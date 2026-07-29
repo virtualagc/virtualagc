@@ -2130,9 +2130,301 @@ imprecision and the dot-product sibling of the cross-product finding
 above — not cleanly separable from the `SQRT`-derived imprecision, so
 not filed as its own repro).
 
+*(Later correction, §6: `029-DATATYPES`'s "register-pair fragility" and
+the cross-product/dot-product residuals mentioned here turned out to be
+genuine, fixable RTL defects after all, not intentional hardware
+fidelity — see §6.3/§6.4 for the full story and the eventual
+`MM14SN.asm`/`VX6S3.asm`/`VV6S3.asm` fixes.)*
+
 `yaGPC2`'s own side stayed clean this round — every one of the 15
 discrepancies traced to either an already-accepted `yaGPC2`-side finding
 or a `yaHALMAT2`-side gap; nothing new for `yaGPC2` to fix.
+
+---
+
+## 6. Second and third full re-sweeps; the `MM14SN.asm`/id-53 register-pair-leak saga (2026-07-29)
+
+### 6.1 Second full re-sweep: two premature `not_a_bug` reclassifications caught and corrected
+
+Once both projects' `open` queues were cleared again, a second full
+99-file sweep ran (triggered automatically once a polling job detected
+zero open issues): **81 AGREE, 10 DISCREPANCY, 8 SKIP-LIBRARY, 0
+SKIP-COMPILE/SKIP-LINK/TIMEOUT** — up from 76/15/8 the first time (5 of
+the prior sweep's findings had genuinely resolved: 108-EXAMPLE_5,
+119-EXAMPLE_9, 197-P, 198-P, GOOGLE-PARALLAX).
+
+Two of the remaining "fixed but still shows a diff" cases turned out to
+be premature reclassifications, caught by re-deriving the primary
+evidence directly rather than trusting either side's own summary of it:
+
+- **`multi_item_write_drops_nested_structure_vector_field`** (176-P.hal,
+  **high**, a confirmed regression) had been marked `not_a_bug` on the
+  strength of three "could not reproduce" attempts, all of which used
+  `run_ext_struct_fixture.sh` — a fixture script that compiles with **no
+  `--parms` at all**, a materially different compiler configuration than
+  the standard sweep methodology's full parms string
+  (`NOTABLES,SRN,TEMPLATE,NOLFXI,REGOPT,VARSYM,CARDTYPE=...`). Using the
+  correct (standard-parms) compile against a freshly rebuilt
+  `yaHALMAT2`, the original bug reproduced exactly as first found —
+  reverted to `open`/high, with a concrete next step (bisect which
+  specific parm token flips the behavior) the original investigation
+  lacked.
+- **`empty_character_write_padded_to_declared_length`** (186-P.hal) had
+  been reclassified `not_a_bug` because `yaHALMAT2`'s padded output
+  "matches a fresh real-`gpc` run" — true, but reading the actual
+  historical RTL source (`RUNASM/CASV.asm`, "CHARACTER ASSIGN") and
+  tracing the real compiled instructions with actual register/memory
+  values shows the algorithm is unambiguously
+  `MIN(sourceCurrLen, destMaxLen)`, never padding. The source string's
+  own baked-in descriptor genuinely has `currLen=0` for this file's
+  `INITIAL('')`, and the instruction trace confirms the real algorithm
+  computes a final `currLen=0` — **0 characters is the correct,
+  hardware-faithful answer**, exactly what `yaGPC2` already produces.
+  Frozen `yaGPC`'s matching-`yaHALMAT2` padded output is therefore
+  itself a bug in that deliberately-frozen predecessor (not explored
+  further) — agreement with it wasn't evidence of correctness here.
+  Reopened as a real, medium-severity, `yaHALMAT2`-owned gap.
+
+The other two "still shows a diff" cases checked out as legitimate,
+already-understood residuals: `vector_cross_product_diverges_on_exact_inputs`
+(072-EXAMPLE_2, its own remaining residual explicitly caveated against
+the F1-register-chain class, id 40, still open at the time) and
+`multi_item_write_truncated_with_bareword_array_of_matrix` (DEMO.hal,
+whose own residual lines up exactly with the separate, already-accepted
+`array_oob_subscript_returns_zero_unconfirmed_guarantee` undefined
+behavior). A stray form-feed noticed during that same DEMO.hal fix was
+given its own entry (`demo_recursive_structure_write_spurious_form_feed`,
+low), fixed in §6.2 below. Net DB state after this round: 58 `fixed`, 7
+`not_a_bug`, 3 `open` (all `yahalmat2`-owned), 2 `suspected`.
+
+### 6.2 Automatic page-turn-on-overflow: a real `yaGPC2` gap the whole project had been trusting the absence of
+
+`yaGPC2`'s `hal_newline()` (`src/halucp.c`) only ever turned a page via
+*explicit* `LINE`/`PAGE` pseudo-functions — it had no automatic
+page-turn when a `PAGED` device's line count simply overflowed
+`linesPerPage` from ordinary `WRITE` advances alone. `yaHALMAT2`'s own
+`interp.c` had this behavior correctly implemented (`dm_advance_lines`,
+emitting a form-feed on overflow), then removed it the same day,
+reasoning from reading `yaGPC2`'s own (incomplete) `halucp.c` that its
+absence there meant real hardware doesn't do this — treating a missing
+feature as authoritative evidence about real hardware, when it was just
+an oversight.
+
+Confirmed via the actual language spec (`USA003087.txt` Sec. 12.4 rule
+2): an explicit `SKIP(alpha)` may cross page boundaries ("SKIPs over
+page boundaries are allowed"), with no documented reason the *default*
+one-line advance (functionally an implicit `SKIP(1)`) would behave any
+differently — same "device mechanism," different trigger. The manual
+never spells out the overflow case explicitly because that's just how a
+physical line printer behaves, obvious enough not to need stating.
+
+Fixed by adding the check directly in `hal_newline()` — the single
+choke point every ordinary line advance (implicit default, `SKIP(n)`,
+and `LINE`/`PAGE`'s own delta loops) already funnels through — so it
+uniformly covers all cases and naturally reproduces `PAGE(beta)`'s own
+"relative line number unchanged" behavior as a side effect. Also
+corrected `linesPerPage`'s own default from an unexplained `60` to `66`
+(the IBM 1403 line printer's documented lines-per-page, matching
+`yaHALMAT2`'s independently-researched same default). Verified against
+`yaHALMAT2`'s own regression fixture spec (70 sequential `WRITE(6) I;`
+statements, form-feed lands exactly between lines 66 and 67) and a full
+corpus re-sweep showing no new discrepancies — all three previously-open
+issues from §6.1 were resolved this round (the other two independently,
+by `yaHALMAT2`'s own session), bringing the database back to zero open
+issues.
+
+### 6.3 The `MM14SN.asm`/id-53 register-pair-leak saga: two false starts, then the real fix
+
+`datatypes_repeated_singular_inverse_unstable_result` (id 53,
+029-DATATYPES.hal: three back-to-back, bit-identical `A4I=INVERSE(A4A)`
+calls on the same singular matrix give three different results) had a
+long, twisting investigation before landing on its final, correct
+disposition — recorded here in full because each wrong turn taught
+something the next attempt needed.
+
+**First attempt (disproven).** The singularity check (`LER F0,F0`/
+`BE AOUT`) was suspected of reading leftover garbage in F0's uncleared
+companion register F1. A `&ASM101S`-gated `SER F1,F1` fix (the same
+conditional-assembly technique as `CINDEX.asm`, id 10) was implemented,
+verified clean at the assembler level (historical path byte-identical,
+full regression clean) — but end-to-end, the three `INVERSE(A4A)`
+outputs came out bit-for-bit identical to the unfixed run. **Root
+cause of the false lead**: re-deriving the AP-101S mnemonic semantics
+precisely from `yaGPC2`'s own `src/cpu_instr.c` (its
+20,000-fixture-tested emulator ground truth) showed the "ER" suffix
+(`LER`/`DER`/`CER`/`AER`/`SER`/`MER`) is plain single-precision
+register-to-register, **not** extended — only "ED"/"EDR" mnemonics are
+genuinely paired. `LER F0,F0` never reads F1 at all; the fix was
+reverted.
+
+**Second attempt (the real fix, briefly reclassified away, then
+correctly reinstated).** Tracing the real divergence to `QLOOP`'s
+reduction-loop `AEDR F4,F2` (`A(I,J)+=A(I,K)*A(K,J)`): F2 and F4 are
+both loaded via single-precision `LE` (never clearing companions F3/F5),
+yet `AEDR` is a genuine 64-bit extended add. Instruction trace confirmed
+F4's companion F5 holds different leftover garbage across the three
+bit-identical calls, producing three different results that cascade
+through the rest of the elimination (and explain why `AERROR 27`
+sometimes fails to fire — corrupted intermediate values simply never
+land on an exact-zero pivot). A `&ASM101S`-gated `SER F3,F3`/`SER F5,F5`
+fix immediately before this `AEDR` made all three calls produce an
+identical, correct result.
+
+This fix was then **briefly reverted** on the reasoning that
+`yaHALMAT2/src/hal_matrix.c` had already independently investigated the
+same question via its own real-execution trace and concluded F1/F3/F5
+are genuinely never reset anywhere in real `MM14SN.asm` — correct as a
+description of the *historical* RTL, and corroborated by running the
+actual compiled file through `yaHALMAT2`, which reproduced the same
+"wild garbage" symptom byte-for-byte. But **this reasoning was wrong**:
+"both tools faithfully reproduce the same historical behavior" is
+evidence of authenticity, not correctness. A matrix-inversion result
+that silently depends on unrelated prior floating-point call history
+(leftover garbage from a completely unrelated `WRITE(6)` statement) is
+a genuine RTL defect regardless of how faithfully it has been
+replicated — the same class of finding as `cindex_not_found_overrun`
+(id 10), and a direct generalization of the earlier F0/F1
+false-lead reasoning to this routine's actual reduction step.
+
+The fix was reinstated and finalized: **two `SER F1,F1` insertions**
+(`ALOOP`/`CTSW`, the singularity-check pivot pair — harmless but
+consistent with the file's own established companion-clearing
+convention) plus **`SER F3,F3`+`SER F5,F5` before `QLOOP`'s
+`AEDR F4,F2`** (the actually-effectual fix). Verified: historical
+(`&ASM101S`-false) path byte-for-byte identical to `RUNLST/MM14SN.txt`;
+full `regressionASM101S.sh` corpus run clean (only the expected
+CINDEX/MM14SN divergence anywhere in the corpus); end-to-end, all three
+repeated `INVERSE(A4A)` calls produce an identical, correct identity
+result every time, non-singular cases unaffected.
+
+**A follow-up correction narrowed the fix to a single instruction.**
+Re-deriving the mnemonic semantics (see above) meant the two `SER F1,F1`
+insertions never had any effect (`LER F0,F0` doesn't read F1) and the
+`SER F3,F3` before the `AEDR` was redundant (`DIVLOOP`'s own
+pre-existing `SER F3,F3` already guarantees F3 is zero by the time
+`QLOOP` runs — confirmed via trace, which never once showed F3 changing
+across the three otherwise-divergent calls, only F5). The committed fix
+is a single `SER F5,F5` before `QLOOP`'s `AEDR F4,F2`, re-verified
+end-to-end with identical, correct results to the broader version.
+
+Database disposition: `datatypes_repeated_singular_inverse_unstable_result`
+is `fixed`/`yagpc2`. A follow-up issue
+(`yahalmat2_matrix_leak_model_should_match_corrected_rtl`) is open for
+`yaHALMAT2` to update its own `f5_accum` model to match the corrected
+RTL (freshly zeroed at each step) instead of continuing to replicate
+the historical leak; the `MM14S3.asm` 3x3 cofactor path's own,
+separate `SEDR`-based F1/F3 threading is unaffected by this narrowing
+and not yet independently re-verified. The `nsts-sdl-dps` build
+pipeline's own embedded `asm101` package was found to predate the
+`&ASM101S` convention entirely (silently produces the historical/
+unfixed object code regardless of source changes) — a pre-existing gap
+that equally affects `CINDEX.asm`'s own already-accepted fix, not yet
+addressed.
+
+### 6.4 `--no-rtl-fixes`, and two more RTL register-pair-leak fixes (`VX6S3.asm` cross product, `VV6S3.asm` dot product)
+
+`ASM101S.py` gained a `--no-rtl-fixes` switch: forces `&ASM101S` to
+false (matching a genuine historical assembler) so a build can
+reproduce an exact historical memory image — including the underlying
+bugs — when that matters more than having the fixes (RTL fixes change
+object-code size, which cascades into the linker's memory layout).
+Checked via a pre-scan of `sys.argv` before any source file is read, so
+it takes effect regardless of argument order relative to the source
+files.
+
+Applying the same corrected mnemonic understanding and the same
+reasoning established in §6.3 (a result silently depending on unrelated
+prior floating-point history is a genuine RTL defect, not intentional
+design, regardless of how faithfully it's been reproduced elsewhere),
+two more instances of the same bug class were found and fixed, scoped
+to the dot-product/sqrt-class residuals from §5's own sweep
+(`vector_cross_product_diverges_on_exact_inputs` and 117-EXAMPLE_8's
+dot-product-derived `APPROACH_RATE`):
+
+- **`RUNASM/VX6S3.asm`** (VECTOR cross product): its three components
+  are mathematically independent, so `SEDR`'s own F1 chaining
+  component-to-component (and F3, never written at all) has no
+  legitimate purpose — a plain register-clearing omission. Fixed with
+  `SER F1,F1`/`SER F3,F3` before each of the three `SEDR` calls.
+  072-EXAMPLE_2.hal's `RESULT2` now reads exactly `-68.0/136.0/-68.0`
+  (was `-6.7999985E+01/1.3600000E+02/-6.7999985E+01`), matching
+  `yaHALMAT2` bit-for-bit; `RESULT1` (`UNIT(V_PRIME)`) also now matches
+  exactly. This supersedes `vector_cross_product_diverges_on_exact_inputs`'s
+  prior disposition (which had `yaHALMAT2` replicate the leak instead
+  of fixing the RTL) — reclassified `fixed`/`yagpc2`, with a follow-up
+  issue (`yahalmat2_vcrs_leak_model_should_match_corrected_rtl`) logged
+  for `yaHALMAT2` to match the corrected RTL.
+- **`RUNASM/VV6S3.asm`** (VECTOR dot product): a different shape — the
+  second `AEDR` call is a legitimate, intentional running-sum
+  accumulation (F0:F1 correctly carries the first `AEDR`'s own real
+  result forward), so only the *first* `AEDR` needed a fix (F1/F3 both
+  start as pure external garbage before any accumulation begins).
+  Single `SER F1,F1`/`SER F3,F3` pair, once, before the first `AEDR`
+  only. 117-EXAMPLE_8.hal's `APPROACH_RATE` now reads
+  `0.0/-1.6712570E+00/0.0/5.0137711E+00/6.8649292E+00`, matching
+  `yaHALMAT2` bit-for-bit (`DISTANCE`, the `ABVAL`/sqrt-derived value in
+  the same file, was already bit-exact). Logged and closed in the same
+  pass as `vv6s3_dot_product_leading_companion_register_uncleared`,
+  `fixed`/`yagpc2`, no `yaHALMAT2` follow-up needed.
+
+All three RTL fixes (`MM14SN`, `VX6S3`, `VV6S3`) were verified together:
+each historical (`--no-rtl-fixes`) path byte-for-byte identical to its
+own `RUNLST/*.txt`; full `regressionASM101S.sh` clean (only the four
+now-expected `CINDEX`/`MM14SN`/`VX6S3`/`VV6S3` divergences anywhere in
+the ~190-file RTL corpus).
+
+### 6.5 Third full re-sweep: sweep-script fixes, and one residual proven isolated to a display-only routine
+
+A third full 98-file "Programming in HAL/S" sweep (yaGPC2 vs.
+`yaHALMAT2` directly): **84 AGREE, 4 DISCREPANCY, 10 SKIP** (8
+template-provider files + 176-P/176.1 needing multi-file linking), 0
+SKIP-LINK/TIMEOUT. Three sweep-script methodology bugs were found and
+fixed along the way, not real findings: `yaHALMAT2` needs its own
+`--line-length` flag passed explicitly (its default of 80 doesn't match
+`yaGPC2`'s `--line-width 240`, causing 4 spurious line-wrap
+"discrepancies"); `yaGPC2`'s default `--max-steps 100000` is too low
+for two long-running files (071-DARTBOARD_APPROXIMATION,
+104-EXAMPLE_1's own 100-inversion timing loop), raised to 5000000
+matching established precedent; 176-P needs per-file `HALSFC` compiles
+linked together via a single multi-object `lnk101` call (`lnk101`
+accepts multiple object files on one command line), not a
+`--test`/`@list`-style multi-file `HALSFC` invocation.
+
+The 4 real discrepancies were all already-explained or newly resolved:
+104-EXAMPLE_1/120-EXAMPLE_A (`RUNTIME()` scope boundary) and
+167-ASSORTEDIO (`%SVC` macro scope boundary) are unchanged from prior
+sweeps. 029-DATATYPES showed two new residuals not previously examined:
+
+- **DETERMINANT residual (`MM12SN.asm`)**: traced the whole routine —
+  single-precision throughout (`LE`/`ME`/`MER`/`AE`/`LECR`), no genuine
+  extended operation anywhere in the general-N path. Not the
+  register-leak bug class; logged as a `yaHALMAT2`-owned
+  algorithm-fidelity gap (its own determinant implementation doesn't
+  bit-exactly replicate this specific single-precision elimination
+  order), no `yaGPC2` action needed.
+- **Non-singular INVERSE residual (A4B/A5A)**: a long investigation that
+  ended by **proving `MM14SN.asm`'s fix (§6.3) is fully correct**. Every
+  step of A4B's forward elimination (K=0 through K=3: pivot search, row/
+  column exchange, column-divide, reduce, row-divide, reciprocal) was
+  independently verified bit-exact against the real instruction trace,
+  via a from-scratch Python port of `yaGPC2`'s own `fibm_addE`/
+  `fibm_mulE`/`fibm_divE` (`floatIBM.c`) — after finding and fixing two
+  bugs in that verification port itself (a wrong exponent-alignment
+  branch in the add/subtract logic; a missing single-precision
+  truncation after every store, matching real `STE`/`.msw` semantics).
+  `INVERSE()` itself has no remaining defect. The residual is isolated
+  to `RUNASM/MM6SN.asm` (a display-only matrix-multiply used just for
+  the "should be identity" printout, not part of `INVERSE()`'s own
+  result) — confirmed this routine has the same latent
+  uncleared-F3-before-`AEDR` pattern as `VX6S3`/`VV6S3` (line 51's
+  single-precision `LE`+`ME` load of an M2 element, never clearing its
+  companion F3, before line 53's genuine extended `AEDR F0,F2`), but the
+  real trace shows F3 never changes throughout this specific run, so
+  that latent bug isn't the active cause here. Logged as
+  `mm6sn_display_multiply_residual_source_unidentified`, low severity,
+  `open`/`yagpc2` — the actual `INVERSE()` result users see is proven
+  correct; only a display-only sanity-check multiply's own bit-level
+  fidelity remains unresolved.
 
 ---
 
