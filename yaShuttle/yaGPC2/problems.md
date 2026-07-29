@@ -19,10 +19,106 @@ from that same repo (`cd yaGPC && make`) or against the live JS
 reference (`node dist/gpc.js run ...` from the repo root, after `npm
 install` + `node esbuild/esbuild.gpc.config.js`).
 
-**Start here**: of everything in this file, **Section 2.1** (`ON ERROR`
-apparently not stopping the trapping statement's own remaining
-execution) looks like the most significant finding — bigger than
-anything already known and listed in Section 1. Look at that one first.
+**Status (2026-07-29): every item in Section 1 and Section 2 has now
+been individually triaged, Section 3's "Programming in HAL/S" corpus
+has been fully swept and completed, `DEMO.hal` (Section 4) has had its
+own sweep, and a full corpus re-sweep run directly against `yaHALMAT2`
+(Section 5) has now superseded the old `yaGPC`-as-reference sweep
+methodology for good.** All confirmed yaGPC2 bugs are fixed — see the
+"Status in yaGPC2" note at the end of each subsection below.
+Cross-project findings (both directions) are tracked in a shared
+SQLite database, not this file — see
+`yaShuttle/yagpc2-yahalmat2-issues.db` and
+`yaShuttle/yaHALMAT2/problem-communication-rules.txt` for the
+schema/workflow. **As of this writing (2026-07-29) the database has 67
+entries: 49 `fixed`, 9 `open` (all currently `yahalmat2`-owned — see
+Section 5 for the 7 found by the latest sweep, plus the pre-existing
+`multi_item_write_truncated_with_bareword_array_of_matrix` (§4) and
+`random_reference_f1_chain_disrupted_by_other_float_ops`, the latter
+corrected from `deferred` back to `open` per the standing rule that a
+real fix path existing, however substantial, means it can't sit
+indefinitely — see §2.6), 7 `not_a_bug` (`ext_double_methodology_artifact`,
+`gtbyte_sibling_routines_scale_audit`,
+`array_oob_subscript_returns_zero_unconfirmed_guarantee`,
+`assortedio_svc_macro_scope_gap`,
+`runtime_svc_miscategorized_as_wallclock_nondeterminism`,
+`datatypes_repeated_singular_inverse_unstable_result`, and
+`write_first_write_inside_do_for_loop_missing_skip` — all "investigated,
+confirmed nothing wrong" records kept so the same ground isn't
+re-covered), and 2 `suspected` (`yahalmat2_nint_mint_vint_offset_form`,
+`yahalmat2_read_line_page_unimplemented` — yaHALMAT2-side watchlist
+items with no known triggering HAL/S source yet, not yaGPC2's to chase).
+Query the database directly for the full, current list rather than
+trusting a stale count here later — this file records *how* things were
+found and root-caused, not a live status board.
+
+**Standing policy, established 2026-07-28/29**: `yaGPC2` is now the
+authoritative cross-check target for `yaHALMAT2`'s real-hardware
+fidelity, superseding the historical `gpc`/`yaGPC` reference (which only
+ever achieved partial hex-float authenticity — basic arithmetic only,
+never the transcendental/matrix-inversion RTL routines `yaGPC2`
+faithfully executes as real compiled AP-101S code). Development is not
+considered complete until the two reach parity on numerical results,
+including cases where `yaHALMAT2`'s output must now *diverge* from old
+`gpc`/`yaGPC` once it also adopts genuine hex-float semantics for
+operations `gpc` only ever approximated. Both projects are expected to
+clear their own `open` queues before any full corpus sweep is treated as
+meaningful — a real, demonstrated concern (see §3's `wildcard_subscript_matrix_write_loses_row_forcing`
+finding, which showed a premature sweep can look clean purely because
+the corpus doesn't yet exercise a buggy construct, not because of real
+parity).
+
+Since the last update: `cindex_not_found_overrun` (the real `CINDEX.asm`
+`INDEX()` bug, §2.9's `test_bfnc_char`) is no longer just a documented,
+accepted-as-is hardware quirk — it's now **fixed directly in the real,
+historical flight-software RTL source**, via a deliberately reversible
+mechanism invisible to any assembler but this project's own (see §2.9).
+`RANDOM`/`RANDOMG` (§2.6) turned out to be fully deterministic real
+hardware, not wall-clock-dependent, and a bit-exact reference
+implementation now exists for `yaHALMAT2` to adopt. `130-EXAMPLE_N`'s
+long-standing `no_return_function_undefined_behavior_diverges`/
+`examplen130_cfor_pretest_hardware_divergence` puzzle (§3.5) is fully
+resolved — a documented HAL/S language rule (`DO ... UNTIL` is
+post-tested), not hardware-specific undefined behavior. `mmwsnp_vector_forces_newline`,
+`read_array_early_termination_stale_iobuf`, and
+`integer_exponentiation_overflow_needs_fcos` (§3.1/§3.5) were briefly
+mis-filed as accepted non-bugs/deferred items in an earlier pass of this
+file — corrected below, and now resolved for real.
+`schedule_priority_out_of_documented_range` (§3.5) turned out to be
+fixable after all (the "documented range" was implementation-defined,
+not a hard textbook-fidelity constraint) and is now fixed. `compool_array_integer_type`
+was fixed asynchronously in yaHALMAT2 between two earlier sessions,
+discovered only by querying the database — no document report was ever
+sent or needed. `test_eron_goto` (§2.1's third example program) turned
+out not to be a bug at all — a different, real, faithfully-reproduced
+hardware/RTL quirk (register-pair history in `MM14SN.asm`'s singularity
+check), fully explained. **Start here** if picking this file back up —
+or Section 3/4 if the interest is the HAL/S example corpora
+specifically, or Section 5 for the latest full-corpus parity sweep.
+
+**Since the 2026-07-28 sync**: `inverse_singular_matrix_not_detected`
+(§2.1/§3.1, id 46) is now genuinely, fully fixed — not the false
+retraction logged in an earlier pass of this file. Confidential FCOS
+source (`FPMSDERR.asm`, the real SEND ERROR SVC handler) proved the
+OS/SVC level never dispatches to a user `ON ERROR` handler for *any*
+error; real GOTO dispatch instead works because the compiler emits its
+own redundant, statically-known re-check of the error condition
+directly in the calling code, which doesn't exist for matrix-inverse
+singularity (confirmed by disassembling `$0P`'s real compiled code —
+no check follows its call to `MM14S3`). `yaGPC2`'s `try_on_error_dispatch()`
+now correctly never dispatches for this one error condition, matching
+real hardware (197-P.hal/198-P.hal both now show the identity matrix,
+not zero). `datatypes_repeated_singular_inverse_unstable_result` (§3.1,
+id 53) is now confirmed `not_a_bug` directly from `MM14SN.asm`'s own
+source — the same register-pair-history fragility class as
+`test_eron_goto`, not a separate mystery.
+`runtime_svc_miscategorized_as_wallclock_nondeterminism` (§2.6, id 54)
+is likewise confirmed `not_a_bug` — `RUNTIME()` needs the same missing
+real-time task-executive infrastructure §2.7 already accepted as a
+scope boundary for `SCHEDULE`/`WAIT`. A full corpus re-sweep run
+directly against `yaHALMAT2` (not the frozen `yaGPC` predecessor) is now
+in Section 5, under the new standing policy that `yaGPC2` is the
+authoritative parity target going forward.
 
 **Methodology note for anyone extending this list**: when comparing two
 tools' output, capture and diff stdout and stderr *separately*. Merging
@@ -85,6 +181,10 @@ behavior instead).
 (`@cp.r(...)` → `@cp().r(...)`); the C side (`yaGPC`'s `iopls_ls()`
 already does this correctly) needs no change, just confirm it's still
 there once `yaGPC2` diverges from `yaGPC`.
+
+**Status in yaGPC2 (2026-07-26): confirmed correct, no change needed.**
+`iopls_ls()` already implements `@cp().r(...)`'s evidently-intended
+behavior.
 
 ### 1.2 `gpc run --interactive` never detects real stdin EOF
 
@@ -150,6 +250,12 @@ thing (`prompt_and_provide_input` in `run.c` uses a blocking `fgets()`
 that correctly returns EOF) — nothing to port from `gpc` here, just
 keep it working.
 
+**Status in yaGPC2 (2026-07-26): fixed.** `interactive_input_cb` (in
+`src/halucp.c`) now checks `iohost_has_file_configured` before falling
+through to `prompt_and_provide_input`, matching (a) above — this had
+not, in fact, already been correct in `yaGPC` as originally assumed;
+an actual code change was needed.
+
 ### 1.3 `#MOUTC`/`#MINC` BCE instruction dict collision — `#MOUTC` permanently unreachable
 
 **File**: `gpc/iop_bce_instr.coffee` (BCE instruction table).
@@ -179,6 +285,28 @@ the one BCE instruction that could NOT be, for the reason above; see
 `yaGPC`'s Phase 6 notes for "28/29 BCE instructions pass 76,312 generic
 exec fixtures").
 
+**Status in yaGPC2 (2026-07-26): fixed, but not the way originally
+guessed above.** Root cause turned out to be a genuine misunderstanding
+of the ISA, not a missing bit in the mask: per the real IOP hardware
+manual (IBM-74-A31-016, Fig. 2-6 / Table 2-10) and real assembled
+Shuttle flight-software object code (`workspace/PFS/BFS.SRC as
+received/COMPILED/BCE`), `#MOUTC`/`#MINC` are **not independently
+dispatched opcodes at all** — they're just the raw 2nd word of
+`#MOUT`/`#MIN`'s own two-word instruction format (8 zero bits + 5-bit
+IUA + 19-bit command), bit-for-bit identical to each other by
+construction, meaningful only in the context of the preceding word.
+Fix: removed both from the BCE dispatch table entirely; `#MOUT`/`#MIN`
+now decode and act on that 2nd word directly (setting `IUAR` and
+issuing the command via `mia_xmit_cmd`, matching `#CMD`/`#CMDI`'s
+analogous behavior — something the original `gpc`/`yaGPC` reference
+never did, i.e. this was actually a second, related bug beyond the
+dict-collision itself). Also corrected `#MOUT`/`#MIN`'s NIA increment
+from 3 to 4 halfwords, and separately found and fixed the same kind of
+off-by-one for `#MOUT@`/`#MIN@` (2 halfwords, not 3) — both confirmed
+against real flight-code address deltas. See `src/iop_bce_instr.c`'s
+`bce_process_mio_command()` and `bce_instr_table_init()`'s comment.
+Fixtures regenerated; all 75,600 BCE exec fixtures pass.
+
 ### 1.4 `SVC_ERROR_MESSAGES[22]` — corrupted message text
 
 **File**: `gpc/halUCP.coffee:34`
@@ -207,6 +335,10 @@ confirmed (almost certainly "CHARACTER TO INTEGER CONVERSION" — cross-check
 against `USA003090`, the HAL/S-FC User's Manual, Appendix C's
 execution-time-error "standard fixups" table, available in
 `yaHALMAT2`'s `source-documentation/USA003090.txt`).
+
+**Status in yaGPC2 (2026-07-26): fixed.** `SVC_ERROR_MESSAGES[22]` in
+`src/halucp.c` corrected to "CHARACTER TO INTEGER CONVERSION",
+cross-checked against `USA003090.txt` Appendix C as suggested above.
 
 ### 1.5 `IOP.curPE` never reassigned after construction
 
@@ -254,6 +386,16 @@ value, or a copy of it) and where it should be set (probably inside
 `execProcessors()`, alongside where `curBCE`/`curPage` are already
 updated).
 
+**Status in yaGPC2 (2026-07-26): fixed**, exactly as guessed above.
+`iop_exec_processors()` (`src/iop.c`) now sets `iop->curPE = page`
+right after computing which page the round-robin scheduler selected.
+New integration test `test_bce_curpe_addressing` (in
+`test/test_iop_exec_processors.c`) exercises BCE #3 specifically with
+distinct memory markers distinguishing correct- from
+incorrect-`curPE` addressing — this end-to-end scenario (a BCE beyond
+#1 using `curPE`-based addressing) had never been exercised by any
+prior fixture.
+
 ### 1.6 CPU instruction table: `ICR`'s illegal-command path calls a nonexistent method
 
 **File**: `gpc/cpu_instr.coffee`, `ICR` instruction's exec body.
@@ -273,6 +415,13 @@ other instructions with an illegal-command check handle it, e.g. grep
 `signalIllegalOp`-equivalent in the CoffeeScript, if a name like that
 exists, or check what real "illegal operation" program-interrupt
 handling looks like in `cpu.coffee`).
+
+**Status in yaGPC2 (2026-07-26): confirmed correct, no change needed.**
+`yaGPC2`'s C port already implements the evidently-intended
+`signalIllegalOp`-equivalent behavior, matching what every other
+illegal-opcode path in the same file does — this was already fixed
+during the original `yaGPC` port, not something that needed
+re-fixing.
 
 ### 1.7 Two related genuine no-ops (lower priority — dead code, not wrong output)
 
@@ -294,6 +443,11 @@ handling looks like in `cpu.coffee`).
   there'd be no test coverage catching it since the commented code never
   runs. Worth a side-by-side read if yaGPC2 touches interrupt handling.
 
+**Status in yaGPC2 (2026-07-26): confirmed as-is, no change needed.**
+Both are dead-code no-ops in `gpc`, and `yaGPC2`'s C port already
+omits the equivalent no-op writes (same as `yaGPC` before it) — no
+observable-output difference either way.
+
 ### 1.8 Source-formatting gotcha (not a runtime bug — a tooling trap)
 
 `gpc/cpu_instr.coffee` has a stray space in one instruction's key:
@@ -306,6 +460,73 @@ undercount by one — the real CPU instruction count is **135**, not 134.
 Not a functional bug (the JS object literal parses fine either way,
 `MVS :` is valid CoffeeScript), just a trap for anyone writing
 source-scraping tools against `cpu_instr.coffee`.
+
+**Status in yaGPC2 (2026-07-26): no action needed.** This is a
+tooling/documentation note about the JS reference source's own
+formatting, not something that applies to the C port (nothing in
+`yaGPC2`'s own tooling string-scrapes `cpu_instr.c`'s `OPS[]` table
+this way).
+
+### 1.9 (found during yaGPC2 development) `iop_exec_processors()`: PC read via the wrong accessor width, plus an NIA-override bug — both silently defeated BCE branching and multi-word instructions
+
+**File**: `src/iop.c`, `iop_exec_processors()` (the per-tick
+fetch/dispatch loop `run()` actually uses — not covered by any prior
+exec-fixture test, which test instruction *bodies* in isolation, not
+the fetch loop that drives them). Both bugs were inherited verbatim
+from `gpc/iop.coffee`, not introduced during porting.
+
+Two compounding issues:
+
+1. PC was fetched via `register_get16`/`set16` (only the register's
+   first backing halfword), while every instruction's own NIA update
+   (`iop_set_nia`/`iop_incr_nia`, used by e.g. `#BU`/`#BU@`) uses
+   `register_get32`/`set32` (spans both halfwords) on the *same*
+   register. For any address under `0x10000` (every real address in
+   this system), the two accessors read/write different halfwords, so
+   the fetch loop never actually saw what an instruction had just set.
+   (`gpc` source: `@ls.PC().get16()` vs. `setNIA`/`incrNIA`'s
+   `.get32()`.)
+2. Independently, this function forced BCE's PC to
+   `(pre-dispatch PC)+1` unconditionally after every dispatch,
+   discarding whatever the matched instruction had actually set — so
+   even with (1) fixed, branches/multi-word instructions still
+   wouldn't take effect. (`gpc` source: `@ls.PC().set16(pc + 1) #
+   Default NIA increment for BCE`.)
+
+**Effect**: no BCE branch or multi-halfword instruction, and no MSC
+instruction sequencing at all, could ever actually work through the
+full simulation loop — only single-halfword, non-branching
+instructions appeared to "work," and only by accident (the broken PC
+write happened to leave PC in roughly the right place for the *next*
+sequential single-word instruction).
+
+**Status in yaGPC2: fixed.** Both reads/writes now go through
+`register_get32`/`set32`; the unconditional override is removed
+entirely, trusting each instruction's own NIA handling. This also
+correctly preserves `#WIX`'s intentional "stay parked while waiting
+for a Listen command" behavior, and BCE's documented (deliberately
+asymmetric vs. MSC's) "stall on unrecognized opcode" behavior. New
+integration test suite added: `test/test_iop_exec_processors.c`
+(wired into `Makefile`/`NMakefile`), covering branch-taking,
+sequential MSC/BCE advancement, `#WIX` waiting, and the
+unrecognized-opcode stall — none of which any prior fixture actually
+exercised, since they all test instruction *bodies*, not the fetch
+loop driving them.
+
+### 1.10 (found during yaGPC2 development) `#MOUT@`/`#MIN@` NIA increment off-by-one
+
+**File**: `src/iop_bce_instr.c`, `exec_MOUT_at`/`exec_MIN_at`.
+
+These used `incrNIA(3)` despite being single-word (Long Format 1)
+instructions like `#LBR`/`#CMD`/`#TDL` (which correctly use
+`incrNIA(2)`). Confirmed as a genuine off-by-one via three independent
+real flight-code address deltas (`workspace/PFS/BFS.SRC as
+received/COMPILED/BCE`), each `#MOUT@`/`#MIN@` spanning exactly 2
+halfwords between its surrounding instructions.
+
+**Status in yaGPC2: fixed** — both now use `incrNIA(2)`. Fixtures
+regenerated the same way as the 1.3 fix; all 14 unit test suites still
+pass.
 
 ---
 
@@ -412,6 +633,206 @@ run` and `yaGPC` (they agree with each other) vs. `yaHALMAT2
 halmat.bin` (the `halmat.bin` HALSFC leaves in the compile directory).
 **Highest-priority item in this whole file** — start here.
 
+**Status in yaGPC2 (2026-07-26/27): fixed for `test_eron_goto_appc`
+specifically** (all 4 of its error types — SQRT, UNIT null-vector,
+`#MDIV` zero-divide, `ZERO**0` — now correctly trap; none of its
+"SHOULD NOT PRINT" lines appear). `test_eron_goto` and `test_eron_event`
+have now also been independently investigated (2026-07-27) — **neither
+turns out to be the same ON-ERROR-dispatch bug**, both are distinct
+findings in their own right:
+
+- **`test_eron_goto` — NOT a yaGPC2 bug; a genuine real-hardware
+  floating-point-register-pair-history fragility in the actual compiled
+  RTL, faithfully executed.** Its `SHOULD NOT PRINT` line isn't a
+  dispatch failure at all — the SVC for `SEND ERROR` is never even
+  reached a second time. Traced via `--trace` instruction-by-instruction:
+  `INVERSE`'s real runtime routine (`RUNASM/MM14SN.asm`, 2x2 direct-
+  computation path) detects singularity via `SEDR F0,F2` (Subtract Long
+  — confirmed against the AP-101S Software Model manual, Sec. 8.26: this
+  operates on the **full 64-bit register pair** F0:F1 and F2:F3, not
+  just F0/F2) immediately after loading F0/F2 via `LE` (Load Short,
+  Sec. 8.18 — confirmed the manual describes this as affecting *only*
+  the target register, consistent with `exec_LE` in `src/cpu_instr.c`
+  not touching the paired register). Nothing in `MM14SN.asm`, `AMAIN`'s
+  prologue, or the architecture manual ever clears F1/F3, so `SEDR`'s
+  "long" comparison picks up whatever garbage is left in the paired
+  extension registers from earlier, unrelated double-precision
+  arithmetic (the `WRITE` statement's own float-formatting code, in this
+  test). First call happens to see a clean zero (correctly detects
+  singularity); the second/third calls see leftover nonzero garbage in
+  the low half, so the "determinant" reads as a tiny nonzero value
+  instead of exactly zero, and the singularity check silently fails to
+  fire. **Confirmed present in the original `gpc.js`, in `yaGPC`, and in
+  `yaGPC2` identically** (all three give the same garbage matrix) — a
+  real, inherited compiled-RTL fragility, not a yaGPC2 regression.
+  Cross-checked against `yaHALMAT2`, which correctly avoids this every
+  time (no register-pair-history model at that level of abstraction) —
+  confirming the discrepancy is fully explained, not concerning. No
+  yaGPC2 change made or warranted; nothing to fix here without
+  deliberately *deviating* from real hardware fidelity.
+- **`test_eron_event` — a genuine, confirmed, different omission: the
+  `ON ERROR ... IGNORE AND SIGNAL/SET/RESET <event>` disposition's
+  event-signaling side effect is entirely unimplemented.** Confirmed via
+  temporary FIXV-dump instrumentation that the compiler *does* install a
+  real FIXV entry at the expected direct slot for each of this test's
+  three `ON ERROR$(4:5) IGNORE AND ... EVn` statements — but with `TAG`
+  values of `0xF` and `0x7` (not `0x0`/`0x1`/`0x3`, the only three this
+  session's earlier work had ever observed and hard-coded for). Given
+  `match_error_handler()` in `src/halucp.c` only ever recognizes `TAG=0`
+  (`0x3F` group/num wildcards) and unconditionally rejects everything
+  else, these dispositions are never matched at all — the `SEND ERROR`
+  falls through unhandled every time (confirmed via `--verbose`: the
+  fallback SCAL-unwind path is reached and computes a nonsense address,
+  `0xfffffffe`, since this isn't actually a SCAL context), and no event
+  ever gets signaled/set/reset. The differing tag values between
+  `SIGNAL`/`RESET` statements strongly suggest the compiler assigns a
+  distinct tag per statement, indexing some separate compiler-emitted
+  table (event address + action-type) that hasn't been located yet.
+
+  **Update (2026-07-27): FIXED.** Root-caused via three isolated
+  single-statement compiles (one each for `IGNORE AND
+  SIGNAL`/`SET`/`RESET`, `LSTALL` listings): all three use the
+  identical `FIXV` layout as the existing `TAG=0` `GO TO` case
+  (group/num in the low 12 bits), differing only in `TAG`
+  (`SIGNAL=0xF`, `SET=0x7`, `RESET=0xB` — no bit relationship found
+  between them, matched by direct enumeration since only 3 data points
+  were confirmed), with the paired "handler" slot holding the **EVENT
+  variable's own address directly** (`LA R4,EVn` / `STH R4,slot+1`),
+  not a jump target. Fixed in `src/halucp.c`: `match_ignore_event_handler()`
+  recognizes the three tags (checked in `try_on_error_dispatch()`'s
+  existing slot-scan loop, before the `TAG=0` check);
+  `apply_ignore_event_action()` sets/clears bit 0 (mask 1) of the
+  halfword at the event's address — confirmed as the "is this event
+  set" bit via the matching `IF EVn THEN` compiled check (`TB 0(Rn),1`).
+  No jump or `R0`/`R1`/`R3` fixup needed for this disposition — the
+  erroring routine's own epilogue runs completely normally afterward,
+  exactly as an unhandled error already would; only the event's bit
+  changes. `test_eron_event.hal` now gives `EV1 SET` / `EV2 NOT SET` /
+  `EV3 SET`, exactly matching yaHALMAT2. A directly related, separate
+  gap found in the same investigation: plain (non-`ON ERROR`)
+  `SIGNAL`/`SET`/`RESET <event>` statements were *also* unhandled
+  (generic "SVC trapped"). These compile to fixed SVC codes
+  `0x000C`/`0x000D`/`0x000E`, with the event's address as the SVC's
+  second operand halfword (`mem[ea+1]`) — the exact same convention
+  `SEND ERROR` (`0x0014`) uses for its own group/num data. Fixed in
+  `halucp_handle_svc`, reusing the same `apply_ignore_event_action()`
+  helper. Verified: all 14 unit test suites pass;
+  `test_eron_goto_appc`/`read_eof_onerror.fcm` re-checked unaffected.
+
+Root cause, confirmed against a real HALSFC-compiled listing plus
+`RUNMAC/AEXIT.asm`/`ERRPARMS.asm`/`AERROR.asm`/`AMAIN.asm`
+(`~/git/virtualagc/yaShuttle/Source Code/PASS.REL32V0/RUNMAC/`):
+`gpc`/`yaGPC`'s original single-mechanism "SCAL-frame-unwind" ON ERROR
+dispatch (reading FIXV/handler via one level of indirection through a
+caller-saved-R0 chain) only covers routines entered via the heavier
+`SCAL@#` convention. Two more cases exist and neither was previously
+handled:
+- RTL intrinsics entered via a plain `BAL@#` that never reassigns R0
+  (e.g. `SQRT`) — for these, the ON ERROR statement's FIXV/handler
+  live directly in the current frame at a range of offsets starting at
+  18 (one 2-halfword slot per distinct `ON ERROR` statement in the
+  routine, allocated sequentially by the compiler's `SET_ERRLOC` —
+  `HALINCL/GENCLAS0.xpl`).
+- RTL routines that are *also* entered via plain `BAL@#` but
+  themselves make further nested calls (e.g. `UNIT`'s `VV10S3`, which
+  internally calls `SQRT`) are declared `AMAIN ACALL=YES`
+  (`RUNMAC/AMAIN.asm`) and so bump R0 forward via `IAL
+  0,STACKEND-STACK` to claim their own scratch frame, *without* using
+  `SCAL@#`. Such a routine has no `ON ERROR` statement of its own, so
+  its own frame's slots are always empty — the real FIXV/handler is
+  one level up, in the enclosing routine's frame, recoverable by
+  walking `mem[current_frame_sa + 2]` (the caller's original R0,
+  saved as a hi/lo halfword pair — the same convention the original
+  SCAL-unwind path already relied on for its own single level of
+  indirection).
+
+Fix, in `src/halucp.c`'s `try_on_error_dispatch()`: the direct-slot
+scan is now retried at each ancestor frame (walking up via the
+above-mentioned R0-recovery, bounded to 8 levels) before falling back
+to the original SCAL-unwind logic (kept, structurally unreached in
+every case checked so far, as a safety net for any other calling
+convention not yet seen). Two non-obvious details, both caught via
+empirical re-testing rather than derived purely from the manual: (1)
+the R1/R3 data-base-register restore-before-dispatch (needed because
+jumping away bypasses the erroring routine's own `AEXIT` epilogue)
+must use the *matched* ancestor frame's own save slots, not the
+originally-erroring frame's (usually unpopulated in a callee like
+`VV10S3`); (2) R0 itself must also be restored to the reconstructed
+ancestor value when dispatching from a level > 0 — omitting this
+produced a real regression (a later, same-program error whose
+dispatch *should* have worked at level 0 instead spuriously matched
+garbage in the abandoned child frame's stale, reused stack memory).
+Verified no regressions: all 14 unit test suites pass, plus
+`read_eof_onerror.fcm` (which exercises the true-SCAL path) unchanged.
+
+**A fourth case, `inverse_singular_matrix_not_detected` (197-P.hal/198-P.hal,
+also cross-referenced in §3.1), turned out to be architecturally
+different from all three above and took a false start before being
+root-caused for real.** Initial testing (2026-07-28) found 197-P/198-P
+agreeing byte-for-byte with `yaHALMAT2` (both all-zero, i.e. both honor
+the registered `ON ERROR$(4:27) DO; M=0; GO TO L1; END;` handler) and
+the finding was retracted as a side effect of an unrelated `WRITE`
+buffering fix. That retraction was wrong: the frozen, hardware-faithful
+`yaGPC` predecessor binary shows the **identity matrix**, not zero, for
+this exact file — even with the `GO TO` handler registered — an
+unexplained real-hardware mechanism that needed its own investigation.
+
+Root-caused via the confidential real FCOS source
+(`~/workspace/PFS/OI340600/SSSRC/FPMSDERR.asm`, the actual SEND ERROR
+SVC handler — access authorized for this analysis; findings summarized
+here, not the source quoted verbatim): the OS/SVC level **never**
+dispatches to a user's `ON ERROR` handler for *any* error, ever — it
+only logs, runs system-default action (`FPMSYSAC`, which only ever
+special-cases a handful of severe errors like illegal opcode/CPU store
+protect for process closure), and returns. `try_on_error_dispatch()`'s
+entire SVC-time FIXV-walk-and-jump architecture (all three cases
+above) does not match how real FCOS actually works — it happens to
+produce correct-looking results for the cases already fixed, but not
+because the OS is doing what that architecture assumes.
+
+Traced how real GOTO dispatch actually works instead, using
+`test_eron_goto_appc.hal` (the already-verified-correct SQRT/UNIT/MDIV/ZEROPOW
+cases) and 197-P.hal side by side, disassembling the real compiled
+instructions on both sides of each call: the **compiler** emits its own
+redundant, statically-known re-check of the error condition directly in
+the calling code immediately after the call — e.g. `$0TESTER`'s compiled
+code re-tests "is the SQRT argument negative" via a leftover condition
+code right after the call, and branches around the "should not print"
+statement accordingly. `$0P`'s real compiled code, traced the same way
+immediately after its call to `MM14S3` (197-P.hal's 3×3
+cofactor-expansion matrix inverse), has **no such check at all** — it
+falls straight through unconditionally to the next statement
+(`WRITE(6) M`). This is presumably because matrix-inverse singularity
+can't be cheaply re-verified at the call site the way "is this argument
+negative" can (it would require redoing the whole cofactor expansion) —
+so the compiler simply never generates a check for this error
+condition, meaning the `ON ERROR GO TO`/DO-block registration for group
+4:27 is syntactically valid but **never actually dispatches on real
+hardware**, regardless of implementation.
+
+**Fixed** (2026-07-28): `try_on_error_dispatch()` (`src/halucp.c`) now
+returns immediately (no dispatch, any disposition) for the specific
+case `errGroup==4 && errNum==27`, narrowly scoped — confirmed via grep
+that no other corpus file registers this exact group/num except
+197-P.hal, 198-P.hal, and 029-DATATYPES.hal (a wholly different code
+path, `MM14SN` not `MM14S3`, where this error is confirmed to never even
+fire — see §3.1's `datatypes_repeated_singular_inverse_unstable_result`
+— so inert there). Verified 197-P.hal now matches frozen `yaGPC` byte
+for byte (identity matrix, not zeros); 198-P.hal's content (10 looped
+identity matrices) matches exactly too; `test_eron_goto_appc.hal`
+re-verified unaffected. Full unit test suite re-run: identical pass/fail
+counts before and after (one pre-existing, unrelated `CVFX`-fixture
+failure in `test_cpu_instr_exec`, confirmed via `git stash` to predate
+this work entirely).
+
+**This is a real, cleanly-characterizable — not a "these will just
+always differ" — parity gap on `yaHALMAT2`'s side**, logged as
+`yahalmat2_dispatches_goto_for_undispatchable_matrix_inverse_error`
+(§5): unlike the `test_eron_goto`/`MM14SN.asm` register-garbage class
+(genuinely non-deterministic, nothing to replicate), this one is a
+simple, deterministic special case `yaHALMAT2` could adopt symmetrically
+to `yaGPC2`'s own fix above.
+
 ### 2.2 Systematic: `BIT`-pattern-to-`INTEGER` conversion sign interpretation
 
 Four independent test programs show the exact same numeric relationship
@@ -444,6 +865,47 @@ is the simplest repro — see the `test_bit` example already worked
 through in this file's own methodology section (`I3 = INTEGER(NOT B1)`
 with `B1 = BIT(12)` truncated into a `BIT(8)` field).
 
+**Status (2026-07-26, corrected 2026-07-27): resolved — not a yaGPC2
+bug, and now fixed in yaHALMAT2 — but the original "spec-correct across
+all 4 tests" claim below was wrong for `test_bit` itself; correcting
+the record.** `USA003087.txt` Appendix A ("STANDARD CONVERSION
+FORMATS" / "CONVERSIONS TO INTEGER TYPE") states a bit type converts
+to integer "by regarding it as the bit pattern of a **signed** integer
+of the desired precision," and on 2026-07-26 this was assumed to settle
+all 4 rows of the table above in `yaGPC`'s favor without re-running
+`test_bit` itself to check — an error caught on 2026-07-27 by directly
+re-compiling and re-running all 4 tests through current `yaGPC2`:
+`test_bit_at_partition` (`-9011`), `test_subbit_assign` (`-3856`), and
+`test_init8` (`-21846`) all directly reproduce, confirming the table's
+"yaGPC (signed)" column for those three — but `test_bit`'s own `I3`
+comes out **`243`, not `-13`** (i.e. `yaGPC2` itself currently agrees
+with the table's "yaHALMAT2 (unsigned)" column for this one row, not
+its own). Root cause (confirmed by reading `test_bit.hal`'s compiled
+listing): `INTEGER(bit-expression)` doesn't invoke any explicit
+sign/zero-extension instruction at all — it's a bare `STH` of whatever
+the immediately-preceding bitwise operation (`NR`/`OR` for
+`AND`/`OR`/`NOT`) left in the register's upper halfword, with no
+separate conversion step. For `test_bit_at_partition`/
+`test_subbit_assign`/`test_init8`, the source `BIT` value's width
+matches the register position such that the top bit lands exactly on
+the halfword's sign bit — not really "sign extension" as an operation,
+just direct reinterpretation of a same-width pattern. `test_bit`'s
+`NOT B1` (an 8-bit-declared operand) doesn't get that same alignment,
+and empirically doesn't yield a sign-extended result in real compiled
+code. **yaHALMAT2 independently rediscovered this exact fact** (see
+`problems-yaHALMAT2.md`, yaHALMAT2 directory, `test_bit` entry, FIXED
+2026-07-27) via its own real-`gpc` probing, and fixed both root causes
+on its side: `BNOT` now masks to the operand's declared `BIT(n)` width
+instead of complementing the full register, and non-`DOUBLE` `INTEGER`
+values now truncate/reinterpret as signed 16-bit at `WRITE` time
+(matching real hardware) instead of keeping a full 32-bit value —
+which incidentally also resolved `test_bit_at_partition`,
+`test_subbit_assign`, `test_init8`, and 2.9's `test_subbit_scalar` for
+free, all via the same underlying mechanism. No yaGPC2 change was ever
+needed here; the only actual bug was in yaHALMAT2, now fixed on that
+side, plus one factual error in this file's own 2026-07-26 write-up,
+also now fixed.
+
 ### 2.3 `SCALAR`→`INTEGER` conversion: exact-.5 tie-breaking rule differs
 
 `test_stoi.hal`: `S2=7.5` → `yaGPC`/`gpc` gives `I2=7`, `yaHALMAT2` gives
@@ -464,6 +926,25 @@ convention explicitly.
 **Reproduction**: `~/git/virtualagc/yaShuttle/yaHALMAT2/src/tests/hal/test_stoi.hal`,
 same compile+link+run recipe as above.
 
+**Status (2026-07-26): resolved — not a yaGPC2 bug, a yaHALMAT2 bug.**
+Compiled and traced to a real, linked-in RTL module call (`BAL` to
+`ETOH`), then read `Source Code/PASS.REL32V0/RUNASM/ETOH.asm` (public-
+domain Shuttle flight-software runtime library source): the conversion
+is `CVFX` (truncating float-to-fixed) followed by a hand-coded
+rounding-bias sequence (`A R5,=X'7FFF'` / conditional `A R5,=X'1'` /
+`NHI R5,X'FFFF'`) — real, authentic flight-software rounding logic
+that `yaGPC2` just executes as compiled AP-101S machine code (via its
+already-fixture-validated CPU instructions), not something it
+reimplements. `gpc`/`yaGPC`'s "round toward zero at exact .5" is
+therefore the authentic result of running the real algorithm;
+`yaHALMAT2`'s "round away from zero" is the divergent behavior. No
+yaGPC2 change made. **Resolved: fixed in yaHALMAT2 (2026-07-27)** —
+exact-.5 ties now round toward zero, confirmed via yaHALMAT2's own
+24-point real-`gpc` probe across magnitudes/signs (their prior "away
+from zero" behavior had itself been copied from a different,
+unverified reference emulator rather than checked against real
+hardware). See `problems-yaHALMAT2.md`, `test_stoi`, FIXED.
+
 ### 2.4 Formatting: leading blank line before the first `WRITE` in `--interactive` mode
 
 At least 9 of the 73 (`test_array_double`, `test_matrix_identity_init`,
@@ -481,6 +962,16 @@ proper — low priority, but confirm it's really `--interactive`-specific
 (try the same programs in batch/non-interactive mode) before spending
 time on it, since it may just be expected/correct `--interactive`-mode
 behavior that `yaHALMAT2` doesn't replicate (rather than a `gpc` bug).
+
+**Status (2026-07-26): resolved — not a bug on either side.** Compiled
+`test_array_double.hal` and compared yaGPC2 interactive vs. batch
+(byte-identical, no leading-newline difference at all) and yaGPC2 vs.
+yaHALMAT2 with **matched** `--line-width`/`--line-length` settings on
+the same compiled `halmat.bin` (also byte-identical). Confirms this
+was purely an artifact of the original sweep's mismatched
+configuration (yaHALMAT2 defaulted to 132 columns, gpc/yaGPC used
+240) — see the parity-testing caveat now in `tools.md`. No change
+needed on either side.
 
 ### 2.5 Formatting: output line-wrap / `PAGE`/`SKIP`/`TAB`/`COLUMN` positioning
 
@@ -500,14 +991,168 @@ be a pure line-width artifact and more likely a real `TAB`/`COLUMN`
 positioning-logic difference — worth checking first if only one item
 from this bucket gets attention.
 
-### 2.6 Not meaningfully comparable: wall-clock/timing/PRNG built-ins
+**Status (2026-07-26): `test_tabcol` confirmed as a genuine yaGPC2/gpc
+bug and fixed. The other 6 tests in this bucket
+(`test_write_wrap`, `test_dots`, `test_skipline`, `test_page`,
+`test_write_vector`, `test_vsum`) were never individually re-checked
+with matched line-width settings** — given this caveat's own warning
+above, some or all of them may turn out to be the same
+mismatched-configuration artifact as 2.4, but this has not been
+verified either way; re-run them with matched settings before assuming
+they're either fixed-by-the-2.5-fix or still-open.
 
-`test_random`, `test_runtime`, `test_date_clocktime` all differ, but
-`RANDOM()`, `RUNTIME()`, `DATE()`/`CLOCKTIME()` are inherently
-non-deterministic or wall-clock-dependent — `gpc` and `yaHALMAT2` have no
-shared PRNG seed convention or simulated master clock, so these are
-expected to differ and are not evidence of a bug on either side. Listed
-only so a future session doesn't waste time on them.
+`test_tabcol`'s root cause: `src/halucp.c`'s TAB handler explicitly
+logged "negative tab, unimplemented" and no-op'd instead of correctly
+handling `TAB(negative)`/backward `COLUMN()` values — confirmed
+against the HAL/S Programmer's Guide's own worked example
+(`USA003087.txt` lines 6106-6150, using this exact test's WRITE
+statement as its illustration). The real fix turned out to be
+architectural, not a formula tweak: `yaGPC2` streamed WRITE output
+directly to the output callback as each field was processed, which
+structurally cannot place a later-column field before an
+earlier-column one on the same line (a real stream can't move
+backward). Ported yaHALMAT2's own already-correct model (its
+`interp.c`'s `dm_write_at`/`dm_emit_field`/`dm_finalize_line`): buffer
+each channel's current (not-yet-newline-terminated) line in memory
+(`HalUCP.lineBuf[]` etc., `src/halucp.h`), write fields into it at
+their target column in any order via `buf_write_at()` (mirroring
+`dm_write_at`'s "overstrike, not replace-to-end-of-line" semantics),
+and flush to real output only when the line actually advances. Added a
+`positioned[ch]` flag (reset at IOINIT, set by any of
+TAB/COLUMN/SKIP/LINE/PAGE) so a *leading* TAB in a WRITE statement
+correctly uses the column the mechanism was already at *before* the
+statement's default line-advance (matching `USA003087` Fig. 12-5's own
+worked example), not column 1. Verified byte-for-byte identical to
+yaHALMAT2 on `test_tabcol` with matched line-width settings.
+
+Two regressions were caught and fixed during implementation, both
+worth knowing about if this code is touched again: (1) the SVC `0x0015`
+program-halt handler emitted a bare trailing `"\n"` per channel
+directly, bypassing the new buffer and silently discarding the last
+line's content — fixed by routing it through `hal_newline()` instead.
+(2) A compiled WRITE statement issues a fresh IOINIT call *per field*,
+not once per statement — IOINIT's "no real line movement" branches
+were hardcoding `toCol=1` (harmless under the old streaming model, but
+exposed once the new buffering model no longer had the old
+accidentally-compensating guard), corrupting every multi-field WRITE
+statement's output; fixed by only resetting `toCol` to 1 on a genuine
+new line, otherwise carrying the current column forward. Given this
+was a substantial rewrite of the core WRITE-output mechanism (affects
+every HAL/S program's output, not just TAB/COLUMN users), it deserves
+extra scrutiny before being considered fully settled — a broader sweep
+re-run against the full yaHALMAT2 test corpus (with matched settings)
+would be worthwhile if this file is revisited.
+
+### 2.6 `RUNTIME()`/`DATE()`/`CLOCKTIME()` not comparable; `RANDOM()`/`RANDOMG()` are actually deterministic
+
+`test_random`, `test_runtime`, `test_date_clocktime` all differ.
+`RUNTIME()`/`DATE()`/`CLOCKTIME()` are genuinely wall-clock-dependent —
+`gpc` and `yaHALMAT2` have no simulated master clock in common, so these
+remain not meaningfully comparable, expected to differ, not evidence of
+a bug on either side.
+
+**Status (2026-07-26): confirmed as-is for `RUNTIME`/`DATE`/`CLOCKTIME`,
+no action possible or needed.**
+
+**Correction (2026-07-28): `test_random`'s premise was wrong — `RANDOM()`
+and `RANDOMG()` are fully deterministic on real hardware, not
+PRNG-non-comparable at all.** Per direct reading of `RUNASM/RANDOM.asm`:
+the generator is a classic IBM System/360 SSP "RANDU"-family linear
+congruential generator (`X(n+1) = 65539*X(n) mod 2^32`), seeded from a
+fixed `SEED=1435` constant baked directly into the object code — no
+wall-clock or hardware entropy anywhere. `yaGPC2` (executing the real
+compiled routine) is 100% run-to-run reproducible for any program using
+`RANDOM`/`RANDOMG`; `yaHALMAT2` previously used its own unrelated
+method and couldn't be compared against it at all.
+
+Produced and rigorously verified a bit-exact C reference implementation
+(`yaGPC2/reference-impls/hal_random.{h,c}`, untracked scratch files, not
+committed) for `yaHALMAT2` to adopt. Two real bugs were found and fixed
+in the reference *during* its own verification (both caught only by
+diffing against `yaGPC2`'s actual `--trace` execution, never by static
+reading of the assembly alone):
+1. `M R6,SEED` is not a plain S/360 signed multiply on this CPU —
+   `exec_M` routes even-register multiplies through `q31_mul32()`,
+   which left-shifts the 64-bit product by 1 bit before splitting into
+   the register pair (a Q31 fixed-point convention), and the following
+   `SRDA R6,1` exactly cancels that shift; net effect of `M`+`SRDA`+`LR`
+   together is a *plain* truncating 32-bit multiply.
+2. `CVFL F0,R6` never touches its paired register `F1` (confirmed
+   against `exec_CVFL` — no `F(x+1)` store at all), so `F1` holds
+   whatever the *previous* floating-point op on that pair left behind
+   when the following `MED` reads `F0:F1` as an extended pair. This
+   resolves to a fully deterministic chain (not garbage), since exactly
+   two instructions ever write `F1`: `MED` itself every call, and
+   `RANDOMG`'s own epilogue (`LER F0,F2`/`LER F1,F3`), which repackages
+   the Gaussian accumulator into `F0:F1` as the declared return value
+   and, as a side effect, overwrites the chain with *that* result's low
+   word instead of the 12th internal draw's.
+3. Also corrected along the way: the correct built-in name is
+   `RANDOMG` (`USA003088.txt` Sec. 9397/9399), not `RANDG` as originally
+   guessed from the RTL routine's own internal label.
+
+Verification: bit-exact match confirmed for 5 consecutive `RANDOM()`
+calls interleaved with `WRITE`s, 3 consecutive `RANDOMG()` calls with
+nothing in between, and a 20-call sequence mixing both in arbitrary
+order — all diffed against `yaGPC2` actually compiling and running real
+HAL/S test programs, not derived from static analysis alone. Logged as
+`yahalmat2_random_not_deterministic` — **now `fixed`** on yaHALMAT2's
+side, adopting this algorithm.
+
+**Known scope limitation, tracked as its own entry
+(`random_reference_f1_chain_disrupted_by_other_float_ops`, `status=deferred`):**
+the F1-chaining model above was only verified for back-to-back
+`RANDOM`/`RANDOMG` calls with nothing but `WRITE`s in between. Real
+corpus code doesn't look like that — `071-DARTBOARD_APPROXIMATION.hal`
+computes with drawn values (`X**2+Y**2`-style) before drawing again. A
+direct repro (`X=RANDOM; Y=RANDOM; Z=X**2+Y**2; V=RANDOM;`) confirms `X`
+and `Y` match the isolated-chain prediction exactly, but `V` (the 3rd
+draw) diverges once `Z`'s computation has touched `F0`/`F1` in between —
+`yaGPC2` gets this right for free (real register-level execution);
+`yaHALMAT2` and the reference model `RANDOM`/`RANDOMG` in isolation with
+no representation of the rest of the program's floating-point register
+state. Bit-exact matching for any program computing anything with a
+drawn value before the next call isn't achievable without `yaHALMAT2`
+tracking F-register low-order-bit state across *every* floating-point
+op, not just `RANDOM`/`RANDOMG` — a much bigger undertaking than
+adopting the self-contained algorithm. The core algorithm/determinism
+finding above remains correct and useful; this only narrows what
+"fixed" covers.
+
+**Status corrected `deferred` → `open` (2026-07-28), per a clarified
+standing rule**: `deferred` means "doesn't need fixing *right now*, but
+must be fixed before the next project phase" — not indefinite
+"someday, not this phase." A real fix path exists here in principle
+(tracking F-register state more generally), so it can't sit
+indefinitely just because it's substantial engineering; still open, now
+tracked at `medium` severity.
+
+**`RUNTIME()`/`DATE()`/`CLOCKTIME()` — resolved for real (2026-07-29),
+correcting an intermediate mischaracterization.** An earlier pass of
+this file corrected the framing from "genuinely wall-clock-dependent"
+to "simply SVC-trapped/unimplemented" (confirmed: no `RUNTIME`-handling
+code in `halucp.c`, no `RUNASM/` source backing them), speculating
+`RUNTIME()` specifically might mean a simple, implementable "simulated
+elapsed mission time." Reading the real, confidential FCOS source for
+SVC 22 (`FPMTMHAL.asm`, "HAL/FCOS TIME MANAGEMENT INTERFACE") settled
+it: `RUNTIME()` calls `FPMGMTIM` (a continuously-updating GMT-style
+clock, driven by a periodic hardware timer interrupt at the OS level),
+while `CLOCKTIME()` uses the task scheduler's own TQE tick machinery —
+the *same* real-time task-executive infrastructure §2.7 already
+confirmed has no backing implementation anywhere in this toolchain
+(checked `120-EXAMPLE_A.hal`'s own `.fcm.LIST`: only the single `START`
+module is linked, the identical "nothing to link against" signature
+§2.7 already used to accept `SCHEDULE`/`WAIT` as a genuine scope
+boundary). `RUNTIME()` therefore folds into that same already-accepted
+boundary, not a separately-fixable gap. `DATE()`/`CLOCKTIME()` remain a
+different, separate case: confirmed via `yaHALMAT2`'s own `interp.c`
+that it deliberately implements them via real OS wall-clock time
+(`time()`/`localtime()`) — genuinely non-deterministic/non-comparable
+across runs by design, confirming the *original* framing was right for
+these two specifically. Logged as
+`runtime_svc_miscategorized_as_wallclock_nondeterminism`,
+`status=not_a_bug` — no code change, not fixable without the same new
+periodic-timer/interrupt subsystem §2.7 already declined to build.
 
 ### 2.7 Real-time task model (`SCHEDULE`/`WAIT`/`TASK`/priority): likely a scope/methodology gap, not a semantic bug
 
@@ -538,6 +1183,16 @@ calling into a runtime task-management library that would need to be
 includes such a library, the way `IOINIT`/`HIN`/`COUT` are linked in
 for I/O) before concluding it's unfixable rather than just unlinked.
 
+**Status (2026-07-26): confirmed as a genuine scope boundary, not a
+fixable bug.** Compiled and linked `test_sched_on.hal` and inspected
+the `.fcm.LIST` module table directly: only I/O support modules get
+linked (IOINIT/COUTP/CASPV/CASV/`#Q*`-trap-stubs) — no SCHD/task-
+scheduling runtime module appears anywhere. This toolchain has no
+backing implementation for real-time task semantics to link against at
+all; `gpc`'s bare CPU/IOP simulation genuinely has no task executive.
+Not fixable within yaGPC2's current scope without building an entirely
+new runtime subsystem — no action taken.
+
 ### 2.8 Floating-point LSB-level precision differences (likely not bugs)
 
 `test_errfix_scalar`, `test_bfnc_hyperbolic`, `test_bfnc_invtrig`,
@@ -554,22 +1209,88 @@ different rounding characteristics, not necessarily a bug in either.
 Lowest priority in this file unless a specific one turns out to matter
 for some downstream computation.
 
+**Status (2026-07-26): confirmed as-is, no action needed.** — **superseded,
+this framing was wrong (2026-07-28).** The user's own assessment: "`yaHALMAT2`
+should be using IBM Hex Float, and if it is not, it's probably a
+failure on my part to specify it. I consider that a very big bug, even
+if I'm the one who caused it." Confirmed via `yaHALMAT2 --help`: no
+`--float-format`/`--hex-float`/`--ieee` flag exists at all, ruling out
+"forgot to pass a flag" and pointing to native IEEE double being used
+throughout with no IBM hex float mode available — logged
+`yahalmat2_uses_ieee_double_not_ibm_hex_float`, `open`, high severity,
+as the likely single largest remaining source of this file's whole §2.8
+bucket.
+
+**Correction (2026-07-28): the "uses native IEEE double throughout"
+framing was itself not accurate**, per direct inspection of
+`yaHALMAT2`'s `value.c`/`interp.c` (not just `--help` output). Verified
+independently (not just taken from `yaHALMAT2`'s own claim):
+`halmat_scalar_add()` genuinely performs IBM System/360-style hex-float
+arithmetic — real sign/characteristic/fraction extraction (7-bit
+base-16 exponent, 24/56-bit hex fraction), hex-digit-aligned shifts, a
+signed-magnitude add, and postnormalization — wired into every core
+`SCALAR`/`MATRIX`/`VECTOR` arithmetic opcode, not a native-double
+approximation. The real, much narrower gap: roughly 50 call sites
+(transcendental/special functions, matrix inversion's Gauss-Jordan
+elimination, `RANDOM`/`RANDOMG`, `DFOR`/`CFOR` loop-control increment
+arithmetic, `READ`-statement decimal-text parsing) went through a
+native-double intermediate, for functions with no available
+primary-source hex-float RTL algorithm to port instead — not a
+blanket architectural fidelity gap needing a full floating-point-core
+rewrite.
+
+**Further correction (2026-07-29), per direct user clarification: the
+authoritative target for `yaHALMAT2`'s numerical fidelity is real
+AP-101S flight hardware/software, not real `gpc`/`yaGPC`** — `gpc`
+itself only ever achieved *partial* hex-float authenticity (basic
+arithmetic only). `yaGPC2` is this project's newer, fully-authentic
+reimplementation (genuine hex-float for `SQRT`/transcendentals/matrix-inversion,
+not just the four basic ops, simply by virtue of executing the real
+compiled AP-101S RTL machine code rather than reimplementing each
+function — see §5's introduction for why that asymmetry exists
+structurally) and is now the correct cross-check target. Per the user's
+explicit standing rule (see the standing policy note near the top of
+this file): development cannot proceed until
+`yaHALMAT2` and `yaGPC2` reach parity, including cases where that means
+`yaHALMAT2`'s output must now *diverge* from old `gpc`/`yaGPC`.
+
+**Closed out (2026-07-29)**: every RUNASM transcendental/matrix routine
+identified as needing a genuine hex-float port (`EXP`, `LOG`, `ATANH`,
+`ASINH`, `SQRT`, `ATAN`, `ATAN2` single+double, `COSH`, `SINH`, `TANH`,
+`ARCCOSH`, and `MATRIX**-1` single+double for every N) has been ported
+and independently verified bit-for-bit against `yaGPC2`'s own real
+execution — `status=fixed`, high severity, closing out the whole
+finding. Two narrower, explicitly-out-of-scope-for-now residual gaps
+remain documented on `yaHALMAT2`'s own side (MMWSNP/assignment-copy
+odd-companion-register leakage; `MATRIX(...)`-literal-constructor
+leakage) — neither affects the RTL ports themselves, only the accuracy
+of entering FPU state at certain mainline call sites. **However, §5's
+fresh full-corpus sweep against this "closed" state still found real,
+concrete residual gaps** (`double_to_single_scalar_assignment_narrowing_mismatch`,
+`array_of_vector_element_write_precision_format_mismatch`,
+`tan_function_possibly_missed_by_hex_float_port` — plain `TAN` notably
+absent from the ported-function list just above) — a good illustration
+of this project's own standing rule that a narrower root cause doesn't
+by itself justify a severity/urgency downgrade without independently
+confirming it actually explains the originally-observed evidence.
+
 ### 2.9 Not yet characterized — needs individual follow-up
 
-`test_bfnc_char` (`13` vs `0` for a character built-in function —
-possibly a `yaHALMAT2` scope gap analogous to `YERRORS.md`'s finding 3
-about the older `yaHALMAT`, or possibly real), `test_bit_conv`
-(`CHARACTER(BIT)` conversion: `yaGPC` renders the literal bit pattern
-`"00001100"`, `yaHALMAT2` renders `"12"` — a real, checkable semantic
-question about what `CHARACTER()` of a `BIT` value should produce),
-`test_bit_write` (a bare `HEX'1234'` literal's default bit-width in
-`WRITE`: `yaGPC` treats it as 16 bits, `yaHALMAT2` as 32),
-`test_tint_null_terminal` (bit-width again: 4 groups of 4 vs. 8 groups
-of 4 — likely related to 2.2/the `test_bit_conv` family), `test_link_prog_array`
-(integer-style vs. scalar-style `0` formatting — possibly an artifact of
-this sweep's simplified single-file link not matching what this
-multi-file-linking test actually needs), `test_errgrp_errnum` (`3,3` vs
-`4,5`) and `test_errfix_trig` (`3` vs `2147483647` — the latter being
+Originally: `test_bfnc_char` (`13` vs `0` for a character built-in
+function — possibly a `yaHALMAT2` scope gap analogous to
+`YERRORS.md`'s finding 3 about the older `yaHALMAT`, or possibly
+real), `test_bit_conv` (`CHARACTER(BIT)` conversion: `yaGPC` renders
+the literal bit pattern `"00001100"`, `yaHALMAT2` renders `"12"` — a
+real, checkable semantic question about what `CHARACTER()` of a `BIT`
+value should produce), `test_bit_write` (a bare `HEX'1234'` literal's
+default bit-width in `WRITE`: `yaGPC` treats it as 16 bits,
+`yaHALMAT2` as 32), `test_tint_null_terminal` (bit-width again: 4
+groups of 4 vs. 8 groups of 4 — likely related to 2.2/the
+`test_bit_conv` family), `test_link_prog_array` (integer-style vs.
+scalar-style `0` formatting — possibly an artifact of this sweep's
+simplified single-file link not matching what this multi-file-linking
+test actually needs), `test_errgrp_errnum` (`3,3` vs `4,5`) and
+`test_errfix_trig` (`3` vs `2147483647` — the latter being
 `INT32_MAX`, likely an error/overflow sentinel value, so probably
 related to the same error-group/error-number reporting as
 `test_errgrp_errnum` and to the 2.1 `ON ERROR` finding above),
@@ -580,32 +1301,838 @@ type-confused/uninitialized-memory read on one side rather than a
 effectively broken — `yaGPC` prints all-zero garbage, `yaHALMAT2`
 prints nothing, both exit 1 — likely this sweep's simplified
 single-file compile not providing whatever external declaration this
-test needs, not a real finding). None of these were root-caused in this
-pass; see `sweep_raw_results.txt` for each one's exact output.
+test needs, not a real finding). See `sweep_raw_results.txt` for each
+one's exact original output.
+
+**Per-item status as of 2026-07-27:**
+
+- **`test_bfnc_char`** — **investigated 2026-07-27: a confirmed, real,
+  inherited bug — but in the actual 1980s HAL/S runtime library itself
+  (`CINDEX.asm`), not in yaGPC2, yaGPC, or `gpc`, all three of which
+  faithfully execute it as-is.** `I1 = INDEX(C1, 'ZZZ')` (`C1 =
+  'HELLOWORLD'`, no `'ZZZ'` substring present) gives `13` from
+  `gpc.js`/`yaGPC`/`yaGPC2` identically (confirmed by running all three
+  directly), but `USA003088.txt` (Language Specification) explicitly
+  states `INDEX` "otherwise zero is returned" when not found — and
+  `yaHALMAT2` correctly gives `0`. This is the first finding in this
+  whole file where the *real, compiled runtime library code itself* is
+  the confirmed bug, not a comparison artifact or a real-but-authentic
+  hardware quirk. Traced via `--trace`, and a bogus 3-byte "match"
+  turns up in whatever's just past the string's real data (checking
+  position 13 in a 10-character string against a 3-character key),
+  which then gets returned as if it were a genuine index.
+
+  **Correction (2026-07-27, prompted by a user challenge to the
+  mechanism below): the original write-up's claimed mechanism was
+  wrong.** It had concluded `CINDEX`'s outer bounds check (`AR R2,R1` /
+  `CR R2,R5` / `BH NO`) itself "never fires" — checked directly against
+  `yaGPC2`'s own (fixture-validated) `exec_BCF`/`exec_CR`/
+  `cpu_compute_cc_arith` rather than assumed: `BH` (compiled to `BCF`,
+  mask=1) correctly branches only on `CC==1` ("greater"), and at every
+  sampled iteration the compared values genuinely did satisfy "still
+  fits" (`CC==3`) — the branch was behaving completely correctly on its
+  actual inputs. **The real, corrected mechanism, one level up:**
+  `CINDEX`'s `END_OF_COMPARE` setup (`LH R6,0(R2)` / `NHI R6,X'00FF'` /
+  `AR R2,R6`) adds `CURRENT_LENGTH(C1)` scaled as `N*0x10000`, but the
+  same routine's own per-character `GTBYTE`-based address stepping
+  (used everywhere else in it) advances one character via `+0x8000` —
+  exactly double the correct address-space span for a 10-character
+  string, confirmed numerically (`LH`'s raw descriptor value
+  `0x0a0a0000` → masked `0x000a0000` = 10, added directly to
+  `NAME(C1)`). `GTBYTE` itself remains internally consistent and not
+  the culprit — the 2× unit-scale mismatch is entirely in `CINDEX`'s
+  own one-time `END_OF_COMPARE` setup arithmetic. This still leaves
+  `CINDEX.asm` (the real, public-domain 1980s runtime library) as the
+  confirmed bug location, just via a different, now-verified mechanism —
+  not a `yaGPC2`/`gpc` mnemonic-decoding issue.
+
+  **Update (2026-07-28): FIXED — directly in the real, historical
+  `CINDEX.asm` source, via a deliberately reversible mechanism.** The
+  user was, understandably, very reluctant to touch real 1980s Shuttle
+  flight-software RTL source irreversibly. Design worked out
+  collaboratively: `ASM101S.py` (the modern reimplementation of the
+  AP-101S assembler this project uses,
+  `~/git/virtualagc/ASM101S/`) now unconditionally pre-defines a global
+  `SETB &ASM101S=True` before reading any source file — no build-flag
+  needed anywhere. `CINDEX.asm` declares `GBLB &ASM101S` itself (a
+  completely standard, zero-object-code pseudo-op) and gates the fix
+  behind `AIF (&ASM101S)...`: under `ASM101S.py` the symbol already
+  exists (`True`), so the `GBLB` is a no-op and the fixed logic
+  assembles; under any *other*/historical assembler that's never heard
+  of `&ASM101S`, the same `GBLB` line freshly declares it defaulting to
+  binary false, and the *original*, byte-for-byte-unmodified historical
+  logic assembles instead. Confirmed via direct object-code comparison
+  against a pristine, unmodified `CINDEX.asm` (`cmp`: identical) that
+  this holds exactly — someone using a real historical assembler never
+  has to touch or even notice the source changed.
+
+  The actual fix covers **two** occurrences of the identical 2×
+  address-scale bug, not one — a first attempt fixed only the outer
+  `END_OF_COMPARE` occurrence described above, which is strictly *worse*
+  than fixing neither: it desynchronized the two bounds calculations and
+  broke a previously-working case (`INDEX(C1,'WORLD')`, a genuine match,
+  started returning `0` instead of `6`), caught only by actually running
+  the fixed build end-to-end before declaring it done. The second,
+  previously-unnoticed occurrence is in the `NEWK:` retry-loop's own
+  bounds check (`AR R2,R1`/`SR R2,R1`, the same un-rescaled address
+  arithmetic on `CURRENT_LENGTH(C2)`) — fixed via a second `AIF`-gated
+  branch computing a rescaled *copy* of `R1` into free register `R6`
+  (`LR R6,R1`/`SRL R6,1`) for just that add/compare/subtract, leaving
+  the real `R1` untouched since `BCTB` immediately afterward still needs
+  it as a plain, unscaled loop counter. After both fixes, `yaGPC2` gives
+  `6`/`0` for `INDEX(C1,'WORLD')`/`INDEX(C1,'ZZZ')` (was `6`/`13`),
+  byte-for-byte matching `yaHALMAT2`.
+
+  **Follow-up audit (2026-07-28, `gtbyte_sibling_routines_scale_audit`,
+  `status=not_a_bug`):** checked the 9 other RTL routines sharing
+  `CINDEX`'s GTBYTE/STBYTE-based string-traversal pattern (`CLJSTV`,
+  `CPAS`, `CPASR`, `CRJSTV`, `CTOB`, `CTOE`, `CTOI`, `CTOX`, `CTRIMV`)
+  for the same missing-rescale mistake — none found. Every manual
+  pointer-displacement site in all 9 files already does the correct
+  `SRL`/`SRA` #1 rescale before adding a count to a byte-pointer
+  register (including `CRJSTV`'s `TRUNCATE` path, which is essentially
+  the exact maneuver `CINDEX` needed and got wrong, done right); the
+  rest never touch pointers manually at all. `CINDEX`'s bug looks like
+  an isolated authoring mistake in one unusually tricky backward-search
+  routine, not a systemic pattern.
+- **`test_bit_conv`** — **resolved: was a yaHALMAT2 bug, now fixed on
+  that side (2026-07-27).** `USA003087` Sec. 21.4's own worked example
+  (a 4-bit string `0101` converting via simple-form `CHARACTER()` to
+  the literal string `'0101'`) matches `gpc`/`yaGPC2`'s observed
+  `"00001100"` output exactly — `yaHALMAT2`'s `BTOC` now maps each bit
+  to a literal `'0'`/`'1'` character instead of formatting the pattern
+  as decimal, matching. No yaGPC2 change was needed. See
+  `problems-yaHALMAT2.md`, `test_bit_conv`, FIXED.
+- **`test_bit_write`** — **resolved: was a yaHALMAT2 bug, now fixed on
+  that side (2026-07-27).** The general rule was fully characterized
+  empirically (compiled 15 `WRITE(6) <radix-literal>` variations
+  through the real HALSFC compiler and read each one's compiled `LHI
+  R6,<N>` width parameter): width = (bits-per-digit for that radix) ×
+  (digit-count in source), leading zeros counted. This is baked into
+  the compiled AP-101S machine code by the real compiler —
+  `gpc`/`yaGPC2` just executes it; `yaHALMAT2` now reads its own
+  litfile's width cell instead of discarding it. No yaGPC2 change was
+  needed. See `problems-yaHALMAT2.md`, `test_bit_write`, FIXED.
+- **`test_tint_null_terminal`** — **resolved: was the same yaHALMAT2
+  bug category as `test_bit_write`, now fixed on that side
+  (2026-07-27), confirmed as its own distinct code path.** The test
+  declares `STATUS BIT(16)` explicitly, so `WRITE(6)
+  FWDSENSORS.STATUS` should use the *declared* field's width, not a
+  literal's own digit count — `yaHALMAT2` wasn't looking up a
+  structure field's declared `BIT(n)` width for this kind of WRITE
+  argument at all (defaulting to 32 bits), a genuinely separate fix
+  from `test_bit_write`'s (which also, in fixing it, silently fixed
+  the identical bug in two other fixtures). No yaGPC2 change was
+  needed. See `problems-yaHALMAT2.md`, `test_tint_null_terminal`,
+  FIXED.
+- **`test_link_prog_array`, `test_errgrp_errnum`, `test_errfix_trig`,
+  `test_ext_double`** — investigated 2026-07-27; see the dedicated
+  write-up immediately below.
+- **`test_subbit_scalar`** — **resolved: was the same yaHALMAT2 bug as
+  §2.2/`test_bit` above, now fixed for free by that fix (2026-07-27),
+  not actually a separate ambiguous case as originally assessed here.**
+  This entry's own original "genuinely unresolved which is more
+  correct" framing turned out to be too generous to `yaHALMAT2`'s
+  side: once `yaHALMAT2` implemented real hardware's actual rule (a
+  non-`DOUBLE` `INTEGER` truncates/reinterprets as signed 16-bit at
+  `WRITE` time, confirmed via §2.2's `test_bit` investigation), this
+  test's own divergence resolved automatically — it was never actually
+  a precision-inference ambiguity, just the same missing truncation.
+  No yaGPC2 change was needed. See `problems-yaHALMAT2.md`,
+  `test_subbit_scalar`, FIXED.
+
+### 2.9 `test_link_prog_array`, `test_errgrp_errnum`, `test_errfix_trig`, `test_ext_double` — investigated 2026-07-27
+
+All four were properly re-tested with real multi-file compiling+linking
+(the original sweep only ever attempted single-file compiles, which
+cannot work for any of these — they all require a second unit/companion
+file). Results:
+
+- **`test_errgrp_errnum` — FIXED, a genuine yaGPC2/`gpc` omission, not
+  a yaHALMAT2 discrepancy at all.** `I1 = ERRGRP;`/`I2 = ERRNUM;`
+  compile to fixed SVC codes `0x0117`/`0x0217` (confirmed identical at
+  every call site via a real compiled listing), which neither `gpc`
+  nor `yaGPC` ever implemented (grep-verified against `gpc/halUCP.coffee`
+  — it only ever handled SVC `0x0014`/`0x0015`). Fixed in
+  `src/halucp.c`/`halucp.h`: `HalUCP.lastErrGroup`/`lastErrNum` track
+  the most recent SEND ERROR (updated regardless of whether a handler
+  was found), and the two SVC codes now write them into R5's upper
+  halfword (the calling convention every compiled call site expects —
+  confirmed via the compiled listing's invariant `STH 5,<dest>`
+  immediately following each SVC). `test_errgrp_errnum` now outputs
+  `0/0/2.0/4/5`, exactly matching yaHALMAT2. All 14 unit test suites
+  still pass.
+- **`test_errfix_trig` — now fully resolved (`cvfx_overflow_truncation_rule`,
+  `status=fixed`).** `TAN`/`SIN`/`COS` agree already (not actually part
+  of this discrepancy). The remaining line, `IRESULT =
+  INTEGER(HUGESCALAR)` with `HUGESCALAR=5e10` (far outside `INTEGER`
+  range): read `RUNMAC/ETOH.asm` (the real linked-in RTL conversion
+  routine) and confirmed it has **no overflow check or `AERROR` call at
+  all** — just `CVFX` + rounding-bias + `NHI R5,X'FFFF'` (mask to 16
+  bits). `USA003090` App. C's documented "overflow errors may occur"
+  fixup is aspirational here; the real routine just wraps silently.
+  `gpc`/`yaGPC2`'s bare-hardware result is the authentic result of that
+  real algorithm on this input — not a yaGPC2 bug, same "executes real
+  compiled code faithfully" pattern as §2.3. **Update (2026-07-27): the
+  real architectural split is now understood.** Space Shuttle flight
+  software has an FCOS interrupt handler (`FPMCVFX`, in the real
+  flight-software source
+  `workspace/PFS/OI340600/SSSRC/FPMSDERR.asm`) that clamps a `CVFX`
+  convert-overflow to +32767/-32767; a standalone HAL/S program with no
+  real OS underneath it (i.e. everything this file tests) never gets
+  that ISR, and instead sees whatever the bare `CVFX` instruction
+  itself produces. `yaHALMAT2` (modeling "the whole system including
+  FCOS") clamps; `yaGPC2` (a bare hardware emulator with no OS)
+  shouldn't, by default — not a bug on either side, two different, both
+  legitimate things being modeled. Added a new **`--fcos`** command-line
+  flag to yaGPC2 (`src/opts.h`/`opts.c`, `src/cpu.h`'s new
+  `CPU.fcosMode`, wired via `ageharness_configure_from_opts`) that
+  simulates known FCOS/flight-OS behaviors a bare-hardware program
+  doesn't get — so far exactly one case: `exec_CVFX` (`src/cpu_instr.c`)
+  now clamps to +32767/-32767 by the source float's sign when `--fcos`
+  is passed, reproducing `FPMCVFX` exactly. Also found and fixed, in
+  the same investigation, a real, separate, previously-undiagnosed bug:
+  `exec_CVFX` had been discarding its destination-register store
+  *entirely* whenever `fibm_cvfx` signaled `FP_EXC_CONVERT_OVERFLOW`
+  (the shared exc-then-bail pattern used by every other FP instruction
+  in `cpu_instr.c`), leaving the register as stale, unrelated garbage —
+  this, not a deliberate "bare hardware truncates" semantic, was the
+  actual root cause of the old unreliable `3` result. Real `CVFX`
+  always completes and stores *some* result before any interrupt is
+  taken; `exec_CVFX` now always stores `fibm_cvfx`'s computed result
+  (still signaling the exception for logging) instead of bailing before
+  the store. Also confirmed along the way (tracing a normal in-range
+  conversion): `CVFX`'s result is a **Q16.16 fixed-point value**, not a
+  plain integer — `ETOH.asm`'s subsequent `+0x7FFF` bias and `NHI
+  ...,X'FFFF'` mask/keep the *upper* 16 bits to extract the final
+  rounded integer; the `--fcos` clamp values had to be pre-scaled by
+  `0x10000` (`0x7FFF0000`/`0x80010000`) accordingly. Verified against
+  `test_errfix_trig.hal` and ad hoc overflow test cases in both
+  directions; all unit test suites pass. **Resolved on yaHALMAT2's side
+  too (2026-07-27)**, independently, once this FCOS/no-FCOS split was
+  understood — see `problems-yaHALMAT2.md`, `test_errfix_trig`, FIXED.
+  **Additional confirmed trigger found 2026-07-28** (prompted by a
+  possible-concern audit of runtime `INTEGER**INTEGER` exponentiation
+  overflow, not a new bug): `B**E` for two genuinely runtime-valued
+  `INTEGER SP` operands (forced non-foldable via `DO FOR` loops, e.g.
+  `3**11`) compiles not to the integer-only `IPWRI`/`HPWRH` routines but
+  to `EPWRI`/`EPWRH` (the *scalar*-to-integral-power routine, computed
+  in floating point) followed by `#0ETOH`'s `CVFX`-based scalar→integer
+  conversion — landing squarely on this same Q16.16-overflow mechanism.
+  Not a new bug; just confirms the fix (bare default: silent truncation;
+  `--fcos`: clamps to ±32767) applies correctly via a previously-untested
+  call path.
+- **`test_ext_double` — CONFIRMED as a pure sweep-methodology artifact,
+  not a real bug.** Properly compiled+linked as a 2-unit program (the
+  `DOUBLE_IT` procedure unit with `--parms=TEMPLATE`, then the calling
+  `PROGRAM` unit via `D INCLUDE TEMPLATE`, then both `cards.bin`s
+  linked together) — yaGPC2 outputs `5  10`, exactly matching
+  yaHALMAT2's own expected value. The original "both sides broken"
+  result was purely from compiling the bare `PROCEDURE` (no entry
+  point) standalone, which can't work in any tool. No discrepancy
+  exists.
+- **`test_link_prog_array` — was a real yaHALMAT2 bug, now fixed on
+  that side (2026-07-27, found asynchronously via the shared issue
+  database rather than a document report).** Properly compiled+linked
+  as a 2-unit program, yaGPC2 correctly outputs `10  20  30`
+  (INTEGER-style) for the `EXTERNAL COMPOOL`-shared `SHARED_ARR
+  ARRAY(3) INTEGER`. Turned out not to be COMPOOL-specific at all: per
+  yaHALMAT2's own root-cause (`yagpc2-yahalmat2-issues.db`, key
+  `compool_array_integer_type`), any whole `ARRAY(n) INTEGER` `WRITE`
+  argument (local or `EXTERNAL COMPOOL`) went through a code path that
+  always reported it as `SCALAR` regardless of declared type; fixed by
+  broadening the WRITE-argument type-reclassification check to cover
+  array-element reads, not just bare literals. No yaGPC2 change needed.
 
 ---
 
-## 3. Additional untapped source: "Programming in HAL/S" worked examples
+## 3. "Programming in HAL/S" worked examples — corpus sweep and completion
 
 `~/git/virtualagc/yaShuttle/"Source Code"/"Programming in HAL-S"/` has
-**98** `.hal` files (`NNN-NAME.hal`, each with a matching `.hal.lst`
-compiler-listing file from a prior compile) — the worked examples from
-the "Programming in HAL/S" textbook (Sept. 1978), the same source
-`yaGPC`'s own port used for its `gpc/gen/A3GRESCH.fcm`-style example
-corpus provenance. As the user noted, **no test fixtures/expected
-outputs have been devised for these** — unlike `yaHALMAT2`'s
-`src/tests/hal/`, there's no `run_all.sh`-style harness or hardcoded
-expected strings here.
+**98** `.hal` files (`NNN-NAME.hal`, `NNN` = the PDF page number in the
+book where the original version of the code appears) — the worked
+examples from the "Programming in HAL/S" textbook (Sept. 1978), the
+same source `yaGPC`'s own port used for its `gpc/gen/A3GRESCH.fcm`-style
+example corpus provenance. Unlike `yaHALMAT2`'s `src/tests/hal/`, there
+was no `run_all.sh`-style harness or hardcoded expected output here.
+**Status (2026-07-27): fully swept and completed.** This section covers
+both passes: the initial yaGPC2-vs-yaHALMAT2 comparison sweep, and the
+subsequent file-by-file completion of every "currently broken" file
+(per the user's direction below).
 
-This is a large additional pool of real HAL/S programs that could be
-run through the same three-way comparison (`gpc`/`yaGPC` vs.
-`yaHALMAT2`) as Section 2 above, but doing so usefully would need either
-(a) hand-deriving expected output per program (slow, but same rigor as
-this file's Section 2 discrepancies), or (b) treating `gpc`-vs-`yaGPC`
-agreement as the "known-good" baseline (already established elsewhere)
-and only using `yaHALMAT2` divergence as a lead-generator the same way
-Section 2 does. Not attempted in this pass — flagged for discussion per
-the user's request, not yet executed.
+**Important context, from the user, that reframes this whole corpus**:
+the code in these files was taken from the book to illustrate HAL/S
+language *syntax*, not to actually run — many never acquired usable
+output, some are deliberately incomplete (omitted "..." sections, empty
+function bodies) precisely because the book's point was the syntax
+being shown, not the computation. Treating them as a runnable parity
+corpus (as Section 2 treats `yaHALMAT2`'s `test_*.hal` suite) required
+first bringing each file up to a state where it actually produces
+comparable output — adding `WRITE` statements and/or termination
+conditions, guided by each file's own code logic and, where that wasn't
+enough, the corresponding book page's surrounding text (extracted to
+`yaHALMAT2/source-documentation/ProgrammingInHALS.txt`, page-navigable
+via `awk 'BEGIN{RS="\f"} NR==<page>{print}'`).
+
+### 3.1 Initial sweep (all 98 files, before any corpus edits)
+
+Same methodology as Section 2 (`--interactive --no-trace --no-verbose
+--line-width 240`, stdout/stderr captured separately, `yaHALMAT2` run
+with matched `--line-length 240`), with a per-file `timeout 10` and
+`--max-steps 500000` (needed — see below). Results: **61 AGREE, 25
+DISCREPANCY, 10 SKIP-COMPILE, 2 TIMEOUT**.
+
+The 2 `TIMEOUT`s (`194-TEST_X.hal`, `250-BITS.hal`) were both confirmed
+non-bugs: textbook excerpts with the illustrative loop body
+*deliberately* omitted, leaving a genuine `DO WHILE TRUE;`/`DO WHILE
+ON;` infinite loop with nothing in it — not a real finding, just needed
+the per-file `timeout` (now permanently in the sweep script). The 10
+`SKIP-COMPILE` files all needed the `TEMPLATE` compiler option and a
+shared template library — see §3.5.
+
+**Two real, confirmed `yaGPC2` bugs found and fixed** during this sweep
+(both regressions from the earlier §2.5 line-buffering rewrite not
+being fully propagated to every halt/prompt path — full detail in
+`yagpc2-yahalmat2-issues.db` keys `read_eof_flush_missing` and
+`interactive_prompt_raw_newline`): (1) the unhandled-READ-EOF halt path
+in `halucp_provide_eof()` never flushed pending buffered output,
+silently losing the last `WRITE`'d line in ~13 of the 25 discrepancies;
+(2) `run.c`'s interactive-mode prompt logic used a raw `fputs("\n",
+stdout)` (predating the §2.5 buffering model) instead of flushing the
+actual buffer, corrupting output between consecutive `WRITE` statements
+before a `READ`. Both fixed; re-running the full sweep after each
+dropped the discrepancy count from 35 → 25. All unit test suites
+re-verified passing after each fix.
+
+**A confirmed real hardware behavior `yaHALMAT2` didn't model, affecting
+7 files**: vector/matrix `WRITE` arguments always force a fresh output
+line in real hardware (`RUNASM/MMWSNP.asm` unconditionally does `ACALL
+SKIP`/`ACALL COLUMN` before each row) — `yaGPC2` executes this
+faithfully; `yaHALMAT2` didn't model it and kept everything on one line.
+Database key `mmwsnp_vector_forces_newline` (`029-DATATYPES`,
+`106-EXAMPLE_2`, `117-EXAMPLE_8`, `119-EXAMPLE_9`, `134-DOTS`,
+`136-DOTS`, `141-VSUM`) — **status corrected 2026-07-27 from
+`not_a_bug` to `open`** (once a discrepancy is confirmed authentic
+real-hardware behavior rather than a `yaGPC2`-only artifact, the
+expected resolution is for `yaHALMAT2` to replicate it for fidelity, not
+keep a "two legitimately different models" framing) — **now `fixed`**
+on yaHALMAT2's side.
+
+**Five `yaHALMAT2`-side findings** logged, all now `fixed`:
+`function_result_scalar_integer_confusion` (a `FUNCTION(...) SCALAR`'s
+call-result printed as `INTEGER`), `partition_array_shift_wrong` (a
+sliding-window filter's partition-range array-shift assignment computed
+a wrong result from the 3rd iteration onward — `yaGPC2` confirmed
+correct by hand-computation), `radix_qualified_character_bit_ignored`
+(`CHARACTER(bit)@HEX`/`@DEC`/`@OCT`/`@BIN` all gave the identical
+`@BIN`-style answer, ignoring the qualifier), `bit_partition_extraction_mismatch`
+(a single-bit `SUBBIT`-style extraction disagreed for one specific
+index), and `integer_exponentiation_overflow_needs_fcos` — **the
+original framing here was wrong, corrected 2026-07-27**: `052-TABLE.hal`'s
+`2**(N-1)` has a literal compile-time-constant `N` at every call site,
+so the real compiler constant-folds the whole exponentiation — there is
+no runtime instruction and no program-interrupt involved, so `--fcos`
+was never going to be relevant. `yaGPC2`'s wide output
+(`128/2048/.../2147483647`) is simply that real compiled constant,
+faithfully executed; `yaHALMAT2` clamped every one of these to `32767` —
+*that* was the actual, sole bug, now fixed by honoring the HALMAT-level
+width indicator instead of a blanket 16-bit clamp.
+
+The remaining ~12 discrepancies were already-known, non-actionable
+categories: the §2.4 leading-blank-line artifact (`047-ROWS`, `197-P`,
+`198-P`), `RUNTIME()` non-determinism and — per §2.6's correction —
+`RANDOM()`'s determinism now addressed via the reference algorithm
+(`071-DARTBOARD_APPROXIMATION`, `134-ROLL`, `104-EXAMPLE_1`,
+`120-EXAMPLE_A`), tiny IBM-hex-vs-IEEE floating-point precision (§2.8:
+`205-LOG10`, `129-ALMOST_EQUAL`, `GOOGLE-PARALLAX`), and one
+incomplete-textbook-excerpt case with empty function bodies
+(`130-EXAMPLE_N`, revisited on its own terms in §3.4 below).
+
+**`029-DATATYPES.hal`'s real divergence (not the leading-blank-line
+artifact it was briefly filed under in an earlier pass — both tools
+actually agree on that) is a matrix-inverse instability, confirmed
+`not_a_bug`.** Three identical, back-to-back `A4I=INVERSE(A4A)` calls on
+an unchanged, genuinely-singular 4×4 matrix give three *different*
+results under `yaGPC2` (near-identity / wild ~1E12–1E13-magnitude
+garbage / near-identity again). Traced via `--trace`: the underlying
+`MM14SN` routine's own singularity-check branch (`AOUT`, which calls
+`AERROR 27`) never executes for any of the three calls, even though the
+matrix is exactly, provably singular — the divergence isn't about `ON
+ERROR` dispatch at all, but about `MM14SN`'s own floating-point
+pivot/determinant check never landing on exactly zero. Confirmed
+directly from the real RTL source (`Source Code/PASS.REL32V0/RUNASM/MM14SN.asm`,
+public domain): the general (N≠2) pivot-search singularity check loads
+the running-largest pivot magnitude via `LE F0,0(R1,R2)` (single-precision,
+never clears its extended-pair partner `F1`), then, after the full
+pivot search, `LER F0,F0` / `BE AOUT` is an *extended* (register-pair,
+`F0:F1`) self-compare-and-branch — the identical bug class the same
+file's own N==2 special case demonstrates a few lines earlier verbatim
+(`LE F0,2(R1)` / `LE F2,4(R1)` / `SEDR F0,F2` / `BZ AOUT`), and the same
+class already accepted for `test_eron_goto`'s `MM14SN.asm` finding
+(§2.1). `F1` retains whatever garbage the immediately preceding
+floating-point work left behind — here, each `WRITE(6) A4I;`'s own
+formatting work between the three `INVERSE()` calls. Logged as
+`datatypes_repeated_singular_inverse_unstable_result`,
+`status=not_a_bug` — genuine, faithfully-reproduced real hardware
+fragility, confirmed via direct primary-source reading rather than an
+independent JS reference.
+
+**A brief false lead worth recording so it isn't rediscovered**: while
+fixing §2.1's `inverse_singular_matrix_not_detected`, 198-P.hal (the
+same `WRITE(6) M;` inside a `DO FOR` loop) appeared to be missing one
+leading blank line that frozen `yaGPC` shows before its first output —
+initially logged as `write_first_write_inside_do_for_loop_missing_skip`,
+suspected to be a `yaGPC2` bug specific to loop bodies. Re-investigation
+found the loop was never the differentiator (197-P.hal, no loop, has
+the exact same discrepancy against frozen `yaGPC` — an earlier
+diff had been mis-read as an exact match) and that frozen `yaGPC`'s own
+`src/halucp.c` simply has no true-first-write suppression logic at all
+in its `SKIP` handler — it predates this project's own already-validated
+`write_first_ever_positioning_clobbered_by_internal_skip` fix (§3.1
+below). `yaGPC2`'s current behavior is correct; the frozen reference is
+just stale here. Logged `not_a_bug`. **Lesson**: frozen `yaGPC` is
+reliable where independently confirmed against real FCOS/compiled-trace
+evidence (as with `inverse_singular_matrix_not_detected` above) — but it
+is not automatically authoritative for every mechanism, since it can
+itself be out of date relative to `yaGPC2`'s own, more carefully
+validated fixes.
+
+### 3.2 The `TEMPLATE`/`D INCLUDE TEMPLATE` mechanism (resolves all 10 `SKIP-COMPILE` files)
+
+A few corpus files contain lines like `D INCLUDE TEMPLATE xxxxx`
+(column 1) — `xxxxx` names another `.hal` file (or a mangled form of
+its name) that must be pre-compiled into a "template library" before
+it can be `INCLUDE`d, analogous to a C header needing to exist before
+`#include`. To compile a file that needs this, `HALSFC`'s `--parms`
+must include the compiler option `TEMPLATE` — usable unconditionally
+for *every* file with no downside, whether or not it's actually acting
+as a template consumer/provider. The template library is a `TEMPLIB/`
+directory plus a `TEMPLIB.json` file (`{}` if empty); both must exist
+before compiling anything that needs `TEMPLATE`.
+
+Dependency chain traced and resolved for all 10 files: 4 template
+providers (`269-PROCESS_CONTROL` → `264-TQE` → `189-IMU_DATA` →
+`176.0-SUPER_VECTOR`, compiled in that order into a shared `TEMPLIB/`)
+unblock the 10 consumers, all of which now compile.
+`176.1-READ_ACC`/`265-ENQUEUE`/`269-STALL` turned out to be pure
+`FUNCTION`/`PROCEDURE` library files (no `PROGRAM` — like a `.c` file
+with no `main()`) and were excluded from the completion pass below;
+`176-P` needed no content edit at all, just `176.1-READ_ACC.obj` linked
+alongside it (`lnk101 176-P.obj 176.1-READ_ACC.obj -o 176-P.fcm ...`) —
+`yaGPC2` then runs it correctly. `yaHALMAT2`'s own `@list`-based
+multi-unit linking mechanism hits a different wall for this same file
+(`EXTN: expected 2 operands`) even once the template-provider unit is
+also included in its list — logged as `yahalmat2_extn_multifile_template`,
+`status=open`, appears to be a genuine `yaHALMAT2` multi-file-linking
+limitation outside `yaGPC2`'s scope.
+
+### 3.3 Completing the "currently broken" files
+
+Per the user's direction, only files that currently produce no output,
+don't terminate, or fail to compile/link were edited (not the whole
+corpus, and not files that are pure library code with no `PROGRAM`).
+For each: read the file's own logic (and, when that alone didn't make
+the intent obvious, the corresponding book page), added `WRITE`
+statement(s) and/or a termination condition, then individually verified
+compile+link+run against both tools. All ~30 identified files are now
+done:
+
+`194-TEST_X`, `250-BITS` (filled in the two deliberately-omitted loop
+bodies from §3.1's `TIMEOUT` pair), `031-DECLARE3`,
+`032-INITIAL_AND_CONSTANT`, `072-EXAMPLE_2`, `076-EXAMPLE_3`,
+`097-SAMPLE_FLOW`, `164-OUTER`, `167-ASSORTEDIO`, `169-OUTER`,
+`170-OUTER`, `177-P`, `180-EXAMPLE_N`, `184-EXAMPLE_N`, `186-P`,
+`199-P`, `203-A`, `219-P`, `222-BETTER`, `222-MULTI`, `224-GNC_POOL`,
+`230-STARTUP`, `234-X`, `237-STARTUP`, `238-P`, `239-STARTUP`, `241-P`,
+`242-P`, `245-P`, `254-TEST1`, `254-TEST2`, `257-TEST4` all got `WRITE`
+statements (and, for a couple of loop-based files, a real termination
+condition) added. `154-ADD`, `172-OUTER`, `176-P` (see §3.2), and
+`130-EXAMPLE_N` needed **no edit at all** — each was already complete
+as written and just needed the correct build procedure or sample input
+data (`130-EXAMPLE_N` already has a `WRITE` and terminates, via its
+deliberately-incomplete-per-the-book `MASS`/`TAU` stub bodies — see
+§3.4).
+
+A few files needed input data supplied at runtime (matching the book's
+own worked examples where one exists, e.g. `154-ADD`'s sample
+`-3.95, -17.31, ..., +7.50;` from p.154) rather than a content edit —
+this is an established, pre-existing convention in this corpus (e.g.
+`194-TEST_X` already used it), not new.
+
+### 3.4 Two more real `yaGPC2` bugs found and fixed during completion
+
+**`read_skip_column_not_wired_to_input`** (found completing
+`164-OUTER`, now `status=fixed`): `READ ... SKIP(n), COLUMN(n)` control
+specifiers (the standard idiom for re-parsing a value from a specific
+column of a line a preceding `READALL` already consumed — a
+name/value initialization-file reader, per `USA003087` Sec. 10.1.1) had
+**zero effect on input parsing**. `COLUMN`/`SKIP`'s `handle_control`
+cases only ever wrote to `column[ch]`/`deferred[ch]` (output-only state
+read exclusively by the `WRITE`-side formatter), while `IOINIT`
+unconditionally wiped `inputBuffer` at the start of every
+`READ`/`READALL` statement regardless of what `SKIP`/`COLUMN`
+(processed afterward, per compiled HALMAT order) would go on to
+request — so any `SKIP(0)` (stay on the current line) statement crashed
+with a spurious "READ exhausted input... no ON ERROR handler" abort
+instead of re-reading the still-buffered line. Fixed in
+`src/halucp.c`/`src/halucp.h`: `IOINIT` (READ variant) no longer wipes
+the buffer immediately; a new `apply_read_positioning()` (called once
+per statement, right before its first argument is read) honors an
+explicit `SKIP(0)` by keeping the buffered line and applies `COLUMN(n)`
+by advancing (forward-only — no corpus need yet for backward rewind)
+`inputBuffer`'s consumption cursor, tracked via a new `inputColumn`
+field maintained incrementally in `ib_consume_prefix`/`ib_reset`.
+Verified via an isolated minimal repro and the full `164-OUTER.hal`
+file (`PHI`/`ALPHA`/`I_POSN`/`MODE`/`PRINT` all correctly parsed,
+matching `yaHALMAT2` exactly for the fields it supports — see §3.5).
+
+**`stale_suppress_next_advance_merges_writes`** (found completing
+`254-TEST2`, now `status=fixed`): two independent, back-to-back
+`WRITE(6)` statements (each the sole statement of its own `IF-THEN`, no
+shared `DO` block) printed with no newline between them. Root cause:
+`halucp_notify_interactive_input()` (called after a `READ` provides
+input, to avoid a spurious blank line before the next `WRITE`) sets
+`suppressNextAdvance[ch]=true`, but `handle_control`'s WRITE `IOINIT`
+only cleared that flag in its `suppressNextAdvance` branch — if the
+very next `WRITE` on that channel happened to *also* be the channel's
+first-ever (taking the sibling `!hasWrittenBefore` branch instead), the
+flag was left dangling `true` and wrongly suppressed the newline
+advance of whichever `WRITE` came after *that* one instead. Fixed in
+`src/halucp.c`: the `!hasWrittenBefore` branch now also clears
+`suppressNextAdvance[ch]`. Verified via `cat -A` showing a real newline
+between the two lines; all unrelated unit test suites re-run clean, and
+the whole batch of previously-fixed corpus files spot-re-verified
+unaffected.
+
+### 3.5 New `yaHALMAT2`-side findings from the completion pass
+
+Eleven more findings logged to the shared database, all discovered by
+completing individual corpus files (full repro/detail in the database;
+`status=open` and `next_action_owner=yahalmat2` unless noted):
+`yahalmat2_structure_param_vector_return` (can't `RETURN` a `VECTOR`
+field of a `STRUCTURE`-typed function parameter, `170-OUTER`),
+`yahalmat2_structure_read_write_all_zero` (a whole-`STRUCTURE`
+natural-sequence `READ`/`WRITE` silently gives all zeros regardless of
+input, `172-OUTER`), `yahalmat2_nested_structure_vector_field_assign`
+(can't assign a `VECTOR` field nested two `STRUCTURE` levels deep,
+`177-P`), `yahalmat2_assign_array_struct_element` (can't `ASSIGN()`
+into a single array-indexed element of a `STRUCTURE`-typed `ARRAY`
+output parameter, `180-EXAMPLE_N`/`184-EXAMPLE_N`),
+`yahalmat2_send_error_no_dispatch` (a plain `SEND ERROR$(group:num)`
+statement silently no-ops instead of dispatching to the active `ON
+ERROR` handler, `199-P`), `yahalmat2_update_block_no_output` (a program
+containing an `UPDATE` block on a `LOCK`ed variable produces zero
+output at all, `222-BETTER`/`224-GNC_POOL`), `yahalmat2_read_vector_unimplemented`
+(any `READ` targeting a `VECTOR` aborts immediately, `164-OUTER`), and
+`yahalmat2_bit_concat_sum_expression` (a `BIT$`-concatenation-of-`SUM(INTEGER(...))`
+expression can't be evaluated, `257-TEST4`).
+
+**`schedule_priority_out_of_documented_range` — now FIXED, not a
+corpus-fidelity trade-off after all.** Two corpus files use `SCHEDULE
+PRIORITY` values above the range `yaHALMAT2` enforces (`0<P<255`); the
+original framing here treated this as an intentional, unfixable
+textbook-fidelity artifact (`241-P`'s `PRIORITY(999)` is verbatim from
+the book, `239-STARTUP`'s `PRIORITY(776)` is the corpus transcriber's
+own fabricated addition). Corrected: `USA003087` p.166 states
+`PRIORITY`'s argument "must lie in the legal range for a given
+implementation" — the range is explicitly *implementation-defined*, so
+neither number ever had real portable numeric significance beyond "some
+big/distinct number." Fixed by editing both corpus files to valid values
+for this implementation's actual enforced range: `241-P.hal` →
+`PRIORITY(254)` (preserving the book's "since it is of such a high
+priority" framing), `239-STARTUP.hal` → `PRIORITY(240)` (non-colliding
+with the file's other priorities). Both files now agree exactly between
+`yaGPC2` and `yaHALMAT2`.
+
+**`no_return_function_undefined_behavior_diverges` — fully resolved,
+not undefined behavior at all.** `130-EXAMPLE_N`'s deliberately-incomplete
+`MASS` function (no `RETURN` statement, per the book's own "..."
+omission) triggers real HAL/S error #14 ("NO RETURN STATEMENT IN
+FUNCTION"); `yaGPC2` and `yaHALMAT2` originally disagreed on the
+resulting value (`249900` vs. `32767` for "THE ANSWER IS"), filed here
+as "undefined-by-construction, not root-caused further." That framing
+was wrong. `USA003090.txt` Appendix C documents error #14's standard
+fixup as literally **"Continue"** — proceed as if `RETURN` had been
+reached, leaving whatever was already in the result register/slot
+untouched, no substituted value (distinct from the adjacent error #15,
+"SCALAR too large for INTEGER conversion," whose fixup really is
+"32767/-32768"). `yaGPC2`'s `249900` (preceded by a genuine `SEND ERROR
+#14` log line) is the *authentic* real-hardware "Continue" behavior.
+`yaHALMAT2`'s bare `32767`, no error logged at all, was a real,
+actionable gap: its `OP_CLOS` "implicit return" path never detected or
+reported the missing-`RETURN` condition, silently popping the call
+frame without touching the result slot. Database entry corrected
+(`deferred`→`open`, owner→`yahalmat2`) and, once yaHALMAT2 investigated
+further, the actual proximate cause of the `32767` symptom was found
+and fixed on their side: `OP_DFOR`/`OP_EFOR` unconditionally typed the
+`DO FOR` loop control variable `INTEGER` and forced its value through
+the SCALAR→INTEGER overflow fixup regardless of the variable's own
+declared type, even though HAL/S `DO FOR` control variables can be
+declared `SCALAR` (`USA003087` Sec. 10.2) — output is now correctly
+SCALAR-formatted (`250000`).
+
+A close remaining mismatch (`250000` vs. `yaGPC2`'s `249900`) turned out
+to be its own separate, fully-resolved finding
+(`examplen130_cfor_pretest_hardware_divergence`): **`DO FOR ... UNTIL`
+is simply post-tested, a documented HAL/S language rule, nothing
+hardware- or error-14-specific.** `USA003087` states plainly, for `DO
+... UNTIL` generally, "the group is always executed at least once...the
+[UNTIL] expression is evaluated at the beginning of each cycle [after
+the first]...until the result becomes TRUE." Confirmed independently via
+two clean, `MASS`-free repros: `DO FOR V=250000 TO 0 BY -100 UNTIL
+TRUE;` (a compile-time-constant, unconditionally-true condition, zero
+function calls) still gives final `V=249900`, not `250000` — the body
+runs once for `V=250000`, the step is applied (`V→249900`), and only
+*then* is `UNTIL` checked (trivially true, exits). Traced the compiled
+instructions: a `TS` (Test-and-Set) instruction against a dedicated
+"first pass" flag jumps straight into the body on cycle 1 (skipping the
+bounds/`UNTIL` check entirely), only applying that check from cycle 2
+onward using the already-stepped value. For `130-EXAMPLE_N.hal`:
+`MASS`/`ALMOST_EQUAL` are therefore called exactly once, evaluating
+`UNTIL` for `V=249900` (post-step), never for `V=250000` — fully
+explaining `yaGPC2`'s real `249900` result with no error-14 involvement
+whatsoever. Fixed on yaHALMAT2's side: `OP_DFOR`/`OP_CFOR`'s body now
+runs unconditionally for the starting value before either the `UNTIL`
+or `TO`-bound check ever runs, matching this documented, portable
+control-flow rule.
+
+**`read_array_early_termination_stale_iobuf` (`154-ADD`) — corrected
+from `deferred` to `open`, now `fixed`.** A confirmed, real AP-101S RTL
+quirk: when a semicolon-terminated `READ` into an `ARRAY` supplies fewer
+values than the array has elements, the real AP-101S RTL
+(`RUNASM/HIN.asm`'s `EIN`/`HIN`/`IIN`/`DIN`/`BIN` routines)
+unconditionally re-stores the last-read value into every remaining
+iteration of the compiled fixed-count `READ` loop, overwriting the
+`DECLARE...INITIAL` value in every unread element — `yaGPC2` faithfully
+replicates this (confirmed byte-identical against the golden `gpc run`
+reference); `yaHALMAT2` originally left unread elements at their
+initialized value instead, matching the textbook's own idealized worked
+answer rather than real hardware. The earlier `deferred` status
+reflected only a subjective "is this actually desirable" judgment call,
+not any real attempted work or a confirmed hard blocker — corrected per
+this project's established convention (`cvfx_overflow_truncation_rule`,
+`test_stoi`'s rounding rule, `mmwsnp` above): once a discrepancy is
+confirmed authentic real-hardware behavior, the expected resolution is
+for `yaHALMAT2` to replicate it for fidelity. Now fixed on yaHALMAT2's
+side.
+
+---
+
+## 4. "HAL-S-360 Users Manual" corpus — `DEMO.hal`, a new sweep candidate
+
+`~/git/virtualagc/yaShuttle/"Source Code"/"HAL-S-360 Users Manual"/DEMO.hal`
+is a second, separate HAL/S example source, outside the "Programming in
+HAL/S" corpus Section 3 covers — it's the *compiler manual's* own
+syntax-showcase demo (structures, matrices, vectors, `DO CASE`, `DO
+FOR`), included here to show off the listing the HAL/S-360 compiler
+produces, not originally written to run meaningfully. A stale build
+artifact alongside it (dated October 25, 2023, long predating this
+project's current HALSFC/`yaGPC2` tooling) shows 9 phase-1 compile
+errors from some unrelated prior tool/era — not indicative of current
+behavior.
+
+**Prepared as a real cross-tool test (2026-07-28):** the user modified
+the file to compile cleanly and gave its variables real initial values.
+An initial sanity-check pass found the resulting output fully explained
+by the source (not a bug): `K=0;` runs immediately before the main
+`WRITE`, so `K`'s `INITIAL` values never actually print; `PROC1`'s
+original loop reused the *global* `I` as its `DO FOR` counter (only `A`
+was locally redeclared), so `I` ended up at the loop's post-exit value
+rather than its `INITIAL` — both since fixed (`DO FOR TEMPORARY I`/`J`
+now used instead, so the globals survive `CALL PROC1` correctly).
+
+This investigation also surfaced and resolved
+**`array_oob_subscript_returns_zero_unconfirmed_guarantee`**
+(`status=not_a_bug`) — a `yaHALMAT2`-side open question from their own,
+separate crash investigation of this same file, about the original
+`DO FOR C = 1 TO 100; D=K$(C:2,3); END;` (`K` only `ARRAY(5)`, deliberately
+walked far out of bounds). Traced the compiled instructions for a
+minimal repro via `--trace`: there is no bounds-check instruction
+anywhere between computing the index and the load that uses it —
+straight-line, unconditional address arithmetic. The result is **not**
+a stable 0: consecutive out-of-range reads gave `0.0`, a denormalized
+garbage float, `0.0` again, and a different nonzero garbage value —
+exactly what raw, unchecked reads of whatever memory sits past the
+array would produce, not a deliberate "OOB returns 0" convention.
+Cross-checked against the real HALSFC PASS2 compiler-internals source
+(`GENERATExSUBSCRIPTuRANGEuCHECK.c`): despite its name, this has nothing
+to do with HAL/S-level array-bounds checking — it's purely about
+whether a computed address offset fits an S/360-style instruction's
+displacement-field addressing range; its only error call is a
+compile-time internal-consistency check, not a runtime `SEND ERROR`.
+This compiler generates **zero** runtime array-bounds checking — an
+out-of-range subscript is genuine undefined behavior dependent on the
+compiler's static memory layout, exactly like an out-of-bounds C array
+access. `yaGPC2` is already doing the right (bare-hardware-faithful)
+thing by not adding a check; `yaHALMAT2`'s modulo-wrap convention
+doesn't match real hardware either, but matching isn't achievable in
+principle here (no equivalent real memory layout to replicate) — a
+reasonable, deliberate choice for a symbolic interpreter facing genuine
+UB, not a bug on either side.
+
+Per the user's direction, the out-of-range loop was kept exactly as-is
+(deliberately, to prove neither tool traps the overrun — a real,
+reproducible-per-build property worth testing for, not avoiding), and
+its result (`D`) was moved into its own isolated `WRITE(PRINTER) D;`
+statement so it doesn't contaminate an otherwise fully-deterministic
+comparison target.
+
+The file's two remaining dead code paths were then also brought to
+life, so the test exercises as much of the demo's showcased
+functionality as possible: `PROC1`'s local `A` now has `INITIAL(1)`
+(matching global `B`), so its `IF A=B THEN DO;...END;` branch actually
+runs, performing a real cross-structure `MATRIX` slice assignment
+(`EE$(*;3:2,*) = CC$(*;*,2)`); `CC` was given real, per-structure-element
+values via the `MATRIX$(m,n)(...)` conversion builtin (`USA003087`'s
+"matrix conversion" — a bare literal list or `MATRIX(m,n)(...)` without
+the `$` both fail to compile); and a duplicated `DO CASE A;` block (with
+`A` set to a different value first) exercises the previously-dead
+second branch too. `MY_STRUCTURE.RR.SS` (`CHARACTER(5)`, the one
+remaining never-assigned field) was likewise given distinct per-element
+values. Every field is now genuinely exercised except `D` (deliberately
+left as real, undefined out-of-range-read behavior, as above).
+Compiles and runs clean end-to-end. Not yet run through `yaHALMAT2` for
+a cross-tool comparison — that's the natural next step whenever this
+corpus gets its own sweep pass, analogous to Section 3's.
+
+Two dialect notes worth remembering, both confirmed by direct
+experiment while preparing this file: this compiler's fixed-column card
+format caps lines around 72 columns — a too-long statement doesn't
+necessarily error on its own line, but can silently desync the parser
+into confusing cascading errors on *later*, unrelated statements.
+Scalar-broadcast assignment (`X = 5;` or `X$(*,*) = 5;`) works for
+`ARRAY`-of-`MATRIX` targets (like `K=0;`) but is rejected for a plain
+`MATRIX`/`VECTOR` target ("TYPE OF X IS ILLEGAL FOR ASSIGNMENT") — a
+real `MATRIX`/`VECTOR` value needs the `MATRIX$(m,n)(...)`/`VECTOR$(n)(...)`
+conversion builtin instead.
+
+---
+
+## 5. Full corpus re-sweep against `yaHALMAT2` directly (2026-07-29)
+
+Once both projects' `open` queues were cleared (per the standing policy
+in the header above), a full 99-file sweep (the 98 "Programming in
+HAL/S" files plus `GOOGLE-PARALLAX.hal`/`HELLO.hal`, which turned out to
+already be part of the corpus directory alongside the numbered textbook
+files) was run **directly against `yaHALMAT2`, not the frozen `yaGPC`
+predecessor** — the first sweep under the new policy that `yaGPC2` is
+the authoritative parity target. **Result: 76 AGREE, 15 DISCREPANCY, 8
+SKIP-LIBRARY (expected — the same 8 template-provider/pure-library files
+as §3.2), 0 SKIP-COMPILE/SKIP-LINK/TIMEOUT.**
+
+**Sweep-script bugs found and worked around, not real findings**: the
+reused sweep script pointed at the frozen `~/bin/yaGPC` symlink instead
+of `yaGPC2`'s own binary (the same stale-binary trap noted earlier in
+this file — fixed: full path + the `run` subcommand `yaGPC2`'s current
+CLI requires). Separately, compiling a main file and its multi-file
+companion (176-P/176.1-READ_ACC, 224-GNC_POOL/213-GNC_POOL) back-to-back
+sometimes left the compiler's `current.results` symlink pointing at the
+wrong archive directory, producing a bogus "multiple PROGRAM units
+found" crash on `yaHALMAT2`'s side. Manually rebuilding each pair with
+distinct archive directories resolved 224-GNC_POOL to an exact match
+(confirmed not a real issue); 176-P did not resolve the same way — see
+below.
+
+**7 new findings, all `yaHALMAT2`-owned**, each personally re-verified
+(not taken from the raw diff alone) — correcting a miscount given
+verbally at the time (said as "9," which conflated these 7 with the 2
+already-open entries the sweep also touched on):
+
+- **`yahalmat2_dispatches_goto_for_undispatchable_matrix_inverse_error`**
+  (medium) — covered in full under §2.1 above: `yaHALMAT2` still honors
+  the `GO TO` handler for the matrix-inverse-singularity error §2.1/§3.1
+  proved real hardware never dispatches for. A real, actionable parity
+  gap, not a permanent divergence.
+- **`multi_item_write_drops_nested_structure_vector_field`** (**high** —
+  a confirmed regression) — 176-P.hal's `WRITE(6) 'ACCEL=',
+  STATE2.STATE.ACCEL.V;` prints only the label on `yaHALMAT2`, dropping
+  the vector's three components entirely. Confirmed via a from-scratch
+  3-way `@list` rebuild (176-P + 176.0-SUPER_VECTOR + 176.1-READ_ACC,
+  the same repro §3.2's `yahalmat2_extn_multifile_template` fix used)
+  that this is not a sweep-script artifact — `yaGPC2` correctly shows
+  every value (matching that same fix's own previously-recorded
+  real-`gpc`-confirmed numbers). Something since that fix landed has
+  broken this specific case: a multi-item `WRITE` combining a plain
+  string literal with a container item reached via a multi-level
+  `STRUCTURE` path. Structurally related to (but not identical to) the
+  next finding below — 072-EXAMPLE_2.hal's `WRITE(6) 'V_PRIME=',
+  V_PRIME;` (string + a *plain bareword* `VECTOR`, no structure nesting)
+  prints correctly, ruling out "any container item in a multi-item
+  WRITE" as the trigger and narrowing it to structure-nested field
+  paths specifically.
+- **`multi_item_write_truncated_with_bareword_array_of_matrix`** (medium,
+  already open from §4/`DEMO.hal`) — likely the same general class as
+  the finding above (a container item vanishing from multi-item `WRITE`
+  output), but with a different trigger shape (bareword `ARRAY(5)
+  MATRIX(3,4)` vs. a nested-structure `VECTOR` field) — logged
+  separately until root-caused, since it isn't yet safe to assume one
+  fix covers both.
+- **`double_to_single_scalar_assignment_narrowing_mismatch`** (medium) —
+  108-EXAMPLE_5.hal computes `SQRT(3383.5)` two ways: assigned into a
+  plain (single-precision) `SCALAR` via `RMS = SQRT(TOTAL/COUNT);
+  WRITE(6) RMS;` (`TOTAL` is `SCALAR DOUBLE`), vs. computed inline as a
+  `WRITE` argument with no intermediate variable. `yaGPC2` gives the
+  identical answer either way (as it must — `SQRT` doesn't care how its
+  argument arrived); `yaHALMAT2` only matches via the second path. This
+  isolates the bug to the DOUBLE→SINGLE assignment-narrowing step, not
+  `SQRT`'s own hex-float port, despite `yahalmat2_uses_ieee_double_not_ibm_hex_float`'s
+  (§2.8) claim of comprehensive, bit-exact-verified transcendental
+  coverage.
+- **`array_of_vector_element_write_precision_format_mismatch`** (medium)
+  — `vector_write_precision_format_mismatch`'s fix (§2.8, `VASN`/`MASN`'s
+  plain-SYT destination write) only covered a bare `VECTOR` symbol;
+  119-EXAMPLE_9.hal assigns/reads exclusively via subscripted
+  `ARRAY(999) VECTOR(3)` elements (`V$(I:) = VECTOR(RANDOM, RANDOM,
+  RANDOM);`), which still prints in full ~17-digit double-precision
+  format on `yaHALMAT2` instead of the correct ~7-digit single-precision
+  `yaGPC2` uses — a genuinely different code path the original fix never
+  reached.
+- **`vector_cross_product_diverges_on_exact_inputs`** (low) —
+  072-EXAMPLE_2.hal's `RESULT2 = V_PRIME * E` (cross product) diverges
+  from `yaGPC2` even though every input and intermediate value is a
+  small, exactly-representable integer (`V_PRIME=(14,32,50)`,
+  `E=(3,2,1)`, exact answer `(-68,136,-68)` by hand) — ruling out a
+  precision-*representation* explanation entirely (there is no rounding
+  a genuine hex-float multiply-then-subtract of clean small integers
+  should ever introduce) and implicating the cross-product
+  formula/algorithm itself. `yaGPC2` (running the real RTL) shows a tiny
+  (~2e-7) residual on the two components involving a subtraction of two
+  nonzero products — plausibly the real RTL's own faithfully-reproduced
+  quirk (the same general class as `MM14SN.asm`'s documented
+  workarounds), which `yaHALMAT2`'s more direct formula doesn't
+  replicate.
+- **`tan_function_possibly_missed_by_hex_float_port`** (low) —
+  GOOGLE-PARALLAX.hal's all-`DOUBLE` `TAN()` call diverges from
+  `yaGPC2` by the classic hex-float-vs-double signature (agreement to
+  ~7 significant digits, divergence beyond). Every variable in the file
+  is `DOUBLE`, ruling out the assignment-narrowing bug above. Notably,
+  plain `TAN` (as opposed to `ATAN`/`TANH`) does not appear in
+  `yahalmat2_uses_ieee_double_not_ibm_hex_float`'s own list of ported
+  functions (§2.8) — worth checking whether it was simply overlooked
+  before assuming a deeper algorithmic cause.
+- **`empty_character_write_padded_to_declared_length`** (low) —
+  186-P.hal's empty-initialized `CHARACTER(5)` field writes 5 trailing
+  blank spaces on `yaHALMAT2` (padded to the declared maximum length)
+  vs. zero characters on `yaGPC2` (the real hardware's actual-length
+  behavior).
+
+**6 of the 15 discrepancies were already fully explained, no new
+action**: `029-DATATYPES` (§3.1's register-pair fragility),
+`104-EXAMPLE_1` and `120-EXAMPLE_A` (§2.6's `RUNTIME()` scope boundary
+— `104-EXAMPLE_1` specifically uses `RUNTIME` to *time* 100 matrix
+inversions, so its `TMEAN`/`TMAX`/`TMIN` output is statistics computed
+*from* an already-non-comparable quantity), `167-ASSORTEDIO` (the
+`%SVC`-macro scope boundary), `DEMO.hal` (the already-open
+`multi_item_write_truncated_with_bareword_array_of_matrix` above), and
+117-EXAMPLE_8 (its `DISTANCE`/`APPROACH_RATE` residuals are consistent
+with a combination of the already-known `ABVAL`/`UNIT` transcendental
+imprecision and the dot-product sibling of the cross-product finding
+above — not cleanly separable from the `SQRT`-derived imprecision, so
+not filed as its own repro).
+
+`yaGPC2`'s own side stayed clean this round — every one of the 15
+discrepancies traced to either an already-accepted `yaGPC2`-side finding
+or a `yaHALMAT2`-side gap; nothing new for `yaGPC2` to fix.
 
 ---
 
