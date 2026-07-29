@@ -775,6 +775,34 @@ objectFileName = None
 sourceFileCount = 0
 tolerableSeverity = 1
 svGlobals["&SYSPARM"] = "PASS"
+# Always-true (by default) global SETB, undeclared by default (no GBLB
+# here) so that any source file can reference &ASM101S directly without
+# ASM101S.py forcing a declaration on it. A source file that wants to
+# detect "am I being assembled by ASM101S specifically, as opposed to a
+# genuine historical assembler" declares `GBLB &ASM101S` itself; since
+# svDeclare() no-ops on a global that already exists, that self-declaration
+# harmlessly preserves this True value here, while the identical
+# `GBLB &ASM101S` line assembled by any other, real assembler (which never
+# pre-populates this symbol) freshly declares it defaulting to binary
+# false. This lets a file carry a deliberate, reversible divergence from
+# historical fidelity -- gated by `AIF (&ASM101S)...` -- that is
+# completely inert/invisible to any other assembler, with no build-
+# invocation flag needed anywhere.
+#
+# --no-rtl-fixes overrides this to False, i.e., reproduces a genuine
+# historical assembler's own lack of any RTL-fix knowledge. The RTL fixes
+# gated this way are real bug fixes, but they also change the object-code
+# size of whatever module they're in, which cascades into the linker's
+# memory-image layout for everything after it. Reproducing a memory image
+# exactly as it existed years ago -- even at the cost of the underlying
+# bugs those fixes correct -- sometimes matters more than having the
+# fixes, hence this override. Checked here, before any source file is
+# read, rather than in the command-line-parsing loop below, so that
+# --no-rtl-fixes takes effect regardless of where it appears relative to
+# the source-file arguments (the parsing loop reads each source file
+# in-place as it encounters it, so setting this too late would silently
+# fail to affect files already read).
+svGlobals["&ASM101S"] = "--no-rtl-fixes" not in sys.argv[1:]
 endLibraries = 0 # First line in `source` following macro-library definitions.
 comparisonSects = None
 comparisonFile = None
@@ -820,6 +848,8 @@ for parm in sys.argv[1:]:
         sourceFileCount += 1
     elif parm in ["--force-d", "--no-force-d"]:
         pass
+    elif parm == "--no-rtl-fixes":
+        pass # Already accounted for, above, before this loop even starts.
     elif parm in ["--trace"]:
         pass
     elif parm == "--help":
@@ -864,6 +894,15 @@ for parm in sys.argv[1:]:
         print("--no-force-d        Opposite of --force-d.")
         print("--trace             Enable tracing mode for debugging assembler")
         print("                    operation.")
+        print("--no-rtl-fixes      Reproduce the RTL library's original, historical")
+        print("                    behavior -- including its known bugs -- by making")
+        print("                    &ASM101S false instead of true. Some RTL source")
+        print("                    files use &ASM101S to gate a reversible, otherwise-")
+        print("                    invisible bug fix; those fixes change object-code")
+        print("                    size, which cascades into the linker's memory-image")
+        print("                    layout. Use this switch when reproducing an exact,")
+        print("                    historical memory image matters more than having")
+        print("                    the fixes.")
         print()
         sys.exit(1)
     else:

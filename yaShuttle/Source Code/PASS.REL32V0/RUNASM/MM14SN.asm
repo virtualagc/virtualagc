@@ -31,7 +31,7 @@ MM14SN   AMAIN  ACALL=YES                                               00000600
                R5,            INTEGER(N)  SP                           X00001500
                R7             WORKAREA                                  00001600
          OUTPUT R2            MATRIX(N,N)  SP                           00001700
-         WORK  R1,R3,R6,F0,F1,F2,F3,F4,F5                               00001800
+         WORK  R1,R3,R6,F0,F2,F3,F4,F5                                  00001800
 *                                                                       00001900
 *  ALGORITHM :                                                          00002000
 *                                                                       00002100
@@ -88,48 +88,6 @@ MVLOOP   LE    F0,0(R7,R1)   MOVE TO WORKAREA                           00006800
          STH   R5,ROWL                                                  00007200
          LFXI  R5,1                                                     00007300
 ALOOP    SER   F0,F0                                                    00007400
-*
-* The blocks below (through .MM14CONT3, further down this file) have
-* two variants each, selected at assembly time and completely invisible
-* to any assembler other than the modern ASM101S.py (which is the only
-* tool that ever pre-defines &ASM101S as true -- see its own comment at
-* the point that happens). Any other/historical assembler never
-* declares &ASM101S at all before this point, so the GBLB below freshly
-* declares it defaulting to binary false, and assembles the ORIGINAL,
-* unmodified logic (i.e. nothing extra here), producing byte-for-byte
-* the same object code as before this comment block existed.
-*
-* THE BUG (yagpc2-yahalmat2-issues.db key
-* datatypes_repeated_singular_inverse_unstable_result): BIG (F0) is
-* cleared here with SER (single-precision only), but its companion
-* register F1 is never cleared. The singularity check below (LER F0,F0
-* / BE AOUT, a few lines down) tests F0:F1 as an EXTENDED (paired)
-* value, so whatever floating-point garbage happens to be left sitting
-* in F1 by unrelated prior work can silently corrupt the "is BIG
-* exactly zero" test. This routine''s own established convention
-* elsewhere (e.g. "SER F3,F3" a few lines below, clearing F2''s
-* companion before F2 is used as a DER operand) shows the original
-* author knew to explicitly clear a companion register before using a
-* singly-loaded value as an extended operand -- this is a plain,
-* mechanical omission here, not an intentional design choice. This is
-* the FIRST of three sites in this file with the identical bug/fix
-* pattern; a second occurrence is a few lines below (.MM14FIX2), and a
-* third, more consequential one (silently corrupting the Gauss-Jordan
-* reduction''s own numeric result via an uncleared companion feeding
-* an extended add) is at .MM14FIX3 further down.
-*
-         GBLB  &ASM101S
-         AIF   (&ASM101S).MM14FIX1
-*
-* ---------- ORIGINAL, HISTORICAL LOGIC (buggy; unmodified) ----------
-*
-         AGO   .MM14CONT1
-*
-* ---------- FIXED LOGIC (ASM101S.py-assembled builds only) ----------
-*
-.MM14FIX1 ANOP
-         SER   F1,F1          CLEAR BIG COMPANION REGISTER TOO
-.MM14CONT1 ANOP
          LER   F2,F0                                                    00007500
          LR    R6,R5          I1=K                                      00007600
          LR    R7,R5          J1=K                                      00007700
@@ -141,16 +99,6 @@ ELOOP    LE    F4,0(R1,R2)                                              00008000
 NSKIP    CER   F2,F4                                                    00008300
          BNL   GLOOP                                                    00008400
 CTSW     LE    F0,0(R1,R2)  NEW BIG                                     00008500
-*
-* Second occurrence of the identical historical bug/fix split as above
-* (see the comment block near .MM14FIX1): a new BIG candidate is loaded
-* singly into F0 here, again without clearing its companion F1.
-*
-         AIF   (&ASM101S).MM14FIX2
-         AGO   .MM14CONT2
-.MM14FIX2 ANOP
-         SER   F1,F1          CLEAR BIG COMPANION REGISTER TOO
-.MM14CONT2 ANOP
          LER   F2,F0     ABS(BIG)                                       00008600
          BNM   POS                                                      00008700
          LECR  F2,F2         ABS(BIG)                                   00008800
@@ -233,30 +181,50 @@ QLOOP    CR    R6,R5      J=K?                                          00016200
          ME    F2,0(R6,R2)     A(K,J)*A(I,K)                            00016500
          LE    F4,0(R6,R1)     A(I,J)                                   00016600
 *
-* Third occurrence of the identical historical bug/fix split as above
-* (see the comment block near .MM14FIX1) -- the most consequential of
-* the three. F2 and F4 are both loaded here with single-precision LE,
-* leaving their companion registers F3/F5 uncleared -- but the very
-* next instruction, AEDR F4,F2, is an EXTENDED (64-bit, F4:F5 +=
-* F2:F3) add. Whatever floating-point garbage is sitting in F3/F5 from
-* unrelated prior work (e.g. the WRITE(6) statements'' own formatting
-* between repeated INVERSE() calls) is folded into the add and can
-* survive the subsequent single-precision STE truncation, making the
-* reduction step''s result -- and everything computed from it for the
-* rest of the elimination -- depend on leftover register history
-* instead of purely on the matrix''s own values. Confirmed via
+* The block below (through .MM14CONT) has two variants, selected at
+* assembly time and completely invisible to any assembler other than the
+* modern ASM101S.py (which is the only tool that ever pre-defines
+* &ASM101S as true -- see its own comment at the point that happens).
+* Any other/historical assembler never declares &ASM101S at all before
+* this point, so the GBLB below freshly declares it defaulting to binary
+* false, and assembles the ORIGINAL, unmodified logic (i.e. nothing
+* extra here), producing byte-for-byte the same object code as before
+* this comment block existed.
+*
+* THE BUG (yagpc2-yahalmat2-issues.db key
+* datatypes_repeated_singular_inverse_unstable_result): F4 is loaded
+* here with single-precision LE, leaving its companion register F5
+* uncleared -- but the very next instruction, AEDR F4,F2, is an
+* EXTENDED (64-bit, F4:F5 += F2:F3) add. Whatever floating-point
+* garbage is sitting in F5 from unrelated prior work (e.g. the
+* WRITE(6) statements'' own formatting between repeated INVERSE()
+* calls) is folded into the add and can survive the subsequent
+* single-precision STE truncation, making the reduction step''s result
+* -- and everything computed from it for the rest of the elimination
+* -- depend on leftover register history instead of purely on the
+* matrix''s own values. (F2''s own companion, F3, needs no equivalent
+* fix: DIVLOOP''s own "SER F3,F3" a few lines above already guarantees
+* F3 is exactly zero every time QLOOP is reached, for every K --
+* confirmed via instruction trace, which never shows F3 changing
+* across repeated, otherwise-divergent calls.) Confirmed via
 * instruction trace: three back-to-back, bit-identical INVERSE() calls
 * on the same input reach this AEDR with the identical F4 input
 * (0x41600000) each time, but with different garbage in F5 (0x00000aaa
 * vs 0x3952db92 vs implicitly-zero), producing three different results
 * (0xc1100000 vs 0xc0ffffff vs 0xc0fffffc).
 *
-         AIF   (&ASM101S).MM14FIX3
-         AGO   .MM14CONT3
-.MM14FIX3 ANOP
-         SER   F3,F3          CLEAR A(I,K)*A(K,J) COMPANION REGISTER
+         GBLB  &ASM101S
+         AIF   (&ASM101S).MM14FIX
+*
+* ---------- ORIGINAL, HISTORICAL LOGIC (buggy; unmodified) ----------
+*
+         AGO   .MM14CONT
+*
+* ---------- FIXED LOGIC (ASM101S.py-assembled builds only) ----------
+*
+.MM14FIX ANOP
          SER   F5,F5          CLEAR A(I,J) COMPANION REGISTER
-.MM14CONT3 ANOP
+.MM14CONT ANOP
          AEDR  F4,F2   A(I,K)*A(I,K)+A(I,J)                             00016700
          STE   F4,0(R6,R1)                                              00016800
 S1       AHI   R6,1    J=J+1                                            00016900
