@@ -14,11 +14,15 @@ identifier since it isn't required to be unique. The number that's
 actually universal is the HAL/S *statement number*: a HAL/S statement's
 1-based position in the SDF's own `statementIndexTable` (equivalently,
 the SDF "member" restarts numbering at 1 per file) -- and that's exactly
-the leftmost number on each pass1.rpt listing line, which this tool was
-already reading correctly under the wrong name. Renamed "srn" -> "stmt"
-throughout accordingly; no logic changed. pass1.rpt/pass2.rpt remain the
-data source (plain text, no cmem/sdf/sdfpkg dependency needed) -- they
-already contain everything needed: full source text per statement in
+the number immediately before "M|" on each pass1.rpt listing line (the
+*only* number there, unless the source actually has SRN data in columns
+73-78, in which case that appears too, to its left -- see parse_pass1()),
+which this tool was already reading correctly under the wrong name.
+Renamed "srn" -> "stmt" throughout accordingly; no logic changed beyond
+also handling a leading SRN column when present. pass1.rpt/pass2.rpt
+remain the data source (plain text, no cmem/sdf/sdfpkg dependency
+needed) -- they already contain everything needed: full source text per
+statement in
 pass1.rpt; statement-start markers "ST#N EQU *" interleaved with the
 CSECT-relative code addresses in pass2.rpt (that `N` is the same
 statement number).
@@ -45,11 +49,21 @@ def parse_pass1(path):
     multiple physical listing lines (e.g. a label line plus the statement
     it labels, both tagged with the same statement number).
 
-    The line format is "STMT M|SOURCE_TEXT_PADDED|SCOPE" with the source
-    text padded to a fixed column -- matched on the LAST '|' rather than
-    the first, since HAL/S source can itself contain '|' characters (the
-    '||' string-concatenation operator)."""
-    prefix_re = re.compile(r"^\s*(\d+)\s+M\|")
+    The line format is "[SRN ]STMT M|SOURCE_TEXT_PADDED|SCOPE" with the
+    source text padded to a fixed column -- matched on the LAST '|'
+    rather than the first, since HAL/S source can itself contain '|'
+    characters (the '||' string-concatenation operator). The leading SRN
+    (Statement Reference Number, from source columns 73-78) is present
+    only when the HAL/S source actually populates those columns -- e.g.
+    "000010    1 M|..." rather than "          1 M|..." -- and is always
+    the statement number's own decimal value, so the optional leading
+    group below only ever needs to consume one extra digit run, not a
+    specific width or format. SRN is never used as the statement
+    identifier here even when present: it isn't required to be unique,
+    unlike the *statement number* (this capture group), which is always
+    a HAL/S statement's 1-based position in the SDF's statementIndexTable
+    and is what pass2.rpt's "ST#N" markers key off of too."""
+    prefix_re = re.compile(r"^\s*(?:\d+\s+)?(\d+)\s+M\|")
     statements = {}
     with open(path, "r", errors="replace") as f:
         for line in f:
