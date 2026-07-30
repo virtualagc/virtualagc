@@ -46,37 +46,86 @@ import sys
 
 def parse_pass1(path):
     """Returns {stmt: [source_text_line, ...]} -- a statement may span
-    multiple physical listing lines (e.g. a label line plus the statement
-    it labels, both tagged with the same statement number).
+    multiple physical listing lines, and not just the "M|" (Main) lines
+    a first version of this tool captured exclusively: HAL/S source that
+    uses subscripts or exponents (matrix/array element references,
+    "**") gets typeset across up to three aligned physical lines -- "E|"
+    (Exponent, printed above) and "S|" (Subscript, printed below) lines
+    besides the "M|" line itself -- and a comment ("C|") can precede a
+    statement as its own line group too. Each captured line keeps its
+    own "X|" tag verbatim (rather than stripping it) so a reader can
+    still tell a main line from an exponent/subscript/comment line once
+    it's re-displayed outside the fixed-column layout that made the
+    distinction visually obvious in the original report.
 
-    The line format is "[SRN ]STMT M|SOURCE_TEXT_PADDED|SCOPE" with the
-    source text padded to a fixed column -- matched on the LAST '|'
-    rather than the first, since HAL/S source can itself contain '|'
-    characters (the '||' string-concatenation operator). The leading SRN
-    (Statement Reference Number, from source columns 73-78) is present
-    only when the HAL/S source actually populates those columns -- e.g.
-    "000010    1 M|..." rather than "          1 M|..." -- and is always
-    the statement number's own decimal value, so the optional leading
-    group below only ever needs to consume one extra digit run, not a
-    specific width or format. SRN is never used as the statement
-    identifier here even when present: it isn't required to be unique,
-    unlike the *statement number* (this capture group), which is always
-    a HAL/S statement's 1-based position in the SDF's statementIndexTable
-    and is what pass2.rpt's "ST#N" markers key off of too."""
-    prefix_re = re.compile(r"^\s*(?:\d+\s+)?(\d+)\s+M\|")
+    The line format is "[SRN ]STMT M|SOURCE_TEXT_PADDED|SCOPE" for a
+    Main line, or "     X|SOURCE_TEXT_PADDED|[SCOPE]" (no statement
+    number of its own) for an Exponent/Subscript/Comment line -- matched
+    on the LAST '|' rather than the first, since HAL/S source can itself
+    contain '|' characters (the '||' string-concatenation operator). The
+    leading SRN (Statement Reference Number, from source columns 73-78)
+    is present only when the HAL/S source actually populates those
+    columns -- e.g. "000010    1 M|..." rather than "          1 M|..."
+    -- and is always the statement number's own decimal value, so the
+    optional leading group below only ever needs to consume one extra
+    digit run, not a specific width or format. SRN is never used as the
+    statement identifier here even when present: it isn't required to be
+    unique, unlike the *statement number* (this capture group), which is
+    always a HAL/S statement's 1-based position in the SDF's
+    statementIndexTable and is what pass2.rpt's "ST#N" markers key off
+    of too.
+
+    E|/S|/C| lines carry no statement number of their own, so which
+    statement they belong to has to be inferred from position: an E| or
+    C| line is typeset *above* the M| line it decorates (an exponent
+    sits above its base; a comment precedes the statement it documents),
+    so when one directly follows a blank line (or a page break) it's
+    attached to whichever M| line comes *next*. An S| line is typeset
+    *below* its M| line, so when one directly follows an M| line (or
+    another such trailing annotation, no blank in between) it's attached
+    to that *preceding* statement instead. A blank line or anything
+    unrecognized (page headers/footers) resets this so a fresh run of
+    annotation lines is re-classified from scratch -- confirmed against
+    a real pass1.rpt (108-EXAMPLE_5.hal) where a lone "E|" line sits
+    between two statements' M| lines and, per this rule, correctly
+    attaches to the following one rather than the preceding one."""
+    m_re = re.compile(r"^\s*(?:\d+\s+)?(\d+)\s+M\|")
+    tag_re = re.compile(r"^\s*([ESC])\|")
+
+    def extract(rest):
+        close = rest.rfind("|")
+        return rest[:close].rstrip() if close >= 0 else rest.rstrip()
+
     statements = {}
+    current_stmt = None
+    pending = []  # E|/S|/C| lines not yet attached, waiting for the next M| line
+    mode = None  # 'trailing' right after an M| line (or another trailing line); else None
     with open(path, "r", errors="replace") as f:
         for line in f:
-            m = prefix_re.match(line)
-            if not m:
+            if not line.strip():
+                mode = None
                 continue
-            rest = line[m.end():]
-            close = rest.rfind("|")
-            if close < 0:
+            m = m_re.match(line)
+            if m:
+                stmt = int(m.group(1))
+                bucket = statements.setdefault(stmt, [])
+                bucket.extend(pending)
+                pending = []
+                bucket.append("M|" + extract(line[m.end():]))
+                current_stmt = stmt
+                mode = "trailing"
                 continue
-            stmt = int(m.group(1))
-            text = rest[:close].rstrip()
-            statements.setdefault(stmt, []).append(text)
+            tm = tag_re.match(line)
+            if tm:
+                tag = tm.group(1)
+                text = tag + "|" + extract(line[tm.end():])
+                if mode == "trailing" and current_stmt is not None:
+                    statements[current_stmt].append(text)
+                else:
+                    pending.append(text)
+                    mode = "pending"
+                continue
+            mode = None  # unrecognized line (page header/footer, etc.) -- treat as a boundary
     return statements
 
 

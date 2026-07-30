@@ -515,12 +515,17 @@ static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
 
 /* Prints every physical pass1.rpt line belonging to a HAL/S statement,
  * each on its own output line with the statement number repeated --
- * matching yaHALMAT2's debug.c print_source() precedent -- rather than
- * collapsing a multi-line statement (e.g. a label and the statement it
- * labels, which pass1.rpt lists separately even when they shared one
- * source line) into a single artificially-joined summary line. */
+ * rather than collapsing a multi-line statement (e.g. a label and the
+ * statement it labels, which pass1.rpt lists separately even when they
+ * shared one source line) into a single artificially-joined summary
+ * line. Each line keeps its own leading "M|"/"E|"/"S|"/"C|" tag (Main/
+ * Exponent/Subscript/Comment -- see gen_source_map.py's parse_pass1())
+ * verbatim, per the user's explicit request that these not be stripped
+ * out: they're the only thing distinguishing a subscript or exponent
+ * line from the main source text once it's no longer typeset in
+ * pass1.rpt's own column-aligned layout. */
 static void print_source_lines(int stmt, const char *const *lines, int count) {
-    for (int i = 0; i < count; i++) printf("HAL/S %4d:%s\n", stmt, lines[i]);
+    for (int i = 0; i < count; i++) printf("HAL/S %4d: %s\n", stmt, lines[i]);
 }
 
 /* Prints the HAL/S source line(s) active at addr, if a source map is
