@@ -1,4 +1,4 @@
-/* CLI option parsing for `yaGPC` — mirrors `gpc run`'s commander.js option
+/* CLI option parsing for `yaGPC2` — mirrors `gpc run`'s commander.js option
  * set (AGEHarness.addOptions + IOHost.addOptions + cmd_run's own options).
  * See gpc/cmd_run.coffee, gpc/ageharness.coffee, gpc/iohost.coffee. */
 #ifndef YAGPC_OPTS_H
@@ -23,7 +23,14 @@ typedef struct {
     bool ebcdic;                    /* default false */
     bool trapSvcError;              /* default true */
     char *halucpFormatNumBlanks;    /* default "5" */
-    char *lineWidth;                /* default "132" */
+    char *lineWidth;                /* default "132"; only applied as a
+                                      * uniform override if lineWidthSet */
+    bool lineWidthSet;               /* true only if --line-width was
+                                       * actually passed -- see halucp.c's
+                                       * effective_line_width() for the
+                                       * PAGED(132)/UNPAGED(80) default
+                                       * split used otherwise (USA003090
+                                       * Sec. 6.1.4) */
 
     /* IOHost options */
     char *infile[OPTS_NUM_CHANNELS];
@@ -40,6 +47,13 @@ typedef struct {
     bool verbose;                   /* default false */
     bool interactive;               /* default false */
     bool watchLog;                  /* default false */
+
+    /* Not part of gpc run's own option set -- yaGPC2-specific. Simulates
+     * specific known FCOS (Shuttle flight-software OS) behaviors that a
+     * bare-hardware/no-OS program never gets; see cpu.h's fcosMode
+     * comment. Default false: an ordinary standalone-compiled HAL/S
+     * program run without a real flight OS underneath it. */
+    bool fcos;                       /* default false */
 } Options;
 
 /* Parses argv (starting at argv[1]) exactly as `gpc run` would, except that

@@ -949,8 +949,48 @@ static void exec_CVFX(CPU *t, DInstr *v) {
     uint32_t rawIn = register_get32(F(t, v, 'y'));
     FloatIBM v2 = fibm_from32(rawIn);
     FloatIBMCvfxResult r = fibm_cvfx(&v2);
-    if (!cpu_fp_dispatch_exc(t, r.exc)) return;
-    uint32_t result = (uint32_t)r.result;
+    uint32_t result;
+
+    if (r.exc == FP_EXC_CONVERT_OVERFLOW && t->fcosMode) {
+        /* Simulate FCOS's FPMCVFX program-check handler (source-
+         * confirmed: workspace/PFS/OI340600/SSSRC/FPMSDERR.asm) --
+         * patches the destination register to +32767/-32767 by the
+         * source float's sign, then resumes. Modeling the net effect
+         * directly rather than actually routing through a PSW swap to
+         * an interrupt vector, since nothing else needs that
+         * intermediate step simulated (see cpu.h's fcosMode comment).
+         *
+         * CVFX's own result convention (confirmed by tracing a normal,
+         * in-range conversion: S2=7.2 -> CVFX gives 0x00073333, i.e.
+         * 7.2*65536 truncated) is Q16.16 fixed point, not a plain
+         * integer -- callers like RUNASM/ETOH.asm always follow CVFX
+         * with a +0x7FFF rounding-bias add and an NHI-keep-upper-16-bits
+         * step to extract the final rounded integer. The clamp value
+         * must be pre-scaled by 0x10000 (65536) to survive that same
+         * bias-and-extract sequence and still land on exactly
+         * +32767/-32767, matching what FPMCVFX's own patched register
+         * would produce once the resumed code runs that sequence on it. */
+        result = (rawIn & 0x80000000u) ? 0x80010000u : 0x7FFF0000u;
+        register_set32(R(t, v, 'x'), result);
+        psw_set_cc(&t->psw, (rawIn & 0x80000000u) ? 3 : 1);
+        return;
+    }
+
+    /* Unlike every other FP instruction's exc-then-bail pattern in this
+     * file, a real CVFX always completes and stores *some* result before
+     * any interrupt is taken -- software only gets a chance to patch the
+     * register afterward (see fcosMode branch above). Bailing out before
+     * the store here left the destination register as stale, unrelated
+     * garbage on overflow whenever fcosMode is off, which is exactly what
+     * an independent investigation (see yagpc2-yahalmat2-issues.db,
+     * cvfx_overflow_truncation_rule) found made gpc's own CVFX-overflow
+     * behavior "unreliable, context-dependent" -- not a deliberate
+     * bare-hardware truncation semantic, just a bug losing an
+     * already-computed value. Still signal the exception (so an
+     * unhandled-program-check log fires, same as any other unserviced
+     * program check) but always store what fibm_cvfx computed. */
+    if (r.exc != FP_EXC_OK) cpu_fp_dispatch_exc(t, r.exc);
+    result = (uint32_t)r.result;
     register_set32(R(t, v, 'x'), result);
     /* POO 8.13 anomaly: 41100000 converts to 0x00010000 but CC=00
      * (instead of the standard bits-0-15 rule's CC=01). */

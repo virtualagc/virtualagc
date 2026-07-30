@@ -5,7 +5,13 @@ C/ From PDF p. 241 in "Programming in HAL/S".
      DECLARE EVENT,
                 ENGINE_OFF,
                 ORBIT LATCHED;
-     SCHEDULE RE_IGNITE PRIORITY(999);
+C/ USA003087 p.166 (13-7): PRIORITY's legal range is implementation-
+C/ dependent, so the book's own PRIORITY(999) has no portable meaning
+C/ beyond "some big number" -- this implementation's legal range is
+C/ 0<P<255 (254 is the max), substituted here, preserving the book's
+C/ own "since it is of such a high priority" intent.
+     SCHEDULE RE_IGNITE PRIORITY(254);
+     WRITE(6) 'RE_IGNITE SCHEDULED';
   RE_IGNITE:
   TASK;
      DO WHILE TRUE;

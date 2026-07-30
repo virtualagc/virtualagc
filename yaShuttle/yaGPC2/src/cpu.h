@@ -54,6 +54,21 @@ typedef struct CPU {
 
     uint32_t counter1, counter2;
     bool counter1Enabled, counter2Enabled;
+
+    /* --fcos (see opts.h): simulate specific known behaviors of FCOS
+     * (the Shuttle flight-software OS), which real bare-hardware/no-OS
+     * programs never get since nothing is installed at the program-check
+     * interrupt vector to provide them. So far this covers exactly one
+     * case (see exec_CVFX's FP_EXC_CONVERT_OVERFLOW handling, cpu_instr.c):
+     * FCOS's FPMCVFX interrupt handler (source-confirmed,
+     * workspace/PFS/OI340600/SSSRC/FPMSDERR.asm) patches a CVFX
+     * instruction's destination register to +32767/-32767 (by the
+     * source float's sign) when the conversion overflows, then resumes
+     * — a real HAL/S program compiled for flight use relies on this;
+     * one compiled to run standalone with no OS underneath it does not
+     * get it, and instead sees whatever raw truncation the bare CVFX
+     * instruction itself produces. */
+    bool fcosMode;
 } CPU;
 
 void cpu_init(CPU *cpu);

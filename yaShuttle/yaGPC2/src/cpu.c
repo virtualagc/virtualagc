@@ -30,6 +30,7 @@ void cpu_init(CPU *cpu) {
     cpu->counter2 = 0;
     cpu->counter1Enabled = false;
     cpu->counter2Enabled = false;
+    cpu->fcosMode = false;
 }
 
 void cpu_free(CPU *cpu) {

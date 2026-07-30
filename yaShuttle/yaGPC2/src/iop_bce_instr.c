@@ -186,7 +186,25 @@ static void exec_TDL(IOP *t, DInstr *v) {
     iop_incr_nia(t, 2);
 }
 
+/* #MOUT/#MIN's 2nd instruction word (IBM-74-A31-016 Fig 2-6/Table 2-10:
+ * BCE Long Format 3's "COMMAND" word) is never independently fetched or
+ * dispatched — real object code (confirmed against assembled Shuttle
+ * flight software) shows it's always 8 zero bits + a 5-bit IUA + a
+ * 19-bit command, immediately following #MOUT/#MIN's own word, with no
+ * opcode bits distinguishing an "#MOUTC" from an "#MINC" — the two
+ * mnemonics are indistinguishable at the bit level and only ever meant
+ * to be decoded in the context of their parent instruction. */
+static void bce_process_mio_command(IOP *t, uint32_t pc) {
+    if (!register_getbit32(&t->regXmitEna, t->curPE)) return;
+    uint32_t cmdWord = iop_g_eaf(t, pc + 2) & 0x00ffffffu;
+    register_set32(iopls_IUAR(&t->ls), (cmdWord >> 19) & 0x1fu);
+    BCE *bce = iop_cur_bce(t);
+    if (bce) mia_xmit_cmd(&bce->mia, cmdWord);
+}
+
 static void exec_MOUT(IOP *t, DInstr *v) {
+    uint32_t pc = register_get32(iopls_PC(&t->ls));
+    bce_process_mio_command(t, pc);
     uint32_t count = df_get(v, 'c') + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);
@@ -194,23 +212,23 @@ static void exec_MOUT(IOP *t, DInstr *v) {
         uint32_t addr = base + df_get(v, 'd') + i;
         iop_queue_dma(t, addr, DMA_READ, bce);
     }
-    iop_incr_nia(t, 3);
-}
-
-static void exec_MOUTC(IOP *t, DInstr *v) {
-    if (register_getbit32(&t->regXmitEna, t->curPE)) {
-        register_set32(iopls_IUAR(&t->ls), df_get(v, 'u'));
-    }
-    /* NIA handled by parent #MOUT */
+    iop_incr_nia(t, 4);
 }
 
 static void exec_MOUT_at(IOP *t, DInstr *v) {
+    /* Fixes problems.md's #MOUT@/#MIN@ NIA-increment discrepancy (found
+     * while fixing 1.3): both are single-word (Long Format 1)
+     * instructions like #LBR/#CMD/#TDL, which correctly use incrNIA(2) —
+     * confirmed against real flight-code address deltas (#MOUT@/#MIN@
+     * each span exactly 2 halfwords between the surrounding
+     * instructions in workspace/PFS/BFS.SRC as received/COMPILED/BCE),
+     * not 3. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
     uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);
     for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_READ, bce);
-    iop_incr_nia(t, 3);
+    iop_incr_nia(t, 2);
 }
 
 /* ---------------------------------------------------------------------
@@ -249,6 +267,8 @@ static void exec_RDL(IOP *t, DInstr *v) {
 }
 
 static void exec_MIN(IOP *t, DInstr *v) {
+    uint32_t pc = register_get32(iopls_PC(&t->ls));
+    bce_process_mio_command(t, pc);
     uint32_t count = df_get(v, 'c') + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);
@@ -256,23 +276,17 @@ static void exec_MIN(IOP *t, DInstr *v) {
         uint32_t addr = base + df_get(v, 'd') + i;
         iop_queue_dma(t, addr, DMA_WRITE, bce);
     }
-    iop_incr_nia(t, 3);
-}
-
-static void exec_MINC(IOP *t, DInstr *v) {
-    if (register_getbit32(&t->regXmitEna, t->curPE)) {
-        register_set32(iopls_IUAR(&t->ls), df_get(v, 'u'));
-    }
-    /* NIA handled by parent #MIN */
+    iop_incr_nia(t, 4);
 }
 
 static void exec_MIN_at(IOP *t, DInstr *v) {
+    /* See exec_MOUT_at's comment: same NIA-increment fix, same evidence. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
     uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);
     for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_WRITE, bce);
-    iop_incr_nia(t, 3);
+    iop_incr_nia(t, 2);
 }
 
 /* ---------------------------------------------------------------------
@@ -312,13 +326,11 @@ static const BceOpEntry OPS[] = {
     {"#TDLI", "11110100000000cccccccccccccccccc", exec_TDLI},
     {"#TDL", "11111100000000aaaaaaaaaaaaaaaaaa", exec_TDL},
     {"#MOUT", "11110101ddddddddcccccccccccccccc", exec_MOUT},
-    {"#MOUTC", "________uuuuummmmmmmmmmmmmmmmmmm", exec_MOUTC},
     {"#MOUT@", "11111101000000aaaaaaaaaaaaaaaaaa", exec_MOUT_at},
     {"#RDS", "011cccccdddddddd", exec_RDS},
     {"#RDLI", "11110011000000cccccccccccccccccc", exec_RDLI},
     {"#RDL", "11111011000000cccccccccccccccccc", exec_RDL},
     {"#MIN", "11110001ddddddddcccccccccccccccc", exec_MIN},
-    {"#MINC", "________uuuuuccccccccccccccccccc", exec_MINC},
     {"#MIN@", "11111001000000aaaaaaaaaaaaaaaaaa", exec_MIN_at},
     {"#DLYI", "11000iiiiiiiiiii", exec_DLYI},
     {"#DLY", "11001ddddddddddd", exec_DLY},
@@ -360,16 +372,17 @@ void bce_instr_table_init(void) {
         DESCS[i].pb = pb_make_desc(OPS[i].pattern);
         DESCS[i].e = OPS[i].e;
     }
-    /* JS builds a single `opByMask[mask][maskedVal] = desc` dict — if two
-     * instructions share an identical (mask, maskedVal) pair (this
-     * genuinely happens: #MOUTC and #MINC both parse to mask=0,
-     * maskedVal=0, since neither pattern has a single literal '0'/'1'
-     * bit), the *later* one (in `ops` object insertion/iteration order,
-     * i.e. later in OPS[] here) silently overwrites the dict entry —
-     * permanently shadowing the earlier one, which then can never match
-     * anything. A plain per-instruction linear scan doesn't reproduce
-     * this on its own, so explicitly drop every entry that's shadowed by
-     * a later same-(mask,maskedVal) entry before sorting. */
+    /* JS builds a single `opByMask[mask][maskedVal] = desc` dict, so if
+     * two instructions ever shared an identical (mask, maskedVal) pair,
+     * the later one would silently overwrite the dict entry, permanently
+     * shadowing the earlier one. This used to genuinely happen (#MOUTC
+     * and #MINC both parsed to mask=0/maskedVal=0, since neither had a
+     * literal '0'/'1' bit anywhere) until both were removed from OPS[]
+     * above — they were never independently-dispatched opcodes to begin
+     * with (see bce_process_mio_command()'s comment). Kept as a general
+     * defensive check, since a plain per-instruction linear scan
+     * wouldn't otherwise reproduce JS's overwrite-shadowing semantics if
+     * a real collision were ever (re)introduced. */
     bool shadowed[OPS_COUNT] = {false};
     for (int i = 0; i < OPS_COUNT; i++) {
         for (int j = i + 1; j < OPS_COUNT; j++) {

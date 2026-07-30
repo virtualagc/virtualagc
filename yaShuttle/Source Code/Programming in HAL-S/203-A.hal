@@ -18,16 +18,12 @@ C       .
 C       .
 C       .
 Z    OFF ERROR;
-C       .
-C       .
-C       .
+C/   Propagates to A's GO TO X, since OFF ERROR just cancelled B's handler.
+     SEND ERROR$(2:2);
   CLOSE B;
 
-C       .
-C       .
-C       .
-
-  X: 
+  X:
+     WRITE(6) 'REACHED X VIA ON ERROR GO TO';
 Y %SVCI(0);
   CLOSE A;
   

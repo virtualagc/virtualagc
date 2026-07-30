@@ -10,6 +10,7 @@ C/ From PDF p. 170 of "Programming in HAL/S".
         1 C INTEGER,
         1 S2 SCALAR,
         1 E BOOLEAN;
+     CALL NESTED;
   UTIL:
   FUNCTION(X) VECTOR;
      DECLARE X UTIL_PARM-STRUCTURE;
@@ -38,10 +39,7 @@ C       .
 E      -
 M    RESULT = UTIL(LOCAL);
 
-C       .
-C       .
-C       .
-
+     WRITE(6) 'RESULT=', RESULT;
   CLOSE NESTED;
   
 C       .

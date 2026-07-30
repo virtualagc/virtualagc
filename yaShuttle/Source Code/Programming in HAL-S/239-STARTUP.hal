@@ -44,7 +44,13 @@ C    hence I've arbitrarily replaced it with a different example
 C    below:
      SCHEDULE FREEFALL ON (ORBIT & (ORBIT2 & ORBIT3)) 
         PRIORITY(75), REPEAT EVERY 1 / 10;
-     SCHEDULE FREEFALL2 ON (ORBIT | (ORBIT2 | ORBIT3)) 
-        PRIORITY(776), REPEAT EVERY 1 / 10;
+C/ USA003087 p.166 (13-7): PRIORITY's legal range is implementation-
+C/ dependent; PRIORITY(776) was this corpus's own fabricated addition
+C/ (not from the book), so its exact value has no significance beyond
+C/ "distinct and high" -- substituted with 240 (this implementation's
+C/ legal range is 0-255), which doesn't collide with 60/70/80/75 above.
+     SCHEDULE FREEFALL2 ON (ORBIT | (ORBIT2 | ORBIT3))
+        PRIORITY(240), REPEAT EVERY 1 / 10;
+     WRITE(6) 'ALL TASKS SCHEDULED';
 Y %SVCI(0);
   CLOSE STARTUP;

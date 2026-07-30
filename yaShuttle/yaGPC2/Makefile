@@ -1,4 +1,4 @@
-# yaGPC — C port of `gpc run` (AP-101 GPC batch simulator)
+# yaGPC2 — C port of `gpc run` (AP-101 GPC batch simulator)
 #
 # This Makefile targets GNU Make on Linux, macOS, or Windows-under-MSYS2
 # (any POSIX-ish shell). Native Windows (cmd.exe/PowerShell, no MSYS2)
@@ -27,7 +27,7 @@ LDLIBS  := -lm
 
 SRC_DIR   := src
 BUILD_DIR := build
-BIN       := yaGPC
+BIN       := yaGPC2
 
 SRCS := $(wildcard $(SRC_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
@@ -50,7 +50,7 @@ $(BUILD_DIR):
 
 TEST_BIN_DIR := $(BUILD_DIR)/test
 
-UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr
+UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors
 
 test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS))
 	./test/run_all.sh
@@ -103,6 +103,9 @@ $(TEST_BIN_DIR)/test_iop_msc_exec: test/test_iop_msc_exec.c $(IOP_TEST_DEPS) src
 
 $(TEST_BIN_DIR)/test_instr_tostr: test/test_instr_tostr.c $(CPU_INSTR_DEPS) src/cpu_instr.h test/instr_tostr_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_instr_tostr.c $(CPU_INSTR_DEPS) $(LDLIBS)
+
+$(TEST_BIN_DIR)/test_iop_exec_processors: test/test_iop_exec_processors.c $(IOP_TEST_DEPS) src/iop.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_iop_exec_processors.c $(IOP_TEST_DEPS) $(LDLIBS)
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN)

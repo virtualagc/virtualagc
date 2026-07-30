@@ -4,6 +4,7 @@ C/ From PDF p. 169 of "Programming in HAL/S".
   PROGRAM;
      DECLARE SCALAR,
                 G1 INITIAL(6), G2 INITIAL(7);
+     CALL NESTED;
   UTIL:
   FUNCTION(A, B, C, D, E) VECTOR;
      DECLARE A VECTOR;
@@ -40,10 +41,7 @@ C       .
 E      -           -             .
 M    RESULT = UTIL(V, S1, C, S2, E);
 
-C       .
-C       .
-C       .
-
+     WRITE(6) 'RESULT=', RESULT;
   CLOSE NESTED;
   
 C       .

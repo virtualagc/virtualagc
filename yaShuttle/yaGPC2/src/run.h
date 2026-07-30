@@ -1,5 +1,5 @@
 /* BatchRunner, ported from gpc/cmd_run.coffee. Drives the actual
- * fetch/decode/execute loop for `gpc run`/`yaGPC <fcm>`.
+ * fetch/decode/execute loop for `gpc run`/`yaGPC2 <fcm>`.
  *
  * NOTE: BatchRunner has its own `_formatTraceLine`/`formatSectionOffset`
  * that is subtly different from gpc/trace.coffee's exported

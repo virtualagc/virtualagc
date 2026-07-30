@@ -228,6 +228,14 @@ void iop_exec_dma_queue(IOP *iop) {
 void iop_exec_processors(IOP *iop) {
     iopls_next_slice(&iop->ls);
     int page = iop->ls.curPage;
+    /* Fixes problems.md 1.5: gpc/iop.coffee initializes @curPE=0 ("MSC=0,
+     * BCE=1-24") but never reassigns it anywhere, so every BCE
+     * instruction's "2*curPE" addressing offset and per-PE bit indexing
+     * always computed as if BCE 0 were running. curPage/curBCE (which
+     * the round-robin scheduler *does* keep current, immediately above)
+     * already carry exactly the intended value — 0 while MSC runs, 1-24
+     * while a given BCE runs — so curPE just needs to track it here. */
+    iop->curPE = page;
 
     if (page == 0) {
         if (register_getbit32(&iop->regHalt, 0)) return;
@@ -238,7 +246,22 @@ void iop_exec_processors(IOP *iop) {
         if (!register_getbit32(&iop->regBusyWait, bceIdx)) return;
     }
 
-    uint32_t pc = register_get16(iopls_PC(&iop->ls));
+    /* PC must be read/written via the 32-bit accessor here, matching every
+     * instruction's own NIA logic (iop_set_nia/iop_incr_nia, and #BU/#BU@'s
+     * direct register_set32 calls) — Register's get16()/set16() only touch
+     * the register's *first* backing halfword, while get32()/set32() span
+     * both (see regmem.c's Register comment). Using get16()/set16() here
+     * (as gpc/iop.coffee's execProcessors does: `@ls.PC().get16()` vs
+     * setNIA/incrNIA's `.get32()`) reads/writes a different halfword than
+     * every instruction's own PC update, so for any address under 0x10000
+     * (i.e. every real address in this system) the fetch loop never sees
+     * what an instruction just set: BCE's PC never actually follows a
+     * branch or a multi-halfword instruction's true length (just free-runs
+     * on its own +1-per-tick default below), and MSC's PC never advances
+     * past its initial value at all (no default-increment fallback exists
+     * for MSC). Confirmed empirically against both paths; not merely a
+     * theoretical concern. */
+    uint32_t pc = register_get32(iopls_PC(&iop->ls));
     uint32_t hw1 = mcm_get16(&iop->cpu->mainStorage, pc);
     uint32_t hw2 = mcm_get16(&iop->cpu->mainStorage, pc + 1);
     register_set16(iopls_IH(&iop->ls), hw1);
@@ -246,11 +269,23 @@ void iop_exec_processors(IOP *iop) {
 
     if (page == 0) {
         msc_instr_exec(iop, hw1, hw2);
-        /* MSC instructions manage their own NIA via incrNIA/setNIA */
     } else {
         bce_instr_exec(iop, hw1, hw2);
-        register_set16(iopls_PC(&iop->ls), (uint32_t)(pc + 1)); /* default NIA increment for BCE */
     }
+    /* Both MSC and BCE instructions manage their own NIA via
+     * incrNIA/setNIA (see e.g. iop_bce_instr.c's #WIX, which must be able
+     * to leave NIA untouched while waiting for a Listen command, and its
+     * and MSC's own — deliberately asymmetric, see both files' comments
+     * on unrecognized-instruction handling — behavior on an unrecognized
+     * opcode). A second bug used to live here: this function forced BCE's
+     * NIA to (pre-dispatch PC)+1 unconditionally after every call,
+     * discarding whatever the matched instruction had just set — so
+     * #BU/#BU@ branches and every multi-halfword instruction's true
+     * length never actually took effect, silently replaced by a
+     * halfword-per-tick free-run. Confirmed inherited from gpc/iop.coffee
+     * verbatim (`@ls.PC().set16(pc + 1) # Default NIA increment for BCE`)
+     * rather than a porting mistake. Removed; each instruction's own NIA
+     * handling is authoritative now, matching how MSC already worked. */
 }
 
 void iop_exec(IOP *iop) {

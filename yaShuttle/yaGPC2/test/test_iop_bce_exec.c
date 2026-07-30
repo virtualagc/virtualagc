@@ -1,16 +1,26 @@
-/* Cross-checks the 29-instruction BCE instruction set (bce_instr_exec(),
+/* Cross-checks the 27-instruction BCE instruction set (bce_instr_exec(),
  * which does its own internal decode — there's no standalone decode to
- * validate separately, unlike cpu_instr.c) against the real
- * gpc/iop_bce_instr.coffee, driven through the same entry point
- * iop.coffee's execProcessors() uses (BCE#exec -> BCEInstruction#exec).
+ * validate separately, unlike cpu_instr.c) against a corrected reference
+ * (a patched copy of gpc/iop_bce_instr.coffee), driven through the same
+ * entry point iop.coffee's execProcessors() uses (BCE#exec ->
+ * BCEInstruction#exec).
  *
- * #MOUTC is intentionally excluded from the fixture set: it and #MINC
- * both parse to mask=0/maskedVal=0 (neither pattern has a single literal
- * '0'/'1' bit), so JS's `opByMask[0][0] = desc` dict-insertion overwrites
- * #MOUTC's entry with #MINC's — #MOUTC is permanently unreachable via any
- * input in the real implementation (verified directly against the live
- * CoffeeScript; see iop_bce_instr.c's bce_instr_table_init comment for
- * the C-side replication of this shadowing).
+ * #MOUTC/#MINC are intentionally absent: they were never independently
+ * dispatched opcodes (real object code shows both are just "8 zero bits
+ * + 5-bit IUA + 19-bit command" — the raw 2nd word of #MOUT/#MIN's own
+ * instruction, indistinguishable from each other at the bit level, per
+ * IBM-74-A31-016 Fig 2-6/Table 2-10) — see iop_bce_instr.c's
+ * bce_process_mio_command() and #MOUT/#MIN's own exec bodies, which now
+ * decode and act on that word directly instead of relying on a
+ * (previously colliding, permanently-partly-unreachable) separate
+ * dispatch-table entry.
+ *
+ * The #MOUT/#MIN fixtures below were regenerated against a scratch copy
+ * of gpc/iop_bce_instr.coffee patched to match this corrected behavior
+ * (same technique as the IOPLocalStore#ls fix above) — the live
+ * reference's own #MOUT/#MIN never process their command word or issue
+ * it via mia.xmitCmd, and use the wrong NIA increment (3, not 4), so
+ * fixtures generated straight from it would just re-encode those bugs.
  *
  * Fixtures regenerated via:
  *   node test/gen_iop_instr_exec_fixtures.cjs bce NAME... > fixtures.json

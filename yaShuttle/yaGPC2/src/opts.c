@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Captured verbatim from `node dist/gpc.js run --help` so `yaGPC --help`
+/* Captured verbatim from `node dist/gpc.js run --help` so `yaGPC2 --help`
  * matches byte-for-byte. */
 static const char *HELP_TEXT =
 "Usage: gpc run [options] <fcm-file>\n"
@@ -23,8 +23,13 @@ static const char *HELP_TEXT =
 "  --no-trap-svc-error             pass SEND ERROR SVCs to SVC handler\n"
 "  --halucp-format-num-blanks <n>  blanks between WRITE output fields (default:\n"
 "                                  5) (default: \"5\")\n"
-"  --line-width <n>                WRITE line width for wrap (default: 132)\n"
-"                                  (default: \"132\")\n"
+"  --line-width <n>                WRITE line width for wrap, overriding the\n"
+"                                  per-channel default (132 for PAGED\n"
+"                                  channels, 80 for UNPAGED -- USA003090\n"
+"                                  Sec. 6.1.4's default LRECL, less 1 non-\n"
+"                                  printing byte on PAGED channels for the\n"
+"                                  auto-generated ANSI/ASA carriage-control\n"
+"                                  character)\n"
 "  --infile0 <file>                read input for channel 0\n"
 "  --outfile0 <file>               write output for channel 0\n"
 "  --infile1 <file>                read input for channel 1\n"
@@ -56,6 +61,11 @@ static const char *HELP_TEXT =
 "  --interactive                   interactive terminal I/O\n"
 "  --watch-log                     log every watchpoint change instead of\n"
 "                                  breaking (default: false)\n"
+"  --fcos                          simulate specific known FCOS (Shuttle\n"
+"                                  flight-software OS) behaviors that a\n"
+"                                  standalone/no-OS program doesn't get\n"
+"                                  (default: false)\n"
+"  --no-fcos                       disable FCOS behavior simulation (default)\n"
 "  -h, --help                      display help for command\n";
 
 static void set_defaults(Options *o) {
@@ -152,6 +162,7 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->halucpFormatNumBlanks = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--line-width", &n)) {
             opts->lineWidth = take_value(argc, argv, &i, tok, n);
+            opts->lineWidthSet = true;
         } else if (tok_is(tok, "--max-steps", &n)) {
             opts->maxSteps = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--break", &n)) {
@@ -170,6 +181,10 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->verbose = true;
         } else if (tok_is(tok, "--no-verbose", &n)) {
             (void)n; opts->verbose = false;
+        } else if (tok_is(tok, "--fcos", &n)) {
+            (void)n; opts->fcos = true;
+        } else if (tok_is(tok, "--no-fcos", &n)) {
+            (void)n; opts->fcos = false;
         } else if (tok_is(tok, "--interactive", &n)) {
             (void)n; opts->interactive = true;
         } else if (tok_is(tok, "--watch-log", &n)) {

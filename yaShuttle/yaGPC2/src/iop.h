@@ -59,7 +59,7 @@ typedef void (*IopInstrExecFn)(struct IOP *iop, DInstr *v);
  * instruction, same "derive bit-layout by hand, validate against the
  * live JS reference first" technique as the svc_*.fcm fixtures) does
  * exactly this and reproduces the predicted crash in `gpc run` verbatim
- * (TypeError: this.cp.r is not a function, at IOPLocalStore.ls). yaGPC
+ * (TypeError: this.cp.r is not a function, at IOPLocalStore.ls). yaGPC2
  * runs the same fixture to completion correctly (drives @SIO through the
  * real execProcessors() round-robin scheduler for the first time via the
  * actual run() pipeline, not just the isolated fixture harness) — see
@@ -159,16 +159,16 @@ typedef struct IOP {
     MSC msc;
     BCE bce[24]; /* bce[0] = BCE #1 ... bce[23] = BCE #24 */
 
-    /* Always 0 for the lifetime of a `gpc run` process: iop.coffee
-     * initializes @curPE=0 and never reassigns it anywhere (grep-verified
-     * across the whole source tree) — the "MSC=0, BCE=1-24" comment
-     * describes intent, but in practice every BCE instruction that reads
-     * t.curPE for a "2*BCE#" addressing offset always sees 0. This is a
-     * genuine quirk of the reference implementation, not a simplification
-     * on this port's part — replicated exactly rather than "fixed" to
-     * what a per-BCE curPE probably should have been. curBCE() below is
-     * unaffected: it derives the running BCE from ls.curPage, which *is*
-     * kept current by nextSlice(). */
+    /* "MSC = 0, BCE = 1-24": which processing element's instruction is
+     * currently executing, used throughout iop_bce_instr.c for "2*curPE"
+     * addressing offsets and per-PE bit indexing. Fixes problems.md 1.5:
+     * gpc/iop.coffee initializes @curPE=0 in the constructor and never
+     * reassigns it anywhere (grep-verified across the whole source
+     * tree), so every BCE beyond BCE 1 computed its addressing/bit
+     * offsets as if it were BCE 0 — a genuine bug in the reference,
+     * previously replicated exactly rather than fixed. Kept current now
+     * by iop_exec_processors() (mirroring curBCE()/ls.curPage, which the
+     * round-robin scheduler already keeps correct). */
     int curPE;
 
     bool dmaBurst, dmaForceBadParity, dataForceBadParity;

@@ -3,12 +3,14 @@ C/ From PDF p. 97 of "Programming in HAL/S".
   SAMPLE_FLOW:
   PROGRAM;
      DECLARE INTEGER,
-             I INITIAL(1), J INITIAL(2), 
+             I INITIAL(0), J INITIAL(2),
              K, L, M INITIAL(3), N INITIAL(4);
      DO UNTIL FALSE;
         IF I = 0 THEN
            DO;
               J = 0;
+              I = I - 1;
+              WRITE(6) 'REPEATING OUTER LOOP, J SET TO', J;
               REPEAT;
            END;
         ELSE
@@ -23,6 +25,7 @@ C/ From PDF p. 97 of "Programming in HAL/S".
            END;
         END;
      END;
+     WRITE(6) 'FINAL: I=', I, 'J=', J, 'K=', K, 'L=', L;
 Y %SVCI(0);
   CLOSE SAMPLE_FLOW;
   

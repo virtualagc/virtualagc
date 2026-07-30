@@ -63,6 +63,14 @@ typedef struct {
     bool wasRunning;
     bool skipTrap;
 
+    /* Group/number of the last SEND ERROR (SVC 0x0014), whether or not
+     * it was caught by an ON ERROR handler -- backs the ERRGRP/ERRNUM
+     * built-in functions (USA003087: "returns group/number of last
+     * error detected, or zero"), which compile to their own dedicated
+     * query SVCs (0x0117/0x0217) rather than reading ordinary program
+     * memory. 0 until the first SEND ERROR. */
+    int lastErrGroup, lastErrNum;
+
     bool iobufAscii; /* false = ebcdic (default), true = ascii */
     int channel;
 
@@ -73,6 +81,41 @@ typedef struct {
     char *inputBuffer; /* growable NUL-terminated string; '\0'-length == empty */
     size_t inputBufferLen, inputBufferCap;
     bool readTerminated;
+
+    /* 1-indexed column (since the last newline consumed out of
+     * inputBuffer) of the next unconsumed character -- tracked
+     * incrementally by ib_consume_prefix/ib_reset so a READ statement's
+     * COLUMN(n) control specifier can reposition forward within the
+     * still-buffered current line (see readSkipPending/readColumnPending
+     * below and apply_read_positioning() in halucp.c). */
+    size_t inputColumn;
+
+    /* READ-only pending SKIP(n)/COLUMN(n) state for the *current* READ
+     * statement, distinct from WRITE's output-side deferred[]/column[].
+     * Needed for the READALL-then-"SKIP(0), COLUMN(n)"-re-read-the-
+     * -same-line idiom (USA003087 Sec. 10.1.1; see "Programming in
+     * HAL/S" p.164's name/value initialization-file reader, corpus file
+     * 164-OUTER.hal) -- without this, SKIP(0)/COLUMN(n) had no effect on
+     * input parsing at all and every READ unconditionally discarded the
+     * current line, causing a spurious "exhausted input" abort as soon
+     * as a program tried to re-read a value from later in a line
+     * READALL had already consumed part of.
+     * inReadIOInit: true from the most recent IOINIT until the next one,
+     * iff that IOINIT was a READ/READALL (iocode<=1) rather than a WRITE
+     * (iocode 2/3) -- lets handle_control's shared SKIP/COLUMN cases
+     * route to this read-side state instead of the write-side one.
+     * readSkipPending/readColumnPending: -1 = not specified this
+     * statement (apply_read_positioning's default: advance to a fresh
+     * line, matching HAL/S's implicit SKIP(1) and yaGPC2's pre-existing
+     * behavior for the common case).
+     * readPositioningApplied: guards apply_read_positioning() to run
+     * exactly once per READ statement (right before its first argument's
+     * field extraction), since SKIP/COLUMN control specifiers can arrive
+     * as multiple separate control-trap calls before any XXAR. */
+    bool inReadIOInit;
+    int readSkipPending;
+    int readColumnPending;
+    bool readPositioningApplied;
 
     int formatNumBlanks;
     bool verbose;
@@ -85,12 +128,55 @@ typedef struct {
      * comment / halucp.c for why this is also what "for ch of
      * @firstWrite" iterates over). */
     bool hasWrittenBefore[HALUCP_MAX_CHANNEL];
+    /* Distinct from hasWrittenBefore, which flips true the moment IOINIT
+     * runs -- i.e. already true by the time any item (including a
+     * MATRIX/VECTOR's own row-1 SKIP) in that SAME first statement gets
+     * processed, so it can't distinguish "this genuinely is the device's
+     * first-ever WRITE statement" from "this is the 2nd, 3rd, ... one" at
+     * the point where that distinction actually matters. everEmittedField
+     * only flips true once a real field has actually been flushed --
+     * still false throughout the whole first statement's own item
+     * processing, true for every later one. Needed because MMWSNP.asm
+     * (VECTOR/MATRIX WRITE output) unconditionally issues an "ACALL SKIP"
+     * before every row, including row 1 -- see halucp.c's SKIP case.
+     * USA003087 Sec. 12.2's "first WRITE statement executed for this
+     * device" rule is a one-time, whole-program condition, NOT "is the
+     * device currently sitting at column 1" -- those are different
+     * things: a MATRIX's forced-fresh-line separator is a deliberate,
+     * real effect anywhere *after* the true first write, even if column
+     * happens to be 1 for some unrelated reason (e.g. the previous
+     * statement's own output happened to end exactly at a line
+     * boundary) -- conflating the two (an earlier attempt at this fix
+     * gated on column==1 instead) silently discarded a following
+     * explicit SKIP(n>1)'s own requested value whenever column
+     * coincidentally started at 1, a real regression caught in review. */
+    bool everEmittedField[HALUCP_MAX_CHANNEL];
     bool firstField[HALUCP_MAX_CHANNEL];
     int column[HALUCP_MAX_CHANNEL];
     int lineNumber[HALUCP_MAX_CHANNEL];
     HalUCPDeferredPos deferred[HALUCP_MAX_CHANNEL];
     bool suppressNextSep[HALUCP_MAX_CHANNEL];
     bool suppressNextAdvance[HALUCP_MAX_CHANNEL];
+
+    /* Fixes problems.md 2.5 (negative TAB / backward COLUMN): USA003087
+     * Sec. 12.4's TAB/COLUMN pseudo-functions can reposition the device
+     * mechanism to any column, including *before* content already
+     * written earlier in the same WRITE statement (Fig. 12-5's own
+     * worked example) — a plain append-only output stream can't do
+     * that, so each channel's current (not yet newline-terminated) line
+     * is buffered here and fields are written into it at their target
+     * column (arbitrary order, arbitrary direction), flushed to
+     * outputCallback only when the line actually advances. positioned
+     * tracks whether a TAB/COLUMN/SKIP/LINE/PAGE has already applied
+     * within the current WRITE statement — a *leading* TAB is relative
+     * to the column the mechanism was already at before this statement
+     * began (persisted in `column`, never reset except by a real
+     * newline), not column 1; once something has positioned the
+     * mechanism, subsequent TABs are relative to that instead (see
+     * halucp.c's handle_control TAB/COLUMN cases). */
+    char *lineBuf[HALUCP_MAX_CHANNEL];
+    size_t lineBufLen[HALUCP_MAX_CHANNEL], lineBufCap[HALUCP_MAX_CHANNEL];
+    bool positioned[HALUCP_MAX_CHANNEL];
 } HalUCP;
 
 void halucp_init(HalUCP *h, CPU *cpu);
@@ -99,6 +185,16 @@ void halucp_free(HalUCP *h);
 /* Wired into cpu->halUCPHandleSVC (see cpu.h); returns true if the SVC
  * was intercepted (caller should skip the standard PSW swap). */
 bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1);
+
+/* Flushes channel ch's current line (whatever's sitting in lineBuf[ch],
+ * per problems.md 2.5's per-channel line-buffering model) through
+ * outputCallback and terminates it with a real newline. For callers
+ * outside halucp.c (run.c's interactive-mode prompt logic) that need to
+ * move to a fresh line before printing a prompt or detecting EOF --
+ * calling this instead of writing a raw "\n" directly is what actually
+ * flushes any buffered-but-not-yet-emitted text instead of silently
+ * discarding it. */
+void halucp_flush_channel(HalUCP *h, int ch);
 /* Wired into cpu->halUCPLog. */
 void halucp_log_cb(void *halUCPvp, const char *msg);
 

@@ -6,7 +6,7 @@
  * `& 0xFFFFFFFFn` reading as "low 32 bits of the two's complement
  * representation") using only standard `int64_t`/`uint64_t` — no
  * `__int128` (a GCC/Clang extension MSVC doesn't have; this file used to
- * rely on it, kept portable now that yaGPC targets MSVC too).
+ * rely on it, kept portable now that yaGPC2 targets MSVC too).
  *
  * Every intermediate here is provably representable in 64 bits (worked
  * out per call site below), *except* q31_div's dividend/divisor hitting

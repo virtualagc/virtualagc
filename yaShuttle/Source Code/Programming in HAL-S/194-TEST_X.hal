@@ -1,27 +1,45 @@
-C/ From PDF p. 194 of "Programming in HAL/S".
+C/ From PDF p. 194 of "Programming in HAL/S". The book leaves the loop
+C/ body as "." placeholders (it's illustrating the ON ERROR/DO WHILE
+C/ TRUE/RETURN mechanism in isolation, not this program's own logic) --
+C/ filled in here with the same READ/CALL X/comparison body used by the
+C/ book's own immediately-preceding page-193 example (see this repo's
+C/ test_read_eof_onerror.hal, which is that page-193 version), since
+C/ this page's own text describes this as that same example rewritten
+C/ to use a DO...END action instead of GO TO.
 
   TEST_X:
   PROGRAM;
      REPLACE IO BY "10";
+     DECLARE SCALAR,
+                INPUT, OUTPUT, EXPECTED;
      DECLARE INTEGER INITIAL(0),
                 RIGHT, WRONG;
-C       .
-C       .
-C       .               
 Y    ON ERROR
 Z    ON ERROR$(IO:5)
 
         DO;
            WRITE(6) 'TEST RESULTS FOLLOW';
-           
+
            WRITE(6) RIGHT, WRONG;
            RETURN;
         END;
      DO WHILE TRUE;
-C       .
-C       .
-C       .
+        READ(5) INPUT, EXPECTED;
+        CALL X(INPUT) ASSIGN(OUTPUT);
+        IF OUTPUT = EXPECTED THEN
+           RIGHT = RIGHT + 1;
+        ELSE
+           WRONG = WRONG + 1;
      END;
+
+  X:
+  PROCEDURE(I) ASSIGN(O);
+     DECLARE SCALAR,
+                I, O;
+C       .
+C       .
+C       .
+  CLOSE X;
+
 Y %SVCI(0);
   CLOSE;
-  

@@ -1,4 +1,4 @@
-/* yaGPC — C port of `gpc run` (AP-101 GPC batch simulator). */
+/* yaGPC2 — C port of `gpc run` (AP-101 GPC batch simulator). */
 #include "opts.h"
 #include "run.h"
 

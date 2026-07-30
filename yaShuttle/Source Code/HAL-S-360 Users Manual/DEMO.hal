@@ -5,17 +5,44 @@ C       THE HAL/S-360 COMPILER
 C
     REPLACE PRINTER BY "6";
     DECLARE INTEGER INITIAL(1), A, B, C;
-    DECLARE D, F, G;
-    DECLARE E VECTOR(4);
-    DECLARE H, I, J, K ARRAY(5) MATRIX(3,4), L, M, N, O SCALAR;
+    DECLARE D, F INITIAL(45), G INITIAL(56);
+    DECLARE E VECTOR(4) INITIAL(100, 200, 300, 400);
+    DECLARE H INITIAL(67), I INITIAL(78), J INITIAL(89), 
+       K ARRAY(5) MATRIX(3,4) INITIAL(  1,   2,   3,   4,
+                                        5,   6,   7,   8,
+                                        9,  10,  11,  12, 
+                                       
+                                      101, 102, 103, 104,
+                                      105, 106, 107, 108,
+                                      109, 110, 111, 112,
+                                       
+                                      201, 202, 203, 204,
+                                      205, 206, 207, 208,
+                                      209, 210, 211, 212,
+                                       
+                                      301, 302, 303, 304,
+                                      305, 306, 307, 308,
+                                      309, 310, 311, 312,
+                                       
+                                      401, 402, 403, 404,
+                                      405, 406, 407, 408,
+                                      409, 410, 411, 412),
+       L INITIAL(90), M INITIAL(01),
+       N INITIAL(12), O SCALAR INITIAL(23);
     STRUCTURE AA: 
        1 BB, 2 CC MATRIX(4,3), 
        1 DD, 2 EE ARRAY(4) MATRIX(3,4);
     STRUCTURE QQ:
        1 RR, 2 AAREF AA-STRUCTURE, 2 SS CHARACTER(5);
     DECLARE MY_STRUCTURE QQ-STRUCTURE(5);
+    
     PROC1: PROCEDURE;
-       DECLARE A INTEGER;
+       DECLARE A INTEGER INITIAL(1);
+       DO FOR TEMPORARY I = 1 TO 5;
+          DO FOR TEMPORARY J = 1 TO 4;
+             MY_STRUCTURE.RR.AAREF.DD.EE$(I;J:) = 10**I K$(J+1:);
+          END;
+       END;
        IF A=B THEN 
           DO;
     LABEL1:  B = C;
@@ -25,6 +52,23 @@ C
        ELSE 
           A=C;
     CLOSE PROC1;
+    
+    MY_STRUCTURE.RR.AAREF.BB.CC$(1;*,*) =
+       MATRIX$(4,3)(511,512,513,514,515,516,517,518,519,520,521,522);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(2;*,*) =
+       MATRIX$(4,3)(611,612,613,614,615,616,617,618,619,620,621,622);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(3;*,*) =
+       MATRIX$(4,3)(711,712,713,714,715,716,717,718,719,720,721,722);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(4;*,*) =
+       MATRIX$(4,3)(811,812,813,814,815,816,817,818,819,820,821,822);
+    MY_STRUCTURE.RR.AAREF.BB.CC$(5;*,*) =
+       MATRIX$(4,3)(911,912,913,914,915,916,917,918,919,920,921,922);
+    MY_STRUCTURE.RR.SS$(1;) = 'ELEM1';
+    MY_STRUCTURE.RR.SS$(2;) = 'ELEM2';
+    MY_STRUCTURE.RR.SS$(3;) = 'ELEM3';
+    MY_STRUCTURE.RR.SS$(4;) = 'ELEM4';
+    MY_STRUCTURE.RR.SS$(5;) = 'ELEM5';
+    CALL PROC1;
     DO FOR C = 1 TO 100;
        D=K$(C:2,3);
     END;
@@ -32,8 +76,25 @@ C
        A=B;
        E=K$(B:A,*);
     END;
+    A=2;
+    DO CASE A;
+       A=B;
+       E=K$(B:A,*);
+    END;
     K=0;
     WRITE(PRINTER) MY_STRUCTURE.RR.AAREF.BB.CC$(3;1 TO 3,*),
-                   MY_STRUCTURE.RR.AAREF.DD.EE$(2;2 TO 4:), 
-                   D, E, F, G, H, I, J, K, L, M, N, O;
+                   MY_STRUCTURE.RR.AAREF.DD.EE$(2;2 TO 4:),
+                   E, F, G, H, I, J, K, L, M, N, O;
+C   D is deliberately left out of the block above: the DO FOR C = 1 TO 100
+C   loop (18 lines up) walks K (only ARRAY(5)) far out of bounds on purpose,
+C   to demonstrate that HAL/S-FC generates no runtime subscript-range
+C   check and AP-101S hardware traps none either -- D ends up holding
+C   whatever raw memory happens to sit past K, which is real, correct,
+C   reproducible-per-build behavior but NOT something meant to compare
+C   equal across tools with a different static memory layout. Printed
+C   separately so the rest of this WRITE stays a clean, deterministic
+C   comparison target. See yagpc2-yahalmat2-issues.db id 43.
+    WRITE(PRINTER) D;
+    WRITE(PRINTER) '';
+    WRITE(PRINTER) MY_STRUCTURE;
  CLOSE DEMO;

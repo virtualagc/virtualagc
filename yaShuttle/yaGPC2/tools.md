@@ -1,9 +1,18 @@
 # HAL/S Compiler & AP-101S Toolchain Reference
 
 Notes carried over from work in `yaHALMAT2` (a HALMAT bytecode
-interpreter/emulator project), written up here for use from
-`~/git/yaGPC/yaGPC/`. All paths below are given relative to that
-directory.
+interpreter/emulator project), written up here for use from this
+directory (`yaGPC2`, forked from `yaGPC`). All paths below are given
+relative to that directory unless otherwise noted.
+
+**Parity-testing caveat, learned the hard way** (see `problems.md`
+§2.4/§2.5): when comparing `yaGPC2` output against `yaHALMAT2`, always
+pass **matched** line/page-width settings to both (`yaGPC2
+--line-width N` vs. `yaHALMAT2 --line-length N --page-length M`).
+`yaHALMAT2` defaults to 132 columns while `yaGPC2`/`gpc` default to
+240 — an unmatched comparison produces spurious formatting
+discrepancies that look like real bugs but aren't. This cost real
+investigation time at least twice during this project's own §2 sweep.
 
 ## The toolchain, end to end
 
@@ -14,7 +23,7 @@ A HAL/S source file goes through three stages to actually run:
    options].
 2. **`lnk101`** (linker) — object code -> a loadable "FCM" image
    (`.fcm`) [+ a JSON symbol-table file].
-3. **`gpc run`** (or **`yaGPC`**, this project's own emulator) — loads
+3. **`gpc run`** (or **`yaGPC2`**, this project's own emulator) — loads
    and executes the `.fcm` image.
 
 `compileLinkRun` (see below) automates all three steps for a
@@ -118,17 +127,23 @@ is `rldanalyze SYMFILE FCMFILE OTHERFCM --csect-table CSECTS.json
 --show-gaps --show-csects --scan-gaps` (diagnoses CSECT/relocation
 gaps between images).
 
-## `gpc run` / `yaGPC`
+## `gpc run` / `yaGPC2`
 
 The AP-101S emulator that actually executes a linked `.fcm` image.
-Two implementations exist:
+Multiple implementations exist:
 
-- **`gpc run`** — presumably the "real"/reference AP-101S emulator
-  (used as the default, and as a ground-truth cross-check against
-  this project's own emulator).
-- **`yaGPC`** (this project) — invoked as a single command (no `run`
-  subcommand needed, per `compileLinkRun`'s usage), or via
-  `GPC.sh`:
+- **`gpc run`** — the original Javascript reference AP-101S emulator,
+  used as a ground-truth cross-check.
+- **`yaGPC`** — a byte-for-byte-faithful C port of `gpc run`,
+  including its bugs; superseded by `yaGPC2` for actual use, kept
+  around as a fidelity baseline.
+- **`yaGPC2`** (this project) — the bug-fixed C emulator; invoked as a
+  single command (no `run` subcommand needed, per `compileLinkRun`'s
+  usage — though `compileLinkRun`'s own `--yaGPC` flag currently
+  invokes a binary literally named `yaGPC` on `PATH`, not `yaGPC2`; to
+  test `yaGPC2` through that script, put a `yaGPC2` binary on `PATH`
+  under the name `yaGPC`, or just invoke `yaGPC2` directly instead of
+  using `compileLinkRun`), or via `GPC.sh`:
   ```
   GPC.sh run <fcm>       # batch execution
   GPC.sh debug <fcm>     # interactive REPL debugger

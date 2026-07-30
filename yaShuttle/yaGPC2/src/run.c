@@ -514,8 +514,20 @@ static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, l
 /* Prompts on stdout (matching promptInput's column-6 newline + " INPUT(ch): "
  * / "" prompt logic) and blocks for one line of stdin input. */
 static void prompt_and_provide_input(BatchRunner *r, int channel) {
-    if (r->age.halUCP.column[6] > 1) {
-        fputs("\n", stdout);
+    /* Was `if (column[6] > 1) fputs("\n", stdout)` -- a raw, unbuffered
+     * newline that predates problems.md 2.5's per-channel line-buffering
+     * rewrite and was never updated for it: channel 6's current line may
+     * still be sitting unflushed in lineBuf[6] at this point (WRITE
+     * doesn't flush until something actually advances the line), so a
+     * bare "\n" here silently discarded whatever text was buffered,
+     * instead of the real newline it was supposed to represent --
+     * confirmed via the "Programming in HAL/S" sweep, where several
+     * `WRITE(6) 'A'; WRITE(6) 'B'; READ(5) ...;` (unhandled-EOF) programs
+     * printed an extra blank line before 'B' instead of 'B' itself.
+     * halucp_flush_channel() flushes the same way the SVC-0x0015/
+     * READ-EOF halt paths already do. */
+    if (r->age.halUCP.lineBufLen[6] > 0) {
+        halucp_flush_channel(&r->age.halUCP, 6);
     }
     if (channel != 5) {
         printf(" INPUT(%d): ", channel);
@@ -536,23 +548,30 @@ static void prompt_and_provide_input(BatchRunner *r, int channel) {
     halucp_notify_interactive_input(&r->age.halUCP, 6);
 }
 
-/* Deliberate divergence from the JS reference (gpc/cmd_run.coffee's
- * inputCallback in runInteractive): iohost_has_file_input() (like JS's
- * IOHost#hasFileInput) is true only while unread lines remain, so once
- * a --infileN channel's lines run out this falls into the terminal-
- * prompt branch below exactly as the JS does. In the JS, that branch
- * (promptInput -> readline's rl.question()) never resolves on real EOF
- * — its callback only fires on a 'line' event, so an exhausted/closed
- * stdin just stalls forever with nothing keeping Node's event loop
- * alive, and the process silently exits 0 without ever reaching
- * HalUCP#provideEof() or the program's ON ERROR handler. Confirmed
- * against the live reference with a real HALSFC/lnk101-compiled
- * READ-until-EOF program (the classic HAL/S idiom from "Programming in
- * HAL/S" p.193): gpc run --interactive truncates it silently; this
- * port's prompt_and_provide_input() below uses a blocking fgets(),
- * which correctly returns EOF and calls halucp_provide_eof() here,
- * completing the program as intended. Kept as the correct behavior
- * rather than replicated bug-for-bug — see yaGPC port session notes. */
+/* Fixes problems.md 1.2 in full. The JS reference (gpc/cmd_run.coffee's
+ * inputCallback in runInteractive) has two compounding bugs: (a)
+ * IOHost#hasFileInput is true only while unread lines remain, so once a
+ * --infileN channel's lines run out, exhaustion is indistinguishable
+ * from "no file was ever configured for this channel" and it falls
+ * into the terminal-prompt branch instead of signaling EOF for that
+ * channel; (b) that terminal-prompt branch (promptInput ->
+ * readline's rl.question()) never resolves on real EOF either — its
+ * callback only fires on a 'line' event, so an exhausted/closed stdin
+ * just stalls forever, and the process silently exits 0 without ever
+ * reaching HalUCP#provideEof() or the program's ON ERROR handler.
+ *
+ * (b) is fixed here because prompt_and_provide_input() below uses a
+ * blocking fgets(), which correctly returns EOF and calls
+ * halucp_provide_eof(). But an earlier version of this port fixed only
+ * (b): a --infileN channel that ran dry under --interactive still fell
+ * through to prompt_and_provide_input() and would incorrectly block on
+ * real stdin instead of reporting EOF on its own channel — the same
+ * structural bug as (a), just with a different symptom than gpc's
+ * silent truncation. Checking iohost_has_file_configured() here closes
+ * that gap: an exhausted-but-configured channel reports EOF directly,
+ * exactly like batch mode's batchrunner_input_cb does; only a channel
+ * with no file configured at all falls through to the real terminal
+ * prompt. */
 static void interactive_input_cb(void *ctx, int channel, int iocode) {
     BatchRunner *r = ctx;
     (void)iocode;
@@ -563,6 +582,8 @@ static void interactive_input_cb(void *ctx, int channel, int iocode) {
         } else {
             halucp_provide_eof(&r->age.halUCP);
         }
+    } else if (iohost_has_file_configured(&r->iohost, channel)) {
+        halucp_provide_eof(&r->age.halUCP);
     } else {
         prompt_and_provide_input(r, channel);
     }

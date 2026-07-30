@@ -19,7 +19,7 @@
 #                          run.c's interactive_input_cb comment) — do NOT
 #                          add this one to run_matrix.sh's byte-diff
 #                          matrix, its expected output is checked directly
-#                          against yaGPC only.
+#                          against yaGPC2 only.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"

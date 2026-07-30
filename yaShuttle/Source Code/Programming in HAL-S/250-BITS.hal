@@ -1,16 +1,23 @@
-C/ Adapted from PDF p. 250 in "Programming in HAL/S".
+C/ Adapted from PDF p. 250 in "Programming in HAL/S". Illustrates
+C/ packing several BOOLEANs into a single BIT(8) string. The book's own
+C/ "DO WHILE ON;" is a deliberately never-ending background-task loop
+C/ (illustrating the packing idiom in isolation, not meant to run to
+C/ completion) -- bounded here to a few cycles, with a WRITE of the
+C/ packed result added at the end of each, so it actually terminates
+C/ and shows something.
 
  TEST250:
  PROGRAM;
 
      DECLARE I INTEGER;
+     DECLARE CYCLE INTEGER;
      DECLARE B BIT(8);
      DECLARE BOOLEAN INITIAL(ON),
                 C1, C2, C3, C4, C5, C6, C7, C8;
-                
+
 C
 
-     DO WHILE ON;
+     DO FOR CYCLE = 1 TO 3;
         DO FOR I = 1 TO 100;
 E             .
 M          IF B = HEX'00' THEN
@@ -48,6 +55,7 @@ E          .
 M          B  = ON;
 S           8
 
+        WRITE(6) 'CYCLE', CYCLE, 'PACKED B =', B;
      END;
  
 Y %SVCI(0);

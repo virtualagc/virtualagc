@@ -1,4 +1,4 @@
-# NMakefile — yaGPC build for native Windows (nmake + MSVC's cl.exe),
+# NMakefile — yaGPC2 build for native Windows (nmake + MSVC's cl.exe),
 # companion to the GNU `Makefile` used on Linux, macOS, and
 # Windows-under-MSYS2 (see that file's header comment for the split
 # rationale — nmake's syntax is different enough from GNU Make's that a
@@ -51,7 +51,7 @@ LDLIBS =
 
 BUILD_DIR = build
 TEST_BIN_DIR = $(BUILD_DIR)\test
-BIN = yaGPC.exe
+BIN = yaGPC2.exe
 
 OBJS = \
 	$(BUILD_DIR)\ageharness.obj \
@@ -114,7 +114,8 @@ UNIT_TESTS = \
 	$(TEST_BIN_DIR)\test_cpu_instr_exec.exe \
 	$(TEST_BIN_DIR)\test_iop_bce_exec.exe \
 	$(TEST_BIN_DIR)\test_iop_msc_exec.exe \
-	$(TEST_BIN_DIR)\test_instr_tostr.exe
+	$(TEST_BIN_DIR)\test_instr_tostr.exe \
+	$(TEST_BIN_DIR)\test_iop_exec_processors.exe
 
 test: all $(TEST_BIN_DIR) $(UNIT_TESTS)
 	$(TEST_BIN_DIR)\test_packedbits.exe
@@ -130,6 +131,7 @@ test: all $(TEST_BIN_DIR) $(UNIT_TESTS)
 	$(TEST_BIN_DIR)\test_iop_bce_exec.exe
 	$(TEST_BIN_DIR)\test_iop_msc_exec.exe
 	$(TEST_BIN_DIR)\test_instr_tostr.exe
+	$(TEST_BIN_DIR)\test_iop_exec_processors.exe
 
 $(TEST_BIN_DIR)\test_packedbits.exe: test\test_packedbits.c src\util.c src\util.h test\packedbits_fixtures.h $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_packedbits.c src\util.c $(LDLIBS)
@@ -175,6 +177,9 @@ $(TEST_BIN_DIR)\test_iop_msc_exec.exe: test\test_iop_msc_exec.c $(IOP_TEST_DEPS)
 
 $(TEST_BIN_DIR)\test_instr_tostr.exe: test\test_instr_tostr.c $(CPU_INSTR_DEPS) src\cpu_instr.h test\instr_tostr_fixtures.h $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_instr_tostr.c $(CPU_INSTR_DEPS) $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_iop_exec_processors.exe: test\test_iop_exec_processors.c $(IOP_TEST_DEPS) src\iop.h $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_iop_exec_processors.c $(IOP_TEST_DEPS) $(LDLIBS)
 
 clean:
 	if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
