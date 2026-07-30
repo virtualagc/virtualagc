@@ -72,7 +72,7 @@ struct Debugger {
     bool hasTempBreakpoint; /* one-shot breakpoint used by 'next' */
     uint32_t tempBreakpoint;
 
-    /* Register-state display at each stop (see show_stop_registers()):
+    /* Register-state display at each stop (see show_stop_location_and_registers()):
      * beforeResumeRegs is snapshotted, and instructionsThisResume reset
      * to 1 (pre-counting the "free" instruction -- see debugger_hook's
      * own comment), each time a resume command is dispatched; every
@@ -195,36 +195,6 @@ static void show_registers(Debugger *dbg, AGEHarness *age) {
     char lines[TRACE_REGDUMP_LINES][200];
     trace_format_reg_dump(&age->gpc.cpu, (int)dbg->currentStep, &TRACE_COLOR_PLAIN, lines, sizeof(lines[0]));
     for (int i = 0; i < TRACE_REGDUMP_LINES; i++) printf("%s\n", lines[i]);
-}
-
-/* Shown at every debugger stop, regardless of 'trace'/'htrace': exactly
- * one instruction executed since the last stop (the common case for a
- * plain 'step') gets just the register changes it made, the same
- * detail level 'htrace' shows per instruction; zero (startup) or more
- * than one (e.g. 'step N>1', or 'next'/'run' covering several
- * instructions) gets a full register dump instead, since neither "diff
- * against nothing" nor "diff spanning several instructions" is a
- * meaningful single display -- per user feedback. */
-static void show_stop_registers(Debugger *dbg, AGEHarness *age) {
-    if (dbg->instructionsThisResume != 1) {
-        show_registers(dbg, age);
-        return;
-    }
-
-    RegSnapshot after;
-    ageharness_snapshot_regs(age, &after);
-    RegChange changes[REG_SNAPSHOT_MAX_CHANGES];
-    int changeCount = ageharness_diff_regs(&dbg->beforeResumeRegs, &after, changes);
-    int filteredCount = 0;
-    RegChange filtered[REG_SNAPSHOT_MAX_CHANGES];
-    for (int i = 0; i < changeCount; i++) {
-        if (strcmp(changes[i].name, "NIA") != 0) filtered[filteredCount++] = changes[i];
-    }
-    if (filteredCount == 0) return; /* e.g. a plain branch changed nothing else */
-
-    char blob[4096];
-    debugger_format_changes(dbg, "", filtered, filteredCount, blob, sizeof blob);
-    printf("%s\n", blob);
 }
 
 static void show_register(AGEHarness *age, const char *nameIn) {
@@ -436,7 +406,15 @@ static void show_symbol(AGEHarness *age, const char *nameIn) {
     if (!found) printf("*** Symbol not found: %s\n", upper);
 }
 
-static void show_current_location(AGEHarness *age) {
+/* Builds the "current location" line's text (no trailing newline, so
+ * show_stop_location_and_registers() can append register changes to
+ * the right of it, matching how 'htrace' lays out its own trace lines)
+ * into `out`. Left unpadded here (unlike run.c's own trace-line
+ * formatter) since this same text is also used standalone by 'where'/
+ * 'loc'/'here', where padding would just be pointless trailing
+ * whitespace -- show_stop_location_and_registers() pads its own copy
+ * only when it's actually about to append something after it. */
+static void format_current_location(AGEHarness *age, char *out, size_t outSize) {
     uint32_t nia = psw_get_nia(&age->gpc.cpu.psw);
     uint32_t hw1 = membus_get16(&age->gpc.ram, nia);
     uint32_t hw2 = membus_get16(&age->gpc.ram, nia + 1);
@@ -454,7 +432,64 @@ static void show_current_location(AGEHarness *age) {
 
     char csect[32];
     symtable_format_csect(&age->sym, nia, csect, sizeof csect);
-    printf(">> %s %s: %s %s  %s\n", niaHex, csect, hw1Hex, hw2Hex, disasm);
+    snprintf(out, outSize, ">> %s %s: %s %s  %s", niaHex, csect, hw1Hex, hw2Hex, disasm);
+}
+
+static void show_current_location(AGEHarness *age) {
+    char line[300];
+    format_current_location(age, line, sizeof line);
+    printf("%s\n", line);
+}
+
+/* Shown at every debugger stop, regardless of 'trace'/'htrace', in place
+ * of a plain show_current_location(): exactly one instruction executed
+ * since the last stop (the common case for a plain 'step') gets the
+ * register changes it made appended to the RIGHT of the location line,
+ * matching how 'htrace' lays out its own trace lines (wrapped per 'set
+ * width', continuation lines aligned under the first change -- see
+ * debugger_format_changes()); zero (startup) or more than one (e.g.
+ * 'step N>1', or 'next'/'run' covering several instructions) gets a
+ * full register dump instead, printed ABOVE the location line the way
+ * debuggers conventionally order "overall state" before the "you are
+ * here" pointer -- since neither "diff against nothing" nor "diff
+ * spanning several instructions" is a meaningful single display. Per
+ * user feedback on both the placement and the layout. */
+static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
+    char line[300];
+    format_current_location(age, line, sizeof line);
+
+    if (dbg->instructionsThisResume != 1) {
+        show_registers(dbg, age);
+        printf("%s\n", line);
+        return;
+    }
+
+    RegSnapshot after;
+    ageharness_snapshot_regs(age, &after);
+    RegChange changes[REG_SNAPSHOT_MAX_CHANGES];
+    int changeCount = ageharness_diff_regs(&dbg->beforeResumeRegs, &after, changes);
+    int filteredCount = 0;
+    RegChange filtered[REG_SNAPSHOT_MAX_CHANGES];
+    for (int i = 0; i < changeCount; i++) {
+        if (strcmp(changes[i].name, "NIA") != 0) filtered[filteredCount++] = changes[i];
+    }
+    if (filteredCount == 0) {
+        printf("%s\n", line); /* e.g. a plain branch changed nothing else */
+        return;
+    }
+
+    /* Pad only this copy (not format_current_location()'s own, shared
+     * with the plain, nothing-appended 'where' display) to leave a
+     * real gap before the changes -- matches the same 28-column
+     * disasm width run.c's own trace-line formatter pads to, applied
+     * to the whole line here since the leading ">> ADDR SECT: HW HW "
+     * portion has a different, fixed width of its own. */
+    char paddedLine[300];
+    str_rpad(paddedLine, sizeof paddedLine, line, " ", 64);
+
+    char blob[4096];
+    debugger_format_changes(dbg, paddedLine, filtered, filteredCount, blob, sizeof blob);
+    printf("%s%s\n", paddedLine, blob);
 }
 
 /* Prints the HAL/S source line active at addr, if a source map is
@@ -1317,18 +1352,18 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
     dbg->stepsRemaining = 0;
 
     if (shouldStop) printf("--- stopped: %s (%ld steps) ---\n", stopMsg, step);
-    show_current_location(age);
+    show_stop_location_and_registers(dbg, age);
     show_source_line_if_changed(dbg, nia);
-    show_stop_registers(dbg, age);
     if (dbg->watchCount > 0) show_watches(dbg, age);
 
     debugger_repl(dbg, age, nia, hw1, hw2);
 
     /* A resume command was just dispatched inside that REPL call:
-     * snapshot "before" state for show_stop_registers()'s diff-vs-dump
-     * decision at the *next* stop, and pre-count the "free" instruction
-     * about to execute below (return true) -- it happens without another
-     * debugger_hook() call to increment instructionsThisResume for it. */
+     * snapshot "before" state for show_stop_location_and_registers()'s
+     * diff-vs-dump decision at the *next* stop, and pre-count the "free"
+     * instruction about to execute below (return true) -- it happens
+     * without another debugger_hook() call to increment
+     * instructionsThisResume for it. */
     ageharness_snapshot_regs(age, &dbg->beforeResumeRegs);
     dbg->instructionsThisResume = 1;
 
