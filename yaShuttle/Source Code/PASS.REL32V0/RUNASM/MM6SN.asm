@@ -29,7 +29,7 @@ MM6SN    AMAIN INTSIC=YES                                               00000200
                R6,            INTEGER(N) SP                            X00001300
                R7             INTEGER(R) SP                             00001400
          OUTPUT R1            MATRIX(N,R) SP                            00001500
-         WORK  R4,F0,F2,F4,F5                                           00001600
+         WORK  R4,F0,F2,F3,F4,F5                                        00001600
 *                                                                       00001700
 * ALGORITHM:                                                            00001800
 *   SEE ALGORITHM DESCRIPTION IN MM6DN                                  00001900
@@ -50,6 +50,42 @@ LOOP2    LFLR  F5,R3          SAVE (ADDR(M2) || M)                      00003300
          SEDR  F0,F0          CLEAR ACC                                 00003400
 LOOP1    LE    F2,2(R3)       GET ELEMENT OF M2                         00003500
          ME    F2,2(R2)       MULTIPLY BE ELEMENT OF M1                 00003600
+*
+* The block below (through .MM6SNCONT) has two variants, selected at
+* assembly time and completely invisible to any assembler other than
+* the modern ASM101S.py (which is the only tool that ever pre-defines
+* &ASM101S as true -- see its own comment at the point that happens).
+* Any other/historical assembler never declares &ASM101S at all before
+* this point, so the GBLB below freshly declares it defaulting to
+* binary false, and assembles the ORIGINAL, unmodified logic (i.e.
+* nothing extra here), producing byte-for-byte the same object code as
+* before this comment block existed.
+*
+* THE BUG (yagpc2-yahalmat2-issues.db key
+* mm6sn_display_multiply_residual_source_unidentified, the same
+* register-pair-leak class as MM14SN.asm/id-53 and VX6S3.asm/VV6S3.asm):
+* F2 is loaded here with single-precision LE then ME, leaving its
+* companion register F3 uncleared -- but the very next instruction,
+* AEDR F0,F2, is an EXTENDED (64-bit, F0:F1 += F2:F3) add. F0:F1 is
+* legitimately maintained as a genuine extended-precision running sum
+* across all N iterations of LOOP1 (correctly cleared once per output
+* element by LOOP2's own SEDR F0,F0), but F3 is never cleared anywhere
+* in this routine, so whatever floating-point garbage is sitting in it
+* from unrelated prior work is folded into every one of the N terms of
+* the dot product, not just the first. Confirmed via instruction trace
+* against 029-DATATYPES.hal's "should be identity" display multiplies:
+* stale, non-reproducible F3 garbage (left behind by whichever HAL/S
+* statement most recently executed a genuine extended op before this
+* call) explains the residual noise scattered across nearly every cell
+* of the result matrix, while calls where F3 happened to already be
+* zero from context produce a bit-exact result.
+*
+         GBLB  &ASM101S
+         AIF   (&ASM101S).MM6SNFIX
+         AGO   .MM6SNCONT
+.MM6SNFIX ANOP
+         SER   F3,F3          CLEAR PRODUCT COMPANION REGISTER
+.MM6SNCONT ANOP
          AEDR  F0,F2          PLACE RESULT IN ACC                       00003700
          LA    R2,2(R2)       BUMP M1 PTR TO NEXT ELEMENT IN ROW        00003800
          AR    R3,R5          BUMP M2 PTR TO NEXT ELEMENT IN COLUMN     00003900

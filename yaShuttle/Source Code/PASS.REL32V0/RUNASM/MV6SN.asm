@@ -28,7 +28,7 @@ MV6SN    AMAIN INTSIC=YES                                               00000200
                R5,            INTEGER(M)   SP                          X00001200
                R6             INTEGER(N)   SP                           00001300
          OUTPUT R1            VECTOR(M)    SP                           00001400
-         WORK  R7,F0,F2,F4                                              00001500
+         WORK  R7,F0,F1,F2,F4                                           00001500
 *                                                                       00001600
 *   ALGORITHM:                                                          00001700
 *        DO FOR I=1 TO M ;                                              00001800
@@ -41,7 +41,38 @@ MV6SN    AMAIN INTSIC=YES                                               00000200
 *                                                                       00002500
 MV6SNX   LFLR  F4,R6          SAVE N IN F4                              00002600
 $TIM1    LR    R7,R3          SAVE VECTOR ADD.                          00002700
+*
+* The block below (through .MV6SNCONT) has two variants, selected at
+* assembly time and completely invisible to any assembler other than
+* the modern ASM101S.py (which is the only tool that ever pre-defines
+* &ASM101S as true -- see its own comment at the point that happens).
+* Any other/historical assembler never declares &ASM101S at all before
+* this point, so the GBLB below freshly declares it defaulting to
+* binary false, and assembles the ORIGINAL, unmodified logic (i.e.
+* nothing extra here), producing byte-for-byte the same object code as
+* before this comment block existed.
+*
+* THE BUG (yagpc2-yahalmat2-issues.db key
+* mv6sn_accumulator_leak_uninitialized_companion_register, the same
+* register-pair-leak class as MM14SN.asm/id-53, VX6S3.asm/VV6S3.asm,
+* and MM6SN.asm): LOOP1 clears the accumulator with the SINGLE-
+* precision SER F0,F0, leaving its companion register F1 uncleared --
+* but LOOP2's AEDR F0,F2 is a genuine EXTENDED (64-bit, F0:F1) add, so
+* F1 is real, live low-order-mantissa state throughout the whole
+* accumulation, not a fresh zero. Whatever floating-point garbage is
+* sitting in F1 from unrelated prior work is folded into every row's
+* dot product from the very first term onward. MM6SN.asm/VM6SN.asm/
+* VV6SN.asm all correctly use the EXTENDED SEDR F0,F0 for this same
+* clear; MV6SN.asm is the one outlier that uses the single-precision
+* form.
+*
 LOOP1    SER   F0,F0          F0=0                                      00002800
+         GBLB  &ASM101S
+         AIF   (&ASM101S).MV6SNFIX
+         AGO   .MV6SNCONT
+.MV6SNFIX ANOP
+         SER   F1,F1          CLEAR ACCUMULATOR COMPANION REGISTER
+.MV6SNCONT ANOP
 $TIM2    LFXR  R6,F4          GET BACK N                                00002900
 LOOP2    LE    F2,2(R3)       GET V1 ELE.                               00003000
          ME    F2,2(R2)       MUL. BY M ELE.                            00003100
