@@ -1,12 +1,15 @@
 # yaGPC2 `--debug` mode — planning document
 
-**Status: planned, not started.** This work is intentionally deferred
-until the current, higher-priority goal — bringing `yaHALMAT2` and
-`yaGPC2` to parity absent any debugger — is achieved (see
-`yagpc2-yahalmat2-issues.db` / `problems.md` for that effort's own
-tracking). This document exists so the evaluation the user asked for
-isn't lost or has to be redone later; nothing below has been
-implemented.
+**Status: implemented (Stages 0–3 complete).** Parity between
+`yaHALMAT2` and `yaGPC2` was reached first (see
+`yagpc2-yahalmat2-issues.db` / `problems.md`), then this work was done in
+full — commits `ca1e9784a` (Stages 0–2) and `466b8c5ac` (Stage 3). This
+document is kept as the historical planning/evaluation record; see
+"Recommended staged rollout" below for what actually shipped in each
+stage. One correction from the original evaluation: the "Address →
+HAL/S source-line mapping" section's SDF recommendation turned out not
+to pan out once Stage 3 actually started — see that section's own
+update, and Stage 3's entry below.
 
 ## Original request
 
@@ -133,7 +136,7 @@ instead of two pasted-in hook calls, and it's cheaply verifiable in
 isolation (existing fixtures should produce byte-identical output
 before/after).
 
-### Address → HAL/S source-line mapping — SDF is the right approach, and it works
+### Address → HAL/S source-line mapping — SDF looked right, but wasn't (see update below)
 
 Simulation Data Files (SDF), produced by PASS3 of the HAL/S compiler,
 contain a full symbol table (real memory addresses), a mapping of HAL/S
@@ -168,6 +171,37 @@ meaningfully de-risks Stage 3 below — it's no longer gated on an unknown
 compiler-side fix, just on writing the C-side (or shelling out to the
 Python) integration once this stage actually starts.
 
+**Update (Stage 3 implementation): SDF turned out not to work — SRN is
+never populated by this toolchain.** Compiling `HELLO.hal` without
+`NOTABLES` and loading the resulting SDF directly via `modules/sdf` +
+`modules/sdfpkg` (bypassing the `MONITOR(22)`/`COMMTABL` emulation layer
+by driving `cmem`'s mode-0/mode-4 init/select calls directly, then
+calling `sdf.parseSDF()` against the result) confirmed the SDF loads and
+parses cleanly, and `statementIndexTable` is populated with 14 real
+per-statement entries — but every entry's `srn` field comes back as six
+EBCDIC blanks (`b'@@@@@@'`). This is a real gap in this project's
+Python-ported HAL/S compiler (`HAL_S_FC.py`), not a parsing bug on this
+side: the field is written, just never filled in. Given that, SDF was
+dropped as Stage 3's data source.
+
+**What was used instead: `pass1.rpt`/`pass2.rpt` text reports.**
+`pass1.rpt`'s per-statement listing lines (`SRN M|SOURCE_TEXT|SCOPE`)
+give the actual HAL/S source text for every statement, keyed by the same
+SRN. `pass2.rpt`'s assembly listing has an `ST#N EQU *` pseudo-label at
+each statement's code-generation boundary, giving statement `N`'s
+CSECT-relative address directly — added to the linker's own section base
+address (from `-lnk101.json`), that's the full address→statement map,
+with no need for SDF, `modules/sdf`, or `modules/sdfpkg` at all. New
+`tools/gen_source_map.py` implements this, with two wrinkles found only
+by testing against a real compile: HAL/S's `||` concatenation operator
+means source text can't be delimited by the *first* `|` on a listing
+line (must use the last); and a statement's `ST#N` marker can land in a
+*non-code* CSECT (a zero-code `DECLARE` statement's marker ends up
+inside a data-literal CSECT the compiler interleaves into the listing)
+and must be bound to the code CSECT's *next* resumption point rather
+than discarded, or the debugger shows a stale source line lingering over
+code that's really implementing a later statement.
+
 ### Multi-unit memory images
 
 A single running `yaGPC2` memory image is very often the *linked*
@@ -200,6 +234,15 @@ indeed keyed by compilation-unit name the same way the linker's own
 `module` field already is — worth confirming directly against a
 multi-unit compile's own set of SDFs when this stage begins.
 
+**Update (Stage 3 implementation): still open.** The reasoning above was
+built around SDF's own "member" concept, which is moot now that SDF
+isn't used at all (see the pivot noted above). `tools/gen_source_map.py`
+as implemented only handles a single-module compile — one `pass1.rpt`/
+`pass2.rpt` pair, one code CSECT, one `SourceMap`. A linked multi-unit
+image would need one source map per compilation unit, dispatched by
+`symtable_get_section_at`'s existing `module` resolution the same way
+this section originally proposed — that wiring hasn't been built.
+
 ### Backtrace — simplified: recent-instruction history, not a call tree
 
 Neither `yaHALMAT2`'s debugger nor `cmd_debug.coffee` (which only has
@@ -214,10 +257,13 @@ runtime's calling convention at all.
 
 ## Recommended staged rollout
 
-**Stage 0 (prerequisite refactor)**: unify the two `run.c` loops, as
-above. No behavior change.
+**Stage 0 (prerequisite refactor, done — commit `ca1e9784a`)**: unify
+the two `run.c` loops, as above. No behavior change (verified
+byte-identical against a pre-refactor baseline across a batch/
+interactive/trace/watch/break argument matrix).
 
-**Stage 1 (skeleton + port core `cmd_debug.coffee` commands)**: new
+**Stage 1 (done — commit `ca1e9784a`)**: skeleton + port core
+`cmd_debug.coffee` commands. New
 `src/debugger.h`/`src/debugger.c`, opaque `Debugger` type owning its own
 REPL state (breakpoint list, one-shot step-mode flag, htrace-equivalent
 flag, last-command-repeat buffer, recent-instruction ring buffer for the
@@ -243,31 +289,69 @@ Port from `cmd_debug.coffee`: `step`/`next`, `run`/`continue`, `break`,
 `clear`/`delete`, `bd`/`be`/`bl`, `reg`, `disasm` (using `cmd_run.coffee`'s
 `disasm()` as the direct model), `mem`/`xw`/`deposit`, `sym`, `sections`,
 `where`, `steps`, `help`, `quit`. Add the new recent-instruction
-`backtrace`/`bt`.
+`backtrace`/`bt`. All shipped as designed, plus `trace`/`htrace` and
+`info` (with `breakpoints`/`registers`/`sections`/`watches`/`memwatch`
+subcommands) folded into Stage 1 rather than left implicit.
 
-**Stage 2**: `watch`/`unwatch`/`mw`/`mwc`/`mwl`/`wl` (memory
-watchpoints) and `set` (register/memory alteration), if not already
-folded into Stage 1 — these are already-designed features in
-`cmd_debug.coffee`, just a matter of porting effort/priority.
+One real bug found only by testing against a real fixture, not obvious
+from the design alone: the breakpoint-recheck guard on the instruction
+immediately after a `next`/`step N` resume was mistranslated from
+`cmd_debug.coffee`'s `_execLoop` (whose `ran > 0` skip exists to avoid
+re-triggering the breakpoint the loop is *already sitting on* for its
+first iteration) — this hook's architecture only ever calls
+`debugger_hook` once per address, so there's no equivalent "already
+sitting on it" case to guard against, and copying the skip anyway caused
+`next`'s own one-shot temp breakpoint to be silently skipped on exactly
+the call meant to detect it. Fixed by checking every call unconditionally
+and fixing `step N`'s off-by-one at the same time (`stepsRemaining =
+count - 1`, since the currently-displayed instruction always executes
+"for free" as part of resuming).
 
-**Stage 3 (separate, later, only if actually wanted)**: HAL/S
-source-line display at stops, via SDF (confirmed working — see above:
-compile debug targets without `NOTABLES`, parse with `modules/sdf`/
-`modules/sdfpkg`). Real, separable work — building the address→statement
-lookup and integrating it into the debugger's stop-display — but no
-longer gated on any unresolved compiler-side question.
+**Stage 2 (done — commit `ca1e9784a`)**: `watch`/`unwatch`/`wl` (display-
+on-stop expressions) and `mw`/`mwc`/`mwl` (memory write-watchpoints, fed
+by a before/after snapshot split across two consecutive `debugger_hook`
+calls rather than bracketing `ap101_exec1()` in one place, since the
+hook only runs *before* execution) and `set` (register alteration —
+`deposit`, from Stage 1, already covers memory alteration). Verifying
+`mw` against a real fixture surfaced a real addressing-model gotcha:
+`STH 1,X'0005'(0)`'s `(0)` names base register R0, not "no base" — the
+actual effective address is register-relative (`R0`'s value + the
+displacement), not the literal displacement shown in the disassembly.
 
-## Verification (once this work actually starts)
+**Stage 3 (done — commit `466b8c5ac`)**: HAL/S source-line display at
+stops, via `pass1.rpt`/`pass2.rpt` text reports — *not* SDF; see the
+updated finding in "Address → HAL/S source-line mapping" above. New
+`src/sourcemap.h`/`.c` (JSON loader + address→statement lookup, reusing
+the existing `src/json.c` parser) and `tools/gen_source_map.py` (the
+`pass1.rpt`/`pass2.rpt`/`-lnk101.json` → JSON export). New
+`--source-map <file>` CLI flag; a source line is shown automatically at
+each stop only when it differs from the last one shown (matching
+`yaHALMAT2`'s behavior from the original request), plus an on-demand
+`source`/`src` command. Only handles a single-module compile for
+now — see the multi-unit note above.
 
-- Stage 0: existing corpus/unit test output must be byte-identical
-  before/after the loop unification.
-- Stage 1+: a new `test/test_debugger.c` (breakpoint add/delete/ID
-  stability, address-walking logic) added to the `Makefile`'s existing
-  `UNIT_TESTS` pattern, plus an end-to-end scripted-stdin transcript
-  test in the style of `test/run_all.sh`/`compare.sh`.
-- Where a `cmd_debug.coffee` command is being ported, cross-check
-  behavior directly against `nsts-sim-gpc`'s own debugger output for the
-  same fixture where practical, the same "run both, diff" discipline
-  used throughout this whole project's development.
-- Manual exercise of `yaGPC2 run --debug ...` against a real corpus
-  fixture, not just unit tests, before considering any stage done.
+## Verification (as actually done)
+
+- Stage 0: confirmed byte-identical against a pre-refactor baseline
+  build across a batch/interactive/trace/watch/break argument matrix
+  (the corpus test harness itself needs external `../yaGPC` and
+  `../dist/gpc.js` reference builds that aren't present in every
+  environment, so this ran as a direct old-vs-new binary comparison
+  instead where the harness itself couldn't run).
+- Stage 1+: `test/test_debugger.sh` — three golden-transcript,
+  scripted-stdin end-to-end cases (`hello`/`watch`/`srcmap`) against
+  `test/fixtures/hello.fcm`, in the style of `test/run_all.sh`/
+  `compare.sh`, wired into `make test`. A separate `test/test_debugger.c`
+  white-box unit test (as originally planned) wasn't added — it would
+  have meant breaking the debugger's intentional opaque-state
+  encapsulation for no real benefit over the behavioral end-to-end
+  coverage the golden-transcript tests already give.
+- Cross-checking ported commands directly against `nsts-sim-gpc`'s own
+  debugger output wasn't done in practice (no run-both-and-diff harness
+  for it exists) — verification instead relied on direct manual exercise
+  against real fixtures, which is what actually caught the two real bugs
+  noted above (the `next`/`step N` breakpoint-recheck guard in Stage 1,
+  the base-register-relative addressing gotcha in Stage 2's `mw` tests).
+- Manual exercise of `yaGPC2 --debug ...` against real HAL/S-compiled
+  fixtures (`hello.fcm`, `021-SIMPLE.fcm`) was done throughout every
+  stage, not just via automated tests.
