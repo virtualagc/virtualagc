@@ -171,6 +171,25 @@ static void batchrunner_format_trace_line(BatchRunner *r, long step, uint32_t ni
         snprintf(hw2Str, sizeof hw2Str, "    ");
     }
 
+    char disasmPadded[256];
+    str_rpad(disasmPadded, sizeof disasmPadded, disasm, " ", 28);
+
+    char prefix[400];
+    snprintf(prefix, sizeof prefix, "[%s] %s%s: %s %s  %s", stepStr, niaStr, sectOffsetStr, hw1Str, hw2Str, disasmPadded);
+
+    /* Under --debug with a nonzero 'set width' (see src/debugger.h),
+     * wrap the register-changes list at whole-entry boundaries instead
+     * of printing it all on one (potentially very long) line. Plain
+     * --trace (no --debug) always takes the flat-join path below
+     * unchanged, matching this project's default of zero behavior
+     * change when --debug isn't passed. */
+    if (r->debugMode && debugger_line_width(r->dbg) > 0 && changeCount > 0) {
+        char changesBlob[4096];
+        debugger_format_changes(r->dbg, prefix, changes, changeCount, changesBlob, sizeof changesBlob);
+        snprintf(out, outSize, "%s%s", prefix, changesBlob);
+        return;
+    }
+
     char changesStr[2048];
     changesStr[0] = '\0';
     if (changeCount > 0) {
@@ -189,10 +208,7 @@ static void batchrunner_format_trace_line(BatchRunner *r, long step, uint32_t ni
         }
     }
 
-    char disasmPadded[256];
-    str_rpad(disasmPadded, sizeof disasmPadded, disasm, " ", 28);
-
-    snprintf(out, outSize, "[%s] %s%s: %s %s  %s%s", stepStr, niaStr, sectOffsetStr, hw1Str, hw2Str, disasmPadded, changesStr);
+    snprintf(out, outSize, "%s%s", prefix, changesStr);
 }
 
 static long batchrunner_load(BatchRunner *r) {

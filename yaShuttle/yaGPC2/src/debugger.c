@@ -83,6 +83,12 @@ struct Debugger {
     int lastStmt;
     bool hasLastStmt; /* only show a source line when it differs from the
                        * last one shown, matching yaHALMAT2's --debug mode */
+
+    /* 'set width N': wraps the register-changes list run.c prints during
+     * 'trace'/'htrace' (see debugger_format_changes()); N<=0 disables
+     * wrapping. Purely a debug-mode presentation setting -- has no
+     * effect on plain --trace (no --debug). */
+    int lineWidth;
 };
 
 /* ---------------------------------------------------------------------
@@ -422,6 +428,23 @@ static bool show_source_line(Debugger *dbg, uint32_t addr) {
     return true;
 }
 
+/* Auto-display variant used both at debugger stops and (new) as
+ * instructions flow by during 'trace'/'htrace': shows the source line
+ * only when it differs from the last one shown, matching yaHALMAT2's
+ * --debug behavior, sharing the same lastStmt/hasLastStmt tracking in
+ * both cases so flowing past a statement and later stopping inside it
+ * doesn't reprint it twice. */
+static void show_source_line_if_changed(Debugger *dbg, uint32_t addr) {
+    if (!dbg->srcmap) return;
+    int stmt = 0;
+    const char *text = sourcemap_lookup(dbg->srcmap, addr, &stmt);
+    if (text && (!dbg->hasLastStmt || stmt != dbg->lastStmt)) {
+        printf("HAL/S %4d:%s\n", stmt, text);
+        dbg->lastStmt = stmt;
+        dbg->hasLastStmt = true;
+    }
+}
+
 static void show_backtrace(Debugger *dbg) {
     if (dbg->recentCount == 0) {
         printf("  (no history yet)\n");
@@ -457,6 +480,7 @@ static const HelpEntry HELP_ENTRIES[] = {
     {"wl", "List watch expressions"},
     {"reg, regs, registers [NAME]", "Show registers (all, or one by name)"},
     {"set REGISTER VALUE", "Set register value ($Rn/$FPn/NIA)"},
+    {"set width N", "Wrap trace/htrace register changes at N columns (0 = off)"},
     {"disasm, d, u, unassemble [ADDR] [COUNT]", "Disassemble instructions (default: NIA, 20)"},
     {"mem, x, examine ADDR [COUNT]", "Examine memory, halfwords (default 16)"},
     {"xw, x32, fw ADDR", "Examine memory, one fullword"},
@@ -467,7 +491,7 @@ static const HelpEntry HELP_ENTRIES[] = {
     {"source, src", "Show the HAL/S source line at the current location"},
     {"steps", "Show step count"},
     {"backtrace, bt", "Show recently executed instructions"},
-    {"trace, htrace [on|off]", "Toggle or show instruction trace"},
+    {"trace, htrace [on|off]", "Toggle or show instruction trace (+ HAL/S source lines, if mapped)"},
     {"info breakpoints|watches|memwatch|registers|sections", "Show info"},
     {"help, h, ? [command]", "Show this help"},
     {"quit, q, exit", "Exit the debugger"},
@@ -711,13 +735,29 @@ static void cmd_unwatch(Debugger *dbg, AGEHarness *age, const char *addrStr) {
     printf("*** No watch at %s\n", hex);
 }
 
-/* Register alteration only -- memory alteration is 'deposit'. Mirrors
- * cmd_debug.coffee's setRegister. */
-static void cmd_set(AGEHarness *age, const char *nameIn, const char *valStr) {
+/* Register alteration (mirrors cmd_debug.coffee's setRegister) plus one
+ * yaGPC2-specific extension not in the CoffeeScript original: 'set width
+ * N' controls wrapping of the register-changes list printed during
+ * 'trace'/'htrace' (see debugger_format_changes()) -- N<=0 disables
+ * wrapping entirely. Memory alteration is 'deposit', not 'set'. */
+static void cmd_set(Debugger *dbg, AGEHarness *age, const char *nameIn, const char *valStr) {
     char name[16];
     size_t n = 0;
     for (const char *p = nameIn; *p && n < sizeof(name) - 1; p++, n++) name[n] = (char)toupper((unsigned char)*p);
     name[n] = '\0';
+
+    if (strcmp(name, "WIDTH") == 0) {
+        char *end;
+        long width = strtol(valStr, &end, 10);
+        if (*end != '\0' || *valStr == '\0') {
+            printf("*** Invalid value: %s\n", valStr);
+            return;
+        }
+        dbg->lineWidth = (int)width;
+        if (dbg->lineWidth > 0) printf("width = %d\n", dbg->lineWidth);
+        else printf("width = 0 (wrapping disabled)\n");
+        return;
+    }
 
     bool isHex = valStr[0] == '0' && (valStr[1] == 'x' || valStr[1] == 'X');
     const char *v = valStr + (isHex ? 2 : 0);
@@ -937,7 +977,7 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
     }
     if (cmd_is(cmd, "set", NULL)) {
         if (argc < 3) printf("*** Usage: set REGISTER VALUE\n");
-        else cmd_set(age, argv[1], argv[2]);
+        else cmd_set(dbg, age, argv[1], argv[2]);
         return false;
     }
     if (cmd_is(cmd, "disasm", "d", "u", "unassemble", NULL)) {
@@ -1088,6 +1128,7 @@ static void debugger_repl(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t
 Debugger *debugger_create(const Options *opts) {
     Debugger *dbg = calloc(1, sizeof(Debugger));
     dbg->traceEnabled = opts->trace;
+    dbg->lineWidth = 132;
 
     if (opts->sourceMap) dbg->srcmap = sourcemap_load(opts->sourceMap);
 
@@ -1108,6 +1149,51 @@ void debugger_free(Debugger *dbg) {
 }
 
 bool debugger_wants_trace(const Debugger *dbg) { return dbg->traceEnabled; }
+
+int debugger_line_width(const Debugger *dbg) { return dbg->lineWidth; }
+
+/* Formats `changes` as "NAME: OLD->NEW, NAME: OLD->NEW, ..." (same token
+ * format run.c's own flat join uses), wrapped so no printed line exceeds
+ * dbg->lineWidth columns -- wrapping only ever happens between whole
+ * "NAME: OLD->NEW" entries, never mid-entry, with continuation lines
+ * indented to align under the first entry rather than the left margin.
+ * `prefix` is everything the caller
+ * has already printed earlier on this same line (used only to measure
+ * that indent); `out` receives just the changes portion (no leading
+ * content, no trailing newline) to be concatenated directly after
+ * `prefix`. */
+void debugger_format_changes(const Debugger *dbg, const char *prefix, const RegChange *changes, int changeCount,
+                              char *out, size_t outSize) {
+    out[0] = '\0';
+    if (changeCount <= 0) return;
+
+    int width = dbg->lineWidth;
+    size_t prefixLen = strlen(prefix);
+    size_t pos = 0;
+    size_t lineLen = prefixLen;
+    bool firstOnLine = true;
+
+    for (int i = 0; i < changeCount; i++) {
+        char oldStr[16], newStr[16];
+        trace_format_reg_val(oldStr, sizeof oldStr, changes[i].name, changes[i].oldVal);
+        trace_format_reg_val(newStr, sizeof newStr, changes[i].name, changes[i].newVal);
+        bool isLast = i == changeCount - 1;
+        char token[64];
+        snprintf(token, sizeof token, "%s: %s->%s%s", changes[i].name, oldStr, newStr, isLast ? "" : ", ");
+        size_t tokenLen = strlen(token);
+
+        if (!firstOnLine && width > 0 && lineLen + tokenLen > (size_t)width) {
+            int n = snprintf(out + pos, pos < outSize ? outSize - pos : 0, "\n%*s", (int)prefixLen, "");
+            pos += (n > 0) ? (size_t)n : 0;
+            lineLen = prefixLen;
+            firstOnLine = true;
+        }
+        int n = snprintf(out + pos, pos < outSize ? outSize - pos : 0, "%s", token);
+        pos += (n > 0) ? (size_t)n : 0;
+        lineLen += tokenLen;
+        firstOnLine = false;
+    }
+}
 
 bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, uint32_t hw2, long step) {
     dbg->currentStep = step;
@@ -1178,6 +1264,11 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
 
     if (!shouldStop && dbg->stepsRemaining > 0) {
         dbg->stepsRemaining--;
+        /* 'trace'/'htrace': show the HAL/S source line as instructions
+         * flow by, not just at stops -- printed here (before returning)
+         * so it lands just before this instruction's own trace line,
+         * which run.c prints only after ap101_exec1() actually runs it. */
+        if (dbg->traceEnabled) show_source_line_if_changed(dbg, nia);
         return true;
     }
 
@@ -1186,15 +1277,7 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
 
     if (shouldStop) printf("--- stopped: %s (%ld steps) ---\n", stopMsg, step);
     show_current_location(age);
-    if (dbg->srcmap) {
-        int stmt = 0;
-        const char *text = sourcemap_lookup(dbg->srcmap, nia, &stmt);
-        if (text && (!dbg->hasLastStmt || stmt != dbg->lastStmt)) {
-            printf("HAL/S %4d:%s\n", stmt, text);
-            dbg->lastStmt = stmt;
-            dbg->hasLastStmt = true;
-        }
-    }
+    show_source_line_if_changed(dbg, nia);
     if (dbg->watchCount > 0) show_watches(dbg, age);
 
     debugger_repl(dbg, age, nia, hw1, hw2);

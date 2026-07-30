@@ -1,0 +1,18 @@
+>> 10164 START   +00000: e4f3 8000  BAL  4,X'8000'
+gpc> >> 1000d $0HELLO +0000d: d0ff 394a  SCAL 0,X'014a'(1,)
+HAL/S    6:   WRITE(PRINTER) 'THE BEGINNING';
+gpc> Trace enabled
+gpc> width = 50
+gpc> [   10] 01010e IOINIT  +0000: b624 0000  NIST X'0009'(0),X'0000'     PSW1: 810e0020->81100020
+[   11] 010110 IOINIT  +0002: bef3       STH  6,X'0190'              PSW1: 81100020->81120020
+[   12] 010112 IOINIT  +0004: bdf3       STH  5,X'018e'              PSW1: 81120020->81140020
+[   13] 010114 IOINIT  +0006: e4f7 0038  BAL  4,X'0038'              R04: 81660020->81160020, 
+                                                                     PSW1: 81140020->814e0020
+[   14] 01014e IOINIT  +0040: c7e4       BCR  7,4                    PSW1: 814e0020->81160020
+[   15] 010116 IOINIT  +0008: 97e8       SRET 7,0                    R00: 023a0012->02120028, 
+                                                                     R04: 81160020->81660020, 
+                                                                     PSW1: 81160020->800f0020
+--- stopped: breakpoint at 1000f (16 steps) ---
+>> 1000f $0HELLO +0000f: eac1       LA   2,X'0030'(1)
+gpc> width = 0 (wrapping disabled)
+gpc> Goodbye.

@@ -71,4 +71,12 @@ run_case "watch"
 # comment for why -- not the SDF binary format originally targeted).
 run_case "srcmap" --source-map fixtures/hello.srcmap.json
 
+# Post-Stage-3 feedback: HAL/S source lines shown as instructions flow
+# by during 'trace'/'htrace' (not just at stops), and 'set width N'
+# wrapping of the register-changes list at whole-entry boundaries with
+# continuation lines aligned under the first entry (N<=0 disables
+# wrapping). Uses 'next' to skip an entire SCAL subroutine call so the
+# flow-by path (not just the at-stop path) actually gets exercised.
+run_case "wrap" --source-map fixtures/hello.srcmap.json
+
 exit $fail
