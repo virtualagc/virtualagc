@@ -2398,10 +2398,15 @@ sweeps. 029-DATATYPES showed two new residuals not previously examined:
 - **DETERMINANT residual (`MM12SN.asm`)**: traced the whole routine —
   single-precision throughout (`LE`/`ME`/`MER`/`AE`/`LECR`), no genuine
   extended operation anywhere in the general-N path. Not the
-  register-leak bug class; logged as a `yaHALMAT2`-owned
-  algorithm-fidelity gap (its own determinant implementation doesn't
-  bit-exactly replicate this specific single-precision elimination
-  order), no `yaGPC2` action needed.
+  register-leak bug class; logged as issue 76
+  (`mm12sn_determinant_algorithm_fidelity_gap`, `open`,
+  `next_action_owner=yahalmat2`) — a `yaHALMAT2`-owned algorithm-fidelity
+  gap (its own determinant implementation doesn't bit-exactly replicate
+  this specific single-precision elimination order), no `yaGPC2` action
+  needed. *(This DB row wasn't actually created until a later pass — see
+  §6.6 — despite being described in prose here at the time; a reminder
+  that "documented in prose" and "logged in the DB" are not the same
+  thing in this project's workflow.)*
 - **Non-singular INVERSE residual (A4B/A5A)**: a long investigation that
   ended by **proving `MM14SN.asm`'s fix (§6.3) is fully correct**. Every
   step of A4B's forward elimination (K=0 through K=3: pivot search, row/
@@ -2412,19 +2417,89 @@ sweeps. 029-DATATYPES showed two new residuals not previously examined:
   bugs in that verification port itself (a wrong exponent-alignment
   branch in the add/subtract logic; a missing single-precision
   truncation after every store, matching real `STE`/`.msw` semantics).
-  `INVERSE()` itself has no remaining defect. The residual is isolated
+  `INVERSE()` itself has no remaining defect. The residual was isolated
   to `RUNASM/MM6SN.asm` (a display-only matrix-multiply used just for
   the "should be identity" printout, not part of `INVERSE()`'s own
   result) — confirmed this routine has the same latent
   uncleared-F3-before-`AEDR` pattern as `VX6S3`/`VV6S3` (line 51's
   single-precision `LE`+`ME` load of an M2 element, never clearing its
   companion F3, before line 53's genuine extended `AEDR F0,F2`), but the
-  real trace shows F3 never changes throughout this specific run, so
-  that latent bug isn't the active cause here. Logged as
-  `mm6sn_display_multiply_residual_source_unidentified`, low severity,
-  `open`/`yagpc2` — the actual `INVERSE()` result users see is proven
-  correct; only a display-only sanity-check multiply's own bit-level
-  fidelity remains unresolved.
+  real trace showed F3 never changes throughout this specific run, so
+  that latent bug wasn't the active cause. Logged at the time as
+  `mm6sn_display_multiply_residual_source_unidentified`, `open`/`yagpc2`
+  — **since fully resolved, see §6.6 for the actual root cause and fix.**
+
+---
+
+### 6.6 Issue 75 resolved: the real cause was `yaHALMAT2`'s truncate-every-term modeling gap, not `MM6SN.asm`'s F3
+
+The `mm6sn_display_multiply_residual_source_unidentified` residual (§6.5)
+was fully resolved. The suspected `MM6SN.asm` companion-register leak
+(F3 uncleared before `AEDR F0,F2`, same class as `MM14SN.asm`/`VX6S3.asm`/
+`VV6S3.asm`) was real and got its own `&ASM101S`-gated `SER F3,F3` fix on
+the RTL side — but instruction-trace verification confirmed F3 was
+already zero throughout every `MM6SN.asm` call in this specific test, so
+it was **not** the active cause of the observed residual.
+
+The actual root cause was found by direct comparison against
+`yaHALMAT2`'s `interp.c`: real RTL (`MM6SN.asm` and its siblings
+`MV6SN.asm`/`VM6SN.asm`/`VV6S3.asm`/`VV6SN.asm`) accumulates an entire
+N-term dot product in a genuine EXTENDED (56-bit, register-pair) running
+sum via `SEDR`/`AEDR`, truncating to single precision only **once**, at
+the final `STE`. `yaHALMAT2`'s `OP_MMPR`/`OP_MVPR`/`OP_VMPR`/`OP_VDOT`
+instead truncated to single precision after **every** term — discarding
+low-order bits N times instead of once, producing a different (larger,
+differently-patterned) rounding residual than real hardware, even though
+both sides were computing the same mathematically-correct dot product.
+Fixed by switching all four opcodes to accumulate via the extended
+`hrfp_addE` primitive and truncate only once at the end, matching real
+hardware's own accumulation order.
+
+While auditing `MM6SN.asm`'s sibling routines for the same
+companion-register-leak class (the investigation's original hypothesis),
+found a second, distinct, genuine `yaGPC2`-side defect: `MV6SN.asm`
+(MATRIX\*VECTOR multiply) clears its accumulator with the
+single-precision `SER F0,F0` instead of the extended `SEDR F0,F0` that
+`MM6SN.asm`/`VM6SN.asm`/`VV6SN.asm` all correctly use — leaving
+companion register F1 with leftover floating-point garbage from
+unrelated prior work throughout the whole accumulation. Fixed via an
+added, `&ASM101S`-gated `SER F1,F1` (purely additive; byte-identical
+historical object code confirmed preserved under `--no-rtl-fixes`).
+Logged as issue 77 (`mv6sn_accumulator_leak_uninitialized_companion_register`,
+fixed, `yagpc2`) — no HAL/S corpus test currently exercises this specific
+latent path, but the defect follows the exact reasoning already
+established for id-53/72/73/74.
+
+Also created the DB row for issue 76
+(`mm12sn_determinant_algorithm_fidelity_gap`) at this point — see the
+note in §6.5 above: this finding had only ever been described in prose,
+never actually logged as a DB issue, until the gap was caught.
+
+**A serious build-pipeline gotcha, discovered while deploying the
+`MV6SN.asm`/`MM6SN.asm` fixes**: the separate `nsts-sdl-dps` project
+(which actually supplies the `lnk101`/`HALSFC`-adjacent toolchain used
+throughout this whole sweep methodology) has its own from-scratch
+reimplementation of the AP-101 assembler (Python package `asm101`,
+*not* `ASM101S.py`), built via its own `make runtime` CMake target. That
+reimplementation does not pre-define `&ASM101S` and silently drops
+`GBLB`/`AIF`/`AGO` conditional-assembly blocks entirely — no error, no
+warning, clean exit — always producing the historical/buggy object code
+regardless of source intent. Running `make runtime` there silently
+reverted the already-deployed `MM14SN.asm`/`VX6S3.asm`/`VV6S3.asm` fixes
+(id-53/72/73) back to their original buggy object code mid-session,
+causing a severe regression (garbage, `E+12`-magnitude "should be
+identity" results) before being traced back to this root cause. The
+correct fix: reassemble by hand with the real `ASM101S.py` and copy the
+resulting `.obj` files directly into
+`nsts-sdl-dps/build/lib/runtime/RUN/`, bypassing that project's own
+build tooling entirely for any RTL file gated by `&ASM101S`.
+
+A fourth full 98-file corpus sweep (yaGPC2 vs. `yaHALMAT2` directly,
+after all of the above): **85 AGREE, 3 DISCREPANCY** (up from 84/4) —
+029-DATATYPES.hal now matches bit-for-bit. Zero regressions; the
+remaining 3 discrepancies (104-EXAMPLE_1, 120-EXAMPLE_A, 167-ASSORTEDIO)
+are the same pre-existing, already-tracked findings from earlier
+sweeps (§5, §6.5), still open.
 
 ---
 
