@@ -1532,9 +1532,17 @@ struct halmat_state {
      * predated an independently-verified reference implementation of the
      * genuine algorithm becoming available). hal_random_init()
      * (interp_init) resets this to a fresh process's own initial state
-     * (SEED=1435, chained_f1=0), matching RANDOM.asm's own object-code-
-     * baked initial constant and a genuinely cold register file. */
+     * (SEED=1435), matching RANDOM.asm's own object-code-baked initial
+     * constant. */
     hal_random_state_t random_rng;
+
+    /* Persistent AP-101S floating-register-file state (hal_fpu.h) shared
+     * by every ported RTL routine that touches an extended (register-
+     * pair) instruction -- RANDOM/RANDOMG's own RANU, EXP, LOG, ATANH,
+     * and MATRIX**(-1)'s own MM14SN so far (task 100/id 51). Reset to
+     * all-zero by hal_fpu_init() (interp_init), matching a genuinely
+     * cold register file. */
+    hal_fpu_state_t fpu;
 
     /* BFNC selectors 38/39 (ERRGRP/ERRNUM, class-0/BFNC.md): "returns
      * group/number of last error detected, or zero" [USA003087] Appendix

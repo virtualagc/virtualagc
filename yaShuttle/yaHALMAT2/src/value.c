@@ -168,11 +168,40 @@ halmat_scalar_t halmat_scalar_add(halmat_scalar_t a, halmat_scalar_t b) {
     if (frac_a == 0) return halmat_scalar_from_ibm_words(b.msw, b.lsw, dbl);
     if (frac_b == 0) return halmat_scalar_from_ibm_words(a.msw, a.lsw, dbl);
 
-    /* Align: right-shift the smaller-characteristic operand's fraction
-     * until both characteristics match. */
-    int char_r = (char_a > char_b) ? char_a : char_b;
-    if (char_a < char_r) frac_a >>= (4 * (char_r - char_a));
-    if (char_b < char_r) frac_b >>= (4 * (char_r - char_b));
+    /* Align, matching real hardware's own AE/AED algorithm exactly (id
+     * 40, yagpc2-yahalmat2-issues.db -- ported from hal_random.c's own
+     * hrfp_addsub/floatIBM.c's addsubE, already independently verified
+     * bit-exact for RANDOM/EXP/LOG/TAN/VCRS's own AED/SED steps this
+     * project relies on elsewhere). This function's own prior alignment
+     * -- an immediate, full-width right-shift that discards every
+     * shifted-out bit outright -- was a genuinely CRUDER, less accurate
+     * approximation than real hardware's own algorithm, not just a
+     * differently-scoped one: both operands are pre-shifted left one
+     * hex digit first (`<<4`), so the SMALLER operand's own alignment
+     * shift is one digit short of "full" (`shift = |char_a-char_b|-1`,
+     * not the difference itself) -- genuinely retaining one extra digit
+     * of the smaller operand's own fraction through the add/subtract
+     * itself, not discarding it upfront the way this function's own
+     * prior single-pass shift did. Confirmed via id 40's own recorded
+     * repro (X=RANDOM;Y=RANDOM;Z=X**2+Y**2;V=RANDOM;) that this
+     * specific gap -- not F1-chain plumbing, already tried and found
+     * insufficient -- was the actual blocker. */
+    int char_r;
+    if (char_a == char_b) {
+        frac_a <<= 4;
+        frac_b <<= 4;
+        char_r = char_a;
+    } else if (char_a < char_b) {
+        int shift = char_b - char_a - 1;
+        char_r = char_b;
+        if (shift > 0) frac_a = (shift >= 14) ? 0 : (frac_a >> (shift * 4));
+        frac_b <<= 4;
+    } else {
+        int shift = char_a - char_b - 1;
+        char_r = char_a;
+        if (shift > 0) frac_b = (shift >= 14) ? 0 : (frac_b >> (shift * 4));
+        frac_a <<= 4;
+    }
 
     int64_t signed_a = sign_a ? -(int64_t)frac_a : (int64_t)frac_a;
     int64_t signed_b = sign_b ? -(int64_t)frac_b : (int64_t)frac_b;
@@ -183,17 +212,28 @@ halmat_scalar_t halmat_scalar_add(halmat_scalar_t a, halmat_scalar_t b) {
 
     if (result_frac == 0) return halmat_scalar_zero(dbl);
 
-    /* Postnormalize in the wide (14-hex-digit/double) domain regardless
-     * of the result's final precision; packing below truncates to 6 hex
-     * digits for a single-precision result. */
-    int max_hex_digits = 14;
-    int k = hex_digit_count64(result_frac);
-    if (k > max_hex_digits) {
-        result_frac >>= (4 * (k - max_hex_digits));
-        char_r += (k - max_hex_digits);
-    } else if (k < max_hex_digits) {
-        result_frac <<= (4 * (max_hex_digits - k));
-        char_r -= (max_hex_digits - k);
+    /* Renormalize -- hrfp_addsub's own exact 3-way branch (not this
+     * function's prior generic hex_digit_count64-based postnormalize):
+     * the pre-shift above means result_frac is at most 2 hex digits
+     * wider than the target 14-digit/56-bit width (a 17th-digit carry
+     * needs >>8, a 15th-digit carry needs >>4), or arbitrarily
+     * narrower after cancellation (needs a genuine renormalizing
+     * left-shift loop) -- reusing hrfp_addsub's own already-verified
+     * branch structure verbatim rather than re-deriving an equivalent
+     * generic one, given how much of this project's own already-
+     * confirmed-correct behavior (RANDOM, every RUNASM port this
+     * session) depends on this exact shape. */
+    if (result_frac & ((uint64_t)0xF << 60)) {
+        result_frac >>= 8;
+        char_r += 1;
+    } else if (result_frac & ((uint64_t)0xF << 56)) {
+        result_frac >>= 4;
+    } else {
+        char_r -= 1;
+        while (!(result_frac & ((uint64_t)0xF << 52))) {
+            result_frac <<= 4;
+            char_r -= 1;
+        }
     }
     if (char_r < 0) char_r = 0;
     if (char_r > 127) char_r = 127;

@@ -1,0 +1,28 @@
+C DB id 71 (yagpc2-yahalmat2-issues.db, unit_abval_not_wired_into_fpu_
+C state_leak_model): UNIT's own internal `ABAL SQRT` (real RUNASM/
+C VV9S3.asm and VV10S3.asm both funnel through SQRT.asm) leaves F1/F3
+C behind exactly like any other RTL-family call (hal_sqrt_single's own
+C `fpu` parameter, id 71's fix). id 73's own later fix (VX6S3.asm's own
+C companion-clearing bug, RUNASM SER F1,F1/SER F3,F3 before each SEDR)
+C means the immediately-following VCRS call no longer reads ANY
+C incoming companion state at all, so UNIT's own leak has no effect on
+C it -- RESULT2 lands on the mathematically-exact -68.0 (matching
+C vcrs_precision's own isolated fixture). Source matches 072-EXAMPLE_2.
+C hal ("Programming in HAL-S" p. 72) verbatim, the original repro id 71
+C was found from.
+  T:
+  PROGRAM;
+     DECLARE VEL VECTOR INITIAL(1, 2, 3),
+             MY_FRAME MATRIX INITIAL(1, 2, 3, 4, 5, 6, 7, 8, 9);
+     DECLARE VECTOR,
+             RESULT1, RESULT2, E INITIAL(3, 2, 1);
+     DO;
+        TEMPORARY V_PRIME VECTOR;
+        V_PRIME = MY_FRAME VEL;
+        RESULT1 = UNIT(V_PRIME);
+        RESULT2 = V_PRIME * E;
+        WRITE(6) 'V_PRIME=', V_PRIME;
+     END;
+     WRITE(6) 'RESULT1=', RESULT1;
+     WRITE(6) 'RESULT2=', RESULT2;
+  CLOSE T;

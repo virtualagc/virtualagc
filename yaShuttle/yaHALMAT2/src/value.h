@@ -80,9 +80,16 @@ halmat_scalar_t halmat_scalar_from_double(double value, bool double_precision);
  * Model PDF Sec. 8: characteristic comparison and alignment, fraction
  * add/subtract, postnormalization) -- not a native-double approximation.
  * Result precision is double if either operand is double, else single.
- * Known limitations (documented, not silently wrong): no guard-digit
- * extra precision during alignment (real hardware keeps a few extra
- * bits before the final truncation; this truncates immediately), and
+ * Alignment genuinely retains one extra hex digit of the smaller
+ * operand's own fraction through the add/subtract itself (id 40,
+ * yagpc2-yahalmat2-issues.db -- ported from hal_random.c's own
+ * hrfp_addsub/floatIBM.c's addsubE, matching real hardware's own AE/AED
+ * algorithm exactly), NOT a same-pass immediate truncating shift the
+ * way an earlier version of this function used -- confirmed via id 40's
+ * own recorded repro that this specific gap, not F1-chain state-
+ * plumbing, was the actual source of a real (if narrow) divergence from
+ * yaGPC2 for scalar arithmetic sandwiched between RANDOM/RANDOMG calls.
+ * Known remaining limitation (documented, not silently wrong):
  * characteristic overflow/underflow clamps to [0,127] rather than
  * raising the real ERROR CONDITION interrupt. */
 halmat_scalar_t halmat_scalar_add(halmat_scalar_t a, halmat_scalar_t b);

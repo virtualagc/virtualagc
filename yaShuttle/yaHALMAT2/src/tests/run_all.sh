@@ -120,7 +120,20 @@ run ./run_local_fixture.sh mixed_type "S2=      5.5000000E+00"
 # TINT's per-field correction and bind_call_argument's parameter-
 # precision conversion) and let it override the opcode's nominal class
 # and normalize precision on every write to a plain SCALAR destination.
-run ./run_local_fixture.sh scalar_double "$(printf ' 9.3000000000000007E+07\n 5.0000000000000000E-01\n 1.7023535811925805E+08')"
+# DISTANCE line's own expected value corrected 2026-07-29 (id 66, then
+# again same day once id 69 landed): was 1.7023535811925805E+08, never
+# actually verified against real gpc (this fixture's own point was the
+# IASN/SASN precision-tagging fix above, predating TAN's own real port
+# entirely -- whatever yaHALMAT2 happened to compute via the old libm
+# tan() got locked in unchecked); briefly 1.7023535802332896E+08 once
+# TAN itself was fixed (id 66) but before OP_SSDV's own DOUBLE-precision
+# QDEDR fix (id 69) closed the remaining ~11th-significant-digit gap.
+# Now bit-exact against real gpc end to end (TAN(ANGULAR_SHIFT) alone
+# already independently confirmed bit-exact, 5.4630249015163663E-01
+# both, isolated in a standalone probe; the division itself now uses
+# the same QDEDR algorithm real hardware's own compiled `/` between two
+# DOUBLEs does, not value.c's own genuinely-exact halmat_scalar_divide).
+run ./run_local_fixture.sh scalar_double "$(printf ' 9.3000000000000007E+07\n 5.0000000000000000E-01\n 1.7023535809041477E+08')"
 # This WRITE statement's 8 fields ('I1=',I1,'I2=',I2,'I3=',I3,'I4=',I4)
 # total 91 columns -- past the 80-column line_length UNPAGED default, so
 # under an UNPAGED device this wraps onto two lines. Channel 6 here is
@@ -167,7 +180,13 @@ run ./run_link_fixture.sh "$(printf '         10              20              30
 # Direct (non-COMPOOL) regression for the same root cause -- see the
 # comment above.
 run ./run_local_fixture.sh arrint_write "$(printf '         10              20              30')"
-run ./run_ext_func_fixture.sh "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
+# ext_squroo's SQRT(3) row was updated from 1.7320499E+00 to the
+# authentic RUNASM/SQRT.asm result 1.7320509E+00 -- independently
+# confirmed against yaGPC2's own real execution of this exact fixture
+# (task 100/id 51's own verification, hal_transcendental.c's
+# hal_sqrt_single). The old value was simply imprecise, not a match to
+# any real emulator's own output.
+run ./run_ext_func_fixture.sh "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320509E+00')" ext_mytable ext_square ext_squroo
 run ./run_ext_func_fixture.sh "          5              10" ext_pcal_prog ext_double
 # User-reported sweep item: an external (cross-unit) FUNCTION returning a
 # CHARACTER value previously failed loudly -- interp_copy_external_call_
@@ -219,7 +238,7 @@ run ./run_local_fixture.sh inline_vector_return "$(printf ' 1.0000000E+00      2
 # replacing the 16MB memory image (would fail or print blank/wrong output
 # if that plumbing were broken or omitted).
 run ./run_link_container_fixture.sh --plain 150000 "Y=              43" link_pool link_prog
-run ./run_link_container_fixture.sh --tmpl 150000 "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320499E+00')" ext_mytable ext_square ext_squroo
+run ./run_link_container_fixture.sh --tmpl 150000 "$(printf '          1      1.0000000E+00      1.0000000E+00\n          2      4.0000000E+00      1.4142132E+00\n          3      9.0000000E+00      1.7320509E+00')" ext_mytable ext_square ext_squroo
 run ./run_link_container_fixture.sh --plain 50000 "HELLO CONTAINER" link_lit
 
 # --debug + @list: works for a single-unit @list (previously silently
@@ -496,7 +515,13 @@ run ./run_local_fixture.sh arctan " 7.8539813E-01"
 # third operand for the other, plainly-indexed dimension and isn't
 # handled) producing a VECTOR-shaped VAC container result, same mechanism
 # the existing asterisk-partition case already uses.
-run ./run_local_fixture.sh vec_atpartition "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.6055508E+00')"
+# ABVAL's own expected value corrected 2026-07-29 (id 67,
+# yagpc2-yahalmat2-issues.db): was 3.6055508E+00, never actually
+# verified against real gpc -- ABVAL used a plain libm sqrt() shortcut
+# instead of the authentic hal_sqrt_single RTL port, which happened to
+# be off by 1 ULP here too (same root cause as id 67's own main repro).
+# Confirmed 3.6055517E+00 bit-exact against a fresh real-gpc run.
+run ./run_local_fixture.sh vec_atpartition "$(printf ' 1.0000000E+00      2.0000000E+00\n 3.6055517E+00')"
 run ./run_local_fixture.sh minv "$(printf ' 5.9999996E-01\n-6.9999999E-01\n-1.9999999E-01\n 3.9999998E-01')"
 run ./run_local_fixture.sh bfnc_inv "$(printf ' 5.9999996E-01\n 3.9999998E-01')"
 # BFNC selector 3 (DET, class-0/BFNC.md): a whole-MATRIX argument (`WRITE(6)
@@ -512,7 +537,79 @@ run ./run_local_fixture.sh bfnc_det "$(printf -- '-1.9000000E+01\n 1.8000000E+01
 # itself), and 25 (MATRIX/scalar division by zero -> the original
 # matrix). Also exercises this session's MINV finding that the opcode is
 # general matrix exponentiation (`M**N`), not INVERSE-only -- N=0/2 here.
-run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 0.0                0.0                0.0          \n 7.0000000E+00      1.0000000E+01\n 1.5000000E+01      2.2000000E+01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n-1.9999990E+00      9.9999994E-01\n 1.5000000E+00     -4.9999994E-01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00')"
+# M2**(-1)'s own expected value was updated from -1.9999990E+00/
+# 9.9999994E-01/1.5000000E+00/-4.9999994E-01 (the old native-double-
+# based matrix_invert's own less-authentic result) to an exact
+# -2.0000000E+00/1.0000000E+00/1.5000000E+00/-5.0000000E-01, the
+# authentic RUNASM/MM14SN.asm result -- independently confirmed
+# bit-for-bit against yaGPC2's own real execution of this exact fixture
+# (task 100/id 51's own verification, hal_matrix.c).
+run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 0.0                0.0                0.0          \n 7.0000000E+00      1.0000000E+01\n 1.5000000E+01      2.2000000E+01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n-2.0000000E+00      1.0000000E+00\n 1.5000000E+00     -5.0000000E-01\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\n 1.0000000E+00      2.0000000E+00\n 3.0000000E+00      4.0000000E+00')"
+# Task #106/id 51: authentic AP-101S RUNASM/MM14S3.asm (via MM12S3.asm's
+# own Sarrus-rule determinant) N==3 single-precision MATRIX**(-1) port
+# (hal_matrix.c). Uses DECLARE...INITIAL(...) rather than a runtime
+# MATRIX(...) assignment deliberately -- a real trace showed the latter
+# leaves genuine, non-zero leftover state in F1/F3/F5/F7 as a side
+# effect of the compiler's own literal-constructor register cycling,
+# the same class of "mainline compiled code touches the odd companion
+# registers" gap already documented for MMWSNP/assignment-copy
+# (interp.c's own store_container_result comment) and equally out of
+# scope here -- see hal_matrix.h's own header comment. INITIAL(...) has
+# no runtime register traffic at all, so this fixture's own entering
+# fpu state genuinely matches yaHALMAT2's own (zero, at program start),
+# and the result is independently confirmed bit-for-bit against
+# yaGPC2's own real execution.
+run ./run_local_fixture.sh mm14s3 "$(printf -- '-2.0000000E+00      1.3333330E+00     -3.3333331E-01\n 3.0000000E+00     -3.6666660E+00      1.6666660E+00\n-1.0000000E+00      2.0000000E+00     -1.0000000E+00')"
+# Task #107/id 51: authentic AP-101S RUNASM/MM14DN.asm (N=2 closed
+# form + general Gauss-Jordan) and RUNASM/MM14D3.asm (N==3, via
+# MM12D3.asm's own genuine extended-precision Sarrus-rule determinant)
+# DOUBLE-precision MATRIX**(-1) ports (hal_matrix.c). Same
+# DECLARE...INITIAL(...) rationale as mm14s3 above. Also locks in a
+# real bug fix: QDEDR's own internal DER/DE steps were initially
+# modeled as reading full extended-precision (msw+lsw) operands (which
+# happened to give the right answer whenever the divisor's own lsw was
+# 0, as in every N=2/N=3 case here and in this fixture's own N=4 K=0-2
+# pivots) -- but a real trace of this exact N=4 case's own K=3 pivot
+# (5/3, genuinely nonzero lsw) proved DER/DE narrow BOTH operands to
+# msw-only, not just the output; the M(3,3)=6.0000000089404137E-01
+# element below only became bit-exact after that fix (previously
+# 6.0000000089406802E-01, wrong from the 11th significant digit
+# onward). Independently confirmed bit-for-bit against yaGPC2's own
+# real execution (N=2, N=3, and N=4).
+run ./run_local_fixture.sh mm14dn "$(printf -- '-2.0000000000000000E+00      1.0000000000000000E+00\n 1.5000000000000000E+00     -5.0000000000000000E-01\n-2.0000000009313226E+00      1.3333333339542150E+00     -3.3333333348855376E-01\n 3.0000000013969839E+00     -3.6666666683740914E+00      1.6666666674427688E+00\n-1.0000000004656613E+00      2.0000000009313226E+00     -1.0000000004656613E+00\n 5.7142857142856940E-01      0.0                         0.0                        -1.4285714284051210E-01\n 0.0                         4.0000000024835147E-01     -2.0000000043461719E-01      0.0                   \n 0.0                        -2.0000000043461719E-01      6.0000000089404137E-01      0.0                   \n-1.4285714284051210E-01      0.0                         0.0                         2.8571428568102419E-01')"
+
+# id 53/72 (yagpc2-yahalmat2-issues.db, datatypes_repeated_singular_
+# inverse_unstable_result / yahalmat2_matrix_leak_model_should_match_
+# corrected_rtl): three back-to-back INVERSE(A4A) calls on the same
+# exactly-singular 4x4 matrix used to give three DIFFERENT results
+# (near-identity, wild ~1E12 garbage, near-identity) because the
+# general-N reduction loop's own AEDR read genuinely-leaked companion
+# registers (F3/F5) that unrelated prior floating-point call history
+# could corrupt -- confirmed a real RTL bug (RUNASM/MM14SN.asm), fixed
+# on the real RTL side (yaGPC2 commit 8439ae054, an &ASM101S-gated
+# SER F3,F3/SER F5,F5 pair) and here in hal_matrix.c (both companions
+# now modeled as freshly zeroed at every use, matching the corrected
+# RTL). All three calls now consistently give the standard singularity
+# fixup (identity matrix), matching yaGPC2 exactly.
+run ./run_local_fixture.sh repeated_singular_inverse "$(printf ' 1.0000000E+00      0.0                0.0                0.0          \n 0.0                1.0000000E+00      0.0                0.0          \n 0.0                0.0                1.0000000E+00      0.0          \n 0.0                0.0                0.0                1.0000000E+00\n 1.0000000E+00      0.0                0.0                0.0          \n 0.0                1.0000000E+00      0.0                0.0          \n 0.0                0.0                1.0000000E+00      0.0          \n 0.0                0.0                0.0                1.0000000E+00\n 1.0000000E+00      0.0                0.0                0.0          \n 0.0                1.0000000E+00      0.0                0.0          \n 0.0                0.0                1.0000000E+00      0.0          \n 0.0                0.0                0.0                1.0000000E+00')"
+
+# id 76 (yagpc2-yahalmat2-issues.db, mm12sn_determinant_algorithm_
+# fidelity_gap): DET() on a single-precision N>=4 matrix used a generic
+# double-precision Gaussian-elimination fallback, giving small residuals
+# that didn't match real hardware's own RUNASM/MM12SN.asm (a distinct,
+# genuinely single-precision-throughout complete-pivoting algorithm --
+# confirmed via direct reading to have NO register-pair-leak bug, unlike
+# the MM14SN/VX6S3/VV6S3 family fixed just above). Ported bit-exactly as
+# hal_matrix_determinant_single, dispatched for n>=4 single-precision
+# matrices only (n==2/n==3 and DOUBLE precision stay on the generic
+# path -- real hardware routes those to MM12SN's own closed form/the
+# separate MM12S3.asm instead, neither touched by this fix). The
+# residuals below (-3.4799951E+02 vs the mathematically exact -348.0,
+# -2.3999977E+02 vs -240.0) are real, expected single-precision
+# roundoff -- confirmed bit-exact against a direct yaGPC2 run, which
+# shows the identical residuals.
+run ./run_local_fixture.sh mm12sn_determinant "$(printf -- '-3.4799951E+02      4x4 determinant should be -348.0.\n-2.3999977E+02      5x5 determinant should be -240.0.')"
+
 # ON ERROR's user-statement (GOTO) form (class-0/ERON.md), USA003087 Sec.
 # 25 -- a user-reported bug against a modified 029-DATATYPES.hal (adding
 # ON ERROR/OFF ERROR around the INVERSE-of-a-singular-matrix section):
@@ -527,7 +624,24 @@ run ./run_local_fixture.sh errfix_matrix "$(printf -- ' 1.0000000E+00      0.0  
 # showed as part of ERON's *own* object code ("BC 7,L#1 <- unconditional
 # branch skipping the handler code in normal flow"), not a separate
 # HALMAT instruction as an earlier session's comment here assumed.
-run ./run_local_fixture.sh eron_goto "$(printf -- 'BEFORE TRAP\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\nAFTER ON ERROR\nAFTER SKIPPED LABEL\nAFTER RESTORE\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00')"
+# id 61 (yagpc2-yahalmat2-issues.db): the second `A = INVERSE(SNG);` call
+# below is made WITH the `GO TO SKIPPED` handler already registered, so
+# this fixture's own expected output used to lock in a GOTO dispatch
+# that skipped 'SHOULD NOT PRINT' entirely -- but real hardware's SEND
+# ERROR SVC handler never dispatches to a user handler at the OS/SVC
+# level for group-4:27 (INVERSE-of-a-singular-matrix) specifically,
+# confirmed via a real gpc run of this exact fixture (compileLinkRun):
+# 'SHOULD NOT PRINT' genuinely prints there, per id 46's own finding
+# that this error's compiled call site (unlike SQRT/UNIT/MDIV/ZEROPOW,
+# see eron_goto_appc below) has no compiler-generated re-check to branch
+# on. Fixed via a `member != HAL_S_ERROR_INVERSE_SINGULAR` bypass in
+# arithmetic_error_should_apply_fixup()'s GOTO-redirect branch (interp.c).
+# The matrix VALUES real hardware prints there (huge register-garbage
+# numbers, not identity) are the separately-documented, non-reproducible
+# id-53 MM14SN register-garbage class -- out of scope here; this fixture
+# only exercises yaHALMAT2's own consistent (identity-fallback) value,
+# not a bit-for-bit match against that specific real-hardware garbage.
+run ./run_local_fixture.sh eron_goto "$(printf -- 'BEFORE TRAP\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\nAFTER ON ERROR\nSHOULD NOT PRINT\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00\nAFTER SKIPPED LABEL\nAFTER RESTORE\n 1.0000000E+00      0.0          \n 0.0                1.0000000E+00')"
 # Per direct instruction, every App. C fixup site implemented this
 # session now consults the ON ERROR table (not just INVERSE's error 27,
 # the one a bug report happened to exercise) -- spot-checks a GOTO
@@ -549,12 +663,17 @@ run ./run_local_fixture.sh eron_goto_appc "$(printf -- 'AFTER SQRT TRAP\nAFTER U
 # independent (dispatching) behavior instead, per direct guidance.
 run ./run_local_fixture.sh send_error "$(printf ' 1.0000000E+01      1.1000000E+01      1.2000000E+01              13              14              15')"
 # Same table, the plain-SCALAR-argument errors: 5 (SQRT<0 -> sqrt(|x|)),
-# 7 (LOG<=0 -> 0: -max value, else log(|x|)), 6 (EXP>174.673 -> max
-# value), 24 (negative-base exponentiation -> |A|**B, via SEXP), and 4
-# (0**B, B<=0 -> 0, across SEXP/SPEX/SIEX's three different HALMAT
-# opcodes for "non-literal", "literal>=0", and "literal any-sign"
-# exponents respectively).
-run ./run_local_fixture.sh errfix_scalar "$(printf -- ' 2.0000000E+00\n-7.2370051E+75\n 1.6094370E+00\n 7.2370051E+75\n 1.9999990E+00\n 0.0          \n 0.0          \n 0.0          ')"
+# 7 (LOG<=0 -> 0: -max value, else LOG(|x|) via the real authentic
+# RUNASM/LOG.asm port -- hal_transcendental.c, task 100/id 51), 6
+# (EXP>174.673 -> max value), 24 (negative-base exponentiation -> |A|**B,
+# via SEXP), and 4 (0**B, B<=0 -> 0, across SEXP/SPEX/SIEX's three
+# different HALMAT opcodes for "non-literal", "literal>=0", and
+# "literal any-sign" exponents respectively). LOG(|-5.0|)'s own expected
+# value was updated from 1.6094370E+00 (the old libm-based
+# implementation's own less-authentic result) to 1.6094379E+00, the
+# authentic RUNASM/LOG.asm result -- independently confirmed bit-for-bit
+# against yaGPC2's own real execution (task 100/id 51's own verification).
+run ./run_local_fixture.sh errfix_scalar "$(printf -- ' 2.0000000E+00\n-7.2370051E+75\n 1.6094379E+00\n 7.2370051E+75\n 1.9999990E+00\n 0.0          \n 0.0          \n 0.0          ')"
 # Errors 11 (TAN |arg| too large -> 1), 8 (SIN/COS |arg| too large ->
 # sqrt(2)/2), and 15 (SCALAR too large for INTEGER conversion -> the
 # maximum representable value, 32767/-32767 -- see value.c's
@@ -727,7 +846,18 @@ run ./run_local_fixture.sh matrix_identity5_init "$(printf ' 1.0000000E+00      
 # interp_prepare_external_call) to copy such an argument's elements into
 # the callee's own parameter storage by value, shape-checked against the
 # parameter's declared dimensions (USA003087 Sec. 11.2/11.4-11.5).
-run ./run_local_fixture.sh proc_matrix_arg "$(printf '      1.0000000E+00      0.0                0.0                0.0                0.0          \n      0.0                1.0000000E+00      0.0                0.0                0.0          \n      0.0                0.0                1.0000000E+00      0.0                0.0          \n      0.0                0.0                0.0                1.0000000E+00      0.0          \n      0.0                0.0                0.0                0.0                1.0000000E+00')" --line-length 200
+# Own expected value corrected 2026-07-29 (id 65, yagpc2-yahalmat2-
+# issues.db): the fixture's own `WRITE(6) '', M$(I,*);` leads with an
+# empty CHARACTER literal, which used to reserve a 6-blank inter-field
+# separator gap before the matrix row (dm_emit_field's own prior
+# unconditional separator, id 65's actual root cause) -- was locked in
+# as "expected" from that stale behavior, never verified against real
+# hardware. Confirmed via yaGPC2 directly that a leading empty literal
+# contributes nothing to the output stream, same as an empty CHARACTER
+# variable's own runtime-empty content (id 65's own original repro) --
+# real hardware doesn't distinguish the two. Now matches yaGPC2 exactly
+# (1 leading space, ordinary field spacing, not 6).
+run ./run_local_fixture.sh proc_matrix_arg "$(printf ' 1.0000000E+00      0.0                0.0                0.0                0.0          \n 0.0                1.0000000E+00      0.0                0.0                0.0          \n 0.0                0.0                1.0000000E+00      0.0                0.0          \n 0.0                0.0                0.0                1.0000000E+00      0.0          \n 0.0                0.0                0.0                0.0                1.0000000E+00')" --line-length 200
 # User-reported bug (039-CORNERS.hal's `AB = 0;`, AB a VECTOR(2)): a
 # third distinct trigger for the same "outside an arrayed-paragraph
 # replay" error as the two fixtures above, this time via a plain scalar
@@ -826,7 +956,10 @@ run ./run_local_fixture.sh assign_array "$(printf ' 3.5000000E+00\n0     0     0
 # from inside a TASK block too (not just PROCEDURE/FUNCTION), so the fix
 # (being purely symbol-table-driven, not block-kind-specific) covers that
 # case the same way, though no TASK-based fixture is included here.
-run ./run_local_fixture.sh nest_call "$(printf '      1.0000000E+00      0.0                0.0                0.0                0.0          \n      0.0                1.0000000E+00      0.0                0.0                0.0          \n      0.0                0.0                1.0000000E+00      0.0                0.0          \n      0.0                0.0                0.0                1.0000000E+00      0.0          \n      0.0                0.0                0.0                0.0                1.0000000E+00')" --line-length 200
+# Own expected value corrected 2026-07-29 (id 65) -- same stale-
+# leading-empty-literal-separator issue as proc_matrix_arg above (this
+# fixture reuses the same test_proc_matrix_arg.hal source), same fix.
+run ./run_local_fixture.sh nest_call "$(printf ' 1.0000000E+00      0.0                0.0                0.0                0.0          \n 0.0                1.0000000E+00      0.0                0.0                0.0          \n 0.0                0.0                1.0000000E+00      0.0                0.0          \n 0.0                0.0                0.0                1.0000000E+00      0.0          \n 0.0                0.0                0.0                0.0                1.0000000E+00')" --line-length 200
 # WRITE of a whole VECTOR/MATRIX argument (`WRITE(6) V;`): confirmed this
 # session that -- unlike a plain ARRAY, which the ADLP/DLPE per-element
 # replay above already covered -- this compiles as a single, unreplayed
@@ -1067,7 +1200,24 @@ run ./run_py_fixture.sh simple_do "$py_exp"
 # BI_NAME-position selector numbers, just a different dispatch opcode);
 # the dead BFNC cases for these five were removed once this was
 # confirmed, not left in as unreachable code.
-run ./run_local_fixture.sh bfnc_hyperbolic "$(printf ' 1.5430803E+00\n 1.1752005E+00\n 7.6159412E-01\n 1.3169575E+00\n 1.4436350E+00\n 5.4930609E-01\n 0.0          ')"
+# ARCTANH(0.5)'s own expected value was updated from 5.4930609E-01 (the
+# old libm-based implementation's own less-authentic result) to
+# 5.4930639E-01, the authentic RUNASM/ATANH.asm result -- independently
+# confirmed bit-for-bit against yaGPC2's own real execution (task
+# 100/id 51's own verification, hal_transcendental.c).
+# ARCSINH(2.0)'s own expected value was updated from 1.4436350E+00 (the
+# old libm-based implementation's own less-authentic result) to
+# 1.4436359E+00, the authentic RUNASM/ASINH.asm result -- independently
+# confirmed bit-for-bit against yaGPC2's own real execution of this exact
+# fixture (task 100/id 51's own verification, hal_transcendental.c).
+# SINH(1.0)/TANH(1.0)/ARCCOSH(2.0)'s own expected values were updated
+# from 1.1752005E+00/7.6159412E-01/1.3169575E+00 (the old libm-based
+# implementation's own less-authentic results) to 1.1752014E+00/
+# 7.6159418E-01/1.3169584E+00, the authentic RUNASM/SINH.asm/TANH.asm/
+# ACOSH.asm results (task 108/id 51's own RUNASM SINH.asm/TANH.asm/
+# ACOSH.asm ports) -- independently confirmed bit-for-bit against
+# yaGPC2's own real execution of this exact fixture.
+run ./run_local_fixture.sh bfnc_hyperbolic "$(printf ' 1.5430803E+00\n 1.1752014E+00\n 7.6159418E-01\n 1.3169584E+00\n 1.4436359E+00\n 5.4930639E-01\n 0.0          ')"
 run ./run_local_fixture.sh bfnc_invtrig "$(printf ' 1.0471973E+00\n 5.2359873E-01\n 0.0          \n 1.5707960E+00\n 3.1415920E+00\n-1.5707960E+00\n 7.8539813E-01\n 0.0          ')"
 run ./run_local_fixture.sh bfnc_rounding "$(printf ' 2.0000000E+00\n 3.0000000E+00\n 2.0000000E+00\n 1.0000000E+00\n-3.0000000E+00\n-2.0000000E+00\n-2.0000000E+00\n-1.0000000E+00\n 5.0000000E+00')"
 run ./run_local_fixture.sh bfnc_intops "$(printf '          3\n          2\n 2.0000000E+00\n 3.0000000E+00\n          1\n          0\n         48\n         16\n        188')"
@@ -1160,7 +1310,20 @@ run ./run_walltime_fixture.sh date_clocktime
 # case needs. All values independently hand-verified (vector subtraction/
 # magnitude/dot-product arithmetic), not just cross-checked against
 # compileLinkRun.
-run ./run_local_fixture.sh array_of_vector "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 0.0                0.0                0.0          \n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n 1.0488088E+01\n 5.3851643E+00\n 1.4142132E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
+# The two ABVAL lines' own expected values corrected 2026-07-29 (id 67,
+# yagpc2-yahalmat2-issues.db): were 1.0488088E+01/5.3851643E+00 --
+# "independently hand-verified" per the comment above, but that hand
+# verification used ordinary (mathematically exact) arithmetic, which is
+# NOT what real hardware's own ABVAL actually computes -- real hardware
+# calls the genuine SQRT.asm RTL algorithm (a hyperbolic-approximation-
+# plus-Newton-Raphson routine, not a mathematically exact sqrt), same as
+# every other SQRT call site, and lands 1 ULP off from the exact value
+# here. yaHALMAT2 previously used a libm sqrt() shortcut for ABVAL that
+# happened to coincidentally match the mathematically-exact hand-
+# verification instead of real hardware. Confirmed 1.0488089E+01/
+# 5.3851652E+00 bit-exact against a fresh real-gpc run of this exact
+# file.
+run ./run_local_fixture.sh array_of_vector "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00\n 0.0                0.0                0.0          \n 1.0000000E+00      1.0000000E+00      1.0000000E+00\n 2.0000000E+00      2.0000000E+00      2.0000000E+00\n 1.0488089E+01\n 5.3851652E+00\n 1.4142132E+00\n 1.0000000E+00      2.0000000E+00      3.0000000E+00\n 4.0000000E+00      5.0000000E+00      6.0000000E+00\n 7.0000000E+00      8.0000000E+00      9.0000000E+00')"
 # User-reported (119-EXAMPLE_9.hal's `INNER: DO FOR TEMPORARY J = 1 TO 3;
 # ... EXIT INNER; ... END INNER;`): "branch to undefined label 11" --
 # `EXIT <label>;` targeting a *labeled* `DO FOR` compiles to a plain BRA
@@ -2721,12 +2884,33 @@ run ./run_local_fixture.sh noret14 "$(printf 'R=      0.0          \nERRGRP=    
 # The one remaining divergence (D, the very last value on this
 # program's own `DO FOR C=1 TO 100; D=K$(C:2,3); END;` loop -- K only
 # has 5 array elements, so this deliberately runs 95 iterations out of
-# bounds) is a separate, newly-discovered real-hardware behavior
-# (yagpc2-yahalmat2-issues.db, a new id) -- real gpc gives D=0.0 (the
-# untouched declare-time default) rather than any of K's real values,
-# confirmed independently via a clean minimal repro; not attempted here,
-# tracked separately.
-run ./run_local_fixture.sh demo_users_manual "$(printf ' 0.0                0.0                0.0          \n 0.0                0.0                0.0          \n 0.0                0.0                0.0          \n 2.0100000E+02      2.0200000E+02      2.0300000E+02      2.0400000E+02\n 2.0500000E+02      2.0600000E+02      2.0700000E+02      2.0800000E+02\n 2.0900000E+02      2.1000000E+02      2.1100000E+02      2.1200000E+02\n 3.0100000E+02      3.0200000E+02      3.0300000E+02      3.0400000E+02\n 3.0500000E+02      3.0600000E+02      3.0700000E+02      3.0800000E+02\n 3.0900000E+02      3.1000000E+02      3.1100000E+02      3.1200000E+02\n 4.0100000E+02      4.0200000E+02      4.0300000E+02      4.0400000E+02\n 4.0500000E+02      4.0600000E+02      4.0700000E+02      4.0800000E+02\n 4.0900000E+02      4.1000000E+02      4.1100000E+02      4.1200000E+02      3.0700000E+02\n 1.0000000E+02      2.0000000E+02      3.0000000E+02      4.0000000E+02      4.5000000E+01      5.6000000E+01      6.7000000E+01\n 7.8000000E+01      8.9000000E+01      0.0                0.0                0.0                0.0                0.0          \n 9.0000000E+01      1.0000000E+00      1.2000000E+01      2.3000000E+01')"
+# bounds) is a separate, real-hardware behavior (D holding whatever raw
+# memory sits past K's own declared bound) that isn't meant to compare
+# equal across tools with a different static memory layout -- real gpc
+# gives D=0.0, yaHALMAT2 gives D=307.0, both "correct" for their own
+# build; not attempted here, left as yaHALMAT2's own consistent value.
+#
+# id 59 (multi_item_write_truncated_with_bareword_array_of_matrix)
+# fix updated K's own expected block below from a
+# WRONG 5-element truncation (this fixture's own PRE-FIX snapshot,
+# apparently locked in without noticing K itself was wrong, only D's
+# own separate divergence above) to the authentic full 60-element
+# ARRAY(5) MATRIX(3,4) result -- confirmed bit-for-bit against yaGPC2's
+# own real execution of this exact fixture (WRITE(6) K; K=0; both
+# affected: real hardware's own ADLP(5)/DLPE replay for K resolves each
+# pass to a genuine rows*cols=12-element MATRIX block, not one flat
+# scalar, which resolve_container's/write_destination's own generic
+# per-element replay logic had no array_of_matrix awareness for).
+run ./run_local_fixture.sh demo_users_manual "$(printf ' 0.0                0.0                0.0          \n 0.0                0.0                0.0          \n 0.0                0.0                0.0          \n 2.0100000E+02      2.0200000E+02      2.0300000E+02      2.0400000E+02\n 2.0500000E+02      2.0600000E+02      2.0700000E+02      2.0800000E+02\n 2.0900000E+02      2.1000000E+02      2.1100000E+02      2.1200000E+02\n 3.0100000E+02      3.0200000E+02      3.0300000E+02      3.0400000E+02\n 3.0500000E+02      3.0600000E+02      3.0700000E+02      3.0800000E+02\n 3.0900000E+02      3.1000000E+02      3.1100000E+02      3.1200000E+02\n 4.0100000E+02      4.0200000E+02      4.0300000E+02      4.0400000E+02\n 4.0500000E+02      4.0600000E+02      4.0700000E+02      4.0800000E+02\n 4.0900000E+02      4.1000000E+02      4.1100000E+02      4.1200000E+02      3.0700000E+02\n 1.0000000E+02      2.0000000E+02      3.0000000E+02      4.0000000E+02      4.5000000E+01      5.6000000E+01      6.7000000E+01\n 7.8000000E+01      8.9000000E+01\n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0                9.0000000E+01      1.0000000E+00      1.2000000E+01\n 2.3000000E+01')"
+
+# id 59's own dedicated, minimal repro: a bareword ARRAY(5) MATRIX(3,4)
+# WRITE (real HALSFC compiles this as an ADLP(5)/DLPE-replayed XXAR,
+# TAG1=3, confirmed via --disasm -- each replay pass must resolve to a
+# genuine rows*cols=12-element MATRIX block) and the "null MATRIX
+# array" idiom (`K=0;`, also ADLP(5)/DLPE-replayed on real hardware,
+# each pass zeroing a whole 12-element block) -- both independently
+# confirmed bit-for-bit against yaGPC2's own real execution.
+run ./run_local_fixture.sh array_of_matrix_write "$(printf ' 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00\n 9.0000000E+00      1.0000000E+01      1.1000000E+01      1.2000000E+01\n 1.0100000E+02      1.0200000E+02      1.0300000E+02      1.0400000E+02\n 1.0500000E+02      1.0600000E+02      1.0700000E+02      1.0800000E+02\n 1.0900000E+02      1.1000000E+02      1.1100000E+02      1.1200000E+02\n 2.0100000E+02      2.0200000E+02      2.0300000E+02      2.0400000E+02\n 2.0500000E+02      2.0600000E+02      2.0700000E+02      2.0800000E+02\n 2.0900000E+02      2.1000000E+02      2.1100000E+02      2.1200000E+02\n 3.0100000E+02      3.0200000E+02      3.0300000E+02      3.0400000E+02\n 3.0500000E+02      3.0600000E+02      3.0700000E+02      3.0800000E+02\n 3.0900000E+02      3.1000000E+02      3.1100000E+02      3.1200000E+02\n 4.0100000E+02      4.0200000E+02      4.0300000E+02      4.0400000E+02\n 4.0500000E+02      4.0600000E+02      4.0700000E+02      4.0800000E+02\n 4.0900000E+02      4.1000000E+02      4.1100000E+02      4.1200000E+02\n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          ')"
 
 # DB id 49 (demo_hal_matrix_shaping_wildcard_dsub_crash): the live
 # "HAL-S-360 Users Manual"/DEMO.hal has since been substantially
@@ -2910,6 +3094,23 @@ run ./run_local_fixture.sh tsub_asterisk_broadcast "$(printf ' 5.1200000E+02    
 # own separate, unrelated multi-item-WRITE gap -- see id 59).
 run ./run_local_fixture.sh write_whole_structure_recursive "$(printf ' 5.1100000E+02      5.1200000E+02      5.1300000E+02\n 5.1400000E+02      5.1500000E+02      5.1600000E+02\n 5.1700000E+02      5.1800000E+02      5.1900000E+02\n 5.2000000E+02      5.2100000E+02      5.2200000E+02\n 1.0000000E+00      2.0000000E+00      3.0000000E+00      4.0000000E+00\n 5.0000000E+00      6.0000000E+00      7.0000000E+00      8.0000000E+00\n 9.0000000E+00      1.0000000E+01      1.1000000E+01      1.2000000E+01\n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0               ELEM1\n 6.1100000E+02      6.1200000E+02      6.1300000E+02\n 6.1400000E+02      6.1500000E+02      6.1600000E+02\n 6.1700000E+02      6.1800000E+02      6.1900000E+02\n 6.2000000E+02      6.2100000E+02      6.2200000E+02\n 2.1000000E+01      2.2000000E+01      2.3000000E+01      2.4000000E+01\n 2.5000000E+01      2.6000000E+01      2.7000000E+01      2.8000000E+01\n 2.9000000E+01      3.0000000E+01      3.1000000E+01      3.2000000E+01\n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0          \n 0.0                0.0                0.0                0.0               ELEM2')"
 
+# DB id 70 (demo_recursive_structure_write_spurious_form_feed): a
+# same-day attempt to strip the automatic "line count reaches
+# page_length => turn the page" check out of dm_advance_lines
+# (reasoning it didn't match yaGPC2's own halucp.c) was REVERTED per
+# direct user correction: real hardware DOES turn the page whenever
+# writing crosses the page-length boundary, regardless of which
+# statement caused the line advance (implicit default advance,
+# SKIP(n), or an explicit LINE/PAGE wrap) -- yaGPC2's own agreement
+# with the (wrong) no-turn theory was not independent confirmation
+# (see feedback_gpc_not_authoritative memory: yaGPC2's halucp.c likely
+# shares lineage with gpc's own halUCP.coffee), and yaGPC2 itself has
+# this same bug, being fixed on that side. This minimal repro (70
+# single-line WRITEs, crossing the 66-line default page_length
+# mid-stream) confirms a form-feed correctly appears right after line
+# 66 (before line 67 is written), with no LINE/PAGE statement in sight.
+run ./run_local_fixture.sh page_overflow_no_autoformfeed "$(printf '          1\n          2\n          3\n          4\n          5\n          6\n          7\n          8\n          9\n         10\n         11\n         12\n         13\n         14\n         15\n         16\n         17\n         18\n         19\n         20\n         21\n         22\n         23\n         24\n         25\n         26\n         27\n         28\n         29\n         30\n         31\n         32\n         33\n         34\n         35\n         36\n         37\n         38\n         39\n         40\n         41\n         42\n         43\n         44\n         45\n         46\n         47\n         48\n         49\n         50\n         51\n         52\n         53\n         54\n         55\n         56\n         57\n         58\n         59\n         60\n         61\n         62\n         63\n         64\n         65\n         66\n\f         67\n         68\n         69\n         70')"
+
 # DB id 51 (yahalmat2_uses_ieee_double_not_ibm_hex_float, re-investigated
 # 2026-07-29 per direct user clarification: the real fidelity target is
 # the original AP-101S hardware/software via yaGPC2, not real gpc, which
@@ -2940,6 +3141,215 @@ run ./run_local_fixture.sh write_whole_structure_recursive "$(printf ' 5.1100000
 # literal table's own msw/lsw instead of merely flipping the flag on the
 # already-truncated resolved scalar.
 run ./run_local_fixture.sh double_literal_precision " 1.4142135623730949E+00"
+
+# id 63 (yagpc2-yahalmat2-issues.db, 108-EXAMPLE_5.hal's own `RMS =
+# SQRT(TOTAL/COUNT);`, TOTAL SCALAR DOUBLE, RMS plain SCALAR): SQRT of a
+# DOUBLE-precision argument previously reused hal_sqrt_single on X's own
+# narrowed msw and just re-tagged the result double_precision=true --
+# correct bits, wrong ALGORITHM (inherently single-precision ~24-bit-
+# mantissa accuracy mislabeled as double), landing on a different last
+# digit than real hardware once narrowed back down to RMS's own single-
+# precision 7-significant-digit format (previously 5.8167862E+01, real
+# gpc/yaGPC2 both give 5.8167847E+01). Fixed via a real, genuinely
+# double-precision port of RUNASM/DSQRT.asm (hal_sqrt_double,
+# hal_transcendental.c) -- instruction-by-instruction against a real
+# yaGPC2 --trace of this exact repro, reusing the project's own already-
+# verified extended-precision hex-float core (hrfp_addE/subE/mulE/divE)
+# for DSQRT's own genuine SEDR/AEDR double-precision correction pass,
+# the one thing hal_sqrt_single's own single-precision-only Newton-
+# Raphson can never provide. Confirmed bit-exact against real gpc.
+run ./run_local_fixture.sh dsqrt_precision " 5.8167847E+01"
+
+# id 67 (yagpc2-yahalmat2-issues.db, 119-EXAMPLE_9.hal's own `V$(I:) =
+# VECTOR(RANDOM, RANDOM, RANDOM);`, V a plain -- not DOUBLE -- ARRAY(999)
+# VECTOR(3)): id 45's own scale_precision() narrowing fix (VASN's plain-
+# whole-SYT destination branch) never reached the SEPARATE is_container_ref
+# write path a SUBSCRIPTED ARRAY(n) VECTOR(m) element assignment actually
+# uses -- a genuinely DOUBLE-precision source (D SCALAR DOUBLE below,
+# standing in for RANDOM()'s own real DOUBLE return) landed in storage
+# still flagged double_precision=true, which halmat_scalar_format then
+# printed at full double-precision width instead of narrowing to V's own
+# single-precision declared shape. Fixed via the same per-element
+# scale_precision() pattern id 45 already established, applied to
+# is_container_ref's own write loop (interp.c's OP_VASN). Uncovered a
+# SECOND, previously-masked gap while verifying against the full
+# 119-EXAMPLE_9.hal repro: ABVAL/UNIT (BFNC selectors 28/27) used a plain
+# libm sqrt() shortcut instead of the real, authentic hal_sqrt_single/
+# hal_sqrt_double RTL port (no dedicated RUNASM RTL routine exists for
+# either -- PASS2 code generation inlines a dot-product plus a genuine
+# ACALL SQRT at each call site instead) -- a small, systematic last-2-
+# digit divergence on every ABVAL() call that this fixture's own
+# genuinely-double-precision input (D) exercises just as it did the real
+# RANDOM()-sourced repro. Both fixed together; confirmed bit-exact
+# against real gpc.
+run ./run_local_fixture.sh array_of_vector_precision "$(printf ' 1.9052544E+00\n 1.0999994E+00      1.0999994E+00      1.0999994E+00')"
+
+# id 66 (yagpc2-yahalmat2-issues.db, GOOGLE-PARALLAX.hal): id 51's own
+# closing summary of ported RUNASM transcendentals never actually
+# listed plain TAN (only ATAN/TANH) -- a genuine gap, not just an
+# already-adequate libm shortcut. TAN(X) on a DOUBLE-precision X
+# previously used libm tan() directly (double round-trip through native
+# IEEE 754, not real hardware's own hex-float algorithm), landing on a
+# different value starting around the 10th significant digit. Fixed via
+# a real, genuinely double-precision port of RUNASM/DTAN.asm
+# (hal_tan_double, hal_transcendental.c) -- instruction-by-instruction
+# against a real yaGPC2 --trace of this exact repro (confirmed bit-exact
+# at every intermediate step: range-reduction, the cubic rational-
+# polynomial P/Q, and the QDEDR-refined final divide, reusing this
+# file's own already-verified datan2_qdedr). A companion single-
+# precision port (hal_tan_single, RUNASM/TAN.asm) was written and wired
+# in at the same time for completeness, though not independently
+# trace-verified the same way (no single-precision TAN divergence was
+# ever reported). NOTE: GOOGLE-PARALLAX.hal's own FULL printed answer
+# still differs from real gpc beyond TAN itself -- two SEPARATE,
+# already-filed gaps (a literal DOUBLE argument passed directly to a
+# BFNC call losing its own lsw before ever reaching TAN, and double-
+# precision SSDV division not matching real hardware's own QDEDR-based
+# algorithm) contribute additional divergence downstream of TAN's own
+# now-correct result; this fixture sidesteps both by feeding TAN a
+# COMPUTED (not literal) DOUBLE argument and WRITEing its own result
+# directly (no further division).
+run ./run_local_fixture.sh dtan_precision " 1.4805486979148472E-06"
+
+# id 64 (yagpc2-yahalmat2-issues.db, 072-EXAMPLE_2.hal's own `RESULT2 =
+# V_PRIME * E;`): a plain exact halmat_scalar_sub/multiply gave a
+# subtly wrong result even for clean, exactly-representable integer
+# inputs. Root-caused by reading RUNASM/VX6S3.asm (single) and
+# RUNASM/VX6D3.asm (double) directly: DOUBLE's own MED (rounds each
+# operand to 31 bits, hrfp_mulQeE) differs from an exact product;
+# SINGLE's own subtraction is genuinely-extended SEDR despite being a
+# single-precision routine. Fixed in interp.c's own OP_VCRS.
+#
+# id 73 (yagpc2-yahalmat2-issues.db, yahalmat2_vcrs_leak_model_should_
+# match_corrected_rtl): OP_VCRS used to thread state->fpu.f1/f3 across
+# the three per-component SEDR computations (F1 chaining forward, F3
+# held fixed), faithfully matching VX6S3.asm's own historical behavior
+# -- its own F0/F2 odd companions were never explicitly loaded before
+# any SEDR, so they genuinely carried forward whatever a PRIOR
+# floating-point-heavy RTL call left them as. That turned out to be a
+# genuine, undetected RTL bug (same reasoning as id 53/72): the three
+# cross-product components are mathematically INDEPENDENT, so a result
+# depending on unrelated prior register history was never intentional.
+# Fixed on the real RTL side via an &ASM101S-gated `SER F1,F1`/
+# `SER F3,F3` pair before EACH SEDR (yaGPC2 commit cb63663cd) and here
+# in OP_VCRS the same way -- both companions now freshly zeroed for
+# every component, no chaining, nothing left to leak forward either.
+# This fixture (isolated, no other floating-point-heavy call before it)
+# confirmed bit-exact against a direct yaGPC2 run either way.
+run ./run_local_fixture.sh vcrs_precision "-6.8000000E+01      1.3600000E+02     -6.8000000E+01"
+
+# id 71 (yagpc2-yahalmat2-issues.db, unit_abval_not_wired_into_fpu_
+# state_leak_model): UNIT/ABVAL (interp.c cases 27/28) compute their
+# magnitude via a genuine ACALL into SQRT.asm (real RUNASM/VV9S3.asm,
+# VV10S3.asm/VV10SN/VV9SN) -- hal_sqrt_single now threads `state->fpu`
+# through (id 71's fix) so SQRT.asm's own leaked F1/F3 correctly
+# propagates to whatever RTL-family call comes next. This fixture is
+# 072-EXAMPLE_2.hal ("Programming in HAL-S" p. 72) verbatim -- the
+# original repro id 71 was found from. Its own RESULT2 (the VCRS call
+# immediately following UNIT) used to land on -6.7999985E+01 (real
+# hardware's own F1/F3-garbage-perturbed answer, matching the OLD,
+# unpatched VX6S3.asm) -- id 73's own fix means VCRS no longer reads
+# ANY incoming companion state at all, so UNIT's own leak now has no
+# effect on it whatsoever, and RESULT2 lands on the same mathematically
+# clean -6.8000000E+01 vcrs_precision's own isolated fixture gives.
+# Confirmed bit-exact against a direct yaGPC2 run (not gpc) either way.
+run ./run_local_fixture.sh unit_vcrs_fpu_leak "$(printf 'V_PRIME=\n 1.4000000E+01      3.2000000E+01      5.0000000E+01\nRESULT1=\n 2.2953898E-01      5.2466059E-01      8.1978220E-01\nRESULT2=\n-6.8000000E+01      1.3600000E+02     -6.8000000E+01')"
+
+# id 40 (yagpc2-yahalmat2-issues.db, long-open "architectural" item):
+# X=RANDOM;Y=RANDOM;Z=X**2+Y**2;V=RANDOM; -- V (the RANDOM draw
+# immediately after an intervening floating-point computation) diverged
+# from real hardware in the low-order digits only. Two genuine, distinct
+# fixes, found by first fixing the underlying arithmetic (verified via
+# X/Y/Z all already matching, then V still wrong) and THEN getting a
+# real yaGPC2 --trace to find the true remaining cause (a first,
+# plausible-but-wrong guess -- hooking SADD's own result into the
+# shared fpu.f1 leak state -- was empirically disproven by that same
+# trace and removed):
+#   (1) value.c's halmat_scalar_add/sub had NO guard-digit extra
+#       precision during exponent alignment (an immediate, full-width
+#       truncating right-shift) -- real hardware's own AE/AED algorithm
+#       (hal_random.c's own hrfp_addsub, already verified for RANDOM/
+#       EXP/LOG/TAN/VCRS) genuinely retains one extra hex digit of the
+#       smaller operand's own fraction through the add itself. Fixed by
+#       porting that same algorithm into halmat_scalar_add's own
+#       alignment step.
+#   (2) Even with (1) fixed, V was STILL wrong -- a real trace of this
+#       exact repro showed `Y**2`'s own squaring (SPEX, a genuine
+#       register-pair self-multiply reusing Y's own still-resident F0:F1
+#       from the immediately-preceding RANDOM draw) is the LAST
+#       operation to touch F0:F1 before the next RANDOM call -- the
+#       FOLLOWING add's own result goes to a DIFFERENT register pair
+#       (F2:F3) and never touches F0:F1 again. Fixed by hooking SPEX/
+#       SIEX's own DOUBLE-precision result into the shared fpu.f1 leak
+#       state instead of SADD/SSUB.
+# Confirmed bit-exact against real gpc for this exact repro, AND
+# re-confirmed the pre-existing 071-DARTBOARD_APPROXIMATION.hal
+# aggregate cross-check (10000 RANDOM-pair draws, HIT/N) still matches
+# bit-for-bit (3.1507998E+00) -- this fix doesn't just move the needle
+# on a synthetic probe. Full regression suite passes, no regressions.
+# NOTE: item (2)'s own fix is still only a narrow, trace-confirmed
+# special case (a squaring whose own operand was just computed and
+# still resident in F0:F1), not a general solution for arbitrary
+# floating-point-op sequences between RANDOM calls -- which physical
+# register pair any given HALMAT arithmetic result lands in is a
+# genuine PASS2 register-allocation decision HALMAT's own IR doesn't
+# expose. Left as a documented, narrower-scoped known gap rather than
+# claimed fully general.
+run ./run_local_fixture.sh random_f1_chain "$(printf ' 4.3794728815555573E-02\n 2.6276230812072754E-01\n 7.0962008840960209E-02\n 1.8242163863033056E-01')"
+
+# id 68 (yagpc2-yahalmat2-issues.db, GOOGLE-PARALLAX.hal): a literal
+# DOUBLE constant passed directly as a BFNC argument (or into an ARRAY
+# element via INITIAL(...)) lost its own lsw precision -- resolve_
+# operand's own QUAL_LIT default zeroes lsw unless the litfile's own
+# type tag happens to be LIT_DOUBLE (unreliable), and neither OP_SINT's
+# own plain-SYT write path nor xint_offset_run's own ARRAY-element path
+# had the same literal-table re-derivation OP_SASN's own dest_sym
+# coercion already uses (id 45/51) -- both fixed the same way now.
+# Confirmed bit-exact against real gpc for both the plain-SCALAR
+# (Y=TAN(X), X a DOUBLE literal-initialized variable) and ARRAY-element
+# (A$1, ARRAY(2) SCALAR DOUBLE INITIAL(...)) cases.
+run ./run_local_fixture.sh literal_double_precision "$(printf ' 1.1400000008460927E-06\n 1.1399999999999999E-06')"
+
+# id 69 (yagpc2-yahalmat2-issues.db, GOOGLE-PARALLAX.hal): real
+# hardware's own compiled code for a plain "/" between two DOUBLE
+# scalars uses the QDEDR Newton-refined narrowing-divide macro (already
+# ported once for DATAN2/DTAN's own final divide, hal_qdedr_double),
+# confirmed via a real yaGPC2 --trace of this exact repro (a plain,
+# unrelated C=A/B, no RTL call involved at all -- NOT scoped to
+# "dividing by an RTL-call result" as first suspected) -- NOT a
+# genuinely exact division the way value.c's own halmat_scalar_divide
+# computes. A companion trace of a plain SINGLE-precision "/" confirmed
+# that one compiles to a single plain DE instead, so SINGLE keeps using
+# halmat_scalar_divide unchanged. Fixing this also closed the
+# previously-documented residual gap in GOOGLE-PARALLAX.hal's own full
+# comparison (see id 66/scalar_double's own updated comment) -- that
+# repro is now bit-exact against real gpc end to end.
+run ./run_local_fixture.sh ssdv_double_qdedr " 7.5330000802590851E+07"
+
+# id 65 (yagpc2-yahalmat2-issues.db, 186-P.hal). Genuinely root-caused
+# this time (2026-07-29): an earlier pass this session closed this as
+# not_a_bug because a fresh `gpc` run also showed 5 trailing blanks --
+# but `gpc` itself was wrong here (see feedback_gpc_not_authoritative
+# memory), confirmed via yaGPC2 (this project's own actually-
+# authoritative reference) showing genuinely zero trailing characters,
+# and via a real instruction trace of RUNASM/CASV.asm ("CHARACTER
+# ASSIGN") computing MIN(srcCurrLen, destMaxLen) -- srcCurrLen=0 for an
+# empty CHARACTER, so the real algorithm never pads. Root cause was NOT
+# a padding bug at all, despite how it looked: the string VALUE was
+# already correctly empty at every step upstream (storage, WRITE-
+# argument capture) -- dm_emit_field (interp.c) unconditionally
+# reserved the inter-field separator's own blank-fill gap before EVERY
+# WRITE item regardless of that item's own content length, and
+# dm_write_at's own column-alignment gap-fill then wrote real blank
+# bytes into that reserved gap; since a zero-length field's own text
+# never occupies any of it, those separator blanks became the only
+# visible output, indistinguishable from "padded to declared width".
+# Fixed by making dm_emit_field skip entirely (no column advance, no
+# separator consumed) for a zero-length field, matching real hardware
+# treating it as contributing nothing to the output stream at all.
+# Confirmed bit-exact against yaGPC2 for both the standalone (`WRITE(6)
+# C2;`, C2 empty CHARACTER(5)) and mixed-item (`'C=', STATUS.C`) cases.
+run ./run_local_fixture.sh empty_character_write "$(printf '\nB1=     0     C=')"
 
 echo "============================"
 if [ "$fail" -eq 0 ]; then

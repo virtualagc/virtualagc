@@ -1,0 +1,20 @@
+C DB id 76 (yagpc2-yahalmat2-issues.db, mm12sn_determinant_algorithm_
+C fidelity_gap): DET() on a single-precision N>=4 matrix must replicate
+C RUNASM/MM12SN.asm's own specific complete-pivoting elimination order
+C bit-exactly (hal_matrix_determinant_single) rather than a generic
+C higher-precision Gaussian elimination -- the small residuals below
+C (-3.4799951E+02 vs the mathematically exact -348.0, and
+C -2.3999977E+02 vs -240.0) are real, expected single-precision
+C roundoff that real hardware also produces, not something to "fix
+C away"; the previous generic implementation gave a DIFFERENT residual
+C that didn't match yaGPC2. Source matches 029-DATATYPES.hal's own
+C A4B/A5A DET() calls verbatim.
+  T:
+  PROGRAM;
+     DECLARE A4B MATRIX(4,4) INITIAL(1,2,3,4,8,5,6,7,9,12,
+                                     10,11,13,14,16,15);
+     DECLARE A5A MATRIX(5,5) INITIAL(1,2,3,4,1,8,5,6,7,2,9,12,10,11,3,
+                                     13,14,16,15,4,10,8,6,4,2);
+     WRITE(6) DET(A4B), ' 4x4 determinant should be -348.0.';
+     WRITE(6) DET(A5A), ' 5x5 determinant should be -240.0.';
+  CLOSE T;

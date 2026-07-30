@@ -54,8 +54,11 @@ static halmat_scalar_t hrfp_zero(void) {
     return z;
 }
 
-/* CVFL F0,R6 (32-bit integer to short IBM hex float). */
-static halmat_scalar_t hrfp_cvfl(int32_t x) {
+/* CVFL F0,R6 (32-bit integer to short IBM hex float) -- exposed (not
+ * static) for reuse by hal_transcendental.c's own RUNASM ports (LOG.asm
+ * etc., id 51/task 100), which use the exact same real CVFL instruction
+ * this file already implements for RANDOM.asm's own RANU. */
+halmat_scalar_t hrfp_cvfl(int32_t x) {
     if (x == 0) return hrfp_zero();
     halmat_scalar_t res = hrfp_zero();
     uint32_t mag;
@@ -179,8 +182,12 @@ static halmat_scalar_t hrfp_addsub(const halmat_scalar_t *x_in, const halmat_sca
     return r;
 }
 
-static halmat_scalar_t hrfp_addE(const halmat_scalar_t *x, const halmat_scalar_t *y) { return hrfp_addsub(x, y, false); }
-static halmat_scalar_t hrfp_subE(const halmat_scalar_t *x, const halmat_scalar_t *y) { return hrfp_addsub(x, y, true); }
+/* AED/SED (Add/Subtract Extended Double) -- exposed (not static) for reuse
+ * by hal_transcendental.c's own RUNASM ports (EXP.asm etc., id 51/100),
+ * which need the exact same guard-digit-free extended-precision add/
+ * subtract core real AP-101S hardware uses for these two instructions. */
+halmat_scalar_t hrfp_addE(const halmat_scalar_t *x, const halmat_scalar_t *y) { return hrfp_addsub(x, y, false); }
+halmat_scalar_t hrfp_subE(const halmat_scalar_t *x, const halmat_scalar_t *y) { return hrfp_addsub(x, y, true); }
 
 static void hrfp_round_once(uint64_t *mant, int *biased_exp) {
     uint64_t rounded = *mant + ((uint64_t)1 << 24);
@@ -198,7 +205,7 @@ static void hrfp_round_once(uint64_t *mant, int *biased_exp) {
  * RANDOM.asm's own RANU actually uses (`MED F0,=X'3D20...'`) -- using
  * the exact-product mulE here instead would NOT reproduce real
  * hardware's own rounding error, breaking bit-exactness. */
-static halmat_scalar_t hrfp_mulQeE(const halmat_scalar_t *x, const halmat_scalar_t *y) {
+halmat_scalar_t hrfp_mulQeE(const halmat_scalar_t *x, const halmat_scalar_t *y) {
     uint64_t x_frac = hrfp_gfracbits(x);
     uint64_t y_frac = hrfp_gfracbits(y);
     if (x_frac == 0 || y_frac == 0) return hrfp_zero();
@@ -240,8 +247,95 @@ static halmat_scalar_t hrfp_mulQeE(const halmat_scalar_t *x, const halmat_scalar
     return result;
 }
 
+/* ME/MER (Multiply Extended, exact -- unrounded, unlike MED's own
+ * round-to-31-bits-per-operand behavior) -- ported from floatIBM.c's own
+ * fibm_mulE. LOG.asm's own trace (task 100/id 51) confirms this is an
+ * EXACT product truncated to 56 bits with no guard digit (same "no
+ * guard digit" convention this project's own value.c scalar add/sub
+ * already documents for AED/SED) -- verified via `ME F2,LOGE2` with F2
+ * holding exactly 1.0, which reproduces LOGE2's own bit pattern exactly,
+ * something MulQeE's own operand-rounding would NOT do. */
+halmat_scalar_t hrfp_mulE(const halmat_scalar_t *x, const halmat_scalar_t *y) {
+    uint64_t x_frac = hrfp_gfracbits(x);
+    uint64_t y_frac = hrfp_gfracbits(y);
+    if (x_frac == 0 || y_frac == 0) return hrfp_zero();
+
+    int result_sign = hrfp_gsign(x) * hrfp_gsign(y);
+    int x_exp = hrfp_gexp(x) + 64;
+    int y_exp = hrfp_gexp(y) + 64;
+    while (!(x_frac & FRAC56_TOP_HEX_MASK)) { x_frac <<= 4; x_exp -= 1; }
+    while (!(y_frac & FRAC56_TOP_HEX_MASK)) { y_frac <<= 4; y_exp -= 1; }
+
+    /* x_frac/y_frac each occupy [2**52,2**56) once normalized -- their
+     * exact product occupies [2**104,2**112), i.e. either 27 or 28 hex
+     * digits, one nibble-alignment away from mulQeE's own analogous
+     * two-branch normalization check, just scaled up to the full
+     * 112-bit exact product instead of mulQeE's own reduced 62-bit
+     * rounded one. */
+    unsigned __int128 prod = (unsigned __int128)x_frac * (unsigned __int128)y_frac;
+
+    uint64_t r_mant;
+    int r_exp;
+    if (prod & (((unsigned __int128)0xF) << 108)) {
+        r_mant = (uint64_t)(prod >> 56) & FRAC56_MASK;
+        r_exp = x_exp + y_exp - 64;
+    } else {
+        r_mant = (uint64_t)(prod >> 52) & FRAC56_MASK;
+        r_exp = x_exp + y_exp - 65;
+    }
+    if (r_mant == 0) return hrfp_zero();
+
+    halmat_scalar_t result = hrfp_zero();
+    if (result_sign < 0) hrfp_ssign(&result, -1);
+    hrfp_sexp(&result, r_exp - 64);
+    hrfp_sfrac(&result, r_mant);
+    return result;
+}
+
+/* DER/DE (Divide Extended) -- ported from floatIBM.c's own fibm_divE.
+ * Same "no guard digit" truncating convention as hrfp_mulE above,
+ * mirroring the real hardware's own documented behavior (this project's
+ * value.c scalar add/sub comment). Divide-by-zero is not handled (not
+ * reachable by any of this file's own callers, whose fixed algorithms
+ * never divide by a value that can legitimately be zero). */
+halmat_scalar_t hrfp_divE(const halmat_scalar_t *x, const halmat_scalar_t *y) {
+    uint64_t x_frac = hrfp_gfracbits(x);
+    uint64_t y_frac = hrfp_gfracbits(y);
+    if (x_frac == 0) return hrfp_zero();
+
+    int result_sign = hrfp_gsign(x) * hrfp_gsign(y);
+    int x_exp = hrfp_gexp(x) + 64;
+    int y_exp = hrfp_gexp(y) + 64;
+    while (!(x_frac & FRAC56_TOP_HEX_MASK)) { x_frac <<= 4; x_exp -= 1; }
+    while (!(y_frac & FRAC56_TOP_HEX_MASK)) { y_frac <<= 4; y_exp -= 1; }
+
+    /* Scale the dividend up by 56 bits before dividing so the quotient
+     * itself retains 56 bits of significance (x_frac/y_frac alone would
+     * be < 16, losing almost all precision to integer truncation). Since
+     * each of x_frac/y_frac's own leading hex digit can independently be
+     * anywhere in [1,16), the raw quotient can land up to a couple of
+     * nibbles away from properly normalized in either direction -- renor-
+     * malize with the same kind of nibble-at-a-time loop hrfp_normalize
+     * itself uses, rather than assuming a single fixed-size adjustment
+     * the way hrfp_mulE's own two-branch check can (multiply's operand
+     * ranges are tighter). */
+    unsigned __int128 dividend = (unsigned __int128)x_frac << 56;
+    uint64_t quot = (uint64_t)(dividend / y_frac);
+    int r_exp = x_exp - y_exp + 64;
+    while (quot >> 56) { quot >>= 4; r_exp += 1; }
+    while (quot != 0 && !(quot & FRAC56_TOP_HEX_MASK)) { quot <<= 4; r_exp -= 1; }
+    uint64_t r_mant = quot & FRAC56_MASK;
+    if (r_mant == 0) return hrfp_zero();
+
+    halmat_scalar_t result = hrfp_zero();
+    if (result_sign < 0) hrfp_ssign(&result, -1);
+    hrfp_sexp(&result, r_exp - 64);
+    hrfp_sfrac(&result, r_mant);
+    return result;
+}
+
 /* RUNASM/RANDOM.asm's RANU, shared by RANDOM and RANDOMG alike. */
-static halmat_scalar_t ranu_raw(hal_random_state_t *rng) {
+static halmat_scalar_t ranu_raw(hal_random_state_t *rng, hal_fpu_state_t *fpu) {
     /* M R6,SEED ; SRDA R6,1 ; LR ... -- not a plain S/360 signed
      * multiply on this CPU (yaGPC2's own exec_M routes even-register
      * multiplies through a Q31 fixed-point path that left-shifts by 1
@@ -261,41 +355,43 @@ static halmat_scalar_t ranu_raw(hal_random_state_t *rng) {
 
     halmat_scalar_t f0 = hrfp_cvfl(r6); /* CVFL F0,R6 -- only ever stores F0's own half */
     /* MED F0,=X'3D20000000000000' reads F0:F1 as one extended pair --
-     * F0 freshly from CVFL above, F1 still whatever chained_f1 last left
-     * there (this struct's own header comment). X'3D200000' == 2^-15 in
-     * this same IBM hex-float encoding (confirmed against yaGPC2's own
-     * floatIBM.c, not by hand-decoding the source's own "2**-31"
-     * comment, which describes a different conceptual framing than the
-     * literal bit pattern actually stored). */
+     * F0 freshly from CVFL above, F1 still whatever the shared FPU
+     * state's own `f1` last left there (hal_fpu.h's own header comment).
+     * X'3D200000' == 2^-15 in this same IBM hex-float encoding
+     * (confirmed against yaGPC2's own floatIBM.c, not by hand-decoding
+     * the source's own "2**-31" comment, which describes a different
+     * conceptual framing than the literal bit pattern actually stored). */
     halmat_scalar_t v1;
     v1.double_precision = true;
     v1.msw = f0.msw;
-    v1.lsw = rng->chained_f1;
+    v1.lsw = fpu->f1;
     halmat_scalar_t v2;
     v2.double_precision = true;
     v2.msw = 0x3D200000u;
     v2.lsw = 0x00000000u;
     halmat_scalar_t result = hrfp_mulQeE(&v1, &v2);
-    rng->chained_f1 = result.lsw; /* MED sets F1 too -- carries into the next draw */
+    fpu->f1 = result.lsw; /* MED sets F1 too -- carries into the next draw */
     return result;
 }
 
 void hal_random_init(hal_random_state_t *rng) {
     rng->seed = 1435; /* SEED DC F'1435' */
-    rng->chained_f1 = 0; /* only valid for a fresh process's first draw -- see header comment */
 }
 
-halmat_scalar_t hal_random_next(hal_random_state_t *rng) {
-    return ranu_raw(rng);
+halmat_scalar_t hal_random_next(hal_random_state_t *rng, hal_fpu_state_t *fpu) {
+    return ranu_raw(rng, fpu);
 }
 
-halmat_scalar_t hal_randomg_next(hal_random_state_t *rng) {
+halmat_scalar_t hal_randomg_next(hal_random_state_t *rng, hal_fpu_state_t *fpu) {
     /* SEDR F2,F2 -- zeroes the accumulator via self-subtraction (not a
-     * literal 0.0 load; mathematically identical either way). */
+     * literal 0.0 load; mathematically identical either way -- and,
+     * being a self-subtract, this is exactly-zero regardless of
+     * whatever F3 held coming in, so no shared-state read is needed
+     * here). */
     halmat_scalar_t acc = hrfp_zero();
     for (int i = 0; i < 12; i++) {
         /* BAL R5,RANU ; AEDR F2,F0 -- "LOOP TWELVE TIMES". */
-        halmat_scalar_t ru = ranu_raw(rng);
+        halmat_scalar_t ru = ranu_raw(rng, fpu);
         acc = hrfp_addE(&acc, &ru);
     }
     /* SED F2,=D'6.0' -- Irwin-Hall recentering to mean 0, variance 1.
@@ -316,9 +412,10 @@ halmat_scalar_t hal_randomg_next(hal_random_state_t *rng) {
     /* LER F0,F2 ; LER F1,F3 -- the original source's own "FAKE D.P.
      * LOAD" comment: repackages the Gaussian result into F0:F1 as
      * RANDOMG's own declared return value, and as a side effect
-     * overwrites the RANU chain with this result's own low word
-     * (chained_f1's own header comment explains why this matters for
-     * whatever RANDOM/RANDOMG call comes next). */
-    rng->chained_f1 = result.lsw;
+     * overwrites the shared FPU state's own `f1` with this result's own
+     * low word -- exactly the same leakage every other RTL routine
+     * shares (hal_fpu.h's own header comment explains why this matters
+     * for whatever RANDOM/RANDOMG/EXP/LOG/... call comes next). */
+    fpu->f1 = result.lsw;
     return result;
 }

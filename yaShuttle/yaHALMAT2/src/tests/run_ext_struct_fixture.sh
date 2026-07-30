@@ -33,16 +33,30 @@ trap 'rm -rf "$workdir"' EXIT
 listfile="$workdir/list.txt"
 : > "$listfile"
 
+# Standard sweep parms (id 62, yagpc2-yahalmat2-issues.db): every unit
+# in the real corpus sweep this project's own methodology follows
+# (problems.md Section 5, CLAUDE_LOG.md) compiles with the FULL parms
+# string below, not TEMPLATE-only for the COMPOOL and bare defaults for
+# FUNC/PROG the way this harness used to -- a genuine, confirmed-real
+# multi-unit WRITE regression (176-P.hal's own ACCEL=/VEL=/POS= vector
+# fields going missing) was found ONLY under the real sweep's own full-
+# parms compile, not under this harness's own weaker one, so a fixture
+# using the weaker parms could pass while the real corpus scenario
+# still fails. TEMPLATE stays appended for every unit (not just the
+# COMPOOL) since FUNC/PROG both need it too, to consume the COMPOOL's
+# own template via `D INCLUDE TEMPLATE`.
+STANDARD_PARMS="LIST,NOTABLES,SRN,TEMPLATE,NOLFXI,REGOPT,VARSYM,CARDTYPE=FCRMYCZM"
+
 cp "$HAL_SRC_DIR/test_$compool_name.hal" "$workdir/"
-( cd "$workdir" && "$HALSFC" --clean --archive --parms=TEMPLATE "test_$compool_name.hal" >/dev/null )
+( cd "$workdir" && "$HALSFC" --clean --archive --parms="$STANDARD_PARMS" "test_$compool_name.hal" >/dev/null )
 readlink -f "$workdir/current.results" >> "$listfile"
 
 cp "$HAL_SRC_DIR/test_$func_name.hal" "$workdir/"
-( cd "$workdir" && "$HALSFC" --clean --archive "test_$func_name.hal" >/dev/null )
+( cd "$workdir" && "$HALSFC" --clean --archive --parms="$STANDARD_PARMS" "test_$func_name.hal" >/dev/null )
 readlink -f "$workdir/current.results" >> "$listfile"
 
 cp "$HAL_SRC_DIR/test_$prog_name.hal" "$workdir/"
-( cd "$workdir" && "$HALSFC" --clean --archive "test_$prog_name.hal" >/dev/null )
+( cd "$workdir" && "$HALSFC" --clean --archive --parms="$STANDARD_PARMS" "test_$prog_name.hal" >/dev/null )
 readlink -f "$workdir/current.results" >> "$listfile"
 
 actual=$("$YAHALMAT2" "@$listfile")

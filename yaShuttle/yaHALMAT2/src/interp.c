@@ -25,6 +25,9 @@
 
 #include "opcode_table.h"
 #include "value.h"
+#include "hal_transcendental.h"
+#include "hal_matrix.h"
+#include "hal_random.h"
 
 /* Combined 12-bit class:opcode values for the instructions implemented so
  * far. Extended opcode-by-opcode as later fixtures require -- see
@@ -1218,6 +1221,47 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             }
             ensure_container(state, op->data);
             halmat_syt_entry_t *e = &state->syt[op->data];
+            /* ARRAY-of-MATRIX/ARRAY-of-VECTOR's own replayed counterpart of
+             * the unreplayed null-matrix idiom just above (`K=0;`, K an
+             * `ARRAY(5) MATRIX(3,4)` -- same DEMO.hal repro, id 59): a real
+             * HALSFC compile confirms this compiles as an ADLP(5)/DLPE-
+             * replayed IASN (one replay per OUTER array index -- unlike a
+             * plain VECTOR/MATRIX `M=0;`, which is a single unreplayed
+             * IASN/SASN, per the comment above), and real hardware zeros
+             * the FULL rows*cols block on each of those 5 passes, not one
+             * flat scalar -- confirmed via `K=0; WRITE(6) K;` giving all
+             * 60 zeros on yaGPC2. USA003087 Sec. 8.2 rule 3's own "only
+             * legal R-type is literal zero" still applies here (see the
+             * comment above), so this only ever needs to handle the zero
+             * case; a genuinely per-element (non-zero) replayed write to
+             * an array_of_matrix/array_of_vector SYT isn't valid HAL/S
+             * (real MATRIX/VECTOR *element* values are transmitted via
+             * MASN/VASN, not IASN/SASN) and falls through to the ordinary
+             * single-scalar write below unchanged. */
+            if (e->array_of_matrix && e->array_len > 0) {
+                bool is_zero = (val->kind == RV_INTEGER && val->integer == 0) ||
+                                (val->kind == RV_SCALAR && halmat_scalar_to_double(val->scalar) == 0.0);
+                if (is_zero) {
+                    size_t block = (size_t)e->rows * (size_t)e->cols;
+                    size_t i = (size_t)state->arrayed_index % (size_t)e->array_len;
+                    for (size_t k = 0; k < block; k++) {
+                        halmat_scalar_t *slot = &e->elements[i * block + k];
+                        *slot = halmat_scalar_zero(slot->double_precision);
+                    }
+                    return true;
+                }
+            } else if (e->array_of_vector && e->rows > 0) {
+                bool is_zero = (val->kind == RV_INTEGER && val->integer == 0) ||
+                                (val->kind == RV_SCALAR && halmat_scalar_to_double(val->scalar) == 0.0);
+                if (is_zero) {
+                    size_t i = (size_t)state->arrayed_index % (size_t)e->rows;
+                    for (size_t k = 0; k < (size_t)e->cols; k++) {
+                        halmat_scalar_t *slot = &e->elements[i * (size_t)e->cols + k];
+                        *slot = halmat_scalar_zero(slot->double_precision);
+                    }
+                    return true;
+                }
+            }
             size_t idx = (size_t)state->arrayed_index % (e->element_count ? e->element_count : 1);
             return write_container_element(state, op->data, e, idx, val);
         }
@@ -1483,12 +1527,38 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
  * numeric literal run landing on a CHARACTER ARRAY) fails loudly there
  * rather than silently corrupting. */
 static bool xint_offset_run(halmat_state_t *state, const halmat_instr_t *ins) {
+    /* id 68 (yagpc2-yahalmat2-issues.db): same literal-widening gap
+     * OP_SINT's own plain-SYT case and OP_SASN's own dest_sym coercion
+     * already fix -- a literal source's own lsw is silently zeroed by
+     * resolve_operand's own QUAL_LIT default (the litfile's own type
+     * tag can't reliably signal single-vs-double), and
+     * write_container_element's own scale_precision fallback can only
+     * WIDEN (flip the flag), never recover already-discarded fraction
+     * bits -- so an ARRAY(n) SCALAR DOUBLE's own explicit-literal-list
+     * INITIAL(v1,v2,...) silently lost precision on any element needing
+     * more than 6 hex digits (confirmed via `DECLARE A ARRAY(2) SCALAR
+     * DOUBLE INITIAL(0.0000011400000000, 2.0);`). Look up the run's own
+     * target symbol once (state->stri_target_syt, same SYT this loop's
+     * own write_destination call eventually resolves to via QUAL_OFF)
+     * and re-derive the full msw/lsw pair directly from the literal
+     * table for any element that needs widening, same technique as the
+     * other two fixed sites. */
+    bool want_double = false;
+    if (state->stri_target_syt >= 0 && state->stri_target_syt < HALMAT_SYT_MAX && state->symtab) {
+        const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, (uint16_t)state->stri_target_syt);
+        if (dsym && (dsym->flags & HALMAT_SYM_FLAG_DOUBLE)) want_double = true;
+    }
     int run_count = ins->operands[1].tag1 > 0 ? ins->operands[1].tag1 : 1;
     for (int k = 0; k < run_count; k++) {
         halmat_operand_t lit_op = ins->operands[1];
         lit_op.data = (uint16_t)(ins->operands[1].data + k);
         resolved_value_t rv;
         if (!resolve_operand(state, &lit_op, &rv)) return false;
+        if (want_double && rv.kind == RV_SCALAR && !rv.scalar.double_precision &&
+            state->literals && lit_op.data < state->literals->count) {
+            const halmat_literal_t *src_lit = &state->literals->entries[lit_op.data];
+            rv.scalar = halmat_scalar_from_ibm_words(src_lit->msw, src_lit->lsw, true);
+        }
         halmat_operand_t off_op = ins->operands[0];
         off_op.data = (uint16_t)(ins->operands[0].data + k);
         if (!write_destination(state, &off_op, &rv)) return false;
@@ -1687,39 +1757,26 @@ static void ensure_container(halmat_state_t *state, uint16_t syt_index) {
  * exact USA003090 Appendix C response text wasn't available to consult
  * in this session -- the caller fail()s loudly rather than guessing at
  * that wording. */
-static bool matrix_invert(const halmat_scalar_t *in, int n, halmat_scalar_t *out) {
+static bool matrix_invert(const halmat_scalar_t *in, int n, halmat_scalar_t *out, hal_fpu_state_t *fpu) {
     if (n <= 0 || n > 8) return false;
-    double aug[8][16];
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) aug[i][j] = halmat_scalar_to_double(in[i * n + j]);
-        for (int j = 0; j < n; j++) aug[i][n + j] = (i == j) ? 1.0 : 0.0;
-    }
-    for (int col = 0; col < n; col++) {
-        int pivot = col;
-        double best = fabs(aug[col][col]);
-        for (int r = col + 1; r < n; r++) {
-            if (fabs(aug[r][col]) > best) { best = fabs(aug[r][col]); pivot = r; }
-        }
-        if (best < 1e-12) return false; /* singular */
-        if (pivot != col) {
-            for (int j = 0; j < 2 * n; j++) { double t = aug[col][j]; aug[col][j] = aug[pivot][j]; aug[pivot][j] = t; }
-        }
-        double pv = aug[col][col];
-        for (int j = 0; j < 2 * n; j++) aug[col][j] /= pv;
-        for (int r = 0; r < n; r++) {
-            if (r == col) continue;
-            double factor = aug[r][col];
-            for (int j = 0; j < 2 * n; j++) aug[r][j] -= factor * aug[col][j];
-        }
-    }
-    bool dbl = false;
+    /* Authentic AP-101S RUNASM/MM14SN.asm/MM14S3.asm (single) and
+     * RUNASM/MM14DN.asm/MM14D3.asm (double) ports (hal_matrix.c, task
+     * 100/106/107/id 51) -- covers everything real hardware routes to
+     * any of the four matrix-inversion RTL routines: N==3 (MM14S3.asm/
+     * MM14D3.asm, each via their own MM12S*.asm Sarrus-rule
+     * determinant) and every other N (MM14SN.asm/MM14DN.asm's own N=2
+     * closed form / general Gauss-Jordan), single or double precision
+     * selected by whether the matrix is DOUBLE-declared. Independently
+     * verified bit-for-bit against yaGPC2's own real execution across
+     * N=2, N=3, and N=4-5, both precisions. */
+    bool any_double = false;
     for (int i = 0; i < n * n; i++) {
-        if (in[i].double_precision) { dbl = true; break; }
+        if (in[i].double_precision) { any_double = true; break; }
     }
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            out[i * n + j] = halmat_scalar_from_double(aug[i][n + j], dbl);
-    return true;
+    if (!any_double) {
+        return hal_matrix_invert_single(in, n, out, fpu);
+    }
+    return hal_matrix_invert_double(in, n, out);
 }
 
 /* USA003090 App. C error 27's standard fixup ("argument of INVERSE is a
@@ -1774,7 +1831,36 @@ static bool arithmetic_error_should_apply_fixup(halmat_state_t *state, int membe
         e->type = SYT_TYPE_BIT;
         e->bit_value = (h->event_action == HALMAT_EVENT_RESET) ? 0 : 1;
     }
-    if (h && h->action == HALMAT_ERRACT_GOTO) {
+    /* Error 27 (INVERSE-of-a-singular-matrix, HAL_S_ERROR_INVERSE_SINGULAR)
+     * never actually reaches a registered GOTO handler on real hardware,
+     * REGARDLESS of ON ERROR registration -- id 46's own finding (yagpc2-
+     * yahalmat2-issues.db), confirmed against the confidential FCOS
+     * source (FPMSDERR.asm, the real SEND ERROR SVC handler): the OS/SVC
+     * level never dispatches to a user handler for ANY error at all --
+     * genuine GOTO dispatch instead works because the COMPILER emits its
+     * own redundant, statically-known re-check of the error condition
+     * directly in the calling code immediately after specific calls
+     * (confirmed present for SQRT/UNIT/MDIV/ZEROPOW, via a real
+     * disassembly of their own call sites) and branches on THAT. A
+     * matrix-inverse call site's own compiled code (197-P.hal's `$0P`,
+     * traced the same way immediately after its own call into MM14S3)
+     * has NO such check -- it falls straight through unconditionally,
+     * so a registered `ON ERROR$(4:27) GO TO ...;` handler is
+     * architecturally unreachable for this specific error on real
+     * hardware, confirmed against yaGPC2's own real execution (which
+     * shows the standard identity-matrix fixup, from MM14S3's own
+     * MM15SN fallback, not the handler, even with one registered) --
+     * this holds for every INVERSE call site (BFNC's INVERSE selector
+     * and MINV's `**(-1)` form alike, and every underlying RTL variant
+     * -- MM14SN/MM14S3/MM14DN/MM14D3 -- since the CALLING code's own
+     * shape doesn't depend on which gets linked). id 61's own
+     * yaHALMAT2-side divergence (yagpc2-yahalmat2-issues.db): this
+     * function's own generic GOTO-dispatch below is otherwise correct
+     * for every OTHER group-4 error it's used for (each backed by its
+     * own confirmed-present compiler re-check), so the exception is
+     * scoped narrowly to this one member, not a blanket "never dispatch"
+     * rule. */
+    if (h && h->action == HALMAT_ERRACT_GOTO && member != HAL_S_ERROR_INVERSE_SINGULAR) {
         *pc = h->goto_pc;
         *branched = true;
         return false;
@@ -1868,15 +1954,33 @@ static void matrix_multiply_square(const halmat_scalar_t *a, const halmat_scalar
     }
 }
 
-/* Matrix determinant (DET, BFNC selector 3 -- class-0/BFNC.md). Same
- * double-precision Gaussian elimination with partial pivoting as
- * matrix_invert just above (no bit-exact algorithm mandated by the
- * primary sources), tracking the running product of pivots and the sign
- * flip from each partial-pivot row swap. n capped at 8, same container-
- * size ceiling as matrix_invert; unlike INVERSE, a singular matrix isn't
- * a HAL/S error condition here -- DET of a singular matrix is simply
- * 0.0, so this returns that instead of failing. */
+/* Matrix determinant (DET, BFNC selector 3 -- class-0/BFNC.md).
+ *
+ * id 76 (yagpc2-yahalmat2-issues.db): for a single-precision matrix
+ * with n>=4 (real hardware's own MM12SN.asm general-N path, hal_matrix.c
+ * task -- see hal_matrix_determinant_single's own header comment for
+ * the full instruction-by-instruction correspondence), dispatches to
+ * that bit-exact port instead of the generic double-precision fallback
+ * below, which had a small but confirmed-real residual (029-DATATYPES.
+ * hal's own A4B/A5A 4x4/5x5 non-singular determinants) from not
+ * replicating MM12SN.asm's specific single-precision pivoting/
+ * elimination order. n==2/n==3 (real hardware's own closed-form/
+ * MM12S3.asm Sarrus-rule dispatch) and any DOUBLE-precision matrix stay
+ * on the generic path below -- out of scope for id 76, not confirmed to
+ * have the same gap.
+ *
+ * GENERIC PATH (n<4, or any operand DOUBLE): double-precision Gaussian
+ * elimination with partial pivoting (no bit-exact algorithm mandated by
+ * the primary sources for these cases), tracking the running product of
+ * pivots and the sign flip from each partial-pivot row swap. n capped
+ * at 8, same container-size ceiling as matrix_invert; unlike INVERSE, a
+ * singular matrix isn't a HAL/S error condition here -- DET of a
+ * singular matrix is simply 0.0, so this returns that instead of
+ * failing. */
 static halmat_scalar_t matrix_determinant(const halmat_scalar_t *in, int n, bool dbl) {
+    if (!dbl && n >= 4) {
+        return hal_matrix_determinant_single(in, n);
+    }
     double aug[8][8];
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++) aug[i][j] = halmat_scalar_to_double(in[i * n + j]);
@@ -1928,6 +2032,27 @@ static bool resolve_container(halmat_state_t *state, const halmat_operand_t *op,
             *out_elems = &e->elements[i * (size_t)e->cols];
             *out_count = (size_t)e->cols;
             *out_rows = 0;
+            *out_cols = e->cols;
+            return true;
+        }
+        /* ARRAY-of-MATRIX's own sibling of the array_of_vector slice just
+         * above -- same rationale (a per-element replay must yield exactly
+         * one MATRIX(r,c) block, not the whole flat n*r*c container), same
+         * DEMO.hal repro (`K ARRAY(5) MATRIX(3,4)`, multi_item_write_
+         * truncated_with_bareword_array_of_matrix / id 59): a real HALSFC
+         * compile of `WRITE(6) K;` confirms K's own XXAR is TAG1=3
+         * (MATRIX) wrapped in an ADLP(5)/DLPE replay -- each of the 5
+         * passes must resolve to its own rows*cols=12-element MATRIX
+         * block, not the single flat scalar resolve_operand's own generic
+         * arrayed QUAL_SYT case would give. `e->array_len` (not e->rows,
+         * which holds the per-element MATRIX's own row count here) is the
+         * outer ARRAY dimension to wrap the replay index by. */
+        if (e->array_of_matrix && state->arrayed_index >= 0 && e->array_len > 0) {
+            size_t block = (size_t)e->rows * (size_t)e->cols;
+            size_t i = (size_t)state->arrayed_index % (size_t)e->array_len;
+            *out_elems = &e->elements[i * block];
+            *out_count = block;
+            *out_rows = e->rows;
             *out_cols = e->cols;
             return true;
         }
@@ -2054,6 +2179,31 @@ static bool store_container_result(halmat_state_t *state, size_t vac_index,
     slot->container_rows = rows;
     slot->container_cols = cols;
     slot->container_is_integer = false; /* default; only OP_DSUB's own asterisk-select branch overrides this */
+    /* NOTE (task 100/id 51): real hardware's own compiled code for
+     * "copy a computed MATRIX/VECTOR result into its destination
+     * variable" does leave F1 polluted (an LED/STED-pair copy
+     * optimization, confirmed via a real trace of `B2I = B2**(-1);`
+     * immediately followed by `C2I = C2**(-1);` with no intervening
+     * WRITE). An attempt to model that here was REVERTED: a fuller test
+     * with WRITE(6) statements interleaved between container-producing
+     * calls (test_errfix_matrix.hal, test_eron_goto.hal) showed real
+     * hardware's own MMWSNP (matrix/vector WRITE output formatting)
+     * ALSO touches F1 by a similar but distinct mechanism that isn't
+     * modeled anywhere in this codebase -- modeling only the assignment-
+     * copy half of this while leaving MMWSNP's own contribution out
+     * produced a WRONG fpu.f1 in any WRITE-interleaved program (the
+     * overwhelmingly common real-world shape), which is worse than not
+     * modeling it at all: a determinant that's genuinely exactly zero
+     * came out spuriously nonzero, silently skipping the singular-
+     * matrix error fixup and corrupting CONTROL FLOW, not just a
+     * displayed digit. Correctly closing this gap needs MMWSNP (and
+     * likely MMRSNP/other I/O-adjacent RTL routines) ported with the
+     * same trace-verified rigor as MM14SN itself before any of this can
+     * be safely modeled at the store_container_result level -- out of
+     * scope for now. hal_matrix_invert_single's own N==2 branch still
+     * correctly reads/writes state->fpu.f1 for genuine back-to-back RTL
+     * calls with no WRITE in between; it's this copy step's own
+     * contribution that's missing. */
     return true;
 }
 
@@ -3123,9 +3273,13 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
 
     /* RANDOM/RANDOMG's own real-hardware-replicating generator (state.h's
      * random_rng comment) -- resets to a fresh process's own initial
-     * state (SEED=1435, chained_f1=0), matching RANDOM.asm's own object-
-     * code-baked constant and a genuinely cold register file. */
+     * state (SEED=1435), matching RANDOM.asm's own object-code-baked
+     * constant. */
     hal_random_init(&state->random_rng);
+    /* Persistent AP-101S floating-register-file state shared by every
+     * ported RTL routine (state.h's fpu comment) -- resets to a
+     * genuinely cold register file. */
+    hal_fpu_init(&state->fpu);
 }
 
 void interp_set_device(halmat_state_t *state, int device, FILE *f) {
@@ -3482,6 +3636,20 @@ static void emit_page_break(halmat_state_t *state, FILE *out, int page_num) {
  * spelled out explicitly since the loop body never runs. */
 static void dm_advance_lines(halmat_state_t *state, halmat_device_mech_t *dm, FILE *out, int n, bool unpaged) {
     if (n == 0) { dm->col = 1; return; }
+    /* id 70 (yagpc2-yahalmat2-issues.db): a same-session attempt to
+     * remove this automatic page-turn (on the theory that ordinary line
+     * advances never turn a page on real hardware, "confirmed" by
+     * reading yaGPC2's own halucp.c) was REVERTED per direct user
+     * correction: "writing lines past the number of lines defined for
+     * page length should constitute a page change, regardless of how it
+     * happens" -- i.e. this check is correct and must apply uniformly to
+     * every line-advancing path, not just LINE(gamma)/PAGE(beta)'s own
+     * explicit wraps. yaGPC2's own agreement with the (wrong) no-turn
+     * theory did not hold up as independent confirmation -- yaGPC2's
+     * halucp.c very likely shares lineage with gpc's own halUCP.coffee
+     * (same name/structure; see feedback_gpc_not_authoritative memory),
+     * and yaGPC2 itself was independently found to have this same bug,
+     * which is being fixed on that side. */
     for (int i = 0; i < n; i++) {
         dm_finalize_line(dm, out);
         if (!unpaged && dm->line >= state->page_length) {
@@ -3579,6 +3747,36 @@ static bool dm_do_line(halmat_state_t *state, halmat_device_mech_t *dm, FILE *ou
  * the field lands exactly at dm->col with no leading blanks. */
 static void dm_emit_field(halmat_state_t *state, halmat_device_mech_t *dm, FILE *out, const char *text, bool *need_sep, int wrap_col, bool unpaged) {
     int width = (int)strlen(text);
+    /* id 65 (yagpc2-yahalmat2-issues.db): a genuinely zero-length field
+     * (a non-VARYING CHARACTER value whose own real current length is
+     * 0, per RUNASM/CASV.asm's own documented MIN(srcCurrLen,
+     * destMaxLen) algorithm -- confirmed via a real yaGPC2 --trace of
+     * 186-P.hal's own compiled code, which stores a final I/O
+     * descriptor with CURRLEN=0 for STATUS.C's own empty INITIAL('')
+     * value) contributes NOTHING to the output stream on real hardware
+     * -- not even its own inter-field separator. yaHALMAT2's own prior
+     * behavior unconditionally reserved the `num_blanks`-wide separator
+     * gap before EVERY field regardless of its own content length,
+     * which dm_write_at's own gap-fill (blank-padding up to the target
+     * column, needed for legitimate column alignment between
+     * *non-empty* fields) then filled with real blank bytes -- since a
+     * zero-length field's own text never actually occupies any of that
+     * reserved gap, those blanks became the ONLY thing written for the
+     * field, visually indistinguishable from "padded to some declared
+     * width" even though no such padding was ever intended. This was
+     * never a CHARACTER(n)-declared-width padding bug at all despite
+     * how it looked; the actual field VALUE was already correctly
+     * empty at every step upstream (storage, WRITE-argument capture) --
+     * only this shared low-level formatting primitive's own column
+     * bookkeeping treated "empty" as "reserve space anyway". Skipping
+     * entirely (no column advance, no separator consumed, `need_sep`
+     * left exactly as the prior real field set it) makes a zero-length
+     * field truly invisible in the output stream, matching real
+     * hardware -- safe for every OTHER caller of this shared primitive
+     * too, since a SCALAR/INTEGER/BIT field's own formatted
+     * representation is never genuinely zero-length (the empty case
+     * can only arise for a CHARACTER string). */
+    if (width == 0) return;
     int col = *need_sep ? dm->col + state->num_blanks : dm->col;
     if (*need_sep && col - 1 + width > wrap_col) {
         dm_advance_lines(state, dm, out, 1, unpaged);
@@ -6918,8 +7116,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         fail(state, "MASN/VASN: shape mismatch (%zu vs %zu elements)", src_count, slot->container_count);
                         break;
                     }
+                    /* Same cross-precision (SINGLE<->DOUBLE) narrowing id
+                     * 45 already established for a plain whole-VECTOR SYT
+                     * destination below (this function's own later
+                     * comment) -- id 45's own fix never reached THIS
+                     * branch (a SUBSCRIPTED ARRAY(n) VECTOR(m) element,
+                     * `V$(I:) = VECTOR(RANDOM, RANDOM, RANDOM);`, V a
+                     * plain -- not DOUBLE -- ARRAY(999) VECTOR(3)), a
+                     * distinct is_container_ref write path (id 67,
+                     * 119-EXAMPLE_9.hal): a plain memcpy-equivalent
+                     * per-element copy with no precision scaling at all,
+                     * so a genuinely DOUBLE-precision RANDOM() result
+                     * landed in a SINGLE-precision destination still
+                     * flagged double_precision=true, which
+                     * halmat_scalar_format then printed at full
+                     * double-precision width. Scoped to the non-field
+                     * case (a real SYT index to consult) -- field
+                     * (nested-structure) receivers have no established
+                     * flags-lookup path here yet and keep the prior
+                     * unscaled behavior. */
+                    bool have_prec_flag = false, want_double = false;
+                    if (!slot->container_ref_is_field && slot->container_ref_syt < HALMAT_SYT_MAX && state->symtab) {
+                        const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, slot->container_ref_syt);
+                        if (dsym && (dsym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE))) {
+                            have_prec_flag = true;
+                            want_double = (dsym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
+                        }
+                    }
                     for (size_t k = 0; k < src_count; k++) {
-                        rbase->elements[slot->container_ref_offset + k * slot->container_ref_stride] = src[k];
+                        halmat_scalar_t v = src[k];
+                        if (have_prec_flag && v.double_precision != want_double) v = scale_precision(v, want_double);
+                        rbase->elements[slot->container_ref_offset + k * slot->container_ref_stride] = v;
                     }
                     break;
                 }
@@ -7184,7 +7411,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 } else {
                     halmat_scalar_t base[HALMAT_CONTAINER_CAPACITY];
                     if (exponent < 0) {
-                        if (!matrix_invert(src, rows, base)) {
+                        if (!matrix_invert(src, rows, base, &state->fpu)) {
                             /* USA003090 App. C error 27 ("argument of
                              * INVERSE is a singular matrix"): standard
                              * fixup is the identity matrix, not an abort
@@ -7222,11 +7449,23 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
                 for (int i = 0; i < rows_a; i++) {
                     for (int j = 0; j < cols_b; j++) {
-                        halmat_scalar_t sum = halmat_scalar_zero(false);
+                        /* mm6sn_display_multiply_residual_source_unidentified
+                         * (yagpc2-yahalmat2-issues.db): real RTL (MM6SN.asm)
+                         * accumulates the whole N-term dot product in a
+                         * genuine EXTENDED (F0:F1, 56-bit) register pair via
+                         * SEDR/AEDR, truncating to single precision only
+                         * ONCE at the final STE -- not after every term.
+                         * Truncating here on every iteration (the old
+                         * halmat_scalar_add behavior) discards low-order
+                         * bits N times instead of once, producing a
+                         * different (larger, differently-patterned)
+                         * rounding residual than real hardware. */
+                        halmat_scalar_t sum = halmat_scalar_zero(true);
                         for (int k = 0; k < cols_a; k++) {
-                            sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i * cols_a + k], cb[k * cols_b + j]));
+                            halmat_scalar_t prod = halmat_scalar_multiply(ca[i * cols_a + k], cb[k * cols_b + j]);
+                            sum = hrfp_addE(&sum, &prod);
                         }
-                        result[i * cols_b + j] = sum;
+                        result[i * cols_b + j] = (halmat_scalar_t){ .double_precision = false, .msw = sum.msw, .lsw = 0 };
                     }
                 }
                 if (!store_container_result(state, ins->index, result, result_count, rows_a, cols_b)) break;
@@ -7245,9 +7484,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if ((size_t)rows_a > HALMAT_CONTAINER_CAPACITY) { fail(state, "MVPR: result too large"); break; }
                 halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
                 for (int i = 0; i < rows_a; i++) {
-                    halmat_scalar_t sum = halmat_scalar_zero(false);
-                    for (int k = 0; k < cols_a; k++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i * cols_a + k], cb[k]));
-                    result[i] = sum;
+                    /* mv6sn_accumulator_leak_uninitialized_companion_register
+                     * (yagpc2-yahalmat2-issues.db): real RTL (MV6SN.asm)
+                     * accumulates the whole dot product in a genuine
+                     * EXTENDED register pair via AEDR, truncating to single
+                     * precision only ONCE at the end -- see OP_MMPR above
+                     * for the same reasoning. */
+                    halmat_scalar_t sum = halmat_scalar_zero(true);
+                    for (int k = 0; k < cols_a; k++) {
+                        halmat_scalar_t prod = halmat_scalar_multiply(ca[i * cols_a + k], cb[k]);
+                        sum = hrfp_addE(&sum, &prod);
+                    }
+                    result[i] = (halmat_scalar_t){ .double_precision = false, .msw = sum.msw, .lsw = 0 };
                 }
                 if (!store_container_result(state, ins->index, result, (size_t)rows_a, 0, rows_a)) break;
                 break;
@@ -7265,24 +7513,94 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if ((size_t)cols_b > HALMAT_CONTAINER_CAPACITY) { fail(state, "VMPR: result too large"); break; }
                 halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
                 for (int j = 0; j < cols_b; j++) {
-                    halmat_scalar_t sum = halmat_scalar_zero(false);
-                    for (int k = 0; k < rows_b; k++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[k], cb[k * cols_b + j]));
-                    result[j] = sum;
+                    /* Real RTL (VM6SN.asm) accumulates in a genuine
+                     * EXTENDED register pair via SEDR/AEDR, truncating to
+                     * single precision only ONCE at the end -- see OP_MMPR
+                     * above for the same reasoning. */
+                    halmat_scalar_t sum = halmat_scalar_zero(true);
+                    for (int k = 0; k < rows_b; k++) {
+                        halmat_scalar_t prod = halmat_scalar_multiply(ca[k], cb[k * cols_b + j]);
+                        sum = hrfp_addE(&sum, &prod);
+                    }
+                    result[j] = (halmat_scalar_t){ .double_precision = false, .msw = sum.msw, .lsw = 0 };
                 }
                 if (!store_container_result(state, ins->index, result, (size_t)cols_b, 0, cols_b)) break;
                 break;
             }
 
             case OP_VCRS: {
+                /* id 64 (yagpc2-yahalmat2-issues.db, 072-EXAMPLE_2.hal's
+                 * `RESULT2 = V_PRIME * E;`, both plain -- not DOUBLE --
+                 * VECTOR(3)): a plain exact halmat_scalar_sub/multiply
+                 * gave a subtly WRONG result even for clean, exactly-
+                 * representable integer inputs. Root-caused by reading
+                 * the real primary sources directly (RUNASM/VX6S3.asm
+                 * single-precision, RUNASM/VX6D3.asm double-precision)
+                 * -- two genuine, distinct gaps, one per precision. */
                 if (ins->operand_count != 2) { fail(state, "VCRS: expected 2 operands"); break; }
                 halmat_scalar_t *ca, *cb; size_t count_a, count_b; int rows_a, cols_a, rows_b, cols_b;
                 if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
                 if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
                 if (count_a != 3 || count_b != 3) { fail(state, "VCRS: both operands must be 3-element VECTORs"); break; }
                 halmat_scalar_t result[3];
-                result[0] = halmat_scalar_sub(halmat_scalar_multiply(ca[1], cb[2]), halmat_scalar_multiply(ca[2], cb[1]));
-                result[1] = halmat_scalar_sub(halmat_scalar_multiply(ca[2], cb[0]), halmat_scalar_multiply(ca[0], cb[2]));
-                result[2] = halmat_scalar_sub(halmat_scalar_multiply(ca[0], cb[1]), halmat_scalar_multiply(ca[1], cb[0]));
+                bool dbl = ca[0].double_precision || cb[0].double_precision;
+                if (dbl) {
+                    /* VX6D3.asm: every LE explicitly loads BOTH halves of
+                     * its own register pair (no companion-register leak
+                     * concern, unlike single below), but multiplies via
+                     * MED -- hrfp_mulQeE, rounding each operand to 31
+                     * bits first -- not an exact product like
+                     * halmat_scalar_multiply. */
+                    halmat_scalar_t t1 = hrfp_mulQeE(&ca[1], &cb[2]), t2 = hrfp_mulQeE(&cb[1], &ca[2]);
+                    result[0] = hrfp_subE(&t1, &t2);
+                    halmat_scalar_t t3 = hrfp_mulQeE(&ca[2], &cb[0]), t4 = hrfp_mulQeE(&cb[2], &ca[0]);
+                    result[1] = hrfp_subE(&t3, &t4);
+                    halmat_scalar_t t5 = hrfp_mulQeE(&ca[0], &cb[1]), t6 = hrfp_mulQeE(&ca[1], &cb[0]);
+                    result[2] = hrfp_subE(&t5, &t6);
+                } else {
+                    /* VX6S3.asm: SINGLE-precision, but its own
+                     * subtraction is SEDR (genuinely extended register-
+                     * pair), not SER.
+                     *
+                     * id 73 (yagpc2-yahalmat2-issues.db): this code used
+                     * to thread state->fpu.f1/f3 across the three SEDR
+                     * calls (F1 chaining component-to-component, F3 held
+                     * fixed at its own incoming value), faithfully
+                     * modeling VX6S3.asm's own historical behavior -- its
+                     * own F0/F2 odd companions were never explicitly
+                     * loaded before any SEDR, so they genuinely carried
+                     * forward whatever a PRIOR floating-point-heavy RTL
+                     * call left them as. That turned out to be a genuine,
+                     * undetected RTL bug (same class/reasoning as id 53/
+                     * 72): the three cross-product components are
+                     * mathematically INDEPENDENT, so a result depending
+                     * on unrelated prior register history -- let alone on
+                     * which component happens to be computed first -- was
+                     * never intentional. Fixed on the real RTL side via
+                     * an &ASM101S-gated `SER F1,F1`/`SER F3,F3` pair
+                     * before EACH of the three SEDR calls (yaGPC2 commit
+                     * cb63663cd). Modeled here the same way -- both
+                     * companions freshly zeroed for every component, no
+                     * chaining, nothing left to leak into whatever RTL
+                     * call comes next either. */
+                    uint32_t a1b2 = halmat_scalar_multiply(ca[1], cb[2]).msw;
+                    uint32_t a2b1 = halmat_scalar_multiply(ca[2], cb[1]).msw;
+                    halmat_scalar_t x1 = {true, a1b2, 0}, y1 = {true, a2b1, 0};
+                    halmat_scalar_t s1 = hrfp_subE(&x1, &y1);
+                    result[0] = (halmat_scalar_t){false, s1.msw, 0};
+
+                    uint32_t a2b0 = halmat_scalar_multiply(ca[2], cb[0]).msw;
+                    uint32_t a0b2 = halmat_scalar_multiply(ca[0], cb[2]).msw;
+                    halmat_scalar_t x2 = {true, a2b0, 0}, y2 = {true, a0b2, 0};
+                    halmat_scalar_t s2 = hrfp_subE(&x2, &y2);
+                    result[1] = (halmat_scalar_t){false, s2.msw, 0};
+
+                    uint32_t a0b1 = halmat_scalar_multiply(ca[0], cb[1]).msw;
+                    uint32_t a1b0 = halmat_scalar_multiply(ca[1], cb[0]).msw;
+                    halmat_scalar_t x3 = {true, a0b1, 0}, y3 = {true, a1b0, 0};
+                    halmat_scalar_t s3 = hrfp_subE(&x3, &y3);
+                    result[2] = (halmat_scalar_t){false, s3.msw, 0};
+                }
                 if (!store_container_result(state, ins->index, result, 3, 0, 3)) break;
                 break;
             }
@@ -7298,11 +7616,18 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
                 if (count_a != count_b) { fail(state, "VDOT: operand shape mismatch"); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
-                halmat_scalar_t sum = halmat_scalar_zero(false);
-                for (size_t i = 0; i < count_a; i++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i], cb[i]));
+                /* Real RTL (VV6S3.asm/VV6SN.asm) accumulates the whole
+                 * dot product in a genuine EXTENDED register pair via
+                 * SEDR/AEDR, truncating to single precision only ONCE at
+                 * the end -- see OP_MMPR above for the same reasoning. */
+                halmat_scalar_t sum = halmat_scalar_zero(true);
+                for (size_t i = 0; i < count_a; i++) {
+                    halmat_scalar_t prod = halmat_scalar_multiply(ca[i], cb[i]);
+                    sum = hrfp_addE(&sum, &prod);
+                }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
-                state->vac[ins->index].scalar = sum;
+                state->vac[ins->index].scalar = (halmat_scalar_t){ .double_precision = false, .msw = sum.msw, .lsw = 0 };
                 break;
             }
 
@@ -7399,6 +7724,37 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[1], &a)) break;
                 {
                     halmat_scalar_t sv = rv_to_scalar(&a);
+                    /* id 68 (yagpc2-yahalmat2-issues.db): same literal-
+                     * widening gap OP_SASN's own dest_sym coercion
+                     * already fixed (id 45/51) -- a literal source's own
+                     * lsw is silently zeroed by resolve_operand's own
+                     * QUAL_LIT default unless the litfile's own type tag
+                     * happens to be LIT_DOUBLE (unreliable -- confirmed
+                     * via a real litfile dump that EVERY literal is
+                     * tagged LIT_FIXED regardless of its actual value's
+                     * precision needs, resolve_operand's own comment).
+                     * write_syt_entry's own scale_precision fallback
+                     * can only WIDEN (flip the flag), never recover
+                     * already-discarded fraction bits, so a plain SCALAR
+                     * DOUBLE variable's own INITIAL(<a literal needing
+                     * more than 6 hex digits>) value silently lost
+                     * precision here -- confirmed via id 68's own repro
+                     * (`DECLARE X SCALAR DOUBLE INITIAL(0.0000011400000000);`,
+                     * X's own lsw arriving as a BFNC argument as 0
+                     * instead of its real 0x41733ce3). Re-derive the
+                     * full msw/lsw pair directly from the literal table
+                     * when widening a literal INITIAL() value into a
+                     * DOUBLE destination, same technique OP_SASN already
+                     * uses. */
+                    if (ins->operands[1].qual == QUAL_LIT && !sv.double_precision &&
+                        ins->operands[0].qual == QUAL_SYT && state->symtab &&
+                        state->literals && ins->operands[1].data < state->literals->count) {
+                        const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                        if (dsym && (dsym->flags & HALMAT_SYM_FLAG_DOUBLE)) {
+                            const halmat_literal_t *src_lit = &state->literals->entries[ins->operands[1].data];
+                            sv = halmat_scalar_from_ibm_words(src_lit->msw, src_lit->lsw, true);
+                        }
+                    }
                     a.kind = RV_SCALAR;
                     a.scalar = sv;
                 }
@@ -7759,8 +8115,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 /* Genuine IBM hex-float arithmetic (value.c's
                  * halmat_scalar_add/sub), not a native-double
                  * approximation -- see value.h's documented caveats
-                 * (no guard digits, characteristic overflow clamps
-                 * rather than raising the real ERROR CONDITION). */
+                 * (characteristic overflow clamps rather than raising
+                 * the real ERROR CONDITION). */
                 if (ins->operand_count != 2) { fail(state, "SADD/SSUB: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
@@ -7787,8 +8143,30 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
                 if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                halmat_scalar_t av = rv_to_scalar(&a), bv = rv_to_scalar(&b);
                 halmat_scalar_t quotient;
-                if (!halmat_scalar_divide(rv_to_scalar(&a), rv_to_scalar(&b), &quotient)) {
+                /* id 69 (yagpc2-yahalmat2-issues.db): real hardware's own
+                 * compiled code for a plain "/" between two DOUBLE
+                 * scalars uses the QDEDR Newton-refined narrowing-divide
+                 * macro (already ported for DATAN2/DTAN's own final
+                 * divide, hal_qdedr_double), confirmed via a real yaGPC2
+                 * --trace of a plain, unrelated `C=A/B;` -- NOT scoped
+                 * to "dividing by a value that just came from an RTL
+                 * call" as originally suspected (GOOGLE-PARALLAX.hal's
+                 * own `EOR/TAN(...)`), it's how every double SSDV
+                 * compiles. A companion trace of a plain SINGLE-
+                 * precision "/" confirmed that one compiles to a single
+                 * plain DE instead -- genuinely different per precision,
+                 * so SINGLE keeps using value.c's own exact
+                 * halmat_scalar_divide (still correct there). */
+                if (av.double_precision || bv.double_precision) {
+                    if (halmat_scalar_to_double(bv) == 0.0) {
+                        fail(state, "division by zero (floating point divide exception)");
+                        break;
+                    }
+                    quotient = hal_qdedr_double(av, bv);
+                    quotient.double_precision = true;
+                } else if (!halmat_scalar_divide(av, bv, &quotient)) {
                     fail(state, "division by zero (floating point divide exception)");
                     break;
                 }
@@ -7841,6 +8219,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         result = reciprocal;
                     }
                 }
+                /* id 40 (yagpc2-yahalmat2-issues.db): a DOUBLE-precision
+                 * squaring/exponentiation genuinely leaves its own
+                 * result's own lsw sitting in F0's own odd companion
+                 * (F1) on real hardware -- confirmed via a real yaGPC2
+                 * --trace of id 40's own recorded repro
+                 * (X=RANDOM;Y=RANDOM;Z=X**2+Y**2;V=RANDOM;): `Y**2`'s
+                 * own "MEDR F0,F0" (a genuine register-pair self-
+                 * multiply, reusing Y's own still-resident F0:F1 from
+                 * the immediately-preceding RANDOM draw) is the LAST
+                 * operation to touch F0:F1 before the next RANDOM call
+                 * -- the FOLLOWING `Z=X**2+Y**2` add itself writes its
+                 * own result to a DIFFERENT register pair (F2:F3, where
+                 * X**2 was staged first) and never touches F0:F1 again,
+                 * so it's SPEX/SIEX's own leftover, not SADD's, that
+                 * actually leaks forward to the next RANU call -- an
+                 * earlier attempt hooking SADD/SSUB instead was
+                 * empirically wrong (verified against this same trace)
+                 * and has been removed. This is still only a narrow,
+                 * trace-confirmed special case (a squaring whose own
+                 * operand was JUST computed and still resident in
+                 * F0:F1), not a general solution -- which physical
+                 * register pair any given HALMAT arithmetic result
+                 * lands in is a genuine PASS2 register-allocation
+                 * decision HALMAT's own IR doesn't expose, so this
+                 * heuristic (every DOUBLE SPEX/SIEX result updates the
+                 * shared fpu.f1) will be wrong for other register-
+                 * allocation shapes -- documented as a known remaining
+                 * gap, not silently assumed complete. */
+                if (result.double_precision) state->fpu.f1 = result.lsw;
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = result;
@@ -9114,8 +9521,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * declaration for both). */
                     if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
                     halmat_scalar_t r = (ins->tag == 42)
-                        ? hal_random_next(&state->random_rng)
-                        : hal_randomg_next(&state->random_rng);
+                        ? hal_random_next(&state->random_rng, &state->fpu)
+                        : hal_randomg_next(&state->random_rng, &state->fpu);
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_scalar = true;
                     state->vac[ins->index].scalar = r;
@@ -9218,25 +9625,40 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
 
                 switch (ins->tag) {
-                    case 1: case 2: case 5: case 6: case 13: case 15: case 21: case 24: case 33: case 37:
-                    case 17: case 22: case 25: case 29: case 35: case 36: case 43: case 44: case 45: case 46: case 48: case 53: {
-                        /* ABS/COS/EXP/LOG/SIN/TAN/SIGN/SQRT/ROUND/ARCTAN/
-                         * COSH/SINH/TANH/FLOOR/ARCCOS/ARCSIN/SIGNUM/
-                         * ARCCOSH/ARCSINH/ARCTANH/CEILING/TRUNCATE:
+                    case 1: case 2: case 13: case 21: case 33:
+                    case 29: case 35: case 36: case 43: case 48: case 53: {
+                        /* ABS/COS/SIN/SIGN/ROUND/
+                         * FLOOR/ARCCOS/ARCSIN/SIGNUM/
+                         * CEILING/TRUNCATE:
                          * through double via libm, same documented precision
                          * compromise as SEXP (no hex-float algorithm for
-                         * these in the extracted AP-101S material). Domain/
-                         * overflow guards on EXP/LOG/SIN/COS/TAN/SQRT below
-                         * implement USA003090 App. C's group-4 "standard
-                         * fixups" (errors 5-8/11-12) rather than letting
-                         * libm's NaN/Inf for out-of-domain input silently
-                         * propagate into the packed result -- see
-                         * STATUS.md's Class 0 section for the fuller
-                         * per-error trace and citation. ARCTAN needs no such
-                         * guard: [USA003087] Appendix B gives it no
-                         * restricted domain ("ARCTAN(α) tan-1 α", unlike
-                         * ARCSIN/ARCCOS/ARCTANH's documented |α|<1 limits),
-                         * and USA003090 Appendix C's error table has no
+                         * these in the extracted AP-101S material). EXP(5),
+                         * LOG(6), SQRT(24), TAN(15), ARCTAN(37), ARCSINH(45),
+                         * ARCTANH(46), ARCTAN2(47), COSH(17), SINH(22),
+                         * TANH(25), and ARCCOSH(44) are the twelve
+                         * exceptions -- each has its own dedicated case
+                         * below, since RUNASM/EXP.asm, RUNASM/LOG.asm,
+                         * RUNASM/SQRT.asm, RUNASM/TAN.asm/DTAN.asm,
+                         * RUNASM/EATAN2.asm, RUNASM/DATAN2.asm, RUNASM/
+                         * ASINH.asm, RUNASM/ATANH.asm, RUNASM/SINH.asm,
+                         * RUNASM/TANH.asm, and RUNASM/ACOSH.asm's primary
+                         * source was found and ported (hal_transcendental.c,
+                         * task 100/id 51, TAN itself added later per id 66 --
+                         * id 51's own closing summary never actually listed
+                         * plain TAN, only ATAN/TANH, a genuine gap not
+                         * caught until GOOGLE-PARALLAX.hal's own DOUBLE-
+                         * precision divergence surfaced it).
+                         * Domain/overflow guards on SIN/COS below implement
+                         * USA003090 App. C's group-4 "standard fixups"
+                         * (errors 5-8) rather than letting libm's NaN/Inf
+                         * for out-of-domain input silently propagate into
+                         * the packed result -- see STATUS.md's Class 0
+                         * section for the fuller per-error trace and
+                         * citation. ARCTAN needs no such guard: [USA003087]
+                         * Appendix B gives it no restricted domain
+                         * ("ARCTAN(α) tan-1 α", unlike ARCSIN/ARCCOS/
+                         * ARCTANH's documented |α|<1 limits), and
+                         * USA003090 Appendix C's error table has no
                          * ARCTAN-specific entry either (only ARCTANH/
                          * ARCTAN2 do) -- libm's plain `atan()` is total over
                          * every representable double already. */
@@ -9264,74 +9686,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                 }
                                 break;
                             }
-                            case 5: /* EXP: error 6 */
-                                if (x > 174.673) {
-                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_EXP_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
-                                    r = HAL_S_MAX_REPRESENTABLE;
-                                } else {
-                                    r = exp(x);
-                                }
-                                break;
-                            case 6: /* LOG (natural log): error 7 */
-                                if (x <= 0.0) {
-                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_LOG_NONPOSITIVE, &state->pc, &branched)) { redirected = true; break; }
-                                    r = (x == 0.0) ? -HAL_S_MAX_REPRESENTABLE : log(fabs(x));
-                                } else {
-                                    r = log(x);
-                                }
-                                break;
-                            case 15: { /* TAN: errors 11/12 */
-                                double sp_limit = 823549.625, dp_limit = 3.537e15;
-                                if (fabs(x) > (dbl ? dp_limit : sp_limit)) {
-                                    /* error 11: argument magnitude too large */
-                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_TAN_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
-                                    r = 1.0;
-                                } else {
-                                    double v = tan(x);
-                                    /* error 12: argument too close to an odd
-                                     * multiple of pi/2 -- rather than
-                                     * replicating the primary source's own
-                                     * proximity test, detect the same
-                                     * condition by its effect (tan()
-                                     * approaching the singularity, i.e. no
-                                     * longer finite/representable). */
-                                    if (!isfinite(v)) {
-                                        if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_TAN_SINGULARITY, &state->pc, &branched)) { redirected = true; break; }
-                                        r = HAL_S_MAX_REPRESENTABLE;
-                                    } else {
-                                        r = v;
-                                    }
-                                }
-                                break;
-                            }
                             case 21: r = (x > 0.0) ? 1.0 : (x < 0.0) ? -1.0 : 0.0; break;
-                            case 24: /* SQRT: error 5 */
-                                if (x < 0.0) {
-                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SQRT_NEGATIVE, &state->pc, &branched)) { redirected = true; break; }
-                                    r = sqrt(fabs(x));
-                                } else {
-                                    r = sqrt(x);
-                                }
-                                break;
                             case 33: r = round(x); break;
-                            case 37: r = atan(x); break;
-                            case 17: /* COSH: error 9 */
-                                if (fabs(x) > 175366.0) {
-                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SINH_COSH_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
-                                    r = HAL_S_MAX_REPRESENTABLE;
-                                } else {
-                                    r = cosh(x);
-                                }
-                                break;
-                            case 22: /* SINH: error 9 (odd function -- sign of x preserved in the fixup, per COSH's positive-only fixup contrasted with SINH's own sign) */
-                                if (fabs(x) > 175366.0) {
-                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SINH_COSH_OVERFLOW, &state->pc, &branched)) { redirected = true; break; }
-                                    r = copysign(HAL_S_MAX_REPRESENTABLE, x);
-                                } else {
-                                    r = sinh(x);
-                                }
-                                break;
-                            case 25: r = tanh(x); break; /* TANH: bounded (-1,1), no App. C entry -- no overflow possible */
                             case 29: r = floor(x); break; /* FLOOR: "largest integer <= a", no App. C entry */
                             case 35: /* ARCCOS: error 10 */
                                 if (x > 1.0) {
@@ -9356,23 +9712,6 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                 }
                                 break;
                             case 43: r = (x > 0.0) ? 1.0 : (x < 0.0) ? -1.0 : 0.0; break; /* SIGNUM: same formula as SIGN(21) -- USA003087 Appendix B distinguishes them only by SIGN having no "=0" case documented, both computed identically here */
-                            case 44: /* ARCCOSH: error 59 */
-                                if (x < 1.0) {
-                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCCOSH_DOMAIN, &state->pc, &branched)) { redirected = true; break; }
-                                    r = 0.0;
-                                } else {
-                                    r = acosh(x);
-                                }
-                                break;
-                            case 45: r = asinh(x); break; /* ARCSINH: unbounded domain, no App. C entry */
-                            case 46: /* ARCTANH: error 60 -- guard uses >= 1 rather than the documented >1, since libm's atanh(±1) is +-Inf and this project has already hit (and fixed) a real hang from an unguarded Inf reaching halmat_scalar_from_double's normalization loop (see error 4's SEXP fix, STATUS.md) */
-                                if (fabs(x) >= 1.0) {
-                                    if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCTANH_DOMAIN, &state->pc, &branched)) { redirected = true; break; }
-                                    r = 0.0;
-                                } else {
-                                    r = atanh(x);
-                                }
-                                break;
                             case 48: r = ceil(x); break; /* CEILING: "smallest integer > a", no App. C entry */
                             case 53: r = trunc(x); break; /* TRUNCATE: "largest integer <= |a| times SIGNUM(integer(a))" == truncation toward zero */
                             default: r = round(x); break;
@@ -9381,6 +9720,328 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->vac[ins->index].is_ref = false;
                         state->vac[ins->index].is_scalar = true;
                         state->vac[ins->index].scalar = halmat_scalar_from_double(r, dbl);
+                        break;
+                    }
+                    case 5: { /* EXP: authentic AP-101S RUNASM/EXP.asm port
+                               * (hal_transcendental.c, task 100/id 51) --
+                               * bypasses the IEEE-double round-trip
+                               * entirely, operating on the raw IBM
+                               * hex-float bits the same way real hardware
+                               * does. Error 6 domain guard kept identical
+                               * to the prior double-based implementation's
+                               * own bound (174.673/-180.218, EXP.asm's own
+                               * MAX/MIN constants) -- only the in-domain
+                               * numeric path changed. */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        double xd = halmat_scalar_to_double(xs);
+                        if (xd > 174.673) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_EXP_OVERFLOW, &state->pc, &branched)) break;
+                            state->vac[ins->index].is_ref = false;
+                            state->vac[ins->index].is_scalar = true;
+                            state->vac[ins->index].scalar = halmat_scalar_from_double(HAL_S_MAX_REPRESENTABLE, dbl);
+                            break;
+                        }
+                        if (xd < -180.218) {
+                            /* EXP.asm's own underflow path: LE F0,ONE (a
+                             * tiny nonzero constant) then MER F0,F0
+                             * (squares it) -- on real hardware this
+                             * exponent-underflows to a hex-float zero,
+                             * which is exactly what a genuine result this
+                             * far below the representable range would be
+                             * regardless. */
+                            state->vac[ins->index].is_ref = false;
+                            state->vac[ins->index].is_scalar = true;
+                            state->vac[ins->index].scalar = halmat_scalar_zero(dbl);
+                            break;
+                        }
+                        /* fpu: EXP's own genuine final f1 is written back
+                         * for whatever RTL call comes next (hal_fpu.h) --
+                         * unlike LOG's own confirmed-via-trace top-level
+                         * caller behavior, it's NOT confirmed whether a
+                         * top-level `Y=EXP(X);` call site's own compiled
+                         * caller resets F1 afterward too, so this doesn't
+                         * add a speculative extra reset here the way
+                         * case 6 (LOG) below does. */
+                        halmat_scalar_t result = hal_exp_single(xs, &state->fpu);
+                        if (dbl) result.double_precision = true; /* zero-pad lsw -- EXP.asm itself is single-precision-only, see hal_exp_single's own header comment */
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 15: { /* TAN: authentic AP-101S RUNASM/TAN.asm
+                                * (single) / RUNASM/DTAN.asm (double) port
+                                * (hal_transcendental.c, id 66) -- id 51's
+                                * own closing summary never actually
+                                * listed plain TAN among the ported
+                                * transcendentals (only ATAN/TANH), a
+                                * genuine gap the prior libm tan()
+                                * shortcut masked until GOOGLE-PARALLAX.hal's
+                                * own DOUBLE-precision divergence surfaced
+                                * it. Domain guard (error 11, |arg| too
+                                * large) kept identical to the prior
+                                * double-based implementation's own bounds
+                                * (TAN.asm's own MAX=PI*2**18 / DTAN.asm's
+                                * own MAX=PI*2**50) -- only the in-domain
+                                * numeric path (and error 12's own
+                                * singularity detection, now genuinely
+                                * computed rather than inferred from
+                                * !isfinite()) changed. */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        double xd = halmat_scalar_to_double(xs);
+                        double sp_limit = 823549.625, dp_limit = 3.537e15;
+                        if (fabs(xd) > (dbl ? dp_limit : sp_limit)) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_TAN_OVERFLOW, &state->pc, &branched)) break;
+                            state->vac[ins->index].is_ref = false;
+                            state->vac[ins->index].is_scalar = true;
+                            state->vac[ins->index].scalar = halmat_scalar_from_double(1.0, dbl);
+                            break;
+                        }
+                        bool singular = false;
+                        halmat_scalar_t result = dbl ? hal_tan_double(xs, &singular) : hal_tan_single(xs, &singular);
+                        if (singular) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_TAN_SINGULARITY, &state->pc, &branched)) break;
+                            result = halmat_scalar_from_double(HAL_S_MAX_REPRESENTABLE, dbl);
+                        }
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 6: { /* LOG: authentic AP-101S RUNASM/LOG.asm
+                               * port (hal_transcendental.c, task
+                               * 100/id 51). Error 7 domain guard kept
+                               * identical to the prior double-based
+                               * implementation's own bound (x<=0), but
+                               * the fixup values themselves are now the
+                               * AUTHENTIC ones LOG.asm's own FIXUP
+                               * SECTION computes (ARGZERO's exact
+                               * X'FFFFFFFF' most-negative-representable
+                               * bit pattern, and a genuine re-run of the
+                               * real algorithm on |X| for ARG<0) rather
+                               * than the old libm-based sentinels. */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        double xd = halmat_scalar_to_double(xs);
+                        halmat_scalar_t result;
+                        if (xd <= 0.0) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_LOG_NONPOSITIVE, &state->pc, &branched)) break;
+                            if (xd == 0.0) {
+                                result.double_precision = false;
+                                result.msw = 0xFFFFFFFFu; /* LOG.asm's own INFINITY constant */
+                                result.lsw = 0;
+                            } else {
+                                halmat_scalar_t absx = xs;
+                                absx.msw &= 0x7FFFFFFFu; /* LECR F0,F0 -- |ARG|, then retry via the real algorithm */
+                                result = hal_log_single(absx, &state->fpu);
+                            }
+                        } else {
+                            result = hal_log_single(xs, &state->fpu);
+                        }
+                        /* A top-level `Y=LOG(X);` call site's own compiled
+                         * caller resets F1 immediately after LOG's own
+                         * SRET, before ever storing the result -- confirmed
+                         * via a real trace (hal_log_single's own header
+                         * comment) -- so this dispatch applies that same
+                         * reset itself, unlike ATANH.asm's own internal
+                         * `ACALL LOG` (hal_atanh_single doesn't add it). */
+                        state->fpu.f1 = 0;
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 46: { /* ARCTANH: authentic AP-101S RUNASM/
+                                * ATANH.asm port (hal_transcendental.c,
+                                * task 100/id 51). Error 60 domain guard
+                                * kept identical to the prior double-based
+                                * implementation's own bound (>=1 rather
+                                * than the documented >1, see this case's
+                                * old comment, preserved below). */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        double xd = halmat_scalar_to_double(xs);
+                        if (fabs(xd) >= 1.0) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCTANH_DOMAIN, &state->pc, &branched)) break;
+                            state->vac[ins->index].is_ref = false;
+                            state->vac[ins->index].is_scalar = true;
+                            state->vac[ins->index].scalar = halmat_scalar_zero(dbl);
+                            break;
+                        }
+                        /* fpu threaded through for the internal ACALL LOG
+                         * (hal_atanh_single's own header comment); no
+                         * speculative extra reset here, same rationale as
+                         * case 5 (EXP) above. */
+                        halmat_scalar_t result = hal_atanh_single(xs, &state->fpu);
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 45: { /* ARCSINH: authentic AP-101S RUNASM/
+                                * ASINH.asm port (hal_transcendental.c,
+                                * task 100/id 51). Unbounded domain (no
+                                * App. C error entry), so no guard here --
+                                * unlike ARCTANH, every double value is
+                                * in-domain. */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        /* fpu threaded through for the internal ACALL LOG
+                         * calls (hal_asinh_single's own header comment);
+                         * no speculative extra reset here, same rationale
+                         * as case 5 (EXP)/case 46 (ARCTANH) above. */
+                        halmat_scalar_t result = hal_asinh_single(xs, &state->fpu);
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 24: { /* SQRT: authentic AP-101S RUNASM/SQRT.asm
+                                * port (hal_transcendental.c, task
+                                * 100/id 51). Error 5 domain guard kept
+                                * identical to the prior double-based
+                                * implementation's own bound (x<0), but
+                                * the ARG<0 fixup now genuinely re-runs
+                                * the real algorithm on |X| (SQRT.asm's
+                                * own "LECR F0,F0 ; B START" retry),
+                                * matching LOG's own ARG<0 fixup
+                                * convention -- not a libm sqrt(fabs(x))
+                                * approximation. ARG=0 returns 0
+                                * unchanged (SQRT.asm's own "BCB 4,EXIT"
+                                * -- exits with no error at all for
+                                * exact zero, distinct from the ARG<0
+                                * case). A DOUBLE-precision X routes
+                                * through the genuinely-double RUNASM/
+                                * DSQRT.asm port (hal_sqrt_double, id 63)
+                                * instead of hal_sqrt_single -- reusing
+                                * hal_sqrt_single and just re-tagging the
+                                * result double_precision=true gave
+                                * single-precision-only ~24-bit accuracy
+                                * mislabeled as double, which only
+                                * surfaced once narrowed back down to a
+                                * SINGLE-precision receiver's own last
+                                * significant digit (108-EXAMPLE_5.hal's
+                                * `RMS = SQRT(TOTAL/COUNT);`, TOTAL
+                                * DOUBLE). */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        double xd = halmat_scalar_to_double(xs);
+                        halmat_scalar_t result;
+                        if (xd < 0.0) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SQRT_NEGATIVE, &state->pc, &branched)) break;
+                            halmat_scalar_t absx = xs;
+                            absx.msw &= 0x7FFFFFFFu;
+                            result = dbl ? hal_sqrt_double(absx) : hal_sqrt_single(absx, &state->fpu);
+                        } else if (xd == 0.0) {
+                            result = xs;
+                            result.msw &= 0x7FFFFFFFu; /* single-narrow, matching every other case here -- F0 already 0 either way */
+                            result.lsw = 0;
+                            result.double_precision = false;
+                        } else {
+                            result = dbl ? hal_sqrt_double(xs) : hal_sqrt_single(xs, &state->fpu);
+                        }
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 17: { /* COSH: authentic AP-101S RUNASM/SINH.asm
+                                * own COSH entry port (hal_transcendental.c,
+                                * task 100/id 51). Error 9 domain guard:
+                                * |x|>175.366 (SINH.asm's own MAX constant,
+                                * X'42AF5DC0' -- the prior libm-based
+                                * implementation's own bound was actually
+                                * 175366.0, a factor-of-1000 bug traced to
+                                * USA003090 Appendix C's own "> 175,366"
+                                * text, where the comma is almost certainly
+                                * a decimal point mangled by OCR/scanning,
+                                * not a thousands separator; harmless under
+                                * libm's own graceful overflow-to-inf
+                                * behavior, but newly consequential now
+                                * that hal_cosh_single's own internal ACALL
+                                * EXP has a real, narrower domain -- fixed
+                                * here, task 108/id 51). */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        double xd = halmat_scalar_to_double(xs);
+                        halmat_scalar_t result;
+                        if (fabs(xd) > 175.366) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SINH_COSH_OVERFLOW, &state->pc, &branched)) break;
+                            result = halmat_scalar_from_double(HAL_S_MAX_REPRESENTABLE, false);
+                        } else {
+                            result = hal_cosh_single(xs, &state->fpu);
+                        }
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 22: { /* SINH: authentic AP-101S RUNASM/SINH.asm
+                                * own SINH entry port (hal_transcendental.c,
+                                * task 100/id 51). Error 9 domain guard:
+                                * |x|>175.366, same fix as case 17 (COSH)
+                                * above -- see that case's own comment for
+                                * the 175366.0-vs-175.366 bug this
+                                * corrects (odd function here -- sign of x
+                                * preserved in the fixup, per COSH's
+                                * positive-only fixup contrasted with
+                                * SINH's own sign). */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        double xd = halmat_scalar_to_double(xs);
+                        halmat_scalar_t result;
+                        if (fabs(xd) > 175.366) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_SINH_COSH_OVERFLOW, &state->pc, &branched)) break;
+                            result = halmat_scalar_from_double(copysign(HAL_S_MAX_REPRESENTABLE, xd), false);
+                        } else {
+                            result = hal_sinh_single(xs, &state->fpu);
+                        }
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 25: { /* TANH: authentic AP-101S RUNASM/TANH.asm
+                                * port (hal_transcendental.c, task 100/id
+                                * 51). Bounded (-1,1), no App. C entry --
+                                * no overflow guard needed (same as the
+                                * prior libm-based implementation). */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        halmat_scalar_t result = hal_tanh_single(xs, &state->fpu);
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 44: { /* ARCCOSH: authentic AP-101S RUNASM/
+                                * ACOSH.asm port (hal_transcendental.c,
+                                * task 100/id 51). Error 59 domain guard
+                                * kept identical to the prior libm-based
+                                * implementation's own bound (x<1). */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        double xd = halmat_scalar_to_double(xs);
+                        halmat_scalar_t result;
+                        if (xd < 1.0) {
+                            if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCCOSH_DOMAIN, &state->pc, &branched)) break;
+                            result = halmat_scalar_zero(dbl);
+                        } else {
+                            result = hal_arccosh_single(xs, &state->fpu);
+                        }
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
                         break;
                     }
                     case 3: { /* DET: matrix determinant -> SCALAR */
@@ -9397,24 +10058,93 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->vac[ins->index].scalar = matrix_determinant(ca, rows, dbl);
                         break;
                     }
-                    case 28: { /* ABVAL: vector magnitude -> SCALAR */
+                    case 28: { /* ABVAL: vector magnitude -> SCALAR. No
+                                * dedicated RUNASM RTL routine exists for
+                                * this BFNC selector (unlike SQRT/EXP/LOG/
+                                * etc) -- confirmed via yaGPC2's own
+                                * source having zero references to "BFNC"
+                                * or "ABVAL" at all, meaning BFNC is a
+                                * HALMAT/PASS1-level opcode only, already
+                                * lowered by PASS2 code generation (never
+                                * reaching the real CPU as its own
+                                * instruction) into an inlined dot-product
+                                * plus a genuine ACALL into SQRT.asm/
+                                * DSQRT.asm -- so this interpreter must
+                                * reproduce that same inlined shape itself
+                                * rather than shortcut through libm sqrt()
+                                * (id 67, 119-EXAMPLE_9.hal: a systematic
+                                * last-2-digit divergence on every single
+                                * ABVAL() call, uncovered only once the
+                                * VECTOR-formatting bug hiding it -- feeding
+                                * ABVAL genuinely-double, never-narrowed
+                                * RANDOM() results instead of the properly
+                                * single-precision-narrowed storage -- was
+                                * fixed above).
+                                *
+                                * id 71 (yagpc2-yahalmat2-issues.db): the
+                                * inlined dot-product itself has no
+                                * companion-register concern (MER/AER are
+                                * both single, per VV9S3.asm/VV9SN), but the
+                                * "genuine ACALL into SQRT.asm" above DOES
+                                * leave F1/F3 behind on exit -- now threaded
+                                * through via hal_sqrt_single's own `fpu`
+                                * parameter below, so this leaks correctly
+                                * into whatever RTL-family call comes next
+                                * (same as VCRS/id 64), instead of silently
+                                * not participating in the shared model at
+                                * all. The exact-zero early-return below
+                                * correctly does NOT touch state->fpu --
+                                * real SQRT.asm's own `BNP ERROR`/`BCB 4,EXIT`
+                                * domain guard exits before ever reaching its
+                                * own F1/F3-writing code for a zero input, so
+                                * skipping the call entirely here matches
+                                * hardware, not just a convenient shortcut. */
                         halmat_scalar_t *ca; size_t count; int rows, cols;
                         if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
                         halmat_scalar_t sum = halmat_scalar_zero(false);
                         for (size_t i = 0; i < count; i++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i], ca[i]));
-                        double mag = sqrt(halmat_scalar_to_double(sum));
+                        /* hal_sqrt_single/hal_sqrt_double both explicitly
+                         * assume X>0 (their own header comments) -- a
+                         * null-vector sum (exact zero, real hardware's
+                         * own AERROR-28 "UNIT" domain edge but a
+                         * perfectly ordinary ABVAL input) is OUT of that
+                         * assumed domain and produces garbage rather than
+                         * a clean zero if fed straight in, unlike a plain
+                         * sqrt(0.0). Special-cased the same way case 24's
+                         * own top-level SQRT already does for ARG=0. */
+                        halmat_scalar_t mag_s;
+                        if (halmat_scalar_to_double(sum) == 0.0) {
+                            mag_s = sum;
+                        } else {
+                            mag_s = sum.double_precision ? hal_sqrt_double(sum) : hal_sqrt_single(sum, &state->fpu);
+                        }
                         state->vac[ins->index].is_ref = false;
                         state->vac[ins->index].is_scalar = true;
-                        state->vac[ins->index].scalar = halmat_scalar_from_double(mag, false);
+                        state->vac[ins->index].scalar = mag_s;
                         break;
                     }
-                    case 27: { /* UNIT: normalize -> VECTOR */
+                    case 27: { /* UNIT: normalize -> VECTOR. Same "no
+                                * dedicated RTL routine, PASS2 inlines a
+                                * dot-product plus a genuine ACALL SQRT"
+                                * rationale as ABVAL (case 28) just above
+                                * -- same libm-sqrt()-shortcut gap, fixed
+                                * the same way. */
                         halmat_scalar_t *ca; size_t count; int rows, cols;
                         if (!resolve_container(state, &ins->operands[0], &ca, &count, &rows, &cols)) break;
                         if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "UNIT: container too large"); break; }
                         halmat_scalar_t sum = halmat_scalar_zero(false);
                         for (size_t i = 0; i < count; i++) sum = halmat_scalar_add(sum, halmat_scalar_multiply(ca[i], ca[i]));
-                        double mag = sqrt(halmat_scalar_to_double(sum));
+                        /* Same "hal_sqrt_single/double assume X>0, a null-
+                         * vector's own exact-zero sum needs its own
+                         * explicit bypass" fix as ABVAL (case 28) just
+                         * above -- doubly relevant here since a null
+                         * vector is UNIT's own documented error-28 case,
+                         * not just an edge case: garbage from feeding
+                         * sqrt() a zero it doesn't handle previously
+                         * masked the mag==0.0 check below entirely
+                         * (the eron_goto_appc regression this caused). */
+                        double mag = (halmat_scalar_to_double(sum) == 0.0) ? 0.0
+                            : halmat_scalar_to_double(sum.double_precision ? hal_sqrt_double(sum) : hal_sqrt_single(sum, &state->fpu));
                         halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
                         if (mag == 0.0) {
                             /* USA003090 App. C error 28 ("argument of UNIT
@@ -9462,7 +10192,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (rows <= 0 || cols <= 0 || rows != cols) { fail(state, "INVERSE: operand is not a square MATRIX"); break; }
                         if (count > HALMAT_CONTAINER_CAPACITY) { fail(state, "INVERSE: container too large"); break; }
                         halmat_scalar_t result[HALMAT_CONTAINER_CAPACITY];
-                        if (!matrix_invert(ca, rows, result)) {
+                        if (!matrix_invert(ca, rows, result, &state->fpu)) {
                             /* USA003090 App. C error 27 ("argument of
                              * INVERSE is a singular matrix"): standard
                              * fixup is the identity matrix, not an abort
@@ -9499,28 +10229,58 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         state->vac[ins->index].scalar = sum;
                         break;
                     }
-                    case 47: { /* ARCTAN2(α,β): atan2(α,β) per Appendix B's "α=k sinθ, β=k cosθ" convention -> SCALAR angle */
+                    case 47: { /* ARCTAN2(α,β): authentic AP-101S RUNASM
+                               * port (hal_transcendental.c, task 100/id
+                               * 51), per Appendix B's "α=k sinθ, β=k
+                               * cosθ" convention -> SCALAR angle. A real
+                               * trace confirmed DOUBLE-declared operands
+                               * compile to a call into DATAN2.asm's own
+                               * separate double-precision routine, NOT a
+                               * "double-tagged" call into EATAN2 (unlike
+                               * every other transcendental here, where a
+                               * DOUBLE operand is silently narrowed to
+                               * single) -- see hal_atan2_double's own
+                               * header comment. */
                         if (ins->operand_count != 2) { fail(state, "ARCTAN2: expected 2 operands"); break; }
                         resolved_value_t b2;
                         if (!resolve_operand(state, &ins->operands[1], &b2)) break;
-                        double alpha = halmat_scalar_to_double(rv_to_scalar(&a));
-                        double beta = halmat_scalar_to_double(rv_to_scalar(&b2));
-                        bool dbl2 = rv_to_scalar(&a).double_precision || rv_to_scalar(&b2).double_precision;
-                        double r;
+                        halmat_scalar_t sinarg = rv_to_scalar(&a);
+                        halmat_scalar_t cosarg = rv_to_scalar(&b2);
+                        double alpha = halmat_scalar_to_double(sinarg);
+                        double beta = halmat_scalar_to_double(cosarg);
+                        bool dbl2 = sinarg.double_precision || cosarg.double_precision;
+                        halmat_scalar_t result;
                         if (alpha == 0.0 && beta == 0.0) {
-                            /* error 62: libm's atan2(0,0) already returns 0.0,
-                             * satisfying the documented fixup on its own --
-                             * still routed through arithmetic_error_should_
-                             * apply_fixup so ERRGRP/ERRNUM and any registered
-                             * ON ERROR$(4:62) handler still see/react to it. */
+                            /* error 62 -- the RTL's own ERROR handler:
+                             * SER F0,F0 (zero) then AERROR 62. */
                             if (!arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_ARCTAN2_ZERO, &state->pc, &branched)) break;
-                            r = 0.0;
+                            result.double_precision = false;
+                            result.msw = 0;
+                            result.lsw = 0;
+                        } else if (dbl2) {
+                            result = hal_atan2_double(sinarg, cosarg);
                         } else {
-                            r = atan2(alpha, beta);
+                            result = hal_atan2_single(sinarg, cosarg);
                         }
+                        if (dbl2) result.double_precision = true;
                         state->vac[ins->index].is_ref = false;
                         state->vac[ins->index].is_scalar = true;
-                        state->vac[ins->index].scalar = halmat_scalar_from_double(r, dbl2);
+                        state->vac[ins->index].scalar = result;
+                        break;
+                    }
+                    case 37: { /* ARCTAN: authentic AP-101S RUNASM/
+                                * EATAN2.asm own ATAN entry point port
+                                * (hal_transcendental.c, task 100/id 51).
+                                * Unbounded domain (no App. C entry, same
+                                * as the old libm-based comment already
+                                * noted), so no guard here. */
+                        halmat_scalar_t xs = rv_to_scalar(&a);
+                        bool dbl = xs.double_precision;
+                        halmat_scalar_t result = hal_atan_single(xs);
+                        if (dbl) result.double_precision = true;
+                        state->vac[ins->index].is_ref = false;
+                        state->vac[ins->index].is_scalar = true;
+                        state->vac[ins->index].scalar = result;
                         break;
                     }
                     case 4: { /* DIV(α,β): integer division α/β, both arguments rounded to integers first -> INTEGER */
@@ -10106,8 +10866,33 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (call_array_replay && state->arrayed_index > 0) {
                     break;
                 }
+                /* ARRAY-of-MATRIX/ARRAY-of-VECTOR *replayed* WRITE argument
+                 * (`WRITE(6) K;`, K an `ARRAY(5) MATRIX(3,4)` --
+                 * multi_item_write_truncated_with_bareword_array_of_matrix/
+                 * id 59): confirmed via a real HALSFC compile that this
+                 * shape's own XXAR carries TAG1=3(MATRIX)/4(VECTOR), same
+                 * as a genuine whole VECTOR/MATRIX reference, but -- unlike
+                 * a plain VECTOR/MATRIX SYT, which is never replayed -- IS
+                 * wrapped in an ADLP(5)/DLPE replay, one pass per outer
+                 * ARRAY element. Each pass must resolve to that one
+                 * element's own full rows*cols MATRIX (or cols-wide
+                 * VECTOR) block (resolve_container's own array_of_matrix/
+                 * array_of_vector slicing, just added/already present
+                 * above) rather than falling through to the generic
+                 * resolve_operand() single-flat-scalar path below, which
+                 * has no array_of_matrix/array_of_vector awareness at all
+                 * and would silently capture just 1 of the 12 (or 3)
+                 * elements each pass actually represents. */
+                bool replay_container_row = false;
+                if (ins->operands[0].qual == QUAL_SYT && state->arrayed_index >= 0 &&
+                    (ins->operands[0].tag1 == 3 || ins->operands[0].tag1 == 4) &&
+                    syt_is_array_shaped(state, ins->operands[0].data)) {
+                    ensure_container(state, ins->operands[0].data);
+                    const halmat_syt_entry_t *rce = &state->syt[ins->operands[0].data];
+                    replay_container_row = rce->array_of_matrix || rce->array_of_vector;
+                }
                 if (((state->io_pending.kind == 2 || state->io_pending.is_call) && state->arrayed_index < 0) ||
-                    whole_vac_container || call_array_replay) {
+                    whole_vac_container || call_array_replay || replay_container_row) {
                     /* A whole VECTOR/MATRIX reference (QUAL=SYT, confirmed
                      * via a real HALSFC compile of `WRITE(6) V;`/
                      * `WRITE(6) M;` -- class-0/XXAR.md's former "whether
@@ -10173,7 +10958,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * documents. */
                     bool whole_xpt = ins->operands[0].qual == QUAL_XPT &&
                                       (ins->operands[0].tag1 == 4 || ins->operands[0].tag1 == 3);
-                    if (whole_syt || whole_vac || whole_xpt) {
+                    if (whole_syt || whole_vac || whole_xpt || replay_container_row) {
                         if (whole_syt && (ins->operands[0].tag1 == 1 || ins->operands[0].tag1 == 2)) {
                             /* Whole BIT/CHARACTER ARRAY argument
                              * (`WRITE(6) DATA_VALID;`, `DATA_VALID` an

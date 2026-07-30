@@ -1,0 +1,27 @@
+C DB id 53/72 (yagpc2-yahalmat2-issues.db): three back-to-back,
+C bit-identical A4I=INVERSE(A4A) calls on the SAME exactly-singular
+C 4x4 matrix must give the SAME result every time (the standard
+C singularity fixup: an identity matrix). The real RTL (RUNASM/
+C MM14SN.asm) had a genuine, undetected bug -- its own general-N
+C Gauss-Jordan reduction loop's AEDR F4,F2 read F2:F3/F4:F5 as a
+C genuine extended pair without ever clearing the companion halves
+C (F3/F5), so unrelated prior floating-point call history could
+C corrupt the reduction and even suppress the singularity-check SEND
+C ERROR entirely -- producing wild, non-reproducible garbage on
+C repeat calls instead of a consistent fixup. Fixed on the real RTL
+C side via an &ASM101S-gated SER F3,F3/SER F5,F5 pair (yaGPC2 commit
+C 8439ae054); id 72 updates hal_matrix.c to model the CORRECTED
+C behavior (both companions freshly zeroed at every use) instead of
+C the historical leak.
+  T:
+  PROGRAM;
+     DECLARE A4A MATRIX(4,4) INITIAL(1,2,3,4,5,6,7,8,9,
+        10,11,12,13,14,15,16);
+     DECLARE A4I MATRIX(4,4);
+     A4I = INVERSE(A4A);
+     WRITE(6) A4I;
+     A4I = INVERSE(A4A);
+     WRITE(6) A4I;
+     A4I = INVERSE(A4A);
+     WRITE(6) A4I;
+  CLOSE T;
