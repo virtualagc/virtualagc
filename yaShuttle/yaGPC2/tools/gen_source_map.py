@@ -4,15 +4,24 @@ for yaGPC2's --debug mode (Stage 3), from a HALSFC compile's plain-text
 pass1.rpt/pass2.rpt reports plus the linker's -lnk101.json section table.
 
 Why text reports instead of the SDF binary format debugger-planner.md
-originally targeted: direct investigation found the SDF's per-statement
-SRN (Statement Reference Number) field comes back all-blank from this
-toolchain's HAL/S compiler port (modules/sdf + modules/sdfpkg parse it
-fine -- the field itself is just never populated at compile time), which
-makes the binary SDF route a dead end for now. pass1.rpt/pass2.rpt are
-plain text, already contain everything needed (full source text per
-statement in pass1.rpt; statement-start markers "ST#N EQU *" interleaved
-with the CSECT-relative code addresses in pass2.rpt), and don't depend on
-that unpopulated field at all.
+originally targeted: an earlier pass of this tool tried to read the SDF's
+per-statement SRN (Statement Reference Number) field and found it came
+back all-blank -- turns out that's not a toolchain gap, just this
+script asking the wrong question. SRN comes from columns 73-78 of the
+HAL/S source card image, an optional field the test source here simply
+never had characters in; and even when present, SRN is a poor statement
+identifier since it isn't required to be unique. The number that's
+actually universal is the HAL/S *statement number*: a HAL/S statement's
+1-based position in the SDF's own `statementIndexTable` (equivalently,
+the SDF "member" restarts numbering at 1 per file) -- and that's exactly
+the leftmost number on each pass1.rpt listing line, which this tool was
+already reading correctly under the wrong name. Renamed "srn" -> "stmt"
+throughout accordingly; no logic changed. pass1.rpt/pass2.rpt remain the
+data source (plain text, no cmem/sdf/sdfpkg dependency needed) -- they
+already contain everything needed: full source text per statement in
+pass1.rpt; statement-start markers "ST#N EQU *" interleaved with the
+CSECT-relative code addresses in pass2.rpt (that `N` is the same
+statement number).
 
 Must be compiled without NOTABLES for pass2.rpt's per-statement "ST#N EQU
 *" markers to appear (same TABLES-vs-NOTABLES finding debugger-planner.md
@@ -32,11 +41,11 @@ import sys
 
 
 def parse_pass1(path):
-    """Returns {srn: [source_text_line, ...]} -- a statement may span
+    """Returns {stmt: [source_text_line, ...]} -- a statement may span
     multiple physical listing lines (e.g. a label line plus the statement
-    it labels, both tagged with the same SRN).
+    it labels, both tagged with the same statement number).
 
-    The line format is "SRN M|SOURCE_TEXT_PADDED|SCOPE" with the source
+    The line format is "STMT M|SOURCE_TEXT_PADDED|SCOPE" with the source
     text padded to a fixed column -- matched on the LAST '|' rather than
     the first, since HAL/S source can itself contain '|' characters (the
     '||' string-concatenation operator)."""
@@ -51,14 +60,14 @@ def parse_pass1(path):
             close = rest.rfind("|")
             if close < 0:
                 continue
-            srn = int(m.group(1))
+            stmt = int(m.group(1))
             text = rest[:close].rstrip()
-            statements.setdefault(srn, []).append(text)
+            statements.setdefault(stmt, []).append(text)
     return statements
 
 
 def parse_pass2(path, code_csect):
-    """Returns [(offset, srn), ...] in ascending-offset order.
+    """Returns [(offset, stmt), ...] in ascending-offset order.
 
     "ST#N EQU *" markers are emitted wherever the assembler happens to be
     when it reaches statement N's boundary, which is not always inside
@@ -75,7 +84,7 @@ def parse_pass2(path, code_csect):
     csect_re = re.compile(r"^([0-9A-Fa-f]*)\s+(\S+)\s+CSECT\b")
     stmt_re = re.compile(r"^([0-9A-Fa-f]+)\s+ST#(\d+)\s+EQU\s+\*")
     in_code = False
-    pending_srns = []
+    pending_stmts = []
     entries = []
     with open(path, "r", errors="replace") as f:
         for line in f:
@@ -83,10 +92,10 @@ def parse_pass2(path, code_csect):
             if m:
                 loc_str, name = m.group(1), m.group(2)
                 in_code = name == code_csect
-                if in_code and pending_srns:
+                if in_code and pending_stmts:
                     offset = int(loc_str, 16) if loc_str else 0
-                    entries.extend((offset, srn) for srn in pending_srns)
-                    pending_srns = []
+                    entries.extend((offset, stmt) for stmt in pending_stmts)
+                    pending_stmts = []
                 continue
             m = stmt_re.match(line)
             if not m:
@@ -94,7 +103,7 @@ def parse_pass2(path, code_csect):
             if in_code:
                 entries.append((int(m.group(1), 16), int(m.group(2))))
             else:
-                pending_srns.append(int(m.group(2)))
+                pending_stmts.append(int(m.group(2)))
     return entries
 
 
@@ -128,12 +137,12 @@ def main():
             "-- was this compiled without NOTABLES?"
         )
 
-    addr_to_srn = {}
-    for offset, srn in entries:
-        addr_to_srn[base + offset] = srn  # last one wins for a shared (zero-code-statement) address
+    addr_to_stmt = {}
+    for offset, stmt in entries:
+        addr_to_stmt[base + offset] = stmt  # last one wins for a shared (zero-code-statement) address
 
-    addresses = [{"addr": a, "srn": s} for a, s in sorted(addr_to_srn.items())]
-    stmt_list = [{"srn": srn, "lines": lines} for srn, lines in sorted(statements.items())]
+    addresses = [{"addr": a, "stmt": s} for a, s in sorted(addr_to_stmt.items())]
+    stmt_list = [{"stmt": stmt, "lines": lines} for stmt, lines in sorted(statements.items())]
 
     out = {
         "module": args.module,

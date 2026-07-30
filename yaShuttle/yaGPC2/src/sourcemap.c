@@ -8,11 +8,11 @@
 
 typedef struct {
     uint32_t addr;
-    int srn;
+    int stmt;
 } AddrEntry;
 
 typedef struct {
-    int srn;
+    int stmt;
     char *text;
 } StmtEntry;
 
@@ -84,7 +84,7 @@ SourceMap *sourcemap_load(const char *jsonPath) {
         sm->stmts = calloc((size_t)stmtCount, sizeof(StmtEntry));
         for (int i = 0; i < stmtCount; i++) {
             JsonValue *st = json_arr_get(stmts, i);
-            sm->stmts[i].srn = (int)json_as_number(json_obj_get(st, "srn"), 0);
+            sm->stmts[i].stmt = (int)json_as_number(json_obj_get(st, "stmt"), 0);
             sm->stmts[i].text = join_lines(json_obj_get(st, "lines"));
             sm->stmtCount++;
         }
@@ -97,7 +97,7 @@ SourceMap *sourcemap_load(const char *jsonPath) {
         for (int i = 0; i < addrCount; i++) {
             JsonValue *e = json_arr_get(addrs, i);
             sm->addrs[i].addr = (uint32_t)json_as_number(json_obj_get(e, "addr"), 0);
-            sm->addrs[i].srn = (int)json_as_number(json_obj_get(e, "srn"), 0);
+            sm->addrs[i].stmt = (int)json_as_number(json_obj_get(e, "stmt"), 0);
             sm->addrCount++;
         }
         qsort(sm->addrs, (size_t)sm->addrCount, sizeof(AddrEntry), cmp_addr);
@@ -121,14 +121,14 @@ void sourcemap_free(SourceMap *sm) {
     free(sm);
 }
 
-static const char *find_stmt_text(const SourceMap *sm, int srn) {
+static const char *find_stmt_text(const SourceMap *sm, int stmt) {
     for (int i = 0; i < sm->stmtCount; i++) {
-        if (sm->stmts[i].srn == srn) return sm->stmts[i].text;
+        if (sm->stmts[i].stmt == stmt) return sm->stmts[i].text;
     }
     return NULL;
 }
 
-const char *sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *srnOut) {
+const char *sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *stmtOut) {
     if (!sm || sm->addrCount == 0) return NULL;
     if (addr < sm->codeStart || addr >= sm->codeEnd) return NULL;
     int lo = 0, hi = sm->addrCount - 1, best = -1;
@@ -142,7 +142,7 @@ const char *sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *srnOut) {
         }
     }
     if (best < 0) return NULL;
-    int srn = sm->addrs[best].srn;
-    if (srnOut) *srnOut = srn;
-    return find_stmt_text(sm, srn);
+    int stmt = sm->addrs[best].stmt;
+    if (stmtOut) *stmtOut = stmt;
+    return find_stmt_text(sm, stmt);
 }

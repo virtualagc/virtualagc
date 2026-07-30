@@ -80,8 +80,8 @@ struct Debugger {
     /* Stage 3: HAL/S source-line display (see src/sourcemap.h). NULL
      * unless --source-map was given -- zero cost otherwise. */
     SourceMap *srcmap;
-    int lastSrn;
-    bool hasLastSrn; /* only show a source line when it differs from the
+    int lastStmt;
+    bool hasLastStmt; /* only show a source line when it differs from the
                        * last one shown, matching yaHALMAT2's --debug mode */
 };
 
@@ -415,10 +415,10 @@ static void show_current_location(AGEHarness *age) {
  * statement mapped at this exact address"). */
 static bool show_source_line(Debugger *dbg, uint32_t addr) {
     if (!dbg->srcmap) return false;
-    int srn = 0;
-    const char *text = sourcemap_lookup(dbg->srcmap, addr, &srn);
+    int stmt = 0;
+    const char *text = sourcemap_lookup(dbg->srcmap, addr, &stmt);
     if (!text) return false;
-    printf("HAL/S %4d:%s\n", srn, text);
+    printf("HAL/S %4d:%s\n", stmt, text);
     return true;
 }
 
@@ -812,6 +812,38 @@ static int tokenize(char *line, char *tokens[DEBUGGER_MAX_TOKENS]) {
     return n;
 }
 
+/* gdb allows a repeat count to be typed directly after a command with no
+ * intervening space (e.g. "step5" same as "step 5") -- split such a
+ * token in place if the first one is letters immediately followed by
+ * digits and nothing else, shifting the remaining tokens up by one
+ * slot. "x32" (an alias for xw, not "x" + count 32) is the one existing
+ * command name that itself ends in digits, so it's excluded. */
+static int split_digit_suffix(char *tokens[DEBUGGER_MAX_TOKENS], int argc) {
+    if (argc == 0 || argc >= DEBUGGER_MAX_TOKENS) return argc;
+    char *tok = tokens[0];
+    if (strcmp(tok, "x32") == 0) return argc;
+
+    char *p = tok;
+    while (*p && !isdigit((unsigned char)*p)) p++;
+    if (p == tok || *p == '\0') return argc; /* no letters, or no digits at all */
+    for (char *q = p; *q; q++) {
+        if (!isdigit((unsigned char)*q)) return argc; /* letters after the digit run too -- leave it alone */
+    }
+
+    /* Copy the digit run out BEFORE truncating tok in place -- p+1 would
+     * otherwise point one byte past the digit we just overwrote with the
+     * new NUL terminator, not at a copy of it. */
+    static char digitBuf[32];
+    size_t digitLen = strlen(p);
+    if (digitLen >= sizeof(digitBuf)) return argc;
+    memcpy(digitBuf, p, digitLen + 1);
+
+    *p = '\0';
+    for (int i = argc; i > 1; i--) tokens[i] = tokens[i - 1];
+    tokens[1] = digitBuf;
+    return argc + 1;
+}
+
 /* Returns true if this command resumes execution (step/next/run) --
  * the caller should stop prompting and let debugger_hook return. */
 static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, uint32_t hw2, int argc,
@@ -1043,6 +1075,7 @@ static void debugger_repl(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t
         char *tokens[DEBUGGER_MAX_TOKENS];
         int argc = tokenize(lineBuf, tokens);
         if (argc == 0) continue;
+        argc = split_digit_suffix(tokens, argc);
 
         if (dispatch_command(dbg, age, nia, hw1, hw2, argc, tokens)) return;
     }
@@ -1154,12 +1187,12 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
     if (shouldStop) printf("--- stopped: %s (%ld steps) ---\n", stopMsg, step);
     show_current_location(age);
     if (dbg->srcmap) {
-        int srn = 0;
-        const char *text = sourcemap_lookup(dbg->srcmap, nia, &srn);
-        if (text && (!dbg->hasLastSrn || srn != dbg->lastSrn)) {
-            printf("HAL/S %4d:%s\n", srn, text);
-            dbg->lastSrn = srn;
-            dbg->hasLastSrn = true;
+        int stmt = 0;
+        const char *text = sourcemap_lookup(dbg->srcmap, nia, &stmt);
+        if (text && (!dbg->hasLastStmt || stmt != dbg->lastStmt)) {
+            printf("HAL/S %4d:%s\n", stmt, text);
+            dbg->lastStmt = stmt;
+            dbg->hasLastStmt = true;
         }
     }
     if (dbg->watchCount > 0) show_watches(dbg, age);
