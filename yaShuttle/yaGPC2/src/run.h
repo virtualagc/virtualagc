@@ -18,6 +18,7 @@
 #include <stdint.h>
 
 #include "ageharness.h"
+#include "debugger.h"
 #include "iohost.h"
 #include "opts.h"
 
@@ -49,6 +50,21 @@ typedef struct {
     char stopReason[600];
     bool hasLastSection;
     char lastSection[256];
+
+    /* Memory watchpoints (from --watch/--watch-log), checked every step.
+     * Populated by both batchrunner_run() and batchrunner_run_interactive()
+     * via the shared batchrunner_step() so the feature works the same way
+     * in either mode. */
+    bool hasWatchpoints;
+    uint32_t *watchAddrs;
+    int watchAddrCount;
+    uint16_t *watchBefore;
+
+    /* --debug: see src/debugger.h. NULL/false unless --debug was passed
+     * -- zero cost otherwise, since debugger_hook() is then never
+     * called. */
+    bool debugMode;
+    Debugger *dbg;
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts);

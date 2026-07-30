@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     BatchRunner runner;
     batchrunner_init(&runner, &opts);
 
-    int code = opts.interactive ? batchrunner_run_interactive(&runner) : batchrunner_run(&runner);
+    int code = (opts.interactive || opts.debug) ? batchrunner_run_interactive(&runner) : batchrunner_run(&runner);
 
     batchrunner_free(&runner);
     return code;

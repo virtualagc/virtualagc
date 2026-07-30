@@ -33,6 +33,16 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     r->verbose = opts->verbose;
     r->interactive = opts->interactive;
 
+    r->debugMode = opts->debug;
+    r->dbg = opts->debug ? debugger_create(opts) : NULL;
+    if (opts->debug && strcmp(opts->maxSteps, "100000") == 0) {
+        /* The batch default is too tight for an interactive debugging
+         * session left running via 'continue' -- bump it to match
+         * cmd_debug.coffee's own much larger default (10000000), unless
+         * the user explicitly passed --max-steps themselves. */
+        r->maxSteps = 10000000;
+    }
+
     ageharness_init(&r->age);
     r->age.halUCP.verbose = r->verbose;
     r->age.halUCP.cbCtx = NULL;
@@ -46,6 +56,7 @@ void batchrunner_free(BatchRunner *r) {
     free(r->lines);
     iohost_free(&r->iohost);
     ageharness_free(&r->age);
+    if (r->dbg) debugger_free(r->dbg);
     memset(r, 0, sizeof(*r));
 }
 
@@ -314,6 +325,170 @@ static void format_watchpoint_msg(BatchRunner *r, uint32_t addr, uint16_t before
              addrHex, beforeHex, afterHex, disasm, niaHex, step, sectionPart, r0h, r1h, r3h, r5h, r7h);
 }
 
+/* Shared fetch/decode/execute step used by both batchrunner_run() and
+ * batchrunner_run_interactive() — the single place a debugger hook can
+ * be inserted (immediately before ap101_exec1(), before the HalUCP trap
+ * check) with one integration point instead of two. Returns false if the
+ * loop should stop (r->hasStopReason will be set), true to continue. */
+static bool batchrunner_step(BatchRunner *r) {
+    RegSnapshot before, after;
+    ageharness_snapshot_regs(&r->age, &before);
+    uint32_t nia = psw_get_nia(&r->age.gpc.cpu.psw);
+
+    if (r->traceEnabled && r->age.sym.loaded) {
+        const char *currentSection = symtable_get_section_at(&r->age.sym, nia);
+        if (currentSection && (!r->hasLastSection || strcmp(currentSection, r->lastSection) != 0)) {
+            char line[300];
+            snprintf(line, sizeof line, "--- ENTERING: %s ---", currentSection);
+            batchrunner_write(r, line);
+            r->hasLastSection = true;
+            snprintf(r->lastSection, sizeof r->lastSection, "%s", currentSection);
+        }
+    }
+
+    /* Under --debug, the debugger's own breakpoint table (seeded from
+     * --break, if given -- see debugger_create()) replaces this single-
+     * breakpoint mechanism rather than running alongside it as a second,
+     * redundant check. */
+    if (!r->debugMode && r->hasBreakpoint && nia == r->breakpoint) {
+        char bpHex[16];
+        as_hex(bpHex, sizeof bpHex, (long long)nia, 4);
+        snprintf(r->stopReason, sizeof r->stopReason, "breakpoint at 0x%s", bpHex);
+        r->hasStopReason = true;
+        return false;
+    }
+
+    uint32_t hw1 = mcm_get16(&r->age.gpc.cpu.mainStorage, nia);
+    uint32_t hw2 = mcm_get16(&r->age.gpc.cpu.mainStorage, nia + 1);
+
+    char disasm[256];
+    instr_to_str(hw1, hw2, disasm, sizeof disasm);
+    DInstr v;
+    const InstrDesc *d = instr_decode(hw1, hw2, &v);
+    int instrLen = d ? d->pb.origLen : 1;
+
+    bool traceWanted = r->traceEnabled || (r->debugMode && debugger_wants_trace(r->dbg));
+
+    if (!d) {
+        if (traceWanted) {
+            char line[400];
+            batchrunner_format_trace_line(r, r->step, nia, hw1, hw2, "??? (invalid)", 1, NULL, 0, line, sizeof line);
+            batchrunner_write(r, line);
+        }
+        char hexv[16];
+        as_hex(hexv, sizeof hexv, (long long)hw1, 4);
+        char niaHex[16];
+        as_hex(niaHex, sizeof niaHex, (long long)nia, 4);
+        snprintf(r->stopReason, sizeof r->stopReason, "invalid instruction 0x%s at 0x%s", hexv, niaHex);
+        r->hasStopReason = true;
+        return false;
+    }
+
+    if (r->hasWatchpoints) {
+        for (int i = 0; i < r->watchAddrCount; i++) {
+            r->watchBefore[i] = (uint16_t)mcm_get16(&r->age.gpc.cpu.mainStorage, r->watchAddrs[i]);
+        }
+    }
+
+    if (r->debugMode) {
+        if (!debugger_hook(r->dbg, &r->age, nia, hw1, hw2, r->step)) return false;
+    }
+
+    if (r->age.halUCP.active && halucp_is_trap_addr(&r->age.halUCP, nia)) {
+        halucp_check_trap(&r->age.halUCP, nia); /* may synchronously block on stdin under --interactive */
+    }
+
+    ap101_exec1(&r->age.gpc);
+
+    ageharness_snapshot_regs(&r->age, &after);
+    RegChange changes[REG_SNAPSHOT_MAX_CHANGES];
+    int changeCount = ageharness_diff_regs(&before, &after, changes);
+    int filteredCount = 0;
+    RegChange filtered[REG_SNAPSHOT_MAX_CHANGES];
+    for (int i = 0; i < changeCount; i++) {
+        if (strcmp(changes[i].name, "NIA") != 0) filtered[filteredCount++] = changes[i];
+    }
+
+    if (traceWanted) {
+        char line[2400];
+        batchrunner_format_trace_line(r, r->step, nia, hw1, hw2, disasm, instrLen, filtered, filteredCount, line, sizeof line);
+        batchrunner_write(r, line);
+    }
+
+    r->step++;
+
+    if (r->traceEnabled && r->dumpInterval > 0 && r->step % r->dumpInterval == 0) {
+        write_reg_dump(r, r->step);
+        batchrunner_write(r, "");
+    }
+
+    if (r->hasWatchpoints) {
+        for (int i = 0; i < r->watchAddrCount; i++) {
+            uint16_t newVal = (uint16_t)mcm_get16(&r->age.gpc.cpu.mainStorage, r->watchAddrs[i]);
+            if (newVal != r->watchBefore[i]) {
+                char wmsg[512];
+                format_watchpoint_msg(r, r->watchAddrs[i], r->watchBefore[i], newVal, disasm, nia, r->step, &after, wmsg, sizeof wmsg);
+                if (r->watchLog) {
+                    fprintf(stderr, "%s\n", wmsg);
+                    r->watchBefore[i] = newVal;
+                } else {
+                    snprintf(r->stopReason, sizeof r->stopReason, "%s", wmsg);
+                    r->hasStopReason = true;
+                    break;
+                }
+            }
+        }
+        if (r->hasStopReason) return false;
+    }
+
+    if (psw_get_wait_state(&r->age.gpc.cpu.psw)) {
+        snprintf(r->stopReason, sizeof r->stopReason, "wait state");
+        r->hasStopReason = true;
+        return false;
+    }
+
+    return true;
+}
+
+/* Shared by both loops so --watch/--watch-log behave identically in
+ * batch and interactive mode. */
+static void batchrunner_init_watchpoints(BatchRunner *r) {
+    WatchAddrs wa = build_watch_addrs(r->opts);
+    r->hasWatchpoints = wa.count > 0;
+    r->watchAddrs = wa.addrs;
+    r->watchAddrCount = wa.count;
+    r->watchBefore = r->hasWatchpoints ? malloc((size_t)wa.count * sizeof(uint16_t)) : NULL;
+}
+
+static void batchrunner_free_watchpoints(BatchRunner *r) {
+    free(r->watchBefore);
+    free(r->watchAddrs);
+    r->watchBefore = NULL;
+    r->watchAddrs = NULL;
+}
+
+/* Shared end-of-run reporting/exit-code logic for both loops. */
+static int batchrunner_report_stop(BatchRunner *r) {
+    if (!r->hasStopReason) {
+        snprintf(r->stopReason, sizeof r->stopReason, "max steps reached (%ld)", r->maxSteps);
+        r->hasStopReason = true;
+    }
+
+    char msg[700];
+    snprintf(msg, sizeof msg, "--- STOPPED after %ld steps (reason: %s) ---", r->step, r->stopReason);
+    batchrunner_info(r, msg);
+    batchrunner_info(r, "--- FINAL REGISTERS ---");
+    info_reg_dump(r, r->step);
+
+    batchrunner_flush(r);
+
+    if (strcmp(r->stopReason, "wait state") != 0) {
+        fprintf(stderr, "ERROR: %s\n", r->stopReason);
+        return 1;
+    }
+    return 0;
+}
+
 int batchrunner_run(BatchRunner *r) {
     long byteCount = batchrunner_load(r);
     batchrunner_init_io(r);
@@ -343,143 +518,21 @@ int batchrunner_run(BatchRunner *r) {
 
     print_section_map(r);
 
-    long step = 0;
-    bool hasStopReason = false;
-    char stopReason[600] = "";
-    bool hasLastSection = false;
-    char lastSection[256] = "";
+    r->step = 0;
+    r->hasStopReason = false;
+    r->stopReason[0] = '\0';
+    r->hasLastSection = false;
+    r->lastSection[0] = '\0';
 
-    WatchAddrs watchAddrs = build_watch_addrs(r->opts);
-    bool hasWatchpoints = watchAddrs.count > 0;
-    uint16_t *watchBefore = hasWatchpoints ? malloc((size_t)watchAddrs.count * sizeof(uint16_t)) : NULL;
+    batchrunner_init_watchpoints(r);
 
-    while (step < r->maxSteps) {
-        RegSnapshot before, after;
-        ageharness_snapshot_regs(&r->age, &before);
-        uint32_t nia = psw_get_nia(&r->age.gpc.cpu.psw);
-
-        if (r->traceEnabled && r->age.sym.loaded) {
-            const char *currentSection = symtable_get_section_at(&r->age.sym, nia);
-            if (currentSection && (!hasLastSection || strcmp(currentSection, lastSection) != 0)) {
-                char line[300];
-                snprintf(line, sizeof line, "--- ENTERING: %s ---", currentSection);
-                batchrunner_write(r, line);
-                hasLastSection = true;
-                snprintf(lastSection, sizeof lastSection, "%s", currentSection);
-            }
-        }
-
-        if (r->hasBreakpoint && nia == r->breakpoint) {
-            char bpHex[16];
-            as_hex(bpHex, sizeof bpHex, (long long)nia, 4);
-            snprintf(stopReason, sizeof stopReason, "breakpoint at 0x%s", bpHex);
-            hasStopReason = true;
-            break;
-        }
-
-        uint32_t hw1 = mcm_get16(&r->age.gpc.cpu.mainStorage, nia);
-        uint32_t hw2 = mcm_get16(&r->age.gpc.cpu.mainStorage, nia + 1);
-
-        char disasm[256];
-        instr_to_str(hw1, hw2, disasm, sizeof disasm);
-        DInstr v;
-        const InstrDesc *d = instr_decode(hw1, hw2, &v);
-        int instrLen = d ? d->pb.origLen : 1;
-
-        if (!d) {
-            if (r->traceEnabled) {
-                char line[400];
-                batchrunner_format_trace_line(r, step, nia, hw1, hw2, "??? (invalid)", 1, NULL, 0, line, sizeof line);
-                batchrunner_write(r, line);
-            }
-            char hexv[16];
-            as_hex(hexv, sizeof hexv, (long long)hw1, 4);
-            char niaHex[16];
-            as_hex(niaHex, sizeof niaHex, (long long)nia, 4);
-            snprintf(stopReason, sizeof stopReason, "invalid instruction 0x%s at 0x%s", hexv, niaHex);
-            hasStopReason = true;
-            break;
-        }
-
-        if (hasWatchpoints) {
-            for (int i = 0; i < watchAddrs.count; i++) {
-                watchBefore[i] = (uint16_t)mcm_get16(&r->age.gpc.cpu.mainStorage, watchAddrs.addrs[i]);
-            }
-        }
-
-        if (r->age.halUCP.active && halucp_is_trap_addr(&r->age.halUCP, nia)) {
-            halucp_check_trap(&r->age.halUCP, nia);
-        }
-
-        ap101_exec1(&r->age.gpc);
-
-        ageharness_snapshot_regs(&r->age, &after);
-        RegChange changes[REG_SNAPSHOT_MAX_CHANGES];
-        int changeCount = ageharness_diff_regs(&before, &after, changes);
-        int filteredCount = 0;
-        RegChange filtered[REG_SNAPSHOT_MAX_CHANGES];
-        for (int i = 0; i < changeCount; i++) {
-            if (strcmp(changes[i].name, "NIA") != 0) filtered[filteredCount++] = changes[i];
-        }
-
-        if (r->traceEnabled) {
-            char line[2400];
-            batchrunner_format_trace_line(r, step, nia, hw1, hw2, disasm, instrLen, filtered, filteredCount, line, sizeof line);
-            batchrunner_write(r, line);
-        }
-
-        step++;
-
-        if (r->traceEnabled && r->dumpInterval > 0 && step % r->dumpInterval == 0) {
-            write_reg_dump(r, step);
-            batchrunner_write(r, "");
-        }
-
-        if (hasWatchpoints) {
-            for (int i = 0; i < watchAddrs.count; i++) {
-                uint16_t newVal = (uint16_t)mcm_get16(&r->age.gpc.cpu.mainStorage, watchAddrs.addrs[i]);
-                if (newVal != watchBefore[i]) {
-                    char wmsg[512];
-                    format_watchpoint_msg(r, watchAddrs.addrs[i], watchBefore[i], newVal, disasm, nia, step, &after, wmsg, sizeof wmsg);
-                    if (r->watchLog) {
-                        fprintf(stderr, "%s\n", wmsg);
-                        watchBefore[i] = newVal;
-                    } else {
-                        snprintf(stopReason, sizeof stopReason, "%s", wmsg);
-                        hasStopReason = true;
-                        break;
-                    }
-                }
-            }
-            if (hasStopReason) break;
-        }
-
-        if (psw_get_wait_state(&r->age.gpc.cpu.psw)) {
-            snprintf(stopReason, sizeof stopReason, "wait state");
-            hasStopReason = true;
-            break;
-        }
+    while (r->step < r->maxSteps) {
+        if (!batchrunner_step(r)) break;
     }
 
-    free(watchBefore);
-    free(watchAddrs.addrs);
+    batchrunner_free_watchpoints(r);
 
-    if (!hasStopReason) {
-        snprintf(stopReason, sizeof stopReason, "max steps reached (%ld)", r->maxSteps);
-    }
-
-    snprintf(msg, sizeof msg, "--- STOPPED after %ld steps (reason: %s) ---", step, stopReason);
-    batchrunner_info(r, msg);
-    batchrunner_info(r, "--- FINAL REGISTERS ---");
-    info_reg_dump(r, step);
-
-    batchrunner_flush(r);
-
-    if (strcmp(stopReason, "wait state") != 0) {
-        fprintf(stderr, "ERROR: %s\n", stopReason);
-        return 1;
-    }
-    return 0;
+    return batchrunner_report_stop(r);
 }
 
 /* ---------------------------------------------------------------------
@@ -617,110 +670,18 @@ int batchrunner_run_interactive(BatchRunner *r) {
     r->hasLastSection = false;
     r->lastSection[0] = '\0';
 
+    batchrunner_init_watchpoints(r);
+
     signal(SIGINT, on_sigint);
 
     while (r->step < r->maxSteps) {
         if (g_sigint_received) {
             interactive_report_and_exit(r, "\n--- INTERRUPTED after %ld steps ---", r->step, 0);
         }
-
-        RegSnapshot before, after;
-        ageharness_snapshot_regs(&r->age, &before);
-        uint32_t nia = psw_get_nia(&r->age.gpc.cpu.psw);
-
-        if (r->traceEnabled && r->age.sym.loaded) {
-            const char *currentSection = symtable_get_section_at(&r->age.sym, nia);
-            if (currentSection && (!r->hasLastSection || strcmp(currentSection, r->lastSection) != 0)) {
-                char line[300];
-                snprintf(line, sizeof line, "--- ENTERING: %s ---", currentSection);
-                batchrunner_write(r, line);
-                r->hasLastSection = true;
-                snprintf(r->lastSection, sizeof r->lastSection, "%s", currentSection);
-            }
-        }
-
-        if (r->hasBreakpoint && nia == r->breakpoint) {
-            char bpHex[16];
-            as_hex(bpHex, sizeof bpHex, (long long)nia, 4);
-            snprintf(r->stopReason, sizeof r->stopReason, "breakpoint at 0x%s", bpHex);
-            r->hasStopReason = true;
-            break;
-        }
-
-        uint32_t hw1 = mcm_get16(&r->age.gpc.cpu.mainStorage, nia);
-        uint32_t hw2 = mcm_get16(&r->age.gpc.cpu.mainStorage, nia + 1);
-
-        char disasm[256];
-        instr_to_str(hw1, hw2, disasm, sizeof disasm);
-        DInstr v;
-        const InstrDesc *d = instr_decode(hw1, hw2, &v);
-        int instrLen = d ? d->pb.origLen : 1;
-
-        if (!d) {
-            if (r->traceEnabled) {
-                char line[400];
-                batchrunner_format_trace_line(r, r->step, nia, hw1, hw2, "??? (invalid)", 1, NULL, 0, line, sizeof line);
-                batchrunner_write(r, line);
-            }
-            char hexv[16], niaHex[16];
-            as_hex(hexv, sizeof hexv, (long long)hw1, 4);
-            as_hex(niaHex, sizeof niaHex, (long long)nia, 4);
-            snprintf(r->stopReason, sizeof r->stopReason, "invalid instruction 0x%s at 0x%s", hexv, niaHex);
-            r->hasStopReason = true;
-            break;
-        }
-
-        if (r->age.halUCP.active && halucp_is_trap_addr(&r->age.halUCP, nia)) {
-            halucp_check_trap(&r->age.halUCP, nia); /* may synchronously block on stdin via interactive_input_cb */
-        }
-
-        ap101_exec1(&r->age.gpc);
-
-        ageharness_snapshot_regs(&r->age, &after);
-        RegChange changes[REG_SNAPSHOT_MAX_CHANGES];
-        int changeCount = ageharness_diff_regs(&before, &after, changes);
-        int filteredCount = 0;
-        RegChange filtered[REG_SNAPSHOT_MAX_CHANGES];
-        for (int i = 0; i < changeCount; i++) {
-            if (strcmp(changes[i].name, "NIA") != 0) filtered[filteredCount++] = changes[i];
-        }
-
-        if (r->traceEnabled) {
-            char line[2400];
-            batchrunner_format_trace_line(r, r->step, nia, hw1, hw2, disasm, instrLen, filtered, filteredCount, line, sizeof line);
-            batchrunner_write(r, line);
-        }
-
-        r->step++;
-
-        if (r->traceEnabled && r->dumpInterval > 0 && r->step % r->dumpInterval == 0) {
-            write_reg_dump(r, r->step);
-            batchrunner_write(r, "");
-        }
-
-        if (psw_get_wait_state(&r->age.gpc.cpu.psw)) {
-            snprintf(r->stopReason, sizeof r->stopReason, "wait state");
-            r->hasStopReason = true;
-            break;
-        }
+        if (!batchrunner_step(r)) break;
     }
 
-    if (!r->hasStopReason && r->step >= r->maxSteps) {
-        snprintf(r->stopReason, sizeof r->stopReason, "max steps reached (%ld)", r->maxSteps);
-        r->hasStopReason = true;
-    }
+    batchrunner_free_watchpoints(r);
 
-    if (r->hasStopReason) {
-        snprintf(msg, sizeof msg, "--- STOPPED after %ld steps (reason: %s) ---", r->step, r->stopReason);
-        batchrunner_info(r, msg);
-        batchrunner_info(r, "--- FINAL REGISTERS ---");
-        info_reg_dump(r, r->step);
-        batchrunner_flush(r);
-        int exitCode = strcmp(r->stopReason, "wait state") == 0 ? 0 : 1;
-        if (exitCode != 0) {
-            fprintf(stderr, "ERROR: %s\n", r->stopReason);
-        }
-        return exitCode;
-    }
-    return 0;
+    return batchrunner_report_stop(r);
 }

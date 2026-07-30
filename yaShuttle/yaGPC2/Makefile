@@ -54,6 +54,7 @@ UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_
 
 test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS))
 	./test/run_all.sh
+	./test/test_debugger.sh
 	@for t in $(UNIT_TESTS); do $(TEST_BIN_DIR)/$$t || exit 1; done
 
 $(TEST_BIN_DIR):

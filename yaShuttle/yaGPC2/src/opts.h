@@ -48,6 +48,11 @@ typedef struct {
     bool interactive;               /* default false */
     bool watchLog;                  /* default false */
 
+    /* Not part of gpc run's own option set -- yaGPC2-specific, like
+     * --fcos below. Enables the gdb-style interactive debugger (see
+     * src/debugger.h); implies --interactive. */
+    bool debug;                      /* default false */
+
     /* Not part of gpc run's own option set -- yaGPC2-specific. Simulates
      * specific known FCOS (Shuttle flight-software OS) behaviors that a
      * bare-hardware/no-OS program never gets; see cpu.h's fcosMode

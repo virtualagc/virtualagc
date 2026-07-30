@@ -1,0 +1,45 @@
+>> 10164 START   +00000: e4f3 8000  BAL  4,X'8000'
+gpc> Breakpoint set at 10008 <$0HELLO+008>
+gpc> --- stopped: breakpoint at 10008 (6 steps) ---
+>> 10008 $0HELLO +00008: bb24       STH  3,X'0009'(0)
+gpc>   R3 = 0x01520000 (22151168)
+gpc> >> 10008 $0HELLO +00008: bb24       STH  3,X'0009'(0)
+gpc> >*10008: bb24       STH  3,X'0009'(0)
+  10009: eef3 0006  LHI  6,X'0006'
+  1000b: edf3 0003  LHI  5,X'0003'
+gpc>   10000: e8f3 0212 e9f3 014e b914 e0fb 0028 eb11  |.......N.....(..|
+gpc>   #0   10008: STH  3,X'0009'(0)
+  #1   10007: LA   3,X'0004'(1)
+  #2   10005: IAL  0,X'0028'
+  #3   10004: STH  1,X'0005'(0)
+  #4   10002: LHI  1,X'014e'
+  #5   10000: LHI  0,X'0212'
+  #6   10164: BAL  4,X'8000'
+gpc> --- stopped: breakpoint at 10009 (7 steps) ---
+>> 10009 $0HELLO +00009: eef3 0006  LHI  6,X'0006'
+gpc> Step count: 7
+gpc>   #DHELLO          addr=0014e  section=#DHELLO
+  #EHELLO          addr=00186  section=#EHELLO
+  @0HELLO          addr=00212  section=@0HELLO
+  $0HELLO          addr=10000  section=$0HELLO
+gpc> --- Section Map ---
+  00140 - 00141  #QCASPV        (2 HW, #QCASPV)
+  00142 - 00143  #QCASV         (2 HW, #QCASV)
+  00144 - 00145  #QCATV         (2 HW, #QCATV)
+  00146 - 00147  #QCOUT         (2 HW, #QCOUT)
+  00148 - 00149  #QHOUT         (2 HW, #QHOUT)
+  0014a - 0014b  #QIOINIT       (2 HW, #QIOINIT)
+  0014c - 0014d  #QOUTER1       (2 HW, #QOUTER1)
+  0014e - 00185  #DHELLO        (56 HW, HELLO)
+  00186 - 0018b  #EHELLO        (6 HW, HELLO)
+  0018c - 0018d  #LCASPV        (2 HW, CASPV)
+  0018e - 00210  #LIOINIT       (131 HW, IOINIT)
+  00212 - 00261  @0HELLO        (80 HW, <generated-stacks>)
+  10000 - 10050  $0HELLO        (81 HW, HELLO)
+  10052 - 10091  CASPV          (64 HW, CASPV)
+  10092 - 100ad  CASV           (28 HW, CASV)
+  100ae - 100f9  CATV           (76 HW, CATV)
+  100fa - 1010d  COUTP          (20 HW, COUTP)
+  1010e - 10163  IOINIT         (86 HW, IOINIT)
+  10164 - 10165  START          (2 HW, HELLO)
+gpc> Goodbye.
