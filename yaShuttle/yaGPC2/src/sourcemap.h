@@ -20,13 +20,22 @@ typedef struct SourceMap SourceMap;
 SourceMap *sourcemap_load(const char *jsonPath);
 void sourcemap_free(SourceMap *sm);
 
-/* Returns the HAL/S source text for whichever statement is "active" at
- * addr (the mapped statement whose start address is <= addr and
- * closest to it), or NULL if addr is before every mapped statement.
- * *stmtOut receives the HAL/S statement number (its 1-based position in
- * the SDF's statementIndexTable, matching pass1.rpt's leftmost column --
- * *not* the SDF's own SRN field, a different and less reliable
- * identifier) when non-NULL and a mapping is found. */
-const char *sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *stmtOut);
+/* Returns the number of physical pass1.rpt listing lines for whichever
+ * HAL/S statement is "active" at addr (the mapped statement whose
+ * start address is <= addr and closest to it), or 0 if addr is before
+ * every mapped statement. *stmtOut receives the HAL/S statement number
+ * (its 1-based position in the SDF's statementIndexTable, matching
+ * pass1.rpt's leftmost column -- *not* the SDF's own SRN field, a
+ * different and less reliable identifier) and *linesOut the statement's
+ * own lines (owned by sm, valid until sourcemap_free(), each already
+ * trimmed of pass1.rpt's own fixed-column padding and trailing scope
+ * field but otherwise exactly as that line appeared in pass1.rpt) when
+ * both are non-NULL and a mapping is found. A statement can span more
+ * than one such line (e.g. a label and the statement it labels sharing
+ * one statement number but printed as separate pass1.rpt lines even
+ * when they came from the same source line) -- callers should print
+ * each line on its own, rather than collapsing them into one, to match
+ * pass1.rpt's own layout instead of an artificially shortened summary. */
+int sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *stmtOut, const char *const **linesOut);
 
 #endif

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "compat.h"
 #include "json.h"
 
 typedef struct {
@@ -13,7 +14,8 @@ typedef struct {
 
 typedef struct {
     int stmt;
-    char *text;
+    char **lines;
+    int lineCount;
 } StmtEntry;
 
 struct SourceMap {
@@ -35,17 +37,12 @@ static int cmp_addr(const void *a, const void *b) {
     return (x > y) - (x < y);
 }
 
-static char *join_lines(const JsonValue *lines) {
+static char **load_lines(const JsonValue *lines, int *countOut) {
     int n = json_arr_count(lines);
-    size_t total = 1;
-    for (int i = 0; i < n; i++) total += strlen(json_as_string(json_arr_get(lines, i), "")) + 1;
-    char *text = malloc(total);
-    text[0] = '\0';
-    for (int i = 0; i < n; i++) {
-        if (i > 0) strcat(text, " ");
-        strcat(text, json_as_string(json_arr_get(lines, i), ""));
-    }
-    return text;
+    char **out = n > 0 ? calloc((size_t)n, sizeof(char *)) : NULL;
+    for (int i = 0; i < n; i++) out[i] = yagpc_strdup(json_as_string(json_arr_get(lines, i), ""));
+    *countOut = n;
+    return out;
 }
 
 SourceMap *sourcemap_load(const char *jsonPath) {
@@ -85,7 +82,7 @@ SourceMap *sourcemap_load(const char *jsonPath) {
         for (int i = 0; i < stmtCount; i++) {
             JsonValue *st = json_arr_get(stmts, i);
             sm->stmts[i].stmt = (int)json_as_number(json_obj_get(st, "stmt"), 0);
-            sm->stmts[i].text = join_lines(json_obj_get(st, "lines"));
+            sm->stmts[i].lines = load_lines(json_obj_get(st, "lines"), &sm->stmts[i].lineCount);
             sm->stmtCount++;
         }
     }
@@ -115,22 +112,25 @@ SourceMap *sourcemap_load(const char *jsonPath) {
 
 void sourcemap_free(SourceMap *sm) {
     if (!sm) return;
-    for (int i = 0; i < sm->stmtCount; i++) free(sm->stmts[i].text);
+    for (int i = 0; i < sm->stmtCount; i++) {
+        for (int j = 0; j < sm->stmts[i].lineCount; j++) free(sm->stmts[i].lines[j]);
+        free(sm->stmts[i].lines);
+    }
     free(sm->stmts);
     free(sm->addrs);
     free(sm);
 }
 
-static const char *find_stmt_text(const SourceMap *sm, int stmt) {
+static const StmtEntry *find_stmt(const SourceMap *sm, int stmt) {
     for (int i = 0; i < sm->stmtCount; i++) {
-        if (sm->stmts[i].stmt == stmt) return sm->stmts[i].text;
+        if (sm->stmts[i].stmt == stmt) return &sm->stmts[i];
     }
     return NULL;
 }
 
-const char *sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *stmtOut) {
-    if (!sm || sm->addrCount == 0) return NULL;
-    if (addr < sm->codeStart || addr >= sm->codeEnd) return NULL;
+int sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *stmtOut, const char *const **linesOut) {
+    if (!sm || sm->addrCount == 0) return 0;
+    if (addr < sm->codeStart || addr >= sm->codeEnd) return 0;
     int lo = 0, hi = sm->addrCount - 1, best = -1;
     while (lo <= hi) {
         int mid = (lo + hi) / 2;
@@ -141,8 +141,11 @@ const char *sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *stmtOut) {
             hi = mid - 1;
         }
     }
-    if (best < 0) return NULL;
+    if (best < 0) return 0;
     int stmt = sm->addrs[best].stmt;
+    const StmtEntry *e = find_stmt(sm, stmt);
+    if (!e) return 0;
     if (stmtOut) *stmtOut = stmt;
-    return find_stmt_text(sm, stmt);
+    if (linesOut) *linesOut = (const char *const *)e->lines;
+    return e->lineCount;
 }

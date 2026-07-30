@@ -513,31 +513,43 @@ static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
     printf("%s%s\n", paddedLine, blob);
 }
 
-/* Prints the HAL/S source line active at addr, if a source map is
+/* Prints every physical pass1.rpt line belonging to a HAL/S statement,
+ * each on its own output line with the statement number repeated --
+ * matching yaHALMAT2's debug.c print_source() precedent -- rather than
+ * collapsing a multi-line statement (e.g. a label and the statement it
+ * labels, which pass1.rpt lists separately even when they shared one
+ * source line) into a single artificially-joined summary line. */
+static void print_source_lines(int stmt, const char *const *lines, int count) {
+    for (int i = 0; i < count; i++) printf("HAL/S %4d:%s\n", stmt, lines[i]);
+}
+
+/* Prints the HAL/S source line(s) active at addr, if a source map is
  * loaded and one is mapped there. Returns true iff something was
  * printed (callers use this to distinguish "no source map" from "no
  * statement mapped at this exact address"). */
 static bool show_source_line(Debugger *dbg, uint32_t addr) {
     if (!dbg->srcmap) return false;
     int stmt = 0;
-    const char *text = sourcemap_lookup(dbg->srcmap, addr, &stmt);
-    if (!text) return false;
-    printf("HAL/S %4d:%s\n", stmt, text);
+    const char *const *lines = NULL;
+    int count = sourcemap_lookup(dbg->srcmap, addr, &stmt, &lines);
+    if (count == 0) return false;
+    print_source_lines(stmt, lines, count);
     return true;
 }
 
 /* Auto-display variant used both at debugger stops and (new) as
- * instructions flow by during 'trace'/'htrace': shows the source line
- * only when it differs from the last one shown, matching yaHALMAT2's
- * --debug behavior, sharing the same lastStmt/hasLastStmt tracking in
- * both cases so flowing past a statement and later stopping inside it
- * doesn't reprint it twice. */
+ * instructions flow by during 'trace'/'htrace': shows the source
+ * line(s) only when the statement differs from the last one shown,
+ * matching yaHALMAT2's --debug behavior, sharing the same
+ * lastStmt/hasLastStmt tracking in both cases so flowing past a
+ * statement and later stopping inside it doesn't reprint it twice. */
 static void show_source_line_if_changed(Debugger *dbg, uint32_t addr) {
     if (!dbg->srcmap) return;
     int stmt = 0;
-    const char *text = sourcemap_lookup(dbg->srcmap, addr, &stmt);
-    if (text && (!dbg->hasLastStmt || stmt != dbg->lastStmt)) {
-        printf("HAL/S %4d:%s\n", stmt, text);
+    const char *const *lines = NULL;
+    int count = sourcemap_lookup(dbg->srcmap, addr, &stmt, &lines);
+    if (count > 0 && (!dbg->hasLastStmt || stmt != dbg->lastStmt)) {
+        print_source_lines(stmt, lines, count);
         dbg->lastStmt = stmt;
         dbg->hasLastStmt = true;
     }
