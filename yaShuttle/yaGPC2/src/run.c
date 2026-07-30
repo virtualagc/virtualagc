@@ -9,6 +9,7 @@
 #include "compat.h"
 #include "cpu_instr.h"
 #include "strfmt.h"
+#include "timing.h"
 #include "trace.h"
 
 static void halucp_error_cb(void *ctx, const char *msg) {
@@ -174,8 +175,17 @@ static void batchrunner_format_trace_line(BatchRunner *r, long step, uint32_t ni
     char disasmPadded[256];
     str_rpad(disasmPadded, sizeof disasmPadded, disasm, " ", 28);
 
+    /* Elapsed AP-101S execution time (src/timing.h) is debug-mode-only
+     * state (see debugger.h) -- omitted here under plain --trace, same
+     * "zero behavior change outside --debug" rule as the wrapping
+     * below, even though the "[NNNNN]" marker itself is unconditional. */
+    char timeStr[32];
+    timeStr[0] = '\0';
+    if (r->debugMode) snprintf(timeStr, sizeof timeStr, "T=%.2f ", debugger_elapsed_time(r->dbg));
+
     char prefix[400];
-    snprintf(prefix, sizeof prefix, "[%s] %s%s: %s %s  %s", stepStr, niaStr, sectOffsetStr, hw1Str, hw2Str, disasmPadded);
+    snprintf(prefix, sizeof prefix, "[%s] %s%s%s: %s %s  %s", stepStr, timeStr, niaStr, sectOffsetStr, hw1Str, hw2Str,
+             disasmPadded);
 
     /* Under --debug with a nonzero 'set width' (see src/debugger.h),
      * wrap the register-changes list at whole-entry boundaries instead
@@ -421,7 +431,18 @@ static bool batchrunner_step(BatchRunner *r) {
         halucp_check_trap(&r->age.halUCP, nia); /* may synchronously block on stdin under --interactive */
     }
 
+    /* Captured before execution -- some operands instr_time_us() needs
+     * (e.g. MVH's count) aren't safe to re-read afterward. Only under
+     * --debug: elapsed time is debug-mode-only state (see debugger.h),
+     * so skip the work otherwise. */
+    uint32_t timePreN = r->debugMode ? instr_time_pre_n(&r->age.gpc.cpu, d, &v, hw1) : 0;
+
     ap101_exec1(&r->age.gpc);
+
+    if (r->debugMode) {
+        bool branchTaken = psw_get_nia(&r->age.gpc.cpu.psw) != nia + (uint32_t)instrLen;
+        debugger_add_instr_time(r->dbg, instr_time_us(d, &v, timePreN, branchTaken));
+    }
 
     ageharness_snapshot_regs(&r->age, &after);
     RegChange changes[REG_SNAPSHOT_MAX_CHANGES];

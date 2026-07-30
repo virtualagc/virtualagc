@@ -85,6 +85,7 @@ struct Debugger {
     long instructionsThisResume;
 
     long currentStep;
+    double cumulativeTimeUs; /* see debugger_add_instr_time()/src/timing.h */
 
     char lastLine[256];
     bool hasLastLine;
@@ -418,7 +419,9 @@ static void show_symbol(AGEHarness *age, const char *nameIn) {
  * Leads with the same "[NNNNN]" step marker run.c's own trace lines
  * use (same 5-column left-padded format, via the same str_lpad()) --
  * per user feedback, every displayed instruction should carry one,
- * not just the ones shown while 'htrace' is flowing past. */
+ * not just the ones shown while 'htrace' is flowing past. Followed by
+ * the cumulative AP-101S execution time (see src/timing.h) accrued so
+ * far, also per user feedback. */
 static void format_current_location(Debugger *dbg, AGEHarness *age, char *out, size_t outSize) {
     uint32_t nia = psw_get_nia(&age->gpc.cpu.psw);
     uint32_t hw1 = membus_get16(&age->gpc.ram, nia);
@@ -443,7 +446,8 @@ static void format_current_location(Debugger *dbg, AGEHarness *age, char *out, s
     char stepStr[32];
     str_lpad(stepStr, sizeof stepStr, stepNum, " ", 5);
 
-    snprintf(out, outSize, "[%s] >> %s %s: %s %s  %s", stepStr, niaHex, csect, hw1Hex, hw2Hex, disasm);
+    snprintf(out, outSize, "[%s] T=%.2f >> %s %s: %s %s  %s", stepStr, dbg->cumulativeTimeUs, niaHex, csect, hw1Hex,
+             hw2Hex, disasm);
 }
 
 static void show_current_location(Debugger *dbg, AGEHarness *age) {
@@ -494,9 +498,15 @@ static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
      * real gap before the changes -- matches the same 28-column
      * disasm width run.c's own trace-line formatter pads to, applied
      * to the whole line here since the leading ">> ADDR SECT: HW HW "
-     * portion has a different, fixed width of its own. */
+     * portion has a different, fixed width of its own. 76 (not 64)
+     * to leave room for the "T=NNNN.NN " elapsed-time field this line
+     * now also carries; like any fixed pad width against open-ended
+     * content (a long section name could do the same), a long enough
+     * run eventually outgrows it and the gap degrades gracefully
+     * rather than staying aligned -- same tradeoff as the "[NNNNN]"
+     * step marker itself once it grows past 5 digits. */
     char paddedLine[300];
-    str_rpad(paddedLine, sizeof paddedLine, line, " ", 64);
+    str_rpad(paddedLine, sizeof paddedLine, line, " ", 76);
 
     char blob[4096];
     debugger_format_changes(dbg, paddedLine, filtered, filteredCount, blob, sizeof blob);
@@ -1129,6 +1139,7 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
     }
     if (cmd_is(cmd, "steps", NULL)) {
         printf("Step count: %ld\n", dbg->currentStep);
+        printf("Elapsed instruction time: %.2f\n", dbg->cumulativeTimeUs);
         return false;
     }
     if (cmd_is(cmd, "backtrace", "bt", NULL)) {
@@ -1237,6 +1248,10 @@ void debugger_free(Debugger *dbg) {
 bool debugger_wants_trace(const Debugger *dbg) { return dbg->traceEnabled; }
 
 int debugger_line_width(const Debugger *dbg) { return dbg->lineWidth; }
+
+double debugger_elapsed_time(const Debugger *dbg) { return dbg->cumulativeTimeUs; }
+
+void debugger_add_instr_time(Debugger *dbg, double us) { dbg->cumulativeTimeUs += us; }
 
 /* Formats `changes` as "NAME: OLD->NEW, NAME: OLD->NEW, ..." (same token
  * format run.c's own flat join uses), wrapped so no printed line exceeds
