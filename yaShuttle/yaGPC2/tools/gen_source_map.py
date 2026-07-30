@@ -51,17 +51,24 @@ def parse_pass1(path):
     uses subscripts or exponents (matrix/array element references,
     "**") gets typeset across up to three aligned physical lines -- "E|"
     (Exponent, printed above) and "S|" (Subscript, printed below) lines
-    besides the "M|" line itself -- and a comment ("C|") can precede a
-    statement as its own line group too. Each captured line keeps its
-    own "X|" tag verbatim (rather than stripping it) so a reader can
-    still tell a main line from an exponent/subscript/comment line once
-    it's re-displayed outside the fixed-column layout that made the
-    distinction visually obvious in the original report.
+    besides the "M|" line itself. Each captured line keeps its own "X|"
+    tag verbatim (rather than stripping it) so a reader can still tell a
+    main line from an exponent/subscript line once it's re-displayed
+    outside the fixed-column layout that made the distinction visually
+    obvious in the original report.
+
+    pass1.rpt also has "C|" (Comment) and "D|" (the DEBUG pragma) lines,
+    which are deliberately *not* captured here even though they're
+    typeset the same way E|/S| are: they aren't HAL/S statements at all
+    (a comment is discarded entirely by the compiler; DEBUG is a
+    directive, not executable source), so they have no business being
+    shown as part of one. They fall through untouched to the same
+    "unrecognized line" handling a page header/footer gets, below.
 
     The line format is "[SRN ]STMT M|SOURCE_TEXT_PADDED|SCOPE" for a
     Main line, or "     X|SOURCE_TEXT_PADDED|[SCOPE]" (no statement
-    number of its own) for an Exponent/Subscript/Comment line -- matched
-    on the LAST '|' rather than the first, since HAL/S source can itself
+    number of its own) for an Exponent/Subscript line -- matched on the
+    LAST '|' rather than the first, since HAL/S source can itself
     contain '|' characters (the '||' string-concatenation operator). The
     leading SRN (Statement Reference Number, from source columns 73-78)
     is present only when the HAL/S source actually populates those
@@ -75,22 +82,22 @@ def parse_pass1(path):
     statementIndexTable and is what pass2.rpt's "ST#N" markers key off
     of too.
 
-    E|/S|/C| lines carry no statement number of their own, so which
-    statement they belong to has to be inferred from position: an E| or
-    C| line is typeset *above* the M| line it decorates (an exponent
-    sits above its base; a comment precedes the statement it documents),
-    so when one directly follows a blank line (or a page break) it's
-    attached to whichever M| line comes *next*. An S| line is typeset
-    *below* its M| line, so when one directly follows an M| line (or
-    another such trailing annotation, no blank in between) it's attached
-    to that *preceding* statement instead. A blank line or anything
-    unrecognized (page headers/footers) resets this so a fresh run of
-    annotation lines is re-classified from scratch -- confirmed against
-    a real pass1.rpt (108-EXAMPLE_5.hal) where a lone "E|" line sits
-    between two statements' M| lines and, per this rule, correctly
-    attaches to the following one rather than the preceding one."""
+    E|/S| lines carry no statement number of their own, so which
+    statement they belong to has to be inferred from position: an E|
+    line is typeset *above* the M| line it decorates (an exponent sits
+    above its base), so when one directly follows a blank line (or a
+    page break, or a C|/D| line) it's attached to whichever M| line
+    comes *next*. An S| line is typeset *below* its M| line, so when one
+    directly follows an M| line (or another such trailing annotation, no
+    blank in between) it's attached to that *preceding* statement
+    instead. A blank line or anything unrecognized (page headers/
+    footers, C|/D| lines) resets this so a fresh run of annotation lines
+    is re-classified from scratch -- confirmed against a real pass1.rpt
+    (108-EXAMPLE_5.hal) where a lone "E|" line sits between two
+    statements' M| lines and, per this rule, correctly attaches to the
+    following one rather than the preceding one."""
     m_re = re.compile(r"^\s*(?:\d+\s+)?(\d+)\s+M\|")
-    tag_re = re.compile(r"^\s*([ESC])\|")
+    tag_re = re.compile(r"^\s*([ES])\|")
 
     def extract(rest):
         close = rest.rfind("|")
@@ -98,7 +105,7 @@ def parse_pass1(path):
 
     statements = {}
     current_stmt = None
-    pending = []  # E|/S|/C| lines not yet attached, waiting for the next M| line
+    pending = []  # E|/S| lines not yet attached, waiting for the next M| line
     mode = None  # 'trailing' right after an M| line (or another trailing line); else None
     with open(path, "r", errors="replace") as f:
         for line in f:
@@ -125,7 +132,7 @@ def parse_pass1(path):
                     pending.append(text)
                     mode = "pending"
                 continue
-            mode = None  # unrecognized line (page header/footer, etc.) -- treat as a boundary
+            mode = None  # unrecognized line (page header/footer, C|/D|, etc.) -- treat as a boundary
     return statements
 
 

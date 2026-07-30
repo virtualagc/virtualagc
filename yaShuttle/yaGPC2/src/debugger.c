@@ -518,12 +518,14 @@ static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
  * rather than collapsing a multi-line statement (e.g. a label and the
  * statement it labels, which pass1.rpt lists separately even when they
  * shared one source line) into a single artificially-joined summary
- * line. Each line keeps its own leading "M|"/"E|"/"S|"/"C|" tag (Main/
- * Exponent/Subscript/Comment -- see gen_source_map.py's parse_pass1())
- * verbatim, per the user's explicit request that these not be stripped
- * out: they're the only thing distinguishing a subscript or exponent
- * line from the main source text once it's no longer typeset in
- * pass1.rpt's own column-aligned layout. */
+ * line. Each line keeps its own leading "M|"/"E|"/"S|" tag (Main/
+ * Exponent/Subscript -- see gen_source_map.py's parse_pass1(), which
+ * deliberately does *not* similarly capture "C|"/"D|" comment/DEBUG-
+ * pragma lines: those aren't HAL/S statements, so they have no
+ * business appearing here) verbatim, per the user's explicit request
+ * that these not be stripped out: they're the only thing distinguishing
+ * a subscript or exponent line from the main source text once it's no
+ * longer typeset in pass1.rpt's own column-aligned layout. */
 static void print_source_lines(int stmt, const char *const *lines, int count) {
     for (int i = 0; i < count; i++) printf("HAL/S %4d: %s\n", stmt, lines[i]);
 }
