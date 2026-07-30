@@ -151,7 +151,6 @@ static void hal_report_error(HalUCP *h, const char *msg) {
 
 bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
     HalUCP *h = halUCPvp;
-    if (!h->trapSvcError) return false;
 
     uint32_t hw0 = mcm_get16(&h->cpu->mainStorage, ea);
     uint32_t hw1 = mcm_get16(&h->cpu->mainStorage, ea + 1);
@@ -186,11 +185,23 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                 hal_newline(h, ch);
             }
         }
-        const char *msg = "HAL/S PROGRAM HALT (SVC 0)";
-        if (h->errorCallback) {
-            h->errorCallback(h->cbCtx, msg);
-        } else {
-            fprintf(stderr, "%s\n", msg);
+        /* SVC 0x0015 is HAL/S-FC's universal, successful end-of-program
+         * call (every compiled CLOSE reaches it, not just abnormal exits)
+         * -- confirmed via HELLO.hal, which has no explicit %SVCI call
+         * and no error condition, yet still ends this way. yaHALMAT2 (no
+         * machine-code abstraction to trap at all) exits silently on
+         * normal termination, so printing this unconditionally made every
+         * single yaGPC2 run look like it hit an alarm yaHALMAT2 never
+         * shows. Gated on --verbose, like the "SVC DEBUG" trace line
+         * above, instead of always firing through the error-report
+         * channel. */
+        if (h->verbose) {
+            const char *msg = "HAL/S PROGRAM HALT (SVC 0)";
+            if (h->errorCallback) {
+                h->errorCallback(h->cbCtx, msg);
+            } else {
+                fprintf(stderr, "%s\n", msg);
+            }
         }
         psw_set_wait_state(&h->cpu->psw, true);
         h->svcTrapped = true;
@@ -198,6 +209,14 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
     }
 
     if (svcCode == 0x0014) {
+        /* --no-trap-svc-error's documented scope ("pass SEND ERROR SVCs to
+         * SVC handler") is specifically this code, 0x0014 -- unlike QUIT
+         * (0x0015, above) and the builtins/event codes below, which have
+         * nothing to do with error trapping and must always be handled
+         * regardless of this flag (see halucp.h/opts.c for the flag's own
+         * wording). This is the ONLY svcCode in this function still gated
+         * on trapSvcError. */
+        if (!h->trapSvcError) return false;
         uint32_t errDesc = mcm_get16(&h->cpu->mainStorage, ea + 1);
         int errGroup = (int)((errDesc >> 8) & 0xff);
         int errNum = (int)(errDesc & 0xff);
