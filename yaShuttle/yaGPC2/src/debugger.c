@@ -413,8 +413,13 @@ static void show_symbol(AGEHarness *age, const char *nameIn) {
  * formatter) since this same text is also used standalone by 'where'/
  * 'loc'/'here', where padding would just be pointless trailing
  * whitespace -- show_stop_location_and_registers() pads its own copy
- * only when it's actually about to append something after it. */
-static void format_current_location(AGEHarness *age, char *out, size_t outSize) {
+ * only when it's actually about to append something after it.
+ *
+ * Leads with the same "[NNNNN]" step marker run.c's own trace lines
+ * use (same 5-column left-padded format, via the same str_lpad()) --
+ * per user feedback, every displayed instruction should carry one,
+ * not just the ones shown while 'htrace' is flowing past. */
+static void format_current_location(Debugger *dbg, AGEHarness *age, char *out, size_t outSize) {
     uint32_t nia = psw_get_nia(&age->gpc.cpu.psw);
     uint32_t hw1 = membus_get16(&age->gpc.ram, nia);
     uint32_t hw2 = membus_get16(&age->gpc.ram, nia + 1);
@@ -432,12 +437,18 @@ static void format_current_location(AGEHarness *age, char *out, size_t outSize) 
 
     char csect[32];
     symtable_format_csect(&age->sym, nia, csect, sizeof csect);
-    snprintf(out, outSize, ">> %s %s: %s %s  %s", niaHex, csect, hw1Hex, hw2Hex, disasm);
+
+    char stepNum[32];
+    snprintf(stepNum, sizeof stepNum, "%ld", dbg->currentStep);
+    char stepStr[32];
+    str_lpad(stepStr, sizeof stepStr, stepNum, " ", 5);
+
+    snprintf(out, outSize, "[%s] >> %s %s: %s %s  %s", stepStr, niaHex, csect, hw1Hex, hw2Hex, disasm);
 }
 
-static void show_current_location(AGEHarness *age) {
+static void show_current_location(Debugger *dbg, AGEHarness *age) {
     char line[300];
-    format_current_location(age, line, sizeof line);
+    format_current_location(dbg, age, line, sizeof line);
     printf("%s\n", line);
 }
 
@@ -456,7 +467,7 @@ static void show_current_location(AGEHarness *age) {
  * user feedback on both the placement and the layout. */
 static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
     char line[300];
-    format_current_location(age, line, sizeof line);
+    format_current_location(dbg, age, line, sizeof line);
 
     if (dbg->instructionsThisResume != 1) {
         show_registers(dbg, age);
@@ -1108,7 +1119,7 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
         return false;
     }
     if (cmd_is(cmd, "where", "loc", "here", NULL)) {
-        show_current_location(age);
+        show_current_location(dbg, age);
         return false;
     }
     if (cmd_is(cmd, "source", "src", NULL)) {

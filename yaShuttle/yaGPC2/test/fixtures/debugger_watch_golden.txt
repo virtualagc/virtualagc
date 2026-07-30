@@ -4,7 +4,7 @@
   FP0=00000000  FP1=00000000  FP2=00000000  FP3=00000000
   FP4=00000000  FP5=00000000  FP6=00000000  FP7=00000000
   PSW1=81640020  PSW2=00080000  NIA=10164  CC=0  BSR=2  DSR=0
->> 10164 START   +00000: e4f3 8000  BAL  4,X'8000'
+[    0] >> 10164 START   +00000: e4f3 8000  BAL  4,X'8000'
 gpc> Memory watchpoint set at 00217 <@0HELLO+005>
 gpc>   [ON ] 00217 <@0HELLO+005> <0x217> = 0000
 gpc> --- stopped: memory watchpoint: HW 00217 (0x217) changed 0000 -> 014e (4 steps) ---
@@ -14,13 +14,13 @@ gpc> --- stopped: memory watchpoint: HW 00217 (0x217) changed 0000 -> 014e (4 st
   FP0=00000000  FP1=00000000  FP2=00000000  FP3=00000000
   FP4=00000000  FP5=00000000  FP6=00000000  FP7=00000000
   PSW1=80050020  PSW2=00080000  NIA=10005  CC=0  BSR=2  DSR=0
->> 10005 $0HELLO +00005: e0fb       IAL  0,X'0028'
-gpc> >> 10005 $0HELLO +00005: e0fb       IAL  0,X'0028'
+[    4] >> 10005 $0HELLO +00005: e0fb       IAL  0,X'0028'
+gpc> [    4] >> 10005 $0HELLO +00005: e0fb       IAL  0,X'0028'
 gpc> Memory watchpoint cleared at 00217 <@0HELLO+005>
 gpc>   (no memory watchpoints)
 gpc> Watch added: 0x217 @ 00217 <@0HELLO+005>
 gpc>   0x217 @ 00217: 014e (334)
-gpc> >> 10007 $0HELLO +00007: eb11       LA   3,X'0004'(1)           R00: 02120000->02120028, PSW1: 80050020->80070020
+gpc> [    5] >> 10007 $0HELLO +00007: eb11       LA   3,X'0004'(1)   R00: 02120000->02120028, PSW1: 80050020->80070020
   0x217 @ 00217: 014e (334)
 gpc>   0x217 @ 00217: 014e (334)
 gpc> All watches cleared
