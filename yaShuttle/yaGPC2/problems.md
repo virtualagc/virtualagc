@@ -2501,6 +2501,52 @@ remaining 3 discrepancies (104-EXAMPLE_1, 120-EXAMPLE_A, 167-ASSORTEDIO)
 are the same pre-existing, already-tracked findings from earlier
 sweeps (§5, §6.5), still open.
 
+### 6.7 DB issue 78: spurious `HAL/S PROGRAM HALT` message on every normal
+termination, and an over-broad `--no-trap-svc-error`
+
+Found by the user running `yaGPC2` directly against `hello.fcm`
+(compiled from `ported/PASS1.PROCS/HELLO.hal` — no explicit `%SVCI`
+call, just falls off the end via `CLOSE`): stderr always showed `***
+HAL/S PROGRAM HALT (SVC 0)`, which `yaHALMAT2` never prints for the same
+program. Root cause: SVC 0x0015 is HAL/S-FC's universal,
+successful end-of-program call — every compiled `CLOSE` reaches it, not
+just abnormal exits — but `halucp_handle_svc()` (`halucp.c`) printed
+this message unconditionally via the error-report channel, regardless
+of `--verbose`. `yaHALMAT2` has no machine-code abstraction to trap at
+all, so it simply exits silently on normal termination. Fixed by gating
+the message on `h->verbose`, matching the existing `SVC DEBUG` trace-line
+convention in the same function. Verified via direct cross-check
+(`compileLinkRun`'s `yaHALMAT2 halmat.bin` run against `yaGPC2
+hello.fcm`): stdout is now byte-identical by default.
+
+While investigating, the user reported that trying to work around the
+message themselves via `--no-trap-svc-error` made the message disappear
+but also silently dropped the program's final buffered `WRITE` line
+(`THE END`) — real data loss, not cosmetic. Root cause: `--no-trap-svc-error`'s
+own name and `--help` text ("intercept HAL/S SEND ERROR SVCs") document
+its scope as SVC 0x0014 (SEND ERROR) only, but the code gated `halucp_handle_svc()`'s
+*entire* SVC layer — QUIT (0x0015), ERRGRP/ERRNUM (0x0117/0x0217),
+SIGNAL/SET/RESET (0x000C-E), and the unknown-code fallback — behind one
+top-level `trapSvcError` check. With the flag set, QUIT's own
+channel-flush-then-halt logic (the substitute for what a real OS would
+do on shutdown) never ran; since these bare/no-OS test images have no
+real interrupt-vector code for the SVC to usefully fall through to
+either, the machine just ran on into nothing, losing the pending output.
+Fixed by narrowing the `trapSvcError` gate to only the 0x0014 branch, so
+the flag now does exactly what its own documentation always said and
+nothing more. Verified against the hand-assembled `svc_halt.fcm`/
+`svc_senderror.fcm`/`svc_unknown.fcm` fixtures (`test/fixtures/gen_svc_fcms.cjs`):
+SEND ERROR trapping is still the only thing `--no-trap-svc-error`
+disables; QUIT/unknown-code handling is unaffected by the flag either
+way. Full `yaGPC2` unit test suite re-run showed zero regressions (the
+one pre-existing `test_cpu_instr_exec` CVFX failure, 114650/114801, is
+unrelated and identical before/after this fix). The old `compare.sh`/
+`run_matrix.sh` `gpc.js`-reference suite could not even be run in this
+environment (`dist/gpc.js` and `yaGPC/yaGPC` both absent) — a pre-existing,
+unrelated infra gap; that comparison axis was already superseded by the
+`yaHALMAT2` cross-check (see Methodology below). Fixed in commit
+`55bf9d7a5`; DB issue 78.
+
 ---
 
 ## Methodology and caveats
