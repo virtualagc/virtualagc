@@ -290,6 +290,27 @@ generalized to a per-element stride specifically to cover it too, not
 left read-only. See [MASN](../class-3/MASN.md)'s own "Confirmed Runtime
 Behavior" section for the fuller writable-view mechanism.
 
+**Full-wildcard `M$(*,*)` (both `MATRIX` axes asterisked at once)** is
+also implemented, a genuinely 2-D result distinct from the three
+single-axis asterisk-partition cases above (task DB id 56,
+`wildcard_subscript_matrix_write_loses_row_forcing`). The shared tail
+that builds the result shape for every asterisk-select case
+(`store_container_result`, `interp.c`) previously hardcoded `rows=0` for
+all of them — correct for the three genuinely `VECTOR`-shaped results
+(`V$(*)`/`M$(i,*)`/`M$(*,j)`) but wrong for `M$(*,*)`, which needs its
+own row count preserved. Fixing this also surfaced a real, confirmed-
+both-ways distinction in `WRITE`'s own row-per-line forced-newline
+layout (the `MMWSNP.asm` RTL mechanism, `mmwsnp_vector_forces_newline`
+finding): `M$(*,*)` on a **plain declared `MATRIX` variable**
+(a `SYT` base) gets that row-forced layout, matching bareword
+`WRITE(6) X;` — but the identical `$(*,*)` wildcard on a `MATRIX`
+**structure-field terminal** (an `XPT` base, e.g. a structure's own
+`CC$(1;*,*)` field) does **not** get row-forcing and stays flat, even
+though both compile through the same `DSUB` asterisk shape. The fix
+gates the row-forced shape on `base_syt < HALMAT_SYT_MAX` (plain `SYT`
+vs. `XPT`-resolved structure field) to match this real hardware
+distinction.
+
 **Component at-partition** (`V1(2 AT 1)`, a `VECTOR`/`ARRAY` slice) is
 also now interpreted, not just confirmed in the wire format — produces a
 `VECTOR`-shaped `VAC` container result via the same mechanism as the

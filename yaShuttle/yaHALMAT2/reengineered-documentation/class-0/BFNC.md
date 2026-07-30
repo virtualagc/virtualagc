@@ -180,7 +180,11 @@ selector itself was implemented):
   `ARCTAN(α) = tan⁻¹α`, unlike `ARCSIN`/`ARCCOS`/`ARCTANH`'s documented
   `|α|<1` limits) — a plain `atan()` via libm is total over every
   representable double, no guard needed.
-- `COSH`/`SINH` (17/22, error 9, `|argument|` > 175,366): result is the
+- `COSH`/`SINH` (17/22, error 9, `|argument|` > 175.366 — **corrected**;
+  the scanned `USA003090` text's "175,366" is almost certainly a decimal
+  point mangled by OCR, not a thousands separator, confirmed against the
+  real `RUNASM/SINH.asm` `MAX` constant `X'42AF5DC0'`, which hand-decodes
+  to 175.366, not 175366.0 — task 108/id 51): result is the
   maximum representable value (sign-preserved for `SINH`, an odd
   function; `COSH` is even, always positive).
 - `ARCCOS`/`ARCSIN` (35/36, error 10, `|argument|` > 1): `ARCCOS(>1)=0`,

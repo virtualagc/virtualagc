@@ -19,6 +19,24 @@ typedef struct {
     uint32_t lsw; /* unused (0) for short/single precision */
 } halmat_scalar_t;
 
+/* Fidelity scope note (DB id 51, yagpc2-yahalmat2-issues.db, corrected
+ * 2026-07-28 after an earlier pass wrongly characterized the project as
+ * "using native IEEE double throughout"): that claim didn't survive
+ * contact with the actual code. halmat_scalar_add/sub/multiply/divide
+ * below ARE genuine IBM hex-float arithmetic (characteristic/fraction,
+ * hex postnormalization) -- confirmed via direct call-site inspection,
+ * not just this header comment -- and are wired into every core SCALAR/
+ * MATRIX/VECTOR opcode. The real, narrower situation: roughly 50 call
+ * sites across the interpreter (transcendental/special functions --
+ * SIN/LOG/SQRT/ARCTAN/etc. before their own real RUNASM ports landed,
+ * MATRIX inversion's own N>4 general path, RANDOM, DFOR/CFOR loop
+ * control, READ decimal parsing) go through a native-double
+ * intermediate instead -- a reasonable choice absent a primary-source
+ * hex-float RTL algorithm for most of these, and shrinking over time as
+ * more RTL routines get ported bit-exactly (see hal_transcendental.c/
+ * hal_matrix.c). Keep this distinction in mind when characterizing the
+ * project's own floating-point fidelity: "hex-float vs. IEEE double" is
+ * not an all-or-nothing property of the interpreter as a whole. */
 halmat_scalar_t halmat_scalar_zero(bool double_precision);
 halmat_scalar_t halmat_scalar_from_ibm_words(uint32_t msw, uint32_t lsw, bool double_precision);
 

@@ -251,10 +251,22 @@ symbols interleaved). This is the same "callee+1+i" positional
 convention this project already confirmed for
 [FCAL](../class-0/FCAL.md)'s argument binding — so a given `TINT`'s
 `OFFSET` operand maps directly to field symbol
-`TEMPLATE_syt + 1 + OFFSET` for the plain scalar/integer-terminal case
-(an `ARRAY`/`MATRIX`/`VECTOR` terminal, which per the non-coalesced
-trace above occupies multiple consecutive `OFFSET` slots for its own
-elements, needs more than this simple formula — untested, see below).
+`TEMPLATE_syt + 1 + OFFSET` **only when no `VECTOR` terminal precedes
+the target slot** — resolved in a later session (task #70,
+`yahalmat2_structure_param_vector_return`): a `VECTOR` terminal occupies
+multiple consecutive `OFFSET` slots for its own components (per the
+non-coalesced trace above), so the simple `+1+OFFSET` arithmetic drifts
+out of sync with the true terminal index as soon as one is crossed. The
+general mapping now goes through a new `tint_locate_slot()` walk
+(`interp.c`) that scans the TEMPLATE's own terminal list in order,
+consuming one `OFFSET` slot per plain terminal and `cols` slots per
+`VECTOR` terminal (keyed on `hal_class==4 && cols>0`), landing on the
+correct field symbol regardless of how many `VECTOR` terminals precede
+it — confirmed against real `gpc` via `170-OUTER.hal`
+(`1 V VECTOR, 1 S1 SCALAR, ...`, `INITIAL(0,1,0,0,83,0,OFF)`, one
+coalesced `TINT` run of 7 slots for `V`'s 3 components plus 4 scalar
+terminals). `MATRIX`/`ARRAY` structure terminals are not yet covered by
+this walk — see Unresolved below.
 
 **One more wrinkle, confirmed the hard way**: the literal table itself
 carries no `INTEGER`-vs-`SCALAR` distinction (`FIXED`/`DOUBLE` litfile
@@ -296,9 +308,11 @@ coalescing path entirely.
 
 ## Unresolved (still, after the above)
 
-- `ARRAY`/`MATRIX`/`VECTOR` structure terminals (which the non-coalesced
+- `VECTOR` structure terminals are now implemented (task #70, see
+  above) — `ARRAY`/`MATRIX` structure terminals (which the non-coalesced
   trace above shows occupying multiple `OFFSET` slots each, one per
-  element) are not implemented — only plain scalar/integer terminals.
+  element, the same way `VECTOR` does) are still not implemented; no
+  confirmed real-hardware trigger has been found for either yet.
 - ~~Multiple-copy structures (`Q-STRUCTURE(n)` with a whole-structure
   `INITIAL(...)` list) were not tested in combination with `TINT`.~~
   **Resolved in a later session** — see "Copiness" above. Still open: a

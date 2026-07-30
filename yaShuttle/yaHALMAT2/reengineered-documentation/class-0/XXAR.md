@@ -29,6 +29,27 @@ compiling `READ(5) T1;` for a `RIGID` structure variable — `10` doesn't
 fit the class-number pattern above (structures have no HALMAT class of
 their own; their class-0 operations are `TASN`/`TEQU`/`TNEQ`).
 
+**`TAG1` in a `CALL`/function-invocation argument list is a different
+claim than in a `READ`/`READALL`/`WRITE` list** — confirmed empirically
+(task #63, `function_result_scalar_integer_confusion`; `127-LIMIT.hal`/
+`211-LIMIT.hal`, cross-checked with a minimal probe file). For a call
+argument, `TAG1` is **not** the target parameter's declared type — it's
+the *caller's own literal/expression*'s natural HALMAT class, decided
+independently of the callee's own declaration. Compiling
+`LIMIT(VALUE, BOUND) SCALAR;` (both parameters declared `SCALAR`) and
+calling it two ways makes this concrete: `LIMIT(5.0, 10.0)` (whole-
+number-valued literals) emits `TAG1`=`6`=`INTEGER` on both `XXAR`
+operands, while `LIMIT(5.5, 10.25)` (fractional) emits `TAG1`=`5`=
+`SCALAR` — same `SCALAR`-declared parameters both times, different
+`TAG1` purely from the literal's own value. A same-unit call therefore
+cannot use the call argument's own `TAG1` to learn the parameter's real
+declared type; it must consult the callee's own symbol table
+(`param_syt`'s `hal_class`) instead — which is what `yaHALMAT2`'s
+`bind_call_argument` (`interp.c`) does, via a `SCALAR`<->`INTEGER`
+cross-coercion keyed on the parameter's own declared type rather than
+the argument's `TAG1`. See also [FCAL](FCAL.md)/[PCAL](PCAL.md) for the
+argument-binding call sites this feeds.
+
 The trailing `TAG2` field's meaning is
 **context-dependent** on the surrounding construct: for a procedure/
 function call's argument list it distinguishes an input argument (`0`)

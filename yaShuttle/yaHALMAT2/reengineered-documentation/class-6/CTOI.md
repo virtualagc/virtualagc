@@ -35,10 +35,23 @@ integral value. A value with no explicit sign is assumed positive.
 
 ## Unresolved Questions
 
-- Exact error behavior for a string that is *not* in one of the standard
-  input formats (§8.2 rule 16 just says conversion "can take place only
-  if" the format matches, implying failure/error otherwise, but the
-  precise error condition isn't spelled out here) is unconfirmed.
+- ~~Exact error behavior for a string that is *not* in one of the
+  standard input formats~~ **Resolved** (DB id 55,
+  `ctoi_invalid_digit_substring_wrong_result`): confirmed against real
+  `gpc` across a 10-case matrix (`159-AGE.hal`'s
+  `X = INTEGER(C(7 TO 10));`) that an invalid string converts to `0`,
+  and — critically — that validation is **whole-string**, not
+  prefix-based: any interior non-blank, non-digit character anywhere
+  invalidates the entire conversion (e.g. `"7AAA"`→`0`, not `7` the way
+  a `strtod()`-style partial parse would give), and a *leading* blank
+  before an otherwise-valid digit also invalidates it (`"  9 "`→`0`, not
+  `9`) — only *trailing* blanks after a complete number are tolerated
+  (`"7   "`→`7`). `yaHALMAT2`'s own `OP_CTOI`/`OP_CTOS` previously used
+  plain `strtod()` (silently prefix-parsing); fixed via a new strict
+  `ctoi_parse_scalar()` helper (`interp.c`). This was only independently
+  reconfirmed for `CTOI`/`INTEGER` specifically — `CTOS`/`SCALAR` is
+  assumed to share it per this doc's own "same parse" framing (§8.2 rule
+  16 covers both), not separately verified against real `gpc`.
 - HAL/S operand-word format details beyond the basic single-operand
   pattern (see Source Analysis) are unconfirmed.
 
