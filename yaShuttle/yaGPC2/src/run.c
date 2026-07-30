@@ -408,6 +408,13 @@ static bool batchrunner_step(BatchRunner *r) {
 
     if (r->debugMode) {
         if (!debugger_hook(r->dbg, &r->age, nia, hw1, hw2, r->step)) return false;
+        /* Re-derive traceWanted: debugger_hook()'s REPL (just run, above)
+         * may have changed whether trace-style output is wanted for the
+         * instruction about to execute -- e.g. dispatching 'step' turns
+         * it on for exactly this instruction (see debugger_wants_trace())
+         * even though it read false when this function started, before
+         * the command was dispatched. */
+        traceWanted = r->traceEnabled || debugger_wants_trace(r->dbg);
     }
 
     if (r->age.halUCP.active && halucp_is_trap_addr(&r->age.halUCP, nia)) {

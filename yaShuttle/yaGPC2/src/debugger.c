@@ -71,6 +71,11 @@ struct Debugger {
     long stepsRemaining;
     bool hasTempBreakpoint; /* one-shot breakpoint used by 'next' */
     uint32_t tempBreakpoint;
+    /* Set by 'step [N]' (only), cleared by 'next'/'run': forces trace-
+     * style output (register changes, HAL/S source lines) on for the
+     * instruction(s) a bounded step consumes, regardless of the
+     * persistent 'trace'/'htrace' toggle -- see debugger_wants_trace(). */
+    bool inBoundedStep;
 
     long currentStep;
 
@@ -464,7 +469,7 @@ typedef struct {
 } HelpEntry;
 
 static const HelpEntry HELP_ENTRIES[] = {
-    {"step, s, si [N]", "Step N instructions (default 1)"},
+    {"step, s, si [N]", "Step N instructions (default 1), always showing changes"},
     {"next, n", "Step over (run until just after this instruction)"},
     {"run, r, c, continue, g, go", "Run until breakpoint/halt"},
     {"break, b, bp ADDR", "Set breakpoint"},
@@ -797,9 +802,14 @@ static void cmd_set(Debugger *dbg, AGEHarness *age, const char *nameIn, const ch
 /* debugger_hook() always lets the instruction it's currently stopped at
  * execute "for free" once a resume command is dispatched (see its own
  * comment) -- stepsRemaining only counts instructions BEYOND that one,
- * so 'step 1' sets 0, not 1. */
+ * so 'step 1' sets 0, not 1. Sets inBoundedStep so every instruction
+ * this step consumes shows trace-style output (register changes, HAL/S
+ * source lines) regardless of whether 'trace'/'htrace' is on -- per
+ * user feedback, stepping through code should always show what
+ * changed. */
 static void cmd_step(Debugger *dbg, long count) {
     dbg->stepsRemaining = count - 1;
+    dbg->inBoundedStep = true;
 }
 
 /* Sets a one-shot breakpoint right after the current instruction, then
@@ -807,7 +817,9 @@ static void cmd_step(Debugger *dbg, long count) {
  * over a BAL/subroutine call without knowing anything about the HAL/S
  * runtime's call convention, since execution naturally lands back here
  * once (if) the call returns. Ported faithfully from cmd_debug.coffee's
- * 'next', which does exactly this. */
+ * 'next', which does exactly this. Does *not* set inBoundedStep --
+ * 'next's whole point is to skip past a subroutine's details, not show
+ * every instruction inside it. */
 static void cmd_next(Debugger *dbg, uint32_t nia, uint32_t hw1, uint32_t hw2) {
     DInstr v;
     const InstrDesc *d = instr_decode(hw1, hw2, &v);
@@ -819,9 +831,13 @@ static void cmd_next(Debugger *dbg, uint32_t nia, uint32_t hw1, uint32_t hw2) {
         dbg->tempBreakpoint = nextAddr;
     }
     dbg->stepsRemaining = LONG_MAX;
+    dbg->inBoundedStep = false;
 }
 
-static void cmd_run(Debugger *dbg) { dbg->stepsRemaining = LONG_MAX; }
+static void cmd_run(Debugger *dbg) {
+    dbg->stepsRemaining = LONG_MAX;
+    dbg->inBoundedStep = false;
+}
 
 /* ---------------------------------------------------------------------
  * Command dispatch / REPL
@@ -1148,7 +1164,7 @@ void debugger_free(Debugger *dbg) {
     free(dbg);
 }
 
-bool debugger_wants_trace(const Debugger *dbg) { return dbg->traceEnabled; }
+bool debugger_wants_trace(const Debugger *dbg) { return dbg->traceEnabled || dbg->inBoundedStep; }
 
 int debugger_line_width(const Debugger *dbg) { return dbg->lineWidth; }
 
@@ -1264,11 +1280,13 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
 
     if (!shouldStop && dbg->stepsRemaining > 0) {
         dbg->stepsRemaining--;
-        /* 'trace'/'htrace': show the HAL/S source line as instructions
-         * flow by, not just at stops -- printed here (before returning)
-         * so it lands just before this instruction's own trace line,
-         * which run.c prints only after ap101_exec1() actually runs it. */
-        if (dbg->traceEnabled) show_source_line_if_changed(dbg, nia);
+        /* 'trace'/'htrace' (or a bounded 'step [N]' -- see
+         * debugger_wants_trace()): show the HAL/S source line as
+         * instructions flow by, not just at stops -- printed here
+         * (before returning) so it lands just before this instruction's
+         * own trace line, which run.c prints only after ap101_exec1()
+         * actually runs it. */
+        if (debugger_wants_trace(dbg)) show_source_line_if_changed(dbg, nia);
         return true;
     }
 
