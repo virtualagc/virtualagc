@@ -32,21 +32,19 @@ typedef struct Debugger Debugger;
 Debugger *debugger_create(const Options *opts);
 void debugger_free(Debugger *dbg);
 
-/* True when per-instruction trace output (disassembly + register
- * changes) should be shown for the instruction debugger_hook() was just
- * called for -- either because 'trace'/'htrace' is toggled on, or
- * because a bounded 'step [N]' is in progress (shown regardless of
- * htrace, so stepping through code always shows what each step actually
- * changed; 'next'/'run'/'continue' don't force this on, since their
- * whole point is often to skip past the noisy part). run.c ORs this
- * into its own --trace-driven per-instruction line printing so this
- * reuses the existing trace-line formatting/diffing rather than
+/* True when the debugger's 'trace'/'htrace' toggle is on -- run.c ORs
+ * this into its own --trace-driven per-instruction line printing so
+ * 'htrace' reuses the existing trace-line formatting/diffing rather than
  * duplicating it here (that logic needs the post-execution register
- * diff, which isn't available yet at debugger_hook()'s call site).
- * Since 'step' only sets this from *inside* debugger_hook() (once its
- * REPL actually dispatches the command), callers must consult this
- * again after debugger_hook() returns, not just before calling it --
- * see run.c's own comment at its call site. */
+ * diff, which isn't available yet at debugger_hook()'s call site). (A
+ * separate, always-on register-change/full-dump summary is shown at
+ * every debugger stop regardless of this toggle -- see debugger_hook()'s
+ * own comment -- so 'step' shows what changed without needing htrace.)
+ * Since a 'trace on'/'trace off' command can itself be dispatched from
+ * *inside* debugger_hook() (its REPL), callers must consult this again
+ * after debugger_hook() returns, not just before calling it, or a
+ * same-prompt "trace on" + resume can miss the first instruction's
+ * trace line -- see run.c's own comment at its call site. */
 bool debugger_wants_trace(const Debugger *dbg);
 
 /* Current 'set width N' value (default 132; <=0 means "no wrapping").
