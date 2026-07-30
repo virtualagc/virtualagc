@@ -1,0 +1,16 @@
+>> 10164 START   +00000: e4f3 8000  BAL  4,X'8000'
+gpc> >> 10000 $0HELLO +00000: e8f3 0212  LHI  0,X'0212'
+HAL/S    1: HELLO:  PROGRAM;
+gpc> >> 10002 $0HELLO +00002: e9f3 014e  LHI  1,X'014e'
+gpc> >> 10004 $0HELLO +00004: b914       STH  1,X'0005'(0)
+gpc> >> 10005 $0HELLO +00005: e0fb       IAL  0,X'0028'
+gpc> >> 10007 $0HELLO +00007: eb11       LA   3,X'0004'(1)
+gpc> >> 10008 $0HELLO +00008: bb24       STH  3,X'0009'(0)
+gpc> HAL/S    1: HELLO:  PROGRAM;
+gpc> >> 10008 $0HELLO +00008: bb24       STH  3,X'0009'(0)
+gpc> >> 10009 $0HELLO +00009: eef3 0006  LHI  6,X'0006'
+HAL/S    6:   WRITE(PRINTER) 'THE BEGINNING';
+gpc> >> 1000b $0HELLO +0000b: edf3 0003  LHI  5,X'0003'
+gpc> >> 1000d $0HELLO +0000d: d0ff 394a  SCAL 0,X'014a'(1,)
+gpc> HAL/S    6:   WRITE(PRINTER) 'THE BEGINNING';
+gpc> Goodbye.

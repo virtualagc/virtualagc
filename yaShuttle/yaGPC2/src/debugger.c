@@ -9,6 +9,7 @@
 
 #include "cpu_instr.h"
 #include "membus.h"
+#include "sourcemap.h"
 #include "strfmt.h"
 #include "trace.h"
 
@@ -75,6 +76,13 @@ struct Debugger {
 
     char lastLine[256];
     bool hasLastLine;
+
+    /* Stage 3: HAL/S source-line display (see src/sourcemap.h). NULL
+     * unless --source-map was given -- zero cost otherwise. */
+    SourceMap *srcmap;
+    int lastSrn;
+    bool hasLastSrn; /* only show a source line when it differs from the
+                       * last one shown, matching yaHALMAT2's --debug mode */
 };
 
 /* ---------------------------------------------------------------------
@@ -401,6 +409,19 @@ static void show_current_location(AGEHarness *age) {
     printf(">> %s %s: %s %s  %s\n", niaHex, csect, hw1Hex, hw2Hex, disasm);
 }
 
+/* Prints the HAL/S source line active at addr, if a source map is
+ * loaded and one is mapped there. Returns true iff something was
+ * printed (callers use this to distinguish "no source map" from "no
+ * statement mapped at this exact address"). */
+static bool show_source_line(Debugger *dbg, uint32_t addr) {
+    if (!dbg->srcmap) return false;
+    int srn = 0;
+    const char *text = sourcemap_lookup(dbg->srcmap, addr, &srn);
+    if (!text) return false;
+    printf("HAL/S %4d:%s\n", srn, text);
+    return true;
+}
+
 static void show_backtrace(Debugger *dbg) {
     if (dbg->recentCount == 0) {
         printf("  (no history yet)\n");
@@ -443,6 +464,7 @@ static const HelpEntry HELP_ENTRIES[] = {
     {"sym, symbol NAME", "Look up symbol (substring match)"},
     {"sections, sect", "Show section map"},
     {"where, loc, here", "Show current location"},
+    {"source, src", "Show the HAL/S source line at the current location"},
     {"steps", "Show step count"},
     {"backtrace, bt", "Show recently executed instructions"},
     {"trace, htrace [on|off]", "Toggle or show instruction trace"},
@@ -942,6 +964,11 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
         show_current_location(age);
         return false;
     }
+    if (cmd_is(cmd, "source", "src", NULL)) {
+        if (!dbg->srcmap) printf("*** No source map loaded (see --source-map)\n");
+        else if (!show_source_line(dbg, nia)) printf("*** No HAL/S source mapped at this address\n");
+        return false;
+    }
     if (cmd_is(cmd, "steps", NULL)) {
         printf("Step count: %ld\n", dbg->currentStep);
         return false;
@@ -1029,6 +1056,8 @@ Debugger *debugger_create(const Options *opts) {
     Debugger *dbg = calloc(1, sizeof(Debugger));
     dbg->traceEnabled = opts->trace;
 
+    if (opts->sourceMap) dbg->srcmap = sourcemap_load(opts->sourceMap);
+
     if (opts->breakAddr) {
         const char *s = opts->breakAddr;
         if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
@@ -1040,7 +1069,10 @@ Debugger *debugger_create(const Options *opts) {
     return dbg;
 }
 
-void debugger_free(Debugger *dbg) { free(dbg); }
+void debugger_free(Debugger *dbg) {
+    if (dbg->srcmap) sourcemap_free(dbg->srcmap);
+    free(dbg);
+}
 
 bool debugger_wants_trace(const Debugger *dbg) { return dbg->traceEnabled; }
 
@@ -1121,6 +1153,15 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
 
     if (shouldStop) printf("--- stopped: %s (%ld steps) ---\n", stopMsg, step);
     show_current_location(age);
+    if (dbg->srcmap) {
+        int srn = 0;
+        const char *text = sourcemap_lookup(dbg->srcmap, nia, &srn);
+        if (text && (!dbg->hasLastSrn || srn != dbg->lastSrn)) {
+            printf("HAL/S %4d:%s\n", srn, text);
+            dbg->lastSrn = srn;
+            dbg->hasLastSrn = true;
+        }
+    }
     if (dbg->watchCount > 0) show_watches(dbg, age);
 
     debugger_repl(dbg, age, nia, hw1, hw2);

@@ -17,14 +17,14 @@ SYM="fixtures/hello-lnk101.json"
 fail=0
 
 run_case() {
-    label="$1"
-    commands="fixtures/debugger_${1}_commands.txt"
-    golden="fixtures/debugger_${1}_golden.txt"
+    label="$1"; shift
+    commands="fixtures/debugger_${label}_commands.txt"
+    golden="fixtures/debugger_${label}_golden.txt"
 
     act_out=$(mktemp)
     act_err=$(mktemp)
 
-    "$YAGPC2" --symbols "$SYM" --debug --line-width 240 "$FCM" <"$commands" >"$act_out" 2>"$act_err"
+    "$YAGPC2" --symbols "$SYM" --debug --line-width 240 "$@" "$FCM" <"$commands" >"$act_out" 2>"$act_err"
     act_code=$?
 
     ok=1
@@ -64,5 +64,11 @@ run_case "hello"
 # 0x217, not literal 0x5 -- see cpu_g_ea's non-indexed/DSE branch)
 # indirectly, since the watched address had to be the real one.
 run_case "watch"
+
+# Stage 3: HAL/S source-line display ('source'/'src', and automatically
+# at each stop) via a source map built by tools/gen_source_map.py from a
+# real HALSFC compile's pass1.rpt/pass2.rpt (see that script's header
+# comment for why -- not the SDF binary format originally targeted).
+run_case "srcmap" --source-map fixtures/hello.srcmap.json
 
 exit $fail

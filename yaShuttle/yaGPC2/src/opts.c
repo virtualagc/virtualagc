@@ -69,6 +69,8 @@ static const char *HELP_TEXT =
 "  --debug                         gdb-style interactive debugger (implies\n"
 "                                  --interactive) (default: false)\n"
 "  --no-debug                      disable the interactive debugger (default)\n"
+"  --source-map <file>             HAL/S source-line map for --debug (see\n"
+"                                  tools/gen_source_map.py)\n"
 "  -h, --help                      display help for command\n";
 
 static void set_defaults(Options *o) {
@@ -196,6 +198,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->debug = true;
         } else if (tok_is(tok, "--no-debug", &n)) {
             (void)n; opts->debug = false;
+        } else if (tok_is(tok, "--source-map", &n)) {
+            opts->sourceMap = take_value(argc, argv, &i, tok, n);
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {

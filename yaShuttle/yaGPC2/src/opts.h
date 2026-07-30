@@ -52,6 +52,10 @@ typedef struct {
      * --fcos below. Enables the gdb-style interactive debugger (see
      * src/debugger.h); implies --interactive. */
     bool debug;                      /* default false */
+    /* Optional HAL/S source-line map for --debug (see src/sourcemap.h
+     * and tools/gen_source_map.py); NULL if not given -- the debugger
+     * simply shows no source line at stops. */
+    char *sourceMap;                 /* NULL if unset */
 
     /* Not part of gpc run's own option set -- yaGPC2-specific. Simulates
      * specific known FCOS (Shuttle flight-software OS) behaviors that a
