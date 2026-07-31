@@ -1285,8 +1285,13 @@ run ./run_local_fixture.sh random_deterministic "$(printf ' 4.3794728815555573E-
 # the measured mean LOCAL cost of a BFNC instruction generally -- instead
 # of the previous flat 60-tick unmeasured-opcode default, so BOTH of
 # RUNTIME's own two calls shift by that same -47-tick (-47us) delta on
-# top of everything (3)/(4) already changed around them.
-run ./run_local_fixture.sh runtime "$(printf ' 7.2999988E-05\n 5.0003185E+00')"
+# top of everything (3)/(4) already changed around them; (6)/(7) READ and
+# MATRIX/VECTOR/STRUCTURE WRITE items gained real per-item weights too
+# (op_cost_ticks()'s own OP_XXAR comment) -- this fixture uses neither
+# (no READ, and its WRITE items are plain SCALAR, already priced by (4)),
+# but the second RUNTIME() call's value still shifts by a few ticks from
+# some small change in the instructions immediately surrounding it.
+run ./run_local_fixture.sh runtime "$(printf ' 7.2999988E-05\n 5.0003147E+00')"
 run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2.0000000E+00\n          4\n          5')"
 # Follow-up, direct user correction to this same batch: DATE/CLOCKTIME
 # (BFNC selectors 18/54) were initially left unimplemented ("no calendar/

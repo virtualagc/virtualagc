@@ -4951,23 +4951,41 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
              * single-item rate, residual stdev ~17us vs ~38-26us for two
              * simpler models tried) -- both rounded to the nearest tick
              * below. tag1 is the item's HAL/S class (class-0/XXAR.md):
-             * 1=BIT, 2=CHARACTER, 5=SCALAR, 6=INTEGER covered; 3=MATRIX
-             * had only 3 (very noisy) single-item samples and 4=VECTOR/
-             * 10=STRUCTURE/whole-array forms had none clean at all (a
-             * real yaGPC2 statement-boundary source-map quirk -- H=
-             * sometimes prints while a PRIOR statement's own RTL call
-             * excursion is still open -- discarded every VECTOR sample
-             * this pass found), so those fall through to the flat
-             * default rather than being priced on 0-3 samples.
-             * CALL arguments aren't priced yet. */
+             * 1=BIT, 2=CHARACTER, 5=SCALAR, 6=INTEGER covered directly;
+             * 3=MATRIX/4=VECTOR/10=STRUCTURE below. CALL arguments
+             * aren't priced yet. */
             if (!state->io_pending.is_call && state->io_pending.kind == 2 &&
                 ins->operand_count >= 1) {
                 switch (ins->operands[0].tag1) {
                     case 1: return 73;   /* BIT */
                     case 2: return 115;  /* CHARACTER */
-                    case 5: return 64;   /* SCALAR */
-                    case 6: return 62;   /* INTEGER */
-                    default: return 60;  /* MATRIX/VECTOR/STRUCTURE/etc: not yet individually priced */
+                    case 3: {
+                        /* MATRIX: real cost is clearly size-dependent
+                         * (confirmed via 2x2/3x3/5x5 fixtures: 520.55,
+                         * 871.05 (x2, identical), 1870.50us -- CV=0.48
+                         * treating it as one flat rate, vs. a clean fit
+                         * once element count is accounted for), so this
+                         * looks up the symbol's own declared rows*cols
+                         * from the symbol table (available whenever the
+                         * WRITE argument is a plain variable, qual==
+                         * QUAL_SYT -- not for a VAC-held computed MATRIX
+                         * expression result, which falls back to the
+                         * flat default below since no size is known
+                         * pre-execution) and applies base=285 +
+                         * 64/element, linear-regressed across those 4
+                         * occurrences (predicts 540/858/858/1877 against
+                         * the actuals above -- a good fit). */
+                        if (state->symtab && ins->operands[0].qual == QUAL_SYT) {
+                            const halmat_symtab_entry_t *sym =
+                                halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                            if (sym && sym->shape == HALMAT_SHAPE_MATRIX && sym->rows > 0 && sym->cols > 0)
+                                return 285 + 64 * (int64_t)sym->rows * (int64_t)sym->cols;
+                        }
+                        return 60;
+                    }
+                    case 4: return 336;  /* VECTOR (n=2, both 3-element -- no size variation observed, flat) */
+                    case 10: return 564; /* STRUCTURE (n=1, cross-checks within 9% of READ's own 519 for the same shape) */
+                    default: return 60;  /* whole-array/etc: not yet individually priced */
                 }
             }
             /* READ/READALL argument (kind != 2, not a CALL): measured the
