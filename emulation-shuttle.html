@@ -1,7 +1,7 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
   <head>
-    <title>HAL/S Development Chain</title>
+    <title>HAL/S and AP-101 Emulation</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="Author" content="Ronald Burkey">
     <link rel="icon" type="image/png" href="favicon.png">
@@ -15,22 +15,42 @@ document.write(headerTemplate.replace("@TITLE@","Running It!").replace("@SUBTITL
     <h1>Table of Contents </h1>
     <ul>
       <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
-      <li><a moz-do-not-send="true" href="#Installation">Installation of
-          the Emulators</a></li>
+      <li><a moz-do-not-send="true" href="#installation">Installation</a><br>
+      </li>
       <li><a moz-do-not-send="true" href="#halmat">The Mystery of HALMAT</a></li>
-      <li>Emulating HALMAT</li>
+      <li><a moz-do-not-send="true" href="#halmatEmulators">HALMAT
+          Emulators</a><br>
+      </li>
       <ul>
         <li><a moz-do-not-send="true" href="#zane">Zane Hambly's
-            Emulator</a></li>
-        <li><a moz-do-not-send="true" href="#claude">Claude's Emulator</a><br>
+            Emulator (yaHALMAT)</a></li>
+        <li><a moz-do-not-send="true" href="#yaHALMAT2">Claude's
+            Emulator (yaHALMAT2)</a><br>
         </li>
       </ul>
-      <li>Emulating AP-101</li>
+      <li><a moz-do-not-send="true" href="#AP-101emulators">AP-101B/S
+          Emulators</a><br>
+      </li>
+      <a moz-do-not-send="true" href="#gpc"> </a>
       <ul>
-        <li><a moz-do-not-send="true" href="#don">Don Schmidt's Emulator</a></li>
-        <li><a moz-do-not-send="true" href="#dan">Dan Weaver's Emulator</a><br>
+        <a moz-do-not-send="true" href="#gpc"> </a>
+        <li><a moz-do-not-send="true" href="#gpc">Don Schmidt's Emulator
+            (gpc)<br>
+          </a></li>
+        <a moz-do-not-send="true" href="#gpc"> </a>
+        <li><a href="#ap0000a">Dan Weaver's Emulator (ap0000a)</a><br>
         </li>
+        <li><a moz-do-not-send="true" href="#yaGPC2">Claude's Emulator
+            (yaGPC2)</a></li>
       </ul>
+      <li><a moz-do-not-send="true" href="#accuracy">Accuracy Of the
+          Emulators</a><br>
+      </li>
+      <ul>
+      </ul>
+      <li><a moz-do-not-send="true" href="#integration">Integration Into
+          Spaceflight Simulations Or Other Software</a><br>
+      </li>
       <ul>
       </ul>
     </ul>
@@ -50,22 +70,36 @@ document.write(headerTemplate.replace("@TITLE@","Running It!").replace("@SUBTITL
     Windows —, but which can run HAL/S or AP-101S code in some
     fashion.&nbsp; There are several alternative ways to accomplish this
     feat.&nbsp; You may consider these choices either a blessing or a
-    curse, but you nevertheless need to make a decision about which
-    approach is most-suitable for your own purposes.<br>
+    curse, but you can try out any or all of them before deciding which
+    approach is most suitable for your own purposes.<br>
     <br>
-    There are actually two broadly-different classes of emulators
-    available, and multiple emulators in each of the two classes.&nbsp;
-    Two of the emulators accept AP-101S memory images as alluded to
-    above, and pretend to be an AP-101S computer, directly executing
-    AP-101S machine code.&nbsp; <br>
+    There are two broad classes of emulators available, namely those
+    developed externally to the Virtual AGC Project as personal projects
+    of their respective developers, versus those which are internal to
+    the Virtual AGC Project.&nbsp; However — to give credit where it's
+    due! —, even the internal emulators haven't truly been developed by
+    Virtual AGC, but instead have been created by A.I. coding agents
+    (under direction, of course!) and are in some sense derivatives of
+    the externally-developed emulators.&nbsp; There are advantages and
+    disadvantages to either.&nbsp; With the external emulators, you're
+    directly benefiting from the experience and insights of their
+    developers.&nbsp; With the internal emulators, you benefit from a
+    faster maintenance cycle.&nbsp; Or perhaps more accurately, we have
+    control over maintenance for the internal emulators, and no control
+    at all over maintenance for the external emulators.&nbsp; The choice
+    is yours.<br>
     <br>
-    Two of the emulators instead accept programs in a form that's known
-    as the <i>HALMAT Intermediate Language</i>, and execute
-    instructions of the HALMAT language.&nbsp; Where would you get such
-    a "HALMAT" program from, and why in the world would you want
-    to?&nbsp; Getting your hands on HALMAT code is not a problem,
+    Another useful classification relates to the nature of the
+    executable programs being emulated.&nbsp; <i>Some</i> of the
+    emulators accept AP-101S memory images as alluded to above, and
+    pretend to be an AP-101S computer, directly executing AP-101S
+    machine code. <i>Other</i> emulators instead accept programs in a
+    form that's known as the <i>HALMAT Intermediate Language</i>, and
+    execute instructions of the HALMAT language.&nbsp; Where would you
+    get such a "HALMAT" program from, and why in the world would you
+    want to?&nbsp; Getting your hands on HALMAT code is not a problem,
     because HALMAT is the natural way that the HAL/S compiler
-    communicates amongst its various passes; in other words, HALMAT is
+    communicates among its various passes; in other words, HALMAT is
     going to be produced by the HAL/S compilation process automatically,
     whether you happen to care about it or not.&nbsp; There are various
     pro's and con's related to emulation via HALMAT versus via AP-101S:<br>
@@ -90,133 +124,59 @@ document.write(headerTemplate.replace("@TITLE@","Running It!").replace("@SUBTITL
         so AP-101S assembly-language programs are not supported.</li>
       <li>Con: Unlike machine code, HALMAT instructions don't have
         specific timings, so it's tricky to maintain exact timing in
-        software that needs it.<br>
+        software that needs it.&nbsp; Indeed, to provide timing for them
+        at all, we needed to perform extensive measurements and
+        statistical analysis versus actual AP-101S assembly code, and
+        have never even managed yet to satisfactory deal with <i>all</i>
+        HALMAT instructions.&nbsp; If a HALMAT emulation is within ±10%
+        of the timing of a corresponding AP-101S emulation, it's doing
+        quite well!&nbsp; On the other hand, it's tricky to maintain
+        accurate timing in AP-101S machine code as well, even though the
+        HAL/S compiler's code generator contained a possibly-complete
+        timing model we were able to filch.<br>
       </li>
     </ul>
-    <h1><a name="Installation"></a>Installation of the Emulators</h1>
-    <p>You can choose to install any or all of the available
-      emulators.&nbsp; Or none of them, of course, though if so, I'd
-      question why you're even reading this at all.<br>
+    <p>Again, the choice is yours.<br>
     </p>
-    <p>I'd note that most of these emulators are written by independent
-      developers and reside in their own projects, separate from the
-      Virtual AGC Project itself, so I literally have no way of giving
-      you authoritative installation instructions for them, or of
-      dealing with problems you encounter using them.&nbsp; Nor are all
-      of the emulators (yet) at fully-comparable levels of development
-      or capability.&nbsp; Weighing all of that, I'll very-subjectively
-      prioritize them as follows in terms of which ones I think might be
-      most useful to you if you're complete newbies.&nbsp; Of course,
-      the rankings are just at the time of this writing ... all of which
-      may (and probably will!) change in time.<br>
+    <ul>
+    </ul>
+    <h1><a name="Installation"></a>Installation</h1>
+    <p>Refer directly to the particular document section below for the
+      specific emulator you'd like to install.&nbsp; You can choose to
+      install any or all of the available emulators.&nbsp; Or none of
+      them, of course, though if so, I'd question why you're even
+      reading this at all.<br>
     </p>
-    <table cellspacing="2" cellpadding="2" border="1" align="center"
-      width="50%">
-      <tbody>
-        <tr>
-          <td valign="top">
-            <div align="center"><b>yaHALMAT2</b><br>
-            </div>
-            <br>
-            I'll assume you have a local clone of the Virtual AGC source
-            tree from GitHub, and for the sake of argument I'll refer to
-            that local directory as <i><code>virtualagc</code></i>.&nbsp;
-            But use the <i>actual</i> directory name in the
-            instructions below.<br>
-            <br>
-            To build it on Linux or Mac OS, simply<br>
-            <blockquote>
-              <pre>cd <font color="#996633"><i>virtualagc</i></font>/yaShuttle/yaHALMAT2/src<br>make clean all<br></pre>
-            </blockquote>
-            On Windows, you should be able to build it either in an
-            MSYS2 environment (for which the instructions should be the
-            same as above), or else in a Windows "developer" terminal
-            using Visual C.&nbsp; In the latter case, I'm told that
-            instead of <b>make</b> you have to use <b>nmake</b>, along
-            with the makefile called Makefile.win.&nbsp; But I've only
-            built <b>yaHALMAT2</b> on Linux, so you can regard anything
-            I say about Mac OS or Windows as speculative.&nbsp; The
-            default on Linux, Mac, or Windows with MSYS2 is to use <b>clang</b>
-            as the compiler if available, falling back on <b>gcc</b>.&nbsp;
-            Regardless of the platform, you can choose any compiler you
-            want by specifying it on the <b>make</b>/<b>nmake</b>
-            command line with the <code>CC</code> variable.&nbsp; I
-            have not tried that myself.<br>
-            <br>
-            Finally, once compiled, unless you want to invoke <b>yaHALMAT2</b>
-            by using its full pathname, you'll probably want to copy or
-            link <b>yaHALMAT2[.exe]</b> somewhere into your existing
-            path, or else change your <code>PATH</code> variable to
-            include the directory that <b>yaHALMAT2</b> is in.&nbsp;
-            I'll let you to figure out that part.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">
-            <div align="center"><b>gpc</b><br>
-            </div>
-            <br>
-            To my recollection, I have lost the ability to build <b>gpc</b>
-            from source, but perhaps <a moz-do-not-send="true"
-              href="https://github.com/ColanderCombo/nsts-sim-gpc">the
-              author's instructions</a> might work for you.&nbsp; I
-            think what worked for me was to download <a
-              moz-do-not-send="true"
-              href="https://github.com/ColanderCombo/nsts-sim-gpc/releases">the
-              pre-built "AppImage" for Linux</a>, rename it "gpc", and
-            copy it into my path.&nbsp; There are also pre-built Mac OS
-            "dmg" files at the same link, though I don't know how to use
-            them myself.&nbsp; As far as Windows is concerned, I haven't
-            a clue as to what you have to do. <br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">
-            <div align="center"><b>ap0000a</b><br>
-            </div>
-            <br>
-            (Not yet publicly available. I've seen it privately, only in
-            very-preliminary versions.)<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">
-            <div align="center"><b>yaHALMAT</b><br>
-            </div>
-            <br>
-            You need first to clone <a moz-do-not-send="true"
-              href="https://github.com/Zaneham/Halmat">the source tree
-              from GitHub</a> (or download it via a zipfile) into a
-            local directory in your filesystem.&nbsp; For the sake of
-            discussion, let's suppose that the local directory is called
-            <i><code>Halmat</code></i>.&nbsp; If you've chosen to call
-            it something else, then substitute the correct name
-            instead.&nbsp; To build it on Linux or Mac OS, do this:<br>
-            <blockquote>
-              <pre>cd <font color="#996633"><i>Halmat</i></font>/emu<br>make clean yaHALMAT<br></pre>
-            </blockquote>
-            On Windows?&nbsp; Maybe it will work.&nbsp; I don't know,
-            I've only tried it on Linux myself.<br>
-            <br>
-            Finally, once compiled, unless you want to invoke <b>yaHALMAT</b>
-            by using its full pathname, you'll probably want to copy or
-            link <b>yaHALMAT[.exe]</b> somewhere into your existing
-            path, or else change your <code>PATH</code> variable to
-            include the directory that <b>yaHALMAT</b> is in.&nbsp;
-            I'll let you to figure out that part.</td>
-        </tr>
-      </tbody>
-    </table>
+    <p>Why do I not just <i>tell</i> you what to install, rather than
+      giving you this rigamarole about all of the possible emulators you
+      <i>might</i> install if you had they slightest idea which of them
+      were "better" or "worse"?&nbsp; There are lots of shades of gray
+      here.&nbsp; I'm not unbiased, and being an egotist myself, I
+      naturally gravitate towards the ones I had some personal
+      involvement with, so you have to take anything I say with a grain
+      of salt.&nbsp; At this writing, my suggestions would be:<br>
+    </p>
+    <ul>
+      <li>If you're happy running or debugging (with a <b>gdb</b>-like
+        interface) a HAL/S program from a command line, install <a
+          moz-do-not-send="true" href="#yaHALMAT2"><b>yaHALMAT2</b></a>
+        or <b><a moz-do-not-send="true" href="#yaGPC2">yaGPC2</a></b>.<br>
+      </li>
+      <li> If you want to debug (and run) a HAL/S program using a fancy
+        (and pretty!) graphical debugger, install <a
+          moz-do-not-send="true" href="#gpc"><b>gpc</b></a>.<br>
+      </li>
+    </ul>
     <h1><a name="halmat"></a>The Mystery of HALMAT</h1>
     <p>Supporting HALMAT is quite a bit trickier than supporting AP-101S
       machine language, not because of its structure, but for historical
       reasons.&nbsp; So a few words of explanation are in order.<br>
     </p>
-    <p>As you already know, the original compiler used for converting
-      Space Shuttle flight software written in the high-level language
-      known as HAL/S into assembly-language object code for the Space
-      Shuttle's general purpose computers was partitioned into several
-      successive passes as follows:<br>
+    <p>As you already know, the original HAL/S compiler used for
+      converting Space Shuttle flight software written in the high-level
+      language known as HAL/S into assembly-language object code for the
+      Space Shuttle's general purpose computers was partitioned into
+      several successive passes as follows:<br>
     </p>
     <ul>
       <li>PASS1 parsed the HAL/S source code and generated a
@@ -337,6 +297,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
+
+
+
           5 of the document, IR-60-5 from 1977</a>, and this version
         contains only the pages that changed between Revision 4 and
         Revision 5.&nbsp; The complete Appendix A, which from the page
@@ -350,10 +314,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
         believe that they weren't all simply thrown away.<br>
       </li>
       <li>Though not "documentation" as such, the HAL/S-FC compiler
-        passes PASS1, OPT, and PASS2 all outputed and/or inputed HALMAT
-        files, so potentially one could get additional information about
-        HALMAT's individual instructions or groupings of instructions by
-        looking through HAL/S-FC source code.</li>
+        passes PASS1, OPT, and PASS2 all outputted and/or inputted
+        HALMAT files, so potentially one could get additional
+        information about HALMAT's individual instructions or groupings
+        of instructions by looking through HAL/S-FC source code.</li>
       <li>Moreover, PASS1 has the optional capability of interleaving
         HAL/S statements with the derived HALMAT in the compilation
         reports it generates.&nbsp; Similarly, PASS2 has the optional
@@ -390,6 +354,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     and as we discussed in the installation section above, resides in
     Zane's own <a moz-do-not-send="true"
       href="https://github.com/Zaneham/Halmat/tree/main">repository</a>.&nbsp;
+
+
+
+
     At this writing, the fly in the ointment is that after the
     extremely-rapid initial development of the HALMAT spec and of <b>yaHALMAT</b>,
     life and priorities intervened and progress came to a halt.&nbsp;
@@ -452,6 +420,10 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
+
+
+
         That information is just to help out the reader, though.&nbsp;
         HALMAT only cares that it's "Symbol #1", and not what it's
         particular name is in your imagination.<br>
@@ -489,7 +461,8 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     </ul>
     <ul>
     </ul>
-    <h1>Emulating HALMAT</h1>
+    <h1><a name="halmatEmulators"></a>HALMAT Emulators<br>
+    </h1>
     One characteristic of HALMAT files is that they don't <i>quite</i>
     contain all of the information needed to run the program.&nbsp; The
     thing they're missing is the values of <i>literals</i>, and HALMAT
@@ -507,42 +480,42 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
-          <th align="center" valign="middle">Compiler/Pass<br>
+          <th valign="middle" align="center">Compiler/Pass<br>
           </th>
-          <th align="center" valign="middle">HALMAT Filename<br>
+          <th valign="middle" align="center">HALMAT Filename<br>
           </th>
-          <th align="center" valign="middle">First Literal File<br>
+          <th valign="middle" align="center">First Literal File<br>
           </th>
-          <th align="center" valign="middle">Second Literal File<br>
+          <th valign="middle" align="center">Second Literal File<br>
           </th>
         </tr>
         <tr>
-          <td align="center" valign="middle">HALSFC-PASS1<br>
+          <td valign="middle" align="center">HALSFC-PASS1<br>
           </td>
-          <td align="center" valign="middle">halmat.bin<br>
+          <td valign="middle" align="center">halmat.bin<br>
           </td>
-          <td align="center" valign="middle">litfile0.bin<br>
+          <td valign="middle" align="center">litfile0.bin<br>
           </td>
-          <td align="center" valign="middle">COMMON0.out.bin.gz</td>
+          <td valign="middle" align="center">COMMON0.out.bin.gz</td>
         </tr>
         <tr>
-          <td align="center" valign="middle">HALSFC-OPT<br>
+          <td valign="middle" align="center">HALSFC-OPT<br>
           </td>
-          <td align="center" valign="middle">optmat.bin<br>
+          <td valign="middle" align="center">optmat.bin<br>
           </td>
-          <td align="center" valign="middle">litfile2.bin<br>
+          <td valign="middle" align="center">litfile2.bin<br>
           </td>
-          <td align="center" valign="middle">COMMON2.out.bin.gz<br>
+          <td valign="middle" align="center">COMMON2.out.bin.gz<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">HAL_S_FC.py<br>
+          <td valign="middle" align="center">HAL_S_FC.py<br>
           </td>
-          <td align="center" valign="middle">FILE1.bin<br>
+          <td valign="middle" align="center">FILE1.bin<br>
           </td>
-          <td align="center" valign="middle">FILE2.bin<br>
+          <td valign="middle" align="center">FILE2.bin<br>
           </td>
-          <td align="center" valign="middle">LIT_CHAR.bin<br>
+          <td valign="middle" align="center">LIT_CHAR.bin<br>
           </td>
         </tr>
       </tbody>
@@ -621,19 +594,53 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       literals, on the other hand, of which there are none in our
       example, are all stored as 32-bit big-endian form.</p>
     <blockquote> </blockquote>
-    <h2><a name="zane"></a>Zane Hambly's Emulator<br>
+    <h2><a name="zane"></a>Zane Hambly's Emulator (yaHALMAT)<br>
     </h2>
-    My illustrating comments here are frozen at the emulator's condition
-    when I first wrote about it, so you may find some differences if you
-    try out the emulator now.&nbsp; <a moz-do-not-send="true"
-      href="https://github.com/Zaneham/Halmat">All of Zane's material is
-      in his own GitHub repository</a>.&nbsp; <a moz-do-not-send="true"
+    My illustrating comments here are frozen at the <b>yaHALMAT</b>
+    emulator's condition when I first wrote about it, so you may find
+    some differences if you try out the emulator now.&nbsp; <a
+      moz-do-not-send="true" href="https://github.com/Zaneham/Halmat">All
+
+
+
+      of Zane's material is in his own GitHub repository</a>.&nbsp; <a
+      moz-do-not-send="true"
       href="https://github.com/Zaneham/Halmat/issues/new/choose">That's
       also where bugs should be reported, as "issues" in the repository</a>.<br>
     <br>
-    This program itself is called <b>yaHALMAT</b> — or probably
-    yaHALMAT.exe on Windows, though I haven't tried it there myself —
-    and you'll want to make sure that it gets into your PATH.&nbsp;
+    <table width="60%" cellspacing="2" cellpadding="2" border="1"
+      align="center">
+      <tbody>
+        <tr>
+          <td valign="top">
+            <div align="center"><b>Installation of yaHALMAT</b><br>
+            </div>
+            <br>
+            You need first to clone <a moz-do-not-send="true"
+              href="https://github.com/Zaneham/Halmat">the source tree
+              from GitHub</a> (or download it via a zipfile) into a
+            local directory in your filesystem.&nbsp; For the sake of
+            discussion, let's suppose that the local directory is called
+            <i><code>Halmat</code></i>.&nbsp; If you've chosen to call
+            it something else, then substitute the correct name
+            instead.&nbsp; To build it on Linux or Mac OS, do this:<br>
+            <blockquote>
+              <pre>cd <font color="#996633"><i>Halmat</i></font>/emu<br>make clean yaHALMAT<br></pre>
+            </blockquote>
+            On Windows?&nbsp; Maybe it will work.&nbsp; I don't know,
+            I've only tried it on Linux myself.<br>
+            <br>
+            Finally, once compiled, unless you want to invoke <b>yaHALMAT</b>
+            by using its full pathname, you'll probably want to copy or
+            link <b>yaHALMAT[.exe]</b> somewhere into your existing
+            path, or else change your <code>PATH</code> variable to
+            include the directory that <b>yaHALMAT</b> is in.&nbsp;
+            I'll let you to figure out that part.</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <br>
     Assuming you've done all that, it's time to play!&nbsp; I'll give a
     few examples of my own below, although Zane has some of his own as
     well.<br>
@@ -684,6 +691,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <ul>
     </ul>
     <i>Or</i> we could use the unoptimized HALMAT from <b>HAL_S_FC.py</b>.&nbsp;
+
+
+
+
     In principle, the compilation command for that would have been<br>
     <ul>
     </ul>
@@ -721,6 +732,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <blockquote>
       <pre>&gt; <font color="#996633">HALSFC HELLO.hal</font><br>Compilation successful. Results in "HALSFC HELLO.hal Tue 02-24-2026  6-50-07.00.results".<br>&gt; <font color="#996633">yaHALMAT halmat.bin</font><br>THE BEGINNING<br>          1     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>                    0     RON BURKEY SAYS ISN'T THIS FUN?<br>                    0     RON BURKEY SAYS ISN'T THIS FUN?<br>                    0     RON BURKEY SAYS ISN'T THIS FUN?<br>                    0     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>          0     HELLO, WORLD!<br>                    2     RON BURKEY SAYS ISN'T THIS FUN?<br>THE END<br><br></pre>
     </blockquote>
+    Is this printout correct?&nbsp; No it is not, and I'll leave it as
+    an exercise for the reader to figure out how it differs from what it
+    should be.&nbsp; As the first emulator out of the gate, so to speak,
+    let's give <b>yaHALMAT</b> the credit it deserves!&nbsp; But ...
+    there are bugs.<br>
+    <br>
     And just for OCD's sake, a final example source-code example:<br>
     <blockquote>
       <pre> POWER_TABLE: PROGRAM;<br>   WRITE(6) '          N       N**2       N**3       N**4       N**5';<br>   WRITE(6) ' ---------- ---------- ---------- ---------- ----------';<br>   DO FOR TEMPORARY N = 1 TO 10;<br>     WRITE(6) N, N N, N**3, N**4, N**5;<br>   END;<br> CLOSE POWER_TABLE;<br></pre>
@@ -729,43 +746,111 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <blockquote>
       <pre>          N       N**2       N**3       N**4       N**5<br> ---------- ---------- ---------- ---------- ----------<br>          1          1          1          1          1<br>          2          4          8         16         32<br>          3          9         27         81        243<br>          4         16         64        256       1024<br>          5         25        125        625       3125<br>          6         36        216       1296       7776<br>          7         49        343       2401      16807<br>          8         64        512       4096      32768<br>          9         81        729       6561      59049<br>         10        100       1000      10000     100000<br><br></pre>
     </blockquote>
-    <h2><a name="claude"></a>Claude's Emulator<br>
+    <h2><a name="yaHALMAT2"></a>Claude's Emulator (yaHALMAT2)<br>
     </h2>
-    As I mentioned earlier, the "Claude" in this case is ANTHROP\C
-    Claude.&nbsp; Unlike the other emulators described herein, the
-    emulator Claude (with some advice from me) developed is actually
-    part of Virtual AGC itself, so it's the one emulator over which we
-    can actually exhibit some control.&nbsp; <br>
+    This is where Virtual AGC throws its halmat into the ring.&nbsp;
+    (Ouch!)&nbsp; As I mentioned earlier, the "Claude" in this case is
+    ANTHROP\C Claude.&nbsp; The emulator developed by Claude, under
+    direction, is <b>yaHALMAT2</b>, and its code resides the Virtual
+    AGC Project's source tree.<br>
     <br>
-    Our first step was to regenerate complete HALMAT documentation,
-    using not only <a moz-do-not-send="true" href="#zane-doc">the
-      technique pioneered earlier by Zane Hambly</a>, but also extensive
-    compilation of HAL/S test code, comparison of HALMAT to generated
-    object code, and refering to additional documentation not specific
-    to HALMAT that might not have been previously consulted ... in other
-    words, to hit the problem with an enormous helping of obsessive
-    attention to detail.&nbsp; After all of that had been completed, and
-    only then, a final cross-check was done against Zane's earlier
-    reconstructed documentation.&nbsp; While there were discrepancies
-    (i.e., <i>errors</i>) on both sides when the cross-check was
-    performed, they were surprisingly few, which should give us some
-    confidence in the results.&nbsp; Of course, Claude's errors have
-    been corrected by the time you've read this.<br>
+    The first step in developing <b>yaHALMAT2</b> was to regenerate
+    complete HALMAT documentation, using not only <a
+      moz-do-not-send="true" href="#zane-doc">the technique pioneered
+      earlier by Zane Hambly</a>, but also extensive compilation of
+    HAL/S test code, comparison of HALMAT to generated object code, and
+    referring to additional documentation not specific to HALMAT that
+    might not have been previously consulted ... in other words, to hit
+    the problem with an enormous helping of obsessive attention to
+    detail.&nbsp; After all of that had been completed, and only then, a
+    final cross-check was done against Zane's earlier reconstructed
+    documentation.&nbsp; While there were discrepancies (i.e., <i>errors</i>)
+    on both sides when the cross-check was performed, they were
+    surprisingly few, which should give us some confidence in the
+    results.&nbsp; Of course, Claude's errors have been corrected by the
+    time you've read this.<br>
+    <br>
+    <table width="60%" cellspacing="2" cellpadding="2" border="1"
+      align="center">
+      <tbody>
+        <tr>
+          <td valign="top">
+            <div align="center"><font size="+1"><b>Installation of
+                  yaHALMAT2</b></font><br>
+            </div>
+            <br>
+            I'll assume you have a local clone of the Virtual AGC source
+            tree from GitHub, and for the sake of argument I'll refer to
+            that local directory as <i><code>virtualagc</code></i>.&nbsp;
+
+
+
+
+            But use the <i>actual</i> directory name in the
+            instructions below.<br>
+            <br>
+            To build it on Linux or Mac OS, simply<br>
+            <blockquote>
+              <pre>cd <font color="#996633"><i>virtualagc</i></font>/yaShuttle/yaHALMAT2/src<br>make clean all<br></pre>
+            </blockquote>
+            On Windows, you should be able to build it either in an
+            MSYS2 environment (for which the instructions should be the
+            same as above), or else in a Windows "developer" terminal
+            using Visual C.&nbsp; In the latter case, I'm told that
+            instead of <b>make</b> you have to use <b>nmake</b>, along
+            with the makefile called Makefile.win.&nbsp; But I've only
+            built <b>yaHALMAT2</b> on Linux, so you can regard anything
+            I say about Mac OS or Windows as speculative.&nbsp; The
+            default on Linux, Mac, or Windows with MSYS2 is to use <b>clang</b>
+            as the compiler if available, falling back on <b>gcc</b>.&nbsp;
+
+
+
+
+            Regardless of the platform, you can choose any compiler you
+            want by specifying it on the <b>make</b>/<b>nmake</b>
+            command line with the <code>CC</code> variable.&nbsp; I
+            have not tried that myself.<br>
+            <br>
+            Finally, once compiled, unless you want to invoke <b>yaHALMAT2</b>
+            by using its full pathname, you'll probably want to copy or
+            link <b>yaHALMAT2[.exe]</b> somewhere into your existing
+            path, or else change your <code>PATH</code> variable to
+            include the directory that <b>yaHALMAT2</b> is in.&nbsp;
+            I'll let you to figure out that part.</td>
+        </tr>
+      </tbody>
+    </table>
     <br>
     <a moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/reengineered-documentation/HALMAT.md">This
-      new, full HALMAT documentation can be seen on GitHub</a>.&nbsp; As
-    a slap in the face to the current hubbub about how "human" A.I. is,
-    this new documentation looks very much as though a machine wrote it
-    ... or at least someone with little interest in engaging the
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/reengineered-documentation/HALMAT.md">The
+
+
+
+
+      new, full HALMAT documentation I mentioned can be seen on GitHub</a>.&nbsp;
+
+
+
+    As a slap in the face to the current hubbub about how "human" A.I.
+    is, this new documentation looks very much as though a machine wrote
+    it ... or at least someone with little interest in engaging the
     reader.&nbsp; With that's said, it's kind of fascinating to look at,
     and indeed very informative if you're the kind of person who really
     likes to get at the nuts and bolts of everything.&nbsp; If you're <i>that</i>
     person, you might be interested in <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/reengineered-documentation/STATUS.md">the
+
+
+
+
       document that describes the current state of development</a>, or <a
       moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/Plan.md">the
+
+
+
+
       document used to plan development</a>.&nbsp; All of this
     documentation is in so-called "markdown" format to make it easy to
     update as further corrections become necessary, as well as being
@@ -778,6 +863,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     <br>
     The next step was to proceed to implementation of the emulator
     itself, called <b>yaHALMAT2</b> to distinguish itself from Zane's <b>yaHALMAT</b>.&nbsp;
+
+
+
+
     To give credit where credit is due, Claude concluded that <b>yaHALMAT</b>
     had a nice, clean design, and therefore may have based <b>yaHALMAT2</b>
     at least partially on it.<br>
@@ -786,7 +875,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     HELLO.hal sample code that's not a "HELLO" program at all, namely
     (in its latest incarnation as of this writing):<br>
     <blockquote>
-      <pre>DEBUG ¢4 ¢E<br> HELLO: PROGRAM;<br>  DECLARE I INTEGER;<br>    DECLARE POOKIE CHARACTER(20);<br>    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');<br>    DECLARE INTEGER, J;<br>    REPLACE PRINTER BY "6";<br>    WRITE(PRINTER) 'THE BEGINNING';<br>    DO FOR I = 1 TO 5;<br>       WRITE(PRINTER) I, 'HELLO, WORLD!';<br>       DO FOR J = 2 TO 8 BY 2;<br>          WRITE(PRINTER) '     ', J, MY_NAME||' SAYS ISN''T THIS FUN?';<br>       END;<br>    END;<br>    WRITE(6) 'THE END';<br> CLOSE HELLO;<br><br></pre>
+      <pre> HELLO: PROGRAM;<br>  DECLARE I INTEGER;<br>    DECLARE POOKIE CHARACTER(20);<br>    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');<br>    DECLARE INTEGER, J;<br>    REPLACE PRINTER BY "6";<br>    WRITE(PRINTER) 'THE BEGINNING';<br>    DO FOR I = 1 TO 5;<br>       WRITE(PRINTER) I, 'HELLO, WORLD!';<br>       DO FOR J = 2 TO 8 BY 2;<br>          WRITE(PRINTER) '     ', J, MY_NAME||' SAYS ISN''T THIS FUN?';<br>       END;<br>    END;<br>    WRITE(6) 'THE END';<br> CLOSE HELLO;<br><br></pre>
     </blockquote>
     Compile it and run it:<br>
     <blockquote>
@@ -796,50 +885,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     the <b>gdb</b> debugger.&nbsp; Below, I load halmat.bin in
     debugging mode and single step through a few HALMAT instructions:<br>
     <blockquote>
-      <pre>&gt; <font color="#996633">yaHALMAT2 --debug halmat.bin</font><br>yaHALMAT2 debugger. Type 'help' for commands.
-<span style="color:green;">   1	  HELLO:
-</span><span style="color:green;">   1	  PROGRAM;
-</span><span style="color:dimgray;">[task 0] #0      0x005 PXRC  numop=1 tag=0x00 copt=0x0  ; Record header, points to closing XREC
-        [0] data=0x005C(92) qual=  0 tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:dimgray;">[task 0] #2      0x02B MDEF  numop=1 tag=0x00 copt=0x0  ; Program definition header
-        [0] data=0x0001(1) qual=SYT tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:dimgray;">[task 0] #4      0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
-        [0] data=0x0001(1) qual=  0 tag1=0x00 tag2=0x1
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:green;">   2	    DECLARE I INTEGER;
-</span><span style="color:dimgray;">[task 0] #6      0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
-        [0] data=0x0002(2) qual=  0 tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:green;">   3	    DECLARE POOKIE CHARACTER(20);
-</span><span style="color:dimgray;">[task 0] #8      0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
-        [0] data=0x0003(3) qual=  0 tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:green;">   4	    DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');
-</span><span style="color:dimgray;">[task 0] #10     0x841 CINT  numop=2 tag=0x02 copt=0x0  ; Character initialize
-        [0] data=0x0004(4) qual=SYT tag1=0x00 tag2=0x0
-        [1] data=0x0003(3) qual=LIT tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:dimgray;">[task 0] #13     0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
-        [0] data=0x0004(4) qual=  0 tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:green;">   5	    DECLARE INTEGER, J;
-</span><span style="color:dimgray;">[task 0] #15     0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
-        [0] data=0x0005(5) qual=  0 tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:green;">   6	    REPLACE PRINTER BY "6";
-</span><span style="color:dimgray;">[task 0] #17     0x004 SMRK  numop=1 tag=0x00 copt=0x1  ; Statement marker
-        [0] data=0x0006(6) qual=  0 tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:green;">   7	    WRITE(PRINTER) 'THE BEGINNING';
-</span><span style="color:dimgray;">[task 0] #19     0x031 EDCL  numop=0 tag=0x01 copt=0x1  ; End-of-declarations marker
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">step
-</span><span style="color:dimgray;">[task 0] #20     0x025 XXST  numop=1 tag=0x00 copt=0x1  ; I/O statement start, carries I/O-kind code
-        [0] data=0x0002(2) qual=IMD tag1=0x00 tag2=0x0
-</span><span style="color:red;">(halmat) </span><span style="color:olive;">kill
-</span>execution stopped
-<span style="color:red;">(halmat) </span><span style="color:olive;">quit
+      <pre>&gt; <font color="#996633">yaHALMAT2 --debug halmat.bin</font><br>yaHALMAT2 debugger. Type 'help' for commands.<br><font color="#009900">          1 M| HELLO:                                                                                              |HELLO<br>          1 M| PROGRAM;                                                                                            |HELLO<br></font>N=0 T=0.00 [0: HELLO] #0      0x005 PXRC  numop=1 tag=0x00 copt=0x0  ; Record header, points to closing XREC<br>        [0] data=0x005C(92) qual=  0 tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br>N=1 T=0.00 [0: HELLO] #2      0x02B MDEF  numop=1 tag=0x00 copt=0x0  ; Program definition header<br>        [0] data=0x0001(1) qual=SYT tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br>N=2 T=60.00 [0: HELLO] #4      0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker<br>        [0] data=0x0001(1) qual=  0 tag1=0x00 tag2=0x1<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br><font color="#009900">          2 M|   DECLARE I INTEGER;                                                                                |HELLO</font><br>N=3 T=60.00 [0: HELLO] #6      0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker<br>        [0] data=0x0002(2) qual=  0 tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br><font color="#009900">          3 M|   DECLARE POOKIE CHARACTER(20);                                                                     |HELLO</font><br>N=4 T=60.00 [0: HELLO] #8      0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker<br>        [0] data=0x0003(3) qual=  0 tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br><font color="#009900">          4 M|   DECLARE MY_NAME CHARACTER(20) INITIAL('RON BURKEY');                                              |HELLO</font><br>N=5 T=60.00 [0: HELLO] #10     0x841 CINT  numop=2 tag=0x02 copt=0x0  ; Character initialize<br>        [0] data=0x0004(4) qual=SYT tag1=0x00 tag2=0x0<br>        [1] data=0x0003(3) qual=LIT tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br>N=6 T=60.00 [0: HELLO] #13     0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker<br>        [0] data=0x0004(4) qual=  0 tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br><font color="#009900">          5 M|   DECLARE INTEGER, J;                                                                               |HELLO</font><br>N=7 T=60.00 [0: HELLO] #15     0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker<br>        [0] data=0x0005(5) qual=  0 tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br><font color="#009900">          6 M|   REPLACE PRINTER BY "6";                                                                           |HELLO</font><br>N=8 T=60.00 [0: HELLO] #17     0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker<br>        [0] data=0x0006(6) qual=  0 tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br><font color="#009900">          7 M|   WRITE(PRINTER) 'THE BEGINNING';                                                                   |HELLO</font><br>N=9 T=60.00 [0: HELLO] #19     0x031 EDCL  numop=0 tag=0x01 copt=0x0  ; End-of-declarations marker<br><font color="#ff0000">(halmat)</font> step<br><font color="#cc9933">step</font><br>N=10 T=60.00 [0: HELLO] #20     0x025 XXST  numop=1 tag=0x00 copt=0x0  ; I/O statement start, carries I/O-kind code<br>        [0] data=0x0002(2) qual=IMD tag1=0x00 tag2=0x0<br><font color="#ff0000">(halmat)</font> kill<br><font color="#cc9933">step</font><br>execution stopped<br><font color="#ff0000">(halmat)</font> quit<br><font color="#cc9933">step</font><span style="color:olive;">
 </span></pre>
     </blockquote>
     The colors are adjustable via the command line, or can be disabled
@@ -849,6 +895,40 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     earlier, along with embedding the HAL/S source code so you can see
     the larger context.<br>
     <br>
+    What do all of the fields in the printout above mean?&nbsp; <br>
+    <ul>
+      <li>The items in green, obviously, are related to the HAL/S source
+        code, and in fact are taken directly from the report generated
+        by PASS1 of the HAL/S compiler.&nbsp; <br>
+      </li>
+      <li>The <code>N=<i>x</i></code> field tells you the cumulative
+        number of HALMAT instructions executed so far.</li>
+      <li>The <code>T=<i>x.xx</i></code> field tells you the total
+        amount of execution time so far, in microseconds.&nbsp; In fact,
+        as explained earlier, HALMAT instructions are ideal; i.e., they
+        exist outside of time, and have no timing associated with
+        them.&nbsp; But for the purpose of the emulation, we've assigned
+        each HALMAT instruction a timing, which was obtained by
+        statistically analyzing the average amount of time that AP-101S
+        instructions generated from the HALMAT would have taken.&nbsp;
+        Do you find it odd that in our example above, the time seems to
+        be stuck at <code>T=60.00</code>?&nbsp; It's not, really.&nbsp;
+        I just happened to show you a selection involving mostly
+        declarations, and those don't consume any runtime.</li>
+      <li>Fields like <code>[<i>x</i>: <i>yyyy</i>]</code> pertains to
+        the fact that there may be several HAL/S programs loaded into
+        the emulator at any given time (see below).&nbsp; This field
+        tells you that the current instruction belongs to program #<i>x</i>,
+        whose name is "<i>yyyy</i>".</li>
+      <li>The <code>#</code><code><i>nn</i></code> field tells you
+        where in the raw HALMAT data-stream the current instruction is
+        located.</li>
+      <li>The <code>0x<i>nnn</i></code> field is the actual numerical
+        code for the instruction, in hexadecimal.</li>
+      <li>... and so on; consult the HALMAT documentation if you wan't
+        more detail ... <br>
+      </li>
+    </ul>
     But I'm bored with HELLO.hal!&nbsp; Let's look at some other
     examples that aren't quite so lame.<br>
     <br>
@@ -882,6 +962,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     multitude of files, as well as to maintain order, a typical strategy
     is to perform all of your HAL/S compilations with the <b>HALSFC</b>
     command-line switch <code>--clean</code>, or possibly <code>--clean
+
+
+
+
       --archive</code>.&nbsp; This strategy creates a new subdirectory
     for each compilation and shoves all of the files that were generated
     into it.<br>
@@ -956,10 +1040,18 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
       <pre>&gt; <font color="#996633">yaHALMAT2 @LIST</font><br>          1      1.0000000E+00      1.0000000E+00<br>          2      4.0000000E+00      1.4142132E+00<br>          3      9.0000000E+00      1.7320499E+00<br>          4      1.6000000E+01      2.0000000E+00<br>          5      2.5000000E+01      2.2360678E+00<br>          6      3.6000000E+01      2.4494896E+00<br>          7      4.9000000E+01      2.6457510E+00<br>          8      6.4000000E+01      2.8284264E+00<br>          9      8.1000000E+01      3.0000000E+00<br>         10      1.0000000E+02      3.1622772E+00<br></pre>
     </blockquote>
     Multi-file capability isn't <i>fully</i> implemented yet in <b>yaHALMAT2</b>.&nbsp;
+
+
+
+
     HAL/S real-time mechanisms allow multiple <code>PROGRAM</code>'s to
     be simultanously running, while flipping back and forth between
     them, whereas all <i>we</i> have implemented so far is a <i>single</i>
     <code>PROGRAM</code> plus multiple <code>COMPOOL</code>'s, <code>PROCEDURE</code>'s,
+
+
+
+
     and <code>FUNCTION</code>'s.&nbsp; First things first!<br>
     <br>
     Actually, I gave <b>yaHALMAT2</b> short shrift earlier when I said
@@ -1048,18 +1140,27 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
         color="#000000">, printouts by default wrap around to the next
         line afer 80 columns.&nbsp; This option just increases that to
         132 columns instead.</font></font><br>
-    <h1>Emulating AP-101</h1>
-    <p>Both of the emulators presented below accept an AP-101S memory
-      image as input, as opposed (say) to an IBM "load file".&nbsp; To
-      produce such a memory image, it's necessary first to compile or
-      assemble all of the individual source code modules comprising the
-      program, and then to use a linker program to combine the separate
-      object files generated by compilation/assembly.&nbsp; <a
+    <h1><a name="AP-101emulators"></a>AP-101B/S Emulators<br>
+    </h1>
+    <p>The emulators presented below accept an AP-101S memory image as
+      input, as opposed (say) to an IBM "load file".&nbsp; To produce
+      such a memory image, it's necessary first to compile or assemble
+      all of the individual source code modules comprising the program,
+      and then to use a linker program to combine the separate object
+      files generated by compilation/assembly.&nbsp; <a
         moz-do-not-send="true" href="HALLINK101S.html#scenario1">Please
         refer to our linker page for more information</a> for more
       specifics.&nbsp; Below, for simplicity of expossion, we'll just
       suppose that you've compiled a HAL/S program called <i>MYPROGRAM</i>.hal,
+
+
+
+
       and have produced a memory image from it that's called <i>MYPROGRAM</i>.fcm,
+
+
+
+
       with ".fcm" being the conventional filename extension we use for
       memory images.<br>
     </p>
@@ -1075,11 +1176,41 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
       <pre>HALSFC -o HELLO_WORLD.obj HELLO_WORLD.hal<br>lnk101 -o HELLO_WORLD.fcm --json-symbols HELLO_WORLD.sym.json HELLO_WORLD.obj<br></pre>
     </blockquote>
     gives us HELLO_WORLD.fcm.<br>
-    <h2><a name="don"></a>Don Schmidt's Emulator</h2>
+    <h2><a name="gpc"></a>Don Schmidt's Emulator (gpc)<br>
+    </h2>
     <p>Don's emulator, <b>gpc</b>, can be run in either a simple mode
       that just executes the code without fanfare, or else in a fancy
-      graphical debugging mode.&nbsp; Let's just look at the simple mode
-      first:<br>
+      graphical debugging mode.&nbsp; <br>
+    </p>
+    <table width="60%" cellspacing="2" cellpadding="2" border="1"
+      align="center">
+      <tbody>
+        <tr>
+          <td valign="top">
+            <div align="center"><b>Installation of gpc</b><br>
+            </div>
+            <br>
+            To my recollection, I have lost the ability to build <b>gpc</b>
+            from source, but perhaps <a moz-do-not-send="true"
+              href="https://github.com/ColanderCombo/nsts-sim-gpc">the
+              author's instructions</a> might work for you.&nbsp; I
+            think what worked for me was to download <a
+              moz-do-not-send="true"
+              href="https://github.com/ColanderCombo/nsts-sim-gpc/releases">the
+
+
+
+
+              pre-built "AppImage" for Linux</a>, rename it "gpc", and
+            copy it into my path.&nbsp; There are also pre-built Mac OS
+            "dmg" files at the same link, though I don't know how to use
+            them myself.&nbsp; As far as Windows is concerned, I haven't
+            a clue as to what you have to do. </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><br>
+      Let's just look at the simple mode first:<br>
     </p>
     <blockquote>
       <pre>gpc run --interactive HELLO_WORLD.fcm<br></pre>
@@ -1092,7 +1223,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     <p>The <code>--interactive</code> switch tells the emulator to
       accept keyboard input on device 5 (as in the HAL/S <code>READ(5)
         ...;</code>) and output to device 6 (as in the HAL/S <code>WRITE(6)
-        ...;</code>).&nbsp; In this example, we could hav just omitted
+
+
+
+
+        ...;</code>).&nbsp; In this example, we could have just omitted
       it.<br>
     </p>
     <p>Or if we were to try the same thing but with our ubiquitous but
@@ -1104,6 +1239,59 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     <p>There are actually lots of command-line options, which you can
       view with the command <code>gpc help run</code>.<br>
     </p>
+    <table width="60%" cellspacing="2" cellpadding="2" border="1"
+      align="center">
+      <tbody>
+        <tr>
+          <td valign="top">
+            <div align="center"><b><a name="yaGPC"></a>Installation of
+                yaGPC</b><br>
+            </div>
+            <br>
+            It's probably not worth mentioning when you already have <b>gpc</b>,
+            but we also have an A.I.-generated port (from the Javascript
+            language to the C language) for the "<code>gpc run ...</code>"&nbsp;
+
+
+            command mentioned above, in the form of a program called <b>yaGPC</b>.&nbsp;
+
+
+
+            It was created solely as an intermediate step in creating <a
+              moz-do-not-send="true" href="#yaGPC2">the <b>yaGPC2</b>
+              emulator</a>, but it does have some slight advantages over
+            "<code>gpc run</code>"&nbsp; in terms of timing, resource
+            utilization, and perhaps (depending on your outlook) ease of
+            installation, if you're the kind of person who has <b>git</b>
+            installed on their computer.&nbsp; To install it, do this:<br>
+            <blockquote>
+              <pre><pre><meta http-equiv="content-type" content="text/html; charset=UTF-8"><pre>git clone <a class="moz-txt-link-freetext" href="https://github.com/rburkey2005/yaGPC.git">https://github.com/rburkey2005/yaGPC.git</a>
+cd yaGPC
+git checkout yaGPC
+cd yaGPC
+make
+</pre></pre></pre>
+            </blockquote>
+            In Windows, replace the final line above with <br>
+            <blockquote>
+              <pre>nmake /f NMakefile<br></pre>
+            </blockquote>
+            The executable file <b>yaGPC[.exe]</b> must then be put
+            into your <code>PATH</code>. <br>
+            <br>
+            After installation, you can just replace any use of "<code>git
+
+
+
+              run ...</code>" by "<code>yaGPC ...</code>".&nbsp; You can
+            also get a complete list of options via "<code>yaGPC --help</code>".<br>
+            <br>
+            <b>yaGPC</b> does <i>not</i> support the "gpc gui ..." mode
+            discussed below.&nbsp; There is no substitute.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <p>The second way to run the emulator is, as I mentioned, with a GUI
       debugging interface.&nbsp; You could use a command like,<br>
     </p>
@@ -1130,8 +1318,338 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     to get keyboard input from you, you could have typed your input into
     the pane at the bottom of the window, where it now shows the message
     "(waiting for program input...)".
-    <h2><a name="dan"></a>Dan Weaver's Emulator</h2>
-    (Not yet publicly available.)<br>
+    <h2><a name="ap0000a"></a>Dan Weaver's Emulator (ap0000a)<br>
+    </h2>
+    <table width="60%" cellspacing="2" cellpadding="2" border="1"
+      align="center">
+      <tbody>
+        <tr>
+          <td valign="top">
+            <div align="center"><font size="+2"><b>Installation of
+                  ap0000a</b></font><br>
+            </div>
+            <br>
+            Not yet publicly available.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    TBD<br>
+    <h2><a name="yaGPC2"></a>Claude's Emulator (yaGPC2)</h2>
+    <p><b>yaGPC2</b> is an AP-101B/S emulator created by the ANTHROP\C
+      Claude A.I. coding agent, under direction, intended to partially
+      extend <a moz-do-not-send="true" href="#gpc">Don Schmidt's <b>gpc</b>
+        emulator</a>.&nbsp; Only <b>gpc</b>'s batch mode is handled,
+      and not its GUI debugger, hence the "partial" qualifier.&nbsp; But
+      why?&nbsp; What's wrong with <b>gpc</b>'s batch mode?&nbsp;
+      Nothing!&nbsp; It's lovely.&nbsp; But that doesn't mean that it's
+      fit for all use cases.&nbsp; A use case that's significant to us
+      is integration into spaceflight-simulation software such as
+      Orbiter.&nbsp; As a Javascript program, <b>gpc</b> is a poor
+      choice for that particular use.&nbsp; There is also a pragmatic
+      concern, in that we would like to maintain bug-fix and feature
+      parity between HALMAT and AP-101S emulators, which is tricky when
+      independent developers are involved, each with their own
+      schedules, priorities, and opinions.&nbsp; Having control over
+      development, and allowing A.I. to perform all of that work, which
+      is the case for both our <b>yaHALMAT2</b> and <b>yaGPC2</b>
+      emulators, makes achieving that parity simpler and easier.<br>
+    </p>
+    <table width="60%" cellspacing="2" cellpadding="2" border="1"
+      align="center">
+      <tbody>
+        <tr>
+          <td valign="top">
+            <div align="center"><font size="+2"><b>Installation of
+                  yaGPC2</b></font><br>
+            </div>
+            <br>
+            I'll assume you have a local clone of the Virtual AGC source
+            tree from GitHub, and for the sake of argument I'll refer to
+            that local directory as <i><code>virtualagc</code></i>.&nbsp;
+
+
+
+
+            But use the <i>actual</i> directory name in the
+            instructions below.<br>
+            <br>
+            To build it on Linux or Mac OS, simply<br>
+            <blockquote>
+              <pre>cd <font color="#996633"><i>virtualagc</i></font>/yaShuttle/yaGPC2<br>make clean all<br></pre>
+            </blockquote>
+            On Windows, you should be able to build it either in an
+            MSYS2 environment (for which the instructions should be the
+            same as above), or else in a Windows "developer" terminal
+            using Visual C.&nbsp; In the latter case, I'm told that
+            instead of <b>make</b> you have to use "<code>nmake /f
+              NMakefile</code>".&nbsp; But I've only built <b>yaGPC2</b>
+            on Linux, so you can regard anything I say about Mac OS or
+            Windows as speculative.&nbsp; The default on Linux, Mac, or
+            Windows with MSYS2 is to use <b>clang</b> as the compiler
+            if available, falling back on <b>gcc</b>.&nbsp; Regardless
+            of the platform, you can choose any compiler you want by
+            specifying it on the <b>make</b>/<b>nmake</b> command line
+            with the <code>CC</code> variable.&nbsp; I have not tried
+            that myself.<br>
+            <br>
+            Finally, once compiled, unless you want to invoke <b>yaGPC2</b>
+            by using its full pathname, you'll probably want to copy or
+            link <b>yaGPC2</b><b>[.exe]</b> somewhere into your
+            existing path, or else change your <code>PATH</code>
+            variable to include the directory that <b>yaGPC2</b> is
+            in.&nbsp; I'll let you to figure out that part.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><br>
+      Usage of&nbsp; <b>yaGPC2</b> is basically just like<a
+        moz-do-not-send="true" href="#gpc"> "<code>gpc run ...</code>"
+        as described earlier</a>, but "<code>yaGPC2 ...</code>"
+      instead.&nbsp; In particular, you can use "<code>yaGPC2 --help</code>"
+      to get more usage info.<br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; With that said, there is a
+          new command-line switch, "<code>--fcos</code>" that addresses
+          an implementation conundrum.&nbsp; <i>If</i> you were using <b>yaGPC2</b>
+          to run Space Shuttle flight software, it would from
+          time-to-time execute instructions in the underlying operating
+          system (<b>FCOS</b>), whereas if you were using <b>yaGPC2</b>
+          to run "general purpose" software like Hello World, the
+          underlying operating system would not be present.&nbsp;
+          Certain AP-101S instructions behave differently in those two
+          cases.&nbsp; The HALMAT emulator, <b>yaHALMAT2</b>, isn't
+          affected by this, because it has no knowledge of the operating
+          system anyway, so it always behaves as if the operating system
+          were present.&nbsp; In a situation like that, the behavior of
+          <b>yaHALMAT2</b> and <b>yaGPC2</b> might differ from time to
+          time.&nbsp; What the <code>--fcos</code> switch does is to
+          tell <b>yaGPC2</b> to simulate enough of <b>FCOS</b>'s
+          presence to agree with <b>yaHALMAT2</b>. I'm aware that that
+          explanation makes it all sound a bit ominous, but in fact it's
+          rather benign.&nbsp; The only situation known so far in which
+          this has any effect is the following:<br>
+        </font> </p>
+    </blockquote>
+    <ul>
+      <ul>
+        <font size="-1"> </font>
+        <li><font size="-1">If a <code>SCALAR</code> outside the
+            supported <code>INTEGER</code> range of -3276<b>8</b>
+            through 32767 is converted to an <code>INTEGER</code>, then
+            <b>FCOS</b> (or <code>--fcos</code>) will clamp it to the
+            -3276<b>7</b> or 32767, but otherwise it will just be
+            truncated to 16 bits just by masking it with 0xFFFF. As it
+            happens, this is not actually a situation that arises all
+            that often, and won't happen at all in well-designed
+            software. (Slightly confusingly, the contemporary
+            documentation, namely the <a moz-do-not-send="true"
+              href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=200"><i>HAL/S-FC
+
+
+                User's Manual</i></a>, states that the "standard fixup"
+            in this situation is to clamp at -3276<b>8</b> or
+            32767.&nbsp; This would make sense, but the actual <b>FCOS</b>
+            source code, FPMSDERR.asm, does not agree with the
+            documentation.&nbsp; And in case you're a tech nerd who
+            worries about these things, the conversion from <code>SCALAR</code>
+            to <code>INTEGER</code> is largely handled by an AP-101S
+            instruction called <code>CVFX</code>.&nbsp; Upon overflow
+            in <code>CVFX</code>, an interrupt is triggered that ends
+            up being handled in FPMSDERR.asm.&nbsp; If <b>FCOS</b>
+            isn't there, then that interrupt never occurs because it
+            never will have been set up.)</font></li>
+        <li><font size="-1">... More in the future? Who knows! ...</font></li>
+      </ul>
+    </ul>
+    <blockquote><font size="-1">And there are other new command-line
+        switches as well.</font><br>
+    </blockquote>
+    <ul>
+      <ul>
+      </ul>
+    </ul>
+    <p>I won't bother to show you yet one more time what yaGPC2 looks
+      like when emulating our standard HELLO.hal program, because it
+      looks just like all of the other emulators when it does.&nbsp;
+      Boring!&nbsp; It <i>does</i> have a build-in command-line-based
+      debugger with <b>gdb</b>-style commands.&nbsp; Just add <code>--debug</code>
+      to the command line.&nbsp; So let's look at that for a moment,
+      with HELLO.hal (naturally!).</p>
+    <blockquote>
+      <pre>&gt; <font color="#996633">yaGPC2 --debug --interactive --no-trace --no-verbose --symbols HELLO-lnk101.json --line-width 240 --source-map HELLO.srcmap.json HELLO.fcm</font><br>--- Registers (step 0, bank 0) ---<br>  R00=00000000  R01=00000000  R02=00000000  R03=00000000<br>  R04=00000000  R05=00000000  R06=00000000  R07=00000000<br>  FP0=00000000  FP1=00000000  FP2=00000000  FP3=00000000<br>  FP4=00000000  FP5=00000000  FP6=00000000  FP7=00000000<br>  PSW1=81640020  PSW2=00080000  NIA=10164  CC=0  BSR=2  DSR=0<br>[    0] T=0.00 &gt;&gt; 10164 START   +00000: e4f3 8000  BAL  4,X'8000'<br>gpc&gt;<br></pre>
+    </blockquote>
+    <blockquote><b><font size="-1">Aside:</font></b><font size="-1">
+        Where did I get that ridiculously-complex command line, you
+        ask?&nbsp; It's not as hard as it sounds, at least if you have a
+        single HAL/S file you want to run.&nbsp; I just use the script<b>
+          compileLinkRun</b> thusly, "<code>compileLinkRun --debug
+          --filename=HELLO.hal</code>", and it generates all of the
+        commands for compiling, linking, and running. If I don't want to
+        debug, I just leave out the <code>--debug</code> switch.</font><br>
+    </blockquote>
+    <p>What are we actually seeing here.&nbsp; Well, starting on the far
+      left:<br>
+    </p>
+    <ul>
+      <li><code>[<i>NNNNN</i>]</code> is the number of instructions
+        executed so far, in decimal.&nbsp; It'll quickly grow far past 5
+        digits for any realistic program, but we'll give it 5 to start
+        with.</li>
+      <li><code>T=<i>N.NN</i></code> is the elapsed (simulated) time so
+        far, in μs.</li>
+      <li><i><code>NNNNN</code></i> (after the &gt;&gt;) is the absolute
+        address in memory of the instruction. The AP-101S has <i>halfword</i>
+        (i.e., 16-bit) memory, so address 0x00000 is the first halfword
+        in memory, 0x00001 is the second halfword, and so on.</li>
+      <li>The word <code>START</code> above or <code>$0HELLO</code> is
+        the name of the "CSECT" to which the instruction belongs.</li>
+      <li>The <code>+<i>NNNNN</i></code> next to the <code>CSECT</code>
+        name is the offset into the <code>CSECT</code> at which the
+        instruction resides, in halfwords.&nbsp; So evidently, <code>CSECT
+
+          START</code> is located at address 0x10164, <code>$0HELLO</code>
+        is located at 0x10000, and so on.</li>
+      <li>The next <i><code>XXXX</code></i> (or <i><code>XXXX XXXX</code></i>)
+        is the hexadecimal value of the halfword (or halfwords) stored
+        at that address.</li>
+      <li>Followed by the disassembled form of the instruction.</li>
+      <li>Followed usually by a list of the changes to the CPU's
+        register values since the preceding instruction was executed. <br>
+      </li>
+    </ul>
+    <p>Not too different from any other command-line
+      debugger.&nbsp;&nbsp; Let's run through a few instructions:<br>
+    </p>
+    <blockquote>
+      <pre>gpc&gt; <font color="#996633">step</font><br>[    1] T=3.75 &gt;&gt; 10000 $0HELLO +00000: e8f3 021e  LHI  0,X'021e'           R04: 00000000-&gt;81660020, PSW1: 81640020-&gt;80000020<br>HAL/S    1: HELLO:  PROGRAM;<br>gpc&gt; step<br>[    2] T=4.00 &gt;&gt; 10002 $0HELLO +00002: e9f3 014e  LHI  1,X'014e'           R00: 00000000-&gt;021e0000, PSW1: 80000020-&gt;80020020<br>gpc&gt; step<br>[    3] T=4.25 &gt;&gt; 10004 $0HELLO +00004: b914       STH  1,X'0005'(0)        R01: 00000000-&gt;014e0000, PSW1: 80020020-&gt;80040020<br>gpc&gt; step<br>[    4] T=4.75 &gt;&gt; 10005 $0HELLO +00005: e0fb       IAL  0,X'0028'           PSW1: 80040020-&gt;80050020<br>gpc&gt; step<br>[    5] T=5.25 &gt;&gt; 10007 $0HELLO +00007: eb11       LA   3,X'0004'(1)        R00: 021e0000-&gt;021e0028, PSW1: 80050020-&gt;80070020<br>gpc&gt;<br></pre>
+    </blockquote>
+    <p>So a little screen space is saved, by just showing the registers
+      which have changed, rather than insisting on showing you all
+      registers every time.&nbsp; Nice!&nbsp; Of course, you could see
+      all of the registers any time you liked, just by using the command
+      <code>regs</code>.&nbsp; And notice that it has displayed a line
+      of HAL/S source code too.&nbsp; <br>
+    </p>
+    <p>There's a feature, "<code>htrace on</code>", that yaGPC2 has but
+      which is missing from normal <b>gdb</b>, which enables printing
+      of a short record for every instruction executed.&nbsp; That can
+      be useful if want to execute a batch of them at once:<br>
+    </p>
+    <blockquote>
+      <pre>gpc&gt; <font color="#996633">htrace on</font><br>Trace enabled<br>gpc&gt; <font color="#996633">step 100</font><br>[    5] T=5.50 010007 $0HELLO +0007: eb11       LA   3,X'0004'(1)           R03: 00000000-&gt;01520000, PSW1: 80070020-&gt;80080020<br>[    6] T=6.00 010008 $0HELLO +0008: bb24       STH  3,X'0009'(0)           PSW1: 80080020-&gt;80090020<br><b>HAL/S    7:   WRITE(PRINTER) 'THE BEGINNING';</b><br>[    7] T=6.25 010009 $0HELLO +0009: eef3 0006  LHI  6,X'0006'              R06: 00000000-&gt;00060000, PSW1: 80090020-&gt;800b0020<br>[    8] T=6.50 01000b $0HELLO +000b: edf3 0003  LHI  5,X'0003'              R05: 00000000-&gt;00030000, PSW1: 800b0020-&gt;800d0020<br>[    9] T=31.00 01000d $0HELLO +000d: d0ff 394a  SCAL 0,X'014a'(1,)          R00: 021e0028-&gt;02460012, PSW1: 800d0020-&gt;810e0020<br>[   10] T=34.00 01010e IOINIT  +0000: b624 0000  NIST X'0009'(0),X'0000'     PSW1: 810e0020-&gt;81100020<br>[   11] T=34.50 010110 IOINIT  +0002: bef3       STH  6,X'019c'              PSW1: 81100020-&gt;81120020<br>[   12] T=35.00 010112 IOINIT  +0004: bdf3       STH  5,X'019a'              PSW1: 81120020-&gt;81140020<br>[   13] T=38.75 010114 IOINIT  +0006: e4f7 0038  BAL  4,X'0038'              R04: 81660020-&gt;81160020, PSW1: 81140020-&gt;814e0020<br>[   14] T=39.00 01014e IOINIT  +0040: c7e4       BCR  7,4                    PSW1: 814e0020-&gt;81160020<br>[   15] T=56.50 010116 IOINIT  +0008: 97e8       SRET 7,0                    R00: 02460012-&gt;021e0028, R04: 81160020-&gt;81660020, <br>                                                                             PSW1: 81160020-&gt;800f0020<br>[   16] T=56.75 01000f $0HELLO +000f: eaf1       LA   2,X'003b'(1)           R02: 00000000-&gt;01890000, PSW1: 800f0020-&gt;80110020<br>.<br>. <br>.<br>[   77] T=157.18 010121 IOINIT  +0013: b624 0000  NIST X'0009'(0),X'0000'     PSW1: 81210020-&gt;81230020<br>[   78] T=157.18 010123 IOINIT  +0015: df16       BCB  7,X'0005'              PSW1: 81230020-&gt;811f0020<br>[   79] T=157.43 01011f IOINIT  +0011: c0e0       BCR  0,0                    PSW1: 811f0020-&gt;81200020<br>[   80] T=174.93 010120 IOINIT  +0012: 97e8       SRET 7,0                    R00: 02580012-&gt;02460012, PSW1: 81200020-&gt;810d0020<br>[   81] T=192.43 01010d COUTP   +0013: 97e8       SRET 7,0                    R00: 02460012-&gt;021e0028, R01: 00000000-&gt;014e0000, <br>                                                                              R02: 01900000-&gt;01890000, R03: 00000000-&gt;01520000, <br>                                                                              R04: 81070020-&gt;81660020, R05: 47000000-&gt;00030000, <br>                                                                              R06: 000d0000-&gt;00060000, PSW1: 810d0020-&gt;80130020<br><b>HAL/S    8:   DO FOR I = 1 TO 5;</b><br>[   82] T=192.68 010013 $0HELLO +0013: eff3 0001  LHI  7,X'0001'              R07: 00000000-&gt;00010000, PSW1: 80130020-&gt;80150020<br>[   83] T=192.93 010015 $0HELLO +0015: dfb4       BCF  7,X'002d'              PSW1: 80150020-&gt;80430020<br><b>HAL/S   13:   END;</b><br>[   84] T=193.43 010043 $0HELLO +0043: bf19       STH  7,X'0006'(1)           PSW1: 80430020-&gt;80440020<br>[   85] T=193.68 010044 $0HELLO +0044: b5e7 0005  CHI  7,X'0005'              CC: 0-&gt;3, PSW1: 80440020-&gt;8046c020<br>[   86] T=193.68 010046 $0HELLO +0046: dec6       BCB  6,X'0031'              PSW1: 8046c020-&gt;8016c020<br>HAL/S    9: 1   WRITE(PRINTER) I, 'HELLO, WORLD!';<br>[   87] T=193.93 010016 $0HELLO +0016: eef3 0006  LHI  6,X'0006'              PSW1: 8016c020-&gt;8018c020<br>[   88] T=194.18 010018 $0HELLO +0018: edf3 0003  LHI  5,X'0003'              PSW1: 8018c020-&gt;801ac020<br>[   89] T=218.68 01001a $0HELLO +001a: d0ff 394a  SCAL 0,X'014a'(1,)          R00: 021e0028-&gt;02460012, PSW1: 801ac020-&gt;810ec020<br>[   90] T=221.68 01010e IOINIT  +0000: b624 0000  NIST X'0009'(0),X'0000'     CC: 3-&gt;0, PSW1: 810ec020-&gt;81100020<br>[   91] T=222.18 010110 IOINIT  +0002: bef3       STH  6,X'019c'              PSW1: 81100020-&gt;81120020<br>[   92] T=222.68 010112 IOINIT  +0004: bdf3       STH  5,X'019a'              PSW1: 81120020-&gt;81140020<br>[   93] T=226.43 010114 IOINIT  +0006: e4f7 0038  BAL  4,X'0038'              R04: 81660020-&gt;81160020, PSW1: 81140020-&gt;814e0020<br>[   94] T=226.68 01014e IOINIT  +0040: c7e4       BCR  7,4                    PSW1: 814e0020-&gt;81160020<br>[   95] T=244.18 010116 IOINIT  +0008: 97e8       SRET 7,0                    R00: 02460012-&gt;021e0028, R04: 81160020-&gt;81660020, <br>                                                                              CC: 0-&gt;3, PSW1: 81160020-&gt;801cc020<br>[   96] T=244.43 01001c $0HELLO +001c: 1de7       LR   5,7                    R05: 00030000-&gt;00010000, CC: 3-&gt;1, <br>                                                                              PSW1: 801cc020-&gt;801d4020<br>[   97] T=268.93 01001d $0HELLO +001d: d0ff 3948  SCAL 0,X'0148'(1,)          R00: 021e0028-&gt;02460012, PSW1: 801d4020-&gt;81174020<br>[   98] T=271.93 010117 IOINIT  +0009: b624 0000  NIST X'0009'(0),X'0000'     CC: 1-&gt;0, PSW1: 81174020-&gt;81190020<br>[   99] T=272.43 010119 IOINIT  +000b: bdf3       STH  5,X'019c'              PSW1: 81190020-&gt;811b0020<br>[  100] T=272.68 01011b IOINIT  +000d: eef3 000a  LHI  6,X'000a'              R06: 00060000-&gt;000a0000, PSW1: 811b0020-&gt;811d0020<br>[  101] T=273.18 01011d IOINIT  +000f: bef3       STH  6,X'019a'              PSW1: 811d0020-&gt;811f0020<br><b>THE BEGINNING</b><br>[  102] T=273.43 01011f IOINIT  +0011: c0e0       BCR  0,0                    PSW1: 811f0020-&gt;81200020<br>[  103] T=290.93 010120 IOINIT  +0012: 97e8       SRET 7,0                    R00: 02460012-&gt;021e0028, R06: 000a0000-&gt;00060000, <br>                                                                              CC: 0-&gt;1, PSW1: 81200020-&gt;801f4020<br>[  104] T=291.18 01001f $0HELLO +001f: eacd       LA   2,X'0033'(1)           R02: 01890000-&gt;01810000, PSW1: 801f4020-&gt;80204020<br>--- Registers (step 105, bank 0) ---<br>  R00=021e0028  R01=014e0000  R02=01810000  R03=01520000<br>  R04=81660020  R05=00010000  R06=00060000  R07=00010000<br>  FP0=00000000  FP1=00000000  FP2=00000000  FP3=00000000<br>  FP4=00000000  FP5=00000000  FP6=00000000  FP7=00000000<br>  PSW1=80204020  PSW2=00080000  NIA=10020  CC=1  BSR=2  DSR=0<br>[  105] T=291.18 &gt;&gt; 10020 $0HELLO +00020: d0ff 3946  SCAL 0,X'0146'(1,)<br>gpc&gt;<br></pre>
+    </blockquote>
+    <p>There are some interesting features in the trace above that you
+      might amuse yourself by pondering.&nbsp; Four lines are <b>bolded</b>
+      in the excerpt above.&nbsp; Notice that the first of these 4 lines
+      is the one that caused the last of the 4 (a simple text message)
+      to be printed.&nbsp; Why did it take so long to print?&nbsp; Why
+      are there several statements in between the command and the
+      printed line?&nbsp; Don't rationalize that it's because some <i>other</i>
+      code did the printing, and that it took a while to spit it out,
+      because you're already looking at every single instruction
+      executed.&nbsp; Now look at the middle two <b>bolded</b>
+      lines:&nbsp; Where is all of the stuff that's supposed to go
+      between the <code>DO FOR</code> and its <code><font
+          color="#996633">END</font></code>?&nbsp; In case you don't
+      remember — and why <i>would</i> you? —, that stuff looks like the
+      <b>bolded</b> stuff below:<br>
+    </p>
+    <blockquote>
+      <pre>          8 M|   DO FOR I = 1 TO 5;                                                                                |HELLO<br><b>          9 M| 1   WRITE(PRINTER) I, 'HELLO, WORLD!';                                                              |HELLO</b><b><br></b><b>                         ^^^^^^^                                                                                   </b><b><br></b><b>         10 M| 1   DO FOR J = 2 TO 8 BY 2;                                                                         |HELLO</b><b><br></b><b><br></b><b>            E|                                     ,                                                               | </b><b><br></b><b>         11 M| 2     WRITE(PRINTER) '     ', J, MY_NAME || ' SAYS ISN''T THIS FUN?';                               |HELLO</b><b><br></b><b>                           ^^^^^^^                                                                                 </b><b><br></b><b>         12 M| 1   END;                                                                                            |ST#10</b><b><br></b>         13 M|   END;                                                                                              |ST#8<br></pre>
+    </blockquote>
+    Where did it go?&nbsp; I'll give you a hint: If I thought you were
+    interested in seeing it, I would have included a lot more of the
+    run, and you would have seen the missing lines farther down the page
+    ... and indeed, you would have seen them <i>several</i> times.<br>
+    <br>
+    At any rate, I'm not here to teach you how to debug an
+    assembly-language program, so I'll end my little demo at this point.<br>
+    <h1><a name="accuracy"></a>Accuracy Of the Emulators</h1>
+    <p>I can only speak to the accuracy of the in-house emulators, <b>yaHALMAT2</b>
+      and <b>yaGPC2</b>.&nbsp; I've already mentioned that it's
+      basically impossible for <b>yaHALMAT2</b> to have an exact timing
+      model, so the "accuracy" I'm referring to as behavioral accuracy.<br>
+    </p>
+    <p>The two programs represent very different development approaches,
+      with one emulating HALMAT and the other emulating AP-101S assembly
+      language, so a principal tool in finding bugs in them has been to
+      directly compare the results they produce when confronted with the
+      same HAL/S source code.&nbsp; Because A.I. coding agents are
+      endlessly patient, it was feasible to track down every discrepancy
+      that came up in such a comparison, and to eliminate all of the
+      associated bug(s) in whichever (or both!) of the emulators was
+      demonstrated to be at fault.&nbsp; This not to say that it was
+      possible to obtain 100% agreement in all cases. With even the
+      slightest thought about it, it should be obvious (for example)
+      that it is impossible to guarantee exact timing agreement between
+      the two, besides which there are a few ways in which which AP-101S
+      results depend on specific hardware quirks that cannot be
+      duplicated in an abstraction like HALMAT.&nbsp; Nevertheless, this
+      stress testing gives us (by which I mean <i>me</i>) some
+      confidence that the emulators work pretty well.&nbsp; You, of
+      course, can form your own opinion.<br>
+    </p>
+    <p>At this writing, the emulators have no ability to communicate
+      with Space Shuttle peripheral devices such as the DEU.&nbsp; At
+      some point in the not-too-distant future, that capability will be
+      built into both emulators.&nbsp; For now, their usefulness is
+      limited to "general purpose" HAL/S programming rather than Space
+      Shuttle programming specifically.<br>
+    </p>
+    <p>A bit of collateral damage from the stress-testing approach was
+      that actual bugs were found in the AP-101S assembly-language
+      programs comprising the run-time library (RTL) supplied with the
+      original HAL/S compiler, and thus inherited by us.&nbsp; Most of
+      these bugs related to delivery of wrong but "close" numerical
+      results for library functions like <code>SQRT</code> and
+      transcendental functions (<code>SIN</code>,<code> COS</code>, <code>LOG</code>,
+      <i>etc</i>.).&nbsp; A function for finding strings within other
+      strings (<code>CTIME</code>) actually doubled the search length,
+      and so if you were searching (say) string <i><code>C1</code></i>
+      for string <i><code>C2</code></i>, you might actually end up
+      finding a match in the <code>strlen(<i>C1</i>)</code> characters
+      following <i><code>C1</code></i>.&nbsp; The worst of the bugs
+      made it highly unlikely that you could compute matrix determinants
+      or inverses that were even vaguely correct for 4×4 matrices.&nbsp;
+      Reluctantly, I concluded that the RTL itself needed to be fixed,
+      at least to the extent needed to support testing of the
+      emulators.&nbsp; These RTL fixes were effected in a very innocuous
+      way, though, in that they <i>only</i> take effect when assembling
+      the RTL using our own <b>ASM101S</b> assembler — and not, for
+      example, with the original Intermetrics assembler —, and that even
+      with <b>ASM101S</b> they could be disabled with a simple
+      command-line switch.&nbsp; (For what it's worth, the affected RTL
+      source-code files are <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM/CINDEX.asm">CINDEX.asm</a>,
+      <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM/MM14SN.asm">MM14SN.asm</a>,
+      <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM/MM6SN.asm">MM6SN.asm</a>,
+      <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM/MV6SN.asm">MV6SN.asm</a>,
+      <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM/VV6S3.asm">VV6S3.asm</a>,
+      and <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM/VX6S3.asm">VX6S3.asm</a>.&nbsp;
+
+      Just search for the string "&amp;ASM101S" to see the differences,
+      and explanations thereof.)<br>
+    </p>
+    <p> </p>
+    <h1><a name="integration"></a>Integration Into Spaceflight
+      Simulators Or Other Software</h1>
+    <p>I'll confine my remarks to the <a moz-do-not-send="true"
+        href="#yaHALMAT2">yaHALMAT2</a> and <a moz-do-not-send="true"
+        href="yaGPC2">yaGPC2</a> emulators, and we'll find (I hope!)
+      that once you've integrated one, you've really integrated the
+      choice of using either.<br>
+    </p>
+    <p>TBD<br>
+    </p>
     <p> </p>
     <br>
     <hr style="width: 100%; height: 2px;">
@@ -1148,7 +1666,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-07-22<br>
+          2026-07-31<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
