@@ -35,8 +35,10 @@ static int failures = 0;
 
 static void test_two_instance_independence(void) {
     GpcState a = {.gpcID = 1}, b = {.gpcID = 2};
-    CHECK(yaGPC2_ops.initializer(&a, "test/fixtures/hello.fcm"), "instance A initializer succeeded");
-    CHECK(yaGPC2_ops.initializer(&b, "test/fixtures/hello.fcm"), "instance B initializer succeeded");
+    CHECK(yaGPC2_ops.initializer(&a, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
+          "instance A initializer succeeded");
+    CHECK(yaGPC2_ops.initializer(&b, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
+          "instance B initializer succeeded");
     CHECK(a.impl != NULL && b.impl != NULL, "both instances got a non-NULL impl");
     CHECK(a.impl != b.impl, "instances have distinct impl allocations");
 

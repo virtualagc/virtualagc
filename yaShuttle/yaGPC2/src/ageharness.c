@@ -143,9 +143,15 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
     }
 }
 
-bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath) {
+bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath, const char *symbolsPath) {
     ageharness_init(age);
     load_fcm(age, fcmPath); /* exits(1) on hard failure -- see header comment */
+    if (symbolsPath) {
+        uint32_t entryPoint = 0;
+        if (load_symbols(age, symbolsPath, false, &entryPoint)) {
+            ageharness_set_entry_point(age, entryPoint);
+        }
+    }
     return true;
 }
 

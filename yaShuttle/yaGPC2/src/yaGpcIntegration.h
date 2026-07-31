@@ -27,7 +27,15 @@ typedef struct {
 
 typedef void (*GpcEngineFn)(GpcState *state);
 typedef bool (*GpcDebuggerFn)(GpcState *state, void *dbgState); /* false => stop */
-typedef bool (*GpcInitializerFn)(GpcState *state, const char *programPath);
+
+/* symbolsPath: optional (NULL allowed) path to a linker/symbols JSON file
+ * providing, at minimum, an entry point. yaGPC2 reads it and establishes
+ * the start address from it (a freshly loaded .fcm otherwise sits in the
+ * CPU's default wait state, per real AP-101S reset behavior -- there is
+ * no implicit "start at word 0"). yaHALMAT2 ignores this parameter: its
+ * entry point comes from the HALMAT program itself, not a companion
+ * file. */
+typedef bool (*GpcInitializerFn)(GpcState *state, const char *programPath, const char *symbolsPath);
 
 typedef struct {
     GpcEngineFn engine;

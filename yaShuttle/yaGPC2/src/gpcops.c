@@ -34,9 +34,9 @@ static bool yagpc2_debugger(GpcState *state, void *dbgState) {
     return debugger_hook(dbg, age, nia, hw1, hw2, (long)age->stepCount);
 }
 
-static bool yagpc2_initializer(GpcState *state, const char *programPath) {
+static bool yagpc2_initializer(GpcState *state, const char *programPath, const char *symbolsPath) {
     AGEHarness *age = malloc(sizeof(AGEHarness));
-    if (!ageharness_init_minimal(age, programPath)) {
+    if (!ageharness_init_minimal(age, programPath, symbolsPath)) {
         free(age);
         return false;
     }
