@@ -4959,6 +4959,8 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
                 switch (ins->operands[0].tag1) {
                     case 1: return 73;   /* BIT */
                     case 2: return 115;  /* CHARACTER */
+                    case 5: return 64;   /* SCALAR */
+                    case 6: return 62;   /* INTEGER */
                     case 3: {
                         /* MATRIX: real cost is clearly size-dependent
                          * (confirmed via 2x2/3x3/5x5 fixtures: 520.55,

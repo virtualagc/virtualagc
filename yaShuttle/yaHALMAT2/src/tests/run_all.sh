@@ -1288,10 +1288,18 @@ run ./run_local_fixture.sh random_deterministic "$(printf ' 4.3794728815555573E-
 # top of everything (3)/(4) already changed around them; (6)/(7) READ and
 # MATRIX/VECTOR/STRUCTURE WRITE items gained real per-item weights too
 # (op_cost_ticks()'s own OP_XXAR comment) -- this fixture uses neither
-# (no READ, and its WRITE items are plain SCALAR, already priced by (4)),
-# but the second RUNTIME() call's value still shifts by a few ticks from
-# some small change in the instructions immediately surrounding it.
-run ./run_local_fixture.sh runtime "$(printf ' 7.2999988E-05\n 5.0003147E+00')"
+# directly (no READ), but that same edit accidentally DROPPED the
+# existing SCALAR(5)/INTEGER(6) cases from the WRITE-context XXAR switch
+# (an editing mistake, not an intentional repricing -- confirmed by
+# diffing against the commit that introduced it) while adding the new
+# MATRIX/VECTOR/STRUCTURE cases, silently falling those two back to the
+# generic 60-tick default instead of their correct 64/62; this fixture's
+# own WRITE(6) S1; (S1 a SCALAR) was hit by that regression, which is
+# what the "some small change... not fully explained" note previously
+# here was actually seeing. (8) Fixed by restoring the two missing
+# cases -- the second RUNTIME() call's value reverts to exactly its
+# pre-regression figure, back to matching (7)'s own original value.
+run ./run_local_fixture.sh runtime "$(printf ' 7.2999988E-05\n 5.0003185E+00')"
 run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2.0000000E+00\n          4\n          5')"
 # Follow-up, direct user correction to this same batch: DATE/CLOCKTIME
 # (BFNC selectors 18/54) were initially left unimplemented ("no calendar/
