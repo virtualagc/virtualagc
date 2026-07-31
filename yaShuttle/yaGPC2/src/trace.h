@@ -27,6 +27,10 @@ typedef struct {
     const SymbolTable *sym;   /* NULL -> no section-offset field */
     int stepWidth;            /* 0 -> 6 */
     int niaWidth;              /* 0 -> 5 */
+    const double *elapsedTimeUs; /* NULL -> omit; else prepends "T=%.2f "
+                                   * before the NIA field, matching run.c's
+                                   * own --debug display (see cpu.h's
+                                   * elapsedTimeUs comment) */
 } TraceLineOpts;
 
 /* Writes one formatted trace line (no trailing newline) into out. */

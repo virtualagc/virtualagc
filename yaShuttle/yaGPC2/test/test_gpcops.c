@@ -1,4 +1,4 @@
-/* Verifies two pieces of the Shuttle-sim integration work (see
+/* Verifies three pieces of the Shuttle-sim integration work (see
  * ../src/yaGpcIntegration.h and its plan-mode discussion history):
  *
  *  1. yaGPC2_ops (../src/gpcops.c) supports multiple fully independent
@@ -9,12 +9,18 @@
  *     iop_exec_dma_queue()/mia_xmit_cmd() paths #TDS/#RDS/#CMD/#CMDI
  *     themselves use, while confirming the no-servicer-installed case
  *     is still byte-for-byte the original inert stub.
+ *  3. yagpc2_engine() prints a trace line exactly when
+ *     AGEHarness.htraceWanted is set (and nothing when it isn't) --
+ *     the mechanism a driver relies on to get 'htrace'-equivalent
+ *     output without owning any snapshot/diff/format logic itself.
  *
  * Run from the repo root (as `make test` does) -- fixture path below is
  * relative to that. */
+#define _POSIX_C_SOURCE 200809L /* fileno(), dup(), dup2() -- see capture_engine_output_bytes() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../src/ageharness.h"
 #include "../src/gpcops.h"
@@ -158,9 +164,52 @@ static void test_servicer_roundtrip(void) {
     cpu_free(&cpu);
 }
 
+/* ---------------------------------------------------------------------
+ * 3. htraceWanted-driven engine output
+ * ------------------------------------------------------------------- */
+
+/* Redirects stdout to a tmpfile() for the duration of one yaGPC2_ops.engine()
+ * call and returns how many bytes it printed. */
+static long capture_engine_output_bytes(GpcState *state) {
+    fflush(stdout);
+    FILE *tmp = tmpfile();
+    int savedFd = dup(fileno(stdout));
+    dup2(fileno(tmp), fileno(stdout));
+
+    yaGPC2_ops.engine(state);
+
+    fflush(stdout);
+    dup2(savedFd, fileno(stdout));
+    close(savedFd);
+    long size = ftell(tmp);
+    fclose(tmp);
+    return size;
+}
+
+static void test_htrace_output(void) {
+    GpcState state = {.gpcID = 1};
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
+          "htrace-output instance initializer succeeded");
+    AGEHarness *age = (AGEHarness *)state.impl;
+
+    CHECK(!age->htraceWanted, "htraceWanted starts false (no debugger attached)");
+    CHECK(capture_engine_output_bytes(&state) == 0, "engine prints nothing when htraceWanted is false");
+
+    age->htraceWanted = true; /* what yagpc2_debugger() would set from debugger_wants_htrace() */
+    long n = capture_engine_output_bytes(&state);
+    CHECK(n > 0, "engine prints a trace line when htraceWanted is true");
+
+    age->htraceWanted = false;
+    CHECK(capture_engine_output_bytes(&state) == 0, "engine stops printing once htraceWanted is cleared again");
+
+    ageharness_free(age);
+    free(age);
+}
+
 int main(void) {
     test_two_instance_independence();
     test_servicer_roundtrip();
+    test_htrace_output();
     if (failures == 0) {
         printf("all gpcops/servicer tests passed\n");
     } else {

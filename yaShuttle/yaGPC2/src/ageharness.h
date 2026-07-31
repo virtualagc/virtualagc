@@ -34,6 +34,16 @@ typedef struct {
     char *initialFcmPath;
     Options initialOpts;
     bool hasInitial;
+
+    /* Set by src/gpcops.c's yagpc2_debugger() from debugger_wants_htrace()
+     * after each debugger_hook() call, and consumed by yagpc2_engine() to
+     * decide whether to print a trace line for the next instruction --
+     * lets the black-box engine (see yaGpcIntegration.h) honor 'htrace'
+     * without debugger.c or a driver needing to own the snapshot/diff/
+     * print work itself. Not read or written anywhere in the standalone
+     * `gpc run` CLI path, which prints its own trace lines from run.c as
+     * before. */
+    bool htraceWanted;
 } AGEHarness;
 
 void ageharness_init(AGEHarness *age);

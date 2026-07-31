@@ -394,7 +394,7 @@ static bool batchrunner_step(BatchRunner *r) {
     const InstrDesc *d = instr_decode(hw1, hw2, &v);
     int instrLen = d ? d->pb.origLen : 1;
 
-    bool traceWanted = r->traceEnabled || (r->debugMode && debugger_wants_trace(r->dbg));
+    bool traceWanted = r->traceEnabled || (r->debugMode && debugger_wants_htrace(r->dbg));
 
     if (!d) {
         if (traceWanted) {
@@ -422,10 +422,10 @@ static bool batchrunner_step(BatchRunner *r) {
         /* Re-derive traceWanted: debugger_hook()'s REPL (just run, above)
          * may have changed whether trace-style output is wanted for the
          * instruction about to execute -- e.g. dispatching 'step' turns
-         * it on for exactly this instruction (see debugger_wants_trace())
+         * it on for exactly this instruction (see debugger_wants_htrace())
          * even though it read false when this function started, before
          * the command was dispatched. */
-        traceWanted = r->traceEnabled || debugger_wants_trace(r->dbg);
+        traceWanted = r->traceEnabled || debugger_wants_htrace(r->dbg);
     }
 
     if (r->age.halUCP.active && halucp_is_trap_addr(&r->age.halUCP, nia)) {

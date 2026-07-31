@@ -87,8 +87,12 @@ void trace_format_line(char *out, size_t outSize, int step, uint32_t nia, uint32
     char disasmPadded[256];
     str_rpad(disasmPadded, sizeof disasmPadded, disasm, " ", 28);
 
-    snprintf(out, outSize, "%s[%s]%s %s%s: %s %s  %s%s%s%s",
-             c->dim, stepStr, c->reset, niaStr, sectStr, hw1Str, hw2Str, disasmPadded, c->yellow, changesStr, c->reset);
+    char timeStr[32];
+    timeStr[0] = '\0';
+    if (opts && opts->elapsedTimeUs) snprintf(timeStr, sizeof timeStr, "T=%.2f ", *opts->elapsedTimeUs);
+
+    snprintf(out, outSize, "%s[%s]%s %s%s%s: %s %s  %s%s%s%s",
+             c->dim, stepStr, c->reset, timeStr, niaStr, sectStr, hw1Str, hw2Str, disasmPadded, c->yellow, changesStr, c->reset);
 }
 
 void trace_format_reg_dump(CPU *cpu, int step, const TraceColors *color, char lines[TRACE_REGDUMP_LINES][200], size_t lineSize) {

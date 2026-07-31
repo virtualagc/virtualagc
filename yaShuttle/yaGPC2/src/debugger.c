@@ -52,7 +52,7 @@ typedef struct {
 } RecentInstr;
 
 struct Debugger {
-    bool traceEnabled; /* 'trace'/'htrace' toggle -- see debugger_wants_trace() */
+    bool htraceEnabled; /* 'htrace' toggle -- see debugger_wants_htrace() */
 
     Breakpoint breakpoints[DEBUGGER_MAX_BREAKPOINTS];
     int breakpointCount;
@@ -109,10 +109,10 @@ struct Debugger {
                          * alongside the HAL/S source line, when the
                          * source map was built with a --unit HALMAT_FILE
                          * and the active statement has any; mirrors
-                         * traceEnabled exactly */
+                         * htraceEnabled exactly */
 
     /* 'set width N': wraps the register-changes list run.c prints during
-     * 'trace'/'htrace' (see debugger_format_changes()); N<=0 disables
+     * 'htrace' (see debugger_format_changes()); N<=0 disables
      * wrapping. Purely a debug-mode presentation setting -- has no
      * effect on plain --trace (no --debug). */
     int lineWidth;
@@ -470,7 +470,7 @@ static void show_current_location(Debugger *dbg, AGEHarness *age) {
     printf("%s\n", line);
 }
 
-/* Shown at every debugger stop, regardless of 'trace'/'htrace', in place
+/* Shown at every debugger stop, regardless of 'htrace', in place
  * of a plain show_current_location(): exactly one instruction executed
  * since the last stop (the common case for a plain 'step') gets the
  * register changes it made appended to the RIGHT of the location line,
@@ -580,7 +580,7 @@ static bool show_source_line(Debugger *dbg, AGEHarness *age, uint32_t addr) {
 }
 
 /* Auto-display variant used both at debugger stops and (new) as
- * instructions flow by during 'trace'/'htrace': shows the source
+ * instructions flow by during 'htrace': shows the source
  * line(s) only when the (module, statement) pair differs from the last
  * one shown, matching yaHALMAT2's --debug behavior, sharing the same
  * lastModule/lastStmt/hasLastStmt tracking in both cases so flowing
@@ -651,7 +651,7 @@ static const HelpEntry HELP_ENTRIES[] = {
     {"source, src", "Show the HAL/S source line at the current location"},
     {"steps", "Show step count"},
     {"backtrace, bt", "Show recently executed instructions"},
-    {"trace, htrace [on|off]", "Toggle or show instruction trace (+ HAL/S source lines, if mapped)"},
+    {"htrace [on|off]", "Toggle or show instruction trace (+ HAL/S source lines, if mapped)"},
     {"halmat [on|off]", "Toggle or show HALMAT instruction-number (H=...) display, if mapped"},
     {"info breakpoints|watches|memwatch|registers|sections", "Show info"},
     {"help, h, ? [command]", "Show this help"},
@@ -899,7 +899,7 @@ static void cmd_unwatch(Debugger *dbg, AGEHarness *age, const char *addrStr) {
 /* Register alteration (mirrors cmd_debug.coffee's setRegister) plus one
  * yaGPC2-specific extension not in the CoffeeScript original: 'set width
  * N' controls wrapping of the register-changes list printed during
- * 'trace'/'htrace' (see debugger_format_changes()) -- N<=0 disables
+ * 'htrace' (see debugger_format_changes()) -- N<=0 disables
  * wrapping entirely. Memory alteration is 'deposit', not 'set'. */
 static void cmd_set(Debugger *dbg, AGEHarness *age, const char *nameIn, const char *valStr) {
     char name[16];
@@ -1209,15 +1209,20 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
         show_backtrace(dbg);
         return false;
     }
-    if (cmd_is(cmd, "trace", "htrace", NULL)) {
+    /* Deliberately NOT aliased to "trace" -- gdb's own `trace` command is a
+     * genuinely different, heavier mechanism (tracepoints: tstart/tfind/
+     * data collection for later analysis), unrelated to this per-instruction
+     * display toggle. Conflating the two names invited exactly that
+     * confusion. */
+    if (cmd_is(cmd, "htrace", NULL)) {
         if (argc > 1 && strcmp(argv[1], "on") == 0) {
-            dbg->traceEnabled = true;
-            printf("Trace enabled\n");
+            dbg->htraceEnabled = true;
+            printf("htrace enabled\n");
         } else if (argc > 1 && strcmp(argv[1], "off") == 0) {
-            dbg->traceEnabled = false;
-            printf("Trace disabled\n");
+            dbg->htraceEnabled = false;
+            printf("htrace disabled\n");
         } else {
-            printf("Trace is %s\n", dbg->traceEnabled ? "on" : "off");
+            printf("htrace is %s\n", dbg->htraceEnabled ? "on" : "off");
         }
         return false;
     }
@@ -1299,7 +1304,7 @@ static void debugger_repl(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t
 
 Debugger *debugger_create(const Options *opts) {
     Debugger *dbg = calloc(1, sizeof(Debugger));
-    dbg->traceEnabled = opts->trace;
+    dbg->htraceEnabled = opts->trace;
     dbg->lineWidth = 132;
 
     if (opts->sourceMap) dbg->srcmap = sourcemap_load(opts->sourceMap);
@@ -1320,7 +1325,7 @@ void debugger_free(Debugger *dbg) {
     free(dbg);
 }
 
-bool debugger_wants_trace(const Debugger *dbg) { return dbg->traceEnabled; }
+bool debugger_wants_htrace(const Debugger *dbg) { return dbg->htraceEnabled; }
 
 int debugger_line_width(const Debugger *dbg) { return dbg->lineWidth; }
 
@@ -1437,11 +1442,11 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
     if (!shouldStop && dbg->stepsRemaining > 0) {
         dbg->stepsRemaining--;
         dbg->instructionsThisResume++;
-        /* 'trace'/'htrace': show the HAL/S source line as instructions
+        /* 'htrace': show the HAL/S source line as instructions
          * flow by, not just at stops -- printed here (before returning)
          * so it lands just before this instruction's own trace line,
          * which run.c prints only after ap101_exec1() actually runs it. */
-        if (debugger_wants_trace(dbg)) show_source_line_if_changed(dbg, age, nia);
+        if (debugger_wants_htrace(dbg)) show_source_line_if_changed(dbg, age, nia);
         return true;
     }
 
