@@ -35,6 +35,8 @@ repository root for the roadmap and editorial rules governing this material.
   - [By Class, then Mnemonic](#by-class-then-mnemonic)
   - [By Mnemonic (alphabetical)](#by-mnemonic-alphabetical)
   - [By Opcode (numeric)](#by-opcode-numeric)
+- [Timing Model](#timing-model)
+  - [Timing by Instruction (alphabetical)](#timing-by-instruction-alphabetical)
 
 ## Source Documents
 
@@ -1253,3 +1255,275 @@ byte is independent); sorted here by class first, then opcode.
 These lists will be regenerated/expanded as more instruction files are
 added; see `STATUS.md` for the full known inventory, including opcodes
 confirmed but not yet documented.
+
+## Timing Model
+
+yaHALMAT2's interpreter (`op_cost_ticks()` in `interp.c`) charges each real
+HALMAT instruction executed a number of virtual-time ticks (1 tick = 1
+microsecond, `HALMAT_TICKS_PER_SECOND`) intended to approximate its real
+AP-101S execution cost — driving the simulated clock behind `WAIT`/`SCHEDULE`
+and the `RUNTIME`/`NEXTIME` built-in functions. This section documents how
+those numbers were derived and lists the current charge for every
+instruction.
+
+**Method**: yaGPC2 (the real AP-101S emulator this project's regression
+corpus is cross-checked against) gained a `halmat on`+`htrace on` debug-trace
+mode that tags each real AP-101S instruction it executes with the HALMAT
+word index of the HAL/S statement it belongs to. Running this across the
+`tests/hal/*.hal` regression corpus (and several small dedicated calibration
+programs, written when the organic corpus didn't exercise a case cleanly
+enough — e.g. `calib_struct_write.hal` for a lone `STRUCTURE` `WRITE`, or
+`calib_matrix_bfnc.hal`, filling several different-sized `MATRIX`es and
+calling `DET`/`INVERSE`/`TRANSPOSE`/`TRACE` on each) gives real elapsed time
+per HAL/S statement. Two further steps refine that into a *per-instruction*
+number:
+
+- **Call-stack reconstruction**: real AP-101S execution spends much of its
+  time inside RTL/library routines (formatting a `WRITE` field, `SQRT`,
+  matrix inversion, etc.), not the compiled code itself. Time spent inside
+  these calls is separated from the compiled code's own "local" time by
+  reconstructing real call/return nesting from the AP-101S opcodes
+  themselves (`SCAL`/`BAL` push a return context, `SRET`/`SVC`/a register-
+  target branch pop one) — correctly folding a call an RTL routine makes
+  *internally* to another RTL routine (e.g. a character-output routine
+  calling a string-conversion routine) into the one outermost call actually
+  made by compiled program code, rather than double-counting it.
+- **Per-opcode/per-item attribution**: for instructions whose real cost
+  doesn't correlate with a single fixed value — a `WRITE`/`READ` item's cost
+  depends on its data type; a `MATRIX` determinant's cost depends on its
+  dimension — the statement-level real total is further broken down by
+  item class or by symbol-table dimension lookup (`state->symtab`, when the
+  operand is a plain variable) and fit against the available samples
+  (equal division, or linear regression against item count/element
+  count/dimension, whichever the data supported without overfitting).
+
+Every number below traces back to `op_cost_ticks()` in `interp.c`, which
+remains the single source of truth — this table is a snapshot of it, not an
+independent record; if the two ever disagree, the code is authoritative.
+Consult the git commit history for `interp.c` (commit subjects mentioning
+"timing weights", "BFNC", "MATRIX", "READ", or "WRITE") for the full
+derivation narrative behind any individual entry, including methodology
+mistakes found and fixed along the way (a depth-ordering bug that dropped
+one instruction's local time per call return during the analysis phase; an
+early confusion between `halmat.bin` and `optmat.bin` — yaGPC2's own H=
+word indices are numbered against the latter, the optimizer-expanded stream
+it actually executes, which only matters for instructions the optimizer
+rewrites, such as a whole-`MATRIX` `BFNC` result).
+
+Coverage is partial and explicitly marked as such below: most HALMAT
+opcodes are not yet individually measured and fall back to a flat default
+(60 ticks generically, or 13 ticks for a `BFNC` selector without its own
+entry) — chosen to preserve this model's own prior behavior rather than
+guessed at. "Not individually measured" in the table below means exactly
+that, not "confirmed to cost nothing."
+
+### Timing by Instruction (alphabetical)
+
+| Mnemonic | Timing (ticks = microseconds) | Notes |
+|---|---|---|
+| [ADLP](class-0/ADLP.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [AFOR](class-0/AFOR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BAND](class-1/BAND.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BASN](class-1/BASN.md) | 2 | Measured local-instruction cost (n=25, CV=2.13); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [BCAT](class-1/BCAT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BEQU](class-7/BEQU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BFNC](class-0/BFNC.md) (default, ~25 selectors) | 13 | Most BFNC selectors (ABS, SIGN, ROUND, FLOOR, CEILING, TRUNCATE, SIN, COS, ARCSIN, ARCTAN, DIV, MOD, etc.) are computed entirely inline — no call to a named AP-101S RTL routine was ever observed for any of them. This is the measured mean *local* cost of a `BFNC` instruction generally (n=66, CV=0.69) — better than the generic 60-tick default, though not selector-specific. |
+| [BFNC](class-0/BFNC.md): ARCCOS (tag 35) | 80 | RTL routine name is `ACOS`. n=6, CV=0.23; synthesized as 13 (generic local cost above) + 67 (`ACOS`'s own separately-measured RTL-call mean). |
+| [BFNC](class-0/BFNC.md): DET (tag 3) | 69 (n=2); 139 (n=3); 561+20·n³ (n≥4) | Matrix determinant. Two-regime structure: n=2/n=3 use a cheap closed-form path; n≥4 switches to a general Gaussian-elimination algorithm scaling ~n³ (linear-regressed against n³, predicts all four n≥4 sizes within 5%). Only priced when the argument is a plain variable (symbol table gives *n*=rows=cols directly); a computed MATRIX expression result falls back to 13. |
+| [BFNC](class-0/BFNC.md): INVERSE (tag 49) | 111 (n=2); 473 (n=3); 466+65·n³ (n≥4) | Matrix inverse. Same two-regime shape as DET (it's DET's own elimination machinery plus back-substitution — ~2-3× DET's cost at every size). Same plain-variable-only caveat as DET. |
+| [BFNC](class-0/BFNC.md): RANDOM (tag 42) | 72 | n=23, CV=0.13 — direct measurement from clean single-statement totals. |
+| [BFNC](class-0/BFNC.md): RANDOMG (tag 51) | 513 | n=11, CV=0.00 — direct measurement; double-precision generator, genuinely and consistently more expensive than RANDOM. |
+| [BFNC](class-0/BFNC.md): SINH (tag 22) | 177 | n=2, CV=0.01 — synthesized (13 generic + 164 RTL-call mean), unusually tight for a synthesized estimate. |
+| [BFNC](class-0/BFNC.md): SQRT (tag 24) | 94 | n=3, direct measurement; cross-checked within 8% against a synthesized estimate (13 + 73). |
+| [BFNC](class-0/BFNC.md): TRACE (tag 34) | 48 | Sum of diagonal elements. Real cost (23-83us across 6 tested sizes) small enough, and its own size correlation weak/noisy enough (n=2 measured *higher* than n=3), that a flat average fits about as well as any curve. Only priced for a plain-variable argument, same caveat as DET. |
+| [BFNC](class-0/BFNC.md): TRANSPOSE (tag 56) | 19+13·n² | A flat O(n²) element copy, no elimination algorithm involved — unlike DET/INVERSE, a single smooth curve across all 6 tested sizes with no algorithm-switch discontinuity (fit predicts every point within 7%). Same plain-variable-only caveat as DET. |
+| [BINT](class-8/BINT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [BNEQ](class-7/BNEQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BNOT](class-1/BNOT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BOR](class-1/BOR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BRA](class-0/BRA.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BTOB](class-1/BTOB.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BTOC](class-2/BTOC.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BTOI](class-6/BTOI.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BTOQ](class-1/BTOQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BTOS](class-5/BTOS.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [BTRU](class-7/BTRU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CANC](class-0/CANC.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CAND](class-7/CAND.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CASN](class-2/CASN.md) | 13 | Measured local-instruction cost (n=11, CV=0.36); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [CCAT](class-2/CCAT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CDEF](class-0/CDEF.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CEQU](class-7/CEQU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CFOR](class-0/CFOR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CGT](class-7/CGT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CINT](class-8/CINT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [CLBL](class-0/CLBL.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [CLOS](class-0/CLOS.md) | 4 | Measured local-instruction cost (n=130, CV=3.63); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [CLT](class-7/CLT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CNEQ](class-7/CNEQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CNGT](class-7/CNGT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CNLT](class-7/CNLT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CNOT](class-7/CNOT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [COR](class-7/COR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CTOB](class-1/CTOB.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CTOC](class-2/CTOC.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CTOI](class-6/CTOI.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CTOQ](class-1/CTOQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CTOS](class-5/CTOS.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [CTST](class-0/CTST.md) | 2 | Measured local-instruction cost (n=7, CV=0.34); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [DCAS](class-0/DCAS.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [DFOR](class-0/DFOR.md) | 0 | Measured local-instruction cost (n=16, CV=2.04); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [DLPE](class-0/DLPE.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [DSMP](class-0/DSMP.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [DSUB](class-0/DSUB.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [DTST](class-0/DTST.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [ECAS](class-0/ECAS.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [EDCL](class-0/EDCL.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [EFOR](class-0/EFOR.md) | 1 | Measured local-instruction cost (n=181, CV=1.62); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [EINT](class-8/EINT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ELRI](class-8/ELRI.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [ERON](class-0/ERON.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ERSE](class-0/ERSE.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ESMP](class-0/ESMP.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [ETRI](class-8/ETRI.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [ETST](class-0/ETST.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [EXTN](class-0/EXTN.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [FBRA](class-0/FBRA.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [FCAL](class-0/FCAL.md) | 6 | Measured local-instruction cost (n=22, CV=0.73); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [FDEF](class-0/FDEF.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [FILE](class-0/FILE.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [IADD](class-6/IADD.md) | 1 | Measured local-instruction cost (n=22, CV=1.52); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [IASN](class-6/IASN.md) | 5 | Measured local-instruction cost (n=54, CV=1.34); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [ICLS](class-0/ICLS.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [IDEF](class-0/IDEF.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [IDLP](class-0/IDLP.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [IEQU](class-7/IEQU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [IFHD](class-0/IFHD.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [IGT](class-7/IGT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [IINT](class-8/IINT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [IIPR](class-6/IIPR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ILT](class-7/ILT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [IMRK](class-0/IMRK.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [INEG](class-6/INEG.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [INEQ](class-7/INEQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [INGT](class-7/INGT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [INLT](class-7/INLT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [IPEX](class-6/IPEX.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ISHP](class-0/ISHP.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ISUB](class-6/ISUB.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ITOB](class-1/ITOB.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ITOC](class-2/ITOC.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ITOI](class-6/ITOI.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ITOQ](class-1/ITOQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [ITOS](class-5/ITOS.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [LBL](class-0/LBL.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [LFNC](class-0/LFNC.md) | 3 | Measured local-instruction cost (n=17, CV=1.71); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [MADD](class-3/MADD.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MASN](class-3/MASN.md) | 29 | Measured local-instruction cost (n=8, CV=0.67); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [MDEF](class-0/MDEF.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MEQU](class-7/MEQU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MINT](class-8/MINT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [MINV](class-3/MINV.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MMPR](class-3/MMPR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MNEG](class-3/MNEG.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MNEQ](class-7/MNEQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MSDV](class-3/MSDV.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MSHP](class-0/MSHP.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MSPR](class-3/MSPR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MSUB](class-3/MSUB.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MTOM](class-3/MTOM.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MTRA](class-3/MTRA.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [MVPR](class-4/MVPR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [NASN](class-0/NASN.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [NEQU](class-0/NEQU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [NINT](class-8/NINT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [NNEQ](class-0/NNEQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [NOP](class-0/NOP.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [PCAL](class-0/PCAL.md) | 5 | Measured local-instruction cost (n=12, CV=0.56); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [PDEF](class-0/PDEF.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [PMAR](class-0/PMAR.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [PMHD](class-0/PMHD.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [PMIN](class-0/PMIN.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [PRIO](class-0/PRIO.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [PXRC](class-0/PXRC.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [RDAL](class-0/RDAL.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [READ](class-0/READ.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [RTRN](class-0/RTRN.md) | 2 | Measured local-instruction cost (n=10, CV=2.98); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [SADD](class-5/SADD.md) | 1 | Measured local-instruction cost (n=24, CV=4.13); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [SASN](class-5/SASN.md) | 9 | Measured local-instruction cost (n=117, CV=0.95); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [SCHD](class-0/SCHD.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SEQU](class-7/SEQU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SEXP](class-5/SEXP.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SFAR](class-0/SFAR.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [SFND](class-0/SFND.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [SFST](class-0/SFST.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [SGNL](class-0/SGNL.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SGT](class-7/SGT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SIEX](class-5/SIEX.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SINT](class-8/SINT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [SLRI](class-8/SLRI.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [SLT](class-7/SLT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SMRK](class-0/SMRK.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [SNEG](class-5/SNEG.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SNEQ](class-7/SNEQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SNGT](class-7/SNGT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SNLT](class-7/SNLT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SPEX](class-5/SPEX.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SSDV](class-5/SSDV.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SSHP](class-0/SSHP.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SSPR](class-5/SSPR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [SSUB](class-5/SSUB.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [STOB](class-1/STOB.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [STOC](class-2/STOC.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [STOI](class-6/STOI.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [STOQ](class-1/STOQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [STOS](class-5/STOS.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [STRI](class-8/STRI.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [TASN](class-0/TASN.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [TDCL](class-0/TDCL.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [TDEF](class-0/TDEF.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [TEQU](class-0/TEQU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [TERM](class-0/TERM.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [TINT](class-8/TINT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [TNEQ](class-0/TNEQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [TSUB](class-0/TSUB.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [UDEF](class-0/UDEF.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VADD](class-4/VADD.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VASN](class-4/VASN.md) | 7 | Measured local-instruction cost (n=10, CV=0.54); see `op_cost_ticks()` in `interp.c` for the full per-opcode derivation. |
+| [VCRS](class-4/VCRS.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VDOT](class-5/VDOT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VEQU](class-7/VEQU.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VINT](class-8/VINT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [VMPR](class-4/VMPR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VNEG](class-4/VNEG.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VNEQ](class-7/VNEQ.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VSDV](class-4/VSDV.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VSHP](class-0/VSHP.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VSPR](class-4/VSPR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VSUB](class-4/VSUB.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VTOV](class-4/VTOV.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [VVPR](class-3/VVPR.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [WAIT](class-0/WAIT.md) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [WRIT](class-0/WRIT.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [XREC](class-0/XREC.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [XXAR](class-0/XXAR.md) (WRITE, BIT) | 73 | Per-item-class WRITE cost, marginal rate (see `XXST` (WRITE) above for the shared base). n=5, CV=0.08 single-item source measurement, refit to a 0.63× marginal rate. |
+| [XXAR](class-0/XXAR.md) (WRITE, CHARACTER) | 115 | n=24, CV=0.07 single-item source measurement, refit to a 0.63× marginal rate. |
+| [XXAR](class-0/XXAR.md) (WRITE, INTEGER) | 62 | n=81, CV=0.06 single-item source measurement, refit to a 0.63× marginal rate. |
+| [XXAR](class-0/XXAR.md) (WRITE, MATRIX) | 285+64·rows·cols | Size-dependent (confirmed via 2×2/3×3/5×5 fixtures: 521/871/871/1871us — CV=0.48 as one flat rate, vs. a clean fit once element count is accounted for). Reads the argument's own declared `rows`×`cols` from the symbol table (plain-variable arguments only, `qual==QUAL_SYT`) — a computed MATRIX expression result falls back to 60. |
+| [XXAR](class-0/XXAR.md) (WRITE, SCALAR) | 64 | n=82, CV=0.13 single-item source measurement, refit to a 0.63× marginal rate. |
+| [XXAR](class-0/XXAR.md) (WRITE, STRUCTURE) | 564 | n=1 (a dedicated calibration fixture, `calib_struct_write.hal` — no existing test WRITEs a whole structure in isolation); cross-checks within 9% of READ's own rate for the identical shape. |
+| [XXAR](class-0/XXAR.md) (WRITE, VECTOR) | 336 | n=2, both 3-element — no size variation observed in the available sample to fit a slope from (unlike MATRIX, VECTOR is priced flat, not size-aware). |
+| [XXAR](class-0/XXAR.md) (WRITE, other/whole-array) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [XXAR](class-0/XXAR.md) (READ, BIT/other) | 60 (default) | No fixture in the whole trace sample READs a lone BIT value; not individually measured. |
+| [XXAR](class-0/XXAR.md) (READ, CHARACTER) | 114 | Direct single-item measurement; the READ sample (~10 clean occurrences total) showed no evidence of a shared base cost the way WRITE has one, so this is a plain per-item rate, not a marginal one. |
+| [XXAR](class-0/XXAR.md) (READ, INTEGER) | 83 | Direct single-item measurement; cross-checked against an INTEGER+SCALAR multi-item combination (summed rates matched the real total within ~7us). |
+| [XXAR](class-0/XXAR.md) (READ, MATRIX) | 340 | Direct single-item measurement; unlike the WRITE side, no multi-size data was gathered for READ, so this is flat, not size-aware. |
+| [XXAR](class-0/XXAR.md) (READ, SCALAR) | 72 | Direct single-item measurement. |
+| [XXAR](class-0/XXAR.md) (READ, STRUCTURE) | 519 | n=13 (from one fixture's own 10 identical structure reads plus 3 more elsewhere), CV=0.00 — extremely consistent. |
+| [XXAR](class-0/XXAR.md) (READ, VECTOR) | 279 | Direct single-item measurement. |
+| [XXAR](class-0/XXAR.md) (CALL) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+| [XXND](class-0/XXND.md) | 0 | Confirmed zero real cost (no emitted AP-101S machine code) — see methodology above. |
+| [XXST](class-0/XXST.md) (WRITE) | 40 | Fixed per-statement base charge, shared across a WRITE statement's items (see `XXAR` (WRITE) above): real multi-item WRITE statements are cheaper per item than independent items would predict — some RTL setup (a `COUTP` flush, in particular) is shared across items rather than repeated per item. Linear-regressed across 230 single- and multi-item WRITE occurrences (residual stdev ~17us). |
+| [XXST](class-0/XXST.md) (READ/READALL) | 0 | Real per-item cost is charged entirely at `XXAR` (READ) above — the small READ sample showed no evidence of a shared base cost (fitting one produced a negative, unphysical value). |
+| [XXST](class-0/XXST.md) (CALL) | 60 (default) | Not individually measured; flat unmeasured-opcode default. |
+
