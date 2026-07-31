@@ -5061,6 +5061,53 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
                 case 24: return 94;   /* SQRT (n=3, direct) */
                 case 35: return 80;   /* ARCCOS (RTL name ACOS, n=6, CV=0.23, synthesized) */
                 case 22: return 177;  /* SINH (n=2, CV=0.01, synthesized) */
+                case 3: {
+                    /* DET (matrix determinant): the one MATRIX-argument
+                     * BFNC selector with a full, clean size-correlated
+                     * dataset -- a dedicated calibration program
+                     * (calib_matrix_bfnc.hal, scratch-only, user's own
+                     * suggestion: fill several different-sized MATRICEs
+                     * via READ and call DET/INVERSE/TRANSPOSE/TRACE on
+                     * each) gave one real total per size 2/3/4/5/6/8.
+                     * Reveals a genuine two-regime structure, not a
+                     * single smooth curve: n=2 (69us) and n=3 (139us) are
+                     * cheap, consistent with a hardcoded closed-form
+                     * formula; n=4 (1816us) jumps ~13x over n=3 and from
+                     * there scales roughly with n^3 (n=5 2955us, n=6
+                     * 5154us, n=8 10846us -- linear-regressed against n^3
+                     * gives 561 + 20.2/n^3, predicting all four within
+                     * 5%), consistent with a genuine general-N Gaussian-
+                     * elimination algorithm only kicking in at n>=4 (see
+                     * hal_matrix.c/RUNASM MM12SN.asm's own "general-N
+                     * path... n>=4" as referenced elsewhere in this
+                     * file). Only priced when the argument is a plain
+                     * variable (qual==QUAL_SYT, symbol table gives rows/
+                     * cols directly, same technique as MATRIX WRITE
+                     * items) -- a VAC-held computed MATRIX expression
+                     * result falls back to the generic default, same
+                     * caveat as that case. INVERSE(49)/TRANSPOSE(56)/
+                     * TRACE(34) are almost certainly governed by the same
+                     * underlying routines (DET/INVERSE both cite MM12SN/
+                     * MM14SN in this file's own comments) but this same
+                     * calibration run's own H=-group boundaries didn't
+                     * separate most of their individual calls cleanly (a
+                     * different grouping issue than the one already
+                     * documented for WRITE/READ items, not yet root-
+                     * caused) -- left on the generic default rather than
+                     * fit from 1-2 unreliable points; a real follow-up,
+                     * not abandoned. */
+                    if (state->symtab && ins->operand_count >= 1 && ins->operands[0].qual == QUAL_SYT) {
+                        const halmat_symtab_entry_t *sym =
+                            halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                        if (sym && sym->shape == HALMAT_SHAPE_MATRIX && sym->rows > 0 && sym->rows == sym->cols) {
+                            int64_t n = sym->rows;
+                            if (n == 2) return 69;
+                            if (n == 3) return 139;
+                            return 561 + 20 * n * n * n;
+                        }
+                    }
+                    return 13;
+                }
                 default: return 13;
             }
         }
