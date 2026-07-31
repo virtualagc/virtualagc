@@ -20,47 +20,8 @@
 #endif
 
 #define OP_SMRK_CONST 0x004
-#define MAX_BREAKPOINTS 64
-
-/* How deep `step` can push the debug frame stack (point 2, Plan.md) --
- * matches state->call_return_stack's own 64-deep same-unit cap being
- * generous but bounded; cross-unit nesting is expected to be far
- * shallower in practice (each frame is a whole separately-compiled
- * EXTERNAL FUNCTION/PROCEDURE unit, not a single call instruction). */
-#define MAX_DEBUG_FRAMES 32
-
-typedef struct {
-    size_t word_index[MAX_BREAKPOINTS];
-    halmat_state_t *owner[MAX_BREAKPOINTS]; /* which frame's state this breakpoint belongs to (point 4, Plan.md) --
-                                              * break ADDR/break :STMT apply to whichever frame is active when the
-                                              * command is issued; is_breakpoint() filters by word_index AND owner. */
-    int id[MAX_BREAKPOINTS]; /* stable numbering, gdb-style -- not reused/renumbered on delete */
-    int count;
-    int next_id;
-} breakpoints_t;
-
-/* One entry of debug_run()'s own frame stack (point 2, Plan.md): a
- * cross-unit CALL into a separately-compiled EXTERNAL FUNCTION/PROCEDURE
- * makes the callee's own halmat_state_t (main.c's interp_set_external_
- * units()/state->external_calls[]) the active top frame while `step` is
- * inside it, instead of the atomic single-shot run_external_call() every
- * *other* command (`next`, `continue`, and ordinary non-debug execution)
- * still uses. frames[0] (the outermost frame) is always the triple
- * debug_run()'s own caller (main.c) passed in; every frame above it was
- * pushed by push_frame() at some `step`-into moment. */
-typedef struct {
-    halmat_state_t *state;
-    const halmat_symtab_t *symtab; /* may be NULL -- same optional-companion convention as always */
-    halmat_srcmap_t srcmap;        /* only valid if have_srcmap */
-    bool have_srcmap;
-    bool owns_srcmap;              /* true for a lazily-loaded callee frame (must halmat_srcmap_free on pop);
-                                     * false for the outermost frame, whose srcmap is owned by main.c's caller
-                                     * exactly as before this refactor. */
-    char label[128];               /* unit directory/label (unit_t.dir, a container's diagnostic label, or the
-                                     * HALMAT_FILE path), for backtrace/display. */
-    const halmat_instr_t *return_ins; /* the FCAL/PCAL instruction in the frame below that led here; NULL for
-                                        * the outermost frame. */
-} debug_frame_t;
+/* breakpoints_t, debug_frame_t, MAX_BREAKPOINTS, MAX_DEBUG_FRAMES moved to
+ * debug.h (now embedded by value in debugger_state_t there). */
 
 /* Set by the SIGINT handler during `continue`/`run`, checked once per
  * loop iteration to return to the prompt instead of the process dying.
@@ -704,240 +665,244 @@ static void run_until_stop(debug_frame_t *frames, int *frame_count, const breakp
     signal(SIGINT, prev_handler);
 }
 
-int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat_srcmap_t *srcmap,
-              const char *label, const debug_unit_info_t *units, int num_units,
-              const debug_colors_t *colors, FILE *out) {
-    breakpoints_t bp = {0};
-    bool htrace = false; /* `htrace on`/`htrace off` -- off (the default) leaves `continue`/`run`
-                           * exactly as before; on, they print the same per-instruction message
-                           * `step` would, as if every instruction along the way had been `step`ped
-                           * individually. Session-scoped state, like `bp` above -- not part of
-                           * halmat_state_t, since it's a debugger display preference, not
-                           * interpreter state. */
-    char line[256];
-    char last_line[256] = "";
-    bool have_last = false;
-    long last_stmt_shown = -2; /* sentinel: interp_current_stmt_for_next() never returns less than -1 */
+void debug_run_init(debugger_state_t *dstate, halmat_state_t *state, const halmat_symtab_t *symtab,
+                     const halmat_srcmap_t *srcmap, const char *label, const debug_unit_info_t *units,
+                     int num_units, const debug_colors_t *colors, FILE *out) {
+    memset(dstate, 0, sizeof(*dstate)); /* zeroes bp, htrace, have_last, last_line[0]='\0', frames[] */
+    dstate->last_stmt_shown = -2; /* sentinel: interp_current_stmt_for_next() never returns less than -1 */
+    dstate->frame_count = 1;
+    dstate->units = units;
+    dstate->num_units = num_units;
+    dstate->colors = colors;
+    dstate->out = out;
 
-    debug_frame_t frames[MAX_DEBUG_FRAMES];
-    int frame_count = 1;
-    memset(&frames[0], 0, sizeof(frames[0]));
-    frames[0].state = state;
-    frames[0].symtab = symtab;
+    dstate->frames[0].state = state;
+    dstate->frames[0].symtab = symtab;
     if (srcmap) {
-        frames[0].srcmap = *srcmap;
-        frames[0].have_srcmap = true;
+        dstate->frames[0].srcmap = *srcmap;
+        dstate->frames[0].have_srcmap = true;
     }
-    frames[0].owns_srcmap = false; /* owned by main.c's caller, exactly as before this refactor */
-    frames[0].return_ins = NULL;
+    dstate->frames[0].owns_srcmap = false; /* owned by the caller, exactly as before this refactor */
+    dstate->frames[0].return_ins = NULL;
     if (label) {
-        strncpy(frames[0].label, label, sizeof(frames[0].label) - 1);
+        strncpy(dstate->frames[0].label, label, sizeof(dstate->frames[0].label) - 1);
     }
 
     fprintf(out, "yaHALMAT2 debugger. Type 'help' for commands.\n");
-    print_current(&frames[0], &last_stmt_shown, colors, out);
+    print_current(&dstate->frames[0], &dstate->last_stmt_shown, colors, out);
+}
 
-    for (;;) {
-        cprintf(colors, colors ? colors->prompt_code : -1, out, "(halmat) ");
-        fflush(out);
-        if (!fgets(line, sizeof(line), stdin)) {
-            fprintf(out, "\n");
-            return frames[0].state->exit_code;
-        }
-        size_t len = strlen(line);
-        while (len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r')) line[--len] = '\0';
-
-        /* A blank (or all-whitespace) line repeats the last non-blank
-         * command, matching gdb -- most useful for `step`/`continue`.
-         * Repeated blank lines keep repeating the same command, not
-         * "the previous line" (which would just be blank again). */
-        bool blank = true;
-        for (size_t i = 0; i < len; i++) {
-            if (line[i] != ' ' && line[i] != '\t') { blank = false; break; }
-        }
-        if (blank) {
-            if (!have_last) continue;
-            strncpy(line, last_line, sizeof(line) - 1);
-            line[sizeof(line) - 1] = '\0';
-        } else {
-            strncpy(last_line, line, sizeof(last_line) - 1);
-            last_line[sizeof(last_line) - 1] = '\0';
-            have_last = true;
-        }
-        /* Echo the command actually acted on -- both for a repeated
-         * blank line (so it's clear what ran) and for redirected/logged
-         * non-interactive sessions, where the terminal's own echo of
-         * what was "typed" wouldn't otherwise appear anywhere. */
-        cprintf(colors, colors ? colors->input_code : -1, out, "%s\n", line);
-
-        char *cmd = strtok(line, " \t");
-        if (!cmd) continue;
-        char *arg = strtok(NULL, " \t");
-        debug_frame_t *top = &frames[frame_count - 1]; /* commands that don't change frame_count may use this directly */
-        long step_count; /* set by parse_repeat_count() for step/next's own branches below */
-
-        if (strcmp(cmd, "quit") == 0 || strcmp(cmd, "q") == 0) {
-            return frames[0].state->exit_code;
-        } else if (strcmp(cmd, "help") == 0 || strcmp(cmd, "h") == 0) {
-            print_help(out);
-        } else if (strcmp(cmd, "break") == 0 || strcmp(cmd, "b") == 0) {
-            if (!arg) {
-                fprintf(out, "usage: break ADDR | break :STMT\n");
-                continue;
-            }
-            size_t target;
-            bool ok;
-            if (arg[0] == ':') {
-                ok = find_word_index_for_stmt(top->state->prog, strtol(arg + 1, NULL, 10), &target);
-                if (!ok) fprintf(out, "no SMRK found for statement %s\n", arg + 1);
-            } else {
-                target = (size_t)strtoul(arg, NULL, 0);
-                ok = (find_instr_by_word_index(top->state->prog, target) != NULL);
-                if (!ok) fprintf(out, "no instruction at word index %s\n", arg);
-            }
-            if (ok) {
-                if (bp.count >= MAX_BREAKPOINTS) {
-                    fprintf(out, "too many breakpoints\n");
-                } else {
-                    int id = ++bp.next_id;
-                    bp.word_index[bp.count] = target;
-                    bp.owner[bp.count] = top->state;
-                    bp.id[bp.count] = id;
-                    bp.count++;
-                    fprintf(out, "breakpoint %d at word #%zu (frame #%d%s%s)\n", id, target, frame_count - 1,
-                            top->label[0] ? ", " : "", top->label[0] ? top->label : "");
-                }
-            }
-        } else if (strcmp(cmd, "delete") == 0) {
-            if (!arg) {
-                bp.count = 0; /* IDs are never reused, so next_id is left alone -- matches gdb */
-                fprintf(out, "all breakpoints deleted\n");
-            } else {
-                int id = atoi(arg);
-                int found = -1;
-                for (int i = 0; i < bp.count; i++) {
-                    if (bp.id[i] == id) { found = i; break; }
-                }
-                if (found < 0) {
-                    fprintf(out, "no breakpoint %d\n", id);
-                } else {
-                    for (int i = found; i < bp.count - 1; i++) {
-                        bp.word_index[i] = bp.word_index[i + 1];
-                        bp.owner[i] = bp.owner[i + 1];
-                        bp.id[i] = bp.id[i + 1];
-                    }
-                    bp.count--;
-                    fprintf(out, "breakpoint %d deleted\n", id);
-                }
-            }
-        } else if (parse_repeat_count(cmd, arg, "step", "s", &step_count)) {
-            /* `step N`/`stepN`/`sN` (gdb-style repeat count): N plain
-             * `step`s in a row, quietly by default -- only the FINAL
-             * resulting state gets a full print_current() instruction
-             * dump (matching gdb's own "step N" showing just the line
-             * reached, not every intermediate one), but auto_pop()'s own
-             * "returned to caller" message (a genuinely notable event,
-             * not routine per-instruction noise) still prints on every
-             * iteration it fires, same as a real gdb stop-on-something-
-             * interesting would. With `htrace on`, EVERY intermediate
-             * iteration also gets its own print_current() (matching
-             * htrace's own documented "as if you'd stepped through each
-             * one by hand" behavior for continue/run, run_until_stop's
-             * own convention above) -- except the very last one, since
-             * the unconditional post-loop print_current() below already
-             * covers it and printing it twice would just duplicate it.
-             * Stops early if the outermost frame halts partway through --
-             * nothing left to step. */
-            for (long i = 0; i < step_count; i++) {
-                cmd_step(frames, &frame_count, units, num_units, out);
-                auto_pop_all(frames, &frame_count, &last_stmt_shown, out);
-                bool halted_now = (frame_count == 1 && frames[0].state->halted);
-                if (htrace && !halted_now && i + 1 < step_count) print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
-                if (halted_now) break;
-            }
-            print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
-            if (frame_count == 1 && frames[0].state->halted) fprintf(out, "(program has ended, exit code %d)\n", frames[0].state->exit_code);
-        } else if (parse_repeat_count(cmd, arg, "next", "n", &step_count)) {
-            /* Exactly `step`'s old (pre-multi-unit) behavior -- a
-             * cross-unit call always runs atomically via interp_step(),
-             * which reaches exec_one()'s own OP_FCAL/OP_PCAL cross-unit
-             * branch (run_external_call(): interp_prepare_external_
-             * call() + interp_run() + interp_finish_external_call(),
-             * plus interp_copy_external_call_result() for an FCAL) --
-             * the very same phases `step` calls directly for its own
-             * step-into, just run straight through in one shot instead
-             * of stopping partway. No peeking needed here: interp_step()
-             * already does the right thing regardless of what kind of
-             * instruction comes next.
-             *
-             * `next N`/`nextN`/`nN`: same repeat-count/htrace-aware
-             * convention as `step` above -- re-fetches the top frame each
-             * iteration (not the `top` pointer computed once, above the
-             * whole if/else chain), since auto_pop_all() can change
-             * frame_count mid-loop if a stepped-into callee this `next`
-             * runs straight through happens to finish along the way. */
-            for (long i = 0; i < step_count; i++) {
-                debug_frame_t *cur = &frames[frame_count - 1];
-                interp_step(cur->state, out);
-                auto_pop_all(frames, &frame_count, &last_stmt_shown, out);
-                bool halted_now = (frame_count == 1 && frames[0].state->halted);
-                if (htrace && !halted_now && i + 1 < step_count) print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
-                if (halted_now) break;
-            }
-            print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
-            if (frame_count == 1 && frames[0].state->halted) fprintf(out, "(program has ended, exit code %d)\n", frames[0].state->exit_code);
-        } else if (strcmp(cmd, "continue") == 0 || strcmp(cmd, "c") == 0 ||
-                   strcmp(cmd, "run") == 0 || strcmp(cmd, "r") == 0) {
-            bool done, hit_bp, interrupted;
-            run_until_stop(frames, &frame_count, &bp, &last_stmt_shown, colors, htrace, out, &done, &hit_bp, &interrupted);
-            print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
-            if (interrupted) fprintf(out, "interrupted\n");
-            if (hit_bp) fprintf(out, "breakpoint hit\n");
-            if (done) fprintf(out, "(program has ended, exit code %d)\n", frames[0].state->exit_code);
-        } else if (strcmp(cmd, "htrace") == 0) {
-            if (!arg || (strcmp(arg, "on") != 0 && strcmp(arg, "off") != 0)) {
-                fprintf(out, "usage: htrace on | htrace off\n");
-            } else {
-                htrace = (strcmp(arg, "on") == 0);
-                fprintf(out, "htrace %s\n", htrace ? "on" : "off");
-            }
-        } else if (strcmp(cmd, "kill") == 0 || strcmp(cmd, "k") == 0) {
-            if (top->state->halted) {
-                fprintf(out, "(program has already ended)\n");
-            } else {
-                top->state->halted = true;
-                fprintf(out, "execution stopped\n");
-            }
-        } else if (strcmp(cmd, "print") == 0 || strcmp(cmd, "p") == 0) {
-            if (!arg) {
-                fprintf(out, "usage: print NAME\n");
-                continue;
-            }
-            print_symbol(top->state, top->symtab, arg, out);
-        } else if (strcmp(cmd, "x") == 0) {
-            char *idx_str = strtok(NULL, " \t");
-            if (!arg || !idx_str) {
-                fprintf(out, "usage: x syt N | x vac N\n");
-                continue;
-            }
-            uint16_t idx = (uint16_t)strtoul(idx_str, NULL, 0);
-            if (strcmp(arg, "syt") == 0) {
-                examine_syt(top->state, idx, out);
-            } else if (strcmp(arg, "vac") == 0) {
-                examine_vac(top->state, idx, out);
-            } else {
-                fprintf(out, "usage: x syt N | x vac N\n");
-            }
-        } else if (strcmp(cmd, "info") == 0) {
-            if (arg && strcmp(arg, "tasks") == 0) {
-                print_tasks(top->state, out);
-            } else {
-                fprintf(out, "usage: info tasks\n");
-            }
-        } else if (strcmp(cmd, "backtrace") == 0 || strcmp(cmd, "bt") == 0) {
-            print_backtrace(frames, frame_count, out);
-        } else {
-            fprintf(out, "unrecognized command '%s' (type 'help')\n", cmd);
-        }
+bool debug_run_command(debugger_state_t *dstate) {
+    cprintf(dstate->colors, dstate->colors ? dstate->colors->prompt_code : -1, dstate->out, "(halmat) ");
+    fflush(dstate->out);
+    if (!fgets(dstate->line, sizeof(dstate->line), stdin)) {
+        fprintf(dstate->out, "\n");
+        return false;
     }
+    size_t len = strlen(dstate->line);
+    while (len > 0 && (dstate->line[len - 1] == '\n' || dstate->line[len - 1] == '\r')) dstate->line[--len] = '\0';
+
+    /* A blank (or all-whitespace) line repeats the last non-blank
+     * command, matching gdb -- most useful for `step`/`continue`.
+     * Repeated blank lines keep repeating the same command, not
+     * "the previous line" (which would just be blank again). */
+    bool blank = true;
+    for (size_t i = 0; i < len; i++) {
+        if (dstate->line[i] != ' ' && dstate->line[i] != '\t') { blank = false; break; }
+    }
+    if (blank) {
+        if (!dstate->have_last) return true;
+        strncpy(dstate->line, dstate->last_line, sizeof(dstate->line) - 1);
+        dstate->line[sizeof(dstate->line) - 1] = '\0';
+    } else {
+        strncpy(dstate->last_line, dstate->line, sizeof(dstate->last_line) - 1);
+        dstate->last_line[sizeof(dstate->last_line) - 1] = '\0';
+        dstate->have_last = true;
+    }
+    /* Echo the command actually acted on -- both for a repeated
+     * blank line (so it's clear what ran) and for redirected/logged
+     * non-interactive sessions, where the terminal's own echo of
+     * what was "typed" wouldn't otherwise appear anywhere. */
+    cprintf(dstate->colors, dstate->colors ? dstate->colors->input_code : -1, dstate->out, "%s\n", dstate->line);
+
+    char *cmd = strtok(dstate->line, " \t");
+    if (!cmd) return true;
+    char *arg = strtok(NULL, " \t");
+    debug_frame_t *top = &dstate->frames[dstate->frame_count - 1]; /* commands that don't change frame_count may use this directly */
+    long step_count; /* set by parse_repeat_count() for step/next's own branches below */
+
+    if (strcmp(cmd, "quit") == 0 || strcmp(cmd, "q") == 0) {
+        return false;
+    } else if (strcmp(cmd, "help") == 0 || strcmp(cmd, "h") == 0) {
+        print_help(dstate->out);
+    } else if (strcmp(cmd, "break") == 0 || strcmp(cmd, "b") == 0) {
+        if (!arg) {
+            fprintf(dstate->out, "usage: break ADDR | break :STMT\n");
+            return true;
+        }
+        size_t target;
+        bool ok;
+        if (arg[0] == ':') {
+            ok = find_word_index_for_stmt(top->state->prog, strtol(arg + 1, NULL, 10), &target);
+            if (!ok) fprintf(dstate->out, "no SMRK found for statement %s\n", arg + 1);
+        } else {
+            target = (size_t)strtoul(arg, NULL, 0);
+            ok = (find_instr_by_word_index(top->state->prog, target) != NULL);
+            if (!ok) fprintf(dstate->out, "no instruction at word index %s\n", arg);
+        }
+        if (ok) {
+            if (dstate->bp.count >= MAX_BREAKPOINTS) {
+                fprintf(dstate->out, "too many breakpoints\n");
+            } else {
+                int id = ++dstate->bp.next_id;
+                dstate->bp.word_index[dstate->bp.count] = target;
+                dstate->bp.owner[dstate->bp.count] = top->state;
+                dstate->bp.id[dstate->bp.count] = id;
+                dstate->bp.count++;
+                fprintf(dstate->out, "breakpoint %d at word #%zu (frame #%d%s%s)\n", id, target, dstate->frame_count - 1,
+                        top->label[0] ? ", " : "", top->label[0] ? top->label : "");
+            }
+        }
+    } else if (strcmp(cmd, "delete") == 0) {
+        if (!arg) {
+            dstate->bp.count = 0; /* IDs are never reused, so next_id is left alone -- matches gdb */
+            fprintf(dstate->out, "all breakpoints deleted\n");
+        } else {
+            int id = atoi(arg);
+            int found = -1;
+            for (int i = 0; i < dstate->bp.count; i++) {
+                if (dstate->bp.id[i] == id) { found = i; break; }
+            }
+            if (found < 0) {
+                fprintf(dstate->out, "no breakpoint %d\n", id);
+            } else {
+                for (int i = found; i < dstate->bp.count - 1; i++) {
+                    dstate->bp.word_index[i] = dstate->bp.word_index[i + 1];
+                    dstate->bp.owner[i] = dstate->bp.owner[i + 1];
+                    dstate->bp.id[i] = dstate->bp.id[i + 1];
+                }
+                dstate->bp.count--;
+                fprintf(dstate->out, "breakpoint %d deleted\n", id);
+            }
+        }
+    } else if (parse_repeat_count(cmd, arg, "step", "s", &step_count)) {
+        /* `step N`/`stepN`/`sN` (gdb-style repeat count): N plain
+         * `step`s in a row, quietly by default -- only the FINAL
+         * resulting state gets a full print_current() instruction
+         * dump (matching gdb's own "step N" showing just the line
+         * reached, not every intermediate one), but auto_pop()'s own
+         * "returned to caller" message (a genuinely notable event,
+         * not routine per-instruction noise) still prints on every
+         * iteration it fires, same as a real gdb stop-on-something-
+         * interesting would. With `htrace on`, EVERY intermediate
+         * iteration also gets its own print_current() (matching
+         * htrace's own documented "as if you'd stepped through each
+         * one by hand" behavior for continue/run, run_until_stop's
+         * own convention above) -- except the very last one, since
+         * the unconditional post-loop print_current() below already
+         * covers it and printing it twice would just duplicate it.
+         * Stops early if the outermost frame halts partway through --
+         * nothing left to step. */
+        for (long i = 0; i < step_count; i++) {
+            cmd_step(dstate->frames, &dstate->frame_count, dstate->units, dstate->num_units, dstate->out);
+            auto_pop_all(dstate->frames, &dstate->frame_count, &dstate->last_stmt_shown, dstate->out);
+            bool halted_now = (dstate->frame_count == 1 && dstate->frames[0].state->halted);
+            if (dstate->htrace && !halted_now && i + 1 < step_count) print_current(&dstate->frames[dstate->frame_count - 1], &dstate->last_stmt_shown, dstate->colors, dstate->out);
+            if (halted_now) break;
+        }
+        print_current(&dstate->frames[dstate->frame_count - 1], &dstate->last_stmt_shown, dstate->colors, dstate->out);
+        if (dstate->frame_count == 1 && dstate->frames[0].state->halted) fprintf(dstate->out, "(program has ended, exit code %d)\n", dstate->frames[0].state->exit_code);
+    } else if (parse_repeat_count(cmd, arg, "next", "n", &step_count)) {
+        /* Exactly `step`'s old (pre-multi-unit) behavior -- a
+         * cross-unit call always runs atomically via interp_step(),
+         * which reaches exec_one()'s own OP_FCAL/OP_PCAL cross-unit
+         * branch (run_external_call(): interp_prepare_external_
+         * call() + interp_run() + interp_finish_external_call(),
+         * plus interp_copy_external_call_result() for an FCAL) --
+         * the very same phases `step` calls directly for its own
+         * step-into, just run straight through in one shot instead
+         * of stopping partway. No peeking needed here: interp_step()
+         * already does the right thing regardless of what kind of
+         * instruction comes next.
+         *
+         * `next N`/`nextN`/`nN`: same repeat-count/htrace-aware
+         * convention as `step` above -- re-fetches the top frame each
+         * iteration (not the `top` pointer computed once, above the
+         * whole if/else chain), since auto_pop_all() can change
+         * frame_count mid-loop if a stepped-into callee this `next`
+         * runs straight through happens to finish along the way. */
+        for (long i = 0; i < step_count; i++) {
+            debug_frame_t *cur = &dstate->frames[dstate->frame_count - 1];
+            interp_step(cur->state, dstate->out);
+            auto_pop_all(dstate->frames, &dstate->frame_count, &dstate->last_stmt_shown, dstate->out);
+            bool halted_now = (dstate->frame_count == 1 && dstate->frames[0].state->halted);
+            if (dstate->htrace && !halted_now && i + 1 < step_count) print_current(&dstate->frames[dstate->frame_count - 1], &dstate->last_stmt_shown, dstate->colors, dstate->out);
+            if (halted_now) break;
+        }
+        print_current(&dstate->frames[dstate->frame_count - 1], &dstate->last_stmt_shown, dstate->colors, dstate->out);
+        if (dstate->frame_count == 1 && dstate->frames[0].state->halted) fprintf(dstate->out, "(program has ended, exit code %d)\n", dstate->frames[0].state->exit_code);
+    } else if (strcmp(cmd, "continue") == 0 || strcmp(cmd, "c") == 0 ||
+               strcmp(cmd, "run") == 0 || strcmp(cmd, "r") == 0) {
+        bool done, hit_bp, interrupted;
+        run_until_stop(dstate->frames, &dstate->frame_count, &dstate->bp, &dstate->last_stmt_shown, dstate->colors, dstate->htrace, dstate->out, &done, &hit_bp, &interrupted);
+        print_current(&dstate->frames[dstate->frame_count - 1], &dstate->last_stmt_shown, dstate->colors, dstate->out);
+        if (interrupted) fprintf(dstate->out, "interrupted\n");
+        if (hit_bp) fprintf(dstate->out, "breakpoint hit\n");
+        if (done) fprintf(dstate->out, "(program has ended, exit code %d)\n", dstate->frames[0].state->exit_code);
+    } else if (strcmp(cmd, "htrace") == 0) {
+        if (!arg || (strcmp(arg, "on") != 0 && strcmp(arg, "off") != 0)) {
+            fprintf(dstate->out, "usage: htrace on | htrace off\n");
+        } else {
+            dstate->htrace = (strcmp(arg, "on") == 0);
+            fprintf(dstate->out, "htrace %s\n", dstate->htrace ? "on" : "off");
+        }
+    } else if (strcmp(cmd, "kill") == 0 || strcmp(cmd, "k") == 0) {
+        if (top->state->halted) {
+            fprintf(dstate->out, "(program has already ended)\n");
+        } else {
+            top->state->halted = true;
+            fprintf(dstate->out, "execution stopped\n");
+        }
+    } else if (strcmp(cmd, "print") == 0 || strcmp(cmd, "p") == 0) {
+        if (!arg) {
+            fprintf(dstate->out, "usage: print NAME\n");
+            return true;
+        }
+        print_symbol(top->state, top->symtab, arg, dstate->out);
+    } else if (strcmp(cmd, "x") == 0) {
+        char *idx_str = strtok(NULL, " \t");
+        if (!arg || !idx_str) {
+            fprintf(dstate->out, "usage: x syt N | x vac N\n");
+            return true;
+        }
+        uint16_t idx = (uint16_t)strtoul(idx_str, NULL, 0);
+        if (strcmp(arg, "syt") == 0) {
+            examine_syt(top->state, idx, dstate->out);
+        } else if (strcmp(arg, "vac") == 0) {
+            examine_vac(top->state, idx, dstate->out);
+        } else {
+            fprintf(dstate->out, "usage: x syt N | x vac N\n");
+        }
+    } else if (strcmp(cmd, "info") == 0) {
+        if (arg && strcmp(arg, "tasks") == 0) {
+            print_tasks(top->state, dstate->out);
+        } else {
+            fprintf(dstate->out, "usage: info tasks\n");
+        }
+    } else if (strcmp(cmd, "backtrace") == 0 || strcmp(cmd, "bt") == 0) {
+        print_backtrace(dstate->frames, dstate->frame_count, dstate->out);
+    } else {
+        fprintf(dstate->out, "unrecognized command '%s' (type 'help')\n", cmd);
+    }
+
+    return true;
+}
+
+int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat_srcmap_t *srcmap,
+              const char *label, const debug_unit_info_t *units, int num_units,
+              const debug_colors_t *colors, FILE *out) {
+    debugger_state_t dstate;
+    debug_run_init(&dstate, state, symtab, srcmap, label, units, num_units, colors, out);
+    while (debug_run_command(&dstate)) { }
+    return dstate.frames[0].state->exit_code;
 }

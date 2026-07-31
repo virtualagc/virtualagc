@@ -3401,6 +3401,11 @@ run ./run_local_fixture.sh ssdv_double_qdedr " 7.5330000802590851E+07"
 # C2;`, C2 empty CHARACTER(5)) and mixed-item (`'C=', STATUS.C`) cases.
 run ./run_local_fixture.sh empty_character_write "$(printf '\nB1=     0     C=')"
 
+# yaGpcIntegration.h contract (yaGpcOps.c): two independently-initialized
+# yaHALMAT2_ops instances, stepped with a deliberately uneven interleaving,
+# must not leak state into each other -- see gpc_smoke_test.c.
+run ./run_gpc_smoke.sh
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

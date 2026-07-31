@@ -46,17 +46,29 @@ endif
 
 SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
         literal.c ebcdic.c interp.c value.c symtab.c debug.c srcmap.c \
-        container.c hal_random.c hal_transcendental.c hal_matrix.c hal_fpu.c
+        container.c hal_random.c hal_transcendental.c hal_matrix.c hal_fpu.c \
+        yaGpcOps.c
 OBJS := $(SRCS:.c=.o)
 DEPS := $(SRCS:.c=.d)
 TARGET := yaHALMAT2
 
+# Two-instance independence smoke test for the yaGpcIntegration.h contract
+# (yaGpcOps.c). Its own main() replaces main.o, but otherwise links against
+# the same object files as $(TARGET).
+SMOKE_SRCS := test_gpc_smoke.c
+SMOKE_OBJS := $(filter-out main.o,$(OBJS)) $(SMOKE_SRCS:.c=.o)
+SMOKE_DEPS := $(SMOKE_SRCS:.c=.d)
+GPC_SMOKE_TARGET := gpc_smoke_test
+
 .PHONY: all clean
 
-all: $(TARGET)
+all: $(TARGET) $(GPC_SMOKE_TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
+
+$(GPC_SMOKE_TARGET): $(SMOKE_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(SMOKE_OBJS) $(LDFLAGS)
 
 # -MMD -MP generates a per-.o .d file listing every header it #includes,
 # so a change to a shared header (e.g. state.h) triggers a rebuild of
@@ -71,6 +83,7 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
 
 -include $(DEPS)
+-include $(SMOKE_DEPS)
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGET)
+	rm -f $(OBJS) $(DEPS) $(TARGET) $(SMOKE_OBJS) $(SMOKE_DEPS) $(GPC_SMOKE_TARGET)

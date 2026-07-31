@@ -51,6 +51,77 @@ typedef struct {
     const halmat_symtab_t *symtab; /* may be NULL, same optional-companion convention as everywhere else */
 } debug_unit_info_t;
 
+#define MAX_BREAKPOINTS 64
+
+/* How deep `step` can push the debug frame stack (point 2, Plan.md) --
+ * matches state->call_return_stack's own 64-deep same-unit cap being
+ * generous but bounded; cross-unit nesting is expected to be far
+ * shallower in practice (each frame is a whole separately-compiled
+ * EXTERNAL FUNCTION/PROCEDURE unit, not a single call instruction). */
+#define MAX_DEBUG_FRAMES 32
+
+typedef struct {
+    size_t word_index[MAX_BREAKPOINTS];
+    halmat_state_t *owner[MAX_BREAKPOINTS]; /* which frame's state this breakpoint belongs to (point 4, Plan.md) --
+                                              * break ADDR/break :STMT apply to whichever frame is active when the
+                                              * command is issued; is_breakpoint() filters by word_index AND owner. */
+    int id[MAX_BREAKPOINTS]; /* stable numbering, gdb-style -- not reused/renumbered on delete */
+    int count;
+    int next_id;
+} breakpoints_t;
+
+/* One entry of the debugger's own frame stack (point 2, Plan.md): a
+ * cross-unit CALL into a separately-compiled EXTERNAL FUNCTION/PROCEDURE
+ * makes the callee's own halmat_state_t (main.c's interp_set_external_
+ * units()/state->external_calls[]) the active top frame while `step` is
+ * inside it, instead of the atomic single-shot run_external_call() every
+ * *other* command (`next`, `continue`, and ordinary non-debug execution)
+ * still uses. frames[0] (the outermost frame) is always the triple
+ * debug_run_init()'s own caller passed in; every frame above it was
+ * pushed by push_frame() at some `step`-into moment. */
+typedef struct {
+    halmat_state_t *state;
+    const halmat_symtab_t *symtab; /* may be NULL -- same optional-companion convention as always */
+    halmat_srcmap_t srcmap;        /* only valid if have_srcmap */
+    bool have_srcmap;
+    bool owns_srcmap;              /* true for a lazily-loaded callee frame (must halmat_srcmap_free on pop);
+                                     * false for the outermost frame, whose srcmap is owned by the caller
+                                     * exactly as before this refactor. */
+    char label[128];               /* unit directory/label (unit_t.dir, a container's diagnostic label, or the
+                                     * HALMAT_FILE path), for backtrace/display. */
+    const halmat_instr_t *return_ins; /* the FCAL/PCAL instruction in the frame below that led here; NULL for
+                                        * the outermost frame. */
+} debug_frame_t;
+
+/* All of debug_run()'s own former per-session locals, bundled into one
+ * struct so a single dbgState pointer (yaGpcIntegration.h's GpcDebuggerFn)
+ * can carry them across separate calls instead of one function's own
+ * stack frame. Every existing debug.c helper (cmd_step, auto_pop_all,
+ * run_until_stop, print_current, etc.) keeps its own original signature
+ * unchanged -- callers now pass dstate->field in place of a bare local,
+ * nothing else about them changes. units/num_units/colors/out are
+ * session-constant configuration (set once by debug_run_init(), never
+ * mutated afterward) folded in here rather than passed as extra
+ * parameters to debug_run_command(), since GpcDebuggerFn's own signature
+ * is fixed at (GpcState*, void *dbgState) with no room for anything else
+ * -- debug_run_command() must be fully self-contained from dstate alone. */
+typedef struct {
+    breakpoints_t bp;
+    bool htrace; /* `htrace on`/`htrace off` -- off (the default) leaves `continue`/`run` exactly as before; on,
+                  * they print the same per-instruction message `step` would. Session-scoped, not part of
+                  * halmat_state_t -- a debugger display preference, not interpreter state. */
+    char line[256];
+    char last_line[256];
+    bool have_last;
+    long last_stmt_shown; /* sentinel -2: interp_current_stmt_for_next() never returns less than -1 */
+    debug_frame_t frames[MAX_DEBUG_FRAMES];
+    int frame_count;
+    const debug_unit_info_t *units;
+    int num_units;
+    const debug_colors_t *colors;
+    FILE *out;
+} debugger_state_t;
+
 /* Interactive gdb-subset debugger (Plan.md Phase 3 M7/M8). Instruction-
  * level stepping (break/step/next/continue/run/kill/delete/x/info
  * tasks/print/backtrace/quit), plus HAL/S source-line display alongside
@@ -84,5 +155,26 @@ typedef struct {
 int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat_srcmap_t *srcmap,
               const char *label, const debug_unit_info_t *units, int num_units,
               const debug_colors_t *colors, FILE *out);
+
+/* debug_run()'s own pre-loop setup and per-command loop body, split out
+ * so a caller other than debug_run() itself (yaGpcOps.c's GpcDebuggerFn
+ * adapter) can drive one command at a time through an explicit
+ * debugger_state_t rather than debug_run()'s own stack-local state.
+ * debug_run() itself is now just:
+ *     debugger_state_t dstate;
+ *     debug_run_init(&dstate, state, symtab, srcmap, label, units, num_units, colors, out);
+ *     while (debug_run_command(&dstate)) { }
+ *     return dstate.frames[0].state->exit_code;
+ * -- same signature, same observable behavior as before this split.
+ * debug_run_init() can't fail (nothing in the original pre-loop setup
+ * had a failure mode), hence void. debug_run_command() blocks on a
+ * single fgets(stdin) (unchanged from debug_run()'s own original
+ * behavior) to read one command, dispatches it, and returns false only
+ * on `quit`/`q` or end-of-input -- true otherwise, meaning "call me
+ * again for the next command." */
+void debug_run_init(debugger_state_t *dstate, halmat_state_t *state, const halmat_symtab_t *symtab,
+                     const halmat_srcmap_t *srcmap, const char *label, const debug_unit_info_t *units,
+                     int num_units, const debug_colors_t *colors, FILE *out);
+bool debug_run_command(debugger_state_t *dstate);
 
 #endif

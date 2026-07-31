@@ -1,0 +1,85 @@
+#ifndef YAGPC_INTEGRATION_H
+#define YAGPC_INTEGRATION_H
+#include <stdint.h>
+#include <stdbool.h>
+
+typedef enum { GPC_EMULATOR_HALMAT = 0, GPC_EMULATOR_YAGPC2 = 1 } GpcEmulatorType;
+
+typedef struct {
+    int gpcID;                 /* 1..5 (or more), caller-assigned */
+    GpcEmulatorType emulator;
+    double elapsedTime;        /* microseconds, monotonically increasing */
+    void *impl;                /* AGEHarness* (yaGPC2) or halmat_state_t* (yaHALMAT2) */
+} GpcState;
+
+typedef void (*GpcEngineFn)(GpcState *state);
+typedef bool (*GpcDebuggerFn)(GpcState *state, void *dbgState); /* false => stop */
+
+/* symbolsPath: optional (NULL allowed) path to a linker/symbols JSON file
+ * providing, at minimum, an entry point. yaGPC2 reads it and establishes
+ * the start address from it (a freshly loaded .fcm otherwise sits in the
+ * CPU's default wait state, per real AP-101S reset behavior -- there is
+ * no implicit "start at word 0"). yaHALMAT2 ignores this parameter: its
+ * entry point comes from the HALMAT program itself, not a companion
+ * file. */
+typedef bool (*GpcInitializerFn)(GpcState *state, const char *programPath, const char *symbolsPath);
+
+/* Releases whatever initializer allocated for state->impl (and, on
+ * yaGPC2's side, flushes any output still buffered but not yet
+ * newline-terminated -- see halucp_flush_all_pending() -- since a
+ * driver tearing down or replacing an instance is another way a
+ * program's session can end besides its own HALT/EOF). Leaves *state
+ * otherwise unspecified after the call; the caller must not use it
+ * again without re-initializing. */
+typedef void (*GpcReleaseFn)(GpcState *state);
+
+/* Creates a fresh, opaque debugger-session state for GpcDebuggerFn's
+ * dbgState parameter -- session/REPL state (breakpoints, step mode,
+ * htrace toggle, etc.), independent of any particular GpcState instance,
+ * matching how yaGPC2's own Debugger and yaHALMAT2's own
+ * debugger_state_t are already kept separate from emulator state.
+ * sourceMapPath is optional (NULL allowed), mirroring
+ * GpcInitializerFn's symbolsPath -- meaning/support is emulator-specific
+ * (yaGPC2: a --source-map-equivalent HAL/S source map, loaded once at
+ * creation since there's no way to load one later through the debugger's
+ * own commands). Returns NULL on failure. */
+typedef void *(*GpcDebuggerStateCreateFn)(const char *sourceMapPath);
+
+/* Releases a debugger-session state created by GpcDebuggerStateCreateFn.
+ * Does not touch any GpcState -- a debugger session and a GPC instance
+ * are independently created/destroyed and one dbgState may outlive, or
+ * be reused across, more than one GpcState over a debugging session. */
+typedef void (*GpcDebuggerStateDestroyFn)(void *dbgState);
+
+typedef struct {
+    GpcEngineFn engine;
+    GpcDebuggerFn debugger;
+    GpcInitializerFn initializer;
+    GpcReleaseFn release;
+    GpcDebuggerStateCreateFn debuggerStateCreate;
+    GpcDebuggerStateDestroyFn debuggerStateDestroy;
+} GpcOps;
+
+/* Servicer: the GPC's interface to vehicle peripherals. Deliberately
+ * word/data-level (not bit/signal-level, not protocol-shaped) so a
+ * shared-memory implementation is trivial; a networked/standalone
+ * implementation is equally valid behind the same signature. This enum
+ * is a provisional first draft covering only yaGPC2's known MIA-boundary
+ * transactions -- yaHALMAT2's agent should extend it once that side's
+ * needs are known, not treat it as closed. */
+typedef enum {
+    GPC_SVC_XMIT_WORD = 0,
+    GPC_SVC_XMIT_CMD  = 1,
+    GPC_SVC_RECV_WORD = 2,
+    GPC_SVC_RECV_POLL = 3
+} GpcServiceNumber;
+
+typedef struct {
+    int busID;       /* e.g. BCE number */
+    int address;      /* IUA/subaddress or equivalent; meaning is bus-specific */
+    uint32_t word;    /* data or command word; direction implied by serviceNumber */
+} GpcServiceArgs;
+
+typedef bool (*GpcServicerFn)(GpcState *state, GpcServiceNumber serviceNumber, GpcServiceArgs *args);
+
+#endif
