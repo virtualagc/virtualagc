@@ -4914,10 +4914,17 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
              * comment for where this number and the per-item marginal
              * costs below both come from. READ/CALL openers (kind != 2,
              * or a QUAL_SYT callee) aren't priced yet -- flat default. */
-            if (ins->operand_count >= 1 && ins->operands[0].qual == QUAL_IMD &&
-                (int16_t)ins->operands[0].data == 2)
-                return 40;
-            return 60;
+            if (ins->operand_count >= 1 && ins->operands[0].qual == QUAL_IMD) {
+                if ((int16_t)ins->operands[0].data == 2) return 40;
+                /* READ/READALL opener: unlike WRITE, the per-item READ
+                 * weights below (OP_XXAR) were fit WITHOUT a shared base
+                 * term (see that case's own comment) -- the small
+                 * READ sample didn't support one (the regression that
+                 * included one came out with a negative, unphysical
+                 * base), so the opener itself charges nothing here. */
+                return 0;
+            }
+            return 60;  /* CALL (QUAL_SYT callee): not yet priced */
 
         case OP_XXAR:
             /* WRITE-statement argument (state->io_pending already
@@ -4952,7 +4959,7 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
              * excursion is still open -- discarded every VECTOR sample
              * this pass found), so those fall through to the flat
              * default rather than being priced on 0-3 samples.
-             * READ/CALL arguments aren't priced yet. */
+             * CALL arguments aren't priced yet. */
             if (!state->io_pending.is_call && state->io_pending.kind == 2 &&
                 ins->operand_count >= 1) {
                 switch (ins->operands[0].tag1) {
@@ -4961,6 +4968,36 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
                     case 5: return 64;   /* SCALAR */
                     case 6: return 62;   /* INTEGER */
                     default: return 60;  /* MATRIX/VECTOR/STRUCTURE/etc: not yet individually priced */
+                }
+            }
+            /* READ/READALL argument (kind != 2, not a CALL): measured the
+             * same way as WRITE items -- single-item `READ(dev) x;`
+             * statements captured with real stdin data piped to each
+             * fixture (the original ~184-fixture sample's own READ
+             * statements all had no real input behind them, so their
+             * traces ended mid-call rather than completing -- see
+             * CLAUDE_LOG.md) -- but the sample is much smaller (~10
+             * clean occurrences total vs. WRITE's 230) and, unlike
+             * WRITE, showed no clear evidence of a shared per-statement
+             * base cost (fitting one produced a negative, unphysical
+             * value), so this is a plain per-item sum instead of a
+             * base+marginal split: each item is charged its own
+             * independently-measured single-item rate directly, cross-
+             * checked where multi-item combinations existed (e.g.
+             * INTEGER+SCALAR's own measured total matched the sum of
+             * their individual single-item rates within ~7us). BIT has
+             * no sample at all (no fixture in the whole trace sample
+             * READs a lone BIT value) and stays on the flat default. */
+            if (!state->io_pending.is_call && state->io_pending.kind != 2 &&
+                ins->operand_count >= 1) {
+                switch (ins->operands[0].tag1) {
+                    case 2: return 114;  /* CHARACTER */
+                    case 3: return 340;  /* MATRIX */
+                    case 4: return 279;  /* VECTOR */
+                    case 5: return 72;   /* SCALAR */
+                    case 6: return 83;   /* INTEGER */
+                    case 10: return 519; /* STRUCTURE */
+                    default: return 60;  /* BIT/other: not yet individually priced */
                 }
             }
             return 60;
