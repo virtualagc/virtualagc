@@ -93,7 +93,7 @@ from types import SimpleNamespace
 
 # Import `sdf`, `cmem`, and `asciiToEbcdic` modules in such a way that they'll
 # be automatically installed via pip if they're missing.
-_pathToVAGC = os.path.dirname(os.path.abspath(__file__)) + "/../../.."
+_pathToVAGC = os.path.dirname(os.path.realpath(__file__)) + "/../../.."
 with open(f"{_pathToVAGC}/modules/pipIt.py", "r") as f: exec(f.read())
 for i in range(2):
     try:

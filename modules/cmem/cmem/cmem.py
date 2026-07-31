@@ -52,7 +52,7 @@ for i in range(2):
     try:
         from asciiToEbcdic import *
     except ImportError as error:
-        _pathToVAGC = os.path.dirname(os.path.abspath(__file__)) + "/../../.."
+        _pathToVAGC = os.path.dirname(os.path.realpath(__file__)) + "/../../.."
         with open(f"{_pathToVAGC}/modules/pipIt.py", "r") as f: exec(f.read())
         pipIt(i, _pathToVAGC, error.name)
 
@@ -213,17 +213,20 @@ class cmem:
     def _setU8(self, offset, value):
         self.mem[self.commtabl + offset] = value & 0xFF
 
-    def _getText(self, offset, length):
+    def _getText(self, offset, length, stripText=True):
         a = self.commtabl + offset
         raw = self.mem[a:a + length]
-        return "".join(ebcdicToAscii[b] for b in raw).rstrip(" ")
+        s = "".join(ebcdicToAscii[b] for b in raw)
+        if stripText:
+            s = s.rstrip(" ")
+        return s
 
     def _setText(self, offset, length, value):
         a = self.commtabl + offset
         self.mem[a:a + length] = encodeText(value, length)
 
     def _readSdfName(self):
-        return self._getText(self.OFF_SDFNAM, 8)
+        return self._getText(self.OFF_SDFNAM, 8, stripText=False)
 
     def toNative(self):
         '''Translate COMMTABL from mem into a dict of native Python values, keyed by field name.'''
@@ -581,6 +584,7 @@ class cmem:
 
     def _mode4(self):
         name = self._readSdfName()
+        print(f"'{name}'")
 
         for i in range(self.npages):
             if self._nameForPad(i) == name:
