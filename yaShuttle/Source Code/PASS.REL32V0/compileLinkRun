@@ -140,7 +140,7 @@ print(f"Producing {fcmfile}, {symfile}")
 # each unit's own filename) work correctly for a manifest whose files
 # don't all want the same cardtype.
 objfiles = []
-unitSpecs = []  # (module, pass1Path, pass2Path, halmatPath) for gen_source_map.py, one per unit that has a captured results folder
+unitSpecs = []  # (module, pass1Path, pass2Path, halmatPath, sdflibDir) for gen_source_map.py, one per unit that has a captured results folder
 for module, halPath in units:
     objfile = f"{module}.obj"
     thisParmList = parmList if parmList is not None else getParms(halPath)
@@ -179,7 +179,16 @@ for module, halPath in units:
             if os.path.exists(candidatePath):
                 halmatPath = candidatePath
                 break
-        unitSpecs.append((module, f"{resultsDir}/pass1.rpt", f"{resultsDir}/pass2.rpt", halmatPath))
+        # SDFLIB always exists (whenever NOTABLES isn't used), but only
+        # has real embedded HALMAT to cross-check against when the
+        # compile's own --parms included HALMAT (not this script's
+        # default) -- gen_source_map.py's cross-check degrades
+        # gracefully (silently finds nothing to compare) otherwise, so
+        # it's harmless to always pass this along.
+        sdflibDir = f"{resultsDir}/SDFLIB"
+        if not os.path.isdir(sdflibDir):
+            sdflibDir = None
+        unitSpecs.append((module, f"{resultsDir}/pass1.rpt", f"{resultsDir}/pass2.rpt", halmatPath, sdflibDir))
     else:
         print(f"Warning: could not determine the results folder for {halPath}; "
               f"HAL/S source-line display for {module} will be unavailable.")
@@ -227,21 +236,28 @@ if objsListFile:
 # line display is a debugger nicety, not a requirement for compiling,
 # linking, and running the program.
 #
-# One "--unit MODULE=PASS1:PASS2[:HALMAT_FILE]" per compiled unit, via an
-# @argsfile (gen_source_map.py's own fromfile_prefix_chars support)
-# rather than directly on the command line, again so a large manifest
-# can't hit an argv-length limit; a COMPOOL/template-only unit with no
-# code markers of its own (e.g. a shared STRUCTURE declaration) is fine
-# to include -- gen_source_map.py skips it with a warning rather than
-# failing.
+# One "--unit MODULE=PASS1:PASS2[:HALMAT_FILE[:SDFLIB_DIR]]" per
+# compiled unit, via an @argsfile (gen_source_map.py's own
+# fromfile_prefix_chars support) rather than directly on the command
+# line, again so a large manifest can't hit an argv-length limit; a
+# COMPOOL/template-only unit with no code markers of its own (e.g. a
+# shared STRUCTURE declaration) is fine to include -- gen_source_map.py
+# skips it with a warning rather than failing. SDFLIB_DIR only enables
+# an optional confidence cross-check (see gen_source_map.py's
+# cross_check_halmat_with_sdf()) against SDF's own per-statement HALMAT
+# data -- harmless to always pass along even when this compile's own
+# --parms never included HALMAT (gen_source_map.py finds nothing to
+# compare against and silently skips it).
 srcmapfile = f"{basename}.srcmap.json"
 haveSrcmap = False
 if gpcCommand[0] == "yaGPC2" and unitSpecs:
     with tempfile.NamedTemporaryFile("w", suffix=".args", delete=False) as f:
-        for module, pass1Path, pass2Path, halmatPath in unitSpecs:
+        for module, pass1Path, pass2Path, halmatPath, sdflibDir in unitSpecs:
             spec = f"{module}={shlex.quote(pass1Path)}:{shlex.quote(pass2Path)}"
             if halmatPath:
                 spec += f":{shlex.quote(halmatPath)}"
+                if sdflibDir:
+                    spec += f":{shlex.quote(sdflibDir)}"
             f.write(f"--unit {spec}\n")
         argsFile = f.name
     command = ["gen_source_map.py", f"@{argsFile}", "--lnk101", symfile, "-o", srcmapfile]
@@ -249,6 +265,14 @@ if gpcCommand[0] == "yaGPC2" and unitSpecs:
     try:
         result = subprocess.run(command, capture_output = True, text = True, check = True)
         print(result.stdout)
+        # Unlike this script's other subprocess calls, stderr is worth
+        # printing here even on success: it's where the optional SDF
+        # HALMAT cross-check (see gen_source_map.py's
+        # cross_check_halmat_with_sdf()) reports its own confirmation/
+        # warnings, which would otherwise be silently lost -- defeating
+        # the point of a cross-*check*.
+        if result.stderr:
+            print(result.stderr)
         haveSrcmap = True
     except subprocess.CalledProcessError as e:
         print(f"Source-map generation failed with exit code {e.returncode} (continuing without it).")

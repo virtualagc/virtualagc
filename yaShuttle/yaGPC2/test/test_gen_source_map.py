@@ -45,12 +45,25 @@ with ones that have real code.
 
 T13-T15 use a real excerpt of "yaHALMAT2 --disasm optmat.bin" against the
 same HELLO.hal compile backing test/fixtures/hello.srcmap.json (hand-
-verified statement by statement against this exact output during
+verified statement by statement against this exact output, and cross-
+checked against the real SDF's own per-statement HALMAT data, during
 planning -- see parse_halmat_offsets()'s own docstring for the
-attribution rule being tested): the leading PXRC/MDEF header excluded
-from statement 1, back-to-back SMRKs for statements with no HALMAT of
-their own (a label/PROGRAM statement, plain DECLAREs), a single-
-instruction statement, and a multi-instruction one.
+attribution rule being tested): the leading PXRC record header excluded
+but MDEF (the program-definition header) correctly attributed to
+statement 1, back-to-back SMRKs for statements with no HALMAT of their
+own (plain DECLAREs), a single-instruction statement, and a multi-
+instruction one. T16-T18 cover fold_halmat_to_eligible_statements() --
+folding a statement with no address entry of its own (e.g. a DECLARE)
+forward into the nearest preceding one that has one, matching the
+debugger's own "nearest address <= target" display semantics -- using
+the same real HELLO.hal data. T19-T21 cover is_subsequence(), the
+comparison the SDF cross-check itself relies on (SDF's per-statement
+opcode list is expected to be a subsequence of the raw-stream one, not
+necessarily an exact match, since SDF's HALMAT-cell pointer doesn't
+track once-at-startup-only operators like an INITIAL(...) clause's own
+CINT -- confirmed empirically: such a value is not reset on a second
+CALL). T22-T23 cover derive_internal_name(), confirmed against a real
+multi-unit link to differ from the --unit MODULE= name.
 
 Usage: ./test_gen_source_map.py [--help]
 """
@@ -303,7 +316,7 @@ def main():
     try:
         stderr = io.StringIO()
         with redirect_stderr(stderr):
-            unit = gsm.build_unit("DUMMY_COMPOOL", compool_pass1, compool_pass2, None, {})
+            unit = gsm.build_unit("DUMMY_COMPOOL", compool_pass1, compool_pass2, None, None, {})
         check("T12 a COMPOOL/template-only compile (no code markers) is skipped, not a hard error", unit, None)
         check("T12b ...with a warning explaining why", "skipping" in stderr.getvalue(), True)
     finally:
@@ -311,16 +324,89 @@ def main():
         Path(compool_pass2).unlink()
 
     halmat = gsm.parse_halmat_offsets(HELLO_OPTMAT_DISASM_EXCERPT)
-    check("T13 leading PXRC/MDEF header excluded, statement 1 (label+PROGRAM) has no HALMAT", halmat[1], [])
-    check("T13b statement 2 (plain DECLARE) also has none -- back-to-back SMRKs", halmat[2], [])
-    check("T14 statement 3 (DECLARE ... INITIAL(...)) is a single-instruction CINT", halmat[3], [8])
+    check(
+        "T13 leading PXRC excluded but MDEF (the program-definition header) IS attributed to "
+        "statement 1 (label+PROGRAM) -- confirmed against real SDF data during planning",
+        halmat[1],
+        [(2, 0x02B)],
+    )
+    check("T13b statement 2 (plain DECLARE) has none -- back-to-back SMRKs", halmat[2], [])
+    check(
+        "T14 statement 3 (DECLARE ... INITIAL(...)) is a single-instruction CINT",
+        halmat[3],
+        [(8, 0x841)],
+    )
     check(
         "T15 statement 6 (first executable WRITE, also sweeps up the EDCL phase-transition marker) "
         "gets the whole instruction set, not one representative value",
         halmat[6],
-        [17, 18, 20, 22, 24],
+        [(17, 0x031), (18, 0x025), (20, 0x027), (22, 0x021), (24, 0x026)],
     )
-    check("T15b statement 7 (DO FOR header) is a single instruction", halmat[7], [27])
+    check("T15b statement 7 (DO FOR header) is a single instruction", halmat[7], [(27, 0x010)])
+
+    # T16-T18: fold_halmat_to_eligible_statements(). Statements 2-5 never
+    # win their own address entry (confirmed against the real HELLO.hal
+    # fixture: their zero-code markers all cluster at the very same
+    # offset statement 6's own marker does, and lose that tie) -- so
+    # their raw HALMAT (statement 3's CINT) must fold forward into
+    # statement 1, the nearest *preceding* statement that does win an
+    # address, matching the debugger's own "nearest address <= target"
+    # display semantics exactly.
+    addr_to_stmt = {65536: 1, 65545: 6, 65554: 7}  # 2,3,4,5 never appear as values
+    folded = gsm.fold_halmat_to_eligible_statements(halmat, addr_to_stmt)
+    check(
+        "T16 statement 1's folded HALMAT includes its own MDEF plus statement 3's folded-in CINT",
+        folded[1],
+        [(2, 0x02B), (8, 0x841)],
+    )
+    check("T16b statements 2/4/5 (empty, and no address of their own) vanish rather than leaving empty entries",
+          {k: v for k, v in folded.items() if k in (2, 4, 5)}, {})
+    check("T17 statement 6 (its own address) keeps just its own instructions, nothing extra folds in",
+          folded[6], halmat[6])
+    check(
+        "T18 no address entries at all (e.g. --unit had no HALMAT_FILE and this never gets called in "
+        "practice, but should still degrade gracefully) folds nothing rather than raising",
+        gsm.fold_halmat_to_eligible_statements(halmat, {}),
+        {},
+    )
+
+    # T19-T21: is_subsequence() -- the SDF-cross-check comparison itself.
+    check("T19 SDF's list missing a leading one-time-startup op is still a valid subsequence",
+          gsm.is_subsequence([0x25, 0x27, 0x21, 0x26], [0x31, 0x25, 0x27, 0x21, 0x26]), True)
+    check("T19b an empty SDF list is trivially a subsequence of anything", gsm.is_subsequence([], [0x25, 0x27]), True)
+    check("T20 identical lists are a subsequence of each other", gsm.is_subsequence([0x25, 0x27], [0x25, 0x27]), True)
+    check(
+        "T21 a genuinely wrong/out-of-order SDF list is NOT a subsequence",
+        gsm.is_subsequence([0x27, 0x25], [0x25, 0x27]),
+        False,
+    )
+    check(
+        "T21b an SDF opcode that never appears in the raw list at all is NOT a subsequence",
+        gsm.is_subsequence([0x99], [0x25, 0x27]),
+        False,
+    )
+
+    # T22-T23: derive_internal_name() -- the compiler's own internal
+    # PROGRAM/PROCEDURE/FUNCTION identifier (used for the SDF member
+    # filename), confirmed against a real multi-unit link to differ from
+    # the --unit MODULE= name (just the external .hal filename's stem):
+    # "176-P" -> CSECT "$0P" -> internal name "P"; "176.1-READ_ACC" ->
+    # CSECT "#CREADAC" -> internal name "READAC".
+    check(
+        "T22 a PROGRAM's own internal name comes from its \"$0NAME\" CSECT",
+        gsm.derive_internal_name([("$0P", 0, 1), ("$0P", 9, 2), ("A1P", 0, 7)]),
+        "P",
+    )
+    check(
+        "T22b a separately-compiled PROCEDURE/FUNCTION's own internal name comes from its \"#CNAME\" CSECT",
+        gsm.derive_internal_name([("#CREADAC", 0, 4), ("#CREADAC", 7, 7)]),
+        "READAC",
+    )
+    check(
+        "T23 no matching CSECT (e.g. a COMPOOL, with no code CSECT of its own) returns None",
+        gsm.derive_internal_name([("#DDUMMY", 0, 1)]),
+        None,
+    )
 
     if failCount:
         print(f"{failCount} test(s) FAILED")

@@ -68,7 +68,10 @@ Usage:
     #   --lnk101 176-P-lnk101.json
 """
 import argparse
+import contextlib
+import io
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -263,16 +266,32 @@ class ArgParser(argparse.ArgumentParser):
 
 
 def parse_unit_spec(spec):
-    """"--unit" values look like "MODULE=PASS1_PATH:PASS2_PATH" or
-    "MODULE=PASS1_PATH:PASS2_PATH:HALMAT_FILE" (see module docstring).
-    Returns (module, pass1_path, pass2_path, halmat_path_or_None), or
-    exits with a usage error."""
+    """"--unit" values look like "MODULE=PASS1_PATH:PASS2_PATH", or with
+    an optional HALMAT file and/or SDFLIB directory appended
+    ("MODULE=PASS1_PATH:PASS2_PATH:HALMAT_FILE:SDFLIB_DIR" -- see module
+    docstring). SDFLIB_DIR (a directory of "##NAME.sdf"-style members,
+    e.g. a compile's own results/SDFLIB) is only meaningful alongside
+    HALMAT_FILE -- it drives cross_check_halmat_with_sdf(), an optional
+    confidence check against SDF's own per-statement HALMAT data, not an
+    alternate data source. Returns (module, pass1_path, pass2_path,
+    halmat_path_or_None, sdflib_dir_or_None), or exits with a usage
+    error."""
     module, eq, rest = spec.partition("=")
     pass1_path, colon, rest = rest.partition(":")
-    pass2_path, colon2, halmat_path = rest.partition(":")
+    pass2_path, colon2, rest = rest.partition(":")
+    halmat_path, colon3, sdflib_dir = rest.partition(":")
     if not eq or not colon or not module or not pass1_path or not pass2_path:
-        sys.exit(f"error: --unit {spec!r} must be of the form MODULE=PASS1_PATH:PASS2_PATH[:HALMAT_FILE]")
-    return module, pass1_path, pass2_path, (halmat_path if colon2 else None)
+        sys.exit(
+            f"error: --unit {spec!r} must be of the form "
+            "MODULE=PASS1_PATH:PASS2_PATH[:HALMAT_FILE[:SDFLIB_DIR]]"
+        )
+    return (
+        module,
+        pass1_path,
+        pass2_path,
+        (halmat_path if colon2 else None),
+        (sdflib_dir if colon3 else None),
+    )
 
 
 def run_yahalmat2_disasm(halmat_path):
@@ -299,30 +318,33 @@ def run_yahalmat2_disasm(halmat_path):
 
 
 def parse_halmat_offsets(disasm_text):
-    """Returns {stmt: [word_offset, ...]} (offsets in ascending order),
-    parsed from 'yaHALMAT2 --disasm's own text output -- reusing that
-    tool's already-correct, already-tested HALMAT decoding rather than
-    re-implementing it, the same "parse an existing tool's report" style
-    this whole script already uses for pass1.rpt/pass2.rpt.
+    """Returns {stmt: [(word_offset, opcode), ...]} (ascending offset
+    order), parsed from 'yaHALMAT2 --disasm's own text output -- reusing
+    that tool's already-correct, already-tested HALMAT decoding rather
+    than re-implementing it, the same "parse an existing tool's report"
+    style this whole script already uses for pass1.rpt/pass2.rpt.
 
     Every instruction line looks like "#N 0xOOO MNEM  numop=... ; comment"
-    (N is the word offset -- see yaShuttle/yaHALMAT2/src/disasm.c's own
-    format string). A "SMRK" (HALMAT Statement Marker) instruction's own
-    operand -- printed on the following "[0] data=0xNNNN(NNNN) ..." line
-    -- is the HAL/S statement number it closes (confirmed against
-    yaShuttle/yaHALMAT2/src/debug.c's find_word_index_for_stmt(), which
-    matches on exactly this operand). Verified by hand, statement by
-    statement, against a real compile: the instructions strictly between
-    the previous SMRK (its own word offset + 2, since SMRK is always a
-    1-operand/2-word instruction) and this SMRK belong to the statement
-    it closes -- e.g. a statement with no code of its own (a plain
-    DECLARE) has two SMRKs back to back, no instructions between them.
-    The compiler's own leading PXRC/MDEF header instructions (before any
-    SMRK at all -- a record header and the program-definition header,
-    never any statement's own content) are excluded by mnemonic, not
-    attributed to statement 1."""
-    HEADER_MNEMONICS = {"PXRC", "MDEF"}
-    instr_re = re.compile(r"^#(\d+)\s+0x[0-9A-Fa-f]+\s+(\S+)")
+    (N is the word offset, OOO the 12-bit opcode -- see yaShuttle/
+    yaHALMAT2/src/disasm.c's own format string). A "SMRK" (HALMAT
+    Statement Marker) instruction's own operand -- printed on the
+    following "[0] data=0xNNNN(NNNN) ..." line -- is the HAL/S statement
+    number it closes (confirmed against yaShuttle/yaHALMAT2/src/
+    debug.c's find_word_index_for_stmt(), which matches on exactly this
+    operand). Verified by hand, statement by statement, against a real
+    compile: the instructions strictly between the previous SMRK (its
+    own word offset + 2, since SMRK is always a 1-operand/2-word
+    instruction) and this SMRK belong to the statement it closes -- e.g.
+    a statement with no code of its own (a plain DECLARE) has two SMRKs
+    back to back, no instructions between them. The compiler's own
+    leading "PXRC" instruction (before any SMRK at all -- a record
+    header, never any statement's own content) is excluded by mnemonic,
+    not attributed to statement 1. "MDEF" (the program-definition
+    header) is deliberately *not* excluded -- confirmed by cross-
+    checking against SDF's own per-statement HALMAT data (see
+    modules/sdf/sdf/sdf.py's parseHalmatCellChain()) that MDEF genuinely
+    belongs to the PROGRAM statement itself."""
+    instr_re = re.compile(r"^#(\d+)\s+0x([0-9A-Fa-f]+)\s+(\S+)")
     operand_re = re.compile(r"^\s*\[0\]\s+data=0x([0-9A-Fa-f]+)")
 
     stmt_offsets = {}
@@ -332,11 +354,11 @@ def parse_halmat_offsets(disasm_text):
         m = instr_re.match(line)
         if not m:
             continue
-        offset, mnemonic = int(m.group(1)), m.group(2)
-        if mnemonic in HEADER_MNEMONICS:
+        offset, opcode, mnemonic = int(m.group(1)), int(m.group(2), 16), m.group(3)
+        if mnemonic == "PXRC":
             continue
         if mnemonic != "SMRK":
-            pending.append(offset)
+            pending.append((offset, opcode))
             continue
         stmt = None
         if i + 1 < len(lines):
@@ -349,12 +371,175 @@ def parse_halmat_offsets(disasm_text):
     return stmt_offsets
 
 
-def build_unit(module, pass1_path, pass2_path, halmat_path, sections_by_name):
+def fold_halmat_to_eligible_statements(halmat_offsets, addr_to_stmt):
+    """Returns {stmt: [(word_offset, opcode), ...]}, folding a statement
+    with no address entry of its own into whichever earlier statement
+    *does* end up owning the address range its generated code actually
+    falls in.
+
+    A statement never becomes the debugger's "currently active"
+    statement unless it's a value somewhere in addr_to_stmt (build_
+    unit()'s own address -> statement map, keyed by the *nearest address
+    <= target* lookup sourcemap_lookup() already does at runtime) -- a
+    plain DECLARE, for instance, never independently wins any address
+    (confirmed against a real compile: several zero-code DECLAREs in a
+    row all end up mapped to whatever code-bearing statement's own
+    marker happens to land at the very same offset, and lose that tie to
+    it). So a statement number missing from addr_to_stmt.values() would
+    have its own raw HALMAT (see parse_halmat_offsets()) go undisplayed
+    forever if left under its own statement number -- instead it's
+    folded into the *nearest preceding* statement that does win an
+    address, exactly matching the "nearest address <= target" logic
+    that already governs which statement's source line is shown for a
+    given PC: whatever code executes while the debugger shows "statement
+    N" should have all of its HALMAT -- including a preceding DECLARE's
+    own once-at-startup INITIAL(...) setup code, physically executing in
+    that very same address range -- attributed to that same N."""
+    eligible = set(addr_to_stmt.values())
+    folded = {}
+    current = None
+    for stmt in sorted(set(halmat_offsets) | eligible):
+        if stmt in eligible:
+            current = stmt
+            folded.setdefault(current, [])
+        if current is not None:
+            folded[current].extend(halmat_offsets.get(stmt, []))
+    return folded
+
+
+def derive_internal_name(entries):
+    """Best-effort derivation of a unit's own internal HAL/S PROGRAM/
+    PROCEDURE/FUNCTION identifier -- as used in SDF member names, e.g.
+    "##HELLO .sdf" -- from its own code CSECT names: "$0NAME" (a
+    PROGRAM's own main CSECT) or "#CNAME" (a separately-compiled
+    PROCEDURE/FUNCTION's own code CSECT) both carry this name directly,
+    already truncated to 6 characters by the compiler itself (confirmed
+    against a real multi-unit link: "176.1-READ_ACC" -> CSECT "#CREADAC"
+    -> internal name "READAC"). This is *not* the same as the --unit
+    MODULE= name, which is just the external .hal filename's own stem
+    and can differ arbitrarily from the internal identifier. Returns
+    None if no CSECT name matches either convention (e.g. a COMPOOL,
+    which has no code CSECT of its own at all)."""
+    seen = set()
+    for csect_name, _offset, _stmt in entries:
+        if csect_name in seen:
+            continue
+        seen.add(csect_name)
+        if csect_name.startswith("$0"):
+            return csect_name[2:]
+        if csect_name.startswith("#C"):
+            return csect_name[2:]
+    return None
+
+
+def is_subsequence(needle, haystack):
+    """True iff needle's elements appear in haystack, in order (not
+    necessarily contiguously)."""
+    it = iter(haystack)
+    return all(x in it for x in needle)
+
+
+def load_sdf_halmat_opcodes(sdflib_dir, internal_name):
+    """Selects and parses the SDF member for internal_name (see
+    derive_internal_name()) from sdflib_dir (a directory of "##NAME.sdf"
+    -style members, e.g. a compile's own results/SDFLIB), and returns
+    {stmt: [opcode, ...]} via modules/sdf/sdf/sdf.py's
+    parseHalmatCellChain(), for every statement that has any. Raises on
+    any failure (sdfpkg not importable, no such member, etc.) -- callers
+    treat this as a soft warning, since the cross-check it feeds is a
+    confidence nicety, not a hard requirement."""
+    repoRoot = os.path.dirname(os.path.realpath(__file__)) + "/../../.."
+    sdfpkgDir = os.path.join(repoRoot, "modules", "sdfpkg", "sdfpkg")
+    if sdfpkgDir not in sys.path:
+        sys.path.insert(0, sdfpkgDir)
+    from sdfpkg import sdfpkg  # local import: only needed for this optional cross-check
+
+    memoryModel = bytearray(0x100000)
+    fields = [
+        "APGAREA", "AFCBAREA", "NPAGES", "NBYTES", "MISC", "CRETURN", "BLKNO", "SYMBNO",
+        "STMTNO", "BLKNLEN", "SYMBNLEN", "PNTR", "ADDR", "SDFNAM", "CSECTNAM", "SREFNO",
+        "INCLCNT", "BLKNAM", "SYMBNAM",
+    ]
+    commtabl = {k: None for k in fields}
+    pkg = sdfpkg(memoryModel, sdflib_dir, commtabl)
+    commtabl.update(MISC=0, APGAREA=0x100000, AFCBAREA=0x10000, NPAGES=1, NBYTES=1024, ADDR=0, PNTR=0)
+    # modules/cmem/cmem/cmem.py's own _mode4() has an unconditional debug
+    # print() of the selected SDF name -- not this project's own code to
+    # fix, so just suppressed here rather than left leaking into this
+    # script's otherwise-clean output.
+    with contextlib.redirect_stdout(io.StringIO()):
+        pkg.sdfpkg(0, 0x1000)
+        commtabl["SDFNAM"] = "##" + internal_name[:6].ljust(6)
+        pkg.sdfpkg(4)
+    s = pkg.s
+    s.verbose = False
+    s.parseSDF()
+
+    opcodes_by_stmt = {}
+    for i, st in enumerate(s.statementIndexTable):
+        ptr = getattr(st, "halmatCellPointer", getattr(st, "pHalmatCell", 0))
+        opcodes = s.parseHalmatCellChain(ptr)
+        if opcodes:
+            opcodes_by_stmt[i + 1] = opcodes
+    return opcodes_by_stmt
+
+
+def cross_check_halmat_with_sdf(module, halmat_offsets, sdflib_dir, internal_name):
+    """Cross-checks this script's own raw-HALMAT-stream statement
+    attribution (parse_halmat_offsets(), unfolded -- i.e. keyed by the
+    same raw SMRK-based statement numbers, not yet folded into address-
+    eligible ones) against SDF's own per-statement HALMAT Cell data
+    (modules/sdf/sdf/sdf.py's parseHalmatCellChain()). Confirmed by hand
+    against a real compile that SDF's own opcode list for a statement is
+    always a SUBSEQUENCE of the raw-stream one, not necessarily an exact
+    match: some statements have leading HALMAT operators that only ever
+    run once, at program load (confirmed empirically -- a HAL/S
+    PROCEDURE's own DECLARE ... INITIAL(...) value is not reset on a
+    second CALL), and SDF's per-statement HALMAT-cell pointer only
+    tracks HALMAT that runs on ordinary re-entry to a statement, so it
+    correctly omits these (MDEF/CINT/EDCL confirmed by hand) while the
+    raw stream correctly includes them. Purely a confidence signal at
+    generation time -- never changes what gets written to the JSON
+    output, and any failure here (including sdfpkg not being importable,
+    or this compile never having used the HALMAT parm at all) is
+    reported as a warning and otherwise ignored."""
+    try:
+        opcodes_by_stmt = load_sdf_halmat_opcodes(sdflib_dir, internal_name)
+    except Exception as e:
+        print(f"warning: SDF HALMAT cross-check skipped for module {module!r}: {e}", file=sys.stderr)
+        return
+    if not opcodes_by_stmt:
+        return
+
+    mismatches = []
+    for stmt, sdf_opcodes in sorted(opcodes_by_stmt.items()):
+        raw_opcodes = [op for _off, op in halmat_offsets.get(stmt, [])]
+        if not is_subsequence(sdf_opcodes, raw_opcodes):
+            mismatches.append((stmt, sdf_opcodes, raw_opcodes))
+    print(
+        f"SDF HALMAT cross-check for module {module!r}: {len(opcodes_by_stmt) - len(mismatches)}/"
+        f"{len(opcodes_by_stmt)} statements consistent (SDF's own per-statement list is expected to "
+        "be a subsequence of the raw-stream one, omitting once-at-startup-only operators)",
+        file=sys.stderr,
+    )
+    for stmt, sdf_opcodes, raw_opcodes in mismatches:
+        print(
+            f"warning: module {module!r} statement {stmt}: SDF HALMAT opcodes "
+            f"{[hex(o) for o in sdf_opcodes]} are NOT a subsequence of the raw-stream opcodes "
+            f"{[hex(o) for o in raw_opcodes]} -- worth investigating",
+            file=sys.stderr,
+        )
+
+
+def build_unit(module, pass1_path, pass2_path, halmat_path, sdflib_dir, sections_by_name):
     """Returns {"module":..., "statements":[...], "addresses":[...],
     "codeRanges":[...]} for one compiled unit -- each statement entry
-    additionally gets a "halmat" field (list of word offsets, see
-    parse_halmat_offsets()) when halmat_path is given and that statement
-    has any. Resolves
+    additionally gets a "halmat" field (list of word offsets, folded per
+    fold_halmat_to_eligible_statements()) when halmat_path is given and
+    that statement has any. When sdflib_dir is also given, cross-checks
+    the raw-stream HALMAT attribution against SDF's own per-statement
+    HALMAT Cell data (see cross_check_halmat_with_sdf()) as a non-fatal
+    confidence signal, printed to stderr. Resolves
     parse_pass2()'s (csectName, offset) pairs to absolute linked
     addresses via sections_by_name (looked up directly by CSECT name --
     a real linked CSECT name is already unique, so no module cross-check
@@ -402,13 +587,24 @@ def build_unit(module, pass1_path, pass2_path, halmat_path, sections_by_name):
         disasm_text = run_yahalmat2_disasm(halmat_path)
         if disasm_text is not None:
             halmat_offsets = parse_halmat_offsets(disasm_text)
+            if sdflib_dir:
+                internal_name = derive_internal_name(entries)
+                if internal_name:
+                    cross_check_halmat_with_sdf(module, halmat_offsets, sdflib_dir, internal_name)
+                else:
+                    print(
+                        f"warning: could not derive module {module!r}'s own internal HAL/S name "
+                        "from its CSECT names -- skipping SDF HALMAT cross-check",
+                        file=sys.stderr,
+                    )
+    folded_halmat = fold_halmat_to_eligible_statements(halmat_offsets, addr_to_stmt)
 
     addresses = [{"addr": a, "stmt": s} for a, s in sorted(addr_to_stmt.items())]
     stmt_list = []
     for stmt, lines in sorted(statements.items()):
         entry = {"stmt": stmt, "lines": lines}
-        if halmat_offsets.get(stmt):
-            entry["halmat"] = halmat_offsets[stmt]
+        if folded_halmat.get(stmt):
+            entry["halmat"] = [off for off, _op in folded_halmat[stmt]]
         stmt_list.append(entry)
     ranges = [{"start": start, "end": end} for start, end in sorted(code_ranges.values())]
     return {"module": module, "statements": stmt_list, "addresses": addresses, "codeRanges": ranges}

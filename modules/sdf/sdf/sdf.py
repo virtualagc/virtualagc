@@ -110,7 +110,7 @@ import os
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 
-_pathToVAGC = os.path.dirname(os.path.abspath(__file__)) + "/../../.."
+_pathToVAGC = os.path.dirname(os.path.realpath(__file__)) + "/../../.."
 with open(f"{_pathToVAGC}/modules/pipIt.py", "r") as f: exec(f.read())
 for i in range(2):
     try:
@@ -363,7 +363,73 @@ class sdf:
             i += 1
 
         self.offsetForGet = oldOffsetForGet
-    
+
+    # Given a statement's HALMAT Cell Pointer (Field 0e of an Executable
+    # Statement Data Cell, or Field 5 of a Declare Statement Data Cell --
+    # see Section 2.2.2.2.9.1, "HALMAT Cells", Figures 2-83/2-84, ICD PDF
+    # p.120), walks the HALMAT Cell -> HALMAT Extension Cell chain and
+    # returns the list of HALMAT operator opcodes found, in order (each
+    # opcode a 12-bit value, matching yaHALMAT2's own `instr->opcode`).
+    #
+    # A pointer of 0 or 0xFFFFFFFF (both seen in practice as "no HALMAT
+    # for this statement" -- the ICD's own prose says the sentinel is -1,
+    # i.e. 0xFFFFFFFF, but a real compile shows plain 0 for a Declare
+    # Statement Data Cell that has no HALMAT of its own, confirmed by
+    # reading Figure 2-65's own byte layout (ICD PDF p.109) and finding
+    # the existing declaration-branch parsing above already reads the
+    # right field at the right offset) both return an empty list.
+    #
+    # Each HALMAT Cell stores Field 1 (word count of HALMAT for the WHOLE
+    # statement -- covers every cell in the chain, not just this one --
+    # only present in the head cell) and Field 2 (word offset to the
+    # last operator IN THIS CELL, unused here since Field 1's own total
+    # already says when the whole chain ends), followed by a flat,
+    # undelimited sequence of operator words and their own operand
+    # words. There is no separate "how many operands does this operator
+    # have" field anywhere in the format -- the operator word's own bits
+    # encode it directly (byte-for-byte the same bit layout yaHALMAT2's
+    # own halmat_load_from_buffer(), yaShuttle/yaHALMAT2/src/loader.c,
+    # decodes from the raw pre-SDF HALMAT stream): only operand VALUES
+    # (symbol/VAC/literal indexes) get remapped for SDF storage per the
+    # ICD's own text, so the operator word's own structure carries over
+    # unchanged, and this method deliberately mirrors that same decoding
+    # rather than re-deriving it independently.
+    #
+    # A statement whose HALMAT doesn't fit in one SDF page continues via
+    # Field 5 (a sentinel fullword of all-1-bits, 0xFFFFFFFF) followed by
+    # Field 6 (a pointer to a HALMAT Extension Cell, Figure 2-84, which
+    # has no word-count/last-operator header of its own -- just operator/
+    # operand words directly from its own offset 0) -- this path is
+    # unverified against real data (no compile in this project's own
+    # test corpus has ever needed more than one cell), unlike the rest of
+    # this method, hand-verified opcode-by-opcode against a real compile.
+    def parseHalmatCellChain(self, pointer):
+        if pointer == 0 or pointer == 0xFFFFFFFF:
+            return []
+        oldOffsetForGet = self.offsetForGet
+        self.offsetForGet = pointer
+        wordCount = self.getHalfword(0)
+        opcodes = []
+        consumed = 0
+        off = 4
+        maxCells = 1000  # safety bound against a misunderstood/malformed chain
+        for _ in range(maxCells):
+            if consumed >= wordCount:
+                break
+            w = self.getFullword(off)
+            if w == 0xFFFFFFFF:
+                extensionCellPointer = self.getFullword(off + 4)
+                self.offsetForGet = extensionCellPointer
+                off = 0
+                continue
+            numop = (w >> 16) & 0xFF
+            opcode = ((w >> 12) & 0xF) << 8 | ((w >> 4) & 0xFF)
+            opcodes.append(opcode)
+            off += 4 * (1 + numop)
+            consumed += 1 + numop
+        self.offsetForGet = oldOffsetForGet
+        return opcodes
+
     # The `parseSymbol` method is intended to be used only by the `parseSDF`
     # method rather than being called directly.  As the name implies, it 
     # parses symbol data found in the SDF.  The `nameBeginning` argument is a 
