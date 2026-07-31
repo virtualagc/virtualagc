@@ -1279,8 +1279,14 @@ run ./run_local_fixture.sh random_deterministic "$(printf ' 4.3794728815555573E-
 # so dominated by the explicit 5-second wait, but by then two WRITE(6)
 # statements have also executed) shows a further small residual shift
 # from (4) on top of the same small (3)-driven effect on the surrounding
-# instructions.
-run ./run_local_fixture.sh runtime "$(printf ' 1.2000000E-04\n 5.0004129E+00')"
+# instructions; (5) OP_BFNC (which RUNTIME itself is, selector 52) gained
+# a real per-tag switch in op_cost_ticks(), whose default arm for every
+# not-yet-individually-priced selector (including RUNTIME) is 13 ticks --
+# the measured mean LOCAL cost of a BFNC instruction generally -- instead
+# of the previous flat 60-tick unmeasured-opcode default, so BOTH of
+# RUNTIME's own two calls shift by that same -47-tick (-47us) delta on
+# top of everything (3)/(4) already changed around them.
+run ./run_local_fixture.sh runtime "$(printf ' 7.2999988E-05\n 5.0003185E+00')"
 run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2.0000000E+00\n          4\n          5')"
 # Follow-up, direct user correction to this same batch: DATE/CLOCKTIME
 # (BFNC selectors 18/54) were initially left unimplemented ("no calendar/

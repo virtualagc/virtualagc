@@ -4965,6 +4965,51 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
             }
             return 60;
 
+        case OP_BFNC: {
+            /* Built-in function call -- ins->tag selects which one
+             * (class-0/BFNC.md's selector table, this opcode's own case
+             * body comment). Most BFNC selectors (ABS/SIGN/ROUND/FLOOR/
+             * CEILING/TRUNCATE/SIN/COS/ARCSIN/ARCTAN/DIV/MOD/etc.) are
+             * computed entirely inline (no call to a named AP-101S RTL
+             * routine was ever observed for any of them across the whole
+             * trace sample) -- for those, and every tag not listed
+             * below, this returns 13 ticks, the measured mean LOCAL cost
+             * of an OP_BFNC instruction generally (n=66, CV=0.69, "local"
+             * report in CLAUDE_LOG.md's methodology) -- better than the
+             * generic 60-tick unmeasured default, though not tag-
+             * specific. A handful of selectors DO call into a named RTL
+             * routine and got their own real weight below, each derived
+             * one of two ways: (a) directly, from a clean single-BFNC-
+             * call statement's own real total (local + RTL call) the
+             * same way Phase 2's WRITE items were measured (RANDOM,
+             * RANDOMG, SQRT); or (b) where that direct measurement had
+             * too few/no clean samples, as 13 (the generic local BFNC
+             * mean above) + the RTL call's own separately-measured mean
+             * from CLAUDE_LOG.md's per-RTL-call table (ARCCOS's own real
+             * AP-101S routine is named ACOS; ARCSINH/ARCTANH/ARCCOSH are
+             * ASINH/ATANH/ACOSH) -- cross-checked once, for SQRT, where
+             * both methods happened to be available (94 direct vs.
+             * 13+73=86 synthesized, an 8% gap, reasonable agreement).
+             * That synthesis method is NOT included below except for
+             * SINH, whose 2-sample RTL-call mean was unusually tight
+             * (CV=0.01): the same synthesis attempted for TAN, LOG,
+             * ACOSH/ASINH/ATANH/EXP disagreed badly with a direct
+             * measurement where one existed (TAN: 13+67=80 synthesized
+             * vs. 315 measured directly, a 4x gap) or had only a single
+             * supporting sample either way, so those are deliberately
+             * left at the generic 13-tick default rather than shipping
+             * an unreliable-looking number -- a real follow-up phase,
+             * not a returned-to-guessing decision. */
+            switch (ins->tag) {
+                case 42: return 72;   /* RANDOM (n=23, CV=0.13) */
+                case 51: return 513;  /* RANDOMG (n=11, CV=0.00) */
+                case 24: return 94;   /* SQRT (n=3, direct) */
+                case 35: return 80;   /* ARCCOS (RTL name ACOS, n=6, CV=0.23, synthesized) */
+                case 22: return 177;  /* SINH (n=2, CV=0.01, synthesized) */
+                default: return 13;
+            }
+        }
+
         default:
             return 60;
     }
