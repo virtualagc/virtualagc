@@ -1,4 +1,4 @@
-/* Verifies three pieces of the Shuttle-sim integration work (see
+/* Verifies five pieces of the Shuttle-sim integration work (see
  * ../src/yaGpcIntegration.h and its plan-mode discussion history):
  *
  *  1. yaGPC2_ops (../src/gpcops.c) supports multiple fully independent
@@ -13,6 +13,12 @@
  *     AGEHarness.htraceWanted is set (and nothing when it isn't) --
  *     the mechanism a driver relies on to get 'htrace'-equivalent
  *     output without owning any snapshot/diff/format logic itself.
+ *  4. yaGPC2_ops.release() (issue #79) actually flushes pending HalUCP
+ *     output before freeing an instance, not just reclaims memory.
+ *  5. yaGPC2_ops.debuggerStateCreate()/debuggerStateDestroy() (issue #79)
+ *     work as a generic pair a driver can call without knowing this is
+ *     yaGPC2 specifically (i.e. without reaching for debugger_create()/
+ *     debugger_free() and an Options struct directly).
  *
  * Run from the repo root (as `make test` does) -- fixture path below is
  * relative to that. */
@@ -77,10 +83,9 @@ static void test_two_instance_independence(void) {
     ageharness_snapshot_regs(ageA, &snapA2);
     CHECK(snapA2.nia == snapA.nia, "instance A's NIA unchanged while B was stepped");
 
-    ageharness_free(ageA);
-    ageharness_free(ageB);
-    free(ageA);
-    free(ageB);
+    yaGPC2_ops.release(&a);
+    yaGPC2_ops.release(&b);
+    CHECK(a.impl == NULL && b.impl == NULL, "release() clears impl on both instances");
 }
 
 /* ---------------------------------------------------------------------
@@ -219,14 +224,66 @@ static void test_htrace_output(void) {
     age->htraceWanted = false;
     CHECK(capture_engine_output(&state, buf, sizeof buf) == 0, "engine stops printing once htraceWanted is cleared again");
 
-    ageharness_free(age);
-    free(age);
+    yaGPC2_ops.release(&state);
+}
+
+/* ---------------------------------------------------------------------
+ * 4. GpcOps lifecycle hooks (issue #79): release() and debuggerState
+ *    create/destroy
+ * ------------------------------------------------------------------- */
+
+static char g_flushCapture[256];
+
+static void capture_output_cb(void *ctx, const char *text, int channel) {
+    (void)ctx;
+    (void)channel;
+    strncat(g_flushCapture, text, sizeof g_flushCapture - strlen(g_flushCapture) - 1);
+}
+
+/* Directly verifies yagpc2_release() actually flushes pending HalUCP
+ * output (not just frees memory) -- the concrete fix for issue #79's
+ * "release() needs to do the same flush-on-teardown the CLI's HALT/EOF
+ * paths already have" finding. Simulates "a WRITE left text sitting in
+ * lineBuf[ch], never finalized by SKIP/LINE/PAGE, before the driver
+ * decided to tear the instance down" by poking the public lineBuf/
+ * lineBufLen fields directly, same technique halucp_flush_all_pending()
+ * itself is built to handle. */
+static void test_release_flushes_pending_output(void) {
+    GpcState state = {.gpcID = 1};
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
+          "release-flush instance initializer succeeded");
+    AGEHarness *age = (AGEHarness *)state.impl;
+
+    g_flushCapture[0] = '\0';
+    age->halUCP.cbCtx = NULL;
+    age->halUCP.outputCallback = capture_output_cb;
+
+    const char *pending = "UNFLUSHED LINE";
+    age->halUCP.lineBuf[6] = malloc(strlen(pending) + 1);
+    strcpy(age->halUCP.lineBuf[6], pending);
+    age->halUCP.lineBufLen[6] = strlen(pending);
+
+    yaGPC2_ops.release(&state);
+
+    CHECK(strstr(g_flushCapture, pending) != NULL, "release() flushed the pending unflushed line before freeing");
+}
+
+static void test_debugger_state_lifecycle(void) {
+    void *dbgState = yaGPC2_ops.debuggerStateCreate(NULL);
+    CHECK(dbgState != NULL, "debuggerStateCreate(NULL) returns a non-NULL session");
+    yaGPC2_ops.debuggerStateDestroy(dbgState); /* must not crash */
+
+    void *dbgState2 = yaGPC2_ops.debuggerStateCreate("test/fixtures/hello.srcmap.json");
+    CHECK(dbgState2 != NULL, "debuggerStateCreate(sourceMapPath) returns a non-NULL session");
+    yaGPC2_ops.debuggerStateDestroy(dbgState2);
 }
 
 int main(void) {
     test_two_instance_independence();
     test_servicer_roundtrip();
     test_htrace_output();
+    test_release_flushes_pending_output();
+    test_debugger_state_lifecycle();
     if (failures == 0) {
         printf("all gpcops/servicer tests passed\n");
     } else {

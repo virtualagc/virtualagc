@@ -92,6 +92,12 @@ static void batchrunner_flush(BatchRunner *r) {
 
 static void batchrunner_fatal(BatchRunner *r, const char *msg) {
     fprintf(stderr, "FATAL: %s\n", msg);
+    /* Called both before the run starts (nothing buffered yet, harmless
+     * no-op) and mid-run (e.g. a READ on a channel with no --infileN) --
+     * in the latter case the program may already have unflushed WRITE
+     * output on some other channel; same reasoning as run.c's other
+     * halucp_flush_all_pending() call sites. */
+    halucp_flush_all_pending(&r->age.halUCP);
     batchrunner_flush(r);
     exit(1);
 }
@@ -471,6 +477,15 @@ int batchrunner_run(BatchRunner *r) {
         if (!batchrunner_step(r)) break;
     }
 
+    /* Whatever reason the loop stopped for -- max-steps exhausted, a
+     * breakpoint, a watchpoint -- flush any still-buffered, not-yet-
+     * newline-terminated WRITE output (see halucp_flush_all_pending()'s
+     * own comment). The program's own HALT/EOF paths already do this
+     * internally; this covers every other way the loop can end, which
+     * previously had no equivalent flush at all. Safe/idempotent if a
+     * HALT/EOF already flushed everything. */
+    halucp_flush_all_pending(&r->age.halUCP);
+
     batchrunner_free_watchpoints(r);
 
     return batchrunner_report_stop(r);
@@ -496,6 +511,11 @@ static void on_sigint(int sig) {
 }
 
 static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, long step, int exitCode) {
+    /* A third distinct way the run loop can end besides max-steps and the
+     * program's own HALT/EOF -- Ctrl-C -- and this calls exit() directly,
+     * bypassing batchrunner_run_interactive()'s own post-loop flush. Same
+     * "don't silently drop a still-buffered WRITE line" reasoning. */
+    halucp_flush_all_pending(&r->age.halUCP);
     char msg[128];
     snprintf(msg, sizeof msg, headerFmt, step);
     batchrunner_info(r, msg);
@@ -621,6 +641,12 @@ int batchrunner_run_interactive(BatchRunner *r) {
         }
         if (!batchrunner_step(r)) break;
     }
+
+    /* See batchrunner_run()'s own identical call for the reasoning --
+     * max-steps/breakpoint/watchpoint stops here need the same flush the
+     * program's own HALT/EOF paths (and interactive_report_and_exit()'s
+     * Ctrl-C path, above) already have. */
+    halucp_flush_all_pending(&r->age.halUCP);
 
     batchrunner_free_watchpoints(r);
 

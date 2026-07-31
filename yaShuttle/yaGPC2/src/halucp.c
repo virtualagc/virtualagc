@@ -172,19 +172,14 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
             h->inputBufferLen = 0;
             h->inputBuffer[0] = '\0';
         }
-        for (int ch = 0; ch < HALUCP_MAX_CHANNEL; ch++) {
-            if (h->lineBufLen[ch] > 0 && h->outputCallback) {
-                /* hal_newline(), not a bare "\n": the program is halting
-                 * with its last line's content possibly still sitting in
-                 * lineBuf[ch] (never yet flushed by an explicit
-                 * SKIP/LINE/PAGE), and a bare newline here would discard
-                 * it silently. Gated on lineBufLen (not just
-                 * hasWrittenBefore) so a channel some OTHER code path
-                 * (e.g. run.c's interactive-prompt logic) already
-                 * flushed doesn't get a second, spurious blank line. */
-                hal_newline(h, ch);
-            }
-        }
+        /* Not a bare "\n": the program is halting with its last line's
+         * content possibly still sitting in lineBuf[ch] (never yet
+         * flushed by an explicit SKIP/LINE/PAGE), and a bare newline here
+         * would discard it silently. halucp_flush_all_pending() is gated
+         * on lineBufLen (not just hasWrittenBefore) so a channel some
+         * OTHER code path (e.g. run.c's interactive-prompt logic) already
+         * flushed doesn't get a second, spurious blank line. */
+        halucp_flush_all_pending(h);
         /* SVC 0x0015 is HAL/S-FC's universal, successful end-of-program
          * call (every compiled CLOSE reaches it, not just abnormal exits)
          * -- confirmed via HELLO.hal, which has no explicit %SVCI call
@@ -504,6 +499,12 @@ static void hal_newline(HalUCP *h, int ch) {
 
 void halucp_flush_channel(HalUCP *h, int ch) {
     hal_newline(h, ch);
+}
+
+void halucp_flush_all_pending(HalUCP *h) {
+    for (int ch = 0; ch < HALUCP_MAX_CHANNEL; ch++) {
+        if (h->lineBufLen[ch] > 0 && h->outputCallback) hal_newline(h, ch);
+    }
 }
 
 void halucp_notify_interactive_input(HalUCP *h, int ch) {
@@ -1380,9 +1381,7 @@ void halucp_provide_eof(HalUCP *h) {
      * just hasWrittenBefore) so a channel run.c's own interactive-prompt
      * logic already flushed (see prompt_and_provide_input) doesn't get a
      * second, spurious blank line. */
-    for (int ch = 0; ch < HALUCP_MAX_CHANNEL; ch++) {
-        if (h->lineBufLen[ch] > 0 && h->outputCallback) hal_newline(h, ch);
-    }
+    halucp_flush_all_pending(h);
     char msg[160];
     snprintf(msg, sizeof msg, "HalUCP: READ exhausted input on channel %d with no ON ERROR handler installed", h->channel);
     hal_report_error(h, msg);

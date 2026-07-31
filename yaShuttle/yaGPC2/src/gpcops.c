@@ -14,6 +14,8 @@
 #include "ageharness.h"
 #include "cpu_instr.h"
 #include "debugger.h"
+#include "halucp.h"
+#include "opts.h"
 #include "trace.h"
 
 /* Snapshot/execute/diff/print, gated on age->htraceWanted (set by
@@ -101,8 +103,41 @@ static bool yagpc2_initializer(GpcState *state, const char *programPath, const c
     return true;
 }
 
+/* Counterpart to yagpc2_initializer(): flushes any output still buffered
+ * but not yet newline-terminated (same reasoning as run.c's own
+ * halucp_flush_all_pending() call sites -- a driver releasing an
+ * instance is another way a program's session can end besides its own
+ * HALT/EOF), then frees everything the initializer allocated. */
+static void yagpc2_release(GpcState *state) {
+    AGEHarness *age = (AGEHarness *)state->impl;
+    if (!age) return;
+    halucp_flush_all_pending(&age->halUCP);
+    ageharness_free(age);
+    free(age);
+    state->impl = NULL;
+}
+
+/* opts is otherwise all-defaults (calloc'd Debugger: htrace off, no
+ * breakpoints) -- matching debugger_create()'s only three fields read
+ * (trace/sourceMap/breakAddr), all zero/NULL here except sourceMap. A
+ * driver that wants an initial breakpoint or htrace-on-at-startup sets
+ * them via the debugger's own commands after creation, same as any
+ * interactive user would. */
+static void *yagpc2_debugger_state_create(const char *sourceMapPath) {
+    Options opts = {0};
+    opts.sourceMap = (char *)sourceMapPath; /* debugger_create() only reads this -- see sourcemap_load()'s const char* param */
+    return debugger_create(&opts);
+}
+
+static void yagpc2_debugger_state_destroy(void *dbgState) {
+    debugger_free((Debugger *)dbgState);
+}
+
 const GpcOps yaGPC2_ops = {
     .engine = yagpc2_engine,
     .debugger = yagpc2_debugger,
     .initializer = yagpc2_initializer,
+    .release = yagpc2_release,
+    .debuggerStateCreate = yagpc2_debugger_state_create,
+    .debuggerStateDestroy = yagpc2_debugger_state_destroy,
 };

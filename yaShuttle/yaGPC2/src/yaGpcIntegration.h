@@ -37,10 +37,40 @@ typedef bool (*GpcDebuggerFn)(GpcState *state, void *dbgState); /* false => stop
  * file. */
 typedef bool (*GpcInitializerFn)(GpcState *state, const char *programPath, const char *symbolsPath);
 
+/* Releases whatever initializer allocated for state->impl (and, on
+ * yaGPC2's side, flushes any output still buffered but not yet
+ * newline-terminated -- see halucp_flush_all_pending() -- since a
+ * driver tearing down or replacing an instance is another way a
+ * program's session can end besides its own HALT/EOF). Leaves *state
+ * otherwise unspecified after the call; the caller must not use it
+ * again without re-initializing. */
+typedef void (*GpcReleaseFn)(GpcState *state);
+
+/* Creates a fresh, opaque debugger-session state for GpcDebuggerFn's
+ * dbgState parameter -- session/REPL state (breakpoints, step mode,
+ * htrace toggle, etc.), independent of any particular GpcState instance,
+ * matching how yaGPC2's own Debugger and yaHALMAT2's own
+ * debugger_state_t are already kept separate from emulator state.
+ * sourceMapPath is optional (NULL allowed), mirroring
+ * GpcInitializerFn's symbolsPath -- meaning/support is emulator-specific
+ * (yaGPC2: a --source-map-equivalent HAL/S source map, loaded once at
+ * creation since there's no way to load one later through the debugger's
+ * own commands). Returns NULL on failure. */
+typedef void *(*GpcDebuggerStateCreateFn)(const char *sourceMapPath);
+
+/* Releases a debugger-session state created by GpcDebuggerStateCreateFn.
+ * Does not touch any GpcState -- a debugger session and a GPC instance
+ * are independently created/destroyed and one dbgState may outlive, or
+ * be reused across, more than one GpcState over a debugging session. */
+typedef void (*GpcDebuggerStateDestroyFn)(void *dbgState);
+
 typedef struct {
     GpcEngineFn engine;
     GpcDebuggerFn debugger;
     GpcInitializerFn initializer;
+    GpcReleaseFn release;
+    GpcDebuggerStateCreateFn debuggerStateCreate;
+    GpcDebuggerStateDestroyFn debuggerStateDestroy;
 } GpcOps;
 
 /* Servicer: the GPC's interface to vehicle peripherals. Deliberately

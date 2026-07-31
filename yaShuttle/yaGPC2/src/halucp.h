@@ -195,6 +195,20 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1);
  * flushes any buffered-but-not-yet-emitted text instead of silently
  * discarding it. */
 void halucp_flush_channel(HalUCP *h, int ch);
+
+/* Flushes every channel that still has an unflushed, non-newline-
+ * terminated line buffered (lineBufLen[ch] > 0) -- the same guarded
+ * all-channel loop the SVC 0x0015 (HALT) and unhandled-READ-EOF halt
+ * paths already run inline, now shared so any other "this session is
+ * ending" point (a driver stopping the run loop for --max-steps/
+ * --break/--watch, or gpcops.c's embedded-engine release hook) can get
+ * the same guarantee: a program's still-buffered last WRITE'd line is
+ * never silently dropped just because it never itself executed a HALT.
+ * Idempotent -- already-flushed channels have lineBufLen[ch] == 0 and
+ * are skipped, so calling this after a HALT/EOF-triggered flush already
+ * ran is a safe no-op, not a double flush. */
+void halucp_flush_all_pending(HalUCP *h);
+
 /* Wired into cpu->halUCPLog. */
 void halucp_log_cb(void *halUCPvp, const char *msg);
 
