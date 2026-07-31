@@ -93,14 +93,38 @@ void iopls_setBST(IOPLocalStore *ls, uint32_t v) {
 }
 
 /* ---------------------------------------------------------------------
- * MIA (networking stub — see iop.h header comment)
+ * MIA (networking stub, or servicer-backed — see iop.h header comment)
  * ------------------------------------------------------------------- */
 
 void mia_init(MIA *m, int bceNum) { m->bceNum = bceNum; }
-bool mia_data_available(MIA *m) { (void)m; return false; }
-uint32_t mia_get_data(MIA *m) { (void)m; return 0; }
-void mia_xmit_word(MIA *m, uint32_t halfword) { (void)m; (void)halfword; }
-void mia_xmit_cmd(MIA *m, uint32_t cmd24) { (void)m; (void)cmd24; }
+
+bool mia_data_available(struct IOP *iop, MIA *m) {
+    if (!iop->servicer) return false;
+    GpcServiceArgs args = {.busID = m->bceNum, .address = 0, .word = 0};
+    return iop->servicer(iop->servicerState, GPC_SVC_RECV_POLL, &args);
+}
+
+uint32_t mia_get_data(struct IOP *iop, MIA *m) {
+    if (!iop->servicer) return 0;
+    GpcServiceArgs args = {.busID = m->bceNum, .address = 0, .word = 0};
+    if (iop->servicer(iop->servicerState, GPC_SVC_RECV_WORD, &args)) return args.word;
+    return 0;
+}
+
+void mia_xmit_word(struct IOP *iop, MIA *m, uint32_t halfword) {
+    if (!iop->servicer) return;
+    GpcServiceArgs args = {.busID = m->bceNum, .address = 0, .word = halfword};
+    iop->servicer(iop->servicerState, GPC_SVC_XMIT_WORD, &args);
+}
+
+void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
+    if (!iop->servicer) return;
+    /* IUA occupies bits 19-23 of the 24-bit command word (see
+     * exec_CMDI/exec_CMD in iop_bce_instr.c, which build it as
+     * (IUA << 19) | rest). */
+    GpcServiceArgs args = {.busID = m->bceNum, .address = (int)((cmd24 >> 19) & 0x1fu), .word = cmd24};
+    iop->servicer(iop->servicerState, GPC_SVC_XMIT_CMD, &args);
+}
 
 void bce_init(BCE *b, int bceNum) {
     b->bceNum = bceNum;
@@ -187,6 +211,9 @@ void iop_init(IOP *iop, struct CPU *cpu) {
 
     dmaq_init(&iop->dmaQueue);
     iop->clockCycleCount = 0;
+
+    iop->servicer = NULL;
+    iop->servicerState = NULL;
 }
 
 void iop_free(IOP *iop) {
@@ -194,6 +221,11 @@ void iop_free(IOP *iop) {
     registerfile_free(&iop->regInterrupts);
     iopls_free(&iop->ls);
     dmaq_free(&iop->dmaQueue);
+}
+
+void iop_set_servicer(IOP *iop, GpcServicerFn fn, GpcState *state) {
+    iop->servicer = fn;
+    iop->servicerState = state;
 }
 
 void iop_exec_channel_control(IOP *iop) { (void)iop; }
@@ -207,12 +239,12 @@ void iop_exec_dma_queue(IOP *iop) {
         /* IOP reading from main memory (transmit to bus) */
         uint32_t data = mcm_get16(&iop->cpu->mainStorage, req.addr);
         iopls_setD(&iop->ls, data);
-        if (req.bce) mia_xmit_word(&req.bce->mia, data);
+        if (req.bce) mia_xmit_word(iop, &req.bce->mia, data);
     } else {
         /* IOP writing to main memory (receive from bus) */
         uint32_t data;
-        if (req.bce && mia_data_available(&req.bce->mia)) {
-            data = mia_get_data(&req.bce->mia);
+        if (req.bce && mia_data_available(iop, &req.bce->mia)) {
+            data = mia_get_data(iop, &req.bce->mia);
             iopls_setD(&iop->ls, data);
         } else {
             data = iopls_getD(&iop->ls);

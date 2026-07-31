@@ -18,6 +18,10 @@ void ap101_exec1(AP101 *gpc) {
     iop_exec(&gpc->iop);
 }
 
+void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, GpcState *state) {
+    iop_set_servicer(&gpc->iop, fn, state);
+}
+
 void ap101_reset(AP101 *gpc) {
     for (int bank = 0; bank <= 2; bank++) {
         for (int i = 0; i <= 7; i++) {

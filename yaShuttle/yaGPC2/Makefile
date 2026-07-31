@@ -50,7 +50,7 @@ $(BUILD_DIR):
 
 TEST_BIN_DIR := $(BUILD_DIR)/test
 
-UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors
+UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_gpcops
 
 test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS))
 	./test/run_all.sh
@@ -83,10 +83,10 @@ $(TEST_BIN_DIR)/test_floatIBM: test/test_floatIBM.c src/floatIBM.c src/floatIBM.
 
 IOP_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c
 
-$(TEST_BIN_DIR)/test_cpu_ea: test/test_cpu_ea.c src/cpu.c src/cpu.h src/regmem.c src/mcm.c src/membus.c src/util.c $(IOP_DEPS) test/cpu_ea_fixtures.h | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/test_cpu_ea.c src/cpu.c src/regmem.c src/mcm.c src/membus.c src/util.c $(IOP_DEPS) $(LDLIBS)
+$(TEST_BIN_DIR)/test_cpu_ea: test/test_cpu_ea.c src/cpu.c src/cpu.h src/regmem.c src/mcm.c src/membus.c src/util.c src/timing.c $(IOP_DEPS) test/cpu_ea_fixtures.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_cpu_ea.c src/cpu.c src/regmem.c src/mcm.c src/membus.c src/util.c src/timing.c $(IOP_DEPS) $(LDLIBS)
 
-CPU_INSTR_DEPS := src/cpu_instr.c src/cpu.c src/regmem.c src/mcm.c src/membus.c src/util.c src/floatIBM.c src/q31.c src/strfmt.c $(IOP_DEPS)
+CPU_INSTR_DEPS := src/cpu_instr.c src/cpu.c src/regmem.c src/mcm.c src/membus.c src/util.c src/floatIBM.c src/q31.c src/strfmt.c src/timing.c $(IOP_DEPS)
 
 $(TEST_BIN_DIR)/test_cpu_instr_decode: test/test_cpu_instr_decode.c $(CPU_INSTR_DEPS) src/cpu_instr.h test/cpu_instr_decode_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_cpu_instr_decode.c $(CPU_INSTR_DEPS) $(LDLIBS)
@@ -94,7 +94,7 @@ $(TEST_BIN_DIR)/test_cpu_instr_decode: test/test_cpu_instr_decode.c $(CPU_INSTR_
 $(TEST_BIN_DIR)/test_cpu_instr_exec: test/test_cpu_instr_exec.c $(CPU_INSTR_DEPS) src/cpu_instr.h test/cpu_instr_exec_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_cpu_instr_exec.c $(CPU_INSTR_DEPS) $(LDLIBS)
 
-IOP_TEST_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/regmem.c src/mcm.c src/membus.c src/util.c src/cpu.c src/floatIBM.c src/q31.c
+IOP_TEST_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/regmem.c src/mcm.c src/membus.c src/util.c src/cpu.c src/floatIBM.c src/q31.c src/timing.c
 
 $(TEST_BIN_DIR)/test_iop_bce_exec: test/test_iop_bce_exec.c $(IOP_TEST_DEPS) src/iop.h test/iop_bce_exec_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_bce_exec.c $(IOP_TEST_DEPS) $(LDLIBS)
@@ -107,6 +107,15 @@ $(TEST_BIN_DIR)/test_instr_tostr: test/test_instr_tostr.c $(CPU_INSTR_DEPS) src/
 
 $(TEST_BIN_DIR)/test_iop_exec_processors: test/test_iop_exec_processors.c $(IOP_TEST_DEPS) src/iop.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_exec_processors.c $(IOP_TEST_DEPS) $(LDLIBS)
+
+# Everything except main.c (which defines its own main() and would clash
+# with test_gpcops.c's) -- test_gpcops exercises the yaGpcIntegration.h
+# embedding surface (src/gpcops.c) plus the servicer wiring in src/iop.c,
+# both of which pull in most of the tree transitively anyway.
+GPCOPS_TEST_DEPS := $(filter-out $(SRC_DIR)/main.c,$(SRCS))
+
+$(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(GPCOPS_TEST_DEPS) src/gpcops.h src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_gpcops.c $(GPCOPS_TEST_DEPS) $(LDLIBS)
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN)

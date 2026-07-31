@@ -85,7 +85,6 @@ struct Debugger {
     long instructionsThisResume;
 
     long currentStep;
-    double cumulativeTimeUs; /* see debugger_add_instr_time()/src/timing.h */
 
     char lastLine[256];
     bool hasLastLine;
@@ -461,7 +460,7 @@ static void format_current_location(Debugger *dbg, AGEHarness *age, char *out, s
     char stepStr[32];
     str_lpad(stepStr, sizeof stepStr, stepNum, " ", 5);
 
-    snprintf(out, outSize, "[%s] T=%.2f >> %s %s: %s %s  %s", stepStr, dbg->cumulativeTimeUs, niaHex, csect, hw1Hex,
+    snprintf(out, outSize, "[%s] T=%.2f >> %s %s: %s %s  %s", stepStr, age->gpc.cpu.elapsedTimeUs, niaHex, csect, hw1Hex,
              hw2Hex, disasm);
 }
 
@@ -1203,7 +1202,7 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
     }
     if (cmd_is(cmd, "steps", NULL)) {
         printf("Step count: %ld\n", dbg->currentStep);
-        printf("Elapsed instruction time: %.2f\n", dbg->cumulativeTimeUs);
+        printf("Elapsed instruction time: %.2f\n", age->gpc.cpu.elapsedTimeUs);
         return false;
     }
     if (cmd_is(cmd, "backtrace", "bt", NULL)) {
@@ -1324,10 +1323,6 @@ void debugger_free(Debugger *dbg) {
 bool debugger_wants_trace(const Debugger *dbg) { return dbg->traceEnabled; }
 
 int debugger_line_width(const Debugger *dbg) { return dbg->lineWidth; }
-
-double debugger_elapsed_time(const Debugger *dbg) { return dbg->cumulativeTimeUs; }
-
-void debugger_add_instr_time(Debugger *dbg, double us) { dbg->cumulativeTimeUs += us; }
 
 /* Formats `changes` as "NAME: OLD->NEW, NAME: OLD->NEW, ..." (same token
  * format run.c's own flat join uses), wrapped so no printed line exceeds

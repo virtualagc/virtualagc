@@ -54,6 +54,19 @@ typedef struct {
  * the result (e.g. reset()'s internal replay). */
 void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const Options *opts, ConfigureResult *out);
 
+/* Minimal black-box initializer for embedding (see yaGpcIntegration.h's
+ * GpcInitializerFn): calls ageharness_init(age) then loads fcmPath, with
+ * no Options/symbol-table/entry-point concerns. Entry point is left
+ * whatever cpu_init()'s PSW defaults to -- call ageharness_set_entry_point()
+ * separately afterward if a specific start address is needed. Not called
+ * anywhere in the standalone `gpc run` CLI path (which uses
+ * ageharness_configure_from_opts() instead); existing behavior there is
+ * unchanged. Like load_fcm(), a missing/unreadable fcmPath prints an
+ * error and exits(1) rather than returning false -- matching this file's
+ * existing failure convention throughout (see load_fcm()'s own comment).
+ * The bool return is for future graceful-failure support. */
+bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath);
+
 void ageharness_set_entry_point(AGEHarness *age, uint32_t addr);
 
 typedef struct {

@@ -5,13 +5,22 @@
  * bank. See iop_bce_instr.h/iop_msc_instr.h for the two instruction sets.
  *
  * Networking (com/bus.civet's real UDP multicast, used by MIA to talk to
- * other GPCs/BCEs over the simulated hardware bus) is out of scope: a
- * batch `gpc run` process has no network peers, and network I/O doesn't
- * affect captured stdout/stderr/output-file bytes. MIA is ported here as
- * an inert stub — dataAvailable() always false, getData() always 0,
- * xmitWord/xmitCmd no-ops — which is observably identical to a real MIA
- * that never receives anything (the only case that occurs in a
- * single-process batch run). */
+ * other GPCs/BCEs over the simulated hardware bus) is out of scope for
+ * standalone `gpc run`: a batch process has no network peers, and network
+ * I/O doesn't affect captured stdout/stderr/output-file bytes. MIA is
+ * ported here as an inert stub by default — dataAvailable() always
+ * false, getData() always 0, xmitWord/xmitCmd no-ops — observably
+ * identical to a real MIA that never receives anything (the only case
+ * that occurs in a single-process batch run).
+ *
+ * When embedded in a larger simulator (see yaGpcIntegration.h), an
+ * externally-supplied GpcServicerFn can be installed via
+ * iop_set_servicer()/ap101_set_servicer(); when set, mia_xmit_word/
+ * mia_xmit_cmd/mia_data_available/mia_get_data route through it instead
+ * of the stub. This is already the natural word/command-level boundary
+ * for that -- BCE opcodes hand whole 16/24-bit words to these functions
+ * atomically, with no bit-level serialization simulated. With no
+ * servicer installed, behavior is byte-for-byte the same stub as before. */
 #ifndef YAGPC_IOP_H
 #define YAGPC_IOP_H
 
@@ -21,6 +30,7 @@
 #include "instr.h"
 #include "mcm.h"
 #include "regmem.h"
+#include "yaGpcIntegration.h"
 
 struct CPU; /* forward decl; defined in cpu.h */
 struct IOP;
@@ -108,17 +118,17 @@ void iopls_setACC(IOPLocalStore *ls, uint32_t v);
 uint32_t iopls_getBST(IOPLocalStore *ls);
 void iopls_setBST(IOPLocalStore *ls, uint32_t v);
 
-/* MIA — stub, see header comment. bceNum kept only for parity with the
- * JS constructor signature; unused by the stub behavior. */
+/* MIA — stub (or servicer-backed), see header comment. bceNum doubles as
+ * GpcServiceArgs.busID when a servicer is installed. */
 typedef struct {
     int bceNum;
 } MIA;
 
 void mia_init(MIA *m, int bceNum);
-bool mia_data_available(MIA *m);
-uint32_t mia_get_data(MIA *m);
-void mia_xmit_word(MIA *m, uint32_t halfword);
-void mia_xmit_cmd(MIA *m, uint32_t cmd24);
+bool mia_data_available(struct IOP *iop, MIA *m);
+uint32_t mia_get_data(struct IOP *iop, MIA *m);
+void mia_xmit_word(struct IOP *iop, MIA *m, uint32_t halfword);
+void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24);
 
 typedef struct {
     int bceNum;
@@ -184,10 +194,17 @@ typedef struct IOP {
 
     DMAQueue dmaQueue;
     long clockCycleCount;
+
+    /* See header comment: NULL (default) preserves the exact inert-stub
+     * MIA behavior; set via iop_set_servicer()/ap101_set_servicer(). */
+    GpcServicerFn servicer;
+    GpcState *servicerState;
 } IOP;
 
 void iop_init(IOP *iop, struct CPU *cpu);
 void iop_free(IOP *iop);
+
+void iop_set_servicer(IOP *iop, GpcServicerFn fn, GpcState *state);
 
 void iop_exec(IOP *iop);
 void iop_exec_channel_control(IOP *iop);

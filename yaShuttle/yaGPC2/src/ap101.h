@@ -31,4 +31,10 @@ void ap101_free(AP101 *gpc);
 void ap101_exec1(AP101 *gpc);
 void ap101_reset(AP101 *gpc);
 
+/* Installs (or clears, with fn=NULL) an externally-supplied servicer for
+ * peripheral I/O -- see iop.h's MIA/servicer header comment and
+ * yaGpcIntegration.h. Not called anywhere in the standalone `gpc run`
+ * CLI path; a GPC with no servicer installed behaves exactly as before. */
+void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, GpcState *state);
+
 #endif

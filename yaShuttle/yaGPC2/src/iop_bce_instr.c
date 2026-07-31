@@ -117,8 +117,8 @@ static void exec_WIX(IOP *t, DInstr *v) {
         register_setbit32(&t->regBusyWait, t->curPE, 0);
     } else {
         BCE *bce = iop_cur_bce(t);
-        if (bce && mia_data_available(&bce->mia)) {
-            uint32_t data = mia_get_data(&bce->mia);
+        if (bce && mia_data_available(t, &bce->mia)) {
+            uint32_t data = mia_get_data(t, &bce->mia);
             uint32_t listenCmd = (data & 0x01f00000u) >> 20;
             if (listenCmd == 0x8) {
                 uint32_t iua = (data & 0x00003e00u) >> 9;
@@ -142,7 +142,7 @@ static void exec_CMDI(IOP *t, DInstr *v) {
         uint32_t cmd = (df_get(v, 'u') << 19) | df_get(v, 'i');
         register_set32(iopls_IUAR(&t->ls), df_get(v, 'u'));
         BCE *bce = iop_cur_bce(t);
-        if (bce) mia_xmit_cmd(&bce->mia, cmd);
+        if (bce) mia_xmit_cmd(t, &bce->mia, cmd);
     }
     iop_incr_nia(t, 2);
 }
@@ -153,7 +153,7 @@ static void exec_CMD(IOP *t, DInstr *v) {
     if (register_getbit32(&t->regXmitEna, t->curPE)) {
         register_set32(iopls_IUAR(&t->ls), (cmd >> 19) & 0x1f);
         BCE *bce = iop_cur_bce(t);
-        if (bce) mia_xmit_cmd(&bce->mia, cmd);
+        if (bce) mia_xmit_cmd(t, &bce->mia, cmd);
     }
     iop_incr_nia(t, 2);
 }
@@ -199,7 +199,7 @@ static void bce_process_mio_command(IOP *t, uint32_t pc) {
     uint32_t cmdWord = iop_g_eaf(t, pc + 2) & 0x00ffffffu;
     register_set32(iopls_IUAR(&t->ls), (cmdWord >> 19) & 0x1fu);
     BCE *bce = iop_cur_bce(t);
-    if (bce) mia_xmit_cmd(&bce->mia, cmdWord);
+    if (bce) mia_xmit_cmd(t, &bce->mia, cmdWord);
 }
 
 static void exec_MOUT(IOP *t, DInstr *v) {

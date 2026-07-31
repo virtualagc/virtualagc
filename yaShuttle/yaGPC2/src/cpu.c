@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "floatIBM.h"
+#include "timing.h"
 
 /* ---------------------------------------------------------------------
  * Construction
@@ -31,6 +32,7 @@ void cpu_init(CPU *cpu) {
     cpu->counter1Enabled = false;
     cpu->counter2Enabled = false;
     cpu->fcosMode = false;
+    cpu->elapsedTimeUs = 0.0;
 }
 
 void cpu_free(CPU *cpu) {
@@ -551,7 +553,19 @@ void cpu_exec1(CPU *cpu) {
         cpu->intCode = 0x0009;
     }
 
+    /* Captured before execution -- some operands instr_time_us() needs
+     * (e.g. MVH's count) aren't safe to re-read afterward. Computed
+     * unconditionally now (previously only under --debug, in run.c's
+     * batchrunner_step) so elapsedTimeUs stays meaningful whether or not
+     * a debugger is attached -- see cpu.h's elapsedTimeUs comment. */
+    uint32_t timePreN = instr_time_pre_n(cpu, desc, &v, hw1);
+
     if (desc->e) desc->e(cpu, &v);
+
+    {
+        bool branchTaken = psw_get_nia(&cpu->psw) != nia + (uint32_t)desc->pb.origLen;
+        cpu->elapsedTimeUs += instr_time_us(desc, &v, timePreN, branchTaken);
+    }
 
     if (cpu->counter1Enabled) {
         cpu->counter1--;

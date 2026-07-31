@@ -69,6 +69,13 @@ typedef struct CPU {
      * get it, and instead sees whatever raw truncation the bare CVFX
      * instruction itself produces. */
     bool fcosMode;
+
+    /* Cumulative estimated AP-101S execution time (HAL/S-FC's own
+     * unlabeled time units -- see timing.h), summed unconditionally by
+     * every cpu_exec1() call, not just under --debug -- a GPC embedded
+     * in a larger simulator (see yaGpcIntegration.h) needs this whether
+     * or not a debugger is attached. */
+    double elapsedTimeUs;
 } CPU;
 
 void cpu_init(CPU *cpu);

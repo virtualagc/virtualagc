@@ -51,14 +51,6 @@ bool debugger_wants_trace(const Debugger *dbg);
  * See debugger_format_changes(). */
 int debugger_line_width(const Debugger *dbg);
 
-/* Cumulative AP-101S execution time (HAL/S-FC's own unlabeled time
- * units -- see src/timing.h) for every instruction executed so far,
- * summed by run.c's batchrunner_step() via debugger_add_instr_time()
- * as each instruction completes. Shown alongside the "[NNNNN]" step
- * marker on every displayed instruction, per user request. */
-double debugger_elapsed_time(const Debugger *dbg);
-void debugger_add_instr_time(Debugger *dbg, double us);
-
 /* Formats a trace line's register-changes list (as run.c's own flat
  * comma-join would: "NAME: OLD->NEW, NAME: OLD->NEW, ..."), wrapped to
  * fit debugger_line_width() columns with continuation lines aligned

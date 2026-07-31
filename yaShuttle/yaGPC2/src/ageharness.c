@@ -143,6 +143,12 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
     }
 }
 
+bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath) {
+    ageharness_init(age);
+    load_fcm(age, fcmPath); /* exits(1) on hard failure -- see header comment */
+    return true;
+}
+
 void ageharness_set_entry_point(AGEHarness *age, uint32_t addr) {
     psw_set_nia(&age->gpc.cpu.psw, addr);
     psw_set_wait_state(&age->gpc.cpu.psw, false);
