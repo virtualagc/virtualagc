@@ -5085,17 +5085,25 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
                      * cols directly, same technique as MATRIX WRITE
                      * items) -- a VAC-held computed MATRIX expression
                      * result falls back to the generic default, same
-                     * caveat as that case. INVERSE(49)/TRANSPOSE(56)/
-                     * TRACE(34) are almost certainly governed by the same
-                     * underlying routines (DET/INVERSE both cite MM12SN/
-                     * MM14SN in this file's own comments) but this same
-                     * calibration run's own H=-group boundaries didn't
-                     * separate most of their individual calls cleanly (a
-                     * different grouping issue than the one already
-                     * documented for WRITE/READ items, not yet root-
-                     * caused) -- left on the generic default rather than
-                     * fit from 1-2 unreliable points; a real follow-up,
-                     * not abandoned. */
+                     * caveat as that case.
+                     *
+                     * (Root-cause note, since a previous version of this
+                     * comment wrongly called this a dead end: the first
+                     * attempt at this same calibration run genuinely did
+                     * fail to separate most INVERSE/TRANSPOSE calls into
+                     * their own group, but not because of anything in
+                     * yaGPC2 -- it was disassembling halmat.bin, while
+                     * yaGPC2's own H= word indices are numbered against
+                     * optmat.bin, the optimizer-expanded stream it
+                     * actually executes. The two only diverge when the
+                     * optimizer rewrites something; a whole-MATRIX BFNC
+                     * result (INVERSE/TRANSPOSE, unlike DET/TRACE's plain
+                     * SCALAR one) gets wrapped in an extra ADLP...DLPE
+                     * arrayed-paragraph bracket in optmat.bin that
+                     * halmat.bin doesn't have, shifting every later
+                     * index. Switching the calibration scripts to
+                     * optmat.bin recovered full 6-size data for all
+                     * four selectors below -- see CLAUDE_LOG.md.) */
                     if (state->symtab && ins->operand_count >= 1 && ins->operands[0].qual == QUAL_SYT) {
                         const halmat_symtab_entry_t *sym =
                             halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
@@ -5108,6 +5116,57 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
                     }
                     return 13;
                 }
+                case 49: {
+                    /* INVERSE (matrix inverse): same calibration run and
+                     * technique as DET above, and the same two-regime
+                     * shape (n=2/n=3 cheap closed-form path, n>=4 a
+                     * general algorithm scaling ~n^3) -- expected, given
+                     * matrix inversion is DET's own Gaussian-elimination
+                     * machinery plus back-substitution, roughly 2-3x
+                     * DET's own cost at every size (n=8: 33619us vs DET's
+                     * 10846us). n=2 (111us), n=3 (473us) direct; n>=4
+                     * linear-regressed against n^3 gives 466 + 65/n^3,
+                     * predicting all four within 5%. Same QUAL_SYT-only
+                     * caveat as DET. */
+                    if (state->symtab && ins->operand_count >= 1 && ins->operands[0].qual == QUAL_SYT) {
+                        const halmat_symtab_entry_t *sym =
+                            halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                        if (sym && sym->shape == HALMAT_SHAPE_MATRIX && sym->rows > 0 && sym->rows == sym->cols) {
+                            int64_t n = sym->rows;
+                            if (n == 2) return 111;
+                            if (n == 3) return 473;
+                            return 466 + 65 * n * n * n;
+                        }
+                    }
+                    return 13;
+                }
+                case 56: {
+                    /* TRANSPOSE: same calibration run, but a genuinely
+                     * different shape from DET/INVERSE -- no small-n
+                     * cheap path, no algorithm switch, just a single
+                     * smooth curve across all 6 sizes (69/130/241/359/
+                     * 503/870us for n=2/3/4/5/6/8), because transposing
+                     * is a flat O(n^2) element copy with no elimination
+                     * algorithm involved. Linear-regressed against n^2
+                     * (not n^3) across all 6 points gives 19 + 13/n^2,
+                     * predicting every point within 7%. Same QUAL_SYT-
+                     * only caveat as DET/INVERSE. */
+                    if (state->symtab && ins->operand_count >= 1 && ins->operands[0].qual == QUAL_SYT) {
+                        const halmat_symtab_entry_t *sym =
+                            halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
+                        if (sym && sym->shape == HALMAT_SHAPE_MATRIX && sym->rows > 0 && sym->rows == sym->cols) {
+                            int64_t n = sym->rows;
+                            return 19 + 13 * n * n;
+                        }
+                    }
+                    return 13;
+                }
+                case 34: return 48; /* TRACE: same calibration run, but real cost (23-83us
+                                        across all 6 sizes) is small enough, and its own size
+                                        correlation weak/noisy enough (n=2 measured HIGHER than
+                                        n=3), that a flat average fits about as well as any
+                                        curve would -- a lone diagonal-sum loop is cheap enough
+                                        at any of these sizes that fixed overhead dominates. */
                 default: return 13;
             }
         }
