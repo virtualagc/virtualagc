@@ -462,9 +462,10 @@ static void fail(halmat_state_t *state, const char *fmt, ...) {
  * ever gets narrowed into (state.h). at_in_value/stop_deadline/WAIT's
  * own tick count all flow into int64_t fields/locals (wake_deadline,
  * etc.) and pass want_int32=false accordingly -- none of them have a
- * real 32-bit ceiling to enforce, and at HALMAT_TICKS_PER_SECOND=276000,
- * an ordinary multi-thousand-second WAIT/AT/IN interval can legitimately
- * exceed INT32_MAX ticks without being any kind of error. */
+ * real 32-bit ceiling to enforce, and at HALMAT_TICKS_PER_SECOND=1000000
+ * (1 tick == 1 microsecond), an ordinary multi-thousand-second WAIT/AT/IN
+ * interval can legitimately exceed INT32_MAX ticks without being any
+ * kind of error. */
 static bool schd_seconds_to_ticks(halmat_state_t *state, const resolved_value_t *v,
                                    const char *what, bool want_int32, int64_t *out_ticks) {
     double seconds = (v->kind == RV_SCALAR) ? halmat_scalar_to_double(v->scalar)
@@ -4812,45 +4813,65 @@ static void close_current_process(halmat_state_t *state, bool *branched) {
     }
 }
 
-/* Returns true for HALMAT opcodes that are purely structural/compile-
- * time bookkeeping -- markers, brackets, labels, and specifiers
- * consumed entirely by another instruction -- with NO emitted AP-101S
- * machine code of their own on real hardware, so they should contribute
- * nothing to the virtual-time model (state.h's own virtual_time
- * comment, HALMAT_TICKS_PER_SECOND's own calibration comment).
+/* Returns the number of virtual-time ticks (1 tick == 1 microsecond,
+ * HALMAT_TICKS_PER_SECOND) a real AP-101S execution of this HALMAT
+ * instruction costs. Three tiers:
  *
- * Confirmed EMPIRICALLY zero (0 attributed AP-101S instructions across
- * every occurrence) by re-running the exact same methodology
- * HALMAT_TICKS_PER_SECOND's own calibration used -- HALSFC
- * --parms="LSTALL" on the same 7 representative fixtures
- * (state.h/SCHD.md's own list), parsing pass2.rpt's interleaved
- * HALMAT/generated-AP-101S-assembly listing, tallying real assembly
- * lines attributed to each opcode between one "HALMAT:" line and the
- * next: SMRK, PXRC, NOP, XREC, WRIT, XXND, DSUB, EDCL, SINT, IINT.
- * (This same exercise also confirmed several opcodes that might LOOK
- * structural are NOT free: MDEF/PDEF -- a "Program/Procedure
- * definition header" turns out to correspond to genuine one-time
- * entry-prologue machine code, e.g. stack/register setup, not a bare
- * marker -- and DFOR/EFOR/CFOR/CTST, whose real per-iteration loop-
- * control code (bound setup, increment, condition test, branch-back)
- * is exactly what a DO FOR/DO WHILE loop's own real cost should be.)
+ * (1) Purely structural/compile-time bookkeeping opcodes -- markers,
+ * brackets, labels, and specifiers consumed entirely by another
+ * instruction -- with NO emitted AP-101S machine code of their own on
+ * real hardware: 0 ticks. Confirmed EMPIRICALLY zero (0 attributed
+ * AP-101S instructions across every occurrence) by running HALSFC
+ * --parms="LSTALL" on 7 representative fixtures (state.h/SCHD.md's own
+ * list) and parsing pass2.rpt's interleaved HALMAT/generated-AP-101S-
+ * assembly listing: SMRK, PXRC, NOP, XREC, WRIT, XXND, DSUB, EDCL,
+ * SINT, IINT. (That same exercise also confirmed several opcodes that
+ * might LOOK structural are NOT free: MDEF/PDEF -- a "Program/
+ * Procedure definition header" turns out to correspond to genuine
+ * one-time entry-prologue machine code, e.g. stack/register setup, not
+ * a bare marker -- and DFOR/EFOR/CFOR/CTST, whose real per-iteration
+ * loop-control code (bound setup, increment, condition test, branch-
+ * back) is exactly what a DO FOR/DO WHILE loop's own real cost should
+ * be -- hence DFOR/EFOR/CFOR/CTST are priced in tier (2) below rather
+ * than zeroed.) Every other zeroed opcode below shares the SAME
+ * architectural role as one of the empirically-confirmed opcodes above,
+ * or is zero by HAL/S language definition (INITIAL(...), PASS1 %macro
+ * expansion, an INLINE FUNCTION's lack of call/stack-frame overhead --
+ * all compile-time-only, USA003087) -- reasoned, not independently
+ * measured. Genuinely ambiguous opcodes (ADLP/DLPE, FILE, TDCL, ERON,
+ * EINT, ETST) are deliberately left out of this tier, falling through
+ * to tier (3)'s default instead of being guessed at.
  *
- * Every other entry below shares the SAME architectural role as one of
- * the empirically-confirmed opcodes above (a matching bracket/label/
- * specifier for the same construct family) or is zero by HAL/S
- * language definition (an INITIAL(...) specification, PASS1 %macro
- * expansion, or an INLINE FUNCTION's own lack of call/stack-frame
- * overhead are all compile-time-only by definition, USA003087) --
- * reasoned, not independently re-measured. Genuinely ambiguous opcodes
- * with no strong basis either way (ADLP/DLPE, FILE, TDCL, ERON, EINT,
- * and ETST specifically despite DTST's own zero classification -- EFOR's
- * confirmed non-zero loop-back-branch cost makes ETST's own analogous
- * role suspect) are deliberately left OUT of this list, defaulting to
- * the ordinary non-zero cost every other opcode gets, rather than
- * guessed at -- see the DB/commit history for the full writeup if this
- * needs revisiting with better evidence. */
-static bool op_is_zero_cost_time(uint16_t opcode) {
-    switch (opcode) {
+ * (2) Opcodes with a real, individually-measured per-instruction cost,
+ * derived from yaGPC2's "halmat on"+"htrace on" debug tracing (which
+ * tags each AP-101S instruction with its owning HALMAT word index) run
+ * across ~165 fixtures in tests/hal (the *.hal test-suite sources): for
+ * each HAL/S-statement block,
+ * real elapsed time inside top-level RTL/library calls (SCAL/BAL-
+ * entered, SRET/SVC/register-branch-exited, correctly folding nested
+ * RTL-internal calls like COUTP calling CASV into the one outermost
+ * call actually made by compiled code) was subtracted from the
+ * statement's own instruction-level timing, and what remained -- the
+ * statement's compiled code running in its own module, no RTL calls
+ * involved -- was equal-divided across its non-zero-cost opcodes and
+ * averaged (frequency-weighted) across every occurrence. Only opcodes
+ * with a clean measurement uninvolved with RTL calls are priced here;
+ * I/O opcodes (XXST, XXAR, and WRIT/XXND/READ/RDAL's own tier-1 zero
+ * classification) are deliberately left for a follow-on phase, since
+ * their real cost is dominated by RTL calls (IOINIT/COUTP/CASV/CATV)
+ * that don't correlate 1:1 with any single opcode -- see CLAUDE_LOG.md.
+ * BFNC (builtin function calls) is also left to a follow-on phase,
+ * since a single opcode covers many different functions (selected by
+ * ins->tag) with very different costs, needing its own tag-keyed table.
+ *
+ * (3) Everything else: the flat 1-tick-at-the-previous-16800-ticks/sec-
+ * rate charge this model used before per-opcode weighting existed,
+ * carried forward unchanged (round(1e6/16800) = 60 ticks at the current
+ * 1e6-ticks/sec rate) so opcodes outside this pass's scope keep their
+ * prior modeled duration exactly, rather than silently changing when
+ * HALMAT_TICKS_PER_SECOND's own scale changed. */
+static int64_t op_cost_ticks(const halmat_instr_t *ins) {
+    switch (ins->opcode) {
         case OP_SMRK: case OP_PXRC: case OP_NOP: case OP_XREC:
         case OP_WRIT: case OP_XXND: case OP_DSUB: case OP_EDCL:
         case OP_SINT: case OP_IINT:
@@ -4863,9 +4884,27 @@ static bool op_is_zero_cost_time(uint16_t opcode) {
         case OP_STRI: case OP_SLRI: case OP_ELRI: case OP_ETRI:
         case OP_BINT: case OP_CINT: case OP_MINT: case OP_VINT:
         case OP_NINT: case OP_TINT:
-            return true;
+            return 0;
+
+        case OP_EFOR: return 1;
+        case OP_DFOR: return 0;  /* measured 0.17us, rounds to 0 */
+        case OP_CLOS: return 4;
+        case OP_SASN: return 9;
+        case OP_IASN: return 5;
+        case OP_BASN: return 2;
+        case OP_CASN: return 13;
+        case OP_VASN: return 7;
+        case OP_MASN: return 29;
+        case OP_SADD: return 1;
+        case OP_IADD: return 1;
+        case OP_FCAL: return 6;
+        case OP_LFNC: return 3;
+        case OP_PCAL: return 5;
+        case OP_RTRN: return 2;
+        case OP_CTST: return 2;
+
         default:
-            return false;
+            return 60;
     }
 }
 
@@ -4888,7 +4927,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
          * ACTUAL instruction executed, not just once for the whole
          * replay; see interp_step()'s own comment at its former
          * increment site. */
-        if (!op_is_zero_cost_time(ins->opcode)) state->virtual_time++;
+        state->virtual_time += op_cost_ticks(ins);
         resolved_value_t a, b;
         bool branched = false;
 
@@ -13022,8 +13061,9 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * fixed-width int32_t field of halmat_task_t), WAIT's tick
                  * count is only ever added into wake_deadline (int64_t) --
                  * there's no persisted 32-bit field it must fit into, and
-                 * at HALMAT_TICKS_PER_SECOND=276000, a real (if unusually
-                 * long) WAIT(10000) already exceeds INT32_MAX ticks, so
+                 * at HALMAT_TICKS_PER_SECOND=1000000 (1 tick == 1
+                 * microsecond), a real (if unusually long) WAIT(2200)
+                 * already exceeds INT32_MAX ticks, so
                  * narrowing here would fail loudly on a perfectly ordinary
                  * interval. want_int32=false matches at_in_value/
                  * stop_deadline's own int64_t treatment above. */
@@ -13483,7 +13523,7 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     state->tasks[next].saved_pc = state->pc;
     /* virtual_time itself is now incremented inside exec_one() (see its
      * own comment), per REAL instruction actually executed and weighted
-     * by op_is_zero_cost_time() -- not here, unconditionally, per
+     * by op_cost_ticks() -- not here, unconditionally, per
      * interp_step() call. This matters for an arrayed-paragraph replay
      * (the branch above): run_arrayed_paragraph() calls exec_one() once
      * per real instruction in the replay (potentially many for a large

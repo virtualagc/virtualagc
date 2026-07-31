@@ -23,8 +23,44 @@
 /* Ticks-per-(real-)second calibration for the virtual-clock scheduler
  * (see halmat_state_t's virtual_time/scheduler comment block below).
  *
- * CURRENT DERIVATION (direct dynamic runtime comparison, superseding
- * the static pass2.rpt-based method below): for each of 6 representative
+ * CURRENT: 1 tick == 1 microsecond exactly (1,000,000 ticks/sec), chosen
+ * once interp.c's op_cost_ticks() moved from a single flat per-
+ * instruction tick charge to individually-measured per-opcode weights
+ * (see that function's own comment). At 1 tick/microsecond, every
+ * weight-table entry is just the measured microsecond value directly --
+ * no conversion or rounding indirection needed. Opcodes op_cost_ticks()
+ * hasn't individually measured yet fall back to a flat 60 ticks (60us),
+ * chosen to exactly reproduce the OLD flat charge's real-world duration
+ * (1 tick at the PREVIOUS pooled-ratio rate below, 16800 ticks/sec, =
+ * 1e6/16800 ~= 59.52us, rounds to 60) -- so this unit change alone
+ * doesn't silently alter the modeled cost of any opcode outside
+ * op_cost_ticks()'s newly-weighted set; only the explicitly reweighted
+ * opcodes actually change behavior. See CLAUDE_LOG.md and
+ * op_cost_ticks()'s own comment (interp.c) for the per-opcode derivation
+ * methodology: yaGPC2's "halmat on"+"htrace on" debug tracing (tagging
+ * each AP-101S instruction with its owning HALMAT word index) run across
+ * ~165 tests/hal fixtures, correctly folding nested RTL/library calls
+ * (e.g. COUTP internally calling CASV) into the one outermost call
+ * actually made by compiled program code rather than double-counting
+ * them, reconstructed from the AP-101S opcodes themselves (SCAL/BAL
+ * push a return context, SRET/SVC/a register-target branch pop one) --
+ * self-validated per fixture via local-time-sum + call-time-sum ==
+ * (last root-module instant - first root-module instant). WRITE/READ
+ * I/O opcodes and BFNC (builtin function calls, one opcode covering many
+ * different functions) are deliberately NOT YET covered by
+ * op_cost_ticks()'s per-opcode weights -- their real cost is dominated
+ * by RTL/library calls that don't correlate 1:1 with a single opcode, or
+ * (BFNC) need a tag-keyed table instead of a flat per-opcode one; both
+ * remain on the flat 60-tick default pending a follow-on phase.
+ *
+ * PREVIOUS POOLED-RATE DERIVATION (a single flat multiplier applied to
+ * every non-zero-cost HALMAT instruction equally, superseded above by
+ * individually-measured per-opcode weights for the opcodes covered so
+ * far, but this pooled rate is still literally what the 60-tick default
+ * above preserves for every opcode NOT yet covered, and its own
+ * methodology remains the historical basis for that number). Direct
+ * dynamic runtime comparison, itself superseding the static
+ * pass2.rpt-based method further below: for each of 6 representative
  * test fixtures (test_int_arith2.hal, test_pcal.hal, test_scalar_arith.
  * hal, test_write_lit.hal, test_bit.hal, plus the user's own HELLO.hal),
  * compiled+linked+run through BOTH `compileLinkRun --debug` (real
@@ -44,7 +80,7 @@
  * entirely attributable to this loop-repetition-undercounting gap.
  *
  * Results (yaGPC2 us / yaHALMAT2 us, current-model virtual_time already
- * excluding op_is_zero_cost_time() opcodes -- see that function's own
+ * excluding op_cost_ticks()'s zero-cost opcodes -- see that function's own
  * comment): HELLO 10970.23/547.10, int_arith2 671.98/50.72,
  * scalar_arith 130.60/25.36, bit 585.28/83.33, pcal 327.17/61.59,
  * write_lit 171.20/14.49. Two ADDITIONAL fixtures from the original
@@ -101,7 +137,7 @@
  * determine exact AP-101S code shape, and no calibration sample this
  * small can be fully representative of every program) but sourced, not
  * asserted. */
-#define HALMAT_TICKS_PER_SECOND 16800
+#define HALMAT_TICKS_PER_SECOND 1000000
 
 /* interp_run()'s wall-clock pacing window (see its own comment in
  * interp.c): execute a burst of instructions, then check the wall
@@ -1490,17 +1526,18 @@ struct halmat_state {
      * and a non-repeating task's stop_kind is stored but never consulted
      * (OP_CLOS's rearm check only reads it when repeat_kind != NONE), so
      * the task simply runs once and terminates normally. virtual_time
-     * itself ticks 1:1 per REAL HALMAT instruction executed (exec_one()'s
+     * itself accrues per REAL HALMAT instruction executed (exec_one()'s
      * own per-instruction granularity -- correctly per-instruction even
      * inside an arrayed-paragraph replay, which can call exec_one() many
      * times for what interp_step() itself only sees as a single call),
-     * EXCEPT for opcodes op_is_zero_cost_time() (interp.c) identifies as
-     * purely structural/compile-time bookkeeping with no emitted AP-101S
-     * machine code of their own (SMRK, PXRC, the whole Class-8
-     * INITIAL(...) family, and similar markers/brackets/specifiers) --
-     * those contribute zero ticks, confirmed via the same real-compile
-     * methodology HALMAT_TICKS_PER_SECOND's own calibration below used.
-     * But WAIT's duration and
+     * weighted per opcode by op_cost_ticks() (interp.c): 0 ticks for
+     * opcodes confirmed purely structural/compile-time bookkeeping with
+     * no emitted AP-101S machine code of their own (SMRK, PXRC, the
+     * whole Class-8 INITIAL(...) family, and similar markers/brackets/
+     * specifiers); individually-measured real per-instruction costs
+     * (derived from yaGPC2 halmat+htrace tracing, see op_cost_ticks()'s
+     * own comment) for opcodes covered so far; a flat legacy default for
+     * everything not yet individually measured. But WAIT's duration and
      * SCHD's AT/IN/EVERY/AFTER/stopping-deadline expressions are no longer
      * treated as raw tick counts. They're genuine HAL/S numeric-seconds
      * values, converted to ticks via HALMAT_TICKS_PER_SECOND (above) before
