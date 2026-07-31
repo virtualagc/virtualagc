@@ -584,7 +584,7 @@ class cmem:
 
     def _mode4(self):
         name = self._readSdfName()
-        print(f"'{name}'")
+        #print(f"'{name}'")
 
         for i in range(self.npages):
             if self._nameForPad(i) == name:
