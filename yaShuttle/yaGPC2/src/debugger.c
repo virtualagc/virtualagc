@@ -94,6 +94,13 @@ struct Debugger {
      * unless --source-map was given -- zero cost otherwise. */
     SourceMap *srcmap;
     int lastStmt;
+    char lastModule[64]; /* statement numbers are only unique WITHIN a
+                          * compiled unit (see sourcemap.h) -- module
+                          * must be compared alongside lastStmt, or
+                          * moving from one unit's statement N to a
+                          * different unit's own statement N would look
+                          * like no change and wrongly suppress the
+                          * reprint below */
     bool hasLastStmt; /* only show a source line when it differs from the
                        * last one shown, matching yaHALMAT2's --debug mode */
 
@@ -531,14 +538,22 @@ static void print_source_lines(int stmt, const char *const *lines, int count) {
 }
 
 /* Prints the HAL/S source line(s) active at addr, if a source map is
- * loaded and one is mapped there. Returns true iff something was
- * printed (callers use this to distinguish "no source map" from "no
- * statement mapped at this exact address"). */
-static bool show_source_line(Debugger *dbg, uint32_t addr) {
+ * loaded and one is mapped there. Resolves addr's owning compiled unit
+ * via symtable_get_module_at() first -- a linked image is in general
+ * the result of linking many separately-compiled HAL/S units, and a
+ * SourceMap's own lookup is keyed by that module name (see
+ * sourcemap.h) -- and naturally shows nothing (not an error) when addr
+ * belongs to a non-HAL/S runtime-library routine with no unit of its
+ * own in the map. Returns true iff something was printed (callers use
+ * this to distinguish "no source map" from "no statement mapped at
+ * this exact address"). */
+static bool show_source_line(Debugger *dbg, AGEHarness *age, uint32_t addr) {
     if (!dbg->srcmap) return false;
+    const char *module = symtable_get_module_at(&age->sym, addr);
+    if (!module) return false;
     int stmt = 0;
     const char *const *lines = NULL;
-    int count = sourcemap_lookup(dbg->srcmap, addr, &stmt, &lines);
+    int count = sourcemap_lookup(dbg->srcmap, module, addr, &stmt, &lines);
     if (count == 0) return false;
     print_source_lines(stmt, lines, count);
     return true;
@@ -546,18 +561,24 @@ static bool show_source_line(Debugger *dbg, uint32_t addr) {
 
 /* Auto-display variant used both at debugger stops and (new) as
  * instructions flow by during 'trace'/'htrace': shows the source
- * line(s) only when the statement differs from the last one shown,
- * matching yaHALMAT2's --debug behavior, sharing the same
- * lastStmt/hasLastStmt tracking in both cases so flowing past a
- * statement and later stopping inside it doesn't reprint it twice. */
-static void show_source_line_if_changed(Debugger *dbg, uint32_t addr) {
+ * line(s) only when the (module, statement) pair differs from the last
+ * one shown, matching yaHALMAT2's --debug behavior, sharing the same
+ * lastModule/lastStmt/hasLastStmt tracking in both cases so flowing
+ * past a statement and later stopping inside it doesn't reprint it
+ * twice. Comparing module too (not just stmt) matters because
+ * statement numbers are only unique within one compiled unit -- two
+ * different units' own statement 5 must not look like "no change". */
+static void show_source_line_if_changed(Debugger *dbg, AGEHarness *age, uint32_t addr) {
     if (!dbg->srcmap) return;
+    const char *module = symtable_get_module_at(&age->sym, addr);
+    if (!module) return;
     int stmt = 0;
     const char *const *lines = NULL;
-    int count = sourcemap_lookup(dbg->srcmap, addr, &stmt, &lines);
-    if (count > 0 && (!dbg->hasLastStmt || stmt != dbg->lastStmt)) {
+    int count = sourcemap_lookup(dbg->srcmap, module, addr, &stmt, &lines);
+    if (count > 0 && (!dbg->hasLastStmt || stmt != dbg->lastStmt || strcmp(module, dbg->lastModule) != 0)) {
         print_source_lines(stmt, lines, count);
         dbg->lastStmt = stmt;
+        snprintf(dbg->lastModule, sizeof dbg->lastModule, "%s", module);
         dbg->hasLastStmt = true;
     }
 }
@@ -1153,7 +1174,7 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
     }
     if (cmd_is(cmd, "source", "src", NULL)) {
         if (!dbg->srcmap) printf("*** No source map loaded (see --source-map)\n");
-        else if (!show_source_line(dbg, nia)) printf("*** No HAL/S source mapped at this address\n");
+        else if (!show_source_line(dbg, age, nia)) printf("*** No HAL/S source mapped at this address\n");
         return false;
     }
     if (cmd_is(cmd, "steps", NULL)) {
@@ -1389,7 +1410,7 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
          * flow by, not just at stops -- printed here (before returning)
          * so it lands just before this instruction's own trace line,
          * which run.c prints only after ap101_exec1() actually runs it. */
-        if (debugger_wants_trace(dbg)) show_source_line_if_changed(dbg, nia);
+        if (debugger_wants_trace(dbg)) show_source_line_if_changed(dbg, age, nia);
         return true;
     }
 
@@ -1398,7 +1419,7 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
 
     if (shouldStop) printf("--- stopped: %s (%ld steps) ---\n", stopMsg, step);
     show_stop_location_and_registers(dbg, age);
-    show_source_line_if_changed(dbg, nia);
+    show_source_line_if_changed(dbg, age, nia);
     if (dbg->watchCount > 0) show_watches(dbg, age);
 
     debugger_repl(dbg, age, nia, hw1, hw2);

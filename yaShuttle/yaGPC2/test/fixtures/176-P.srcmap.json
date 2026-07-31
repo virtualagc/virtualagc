@@ -1,0 +1,366 @@
+{
+ "units": [
+  {
+   "module": "176-P",
+   "statements": [
+    {
+     "stmt": 4,
+     "lines": [
+      "M| READ_ACC:",
+      "M| EXTERNAL FUNCTION(N) SUPER_VECTOR-STRUCTURE;"
+     ]
+    },
+    {
+     "stmt": 5,
+     "lines": [
+      "M|   DECLARE N INTEGER;"
+     ]
+    },
+    {
+     "stmt": 6,
+     "lines": [
+      "M| CLOSE READ_ACC;"
+     ]
+    },
+    {
+     "stmt": 7,
+     "lines": [
+      "M| P:",
+      "M| PROGRAM;"
+     ]
+    },
+    {
+     "stmt": 8,
+     "lines": [
+      "M|   STRUCTURE STATEVEC:",
+      "M|     1 POSITION SUPER_VECTOR-STRUCTURE,",
+      "M|     1 VELOCITY SUPER_VECTOR-STRUCTURE,",
+      "M|     1 ACCEL SUPER_VECTOR-STRUCTURE;"
+     ]
+    },
+    {
+     "stmt": 9,
+     "lines": [
+      "M|   DECLARE STATE STATEVEC-STRUCTURE;"
+     ]
+    },
+    {
+     "stmt": 10,
+     "lines": [
+      "M|   STRUCTURE S2:",
+      "M|     1 STATE STATEVEC-STRUCTURE,",
+      "M|     1 ATTITUDE_INFO ARRAY(3) VECTOR DOUBLE;"
+     ]
+    },
+    {
+     "stmt": 11,
+     "lines": [
+      "M|   DECLARE STATE2 S2-STRUCTURE;"
+     ]
+    },
+    {
+     "stmt": 12,
+     "lines": [
+      "M|   REPLACE TEST_DATA BY \"1\";"
+     ]
+    },
+    {
+     "stmt": 13,
+     "lines": [
+      "M|   DECLARE CYCLE INTEGER INITIAL(0);"
+     ]
+    },
+    {
+     "stmt": 14,
+     "lines": [
+      "M|   DECLARE DELTA_T CONSTANT(1 / 10);                                   /*TIME BETWEEN SAMPLES*/"
+     ]
+    },
+    {
+     "stmt": 15,
+     "lines": [
+      "E|                  +        +",
+      "M|   STATE2.STATE.ACCEL = READ_ACC(17);"
+     ]
+    },
+    {
+     "stmt": 16,
+     "lines": [
+      "E|                                 +                           +",
+      "M|   CALL INTEGRATE(STATE2.STATE.ACCEL) ASSIGN(STATE2.STATE.VELOCITY);"
+     ]
+    },
+    {
+     "stmt": 17,
+     "lines": [
+      "E|                                  +                             +",
+      "M|   CALL INTEGRATE(STATE2.STATE.VELOCITY) ASSIGN(STATE2.STATE.POSITION);"
+     ]
+    },
+    {
+     "stmt": 18,
+     "lines": [
+      "M|   CYCLE = CYCLE + 1;"
+     ]
+    },
+    {
+     "stmt": 19,
+     "lines": [
+      "E|                                         -",
+      "M|   WRITE(6) 'ACCEL=', STATE2.STATE.ACCEL.V;"
+     ]
+    },
+    {
+     "stmt": 20,
+     "lines": [
+      "E|                                          -",
+      "M|   WRITE(6) 'VEL=', STATE2.STATE.VELOCITY.V;"
+     ]
+    },
+    {
+     "stmt": 21,
+     "lines": [
+      "E|                                          -",
+      "M|   WRITE(6) 'POS=', STATE2.STATE.POSITION.V;"
+     ]
+    },
+    {
+     "stmt": 22,
+     "lines": [
+      "M|   WRITE(6) 'CYCLE=', CYCLE;"
+     ]
+    },
+    {
+     "stmt": 23,
+     "lines": [
+      "M| INTEGRATE:",
+      "M| PROCEDURE(INPUT) ASSIGN(OUTPUT);"
+     ]
+    },
+    {
+     "stmt": 24,
+     "lines": [
+      "M|   DECLARE SUPER_VECTOR-STRUCTURE,",
+      "M|             INPUT, OUTPUT;"
+     ]
+    },
+    {
+     "stmt": 25,
+     "lines": [
+      "E|              .",
+      "M|   IF INPUT.STATUS = FALSE THEN DO;"
+     ]
+    },
+    {
+     "stmt": 27,
+     "lines": [
+      "E|              .",
+      "M| 1   OUTPUT.STATUS = FALSE;"
+     ]
+    },
+    {
+     "stmt": 28,
+     "lines": [
+      "M| 1   RETURN;"
+     ]
+    },
+    {
+     "stmt": 29,
+     "lines": [
+      "M|   END;"
+     ]
+    },
+    {
+     "stmt": 30,
+     "lines": [
+      "M|   OUTPUT.TIMETAG = INPUT.TIMETAG;"
+     ]
+    },
+    {
+     "stmt": 31,
+     "lines": [
+      "E|          -          -         -",
+      "M|   OUTPUT.V = OUTPUT.V + INPUT.V DELTA_T;"
+     ]
+    },
+    {
+     "stmt": 32,
+     "lines": [
+      "M| CLOSE INTEGRATE;"
+     ]
+    },
+    {
+     "stmt": 33,
+     "lines": [
+      "M| CLOSE P;"
+     ]
+    }
+   ],
+   "addresses": [
+    {
+     "addr": 65566,
+     "stmt": 7
+    },
+    {
+     "addr": 65575,
+     "stmt": 15
+    },
+    {
+     "addr": 65585,
+     "stmt": 16
+    },
+    {
+     "addr": 65591,
+     "stmt": 17
+    },
+    {
+     "addr": 65597,
+     "stmt": 18
+    },
+    {
+     "addr": 65599,
+     "stmt": 19
+    },
+    {
+     "addr": 65618,
+     "stmt": 20
+    },
+    {
+     "addr": 65636,
+     "stmt": 21
+    },
+    {
+     "addr": 65654,
+     "stmt": 22
+    },
+    {
+     "addr": 65667,
+     "stmt": 33
+    },
+    {
+     "addr": 65676,
+     "stmt": 25
+    },
+    {
+     "addr": 65679,
+     "stmt": 27
+    },
+    {
+     "addr": 65681,
+     "stmt": 28
+    },
+    {
+     "addr": 65682,
+     "stmt": 30
+    },
+    {
+     "addr": 65685,
+     "stmt": 31
+    },
+    {
+     "addr": 65707,
+     "stmt": 32
+    }
+   ],
+   "codeRanges": [
+    {
+     "start": 65566,
+     "end": 65669
+    },
+    {
+     "start": 65670,
+     "end": 65708
+    }
+   ]
+  },
+  {
+   "module": "176.1-READ_ACC",
+   "statements": [
+    {
+     "stmt": 4,
+     "lines": [
+      "M| READ_ACC:",
+      "M| FUNCTION(N) SUPER_VECTOR-STRUCTURE;"
+     ]
+    },
+    {
+     "stmt": 5,
+     "lines": [
+      "M|   DECLARE N INTEGER;"
+     ]
+    },
+    {
+     "stmt": 6,
+     "lines": [
+      "M|   DECLARE RESULT SUPER_VECTOR-STRUCTURE;"
+     ]
+    },
+    {
+     "stmt": 7,
+     "lines": [
+      "E|          -",
+      "M|   RESULT.V = VECTOR(0.1, -0.2, 9.8);"
+     ]
+    },
+    {
+     "stmt": 8,
+     "lines": [
+      "E|            .",
+      "M|   RESULT.STATUS = TRUE;"
+     ]
+    },
+    {
+     "stmt": 9,
+     "lines": [
+      "M|   RESULT.TIMETAG = N;"
+     ]
+    },
+    {
+     "stmt": 10,
+     "lines": [
+      "E|            +",
+      "M|   RETURN RESULT;"
+     ]
+    },
+    {
+     "stmt": 11,
+     "lines": [
+      "M| CLOSE READ_ACC;"
+     ]
+    }
+   ],
+   "addresses": [
+    {
+     "addr": 65536,
+     "stmt": 4
+    },
+    {
+     "addr": 65543,
+     "stmt": 7
+    },
+    {
+     "addr": 65555,
+     "stmt": 8
+    },
+    {
+     "addr": 65557,
+     "stmt": 9
+    },
+    {
+     "addr": 65559,
+     "stmt": 10
+    },
+    {
+     "addr": 65565,
+     "stmt": 11
+    }
+   ],
+   "codeRanges": [
+    {
+     "start": 65536,
+     "end": 65566
+    }
+   ]
+  }
+ ]
+}

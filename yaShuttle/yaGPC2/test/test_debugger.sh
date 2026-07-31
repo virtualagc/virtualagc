@@ -79,4 +79,18 @@ run_case "srcmap" --source-map fixtures/hello.srcmap.json
 # flow-by path (not just the at-stop path) actually gets exercised.
 run_case "wrap" --source-map fixtures/hello.srcmap.json
 
+# Multi-unit HAL/S source maps: a linked memory image is in general the
+# result of linking many separately-compiled HAL/S units, not just one
+# -- see tools/gen_source_map.py's --unit option and
+# src/symboltable.c's symtable_get_module_at(). Real 2-unit link from
+# this project's own "Programming in HAL-S" corpus: 176-P.hal (a
+# PROGRAM) SCALs into 176.1-READ_ACC.hal (a separately-compiled
+# FUNCTION) and back. Proves cross-module dispatch actually resolves to
+# the *right* unit's own statement text -- both units happen to have
+# their own statement 4 (176-P's is an EXTERNAL declaration of
+# READ_ACC; 176.1-READ_ACC's is the real FUNCTION header) -- and
+# exercises the module-aware lastModule/lastStmt "only show when
+# changed" tracking across the crossing and the later SRET back.
+FCM="fixtures/176-P.fcm" SYM="fixtures/176-P-lnk101.json" run_case "multiunit" --source-map fixtures/176-P.srcmap.json
+
 exit $fail

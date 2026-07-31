@@ -1,5 +1,6 @@
 #include "sourcemap.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,23 +14,42 @@ typedef struct {
 } AddrEntry;
 
 typedef struct {
+    uint32_t start, end; /* [start, end) */
+} CodeRange;
+
+typedef struct {
     int stmt;
     char **lines;
     int lineCount;
 } StmtEntry;
 
-struct SourceMap {
+/* One compiled unit's worth of statements/addresses -- see sourcemap.h's
+ * header comment. `ranges` holds every CSECT's own [start,end) that
+ * actually contributed an address entry -- a unit's code isn't always
+ * one contiguous range (e.g. a HAL/S PROGRAM plus an internal
+ * PROCEDURE compile to separate CSECTs), so this can't be a single
+ * [codeStart,codeEnd) the way a single-unit design could get away
+ * with. It's still needed even though module-name dispatch (see
+ * sourcemap_lookup) already narrows a lookup to this unit: a linker-
+ * generated section with no HAL/S statements of its own (e.g. the
+ * entry trampoline) can still carry this same module's name while
+ * sitting far outside its real mapped code, which would otherwise make
+ * "nearest address <= target" spuriously match whichever statement has
+ * the highest address (confirmed: this happened for real once module
+ * dispatch replaced the old flat codeStart/codeEnd bounds check). */
+typedef struct {
+    char *module;
     AddrEntry *addrs;
     int addrCount;
     StmtEntry *stmts;
     int stmtCount;
-    uint32_t codeStart, codeEnd; /* [codeStart, codeEnd) -- addresses outside
-                                   * this range (e.g. the entry trampoline
-                                   * sitting after the mapped module in the
-                                   * linked image) must never match, or a
-                                   * lookup would spuriously return whichever
-                                   * mapped statement happens to have the
-                                   * highest address */
+    CodeRange *ranges;
+    int rangeCount;
+} SourceUnit;
+
+struct SourceMap {
+    SourceUnit *units;
+    int unitCount;
 };
 
 static int cmp_addr(const void *a, const void *b) {
@@ -43,6 +63,47 @@ static char **load_lines(const JsonValue *lines, int *countOut) {
     for (int i = 0; i < n; i++) out[i] = yagpc_strdup(json_as_string(json_arr_get(lines, i), ""));
     *countOut = n;
     return out;
+}
+
+static void load_unit(SourceUnit *u, const JsonValue *unitJson) {
+    u->module = yagpc_strdup(json_as_string(json_obj_get(unitJson, "module"), ""));
+
+    JsonValue *stmts = json_obj_get(unitJson, "statements");
+    int stmtCount = json_arr_count(stmts);
+    if (stmtCount > 0) {
+        u->stmts = calloc((size_t)stmtCount, sizeof(StmtEntry));
+        for (int i = 0; i < stmtCount; i++) {
+            JsonValue *st = json_arr_get(stmts, i);
+            u->stmts[i].stmt = (int)json_as_number(json_obj_get(st, "stmt"), 0);
+            u->stmts[i].lines = load_lines(json_obj_get(st, "lines"), &u->stmts[i].lineCount);
+            u->stmtCount++;
+        }
+    }
+
+    JsonValue *addrs = json_obj_get(unitJson, "addresses");
+    int addrCount = json_arr_count(addrs);
+    if (addrCount > 0) {
+        u->addrs = calloc((size_t)addrCount, sizeof(AddrEntry));
+        for (int i = 0; i < addrCount; i++) {
+            JsonValue *e = json_arr_get(addrs, i);
+            u->addrs[i].addr = (uint32_t)json_as_number(json_obj_get(e, "addr"), 0);
+            u->addrs[i].stmt = (int)json_as_number(json_obj_get(e, "stmt"), 0);
+            u->addrCount++;
+        }
+        qsort(u->addrs, (size_t)u->addrCount, sizeof(AddrEntry), cmp_addr);
+    }
+
+    JsonValue *ranges = json_obj_get(unitJson, "codeRanges");
+    int rangeCount = json_arr_count(ranges);
+    if (rangeCount > 0) {
+        u->ranges = calloc((size_t)rangeCount, sizeof(CodeRange));
+        for (int i = 0; i < rangeCount; i++) {
+            JsonValue *r = json_arr_get(ranges, i);
+            u->ranges[i].start = (uint32_t)json_as_number(json_obj_get(r, "start"), 0);
+            u->ranges[i].end = (uint32_t)json_as_number(json_obj_get(r, "end"), 0);
+            u->rangeCount++;
+        }
+    }
 }
 
 SourceMap *sourcemap_load(const char *jsonPath) {
@@ -72,38 +133,20 @@ SourceMap *sourcemap_load(const char *jsonPath) {
     }
 
     SourceMap *sm = calloc(1, sizeof(SourceMap));
-    sm->codeStart = (uint32_t)json_as_number(json_obj_get(root, "codeStart"), 0);
-    sm->codeEnd = (uint32_t)json_as_number(json_obj_get(root, "codeEnd"), 0);
-
-    JsonValue *stmts = json_obj_get(root, "statements");
-    int stmtCount = json_arr_count(stmts);
-    if (stmtCount > 0) {
-        sm->stmts = calloc((size_t)stmtCount, sizeof(StmtEntry));
-        for (int i = 0; i < stmtCount; i++) {
-            JsonValue *st = json_arr_get(stmts, i);
-            sm->stmts[i].stmt = (int)json_as_number(json_obj_get(st, "stmt"), 0);
-            sm->stmts[i].lines = load_lines(json_obj_get(st, "lines"), &sm->stmts[i].lineCount);
-            sm->stmtCount++;
+    JsonValue *units = json_obj_get(root, "units");
+    int unitCount = json_arr_count(units);
+    if (unitCount > 0) {
+        sm->units = calloc((size_t)unitCount, sizeof(SourceUnit));
+        for (int i = 0; i < unitCount; i++) {
+            load_unit(&sm->units[i], json_arr_get(units, i));
+            sm->unitCount++;
         }
-    }
-
-    JsonValue *addrs = json_obj_get(root, "addresses");
-    int addrCount = json_arr_count(addrs);
-    if (addrCount > 0) {
-        sm->addrs = calloc((size_t)addrCount, sizeof(AddrEntry));
-        for (int i = 0; i < addrCount; i++) {
-            JsonValue *e = json_arr_get(addrs, i);
-            sm->addrs[i].addr = (uint32_t)json_as_number(json_obj_get(e, "addr"), 0);
-            sm->addrs[i].stmt = (int)json_as_number(json_obj_get(e, "stmt"), 0);
-            sm->addrCount++;
-        }
-        qsort(sm->addrs, (size_t)sm->addrCount, sizeof(AddrEntry), cmp_addr);
     }
 
     json_free(root);
 
-    if (sm->addrCount == 0) {
-        fprintf(stderr, "SourceMap: %s has no address entries\n", jsonPath);
+    if (sm->unitCount == 0) {
+        fprintf(stderr, "SourceMap: %s has no units\n", jsonPath);
         sourcemap_free(sm);
         return NULL;
     }
@@ -112,29 +155,52 @@ SourceMap *sourcemap_load(const char *jsonPath) {
 
 void sourcemap_free(SourceMap *sm) {
     if (!sm) return;
-    for (int i = 0; i < sm->stmtCount; i++) {
-        for (int j = 0; j < sm->stmts[i].lineCount; j++) free(sm->stmts[i].lines[j]);
-        free(sm->stmts[i].lines);
+    for (int i = 0; i < sm->unitCount; i++) {
+        SourceUnit *u = &sm->units[i];
+        for (int j = 0; j < u->stmtCount; j++) {
+            for (int k = 0; k < u->stmts[j].lineCount; k++) free(u->stmts[j].lines[k]);
+            free(u->stmts[j].lines);
+        }
+        free(u->stmts);
+        free(u->addrs);
+        free(u->ranges);
+        free(u->module);
     }
-    free(sm->stmts);
-    free(sm->addrs);
+    free(sm->units);
     free(sm);
 }
 
-static const StmtEntry *find_stmt(const SourceMap *sm, int stmt) {
-    for (int i = 0; i < sm->stmtCount; i++) {
-        if (sm->stmts[i].stmt == stmt) return &sm->stmts[i];
+static const SourceUnit *find_unit(const SourceMap *sm, const char *module) {
+    for (int i = 0; i < sm->unitCount; i++) {
+        if (strcmp(sm->units[i].module, module) == 0) return &sm->units[i];
     }
     return NULL;
 }
 
-int sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *stmtOut, const char *const **linesOut) {
-    if (!sm || sm->addrCount == 0) return 0;
-    if (addr < sm->codeStart || addr >= sm->codeEnd) return 0;
-    int lo = 0, hi = sm->addrCount - 1, best = -1;
+static const StmtEntry *find_stmt(const SourceUnit *u, int stmt) {
+    for (int i = 0; i < u->stmtCount; i++) {
+        if (u->stmts[i].stmt == stmt) return &u->stmts[i];
+    }
+    return NULL;
+}
+
+static bool addr_in_ranges(const SourceUnit *u, uint32_t addr) {
+    for (int i = 0; i < u->rangeCount; i++) {
+        if (addr >= u->ranges[i].start && addr < u->ranges[i].end) return true;
+    }
+    return false;
+}
+
+int sourcemap_lookup(const SourceMap *sm, const char *module, uint32_t addr, int *stmtOut,
+                      const char *const **linesOut) {
+    if (!sm || !module) return 0;
+    const SourceUnit *u = find_unit(sm, module);
+    if (!u || u->addrCount == 0) return 0;
+    if (!addr_in_ranges(u, addr)) return 0;
+    int lo = 0, hi = u->addrCount - 1, best = -1;
     while (lo <= hi) {
         int mid = (lo + hi) / 2;
-        if (sm->addrs[mid].addr <= addr) {
+        if (u->addrs[mid].addr <= addr) {
             best = mid;
             lo = mid + 1;
         } else {
@@ -142,8 +208,8 @@ int sourcemap_lookup(const SourceMap *sm, uint32_t addr, int *stmtOut, const cha
         }
     }
     if (best < 0) return 0;
-    int stmt = sm->addrs[best].stmt;
-    const StmtEntry *e = find_stmt(sm, stmt);
+    int stmt = u->addrs[best].stmt;
+    const StmtEntry *e = find_stmt(u, stmt);
     if (!e) return 0;
     if (stmtOut) *stmtOut = stmt;
     if (linesOut) *linesOut = (const char *const *)e->lines;

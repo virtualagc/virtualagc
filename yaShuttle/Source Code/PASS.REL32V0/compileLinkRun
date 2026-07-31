@@ -8,7 +8,7 @@ from pathlib import Path
 
 extraParms = ""
 def getParms(filename):
-    parmBase = extraParms + "LIST,NOTABLES,SRN,TEMPLATE,NOLFXI,REGOPT,VARSYM,CARDTYPE="
+    parmBase = extraParms + "LIST,SRN,TEMPLATE,NOLFXI,REGOPT,VARSYM,CARDTYPE="
     cardtypesBySourceFile = {
         "CS2INI" : "ACFCRMYCZM",
         "CS4INI" : "ACFCRMYCZM",
@@ -55,7 +55,10 @@ The available OPTIONs are:
                     hopefully temporary in nature while development of it
                     proceeds.
     --no-test       Do not use HALSFC's --test option.
-    --yaGPC         Use `yaGPC ...` in place of `gpc run ...`.
+    --debug         Pass the --debug switch to the emulator.
+    --gpc           Use "gpc run ..." as the emulator command.
+    --yaGPC         Use `yaGPC ...` as the emulator command.
+    --yaGPC2        (The default.) Use `yaGPC2 ...` as the emulator command.
 '''
 
 filename = None
@@ -63,7 +66,8 @@ parmList = None
 interactive = True
 extraPass1 = []
 noTest = False
-gpcCommand = ["gpc", "run"]
+debug = False
+gpcCommand = ["yaGPC2"]
 for parameter in sys.argv[1:]:
     if parameter.startswith("--parms="):
         parmList = parameter[8:]
@@ -79,9 +83,17 @@ for parameter in sys.argv[1:]:
         noTest = True
     elif parameter == "--yaGPC":
         gpcCommand = ["yaGPC"]
+    elif parameter == "--yaGPC3":
+        gpcCommand = ["yaGPC3"]
+    elif parameter == "--gpc":
+        gpcCommand = ["gpc", "run"]
+    elif parameter == "--debug":
+        debug = True
     else:
         print(helpMsg)
         sys.exit(1)
+if debug:
+    gpcCommand.append("--debug")
 if parmList == None:
     parmList = getParms(filename)
 basename = Path(filename).stem
@@ -128,11 +140,45 @@ except subprocess.CalledProcessError as e:
         print("STDERR:", e.stderr)
     os._exit(1)
 
+# Next, build a HAL/S source-line map for yaGPC2's --debug --source-map
+# (see yaGPC2/tools/gen_source_map.py), from the pass1.rpt/pass2.rpt
+# reports HALSFC just wrote to the current directory plus the linker's
+# own section table. Only yaGPC2 understands --source-map, and only
+# when gpcCommand[0] is actually "yaGPC2" is yaGPC2 the emulator that's
+# about to be invoked below -- skipped entirely otherwise. Non-fatal if
+# it fails: source-line display is a debugger nicety, not a requirement
+# for compiling, linking, and running the program.
+#
+# gen_source_map.py's --unit takes MODULE=PASS1_PATH:PASS2_PATH and can
+# repeat (a linked image is in general the result of linking many
+# separately-compiled HAL/S units, not just the one compiled here) --
+# this script only ever compiles a single file, so it always passes
+# exactly one --unit; a real multi-unit link needs its own driver.
+srcmapfile = f"{basename}.srcmap.json"
+haveSrcmap = False
+if gpcCommand[0] == "yaGPC2":
+    command = ["gen_source_map.py",
+               "--unit", f"{basename}=current.results/pass1.rpt:current.results/pass2.rpt",
+               "--lnk101", symfile,
+               "-o", srcmapfile]
+    print(" ".join(command))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+        print(result.stdout)
+        haveSrcmap = True
+    except subprocess.CalledProcessError as e:
+        print(f"Source-map generation failed with exit code {e.returncode} (continuing without it).")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+
 # Next, run it in the emulator.
-command = gpcCommand + ["--interactive", 
-	   "--no-trace", "--no-verbose", 
-	   "--symbols", symfile, 
-	   "--line-width", "240", fcmfile]
+command = gpcCommand + ["--interactive",
+	   "--no-trace", "--no-verbose",
+	   "--symbols", symfile,
+	   "--line-width", "240"]
+if haveSrcmap:
+    command += ["--source-map", srcmapfile]
+command += [fcmfile]
 print(" ".join(command))
 if interactive:
     result = subprocess.run(command)

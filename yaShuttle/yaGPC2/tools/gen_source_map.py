@@ -34,13 +34,29 @@ always includes NOTABLES, so a debug-target compile needs its own
 invocation without it; see test/fixtures/build_hal_fixtures.sh for the
 normal convention this diverges from).
 
+A linked memory image is, in general, the result of linking many
+separately-compiled HAL/S units (a program plus the procedures/functions
+it calls, each its own HALSFC compile) -- so this tool takes one
+repeatable --unit per compiled unit, all resolved against the same
+shared --lnk101 (one linked image, one output covering every unit).
+
 Usage:
-    gen_source_map.py --pass1 pass1.rpt --pass2 pass2.rpt \\
-        --lnk101 foo-lnk101.json --module HELLO -o foo.srcmap.json
+    gen_source_map.py --unit HELLO=pass1.rpt:pass2.rpt \\
+        --lnk101 foo-lnk101.json -o foo.srcmap.json
+
+    # Multi-unit; hundreds of --unit flags can exceed a shell's command-
+    # line length limit, so any/all options can instead come from a
+    # file, one flag (or a "--flag value" pair) per line:
+    gen_source_map.py @build.args -o foo.srcmap.json
+    # where build.args contains lines like:
+    #   --unit 176-P=176-P.pass1.rpt:176-P.pass2.rpt
+    #   --unit 176.1-READ_ACC=176.1-READ_ACC.pass1.rpt:176.1-READ_ACC.pass2.rpt
+    #   --lnk101 176-P-lnk101.json
 """
 import argparse
 import json
 import re
+import shlex
 import sys
 
 
@@ -136,94 +152,182 @@ def parse_pass1(path):
     return statements
 
 
-def parse_pass2(path, code_csect):
-    """Returns [(offset, stmt), ...] in ascending-offset order.
+def parse_pass2(path):
+    """Returns [(csectName, offset, stmt), ...] in file order.
 
     "ST#N EQU *" markers are emitted wherever the assembler happens to be
-    when it reaches statement N's boundary, which is not always inside
-    `code_csect` -- e.g. a zero-code DECLARE statement's marker can land
+    when it reaches statement N's boundary, which is not always inside a
+    *code* CSECT -- e.g. a zero-code DECLARE statement's marker can land
     in the middle of a literal/data CSECT the compiler interleaved into
-    the listing (#DHELLO/#EHELLO-style), and the very first marker can
-    even precede any CSECT line at all. Markers seen outside `code_csect`
-    are buffered and bound to wherever `code_csect` next resumes (that
-    CSECT line's own LOC field), since that's the address execution
-    actually reaches next -- not discarded, or a statement's source line
-    would appear to "linger" past code that's really implementing a
-    later statement (observed directly for a WRITE statement whose
-    zero-code neighbors' markers fell inside #DHELLO)."""
+    the listing, and the very first marker can even precede any CSECT
+    line at all. A single compile can also have more than one code
+    CSECT (e.g. a HAL/S PROGRAM with an internal PROCEDURE compiles to
+    two, conventionally named "$0NAME" and "A1NAME") and can bounce
+    between a code CSECT and a data one and back several times -- so
+    this can't be reduced to "one fixed target CSECT name" the way an
+    earlier version of this function assumed.
+
+    Which CSECTs are "code" is deliberately *not* determined by name
+    (confirmed, by reading lnk101's own placement rule in
+    ~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py's _ZONE_BY_PREFIX,
+    that this is subtler than a prefix guess: e.g. "#CREADAC" starts
+    with "#" like the data CSECTs do, but is actually code because CODE
+    is the *default* zone when no data/ZCON prefix matches -- a rule
+    that lives in someone else's actively-developed repo and could
+    drift). Instead: every real instruction line pass2.rpt prints
+    carries a "TIME: N.NN" annotation (see src/timing.c's own porting
+    notes for the same annotation) and a DC (data) pseudo-op line never
+    does, so a CSECT occurrence is classified as code by scanning its
+    own lines for that annotation -- self-contained within pass2.rpt,
+    no dependency on CSECT-naming conventions at all.
+
+    Two passes: first splits the file into CSECT-bounded "runs" (each
+    with its own name, its own starting offset from the CSECT line
+    itself, and an isCode flag), tagging each "ST#N EQU *" marker with
+    the run it falls in (run index -1 for markers before any CSECT line
+    at all). Second walks the runs in order, buffering markers seen in
+    a non-code run and binding them -- to *that run's own starting
+    offset* -- as soon as a code run is entered, since that's the
+    address execution actually reaches next; not discarded, or a
+    statement's source line would appear to "linger" past code that's
+    really implementing a later statement (observed directly for a
+    WRITE statement whose zero-code neighbors' markers fell inside a
+    data CSECT). Resuming can land in a *different* code CSECT than
+    where execution left off (e.g. buffered while in a data CSECT
+    between two different-named code CSECTs)."""
     csect_re = re.compile(r"^([0-9A-Fa-f]*)\s+(\S+)\s+CSECT\b")
     stmt_re = re.compile(r"^([0-9A-Fa-f]+)\s+ST#(\d+)\s+EQU\s+\*")
-    in_code = False
-    pending_stmts = []
-    entries = []
+
+    runs = []  # [{"name":..., "offset0":..., "isCode": bool}, ...]
+    markers = []  # [(runIndex, offset, stmt), ...] in file order
+    current_run = -1
     with open(path, "r", errors="replace") as f:
         for line in f:
             m = csect_re.match(line)
             if m:
                 loc_str, name = m.group(1), m.group(2)
-                in_code = name == code_csect
-                if in_code and pending_stmts:
-                    offset = int(loc_str, 16) if loc_str else 0
-                    entries.extend((offset, stmt) for stmt in pending_stmts)
-                    pending_stmts = []
+                runs.append({"name": name, "offset0": int(loc_str, 16) if loc_str else 0, "isCode": False})
+                current_run = len(runs) - 1
                 continue
+            if current_run >= 0 and " TIME:" in line:
+                runs[current_run]["isCode"] = True
             m = stmt_re.match(line)
-            if not m:
-                continue
-            if in_code:
-                entries.append((int(m.group(1), 16), int(m.group(2))))
+            if m:
+                markers.append((current_run, int(m.group(1), 16), int(m.group(2))))
+
+    entries = []
+    pending_stmts = []
+    mi = 0
+    while mi < len(markers) and markers[mi][0] == -1:
+        pending_stmts.append(markers[mi][2])
+        mi += 1
+    for run_idx, run in enumerate(runs):
+        if run["isCode"] and pending_stmts:
+            entries.extend((run["name"], run["offset0"], stmt) for stmt in pending_stmts)
+            pending_stmts = []
+        while mi < len(markers) and markers[mi][0] == run_idx:
+            _, offset, stmt = markers[mi]
+            if run["isCode"]:
+                entries.append((run["name"], offset, stmt))
             else:
-                pending_stmts.append(int(m.group(2)))
+                pending_stmts.append(stmt)
+            mi += 1
     return entries
 
 
+class ArgParser(argparse.ArgumentParser):
+    """Splits each line of an "@file" argument (see fromfile_prefix_chars
+    below) as a normal shell-style token sequence (shlex), instead of
+    argparse's default of one whole token per line -- so a units file
+    for a large multi-unit link can hold readable "--unit MODULE=..."
+    lines instead of forcing each flag and its value onto separate
+    lines."""
+
+    def convert_arg_line_to_args(self, arg_line):
+        return shlex.split(arg_line, comments=True)
+
+
+def parse_unit_spec(spec):
+    """"--unit" values look like "MODULE=PASS1_PATH:PASS2_PATH". Returns
+    (module, pass1_path, pass2_path), or exits with a usage error."""
+    module, eq, rest = spec.partition("=")
+    pass1_path, colon, pass2_path = rest.partition(":")
+    if not eq or not colon or not module or not pass1_path or not pass2_path:
+        sys.exit(f"error: --unit {spec!r} must be of the form MODULE=PASS1_PATH:PASS2_PATH")
+    return module, pass1_path, pass2_path
+
+
+def build_unit(module, pass1_path, pass2_path, sections_by_name):
+    """Returns {"module":..., "statements":[...], "addresses":[...],
+    "codeRanges":[...]} for one compiled unit, resolving
+    parse_pass2()'s (csectName, offset) pairs to absolute linked
+    addresses via sections_by_name (looked up directly by CSECT name --
+    a real linked CSECT name is already unique, so no module cross-check
+    is needed here).
+
+    codeRanges records the [start, end) byte range of every CSECT that
+    actually contributed an address entry -- a unit's code isn't always
+    one contiguous range (e.g. a HAL/S PROGRAM with an internal
+    PROCEDURE compiles to two separate code CSECTs) -- so the C side can
+    reject a lookup address that falls outside all of them, rather than
+    trusting the address table's binary search alone: a linker-
+    generated section that isn't backed by any HAL/S statement (e.g. the
+    entry trampoline) can still be tagged with this same module's name
+    while sitting far outside its actual mapped code, which would
+    otherwise make the "nearest address <= target" search spuriously
+    return whichever statement happens to have the highest address."""
+    statements = parse_pass1(pass1_path)
+    entries = parse_pass2(pass2_path)
+    if not entries:
+        sys.exit(
+            f"error: no 'ST#N EQU *' code markers found in {pass2_path} for module {module!r} "
+            "-- was this compiled without NOTABLES?"
+        )
+
+    addr_to_stmt = {}
+    code_ranges = {}  # csectName -> (start, end)
+    for csect_name, offset, stmt in entries:
+        sect = sections_by_name.get(csect_name)
+        if sect is None:
+            sys.exit(f"error: CSECT {csect_name!r} (from {pass2_path}, module {module!r}) not found in --lnk101")
+        addr_to_stmt[sect["address"] + offset] = stmt  # last one wins for a shared (zero-code-statement) address
+        code_ranges[csect_name] = (sect["address"], sect["address"] + sect["size"])
+
+    addresses = [{"addr": a, "stmt": s} for a, s in sorted(addr_to_stmt.items())]
+    stmt_list = [{"stmt": stmt, "lines": lines} for stmt, lines in sorted(statements.items())]
+    ranges = [{"start": start, "end": end} for start, end in sorted(code_ranges.values())]
+    return {"module": module, "statements": stmt_list, "addresses": addresses, "codeRanges": ranges}
+
+
 def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--pass1", required=True, help="HALSFC's pass1.rpt")
-    ap.add_argument("--pass2", required=True, help="HALSFC's pass2.rpt")
+    ap = ArgParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        fromfile_prefix_chars="@",
+    )
+    ap.add_argument(
+        "--unit",
+        action="append",
+        required=True,
+        metavar="MODULE=PASS1_PATH:PASS2_PATH",
+        help="one compiled unit's module name and its pass1.rpt/pass2.rpt paths; "
+        "repeat for a multi-unit linked image",
+    )
     ap.add_argument("--lnk101", required=True, help="lnk101's --json-symbols output")
-    ap.add_argument("--module", required=True, help="HAL/S program/module name, e.g. HELLO")
     ap.add_argument("-o", "--output", required=True)
     args = ap.parse_args()
 
     with open(args.lnk101) as f:
         linked = json.load(f)
-    code_csect = "$0" + args.module
-    base = None
-    size = None
-    for sect in linked.get("sections", []):
-        if sect.get("name") == code_csect:
-            base = sect["address"]
-            size = sect["size"]
-            break
-    if base is None:
-        sys.exit(f"error: code section {code_csect!r} not found in {args.lnk101}")
+    sections_by_name = {sect["name"]: sect for sect in linked.get("sections", [])}
 
-    statements = parse_pass1(args.pass1)
-    entries = parse_pass2(args.pass2, code_csect)
-    if not entries:
-        sys.exit(
-            f"error: no 'ST#N EQU *' markers found for CSECT {code_csect!r} in {args.pass2} "
-            "-- was this compiled without NOTABLES?"
-        )
+    units = [build_unit(*parse_unit_spec(spec), sections_by_name) for spec in args.unit]
 
-    addr_to_stmt = {}
-    for offset, stmt in entries:
-        addr_to_stmt[base + offset] = stmt  # last one wins for a shared (zero-code-statement) address
-
-    addresses = [{"addr": a, "stmt": s} for a, s in sorted(addr_to_stmt.items())]
-    stmt_list = [{"stmt": stmt, "lines": lines} for stmt, lines in sorted(statements.items())]
-
-    out = {
-        "module": args.module,
-        "codeStart": base,
-        "codeEnd": base + size,
-        "statements": stmt_list,
-        "addresses": addresses,
-    }
     with open(args.output, "w") as f:
-        json.dump(out, f, indent=1)
-    print(f"Wrote {args.output}: {len(stmt_list)} statements, {len(addresses)} address entries")
+        json.dump({"units": units}, f, indent=1)
+    total_stmts = sum(len(u["statements"]) for u in units)
+    total_addrs = sum(len(u["addresses"]) for u in units)
+    print(f"Wrote {args.output}: {len(units)} unit(s), {total_stmts} statements, {total_addrs} address entries")
 
 
 if __name__ == "__main__":

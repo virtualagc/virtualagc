@@ -76,6 +76,13 @@ bool symtable_load(SymbolTable *st, const char *symPath, bool verbose, uint32_t 
 /* Returns NULL if none. */
 const Symbol *symtable_get_label_at(const SymbolTable *st, uint32_t addr); /* first symbol at addr, or NULL */
 const char *symtable_get_section_at(const SymbolTable *st, uint32_t addr); /* section name, or NULL */
+/* Which HAL/S (or other) compiled unit's own object code addr belongs
+ * to -- used by debugger.c to dispatch a multi-unit HAL/S source map
+ * (see sourcemap.h) to the right compile's own statement numbering,
+ * since a linked image is in general the result of linking many
+ * separately-compiled units and statement numbers are only unique
+ * within one. */
+const char *symtable_get_module_at(const SymbolTable *st, uint32_t addr); /* module name, or NULL */
 const char *symtable_get_reloc_at(const SymbolTable *st, uint32_t instrAddr, int instrLen);
 
 /* Writes into out[16] (8 chars name, '+', 5 hex digits, NUL — matches

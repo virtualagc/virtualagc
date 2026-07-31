@@ -225,6 +225,11 @@ const char *symtable_get_section_at(const SymbolTable *st, uint32_t addr) {
     return s ? s->name : NULL;
 }
 
+const char *symtable_get_module_at(const SymbolTable *st, uint32_t addr) {
+    const Section *s = find_section_containing(st, addr);
+    return s ? s->module : NULL;
+}
+
 const char *symtable_get_reloc_at(const SymbolTable *st, uint32_t instrAddr, int instrLen) {
     for (int i = 0; i < instrLen; i++) {
         uint32_t addr = instrAddr + (uint32_t)i;
