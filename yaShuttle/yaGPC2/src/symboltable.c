@@ -1,11 +1,13 @@
 #include "symboltable.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "compat.h"
 #include "json.h"
+#include "strfmt.h"
 
 void symtable_init(SymbolTable *st) {
     memset(st, 0, sizeof(*st));
@@ -250,6 +252,28 @@ void symtable_format_csect(const SymbolTable *st, uint32_t addr, char *out, int 
         return;
     }
     snprintf(out, (size_t)outLen, "        +     ");
+}
+
+void symtable_format_section_offset(const SymbolTable *st, uint32_t addr, char *out, size_t outSize) {
+    if (!st->loaded) {
+        out[0] = '\0';
+        return;
+    }
+    const Section *s = find_section_containing(st, addr);
+    if (s) {
+        uint32_t offset = addr - s->address;
+        char nameUpper[9];
+        int n = 0;
+        for (const char *p = s->name; *p && n < 8; p++, n++) nameUpper[n] = (char)toupper((unsigned char)*p);
+        nameUpper[n] = '\0';
+        char padded[9];
+        str_rpad(padded, sizeof padded, nameUpper, " ", 8);
+        char hex[16];
+        as_hex(hex, sizeof hex, (long long)offset, 4);
+        snprintf(out, outSize, "%s+%s", padded, hex);
+        return;
+    }
+    snprintf(out, outSize, "        +    ");
 }
 
 const SymType *symtable_get_symtype(const SymbolTable *st, const char *name) {

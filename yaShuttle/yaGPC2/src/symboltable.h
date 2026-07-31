@@ -11,6 +11,7 @@
 #define YAGPC_SYMBOLTABLE_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 typedef struct {
@@ -88,6 +89,14 @@ const char *symtable_get_reloc_at(const SymbolTable *st, uint32_t instrAddr, int
 /* Writes into out[16] (8 chars name, '+', 5 hex digits, NUL — matches
  * "NNNNNNNN+HHHHH" / "        +     " for no-section). */
 void symtable_format_csect(const SymbolTable *st, uint32_t addr, char *out, int outLen);
+
+/* Ported from BatchRunner#formatSectionOffset (run.c originally) --
+ * deliberately different from symtable_format_csect above (uppercases
+ * the section name, 4 hex digits for the offset not 5, "" when no
+ * symbols loaded at all vs a blank placeholder). Shared by run.c's
+ * --trace/--debug output and gpcops.c's embedded-engine htrace output,
+ * so both format identically. */
+void symtable_format_section_offset(const SymbolTable *st, uint32_t addr, char *out, size_t outSize);
 
 /* NULL if no override for `name` exists in .symtypes.json. */
 const SymType *symtable_get_symtype(const SymbolTable *st, const char *name);

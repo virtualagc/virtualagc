@@ -1,6 +1,5 @@
 #include "run.h"
 
-#include <ctype.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -113,113 +112,18 @@ static void info_reg_dump(BatchRunner *r, long step) {
     for (int i = 0; i < TRACE_REGDUMP_LINES; i++) batchrunner_info(r, lines[i]);
 }
 
-/* Ported from BatchRunner#formatSectionOffset — deliberately different
- * from symtable_format_csect (uppercases the section name, 4 hex digits
- * for the offset not 5, "" when no symbols loaded at all vs a blank
- * placeholder) — see run.h's header comment. */
-static void format_section_offset(BatchRunner *r, uint32_t addr, char *out, size_t outSize) {
-    if (!r->age.sym.loaded) {
-        out[0] = '\0';
-        return;
-    }
-    const char *sect = symtable_get_section_at(&r->age.sym, addr);
-    if (sect) {
-        for (int i = 0; i < r->age.sym.sectionCount; i++) {
-            if (strcmp(r->age.sym.sections[i].name, sect) == 0) {
-                uint32_t offset = addr - r->age.sym.sections[i].address;
-                char nameUpper[9];
-                int n = 0;
-                for (const char *p = sect; *p && n < 8; p++, n++) nameUpper[n] = (char)toupper((unsigned char)*p);
-                nameUpper[n] = '\0';
-                char padded[9];
-                str_rpad(padded, sizeof padded, nameUpper, " ", 8);
-                char hex[16];
-                as_hex(hex, sizeof hex, (long long)offset, 4);
-                snprintf(out, outSize, "%s+%s", padded, hex);
-                return;
-            }
-        }
-    }
-    snprintf(out, outSize, "        +    ");
-}
-
 static void batchrunner_format_trace_line(BatchRunner *r, long step, uint32_t nia, uint32_t hw1, uint32_t hw2,
                                            const char *disasm, int instrLen, const RegChange *changes, int changeCount,
                                            char *out, size_t outSize) {
-    char stepNum[32];
-    snprintf(stepNum, sizeof stepNum, "%ld", step);
-    char stepStr[32];
-    str_lpad(stepStr, sizeof stepStr, stepNum, " ", 5);
-
-    char niaStr[16];
-    as_hex(niaStr, sizeof niaStr, (long long)nia, 6);
-
-    char sectOffsetStr[80];
-    sectOffsetStr[0] = '\0';
-    if (r->age.sym.loaded) {
-        char off[64];
-        format_section_offset(r, nia, off, sizeof off);
-        snprintf(sectOffsetStr, sizeof sectOffsetStr, " %s", off);
-    }
-
-    char hw1Str[16];
-    as_hex(hw1Str, sizeof hw1Str, (long long)hw1, 4);
-    char hw2Str[16];
-    if (instrLen > 1) {
-        as_hex(hw2Str, sizeof hw2Str, (long long)hw2, 4);
-    } else {
-        snprintf(hw2Str, sizeof hw2Str, "    ");
-    }
-
-    char disasmPadded[256];
-    str_rpad(disasmPadded, sizeof disasmPadded, disasm, " ", 28);
-
-    /* Elapsed AP-101S execution time (src/timing.h, tracked unconditionally
-     * on r->age.gpc.cpu -- see cpu.h's elapsedTimeUs comment) is only
-     * *displayed* here under --debug, same "zero behavior change outside
-     * --debug" rule as the wrapping below, even though the "[NNNNN]"
-     * marker itself is unconditional and the underlying value is now
-     * always tracked. */
-    char timeStr[32];
-    timeStr[0] = '\0';
-    if (r->debugMode) snprintf(timeStr, sizeof timeStr, "T=%.2f ", r->age.gpc.cpu.elapsedTimeUs);
-
-    char prefix[400];
-    snprintf(prefix, sizeof prefix, "[%s] %s%s%s: %s %s  %s", stepStr, timeStr, niaStr, sectOffsetStr, hw1Str, hw2Str,
-             disasmPadded);
-
-    /* Under --debug with a nonzero 'set width' (see src/debugger.h),
-     * wrap the register-changes list at whole-entry boundaries instead
-     * of printing it all on one (potentially very long) line. Plain
-     * --trace (no --debug) always takes the flat-join path below
-     * unchanged, matching this project's default of zero behavior
-     * change when --debug isn't passed. */
-    if (r->debugMode && debugger_line_width(r->dbg) > 0 && changeCount > 0) {
-        char changesBlob[4096];
-        debugger_format_changes(r->dbg, prefix, changes, changeCount, changesBlob, sizeof changesBlob);
-        snprintf(out, outSize, "%s%s", prefix, changesBlob);
-        return;
-    }
-
-    char changesStr[2048];
-    changesStr[0] = '\0';
-    if (changeCount > 0) {
-        size_t pos = 0;
-        for (int i = 0; i < changeCount; i++) {
-            char oldStr[16], newStr[16];
-            trace_format_reg_val(oldStr, sizeof oldStr, changes[i].name, changes[i].oldVal);
-            trace_format_reg_val(newStr, sizeof newStr, changes[i].name, changes[i].newVal);
-            int n;
-            if (i > 0) {
-                n = snprintf(changesStr + pos, sizeof changesStr - pos, ", ");
-                pos += (n > 0) ? (size_t)n : 0;
-            }
-            n = snprintf(changesStr + pos, sizeof changesStr - pos, "%s: %s->%s", changes[i].name, oldStr, newStr);
-            pos += (n > 0) ? (size_t)n : 0;
-        }
-    }
-
-    snprintf(out, outSize, "%s%s", prefix, changesStr);
+    /* Elapsed time and wrapping are both --debug-only presentation
+     * choices (see cpu.h's elapsedTimeUs comment and src/debugger.h) --
+     * plain --trace passes NULL/0 here, so trace_format_debug_line()
+     * omits the T= field and never wraps, same as before this was
+     * extracted into a function shared with gpcops.c's embedded engine. */
+    const double *timePtr = r->debugMode ? &r->age.gpc.cpu.elapsedTimeUs : NULL;
+    int lineWidth = r->debugMode ? debugger_line_width(r->dbg) : 0;
+    trace_format_debug_line(out, outSize, step, nia, hw1, hw2, disasm, instrLen, changes, changeCount,
+                             r->age.sym.loaded ? &r->age.sym : NULL, timePtr, lineWidth);
 }
 
 static long batchrunner_load(BatchRunner *r) {
@@ -301,7 +205,7 @@ static void print_section_map(BatchRunner *r) {
     }
     char startHex[16], off[64], msg[256];
     as_hex(startHex, sizeof startHex, (long long)r->entryPoint, 4);
-    format_section_offset(r, r->entryPoint, off, sizeof off);
+    symtable_format_section_offset(&r->age.sym, r->entryPoint, off, sizeof off);
     snprintf(msg, sizeof msg, "  Start: 0x%s (%s)", startHex, off);
     batchrunner_info(r, msg);
     batchrunner_info(r, "");

@@ -112,9 +112,9 @@ struct Debugger {
                          * htraceEnabled exactly */
 
     /* 'set width N': wraps the register-changes list run.c prints during
-     * 'htrace' (see debugger_format_changes()); N<=0 disables
-     * wrapping. Purely a debug-mode presentation setting -- has no
-     * effect on plain --trace (no --debug). */
+     * 'htrace' (see trace.h's trace_format_changes_wrapped()); N<=0
+     * disables wrapping. Purely a debug-mode presentation setting -- has
+     * no effect on plain --trace (no --debug). */
     int lineWidth;
 };
 
@@ -476,7 +476,7 @@ static void show_current_location(Debugger *dbg, AGEHarness *age) {
  * register changes it made appended to the RIGHT of the location line,
  * matching how 'htrace' lays out its own trace lines (wrapped per 'set
  * width', continuation lines aligned under the first change -- see
- * debugger_format_changes()); zero (startup) or more than one (e.g.
+ * trace_format_changes_wrapped()); zero (startup) or more than one (e.g.
  * 'step N>1', or 'next'/'run' covering several instructions) gets a
  * full register dump instead, printed ABOVE the location line the way
  * debuggers conventionally order "overall state" before the "you are
@@ -523,7 +523,7 @@ static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
     str_rpad(paddedLine, sizeof paddedLine, line, " ", 76);
 
     char blob[4096];
-    debugger_format_changes(dbg, paddedLine, filtered, filteredCount, blob, sizeof blob);
+    trace_format_changes_wrapped(dbg->lineWidth, paddedLine, filtered, filteredCount, blob, sizeof blob);
     printf("%s%s\n", paddedLine, blob);
 }
 
@@ -899,7 +899,7 @@ static void cmd_unwatch(Debugger *dbg, AGEHarness *age, const char *addrStr) {
 /* Register alteration (mirrors cmd_debug.coffee's setRegister) plus one
  * yaGPC2-specific extension not in the CoffeeScript original: 'set width
  * N' controls wrapping of the register-changes list printed during
- * 'htrace' (see debugger_format_changes()) -- N<=0 disables
+ * 'htrace' (see trace_format_changes_wrapped()) -- N<=0 disables
  * wrapping entirely. Memory alteration is 'deposit', not 'set'. */
 static void cmd_set(Debugger *dbg, AGEHarness *age, const char *nameIn, const char *valStr) {
     char name[16];
@@ -1328,49 +1328,6 @@ void debugger_free(Debugger *dbg) {
 bool debugger_wants_htrace(const Debugger *dbg) { return dbg->htraceEnabled; }
 
 int debugger_line_width(const Debugger *dbg) { return dbg->lineWidth; }
-
-/* Formats `changes` as "NAME: OLD->NEW, NAME: OLD->NEW, ..." (same token
- * format run.c's own flat join uses), wrapped so no printed line exceeds
- * dbg->lineWidth columns -- wrapping only ever happens between whole
- * "NAME: OLD->NEW" entries, never mid-entry, with continuation lines
- * indented to align under the first entry rather than the left margin.
- * `prefix` is everything the caller
- * has already printed earlier on this same line (used only to measure
- * that indent); `out` receives just the changes portion (no leading
- * content, no trailing newline) to be concatenated directly after
- * `prefix`. */
-void debugger_format_changes(const Debugger *dbg, const char *prefix, const RegChange *changes, int changeCount,
-                              char *out, size_t outSize) {
-    out[0] = '\0';
-    if (changeCount <= 0) return;
-
-    int width = dbg->lineWidth;
-    size_t prefixLen = strlen(prefix);
-    size_t pos = 0;
-    size_t lineLen = prefixLen;
-    bool firstOnLine = true;
-
-    for (int i = 0; i < changeCount; i++) {
-        char oldStr[16], newStr[16];
-        trace_format_reg_val(oldStr, sizeof oldStr, changes[i].name, changes[i].oldVal);
-        trace_format_reg_val(newStr, sizeof newStr, changes[i].name, changes[i].newVal);
-        bool isLast = i == changeCount - 1;
-        char token[64];
-        snprintf(token, sizeof token, "%s: %s->%s%s", changes[i].name, oldStr, newStr, isLast ? "" : ", ");
-        size_t tokenLen = strlen(token);
-
-        if (!firstOnLine && width > 0 && lineLen + tokenLen > (size_t)width) {
-            int n = snprintf(out + pos, pos < outSize ? outSize - pos : 0, "\n%*s", (int)prefixLen, "");
-            pos += (n > 0) ? (size_t)n : 0;
-            lineLen = prefixLen;
-            firstOnLine = true;
-        }
-        int n = snprintf(out + pos, pos < outSize ? outSize - pos : 0, "%s", token);
-        pos += (n > 0) ? (size_t)n : 0;
-        lineLen += tokenLen;
-        firstOnLine = false;
-    }
-}
 
 bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, uint32_t hw2, long step) {
     dbg->currentStep = step;

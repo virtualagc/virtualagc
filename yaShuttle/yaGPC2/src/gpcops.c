@@ -20,13 +20,12 @@
  * yagpc2_debugger(), below) -- self-contained here so any driver using
  * yaGPC2_ops gets working 'htrace' output without having to know
  * anything about register snapshotting or trace-line formatting itself.
- * Uses trace_format_line() (src/trace.c), the one trace-line formatter
- * that's already public and decoupled from both Debugger and
- * BatchRunner -- this is *not* byte-identical to the CLI's own --debug
- * trace lines (that one, run.c's private batchrunner_format_trace_line(),
- * has its own section-offset formatting and 'set width' wrapping that
- * this doesn't reproduce), but it does include the same elapsed-time
- * field via TraceLineOpts.elapsedTimeUs. */
+ * Uses trace_format_debug_line() (src/trace.c) -- the same single
+ * implementation run.c's own --debug trace lines use (via
+ * batchrunner_format_trace_line(), now a thin wrapper around it) -- so
+ * this is byte-identical to the CLI's own htrace output, including
+ * section+offset formatting and 'set width' wrapping (age->htraceLineWidth,
+ * also set by yagpc2_debugger() below). */
 static void yagpc2_engine(GpcState *state) {
     AGEHarness *age = (AGEHarness *)state->impl;
     bool wantTrace = age->htraceWanted;
@@ -62,15 +61,9 @@ static void yagpc2_engine(GpcState *state) {
             if (strcmp(changes[i].name, "NIA") != 0) filtered[filteredCount++] = changes[i];
         }
 
-        TraceLineOpts opts = {
-            .color = &TRACE_COLOR_PLAIN,
-            .sym = age->sym.loaded ? &age->sym : NULL,
-            .stepWidth = 5,
-            .niaWidth = 6,
-            .elapsedTimeUs = &age->gpc.cpu.elapsedTimeUs,
-        };
         char line[2400];
-        trace_format_line(line, sizeof line, stepNum, nia, hw1, hw2, disasm, instrLen, filtered, filteredCount, &opts);
+        trace_format_debug_line(line, sizeof line, stepNum, nia, hw1, hw2, disasm, instrLen, filtered, filteredCount,
+                                 age->sym.loaded ? &age->sym : NULL, &age->gpc.cpu.elapsedTimeUs, age->htraceLineWidth);
         printf("%s\n", line);
     }
 }
@@ -89,9 +82,10 @@ static bool yagpc2_debugger(GpcState *state, void *dbgState) {
     uint32_t hw2 = mcm_get16(&age->gpc.cpu.mainStorage, nia + 1);
     bool cont = debugger_hook(dbg, age, nia, hw1, hw2, (long)age->stepCount);
     /* Consult again after debugger_hook() returns, not just before calling
-     * it -- its own REPL can dispatch 'htrace on'/'off' mid-call, same
-     * reasoning as debugger_wants_htrace()'s own header comment. */
+     * it -- its own REPL can dispatch 'htrace on'/'off'/'set width' mid-
+     * call, same reasoning as debugger_wants_htrace()'s own header comment. */
     age->htraceWanted = debugger_wants_htrace(dbg);
+    age->htraceLineWidth = debugger_line_width(dbg);
     return cont;
 }
 

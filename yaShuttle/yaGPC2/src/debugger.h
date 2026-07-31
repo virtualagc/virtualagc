@@ -52,20 +52,8 @@ void debugger_free(Debugger *dbg);
 bool debugger_wants_htrace(const Debugger *dbg);
 
 /* Current 'set width N' value (default 132; <=0 means "no wrapping").
- * See debugger_format_changes(). */
+ * See trace.h's trace_format_changes_wrapped(), which this feeds. */
 int debugger_line_width(const Debugger *dbg);
-
-/* Formats a trace line's register-changes list (as run.c's own flat
- * comma-join would: "NAME: OLD->NEW, NAME: OLD->NEW, ..."), wrapped to
- * fit debugger_line_width() columns with continuation lines aligned
- * under the first entry -- never wrapping in the middle of one "NAME:
- * OLD->NEW" entry. `prefix` is everything already printed earlier on
- * the same output line (used only to measure the continuation indent);
- * `out` receives just the changes portion, meant to be concatenated
- * directly after `prefix`, with no leading content and no trailing
- * newline. */
-void debugger_format_changes(const Debugger *dbg, const char *prefix, const RegChange *changes, int changeCount,
-                              char *out, size_t outSize);
 
 /* Called once per instruction, immediately before ap101_exec1() and
  * before the HalUCP trap check -- the single integration point between

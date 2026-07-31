@@ -169,8 +169,10 @@ static void test_servicer_roundtrip(void) {
  * ------------------------------------------------------------------- */
 
 /* Redirects stdout to a tmpfile() for the duration of one yaGPC2_ops.engine()
- * call and returns how many bytes it printed. */
-static long capture_engine_output_bytes(GpcState *state) {
+ * call, capturing what it printed into out (NUL-terminated, truncated to
+ * outSize-1 if longer); returns the number of bytes actually printed
+ * (which may exceed what fit in out). */
+static long capture_engine_output(GpcState *state, char *out, size_t outSize) {
     fflush(stdout);
     FILE *tmp = tmpfile();
     int savedFd = dup(fileno(stdout));
@@ -182,6 +184,9 @@ static long capture_engine_output_bytes(GpcState *state) {
     dup2(savedFd, fileno(stdout));
     close(savedFd);
     long size = ftell(tmp);
+    rewind(tmp);
+    size_t got = fread(out, 1, outSize - 1, tmp);
+    out[got] = '\0';
     fclose(tmp);
     return size;
 }
@@ -191,16 +196,28 @@ static void test_htrace_output(void) {
     CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
           "htrace-output instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
+    char buf[2400];
 
     CHECK(!age->htraceWanted, "htraceWanted starts false (no debugger attached)");
-    CHECK(capture_engine_output_bytes(&state) == 0, "engine prints nothing when htraceWanted is false");
 
-    age->htraceWanted = true; /* what yagpc2_debugger() would set from debugger_wants_htrace() */
-    long n = capture_engine_output_bytes(&state);
+    /* Enabled before the very first step, so the trace line's NIA/section
+     * are the known real entry point -- what yagpc2_debugger() would set
+     * from debugger_wants_htrace()/debugger_line_width() after an
+     * 'htrace on'/'set width 60'. */
+    age->htraceWanted = true;
+    age->htraceLineWidth = 60;
+    long n = capture_engine_output(&state, buf, sizeof buf);
     CHECK(n > 0, "engine prints a trace line when htraceWanted is true");
+    /* Content checks confirm this is really trace_format_debug_line()'s
+     * full CLI-identical format (elapsed time + real NIA/disasm), not
+     * just "some bytes" -- the fields a regression could plausibly drop
+     * silently (e.g. passing a NULL elapsedTimeUs by mistake). */
+    CHECK(strstr(buf, "T=") != NULL, "trace line includes the elapsed-time field");
+    CHECK(strstr(buf, "10164") != NULL, "trace line includes the real starting NIA");
+    CHECK(strstr(buf, "START") != NULL, "trace line includes the real section name from symbols");
 
     age->htraceWanted = false;
-    CHECK(capture_engine_output_bytes(&state) == 0, "engine stops printing once htraceWanted is cleared again");
+    CHECK(capture_engine_output(&state, buf, sizeof buf) == 0, "engine stops printing once htraceWanted is cleared again");
 
     ageharness_free(age);
     free(age);

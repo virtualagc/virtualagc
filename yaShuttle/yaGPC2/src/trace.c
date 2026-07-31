@@ -95,6 +95,82 @@ void trace_format_line(char *out, size_t outSize, int step, uint32_t nia, uint32
              c->dim, stepStr, c->reset, timeStr, niaStr, sectStr, hw1Str, hw2Str, disasmPadded, c->yellow, changesStr, c->reset);
 }
 
+void trace_format_changes_wrapped(int lineWidth, const char *prefix, const RegChange *changes, int changeCount,
+                                   char *out, size_t outSize) {
+    out[0] = '\0';
+    if (changeCount <= 0) return;
+
+    size_t prefixLen = strlen(prefix);
+    size_t pos = 0;
+    size_t lineLen = prefixLen;
+    bool firstOnLine = true;
+
+    for (int i = 0; i < changeCount; i++) {
+        char oldStr[16], newStr[16];
+        trace_format_reg_val(oldStr, sizeof oldStr, changes[i].name, changes[i].oldVal);
+        trace_format_reg_val(newStr, sizeof newStr, changes[i].name, changes[i].newVal);
+        bool isLast = i == changeCount - 1;
+        char token[64];
+        snprintf(token, sizeof token, "%s: %s->%s%s", changes[i].name, oldStr, newStr, isLast ? "" : ", ");
+        size_t tokenLen = strlen(token);
+
+        if (!firstOnLine && lineWidth > 0 && lineLen + tokenLen > (size_t)lineWidth) {
+            int n = snprintf(out + pos, pos < outSize ? outSize - pos : 0, "\n%*s", (int)prefixLen, "");
+            pos += (n > 0) ? (size_t)n : 0;
+            lineLen = prefixLen;
+            firstOnLine = true;
+        }
+        int n = snprintf(out + pos, pos < outSize ? outSize - pos : 0, "%s", token);
+        pos += (n > 0) ? (size_t)n : 0;
+        lineLen += tokenLen;
+        firstOnLine = false;
+    }
+}
+
+void trace_format_debug_line(char *out, size_t outSize, long step, uint32_t nia, uint32_t hw1, uint32_t hw2,
+                              const char *disasm, int instrLen, const RegChange *changes, int changeCount,
+                              const SymbolTable *sym, const double *elapsedTimeUs, int lineWidth) {
+    char stepNum[32];
+    snprintf(stepNum, sizeof stepNum, "%ld", step);
+    char stepStr[32];
+    str_lpad(stepStr, sizeof stepStr, stepNum, " ", 5);
+
+    char niaStr[16];
+    as_hex(niaStr, sizeof niaStr, (long long)nia, 6);
+
+    char sectOffsetStr[80];
+    sectOffsetStr[0] = '\0';
+    if (sym) {
+        char off[64];
+        symtable_format_section_offset(sym, nia, off, sizeof off);
+        snprintf(sectOffsetStr, sizeof sectOffsetStr, " %s", off);
+    }
+
+    char hw1Str[16];
+    as_hex(hw1Str, sizeof hw1Str, (long long)hw1, 4);
+    char hw2Str[16];
+    if (instrLen > 1) {
+        as_hex(hw2Str, sizeof hw2Str, (long long)hw2, 4);
+    } else {
+        snprintf(hw2Str, sizeof hw2Str, "    ");
+    }
+
+    char disasmPadded[256];
+    str_rpad(disasmPadded, sizeof disasmPadded, disasm, " ", 28);
+
+    char timeStr[32];
+    timeStr[0] = '\0';
+    if (elapsedTimeUs) snprintf(timeStr, sizeof timeStr, "T=%.2f ", *elapsedTimeUs);
+
+    char prefix[400];
+    snprintf(prefix, sizeof prefix, "[%s] %s%s%s: %s %s  %s", stepStr, timeStr, niaStr, sectOffsetStr, hw1Str, hw2Str,
+             disasmPadded);
+
+    char changesBlob[4096];
+    trace_format_changes_wrapped(lineWidth, prefix, changes, changeCount, changesBlob, sizeof changesBlob);
+    snprintf(out, outSize, "%s%s", prefix, changesBlob);
+}
+
 void trace_format_reg_dump(CPU *cpu, int step, const TraceColors *color, char lines[TRACE_REGDUMP_LINES][200], size_t lineSize) {
     const TraceColors *c = color ? color : &TRACE_COLOR_PLAIN;
     uint32_t grSet = psw_get_reg_set(&cpu->psw);
