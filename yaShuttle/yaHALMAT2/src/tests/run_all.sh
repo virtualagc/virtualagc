@@ -1268,13 +1268,19 @@ run ./run_local_fixture.sh random_deterministic "$(printf ' 4.3794728815555573E-
 # now that weights are individually-measured microsecond values rather
 # than a single pooled multiplier; opcodes not yet in that weighted set
 # keep the previous flat rate's own real-world duration (60us, i.e. the
-# old 1 tick at 16800 ticks/sec, rounded) unchanged. RUNTIME()'s own
-# first call (after only a handful of mostly-structural and now-
-# individually-weighted setup instructions) shifts by a small residual
-# amount accordingly; the second (after WAIT(5.0), so dominated by the
-# explicit 5-second wait) shows only a small residual change from the
-# same effect on the few instructions surrounding it.
-run ./run_local_fixture.sh runtime "$(printf ' 1.2000000E-04\n 5.0004282E+00')"
+# old 1 tick at 16800 ticks/sec, rounded) unchanged; (4) OP_XXST/OP_XXAR
+# gained a real per-item-class WRITE-statement charge (fixed per-statement
+# base + per-class marginal rate, both measured from real yaGPC2 traces --
+# see op_cost_ticks()'s own OP_XXAR comment), replacing their previous
+# flat 60-tick default specifically for WRITE (not READ/CALL) statements.
+# RUNTIME()'s own first call (after only a handful of mostly-structural
+# and now-individually-weighted setup instructions, no WRITE yet) is
+# unaffected by (4) and shifts only from (3); the second (after WAIT(5.0),
+# so dominated by the explicit 5-second wait, but by then two WRITE(6)
+# statements have also executed) shows a further small residual shift
+# from (4) on top of the same small (3)-driven effect on the surrounding
+# instructions.
+run ./run_local_fixture.sh runtime "$(printf ' 1.2000000E-04\n 5.0004129E+00')"
 run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2.0000000E+00\n          4\n          5')"
 # Follow-up, direct user correction to this same batch: DATE/CLOCKTIME
 # (BFNC selectors 18/54) were initially left unimplemented ("no calendar/

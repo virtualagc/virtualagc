@@ -4870,7 +4870,7 @@ static void close_current_process(halmat_state_t *state, bool *branched) {
  * 1e6-ticks/sec rate) so opcodes outside this pass's scope keep their
  * prior modeled duration exactly, rather than silently changing when
  * HALMAT_TICKS_PER_SECOND's own scale changed. */
-static int64_t op_cost_ticks(const halmat_instr_t *ins) {
+static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
     switch (ins->opcode) {
         case OP_SMRK: case OP_PXRC: case OP_NOP: case OP_XREC:
         case OP_WRIT: case OP_XXND: case OP_DSUB: case OP_EDCL:
@@ -4903,6 +4903,68 @@ static int64_t op_cost_ticks(const halmat_instr_t *ins) {
         case OP_RTRN: return 2;
         case OP_CTST: return 2;
 
+        case OP_XXST:
+            /* WRITE statement opener (kind==2, a QUAL_IMD immediate --
+             * class-0/XXST.md -- read directly rather than via
+             * resolve_operand() since op_cost_ticks() runs before this
+             * instruction's own case body sets state->io_pending, and a
+             * QUAL_IMD read has no side effects to worry about doing
+             * early, per resolve_operand()'s own QUAL_IMD case). Charges
+             * the fixed per-statement base cost -- see OP_XXAR's own
+             * comment for where this number and the per-item marginal
+             * costs below both come from. READ/CALL openers (kind != 2,
+             * or a QUAL_SYT callee) aren't priced yet -- flat default. */
+            if (ins->operand_count >= 1 && ins->operands[0].qual == QUAL_IMD &&
+                (int16_t)ins->operands[0].data == 2)
+                return 40;
+            return 60;
+
+        case OP_XXAR:
+            /* WRITE-statement argument (state->io_pending already
+             * reflects the current statement's own XXST, which always
+             * executes -- and so sets io_pending.kind/is_call -- before
+             * any of its own XXAR instructions): per-item-class real
+             * cost. Initially measured directly from single-item
+             * `WRITE(dev) x;` statements (H=-group whose non-zero-cost
+             * opcode set is exactly {XXST, XXAR}, no CCAT/other
+             * computation) across ~165 tests/hal fixtures, local time +
+             * RTL-call time (IOINIT/COUTP/CASV/CATV) both attributed to
+             * that one statement -- see CLAUDE_LOG.md. But applying that
+             * per-item rate independently to every item of a MULTI-item
+             * WRITE badly overcharged it (confirmed regression-testing
+             * this exact model against multi-item fixtures like
+             * int_arith2/bit/pcal/write_lit): real multi-item statements
+             * show clear economies of scale, presumably from some RTL
+             * setup/flush work (COUTP in particular) being shared across
+             * items rather than repeated per item. Refit as a fixed
+             * per-statement base (charged once, at OP_XXST above) plus a
+             * smaller marginal per-item rate, linear-regressed across
+             * 230 single- and multi-item WRITE occurrences (base=39.63,
+             * marginal=0.6301 * the original independently-measured
+             * single-item rate, residual stdev ~17us vs ~38-26us for two
+             * simpler models tried) -- both rounded to the nearest tick
+             * below. tag1 is the item's HAL/S class (class-0/XXAR.md):
+             * 1=BIT, 2=CHARACTER, 5=SCALAR, 6=INTEGER covered; 3=MATRIX
+             * had only 3 (very noisy) single-item samples and 4=VECTOR/
+             * 10=STRUCTURE/whole-array forms had none clean at all (a
+             * real yaGPC2 statement-boundary source-map quirk -- H=
+             * sometimes prints while a PRIOR statement's own RTL call
+             * excursion is still open -- discarded every VECTOR sample
+             * this pass found), so those fall through to the flat
+             * default rather than being priced on 0-3 samples.
+             * READ/CALL arguments aren't priced yet. */
+            if (!state->io_pending.is_call && state->io_pending.kind == 2 &&
+                ins->operand_count >= 1) {
+                switch (ins->operands[0].tag1) {
+                    case 1: return 73;   /* BIT */
+                    case 2: return 115;  /* CHARACTER */
+                    case 5: return 64;   /* SCALAR */
+                    case 6: return 62;   /* INTEGER */
+                    default: return 60;  /* MATRIX/VECTOR/STRUCTURE/etc: not yet individually priced */
+                }
+            }
+            return 60;
+
         default:
             return 60;
     }
@@ -4927,7 +4989,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
          * ACTUAL instruction executed, not just once for the whole
          * replay; see interp_step()'s own comment at its former
          * increment site. */
-        state->virtual_time += op_cost_ticks(ins);
+        state->virtual_time += op_cost_ticks(state, ins);
         resolved_value_t a, b;
         bool branched = false;
 
