@@ -50,8 +50,19 @@ void sourcemap_free(SourceMap *sm);
  * pass1.rpt lines even when they came from the same source line) --
  * callers should print each line on its own, rather than collapsing
  * them into one, to match pass1.rpt's own layout instead of an
- * artificially shortened summary. */
+ * artificially shortened summary.
+ *
+ * halmatOut and halmatCountOut (both optional -- pass NULL to skip) get
+ * the same statement's HALMAT instruction word offsets (see
+ * gen_source_map.py's parse_halmat_offsets()) -- word offsets within
+ * the compiler's raw HALMAT stream, i.e. the same numbering
+ * yaHALMAT2's own --disasm/--debug already use, *not* a dense 1,2,3,...
+ * count -- in ascending order, owned by sm the same way linesOut is.
+ * *halmatCountOut is 0 (and *halmatOut left untouched) when the
+ * statement has none, e.g. no --unit HALMAT_FILE was given when
+ * building the map, or the statement genuinely compiles to no HALMAT
+ * (a plain DECLARE). */
 int sourcemap_lookup(const SourceMap *sm, const char *module, uint32_t addr, int *stmtOut,
-                      const char *const **linesOut);
+                      const char *const **linesOut, const uint32_t **halmatOut, int *halmatCountOut);
 
 #endif

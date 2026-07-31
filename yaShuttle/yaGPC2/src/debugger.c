@@ -104,6 +104,14 @@ struct Debugger {
     bool hasLastStmt; /* only show a source line when it differs from the
                        * last one shown, matching yaHALMAT2's --debug mode */
 
+    bool halmatEnabled; /* 'halmat on'/'halmat off' toggle -- shows an
+                         * "H=..." line of HALMAT instruction word
+                         * offsets (see sourcemap.h's sourcemap_lookup())
+                         * alongside the HAL/S source line, when the
+                         * source map was built with a --unit HALMAT_FILE
+                         * and the active statement has any; mirrors
+                         * traceEnabled exactly */
+
     /* 'set width N': wraps the register-changes list run.c prints during
      * 'trace'/'htrace' (see debugger_format_changes()); N<=0 disables
      * wrapping. Purely a debug-mode presentation setting -- has no
@@ -532,9 +540,20 @@ static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
  * business appearing here) verbatim, per the user's explicit request
  * that these not be stripped out: they're the only thing distinguishing
  * a subscript or exponent line from the main source text once it's no
- * longer typeset in pass1.rpt's own column-aligned layout. */
-static void print_source_lines(int stmt, const char *const *lines, int count) {
+ * longer typeset in pass1.rpt's own column-aligned layout.
+ *
+ * When 'halmat on' and the statement has any, also prints one "H=..."
+ * line listing the whole set of HALMAT instruction word offsets that
+ * compiled to this statement (comma-joined, not collapsed to one
+ * representative value -- see sourcemap.h's sourcemap_lookup()). */
+static void print_source_lines(Debugger *dbg, int stmt, const char *const *lines, int count,
+                                const uint32_t *halmat, int halmatCount) {
     for (int i = 0; i < count; i++) printf("HAL/S %4d: %s\n", stmt, lines[i]);
+    if (dbg->halmatEnabled && halmatCount > 0) {
+        printf("H=%u", halmat[0]);
+        for (int i = 1; i < halmatCount; i++) printf(",%u", halmat[i]);
+        printf("\n");
+    }
 }
 
 /* Prints the HAL/S source line(s) active at addr, if a source map is
@@ -553,9 +572,11 @@ static bool show_source_line(Debugger *dbg, AGEHarness *age, uint32_t addr) {
     if (!module) return false;
     int stmt = 0;
     const char *const *lines = NULL;
-    int count = sourcemap_lookup(dbg->srcmap, module, addr, &stmt, &lines);
+    const uint32_t *halmat = NULL;
+    int halmatCount = 0;
+    int count = sourcemap_lookup(dbg->srcmap, module, addr, &stmt, &lines, &halmat, &halmatCount);
     if (count == 0) return false;
-    print_source_lines(stmt, lines, count);
+    print_source_lines(dbg, stmt, lines, count, halmat, halmatCount);
     return true;
 }
 
@@ -574,9 +595,11 @@ static void show_source_line_if_changed(Debugger *dbg, AGEHarness *age, uint32_t
     if (!module) return;
     int stmt = 0;
     const char *const *lines = NULL;
-    int count = sourcemap_lookup(dbg->srcmap, module, addr, &stmt, &lines);
+    const uint32_t *halmat = NULL;
+    int halmatCount = 0;
+    int count = sourcemap_lookup(dbg->srcmap, module, addr, &stmt, &lines, &halmat, &halmatCount);
     if (count > 0 && (!dbg->hasLastStmt || stmt != dbg->lastStmt || strcmp(module, dbg->lastModule) != 0)) {
-        print_source_lines(stmt, lines, count);
+        print_source_lines(dbg, stmt, lines, count, halmat, halmatCount);
         dbg->lastStmt = stmt;
         snprintf(dbg->lastModule, sizeof dbg->lastModule, "%s", module);
         dbg->hasLastStmt = true;
@@ -630,6 +653,7 @@ static const HelpEntry HELP_ENTRIES[] = {
     {"steps", "Show step count"},
     {"backtrace, bt", "Show recently executed instructions"},
     {"trace, htrace [on|off]", "Toggle or show instruction trace (+ HAL/S source lines, if mapped)"},
+    {"halmat [on|off]", "Toggle or show HALMAT instruction-number (H=...) display, if mapped"},
     {"info breakpoints|watches|memwatch|registers|sections", "Show info"},
     {"help, h, ? [command]", "Show this help"},
     {"quit, q, exit", "Exit the debugger"},
@@ -1195,6 +1219,18 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
             printf("Trace disabled\n");
         } else {
             printf("Trace is %s\n", dbg->traceEnabled ? "on" : "off");
+        }
+        return false;
+    }
+    if (cmd_is(cmd, "halmat", NULL)) {
+        if (argc > 1 && strcmp(argv[1], "on") == 0) {
+            dbg->halmatEnabled = true;
+            printf("HALMAT instruction display enabled\n");
+        } else if (argc > 1 && strcmp(argv[1], "off") == 0) {
+            dbg->halmatEnabled = false;
+            printf("HALMAT instruction display disabled\n");
+        } else {
+            printf("HALMAT instruction display is %s\n", dbg->halmatEnabled ? "on" : "off");
         }
         return false;
     }

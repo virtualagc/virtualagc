@@ -21,6 +21,8 @@ typedef struct {
     int stmt;
     char **lines;
     int lineCount;
+    uint32_t *halmat;
+    int halmatCount;
 } StmtEntry;
 
 /* One compiled unit's worth of statements/addresses -- see sourcemap.h's
@@ -65,6 +67,14 @@ static char **load_lines(const JsonValue *lines, int *countOut) {
     return out;
 }
 
+static uint32_t *load_halmat(const JsonValue *halmat, int *countOut) {
+    int n = json_arr_count(halmat);
+    uint32_t *out = n > 0 ? calloc((size_t)n, sizeof(uint32_t)) : NULL;
+    for (int i = 0; i < n; i++) out[i] = (uint32_t)json_as_number(json_arr_get(halmat, i), 0);
+    *countOut = n;
+    return out;
+}
+
 static void load_unit(SourceUnit *u, const JsonValue *unitJson) {
     u->module = yagpc_strdup(json_as_string(json_obj_get(unitJson, "module"), ""));
 
@@ -76,6 +86,7 @@ static void load_unit(SourceUnit *u, const JsonValue *unitJson) {
             JsonValue *st = json_arr_get(stmts, i);
             u->stmts[i].stmt = (int)json_as_number(json_obj_get(st, "stmt"), 0);
             u->stmts[i].lines = load_lines(json_obj_get(st, "lines"), &u->stmts[i].lineCount);
+            u->stmts[i].halmat = load_halmat(json_obj_get(st, "halmat"), &u->stmts[i].halmatCount);
             u->stmtCount++;
         }
     }
@@ -160,6 +171,7 @@ void sourcemap_free(SourceMap *sm) {
         for (int j = 0; j < u->stmtCount; j++) {
             for (int k = 0; k < u->stmts[j].lineCount; k++) free(u->stmts[j].lines[k]);
             free(u->stmts[j].lines);
+            free(u->stmts[j].halmat);
         }
         free(u->stmts);
         free(u->addrs);
@@ -192,7 +204,7 @@ static bool addr_in_ranges(const SourceUnit *u, uint32_t addr) {
 }
 
 int sourcemap_lookup(const SourceMap *sm, const char *module, uint32_t addr, int *stmtOut,
-                      const char *const **linesOut) {
+                      const char *const **linesOut, const uint32_t **halmatOut, int *halmatCountOut) {
     if (!sm || !module) return 0;
     const SourceUnit *u = find_unit(sm, module);
     if (!u || u->addrCount == 0) return 0;
@@ -213,5 +225,7 @@ int sourcemap_lookup(const SourceMap *sm, const char *module, uint32_t addr, int
     if (!e) return 0;
     if (stmtOut) *stmtOut = stmt;
     if (linesOut) *linesOut = (const char *const *)e->lines;
+    if (halmatOut) *halmatOut = e->halmat;
+    if (halmatCountOut) *halmatCountOut = e->halmatCount;
     return e->lineCount;
 }

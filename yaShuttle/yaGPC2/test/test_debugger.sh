@@ -79,6 +79,17 @@ run_case "srcmap" --source-map fixtures/hello.srcmap.json
 # flow-by path (not just the at-stop path) actually gets exercised.
 run_case "wrap" --source-map fixtures/hello.srcmap.json
 
+# HALMAT instruction-number display ('halmat on'/'halmat off'): shows an
+# "H=..." line of HALMAT instruction word offsets (see
+# tools/gen_source_map.py's parse_halmat_offsets()) alongside the HAL/S
+# source line, when the source map was built with a --unit HALMAT_FILE.
+# Exercises a statement with no HALMAT of its own (stmt 1, no "H=" line),
+# one with several (stmt 6, "H=17,18,20,22,24"), 'halmat off' correctly
+# suppressing the line even as a new statement becomes active, and
+# stepping into non-HAL/S library code (IOINIT) showing neither a HAL/S
+# line nor an H= line (no unit mapped there) without erroring.
+run_case "halmat" --source-map fixtures/hello.srcmap.json
+
 # Multi-unit HAL/S source maps: a linked memory image is in general the
 # result of linking many separately-compiled HAL/S units, not just one
 # -- see tools/gen_source_map.py's --unit option and

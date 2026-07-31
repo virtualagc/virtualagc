@@ -40,6 +40,20 @@ it calls, each its own HALSFC compile) -- so this tool takes one
 repeatable --unit per compiled unit, all resolved against the same
 shared --lnk101 (one linked image, one output covering every unit).
 
+--unit optionally takes a third, HALMAT-file path (MODULE=PASS1:PASS2:
+HALMAT_FILE) for yaGPC2's --debug 'halmat on' HAL/S-statement -> HALMAT-
+instruction-number display -- pass whichever of optmat.bin (preferred:
+what Phase 2/ASM101 actually generates object code from) or halmat.bin
+(pre-optimization fallback, e.g. a --no-opt compile) the caller finds.
+This is unrelated to, and much simpler than, the SDF-embedded-HALMAT
+format modules/sdf/sdf/sdf.py's own docstring discusses and declines to
+parse: it works directly off the raw HALMAT file every compile already
+produces (never gated behind SDF's own HALMAT parm), via 'yaHALMAT2
+--disasm', reusing that tool's own already-correct SMRK-based statement
+correlation (see parse_halmat_offsets()) rather than re-deriving it from
+SDF's statement-scoped, SMRK-stripped storage, which does not actually
+retain enough information to reconstruct the original word offsets.
+
 Usage:
     gen_source_map.py --unit HELLO=pass1.rpt:pass2.rpt \\
         --lnk101 foo-lnk101.json -o foo.srcmap.json
@@ -57,6 +71,7 @@ import argparse
 import json
 import re
 import shlex
+import subprocess
 import sys
 
 
@@ -248,18 +263,98 @@ class ArgParser(argparse.ArgumentParser):
 
 
 def parse_unit_spec(spec):
-    """"--unit" values look like "MODULE=PASS1_PATH:PASS2_PATH". Returns
-    (module, pass1_path, pass2_path), or exits with a usage error."""
+    """"--unit" values look like "MODULE=PASS1_PATH:PASS2_PATH" or
+    "MODULE=PASS1_PATH:PASS2_PATH:HALMAT_FILE" (see module docstring).
+    Returns (module, pass1_path, pass2_path, halmat_path_or_None), or
+    exits with a usage error."""
     module, eq, rest = spec.partition("=")
-    pass1_path, colon, pass2_path = rest.partition(":")
+    pass1_path, colon, rest = rest.partition(":")
+    pass2_path, colon2, halmat_path = rest.partition(":")
     if not eq or not colon or not module or not pass1_path or not pass2_path:
-        sys.exit(f"error: --unit {spec!r} must be of the form MODULE=PASS1_PATH:PASS2_PATH")
-    return module, pass1_path, pass2_path
+        sys.exit(f"error: --unit {spec!r} must be of the form MODULE=PASS1_PATH:PASS2_PATH[:HALMAT_FILE]")
+    return module, pass1_path, pass2_path, (halmat_path if colon2 else None)
 
 
-def build_unit(module, pass1_path, pass2_path, sections_by_name):
+def run_yahalmat2_disasm(halmat_path):
+    """Returns 'yaHALMAT2 --disasm halmat_path's stdout, or None (after
+    printing a warning) if yaHALMAT2 isn't available or fails -- HALMAT-
+    instruction-number display is an opt-in debugger nicety, not a hard
+    requirement, matching this tool's other non-fatal fallbacks."""
+    try:
+        result = subprocess.run(
+            ["yaHALMAT2", "--disasm", halmat_path],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as e:
+        detail = e.stderr if isinstance(e, subprocess.CalledProcessError) and e.stderr else str(e)
+        print(
+            f"warning: 'yaHALMAT2 --disasm {halmat_path}' failed ({detail}) "
+            "-- continuing without HALMAT instruction numbers",
+            file=sys.stderr,
+        )
+        return None
+    return result.stdout
+
+
+def parse_halmat_offsets(disasm_text):
+    """Returns {stmt: [word_offset, ...]} (offsets in ascending order),
+    parsed from 'yaHALMAT2 --disasm's own text output -- reusing that
+    tool's already-correct, already-tested HALMAT decoding rather than
+    re-implementing it, the same "parse an existing tool's report" style
+    this whole script already uses for pass1.rpt/pass2.rpt.
+
+    Every instruction line looks like "#N 0xOOO MNEM  numop=... ; comment"
+    (N is the word offset -- see yaShuttle/yaHALMAT2/src/disasm.c's own
+    format string). A "SMRK" (HALMAT Statement Marker) instruction's own
+    operand -- printed on the following "[0] data=0xNNNN(NNNN) ..." line
+    -- is the HAL/S statement number it closes (confirmed against
+    yaShuttle/yaHALMAT2/src/debug.c's find_word_index_for_stmt(), which
+    matches on exactly this operand). Verified by hand, statement by
+    statement, against a real compile: the instructions strictly between
+    the previous SMRK (its own word offset + 2, since SMRK is always a
+    1-operand/2-word instruction) and this SMRK belong to the statement
+    it closes -- e.g. a statement with no code of its own (a plain
+    DECLARE) has two SMRKs back to back, no instructions between them.
+    The compiler's own leading PXRC/MDEF header instructions (before any
+    SMRK at all -- a record header and the program-definition header,
+    never any statement's own content) are excluded by mnemonic, not
+    attributed to statement 1."""
+    HEADER_MNEMONICS = {"PXRC", "MDEF"}
+    instr_re = re.compile(r"^#(\d+)\s+0x[0-9A-Fa-f]+\s+(\S+)")
+    operand_re = re.compile(r"^\s*\[0\]\s+data=0x([0-9A-Fa-f]+)")
+
+    stmt_offsets = {}
+    pending = []
+    lines = disasm_text.splitlines()
+    for i, line in enumerate(lines):
+        m = instr_re.match(line)
+        if not m:
+            continue
+        offset, mnemonic = int(m.group(1)), m.group(2)
+        if mnemonic in HEADER_MNEMONICS:
+            continue
+        if mnemonic != "SMRK":
+            pending.append(offset)
+            continue
+        stmt = None
+        if i + 1 < len(lines):
+            om = operand_re.match(lines[i + 1])
+            if om:
+                stmt = int(om.group(1), 16)
+        if stmt is not None:
+            stmt_offsets.setdefault(stmt, []).extend(pending)
+        pending = []
+    return stmt_offsets
+
+
+def build_unit(module, pass1_path, pass2_path, halmat_path, sections_by_name):
     """Returns {"module":..., "statements":[...], "addresses":[...],
-    "codeRanges":[...]} for one compiled unit, resolving
+    "codeRanges":[...]} for one compiled unit -- each statement entry
+    additionally gets a "halmat" field (list of word offsets, see
+    parse_halmat_offsets()) when halmat_path is given and that statement
+    has any. Resolves
     parse_pass2()'s (csectName, offset) pairs to absolute linked
     addresses via sections_by_name (looked up directly by CSECT name --
     a real linked CSECT name is already unique, so no module cross-check
@@ -302,8 +397,19 @@ def build_unit(module, pass1_path, pass2_path, sections_by_name):
         addr_to_stmt[sect["address"] + offset] = stmt  # last one wins for a shared (zero-code-statement) address
         code_ranges[csect_name] = (sect["address"], sect["address"] + sect["size"])
 
+    halmat_offsets = {}
+    if halmat_path:
+        disasm_text = run_yahalmat2_disasm(halmat_path)
+        if disasm_text is not None:
+            halmat_offsets = parse_halmat_offsets(disasm_text)
+
     addresses = [{"addr": a, "stmt": s} for a, s in sorted(addr_to_stmt.items())]
-    stmt_list = [{"stmt": stmt, "lines": lines} for stmt, lines in sorted(statements.items())]
+    stmt_list = []
+    for stmt, lines in sorted(statements.items()):
+        entry = {"stmt": stmt, "lines": lines}
+        if halmat_offsets.get(stmt):
+            entry["halmat"] = halmat_offsets[stmt]
+        stmt_list.append(entry)
     ranges = [{"start": start, "end": end} for start, end in sorted(code_ranges.values())]
     return {"module": module, "statements": stmt_list, "addresses": addresses, "codeRanges": ranges}
 

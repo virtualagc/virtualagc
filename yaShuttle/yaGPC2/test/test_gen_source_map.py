@@ -43,6 +43,15 @@ support): it should be skipped with a warning, not treated as a hard
 error, since a real multi-unit build legitimately mixes such units in
 with ones that have real code.
 
+T13-T15 use a real excerpt of "yaHALMAT2 --disasm optmat.bin" against the
+same HELLO.hal compile backing test/fixtures/hello.srcmap.json (hand-
+verified statement by statement against this exact output during
+planning -- see parse_halmat_offsets()'s own docstring for the
+attribution rule being tested): the leading PXRC/MDEF header excluded
+from statement 1, back-to-back SMRKs for statements with no HALMAT of
+their own (a label/PROGRAM statement, plain DECLAREs), a single-
+instruction statement, and a multi-instruction one.
+
 Usage: ./test_gen_source_map.py [--help]
 """
 import importlib.util
@@ -121,6 +130,46 @@ P176_PASS2_EXCERPT = """\
 00010 E2FB 0001                              IAL    R2,1()              TIME: 0.5
 00012 6DEA                                   MVH    R5,R2               TIME: 12.0+.875(N-1) (SEE POO)
 0000013                             ST#16    EQU    *
+"""
+
+# Real "yaHALMAT2 --disasm optmat.bin" excerpt (word offsets 0-32) against
+# the same HELLO.hal compile backing test/fixtures/hello.srcmap.json, used
+# verbatim for T13-T15. See parse_halmat_offsets()'s own docstring.
+HELLO_OPTMAT_DISASM_EXCERPT = """\
+#0      0x005 PXRC  numop=1 tag=0x00 copt=0x0  ; Record header, points to closing XREC
+        [0] data=0x005A(90) qual=  0 tag1=0x00 tag2=0x0
+#2      0x02B MDEF  numop=1 tag=0x00 copt=0x0  ; Program definition header
+        [0] data=0x0001(1) qual=SYT tag1=0x00 tag2=0x0
+#4      0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker
+        [0] data=0x0001(1) qual=  0 tag1=0xCA tag2=0x1
+#6      0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker
+        [0] data=0x0002(2) qual=  0 tag1=0x00 tag2=0x0
+#8      0x841 CINT  numop=2 tag=0x02 copt=0x0  ; Character initialize
+        [0] data=0x0003(3) qual=SYT tag1=0x00 tag2=0x0
+        [1] data=0x0002(2) qual=LIT tag1=0x00 tag2=0x0
+#11     0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker
+        [0] data=0x0003(3) qual=  0 tag1=0x00 tag2=0x0
+#13     0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker
+        [0] data=0x0004(4) qual=  0 tag1=0x00 tag2=0x0
+#15     0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker
+        [0] data=0x0005(5) qual=  0 tag1=0x00 tag2=0x0
+#17     0x031 EDCL  numop=0 tag=0x01 copt=0x0  ; End-of-declarations marker
+#18     0x025 XXST  numop=1 tag=0x00 copt=0x0  ; I/O statement start, carries I/O-kind code
+        [0] data=0x0002(2) qual=IMD tag1=0x00 tag2=0x0
+#20     0x027 XXAR  numop=1 tag=0x00 copt=0x0  ; I/O statement argument
+        [0] data=0x0004(4) qual=LIT tag1=0x02 tag2=0x0
+#22     0x021 WRIT  numop=1 tag=0x00 copt=0x0  ; WRITE statement header
+        [0] data=0x0006(6) qual=IMD tag1=0x00 tag2=0x0
+#24     0x026 XXND  numop=0 tag=0x00 copt=0x0  ; I/O statement end
+#25     0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker
+        [0] data=0x0006(6) qual=  0 tag1=0x00 tag2=0x1
+#27     0x010 DFOR  numop=4 tag=0x01 copt=0x0  ; DO FOR statement header
+        [0] data=0x0001(1) qual=INL tag1=0x00 tag2=0x1
+        [1] data=0x0002(2) qual=SYT tag1=0x00 tag2=0x0
+        [2] data=0x0005(5) qual=LIT tag1=0x00 tag2=0x0
+        [3] data=0x0006(6) qual=LIT tag1=0x00 tag2=0x0
+#32     0x004 SMRK  numop=1 tag=0x00 copt=0x0  ; Statement marker
+        [0] data=0x0007(7) qual=  0 tag1=0x00 tag2=0x1
 """
 
 failCount = 0
@@ -254,12 +303,24 @@ def main():
     try:
         stderr = io.StringIO()
         with redirect_stderr(stderr):
-            unit = gsm.build_unit("DUMMY_COMPOOL", compool_pass1, compool_pass2, {})
+            unit = gsm.build_unit("DUMMY_COMPOOL", compool_pass1, compool_pass2, None, {})
         check("T12 a COMPOOL/template-only compile (no code markers) is skipped, not a hard error", unit, None)
         check("T12b ...with a warning explaining why", "skipping" in stderr.getvalue(), True)
     finally:
         Path(compool_pass1).unlink()
         Path(compool_pass2).unlink()
+
+    halmat = gsm.parse_halmat_offsets(HELLO_OPTMAT_DISASM_EXCERPT)
+    check("T13 leading PXRC/MDEF header excluded, statement 1 (label+PROGRAM) has no HALMAT", halmat[1], [])
+    check("T13b statement 2 (plain DECLARE) also has none -- back-to-back SMRKs", halmat[2], [])
+    check("T14 statement 3 (DECLARE ... INITIAL(...)) is a single-instruction CINT", halmat[3], [8])
+    check(
+        "T15 statement 6 (first executable WRITE, also sweeps up the EDCL phase-transition marker) "
+        "gets the whole instruction set, not one representative value",
+        halmat[6],
+        [17, 18, 20, 22, 24],
+    )
+    check("T15b statement 7 (DO FOR header) is a single instruction", halmat[7], [27])
 
     if failCount:
         print(f"{failCount} test(s) FAILED")
