@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # Compile, link, and run a HAL/S program, using HALSFC, lnk101, and gpc-batch.
 
+import re
+import shlex
 import sys
 import subprocess
 import os
+import tempfile
 from pathlib import Path
 
 extraParms = ""
@@ -34,7 +37,22 @@ Usage:
      
 The available OPTIONs are:
     --filename=F    Required.  F is the path to the HAL/S source-code file.
-    --parms=P       P is a list of HAL/S-FC compiler options that will 
+                    If F starts with "@", it instead names a manifest file
+                    listing multiple HAL/S source-code file paths, one per
+                    line (blank lines and lines starting with "#" are
+                    ignored), in the order they need to be compiled --
+                    e.g. a called procedure/function or a referenced
+                    COMPOOL before whichever unit(s) reference it. Every
+                    listed file is compiled individually, then all of
+                    them are linked together into one image; combined
+                    outputs (the .fcm, -lnk101.json, .srcmap.json) are
+                    named after the manifest file itself rather than any
+                    one compiled unit. A COMPOOL/template-only file (no
+                    executable statements of its own) is fine to include
+                    in the list -- confirmed harmless to link in, and
+                    gen_source_map.py skips it (with a warning) rather
+                    than failing the whole build over it.
+    --parms=P       P is a list of HAL/S-FC compiler options that will
                     completely override the defaults used by this program.
     --extra-parms=P P is a list of extra HAL/S-FC compiler options that will
                     be prefixed to the defaults used by this program.  P should
@@ -94,32 +112,78 @@ for parameter in sys.argv[1:]:
         sys.exit(1)
 if debug:
     gpcCommand.append("--debug")
-if parmList == None:
-    parmList = getParms(filename)
-basename = Path(filename).stem
-objfile = f"{basename}.obj"
+# A plain --filename=F compiles/links just F; --filename=@F instead
+# names a manifest of several HAL/S files (see helpMsg above) to be
+# compiled individually, in the given order, and linked together into
+# one image. Both cases funnel into the same `units` list -- a single-
+# element list for the plain case -- so the compile loop and everything
+# after it doesn't need to know which one it's handling.
+if filename.startswith("@"):
+    manifestPath = os.path.expanduser(os.path.expandvars(filename[1:]))
+    with open(manifestPath) as f:
+        halPaths = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+    if not halPaths:
+        sys.exit(f"error: manifest {manifestPath!r} lists no files")
+    basename = Path(manifestPath).stem
+else:
+    halPaths = [filename]
+    basename = Path(filename).stem
+units = [(Path(p).stem, os.path.expanduser(os.path.expandvars(p))) for p in halPaths]
+
 fcmfile = f"{basename}.fcm"
 symfile = f"{basename}-lnk101.json"
-print(f"For file {basename}.hal, producing {objfile}, {fcmfile}, {symfile}")
-filename = os.path.expanduser(os.path.expandvars(filename))
+print(f"Producing {fcmfile}, {symfile}")
 
-# First step, compile.
-command = ["HALSFC", filename, f"--parms={parmList}", "-o", objfile]
-if not noTest:
-    command += ["--test", "--force", "--clean", "--archive"]
-command += extraPass1
-print(" ".join(command))
-try:
-    result = subprocess.run(command, capture_output = True, text = True, check = True)
-    print(result.stdout)
-except subprocess.CalledProcessError as e:
-    print(f"Compilation failed with exit code {e.returncode}.")
-    print("STDOUT:", e.stdout)
-    print("STDERR:", e.stderr)
-    os._exit(1)
+# First step, compile each unit individually. thisParmList is computed
+# per unit (not just once) so an explicit --parms= override still
+# applies uniformly, but auto-detected parms (getParms(), keyed off
+# each unit's own filename) work correctly for a manifest whose files
+# don't all want the same cardtype.
+objfiles = []
+unitSpecs = []  # (module, pass1Path, pass2Path) for gen_source_map.py, one per unit that has a captured results folder
+for module, halPath in units:
+    objfile = f"{module}.obj"
+    thisParmList = parmList if parmList is not None else getParms(halPath)
+    command = ["HALSFC", halPath, f"--parms={thisParmList}", "-o", objfile]
+    if not noTest:
+        command += ["--test", "--force", "--clean", "--archive"]
+    command += extraPass1
+    print(" ".join(command))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Compilation of {halPath} failed with exit code {e.returncode}.")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+        os._exit(1)
+    objfiles.append(objfile)
 
-# Next, link.
-command = ["lnk101", objfile, "-o", fcmfile, "--json-symbols", symfile]
+    # HALSFC prints e.g. 'Results stored in the folder
+    # "archive.results/HALSFC HELLO.hal 2026-07-30 19-28-56.results".'
+    # -- captured here (rather than assuming "current.results", which
+    # only ever points at the *last* compile) since a later unit's own
+    # compile moves that symlink before the source map gets built below.
+    m = re.search(r'Results stored in the folder "([^"]+)"', result.stdout)
+    if m:
+        resultsDir = m.group(1)
+        unitSpecs.append((module, f"{resultsDir}/pass1.rpt", f"{resultsDir}/pass2.rpt"))
+    else:
+        print(f"Warning: could not determine the results folder for {halPath}; "
+              f"HAL/S source-line display for {module} will be unavailable.")
+
+# Next, link every compiled unit together. lnk101 accepts an "@LISTFILE"
+# argument (one object-file path per line) the same way gen_source_map.py
+# does below -- used here once there's more than one .obj, so a really
+# large manifest can't run into a shell/exec argv-length limit either.
+if len(objfiles) == 1:
+    command = ["lnk101", objfiles[0], "-o", fcmfile, "--json-symbols", symfile]
+    objsListFile = None
+else:
+    with tempfile.NamedTemporaryFile("w", suffix=".objs", delete=False) as f:
+        f.write("\n".join(objfiles) + "\n")
+        objsListFile = f.name
+    command = ["lnk101", f"@{objsListFile}", "-o", fcmfile, "--json-symbols", symfile]
 print(" ".join(command))
 try:
     result = subprocess.run(command, capture_output = True, text = True, check = True)
@@ -128,8 +192,8 @@ except subprocess.CalledProcessError as e:
     print("STDOUT:", e.stdout)
     print("STDERR:", e.stderr)
     #os._exit(1)
-    command = ["rldanalyze", symfile, fcmfile, f"../{config}.fcm", 
-               "--csect-table", "../csects-{config}.json", "--show-gaps", 
+    command = ["rldanalyze", symfile, fcmfile, f"../{config}.fcm",
+               "--csect-table", "../csects-{config}.json", "--show-gaps",
                "--show-csects", "--scan-gaps"]
     print(" ".join(command))
     try:
@@ -139,28 +203,32 @@ except subprocess.CalledProcessError as e:
         print("STDOUT:", e.stdout)
         print("STDERR:", e.stderr)
     os._exit(1)
+if objsListFile:
+    os.remove(objsListFile)
 
 # Next, build a HAL/S source-line map for yaGPC2's --debug --source-map
 # (see yaGPC2/tools/gen_source_map.py), from the pass1.rpt/pass2.rpt
-# reports HALSFC just wrote to the current directory plus the linker's
-# own section table. Only yaGPC2 understands --source-map, and only
-# when gpcCommand[0] is actually "yaGPC2" is yaGPC2 the emulator that's
-# about to be invoked below -- skipped entirely otherwise. Non-fatal if
-# it fails: source-line display is a debugger nicety, not a requirement
-# for compiling, linking, and running the program.
+# reports captured above plus the linker's own section table. Only
+# yaGPC2 understands --source-map, and only when gpcCommand[0] is
+# actually "yaGPC2" is yaGPC2 the emulator that's about to be invoked
+# below -- skipped entirely otherwise. Non-fatal if it fails: source-
+# line display is a debugger nicety, not a requirement for compiling,
+# linking, and running the program.
 #
-# gen_source_map.py's --unit takes MODULE=PASS1_PATH:PASS2_PATH and can
-# repeat (a linked image is in general the result of linking many
-# separately-compiled HAL/S units, not just the one compiled here) --
-# this script only ever compiles a single file, so it always passes
-# exactly one --unit; a real multi-unit link needs its own driver.
+# One "--unit MODULE=PASS1:PASS2" per compiled unit, via an @argsfile
+# (gen_source_map.py's own fromfile_prefix_chars support) rather than
+# directly on the command line, again so a large manifest can't hit an
+# argv-length limit; a COMPOOL/template-only unit with no code markers
+# of its own (e.g. a shared STRUCTURE declaration) is fine to include --
+# gen_source_map.py skips it with a warning rather than failing.
 srcmapfile = f"{basename}.srcmap.json"
 haveSrcmap = False
-if gpcCommand[0] == "yaGPC2":
-    command = ["gen_source_map.py",
-               "--unit", f"{basename}=current.results/pass1.rpt:current.results/pass2.rpt",
-               "--lnk101", symfile,
-               "-o", srcmapfile]
+if gpcCommand[0] == "yaGPC2" and unitSpecs:
+    with tempfile.NamedTemporaryFile("w", suffix=".args", delete=False) as f:
+        for module, pass1Path, pass2Path in unitSpecs:
+            f.write(f"--unit {module}={shlex.quote(pass1Path)}:{shlex.quote(pass2Path)}\n")
+        argsFile = f.name
+    command = ["gen_source_map.py", f"@{argsFile}", "--lnk101", symfile, "-o", srcmapfile]
     print(" ".join(command))
     try:
         result = subprocess.run(command, capture_output = True, text = True, check = True)
@@ -170,6 +238,7 @@ if gpcCommand[0] == "yaGPC2":
         print(f"Source-map generation failed with exit code {e.returncode} (continuing without it).")
         print("STDOUT:", e.stdout)
         print("STDERR:", e.stderr)
+    os.remove(argsFile)
 
 # Next, run it in the emulator.
 command = gpcCommand + ["--interactive",
@@ -199,9 +268,10 @@ else:
         print("STDERR:", e.stderr)
         #os._exit(1)
 # Cleanup:
-try:
+for objfile in objfiles:
+    try:
         os.remove(objfile)
-except:
+    except:
         pass
 try:
         os.remove(fcmfile)

@@ -35,11 +35,21 @@ doesn't exercise: resuming into a *different-named* code CSECT than the
 one execution left off in (e.g. a HAL/S PROGRAM's own "$0NAME" resuming
 into an internal PROCEDURE's separate "A1NAME" CSECT).
 
+T12 exercises build_unit()'s handling of a COMPOOL/template-only compile
+(no code markers at all, e.g. a shared STRUCTURE declaration referenced
+by other units but with no executable statements of its own) -- confirmed
+against the real 176.0-SUPER_VECTOR.hal (see compileLinkRun's own manifest
+support): it should be skipped with a warning, not treated as a hard
+error, since a real multi-unit build legitimately mixes such units in
+with ones that have real code.
+
 Usage: ./test_gen_source_map.py [--help]
 """
 import importlib.util
+import io
 import sys
 import tempfile
+from contextlib import redirect_stderr
 from pathlib import Path
 
 TOOLS_DIR = Path(__file__).resolve().parent.parent / "tools"
@@ -125,10 +135,14 @@ def check(label, got, want):
         failCount += 1
 
 
-def parse(text, parser=gsm.parse_pass1):
+def parse_text_to_file(text):
     with tempfile.NamedTemporaryFile("w", suffix=".rpt", delete=False) as f:
         f.write(text)
-        path = f.name
+        return f.name
+
+
+def parse(text, parser=gsm.parse_pass1):
+    path = parse_text_to_file(text)
     try:
         return parser(path)
     finally:
@@ -227,6 +241,25 @@ def main():
         r,
         [("$0X", 1, 1), ("A1X", 0, 2), ("A1X", 1, 3)],
     )
+
+    compool_pass1 = parse_text_to_file(
+        "          1 M| DUMMY_COMPOOL:                                                                             |DUMMY_COMPOOL\n"
+        "          1 M| COMPOOL;                                                                                   |DUMMY_COMPOOL\n"
+    )
+    compool_pass2 = parse_text_to_file(
+        "0000000                             ST#1     EQU    *\n"
+        "00000                               #DDUMMY  CSECT        ESDID= 0002\n"
+        "00000 0000                                   DC     X'0000'\n"
+    )
+    try:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            unit = gsm.build_unit("DUMMY_COMPOOL", compool_pass1, compool_pass2, {})
+        check("T12 a COMPOOL/template-only compile (no code markers) is skipped, not a hard error", unit, None)
+        check("T12b ...with a warning explaining why", "skipping" in stderr.getvalue(), True)
+    finally:
+        Path(compool_pass1).unlink()
+        Path(compool_pass2).unlink()
 
     if failCount:
         print(f"{failCount} test(s) FAILED")

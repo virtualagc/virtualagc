@@ -263,7 +263,13 @@ def build_unit(module, pass1_path, pass2_path, sections_by_name):
     parse_pass2()'s (csectName, offset) pairs to absolute linked
     addresses via sections_by_name (looked up directly by CSECT name --
     a real linked CSECT name is already unique, so no module cross-check
-    is needed here).
+    is needed here). Returns None (after printing a warning) if the unit
+    has no code markers at all -- expected and harmless for a COMPOOL/
+    template-only compile (e.g. a shared STRUCTURE declaration with no
+    executable statements of its own, confirmed harmless to still link
+    in as an empty section): main() drops these from the output rather
+    than treating them as a hard error, since a real multi-unit build
+    legitimately mixes such units in with ones that have real code.
 
     codeRanges records the [start, end) byte range of every CSECT that
     actually contributed an address entry -- a unit's code isn't always
@@ -279,10 +285,13 @@ def build_unit(module, pass1_path, pass2_path, sections_by_name):
     statements = parse_pass1(pass1_path)
     entries = parse_pass2(pass2_path)
     if not entries:
-        sys.exit(
-            f"error: no 'ST#N EQU *' code markers found in {pass2_path} for module {module!r} "
-            "-- was this compiled without NOTABLES?"
+        print(
+            f"warning: no 'ST#N EQU *' code markers found in {pass2_path} for module {module!r} "
+            "-- skipping (expected for a COMPOOL/template-only compile; "
+            "otherwise, was this compiled without NOTABLES?)",
+            file=sys.stderr,
         )
+        return None
 
     addr_to_stmt = {}
     code_ranges = {}  # csectName -> (start, end)
@@ -322,6 +331,9 @@ def main():
     sections_by_name = {sect["name"]: sect for sect in linked.get("sections", [])}
 
     units = [build_unit(*parse_unit_spec(spec), sections_by_name) for spec in args.unit]
+    units = [u for u in units if u is not None]
+    if not units:
+        sys.exit("error: none of the given --unit compiles had any code markers -- nothing to write")
 
     with open(args.output, "w") as f:
         json.dump({"units": units}, f, indent=1)
