@@ -430,6 +430,54 @@ class sdf:
         self.offsetForGet = oldOffsetForGet
         return opcodes
 
+    # Given a symbol's Constant Value Cell pointer (Field 13 of a Symbol
+    # Data Cell, present only when the CONSTANT flag is set -- see
+    # `parseSymbol`'s own `flagCONSTANT`/Field 13 handling just above,
+    # where this is already called automatically), decodes and returns
+    # the constant's own value -- see Section 2.2.2.2.4.3, "Constant
+    # Value Cells", Figures 2-40/2-41/2-42, ICD PDF p.85-87. Returns None
+    # for a null (0) pointer.
+    #
+    # `isString` (the caller already knows this from the symbol's own
+    # declared type, e.g. CHARACTER vs. SCALAR/INTEGER -- the cell
+    # itself carries no self-describing type tag) selects which of the
+    # two cell formats to decode:
+    #
+    # String Constant Value Cell (Figure 2-41): Field 1 (1 byte) is the
+    # string length minus 1; Field 2 is the EBCDIC text itself, decoded
+    # to ASCII via the existing `convertEbcdicToAscii`.
+    #
+    # Scalar/Integer Constant Value Cell (Figure 2-42): Field 1 is "the
+    # value of the constant stored as a double precision 64-bit floating
+    # point number" per the ICD's own text -- an IBM System/370
+    # hexadecimal (base-16) float, *not* IEEE 754 (sign bit, 7-bit
+    # excess-64 exponent as a power of 16, 56-bit hex fraction). Note the
+    # accompanying Figure 2-42 diagram itself is internally inconsistent
+    # with this text (labels the field "32-bit" and a 0-byte width) --
+    # trusting the prose over the apparently-mislabeled diagram here,
+    # confirmed correct by decoding a real compile with both a
+    # fractional and only-integral CONSTANT and getting back the exact
+    # source values (42.5 and 100).
+    def parseConstantValueCell(self, pointer, isString):
+        if pointer == 0:
+            return None
+        oldOffsetForGet = self.offsetForGet
+        self.offsetForGet = pointer
+        if isString:
+            length = self.getByte(0) + 1
+            raw = self.getText(1, length)
+            value = sdf.convertEbcdicToAscii(raw)
+        else:
+            raw64 = (self.getFullword(0) << 32) | self.getFullword(4)
+            sign = (raw64 >> 63) & 1
+            exponent = (raw64 >> 56) & 0x7F
+            fraction = raw64 & 0x00FFFFFFFFFFFFFF
+            value = (fraction / float(1 << 56)) * (16.0 ** (exponent - 64))
+            if sign:
+                value = -value
+        self.offsetForGet = oldOffsetForGet
+        return value
+
     # The `parseSymbol` method is intended to be used only by the `parseSDF`
     # method rather than being called directly.  As the name implies, it 
     # parses symbol data found in the SDF.  The `nameBeginning` argument is a 
@@ -616,6 +664,8 @@ class sdf:
         if flagCONSTANT:
             scell.constantValueCell = self.getPointer(
                 20, "13\tConstant value cell", indent=indent)
+            isStringConstant = symbolTypeString == "CHARACTER" or symbolTypeString.startswith("BIT")
+            scell.constantValue = self.parseConstantValueCell(scell.constantValueCell, isStringConstant)
         elif symbolTypeString == "REPLACE":
             scell.pReplaceTextCellChain = self.getPointer(
                 20, "13\tReplace text cell chain", indent=indent)
