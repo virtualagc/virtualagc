@@ -145,8 +145,11 @@ static void print_source(const halmat_srcmap_t *srcmap, long stmt, long *last_sh
     size_t n;
     const halmat_srcmap_line_t *l = halmat_srcmap_find(srcmap, stmt, &n);
     if (!l) return;
+    /* `text` is now the ENTIRE raw pass1.rpt line verbatim (srcmap.c),
+     * already starting with its own STMT field -- printing `l[i].stmt`
+     * again here would duplicate it, so just print the line as-is. */
     for (size_t i = 0; i < n; i++) {
-        cprintf(colors, colors ? colors->stmt_code : -1, out, "%4ld\t%s\n", l[i].stmt, l[i].text);
+        cprintf(colors, colors ? colors->stmt_code : -1, out, "%s\n", l[i].text);
     }
 }
 
@@ -184,9 +187,46 @@ static void print_current(const debug_frame_t *frame, long *last_shown,
      * call ever made to it (run_external_call()'s target persists across
      * calls, interp.c), not reset per-call or relative to the caller's
      * timeline -- consistent with this debugger's existing per-frame
-     * design for breakpoints/symtab/etc. */
-    fprintf(out, "t~%.3fs [task %d] ", frame->state->virtual_time / (double)HALMAT_TICKS_PER_SECOND,
-            frame->state->current_task);
+     * design for breakpoints/symtab/etc.
+     *
+     * `T=%.2f` is virtual_time in microseconds (a fixed-prefix field
+     * meant to be easy to grep/parse out of --debug output) -- the
+     * earlier `t~%.3fs` seconds-based sibling field was dropped once
+     * this one existed, since both derive from the identical
+     * HALMAT_TICKS_PER_SECOND calibration and showing both was
+     * redundant. `N=%lld` is instr_count (state.h), a plain running
+     * count of real HALMAT instructions actually executed in this
+     * frame so far -- distinct from virtual_time itself, which is
+     * *ticks* (nominally 1 per instruction today, but a separate
+     * concept that could diverge if per-opcode timing were ever added;
+     * see state.h's own instr_count comment). Same per-frame,
+     * never-reset-per-call semantics as virtual_time above.
+     *
+     * `[%d: %s]` is the SCHEDULE task index (current_task, genuinely
+     * distinct from the compilation unit -- each separately-compiled
+     * unit has its own entirely separate tasks[] -- so this is real
+     * information, not redundant with the unit name) followed by the
+     * unit's own declared name. The name comes from SYT index 1 --
+     * MDEF ("Program definition header," the second instruction in
+     * every compiled unit) always references that exact index, and
+     * confirmed empirically (a real compile of HELLO.hal) that its own
+     * symbol-table name IS the unit's declared name ("HELLO"). Falls
+     * back to just the bracketed task index if no symtab is loaded for
+     * this frame (e.g. a --py unit) or index 1 isn't found/named. */
+    const char *unit_name = NULL;
+    if (frame->symtab) {
+        const halmat_symtab_entry_t *e = halmat_symtab_find_by_index(frame->symtab, 1);
+        if (e && e->name && e->name[0]) unit_name = e->name;
+    }
+    if (unit_name) {
+        fprintf(out, "N=%lld T=%.2f [%d: %s] ", (long long)frame->state->instr_count,
+                frame->state->virtual_time * 1e6 / (double)HALMAT_TICKS_PER_SECOND,
+                frame->state->current_task, unit_name);
+    } else {
+        fprintf(out, "N=%lld T=%.2f [task %d] ", (long long)frame->state->instr_count,
+                frame->state->virtual_time * 1e6 / (double)HALMAT_TICKS_PER_SECOND,
+                frame->state->current_task);
+    }
     halmat_disasm_instr(ins, out);
     if (use_color) fprintf(out, "\033[0m");
 }
@@ -380,6 +420,12 @@ static void print_help(FILE *out) {
             "                would, but automatic rather than requiring a separate command\n"
             "next, n         execute one HALMAT instruction, like `step`, but any cross-unit\n"
             "                call is always run atomically (never stepped into) -- gdb's `next`\n"
+            "step N, s N,\n"
+            "stepN, sN       (also next N/n N/nextN/nN) repeat N times in a row, quietly --\n"
+            "                only the final resulting state is shown (not every intermediate\n"
+            "                step), matching gdb's own repeat-count syntax; \"returned to\n"
+            "                caller\" still prints for any auto-return along the way. Stops\n"
+            "                early if the program ends partway through\n"
             "continue, c     run until a breakpoint or the program ends. Cross-unit calls stay\n"
             "                atomic during continue (like `next`, not `step`) *unless* the\n"
             "                debugger has already stepped into that unit at some earlier point\n"
@@ -511,6 +557,42 @@ static void auto_pop_all(debug_frame_t *frames, int *frame_count, long *last_stm
     while (*frame_count > 1 && frames[*frame_count - 1].state->halted) {
         auto_pop(frames, frame_count, last_stmt_shown, out);
     }
+}
+
+/* Matches `step`/`next` (or their `s`/`n` abbreviations) optionally
+ * followed by a repeat count, in any of gdb's own accepted forms:
+ * `step 5` (separate whitespace-delimited arg, `cmd`="step"/`arg`="5"),
+ * `step5` (no separator at all, digits fused directly onto the command
+ * word), or `s5` (fused onto the abbreviation instead of the full
+ * name). Returns false if `cmd` doesn't name this command at all (with
+ * or without a count); true otherwise, with *count set to the parsed
+ * repeat count (defaulting to 1 if none was given, or if a given count
+ * parses to <= 0 -- a single step is still the right fallback for a
+ * malformed/nonsensical count rather than silently doing nothing). */
+static bool parse_repeat_count(const char *cmd, const char *arg, const char *full, const char *abbrev, long *count) {
+    size_t flen = strlen(full), alen = strlen(abbrev);
+    const char *suffix;
+    if (strncmp(cmd, full, flen) == 0) {
+        suffix = cmd + flen;
+    } else if (strncmp(cmd, abbrev, alen) == 0) {
+        suffix = cmd + alen;
+    } else {
+        return false;
+    }
+    if (suffix[0] != '\0') {
+        for (const char *p = suffix; *p; p++) {
+            if (*p < '0' || *p > '9') return false; /* e.g. "steps" isn't this command at all */
+        }
+        *count = strtol(suffix, NULL, 10);
+    } else if (arg) {
+        char *endptr;
+        long v = strtol(arg, &endptr, 10);
+        *count = (endptr != arg && *endptr == '\0') ? v : 1; /* non-numeric arg: just do 1, don't error */
+    } else {
+        *count = 1;
+    }
+    if (*count <= 0) *count = 1;
+    return true;
 }
 
 /* `step`/`s` (point 3, Plan.md): if the peeked next instruction is a
@@ -692,6 +774,7 @@ int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat
         if (!cmd) continue;
         char *arg = strtok(NULL, " \t");
         debug_frame_t *top = &frames[frame_count - 1]; /* commands that don't change frame_count may use this directly */
+        long step_count; /* set by parse_repeat_count() for step/next's own branches below */
 
         if (strcmp(cmd, "quit") == 0 || strcmp(cmd, "q") == 0) {
             return frames[0].state->exit_code;
@@ -747,12 +830,34 @@ int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat
                     fprintf(out, "breakpoint %d deleted\n", id);
                 }
             }
-        } else if (strcmp(cmd, "step") == 0 || strcmp(cmd, "s") == 0) {
-            cmd_step(frames, &frame_count, units, num_units, out);
-            auto_pop_all(frames, &frame_count, &last_stmt_shown, out);
+        } else if (parse_repeat_count(cmd, arg, "step", "s", &step_count)) {
+            /* `step N`/`stepN`/`sN` (gdb-style repeat count): N plain
+             * `step`s in a row, quietly by default -- only the FINAL
+             * resulting state gets a full print_current() instruction
+             * dump (matching gdb's own "step N" showing just the line
+             * reached, not every intermediate one), but auto_pop()'s own
+             * "returned to caller" message (a genuinely notable event,
+             * not routine per-instruction noise) still prints on every
+             * iteration it fires, same as a real gdb stop-on-something-
+             * interesting would. With `htrace on`, EVERY intermediate
+             * iteration also gets its own print_current() (matching
+             * htrace's own documented "as if you'd stepped through each
+             * one by hand" behavior for continue/run, run_until_stop's
+             * own convention above) -- except the very last one, since
+             * the unconditional post-loop print_current() below already
+             * covers it and printing it twice would just duplicate it.
+             * Stops early if the outermost frame halts partway through --
+             * nothing left to step. */
+            for (long i = 0; i < step_count; i++) {
+                cmd_step(frames, &frame_count, units, num_units, out);
+                auto_pop_all(frames, &frame_count, &last_stmt_shown, out);
+                bool halted_now = (frame_count == 1 && frames[0].state->halted);
+                if (htrace && !halted_now && i + 1 < step_count) print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
+                if (halted_now) break;
+            }
             print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
             if (frame_count == 1 && frames[0].state->halted) fprintf(out, "(program has ended, exit code %d)\n", frames[0].state->exit_code);
-        } else if (strcmp(cmd, "next") == 0 || strcmp(cmd, "n") == 0) {
+        } else if (parse_repeat_count(cmd, arg, "next", "n", &step_count)) {
             /* Exactly `step`'s old (pre-multi-unit) behavior -- a
              * cross-unit call always runs atomically via interp_step(),
              * which reaches exec_one()'s own OP_FCAL/OP_PCAL cross-unit
@@ -763,9 +868,22 @@ int debug_run(halmat_state_t *state, const halmat_symtab_t *symtab, const halmat
              * step-into, just run straight through in one shot instead
              * of stopping partway. No peeking needed here: interp_step()
              * already does the right thing regardless of what kind of
-             * instruction comes next. */
-            interp_step(top->state, out);
-            auto_pop_all(frames, &frame_count, &last_stmt_shown, out);
+             * instruction comes next.
+             *
+             * `next N`/`nextN`/`nN`: same repeat-count/htrace-aware
+             * convention as `step` above -- re-fetches the top frame each
+             * iteration (not the `top` pointer computed once, above the
+             * whole if/else chain), since auto_pop_all() can change
+             * frame_count mid-loop if a stepped-into callee this `next`
+             * runs straight through happens to finish along the way. */
+            for (long i = 0; i < step_count; i++) {
+                debug_frame_t *cur = &frames[frame_count - 1];
+                interp_step(cur->state, out);
+                auto_pop_all(frames, &frame_count, &last_stmt_shown, out);
+                bool halted_now = (frame_count == 1 && frames[0].state->halted);
+                if (htrace && !halted_now && i + 1 < step_count) print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
+                if (halted_now) break;
+            }
             print_current(&frames[frame_count - 1], &last_stmt_shown, colors, out);
             if (frame_count == 1 && frames[0].state->halted) fprintf(out, "(program has ended, exit code %d)\n", frames[0].state->exit_code);
         } else if (strcmp(cmd, "continue") == 0 || strcmp(cmd, "c") == 0 ||

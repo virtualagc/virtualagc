@@ -4812,6 +4812,63 @@ static void close_current_process(halmat_state_t *state, bool *branched) {
     }
 }
 
+/* Returns true for HALMAT opcodes that are purely structural/compile-
+ * time bookkeeping -- markers, brackets, labels, and specifiers
+ * consumed entirely by another instruction -- with NO emitted AP-101S
+ * machine code of their own on real hardware, so they should contribute
+ * nothing to the virtual-time model (state.h's own virtual_time
+ * comment, HALMAT_TICKS_PER_SECOND's own calibration comment).
+ *
+ * Confirmed EMPIRICALLY zero (0 attributed AP-101S instructions across
+ * every occurrence) by re-running the exact same methodology
+ * HALMAT_TICKS_PER_SECOND's own calibration used -- HALSFC
+ * --parms="LSTALL" on the same 7 representative fixtures
+ * (state.h/SCHD.md's own list), parsing pass2.rpt's interleaved
+ * HALMAT/generated-AP-101S-assembly listing, tallying real assembly
+ * lines attributed to each opcode between one "HALMAT:" line and the
+ * next: SMRK, PXRC, NOP, XREC, WRIT, XXND, DSUB, EDCL, SINT, IINT.
+ * (This same exercise also confirmed several opcodes that might LOOK
+ * structural are NOT free: MDEF/PDEF -- a "Program/Procedure
+ * definition header" turns out to correspond to genuine one-time
+ * entry-prologue machine code, e.g. stack/register setup, not a bare
+ * marker -- and DFOR/EFOR/CFOR/CTST, whose real per-iteration loop-
+ * control code (bound setup, increment, condition test, branch-back)
+ * is exactly what a DO FOR/DO WHILE loop's own real cost should be.)
+ *
+ * Every other entry below shares the SAME architectural role as one of
+ * the empirically-confirmed opcodes above (a matching bracket/label/
+ * specifier for the same construct family) or is zero by HAL/S
+ * language definition (an INITIAL(...) specification, PASS1 %macro
+ * expansion, or an INLINE FUNCTION's own lack of call/stack-frame
+ * overhead are all compile-time-only by definition, USA003087) --
+ * reasoned, not independently re-measured. Genuinely ambiguous opcodes
+ * with no strong basis either way (ADLP/DLPE, FILE, TDCL, ERON, EINT,
+ * and ETST specifically despite DTST's own zero classification -- EFOR's
+ * confirmed non-zero loop-back-branch cost makes ETST's own analogous
+ * role suspect) are deliberately left OUT of this list, defaulting to
+ * the ordinary non-zero cost every other opcode gets, rather than
+ * guessed at -- see the DB/commit history for the full writeup if this
+ * needs revisiting with better evidence. */
+static bool op_is_zero_cost_time(uint16_t opcode) {
+    switch (opcode) {
+        case OP_SMRK: case OP_PXRC: case OP_NOP: case OP_XREC:
+        case OP_WRIT: case OP_XXND: case OP_DSUB: case OP_EDCL:
+        case OP_SINT: case OP_IINT:
+        case OP_IMRK: case OP_IFHD: case OP_LBL: case OP_ECAS: case OP_CLBL:
+        case OP_DSMP: case OP_ESMP: case OP_TSUB: case OP_EXTN: case OP_DTST:
+        case OP_READ: case OP_RDAL: case OP_IDLP:
+        case OP_IDEF: case OP_ICLS:
+        case OP_PMHD: case OP_PMAR: case OP_PMIN:
+        case OP_SFST: case OP_SFND: case OP_SFAR:
+        case OP_STRI: case OP_SLRI: case OP_ELRI: case OP_ETRI:
+        case OP_BINT: case OP_CINT: case OP_MINT: case OP_VINT:
+        case OP_NINT: case OP_TINT:
+            return true;
+        default:
+            return false;
+    }
+}
+
 /* Executes exactly one instruction for whatever task is current
  * (state->current_task, state->pc already set to its saved_pc by the
  * scheduler loop in interp_run). Split out from interp_run so the
@@ -4821,8 +4878,17 @@ static void exec_one(halmat_state_t *state, FILE *out) {
     (void)out; /* WRIT/READ now resolve their own device via state->devices
                 * (--ddi/--ddo, state.h) rather than this parameter; kept
                 * for interp_step/interp_run's public signature stability. */
+    state->instr_count++; /* one real HALMAT instruction, see state.h's own comment */
     {
         const halmat_instr_t *ins = &state->prog->instrs[state->pc];
+        /* Per-opcode virtual-time charge (id/task: HALMAT timing-model
+         * opcode weighting) -- moved here from interp_step()'s own flat
+         * per-call increment so an arrayed-paragraph replay (many real
+         * exec_one() calls per interp_step()) correctly accumulates per
+         * ACTUAL instruction executed, not just once for the whole
+         * replay; see interp_step()'s own comment at its former
+         * increment site. */
+        if (!op_is_zero_cost_time(ins->opcode)) state->virtual_time++;
         resolved_value_t a, b;
         bool branched = false;
 
@@ -13415,15 +13481,22 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     }
 
     state->tasks[next].saved_pc = state->pc;
-    /* 1 tick per HALMAT instruction executed -- unchanged, still the
-     * interpreter's fundamental virtual-time granularity. WAIT/SCHD
-     * intervals are converted from real seconds into however many of
-     * these ticks that represents (schd_seconds_to_ticks(), OP_SCHD/
-     * OP_WAIT above, via HALMAT_TICKS_PER_SECOND); interp_run()'s
-     * wall-clock pacing (below) is a separate layer on top of this that
-     * never changes the tick arithmetic itself, only how fast real time
-     * elapses alongside it. */
-    state->virtual_time++;
+    /* virtual_time itself is now incremented inside exec_one() (see its
+     * own comment), per REAL instruction actually executed and weighted
+     * by op_is_zero_cost_time() -- not here, unconditionally, per
+     * interp_step() call. This matters for an arrayed-paragraph replay
+     * (the branch above): run_arrayed_paragraph() calls exec_one() once
+     * per real instruction in the replay (potentially many for a large
+     * array), so charging time per-exec_one() rather than per-
+     * interp_step()-call correctly reflects that real hardware spends
+     * real time on every one of those replayed instructions, not just
+     * once for the whole replay. WAIT/SCHD intervals are still converted
+     * from real seconds into however many ticks that represents
+     * (schd_seconds_to_ticks(), OP_SCHD/OP_WAIT above, via
+     * HALMAT_TICKS_PER_SECOND); interp_run()'s wall-clock pacing (below)
+     * is still a separate layer on top of this that never changes the
+     * tick arithmetic itself, only how fast real time elapses
+     * alongside it. */
 
     return state->halted;
 }

@@ -132,8 +132,8 @@ fi
 
 # --- htrace on/off -------------------------------------------------------
 # `htrace off` (the default) leaves `continue` exactly as before: only the
-# debugger's own startup banner ever prints a per-instruction "t~...s
-# [task N] #<word>  <disasm>" line (print_current(), called once before
+# debugger's own startup banner ever prints a per-instruction "N=... T=...
+# [N: NAME] #<word>  <disasm>" line (print_current(), called once before
 # the REPL loop starts) -- `continue` itself produces none. `htrace on`
 # makes `continue` print that same line after every instruction actually
 # executed, as if each had been `step`ped individually; also checks the
@@ -153,8 +153,8 @@ off_transcript=$(printf 'continue\nquit\n' | "$YAHALMAT2" --debug "@$listfile3" 
 on_transcript=$(printf 'htrace on\ncontinue\nquit\n' | "$YAHALMAT2" --debug "@$listfile3" 2>&1)
 rm -rf "$workdir3"
 
-off_count=$(echo "$off_transcript" | grep -c '^t~')
-on_count=$(echo "$on_transcript" | grep -c '^t~')
+off_count=$(echo "$off_transcript" | grep -c '^N=')
+on_count=$(echo "$on_transcript" | grep -c '^N=')
 on_ended_count=$(echo "$on_transcript" | grep -c '^(program has ended)$')
 
 htrace_ok=1
@@ -179,6 +179,51 @@ if [ "$htrace_ok" -eq 1 ]; then
 else
     echo "  off transcript: $(printf '%q' "$off_transcript")"
     echo "  on transcript:  $(printf '%q' "$on_transcript")"
+    fail=1
+fi
+
+# --- htrace + step/next repeat count -------------------------------------
+# User-reported: `htrace on` printed no per-instruction messages at all
+# during a repeated `step N`/`next N` -- the repeat-count loop (added
+# alongside gdb-style `step N`/`stepN`/`sN` syntax) unconditionally
+# suppressed every intermediate print_current(), never checking `htrace`
+# the way run_until_stop()'s own `continue`/`run` loop does. Fixed by
+# printing on every intermediate iteration when htrace is on (skipping
+# only the very last one, which the unconditional post-loop
+# print_current() already covers -- same dedup convention as continue/
+# run above). For `step 5` specifically: 1 startup-banner print + 4
+# intermediate prints (iterations 0-3; the 5th/last is deliberately
+# skipped here) + 1 final print = 6 total "N=" lines with htrace on,
+# vs. exactly 2 (banner + final only) with htrace off.
+workdir4=$(mktemp -d)
+unitdir4="$workdir4/prog"
+mkdir -p "$unitdir4"
+cp "$HAL_SRC_DIR/test_int_arith2.hal" "$unitdir4/"
+( cd "$unitdir4" && "$HALSFC" test_int_arith2.hal >/dev/null )
+listfile4="$workdir4/list.txt"
+echo "$unitdir4" > "$listfile4"
+
+step_off_transcript=$(printf 'step 5\nquit\n' | "$YAHALMAT2" --debug "@$listfile4" 2>&1)
+step_on_transcript=$(printf 'htrace on\nstep 5\nquit\n' | "$YAHALMAT2" --debug "@$listfile4" 2>&1)
+rm -rf "$workdir4"
+
+step_off_count=$(echo "$step_off_transcript" | grep -c '^N=')
+step_on_count=$(echo "$step_on_transcript" | grep -c '^N=')
+
+step_htrace_ok=1
+if [ "$step_off_count" -ne 2 ]; then
+    echo "FAIL: debug_link(htrace-step-off): expected exactly 2 instruction-dump lines (banner + final), got $step_off_count"
+    step_htrace_ok=0
+fi
+if [ "$step_on_count" -ne 6 ]; then
+    echo "FAIL: debug_link(htrace-step-on): expected exactly 6 instruction-dump lines (banner + 4 intermediate + final), got $step_on_count"
+    step_htrace_ok=0
+fi
+if [ "$step_htrace_ok" -eq 1 ]; then
+    echo "PASS: debug_link(htrace-step-repeat)"
+else
+    echo "  off transcript: $(printf '%q' "$step_off_transcript")"
+    echo "  on transcript:  $(printf '%q' "$step_on_transcript")"
     fail=1
 fi
 

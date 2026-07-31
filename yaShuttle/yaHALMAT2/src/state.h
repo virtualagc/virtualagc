@@ -21,48 +21,87 @@
 #define HALMAT_DEVICE_MAX 10
 
 /* Ticks-per-(real-)second calibration for the virtual-clock scheduler
- * (see halmat_state_t's virtual_time/scheduler comment block below) --
- * sourced from the AP-101S Software Model PDF ("the POO", https://www.
- * ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20AP-
- * 101S.pdf) plus an empirical HALMAT-to-AP-101S-instruction-count
- * sample, not a guess:
+ * (see halmat_state_t's virtual_time/scheduler comment block below).
  *
- *   - Sec. 16.1 ("Instruction Execution - Pipeline Basics") states
- *     directly: "For the AP-101S computer, the pipeline cycle time is
- *     0.250 microseconds."
- *   - Sec. 17.0 ("AP-101S Instruction Execution Times") is a per-
- *     mnemonic table in microseconds; SCAL (subroutine call) = 18.125us
- *     and SVC (supervisor call) = 20.25us are the two entries that
- *     matter most for real HAL/S-compiled code, since runtime-library
- *     calls (I/O formatting, matrix/scalar math support routines) are a
- *     major real cost on this architecture, not just explicit HAL/S
- *     CALL statements.
- *   - To get the other half of the calibration -- how many AP-101S
- *     instructions a typical HALMAT instruction expands into -- 7
- *     representative existing test fixtures (test_int_arith2.hal,
- *     test_pcal.hal, test_scalar_arith.hal, test_write_lit.hal,
- *     test_bit.hal, test_matrix_sub.hal, test_cfor.hal) were compiled
- *     with HALSFC --parms="LSTALL" (reengineered-documentation/STATUS.md's
- *     LSTALL section) and pass2.rpt's interleaved HALMAT/generated-
- *     AP-101S-assembly listing was parsed. Aggregated across all 7:
- *     230 HALMAT instructions -> 188 AP-101S instructions, mnemonic mix
- *     dominated by SCAL (34 occurrences) and SVC (7), the remainder
- *     simple RR/RS/RI loads/stores/arithmetic priced via Sec. 16's
- *     format-class averages (RR=0.25us, SRS=0.375us, RS=0.5us
- *     steady-state pipelined cycles; ~0.4us used as a single
- *     representative "simple instruction" figure rather than chasing
- *     every individual mnemonic in an OCR'd/hand-transcribed table).
- *     This works out to ~3.62 us/HALMAT-instruction aggregate (per-
- *     fixture range 2.45-6.05 us, i.e. ~165,000-408,000 ticks/sec
- *     depending on program mix -- arithmetic-heavy code is cheaper per
- *     instruction, call/I-O-heavy code pricier).
+ * CURRENT DERIVATION (direct dynamic runtime comparison, superseding
+ * the static pass2.rpt-based method below): for each of 6 representative
+ * test fixtures (test_int_arith2.hal, test_pcal.hal, test_scalar_arith.
+ * hal, test_write_lit.hal, test_bit.hal, plus the user's own HELLO.hal),
+ * compiled+linked+run through BOTH `compileLinkRun --debug` (real
+ * yaGPC2 AP-101S emulation) and yaHALMAT2 --debug --opt optmat.bin, in
+ * each case via `htrace on` + `continue`, reading the final accumulated
+ * `T=...` (microseconds) value from each right before program exit
+ * (yaGPC2: the last `SVC X'0000'(1)` line; yaHALMAT2: the last line,
+ * `CLOS`). This is a genuinely DYNAMIC (execution-count-based) 1:1
+ * comparison on the *same compiled program* rather than a STATIC
+ * compiled-code-size estimate -- critically, it correctly captures
+ * loop-repeated code's real cost (e.g. HELLO.hal's own nested DO FOR
+ * loop runs its WRITE(PRINTER) body 20 times at runtime; the OLD static
+ * method below counted that code's own AP-101S expansion exactly ONCE,
+ * regardless of how many times it actually executes) -- confirmed to
+ * matter a great deal: this method's own aggregate ratio (~16.4x) is
+ * roughly 4.5x LARGER than the old static method's own effective ratio,
+ * entirely attributable to this loop-repetition-undercounting gap.
+ *
+ * Results (yaGPC2 us / yaHALMAT2 us, current-model virtual_time already
+ * excluding op_is_zero_cost_time() opcodes -- see that function's own
+ * comment): HELLO 10970.23/547.10, int_arith2 671.98/50.72,
+ * scalar_arith 130.60/25.36, bit 585.28/83.33, pcal 327.17/61.59,
+ * write_lit 171.20/14.49. Two ADDITIONAL fixtures from the original
+ * static-method sample (test_matrix_sub.hal, test_cfor.hal) were
+ * deliberately EXCLUDED from this dynamic re-derivation: matrix_sub
+ * exits via a non-zero `SVC X'0001'` (an intentional error-path test,
+ * not a clean run comparable to the others); cfor's own optmat.bin
+ * fails to load in yaHALMAT2 --debug ("malformed HALMAT stream... word
+ * index 34") -- a separate, not-yet-investigated bug, not a timing
+ * issue.
+ *
+ * Aggregated (pooled sum of all 6 fixtures' own totals, matching the
+ * original static derivation's own "aggregated across all N fixtures"
+ * convention, rather than an unweighted per-fixture average -- the
+ * unweighted average happens to be lower, ~10.4x, since it treats
+ * HELLO.hal's own much-larger absolute runtime the same as every much
+ * smaller fixture): sum(yaGPC2)=12856.46us, sum(yaHALMAT2 ticks-as-us,
+ * OLD 276000 constant)=782.59us, ratio=16.428. Applying that ratio to
+ * the old constant: 276000/16.428 ~= 16800 ticks/sec (~59.52us/tick)
+ * for a REAL (non-zero-cost) HALMAT instruction.
+ *
+ * (A user's own initial independent spot-check of "HELLO.hal" found a
+ * much smaller gap, ~3.6x -- resolved as a mismatch against a different
+ * file, not a real discrepancy: re-checking against the actual
+ * ~/temp/HELLO.hal confirmed this session's own 10970.23us/547.10us/
+ * ~20x figure.)
+ *
+ * ORIGINAL derivation (static compiled-code-size estimate, superseded
+ * above but kept for its own real-hardware-timing-table sourcing,
+ * still the basis for the *shape* of the estimate): sourced from the
+ * AP-101S Software Model PDF ("the POO", https://www.ibiblio.org/
+ * apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf) --
+ * Sec. 16.1 ("Instruction Execution - Pipeline Basics") states the
+ * AP-101S pipeline cycle time is 0.250 microseconds; Sec. 17.0
+ * ("AP-101S Instruction Execution Times") gives SCAL (subroutine
+ * call) = 18.125us and SVC (supervisor call) = 20.25us, the two
+ * entries that matter most for real HAL/S-compiled code (runtime-
+ * library calls are a major real cost, not just explicit HAL/S CALL
+ * statements). To get the other half -- how many AP-101S instructions
+ * a typical HALMAT instruction expands into -- the same 7 fixtures
+ * (int_arith2/pcal/scalar_arith/write_lit/bit/matrix_sub/cfor) were
+ * compiled with HALSFC --parms="LSTALL" and pass2.rpt's interleaved
+ * HALMAT/generated-AP-101S-assembly listing was hand-parsed: 230 HALMAT
+ * instructions -> 188 AP-101S instructions aggregate (~3.62us/HALMAT-
+ * instruction, ~276000 ticks/sec) -- but, confirmed by a later re-
+ * derivation, this STATIC count only ever counts each COMPILED
+ * instruction once, never accounting for how many times loop-body code
+ * actually EXECUTES at runtime, which is exactly what the dynamic
+ * re-derivation above corrects for.
  *
  * See reengineered-documentation/class-0/SCHD.md's "Real-time
- * calibration" section for the full writeup/derivation, including how
- * to redo or refine this sample. Deliberately rough (HAL/S source
- * doesn't determine exact AP-101S code shape) but sourced, not
+ * calibration" section for the original derivation's own full writeup.
+ * Both derivations remain deliberately rough (HAL/S source doesn't
+ * determine exact AP-101S code shape, and no calibration sample this
+ * small can be fully representative of every program) but sourced, not
  * asserted. */
-#define HALMAT_TICKS_PER_SECOND 276000
+#define HALMAT_TICKS_PER_SECOND 16800
 
 /* interp_run()'s wall-clock pacing window (see its own comment in
  * interp.c): execute a burst of instructions, then check the wall
@@ -1451,8 +1490,17 @@ struct halmat_state {
      * and a non-repeating task's stop_kind is stored but never consulted
      * (OP_CLOS's rearm check only reads it when repeat_kind != NONE), so
      * the task simply runs once and terminates normally. virtual_time
-     * itself still ticks 1:1 per HALMAT instruction executed (interp_step's
-     * own per-instruction granularity, unchanged) -- but WAIT's duration and
+     * itself ticks 1:1 per REAL HALMAT instruction executed (exec_one()'s
+     * own per-instruction granularity -- correctly per-instruction even
+     * inside an arrayed-paragraph replay, which can call exec_one() many
+     * times for what interp_step() itself only sees as a single call),
+     * EXCEPT for opcodes op_is_zero_cost_time() (interp.c) identifies as
+     * purely structural/compile-time bookkeeping with no emitted AP-101S
+     * machine code of their own (SMRK, PXRC, the whole Class-8
+     * INITIAL(...) family, and similar markers/brackets/specifiers) --
+     * those contribute zero ticks, confirmed via the same real-compile
+     * methodology HALMAT_TICKS_PER_SECOND's own calibration below used.
+     * But WAIT's duration and
      * SCHD's AT/IN/EVERY/AFTER/stopping-deadline expressions are no longer
      * treated as raw tick counts. They're genuine HAL/S numeric-seconds
      * values, converted to ticks via HALMAT_TICKS_PER_SECOND (above) before
@@ -1510,6 +1558,19 @@ struct halmat_state {
                                * positional convention already used for FCAL's
                                * arguments, class-0/FCAL.md). */
     int64_t virtual_time;
+    int64_t instr_count; /* count of real HALMAT instructions actually executed so far
+                           * (--debug's own "N=" field) -- incremented once per exec_one()
+                           * call, NOT once per interp_step() call: a single interp_step()
+                           * that lands on an arrayed-paragraph replay (run_arrayed_paragraph())
+                           * calls exec_one() many times in a row for what the scheduler sees
+                           * as one "step," so counting at the interp_step() level would
+                           * silently undercount every such replay. Operands are never their
+                           * own instructions in this interpreter's execution model (they're
+                           * just fields consumed inline while executing their parent
+                           * instruction's opcode case), so this is naturally "instructions,
+                           * not instructions+operands" with no extra filtering needed.
+                           * Implicitly zero-initialized the same way virtual_time is
+                           * (interp_init()'s own memset(state, 0, sizeof(*state))). */
     double time_scale; /* interp_run()'s wall-clock pacing divisor (--time-scale, main.c) --
                          * defaults to 1.0 (interp_init) for genuine real-time pacing; a larger
                          * value shrinks how long interp_run() actually sleeps for a given

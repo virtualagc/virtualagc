@@ -8,11 +8,13 @@
  * for --debug's source-line display. A single HAL/S statement can span
  * several of these (continuation lines all share the same `stmt`). */
 typedef struct {
-    long stmt;
-    char *text; /* reconstructed source text: column 1 (the compiler's
-                  * continuation marker -- 'M' for a normal/main line,
-                  * rendered as a space since it's not real source text)
-                  * followed by columns 2-102, trailing blanks trimmed. */
+    long stmt; /* parsed from the line's own STMT field, for lookup only */
+    char *text; /* the ENTIRE raw report line, verbatim -- STMT field,
+                  * column-1 continuation marker, both bars, the full
+                  * 101-character source-text field (trailing blanks
+                  * intact), and the trailing revision/scope field. Only
+                  * the line terminator itself is stripped. Not a
+                  * reconstructed subset -- print as-is. */
 } halmat_srcmap_line_t;
 
 typedef struct {
@@ -26,7 +28,13 @@ typedef struct {
  * source columns 2-102, '|', revision field). Confirmed empirically
  * against real HALSFC output. Non-matching lines (page headers, blank
  * lines, the '+'-pointer annotation lines HALSFC emits under statements
- * with diagnostics, whose statement-number field is blank) are skipped. */
+ * with diagnostics, whose statement-number field is blank) are skipped.
+ * Also handles the OTHER real pass1.rpt layout, used whenever HALSFC is
+ * invoked with `SRN` in --parms: every line above gets a 6-digit Source
+ * Reference Number plus one separator space prepended, shifting every
+ * column that follows by a constant 7 bytes -- auto-detected per file
+ * (see srcmap.c's own SRCMAP_SRN_PREFIX_WIDTH comment), no caller-side
+ * flag needed. */
 bool halmat_srcmap_load(const char *path, halmat_srcmap_t *out, char *errbuf, size_t errbuf_size);
 void halmat_srcmap_free(halmat_srcmap_t *map);
 

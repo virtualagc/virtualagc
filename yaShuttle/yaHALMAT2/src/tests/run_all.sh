@@ -1249,7 +1249,23 @@ run ./run_local_fixture.sh random "$(printf ' 4.3794729E-02\n 2.6276231E-01\n 3.
 # are yaHALMAT2's own output, cross-checked bit-for-bit against real gpc
 # (compileLinkRun) for the identical program before being locked in here.
 run ./run_local_fixture.sh random_deterministic "$(printf ' 4.3794728815555573E-02\n 2.6276230812072754E-01\n 1.8242156505584717E-01\n 7.2966837882995605E-01\n 7.3621582984924316E-01\n 1.5062534809112549E-01\n 1.1224867850542068E+00\n-2.6469413563609123E-01\n-1.3050046935677528E-01\n 8.9225000888109207E-01\n 1.7391182482242584E-01\n-1.5725612472742796E+00\n 5.2557062916457653E-01\n 3.6610984429717064E-01\n 8.8674899935722351E-01\n 2.3147720098495483E-01\n 7.8192532062530518E-01\n 5.1727104187011719E-01\n 5.4636526107788086E-01\n 2.3366975784301758E-01\n-3.0304364114999771E-01\n 6.4744396507740021E-01\n 8.3109536767005920E-01\n-1.4940198436379433E+00\n 1.3369635958224535E-01\n 3.2427629269659519E-01\n 1.4605471119284630E-01\n 8.9314310997724533E-01')"
-run ./run_local_fixture.sh runtime "$(printf ' 1.8115941E-05\n 5.0000534E+00')"
+# Expected values updated twice (both user-requested): (1) virtual_time
+# now charges 0 ticks for HALMAT opcodes confirmed to have no emitted
+# AP-101S machine code of their own on real hardware (SMRK/PXRC/the
+# whole Class-8 INITIAL(...) family/etc. -- interp.c's own
+# op_is_zero_cost_time(), state.h's HALMAT_TICKS_PER_SECOND comment)
+# instead of the uniform 1-tick-per-instruction charge every opcode
+# used to get; (2) HALMAT_TICKS_PER_SECOND itself was recalibrated from
+# a direct dynamic yaGPC2-vs-yaHALMAT2 runtime comparison across 6 real
+# fixtures (state.h's own updated calibration comment) -- 276000 ->
+# 16800 ticks/sec, a real instruction now costs ~16.4x more simulated
+# time than before. RUNTIME()'s own first call (after only a handful of
+# mostly-structural setup instructions) grows accordingly from the
+# recalibration (partly offset by the same instructions' own zero-cost
+# opcodes); the second (after WAIT(5.0), so dominated by the explicit
+# 5-second wait) shows only a small residual change from the same
+# effect on the few instructions surrounding it.
+run ./run_local_fixture.sh runtime "$(printf ' 1.1904762E-04\n 5.0004759E+00')"
 run ./run_local_fixture.sh errgrp_errnum "$(printf '          0\n          0\n 2.0000000E+00\n          4\n          5')"
 # Follow-up, direct user correction to this same batch: DATE/CLOCKTIME
 # (BFNC selectors 18/54) were initially left unimplemented ("no calendar/
