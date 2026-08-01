@@ -70,37 +70,44 @@ int main(int argc, char **argv) {
 
     /* Deliberately uneven: one engine(&gpcA) call per two engine(&gpcB)
      * calls, every loop iteration, regardless of either instance's own
-     * halted state (safe no-op once halted -- see file header comment).
-     * Bounded iteration count so a regression that breaks halting can't
-     * hang the test forever. */
+     * status (safe no-op once stopped -- interp_step() is idempotent once
+     * state->halted, see interp.c). A negative GpcEngineStatus (any HALTED
+     * or ERROR case) means "stop calling me"; RUNNING (0) and WARNING (1000+N)
+     * both mean keep going, per yaGpcIntegration.h's own GpcEngineStatus
+     * comment. Bounded iteration count so a regression that breaks halting
+     * can't hang the test forever. */
+    GpcEngineStatus statusA = GPC_ENGINE_RUNNING;
+    GpcEngineStatus statusB = GPC_ENGINE_RUNNING;
     long callsA = 0, callsB = 0;
     long iterations = 0;
     const long max_iterations = 1000000;
     for (;;) {
-        bool haltedA = ((halmat_state_t *)gpcA.impl)->halted;
-        bool haltedB = ((halmat_state_t *)gpcB.impl)->halted;
-        if (haltedA && haltedB) break;
+        bool doneA = (statusA < 0);
+        bool doneB = (statusB < 0);
+        if (doneA && doneB) break;
         if (++iterations > max_iterations) {
             fprintf(stderr, "FAIL: exceeded %ld iterations without both instances halting\n", max_iterations);
             return 1;
         }
-        yaHALMAT2_ops.engine(&gpcA);
+        statusA = yaHALMAT2_ops.engine(&gpcA);
         callsA++;
-        yaHALMAT2_ops.engine(&gpcB);
+        statusB = yaHALMAT2_ops.engine(&gpcB);
         callsB++;
-        yaHALMAT2_ops.engine(&gpcB);
+        statusB = yaHALMAT2_ops.engine(&gpcB);
         callsB++;
     }
 
     halmat_state_t *stateA = (halmat_state_t *)gpcA.impl;
     halmat_state_t *stateB = (halmat_state_t *)gpcB.impl;
 
-    if (stateA->exit_code != 0) {
-        fprintf(stderr, "FAIL: gpcA exit_code = %d, expected 0\n", stateA->exit_code);
+    if (statusA != GPC_ENGINE_HALTED_NORMAL) {
+        fprintf(stderr, "FAIL: gpcA final status = %s (%d), expected HALTED_NORMAL\n",
+                gpc_engine_status_message(statusA), (int)statusA);
         return 1;
     }
-    if (stateB->exit_code != 0) {
-        fprintf(stderr, "FAIL: gpcB exit_code = %d, expected 0\n", stateB->exit_code);
+    if (statusB != GPC_ENGINE_HALTED_NORMAL) {
+        fprintf(stderr, "FAIL: gpcB final status = %s (%d), expected HALTED_NORMAL\n",
+                gpc_engine_status_message(statusB), (int)statusB);
         return 1;
     }
     if (callsA == callsB) {
@@ -165,7 +172,7 @@ int main(int argc, char **argv) {
     free(bufA);
     free(bufB);
 
-    printf("PASS: gpc_smoke_test (callsA=%ld callsB=%ld virtual_time=%lld)\n",
-           callsA, callsB, final_virtual_time);
+    printf("PASS: gpc_smoke_test (callsA=%ld callsB=%ld virtual_time=%lld, final status: %s)\n",
+           callsA, callsB, final_virtual_time, gpc_engine_status_message(statusA));
     return 0;
 }

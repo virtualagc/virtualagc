@@ -431,16 +431,34 @@ static bool ctoi_parse_scalar(const char *s, double *out) {
     return true;
 }
 
-static void fail(halmat_state_t *state, const char *fmt, ...) {
+static void fail_v(halmat_state_t *state, halmat_halt_reason_t reason, const char *fmt, va_list ap) {
     char buf[256];
-    va_list ap;
-    va_start(ap, fmt);
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    va_end(ap);
     fprintf(stderr, "yaHALMAT2: %s (at HALMAT word #%zu)\n", buf,
             state->prog->instrs[state->pc].index);
     state->halted = true;
     state->exit_code = 1;
+    state->halt_reason = reason;
+}
+
+static void fail(halmat_state_t *state, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    fail_v(state, HALMAT_HALT_REASON_FAIL_GENERIC, fmt, ap);
+    va_end(ap);
+}
+
+/* Same as fail(), but tags state->halt_reason with a specific category
+ * instead of the generic default -- see yaGpcIntegration.h's GpcEngineStatus
+ * and state.h's halmat_halt_reason_t. Used only at the small number of call
+ * sites that warrant their own GpcEngineStatus code; every other fail()
+ * call site is left as plain fail() (HALMAT_HALT_REASON_FAIL_GENERIC),
+ * deliberately, not an oversight. */
+static void fail_cat(halmat_state_t *state, halmat_halt_reason_t reason, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    fail_v(state, reason, fmt, ap);
+    va_end(ap);
 }
 
 /* Converts a resolved HAL/S numeric-seconds value (as produced by SCHD's
@@ -737,7 +755,7 @@ static void unregister_error_handler(halmat_state_t *state, int group, int membe
  * field). */
 static halmat_syt_entry_t *resolve_xpt_field(halmat_state_t *state, const halmat_operand_t *op) {
     if (op->data >= HALMAT_VAC_MAX) {
-        fail(state, "XPT stream position %u out of range", op->data);
+        fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "XPT stream position %u out of range", op->data);
         return NULL;
     }
     const halmat_vac_slot_t *slot = &state->vac[op->data];
@@ -836,7 +854,7 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
     switch (op->qual) {
         case QUAL_SYT: {
             if (op->data >= HALMAT_SYT_MAX) {
-                fail(state, "SYT index %u out of range", op->data);
+                fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "SYT index %u out of range", op->data);
                 return false;
             }
             if (syt_is_array_shaped(state, op->data)) {
@@ -870,7 +888,7 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
         }
         case QUAL_LIT: {
             if (!state->literals || op->data >= state->literals->count) {
-                fail(state, "literal index %u out of range", op->data);
+                fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "literal index %u out of range", op->data);
                 return false;
             }
             const halmat_literal_t *lit = &state->literals->entries[op->data];
@@ -907,19 +925,19 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
             return true;
         case QUAL_VAC: {
             if (op->data >= HALMAT_VAC_MAX) {
-                fail(state, "VAC index %u out of range", op->data);
+                fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index %u out of range", op->data);
                 return false;
             }
             const halmat_vac_slot_t *slot = &state->vac[op->data];
             if (slot->is_ref) {
                 if (slot->ref_syt >= HALMAT_SYT_MAX) {
-                    fail(state, "VAC subscript reference SYT out of range");
+                    fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC subscript reference SYT out of range");
                     return false;
                 }
                 const halmat_syt_entry_t *base = &state->syt[slot->ref_syt];
                 if ((!base->elements && !base->bit_elements && !base->char_elements) ||
                     slot->ref_offset >= base->element_count) {
-                    fail(state, "subscript reference out of range");
+                    fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "subscript reference out of range");
                     return false;
                 }
                 if (base->bit_elements) {
@@ -941,7 +959,7 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                  * variable elsewhere), same MSB-first shift-and-mask
                  * extraction OP_DSUB's own read branches use. */
                 if (slot->bitpart_target_syt >= HALMAT_SYT_MAX) {
-                    fail(state, "VAC bitpart reference SYT out of range");
+                    fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC bitpart reference SYT out of range");
                     return false;
                 }
                 const halmat_syt_entry_t *tsyt = &state->syt[slot->bitpart_target_syt];
@@ -952,7 +970,7 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                      * selected element's own raw bit pattern instead of
                      * a lone scalar bit_value. */
                     if (!tsyt->bit_elements || (size_t)slot->bitpart_array_offset >= tsyt->element_count) {
-                        fail(state, "VAC bitpart reference: array element out of range");
+                        fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC bitpart reference: array element out of range");
                         return false;
                     }
                     raw = tsyt->bit_elements[slot->bitpart_array_offset];
@@ -1181,7 +1199,7 @@ static bool write_container_element(halmat_state_t *state, uint16_t dest_syt, ha
 static bool write_destination(halmat_state_t *state, const halmat_operand_t *op, const resolved_value_t *val) {
     if (op->qual == QUAL_SYT) {
         if (op->data >= HALMAT_SYT_MAX) {
-            fail(state, "SYT index %u out of range", op->data);
+            fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "SYT index %u out of range", op->data);
             return false;
         }
         if (syt_is_array_shaped(state, op->data)) {
@@ -1275,7 +1293,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
     }
     if (op->qual == QUAL_VAC) {
         if (op->data >= HALMAT_VAC_MAX) {
-            fail(state, "VAC index %u out of range", op->data);
+            fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index %u out of range", op->data);
             return false;
         }
         halmat_vac_slot_t *slot = &state->vac[op->data];
@@ -1315,7 +1333,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
              * into or out of at all, a genuinely deeper and separate gap
              * from SCALAR's, not just an unwritten switch-case. */
             if (slot->subbit_target_syt >= HALMAT_SYT_MAX) {
-                fail(state, "SUBBIT assignment: target SYT out of range");
+                fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "SUBBIT assignment: target SYT out of range");
                 return false;
             }
             halmat_syt_entry_t *e = &state->syt[slot->subbit_target_syt];
@@ -1372,7 +1390,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
              * own declared type. User-reported, 250-BITS.hal's
              * `B$(1) = ON;` (`B` a plain `BIT(8)`). */
             if (slot->bitpart_target_syt >= HALMAT_SYT_MAX) {
-                fail(state, "BIT at-partition assignment: target SYT out of range");
+                fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "BIT at-partition assignment: target SYT out of range");
                 return false;
             }
             if (val->kind != RV_BITS) {
@@ -1398,7 +1416,7 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
                  * implemented anyway on general principle, symmetric
                  * with the plain-scalar case just below. */
                 if (!e->bit_elements || (size_t)slot->bitpart_array_offset >= e->element_count) {
-                    fail(state, "BIT at-partition assignment: array element out of range");
+                    fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "BIT at-partition assignment: array element out of range");
                     return false;
                 }
                 uint32_t raw = e->bit_elements[slot->bitpart_array_offset];
@@ -1454,13 +1472,13 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
                 return false;
             }
             if (slot->container_ref_syt >= HALMAT_SYT_MAX) {
-                fail(state, "container-reference assignment: SYT index out of range");
+                fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "container-reference assignment: SYT index out of range");
                 return false;
             }
             halmat_syt_entry_t *rbase = &state->syt[slot->container_ref_syt];
             size_t idx = slot->container_ref_offset + (size_t)state->arrayed_index * slot->container_ref_stride;
             if (!rbase->elements || idx >= rbase->element_count) {
-                fail(state, "container-reference assignment out of range");
+                fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "container-reference assignment out of range");
                 return false;
             }
             return write_container_element(state, slot->container_ref_syt, rbase, idx, val);
@@ -1470,13 +1488,13 @@ static bool write_destination(halmat_state_t *state, const halmat_operand_t *op,
             return false;
         }
         if (slot->ref_syt >= HALMAT_SYT_MAX) {
-            fail(state, "VAC subscript reference SYT out of range");
+            fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC subscript reference SYT out of range");
             return false;
         }
         halmat_syt_entry_t *base = &state->syt[slot->ref_syt];
         if ((!base->elements && !base->bit_elements && !base->char_elements) ||
             slot->ref_offset >= base->element_count) {
-            fail(state, "subscript destination out of range");
+            fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "subscript destination out of range");
             return false;
         }
         return write_container_element(state, slot->ref_syt, base, slot->ref_offset, val);
@@ -1816,6 +1834,7 @@ static bool arithmetic_error_should_apply_fixup(halmat_state_t *state, int membe
      * [USA003087] Appendix B means detected, not merely unhandled. */
     state->last_error_group = HAL_S_ERROR_GROUP_ARITHMETIC;
     state->last_error_member = member;
+    state->send_error_pending = true; /* one-shot edge trigger for GpcEngineStatus's WARNING case -- see state.h */
     halmat_error_handler_t *h = find_error_handler(state, HAL_S_ERROR_GROUP_ARITHMETIC, member);
     if (h && h->has_event_action && h->event_syt < HALMAT_SYT_MAX) {
         /* ERON's `AND SET/RESET/SIGNAL var` clause (class-0/ERON.md):
@@ -2016,7 +2035,7 @@ static halmat_scalar_t matrix_determinant(const halmat_scalar_t *in, int n, bool
 static bool resolve_container(halmat_state_t *state, const halmat_operand_t *op,
                                halmat_scalar_t **out_elems, size_t *out_count, int *out_rows, int *out_cols) {
     if (op->qual == QUAL_SYT) {
-        if (op->data >= HALMAT_SYT_MAX) { fail(state, "SYT index %u out of range", op->data); return false; }
+        if (op->data >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "SYT index %u out of range", op->data); return false; }
         ensure_container(state, op->data);
         halmat_syt_entry_t *e = &state->syt[op->data];
         /* An ARRAY-of-VECTOR operand (state.h's array_of_vector comment)
@@ -2064,7 +2083,7 @@ static bool resolve_container(halmat_state_t *state, const halmat_operand_t *op,
         return true;
     }
     if (op->qual == QUAL_VAC) {
-        if (op->data >= HALMAT_VAC_MAX) { fail(state, "VAC index %u out of range", op->data); return false; }
+        if (op->data >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index %u out of range", op->data); return false; }
         halmat_vac_slot_t *slot = &state->vac[op->data];
         if (!slot->is_container) { fail(state, "operand is not a MATRIX/VECTOR intermediate result"); return false; }
         *out_elems = slot->container;
@@ -2168,7 +2187,7 @@ static bool io_pending_reserve_item(halmat_state_t *state) {
  * freeing here is just as simple as leaking and avoids it outright). */
 static bool store_container_result(halmat_state_t *state, size_t vac_index,
                                     const halmat_scalar_t *elems, size_t count, int rows, int cols) {
-    if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); return false; }
+    if (vac_index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); return false; }
     halmat_vac_slot_t *slot = &state->vac[vac_index];
     free(slot->container);
     slot->container = malloc(count * sizeof(halmat_scalar_t));
@@ -4491,7 +4510,7 @@ bool interp_copy_external_call_result(halmat_state_t *state, halmat_state_t *tar
         fail(state, "external function returned no value");
         return false;
     }
-    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); return false; }
+    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); return false; }
     if (target->external_call_result.is_string) {
         /* Owned heap pointer (char*) -- copying the slot verbatim would
          * alias ownership between this caller's own VAC array and the
@@ -4810,6 +4829,7 @@ static void close_current_process(halmat_state_t *state, bool *branched) {
          * anyway). */
         state->halted = true;
         state->exit_code = 0;
+        state->halt_reason = HALMAT_HALT_REASON_NORMAL;
     }
 }
 
@@ -5262,7 +5282,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     if (!all_syt) { fail(state, "EXTN: expected a SYT field operand"); break; }
                 }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 uint16_t final_field = ins->operands[ins->operand_count - 1].data;
                 if (ins->operands[0].qual == QUAL_SYT) {
                     state->vac[ins->index].is_ref = false;
@@ -5271,7 +5291,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->vac[ins->index].struct_field_syt = final_field;
                     state->vac[ins->index].struct_copy_index = -1;
                 } else if (ins->operands[0].qual == QUAL_VAC) {
-                    if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail(state, "EXTN: VAC index out of range"); break; }
+                    if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "EXTN: VAC index out of range"); break; }
                     const halmat_vac_slot_t *copy_slot = &state->vac[ins->operands[0].data];
                     if (!copy_slot->is_copy_ref) { fail(state, "EXTN: VAC base operand does not reference a TSUB result"); break; }
                     state->vac[ins->index].is_ref = false;
@@ -5316,7 +5336,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * else. */
                 if (ins->operand_count != 2) { fail(state, "TSUB: only the single-copy-select form (2 operands) is implemented"); break; }
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "TSUB: expected a SYT structure operand"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 {
                     int32_t copy_number;
                     if (ins->operands[1].qual == QUAL_IMD) {
@@ -5491,6 +5511,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 int member = (int)ins->operands[0].tag1;
                 state->last_error_group = group;
                 state->last_error_member = member;
+                state->send_error_pending = true; /* one-shot edge trigger for GpcEngineStatus's WARNING case -- see state.h */
                 halmat_error_handler_t *h = find_error_handler(state, group, member);
                 if (h && h->has_event_action && h->event_syt < HALMAT_SYT_MAX) {
                     halmat_syt_entry_t *e = &state->syt[h->event_syt];
@@ -5658,7 +5679,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (ins->operands[0].data >= HALMAT_VAC_MAX || ins->operands[1].data >= HALMAT_VAC_MAX) {
-                    fail(state, "TASN: XPT stream position out of range");
+                    fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "TASN: XPT stream position out of range");
                     break;
                 }
                 const halmat_vac_slot_t *src_ref = &state->vac[ins->operands[0].data];
@@ -5782,7 +5803,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (ins->operands[0].data >= HALMAT_VAC_MAX || ins->operands[1].data >= HALMAT_VAC_MAX) {
-                    fail(state, "TEQU/TNEQ: XPT stream position out of range");
+                    fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "TEQU/TNEQ: XPT stream position out of range");
                     break;
                 }
                 const halmat_vac_slot_t *lhs_ref = &state->vac[ins->operands[0].data];
@@ -5816,7 +5837,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                 }
                 bool result = (ins->opcode == OP_TEQU) ? all_equal : !all_equal;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].integer = result ? 1 : 0;
                 break;
@@ -5836,7 +5857,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 {
                     uint16_t target = (ins->operands[0].qual == QUAL_SYT) ? ins->operands[0].data : HALMAT_NAME_NULL;
                     uint16_t dest_syt = ins->operands[1].data;
-                    if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "NASN: SYT index out of range"); break; }
+                    if (dest_syt >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "NASN: SYT index out of range"); break; }
                     state->syt[dest_syt].type = SYT_TYPE_NAME;
                     state->syt[dest_syt].name_target = target;
                 }
@@ -5858,10 +5879,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     fail(state, "NEQU/NNEQ: both operands must be SYT");
                     break;
                 }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 {
                     uint16_t sym_a = ins->operands[0].data, sym_b = ins->operands[1].data;
-                    if (sym_a >= HALMAT_SYT_MAX || sym_b >= HALMAT_SYT_MAX) { fail(state, "NEQU/NNEQ: SYT index out of range"); break; }
+                    if (sym_a >= HALMAT_SYT_MAX || sym_b >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "NEQU/NNEQ: SYT index out of range"); break; }
                     bool equal = (state->syt[sym_a].name_target == state->syt[sym_b].name_target);
                     bool result = (ins->opcode == OP_NEQU) ? equal : !equal;
                     state->vac[ins->index].is_ref = false;
@@ -6027,7 +6048,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     case OP_CNLT: result = cmp >= 0; break;
                     case OP_CLT: default: result = cmp < 0; break;
                 }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].integer = result ? 1 : 0;
                 break;
@@ -6061,7 +6082,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     case OP_SNLT: result = is_zero || !is_negative; break;
                     case OP_SLT: default: result = !is_zero && is_negative; break;
                 }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].integer = result ? 1 : 0;
                 break;
@@ -6073,7 +6094,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
                 bool ab = (rv_to_integer(&a) != 0), bb = (rv_to_integer(&b) != 0);
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].integer = ((ins->opcode == OP_CAND) ? (ab && bb) : (ab || bb)) ? 1 : 0;
                 break;
@@ -6082,7 +6103,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_CNOT:
                 if (ins->operand_count != 1) { fail(state, "logical NOT: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].integer = (rv_to_integer(&a) == 0) ? 1 : 0;
                 break;
@@ -6106,7 +6127,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     case OP_INLT: result = ai >= bi; break;
                     case OP_ILT: default: result = ai < bi; break;
                 }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].integer = result ? 1 : 0;
                 break;
@@ -6362,7 +6383,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (!sub) { fail(state, "out of memory"); break; }
                     if (width > 0) memcpy(sub, src + (start - 1), (size_t)width);
                     sub[width] = '\0';
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); free(sub); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); free(sub); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_string = true;
                     state->vac[ins->index].string = sub;
@@ -6396,7 +6417,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (!base) break;
                 } else if (ins->operands[0].qual == QUAL_SYT) {
                     base_syt = ins->operands[0].data;
-                    if (base_syt >= HALMAT_SYT_MAX) { fail(state, "DSUB: SYT index out of range"); break; }
+                    if (base_syt >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "DSUB: SYT index out of range"); break; }
                     ensure_container(state, base_syt);
                     base = &state->syt[base_syt];
                 } else {
@@ -6598,12 +6619,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
                         }
                         if (width < 0 || width > 32 || position < 1 || position + width - 1 > decl_width) {
-                            fail(state, "DSUB: BIT array element to-partition subscript out of range");
+                            fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "DSUB: BIT array element to-partition subscript out of range");
                             break;
                         }
                         int32_t elem_idx = state->arrayed_index >= 0 ? state->arrayed_index : 0;
                         elem_idx = (int32_t)((size_t)elem_idx % (base->element_count ? base->element_count : 1));
-                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                         state->vac[ins->index].is_ref = false;
                         state->vac[ins->index].is_bitpart_ref = true;
                         state->vac[ins->index].bitpart_target_syt = base_syt;
@@ -6651,7 +6672,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         ref_offset = (size_t)array_start * per_elem;
                         int result_rows = sel_len * base->rows;
                         int result_cols = base->cols;
-                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                         if (!store_container_result(state, ins->index, buf, count, result_rows, result_cols)) break;
                         if (writable_ref) {
                             state->vac[ins->index].is_container_ref = true;
@@ -6705,7 +6726,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         memcpy(buf, base->elements + (size_t)idx * per_elem, count * sizeof(halmat_scalar_t));
                         writable_ref = true;
                         ref_offset = (size_t)idx * per_elem;
-                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                         if (!store_container_result(state, ins->index, buf, count, base->rows, base->cols)) break;
                         if (writable_ref) {
                             state->vac[ins->index].is_container_ref = true;
@@ -6780,7 +6801,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             ref_offset = elem_offset + (size_t)c;
                             ref_stride = (size_t)base->cols;
                         }
-                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                         if (!store_container_result(state, ins->index, buf, count, 0, (int)count)) break;
                         if (writable_ref) {
                             state->vac[ins->index].is_container_ref = true;
@@ -6835,7 +6856,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         memcpy(buf, base->elements + (size_t)row_start * (size_t)base->cols, count * sizeof(halmat_scalar_t));
                         writable_ref = true;
                         ref_offset = (size_t)row_start * (size_t)base->cols;
-                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                         if (!store_container_result(state, ins->index, buf, count, sel_rows, base->cols)) break;
                         if (writable_ref && base_syt < HALMAT_SYT_MAX) {
                             state->vac[ins->index].is_container_ref = true;
@@ -6876,7 +6897,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (!resolve_operand(state, &ins->operands[1 + other], &idx)) break;
                         int32_t n = rv_to_integer(&idx) - 1;
                         if (n < 0) n = 0;
-                        if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                         state->vac[ins->index].is_ref = true;
                         state->vac[ins->index].ref_syt = base_syt;
                         state->vac[ins->index].ref_offset = (size_t)n % base->element_count;
@@ -7074,7 +7095,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (len < 0) len = 0;
                     if (pos < 0) pos = 0;
                     if (len > HALMAT_CONTAINER_CAPACITY || (size_t)pos + (size_t)len > base->element_count) {
-                        fail(state, "DSUB: at-partition subscript out of range");
+                        fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "DSUB: at-partition subscript out of range");
                         break;
                     }
                     halmat_scalar_t buf[HALMAT_CONTAINER_CAPACITY];
@@ -7146,10 +7167,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
                     }
                     if (width < 0 || width > 32 || position < 1 || position + width - 1 > decl_width) {
-                        fail(state, "DSUB: BIT at-partition subscript out of range");
+                        fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "DSUB: BIT at-partition subscript out of range");
                         break;
                     }
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_bitpart_ref = true;
                     state->vac[ins->index].bitpart_target_syt = base_syt;
@@ -7193,10 +7214,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
                     }
                     if (position < 1 || position > decl_width) {
-                        fail(state, "DSUB: BIT index subscript out of range");
+                        fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "DSUB: BIT index subscript out of range");
                         break;
                     }
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_bitpart_ref = true;
                     state->vac[ins->index].bitpart_target_syt = base_syt;
@@ -7257,7 +7278,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (!sub) { fail(state, "out of memory"); break; }
                     if (width > 0) memcpy(sub, src + (start - 1), (size_t)width);
                     sub[width] = '\0';
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); free(sub); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); free(sub); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_string = true;
                     state->vac[ins->index].string = sub; /* deliberately not freeing any prior
@@ -7287,7 +7308,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     } else {
                         sub[0] = '\0';
                     }
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); free(sub); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); free(sub); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_string = true;
                     state->vac[ins->index].string = sub;
@@ -7345,10 +7366,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (bsym && bsym->bit_width > 0) decl_width = bsym->bit_width;
                     }
                     if (position < 1 || position > decl_width) {
-                        fail(state, "DSUB: BIT array element sub-index out of range");
+                        fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "DSUB: BIT array element sub-index out of range");
                         break;
                     }
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_bitpart_ref = true;
                     state->vac[ins->index].bitpart_target_syt = base_syt;
@@ -7399,7 +7420,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     int32_t start = rv_to_integer(&startv);
                     int32_t idx = start - 1 + (state->arrayed_index >= 0 ? state->arrayed_index : 0);
                     if (idx < 0) idx = 0;
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = true;
                     state->vac[ins->index].ref_syt = base_syt;
                     state->vac[ins->index].ref_offset = (size_t)idx % (base->element_count ? base->element_count : 1);
@@ -7430,7 +7451,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!ok) break;
                 offset %= base->element_count;
 
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = true;
                 state->vac[ins->index].ref_syt = base_syt;
                 state->vac[ins->index].ref_offset = offset;
@@ -7461,7 +7482,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 halmat_scalar_t *src; size_t src_count; int src_rows, src_cols;
                 if (!resolve_container(state, &ins->operands[0], &src, &src_count, &src_rows, &src_cols)) break;
                 if (ins->operands[1].qual == QUAL_VAC) {
-                    if (ins->operands[1].data >= HALMAT_VAC_MAX) { fail(state, "MASN/VASN: VAC index out of range"); break; }
+                    if (ins->operands[1].data >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "MASN/VASN: VAC index out of range"); break; }
                     halmat_vac_slot_t *slot = &state->vac[ins->operands[1].data];
                     if (!slot->is_container_ref) { fail(state, "MASN/VASN: receiver must be SYT"); break; }
                     halmat_syt_entry_t *rbase;
@@ -7482,7 +7503,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                 slot->field_mid_path_len, slot->field_field_syt, copy_idx);
                         if (!rbase) { fail(state, "MASN/VASN: could not resolve structure-field receiver"); break; }
                     } else {
-                        if (slot->container_ref_syt >= HALMAT_SYT_MAX) { fail(state, "MASN/VASN: receiver SYT index out of range"); break; }
+                        if (slot->container_ref_syt >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "MASN/VASN: receiver SYT index out of range"); break; }
                         rbase = &state->syt[slot->container_ref_syt];
                     }
                     if (src_count != slot->container_count ||
@@ -7584,7 +7605,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (ins->operands[1].qual != QUAL_SYT) { fail(state, "MASN/VASN: receiver must be SYT"); break; }
                 uint16_t dest_syt = ins->operands[1].data;
-                if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "MASN/VASN: SYT index out of range"); break; }
+                if (dest_syt >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "MASN/VASN: SYT index out of range"); break; }
                 ensure_container(state, dest_syt);
                 halmat_syt_entry_t *dest = &state->syt[dest_syt];
                 if (dest->array_of_vector && state->arrayed_index >= 0 && dest->rows > 0) {
@@ -7990,7 +8011,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_container(state, &ins->operands[0], &ca, &count_a, &rows_a, &cols_a)) break;
                 if (!resolve_container(state, &ins->operands[1], &cb, &count_b, &rows_b, &cols_b)) break;
                 if (count_a != count_b) { fail(state, "VDOT: operand shape mismatch"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 /* Real RTL (VV6S3.asm/VV6SN.asm) accumulates the whole
                  * dot product in a genuine EXTENDED register pair via
                  * SEDR/AEDR, truncating to single precision only ONCE at
@@ -8041,7 +8062,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (!(diff.msw == 0 && diff.lsw == 0)) all_equal = false;
                 }
                 bool is_neq = (ins->opcode == OP_MNEQ || ins->opcode == OP_VNEQ);
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].integer = (is_neq ? !all_equal : all_equal) ? 1 : 0;
                 break;
@@ -8234,7 +8255,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     uint16_t template_syt = (uint16_t)state->stri_target_template_syt;
                     int32_t copy_idx = current_copy_index(state);
                     uint32_t field_syt32 = (uint32_t)template_syt + 1 + ins->operands[0].data;
-                    if (field_syt32 >= HALMAT_SYT_MAX) { fail(state, "TINT: computed field SYT out of range"); break; }
+                    if (field_syt32 >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "TINT: computed field SYT out of range"); break; }
                     halmat_syt_entry_t *field = find_or_create_struct_field(state, base_syt, (uint16_t)field_syt32, copy_idx);
                     field->type = SYT_TYPE_NAME;
                     field->name_target = HALMAT_NAME_NULL;
@@ -8268,7 +8289,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * applies here unchanged. */
                         uint32_t field_syt32 = (uint32_t)template_syt + 1 + ins->operands[0].data;
                         int32_t this_copy_idx = copy_idx + k;
-                        if (field_syt32 >= HALMAT_SYT_MAX) { fail(state, "TINT: computed field SYT out of range"); ok = false; break; }
+                        if (field_syt32 >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "TINT: computed field SYT out of range"); ok = false; break; }
                         if (state->symtab && rv.kind == RV_SCALAR) {
                             const halmat_symtab_entry_t *fsym = halmat_symtab_find_by_index(state->symtab, field_syt32);
                             if (fsym && fsym->hal_class == 6) { /* INTEGER */
@@ -8417,7 +8438,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operands[0].qual != QUAL_SYT) { fail(state, "MINT/VINT: OFFSET-addressed form not yet implemented"); break; }
                 {
                     uint16_t dest_syt = ins->operands[0].data;
-                    if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "MINT/VINT: SYT index out of range"); break; }
+                    if (dest_syt >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "MINT/VINT: SYT index out of range"); break; }
                     ensure_container(state, dest_syt);
                     halmat_syt_entry_t *e = &state->syt[dest_syt];
                     halmat_scalar_t fill = rv_to_scalar(&a);
@@ -8430,7 +8451,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "IADD/ISUB: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = (ins->opcode == OP_IADD)
@@ -8442,7 +8463,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "IIPR: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = rv_to_integer(&a) * rv_to_integer(&b);
@@ -8451,7 +8472,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_INEG:
                 if (ins->operand_count != 1) { fail(state, "INEG: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = -rv_to_integer(&a);
@@ -8467,7 +8488,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "IPEX: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 int32_t base = rv_to_integer(&a);
                 int32_t exponent = rv_to_integer(&b);
                 if (exponent < 0) { fail(state, "IPEX: negative exponent (expected non-negative literal)"); break; }
@@ -8495,7 +8516,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "SADD/SSUB: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = (ins->opcode == OP_SADD)
@@ -8507,7 +8528,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "SSPR: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = halmat_scalar_multiply(rv_to_scalar(&a), rv_to_scalar(&b));
@@ -8517,7 +8538,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "SSDV: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 halmat_scalar_t av = rv_to_scalar(&a), bv = rv_to_scalar(&b);
                 halmat_scalar_t quotient;
                 /* id 69 (yagpc2-yahalmat2-issues.db): real hardware's own
@@ -8562,7 +8583,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "SPEX/SIEX: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 halmat_scalar_t base = rv_to_scalar(&a);
                 int32_t exponent = rv_to_integer(&b);
                 bool dbl = base.double_precision;
@@ -8642,7 +8663,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 2) { fail(state, "SEXP: expected 2 operands"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 halmat_scalar_t base = rv_to_scalar(&a);
                 double base_d = halmat_scalar_to_double(base);
                 double exponent_d = halmat_scalar_to_double(rv_to_scalar(&b));
@@ -8679,7 +8700,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             case OP_SNEG:
                 if (ins->operand_count != 1) { fail(state, "SNEG: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = halmat_scalar_negate(rv_to_scalar(&a));
@@ -8705,7 +8726,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * representation consistent with that observation. */
                 if (ins->operand_count != 1) { fail(state, "ITOS: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = halmat_scalar_from_integer(rv_to_integer(&a), false);
@@ -8721,7 +8742,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * confirmed 2=DOUBLE_FLAG, 1=SINGLE_FLAG. */
                 if (ins->operand_count != 1) { fail(state, "STOS: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = scale_precision(rv_to_scalar(&a), ins->tag == 2);
@@ -8755,7 +8776,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * come out right. */
                 if (ins->operand_count != 1) { fail(state, "STOI: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 if (a.kind == RV_SCALAR) {
                     double raw = halmat_scalar_to_double(a.scalar);
                     double d = trunc(raw);
@@ -8993,7 +9014,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (lit2->type == LIT_BIT && lit2->bit_width > 0) width2 = lit2->bit_width;
                     }
                     if (width2 <= 0) { fail(state, "BCAT: second operand's declared BIT width is unknown"); break; }
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     uint32_t mask2 = (width2 >= 32) ? 0xFFFFFFFFu : ((1u << width2) - 1u);
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_bits = true;
@@ -9010,7 +9031,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
                 if (a.kind != RV_BITS || b.kind != RV_BITS) { fail(state, "BAND/BOR: both operands must be BIT"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
                 state->vac[ins->index].bits = (ins->opcode == OP_BAND) ? (a.bits & b.bits) : (a.bits | b.bits);
@@ -9020,7 +9041,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "BNOT: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BNOT: operand is not BIT"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 /* Real compiled code masks NOT to the operand's own
                  * declared BIT(n) width (`XHI R7,255` for a BIT(8)
                  * operand) rather than complementing the full 32-bit
@@ -9061,7 +9082,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * -- here just a reinterpretation of the same 32 bits). */
                 if (ins->operand_count != 1) { fail(state, "ITOB: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
                 state->vac[ins->index].bits = (uint32_t)rv_to_integer(&a);
@@ -9071,7 +9092,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "BTOI: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BTOI: operand is not BIT"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = (int32_t)a.bits;
@@ -9088,7 +9109,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "BTOS: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BTOS: operand is not BIT"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = true;
                 state->vac[ins->index].scalar = halmat_scalar_from_double((double)a.bits, false);
@@ -9101,7 +9122,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * is a plain passthrough. */
                 if (ins->operand_count != 1) { fail(state, "ITOI: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_scalar = false;
                 state->vac[ins->index].integer = rv_to_integer(&a);
@@ -9130,7 +9151,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "BTOC: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BTOC: operand is not BIT"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 int width = 32;
                 if (ins->operands[0].qual == QUAL_SYT && state->symtab) {
                     const halmat_symtab_entry_t *sym = halmat_symtab_find_by_index(state->symtab, ins->operands[0].data);
@@ -9219,7 +9240,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "CTOB: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_STRING) { fail(state, "CTOB: operand is not CHARACTER"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 size_t len = strlen(a.string);
                 if (len > 32) len = 32; /* project-wide 32-bit BIT ceiling, state.h's bit_width comment */
                 uint32_t bits = 0;
@@ -9265,7 +9286,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (!resolve_operand(state, &ins->operands[1], &widthv)) break;
                     int width = rv_to_integer(&widthv);
                     if (width < 0 || width > 32) { fail(state, "STOB: width out of range"); break; }
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     uint32_t mask = (width == 32) ? 0xFFFFFFFFu : ((1u << width) - 1u);
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_bits = true;
@@ -9275,7 +9296,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (ins->operand_count != 1) { fail(state, "STOB: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
                 state->vac[ins->index].bits = (uint32_t)rv_to_integer(&a);
@@ -9291,7 +9312,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "BTOB: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BTOB: operand is not BIT"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
                 state->vac[ins->index].bits = a.bits;
@@ -9322,7 +9343,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         fail(state, "SUBBIT assignment: expected a plain SYT operand");
                         break;
                     }
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_subbit_ref = true;
                     state->vac[ins->index].subbit_target_syt = ins->operands[0].data;
@@ -9334,7 +9355,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (ins->operand_count != 1) { fail(state, "BTOQ/CTOQ/STOQ/ITOQ: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 /* RV_SCALAR (STOQ, `SUBBIT(a_scalar_var)`): SUBBIT "opens
                  * a window on the [argument's] bit pattern" (USA003087
                  * Sec. 21.5) -- a raw memory reinterpretation, NOT a
@@ -9386,7 +9407,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "BTRU: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_BITS) { fail(state, "BTRU: operand is not BIT"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].integer = (a.bits != 0) ? 1 : 0;
                 break;
@@ -9397,7 +9418,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
                 if (a.kind != RV_BITS || b.kind != RV_BITS) { fail(state, "BEQU/BNEQ: both operands must be BIT"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 {
                     bool equal = (a.bits == b.bits);
                     bool result = (ins->opcode == OP_BEQU) ? equal : !equal;
@@ -9422,7 +9443,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (!resolve_operand(state, &ins->operands[1], &b)) break;
                 if (a.kind != RV_STRING || b.kind != RV_STRING) { fail(state, "CCAT: both operands must be CHARACTER"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 size_t len_a = strlen(a.string), len_b = strlen(b.string);
                 char *result = malloc(len_a + len_b + 1);
                 if (!result) { fail(state, "CCAT: out of memory"); break; }
@@ -9443,7 +9464,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "CTOC: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_STRING) { fail(state, "CTOC: operand is not CHARACTER"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_string = true;
                 state->vac[ins->index].string = dup_string(a.string);
@@ -9457,7 +9478,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * source WRITE uses. */
                 if (ins->operand_count != 1) { fail(state, "STOC: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 char buf[32];
                 halmat_scalar_format(rv_to_scalar(&a), buf, sizeof(buf));
                 state->vac[ins->index].is_ref = false;
@@ -9473,7 +9494,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * -- i.e. just "%d", not WRITE's fixed-width "%11d". */
                 if (ins->operand_count != 1) { fail(state, "ITOC: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 char buf[16];
                 snprintf(buf, sizeof(buf), "%d", rv_to_integer(&a));
                 state->vac[ins->index].is_ref = false;
@@ -9497,7 +9518,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "CTOS: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_STRING) { fail(state, "CTOS: operand is not CHARACTER"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 double parsed = 0.0;
                 ctoi_parse_scalar(a.string, &parsed);
                 state->vac[ins->index].is_ref = false;
@@ -9514,7 +9535,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (ins->operand_count != 1) { fail(state, "CTOI: expected 1 operand"); break; }
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_STRING) { fail(state, "CTOI: operand is not CHARACTER"); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 double parsed = 0.0;
                 ctoi_parse_scalar(a.string, &parsed);
                 state->vac[ins->index].is_ref = false;
@@ -9760,7 +9781,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     if (!resolve_container(state, &state->shape_pending.items[0], &ca, &count, &rows, &cols)) break;
                 }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 uint16_t selector = ins->operands[0].data;
                 if (selector == 23) { /* SIZE: "length of array," no reduction loop needed -- INTEGER.
                     * USA003087 Appendix B's own SIZE FUNCTION table: "alpha is an
@@ -9872,7 +9893,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * selectors has been observed, so implementing them here
                  * would be unverifiable invention). */
                 if (ins->tag == 19) { /* PRIO: no argument, current task's priority */
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_scalar = false;
                     state->vac[ins->index].integer = state->tasks[state->current_task].priority;
@@ -9894,7 +9915,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * match. Both selectors are double-precision SCALAR
                      * (USA003088.txt's own "OUTPUT F0 SCALAR DP"
                      * declaration for both). */
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     halmat_scalar_t r = (ins->tag == 42)
                         ? hal_random_next(&state->random_rng, &state->fpu)
                         : hal_randomg_next(&state->random_rng, &state->fpu);
@@ -9909,7 +9930,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * rule 18: "double precision scalar" (fixed here
                      * alongside adding DATE/CLOCKTIME below: this
                      * previously returned single precision). */
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     double seconds = (double)state->virtual_time / (double)HALMAT_TICKS_PER_SECOND;
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_scalar = true;
@@ -9927,7 +9948,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * which needs CLOCK_MONOTONIC precision this doesn't).
                      * localtime() already honors TZ/the OS's configured
                      * zone with no extra code. */
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     time_t now = time(NULL);
                     struct tm local_tm = *localtime(&now);
                     if (ins->tag == 18) {
@@ -9969,7 +9990,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     /* ERRGRP/ERRNUM: no argument, INTEGER -- "group/number
                      * of last error detected, or zero" (state.h's
                      * last_error_group/last_error_member comment). */
-                    if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     state->vac[ins->index].is_ref = false;
                     state->vac[ins->index].is_scalar = false;
                     state->vac[ins->index].integer = (ins->tag == 38) ? state->last_error_group : state->last_error_member;
@@ -9983,7 +10004,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * opcode instead, alongside the already-implemented
                  * MAX/MIN pair. No case for them appears below. */
                 if (ins->operand_count < 1) { fail(state, "BFNC: expected at least 1 operand (selector %u)", ins->tag); break; }
-                if (ins->index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                 /* DET(3)/ABVAL(28)/UNIT(27)/INVERSE(49)/TRANSPOSE(56)/
                  * TRACE(34) take a whole VECTOR/MATRIX argument and
                  * resolve it via resolve_container themselves below --
@@ -11006,7 +11027,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         break;
                     }
                     if (cls == 10 && ins->operands[0].qual == QUAL_XPT) {
-                        if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail(state, "READ: XPT stream position out of range"); break; }
+                        if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "READ: XPT stream position out of range"); break; }
                         const halmat_vac_slot_t *sref = &state->vac[ins->operands[0].data];
                         if (!sref->is_struct_ref) { fail(state, "READ: XPT operand does not reference an EXTN result"); break; }
                         /* Bare/unqualified structure reference: EXTN's own
@@ -11109,7 +11130,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * which resolves the *template* symbol itself as a
                      * bogus scalar "field" READ never populates -- printing/
                      * passing zero regardless of ARG's real contents). */
-                    if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail(state, "WRITE/CALL: XPT stream position out of range"); break; }
+                    if (ins->operands[0].data >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "WRITE/CALL: XPT stream position out of range"); break; }
                     const halmat_vac_slot_t *sref = &state->vac[ins->operands[0].data];
                     if (!sref->is_struct_ref) { fail(state, "WRITE/CALL: XPT operand does not reference an EXTN result"); break; }
                     const halmat_symtab_entry_t *tsym = state->symtab ? halmat_symtab_find_by_index(state->symtab, sref->struct_field_syt) : NULL;
@@ -11673,7 +11694,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 FILE *fp = state->raf_devices[channel];
                 long position = (long)record_size * (long)record_num;
                 uint16_t var_syt = ins->operands[1].data;
-                if (var_syt >= HALMAT_SYT_MAX) { fail(state, "FILE: SYT index out of range"); break; }
+                if (var_syt >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "FILE: SYT index out of range"); break; }
                 bool is_write = (ins->operands[1].tag2 != 0);
                 halmat_syt_entry_t *e = &state->syt[var_syt];
                 if (fseek(fp, position, SEEK_SET) != 0) { fail(state, "FILE(%d): seek to record %d failed", channel, record_num); break; }
@@ -11912,7 +11933,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             double v;
                             if (fscanf(in, "%lf", &v) != 1) {
                                 if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
-                                    fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                    fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed SCALAR", device);
                                 }
                                 stop = true;
                                 break;
@@ -11986,7 +12007,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                     double v;
                                     if (fscanf(in, "%lf", &v) != 1) {
                                         if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
-                                            fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                            fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed SCALAR", device);
                                         }
                                         stop = true;
                                         break;
@@ -12002,7 +12023,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                     double v;
                                     if (fscanf(in, "%lf", &v) != 1) {
                                         if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
-                                            fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                            fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed SCALAR", device);
                                         }
                                         stop = true;
                                         break;
@@ -12092,7 +12113,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         long v;
                         if (fscanf(in, "%ld", &v) != 1) {
                             if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
-                                fail(state, "READ(%d): end of input or malformed INTEGER", device);
+                                fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed INTEGER", device);
                             }
                             break;
                         }
@@ -12121,7 +12142,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         long v;
                         if (fscanf(in, "%ld", &v) != 1) {
                             if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
-                                fail(state, "READ(%d): end of input or malformed BIT", device);
+                                fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed BIT", device);
                             }
                             break;
                         }
@@ -12136,7 +12157,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         char buf[1024];
                         if (fscanf(in, "%1023s", buf) != 1) {
                             if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
-                                fail(state, "READ(%d): end of input for CHARACTER", device);
+                                fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input for CHARACTER", device);
                             }
                             break;
                         }
@@ -12148,7 +12169,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         double v;
                         if (fscanf(in, "%lf", &v) != 1) {
                             if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
-                                fail(state, "READ(%d): end of input or malformed SCALAR", device);
+                                fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed SCALAR", device);
                             }
                             break;
                         }
@@ -12194,7 +12215,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             param_syt = resolve_param_syt(state, resolved_call_target, param_pos++);
                         }
                         if (!state->io_pending.items[i].is_assign) continue;
-                        if (param_syt >= HALMAT_SYT_MAX) { fail(state, "ASSIGN: parameter SYT out of range"); break; }
+                        if (param_syt >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "ASSIGN: parameter SYT out of range"); break; }
                         /* Whole STRUCTURE ASSIGN parameter targeting one
                          * copy of a Q-STRUCTURE(n) array
                          * (`CALL READ_IMU(I) ASSIGN(VEL(I));`, VEL a
@@ -12280,7 +12301,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                             ensure_container(state, (uint16_t)param_syt);
                             halmat_syt_entry_t *pe = &state->syt[param_syt];
                             uint16_t dest_syt = state->io_pending.items[i].dest_operand.data;
-                            if (dest_syt >= HALMAT_SYT_MAX) { fail(state, "ASSIGN: receiver SYT out of range"); break; }
+                            if (dest_syt >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "ASSIGN: receiver SYT out of range"); break; }
                             ensure_container(state, dest_syt);
                             halmat_syt_entry_t *de = &state->syt[dest_syt];
                             if (pe->element_count != de->element_count) {
@@ -12369,7 +12390,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (proc >= HALMAT_SYT_MAX || state->symbol_def_pos[proc] == NO_TARGET) {
-                    fail(state, "call to undefined procedure (symbol %u)", proc);
+                    fail_cat(state, HALMAT_HALT_REASON_UNDEFINED_CALL, "call to undefined procedure (symbol %u)", proc);
                     break;
                 }
                 {
@@ -12422,7 +12443,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     if (!bind_ok) break;
                 }
-                if (state->call_return_sp >= 64) { fail(state, "call nesting too deep"); break; }
+                if (state->call_return_sp >= 64) { fail_cat(state, HALMAT_HALT_REASON_STACK_DEPTH, "call nesting too deep"); break; }
                 state->call_return_stack[state->call_return_sp++] = state->pc;
                 state->pc = state->symbol_def_pos[proc] + 1;
                 branched = true;
@@ -12451,7 +12472,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (callee >= HALMAT_SYT_MAX || state->symbol_def_pos[callee] == NO_TARGET) {
-                    fail(state, "call to undefined function (symbol %u)", callee);
+                    fail_cat(state, HALMAT_HALT_REASON_UNDEFINED_CALL, "call to undefined function (symbol %u)", callee);
                     break;
                 }
                 /* Positional argument binding: SYT callee+1+i, per
@@ -12489,7 +12510,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     if (!bind_ok) break;
                 }
-                if (state->call_return_sp >= 64) { fail(state, "call nesting too deep"); break; }
+                if (state->call_return_sp >= 64) { fail_cat(state, HALMAT_HALT_REASON_STACK_DEPTH, "call nesting too deep"); break; }
                 state->call_return_stack[state->call_return_sp++] = state->pc;
                 state->pc = state->symbol_def_pos[callee] + 1;
                 branched = true;
@@ -12502,7 +12523,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * appears in-line in the stream and simply falls
                  * through. Pushed so the matching RTRN (see below) knows
                  * which VAC slot to write its result to. */
-                if (state->inline_func_sp >= 16) { fail(state, "inline FUNCTION nesting too deep"); break; }
+                if (state->inline_func_sp >= 16) { fail_cat(state, HALMAT_HALT_REASON_STACK_DEPTH, "inline FUNCTION nesting too deep"); break; }
                 state->inline_func_stack[state->inline_func_sp++] = state->pc;
                 break;
 
@@ -12543,7 +12564,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         if (ins->operand_count != 1) { fail(state, "RTRN: inline FUNCTION requires a return value"); break; }
                         size_t idef_pos = state->inline_func_stack[state->inline_func_sp - 1];
                         size_t vac_index = state->prog->instrs[idef_pos].index;
-                        if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                        if (vac_index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                         /* DB id 38 (yagpc2-yahalmat2-issues.db): whole
                          * VECTOR/MATRIX RETURN from an inline FUNCTION
                          * (class-0/IDEF.md), e.g. `X = FUNCTION VECTOR;
@@ -12773,7 +12794,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (!resolve_operand(state, &ins->operands[0], &a)) break;
                     size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
                     size_t vac_index = state->prog->instrs[fcal_pos].index;
-                    if (vac_index >= HALMAT_VAC_MAX) { fail(state, "VAC index out of range"); break; }
+                    if (vac_index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     /* User-reported (128-MASS.hal's `WRITE(6)
                      * MASS(REST_MASS, SPEED);`, MASS a same-unit,
                      * non-inline SCALAR-returning FUNCTION called via an
@@ -13387,7 +13408,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 uint16_t sym = ins->operands[0].data;
-                if (sym >= HALMAT_SYT_MAX) { fail(state, "SGNL: SYT index out of range"); break; }
+                if (sym >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "SGNL: SYT index out of range"); break; }
                 halmat_syt_entry_t *e = &state->syt[sym];
                 e->type = SYT_TYPE_BIT;
                 e->bit_value = 1;
@@ -13471,7 +13492,8 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * code) -- failing loudly here with a specific message
                  * rather than silently no-opping, since ignoring an SVC
                  * call could hide behavior a real program depends on. */
-                fail(state, "opcode 0x%03X (%s): %%macro invocations (%%SVC etc.) compile to raw "
+                fail_cat(state, HALMAT_HALT_REASON_INVALID_OPCODE,
+                     "opcode 0x%03X (%s): %%macro invocations (%%SVC etc.) compile to raw "
                             "AP-101S machine instructions with no portable HALMAT-level semantics -- "
                             "out of scope for this interpreter",
                      ins->opcode, ins->opcode == OP_PMHD ? "PMHD" : ins->opcode == OP_PMAR ? "PMAR" : "PMIN");
@@ -13479,7 +13501,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
 
             default: {
                 const opcode_desc_t *desc = opcode_lookup(ins->opcode);
-                fail(state, "opcode 0x%03X (%s) not yet implemented", ins->opcode,
+                fail_cat(state, HALMAT_HALT_REASON_INVALID_OPCODE, "opcode 0x%03X (%s) not yet implemented", ins->opcode,
                      desc ? desc->mnemonic : "????");
                 break;
             }
@@ -13592,7 +13614,7 @@ static void sched_wake_waiting(halmat_state_t *state) {
  * (Sec. 24.3/24.6), so nothing else should ever appear here. */
 static bool reevaluate_live_bit_operand(halmat_state_t *state, const halmat_operand_t *op, uint32_t *out) {
     if (op->qual == QUAL_SYT) {
-        if (op->data >= HALMAT_SYT_MAX) { fail(state, "event expression: SYT index out of range"); return false; }
+        if (op->data >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "event expression: SYT index out of range"); return false; }
         *out = state->syt[op->data].bit_value;
         return true;
     }
@@ -13700,6 +13722,7 @@ static void sched_wake_dependents(halmat_state_t *state) {
             if (t->is_primal) {
                 state->halted = true;
                 state->exit_code = 0;
+                state->halt_reason = HALMAT_HALT_REASON_NORMAL;
             } else {
                 t->task_state = TASK_TERMINATED;
                 if (t->symbol < HALMAT_SYT_MAX) state->symbol_active_task[t->symbol] = -1;

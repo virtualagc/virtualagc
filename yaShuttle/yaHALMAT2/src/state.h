@@ -1022,6 +1022,25 @@ typedef struct {
                              * the still-open line needs flushing at all. */
 } halmat_device_mech_t;
 
+/* Why a run stopped (halted==true), for yaGpcIntegration.h's GpcEngineStatus
+ * mapping (yaGpcOps.c) -- NONE means still running, and is otherwise unused
+ * (halt_reason is only meaningful once halted is true). FAIL_GENERIC is the
+ * default fail()'s own category; the more specific FAIL_* values are set by
+ * fail_cat() at the small number of call sites that warrant their own
+ * GpcEngineStatus code (interp.c) -- every other fail() call site (~480 of
+ * them) stays FAIL_GENERIC, a deliberate, explicitly-scoped-down mapping,
+ * not an oversight. */
+typedef enum {
+    HALMAT_HALT_REASON_NONE = 0,
+    HALMAT_HALT_REASON_NORMAL,
+    HALMAT_HALT_REASON_UNHANDLED_EOF,
+    HALMAT_HALT_REASON_FAIL_GENERIC,
+    HALMAT_HALT_REASON_INVALID_OPCODE,
+    HALMAT_HALT_REASON_BOUNDS,
+    HALMAT_HALT_REASON_STACK_DEPTH,
+    HALMAT_HALT_REASON_UNDEFINED_CALL
+} halmat_halt_reason_t;
+
 struct halmat_state {
     const halmat_program_t *prog;
     const halmat_literal_table_t *literals;
@@ -1278,6 +1297,7 @@ struct halmat_state {
 
     bool halted;
     int exit_code;
+    halmat_halt_reason_t halt_reason; /* zero (HALMAT_HALT_REASON_NONE, the memset default) until halted */
 
     /* Arrayed-expression "paragraph" replay (class-0/ADLP.md role 1):
      * an ordinary arithmetic/assign paragraph over ARRAY-typed operands
@@ -1652,6 +1672,18 @@ struct halmat_state {
      * means "no error detected yet," matching the documented default. */
     int32_t last_error_group;
     int32_t last_error_member;
+
+    /* One-shot edge trigger for yaGpcIntegration.h's GpcEngineStatus
+     * WARNING case (yaGpcOps.c): last_error_group/last_error_member above
+     * are sticky (never reset once first written), so a driver checking
+     * them on some LATER step, after the one that actually fired the
+     * AERROR/SEND ERROR, would incorrectly see a "current" error. Set true
+     * at the exact two points last_error_group/last_error_member are
+     * written (arithmetic_error_should_apply_fixup, OP_ERSE -- interp.c);
+     * read-and-cleared by the engine adapter on the very next interp_step()
+     * return, so a driver only sees the WARNING status on the step it
+     * actually happened. */
+    bool send_error_pending;
 };
 
 #define HALMAT_MAX_CASES 64

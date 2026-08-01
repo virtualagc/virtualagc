@@ -37,11 +37,57 @@ static bool find_companion(const char *halmat_path, const char *const *candidate
 /* Deliberately interp_step() only, never interp_run()/interp_run_burst()/
  * interp_run_signal() -- those have their own real-time pacing (including
  * interp_run_signal()'s process-wide POSIX timer), which doesn't work
- * correctly with multiple independently-driven instances in one process. */
-static void yaHALMAT2_engine(GpcState *gpcState) {
+ * correctly with multiple independently-driven instances in one process.
+ *
+ * Maps interp_step()'s outcome onto GpcEngineStatus (yaGpcIntegration.h):
+ *  - state->send_error_pending (set at the two AERROR/SEND ERROR firing
+ *    sites in interp.c -- arithmetic_error_should_apply_fixup, OP_ERSE) is
+ *    checked first and, if set, wins outright. An AERROR never halts by
+ *    itself (execution continues normally, per the contract's own comment
+ *    on GPC_ENGINE_WARNING_HAL_S_ERROR_BASE), so this and the halted/
+ *    running checks below are mutually exclusive in practice -- checking
+ *    it first just keeps that explicit rather than assumed. Cleared
+ *    immediately after being read (one-shot).
+ *  - interp_step()'s own return value, not just state->halted, decides
+ *    RUNNING vs. stopped: interp_step() returns false on every path that
+ *    did real forward-progress work this call (see its own header comment
+ *    in interp.c) and true on every path that stopped early -- including
+ *    scheduler exhaustion (sched_pick_next()==-1), which is the ONE path
+ *    that returns true WITHOUT setting state->halted. That asymmetry is
+ *    exactly what distinguishes GPC_ENGINE_HALTED_STARVED from
+ *    GPC_ENGINE_RUNNING here -- no separate interp.c-side flag was needed
+ *    for this one; interp_step()'s existing return convention already
+ *    encodes it.
+ *  - Otherwise, state->halt_reason (set at every halted=true site that
+ *    warrants its own GpcEngineStatus code -- state.h/interp.c) maps
+ *    directly. Everything not explicitly categorized (~480 of the ~490
+ *    total fail() call sites) stays HALMAT_HALT_REASON_FAIL_GENERIC ->
+ *    GPC_ENGINE_ERROR_INTERNAL, a deliberate catch-all, not an oversight
+ *    (see the relay's own explicit scoping-down instruction). */
+static GpcEngineStatus yaHALMAT2_engine(GpcState *gpcState) {
     halmat_state_t *state = (halmat_state_t *)gpcState->impl;
-    interp_step(state, stdout);
+    bool stopped = interp_step(state, stdout);
     gpcState->elapsedTime = (double)state->virtual_time;
+
+    if (state->send_error_pending) {
+        state->send_error_pending = false;
+        return (GpcEngineStatus)(GPC_ENGINE_WARNING_HAL_S_ERROR_BASE + state->last_error_member);
+    }
+    if (!stopped) return GPC_ENGINE_RUNNING;
+    if (!state->halted) return GPC_ENGINE_HALTED_STARVED;
+
+    switch (state->halt_reason) {
+        case HALMAT_HALT_REASON_NORMAL: return GPC_ENGINE_HALTED_NORMAL;
+        case HALMAT_HALT_REASON_UNHANDLED_EOF: return GPC_ENGINE_HALTED_UNHANDLED_EOF;
+        case HALMAT_HALT_REASON_INVALID_OPCODE: return GPC_ENGINE_ERROR_INVALID_OPCODE;
+        case HALMAT_HALT_REASON_BOUNDS: return GPC_ENGINE_ERROR_BOUNDS;
+        case HALMAT_HALT_REASON_STACK_DEPTH: return GPC_ENGINE_ERROR_STACK_DEPTH;
+        case HALMAT_HALT_REASON_UNDEFINED_CALL: return GPC_ENGINE_ERROR_UNDEFINED_CALL;
+        case HALMAT_HALT_REASON_FAIL_GENERIC:
+        case HALMAT_HALT_REASON_NONE:
+        default:
+            return GPC_ENGINE_ERROR_INTERNAL;
+    }
 }
 
 /* elapsedTime is re-synced here too, not just in the engine adapter, since
