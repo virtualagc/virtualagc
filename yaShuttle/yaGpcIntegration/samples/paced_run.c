@@ -26,15 +26,43 @@
  * JSON providing the entry point -- see GpcInitializerFn's own comment);
  * yaHALMAT2 ignores it, since a HALMAT file's entry point is
  * self-contained. */
+#ifdef _WIN32
+#include <windows.h>
+#else
 #define _POSIX_C_SOURCE 200809L /* clock_gettime(), nanosleep() */
+#include <time.h>
+#endif
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 
 #include "yaGpcIntegration.h"
 
 #define BATCH_SIZE 500 /* instructions run at full speed before re-checking the clock */
 
+#ifdef _WIN32
+/* clock_gettime()/CLOCK_MONOTONIC and nanosleep() are POSIX-only --
+ * MSVC's headers don't declare them at all (_POSIX_C_SOURCE is a glibc
+ * feature-test macro, not something MSVC honors), so this needs a
+ * genuinely different implementation on Windows, not just a macro
+ * workaround. Sleep()'s millisecond granularity is coarser than
+ * nanosleep()'s -- fine for this example's own pacing, not something a
+ * driver with tighter real-time requirements should copy as-is. */
+static double now_us(void) {
+    static LARGE_INTEGER freq;
+    static int haveFreq;
+    if (!haveFreq) {
+        QueryPerformanceFrequency(&freq);
+        haveFreq = 1;
+    }
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+    return (double)counter.QuadPart * 1e6 / (double)freq.QuadPart;
+}
+
+static void sleep_us(double us) {
+    if (us > 0) Sleep((DWORD)(us / 1000.0));
+}
+#else
 static double now_us(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -47,6 +75,7 @@ static void sleep_us(double us) {
     req.tv_nsec = (long)(us - (double)req.tv_sec * 1e6) * 1000L;
     nanosleep(&req, NULL);
 }
+#endif
 
 int main(int argc, char **argv) {
     if (argc < 2) {
