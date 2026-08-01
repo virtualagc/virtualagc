@@ -28,51 +28,6 @@ typedef struct {
 typedef void (*GpcEngineFn)(GpcState *state);
 typedef bool (*GpcDebuggerFn)(GpcState *state, void *dbgState); /* false => stop */
 
-/* symbolsPath: optional (NULL allowed) path to a linker/symbols JSON file
- * providing, at minimum, an entry point. yaGPC2 reads it and establishes
- * the start address from it (a freshly loaded .fcm otherwise sits in the
- * CPU's default wait state, per real AP-101S reset behavior -- there is
- * no implicit "start at word 0"). yaHALMAT2 ignores this parameter: its
- * entry point comes from the HALMAT program itself, not a companion
- * file. */
-typedef bool (*GpcInitializerFn)(GpcState *state, const char *programPath, const char *symbolsPath);
-
-/* Releases whatever initializer allocated for state->impl (and, on
- * yaGPC2's side, flushes any output still buffered but not yet
- * newline-terminated -- see halucp_flush_all_pending() -- since a
- * driver tearing down or replacing an instance is another way a
- * program's session can end besides its own HALT/EOF). Leaves *state
- * otherwise unspecified after the call; the caller must not use it
- * again without re-initializing. */
-typedef void (*GpcReleaseFn)(GpcState *state);
-
-/* Creates a fresh, opaque debugger-session state for GpcDebuggerFn's
- * dbgState parameter -- session/REPL state (breakpoints, step mode,
- * htrace toggle, etc.), independent of any particular GpcState instance,
- * matching how yaGPC2's own Debugger and yaHALMAT2's own
- * debugger_state_t are already kept separate from emulator state.
- * sourceMapPath is optional (NULL allowed), mirroring
- * GpcInitializerFn's symbolsPath -- meaning/support is emulator-specific
- * (yaGPC2: a --source-map-equivalent HAL/S source map, loaded once at
- * creation since there's no way to load one later through the debugger's
- * own commands). Returns NULL on failure. */
-typedef void *(*GpcDebuggerStateCreateFn)(const char *sourceMapPath);
-
-/* Releases a debugger-session state created by GpcDebuggerStateCreateFn.
- * Does not touch any GpcState -- a debugger session and a GPC instance
- * are independently created/destroyed and one dbgState may outlive, or
- * be reused across, more than one GpcState over a debugging session. */
-typedef void (*GpcDebuggerStateDestroyFn)(void *dbgState);
-
-typedef struct {
-    GpcEngineFn engine;
-    GpcDebuggerFn debugger;
-    GpcInitializerFn initializer;
-    GpcReleaseFn release;
-    GpcDebuggerStateCreateFn debuggerStateCreate;
-    GpcDebuggerStateDestroyFn debuggerStateDestroy;
-} GpcOps;
-
 /* Servicer: the GPC's interface to vehicle peripherals. Deliberately
  * word/data-level (not bit/signal-level, not protocol-shaped) so a
  * shared-memory implementation is trivial; a networked/standalone
@@ -117,10 +72,72 @@ typedef struct {
  * peripheral-bus simulation) -- never a GpcState, and never touched by
  * yaGPC2/yaHALMAT2 themselves, same shape as HalUCP's own
  * cbCtx/outputCallback pattern. Each GPC instance is still wired to its
- * own servicer+servicerCtx pair at registration time (a Shuttle sim's
- * GPC1 and GPC3 may sit on different buses); the callback itself just
- * never sees which GpcState triggered it, by design. */
+ * own servicer+servicerCtx pair (a Shuttle sim's GPC1 and GPC3 may sit
+ * on different buses) -- see GpcInitializerFn, which is where that
+ * wiring happens; the callback itself just never sees which GpcState
+ * triggered it, by design. */
 typedef void (*GpcServicerFn)(void *servicerCtx, GpcServiceNumber serviceNumber, const GpcServiceInput *input,
                                GpcServiceOutput *output);
+
+/* symbolsPath: optional (NULL allowed) path to a linker/symbols JSON file
+ * providing, at minimum, an entry point. yaGPC2 reads it and establishes
+ * the start address from it (a freshly loaded .fcm otherwise sits in the
+ * CPU's default wait state, per real AP-101S reset behavior -- there is
+ * no implicit "start at word 0"). yaHALMAT2 ignores this parameter: its
+ * entry point comes from the HALMAT program itself, not a companion
+ * file.
+ *
+ * servicer/servicerCtx: optional (NULL allowed) -- installs this
+ * instance's peripheral-I/O callback, if any. This belongs on the
+ * initializer rather than as a separate per-emulator function (the way
+ * yaGPC2's own ap101_set_servicer() works internally) or as a field on
+ * GpcOps itself: GpcOps is one shared, effectively-const vtable per
+ * emulator *type* (yaGPC2_ops/yaHALMAT2_ops), used identically by every
+ * instance of that type, so a servicer living there would be forced to
+ * be the same for every instance -- exactly the kind of shared state
+ * this contract has avoided since GpcState's own design. The
+ * initializer already takes other per-instance configuration
+ * (programPath, symbolsPath), so this is the natural place for
+ * per-instance servicer wiring too. Pass NULL for both to run this
+ * instance with no peripheral I/O at all (matches yaGPC2's original
+ * inert MIA stub behavior). */
+typedef bool (*GpcInitializerFn)(GpcState *state, const char *programPath, const char *symbolsPath,
+                                  GpcServicerFn servicer, void *servicerCtx);
+
+/* Releases whatever initializer allocated for state->impl (and, on
+ * yaGPC2's side, flushes any output still buffered but not yet
+ * newline-terminated -- see halucp_flush_all_pending() -- since a
+ * driver tearing down or replacing an instance is another way a
+ * program's session can end besides its own HALT/EOF). Leaves *state
+ * otherwise unspecified after the call; the caller must not use it
+ * again without re-initializing. */
+typedef void (*GpcReleaseFn)(GpcState *state);
+
+/* Creates a fresh, opaque debugger-session state for GpcDebuggerFn's
+ * dbgState parameter -- session/REPL state (breakpoints, step mode,
+ * htrace toggle, etc.), independent of any particular GpcState instance,
+ * matching how yaGPC2's own Debugger and yaHALMAT2's own
+ * debugger_state_t are already kept separate from emulator state.
+ * sourceMapPath is optional (NULL allowed), mirroring
+ * GpcInitializerFn's symbolsPath -- meaning/support is emulator-specific
+ * (yaGPC2: a --source-map-equivalent HAL/S source map, loaded once at
+ * creation since there's no way to load one later through the debugger's
+ * own commands). Returns NULL on failure. */
+typedef void *(*GpcDebuggerStateCreateFn)(const char *sourceMapPath);
+
+/* Releases a debugger-session state created by GpcDebuggerStateCreateFn.
+ * Does not touch any GpcState -- a debugger session and a GPC instance
+ * are independently created/destroyed and one dbgState may outlive, or
+ * be reused across, more than one GpcState over a debugging session. */
+typedef void (*GpcDebuggerStateDestroyFn)(void *dbgState);
+
+typedef struct {
+    GpcEngineFn engine;
+    GpcDebuggerFn debugger;
+    GpcInitializerFn initializer;
+    GpcReleaseFn release;
+    GpcDebuggerStateCreateFn debuggerStateCreate;
+    GpcDebuggerStateDestroyFn debuggerStateDestroy;
+} GpcOps;
 
 #endif

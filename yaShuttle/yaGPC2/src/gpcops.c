@@ -91,12 +91,14 @@ static bool yagpc2_debugger(GpcState *state, void *dbgState) {
     return cont;
 }
 
-static bool yagpc2_initializer(GpcState *state, const char *programPath, const char *symbolsPath) {
+static bool yagpc2_initializer(GpcState *state, const char *programPath, const char *symbolsPath,
+                                GpcServicerFn servicer, void *servicerCtx) {
     AGEHarness *age = malloc(sizeof(AGEHarness));
     if (!ageharness_init_minimal(age, programPath, symbolsPath)) {
         free(age);
         return false;
     }
+    if (servicer) ap101_set_servicer(&age->gpc, servicer, servicerCtx);
     state->impl = age;
     state->emulator = GPC_EMULATOR_YAGPC2;
     state->elapsedTime = age->gpc.cpu.elapsedTimeUs;

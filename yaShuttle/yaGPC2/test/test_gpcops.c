@@ -8,7 +8,10 @@
  *     both directions, exercising the same iop_queue_dma()/
  *     iop_exec_dma_queue()/mia_xmit_cmd() paths #TDS/#RDS/#CMD/#CMDI
  *     themselves use, while confirming the no-servicer-installed case
- *     is still byte-for-byte the original inert stub.
+ *     is still byte-for-byte the original inert stub -- and that
+ *     GpcInitializerFn's servicer/servicerCtx parameters actually wire
+ *     up (via yagpc2_initializer()'s ap101_set_servicer() call), not
+ *     just the low-level iop_set_servicer() path.
  *  3. yagpc2_engine() prints a trace line exactly when
  *     AGEHarness.htraceWanted is set (and nothing when it isn't) --
  *     the mechanism a driver relies on to get 'htrace'-equivalent
@@ -47,9 +50,9 @@ static int failures = 0;
 
 static void test_two_instance_independence(void) {
     GpcState a = {.gpcID = 1}, b = {.gpcID = 2};
-    CHECK(yaGPC2_ops.initializer(&a, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
+    CHECK(yaGPC2_ops.initializer(&a, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
           "instance A initializer succeeded");
-    CHECK(yaGPC2_ops.initializer(&b, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
+    CHECK(yaGPC2_ops.initializer(&b, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
           "instance B initializer succeeded");
     CHECK(a.impl != NULL && b.impl != NULL, "both instances got a non-NULL impl");
     CHECK(a.impl != b.impl, "instances have distinct impl allocations");
@@ -177,6 +180,29 @@ static void test_servicer_roundtrip(void) {
     cpu_free(&cpu);
 }
 
+/* Proves GpcInitializerFn's servicer/servicerCtx parameters actually get
+ * wired up (via yagpc2_initializer()'s internal ap101_set_servicer()
+ * call) -- test_servicer_roundtrip() above exercises the low-level
+ * iop_set_servicer() path directly; this exercises the black-box path a
+ * real driver would use instead. */
+static void test_servicer_via_initializer(void) {
+    FakeServicer fs;
+    memset(&fs, 0, sizeof fs);
+
+    GpcState state = {.gpcID = 1};
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", fake_servicer,
+                                  &fs),
+          "servicer-via-initializer instance initializer succeeded");
+    AGEHarness *age = (AGEHarness *)state.impl;
+
+    uint32_t cmd = (0x07u << 19) | 0x0055u;
+    mia_xmit_cmd(&age->gpc.iop, &age->gpc.iop.bce[0].mia, cmd);
+    CHECK(fs.lastCmdWord == cmd, "servicer registered via the initializer receives real MIA traffic");
+    CHECK(fs.lastCmdAddress == 7, "IUA decoded correctly through the initializer-installed servicer");
+
+    yaGPC2_ops.release(&state);
+}
+
 /* ---------------------------------------------------------------------
  * 3. htraceWanted-driven engine output
  * ------------------------------------------------------------------- */
@@ -206,7 +232,7 @@ static long capture_engine_output(GpcState *state, char *out, size_t outSize) {
 
 static void test_htrace_output(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
           "htrace-output instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
     char buf[2400];
@@ -258,7 +284,7 @@ static void capture_output_cb(void *ctx, const char *text, int channel) {
  * itself is built to handle. */
 static void test_release_flushes_pending_output(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json"),
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
           "release-flush instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
 
@@ -289,6 +315,7 @@ static void test_debugger_state_lifecycle(void) {
 int main(void) {
     test_two_instance_independence();
     test_servicer_roundtrip();
+    test_servicer_via_initializer();
     test_htrace_output();
     test_release_flushes_pending_output();
     test_debugger_state_lifecycle();
