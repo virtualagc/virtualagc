@@ -110,9 +110,14 @@ int main(void) {
         if (aheadUs > 0) sleep_us(aheadUs);
     }
 
-    fprintf(stderr, "stopped: %s (elapsedTime=%.2f us)\n", gpc_engine_status_message(status), state.elapsedTime);
-
+    /* Before printing our own status line, not after -- release() may
+     * flush one final buffered-but-not-yet-newline-terminated line of
+     * the program's own output (see GpcReleaseFn's own comment), which
+     * needs to reach stdout before this driver's own "stopped:" message,
+     * not after it. */
     Ops->release(&state);
+
+    fprintf(stderr, "stopped: %s (elapsedTime=%.2f us)\n", gpc_engine_status_message(status), state.elapsedTime);
     /* HALTED (-1..-3) is program-inherent termination; ERROR (-4..-9,
      * GPC_ENGINE_ERROR_INVALID_OPCODE and below) is an emulator fault. */
     return status <= GPC_ENGINE_ERROR_INVALID_OPCODE ? 1 : 0;
