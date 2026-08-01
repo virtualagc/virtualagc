@@ -46,7 +46,7 @@ DEPS := $(OBJS:.o=.d)
 # there now instead).
 LIB_OBJS := $(filter-out $(BUILD_DIR)/main.o,$(OBJS))
 
-.PHONY: all clean test
+.PHONY: all clean test paced-example
 
 all: $(BIN) $(LIB)
 
@@ -139,6 +139,13 @@ $(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(LIB) src/yaGpcIntegration.h te
 # drift against both yaGpcIntegration.h and $(LIB)'s own completeness.
 $(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(LIB) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/example_gpcops_paced_run.c $(LIB) $(LDLIBS)
+
+# Shorthand for `make build/test/example_gpcops_paced_run` -- builds just
+# the library and this one example, without any of the other 14 unit
+# test binaries or run_all.sh/test_debugger.sh (those only run as part
+# of the `test` target's own recipe, never pulled in as a prerequisite
+# here).
+paced-example: $(TEST_BIN_DIR)/example_gpcops_paced_run
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN) $(LIB)
