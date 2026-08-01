@@ -3406,6 +3406,12 @@ run ./run_local_fixture.sh empty_character_write "$(printf '\nB1=     0     C=')
 # must not leak state into each other -- see gpc_smoke_test.c.
 run ./run_gpc_smoke.sh
 
+# yaGpcIntegration.h contract (yaGpcOps.c): WRITE/READ actually flow
+# through GpcOutputFn/GpcInputFn, purely via the GpcOps surface -- not
+# just "does the program halt" (RELAY-TO-YAHALMAT2-TextIO.txt's own
+# section 3). See gpc_textio_test.c.
+run ./run_gpc_textio.sh
+
 echo "============================"
 if [ "$fail" -eq 0 ]; then
     echo "ALL TESTS PASSED"

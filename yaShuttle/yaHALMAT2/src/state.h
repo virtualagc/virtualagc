@@ -11,6 +11,7 @@
 #include "opcode_table.h" /* for the halmat_state_t typedef */
 #include "symtab.h"
 #include "value.h"
+#include "yaGpcIntegration.h" /* for GpcOutputFn/GpcInputFn -- see output_fn/input_fn below */
 
 /* Logical device numbers, per class-0/XXAR.md's Unresolved-Questions note
  * on USA00309 Sec. 6.1.4's "device numbers 2-9 map to a fixed DD name"
@@ -1090,6 +1091,24 @@ struct halmat_state {
      * the interpreter -- main.c opens/closes any --ddi/--ddo files and
      * owns stdin/stdout, so interp_cleanup() must not fclose() these. */
     FILE *devices[HALMAT_DEVICE_MAX];
+
+    /* yaGpcIntegration.h's GpcOutputFn/GpcInputFn text-I/O routing
+     * (yaGpcOps.c) -- NULL (the memset default) on every state not
+     * created via yaHALMAT2_initializer, meaning devices[]/the logic
+     * below is completely unaffected for the CLI (main.c never touches
+     * these). When output_fn is set, dm_finalize_line() (interp.c) routes
+     * a finished device-6 line through it instead of writing to
+     * devices[6]; when input_fn is set, OP_READ/OP_RDAL's device-5 stream
+     * is backed by a growable tmpfile() refilled on demand
+     * (device_input_refill, interp.c) instead of reading real stdin
+     * directly. Channels other than 6 (output)/5 (input) are not
+     * currently routed through these callbacks -- see yaGpcOps.c's own
+     * comment on why this initial implementation is scoped to HAL/S's
+     * two conventional channels. */
+    GpcOutputFn output_fn;
+    void *output_ctx;
+    GpcInputFn input_fn;
+    void *input_ctx;
 
     /* Per-device PAGED (false, the default)/UNPAGED (true) mode --
      * USA003090 Sec. 5.2: real HAL/S-FC determines this per channel via a

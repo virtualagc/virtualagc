@@ -70,9 +70,16 @@ SMOKE_OBJS := $(SMOKE_SRCS:.c=.o)
 SMOKE_DEPS := $(SMOKE_SRCS:.c=.d)
 GPC_SMOKE_TARGET := gpc_smoke_test
 
+# WRITE/READ-via-GpcOutputFn/GpcInputFn content check (RELAY-TO-YAHALMAT2-
+# TextIO.txt's own section 3 -- not just "does it halt").
+TEXTIO_SRCS := test_gpc_textio.c
+TEXTIO_OBJS := $(TEXTIO_SRCS:.c=.o)
+TEXTIO_DEPS := $(TEXTIO_SRCS:.c=.d)
+GPC_TEXTIO_TARGET := gpc_textio_test
+
 .PHONY: all clean
 
-all: $(TARGET) $(LIB) $(GPC_SMOKE_TARGET)
+all: $(TARGET) $(LIB) $(GPC_SMOKE_TARGET) $(GPC_TEXTIO_TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
@@ -80,12 +87,15 @@ $(TARGET): $(OBJS)
 $(LIB): $(LIB_OBJS)
 	$(AR) rcs $@ $(LIB_OBJS)
 
-# Links against $(LIB) itself, not the raw object list -- deliberately, a
-# live check that $(LIB) is actually self-sufficient for embedding (no
+# Both link against $(LIB) itself, not the raw object list -- deliberately,
+# a live check that $(LIB) is actually self-sufficient for embedding (no
 # object silently missing that a source-list build happened to paper
 # over), matching how a real integrator would link against it.
 $(GPC_SMOKE_TARGET): $(SMOKE_OBJS) $(LIB)
 	$(CC) $(CFLAGS) -o $@ $(SMOKE_OBJS) $(LIB) $(LDFLAGS)
+
+$(GPC_TEXTIO_TARGET): $(TEXTIO_OBJS) $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(TEXTIO_OBJS) $(LIB) $(LDFLAGS)
 
 # -MMD -MP generates a per-.o .d file listing every header it #includes,
 # so a change to a shared header (e.g. state.h) triggers a rebuild of
@@ -101,6 +111,7 @@ $(GPC_SMOKE_TARGET): $(SMOKE_OBJS) $(LIB)
 
 -include $(DEPS)
 -include $(SMOKE_DEPS)
+-include $(TEXTIO_DEPS)
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGET) $(LIB) $(SMOKE_OBJS) $(SMOKE_DEPS) $(GPC_SMOKE_TARGET)
+	rm -f $(OBJS) $(DEPS) $(TARGET) $(LIB) $(SMOKE_OBJS) $(SMOKE_DEPS) $(GPC_SMOKE_TARGET) $(TEXTIO_OBJS) $(TEXTIO_DEPS) $(GPC_TEXTIO_TARGET)

@@ -135,6 +135,7 @@ typedef struct {
     GpcServicerFn servicer;    /* stored, not yet wired to anything -- see
                                  * yaHALMAT2_initializer()'s own comment */
     void *servicerCtx;
+    bool owns_input_tmpfile;  /* true iff devices[5] is a tmpfile() this adapter created (input_fn active) and must fclose() in release() */
 } yaHALMAT2_instance_t;
 
 /* symbolsPath is yaGPC2-only (establishes its start address from a linker/
@@ -168,15 +169,37 @@ typedef struct {
  * original relay. Accepting and storing them now (rather than ignoring
  * outright, the way symbolsPath is) costs nothing and means a future
  * HAL/S I/O construct just needs a call site added here, not a signature
- * change. */
+ * change.
+ *
+ * output/input/ioCtx: wired directly into state->output_fn/input_fn/
+ * output_ctx/input_ctx (state.h) -- see interp.c's device_emit_line()
+ * (output) and device_input_refill() (input) for how those actually get
+ * used. Deliberately scoped to HAL/S's two conventional channels only:
+ * output covers channel 6 (interp_init()'s own default already gives it
+ * a valid devices[6]=stdout, so dm_finalize_line's output_fn branch never
+ * needs to touch a device slot at all); input covers channel 5, whose
+ * devices[5] is replaced here with an empty tmpfile() that
+ * device_input_refill() grows on demand by calling input_fn -- when
+ * input is NULL, devices[5] is simply left as interp_init()'s own
+ * real-stdin default, exactly matching the contract's own NULL-fallback
+ * description for free. WRITE/READ against any OTHER channel is
+ * unchanged from before this relay -- still fails loudly if unmapped,
+ * same as the CLI -- NOT the "discards every other channel"/"reports
+ * immediate EOF on every other channel" default yaGpcIntegration.h
+ * describes; GpcInitializerFn has no way to map additional channels at
+ * all yet, so there's nothing to route those through regardless. Flagged
+ * as a known, deliberate scope gap rather than silently left
+ * unmentioned. */
 static bool yaHALMAT2_initializer(GpcState *gpcState, const char *programPath, const char *symbolsPath,
-                                   GpcServicerFn servicer, void *servicerCtx) {
+                                   GpcServicerFn servicer, void *servicerCtx, GpcOutputFn output, GpcInputFn input,
+                                   void *ioCtx) {
     (void)symbolsPath;
     char errbuf[512];
     yaHALMAT2_instance_t *inst = malloc(sizeof(*inst));
     if (!inst) return false;
     inst->servicer = servicer;
     inst->servicerCtx = servicerCtx;
+    inst->owns_input_tmpfile = false;
     if (!halmat_load(programPath, &inst->prog, errbuf, sizeof(errbuf))) {
         fprintf(stderr, "yaHALMAT2: %s\n", errbuf);
         free(inst);
@@ -209,6 +232,20 @@ static bool yaHALMAT2_initializer(GpcState *gpcState, const char *programPath, c
 
     interp_init(&inst->state, &inst->prog, inst->have_literals ? &inst->literals : NULL, 5); /* num_blanks=5, matching main.c's own CLI default */
     if (inst->have_symtab) interp_set_symtab(&inst->state, &inst->symtab);
+    inst->state.output_fn = output;
+    inst->state.output_ctx = ioCtx;
+    inst->state.input_fn = input;
+    inst->state.input_ctx = ioCtx;
+    if (input) {
+        FILE *tmp = tmpfile();
+        if (tmp) {
+            inst->state.devices[5] = tmp;
+            inst->owns_input_tmpfile = true;
+        }
+        /* else: tmpfile() failed (rare, system-level) -- degrade to
+         * devices[5] staying interp_init()'s own real-stdin default
+         * rather than failing the whole initializer over it. */
+    }
     gpcState->impl = &inst->state;
     gpcState->elapsedTime = 0.0;
     return true;
@@ -227,6 +264,7 @@ static void yaHALMAT2_release(GpcState *gpcState) {
     yaHALMAT2_instance_t *inst = (yaHALMAT2_instance_t *)gpcState->impl; /* first-member cast, same trick the initializer's own gpcState->impl assignment relies on */
     if (!inst) return;
     interp_cleanup(&inst->state);
+    if (inst->owns_input_tmpfile) fclose(inst->state.devices[5]); /* the tmpfile() yaHALMAT2_initializer() created for input_fn -- devices[] itself is otherwise never owned/closed here (state.h) */
     if (inst->have_symtab) halmat_symtab_free(&inst->symtab);
     if (inst->have_literals) halmat_literal_free(&inst->literals);
     halmat_program_free(&inst->prog);

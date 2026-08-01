@@ -3437,6 +3437,36 @@ static void free_syt_container(halmat_syt_entry_t *e) {
     }
 }
 
+/* Emits `dm`'s current line-buffer content plus a trailing newline, either
+ * through state->output_fn (yaGpcIntegration.h's GpcOutputFn, yaGpcOps.c
+ * -- when set) or by writing it to `out` directly (the pre-existing
+ * devices[]-based behavior, when output_fn is unset -- e.g. the CLI's own
+ * main.c, which never sets it). Shared by dm_finalize_line() (interp.c,
+ * below) and interp_cleanup()'s own final-still-open-line flush, so both
+ * paths route through output_fn identically -- the very last line of a
+ * program's output would otherwise only ever reach output_fn if a WRITE
+ * happened to explicitly advance past it, exactly the same class of bug
+ * GpcReleaseFn's own interp_cleanup() call already exists to avoid for the
+ * devices[]-based case. Does not touch dm's own bookkeeping -- each caller
+ * resets what it needs afterward. `device` is the HAL/S channel number,
+ * needed only for the output_fn call itself. */
+static void device_emit_line(halmat_state_t *state, int device, halmat_device_mech_t *dm, FILE *out) {
+    if (state->output_fn) {
+        size_t n = dm->line_buf_len;
+        char *buf = malloc(n + 2);
+        if (buf) {
+            if (n > 0) memcpy(buf, dm->line_buf, n);
+            buf[n] = '\n';
+            buf[n + 1] = '\0';
+            state->output_fn(state->output_ctx, device, buf);
+            free(buf);
+        }
+    } else {
+        if (dm->line_buf_len > 0) fwrite(dm->line_buf, 1, dm->line_buf_len, out);
+        fputc('\n', out);
+    }
+}
+
 void interp_cleanup(halmat_state_t *state) {
     /* io_pending's own items buffer, plus any still-pending nested frames
      * left on io_pending_stack (e.g. a fail()/halt reached mid-nested-
@@ -3534,9 +3564,8 @@ void interp_cleanup(halmat_state_t *state) {
      * against real gpc's own stdout for this exact repro (159-AGE.hal). */
     for (int d = 0; d < HALMAT_DEVICE_MAX; d++) {
         halmat_device_mech_t *dm = &state->device_mech[d];
-        if (dm->started && state->devices[d] && dm->line_has_data) {
-            if (dm->line_buf_len > 0) fwrite(dm->line_buf, 1, dm->line_buf_len, state->devices[d]);
-            fputc('\n', state->devices[d]);
+        if (dm->started && dm->line_has_data && (state->output_fn || state->devices[d])) {
+            device_emit_line(state, d, dm, state->devices[d]);
         }
         free(dm->line_buf);
         dm->line_buf = NULL;
@@ -3575,7 +3604,8 @@ static void dm_write_at(halmat_device_mech_t *dm, int col, const char *text) {
     dm->col = col + (int)len;
 }
 
-/* Commits `dm`'s current-line buffer to `out` with a trailing newline and
+/* Commits `dm`'s current-line buffer to `out` (or state->output_fn, via
+ * device_emit_line -- see its own comment) with a trailing newline and
  * resets it for the next line -- the device mechanism's own vertical
  * movement (dm_advance_lines/dm_do_page/dm_do_line below) is what decides
  * *when* this happens; flush_write itself never calls this at the end of
@@ -3583,10 +3613,13 @@ static void dm_write_at(halmat_device_mech_t *dm, int col, const char *text) {
  * stays open/buffered for whatever comes next, matching USA003087 Sec.
  * 12.2's own "device mechanism is left positioned one column to the
  * right of the end of the last data field written" -- not flushed to a
- * fresh line). Does NOT touch dm->line/dm->page; the caller owns those. */
-static void dm_finalize_line(halmat_device_mech_t *dm, FILE *out) {
-    if (dm->line_buf_len > 0) fwrite(dm->line_buf, 1, dm->line_buf_len, out);
-    fputc('\n', out);
+ * fresh line). Does NOT touch dm->line/dm->page; the caller owns those.
+ * The device/channel number is recovered from `dm`'s own position within
+ * state->device_mech[] rather than threaded through every one of this
+ * function's own callers as a separate parameter. */
+static void dm_finalize_line(halmat_state_t *state, halmat_device_mech_t *dm, FILE *out) {
+    int device = (int)(dm - state->device_mech);
+    device_emit_line(state, device, dm, out);
     dm->line_buf_len = 0;
     dm->line_has_data = false;
     dm->col = 1;
@@ -3671,7 +3704,7 @@ static void dm_advance_lines(halmat_state_t *state, halmat_device_mech_t *dm, FI
      * and yaGPC2 itself was independently found to have this same bug,
      * which is being fixed on that side. */
     for (int i = 0; i < n; i++) {
-        dm_finalize_line(dm, out);
+        dm_finalize_line(state, dm, out);
         if (!unpaged && dm->line >= state->page_length) {
             dm->page++;
             emit_page_break(state, out, dm->page);
@@ -3696,7 +3729,7 @@ static bool dm_do_page(halmat_state_t *state, halmat_device_mech_t *dm, FILE *ou
     if (beta < 0) { fail(state, "PAGE: argument must not be negative"); return false; }
     if (beta == 0) return true;
     int saved_line = dm->line;
-    dm_finalize_line(dm, out);
+    dm_finalize_line(state, dm, out);
     for (int i = 0; i < beta; i++) {
         dm->page++;
         emit_page_break(state, out, dm->page);
@@ -3741,7 +3774,7 @@ static bool dm_do_line(halmat_state_t *state, halmat_device_mech_t *dm, FILE *ou
     if (gamma >= dm->line) {
         dm_advance_lines(state, dm, out, gamma - dm->line, false);
     } else {
-        dm_finalize_line(dm, out);
+        dm_finalize_line(state, dm, out);
         dm->page++;
         emit_page_break(state, out, dm->page);
         dm->line = 1;
@@ -4402,9 +4435,47 @@ typedef enum { HALMAT_READ_FIELD_DATA, HALMAT_READ_FIELD_NULL, HALMAT_READ_FIELD
  *     call to treat as its ordinary preceding separator, exactly like
  *     the doubled-comma case above. A semicolon found here terminates
  *     the whole list starting from item 0, same as any other item. */
-static halmat_read_field_t read_skip_separator(FILE *in, bool require_separator) {
+/* Pulls one more line from state->input_fn (yaGpcIntegration.h's
+ * GpcInputFn, yaGpcOps.c -- when set) and appends it, with a trailing
+ * '\n', to the end of `in` -- `device`'s own backing store when input_fn
+ * is active (yaHALMAT2_initializer replaces the raw-stdin FILE* a GpcOps
+ * instance would otherwise get with a growable tmpfile(), refilled on
+ * demand exactly this way, rather than reading real stdin directly).
+ * Repositions back to the offset the caller was at before its own read
+ * attempt hit EOF, so the caller's own retry immediately sees the newly
+ * appended content. Returns true if new content was appended (caller
+ * should retry its own read), false if input_fn isn't active for this
+ * state or reports EOF (genuine end of input -- caller's existing EOF
+ * handling applies unchanged, same as reading real stdin to EOF always
+ * has). */
+static bool device_input_refill(halmat_state_t *state, int device, FILE *in) {
+    if (!state->input_fn) return false;
+    char linebuf[4096];
+    if (!state->input_fn(state->input_ctx, device, linebuf, sizeof(linebuf))) return false;
+    long pos = ftell(in);
+    fseek(in, 0, SEEK_END);
+    fputs(linebuf, in);
+    fputc('\n', in);
+    fflush(in);
+    fseek(in, pos, SEEK_SET);
+    return true;
+}
+
+/* fgetc(in), but automatically refilling (device_input_refill) and
+ * retrying past an EOF that input_fn can still supply more content for --
+ * every raw fgetc() in read_skip_separator/discard_to_eol below goes
+ * through this instead, so both transparently support an input_fn-backed
+ * device the same as a real, ordinary file/stdin. A no-op wrapper (just
+ * fgetc()) whenever input_fn isn't active. */
+static int fgetc_refill(halmat_state_t *state, int device, FILE *in) {
+    int c = fgetc(in);
+    while (c == EOF && device_input_refill(state, device, in)) c = fgetc(in);
+    return c;
+}
+
+static halmat_read_field_t read_skip_separator(halmat_state_t *state, int device, FILE *in, bool require_separator) {
     int c;
-    while ((c = fgetc(in)) != EOF && isspace(c)) {}
+    while ((c = fgetc_refill(state, device, in)) != EOF && isspace(c)) {}
     /* Consume one expected ordinary-separator comma, if present -- but
      * unlike an earlier version of this function, don't early-return
      * just because there wasn't one (space-only separation, "1 2 3",
@@ -4415,7 +4486,7 @@ static halmat_read_field_t read_skip_separator(FILE *in, bool require_separator)
      * checks below must run either way, not just when a comma was
      * found first. */
     if (require_separator && c == ',') {
-        while ((c = fgetc(in)) != EOF && isspace(c)) {}
+        while ((c = fgetc_refill(state, device, in)) != EOF && isspace(c)) {}
     }
     if (c == ';') {
         ungetc(c, in);
@@ -4443,9 +4514,43 @@ static halmat_read_field_t read_skip_separator(FILE *in, bool require_separator)
  * terminate instantly without reading any new input, and leave A/B/C at
  * their previous values -- an infinite loop that silently reused stale
  * data instead of prompting for more. */
-static void discard_to_eol(FILE *in) {
+static void discard_to_eol(halmat_state_t *state, int device, FILE *in) {
     int c;
-    while ((c = fgetc(in)) != EOF && c != '\n') {}
+    while ((c = fgetc_refill(state, device, in)) != EOF && c != '\n') {}
+}
+
+/* fscanf(in, "%lf"/"%ld"/"%1023s", ...), but automatically refilling
+ * (device_input_refill) and retrying past an EOF that input_fn can still
+ * supply more content for -- returns fscanf's own result (1 on success)
+ * either way. Only a genuine end-of-stream is retried (feof(in) true) --
+ * an ordinary malformed-token mismatch (fscanf found non-numeric content,
+ * not EOF) is returned as-is, exactly like today's plain fscanf() against
+ * a real file. Three typed wrappers rather than one generic one: C's own
+ * fscanf is variadic, and only three distinct field types are read this
+ * way (SCALAR/BIT-as-double-or-long, INTEGER, CHARACTER). */
+static int fscanf_refill_lf(halmat_state_t *state, int device, FILE *in, double *out) {
+    for (;;) {
+        int n = fscanf(in, "%lf", out);
+        if (n == 1) return n;
+        if (feof(in) && device_input_refill(state, device, in)) { clearerr(in); continue; }
+        return n;
+    }
+}
+static int fscanf_refill_ld(halmat_state_t *state, int device, FILE *in, long *out) {
+    for (;;) {
+        int n = fscanf(in, "%ld", out);
+        if (n == 1) return n;
+        if (feof(in) && device_input_refill(state, device, in)) { clearerr(in); continue; }
+        return n;
+    }
+}
+static int fscanf_refill_s(halmat_state_t *state, int device, FILE *in, char *buf) {
+    for (;;) {
+        int n = fscanf(in, "%1023s", buf);
+        if (n == 1) return n;
+        if (feof(in) && device_input_refill(state, device, in)) { clearerr(in); continue; }
+        return n;
+    }
 }
 
 /* Binds `state`'s currently-open io_pending call arguments into
@@ -11794,7 +11899,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * advances n lines instead of the usual one. */
                 int skip_lines = state->io_pending.has_skip ? state->io_pending.skip_n : 1;
                 if (state->device_read_started[device]) {
-                    for (int s = 0; s < skip_lines; s++) discard_to_eol(in);
+                    for (int s = 0; s < skip_lines; s++) discard_to_eol(state, device, in);
                     if (skip_lines > 0) state->device_line_start[device] = ftell(in);
                 } else {
                     state->device_read_started[device] = true;
@@ -11926,12 +12031,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         halmat_syt_entry_t *e = &state->syt[syt_index];
                         bool stop = false;
                         for (size_t k = 0; k < e->element_count; k++) {
-                            halmat_read_field_t field = read_skip_separator(in, any_field_read);
+                            halmat_read_field_t field = read_skip_separator(state, device, in, any_field_read);
                             any_field_read = true;
                             if (field == HALMAT_READ_FIELD_TERMINATE) { stop = true; break; }
                             if (field == HALMAT_READ_FIELD_NULL) continue;
                             double v;
-                            if (fscanf(in, "%lf", &v) != 1) {
+                            if (fscanf_refill_lf(state, device, in, &v) != 1) {
                                 if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
                                     fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed SCALAR", device);
                                 }
@@ -12000,12 +12105,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                     fe->rows = 0;
                                 }
                                 for (int k = 0; !stop && k < fsym->cols; k++) {
-                                    halmat_read_field_t rf = read_skip_separator(in, any_field_read);
+                                    halmat_read_field_t rf = read_skip_separator(state, device, in, any_field_read);
                                     any_field_read = true;
                                     if (rf == HALMAT_READ_FIELD_TERMINATE) { stop = true; break; }
                                     if (rf == HALMAT_READ_FIELD_NULL) continue;
                                     double v;
-                                    if (fscanf(in, "%lf", &v) != 1) {
+                                    if (fscanf_refill_lf(state, device, in, &v) != 1) {
                                         if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
                                             fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed SCALAR", device);
                                         }
@@ -12016,12 +12121,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                 }
                             } else if (fsym->hal_class == 5 || fsym->hal_class == 6 || fsym->hal_class == 1) {
                                 /* Plain SCALAR/INTEGER/BIT(BOOLEAN) terminal. */
-                                halmat_read_field_t rf = read_skip_separator(in, any_field_read);
+                                halmat_read_field_t rf = read_skip_separator(state, device, in, any_field_read);
                                 any_field_read = true;
                                 if (rf == HALMAT_READ_FIELD_TERMINATE) { stop = true; break; }
                                 if (rf != HALMAT_READ_FIELD_NULL) {
                                     double v;
-                                    if (fscanf(in, "%lf", &v) != 1) {
+                                    if (fscanf_refill_lf(state, device, in, &v) != 1) {
                                         if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
                                             fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed SCALAR", device);
                                         }
@@ -12093,7 +12198,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * modeled; no confirmed real-corpus trigger needs it.
                      * A non-numeric (CHARACTER) array isn't covered --
                      * see this loop's own have_last/last_rv comment. */
-                    halmat_read_field_t field = read_skip_separator(in, any_field_read);
+                    halmat_read_field_t field = read_skip_separator(state, device, in, any_field_read);
                     any_field_read = true;
                     if (field == HALMAT_READ_FIELD_TERMINATE) {
                         if (have_last && state->io_pending.items[i].dest_operand.qual == QUAL_SYT &&
@@ -12111,7 +12216,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     if (field == HALMAT_READ_FIELD_NULL) continue;
                     if (state->io_pending.items[i].dest_class == 6) {
                         long v;
-                        if (fscanf(in, "%ld", &v) != 1) {
+                        if (fscanf_refill_ld(state, device, in, &v) != 1) {
                             if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
                                 fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed INTEGER", device);
                             }
@@ -12140,7 +12245,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * reading for a card punched with a bare 0/1
                          * like this file's own `PRINT   1` line. */
                         long v;
-                        if (fscanf(in, "%ld", &v) != 1) {
+                        if (fscanf_refill_ld(state, device, in, &v) != 1) {
                             if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
                                 fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed BIT", device);
                             }
@@ -12155,7 +12260,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                          * state.h's CHARACTER-storage note), just enough
                          * for the common case of reading a plain word. */
                         char buf[1024];
-                        if (fscanf(in, "%1023s", buf) != 1) {
+                        if (fscanf_refill_s(state, device, in, buf) != 1) {
                             if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
                                 fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input for CHARACTER", device);
                             }
@@ -12167,7 +12272,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         continue;
                     } else {
                         double v;
-                        if (fscanf(in, "%lf", &v) != 1) {
+                        if (fscanf_refill_lf(state, device, in, &v) != 1) {
                             if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
                                 fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READ(%d): end of input or malformed SCALAR", device);
                             }
