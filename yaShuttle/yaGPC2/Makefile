@@ -52,10 +52,11 @@ TEST_BIN_DIR := $(BUILD_DIR)/test
 
 UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_gpcops
 
-test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS))
+test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS)) $(TEST_BIN_DIR)/example_gpcops_paced_run
 	./test/run_all.sh
 	./test/test_debugger.sh
 	@for t in $(UNIT_TESTS); do $(TEST_BIN_DIR)/$$t || exit 1; done
+	$(TEST_BIN_DIR)/example_gpcops_paced_run
 
 $(TEST_BIN_DIR):
 	mkdir -p $(TEST_BIN_DIR)
@@ -116,6 +117,14 @@ GPCOPS_TEST_DEPS := $(filter-out $(SRC_DIR)/main.c,$(SRCS))
 
 $(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(GPCOPS_TEST_DEPS) src/gpcops.h src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_gpcops.c $(GPCOPS_TEST_DEPS) $(LDLIBS)
+
+# Not a unit test -- a runnable example of GpcOps-only usage (see its own
+# header comment). Built the same way as test_gpcops (same GPCOPS_TEST_DEPS,
+# for the same reason: it pulls in most of the tree transitively through
+# src/gpcops.c) so it's compiled -- and, in the `test` target above, run --
+# on every `make test`, catching drift against yaGpcIntegration.h early.
+$(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(GPCOPS_TEST_DEPS) src/gpcops.h src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/example_gpcops_paced_run.c $(GPCOPS_TEST_DEPS) $(LDLIBS)
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN)

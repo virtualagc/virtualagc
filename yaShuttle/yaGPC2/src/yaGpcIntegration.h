@@ -94,6 +94,7 @@ typedef enum {
 } GpcEngineStatus;
 
 typedef GpcEngineStatus (*GpcEngineFn)(GpcState *state);
+typedef bool (*GpcDebuggerFn)(GpcState *state, void *dbgState); /* false => stop */
 
 /* Textual description for any GpcEngineStatus value, including the full
  * 1000+N HAL/S-runtime-error range -- maintained here so an integrator
@@ -109,7 +110,6 @@ typedef GpcEngineStatus (*GpcEngineFn)(GpcState *state);
  * retain it past that. Never returns NULL, so a caller can always print
  * *something*. */
 const char *gpc_engine_status_message(GpcEngineStatus status);
-typedef bool (*GpcDebuggerFn)(GpcState *state, void *dbgState); /* false => stop */
 
 /* Servicer: the GPC's interface to vehicle peripherals. Deliberately
  * word/data-level (not bit/signal-level, not protocol-shaped) so a
