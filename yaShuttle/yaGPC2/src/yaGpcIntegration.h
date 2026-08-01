@@ -207,12 +207,15 @@ typedef void (*GpcServicerFn)(void *servicerCtx, GpcServiceNumber serviceNumber,
  * (HAL/S's own field/column/page formatting has already happened; this
  * only ever receives finished text, most calls ending in "\n") tagged
  * with the HAL/S channel number it targeted. NULL falls back to a
- * built-in handler that writes every channel to stdout -- this is what
- * a driver gets by just not passing anything, since a real, confirmed
- * gap existed before this parameter did: yaGPC2's own black-box
- * initializer never wired HalUCP's output callback at all, so WRITE
- * output was silently discarded, not merely un-redirected (see this
- * contract's own history).
+ * built-in handler that connects channel 6 (HAL/S's own conventional
+ * output device -- already hardcoded elsewhere in both emulators, e.g.
+ * yaGPC2's run.c special-cases exactly this channel number for its own
+ * interactive-mode flush-before-prompt logic) to stdout and discards
+ * every other channel -- this is what a driver gets by just not passing
+ * anything, since a real, confirmed gap existed before this parameter
+ * did: yaGPC2's own black-box initializer never wired HalUCP's output
+ * callback at all, so WRITE output was silently discarded regardless of
+ * channel, not merely un-redirected (see this contract's own history).
  *
  * input: called synchronously whenever a READ statement needs a line
  * for `channel` -- must answer immediately, writing a NUL-terminated
@@ -221,10 +224,12 @@ typedef void (*GpcServicerFn)(void *servicerCtx, GpcServiceNumber serviceNumber,
  * must not block on something that won't become ready without the
  * caller re-entering the emulator (a genuinely asynchronous input
  * source needs to buffer ahead of time, not answer from this callback
- * directly). NULL falls back to a built-in handler that reports
- * immediate EOF on every channel, matching a driver that configured no
- * input source at all (the same default a real HAL/S program sees from
- * the CLI when no --infileN was given for that channel).
+ * directly). NULL falls back to a built-in handler that connects
+ * channel 5 (HAL/S's own conventional input device, paired with
+ * channel 6 above) to stdin and reports immediate EOF on every other
+ * channel, matching a driver that configured no input source for it at
+ * all (the same default a real HAL/S program sees from the CLI when no
+ * --infileN was given for that channel).
  *
  * output/input share one ioCtx (distinct from servicerCtx above) since
  * they're one text-I/O concern in practice -- almost always backed by

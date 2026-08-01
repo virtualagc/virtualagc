@@ -145,19 +145,27 @@ static bool yagpc2_debugger(GpcState *state, void *dbgState) {
 /* Built-in defaults for GpcInitializerFn's output/input parameters (see
  * their own comments in yaGpcIntegration.h for exactly what NULL means
  * for each) -- resolved once here at init time so yagpc2_engine()'s
- * shims below never need a NULL check themselves. */
-static void default_output_to_stdout(void *ioCtx, int channel, const char *text) {
+ * shims below never need a NULL check themselves.
+ *
+ * Channels 6/5 are HAL/S's own conventional output/input pair (already
+ * hardcoded elsewhere in this codebase, not invented here -- see
+ * run.c's prompt_and_provide_input()/interactive_input_cb(), which
+ * special-case exactly these two channel numbers the same way). Every
+ * other channel discards on output / reports immediate EOF on input,
+ * same as a channel nothing was ever configured for. */
+static void default_output(void *ioCtx, int channel, const char *text) {
     (void)ioCtx;
-    (void)channel;
+    if (channel != 6) return;
     fputs(text, stdout);
 }
 
-static bool default_input_eof(void *ioCtx, int channel, char *buf, size_t bufSize) {
+static bool default_input(void *ioCtx, int channel, char *buf, size_t bufSize) {
     (void)ioCtx;
-    (void)channel;
-    (void)buf;
-    (void)bufSize;
-    return false;
+    if (channel != 5) return false;
+    if (!fgets(buf, (int)bufSize, stdin)) return false;
+    size_t len = strlen(buf);
+    if (len > 0 && buf[len - 1] == '\n') buf[len - 1] = '\0';
+    return true;
 }
 
 /* Bridges HalUCP's outputCallback shape to GpcOutputFn -- pure
@@ -197,8 +205,8 @@ static bool yagpc2_initializer(GpcState *state, const char *programPath, const c
     }
     if (servicer) ap101_set_servicer(&age->gpc, servicer, servicerCtx);
 
-    age->ioOutput = output ? output : default_output_to_stdout;
-    age->ioInput = input ? input : default_input_eof;
+    age->ioOutput = output ? output : default_output;
+    age->ioInput = input ? input : default_input;
     age->ioCtx = ioCtx;
     age->halUCP.cbCtx = age;
     age->halUCP.outputCallback = gpcops_output_shim;

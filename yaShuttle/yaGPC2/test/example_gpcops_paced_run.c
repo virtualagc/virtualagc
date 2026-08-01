@@ -51,11 +51,12 @@ int main(void) {
     const GpcOps *Ops = &yaGPC2_ops; /* the only line that changes to drive yaHALMAT2 instead */
 
     /* No servicer, and NULL/NULL for output/input -- which, unlike
-     * servicer's NULL (inert: no peripheral I/O at all), means "route
-     * WRITE to stdout, report immediate EOF on every READ" (see
-     * GpcOutputFn/GpcInputFn's own comments in yaGpcIntegration.h).
-     * That's the whole reason hello.fcm's own WRITE output shows up on
-     * this example's stdout with no further setup below. */
+     * servicer's NULL (inert: no peripheral I/O at all), means "connect
+     * HAL/S's conventional channel 6/5 to stdout/stdin, discard/EOF
+     * every other channel" (see GpcOutputFn/GpcInputFn's own comments in
+     * yaGpcIntegration.h). That's the whole reason hello.fcm's own
+     * WRITE(6) output shows up on this example's stdout with no further
+     * setup below. */
     GpcState state = {0};
     if (!Ops->initializer(&state, FCM_PATH, SYMBOLS_PATH, NULL, NULL, NULL, NULL, NULL)) {
         fprintf(stderr, "Failed to initialize from %s / %s\n", FCM_PATH, SYMBOLS_PATH);

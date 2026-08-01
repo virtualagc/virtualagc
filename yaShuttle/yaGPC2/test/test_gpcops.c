@@ -457,9 +457,9 @@ static void test_output_routing_via_initializer(void) {
 /* Redirects the real stdout file descriptor for the duration of a whole
  * hello.fcm run (unlike capture_engine_output() above, which only
  * covers one engine() call) -- the concrete check for GpcOutputFn's own
- * documented NULL behavior: falls back to writing every channel to
- * stdout, not to gpcops.c's old silent-discard gap this parameter
- * exists to close. */
+ * documented NULL behavior: falls back to connecting channel 6 (what
+ * hello.fcm's own WRITE targets) to stdout, not to gpcops.c's old
+ * silent-discard gap this parameter exists to close. */
 static void test_output_defaults_to_stdout(void) {
     GpcState state = {.gpcID = 1};
     CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL,
@@ -488,11 +488,14 @@ static void test_output_defaults_to_stdout(void) {
     yaGPC2_ops.release(&state);
 }
 
-/* No dedicated GpcInputFn test: hello.fcm never READs, and none of this
- * repo's current fixtures do either, so there's no fixture to exercise
- * a custom input callback or the NULL-default-EOF behavior directly --
- * a documented gap, not an oversight. Add one once a READing fixture
- * exists. */
+/* No dedicated GpcInputFn test, and no test of default_output()'s
+ * discard-on-non-6/EOF-on-non-5 behavior specifically: hello.fcm only
+ * ever WRITEs to channel 6 and never READs at all, and none of this
+ * repo's current fixtures READ or WRITE any other channel either, so
+ * there's no fixture to exercise a custom input callback, the NULL
+ * stdin-on-channel-5 default, or the NULL discard/EOF-on-other-channels
+ * default directly -- a documented gap, not an oversight. Add one once
+ * a suitable fixture exists. */
 
 int main(void) {
     test_two_instance_independence();
