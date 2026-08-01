@@ -45,5 +45,15 @@ src/gpc_smoke_test
 src/gpc_smoke_test.exe
 src/gpc_textio_test
 src/gpc_textio_test.exe
+src/example_gpcops_paced_run
+src/example_gpcops_paced_run.exe
 src/*.a
 /archive.results/
+
+# example_gpcops_paced_run.c's own hard-coded fixture (a prebaked
+# optmat.bin, not compiled fresh at test time the way every other HAL/S
+# fixture in this repo is -- this file has no way to take a path argument,
+# same reasoning as yaGPC2's own committed test/fixtures/hello.fcm).
+# Overrides the repo-root .gitignore's own blanket *.bin exclusion.
+!src/tests/fixtures/hello/optmat.bin
+!src/tests/fixtures/hello/litfile2.bin

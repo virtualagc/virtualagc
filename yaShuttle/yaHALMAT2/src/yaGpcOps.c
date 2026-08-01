@@ -143,9 +143,11 @@ typedef struct {
  * itself, so it's accepted for signature uniformity and ignored.
  *
  * Beyond halmat_load()+interp_init(), this also auto-discovers the literal
- * table (litfile0.bin/litfile.bin + COMMON0.out.bin.gz/.bin) and symbol
- * table (COMMON0.out) alongside programPath, exactly like main.c's own
- * run_single() does for the CLI's plain-HALMAT_FILE case. This isn't
+ * table (litfile0.bin/litfile.bin, or litfile2.bin for an optmat.bin --
+ * see the is_opt check below -- + the matching COMMON*.out.bin.gz/.bin
+ * memory image) and symbol table (COMMON0.out, or COMMON3.out for
+ * optmat.bin) alongside programPath, exactly like main.c's own
+ * run_single() does for the CLI's plain-HALMAT_FILE/--opt cases. This isn't
  * optional convenience the way it first looked when this adapter was
  * scoped as "just halmat_load()+interp_init()": QUAL_LIT operands cover
  * every literal constant a HALMAT program has, not only CHARACTER string
@@ -206,11 +208,35 @@ static bool yaHALMAT2_initializer(GpcState *gpcState, const char *programPath, c
         return false;
     }
 
+    /* HALSFC produces a *different* companion-file set for optmat.bin
+     * (--opt: post-PASS2-optimization HALMAT) than for plain halmat.bin --
+     * confirmed against main.c's own run_single() convention -- and both
+     * sets commonly sit side by side in the same directory (HALSFC emits
+     * halmat.bin+litfile0.bin+COMMON0.out.bin.gz AND optmat.bin+
+     * litfile2.bin+COMMON2.out.bin.gz+COMMON3.out together by default), so
+     * picking the wrong set doesn't fail loudly -- it silently loads a
+     * literal table/symtab keyed to the WRONG HALMAT variant. Since
+     * GpcInitializerFn's programPath is a bare file path (no companion
+     * --opt/--py mode flag the way main.c's CLI has one), the mode is
+     * inferred from programPath's own basename instead -- "optmat.bin"
+     * exactly means --opt; anything else (halmat.bin, or a custom name)
+     * uses the plain-HALMAT_FILE candidate set, matching every fixture
+     * this adapter has been tested against so far. */
+    const char *base = strrchr(programPath, '/');
+    base = base ? base + 1 : programPath;
+    bool is_opt = strcmp(base, "optmat.bin") == 0;
+
     char lit_buf[1024], mem_buf[1024];
-    static const char *lit_candidates[] = {"litfile0.bin", "litfile.bin"};
-    static const char *mem_candidates[] = {"COMMON0.out.bin.gz", "COMMON0.out.bin"};
-    const char *lit_path = find_companion(programPath, lit_candidates, 2, lit_buf, sizeof(lit_buf)) ? lit_buf : NULL;
-    const char *mem_path = find_companion(programPath, mem_candidates, 2, mem_buf, sizeof(mem_buf)) ? mem_buf : NULL;
+    static const char *lit_candidates_default[] = {"litfile0.bin", "litfile.bin"};
+    static const char *lit_candidates_opt[] = {"litfile2.bin"};
+    static const char *mem_candidates_default[] = {"COMMON0.out.bin.gz", "COMMON0.out.bin"};
+    static const char *mem_candidates_opt[] = {"COMMON2.out.bin.gz", "COMMON2.out.bin"};
+    const char *lit_path = is_opt
+        ? (find_companion(programPath, lit_candidates_opt, 1, lit_buf, sizeof(lit_buf)) ? lit_buf : NULL)
+        : (find_companion(programPath, lit_candidates_default, 2, lit_buf, sizeof(lit_buf)) ? lit_buf : NULL);
+    const char *mem_path = is_opt
+        ? (find_companion(programPath, mem_candidates_opt, 2, mem_buf, sizeof(mem_buf)) ? mem_buf : NULL)
+        : (find_companion(programPath, mem_candidates_default, 2, mem_buf, sizeof(mem_buf)) ? mem_buf : NULL);
     inst->have_literals = false;
     if (lit_path) {
         if (!halmat_literal_load(lit_path, mem_path, &inst->literals, errbuf, sizeof(errbuf))) {
@@ -223,9 +249,11 @@ static bool yaHALMAT2_initializer(GpcState *gpcState, const char *programPath, c
     }
 
     char sym_buf[1024];
-    static const char *sym_candidates[] = {"COMMON0.out"};
+    static const char *sym_candidates_default[] = {"COMMON0.out"};
+    static const char *sym_candidates_opt[] = {"COMMON3.out"};
     inst->have_symtab = false;
-    if (find_companion(programPath, sym_candidates, 1, sym_buf, sizeof(sym_buf))) {
+    if (is_opt ? find_companion(programPath, sym_candidates_opt, 1, sym_buf, sizeof(sym_buf))
+               : find_companion(programPath, sym_candidates_default, 1, sym_buf, sizeof(sym_buf))) {
         char sym_err[256];
         inst->have_symtab = halmat_symtab_load(sym_buf, &inst->symtab, sym_err, sizeof(sym_err));
     }

@@ -77,9 +77,19 @@ TEXTIO_OBJS := $(TEXTIO_SRCS:.c=.o)
 TEXTIO_DEPS := $(TEXTIO_SRCS:.c=.d)
 GPC_TEXTIO_TARGET := gpc_textio_test
 
+# "Simplest possible" GpcOps-only driver (yaGPC2's own
+# test/example_gpcops_paced_run.c, mirrored here almost verbatim -- see
+# its own header comment) -- not a test, just a live compile+run smoke
+# check, and the concrete proof that yaHALMAT2/yaGPC2 really are
+# interchangeable behind one const GpcOps* .
+EXAMPLE_SRCS := example_gpcops_paced_run.c
+EXAMPLE_OBJS := $(EXAMPLE_SRCS:.c=.o)
+EXAMPLE_DEPS := $(EXAMPLE_SRCS:.c=.d)
+EXAMPLE_TARGET := example_gpcops_paced_run
+
 .PHONY: all clean
 
-all: $(TARGET) $(LIB) $(GPC_SMOKE_TARGET) $(GPC_TEXTIO_TARGET)
+all: $(TARGET) $(LIB) $(GPC_SMOKE_TARGET) $(GPC_TEXTIO_TARGET) $(EXAMPLE_TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
@@ -87,15 +97,18 @@ $(TARGET): $(OBJS)
 $(LIB): $(LIB_OBJS)
 	$(AR) rcs $@ $(LIB_OBJS)
 
-# Both link against $(LIB) itself, not the raw object list -- deliberately,
-# a live check that $(LIB) is actually self-sufficient for embedding (no
-# object silently missing that a source-list build happened to paper
-# over), matching how a real integrator would link against it.
+# All three link against $(LIB) itself, not the raw object list --
+# deliberately, a live check that $(LIB) is actually self-sufficient for
+# embedding (no object silently missing that a source-list build happened
+# to paper over), matching how a real integrator would link against it.
 $(GPC_SMOKE_TARGET): $(SMOKE_OBJS) $(LIB)
 	$(CC) $(CFLAGS) -o $@ $(SMOKE_OBJS) $(LIB) $(LDFLAGS)
 
 $(GPC_TEXTIO_TARGET): $(TEXTIO_OBJS) $(LIB)
 	$(CC) $(CFLAGS) -o $@ $(TEXTIO_OBJS) $(LIB) $(LDFLAGS)
+
+$(EXAMPLE_TARGET): $(EXAMPLE_OBJS) $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(EXAMPLE_OBJS) $(LIB) $(LDFLAGS)
 
 # -MMD -MP generates a per-.o .d file listing every header it #includes,
 # so a change to a shared header (e.g. state.h) triggers a rebuild of
@@ -112,6 +125,7 @@ $(GPC_TEXTIO_TARGET): $(TEXTIO_OBJS) $(LIB)
 -include $(DEPS)
 -include $(SMOKE_DEPS)
 -include $(TEXTIO_DEPS)
+-include $(EXAMPLE_DEPS)
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGET) $(LIB) $(SMOKE_OBJS) $(SMOKE_DEPS) $(GPC_SMOKE_TARGET) $(TEXTIO_OBJS) $(TEXTIO_DEPS) $(GPC_TEXTIO_TARGET)
+	rm -f $(OBJS) $(DEPS) $(TARGET) $(LIB) $(SMOKE_OBJS) $(SMOKE_DEPS) $(GPC_SMOKE_TARGET) $(TEXTIO_OBJS) $(TEXTIO_DEPS) $(GPC_TEXTIO_TARGET) $(EXAMPLE_OBJS) $(EXAMPLE_DEPS) $(EXAMPLE_TARGET)
