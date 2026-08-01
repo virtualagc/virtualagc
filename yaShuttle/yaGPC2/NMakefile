@@ -33,8 +33,22 @@
 #     script and isn't invoked here; `nmake test` runs only the C unit
 #     test binaries. Run run_all.sh separately under WSL/MSYS2/Git Bash
 #     if needed.
+#
+# Requires ..\yaGpcIntegration\yaGpcIntegration.h to exist (the shared,
+# single-copy contract header both yaGPC2 and yaHALMAT2 build against --
+# see that file's own header comment) -- i.e. this repo must be checked
+# out as a sibling of yaGpcIntegration\, same layout the GNU Makefile
+# assumes. `lib.exe` (MSVC's librarian, for $(LIB) below) ships alongside
+# cl.exe/nmake in the same Developer Command Prompt, so no separate PATH
+# setup is needed beyond what running this file at all already requires.
 
 CC = cl
+
+# yaGpcIntegration.h -- the shared, byte-for-byte contract between yaGPC2
+# and yaHALMAT2 -- lives one directory up in the shared yaGpcIntegration\
+# hub (single copy, not a per-repo duplicate), hence /I ..\yaGpcIntegration
+# below (in addition to /I src for everything else).
+INTEGRATION_DIR = ..\yaGpcIntegration
 
 # /std:c11 needs VS2019 16.8+. /W4 is the closest rough equivalent to the
 # GNU build's -Wall -Wextra (not a precise match — MSVC's warning set
@@ -45,13 +59,14 @@ CC = cl
 # MSVC-only APIs. /TC forces C mode regardless of how cl infers the
 # language from the file extension (defensive; .c files are already C by
 # default).
-CFLAGS = /nologo /std:c11 /W4 /O2 /Zi /TC /D_CRT_SECURE_NO_WARNINGS /I src
+CFLAGS = /nologo /std:c11 /W4 /O2 /Zi /TC /D_CRT_SECURE_NO_WARNINGS /I src /I $(INTEGRATION_DIR)
 LDFLAGS =
 LDLIBS =
 
 BUILD_DIR = build
 TEST_BIN_DIR = $(BUILD_DIR)\test
 BIN = yaGPC2.exe
+LIB = libyaGPC2.lib
 
 OBJS = \
 	$(BUILD_DIR)\ageharness.obj \
@@ -59,8 +74,10 @@ OBJS = \
 	$(BUILD_DIR)\compat.obj \
 	$(BUILD_DIR)\cpu.obj \
 	$(BUILD_DIR)\cpu_instr.obj \
+	$(BUILD_DIR)\debugger.obj \
 	$(BUILD_DIR)\ebcdic.obj \
 	$(BUILD_DIR)\floatIBM.obj \
+	$(BUILD_DIR)\gpcops.obj \
 	$(BUILD_DIR)\halucp.obj \
 	$(BUILD_DIR)\iohost.obj \
 	$(BUILD_DIR)\iop.obj \
@@ -74,15 +91,54 @@ OBJS = \
 	$(BUILD_DIR)\q31.obj \
 	$(BUILD_DIR)\regmem.obj \
 	$(BUILD_DIR)\run.obj \
+	$(BUILD_DIR)\sourcemap.obj \
 	$(BUILD_DIR)\strfmt.obj \
 	$(BUILD_DIR)\symboltable.obj \
+	$(BUILD_DIR)\timing.obj \
 	$(BUILD_DIR)\trace.obj \
-	$(BUILD_DIR)\util.obj
+	$(BUILD_DIR)\util.obj \
+	$(BUILD_DIR)\yaGpcEngineStatus.obj
 
-all: $(BIN)
+# Everything except main.obj (the CLI's own entry point, which would
+# clash with an integrator's own) -- mirrors the GNU Makefile's LIB_OBJS
+# exactly; see that file's own comment for the full rationale.
+LIB_OBJS = \
+	$(BUILD_DIR)\ageharness.obj \
+	$(BUILD_DIR)\ap101.obj \
+	$(BUILD_DIR)\compat.obj \
+	$(BUILD_DIR)\cpu.obj \
+	$(BUILD_DIR)\cpu_instr.obj \
+	$(BUILD_DIR)\debugger.obj \
+	$(BUILD_DIR)\ebcdic.obj \
+	$(BUILD_DIR)\floatIBM.obj \
+	$(BUILD_DIR)\gpcops.obj \
+	$(BUILD_DIR)\halucp.obj \
+	$(BUILD_DIR)\iohost.obj \
+	$(BUILD_DIR)\iop.obj \
+	$(BUILD_DIR)\iop_bce_instr.obj \
+	$(BUILD_DIR)\iop_msc_instr.obj \
+	$(BUILD_DIR)\json.obj \
+	$(BUILD_DIR)\mcm.obj \
+	$(BUILD_DIR)\membus.obj \
+	$(BUILD_DIR)\opts.obj \
+	$(BUILD_DIR)\q31.obj \
+	$(BUILD_DIR)\regmem.obj \
+	$(BUILD_DIR)\run.obj \
+	$(BUILD_DIR)\sourcemap.obj \
+	$(BUILD_DIR)\strfmt.obj \
+	$(BUILD_DIR)\symboltable.obj \
+	$(BUILD_DIR)\timing.obj \
+	$(BUILD_DIR)\trace.obj \
+	$(BUILD_DIR)\util.obj \
+	$(BUILD_DIR)\yaGpcEngineStatus.obj
+
+all: $(BIN) $(LIB)
 
 $(BIN): $(BUILD_DIR) $(OBJS)
 	$(CC) $(CFLAGS) /Fe:$(BIN) $(OBJS) $(LDLIBS) $(LDFLAGS)
+
+$(LIB): $(BUILD_DIR) $(LIB_OBJS)
+	lib /nologo /out:$(LIB) $(LIB_OBJS)
 
 # Inference rule: build\X.obj from src\X.c.
 {src}.c{$(BUILD_DIR)}.obj:
@@ -115,9 +171,10 @@ UNIT_TESTS = \
 	$(TEST_BIN_DIR)\test_iop_bce_exec.exe \
 	$(TEST_BIN_DIR)\test_iop_msc_exec.exe \
 	$(TEST_BIN_DIR)\test_instr_tostr.exe \
-	$(TEST_BIN_DIR)\test_iop_exec_processors.exe
+	$(TEST_BIN_DIR)\test_iop_exec_processors.exe \
+	$(TEST_BIN_DIR)\test_gpcops.exe
 
-test: all $(TEST_BIN_DIR) $(UNIT_TESTS)
+test: all $(TEST_BIN_DIR) $(UNIT_TESTS) $(TEST_BIN_DIR)\example_gpcops_paced_run.exe
 	$(TEST_BIN_DIR)\test_packedbits.exe
 	$(TEST_BIN_DIR)\test_strfmt.exe
 	$(TEST_BIN_DIR)\test_ebcdic.exe
@@ -132,6 +189,8 @@ test: all $(TEST_BIN_DIR) $(UNIT_TESTS)
 	$(TEST_BIN_DIR)\test_iop_msc_exec.exe
 	$(TEST_BIN_DIR)\test_instr_tostr.exe
 	$(TEST_BIN_DIR)\test_iop_exec_processors.exe
+	$(TEST_BIN_DIR)\test_gpcops.exe
+	$(TEST_BIN_DIR)\example_gpcops_paced_run.exe
 
 $(TEST_BIN_DIR)\test_packedbits.exe: test\test_packedbits.c src\util.c src\util.h test\packedbits_fixtures.h $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_packedbits.c src\util.c $(LDLIBS)
@@ -181,8 +240,18 @@ $(TEST_BIN_DIR)\test_instr_tostr.exe: test\test_instr_tostr.c $(CPU_INSTR_DEPS) 
 $(TEST_BIN_DIR)\test_iop_exec_processors.exe: test\test_iop_exec_processors.c $(IOP_TEST_DEPS) src\iop.h $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_iop_exec_processors.c $(IOP_TEST_DEPS) $(LDLIBS)
 
+# Both link against $(LIB) itself, not the raw object list -- mirrors the
+# GNU Makefile's own reasoning exactly (a live check that $(LIB) is
+# actually self-sufficient for embedding, same as a real integrator).
+$(TEST_BIN_DIR)\test_gpcops.exe: test\test_gpcops.c $(LIB) $(INTEGRATION_DIR)\yaGpcIntegration.h test\fixtures\hello.fcm $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\test_gpcops.c $(LIB) $(LDLIBS)
+
+$(TEST_BIN_DIR)\example_gpcops_paced_run.exe: test\example_gpcops_paced_run.c $(LIB) $(INTEGRATION_DIR)\yaGpcIntegration.h test\fixtures\hello.fcm $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) /Fo:$(TEST_BIN_DIR)\ /Fe:$@ test\example_gpcops_paced_run.c $(LIB) $(LDLIBS)
+
 clean:
 	if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
 	if exist "$(BIN)" del "$(BIN)"
+	if exist "$(LIB)" del "$(LIB)"
 	if exist "*.pdb" del "*.pdb"
 	if exist "*.ilk" del "*.ilk"

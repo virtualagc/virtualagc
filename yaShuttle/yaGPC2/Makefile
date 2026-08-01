@@ -18,10 +18,19 @@ ifeq ($(origin CC),default)
   endif
 endif
 
+# yaGpcIntegration.h -- the shared, byte-for-byte contract between yaGPC2
+# and yaHALMAT2 -- lives one directory up in the shared yaGpcIntegration/
+# hub (single copy, not a per-repo duplicate anymore), so every compile
+# needs this on its include path. Quote-form #include "yaGpcIntegration.h"
+# already searches the including file's own directory first, then falls
+# through to -I paths -- since no local copy exists in src/ anymore, every
+# such #include resolves here.
+INTEGRATION_DIR := ../yaGpcIntegration
+
 CSTD    := -std=c11
 WARN    := -Wall -Wextra
 OPT     := -O2 -g
-CFLAGS  ?= $(CSTD) $(WARN) $(OPT)
+CFLAGS  ?= $(CSTD) $(WARN) $(OPT) -I$(INTEGRATION_DIR)
 LDFLAGS ?=
 LDLIBS  := -lm
 AR      ?= ar
@@ -129,7 +138,7 @@ $(TEST_BIN_DIR)/test_iop_exec_processors: test/test_iop_exec_processors.c $(IOP_
 # since that's exactly what a real integrator would do, and it doubles as
 # a live check that $(LIB) is actually self-sufficient (no missing object
 # silently papered over by falling back to source).
-$(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(LIB) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
+$(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(LIB) $(INTEGRATION_DIR)/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_gpcops.c $(LIB) $(LDLIBS)
 
 # Not a unit test -- a runnable example of GpcOps-only usage (see its own
@@ -137,7 +146,7 @@ $(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(LIB) src/yaGpcIntegration.h te
 # of exactly how an integrator would build against $(LIB): compiled --
 # and, in the `test` target above, run -- on every `make test`, catching
 # drift against both yaGpcIntegration.h and $(LIB)'s own completeness.
-$(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(LIB) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
+$(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(LIB) $(INTEGRATION_DIR)/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/example_gpcops_paced_run.c $(LIB) $(LDLIBS)
 
 # Shorthand for `make build/test/example_gpcops_paced_run` -- builds just

@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "../src/yaGpcIntegration.h"
+#include "yaGpcIntegration.h" /* ../yaGpcIntegration/ -- see -I in the Makefile/NMakefile */
 
 #define FCM_PATH      "test/fixtures/hello.fcm"
 #define SYMBOLS_PATH  "test/fixtures/hello-lnk101.json"

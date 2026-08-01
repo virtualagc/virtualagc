@@ -1,0 +1,64 @@
+# NMakefile -- yaGpcIntegration build for native Windows (nmake +
+# MSVC's cl.exe), companion to the GNU `Makefile` used on Linux, macOS,
+# and Windows-under-MSYS2. Same split rationale as yaGPC2's own
+# NMakefile/Makefile pair -- see that file's header comment.
+#
+# Usage (from a "Developer Command Prompt for VS" / "x64 Native Tools"
+# shell, so cl.exe/nmake/lib.exe are on PATH):
+#   nmake /f NMakefile
+#   nmake /f NMakefile libs
+#   nmake /f NMakefile samples
+#   nmake /f NMakefile test
+#   nmake /f NMakefile clean
+#
+# Assumes the usual sibling layout: yaGPC2\, yaHALMAT2\, and this
+# directory all live directly under the same parent -- same assumption
+# yaGPC2\NMakefile's own /I ..\yaGpcIntegration already makes in the
+# other direction.
+#
+# NOT build-tested on an actual Windows/MSVC machine (same disclaimer as
+# yaGPC2\NMakefile -- this port was developed entirely on Linux).
+#
+# KNOWN GAP as of this writing: yaHALMAT2\src\Makefile.win does not yet
+# have a library (.lib) target -- only yaHALMAT2\src\Makefile (the
+# Unix/MSYS2 build) does. The `yahalmat2` target below assumes one will
+# exist at yaHALMAT2\src\libyaHALMAT2.lib; until that lands, `nmake /f
+# NMakefile yahalmat2` (and therefore plain `nmake /f NMakefile`) will
+# fail at the copy step after yaHALMAT2's own build runs. `nmake /f
+# NMakefile yagpc2` works standalone in the meantime.
+
+YAGPC2_DIR    = ..\yaGPC2
+YAHALMAT2_DIR = ..\yaHALMAT2\src
+
+all: libs samples
+
+libs: yagpc2 yahalmat2
+
+# cd into the sibling repo for the duration of one recipe line (nmake
+# runs each recipe line as its own cmd.exe invocation, so this cd doesn't
+# leak into later lines) -- necessary because that repo's own NMakefile/
+# Makefile.win uses paths relative to *its own* directory, not whatever
+# nmake's cwd happened to be when invoked with /f <path>.
+yagpc2:
+	cd $(YAGPC2_DIR) && nmake /nologo /f NMakefile
+	copy $(YAGPC2_DIR)\libyaGPC2.lib .
+	copy $(YAGPC2_DIR)\yaGPC2.exe .
+
+yahalmat2:
+	cd $(YAHALMAT2_DIR) && nmake /nologo /f Makefile.win
+	copy $(YAHALMAT2_DIR)\libyaHALMAT2.lib .
+	copy $(YAHALMAT2_DIR)\yaHALMAT2.exe .
+
+samples:
+	cd samples && nmake /nologo /f NMakefile
+
+test: all
+	samples\paced_run.exe yagpc2
+	samples\paced_run.exe yahalmat2
+
+clean:
+	if exist "libyaGPC2.lib" del "libyaGPC2.lib"
+	if exist "yaGPC2.exe" del "yaGPC2.exe"
+	if exist "libyaHALMAT2.lib" del "libyaHALMAT2.lib"
+	if exist "yaHALMAT2.exe" del "yaHALMAT2.exe"
+	cd samples && nmake /nologo /f NMakefile clean

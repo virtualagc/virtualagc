@@ -42,7 +42,7 @@
 #include <unistd.h>
 
 #include "../src/ageharness.h"
-#include "../src/yaGpcIntegration.h"
+#include "yaGpcIntegration.h" /* ../yaGpcIntegration/ -- see -I in the Makefile/NMakefile */
 
 static int failures = 0;
 

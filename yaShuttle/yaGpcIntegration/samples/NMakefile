@@ -1,0 +1,28 @@
+# NMakefile -- yaGpcIntegration/samples build for native Windows (nmake +
+# MSVC's cl.exe). Companion to the GNU `Makefile` in this same directory.
+# Same "not build-tested on real Windows" disclaimer as the parent
+# NMakefile and yaGPC2's own.
+
+INTEGRATION_DIR = ..
+
+CC = cl
+CFLAGS = /nologo /std:c11 /W4 /O2 /Zi /TC /D_CRT_SECURE_NO_WARNINGS /I $(INTEGRATION_DIR)
+LDLIBS =
+
+LIBS = $(INTEGRATION_DIR)\libyaGPC2.lib $(INTEGRATION_DIR)\libyaHALMAT2.lib
+HEADER = $(INTEGRATION_DIR)\yaGpcIntegration.h
+
+all: paced_run.exe multi_gpc_demo.exe
+
+paced_run.exe: paced_run.c $(LIBS) $(HEADER)
+	$(CC) $(CFLAGS) /Fe:$@ paced_run.c $(LIBS) $(LDLIBS)
+
+multi_gpc_demo.exe: multi_gpc_demo.c $(LIBS) $(HEADER)
+	$(CC) $(CFLAGS) /Fe:$@ multi_gpc_demo.c $(LIBS) $(LDLIBS)
+
+clean:
+	if exist "paced_run.exe" del "paced_run.exe"
+	if exist "multi_gpc_demo.exe" del "multi_gpc_demo.exe"
+	if exist "*.obj" del "*.obj"
+	if exist "*.pdb" del "*.pdb"
+	if exist "*.ilk" del "*.ilk"
