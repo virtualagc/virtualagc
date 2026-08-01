@@ -15,6 +15,7 @@
 #define YAGPC_INTEGRATION_H
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef enum { GPC_EMULATOR_HALMAT = 0, GPC_EMULATOR_YAGPC2 = 1 } GpcEmulatorType;
 
@@ -190,6 +191,48 @@ typedef struct {
 typedef void (*GpcServicerFn)(void *servicerCtx, GpcServiceNumber serviceNumber, const GpcServiceInput *input,
                                GpcServiceOutput *output);
 
+/* Text I/O: routes a GPC instance's HAL/S WRITE/READ statement traffic
+ * (ground-equipment printer/terminal/file, addressed by HAL/S logical
+ * channel number) to/from the embedding simulator. Deliberately
+ * separate from GpcServicerFn above: WRITE/READ are HAL/S
+ * language-level I/O, not vehicle peripheral-bus traffic -- different
+ * concern, different lifecycle (every real HAL/S program does WRITE;
+ * plenty never touch a peripheral bus at all), no reason to force one
+ * callback shape to serve both. HAL/S's random-access FILE(n,address)
+ * statement is a third, distinct I/O concern -- deliberately out of
+ * scope here; neither emulator implements it yet (confirmed by reading
+ * yaGPC2's SVC dispatch table), so there is nothing yet to route.
+ *
+ * output: called once per already-fully-formatted line of WRITE output
+ * (HAL/S's own field/column/page formatting has already happened; this
+ * only ever receives finished text, most calls ending in "\n") tagged
+ * with the HAL/S channel number it targeted. NULL falls back to a
+ * built-in handler that writes every channel to stdout -- this is what
+ * a driver gets by just not passing anything, since a real, confirmed
+ * gap existed before this parameter did: yaGPC2's own black-box
+ * initializer never wired HalUCP's output callback at all, so WRITE
+ * output was silently discarded, not merely un-redirected (see this
+ * contract's own history).
+ *
+ * input: called synchronously whenever a READ statement needs a line
+ * for `channel` -- must answer immediately, writing a NUL-terminated
+ * line into buf (capacity bufSize) and returning true, or returning
+ * false to report EOF; nothing else can run until it returns, so this
+ * must not block on something that won't become ready without the
+ * caller re-entering the emulator (a genuinely asynchronous input
+ * source needs to buffer ahead of time, not answer from this callback
+ * directly). NULL falls back to a built-in handler that reports
+ * immediate EOF on every channel, matching a driver that configured no
+ * input source at all (the same default a real HAL/S program sees from
+ * the CLI when no --infileN was given for that channel).
+ *
+ * output/input share one ioCtx (distinct from servicerCtx above) since
+ * they're one text-I/O concern in practice -- almost always backed by
+ * the same file-set/log/terminal object, the same way yaGPC2's own
+ * IOHost already bundles both together internally. */
+typedef void (*GpcOutputFn)(void *ioCtx, int channel, const char *text);
+typedef bool (*GpcInputFn)(void *ioCtx, int channel, char *buf, size_t bufSize);
+
 /* symbolsPath: optional (NULL allowed) path to a linker/symbols JSON file
  * providing, at minimum, an entry point. yaGPC2 reads it and establishes
  * the start address from it (a freshly loaded .fcm otherwise sits in the
@@ -211,9 +254,16 @@ typedef void (*GpcServicerFn)(void *servicerCtx, GpcServiceNumber serviceNumber,
  * (programPath, symbolsPath), so this is the natural place for
  * per-instance servicer wiring too. Pass NULL for both to run this
  * instance with no peripheral I/O at all (matches yaGPC2's original
- * inert MIA stub behavior). */
+ * inert MIA stub behavior).
+ *
+ * output/input/ioCtx: optional (NULL allowed for output and/or input;
+ * see GpcOutputFn/GpcInputFn above for exactly what NULL means for
+ * each -- they're independent, not all-or-nothing). Same per-instance
+ * reasoning as servicer/servicerCtx: one shared GpcOps vtable per
+ * emulator type can't carry per-instance I/O routing itself. */
 typedef bool (*GpcInitializerFn)(GpcState *state, const char *programPath, const char *symbolsPath,
-                                  GpcServicerFn servicer, void *servicerCtx);
+                                  GpcServicerFn servicer, void *servicerCtx, GpcOutputFn output, GpcInputFn input,
+                                  void *ioCtx);
 
 /* Releases whatever initializer allocated for state->impl (and, on
  * yaGPC2's side, flushes any output still buffered but not yet

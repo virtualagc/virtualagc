@@ -20,6 +20,7 @@
 #include "halucp.h"
 #include "opts.h"
 #include "symboltable.h"
+#include "yaGpcIntegration.h"
 
 typedef struct {
     AP101 gpc;
@@ -34,6 +35,19 @@ typedef struct {
     char *initialFcmPath;
     Options initialOpts;
     bool hasInitial;
+
+    /* Set by src/gpcops.c's yagpc2_initializer() from GpcInitializerFn's
+     * output/input/ioCtx parameters -- always non-NULL after
+     * yagpc2_initializer() returns, since a NULL output/input argument
+     * there resolves to gpcops.c's own built-in stdout/EOF default at
+     * init time (see GpcOutputFn/GpcInputFn's own comments in
+     * yaGpcIntegration.h). Consumed by the shim functions gpcops.c wires
+     * onto halUCP.outputCallback/inputCallback. Not used anywhere in the
+     * standalone `gpc run` CLI path (which wires halUCP's callbacks
+     * directly to IOHost instead), same scope as htraceWanted above. */
+    GpcOutputFn ioOutput;
+    GpcInputFn ioInput;
+    void *ioCtx;
 
     /* Set by src/gpcops.c's yagpc2_debugger() from debugger_wants_htrace()/
      * debugger_line_width() after each debugger_hook() call, and consumed

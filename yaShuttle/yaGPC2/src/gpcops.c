@@ -71,6 +71,23 @@ static GpcEngineStatus yagpc2_engine(GpcState *state) {
         ageharness_snapshot_regs(age, &before);
     }
 
+    /* Real, pre-existing gap this whole embedding surface had from the
+     * start, only actually surfaced once something (the output/input
+     * contract work) finally checked WRITE/READ content instead of just
+     * "does it eventually halt": ap101_exec1() does NOT itself intercept
+     * HalUCP's WRITE/READ/control-statement traps -- run.c's own
+     * batchrunner_step() calls halucp_check_trap() as a separate step
+     * immediately before ap101_exec1(), and this adapter never did,
+     * meaning every WRITE/READ statement silently executed as bare
+     * (non-intercepted) AP-101S object code instead of being emulated at
+     * all. Confirmed directly: without this, hello.fcm (which the real
+     * CLI prints ~25 lines of "HELLO, WORLD!"/"RON BURKEY SAYS..." for)
+     * produced zero output through this engine, even with a working
+     * outputCallback wired up -- the callback was simply never reached. */
+    if (age->halUCP.active && halucp_is_trap_addr(&age->halUCP, nia)) {
+        halucp_check_trap(&age->halUCP, nia);
+    }
+
     int stepNum = age->stepCount;
     ap101_exec1(&age->gpc);
     age->stepCount++;
@@ -125,14 +142,68 @@ static bool yagpc2_debugger(GpcState *state, void *dbgState) {
     return cont;
 }
 
+/* Built-in defaults for GpcInitializerFn's output/input parameters (see
+ * their own comments in yaGpcIntegration.h for exactly what NULL means
+ * for each) -- resolved once here at init time so yagpc2_engine()'s
+ * shims below never need a NULL check themselves. */
+static void default_output_to_stdout(void *ioCtx, int channel, const char *text) {
+    (void)ioCtx;
+    (void)channel;
+    fputs(text, stdout);
+}
+
+static bool default_input_eof(void *ioCtx, int channel, char *buf, size_t bufSize) {
+    (void)ioCtx;
+    (void)channel;
+    (void)buf;
+    (void)bufSize;
+    return false;
+}
+
+/* Bridges HalUCP's outputCallback shape to GpcOutputFn -- pure
+ * forwarding, channel/text already exactly match. */
+static void gpcops_output_shim(void *ctx, const char *text, int channel) {
+    AGEHarness *age = (AGEHarness *)ctx;
+    age->ioOutput(age->ioCtx, channel, text);
+}
+
+/* Bridges HalUCP's inputCallback (a notify-only "I need a line for this
+ * channel now" signal, iocode omitted -- see GpcInputFn's own comment on
+ * why the contract stays at the channel-number level) to GpcInputFn's
+ * synchronous pull, then completes the read immediately via
+ * halucp_provide_input()/halucp_provide_eof() -- exactly the same
+ * synchronous notify-then-immediately-answer-back pattern run.c's own
+ * batchrunner_input_cb() already uses against IOHost, just delegating
+ * "how do I get a line for this channel" to the driver-supplied
+ * GpcInputFn instead of iohost_read_input_line(). */
+static void gpcops_input_shim(void *ctx, int channel, int iocode) {
+    (void)iocode;
+    AGEHarness *age = (AGEHarness *)ctx;
+    char buf[512];
+    if (age->ioInput(age->ioCtx, channel, buf, sizeof buf)) {
+        halucp_provide_input(&age->halUCP, buf);
+    } else {
+        halucp_provide_eof(&age->halUCP);
+    }
+}
+
 static bool yagpc2_initializer(GpcState *state, const char *programPath, const char *symbolsPath,
-                                GpcServicerFn servicer, void *servicerCtx) {
+                                GpcServicerFn servicer, void *servicerCtx, GpcOutputFn output, GpcInputFn input,
+                                void *ioCtx) {
     AGEHarness *age = malloc(sizeof(AGEHarness));
     if (!ageharness_init_minimal(age, programPath, symbolsPath)) {
         free(age);
         return false;
     }
     if (servicer) ap101_set_servicer(&age->gpc, servicer, servicerCtx);
+
+    age->ioOutput = output ? output : default_output_to_stdout;
+    age->ioInput = input ? input : default_input_eof;
+    age->ioCtx = ioCtx;
+    age->halUCP.cbCtx = age;
+    age->halUCP.outputCallback = gpcops_output_shim;
+    age->halUCP.inputCallback = gpcops_input_shim;
+
     state->impl = age;
     state->emulator = GPC_EMULATOR_YAGPC2;
     state->elapsedTime = age->gpc.cpu.elapsedTimeUs;

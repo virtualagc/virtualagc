@@ -60,9 +60,9 @@ static int failures = 0;
 
 static void test_two_instance_independence(void) {
     GpcState a = {.gpcID = 1}, b = {.gpcID = 2};
-    CHECK(yaGPC2_ops.initializer(&a, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&a, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
           "instance A initializer succeeded");
-    CHECK(yaGPC2_ops.initializer(&b, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&b, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
           "instance B initializer succeeded");
     CHECK(a.impl != NULL && b.impl != NULL, "both instances got a non-NULL impl");
     CHECK(a.impl != b.impl, "instances have distinct impl allocations");
@@ -201,7 +201,7 @@ static void test_servicer_via_initializer(void) {
 
     GpcState state = {.gpcID = 1};
     CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", fake_servicer,
-                                  &fs),
+                                  &fs, NULL, NULL, NULL),
           "servicer-via-initializer instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
 
@@ -242,7 +242,7 @@ static long capture_engine_output(GpcState *state, char *out, size_t outSize) {
 
 static void test_htrace_output(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
           "htrace-output instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
     char buf[2400];
@@ -294,7 +294,7 @@ static void capture_output_cb(void *ctx, const char *text, int channel) {
  * itself is built to handle. */
 static void test_release_flushes_pending_output(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
           "release-flush instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
 
@@ -335,7 +335,7 @@ static void test_debugger_state_lifecycle(void) {
  * and the plan-mode discussion that found it). */
 static void test_engine_status(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
           "engine-status instance initializer succeeded");
 
     GpcEngineStatus status = yaGPC2_ops.engine(&state);
@@ -397,6 +397,103 @@ static void test_engine_status_messages(void) {
     CHECK(unknownPositive != NULL && unknownPositive[0] != '\0', "an unreserved 1000+N still returns real text, not empty/NULL");
 }
 
+/* ---------------------------------------------------------------------
+ * 7. Text I/O routing (WRITE/READ) via GpcInitializerFn's
+ *    output/input/ioCtx
+ * ------------------------------------------------------------------- */
+
+/* Runs hello.fcm to its own natural halt, purely via GpcEngineStatus
+ * (same pattern as test_engine_status()). Kept separate from that test
+ * rather than merged into it -- this one is about output/input content,
+ * not status transitions. */
+static void run_hello_to_halt(GpcState *state) {
+    GpcEngineStatus status = GPC_ENGINE_RUNNING;
+    long steps = 0;
+    const long maxSteps = 20000;
+    while (status == GPC_ENGINE_RUNNING && steps < maxSteps) {
+        status = yaGPC2_ops.engine(state);
+        steps++;
+    }
+    CHECK(status == GPC_ENGINE_HALTED_NORMAL, "hello.fcm halted normally while its I/O was under test");
+}
+
+typedef struct {
+    char buf[4096];
+    int sawChannel6;
+} CapturedOutput;
+
+static void capture_output(void *ioCtx, int channel, const char *text) {
+    CapturedOutput *co = (CapturedOutput *)ioCtx;
+    if (channel == 6) co->sawChannel6 = 1;
+    strncat(co->buf, text, sizeof co->buf - strlen(co->buf) - 1);
+}
+
+/* The direct regression test for the real bug this whole feature's
+ * development turned up: yagpc2_engine() never called
+ * halucp_check_trap() at all, so WRITE/READ silently executed as bare,
+ * non-intercepted AP-101S object code -- outputCallback was correctly
+ * wired but simply never reached, no matter what GpcInitializerFn was
+ * given. Confirms real program text (not just "some bytes") reaches a
+ * custom output callback, on the real HAL/S channel WRITE(6) targets. */
+static void test_output_routing_via_initializer(void) {
+    CapturedOutput co;
+    memset(&co, 0, sizeof co);
+
+    GpcState state = {.gpcID = 1};
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL,
+                                  capture_output, NULL, &co),
+          "output-routing instance initializer succeeded");
+
+    run_hello_to_halt(&state);
+
+    CHECK(co.sawChannel6, "output callback saw text on HAL/S channel 6 (WRITE(6)'s own channel)");
+    CHECK(strstr(co.buf, "HELLO, WORLD!") != NULL, "custom output callback captured the program's real WRITE text");
+    CHECK(strstr(co.buf, "RON BURKEY SAYS ISN'T THIS FUN?") != NULL, "captured a second, distinct real WRITE line too");
+    CHECK(strstr(co.buf, "THE END") != NULL, "captured output through to the program's own natural end");
+
+    yaGPC2_ops.release(&state);
+}
+
+/* Redirects the real stdout file descriptor for the duration of a whole
+ * hello.fcm run (unlike capture_engine_output() above, which only
+ * covers one engine() call) -- the concrete check for GpcOutputFn's own
+ * documented NULL behavior: falls back to writing every channel to
+ * stdout, not to gpcops.c's old silent-discard gap this parameter
+ * exists to close. */
+static void test_output_defaults_to_stdout(void) {
+    GpcState state = {.gpcID = 1};
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL,
+                                  NULL, NULL, NULL),
+          "default-output instance initializer succeeded");
+
+    fflush(stdout);
+    FILE *tmp = tmpfile();
+    int savedFd = dup(fileno(stdout));
+    dup2(fileno(tmp), fileno(stdout));
+
+    run_hello_to_halt(&state);
+
+    fflush(stdout);
+    dup2(savedFd, fileno(stdout));
+    close(savedFd);
+    char buf[4096];
+    rewind(tmp);
+    size_t got = fread(buf, 1, sizeof buf - 1, tmp);
+    buf[got] = '\0';
+    fclose(tmp);
+
+    CHECK(strstr(buf, "HELLO, WORLD!") != NULL, "NULL output falls back to real WRITE text on actual stdout");
+    CHECK(strstr(buf, "THE END") != NULL, "stdout fallback captured output through to the program's own end");
+
+    yaGPC2_ops.release(&state);
+}
+
+/* No dedicated GpcInputFn test: hello.fcm never READs, and none of this
+ * repo's current fixtures do either, so there's no fixture to exercise
+ * a custom input callback or the NULL-default-EOF behavior directly --
+ * a documented gap, not an oversight. Add one once a READing fixture
+ * exists. */
+
 int main(void) {
     test_two_instance_independence();
     test_servicer_roundtrip();
@@ -406,6 +503,8 @@ int main(void) {
     test_debugger_state_lifecycle();
     test_engine_status();
     test_engine_status_messages();
+    test_output_routing_via_initializer();
+    test_output_defaults_to_stdout();
     if (failures == 0) {
         printf("all gpcops/servicer tests passed\n");
     } else {
