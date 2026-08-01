@@ -251,4 +251,14 @@ typedef struct {
     GpcDebuggerStateDestroyFn debuggerStateDestroy;
 } GpcOps;
 
+/* The two emulators' actual vtable instances (yaGPC2: src/gpcops.c;
+ * yaHALMAT2: its own equivalent .c file). Declared here rather than in
+ * a separate per-repo header (yaGPC2's old gpcops.h / yaHALMAT2's old
+ * yaGpcOps.h, both eliminated) since each was nothing but this one
+ * extern plus an #include of this file -- a real integrator wants both
+ * emulators' vtables visible from the one shared contract header, not
+ * two extra near-empty per-emulator headers to separately track. */
+extern const GpcOps yaGPC2_ops;
+extern const GpcOps yaHALMAT2_ops;
+
 #endif

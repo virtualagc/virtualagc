@@ -42,7 +42,7 @@
 #include <unistd.h>
 
 #include "../src/ageharness.h"
-#include "../src/gpcops.h"
+#include "../src/yaGpcIntegration.h"
 
 static int failures = 0;
 

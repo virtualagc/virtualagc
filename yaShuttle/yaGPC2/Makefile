@@ -115,7 +115,7 @@ $(TEST_BIN_DIR)/test_iop_exec_processors: test/test_iop_exec_processors.c $(IOP_
 # both of which pull in most of the tree transitively anyway.
 GPCOPS_TEST_DEPS := $(filter-out $(SRC_DIR)/main.c,$(SRCS))
 
-$(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(GPCOPS_TEST_DEPS) src/gpcops.h src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
+$(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(GPCOPS_TEST_DEPS) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_gpcops.c $(GPCOPS_TEST_DEPS) $(LDLIBS)
 
 # Not a unit test -- a runnable example of GpcOps-only usage (see its own
@@ -123,7 +123,7 @@ $(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(GPCOPS_TEST_DEPS) src/gpcops.h
 # for the same reason: it pulls in most of the tree transitively through
 # src/gpcops.c) so it's compiled -- and, in the `test` target above, run --
 # on every `make test`, catching drift against yaGpcIntegration.h early.
-$(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(GPCOPS_TEST_DEPS) src/gpcops.h src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
+$(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(GPCOPS_TEST_DEPS) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/example_gpcops_paced_run.c $(GPCOPS_TEST_DEPS) $(LDLIBS)
 
 clean:

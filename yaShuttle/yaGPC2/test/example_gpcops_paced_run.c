@@ -8,6 +8,11 @@
  * unchanged except for swapping which GpcOps it points at) as one of
  * several GPC instances in a larger simulator would actually write.
  *
+ * `Ops` (not a direct `yaGPC2_ops.foo()` call anywhere below) is the
+ * point: swapping this example to drive yaHALMAT2 instead is nothing
+ * more than changing FCM_PATH/SYMBOLS_PATH and this one line to
+ * `const GpcOps *Ops = &yaHALMAT2_ops;` -- everything after it is unchanged.
+ *
  * Stops on GpcEngineStatus rather than a fixed instruction/time budget --
  * this is what that status exists for: a driver written purely against
  * GpcOps otherwise has no way to know when a program has finished, and
@@ -23,7 +28,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "../src/gpcops.h"
+#include "../src/yaGpcIntegration.h"
 
 #define FCM_PATH      "test/fixtures/hello.fcm"
 #define SYMBOLS_PATH  "test/fixtures/hello-lnk101.json"
@@ -43,8 +48,10 @@ static void sleep_us(double us) {
 }
 
 int main(void) {
+    const GpcOps *Ops = &yaGPC2_ops; /* the only line that changes to drive yaHALMAT2 instead */
+
     GpcState state = {0};
-    if (!yaGPC2_ops.initializer(&state, FCM_PATH, SYMBOLS_PATH, NULL, NULL)) {
+    if (!Ops->initializer(&state, FCM_PATH, SYMBOLS_PATH, NULL, NULL)) {
         fprintf(stderr, "Failed to initialize from %s / %s\n", FCM_PATH, SYMBOLS_PATH);
         return 1;
     }
@@ -58,7 +65,7 @@ int main(void) {
      * Only a negative status is terminal. */
     while (status >= GPC_ENGINE_RUNNING) {
         for (int i = 0; i < BATCH_SIZE && status >= GPC_ENGINE_RUNNING; i++) {
-            status = yaGPC2_ops.engine(&state);
+            status = Ops->engine(&state);
             if (status > GPC_ENGINE_RUNNING) fprintf(stderr, "warning: %s\n", gpc_engine_status_message(status));
         }
 
@@ -69,7 +76,7 @@ int main(void) {
 
     fprintf(stderr, "stopped: %s (elapsedTime=%.2f us)\n", gpc_engine_status_message(status), state.elapsedTime);
 
-    yaGPC2_ops.release(&state);
+    Ops->release(&state);
     /* HALTED (-1..-3) is program-inherent termination; ERROR (-4..-9,
      * GPC_ENGINE_ERROR_INVALID_OPCODE and below) is an emulator fault. */
     return status <= GPC_ENGINE_ERROR_INVALID_OPCODE ? 1 : 0;

@@ -5,7 +5,7 @@
  * standalone `gpc run` CLI path (main.c/run.c), which keeps calling
  * ap101_exec1()/debugger_hook()/ageharness_configure_from_opts()
  * directly as before. */
-#include "gpcops.h"
+#include "yaGpcIntegration.h"
 
 #include <stdio.h>
 #include <stdlib.h>
