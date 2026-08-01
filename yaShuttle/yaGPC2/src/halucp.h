@@ -63,13 +63,31 @@ typedef struct {
     bool wasRunning;
     bool skipTrap;
 
+    /* Set only by the unhandled-READ-EOF halt path (halucp_provide_eof()),
+     * never by the normal SVC 0x0015 halt -- both set the AP-101S PSW
+     * wait-state bit identically, so this is the only way to tell them
+     * apart from outside (see gpcops.c's yagpc2_engine(), which maps
+     * this to GpcEngineStatus's GPC_ENGINE_HALTED_UNHANDLED_EOF vs.
+     * GPC_ENGINE_HALTED_NORMAL). */
+    bool haltedOnUnhandledEof;
+
     /* Group/number of the last SEND ERROR (SVC 0x0014), whether or not
      * it was caught by an ON ERROR handler -- backs the ERRGRP/ERRNUM
      * built-in functions (USA003087: "returns group/number of last
      * error detected, or zero"), which compile to their own dedicated
      * query SVCs (0x0117/0x0217) rather than reading ordinary program
-     * memory. 0 until the first SEND ERROR. */
+     * memory. 0 until the first SEND ERROR. Sticky -- stays set until
+     * the next SEND ERROR, so it alone can't tell a caller whether one
+     * just fired on this specific instruction; see sendErrorPending. */
     int lastErrGroup, lastErrNum;
+
+    /* Set true every time the SVC 0x0014 (SEND ERROR) path runs, read
+     * and cleared by gpcops.c's yagpc2_engine() immediately after each
+     * instruction -- a one-shot "did this exact instruction just fire
+     * one" signal, unlike lastErrGroup/lastErrNum above, which stay set
+     * indefinitely and can't distinguish a fresh SEND ERROR from a
+     * stale one several instructions old. */
+    bool sendErrorPending;
 
     bool iobufAscii; /* false = ebcdic (default), true = ascii */
     int channel;

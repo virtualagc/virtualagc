@@ -25,7 +25,8 @@ typedef struct {
     void *impl;                /* AGEHarness* (yaGPC2) or halmat_state_t* (yaHALMAT2) */
 } GpcState;
 
-/* GpcEngineFn's return value: whether the caller should keep calling it.
+/* GpcEngineFn's return value: whether the caller should keep calling it,
+ * and (unlike an earlier draft of this contract) specifically why.
  * Existed as a real, confirmed gap before this: a driver written purely
  * against GpcOps had no way to tell "has this instance's program
  * finished?" (that's AP-101S PSW wait-state / yaHALMAT2's own halted
@@ -35,22 +36,79 @@ typedef struct {
  * as nonsense (observed on yaGPC2: repeated bogus "SVC trapped" reports
  * from decoding non-code memory as instructions).
  *
- * Deliberately collapses "how" into three buckets rather than an
- * open-ended error-code space: each emulator's actual error taxonomy is
- * different (yaGPC2: invalid instruction decode, unrecognized SVC trap;
- * yaHALMAT2: presumably its own runtime-error set) and forcing them into
- * one shared numbering would either be meaningless across emulator types
- * or require constant contract renegotiation as either side's error set
- * grows. GPC_ENGINE_ERROR just means "stop calling this instance's
- * engine" -- query state->impl directly (emulator-specific) if more
- * detail is needed. */
+ * Investigated both emulators' real, existing conditions before settling
+ * on this list (see plan-mode discussion history) rather than inventing
+ * plausible-sounding ones -- every negative value below corresponds to
+ * something at least one emulator's code was already found to do (though
+ * not every value is reachable from both; a value neither has evidence
+ * for yet is still reserved here so the numbering stays identical across
+ * both repos as either side's needs grow, per the user's explicit
+ * requirement that a given code can't mean different things in each).
+ *
+ *   0        RUNNING: keep calling engine().
+ *   1000+N   WARNING: a HAL/S runtime error (SEND ERROR/AERROR) fired,
+ *            group/N in the real HAL/S-FC AERROR numbering -- confirmed
+ *            byte-for-byte identical between yaGPC2's svc_error_message()
+ *            table and yaHALMAT2's HAL_S_ERROR_* defines, both porting
+ *            the same historical spec. Execution continues normally
+ *            (the program's own ON ERROR handler, if any, already ran).
+ *            Message text: gpc_engine_status_message() below.
+ *   -1       HALTED: clean, expected program termination.
+ *   -2       HALTED: unhandled end-of-input (a READ ran out of data with
+ *            no ON ERROR handler installed).
+ *   -3       HALTED: scheduler exhausted -- nothing left ready to run,
+ *            or ever going to become ready (yaHALMAT2's own "silent
+ *            starvation" case; not currently known to be reachable on
+ *            yaGPC2, reserved).
+ *   -4       ERROR: invalid/unrecognized instruction or opcode.
+ *   -5       ERROR: unrecognized/unhandled low-level trap (e.g. yaGPC2's
+ *            unhandled SVC code; not currently known to be reachable on
+ *            yaHALMAT2, reserved).
+ *   -6       ERROR: index/subscript/array bounds violation (not
+ *            currently known to be reachable on yaGPC2, reserved).
+ *   -7       ERROR: call-stack/nesting depth exceeded (not currently
+ *            known to be reachable on yaGPC2, reserved).
+ *   -8       ERROR: call to undefined procedure/function (not currently
+ *            known to be reachable on yaGPC2, reserved).
+ *   -9       ERROR: internal-consistency failure not covered above.
+ *
+ * HALTED (-1..-3) vs. ERROR (-4..-9): the former means the instance
+ * stopped for a reason inherent to the program/its input, not a bug;
+ * the latter means something the emulator itself couldn't make sense
+ * of. Both mean the same thing to a driver -- stop calling engine() --
+ * the distinction is purely diagnostic. */
 typedef enum {
-    GPC_ENGINE_RUNNING = 0, /* keep calling engine() */
-    GPC_ENGINE_HALTED  = 1, /* program reached its own normal/expected termination */
-    GPC_ENGINE_ERROR   = 2  /* an error condition was hit; stop calling engine() on this instance */
+    GPC_ENGINE_RUNNING = 0,
+
+    GPC_ENGINE_WARNING_HAL_S_ERROR_BASE = 1000, /* + real AERROR group/N number */
+
+    GPC_ENGINE_HALTED_NORMAL        = -1,
+    GPC_ENGINE_HALTED_UNHANDLED_EOF = -2,
+    GPC_ENGINE_HALTED_STARVED       = -3,
+    GPC_ENGINE_ERROR_INVALID_OPCODE = -4,
+    GPC_ENGINE_ERROR_UNHANDLED_TRAP = -5,
+    GPC_ENGINE_ERROR_BOUNDS         = -6,
+    GPC_ENGINE_ERROR_STACK_DEPTH    = -7,
+    GPC_ENGINE_ERROR_UNDEFINED_CALL = -8,
+    GPC_ENGINE_ERROR_INTERNAL       = -9
 } GpcEngineStatus;
 
 typedef GpcEngineStatus (*GpcEngineFn)(GpcState *state);
+
+/* Textual description for any GpcEngineStatus value, including the full
+ * 1000+N HAL/S-runtime-error range -- maintained here so an integrator
+ * never has to invent or guess error text themselves (a real ~25-entry
+ * message table already existed, HAL/S-FC-runtime-accurate, before this
+ * function did -- see the shared implementation file's own header
+ * comment). Must be kept byte-for-byte identical between both repos,
+ * same discipline as this whole file. Never free() the result -- every
+ * named/reserved code returns a string literal (valid for the life of
+ * the process); an unrecognized value (including an unreserved N in
+ * 1000+N) returns a shared static buffer instead, valid only until the
+ * next call to this function -- copy it immediately if you need to
+ * retain it past that. Never returns NULL, so a caller can always print
+ * *something*. */
+const char *gpc_engine_status_message(GpcEngineStatus status);
 typedef bool (*GpcDebuggerFn)(GpcState *state, void *dbgState); /* false => stop */
 
 /* Servicer: the GPC's interface to vehicle peripherals. Deliberately

@@ -30,19 +30,28 @@
  * also set by yagpc2_debugger() below).
  *
  * Also where GpcEngineStatus gets decided (see yaGpcIntegration.h's own
- * comment on it): decodes before executing -- same pre-check run.c's
- * batchrunner_step() already does -- so a decode failure is reported as
- * GPC_ENGINE_ERROR without ever calling ap101_exec1(), rather than
- * silently no-op'ing the way cpu_exec1() does internally on its own
- * (that no-op path is documented there as unreachable from `gpc run`
- * specifically because run.c's own pre-check already keeps it from
- * happening -- not a guarantee this entry point can rely on, since a
- * driver can call engine() on a halted or off-the-end instance).
- * Post-execution: the AP-101S wait-state bit means a normal/expected
- * program termination (GPC_ENGINE_HALTED); halUCP.svcTrapped set
- * *without* wait-state means an unrecognized SVC was hit without the
- * program actually halting (GPC_ENGINE_ERROR) -- the exact "ran into
- * garbage" case that motivated adding this in the first place. */
+ * comment on the full code list): decodes before executing -- same
+ * pre-check run.c's batchrunner_step() already does -- so a decode
+ * failure is reported as GPC_ENGINE_ERROR_INVALID_OPCODE without ever
+ * calling ap101_exec1(), rather than silently no-op'ing the way
+ * cpu_exec1() does internally on its own (that no-op path is documented
+ * there as unreachable from `gpc run` specifically because run.c's own
+ * pre-check already keeps it from happening -- not a guarantee this
+ * entry point can rely on, since a driver can call engine() on a halted
+ * or off-the-end instance). Post-execution, in priority order:
+ *   1. A SEND ERROR fired on exactly this instruction (HalUCP's one-shot
+ *      sendErrorPending, read and cleared here -- lastErrGroup/lastErrNum
+ *      alone can't tell a fresh one from a stale one several instructions
+ *      old) -> GPC_ENGINE_WARNING_HAL_S_ERROR_BASE + errNum. Doesn't halt;
+ *      execution already continued normally.
+ *   2. The AP-101S wait-state bit is set -> a normal/expected program
+ *      termination, unless HalUCP.haltedOnUnhandledEof says otherwise
+ *      (both halt the CPU identically; that flag is the only way to
+ *      tell them apart from outside).
+ *   3. HalUCP.svcTrapped set *without* wait-state -> an unrecognized SVC
+ *      was hit without the program actually halting
+ *      (GPC_ENGINE_ERROR_UNHANDLED_TRAP) -- the exact "ran into garbage"
+ *      case that motivated adding all of this in the first place. */
 static GpcEngineStatus yagpc2_engine(GpcState *state) {
     AGEHarness *age = (AGEHarness *)state->impl;
 
@@ -51,7 +60,7 @@ static GpcEngineStatus yagpc2_engine(GpcState *state) {
     uint32_t hw2 = mcm_get16(&age->gpc.cpu.mainStorage, nia + 1);
     DInstr v;
     const InstrDesc *d = instr_decode(hw1, hw2, &v);
-    if (!d) return GPC_ENGINE_ERROR;
+    if (!d) return GPC_ENGINE_ERROR_INVALID_OPCODE;
 
     bool wantTrace = age->htraceWanted;
     char disasm[256] = "";
@@ -84,8 +93,14 @@ static GpcEngineStatus yagpc2_engine(GpcState *state) {
         printf("%s\n", line);
     }
 
-    if (psw_get_wait_state(&age->gpc.cpu.psw)) return GPC_ENGINE_HALTED;
-    if (age->halUCP.svcTrapped) return GPC_ENGINE_ERROR;
+    if (age->halUCP.sendErrorPending) {
+        age->halUCP.sendErrorPending = false;
+        return (GpcEngineStatus)(GPC_ENGINE_WARNING_HAL_S_ERROR_BASE + age->halUCP.lastErrNum);
+    }
+    if (psw_get_wait_state(&age->gpc.cpu.psw)) {
+        return age->halUCP.haltedOnUnhandledEof ? GPC_ENGINE_HALTED_UNHANDLED_EOF : GPC_ENGINE_HALTED_NORMAL;
+    }
+    if (age->halUCP.svcTrapped) return GPC_ENGINE_ERROR_UNHANDLED_TRAP;
     return GPC_ENGINE_RUNNING;
 }
 

@@ -217,6 +217,7 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         int errNum = (int)(errDesc & 0xff);
         h->lastErrGroup = errGroup;
         h->lastErrNum = errNum;
+        h->sendErrorPending = true;
         char gbuf[32], mbuf[32];
         const char *groupName = svc_error_group_name(errGroup, gbuf, sizeof gbuf);
         const char *errMsg = svc_error_message(errNum, mbuf, sizeof mbuf);
@@ -1387,6 +1388,7 @@ void halucp_provide_eof(HalUCP *h) {
     hal_report_error(h, msg);
     psw_set_wait_state(&h->cpu->psw, true);
     h->svcTrapped = true;
+    h->haltedOnUnhandledEof = true;
     h->waitingForInput = false;
     h->hasPendingIocode = false;
     h->skipTrap = true;

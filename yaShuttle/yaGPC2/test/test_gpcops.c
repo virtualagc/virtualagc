@@ -23,12 +23,15 @@
  *     yaGPC2 specifically (i.e. without reaching for debugger_create()/
  *     debugger_free() and an Options struct directly).
  *  6. yagpc2_engine()'s GpcEngineStatus return value correctly reports
- *     GPC_ENGINE_RUNNING while a program executes, GPC_ENGINE_HALTED at
- *     its own natural completion (confirmed against hello.fcm's real,
+ *     GPC_ENGINE_RUNNING while a program executes, GPC_ENGINE_HALTED_NORMAL
+ *     at its own natural completion (confirmed against hello.fcm's real,
  *     empirically-verified halt point), and never RUNNING again once
  *     halted -- the fix for a real, confirmed gap (a driver had no way
  *     to know when to stop calling engine(), and calling it past a
- *     program's own halt decodes adjacent memory as garbage).
+ *     program's own halt decodes adjacent memory as garbage). Also
+ *     confirms gpc_engine_status_message() returns real, non-empty text
+ *     for every named code, so the "always available list of messages"
+ *     requirement this whole scheme exists for is actually met.
  *
  * Run from the repo root (as `make test` does) -- fixture path below is
  * relative to that. */
@@ -345,7 +348,8 @@ static void test_engine_status(void) {
         steps++;
     }
 
-    CHECK(status == GPC_ENGINE_HALTED, "hello.fcm reports GPC_ENGINE_HALTED at its own natural completion");
+    CHECK(status == GPC_ENGINE_HALTED_NORMAL,
+          "hello.fcm reports GPC_ENGINE_HALTED_NORMAL at its own natural completion");
     CHECK(steps < maxSteps, "halted well within the generous step bound, not just cut off by it");
     CHECK(steps > 100, "didn't report halted implausibly early (sanity check)");
 
@@ -353,6 +357,44 @@ static void test_engine_status(void) {
     CHECK(statusAfterHalt != GPC_ENGINE_RUNNING, "engine() called again after halt does not report RUNNING");
 
     yaGPC2_ops.release(&state);
+}
+
+/* gpc_engine_status_message() (src/yaGpcEngineStatus.c) is the "always
+ * available list of messages" an integrator was asked not to have to
+ * invent themselves -- confirms every named code has real, non-empty
+ * text (not just a fallback "unknown status N"), and spot-checks a few
+ * real entries from the shared HAL/S-runtime-error table (1000+N) match
+ * the exact wording halucp.c's own svc_error_message() has carried since
+ * before this scheme existed -- the whole point of sharing one table
+ * instead of each side inventing its own. */
+static void test_engine_status_messages(void) {
+    const GpcEngineStatus namedCodes[] = {
+        GPC_ENGINE_RUNNING,
+        GPC_ENGINE_HALTED_NORMAL,
+        GPC_ENGINE_HALTED_UNHANDLED_EOF,
+        GPC_ENGINE_HALTED_STARVED,
+        GPC_ENGINE_ERROR_INVALID_OPCODE,
+        GPC_ENGINE_ERROR_UNHANDLED_TRAP,
+        GPC_ENGINE_ERROR_BOUNDS,
+        GPC_ENGINE_ERROR_STACK_DEPTH,
+        GPC_ENGINE_ERROR_UNDEFINED_CALL,
+        GPC_ENGINE_ERROR_INTERNAL,
+    };
+    for (size_t i = 0; i < sizeof(namedCodes) / sizeof(namedCodes[0]); i++) {
+        const char *msg = gpc_engine_status_message(namedCodes[i]);
+        CHECK(msg != NULL && msg[0] != '\0', "every named GpcEngineStatus has real message text");
+        CHECK(strstr(msg, "unknown GpcEngineStatus") == NULL, "named code doesn't fall through to the unknown-status fallback");
+    }
+
+    CHECK(strcmp(gpc_engine_status_message((GpcEngineStatus)(GPC_ENGINE_WARNING_HAL_S_ERROR_BASE + 5)),
+                 "SQRT HAS ARGUMENT < 0 ") == 0,
+          "1005 gives the exact SQRT-negative message");
+    CHECK(strcmp(gpc_engine_status_message((GpcEngineStatus)(GPC_ENGINE_WARNING_HAL_S_ERROR_BASE + 16)),
+                 "DIVISION BY ZERO IN REMAINDER") == 0,
+          "1016 gives the exact remainder-divide-by-zero message");
+
+    const char *unknownPositive = gpc_engine_status_message((GpcEngineStatus)(GPC_ENGINE_WARNING_HAL_S_ERROR_BASE + 999));
+    CHECK(unknownPositive != NULL && unknownPositive[0] != '\0', "an unreserved 1000+N still returns real text, not empty/NULL");
 }
 
 int main(void) {
@@ -363,6 +405,7 @@ int main(void) {
     test_release_flushes_pending_output();
     test_debugger_state_lifecycle();
     test_engine_status();
+    test_engine_status_messages();
     if (failures == 0) {
         printf("all gpcops/servicer tests passed\n");
     } else {
