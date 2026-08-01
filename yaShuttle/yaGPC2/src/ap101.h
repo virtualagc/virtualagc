@@ -35,6 +35,6 @@ void ap101_reset(AP101 *gpc);
  * peripheral I/O -- see iop.h's MIA/servicer header comment and
  * yaGpcIntegration.h. Not called anywhere in the standalone `gpc run`
  * CLI path; a GPC with no servicer installed behaves exactly as before. */
-void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, GpcState *state);
+void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, void *servicerCtx);
 
 #endif

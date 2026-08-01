@@ -100,21 +100,25 @@ void mia_init(MIA *m, int bceNum) { m->bceNum = bceNum; }
 
 bool mia_data_available(struct IOP *iop, MIA *m) {
     if (!iop->servicer) return false;
-    GpcServiceArgs args = {.busID = m->bceNum, .address = 0, .word = 0};
-    return iop->servicer(iop->servicerState, GPC_SVC_RECV_POLL, &args);
+    GpcServiceInput input = {.busID = m->bceNum, .address = 0};
+    GpcServiceOutput output = {0};
+    iop->servicer(iop->servicerCtx, GPC_SVC_RECV_POLL, &input, &output);
+    return output.out.poll.available;
 }
 
 uint32_t mia_get_data(struct IOP *iop, MIA *m) {
     if (!iop->servicer) return 0;
-    GpcServiceArgs args = {.busID = m->bceNum, .address = 0, .word = 0};
-    if (iop->servicer(iop->servicerState, GPC_SVC_RECV_WORD, &args)) return args.word;
-    return 0;
+    GpcServiceInput input = {.busID = m->bceNum, .address = 0};
+    GpcServiceOutput output = {0};
+    iop->servicer(iop->servicerCtx, GPC_SVC_RECV_WORD, &input, &output);
+    return output.out.recv.available ? output.out.recv.word : 0;
 }
 
 void mia_xmit_word(struct IOP *iop, MIA *m, uint32_t halfword) {
     if (!iop->servicer) return;
-    GpcServiceArgs args = {.busID = m->bceNum, .address = 0, .word = halfword};
-    iop->servicer(iop->servicerState, GPC_SVC_XMIT_WORD, &args);
+    GpcServiceInput input = {.busID = m->bceNum, .address = 0, .in.word = halfword};
+    GpcServiceOutput output = {0};
+    iop->servicer(iop->servicerCtx, GPC_SVC_XMIT_WORD, &input, &output);
 }
 
 void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
@@ -122,8 +126,9 @@ void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
     /* IUA occupies bits 19-23 of the 24-bit command word (see
      * exec_CMDI/exec_CMD in iop_bce_instr.c, which build it as
      * (IUA << 19) | rest). */
-    GpcServiceArgs args = {.busID = m->bceNum, .address = (int)((cmd24 >> 19) & 0x1fu), .word = cmd24};
-    iop->servicer(iop->servicerState, GPC_SVC_XMIT_CMD, &args);
+    GpcServiceInput input = {.busID = m->bceNum, .address = (int)((cmd24 >> 19) & 0x1fu), .in.word = cmd24};
+    GpcServiceOutput output = {0};
+    iop->servicer(iop->servicerCtx, GPC_SVC_XMIT_CMD, &input, &output);
 }
 
 void bce_init(BCE *b, int bceNum) {
@@ -213,7 +218,7 @@ void iop_init(IOP *iop, struct CPU *cpu) {
     iop->clockCycleCount = 0;
 
     iop->servicer = NULL;
-    iop->servicerState = NULL;
+    iop->servicerCtx = NULL;
 }
 
 void iop_free(IOP *iop) {
@@ -223,9 +228,9 @@ void iop_free(IOP *iop) {
     dmaq_free(&iop->dmaQueue);
 }
 
-void iop_set_servicer(IOP *iop, GpcServicerFn fn, GpcState *state) {
+void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx) {
     iop->servicer = fn;
-    iop->servicerState = state;
+    iop->servicerCtx = servicerCtx;
 }
 
 void iop_exec_channel_control(IOP *iop) { (void)iop; }

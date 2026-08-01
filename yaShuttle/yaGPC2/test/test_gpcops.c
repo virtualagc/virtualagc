@@ -100,26 +100,35 @@ typedef struct {
     int lastBusID;
 } FakeServicer;
 
-static bool fake_servicer(GpcState *state, GpcServiceNumber svc, GpcServiceArgs *args) {
-    FakeServicer *fs = (FakeServicer *)state->impl;
-    fs->lastBusID = args->busID;
+/* Note the signature: no GpcState anywhere -- ctx is whatever opaque
+ * context was registered via iop_set_servicer(), here just &fs
+ * directly, no GpcState wrapper needed at all. */
+static void fake_servicer(void *ctx, GpcServiceNumber svc, const GpcServiceInput *input, GpcServiceOutput *output) {
+    FakeServicer *fs = (FakeServicer *)ctx;
+    fs->lastBusID = input->busID;
     switch (svc) {
         case GPC_SVC_XMIT_WORD:
-            fs->words[fs->count++] = args->word;
-            return true;
+            fs->words[fs->count++] = input->in.word;
+            output->out.xmit.ok = true;
+            break;
         case GPC_SVC_XMIT_CMD:
-            fs->lastCmdWord = args->word;
-            fs->lastCmdAddress = args->address;
-            return true;
+            fs->lastCmdWord = input->in.word;
+            fs->lastCmdAddress = input->address;
+            output->out.xmit.ok = true;
+            break;
         case GPC_SVC_RECV_POLL:
-            return fs->count > 0;
+            output->out.poll.available = fs->count > 0;
+            break;
         case GPC_SVC_RECV_WORD:
-            if (fs->count == 0) return false;
-            args->word = fs->words[0];
+            if (fs->count == 0) {
+                output->out.recv.available = false;
+                break;
+            }
+            output->out.recv.available = true;
+            output->out.recv.word = fs->words[0];
             memmove(fs->words, fs->words + 1, (size_t)(--fs->count) * sizeof(uint32_t));
-            return true;
+            break;
     }
-    return false;
 }
 
 static void test_servicer_roundtrip(void) {
@@ -137,8 +146,7 @@ static void test_servicer_roundtrip(void) {
 
     FakeServicer fs;
     memset(&fs, 0, sizeof fs);
-    GpcState svcState = {.impl = &fs};
-    iop_set_servicer(&iop, fake_servicer, &svcState);
+    iop_set_servicer(&iop, fake_servicer, &fs);
 
     /* #CMD/#CMDI-style: mia_xmit_cmd, IUA in bits 19-23. */
     uint32_t cmd = (0x05u << 19) | 0x01234u;

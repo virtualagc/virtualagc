@@ -119,7 +119,7 @@ uint32_t iopls_getBST(IOPLocalStore *ls);
 void iopls_setBST(IOPLocalStore *ls, uint32_t v);
 
 /* MIA — stub (or servicer-backed), see header comment. bceNum doubles as
- * GpcServiceArgs.busID when a servicer is installed. */
+ * GpcServiceInput.busID when a servicer is installed. */
 typedef struct {
     int bceNum;
 } MIA;
@@ -196,15 +196,17 @@ typedef struct IOP {
     long clockCycleCount;
 
     /* See header comment: NULL (default) preserves the exact inert-stub
-     * MIA behavior; set via iop_set_servicer()/ap101_set_servicer(). */
+     * MIA behavior; set via iop_set_servicer()/ap101_set_servicer().
+     * servicerCtx is opaque -- never a GpcState, see yaGpcIntegration.h's
+     * GpcServicerFn comment. */
     GpcServicerFn servicer;
-    GpcState *servicerState;
+    void *servicerCtx;
 } IOP;
 
 void iop_init(IOP *iop, struct CPU *cpu);
 void iop_free(IOP *iop);
 
-void iop_set_servicer(IOP *iop, GpcServicerFn fn, GpcState *state);
+void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx);
 
 void iop_exec(IOP *iop);
 void iop_exec_channel_control(IOP *iop);

@@ -79,7 +79,15 @@ typedef struct {
  * implementation is equally valid behind the same signature. This enum
  * is a provisional first draft covering only yaGPC2's known MIA-boundary
  * transactions -- yaHALMAT2's agent should extend it once that side's
- * needs are known, not treat it as closed. */
+ * needs are known, not treat it as closed.
+ *
+ * Deliberately generic: a servicer call has no dependency of any kind on
+ * a particular emulator's internal state or type, since it represents
+ * the peripheral/bus side of the interface, not the GPC side. It's a
+ * pure function of a service number plus an input/output pair whose
+ * shapes vary by service number -- one union each, tagged externally by
+ * the serviceNumber argument (not embedded in the structs, since both
+ * sides already have it in hand from the call itself). */
 typedef enum {
     GPC_SVC_XMIT_WORD = 0,
     GPC_SVC_XMIT_CMD  = 1,
@@ -88,11 +96,31 @@ typedef enum {
 } GpcServiceNumber;
 
 typedef struct {
-    int busID;       /* e.g. BCE number */
-    int address;      /* IUA/subaddress or equivalent; meaning is bus-specific */
-    uint32_t word;    /* data or command word; direction implied by serviceNumber */
-} GpcServiceArgs;
+    int busID;      /* e.g. BCE number -- meaningful for every service */
+    int address;    /* IUA/subaddress or equivalent; meaning is bus-specific.
+                      * Unused (0) for services that don't need it. */
+    union {
+        uint32_t word; /* GPC_SVC_XMIT_WORD: data word. GPC_SVC_XMIT_CMD: command word. */
+    } in;
+} GpcServiceInput;
 
-typedef bool (*GpcServicerFn)(GpcState *state, GpcServiceNumber serviceNumber, GpcServiceArgs *args);
+typedef struct {
+    union {
+        struct { bool ok; } xmit;                        /* GPC_SVC_XMIT_WORD / GPC_SVC_XMIT_CMD */
+        struct { bool available; } poll;                  /* GPC_SVC_RECV_POLL */
+        struct { bool available; uint32_t word; } recv;   /* GPC_SVC_RECV_WORD */
+    } out;
+} GpcServiceOutput;
+
+/* servicerCtx is whatever opaque context the embedding simulator
+ * registered when wiring the servicer up (e.g. a handle to its own
+ * peripheral-bus simulation) -- never a GpcState, and never touched by
+ * yaGPC2/yaHALMAT2 themselves, same shape as HalUCP's own
+ * cbCtx/outputCallback pattern. Each GPC instance is still wired to its
+ * own servicer+servicerCtx pair at registration time (a Shuttle sim's
+ * GPC1 and GPC3 may sit on different buses); the callback itself just
+ * never sees which GpcState triggered it, by design. */
+typedef void (*GpcServicerFn)(void *servicerCtx, GpcServiceNumber serviceNumber, const GpcServiceInput *input,
+                               GpcServiceOutput *output);
 
 #endif
