@@ -24,21 +24,37 @@ OPT     := -O2 -g
 CFLAGS  ?= $(CSTD) $(WARN) $(OPT)
 LDFLAGS ?=
 LDLIBS  := -lm
+AR      ?= ar
 
 SRC_DIR   := src
 BUILD_DIR := build
 BIN       := yaGPC2
+LIB       := libyaGPC2.a
 
 SRCS := $(wildcard $(SRC_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 DEPS := $(OBJS:.o=.d)
 
+# Everything except main.o (which defines the CLI's own main() and would
+# clash with an integrator's own) -- the embedding surface (src/gpcops.c
+# and everything it pulls in transitively) plus every emulator internal
+# it needs, archived as one linkable unit so an integrator embedding
+# yaGPC2 links -lyaGPC2 + #include "yaGpcIntegration.h" and is done,
+# rather than having to separately enumerate the object list themselves
+# (which is exactly what GPCOPS_TEST_DEPS used to do below, by hand, for
+# this Makefile's own test/example binaries -- see LIB_OBJS' own use
+# there now instead).
+LIB_OBJS := $(filter-out $(BUILD_DIR)/main.o,$(OBJS))
+
 .PHONY: all clean test
 
-all: $(BIN)
+all: $(BIN) $(LIB)
 
 $(BIN): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+
+$(LIB): $(LIB_OBJS)
+	$(AR) rcs $@ $(LIB_OBJS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
@@ -109,22 +125,20 @@ $(TEST_BIN_DIR)/test_instr_tostr: test/test_instr_tostr.c $(CPU_INSTR_DEPS) src/
 $(TEST_BIN_DIR)/test_iop_exec_processors: test/test_iop_exec_processors.c $(IOP_TEST_DEPS) src/iop.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_exec_processors.c $(IOP_TEST_DEPS) $(LDLIBS)
 
-# Everything except main.c (which defines its own main() and would clash
-# with test_gpcops.c's) -- test_gpcops exercises the yaGpcIntegration.h
-# embedding surface (src/gpcops.c) plus the servicer wiring in src/iop.c,
-# both of which pull in most of the tree transitively anyway.
-GPCOPS_TEST_DEPS := $(filter-out $(SRC_DIR)/main.c,$(SRCS))
-
-$(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(GPCOPS_TEST_DEPS) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/test_gpcops.c $(GPCOPS_TEST_DEPS) $(LDLIBS)
+# Both link against $(LIB) itself, not the raw source list -- deliberately,
+# since that's exactly what a real integrator would do, and it doubles as
+# a live check that $(LIB) is actually self-sufficient (no missing object
+# silently papered over by falling back to source).
+$(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(LIB) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_gpcops.c $(LIB) $(LDLIBS)
 
 # Not a unit test -- a runnable example of GpcOps-only usage (see its own
-# header comment). Built the same way as test_gpcops (same GPCOPS_TEST_DEPS,
-# for the same reason: it pulls in most of the tree transitively through
-# src/gpcops.c) so it's compiled -- and, in the `test` target above, run --
-# on every `make test`, catching drift against yaGpcIntegration.h early.
-$(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(GPCOPS_TEST_DEPS) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/example_gpcops_paced_run.c $(GPCOPS_TEST_DEPS) $(LDLIBS)
+# header comment), and per its own header comment now the demonstration
+# of exactly how an integrator would build against $(LIB): compiled --
+# and, in the `test` target above, run -- on every `make test`, catching
+# drift against both yaGpcIntegration.h and $(LIB)'s own completeness.
+$(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(LIB) src/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/example_gpcops_paced_run.c $(LIB) $(LDLIBS)
 
 clean:
-	rm -rf $(BUILD_DIR) $(BIN)
+	rm -rf $(BUILD_DIR) $(BIN) $(LIB)
