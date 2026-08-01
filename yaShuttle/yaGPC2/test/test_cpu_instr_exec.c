@@ -10,7 +10,23 @@
  * into cpu_instr.c's OPS table):
  *   node test/gen_cpu_instr_exec_fixtures.cjs NAME... > fixtures.json
  *   python3 test/gen_cpu_instr_exec_fixtures_header.py fixtures.json > test/cpu_instr_exec_fixtures.h
- */
+ *
+ * CVFX is a deliberate, hand-patched exception to "regenerated from
+ * gpc": gpc's own fp_dispatch_exc (cpu.coffee) returns false for
+ * CONVERT_OVERFLOW, so gpc's exec_CVFX bails out *before* writing the
+ * result or updating CC -- confirmed (2026-08-01) to be the same root
+ * cause as yagpc2-yahalmat2-issues.db's cvfx_overflow_truncation_rule
+ * (issue #9): gpc's early-bail leaves stale state, which real Shuttle
+ * flight software (FPMSDERR.asm) proved wrong to replicate, since
+ * yaGPC2's exec_CVFX (src/cpu_instr.c) was deliberately fixed to always
+ * store the result and always compute CC instead. The 300 raw
+ * EXEC_FIXTURES_CVFX entries below still come from an unmodified gpc
+ * run; only the 151 entries whose gpc-recorded regDiffCount is 0 (i.e.
+ * CONVERT_OVERFLOW cases gpc silently no-op'd) have had their
+ * psw1After hand-corrected from gpc's stale baseline-CC value to what
+ * yaGPC2's own already-verified-correct exec_CVFX actually produces.
+ * Regenerating CVFX from gpc without reapplying this correction will
+ * silently reintroduce these 151 failures. */
 #include <stdio.h>
 #include <string.h>
 
