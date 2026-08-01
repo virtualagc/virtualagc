@@ -55,22 +55,50 @@ typedef struct {
  *            Message text: gpc_engine_status_message() below.
  *   -1       HALTED: clean, expected program termination.
  *   -2       HALTED: unhandled end-of-input (a READ ran out of data with
- *            no ON ERROR handler installed).
+ *            no ON ERROR handler installed). Confirmed reachable on
+ *            yaHALMAT2 (all 7 READ call sites, SCALAR/INTEGER/BIT/
+ *            CHARACTER variants); not currently known to be reachable
+ *            on yaGPC2 outside the one case this contract's own gap
+ *            analysis already found.
  *   -3       HALTED: scheduler exhausted -- nothing left ready to run,
  *            or ever going to become ready (yaHALMAT2's own "silent
- *            starvation" case; not currently known to be reachable on
- *            yaGPC2, reserved).
+ *            starvation" case; reachable in principle on yaHALMAT2 --
+ *            the code path exists -- but not known to be exercised by
+ *            any real HAL/S source, since it requires a task graph a
+ *            well-formed program's own dependency rules shouldn't
+ *            produce; not currently known to be reachable on yaGPC2,
+ *            reserved).
  *   -4       ERROR: invalid/unrecognized instruction or opcode.
- *   -5       ERROR: unrecognized/unhandled low-level trap (e.g. yaGPC2's
- *            unhandled SVC code; not currently known to be reachable on
- *            yaHALMAT2, reserved).
- *   -6       ERROR: index/subscript/array bounds violation (not
- *            currently known to be reachable on yaGPC2, reserved).
- *   -7       ERROR: call-stack/nesting depth exceeded (not currently
- *            known to be reachable on yaGPC2, reserved).
- *   -8       ERROR: call to undefined procedure/function (not currently
- *            known to be reachable on yaGPC2, reserved).
+ *            Confirmed reachable on yaHALMAT2 (unrecognized-opcode
+ *            default case, plus %SVC-etc. macro invocations -- those
+ *            compile to raw AP-101S instructions outside portable
+ *            HALMAT semantics, a deliberate scope boundary, but "can't
+ *            execute this" is the same outcome from a driver's view).
+ *   -5       ERROR: unrecognized/unhandled low-level trap (yaGPC2's
+ *            unhandled SVC code). Confirmed NOT reachable on yaHALMAT2
+ *            -- it interprets HALMAT bytecode directly, never AP-101S
+ *            object code, so it has no SVC/trap layer of its own to be
+ *            unhandled from. Stays yaGPC2-only, reserved.
+ *   -6       ERROR: index/subscript/array bounds violation. Confirmed
+ *            reachable on yaHALMAT2 (114 call sites -- SYT/VAC/
+ *            subscript/literal-index checks; deliberately excludes 3
+ *            other "out of range" sites that are plain argument-value-
+ *            range validations, not indexing, and stay tagged -9); not
+ *            currently known to be reachable on yaGPC2, reserved.
+ *   -7       ERROR: call-stack/nesting depth exceeded. Confirmed
+ *            reachable on yaHALMAT2 (3 sites: PCAL/FCAL call-nesting,
+ *            inline-FUNCTION nesting); not currently known to be
+ *            reachable on yaGPC2, reserved.
+ *   -8       ERROR: call to undefined procedure/function. Confirmed
+ *            reachable on yaHALMAT2 (2 sites: undefined procedure,
+ *            undefined function); not currently known to be reachable
+ *            on yaGPC2, reserved.
  *   -9       ERROR: internal-consistency failure not covered above.
+ *            On yaHALMAT2 this is the catch-all for the ~365 fail()
+ *            call sites (of ~490 total) not individually mapped above
+ *            -- a deliberate scope boundary, not an oversight; see
+ *            yaHALMAT2's own history for the full site-by-site mapping
+ *            if a specific one ever needs promoting out of -9.
  *
  * HALTED (-1..-3) vs. ERROR (-4..-9): the former means the instance
  * stopped for a reason inherent to the program/its input, not a bug;
@@ -222,5 +250,15 @@ typedef struct {
     GpcDebuggerStateCreateFn debuggerStateCreate;
     GpcDebuggerStateDestroyFn debuggerStateDestroy;
 } GpcOps;
+
+/* The two emulators' actual vtable instances (yaGPC2: src/gpcops.c;
+ * yaHALMAT2: its own equivalent .c file). Declared here rather than in
+ * a separate per-repo header (yaGPC2's old gpcops.h / yaHALMAT2's old
+ * yaGpcOps.h, both eliminated) since each was nothing but this one
+ * extern plus an #include of this file -- a real integrator wants both
+ * emulators' vtables visible from the one shared contract header, not
+ * two extra near-empty per-emulator headers to separately track. */
+extern const GpcOps yaGPC2_ops;
+extern const GpcOps yaHALMAT2_ops;
 
 #endif

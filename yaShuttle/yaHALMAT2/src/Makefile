@@ -7,6 +7,7 @@ endif
 
 CFLAGS ?= -std=c99 -Wall -Wextra -g -O0
 LDFLAGS ?= -lm
+AR ?= ar
 
 # Optional zlib dependency, for decompressing the gzip'd COMMONx.out.bin.gz
 # memory images HALSFC produces (needed for CHARACTER literal text -- see
@@ -51,24 +52,40 @@ SRCS := main.c loader.c disasm.c opcode_table.c opcode_lookup.c \
 OBJS := $(SRCS:.c=.o)
 DEPS := $(SRCS:.c=.d)
 TARGET := yaHALMAT2
+LIB := libyaHALMAT2.a
+
+# Everything except main.o (which defines the CLI's own main() and would
+# clash with an integrator's own) -- the embedding surface (yaGpcOps.c and
+# everything it pulls in transitively) plus every emulator internal it
+# needs, archived as one linkable unit so an integrator embedding
+# yaHALMAT2 links -lyaHALMAT2 + #include "yaGpcIntegration.h" and is done,
+# rather than having to separately enumerate the object list themselves.
+# Reused as-is for $(GPC_SMOKE_TARGET) below.
+LIB_OBJS := $(filter-out main.o,$(OBJS))
 
 # Two-instance independence smoke test for the yaGpcIntegration.h contract
-# (yaGpcOps.c). Its own main() replaces main.o, but otherwise links against
-# the same object files as $(TARGET).
+# (yaGpcOps.c).
 SMOKE_SRCS := test_gpc_smoke.c
-SMOKE_OBJS := $(filter-out main.o,$(OBJS)) $(SMOKE_SRCS:.c=.o)
+SMOKE_OBJS := $(SMOKE_SRCS:.c=.o)
 SMOKE_DEPS := $(SMOKE_SRCS:.c=.d)
 GPC_SMOKE_TARGET := gpc_smoke_test
 
 .PHONY: all clean
 
-all: $(TARGET) $(GPC_SMOKE_TARGET)
+all: $(TARGET) $(LIB) $(GPC_SMOKE_TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
-$(GPC_SMOKE_TARGET): $(SMOKE_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(SMOKE_OBJS) $(LDFLAGS)
+$(LIB): $(LIB_OBJS)
+	$(AR) rcs $@ $(LIB_OBJS)
+
+# Links against $(LIB) itself, not the raw object list -- deliberately, a
+# live check that $(LIB) is actually self-sufficient for embedding (no
+# object silently missing that a source-list build happened to paper
+# over), matching how a real integrator would link against it.
+$(GPC_SMOKE_TARGET): $(SMOKE_OBJS) $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(SMOKE_OBJS) $(LIB) $(LDFLAGS)
 
 # -MMD -MP generates a per-.o .d file listing every header it #includes,
 # so a change to a shared header (e.g. state.h) triggers a rebuild of
@@ -86,4 +103,4 @@ $(GPC_SMOKE_TARGET): $(SMOKE_OBJS)
 -include $(SMOKE_DEPS)
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGET) $(SMOKE_OBJS) $(SMOKE_DEPS) $(GPC_SMOKE_TARGET)
+	rm -f $(OBJS) $(DEPS) $(TARGET) $(LIB) $(SMOKE_OBJS) $(SMOKE_DEPS) $(GPC_SMOKE_TARGET)

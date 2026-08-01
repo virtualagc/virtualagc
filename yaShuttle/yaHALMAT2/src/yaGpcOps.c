@@ -9,7 +9,6 @@
 #include "literal.h"
 #include "symtab.h"
 #include "yaGpcIntegration.h"
-#include "yaGpcOps.h"
 
 static bool file_exists(const char *path) {
     struct stat st;

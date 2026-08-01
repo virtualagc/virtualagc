@@ -16,7 +16,6 @@
 
 #include "interp.h"
 #include "yaGpcIntegration.h"
-#include "yaGpcOps.h"
 
 static char *slurp(FILE *f, long *out_len) {
     if (fseek(f, 0, SEEK_END) != 0) return NULL;
