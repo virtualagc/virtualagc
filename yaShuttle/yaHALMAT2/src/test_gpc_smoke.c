@@ -45,11 +45,11 @@ int main(int argc, char **argv) {
     gpcB.gpcID = 2;
     gpcB.emulator = GPC_EMULATOR_HALMAT;
 
-    if (!yaHALMAT2_ops.initializer(&gpcA, program_path, NULL)) {
+    if (!yaHALMAT2_ops.initializer(&gpcA, program_path, NULL, NULL, NULL)) {
         fprintf(stderr, "FAIL: gpcA initializer failed\n");
         return 1;
     }
-    if (!yaHALMAT2_ops.initializer(&gpcB, program_path, NULL)) {
+    if (!yaHALMAT2_ops.initializer(&gpcB, program_path, NULL, NULL, NULL)) {
         fprintf(stderr, "FAIL: gpcB initializer failed\n");
         return 1;
     }

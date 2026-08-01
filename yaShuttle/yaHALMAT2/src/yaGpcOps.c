@@ -87,6 +87,9 @@ typedef struct {
     bool have_literals;
     halmat_symtab_t symtab;
     bool have_symtab;
+    GpcServicerFn servicer;    /* stored, not yet wired to anything -- see
+                                 * yaHALMAT2_initializer()'s own comment */
+    void *servicerCtx;
 } yaHALMAT2_instance_t;
 
 /* symbolsPath is yaGPC2-only (establishes its start address from a linker/
@@ -108,12 +111,27 @@ typedef struct {
  * auto-discovered -- those really are CLI-only concerns with no
  * standalone-Shuttle-sim analogue. Missing companions degrade gracefully
  * (blank string literals, no MATRIX/VECTOR symbol lookup) exactly as they
- * do for the CLI, rather than failing. */
-static bool yaHALMAT2_initializer(GpcState *gpcState, const char *programPath, const char *symbolsPath) {
+ * do for the CLI, rather than failing.
+ *
+ * servicer/servicerCtx: stored on the instance but not wired to anything
+ * yet. yaHALMAT2 has no HAL/S-level construct for vehicle discrete/analog
+ * I/O at all (confirmed by exhaustive search across interp.c, state.h, and
+ * every reengineered-documentation/ doc including STATUS.md -- a plain
+ * absence, not a documented gap) -- READ/WRITE/RDAL are ordinary channel
+ * I/O, out of scope for the servicer. So there is currently no call site
+ * to route these through, the same open question flagged since the
+ * original relay. Accepting and storing them now (rather than ignoring
+ * outright, the way symbolsPath is) costs nothing and means a future
+ * HAL/S I/O construct just needs a call site added here, not a signature
+ * change. */
+static bool yaHALMAT2_initializer(GpcState *gpcState, const char *programPath, const char *symbolsPath,
+                                   GpcServicerFn servicer, void *servicerCtx) {
     (void)symbolsPath;
     char errbuf[512];
     yaHALMAT2_instance_t *inst = malloc(sizeof(*inst));
     if (!inst) return false;
+    inst->servicer = servicer;
+    inst->servicerCtx = servicerCtx;
     if (!halmat_load(programPath, &inst->prog, errbuf, sizeof(errbuf))) {
         fprintf(stderr, "yaHALMAT2: %s\n", errbuf);
         free(inst);
