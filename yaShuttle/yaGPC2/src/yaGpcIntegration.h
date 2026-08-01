@@ -200,8 +200,20 @@ typedef void (*GpcServicerFn)(void *servicerCtx, GpcServiceNumber serviceNumber,
  * plenty never touch a peripheral bus at all), no reason to force one
  * callback shape to serve both. HAL/S's random-access FILE(n,address)
  * statement is a third, distinct I/O concern -- deliberately out of
- * scope here; neither emulator implements it yet (confirmed by reading
- * yaGPC2's SVC dispatch table), so there is nothing yet to route.
+ * scope here, permanently rather than provisionally: USA003090 Sec.
+ * 6.2 (the real HAL/S-FC User's Manual) states plainly that "File I/O
+ * is not supported by the HAL/S-FC runtime library. If a FILE I/O
+ * statement is compiled, unresolved external references will occur at
+ * link edit time" -- unlike WRITE/READ (self-contained inline code
+ * that traps into OUTRAP/INTRAP/CNTRAP, no external routine involved),
+ * FILE compiles to a call to an RTL routine that never existed for the
+ * AP-101S-targeted compiler at all, so a real HAL/S-FC program using it
+ * couldn't even be linked into a working binary. (There was reportedly
+ * a System/360-hosted HAL/S compiler where FILE did work, per
+ * "Programming in HAL/S" -- it hasn't survived.) Implementing FILE here
+ * would mean inventing behavior the real historical system never had,
+ * not completing a port -- there is nothing to route because there is
+ * nothing that could ever have worked.
  *
  * output: called once per already-fully-formatted line of WRITE output
  * (HAL/S's own field/column/page formatting has already happened; this
