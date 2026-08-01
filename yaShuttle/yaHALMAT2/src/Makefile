@@ -9,6 +9,14 @@ CFLAGS ?= -std=c99 -Wall -Wextra -g -O0
 LDFLAGS ?= -lm
 AR ?= ar
 
+# yaGpcIntegration.h (and gpc_engine_status_message()'s own declaration)
+# now live in one shared location, yaGpcIntegration/ (sibling to this
+# repo and yaGPC2/), not duplicated per-repo -- quote-form
+# #include "yaGpcIntegration.h" already searches each including file's
+# own directory first, so this -I only matters because no local copy
+# exists in src/ anymore.
+CFLAGS += -I../../yaGpcIntegration
+
 # Optional zlib dependency, for decompressing the gzip'd COMMONx.out.bin.gz
 # memory images HALSFC produces (needed for CHARACTER literal text -- see
 # literal.c). Mirrors the reference yaHALMAT emulator's own Makefile probe
@@ -61,6 +69,17 @@ LIB := libyaHALMAT2.a
 # yaHALMAT2 links -lyaHALMAT2 + #include "yaGpcIntegration.h" and is done,
 # rather than having to separately enumerate the object list themselves.
 # Reused as-is for $(GPC_SMOKE_TARGET) below.
+#
+# A static library doesn't carry its own link requirements with it --
+# ZLIB_CHECK/POSIX_TIMER_CHECK above only affect $(LDFLAGS) for targets
+# *this* Makefile links (yaHALMAT2 itself, and the GpcOps test/example
+# binaries below). A separate consumer linking $(LIB) directly (not via
+# this Makefile) needs to independently add -lz (literal.o's
+# gzopen/gzclose/gzread, if HAVE_ZLIB was set when $(LIB) was built) and
+# potentially -lrt (if HAVE_POSIX_TIMERS was set) -- confirmed the hard
+# way via yaGpcIntegration/samples/, which links $(LIB) directly and had
+# to replicate both probes in its own Makefile to resolve undefined
+# gzopen/gzclose/gzread references.
 LIB_OBJS := $(filter-out main.o,$(OBJS))
 
 # Two-instance independence smoke test for the yaGpcIntegration.h contract

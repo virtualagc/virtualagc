@@ -44,12 +44,19 @@ TARGET = yaHALMAT2.exe
 # Unix side this session (see Makefile's comment on the same issue).
 # ALWAYS run `clean` before rebuilding after touching any .h file.
 
+# yaGpcIntegration.h now lives in one shared location, yaGpcIntegration\
+# (sibling to this repo and yaGPC2\), not duplicated per-repo -- the /I
+# (cl) / -I (gcc/clang) below is what makes #include "yaGpcIntegration.h"
+# resolve for the .c files that need it (currently none in $(SRCS) below
+# -- yaGpcOps.c/yaGpcEngineStatus.c aren't built by this file yet, see
+# Makefile (GNU) for those -- added here anyway for when they are).
+
 !IF "$(CC)" == "cl"
-CFLAGS = /nologo /W3 /Zi /Od /D_CRT_SECURE_NO_WARNINGS
+CFLAGS = /nologo /W3 /Zi /Od /D_CRT_SECURE_NO_WARNINGS /I ..\..\yaGpcIntegration
 OBJS = $(SRCS:.c=.obj)
 LIBS =
 !ELSE
-CFLAGS = -std=c99 -Wall -Wextra -g -O0
+CFLAGS = -std=c99 -Wall -Wextra -g -O0 -I../../yaGpcIntegration
 OBJS = $(SRCS:.c=.o)
 LIBS = -lm
 !ENDIF
