@@ -25,7 +25,32 @@ typedef struct {
     void *impl;                /* AGEHarness* (yaGPC2) or halmat_state_t* (yaHALMAT2) */
 } GpcState;
 
-typedef void (*GpcEngineFn)(GpcState *state);
+/* GpcEngineFn's return value: whether the caller should keep calling it.
+ * Existed as a real, confirmed gap before this: a driver written purely
+ * against GpcOps had no way to tell "has this instance's program
+ * finished?" (that's AP-101S PSW wait-state / yaHALMAT2's own halted
+ * flag, neither exposed through GpcState). Concretely verified what
+ * happens without it: calling the engine past a program's own natural
+ * completion runs it into whatever memory/state follows, which surfaces
+ * as nonsense (observed on yaGPC2: repeated bogus "SVC trapped" reports
+ * from decoding non-code memory as instructions).
+ *
+ * Deliberately collapses "how" into three buckets rather than an
+ * open-ended error-code space: each emulator's actual error taxonomy is
+ * different (yaGPC2: invalid instruction decode, unrecognized SVC trap;
+ * yaHALMAT2: presumably its own runtime-error set) and forcing them into
+ * one shared numbering would either be meaningless across emulator types
+ * or require constant contract renegotiation as either side's error set
+ * grows. GPC_ENGINE_ERROR just means "stop calling this instance's
+ * engine" -- query state->impl directly (emulator-specific) if more
+ * detail is needed. */
+typedef enum {
+    GPC_ENGINE_RUNNING = 0, /* keep calling engine() */
+    GPC_ENGINE_HALTED  = 1, /* program reached its own normal/expected termination */
+    GPC_ENGINE_ERROR   = 2  /* an error condition was hit; stop calling engine() on this instance */
+} GpcEngineStatus;
+
+typedef GpcEngineStatus (*GpcEngineFn)(GpcState *state);
 typedef bool (*GpcDebuggerFn)(GpcState *state, void *dbgState); /* false => stop */
 
 /* Servicer: the GPC's interface to vehicle peripherals. Deliberately

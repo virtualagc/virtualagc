@@ -27,23 +27,38 @@
  * batchrunner_format_trace_line(), now a thin wrapper around it) -- so
  * this is byte-identical to the CLI's own htrace output, including
  * section+offset formatting and 'set width' wrapping (age->htraceLineWidth,
- * also set by yagpc2_debugger() below). */
-static void yagpc2_engine(GpcState *state) {
+ * also set by yagpc2_debugger() below).
+ *
+ * Also where GpcEngineStatus gets decided (see yaGpcIntegration.h's own
+ * comment on it): decodes before executing -- same pre-check run.c's
+ * batchrunner_step() already does -- so a decode failure is reported as
+ * GPC_ENGINE_ERROR without ever calling ap101_exec1(), rather than
+ * silently no-op'ing the way cpu_exec1() does internally on its own
+ * (that no-op path is documented there as unreachable from `gpc run`
+ * specifically because run.c's own pre-check already keeps it from
+ * happening -- not a guarantee this entry point can rely on, since a
+ * driver can call engine() on a halted or off-the-end instance).
+ * Post-execution: the AP-101S wait-state bit means a normal/expected
+ * program termination (GPC_ENGINE_HALTED); halUCP.svcTrapped set
+ * *without* wait-state means an unrecognized SVC was hit without the
+ * program actually halting (GPC_ENGINE_ERROR) -- the exact "ran into
+ * garbage" case that motivated adding this in the first place. */
+static GpcEngineStatus yagpc2_engine(GpcState *state) {
     AGEHarness *age = (AGEHarness *)state->impl;
-    bool wantTrace = age->htraceWanted;
 
-    uint32_t nia = 0, hw1 = 0, hw2 = 0;
+    uint32_t nia = psw_get_nia(&age->gpc.cpu.psw);
+    uint32_t hw1 = mcm_get16(&age->gpc.cpu.mainStorage, nia);
+    uint32_t hw2 = mcm_get16(&age->gpc.cpu.mainStorage, nia + 1);
+    DInstr v;
+    const InstrDesc *d = instr_decode(hw1, hw2, &v);
+    if (!d) return GPC_ENGINE_ERROR;
+
+    bool wantTrace = age->htraceWanted;
     char disasm[256] = "";
-    int instrLen = 1;
+    int instrLen = d->pb.origLen;
     RegSnapshot before;
     if (wantTrace) {
-        nia = psw_get_nia(&age->gpc.cpu.psw);
-        hw1 = mcm_get16(&age->gpc.cpu.mainStorage, nia);
-        hw2 = mcm_get16(&age->gpc.cpu.mainStorage, nia + 1);
         instr_to_str(hw1, hw2, disasm, sizeof disasm);
-        DInstr v;
-        const InstrDesc *d = instr_decode(hw1, hw2, &v);
-        instrLen = d ? d->pb.origLen : 1;
         ageharness_snapshot_regs(age, &before);
     }
 
@@ -68,6 +83,10 @@ static void yagpc2_engine(GpcState *state) {
                                  age->sym.loaded ? &age->sym : NULL, &age->gpc.cpu.elapsedTimeUs, age->htraceLineWidth);
         printf("%s\n", line);
     }
+
+    if (psw_get_wait_state(&age->gpc.cpu.psw)) return GPC_ENGINE_HALTED;
+    if (age->halUCP.svcTrapped) return GPC_ENGINE_ERROR;
+    return GPC_ENGINE_RUNNING;
 }
 
 /* Derives the nia/hw1/hw2/step debugger_hook() itself needs from

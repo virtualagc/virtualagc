@@ -1,4 +1,4 @@
-/* Verifies five pieces of the Shuttle-sim integration work (see
+/* Verifies six pieces of the Shuttle-sim integration work (see
  * ../src/yaGpcIntegration.h and its plan-mode discussion history):
  *
  *  1. yaGPC2_ops (../src/gpcops.c) supports multiple fully independent
@@ -22,6 +22,13 @@
  *     work as a generic pair a driver can call without knowing this is
  *     yaGPC2 specifically (i.e. without reaching for debugger_create()/
  *     debugger_free() and an Options struct directly).
+ *  6. yagpc2_engine()'s GpcEngineStatus return value correctly reports
+ *     GPC_ENGINE_RUNNING while a program executes, GPC_ENGINE_HALTED at
+ *     its own natural completion (confirmed against hello.fcm's real,
+ *     empirically-verified halt point), and never RUNNING again once
+ *     halted -- the fix for a real, confirmed gap (a driver had no way
+ *     to know when to stop calling engine(), and calling it past a
+ *     program's own halt decodes adjacent memory as garbage).
  *
  * Run from the repo root (as `make test` does) -- fixture path below is
  * relative to that. */
@@ -312,6 +319,42 @@ static void test_debugger_state_lifecycle(void) {
     yaGPC2_ops.debuggerStateDestroy(dbgState2);
 }
 
+/* ---------------------------------------------------------------------
+ * 6. GpcEngineStatus: RUNNING -> HALTED, never RUNNING again
+ * ------------------------------------------------------------------- */
+
+/* Runs hello.fcm to its own real completion purely by watching
+ * GpcEngineStatus -- no yaGPC2-specific wait-state check, exactly what a
+ * black-box driver has to do. Confirms the status transitions correctly
+ * and that calling engine() again post-halt never reports RUNNING (the
+ * concrete guard against the "decodes adjacent memory as garbage" case
+ * this was added to fix -- see yaGpcIntegration.h's GpcEngineFn comment
+ * and the plan-mode discussion that found it). */
+static void test_engine_status(void) {
+    GpcState state = {.gpcID = 1};
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL),
+          "engine-status instance initializer succeeded");
+
+    GpcEngineStatus status = yaGPC2_ops.engine(&state);
+    CHECK(status == GPC_ENGINE_RUNNING, "first instruction reports GPC_ENGINE_RUNNING");
+
+    long steps = 1;
+    const long maxSteps = 20000; /* generous bound so a regression can't hang this test forever */
+    while (status == GPC_ENGINE_RUNNING && steps < maxSteps) {
+        status = yaGPC2_ops.engine(&state);
+        steps++;
+    }
+
+    CHECK(status == GPC_ENGINE_HALTED, "hello.fcm reports GPC_ENGINE_HALTED at its own natural completion");
+    CHECK(steps < maxSteps, "halted well within the generous step bound, not just cut off by it");
+    CHECK(steps > 100, "didn't report halted implausibly early (sanity check)");
+
+    GpcEngineStatus statusAfterHalt = yaGPC2_ops.engine(&state);
+    CHECK(statusAfterHalt != GPC_ENGINE_RUNNING, "engine() called again after halt does not report RUNNING");
+
+    yaGPC2_ops.release(&state);
+}
+
 int main(void) {
     test_two_instance_independence();
     test_servicer_roundtrip();
@@ -319,6 +362,7 @@ int main(void) {
     test_htrace_output();
     test_release_flushes_pending_output();
     test_debugger_state_lifecycle();
+    test_engine_status();
     if (failures == 0) {
         printf("all gpcops/servicer tests passed\n");
     } else {
