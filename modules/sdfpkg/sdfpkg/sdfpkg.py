@@ -276,6 +276,21 @@ class sdfpkg:
                 return symbno
         return None
 
+    def _inputName(self, nameField, lengthField):
+        '''A name supplied to us in COMMTABL, honouring its length field.
+
+        BLKNAM and SYMBNAM are fixed 32-byte areas, and callers write only as
+        many characters as the name has, leaving whatever was there before in
+        the remaining bytes.  So "IA" written over a previous "ASTRUCTURE"
+        leaves "IATRUCTURE" in the field, and the length field is the only
+        thing that says where the name really ends -- which is why CHKMATCH
+        loads SYMBNLEN before comparing.  Falling back on the whole field when
+        no length is given keeps the simple cases working.
+        '''
+        name = self.COMMTABL.get(nameField) or ""
+        length = self.COMMTABL.get(lengthField) or 0
+        return name[:length] if length else name
+
     def _findBlockByName(self, name):
         for blkno, block in enumerate(self.s.blockIndexTable, start=1):
             cell = block.blockDataCell
@@ -423,7 +438,8 @@ class sdfpkg:
             return
 
         if modeNumber == 11:
-            blkno, block = self._findBlockByName(self.COMMTABL["BLKNAM"] or "")
+            blkno, block = self._findBlockByName(
+                self._inputName("BLKNAM", "BLKNLEN"))
             if block is None:
                 self._fail(16)                 # No block found with that name
                 return
@@ -431,13 +447,14 @@ class sdfpkg:
             return
 
         if modeNumber == 12:
-            blkno, block = self._findBlockByName(self.COMMTABL["BLKNAM"] or "")
+            blkno, block = self._findBlockByName(
+                self._inputName("BLKNAM", "BLKNLEN"))
             if block is None:
                 self._fail(16)
                 return
             self.searchBlock = block
             self.lastSymbolFound = None
-            name = self.COMMTABL["SYMBNAM"] or ""
+            name = self._inputName("SYMBNAM", "SYMBNLEN")
             symbno = self._findSymbolInBlock(block, name)
             if symbno is None:
                 self._fail(20)                 # Block found, symbol not
@@ -456,7 +473,7 @@ class sdfpkg:
                 # Mode 8, 11, or 12 call."  SYMBSRCH checks SAVFSYMB and takes
                 # ABEND8, which is 4020, "BLOCK NOT PREVIOUSLY SPECIFIED".
                 cmem.abend(4020)
-            name = self.COMMTABL["SYMBNAM"] or ""
+            name = self._inputName("SYMBNAM", "SYMBNLEN")
             startAfter = 0
             if self.lastSymbolFound is not None \
                     and self.lastSymbolFound[0] == name:
@@ -666,7 +683,10 @@ def runTests(sdflibName, memberNames):
                   word(COMMTABL["ADDR"] + 8) == block.pBlockDataCell)
 
             # --- mode 11, the same block by name --------------------------
+            # BLKNLEN matters: the name field is 32 bytes and only the name's
+            # own characters get written into it.
             COMMTABL["BLKNAM"] = name
+            COMMTABL["BLKNLEN"] = len(name)
             p.sdfpkg(11)
             check(f"mode 11 finds block {blkno} by name",
                   COMMTABL["CRETURN"] == 0 and COMMTABL["BLKNO"] == blkno
@@ -677,6 +697,7 @@ def runTests(sdflibName, memberNames):
         check("mode 8 rejects an out-of-range block number",
               COMMTABL["CRETURN"] == 16)
         COMMTABL["BLKNAM"] = "NOSUCHBLOCK"
+        COMMTABL["BLKNLEN"] = len("NOSUCHBLOCK")
         p.sdfpkg(11)
         check("mode 11 reports 16 for an unknown block name",
               COMMTABL["CRETURN"] == 16)
@@ -722,7 +743,9 @@ def runTests(sdflibName, memberNames):
                     continue                # CHKMATCH would skip past it
                 name = p._symbolName(symbno)
                 COMMTABL["BLKNAM"] = blockName
+                COMMTABL["BLKNLEN"] = len(blockName)
                 COMMTABL["SYMBNAM"] = name
+                COMMTABL["SYMBNLEN"] = len(name)
                 p.sdfpkg(12)
                 # An earlier symbol of the same name legitimately wins, so
                 # check the name rather than the number.
@@ -737,11 +760,14 @@ def runTests(sdflibName, memberNames):
 
                 # Mode 13 searches the block mode 12 just established.
                 COMMTABL["SYMBNAM"] = name
+                COMMTABL["SYMBNLEN"] = len(name)
                 p.sdfpkg(13)
                 check(f"mode 13 continues the search for {name}",
                       COMMTABL["CRETURN"] in (0, 20))
             COMMTABL["BLKNAM"] = blockName
+            COMMTABL["BLKNLEN"] = len(blockName)
             COMMTABL["SYMBNAM"] = "NOSUCHSYMBOL"
+            COMMTABL["SYMBNLEN"] = len("NOSUCHSYMBOL")
             p.sdfpkg(12)
             check(f"mode 12 reports 20 for an unknown symbol in {blockName}",
                   COMMTABL["CRETURN"] == 20)

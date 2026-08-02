@@ -603,6 +603,17 @@ class cmem:
             self.afcbarea = None
             self.nbytes = None
 
+        # Initializing means starting with nothing cached.  This matters when
+        # the caller supplies the PAD, because then it lives in the caller's
+        # memory and outlives us: a second cmem over the same memory would
+        # otherwise inherit the previous one's entries.  They would not merely
+        # be stale, they would be actively wrong, since SDF ids are handed out
+        # from 1 again and an inherited entry can therefore be mistaken for a
+        # page of the newly selected SDF.  (Which is exactly what happened:
+        # including a second COMPOOL re-read the first one's pages.)
+        for i in range(self.padSize // self.PAD_ENTRY_SIZE):
+            self._padMarkFree(i)
+
         # Remembered so that mode 3 (rescind) knows how far back to unwind the
         # augments applied by mode 2.
         self.baseNpages = self.npages
@@ -1117,6 +1128,40 @@ if __name__ == "__main__":
                 mB.monitor22(buildMode(3))
             check("mode 3 with a reserved page in the augment aborts (abend 4012)",
                   _runInChild(rescindWhileReserved) == 1)
+
+            # --- a caller-supplied PAD must be initialized by mode 0 -----------
+            # Two cmems in succession over the same memory: the second must not
+            # inherit the first's cached pages.  Ids restart at 1, so an
+            # inherited entry can otherwise be mistaken for a page of the
+            # newly-selected SDF.
+            padPages = 2
+            padApgarea = 0x1000
+            padCommtabl = 0x100
+            padAddr = padApgarea + padPages * cmem.PAGE_SIZE
+            sharedMem = bytearray(padAddr + 16 * padPages + 256)
+            for sdfName, fill in (("PADONE", 0xAA), ("PADTWO", 0xBB)):
+                with open(os.path.join(sdflib, sdfName + ".sdf"), "wb") as f:
+                    f.write(bytes([fill]) * cmem.PAGE_SIZE)
+            firstByte = {}
+            for sdfName in ("PADONE", "PADTWO"):
+                mP = cmem(sharedMem, sdflib)
+                packU32(sharedMem, padCommtabl + cmem.OFF_APGAREA, padApgarea)
+                packU32(sharedMem, padCommtabl + cmem.OFF_AFCBAREA, 0)
+                packU16(sharedMem, padCommtabl + cmem.OFF_NPAGES, padPages)
+                packU16(sharedMem, padCommtabl + cmem.OFF_NBYTES, 0)
+                packU16(sharedMem, padCommtabl + cmem.OFF_MISC, 0x02)
+                packU32(sharedMem, padCommtabl + cmem.OFF_PNTR, 16 * padPages)
+                packU32(sharedMem, padCommtabl + cmem.OFF_ADDR, padAddr)
+                mP.monitor22(0, padCommtabl)
+                writeSdfName(sharedMem, padCommtabl, sdfName)
+                mP.monitor22(buildMode(4))
+                packU32(sharedMem, padCommtabl + cmem.OFF_PNTR, 0)
+                mP.monitor22(buildMode(5))
+                addr = unpackU32(sharedMem, padCommtabl + cmem.OFF_ADDR)
+                firstByte[sdfName] = sharedMem[addr]
+            check("mode 0 clears a caller-supplied PAD, so a later cmem over "
+                  "the same memory does not inherit stale pages",
+                  firstByte["PADONE"] == 0xAA and firstByte["PADTWO"] == 0xBB)
 
             # --- RESV/RELS accounting -------------------------------------------
             writeSdfName(memB, ctB, "MULTI")
