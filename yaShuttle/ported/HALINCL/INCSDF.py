@@ -41,6 +41,7 @@ import HALINCL.COMMON as h
 import HALINCL.DTOKEN as t
 from ERROR import ERROR
 from HALINCL.SAVELITE import SAVE_LITERAL
+from ibmFloat import hfpJoin
 from HALINCL.SETDUPLF import SET_DUPL_FLAG
 from HALINCL.ENTERDIM import ENTER_DIMS
 from HALINCL.ICQARRAY import ICQ_ARRAYp
@@ -690,7 +691,17 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
                 SAVE_LITERAL(0,MAKESTRING(SDF_B(0) + 1, SDFPKG_LOC_ADDR() + 1))
             # ARITH. LIT
             else: 
-                SAVE_LITERAL(1, SDFPKG_LOC_ADDR(),0,1)
+                # The XPL passes SAVE_LITERAL the *address* of the constant
+                # value cell here, its arithmetic case being
+                # "LIT2 = COREWORD(VAL); LIT3 = COREWORD(VAL+4)".  The Python
+                # port changed that case to take the 64-bit value itself,
+                # which is what every other caller now supplies as
+                # hfpJoin(DW(0), DW(1)) where the XPL passed DW_AD.  So read
+                # the cell's two fullwords and join them.  The mask is because
+                # SDF_F sign-extends, FIXED being signed, whereas the halves
+                # of a hex floating-point value are wanted unsigned.
+                SAVE_LITERAL(1, hfpJoin(SDF_F(0) & 0xFFFFFFFF,
+                                        SDF_F(1) & 0xFFFFFFFF), 0, 1)
             #MOD-DR109083
             g.SYT_PTR(g.ID_LOC, -g.LIT_TOP())
             LOCATE_SDF_PTR(TEMP_PTR)

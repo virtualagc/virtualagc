@@ -768,11 +768,13 @@ class sdf:
                     xrefEntriesLeft -= 1
                     continue
                 # If we got here, then item 27 should be next
-                # to change to a different 1680-byte page.
-                page, offset = self.getPointer(
-                    offset, "27\tNext XREF cell", indent=indent)
+                # to change to a different 1680-byte page.  Note that
+                # getPointer returns the pointer itself rather than a
+                # (page, offset) pair, so parsePointer is what splits it.
+                page, offset = sdf.parsePointer(self.getPointer(
+                    offset, "27\tNext XREF cell", indent=indent))
                 self.offsetForGet = (page << 16) | offset
-                offset = 0 
+                offset = 0
             scell.xrefEntries = xrefEntries
         
         self.offsetForGet = oldOffsetForGet

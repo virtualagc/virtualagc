@@ -83,7 +83,15 @@ The available OPTIONS are:
     --archive        Causes the results directories ("HALSFC ...".results) to
                      appear in a directory called archive.results rather than
                      in the current working directory.
-    --debug=X        A debugging-mode flagword to pass directly to the 
+    --sdfi=D         Name of a directory to read Simulation Data Files (SDF)
+                     from, so that a "D INCLUDE TEMPLATE" can be satisfied
+                     from an SDF in preference to the template library.
+                     Customarily --sdfi=SDFLIB.  Passed on to PASS1 and, under
+                     --test, to HAL_S_FC.py, both of which spell the switch the
+                     same way.  By default no directory is named and no SDFs
+                     are read.  Note that this concerns only the *reading* of
+                     SDFs; PASS3 writes them to SDFLIB regardless.
+    --debug=X        A debugging-mode flagword to pass directly to the
                      HALSFC-XXXX compiler passes.  X is a hexadecimal number
                      whose present interpretation is:
                          Bit 0:  PASS2:  Print messages in `SAVE_LITERAL`.
@@ -113,6 +121,7 @@ verbose = False
 debugLiterals = ""
 clean = False
 archive = False
+sdfi = None
 if isWindows:
     ext = ".exe"
 for parm in sys.argv[1:]:
@@ -151,6 +160,8 @@ for parm in sys.argv[1:]:
         clean = True
     elif parm == "--archive":
         archive = True
+    elif parm.startswith("--sdfi="):
+        sdfi = parm[7:]
     elif not parm.startswith("-"):
         if halsFile != None:
             print("Multiple HAL/S files specified")
@@ -352,6 +363,13 @@ if appDir == None:
     sys.exit(1)
 ERRORLIB = appDir + os.sep + "ERRORLIB"
 parmList = parmString.split(",")
+# An SDF library to import from, for PASS1 and for HAL_S_FC.py alike.  PASS3
+# writes to SDFLIB by default whether or not this is given; --sdfi is only
+# about reading them back in place of TEMPLATEs.
+if sdfi == None:
+    sdfiSwitch = ""
+else:
+    sdfiSwitch = '--sdfi="%s"' % sdfi
 
 # Run PASS1.
 command ='''%s
@@ -373,9 +391,10 @@ command ='''%s
  %s
  %s
  %s
+ %s
  >pass1.rpt''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, 
                  INCLIB, INCLIB2, INCLIB2, extCOMMON, debugX, rsbTrace,
-                 prettyBNF)
+                 prettyBNF, sdfiSwitch)
 #print(f"Here {command}", file=sys.stderr)
 command = command.replace("\n", "")
 if verbose:
@@ -413,9 +432,10 @@ if test:
     ported=Path(ported).parent
     if ported == None:
         errorExit("Not available for --test:  HAL_S_FC.py")
-    command = 'python "%s" %s %s %s %s %s --templib --hal="%s" >pass1p.rpt' \
+    command = 'python "%s" %s %s %s %s %s %s --templib --hal="%s" >pass1p.rpt' \
                          % (fullPath, TARGET, parmString.replace(",", " "), 
-                            rsbTrace, prettyBNF, debugLiterals, halsFile)
+                            rsbTrace, prettyBNF, debugLiterals, sdfiSwitch,
+                            halsFile)
     #print(command)
     if verbose:
         print(command)

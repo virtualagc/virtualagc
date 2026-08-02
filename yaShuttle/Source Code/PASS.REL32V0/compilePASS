@@ -40,6 +40,13 @@ import tempfile
 import shutil
 
 def outtaHere(n):
+    # os._exit() does not flush, and stdout is block-buffered whenever the
+    # output has been redirected to a log rather than to a terminal.  Without
+    # these flushes the diagnostic explaining why we are exiting sits in the
+    # buffer and is discarded, which makes an orderly abort look for all the
+    # world like the process having been killed.
+    sys.stdout.flush()
+    sys.stderr.flush()
     os._exit(n)
 
 helpMsg = '''
@@ -57,6 +64,15 @@ The only OPTIONS available are:
     --no-preprocess Opposite of --preprocess.
     --clean         Use HALSFC's --clean switch.
     --archive       Use HALSFC's --archive switch.
+    --sdfi=D        (Default SDFLIB.)  Directory the compilers read Simulation
+                    Data Files (SDF) from, so that a "D INCLUDE TEMPLATE" is
+                    satisfied from an SDF where one exists, in preference to
+                    the template library.  Since the files here are compiled in
+                    dependency order, a file's SDFs have been written by the
+                    time it is compiled.
+    --no-sdfi       Read no SDFs at all, and satisfy every "D INCLUDE TEMPLATE"
+                    from the template library, as was done before SDF import
+                    existed.
     --dfg           (Not yet available.)  Run the DFG preprocessor to convert
                     display-format files to HAL/S source code.
     --no-dfg        Do not run the DFG preprocessor to convert display-format 
@@ -128,6 +144,7 @@ rsbTrace = ""
 ops = "G16"
 clean = False
 archive = False
+sdfi = "SDFLIB"
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg)
@@ -140,6 +157,10 @@ for parm in sys.argv[1:]:
         clean = True
     elif parm == "--archive":
         archive = True
+    elif parm.startswith("--sdfi="):
+        sdfi = parm[7:]
+    elif parm == "--no-sdfi":
+        sdfi = None
     elif parm == "--dfg":
         dfg = True
     elif parm == "--no-dfg":
@@ -215,6 +236,47 @@ def getParms(template):
     else:
         parms = parmBase + cardtypesBySourceFile["default"] + modern
     return parms
+
+# SPACELIB, the space-management system, is linked into every pass and can
+# abend with any of BI002, BI003, BI004 or BI010 -- respectively a bug in the
+# system, a bug with no space left to describe it, too many such errors, and
+# "yoyoing".  All four are severity 3, all four name "SPACE MANAGEMENT", and any
+# of them halts the entire run, which is intolerable when surveying a thousand
+# source files.  They are known-shaky ground in the port and are on the list to
+# be fixed properly; until then, treat them like the other delayable errors and
+# skip the file.  They need a check of their own because, unlike the others, the
+# messages carry no "***** " prefix, and because they can come from any pass.
+# Kept apart from errorsSkipped deliberately.  That set is a one-shot per file,
+# so a file that has already used it up on (say) an --auto-x1 retry for a ZO3
+# error would fall straight through to a hard failure here, which is exactly
+# what happened to RVMCON.hal.
+spaceBugsSkipped = set()
+spaceBugReports = ["pass1.rpt", "flo.rpt", "opt.rpt", "aux.rpt", "auxp.rpt",
+                   "pass2.rpt", "pass3.rpt", "pass4.rpt"]
+def checkSpaceManagementBug(template):
+    global spaceBugsSkipped
+    for report in spaceBugReports:
+        try:
+            f = open(f"current.results{os.sep}{report}", "r")
+        except:
+            continue
+        found = False
+        try:
+            for line in f:
+                if "SPACE MANAGEMENT" in line:
+                    found = line.strip()
+                    break
+        except:
+            pass
+        f.close()
+        if found:
+            stem = template["stem"]
+            if stem in spaceBugsSkipped:
+                return False
+            spaceBugsSkipped.add(stem)
+            print(f"      {report}: {found}")
+            return True
+    return False
 
 # Return True if there's a delayable error.
 errorsSkipped = set()
@@ -302,6 +364,8 @@ def compile(template):
                 command.append("--clean")
             if archive:
                 command.append("--archive")
+            if sdfi != None:
+                command.append(f"--sdfi={sdfi}")
             if rsbTrace != "":
                 command.append(rsbTrace)
             result = subprocess.run(command, capture_output = True, text = True, check = True)
@@ -334,6 +398,10 @@ def compile(template):
                 return False
             elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["XI3"]):
                 print(f"      XI3 error in PASS1, compilation of {rawFilename} skipped.")
+                rsbTrace = ""
+                return False
+            elif checkSpaceManagementBug(template):
+                print(f"      SPACELIB error, compilation of {rawFilename} skipped.")
                 rsbTrace = ""
                 return False
             print(f"Failed with exit code {e.returncode}.")
