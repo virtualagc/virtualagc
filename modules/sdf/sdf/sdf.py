@@ -145,6 +145,10 @@ class sdf:
     # followed by a second byte giving the number of blanks minus 1.  So for 
     # example, if 0xEE 0x05 is encountered (and `compressed=True`), those two 
     # bytes are replaced by 6 blanks.
+    # (Was missing its @staticmethod, so that while sdf.convertEbcdicToAscii(x)
+    # worked, the equally natural anInstance.convertEbcdicToAscii(x) silently
+    # bound the instance to `bytes` and x to `compressed`.)
+    @staticmethod
     def convertEbcdicToAscii(bytes, compressed=False):
         s = ""
         escaping = False

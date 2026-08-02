@@ -111,163 +111,652 @@ for i in range(2):
     except ImportError as error:
         pipIt(i, _pathToVAGC, error.name)
 
+# Disposition parameters, occupying the most-significant nibble of the mode
+# word passed to MONITOR(22).  See section 13 of the SDFPKG User's Guide, and
+# note that HALSTAT really does use them: MONITOR(22,"20000009") carries the
+# comment "RELEASE PREVIOUS SYMBOL".
+DISP_SELECT = 0x8
+DISP_MODF = 0x4
+DISP_RELS = 0x2
+DISP_RESV = 0x1
+
+# Symbol classes and types, from ##DRIVER.xpl.  Only the ones CHKMATCH cares
+# about are named here.
+SCLASS_LABEL = 2
+SCLASS_FUNC = 3
+STYPE_IORS = 8
+
+# Bits of the first flag byte of a Symbol Data Cell, i.e. of the most
+# significant byte of the fullword at offset 8.
+SFLAG1_TEMPLATE = 0x02
+SFLAG1_UNQUALIFIED = 0x01
+
+
 class sdfpkg:
     c = None
     s = None
-    COMMTABL= None
-    commtablAddress=None
-    
+    COMMTABL = None
+    commtablAddress = None
+
     def __init__(self, memoryModel, sdflibName, COMMTABL):
         self.c = cmem(memoryModel, sdflibName)
         self.s = sdf(self.c)
         self.COMMTABL = COMMTABL
+        # Which SDF `self.s` currently holds a parse of, so that selecting a
+        # different one re-parses rather than answering from stale tables.
+        self.parsedName = None
+        # The block a mode 8, 11 or 12 call last established.  Mode 13 searches
+        # within it, and per the User's Guide "a Mode 13 call must have been
+        # preceded at some point by a Mode 8, 11, or 12 call".
+        self.searchBlock = None
+        # (name, symbol number) of the last symbol mode 13 returned, so that
+        # "successive mode 13 calls are legal" resumes rather than repeating.
+        self.lastSymbolFound = None
 
-    '''
-    Perform a function of SDFPKG.ASM.
-    '''
+    # -- helpers ---------------------------------------------------------------
+
+    def _parse(self):
+        '''Make sure `self.s` holds a parse of whichever SDF is selected.'''
+        if self.c.current is None:
+            cmem.abend(4010)
+        if self.parsedName != self.c.current:
+            self.s.parseSDF()
+            self.parsedName = self.c.current
+            self.searchBlock = None
+            self.lastSymbolFound = None
+
+    def _reply(self, disp, **fields):
+        '''Store the outputs of a successful mode call into COMMTABL, both the
+        copy in `mem` and the caller's dictionary, then apply the disposition
+        parameters to the page the call just located.
+        '''
+        fields.setdefault("CRETURN", 0)
+        self.c.fromNative(fields)
+        self.COMMTABL.update(self.c.toNative())
+        if disp & (DISP_MODF | DISP_RELS | DISP_RESV):
+            # Mode 6 takes only MODF/RESV/RELS; SELECT has already been dealt
+            # with, and passing it on would be meaningless.
+            self.c.monitor22(((disp & 0x7) << 28) | 6)
+            self.COMMTABL.update(self.c.toNative())
+
+    def _fail(self, code):
+        '''Store a failure return code.  ADDR and PNTR are zeroed so that a
+        caller which forgets to check CRETURN gets an obviously bad pointer
+        rather than whatever the previous call happened to leave behind.
+        '''
+        self.c.fromNative({"CRETURN": code, "ADDR": 0, "PNTR": 0})
+        self.COMMTABL.update(self.c.toNative())
+
+    @staticmethod
+    def _flag1(symbolDataCell):
+        return (symbolDataCell.flagBits >> 24) & 0xFF
+
+    def _symbolName(self, i):
+        '''Full ASCII name of symbol number i (1-based, as SYMBNO is).'''
+        return sdf.fullSymbolASCII(self.s.symbolIndexTable[i - 1])
+
+    def _blockNodeVmp(self, blkno):
+        return sdf.vmpPlusOffset(
+            self.s.directoryRootCell.pHeadOfBlockIndexTable, 12 * blkno)
+
+    def _symbolNodeVmp(self, symbno):
+        return sdf.vmpPlusOffset(
+            self.s.directoryRootCell.pFirstSymbolIndexTableEntry,
+            12 * (symbno - 1))
+
+    def _chkMatch(self, symbno):
+        '''SDFPKG.ASM's CHKMATCH type filter, transcribed from SDFPKG.bal:
+
+            CHKTYPE  CLI   FIRST,1        IF IN FIRST MODE, TAKE IT AND GO
+                     BE    SYMFOUND
+                     CLI   CLASS,2
+                     BNE   NOT2
+                     CLI   TYPE,8
+                     BE    SKIPIT         EQUATE EXTERNAL
+            NOT2     CLI   CLASS,3        NO PROBLEMS IF CLASSES 1,2 OR 3
+                     BNH   SYMFOUND
+                     TM    FLAG1,X'03'    IS IT AN UNQUALIFIED STRUC TERMINAL?
+                     BC    5,SYMFOUND     OR A TEMPLATE HEADER???
+
+        `BC 5` branches on condition codes 1 and 3, i.e. on "some of the tested
+        bits are set" and "all of them are", so the last test accepts whenever
+        FLAG1 & 0x03 is non-zero.  Note that this is the opposite of how the
+        User's Guide describes the same algorithm ("If ... unqualified
+        STRUCTURE or TEMPLATE, then skip symbol"); the assembly is what
+        actually ran, so it wins.
+        '''
+        if self.c.first:
+            return True
+        cell = self.s.symbolIndexTable[symbno - 1].symbolDataCell
+        if cell.symbolClass == SCLASS_LABEL and cell.symbolType == STYPE_IORS:
+            return False                               # EQUATE EXTERNAL
+        if cell.symbolClass <= SCLASS_FUNC:
+            return True
+        return 0 != (self._flag1(cell) & (SFLAG1_TEMPLATE | SFLAG1_UNQUALIFIED))
+
+    def _findSymbolInBlock(self, block, name, startAfter=0):
+        '''Return the number of the first symbol of `block` called `name` that
+        survives CHKMATCH, or None.  SDFPKG binary-searches the symbol index
+        table and then scans two ways from the hit; since the whole table is
+        already parsed here, an ordered scan of the block's symbol range gives
+        the same answer with far less that can go wrong.
+        '''
+        first = block.blockDataCell.indexToFirstSymbol
+        last = block.blockDataCell.indexToLastSymbol
+        for symbno in range(max(first, startAfter + 1), last + 1):
+            if symbno < 1 or symbno > len(self.s.symbolIndexTable):
+                break
+            if self._symbolName(symbno) == name and self._chkMatch(symbno):
+                return symbno
+        return None
+
+    def _findBlockByName(self, name):
+        for blkno, block in enumerate(self.s.blockIndexTable):
+            cell = block.blockDataCell
+            if sdf.convertEbcdicToAscii(
+                    cell.blockName[:cell.lengthOfBlockName]) == name:
+                return blkno, block
+        return None, None
+
+    def _locateBlock(self, blkno, disp, extra=None):
+        block = self.s.blockIndexTable[blkno]
+        cell = block.blockDataCell
+        vmp = block.pBlockDataCell
+        self.searchBlock = block
+        self.lastSymbolFound = None
+        fields = {
+            "ADDR": self.c.mode5(vmp),
+            "PNTR": vmp,
+            "BLKNLEN": cell.lengthOfBlockName,
+            "CSECTNAM": sdf.convertEbcdicToAscii(block.blockCsectName),
+            "BLKNAM": sdf.convertEbcdicToAscii(
+                cell.blockName[:cell.lengthOfBlockName]),
+        }
+        if extra:
+            fields.update(extra)
+        self._reply(disp, **fields)
+
+    def _locateSymbol(self, symbno, disp, extra=None):
+        symbol = self.s.symbolIndexTable[symbno - 1]
+        vmp = symbol.pDataCell
+        fields = {
+            "ADDR": self.c.mode5(vmp),
+            "PNTR": vmp,
+            "SYMBNLEN": symbol.symbolDataCell.lengthOfSymbolName,
+            "SYMBNAM": self._symbolName(symbno),
+            "BLKNO": symbol.symbolDataCell.blockIndexNumber,
+        }
+        if extra:
+            fields.update(extra)
+        self._reply(disp, **fields)
+
+    def _locateStatement(self, index, disp, extra=None):
+        '''`index` is 0-based into statementIndexTable.'''
+        statement = self.s.statementIndexTable[index]
+        if statement.pStatementData == 0:
+            self._fail(24)                     # Statement is non-executable
+            return
+        vmp = statement.pStatementData
+        fields = {
+            "ADDR": self.c.mode5(vmp),
+            "PNTR": vmp,
+            "BLKNO": statement.halsBlockIndex,
+        }
+        if getattr(statement, "srn", None) is not None:
+            fields["SREFNO"] = sdf.convertEbcdicToAscii(statement.srn)
+            fields["INCLCNT"] = statement.includeCount
+        if extra:
+            fields.update(extra)
+        self._reply(disp, **fields)
+
+    def _statementIndex(self, stmtno):
+        '''Statement numbers are ISNs, which do not start at 1.  Returns the
+        0-based index into statementIndexTable, or None if out of range.
+        '''
+        table = getattr(self.s, "statementIndexTable", None)
+        if not table:
+            return None
+        index = stmtno - self.s.directoryRootCell.valueOfTheFirstISNInFile
+        if index < 0 or index >= len(table):
+            return None
+        return index
+
+    def _hasSRNs(self):
+        return 0 != (self.s.directoryRootCell.flagField & 0x8000)
+
+    # -- the mode call ---------------------------------------------------------
+
     def sdfpkg(self, mode, commtablAddress=None):
-        mode = mode & 0x0000FFFF
-        disp = mode & 0xF0000000
-        
+        '''Perform a function of SDFPKG.ASM.'''
+        disp = (mode >> 28) & 0xF
+        modeNumber = mode & 0x0000FFFF
+
         # Hand off operations which are virtual-memory manipulations to `cmem`.
-        
-        if mode == 0:
+
+        if modeNumber == 0:
             self.c.fromNative(self.COMMTABL, commtabl=commtablAddress)
             self.c.monitor22(mode, commtablAddress)
             self.COMMTABL.update(self.c.toNative())
+            self.parsedName = None
             return
-        
-        if mode in { 1, 2, 3, 4, 5, 6, 18 }:
+
+        if modeNumber in {1, 2, 3, 4, 5, 6, 18}:
             self.c.fromNative(self.COMMTABL)
             self.c.monitor22(mode)
             self.COMMTABL.update(self.c.toNative())
+            if modeNumber in {1, 18}:
+                self.parsedName = None
+                self.searchBlock = None
+                self.lastSymbolFound = None
             return
-        
-        # Otherwise, let us handle it here.
-        
-        if mode == 7:
+
+        # Everything from here on is a search, which is answered from the
+        # parsed representation of the SDF rather than by walking the trees in
+        # virtual memory as SDFPKG.ASM did.  The *results* are still virtual
+        # memory pointers and the addresses cmem pages them in at, because that
+        # is what the caller goes on to read the cell's raw System/360-format
+        # fields out of.
+
+        if modeNumber not in {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}:
+            cmem.abend(4016)
+
+        self.c.fromNative(self.COMMTABL)
+        if disp & DISP_SELECT:
+            if not self.c.autoSelect():
+                self.COMMTABL.update(self.c.toNative())
+                return
+        self._parse()
+
+        if modeNumber == 7:
             vmp = self.s.masterDirectoryCell.pDirectoryRootCell
-            COMMTABL = {
-                "CRETURN": 0,
-                "ADDR": self.c.mode5(vmp),
-                "PNTR": vmp
-            }
-            self.c.fromNative(COMMTABL) # Write to `COMMTABL` in `mem`.
-            self.COMMTABL.update(self.c.toNative())
-            self.c.monitor22(6, disp | 6) # Set disposition parameters.
+            self._reply(disp, ADDR=self.c.mode5(vmp), PNTR=vmp)
             return
-        
-        if mode == 8:
-            blkno = self.COMMTABL["BLKNO"]
-            cell = self.s.blockIndexTable[blkno]
-            dataCell = cell.blockDataCell
-            vmp = cell.pThisCell
-            COMMTABL = {
-                "CRETURN": 0,
-                "ADDR": self.c.mode5(vmp),
-                "PNTR": vmp,
-                "BLKNLEN": dataCell.lengthOfBlockName,
-                "CSECTNAM": self.s.convertEbcdicToAscii(cell.blockCsectName),
-                "BLKNAM": self.s.convertEbcdicToAscii(dataCell.blockName)
-            }
-            self.c.fromNative(COMMTABL) # Write to `COMMTABL` in `mem`.
-            self.COMMTABL.update(self.c.toNative())
-            self.c.monitor22(6, disp | 6) # Set disposition parameters.
-            return None
-        
-        if mode == 9:
-            symbno = self.COMMTABL["SYMBNO"] - 1
-            if symbno >= 0 and symbno < len(self.s.symbolIndexTable):
-                symbol = self.s.symbolIndexTable[symbno]
-                symbnlen = symbol.symbolDataCell.lengthOfSymbolName
-                if symbnlen <= 8:
-                    symbnam = symbol.nameStart[:symbnlen]
-                else:
-                    symbnlen = symbol.nameStart + \
-                               symbol.symbolDataCell.continuationOfSymbolName
-                vmp = symbol.pDataCell
-                COMMTABL = {
-                    "CRETURN": 0,
-                    "ADDR": self.c.mode5(vmp),
-                    "PNTR": vmp,
-                    "SYMBNLEN": symbnlen,
-                    "SYMBNAM": symbnam,
-                    "BLKNO": symbol.symbolDataCell.blockIndexNumber,
-                    "MEMORY": page
-                }
+
+        if modeNumber == 8:
+            blkno = self.COMMTABL["BLKNO"] or 0
+            if blkno < 0 or blkno >= len(self.s.blockIndexTable):
+                self._fail(16)
+                return
+            self._locateBlock(blkno, disp)
+            return
+
+        if modeNumber == 9:
+            symbno = self.COMMTABL["SYMBNO"] or 0
+            if symbno < 1 or symbno > len(self.s.symbolIndexTable):
+                self._fail(20)
+                return
+            self._locateSymbol(symbno, disp)
+            return
+
+        if modeNumber == 10:
+            index = self._statementIndex(self.COMMTABL["STMTNO"] or 0)
+            if index is None:
+                self._fail(36)                 # Outside legal range
+                return
+            self._locateStatement(index, disp)
+            return
+
+        if modeNumber == 11:
+            blkno, block = self._findBlockByName(self.COMMTABL["BLKNAM"] or "")
+            if block is None:
+                self._fail(16)                 # No block found with that name
+                return
+            self._locateBlock(blkno, disp, {"BLKNO": blkno})
+            return
+
+        if modeNumber == 12:
+            blkno, block = self._findBlockByName(self.COMMTABL["BLKNAM"] or "")
+            if block is None:
+                self._fail(16)
+                return
+            self.searchBlock = block
+            self.lastSymbolFound = None
+            name = self.COMMTABL["SYMBNAM"] or ""
+            symbno = self._findSymbolInBlock(block, name)
+            if symbno is None:
+                self._fail(20)                 # Block found, symbol not
+                return
+            self.lastSymbolFound = (name, symbno)
+            self._locateSymbol(symbno, disp, {
+                "BLKNO": blkno,
+                "SYMBNO": symbno,
+                "CSECTNAM": sdf.convertEbcdicToAscii(block.blockCsectName),
+            })
+            return
+
+        if modeNumber == 13:
+            if self.searchBlock is None:
+                # "A Mode 13 call must have been preceded at some point by a
+                # Mode 8, 11, or 12 call."
+                cmem.abend(4010)
+            name = self.COMMTABL["SYMBNAM"] or ""
+            startAfter = 0
+            if self.lastSymbolFound is not None \
+                    and self.lastSymbolFound[0] == name:
+                startAfter = self.lastSymbolFound[1]
+            symbno = self._findSymbolInBlock(self.searchBlock, name, startAfter)
+            if symbno is None:
+                self.lastSymbolFound = None
+                self._fail(20)                 # Symbol not found
+                return
+            self.lastSymbolFound = (name, symbno)
+            self._locateSymbol(symbno, disp, {"SYMBNO": symbno})
+            return
+
+        if modeNumber == 14:
+            if not self._hasSRNs():
+                self._fail(28)                 # SDF does not have SRNs
+                return
+            srn = self.COMMTABL["SREFNO"] or ""
+            inclcnt = self.COMMTABL["INCLCNT"] or 0
+            table = getattr(self.s, "statementIndexTable", [])
+            for index, statement in enumerate(table):
+                if sdf.convertEbcdicToAscii(statement.srn) == srn \
+                        and statement.includeCount == inclcnt:
+                    stmtno = index + \
+                        self.s.directoryRootCell.valueOfTheFirstISNInFile
+                    self._locateStatement(index, disp, {"STMTNO": stmtno})
+                    return
+            self._fail(20)                     # SRN not found
+            return
+
+        if modeNumber == 15:
+            blkno = self.COMMTABL["BLKNO"] or 0
+            if blkno < 0 or blkno >= len(self.s.blockIndexTable):
+                self._fail(16)
+                return
+            block = self.s.blockIndexTable[blkno]
+            vmp = self._blockNodeVmp(blkno)
+            self.searchBlock = block
+            self.lastSymbolFound = None
+            self._reply(disp, ADDR=self.c.mode5(vmp), PNTR=vmp,
+                        CSECTNAM=sdf.convertEbcdicToAscii(block.blockCsectName))
+            return
+
+        if modeNumber == 16:
+            symbno = self.COMMTABL["SYMBNO"] or 0
+            if symbno < 1 or symbno > len(self.s.symbolIndexTable):
+                self._fail(20)
+                return
+            vmp = self._symbolNodeVmp(symbno)
+            self._reply(disp, ADDR=self.c.mode5(vmp), PNTR=vmp)
+            return
+
+        if modeNumber == 17:
+            index = self._statementIndex(self.COMMTABL["STMTNO"] or 0)
+            if index is None:
+                self._fail(36)
+                return
+            statement = self.s.statementIndexTable[index]
+            vmp = statement.pThisCell
+            fields = {"ADDR": self.c.mode5(vmp), "PNTR": vmp}
+            if getattr(statement, "srn", None) is not None:
+                fields["SREFNO"] = sdf.convertEbcdicToAscii(statement.srn)
+                fields["INCLCNT"] = statement.includeCount
+            self._reply(disp, **fields)
+            return
+
+#------------------------------------------------------------------------------
+def runTests(sdflibName, memberNames):
+    '''Self-test.  Rather than hard-coding expected values against one
+    particular SDF -- which would mean checking a binary fixture into the
+    source tree and would only ever prove anything about that one file -- this
+    drives every mode against whatever SDFs it is given and checks the answers
+    against the independently-parsed representation of the same file.
+
+    The property that matters most to a caller such as the HAL/S compiler's
+    INCLUDE_SDF is that the ADDR a locate hands back really does point at the
+    located cell's raw System/360-format bytes, since that is what it reads its
+    fields out of.  So wherever a mode reports both a pointer and an address,
+    the test reads the bytes back out of the memory model and requires them to
+    agree with the parse.
+    '''
+    passed = 0
+    failed = 0
+
+    def check(desc, cond):
+        nonlocal passed, failed
+        if cond:
+            print("PASS:", desc)
+            passed += 1
+        else:
+            print("FAIL:", desc)
+            failed += 1
+
+    APGAREA = 0x100000
+    COMMTABL_ADDRESS = 0x1000
+    NPAGES = 250
+
+    for member in memberNames:
+        print(f"--- {sdflibName}/{member}.sdf")
+        memoryModel = bytearray(APGAREA + (NPAGES + 1) * 1680)
+        COMMTABL = {name: None for name, _, _ in cmem._COMMTABL_FIELDS}
+        p = sdfpkg(memoryModel, sdflibName, COMMTABL)
+        COMMTABL.update({"MISC": 0, "APGAREA": APGAREA, "AFCBAREA": 0,
+                         "NPAGES": NPAGES, "NBYTES": 0, "ADDR": 0, "PNTR": 0})
+        p.sdfpkg(0, COMMTABL_ADDRESS)
+        check("mode 0 initializes", COMMTABL["CRETURN"] == 0)
+
+        COMMTABL["SDFNAM"] = member
+        p.sdfpkg(4)
+        check("mode 4 selects the member", COMMTABL["CRETURN"] == 0)
+        p.s.verbose = False
+        p._parse()
+
+        def word(addr):
+            return int.from_bytes(memoryModel[addr:addr + 4], "big")
+
+        def half(addr):
+            return int.from_bytes(memoryModel[addr:addr + 2], "big")
+
+        # --- mode 7, the directory root ------------------------------------
+        p.sdfpkg(7)
+        check("mode 7 locates the directory root cell",
+              COMMTABL["CRETURN"] == 0
+              and COMMTABL["PNTR"] == p.s.masterDirectoryCell.pDirectoryRootCell)
+        drc = p.s.directoryRootCell
+        check("mode 7's ADDR holds the root cell's raw bytes",
+              half(COMMTABL["ADDR"]) == drc.flagField)
+
+        # --- modes 8 and 15, blocks by number ------------------------------
+        for blkno, block in enumerate(p.s.blockIndexTable):
+            COMMTABL["BLKNO"] = blkno
+            p.sdfpkg(8)
+            check(f"mode 8 locates block {blkno}",
+                  COMMTABL["CRETURN"] == 0
+                  and COMMTABL["PNTR"] == block.pBlockDataCell)
+            name = sdf.convertEbcdicToAscii(
+                block.blockDataCell.blockName[
+                    :block.blockDataCell.lengthOfBlockName])
+            check(f"mode 8 reports block {blkno}'s name",
+                  COMMTABL["BLKNAM"] == name
+                  and COMMTABL["BLKNLEN"] == block.blockDataCell.lengthOfBlockName)
+            check(f"mode 8's ADDR holds block {blkno}'s raw data cell",
+                  word(COMMTABL["ADDR"]) == block.blockDataCell.pNextHigherMember)
+
+            COMMTABL["BLKNO"] = blkno
+            p.sdfpkg(15)
+            check(f"mode 15 locates block node {blkno}",
+                  COMMTABL["CRETURN"] == 0
+                  and COMMTABL["PNTR"] == p._blockNodeVmp(blkno))
+            check(f"mode 15's ADDR holds block node {blkno}'s pointer field",
+                  word(COMMTABL["ADDR"] + 8) == block.pBlockDataCell)
+
+            # --- mode 11, the same block by name --------------------------
+            COMMTABL["BLKNAM"] = name
+            p.sdfpkg(11)
+            check(f"mode 11 finds block {blkno} by name",
+                  COMMTABL["CRETURN"] == 0 and COMMTABL["BLKNO"] == blkno
+                  and COMMTABL["PNTR"] == block.pBlockDataCell)
+
+        COMMTABL["BLKNO"] = len(p.s.blockIndexTable)
+        p.sdfpkg(8)
+        check("mode 8 rejects an out-of-range block number",
+              COMMTABL["CRETURN"] == 16)
+        COMMTABL["BLKNAM"] = "NOSUCHBLOCK"
+        p.sdfpkg(11)
+        check("mode 11 reports 16 for an unknown block name",
+              COMMTABL["CRETURN"] == 16)
+
+        # --- modes 9 and 16, symbols by number ------------------------------
+        for symbno in range(1, len(p.s.symbolIndexTable) + 1):
+            symbol = p.s.symbolIndexTable[symbno - 1]
+            COMMTABL["SYMBNO"] = symbno
+            p.sdfpkg(9)
+            ok = (COMMTABL["CRETURN"] == 0
+                  and COMMTABL["PNTR"] == symbol.pDataCell
+                  and COMMTABL["SYMBNAM"] == sdf.fullSymbolASCII(symbol)
+                  and COMMTABL["BLKNO"] == symbol.symbolDataCell.blockIndexNumber)
+            check(f"mode 9 locates symbol {symbno}", ok)
+            check(f"mode 9's ADDR holds symbol {symbno}'s raw data cell",
+                  word(COMMTABL["ADDR"] + 8) == symbol.symbolDataCell.flagBits)
+
+            COMMTABL["SYMBNO"] = symbno
+            p.sdfpkg(16)
+            check(f"mode 16 locates symbol node {symbno}",
+                  COMMTABL["CRETURN"] == 0
+                  and COMMTABL["PNTR"] == p._symbolNodeVmp(symbno))
+            check(f"mode 16's ADDR holds symbol node {symbno}'s pointer field",
+                  word(COMMTABL["ADDR"] + 8) == symbol.pDataCell)
+
+        COMMTABL["SYMBNO"] = 0
+        p.sdfpkg(9)
+        check("mode 9 rejects symbol number 0", COMMTABL["CRETURN"] == 20)
+        COMMTABL["SYMBNO"] = len(p.s.symbolIndexTable) + 1
+        p.sdfpkg(9)
+        check("mode 9 rejects an out-of-range symbol number",
+              COMMTABL["CRETURN"] == 20)
+
+        # --- modes 12 and 13, symbols by name -------------------------------
+        for blkno, block in enumerate(p.s.blockIndexTable):
+            first = block.blockDataCell.indexToFirstSymbol
+            last = block.blockDataCell.indexToLastSymbol
+            blockName = sdf.convertEbcdicToAscii(
+                block.blockDataCell.blockName[
+                    :block.blockDataCell.lengthOfBlockName])
+            for symbno in range(max(1, first), min(last, len(p.s.symbolIndexTable)) + 1):
+                if not p._chkMatch(symbno):
+                    continue                # CHKMATCH would skip past it
+                name = p._symbolName(symbno)
+                COMMTABL["BLKNAM"] = blockName
+                COMMTABL["SYMBNAM"] = name
+                p.sdfpkg(12)
+                # An earlier symbol of the same name legitimately wins, so
+                # check the name rather than the number.
+                check(f"mode 12 finds {blockName}.{name}",
+                      COMMTABL["CRETURN"] == 0
+                      and p._symbolName(COMMTABL["SYMBNO"]) == name
+                      and COMMTABL["BLKNO"] == blkno)
+                check(f"mode 12's ADDR holds {name}'s raw data cell",
+                      word(COMMTABL["ADDR"] + 8)
+                      == p.s.symbolIndexTable[
+                          COMMTABL["SYMBNO"] - 1].symbolDataCell.flagBits)
+
+                # Mode 13 searches the block mode 12 just established.
+                COMMTABL["SYMBNAM"] = name
+                p.sdfpkg(13)
+                check(f"mode 13 continues the search for {name}",
+                      COMMTABL["CRETURN"] in (0, 20))
+            COMMTABL["BLKNAM"] = blockName
+            COMMTABL["SYMBNAM"] = "NOSUCHSYMBOL"
+            p.sdfpkg(12)
+            check(f"mode 12 reports 20 for an unknown symbol in {blockName}",
+                  COMMTABL["CRETURN"] == 20)
+
+        # --- modes 10, 14 and 17, statements --------------------------------
+        table = getattr(p.s, "statementIndexTable", [])
+        firstISN = drc.valueOfTheFirstISNInFile
+        for index, statement in enumerate(table):
+            COMMTABL["STMTNO"] = firstISN + index
+            p.sdfpkg(10)
+            if statement.pStatementData == 0:
+                check(f"mode 10 reports 24 for non-executable statement {index}",
+                      COMMTABL["CRETURN"] == 24)
             else:
-                COMMTABL = {
-                    "CRETURN": 1,
-                    "ADDR": 0,
-                    "PNTR": 0
-                }
-            self.c.fromNative(COMMTABL) # Write to `COMMTABL` in `mem`.
-            self.COMMTABL.update(self.c.toNative())
-            self.c.monitor22(6, disp | 6) # Set disposition parameters.
-            return
-            
-        if mode == 10:
-            stmtno = self.COMMTABL["STMTNO"] - 1
-            if stmtno >= 0 and stmtno < len(self.s.statementIndexTable):
-                statement = self.s.statementIndexTable[stmtno]
-                vmp = s.v.mode5(symbol.pThisCell)
-                COMMTABL = {
-                    "CRETURN": 0, # ***FIXME***
-                    "ADDR": self.c.mode5(vmp),
-                    "PNTR": vmp,
-                    "SREFNO": statement.srn,
-                    "INCLCNT": statement.includeCount,
-                    "BLKNO": statement.halsBlockIndex
-                }
-            self.c.fromNative(COMMTABL) # Write to `COMMTABL` in `mem`.
-            self.COMMTABL.update(self.c.toNative())
-            self.c.monitor22(6, disp | 6) # Set disposition parameters.
-            return
-        
-        if mode == 11:
-            return 
-        
-        if mode == 12:
-            return 
-        
-        if mode == 13:
-            return 
-        
-        if mode == 14:
-            return 
-        
-        if mode == 15:
-            return 
-        
-        if mode == 16:
-            symbno = self.COMMTABL["SYMBNO"] - 1
-            if symbno >= 0 and symbno < len(self.s.symbolIndexTable):
-                COMMTABL = {
-                    "CRETURN": 0,
-                    "ADDR": 0,
-                    "PNTR": self.s.symbolIndexTable[symbno]
-                }
-            else:
-                COMMTABL = {
-                    "CRETURN": 1,
-                    "ADDR": 0,
-                    "PNTR": 0
-                }
-            self.c.fromNative(COMMTABL) # Write to `COMMTABL` in `mem`.
-            self.COMMTABL.update(self.c.toNative())
-            self.c.monitor22(6, disp | 6) # Set disposition parameters.
-            return
-            
-        if mode == 17:
-            return 
-        
-        cmem.abend(4016)
+                check(f"mode 10 locates statement {index}",
+                      COMMTABL["CRETURN"] == 0
+                      and COMMTABL["PNTR"] == statement.pStatementData
+                      and COMMTABL["BLKNO"] == statement.halsBlockIndex)
+
+            COMMTABL["STMTNO"] = firstISN + index
+            p.sdfpkg(17)
+            check(f"mode 17 locates statement node {index}",
+                  COMMTABL["CRETURN"] == 0
+                  and COMMTABL["PNTR"] == statement.pThisCell)
+
+            if p._hasSRNs() and statement.pStatementData != 0:
+                COMMTABL["SREFNO"] = sdf.convertEbcdicToAscii(statement.srn)
+                COMMTABL["INCLCNT"] = statement.includeCount
+                p.sdfpkg(14)
+                # Duplicate SRNs are legal, so only require that whatever was
+                # found carries the SRN asked for.
+                found = COMMTABL["CRETURN"] == 0 and COMMTABL["STMTNO"] is not None
+                check(f"mode 14 finds statement {index} by its SRN",
+                      found and sdf.convertEbcdicToAscii(
+                          table[COMMTABL["STMTNO"] - firstISN].srn)
+                      == sdf.convertEbcdicToAscii(statement.srn))
+
+        if table:
+            COMMTABL["STMTNO"] = firstISN - 1
+            p.sdfpkg(10)
+            check("mode 10 rejects a statement number below the first ISN",
+                  COMMTABL["CRETURN"] == 36)
+            COMMTABL["STMTNO"] = firstISN + len(table)
+            p.sdfpkg(17)
+            check("mode 17 rejects a statement number past the last ISN",
+                  COMMTABL["CRETURN"] == 36)
+
+        # --- dispositions ----------------------------------------------------
+        COMMTABL["BLKNO"] = 0
+        p.sdfpkg((DISP_RESV << 28) | 8)
+        reserved = [e for e in p.c.padSummary()["cached"] if e["resucnt"] > 0]
+        check("a RESV disposition reserves the located page", len(reserved) == 1)
+        COMMTABL["BLKNO"] = 0
+        p.sdfpkg((DISP_RELS << 28) | 8)
+        reserved = [e for e in p.c.padSummary()["cached"] if e["resucnt"] > 0]
+        check("a RELS disposition releases it again", len(reserved) == 0)
+
+        # --- SELECT (auto-select) --------------------------------------------
+        COMMTABL["SDFNAM"] = member
+        p.sdfpkg((DISP_SELECT << 28) | 7)
+        check("a SELECT disposition selects and then locates",
+              COMMTABL["CRETURN"] == 0
+              and COMMTABL["PNTR"] == p.s.masterDirectoryCell.pDirectoryRootCell)
+        COMMTABL["SDFNAM"] = "NOSUCH"
+        p.sdfpkg((DISP_SELECT << 28) | 7)
+        check("a SELECT of a missing SDF reports 8 and does not locate",
+              COMMTABL["CRETURN"] == 8)
+
+    print()
+    print(f"{passed} passed, {failed} failed")
+    return failed == 0
+
 
 #------------------------------------------------------------------------------
 # Stand-alone program.
 if __name__ == "__main__":
     import pprint
-    
+
+    if "--test" in sys.argv:
+        sdflibName = "SDFLIB"
+        members = []
+        for parm in sys.argv[1:]:
+            if parm.startswith("--sdflib="):
+                sdflibName = parm.split("=", 1)[1]
+            elif parm.startswith("--sdf="):
+                members.append(parm.split("=", 1)[1])
+        if not members:
+            # PASS3 names every SDF it writes "##" + the first 6 characters of
+            # the underscore-stripped compilation-unit name, so anything in the
+            # library not spelled that way is not one of ours and is left
+            # alone.  Name it explicitly with --sdf= to test it anyway.
+            members = sorted(f[:-4] for f in os.listdir(sdflibName)
+                             if f.endswith(".sdf") and f.startswith("##"))
+        if not members:
+            print(f"No SDFs found in {sdflibName}/", file=sys.stderr)
+            sys.exit(1)
+        sys.exit(0 if runTests(sdflibName, members) else 1)
+
     memoryModel = bytearray(0x100000)
     COMMTABL = {
         "APGAREA": None, 

@@ -102,6 +102,9 @@ class cmem:
     PAGE_SIZE = 1680
     PAD_ENTRY_SIZE = 16
     COMMTABL_SIZE = 120
+    # "The Paging Area cannot be augmented past its maximum value", SDFPKG
+    # User's Guide section 13.3, which also gives 250 as the default PAD size.
+    MAX_PAGES = 250
 
     # COMMTABL field offsets.
     OFF_APGAREA = 0
@@ -190,7 +193,13 @@ class cmem:
 
     @staticmethod
     def abend(code):
+        # os._exit() is deliberate -- an abend must be uncatchable and must not
+        # run atexit handlers -- but it also discards whatever is still sitting
+        # in stdout's buffer, which silently swallows the output of whatever
+        # was running at the time.  So flush both streams first.
+        sys.stdout.flush()
         print(f"Abend {code}", file=sys.stderr)
+        sys.stderr.flush()
         os._exit(1)
 
     # -- COMMTABL field access -------------------------------------------------
@@ -226,7 +235,11 @@ class cmem:
         self.mem[a:a + length] = encodeText(value, length)
 
     def _readSdfName(self):
-        return self._getText(self.OFF_SDFNAM, 8, stripText=False)
+        # Stripped, to agree with what toNative() reports for the same field.
+        # Trailing blanks are a property of the 8-character COMMTABL field, not
+        # of the SDF's identity; _resolveSdfName() puts them back if that is
+        # how the member happens to be named on disk.
+        return self._getText(self.OFF_SDFNAM, 8)
 
     def toNative(self):
         '''Translate COMMTABL from mem into a dict of native Python values, keyed by field name.'''
@@ -391,10 +404,25 @@ class cmem:
 
     # -- SDF file management -------------------------------------------------
 
+    def _sdfPath(self, name):
+        return os.path.join(self.sdflib, name + ".sdf")
+
+    def _resolveSdfName(self, name):
+        '''SDFNAM is an 8-character blank-padded field, and PASS3 keeps the
+        padding in the filename it writes ("##COMPA .sdf").  Callers who build
+        the name themselves often leave the padding off, so accept either
+        spelling and canonicalize on whichever one actually exists.  Returns
+        None if neither does.
+        '''
+        for candidate in (name, name.rstrip(" "), name.ljust(8)):
+            if os.path.exists(self._sdfPath(candidate)):
+                return candidate
+        return None
+
     def _openSdf(self, name):
         if name in self.sdfs:
             return self.sdfs[name]
-        path = os.path.join(self.sdflib, name + ".sdf")
+        path = self._sdfPath(name)
         fileobj = open(path, "r+b")
         sdfId = self._nextSdfId
         self._nextSdfId += 1
@@ -482,12 +510,21 @@ class cmem:
         if not self.initialized:
             self.abend(4009)
 
+        # "Auto-Select": for modes 5 and 7-17 the SELECT disposition means
+        # "select the SDF named in SDFNAM first, then do the operation".  See
+        # note 1 of section 13 of the SDFPKG User's Guide.  Modes 7-17 are
+        # implemented a layer up, in sdfpkg, but the select belongs here since
+        # this is where selection lives; sdfpkg calls autoSelect() for them.
+        if select and modeNumber in (5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17):
+            if not self.autoSelect():
+                return
+
         if modeNumber == 1:
             self._mode1()
         elif modeNumber == 2:
-            self.abend(4001)
+            self._mode2()
         elif modeNumber == 3:
-            self.abend(4012)
+            self._mode3()
         elif modeNumber == 4:
             self._mode4()
         elif modeNumber == 5:
@@ -554,6 +591,10 @@ class cmem:
             self.afcbarea = None
             self.nbytes = None
 
+        # Remembered so that mode 3 (rescind) knows how far back to unwind the
+        # augments applied by mode 2.
+        self.baseNpages = self.npages
+
         self._setU16(self.OFF_CRETURN, 0)
         self._setU32(self.OFF_APGAREA, 0)
         self._setU32(self.OFF_AFCBAREA, 0)
@@ -561,6 +602,78 @@ class cmem:
         self._setU16(self.OFF_NPAGES, self.padSize // 16)
 
         self.initialized = True
+
+    def _pagesStillAvailable(self):
+        '''Mode 0, 2 and 3 all report, in NPAGES, how many further pages the
+        Paging Area could still grow by.  That is bounded both by the PAD and
+        by the documented maximum Paging Area size.
+        '''
+        return max(0, min(self.padSize // 16, self.MAX_PAGES) - self.npages)
+
+    def _mode2(self):
+        '''Augment the Paging Area and/or the FCB Area.
+
+        The original GETMAINed fresh storage and spliced it in.  There is no
+        allocator here, so an augment can only be honoured when the caller's
+        area happens to abut the one we already have -- which is exactly what
+        happens when the caller is carving both out of one static memory model,
+        the arrangement the Python port uses.  Anything else abends rather than
+        being quietly ignored, so that a genuine shortfall is noticed instead
+        of turning into silent corruption later.
+        '''
+        apgarea = self._getU32(self.OFF_APGAREA)
+        npages = self._getU16(self.OFF_NPAGES)
+        afcbarea = self._getU32(self.OFF_AFCBAREA)
+        nbytes = self._getU16(self.OFF_NBYTES)
+
+        if npages != 0:
+            if apgarea == 0:
+                self.abend(4013)                      # User's Guide case 2
+            if npages > self._pagesStillAvailable():
+                self.abend(4013)
+            if apgarea != self.apgarea + self.npages * self.PAGE_SIZE:
+                # Not contiguous with the existing Paging Area, so we cannot
+                # represent the result as one flat run of pages.
+                self.abend(4013)
+            self.npages += npages
+        # npages == 0 is "no action" for the Paging Area, whatever APGAREA says.
+
+        if nbytes != 0:
+            if afcbarea == 0:
+                self.abend(4015)                      # User's Guide case 5
+            # cmem keeps SDF metadata in Python objects rather than in an FCB
+            # area, so an FCB augment is accepted and merely accounted for.
+            self.nbytes = (self.nbytes or 0) + nbytes
+        # nbytes == 0 is "no action" for the FCB Area.
+
+        self._setU16(self.OFF_CRETURN, 0)
+        self._setU32(self.OFF_APGAREA, 0)
+        self._setU32(self.OFF_AFCBAREA, 0)
+        self._setU16(self.OFF_NBYTES, 0)
+        self._setU16(self.OFF_NPAGES, self._pagesStillAvailable())
+
+    def _mode3(self):
+        '''Rescind Paging Area augments.  "All Paging Area augments are removed
+        by a single rescind", and none of the FCB Area augments can be.  Any
+        page cached in the part of the area that is going away has to be
+        written back first if it was modified, and must not still be reserved.
+        '''
+        for i in range(self.baseNpages, self.npages):
+            if self._padGetId(i) == 0:
+                continue
+            if self._padGetResucnt(i) > 0:
+                self.abend(4012)
+            if self._padGetModifiedFlag(i):
+                self._writePageToSdf(i)
+            self._padMarkFree(i)
+
+        self.npages = self.baseNpages
+
+        self._setU16(self.OFF_CRETURN, 0)
+        self._setU32(self.OFF_APGAREA, 0)
+        self._setU32(self.OFF_AFCBAREA, 0)
+        self._setU16(self.OFF_NBYTES, 0)
+        self._setU16(self.OFF_NPAGES, self._pagesStillAvailable())
 
     def _mode1(self):
         for i in range(self.npages):
@@ -582,20 +695,29 @@ class cmem:
 
         self.__del__()
 
+    def autoSelect(self):
+        '''Honour the SELECT disposition: select the SDF named in SDFNAM before
+        carrying out the operation the mode number asks for.  Returns True if
+        the caller should go on to do that operation, or False if the select
+        failed, in which case CRETURN already holds the failure code (8) and
+        nothing further should be attempted.
+        '''
+        if not self.initialized:
+            self.abend(4009)
+        self._mode4()
+        return self._getU16(self.OFF_CRETURN) == 0
+
     def _mode4(self):
-        name = self._readSdfName()
-        #print(f"'{name}'")
+        name = self._resolveSdfName(self._readSdfName())
+        if name is None:
+            self._setU16(self.OFF_CRETURN, 8)
+            return
 
         for i in range(self.npages):
             if self._nameForPad(i) == name:
                 self.current = name
                 self._setU16(self.OFF_CRETURN, 0)
                 return
-
-        path = os.path.join(self.sdflib, name + ".sdf")
-        if not os.path.exists(path):
-            self._setU16(self.OFF_CRETURN, 8)
-            return
 
         self._cachePage(name, 0)
         self.current = name
@@ -680,7 +802,9 @@ class cmem:
             self._padDecResucntIfPositive(idx)
 
     def _mode18(self):
-        name = self._readSdfName()
+        name = self._resolveSdfName(self._readSdfName())
+        if name is None:
+            name = self._readSdfName()
         indices = [i for i in range(self.npages) if self._nameForPad(i) == name]
 
         if not indices or any(self._padGetResucnt(i) > 0 for i in indices):
@@ -883,10 +1007,100 @@ if __name__ == "__main__":
             check("VMP normalizing to an out-of-range page number aborts (abend 4005)",
                   _runInChild(tryBadOffset) == 1)
 
-            check("MODE_NUMBER 2 aborts (abend 4001)",
-                  _runInChild(lambda: m2.monitor22(buildMode(2))) == 1)
-            check("MODE_NUMBER 3 aborts (abend 4012)",
-                  _runInChild(lambda: m2.monitor22(buildMode(3))) == 1)
+            # --- modes 2 and 3: augment / rescind the Paging Area -------------
+            def augment(m, mem, ct, apgarea, npages, afcbarea=0, nbytes=0):
+                packU32(mem, ct + cmem.OFF_APGAREA, apgarea)
+                packU16(mem, ct + cmem.OFF_NPAGES, npages)
+                packU32(mem, ct + cmem.OFF_AFCBAREA, afcbarea)
+                packU16(mem, ct + cmem.OFF_NBYTES, nbytes)
+                m.monitor22(buildMode(2))
+
+            basePages = 3
+            mA, memA, ctA = _makeInstance(sdflib, basePages)
+            # The PAD in _makeInstance is sized to exactly npages entries, so
+            # there is no room to grow; that itself is worth asserting.
+            check("mode 2 with NPAGES=0 is a no-op",
+                  (augment(mA, memA, ctA, 0, 0),
+                   unpackU16(memA, ctA + cmem.OFF_CRETURN) == 0
+                   and mA.npages == basePages)[1])
+            check("mode 2 reports 0 further pages when the PAD is full",
+                  unpackU16(memA, ctA + cmem.OFF_NPAGES) == 0)
+            check("mode 2 with NPAGES>0 but APGAREA=0 aborts (abend 4013)",
+                  _runInChild(lambda: augment(mA, memA, ctA, 0, 1)) == 1)
+            check("mode 2 beyond the PAD's capacity aborts (abend 4013)",
+                  _runInChild(lambda: augment(
+                      mA, memA, ctA,
+                      mA.apgarea + mA.npages * cmem.PAGE_SIZE, 1)) == 1)
+
+            # Now an instance whose PAD has room, so an augment can succeed.
+            padRoom = 6
+            apgarea = 0x1000
+            commtablAddr = 0x100
+            padAddr = apgarea + padRoom * cmem.PAGE_SIZE
+            memB = bytearray(padAddr + 16 * padRoom + 256)
+            mB = cmem(memB, sdflib)
+            packU32(memB, commtablAddr + cmem.OFF_APGAREA, apgarea)
+            packU32(memB, commtablAddr + cmem.OFF_AFCBAREA, 0)
+            packU16(memB, commtablAddr + cmem.OFF_NPAGES, 2)
+            packU16(memB, commtablAddr + cmem.OFF_NBYTES, 0)
+            packU16(memB, commtablAddr + cmem.OFF_MISC, 0x02)
+            packU32(memB, commtablAddr + cmem.OFF_PNTR, 16 * padRoom)
+            packU32(memB, commtablAddr + cmem.OFF_ADDR, padAddr)
+            mB.monitor22(0, commtablAddr)
+            ctB = commtablAddr
+            check("mode 0 reports the pages still addable",
+                  unpackU16(memB, ctB + cmem.OFF_NPAGES) == padRoom)
+
+            augment(mB, memB, ctB, apgarea + 2 * cmem.PAGE_SIZE, 3)
+            check("a contiguous mode 2 augment succeeds",
+                  unpackU16(memB, ctB + cmem.OFF_CRETURN) == 0 and mB.npages == 5)
+            check("mode 2 reports the pages still addable after augmenting",
+                  unpackU16(memB, ctB + cmem.OFF_NPAGES) == padRoom - 5)
+            check("a non-contiguous mode 2 augment aborts (abend 4013)",
+                  _runInChild(lambda: augment(
+                      mB, memB, ctB, apgarea + 99 * cmem.PAGE_SIZE, 1)) == 1)
+            check("mode 2 with NBYTES>0 but AFCBAREA=0 aborts (abend 4015)",
+                  _runInChild(lambda: augment(mB, memB, ctB, 0, 0, 0, 512)) == 1)
+
+            # A page cached in the augmented region must be given up by mode 3.
+            sdfPathB = os.path.join(sdflib, "AUGMENT.sdf")
+            with open(sdfPathB, "wb") as f:
+                f.write(bytes(cmem.PAGE_SIZE * 5))
+            writeSdfName(memB, ctB, "AUGMENT")
+            mB.monitor22(buildMode(4))
+            for pageNum in range(5):
+                packU32(memB, ctB + cmem.OFF_PNTR, (pageNum << 16) | 0)
+                mB.monitor22(buildMode(5))
+            check("all 5 pages of the augmented area are in use",
+                  mB.padSummary()["cachedCount"] == 5)
+
+            mB.monitor22(buildMode(3))
+            check("mode 3 restores the Paging Area to its mode-0 size",
+                  unpackU16(memB, ctB + cmem.OFF_CRETURN) == 0 and mB.npages == 2)
+            check("mode 3 frees the PAD entries above the base size",
+                  mB.padSummary()["cachedCount"] == 2)
+            check("mode 3 reports the pages still addable",
+                  unpackU16(memB, ctB + cmem.OFF_NPAGES) == padRoom - 2)
+
+            def rescindWhileReserved():
+                augment(mB, memB, ctB, apgarea + 2 * cmem.PAGE_SIZE, 1)
+                packU32(memB, ctB + cmem.OFF_PNTR, (4 << 16) | 0)
+                mB.monitor22(buildMode(5, resv=1))
+                mB.monitor22(buildMode(3))
+            check("mode 3 with a reserved page in the augment aborts (abend 4012)",
+                  _runInChild(rescindWhileReserved) == 1)
+
+            # --- SELECT (auto-select) disposition ------------------------------
+            writeSdfName(memB, ctB, "MULTI")
+            packU32(memB, ctB + cmem.OFF_PNTR, (0 << 16) | 0)
+            mB.monitor22(buildMode(5, select=1))
+            check("SELECT on mode 5 selects the SDF named in SDFNAM first",
+                  unpackU16(memB, ctB + cmem.OFF_CRETURN) == 0
+                  and mB.current == "MULTI")
+            writeSdfName(memB, ctB, "NOSUCH")
+            mB.monitor22(buildMode(5, select=1))
+            check("SELECT on a missing SDF reports CRETURN=8 and does not locate",
+                  unpackU16(memB, ctB + cmem.OFF_CRETURN) == 8)
 
             def tryModifyWithoutUpdat():
                 m3, mem3, ct3 = _makeInstance(sdflib, 1, updat=False)
