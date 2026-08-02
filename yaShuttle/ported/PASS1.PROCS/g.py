@@ -668,6 +668,8 @@ if not suppress:
             templib = True
         elif parm == "--sdf":
             sdf = True
+        elif parm.startswith("--sdfi=") or parm in ("--sdfpkg", "--no-sdfpkg"):
+            pass  # Handled in xplBuiltins.py, where MONITOR(22) lives.
         elif parm == "--debugwr":
             debugwr = True
         elif parm in pCON or ("NO" + parm) in pCON or \
@@ -713,6 +715,14 @@ if not suppress:
             print('                 Note that if --bfs is used, place it first.')
             print('--tabs=N         (Default 8.) Tab-stop size in source code.')
             print('--templib        Identify &&TEMPLIB with TEMPLIB.')
+            print('--sdfi=D         Name of a directory to read Simulation')
+            print('                 Data Files (SDF) from, so that an')
+            print('                 INCLUDE TEMPLATE can be satisfied from an')
+            print('                 SDF in preference to the template library.')
+            print('                 By default there is no such directory and')
+            print('                 no SDFs are read.  Customarily')
+            print('                 --sdfi=SDFLIB.  Same name and default as')
+            print('                 the switch of that name in HALSFC-PASS1.')
             print('--sdf            Enable the Simulation Data File (SDF)')
             print('                 machinery, namely the SIMULATING flag')
             print('                 derived from the SDL compiler option and')

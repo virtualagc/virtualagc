@@ -49,17 +49,22 @@ from HALINCL.SPACELIB import NEXT_ELEMENT
 from HASH import HASH
 from HEX import HEX
 
-implemented = False # default
-if "--sdfpkg" in sys.argv:
-    implemented = True
-if "--no-sdfpkg" in sys.argv:
-    implemented = False
+# Whether SDFs can be imported at all.  The switch is --sdfi=DIRECTORY, named
+# and defaulted to match HALSFC-PASS1's: with no directory given no SDFs are
+# read, INCLUDE_SDF always reports "not found", and every INCLUDE TEMPLATE
+# falls back on the template library exactly as it did before.  xplBuiltins
+# parses the switch, because MONITOR(22) is where the library is opened.
+implemented = sdfAvailable()
 
 # A model of memory as bytes, used only by `INCLUDE_SDF`.  It needs to be just
-# big enough to hold 
+# big enough to hold
 #    COMMTABL (30 `FIXED`)
 #    250 SDF pages (1680 bytes) (From SDFPKG User's Guide, PDF p. 11)
 #    Area for FCBs.
+# Note that the PAD -- the paging area directory, 16 bytes per page -- has to
+# live somewhere too, so there is a fourth area for it.  Sizing the paging area
+# at the documented maximum of 250 pages, rather than growing it on demand, is
+# what lets MONITOR(22,2)'s "augment" never actually have to find more memory.
 MAX_CONCURRENT_SDFS = 10
 COMMTABL_base = 0
 COMMTABL_size = 30 * 4
@@ -69,8 +74,11 @@ SDF_PAGES_base = COMMTABL_base + COMMTABL_size
 SDF_PAGES_size = SDF_NUM_PAGES * SDF_PAGE_size
 FCBS_base = SDF_PAGES_base + SDF_PAGES_size
 FCBS_size = MAX_CONCURRENT_SDFS * 128
-memorySize = FCBS_base + FCBS_size
+PAD_base = FCBS_base + FCBS_size
+PAD_size = SDF_NUM_PAGES * 16
+memorySize = PAD_base + PAD_size
 memoryModel = bytearray(memorySize)
+registerSdfMemoryModel(memoryModel)
 
 # ROUTINE TO INCLUDE VARIABLES FROM AN EXTERNAL UNIT'S SDF
 

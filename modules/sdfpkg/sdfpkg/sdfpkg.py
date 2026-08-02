@@ -447,8 +447,9 @@ class sdfpkg:
         if modeNumber == 13:
             if self.searchBlock is None:
                 # "A Mode 13 call must have been preceded at some point by a
-                # Mode 8, 11, or 12 call."
-                cmem.abend(4010)
+                # Mode 8, 11, or 12 call."  SYMBSRCH checks SAVFSYMB and takes
+                # ABEND8, which is 4020, "BLOCK NOT PREVIOUSLY SPECIFIED".
+                cmem.abend(4020)
             name = self.COMMTABL["SYMBNAM"] or ""
             startAfter = 0
             if self.lastSymbolFound is not None \

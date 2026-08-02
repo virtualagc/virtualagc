@@ -259,6 +259,81 @@ namePassedToCompiler = ""
 
 redirections = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # For MONITOR(8).
 
+#-----------------------------------------------------------------------------
+# MONITOR(22) -- the SDF access package, SDFPKG.
+#
+# SDFPKG is reached only through MONITOR(22, mode), taking its arguments from
+# and returning its results in a fixed-layout area of memory called COMMTABL
+# rather than through the call.  It also needs somewhere to page the SDF into.
+# Neither of those fits a Python port with no memory model, so INCLUDE_SDF
+# (HALINCL/INCSDF.py) keeps a small `bytearray` that serves as both, and hands
+# it to us here at import time.  See the notes at the head of INCSDF.py.
+#
+# We cannot import INCSDF from here -- it imports us -- so the registration
+# goes the other way round.
+
+sdfpkgInstance = None       # The `sdfpkg` class, once MONITOR(22,0) has run.
+sdfMemoryModel = None       # The bytearray COMMTABL and the paging area live in.
+sdfCOMMTABL = None          # Python-dictionary mirror of COMMTABL, for sdfpkg.
+sdfLibrary = None           # Directory the SDFs are read from, or None for
+                            # "no SDFs", which is also HALSFC-PASS1's default.
+
+for parm in sys.argv[1:]:
+    if parm.startswith("--sdfi="):
+        sdfLibrary = parm[7:]
+    elif parm == "--sdfpkg":
+        # Older spelling, equivalent to --sdfi=SDFLIB.
+        sdfLibrary = "SDFLIB"
+    elif parm == "--no-sdfpkg":
+        sdfLibrary = None
+
+
+def registerSdfMemoryModel(memoryModel):
+    '''Called by INCSDF.py at import time to lend us its memory model.'''
+    global sdfMemoryModel
+    sdfMemoryModel = memoryModel
+
+
+def sdfAvailable():
+    '''True if SDFs can be read at all, i.e. if a library was named.'''
+    return sdfLibrary != None and os.path.isdir(sdfLibrary)
+
+
+def MONITOR22(mode, commtablAddress=None):
+    '''MONITOR(22, mode[, address of COMMTABL]).
+
+    Mode 0 establishes where COMMTABL is and builds the package; every later
+    call finds its arguments already sitting in COMMTABL.  `sdfpkg` prefers to
+    work through a Python dictionary, so the dictionary is refreshed from the
+    memory model before each call -- the memory model is what the caller has
+    actually been writing into, and so is the authoritative copy.
+    '''
+    global sdfpkgInstance, sdfCOMMTABL
+
+    from sdfpkg import sdfpkg
+    from cmem import cmem
+
+    if mode & 0xFFFF == 0:
+        if sdfMemoryModel == None:
+            print("MONITOR(22,0) before INCSDF.py registered a memory model",
+                  file=sys.stderr)
+            sys.exit(1)
+        sdfCOMMTABL = {name: None for name, _, _ in cmem._COMMTABL_FIELDS}
+        sdfpkgInstance = sdfpkg(sdfMemoryModel, sdfLibrary, sdfCOMMTABL)
+        # The caller filled COMMTABL in memory, not the dictionary, so read the
+        # inputs back out of it.  cmem needs to be told where it is first,
+        # since mode 0 is what would normally tell it.
+        sdfpkgInstance.c.commtabl = commtablAddress
+        sdfCOMMTABL.update(sdfpkgInstance.c.toNative())
+        sdfpkgInstance.c.commtabl = None
+        sdfpkgInstance.sdfpkg(mode, commtablAddress)
+        return
+
+    if sdfpkgInstance == None:
+        cmem.abend(4009)        # First call to SDFPKG was not INIT
+    sdfCOMMTABL.update(sdfpkgInstance.c.toNative())
+    sdfpkgInstance.sdfpkg(mode)
+
 
 def MONITOR(function, arg2=None, arg3=None):
     from g import FR
@@ -538,7 +613,7 @@ def MONITOR(function, arg2=None, arg3=None):
     
     # Calls to the SDF access package.
     elif function == 22:
-        pass
+        return MONITOR22(arg2, arg3)
     
     # Return program identification.
     elif function == 23:

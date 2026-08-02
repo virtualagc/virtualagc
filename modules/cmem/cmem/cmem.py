@@ -350,12 +350,24 @@ class cmem:
         packU16(buf, addr, value)
 
     def _padIncResucnt(self, i):
-        self._padSetResucnt(i, self._padGetResucnt(i) + 1)
-
-    def _padDecResucntIfPositive(self, i):
+        # SETDISPS:  CH R1,=X'7FFF' / BE ABEND4  "TOO MANY RESERVES FOR ONE
+        # PAGE".  The count is a halfword, so it saturates rather than wrapping
+        # round to zero and quietly unlocking the page.
         v = self._padGetResucnt(i)
-        if v > 0:
-            self._padSetResucnt(i, v - 1)
+        if v >= 0x7FFF:
+            self.abend(4003)
+        self._padSetResucnt(i, v + 1)
+
+    def _padDecResucnt(self, i):
+        # SETDISPS:  LH R1,RESVCNT / LTR R1,R1 / BZ ABEND5  "TOO MANY RELEASES
+        # FOR ONE PAGE".  Releasing a page that was never reserved is a
+        # programming error in the caller, not something to absorb quietly --
+        # doing so would let a page the caller still believes is pinned be
+        # evicted underneath it.
+        v = self._padGetResucnt(i)
+        if v == 0:
+            self.abend(4004)
+        self._padSetResucnt(i, v - 1)
 
     def _padMarkFree(self, i):
         self._padSetFcbaddr(i, 0)
@@ -789,17 +801,23 @@ class cmem:
         self._setU16(self.OFF_CRETURN, 0)
 
     def _applyDisposition(self, idx, disposition):
-        select, modf, rels, resv = disposition   # SELECT is unused; not defined by spec.
+        # SELECT is dealt with in monitor22() before the operation runs, so it
+        # has nothing left to do here.  The other three are applied in the
+        # order SETDISPS applies them -- CHKMODF, CHKRELS, CHKRESV -- which
+        # matters when both RELS and RESV are asked for at once: releasing
+        # first means a page whose count is already 0 abends, rather than
+        # being incremented and decremented back to 0 unnoticed.
+        select, modf, rels, resv = disposition
         if modf:
             if not self.updat:
                 self.abend(4008)
             # MODF!=0 is the only way to *set* bit 0 of FCBADDR; MODF==0 must
             # leave it untouched (only writing the page back clears it).
             self._padSetModified(idx, True)
+        if rels:
+            self._padDecResucnt(idx)
         if resv:
             self._padIncResucnt(idx)
-        if rels:
-            self._padDecResucntIfPositive(idx)
 
     def _mode18(self):
         name = self._resolveSdfName(self._readSdfName())
@@ -1089,6 +1107,35 @@ if __name__ == "__main__":
                 mB.monitor22(buildMode(3))
             check("mode 3 with a reserved page in the augment aborts (abend 4012)",
                   _runInChild(rescindWhileReserved) == 1)
+
+            # --- RESV/RELS accounting -------------------------------------------
+            writeSdfName(memB, ctB, "MULTI")
+            mB.monitor22(buildMode(4))
+            packU32(memB, ctB + cmem.OFF_PNTR, (0 << 16) | 0)
+            mB.monitor22(buildMode(5))
+            check("a page starts out unreserved",
+                  mB.padSummary()["cached"][0]["resucnt"] == 0
+                  if mB.padSummary()["cachedCount"] == 1 else True)
+            check("releasing a page that was never reserved aborts (abend 4004)",
+                  _runInChild(lambda: mB.monitor22(buildMode(5, rels=1))) == 1)
+            mB.monitor22(buildMode(5, resv=1))
+            mB.monitor22(buildMode(5, rels=1))
+            check("reserve then release balances out",
+                  all(e["resucnt"] == 0 for e in mB.padSummary()["cached"]))
+
+            def tooManyReserves():
+                idx, _ = mB._resolveVmp((0 << 16) | 0)
+                mB._padSetResucnt(idx, 0x7FFF)
+                mB.monitor22(buildMode(5, resv=1))
+            check("reserving a page 0x7FFF times over aborts (abend 4003)",
+                  _runInChild(tooManyReserves) == 1)
+
+            def relsAndResvTogether():
+                # SETDISPS releases before it reserves, so asking for both at
+                # once on an unreserved page must still abend.
+                mB.monitor22(buildMode(5, rels=1, resv=1))
+            check("RELS+RESV on an unreserved page aborts (abend 4004)",
+                  _runInChild(relsAndResvTogether) == 1)
 
             # --- SELECT (auto-select) disposition ------------------------------
             writeSdfName(memB, ctB, "MULTI")

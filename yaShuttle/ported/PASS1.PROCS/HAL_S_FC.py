@@ -46,8 +46,15 @@ shutil.copyfile(scriptParentFolder + "/xplBuiltins.py", \
 shutil.rmtree(scriptFolder + "/HALINCL", ignore_errors=True)
 shutil.copytree(scriptParentFolder + "/HALINCL", \
                 scriptFolder + "/HALINCL")
-shutil.copyfile(scriptParentFolder + "/sdfpkg/sdfpkg.py", \
-                scriptFolder + "/sdfpkg.py")
+# SDF support comes from the installable `sdfpkg` module in modules/sdfpkg/
+# (with `sdf` and `cmem` beneath it), not from a copied-in file.  An earlier
+# arrangement copied ../sdfpkg/sdfpkg.py to here; since that file is a
+# different, unrelated implementation with an incompatible API, leaving the
+# copy in place would shadow the real module.  Remove any that survives.
+try:
+    os.remove(scriptFolder + "/sdfpkg.py")
+except FileNotFoundError:
+    pass
 #####################################################################
 
 from xplBuiltins import *
