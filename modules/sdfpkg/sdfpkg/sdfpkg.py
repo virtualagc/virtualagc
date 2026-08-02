@@ -195,9 +195,15 @@ class sdfpkg:
         '''Full ASCII name of symbol number i (1-based, as SYMBNO is).'''
         return sdf.fullSymbolASCII(self.s.symbolIndexTable[i - 1])
 
+    def _validBlock(self, blkno):
+        return 1 <= blkno <= len(self.s.blockIndexTable)
+
     def _blockNodeVmp(self, blkno):
+        # Block numbers are 1-based, as symbol and statement numbers are:
+        # a Directory Root Cell reporting indexOfCompilationUnitBlockDataCell
+        # as 1 means blockIndexTable[0].
         return sdf.vmpPlusOffset(
-            self.s.directoryRootCell.pHeadOfBlockIndexTable, 12 * blkno)
+            self.s.directoryRootCell.pHeadOfBlockIndexTable, 12 * (blkno - 1))
 
     def _relativeAddress(self, symbol):
         '''RELADDR of a Symbol Data Cell, read the way the assembly reads it.
@@ -271,7 +277,7 @@ class sdfpkg:
         return None
 
     def _findBlockByName(self, name):
-        for blkno, block in enumerate(self.s.blockIndexTable):
+        for blkno, block in enumerate(self.s.blockIndexTable, start=1):
             cell = block.blockDataCell
             if sdf.convertEbcdicToAscii(
                     cell.blockName[:cell.lengthOfBlockName]) == name:
@@ -279,7 +285,7 @@ class sdfpkg:
         return None, None
 
     def _locateBlock(self, blkno, disp, extra=None):
-        block = self.s.blockIndexTable[blkno]
+        block = self.s.blockIndexTable[blkno - 1]
         cell = block.blockDataCell
         vmp = block.pBlockDataCell
         self.searchBlock = block
@@ -394,7 +400,7 @@ class sdfpkg:
 
         if modeNumber == 8:
             blkno = self.COMMTABL["BLKNO"] or 0
-            if blkno < 0 or blkno >= len(self.s.blockIndexTable):
+            if not self._validBlock(blkno):
                 self._fail(16)
                 return
             self._locateBlock(blkno, disp)
@@ -483,10 +489,10 @@ class sdfpkg:
 
         if modeNumber == 15:
             blkno = self.COMMTABL["BLKNO"] or 0
-            if blkno < 0 or blkno >= len(self.s.blockIndexTable):
+            if not self._validBlock(blkno):
                 self._fail(16)
                 return
-            block = self.s.blockIndexTable[blkno]
+            block = self.s.blockIndexTable[blkno - 1]
             vmp = self._blockNodeVmp(blkno)
             self.searchBlock = block
             self.lastSymbolFound = None
@@ -636,7 +642,7 @@ def runTests(sdflibName, memberNames):
               half(COMMTABL["ADDR"]) == drc.flagField)
 
         # --- modes 8 and 15, blocks by number ------------------------------
-        for blkno, block in enumerate(p.s.blockIndexTable):
+        for blkno, block in enumerate(p.s.blockIndexTable, start=1):
             COMMTABL["BLKNO"] = blkno
             p.sdfpkg(8)
             check(f"mode 8 locates block {blkno}",
@@ -666,7 +672,7 @@ def runTests(sdflibName, memberNames):
                   COMMTABL["CRETURN"] == 0 and COMMTABL["BLKNO"] == blkno
                   and COMMTABL["PNTR"] == block.pBlockDataCell)
 
-        COMMTABL["BLKNO"] = len(p.s.blockIndexTable)
+        COMMTABL["BLKNO"] = len(p.s.blockIndexTable) + 1
         p.sdfpkg(8)
         check("mode 8 rejects an out-of-range block number",
               COMMTABL["CRETURN"] == 16)
@@ -705,7 +711,7 @@ def runTests(sdflibName, memberNames):
               COMMTABL["CRETURN"] == 20)
 
         # --- modes 12 and 13, symbols by name -------------------------------
-        for blkno, block in enumerate(p.s.blockIndexTable):
+        for blkno, block in enumerate(p.s.blockIndexTable, start=1):
             first = block.blockDataCell.indexToFirstSymbol
             last = block.blockDataCell.indexToLastSymbol
             blockName = sdf.convertEbcdicToAscii(
@@ -817,11 +823,11 @@ def runTests(sdflibName, memberNames):
         p._parse()
 
         # --- dispositions ----------------------------------------------------
-        COMMTABL["BLKNO"] = 0
+        COMMTABL["BLKNO"] = 1
         p.sdfpkg((DISP_RESV << 28) | 8)
         reserved = [e for e in p.c.padSummary()["cached"] if e["resucnt"] > 0]
         check("a RESV disposition reserves the located page", len(reserved) == 1)
-        COMMTABL["BLKNO"] = 0
+        COMMTABL["BLKNO"] = 1
         p.sdfpkg((DISP_RELS << 28) | 8)
         reserved = [e for e in p.c.padSummary()["cached"] if e["resucnt"] > 0]
         check("a RELS disposition releases it again", len(reserved) == 0)

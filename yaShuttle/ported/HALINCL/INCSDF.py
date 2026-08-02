@@ -48,6 +48,15 @@ from HALINCL.ICQTERMp import ICQ_TERMp
 from HALINCL.SPACELIB import NEXT_ELEMENT
 from HASH import HASH
 from HEX import HEX
+from DESCORE import DESCORE
+from HALINCL.ENTERLAY import ENTER_LAYOUT
+from HALINCL.ENTER import ENTER
+from HALINCL.ENTERXRE import ENTER_XREF
+from HALINCL.CHECKSTR import CHECK_STRUC_CONFLICTS
+from HALINCL.DISCONNE import DISCONNECT
+from HALINCL.FINISHMA import FINISH_MACRO_TEXT
+from HALINCL.MAKEINCL import MAKE_INCL_CELL
+from SYNTHESI import clearListTYPE
 
 # Whether SDFs can be imported at all.  The switch is --sdfi=DIRECTORY, named
 # and defaulted to match HALSFC-PASS1's: with no directory given no SDFs are
@@ -79,6 +88,42 @@ PAD_size = SDF_NUM_PAGES * 16
 memorySize = PAD_base + PAD_size
 memoryModel = bytearray(memorySize)
 registerSdfMemoryModel(memoryModel)
+
+
+# The XPL called the run-time library's MOVE() for two quite different jobs,
+# both of which have to go to `memoryModel` above.  Note in particular that
+# this is *not* HALINCL/VMEM3.py's MOVE(): that one addresses the compiler's
+# own virtual memory on FILE6, a different memory model entirely, and using it
+# here would quietly scribble on the wrong buffer.
+def MOVE_TEXT_TO(length, text, address):
+    '''CALL MOVE(n, string, addressWithinCOMMTABL).  COMMTABL's text fields
+    hold EBCDIC, as they did on the System/360.'''
+    text = (text or "")[:length].ljust(length)
+    memoryModel[address:address + length] = \
+        bytes(asciiToEbcdic[ord(c)] for c in text)
+
+
+def RVL_STRING(rev):
+    '''Render the revision level SELECT reports in BLKNO as the two EBCDIC
+    characters it is.  An SDF library of plain files has no PDS directory
+    entry to take one from, so SELECT reports 0 -- exactly as the assembly's
+    GETRVL does when there is no revision level -- and that is spelled "00"
+    here, matching how the rest of the compiler prints an absent RVL.
+    '''
+    high, low = (rev >> 8) & 0xFF, rev & 0xFF
+    if high == 0 and low == 0:
+        return "00"
+    return ebcdicToAscii[high] + ebcdicToAscii[low]
+
+
+def MOVE_MACRO_TEXT_FROM(length, address, firstFree):
+    '''CALL MOVE(n, addressWithinTheSDF, ADDR(MACRO_TEXTS(FIRST_FREE))).  The
+    source is raw bytes of a REPLACE-text cell paged in from the SDF; the
+    destination was a contiguous run of MACRO_TEXT bytes, which in this port is
+    a Python list of objects with a one-byte field apiece, so the copy has to
+    be spelled out.'''
+    for i in range(length):
+        g.MACRO_TEXT(firstFree + i, memoryModel[address + i])
 
 # ROUTINE TO INCLUDE VARIABLES FROM AN EXTERNAL UNIT'S SDF
 
@@ -122,8 +167,18 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
             return CSECT_LENGTH[1]
         CSECT_LENGTH[1] = value
     SDF_VAR_CLASS = 1  # INDICATES A VARIABLE
-    def MAKESTRING(len, addr): # ***FIXME*** String, or string descriptor?
-        return ((len-1) << 24) + addr
+    def MAKESTRING(len, addr):
+        '''The XPL's MAKESTRING built an XPL string descriptor -- a length in
+        the top byte and an address in the bottom three -- out of a length and
+        an address, so that a run of bytes in memory could be handed round as
+        a CHARACTER value.  Python has no such representation: a string is a
+        string.  So this reads the bytes and returns them, converted out of the
+        EBCDIC they are held in.  (It used to return the descriptor itself,
+        which meant that comparisons like "COMPILER = SDF_ROOT_COMPILER" were
+        comparing a string against an integer, and so were never true.)
+        '''
+        return "".join(ebcdicToAscii[b]
+                       for b in memoryModel[addr:addr + len])
     def NEW_STRING(s):
         return s[:] # Clone the input string.
     INCLUDABLE_VERSIONp = 26
@@ -243,18 +298,18 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     def SDF_ROOT_UNIT_BLKp(value = None):
         return SDF_H(44, value)
     def SDF_ROOT_COMPILER():
-        return MAKESTRING(4,SDFPKG_LOC_ADDR+140)
+        return MAKESTRING(4,SDFPKG_LOC_ADDR()+140)
     # FIELDS WITHIN AN SDF REPLACE CELL
     def SDF_REPL_ARG_CNT():
         return -SDF_H(2)-1
     def SDF_REPL_ARG_NAME(i):
-        return STRING(SDFPKG_LOC_ADDR+SDF_F(1+i))
+        return STRING(SDFPKG_LOC_ADDR()+SDF_F(1+i))
     def SDF_REPL_NEXT_PTR(value = None):
         return SDF_F(0, value)
     def SDF_REPL_pBYTES(value = None):
         return SDF_H(2, value)
     def SDF_REPL_TEXT_ADDR():
-        return SDFPKG_LOC_ADDR+6
+        return SDFPKG_LOC_ADDR()+6
     # FIELDS WITHIN AN SDF BLOCK DATA CELL
     def SDF_BLK_FIRST_SYMBp(value = None):
         return SDF_H(16, value)
@@ -327,25 +382,25 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     def SDFPKG_SDFNAM_ADDR():
         return COMMTABL_ADDR+32
     def SDFPKG_SDFNAM():
-        return MAKESTRING(8,SDFPKG_SDFNAM_ADDR)
+        return MAKESTRING(8,SDFPKG_SDFNAM_ADDR())
     def SDFPKG_CSECTNAM_ADDR():
         return COMMTABL_ADDR+40
     def SDFPKG_CSECTNAM():
-        return MAKESTRING(8,SDFPKG_CSECTNAM_ADDR)
+        return MAKESTRING(8,SDFPKG_CSECTNAM_ADDR())
     def SDFPKG_SREFNO_ADDR():
         return COMMTABL_ADDR+48
     def SDFPKG_SREFNO():
-        return MAKESTRING(6,SDFPKG_SREFNO_ADDR)
+        return MAKESTRING(6,SDFPKG_SREFNO_ADDR())
     def SDFPKG_INCLCNT(value = None):
         return COMMTABL_HALFWORD(27, value)
     def SDFPKG_BLKNAM_ADDR():
         return COMMTABL_ADDR+56
     def SDFPKG_BLKNAM():
-        return MAKESTRING(SDFPKG_BLKNLEN,SDFPKG_BLKNAM_ADDR)
+        return MAKESTRING(SDFPKG_BLKNLEN(),SDFPKG_BLKNAM_ADDR())
     def SDFPKG_SYMBNAM_ADDR():
         return COMMTABL_ADDR+88
     def SDFPKG_SYMBNAM():
-        return MAKESTRING(SDFPKG_SYMBNLEN,SDFPKG_SYMBNAM_ADDR)
+        return MAKESTRING(SDFPKG_SYMBNLEN(),SDFPKG_SYMBNAM_ADDR())
     SDFPKG_PAGES_LEFT = 0 # BIT(16);
     '''
    BASED  PGING   RECORD:
@@ -362,9 +417,9 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         MONITOR(22, mode)
     def SET_SDF_BASED():
         nonlocal SDF_B_base, SDF_H_base, SDF_F_base
-        SDF_B_base = SDFPKG_LOC_ADDR
-        SDF_H_base = SDFPKG_LOC_ADDR
-        SDF_F_base = SDFPKG_LOC_ADDR
+        SDF_B_base = SDFPKG_LOC_ADDR()
+        SDF_H_base = SDFPKG_LOC_ADDR()
+        SDF_F_base = SDFPKG_LOC_ADDR()
     def LOCATE_SDF_SYMBp(symbNo):
         SDFPKG_SYMBNO(symbNo)
         MONITOR(22, 9)
@@ -376,7 +431,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     def LOCATE_SDF_SYMBNAME(name):
         SDFPKG_SYMBNLEN(LENGTH(name))
         # ***FIXME***
-        MOVE(SDFPKG_SYMBNLEN(),name,SDFPKG_SYMBNAM_ADDR())
+        MOVE_TEXT_TO(SDFPKG_SYMBNLEN(), name, SDFPKG_SYMBNAM_ADDR())
         MONITOR(22,13)
         SET_SDF_BASED()
     def LOCATE_SDF_ROOT():
@@ -392,6 +447,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     
     def FIND(NAME):
         # FIND SYMBOL WITH GIVEN NAME, RETURNING ITS INDEX OR 0 IF NOT FOUND
+        nonlocal I  # shared with INCLUDE_SDF, as in the XPL
         I = 0 # Note that I is local to this function.
         g.NAME_HASH = HASH(NAME, g.SYT_HASHSIZE);
         I = g.SYT_HASHSTART[g.NAME_HASH];
@@ -404,6 +460,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         # CHECK TO SEE IF NAME ALREADY EXISTS IN THE SYMBOL TABLE IN A FORM
         # THAT IMPLIES A MULTIPLE DECLARATION ERROR.  SET STRUC. FLAGS
         #DECLARE NAME CHARACTER;
+        nonlocal I  # shared with INCLUDE_SDF, as in the XPL
         I = 0 # Local
         g.NAME_HASH = HASH(NAME, g.SYT_HASHSIZE);
         I = g.SYT_HASHSTART[g.NAME_HASH];
@@ -427,6 +484,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     def SET_SYT_FLAGS(NDX):
         # SET SYT_FLAGS BASED ON SDF_SYMB_FLAGS
         #DECLARE NDX BIT(16);
+        nonlocal FLAGS, I  # shared with INCLUDE_SDF, as in the XPL
         I = 0 # BIT(16);
         SDFFLAGS = 0 # FIXED
         FLAGS = 0 # FIXED
@@ -487,8 +545,8 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         #END
         #*************** END OF FIX FOR DR100579  **********************
         for I  in range(0, pFLAGS):
-            if (SDFFLAGS & IN_FLAG(I)) != 0:
-                FLAGS = FLAGS | OUT_FLAG(I)
+            if (SDFFLAGS & IN_FLAG[I]) != 0:
+                FLAGS = FLAGS | OUT_FLAG[I]
         g.SYT_FLAGS(NDX, FLAGS)
         g.NAME_IMPLIED = ((FLAGS & g.NAME_FLAG) != 0)
         g.TEMPORARY_IMPLIED = ((FLAGS & g.TEMPORARY_FLAG) != 0)
@@ -500,6 +558,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     def SET_TYPE_AND_LEN(NDX):
         # SET SYT_TYPE AND VAR_LENGTH FOR VARIABLES AND FUNCTIONS
         #DECLARE NDX BIT(16);
+        nonlocal TEMP_PTR  # shared with INCLUDE_SDF, as in the XPL
         TYPE = 0 # local BIT(16);
         P1_TYPE = (0, g.BIT_TYPE, g.CHAR_TYPE, g.MAT_TYPE, # C13335
                    g.VEC_TYPE, g.SCALAR_TYPE, g.INT_TYPE, 0, 0, g.BIT_TYPE,
@@ -507,22 +566,22 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
                    g.VEC_TYPE, g.SCALAR_TYPE, g.INT_TYPE, 0, g.MAJ_STRUC, 
                    g.EVENT_TYPE) # locl BIT(8)
         STRUC_NAME = "" # local  CHARACTER;
-        g.SYT_TYPE(NDX, P1_TYPE[SDF_SYMB_TYPE])
-        TYPE = P1_TYPE[SDF_SYMB_TYPE]
+        g.SYT_TYPE(NDX, P1_TYPE[SDF_SYMB_TYPE()])
+        TYPE = P1_TYPE[SDF_SYMB_TYPE()]
         if (TYPE >=g.MAT_TYPE) and (TYPE<=g.INT_TYPE): #DO
-            if SDF_SYMB_TYPE > 8:
+            if SDF_SYMB_TYPE() > 8:
                 g.SYT_FLAGS(NDX, g.SYT_FLAGS(NDX) | g.DOUBLE_FLAG)
             else: 
                 g.SYT_FLAGS(NDX, g.SYT_FLAGS(NDX) | g.SINGLE_FLAG)
         #END
         if (TYPE == g.CHAR_TYPE) or (TYPE == g.MAT_TYPE):
-            g.VAR_LENGTH(NDX, SDF_SYMB_VAR_LENGTH)
+            g.VAR_LENGTH(NDX, SDF_SYMB_VAR_LENGTH())
         elif (TYPE == g.BIT_TYPE) or (TYPE == g.VEC_TYPE):
-            g.VAR_LENGTH(NDX, SDF_SYMB_VAR_LENGTH & 0xFF)
-        elif (TYPE == g.MAJ_STRUC) and (SDF_SYMB_VAR_LENGTH != 0): #DO
-            TEMP_PTR = SDFPKG_LOC_PTR;
-            LOCATE_SDF_SYMBp(SDF_SYMB_VAR_LENGTH);
-            STRUC_NAME = NEW_STRING(SDFPKG_SYMBNAM);
+            g.VAR_LENGTH(NDX, SDF_SYMB_VAR_LENGTH() & 0xFF)
+        elif (TYPE == g.MAJ_STRUC) and (SDF_SYMB_VAR_LENGTH() != 0): #DO
+            TEMP_PTR = SDFPKG_LOC_PTR();
+            LOCATE_SDF_SYMBp(SDF_SYMB_VAR_LENGTH());
+            STRUC_NAME = NEW_STRING(SDFPKG_SYMBNAM());
             LOCATE_SDF_PTR(TEMP_PTR);
             g.STRUC_PTR = FIND(STRUC_NAME);
             if g.STRUC_PTR == 0: #DO
@@ -547,6 +606,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     def ENTER_SDF_VAR(CLASS):
         # ENTER A VARIABLE OR FUNCTION FROM AN SDF INTO THE SYMBOL TABLE
         #DECLARE CLASS BIT(16);
+        nonlocal I, TEMP_PTR  # shared with INCLUDE_SDF, as in the XPL
         I = 0 # local BIT(16);
         if DUPLICATE_NAME(g.BCD): #DO
             ERROR(d.CLASS_PM, 1, g.BCD)
@@ -558,9 +618,9 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
                       g.BCD + ', CLASS = ' + CLASS)
         SET_SYT_FLAGS(g.ID_LOC)
         SET_TYPE_AND_LEN(g.ID_LOC)
-        g.SYT_ADDR(g.ID_LOC, SDF_SYMB_ADDR)
-        g.SYT_LOCKp(g.ID_LOC, SDF_SYMB_LOCKp)
-        if SDF_SYMB_ARRAY_OFF == 0: 
+        g.SYT_ADDR(g.ID_LOC, SDF_SYMB_ADDR())
+        g.SYT_LOCKp(g.ID_LOC, SDF_SYMB_LOCKp())
+        if SDF_SYMB_ARRAY_OFF() == 0: 
             g.SYT_ARRAY(g.ID_LOC, 0)
         elif g.SYT_TYPE(g.ID_LOC) == g.MAJ_STRUC: #DO
             I = SDF_SYMB_ARRAY(0)
@@ -573,7 +633,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         #END
         else: #DO
             # ENTER ARRAY VALUES
-            g.N_DIM = SDF_SYMB_NDIM;
+            g.N_DIM = SDF_SYMB_NDIM();
             for I  in range(0, g.N_DIM):
                 g.S_ARRAY[I] = SDF_SYMB_ARRAY(I);
             #END
@@ -582,15 +642,15 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
             ENTER_DIMS()
             g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.ARRAY_FLAG)
         #END
-        if (SDF_SYMB_FLAGS & SDF_LIT_FLAG) != 0: #DO
+        if (SDF_SYMB_FLAGS() & SDF_LIT_FLAG) != 0: #DO
             # ENTER LITERAL
-            TEMP_PTR = SDFPKG_LOC_PTR;
-            LOCATE_SDF_PTR(SDF_SYMB_LIT_PTR);
+            TEMP_PTR = SDFPKG_LOC_PTR();
+            LOCATE_SDF_PTR(SDF_SYMB_LIT_PTR());
             if g.SYT_TYPE(g.ID_LOC) == g.CHAR_TYPE:
-                SAVE_LITERAL(0,MAKESTRING(SDF_B + 1, SDFPKG_LOC_ADDR + 1))
+                SAVE_LITERAL(0,MAKESTRING(SDF_B(0) + 1, SDFPKG_LOC_ADDR() + 1))
             # ARITH. LIT
             else: 
-                SAVE_LITERAL(1, SDFPKG_LOC_ADDR,0,1)
+                SAVE_LITERAL(1, SDFPKG_LOC_ADDR(),0,1)
             #MOD-DR109083
             g.SYT_PTR(g.ID_LOC, -g.LIT_TOP())
             LOCATE_SDF_PTR(TEMP_PTR)
@@ -606,15 +666,15 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
                    g.TASK_LABEL, 0, 0) # BIT(8)
         if DUPLICATE_NAME(g.BCD):
             #COMPOOL CLOSE LABELS CAN BE DUPLICATED
-            if SDF_SYMB_TYPE != 7: 
+            if SDF_SYMB_TYPE() != 7: 
                 ERROR(d.CLASS_PL, 2, g.BCD)
         g.ID_LOC = ENTER(g.BCD, CLASS)
         if (g.CONTROL[0x3] & 1) != 0:
             OUTPUT(0, 'ENTER_SDF_LABEL: ID_LOC = ' + g.ID_LOC + ', NAME = ' + \
                       g.BCD + ', CLASS = ' + CLASS)
         SET_SYT_FLAGS(g.ID_LOC);
-        g.SYT_TYPE(g.ID_LOC, P1_TYPE(SDF_SYMB_TYPE))
-        g.SYT_ADDR(g.ID_LOC, SDF_SYMB_ADDR)
+        g.SYT_TYPE(g.ID_LOC, P1_TYPE[SDF_SYMB_TYPE()])
+        g.SYT_ADDR(g.ID_LOC, SDF_SYMB_ADDR())
         return;
     # END ENTER_SDF_LABEL;
     
@@ -632,7 +692,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
                       ', NAME = ' + g.BCD)
         g.SYT_TYPE(g.REF_ID_LOC, g.TEMPL_NAME)
         SET_SYT_FLAGS(g.REF_ID_LOC)
-        if (SDF_SYMB_FLAGS & SDF_MISC_NAME_FLAG) != 0:
+        if (SDF_SYMB_FLAGS() & SDF_MISC_NAME_FLAG) != 0:
             g.SYT_FLAGS(g.REF_ID_LOC, g.SYT_FLAGS(g.REF_ID_LOC) | g.MISC_NAME_FLAG)
         g.STRUC_SIZE = 0
         g.BUILDING_TEMPLATE = g.TRUE
@@ -670,11 +730,11 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
                     g.SYT_LINK2(g.ID_LOC, g.ID_LOC + 1)
                 else: #DO
                     g.SYT_LINK2(g.ID_LOC, -FATHER[LEVEL])
-                    while g.SYT_LINK2(FATHER(LEVEL)) < 0:
+                    while g.SYT_LINK2(FATHER[LEVEL]) < 0:
                         LEVEL = LEVEL - 1
                     #END
                     if LEVEL > 0: #DO
-                        g.SYT_LINK2(FATHER(LEVEL), g.ID_LOC + 1)
+                        g.SYT_LINK2(FATHER[LEVEL], g.ID_LOC + 1)
                         if (g.CONTROL[0x3] & 1) != 0:
                             OUTPUT(0, 'ENTER_SDF_TEMPLATE: LINK2(' + 
                                       FATHER[LEVEL] + 
@@ -696,6 +756,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     # END ENTER_SDF_TEMPLATE;
     
     def ENTER_SDF_MACRO():
+        nonlocal I  # shared with INCLUDE_SDF, as in the XPL
         nonlocal TEMP_PTR
         # ENTER A REPLACE MACRO FROM AN SDF
         MACRO_NDX = 0 # local BIT(16)
@@ -721,17 +782,17 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
             g.SYT_FLAGS(g.ID_LOC, g.INACTIVE_FLAG)
         #END
         g.VAR_LENGTH(MACRO_NDX, g.MACRO_ARG_COUNT)
-        g.START_POINT = g.FIRST_FREE
-        g.SYT_ADDR(MACRO_NDX, g.FIRST_FREE)
+        g.START_POINT = g.FIRST_FREE()
+        g.SYT_ADDR(MACRO_NDX, g.FIRST_FREE())
         # MOVE_TEXT:  This label is never referenced.
         while SDF_REPL_NEXT_PTR() != 0:
-            LOCATE_SDF_PTR(SDF_REPL_NEXT_PTR)
+            LOCATE_SDF_PTR(SDF_REPL_NEXT_PTR())
             pBYTES = SDF_REPL_pBYTES()
             for I in range(1, pBYTES + 1):
                 NEXT_ELEMENT(g.MACRO_TEXTS)
             #END
-            MOVE(pBYTES, SDF_REPL_TEXT_ADDR(), ADDR(g.MACRO_TEXTS[g.FIRST_FREE]));
-            g.FIRST_FREE = g.FIRST_FREE + pBYTES;
+            MOVE_MACRO_TEXT_FROM(pBYTES, SDF_REPL_TEXT_ADDR(), g.FIRST_FREE());
+            g.FIRST_FREE(g.FIRST_FREE() + pBYTES);
         #END
         FINISH_MACRO_TEXT();
         g.EXTENT(MACRO_NDX, g.REPLACE_TEXT_PTR)
@@ -744,7 +805,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         # APPROPRIATE ROUTINE
         if (g.CONTROL[0x3] & 1) != 0: 
             OUTPUT(0, 'ENTER_SDF_THING: ENTERED')
-        g.BCD = NEW_STRING(SDFPKG_SYMBNAM);
+        g.BCD = NEW_STRING(SDFPKG_SYMBNAM());
         sw = SDF_SYMB_CLASS()
         if sw == 0:
             pass # NOT USED
@@ -787,7 +848,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
             LOCATE_SDF_SYMBp(CUR_SYMBOL)
             NEXT_SYMBOL = SDF_SYMB_DECLARE_LINK()
             if (SDF_SYMB_FLAGS() & SDF_PARM_FLAGS) == 0: #DO
-                g.BCD = NEW_STRING(SDFPKG_SYMBNAM)
+                g.BCD = NEW_STRING(SDFPKG_SYMBNAM())
                 if BYTE(g.BCD) == BYTE(' '):
                     ENTER_SDF_TEMPLATE();
             #END
@@ -801,7 +862,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
             first = False
             CUR_SYMBOL = NEXT_SYMBOL
             LOCATE_SDF_SYMBp(CUR_SYMBOL)
-            NEXT_SYMBOL = SDF_SYMB_DECLARE_LINK
+            NEXT_SYMBOL = SDF_SYMB_DECLARE_LINK()
             if (SDF_SYMB_FLAGS() & SDF_PARM_FLAGS) == 0: 
                 break
             ENTER_SDF_THING()
@@ -817,34 +878,42 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
             OUTPUT(0, 'ENTER_COMPOOL_VARS: ENTERED')
         ACCESS_COMPOOL = (g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & g.ACCESS_FLAG) != 0
         g.PROCMARK = 1
-        # AUGMENT SDFPKG PAGING AREA IF NECESSARY/POSSIBLE
-        TEMP=RECORD_ALLOC(SYM_TAB)-RECORD_USED(SYM_TAB)
-        if TEMP <= pBLK_SYMBS: #DO
-            TEMP = RECORD_USED(SYM_TAB) + pBLK_SYMBS
-            while RECORD_ALLOC(SYM_TAB)<=TEMP:
-                NEEDMORE_SPACE(SYM_TAB)
-            #END
-        #END
-        SDFPKG_NPAGES=(FREELIMIT-FREESTRING_MIN-g.FREEPOINT-32*pBLK_SYMBS)/1680
-        SDFPKG_NPAGES = MIN(SDFPKG_NPAGES, pSDF_PAGES - 3)
-        SDFPKG_NPAGES = MIN(SDFPKG_NPAGES, SDFPKG_PAGES_LEFT)
-        if SDFPKG_NPAGES > 0: #DO
-            RECORD_CONSTANT(PGING,SDFPKG_NPAGES,g.UNMOVEABLE)
-            SDFPKG_APGAREA=ADDR(PGING(0).PAGEADDR(0))
-            SDFPKG_AFCBAREA = 0
-            SDFPKG_NBYTES = 0
-            _SDFPKG(2)
-            # AUGMENT PAGING AREA
-        #END
+        # AUGMENT SDFPKG PAGING AREA IF NECESSARY/POSSIBLE.  The original first
+        # made sure the symbol table had room for the #BLK_SYMBS entries about
+        # to be added:
+        #    TEMP=RECORD_ALLOC(SYM_TAB)-RECORD_USED(SYM_TAB);
+        #    IF TEMP <= #BLK_SYMBS THEN DO;
+        #       TEMP = RECORD_USED(SYM_TAB) + #BLK_SYMBS;
+        #       DO WHILE RECORD_ALLOC(SYM_TAB)<=TEMP; NEEDMORE_SPACE(SYM_TAB);
+        #       END;
+        #    END;
+        # SYM_TAB is a Python list here, with no fixed capacity to reserve in
+        # advance -- NEXT_ELEMENT() extends it as entries are actually added --
+        # so there is nothing to do.
+        # AUGMENT PAGING AREA.  The original worked out how many further pages
+        # it could afford out of the free-string area, GETMAINed them and gave
+        # them to SDFPKG:
+        #    SDFPKG_NPAGES=(FREELIMIT-FREESTRING_MIN-FREEPOINT-32*#BLK_SYMBS)/1680
+        #    SDFPKG_NPAGES = MIN(SDFPKG_NPAGES, #SDF_PAGES - 3);
+        #    SDFPKG_NPAGES = MIN(SDFPKG_NPAGES, SDFPKG_PAGES_LEFT);
+        #    IF SDFPKG_NPAGES > 0 THEN DO;
+        #       RECORD_CONSTANT(PGING,SDFPKG_NPAGES,UNMOVEABLE);
+        #       ...
+        #       CALL_SDFPKG(2);
+        #    END;
+        # Our paging area is allocated at the documented maximum of 250 pages
+        # when SDFPKG is initialized, precisely so that this never has to
+        # happen; there is no allocator here to GETMAIN from.  See the notes on
+        # the memory model at the top of this file.
         #ENTER EVERYTHING
         while NEXT_SYMBOL != 0:
             LOCATE_SDF_SYMBp(NEXT_SYMBOL);
             #CUR_SYMBOL = NEXT_SYMBOL;  DANNY STRAUSS
-            NEXT_SYMBOL = SDF_SYMB_DECLARE_LINK;
+            NEXT_SYMBOL = SDF_SYMB_DECLARE_LINK();
             if SDF_SYMB_CLASS() == SDF_VAR_CLASS:  # A VARIABLE OR CONSTANT
                 if (SDF_SYMB_FLAGS() & SDF_LIT_FLAG) == 0: # ITS A VARIABLE
                     CSECT_LENGTH[(SDF_SYMB_FLAGS()&SDF_REMOTE_FLAG)!=0] = \
-                        MAX(CSECT_LENGTH((SDF_SYMB_FLAGS()&SDF_REMOTE_FLAG)!=0),
+                        MAX(CSECT_LENGTH[(SDF_SYMB_FLAGS()&SDF_REMOTE_FLAG)!=0],
                             SDF_SYMB_ADDR()+SDF_SYMB_EXTENT())
             # INCLUDE_OK SETS C TO FIRST TOKEN AFTER INCLUDE OPTIONS
             if g.C[0] != ':': 
@@ -887,6 +956,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     
     def SDF_FOUND(): # BIT(1)):
         # ROUTINE THAT TRIES TO FIND APPLICABLE SDF FOR AN INCLUDE
+        nonlocal CAT, I, INCL_FLAGS, REV, REVSTR, SDFPKG_PAGES_LEFT, SDF_NAME, SDF_VERSIONp  # shared with INCLUDE_SDF, as in the XPL
         COMPILER = "" # local CHARACTER
         DDBAD = [g.FALSE,g.FALSE] # local BIT(1)
         MISC_VAL = (8,12) # local BIT(16)
@@ -894,10 +964,15 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         OLD_SDF = 0 # local BIT(1)
         I = 0 # local BIT(16)
         REASON = (' TOO OLD', ' NOT FOUND') # local CHARACTER
-        # ALLOCATE SPACE FOR SDFPKG
+        # ALLOCATE SPACE FOR SDFPKG.  The XPL was
+        #    COREWORD(ADDR(COMMTABL_BYTE)), COREWORD(ADDR(COMMTABL_HALFWORD)),
+        #       COREWORD(ADDR(COMMTABL_FULLWORD)) = ADDR(COMMTABL);
+        # i.e. pointing all three BASED views of COMMTABL at the same storage.
+        nonlocal COMMTABL_BYTE_base, COMMTABL_HALFWORD_base, \
+            COMMTABL_FULLWORD_base, COMMTABL_ADDR
         COMMTABL_BYTE_base = COMMTABL_base
-        COMMTABL_HALFWORD = COMMTABL_base
-        COMMTABL_FULLWORD = COMMTABL_base
+        COMMTABL_HALFWORD_base = COMMTABL_base
+        COMMTABL_FULLWORD_base = COMMTABL_base
         COMMTABL_ADDR = COMMTABL_base
         '''
         Unlike the original, we just assume you have all the memory we'd ever
@@ -924,69 +999,88 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         #    THE SDF WAS MADE BY A COMPILATION FOR THE APPROPRIATE OBJECT
         #       MACHINE, AND
         #    THE SDF WAS CREATED BY A PHASE3 OF VERSION >= INCLUDABLE_VERSION#
+        # The original tried two DD names in turn, HALSDF and then OUTPUT5.  We
+        # have exactly one SDF library, named by --sdfi, so only the first pass
+        # can find anything; the loop is kept so that the not-found reporting
+        # below still reads as it did.
         for I in range(0, 1 + 1):
-            if DDBAD(I): 
+            if DDBAD[I]:
                 continue
-            SDFPKG_NPAGES = 3;
-            SDFPKG_APGAREA = ADDR(g.INIT_APGAREA[0].AREAPG(0));
-            SDFPKG_NBYTES = 512;
-            SDFPKG_AFCBAREA = ADDR(g.INIT_AFCBAREA[0].AREAFCB(0));
-            SDFPKG_MISC = MISC_VAL(I);
+            # Where the original GETMAINed a paging area and an FCB area and
+            # then grew them on demand, we hand SDFPKG fixed areas out of the
+            # static memory model, sized for the worst case the SDFPKG User's
+            # Guide allows.  That is what makes the "augment" call below
+            # unnecessary -- there is never any more memory to be found.
+            SDFPKG_NPAGES(SDF_NUM_PAGES);
+            SDFPKG_APGAREA(SDF_PAGES_base);
+            SDFPKG_NBYTES(FCBS_size);
+            SDFPKG_AFCBAREA(FCBS_base);
+            # PNTR and ADDR describe the Paging Area Directory, one 16-byte
+            # entry per page.  Supplying our own is the "alternate PAD"
+            # arrangement, hence the extra 32 in MISC.
+            SDFPKG_LOC_PTR(PAD_size);
+            SDFPKG_LOC_ADDR(PAD_base);
+            SDFPKG_MISC(MISC_VAL[I] | 32);
             MONITOR(22, 0, COMMTABL_ADDR);
-            if SDFPKG_CRETURN != 0: 
-                DDBAD(I, g.TRUE)
+            if SDFPKG_CRETURN() != 0:
+                DDBAD[I] = g.TRUE
             else: #DO
                 # DDNAME EXISTS
                 g.SDF_OPEN = g.TRUE;
-                SDFPKG_PAGES_LEFT = SDFPKG_NPAGES;
-                MOVE(8, SDF_NAME, SDFPKG_SDFNAM_ADDR);
+                SDFPKG_PAGES_LEFT = SDFPKG_NPAGES();
+                MOVE_TEXT_TO(8, SDF_NAME, SDFPKG_SDFNAM_ADDR());
                 _SDFPKG(4);
-                if SDFPKG_CRETURN == 12: #DO
-                    # INSUFFICIENT FCB AREA
-                    SDFPKG_NPAGES = 0;
-                    SDFPKG_APGAREA = 0;
-                    # SDFPKG SETS SDFPKG_NBYTES TO AMOUNT NEEDED
-                    RECORD_CONSTANT(FORFCB,SHR(SDFPKG_NBYTES+511,9),g.UNMOVEABLE);
-                    SDFPKG_AFCBAREA=ADDR(FORFCB(0).FCBADDR(0));
-                    _SDFPKG(2);
-                    # TELL SDFPKG ABOUT EXTRA SPACE
-                    _SDFPKG(4);
-                    # RE-TRY SELECT
+                if SDFPKG_CRETURN() == 12: #DO
+                    # INSUFFICIENT FCB AREA.  Cannot happen here: the FCB area
+                    # is already at its maximum size and cmem does not use it
+                    # anyway, keeping the equivalent bookkeeping in Python
+                    # objects.  Left in place, and made to abend rather than
+                    # silently proceed, in case that ever stops being true.
+                    print("SDFPKG reports the FCB area exhausted, which the "
+                          "static memory model cannot extend", file=sys.stderr)
+                    sys.exit(1)
                 #END
-                REV = SDFPKG_BLKNO;
-                CAT = SDFPKG_SYMBNO;
-                if SDFPKG_CRETURN == 0: #DO
+                REV = SDFPKG_BLKNO();
+                CAT = SDFPKG_SYMBNO();
+                if SDFPKG_CRETURN() == 0: #DO
                     # SDF FOUND
-                    LOCATE_SDF_ROOT;
-                    if COMPILER == SDF_ROOT_COMPILER: #DO
+                    LOCATE_SDF_ROOT();
+                    if COMPILER == SDF_ROOT_COMPILER(): #DO
                         # CORRECT OBJECT
                         LOCATE_SDF_PTR(0);
-                        SDF_VERSIONp=SDF_H;
-                        if SDF_H >= INCLUDABLE_VERSIONp: #DO
+                        SDF_VERSIONp=SDF_H(0);
+                        if SDF_H(0) >= INCLUDABLE_VERSIONp: #DO
                             # GOOD SDF
-                            INCL_FLAGS = INCL_FLAGS | SOURCE_FLAG(I);
-                            REVSTR = 'RVL ' + STRING(0x01000000 | ADDR(REV)) + \
-                                     ' CATENATION NUMBER ' + CAT;
+                            INCL_FLAGS = INCL_FLAGS | SOURCE_FLAG[I];
+                            # The XPL was
+                            #   REVSTR = 'RVL ' || STRING("01000000"|ADDR(REV))
+                            #            || ' CATENATION NUMBER ' || CAT;
+                            # "01000000"|ADDR(REV) is a string descriptor of
+                            # length 2 over REV's own storage, i.e. it prints
+                            # the halfword as the two EBCDIC characters SELECT
+                            # took from the PDS directory entry.
+                            REVSTR = 'RVL ' + RVL_STRING(REV) + \
+                                     ' CATENATION NUMBER ' + str(CAT);
                             return g.TRUE;
                         #END
                         else: OLD_SDF = g.TRUE;
                     #END
                 #END
-                TERMINATE_SDFPKG;
+                TERMINATE_SDFPKG();
             #END
             # OF DDNAME OK
         #END
         # OF DO I =
-        # IF WE GET HERE, WE HAVE FAILED
-        if RECORD_ALLOC(FORFCB) >0:
-            RECORD_FREE(FORFCB);
-        if OLD_SDF: 
+        # IF WE GET HERE, WE HAVE FAILED.  (The original freed the FORFCB area
+        # here; ours is a fixed slice of the static memory model and so is
+        # neither allocated nor freed.)
+        if OLD_SDF:
             I = 0;
         else: I = 1;
         COMPILER = COMPILER + ' SDF ' + SDF_NAME;
-        if (INCL_FLAGS & INCL_TEMPLATE_FLAG) !=0:
+        if (INCL_FLAGS & g.INCL_TEMPLATE_FLAG) != 0:
             OUTPUT(0, g.X8 + g.STARS + 'INCLUDED FROM TEMPLATE: ' + COMPILER + \
-                      REASON(I))
+                      REASON[I])
         else: 
             ERROR(d.CLASS_XI, I+9, COMPILER);
         return g.FALSE;
@@ -999,31 +1093,32 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         return g.TRUE;
         # DON'T TRY THE TEMPLATE
     #END
-    elif BLOCK_MODE > 0: #DO
+    elif g.BLOCK_MODE[0] > 0: #DO
+        # The XPL's unsubscripted BLOCK_MODE means BLOCK_MODE(0).
         ERROR(d.CLASS_PE, 2);
         return g.TRUE;
     #END
     # CHECK TO SEE IF AN SDF EXISTS
-    if not SDF_FOUND: 
+    if not SDF_FOUND(): 
         return g.FALSE;
     # ENTER THE COMPILATION UNIT INTO THE SYMBOL TABLE
-    LOCATE_SDF_ROOT;
+    LOCATE_SDF_ROOT();
     SDF_ROOT_FLAGS = SDF_H(0);
     ##DFLAG LOOK AT ROOT FLAGS
-    LAST_COMSUB_SYMB = SDF_ROOT_COMSUB_END;
-    UNIT_SYMBp = SDF_ROOT_UNIT_SYMBp;
-    pSDF_PAGES = SDF_ROOT_LAST_PAGE + 1;
-    LOCATE_SDF_BLOCKp(SDF_ROOT_UNIT_BLKp);
-    if SDFPKG_BLKNAM != UNIT: #DO
-        UNIT = NEW_STRING(SDFPKG_BLKNAM);
+    LAST_COMSUB_SYMB = SDF_ROOT_COMSUB_END();
+    UNIT_SYMBp = SDF_ROOT_UNIT_SYMBp();
+    pSDF_PAGES = SDF_ROOT_LAST_PAGE() + 1;
+    LOCATE_SDF_BLOCKp(SDF_ROOT_UNIT_BLKp());
+    if SDFPKG_BLKNAM() != UNIT: #DO
+        UNIT = NEW_STRING(SDFPKG_BLKNAM());
         # ERROR CALL DELETED AT IBM REQUEST
     #END
     if DUPLICATE_NAME(UNIT):
         ERROR(d.CLASS_PL, 2, UNIT);
     # BUT CONTINUE ANYWAY
-    pBLK_SYMBS = SDF_BLK_LAST_SYMBp - SDF_BLK_FIRST_SYMBp + 1;
+    pBLK_SYMBS = SDF_BLK_LAST_SYMBp() - SDF_BLK_FIRST_SYMBp() + 1;
     g.ID_LOC = ENTER(UNIT, g.LABEL_CLASS);
-    BLK_TYPE = SDF_BLK_CATEGORY;
+    BLK_TYPE = SDF_BLK_CATEGORY();
     FLAGS = g.EXTERNAL_FLAG | g.DEFINED_LABEL | g.SDF_INCL_FLAG;
     if (INCL_FLAGS & g.INCL_REMOTE_FLAG) != 0: #DO
         if BLK_TYPE == 4: # COMPOOL
@@ -1032,27 +1127,29 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         g.TPL_REMOTE = g.FALSE;
     #END
     for g.I  in range(0, pBLK_FLAGS + 1):
-        if (SDF_BLK_FLAGS & IN_BLK_FLAG(g.I)) != 0:
-            FLAGS = FLAGS | OUT_BLK_FLAG(g.I);
+        if (SDF_BLK_FLAGS() & IN_BLK_FLAG[g.I]) != 0:
+            FLAGS = FLAGS | OUT_BLK_FLAG[g.I];
     #END
     g.SYT_FLAGS(g.ID_LOC, FLAGS);
     # DO BLOCK "ENTRY"
     g.NEST = 1;
-    g.SCOPEp_STACK[g.NEST] = SCOPEp;
-    g.SYT_SCOPE(g.ID_LOC, MAX_SCOPEp + 1)
-    SCOPEp = MAX_SCOPEp + 1
-    MAX_SCOPEp = MAX_SCOPEp + 1
-    NEXT_ELEMENT(CSECT_LENGTHS);
+    # XPL:  SYT_SCOPE(ID_LOC), SCOPE#, MAX_SCOPE# = MAX_SCOPE# + 1;
+    # MAX_SCOPEp is one of the COMM-backed accessors, so it needs calling.
+    g.SCOPEp_STACK[g.NEST] = g.SCOPEp;
+    g.SYT_SCOPE(g.ID_LOC, g.MAX_SCOPEp() + 1)
+    g.SCOPEp = g.MAX_SCOPEp() + 1
+    g.MAX_SCOPEp(g.MAX_SCOPEp() + 1)
+    NEXT_ELEMENT(h.CSECT_LENGTHS);
     g.PROCMARK_STACK[g.NEST] = g.PROCMARK;
     g.REGULAR_PROCMARK = g.NDECSY() + 1;
     g.PROCMARK = g.NDECSY() + 1;
     g.BLOCK_SYTREF[g.NEST] = g.ID_LOC;
     g.SYT_PTR(g.ID_LOC, g.PROCMARK)
     ENTER_LAYOUT(g.ID_LOC);
-    SYT_LOCKp(g.ID_LOC, SDF_BLK_VERSIONp)
+    g.SYT_LOCKp(g.ID_LOC, SDF_BLK_VERSIONp())
     # ENTER SYMBOLS BASED ON BLOCK TYPE
     LOCATE_SDF_SYMBp(UNIT_SYMBp);
-    NEXT_SYMBOL = SDF_SYMB_DECLARE_LINK;
+    NEXT_SYMBOL = SDF_SYMB_DECLARE_LINK();
     if BLK_TYPE == 0:
         pass # UNDEFINED
     elif BLK_TYPE == 1:
@@ -1091,24 +1188,24 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         # COMPOOL
         g.BLOCK_MODE[g.NEST] = g.CMPL_MODE;
         g.SYT_TYPE(g.ID_LOC, g.COMPOOL_LABEL)
-        CSECT_LENGTHS(SCOPEp).PRIMARY = PRIMARY_LENGTH;
-        CSECT_LENGTHS(SCOPEp).REMOTE = REMOTE_LENGTH;
+        h.CSECT_LENGTHS[g.SCOPEp].PRIMARY = PRIMARY_LENGTH();
+        h.CSECT_LENGTHS[g.SCOPEp].REMOTE = REMOTE_LENGTH();
         CSECT_LENGTH[0] = 0
         CSECT_LENGTH[1] = 0
-        ENTER_COMPOOL_VARS;
-        CSECT_LENGTHS(SCOPEp).PRIMARY = PRIMARY_LENGTH;
-        CSECT_LENGTHS(SCOPEp).REMOTE = REMOTE_LENGTH;
+        ENTER_COMPOOL_VARS();
+        h.CSECT_LENGTHS[g.SCOPEp].PRIMARY = PRIMARY_LENGTH();
+        h.CSECT_LENGTHS[g.SCOPEp].REMOTE = REMOTE_LENGTH();
     elif BLK_TYPE == 5:
         pass # TASK
     elif BLK_TYPE == 6:
         pass # UPDATE
     #END OF DO CASE BLK_TYPE
     # PERFORM BLOCK "CLOSING"
-    g.SYT_FLAGS(g.NDECSY, g.SYT_FLAGS(g.NDECSY) | g.ENDSCOPE_FLAG)
-    if g.REGULAR_PROCMARK > g.NDECSY:
+    g.SYT_FLAGS(g.NDECSY(), g.SYT_FLAGS(g.NDECSY()) | g.ENDSCOPE_FLAG)
+    if g.REGULAR_PROCMARK > g.NDECSY():
         g.SYT_PTR(g.BLOCK_SYTREF[g.NEST], 0) # NO LOCAL SYMBOLS
     else: 
-        for g.I  in range(0, g.NDECSY - g.REGULAR_PROCMARK + 1):
+        for g.I  in range(0, g.NDECSY() - g.REGULAR_PROCMARK + 1):
             g.J = g.NDECSY() - g.I;
             if (g.SYT_FLAGS(g.J) & g.INACTIVE_FLAG) != 0: 
                 continue # REPEAT;
@@ -1118,13 +1215,14 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     g.SYT_ARRAY(g.BLOCK_SYTREF[g.NEST], 0xE000)
     g.PROCMARK = g.PROCMARK_STACK[g.NEST]
     g.REGULAR_PROCMARK = g.PROCMARK_STACK[g.NEST]
-    SCOPEp = g.SCOPEp_STACK[g.NEST];
+    g.SCOPEp = g.SCOPEp_STACK[g.NEST];
     g.NEST = 0;
-    # CLEAN UP
-    for g.I  in range(0, g.FACTOR_LIM + 1):
-        # DON'T LEAVE TRACKS
-        g.TYPE[g.I] = 0;
-    #END
+    # CLEAN UP.  "DO I = 0 TO FACTOR_LIM; TYPE(I) = 0; END;" is one of the
+    # handful of places where the XPL treats TYPE, BIT_LENGTH, ..., S_ARRAY as
+    # a single 20-element array rather than as separate variables.  See the
+    # long comment beside TYPE's declaration in g.py; SYNTHESI already provides
+    # the spelled-out equivalent.
+    clearListTYPE()
     g.NAME_IMPLIED = g.FALSE
     g.TEMPORARY_IMPLIED = g.FALSE
     g.MACRO_ARG_COUNT = 0
@@ -1139,11 +1237,10 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     OUTPUT(0, g.X8 + g.STARS + 'INCLUDED FROM SDF ' + SDF_NAME + g.X1 + g.STARS)
     OUTPUT(0, g.X8 + g.STARS + REVSTR + g.X1 + g.STARS)
     OUTPUT(0, g.X1)
-    TERMINATE_SDFPKG;
-    if RECORD_ALLOC(FORFCB) > 0:
-        RECORD_FREE(FORFCB);
-    if RECORD_ALLOC(PGING) > 0:
-        RECORD_FREE(PGING);
+    TERMINATE_SDFPKG();
+    # The original freed the FORFCB and PGING areas here.  Both are fixed
+    # slices of the static memory model in this port, so there is nothing to
+    # return to an allocator.
     if 0 != (g.SIMULATING & 1):
         MAKE_INCL_CELL(SDF_NAME, INCL_FLAGS, SHL(REV,16) | CAT);
     return g.TRUE;

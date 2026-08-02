@@ -725,6 +725,16 @@ class cmem:
             self._setU16(self.OFF_CRETURN, 8)
             return
 
+        # SELECT.bal also reports, undocumented by the User's Guide, the
+        # member's revision level in BLKNO (as two EBCDIC characters) and its
+        # catenation level in SYMBNO.  Both come from the z/OS PDS directory
+        # entry -- "PMF always inserts the RVL immediately after the last
+        # TTRN" -- which a plain file in an SDF library does not have.  So we
+        # report what GETRVL reports when there is no revision level to be
+        # had: zero, meaning "SHOW NO REVISION LEVEL OBTAINED".
+        self._setU16(self.OFF_BLKNO, 0)
+        self._setU16(self.OFF_SYMBNO, 0)
+
         for i in range(self.npages):
             if self._nameForPad(i) == name:
                 self.current = name
