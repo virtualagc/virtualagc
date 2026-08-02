@@ -117,6 +117,46 @@ def MOVE(LENGTH, FROM, INTO):
 # END MOVE;
 
 
+# The next three functions are not present in the original XPL.  They exist
+# because XPL got at the contents of a virtual-memory cell through a BASED
+# variable -- i.e., through a pointer whose value was simply the "core address"
+# returned by GET_CELL() or LOCATE().  Python has no pointers, so wherever the
+# XPL wrote (say) "NODE_H(13) = X" for a "BASED NODE_H BIT(16)", the port must
+# instead write "COREHALFWORD(NODE_H + 2*13, X)", NODE_H being the integer core
+# address.  See the Virtual Memory section of README.md for what a "core
+# address" is.
+#
+# In each case, omitting VALUE reads the datum and returns it, whereas
+# supplying VALUE writes it.  Storage is big-endian, as it was on the
+# System/360.  Bytes and halfwords read back unsigned (as BIT(8) and BIT(16)
+# did), whereas fullwords read back signed (as FIXED did).
+def _coreDatum(CORE_ADDR, nBytes, VALUE, signed):
+    object, index, isString = normalize(CORE_ADDR)
+    if not isinstance(object, bytearray):
+        print("Core access to a non-bytearray is not implemented", \
+              file=sys.stderr)
+        sys.exit(1)
+    if VALUE == None:
+        value = int.from_bytes(object[index:index + nBytes], 'big')
+        if signed and 0 != (value & (1 << (8 * nBytes - 1))):
+            value -= 1 << (8 * nBytes)
+        return value
+    VALUE = VALUE & ((1 << (8 * nBytes)) - 1)
+    object[index:index + nBytes] = VALUE.to_bytes(nBytes, 'big')
+
+
+def COREBYTE(CORE_ADDR, VALUE=None):
+    return _coreDatum(CORE_ADDR, 1, VALUE, False)
+
+
+def COREHALFWORD(CORE_ADDR, VALUE=None):
+    return _coreDatum(CORE_ADDR, 2, VALUE, False)
+
+
+def COREWORD(CORE_ADDR, VALUE=None):
+    return _coreDatum(CORE_ADDR, 4, VALUE, True)
+
+
 # ZERO 'COUNT' BYTES OF THE SPECIFIED CORE LOCATIONS.  The "core address"
 # referred to is the addressing scheme used by the Python MOVE() function;
 # refer to the Virtual Memory section of READM.md.  Note that if the "core

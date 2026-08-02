@@ -351,7 +351,7 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     FORFCB_base = 0
     # SDFPKG CALLS
     def _SDFPKG(mode):
-        g.MONITOR(22, mode)
+        MONITOR(22, mode)
     def SET_SDF_BASED():
         nonlocal SDF_B_base, SDF_H_base, SDF_F_base
         SDF_B_base = SDFPKG_LOC_ADDR
@@ -359,27 +359,27 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         SDF_F_base = SDFPKG_LOC_ADDR
     def LOCATE_SDF_SYMBp(symbNo):
         SDFPKG_SYMBNO(symbNo)
-        g.MONITOR(22, 9)
+        MONITOR(22, 9)
         SET_SDF_BASED()
     def LOCATE_SDF_PTR(ptr):
         SDFPKG_LOC_PTR(ptr)
-        g.MONITOR(22, 5)
+        MONITOR(22, 5)
         SET_SDF_BASED()
     def LOCATE_SDF_SYMBNAME(name):
         SDFPKG_SYMBNLEN(LENGTH(name))
         # ***FIXME***
         MOVE(SDFPKG_SYMBNLEN(),name,SDFPKG_SYMBNAM_ADDR())
-        g.MONITOR(22,13)
+        MONITOR(22,13)
         SET_SDF_BASED()
     def LOCATE_SDF_ROOT():
-        g.MONITOR(22,7)
+        MONITOR(22,7)
         SET_SDF_BASED()
     def LOCATE_SDF_BLOCKp(blockNo):
         SDFPKG_BLKNO(blockNo)
-        g.MONITOR(22, 8)
+        MONITOR(22, 8)
         SET_SDF_BASED()
     def TERMINATE_SDFPKG():
-        g.MONITOR(22,1)
+        MONITOR(22,1)
         g.SDF_OPEN = g.FALSE
     
     def FIND(NAME):
@@ -823,7 +823,8 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         if SDFPKG_NPAGES > 0: #DO
             RECORD_CONSTANT(PGING,SDFPKG_NPAGES,g.UNMOVEABLE)
             SDFPKG_APGAREA=ADDR(PGING(0).PAGEADDR(0))
-            SDFPKG_AFCBAREA, SDFPKG_NBYTES = 0
+            SDFPKG_AFCBAREA = 0
+            SDFPKG_NBYTES = 0
             _SDFPKG(2)
             # AUGMENT PAGING AREA
         #END
@@ -934,7 +935,8 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
                 _SDFPKG(4);
                 if SDFPKG_CRETURN == 12: #DO
                     # INSUFFICIENT FCB AREA
-                    SDFPKG_NPAGES, SDFPKG_APGAREA = 0;
+                    SDFPKG_NPAGES = 0;
+                    SDFPKG_APGAREA = 0;
                     # SDFPKG SETS SDFPKG_NBYTES TO AMOUNT NEEDED
                     RECORD_CONSTANT(FORFCB,SHR(SDFPKG_NBYTES+511,9),g.UNMOVEABLE);
                     SDFPKG_AFCBAREA=ADDR(FORFCB(0).FCBADDR(0));
@@ -1034,7 +1036,8 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     MAX_SCOPEp = MAX_SCOPEp + 1
     NEXT_ELEMENT(CSECT_LENGTHS);
     g.PROCMARK_STACK[g.NEST] = g.PROCMARK;
-    g.PROCMARK, g.REGULAR_PROCMARK = g.NDECSY + 1;
+    g.REGULAR_PROCMARK = g.NDECSY() + 1;
+    g.PROCMARK = g.NDECSY() + 1;
     g.BLOCK_SYTREF[g.NEST] = g.ID_LOC;
     g.SYT_PTR(g.ID_LOC, g.PROCMARK)
     ENTER_LAYOUT(g.ID_LOC);
@@ -1118,9 +1121,11 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     g.TEMPORARY_IMPLIED = g.FALSE
     g.MACRO_ARG_COUNT = 0
     g.STRUC_PTR = 0
-    g.STRUC_DIM, g.STRUC_SIZE = 0
-    g.ID_LOC, g.REF_ID_LOC = 0;
-    g.INCLUDE_STMT = g.g.STMT_NUM();
+    g.STRUC_SIZE = 0
+    g.STRUC_DIM = 0
+    g.REF_ID_LOC = 0;
+    g.ID_LOC = 0;
+    g.INCLUDE_STMT = g.STMT_NUM();
     g.STMT_NUM(g.STMT_NUM() + 1)
     # TREAT EACH INCLUDE AS ONE STMT
     OUTPUT(0, g.X8 + g.STARS + 'INCLUDED FROM SDF ' + SDF_NAME + g.X1 + g.STARS)

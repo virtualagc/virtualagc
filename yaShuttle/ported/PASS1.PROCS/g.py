@@ -555,6 +555,19 @@ templib = False
 traceInlines = False
 rsbTrace = False
 debugLiterals = False
+# The --sdf switch enables the Simulation Data File (SDF) machinery that hangs
+# off the SIMULATING flag: STAB_HDR(), STAB_VAR(), STAB_LAB(), and the
+# SIMULATING branch of FINISH_MACRO_TEXT().  Until now SIMULATING was simply
+# hardcoded to 0 in INITIALIZATION(), because SDFs were thought to be of no
+# interest to PASS1 and the modules involved were therefore never ported.
+# The switch is off by default because that porting is still under way (see
+# ../../../modules/sdfpkg/ and ../../../modules/cmem/), so that without it
+# HAL_S_FC.py behaves exactly as it did beforehand.  Once the SDF support is
+# believed complete the default should become True and the switch can go away.
+# Note that INCLUDE-from-SDF (HALINCL/INCSDF.py) is *not* gated by this, since
+# it is reached only when the HAL/S source explicitly asks for it and so
+# cannot perturb an ordinary compilation.
+sdf = False
 
 # Apparently comes from MONITOR.bal, normally, but we don't have that and so
 # must hard-code something that's big enough but not too big.
@@ -653,6 +666,8 @@ if not suppress:
             pass
         elif parm == "--templib":
             templib = True
+        elif parm == "--sdf":
+            sdf = True
         elif parm == "--debugwr":
             debugwr = True
         elif parm in pCON or ("NO" + parm) in pCON or \
@@ -698,6 +713,13 @@ if not suppress:
             print('                 Note that if --bfs is used, place it first.')
             print('--tabs=N         (Default 8.) Tab-stop size in source code.')
             print('--templib        Identify &&TEMPLIB with TEMPLIB.')
+            print('--sdf            Enable the Simulation Data File (SDF)')
+            print('                 machinery, namely the SIMULATING flag')
+            print('                 derived from the SDL compiler option and')
+            print('                 hence STAB_HDR, STAB_VAR, and STAB_LAB.')
+            print('                 Off by default while that code is being')
+            print('                 ported; without it the compiler behaves')
+            print('                 as it did before that port began.')
             print('--utf8           Use UTF-8 in program listings.')
             print('--ascii          (Default.) Use ASCII in program listings.')
             print('--extra          Enhances messages for some ¢-toggles.')

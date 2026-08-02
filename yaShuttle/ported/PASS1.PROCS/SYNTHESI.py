@@ -125,6 +125,7 @@ from SETXREFR import SET_XREF_RORS
 from SRNUPDAT import SRN_UPDATE
 from STABHDR  import STAB_HDR
 from STABLAB  import STAB_LAB
+from STABVAR  import STAB_VAR
 from STACKDUM import STACK_DUMP
 from STARTNOR import START_NORMAL_FCN
 from STRUCTUR import STRUCTURE_COMPARE
@@ -3753,7 +3754,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         while g.TEMP > 1:
             if SHR(g.DO_INX[g.TEMP], 7) & 1: 
                 ERROR(d.CLASS_GE, 4);
-            if g.DO_INX[g.TEMP]: 
+            if g.DO_INX[g.TEMP] & 1:
                 if LABEL_MATCH():
                     HALMAT_POP(g.XBRA, 1, 0, 0);
                     HALMAT_PIP(g.DO_LOC[g.TEMP] + 1, g.XINL, 0, 0);
@@ -5160,7 +5161,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_DI, 12, g.VAR[g.MP]);
                     g.DO_INIT = g.FALSE;
                     g.ATTRIBUTES = g.ATTRIBUTES & (~g.ILL_INIT_ATTR);
-                if g.CLASS > 0 & (not g.NAME_IMPLIED): 
+                if (g.CLASS > 0) and (not g.NAME_IMPLIED):
                     ERROR(d.CLASS_D, 1, g.VAR[g.MP]);
                     g.NONHAL = 0
                     g.CLASS = 0;
@@ -5199,7 +5200,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                                 ERROR(d.CLASS_D, 2, g.VAR[g.MP]);
                         elif g.CLASS == 1:
                             if g.TYPE == g.TASK_LABEL:
-                                if g.NEST > 1 | g.BLOCK_MODE[1] != g.PROG_MODE:
+                                if (g.NEST > 1) or (g.BLOCK_MODE[1] != g.PROG_MODE):
                                     ERROR(d.CLASS_PT, 1);
                             else:
                                 ERROR(d.CLASS_DN, 1, g.VAR[g.MP]);

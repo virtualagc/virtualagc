@@ -22,5 +22,5 @@ def SET_DUPL_FLAG(DUPL_TERM):
     g.SYT_FLAGS(J, g.SYT_FLAGS(J) | g.DUPL_FLAG);
     if g.SYT_PTR(J) > 0:
         g.SYT_PTR(J, 0);
-        ERROR(d.CLASS_DQ, 7, g.SYT_NAME(g.DUPL_TERM));
+        ERROR(d.CLASS_DQ, 7, g.SYT_NAME(DUPL_TERM));
     return;

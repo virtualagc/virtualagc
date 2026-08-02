@@ -198,7 +198,7 @@ def COMPILATION_LOOP():
                 g.MPP1 = g.MP + 1;
                 SYNTHESIZE (g.STATE - g.MAXPp);  #   APPLY PRODUCTION
                 g.SP = g.MP;  #   RESET STACK POINTER
-                g.PARSE_STACK[g.SP] = g.pPRODUCE_NAME[g.STATE - g.MAXPp] & 0x1FF;
+                g.PARSE_STACK[g.SP] = g.pPRODUCE_NAME[g.STATE - g.MAXPp] & 0xFFF;
                 I = g.INDEX1[g.STATE];
                 #   COMPARE TOP OF STATE STACK WITH TABLES
                 J = g.STATE_STACK[g.SP];

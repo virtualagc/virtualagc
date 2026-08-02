@@ -296,8 +296,12 @@ def INITIALIZATION():
     g.LINE_LIM = int(VALS[1]);
     g.LISTING2_COUNT = g.LINE_LIM
     g.LINE_MAX = g.LINE_LIM
-    #g.SIMULATING = (g.OPTIONS_CODE() & 0x800) != 0;
-    g.SIMULATING = 0
+    if g.sdf:
+        g.SIMULATING = 1 if (g.OPTIONS_CODE() & 0x800) != 0 else 0;
+    else:
+        # The Simulation Data File machinery this flag turns on is still being
+        # ported, so it stays switched off unless HAL_S_FC.py was given --sdf.
+        g.SIMULATING = 0
     if (g.OPTIONS_CODE() & 0x10) == 0x10:
         g.TPL_FLAG = 0;
     g.SRN_PRESENT = (g.OPTIONS_CODE() & 0x80000) != 0;

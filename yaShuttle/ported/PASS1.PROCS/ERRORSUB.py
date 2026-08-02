@@ -130,23 +130,23 @@ def ERROR_SUB(MODE):
                 pass;
             elif g.INX[g.TEMP] == 1:
                 # DO
-                if g.PSEUDO_LENGTH[g.TEMP] > 0: 
+                if g.PSEUDO_LENGTH[g.TEMP] > 0:
                     goto = "BAD_ERROR_SUB";
-                    break
-                if not g.VAL_P[g.TEMP]: 
+                    continue
+                if not (g.VAL_P[g.TEMP] & 1):
                     goto = "BAD_ERROR_SUB";
-                    break
+                    continue
                 g.LOC_P[g.TEMP] = ERROR_SS_FIX(1);
                 g.FIXV[g.MP] = SHL(g.LOC_P[g.TEMP], 6) | 0x3F;
                 # END
             elif g.INX[g.TEMP] == 2:
                 # DO
-                if g.PSEUDO_LENGTH[g.TEMP] != 0: 
+                if g.PSEUDO_LENGTH[g.TEMP] != 0:
                     goto = "BAD_ERROR_SUB";
-                    break
-                if g.VAL_P[g.TEMP] != 1: 
+                    continue
+                if g.VAL_P[g.TEMP] != 1:
                     goto = "BAD_ERROR_SUB";
-                    break
+                    continue
                 g.LOC_P[g.TEMP] = ERROR_SS_FIX(1);
                 g.FIXV[g.MP] = ERROR_SS_FIX(2) | SHL(g.LOC_P[g.TEMP], 6);
                 # END

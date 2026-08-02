@@ -626,8 +626,18 @@ def STREAM():
                         g.K = BYTE(ll.C[0], ll.I);
                         if g.CHARTYPE[g.K] != 1:
                             goto_NO_CHAN = True;
-                            continue;
+                            break;  # GO TO NO_CHAN
                         g.J = g.J * 10 + (g.K & 0xF);
+                    else:
+                        # On normal completion an XPL "DO I = 8 TO LENGTH(C)-1"
+                        # leaves I one past the end, whereas Python's for-loop
+                        # leaves it at the last value used.  The test just below
+                        # depends on the difference:  without this, a one-digit
+                        # channel (the only kind that is legal, since J>9 is
+                        # rejected further down) always took the NO_CHAN exit.
+                        ll.I = LENGTH(ll.C[0]);
+                    if goto_NO_CHAN:
+                        continue
                     if ll.I == 8:
                         goto_NO_CHAN = True;
                         continue
@@ -637,7 +647,7 @@ def STREAM():
                     return
                 ll.C[0] = hd.D_TOKEN();
                 ll.PRINT_FLAG = g.FALSE;
-                l.L = g.J(g.J);
+                l.L = h.IODEV[g.J];
                 if ll.C[0] == 'UNPAGED':
                     pass
                 elif ll.C[0] == 'PAGED':
@@ -666,7 +676,7 @@ def STREAM():
                         else:
                             l.L = (l.L & 0xFB) | 0x03;  # PRINT OFF, READ/WRITE ON
                 goto_D_DONE = False
-                g.J[g.J] = l.L;
+                h.IODEV[g.J] = l.L;
                 ERRPRINT()
                 return
             elif ll.C[0] == ll.INCLUDE_DIR:
