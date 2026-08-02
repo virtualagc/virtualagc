@@ -11,6 +11,7 @@ from xplBuiltins import *
 import HALINCL.VMEM1 as v1
 import HALINCL.VMEM2 as v2
 from ERRORS import ERRORS
+import HALINCL.CERRDECL as d
 
 # VIRTUAL MEMORY LOGIC FOR THE XPL PROGRAMMING SYSTEM
 # EDIT LEVEL 002             23 AUGUST 1977         VERSION 1.1
@@ -242,7 +243,7 @@ def PTR_LOCATE(PTR, FLAGS):
     # Locals: BUFF_ADDR, PREF_CNT, I, J, PAGE, PAGE_TMP, OFFSET, CUR_NDX, 
     #         PASSED_FLAGS, VMEM_PAGE.  But some I've changed to globals for
     #         the sake of persistence.
-    global VMEM_PAGE, PREV_COUNT, CUR_NDX
+    global VMEM_PAGE, PREV_CNT, CUR_NDX
     
     # PROCEDURE TO SAVE CURRENT POINTER INFORMATION
     def SAVE_PTR_STATE(INDEX):
@@ -257,8 +258,8 @@ def PTR_LOCATE(PTR, FLAGS):
         
         # The following was originally a macro.
         def SET_INDEX():
-            global PREV_CNT, CUR_INDEX
-            CUR_NDX = I; 
+            global CUR_NDX, PREV_CNT
+            CUR_NDX = I;
             PREV_CNT = v2.VMEM_PAD_CNT[I];
         # END SET_INDEX.
         
@@ -297,10 +298,11 @@ def PTR_LOCATE(PTR, FLAGS):
         EXIT();
     # END BAD_PTR;
     
+    goto = None
     PASSED_FLAGS = FLAGS;
     PAGE = SHR(PTR, 16) & 0xFFFF;
     OFFSET = PTR & 0xFFFF;
-    if OFFSET >= v1.VMEM_PAGE_SIZE: BAD_PTR;
+    if OFFSET >= v1.VMEM_PAGE_SIZE: BAD_PTR();
     if PAGE == v2.VMEM_PRIOR_PAGE:  # DO
         v2.VMEM_LOC_PTR = PTR;
         #VMEM_LOC_ADDR = VMEM_PAD_ADDR[VMEM_OLD_NDX] + OFFSET;
@@ -312,16 +314,16 @@ def PTR_LOCATE(PTR, FLAGS):
     v2.VMEM_PRIOR_PAGE = PAGE;
     v2.VMEM_LOC_CNT = v2.VMEM_LOC_CNT + 1;
     if PAGE > v2.VMEM_LAST_PAGE:  # DO
-        if (PAGE - 1) != v2.VMEM_LAST_PAGE: BAD_PTR;
+        if (PAGE - 1) != v2.VMEM_LAST_PAGE: BAD_PTR();
         v2.VMEM_LAST_PAGE = PAGE;
         v2.VMEM_PAGE_AVAIL_SPACE[v2.VMEM_LAST_PAGE] = v1.VMEM_PAGE_SIZE;
         if v2.VMEM_LAST_PAGE <= v2.VMEM_MAX_PAGE:  # DO
             CUR_NDX = v2.VMEM_LAST_PAGE;
         # END
         else:  # DO
-            if v2.VMEM_LAST_PAGE > VMEM_TOTAL_PAGES:  # DO
+            if v2.VMEM_LAST_PAGE > v1.VMEM_TOTAL_PAGES:  # DO
                 ERRORS(d.CLASS_BI, 702);
-                EXIT;
+                EXIT();
             # END
             PAGING_STRATEGY();
         # END
@@ -340,10 +342,7 @@ def PTR_LOCATE(PTR, FLAGS):
             VMEM_PAGE = v2.VMEM_PAD_ADDR[CUR_NDX]
             FILE(VMEM_PAGE, v1.VMEM_FILEp, PAGE);
             v2.VMEM_READ_CNT = v2.VMEM_READ_CNT + 1;
-            if goto == "LOC_COMMON1": goto = None
-            v2.VMEM_PAGE_TO_NDX[PAGE] = CUR_NDX;
-            v2.VMEM_PAD_PAGE[CUR_NDX] = PAGE;
-            v2.VMEM_PAD_DISP[CUR_NDX] = 0;
+            goto = "LOC_COMMON1";
         # END
         else:  # DO
             if PAGE == v2.VMEM_LOOK_AHEAD_PAGE:  # DO
@@ -351,8 +350,25 @@ def PTR_LOCATE(PTR, FLAGS):
                 v2.VMEM_LOOK_AHEAD_PAGE = -1;
             # END
         # END
-        v2.VMEM_PAD_CNT[CUR_NDX] = v2.VMEM_LOC_CNT;
     # END
+    # The XPL's "GO TO LOC_COMMON1" leaves the new-page branch and lands *in the
+    # middle of* the other branch's "IF CUR_NDX = -1 THEN DO", just past the
+    # FILE read.  Both of those paths therefore perform the three assignments
+    # below, and all three paths -- including the one that found the page
+    # already in core -- perform the VMEM_PAD_CNT update, that being the last
+    # statement of the enclosing ELSE DO.  So the label's body is lifted out to
+    # here rather than left inside the one branch it happens to be written in.
+    # Leaving it there meant a newly created page was never recorded in
+    # VMEM_PAGE_TO_NDX or VMEM_PAD_PAGE, so the next reference to it took the
+    # CUR_NDX = -1 path and re-read it from the paging file, and PAGING_STRATEGY
+    # would eventually try to write a page out to page number -1.
+    if goto == "LOC_COMMON1":  # LOC_COMMON1:
+        goto = None
+        v2.VMEM_PAGE_TO_NDX[PAGE] = CUR_NDX;
+        v2.VMEM_PAD_PAGE[CUR_NDX] = PAGE;
+        v2.VMEM_PAD_DISP[CUR_NDX] = 0;
+    # END
+    v2.VMEM_PAD_CNT[CUR_NDX] = v2.VMEM_LOC_CNT;
     SAVE_PTR_STATE(CUR_NDX);
     v2.VMEM_OLD_NDX = CUR_NDX;
     v2.VMEM_LOC_PTR = PTR;
@@ -418,6 +434,14 @@ def GET_CELL(CELL_SIZE, FLAGS):
                 AVAIL_SIZE = v2.VMEM_PAGE_AVAIL_SPACE[PAGE];
                 if (AVAIL_SIZE >= CELL_SIZE) & (v2.VMEM_PAGE_TO_NDX[PAGE] != -1):
                     goto = "GET_SPACE";
+                    # The XPL's "GO TO GET_SPACE" leaves the loop at once,
+                    # keeping the PAGE and AVAIL_SIZE that matched.  Without
+                    # this the loop ran on to its last iteration and handed
+                    # PTR_LOCATE the figures for whichever page came last --
+                    # PAGE 0, with an AVAIL_SIZE that can be negative, hence an
+                    # offset past the end of the page, which is precisely the
+                    # invalid pointer BAD_PTR exists to catch.
+                    break
             # END
     # END
     if goto in [None, "EXTEND_VMEM"]:
@@ -440,7 +464,12 @@ def MISC_ALLOCATE(TABLE_SIZE):
     LEN = (TABLE_SIZE + 3) & 0xFFFFFFFC;
     # MULTIPLE OF 4 BYTES
     if LEN <= v1.VMEM_PAGE_SIZE: return GET_CELL(LEN, 0)[0];
-    BASE_PTR = GET_CELL(v1.VMEM_PAGE_SIZE, 0)[0] | 0x80000000;
+    # Setting the top bit of a 32-bit FIXED makes it negative, and LOC_MISC
+    # distinguishes a multi-page table from a single-page one by exactly that
+    # sign.  Python integers have no width, so "| 0x80000000" alone would leave
+    # the value positive and LOC_MISC would take the wrong branch, adding the
+    # whole byte offset to a single page's offset field.
+    BASE_PTR = (GET_CELL(v1.VMEM_PAGE_SIZE, 0)[0] | 0x80000000) - 0x100000000;
     LEN = LEN - v1.VMEM_PAGE_SIZE;
     while LEN > 0:
         GET_CELL(v1.VMEM_PAGE_SIZE, 0);
@@ -462,7 +491,9 @@ def LOC_MISC(BASE_PTR, OFFSET, FLAGS):
     PTR = BASE_PTR & 0x3FFFFFFF;
     if BASE_PTR > 0: PTR = PTR + OFFSET;
     else:  # DO
-        PAGE_INC = OFFSET / v1.VMEM_PAGE_SIZE;
+        # Integer division, as XPL's FIXED division is; Python's "/" would
+        # give a float here and SHL() would then have nothing it could shift.
+        PAGE_INC = OFFSET // v1.VMEM_PAGE_SIZE;
         PTR = PTR + SHL(PAGE_INC, 16) + (OFFSET % v1.VMEM_PAGE_SIZE);
     # END
     PTR_LOCATE(PTR, FLAGS);
@@ -470,56 +501,61 @@ def LOC_MISC(BASE_PTR, OFFSET, FLAGS):
 # END LOC_MISC;
 
 
+# In each of the six routines below, the XPL declared a BASED variable -- NODE_F
+# FIXED, NODE_H BIT(16) or NODE_B BIT(8) -- pointed it at the located datum with
+# LOC_MISC(...,ADDR(NODE_x),...), and then read or wrote it as NODE_x(0).  Since
+# Python has no pointers, LOC_MISC returns the "core address" instead and the
+# datum is reached with COREWORD/COREHALFWORD/COREBYTE, exactly as STABHDR and
+# SET_BLOCK_SRN reach theirs.  Fullwords come back signed and halfwords and
+# bytes unsigned, matching FIXED, BIT(16) and BIT(8), so the XPL's explicit
+# &"FFFF" on the halfword reads is subsumed.
 def GET_MISCF(BASE_PTR, INDEX):
     # Local:  NODE_F
-    NODE_F = [0]
-    NODE_F[0] = LOC_MISC(BASE_PTR, SHL(INDEX, 2), 0);
-    return NODE_F(0);
+    NODE_F = LOC_MISC(BASE_PTR, SHL(INDEX, 2), 0);
+    return COREWORD(NODE_F);
 # END GET_MISCF;
 
 
 def SET_MISCF(BASE_PTR, INDEX, VALUE):
-    # Local:  NODE_F, OLD_VALUE
-    NODE_F = [0]
-    NODE_F[0] = LOC_MISC(BASE_PTR, SHL(INDEX, 2), v2.ODF);
-    OLD_VALUE = NODE_F(0);
-    NODE_F[0] = VALUE;
+    # Locals:  NODE_F, OLD_VALUE
+    NODE_F = LOC_MISC(BASE_PTR, SHL(INDEX, 2), v2.MODF);
+    OLD_VALUE = COREWORD(NODE_F);
+    COREWORD(NODE_F, VALUE);
     return OLD_VALUE;
 # END SET_MISCF;
 
 
 def GET_MISCH(BASE_PTR, INDEX):
     # Local:  NODE_H
-    NODE_H = [0]
-    NODE_H[0] = LOC_MISC(BASE_PTR, SHL(INDEX, 1), 0);
-    return (NODE_H[0] & 0xFFFF);
+    NODE_H = LOC_MISC(BASE_PTR, SHL(INDEX, 1), 0);
+    return COREHALFWORD(NODE_H);
 # END GET_MISCH;
 
 
-def SET_MISCH(BASE_PTR, INDEX, VALUE, OLD_VALUE):
+# OLD_VALUE is a parameter in the XPL only because XPL has no way to declare a
+# procedure-level local; it is assigned before it is read, so callers need not
+# supply it.
+def SET_MISCH(BASE_PTR, INDEX, VALUE, OLD_VALUE=0):
     # Local:  NODE_H
-    NODE_H = [0]
-    NODE_H[0] = LOC_MISC(BASE_PTR, SHL(INDEX, 1), v2.MODF);
-    OLD_VALUE = NODE_H(0) & 0xFFFF;
-    NODE_H[0] = VALUE;
+    NODE_H = LOC_MISC(BASE_PTR, SHL(INDEX, 1), v2.MODF);
+    OLD_VALUE = COREHALFWORD(NODE_H);
+    COREHALFWORD(NODE_H, VALUE);
     return OLD_VALUE;
 # END SET_MISCH;
 
 
 def GET_MISCB(BASE_PTR, INDEX):
     # Local:  NODE_B
-    NODE_B = [0]
-    NODE_B[0] = LOC_MISC(BASE_PTR, INDEX, 0);
-    return NODE_B[0];
+    NODE_B = LOC_MISC(BASE_PTR, INDEX, 0);
+    return COREBYTE(NODE_B);
 # END GET_MISCB;
 
 
 def SET_MISCB(BASE_PTR, INDEX, VALUE):
-    # Local:  NODE_B
-    NODE_B = [0]
-    NODE_B[0] = LOC_MISC(BASE_PTR, INDEX, v2.MODF);
-    OLD_VALUE = NODE_B[0];
-    NODE_B[0] = VALUE;
+    # Locals:  NODE_B, OLD_VALUE
+    NODE_B = LOC_MISC(BASE_PTR, INDEX, v2.MODF);
+    OLD_VALUE = COREBYTE(NODE_B);
+    COREBYTE(NODE_B, VALUE);
     return OLD_VALUE;
 # END SET_MISCB;
 

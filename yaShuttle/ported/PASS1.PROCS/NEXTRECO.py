@@ -12,6 +12,7 @@ History:    2023-09-07 RSB  Ported from XPL
 import sys
 from xplBuiltins import *
 import g
+from DECOMPRE import DECOMPRESS
 
 '''
  /***************************************************************************/
@@ -45,7 +46,7 @@ def NEXT_RECORD():
         return;
     if g.INCLUDING:
         if g.INCLUDE_COMPRESSED:
-            g.CURRENT_CARD = g.DECOMPRESS(1)[:];
+            g.CURRENT_CARD = DECOMPRESS(1)[:];
             pass
         else:
             if g.INITIAL_INCLUDE_RECORD:
@@ -55,7 +56,7 @@ def NEXT_RECORD():
                 pass
     else:  # NOT INCLUDE
         if g.SYSIN_COMPRESSED:
-            g.CURRENT_CARD = g.DECOMPRESS(0)[:];
+            g.CURRENT_CARD = DECOMPRESS(0)[:];
             pass
         else:
             g.CURRENT_CARD = INPUT(g.INPUT_DEV)[:];
