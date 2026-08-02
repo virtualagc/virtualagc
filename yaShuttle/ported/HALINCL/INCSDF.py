@@ -168,15 +168,19 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         CSECT_LENGTH[1] = value
     SDF_VAR_CLASS = 1  # INDICATES A VARIABLE
     def MAKESTRING(len, addr):
-        '''The XPL's MAKESTRING built an XPL string descriptor -- a length in
-        the top byte and an address in the bottom three -- out of a length and
-        an address, so that a run of bytes in memory could be handed round as
-        a CHARACTER value.  Python has no such representation: a string is a
-        string.  So this reads the bytes and returns them, converted out of the
-        EBCDIC they are held in.  (It used to return the descriptor itself,
-        which meant that comparisons like "COMPILER = SDF_ROOT_COMPILER" were
-        comparing a string against an integer, and so were never true.)
+        '''The XPL's MAKESTRING built an XPL string descriptor -- the length
+        *minus one* in the top byte and the address of the character data in
+        the bottom three, with an all-zero descriptor as the special case for
+        an empty string, which occupies no data storage at all -- so that a run
+        of bytes in memory could be handed round as a CHARACTER value.  Python
+        has no such representation: a string is a string.  So this reads the
+        bytes and returns them, converted out of the EBCDIC they are held in.
+        (It used to return the descriptor itself, which meant that comparisons
+        like "COMPILER = SDF_ROOT_COMPILER" were comparing a string against an
+        integer, and so were never true.)
         '''
+        if len <= 0:
+            return ""
         return "".join(ebcdicToAscii[b]
                        for b in memoryModel[addr:addr + len])
     def NEW_STRING(s):
@@ -207,9 +211,19 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     #    SDF_B BASED BIT(8),
     #    SDF_H BASED BIT(16),
     #    SDF_F BASED FIXED;
-    SDF_B_base = 0 
-    SDF_H_base = 0 
-    SDF_F_base = 0 
+    #
+    # Mind the datatypes when these are read.  XPL/I up-converts BIT(1) through
+    # BIT(15) to FIXED as *positive* integers, but BIT(16) with sign extension,
+    # so a BIT(16) really can be negative -- and INCLUDE_SDF depends on it,
+    # since tests like "IF SDF_SYMB_LINK2 < 0" are how it recognizes the end of
+    # a level while walking a structure template.  Returning an unsigned 0 to
+    # 65535 from SDF_H() instead made those tests permanently false, so the
+    # walk ran off the end of the declare chain and swallowed every remaining
+    # symbol in the compool.  SDF_F is FIXED and likewise signed; only SDF_B,
+    # being BIT(8), is unsigned.
+    SDF_B_base = 0
+    SDF_H_base = 0
+    SDF_F_base = 0
     def SDF_B(n, value=None):
         addr = SDF_B_base + n
         if value == None:
@@ -219,17 +233,23 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     def SDF_H(n, value=None):
         addr = SDF_H_base + 2 * n
         if value == None:
-            return (memoryModel[addr] << 8) + memoryModel[addr + 1]
+            unsigned = (memoryModel[addr] << 8) + memoryModel[addr + 1]
+            if 0 != (unsigned & 0x8000):
+                unsigned -= 0x10000
+            return unsigned
         memoryModel[addr] = (value >> 8) & 0xFF
         memoryModel[addr + 1] = value & 0xFF
         return value & 0xFFFF
     def SDF_F(n, value=None):
         addr = SDF_F_base + 4 * n
         if value == None:
-            return (memoryModel[addr] << 24) + \
-                   (memoryModel[addr + 1] << 16) + \
-                   (memoryModel[addr + 2] << 8) + \
-                   memoryModel[addr + 3]
+            unsigned = (memoryModel[addr] << 24) + \
+                       (memoryModel[addr + 1] << 16) + \
+                       (memoryModel[addr + 2] << 8) + \
+                       memoryModel[addr + 3]
+            if 0 != (unsigned & 0x80000000):
+                unsigned -= 0x100000000
+            return unsigned
         memoryModel[addr] = (value >> 24) & 0xFF
         memoryModel[addr + 1] = (value >> 16) & 0xFF
         memoryModel[addr + 2] = (value >> 8) & 0xFF
