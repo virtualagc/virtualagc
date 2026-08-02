@@ -129,10 +129,11 @@ int main(int argc, char **argv) {
         if (aheadUs > 0) sleep_us(aheadUs);
     }
 
+    Ops->release(&state);
+
     fprintf(stderr, "stopped (%s): %s (elapsedTime=%.2f us)\n", argv[1], gpc_engine_status_message(status),
             state.elapsedTime);
 
-    Ops->release(&state);
     /* HALTED (-1..-3) is program-inherent termination; ERROR (-4..-9,
      * GPC_ENGINE_ERROR_INVALID_OPCODE and below) is an emulator fault. */
     return status <= GPC_ENGINE_ERROR_INVALID_OPCODE ? 1 : 0;

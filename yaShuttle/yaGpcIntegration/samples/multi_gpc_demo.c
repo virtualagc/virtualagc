@@ -69,10 +69,11 @@ int main(void) {
         if (s3 >= GPC_ENGINE_RUNNING) s3 = yaHALMAT2_ops.engine(&gpc3);
     }
 
+    yaGPC2_ops.release(&gpc1);
+    yaHALMAT2_ops.release(&gpc3);
+
     fprintf(stderr, "GPC1 (yaGPC2):    %s\n", gpc_engine_status_message(s1));
     fprintf(stderr, "GPC3 (yaHALMAT2): %s\n", gpc_engine_status_message(s3));
 
-    yaGPC2_ops.release(&gpc1);
-    yaHALMAT2_ops.release(&gpc3);
     return 0;
 }
