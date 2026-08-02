@@ -11,7 +11,7 @@ History:    2023-09-22 RSB  Ported
                             had been writing the cell header to Python
                             locals instead of to virtual memory, and which
                             handed MOVE() a byte value where it wanted the
-                            address of one.  Reached only via --sdf.
+                            address of one.
 '''
 
 from xplBuiltins import *

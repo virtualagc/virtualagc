@@ -351,7 +351,7 @@ def PTR_LOCATE(PTR, FLAGS):
                 v2.VMEM_LOOK_AHEAD_PAGE = -1;
             # END
         # END
-        v2VMEM_PAD_CNT[CUR_NDX] = v2.VMEM_LOC_CNT;
+        v2.VMEM_PAD_CNT[CUR_NDX] = v2.VMEM_LOC_CNT;
     # END
     SAVE_PTR_STATE(CUR_NDX);
     v2.VMEM_OLD_NDX = CUR_NDX;
@@ -380,7 +380,7 @@ def PTR_LOCATE(PTR, FLAGS):
                 v2.VMEM_PAGE_TO_NDX[PAGE] = CUR_NDX;
                 v2.VMEM_PAD_PAGE[CUR_NDX] = PAGE;
                 v2.VMEM_PAD_DISP[CUR_NDX] = 0;
-                v2VMEM_PAD_CNT[CUR_NDX] = v2.VMEM_LOC_CNT - 1;
+                v2.VMEM_PAD_CNT[CUR_NDX] = v2.VMEM_LOC_CNT - 1;
             # END
         # END
     # END

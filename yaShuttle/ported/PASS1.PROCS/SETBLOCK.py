@@ -7,6 +7,12 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-22 RSB  Began porting from XPL
+            2026-08-02 RSB  Finished the port.  What had stalled it was that
+                            LOCATE() returns an address into a paged buffer at
+                            an arbitrary offset, and there is no way to make a
+                            Python reference to part of a bytearray; the
+                            COREWORD() accessor added to VMEM3 for STABHDR
+                            removes the difficulty.
 '''
 
 from xplBuiltins import *
@@ -40,41 +46,42 @@ import HALINCL.VMEM2 as v2
 '''
 
 
+# BLOCK_PTR is declared inside the XPL procedure, as "DECLARE BLOCK_PTR FIXED
+# INITIAL(1)", but XPL allocates procedure locals statically and performs the
+# INITIAL once at load time rather than on entry.  It therefore keeps its value
+# from one call to the next, which is the only reason successive blocks land in
+# successive slots.  Hence it lives out here.
+BLOCK_PTR = 1
+
+
 def SET_BLOCK_SRN(SYMNUM):
-    # Locals are BLOCK_PTR, BLOCK_SRN.
-    
-    # Okay, the more I think about this, the more at a loss I am.  For now,
-    # let's just ignore it.
-    return
-    
+    # The other local is BLOCK_SRN.
+    global BLOCK_PTR
+
     # CONVERT SRN TO FIXED AND INSERT WITH SYM_NUM  IN TABLE FOR PHASE2
-    BLOCK_PTR = 1
     if g.MAIN_SCOPE == 0:
         return;  # STILL EXTERNAL CSECTS
-    # CONVERT SRN TO FIXED
+    # CONVERT SRN TO FIXED.  Note that this is not conditioned on SRN_PRESENT,
+    # so with no SRNs in the source it converts six bytes of nothing; the XPL
+    # did the same, and nothing downstream reads the result in any case.  The
+    # loop is written out rather than left to range() because XPL's "DO I=0 TO
+    # 5" leaves I at 6, whereas Python's for-loop would leave it at 5, and I is
+    # a shared global.
     BLOCK_SRN = 0;
-    for g.I in range(0, 5 + 1):
+    g.I = 0
+    while g.I <= 5:
         BLOCK_SRN = (BLOCK_SRN * 10) + (BYTE(g.SRN[0], g.I) - BYTE('0'));
-    # INCREMENT ENTRY COUNT AND ENTER PAIR
-    '''
-    What the following ghastliness was trying to do in XPL was to change
-    SRN_BLOCK_RECORD (an array) so that it pointed to a different area of
-    memory, for a different block of SRN data.  It seems to use the 
-    Virtual Memory system for this, which it can do since SRN blocks are 2044
-    bytes in size, whereas virtual-memory blocks are 3360 bytes in size.
-    The return address of LOCATE() was originally an absolute numerical 
-    address in memory, but for us is a number that encodes a virtual-memory
-    buffer number and an offset into that buffer.
-    
-    Unfortunately, there's no guarantee that the offset is 0, and there's
-    no way in Python to create a reference that's a bytearray to (say) just the
-    last half of another bytearray.
-    '''
-    g.SRN_BLOCK_RECORD = LOCATE(g.BLOCK_SRN_DATA(), v2.MODF);
-    while len(g.SRN_BLOCK_RECORD) < BLOCK_PTR + 2:
-        g.SRN_BLOCK_RECORD.append(0)
-    g.SRN_BLOCK_RECORD[0] = g.SRN_BLOCK_RECORD[0] + 1;
-    g.SRN_BLOCK_RECORD[BLOCK_PTR] = SYMNUM;
-    g.SRN_BLOCK_RECORD[BLOCK_PTR + 1] = BLOCK_SRN;
+        g.I = g.I + 1
+    # END
+    # INCREMENT ENTRY COUNT AND ENTER PAIR.  SRN_BLOCK_RECORD is a BASED FIXED
+    # in the XPL, i.e. a pointer to the virtual-memory cell that INITIALIZE
+    # allocated and left in BLOCK_SRN_DATA (= COMM(18)).  LOCATE() returns the
+    # "core address" of that cell, and the based-variable subscripting is
+    # spelled out as COREWORD(SRN_BLOCK_RECORD + 4*n), exactly as in STABHDR.
+    # Word 0 is a running count of the blocks recorded, and the pairs follow.
+    SRN_BLOCK_RECORD = LOCATE(g.BLOCK_SRN_DATA(), v2.MODF);
+    COREWORD(SRN_BLOCK_RECORD, COREWORD(SRN_BLOCK_RECORD) + 1);
+    COREWORD(SRN_BLOCK_RECORD + 4 * BLOCK_PTR, SYMNUM);
+    COREWORD(SRN_BLOCK_RECORD + 4 * (BLOCK_PTR + 1), BLOCK_SRN);
     BLOCK_PTR = BLOCK_PTR + 2;
     return;

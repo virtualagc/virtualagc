@@ -296,12 +296,7 @@ def INITIALIZATION():
     g.LINE_LIM = int(VALS[1]);
     g.LISTING2_COUNT = g.LINE_LIM
     g.LINE_MAX = g.LINE_LIM
-    if g.sdf:
-        g.SIMULATING = 1 if (g.OPTIONS_CODE() & 0x800) != 0 else 0;
-    else:
-        # The Simulation Data File machinery this flag turns on is still being
-        # ported, so it stays switched off unless HAL_S_FC.py was given --sdf.
-        g.SIMULATING = 0
+    g.SIMULATING = 1 if (g.OPTIONS_CODE() & 0x800) != 0 else 0;
     if (g.OPTIONS_CODE() & 0x10) == 0x10:
         g.TPL_FLAG = 0;
     g.SRN_PRESENT = (g.OPTIONS_CODE() & 0x80000) != 0;
@@ -367,8 +362,12 @@ def INITIALIZATION():
         v2.VMEM_PAD_ADDR[I] = h.VMEMREC[I];
     #END;
     
-    #/* GET AREA FOR SYM SRN TABLE */
-    #BLOCK_SRN_DATA, SRN_BLOCK_RECORD =GET_CELL(2044,MODF);
+    # GET AREA FOR SYM SRN TABLE.  The XPL passed ADDR(SRN_BLOCK_RECORD) so
+    # that GET_CELL could point the based variable at the new cell; the Python
+    # GET_CELL returns that address as the second element of a pair instead,
+    # and it is of no use here, since SET_BLOCK_SRN LOCATEs the cell afresh on
+    # every call.  Only the pointer, kept in COMM(18), needs to survive.
+    g.BLOCK_SRN_DATA(GET_CELL(2044, v2.MODF)[0]);
     #RECORD_CONSTANT(h.FOR_DW,13,g.UNMOVEABLE);
     #RECORD_USED(h.FOR_DW, RECORD_ALLOC(h.FOR_DW));
     
