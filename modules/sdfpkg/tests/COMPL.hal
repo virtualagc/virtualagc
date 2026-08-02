@@ -1,0 +1,11 @@
+C/ COMPOOL whose structure template contains a label member, so that the
+C/ SDF carries a class 5 ("Template label") symbol and ENTER_SDF_LABEL is
+C/ reached when it is imported.
+ COMPL: COMPOOL;
+    STRUCTURE LSTRUCT:
+       1 PROG NAME PROGRAM,
+       1 TSK NAME TASK,
+       1 LX INTEGER;
+    DECLARE LSTRUCT LSTRUCT-STRUCTURE;
+    DECLARE LY SCALAR;
+ CLOSE COMPL;

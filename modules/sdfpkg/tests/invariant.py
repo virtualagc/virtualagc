@@ -35,6 +35,9 @@ Three differences are expected rather than faults, and are allowed for below:
     exactly as here -- INCSDF.xpl sets SYT_LINK1/2 only inside
     ENTER_SDF_TEMPLATE, for the members of a structure template.
 
+  * DEFINED_LABEL on a label declared inside a structure template.  See the
+    comment beside the test for it below.
+
   * SYM_XREF, which is an index into the cross-reference table.  Including a
     TEMPLATE inserts the included source, and those statements are themselves
     cross-referenced, so the table is larger and every index into it shifts.
@@ -60,6 +63,7 @@ import subprocess
 import tempfile
 
 SDF_INCL_FLAG = 0x800
+DEFINED_LABEL = 0x40
 EXEMPT = {"SYM_ADDR", "SYM_LINK1", "SYM_LINK2", "SYM_XREF"}
 XREF_MASK = 0x1FFF
 
@@ -117,6 +121,16 @@ def compare(template, templateXref, sdf, sdfXref):
             if field == "SYM_FLAGS":
                 # The SDF route additionally marks the block as SDF-derived.
                 right &= ~SDF_INCL_FLAG
+                # A label declared inside a structure template -- "1 P NAME
+                # PROGRAM" -- is marked DEFINED_LABEL when the declaration is
+                # seen in source, but not when it arrives from an SDF:
+                # INCSDF.xpl names DEFINED_LABEL in exactly one place, for the
+                # compilation unit's own block label, and the SDF carries no
+                # flag for SET_SYT_FLAGS to map onto it.  Allowed in that
+                # direction only, so that any other flag difference still
+                # fails.
+                if (left & DEFINED_LABEL) and not (right & DEFINED_LABEL):
+                    left &= ~DEFINED_LABEL
             if left != right:
                 complaints.append(
                     "symbol %d (%s): %s is %s via the template but %s via the "
