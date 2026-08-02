@@ -1,0 +1,8 @@
+C/ COMPOOL carrying REPLACE macros, to exercise ENTER_SDF_MACRO and the
+C/ REPLACE-text cell chain.
+ COMPM: COMPOOL;
+    REPLACE INFILE BY "5";
+    REPLACE OUTFILE BY "6";
+    REPLACE TWICE(X) BY "(2 X)";
+    DECLARE MV SCALAR;
+ CLOSE COMPM;

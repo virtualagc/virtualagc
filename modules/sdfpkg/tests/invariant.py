@@ -35,6 +35,15 @@ Three differences are expected rather than faults, and are allowed for below:
     exactly as here -- INCSDF.xpl sets SYT_LINK1/2 only inside
     ENTER_SDF_TEMPLATE, for the members of a structure template.
 
+  * SYM_XREF, which is an index into the cross-reference table.  Including a
+    TEMPLATE inserts the included source, and those statements are themselves
+    cross-referenced, so the table is larger and every index into it shifts.
+    Rather than ignore the field, the flag bits of each symbol's leading
+    cross-reference entry are compared instead: those must agree.  The
+    statement number in that entry legitimately does not, an imported symbol
+    being attributed to the INCLUDE statement ("TREAT EACH INCLUDE AS ONE
+    STMT") rather than to a source line that is not part of this compilation.
+
 Usage:
     invariant.py [--compiler=PATH] [--keep] COMPOOL.hal USER.hal ...
 
@@ -51,7 +60,8 @@ import subprocess
 import tempfile
 
 SDF_INCL_FLAG = 0x800
-EXEMPT = {"SYM_ADDR", "SYM_LINK1", "SYM_LINK2"}
+EXEMPT = {"SYM_ADDR", "SYM_LINK1", "SYM_LINK2", "SYM_XREF"}
+XREF_MASK = 0x1FFF
 
 _here = os.path.dirname(os.path.realpath(__file__))
 _defaultCompiler = os.path.join(
@@ -60,7 +70,7 @@ _defaultCompiler = os.path.join(
 
 
 def compile(compiler, workDir, halFile, *extra):
-    '''Run one compilation, returning its exit status.'''
+    '''Run one compilation, returning (exit status, report).'''
     command = [sys.executable, compiler, "--pfs", "--templib",
                "--hal=" + halFile] + list(extra)
     result = subprocess.run(command, cwd=workDir, capture_output=True,
@@ -68,21 +78,38 @@ def compile(compiler, workDir, halFile, *extra):
     if result.returncode not in (0, 8):
         print(command)
         print(result.stderr[-2000:], file=sys.stderr)
-    return result.returncode
+    return result.returncode, result.stdout
 
 
 def symbolTable(workDir):
     with open(os.path.join(workDir, "SYM_TAB.json")) as f:
-        return json.load(f)
+        symbols = json.load(f)
+    with open(os.path.join(workDir, "CROSS_REF.json")) as f:
+        crossRef = json.load(f)
+    return symbols, crossRef
 
 
-def compare(template, sdf):
+def xrefFlags(symbol, crossRef):
+    '''The flag bits of a symbol's leading cross-reference entry, or None.'''
+    index = symbol.get("SYM_XREF") or 0
+    if not 0 < index < len(crossRef):
+        return None
+    return (crossRef[index].get("CR_REF", 0) >> 13) & 7
+
+
+def compare(template, templateXref, sdf, sdfXref):
     '''Return a list of complaints, empty if the two tables agree.'''
     complaints = []
     if len(template) != len(sdf):
         return ["symbol table has %d entries via the template and %d via the "
                 "SDF" % (len(template), len(sdf))]
     for i, (a, b) in enumerate(zip(template, sdf)):
+        left, right = xrefFlags(a, templateXref), xrefFlags(b, sdfXref)
+        if left != right:
+            complaints.append(
+                "symbol %d (%s): leading cross-reference flags are %s via the "
+                "template but %s via the SDF"
+                % (i, a.get("SYM_NAME", "?"), left, right))
         for field in sorted(set(a) | set(b)):
             if field in EXEMPT:
                 continue
@@ -129,7 +156,7 @@ def main():
         # template library HAL_S_FC.py uses is TEMPLIB.json, not HALSFC's
         # TEMPLIB/ directory, so it has to be built with this compiler.
         for name in compools:
-            status = compile(compiler, workDir, name, "TEMPLATE")
+            status, _ = compile(compiler, workDir, name, "TEMPLATE")
             if status not in (0, 8):
                 print("FAIL: could not compile %s (status %d)"
                       % (name, status))
@@ -153,11 +180,22 @@ def main():
 
         failed = 0
         for name in users:
-            status = compile(compiler, workDir, name)
-            template = symbolTable(workDir)
-            statusSdf = compile(compiler, workDir, name, "--sdfi=SDFLIB")
-            sdf = symbolTable(workDir)
-            complaints = compare(template, sdf)
+            status, report = compile(compiler, workDir, name)
+            template, templateXref = symbolTable(workDir)
+            statusSdf, reportSdf = compile(compiler, workDir, name,
+                                           "--sdfi=SDFLIB")
+            sdf, sdfXref = symbolTable(workDir)
+            complaints = compare(template, templateXref, sdf, sdfXref)
+            # Without this the test would be satisfied by an SDF route that
+            # quietly fell back on the template, which is exactly what happens
+            # when the SDF cannot be read -- and the two would then agree
+            # trivially.
+            if "INCLUDED FROM SDF" not in reportSdf:
+                complaints.insert(0, "the --sdfi run did not import an SDF; "
+                                  "it fell back on the template library")
+            if "INCLUDED FROM SDF" in report:
+                complaints.insert(0, "the run without --sdfi imported an SDF "
+                                  "anyway, so the two routes are not distinct")
             if status != statusSdf:
                 complaints.insert(0, "exit status %d via the template but %d "
                                   "via the SDF" % (status, statusSdf))

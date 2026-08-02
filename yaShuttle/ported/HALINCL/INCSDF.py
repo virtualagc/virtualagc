@@ -103,6 +103,20 @@ def MOVE_TEXT_TO(length, text, address):
         bytes(asciiToEbcdic[ord(c)] for c in text)
 
 
+def STRING_AT(descriptor):
+    '''XPL's STRING() applied to a string descriptor, i.e. the inverse of
+    MAKESTRING: the top byte holds the length *minus one*, the low three the
+    address of the character data, and an all-zero descriptor is the special
+    case for the empty string, which occupies no data storage at all.
+    '''
+    if descriptor == 0:
+        return ""
+    length = ((descriptor >> 24) & 0xFF) + 1
+    address = descriptor & 0xFFFFFF
+    return "".join(ebcdicToAscii[b]
+                   for b in memoryModel[address:address + length])
+
+
 def RVL_STRING(rev):
     '''Render the revision level SELECT reports in BLKNO as the two EBCDIC
     characters it is.  An SDF library of plain files has no PDS directory
@@ -323,7 +337,13 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     def SDF_REPL_ARG_CNT():
         return -SDF_H(2)-1
     def SDF_REPL_ARG_NAME(i):
-        return STRING(SDFPKG_LOC_ADDR()+SDF_F(1+i))
+        # XPL:  STRING(SDFPKG_LOC_ADDR+SDF_F(1+%1%))
+        # SDF_F(1+i) holds a string descriptor whose address part is relative
+        # to the start of the REPLACE cell, so adding SDFPKG_LOC_ADDR relocates
+        # it -- the length lives in the top byte and is undisturbed by the
+        # addition, addresses being 24-bit.  STRING() then says "read this as a
+        # descriptor", which is the inverse of what MAKESTRING does above.
+        return STRING_AT(SDFPKG_LOC_ADDR() + SDF_F(1 + i))
     def SDF_REPL_NEXT_PTR(value = None):
         return SDF_F(0, value)
     def SDF_REPL_pBYTES(value = None):
@@ -861,8 +881,11 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
             OUTPUT(0, 'ENTER_COMSUB_ARGS: ENTERED')
         # PASS OVER PARAMETERS AND ENTER TEMPLATES, IF ANY
         SAVE_FIRST = NEXT_SYMBOL
+        # XPL:  DO UNTIL CUR_SYMBOL = LAST_COMSUB_SYMB;
+        # An UNTIL loop runs its body once and then repeats for as long
+        # as the condition is *false*, so the test is != rather than ==.
         first = True
-        while first or CUR_SYMBOL == LAST_COMSUB_SYMB:
+        while first or CUR_SYMBOL != LAST_COMSUB_SYMB:
             first = False
             CUR_SYMBOL = NEXT_SYMBOL
             LOCATE_SDF_SYMBp(CUR_SYMBOL)
@@ -877,8 +900,11 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
         NEXT_SYMBOL = SAVE_FIRST;
         g.SYT_PTR(g.BLOCK_SYTREF[g.NEST], g.NDECSY() + 1)
         # POINT TO FIRST ARG
+        # XPL:  DO UNTIL CUR_SYMBOL = LAST_COMSUB_SYMB;
+        # An UNTIL loop runs its body once and then repeats for as long
+        # as the condition is *false*, so the test is != rather than ==.
         first = True
-        while first or CUR_SYMBOL == LAST_COMSUB_SYMB:
+        while first or CUR_SYMBOL != LAST_COMSUB_SYMB:
             first = False
             CUR_SYMBOL = NEXT_SYMBOL
             LOCATE_SDF_SYMBp(CUR_SYMBOL)
