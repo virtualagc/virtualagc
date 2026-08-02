@@ -199,6 +199,26 @@ class sdfpkg:
         return sdf.vmpPlusOffset(
             self.s.directoryRootCell.pHeadOfBlockIndexTable, 12 * blkno)
 
+    def _relativeAddress(self, symbol):
+        '''RELADDR of a Symbol Data Cell, read the way the assembly reads it.
+
+        SYMBDC puts SYMBLEN (one byte, offset 12) immediately before RELADDR
+        (three bytes, offset 13), which is why CR13079 loads a fullword at
+        SYMBLEN and masks the top byte off:
+
+            L  R4,SYMBLEN
+            N  R4,=X'00FFFFFF'
+
+        Those three bytes are overloaded -- for a REPLACE label they hold a
+        byte count, and for other class 2 and 3 symbols a statement number --
+        and the parser accordingly only records `relativeMemoryAddressOfSymbol`
+        for the classes where it really is an address.  The assembly makes no
+        such distinction, so neither does this: read the raw bytes.
+        '''
+        addr = self.c.mode5(symbol.pDataCell)
+        return int.from_bytes(self.c.mem[addr + 12:addr + 16], "big") \
+            & 0x00FFFFFF
+
     def _symbolNodeVmp(self, symbno):
         return sdf.vmpPlusOffset(
             self.s.directoryRootCell.pFirstSymbolIndexTableEntry,
@@ -340,11 +360,11 @@ class sdfpkg:
             self.parsedName = None
             return
 
-        if modeNumber in {1, 2, 3, 4, 5, 6, 18}:
+        if modeNumber in {1, 2, 3, 4, 5, 6}:
             self.c.fromNative(self.COMMTABL)
             self.c.monitor22(mode)
             self.COMMTABL.update(self.c.toNative())
-            if modeNumber in {1, 18}:
+            if modeNumber == 1:
                 self.parsedName = None
                 self.searchBlock = None
                 self.lastSymbolFound = None
@@ -357,7 +377,7 @@ class sdfpkg:
         # is what the caller goes on to read the cell's raw System/360-format
         # fields out of.
 
-        if modeNumber not in {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}:
+        if modeNumber not in {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}:
             cmem.abend(4016)
 
         self.c.fromNative(self.COMMTABL)
@@ -495,6 +515,62 @@ class sdfpkg:
                 fields["INCLCNT"] = statement.includeCount
             self._reply(disp, **fields)
             return
+
+        if modeNumber == 18:
+            # Careful: mode 18 means two different things.  The SDFPKG User's
+            # Guide (SFOC-PASS0092, 02/08/99) documents it as "Deselect an SDF
+            # (FSWAT C version only)".  Three months later CR13079 gave the
+            # *assembly* a mode 18 of its own -- "FIND INIT DATA AT GIVEN #" --
+            # and it is the assembly we are reproducing, so that is what is
+            # implemented here.  Deselect is still available, as deselect().
+            #
+            #     INITDATA B     SYMB           - GET SYMBOL RELADDR IN R4
+            #     GETINIT  L     R1,INITPTR     - R1 = INITIAL DATA POINTER
+            #              N     R4,=X'00FFFFFF'  - MASK TO GET RELADDR FIELD
+            #              AR    R4,R4          - MULTIPLY BY 2 FOR BYTE OFFSET
+            #              ... normalize on 1680 and add to R1 ...
+            #              CALL  LOCATE
+            #
+            # It is gated in the dispatcher by "CLI SDFVERS+1,33 / BH NEWCHECK",
+            # SDFVERS being the version halfword at offset 0 of page 0, so only
+            # an SDF newer than version 33 has initialization data to find.
+            if self.s.masterDirectoryCell.phase3VersionNumber <= 33:
+                cmem.abend(4016)
+            symbno = self.COMMTABL["SYMBNO"] or 0
+            if symbno < 1 or symbno > len(self.s.symbolIndexTable):
+                self._fail(20)
+                return
+            symbol = self.s.symbolIndexTable[symbno - 1]
+            reladdr = self._relativeAddress(symbol)
+            vmp = sdf.vmpPlusOffset(
+                self.s.directoryRootCell.pInitializationTable, 2 * reladdr)
+            # INITDATA runs the whole mode 9 path first, so the symbol's own
+            # outputs are reported too; only ADDR refers to the init data,
+            # being the result of the last LOCATE the assembly performs.
+            self._reply(disp,
+                        ADDR=self.c.mode5(vmp),
+                        PNTR=symbol.pDataCell,
+                        SYMBNO=symbno,
+                        SYMBNLEN=symbol.symbolDataCell.lengthOfSymbolName,
+                        SYMBNAM=self._symbolName(symbno),
+                        BLKNO=symbol.symbolDataCell.blockIndexNumber)
+            return
+
+    def deselect(self, name=None):
+        '''Deselect an SDF: mode 18 of the FSWAT C build of SDFPKG, which the
+        assembly spends on CR13079's initialization-data lookup instead.  Kept
+        as a method of its own because it is genuinely useful -- it lets the
+        FCB area be reused when many members are processed in turn -- and
+        because a C port of this module may want to expose it as mode 18 again.
+        '''
+        if name is not None:
+            self.COMMTABL["SDFNAM"] = name
+        self.c.fromNative(self.COMMTABL)
+        self.c.monitor22(18)
+        self.COMMTABL.update(self.c.toNative())
+        self.parsedName = None
+        self.searchBlock = None
+        self.lastSymbolFound = None
 
 #------------------------------------------------------------------------------
 def runTests(sdflibName, memberNames):
@@ -705,6 +781,39 @@ def runTests(sdflibName, memberNames):
             p.sdfpkg(17)
             check("mode 17 rejects a statement number past the last ISN",
                   COMMTABL["CRETURN"] == 36)
+
+        # --- mode 18, CR13079's initialization data --------------------------
+        if p.s.masterDirectoryCell.phase3VersionNumber > 33:
+            initPtr = drc.pInitializationTable
+            for symbno in range(1, len(p.s.symbolIndexTable) + 1):
+                symbol = p.s.symbolIndexTable[symbno - 1]
+                # Independently of sdfpkg: read RELADDR straight out of the
+                # located cell, which is what the assembly does.
+                cellAddr = p.c.mode5(symbol.pDataCell)
+                reladdr = int.from_bytes(
+                    memoryModel[cellAddr + 12:cellAddr + 16], "big") & 0x00FFFFFF
+                expected = sdf.vmpPlusOffset(initPtr, 2 * reladdr)
+                COMMTABL["SYMBNO"] = symbno
+                p.sdfpkg(18)
+                check(f"mode 18 locates the init data of symbol {symbno}",
+                      COMMTABL["CRETURN"] == 0
+                      and COMMTABL["ADDR"] == p.c.mode5(expected)
+                      and COMMTABL["PNTR"]
+                      == p.s.symbolIndexTable[symbno - 1].pDataCell)
+            COMMTABL["SYMBNO"] = len(p.s.symbolIndexTable) + 1
+            p.sdfpkg(18)
+            check("mode 18 rejects an out-of-range symbol number",
+                  COMMTABL["CRETURN"] == 20)
+
+        # --- deselect, which is the C build's mode 18 ------------------------
+        p.deselect(member)
+        check("deselect releases the member",
+              COMMTABL["CRETURN"] == 0 and p.c.current is None)
+        COMMTABL["SDFNAM"] = member
+        p.sdfpkg(4)
+        check("the member can be selected again after deselect",
+              COMMTABL["CRETURN"] == 0)
+        p._parse()
 
         # --- dispositions ----------------------------------------------------
         COMMTABL["BLKNO"] = 0
