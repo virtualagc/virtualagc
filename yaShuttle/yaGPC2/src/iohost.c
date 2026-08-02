@@ -45,6 +45,7 @@ static void load_input_file(IOHost *io, int ch, const char *content, size_t len)
     for (size_t i = 0; i <= len; i++) {
         if (i == len || content[i] == '\n') {
             size_t lineLen = i - start;
+            if (lineLen > 0 && content[start + lineLen - 1] == '\r') lineLen--; /* CRLF-terminated source */
             char *line = malloc(lineLen + 1);
             memcpy(line, content + start, lineLen);
             line[lineLen] = '\0';

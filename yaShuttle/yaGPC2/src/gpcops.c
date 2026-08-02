@@ -164,7 +164,10 @@ static bool default_input(void *ioCtx, int channel, char *buf, size_t bufSize) {
     if (channel != 5) return false;
     if (!fgets(buf, (int)bufSize, stdin)) return false;
     size_t len = strlen(buf);
-    if (len > 0 && buf[len - 1] == '\n') buf[len - 1] = '\0';
+    if (len > 0 && buf[len - 1] == '\n') {
+        buf[--len] = '\0';
+        if (len > 0 && buf[len - 1] == '\r') buf[--len] = '\0'; /* CRLF-terminated source */
+    }
     return true;
 }
 
