@@ -310,6 +310,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
           5 of the document, IR-60-5 from 1977</a>, and this version
         contains only the pages that changed between Revision 4 and
         Revision 5.&nbsp; The complete Appendix A, which from the page
@@ -368,6 +369,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
 
 
 
+
     At this writing, the fly in the ointment is that after the
     extremely-rapid initial development of the HALMAT spec and of <b>yaHALMAT</b>,
     life and priorities intervened and progress came to a halt.&nbsp;
@@ -416,6 +418,7 @@ href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf
         <code>FUNCTION</code>, or <code>COMPOOL</code>).</li>
       <li>HALMAT #3:&nbsp; This is an argument for HALMAT #2.&nbsp; It
         tells us that the <code>PROGRAM</code> is named <code>HELLO</code>.&nbsp;
+
 
 
 
@@ -616,6 +619,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       of Zane's material is in his own GitHub repository</a>.&nbsp; <a
       moz-do-not-send="true"
       href="https://github.com/Zaneham/Halmat/issues/new/choose">That's
@@ -704,6 +708,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <ul>
     </ul>
     <i>Or</i> we could use the unoptimized HALMAT from <b>HAL_S_FC.py</b>.&nbsp;
+
 
 
 
@@ -801,6 +806,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
             But use the <i>actual</i> directory name in the
             instructions below.<br>
             <br>
@@ -843,7 +849,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/r
 
 
 
+
       new, full HALMAT documentation I mentioned can be seen on GitHub</a>.&nbsp;
+
 
 
 
@@ -861,9 +869,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/r
 
 
 
+
       document that describes the current state of development</a>, or <a
       moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/Plan.md">the
+
 
 
 
@@ -881,6 +891,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     <br>
     The next step was to proceed to implementation of the emulator
     itself, called <b>yaHALMAT2</b> to distinguish itself from Zane's <b>yaHALMAT</b>.&nbsp;
+
 
 
 
@@ -979,6 +990,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
 
 
 
+
       --archive</code>.&nbsp; This strategy creates a new subdirectory
     for each compilation and shoves all of the files that were generated
     into it.<br>
@@ -1058,10 +1070,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
 
 
 
+
     HAL/S real-time mechanisms allow multiple <code>PROGRAM</code>s to
     be simultaneously running, while flipping back and forth between
     them, whereas all <i>we</i> have implemented so far is a <i>single</i>
     <code>PROGRAM</code> plus multiple <code>COMPOOL</code>s, <code>PROCEDURE</code>s,
+
 
 
 
@@ -1172,7 +1186,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
 
 
 
+
       and have produced a memory image from it that's called <i>MYPROGRAM</i>.fcm,
+
 
 
 
@@ -1230,6 +1246,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
 
 
 
+
               pre-built "AppImage" for Linux</a>, rename it "gpc", and
             copy it into my path.&nbsp; There are also pre-built Mac OS
             "dmg" files at the same link, though I don't know how to use
@@ -1252,6 +1269,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
     <p>The <code>--interactive</code> switch tells the emulator to
       accept keyboard input on device 5 (as in the HAL/S <code>READ(5)
         ...;</code>) and output to device 6 (as in the HAL/S <code>WRITE(6)
+
 
 
 
@@ -1284,7 +1302,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/yaHALMAT2/P
 
 
 
+
             command mentioned above, in the form of a program called <b>yaGPC</b>.&nbsp;
+
 
 
 
@@ -1312,6 +1332,7 @@ make
             into your <code>PATH</code>. <br>
             <br>
             After installation, you can just replace any use of "<code>git
+
 
 
 
@@ -1406,6 +1427,7 @@ make
 
 
 
+
             But use the <i>actual</i> directory name in the
             instructions below.<br>
             <br>
@@ -1487,6 +1509,7 @@ make
 
 
 
+
                 User's Manual</i></a>, states that the "standard fixup"
             in this situation is to clamp at -3276<b>8</b> or
             32767.&nbsp; This would make sense, but the actual <b>FCOS</b>
@@ -1550,6 +1573,7 @@ make
       <li>The <code>+<i>NNNNN</i></code> next to the <code>CSECT</code>
         name is the offset into the <code>CSECT</code> at which the
         instruction resides, in halfwords.&nbsp; So evidently, <code>CSECT
+
 
 
           START</code> is located at address 0x10164, <code>$0HELLO</code>
@@ -1680,6 +1704,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM/VX6S3.asm">VX6S3.asm</a>.&nbsp;
 
 
+
       Just search for the string "&amp;ASM101S" to see the differences,
       and explanations thereof.)<br>
     </p>
@@ -1688,7 +1713,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       Simulators Or Other Software</h1>
     <p>I'll confine my remarks in this section to the <b><a
           moz-do-not-send="true" href="#yaHALMAT2">yaHALMAT2</a></b> and
-      <b><a moz-do-not-send="true" href="yaGPC2">yaGPC2</a></b>
+      <b><a moz-do-not-send="true" href="#yaGPC2">yaGPC2</a></b>
       emulators.&nbsp; These two emulators have an architecture and a
       mutual consistency that hopefully can assist anybody wishing to
       bypass our stand-alone programs entirely, in order to integrate
@@ -1749,6 +1774,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <pre>paced_run yagpc2|yahalmat2 <i>FILENAME1</i> [<i>FILENAME2</i>]<br></pre>
     </blockquote>
     The first argument, literally "<code>yagpc2</code>" or "<code>yahalmat2</code>",
+
     naturally selects whether to run an AP-101S emulator or a HALMAT
     emulator.&nbsp; <i><code>FILENAME1</code></i> is either the name of
     a memory-image file created by the linker (.fcm) or a HALMAT file
@@ -1796,7 +1822,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       </li>
     </ul>
     In other words, you execute a burst of instructions, followed by
-    sleeping for about 20 ms, followed by a burst of instructions, and
+    sleeping for about 10 ms, followed by a burst of instructions, and
     so on.&nbsp; Simple-minded scheduling?&nbsp; Sure!&nbsp; Use
     something better if you've got it.<br>
     <br>
@@ -1893,21 +1919,29 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             </ul>
           </td>
           <td valign="middle" nowrap="nowrap"><code></code><code>GpcState
+
               state = { 0 };<br>
               initializer(GpcState *state, <br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
               const char *programPath, <br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
               const char *symbolsPath,<br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
               GpcServicerFn servicer,<br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
               void *servicerCtx,<br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
               GpcOutputFn output, <br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
               GpcInputFn input,<br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
               void *ioCtx)</code></td>
         </tr>
         <tr>
@@ -1916,6 +1950,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             allocate the <code>state</code> structure itself (say, with
             <code>malloc</code>), rather than declaring it statically,
             you'll have to <code>free</code> it yourself after <code>release</code>'ing
+
             it.<br>
           </td>
           <td valign="middle"><code>release(GpcState *state)<br>
@@ -1939,6 +1974,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             pointer to the structure on success or <code>NULL</code> on
             failure.&nbsp; The <code>sourceMapPath</code> argument is
             not used for yaHALMAT2-style emulation, and may be <code>NULL</code>.&nbsp;
+
             For yaGPC2-style emulation it is the name of a file created
             by the utility <code>gen_source_map.py</code> that holds
             the text of all of the HAL/S source-code lines displayed
@@ -1982,14 +2018,23 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           *<i>ioCtx</i>, int <i>N</i>, char *<i>buf</i>, size_t <i>bufSize</i>)</code>,
         make it read a line of text from logical device <i><code>N</code></i>
         into <code><i>buf</i></code>, NUL-terminating it.&nbsp; Returns
-        true on success, or false on end-of-file.&nbsp; There is a
-        proviso, however, in that this callback can't block and must
-        return immediately: If it waits for input then real time
-        operations like <code>SCHEDULE</code> can't function.&nbsp; So
-        to implement it, you'll have to have a separate thread
-        collecting input data from your logical devices, buffering it so
-        that it can immediately return data once a full line has been
-        collected.</li>
+        true on success, or false on end-of-file.&nbsp; You might wonder
+        how a <code>READ</code> or <code>READALL</code> interacts with
+        HAL/S real time scheduling features?&nbsp; <i>I</i> did!&nbsp;
+        Scheduling is based on <i>emulated</i> time, not real time, and
+        no emulated time passes while you're sitting at a <code>READ</code>
+        waiting for input. In real Shuttle code, there are of course no
+        <code>READ</code> (or <code>WRITE</code>) statements, but there
+        are in HAL/S code compiled with <b>HAL/S-360</b>, the
+        System/360 version of the HAL/S compiler, and interestingly, <code>READ</code>
+        did not consume time there either.&nbsp; Why?&nbsp; Because on a
+        System/360 there were no terminals to interactively input data
+        into a <code>READ</code> anyway; data for a <code>READ</code>
+        was directly embedded into the Job Control Language (JCL) for
+        running the HAL/S program as punch-cards, and hence did not
+        consume <i>real</i> time because it was always instantly
+        available.<br>
+      </li>
       <li>The "Shuttle i/o" callback:&nbsp; In a Space Shuttle setting,
         GPC's communicate with their peripheral devices via networking,
         and that's what this callback is supposed to handle.&nbsp; With
