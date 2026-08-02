@@ -230,18 +230,30 @@ typedef void (*GpcServicerFn)(void *servicerCtx, GpcServiceNumber serviceNumber,
  * channel, not merely un-redirected (see this contract's own history).
  *
  * input: called synchronously whenever a READ statement needs a line
- * for `channel` -- must answer immediately, writing a NUL-terminated
- * line into buf (capacity bufSize) and returning true, or returning
- * false to report EOF; nothing else can run until it returns, so this
- * must not block on something that won't become ready without the
- * caller re-entering the emulator (a genuinely asynchronous input
- * source needs to buffer ahead of time, not answer from this callback
- * directly). NULL falls back to a built-in handler that connects
- * channel 5 (HAL/S's own conventional input device, paired with
- * channel 6 above) to stdin and reports immediate EOF on every other
- * channel, matching a driver that configured no input source for it at
- * all (the same default a real HAL/S program sees from the CLI when no
- * --infileN was given for that channel).
+ * for `channel` -- writes a NUL-terminated line into buf (capacity
+ * bufSize) and returns true, or returns false to report EOF. May
+ * genuinely block (e.g. a real blocking read on stdin -- exactly what
+ * the CLI's own --interactive mode already does) without desyncing
+ * anything: HAL/S-level scheduling (SCHEDULE/WAIT/task priority) runs
+ * entirely on emulated, instruction-derived time (yaHALMAT2's own
+ * virtual_time is advanced only from inside instruction execution,
+ * never by a real clock -- confirmed by reading its scheduler; yaGPC2
+ * has no real-time-clock mechanism at all for compiled RTL scheduling
+ * code to read), so nothing measures real elapsed time while blocked
+ * in here -- once this returns, execution resumes exactly where it
+ * left off, real time elapsed or not. The one real constraint is at
+ * the *driver's* level, not the emulator's: a single-threaded driver
+ * polling multiple GpcState instances in one loop (a Shuttle sim
+ * running GPC1-GPC5) can't service another instance's engine() call
+ * while blocked inside this one's GpcInputFn -- if that matters, give
+ * each instance its own thread, or use an input source that's already
+ * buffered ahead of time rather than one that blocks waiting for more.
+ * NULL falls back to a built-in handler that connects channel 5
+ * (HAL/S's own conventional input device, paired with channel 6 above)
+ * to stdin and reports immediate EOF on every other channel, matching
+ * a driver that configured no input source for it at all (the same
+ * default a real HAL/S program sees from the CLI when no --infileN was
+ * given for that channel).
  *
  * output/input share one ioCtx (distinct from servicerCtx above) since
  * they're one text-I/O concern in practice -- almost always backed by
