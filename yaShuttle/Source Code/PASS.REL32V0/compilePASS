@@ -220,7 +220,7 @@ if csectsDir != None:
     for name in sorted(glob.glob(csectsDir + os.sep + "csects-*.json")):
         try:
             import json as _json
-            csectsInPass |= set(k.strip() for k in _json.load(open(name)))
+            csectsInPass |= set(k for k in _json.load(open(name)))
         except:
             print("Warning: could not read " + name)
     if len(csectsInPass) == 0:
@@ -232,10 +232,20 @@ if csectsDir != None:
                len(glob.glob(csectsDir + os.sep + "csects-*.json"))))
 
 notInPass = []
+# Every CSECT naming convention in the SDL Interface Control Document (pages
+# 163-164) is two characters of type followed by the six-character name of the
+# HAL/S compilation unit: $0 for a PROGRAM, $1-$F for a task, #C for a COMSUB,
+# #D for DECLARE data, #P for COMPOOL data, @c for a stack, an (a=A-M, n=0-9)
+# for an internal procedure, aa for a library routine, and #Z/#Q/#0/#E/#L/#X
+# for the various ZCON and special data sections.  Rather than enumerate them,
+# strip the two-character prefix off every CSECT in the indexes and keep the
+# names; a unit is part of PASS if any CSECT of any type was emitted for it.
+unitsInPass = set(n[2:8].strip() for n in csectsInPass if len(n) >= 3)
+
 def isInPass(halname):
-    if not csectsInPass or halname == None:
+    if not unitsInPass or halname == None:
         return True
-    return ("#P" + halname)[:8] in csectsInPass
+    return halname.strip() in unitsInPass
 
 '''
 Regarding the compiler parameters:
