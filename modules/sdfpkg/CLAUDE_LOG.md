@@ -41,3 +41,33 @@
 - RETRACTION and fix of the PASS-membership check. The "#P + name" mapping was wrong and the run built on it excluded 717 of 1167 files; the earlier "44 of 60 failures are not part of PASS" claim rested on the same bad heuristic and is withdrawn. The evidence had been on screen and was misread: RVMCON's own SDF gives its CSECTs as #PCRATE/#PCRCCOT/#PCRDCIL, none of them #PRVMCON.
 - Correct method, from the SDL ICD (USA001556) pages 163-164: every CSECT name is two characters of type followed by the six-character HAL/S compilation-unit name. $0 PROGRAM, $1-$F task, #C COMSUB, an (a=A-M, n=0-9) internal procedure, aa library routine, @c stack, #D DECLARE data, #P COMPOOL data, #Z/#Q/#0/#E/#L/#X the ZCON and special data sections, ## SDF, @@ TEMPLATE. #P alone is only COMPOOL *data*, which is why testing it rejected every PROGRAM. So strip the two-character prefix from every CSECT in the indexes and keep the names: a unit is in PASS if a CSECT of any type was emitted for it. 3859 CSECTs -> 1654 distinct unit names, against 1167 source files, which is the right shape since one file can hold several units.
 - Now correct on the cases that exposed the bug: RVMCON, CDR06D, DKFCM8 and CRATE all in PASS; CS4IX3 out while CS2IX3 is in, so the CS2/CS4 split survives the corrected method and now has real evidence behind it.
+
+### [2026-08-03] Target: [sdfpkg-rationale.md]
+- HANDOVER. Open question: BI002 "NON COMMON RECORD AT LINK" on ~30 PASS files that import SDFs. Everything below is measured, not inferred.
+
+**The finding.** `_IS_COMMON(CUR)` in SPACELIB.xpl:994 is `CUR < ADDR(DESCRIPTOR)`, and XCOM-I's generateADDR (generateC.py:776) returns `regions[1][1]` for that. In PASS1 the regions are in PASS1.build/memory.c:13498; region 1 is {1318, 4196}, so the COMMON boundary is **4196**. RECORD_LINK abends on any record still allocated at LINK whose dope is >= 4196.
+
+**Measured dopes** (instrumented every RECORD_CONSTANT/RECORD_FREE site in PASS1.build; 17 sites):
+  - Normal compile, no --sdfi (SSSRC/DUMULK.hal): five records allocated, none freed, no BI002 -- LIT_NDX 1456, FOR_DW 1484, FOR_ATOMS 1512, LIT_PG 2428, VMEMREC 2456. All **below** 4196. So surviving to LINK is normal and expected; RECORD_LINK hands each to _RETURN_UNUSED.
+  - SDF compile (APPLSRC/RVMCON.hal): INIT_APGAREA 4336, INIT_AFCBAREA 4364, PGING 4784. All **above** 4196. PGING is balanced 6 allocations / 6 frees. INIT_APGAREA and INIT_AFCBAREA are never freed anywhere -- INCSDF.xpl has RECORD_FREE only for FORFCB (752, 898) and PGING (900).
+
+**Conclusion.** Not an INCSDF bug and not a SPACELIB bug. The five records declared in ##DRIVER.xpl/COMMON.xpl land in region 1; the three declared in HALINCL/INCSDF.xpl land in region 2. The discriminator is an XCOM-I region-assignment question, not a boundary question. Start at generateC.py `allocateVariable` and the `baseRestriction` argument (generateC.py:2755), and at how a `BASED ... RECORD` declared in an included file is placed versus one declared in ##DRIVER. Note generateADDR's own comment calls the regions[1][1] choice "a workaround ... in lieu of altering the design".
+
+**Retractions to carry forward, so the wrong turns are not repeated.**
+  - PGING is NOT the leaked record. Asserted, disproved, revived on a mode tally, finally disproved by the dope trace. It balances 6/6.
+  - "44 of 60 failures are not part of PASS" was based on testing `#P`+name, which is only the COMPOOL *data* convention and rejected every PROGRAM (717 of 1167 files). Withdrawn. Corrected method below; real figure is 59 excluded.
+  - SPACELIB was called a pre-existing deferred C defect. Only RVMCON's PASS3 instance is; the PASS1 ones appeared with the SDF path.
+  - Page thrashing / LRU eviction was a theory; eviction logging shows ZERO evictions. Dead.
+
+**PASS membership, corrected.** SDL ICD (USA001556) pp.163-164: every CSECT name is two characters of type plus the six-character compilation-unit name -- $0 PROGRAM, $1-$F task, #C COMSUB, an internal procedure, aa library routine, @c stack, #D DECLARE data, #P COMPOOL data, #Z/#Q/#0/#E/#L/#X ZCON and special data, ## SDF, @@ TEMPLATE. compilePASS now strips the prefix from every CSECT in ../mafgen/csects-*.json and keeps the names (--csects=D, --no-csects). 3859 CSECTs -> 1654 names. One .hal outside INCL80 = exactly one compilation unit (user), so halname is unambiguous; the surplus over 1167 files is library and assembly CSECTs, making the test permissive in the safe direction.
+
+**Last good corpus run** (both compilers importing SDFs, membership check on): 917 compiled, 59 not in PASS, 885 SDFs, Done. PM2 0 and DI11 1 against 79 and 43 under the template route. 870 files cross-compared, **0 differences** in pass1.rpt and in HALMAT. Residue: ZO3 90, SPACELIB 30, XI3 12, other PASS1 1, 193 never attempted.
+
+**Tools and state.**
+  - Repro for BI002: `cd ~/workspace/PFS/OI340600-sdftest` then HALSFC-PASS1 on APPLSRC/RVMCON.hal with --sdfi=SDFLIB and the usual --pdsi switches (see the command in this log's history).
+  - `SDFPKG_TRACE=1` env var makes XCOM-I/sdfpkg.c log every MONITOR(22) mode, its COMMTABL inputs, and every page eviction.
+  - Fast rebuild: `cd PASS.REL32V0/PASS1.PROCS/PASS1.build && make`, then `cp ../PASS1 ../../HALSFC-PASS1`. ~20s. Full rebuild `make -s XEXTRA=--quiet PASS1` from PASS.REL32V0 (~30s) regenerates the C and DISCARDS temporary edits there.
+  - **PASS1.build currently holds temporary debug edits** (17 DOPETRACE fprintf calls) and HALSFC-PASS1 is that instrumented build. Rebuild fully before any corpus run.
+  - Work directory ~/workspace/PFS/OI340600-sdftest is a copy of OI340600's APPLSRC/SSSRC/INCL80; the user's own OI340600 is untouched.
+
+**TO RESUME IN A CLEARED SESSION**, say something like: "Read modules/sdfpkg/CLAUDE_LOG.md, last entry, and resume the BI002 investigation: find why XCOM-I places INCSDF.xpl's RECORD_CONSTANT records (INIT_APGAREA 4336, INIT_AFCBAREA 4364, PGING 4784) in region 2 while ##DRIVER.xpl's land in region 1 below the 4196 COMMON boundary."
