@@ -50,9 +50,22 @@ typedef struct {
 static sdfFile_t sdfs[MAX_SDFS];
 static int numSdfs = 0;         /* Ids are 1-based indices into sdfs[]      */
 
+/* The Paging Area is not one contiguous run.  Mode 2 augments it, and the
+ * caller's allocator (SPACELIB, via RECORD_CONSTANT(PGING,...)) hands back a
+ * fresh area each time rather than extending the previous one, so the area is
+ * a set of segments and a frame's address has to be looked up rather than
+ * computed.  The original spliced fresh storage in the same way. */
+#define MAX_SEGMENTS 64
+typedef struct {
+  uint32_t base;
+  int count;
+} segment_t;
+static segment_t segments[MAX_SEGMENTS];
+static int numSegments = 0;
+
 static int initialized = 0;
 static uint32_t commtabl = 0;   /* Address of COMMTABL within memory[]      */
-static uint32_t apgarea = 0;    /* Address of the Paging Area               */
+static uint32_t apgarea = 0;    /* Address of the first Paging Area segment */
 static uint32_t padAddr = 0;    /* Address of the Paging Area Directory     */
 static int npages = 0;          /* Page frames in the Paging Area           */
 static int padEntries = 0;
@@ -60,10 +73,15 @@ static int currentSdf = 0;      /* Id of the selected SDF, 0 for none       */
 static uint32_t usecount = 0;   /* Ticks on every call; drives LRU          */
 static int updat = 0;           /* From MISC: writing back is permitted     */
 
-/* Where a PAD supplied by the caller is absent we keep one of our own.  The
- * Python does the same; INCSDF happens always to supply one. */
-static uint8_t internalPad[SDF_PAD_ENTRY_SIZE * 250];
-static int padIsInternal = 0;
+/* The Paging Area Directory is ours, not the caller's.  SDFPKG.ASM keeps it in
+ * its own storage and INCSDF.xpl's MONITOR(22,0) call sets neither PNTR nor
+ * ADDR, so there is nothing in COMMTABL that describes one.  (The Python port
+ * does pass a PAD through PNTR/ADDR, but that is a convention of the port and
+ * not of the interface.)  One entry per page frame, sized to outlast any
+ * augment INCSDF is going to ask for. */
+#define MAX_FRAMES 4096
+static uint8_t internalPad[SDF_PAD_ENTRY_SIZE * MAX_FRAMES];
+static const int padIsInternal = 1;
 
 /*---------------------------------------------------------------------------
  * Abends.  The codes are SDFPKG.ASM's own, from its abend table, so that a
@@ -121,6 +139,21 @@ static uint8_t ctU8(uint32_t off) { return memory[commtabl + off]; }
  *      12  Page number within the SDF, times 8
  *      14  Reserve count
  */
+
+/* Address of page frame `i`, counting across the segments in the order they
+ * were given to us. */
+static uint32_t
+frameAddress(int i) {
+  int seg;
+  for (seg = 0; seg < numSegments; seg++)
+    {
+      if (i < segments[seg].count)
+        return segments[seg].base + (uint32_t) i * SDF_PAGE_SIZE;
+      i -= segments[seg].count;
+    }
+  sdfAbend(4013, "page frame index is outside the Paging Area");
+  return 0;
+}
 
 static uint8_t *
 padBuf(void) {
@@ -315,7 +348,7 @@ cachePage(int id, int pageNumber) {
       freeIndex = lru;
     }
 
-  pageAddr = apgarea + freeIndex * SDF_PAGE_SIZE;
+  pageAddr = frameAddress(freeIndex);
   memset(&memory[pageAddr], 0, SDF_PAGE_SIZE);
   fseek(sdfs[id - 1].fp, (long) pageNumber * SDF_PAGE_SIZE, SEEK_SET);
   got = fread(&memory[pageAddr], 1, SDF_PAGE_SIZE, sdfs[id - 1].fp);
@@ -367,7 +400,7 @@ resolveVmp(uint32_t vmp, int *padIndexOut) {
 
   if (padIndexOut != NULL)
     *padIndexOut = idx;
-  return apgarea + idx * SDF_PAGE_SIZE + offset;
+  return frameAddress(idx) + offset;
 }
 
 /* Reading fields of the SDF by VMP, for the searches. */
@@ -585,7 +618,6 @@ inputName(uint32_t nameOffset, uint32_t lengthOffset, uint8_t *out) {
 
 uint32_t
 sdfpkgInitialize(uint32_t commtablAddress) {
-  uint32_t pntr, addr;
   uint16_t misc;
   int i;
 
@@ -596,22 +628,8 @@ sdfpkgInitialize(uint32_t commtablAddress) {
   misc = ctU16(SDF_OFF_MISC);
   updat = (misc & 0x02) != 0;
 
-  pntr = ctU32(SDF_OFF_PNTR);
-  addr = ctU32(SDF_OFF_ADDR);
-  if (pntr > 0 && pntr < 4096)
-    {
-      padAddr = addr;
-      padEntries = pntr / SDF_PAD_ENTRY_SIZE;
-      padIsInternal = 0;
-    }
-  else if (pntr == 0 && addr == 0)
-    {
-      padAddr = 0;
-      padEntries = sizeof(internalPad) / SDF_PAD_ENTRY_SIZE;
-      padIsInternal = 1;
-    }
-  else
-    sdfAbend(4014, "unsupported Paging Area Directory configuration");
+  padAddr = 0;
+  padEntries = MAX_FRAMES;
 
   npages = ctU16(SDF_OFF_NPAGES);
   if (npages == 0)
@@ -631,6 +649,10 @@ sdfpkgInitialize(uint32_t commtablAddress) {
    * a page of the newly selected SDF. */
   for (i = 0; i < padEntries; i++)
     padMarkFree(i);
+
+  segments[0].base = apgarea;
+  segments[0].count = npages;
+  numSegments = 1;
 
   currentSdf = 0;
   usecount = 0;
@@ -719,8 +741,46 @@ sdfpkgService(uint32_t mode) {
             }
         numSdfs = 0;
         currentSdf = 0;
+        numSegments = 0;
+        npages = 0;
         initialized = 0;
         ctPutU16(SDF_OFF_CRETURN, 0);
+        return 0;
+      }
+
+    case 2:                     /* Augment the Paging Area and/or FCB area */
+      {
+        uint32_t newArea = ctU32(SDF_OFF_APGAREA);
+        int more = ctU16(SDF_OFF_NPAGES);
+        /* The original GETMAINed fresh storage and spliced it in.  There is no
+         * allocator here, so an augment can only be honoured when the new area
+         * abuts the one we already have; anything else abends rather than
+         * being quietly ignored, so a genuine shortfall is noticed instead of
+         * turning into silent corruption later.  NPAGES of zero means "no
+         * action for the Paging Area" whatever APGAREA says. */
+        if (more != 0)
+          {
+            if (newArea == 0)
+              sdfAbend(4013, "augment of the Paging Area with no area given");
+            if (npages + more > padEntries)
+              sdfAbend(4013, "augment would outgrow the Paging Area Directory");
+            if (numSegments >= MAX_SEGMENTS)
+              sdfAbend(4013, "too many Paging Area augments");
+            segments[numSegments].base = newArea;
+            segments[numSegments].count = more;
+            numSegments++;
+            npages += more;
+          }
+        /* An FCB augment is accepted and merely accounted for: we keep the
+         * SDFs' metadata in our own structures rather than in an FCB area. */
+        if (ctU16(SDF_OFF_NBYTES) != 0 && ctU32(SDF_OFF_AFCBAREA) == 0)
+          sdfAbend(4015, "augment of the FCB area with no area given");
+
+        ctPutU16(SDF_OFF_CRETURN, 0);
+        ctPutU32(SDF_OFF_APGAREA, 0);
+        ctPutU32(SDF_OFF_AFCBAREA, 0);
+        ctPutU16(SDF_OFF_NBYTES, 0);
+        ctPutU16(SDF_OFF_NPAGES, padEntries - npages);
         return 0;
       }
 

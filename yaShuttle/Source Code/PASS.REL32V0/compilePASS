@@ -278,6 +278,37 @@ def checkSpaceManagementBug(template):
             return True
     return False
 
+# Importing SDFs in place of TEMPLATEs lets many files get further through
+# PASS1 than they ever did before, whereupon they meet source-level errors of
+# their own that the named-error checks above know nothing about -- D15, M1 and
+# so on.  Halting the whole run at each new one makes a survey of a thousand
+# files impossible, so this is a final catch-all: any PASS1 error at all is
+# delayable.  The codes found are named in the message, so a file skipped here
+# is still identifiable afterwards rather than vanishing into a bare count.
+anyPass1Skipped = set()
+lastPass1Errors = ""
+def checkAnyPass1Error(template):
+    global anyPass1Skipped, lastPass1Errors
+    codes = set()
+    try:
+        f = open(f"current.results{os.sep}pass1.rpt", "r")
+        for line in f:
+            fields = line.split()
+            if len(fields) >= 2 and fields[0] == "*****" and \
+                    fields[1][:1].isalpha() and fields[1][-1:].isdigit():
+                codes.add(fields[1])
+        f.close()
+    except:
+        return False
+    if not codes:
+        return False
+    stem = template["stem"]
+    if stem in anyPass1Skipped:
+        return False
+    anyPass1Skipped.add(stem)
+    lastPass1Errors = ",".join(sorted(codes))
+    return True
+
 # Return True if there's a delayable error.
 errorsSkipped = set()
 def checkDelayableErrors(template, nameOfPass, passRptFilename, candidateErrorList):
@@ -396,12 +427,20 @@ def compile(template):
                 print(f"      DI11 error in PASS1, compilation of {rawFilename} skipped.")
                 rsbTrace = ""
                 return False
+            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["D15"]):
+                print(f"      D15 error in PASS1, compilation of {rawFilename} skipped.")
+                rsbTrace = ""
+                return False
             elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["XI3"]):
                 print(f"      XI3 error in PASS1, compilation of {rawFilename} skipped.")
                 rsbTrace = ""
                 return False
             elif checkSpaceManagementBug(template):
                 print(f"      SPACELIB error, compilation of {rawFilename} skipped.")
+                rsbTrace = ""
+                return False
+            elif checkAnyPass1Error(template):
+                print(f"      PASS1 errors ({lastPass1Errors}), compilation of {rawFilename} skipped.")
                 rsbTrace = ""
                 return False
             print(f"Failed with exit code {e.returncode}.")
