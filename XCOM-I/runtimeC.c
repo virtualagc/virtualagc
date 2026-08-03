@@ -2348,17 +2348,36 @@ errorSUBSTR(descriptor_t *s, int32_t start, int32_t length)
 }
 */
 
-// From the way SUBSTR() is used in the LITDUMP module, it's clear
-// that if ne2 is specified, then the function always returns exactly
-// ne2 characters, padded with blanks if past the end of the input
-// string.  I.e., ne2 is not merely the max number of characters to return.
-// However, from the behavior in TRUNCATE() of the SYTDUMP module, it
-// does appear that the string is shorter when ne < 0, though it's
-// unclear exactly what the behavior is supposed to be then.
+/*
+  `SUBSTR(s, start, length)` returns exactly `length` characters, blank-padded
+  when the string runs out -- `length` is not merely a maximum.
+
+  That padding is load-bearing, though not for the reason once recorded here.
+  The old comment deduced it from LITDUMP, and LITDUMP does not in fact
+  demonstrate it: its `T` is 25 characters and the three documented LIT1 type
+  codes slice it at 0, 8 and 16, so eight characters always remain and the
+  short case never arises there at all.  What does depend on it is the much
+  more ordinary business of building fixed-width report columns by
+  concatenation.  Removing the padding and running the PASS corpus moved 282
+  of 907 compilations: lines like SYT_DUMP's
+
+       USED BY: CDUV_DUP_COMMAND
+
+  lost leading spaces and shifted left, because a field assembled from a
+  substring of a too-short string came back short instead of padded.
+
+  The one case that must *not* pad is an empty string.  PASS4's SDFLIST strips
+  leading blanks with `DO WHILE SUBSTR(SDF_NAME,0,1) = X1`, and at end of file
+  SDF_NAME is empty; padding there returns a blank, the string never changes,
+  and the loop spins for ever.  An empty string has no "past the end" to pad
+  out to, so it yields an empty result.
+*/
 descriptor_t *
 SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
   descriptor_t *returnValue = nextBuffer();
   int len = s->numBytes - start, rawLength = length;
+  if (s->numBytes == 0)
+    return returnValue; // Nothing to take and nothing to pad out to.
   if (len <= 0) length = 0; // Starting position past end of string.
   else {
     if (start < 0 || length <= 0) // Return empty string.

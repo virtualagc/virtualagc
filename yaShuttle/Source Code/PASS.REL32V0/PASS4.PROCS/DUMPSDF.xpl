@@ -974,6 +974,15 @@ PRINT_XREF_DATA:
          COREWORD(ADDR(NODE_H)) = LOC_ADDR;                                     00183700
          PTR1 = NODE_F(23);                                                     00183800
          SDF_TITLE = '';                                                        00183900
+ /*@ SYM_SORT and MAX_ARRAY are scratch for one SDF, but DUMP_SDF is called  */
+ /*@ once per SDF and XPL locals are static, so neither was ever reset.  The */
+ /*@ second call met "IN ALLOCATE_SPACE, ALREADY ALLOCATED" from SPACELIB,   */
+ /*@ and had it got past that, MAX_ARRAY would still have been carrying the  */
+ /*@ previous SDF's high-water index.  Only the ALL option dumps more than   */
+ /*@ one SDF in a run, which is presumably why this went unnoticed.          */
+         IF RECORD_ALLOC(SYM_SORT) > 0 THEN     /*@*/
+            RECORD_FREE(SYM_SORT);              /*@*/
+         MAX_ARRAY = -1;                        /*@*/
          ALLOCATE_SPACE(SYM_SORT,10);  /*CR13079*/
          IF PTR1 ^= 0 THEN DO;                                                  00184000
             CALL SDF_LOCATE(PTR1,ADDR(NODE_B),0);                               00184100

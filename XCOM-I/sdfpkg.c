@@ -84,6 +84,52 @@ static uint8_t internalPad[SDF_PAD_ENTRY_SIZE * MAX_FRAMES];
 static const int padIsInternal = 1;
 
 /*---------------------------------------------------------------------------
+ * DATABUF, SDFPKG's internal data buffer.
+ *
+ * PASS4's SDFLIST and MISCELLANEOUS/HALSTAT.xpl both read SDFPKG's running
+ * statistics out of it, and both find it the same way: call MONITOR(22,0),
+ * then take the base from COMMTABL_FULLWORD(7) -- the ADDR field -- and
+ * overlay three BASED arrays on it, DATABUF_BYTE, DATABUF_HALFWORD and
+ * DATABUF_FULLWORD, so that a field can be reached at whatever width suits
+ * it.  The offsets below are HALSTAT's, which names more fields than PASS4
+ * uses.  SDFLIST reads the statistics at its STATISTICS: label *before*
+ * calling mode 1, so they have to be current throughout, not merely at
+ * termination.
+ *
+ * Until this existed, mode 0 left ADDR alone, so the base came out as 0 and
+ * every statistic was read from low memory: SDFLIST's "NUMBER OF SDFPKG
+ * LOCATES" was COREWORD(0), the MONITOR(23) identifier descriptor, and its
+ * "GETMAINS" was the halfword at 36, which is part of MONITOR(13)'s NPVALS
+ * pointer.
+ *
+ * The buffer is placed in the topmost memory region, which XCOM-I lays out
+ * above the free-string area and leaves otherwise unoccupied.  It cannot go
+ * in the caller's FCB area, plausible though that would be: HALSTAT calls
+ * mode 0 with a Paging Area and no FCB area at all.
+ */
+#define DB_LOCCNT    0    /* fullword 0  Locate operations performed         */
+#define DB_CURFCB    8    /* fullword 2  Current FCB                         */
+#define DB_PADADDR   12   /* fullword 3  Paging Area Directory address       */
+#define DB_ACOMMTAB  16   /* fullword 4  COMMTABL address                    */
+#define DB_ROOT      24   /* fullword 6  Directory Root Cell pointer         */
+#define DB_NUMGETM   36   /* halfword 18 GETMAINs issued                     */
+#define DB_NUMOFPGS  38   /* halfword 19 Page frames in the Paging Area      */
+#define DB_BASNPGS   40   /* halfword 20 Page frames in the base segment     */
+#define DB_TOTFCBLN  52   /* fullword 13 Total FCB area length, bytes        */
+#define DB_RESERVES  56   /* fullword 14 RESV dispositions honoured          */
+#define DB_READS     60   /* fullword 15 Pages read in                       */
+#define DB_WRITES    64   /* fullword 16 Pages written back                  */
+#define DB_SLECTCNT  68   /* fullword 17 SDFs selected                       */
+#define DB_FCBCNT    72   /* fullword 18 FCBs in use                         */
+#define DB_VERSION   94   /* halfword 47 SDFPKG version                      */
+#define SDF_DATABUF_SIZE 96
+
+static uint32_t databuf = 0;    /* Its address, 0 until mode 0 places it     */
+static uint32_t statLocates = 0, statReads = 0, statWrites = 0,
+                statSelects = 0, statReserves = 0;
+static uint32_t totalFcbLength = 0;
+
+/*---------------------------------------------------------------------------
  * Abends.  The codes are SDFPKG.ASM's own, from its abend table, so that a
  * failure here is diagnosed with the same number the assembly would have used.
  */
@@ -360,6 +406,7 @@ cachePage(int id, int pageNumber) {
   memset(&memory[pageAddr], 0, SDF_PAGE_SIZE);
   fseek(sdfs[id - 1].fp, (long) pageNumber * SDF_PAGE_SIZE, SEEK_SET);
   got = fread(&memory[pageAddr], 1, SDF_PAGE_SIZE, sdfs[id - 1].fp);
+  statReads++;
   (void) got;  /* A short final page is legitimate; the rest stays zero. */
 
   padSetPageAddr(freeIndex, pageAddr);
@@ -450,7 +497,10 @@ applyDisposition(int idx, int disp) {
   if (disp & SDF_DISP_RELS)
     padDecResucnt(idx);
   if (disp & SDF_DISP_RESV)
-    padIncResucnt(idx);
+    {
+      padIncResucnt(idx);
+      statReserves++;
+    }
 }
 
 /*---------------------------------------------------------------------------
@@ -520,14 +570,33 @@ directoryRootCell(void) {
   return sdfU32(MDC_PDIRECTORYROOTCELL);
 }
 
+/* Refresh the DATABUF counters that change as work is done.  Called on every
+ * service call rather than only at termination, since SDFLIST reads them at
+ * its STATISTICS: label, before it asks SDFPKG to terminate. */
+static void
+databufSync(void) {
+  if (databuf == 0)
+    return;
+  putU32(memory, databuf + DB_LOCCNT, statLocates);
+  putU32(memory, databuf + DB_READS, statReads);
+  putU32(memory, databuf + DB_WRITES, statWrites);
+  putU32(memory, databuf + DB_SLECTCNT, statSelects);
+  putU32(memory, databuf + DB_RESERVES, statReserves);
+  putU32(memory, databuf + DB_CURFCB, currentSdf);
+  putU32(memory, databuf + DB_FCBCNT, currentSdf ? 1 : 0);
+  putU16(memory, databuf + DB_NUMOFPGS, npages);
+}
+
 static void
 reply(int disp, uint32_t vmp) {
   int idx;
   uint32_t addr = resolveVmp(vmp, &idx);
   applyDisposition(idx, disp);
+  statLocates++;
   ctPutU32(SDF_OFF_PNTR, vmp);
   ctPutU32(SDF_OFF_ADDR, addr);
   ctPutU16(SDF_OFF_CRETURN, 0);
+  databufSync();
 }
 
 static void
@@ -667,6 +736,7 @@ sdfpkgInitialize(uint32_t commtablAddress) {
   if (padEntries < npages)
     sdfAbend(4014, "the Paging Area Directory is smaller than the Paging Area");
 
+  totalFcbLength = ctU16(SDF_OFF_NBYTES);
   if (ctU32(SDF_OFF_AFCBAREA) > 0 && ctU16(SDF_OFF_NBYTES) == 0)
     sdfAbend(4015, "an FCB area of no bytes was requested");
 
@@ -685,11 +755,24 @@ sdfpkgInitialize(uint32_t commtablAddress) {
   usecount = 0;
   initialized = 1;
 
+  /* Lay DATABUF at the base of the topmost memory region and report it in
+   * ADDR, which is where SDFLIST and HALSTAT go looking for it. */
+  databuf = memoryRegions[6].start;  /* XCOM-I always emits 0..6. */
+  memset(&memory[databuf], 0, SDF_DATABUF_SIZE);
+  statLocates = statReads = statWrites = statSelects = statReserves = 0;
+  putU32(memory, databuf + DB_ACOMMTAB, commtabl);
+  putU32(memory, databuf + DB_PADADDR, padIsInternal ? 0 : padAddr);
+  putU32(memory, databuf + DB_TOTFCBLN, totalFcbLength);
+  putU16(memory, databuf + DB_BASNPGS, npages);
+  putU16(memory, databuf + DB_NUMGETM, 0);  /* Nothing here does a GETMAIN. */
+  databufSync();
+
   ctPutU16(SDF_OFF_CRETURN, 0);
   ctPutU32(SDF_OFF_APGAREA, 0);
   ctPutU32(SDF_OFF_AFCBAREA, 0);
   ctPutU16(SDF_OFF_NBYTES, 0);
   ctPutU16(SDF_OFF_NPAGES, padEntries);
+  ctPutU32(SDF_OFF_ADDR, databuf);
   return 0;
 }
 
@@ -729,6 +812,12 @@ selectSdf(void) {
   ctPutU16(SDF_OFF_SYMBNO, 0);
 
   currentSdf = id;
+  statSelects++;
+  /* DATABUF's VERSION is the selected SDF's Phase 3 version, which is what
+   * HALSTAT gates on with "IF VERSION >= 25". */
+  if (databuf != 0)
+    putU16(memory, databuf + DB_VERSION, sdfU16(MDC_PHASE3VERSIONNUMBER));
+  databufSync();
   ctPutU16(SDF_OFF_CRETURN, 0);
   return 1;
 }

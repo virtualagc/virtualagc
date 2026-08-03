@@ -1,0 +1,666 @@
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 1
+
+
+SDFLIST -- VERSION OF AUGUST 3, 2026. CLOCK TIME = 11:48:9.00
+
+
+TODAY IS AUGUST 3, 2026. CLOCK TIME = 11:48:30.51
+ 
+PARM FIELD: TABLST
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 2
+
+
+                                                    FORMATTED DUMP OF SDF ##ARYMFB
+ 
+                              D I R E C T O R Y   D A T A
+ 
+ 
+          FLAGS:                        SRN,FC,NON_UNIQUE_SRNS,DATA_REMOTE
+          COMPUNIT:                     0
+          # OF LAST PAGE:               6
+          DATE/TIME:                    AUGUST 3, 2026. CLOCK TIME = 5:17:38.40
+          SDF VERSION #:                35
+          # OF LAST DIRECTORY PAGE:     0
+          # OF EXTERNAL BLOCKS:         2
+          # OF BLOCKS:                  3
+          # OF SYMBOLS:                 61
+          # OF EMITTED INSTRUCTIONS:    220
+          FREE SPACE (BYTES):           1492
+          LIST HEAD PTR (ALPHABETIC):   27
+          LITERAL ADDRESS (#D):         45
+          LIST HEAD PTR (#D#P DATA):    28
+          START OF INITIAL LITERAL AREA (#D) :     0
+          END OF INITIAL LITERAL AREA (#D) :        5
+          ROOT OF HIERARCHY TREE:       1  ARY_MF_BUS_CHG
+          ROOT OF ALPHABETICAL TREE:    1  ARY_MF_BUS_CHG
+          FIRST STMT #:                 3
+          LAST STMT #:                  108
+          # OF EXECUTABLE STMTS:        82
+          TOTAL # OF STMTS:             106
+          BLOCK # OF COMP. UNIT:        1
+          SYMBOL # OF COMP. UNIT:       28
+          SYMBOL # OF LAST COMSUB PARM: 57
+          NUMBER OF STACK WALKS:        0
+          FIRST SRN & INCLUDE COUNT:    000600      0
+          LAST SRN & INCLUDE COUNT:     014200      0
+ 
+          SYMBOLS     405/200
+          MACROSIZE   2356/500
+          LITSTRINGS  0/3000
+          XREFSIZE    542/2000
+          CARDTYPE:   FCRMUDXCVMWC
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 3
+  BLOCK#  NAME                              TYPE        CLASS       FLAGS
+
+
+                              B L O C K   D A T A
+ 
+       1  ARY_MF_BUS_CHG                                PROCEDURE   
+          CSECT NAME = #CARYMFB  SYM# OF BLOCK NAME = 28
+          TEMPLATE VERSION = 1
+          LIST HEAD PTR (STACK DATA) = 48
+          STACK ID = 0
+          SYMBOLS = 27 TO 61    STMTS = 3 TO 108
+          FIRST POST-DECLARE STMT = 28
+          ALPHABETIC > LINK POINTS TO:        2  CZ2_COMMON
+ 
+       2  CZ2_COMMON                                    COMPOOL     RIGID,EXTERNAL
+          CSECT NAME = #PCZ2COM  SYM# OF BLOCK NAME = 2
+          TEMPLATE VERSION = 1
+          SYMBOLS = 1 TO 22
+          ALPHABETIC > LINK POINTS TO:        3  FCMCOM
+ 
+       3  FCMCOM                                        COMPOOL     RIGID,EXTERNAL
+          CSECT NAME = #PFCMCOM  SYM# OF BLOCK NAME = 23
+          TEMPLATE VERSION = 1
+          SYMBOLS = 23 TO 26
+ 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 4
+   INCL#  MEMBER NAME                       TYPE
+
+
+                              I N C L U D E   D A T A
+ 
+       1  ##CZ2COM                      TEMPLATE
+          RVL: 00  CATENATION NUMBER: 0
+          INCLUDED AT SRN: 000400
+          FROM FILE SPECIFIED IN THE ?? DD CARD
+ 
+       2  ##FCMCOM                      TEMPLATE
+          RVL: 00  CATENATION NUMBER: 0
+          INCLUDED AT SRN: 000500
+          FROM FILE SPECIFIED IN THE ?? DD CARD
+ 
+       3  PROTMACS                      
+          RVL: 00  CATENATION NUMBER: 0
+          INCLUDED AT SRN: 001500
+          FROM FILE SPECIFIED IN THE OUTPUT8 DD CARD
+ 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 5
+   SYMB#  NAME                              TYPE        CLASS         FLAGS
+
+
+                              S Y M B O L   D A T A
+ 
+ 
+******************  BLOCK:    2  CZ2_COMMON
+ 
+       1   CZ2V_GST                         STRUCTURE   TEMPLATE      COMPOOL,TPL_HDR,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 4
+          ADDRESS = 00000000(     0)  SIZE = 00000014(    20)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO ELDEST SON:       4  CZ2B_ACT_XMITR1
+ 
+       2  CZ2_COMMON                        COMPOOL     LABEL         COMPOOL,RIGID,EXTERNAL
+          CROSS REFERENCE:  0 0001  
+ 
+       3  CZ2B_ACT_RECVR                    BIT STRING  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 6
+          ADDRESS = 00000002(     2)  SIZE = 00000002(     2)
+          BIT(32)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:          6  CZ2B_BUS_MASK1
+ 
+       4  CZ2B_ACT_XMITR1                   BIT STRING  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 5
+          ADDRESS = 00000000(     0)  SIZE = 00000001(     1)
+          BIT(16)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:          5  CZ2B_ACT_XMITR2
+ 
+       5  CZ2B_ACT_XMITR2                   BIT STRING  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 3
+          ADDRESS = 00000001(     1)  SIZE = 00000001(     1)
+          BIT(16)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:          3  CZ2B_ACT_RECVR
+ 
+       6  CZ2B_BUS_MASK1                    BIT STRING  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 7
+          ADDRESS = 00000004(     4)  SIZE = 00000001(     1)
+          BIT(16)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:          7  CZ2B_BUS_MASK2
+ 
+       7  CZ2B_BUS_MASK2                    BIT STRING  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 10
+          ADDRESS = 00000005(     5)  SIZE = 00000001(     1)
+          BIT(16)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:         10  CZ2B_PASS_BUS_MASKS
+ 
+       8  CZ2B_CS                           BIT STRING  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 11
+          ADDRESS = 00000012(    18)  SIZE = 00000001(     1)
+          BIT(16)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:         11  CZ2B_RS
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 6
+   SYMB#  NAME                              TYPE        CLASS         FLAGS
+
+ 
+       9  CZ2B_OFF_MASK                     BIT STRING  VARIABLE      COMPOOL,BIAS,INITIAL,EXTERNAL
+          ADDRESS = 00000590(  1424)  SIZE = 00000010(    16)  BIAS = 00000001(     1)
+          BIT(16)
+          ARRAY(16)
+          CROSS REFERENCE:  2 0069  
+ 
+      10  CZ2B_PASS_BUS_MASKS               BIT STRING  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 13
+          ADDRESS = 00000006(     6)  SIZE = 00000002(     2)
+          BIT(32)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:         13  CZ2V_CURRENT_OPS
+ 
+      11  CZ2B_RS                           BIT STRING  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ADDRESS = 00000013(    19)  SIZE = 00000001(     1)
+          BIT(16)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               THREADS BACK TO FATHER:     1   CZ2V_GST
+          CROSS REFERENCE:  2 0039  2 0049  
+ 
+      12  CZ2V_BUS_MGMT_MC                  SP INTEGER  TEMPLATE      COMPOOL,UNQUALIFIED,BIAS,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 20
+          ADDRESS = 0000000B(    11)  SIZE = 00000003(     3)  BIAS = 00000001(     1)
+          ARRAY(3)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:         20  CZ2V_PROG_OVLY
+          CROSS REFERENCE:  2 0041  
+ 
+      13  CZ2V_CURRENT_OPS                  SP INTEGER  TEMPLATE      COMPOOL,UNQUALIFIED,BIAS,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 12
+          ADDRESS = 00000008(     8)  SIZE = 00000003(     3)  BIAS = 00000001(     1)
+          ARRAY(3)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:         12  CZ2V_BUS_MGMT_MC
+ 
+      14  CZ2V_GPC_CRT_CMDR                 SP INTEGER  VARIABLE      COMPOOL,BIAS,INITIAL,EXTERNAL
+          ADDRESS = 0000057A(  1402)  SIZE = 00000004(     4)  BIAS = 00000001(     1)
+          ARRAY(4)
+          CROSS REFERENCE:  2 0051  
+ 
+      15  CZ2V_GST                          STRUCTURE   VARIABLE      COMPOOL,UNQUALIFIED,BIAS,INITIAL,EXTERNAL
+          ADDRESS = 00000000(     0)  SIZE = 00000064(   100)  BIAS = 00000014(    20)
+          POINTS TO TEMPLATE:     1   CZ2V_GST
+          STRUCTURE(5)
+          CROSS REFERENCE:  2 0039  2 0041  2 0049  
+ 
+      16  CZ2V_MC                           SP INTEGER  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 21
+          ADDRESS = 00000010(    16)  SIZE = 00000001(     1)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:         21  CZ2V_TB_ID
+ 
+      17  CZ2V_MF_OVLY                      SP INTEGER  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 16
+          ADDRESS = 0000000F(    15)  SIZE = 00000001(     1)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 7
+   SYMB#  NAME                              TYPE        CLASS         FLAGS
+
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:         16  CZ2V_MC
+ 
+      18  CZ2V_NBR_GPCS                     REPLACE     LABEL         COMPOOL,EXTERNAL
+          REPLACE TEXT(1 BYTE):  "5"                                                                                                  
+          CROSS REFERENCE:  2 0035  2 0060  2 0080  2 0089  
+ 
+      19  CZ2V_NOM_BUS                      SP INTEGER  VARIABLE      COMPOOL,BIAS,INITIAL,EXTERNAL
+          ADDRESS = 00000326(   806)  SIZE = 00000082(   130)  BIAS = 0000000E(    14)
+          ARRAY(10,13)
+          CROSS REFERENCE:  2 0050  
+ 
+      20  CZ2V_PROG_OVLY                    SP INTEGER  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 17
+          ADDRESS = 0000000E(    14)  SIZE = 00000001(     1)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:         17  CZ2V_MF_OVLY
+ 
+      21  CZ2V_TB_ID                        SP INTEGER  TEMPLATE      COMPOOL,UNQUALIFIED,RIGID,EXTERNAL
+          ALPHABETIC LINK = 0    ADDRESS LINK = 8
+          ADDRESS = 00000011(    17)  SIZE = 00000001(     1)
+               POINTS TO STRUCTURE:       15  CZ2V_GST
+               POINTS TO BROTHER:          8  CZ2B_CS
+ 
+      22  RESET_BIT_16                      REPLACE     LABEL         COMPOOL,EXTERNAL,REPL_MACRO_ARGS
+          REPLACE ARGS: X,Y    TEXT(29 BYTES):  "X = X AND CZ2B_OFF_MASK$(Y:*)"                                                                      
+          CROSS REFERENCE:  2 0069  
+ 
+ 
+******************  BLOCK:    3  FCMCOM
+ 
+      23  FCMCOM                            COMPOOL     LABEL         COMPOOL,RIGID,EXTERNAL
+          CROSS REFERENCE:  0 0002  
+ 
+      24  TFCM_CS_MASK                      BIT STRING  VARIABLE      COMPOOL,INITIAL,EXTERNAL
+          ADDRESS = 000000E6(   230)  SIZE = 00000001(     1)
+          BIT(16)
+          CROSS REFERENCE:  2 0033  
+ 
+      25  TFCM_MY_GPC_MASK                  BIT STRING  VARIABLE      COMPOOL,INITIAL,EXTERNAL
+          ADDRESS = 000000E5(   229)  SIZE = 00000001(     1)
+          BIT(16)
+          CROSS REFERENCE:  2 0059  
+ 
+      26  TFCMID                            SP INTEGER  VARIABLE      COMPOOL,INITIAL,EXTERNAL
+          ADDRESS = 00000000(     0)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  1 0049  1 0055  1 0056  1 0069  
+ 
+ 
+******************  BLOCK:    1  ARY_MF_BUS_CHG
+ 
+      27  ARY_CLOSE                         STATEMENT   LABEL         
+          ALPHABETIC LINK = 28    ADDRESS LINK = 0    PHASE1 LINK = 0
+          LABEL DEFINED ON STMT 108
+          CROSS REFERENCE:  0 0108  
+ 
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 8
+   SYMB#  NAME                              TYPE        CLASS         FLAGS
+
+      28  ARY_MF_BUS_CHG                    PROCEDURE   LABEL         BLOCK_DATA
+          ALPHABETIC LINK = 29    ADDRESS LINK = 45    PHASE1 LINK = 51
+          LABEL DEFINED ON STMT 3  :  ARY_MF_BUS_CHG(INPUT_CRT,INPUT_MF) ASSIGN(OUTPUT_NEW_CMDR)
+          ADDRESS = 00000008(     8)  SIZE = 00000002(     2)
+          CROSS REFERENCE:  0 0003  
+ 
+      29  ARYVL_CRT                         SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 30    ADDRESS LINK = 38    PHASE1 LINK = 38
+          ADDRESS = 00000010(    16)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0016  4 0028  1 0050  1 0051  
+ 
+      30  ARYVL_CS_ALL                      BIT STRING  VARIABLE      INITIAL
+          ALPHABETIC LINK = 31    ADDRESS LINK = 39    PHASE1 LINK = 39
+          ADDRESS = 00000015(    21)  SIZE = 00000001(     1)
+          BIT(16)
+          CROSS REFERENCE:  0 0024  4 0033  2 0037  
+ 
+      31  ARYVL_DEU_NBAT                    SP INTEGER  VARIABLE      BIAS,INITIAL
+          ALPHABETIC LINK = 32    ADDRESS LINK = 0    PHASE1 LINK = 30
+          ADDRESS = 00000023(    35)  SIZE = 0000000A(    10)  BIAS = 00000001(     1)
+          ARRAY(10)
+          CROSS REFERENCE:  0 0023  4 0050  2 0076  2 0094  
+ 
+      32  ARYVL_GPC_CRT_CMDR                SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 33    ADDRESS LINK = 33    PHASE1 LINK = 58
+          ADDRESS = 00000018(    24)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0027  4 0051  2 0073  
+ 
+      33  ARYVL_GPC_MC                      SP INTEGER  VARIABLE      BIAS,INITIAL
+          ALPHABETIC LINK = 34    ADDRESS LINK = 34    PHASE1 LINK = 34
+          ADDRESS = 00000019(    25)  SIZE = 00000005(     5)  BIAS = 00000001(     1)
+          ARRAY(5)
+          CROSS REFERENCE:  0 0021  4 0046  2 0055  4 0063  1 0094  
+ 
+      34  ARYVL_GPC_MF                      SP INTEGER  VARIABLE      BIAS,INITIAL
+          ALPHABETIC LINK = 35    ADDRESS LINK = 31    PHASE1 LINK = 31
+          ADDRESS = 0000001E(    30)  SIZE = 00000005(     5)  BIAS = 00000001(     1)
+          ARRAY(5)
+          CROSS REFERENCE:  0 0022  4 0047  2 0056  4 0064  2 0090  
+ 
+      35  ARYVL_MC_SELF                     SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 36    ADDRESS LINK = 37    PHASE1 LINK = 37
+          ADDRESS = 0000000D(    13)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0013  4 0055  2 0063  1 0076  
+ 
+      36  ARYVL_MF                          SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 37    ADDRESS LINK = 29    PHASE1 LINK = 29
+          ADDRESS = 0000000F(    15)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0015  4 0029  2 0071  2 0090  
+ 
+      37  ARYVL_MF_SELF                     SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 38    ADDRESS LINK = 36    PHASE1 LINK = 36
+          ADDRESS = 0000000E(    14)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0014  4 0056  2 0064  2 0071  
+ 
+      38  ARYVL_NEW_CMDR                    SP INTEGER  VARIABLE      INITIAL
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 9
+   SYMB#  NAME                              TYPE        CLASS         FLAGS
+
+          ALPHABETIC LINK = 39    ADDRESS LINK = 41    PHASE1 LINK = 41
+          ADDRESS = 00000011(    17)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0017  4 0073  1 0074  4 0076  1 0077  4 0079  2 0080  4 0082  4 0088  2 0089  4 0094  1 0095  4 0096  
+                            2 0104  4 0105  2 0107  
+ 
+      39  ARYVL_RS_ALL                      BIT STRING  VARIABLE      INITIAL
+          ALPHABETIC LINK = 40    ADDRESS LINK = 40    PHASE1 LINK = 40
+          ADDRESS = 00000016(    22)  SIZE = 00000001(     1)
+          BIT(16)
+          CROSS REFERENCE:  0 0025  4 0034  6 0039  4 0059  6 0069  2 0074  2 0077  2 0081  2 0092  2 0095  
+ 
+      40  ARYVL_RS_SELF                     BIT STRING  VARIABLE      INITIAL
+          ALPHABETIC LINK = 41    ADDRESS LINK = 32    PHASE1 LINK = 32
+          ADDRESS = 00000017(    23)  SIZE = 00000001(     1)
+          BIT(16)
+          CROSS REFERENCE:  0 0026  4 0049  2 0057  2 0059  2 0061  2 0071  
+ 
+      41  ARYVL_SIMPLEX_CMDR                SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 42    ADDRESS LINK = 42    PHASE1 LINK = 42
+          ADDRESS = 00000012(    18)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0018  4 0088  2 0099  4 0100  2 0105  
+ 
+      42  ARYVL_TEMP_MC                     SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 43    ADDRESS LINK = 43    PHASE1 LINK = 43
+          ADDRESS = 00000013(    19)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0019  4 0036  2 0040  4 0041  2 0042  2 0046  
+ 
+      43  ARYVL_TEMP_MF                     SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 44    ADDRESS LINK = 30    PHASE1 LINK = 33
+          ADDRESS = 00000014(    20)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0020  4 0036  4 0043  2 0047  
+ 
+      44  DISABNSPL                         SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 45    ADDRESS LINK = 35    PHASE1 LINK = 55
+          ADDRESS = 0000000C(    12)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0009  
+ 
+      45  DISABPL                           SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 46    ADDRESS LINK = 46    PHASE1 LINK = 46
+          ADDRESS = 0000000A(    10)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0007  2 0031  
+ 
+      46  ENABPL                            SP INTEGER  VARIABLE      INITIAL
+          ALPHABETIC LINK = 47    ADDRESS LINK = 44    PHASE1 LINK = 44
+          ADDRESS = 0000000B(    11)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0008  2 0052  
+ 
+      47  GPC                               SP INTEGER  VARIABLE      TEMPORARY,STACK
+          ALPHABETIC LINK = 48    ADDRESS LINK = 56    PHASE1 LINK = 56
+          STACK ID = 0
+          ADDRESS = 00000014(    20)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0035  4 0035  1 0037  1 0039  1 0041  1 0046  1 0047  
+ 
+      48  GPC                               SP INTEGER  VARIABLE      TEMPORARY,STACK
+          ALPHABETIC LINK = 49    ADDRESS LINK = 51    PHASE1 LINK = 49
+          STACK ID = 0
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 10
+   SYMB#  NAME                              TYPE        CLASS         FLAGS
+
+          ADDRESS = 00000000(     0)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0060  4 0060  1 0061  1 0063  1 0064  
+ 
+      49  GPC                               SP INTEGER  VARIABLE      TEMPORARY,STACK
+          ALPHABETIC LINK = 50    ADDRESS LINK = 50    PHASE1 LINK = 50
+          STACK ID = 0
+          ADDRESS = 00000013(    19)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0080  4 0080  1 0081  2 0082  
+ 
+      50  GPC                               SP INTEGER  VARIABLE      TEMPORARY,STACK
+          ALPHABETIC LINK = 51    ADDRESS LINK = 47    PHASE1 LINK = 27
+          STACK ID = 0
+          ADDRESS = 00000013(    19)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0089  4 0089  1 0090  1 0092  1 0094  2 0096  2 0100  
+ 
+      51  INPUT_CRT                         SP INTEGER  VARIABLE      INPUT,STACK
+          ALPHABETIC LINK = 52    ADDRESS LINK = 52    PHASE1 LINK = 52
+          STACK ID = 0
+          ADDRESS = 0000000C(    12)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0003  0 0004  2 0028  
+ 
+      52  INPUT_MF                          SP INTEGER  VARIABLE      INPUT,STACK
+          ALPHABETIC LINK = 53    ADDRESS LINK = 57    PHASE1 LINK = 57
+          STACK ID = 0
+          ADDRESS = 0000000E(    14)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0003  0 0005  2 0029  
+ 
+      53  INTRPT_PROT_DO                    REPLACE     LABEL         REPL_MACRO_ARGS
+          ALPHABETIC LINK = 54    ADDRESS LINK = 0    PHASE1 LINK = 54
+          REPLACE ARG: INT_LABEL    TEXT(58 BYTES):  "Z_`INT_LABEL`_DIS: DO;                                                  %SVC(                       
+          DISABPL);                                                        Z_`INT_LABEL`_DO: "                                      
+          CROSS REFERENCE:  0 0011  2 0030  
+ 
+      54  INTRPT_PROT_END                   REPLACE     LABEL         REPL_MACRO_ARGS
+          ALPHABETIC LINK = 55    ADDRESS LINK = 0    PHASE1 LINK = 35
+          REPLACE ARG: INT_LABEL    TEXT(75 BYTES):  "Z_`INT_LABEL`_ENA: %SVC(ENABPL);                                       Z_`INT                       
+          _LABEL`_END: END Z_`INT_LABEL`_DIS;"                                                                                      
+          CROSS REFERENCE:  0 0012  2 0052  
+ 
+      55  INTRPT_PROT_NS                    REPLACE     LABEL         REPL_MACRO_ARGS
+          ALPHABETIC LINK = 56    ADDRESS LINK = 0    PHASE1 LINK = 53
+          REPLACE ARG: HAL_STMTS    TEXT(41 BYTES):  "%SVC(DISABNSPL); HAL_STMTS %SVC    (ENABPL)"                                                        
+          CROSS REFERENCE:  0 0010  
+ 
+      56  MF                                SP INTEGER  VARIABLE      TEMPORARY,STACK
+          ALPHABETIC LINK = 57    ADDRESS LINK = 0    PHASE1 LINK = 60
+          STACK ID = 0
+          ADDRESS = 00000016(    22)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0040  4 0040  1 0041  2 0043  
+ 
+      57  OUTPUT_NEW_CMDR                   SP INTEGER  VARIABLE      ASSIGN,INDIRECT,STACK
+          ALPHABETIC LINK = 58    ADDRESS LINK = 49    PHASE1 LINK = 45
+          STACK ID = 0
+          ADDRESS = 00000010(    16)  SIZE = 00000001(     1)
+          CROSS REFERENCE:  0 0003  0 0006  4 0107  
+ 
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 11
+   SYMB#  NAME                              TYPE        CLASS         FLAGS
+
+      58  Z_PROT_GROUP_1_DIS                STATEMENT   LABEL         
+          ALPHABETIC LINK = 59    ADDRESS LINK = 0    PHASE1 LINK = 59
+          LABEL DEFINED ON STMT 30
+          CROSS REFERENCE:  0 0030  
+ 
+      59  Z_PROT_GROUP_1_DO                 STATEMENT   LABEL         
+          ALPHABETIC LINK = 60    ADDRESS LINK = 0    PHASE1 LINK = 47
+          LABEL DEFINED ON STMT 32
+          CROSS REFERENCE:  0 0032  
+ 
+      60  Z_PROT_GROUP_1_ENA                STATEMENT   LABEL         
+          ALPHABETIC LINK = 61    ADDRESS LINK = 0    PHASE1 LINK = 61
+          LABEL DEFINED ON STMT 52
+          CROSS REFERENCE:  0 0052  
+ 
+      61  Z_PROT_GROUP_1_END                STATEMENT   LABEL         
+              PHASE1 LINK = 48
+          LABEL DEFINED ON STMT 53
+          CROSS REFERENCE:  0 0053  
+ 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 12
+STMT#  TYPE                       SRN   INCL  ORIG SRN
+
+
+                              S T A T E M E N T   D A T A
+ 
+ 
+******************  BLOCK:    1  ARY_MF_BUS_CHG
+ 
+    3  BLOCK                     000600     0          LABEL(S):  28=ARY_MF_BUS_CHG
+    4  DECLARE                   000700     0        
+    5  DECLARE                   000800     0        
+    6  DECLARE                   000900     0        
+    7  DECLARE                   001500     3  000100
+    8  DECLARE                   001500     4  000200
+    9  DECLARE                   001500     5  000300
+   10  REPLACE                   001500     6  000400
+   11  REPLACE                   001500     8  000600
+   12  REPLACE                   001500    12  001000
+   13  DECLARE                   001900     0        
+   14  DECLARE                   002000     0        
+   15  DECLARE                   002100     0        
+   16  DECLARE                   002200     0        
+   17  DECLARE                   002300     0        
+   18  DECLARE                   002400     0        
+   19  DECLARE                   002500     0        
+   20  DECLARE                   002600     0        
+   21  DECLARE                   002700     0        
+   22  DECLARE                   002800     0        
+   23  DECLARE                   002900     0        
+   24  DECLARE                   003000     0        
+   25  DECLARE                   003100     0        
+   26  DECLARE                   003200     0        
+   27  DECLARE                   003210     0        
+   28  ASSIGN                    003900     0          TARGET(S): 29=ARYVL_CRT
+            RHS VARS:  51=INPUT_CRT
+   29  ASSIGN                    004000     0          TARGET(S): 36=ARYVL_MF
+            RHS VARS:  52=INPUT_MF
+   30  DO                        004200     0          LABEL(S):  58=Z_PROT_GROUP_1_DIS
+   31  %SVC                      004200     0        
+   32  NULL                      004200     0          LABEL(S):  59=Z_PROT_GROUP_1_DO
+   33  ASSIGN                    004300     0          TARGET(S): 30=ARYVL_CS_ALL
+            RHS VARS:  24=TFCM_CS_MASK
+   34  ASSIGN                    004400     0          TARGET(S): 39=ARYVL_RS_ALL
+   35  DO FOR                    004500     0          TARGET(S): 47=GPC
+   36  ASSIGN                    004600     0          TARGET(S): 42=ARYVL_TEMP_MC, 43=ARYVL_TEMP_MF
+   37  IF                        004700     0          RHS VARS:  30=ARYVL_CS_ALL$(?):( 47=GPC )
+   38  THEN DO                   004700     0        
+   39  ASSIGN                    004800     0          TARGET(S): 39=ARYVL_RS_ALL
+            RHS VARS:  39=ARYVL_RS_ALL, (15,11)=CZ2V_GST.CZ2B_RS$(?;):( 47=GPC )
+   40  DO FOR                    005000     0          TARGET(S): 56=MF
+            RHS VARS:  42=ARYVL_TEMP_MC
+   41  ASSIGN                    005100     0          TARGET(S): 42=ARYVL_TEMP_MC
+            RHS VARS:  (15,12)=CZ2V_GST.CZ2V_BUS_MGMT_MC$(?;?:):( 47=GPC, 56=MF )
+   42  IF                        005200     0          RHS VARS:  42=ARYVL_TEMP_MC
+   43  THEN ASSIGN               005200     0          TARGET(S): 43=ARYVL_TEMP_MF
+            RHS VARS:  56=MF
+   44  END                       005300     0        
+   45  END                       005400     0        
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 13
+STMT#  TYPE                       SRN   INCL  ORIG SRN
+
+   46  ASSIGN                    005500     0          TARGET(S): 33=ARYVL_GPC_MC$(?:):( 47=GPC )
+            RHS VARS:  42=ARYVL_TEMP_MC
+   47  ASSIGN                    005600     0          TARGET(S): 34=ARYVL_GPC_MF$(?:):( 47=GPC )
+            RHS VARS:  43=ARYVL_TEMP_MF
+   48  END                       005700     0        
+   49  ASSIGN                    005800     0          TARGET(S): 40=ARYVL_RS_SELF
+            RHS VARS:  (15,11)=CZ2V_GST.CZ2B_RS$(?;):( 26=TFCMID )
+   50  ASSIGN                    005900     0          TARGET(S): 31=ARYVL_DEU_NBAT$(*:)
+            RHS VARS:  19=CZ2V_NOM_BUS$(*,?:):( 29=ARYVL_CRT )
+   51  ASSIGN                    006010     0          TARGET(S): 32=ARYVL_GPC_CRT_CMDR
+            RHS VARS:  14=CZ2V_GPC_CRT_CMDR$(?:):( 29=ARYVL_CRT )
+   52  %SVC                      006100     0          LABEL(S):  60=Z_PROT_GROUP_1_ENA
+   53  END                       006100     0          LABEL(S):  61=Z_PROT_GROUP_1_END
+   54  NULL                      006100     0        
+   55  ASSIGN                    006200     0          TARGET(S): 35=ARYVL_MC_SELF
+            RHS VARS:  33=ARYVL_GPC_MC$(?:):( 26=TFCMID )
+   56  ASSIGN                    006300     0          TARGET(S): 37=ARYVL_MF_SELF
+            RHS VARS:  34=ARYVL_GPC_MF$(?:):( 26=TFCMID )
+   57  IF                        006400     0          RHS VARS:  40=ARYVL_RS_SELF
+   58  THEN DO                   006400     0        
+   59  ASSIGN                    006700     0          TARGET(S): 39=ARYVL_RS_ALL
+            RHS VARS:  40=ARYVL_RS_SELF, 25=TFCM_MY_GPC_MASK
+   60  DO FOR                    006800     0          TARGET(S): 48=GPC
+   61  IF                        006900     0          RHS VARS:  40=ARYVL_RS_SELF$(?):( 48=GPC )
+   62  THEN DO                   006900     0        
+   63  ASSIGN                    007000     0          TARGET(S): 33=ARYVL_GPC_MC$(?:):( 48=GPC )
+            RHS VARS:  35=ARYVL_MC_SELF
+   64  ASSIGN                    007100     0          TARGET(S): 34=ARYVL_GPC_MF$(?:):( 48=GPC )
+            RHS VARS:  37=ARYVL_MF_SELF
+   65  END                       007200     0        
+   66  END                       007300     0        
+   67  END                       007400     0        
+   68  ELSE DO                   007500     0        
+   69  ASSIGN                    007900     0          TARGET(S): 39=ARYVL_RS_ALL
+            RHS VARS:  39=ARYVL_RS_ALL, 9=CZ2B_OFF_MASK$(?:*):( 26=TFCMID )
+   70  END                       008000     0        
+   71  IF                        009700     0          RHS VARS:  36=ARYVL_MF, 37=ARYVL_MF_SELF, 40=ARYVL_RS_SELF
+   72  THEN DO                   009800     0        
+   73  ASSIGN                    009910     0          TARGET(S): 38=ARYVL_NEW_CMDR
+            RHS VARS:  32=ARYVL_GPC_CRT_CMDR
+   74  IF                        009920     0          RHS VARS:  39=ARYVL_RS_ALL$(?):( 38=ARYVL_NEW_CMDR )
+   75  THEN DO                   009920     0        
+   76  ASSIGN                    010000     0          TARGET(S): 38=ARYVL_NEW_CMDR
+            RHS VARS:  31=ARYVL_DEU_NBAT$(?:):( 35=ARYVL_MC_SELF )
+   77  IF                        010100     0          RHS VARS:  39=ARYVL_RS_ALL$(?):( 38=ARYVL_NEW_CMDR )
+   78  THEN DO                   010100     0        
+   79  ASSIGN                    010300     0          TARGET(S): 38=ARYVL_NEW_CMDR
+   80  DO FOR                    010400     0          TARGET(S): 49=GPC
+            RHS VARS:  38=ARYVL_NEW_CMDR
+   81  IF                        010600     0          RHS VARS:  39=ARYVL_RS_ALL$(?):( 49=GPC )
+   82  THEN ASSIGN               010600     0          TARGET(S): 38=ARYVL_NEW_CMDR
+            RHS VARS:  49=GPC
+   83  END                       010700     0        
+   84  END                       010800     0        
+   85  END                       010810     0        
+   86  END                       010900     0        
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 14
+STMT#  TYPE                       SRN   INCL  ORIG SRN
+
+   87  ELSE DO                   011000     0        
+   88  ASSIGN                    011300     0          TARGET(S): 38=ARYVL_NEW_CMDR, 41=ARYVL_SIMPLEX_CMDR
+   89  DO FOR                    011400     0          TARGET(S): 50=GPC
+            RHS VARS:  38=ARYVL_NEW_CMDR
+   90  IF                        011600     0          RHS VARS:  36=ARYVL_MF, 34=ARYVL_GPC_MF$(?:):( 50=GPC )
+   91  THEN DO                   011600     0        
+   92  IF                        011800     0          RHS VARS:  39=ARYVL_RS_ALL$(?):( 50=GPC )
+   93  THEN DO                   011800     0        
+   94  ASSIGN                    012000     0          TARGET(S): 38=ARYVL_NEW_CMDR
+            RHS VARS:  31=ARYVL_DEU_NBAT$(?:):( 33=ARYVL_GPC_MC$(?:):( 50=GPC ) )
+   95  IF                        012100     0          RHS VARS:  39=ARYVL_RS_ALL$(?):( 38=ARYVL_NEW_CMDR )
+   96  THEN ASSIGN               012300     0          TARGET(S): 38=ARYVL_NEW_CMDR
+            RHS VARS:  50=GPC
+   97  END                       012400     0        
+   98  ELSE DO                   012500     0        
+   99  IF                        012700     0          RHS VARS:  41=ARYVL_SIMPLEX_CMDR
+  100  THEN ASSIGN               012700     0          TARGET(S): 41=ARYVL_SIMPLEX_CMDR
+            RHS VARS:  50=GPC
+  101  END                       013100     0        
+  102  END                       013200     0        
+  103  END                       013300     0        
+  104  IF                        013400     0          RHS VARS:  38=ARYVL_NEW_CMDR
+  105  THEN ASSIGN               013500     0          TARGET(S): 38=ARYVL_NEW_CMDR
+            RHS VARS:  41=ARYVL_SIMPLEX_CMDR
+  106  END                       013900     0        
+  107  ASSIGN                    014000     0          TARGET(S): 57=OUTPUT_NEW_CMDR
+            RHS VARS:  38=ARYVL_NEW_CMDR
+  108  CLOSE                     014200     0          LABEL(S):  27=ARY_CLOSE
+------------------------------------------------------------------------------------------------------------------------------------------------------
+S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 3, 2026   11:48:30.51     PAGE 15
+
+
+END OF SDFLIST AUGUST 3, 2026. CLOCK TIME = 11:48:30.52
+ 
+NUMBER OF SDFPKG LOCATES          = 883
+NUMBER OF SDFPKG READS            = 6
+NUMBER OF SDFPKG SELECTS          = 2
+NUMBER OF SDFPKG GETMAINS         = 0
+SDFPKG FCB AREA SIZE (BYTES)      = 2048
+SDFPKG PAGING AREA SIZE (PAGES)   = 5
+ 
+NUMBER OF MINOR COMPACTIFIES      = 0
+NUMBER OF MAJOR COMPACTIFIES      = 0
+NUMBER OF REALLOCATIONS           = 1
+ 
+TOTAL CPU TIME IN SDFLIST              0:0:0.01
+ 
