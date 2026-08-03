@@ -51,7 +51,13 @@ def DOWNGRADE_SUMMARY():
     #  PRINT TITLE FOR DOWNGRADE SUMMARY
     l.DOWN_COUNT = 1;
     #  DETERMINE IF THERE ARE ANY DOWNGRADED MESSAGES
-    if len(h.DOWN_INFO) >= 1:
+    # The XPL is RECORD_TOP(DOWN_INFO), which SPACELIB.py renders as
+    # len(DOWN_INFO) - 1, as CERRORS.py already does.  DOWN_INFO carries an
+    # unused element 0 -- PASS1's INITIALIZATION does one NEXT_ELEMENT before
+    # any downgrade is recorded -- so plain len() is one too many, and a
+    # compilation with no D DOWNGRADE directive at all printed an empty
+    # DOWNGRADE SUMMARY heading that HALSFC-PASS1 rightly did not.
+    if len(h.DOWN_INFO) - 1 >= 1:
         #  THERE ARE ATTEMPTS AT DOWNGRADE
         OUTPUT(0, ' ');
         OUTPUT(0, ' ');
@@ -61,7 +67,7 @@ def DOWNGRADE_SUMMARY():
         OUTPUT(0, ' ');
         #  TRAVERSE THROUGH DOWNGRADE LIST LOOKING FOR DOWNGRADED ERRORS
         #  CHANGED HARDCODED 10 TO RECORD_TOP(DOWN_INFO) FOR CR11088
-        while l.END_OF_LIST == 0 and l.DOWN_COUNT <= len(h.DOWN_INFO):
+        while l.END_OF_LIST == 0 and l.DOWN_COUNT <= len(h.DOWN_INFO) - 1:
             if g.DWN_ERR(l.DOWN_COUNT) > ' ':
                 if g.DWN_VER(l.DOWN_COUNT) == '1':
                     l.SEARCH_FOR_CLS = 1;
@@ -100,7 +106,8 @@ def DOWNGRADE_SUMMARY():
             OUTPUT(0, '*****  DOWNGRADE DIRECTIVES THAT WERE NOT DOWNGRADED *****');
             OUTPUT(0, '  ');
             OUTPUT(0, '  ');
-            for l.I in range(1, len(h.DOWN_INFO) + 1):
+            # DO I = 1 TO RECORD_TOP(DOWN_INFO), i.e. 1 to len(DOWN_INFO)-1.
+            for l.I in range(1, len(h.DOWN_INFO)):
                 if g.DWN_VER(l.I) != '1':
                     l.DOWN_COUNT = l.I;
                     l.SEARCH_FOR_CLS = 1;

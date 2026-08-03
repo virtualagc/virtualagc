@@ -32,6 +32,15 @@ from pathlib import Path
 # python is run in an MSYS2 environment, it does *not* detect Windows,
 # which is just what we want.
 isWindows = (platform.system() == "Windows")
+
+# Exit statuses of HALSFC itself.  These deliberately occupy 240-254: above
+# anything a compiler pass can return as a severity, and below XCOM-I's
+# EXIT_ABEND (255), so that a caller can tell the three apart.  A process exit
+# status is only 8 bits, so there is no room above 255 to spread them out.
+EXIT_PASS_FAILED = 240  # A compiler pass reported failure.
+EXIT_USAGE = 241        # Bad command line.
+EXIT_ENVIRONMENT = 242  # Something missing from the installation.
+
 # Just in case of working with .exe files in WINE.
 if not isWindows:
     os.environ['WINEDEBUG'] = '-all'
@@ -129,10 +138,10 @@ for parm in sys.argv[1:]:
         oWasLast = False
         if parm.startswith("-"):
             print("-o followed by aswitch rather than an object-code filename")
-            sys.exit(1)
+            sys.exit(EXIT_USAGE)
         elif parm.endswith(".hal"):
             print("-o followed by a source-code filename rather than an object-code filename")
-            sys.exit(1)
+            sys.exit(EXIT_USAGE)
         objectFilename = parm
     elif parm == "--pretty-bnf":
         prettyBNF = parm
@@ -165,16 +174,16 @@ for parm in sys.argv[1:]:
     elif not parm.startswith("-"):
         if halsFile != None:
             print("Multiple HAL/S files specified")
-            sys.exit(1)
+            sys.exit(EXIT_USAGE)
         halsFile = parm
         if not os.path.exists(halsFile):
             print("Specified HAL/S file (%s) does not exist" % halsFile)
-            sys.exit(1)
+            sys.exit(EXIT_USAGE)
     else:
         print(helpMessage)
         if parm == "--help":
             sys.exit(0)
-        sys.exit(1)
+        sys.exit(EXIT_USAGE)
 if "CARDTYPE=" not in parmString:
     if parmString != "":
         parmString += ","
@@ -185,10 +194,10 @@ if "CARDTYPE=" not in parmString:
     parmString += f"CARDTYPE={cardType}"
 if halsFile == None:
     print(helpMessage)
-    sys.exit(1)
+    sys.exit(EXIT_USAGE)
 if oWasLast:
     print("-o followed by end of line rather than an object-code filename")
-    sys.exit(1)
+    sys.exit(EXIT_USAGE)
 normFile = Path(halsFile).name
 commandLine = " ".join(sys.argv)
 if objectFilename == None:
@@ -313,11 +322,40 @@ def moveAll(message):
     except:
         pass
 
+# Did a compiler pass fail?
+#
+# The compiled passes follow the OS/360 convention that the HAL/S-FC XPL is
+# written to: RETURN's value from the program's outermost scope is
+# SHL(MAX_SEVERITY,2), the severity times 4.  So 0 is clean, 4 is warnings, 8
+# is errors, and so on up.  The compiler's own rule for whether a compilation
+# is still viable is MAX_SEVERITY < 2 -- PASS1 chains to the next pass on
+# exactly that test, and otherwise forces MAX_SEVERITY to 4 and declares
+# "COMPILATION ABANDONED".  Below 8 is therefore tolerable and 8 or above is
+# not.  A severity-1 warning is the common case here: OPT's ZO3 sets
+# SEVERITY_ONE, which makes PASS2 return 4, and treating that as fatal would
+# throw away a perfectly good object module and, worse, skip PASS3 so that no
+# SDF is written for anything downstream to include.
+#
+# Statuses that are not severities stay fatal by construction, being >= 8:
+# XCOM-I's runtime library abends with 255, XPL's CALL EXIT gives 10, and
+# HALSFC's own diagnoses are 240-254.
+#
+# Note that os.system() hands back a wait status rather than an exit status,
+# so the exit code is in the high byte and a fatal signal is in the low byte.
+#
+# This applies only to the compiled passes.  HAL_S_FC.py, the Python port of
+# PASS1, has no such convention -- its EXIT() is a plain sys.exit(1) -- so its
+# result is still tested against zero.
+def passFailed(exitCode):
+    if exitCode & 0xFF:  # Died on a signal.
+        return True
+    return (exitCode >> 8) >= 8
+
 # The arguments comprise an error message.
 def errorExit(message):
     print(message)
     moveAll("%s: %s" % (message, commandLine))
-    sys.exit(1)
+    sys.exit(EXIT_PASS_FAILED)
 
 # Adapted this from google AI.
 def findFileUsingPATH(filename):
@@ -360,7 +398,7 @@ else:
 appDir = findFileUsingPATH(PASS1)
 if appDir == None:
     print("Directory containing the compiler is not in the PATH")
-    sys.exit(1)
+    sys.exit(EXIT_ENVIRONMENT)
 ERRORLIB = appDir + os.sep + "ERRORLIB"
 parmList = parmString.split(",")
 # An SDF library to import from, for PASS1 and for HAL_S_FC.py alike.  PASS3
@@ -401,7 +439,7 @@ if verbose:
     print(command)
 exitCode = os.system(command)
 pendingFailure = None
-if exitCode != 0:
+if passFailed(exitCode):
     if test and force:
         print("HALSFC-PASS1 has failed, but --test will be performed anyway.")
         pendingFailure = "HALSFC-PASS1 failure"
@@ -492,7 +530,7 @@ command = command.replace("\n", "")
 if verbose:
     print(command)
 exitCode = os.system(command)
-if exitCode != 0:
+if passFailed(exitCode):
     errorExit("Aborted after FLO")
 shutil.copy("litfile.bin", "litfile1.bin")
 
@@ -508,7 +546,7 @@ command = '''%s
  %s
  >opt.rpt''' % (OPT, extCOMMON, extCOMMON, ERRORLIB, debugX)
 exitCode = os.system(command.replace("\n", ""))
-if exitCode != 0:
+if passFailed(exitCode):
     errorExit("Aborted after OPT")
 shutil.copy("litfile.bin", "litfile2.bin")
 
@@ -527,7 +565,7 @@ command = command.replace("\n", "")
 if verbose:
     print(command)
 exitCode = os.system(command)
-if exitCode != 0:
+if passFailed(exitCode):
     errorExit("Aborted after AUX")
 shutil.copy("litfile.bin", "litfile3.bin")
 
@@ -550,7 +588,7 @@ command = command.replace("\n", "")
 if verbose:
     print(command)
 exitCode = os.system(command)
-if exitCode != 0:
+if passFailed(exitCode):
     errorExit("Aborted after PASS2")
 shutil.copy("litfile.bin", "litfile4.bin")
 
@@ -572,22 +610,29 @@ if pass3:
         print(command)
     exitCode = os.system(command)
     os.system("echo >>pass3.rpt") # Doesn't end with a newline, so add one.
-    if exitCode != 0:
+    if passFailed(exitCode):
         errorExit("Aborted after PASS3")
 
 if pass3 and pass4:
-    # Run PASS4. **FIXME**
-    command = '''%s 
-     --pdsi=5,"%s" 
-     --commoni=COMMON4%s 
-     --commono=COMMON5%s 
+    # Run PASS4, the SDFLIST utility, which formats a dump of the SDF just
+    # written.  Note --commoni=COMMON5: PASS3 reads COMMON4 and writes
+    # COMMON5, so COMMON5 is what PASS4 inherits, and its own output goes to
+    # COMMON6 rather than back over PASS3's.  --sdfi is required, not
+    # optional: MONITOR22 short-circuits to a failure return when no SDF
+    # directory has been named, so without it every SDFPKG call PASS4 makes
+    # would fail.
+    command = '''%s
+     --pdsi=5,"%s"
+     --commoni=COMMON5%s
+     --commono=COMMON6%s
      %s
-     >pass4.rpt''' % (PASS4, extCOMMON, extCOMMON, debugX)
+     %s
+     >pass4.rpt''' % (PASS4, ERRORLIB, extCOMMON, extCOMMON, sdfiSwitch, debugX)
     command = command.replace("\n", "")
     if verbose:
         print(command)
     exitCode = os.system(command)
-    if exitCode != 0:
+    if passFailed(exitCode):
         errorExit("Aborted after PASS4")
 
 moveAll(f"Success: {' '.join(sys.argv)}")

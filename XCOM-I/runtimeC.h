@@ -36,6 +36,33 @@
 #include "inline360.h"
 
 #define MAX_XPL_STRING 256
+
+/*
+  Process exit status for a failure detected by the runtime library itself,
+  as opposed to one reported by the XPL/I program.
+
+  An XPL/I program's own exit status is RETURN's value from its outermost
+  scope, and HAL/S-FC (like anything following the OS/360 convention) makes
+  that a multiple of 4 -- 0 clean, 4 warnings, 8 errors, and so on up.  A
+  driver therefore wants to read a status of 4 as "keep going", which means
+  the runtime library must not abend with anything a driver could mistake for
+  a severity.  Hence 255 rather than the 1 that `abend` used to exit with:
+  outside the severity ladder, and above the 240-254 that HALSFC reserves for
+  its own diagnoses.
+
+  Note that a process exit status is only 8 bits, so this cannot be given
+  more headroom by making it a larger number; 256 and its multiples would be
+  truncated to 0 and read as success.
+*/
+#define EXIT_ABEND 255
+
+/*
+  Sanity bound on the length of SPACELIB's free-block list when COMMON is
+  written.  The list is walked out of the program's own memory, so a corrupt
+  link must be caught rather than followed forever.  Real lists are a handful
+  of entries; this is a backstop, not a limit anyone should reach.
+*/
+#define MAX_FREE_BLOCKS_COMMON 100000
 #if 0
 typedef char string_t[MAX_XPL_STRING];
 typedef struct {

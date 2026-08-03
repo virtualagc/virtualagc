@@ -91,8 +91,7 @@ The only OPTIONS available are:
     --no-csects     Compile every HAL/S file found, without regard to whether
                     it is part of PASS.  This was the behaviour before the
                     check existed.
-    --auto-x1       Automatically disable OPT and retry for ZO3 errors.
-    --skip-to=F     Skip all source-code files prior to F.  F must be the 
+    --skip-to=F     Skip all source-code files prior to F.  F must be the
                     relative path of a file, such as APPLSRC/RDDDDI.hal.
                     Note the presence of the subdirectory name and the .hal
                     filename extension.  If the selected filename is never 
@@ -111,11 +110,11 @@ In Linux, a typical usage would be to *begin* a clean compilation like so:
     rm *.results -rf
     prepareTEMPLIB --clear
     prepareINCLIB --clear --include=INCL80
-    unbuffer compilePASS --clean --archive --auto-x1  2>&1 | tee compilePASS.log
+    unbuffer compilePASS --clean --archive  2>&1 | tee compilePASS.log
 Whereas you'd subsequently *resume* compilation previously aborted due to 
 failure of a clean compilation, presumably after fixing the problem that caused
 the failure, like so:
-    unbuffer compilePASS --clean --archive --auto-x1 --skip-to=FILENAME 2>&1 | tee -a compilePASS.log
+    unbuffer compilePASS --clean --archive --skip-to=FILENAME 2>&1 | tee -a compilePASS.log
 where FILENAME was the file at which the clean compilation had failed. 
 
 But not all of these things (namely rm, unbuffer, 2>&1, tee) necessarily work 
@@ -145,7 +144,6 @@ see the messages more-or-less at the time they're emitted, rather than having
 the operating system buffer them in large blocks and only emitting them when 
 full blocks become available.
 '''
-autoX1 = False
 preprocess = True
 dfg = True
 skipTo = None
@@ -188,8 +186,6 @@ for parm in sys.argv[1:]:
         skipTo = parm[10:]
     elif parm.startswith("--rsb-trace="):
         rsbTrace = parm
-    elif parm == "--auto-x1":
-        autoX1 = True
     else:
         print("Unrecognized parameter:", parm)
         print(helpMsg)
@@ -298,14 +294,17 @@ def getParms(template):
 # system, a bug with no space left to describe it, too many such errors, and
 # "yoyoing".  All four are severity 3, all four name "SPACE MANAGEMENT", and any
 # of them halts the entire run, which is intolerable when surveying a thousand
-# source files.  They are known-shaky ground in the port and are on the list to
-# be fixed properly; until then, treat them like the other delayable errors and
-# skip the file.  They need a check of their own because, unlike the others, the
+# source files, so treat them like the other delayable errors and skip the
+# file.  They need a check of their own because, unlike the others, the
 # messages carry no "***** " prefix, and because they can come from any pass.
-# Kept apart from errorsSkipped deliberately.  That set is a one-shot per file,
-# so a file that has already used it up on (say) an --auto-x1 retry for a ZO3
-# error would fall straight through to a hard failure here, which is exactly
-# what happened to RVMCON.hal.
+#
+# BI002 in particular was not a SPACELIB fault at all and no longer occurs:
+# XCOM-I was translating a RETURN from an XPL program's outermost scope into a
+# call to RECORD_LINK, which enforces "every record still allocated is in
+# COMMON" -- an invariant the XPL deliberately routes around on exactly the
+# paths that RETURN rather than linking.  See XCOM-I/generateC.py.  The check
+# below is kept for BI003, BI004 and BI010, none of which has been seen in
+# practice.
 spaceBugsSkipped = set()
 spaceBugReports = ["pass1.rpt", "flo.rpt", "opt.rpt", "aux.rpt", "auxp.rpt",
                    "pass2.rpt", "pass3.rpt", "pass4.rpt"]
@@ -439,93 +438,78 @@ def compile(template):
             print("STDERR:", e.stderr)
             outtaHere(1)
     result = None
-    firstTry = True
-    retryX1 = False
-    while firstTry or retryX1:
-        firstTry = False
-        try:
-            if retryX1:
-                parmsFull = parms + ",X1"
-                print("      Recompiling %s with X1 due to OPT ZO3 error" % \
-                      rawFilename)
-            else:
-                parmsFull = parms
-                print("%4d: Compiling %s" % \
-                      (compilationCount, rawFilename))
-            command = ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
-                 f"--parms={parmsFull}", "-o", f"objects/{template['stem']}.obj"]
-            if clean:
-                command.append("--clean")
-            if archive:
-                command.append("--archive")
-            if sdfi != None:
-                command.append(f"--sdfi={sdfi}")
-            if rsbTrace != "":
-                command.append(rsbTrace)
-            result = subprocess.run(command, capture_output = True, text = True, check = True)
-            if len(result.stdout):
-                print(result.stdout)
-            if len(result.stderr):
-                print(result.stderr)
-            retryX1 = False
-        except subprocess.CalledProcessError as e:
-            if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
-                if autoX1 and not retryX1:
-                    retryX1 = True
-                    if filename.startswith("_") and not Path(filename).is_file():
-                        shutil.copy(f"current.results{os.sep}{filename}", filename)
-                    continue
-                print(f"      ZO3 error in OPT, compilation of {rawFilename} skipped.")
-                rsbTrace = ""
-                return False
-            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2"]):
-                print(f"      PM2 error in PASS1, compilation of {rawFilename} skipped.")
-                rsbTrace = ""
-                return False
-            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["IR1"]):
-                print(f"      IR1 error in PASS1, compilation of {rawFilename} skipped.")
-                rsbTrace = ""
-                return False
-            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["DI11"]):
-                print(f"      DI11 error in PASS1, compilation of {rawFilename} skipped.")
-                rsbTrace = ""
-                return False
-            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["D15"]):
-                print(f"      D15 error in PASS1, compilation of {rawFilename} skipped.")
-                rsbTrace = ""
-                return False
-            elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["XI3"]):
-                print(f"      XI3 error in PASS1, compilation of {rawFilename} skipped.")
-                rsbTrace = ""
-                return False
-            elif checkSpaceManagementBug(template):
-                print(f"      SPACELIB error, compilation of {rawFilename} skipped.")
-                rsbTrace = ""
-                return False
-            elif checkAnyPass1Error(template):
-                print(f"      PASS1 errors ({lastPass1Errors}), compilation of {rawFilename} skipped.")
-                rsbTrace = ""
-                return False
-            print(f"Failed with exit code {e.returncode}.")
-            if len(e.stdout):
-                print(e.stdout)
-            if len(e.stderr):
-                print(e.stderr)
-            if preprocess:
-                extra = "--preprocess"
-            else:
-                extra = ""
-            resumeCommand = '''#!/bin/bash
+    try:
+        parmsFull = parms
+        print("%4d: Compiling %s" % \
+              (compilationCount, rawFilename))
+        command = ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
+             f"--parms={parmsFull}", "-o", f"objects/{template['stem']}.obj"]
+        if clean:
+            command.append("--clean")
+        if archive:
+            command.append("--archive")
+        if sdfi != None:
+            command.append(f"--sdfi={sdfi}")
+        if rsbTrace != "":
+            command.append(rsbTrace)
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+        if len(result.stdout):
+            print(result.stdout)
+        if len(result.stderr):
+            print(result.stderr)
+    except subprocess.CalledProcessError as e:
+        if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
+            print(f"      ZO3 error in OPT, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2"]):
+            print(f"      PM2 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["IR1"]):
+            print(f"      IR1 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["DI11"]):
+            print(f"      DI11 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["D15"]):
+            print(f"      D15 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["XI3"]):
+            print(f"      XI3 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkSpaceManagementBug(template):
+            print(f"      SPACELIB error, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkAnyPass1Error(template):
+            print(f"      PASS1 errors ({lastPass1Errors}), compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        print(f"Failed with exit code {e.returncode}.")
+        if len(e.stdout):
+            print(e.stdout)
+        if len(e.stderr):
+            print(e.stderr)
+        if preprocess:
+            extra = "--preprocess"
+        else:
+            extra = ""
+        resumeCommand = '''#!/bin/bash
 prepareINCLIB %s --clear --include=INCL80
 unbuffer compilePASS %s --skip-to=%s  2>&1 | tee -a compilePASS.log
 ''' % (extra, extra, template["filename"])
-            resumeFilename = "resumeCompilePASS"
-            f = open(resumeFilename, "w")
-            f.write(resumeCommand)
-            f.close()
-            os.chmod(resumeFilename, os.stat(resumeFilename).st_mode | stat.S_IEXEC)
-            print("Note:  Created script", resumeFilename)
-            outtaHere(1)
+        resumeFilename = "resumeCompilePASS"
+        f = open(resumeFilename, "w")
+        f.write(resumeCommand)
+        f.close()
+        os.chmod(resumeFilename, os.stat(resumeFilename).st_mode | stat.S_IEXEC)
+        print("Note:  Created script", resumeFilename)
+        outtaHere(1)
     rsbTrace = ""
     return True
 

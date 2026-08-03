@@ -459,12 +459,25 @@ applyDisposition(int idx, int disp) {
  * every SDF in the tree.
  */
 
+/* The Phase 3 version number is the halfword at the very start of page 0,
+ * which the assembly calls SDFVERS. */
+#define MDC_PHASE3VERSIONNUMBER 0
 #define MDC_PDIRECTORYROOTCELL 8
 
+#define DRC_FLAGFIELD 0             /* Halfword */
 #define DRC_NUMBEROFBLOCKINDICES 16
 #define DRC_NUMBEROFSYMBOLS 18
 #define DRC_PHEADOFBLOCKINDEXTABLE 20
 #define DRC_PFIRSTSYMBOLINDEXTABLEENTRY 36
+#define DRC_VALUEOFTHEFIRSTISNINFILE 52   /* Halfword */
+#define DRC_VALUEOFTHELASTISNINFILE 54    /* Halfword */
+#define DRC_PFIRSTSTATEMENTINDEXTABLEENTRY 60
+#define DRC_PINITIALIZATIONTABLE 156
+
+/* Bit 0 of the Directory Root Cell's flag field, SRN_FLAG.  It decides the
+ * width of a Statement Index Table entry, so nothing can be indexed in that
+ * table without consulting it first. */
+#define DRC_FLAG_SRN 0x8000
 
 /* Block Index Table entries are 12 bytes: an 8-character CSECT name and a
  * pointer to the Block Data Cell.  Symbol Index Table entries are likewise 12:
@@ -828,6 +841,17 @@ sdfpkgService(uint32_t mode) {
       reply(disp, ctU32(SDF_OFF_PNTR));
       return 0;
 
+    case 6:                     /* Set disposition parameters */
+      /* SETDISPS.  There is no locate here: the disposition bits in the mode
+       * word are applied to the page that the previous locate left addressed,
+       * which is the one PNTR still names.  Every other mode reaches
+       * `applyDisposition` through `reply`, so routing this through `reply`
+       * too both applies them and leaves ADDR consistent with PNTR, in case
+       * honouring RESV moved the page.  PASS4 calls it after a mode 15 to
+       * reserve a block node's page while it works from that node. */
+      reply(disp, ctU32(SDF_OFF_PNTR));
+      return 0;
+
     case 7:                     /* Locate the Directory Root Cell */
       reply(disp, directoryRootCell());
       return 0;
@@ -944,6 +968,114 @@ sdfpkgService(uint32_t mode) {
         lastSymbolFound = 0;
         lastSymbolNameLen = -1;
         fail(20);               /* Symbol not found */
+        return 0;
+      }
+
+    /* Modes 15, 16 and 17 locate the *index-table entry* for a block, symbol
+     * or statement, where modes 8, 9 and 10 locate the data cell the entry
+     * points at.  PASS4 (SDFLIST) walks the index tables directly and so
+     * wants the former. */
+
+    case 15:                    /* Locate a block index-table entry by number */
+      {
+        uint32_t drc = directoryRootCell();
+        int blkno = ctU16(SDF_OFF_BLKNO);
+        int count = sdfU16(vmpPlus(drc, DRC_NUMBEROFBLOCKINDICES));
+        uint32_t table, entry;
+        if (blkno < 1 || blkno > count)
+          {
+            fail(16);
+            return 0;
+          }
+        table = sdfU32(vmpPlus(drc, DRC_PHEADOFBLOCKINDEXTABLE));
+        entry = vmpPlus(table, (blkno - 1) * INDEX_ENTRY_SIZE);
+        /* Like mode 8, this establishes the block a subsequent mode 13 will
+         * search, and so must discard any symbol a previous mode 13 found. */
+        searchBlockCell = sdfU32(vmpPlus(entry, 8));
+        searchBlockValid = 1;
+        lastSymbolFound = 0;
+        lastSymbolNameLen = -1;
+        putField(SDF_OFF_CSECTNAM, 8, entry, 8);
+        reply(disp, entry);
+        return 0;
+      }
+
+    case 17:                    /* Locate a statement index-table entry */
+      {
+        uint32_t drc = directoryRootCell();
+        int stmtno = ctU16(SDF_OFF_STMTNO);
+        int firstISN = sdfU16(vmpPlus(drc, DRC_VALUEOFTHEFIRSTISNINFILE));
+        int lastISN = sdfU16(vmpPlus(drc, DRC_VALUEOFTHELASTISNINFILE));
+        uint32_t table = sdfU32(vmpPlus(drc, DRC_PFIRSTSTATEMENTINDEXTABLEENTRY));
+        int hasSRNs = 0 != (sdfU16(vmpPlus(drc, DRC_FLAGFIELD)) & DRC_FLAG_SRN);
+        /* An entry is a 4-byte pointer to the statement data, preceded by a
+         * 6-character SRN and a halfword INCLUDE count when the SDF carries
+         * SRNs at all.  Statement numbers are ISNs and do not start at 1. */
+        int entrySize = hasSRNs ? 12 : 4;
+        int index = stmtno - firstISN;
+        uint32_t entry;
+        if (table == 0 || index < 0 || stmtno > lastISN)
+          {
+            fail(36);           /* Statement number out of range */
+            return 0;
+          }
+        entry = vmpPlus(table, index * entrySize);
+        if (hasSRNs)
+          {
+            putField(SDF_OFF_SREFNO, 6, entry, 6);
+            ctPutU16(SDF_OFF_INCLCNT, sdfU16(vmpPlus(entry, 6)));
+          }
+        reply(disp, entry);
+        return 0;
+      }
+
+    case 18:                    /* Find the INITIAL data for a given symbol */
+      {
+        /* CR13079's mode, not the "deselect an SDF" that the SDFPKG User's
+         * Guide (SFOC-PASS0092, 02/08/99) gives as mode 18 for the FSWAT C
+         * build.  The assembly gained this one three months after that guide,
+         * and it is the assembly being reproduced here.
+         *
+         *     INITDATA B     SYMB             - get the symbol's RELADDR
+         *     GETINIT  L     R1,INITPTR
+         *              N     R4,=X'00FFFFFF'  - mask off SYMBLEN
+         *              AR    R4,R4            - halfwords to bytes
+         *              CALL  LOCATE
+         *
+         * The dispatcher gates it on "CLI SDFVERS+1,33 / BH NEWCHECK", so
+         * only an SDF newer than version 33 has an initialization table. */
+        uint32_t drc, table, entry, cell, initTable, vmp;
+        int symbno, count, nameLen, reladdr;
+
+        if (sdfU16(MDC_PHASE3VERSIONNUMBER) <= 33)
+          sdfAbend(4016, "mode 18 on an SDF too old to hold INITIAL data");
+
+        drc = directoryRootCell();
+        symbno = ctU16(SDF_OFF_SYMBNO);
+        count = sdfU16(vmpPlus(drc, DRC_NUMBEROFSYMBOLS));
+        if (symbno < 1 || symbno > count)
+          {
+            fail(20);
+            return 0;
+          }
+        table = sdfU32(vmpPlus(drc, DRC_PFIRSTSYMBOLINDEXTABLEENTRY));
+        entry = vmpPlus(table, (symbno - 1) * INDEX_ENTRY_SIZE);
+        cell = sdfU32(vmpPlus(entry, 8));
+        /* SYMBLEN is the byte at offset 12 and RELADDR the three bytes that
+         * follow it, so CR13079 loads the fullword and masks the top byte
+         * away rather than reading three bytes as such. */
+        reladdr = sdfU32(vmpPlus(cell, SDC_LENGTHOFNAME)) & 0x00FFFFFF;
+        initTable = sdfU32(vmpPlus(drc, DRC_PINITIALIZATIONTABLE));
+        vmp = vmpPlus(initTable, 2 * reladdr);
+
+        /* INITDATA falls into the whole of mode 9 before locating the data,
+         * so the symbol's own outputs are reported too; only ADDR and PNTR
+         * refer to the initialization data, being the last LOCATE done. */
+        nameLen = sdfU8(vmpPlus(cell, SDC_LENGTHOFNAME));
+        memory[commtabl + SDF_OFF_SYMBNLEN] = nameLen;
+        putSymbolName(entry, cell, nameLen);
+        ctPutU16(SDF_OFF_BLKNO, sdfU16(vmpPlus(cell, SDC_BLOCKINDEXNUMBER)));
+        reply(disp, vmp);
         return 0;
       }
 

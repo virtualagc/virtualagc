@@ -244,8 +244,9 @@ void writeZipfile(gzFile dest) {
     // Set binary mode for standard I/O on Windows if needed (best practice)
     //SET_BINARY_MODE(dest);
     if (gzwrite(dest, memory, MEMORY_SIZE) != MEMORY_SIZE) {
-        fprintf(stderr, "Error writing COMMON file\n");
-        exit(1);
+        // Via `abend` rather than a bare `exit`, so that this failure carries
+        // EXIT_ABEND like every other runtime-detected one.
+        abend("Error writing COMMON file");
     }
     gzclose(dest);
 }
@@ -711,7 +712,7 @@ abend(const char *fmt, ...) {
   fprintf(stderr, "\n");
   if (showBacktrace)
     printBacktrace();
-  exit(1);
+  exit(EXIT_ABEND);
 }
 
 // Try to match a string to a Type 1 PARM field.  Returns 1 if found, 0 if not.
@@ -3691,6 +3692,62 @@ writeEntryCOMMON(FILE *fp, memoryMapEntry_t *entry, int isField, char *parent) {
 }
 #endif // STANDARD_XPL
 
+/*
+  Write the free-block chain of the SPACELIB heap, if there is one.
+
+  SPACELIB keeps its records at absolute addresses near the top of memory,
+  and `readCOMMON` restores them there verbatim, so the heap really does
+  carry from one program in a chain to the next.  The gaps between records
+  are free blocks, threaded on a list rooted at `FIRSTBLOCK`, each with an
+  eight-byte header: the size at B-4 and the link to the next block at B.
+
+  Those headers belong to no declared variable, and they sit far above
+  `ROOT_BASED`, so neither of the two mechanisms in `writeCOMMON` above can
+  see them -- the raw-byte dump stops short and the symbol-by-symbol dump has
+  no symbol to write.  `FIRSTBLOCK` itself is an ordinary COMMON FIXED and so
+  does get written, with the result that the reader restores a pointer to a
+  header that was never transferred.  The next program then walks its heap
+  through uninitialized memory and `_FREEBLOCK_CHECK` rightly abends with
+  "BI002 ... RECORD HAS WRONG SIZE".
+
+  This went unnoticed for a long time because the free list is almost always
+  empty at the point COMMON is written: RECORD_LINK squashes the heap back
+  into the free-string area before linking, which leaves FIRSTBLOCK at 0.
+  Only a program that writes COMMON *without* having called RECORD_LINK -- as
+  PASS2 does when MAX_SEVERITY is nonzero -- can hand over a non-empty list.
+
+  A distinct '%' record is used rather than plain '@' raw bytes so that the
+  reader can also lower `freelimit` to take the block into account, exactly
+  as it does for each record it restores.  Without that the heap's lower
+  bound comes out wrong and the walk fails its final size check instead.
+*/
+static void __attribute__ ((no_instrument_function))
+writeFreeBlocksCOMMON(FILE *fp) {
+  memoryMapEntry_t *entry;
+  uint32_t block;
+  int guard;
+
+  entry = lookupVariable("FIRSTBLOCK");
+  if (entry == NULL)
+    return;  // Not a program that uses SPACELIB.
+  block = getFIXED(entry->address);
+  // The list is short in practice, but it is read out of the program's own
+  // memory, so a corrupt link must not spin here forever.
+  for (guard = 0; block != 0; guard++)
+    {
+      uint32_t size, next;
+      if (guard > MAX_FREE_BLOCKS_COMMON)
+        abend("Free-block list too long or looped at %06X in writeCOMMON",
+              block);
+      if (block < 4 || block + 4 > MEMORY_SIZE)
+        abend("Free-block address %06X out of range in writeCOMMON", block);
+      size = COREWORD(block - 4);
+      next = COREWORD(block);
+      fprintf(fp, "%%\t%06X\t%08X\t%08X\n", block, size, next);
+      block = next;
+    }
+}
+
 // Write entire COMMON file.
 int __attribute__ ((no_instrument_function))
 writeCOMMON(void) {
@@ -3716,6 +3773,7 @@ writeCOMMON(void) {
 	fprintf(COMMON_OUT, "@\t%06X\t%02X\n", i, memory[i]);
       for (i = 0; i < NUM_SYMBOLS; i++)
 	writeEntryCOMMON(COMMON_OUT, &memoryMap[i], 0, "(root)");
+      writeFreeBlocksCOMMON(COMMON_OUT);
     }
 #endif
   return 0;
@@ -3762,6 +3820,24 @@ readCOMMON(void) {
 	  memory[address] = value;
 	  continue;
 	}
+      if (line[0] == '%') // A free block of the SPACELIB heap.
+        {
+          // See `writeFreeBlocksCOMMON` for why these need a record of their
+          // own.  Restore the eight-byte header -- size at B-4, link at B --
+          // and lower `freelimit` past the bottom of the block, which is at
+          // B-size+4, the same way the BASED case below does for a record.
+          unsigned block, size, next;
+          if (3 != sscanf(line, "%%\t%X\t%X\t%X", &block, &size, &next))
+            abend("Corrupt free-block data in COMMON: %s", line);
+          if (block < 4 || block + 4 > MEMORY_SIZE || size > block + 4)
+            abend("Free block %06X size %08X out of range in COMMON", block,
+                  size);
+          COREWORD2(block - 4, size);
+          COREWORD2(block, next);
+          if (freelimit > block - size + 4 - 512)
+            freelimit = block - size + 4 - 512;
+          continue;
+        }
       if (3 == sscanf(line, "/\t%s\t%d\tBASED\t%[^\n\r]",
                       field, &fieldIndex, svalue))
         {

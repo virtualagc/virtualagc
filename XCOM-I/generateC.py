@@ -2293,8 +2293,20 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 if standardXPL:
                     print(indent2 + "exit(%s);" % source)
                 else:
+                    # `LINK` rather than `RECORD_LINK`:  A RETURN from the
+                    # outermost scope of an XPL program is not a LINK to the
+                    # next program in the chain, and historically did not run
+                    # RECORD_LINK's fixups.  All that's wanted here is what
+                    # `LINK` itself does, namely writing COMMON out and
+                    # exiting with the return code.  Calling `RECORD_LINK`
+                    # instead would additionally impose its rule that every
+                    # record still allocated must be in COMMON, and abend with
+                    # "BI002 ... NON COMMON RECORD AT LINK" on paths that the
+                    # XPL deliberately routes around `CALL RECORD_LINK` --
+                    # e.g. PASS3's `IF NOT_DOWNGRADED THEN RETURN "8"`, taken
+                    # while RVL_SRN is still allocated.
                     print(indent2 + "exitCodeLINK = %s;" % source)
-                    print(indent2 + "RECORDuLINK(0);")
+                    print(indent2 + "LINK();")
                 print(indent + "}")
                 return;
         procedureName = procScope["symbol"]
@@ -2721,7 +2733,10 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         if not standardXPL:
             if nonCommonBase > commonBase:
                 #print(indent + "writeCOMMON(COMMON_OUT);")
-                print(indent + "RECORDuLINK(0);")
+                # Falling off the end of the outermost scope is an implicit
+                # RETURN, so `LINK` rather than `RECORD_LINK` for the reasons
+                # given at the explicit-RETURN case above.
+                print(indent + "LINK();")
         #print(indent + \
         #      'fprintf(stderr, "FYI: %d of %d buffers still active.\\n", countBuffers(), MAX_BUFFS);')
         #print(indent + "if (LINE_COUNT)")
