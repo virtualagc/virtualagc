@@ -343,6 +343,14 @@ cachePage(int id, int pageNumber) {
           lru = i;
       if (lru < 0)
         sdfAbend(4001, "every page frame is reserved; none can be evicted");
+      if (getenv("SDFPKG_TRACE") != NULL)
+        {
+          fflush(stdout);
+          fprintf(stderr, "SDFPKG:   EVICT frame %d (was page %d of sdf %d) "
+                  "for page %d of sdf %d, %d frames\n",
+                  lru, padPageNo(lru) / 8, padId(lru), pageNumber, id, npages);
+          fflush(stderr);
+        }
       if (padModified(lru))
         writePageBack(lru);
       freeIndex = lru;
@@ -625,6 +633,12 @@ sdfpkgInitialize(uint32_t commtablAddress) {
     sdfAbend(4017, "MONITOR(22,0) called twice without an intervening mode 1");
 
   commtabl = commtablAddress;
+  if (getenv("SDFPKG_TRACE") != NULL)
+    {
+      fflush(stdout);
+      fprintf(stderr, "SDFPKG: mode 0 (initialize)\n");
+      fflush(stderr);
+    }
   misc = ctU16(SDF_OFF_MISC);
   updat = (misc & 0x02) != 0;
 
@@ -711,16 +725,21 @@ sdfpkgService(uint32_t mode) {
   int disp = (mode >> 28) & 0xF;
   int modeNumber = mode & 0xFFFF;
 
+  int traceMode = 0;
   usecount++;
 
   if (getenv("SDFPKG_TRACE") != NULL)
     {
       fflush(stdout);
-      fprintf(stderr, "SDFPKG: mode %d disp %d BLKNO %d SYMBNO %d PNTR %08X\n",
+      fprintf(stderr, "SDFPKG: mode %d disp %d BLKNO %d SYMBNO %d PNTR %08X"
+              " NPAGES %d APGAREA %06X\n",
               modeNumber, disp, ctU16(SDF_OFF_BLKNO), ctU16(SDF_OFF_SYMBNO),
-              ctU32(SDF_OFF_PNTR));
+              ctU32(SDF_OFF_PNTR), ctU16(SDF_OFF_NPAGES),
+              ctU32(SDF_OFF_APGAREA));
       fflush(stderr);
     }
+  traceMode = modeNumber;
+  (void) traceMode;
 
   if (!initialized)
     sdfAbend(4009, "a MONITOR(22) service was asked for before MONITOR(22,0)");
@@ -786,6 +805,13 @@ sdfpkgService(uint32_t mode) {
 
     case 4:                     /* Select an SDF */
       selectSdf();
+      if (getenv("SDFPKG_TRACE") != NULL)
+        {
+          fflush(stdout);
+          fprintf(stderr, "SDFPKG:   mode 4 -> CRETURN %d\n",
+                  ctU16(SDF_OFF_CRETURN));
+          fflush(stderr);
+        }
       return 0;
 
     default:

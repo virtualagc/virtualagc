@@ -82,6 +82,15 @@ The only OPTIONS available are:
                     to the various operational modes of PASS, and each would
                     represent a different memory image.  [Ignore this parameter
                     and don't use it for now.]
+    --csects=D      (Default ../mafgen.)  Directory holding csects-*.json, the
+                    indexes of the CSECTs actually present in each PASS
+                    configuration.  A HAL/S file whose CSECT appears in none of
+                    them is auxiliary code that is not part of PASS at all, and
+                    is reported as such rather than compiled.  Membership is
+                    the union of all eight configurations.
+    --no-csects     Compile every HAL/S file found, without regard to whether
+                    it is part of PASS.  This was the behaviour before the
+                    check existed.
     --auto-x1       Automatically disable OPT and retry for ZO3 errors.
     --skip-to=F     Skip all source-code files prior to F.  F must be the 
                     relative path of a file, such as APPLSRC/RDDDDI.hal.
@@ -145,6 +154,7 @@ ops = "G16"
 clean = False
 archive = False
 sdfi = "SDFLIB"
+csectsDir = ".." + os.sep + "mafgen"
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg)
@@ -161,6 +171,10 @@ for parm in sys.argv[1:]:
         sdfi = parm[7:]
     elif parm == "--no-sdfi":
         sdfi = None
+    elif parm.startswith("--csects="):
+        csectsDir = parm[9:]
+    elif parm == "--no-csects":
+        csectsDir = None
     elif parm == "--dfg":
         dfg = True
     elif parm == "--no-dfg":
@@ -190,6 +204,38 @@ if not Path("APPLSRC").is_dir():
 
 def descore(s):
     return s.strip().replace("_", "")[:6]
+
+# OI340600 holds more than PASS: auxiliary code for the same software version
+# sits alongside it in APPLSRC/ and SSSRC/, and compiling it is a waste at best
+# and misleading at worst, since some of it cannot compile at all.  (The CS4
+# family, for instance, duplicates structure names with the CS2 family that
+# really is in PASS.)  Membership cannot be read off the filenames, but it can
+# be had from the CSECT indexes distilled from the disassemblies: a compilation
+# unit's CSECT is "#P" followed by its descored name, truncated to eight
+# characters.  Take the union of all the configurations, so that a file
+# belonging to any of them is compiled.
+import glob
+csectsInPass = set()
+if csectsDir != None:
+    for name in sorted(glob.glob(csectsDir + os.sep + "csects-*.json")):
+        try:
+            import json as _json
+            csectsInPass |= set(k.strip() for k in _json.load(open(name)))
+        except:
+            print("Warning: could not read " + name)
+    if len(csectsInPass) == 0:
+        print("Warning: no CSECT indexes found in " + csectsDir +
+              "; every HAL/S file will be compiled.")
+    else:
+        print("%d CSECTs across %d PASS configurations." %
+              (len(csectsInPass),
+               len(glob.glob(csectsDir + os.sep + "csects-*.json"))))
+
+notInPass = []
+def isInPass(halname):
+    if not csectsInPass or halname == None:
+        return True
+    return ("#P" + halname)[:8] in csectsInPass
 
 '''
 Regarding the compiler parameters:
@@ -364,6 +410,13 @@ def compile(template):
             #print("%3d: Skipping past %s/%s." % \
             #  (compilationCount, subfolder, filename))
             return None
+    # Auxiliary code that is not part of PASS at all: report it and move on,
+    # rather than compiling it and counting whatever it does as a result.
+    if not isInPass(template.get("halname")):
+        notInPass.append(template["filename"])
+        print("%4d: Not part of PASS, skipping %s" %
+              (compilationCount, rawFilename))
+        return None
     if False and preprocess:
         subfolder = "."
         filename = "_" + template["stem"] + ".hal"
@@ -683,6 +736,7 @@ if False:
         compile(template)
         templatesByFilename.pop(filename)
 
+print(f"{len(notInPass)} files not part of PASS (CSECT in no configuration)")
 print(f"{len(skipped)} skipped files due to IR1, DI11, PM2, or ZO3 errors")
 print(f"Uncompiled files due to dependence ({len(templatesByFilename)-len(skipped)}):")
 if len(templatesByFilename) == len(skipped):
