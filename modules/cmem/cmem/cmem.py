@@ -743,7 +743,11 @@ class cmem:
         # TTRN" -- which a plain file in an SDF library does not have.  So we
         # report what GETRVL reports when there is no revision level to be
         # had: zero, meaning "SHOW NO REVISION LEVEL OBTAINED".
-        self._setU16(self.OFF_BLKNO, 0)
+        # The revision level is two EBCDIC characters, not a number, so its
+        # "absent" value is the characters "00" rather than binary zero, which
+        # would render in a report as two NULs.  The catenation level really
+        # is numeric.
+        self._setU16(self.OFF_BLKNO, 0xF0F0)
         self._setU16(self.OFF_SYMBNO, 0)
 
         for i in range(self.npages):

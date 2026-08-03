@@ -85,6 +85,7 @@ typedef char sbuf_t[MAX_XPL_STRING + 1];
 extern int debugX;
 extern int outUTF8;
 extern char *sdfDirnameIn, *sdfDirnameOut;
+extern char ebcdicToAscii[256];
 // "Device control blocks" for sequential files and PDS.  These have nothing
 // to do with IBM 360 DCBs.
 #define DCB_MAX 10

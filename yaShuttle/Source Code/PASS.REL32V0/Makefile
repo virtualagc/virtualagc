@@ -124,7 +124,11 @@ endif
 TARGETS := PASS1 FLO OPT AUXP PASS2 PASS3 PASS4
 TARGETSB := PASS1B OPTB PASS2B PASS3B
 XLIB := ../../../../SPACELIB.xpl
-SDFPKG := ../../ported/sdfpkg
+# SDFPKG used to be a separate C library built from ../../ported/sdfpkg.  That
+# was the abandoned first attempt and has been deleted; the SDF services now
+# live in the XCOM-I runtime library itself (XCOM-I/sdfpkg.c), since MONITOR(22)
+# is a runtime service and the C that XCOM-I emits cannot be edited.  Nothing
+# is left to build or clean here.
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
 PARM_STRING = SRN,LISTING2,X6,LIST,ADDRS,HALMAT,NOTABLES,DECK
@@ -150,13 +154,9 @@ CARDS := --ddo=3,cards2.bin,E
 endif
 
 # For including SDFPKG in PASS3.
-#override export EXTRALIBS += -DHALSFC_PASS3 -L../../${SDFPKG} -lsdfpkg
 
 all:	$(TARGETS) $(TARGETSB)
 
-.PHONY: $(SDFPKG)
-$(SDFPKG):
-	#make -C $(SDFPKG)
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION)
 .PHONY: regression
@@ -210,7 +210,7 @@ test:
 	@echo Regression test passed.
 
 .PHONY: $(TARGETS)
-$(TARGETS): $(SDFPKG)
+$(TARGETS):
 	@echo Building HAL/S-FC $@ ...
 	@cd $(subst AUXP.,AUX_,$@.PROCS) && \
 	$(XCOMI) $(XEXTRA) --identifier="REL32V0   " --cond=P --cond=V --output=$@ "##DRIVER.xpl" && \
@@ -219,7 +219,7 @@ $(TARGETS): $(SDFPKG)
 	mv xcomiMultiAssignments.txt xcomiMultiAssignments-$@.txt 2>/dev/null
 
 .PHONY: $(TARGETSB)
-$(TARGETSB): $(SDFPKG)
+$(TARGETSB):
 	@echo Building HAL/S-FC $@ ...
 	@cd $(subst AUXP.,AUX_,$(subst B,,$@).PROCS) && \
 	$(XCOMI) $(XEXTRA) --identifier="BFC V17.0 " --cond=B --cond=V --output=$@ "##DRIVER.xpl" && \
@@ -237,7 +237,6 @@ clean:
 	-@rm COMMON* listing2* vmem* halmat* litfile* \
 	    *.rpt optmat* auxmat* objcode* cards* \
 	    extra* deck* monitor13* -rf 2>$(NULL)
-	make -C $(SDFPKG) clean
 
 .PHONY: cleanall
 cleanall: clean

@@ -85,6 +85,7 @@
  */
 
 #include "runtimeC.h"
+#include "sdfpkg.h"
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -384,7 +385,10 @@ makeDescriptor(descriptor_t *descriptor) {
 // latter had to be invented, but that's impossible because of the way
 // ~,^ map to logical-NOT and ` maps to U.S. cent.  I.e., the mapping isn't
 // 1-to-1.  It's just too dodgy trying to make it work.
-static char ebcdicToAscii[256] = {
+/* Not static: sdfpkg.c needs it to read the SDF-member name out of
+ * COMMTABL, which like everything else in the XPL/I program's memory is
+ * EBCDIC. */
+char ebcdicToAscii[256] = {
   '\x00', '\x01', '\x02', '\x03', ' '   , '\x09', ' '   , '\x7F',
   ' '   , ' '   , ' '   , '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
   '\x10', '\x11', '\x12', '\x13', ' '   , ' '   , '\x08', ' '   ,
@@ -3118,30 +3122,23 @@ MONITOR21(void) {
   return sizeof(memory) - used;
 }
 
+// MONITOR(22) is the interface to SDFPKG, by which HAL/S-FC reads a
+// Simulation Data File in place of a TEMPLATE.  The services themselves are
+// in sdfpkg.c.  Note that "no SDF library was named" is not an error: it is
+// how a compilation that is not meant to read SDFs behaves, and INCSDF copes
+// with the failure return by falling back on the template library.
 uint32_t
 MONITOR22(uint32_t n1) {
-  static int notShownYet = 1;
-  if (notShownYet)
-    {
-      notShownYet = 0;
-      fflush(stdout);
-      fprintf(stderr, "\nFYI: MONITOR(22,n) not yet implemented\n");
-      fflush(stderr);
-    }
-  return 1;
+  if (sdfDirnameIn == NULL)
+    return 1;
+  return sdfpkgService(n1);
 }
 
 uint32_t
 MONITOR22A(uint32_t n2) {
-  static int notShownYet = 1;
-  if (notShownYet)
-    {
-      notShownYet = 0;
-      fflush(stdout);
-      fprintf(stderr, "FYI: MONITOR(22,0,n) not yet implemented\n");
-      fflush(stderr);
-    }
-  return 1;
+  if (sdfDirnameIn == NULL)
+    return 1;
+  return sdfpkgInitialize(n2);
 }
 
 descriptor_t *

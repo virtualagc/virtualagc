@@ -120,15 +120,12 @@ def STRING_AT(descriptor):
 
 def RVL_STRING(rev):
     '''Render the revision level SELECT reports in BLKNO as the two EBCDIC
-    characters it is.  An SDF library of plain files has no PDS directory
-    entry to take one from, so SELECT reports 0 -- exactly as the assembly's
-    GETRVL does when there is no revision level -- and that is spelled "00"
-    here, matching how the rest of the compiler prints an absent RVL.
+    characters it is.  This is the port's stand-in for the XPL's
+    STRING("01000000"|ADDR(REV)), which reinterprets the halfword as text.
+    An SDF library of plain files has no PDS directory entry to take a
+    revision level from, so SELECT reports the characters "00".
     '''
-    high, low = (rev >> 8) & 0xFF, rev & 0xFF
-    if high == 0 and low == 0:
-        return "00"
-    return ebcdicToAscii[high] + ebcdicToAscii[low]
+    return ebcdicToAscii[(rev >> 8) & 0xFF] + ebcdicToAscii[rev & 0xFF]
 
 
 def MOVE_MACRO_TEXT_FROM(length, address, firstFree):
