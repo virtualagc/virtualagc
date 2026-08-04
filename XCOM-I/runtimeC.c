@@ -2574,10 +2574,29 @@ MONITOR2(uint32_t dev, descriptor_t *name) {
   lenPart = name->numBytes;
   cname = descriptorToAscii(name);
   for (; lenPart > 0 && isspace(cname[lenPart - 1]); cname[--lenPart] = 0);
+  /*
+    A name that could not name a member -- empty once trailing blanks are
+    stripped, or longer than a member name may be -- is simply a member that
+    is not there, and "not there" is what this function exists to report.  It
+    must not abend: callers ask precisely so that they can cope, as PASS3's
+    OUTPUT_MSG does with
+
+        IF MONITOR(2,5,ERROR) THEN DO;
+           OUTPUT = 'ERROR MESSAGE ' || ERROR || ' NOT FOUND';
+           RETURN;
+        END;
+
+    PASS3 reaches that with a blank code because PRINTSUM.xpl's advisory loop
+    runs `DO I = 0 TO RECORD_ALLOC(ADVISE)-1` -- the *allocated* capacity of
+    ADVISE rather than the part of it in use -- so it walks off the end of the
+    real advisories into slots that were never filled in.  On the 360 those
+    printed a harmless "NOT FOUND" line; here they killed the compilation.
+
+    Note that the output side of MONITOR(2) keeps its abend: creating a member
+    under an impossible name is a real error, not a question being asked.
+  */
   if (lenPart < 1 || lenPart > PDS_MEMBER_SIZE)
-    abend("PDS partitions must have names from 1-8 characters long: "
-          "Device number %d, PDS = '%s', part = '%s'",
-          dev, DCB_INS[dev].filename, cname);
+    return 1;
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
     abend("Out of memory in MONITOR(2)");
@@ -3787,7 +3806,22 @@ writeCOMMON(void) {
   if (COMMON_OUT != NULL)
     {
       int i;
-      fprintf(COMMON_OUT, ":\t%d\n", dwAddress);
+      /*
+        The internal-state line carries `freelimit` as well as `dwAddress`.
+        It has to: `freelimit` is part of the heap's description, and the
+        reader can only otherwise *infer* it, from the addresses of the
+        records it restores.  That inference holds while FREELIMIT sits where
+        the records imply -- but RECORD_LINK's squash moves it, since
+        _RETURN_TO_FREESTRING does `FREELIMIT = FREELIMIT + NBYTES` while the
+        records stay put.  A program that squashes before writing COMMON
+        therefore hands the next one a heap whose lower bound cannot be
+        reconstructed, and its first allocation abends in _FREEBLOCK_CHECK.
+        PASS3 does exactly that when SDF_SUMMARY is set, which is how PASS4
+        came to fail with "BLOCK WRONG SIZE".
+
+        Older COMMON files have only the one field; the reader accepts both.
+      */
+      fprintf(COMMON_OUT, ":\t%d\t%u\n", dwAddress, freelimit);
       for (i = 0; i < ROOT_BASED; i++)
 	fprintf(COMMON_OUT, "@\t%06X\t%02X\n", i, memory[i]);
       for (i = 0; i < NUM_SYMBOLS; i++)
@@ -3808,6 +3842,8 @@ readCOMMON(void) {
       dopeVectorAddress;
   memoryMapEntry_t *basedMemoryMapEntry;
   descriptor_t *descriptor;
+  uint32_t commonFreelimit = 0;
+  int haveCommonFreelimit = 0;
 
   if (COMMON_INz != NULL)
     {
@@ -3826,10 +3862,17 @@ readCOMMON(void) {
         continue;
       if (line[0] == ':') // Internal state?
         {
-          if (1 == sscanf(line, ":\t%d", &dwAddress))
-            continue;
-          else
-            abend("Unrecognized line in COMMON: %s", line);
+          unsigned fl;
+          int n = sscanf(line, ":\t%d\t%u", &dwAddress, &fl);
+          if (n == 2)
+            {
+              commonFreelimit = fl;
+              haveCommonFreelimit = 1;
+              continue;
+            }
+          if (n == 1)
+            continue;         // An older COMMON, without a freelimit.
+          abend("Unrecognized line in COMMON: %s", line);
         }
       if (line[0] == '@') // Raw bytes
 	{
@@ -3979,6 +4022,11 @@ readCOMMON(void) {
     }
   fclose(COMMON_IN);
   COMMON_IN = NULL;
+  /* After the records, not before: restoring each one lowers `freelimit` to
+     `address - 512`, which would otherwise overwrite the value the writer
+     actually had. */
+  if (haveCommonFreelimit)
+    freelimit = commonFreelimit;
 #endif // STANDARD_XPL
   return 0;
 }
