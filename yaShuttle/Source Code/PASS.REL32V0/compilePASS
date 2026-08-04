@@ -329,6 +329,14 @@ cardtypesBySourceFile = {
     "CS2PDT" : f"FCRC",
     "CS4PDT" : f"FCRC",
     "PGSCRU" : f"FCRC",
+    # GKFHOR's five T cards were the whole of its M1 "ILLEGAL CARD TYPE"
+    # failure; S, its only other unusual column 1, is a standard type.  Both
+    # readings parse and compile, since the T lines wrap an IF/ELSE around a
+    # block that balances either way, so the OI301700 report decides it: SRNs
+    # 009228, 009240, 009260 and 009352 all appear there marked M with
+    # statement numbers 349, 350, 351 and 360.  (009229 is absent only because
+    # OI301700 fits the IF condition on one line where OI340600 splits it.)
+    "GKFHOR" : f"TMFCRM",
     "GKDASC": f"AMOCNCRMFDGCHC",
     "GKRORB": f"ACOMNCRCFCGDHC",
     "GKGMNV": f"ACOCNMRMFCGCHD",
