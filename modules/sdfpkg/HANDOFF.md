@@ -278,7 +278,14 @@ The eight OI301700 failures not yet repaired, from the last complete run:
            sequences in these two files.  Borrowing it would splice OI-34.06
            code INSIDE an OI-30.17 module, which is more invasive than the
            INCL80 borrowing and is the user's call.
-  GKGMNV   DU1, undeclared GK3_ORB_TGT and CGGV_THR_VEC_ROLL_ANG_COS.
+  GKGMNV   DU1, undeclared GK3_ORB_TGT and CGGV_THR_VEC_ROLL_ANG_COS.  Both
+           references are inside an INCLUDED region -- the listing marks them
+           "+23  332+M" -- and GK3_ORB_TGT is declared in GK3ORB, which GWAORB,
+           GTBUPL and GKRORB all use successfully.  So this is include
+           resolution, not an extraction artifact.  Note that GKGMNV is one of
+           the files with its own CARDTYPE entry in compilePASS ("ACOCNMR..."),
+           written for OI-34.06; OI-30.17's column 1 is already resolved, so
+           such an entry can only mis-resolve there.  Check that first.
   GKEKIP   XI3 cascades -- a needed template's provider failed.  These should
   GM2MAJ   clear themselves as their providers are fixed; SGCKIP's XI3 was for
   GMAMIN   @@SAFACQ and is already fixed.
