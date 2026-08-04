@@ -18,8 +18,9 @@ Reach `successful == attempts` for a full compilePASS corpus run, for BOTH
 PASS versions.
 
     OI340600    974 / 974      MET.  Zero failures, run complete.
-    OI301700    974 / 986      12 failures; 4 of them repaired since that run
-                               and awaiting confirmation, 8 open.
+    OI301700    984 / 991      7 failures, which are 4 roots and 3 cascades:
+                               GKEKIP waits on GKGMNV; GM2MAJ and GMAMIN wait
+                               on GMGMAJ.  SULUPLIN repaired again since.
 
 For scale, OI340600 began the previous session at 843/907.
 
@@ -258,13 +259,19 @@ block as ASCII and every name arrives blank.
 --------------------------------------------------------------------------------
 The eight OI301700 failures not yet repaired, from the last complete run:
 
-  PMQTEC   FT101, "DATA TYPE CONFLICT ON PARAMETER #1", statement 116.  It
-           passes HEX'0003' to a parameter both versions declare INTEGER, and
-           the original listing carries NO error underline there, so the
-           original build accepted it.  PASS2's XPL *is* the original, so the
-           difference must be in the type our compiler gives a hex literal.
-           Worth understanding rather than papering over.  This is also the
-           file that used to abort the whole run.
+  PMQTEC   FT101, "DATA TYPE CONFLICT ON PARAMETER #1".  TWO files now, on
+  SULUPLIN the very same call:  PMP_SL_PRB(HEX'0003', ...) at PMQTEC statement
+           116 and PMP_SL_PRB(HEX'0001', ...) at SULUPLIN statement 884.  Both
+           versions declare that parameter INTEGER, and the original listing
+           carries NO error underline at PMQTEC's statement, so the original
+           build accepted a hex literal there.  PASS2's XPL *is* the original,
+           so the difference has to be in the type our compiler gives the
+           literal, or in what the template/SDF records about the parameter.
+           Compiling without --sdfi is NOT a valid control: it fails earlier,
+           with DI11, because templates lack the transitive includes.  The next
+           step is to compare what the SDF and the template each say about
+           PMP_SL_PRB's parameter 1 against what CHECK_ASSIGN_PARM expects.
+           PMQTEC is also the file that used to abort the whole run.
   GMGMAJ   XD7, "DEFINE SEQUENCE IS EMPTY".  "D DEFINE GM6CLC NOLIST" and its
   GMESTA   CLOSE have nothing between them, because NOLIST prints nothing in
            the listing.  OI-34.06 has the content, at the same SRNs.  Four such
