@@ -59,9 +59,22 @@ and INCL80/).  Usage:
 The only OPTIONS available are:
 
     --help          Show this message.
-    --preprocess    (Default.)  Preprocess the HAL/S source code prior to
-                    compilation to eliminate DI11 compile-time errors.
-    --no-preprocess Opposite of --preprocess.
+    --preprocess    Preprocess the HAL/S source code prior to compilation to
+                    eliminate DI11 compile-time errors.  This is no longer the
+                    default, and is not expected to be useful when SDFs are
+                    being imported.  preprocessHALSFC exists because the
+                    template path does not include a template's own templates
+                    (DI11) and has no way to cope with the same template being
+                    included twice (PM2).  Importing an SDF has both: INCSDF's
+                    ENTER_COMPOOL_VARS enters the whole declare chain, which
+                    carries the symbols the COMPOOL itself obtained from its
+                    own includes, and its DUPLICATE_NAME flags a redeclaration
+                    rather than rejecting it.  The preprocessor also does
+                    active harm now, since it knows only "D INCLUDE TEMPLATE"
+                    and is blind to "D INCLUDE SDF X:", so it hoists a second
+                    include of something already included and PASS1 rejects it
+                    with PL2 -- which is what happened to CS2PAT.
+    --no-preprocess (Default.)  Opposite of --preprocess.
     --clean         Use HALSFC's --clean switch.
     --archive       Use HALSFC's --archive switch.
     --sdfi=D        (Default SDFLIB.)  Directory the compilers read Simulation
@@ -152,7 +165,7 @@ see the messages more-or-less at the time they're emitted, rather than having
 the operating system buffer them in large blocks and only emitting them when 
 full blocks become available.
 '''
-preprocess = True
+preprocess = False
 dfg = True
 skipTo = None
 rsbTrace = ""
