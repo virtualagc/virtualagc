@@ -363,7 +363,22 @@ def getCardtypeMap(stem):
     # those includes hid CS4PDT from the dependency graph entirely, so it was
     # never compiled and CPTOSV then failed with XI3 for want of its template.
     cardtype = getCardtype(stem)
-    return { cardtype[i]: cardtype[i + 1] for i in range(0, len(cardtype) - 1, 2) }
+    # PASS1 installs a pair only where the type on its left does not already
+    # have a meaning: INITIALI.xpl:526-538 sets E, M, S, C, D and blank first,
+    # and then guards the substitution with IF CARD_TYPE(J) = 0.  A pair naming
+    # one of those on the left is therefore inert in the compiler, and applying
+    # it here anyway made this scan disagree with the compilation it is meant
+    # to predict.  CV5SLCOM's "DC" turned its own "D INCLUDE TEMPLATE CPSSLD
+    # NOLIST" into a comment, so CPSSLD was never recorded as a dependency; it
+    # was compiled 159 files after CV5SLCOM, which failed XI3 for want of its
+    # template.  The same guard also makes the first pair for a given type win,
+    # rather than the last.
+    map = {}
+    for i in range(0, len(cardtype) - 1, 2):
+        if cardtype[i] in "EMSCD " or cardtype[i] in map:
+            continue
+        map[cardtype[i]] = cardtype[i + 1]
+    return map
 
 def getParms(template):
     # Note: LITSTRINGS increased from default (2000) for
