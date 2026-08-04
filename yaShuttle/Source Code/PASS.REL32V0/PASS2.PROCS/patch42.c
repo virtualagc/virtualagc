@@ -14,6 +14,7 @@
    *                            Inspected.
    *            2026-05-01 DS   Alterations related to HFP-native arithmetic.
    *            2026-05-12 RSB  Corrected page number for `L` instruction.
+   *            2026-08-04 DAS  INTEGER_VALUED's result is in GR[3]; return it.
    */
 
 p42_0: ;
@@ -93,4 +94,10 @@ p42_22: ;
   detailedInlineAfter();
 
 p42_24: ;
+  // INTEGER_VALUED returns GR[3]: 1 if the value is an exact integer (the
+  // BC 8 above skipped the SR that zeroes GR[3]), else 0.  Without this the
+  // generator's default `return 0` epilogue makes INTEGER_VALUED always
+  // FALSE, so INTEGER_VALUE returns NEGMAX and POWER_OF_TWO fails for every
+  // scalar literal -- no x1/x2/x4 strength reduction survives.
+  RETURN(GR[3]);
 }
