@@ -441,11 +441,11 @@ def checkSpaceManagementBug(template):
 # is still identifiable afterwards rather than vanishing into a bare count.
 anyPass1Skipped = set()
 lastPass1Errors = ""
-def checkAnyPass1Error(template):
-    global anyPass1Skipped, lastPass1Errors
+def checkAnyPassError(template, passRptFilename, skipped):
+    global lastPass1Errors
     codes = set()
     try:
-        f = open(f"current.results{os.sep}pass1.rpt", "r")
+        f = open(f"current.results{os.sep}{passRptFilename}", "r")
         for line in f:
             fields = line.split()
             if len(fields) >= 2 and fields[0] == "*****" and \
@@ -457,11 +457,26 @@ def checkAnyPass1Error(template):
     if not codes:
         return False
     stem = template["stem"]
-    if stem in anyPass1Skipped:
+    if stem in skipped:
         return False
-    anyPass1Skipped.add(stem)
+    skipped.add(stem)
     lastPass1Errors = ",".join(sorted(codes))
     return True
+
+def checkAnyPass1Error(template):
+    return checkAnyPassError(template, "pass1.rpt", anyPass1Skipped)
+
+# The same reasoning one pass later.  A file that gets through PASS1 can still
+# meet a conversion error in PASS2 -- PMQTEC has FT101, "DATA TYPE CONFLICT ON
+# PARAMETER #1", at statement 116 -- and PASS2 then inhibits the object module
+# and HALSFC exits 240.  Nothing caught that, so a single such file halted the
+# entire run: the OI-30.17 corpus stopped at file 1030 of 1266 and the 236
+# after it were never compiled at all, while the summary still read as though
+# the run had merely found four failures.  A survey cannot be allowed to end
+# on its first unfamiliar error.
+anyPass2Skipped = set()
+def checkAnyPass2Error(template):
+    return checkAnyPassError(template, "pass2.rpt", anyPass2Skipped)
 
 # Return True if there's a delayable error.
 errorsSkipped = set()
@@ -587,6 +602,10 @@ def compile(template):
             return False
         elif checkAnyPass1Error(template):
             print(f"      PASS1 errors ({lastPass1Errors}), compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkAnyPass2Error(template):
+            print(f"      PASS2 errors ({lastPass1Errors}), compilation of {rawFilename} skipped.")
             rsbTrace = ""
             return False
         print(f"Failed with exit code {e.returncode}.")

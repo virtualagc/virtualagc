@@ -313,3 +313,16 @@
   databases.  Note it appends to collisions.anon as a side effect.
 - GX4DIS, PMCCYC and PMOSTA masters carry blocks no extraction has ever
   produced -- macro expansions, most likely.  Do not regenerate them blindly.
+
+### [2026-08-04] Target: [HANDOFF.md]
+- Next corpus run should add TABLST to the compiler parms (user's suggestion).
+  It forces PASS4 to parse each SDF it wrote rather than just open it, so the
+  corpus becomes a test of PASS4/SDFPKG as well as of the compiler.  Costs
+  report size and some time; nothing else.
+- PASS4 stand-alone: `--sdfi` now defaults to SDFLIB for PASS4 only, so from a
+  results directory `echo NAME | HALSFC-PASS4 --parm=BRIEF` suffices.  The
+  earlier advice to pass `--pdsi=5,ERRORLIB --sdfi=SDFLIB` was over-specified.
+- MONITOR22A now sets CRETURN when no SDF library is named.  SDFPROCE.xpl:116
+  and INCSDF.xpl:716 both test CRETURN, not the value of the CALL, so the old
+  short circuit was invisible to both -- PASS4 formatted a report out of
+  address 0, and PASS1 set SDF_OPEN=TRUE on a failure return.
