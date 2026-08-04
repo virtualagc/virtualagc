@@ -104,6 +104,16 @@ corpus-run.sh now passes --extra-parms=TABLST, so PASS4 parses each SDF the run
 has written rather than merely opening it, making the corpus a test of PASS4
 and SDFPKG too.  It costs report size and some time.
 
+When the compiler needs rebuilding, build only the PASS targets:
+
+    make PASS1 FLO OPT AUXP PASS2 PASS3 PASS4
+
+NOT `make all`, which also builds the B variants (PASS1B, OPTB, PASS2B,
+PASS3B).  Those are for BFS: PASS code is not intended to compile with them and
+would not be properly functional if it did.  HALSFC selects them only under
+--bfs, which neither compilePASS nor corpus-run.sh passes, so they are never
+used here -- building them is about half the build time wasted.
+
 --------------------------------------------------------------------------------
 4.  THE EXTRACTOR IS THE ROOT OF EVERY OI301700 ARTIFACT
 --------------------------------------------------------------------------------
@@ -259,19 +269,35 @@ block as ASCII and every name arrives blank.
 --------------------------------------------------------------------------------
 The eight OI301700 failures not yet repaired, from the last complete run:
 
-  PMQTEC   FT101, "DATA TYPE CONFLICT ON PARAMETER #1".  TWO files now, on
-  SULUPLIN the very same call:  PMP_SL_PRB(HEX'0003', ...) at PMQTEC statement
-           116 and PMP_SL_PRB(HEX'0001', ...) at SULUPLIN statement 884.  Both
-           versions declare that parameter INTEGER, and the original listing
-           carries NO error underline at PMQTEC's statement, so the original
-           build accepted a hex literal there.  PASS2's XPL *is* the original,
-           so the difference has to be in the type our compiler gives the
-           literal, or in what the template/SDF records about the parameter.
-           Compiling without --sdfi is NOT a valid control: it fails earlier,
-           with DI11, because templates lack the transitive includes.  The next
-           step is to compare what the SDF and the template each say about
-           PMP_SL_PRB's parameter 1 against what CHECK_ASSIGN_PARM expects.
-           PMQTEC is also the file that used to abort the whole run.
+  PMQTEC   FT101, "DATA TYPE CONFLICT ON PARAMETER #1", and it is CORRECT.
+  SULUPLIN Both call PMP_SL_PRB(HEX'000n', ...), and PMP_CALLING_MOD_MASK, its
+           first parameter, is declared INTEGER in both versions.  A HEX
+           literal is a BIT literal, so the types genuinely conflict.
+
+           The control that settles it:  four other OI-30.17 modules pass a HEX
+           literal to a procedure -- GEQENT, GEPENT, GENEDM and GERENT all call
+           GKE_KIP(HEX'4000', ...) -- and OI-34.06 compiles the very same calls
+           with zero failures.  GKE_EXEC_PRIO is declared BIT(16), so there the
+           types match.  Passing a hex literal is therefore not the problem;
+           passing one to an INTEGER formal is.
+
+           OI-34.06 fixed it at the source: its SULUPLIN reads
+           "CALL PMP_SL_PRB(1,NAME(SUL_BUFFER$(2:)))" -- a plain integer.
+
+           An earlier handoff said the original listing carries no error marker
+           at PMQTEC's statement, so the original build must have accepted it.
+           THAT REASONING WAS WRONG:  FT101 is raised in PASS2, and the "as
+           received" listings are PASS1 output-writer listings, which cannot
+           show a PASS2 error at all.  Their silence proves nothing here.
+
+           So the options are to leave it failing as a real defect of the
+           OI-30.17 source that OI-34.06 later corrected; to apply OI-34.06's
+           correction to OI-30.17, which is editing the older source to suit a
+           later compiler and is the user's call; or to make FT101 delayable in
+           compilePASS.  Note that GKGMNV currently blocks GKEKIP, which blocks
+           those four GKE_KIP callers, so more FT101s may appear as roots clear
+           -- though on the evidence above those four should be fine.
+
   GMGMAJ   XD7, "DEFINE SEQUENCE IS EMPTY".  "D DEFINE GM6CLC NOLIST" and its
   GMESTA   CLOSE have nothing between them, because NOLIST prints nothing in
            the listing.  OI-34.06 has the content, at the same SRNs.  Four such
