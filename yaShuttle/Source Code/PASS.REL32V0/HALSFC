@@ -206,7 +206,6 @@ if objectFilename == None:
     else:
         objectFilename = "cards.bin"
 pass3 = "NOTABLES" not in parmString
-pass4 = False #pass3
 
 now = datetime.now()
 now = now.strftime("%Y-%m-%d %H-%M-%S")
@@ -613,14 +612,24 @@ if pass3:
     if passFailed(exitCode):
         errorExit("Aborted after PASS3")
 
-if pass3 and pass4:
+if pass3:
     # Run PASS4, the SDFLIST utility, which formats a dump of the SDF just
-    # written.  Note --commoni=COMMON5: PASS3 reads COMMON4 and writes
-    # COMMON5, so COMMON5 is what PASS4 inherits, and its own output goes to
-    # COMMON6 rather than back over PASS3's.  --sdfi is required, not
-    # optional: MONITOR22 short-circuits to a failure return when no SDF
-    # directory has been named, so without it every SDFPKG call PASS4 makes
-    # would fail.
+    # written.  It runs whenever PASS3 did and succeeded -- reaching here at
+    # all means PASS3 did not abort.  Note --commoni=COMMON5: PASS3 reads
+    # COMMON4 and writes COMMON5, so COMMON5 is what PASS4 inherits, and its
+    # own output goes to COMMON6 rather than back over PASS3's.  --sdfi is
+    # required, not optional: MONITOR22 short-circuits to a failure return
+    # when no SDF directory has been named, so without it every SDFPKG call
+    # PASS4 makes would fail.
+    #
+    # PASS4 needs no PARM field of its own.  Running in the chain it is not
+    # STAND_ALONE -- PASS3 leaves the SDF name in COMM(40), which is the test
+    # -- so INITIALIZE never calls MONITOR(13,'LISTOPT '), and its options
+    # come from OPTIONS_CODE in COMM(7), carried through COMMON from PASS1.
+    # TABLST and TABDMP are the same keywords for the same bits in PASS1's
+    # COMPOPT table as in PASS4's LISTOPT, so --parms reaches them.  ALL and
+    # BRIEF exist only in LISTOPT and are guarded by STAND_ALONE besides, so
+    # they are reachable only by running PASS4 by itself, as SDFLIST does.
     command = '''%s
      --pdsi=5,"%s"
      --commoni=COMMON5%s

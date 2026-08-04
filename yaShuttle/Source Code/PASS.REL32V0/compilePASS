@@ -91,6 +91,14 @@ The only OPTIONS available are:
     --no-csects     Compile every HAL/S file found, without regard to whether
                     it is part of PASS.  This was the behaviour before the
                     check existed.
+    --no-provider-deps
+                    Do not widen PASS membership to cover the providers of
+                    templates that PASS members include.  A COMPOOL that some
+                    PASS member includes must be compiled for its template or
+                    SDF to exist, even when it contributes no CSECT of its own
+                    and so does not look like part of PASS; by default such
+                    providers are compiled.  This switch restores the older,
+                    strictly CSECT-based membership.
     --skip-to=F     Skip all source-code files prior to F.  F must be the
                     relative path of a file, such as APPLSRC/RDDDDI.hal.
                     Note the presence of the subdirectory name and the .hal
@@ -153,6 +161,7 @@ clean = False
 archive = False
 sdfi = "SDFLIB"
 csectsDir = ".." + os.sep + "mafgen"
+providerDeps = True
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg)
@@ -173,6 +182,8 @@ for parm in sys.argv[1:]:
         csectsDir = parm[9:]
     elif parm == "--no-csects":
         csectsDir = None
+    elif parm == "--no-provider-deps":
+        providerDeps = False
     elif parm == "--dfg":
         dfg = True
     elif parm == "--no-dfg":
@@ -262,32 +273,66 @@ Regarding the compiler parameters:
                 this approach agrees with MAFGEN.
 '''
 extraParms = ""
-def getParms(template):
-    # Note: LITSTRINGS increased from default (2000) for 
-    # OI301700/APPLSRC/CGBIH2.hal (uses 2646).
+
+# The four COMPOOLs given R=C are the ones that "D INCLUDE STRPDT", whose R
+# cards are "DECLARE X NAME X-STRUCTURE" -- a NAME variable whose name is its
+# own template's name.  That is exactly the condition CHECK_STRUCTURE tests
+# before setting SYT_PTR (HALINCL/CHECKSTR.xpl:60), and SYT_PTR is in turn the
+# gate on SET_DUPL_FLAG's DQ7 (HALINCL/SETDUPLF.xpl).  So a unit that includes
+# two of these COMPOOLs sees STRPDT's nodes twice and gets DQ7 on
+# CSAS_PDT_PAR_ENTRY and its siblings, followed by a fatal PM1.  Compiled with
+# R=C the R cards are comments, the COMPOOL exports the structures without the
+# NAME aliases, and consumers compile clean.  Programs that include STRPDT
+# themselves keep the default R=M, since they include it once and do use the
+# NAME pointers -- which is the whole reason the cards are an R type rather
+# than plain C or M.  Note that duplication alone is not the trigger: CGEIPA
+# and CGCFL1 each declare their own STRUCTURE QUAT, and the 36 compiled units
+# that include both are fine.
+cardtypesBySourceFile = {
+    "default": f"FCRM",
+    "CS2INI" : f"ACFCRM",
+    "CS4INI" : f"ACFCRM",
+    "CPTOSV" : f"ACBDFCRM",
+    "CPUSLS" : f"ACBDFCRM",
+    "CPGPCD" : f"FCRC",
+    "CSAPDT" : f"FCRC",
+    "CS2PDT" : f"FCRC",
+    "CS4PDT" : f"FCRC",
+    "GKDASC": f"AMOCNCRMFDGCHC",
+    "GKRORB": f"ACOMNCRCFCGDHC",
+    "GKGMNV": f"ACOCNMRMFCGCHD",
+    "CV5SLCOM": f"DC"
+    }
+
+def getCardtype(stem):
+    # The CARDTYPE parameter is a string of *pairs*, each saying "a card of
+    # type J behaves like one of type K" (PASS1.PROCS/INITIALI.xpl:526-538).
+    # The trailing pairs are constant: U, X, V and W are the column-1 markers
+    # Virtual AGC uses for its own conditionally-compiled lines, while the
+    # earlier pairs vary per source file and belong to PASS itself.
     modern = "UDXCVMWC"  # contemporary = "UCXDVCWM"
-    # Just to be clear, there *are* LFXI instructions in the MAFGEN memory 
-    # dumps, but just not any in HAL/S code.
-    parmBase = extraParms + "SREF,LIST,LISTING2,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE="
-    cardtypesBySourceFile = {
-        "default": f"FCRM",
-        "CS2INI" : f"ACFCRM",
-        "CS4INI" : f"ACFCRM",
-        "CPTOSV" : f"ACBDFCRM",
-        "CPUSLS" : f"ACBDFCRM",
-        "GKDASC": f"AMOCNCRMFDGCHC",
-        "GKRORB": f"ACOMNCRCFCGDHC",
-        "GKGMNV": f"ACOCNMRMFCGCHD",
-        "CV5SLCOM": f"DC"
-        }
-    stem = template["stem"]
     if stem.startswith("_"):
         stem = stem[1:]
-    if stem in cardtypesBySourceFile:
-        parms = parmBase + cardtypesBySourceFile[stem] + modern
-    else:
-        parms = parmBase + cardtypesBySourceFile["default"] + modern
-    return parms
+    return cardtypesBySourceFile.get(stem, cardtypesBySourceFile["default"]) \
+           + modern
+
+def getCardtypeMap(stem):
+    # The same pairs as a column-1 substitution, so that we can classify a card
+    # the way the compiler will rather than the way it looks.  Needed because a
+    # "D INCLUDE TEMPLATE" is not always written on a literal D card: CPTOSV
+    # line 40 begins with B, and CPTOSV's BD pair makes it a directive.  Missing
+    # those includes hid CS4PDT from the dependency graph entirely, so it was
+    # never compiled and CPTOSV then failed with XI3 for want of its template.
+    cardtype = getCardtype(stem)
+    return { cardtype[i]: cardtype[i + 1] for i in range(0, len(cardtype) - 1, 2) }
+
+def getParms(template):
+    # Note: LITSTRINGS increased from default (2000) for
+    # OI301700/APPLSRC/CGBIH2.hal (uses 2646).
+    # Just to be clear, there *are* LFXI instructions in the MAFGEN memory
+    # dumps, but just not any in HAL/S code.
+    parmBase = extraParms + "SREF,LIST,LISTING2,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE="
+    return parmBase + getCardtype(template["stem"])
 
 # SPACELIB, the space-management system, is linked into every pass and can
 # abend with any of BI002, BI003, BI004 or BI010 -- respectively a bug in the
@@ -554,8 +599,16 @@ for filename in templateFiles:
     debugging = False
     debug("A")
     f = open(filename, "r")
+    # Column 1 is rewritten through this file's CARDTYPE before the card is
+    # classified, so that conditionally-compiled comments really disappear and
+    # conditionally-compiled directives really are seen as directives.  Note
+    # that the substitution is applied once and not iterated: a pair maps a
+    # card type to a *behaviour*, so the result is not itself a type to
+    # translate again.
+    cardtypeMap = getCardtypeMap(Path(filename).stem)
     lines = []
     for line in f.readlines():
+        line = cardtypeMap.get(line[:1], line[:1]) + line[1:]
         if line[:1] == "C":
             continue
         lines.append(line[:72])
@@ -671,6 +724,45 @@ for halname in sorted(nonexistentTemplates):
     print(msg)
 print(f"     {len(nonexistentTemplates)} non-existent templates referenced")
 print(f"{len(templatesByFilename)} templates in all")
+
+# ---------------------------------------------------------------------------
+# TO DISABLE THIS, run with --no-provider-deps, or set providerDeps = False.
+#
+# Widen PASS membership to include the providers of templates that PASS
+# members need.  The CSECT test answers "does this unit contribute code or
+# data to a linked image?", which is not the same question as "must this unit
+# be compiled in order to build PASS?".  A COMPOOL that some PASS member
+# includes has to be compiled so that its template -- or, with --sdfi, its SDF
+# -- exists by the time that member is compiled, even when the compool itself
+# contributes no CSECT to any configuration and so looks like auxiliary code.
+#
+# Skipping such a compool produced XI3, "SDF ... NOT FOUND", in 11 files of
+# the corpus, from nine providers: CPCGXT, CSAPXT, CSACAT, CSAPAT, CSAPAR,
+# CSAINB, CSADAR, CSAFCM and CSDINI.  Each exists as source, each is declared
+# COMPOOL, each is named in a "D INCLUDE TEMPLATE" of a file that *is* in
+# PASS, and none appears under any CSECT prefix in any of the eight
+# csects-*.json indexes.
+#
+# The closure is transitive, since a needed compool may itself include one.
+# It only ever widens the set, so no file that would have been compiled is
+# skipped because of it.
+if providerDeps and unitsInPass:
+    pending = [h for h in templatesByHalname if h in unitsInPass]
+    added = set()
+    while pending:
+        h = pending.pop()
+        entry = templatesByHalname.get(h)
+        if entry == None:
+            continue
+        for needed in entry["includedHalnames"]:
+            if needed in unitsInPass or needed not in templatesByHalname:
+                continue
+            unitsInPass.add(needed)
+            added.add(needed)
+            pending.append(needed)
+    if added:
+        print("%d template providers added to PASS membership: %s" %
+              (len(added), " ".join(sorted(added))))
 #for filename in templatesByFilename:
 #    print(filename, templatesByFilename[filename])
 #sys.exit(1)
