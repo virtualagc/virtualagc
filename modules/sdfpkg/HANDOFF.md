@@ -304,14 +304,46 @@ The eight OI301700 failures not yet repaired, from the last complete run:
            sequences in these two files.  Borrowing it would splice OI-34.06
            code INSIDE an OI-30.17 module, which is more invasive than the
            INCL80 borrowing and is the user's call.
-  GKGMNV   DU1, undeclared GK3_ORB_TGT and CGGV_THR_VEC_ROLL_ANG_COS.  Both
-           references are inside an INCLUDED region -- the listing marks them
-           "+23  332+M" -- and GK3_ORB_TGT is declared in GK3ORB, which GWAORB,
-           GTBUPL and GKRORB all use successfully.  So this is include
-           resolution, not an extraction artifact.  Note that GKGMNV is one of
-           the files with its own CARDTYPE entry in compilePASS ("ACOCNMR..."),
-           written for OI-34.06; OI-30.17's column 1 is already resolved, so
-           such an entry can only mis-resolve there.  Check that first.
+  GKGMNV   DU1, and the cause is structural rather than a stray artifact.
+           GKGMNV is a shell: 21 directives and three lines of its own.  The
+           code is in GKPMNV, an include member it pulls in without NOLIST.
+
+           GKPMNV is shared by three modules, and each selects a different
+           variant of the same cards through CARDTYPE -- compilePASS already
+           encodes this:
+
+               GKDASC   A->M, O->C, N->C     (the G1 cards, ascent)
+               GKRORB   A->C, O->M, N->C     (the G2 cards, orbit)
+               GKGMNV   A->C, O->C, N->M     (the G3 cards)
+
+           OI-34.06's INCL80/GKPMNV.hal keeps all 145 conditional cards with
+           A, O or N in column 1, so one file serves all three.  OI-30.17's
+           listings are pre-resolved, so extracting GKPMNV bakes in whichever
+           parent was extracted last -- GKRORB, alphabetically -- and our copy
+           has 0 conditional cards and the G2 variant live.  GKGMNV then
+           schedules GK3_ORB_TGT, whose template it does not include (it
+           includes GZY_ENT_TAR, G3's target), and PASS1 reports it undeclared.
+
+           The listing proves the correct reading: at GKGMNV lines 320-321 the
+           G1 and G2 cards are marked C and the live card is 323, "G3
+           GZY_ENT_TAR = ON".  The G1/G2/G3 tags in columns 2-3 are harmless --
+           GKPMNV declares REPLACE G1/G2/G3 BY "  ".
+
+           Two ways out.  Borrow OI-34.06's GKPMNV.hal, which retains the
+           letters; that is a replacement rather than a fill-in, and the
+           versions differ (654 lines against 609), so it is the user's call.
+           Or reconstruct the letters from OI-30.17 alone: extract GKPMNV from
+           each of its three parents' listings and combine, since a card live
+           only under GKDASC is an A card, only under GKRORB an O card, only
+           under GKGMNV an N card, and one live under all three is
+           unconditional.  Extracting from each parent gives 177, 207 and 146
+           live lines respectively, which is consistent with that model.  The
+           files are not line-aligned, so the merge has to be by SRN.
+
+           Only GKPMNV and STRPDT are affected -- they are the only shared
+           include members carrying conditional cards -- and STRPDT's 15 R
+           cards were already restored by hand.
+
   GKEKIP   XI3 cascades -- a needed template's provider failed.  These should
   GM2MAJ   clear themselves as their providers are fixed; SGCKIP's XI3 was for
   GMAMIN   @@SAFACQ and is already fixed.
