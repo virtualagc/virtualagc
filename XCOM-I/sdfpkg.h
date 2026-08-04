@@ -71,6 +71,7 @@
  * in the top nibble.  Both return the value the XPL/I expects to see, which
  * for these services is simply zero; the real result is CRETURN in COMMTABL. */
 uint32_t sdfpkgInitialize(uint32_t commtablAddress);
+uint32_t sdfpkgNoLibrary(uint32_t commtablAddress);
 uint32_t sdfpkgService(uint32_t mode);
 
 /* Releases every open SDF.  Called at normal termination so that a modified

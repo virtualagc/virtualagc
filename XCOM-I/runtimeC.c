@@ -1215,9 +1215,11 @@ parseCommandLine(int argc, char **argv)
           printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
           printf("              have been provided in JCL.\n");
           printf("--sdfi=D      Name of a directory used for reading Simulation Data\n");
-          printf("              Files (SDF).  By default, there is no directory\n");
-          printf("              defined, and no SDF's are read.  Customarily,\n");
-          printf("              --sdfi=SDFLIB, but any directory can be used.\n");
+          printf("              Files (SDF).  By default no directory is defined\n");
+          printf("              and no SDF's are read -- except in PASS4, which\n");
+          printf("              exists to read them and so defaults to SDFLIB.\n");
+          printf("              Customarily --sdfi=SDFLIB, but any directory can\n");
+          printf("              be used.\n");
           printf("--sdfo=D      Name of a directory used by PASS3 for writing\n");
           printf("              Simulation Data Files (SDF).  Defaults to\n");
           printf("              --sdfo=SDFLIB, but any directory can be used.\n");
@@ -1300,6 +1302,18 @@ parseCommandLine(int argc, char **argv)
       else
         fprintf(stderr, "This program has no COMMON block.\n");
     }
+  /*
+    A NULL `sdfDirnameIn` is load-bearing everywhere else: it is how a
+    compilation that is not meant to read SDFs behaves, with INCSDF falling
+    back on the template library, so it must not acquire a default and start
+    reading whatever SDFLIB happens to sit in the working directory.  PASS4
+    is the exception.  It is SDFLIST: reading SDFs is the whole of what it
+    does, and run with no library named it has nothing to list.  `--sdfo`
+    already defaults to SDFLIB, so this only makes the input side match the
+    output side for the one program where that is unambiguous.
+  */
+  if (sdfDirnameIn == NULL && strstr(APP_NAME, "PASS4") != NULL)
+    sdfDirnameIn = "SDFLIB";
 #ifndef STANDARD_XPL
   if (COMMON_OUT == NULL && COMMON_OUTz == NULL)
     {
@@ -3176,7 +3190,7 @@ MONITOR22(uint32_t n1) {
 uint32_t
 MONITOR22A(uint32_t n2) {
   if (sdfDirnameIn == NULL)
-    return 1;
+    return sdfpkgNoLibrary(n2);
   return sdfpkgInitialize(n2);
 }
 

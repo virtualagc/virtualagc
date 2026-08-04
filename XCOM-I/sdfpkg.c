@@ -706,6 +706,27 @@ inputName(uint32_t nameOffset, uint32_t lengthOffset, uint8_t *out) {
  * The services.
  */
 
+/* Report "no SDF library was named" where the caller actually looks for it.
+ * SDFPROCE.xpl tests CRETURN rather than the value of the CALL:
+ *
+ *      CALL MONITOR(22,0,COMMTABL_ADDR);
+ *      IF CRETURN ^= 0 THEN DO;
+ *         OUTPUT = '**** OPEN ERROR DETECTED FOR SDF PDS ...';
+ *         GO TO BAIL_OUT;
+ *      END;
+ *
+ * so a short circuit that returns nonzero but leaves CRETURN at its initial
+ * zero is invisible to it.  PASS4 then ran on with SDFPKG uninitialized and
+ * ADDR unpublished, and formatted an entire report out of address 0 -- the
+ * date came out "JANUARY -573, -639446" and the statistics were low memory
+ * read as numbers.  A failure the caller cannot see is worse than one it can.
+ */
+uint32_t
+sdfpkgNoLibrary(uint32_t commtablAddress) {
+  putU16(memory, commtablAddress + SDF_OFF_CRETURN, 4);
+  return 1;
+}
+
 uint32_t
 sdfpkgInitialize(uint32_t commtablAddress) {
   uint16_t misc;
