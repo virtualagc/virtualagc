@@ -85,7 +85,16 @@ def D_TOKEN():
                 D_CONTINUATION_OK = g.FALSE;
                 return '';
             g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('D'));
-            PRINT_COMMENT(g.TRUE);
+            # PRINT_COMMENT declares PRINT, CURRENT_DIR, FORMAT_CHAR, C, T and
+            # R, but not I, so the I it uses is STREAM's -- the enclosing scope
+            # it is textually included into ("$%PRINTCOM" at STREAM.xpl:404).
+            # That is true of this call as much as of the ones in STREAM, so
+            # STREAM's frame is what has to be passed, not D_TOKEN's own: I and
+            # J here are D_TOKEN's own locals (DTOKEN.xpl:"DECLARE (I,J)"), a
+            # different variable that merely shares the name.  Imported late
+            # because STREAM imports D_TOKEN in its turn.
+            from STREAM import lSTREAM
+            PRINT_COMMENT(g.TRUE, lSTREAM);
             D_INDEX = 1;
             continue;
         else:

@@ -39,13 +39,44 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
 import os
 import pathlib
 import shutil
+
+# The refresh copies a file only when it differs from the master, and never
+# deletes anything.  It used to rmtree HALINCL/ and copytree it back on every
+# run, which is safe for one process and not for two: the destination is a
+# fixed shared path, so a second compilation running at the same time could
+# find the tree missing part-way through its imports ("No module named
+# HALINCL.COMMON") or half-rebuilt (copytree's makedirs raising
+# FileExistsError).  Both were observed once two corpora were run at once.
+#
+# Copying through a temporary name and renaming into place keeps each file
+# atomic from a reader's point of view, so an importer sees either the old
+# file or the new one, never a partial write.  The staleness test is equality
+# rather than "master is newer", so that a file edited here -- this is the
+# copy on the PATH, so such an edit would otherwise take effect and persist
+# invisibly -- is still overwritten from the master, as it always was.
+def refreshFile(src, dst):
+    try:
+        s, d = os.stat(src), os.stat(dst)
+        if s.st_size == d.st_size and int(s.st_mtime) == int(d.st_mtime):
+            return
+    except OSError:
+        pass
+    tmp = "%s.tmp%d" % (dst, os.getpid())
+    shutil.copy2(src, tmp)
+    os.replace(tmp, dst)
+
 scriptFolder = os.path.dirname(__file__)
 scriptParentFolder = str(pathlib.Path(scriptFolder).parent.absolute())
-shutil.copyfile(scriptParentFolder + "/xplBuiltins.py", \
-                scriptFolder + "/xplBuiltins.py")
-shutil.rmtree(scriptFolder + "/HALINCL", ignore_errors=True)
-shutil.copytree(scriptParentFolder + "/HALINCL", \
-                scriptFolder + "/HALINCL")
+refreshFile(scriptParentFolder + "/xplBuiltins.py",
+            scriptFolder + "/xplBuiltins.py")
+srcInclude = scriptParentFolder + "/HALINCL"
+dstInclude = scriptFolder + "/HALINCL"
+os.makedirs(dstInclude, exist_ok=True)
+for name in os.listdir(srcInclude):
+    # Regular files only: __pycache__ is Python's affair, and copying stale
+    # bytecode in was never useful.
+    if os.path.isfile(srcInclude + "/" + name):
+        refreshFile(srcInclude + "/" + name, dstInclude + "/" + name)
 # SDF support comes from the installable `sdfpkg` module in modules/sdfpkg/
 # (with `sdf` and `cmem` beneath it), not from a copied-in file.  An earlier
 # arrangement copied ../sdfpkg/sdfpkg.py to here; since that file is a
