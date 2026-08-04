@@ -274,30 +274,48 @@ Regarding the compiler parameters:
 '''
 extraParms = ""
 
-# The four COMPOOLs given R=C are the ones that "D INCLUDE STRPDT", whose R
-# cards are "DECLARE X NAME X-STRUCTURE" -- a NAME variable whose name is its
-# own template's name.  That is exactly the condition CHECK_STRUCTURE tests
-# before setting SYT_PTR (HALINCL/CHECKSTR.xpl:60), and SYT_PTR is in turn the
-# gate on SET_DUPL_FLAG's DQ7 (HALINCL/SETDUPLF.xpl).  So a unit that includes
-# two of these COMPOOLs sees STRPDT's nodes twice and gets DQ7 on
-# CSAS_PDT_PAR_ENTRY and its siblings, followed by a fatal PM1.  Compiled with
-# R=C the R cards are comments, the COMPOOL exports the structures without the
-# NAME aliases, and consumers compile clean.  Programs that include STRPDT
-# themselves keep the default R=M, since they include it once and do use the
-# NAME pointers -- which is the whole reason the cards are an R type rather
-# than plain C or M.  Note that duplication alone is not the trigger: CGEIPA
-# and CGCFL1 each declare their own STRUCTURE QUAT, and the 36 compiled units
-# that include both are fine.
+# STRPDT is included by sixteen units, and its R cards are
+# "DECLARE X NAME X-STRUCTURE" -- a NAME variable whose name equals its own
+# template's name.  That is exactly the condition CHECK_STRUCTURE tests before
+# setting SYT_PTR (HALINCL/CHECKSTR.xpl:60), and SYT_PTR is in turn the gate on
+# SET_DUPL_FLAG's DQ7 (HALINCL/SETDUPLF.xpl).  A unit that includes two
+# templates whose COMPOOLs both carry the aliases sees STRPDT's nodes twice and
+# gets DQ7 on CSAS_PDT_PAR_ENTRY and its siblings, followed by a fatal PM1.
+# This is issue #1281.  Note that duplication by itself is not the trigger:
+# CGEIPA and CGCFL1 each declare their own STRUCTURE QUAT, and the 36 compiled
+# units that include both are fine.  It is the NAME-alias form specifically.
+#
+# Which units suppressed the R cards is not a matter of inference: the
+# OI30.17 "output-writer" reports in PFS/"OI301700 as received"/APPLSRC/ are
+# real listings from the original build, and they carry the resolved card type
+# per line.  The alias lines appear marked C, with no statement number, in
+# CSAPDT, CS2PDT, CS4PDT and PGSCRU, and marked M with statement numbers in
+# SCKPNT, STCCYCL, STMTAB and SULUPLIN.  So the historical build really did
+# compile STRPDT both ways, which is why the cards are type R rather than
+# plain C or M.  The remaining seven includers say "INCLUDE STRPDT NOLIST", so
+# their listings show nothing and the reports cannot say; all of those compile
+# clean at the default R=M and are left there.
+#
+# R=C is necessary but not sufficient for PGSCRU and PGPPLD, which fail on
+# after it with DQ8 rather than DQ7 -- "STRUCTURE ... CANNOT BE UNQUALIFIED".
+# Those two are a different defect and not a CARDTYPE matter at all.  PGSCRU's
+# own report settles it: STRUCTURE CSAS_PDT_PAR_ENTRY appears exactly once in
+# it, from its own "D INCLUDE STRPDT" at statement 28, so the CPG_PCD template
+# it includes at statement 6 did not carry STRPDT's structures.  Our SDF for
+# CPGPCD does carry them, and the collision follows.  The SDF include path
+# (HALINCL/INCSDF.xpl) exports or imports more than the template path does --
+# compiling the same unit with --no-sdfi gives PM2 instead, so the two paths
+# genuinely disagree.  That is the thing to fix; R=C only moves the symptom.
 cardtypesBySourceFile = {
     "default": f"FCRM",
     "CS2INI" : f"ACFCRM",
     "CS4INI" : f"ACFCRM",
     "CPTOSV" : f"ACBDFCRM",
     "CPUSLS" : f"ACBDFCRM",
-    "CPGPCD" : f"FCRC",
     "CSAPDT" : f"FCRC",
     "CS2PDT" : f"FCRC",
     "CS4PDT" : f"FCRC",
+    "PGSCRU" : f"FCRC",
     "GKDASC": f"AMOCNCRMFDGCHC",
     "GKRORB": f"ACOMNCRCFCGDHC",
     "GKGMNV": f"ACOCNMRMFCGCHD",
@@ -623,10 +641,18 @@ for filename in templateFiles:
             fields = line[1:].strip().split()
             if len(fields) < 3:
                 continue
-            if fields[0] == "INCLUDE" and fields[1] == "TEMPLATE":
-                if fields[2].endswith(";"):
-                    fields[2] = fields[2][:-1]
-                entry["includedHalnames"].append(descore(fields[2]))
+            # "D INCLUDE SDF X:" is as much a dependency as "D INCLUDE
+            # TEMPLATE X" -- X's SDF has to have been written before this file
+            # is compiled -- but only the latter used to be recorded, so the
+            # ordering was left to chance.  CS2IX4 and CS2IX5 were compiled at
+            # positions 389 and 475 against a CS2IXP that was not compiled
+            # until 518, and failed XI10 "REL3 SDF ##CS2IXP NOT FOUND"; CS2IX2
+            # and CS2IX3 happened to fall after it and were fine.  The name is
+            # written with a trailing colon, and sometimes a space before it.
+            if fields[0] == "INCLUDE" and fields[1] in ("TEMPLATE", "SDF"):
+                name = fields[2].rstrip(";:")
+                if name:
+                    entry["includedHalnames"].append(descore(name))
                 debug("C " + str(entry))
             continue
         if halname != None:
