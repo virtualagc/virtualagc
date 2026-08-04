@@ -15,7 +15,9 @@ Mods:       2024-03-27 RSB  Began.
             2026-02-19 RSB  Switched from left-to-right processing order in
                             in multipl assignments to right-to-left.
             2026-08-03 DAS  use runtime record widths set by SET_RECORD_WIDTH
-                            on RECORD DYNAMIC tables
+                            on RECORD DYNAMIC tables.
+                            Fix "BI002 ... NON COMMON RECORD AT LINK" error
+                            with otherwise persistent global records.
 '''
 
 import sys
@@ -770,12 +772,32 @@ def sortJumps(scope, extra = None):
 def generateADDR(scope, parameter):
     token = parameter["token"]
     if "builtin" in token and token["builtin"] == "DESCRIPTOR":
-        # SPACELIB uses the address of `DESCRIPTOR` to detect the upper
-        # boundary of `COMMON`.  Before I realized that, I chose to arrange
-        # memory somewhat differently, and to implement `DESCRIPTOR` as a 
-        # function rather than a variable.  The following is a workaround for
-        # that, in lieu of altering the design.
-        return regions[1][1]
+        # SPACELIB's space manager uses `ADDR(DESCRIPTOR)` solely as the upper
+        # boundary of "common" (persistent) based-record dope vectors:
+        #   _IS_COMMON(x) _AS '(x < ADDR(DESCRIPTOR))'
+        # In RECORD_LINK this asserts that every dope vector still on the
+        # FIRSTRECORD chain at link time lives in persistent storage (i.e. was
+        # not a transient record leaked past the end of the pass).
+        #
+        # In the original 360 build, `DESCRIPTOR` sat just above the COMMON
+        # region, so the persistent global based-record dope vectors fell below
+        # it.  Returning `regions[1][1]` (the end of XPL-`COMMON`, region 1)
+        # reproduced that *only* when the chain held nothing but explicitly
+        # COMMON-declared records: HAL/S-FC's persistent global based records
+        # (OUTER_REF_TABLE, MACRO_TEXTS, LINK_SORT, ...) are NOT declared
+        # COMMON, so XCOM-I allocates their dope vectors in the non-common
+        # static region (region 2, above `regions[1][1]`).  Any data-heavy
+        # compool that allocates one of them therefore tripped the assert and
+        # aborted PASS1 with "BI002 ... NON COMMON RECORD AT LINK" -- a false
+        # positive, since those records are genuinely persistent.
+        #
+        # In XCOM-I's flat model *every* based-record dope vector is allocated
+        # statically below `freeBase` (the dynamic free-string heap starts at
+        # `freeBase`); there are no transient dope vectors above it for the
+        # assert to catch.  So the correct boundary -- "is this dope vector in
+        # static/persistent memory" -- is `freeBase`, which makes _IS_COMMON
+        # true for all real dope vectors and the assert a (correct) no-op.
+        return freeBase
     elif "builtin" in token:
         # I allow this because there's some stuff in HAL/S-FC source code that
         # attempts various memory-management operations by exploiting hidden
