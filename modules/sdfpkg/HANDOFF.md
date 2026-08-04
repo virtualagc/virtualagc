@@ -1,32 +1,52 @@
 ================================================================================
-HANDOFF -- PASS corpus compilation, 2026-08-03/04
+HANDOFF -- PASS corpus compilation, 2026-08-04
 ================================================================================
-Written so that a fresh session can restart from this file alone.  Companion
-material: modules/sdfpkg/CLAUDE_LOG.md holds the same findings in log form and
-is the file to append further notes to.  Two helper scripts live beside this
-one: corpus-classify.py and corpus-run.sh.
+Written so a fresh session can restart from this file alone.  Companion
+material: modules/sdfpkg/CLAUDE_LOG.md, and two helper scripts beside this
+file, corpus-classify.py and corpus-run.sh.
+
+This supersedes the 2026-08-03/04 handoff entirely.  Its section 7, on a
+harness for reconstructing subscripts from the M/S card images, is obsolete:
+that harness was measuring the output of a broken extractor, and the extractor
+has since been fixed.  The one part of it worth keeping is the governing rule
+about blank columns, which the separator fix now implements.
 
 --------------------------------------------------------------------------------
-1.  THE GOAL
+1.  THE GOAL, AND WHERE IT STANDS
 --------------------------------------------------------------------------------
 Reach `successful == attempts` for a full compilePASS corpus run, for BOTH
-PASS versions.  OI301700 was added to the goal on the evening of 2026-08-03;
-it is not a secondary curiosity.
+PASS versions.
 
-Standing at handoff:
+    OI340600    974 / 974      MET.  Zero failures, run complete.
+    OI301700    974 / 986      12 failures; 4 of them repaired since that run
+                               and awaiting confirmation, 8 open.
 
-    OI340600    967 / 968      one failure: PGPPLD, D15
-    OI301700    926 / 978      last completed run; several fixes committed
-                               since, so the next run should be better
+For scale, OI340600 began the previous session at 843/907.
 
-For scale, OI340600 began this session at 843/907.
+*** CHECK THAT A RUN FINISHED. ***  `successful == attempts` is meaningless on
+a run that stopped early, and compilePASS's summary does not say that it did.
+The test is a "Done." line at the end of compilePASS.log:
+
+    grep -c 'Done\.' compilePASS.log        # 1 = complete, 0 = aborted
+
+An OI301700 run was reported as 935/939 when it had in fact stopped at file
+1030 of 1266; the 236 files after it were never compiled.  That is fixed (a
+PASS2 error is now delayable, see §6) but the habit is worth keeping.
+
+Coverage is a separate question from the goal.  Of files that are neither
+compiled nor "Not part of PASS", OI340600 leaves 156 and OI301700 183 never
+attempted at all -- their dependencies were never satisfiable.  Nobody has
+looked at why.  The accounting closes exactly:
+
+    OI340600   974 attempted + 156 not attempted +  37 not in PASS = 1167
+    OI301700   986 attempted + 183 not attempted +  97 not in PASS = 1266
 
 --------------------------------------------------------------------------------
 2.  WHERE EVERYTHING IS
 --------------------------------------------------------------------------------
-TWO SEPARATE GIT REPOSITORIES.  This caught me out; `git` run from inside the
-virtualagc checkout against a PFS path reports "outside repository", which
-reads as "not version controlled" and is wrong.  cd into the PFS tree first.
+TWO SEPARATE GIT REPOSITORIES.  `git` run from inside the virtualagc checkout
+against a PFS path reports "outside repository", which reads as "not version
+controlled" and is wrong.  cd into the PFS tree first.
 
   /mnt/STORAGE/home/rburkey/git/virtualagc        compiler, compilePASS, HALSFC
   /mnt/STORAGE/home/rburkey/workspace/PFS         PASS source, branch master
@@ -34,18 +54,23 @@ reads as "not version controlled" and is wrong.  cd into the PFS tree first.
 Inside ~/workspace/PFS:
 
   OI340600/, OI301700/                 the masters.  Committable.  OI340600's
-                                       source is genuine; OI301700's was
-                                       extracted from listings (see section 5).
+                                       source is genuine punch cards; OI301700's
+                                       was extracted from listings (§4).
   OI340600-sdftest/, OI301700-sdftest/ the corpus work directories.  Untracked
-                                       build output -- keep them out of commits.
+                                       build output -- keep out of commits.
   "OI301700 as received"/APPLSRC/      1115 original build listings, plus
-                                       SSSRC/.  PRIMARY EVIDENCE.  See §4.
-  mafgen/csects-*.json                 CSECT indexes for the flight images.
+                                       SSSRC/.  PRIMARY EVIDENCE.  See §3.
+  unprint.py                           the extractor.  See §4.
+  prepareSource.py                     header + anonymization.  Needs the
+                                       `ahocorapy` package, which is not
+                                       installed; a 60-line Aho-Corasick
+                                       stand-in reproduces master bodies
+                                       byte-for-byte, so the anonymizer is
+                                       deterministic given its .anon files.
+                                       Note it appends to collisions.anon.
 
 *** TRAP ***  The -sdftest directories hold their own COPIES of APPLSRC,
-SSSRC and INCL80.  Editing a master does NOT affect a run.  After any source
-edit, rsync master -> work copy before rerunning, or you will spend an hour
-producing stale results.  I did exactly that with the STRPDT R cards.
+SSSRC and INCL80.  Editing a master does NOT affect a run.  rsync first:
 
     for v in OI340600 OI301700; do
       for d in APPLSRC SSSRC INCL80; do
@@ -57,289 +82,242 @@ producing stale results.  I did exactly that with the STRPDT R cards.
 --------------------------------------------------------------------------------
 3.  HOW TO RUN A CORPUS
 --------------------------------------------------------------------------------
-From a work directory (see corpus-run.sh, which does all of this):
+corpus-run.sh does all of it:
 
-    cd ~/workspace/PFS/OI340600-sdftest
-    mv compilePASS.log compilePASS.PREV.log
-    mv archive.results archive.results.PREV
-    rm -rf ./*.results _*.hal
-    rm -rf SDFLIB && mkdir -p SDFLIB      # compilePASS does not clear it
-    mkdir -p objects
-    prepareTEMPLIB --clear
-    prepareINCLIB  --clear --include=INCL80
-    compilePASS --clean --archive > compilePASS.log 2>&1
+    ./corpus-run.sh ~/workspace/PFS/OI340600-sdftest TAG
 
-Both corpora can run CONCURRENTLY -- roughly an hour each, and they do not
-interfere now that the HAL_S_FC.py race is fixed (commit 6367bfc85).  Before
-that fix, two at once destroyed both runs.
-
-Classify results with corpus-classify.py (beside this file):
+TAG names the archives of the previous run so nothing is lost.  Classify with
 
     python3 corpus-classify.py ~/workspace/PFS/OI340600-sdftest/compilePASS.log
 
 Do NOT count failures by grepping ": Compiling" against "Compilation
-successful".  The log carries two phase headers ("Compiling independent
-templates ...") that inflate the count, and without the preprocessor the paths
-read APPLSRC/X.hal rather than ./_X.hal.  I misreported a false alarm this way.
+successful": the log carries two phase headers that inflate the count.
+
+Both corpora can run at once, but STAGGER THEM by a couple of minutes.  Two
+launched in the same second once aborted together on the first file, with the
+PASS1 cross-comparison differing and litfile.bin vanishing mid-run.  It did not
+reproduce, and the mechanism was never found -- it is NOT the shared
+yaShuttle/ported directory, whose files are untouched during a run.
+
+corpus-run.sh now passes --extra-parms=TABLST, so PASS4 parses each SDF the run
+has written rather than merely opening it, making the corpus a test of PASS4
+and SDFPKG too.  It costs report size and some time.
 
 --------------------------------------------------------------------------------
-4.  THE MOST USEFUL TOOL:  THE OUTPUT-WRITER REPORTS
+4.  THE EXTRACTOR IS THE ROOT OF EVERY OI301700 ARTIFACT
 --------------------------------------------------------------------------------
-~/workspace/PFS/"OI301700 as received"/APPLSRC/ holds real listings from the
-original Shuttle build.  They settled every question I put to them, after a
-good deal of fruitless reasoning in each case.  Go here FIRST.
+OI301700's HAL/S was extracted from the output-writer listings by
+~/workspace/PFS/unprint.py.  Seven bugs in it accounted for every artifact
+class the previous session had been repairing by hand.  All are fixed; the
+masters were regenerated (434 files) by three-way merge with the previous
+extraction as the ancestor, so anonymization, headers and hand repairs the
+extractor still cannot make all survived.
 
-Line format:
+  1. collapseES() recursed without passing its S flag, so a subscript of a
+     subscript came out as an exponent: "$(NAME**INDEX)" for "$(NAME$(INDEX))".
+     112 sites.  PFS c2a8fa9.
+  2. E and S lines were padded `use` columns for an absent card but `use`-1 for
+     a present one, so from the second card of a statement onward they sat one
+     column left of their M card.  Subscripts lost their last character and it
+     reappeared as a subscript of its own: "$AXIS" -> "$AXI" plus a stray "$S".
+  3. startGap() ignored the caller's left boundary, so blanks past the end of a
+     subscript let the recursion reach back and emit the subscript to its left
+     a second time: "...$1);" acquired a trailing "$1".
+  4. Collapsing a subscript ate the blank separating two identifiers, turning
+     an implicit multiply into one undeclared identifier:
+     "CGCV_GDQ_SLOPE$INDXTEMP_MACH".  The blank is kept where it separates
+     identifiers, which is the only place it can matter.
+  5. The DO-nesting level test demanded exactly 2*level+1 following blanks,
+     missing every two-digit level and every outdented label; the digits became
+     source, as in "(GSF_NZ_INHIBIT = ON) 10 THEN DO;".  120 sites.  PFS
+     3a6bbea.  Levels run 1..17; the rule is now "digits at offset 1 followed
+     by 3+ blanks, or by 1-2 blanks and a label".  Checked by requiring every M
+     card of a statement to agree: 188510 groups, no disagreements.
+  6. The test that ended an inclusion was the "elif" of the one that began one,
+     so a "D INCLUDE" card immediately following another member's expansion was
+     written into that member's file and vanished from the parent.  SSMANTMG
+     lost its own "D INCLUDE TCSMACS", and with it the TCSOUT macro.  172 cards
+     over 136 modules recovered.  Also: an include card now carries its SRN.
+  7. addPar() judged a subscript by how it was spelled, so a bare identifier got
+     no parentheses -- but an identifier can be a REPLACE macro standing for its
+     expansion.  "$PGH_LINE_PL_NUM" expands to "$INTEGER(...)" and PASS1 rejects
+     it, naming INTEGER as the illegal symbol and never mentioning the
+     subscript.  unprint.py now consults each file's REPLACE table.  Of 274
+     macro subscripts, 258 expand to something simple and are left alone.
+     PFS 7016b8d1.
+
+WHAT THE EXTRACTOR STILL GETS WRONG, and cannot easily be taught:
+
+  The output writer prints the legend of a macro's parameters as a comment on a
+  card carrying the statement's ";", and unprint.py takes it for source:
+
+      030600  295 M|   PFLOW(SAF_PFLOW, SAF_SVC_MDM_READ_EVENT, NO_WATE)
+      030600  296 M|   ; /* I/O SVC NUMBER=24  UNUSED  SYNC TYPE ...       */
+                  S|     /* TRANSACTION ERROR STATUS  OUTPUT I/O ...       */
+                  S|     /*WORD COUNT  BUFFER NAME  EVENT  I/O SVC NUM**/
+
+  At compile time the macro expands and emits the legend again; together they
+  pass 256 characters and draw M3.  OI-34.06 shows the card is really one line
+  with no comment at all.  Four files repaired by hand so far: SPSPSP, SAFACQ,
+  SPNINT, SPCPPC.  A RE-EXTRACTION WILL REINTRODUCE THESE.
+
+  Suppressing the merge in unprint.py was tried and reverted: the M and S values
+  it must test are the concatenation of every card of the statement, so it
+  cannot tell a closed comment from an open one, and it truncated genuine
+  comment overflow (CDHMMUTI) and cost subscripts (DMPMMMSG).
+
+  DO NOT repair this class by pattern.  "A call ending in ')' followed by a card
+  beginning '; /*'" occurs 199 times in 57 files and most are genuine source
+  comments -- "DISABLE INTERRUPTS", "RELEASE COMMON BUFFER", "DR44041".  Confirm
+  each against OI-34.06's own copy of the file, which exists for all 57.
+
+--------------------------------------------------------------------------------
+5.  THE MOST USEFUL TOOLS
+--------------------------------------------------------------------------------
+FIRST:  ~/workspace/PFS/"OI301700 as received"/APPLSRC/ holds the real listings.
+They settle questions that resist reasoning.  Line format:
 
     SRN     stmt +T| source text ...                        |rv|CURRENT_SCOPE
 
-  - The character before the "|" is the card type AFTER CARDTYPE substitution:
-    C = comment (no statement number), M = live code (has one).
+  - The character before "|" is the card type AFTER CARDTYPE substitution:
+    C = comment, M = live code, D = directive, E/S = exponent/subscript.
   - A "+" between the statement number and column 1 marks an INCLUDED line.
-  - The far right is the current scope, not the included module's name.
-  - Immediately after the "|" the listing prints the DO-NESTING LEVEL.  It is
-    NOT source.  Forgetting this cost me hours (§6).
+  - Immediately after "|" is the DO-NESTING LEVEL.  It is NOT source.
+  - An error in the original build shows as a "+ ___" underline card.  Their
+    absence is evidence: PMQTEC's statement 116 has none, so the original
+    compiler accepted what ours rejects.
 
-Card ordering (from the user):  zero or more E cards, then exactly one M card,
-then zero or more S cards.  Exponents above, subscripts below.  So an E card
-never lies between an M card and its S cards, and every S card must have an M
-card above it -- any "no M above" result is a bug in your scan.
+Card ordering: zero or more E cards, then exactly one M card, then zero or more
+S cards.  Exponents above, subscripts below.
 
-What the reports CANNOT tell you: they carry no error summaries, and a
-"D INCLUDE TEMPLATE" contributes no listed lines, so they cannot say whether
-an include was satisfied from a template or an SDF.  NOLIST includes show
-nothing at all.
+They CANNOT tell you: error summaries; whether an include came from a template
+or an SDF; anything at all about a NOLIST include, which prints nothing.
 
-Second-best tool: OI340600's source was NOT extracted from listings, so where
-a file exists in both versions it is the authoritative reference for correct
-1-D form.  This settled the "**" question in one step.
+SECOND:  OI340600's source was NOT extracted from listings, so where a file
+exists in both versions it is authoritative for correct 1-D form.  Every repair
+in this session was confirmed against it before being made.
 
 --------------------------------------------------------------------------------
-5.  OI301700 IS EXTRACTED SOURCE, AND THAT IS THE WHOLE PROBLEM
---------------------------------------------------------------------------------
-OI301700's HAL/S was extracted from the output-writer listings, so:
-
-  (a) Column 1 was ALREADY RESOLVED through CARDTYPE.  Conditional-compilation
-      letters are simply gone, and only one resolution was captured.  A
-      CARDTYPE-based fix that works for OI340600 may be a no-op here.  This is
-      why 25 DQ7 failures survived a run that fixed the identical failures in
-      OI340600.
-  (b) Folding the two-dimensional notation flat introduced artifacts.  Four
-      classes found so far, three fixed:
-
-      1. Subscript glued to what follows.  Subscripts live on an S card
-         beneath the M card; folding one in consumed the separating space, so
-         "CGCV_GDQ_SLOPE$INDX TEMP_MACH" (an implicit multiply) became the
-         undeclared identifier INDXTEMP_MACH.  84 fixed over ~20 files.
-         Two detectors, use both: (i) "$NAME" where NAME occurs nowhere else
-         in the file but splits into two names that each do; (ii) far better,
-         read the undeclared identifiers straight out of the DU1 diagnostics.
-         Detector (i) misses single-letter subscripts and numeric tails.
-      2. Listing nesting level left in the code.  One instance, GSFABT SRN
-         138700: "(GSF_NZ_INHIBIT = ON) 10 THEN DO;".  Other continuation
-         lines beginning with an integer were checked and are legitimate --
-         their preceding line ends in a comparison operator.
-      3. Nested subscripts written "**".  203 across 39 files; 22 fixed.
-         THIS IS THE BIG REMAINING ITEM -- see §7.
-      4. Whatever accounts for SSMANTMG's TCSOUT.  No M/S card pair explains
-         it; left alone.
-
---------------------------------------------------------------------------------
-6.  WHAT WAS FIXED  (9 commits)
+6.  WHAT ELSE WAS FIXED
 --------------------------------------------------------------------------------
 virtualagc:
-  b92e31eea  XCOM-I: FREELIMIT carried in COMMON (fixes the PASS3->PASS4 heap
-             abend); MONITOR2 returns 1 instead of abending on a bad member
-             name (this was the whole 34-file ZO3 class).  Two regression
-             baselines moved with the COMMON format; object code, HALMAT,
-             literals and listings are byte-identical.
-  6367bfc85  ported: D_TOKEN called PRINT_COMMENT with one argument too few,
-             killing any compile whose directive continued onto a second card.
-             PRINT_COMMENT declares no I of its own, so the I it uses is
-             STREAM's.  Also HAL_S_FC.py's rmtree+copytree of a shared path,
-             which made parallel corpora impossible; now per-file, only when
-             different, through a temp name renamed into place.
-  e9b4eda9e  compilePASS: apply CARDTYPE when scanning column 1 (a directive
-             on a conditionally-compiled card was invisible; CPTOSV line 40
-             begins with B and its BD pair makes it a directive, so CS4PDT was
-             never compiled).  Also the first cut of the R-card table.
-  73dbda864  compilePASS: "D INCLUDE SDF X:" is a dependency too -- 16 were
-             missing, and CS2IX4/CS2IX5 compiled before CS2IXP existed.  Also
-             the R-card table taken from the reports rather than guessed.
-  1f1a74b90  compilePASS: --no-preprocess is now the DEFAULT.  See §8.
-  ed3cd2aa8  compilePASS: GKFHOR's T cards compile as live code (T=M), settled
-             by the OI301700 report.
+  3b78ef4e8  D15 becomes severity 0, so PGPPLD compiles.  Severity 1 is not
+             enough: PASS1 records a statement's highest severity in its SMRK
+             and OPTIMISE.xpl:144 raises B100 for any nonzero tag, so PASS2
+             abandons the conversion.  Only 0 leaves the statement unflagged.
+             The nine D15s still print.  THIS MECHANISM EXPLAINS M3 AND XD7
+             FAILURES TOO -- a severity-1 warning still costs the object module.
+  d98f97e01  compilePASS: a CARDTYPE pair naming a standard type is inert.
+             PASS1 installs a pair only where the type has no meaning yet
+             (INITIALI.xpl:526-538, guarded by IF CARD_TYPE(J) = 0), so
+             CV5SLCOM's "DC" is nothing in the compiler -- but the scan applied
+             it and turned every D card of the file into a comment, hiding
+             CPSSLD as a dependency.
+  443eb57ff  PASS4 defaults --sdfi to SDFLIB (PASS4 alone, gated on APP_NAME),
+             and MONITOR22A reports "no SDF library" through CRETURN, which is
+             where SDFPROCE.xpl:116 and INCSDF.xpl:716 actually look.  Without
+             it PASS4 formatted a whole report out of address 0 and INCSDF set
+             SDF_OPEN = TRUE on a failure return.
+  81ee884e2  SDFLIST.py, and a PASS2 error is now delayable.  See §1 and §7.
+  (also)     compilePASS --extra-parms, for TABLST.
 
 ~/workspace/PFS:
-  ac57108    Restored 13 R cards in OI301700 INCL80/STRPDT.hal.  This removed
-             the entire 25-file DQ7 class.
-  f96af7b    GSFABT nesting level; 39 glued subscripts.
-  f4aff95    34 more glued subscripts.
-  abc84f6    22 unambiguous nested subscripts.
-  cefd41f    11 glued subscripts found via the DU1 diagnostics.
-
-All source edits keep every line exactly 80 characters with its SRN
-undisturbed, taking the needed column from trailing padding or, failing that,
-from the leading indentation, which HAL/S ignores.  Verify with:
-    git diff -U0 OI301700/ | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' \
-      | awk '{print length($0)-1}' | sort -n | uniq -c
+  c2a8fa9, 3a6bbea, f4d6d80, 79854d6, 7016b8d1   unprint.py, seven bugs
+  5efb99e, 70d0eaa                               434 files regenerated
+  d4e5bfa    19 INCL80 members borrowed from OI-34.06.  They are named by
+             "D INCLUDE" in OI-30.17 source but absent from its library, and
+             all 61 directives that include them say NOLIST -- which prints
+             nothing in a report, so no copy was ever there to extract.  Each
+             carries a History entry.  DOWBUILD, EVNTCHEK and TCSBUILD are
+             wanted too but do not exist in OI-34.06 either; PMOSTA and PMCCYC,
+             which want them, already carry hand-inlined expansions.
+  7abb7533, fbc2110f   SAFACQ, SPNINT, SPCPPC: macro legends removed
 
 --------------------------------------------------------------------------------
-7.  OPEN ITEM A -- THE 181 NESTED SUBSCRIPTS  (largest OI301700 item)
+7.  RUNNING THE SDF REPORTS
 --------------------------------------------------------------------------------
-"**" in the extracted source has TWO DISTINCT ORIGINS, so no textual rewrite
-rule is valid for both:
+From a *.results directory, which is where the SDF library is left:
 
-  (a) The S card genuinely contains it.  GPSASC's reads "[JET_ARRAY]**I:",
-      the listing's notation for "the bracketed name is itself subscripted by
-      what follows".  The extractor dropped the brackets and kept the "**".
-      OI340600's own GPSASC confirms the target form: "$(JET_ARRAY$(I):)".
-      These are the 22 already fixed, all matching "$(NAME**INDEX)" or
-      "$(NAME**INDEX:)".
-  (b) The S card contains no "**" at all.  The extractor invented one while
-      merging TWO DIFFERENT VARIABLES' subscripts into a single subscript.
-      PGGPCF SRN 313900:
-          M| 5  CPGB_S71_LAST_OP                             = CPGB_LAST_OP ;
-          S|                    CPGV_DISP_INDEX            ;   PGG_PL_INDEX;
-      Truth: "CPGB_S71_LAST_OP$(CPGV_DISP_INDEX;) = CPGB_LAST_OP$(PGG_PL_INDEX;)"
-      Extracted: "CPGB_S71_LAST_OP$(CPGV_DISP_INDEX**PGG_PL_INDEX;)"
-      Class (b) needs the subscripts re-associated with their variables by
-      column, i.e. redoing the extraction for those lines from the card pair.
+    SDFLIST.py "##HELLO"                    one SDF, default TABLST
+    SDFLIST.py --brief "##HELLO" "##FOO"    the summary only
+    SDFLIST.py --all --tabdmp                every SDF, full dump
+    echo NAME | HALSFC-PASS4 --parm=BRIEF    equivalent for one, by hand
 
-THE GOVERNING RULE, from the user, which supersedes every ad-hoc test I tried:
+Quote the names: "##" begins a comment to the shell.
 
-    A subscript on an S card is valid only where every position it occupies is
-    BLANK on every line above it, up to and including the M card -- EXCEPT
-    that comments do not count as available space.
-
-The "except comments" clause is essential and not optional: comments contain
-blanks between words, and comment-overflow text lands in exactly those, so the
-blank test alone admits it.  Mark comment regions unavailable rather than
-merely testing for blankness.  ("/" is a sound cross-check -- 0 of 33768 S
-cards use it in a genuine subscript -- but it is redundant given the blank
-test, and must TRUNCATE the card rather than discard it, since 37 cards carry
-subscripts followed by a comment tail.)
-
-VALIDATION STRATEGY, and it is the right one: build the reconstructor, then
-require it to reproduce the many thousands of lines that extracted CORRECTLY,
-before letting it touch a "**" line.  A mismatch must mean "the source is
-wrong", not "my harness is wrong".
-
-Scoring history -- read this before repeating any of it:
-
-    model 1  subscript = each whitespace-delimited run of the S card
-    model 2  subscript = S card content within each blank gap of the M card
-             (model 2 is the only one that can express a subscript containing
-             spaces, e.g. "$(6 TO 10)"; model 1 gives "$6 $TO $10")
-
-    first attempt, halting walk, first S card only:
-        model 1  82%      model 2  90%   over 27896 pairs
-    after fixing both harness gaps (skip non-card lines when walking up from
-    an S card; collect ALL S cards for an M card; recurse so a subscript of a
-    subscript nests):
-        model 2  82%      over 42246 pairs, 34720 reproduced
-
-The rate FELL but the work improved: the walk fix recovered ~14350 pairs that
-were being silently dropped, and 9555 MORE lines now reconstruct correctly.
-The 90% was measured on the easy subset.
-
-Comparison must ignore whitespace AND parentheses -- the extractor writes "$X"
-in some places and "$(X)" in others.  Build the source body from columns 1-72
-ONLY; including the SRN columns breaks contiguity and makes everything look
-like a mismatch.
-
-Harness faults found and fixed so far, none of them in the models:
-  - The DO-nesting level printed after the bar is not source.  This single
-    fault is why the first 120 files scored 100% (mostly level blank) and
-    everything after them 18%.  Blank the field IN PLACE so the S card's
-    column alignment survives.
-  - S cards can carry comment overflow.  CDHMMUTI's inline comment runs off
-    the M card and resumes as "/*ESPONSE LENGTH */".
-  - The upward walk halted on "+   ______" error-position underline cards.
-  - Only the first S card per M card was read.  491 M cards have 2, 22 have 3,
-    7 have 4.
-
-NEXT STEP, and start here:  7526 pairs still fail, and at least some are
-harness rather than source.  "1 CDHV_CHK_SUM INTEGER;" appears as a miss with
-no subscript in it at all -- that reconstruction ought to be a substring of
-its source line, so the containment test itself is still wrong somewhere.
-Find that before reading anything into the 82%, and do not edit source until
-the score is essentially 100%.
-
-Worth considering instead: the nesting-level artifact (§5.2) and the "**"
-artifact share a root cause in the original extractor.  Fixing the extractor
-and re-extracting may be a better target than patching its output.
+SDFLIST.py exists because of --all, which reads the names from an OS/360 PDS
+directory block on device 3 (SDFPROCE.xpl:127-144) -- a halfword byte count,
+then entries of an 8-byte EBCDIC name, a 3-byte TTR and a flags byte whose low
+five bits give a count of user halfwords, so an entry is 12 + 2*(flags & 0x1F)
+bytes, ending at a name of eight 0xFF bytes.  --pdsi=3 does not attach
+INPUT(3); it must be --ddi=3,FILE,E, and without the ",E" the runtime reads the
+block as ASCII and every name arrives blank.
 
 --------------------------------------------------------------------------------
-8.  OPEN ITEM B -- PGPPLD's D15  (OI340600's LAST FAILURE, NEEDS A DECISION)
+8.  OPEN ITEMS
 --------------------------------------------------------------------------------
-PGPPLD emits 9 D15s: "ORDER OF DECLARATIONS WILL CAUSE LOCAL DATA DECLARATIONS
-TO APPEAR IN ANY PROCEDURE OR FUNCTION TEMPLATE GENERATED BY THIS COMPILATION".
+The eight OI301700 failures not yet repaired, from the last complete run:
 
-The diagnostic is CORRECT.  PGP_PLD_DATA_MON: PROCEDURE(PGP_SOURCE, PGP_PROC)
-is followed immediately by "D INCLUDE STRPDT NOLIST", so STRPDT's declarations
-are processed while PARMS_WATCH is set, before the parameters' own DECLAREs.
-SYNTHESI.xpl:5015 raises it.  PGGPCF includes PGPPLD's template, so the
-warning is about a real consequence.
+  PMQTEC   FT101, "DATA TYPE CONFLICT ON PARAMETER #1", statement 116.  It
+           passes HEX'0003' to a parameter both versions declare INTEGER, and
+           the original listing carries NO error underline there, so the
+           original build accepted it.  PASS2's XPL *is* the original, so the
+           difference must be in the type our compiler gives a hex literal.
+           Worth understanding rather than papering over.  This is also the
+           file that used to abort the whole run.
+  GMGMAJ   XD7, "DEFINE SEQUENCE IS EMPTY".  "D DEFINE GM6CLC NOLIST" and its
+  GMESTA   CLOSE have nothing between them, because NOLIST prints nothing in
+           the listing.  OI-34.06 has the content, at the same SRNs.  Four such
+           sequences in these two files.  Borrowing it would splice OI-34.06
+           code INSIDE an OI-30.17 module, which is more invasive than the
+           INCL80 borrowing and is the user's call.
+  GKGMNV   DU1, undeclared GK3_ORB_TGT and CGGV_THR_VEC_ROLL_ANG_COS.
+  GKEKIP   XI3 cascades -- a needed template's provider failed.  These should
+  GM2MAJ   clear themselves as their providers are fixed; SGCKIP's XI3 was for
+  GMAMIN   @@SAFACQ and is already fixed.
+  SGCKIP   DI11, and an XI3 for @@SAFACQ.
 
-The original build saw the same thing.  Its listing shows PROCEDURE at
-statement 13, the include at 14, and DECLARE PGP_SOURCE not until statement
-152 -- and PGPPLD is in the flight image, so it produced object code.  What
-stops us is our own policy: severity 2 -> RC 8, and HALSFC's passFailed()
-treats rc >= 8 as failure.
+Repaired since that run and awaiting confirmation: SAFACQ, SPNINT, SPCPPC,
+PGHHEA, PGGPCF (all verified to compile individually).
 
-"D DOWNGRADE D15" does NOT work.  Tested.  The directive binds to the
-following statement only (STREAM.xpl, "DR58324 - ATTACH DOWNGRADE TO CORRECT
-STATEMENT"), and the nine D15s arise inside STRPDT, a file 16 units share.
-
-Remaining options, both with real reach, which is why I left the decision:
-  - relax HALSFC to tolerate severity 2 generally.  Most of the genuine bugs
-    found this session were severity 2, so this would mask real errors.
-  - special-case D15.
+Also open:
+  - The 156 and 183 files never attempted (§1).  Nobody has looked at why.
+  - The concurrent-run abort (§3), mechanism unknown.
+  - PASS4's DATABUF statistics were never checked against a known-good value;
+    modules/sdfpkg/pass4-*.rpt from 2026-08-03 are a good baseline.
 
 --------------------------------------------------------------------------------
-9.  THINGS THAT ARE SETTLED -- DO NOT RE-LITIGATE
+9.  SETTLED -- DO NOT RE-LITIGATE
 --------------------------------------------------------------------------------
 - The SDF include path "importing too much" is NOT a defect.  It is the
-  transitive-include mechanism.  ENTER_COMPOOL_VARS walks the whole declare
-  chain, carrying symbols the COMPOOL got from its own includes; INCSDF's
-  DUPLICATE_NAME/SET_DUPL_FLAG tolerates redeclaration by flagging it.  Those
-  are exactly the two things preprocessHALSFC's header says the compiler
-  lacks, which is why the preprocessor is now off by default -- and why it was
-  doing harm: it knows only "D INCLUDE TEMPLATE" and is blind to
-  "D INCLUDE SDF X:", so it hoisted a duplicate and PASS1 rejected it (PL2,
-  CS2PAT).
-- There is NO re-export filter in PASS1 to find.  EMIT_EXTERNAL builds a
-  template by echoing tokens as scanned, with no suspension during an include
-  (every EXTERNALIZE assignment checked), so a COMPOOL's template necessarily
-  carries its included text by design.
+  transitive-include mechanism: ENTER_COMPOOL_VARS walks the whole declare
+  chain, and INCSDF's DUPLICATE_NAME/SET_DUPL_FLAG tolerates redeclaration.
+  Those are the two things preprocessHALSFC's header says the compiler lacks,
+  which is why the preprocessor is off by default -- and why it did harm: it
+  knows only "D INCLUDE TEMPLATE" and is blind to "D INCLUDE SDF X:".
+- There is NO re-export filter in PASS1 to find.  EMIT_EXTERNAL echoes tokens
+  as scanned, with no suspension during an include.
 - IDENTIFY.xpl:610300 "IF I < PROCMARK THEN GO TO NOT_FOUND" is what makes a
   match in an outer scope not a duplicate.
-- Duplication alone does not cause DQ7.  CGEIPA and CGCFL1 each declare their
-  own STRUCTURE QUAT; 43 units include both templates and 36 compiled fine.
-  The trigger is the NAME-alias form specifically.
-- PASS4 already receives the SDF name through COMMON.  I implemented the
-  stdin feed and REVERTED it: running PASS4 by hand with "echo CDR06D |" and
-  with "< /dev/null" gives byte-identical 3195-byte reports.  pass4.rpt is
-  empty in the chain only because the default parms carry neither TABLST nor
-  TABDMP, so PASS4 parses the SDF and correctly prints nothing.
-- The R-card rule is NOT "COMPOOLs get R=C".  Read the report markers: C in
-  CSAPDT, CS2PDT, CS4PDT and PGSCRU (PGSCRU is a program); M in SCKPNT,
-  STCCYCL, STMTAB, SULUPLIN.  CPGPCD is a COMPOOL and compiles fine at R=M.
+- Duplication alone does not cause DQ7; the NAME-alias form is the trigger.
+- PASS4 already receives the SDF name through COMMON.  pass4.rpt is empty in
+  the chain only because the default parms carry neither TABLST nor TABDMP.
+- The R-card rule is NOT "COMPOOLs get R=C".  Read the report markers.
 
 --------------------------------------------------------------------------------
 10. WORKING RULES
 --------------------------------------------------------------------------------
 - Do not edit or create *.md files in a project directory without the exact
-  phrase "Full Documentation Sync".  Append to ./CLAUDE_LOG.md instead; that
-  one is always allowed.  As of 2026-08-04 the global rule also carves out
-  "working files" -- HANDOFF*.md, *-handoff.md, RELAY-TO-*.md, RELAY-FROM-*.md
-  -- which may be created and updated freely when the user has asked for them.
-  That is why this file is .md.
+  phrase "Full Documentation Sync".  Append to ./CLAUDE_LOG.md instead.  The
+  global rule carves out "working files" -- HANDOFF*.md, *-handoff.md,
+  RELAY-TO-*.md, RELAY-FROM-*.md -- which may be created and updated freely
+  when the user has asked for them.  That is why this file is .md.
 - Commit finished, verified work proactively; do not wait to be asked.
 - Virtual AGC edits to PASS source are limited to comments and conditionally
   compiled lines marked U-Z in column 1.  Other odd column-1 letters are
   PASS's own.
 - Work in the -sdftest copies.  The masters are the user's.
-- CLAUDE_LOG.md is long (~290 lines).  It wants a claudesync.
+- Verify a repair against OI-34.06 before making it.  Every repair in this
+  session that was checked this way was right; the one pattern-based sweep that
+  was NOT checked would have deleted 174 genuine comments.
 ================================================================================
