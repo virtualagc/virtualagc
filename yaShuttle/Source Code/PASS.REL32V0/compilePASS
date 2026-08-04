@@ -175,6 +175,7 @@ archive = False
 sdfi = "SDFLIB"
 csectsDir = ".." + os.sep + "mafgen"
 providerDeps = True
+extraParms = ""
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg)
@@ -187,6 +188,14 @@ for parm in sys.argv[1:]:
         clean = True
     elif parm == "--archive":
         archive = True
+    elif parm.startswith("--extra-parms="):
+        # Prefixed to every compilation's PARM field.  TABLST is the reason it
+        # exists:  with it, PASS4 parses each SDF the run has just written
+        # rather than merely opening it, so a corpus becomes a test of PASS4
+        # and SDFPKG as well as of the compiler.
+        extraParms = parm[14:]
+        if extraParms and not extraParms.endswith(","):
+            extraParms += ","
     elif parm.startswith("--sdfi="):
         sdfi = parm[7:]
     elif parm == "--no-sdfi":
@@ -285,7 +294,6 @@ Regarding the compiler parameters:
                 workarounds, though much more expensive to implement.  So far,
                 this approach agrees with MAFGEN.
 '''
-extraParms = ""
 
 # STRPDT is included by sixteen units, and its R cards are
 # "DECLARE X NAME X-STRUCTURE" -- a NAME variable whose name equals its own
