@@ -284,3 +284,32 @@
      "no M above" result is this bug and nothing else.
 - Nothing has been edited on the strength of any of this.  Fix both gaps,
   re-score, and only consider applying model 2 if it reaches ~100%.
+
+### [2026-08-04] Target: [HANDOFF.md]
+- Open item A is closed at its root.  The OI-30.17 extraction artifacts are
+  four bugs in ~/workspace/PFS/unprint.py, not something to patch downstream:
+  collapseES() dropped its S flag when recursing (every nested subscript became
+  "**"); E/S lines were padded use columns for an absent card but use-1 for a
+  present one, shifting every card after the first (truncated subscripts, stray
+  re-attached tails); startGap() ignored the caller's left boundary (subscripts
+  emitted twice); and collapsing a subscript ate the blank that separated two
+  identifiers (glued implicit multiplies).  Also the DO-nesting-level test
+  missed two-digit levels and outdented labels.  PFS c2a8fa9, 5efb99e.
+- The reconstruction harness described in HANDOFF §7 is obsolete -- it was
+  measuring the output of a broken extractor.  Delete §7's scoring history when
+  the handoff is next revised; keep the governing rule about blank columns, it
+  is what the separator fix implements.
+- Validation method worth keeping: extract the whole report set with both the
+  old and the new unprint.py, then compare each against the master at token
+  level, three ways.  It separates "the fix changed this" from "the master was
+  repaired by hand here" without any judgement calls.
+- Open item B: D15 is now severity 0, not a passFailed() special case.  PASS1
+  puts a statement's highest severity in its SMRK and PASS2's OPTIMISE.xpl:144
+  raises B100 for any nonzero tag, so severity 1 still abandons the conversion.
+  virtualagc 3b78ef4e8.
+- prepareSource.py needs the ahocorapy package, which is not installed here.  A
+  60-line Aho-Corasick stand-in reproduces master bodies byte-for-byte from the
+  old extraction, so the anonymizer is entirely deterministic given its .anon
+  databases.  Note it appends to collisions.anon as a side effect.
+- GX4DIS, PMCCYC and PMOSTA masters carry blocks no extraction has ever
+  produced -- macro expansions, most likely.  Do not regenerate them blindly.
