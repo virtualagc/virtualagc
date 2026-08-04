@@ -33,5 +33,5 @@ mkdir -p objects
 prepareTEMPLIB --clear                  >  prepare.log 2>&1
 prepareINCLIB  --clear --include=INCL80 >> prepare.log 2>&1
 
-compilePASS --clean --archive > compilePASS.log 2>&1
+compilePASS --extra-parms=TABLST --clean --archive > compilePASS.log 2>&1
 echo $? > corpus.done
