@@ -332,7 +332,10 @@ Remaining options, both with real reach, which is why I left the decision:
 --------------------------------------------------------------------------------
 - Do not edit or create *.md files in a project directory without the exact
   phrase "Full Documentation Sync".  Append to ./CLAUDE_LOG.md instead; that
-  one is always allowed.  (This file is .txt for that reason.)
+  one is always allowed.  As of 2026-08-04 the global rule also carves out
+  "working files" -- HANDOFF*.md, *-handoff.md, RELAY-TO-*.md, RELAY-FROM-*.md
+  -- which may be created and updated freely when the user has asked for them.
+  That is why this file is .md.
 - Commit finished, verified work proactively; do not wait to be asked.
 - Virtual AGC edits to PASS source are limited to comments and conditionally
   compiled lines marked U-Z in column 1.  Other odd column-1 letters are
