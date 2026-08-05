@@ -37,5 +37,12 @@ mkdir -p objects
 prepareTEMPLIB --clear                  >  prepare.log 2>&1
 prepareINCLIB  --clear --include=INCL80 >> prepare.log 2>&1
 
-compilePASS --extra-parms=TABLST --clean --archive > compilePASS.log 2>&1
+# --no-csects compiles every HAL/S file, not only those whose CSECT appears in
+# a PASS configuration.  Restricting to PASS was only ever a way to reduce the
+# up-front burden while there were still many unexplained failures; there are
+# none now, and the auxiliary files compile too, so the wider set is the target.
+# It is passed explicitly rather than left to the ../mafgen default, which is a
+# relative path and silently resolves to nothing from this location.
+compilePASS --no-csects --extra-parms=TABLST --clean --archive \
+    > compilePASS.log 2>&1
 echo $? > corpus.done

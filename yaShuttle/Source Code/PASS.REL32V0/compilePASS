@@ -104,6 +104,14 @@ The only OPTIONS available are:
     --no-csects     Compile every HAL/S file found, without regard to whether
                     it is part of PASS.  This was the behaviour before the
                     check existed.
+    --no-seed-cycles
+                    Do not break template-dependency cycles.  Files that need
+                    each other's templates are then never attempted at all, as
+                    they were before seeding existed: no member of a cycle can
+                    go first, because each waits on a template only another
+                    member can produce.  Seeding compiles a stub carrying one
+                    member's block statement, which is enough for the others
+                    to compile, and the real unit is compiled over it after.
     --no-provider-deps
                     Do not widen PASS membership to cover the providers of
                     templates that PASS members include.  A COMPOOL that some
@@ -175,6 +183,7 @@ archive = False
 sdfi = "SDFLIB"
 csectsDir = ".." + os.sep + "mafgen"
 providerDeps = True
+seedCycles = True
 extraParms = ""
 for parm in sys.argv[1:]:
     if parm == "--help":
@@ -206,6 +215,8 @@ for parm in sys.argv[1:]:
         csectsDir = None
     elif parm == "--no-provider-deps":
         providerDeps = False
+    elif parm == "--no-seed-cycles":
+        seedCycles = False
     elif parm == "--dfg":
         dfg = True
     elif parm == "--no-dfg":
@@ -737,6 +748,19 @@ for filename in templateFiles:
             continue
         halname = descore(h)
         entry["halname"] = halname
+        # Keep the block statement verbatim.  It is all a stub needs -- what a
+        # caller wants from a template is the name and the parameter list --
+        # and it is needed to break dependency cycles further down.  It can
+        # span cards, so accumulate until the terminating semicolon; GV6STA
+        # writes its name on one card and PROGRAM; on the next.
+        text = ""
+        for k in range(i, min(i + 12, len(lines))):
+            text = (text + " " + lines[k][1:].strip()).strip()
+            if ";" in text:
+                break
+        if ";" in text:
+            entry["blockName"] = h
+            entry["blockStatement"] = text[:text.index(";") + 1]
         debug("D " + str(entry))
         continue
     if halname == None:
@@ -878,28 +902,174 @@ for stem in templatesByStem:
     if len(template["includedFilenames"]) == 0:
         templatesByFilename.pop(template["filename"])
 
-print(f"{datetime.now()}: Compiling dependent files ...")
-remove = [0]
-while len(remove) > 0:
-    remove = []
-    filesLeft = set(templatesByFilename)
-    for filename in templatesByFilename:
-        if filename in skipped:
+# ---------------------------------------------------------------------------
+# Breaking template-dependency cycles.
+#
+# The ordering above compiles a file only once every template it needs already
+# exists, so a group of files that need each other's templates can never
+# start: no member can go first.  That alone accounted for 156 files never
+# attempted in OI340600 and 178 in OI301700, in six groups, the largest of 29
+# members.  Nothing is wrong with those files.
+#
+# The D INCLUDE TEMPLATE cards cannot simply be dropped, because both members
+# of a cycle really do use each other -- VM1BFDCY calls VM4_BF_SHUT_DN and
+# VM4BFSHU cancels VM1_BFD_CYCLIC -- so removing one fails on an undeclared
+# name rather than on a missing template.  What works is seeding the library.
+# PASS1 takes TEMPLIB as both input (--pdsi=4) and output (--pdso=6) but emits
+# nothing when the compile fails, so a member cannot seed itself by failing.
+# A stub carrying only the block statement can, since the name and the
+# parameter list are all a caller needs, and the real unit is compiled over
+# the stub as soon as its own dependencies clear.  Nothing synthetic survives.
+#
+# Stubs are named _stub*.hal because corpus-run.sh clears _*.hal at the start
+# of a run, so a stub cannot leak into a later one.
+
+def cyclesAmong(filenames):
+    "Tarjan's algorithm, iterative.  Returns the multi-member SCCs."
+    edges = {}
+    for filename in filenames:
+        edges[filename] = [f for f in
+                           templatesByFilename[filename]["includedFilenames"]
+                           if f in filenames and f != filename]
+    index, low, onStack, stack, result, counter = {}, {}, set(), [], [], [0]
+    for root in filenames:
+        if root in index:
             continue
+        index[root] = low[root] = counter[0]
+        counter[0] += 1
+        stack.append(root)
+        onStack.add(root)
+        work = [(root, iter(edges[root]))]
+        while work:
+            node, children = work[-1]
+            descended = False
+            for child in children:
+                if child not in index:
+                    index[child] = low[child] = counter[0]
+                    counter[0] += 1
+                    stack.append(child)
+                    onStack.add(child)
+                    work.append((child, iter(edges[child])))
+                    descended = True
+                    break
+                elif child in onStack:
+                    low[node] = min(low[node], index[child])
+            if descended:
+                continue
+            work.pop()
+            if work:
+                low[work[-1][0]] = min(low[work[-1][0]], low[node])
+            if low[node] == index[node]:
+                component = []
+                while True:
+                    member = stack.pop()
+                    onStack.discard(member)
+                    component.append(member)
+                    if member == node:
+                        break
+                if len(component) > 1:
+                    result.append(component)
+    return result
+
+def wrapCards(statement):
+    "Break a block statement across cards, leaving column 1 blank."
+    cards, current = [], ""
+    for word in statement.split():
+        if current and len(current) + len(word) + 2 > 71:
+            cards.append(" " + current)
+            current = word
+        else:
+            current = (current + " " + word).strip()
+    if current:
+        cards.append(" " + current)
+    return cards
+
+def seedCycle(component):
+    """Compile a stub for one member of a cycle so the rest can start.
+
+    Returns the filename seeded, or None if no member could be."""
+    # Prefer the member fewest others in the cycle depend on: it perturbs the
+    # least, and its own real compile comes soonest.
+    def dependents(filename):
+        return sum(1 for other in component if filename in
+                   templatesByFilename[other]["includedFilenames"])
+    for filename in sorted(component, key = lambda f: (dependents(f), f)):
         template = templatesByFilename[filename]
-        if template["stem"] in errorsSkipped:
+        statement = template.get("blockStatement")
+        name = template.get("blockName")
+        if statement == None or name == None:
             continue
-        includedFilenames = set(template["includedFilenames"])
-        if len(includedFilenames & filesLeft) == 0:
-            if not compile(template):
-                skipped.add(filename)
-                if template["stem"] not in errorsSkipped:
+        stubStem = "_stub" + template["stem"]
+        stubFilename = "./" + stubStem + ".hal"
+        try:
+            g = open(stubFilename, "w")
+            for card in wrapCards(statement):
+                g.write(card + "\n")
+            g.write(" CLOSE " + name + ";\n")
+            g.close()
+        except:
+            print("      cannot write %s" % stubFilename)
+            continue
+        stub = { "filename": stubFilename, "stem": stubStem,
+                 "halname": template["halname"], "includedFilenames": [],
+                 "includedHalnames": [] }
+        print("      seeding %s from a stub, to break a cycle of %d" %
+              (template["stem"], len(component)))
+        if compile(stub):
+            stubsCompiled.append(template["stem"])
+            return filename
+        print("      the stub for %s did not compile; trying another member" %
+              template["stem"])
+    return None
+
+print(f"{datetime.now()}: Compiling dependent files ...")
+seeded = set()
+stubsCompiled = []
+while True:
+    remove = [0]
+    while len(remove) > 0:
+        remove = []
+        # A seeded file no longer blocks the others: its template is in the
+        # library, even though the file itself has still to be compiled for
+        # real.  It is compiled when its own dependencies clear, like any
+        # other, and that compilation replaces the stub's template.
+        filesLeft = set(templatesByFilename) - seeded
+        for filename in templatesByFilename:
+            if filename in skipped:
+                continue
+            template = templatesByFilename[filename]
+            if template["stem"] in errorsSkipped:
+                continue
+            includedFilenames = set(template["includedFilenames"])
+            if len(includedFilenames & filesLeft) == 0:
+                if not compile(template):
+                    skipped.add(filename)
+                    if template["stem"] not in errorsSkipped:
+                        remove.append(filename)
+                else:
                     remove.append(filename)
-            else:
-                remove.append(filename)
-    for filename in remove:
-        removed.add(filename)
-        templatesByFilename.pop(filename)
+        for filename in remove:
+            removed.add(filename)
+            templatesByFilename.pop(filename)
+    if not seedCycles:
+        break
+    stalled = set(templatesByFilename) - skipped - seeded
+    if len(stalled) == 0:
+        break
+    components = cyclesAmong(stalled)
+    if len(components) == 0:
+        break
+    print("%s: %d file(s) blocked; %d dependency cycle(s) to break" %
+          (datetime.now(), len(stalled), len(components)))
+    progress = False
+    for component in sorted(components, key = len, reverse = True):
+        member = seedCycle(component)
+        if member != None:
+            seeded.add(member)
+            progress = True
+    if not progress:
+        print("      no member of any cycle could be seeded; giving up on them")
+        break
 
 if False:
     print(f"Compilation of {len(errorsSkipped)} files skipped due to ZO3 or PM2 errors:")
@@ -911,6 +1081,11 @@ if False:
         compile(template)
         templatesByFilename.pop(filename)
 
+if len(stubsCompiled) > 0:
+    print("%d cycle(s) broken by seeding a stub: %s" %
+          (len(stubsCompiled), " ".join(stubsCompiled)))
+    print("     (each counts as one extra compilation; the real unit was "
+          "compiled over it)")
 print(f"{len(notInPass)} files not part of PASS (CSECT in no configuration)")
 print(f"{len(skipped)} skipped files due to IR1, DI11, PM2, or ZO3 errors")
 print(f"Uncompiled files due to dependence ({len(templatesByFilename)-len(skipped)}):")
