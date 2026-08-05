@@ -5,11 +5,11 @@ Written so a fresh session can restart from this file alone.  Companion
 material: modules/sdfpkg/CLAUDE_LOG.md, and two helper scripts beside this
 file, corpus-classify.py and corpus-run.sh.
 
-This supersedes the 2026-08-03/04 handoff entirely.  Its section 7, on a
-harness for reconstructing subscripts from the M/S card images, is obsolete:
-that harness was measuring the output of a broken extractor, and the extractor
-has since been fixed.  The one part of it worth keeping is the governing rule
-about blank columns, which the separator fix now implements.
+THIS PHASE IS COMPLETE.  Both corpora compile in full, and nothing in here is
+blocking.  The next phase is described in compileLinkCompare.md, beside this
+file: comparing our linked binary against the actual AP-101S memory dumps.
+Sections 1 through 7 remain the working knowledge a corpus run needs; section 8
+records how the last failures were resolved, and 9 what not to re-litigate.
 
 --------------------------------------------------------------------------------
 1.  THE GOAL, AND WHERE IT STANDS
@@ -33,7 +33,7 @@ on each.  For scale, OI340600 began the previous session at 843/907.
 Three things got there.  corpus-run.sh passes --no-csects, so the auxiliary
 files outside PASS are compiled too -- restricting to PASS was only ever a way
 to reduce the up-front burden while failures were unexplained.  compilePASS
-breaks template-dependency cycles by seeding the library (section 8), which
+breaks template-dependency cycles by seeding the library (section 6), which
 reached the 156 and 161 files no run had ever attempted; 21 cycles are seeded,
 the same 21 in both corpora.  And the twelve OI301700 failures that the wider
 coverage exposed were traced to six roots and repaired:
@@ -79,7 +79,8 @@ shows the shape plainly:
 
 Both uses are real, so no D INCLUDE TEMPLATE card can simply be dropped -- the
 compile would fail on an undeclared name rather than a missing template.  They
-are reachable by seeding the library instead; see §11.
+are reachable by seeding the library instead, which compilePASS now does
+for itself; see section 6.
 
 --------------------------------------------------------------------------------
 2.  WHERE EVERYTHING IS
@@ -301,6 +302,39 @@ in this session was confirmed against it before being made.
 6.  WHAT ELSE WAS FIXED
 --------------------------------------------------------------------------------
 virtualagc:
+  bc0575a73  compilePASS seeds template-dependency cycles.  A file is compiled
+             only once every template it needs exists, so a group needing each
+             other's templates could never start.  When the ordering stalls,
+             the remainder is decomposed into strongly connected components and
+             one member of each is seeded with a stub carrying only its block
+             statement; the real unit is compiled over it once its own
+             dependencies clear, so nothing synthetic survives.  21 cycles are
+             seeded per corpus.  seedable() refuses a COMPOOL, whose template
+             IS its declarations, and anything taking parameters, which HAL/S
+             requires a body to DECLARE -- a stub for either deposits a WRONG
+             template, and its callers are never recompiled.  Stubs are named
+             _stub*.hal so corpus-run.sh's "rm _*.hal" clears them.
+  32e7ff3ae  sdf.py carries a VMP offset past 32K properly.  A VMP holds a page
+             number above an offset 0..1679, and adding a byte count to the
+             whole word survives only while the sum stays under 0x8000, where
+             mode5 starts reading the low half as signed.  Only a large SDF has
+             a statement index table that long: ##VAASEQ, 152 pages, made the
+             Python compiler abend 4005 where the C one did not, so --test
+             reported them disagreeing and abandoned VTCTCSCO.  Fix only the
+             positive-past-0x8000 case: replacing the arithmetic wholesale
+             breaks the negative-offset path, which mode5's "if offset < 0:
+             pageNumber += 1" exists to compensate.
+  a5b057fed  SDFLIST --all selects each SDF, and writes its directory as
+             80-byte records.  Two independent defects: SDF_PROCESSING's ALL
+             path named a member without issuing the SELECT disposition, so
+             DUMP_SDF dumped whichever SDF was already current, 37448 times;
+             and device 3 delivers fixed 80-byte records, so a single oversized
+             directory record truncated at six members.
+  65454288b  halsParms.py holds the CARDTYPE table, the conditional pairs and
+             the option list for compilePASS, compileLinkRun and
+             compileLinkCompare together.  They had drifted three ways, and
+             compileLinkCompare appended no conditional pairs at all, so a U-Z
+             card would have been M1 there while compiling everywhere else.
   3b78ef4e8  D15 becomes severity 0, so PGPPLD compiles.  Severity 1 is not
              enough: PASS1 records a statement's highest severity in its SMRK
              and OPTIMISE.xpl:144 raises B100 for any nonzero tag, so PASS2
@@ -354,19 +388,63 @@ INPUT(3); it must be --ddi=3,FILE,E, and without the ",E" the runtime reads the
 block as ASCII and every name arrives blank.
 
 --------------------------------------------------------------------------------
-8.  OPEN ITEMS
+8.  HOW THE LAST FAILURES WERE RESOLVED
 --------------------------------------------------------------------------------
-Every failure the previous handoff listed here is now repaired, and both corpora
-run to zero failures.  Kept in one line each, because the reasoning is settled
-and the detail is in compilePASS.md:
+NOTHING IS OPEN IN THIS PHASE.  Both corpora compile in full, so what follows
+is a record of how the last failures were resolved, kept because the mechanisms
+recur and because two of them were misdiagnosed first.
 
-  PMQTEC   FT101, "DATA TYPE CONFLICT ON PARAMETER #1", and it was CORRECT:
-  SULUPLIN PMP_SL_PRB's first parameter is INTEGER in both versions and these
-           called it with HEX literals, which are BIT.  Repaired with a W/V
-           conditional pair, so HALSFC gets the correction (W->C, V->M) and the
-           original compiler keeps the uncorrected code under CARDTYPE=WMVC.
-           The control that settles the rule: GEQENT, GEPENT, GENEDM and GERENT
-           all pass HEX'4000' to GKE_KIP, whose formal is BIT(16), and OI-34.06
+The twelve OI301700 failures that the wider coverage exposed were SIX ROOTS:
+
+  4  MACRO-LEGEND COMMENTS, and this is the one that was misdiagnosed.
+     GO1ASC, GO2ORB, GO3ENT and VG9OPS9 each carried a four-line comment after
+     an OPSINIT(...) invocation, reported by PASS1 as M3, "COMMENT LONGER THAN
+     256 CHARACTERS".  The comment is NOT source.  INCL80/OPSIMACS.hal defines
+     OPSINIT as a STRUCTURE whose members each carry a small comment -- "/* I/O
+     SVC NUMBER=24 */", "/* UNUSED */", "/* SYNC TYPE */" -- and the
+     output-writer listing prints them concatenated at the statement end.  The
+     extraction copied that rendering back in as a literal comment, so
+     compiling emitted the macro's comments AND the copy: 218 characters twice,
+     truncated at 256.  It was first called a compiler bug on the strength of
+     the doubling; the minimal test case settled it, because the comment ALONE
+     compiles clean.  Tells: the invented SRNs +1/+2/+3 on the continuation
+     cards, since the listing's S cards carry no SRN, and OI-34.06 has no
+     comment at any of these sites.  PFS a1ab8e89.
+  5  DR121254 TYPE MISMATCH.  DM5NEW, DM6OPS and GO6RTL, then GO1ASC and GO3ENT
+     once M3 stopped masking them, pass the INTEGER literal 0 to a BIT(16)
+     formal -- ARX_RS_BUS_CHG's NEW_SET_MASK, GUS_CS_COM_PROC's MSK_INT_ITI --
+     which PASS2 rejects with FT101.  This is DR121254 again, in the OPPOSITE
+     direction from PMQTEC, where a BIT literal reached an INTEGER formal.
+     OI-34.06 settles the form: its DM6OPS carries the same call at the same
+     SRN 033700 and passes HEX'0000'.  Repaired as W/V pairs.  PFS be35c9e4,
+     a1ab8e89.
+  1  MACRO-VALUED SUBSCRIPTS, also misdiagnosed first.  VAASEQUE failed P8,
+     "SYMBOL SYNTACTICALLY ILLEGAL: +", and the diagnostic pointed nowhere near
+     the fault -- the nearest '+' was in a later statement whose source is
+     provably correct, confirmed by the original listing's S card reading
+     "N+2:" and by OI-34.06 writing the identical CVAA_READY$(N+2:)=OFF; and
+     compiling it.  The real fault is nine subscripts written $NAME where NAME
+     is a REPLACE macro; OI-34.06 writes $(NAME).  The unparenthesised form
+     misparses for a macro, and error recovery then blamed a '+' further on.
+     Only subscripts whose name is a known REPLACE are changed -- five
+     $SPEC_CMD and four $SINGLE_CMD.  PFS d5f28189.
+  0  CASCADES.  CDAP04, CDAP05, CDAP06 and CDAP08 needed no change whatever;
+     their DI11s were only GO1ASC and GO6RTL not existing yet.
+
+Two lessons in there, both of which cost time:
+
+  - A diagnostic can point a long way from its cause.  Error recovery reported
+    VAASEQUE's P8 against a statement that was correct, and the M3 truncation
+    display made a doubled buffer look like a compiler defect.  Reduce to a
+    minimal test case before believing the pointer.
+  - Clearing one error exposes the next.  GO1ASC and GO3ENT showed FT101 only
+    after M3 came off them.  A failure count is a lower bound.
+
+Earlier failures, all repaired and confirmed, one line each:
+
+  PMQTEC   FT101 as above, the BIT-literal-to-INTEGER-formal direction.  The
+  SULUPLIN control that settles the rule: GEQENT, GEPENT, GENEDM and GERENT all
+           pass HEX'4000' to GKE_KIP, whose formal is BIT(16), and OI-34.06
            compiles them clean.  Passing a hex literal is not the problem;
            passing one to an INTEGER formal is.  Page 165 of the 1974 HAL/S
            Programmer's Guide carries the same INTEGER/SCALAR PARAMETER rule
@@ -391,47 +469,14 @@ and the detail is in compilePASS.md:
   PGHHEA
   PGGPCF
 
-THE REAL OPEN ITEM: the 156 and 161 files never attempted (section 1).  They are
-blocked on each other, not broken, and the way in is to seed the template
-library.  This is TESTED and works:
-
-  1. PASS1 takes TEMPLIB as both input (--pdsi=4) and output (--pdso=6), but
-     emits NO template when the compile fails.  So a cycle member cannot seed
-     itself by being compiled and failing -- that was tried first and does not
-     work.
-  2. A stub carrying only the block statement CAN seed it, because what a
-     caller needs is the name and the parameter list and nothing else.  For
-     VM4BFSHU a two-line stub
-
-         VM4_BF_SHUT_DN : PROCEDURE;
-         CLOSE VM4_BF_SHUT_DN;
-
-     compiled clean and deposited @@VM4BFS.  VM1BFDCY -- never once attempted
-     before -- then compiled, exit 0, and VM4BFSHU recompiled for real over the
-     stub, exit 0.  Cycle closed, nothing synthetic left in TEMPLIB.
-  3. All six OI340600 cycles are seedable the same cheap way: every seed
-     candidate is parameterless, so each needs only a two-line stub.  The seeds
-     are ARAGPCSW (cycle of 29), GGQCOM (7), V01TCSSC (5), VM4BFSHU (2), GV6STA
-     (2) and VS5SSTPR (2).  GV6STA looks parameterised only because its block
-     statement is split across two cards.
-
-  cycle-bootstrap-test.sh does step 1 and 2 for the VM pair.  What is NOT done
-  is teaching compilePASS to do this by itself -- detect a cycle, seed it, and
-  carry on -- which is what would actually move those 317 files into the run.
-
-  Name a stub _stub*.hal: corpus-run.sh clears _*.hal at the start of a run, so
-  a stub cannot leak into a later one.  Its .obj is NOT cleared; delete
-  objects/_stub*.obj by hand.
-
-Also open:
-  - corpus-run.sh should pass --csects explicitly rather than relying on the
-    ~/ForClaude/mafgen symlink (section 3).  Do not edit that script while a run
-    is executing it: bash reads a script incrementally and an edit can corrupt
-    the run in progress.
+Carried forward, none of it blocking:
   - PASS4's DATABUF statistics were never checked against a known-good value;
     modules/sdfpkg/pass4-*.rpt from 2026-08-03 are a good baseline.
   - GX4DIS, PMCCYC and PMOSTA masters carry blocks no extraction has ever
     produced -- macro expansions, most likely.  Do not regenerate them blindly.
+  - A stub's .obj is not cleared between runs; delete objects/_stub*.obj by
+    hand if it matters.  The .hal is cleared, because corpus-run.sh removes
+    _*.hal at the start of a run.
 
 --------------------------------------------------------------------------------
 9.  SETTLED -- DO NOT RE-LITIGATE
@@ -455,7 +500,7 @@ Also open:
 - The files never attempted are blocked on each other, not damaged.  Neither
   D INCLUDE TEMPLATE card in a cycle is vestigial -- both members really do use
   each other -- so the cycle cannot be broken by dropping an include.  Seeding
-  the library is what works.  See section 8.
+  the library is what works, and compilePASS does it.  See section 6.
 - FT101 on a hex literal is the compiler being right.  Do not "fix" it in the
   compiler.
 - The validation method for any change to the extractor: extract the whole
@@ -486,4 +531,32 @@ Also open:
 - Verify a repair against OI-34.06 before making it.  Every repair in this
   session that was checked this way was right; the one pattern-based sweep that
   was NOT checked would have deleted 174 genuine comments.
+
+--------------------------------------------------------------------------------
+11. THE NEXT PHASE
+--------------------------------------------------------------------------------
+Compiling cleanly is not the same as generating correct code, and nothing in
+this phase checked the code we generate.  That is the next phase, and it is
+described in compileLinkCompare.md beside this file: link our objects at the
+CSECT addresses the real build used, and compare our binary against the actual
+AP-101S memory dumps in PFS/mafgen.
+
+Three things from that document are worth knowing before opening it:
+
+  - The job is 3212 HAL/S-derived CSECTs, not the 3859 in the indices.  The
+    rest are assembly, which we cannot yet assemble, or HAL/S runtime library
+    routines, which we do not compile at all.
+  - Work one memory configuration at a time, smallest first: SSW is 387 CSECTs
+    against G16's 1406.  The per-configuration counts sum to 7059 instances
+    over 3212 distinct CSECTs, so a mechanism fixed in SSW is already fixed
+    wherever else it occurs.
+  - Do NOT start by mass-testing every file.  Only a few failure mechanisms are
+    expected; take each intensively as it appears.  compilePASS is a mass
+    driver, but it existed because that triage had already happened -- it was
+    the tool that survived the process, not the one that began it.
+
+The corpus tooling here is directly reusable: corpus-run.sh's discipline of
+starting from source alone, the argv[0] check for stray compilers, setsid for
+launching, and the habit of verifying a run finished before believing its
+numbers.
 ================================================================================
