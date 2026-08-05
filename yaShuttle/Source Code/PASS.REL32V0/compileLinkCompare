@@ -45,7 +45,7 @@ Storage:        The only MAFGEN files we presently have, or have any prospect
 Usage:          For lack of any better alternative, the only reasonal comparison
                 we might make is for OI340600 source code vs OI340700 MAFGEN:
                     cd PFS/OI340600/ 
-                    ../compileLinkCompare [OPTIONS] --filename=F
+                    compileLinkCompare [OPTIONS] --filename=F
                 where F is the path to the source-code file being compiled.  
                 The filename extension (.hal, .asm, or .dfg) determines what 
                 prepreprocessors (if any) are used, as well as compilation 
@@ -99,8 +99,8 @@ basename = Path(filename).stem
 objfile = f"{basename}.obj"
 fcmfile = f"{basename}.fcm"
 symfile = f"{basename}.json"
-fileType = Path(filename).suffix
-#print(basename, objfile, fcmfile, symfile)
+fileType = Path(filename).suffix.replace(".", "")
+#print(basename, objfile, fcmfile, symfile, fileType)
 
 if fileType in ["hal", "dfg"]:
     if fileType == "dfg":
@@ -120,7 +120,7 @@ if fileType in ["hal", "dfg"]:
             print("STDERR:", e.stderr)
             os._exit(1)
     else:
-        pfilename = f"{basename}.hal"
+        pfilename = filename
     # First step, compile.
     command = ["HALSFC", "--clean", "--archive", pfilename, "--test", 
                "--force", f"--parms={parmList}", "-o", objfile]
