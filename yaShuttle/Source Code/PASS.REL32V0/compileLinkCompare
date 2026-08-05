@@ -1,0 +1,192 @@
+#!/usr/bin/env python
+import sys
+import subprocess
+import os
+from pathlib import Path
+import shutil
+
+extraParms = ""
+
+# The CARDTYPE table, conditional pairs and option list are shared with
+# compilePASS and compileLinkRun; see halsParms.py.  Note that this script
+# previously appended NO conditional pairs at all, so a U-Z card in column 1
+# would have been an M1 "ILLEGAL CARD TYPE" here while compiling cleanly
+# everywhere else.  It gets them now.
+from halsParms import stemOf
+import halsParms
+
+def getParms(filename):
+    return halsParms.getParms(stemOf(filename), extraParms)
+
+helpMsg = '''
+Purpose:        Used for compiling/assembling a single PASS source-code file, 
+                linking the object file, and comparing the linked file to a
+                GPC memory dump.
+Prerequisites:  * The programs HALSFC, ASM101S, etc., from virtualagc.
+                * The programs lnk101, rldanalyze, fcmcmp from nsts-sdl-dps.
+                * MAFGEN disassemblies for each PASS configuration of interest.
+                * PASS source code files.
+Preparation:    The MAFGEN disassembly of PASS configuration XXX must have  
+                been preprocessed by the utility unlinkMAFGEN2.py to produce:
+                   1. A memory image named XXX.fcm.
+                   2. A CSECT/DSECT index named csects-XXX.json
+                In the case of HAL/S source-code, any templates or include-files
+                needed for compiler directives "D INCLUDE ..." must already be
+                available in the template library or inclusion library; 
+                therefore, it is helpful if *all* HAL/S source-code files have
+                been pre-compiled via the utility compilePASS to populate those
+                libraries.
+Storage:        The only MAFGEN files we presently have, or have any prospect
+                for obtaining (as far as I know) are believed to be for OI340700
+                and are stored in PFS/mafgen/.  The XXX.fcm and csects-XXX.json
+                files for them are stored there as well.  Whereas the only
+                PASS source code we have is for OI340600 (PFS/OI340600/) and
+                OI301700 (PFS/OI301700/).
+Usage:          For lack of any better alternative, the only reasonal comparison
+                we might make is for OI340600 source code vs OI340700 MAFGEN:
+                    cd PFS/OI340600/ 
+                    ../compileLinkCompare [OPTIONS] --filename=F
+                where F is the path to the source-code file being compiled.  
+                The filename extension (.hal, .asm, or .dfg) determines what 
+                prepreprocessors (if any) are used, as well as compilation 
+                (HALSFC) versus assembly (ASM101S).
+OPTIONs:        --config=XXX.     PASS configuration:  G16 (default), G2, G3, G8, 
+                                  G9, P9, S2, or SSW.
+                --parms=P         P is a list of HAL/S-FC compiler parameters 
+                                  (i.e., HALSFC's own --parms command-line option) 
+                                  that will completely override the defaults we'd
+                                  normally use for the selected source-code file.
+                --extra-parms=P   As an alternative to --parms=P (see above),
+                                  P is a list of *extra* HAL/S-FC parameters 
+                                  that will be prefixed to the defaults used by 
+                                  this program.  P should end in a comma.
+                --memory=F.fcm    F.fcm (default ../mafgen/XXX.fcm) is the path 
+                                  to a GPC memory image.
+                --ext-syms=F.json F.json (default ../mafgen/csects-XXX.json) is the 
+                                  path to CSECT/DSECT index file.
+'''
+
+filename = None
+parmList = None
+config = "G16"
+dataDir = "../mafgen/"
+externalSymbolFile = None
+memoryFile = None
+for parameter in sys.argv[1:]:
+    if parameter.startswith("--parms="):
+        parmList = parameter.partition("=")[2]
+    elif parameter.startswith("--extra-parms="):
+        extraParms = parameter.partition("=")[2]
+    elif parameter.startswith("--config="):
+        config = parameter.partition("=")[2]
+    elif parameter.startswith("--filename="):
+        filename = parameter.partition("=")[2]
+    elif parameter.startswith("--ext-syms="):
+        externalSymbolFile = parameter.partition("=")[2]
+    elif parameter.startswith("--memory="):
+        memoryFile = parameter.partition("=")[2]
+    else:
+        print(helpMsg)
+        sys.exit(1)
+if externalSymbolFile == None:
+    externalSymbolFile = f"{dataDir}csects-{config}.json"
+if memoryFile == None:
+    memoryFile = f"{dataDir}{config}.fcm"
+if parmList == None:
+    parmList = getParms(filename)
+basename = Path(filename).stem
+objfile = f"{basename}.obj"
+fcmfile = f"{basename}.fcm"
+symfile = f"{basename}.json"
+fileType = Path(filename).suffix
+#print(basename, objfile, fcmfile, symfile)
+
+if fileType in ["hal", "dfg"]:
+    if fileType == "dfg":
+        # Step -1, convert to .hal
+        print(f"DFG preprocessing not yet implemented.")
+        os._exit(1)
+    
+    # Step zero, preprocess with preprocessHALSFC.
+    if False: # No! Obsolete!
+        pfilename = f"_{basename}.hal"
+        command = ["preprocessHALSFC", f"--in={filename}", f"--out={pfilename}"]
+        print(" ".join(command))
+        try:
+            result = subprocess.run(command, capture_output = True, text = True, check = True)
+        except subprocess.CalledProcessError as e:
+            print(f"Preprocessor failed with exit code {e.returncode}.")
+            print("STDERR:", e.stderr)
+            os._exit(1)
+    else:
+        pfilename = f"{basename}.hal"
+    # First step, compile.
+    command = ["HALSFC", "--clean", "--archive", pfilename, "--test", 
+               "--force", f"--parms={parmList}", "-o", objfile]
+    print(" ".join(command))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Compilation failed with exit code {e.returncode}.")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+        if Path(objfile).is_file():
+            print("However, the object file was created anyway, so let's continue ...")
+        else:
+            os._exit(1)
+
+elif fileType == "asm":
+    command = ["ASM101S", "--library=MLIB80", "--fill=C6C6", "--force-d", filename]
+    print(" ".join(command))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+    except subprocess.CalledProcessError as e:
+        print(f"Assembly failed with exit code {e.returncode}.")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+        os._exit(1)
+    f = open("assembly.rpt", "w")
+    f.writelines(result.stdout)
+    f.close()
+
+else:
+    print(f"Unknown source-code file-type .{fileType}.")
+    os._exit(1)
+
+# Next, link.
+command = ["lnk101", objfile, "-o", fcmfile, # "-L", "RUN", "-L", "ZCON", 
+           "--json-symbols", symfile, "--external-syms", externalSymbolFile]
+print(" ".join(command))
+try:
+    result = subprocess.run(command, capture_output = True, text = True, check = True)
+except subprocess.CalledProcessError as e:
+    print(f"Linking failed with exit code {e.returncode}.")
+    print("STDOUT:", e.stdout)
+    print("STDERR:", e.stderr)
+    #os._exit(1)
+    command = ["rldanalyze", symfile, fcmfile, f"../{config}.fcm", 
+               "--csect-table", "../csects-{config}.json", "--show-gaps", 
+               "--show-csects", "--scan-gaps"]
+    print(" ".join(command))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+    except subprocess.CalledProcessError as e:
+        print(f"rldanalyze failed with exit code {e.returncode}.")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+    os._exit(1)
+
+# Next, compare.
+command = ["fcmcmp", "--max-hw-diffs", "10", "--csect-table", externalSymbolFile, symfile, fcmfile, memoryFile]
+print(" ".join(command))
+try:
+    result = subprocess.run(command, capture_output = True, text = True, check = True)
+    print("STDOUT:", result.stdout)
+    print("STDERR:", result.stderr)
+except subprocess.CalledProcessError as e:
+    #print(f"Comparison failed with exit code {e.returncode}.")
+    print("STDOUT:", e.stdout)
+    print("STDERR:", e.stderr)
+    #os._exit(1)
+
