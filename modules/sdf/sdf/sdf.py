@@ -202,8 +202,34 @@ class sdf:
     # a caption, optionally in hexadecimal, with a selected indentation 
     # consisting of some number of tabs.  The printing occurs only if the 
     # `caption` argument is present.
+    def _addr(self, sdfPtr):
+        '''Address in the page cache of `sdfPtr` bytes into the cell that
+        `offsetForGet` names.
+
+        A VMP carries a page number in its top half and an offset WITHIN that
+        page -- 0 to 1679 -- in its bottom half, so adding a byte count to the
+        word as a whole is not the arithmetic the representation calls for.  It
+        works anyway for every sum below 0x8000, because mode5 renormalizes an
+        offset that has run past a page boundary, and it works for a NEGATIVE
+        sdfPtr, because the borrow the subtraction puts into the page number is
+        what mode5's "if offset < 0: pageNumber += 1" exists to undo.  Both of
+        those are relied on elsewhere in this file and are left alone.
+
+        What it cannot do is carry a positive sum past 0x8000: mode5 reads the
+        bottom half as a SIGNED quantity, so at that point the offset turns
+        negative and the address collapses.  Only a large SDF has a statement
+        index table long enough to reach 32K, which is why ##VAASEQ (152 pages)
+        abended 4005 -- reading 0x03E40000, page 996 of a 152-page SDF, where
+        the file holds 0x00910600 -- while every smaller SDF parsed correctly.
+        That one case, and only that one, is computed properly.
+        '''
+        vmp = self.offsetForGet + sdfPtr
+        if sdfPtr >= 0 and (vmp & 0xFFFF) >= 0x8000:
+            vmp = sdf.vmpPlusOffset(self.offsetForGet, sdfPtr)
+        return self.c.mode5(vmp)
+
     def getByte(self, sdfPtr, caption=None, hex=False, indent=1):
-        address = self.c.mode5(self.offsetForGet + sdfPtr)
+        address = self._addr(sdfPtr)
         value = self.c.mem[address]
         if caption != None:
             if hex:
@@ -216,7 +242,7 @@ class sdf:
     # Same as `getByte`, but for 16-bit integers.  The big-endian byte-order 
     # used in SDF's is accounted for.
     def getHalfword(self, sdfPtr, caption=None, hex=False, indent=1):
-        address = self.c.mode5(self.offsetForGet + sdfPtr)
+        address = self._addr(sdfPtr)
         value = (self.c.mem[address] << 8) | self.c.mem[address + 1]
         if caption != None:
             if hex:
@@ -229,7 +255,7 @@ class sdf:
     # Same as `getByte`, but for 24-bit integers.  The big-endian byte-order 
     # used in SDF's is accounted for.
     def get3QuarterWord(self, sdfPtr, caption=None, hex=False, indent=1):
-        address = self.c.mode5(self.offsetForGet + sdfPtr)
+        address = self._addr(sdfPtr)
         value = (self.c.mem[address] << 16) | (self.c.mem[address + 1] << 8) | \
                 self.c.mem[address + 2]
         if caption != None:
@@ -243,7 +269,7 @@ class sdf:
     # Same as `getByte`, but for 32-bit integers.  The big-endian byte-order 
     # used in SDF's is accounted for.
     def getFullword(self, sdfPtr, caption=None, hex=False, indent=1):
-        address = self.c.mode5(self.offsetForGet + sdfPtr)
+        address = self._addr(sdfPtr)
         value = (self.c.mem[address] << 24) | (self.c.mem[address + 1] << 16) | \
                 (self.c.mem[address + 2] << 8) | self.c.mem[address + 3]
         if caption != None:
@@ -282,7 +308,7 @@ class sdf:
     # ASCII translation of it.  The ASCII translation is *not* returned by
     # the function.  The `compressed` parameter is for `convertEbcdicToAscii`.
     def getText(self, sdfPtr, length, caption=None, compressed=False, indent=1):
-        address = self.c.mode5(self.offsetForGet + sdfPtr)
+        address = self._addr(sdfPtr)
         ret = bytearray(self.c.mem[address: address + length])
         if caption != None:
             msg = f"{'\t'*indent}{caption}: "
