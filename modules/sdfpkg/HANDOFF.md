@@ -17,34 +17,40 @@ about blank columns, which the separator fix now implements.
 Reach `successful == attempts` for a full compilePASS corpus run, for BOTH
 PASS versions.
 
-    OI340600   1188 / 1188     MET, over the WHOLE corpus.  Zero failures.
-    OI301700   1275 / 1287     12 failures, all in files never compiled before.
+    OI340600   1188 / 1188     COMPLETE.  Zero failures, nothing unattempted.
+    OI301700   1287 / 1287     COMPLETE.  Zero failures, nothing unattempted.
 
-The goal has moved, because the old measurement is no longer the interesting
-one.  Both runs now compile EVERY HAL/S file in the corpus:
+BOTH CORPORA COMPILE IN FULL.  Every HAL/S source file in both versions of
+PASS now compiles, and the accounting closes exactly against the files on
+disk:
 
     OI340600   1188 attempted - 21 stubs = 1167 = every source file
     OI301700   1287 attempted - 21 stubs = 1266 = every source file
 
-with "not part of PASS" 0 and "did not compile" 0 in both.  Two things got
-there.  corpus-run.sh passes --no-csects, so the auxiliary files outside PASS
-are compiled too -- restricting to PASS was only ever a way to reduce the
-up-front burden while failures were unexplained.  And compilePASS now breaks
-template-dependency cycles by seeding the library (§8), which reached the 156
-and 161 files that no run had ever attempted.  21 cycles were seeded, the same
-21 in both corpora.
+with "not part of PASS" 0 and "did not compile" 0 in both, and a Done. line
+on each.  For scale, OI340600 began the previous session at 843/907.
 
-For scale, OI340600 began the previous session at 843/907.
+Three things got there.  corpus-run.sh passes --no-csects, so the auxiliary
+files outside PASS are compiled too -- restricting to PASS was only ever a way
+to reduce the up-front burden while failures were unexplained.  compilePASS
+breaks template-dependency cycles by seeding the library (section 8), which
+reached the 156 and 161 files no run had ever attempted; 21 cycles are seeded,
+the same 21 in both corpora.  And the twelve OI301700 failures that the wider
+coverage exposed were traced to six roots and repaired:
 
-OI301700's 12 remaining failures are ALL files that seeding has only just made
-reachable, so they are new ground rather than regressions:
-
-    4  M3            GO1ASC GO2ORB GO3ENT VG9OPS9
-    4  DI11 in PASS1 CDAP04 CDAP05 CDAP06 CDAP08   (contiguous; likely one cause)
-    3  unclassified  DM5NEW DM6OPS GO6RTL
-    1  P8            VAASEQUE
-
-None of them takes the fatal path, so a run reports all twelve and finishes.
+    4  macro-legend comments   GO1ASC GO2ORB GO3ENT VG9OPS9 -- the extraction
+                               had copied the listing's rendering of OPSINIT's
+                               own field comments back in as source, so the
+                               macro emitted them AND the copy: M3, "comment
+                               longer than 256 characters".  PFS a1ab8e89.
+    5  DR121254 type mismatch  DM5NEW DM6OPS GO6RTL GO1ASC GO3ENT -- an INTEGER
+                               literal 0 passed to a BIT(16) formal.  W/V
+                               conditional pairs.  PFS be35c9e4, a1ab8e89.
+    1  macro-valued subscripts VAASEQUE -- nine subscripts written $NAME where
+                               NAME is a REPLACE macro; OI-34.06 writes
+                               $(NAME).  PFS d5f28189.
+    2  cascades                CDAP04/05/06/08 needed no change at all; their
+                               DI11s were only GO1ASC and GO6RTL not existing.
 
 *** CHECK THAT A RUN FINISHED. ***  `successful == attempts` is meaningless on
 a run that stopped early, and compilePASS's summary does not say that it did.
