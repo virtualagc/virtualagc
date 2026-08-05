@@ -130,14 +130,19 @@ def getParms(stem, extraParms="", options=None, original=False):
     '''The full --parms string for one source file.
 
     stem        the source file's stem, e.g. "GKFHOR" for GKFHOR.hal.
-    extraParms  prepended verbatim; this is where a --extra-parms switch goes,
-                and it must already end in a comma if it is not empty.
+    extraParms  prepended; this is where a --extra-parms switch goes.  The
+                separating comma is supplied here, so a caller may pass either
+                "TABLST" or "TABLST,".  Only compilePASS used to add it, so
+                --extra-parms=TABLST in either of the other two produced
+                "TABLSTSREF,LIST,..." and corrupted the option list.
     options     replaces DEFAULT_OPTIONS outright.  All three callers take the
                 default; the parameter exists for a one-off, not as an
                 invitation to start a fourth private option list.
     original    use the pairs for the original compiler rather than HALSFC.
     '''
     opts = list(DEFAULT_OPTIONS if options is None else options)
+    if extraParms and not extraParms.endswith(","):
+        extraParms += ","
     return extraParms + ",".join(opts) + ",CARDTYPE=" + \
            getCardtype(stem, original=original)
 
