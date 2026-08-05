@@ -102,6 +102,8 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
 
 
 
+
+
             the Compiler Itself</a><br>
         </li>
       </ul>
@@ -128,6 +130,8 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Development Toolchain").r
       AP-101B computers.&nbsp; HAL/S also seems to have been used for
       the flight software of the <a moz-do-not-send="true"
         href="https://en.wikipedia.org/wiki/Galileo_(spacecraft)">Galileo
+
+
 
 
 
@@ -233,6 +237,8 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       about the language, namely Michael Ryer's <a
         moz-do-not-send="true"
         href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+
+
 
 
 
@@ -432,6 +438,8 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
 
 
 
+
+
       The software functions pretty well, though it never reached the
       point of implementing 100% of HAL/S's features, nor of being
       extremely polished for user friendliness.&nbsp; I halted work on
@@ -441,6 +449,8 @@ href="Shuttle/UVA-528208-AMCS83-102%20-%20On%20the%20Engineering%20of%20Crucial%
       example) are working their way through Ryer's book.&nbsp; <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/yaHAL-S">The
+
+
 
 
 
@@ -614,8 +624,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
       source code for the original Intermetrics HAL/S compiler called
       HAL/S-FC</a>.&nbsp; We'll also have call to discuss <b>HALSFC</b>'s
+
+
 
     "baby brother" (in terms of capabilities) but "big brother" (in
     terms of age), and still incredibly useful, <b>HAL_S_FC.py</b>.<br>
@@ -781,83 +795,6 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <br>
     <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        At present, the modern implementations of PASS4 has not yet been
-        created, though as you can see from the table above, it's not
-        needed merely for compilation of object code.<br>
-        <br>
-      </font><b><font size="-1">Aside:</font></b><font size="-1">&nbsp;
         Probably, you're beginning to see a truly explosive confusion of
         usages of the word "pass".&nbsp; For one thing, there are 7
         passes of the compiler, <i>some</i> of which are named PASS<i>x</i>
@@ -867,7 +804,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
             moz-do-not-send="true" href="#glossary">glossary</a>, the <i>correct</i>
           acronym for the primary flight software was actually "PFS"
           rather than "PASS", but the term "PASS" became deeply
-          entrenched while the official acroynym "PFS" became mostly
+          entrenched while the official acronym "PFS" became mostly
           disused in the everyday language of the original
           developers.&nbsp;</font> For compiler passes, Intermetrics
         somewhat-interchangeably used the following alternate
@@ -905,7 +842,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       written in a high-level computer language I call XPL/I, with some
       "inline" IBM 360 machine code.&nbsp; The original developers, and
       other online references you'll see, refer to it simply as
-      "XPL".&nbsp; But I regard that as confusing and inaccurate, hence
+      "XPL".&nbsp; But I regard that as confusing and inaccurate, since
+      XPL was a standard language (even if very rare then and dead now)
+      but not the enhanced version of it that Intermetrics used, hence
       my insistence on the term XPL/I instead.&nbsp; In order to create
       our modern HAL/S compiler, <b>HALSFC</b>, I first had to write an
       XPL/I compiler that I call <b>XCOM-I</b>, and then use <b>XCOM-I</b>
@@ -918,15 +857,17 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <blockquote>
       <p><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; I
           intended the suffix "/I" in "XPL/I" to stand for
-          "Intermetrics".&nbsp; But it happens that the special-purpose
-          language XPL is a dialect of the general-purpose computer
-          language PL/I, so it's also possible to read "XPL/I" as being
-          "PL/I" with a prefix of "X".&nbsp; This pun is entirely
-          unintentional on my part, and I didn't even notice it for
-          several years afterward, but I have to say I do like it!</font><br>
+          "Intermetrics".&nbsp; But it happens that XPL was itself a
+          dialect of the general-purpose computer language PL/I, so it's
+          also possible to read "XPL/I" as being "PL/I" with a prefix of
+          "X".&nbsp; This pun is entirely unintentional on my part, and
+          I didn't even notice it for several years afterward, but I
+          have to say I do like it!</font><br>
       </p>
     </blockquote>
     <p><a name="testHal"></a>Also of note:&nbsp; Prior to the <i>very</i>-painful
+
+
 
 
 
@@ -1061,8 +1002,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
       This Python port remains very useful for cross-checking <b>HALSFC</b>,
-      though it's no longer intended to be run directly by
+      though it's no longer primarily intended to be run directly by
       developers.&nbsp; I've created no separate documentation for it
       beyond what's covered on the <b>XCOM-I</b> page, though I'll have
       some occasion below&nbsp; to mention it further.<br>
@@ -1114,7 +1057,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       and just affects what items appear in the compiler's
       printouts.&nbsp; I've altered the background color of this snippet
       of code to call attention to the fact that compiler directives
-      begin in column 1, whereas all code begins or beyond column 2.<br>
+      (and full-line comments) begin in column 1, whereas all code
+      begins or beyond column 2.<br>
     </p>
     <p><b>HALSFC</b> itself is actually a Python script that compiles a
       single HAL/S source-code file.&nbsp; (Or more accurately, it's
@@ -1134,7 +1078,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
     before them, or in the midst of them.&nbsp; The order is
     insignificant.&nbsp; We'll cover the available <i><font
         color="#996633"><code>OPTIONS</code></font></i> later, but some
-    of the more-significant that it's worth knowing about immediately
+    of the more-significant that are worth knowing about immediately
     are:<br>
     <ul>
       <li><font color="#663300"><code>--test</code></font> causes a
@@ -1145,13 +1089,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         and once with <b>HAL_S_FC</b> (<a moz-do-not-send="true"
           href="#testHal">as mentioned above</a>), and then to
         extensively compare the results.&nbsp; We have no means at
-        present to test subsequent passes of the compiler.<br>
+        present to similarly test subsequent passes of the compiler.<br>
       </li>
       <li><font color="#663300"><code>--parms=</code></font><i><font
             color="#663300"><code>"PARAMETERS"</code></font></i>
         specifies the "PARM field" covered in <a moz-do-not-send="true"
           href="#moron">the section on compiler options</a>.&nbsp; For
         example, it might look like <font color="#663300"><code>--parms="SRN,LIST,LISTING2,X6,NOTABLES"</code></font>.&nbsp;
+
+
 
 
 
@@ -1221,9 +1167,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
     </p>
     <p>As a convenience, if your operating system allows it, you'll also
       find some symbolic links to the results directories of recent <b>HALSFC</b>
-      runs, so that if you do want to access the files in them,you don't
-      have to keep typing awful directory names ("HALSFC ...".results)
-      that are continuously changing:<br>
+      runs, so that if you do want to access the files in them, you
+      don't have to keep typing awful directory names ("HALSFC
+      ...".results) that are continuously changing:<br>
     </p>
     <ul>
       <li>"current.results":&nbsp; The most-recent <b>HALSFC</b> run.</li>
@@ -1259,16 +1205,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
             causes all of the generated files (with some exceptions) to
             be cleared from the working directory and thus to be
             preserved <i>only</i> in the *.results directories.&nbsp;
-            (The exceptions are the files for the template library and
-            the include library both of which are covered later:
-            TEMPLIB[B]/, TEMPLIB[B].json, INCLIB[B]/, and
-            INCLIB[B].json.&nbsp; These are needed if you perform a
-            series of <b>HALSFC</b> runs for related HAL/S files that
-            together comprise a complete program, and so not having them
-            would limit you to programs that are completely contained in
-            a single HAL/S source-code file.&nbsp; If you are just
-            experimenting with simple uses of HAL/S, one file at a time,
-            you won't have these anyway.)<br>
+            (The exceptions are the files for the template library, the
+            include library, and the SDF library, all of which are
+            covered later: TEMPLIB[B]/, TEMPLIB[B].json, INCLIB[B]/,
+            INCLIB[B].json, and SDFLIB[B].&nbsp; These are needed if you
+            perform a series of <b>HALSFC</b> runs for related HAL/S
+            files that together comprise a complete program, and so not
+            having them would limit you to programs that are completely
+            contained in a single HAL/S source-code file.&nbsp; If you
+            are just experimenting with simple uses of HAL/S, one file
+            at a time, you won't have these anyway.)<br>
           </font></li>
         <li><font size="-1"><b>HALSFC</b>'s command-line option <code>--archive</code>
             causes all of the "HALSFC ...".results directories to be
@@ -1300,7 +1246,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       to "optimize" the HALMAT, producing new HALMAT-related files
       called optmat.bin and auxmat.bin.&nbsp; <b>Note:</b>&nbsp;
       optmat.bin is a valid HALMAT file, and can be parsed with
-      unHALMAT.py; auxmat.bin is not, and cannot.<br>
+      <b> unHALMAT.py</b>; auxmat.bin is not, and cannot.<br>
     </p>
     <p><a name="report2"></a>The "phase 2" program (PASS2) then pulls in
       all of those HALMAT and HALMAT-related files, and generates
@@ -1321,6 +1267,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
       the report as eye candy!&nbsp; You can read more about it in the
       document "<a moz-do-not-send="true"
         href="Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf">Space
+
+
 
 
 
@@ -1442,6 +1390,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
+
         Object File Format</a> ... or at least, <a
         moz-do-not-send="true" href="HALLINK101S.html">according to my
         write-up of it</a>, very close to that format!&nbsp; If you're
@@ -1496,9 +1446,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
+
       format has in fact been decoded</a>, or at least mostly so.<br>
     <p>Rather than compiling HELLO.hal using the command given earlier,
-      I'd personally be more likely to compile it using the command</p>
+      you might compile it using the command</p>
     <font size="+1"> </font>
     <blockquote>
       <pre><font size="+1" color="#663300">HALSFC HELLO.hal --test --parms="LIST</font><font size="+1"><font color="#663300">,LISTING2"</font><br></font></pre>
@@ -1528,6 +1480,126 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
         described later</a>, and they affect the format when the report
       is printed on an IBM line-printer, assuming anyone still has such
       a thing on which to print the report.<br>
+    </p>
+    <p>The next compiler pass, Phase 3 (PASS3) is a little trickier to
+      understand, in that it creates something called a Simulation Data
+      File (SDF) for your HAL/S file and storing it in an "SDF library"
+      for later use.&nbsp; The SDF library is just a local directory,
+      and the SDF is just a file (called "##HELLO .sdf"; filenames are
+      always exactly 8 characters) in that directory.&nbsp; An SDF is
+      something like a glorified symbol table that's useful in
+      (surprise!) running your program in a digital simulation.&nbsp;
+      Like I did for a long time, you may be thinking, Aha! I have no
+      use for this, since I don't have access to the simulation
+      environment in which this would be used!&nbsp; True, and at the
+      same time, not true.&nbsp; It turns out that the original
+      developers figured out that these SDFs were of use not in the
+      current compilation, but rather in later compilations of other
+      HAL/S files that depend on the file currently being
+      compiled.&nbsp; Therefore, you actually <i>do</i> need the SDF
+      unless you're doing something a extraordinarily simple as
+      compiling HELLO.hal.&nbsp; The report from PASS3 is singularly
+      uninformative, but it's short, so here it is in all its glory:<br>
+    </p>
+    <blockquote>
+      <pre>PAGE 1<br><br><br>   HAL/S COMPILER PHASE 3   --   VERSION OF AUGUST 3, 2026.  CLOCK TIME = 19:25:45.00<br> <br>HAL/S PHASE 3 ENTERED AUGUST 4, 2026.  CLOCK TIME = 6:22:30.19<br> <br> <br>SIMULATION DATA FILE ##HELLO  HAS BEEN CREATED<br> <br> <br>NUMBER OF FILE 6 LOCATES          = 1<br>NUMBER OF FILE 6 READS            = 0<br>NUMBER OF FILE 6 WRITES           = 0<br> <br>PAGING AREA SIZE (PAGES)          = 398<br>NUMBER OF LOCATES                 = 304<br> <br>PREDICTED SDF SIZE (PAGES)        = 3<br>ACTUAL SDF SIZE (PAGES)           = 2<br> <br>DIRECTORY FREE SPACE (BYTES)      = 60<br>DATA FREE SPACE (BYTES)           = 60<br>SDF SIZE (BYTES)                  = 1694<br>SDF DENSITY (%)                   = 50<br>NUMBER OF BLOCK NODES             = 1<br>NUMBER OF SYMBOL NODES            = 6<br>NUMBER OF STATEMENT NODES         = 15<br> <br>NUMBER OF BLOCKS DELETED          = 0<br>NUMBER OF SYMBOLS DELETED         = 0<br>NUMBER OF TEMPLATES DELETED       = 0<br>NUMBER OF MINOR COMPACTIFIES      = 0<br>NUMBER OF MAJOR COMPACTIFIES      = 0<br>NUMBER OF REALLOCATIONS           = 0<br> <br>END OF HAL/S PHASE 3 AUGUST 4, 2026.  CLOCK TIME = 6:22:30.22<br>TOTAL CPU TIME IN PHASE 3              0:0:0.04<br>CPU TIME FOR PHASE 3 INITIALIZATION    0:0:0.01<br>CPU TIME FOR PHASE 3 FILE GENERATION   0:0:0.00<br>CPU TIME FOR PHASE 3 FILE EMISSION     0:0:0.03<br></pre>
+    </blockquote>
+    <p>The final compiler pass, Phase 4 (PASS4), is much easier to
+      understand in principle:&nbsp; It simply writes reports about the
+      SDF just created, or about the contents of the SDF library in
+      general.&nbsp; What isn't so easy to understand is this: PASS4 can
+      produce four different kinds of reports, known as BRIEF, TABLST,
+      TABDMP, and ALL ... but only <i>two</i> of those (TABLST, TABDMP)
+      can be selected via <a moz-do-not-send="true" href="#moron">compiler
+        options</a>., while two (BRIEF, ALL) cannot. Indeed, by <b>HALSFC</b>
+      default (NOTABST, NOTABDMP), PASS4 receives no parameters at all
+      and just produces an empty report.&nbsp; Isn't that fun?&nbsp; A
+      report-generation program that runs by default but by default
+      generates no results!&nbsp; Sounds like Congress.&nbsp; Who says
+      the Shuttle wasn't ahead of its time?&nbsp; Nevertheless, you can
+      produce TABLST and/or TABDMP reports by specifying their
+      parameters at compile-time.<br>
+    </p>
+    <p>As for the BRIEF or ALL reports, you have to do something unusual
+      among the compiler's passes, which is to run PASS4 <i>stand-alone</i>
+      rather than as part of the compilation process.&nbsp; The original
+      Shuttle developers even assigned their own name to PASS4 when run
+      in that fashion, namely <b>SDFLIST</b>, and we may as well do
+      that too, to run PASS4 for you in stand-alone fashion.&nbsp; Just
+      typing "<code>SDFLIST</code>" will give you an explanation of the
+      options available, but I'll show you some too, so that we can see
+      some of the reports available.<br>
+    </p>
+    <blockquote><font size="-1"><b>Note:</b>&nbsp; The <i>gotcha!</i>
+        here is that to invoke <b>SDFLIST</b> you usually have to
+        supply the name of particular SDFs you're interested in ... and
+        those are <i>never</i> the name of the HAL/S file itself:<br>
+      </font>
+      <ul>
+        <li><font size="-1">start with the name of the HAL/S object;
+            i.e., the name of the <code>PROGRAM</code>, <code>PROCEDURE</code>,
+            <code>FUNCTION</code>, or <code>COMPOOL</code> <i>within</i>
+            the source file<br>
+          </font></li>
+        <li><font size="-1">remove all underscore characters</font></li>
+        <li><font size="-1">truncate to 6 characters</font></li>
+        <li><font size="-1">prefix by "##"</font></li>
+      </ul>
+      <p><font size="-1">So in the case of HELLO.hal, it contains a <code>PROGRAM</code>
+          called <code>HELLO</code>, and that translates to an SDF name
+          of "<code>##HELLO</code>".&nbsp; The enclosing double-quotes
+          are necessary when you use that name on the command line, at
+          least in Linux or Mac OS, because the characters <code>##</code>
+          would otherwise be treated as the beginning of a comment, and
+          the remainder of the command line would be ignored.&nbsp;
+          Sounds easy!&nbsp; Well, yes, for HELLO.hal it is.&nbsp; For a
+          file called RUN_A_TEST.hal that contains a procedure called "<code>MY_TEST_46</code>",
+          you'd have to compile RUN_A_TEST.hal but generate reports for
+          "<code>##MYTEST</code>".&nbsp; The report from the compiler's
+          PASS3, as you'll notice in the cut-and-paste above, does tell
+          you the name, if you have any doubts or are too lazy to figure
+          it out: "<code>SIMULATION DATA FILE <b>##HELLO</b> HAS BEEN
+            CREATED</code>".</font><br>
+      </p>
+    </blockquote>
+    <blockquote><b><font size="-1">Note:</font></b><font size="-1"> Any
+        place that <b>SDFLIST</b> accepts&nbsp; the name of an SDF, it
+        can actually accept any number of SDF names, separated by
+        spaces.&nbsp; I won't bother to demo that.</font><br>
+    </blockquote>
+    <p>By default, <b>SDFLIST</b> produces TABLST reports, as for
+      example<br>
+    </p>
+    <blockquote>
+      <pre>SDFLIST "##HELLO"<br></pre>
+    </blockquote>
+    <p>We will abridge most of the reports I show you below, but lets
+      see the TABLST report in all its glory:<br>
+    </p>
+    <blockquote>
+      <pre>S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 5, 2026   6:34:25.27     PAGE 1<br><br><br>SDFLIST -- VERSION OF AUGUST 4, 2026. CLOCK TIME = 15:8:46.00<br><br><br>TODAY IS AUGUST 5, 2026. CLOCK TIME = 6:34:25.27<br> <br>PARM FIELD: TABLST<br><br><br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 5, 2026   6:34:25.27     PAGE 2<br><br><br>                                                    FORMATTED DUMP OF SDF ##HELLO <br> <br>                              D I R E C T O R Y   D A T A<br> <br> <br>          FLAGS:                        SRN,FC,NON_UNIQUE_SRNS<br>          COMPUNIT:                     0<br>          # OF LAST PAGE:               1<br>          DATE/TIME:                    AUGUST 5, 2026. CLOCK TIME = 6:3:18.25<br>          SDF VERSION #:                35<br>          # OF LAST DIRECTORY PAGE:     0<br>          # OF EXTERNAL BLOCKS:         0<br>          # OF BLOCKS:                  1<br>          # OF SYMBOLS:                 6<br>          # OF EMITTED INSTRUCTIONS:    51<br>          FREE SPACE (BYTES):           568<br>          LIST HEAD PTR (ALPHABETIC):   1<br>          LITERAL ADDRESS (#D):         30<br>          LIST HEAD PTR (#D#P DATA):    1<br>          START OF INITIAL LITERAL AREA (#D) :     0<br>          END OF INITIAL LITERAL AREA (#D) :        0<br>          ROOT OF HIERARCHY TREE:       1  HELLO<br>          ROOT OF ALPHABETICAL TREE:    1  HELLO<br>          FIRST STMT #:                 1<br>          LAST STMT #:                  15<br>          # OF EXECUTABLE STMTS:        10<br>          TOTAL # OF STMTS:             15<br>          BLOCK # OF COMP. UNIT:        1<br>          SYMBOL # OF COMP. UNIT:       1<br>          NUMBER OF STACK WALKS:        0<br>          FIRST SRN &amp; INCLUDE COUNT:                0<br>          LAST SRN &amp; INCLUDE COUNT:                 0<br> <br>          SYMBOLS     6/200<br>          MACROSIZE   2/500<br>          LITSTRINGS  75/2000<br>          XREFSIZE    14/2000<br>          CARDTYPE:   FCRMUDVMWCXCYCZM<br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 5, 2026   6:34:25.27     PAGE 3<br>  BLOCK#  NAME                              TYPE        CLASS       FLAGS<br><br><br>                              B L O C K   D A T A<br> <br>       1  HELLO                                         PROGRAM     <br>          CSECT NAME = $0HELLO   SYM# OF BLOCK NAME = 1<br>          TEMPLATE VERSION = 1<br>          STACK ID = 1<br>          SYMBOLS = 1 TO 6    STMTS = 1 TO 15<br>          FIRST POST-DECLARE STMT = 7<br> <br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 5, 2026   6:34:25.27     PAGE 4<br>   SYMB#  NAME                              TYPE        CLASS         FLAGS<br><br><br>                              S Y M B O L   D A T A<br> <br> <br>******************  BLOCK:    1  HELLO<br> <br>       1  HELLO                             PROGRAM     LABEL         LATCHED,BLOCK_DATA<br>          ALPHABETIC LINK = 2    ADDRESS LINK = 2    PHASE1 LINK = 2<br>          LABEL DEFINED ON STMT 1<br>          ADDRESS = 00000004(     4)  SIZE = 00000002(     2)<br>          CROSS REFERENCE:  0 0001  <br> <br>       2  I                                 SP INTEGER  VARIABLE      <br>          ALPHABETIC LINK = 3    ADDRESS LINK = 3    PHASE1 LINK = 5<br>          ADDRESS = 00000006(     6)  SIZE = 00000001(     1)<br>          CROSS REFERENCE:  0 0002  4 0008  2 0009  <br> <br>       3  J                                 SP INTEGER  VARIABLE      <br>          ALPHABETIC LINK = 4    ADDRESS LINK = 5    PHASE1 LINK = 6<br>          ADDRESS = 00000007(     7)  SIZE = 00000001(     1)<br>          CROSS REFERENCE:  0 0005  4 0010  2 0011  <br> <br>       4  MY_NAME                           CHARACTER   VARIABLE      INITIAL<br>          ALPHABETIC LINK = 5    ADDRESS LINK = 0    PHASE1 LINK = 3<br>          ADDRESS = 00000013(    19)  SIZE = 0000000B(    11)<br>          CHARACTER(20)<br>          CROSS REFERENCE:  0 0004  2 0011  <br> <br>       5  POOKIE                            CHARACTER   VARIABLE      <br>          ALPHABETIC LINK = 6    ADDRESS LINK = 4    PHASE1 LINK = 4<br>          ADDRESS = 00000008(     8)  SIZE = 0000000B(    11)<br>          CHARACTER(20)<br>          CROSS REFERENCE:  0 0003  <br> <br>       6  PRINTER                           REPLACE     LABEL         <br>              PHASE1 LINK = 0<br>          REPLACE TEXT(1 BYTE):  "6"                                                                                                  <br>          CROSS REFERENCE:  0 0006  2 0007  2 0009  2 0011  <br> <br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 5, 2026   6:34:25.27     PAGE 5<br>STMT#  TYPE                       SRN   INCL  ORIG SRN<br><br><br>                              S T A T E M E N T   D A T A<br> <br> <br>******************  BLOCK:    1  HELLO<br> <br>    1  BLOCK                                0          LABEL(S):  1=HELLO<br>    2  DECLARE                              0        <br>    3  DECLARE                              0        <br>    4  DECLARE                              0        <br>    5  DECLARE                              0        <br>    6  REPLACE                              0        <br>    7  WRITE                                0        <br>    8  DO FOR                               0          TARGET(S): 2=I<br>    9  WRITE                                0          RHS VARS:  2=I<br>   10  DO FOR                               0          TARGET(S): 3=J<br>   11  WRITE                                0          RHS VARS:  3=J, 4=MY_NAME<br>   12  END                                  0        <br>   13  END                                  0        <br>   14  WRITE                                0        <br>   15  CLOSE                                0        <br><br>------------------------------------------------------------------------------------------------------------------------------------------------------<br>S D F L I S T   REL32V0                T I T A N  S Y S T E M S  C O R P .                AUGUST 5, 2026   6:34:25.27     PAGE 6<br><br><br>END OF SDFLIST AUGUST 5, 2026. CLOCK TIME = 6:34:25.27<br> <br>NUMBER OF SDFPKG LOCATES          = 91<br>NUMBER OF SDFPKG READS            = 1<br>NUMBER OF SDFPKG SELECTS          = 2<br>NUMBER OF SDFPKG GETMAINS         = 0<br>SDFPKG FCB AREA SIZE (BYTES)      = 2048<br>SDFPKG PAGING AREA SIZE (PAGES)   = 5<br> <br>NUMBER OF MINOR COMPACTIFIES      = 0<br>NUMBER OF MAJOR COMPACTIFIES      = 0<br>NUMBER OF REALLOCATIONS           = 0<br> <br>TOTAL CPU TIME IN SDFLIST              0:0:0.01<br></pre>
+    </blockquote>
+    <p>The command line to get a TABDMP report would instead be:<br>
+    </p>
+    <blockquote>
+      <pre>SDFLIST --tabdmp "##HELLO"</pre>
+    </blockquote>
+    <p>But since TABDMP reports are mostly just hexadecimal listings of
+      the SDF files, I won't bother to show you a sample.&nbsp; That's
+      left as an exercise for the reader.&nbsp; Similarly, a BRIEF
+      report,<br>
+    </p>
+    <blockquote>
+      <pre>SDFLIST --brief "##HELLO"</pre>
+    </blockquote>
+    is just a shortened form of a TABLST.<br>
+    <p>Finally, there's <code>SDFLIST --all</code>.&nbsp; What
+      distinguishes --all is that you no longer have to select a
+      specific SDF (or SDFs), but can simply get a report for every SDF
+      in the SDF library, all at once, integrated into a single report.
+      Or, you could add either of the switches <code>--brief</code> or
+      <code>--tabdmp</code> along with <code>--all</code> to get a
+      shortened combined report or a TABDMP combined report.<br>
     </p>
     <p> </p>
     <h1><a name="Installation"></a>Installation of HALSFC</h1>
@@ -1572,6 +1644,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
+
           note:</b>&nbsp; Since the VM is a large download, it's not
         updated too often on our download page.&nbsp; Whereas all HAL/S
         and AP-101S related material is currently undergoing
@@ -1588,6 +1662,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
     </p>
     <ol start="1">
       <li><a moz-do-not-send="true" href="XPL-I.html#Installation">Install
+
+
 
 
 
@@ -1748,6 +1824,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
 
 
 
+
+
             Bootstrapping!</a></li>
       </ul>
     </blockquote>
@@ -1763,6 +1841,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/PASS
     <p>For the true enthusiast using Microsoft Windows, I've found a
       peculiar <a moz-do-not-send="true"
 href="https://marketplace.visualstudio.com/items?itemName=ZaneHambly.hals-lsp">extension
+
+
 
 
 
@@ -1929,9 +2009,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
           book <i>Programming in HAL/S</i> 2nd edition</a> (or <a
           moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/NASA-CR-151872%20-%20Programming%20in%20HAL-S.pdf">first
+
+
 
 
 
@@ -2061,10 +2145,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
           files intended to demonstrate capabilities of HAL/S</a>.<br>
       </li>
       <li><a moz-do-not-send="true"
           href="https://www.ibiblio.org/apollo/Shuttle/19740017615.pdf#page=35">The
+
+
 
 
 
@@ -2284,6 +2372,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/FRR/STVD/STS-128%20FRR%20STVD.pdf#p
 
 
 
+
+
               MOD FRR</a> as having been implemented already in flight
             STS-128, as well as almost all of the OI-34.05 and OI-34.04
             modifications as well.&nbsp; It's difficult to avoid the
@@ -2392,6 +2482,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/FRR/STVD/STS-128%20FRR%20STVD.pdf#p
     as it did, expected that the underlying encoding of textual
     characters such as letters and numbers was <a
       moz-do-not-send="true" href="https://en.wikipedia.org/wiki/EBCDIC">EBCDIC</a>.&nbsp;
+
+
 
 
 
@@ -2560,6 +2652,8 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/encodingDEU.png"><img
 
 
 
+
+
         User's Manual</a> for more info on this, though the table you'd
       see there has a couple of errors in it that are corrected in our
       representation of it here.&nbsp; (Thanks to Dan Weaver for the
@@ -2644,6 +2738,8 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/encodingDEU.png"><img
       library function (namely, just return the dividend) and for
       dividing a <code>VECTOR</code> or <code>MATRIX</code> by 0
       (namely, return the original <code>VECTOR</code> or <code>MATRIX</code>),
+
+
       but not for just dividing a regular old number by 0.&nbsp; And the
       inverse of a singular matrix?&nbsp; Returns the identity matrix.<br>
     </p>
@@ -2654,13 +2750,19 @@ href="file:///mnt/STORAGE/home/rburkey/git/virtualagc-web/encodingDEU.png"><img
       a very wide range of specific errors or groups of errors.&nbsp;
       The entirety of section 25 of the <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=315"><i>HAL/S
+
+
           Programmer's Guide</i></a> covers the ON ERROR
       statements.&nbsp; The entirety of Appendix C of the <a
         moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=199"><i>HAL/S-FC
+
+
           User's Guide</i></a> is spent detailing just the arithmetic
       errors I mentioned.&nbsp; The <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20Space%20Shuttle%20Orbiter%20Avionics%20Software%20-%20Programming%20Standards%20Document%20-%20Shuttle%20Flight%20Software.pdf#page=45">Orbiter
+
+
         Avionics Software Programming Standards Document</a>, revision
       4, devotes section 3.3.1.10 to discussing how to use ON ERROR for
       i/o operations.&nbsp; This feature set is partially implemented,
@@ -2681,6 +2783,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20
     <p>Or, we have the so-called real-time features, in which there are
       all kinds of subtleties about how to schedule or cancel tasks or
       programs for future execution.&nbsp; Three whole chapters in the <i>HAL/S
+
+
         Programmer's Guide</i> are devoted to them.&nbsp; How many are
       used in actual PASS or BFS code?&nbsp; Well ... I won't lie to
       you, some of them are.&nbsp; The <i>vast</i> majority simply
@@ -2739,6 +2843,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20
       <li><b>Compilation Units.</b>&nbsp; Any given file of HAL/s source
         code contains a <i>single</i> compilation unit:&nbsp; <tt>PROGRAM</tt>,
         <tt>PROCEDURE</tt>, <tt>FUNCTION</tt>, or <tt>COMPOOL</tt>.&nbsp;
+
+
 
 
 
@@ -2862,6 +2968,8 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
+
           GitHub issue #1270 for more info</a>), error code E102.&nbsp;
         (The BFS version of the compiler has this problem too.&nbsp; But
         as you'll see in the next bullet point, the BFS version does a <i>lot</i>
@@ -2875,6 +2983,8 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           expression</i> — such as <tt>A AND NOT (B OR C)</tt> — in
         which rather than being boolean variables, the entities <tt>A</tt>,
         <tt>B</tt>, and <tt>C</tt> are <i>event variables</i> or <i>process
+
+
 
 
 
@@ -3030,10 +3140,14 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
+
           Some of the issues described below turn out to be documented
           in the "<a
             href="Shuttle/hal-s_compiler_system_specification.pdf#page=485"
             moz-do-not-send="true">HAL/S Compiler System Specification</a>",
+
+
 
 
 
@@ -3163,6 +3277,8 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
 
 
 
+
+
             assembly language instruction</a> <code>SVC</code>
           (Supervisor Call) wherever it appears. &nbsp; What are the
           legal values of <i><code>N</code></i>?&nbsp; Table 8-1 in the
@@ -3180,6 +3296,8 @@ href="https://github.com/virtualagc/virtualagc/issues/1270#issuecomment-38355673
           functionality designed into HAL/S.&nbsp; In other words, most
           or all of what you find in <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=229">Ryer's
+
+
 
 
 
@@ -3357,6 +3475,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
       It might look something like this in your HAL/S source code:<br>
     </p>
     <blockquote>
@@ -3365,6 +3485,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     <p> </p>
     <p>The line "<font color="#996633"><code>D INCLUDE TEMPLATE
           SOME_PROCEDURE</code></font>" is not a line of HAL/S code <i>per
+
+
 
 
 
@@ -3417,6 +3539,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       other words, it will find out everything needed to <i>interface</i>
       to <font color="#996633"><code>SOME_PROCEDURE</code></font>,
       without any details as to <font color="#996633"><code>SOME_PROCEDURE</code></font>'s
+
+
 
 
 
@@ -3562,6 +3686,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
     whereas the file TEMPLIB.json (or TEMPLIBB.json) is maintained by
     and for the alternate version of the compiler (<b>HAL_S_FC.py</b>)
     that's invoked only by the <b>HALSFC</b> option <font
@@ -3647,6 +3773,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
       This directive instructs the compiler to insert the entirety of
       the HAL/S source-code file <i><font color="#996633"><code>name</code></font></i>
       at the current point.&nbsp; The distinction, in case it isn't
@@ -3677,6 +3805,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       the files INCLIB.json or INCLIBB.json.<br>
     </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
+
 
 
 
@@ -3882,6 +4012,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
         At this writing, PASS1 of the compiler does not yet read
         SDF's.&nbsp; So my remarks below will be forward-looking rather
         than describing what actually exists in the modern HAL/S
@@ -4024,6 +4156,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
         The value of <font color="#663300"><code><i>N</i></code></font>
         (0 through 9) is the number of the device to which the file is
         assigned.<br>
@@ -4050,6 +4184,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
       <li><font color="#663300"><code>--raf=<i>I</i>,<i>R</i>,<i>N</i>,<i>F</i></code></font>
         — Attaches "random-access file" <font color="#663300"><code><i>F</i></code></font>
         to device number <font color="#663300"><code><i>N</i></code></font>.&nbsp;
+
+
 
 
 
@@ -4255,6 +4391,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
     (Yes, I said "without spaces", but I meant without spaces between
     the options.&nbsp; The space in this example is within the <font
       color="#663300"><code>TITLE</code></font> option, which has a
@@ -4278,6 +4416,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
     Many but not all of the allowed behavioral options are described in
     <a moz-do-not-send="true"
       href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=65">the
+
+
 
 
 
@@ -4397,6 +4537,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
         </tr>
         <tr>
           <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+
+
 
 
 
@@ -4650,6 +4792,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
             Without VARSYM, while the object code would could correctly
             manipulate the data for these <font color="#663300"><code>I</code></font>,
             <font color="#663300"><code>J</code></font>, and <font
@@ -4664,6 +4808,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             code.&nbsp; See the section on SYM records in <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/OS/360_Object_File_Format">the
+
+
 
 
 
@@ -4911,6 +5057,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
               implications</a> of this that I won't bother to describe
             here.<br>
             <br>
@@ -4995,9 +5143,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
               Avionics Software Development Then and Now: Different But
               the Same</a>" and "<a moz-do-not-send="true"
               href="Shuttle/HAL-S-FC-SDL-INTERFACE-CONTROL-DOCUMENT.pdf">HAL/S-FC
+
+
 
 
 
@@ -5172,6 +5324,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
 
 
 
+
+
             data with the <font color="#663300"><code>REMOTE</code></font>
             attribute, which has caused me quite a lot of confusion
             personally, so I'll say a few words about it here.&nbsp;
@@ -5227,6 +5381,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201
             register 3 for addressing <font color="#663300"><code>COMPOOL</code></font>
             data.&nbsp; The <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=67">HAL/S
+
+
 
 
 
@@ -5436,9 +5592,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           <td valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="middle" nowrap="nowrap" align="center">ALL (off)</td>
-          <td valign="top">The comments in PASS4 source code indicate
-            that "ALL" means "process all SDFs", though it's not quite
-            clear to me what the implications of that are.<br>
+          <td valign="top">(Note that this option is available only when
+            PASS4 is run in stand-alone mode, rather than as part of <b>HALSFC</b>.)&nbsp;
+
+            The comments in PASS4 source code indicate that "ALL" means
+            "process all SDFs", though it's not quite clear to me what
+            the implications of that are.<br>
           </td>
         </tr>
         <tr>
@@ -5447,14 +5606,18 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
           <td valign="middle" nowrap="nowrap"><br>
           </td>
           <td valign="middle" nowrap="nowrap" align="center">BRIEF (off)</td>
-          <td valign="top">If BRIEF is in effect, PASS4 does not print a
-            formatted dump of the SDF in its output report.&nbsp; BRIEF
-            automatically applies the TABLST and NOTABDMP compiler
-            options.<br>
+          <td valign="top">(Note that this option is available only when
+            PASS4 is run in stand-alone mode, rather than as part of <b>HALSFC</b>.)&nbsp;
+
+            If BRIEF is in effect, PASS4 does not print a formatted dump
+            of the SDF in its output report.&nbsp; BRIEF automatically
+            applies the TABLST and NOTABDMP compiler options.<br>
           </td>
         </tr>
         <tr>
           <td rowspan="1" colspan="4" valign="top" align="center"><i>Type
+
+
 
 
 
@@ -5649,8 +5812,12 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
               8-28</a> and on <a moz-do-not-send="true"
               href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=197">page
+
+
 
 
 
@@ -6014,6 +6181,8 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
               2, Printable</i><br>
           </td>
         </tr>
@@ -6063,6 +6232,8 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
               <li>Double- or triple-spacing of lines via ANSI control
                 characters (see LISTING2).</li>
               <li><a moz-do-not-send="true" href="#overstrike">Overstruck
+
+
 
 
 
@@ -6307,6 +6478,8 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
 
 
 
+
+
               in HAL/S</i>, etc.), and some which you will not (even
             though a theoretical interpretation is assigned to them):<br>
             <ul>
@@ -6373,6 +6546,8 @@ href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the
                 invented the Virtual AGC Project:</li>
               <ul>
                 <li>For "modern" compilation (by <b>HALSFC</b> or <b>HAL_S_FC.py</b>),
+
+
 
 
 
@@ -6526,6 +6701,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/IBM-82-SS-4556%20-%20Rev%204%20-%20
 
 
 
+
+
                 Shuttle Programs Orbiter Avionics Software Programming
                 Standard Document</a></i>.&nbsp; Alas, as of this
             writing we have not a single SAM in our possession.<br>
@@ -6614,12 +6791,16 @@ href="Shuttle/NASA-CR-144100%20-%20HAL,%20SM%20Language%20Specification.pdf">HAL
 
 
 
+
+
                       Language Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
                       href="Shuttle/19760007755.pdf">HAL/SM System
                       Functional Design Specification</a>"</font></li>
                 <li><font size="-1">"<a moz-do-not-send="true"
 href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%20Specification.pdf">HAL/SM
+
+
 
 
 
@@ -6829,6 +7010,8 @@ href="Shuttle/NASA-CR-144099%20-%20HAL,%20SM%20System%20Sofware%20Requirements%2
         </font></font></blockquote>
     <p> </p>
     <p><a moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=40">Section
+
+
 
 
 
@@ -7208,6 +7391,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
               production numbers are related to the BNF rules according
               to comments in the compiler's source code</a>.&nbsp; As
             they used to say, "You could look it up!"<br>
@@ -7231,6 +7416,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
                 production trace available, though at present it applies
                 to the entire HAL/S source-code file, and cannot
                 selectively </font><font size="-1"><font size="-1">be </font>activated
+
+
 
 
 
@@ -7405,6 +7592,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
               machine</a>, with each state having a unique identifying
             number.&nbsp; However, the state transitions are
             table-driven, with both the state numbering and the
@@ -7465,6 +7654,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             hexadecimal representations of double-precision <a
               moz-do-not-send="true"
               href="https://en.wikipedia.org/wiki/IBM_hexadecimal_floating-point">IBM
+
+
 
 
 
@@ -7722,6 +7913,8 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
 
 
 
+
+
                 H(1)</code></font>" as described above.<br>
           </td>
         </tr>
@@ -7930,6 +8123,8 @@ S Y M B O L  &amp;  C R O S S   R E F E R E N C E   T A B L E   L I S T I N G :<
             comments in OPT source code call this "STACK TRACE".&nbsp;
             It is a toggle.&nbsp; The effect is similar but not
             identical to that of <a moz-do-not-send="true" href="#X5">compiler
+
+
 
 
 
@@ -8570,6 +8765,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
                   source-code file PASS1.PROCS/##DRIVER.xpl</a>, though
                 since most of the datatypes won't fit in a single CPU
                 register, not all of the codes are applicable to the
@@ -8650,6 +8847,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
               PASS2 source code</a>.&nbsp; Which is not anything I'd
             normally suggest, since I'd like to thoroughly digest all of
             this subject matter and spit it out explicitly for you, so
@@ -8669,6 +8868,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
               <li>The most-common messages are emitted by the `EMITC`
                 `PROCEDURE`.&nbsp; These are of the format "<font
                   color="#663333"><code>%06X:%6d,&nbsp;&nbsp; %04X</code></font>",
+
+
 
 
 
@@ -8735,12 +8936,16 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
                 where the fields are the current "location counter" and
                 a "data word".<br>
               </li>
               <li>Finally, there are the messages emitted by the
                 `SAVE_LITERAL` `PROCEDURE` in GENERATE.xpl.&nbsp; These
                 messages are of the format "<font color="#663333"><code>%6d:%08X
+
+
 
 
 
@@ -8871,8 +9076,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
               EXAMPLE_2 program</a> from <a moz-do-not-send="true"
               href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=106">p.
+
+
 
 
 
@@ -9218,6 +9427,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
                   </i></code></font></b><b>or </b><b><font
                 color="#663300"><code>stdout</code></font></b></td>
           <td valign="middle"><br>
@@ -9367,6 +9578,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="middle" align="center"><b>n/a</b></td>
           <td valign="top">For use with the compiler directives "<code>D
               DEFINE <i>name</i></code>" and "<code>D CLOSE <i>name</i></code>",
+
+
 
 
 
@@ -9563,8 +9776,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
               file SOURCECO.xpl of the HAL/S compiler's original source
               code</a>.&nbsp; The lines reading "<font color="#663300"><code>OUTPUT(9)
+
+
 
 
 
@@ -9669,14 +9886,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             align="center"><b><code><font color="#663300">--raf=I,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
           <td valign="middle" nowrap="nowrap" bgcolor="#cc33cc"
             align="center"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
-          <td valign="middle" bgcolor="#cc33cc" align="center"><b><code><font
-                  color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
+          <td valign="middle" nowrap="nowrap" bgcolor="#cc33cc"
+            align="center"><b><code><font color="#663300">--raf=B,1560,2,<i>litfile.bi</i><i>n</i></font></code></b></td>
           <td valign="middle" align="center"><b>TBD</b></td>
           <td valign="middle">This is a "random-access file" that the
             compiler uses to store the values of string, floating-point,
             and bit-string literals.&nbsp; I'm not sure the format of it
             is documented anywhere, but <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/unLitfile.py">we've
+
+
 
 
 
@@ -9861,9 +10080,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           <td valign="middle" nowrap="nowrap" bgcolor="#ff99ff"
             align="center"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON4.out</i></code><code></code></font></b></td>
           <td valign="middle" nowrap="nowrap" bgcolor="#cccccc"
-            align="center"><b><font color="#663300"><code>--commoni=</code><code><i>COMMON</i></code><code><i>5.out</i></code></font></b></td>
+            align="center"><b><font color="#663300"><code>[--commoni=</code><code><i>COMMON</i></code><code><i>5.out</i>]</code></font></b></td>
           <td valign="middle">The state of <font color="#663300"><code>COMMON</code></font>
-            memory upon program start.<br>
+            memory upon program start.&nbsp; In PASS4, this is optional,
+            in the sense that it is present when PASS4 is run as part of
+            the compiler, but is absent when PASS4 is run in
+            "stand-alone" mode. In stand-alone mode, several options
+            ("ALL" and "BRIEF") are available that are not available
+            when run within the compiler.<br>
           </td>
         </tr>
         <tr>
@@ -9971,8 +10195,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
         for a full interpretation, because litfile<i>x</i>.bin usually
         contains some pointers to string data residing in COMMON<i>x</i>.out.bin.
+
+
 
 
 
@@ -10248,6 +10476,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
     My claim is that in doing so, we've validated our modern version of
     PASS1.<br>
     <br>
@@ -10263,6 +10493,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>The complete HAL/S and AP-101S source code for some version of
         the Space Shuttle flight software (roughly 700K lines of code).</li>
       <li>A knowledge of the <a moz-do-not-send="true" href="#moron">compiler
+
+
 
 
 
@@ -10440,6 +10672,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
         FLO.PROC/, AUX_PROCS/, and OPT.PROCS/ of the folder
         "yaShuttle/Source Code/PASS.REL32V0/".<br>
       </li>
@@ -10455,6 +10689,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     <h1><a name="imponderable"></a>Other Imponderable Mysteries</h1>
     <blockquote>
       <p><b><font size="-1">Important note:</font></b><font size="-1">&nbsp;
+
+
 
 
 
@@ -10502,6 +10738,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       intractable problems in PASS source code which <b>HAL/S-FC</b>
       cannot handle in its modern incarnation(s) as <b>HALSFC</b> and <b>HAL_S_FC.py</b>,
       and I've expended enough effort on tracking down bugs in <b>HALSFC</b>'s
+
+
 
 
 
@@ -10595,10 +10833,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
         To avoid a digression that's probably not of interest to you at
         this point, I'll just say that this problem is dissected <i>ad
           nauseam</i> in repository <a moz-do-not-send="true"
           href="https://github.com/virtualagc/virtualagc/issues/1280">issue
+
+
 
 
 
@@ -10631,6 +10873,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/preprocessHALSFC">preprocessHALSFC</a></b>[.<a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/preprocessHALSFC.bat">bat</a>])
+
+
 
 
 
@@ -10701,6 +10945,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
           #1281</a>, but there's presently no workaround available for
         it, short of modifying the PASS source code to avoid it.</li>
       <li><u>ZO3</u>:&nbsp; Some (many!) PASS HAL/S source-code files
@@ -10711,6 +10957,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         in the first pass (the parsing pass) of the compiler, ZO3 errors
         are triggered in the compiler's <i>optimization</i> pass ... an
         entirely separate program (<b>HALSFC-OPT</b>, versus <b>HALSFC-PASS1</b>/<b>HAL_S_FC.py</b>).&nbsp;
+
+
 
 
 
@@ -10767,6 +11015,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
           #1282</a>.&nbsp; There is presently no available
         workaround.&nbsp; Why do I say that, given that I also said that
         the <i>HAL/S-FC User's Manual</i> does offer a
@@ -10787,6 +11037,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         compiled by the HAL/S compiler, it must consist of a single
         "compilation unit", which is defined in HAL/S to be a <code>PROGRAM</code>,
         a <code>PROCEDURE</code>, a <code>FUNCTION</code>, or a <code>COMPOOL</code>.&nbsp;
+
+
 
 
 
@@ -10866,6 +11118,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
           a discussion here</a>.&nbsp; Even though these pointers are
         (supposedly) never used, this is not regarded as a "good"
         feature in high-reliability software. ( I am saying this in an
@@ -10913,11 +11167,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
         But again, this preprocessing is done by the compiler itself
         rather than by a program dedicated to that purpose, just by
         managing the order in which we compile HAL/S source-code files.</li>
       <li>And I've said that "inclusion files" must be processed prior
         to their use, by means of a program I call <b>prepareINCLIB</b>.&nbsp;
+
+
 
 
 
@@ -10959,13 +11217,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       stand-alone preprocessing program called <b>preprocessHALSFC</b>.<br>
     </p>
     <blockquote>
-      <p><b><font size="-1">Note:</font></b><font size="-1">&nbsp; It <i>now</i>
-          seems likely that there was originally no preprocessor like <b>preprocessHALSFC</b>,
-          but rather that the HAL/S compiler's transparent SDF-inclusion
-          feature eliminated the <code>COMPOOL</code>-ordering
-          problem.&nbsp; But we won't know that for sure until the SDF
-          creation and SDF inclusion have actually been implemented in <b>HALSFC</b>
-          and/or <b>HAL_S_FC.py</b></font><br>
+      <p><b><font size="-1">Note:</font></b><font size="-1">&nbsp; It is
+          now known that there was originally no preprocessor like <b>preprocessHALSFC</b>.
+          Rather, when asked to include a template, the HAL/S compiler
+          instead tried to include something called a Simulation Date
+          File (SDF), and only fell back on a template if the
+          corresponding SDF did not exist.&nbsp; SDFs do not have the
+          same requirements as templates in terms of the order of
+          inclusion, and thus do not cause the same problems that
+          misordered templates cause.</font><br>
       </p>
     </blockquote>
     <p>On the other hand, there are preprocessors we <i>know</i> were
@@ -11136,6 +11396,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
       For the purpose of this discussion, there are two sub-directories
       of significance, namely:<br>
     </p>
@@ -11151,11 +11413,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <ul>
       <li>APPLSRC/ contains "application software" written in HAL/S.</li>
-      <li><font color="#999999">CON80/ is TBD.</font><br>
+      <li>CON80/ contains lists of source modules included in an any
+        given build.<br>
       </li>
       <li>INCL80/ contains HAL/S source-code files that are intended
         only for importation into other HAL/S files via the HAL/S
         compiler directive "<font color="#996633"><code>D INCLUDE <i>name</i></code></font>".&nbsp;
+
+
 
 
 
@@ -11242,6 +11507,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
     </p>
     <p>Before doing any actual compiling, though, for repeatability you
       might want to prepare <a moz-do-not-send="true" href="#templib">the
+
+
 
 
 
@@ -11430,6 +11697,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
               Inc.</i></a>:&nbsp; The company which originally developed
           the Space Shuttle flight software and the development
           tool-chain for it.&nbsp; At this writing, its current
@@ -11437,6 +11706,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
         </li>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/United_Space_Alliance"><i>United
+
+
 
 
 
@@ -11508,6 +11779,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <li>Timeframes:</li>
       <ul>
         <li><i>Contemporary</i> or <i>original</i> or <i>Intermetrics</i>:&nbsp;
+
+
 
 
 
@@ -11663,6 +11936,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
               AP-101S</i></a> or <i>General Purpose Computer</i>
           (GPC):&nbsp; This is the type of computer onboard the Space
           Shuttle in which the flight software ran; each Shuttle had 5
@@ -11680,6 +11955,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
       <ul>
         <li><a moz-do-not-send="true"
             href="https://en.wikipedia.org/wiki/HAL/S"><i>HAL/S</i></a>:&nbsp;
+
+
 
 
 
@@ -11898,12 +12175,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
+
             in HAL/S</i>, second edition (1979), by Michael Ryer.</li>
         <li>Related Virtual AGC website pages:</li>
         <ul>
           <li><a moz-do-not-send="true" href="Shuttle.html">Space
               Shuttle</a></li>
           <li><a moz-do-not-send="true" href="links-shuttle.html#HAL/S">HAL/S
+
+
 
 
 
@@ -12009,7 +12290,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-07-20<br>
+          2026-08-05<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
