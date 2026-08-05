@@ -554,6 +554,14 @@ image, so it carries PASS2's variables at PASS2's addresses, and PASS3's layout
 differs (`FREE_POINT` 0x0132CE against 0x008C47).  Tested: "UNAUTHORIZED THEFT
 FROM FREE STRING AREA, WAS=469784672".
 
+The same defect had a second face at the PASS3→PASS4 handover, and the fix is in
+the header rather than the records.  The text COMMON's `:` header now carries
+`freelimit` as a second field, and it is applied *after* every record has been
+read, so that record processing cannot overwrite it partway through.  The
+one-field form is still accepted, so older COMMON files continue to load.
+`HALSFC … --parms=…,TABLST` on `_CDR06D.hal` now exits 0 and emits a real TABLST
+report; it abended before.
+
 ## `SUBSTR` pads, and it matters
 
 `runtimeC.c`'s `SUBSTR(s, start, length)` returns exactly `length` characters,
@@ -671,18 +679,66 @@ checkable: FCB area 2048 bytes and paging area 5 pages are exactly what
 `INITIALI.xpl` passes, and 6 reads matches the SDF's "# OF LAST PAGE: 6".
 GETMAINS is honestly 0 — nothing here does a GETMAIN.
 
+## Running two corpora at once
+
+Both PASS versions can now be compiled concurrently, which halves the wall-clock
+cost of a full regression.  `HAL_S_FC.py` previously refreshed its private copies
+of `xplBuiltins.py` and `HALINCL/` by `rmtree` + `copytree` into a *fixed shared
+path*, so a second concurrent compilation could see the tree missing or half
+rebuilt — `ModuleNotFoundError: HALINCL.COMMON`, or `FileExistsError` out of
+`copytree`.  Each file is now copied only when it differs from the master,
+through a temporary name renamed into place, and nothing is deleted.  Verified
+with a two-process smoke test and then with OI340600 and OI301700 running
+together.
+
+A genuine port bug turned up on the way.  `D_TOKEN` called `PRINT_COMMENT` with
+one argument where two are needed, killing any compilation whose directive
+continued onto a second card — which is how `D INCLUDE SDF` is reached.
+`PRINT_COMMENT` declares no `I` of its own, so the `I` it uses is `STREAM`'s, the
+scope it is textually included into, and `STREAM`'s frame is what to pass, as
+every other call site already does.  `D_TOKEN`'s own `I` and `J` are different
+variables entirely.
+
+Note that a *killed* run is not the same as a finished one, and leaves orphaned
+`HALSFC` processes still writing `halmat.bin`, `litfile.bin` and `COMMON*.out`
+into the work directory.  A fresh run started on top of them loses its
+intermediates and aborts after FLO with exit 240 and "Unable to open COMMON input
+file".  That, not concurrency, is what produced the CDR06D abort that went
+undiagnosed for some time.  Check for strays by `argv[0]`; a `pgrep -f` against
+the whole command line matches the checking command itself and reads as a false
+positive.
+
 ## Corpus results
 
-With SDF import in both compilers and the fixes above: **907 attempts, 843
-successful, 59 not part of PASS, 0 cross-comparison differences and 0 SPACE
-MANAGEMENT errors** — against 30 SPACELIB failures in the pre-fix baseline.  ZO3
-skips fell from 90 to 34 and XI3 from 12 to 11.  PASS1-error skips rose from 1
-to 17, which is the CS2 family now reporting its real DQ7 duplicate-name errors
-instead of dying on the spurious BI002.
+With SDF import in both compilers and the fixes above, both PASS versions now
+compile **completely**:
 
-CS2IX4 is representative of that family and its residual failure is genuine:
-DQ7 on `CSAS_PDT_PAR_ENTRY` and others, a real duplicate-name collision between
-the CSAPDT and CS2PDT compools, on which both compilers agree exactly.
+| corpus | attempted | successful | failures | never attempted |
+|---|---|---|---|---|
+| OI340600 | 1011 | 1011 | 0 | 156 |
+| OI301700 | 1105 | 1105 | 0 | 161 |
+
+0 cross-comparison differences and 0 SPACE MANAGEMENT errors, against 30
+SPACELIB failures in the pre-fix baseline.  For scale, the first run recorded
+here was 907 attempts and 843 successful.
+
+Two cautions on reading those numbers.  A run that stops early still prints a
+summary, so `successful == attempted` means nothing without `grep -c 'Done\.'`
+returning 1.  And "attempted" counts every HAL/S file the driver reaches: these
+runs had no CSECT index available, so they compiled the files normally
+classified "not part of PASS" as well — that is more coverage than the historical
+baseline, not less, and all of them passed.
+
+The "never attempted" column is a different matter and is *not* failure.  Those
+files sit in mutually dependent groups — six of them in OI340600, the largest
+with 29 members — where each needs a template only another member can produce,
+so no member can go first.  They are reachable by seeding the library; see the
+handoff.
+
+CS2IX4 was long representative of the residual failures: DQ7 on
+`CSAS_PDT_PAR_ENTRY` and others, a real duplicate-name collision between the
+CSAPDT and CS2PDT compools, on which both compilers agreed exactly.  That class
+is settled and described in `compilePASS.md`.
 
 One Python defect surfaced once the BI002 line stopped masking it.
 `HALINCL/DOWNSUM.py` used `len(h.DOWN_INFO)` where the XPL has
@@ -705,4 +761,11 @@ did not.  Three sites corrected; sibling `CERRORS.py:73` already had it right.
   `yaShuttle/ported/HALINCL/`, and it is the one on the PATH that `HAL_S_FC.py`
   actually imports.  No Makefile or script syncs them, so an edit to the tracked
   master alone changes nothing at runtime.
-- `pass4 = False` in HALSFC: PASS4 works standalone but is not yet in the chain.
+- PASS4 is now in the chain, and `--extra-parms=TABLST` makes a corpus run
+  exercise it properly: PASS4 then *parses* each SDF the run has written rather
+  than merely opening it, so the corpus tests `sdfpkg` as well as the compiler.
+  It costs report size and some time and nothing else.  `MONITOR22A` also sets
+  `CRETURN` when no SDF library is named — `SDFPROCE.xpl:116` and
+  `INCSDF.xpl:716` both test `CRETURN` rather than the value of the `CALL`, so
+  the old short circuit was invisible to both, and PASS4 formatted a report out
+  of address 0 while PASS1 set `SDF_OPEN=TRUE` on a failure return.

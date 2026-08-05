@@ -1,5 +1,5 @@
 ================================================================================
-HANDOFF -- PASS corpus compilation, 2026-08-04
+HANDOFF -- PASS corpus compilation, 2026-08-05
 ================================================================================
 Written so a fresh session can restart from this file alone.  Companion
 material: modules/sdfpkg/CLAUDE_LOG.md, and two helper scripts beside this
@@ -17,12 +17,17 @@ about blank columns, which the separator fix now implements.
 Reach `successful == attempts` for a full compilePASS corpus run, for BOTH
 PASS versions.
 
-    OI340600    974 / 974      MET.  Zero failures, run complete.
-    OI301700    984 / 991      7 failures, which are 4 roots and 3 cascades:
-                               GKEKIP waits on GKGMNV; GM2MAJ and GMAMIN wait
-                               on GMGMAJ.  SULUPLIN repaired again since.
+    OI340600   1011 / 1011     MET.  Zero failures, run complete.
+    OI301700   1105 / 1105     MET.  Zero failures, run complete.
 
-For scale, OI340600 began the previous session at 843/907.
+BOTH ARE MET.  For scale, OI340600 began the previous session at 843/907, and
+OI301700 stood at 984/991 the day before this one.
+
+Read the attempt counts with care: these runs had no CSECT index available (see
+the --csects trap in §3), so they compiled the files normally classified "Not
+part of PASS" as well -- 37 extra in OI340600 and 97 in OI301700.  That is more
+coverage than the historical baseline rather than less, and all of them passed,
+but it is not the same measurement as the 974 and 986 recorded earlier.
 
 *** CHECK THAT A RUN FINISHED. ***  `successful == attempts` is meaningless on
 a run that stopped early, and compilePASS's summary does not say that it did.
@@ -34,13 +39,27 @@ An OI301700 run was reported as 935/939 when it had in fact stopped at file
 1030 of 1266; the 236 files after it were never compiled.  That is fixed (a
 PASS2 error is now delayable, see §6) but the habit is worth keeping.
 
-Coverage is a separate question from the goal.  Of files that are neither
-compiled nor "Not part of PASS", OI340600 leaves 156 and OI301700 183 never
-attempted at all -- their dependencies were never satisfiable.  Nobody has
-looked at why.  The accounting closes exactly:
+Coverage is a separate question from the goal, and it is now the main one.
+OI340600 leaves 156 files never attempted and OI301700 161.  The accounting
+closes exactly:
 
-    OI340600   974 attempted + 156 not attempted +  37 not in PASS = 1167
-    OI301700   986 attempted + 183 not attempted +  97 not in PASS = 1266
+    OI340600   1011 attempted + 156 never attempted = 1167
+    OI301700   1105 attempted + 161 never attempted = 1266
+
+Those files are NOT failures and nothing is wrong with them.  They sit in
+mutually dependent groups: compilePASS compiles a file only once every template
+it needs already exists, and in a cycle no member can go first.  OI340600 has
+six such groups, of 29, 7, 5, 2, 2 and 2 members, and the remainder of the 156
+hang off them.  155 of the 156 have unmet dependencies drawn only from the
+blocked set itself, which is what proves the set closed.  The smallest group
+shows the shape plainly:
+
+    VM1BFDCY:58,63   CALL VM4_BF_SHUT_DN;      needs VM4's template
+    VM4BFSHU:71      CANCEL VM1_BFD_CYCLIC;    needs VM1's template
+
+Both uses are real, so no D INCLUDE TEMPLATE card can simply be dropped -- the
+compile would fail on an undeclared name rather than a missing template.  They
+are reachable by seeding the library instead; see §11.
 
 --------------------------------------------------------------------------------
 2.  WHERE EVERYTHING IS
@@ -104,11 +123,35 @@ TAG names the archives of the previous run so nothing is lost.  Classify with
 Do NOT count failures by grepping ": Compiling" against "Compilation
 successful": the log carries two phase headers that inflate the count.
 
-Both corpora can run at once, but STAGGER THEM by a couple of minutes.  Two
-launched in the same second once aborted together on the first file, with the
-PASS1 cross-comparison differing and litfile.bin vanishing mid-run.  It did not
-reproduce, and the mechanism was never found -- it is NOT the shared
+*** TRAP ***  compilePASS defaults --csects to ../mafgen, a RELATIVE path, which
+resolved to ~/workspace/PFS/mafgen before the work directories moved to
+~/ForClaude and to nothing afterwards.  Without it every HAL/S file is compiled,
+including the ones that should be reported "Not part of PASS", and the run says
+so in its very first line:
+
+    Warning: no CSECT indexes found in ../mafgen; every HAL/S file will be
+    compiled.
+
+~/ForClaude/mafgen is symlinked at the masters to restore it.  Passing --csects
+explicitly from corpus-run.sh would be better and is not yet done.
+
+Both corpora can run at once.  The abort that made the previous handoff advise
+staggering is now understood and is NOT concurrency: a KILLED run leaves
+orphaned HALSFC processes writing halmat.bin, litfile.bin and COMMON*.out into
+the work directory, and a fresh run started on top of them loses its
+intermediates and dies after FLO with exit 240 and "Unable to open COMMON input
+file".  Before starting a run, check for strays BY argv[0] --
+
+    ps -eo args --no-headers | awk '{m=split($1,b,"/"); if (b[m] ~ /^HALSFC/) c++}
+                                    END {print c+0}'
+
+-- because a pgrep -f against the whole command line matches the checking
+command itself and reads as a false positive.  It is also NOT the shared
 yaShuttle/ported directory, whose files are untouched during a run.
+
+Launch runs with setsid.  A background job started from a tool-invoked shell
+dies with that shell's process group; both corpora were once lost that way to a
+pkill aimed at something else entirely.
 
 corpus-run.sh now passes --extra-parms=TABLST, so PASS4 parses each SDF the run
 has written rather than merely opening it, making the corpus a test of PASS4
@@ -293,105 +336,82 @@ block as ASCII and every name arrives blank.
 --------------------------------------------------------------------------------
 8.  OPEN ITEMS
 --------------------------------------------------------------------------------
-The eight OI301700 failures not yet repaired, from the last complete run:
+Every failure the previous handoff listed here is now repaired, and both corpora
+run to zero failures.  Kept in one line each, because the reasoning is settled
+and the detail is in compilePASS.md:
 
-  PMQTEC   FT101, "DATA TYPE CONFLICT ON PARAMETER #1", and it is CORRECT.
-  SULUPLIN Both call PMP_SL_PRB(HEX'000n', ...), and PMP_CALLING_MOD_MASK, its
-           first parameter, is declared INTEGER in both versions.  A HEX
-           literal is a BIT literal, so the types genuinely conflict.
+  PMQTEC   FT101, "DATA TYPE CONFLICT ON PARAMETER #1", and it was CORRECT:
+  SULUPLIN PMP_SL_PRB's first parameter is INTEGER in both versions and these
+           called it with HEX literals, which are BIT.  Repaired with a W/V
+           conditional pair, so HALSFC gets the correction (W->C, V->M) and the
+           original compiler keeps the uncorrected code under CARDTYPE=WMVC.
+           The control that settles the rule: GEQENT, GEPENT, GENEDM and GERENT
+           all pass HEX'4000' to GKE_KIP, whose formal is BIT(16), and OI-34.06
+           compiles them clean.  Passing a hex literal is not the problem;
+           passing one to an INTEGER formal is.  Page 165 of the 1974 HAL/S
+           Programmer's Guide carries the same INTEGER/SCALAR PARAMETER rule
+           word-for-word as the 2005 edition, so DR121254 reads as the compiler
+           being brought into compliance with documentation that always said
+           this, not as a rule changing under the source's feet.
+  GMGMAJ   XD7, "DEFINE SEQUENCE IS EMPTY" -- the extractor had relocated the
+  GMESTA   DEFINE bodies out of the module.  Spliced back inline (69, 52, 52
+           and 245 lines) and four phantom INCL80 members deleted.
+  GKGMNV   DU1.  GKPMNV is shared by three modules that select different
+           variants of the same cards through CARDTYPE, and OI-30.17's
+           pre-resolved listings had baked in GKRORB's.  The user restored the
+           column-1 letters by hand in GKPMNV, GKDASC, GKGMNV and GKRORB from
+           OI-34.06, matching on line beginnings; all 140 cards agree.
+  GKEKIP   XI3 cascades -- a needed template's provider had failed.  They
+  GM2MAJ   cleared themselves once the roots above were repaired.
+  GMAMIN
+  SGCKIP   DI11 plus an XI3 for @@SAFACQ; SAFACQ was repaired.
+  SAFACQ   M3/P8 macro-legend and macro-subscript artifacts, all repaired and
+  SPNINT   confirmed by a complete run.
+  SPCPPC
+  PGHHEA
+  PGGPCF
 
-           The control that settles it:  four other OI-30.17 modules pass a HEX
-           literal to a procedure -- GEQENT, GEPENT, GENEDM and GERENT all call
-           GKE_KIP(HEX'4000', ...) -- and OI-34.06 compiles the very same calls
-           with zero failures.  GKE_EXEC_PRIO is declared BIT(16), so there the
-           types match.  Passing a hex literal is therefore not the problem;
-           passing one to an INTEGER formal is.
+THE REAL OPEN ITEM: the 156 and 161 files never attempted (section 1).  They are
+blocked on each other, not broken, and the way in is to seed the template
+library.  This is TESTED and works:
 
-           The rule is not new: page 165 of the 1974 HAL/S Programmer's
-           Guide (NASA-CR-140389, ~/Desktop/.../19750006407.pdf) carries the
-           same INTEGER/SCALAR PARAMETER section, with rule 2 word-for-word as
-           in 2005 and BIT equally absent from the legal-argument table.  So
-           DR121254 reads as the compiler being brought into compliance with
-           documentation that always said this, not as a rule changing under
-           the source's feet.  (That PDF is a scan; its OCR text is extracted
-           beside it, but the table's INTEGER row did not survive OCR.)
+  1. PASS1 takes TEMPLIB as both input (--pdsi=4) and output (--pdso=6), but
+     emits NO template when the compile fails.  So a cycle member cannot seed
+     itself by being compiled and failing -- that was tried first and does not
+     work.
+  2. A stub carrying only the block statement CAN seed it, because what a
+     caller needs is the name and the parameter list and nothing else.  For
+     VM4BFSHU a two-line stub
 
-           OI-34.06 fixed it at the source: its SULUPLIN reads
-           "CALL PMP_SL_PRB(1,NAME(SUL_BUFFER$(2:)))" -- a plain integer.
+         VM4_BF_SHUT_DN : PROCEDURE;
+         CLOSE VM4_BF_SHUT_DN;
 
-           An earlier handoff said the original listing carries no error marker
-           at PMQTEC's statement, so the original build must have accepted it.
-           THAT REASONING WAS WRONG:  FT101 is raised in PASS2, and the "as
-           received" listings are PASS1 output-writer listings, which cannot
-           show a PASS2 error at all.  Their silence proves nothing here.
+     compiled clean and deposited @@VM4BFS.  VM1BFDCY -- never once attempted
+     before -- then compiled, exit 0, and VM4BFSHU recompiled for real over the
+     stub, exit 0.  Cycle closed, nothing synthetic left in TEMPLIB.
+  3. All six OI340600 cycles are seedable the same cheap way: every seed
+     candidate is parameterless, so each needs only a two-line stub.  The seeds
+     are ARAGPCSW (cycle of 29), GGQCOM (7), V01TCSSC (5), VM4BFSHU (2), GV6STA
+     (2) and VS5SSTPR (2).  GV6STA looks parameterised only because its block
+     statement is split across two cards.
 
-           So the options are to leave it failing as a real defect of the
-           OI-30.17 source that OI-34.06 later corrected; to apply OI-34.06's
-           correction to OI-30.17, which is editing the older source to suit a
-           later compiler and is the user's call; or to make FT101 delayable in
-           compilePASS.  Note that GKGMNV currently blocks GKEKIP, which blocks
-           those four GKE_KIP callers, so more FT101s may appear as roots clear
-           -- though on the evidence above those four should be fine.
+  cycle-bootstrap-test.sh does step 1 and 2 for the VM pair.  What is NOT done
+  is teaching compilePASS to do this by itself -- detect a cycle, seed it, and
+  carry on -- which is what would actually move those 317 files into the run.
 
-  GMGMAJ   XD7, "DEFINE SEQUENCE IS EMPTY".  "D DEFINE GM6CLC NOLIST" and its
-  GMESTA   CLOSE have nothing between them, because NOLIST prints nothing in
-           the listing.  OI-34.06 has the content, at the same SRNs.  Four such
-           sequences in these two files.  Borrowing it would splice OI-34.06
-           code INSIDE an OI-30.17 module, which is more invasive than the
-           INCL80 borrowing and is the user's call.
-  GKGMNV   DU1, and the cause is structural rather than a stray artifact.
-           GKGMNV is a shell: 21 directives and three lines of its own.  The
-           code is in GKPMNV, an include member it pulls in without NOLIST.
-
-           GKPMNV is shared by three modules, and each selects a different
-           variant of the same cards through CARDTYPE -- compilePASS already
-           encodes this:
-
-               GKDASC   A->M, O->C, N->C     (the G1 cards, ascent)
-               GKRORB   A->C, O->M, N->C     (the G2 cards, orbit)
-               GKGMNV   A->C, O->C, N->M     (the G3 cards)
-
-           OI-34.06's INCL80/GKPMNV.hal keeps all 145 conditional cards with
-           A, O or N in column 1, so one file serves all three.  OI-30.17's
-           listings are pre-resolved, so extracting GKPMNV bakes in whichever
-           parent was extracted last -- GKRORB, alphabetically -- and our copy
-           has 0 conditional cards and the G2 variant live.  GKGMNV then
-           schedules GK3_ORB_TGT, whose template it does not include (it
-           includes GZY_ENT_TAR, G3's target), and PASS1 reports it undeclared.
-
-           The listing proves the correct reading: at GKGMNV lines 320-321 the
-           G1 and G2 cards are marked C and the live card is 323, "G3
-           GZY_ENT_TAR = ON".  The G1/G2/G3 tags in columns 2-3 are harmless --
-           GKPMNV declares REPLACE G1/G2/G3 BY "  ".
-
-           Two ways out.  Borrow OI-34.06's GKPMNV.hal, which retains the
-           letters; that is a replacement rather than a fill-in, and the
-           versions differ (654 lines against 609), so it is the user's call.
-           Or reconstruct the letters from OI-30.17 alone: extract GKPMNV from
-           each of its three parents' listings and combine, since a card live
-           only under GKDASC is an A card, only under GKRORB an O card, only
-           under GKGMNV an N card, and one live under all three is
-           unconditional.  Extracting from each parent gives 177, 207 and 146
-           live lines respectively, which is consistent with that model.  The
-           files are not line-aligned, so the merge has to be by SRN.
-
-           Only GKPMNV and STRPDT are affected -- they are the only shared
-           include members carrying conditional cards -- and STRPDT's 15 R
-           cards were already restored by hand.
-
-  GKEKIP   XI3 cascades -- a needed template's provider failed.  These should
-  GM2MAJ   clear themselves as their providers are fixed; SGCKIP's XI3 was for
-  GMAMIN   @@SAFACQ and is already fixed.
-  SGCKIP   DI11, and an XI3 for @@SAFACQ.
-
-Repaired since that run and awaiting confirmation: SAFACQ, SPNINT, SPCPPC,
-PGHHEA, PGGPCF (all verified to compile individually).
+  Name a stub _stub*.hal: corpus-run.sh clears _*.hal at the start of a run, so
+  a stub cannot leak into a later one.  Its .obj is NOT cleared; delete
+  objects/_stub*.obj by hand.
 
 Also open:
-  - The 156 and 183 files never attempted (§1).  Nobody has looked at why.
-  - The concurrent-run abort (§3), mechanism unknown.
+  - corpus-run.sh should pass --csects explicitly rather than relying on the
+    ~/ForClaude/mafgen symlink (section 3).  Do not edit that script while a run
+    is executing it: bash reads a script incrementally and an edit can corrupt
+    the run in progress.
   - PASS4's DATABUF statistics were never checked against a known-good value;
     modules/sdfpkg/pass4-*.rpt from 2026-08-03 are a good baseline.
+  - GX4DIS, PMCCYC and PMOSTA masters carry blocks no extraction has ever
+    produced -- macro expansions, most likely.  Do not regenerate them blindly.
 
 --------------------------------------------------------------------------------
 9.  SETTLED -- DO NOT RE-LITIGATE
@@ -410,6 +430,18 @@ Also open:
 - PASS4 already receives the SDF name through COMMON.  pass4.rpt is empty in
   the chain only because the default parms carry neither TABLST nor TABDMP.
 - The R-card rule is NOT "COMPOOLs get R=C".  Read the report markers.
+- The CDR06D abort is orphaned HALSFC processes from a killed run, NOT
+  concurrency and NOT the shared ported directory.  See section 3.
+- The files never attempted are blocked on each other, not damaged.  Neither
+  D INCLUDE TEMPLATE card in a cycle is vestigial -- both members really do use
+  each other -- so the cycle cannot be broken by dropping an include.  Seeding
+  the library is what works.  See section 8.
+- FT101 on a hex literal is the compiler being right.  Do not "fix" it in the
+  compiler.
+- The validation method for any change to the extractor: extract the whole
+  report set with both the old and the new unprint.py, then compare each against
+  the master at TOKEN level, three ways.  That separates "the fix changed this"
+  from "the master was repaired by hand here" without any judgement calls.
 - The corpus work directories belong under ~/ForClaude, not ~/workspace/PFS.
   PFS is an IDE project; 20 generations of archive.results.* had accumulated
   there, ~1000 module subdirectories of ~58 files apiece per generation, about
