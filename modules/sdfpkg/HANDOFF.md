@@ -51,14 +51,13 @@ controlled" and is wrong.  cd into the PFS tree first.
 
   /mnt/STORAGE/home/rburkey/git/virtualagc        compiler, compilePASS, HALSFC
   /mnt/STORAGE/home/rburkey/workspace/PFS         PASS source, branch master
+  /home/rburkey/ForClaude                         corpus work directories
 
 Inside ~/workspace/PFS:
 
   OI340600/, OI301700/                 the masters.  Committable.  OI340600's
                                        source is genuine punch cards; OI301700's
                                        was extracted from listings (§4).
-  OI340600-sdftest/, OI301700-sdftest/ the corpus work directories.  Untracked
-                                       build output -- keep out of commits.
   "OI301700 as received"/APPLSRC/      1115 original build listings, plus
                                        SSSRC/.  PRIMARY EVIDENCE.  See §3.
   unprint.py                           the extractor.  See §4.
@@ -70,13 +69,24 @@ Inside ~/workspace/PFS:
                                        deterministic given its .anon files.
                                        Note it appends to collisions.anon.
 
+Inside ~/ForClaude:
+
+  OI340600-sdftest/, OI301700-sdftest/ the corpus work directories.  Untracked
+                                       build output, and NOT under ~/workspace/
+                                       PFS: that is an IDE project, and the
+                                       ~2.3 million files a run's archives
+                                       accumulate froze the IDE solid.  Keep
+                                       generated files here.  Never run find or
+                                       du across these trees; the file count
+                                       makes it take hours.  See §9.
+
 *** TRAP ***  The -sdftest directories hold their own COPIES of APPLSRC,
 SSSRC and INCL80.  Editing a master does NOT affect a run.  rsync first:
 
     for v in OI340600 OI301700; do
       for d in APPLSRC SSSRC INCL80; do
         [ -d ~/workspace/PFS/$v/$d ] &&
-          rsync -a --delete ~/workspace/PFS/$v/$d/ ~/workspace/PFS/$v-sdftest/$d/
+          rsync -a --delete ~/workspace/PFS/$v/$d/ ~/ForClaude/$v-sdftest/$d/
       done
     done
 
@@ -85,11 +95,11 @@ SSSRC and INCL80.  Editing a master does NOT affect a run.  rsync first:
 --------------------------------------------------------------------------------
 corpus-run.sh does all of it:
 
-    ./corpus-run.sh ~/workspace/PFS/OI340600-sdftest TAG
+    ./corpus-run.sh ~/ForClaude/OI340600-sdftest TAG
 
 TAG names the archives of the previous run so nothing is lost.  Classify with
 
-    python3 corpus-classify.py ~/workspace/PFS/OI340600-sdftest/compilePASS.log
+    python3 corpus-classify.py ~/ForClaude/OI340600-sdftest/compilePASS.log
 
 Do NOT count failures by grepping ": Compiling" against "Compilation
 successful": the log carries two phase headers that inflate the count.
@@ -400,6 +410,13 @@ Also open:
 - PASS4 already receives the SDF name through COMMON.  pass4.rpt is empty in
   the chain only because the default parms carry neither TABLST nor TABDMP.
 - The R-card rule is NOT "COMPOOLs get R=C".  Read the report markers.
+- The corpus work directories belong under ~/ForClaude, not ~/workspace/PFS.
+  PFS is an IDE project; 20 generations of archive.results.* had accumulated
+  there, ~1000 module subdirectories of ~58 files apiece per generation, about
+  2.3 million files across the two corpora, and the IDE could no longer open.
+  relocate-sdftest.sh moved them and packs all but the two newest generations
+  per corpus into .tar.zst.  Do not move them back, and do not let generated
+  output accumulate under PFS again.
 
 --------------------------------------------------------------------------------
 10. WORKING RULES
