@@ -281,6 +281,15 @@ The eight OI301700 failures not yet repaired, from the last complete run:
            types match.  Passing a hex literal is therefore not the problem;
            passing one to an INTEGER formal is.
 
+           The rule is not new: page 165 of the 1974 HAL/S Programmer's
+           Guide (NASA-CR-140389, ~/Desktop/.../19750006407.pdf) carries the
+           same INTEGER/SCALAR PARAMETER section, with rule 2 word-for-word as
+           in 2005 and BIT equally absent from the legal-argument table.  So
+           DR121254 reads as the compiler being brought into compliance with
+           documentation that always said this, not as a rule changing under
+           the source's feet.  (That PDF is a scan; its OCR text is extracted
+           beside it, but the table's INTEGER row did not survive OCR.)
+
            OI-34.06 fixed it at the source: its SULUPLIN reads
            "CALL PMP_SL_PRB(1,NAME(SUL_BUFFER$(2:)))" -- a plain integer.
 
