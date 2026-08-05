@@ -31,8 +31,11 @@ rm -f corpus.done
 [ -f compilePASS.log ] && mv compilePASS.log "compilePASS.$TAG.log"
 [ -d archive.results ] && mv archive.results "archive.results.$TAG"
 rm -rf ./*.results _*.hal
+# Everything generated goes, so that a run starts from source alone: no
+# TEMPLIB, no INCLIB, no SDFLIB, no objects.  That is the state a newcomer has
+# after cloning the two repositories, and it is the state this must work from.
 rm -rf SDFLIB && mkdir -p SDFLIB     # compilePASS does not clear this itself
-mkdir -p objects
+rm -rf objects && mkdir -p objects
 
 prepareTEMPLIB --clear                  >  prepare.log 2>&1
 prepareINCLIB  --clear --include=INCL80 >> prepare.log 2>&1
