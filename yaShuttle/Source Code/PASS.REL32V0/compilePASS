@@ -77,6 +77,12 @@ The only OPTIONS available are:
     --no-preprocess (Default.)  Opposite of --preprocess.
     --clean         Use HALSFC's --clean switch.
     --archive       Use HALSFC's --archive switch.
+    --extra-parms=P P is a list of extra HAL/S-FC compiler options prefixed to
+                    the defaults used by this program.  A trailing comma is
+                    supplied if you leave it off.  TABLST is the reason it
+                    exists: with it, PASS4 parses each SDF the run has just
+                    written rather than merely opening it, so a corpus run
+                    becomes a test of PASS4 and SDFPKG as well as the compiler.
     --sdfi=D        (Default SDFLIB.)  Directory the compilers read Simulation
                     Data Files (SDF) from, so that a "D INCLUDE TEMPLATE" is
                     satisfied from an SDF where one exists, in preference to
