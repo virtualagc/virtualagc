@@ -104,6 +104,11 @@ The only OPTIONS available are:
     --no-csects     Compile every HAL/S file found, without regard to whether
                     it is part of PASS.  This was the behaviour before the
                     check existed.
+    --halt-on-error Abandon the run on the first failure that is not one of the
+                    recognized, delayable kinds, as compilePASS always used to.
+                    The default is now to record it and carry on: a run takes an
+                    hour, the files that fail are the ones reached last, and
+                    halting discards every other result and the summary with it.
     --no-seed-cycles
                     Do not break template-dependency cycles.  Files that need
                     each other's templates are then never attempted at all, as
@@ -184,6 +189,8 @@ sdfi = "SDFLIB"
 csectsDir = ".." + os.sep + "mafgen"
 providerDeps = True
 seedCycles = True
+haltOnError = False
+unrecognizedFailures = []
 extraParms = ""
 for parm in sys.argv[1:]:
     if parm == "--help":
@@ -217,6 +224,8 @@ for parm in sys.argv[1:]:
         providerDeps = False
     elif parm == "--no-seed-cycles":
         seedCycles = False
+    elif parm == "--halt-on-error":
+        haltOnError = True
     elif parm == "--dfg":
         dfg = True
     elif parm == "--no-dfg":
@@ -530,7 +539,12 @@ try:
 except:
     pass
 # Return True on success, False on skipped compilation.
-def compile(template):
+def compile(template, fatal = True):
+    """Compile one unit.  True on success, False on a failure that can be
+    lived with, and normally the run is abandoned on any other failure.
+
+    fatal=False is for stubs (see seedCycle): a stub is an optimisation, so
+    one that will not compile must cost its cycle and nothing more."""
     global compilationCount, skipping, rsbTrace
     compilationCount += 1
     rawFilename = template["filename"]
@@ -632,6 +646,9 @@ def compile(template):
             print(e.stdout)
         if len(e.stderr):
             print(e.stderr)
+        if not fatal:
+            rsbTrace = ""
+            return False
         if preprocess:
             extra = "--preprocess"
         else:
@@ -646,7 +663,19 @@ unbuffer compilePASS %s --skip-to=%s  2>&1 | tee -a compilePASS.log
         f.close()
         os.chmod(resumeFilename, os.stat(resumeFilename).st_mode | stat.S_IEXEC)
         print("Note:  Created script", resumeFilename)
-        outtaHere(1)
+        # Halting here made sense while a failure was rare, arrived early, and
+        # was likely to be the cause of failures further on.  It does not now:
+        # a full run takes an hour, the files that fail are the ones reached
+        # last, and halting throws away the other thousand-odd results along
+        # with the end-of-run summary -- which is why "never attempted: 0" has
+        # been reported twice from runs that never got as far as counting.
+        # The failure is recorded and the run goes on; --halt-on-error restores
+        # the old behaviour, and resumeCompilePASS is still written either way.
+        unrecognizedFailures.append(template["filename"])
+        if haltOnError:
+            outtaHere(1)
+        rsbTrace = ""
+        return False
     rsbTrace = ""
     return True
 
@@ -984,6 +1013,37 @@ def wrapCards(statement):
         cards.append(" " + current)
     return cards
 
+def seedable(template):
+    """Can this unit's template be reproduced from its block statement alone?
+
+    Only then is a stub safe.  The point is not merely that the stub must
+    compile: the template it deposits is used by every unit compiled before
+    the real one lands, and those units are NOT compiled again afterwards.
+    So a stub whose template merely resembles the real one would let its
+    callers compile against an interface that never existed.  Two kinds
+    cannot be reproduced and are never seeded:
+
+    A COMPOOL, because a compool's template IS its declarations.  A stub
+    would export nothing, and its callers would compile against an empty
+    compool.  Seeding CVJFDECP that way is what produced the DU1/SV3/XI3
+    failures in DGILDBIO, SBCSM and DGRGSERO.
+
+    Anything taking parameters, because HAL/S requires a procedure to
+    DECLARE its parameters in its body and a stub has no body to declare
+    them in -- "DU2, UNDECLARED PARAMETER ASL_I" for ASL_TM_COORD.  Their
+    types would have to be recovered from the real source to do better.
+
+    What is left -- a parameterless PROGRAM, PROCEDURE or FUNCTION -- has a
+    template that the block statement gives exactly, attributes and all."""
+    statement = template.get("blockStatement")
+    if statement == None or template.get("blockName") == None:
+        return False
+    if "(" in statement:
+        return False
+    if "COMPOOL" in statement.upper():
+        return False
+    return True
+
 def seedCycle(component):
     """Compile a stub for one member of a cycle so the rest can start.
 
@@ -993,12 +1053,15 @@ def seedCycle(component):
     def dependents(filename):
         return sum(1 for other in component if filename in
                    templatesByFilename[other]["includedFilenames"])
-    for filename in sorted(component, key = lambda f: (dependents(f), f)):
+    candidates = [f for f in component if seedable(templatesByFilename[f])]
+    if len(candidates) == 0:
+        print("      no member of this cycle of %d can be stubbed safely "
+              "(all take parameters or are COMPOOLs)" % len(component))
+        return None
+    for filename in sorted(candidates, key = lambda f: (dependents(f), f)):
         template = templatesByFilename[filename]
-        statement = template.get("blockStatement")
-        name = template.get("blockName")
-        if statement == None or name == None:
-            continue
+        statement = template["blockStatement"]
+        name = template["blockName"]
         stubStem = "_stub" + template["stem"]
         stubFilename = "./" + stubStem + ".hal"
         try:
@@ -1015,7 +1078,7 @@ def seedCycle(component):
                  "includedHalnames": [] }
         print("      seeding %s from a stub, to break a cycle of %d" %
               (template["stem"], len(component)))
-        if compile(stub):
+        if compile(stub, fatal = False):
             stubsCompiled.append(template["stem"])
             return filename
         print("      the stub for %s did not compile; trying another member" %
@@ -1081,6 +1144,12 @@ if False:
         compile(template)
         templatesByFilename.pop(filename)
 
+if len(unrecognizedFailures) > 0:
+    print("%d file(s) failed in a way compilePASS does not recognize, and the "
+          "run continued past them:" % len(unrecognizedFailures))
+    for filename in unrecognizedFailures:
+        print("     ", filename)
+    print("     (--halt-on-error stops at the first of these instead)")
 if len(stubsCompiled) > 0:
     print("%d cycle(s) broken by seeding a stub: %s" %
           (len(stubsCompiled), " ".join(stubsCompiled)))
