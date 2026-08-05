@@ -117,6 +117,14 @@ used here -- building them is about half the build time wasted.
 --------------------------------------------------------------------------------
 4.  THE EXTRACTOR IS THE ROOT OF EVERY OI301700 ARTIFACT
 --------------------------------------------------------------------------------
+*** DO NOT RE-EXTRACT.  The extracted tree is now the authority, not a thing
+that can be regenerated. ***  OI-30.17's listings are pre-resolved: they record
+one CARDTYPE resolution and cannot say which letter a card carried.  The
+column-1 letters in INCL80/GKPMNV.hal and in GKDASC, GKGMNV and GKRORB were
+restored by hand from OI-34.06 and could not be recovered from the listings a
+second time.  A re-extraction would silently discard them.  For the same reason
+the seventh unprint.py defect below is left unfixed.
+
 OI301700's HAL/S was extracted from the output-writer listings by
 ~/workspace/PFS/unprint.py.  Seven bugs in it accounted for every artifact
 class the previous session had been repairing by hand.  All are fixed; the
@@ -156,6 +164,14 @@ extractor still cannot make all survived.
      subscript.  unprint.py now consults each file's REPLACE table.  Of 274
      macro subscripts, 258 expand to something simple and are left alone.
      PFS 7016b8d1.
+
+  8. A "D DEFINE" region is routed to a file of its own, exactly as a
+     "D INCLUDE" expansion is, so the body arrives in INCL80 rather than
+     between the DEFINE and its CLOSE.  The sequence is then empty and draws
+     XD7, which costs the module through the SMRK/B100 path.  GMGMAJ and
+     GMESTA were repaired by splicing the bodies back inline and deleting
+     INCL80/GM6CLC, GMITUP, GM4DIS and GM8UPL, which never existed in the
+     original.  UNFIXED in unprint.py, deliberately -- see the warning above.
 
 WHAT THE EXTRACTOR STILL GETS WRONG, and cannot easily be taught:
 
