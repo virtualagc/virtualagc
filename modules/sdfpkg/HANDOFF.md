@@ -17,17 +17,34 @@ about blank columns, which the separator fix now implements.
 Reach `successful == attempts` for a full compilePASS corpus run, for BOTH
 PASS versions.
 
-    OI340600   1011 / 1011     MET.  Zero failures, run complete.
-    OI301700   1105 / 1105     MET.  Zero failures, run complete.
+    OI340600   1188 / 1188     MET, over the WHOLE corpus.  Zero failures.
+    OI301700   1275 / 1287     12 failures, all in files never compiled before.
 
-BOTH ARE MET.  For scale, OI340600 began the previous session at 843/907, and
-OI301700 stood at 984/991 the day before this one.
+The goal has moved, because the old measurement is no longer the interesting
+one.  Both runs now compile EVERY HAL/S file in the corpus:
 
-Read the attempt counts with care: these runs had no CSECT index available (see
-the --csects trap in §3), so they compiled the files normally classified "Not
-part of PASS" as well -- 37 extra in OI340600 and 97 in OI301700.  That is more
-coverage than the historical baseline rather than less, and all of them passed,
-but it is not the same measurement as the 974 and 986 recorded earlier.
+    OI340600   1188 attempted - 21 stubs = 1167 = every source file
+    OI301700   1287 attempted - 21 stubs = 1266 = every source file
+
+with "not part of PASS" 0 and "did not compile" 0 in both.  Two things got
+there.  corpus-run.sh passes --no-csects, so the auxiliary files outside PASS
+are compiled too -- restricting to PASS was only ever a way to reduce the
+up-front burden while failures were unexplained.  And compilePASS now breaks
+template-dependency cycles by seeding the library (§8), which reached the 156
+and 161 files that no run had ever attempted.  21 cycles were seeded, the same
+21 in both corpora.
+
+For scale, OI340600 began the previous session at 843/907.
+
+OI301700's 12 remaining failures are ALL files that seeding has only just made
+reachable, so they are new ground rather than regressions:
+
+    4  M3            GO1ASC GO2ORB GO3ENT VG9OPS9
+    4  DI11 in PASS1 CDAP04 CDAP05 CDAP06 CDAP08   (contiguous; likely one cause)
+    3  unclassified  DM5NEW DM6OPS GO6RTL
+    1  P8            VAASEQUE
+
+None of them takes the fatal path, so a run reports all twelve and finishes.
 
 *** CHECK THAT A RUN FINISHED. ***  `successful == attempts` is meaningless on
 a run that stopped early, and compilePASS's summary does not say that it did.
@@ -39,14 +56,11 @@ An OI301700 run was reported as 935/939 when it had in fact stopped at file
 1030 of 1266; the 236 files after it were never compiled.  That is fixed (a
 PASS2 error is now delayable, see §6) but the habit is worth keeping.
 
-Coverage is a separate question from the goal, and it is now the main one.
-OI340600 leaves 156 files never attempted and OI301700 161.  The accounting
-closes exactly:
+Coverage is no longer an open question: nothing is left unattempted.  What
+follows is kept because it explains WHY those files were unreachable, and the
+seeding that reaches them depends on it.
 
-    OI340600   1011 attempted + 156 never attempted = 1167
-    OI301700   1105 attempted + 161 never attempted = 1266
-
-Those files are NOT failures and nothing is wrong with them.  They sit in
+Those files were NOT failures and nothing was wrong with them.  They sit in
 mutually dependent groups: compilePASS compiles a file only once every template
 it needs already exists, and in a cycle no member can go first.  OI340600 has
 six such groups, of 29, 7, 5, 2, 2 and 2 members, and the remainder of the 156
