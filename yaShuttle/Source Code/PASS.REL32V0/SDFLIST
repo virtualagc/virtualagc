@@ -3,16 +3,17 @@
 License:     The author, Ron Burkey, declares this program to be in the Public
              Domain, and it may be freely modified or redistributed for any
              purpose whatever.
-Filename:    SDFLIST.py
+Filename:    SDFLIST
 Purpose:     Runs SDFLIST -- which is to say HALSFC-PASS4 -- over Simulation
              Data Files, without the caller having to know how PASS4 expects
              to be told which files to read.
 Contact:     The Virtual AGC Project (www.ibiblio.org/apollo).
 History:     2026-08-04 ACC  Written.
+             2026-08-05 RSB  Changed to just SDFLIST (dropping .py).
 
 Usage:
 
-    SDFLIST.py [OPTIONS] ["NAME" ...]
+    SDFLIST [OPTIONS] ["NAME" ...]
 
 with the SDF library in the current directory, which is where a *.results
 folder leaves it.  Names may also arrive on stdin, one per line.  With --all,
@@ -21,10 +22,10 @@ every SDF in the library is listed and no names are needed.
 Quote the names.  An SDF name begins with "##", and an unquoted "#" starts a
 comment to the shell, so the name would never reach this program at all.
 
-    SDFLIST.py "##HELLO"                    one SDF, default TABLST report
-    SDFLIST.py --brief "##HELLO" "##FOO"    two SDFs, the summary only
-    SDFLIST.py --all --tabdmp               every SDF, the full dump
-    SDFLIST.py --all >everything.rpt
+    SDFLIST "##HELLO"                    one SDF, default TABLST report
+    SDFLIST --brief "##HELLO" "##FOO"    two SDFs, the summary only
+    SDFLIST --all --tabdmp               every SDF, the full dump
+    SDFLIST --all >everything.rpt
 
 The reason this program exists is `--all`.  PASS4 reads the names for it from
 an OS/360 PDS directory block on device 3 (SDFPROCE.xpl:127-144), which is a
@@ -46,7 +47,7 @@ PROGRAM = "HALSFC-PASS4"
 
 def usage(msg=None):
     if msg:
-        print("SDFLIST.py: " + msg, file=sys.stderr)
+        print("SDFLIST: " + msg, file=sys.stderr)
     print(__doc__.split("Usage:")[1].split("The reason")[0].rstrip(),
           file=sys.stderr)
     sys.exit(1 if msg else 0)
@@ -98,16 +99,34 @@ try:
                          if n.endswith(".sdf"))
         if not members:
             usage("the SDF library '%s' is empty." % library)
-        block = b""
-        for member in members:
-            # 8-byte EBCDIC name, 3-byte TTR, flags byte: no user halfwords,
-            # so each entry is the minimum twelve bytes.  PASS4 uses only the
-            # name and the flags byte's count.
-            block += ("%-8s" % member[:8]).encode("cp037") + b"\0\0\0" + b"\0"
-        block += b"\xFF" * 8            # The end-of-directory name.
-        record = (2 + len(block)).to_bytes(2, "big") + block
+        # Device 3 delivers FIXED 80-BYTE RECORDS, so the directory has to be
+        # written as a sequence of them rather than as one long block.  That
+        # is what SDFPROCE.xpl's outer "DO FOREVER; BUFFER = INPUT(3)" loop is
+        # for: each record carries its own used-byte count and is walked in
+        # turn, exactly as the blocks of a real OS/360 PDS directory are.
+        #
+        # Writing one oversized record instead truncated it at 80 bytes: with
+        # 23 members, six were listed in full and the seventh came out as the
+        # six characters "##HELL" before the report simply stopped.  Nothing
+        # was reported wrong, which is what made it hard to see.
+        RECORD = 80
+        PER_RECORD = (RECORD - 2) // 12         # six entries, and 74 bytes
+        records = []
+        for i in range(0, len(members), PER_RECORD):
+            block = b""
+            for member in members[i:i + PER_RECORD]:
+                # 8-byte EBCDIC name, 3-byte TTR, flags byte: no user
+                # halfwords, so each entry is the minimum twelve bytes.  PASS4
+                # uses only the name and the flags byte's count.
+                block += ("%-8s" % member[:8]).encode("cp037") + b"\0\0\0" \
+                         + b"\0"
+            records.append((2 + len(block)).to_bytes(2, "big") + block)
+        # The end-of-directory name goes in a record of its own, so that it can
+        # never be the entry that does not fit.
+        records.append((2 + 8).to_bytes(2, "big") + b"\xFF" * 8)
         handle, directory = tempfile.mkstemp(prefix="sdflist-", suffix=".dir")
-        os.write(handle, record)
+        for record in records:
+            os.write(handle, record.ljust(RECORD, b"\0"))
         os.close(handle)
         # ",E" matters: the block is binary, and without it the runtime reads
         # the record as ASCII text and every name arrives blank.

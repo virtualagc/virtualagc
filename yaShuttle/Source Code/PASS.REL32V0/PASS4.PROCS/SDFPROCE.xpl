@@ -6,6 +6,12 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2023-04-16 RSB  Suffixed the filename with ".xpl".
+                2026-08-05 ACC  Conditionally (/?V...?/) select the SDF named
+                                in SDFNAM before dumping it, in the ALL case.
+                                Without it, SDFLIST --all dumped whichever SDF
+                                was already current, once per directory entry,
+                                and abended 4005.  The original code is kept
+                                for the original compiler under /?W...?/.
     Note:       Inline comments beginning with "/*@" were created by the
                 Virtual AGC Project. Inline comments beginning merely with
                 "/*" are from the original Space Shuttle development.
@@ -137,7 +143,29 @@ MIT ****';                                                                      
                SDF_NAME = STRING("07000000" + RECORD_ADDR + OFFSET);            00261900
                IF SDF_NAME = FFSTRING THEN GO TO STATISTICS;                    00262000
                CALL MOVE(8,SDF_NAME,SDFNAM);                                    00262100
+/*@ Naming an SDF in SDFNAM does not make it the current one.  The    */
+/*@ select disposition, the "80000000" bit, is what binds SDFNAM to   */
+/*@ the SDF the operation works on, and both other paths below issue  */
+/*@ it before calling DUMP_SDF.  This one did not, so DUMP_SDF dumped */
+/*@ whichever SDF was already current, once per directory entry, and  */
+/*@ never advanced past it.  SDFLIST --all over a 23-member library   */
+/*@ dumped one member 37448 times, never reached the seventh, and     */
+/*@ died in "SDFPKG abend 4005: virtual-memory pointer is past the    */
+/*@ end of the SDF" once a pointer from one SDF was resolved against  */
+/*@ another.  Testing CRETURN also reports a member that cannot be    */
+/*@ opened, rather than silently dumping the previous one instead.    */
+/?W
                CALL DUMP_SDF;                                                   00262200
+?/
+/?V
+               CALL MONITOR(22,"80000007");
+               IF CRETURN = 0 THEN CALL DUMP_SDF;
+               ELSE DO;
+                  OUTPUT = '*** SDF '||SDF_NAME||
+                           ' NOT FOUND -- REQUEST IGNORED ***';
+                  OUTPUT = X1;
+               END;
+?/
                TMP = COREBYTE(RECORD_ADDR+OFFSET+11);                           00262300
                OFFSET = OFFSET + 12 + SHL(TMP&"1F",1);                          00262400
             END;                                                                00262500
