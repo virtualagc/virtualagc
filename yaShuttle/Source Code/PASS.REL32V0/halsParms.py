@@ -126,20 +126,18 @@ def getCardtypeMap(stem):
         map[cardtype[i]] = cardtype[i + 1]
     return map
 
-def getParms(stem, extraParms="", options=None, adding=None, original=False):
+def getParms(stem, extraParms="", options=None, original=False):
     '''The full --parms string for one source file.
 
     stem        the source file's stem, e.g. "GKFHOR" for GKFHOR.hal.
     extraParms  prepended verbatim; this is where a --extra-parms switch goes,
                 and it must already end in a comma if it is not empty.
-    options     replaces DEFAULT_OPTIONS outright.  Prefer `adding`.
-    adding      appended to DEFAULT_OPTIONS, for an option one caller needs and
-                the others do not -- compileLinkRun's VARSYM.
+    options     replaces DEFAULT_OPTIONS outright.  All three callers take the
+                default; the parameter exists for a one-off, not as an
+                invitation to start a fourth private option list.
     original    use the pairs for the original compiler rather than HALSFC.
     '''
     opts = list(DEFAULT_OPTIONS if options is None else options)
-    if adding:
-        opts += list(adding)
     return extraParms + ",".join(opts) + ",CARDTYPE=" + \
            getCardtype(stem, original=original)
 

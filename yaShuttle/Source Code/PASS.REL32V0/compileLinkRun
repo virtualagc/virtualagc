@@ -12,14 +12,12 @@ from pathlib import Path
 extraParms = ""
 
 # The CARDTYPE table, conditional pairs and option list are shared with
-# compilePASS and compileLinkCompare; see halsParms.py.  VARSYM is this
-# script's own addition to the common list, kept because this is the one that
-# links and runs.
+# compilePASS and compileLinkCompare; see halsParms.py.
 from halsParms import stemOf
 import halsParms
 
 def getParms(filename):
-    return halsParms.getParms(stemOf(filename), extraParms, adding=["VARSYM"])
+    return halsParms.getParms(stemOf(filename), extraParms)
 
 helpMsg = '''
 Used for compiling, linking, running a standalone program implemented in a 
