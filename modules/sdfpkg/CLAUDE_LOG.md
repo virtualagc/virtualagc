@@ -429,3 +429,26 @@
 - SSW therefore stands at 466 of 470 in-index sections matching, 132 of 138 files
   exact, with four differing sections: three reconfiguration-data and #PCDQANN, whose
   length disagrees (2010 halfwords against 2695 expected) and which is still unexamined.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- #PCDQANN is the SAME mechanism as the other three, not a separate problem, and my
+  guess that its length mismatch pointed at CARDTYPE or conditional compilation was
+  wrong.  SSRC/CDQANNUN.hal is generated data almost end to end -- six "F GEN ...
+  F END" regions across 1328 lines -- and the numbers are visible in it:
+      DECLARE CDQV_INDEX_ARRAY ARRAY(4) INTEGER INITIAL(
+    F GEN ...
+         18,278,575,1815
+  which is exactly what we emit at +0000 (0012 0116 023F 0717).  The dump has
+  28, 443, 915, 2443.  And CDQK_PL_FMPS, declared STRUCTURE(278) here, occupies 886
+  halfwords in the dump = 443 copies of two -- the same 443 the dump's index array
+  carries in the same slot.
+- So STS-134's annunciator tables were generated with 443 payload entries where ours
+  have 278, and the CSECT is 2695 halfwords against our 2010 because of that.  The
+  length disagreement is a consequence of the data, not a symptom of the build.
+- SSW IS EFFECTIVELY COMPLETE.  466 of 470 in-index sections match byte for byte, 132
+  of 138 files match completely, and all four differing sections are one understood
+  mechanism: our source tree's generated/reconfiguration data is from a different
+  reconfiguration than STS-134's.  Every category of CSECT -- PROCEDURE, PROGRAM, PDE,
+  ZCON, EXCLUSIVE and all HAL/S runtime library -- matches in full.
+- Two files still fail to LINK and have never been examined: APPLSRC/CVJFDECP.hal and
+  APPLSRC/DGRGSERO.hal.  They are the last unexplained thing in SSW.
