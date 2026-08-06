@@ -319,3 +319,32 @@
   AIESIP 3, CGBOBF 4, DMTERR 5, CDAP02 6, CZ3COM 9, CVKSACSC 20, CRDCIL 24, and three
   large ones that look like a different problem: CDCPHA 48 of 57, FCMGPT 955 of 1093,
   CDQANNUN 1981 of 2010 with the length itself wrong (2010 against 2695 expected).
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- THE DELTA IS A LINKER BUG, and the cleanest one yet.  lnk101 dropped the RLD sign
+  bit on the ZCON path: linker.py masked the flags to the type to dispatch
+  (flags & 0x7F) and ZCon.apply then built its AddrCon from the masked value, so
+  AddrCon.sign was always 0.  A negative displacement was therefore ADDED instead of
+  subtracted, putting every such pointer out by exactly twice the displacement.
+  The YCON/ACON path was always correct -- it passes the whole flag byte.
+- The evidence was unambiguous.  Every affected halfword carried fcmcmp's own
+  "(negative disp.)" annotation, printed from flags & 0x80, so the bit was
+  demonstrably in the data; and the error was exactly 2x the displacement each time:
+  #PCDB021 base 0x28212, dump base-1, ours base+1; #PCANNCO base 0x30120, dump
+  base-0x40, ours base+0x40.
+- Fixed by passing the unmasked flag byte to ZCon.apply too, defaulting to the masked
+  one so an existing caller is unaffected.  Branch zcon-negative-displacement, off
+  master, NOT pushed; draft PR text in ~/ForClaude/PR-zcon-negative-displacement.md.
+- MEASURED: six DATA CSECTs become byte-identical (#DVMELOA, #DAIBGPC, #DDM4DEU,
+  #DDM9ITE, #DDMTERR, #PCDAP02) and #DAIESIP drops from 3 differing halfwords to 2.
+  SSW is now 460/470 sections matching and 126 of 138 files exact.
+- BRANCH HYGIENE COST ME A FALSE ALARM.  I built and tested from fcmcmp-no-data, which
+  branches off master and does NOT contain the PDE fix, so DMTERR's PDE appeared to
+  regress.  It had not; the fix simply was not in that build.  There are now three
+  independent upstream branches plus a local-only `integration` branch that merges all
+  three, and sweeps must be run from `integration` or the results are not comparable.
+- Remaining 10 differing sections, all DATA, and they no longer look like one thing:
+  DCDDOW 1, CDULNK 1, AIESIP 2, CGBOBF 4, CZ3COM 9, CVKSACSC 20, CRDCIL 24, and three
+  large ones -- CDCPHA 48 of 57, FCMGPT 955 of 1093, CDQANNUN 1981 of 2010 with the
+  length itself wrong (2010 against 2695 expected).  The last three are probably a
+  different problem from the rest.
