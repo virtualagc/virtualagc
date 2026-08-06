@@ -406,3 +406,26 @@
 - Remaining: FOUR sections, all DATA.  #PCZ3COM 9, #PCVKSAC 20, #PCRDCIL 24 -- we emit
   values where the dump has 0000 -- and #PCDQANN 1981 of 2010, whose length disagrees
   too (2010 against 2695 expected), pointing at the source rather than the build.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- PR #30 opened for fcmcmp --exceptions (stacked on #28).  Four upstream PRs now open.
+- The three same-shape sections are RECONFIGURATION DATA, and they are one mechanism.
+  #PCZ3COM's CZ3_FLEX_MDM_TABLE and #PCVKSAC's CVAV_FLEX_TBL are both initialised
+  inside "F GEN" ... "F END" regions -- column-1 F cards bracketing a generated block
+  -- in INCL80/FLEXDATA.hal and INCL80/FLEXTBL.hal.  Our tree's copy carries device
+  IDs and indices; the STS-134 memory holds zeros throughout both.
+- #PCRDCIL is the one that proves the compiler is right.  CRDS_MTR_SPD_THRESH's
+  INITIAL list names CSSS_COT_985296 and siblings, and INCL80/CSSCOTR.hal says
+  REPLACE CSSS_COT_985296 BY "2.4853566".  Our image holds 4127C405, which as an IBM
+  float is 2.48535 -- converted exactly right.  The dump holds 425A0000, which is
+  90.0.  Same compiler, different input.
+- So this is a SOURCE-DATA difference, not a build defect, and a different class from
+  the starred locations: MAFGEN does not mark these, because the build really did
+  place them -- from other data than ours.
+- DELIBERATELY NOT added to the exceptions file.  That mechanism is for locations the
+  listing marks as changed after the build, and it verifies each entry against the
+  reference image.  Stretching it to cover "our source disagrees" would turn a narrow
+  checkable statement into a way of silencing anything inconvenient.
+- SSW therefore stands at 466 of 470 in-index sections matching, 132 of 138 files
+  exact, with four differing sections: three reconfiguration-data and #PCDQANN, whose
+  length disagrees (2010 halfwords against 2695 expected) and which is still unexamined.
