@@ -564,3 +564,33 @@
   memory layout still reproduces the dump byte for byte.
 - Standing: SSW and P9 both complete.  Six configurations left -- G8 849, S2 865,
   G9 896, G2 1010, G3 1228, G16 1406 HAL/S CSECTs.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- PARALLEL SWEEPS HAD A REAL BUG AND IT COST A WHOLE CONFIGURATION.  dass-run.py's
+  --jobs assigned job i the tree i % N, which does NOT guarantee one compile per tree:
+  with four workers, a slow job in tree 1 is still running when job 5 starts, and job
+  5 was also given tree 1.  Two compiles in one directory corrupt each other's
+  halmat.bin, litfile.bin and COMMON*.out and end in "Unable to open COMMON input
+  file" -- precisely the failure HANDOFF.md section 3 describes, and precisely what
+  the option exists to prevent.  My own docstring for --jobs-root warned about it.
+- It produced 60 spurious errors in G8 (44 compile, 16 link) out of 332 files, plus an
+  unknown share of the 14 differing sections.  Fixed by exclusion through POSSESSION
+  rather than arithmetic: a queue.Queue of trees, each worker taking one for the
+  duration of a compile and returning it afterwards.  --jobs > number of trees is now
+  an error rather than silent overcommitment.
+- Worth remembering as a class: a scheme that looks like it partitions work can fail
+  to, if the partition is by index and the work is not uniform.  The symptom did not
+  look like a concurrency bug -- it looked like 44 files that would not compile.
+- Also note: archive.results had reached 126 GB over 2651 compiles, about 48 MB each.
+  Six configurations at three sweeps each would be roughly 340 GB against 539 GB free.
+  run-configs.sh purges the archives before every sweep; nothing in them is needed
+  once fcmcmp has run, and a single file can be recompiled by hand when it is.
+
+### [2026-08-06] Target: [mafgenComparison.md]
+- TO WRITE, no hurry: an end-to-end account of the comparison process for somebody not
+  familiar with it, at PFS/mafgenComparison.md.  Should cover what is being compared
+  and against what (OI-34.06 source, OI-34.07 dumps), the seven-step per-configuration
+  sequence, what each of the five dass-*.py scripts does and why, the three kinds of
+  exception (verified patch, no-claim, no reference data) and the standard of evidence
+  each represents, and how to tell a real discrepancy from an artefact.  The mechanism
+  table in dass-compare.db is the raw material.

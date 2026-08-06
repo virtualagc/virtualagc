@@ -46,6 +46,7 @@ import os
 import re
 import json
 import time
+import queue
 import sqlite3
 import subprocess
 import datetime
@@ -184,6 +185,21 @@ def parseOutput(text):
     return outcome, sections, None
 
 
+# The pool of source trees a parallel run may compile in.  A worker takes one
+# for the duration of a compile and puts it back afterwards, so at most one
+# compile is ever running in a given tree.
+#
+# The obvious thing -- handing job i the tree i % N -- is NOT enough, and this
+# is the bug that produced 60 spurious failures across a configuration before
+# it was noticed.  With four workers and four trees, a slow job in tree 1 is
+# still running when job 5 starts, and job 5 was also assigned tree 1: two
+# compiles in one directory, which corrupt each other's halmat.bin, litfile.bin
+# and COMMON*.out and end in "Unable to open COMMON input file".  Exactly the
+# failure HANDOFF.md section 3 describes, and exactly what this option exists
+# to prevent.  Exclusion has to be by possession, not by arithmetic.
+treePool = None
+
+
 def runOne(job):
     '''Compile/link/compare one source file.  Returns a record to be inserted.
 
@@ -192,7 +208,8 @@ def runOne(job):
     inserts serially.  (sqlite3 connections are not shareable across threads,
     and a single writer avoids lock contention besides.)
     '''
-    sourceId, path, config, cwd, outDir, logDir, extra = job
+    sourceId, path, config, _unused, outDir, logDir, extra = job
+    cwd = treePool.get() if treePool is not None else _unused
     stem = Path(path).stem
     logPath = Path(logDir) / f"{stem}.log"
     command = ["compileLinkCompare", f"--config={config}",
@@ -212,6 +229,9 @@ def runOne(job):
         text = result.stdout + "\n" + result.stderr
     except subprocess.TimeoutExpired as e:
         text = "TIMEOUT after 3600 seconds\n" + str(e.stdout or "")
+    finally:
+        if treePool is not None:
+            treePool.put(cwd)
     seconds = time.monotonic() - t0
     Path(logDir).mkdir(parents = True, exist_ok = True)
     logPath.write_text(text)
@@ -430,11 +450,19 @@ def main():
             print(f"  {r['path']} ({r['status']})")
         return
 
-    # Each worker keeps to one directory for the whole run, so the per-job
-    # trees stay independent.
+    if jobs > len(cwds):
+        print(f"--jobs={jobs} but only {len(cwds)} tree(s) under {jobsRoot}; "
+              f"two compiles would share a directory and corrupt each other.")
+        sys.exit(1)
+    global treePool
+    if len(cwds) > 1:
+        treePool = queue.Queue()
+        for c in cwds:
+            treePool.put(c)
+
     jobList = []
-    for i, r in enumerate(rows):
-        jobList.append((r["source_id"], r["path"], config, cwds[i % len(cwds)],
+    for r in rows:
+        jobList.append((r["source_id"], r["path"], config, cwds[0],
                         outDir, logDir, extra))
 
     done = 0
