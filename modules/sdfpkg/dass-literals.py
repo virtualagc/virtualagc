@@ -6,7 +6,8 @@ Purpose:    Recover memory contents that unlinkMAFGEN2 did not scrape, from
             MAFGEN's own literal annotations, and patch them into the .fcm.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 
-Usage:      dass-literals.py --config=SSW [--out=F.fcm] [--report]
+Usage:      dass-literals.py --config=SSW [--out=F.fcm]
+                            [--exceptions=F.txt] [--report]
 
 THE PROBLEM.  MAFGEN's data listing does not print every halfword of a CSECT.
 For a #D it prints the "??? ADCONS,LITERALS,ETC. ???" region it recognises and
@@ -92,10 +93,72 @@ def recoverLiterals(path):
     return values, conflicts
 
 
+# MAFGEN prefixes a value with '*' where the location does not hold what the
+# build put there -- an I-LOAD, a patch, or a checksum, all applied afterwards.
+# Two line shapes carry them, and both must be read:
+#
+#   named variable, one value, belonging to the address at the left:
+#     00304A         #PCDULNK+004C   CDUV_NSP_VEHICLE_ILOAD   *0005  BIN'101'
+#
+#   hex dump, several values, consecutive from the address at the left:
+#     0001A6-0001A7  --------+0000      *0000 *1381
+#
+# Reading the second shape as though it were the first put the wrong value at
+# the wrong address, which the self-check below caught.
+STARRED_LINE_RE = re.compile(
+    r"^\s*([0-9A-F]{6})(?:-([0-9A-F]{6}))?\s+(\S+)\s+(.*)$")
+HEXWORD_RE = re.compile(r"^(\*?)([0-9A-F]{4})$")
+
+
+def recoverStarred(path):
+    """address -> (value, name) for every location MAFGEN marks with '*'.
+
+    No compilation or link can reproduce these: they were written after the
+    build by a separate step -- mission and vehicle constants, patches, and
+    checksums.  Over SSW, of the starred locations falling inside a section we
+    link, our build matches the starred value 0 times and differs at every one,
+    which is the evidence that the marker means what it appears to mean.
+
+    They are not defects to chase but bookkeeping to record, so that they stop
+    appearing in comparison reports as differences needing to be explained away
+    again every time somebody reads one.
+    """
+    starred = {}
+    for line in open(path, errors="replace"):
+        m = STARRED_LINE_RE.match(line)
+        if not m or "*" not in m.group(4):
+            continue
+        start, _end, _csect, rest = m.groups()
+        address = int(start, 16)
+        tokens = rest.split()
+        words = [HEXWORD_RE.match(t) for t in tokens]
+        if words and all(words):
+            # Hex-dump row: consecutive halfwords from the leading address.
+            for i, w in enumerate(words):
+                if w.group(1):
+                    starred.setdefault(address + i, (int(w.group(2), 16), ""))
+        else:
+            # Named row: the name is the first token, the starred value is the
+            # first starred token, and it belongs to the leading address.
+            name = tokens[0] if tokens and not tokens[0].startswith("*") else ""
+            # The first token is sometimes the CSECT+offset field rather
+            # than an identifier; that is not a name worth recording.
+            if name.startswith("+") or HEXWORD_RE.match(name) \
+                    or set(name) <= set("-"):
+                name = ""
+            for t in tokens:
+                w = HEXWORD_RE.match(t)
+                if w and w.group(1):
+                    starred.setdefault(address, (int(w.group(2), 16), name))
+                    break
+    return starred
+
+
 def main():
     config = "SSW"
     mafgen = DEFAULT_MAFGEN
     out = None
+    exceptionsOut = None
     report = False
     for p in sys.argv[1:]:
         if p.startswith("--config="):
@@ -104,6 +167,8 @@ def main():
             mafgen = Path(p.partition("=")[2]).expanduser()
         elif p.startswith("--out="):
             out = p.partition("=")[2]
+        elif p.startswith("--exceptions="):
+            exceptionsOut = p.partition("=")[2]
         elif p == "--report":
             report = True
         else:
@@ -111,6 +176,34 @@ def main():
             sys.exit(1)
     if out is None:
         out = f"{config}.literals.fcm"
+
+    if exceptionsOut is None:
+        exceptionsOut = f"exceptions-{config}.txt"
+    starred = recoverStarred(dassPath(mafgen, config))
+    with open(exceptionsOut, "w") as f:
+        f.write(f"# exceptions-{config}.txt -- locations changed after the "
+                f"build, scraped from\n# {dassPath(mafgen, config).name}, "
+                f"where MAFGEN marks the value with '*'.\n"
+                f"# address value name\n")
+        for address, (value, name) in sorted(starred.items()):
+            f.write(f"{address:05X} {value:04X} {name}\n".rstrip() + "\n")
+    print(f"{config}: {len(starred)} location(s) marked as changed after the "
+          f"build -> {exceptionsOut}")
+    # Self-check: every entry must match the reference image, since
+    # unlinkMAFGEN2 scraped the starred value into it.  A mismatch means the
+    # line was parsed wrongly, not that the image is wrong.
+    check = bytearray(open(mafgen / f"{config}.fcm", "rb").read())
+    good = bad = 0
+    for address, (value, _name) in starred.items():
+        byte = address * 2
+        if byte + 1 >= len(check):
+            continue
+        if struct.unpack_from(">H", check, byte)[0] == value:
+            good += 1
+        else:
+            bad += 1
+    print(f"   self-check against {config}.fcm: {good} agree, {bad} DISAGREE"
+          + ("" if not bad else "  <-- parse error, do not use"))
 
     values, conflicts = recoverLiterals(dassPath(mafgen, config))
     image = bytearray(open(mafgen / f"{config}.fcm", "rb").read())

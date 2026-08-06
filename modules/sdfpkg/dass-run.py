@@ -84,8 +84,14 @@ dassDb = importlib.import_module("dass-db")
 SECTION_RE = re.compile(
     r"^\s*(OK|FAIL|MISSING):\s+(\S+)\s+@\s+([0-9A-Fa-f]+)\s+"
     r"\((\d+)\s+halfwords(?:\s+vs\s+(\d+)\s+expected)?\)"
-    r"(?:\s*\[(\d+)\s+no reference data\])?"
+    # Any bracketed note, parsed afterwards rather than matched literally.
+    # fcmcmp has twice gained a new one -- "[N no reference data]", then
+    # "[N patched after build]" -- and each time a regex that spelled out the
+    # previous wording silently stopped matching those section lines, so they
+    # vanished from the database and the totals improved for the wrong reason.
+    r"(?:\s*\[([^\]]*)\])?"
     r"\s*(?:[-‐-―]\s*(.*))?$")
+NOTE_RE = re.compile(r"(\d+)\s+(no reference data|patched after build)")
 DIFF_RE = re.compile(r"^\s*@\s*([0-9A-Fa-f]+)\s+(\S+)\s+vs\s+(\S+)"
                      r"\s*(?:;\s*(.*?))?\s*$")
 SHIFT_RE = re.compile(r"\*\*\s*shift\s*([+-]\d+):")
@@ -115,7 +121,8 @@ def parseOutput(text):
     for line in text.split("\n"):
         m = SECTION_RE.match(line)
         if m:
-            verdict, name, addr, halfwords, expected, noData, tail = m.groups()
+            verdict, name, addr, halfwords, expected, note, tail = m.groups()
+            counts = {k: int(v) for v, k in NOTE_RE.findall(note or "")}
             n = None
             if tail:
                 mm = NDIFF_RE.search(tail)
@@ -129,7 +136,10 @@ def parseOutput(text):
                 # Halfwords the reference image never stated a value for; see
                 # fcmcmp's --no-data.  Neither matched nor differing, so they
                 # are recorded rather than folded into either count.
-                "no_data": int(noData) if noData else 0,
+                "no_data": counts.get("no reference data", 0),
+                # Locations changed after the original build -- I-LOAD, patch
+                # or checksum -- which no compilation or link can reproduce.
+                "patched": counts.get("patched after build", 0),
                 "n_diffs": 0 if verdict == "OK" else n,
                 "verdict": {"OK": "ok", "FAIL": "differ",
                             "MISSING": "missing"}[verdict],
@@ -234,8 +244,10 @@ def record(db, rec):
             (runId, s["name"], s["address"], s["halfwords"], s["expected"],
              s["n_diffs"], s["verdict"], s["shift"], s["shifted_in"],
              s["after_shift"], 1 if s["name"] in inIndex else 0,
-             (s["detail"] + (f" [{s['no_data']} no reference data]"
-                             if s["no_data"] else "")).strip()))
+             (s["detail"] + (f" [{s['patched']} patched after build]"
+                             if s["patched"] else "")
+                            + (f" [{s['no_data']} no reference data]"
+                               if s["no_data"] else "")).strip()))
         sectionId = cur.lastrowid
         db.executemany(
             "INSERT INTO diff(section_id, address, ours, theirs, annotation) "

@@ -84,6 +84,12 @@ OPTIONs:        --config=XXX.     PASS configuration:  G16 (default), G2, G3, G8
                                   all, so it read no SDFs.
                 --no-sdfi         Read no SDFs; satisfy every "D INCLUDE
                                   TEMPLATE" from the template library.
+                --exceptions=F    File listing locations changed after the
+                                  original build (I-LOADs, patches, checksums),
+                                  which no compilation or link can reproduce.
+                                  Passed to fcmcmp, which reports them
+                                  separately instead of as differences.
+                                  Produced by dass-literals.py.
                 --no-sdl          Generate flight code rather than code for the
                                   Software Development Lab: a START CSECT per
                                   PROGRAM, an LHI of the stack address at
@@ -124,6 +130,11 @@ sdfi = halsParms.DEFAULT_SDFI
 # images in PFS/mafgen, which are of a Software Development Lab build, so it
 # generates SDL code.  See DEFAULT_SDL in halsParms.py.
 sdl = True
+# Locations known to have been changed after the original build -- I-LOADs,
+# patches, checksums.  No compilation or link reproduces them, so counting them
+# as differences just buries the real ones.  See dass-literals.py, which
+# scrapes them from the MAFGEN listing.
+exceptionsFile = None
 for parameter in sys.argv[1:]:
     if parameter.startswith("--parms="):
         parmList = parameter.partition("=")[2]
@@ -145,6 +156,8 @@ for parameter in sys.argv[1:]:
         sdfi = None
     elif parameter == "--no-sdl":
         sdl = False
+    elif parameter.startswith("--exceptions="):
+        exceptionsFile = parameter.partition("=")[2]
     else:
         print(helpMsg)
         sys.exit(1)
@@ -261,6 +274,8 @@ except subprocess.CalledProcessError as e:
 # reports them as a separate category instead of hiding or miscounting them.
 command = ["fcmcmp", "--max-hw-diffs", "10", "--no-data", "C9FB,C6C6",
            "--csect-table", externalSymbolFile, symfile, fcmfile, memoryFile]
+if exceptionsFile != None:
+    command[1:1] = ["--exceptions", exceptionsFile]
 print(" ".join(command))
 try:
     result = subprocess.run(command, capture_output = True, text = True, check = True)

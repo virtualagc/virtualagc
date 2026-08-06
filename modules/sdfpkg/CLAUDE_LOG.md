@@ -376,3 +376,33 @@
   where the dump has 0000), and the large ones CDCPHA 48 of 57, FCMGPT 955 of 1093,
   CDQANNUN 1981 of 2010 -- the last with its LENGTH wrong too (2010 against 2695
   expected), which points at the source rather than at the build.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- I was wrong to file the starred locations as unfixable.  "The values are not
+  reproducible" and "they must keep appearing as discrepancies" are different claims
+  and only the first is true.  The user's point stands: a class that has to be
+  explained away every time a report is read is a tooling gap, and bookkeeping beats
+  prose.
+- fcmcmp gained --exceptions, taking a file of "address value [name]" lines and
+  reporting matches as "[N patched after build]" instead of as differences.  An entry
+  is honoured ONLY where the reference image really holds the claimed value; a
+  mismatch is warned about and ignored, so a stale file cannot suppress a real
+  difference.  dass-literals.py --exceptions=F generates the file from the DASS.
+- Reading the listing right took two passes.  Starred values come in two line shapes:
+  a named variable carrying one ("CDUV_NSP_VEHICLE_ILOAD *0005"), and a hex-dump row
+  carrying several consecutive ones ("--------+0000  *0000 *1381"), which is how
+  CHECKSUMs appear.  Treating the second like the first put right values at wrong
+  addresses.  The generator now self-checks every entry against the .fcm -- 1193
+  entries, 1193 agree, 0 disagree -- which caught it.
+- SSW: differing sections 9 -> 4, files matching completely 127 -> 132 of 138, and
+  466 of 470 in-index sections match.  #DDCDDOW, #PCDULNK, #PCGBOBF, #PCDCPHA and
+  #PFCMGPT all clear, FCMGPT's 955 differing halfwords included -- they were almost
+  all mass-memory load parameters.
+- THE PARSER BROKE THE SAME WAY A SECOND TIME.  A regex spelling out
+  "[N no reference data]" stopped matching once the bracket could also say
+  "[N patched after build]", so five sections vanished and errors went 2 -> 6.  It now
+  matches any bracketed note and parses the counts out afterwards.  Twice is a
+  pattern: never spell fcmcmp's wording into the regex.
+- Remaining: FOUR sections, all DATA.  #PCZ3COM 9, #PCVKSAC 20, #PCRDCIL 24 -- we emit
+  values where the dump has 0000 -- and #PCDQANN 1981 of 2010, whose length disagrees
+  too (2010 against 2695 expected), pointing at the source rather than the build.
