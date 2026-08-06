@@ -84,14 +84,17 @@ OPTIONs:        --config=XXX.     PASS configuration:  G16 (default), G2, G3, G8
                                   all, so it read no SDFs.
                 --no-sdfi         Read no SDFs; satisfy every "D INCLUDE
                                   TEMPLATE" from the template library.
-                --no-sdl          Generate for stand-alone operation rather
-                                  than for flight: a START CSECT per PROGRAM,
-                                  an LHI of the stack address at program entry,
-                                  and linkage-editor STACK cards.  This program
+                --no-sdl          Generate flight code rather than code for the
+                                  Software Development Lab: a START CSECT per
+                                  PROGRAM, an LHI of the stack address at
+                                  program entry, and linkage-editor STACK cards
+                                  for stand-alone operation.  This program
                                   compiles with SDL by default, because the
-                                  flight build it is comparing against did;
-                                  see DEFAULT_SDL in halsParms.py for the
-                                  evidence, which is not unanimous.
+                                  memory images in PFS/mafgen are of an SDL
+                                  build -- a DASS disassembly is debugging
+                                  material, and debugging happened in the lab.
+                                  See DEFAULT_SDL in halsParms.py; the evidence
+                                  is not unanimous.
                 --out-dir=D       Write the per-file products (BASENAME.obj,
                                   BASENAME.fcm, BASENAME.json, and the .LIST and
                                   .repro.json files lnk101 and fcmcmp drop beside
@@ -117,8 +120,9 @@ externalSymbolFile = None
 memoryFile = None
 outDir = None
 sdfi = halsParms.DEFAULT_SDFI
-# Unlike the other two callers, this program is comparing against flight
-# memory, so it generates flight code.  See DEFAULT_SDL in halsParms.py.
+# Unlike the other two callers, this program is comparing against the memory
+# images in PFS/mafgen, which are of a Software Development Lab build, so it
+# generates SDL code.  See DEFAULT_SDL in halsParms.py.
 sdl = True
 for parameter in sys.argv[1:]:
     if parameter.startswith("--parms="):

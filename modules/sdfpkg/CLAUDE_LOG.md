@@ -133,3 +133,30 @@
   it look like a defect in the option under test.  Guarded now.
 - Where SSW stands: PDE 0/29 (the linker mechanism), ZCON 38/18, PROCEDURE 100/20,
   DATA 91/27, PROGRAM 27/2, and every HAL_LIBRARY_* section matching, 110 of 110.
+
+### [2026-08-05] Target: [compileLinkCompare.md]
+- CORRECTION to the SDL entry above, from the user: SDL generates code for the
+  Software Development Lab, a ground facility; NOSDL generates flight code.  I had it
+  backwards.  The measurement is unaffected -- the dumps match SDL-compiled code
+  either way -- but the reason is better: a DASS disassembly and a HALSTAT statistics
+  report are debugging material, of no use in flight, so PFS/mafgen's images are of an
+  SDL build and reproducing them means compiling as the SDL did.  The option's effects
+  read the other way at first glance, since NOSDL is what emits the START CSECT and
+  static stacks the manual calls "stand-alone operation".  Wording fixed in
+  halsParms.py and compileLinkCompare.
+- pde-stack-address-fill is now fully specified and verified, and it is a LINK-time
+  fixup.  For PDE slot k of #E<name>: halfword +4 := address of stack CSECT
+  @<k><name>, halfword +5 := its existing value with bit 15 set.  Nothing else.
+  Verified over all eight dumps: 361 PDE slots, rule holds 361, no violations, every
+  slot has a matching stack CSECT.  Multi-task PDEs included -- G9 has 80 slots.
+- That it is link-time rather than load-time was worth settling, since a value written
+  at process creation could never be matched by a static image.  All 30 SSW stack
+  CSECTs are pure C9FB fill over their whole extent, so the dump is a stored load
+  image, not a running snapshot -- yet the PDEs already carry the addresses.
+- The compiler cannot do it: under SDL, SETUP_STACKS returns before entering any stack
+  ESD (PASS2/INITIALI.xpl:431), so PASS2 never learns the address.  lnk101 can: the
+  @<k><name> STACK entries with their addresses are already in the csects-XXX.json it
+  receives as --external-syms, so this is a lookup and not an allocation.
+- Demonstrated by patching our linked image by the rule and re-running fcmcmp:
+  APPLSRC/GI1GPS.hal goes from "FAIL: 1/3 sections differ" to "PASS: all 3 sections
+  match".  Ready to package for lnk101's developer when you want it sent.

@@ -100,12 +100,23 @@ DEFAULT_OPTIONS = ["SREF", "LIST", "LISTING2", "SRN", "TEMPLATE", "NOLFXI",
 # skew a comparison, it removed files from the comparison altogether.
 DEFAULT_SDFI = "SDFLIB"
 
-# SDL selects flight code generation over stand-alone code generation, and it
-# is NOT in DEFAULT_OPTIONS because only one of the three callers wants it.
+# SDL generates code for the Software Development Lab, a ground facility, as
+# against NOSDL which generates flight code.  It is NOT in DEFAULT_OPTIONS
+# because only one of the three callers wants it.
+#
+# WHY THE COMPARISON WANTS THE GROUND-FACILITY SETTING.  Because that is what
+# the memory images we compare against are.  Nobody produces a DASS disassembly
+# or a HALSTAT statistics report of a flight load -- they would be of no use in
+# flight; they are debugging material, and debugging happened in the SDL.  So
+# PFS/mafgen's dumps are of an SDL build, and reproducing them means compiling
+# as the SDL did.  This is worth stating because the option's effects read the
+# other way round at first glance: NOSDL is what emits the START CSECT and the
+# static stack allocation that the manual calls "stand-alone operation", and
+# stand-alone sounds like the lab rather than like flight.
 #
 # USA003090 (HAL/S-FC User's Manual, Nov 2005) section 8.9, page 8-19, at the
 # version stamp 32.0/17.0 -- which is the compiler HALSTAT records for all 1201
-# units of the flight build, "FC-32.0":
+# units the HALSTAT report covers, "FC-32.0":
 #
 #     "If the SDL option is not specified, a separate CSECT is generated for
 #      each compilation which is a PROGRAM.  Its contents in AP-101 Assembler
@@ -121,9 +132,9 @@ DEFAULT_SDFI = "SDFLIB"
 # Without SDL the compiler therefore emits, for every PROGRAM: that START
 # CSECT, an "LHI R0,<stack>" at program entry (HALINCL/GENCLAS0.xpl:1923), a
 # stack ESD (PASS2/INITIALI.xpl:431), and a " STACK" control card
-# (PASS2/OBJECTGE.xpl:2791).  The flight build has none of these -- no memory
-# dump of the eight contains a START CSECT, and $0GI1GPS is 9 halfwords where
-# ours was 11.
+# (PASS2/OBJECTGE.xpl:2791).  The build we compare against has none of these:
+# no memory dump of the eight contains a START CSECT, and $0GI1GPS is 9
+# halfwords there where ours was 11.
 #
 # Measured over all 138 HAL/S files of the SSW configuration, SDL fixes 35
 # CSECTs and breaks none; 27 of the 29 PROGRAM CSECTs become byte-identical to
@@ -131,18 +142,18 @@ DEFAULT_SDFI = "SDFLIB"
 # displaced by exactly the two halfwords the LHI added.
 #
 # THE EVIDENCE AGAINST, which is why this is documented rather than assumed:
-# the SDF records the option and the flight build's does not show it.  HALSTAT
+# the SDF records the option and the original's does not show it.  HALSTAT
 # gives "SRN,ADDRS" for every unit; ours compiled with SDL gives "SRN,FC,SDL".
 # It is the same bit throughout -- MONITOR.ASM/COMPOPT.bal maps SDL to
 # "00800000", PASS2/INITIALI.xpl:1160, PASS3/INITIALI.xpl:1104 and
-# PASS4/DUMPSDF.xpl:1026 all agree -- so a flight build passing SDL should have
-# said so.  Set against that: no START CSECT exists in any dump, which ^SDL
+# PASS4/DUMPSDF.xpl:1026 all agree -- so a build passing SDL should have said so.  Set against that: no START CSECT exists in any dump, which ^SDL
 # requires; and the two flag strings do not reconcile in the other direction
 # either, since ours reports FC, NON_UNIQUE_SRNS and BITMASK where the original
 # reports only ADDRS.  The physical evidence was judged to outweigh one bit.
 #
 # Who wants it:
-#   compileLinkCompare  YES.  Its whole purpose is matching flight memory.
+#   compileLinkCompare  YES.  It matches the memory images in PFS/mafgen, and
+#                       those are of an SDL build; see above.
 #   compilePASS         no.  It only populates the libraries, and SDL does not
 #                       change what goes into them -- see below.
 #   compileLinkRun      no.  It runs a program stand-alone in an emulator,
@@ -162,7 +173,7 @@ DEFAULT_SDFI = "SDFLIB"
 # bytes differing.
 DEFAULT_SDL = False
 
-# ADDRS is deliberately NOT adopted, though the flight build used it on every
+# ADDRS is deliberately NOT adopted, though the original build used it on every
 # unit.  It is code-neutral -- an option sweep over four difference-sensitive
 # files gives object code identical to the baseline -- so it buys the
 # comparison nothing.  But it is not free either: it adds 23 bytes of real
@@ -226,7 +237,8 @@ def getParms(stem, extraParms="", options=None, original=False, sdl=None):
                 default; the parameter exists for a one-off, not as an
                 invitation to start a fourth private option list.
     original    use the pairs for the original compiler rather than HALSFC.
-    sdl         generate for flight rather than for stand-alone operation.
+    sdl         generate for the Software Development Lab rather than for
+                flight.
                 None takes DEFAULT_SDL; see the note beside it for what the
                 option does, which caller wants it, and why.
     '''
