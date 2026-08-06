@@ -674,3 +674,36 @@
   expect the 8 errors to fall and, more importantly, expect some of the 125 differences
   to turn out to have been caused by wrongly recovered addresses rather than by
   anything in the compiler or linker.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- ALL FOUR PRs MERGED UPSTREAM, three of them with changes by the maintainer.  Read the
+  comments before assuming our local versions are what landed:
+    #27  "The patching part is superceded by 'patchStackPDEs' BUT this also catches a
+         bug with multi-task PDE slots."  So the PDE fixup already existed upstream and
+         what our PR actually contributed was the multi-slot binding -- slot k to stack
+         '@' + STACK_SEQUENCE[k] + name.  That part was kept and reworked onto HEAD.
+    #29  "Updated commit to work on HEAD and add fix to phaseresolve as well" -- the
+         ZCON sign bug was present in a second place we never saw.
+    #30  "Change updated to be compatible with file reorganization in my latest pushes."
+    #28  merged as-is.
+- Upstream had moved 38 commits ahead, including a substantial reorganisation, so the
+  re-run then in flight was building against superseded tooling.  Stopped it rather
+  than spend four more hours producing results nobody would trust.
+- WHAT MOVED: src/LNK101/lnk101/* -> src/lnk101/*, fcmcmp -> src/tools/fcmcmp.py,
+  rldanalyze -> src/tools/rldanalyze.py.  New modules phaseresolve.py and
+  stacksizer.py.  New tools mmu2fcm and mmubuild compose a memory-configuration image
+  from per-phase load modules, which is much closer to how the original build actually
+  worked than our per-file compare-at-CSECT-addresses approach -- worth understanding
+  before doing much more of this.
+- WHAT SURVIVED, checked rather than assumed: lnk101 still takes --external-syms, and
+  fcmcmp still takes --no-data and --exceptions, so the whole workflow is intact.
+  Every tool it invokes is still on PATH, rldanalyze included.  Smoke-tested after
+  rebuilding: APPLSRC/GI1GPS.hal matches all three sections, now through the
+  maintainer's patchStackPDEs rather than ours, and SSSRC/DMTERR.hal gives 15.
+- The ext/virtualagc submodule refuses to update because our working tree has changes.
+  That is correct and should be left alone: letting it check out its pinned commit
+  would discard them.  The build does not touch the virtualagc tree otherwise --
+  verified, only dass-compare.db shows modified.
+- Re-running all eight configurations against upstream master with both of our own
+  deferred fixes in place (sole-candidate rule withdrawn, failed links re-linked with
+  -f to harvest evidence).
