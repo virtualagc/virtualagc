@@ -444,7 +444,15 @@ if passFailed(exitCode):
         pendingFailure = "HALSFC-PASS1 failure"
     else:
         errorExit("Aborted after PASS1")
-shutil.copy("litfile.bin", "litfile0.bin")
+# Guarded, because an unguarded copy of a missing intermediate reports itself as
+# a bare Python traceback rather than as a compilation problem.  A stale work
+# directory -- two compilations having run in it at once -- made this fail for
+# one file of a corpus run, and the traceback read as a defect in the compiler
+# option being tested rather than as the leftover state it actually was.
+if os.path.exists("litfile.bin"):
+    shutil.copy("litfile.bin", "litfile0.bin")
+else:
+    print("Warning: PASS1 produced no litfile.bin, so no litfile0.bin is kept.")
 if False:
     shutil.copy("COMMON0.out", "temp")
     shutil.copy("halmat.bin", "temp")

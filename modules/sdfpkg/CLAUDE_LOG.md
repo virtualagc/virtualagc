@@ -102,3 +102,34 @@
   only about killed runs: two *live* sweeps in one work directory destroy each other
   the same way, through halmat.bin, litfile.bin and COMMON*.out.  Cost one option
   sweep and one SDL sweep, both restarted.  dass-run.py's --jobs-root exists for this.
+
+### [2026-08-05] Target: [compileLinkCompare.md]
+- SDL adopted for compileLinkCompare only, via halsParms.DEFAULT_SDL (a per-caller
+  parameter, not a DEFAULT_OPTIONS entry).  compilePASS only populates libraries and
+  compileLinkRun runs programs stand-alone, which is the case ^SDL is documented to
+  serve; only compileLinkCompare is matching flight memory.  --no-sdl overrides.
+  New SSW baseline: matching in-index sections 339/470 -> 374/470, PROGRAM CSECTs
+  0/29 -> 27/29, DATA 83 -> 91.  96 sections still differ, 2 files still fail to link.
+- SDL does NOT require SDFLIB to be regenerated -- the question worth asking, and the
+  answer is measured, not assumed.  Same file compiled both ways, SDFs compared byte
+  for byte: a COMPOOL's and a COMSUB's differ only in the recorded flag bit and the
+  compile timestamp; a PROGRAM's differs additionally in one header count, 7 -> 6,
+  which is the stack ESD that is no longer emitted.  Then the test that actually
+  matters: AIBGPCLO includes the PROGRAM template AIE_SIP, so compile it against both
+  versions of AIESIP's SDF -- the object modules differ in 4 bytes, all inside a SYM
+  card's "T" timestamp, and a control compiling twice against the SAME SDF differs in
+  the same bytes.  Content-identical.
+- This also retroactively validates the SDL measurement itself, which ran against an
+  SDFLIB left in a mixed state by the preceding baseline sweep.
+- ADDRS deliberately NOT adopted, and recorded as such.  It is code-neutral, so it
+  buys the comparison nothing; but it adds ~23 bytes of real content to a PROGRAM's
+  SDF (26 differing bytes against a COMPOOL's 3), so putting it in DEFAULT_OPTIONS
+  would make every SDF in SDFLIB stale pending a full compilePASS, with unmeasured
+  effect on dependent compiles.  Revisit when the SDFs are the subject.
+- CGBOBF.hal's failure under SDL was NOT an SDL defect.  It was stale intermediates
+  from two sweeps that had shared a work directory; it compiles clean in isolation and
+  in the re-measured baseline.  HALSFC's unguarded shutil.copy("litfile.bin", ...) at
+  line 447 reported that leftover state as a bare Python traceback, which is what made
+  it look like a defect in the option under test.  Guarded now.
+- Where SSW stands: PDE 0/29 (the linker mechanism), ZCON 38/18, PROCEDURE 100/20,
+  DATA 91/27, PROGRAM 27/2, and every HAL_LIBRARY_* section matching, 110 of 110.

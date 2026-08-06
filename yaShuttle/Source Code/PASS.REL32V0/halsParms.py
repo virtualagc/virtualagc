@@ -100,6 +100,77 @@ DEFAULT_OPTIONS = ["SREF", "LIST", "LISTING2", "SRN", "TEMPLATE", "NOLFXI",
 # skew a comparison, it removed files from the comparison altogether.
 DEFAULT_SDFI = "SDFLIB"
 
+# SDL selects flight code generation over stand-alone code generation, and it
+# is NOT in DEFAULT_OPTIONS because only one of the three callers wants it.
+#
+# USA003090 (HAL/S-FC User's Manual, Nov 2005) section 8.9, page 8-19, at the
+# version stamp 32.0/17.0 -- which is the compiler HALSTAT records for all 1201
+# units of the flight build, "FC-32.0":
+#
+#     "If the SDL option is not specified, a separate CSECT is generated for
+#      each compilation which is a PROGRAM.  Its contents in AP-101 Assembler
+#      language are as follows (the name of the HAL/S program in this example
+#      is HALPROG):
+#             START CSECT
+#                     EXTRN   $0HALPRO
+#                     BAL     4,$0HALPRO
+#                     END     START
+#      Linkage editor STACK control cards are issued to force static stack
+#      allocation for stand-alone operation."
+#
+# Without SDL the compiler therefore emits, for every PROGRAM: that START
+# CSECT, an "LHI R0,<stack>" at program entry (HALINCL/GENCLAS0.xpl:1923), a
+# stack ESD (PASS2/INITIALI.xpl:431), and a " STACK" control card
+# (PASS2/OBJECTGE.xpl:2791).  The flight build has none of these -- no memory
+# dump of the eight contains a START CSECT, and $0GI1GPS is 9 halfwords where
+# ours was 11.
+#
+# Measured over all 138 HAL/S files of the SSW configuration, SDL fixes 35
+# CSECTs and breaks none; 27 of the 29 PROGRAM CSECTs become byte-identical to
+# the AP-101S memory dump, and 8 DATA CSECTs follow because they held addresses
+# displaced by exactly the two halfwords the LHI added.
+#
+# THE EVIDENCE AGAINST, which is why this is documented rather than assumed:
+# the SDF records the option and the flight build's does not show it.  HALSTAT
+# gives "SRN,ADDRS" for every unit; ours compiled with SDL gives "SRN,FC,SDL".
+# It is the same bit throughout -- MONITOR.ASM/COMPOPT.bal maps SDL to
+# "00800000", PASS2/INITIALI.xpl:1160, PASS3/INITIALI.xpl:1104 and
+# PASS4/DUMPSDF.xpl:1026 all agree -- so a flight build passing SDL should have
+# said so.  Set against that: no START CSECT exists in any dump, which ^SDL
+# requires; and the two flag strings do not reconcile in the other direction
+# either, since ours reports FC, NON_UNIQUE_SRNS and BITMASK where the original
+# reports only ADDRS.  The physical evidence was judged to outweigh one bit.
+#
+# Who wants it:
+#   compileLinkCompare  YES.  Its whole purpose is matching flight memory.
+#   compilePASS         no.  It only populates the libraries, and SDL does not
+#                       change what goes into them -- see below.
+#   compileLinkRun      no.  It runs a program stand-alone in an emulator,
+#                       which is the case ^SDL is documented to serve.  (Both
+#                       settings do in fact run under yaGPC2; this is a matter
+#                       of generating for the situation, not of necessity.)
+#
+# SDL DOES NOT REQUIRE THE SDF LIBRARY TO BE REGENERATED, which was the open
+# question when it was adopted.  Compiling the same file both ways and
+# comparing the SDFs byte for byte: a COMPOOL's and a COMSUB's differ only in
+# the recorded flag bit and the compile timestamp, and a PROGRAM's differs
+# additionally in one header count, 7 against 6, being the stack ESD that is no
+# longer there.  Compiling a dependent unit (AIBGPCLO, which includes the
+# PROGRAM template AIE_SIP) against the two versions of AIESIP's SDF gives
+# object modules that differ only in their own compile timestamp -- confirmed
+# by a control that compiles it twice against the *same* SDF and finds the same
+# bytes differing.
+DEFAULT_SDL = False
+
+# ADDRS is deliberately NOT adopted, though the flight build used it on every
+# unit.  It is code-neutral -- an option sweep over four difference-sensitive
+# files gives object code identical to the baseline -- so it buys the
+# comparison nothing.  But it is not free either: it adds 23 bytes of real
+# content to a PROGRAM's SDF, so putting it in DEFAULT_OPTIONS would make every
+# SDF in SDFLIB stale until a full compilePASS regenerated them, and the effect
+# of the richer SDFs on dependent compiles has not been measured.  Adopt it
+# when the SDFs themselves are the subject, not as a freebie.
+
 def getCardtype(stem, original=False):
     '''The CARDTYPE value for one source file, named by its stem.
 
@@ -142,7 +213,7 @@ def getCardtypeMap(stem):
         map[cardtype[i]] = cardtype[i + 1]
     return map
 
-def getParms(stem, extraParms="", options=None, original=False):
+def getParms(stem, extraParms="", options=None, original=False, sdl=None):
     '''The full --parms string for one source file.
 
     stem        the source file's stem, e.g. "GKFHOR" for GKFHOR.hal.
@@ -155,8 +226,13 @@ def getParms(stem, extraParms="", options=None, original=False):
                 default; the parameter exists for a one-off, not as an
                 invitation to start a fourth private option list.
     original    use the pairs for the original compiler rather than HALSFC.
+    sdl         generate for flight rather than for stand-alone operation.
+                None takes DEFAULT_SDL; see the note beside it for what the
+                option does, which caller wants it, and why.
     '''
     opts = list(DEFAULT_OPTIONS if options is None else options)
+    if (DEFAULT_SDL if sdl is None else sdl) and "SDL" not in opts:
+        opts.insert(0, "SDL")
     if extraParms and not extraParms.endswith(","):
         extraParms += ","
     return extraParms + ",".join(opts) + ",CARDTYPE=" + \
