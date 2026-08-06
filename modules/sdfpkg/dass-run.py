@@ -84,6 +84,7 @@ dassDb = importlib.import_module("dass-db")
 SECTION_RE = re.compile(
     r"^\s*(OK|FAIL|MISSING):\s+(\S+)\s+@\s+([0-9A-Fa-f]+)\s+"
     r"\((\d+)\s+halfwords(?:\s+vs\s+(\d+)\s+expected)?\)"
+    r"(?:\s*\[(\d+)\s+no reference data\])?"
     r"\s*(?:[-‐-―]\s*(.*))?$")
 DIFF_RE = re.compile(r"^\s*@\s*([0-9A-Fa-f]+)\s+(\S+)\s+vs\s+(\S+)"
                      r"\s*(?:;\s*(.*?))?\s*$")
@@ -114,7 +115,7 @@ def parseOutput(text):
     for line in text.split("\n"):
         m = SECTION_RE.match(line)
         if m:
-            verdict, name, addr, halfwords, expected, tail = m.groups()
+            verdict, name, addr, halfwords, expected, noData, tail = m.groups()
             n = None
             if tail:
                 mm = NDIFF_RE.search(tail)
@@ -125,6 +126,10 @@ def parseOutput(text):
                 "address": int(addr, 16),
                 "halfwords": int(halfwords),
                 "expected": int(expected) if expected else None,
+                # Halfwords the reference image never stated a value for; see
+                # fcmcmp's --no-data.  Neither matched nor differing, so they
+                # are recorded rather than folded into either count.
+                "no_data": int(noData) if noData else 0,
                 "n_diffs": 0 if verdict == "OK" else n,
                 "verdict": {"OK": "ok", "FAIL": "differ",
                             "MISSING": "missing"}[verdict],
@@ -228,7 +233,9 @@ def record(db, rec):
             " detail) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
             (runId, s["name"], s["address"], s["halfwords"], s["expected"],
              s["n_diffs"], s["verdict"], s["shift"], s["shifted_in"],
-             s["after_shift"], 1 if s["name"] in inIndex else 0, s["detail"]))
+             s["after_shift"], 1 if s["name"] in inIndex else 0,
+             (s["detail"] + (f" [{s['no_data']} no reference data]"
+                             if s["no_data"] else "")).strip()))
         sectionId = cur.lastrowid
         db.executemany(
             "INSERT INTO diff(section_id, address, ours, theirs, annotation) "

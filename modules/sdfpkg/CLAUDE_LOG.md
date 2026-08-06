@@ -284,3 +284,38 @@
   teaching unlinkMAFGEN2 to scrape LITERAL annotations -- would remove the false
   differences and leave only the real ones.  That is probably the next piece of
   tooling, and it benefits every configuration.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- Tooling fixed before chasing the delta, on the user's suggestion, and it was the
+  right order: it removed a known false factor and in doing so EXPOSED real
+  differences that were previously invisible.
+- fcmcmp gained --no-data C9FB,C6C6.  Those two values are not observations: for any
+  halfword the MAFGEN listing never reported, unlinkMAFGEN2 leaves -1 and then
+  synthesises a value purely from the address (unlinkMAFGEN2.py:481-488, 0xC9FB below
+  0x20000 and 0xC6C6 above).  Comparing against a guess manufactured differences.
+  Such halfwords are now a THIRD category -- neither matched nor counted as differing,
+  reported per section as "[N no reference data]" and totalled at the end -- so
+  nothing is hidden.  Default is empty, preserving existing behaviour.
+- New dass-literals.py recovers the values MAFGEN does report but the scrape drops.  A
+  literal is data, but MAFGEN prints it against the instruction referencing it, with
+  the effective address: "LITERAL: =F'-2132803578', =X'80E00006'" against EFFAD 000728.
+  Over SSW that is 1053 addresses, 0 contradicting, of which 1342 halfwords are also
+  present in the scrape and ALL 1342 agree -- an independent check that the parse is
+  right -- and 67 fill halfwords the scrape had synthesised.  Writes a patched copy;
+  PFS/mafgen is untouched.  Pass it as --memory=.
+- Both together: SSW goes from 447/470 sections matching to 454/470, and from 113 of
+  138 files exact to 120.  16 differing sections remain, ALL of them DATA.
+- The two halves are complementary and neither alone is right.  --no-data alone would
+  have marked #DAIBGPC and #DAIESIP as fully matching, because the halfwords where
+  they disagree are exactly the ones the scrape lost; the patched image turns those
+  back into real, countable differences (n=1 and n=3).
+- WATCH THE PARSER when fcmcmp's output changes.  Adding "[N no reference data]"
+  between the size and the em-dash silently stopped dass-run.py's SECTION_RE matching
+  those lines, so ten sections vanished from the database and the totals looked better
+  than they were (470 in-index became 460).  Caught by the section count moving in the
+  wrong direction.  --reparse fixed it without recompiling anything.
+- Remaining 16, and they are now a small sharply-defined set: six with a single
+  differing halfword (DCDDOW, VMELOAD, AIBGPCLO, CDULNK, DM4DEU, DM9ITEM), then
+  AIESIP 3, CGBOBF 4, DMTERR 5, CDAP02 6, CZ3COM 9, CVKSACSC 20, CRDCIL 24, and three
+  large ones that look like a different problem: CDCPHA 48 of 57, FCMGPT 955 of 1093,
+  CDQANNUN 1981 of 2010 with the length itself wrong (2010 against 2695 expected).

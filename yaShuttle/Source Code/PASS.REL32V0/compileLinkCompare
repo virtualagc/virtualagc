@@ -252,7 +252,15 @@ except subprocess.CalledProcessError as e:
     die()
 
 # Next, compare.
-command = ["fcmcmp", "--max-hw-diffs", "10", "--csect-table", externalSymbolFile, symfile, fcmfile, memoryFile]
+# --no-data C9FB,C6C6: unlinkMAFGEN2 writes those two values for any halfword
+# the MAFGEN listing never reported, choosing between them purely by address
+# (unlinkMAFGEN2.py:481-488), so they are synthesised guesses rather than
+# observations.  Without this, every halfword we emit into such a region is
+# counted as a difference against a value the dump never actually stated -- the
+# bulk of the differing DATA CSECTs in SSW were exactly that.  fcmcmp now
+# reports them as a separate category instead of hiding or miscounting them.
+command = ["fcmcmp", "--max-hw-diffs", "10", "--no-data", "C9FB,C6C6",
+           "--csect-table", externalSymbolFile, symfile, fcmfile, memoryFile]
 print(" ".join(command))
 try:
     result = subprocess.run(command, capture_output = True, text = True, check = True)
