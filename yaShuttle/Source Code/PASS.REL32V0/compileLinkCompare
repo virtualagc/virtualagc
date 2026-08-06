@@ -248,6 +248,23 @@ except subprocess.CalledProcessError as e:
     print("STDOUT:", e.stdout)
     print("STDERR:", e.stderr)
     #os._exit(1)
+
+    # Re-link with -f, purely so lnk101 writes its symbol JSON.  This does NOT
+    # rescue the link: the failure is still reported and this program still
+    # exits nonzero.  But the JSON carries unresolvedRelocations, naming each
+    # unresolved symbol, the halfword it was to be written at, and the addend --
+    # which is the evidence dass-syms.py needs to work out what address the
+    # original build used.  Without it a file that fails to link contributes
+    # nothing to the next recovery pass and so can never be fixed; G8 had seven
+    # of them.  The image is thrown away, only the JSON is kept.
+    print("Re-linking with -f, to record what could not be resolved.")
+    forced = subprocess.run(command + ["-f", "--no-repro"],
+                            capture_output = True, text = True)
+    if Path(symfile).is_file():
+        print(f"Recorded unresolved relocations in {symfile}.")
+    else:
+        print("Forced re-link produced no symbol file.")
+        print("STDERR:", forced.stderr)
     # Both paths here were wrong: "../{config}.fcm" and "../csects-{config}.json"
     # duplicated the defaults computed above one directory too high, and the
     # second was missing its f prefix besides, so it named a literal file

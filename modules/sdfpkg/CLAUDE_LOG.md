@@ -649,3 +649,28 @@
   src.backup(dst) on a read-only connection with a timeout -- rather than copying the
   file, which can tear.  And do not `git add` the database while a sweep is writing it:
   git aborts with "confused by unstable object source data".
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- ALL EIGHT CONFIGURATIONS RUN.  14175 of 14300 in-index CSECTs match, 99.13%, with
+  125 differing and 8 errors.  Per configuration:
+      SSW  476/476    P9   509/509    G8  1625/1637   S2  1227/1249
+      G9  1353/1369   G2  2545/2558   G3 2877/2903   G16 3563/3599
+  Six of the eight have no errors at all; the 8 are G8's 7 and S2's 1, all the same
+  undefined-#Z link-failure variant.
+- Both deferred fixes are now in, and both are tested:
+    1. The "sole HALSTAT candidate" acceptance is WITHDRAWN (--sole-candidates restores
+       it for experiment).  It accepted 18 symbols in SSW and changed nothing, and in
+       S2 it supplied #PCSPCLB at HALSTAT phase 14's 0xAF6E where the dump implies
+       0xAF73, putting $0SPSPSP and other CODE sections out by five halfwords.  Costs
+       correctness, buys nothing.  With it off, S2's recovery drops to only
+       dump-corroborated and cross-configuration addresses.
+    2. compileLinkCompare now re-links a FAILED link with lnk101 -f, purely so the
+       symbol JSON gets written.  The failure is still reported and the exit is still
+       nonzero; the image is discarded.  But the JSON's unresolvedRelocations name each
+       unresolved symbol, its site and its addend, which is the evidence dass-syms.py
+       needs -- and without it a file that will not link contributes nothing to the
+       next recovery pass and can never be fixed.  Verified on GKRORB.
+- Re-running all eight with both fixes.  The numbers above are therefore provisional:
+  expect the 8 errors to fall and, more importantly, expect some of the 125 differences
+  to turn out to have been caused by wrongly recovered addresses rather than by
+  anything in the compiler or linker.

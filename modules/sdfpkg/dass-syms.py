@@ -60,8 +60,12 @@ accepted only when the dump-derived base and a HALSTAT candidate agree
 independently.  For #PCDHMMU that is 170 agreeing references out of 184 usable
 ones, all giving 0xABB8, which is exactly HALSTAT's phase-12 figure: one
 unknown satisfying 170 equations, corroborated by a document that never saw our
-compiler.  A symbol offered by exactly one phase and with no contrary dump
-evidence is also accepted; anything else is left unresolved and reported.
+compiler.  Anything else is left unresolved and reported.  There WAS a weaker rule --
+accept a symbol offered by exactly one phase, with no dump evidence either way
+-- and it has been withdrawn: over SSW it accepted 18 symbols and changed
+nothing measurable, and over S2 it supplied a wrong address for #PCSPCLB that
+put several CODE sections out by five halfwords.  --sole-candidates restores
+it for experiment.
 
 Being conservative here matters more than coverage.  Of SSW's 90 unresolved
 symbols only 9 are accepted, and those 9 fix 26 CSECTs and break none.  Most of
@@ -318,6 +322,16 @@ def main():
     mafgen = DEFAULT_MAFGEN
     linkDir = "work"
     logDir = "logs"
+    # Accepting a symbol because exactly one HALSTAT phase offers it, with no
+    # dump evidence either way, is NOT evidence that the address is right --
+    # and it has been shown to supply wrong ones.  #PCSPCLB was rejected in SSW
+    # for want of agreement (2 of 23 references) and then accepted in S2 by
+    # this rule at HALSTAT phase 14's 0xAF6E, where the dump implies 0xAF73;
+    # that put $0SPSPSP and several other CODE sections out by five halfwords.
+    # In SSW, where it accepted 18 symbols, it changed nothing measurable at
+    # all.  So it costs correctness and buys nothing, and is off unless asked
+    # for.
+    permitSoleCandidate = False
     base = None
     out = None
     report = False
@@ -336,6 +350,8 @@ def main():
             base = p.partition("=")[2]
         elif p.startswith("--out="):
             out = p.partition("=")[2]
+        elif p == "--sole-candidates":
+            permitSoleCandidate = True
         elif p == "--report":
             report = True
         else:
@@ -407,14 +423,15 @@ def main():
                              f"dump-derived {base:#07x} ({n}/{total}) matches "
                              f"no candidate" if candidates
                              else "not in HALSTAT"))
-        elif len(candidates) == 1:
+        elif len(candidates) == 1 and permitSoleCandidate:
             phase = list(candidates)[0]
             accepted[symbol] = (candidates[phase], phase,
                                 "sole HALSTAT candidate, no contrary evidence")
         else:
             rejected.append((symbol, seen[symbol],
-                             "no usable dump evidence and several candidates"
-                             if candidates else "not in HALSTAT"))
+                             ("no usable dump evidence, "
+                              + (f"{len(candidates)} candidate(s)"
+                                 if candidates else "not in HALSTAT"))))
 
     augmented = dict(index)
     for symbol, (address, phase, why) in accepted.items():
