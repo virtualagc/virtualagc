@@ -160,3 +160,41 @@
 - Demonstrated by patching our linked image by the rule and re-running fcmcmp:
   APPLSRC/GI1GPS.hal goes from "FAIL: 1/3 sections differ" to "PASS: all 3 sections
   match".  Ready to package for lnk101's developer when you want it sent.
+
+### [2026-08-05] Target: [compileLinkCompare.md]
+- EVERY CODE CSECT IN SSW NOW MATCHES.  PROCEDURE 120/120 and PROGRAM 29/29, plus all
+  110 HAL_LIBRARY_* sections.  In-index sections matching went 339/470 (start of the
+  session) to 400/470.  What remains is 70 sections and none of it is code: PDE 29,
+  DATA 23, ZCON 18.
+- compool-in-assembly-storage is fixed, and it was a gap in csects-XXX.json rather
+  than a defect of ours.  A COMPOOL whose storage an assembly module owns has no CSECT
+  of its own in the MAFGEN listing -- the memory is attributed to the containing
+  assembly CSECT -- so lnk101 had nothing to resolve it to and linked it at zero.  90
+  external symbols were unresolved in SSW this way.
+- PFS/HALSTAT.ASC supplies the missing addresses.  Per compilation unit it carries a
+  "CSECT INFORMATION" block giving each CSECT's address and size in each memory phase.
+  A phase is NOT a configuration: phase 2 is the resident portion shared by all eight
+  (358/358 agreeing with csects-SSW.json), and each configuration adds overlays --
+  G16 phase 4, G2 5, G3 6, G8 7, G9 8, P9 12, S2 14+15.
+- The discriminator, so this is not fitting a number to the answer: lnk101 reports
+  every unresolved relocation with its site and addend, so the dump at that site minus
+  the addend gives the base the original must have used -- one equation per reference.
+  An address is accepted only where the dump-derived base and a HALSTAT candidate
+  agree independently.  #PCDHMMU: 170 of 184 references agree on 0xABB8, exactly
+  HALSTAT's phase-12 figure.  #PCVWMMU: 12 of 12 on 0x6C32.
+- An address above 64K is stored in the low halfword with bit 15 set -- the same paged
+  form sdf.py's mode5 handles.  #PCDIMMU proves it: HALSTAT 0x2065E, dump-derived
+  0x865E = (0x2065E | 0x8000) & 0xFFFF.  Adding that comparison recovered a tenth
+  symbol my hand pass had rejected.
+- 10 of 90 symbols recovered; they fix 26 CSECTs and break none.  Conservatism is the
+  point: most of the other 80 are compools of other configurations, referenced by an
+  SSW module but pointing into memory SSW does not contain, and their dump-derived
+  bases do not converge (ratios like 1/57), which is the signal that there is nothing
+  to find.
+
+### [2026-08-05] Target: [README.md]
+- New: dass-syms.py, which parses HALSTAT's CSECT INFORMATION, cross-validates each
+  candidate against the memory dump via lnk101's unresolved relocations, and emits an
+  augmented external-symbol table.  It needs a sweep's link outputs (--out-dir kept) to
+  know which symbols went unresolved and where.  csects-SSW-augmented.json is the
+  result for SSW; pass it to compileLinkCompare as --ext-syms.
