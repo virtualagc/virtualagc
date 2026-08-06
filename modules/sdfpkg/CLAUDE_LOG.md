@@ -218,3 +218,42 @@
   never produced -- nothing to do with linking.  Verified by reverting the change,
   rebuilding and re-running: the failure sets are identical before and after.  So
   "tests pass" is not available as a gate there; "no change in the failure set" is.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- The ZCON group is FIXED, all 18, and it was not what I guessed.  These are not
+  consequences to be written off: a configuration can carry a module's ZCON without
+  carrying the module, and the ZCON is a CROSS-CONFIGURATION POINTER holding the
+  address the code has in whichever configuration does load that overlay.  SSW's
+  #ZDCDDG1 points at 0x1DE62, which is where G16 keeps #CDCDDG1.
+- Recovered from the OTHER CONFIGURATIONS' OWN INDEXES, which beat HALSTAT here: same
+  unlinkMAFGEN2 scrape, carries sizes, and covers HALSTAT's misses (#CDCDDG3 and
+  #CDKFCM9 are in no HALSTAT phase but sit in G3's and G9's indexes at exactly the
+  decoded address).  HALSTAT still earns its place for #CDCDDS4 and #CDKFCM5, which
+  are in none of the eight configurations we have dumps for.
+- Discriminator is the dump's own decoded ZCON: HW0 sector-encoded address, HW1 with
+  BSR bits 7-4 (code) and DSR bits 3-0 (data).  A candidate is accepted only if it
+  equals the decoded value.  All 18 agree.
+- Both #C and #D are needed from the same source; #C alone fixes HW0 and leaves HW1's
+  sector fields wrong, leaving the ZCON differing by one halfword.
+- User's observation that the CSECT name encodes the configuration is a good sanity
+  check and held for every case, but it is NOT the rule and is not relied on.
+  IBM-82-SS-4556 section 2.1.1.1 gives the block-label format as ABB_C...C with only
+  the subsystem ID and a two-character ID structured, the rest "descriptive of the
+  purpose of the code block"; downlist units take a DCD prefix, so DCDDS8 is DCD +
+  "DS8".  There is no S8 configuration -- confirmed by the user -- and #CDCDDS8 sits
+  in P9's index accordingly.  S4 does exist; we have no dump for it.
+- My phase-to-configuration table was inferred from agreement counts and is only a
+  rough guide: several phases serve more than one configuration, and phases 16 and 18
+  correspond to configurations we have no dump for.  Nothing relies on it; every
+  address is accepted on direct evidence.
+- SSW now: 447/470 in-index sections matching, 113 of 138 files matching completely.
+  ZCON 56/0, PDE 29/0, PROCEDURE 120/0, PROGRAM 29/0, all HAL_LIBRARY_*.  Remaining:
+  DATA 23, plus 2 files that still fail to link.
+- dass-syms.py gained --base, because the relocation-evidence pass can only see a
+  symbol that was unresolved in the sweep it reads: re-running it against a sweep that
+  already used the augmented table finds nothing and would silently drop the earlier
+  recoveries.  The cross-configuration pass has no such dependency.
+
+### [2026-08-06] Target: [README.md]
+- Extracted modules/sdfpkg/refs/IBM-82-SS-4556-Programming-Standards-Rev4.txt, the
+  Orbiter Avionics Software Programming Standards Document, for its naming standards.

@@ -6,7 +6,8 @@ Purpose:    Recover CSECT addresses that unlinkMAFGEN2 could not, from HALSTAT,
             and emit an augmented external-symbol table for lnk101.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 
-Usage:      dass-syms.py --config=SSW [--out=F.json] [--report]
+Usage:      dass-syms.py --config=SSW [--base=F.json] [--out=F.json] [--report]
+            --base carries a previous augmented table forward; see main().
 
 THE PROBLEM.  csects-XXX.json is incomplete.  A HAL/S COMPOOL whose storage is
 owned by an assembly module has no CSECT of its own in the MAFGEN listing --
@@ -31,10 +32,25 @@ each memory phase:
 
 A phase is not a memory configuration.  Phase 2 is the resident portion shared
 by every configuration -- all 358 of its CSECTs agree with csects-SSW.json --
-and each configuration adds overlays on top of it: G16 takes phase 4, G2 phase
-5, G3 phase 6, G8 phase 7, G9 phase 8, P9 phase 12, S2 phases 14 and 15.  So a
-unit present in several phases offers several candidate addresses and the phase
-alone does not say which one a given configuration uses.
+and each configuration adds overlays on top of it.  Matching each phase's
+addresses against each configuration's index gives, approximately: G16 phase 4,
+G2 phase 5, G3 phase 6, G8 phase 7, G9 phase 8, P9 phase 12, S2 phases 14 and
+15.  Treat that as a rough guide and not as a fact: it is inferred from
+agreement counts, several phases serve more than one configuration, and some
+phases (16, 18) correspond to configurations we have no dump for at all.
+Nothing in this script relies on it -- every address is accepted on direct
+evidence, never on a phase label.
+
+The CSECT name usually names the configuration too -- DCDDG1 for G1, DCDDS2 for
+S2 -- which is a good sanity check but not a rule: #CDCDDS8 lives in P9's
+index, and #CDGNLIG ("GN", generic) is in all five GNC configurations at one
+address.  IBM-82-SS-4556 (Programming Standards, Rev 4) section 2.1.1.1 says
+why: a block label is ABB_C...C, where only A (the subsystem ID) and BB are
+structured, and everything after is "an alphanumeric ID descriptive of the
+purpose of the code block" chosen by the programmer.  Downlist units take a DCD
+prefix, so DCDDS8 is DCD + the descriptive "DS8" -- the trailing digits are
+convention, not a binding to a memory configuration, and there is no S8
+configuration at all.
 
 THE DISCRIMINATOR, and why this is not fitting a number to the answer.  lnk101
 reports every relocation it could not resolve, with the site and the addend.
@@ -137,11 +153,103 @@ def collectUnresolved(linkDir):
     return out
 
 
+def sectorDecode(hw, sector):
+    '''A 16-bit sector-encoded halfword to an absolute halfword address.  Bit 15
+    means "apply the sector register"; otherwise the address is in sector 0.
+    The same rule as lnk101's addrcon.sector_decode, reimplemented in three
+    lines rather than imported, so this script does not depend on the nsts-sdl-
+    dps tree being present.'''
+    return ((sector << 15) | (hw & 0x7FFF)) if hw & 0x8000 else hw
+
+
+def recoverCrossConfigCsects(index, phases, halfword, report, otherConfigs=None):
+    '''Addresses of code that lives in a DIFFERENT memory configuration.
+
+    A configuration can carry a module's ZCON without carrying the module.  The
+    per-flight-phase variants are all like this in SSW: #ZDCDDG1 is present but
+    #CDCDDG1 and #DDCDDG1 are not, because DCDDG1's code belongs to the GNC
+    OPS-1 overlay.  The ZCON is a cross-configuration pointer, and it holds the
+    address the code has in the configuration where that overlay IS loaded --
+    so linking for SSW still needs that foreign address, and without it lnk101
+    puts the code at its default 0x10000 and the ZCON comes out wrong.
+
+    A ZCON is two halfwords: HW0 a sector-encoded address, HW1 carrying the
+    sector registers (BSR bits 7-4 for code, DSR bits 3-0 for data) among other
+    flags.  Decoding the dump's own ZCON therefore yields the code address the
+    original build used, and that is the discriminator: a HALSTAT candidate is
+    accepted only when it equals what the dump decodes to.  Over SSW's 18 such
+    ZCONs, 15 have a HALSTAT entry and all 15 agree exactly -- #ZDCDDG1 decodes
+    to 0x1DE62 and HALSTAT's phase 4 gives #CDCDDG1 at 0x1DE62, and so on
+    through phases 5, 7, 8, 12, 15, 16 and 18.  The other three are absent from
+    HALSTAT altogether and are left alone.
+
+    Both #C and #D are supplied, from the same phase.  #C alone is not enough:
+    it fixes HW0 but leaves HW1's sector fields wrong, so the ZCON still
+    differs by one halfword.
+    '''
+    recovered = {}
+    for name, entry in index.items():
+        if entry.get("type") != "ZCON" or "start" not in entry:
+            continue
+        base = name[2:]
+        code, data = "#C" + base, "#D" + base
+        if code in index:               # the module is in this configuration
+            continue
+        hw0 = halfword(entry["start"])
+        hw1 = halfword(entry["start"] + 1)
+        if hw0 is None or hw1 is None:
+            continue
+        target = sectorDecode(hw0, (hw1 >> 4) & 0xF)
+
+        # Candidate sources, best first.  Another configuration's own CSECT
+        # index beats HALSTAT: it is the same unlinkMAFGEN2 scrape we already
+        # trust for this configuration, it carries the size, and it covers
+        # cases HALSTAT misses -- #CDCDDG3 and #CDKFCM9 appear in no HALSTAT
+        # phase at all, but sit in the G3 and G9 indexes at exactly the address
+        # SSW's own ZCON decodes to.  HALSTAT is the fallback, and it earns its
+        # place: #CDCDDS4 is in none of the eight configurations we have dumps
+        # for, and only HALSTAT has it.
+        #
+        # The CSECT name usually says which configuration it belongs to -- G1,
+        # G2, G3, G8, G9, S2 -- and that is a useful sanity check, but it is
+        # NOT the discriminator and is not relied on here.  It does not always
+        # hold: #CDCDDS8 lives in P9's index, and #CDGNLIG ("GN", generic) is
+        # in all five GNC configurations at one address.  What decides is the
+        # address the dump's own ZCON decodes to.
+        found = None
+        for cfgName, cfgIndex in (otherConfigs or {}).items():
+            entry2 = cfgIndex.get(code)
+            if entry2 and entry2.get("start") == target:
+                found = (f"config {cfgName}",
+                         {c: (cfgIndex[c]["start"],
+                              cfgIndex[c]["end"] - cfgIndex[c]["start"] + 1)
+                          for c in (code, data) if c in cfgIndex})
+                break
+        if found is None:
+            hits = [p for p in phases
+                    if code in phases[p] and phases[p][code][0] == target]
+            if len(hits) == 1:
+                found = (f"HALSTAT phase {hits[0]}",
+                         {c: phases[hits[0]][c]
+                          for c in (code, data) if c in phases[hits[0]]})
+        if found is None:
+            report.append((name, f"decodes to {target:#07x}, "
+                                 f"no configuration or HALSTAT phase has "
+                                 f"{code} there"))
+            continue
+        source, addresses = found
+        for csect, (a, n) in addresses.items():
+            if csect not in index:
+                recovered[csect] = (a, n, source, target)
+    return recovered
+
+
 def main():
     config = "SSW"
     halstat = DEFAULT_HALSTAT
     mafgen = DEFAULT_MAFGEN
     linkDir = "work"
+    base = None
     out = None
     report = False
     for p in sys.argv[1:]:
@@ -153,6 +261,8 @@ def main():
             mafgen = Path(p.partition("=")[2]).expanduser()
         elif p.startswith("--link-dir="):
             linkDir = p.partition("=")[2]
+        elif p.startswith("--base="):
+            base = p.partition("=")[2]
         elif p.startswith("--out="):
             out = p.partition("=")[2]
         elif p == "--report":
@@ -163,7 +273,20 @@ def main():
     if out is None:
         out = f"csects-{config}-augmented.json"
 
+    # The relocation-evidence pass can only see a symbol that was unresolved in
+    # the sweep it reads, so re-running it against a sweep that already had the
+    # augmented table finds nothing and would silently drop what the first run
+    # recovered.  --base carries a previous result forward.  (The
+    # cross-configuration pass below has no such dependency: it works from the
+    # index and the dump, so it is reproducible from scratch every time.)
     index = json.load(open(mafgen / f"csects-{config}.json"))
+    if base is not None:
+        previous = json.load(open(base))
+        for name, entry in previous.items():
+            if name not in index:
+                index[name] = entry
+        print(f"carried {len(index) - len(json.load(open(mafgen / f'csects-{config}.json')))} "
+              f"entries forward from {base}")
     memory = open(mafgen / f"{config}.fcm", "rb").read()
 
     def halfword(a):
@@ -227,18 +350,43 @@ def main():
         n = sizeOf.get((symbol, address), 1)
         augmented[symbol] = {"start": address, "end": address + n - 1,
                              "type": "HALSTAT", "hal": None}
+
+    # Second class: code that lives in another configuration but whose ZCON is
+    # carried here.  Independent of the relocation evidence above, so it is
+    # done against the index rather than against lnk101's output.
+    zconReport = []
+    others = {}
+    for f in sorted(Path(mafgen).glob("csects-*.json")):
+        name = f.stem[len("csects-"):]
+        if name != config:
+            try:
+                others[name] = json.load(open(f))
+            except Exception:
+                pass
+    crossConfig = recoverCrossConfigCsects(index, phases, halfword, zconReport,
+                                           others)
+    for symbol, (address, n, phase, target) in crossConfig.items():
+        augmented[symbol] = {"start": address, "end": address + n - 1,
+                             "type": "HALSTAT", "hal": None}
     json.dump(augmented, open(out, "w"))
 
     print(f"{config}: {len(index)} CSECTs in the index, "
           f"{len(seen)} symbols unresolved by lnk101, "
-          f"{len(accepted)} recovered -> {out}")
+          f"{len(accepted)} recovered from relocation evidence, "
+          f"{len(crossConfig)} from cross-configuration ZCONs -> {out}")
     if report:
-        print("\nACCEPTED")
+        print("\nACCEPTED, from lnk101's unresolved relocations")
         for s, (a, p, why) in sorted(accepted.items()):
             print(f"   {s:10s} {a:#07x}  phase {str(p):<3s} {why}")
+        print("\nACCEPTED, from cross-configuration ZCONs")
+        for s, (a, n, p, t) in sorted(crossConfig.items()):
+            print(f"   {s:10s} {a:#07x}  size {n:5d}  "
+                  f"ZCON decodes to {t:#07x}  from {p}")
         print("\nLEFT UNRESOLVED")
         for s, n, why in rejected:
             print(f"   {s:10s} {n:5d} refs  {why}")
+        for s, why in zconReport:
+            print(f"   {s:10s}       ZCON  {why}")
 
 
 if __name__ == "__main__":
