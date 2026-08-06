@@ -707,3 +707,29 @@
 - Re-running all eight configurations against upstream master with both of our own
   deferred fixes in place (sole-candidate rule withdrawn, failed links re-linked with
   -f to harvest evidence).
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- WHAT THIS PHASE IS ACTUALLY FOR, from the user, and it corrects a misreading of mine.
+  The comparison is A TEST OF HALSFC AND lnk101.  It is done one file at a time
+  because we do not have all the object files -- the assembly modules among them --
+  and because nobody, Don included, yet understands the ordering of CSECTs within the
+  DASS files, which would have to be reproduced exactly to build a whole image.
+- So the CSECT indexes, the HALSTAT address recoveries and the exceptions files are
+  NOT scaffolding to be outgrown.  They are what makes the compiler and linker
+  testable at all while the missing pieces are missing.  I had suggested Don's new
+  mmu2fcm and mmubuild might make much of our approach unnecessary; that is premature.
+  Those tools become relevant at the NEXT stage -- building FCMs with no reference to
+  CSECT indexes, the DASS files or HALSTAT, by linking every object module in the
+  right order -- and that stage is gated on this one finishing.
+- THE CONSEQUENCE FOR HOW RESULTS ARE READ.  "How many CSECTs match" is the wrong
+  headline.  The question each remaining difference has to be put to is: DOES THIS
+  IMPLICATE HALSFC OR lnk101?  On that measure the phase has so far produced four real
+  results, all of them in the linker, and all now merged upstream: the ZCON sign bit
+  (which the maintainer found also affected phaseresolve, a path we never exercise),
+  the multi-task PDE slot binding, and two reporting gaps in fcmcmp.  Everything else
+  found -- post-build patches, revision differences, generated reconfiguration data,
+  scrape gaps -- exonerates the tools rather than accusing them, which is a result too
+  but a different kind.
+- Triage the 125 remaining differences that way when the current run lands, rather than
+  by count.  A difference traced to an I-LOAD or a revision gap is evidence the
+  compiler is right; only an unexplained one is evidence it might not be.
