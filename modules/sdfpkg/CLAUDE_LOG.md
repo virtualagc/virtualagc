@@ -594,3 +594,24 @@
   exception (verified patch, no-claim, no reference data) and the standard of evidence
   each represents, and how to tell a real discrepancy from an artefact.  The mechanism
   table in dass-compare.db is the raw material.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- G8 with the concurrency fix: 1625 of 1637 sections match, 12 differ, 7 link errors
+  (was 60 errors with the broken tree assignment).  S2 onward running.
+- The 7 remaining G8 link failures are a NEW variant, and the right fix is identified
+  but deliberately deferred to avoid changing tooling mid-run.  They need undefined
+  #Z symbols -- another module's ZCON -- rather than the #E PDEs SSW and P9 needed.
+  dass-syms.py refused them correctly: #ZGK5MNV exists in G2 at 0x3F0, G3 at 0x4B2 and
+  G16 at 0x41E, three different addresses, and the recovery requires its sources to
+  agree.  The discriminator used everywhere else -- the dump's value at the
+  referencing site minus the addend -- needs lnk101's relocation records, and a link
+  that FAILS writes no symbol JSON at all.
+- Confirmed the way out: re-linking with lnk101 -f produces the JSON anyway, and its
+  unresolvedRelocations give exactly the evidence needed.  On GKRORB that immediately
+  yields #PCGZ123 at 0x827C.  (#ZGK5MNV's own site is fill in the dump, so it stays
+  ambiguous and would still be refused -- correctly.)
+- PLAN: after all six configurations have run, add to compileLinkCompare a retry with
+  -f whose only purpose is to write the symbol JSON, so a failed link still
+  contributes evidence to the next recovery pass, while still being reported as a
+  failure.  Then re-run whichever configurations still show errors.  Doing it now
+  would leave the six configurations built by different tooling.
