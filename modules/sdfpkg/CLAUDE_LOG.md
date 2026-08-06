@@ -452,3 +452,30 @@
   ZCON, EXCLUSIVE and all HAL/S runtime library -- matches in full.
 - Two files still fail to LINK and have never been examined: APPLSRC/CVJFDECP.hal and
   APPLSRC/DGRGSERO.hal.  They are the last unexplained thing in SSW.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- WHAT WE ARE COMPARING, stated properly: the source is OI-34.06 and the MAFGEN
+  listings say "AT RELEASE 034    VERSION 070", i.e. OI-34.07.  The claim that source
+  is identical across OI-34.xx and only patches differ is measurable, because HALSTAT
+  records each unit's RVL and our source carries a two-letter revision code in columns
+  79-80 of every card.
+- Over SSW's 137 HAL/S files, comparing the highest revision code in our file against
+  HALSTAT's RVL for the same unit:
+      at the SAME revision:  21 files, 0 differ or error
+      at a LATER revision:  116 files, 6 differ or error
+  So a revision bump changes what we can see 5.2% of the time.  "Very close to 100%
+  true" is 94.8%.
+- The correlation is perfect the other way: ALL SIX files that differ or fail are ones
+  OI-34.07 revised, and not one same-revision file gives trouble.  CVJFDECP is 10
+  revisions newer, CZ3COM 9, CVKSACSC 4, DGRGSERO 3, CRDCIL 2, CDQANNUN 1.
+- This reframes the four DATA differences.  The "F GEN ... F END" generated-data
+  observation stands -- that is what the data IS -- but the reason our copy differs is
+  better stated as OI-34.07 having revised those units than as per-vehicle
+  reconfiguration.  Same conclusion, better supported.
+- It also predicts the two link failures, which were the last unexamined thing in SSW.
+  Check the revision gap before treating either as a defect of ours.
+- It does NOT undermine the fixes.  A dropped sign bit, an unfilled PDE field and a
+  masked flag byte are structural and independent of the release.  Nor the positive
+  result: 131 of 137 SSW files reproduce OI-34.07 memory byte for byte from OI-34.06
+  source, which is a strong statement about the compiler and linker precisely BECAUSE
+  the inputs are a release apart.
