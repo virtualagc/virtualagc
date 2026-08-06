@@ -91,7 +91,10 @@ SECTION_RE = re.compile(
     # vanished from the database and the totals improved for the wrong reason.
     r"(?:\s*\[([^\]]*)\])?"
     r"\s*(?:[-‐-―]\s*(.*))?$")
-NOTE_RE = re.compile(r"(\d+)\s+(no reference data|patched after build)")
+# Any "N phrase" note fcmcmp puts in the bracket.  Spelling the phrases out
+# meant a new one -- "N ignored" -- was silently not recorded, so the
+# database showed nothing suppressed while the report showed plenty.
+NOTE_RE = re.compile(r"(\d+)\s+([a-z][a-z ]*?)(?=,|$)")
 DIFF_RE = re.compile(r"^\s*@\s*([0-9A-Fa-f]+)\s+(\S+)\s+vs\s+(\S+)"
                      r"\s*(?:;\s*(.*?))?\s*$")
 SHIFT_RE = re.compile(r"\*\*\s*shift\s*([+-]\d+):")
@@ -140,6 +143,10 @@ def parseOutput(text):
                 # Locations changed after the original build -- I-LOAD, patch
                 # or checksum -- which no compilation or link can reproduce.
                 "patched": counts.get("patched after build", 0),
+                # Locations declared -1 in the exceptions file: a difference is
+                # expected on grounds recorded elsewhere and nothing is claimed
+                # about the contents.  Here, the four units OI-34.07 revised.
+                "ignored": counts.get("ignored", 0),
                 "n_diffs": 0 if verdict == "OK" else n,
                 "verdict": {"OK": "ok", "FAIL": "differ",
                             "MISSING": "missing"}[verdict],
@@ -244,8 +251,10 @@ def record(db, rec):
             (runId, s["name"], s["address"], s["halfwords"], s["expected"],
              s["n_diffs"], s["verdict"], s["shift"], s["shifted_in"],
              s["after_shift"], 1 if s["name"] in inIndex else 0,
-             (s["detail"] + (f" [{s['patched']} patched after build]"
-                             if s["patched"] else "")
+             (s["detail"] + (f" [{s['ignored']} ignored]"
+                             if s["ignored"] else "")
+                            + (f" [{s['patched']} patched after build]"
+                               if s["patched"] else "")
                             + (f" [{s['no_data']} no reference data]"
                                if s["no_data"] else "")).strip()))
         sectionId = cur.lastrowid
@@ -269,7 +278,39 @@ def record(db, rec):
     return runId, n_ok
 
 
+NSTS = Path("~/donschmidt/nsts-sdl-dps").expanduser()
+
+
+def checkToolchainBranch():
+    """Warn if lnk101/fcmcmp were not built from the branch carrying all fixes.
+
+    The upstream changes live on one branch each, off master, so that they can
+    be reviewed and merged separately -- and a local `integration` branch merges
+    them for our own use.  Building from any single feature branch produces a
+    toolchain missing the others, and a sweep run against it silently reports
+    already-fixed mechanisms as live again.
+
+    That happened three times before this check existed.  The most expensive
+    was a sweep whose differing sections jumped from 4 to 33, which looked like
+    a regression in the change under test and was in fact a build off a branch
+    that predated two of the fixes.
+    """
+    try:
+        branch = subprocess.run(["git", "-C", str(NSTS), "branch",
+                                 "--show-current"], capture_output=True,
+                                text=True, timeout=30).stdout.strip()
+    except Exception:
+        return
+    if branch and branch != "integration":
+        print(f"WARNING: {NSTS.name} is on branch '{branch}', not "
+              f"'integration'.  lnk101 and fcmcmp were probably built without "
+              f"the other fixes, and this sweep's results will not be "
+              f"comparable.  Check out integration, rebuild, and re-run.\n",
+              file = sys.stderr)
+
+
 def main():
+    checkToolchainBranch()
     config = "SSW"
     dbPath = dassDb.DEFAULT_DB
     outDir = "work"

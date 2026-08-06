@@ -502,3 +502,31 @@
 - SSW NOW HAS NO ERRORS AT ALL.  Every one of its 138 HAL/S files compiles, links and
   compares.  472 of 476 in-index sections match, 134 of 138 files are byte-identical,
   and the only four differing sections are exactly the four units OI-34.07 revised.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- SSW IS COMPLETE.  138 of 138 HAL/S files match, 476 of 476 in-index sections, zero
+  errors and zero differences.  Of those sections, 5 carry verified post-build patches,
+  10 carry halfwords the listing never reported, and 4 carry no-claim entries for the
+  units OI-34.07 revised.  Everything else is byte-identical to the memory dump.
+- The user's -1 proposal is better than either of the alternatives I offered.  An
+  exceptions entry with a value ASSERTS the reference image holds it and is verified;
+  -1 asserts nothing at all, only "ignore this address, the difference is expected on
+  grounds recorded elsewhere".  Writing the dump's own value in would have verified
+  trivially while claiming knowledge we do not have.  fcmcmp reports the two
+  separately, as "[N patched after build]" and "[N ignored]".
+- New dass-versions.py emits the -1 entries.  It acts only where HALSTAT's RVL is
+  newer than the highest revision code in our source, names the unit and the gap in
+  every line, and reports what it acted on: CDQANNUN CD->CE 1981 halfwords, CRDCIL
+  BI->BK 24, CVKSACSC AU->AY 20, CZ3COM AK->AT 9.
+- It caught a flaw in itself first.  Written naively it also emitted entries for
+  DKFCM1/3/9 and DG9LIGHT -- units that match perfectly -- because their #C and #D
+  sections are placed at another configuration's addresses and compared against
+  unrelated memory.  Restricted to CSECTs the configuration's own index contains.
+- THIRD TIME BUILDING FROM THE WRONG BRANCH, and the worst one: differing sections
+  jumped from 4 to 33 and it looked like a regression in the change under test.  It
+  was a build off fcmcmp-exceptions, which branches off master and predates the PDE
+  and ZCON fixes.  dass-run.py now warns if nsts-sdl-dps is not on `integration`.
+- Parser generalised again.  NOTE_RE spelled out the known phrases, so the new
+  "[N ignored]" was not recorded and the database showed nothing suppressed while the
+  report showed plenty.  It now matches any "N phrase".  That is three format changes
+  in a row; the lesson is written down twice already.
