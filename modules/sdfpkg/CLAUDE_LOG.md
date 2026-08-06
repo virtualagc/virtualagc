@@ -348,3 +348,31 @@
   large ones -- CDCPHA 48 of 57, FCMGPT 955 of 1093, CDQANNUN 1981 of 2010 with the
   length itself wrong (2010 against 2695 expected).  The last three are probably a
   different problem from the rest.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- PR #29 opened for the ZCON sign fix.  All three linker PRs (#27 PDE, #28 fcmcmp
+  --no-data, #29 ZCON sign) are now open and ready for review, none draft.
+- The small residue is CLOSED, and it closes as correctly unfixable.  MAFGEN prints a
+  leading asterisk on a value whose contents are not what the build produced --
+  I-LOADs and patches applied after linking.  The names say it: MISSION_ID *001D,
+  CDUV_NSP_VEHICLE_ILOAD *0005, FCMMGPT_NUM_LOAD_BLKS *000A.
+- The test is as clean as they come: of the 127 asterisked locations inside a section
+  we link, our value matches 0 times and differs 127.  A hundred per cent.  If the
+  asterisk meant anything else we would match at some of them, since we now reproduce
+  most of what we compare.
+- Accounts for #DDCDDOW 1 of 1 and #PCDULNK 1 of 1 entirely, #PCGBOBF 2 of 4 (the
+  other two are the same variable on lines the pattern misses), #PFCMGPT 118 of 955,
+  #PCDCPHA 3 of 48.  Nothing of CZ3COM, CVKSACSC, CRDCIL or CDQANNUN.
+- AIESIP fixed too, by re-running dass-syms.py against the post-fix sweep: #PCSZICC
+  now has 2 usable references and both corroborate HALSTAT's 0xA77C, where before the
+  negative-displacement fix the noisier sites diluted it below the 60% threshold.
+- WORTH KNOWING: the same regeneration accepted 18 more symbols on the weaker "sole
+  HALSTAT candidate, no contrary evidence" rule, and they changed NOTHING -- the sweep
+  moved 460/470 to 461/470 and the single gain was AIESIP, from the one corroborated
+  address.  Every real improvement so far has come from dump-corroborated addresses.
+  The weak rule is harmless but has yet to earn its place; drop it if it ever misfires.
+- SSW now 461/470 sections and 127 of 138 files exact.  Nine differing sections
+  remain, all DATA, in two groups: CZ3COM 9, CVKSACSC 20, CRDCIL 24 (we emit values
+  where the dump has 0000), and the large ones CDCPHA 48 of 57, FCMGPT 955 of 1093,
+  CDQANNUN 1981 of 2010 -- the last with its LENGTH wrong too (2010 against 2695
+  expected), which points at the source rather than at the build.
