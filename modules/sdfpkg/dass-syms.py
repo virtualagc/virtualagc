@@ -153,6 +153,74 @@ def collectUnresolved(linkDir):
     return out
 
 
+# lnk101 prints this for a symbol it cannot resolve and will not tolerate.
+# An undefined #P (COMPOOL) is only a warning, but anything else -- notably a
+# #E, the process directory entry a SCHEDULE refers to -- fails the link, and a
+# failed link leaves no symbol JSON, so the log is the only record of what was
+# missing.
+# Two wordings: lnk101 errors on an undefined symbol it will not tolerate,
+# and warns on an undefined #P COMPOOL, which it links at zero instead.
+# Both are worth recovering -- the warning cost DGRGSERO two halfwords
+# that were otherwise invisible, because a link that fails on the errors
+# never writes the symbol JSON the relocation pass reads.
+UNDEFINED_RE = re.compile(r"Undefined (?:symbol|COMPOOL):\s*(\S+?),")
+
+
+def collectUndefined(logDir):
+    """Every symbol lnk101 reported as undefined, from a sweep's logs."""
+    out = set()
+    for f in sorted(Path(logDir).glob("*.log")):
+        for line in open(f, errors="replace"):
+            m = UNDEFINED_RE.search(line)
+            if m:
+                out.add(m.group(1))
+    return out
+
+
+def recoverForeignSymbols(undefined, index, phases, otherConfigs, report):
+    """Addresses for symbols this configuration does not contain at all.
+
+    A module can SCHEDULE a program that lives in another configuration's
+    overlay.  The reference is to that program's process directory entry, and
+    lnk101 treats an undefined #E as fatal -- so the link produces nothing and
+    the file drops out of the comparison entirely, which is worse than a
+    difference.  Two of SSW's files failed this way, CVJFDECP on seven such
+    symbols and DGRGSERO on two.
+
+    Same standard of evidence as everywhere else here: an address is taken only
+    where the other configurations' CSECT indexes and HALSTAT agree on it
+    independently, and only where every source that has the symbol gives the
+    same answer.  All nine of SSW's are unambiguous -- #EV01TCS is in G9 and in
+    HALSTAT phase 8, both at 0xE26E, and in no other configuration.
+    """
+    recovered = {}
+    for symbol in sorted(undefined):
+        if symbol in index:
+            continue
+        candidates = {}
+        for name, other in (otherConfigs or {}).items():
+            e = other.get(symbol)
+            if e and "start" in e:
+                candidates[f"config {name}"] = (
+                    e["start"], e["end"] - e["start"] + 1)
+        for phase, d in phases.items():
+            if symbol in d:
+                candidates[f"HALSTAT phase {phase}"] = d[symbol]
+        if not candidates:
+            report.append((symbol, "in no other configuration and no HALSTAT phase"))
+            continue
+        addresses = {a for a, _n in candidates.values()}
+        if len(addresses) != 1:
+            report.append((symbol, "sources disagree: "
+                           + ", ".join(f"{k}={v[0]:#x}"
+                                       for k, v in sorted(candidates.items()))))
+            continue
+        source = sorted(candidates)[0]
+        recovered[symbol] = candidates[source] + (
+            f"{source}, {len(candidates)} source(s) agree",)
+    return recovered
+
+
 def sectorDecode(hw, sector):
     '''A 16-bit sector-encoded halfword to an absolute halfword address.  Bit 15
     means "apply the sector register"; otherwise the address is in sector 0.
@@ -249,6 +317,7 @@ def main():
     halstat = DEFAULT_HALSTAT
     mafgen = DEFAULT_MAFGEN
     linkDir = "work"
+    logDir = "logs"
     base = None
     out = None
     report = False
@@ -261,6 +330,8 @@ def main():
             mafgen = Path(p.partition("=")[2]).expanduser()
         elif p.startswith("--link-dir="):
             linkDir = p.partition("=")[2]
+        elif p.startswith("--log-dir="):
+            logDir = p.partition("=")[2]
         elif p.startswith("--base="):
             base = p.partition("=")[2]
         elif p.startswith("--out="):
@@ -351,10 +422,7 @@ def main():
         augmented[symbol] = {"start": address, "end": address + n - 1,
                              "type": "HALSTAT", "hal": None}
 
-    # Second class: code that lives in another configuration but whose ZCON is
-    # carried here.  Independent of the relocation evidence above, so it is
-    # done against the index rather than against lnk101's output.
-    zconReport = []
+    # The other configurations' own indexes, used by both passes below.
     others = {}
     for f in sorted(Path(mafgen).glob("csects-*.json")):
         name = f.stem[len("csects-"):]
@@ -363,6 +431,22 @@ def main():
                 others[name] = json.load(open(f))
             except Exception:
                 pass
+
+    # Second class: symbols this configuration does not contain at all, which
+    # lnk101 will not tolerate for anything but a COMPOOL.  Read from the sweep
+    # LOGS rather than the symbol JSONs, because a link that fails this way
+    # produces no JSON at all.
+    foreignReport = []
+    foreign = recoverForeignSymbols(collectUndefined(logDir), index, phases,
+                                    others, foreignReport)
+    for symbol, (address, n, why) in foreign.items():
+        augmented[symbol] = {"start": address, "end": address + n - 1,
+                             "type": "HALSTAT", "hal": None}
+
+    # Third class: code that lives in another configuration but whose ZCON is
+    # carried here.  Independent of the evidence above, so it works from the
+    # index and the dump rather than from lnk101's output.
+    zconReport = []
     crossConfig = recoverCrossConfigCsects(index, phases, halfword, zconReport,
                                            others)
     for symbol, (address, n, phase, target) in crossConfig.items():
@@ -373,7 +457,8 @@ def main():
     print(f"{config}: {len(index)} CSECTs in the index, "
           f"{len(seen)} symbols unresolved by lnk101, "
           f"{len(accepted)} recovered from relocation evidence, "
-          f"{len(crossConfig)} from cross-configuration ZCONs -> {out}")
+          f"{len(crossConfig)} from cross-configuration ZCONs, "
+          f"{len(foreign)} symbols absent from this configuration -> {out}")
     if report:
         print("\nACCEPTED, from lnk101's unresolved relocations")
         for s, (a, p, why) in sorted(accepted.items()):
@@ -382,7 +467,12 @@ def main():
         for s, (a, n, p, t) in sorted(crossConfig.items()):
             print(f"   {s:10s} {a:#07x}  size {n:5d}  "
                   f"ZCON decodes to {t:#07x}  from {p}")
+        print("\nACCEPTED, symbols absent from this configuration")
+        for sym, (a_, n_, why) in sorted(foreign.items()):
+            print(f"   {sym:10s} {a_:#07x}  size {n_:5d}  {why}")
         print("\nLEFT UNRESOLVED")
+        for sym, why in foreignReport:
+            print(f"   {sym:10s}   absent  {why}")
         for s, n, why in rejected:
             print(f"   {s:10s} {n:5d} refs  {why}")
         for s, why in zconReport:

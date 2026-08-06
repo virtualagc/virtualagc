@@ -479,3 +479,26 @@
   result: 131 of 137 SSW files reproduce OI-34.07 memory byte for byte from OI-34.06
   source, which is a strong statement about the compiler and linker precisely BECAUSE
   the inputs are a release apart.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- THE TWO UNLINKABLE FILES ARE FIXED, and writing them off would have been wrong.  It
+  was tempting once the revision analysis showed both were heavily revised, but a link
+  failure is a toolchain problem, not a version difference.
+- CVJFDECP referenced seven undefined #E symbols and DGRGSERO two.  A #E is a process
+  directory entry, so this is a SCHEDULE of a program living in another
+  configuration's overlay -- the cross-configuration case already handled for ZCONs,
+  reached through a different kind of reference.  All nine are in G9 or G16 and in
+  HALSTAT at the same address.
+- lnk101 is lenient about an undefined #P COMPOOL (warns, links at zero) and strict
+  about everything else, so these failed outright, wrote no symbol JSON, and dropped
+  out of the comparison entirely -- worse than differing, because a file with no
+  result is invisible in the totals.
+- Two consequences, both handled: the relocation pass reads symbol JSONs and a failed
+  link writes none, so these had to come from the LOGS; and the log has two wordings,
+  "Undefined symbol:" and "Undefined COMPOOL:".  Scraping only the first left DGRGSERO
+  linking but two halfwords out on #PCV1LSR and #PCV9LSR, whose addresses (0xEE2A,
+  0xA324) are corroborated three ways -- dump-implied base, other config's index, and
+  HALSTAT.
+- SSW NOW HAS NO ERRORS AT ALL.  Every one of its 138 HAL/S files compiles, links and
+  compares.  472 of 476 in-index sections match, 134 of 138 files are byte-identical,
+  and the only four differing sections are exactly the four units OI-34.07 revised.
