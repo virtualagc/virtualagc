@@ -198,3 +198,23 @@
   augmented external-symbol table.  It needs a sweep's link outputs (--out-dir kept) to
   know which symbols went unresolved and where.  csects-SSW-augmented.json is the
   result for SSW; pass it to compileLinkCompare as --ext-syms.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- pde-stack-address-fill is FIXED, in lnk101 itself.  Linker.completeProcessDirectoryEntries()
+  in ~/donschmidt/nsts-sdl-dps/src/LNK101/lnk101/linker.py, called from link() after
+  applyRelocations() -- after because it writes into the placed image, separately
+  because under SDL there is no relocation to hang it on.  Stack address from the
+  global symbol table when the stack is in the link, otherwise from the external
+  symbol table, which under SDL is the usual case.  --no-pde-stacks disables it.
+  Committed on branch pde-stack-address in that repo; NOT pushed, no PR opened.
+- SSW is now 429/470 in-index sections matching, 95 of 138 files matching completely.
+  PDE 29/29, PROCEDURE 120/120, PROGRAM 29/29, all 110 HAL_LIBRARY_*.  Remaining: 41
+  sections, DATA 23 and ZCON 18.
+- lnk101 already had Addr.sector_encode(), which is exactly the paged-halfword rule
+  found independently from #PCDIMMU: 0x8000 | (hw & 0x7FFF) for hw >= 0x8000.  Every
+  stack CSECT across all eight configurations is below 0x10000 (highest 0xE914), so
+  raw and encoded agree and the choice is not load-bearing here.
+- nsts-sdl-dps's ctest is 176 of 204 FAILING on a clean tree, on .fcm inputs that were
+  never produced -- nothing to do with linking.  Verified by reverting the change,
+  rebuilding and re-running: the failure sets are identical before and after.  So
+  "tests pass" is not available as a gate there; "no change in the failure set" is.
