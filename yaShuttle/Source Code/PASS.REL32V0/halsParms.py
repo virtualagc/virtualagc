@@ -84,6 +84,22 @@ CONDITIONAL_PAIRS_ORIGINAL = "UCXDVCWMYMZC"
 DEFAULT_OPTIONS = ["SREF", "LIST", "LISTING2", "SRN", "TEMPLATE", "NOLFXI",
                    "REGOPT", "LITSTRINGS=3000"]
 
+# The directory HALSFC reads SDFs from, so that a "D INCLUDE TEMPLATE" can be
+# satisfied from an SDF in preference to the template library.  HALSFC's own
+# default is to name no directory and read no SDFs at all, which is not what
+# any of these three callers wants: compilePASS has always passed
+# --sdfi=SDFLIB, and the SDF path is the one the original build used.
+#
+# compileLinkCompare passed nothing, so it compiled by a path compilePASS never
+# exercises.  Usually that is invisible, because the template library satisfies
+# the include too -- but not where the SDF carries declarations the template
+# does not.  SSSRC/ARDCSBUS.hal is the case that found it: "D INCLUDE TEMPLATE
+# CDL_ANNUN" drew "REL3 SDF ##CDLANN NOT FOUND" and then seven errors of
+# severity 2 against CANB_ANN_MSG_BITS.  With --sdfi=SDFLIB it compiles clean.
+# A file that will not compile has no object module to compare, so this did not
+# skew a comparison, it removed files from the comparison altogether.
+DEFAULT_SDFI = "SDFLIB"
+
 def getCardtype(stem, original=False):
     '''The CARDTYPE value for one source file, named by its stem.
 

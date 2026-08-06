@@ -9,6 +9,17 @@ import os
 import tempfile
 from pathlib import Path
 
+def die(code = 1):
+    '''Exit after flushing.  This used to be a bare os._exit(1), which
+    skips interpreter shutdown and therefore throws away whatever is
+    still sitting in stdout's buffer -- so a failure that had just
+    printed the compiler's own diagnostic exited silently whenever
+    stdout was a pipe rather than a terminal, which is every time the
+    script is run from another program.'''
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(code)
+
 extraParms = ""
 
 # The CARDTYPE table, conditional pairs and option list are shared with
@@ -63,6 +74,16 @@ The available OPTIONs are:
                     to work around deficiencies in the emulator that are
                     hopefully temporary in nature while development of it
                     proceeds.
+    --out-dir=D     Write the per-file products (BASENAME.obj, BASENAME.fcm,
+                    BASENAME-lnk101.json, BASENAME.srcmap.json, and the .LIST
+                    and .repro.json files lnk101 drops beside them) into
+                    directory D, which is created if it does not exist, and
+                    keep them there rather than deleting them at the end.
+                    Without this they are written into the current directory
+                    and deleted afterwards.  Note that this does NOT relocate
+                    what HALSFC itself writes into the current directory --
+                    archive.results/, current.results, COMMON*.out, halmat.bin
+                    and the rest.
     --no-test       Do not use HALSFC's --test option.
     --debug         Pass the --debug switch to the emulator.
     --gpc           Use "gpc run ..." as the emulator command.
@@ -76,6 +97,7 @@ interactive = True
 extraPass1 = []
 noTest = False
 debug = False
+outDir = None
 gpcCommand = ["yaGPC2"]
 for parameter in sys.argv[1:]:
     if parameter.startswith("--parms="):
@@ -88,6 +110,8 @@ for parameter in sys.argv[1:]:
         filename = parameter[11:].replace("~", "$HOME")
     elif parameter == "--interactive":
         interactive = True
+    elif parameter.startswith("--out-dir="):
+        outDir = parameter[10:]
     elif parameter == "--no-test":
         noTest = True
     elif parameter == "--yaGPC":
@@ -121,8 +145,17 @@ else:
     basename = Path(filename).stem
 units = [(Path(p).stem, os.path.expanduser(os.path.expandvars(p))) for p in halPaths]
 
-fcmfile = f"{basename}.fcm"
-symfile = f"{basename}-lnk101.json"
+# Every product is named from `prefix`, so --out-dir moves all of them at once,
+# including the ones no line here names: lnk101 writes its .LIST and
+# .repro.json beside its own -o and --json-symbols arguments.
+prefix = basename
+objPrefix = ""
+if outDir != None:
+    os.makedirs(outDir, exist_ok = True)
+    prefix = os.path.join(outDir, basename)
+    objPrefix = outDir + os.sep
+fcmfile = f"{prefix}.fcm"
+symfile = f"{prefix}-lnk101.json"
 print(f"Producing {fcmfile}, {symfile}")
 
 # First step, compile each unit individually. thisParmList is computed
@@ -133,7 +166,7 @@ print(f"Producing {fcmfile}, {symfile}")
 objfiles = []
 unitSpecs = []  # (module, pass1Path, pass2Path, halmatPath, sdflibDir) for gen_source_map.py, one per unit that has a captured results folder
 for module, halPath in units:
-    objfile = f"{module}.obj"
+    objfile = f"{objPrefix}{module}.obj"
     thisParmList = parmList if parmList is not None else getParms(halPath)
     command = ["HALSFC", halPath, f"--parms={thisParmList}", "-o", objfile]
     if not noTest:
@@ -147,7 +180,7 @@ for module, halPath in units:
         print(f"Compilation of {halPath} failed with exit code {e.returncode}.")
         print("STDOUT:", e.stdout)
         print("STDERR:", e.stderr)
-        os._exit(1)
+        die()
     objfiles.append(objfile)
 
     # HALSFC prints e.g. 'Results stored in the folder
@@ -203,18 +236,12 @@ except subprocess.CalledProcessError as e:
     print(f"Linking failed with exit code {e.returncode}.")
     print("STDOUT:", e.stdout)
     print("STDERR:", e.stderr)
-    #os._exit(1)
-    command = ["rldanalyze", symfile, fcmfile, f"../{config}.fcm",
-               "--csect-table", "../csects-{config}.json", "--show-gaps",
-               "--show-csects", "--scan-gaps"]
-    print(" ".join(command))
-    try:
-        result = subprocess.run(command, capture_output = True, text = True, check = True)
-    except subprocess.CalledProcessError as e:
-        print(f"rldanalyze failed with exit code {e.returncode}.")
-        print("STDOUT:", e.stdout)
-        print("STDERR:", e.stderr)
-    os._exit(1)
+    # This used to fall back on rldanalyze, copied from compileLinkCompare and
+    # never adjusted: rldanalyze requires a BASELINE_FCM to compare against and
+    # there is no such thing here, and the fallback named `config`, which does
+    # not exist in this script at all -- so a link failure raised NameError from
+    # inside the handler rather than reporting the link failure.
+    die()
 if objsListFile:
     os.remove(objsListFile)
 
@@ -239,7 +266,7 @@ if objsListFile:
 # data -- harmless to always pass along even when this compile's own
 # --parms never included HALMAT (gen_source_map.py finds nothing to
 # compare against and silently skips it).
-srcmapfile = f"{basename}.srcmap.json"
+srcmapfile = f"{prefix}.srcmap.json"
 haveSrcmap = False
 if gpcCommand[0] == "yaGPC2" and unitSpecs:
     with tempfile.NamedTemporaryFile("w", suffix=".args", delete=False) as f:
@@ -298,26 +325,22 @@ else:
         print("STDOUT:", e.stdout)
         print("STDERR:", e.stderr)
         #os._exit(1)
-# Cleanup:
-for objfile in objfiles:
-    try:
-        os.remove(objfile)
-    except:
-        pass
-try:
-        os.remove(fcmfile)
-except:
-        pass
-try:
-        symfile = f"{basename}-lnk101.json"
-except:
-        pass
-try:
-        symfile = f"{basename}-lnk101.repro.json"
-except:
-        pass
-try:
-        symfile = f"{fcmfile}.LIST"
-except:
-        pass
+# Cleanup.  The last three of these used to read "symfile = f'...'" rather than
+# "os.remove(...)", so they deleted nothing at all: every run left a
+# BASENAME-lnk101.json, a BASENAME-lnk101.repro.json and a BASENAME.fcm.LIST
+# behind in whatever directory it was run from, and BASENAME.srcmap.json was
+# never in the list to begin with.  Running over a source tree accumulated
+# thousands of them.
+#
+# With --out-dir all of this went somewhere disposable in the first place, so
+# leave it there: the point of naming a directory is to keep the products, and
+# a caller who wants them gone can remove the directory.
+if outDir == None:
+    for leftover in objfiles + [fcmfile, symfile, srcmapfile,
+                                f"{basename}-lnk101.repro.json",
+                                f"{fcmfile}.LIST"]:
+        try:
+            os.remove(leftover)
+        except:
+            pass
 
