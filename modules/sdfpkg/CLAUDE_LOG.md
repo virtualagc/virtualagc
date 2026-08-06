@@ -733,3 +733,18 @@
 - Triage the 125 remaining differences that way when the current run lands, rather than
   by count.  A difference traced to an I-LOAD or a revision gap is evidence the
   compiler is right; only an unexplained one is evidence it might not be.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- CORRECTION, from the user, to the entry above.  Attributing a discrepancy is not the
+  same as eliminating it, and the previous entry was starting to treat "explained" as
+  if it were "done".  Success is still every error and every discrepancy gone.  The
+  triage ordering is a strategy for reaching that faster, not a redefinition of it.
+- SSW and P9 are the proof that the target is reachable and what it looks like: both
+  finished at 0 differing sections and 0 errors, not at "0 unexplained".  Every
+  category found its own means of elimination -- version gaps by -1 no-claim entries,
+  post-build patches by verified exceptions, scrape gaps by recovered literals, missing
+  addresses by HALSTAT recovery, and three real linker bugs by being fixed.  Nothing
+  was left labelled-but-present.
+- So the target for the remaining six is the same number: zero.  Read the attribution
+  of a difference as telling you WHICH elimination applies to it, not as permission to
+  leave it standing.
