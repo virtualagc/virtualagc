@@ -615,3 +615,37 @@
   contributes evidence to the next recovery pass, while still being reported as a
   failure.  Then re-run whichever configurations still show errors.  Doing it now
   would leave the six configurations built by different tooling.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- S2: 1227 of 1249 sections match, 22 differ, 1 error.  G8: 1625/1637, 12 differ, 7
+  errors.  Both after their version no-claims, so the remainders are unexplained.
+- THE "SOLE HALSTAT CANDIDATE" RULE IS NOW ACTIVELY HARMFUL AND MUST GO.  In SSW it
+  merely added nothing; in S2 it appears to be supplying WRONG addresses.  S2 has
+  PROCEDURE and PROGRAM differences, which SSW and P9 had none of after the fixes, and
+  they have the signature of a base that is slightly off rather than of bad code:
+      $0SPSPSP +00C3  ours AFD0  dump AFD5   RLD #PCSPCLB (#PCSPCLB+62)
+      #DSRESTO +001E  ours 9148  dump 9166   RLD #PCSASAT (#PCSASAT+686)
+  #PCSPCLB resolved from HALSTAT phase 14 at 0xAF6E, and 0xAF6E+0x62 = 0xAFD0, which is
+  what we emit; the dump implies a base of 0xAF73, five halfwords higher.  A wrong base
+  by a small constant, not a relocation defect.
+- Recall that #PCSPCLB was ALREADY flagged as ambiguous during SSW: 24 references, only
+  2 of 23 agreeing, candidates in phase 8 at 0xA7EE and phase 14 at 0xAF6E.  It was
+  rejected there for want of agreement and then accepted in S2 by the weaker rule,
+  which asks only that one phase offer it.  That is the flaw: "the only candidate" is
+  not evidence that the candidate is right.
+- TWO FIXES TO MAKE, both deferred to the end of the run so the six configurations are
+  built by identical tooling:
+    1. Drop the "sole HALSTAT candidate, no contrary evidence" acceptance, or demote it
+       to requiring dump corroboration like every other rule.  Then VERIFY: after
+       linking, lnk101's appliedRelocations give the resolved value at each site, so
+       every address that came from recovery can be checked against the dump, and any
+       that disagrees withdrawn.  That check should exist regardless.
+    2. compileLinkCompare should retry a failed link with lnk101 -f purely to write the
+       symbol JSON, so a failed link still contributes relocation evidence to the next
+       recovery pass while still being reported as a failure.  Confirmed to work: on
+       GKRORB it immediately yields #PCGZ123 at 0x827C.
+- Also worth noting for whoever picks this up: reading dass-compare.db while a sweep is
+  running fails with "database is locked".  Use sqlite3's online backup --
+  src.backup(dst) on a read-only connection with a timeout -- rather than copying the
+  file, which can tear.  And do not `git add` the database while a sweep is writing it:
+  git aborts with "confused by unstable object source data".
