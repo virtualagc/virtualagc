@@ -257,3 +257,30 @@
 ### [2026-08-06] Target: [README.md]
 - Extracted modules/sdfpkg/refs/IBM-82-SS-4556-Programming-Standards-Rev4.txt, the
   Orbiter Avionics Software Programming Standards Document, for its naming standards.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- The DATA class is now understood in structure, though not closed.  13 of the 23
+  differing DATA sections look like "we emit content where the dump is fill" and are
+  mostly NOT differences at all: they sit in the "??? ADCONS,LITERALS,ETC. ???" region
+  at the head of a #D, which MAFGEN's data listing skips.  unlinkMAFGEN2 leaves the
+  range at its not-initialised marker (0xC9FB / 0xC6C6, unlinkMAFGEN2.py:481-488), and
+  fcmcmp's --equiv only treats a pair as equal when BOTH sides are in the set, so our
+  real content is reported against their nothing.
+- MAFGEN does know those halfwords: it prints them as literals wherever code refers to
+  them -- "LITERAL: =F'-2132803578', =X'80E00006'" against EFFAD 000728, which is
+  #DAIBGPC+0x2C.  Harvesting every such annotation over DASS_SSW gives 356 addresses
+  with ZERO conflicting values, 33 of them where the scrape lost the data.
+- Comparing ours against those recovered values, restricted to sections the module
+  actually owns: 22 agree, 10 disagree.  So most of the class is a scraping gap, and
+  the residue is real and systematic.
+- The residue is a constant small delta in pointers to remote COMPOOLs, almost always
+  exactly 2 halfwords high: ours 8213 vs DASS 8211, 8659 vs 8657, 8011 vs 800F, 800D
+  vs 800B.  Decoding 8213 with DSR 5 gives 0x28213; csects-SSW.json puts #PCDB021 at
+  0x28212, so we point at base+1 where the original points at base-1.  The same delta
+  appears directly in #PCDAP02, every diff exactly 2 high.  #PCANNCO's delta is 0x80
+  and may be a different cause.
+- Also worth knowing: fcmcmp cannot distinguish "the dump says fill" from "the dump
+  says nothing".  Feeding the recovered literals back -- as a diff-json overlay, or by
+  teaching unlinkMAFGEN2 to scrape LITERAL annotations -- would remove the false
+  differences and leave only the real ones.  That is probably the next piece of
+  tooling, and it benefits every configuration.
