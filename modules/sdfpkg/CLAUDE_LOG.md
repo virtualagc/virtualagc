@@ -58,3 +58,47 @@
   re-read twice, once for fcmcmp's em-dash and once for its shift analysis.
 - The whole SSW sweep is 11 minutes at ~3s per file, so the document's advice to
   triage before building a driver costs almost nothing to disregard here.
+
+### [2026-08-05] Target: [compileLinkCompare.md]
+- Compiler version is NOT a suspect and options are closed as a lead.  HALSTAT
+  (PFS/HALSTAT.ASC) records COMPILER and FLAGS per unit: all 1201 units are FC-32.0
+  with FLAGS "SRN,ADDRS" (129 also DATA REMOTE).  FC-32.0 is REL32V0, the compiler we
+  have.  Sweeping options over four sensitive files: baseline and +ADDRS are
+  identical and best; dropping REGOPT or NOLFXI is strictly worse (ARFDPSCO goes from
+  1 differing halfword to 1167 and 1027 respectively).  ADDRS is code-neutral -- it
+  affects SDF content only -- so it is free to add and improves SDF fidelity.
+- HALSTAT is a much better source than its size suggests: per unit it gives the
+  compiler, flags, compilation parameters with high-water marks, and the full
+  COMPILATION LAYOUT naming every external COMPOOL and the variables drawn from it.
+  Our SDF's usage figures for AIB_GPC_LOCATOR match it exactly -- SYMBOLS 2700,
+  MACROSIZE 19845, XREFSIZE 3452 -- which is independent evidence PASS1 is doing the
+  same work as the original.
+- The SDF flags field records only SRN, ADDRS, COMPOOL, FC, DIRECTORY_OVERFLOW,
+  NON_MONOTONIC_SRNS, NON_UNIQUE_SRNS, NOTRACE, DATA_REMOTE, HIGHOPT, HALMAT, FCDATA,
+  SDL and BITMASK (PASS4/DUMPSDF.xpl:993-1029).  REGOPT and LFXI are not among them,
+  so "SRN,ADDRS" says nothing about either.
+- Mechanism 1 renamed program-prologue-sdl and now understood.  USA003090 section 8.9
+  (page 8-19, stamped 32.0/17.0) says that without SDL the compiler emits a START
+  CSECT per PROGRAM and issues linkage-editor STACK cards "for stand-alone
+  operation".  No configuration's CSECT index contains a START -- checked all eight --
+  so the flight build had SDL.  Measured: SDL fixes 35 sections and breaks none;
+  matching in-index sections go 339/470 to 373/469, and 27 of 29 PROGRAM CSECTs
+  become byte-identical.  Against it: the SDF should record SDL and the original's
+  does not, through the same bit at every stage.
+- Mechanism 4 added, pde-stack-address-fill, and it is for lnk101's developer.  All 29
+  PDEs differ in exactly two halfwords -- the stack CSECT's address and bit 15 above
+  it.  Under SDL the compiler has no stack ESD at all, so it cannot be a compiler
+  matter; MONITOR.ASM/HALLINK.bal's three-stage link through a STACKOBJ dataset is
+  where the original filled it in.
+- The CSECT-to-source join is now confirmed from the compiler source rather than
+  inferred: PASS2/PROGNAME.xpl strips underscores and truncates to six characters, and
+  its NAMETYPE table is $0 #C @0 #P #D #T #F A0 #Z #E #X #R.  USA003090 section 8.9
+  gives the same list with #Q for library ZCONs and #L for library data.
+
+### [2026-08-05] Target: [README.md]
+- Extracted modules/sdfpkg/refs/HAL_S-FC-Users-Manual-2005.txt from USA003090 (the
+  Nov 2005 HAL/S-FC User's Manual PDF), so it can be grepped rather than re-opened.
+- HANDOFF.md section 3's warning about two compilations sharing a directory is not
+  only about killed runs: two *live* sweeps in one work directory destroy each other
+  the same way, through halmat.bin, litfile.bin and COMMON*.out.  Cost one option
+  sweep and one SDL sweep, both restarted.  dass-run.py's --jobs-root exists for this.
