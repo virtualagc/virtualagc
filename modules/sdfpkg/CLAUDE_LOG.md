@@ -530,3 +530,37 @@
   "[N ignored]" was not recorded and the database showed nothing suppressed while the
   report showed plenty.  It now matches any "N phrase".  That is three format changes
   in a row; the lesson is written down twice already.
+
+### [2026-08-06] Target: [compileLinkCompare.md]
+- P9 IS COMPLETE, and NO NEW MECHANISM WAS NEEDED.  158 of 158 HAL/S files match,
+  509 of 509 in-index sections, zero errors, zero differences.  Every tool ran
+  unchanged: dass-literals.py, dass-syms.py and dass-versions.py all take --config and
+  needed no edits at all.
+- That is the premise of the whole phase confirmed.  compileLinkCompare.md predicted
+  that a mechanism knocked down in one configuration is already fixed wherever else it
+  occurs, and that later configurations should go much faster than their size
+  suggests.  SSW took most of a session and seven mechanisms; P9 took three sweeps,
+  about forty minutes of compute, and no investigation beyond one iteration.
+- The sequence that works, and it is now routine:
+     1. dass-literals.py --config=X            (independent of any sweep)
+     2. sweep with the plain index             -> harvest unresolved relocations
+     3. dass-syms.py --config=X                -> recover addresses
+     4. sweep with the augmented index
+     5. dass-syms.py again with --base         -> a second pass picks up symbols whose
+                                                  evidence was diluted by noise the
+                                                  first time round
+     6. dass-versions.py --config=X            -> no-claim entries for revised units
+     7. final sweep
+- Step 5 matters and is not optional.  In both configurations exactly one symbol
+  (#PCSZICC at 0xA77C) needed it: its references only stop disagreeing once the other
+  fixes are in, and until then the vote ratio falls below the acceptance threshold.
+- P9 progress by stage: 122 match / 33 differ / 3 link errors with the plain index;
+  149 / 9 / 0 after symbol recovery; 158 / 0 / 0 after the second pass and the version
+  no-claims.  The three link errors were the same foreign-#E-symbol mechanism as SSW's
+  two, fixed by the same code.
+- Of P9's 169 source files, 133 also appear in SSW.  They still had to be verified,
+  since P9 places them at different addresses -- and they all matched, which is a
+  stronger statement than it looks: the same object code relocated to a different
+  memory layout still reproduces the dump byte for byte.
+- Standing: SSW and P9 both complete.  Six configurations left -- G8 849, S2 865,
+  G9 896, G2 1010, G3 1228, G16 1406 HAL/S CSECTs.
