@@ -1050,3 +1050,27 @@
   #DVKISAC/#EDGRGSE and ours in @0ARBIDL -- incoherent as offsets into one
   CSECT -- and dump-existing is not constant (13/6/3/2), so `existing` is not
   a reliable addend and there is no honest base to recover.
+
+### [2026-08-07] Target: mafgenComparison.md
+- IDENTIFIED the A0B5ED8E/A0B5ED8C constant.  Recompiled GO8ORB into an
+  isolated symlink tree (~/ForClaude/listing-tree) so as not to disturb the
+  running sweep; the literal table names it outright:
+      Literal 178: FIXED  3C10C6F7,A0B5ED8E ' 1.000000000000000E-06'
+  It is a DOUBLE-precision .000001, declared in a SHARED INCLUDE --
+  INCL80/GKPMNV.hal:365, ".000001 SCALAR$(@DOUBLE)(CZ2V_MET_MSEC_MFE);" --
+  which is exactly why the identical value appears in three unrelated units.
+- Decoded as IBM hex double (exponent 3C, 56-bit fraction), against the exact
+  value of 1e-6, whose true mantissa is 4722366482869645.2137:
+      ours  0x10C6F7A0B5ED8E = ...646   error +0.786 ULP
+      dump  0x10C6F7A0B5ED8C = ...644   error -1.214 ULP
+      correctly rounded would be ...645, which is NEITHER of them.
+- So this is NOT our compiler being wrong: OUR VALUE IS CLOSER TO 1e-6 THAN
+  THE ORIGINAL BUILD'S.  Neither conversion is correctly rounded; the original
+  is 2 ULP below ours, consistent with truncation where we round.  Checked the
+  other double literals in the table -- their low words vary in parity, so the
+  granularity really is the full 56 bits and ...645 was available.
+- DECISION NEEDED, not a bug to fix: reproducing the dump bit-for-bit requires
+  replicating the original HAL/S-FC's less accurate decimal-to-hex-float
+  conversion.  That is a deliberate fidelity choice, and it is the user's to
+  make -- it trades numerical accuracy for reproduction.  Three sections
+  (#DGO8ORB, #DGO1ASC, #DGO3ENT) hang on it, one halfword each.
