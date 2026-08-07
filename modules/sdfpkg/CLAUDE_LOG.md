@@ -1259,3 +1259,38 @@
   multi-step.  The three known sites (#DGO8ORB @07F5B, #DGO1ASC @0B82F,
   #DGO3ENT @0B0D3) all carry the SAME constant, so they are one data point, not
   three.  Need constants with other large exponents.
+
+### [2026-08-07] Target: mafgenComparison.md
+- Read virtualagc issue #1296 (CLOSED), "Conversion of floating point
+  literals".  Our .000001 case is an instance of a KNOWN, already-investigated
+  residual, not a new discovery.  Key content:
+    * RUNASM has TENSTBL, "POWERS OF TEN DATA TABLE FOR SCALAR OUTPUT
+      CONVERSION": 1, 1E1..1E10, then 1E20,1E30,1E40,1E50,1E60,1E70.  So
+      scaling really is done from a powers-of-ten table -- support for the
+      multi-step idea, though 1E6 is a DIRECT entry, so 1/1E6 needs only one
+      step and gives ED8D, not the dump's ED8C.  That weakens the specific
+      (1/1000)^2 story.
+    * Don found TENSTBL's own constants differ depending on whether they are
+      assembled by truncation or by the Assembler's round-up rule; switching
+      from truncation to rounding improved matching a lot.
+    * His test harness is large and already built: 30206 hex->decimal all
+      match; forward source->hex gives 12036 exact, 18 significantly different,
+      1 near-agree.
+    * REMAINING AND UNEXPLAINED: of 436 asterisked values that agree
+      numerically, 319 are 1 ULP off.  Don: "I do suspect there's still
+      something else going on here, but I haven't found anything consistent
+      with all the data."  ~90% would be explained if DP->SP conversion rounded
+      up, but that breaks many currently exact matches.
+    * Ron established separately (issue #1295 comment) that HAL/S-FC converted
+      549900 to 458640B9 when 458640C0 is EXACT -- so the original compiler has
+      a real algorithmic conversion error, not merely rounding.  That is the
+      strongest evidence for the "original compiler bug" categorisation.
+    * Also recorded there: asterisked halfwords are PATCHED values.  Confirms
+      what dass-literals.py already assumes.
+- IMPLICATION FOR US: stop treating this as a private puzzle.  Our data point
+  is unusually good -- a NON-asterisked constant, source text known
+  (.000001 in INCL80/GKPMNV.hal:365), three independent sites, dump ED8C,
+  correctly-rounded ED8D, ours ED8E (the CEILING).  Note ours being the ceiling
+  is suggestive given Don's truncation-vs-round-up finding.  The right move is
+  to contribute it to that existing investigation, which already has the
+  corpus-wide harness, rather than porting DPWRD on spec.
