@@ -1232,3 +1232,30 @@
   until this is settled -- if the rule holds, the original's value is
   REPRODUCIBLE, which closes the three sections outright and makes the -2
   no-claim unnecessary.
+
+### [2026-08-07] Target: mafgenComparison.md
+- TEST FLAW, mine, recorded so it is not repeated: I tested the multi-step
+  hypothesis by comparing source literals against literals1.txt, which is OUR
+  compilation's literal pool and therefore holds OUR ED8E, not the dump's
+  ED8C.  It cannot say anything about the ORIGINAL compiler.  To test that,
+  the comparison must be against the DUMP's memory contents at the address the
+  literal lands on -- much harder, since it needs each literal located in the
+  image.
+- What the (correctly interpreted) run DOES establish, and it is useful:
+  over 276 candidate decimals from GO8ORB.hal and INCL80/*.hal, 19 appear in
+  our literal pool and ALL 19 match the correct single-step conversion
+  M / 10^k -- including .07987 and 0.00005, both k=5.  ZERO match a multi-step
+  decomposition.
+  So OUR bug is isolated: .000001 (k=6) is the only literal in that unit where
+  our compiler deviates from correct rounding, and it deviates upward, to the
+  ceiling.  This weakens any theory that our via-double path is used for a
+  broad class of literals; it looks specific.
+- The original-compiler side is therefore STILL a single data point: the dump's
+  ED8C is reproduced exactly by (1/1000)^2 and by (1/100)^3, while a single
+  1/1000000 gives ED8D.  Suggestive, unproven.
+- NEXT TEST, correctly framed: find literals in the DUMP whose source text is
+  known -- i.e. constants sitting in a #D section we can locate, as the 1e-6
+  case was found -- and check whether the dump's value matches single-step or
+  multi-step.  The three known sites (#DGO8ORB @07F5B, #DGO1ASC @0B82F,
+  #DGO3ENT @0B0D3) all carry the SAME constant, so they are one data point, not
+  three.  Need constants with other large exponents.
