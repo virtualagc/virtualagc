@@ -161,18 +161,30 @@ def collectUnresolved(linkDir):
     return out
 
 
-def basesFrom(value, addend, flags):
+def basesFrom(value, addend, flags, companion=None):
     '''What base addresses a halfword could have been patched from, given the
     RLD flags.  Bit 7 is the sign, so a negative displacement was subtracted
     rather than added; and a ZCON's address halfword is sector-encoded, so bit
     15 may have been set over it.  Returns an empty set for a relocation that
     patches a register field rather than an address -- BSR-only and DSR-only
     touch four bits of an instruction, and reading them as addresses derives
-    nonsense (S2 has three that yield 0xFE5A against a real base of 0x7D78).'''
+    nonsense (S2 has three that yield 0xFE5A against a real base of 0x7D78).
+
+    `companion` is the halfword after this one.  For a ZCON that is HW1, whose
+    low nibble is the DSR and next nibble the BSR, and applying it is the only
+    way to reach a base above 64K: S2's #PCSAPXT sits at 0x338C2, which no
+    16-bit reading of B8C0 can produce.  Both registers are offered as
+    candidates rather than choosing between them by flag type, since the
+    exact-CSECT-start test downstream is what decides.'''
     if flags & 0x70 in (0x20, 0x40):
         return set()
     signed = -addend if flags & 0x80 else addend
-    return {(value - signed) & 0xFFFF, ((value & 0x7FFF) - signed) & 0xFFFF}
+    out = {(value - signed) & 0xFFFF, ((value & 0x7FFF) - signed) & 0xFFFF}
+    if companion is not None and value & 0x8000 and flags & 0x70 in (0x04, 0x10, 0x50):
+        for sector in (companion & 0xF, (companion >> 4) & 0xF):
+            if sector:
+                out.add(((sector << 15) | (value & 0x7FFF)) - signed)
+    return out
 
 
 # lnk101 prints this for a symbol it cannot resolve and will not tolerate.
@@ -264,7 +276,7 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
             v = halfword(address)
             if v is None or v in FILL or v == addend or v == (addend | 0x8000):
                 continue
-            b = basesFrom(v, addend, flags)
+            b = basesFrom(v, addend, flags, halfword(address + 1))
             derived = b if derived is None else derived & b
         for a in (derived or ()):
             claims[a] += 1
@@ -288,7 +300,7 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
             v = halfword(address)
             if v is None or v in FILL:
                 continue
-            bases = basesFrom(v, addend, flags)
+            bases = basesFrom(v, addend, flags, halfword(address + 1))
             if not bases:
                 continue
             usable.append(address)
@@ -522,7 +534,17 @@ def main():
                 index[name] = entry
         print(f"carried {len(index) - len(json.load(open(mafgen / f'csects-{config}.json')))} "
               f"entries forward from {base}")
-    memory = open(mafgen / f"{config}.fcm", "rb").read()
+    # Prefer the literals-patched image, as dass-versions.py and the comparison
+    # itself do.  unlinkMAFGEN2 synthesises C9FB for a halfword the listing
+    # never reported, and dass-literals.py then recovers many of them from
+    # MAFGEN's own annotations -- 177 of them in S2.  Reading the raw scrape
+    # here made every one of those look like fill and threw the evidence away:
+    # S2's #PCSAPXT and #PCSACAT have sixteen and six references apiece whose
+    # halfwords are all recovered values, so both were reported as having "no
+    # usable dump evidence" when the dump states them plainly.
+    patched = Path(f"{config}.literals.fcm")
+    memory = open(patched if patched.is_file()
+                  else mafgen / f"{config}.fcm", "rb").read()
 
     def halfword(a):
         return struct.unpack_from(">H", memory, a * 2)[0] \

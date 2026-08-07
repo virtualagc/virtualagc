@@ -16,6 +16,12 @@ Subcommands:
     init [--config=XXX ...]   Create the schema and populate the CSECT index
                               and source-file mapping for the named
                               configurations (default: all eight).
+    reset [--config=XXX ...]  Put a configuration back to "not yet swept":
+                              drop its runs, sections and diffs and mark its
+                              membership todo.  What run-configs.sh does
+                              between sweeps; also what a killed sweep needs,
+                              since it leaves rows that make the next sweep
+                              skip those files.
     files --config=XXX        List the source files that make up XXX.
     status [--config=XXX]     Summarise what has been compared and how it went.
 
@@ -299,6 +305,35 @@ def doStatus(db, configs):
               "  ".join(f"{k}={v}" for k, v in sorted(rows.items())))
 
 
+def doReset(db, configs):
+    '''Put a configuration back to "not yet swept": drop its runs, sections and
+    diffs, and mark its membership todo again.
+
+    This is what run-configs.sh does between sweeps, and it had been written out
+    by hand every time it was needed outside the script -- three times, wrongly
+    twice.  Killing a sweep mid-configuration leaves rows behind for the one it
+    was working on, and those rows mark files done, so the next sweep 1 silently
+    skips them.  "skipped" membership is left alone: that is a standing decision
+    about a file, not sweep state.
+    '''
+    for config in configs:
+        n = db.execute("SELECT COUNT(*) FROM run WHERE config=?",
+                       (config,)).fetchone()[0]
+        db.execute("DELETE FROM diff WHERE section_id IN "
+                   "(SELECT s.id FROM section s JOIN run r ON r.id=s.run_id "
+                   " WHERE r.config=?)", (config,))
+        db.execute("DELETE FROM section WHERE run_id IN "
+                   "(SELECT id FROM run WHERE config=?)", (config,))
+        db.execute("DELETE FROM run WHERE config=?", (config,))
+        db.execute("UPDATE membership SET status='todo', note=NULL "
+                   "WHERE config=? AND status!='skipped'", (config,))
+        todo = db.execute("SELECT COUNT(*) FROM membership "
+                          "WHERE config=? AND status='todo'",
+                          (config,)).fetchone()[0]
+        print(f"{config}: dropped {n} run(s), {todo} file(s) now todo")
+    db.commit()
+
+
 def main():
     dbPath = DEFAULT_DB
     srcTree = DEFAULT_SRC
@@ -325,6 +360,8 @@ def main():
     db = connect(dbPath)
     if command == "init":
         doInit(db, configs, srcTree, mafgen)
+    elif command == "reset":
+        doReset(db, configs)
     elif command == "files":
         doFiles(db, configs)
     elif command == "status":
