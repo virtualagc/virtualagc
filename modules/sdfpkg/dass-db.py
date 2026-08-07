@@ -183,9 +183,26 @@ CREATE INDEX IF NOT EXISTS ix_run_source ON run(config, source_id);
 
 
 def connect(dbPath):
-    db = sqlite3.connect(dbPath)
+    '''Open the database for concurrent use.
+
+    A sweep writes for three and a half hours while other things read: another
+    dass-*.py, an interactive query, the next configuration's reset.  Under the
+    default rollback journal any writer blocks every reader, and the default
+    five-second timeout is easily exceeded by a DELETE over a configuration's
+    rows -- which is not a wait but an OperationalError.  One such failure hit
+    dass-run.py while it was reading its work list, and P9's entire sweep
+    produced nothing: "database is locked", no results, and a RESULT line that
+    simply never appeared.
+
+    WAL lets readers proceed while a writer works, and the long busy timeout
+    turns the remaining writer-writer collisions into a wait.  journal_mode is
+    a property of the file and persists once set.
+    '''
+    db = sqlite3.connect(dbPath, timeout = 120.0)
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys = ON")
+    db.execute("PRAGMA journal_mode = WAL")
+    db.execute("PRAGMA busy_timeout = 120000")
     return db
 
 
