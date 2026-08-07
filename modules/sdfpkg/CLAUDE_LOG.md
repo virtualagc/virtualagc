@@ -1316,3 +1316,38 @@
 - Worth testing if it can be found: the DP counterpart of IHCEXPI (IHCDXPI or
   similar).  This one is single-precision E-format and the DP version may
   sequence its multiplies differently.
+
+### [2026-08-07] Target: mafgenComparison.md
+- Read the real System/360 FORTRAN library off the Jay Moseley tape.  Method,
+  since it needs no Hercules utilities: mvtfortg.tar.gz -> tape/mvts04.het;
+  HET block header is clen(2 LE), plen(2 LE), flags1, flags2, payload
+  zlib-compressed (first block decompresses to the 80-byte "VOL1MVTS04"
+  label).  File 2 of the tape is a 19,487,943-byte DSSDUMP payload.  Assembler
+  LISTINGS are in it as 121-byte FBA records, giving source AND object code.
+- Genuine IHCFDXPI (double ** integer) recovered and saved to
+  ~/ForClaude/IHCFDXPI-listing.txt.  It differs from the fabricated "IHCEXPI"
+  in the decisive place: it computes the POSITIVE power by squaring and takes
+  the RECIPROCAL LAST --
+      NEXT  LTR EXPSW,EXPSW / BC 8,SWAP / LD BASE,ONE / DDR BASE,FACTOR
+  where the fake inverted the base first.  Run faithfully, IHCFDXPI(10,-6)
+  gives ED8D, the correctly rounded value -- NOT the dump's ED8C.
+  So three algorithms with real provenance (correct rounding, truncation, and
+  the genuine FORTRAN library routine) all give ED8D and only the original
+  compiler gives ED8C.  Stop chasing it; record as suspected original-compiler
+  bug.  The tape also carries IHCLEXP, IHCLLOG, IHCLSQRT, IHCFDXPD, IHCFRXPR,
+  IHCFIXPI as real source if DPWRD's dependencies are ever wanted.
+- NEW MECHANISM, and a gap in my own rule.  S2's #PCZ4COM, #DSTCCYC and
+  #DSCKPNT all differ by exactly +0x1E into #PCSASAT:
+      914C vs 916A   RLD #PCSASAT+68A -> 3114C
+      9148 vs 9166   RLD #PCSASAT+686 -> 31148
+  The stored halfword is SECTOR-ENCODED: raw 914C is really 3114C.
+  dass-versions.py's reference-site rule looks up the owner using the RAW
+  halfword, so it never resolves into #PCSASAT and never fires -- even though
+  #PCSASAT spans 30AC2..31875 and CSASAT is revised BZ->CA.
+  FIX: before the owner lookup, decode a value with bit 15 set as
+  (sector<<15)|(v & 0x7FFF), trying sectors 0..15 and accepting ONLY where our
+  value and the dump's decode with the SAME sector into the SAME CSECT -- the
+  same self-validating guard the rule already uses.  Verified by hand: sector
+  6 puts all four values inside #PCSASAT.
+  NOT APPLIED: dass-versions.py is used by the running sweep.  Apply after it
+  finishes, then re-run S2 (and any other configuration it touches).
