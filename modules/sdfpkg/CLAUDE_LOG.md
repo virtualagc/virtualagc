@@ -1294,3 +1294,25 @@
   is suggestive given Don's truncation-vs-round-up finding.  The right move is
   to contribute it to that existing investigation, which already has the
   corpus-wide harness, rather than porting DPWRD on spec.
+
+### [2026-08-07] Target: mafgenComparison.md
+- Tested IHCEXPI (S/360 FORTRAN IV, X^I by binary exponentiation, base
+  inverted first for negative I) faithfully in native IBM DP.  NEGATIVE RESULT:
+      IHCEXPI(10,-6)              ED89
+      IHCEXPI(0.1, 6)             ED89
+      IHCEXPI(10,6) then 1/that   ED8D  (correctly rounded)
+      1/1000000                   ED8D
+      (1/1000)^2                  ED8C  <== the dump
+      via C double                ED8E  <== our compiler
+  So IHCEXPI as written does not reproduce the dump.  Inverting the base first
+  and squaring loses 3 more ULP than the dump shows; taking the reciprocal last
+  lands on the correctly rounded value.
+- Pattern across everything tried: the result falls further below correct as
+  the number of multiplication steps rises -- 1 step ED8D, 2 steps ED8C (the
+  dump), 6 steps / binary exponentiation ED8A-ED89.  The dump sits exactly at
+  two steps.  HOLD LOOSELY: TENSTBL has 1E6 as a DIRECT entry so a two-step
+  decomposition has no motivation, and all candidates lie within 6 ULP, so one
+  hit is weak.  Needs a second large-exponent literal located in the dump.
+- Worth testing if it can be found: the DP counterpart of IHCEXPI (IHCDXPI or
+  similar).  This one is single-precision E-format and the DP version may
+  sequence its multiplies differently.
