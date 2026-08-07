@@ -1074,3 +1074,33 @@
   conversion.  That is a deliberate fidelity choice, and it is the user's to
   make -- it trades numerical accuracy for reproduction.  Three sections
   (#DGO8ORB, #DGO1ASC, #DGO3ENT) hang on it, one halfword each.
+
+### [2026-08-07] Target: mafgenComparison.md
+- Tested Ron's hypothesis that the .000001 literal still goes through
+  ibmHex-style conversion.  It does NOT -- but something close to it is true.
+      ibmHex.toFloatIBM(1e-6)                  A0B5ED8D
+      ibmFloat.ibm_dp_from_string('.000001')   A0B5ED8D   (and '1E-6',
+                                               '0.000001', '1.0E-06' alike)
+      ibmFloat.ibm_dp_div(1, 1000000)          A0B5ED8D
+      ibmFloat.ibm_dp_from_double(1e-6)        A0B5ED8E  <== our compiler
+      original build                           A0B5ED8C
+  The C functions in XCOM-I/ibmFloat.c give identical answers to the Python
+  (verified by compiling a harness against it), so the two implementations
+  agree.  EVERY ibmFloat entry point except one yields ED8D, the correctly
+  rounded value; only the native-double round-trip yields our ED8E.
+- So the distinction that matters is NOT ibmHex vs ibmFloat -- both are right.
+  It is decimal-string-direct vs via-a-C-double.  Our literal is taking the
+  via-double path.
+- WHERE is not yet pinned.  MONITOR10, which SCAN.xpl:690 calls to convert a
+  scanned literal, already uses ibm_dp_from_string and its comment cites the
+  atof fix (issue #1296); PASS1B.build's copies of runtimeC.c and ibmFloat.c
+  are byte-identical to XCOM-I's, so the built compiler has that fix.  The
+  other ibm_dp_from_double call sites in runtimeC.c are MONITOR9
+  (transcendentals) and an --eng=fp diagnostic, neither of which is this path.
+  So a fourth route is converting this literal via a double; finding it is the
+  next step.  Note .000001 appears in "SCALAR$(@DOUBLE)" context, and
+  ARITHLIT.xpl carries DR109083 "CONSTANT DOUBLE SCALAR CONVERTED TO ..." --
+  worth reading before hunting further.
+- Even ED8D would not match the dump's ED8C, so this fix alone would not close
+  the three sections; it would move us from 2 ULP away to 1 ULP away, and in
+  the correct direction numerically.
