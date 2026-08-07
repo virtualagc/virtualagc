@@ -978,3 +978,39 @@
   sweep is worth nothing.  Toolchain pinned to branch `integration`
   (master + fcmcmp-size-mismatch + lnk101-absent-section-relocs) and NOT to be
   touched while it runs.
+
+### [2026-08-07] Target: mafgenComparison.md
+- Full 8-configuration run on the fixed tooling (literals parser, reference-site
+  no-claims, #PCSZICC recovery, lnk101 absent-section relocations):
+      before                          after
+      SSW   476/476   0 differ 0 err  476/476   0 differ 0 err
+      P9    509/509   0        0      509/509   0        0
+      G2   2545/2558 13        0     2558/2558  0        0   <== now perfect
+      G3   2882/2905 23        0     2903/2905  2        0
+      G16  3596/3599  3        0     3597/3599  2        0
+      G8   1625/1637 12        7     1635/1637  2        7
+      G9   1353/1369 16        0     1363/1369  6        0
+      S2   1227/1249 22        1     1233/1249 16        1
+    TOTAL 14213/14292 79 differ 8 err -> 14274/14292 28 differ 8 err.
+    Three configurations now at zero: SSW, P9, G2.
+- G8's 7 errors survived because the lnk101 fix corrects relocation VALUES but
+  does not make a link with undefined symbols succeed.  Fixed separately:
+  compileLinkCompare now COMPARES the forced (-f) image instead of discarding
+  it.  Legitimate only because lnk101 now leaves an absent-section relocation
+  unpatched, so the forced image holds what the build held, not a fabrication.
+  Preceded by a FORCED LINK banner; dass-run no longer short-circuits on
+  "Linking failed" when that banner is present.  Verified on GKRORB and
+  GYZSTS: both now score (G8 errors 7 -> 5 with just those two re-run).
+- run-configs.sh now takes configurations as arguments, defaulting to all
+  eight.  Only G8 and S2 have link failures, so only they need re-running --
+  an hour instead of three and a half.
+- REMAINING after that re-run is expected to be ~28 differences, all small:
+    G3  #DGO3ENT 1, #DGZ1ALT 1        G16 #DGFKGRT 1, #DGO1ASC 1
+    G8  #PCGA2MC 1, #DGO8ORB 1
+    G9  #PCSDMD1 24, SPSPSP family 8, $0VG9OPS 1
+    S2  #PCSSSPA 76, SAFACQ 13, SPSPSP 16, SRESTO 5, STMTAB 5, others
+  Note the recurring single-halfword #D differences across G3/G16/G8 --
+  #DGO3ENT, #DGZ1ALT, #DGFKGRT, #DGO1ASC, #DGO8ORB -- all n=1, all in a #D
+  section of an ORB/ASC/ENT-family unit.  Likely one mechanism; not yet looked
+  at.  #PCSDMD1 cleared in S2 via the reference-site rule but not in G9, worth
+  checking why (probably CSAPDT absent from G9's index).
