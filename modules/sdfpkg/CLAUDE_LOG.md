@@ -947,3 +947,34 @@
   fixes), then re-run all 8 configurations.  The branch-name check is gone, so
   integration no longer has a special status -- the capability test will pass
   on any branch carrying the features.
+
+### [2026-08-06] Target: mafgenComparison.md
+- #DAIESIP n=2 appeared in EVERY configuration; it is one symbol, #PCSZICC.
+  AIESIP holds two addresses into that COMPOOL; the dump has A7C4 and A7EC,
+  we had the bare offsets 0048 and 0070, both short by exactly A77C.
+- #PCSZICC IS in HALSTAT (OFFSET 000000, PHASE 14 ADDR 00A77C) and S2's index
+  starts it at A77C, so two independent sources give the same address.
+  dass-syms rejected it anyway: of 5 references, the 2 in #DAIESIP agree on
+  A77C while 3 in #CGFBRCS derive 09DAF, 0F4DB and 0ECAC -- mutually
+  disagreeing, the signature of a reference whose own section is not at its
+  true address, so it reads unrelated memory.  2/5 = 0.40 lost the 0.60
+  majority test, and the true address was outvoted by noise.
+- New rule: accept a value that HALSTAT corroborates, that at least two
+  references agree on, and that is the ONLY corroborated value; ambiguity
+  still refuses.  This is NOT the withdrawn sole-candidate rule -- that took
+  HALSTAT with no dump evidence at all, whereas here dump and HALSTAT must
+  independently agree.  Measured on G16/G8/G2/G3 it accepts exactly one more
+  symbol each, #PCSZICC, and nothing else.
+- Verified: with #PCSZICC at A77C, AIESIP goes to "PASS: all 17 sections
+  match" in G16.  Fixes a difference present in all 8 configurations.
+- Also fixed a misleading rejection message: a symbol failing only the ratio
+  test was reported as "matches no candidate", which is what sent me looking
+  in the wrong place first.
+- G3 projection from the literals fix alone: 19 of 23 differing sections
+  fully explained, every match exact (incl. #PCGN13R n=882, #PCGZMC3 n=191,
+  #PCGCFL1 n=173).  G3 23 -> 4.
+- Restarted the full 8-configuration run from scratch at this point, because
+  dass-syms.py changed 11 minutes into the previous attempt and a half-old
+  sweep is worth nothing.  Toolchain pinned to branch `integration`
+  (master + fcmcmp-size-mismatch + lnk101-absent-section-relocs) and NOT to be
+  touched while it runs.

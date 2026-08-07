@@ -410,19 +410,53 @@ def main():
         if votes[symbol]:
             base, n = votes[symbol].most_common(1)[0]
             total = sum(votes[symbol].values())
+
             # The dump stores an address above 64K in a paged form, so compare
             # the low half and the bit-15 variant as well as the plain value.
-            hit = [p for p, a in candidates.items()
-                   if base in (a, a & 0xFFFF, (a | 0x8000) & 0xFFFF)]
+            def matching(value):
+                return [p for p, a in candidates.items()
+                        if value in (a, a & 0xFFFF, (a | 0x8000) & 0xFFFF)]
+
+            hit = matching(base)
             if hit and n / total >= 0.6:
                 phase = sorted(hit, key=int)[0]
                 accepted[symbol] = (candidates[phase], phase,
                                     f"{n}/{total} references agree")
                 continue
-            rejected.append((symbol, seen[symbol],
-                             f"dump-derived {base:#07x} ({n}/{total}) matches "
-                             f"no candidate" if candidates
-                             else "not in HALSTAT"))
+
+            # A true address can be outvoted by noise.  A reference sitting in
+            # a section that is NOT at its own true address reads unrelated
+            # memory, so it derives a meaningless base -- and several such
+            # references disagree with each OTHER, while the real ones agree.
+            # #PCSZICC went 2 votes for 0A77C against three lone values, so the
+            # majority rule rejected an address HALSTAT gives outright and
+            # another configuration's index confirms.
+            #
+            # So: take a value that HALSTAT corroborates, at least two
+            # references agree on, and that is the ONLY corroborated value --
+            # ambiguity still refuses.  This is not the withdrawn sole-candidate
+            # rule, which accepted HALSTAT with NO dump evidence at all; here
+            # the dump and HALSTAT must independently agree.
+            corroborated = [(v, c) for v, c in votes[symbol].items()
+                            if c >= 2 and matching(v)]
+            if len(corroborated) == 1:
+                value, c = corroborated[0]
+                phase = sorted(matching(value), key=int)[0]
+                accepted[symbol] = (
+                    candidates[phase], phase,
+                    f"{c}/{total} references agree and HALSTAT corroborates; "
+                    f"the others disagree with each other")
+                continue
+
+            if not candidates:
+                why = "not in HALSTAT"
+            elif hit:
+                why = (f"dump-derived {base:#07x} matches a candidate but only "
+                       f"{n}/{total} references agree")
+            else:
+                why = (f"dump-derived {base:#07x} ({n}/{total}) matches "
+                       f"no candidate")
+            rejected.append((symbol, seen[symbol], why))
         elif len(candidates) == 1 and permitSoleCandidate:
             phase = list(candidates)[0]
             accepted[symbol] = (candidates[phase], phase,
