@@ -632,6 +632,18 @@ NEXT STEPS, in order, once that sweep finishes:
      SAFACQ is the same shape).  The target IS in the configuration, so
      dass-syms ought to recover it.  This is ours to fix, not version drift.
 
+  6. CONVERT CLAUDE_LOG.md TO A DATABASE (user's instruction, 2026-08-07).
+     Table (timestamp, target, entry, applied), so capture is an INSERT, a
+     "Full Documentation Sync" is SELECT ... WHERE applied=0 AND target=?, and
+     completing one is an UPDATE.  Rationale is context cost: today's sync read
+     96 KB of log plus every target file, and hand-sorting 53 entries across two
+     passes nearly lost track of which were applied.
+     The design point that makes this work, from the user: a database can RENDER
+     .md as a one-time operation whenever wanted.  So the DB is the store and
+     the document is a generated view -- commit the rendering, which keeps it
+     readable and diffable even though the store is binary.  Do not treat this
+     as replacing prose; it replaces the flat staging file.
+
 BLOCKED, needing a decision or a rebuild:
 
   * The .000001 literal.  Our compiler emits the CEILING (A0B5ED8E), which is
