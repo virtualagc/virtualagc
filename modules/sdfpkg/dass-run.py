@@ -47,6 +47,7 @@ import re
 import json
 import time
 import queue
+import signal
 import sqlite3
 import subprocess
 import datetime
@@ -227,13 +228,34 @@ def runOne(job):
     # but any *other* tool in the chain that does the same would lose its
     # diagnostic here too, and an unbuffered child costs nothing.
     env["PYTHONUNBUFFERED"] = "1"
+    # start_new_session puts the child in its own process group, so a timeout
+    # can kill the whole tree rather than just the process we launched.
+    # subprocess.run's timeout kills only the direct child: compileLinkCompare
+    # died, and HALSFC and its PASS2 grandchild carried on, orphaned, spinning
+    # at 100% of a core until the machine was rebooted or someone noticed.  Six
+    # such orphans accumulated in one day, two of them running over three hours,
+    # and the sweep they were stealing cores from took three times as long as it
+    # should.
+    #
+    # Worse than the waste: HALSFC writes halmat.bin, litfile.bin and COMMON*.out
+    # into its working directory under FIXED names, and that directory goes back
+    # into the tree pool the moment the timeout is handled.  An orphan still
+    # running there is writing those files underneath whichever compile is handed
+    # the tree next.
+    proc = subprocess.Popen(command, cwd = cwd, env = env,
+                            stdout = subprocess.PIPE, stderr = subprocess.PIPE,
+                            text = True, start_new_session = True)
     try:
-        result = subprocess.run(command, cwd = cwd, env = env,
-                                capture_output = True, text = True,
-                                timeout = 3600)
-        text = result.stdout + "\n" + result.stderr
-    except subprocess.TimeoutExpired as e:
-        text = "TIMEOUT after 3600 seconds\n" + str(e.stdout or "")
+        out, err = proc.communicate(timeout = 3600)
+        text = out + "\n" + err
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            proc.kill()
+        out, err = proc.communicate()
+        text = ("TIMEOUT after 3600 seconds; process group killed\n"
+                + (out or "") + "\n" + (err or ""))
     finally:
         if treePool is not None:
             treePool.put(cwd)
