@@ -241,6 +241,21 @@ def main():
             image = open(f.with_suffix(".fcm"), "rb").read()
         except Exception:
             continue
+
+        # Where lnk101 resolved a relocation, it says outright which CSECT the
+        # halfword points at and what address it resolved to.  That is primary
+        # evidence and beats inferring the target from the value: a ZCON's HW0
+        # is sector-encoded, so owner() on the raw halfword lands somewhere
+        # else entirely -- S2's references to #PCSASAT read 9148, which
+        # decodes to 0x31148 but looks up as FIOCBLKS, an FCOS CSECT with no
+        # revision level and nothing to say.  The difference between what
+        # lnk101 wrote and what it resolved to is exactly that decoding, so
+        # applying it to the dump's halfword puts both on the same footing
+        # without reimplementing the sector rules here.
+        relocated = {}
+        for r in symbols.get("relocations") or []:
+            if r.get("targetName") and "target" in r:
+                relocated[r["address"]] = (r["targetName"], r["target"])
         n = 0
         for section in symbols.get("sections", []):
             if section.get("module") in ("<external-syms>",):
@@ -266,9 +281,25 @@ def main():
                 # that is the layout-shift signature, and it is much narrower
                 # than "the value looks like an address into a revised unit",
                 # which any coincidence could satisfy.
-                target = owner(b)
-                if target is None or target != owner(a):
-                    continue
+                if address in relocated:
+                    # lnk101 named the target, so there is nothing to infer for
+                    # our side.  Ask only whether the dump's halfword, decoded
+                    # the same way, lands in that same CSECT.  Containment must
+                    # be judged against the DUMP's extent, which is the build's
+                    # own; our copy of a revised COMPOOL is a different size,
+                    # and #PCSSSPA's references run 0x305 past where the build
+                    # put the same variables in #PCSAPDT.
+                    target, resolved = relocated[address]
+                    span = extents.get(target)
+                    if span is None:
+                        continue
+                    decoded = b + (resolved - a)
+                    if not span[0] <= decoded <= span[1]:
+                        continue
+                else:
+                    target = owner(b)
+                    if target is None or target != owner(a):
+                        continue
                 if target not in revisedUnits:
                     continue
                 tstem, tours, ttheirs = revisedUnits[target]
