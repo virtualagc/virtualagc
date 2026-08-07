@@ -31,3 +31,14 @@
 - Evidence for it is circumstantial and the initial trigger is unexplained. No new hang in the 12 minutes after clearing all six, which is consistent but far too short to mean anything.
 - TOOLING ADDED so the next one can actually be diagnosed: ~/ForClaude/hang-watch.sh reports any HALSFC pass running over 10 minutes and captures, before anyone tidies up, the two things that settle it — /proc/PID/cwd (which job tree) and /proc/PID/fd (which files it holds open). It kills nothing. Evidence lands in ~/ForClaude/hang-evidence/.
 - ~/ForClaude/stop-sweep.sh kills a sweep completely and PROVES it, because the manual procedure was wrong twice over: compileLinkCompare was missing from the kill list, and the verification used `ps | grep`, which returns nothing on this machine because grep is rewritten to `rtk grep`. That check reported "0 remaining, clean" while six orphans were running. pgrep is what tells the truth; never verify a kill with grep here.
+
+### [2026-08-07] Target: [mafgenComparison.md]
+- S2 reaches 1252/1252 sections, 0 differ, 0 errors — it was the worst configuration at 16 differing. But the section count alone OVERSTATES this badly, and the document should say so. Measuring how much of each configuration is verified rather than excused:
+      SSW  107392 halfwords,  2035 no-claim ( 1.89%)
+      P9   165531 halfwords,  2011 no-claim ( 1.21%)
+      G8   200836 halfwords,  2048 no-claim ( 1.02%)
+      S2   269201 halfwords, 59635 no-claim (22.15%)
+  S2 excuses more than a FIFTH of its compared halfwords, because 70 of its units were revised between our source and the dump against 5 for SSW. #PCSSSPA is the extreme case: it passes with 214 of its 255 halfwords ignored, so 84% of that section is not verified at all — every one an RLD-resolved reference into #PCSAPDT, revised CC->CD.
+- A section counts as matching when nothing UNEXPLAINED differs, which is the right rule; the trouble is that a configuration far from the dumped build can reach a perfect count while much of it was never checked. "S2 matches" and "SSW matches" are not the same statement and the table must not present them as though they were.
+- Not all of S2's improvement is excusing, and the distinction matters: SAFACQ, SCKPNT, SRESTO, STMTAB and SULUPLIN were FIXED, by recovering the NONHAL alias addresses (#PCSADAR->#PCS2DAR, #PCSAPXT->#PCS2PXT, #PCSACAT->#PCSTCAT) so the right values are now written. #PCSSSPA and the SPSPSP family were ATTRIBUTED, not fixed.
+- TOOLING: ~/ForClaude/noclaim.py reports the no-claim share per configuration and warns above 5%; run-configs.sh now prints it after every RESULT line, so a clean score that rests on excusing a fifth of the evidence cannot look identical to one that does not.
