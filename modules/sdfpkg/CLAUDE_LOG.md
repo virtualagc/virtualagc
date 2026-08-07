@@ -1173,3 +1173,31 @@
   (56-bit vs 53-bit mantissa), yet 0x10C6F7A0B5ED8D has a leading nibble of 1,
   so only 53 significant bits, and should survive exactly.  So the mechanism is
   not yet proven -- verify against the actual C INLINE emulation.
+
+### [2026-08-07] Target: mafgenComparison.md
+- Checked the C INLINE emulation as asked.  It is CLEAN: PASS1.build's
+  inline360.c implements ADR/SDR/AW as ibm_dp_add / ibm_dp_addsub operating on
+  FR[] directly, and FR[] holds IBM 64-bit values natively.  No double
+  round-trip in LDR/AW/STD.  That hypothesis is dead.
+- PASS1.build/ibmFloat.c and runtimeC.c are byte-identical to XCOM-I's and
+  dated 2026-08-04 18:36, the same as the HALSFC-PASS1 binary, so the built
+  compiler is not stale.  (I had earlier diffed PASS1B.build, the wrong
+  directory; SCAN.c lives in PASS1.build.  Same answer either way.)
+- ibm_dp_from_string CANNOT produce ED8E for this literal under any input form:
+  '.000001', trailing blanks, trailing NUL, '.1E-5', '1.E-6', '.000001E+00',
+  '0.000001E0' all give ED8D.  So the value in PASS1's literal file did not
+  come from MONITOR(10), even though SCAN.xpl:690 calls it.
+- MY POOL-WIDE TEST WAS CONFOUNDED, recorded so it is not repeated: comparing
+  each stored literal against ibm_dp_from_string of unLitfile's RENDERED
+  decimal is meaningless, because the rendering is lossy -- '.040' renders as
+  '3.999999999999999E-02', which converts to a different value than the source
+  text '.040' does.  Only literals whose SOURCE text is known are usable.  So
+  the 21 "match neither" are artifacts, not findings.
+- LEADING REMAINING HYPOTHESIS: MONITOR9's ops 1-4 (add/sub/mul/div) are native
+  IBM arithmetic, but op 5 is pow() and ops 6-11 are transcendentals, and both
+  go ibm_dp_to_double -> C double -> ibm_dp_from_double.  ibm_dp_from_double(
+  pow(10,-6)) is exactly our ED8E.  If a decimal exponent is applied by
+  MONITOR(9) op 5 rather than folded into the string conversion, that is the
+  bug.  AGAINST it: .040 matches ibm_dp_from_string exactly, so whatever the
+  rule is, it is not applied uniformly.  Confirming needs a traced/instrumented
+  rebuild of PASS1, which cannot be done while a sweep is running.
