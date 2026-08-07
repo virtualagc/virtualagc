@@ -748,3 +748,104 @@
 - So the target for the remaining six is the same number: zero.  Read the attribution
   of a difference as telling you WHICH elimination applies to it, not as permission to
   leave it standing.
+
+### [2026-08-06] Target: mafgenComparison.md
+- G8's 7 "errors" are ONE mechanism, not seven.  Each of GKRORB, GMMLAT,
+  GTBUPL, GWAORB, GWBORB, GX4DIS, GYZSTS contributes exactly ONE section to
+  G8 -- its ZCON, `#Z<unit>` -- and every undefined symbol is referenced from
+  `#C`/`#D` sections that live in other configurations' overlays and are
+  excluded from scoring anyway.  The `-f` retry already writes a usable .fcm;
+  the driver discards the file as an error and never compares it.
+- All 7 ZCONs link at exactly the index address, 2 halfwords, 1 differing:
+  HW0 matches (8000), HW1 is ours 0E20 vs dump 0E00.  Per addrcon.py, HW1 is
+  XC(9) C(8) BSR(7-4) DSR(3-0), and "the BSR/DSR byte stays 0 until the
+  linker patches it".  So ours = BSR 2, dump = BSR 0 (unpatched).  BSR 2 is
+  the sector of 0x10000, the fallback address lnk101 gives `#C<unit>` when
+  the section is not in the index -- an artifact of our link, not of the build.
+- Decoding confirmed empirically: of G8's ZCONs whose `#C` IS in the index
+  (154), BSR equals the code section's sector in every case.
+- NOT yet explained: 53 G8 ZCONs have no `#C` in our index, but 21 of those
+  carry a patched BSR (e.g. #ZDKFCM1 E9F0 0E30, #ZDCDDG9 83AA 0E60).  So
+  "absent => unpatched" is not the whole rule; more likely our G8 index is
+  incomplete for those units.  Settle this before choosing the fix.
+- Separately, a real upstream bug: rldanalyze.py:394 `tracker.save(...)`
+  dies with "TypeError: Object of type ZCon is not JSON serializable" on
+  GKRORB, GWBORB, GYZSTS.  It runs after the symfile is written so it cost us
+  nothing here, but it aborts the analysis and should go upstream.
+
+### [2026-08-06] Target: mafgenComparison.md
+- ANSWERED: the G8 index is NOT missing the 21 patched-BSR units.  Each such
+  ZCON points at the overlay slot the unit occupies in ITS OWN configuration;
+  G8's memory at that address holds whichever variant is resident in G8, so
+  the target always lands inside a different, already-indexed CSECT.
+- 18 of 21 reproduce exactly from another configuration's index, and the
+  config is encoded in the unit name exactly as Ron observed:
+  DCDDG1/DKFCM1->G16, G2->G2, G3->G3, G9->G9, DCDDS2/DKFCM4->S2,
+  DCDDS8/DKFCM6->P9.  Independent confirmation of the S8 <-> P9 pairing.
+- 2 of 21 are a real bounded gap: #ZDCDDS4 and #ZDKFCM5 have a `#C` section in
+  NO configuration we hold.  They belong to S4, for which we have no DASS.
+  Their ZCONs point at 24074 / 2403A -- exactly where their S2 siblings
+  (#CDCDDS2 / #CDKFCM4) live, so S2 and S4 share an overlay slot.  The value
+  is therefore inferable, but that is an inference, not evidence; needs an S4
+  DASS to claim honestly.
+- 1 of 21 explained: #ZRIOCGR points at 18030, the exact START of #CFIOCGR,
+  identical across all 8 configurations, and there is no FIOCGR.hal -- not a
+  HAL/S unit.  Two ZCONs (#ZFIOCGR, #ZRIOCGR) for one resident section.
+- The other 32 code-absent ZCONs, INCLUDING all 7 G8 error files, decode to
+  address 00000 (BSR=0, HW0=8000) and 00000 holds zeros.  Genuinely unpatched
+  because the target is absent from G8.  So BSR=0 is CORRECT output for our
+  seven, and our BSR=2 comes from lnk101 giving the unplaced `#C<unit>` a
+  fallback address of 10000 under -f.  Fix belongs in the link, not the index:
+  a relocation to a section absent from the configuration must be left
+  unpatched rather than pointed at a fabricated address.
+
+### [2026-08-06] Target: mafgenComparison.md
+- BSR-only hypothesis is WRONG.  The relocation in each of the 7 G8 ZCONs is
+  flag 0x10 = RLD_ZCON_ADDR, target #C<unit> (or an internal label, e.g.
+  GWBORB's $Y022001), resolved to lnk101's fallback 10000.  Per ZCon.apply(),
+  0x10 writes HW0 *and* sets BSR when sector>0 and CB.
+- So HW0 is written by our link too.  It matched only by luck: 10000 is
+  sector-aligned, so HW0 = 8000|(10000 & 7FFF) = 8000, which happens to equal
+  the unpatched value.  A non-sector-aligned fallback would differ in BOTH
+  halfwords.  The defect is bigger than the 1-halfword symptom suggests.
+- Confirmed 8000 0E00 is the as-assembled ZCON: ALL 32 of G8's code-absent
+  BSR=0 ZCONs are byte-identical 8000 0E00.  The real build never patched
+  them, because the target is absent from the configuration.
+- Fix direction unchanged: a relocation whose target section is absent from
+  the configuration must be left entirely unpatched.  Pull nsts-sdl-dps
+  immediately before making the change.
+
+### [2026-08-06] Target: mafgenComparison.md
+- dass-literals.py had a THIRD DASS line shape wrong: a named variable
+  spanning several halfwords, only some starred --
+    004F64-004F65  #PCGGCOM+0116  CGGV_V_MAG_MECO   4464 *DB00       SP SCALAR
+    005B2C-005B2F  #PCGNCOM+0104  CGGS_NAVBASE_LAT  407F *D2DB *03C7 *34DD
+  It put the first STARRED value at the leading address; the values are
+  positional there too (*DB00 belongs to 004F65).  Fix: halfwords are
+  positional in EVERY row shape, bounded by the address range.
+- Also handled a name wide enough to collide with the value column, gluing
+  them (CGGS_FD_THRUST_ANG_COEF_SWITCH_V*4411).  The split is accepted only
+  where it supplies the count the address range demands, so it self-validates.
+- Self-check over all 8 configurations: 27788 agree, 0 DISAGREE (was 203
+  disagreeing across G8/G9/G2/G3).  Recovery also went UP a lot, so the old
+  parser was LOSING starred locations, not merely misplacing them:
+  SSW 1193->1199, P9 1122->1128, G8 2549->2827, S2 1256->1262,
+  G9 2363->2568, G2 2794->3093, G3 6003->7757, G16 ->7954.
+- Projected effect on known differences, every match EXACT, never partial:
+    G8 12 -> 7 differing (#PCGCCOM 6, #PCGNCOM 7, #PCGNFLT 16, #PCGZCOM 4,
+                          #DGPBGPS 2 all fully accounted for)
+    G9 16 -> 12 (#PCGCCOM 6, #PCGNCOM 7, #PCGZCOM 4, #DGPBGPS 2)
+    G2 13 -> 4  (9 of 13 sections fully accounted for)
+    S2 22 -> 22 (unaffected; S2's self-check was already clean, so its 22 are
+                 a different mechanism -- the SPSPSP/SAFACQ family)
+- Every configuration therefore needs re-running with the corrected exceptions.
+  fcmcmp's checked-value design contained the damage: entries whose asserted
+  value did not match were warned about and ignored, never applied, so the
+  wrong entries suppressed nothing.  The cost was missing suppressions, not
+  false ones.
+- SEPARATE: dass-run.py's checkToolchainBranch() was stale -- it demanded
+  branch 'integration', but upstream merged all four PRs so 'master' is now
+  correct.  It fired on all 21 sweeps of this run; 21 spurious warnings is how
+  a check stops being read.  Replaced the branch test with a capability test
+  (--no-data, --exceptions, --external-syms, patchStackPDEs, ZCon.apply flags).
+  Verified all five present on master, so THIS RUN'S RESULTS ARE VALID.

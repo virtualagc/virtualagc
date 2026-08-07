@@ -105,9 +105,36 @@ def recoverLiterals(path):
 #
 # Reading the second shape as though it were the first put the wrong value at
 # the wrong address, which the self-check below caught.
+#   named variable spanning several halfwords, only some of them starred:
+#     004F64-004F65  #PCGGCOM+0116  CGGV_V_MAG_MECO   4464 *DB00   SP SCALAR
+#     005B2C-005B2F  #PCGNCOM+0104  CGGS_NAVBASE_LAT  407F *D2DB *03C7 *34DD
+#
+# The third shape is the one that took two attempts.  Reading it as the first
+# shape put its first STARRED value at the leading address, when the values are
+# positional there too: *DB00 belongs to 004F65, and 004F64 holds the unstarred
+# 4464.  The address range says how many halfwords the row carries, which is
+# both how the values are placed and how the glued-name case below is settled.
 STARRED_LINE_RE = re.compile(
     r"^\s*([0-9A-F]{6})(?:-([0-9A-F]{6}))?\s+(\S+)\s+(.*)$")
 HEXWORD_RE = re.compile(r"^(\*?)([0-9A-F]{4})$")
+GLUED_RE = re.compile(r"^(.*[^0-9A-F*])(\*?[0-9A-F]{4})$")
+
+
+def leadingRun(tokens, limit):
+    '''The maximal leading run of halfword tokens, at most limit of them.
+
+    Stopping at the first non-halfword keeps the trailing engineering-units
+    and type columns ("4.4000000E+03  SP SCALAR VARIABLE") out of the values.
+    '''
+    words = []
+    for t in tokens:
+        if len(words) >= limit:
+            break
+        w = HEXWORD_RE.match(t)
+        if not w:
+            break
+        words.append(w)
+    return words
 
 
 def recoverStarred(path):
@@ -128,29 +155,36 @@ def recoverStarred(path):
         m = STARRED_LINE_RE.match(line)
         if not m or "*" not in m.group(4):
             continue
-        start, _end, _csect, rest = m.groups()
+        start, end, _csect, rest = m.groups()
         address = int(start, 16)
+        span = (int(end, 16) - address + 1) if end else 1
         tokens = rest.split()
-        words = [HEXWORD_RE.match(t) for t in tokens]
-        if words and all(words):
-            # Hex-dump row: consecutive halfwords from the leading address.
-            for i, w in enumerate(words):
-                if w.group(1):
-                    starred.setdefault(address + i, (int(w.group(2), 16), ""))
-        else:
-            # Named row: the name is the first token, the starred value is the
-            # first starred token, and it belongs to the leading address.
-            name = tokens[0] if tokens and not tokens[0].startswith("*") else ""
+
+        name = ""
+        if tokens and not HEXWORD_RE.match(tokens[0]):
+            name = tokens[0]
+            # A name wide enough to fill its column runs into the first value
+            # with no space between them:
+            #   CGGS_FD_THRUST_ANG_COEF_SWITCH_V*4411 *3000
+            # Split it only where doing so supplies the number of halfwords
+            # the address range says the row carries, so the split validates
+            # itself rather than guessing where a name ends.
+            glued = GLUED_RE.match(name)
+            if glued and len(leadingRun(tokens[1:], span)) < span:
+                name = glued.group(1)
+                tokens = [glued.group(2)] + tokens[1:]
+            else:
+                tokens = tokens[1:]
             # The first token is sometimes the CSECT+offset field rather
             # than an identifier; that is not a name worth recording.
-            if name.startswith("+") or HEXWORD_RE.match(name) \
-                    or set(name) <= set("-"):
+            if name.startswith("+") or set(name) <= set("-"):
                 name = ""
-            for t in tokens:
-                w = HEXWORD_RE.match(t)
-                if w and w.group(1):
-                    starred.setdefault(address, (int(w.group(2), 16), name))
-                    break
+
+        # The halfwords are positional -- consecutive from the leading address
+        # -- in every shape of row, named or not.
+        for i, w in enumerate(leadingRun(tokens, span)):
+            if w.group(1):
+                starred.setdefault(address + i, (int(w.group(2), 16), name))
     return starred
 
 

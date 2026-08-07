@@ -302,31 +302,52 @@ NSTS = Path("~/donschmidt/nsts-sdl-dps").expanduser()
 
 
 def checkToolchainBranch():
-    """Warn if lnk101/fcmcmp were not built from the branch carrying all fixes.
+    """Warn if lnk101/fcmcmp lack any of the fixes this comparison depends on.
 
-    The upstream changes live on one branch each, off master, so that they can
-    be reviewed and merged separately -- and a local `integration` branch merges
-    them for our own use.  Building from any single feature branch produces a
-    toolchain missing the others, and a sweep run against it silently reports
-    already-fixed mechanisms as live again.
+    Building a toolchain that is missing one of them silently reports an
+    already-fixed mechanism as live again.  That happened three times; the most
+    expensive was a sweep whose differing sections jumped from 4 to 33, which
+    looked like a regression in the change under test and was in fact a build
+    predating two of the fixes.
 
-    That happened three times before this check existed.  The most expensive
-    was a sweep whose differing sections jumped from 4 to 33, which looked like
-    a regression in the change under test and was in fact a build off a branch
-    that predated two of the fixes.
+    This used to test that the checkout was on our local `integration` branch,
+    which merged the four fixes while they were still separate feature branches
+    under review.  Upstream has since merged all four, so `master` is now the
+    correct branch and the branch test warned on every sweep -- 21 spurious
+    warnings in one run, which is how a check stops being read at all.
+
+    Test the capabilities instead.  A feature is what the sweep actually
+    depends on; which branch supplies it is upstream's business, not ours.
     """
-    try:
-        branch = subprocess.run(["git", "-C", str(NSTS), "branch",
-                                 "--show-current"], capture_output=True,
-                                text=True, timeout=30).stdout.strip()
-    except Exception:
-        return
-    if branch and branch != "integration":
-        print(f"WARNING: {NSTS.name} is on branch '{branch}', not "
-              f"'integration'.  lnk101 and fcmcmp were probably built without "
-              f"the other fixes, and this sweep's results will not be "
-              f"comparable.  Check out integration, rebuild, and re-run.\n",
+    required = [
+        (Path("src/tools/fcmcmp.py"), "--no-data",
+         "differences against fill words"),
+        (Path("src/tools/fcmcmp.py"), "--exceptions",
+         "post-build patches and no-claim locations"),
+        (Path("src/lnk101/cli.py"), "--external-syms",
+         "placing sections at their DASS addresses"),
+        (Path("src/lnk101/linker.py"), "patchStackPDEs",
+         "stack addresses in process directory entries"),
+        (Path("src/ap101Utils/addrcon.py"), "flags: int | None",
+         "the sign bit on negative-displacement ZCONs"),
+    ]
+    missing = []
+    for relative, token, purpose in required:
+        path = NSTS / relative
+        try:
+            if token not in path.read_text(errors = "replace"):
+                missing.append((relative, token, purpose))
+        except OSError:
+            missing.append((relative, token, purpose))
+    if missing:
+        print(f"WARNING: {NSTS.name} is missing "
+              f"{len(missing)} fix(es) this sweep depends on; its results "
+              f"will not be comparable.  Pull and rebuild.\n",
               file = sys.stderr)
+        for relative, token, purpose in missing:
+            print(f"    {relative}: no '{token}' -- {purpose}",
+                  file = sys.stderr)
+        print(file = sys.stderr)
 
 
 def main():
