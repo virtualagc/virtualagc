@@ -1201,3 +1201,34 @@
   bug.  AGAINST it: .040 matches ibm_dp_from_string exactly, so whatever the
   rule is, it is not applied uniformly.  Confirming needs a traced/instrumented
   rebuild of PASS1, which cannot be done while a sweep is running.
+
+### [2026-08-07] Target: mafgenComparison.md
+- ~/ForClaude/ibmPower-google.{py,c}: NOT usable as-is.  They implement 32-bit
+  SINGLE precision (24-bit fraction, EXP_MASK 0x7F000000) where our problem is
+  double (56-bit fraction), and `power` takes an INTEGER exponent and does
+  repeated multiplication rather than DPWRD's exp(y*log(x)).  The .py also
+  appears to contain two concatenated copies.
+- But a cheaper experiment using the EXISTING native ibm_dp_mul/div is a much
+  better lead.  Reconstructing the two literals whose source text we know:
+      .000001  stored 3C10C6F7 A0B5ED8C   (the original build's value)
+          1 / 1000000        -> ...ED8D   (correctly rounded, NOT it)
+          (1/1000)^2         -> ...ED8C   MATCHES
+          (1/100)^3          -> ...ED8C   MATCHES
+      .040     stored 3FA3D70A 3D70A3D7
+          40 / 1000          -> ...A3D7   MATCHES
+          4 / 100            -> ...A3D7   MATCHES
+          from_string        -> ...A3D7   MATCHES
+          40 * (1/1000)      -> ...A3D5   no
+- HYPOTHESIS: the original scales a decimal literal by powers of ten in more
+  than one step once the exponent is large enough, accumulating about 1 ULP;
+  a single-step scaling is correctly rounded.  That fits both data points --
+  .040 needs one step and is exact, .000001 needs two and is 1 ULP low -- and
+  TWO independent decompositions of 1e-6, (1/1000)^2 and (1/100)^3, agree on
+  exactly the dump's value.
+- NOT PROVEN: two literals only, and the candidate values are clustered
+  (ED89..ED8D), so a chance hit is possible.  CONFIRM by finding more literals
+  whose SOURCE text is known and whose exponent is large, and testing whether
+  the multi-step rule predicts their stored values.  Do not implement DPWRD
+  until this is settled -- if the rule holds, the original's value is
+  REPRODUCIBLE, which closes the three sections outright and makes the -2
+  no-claim unnecessary.
