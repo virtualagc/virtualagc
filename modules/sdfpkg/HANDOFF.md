@@ -632,6 +632,25 @@ NEXT STEPS, in order, once that sweep finishes:
      SAFACQ is the same shape).  The target IS in the configuration, so
      dass-syms ought to recover it.  This is ours to fix, not version drift.
 
+  0. FIRST -- REFINE THE FOREIGN-SYMBOL WITHDRAWAL.  It is currently BLANKET
+     (dass-syms.py, inventForeignAddresses=False) and that is too crude.  The
+     completed sweep shows it fixed two and broke one:
+         G3  #DGZ1ALT  FIXED    (we wrote 456A, dump holds 0000)
+         G8  #PCGA2MC  FIXED    (we wrote E3C5, dump holds 0019 = raw addend)
+         G3  #PCDMUIC  BROKE    (we now write 0000, dump holds 40D4)
+         G16 #PCDMUIC  BROKE    (same)
+     Net zero: 28 differences before and after.  The two cases are INVERSE, and
+     the dump distinguishes them without ambiguity:
+         dump holds 0000 or the raw addend -> the original build did NOT resolve
+             the reference, so inventing an address is wrong: suppress.
+         dump holds a real address         -> the symbol IS present in this
+             configuration, so the address is wanted: recover it.
+     So make the suppression per-site and evidence-driven rather than global.
+     Note dass-syms's existing relocation-evidence pass already derives an
+     address exactly this way (dump value minus addend), so the likely fix is to
+     let that pass own these symbols and suppress only where the dump shows the
+     site unresolved.  Keep --foreign-symbols as the escape hatch.
+
   6. CONVERT CLAUDE_LOG.md TO A DATABASE (user's instruction, 2026-08-07).
      Table (timestamp, target, entry, applied), so capture is an INSERT, a
      "Full Documentation Sync" is SELECT ... WHERE applied=0 AND target=?, and
