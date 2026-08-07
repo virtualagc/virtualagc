@@ -301,6 +301,33 @@ in this session was confirmed against it before being made.
 --------------------------------------------------------------------------------
 6.  WHAT ELSE WAS FIXED
 --------------------------------------------------------------------------------
+compileLinkCompare / compileLinkRun (found while starting the DASS comparison):
+             compileLinkCompare never passed --sdfi, so it read no SDFs and
+             satisfied every "D INCLUDE TEMPLATE" from the template library
+             alone -- a path compilePASS never exercises.  SSSRC/ARDCSBUS.hal
+             found it: "REL3 SDF ##CDLANN NOT FOUND", seven errors of severity
+             2.  The default now lives in halsParms.py as DEFAULT_SDFI, with
+             --sdfi=D and --no-sdfi to override.  Note what this cost: it did
+             not skew comparisons, it removed files from them.
+             compileLinkRun's cleanup block deleted nothing.  Its last three
+             clauses read "symfile = f'...'" where they meant "os.remove(...)",
+             which is the source of the BASENAME*.* residue in PFS/OI340600.
+             Fixed, and both scripts now take --out-dir=D so their output need
+             not land in the source tree at all.
+             Both scripts ended their failure paths in os._exit(), which skips
+             interpreter shutdown and discards stdout's buffer -- so a failed
+             compile printed its diagnostic and then exited with no output
+             whatever, any time stdout was a pipe.  Replaced with a flushing
+             die().
+             compileLinkCompare's rldanalyze fallback named "../{config}.fcm"
+             and a literal "../csects-{config}.json" (missing its f prefix);
+             compileLinkRun's copy referred to `config`, which does not exist in
+             that script, so a link failure raised NameError from inside the
+             error handler.  Fixed and removed respectively.
+             The comparison work directory is ~/ForClaude/OI340600-clc, seeded
+             from PFS/OI340600's libraries -- about 113 MB, and it keeps
+             HALSFC's archive.results out of the PFS IDE project.
+
 virtualagc:
   bc0575a73  compilePASS seeds template-dependency cycles.  A file is compiled
              only once every template it needs exists, so a group needing each
