@@ -587,3 +587,71 @@ starting from source alone, the argv[0] check for stray compilers, setsid for
 launching, and the habit of verifying a run finished before believing its
 numbers.
 ================================================================================
+
+================================================================================
+11. DASS COMPARISON -- CURRENT STATE AND NEXT STEPS  (2026-08-07)
+================================================================================
+
+STATE.  14379 of 14407 in-index sections match, 28 differ, 0 errors.  SSW, P9
+and G2 are exact.  A full eight-configuration sweep is running as this is
+written; ~/ForClaude/run-configs.log is the live record and holds a "RESULT"
+line per configuration.  Process detail is in PFS/mafgenComparison.md, outcomes
+in modules/sdfpkg/compileLinkCompare.md.
+
+NEXT STEPS, in order, once that sweep finishes:
+
+  1. SNAPSHOT run-configs.sh.  A sweep currently consumes its dependencies
+     LIVE, which has cost two restarts.  lnk101 and fcmcmp are EDITABLE installs
+     (build/venv/.../_editable_impl_ap101.pth points at the working tree), so a
+     branch switch changes the linker mid-run; dass-*.py are invoked by absolute
+     path out of the git tree; rebuilding the compiler replaces HALSFC-PASS1
+     underneath a running sweep.  Fix: at launch, copy or "git worktree add"
+     nsts-sdl-dps, the PASS.REL32V0 passes and the dass-*.py scripts into
+     ~/ForClaude/snap-<ts>/, and set PATH/PYTHONPATH so the sweep resolves them
+     ONLY from there.  Also makes each sweep reproducible after the fact.
+     NOTE: bash reads a script incrementally, so run-configs.sh itself must
+     never be edited while it is running.
+
+  2. SECTOR-DECODING FIX in dass-versions.py.  Verified by hand, NOT applied.
+     Before the owner lookup, decode a value with bit 15 set as
+     (sector<<15)|(v & 0x7FFF), trying sectors 0..15 and accepting only where
+     ours and the dump's decode with the SAME sector into the SAME CSECT.
+     Without it, a sector-encoded reference into a revised unit is invisible:
+     S2's #PCZ4COM, #DSTCCYC, #DSCKPNT, #DSRESTO and #DSULUPL all differ by
+     +0x1E into #PCSASAT (30AC2..31875, revised BZ->CA), and the raw halfword
+     914C is really 3114C.
+
+  3. RE-RUN S2 and any configuration step 2 touches.
+
+  4. RE-TEST G9 #PCSDMD1 (24 halfwords).  It was called a dead end -- "no honest
+     base to recover" -- but that was concluded while decoding raw halfwords,
+     the very bug step 2 fixes.  Treat the earlier verdict as suspect.
+
+  5. UNRESOLVED-SYMBOL CLASS in S2.  ZCONs we leave as "8002 0000" where the
+     dump holds an address with DSR=6 (SCKPNT, SRESTO, STMTAB x2, SULUPLIN;
+     SAFACQ is the same shape).  The target IS in the configuration, so
+     dass-syms ought to recover it.  This is ours to fix, not version drift.
+
+BLOCKED, needing a decision or a rebuild:
+
+  * The .000001 literal.  Our compiler emits the CEILING (A0B5ED8E), which is
+    what a round trip through a C double gives; ibm_dp_from_string gives the
+    correctly rounded A0B5ED8D.  The literal is already wrong in litfile0.bin,
+    so PASS1 is at fault and PASS2 is not involved.  The via-double call site is
+    NOT yet found: MONITOR10 uses ibm_dp_from_string, inline360.c is clean, and
+    the built HALSFC-PASS1 is newer than its runtimeC.c.  Confirming needs an
+    instrumented PASS1 rebuild.  Separately the dump's A0B5ED8C is reachable by
+    no rounding mode and not by the genuine S/360 IHCFDXPI either, so it is
+    recorded as a suspected original-compiler defect -- see virtualagc issue
+    #1296, where the case is written up.
+
+  * Recording that residue as -2 rather than -1, to keep it distinct from the
+    FCOS version differences.  fcmcmp CANNOT take -2 as it stands: int("-2",16)
+    parses, so the entry becomes a CHECKED value of -2, fails its check, is
+    ignored, and the difference still counts.  Needs a third upstream PR.
+
+REFERENCE.  ~/ForClaude/mvt/extracted/ holds the System/360 FORTRAN library
+recovered from Jay Moseley's tape -- 424 assembler listings (source AND object
+code) including IHCFDXPI, IHCFDXPD, IHCFRXPI, IHCFRXPR, IHCLEXP, IHCLLOG,
+IHCLSQRT, and IEYFORT itself.  README.txt there explains how the .het was read
+without Hercules utilities.
