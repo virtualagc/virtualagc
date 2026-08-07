@@ -143,7 +143,8 @@ def parseHalstat(path):
 
 def collectUnresolved(linkDir):
     '''Every unresolved relocation lnk101 reported, from the symbol JSONs a
-    sweep left behind.  Returns [(symbol, halfword address, addend)].'''
+    sweep left behind.  Returns [(symbol, halfword address, addend, section,
+    section base as a halfword address)].'''
     out = []
     for f in sorted(Path(linkDir).glob("*.json")):
         if f.name.endswith(".repro.json"):
@@ -153,7 +154,9 @@ def collectUnresolved(linkDir):
         except Exception:
             continue
         for r in sym.get("unresolvedRelocations") or []:
-            out.append((r["symbol"], r["imageOffsetHW"], r["existing"]))
+            out.append((r["symbol"], r["imageOffsetHW"], r["existing"],
+                        (r.get("section") or "").strip(),
+                        r["imageOffsetHW"] - r.get("sectionOffset", 0) // 2))
     return out
 
 
@@ -181,22 +184,52 @@ def collectUndefined(logDir):
     return out
 
 
-def recoverForeignSymbols(undefined, index, phases, otherConfigs, report):
+def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
+                          halfword, report):
     """Addresses for symbols this configuration does not contain at all.
 
     A module can SCHEDULE a program that lives in another configuration's
     overlay.  The reference is to that program's process directory entry, and
-    lnk101 treats an undefined #E as fatal -- so the link produces nothing and
-    the file drops out of the comparison entirely, which is worse than a
-    difference.  Two of SSW's files failed this way, CVJFDECP on seven such
-    symbols and DGRGSERO on two.
+    lnk101 treats an undefined #E as fatal.  Another configuration's index and
+    HALSTAT will usually offer an address for such a symbol -- but offering one
+    is not evidence that the original build used it, and mostly it did not: a
+    section absent from the configuration had nothing to resolve against, so
+    the build left the slot alone.  Borrowing the address unconditionally wrote
+    0x456A into G3's #DGZ1ALT where the dump holds 0000, and G8's #PCGA2MC came
+    out 0xE3C5 where the dump holds the bare addend 0x0019.
 
-    Same standard of evidence as everywhere else here: an address is taken only
-    where the other configurations' CSECT indexes and HALSTAT agree on it
-    independently, and only where every source that has the symbol gives the
-    same answer.  All nine of SSW's are unambiguous -- #EV01TCS is in G9 and in
-    HALSTAT phase 8, both at 0xE26E, and in no other configuration.
+    Withdrawing the borrowing outright is no better.  The dump has #EASCTIM
+    resolved at 0x40D4 in both G3 and G16, where eight other configurations
+    independently place it, and suppressing that lost a halfword in #PCDMUIC in
+    each.  The two cases are inverse, and the dump distinguishes them, so the
+    decision is made per symbol from what the dump holds at the sites that
+    reference it.
+
+    A site counts only if it is ANCHORED: its own section must be in the CSECT
+    index at exactly the address lnk101 placed it, so that the dump halfword at
+    that image offset really is the corresponding location.  Without this most
+    references read unrelated memory -- a section lnk101 could not place sits
+    at the 0x10000 fallback -- and derive meaningless addresses.  G3's second
+    #EASCTIM reference is one of these, implying 0x00EA against the anchored
+    one's 0x40D4.
+
+    An anchored site says "the build did not resolve this" when it holds the
+    bare addend, or the addend with bit 15 set: that is the documented
+    absent-section signature, HW0's sector flag set over an unpatched address.
+    Otherwise it implies `dump - addend`.  The symbol is recovered only when a
+    strict majority of anchored sites are resolved, every resolved site implies
+    the SAME address, and an independent source -- another configuration's
+    index or a HALSTAT phase -- offers that same address.  Corroboration is
+    what makes it evidence rather than arithmetic: S2 has seven distinct #ZP
+    symbols whose lone references each imply 0x298, which no two symbols can
+    share and no candidate confirms.
     """
+    sites = collections.defaultdict(list)
+    for symbol, address, addend, section, base in relocations:
+        e = index.get(section)
+        if e is not None and e.get("start") == base:
+            sites[symbol].append((address, addend))
+
     recovered = {}
     for symbol in sorted(undefined):
         if symbol in index:
@@ -210,18 +243,45 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, report):
         for phase, d in phases.items():
             if symbol in d:
                 candidates[f"HALSTAT phase {phase}"] = d[symbol]
-        if not candidates:
-            report.append((symbol, "in no other configuration and no HALSTAT phase"))
+
+        usable, implied = [], collections.Counter()
+        for address, addend in sites.get(symbol, []):
+            v = halfword(address)
+            if v is None or v in FILL:
+                continue
+            usable.append(address)
+            if v != addend and v != (addend | 0x8000):
+                implied[(v - addend) & 0xFFFF] += 1
+
+        if not usable:
+            report.append((symbol, "no anchored reference, so nothing in the "
+                                   "dump says whether the build resolved it"))
             continue
-        addresses = {a for a, _n in candidates.values()}
-        if len(addresses) != 1:
-            report.append((symbol, "sources disagree: "
-                           + ", ".join(f"{k}={v[0]:#x}"
-                                       for k, v in sorted(candidates.items()))))
+        n = sum(implied.values())
+        if n * 2 <= len(usable):
+            report.append((symbol, f"the dump leaves {len(usable) - n} of "
+                                   f"{len(usable)} anchored references "
+                                   f"unpatched: the build did not resolve it "
+                                   f"either"))
             continue
-        source = sorted(candidates)[0]
-        recovered[symbol] = candidates[source] + (
-            f"{source}, {len(candidates)} source(s) agree",)
+        if len(implied) != 1:
+            report.append((symbol, "anchored references disagree: "
+                           + ", ".join(f"{a:#07x}x{c}"
+                                       for a, c in implied.most_common())))
+            continue
+        address = next(iter(implied))
+        agreeing = {k: v for k, v in candidates.items() if v[0] == address}
+        if not agreeing:
+            report.append((symbol, f"{n}/{len(usable)} anchored references "
+                           f"imply {address:#07x}, corroborated by nothing"
+                           + (": " + ", ".join(f"{k}={v[0]:#x}" for k, v
+                                               in sorted(candidates.items()))
+                              if candidates else "")))
+            continue
+        source = sorted(agreeing)[0]
+        recovered[symbol] = agreeing[source] + (
+            f"{n}/{len(usable)} anchored references imply {address:#07x}, "
+            f"{len(agreeing)} source(s) corroborate ({source})",)
     return recovered
 
 
@@ -333,14 +393,13 @@ def main():
     # for.
     permitSoleCandidate = False
     # Giving a symbol this configuration does not contain an address borrowed
-    # from one that does.  It existed for one reason: a link that failed on an
-    # undefined #E produced no comparison at all, which is worse than a
-    # difference.  compileLinkCompare now compares the forced image instead, so
-    # the rescue is unnecessary -- and it is WRONG, because the original build
-    # had nothing to resolve such a reference against either and left the slot
-    # alone.  G3's #DGZ1ALT held 456A against the dump's 0000 for exactly this
-    # reason, and passes once the invented address is withdrawn.
-    inventForeignAddresses = False
+    # from one that does.  This used to be unconditional, and then off
+    # altogether; both were wrong, in opposite directions and by the same two
+    # halfwords.  recoverForeignSymbols now decides per symbol, from what the
+    # dump holds at the sites that reference it, so there is nothing left to
+    # switch off -- the flag survives only to disable the pass wholesale if a
+    # configuration ever needs it.
+    recoverForeignAddresses = True
     base = None
     out = None
     report = False
@@ -361,8 +420,8 @@ def main():
             out = p.partition("=")[2]
         elif p == "--sole-candidates":
             permitSoleCandidate = True
-        elif p == "--foreign-symbols":
-            inventForeignAddresses = True
+        elif p == "--no-foreign-symbols":
+            recoverForeignAddresses = False
         elif p == "--report":
             report = True
         else:
@@ -401,7 +460,7 @@ def main():
 
     votes = collections.defaultdict(collections.Counter)
     seen = collections.Counter()
-    for symbol, address, addend in relocations:
+    for symbol, address, addend, _section, _base in relocations:
         seen[symbol] += 1
         v = halfword(address)
         if v is None or v in FILL:
@@ -500,8 +559,9 @@ def main():
     # produces no JSON at all.
     foreignReport = []
     foreign = recoverForeignSymbols(collectUndefined(logDir), index, phases,
-                                    others, foreignReport) \
-              if inventForeignAddresses else {}
+                                    others, relocations, halfword,
+                                    foreignReport) \
+              if recoverForeignAddresses else {}
     for symbol, (address, n, why) in foreign.items():
         augmented[symbol] = {"start": address, "end": address + n - 1,
                              "type": "HALSTAT", "hal": None}
