@@ -1104,3 +1104,44 @@
 - Even ED8D would not match the dump's ED8C, so this fix alone would not close
   the three sections; it would move us from 2 ULP away to 1 ULP away, and in
   the correct direction numerically.
+
+### [2026-08-07] Target: mafgenComparison.md
+- Ron's proposal accepted: record the residual as a suspected ORIGINAL-compiler
+  floating-point bug, distinct from the FCOS version discrepancies, using -2
+  rather than -1 so the two categories stay apart in the exceptions files.
+- fcmcmp CANNOT take -2 as it stands.  load_exceptions does
+  `value = None if fields[1] == "-1" else int(fields[1], 16)`, and int("-2",16)
+  succeeds, so a -2 line becomes a CHECKED value of -2.  No halfword can equal
+  -2, so every such entry would fail its check, be reported as a stale
+  exception, be ignored, and the difference would STILL COUNT.  Needs a change:
+  treat any negative value as no-claim and carry the magnitude as a category
+  tag, reported separately in the counts.  Third upstream PR.
+- Evidence that the original compiler is at fault, which is better than the
+  FCOS case where there is none at all:
+    exact mantissa for 1e-6 = 4722366482869645.21
+    round-to-nearest -> ...645 (ED8D)   truncate -> ...645 (ED8D)
+    ceiling          -> ...646 (ED8E) = OURS
+    dump             -> ...644 (ED8C) = reachable by NO rounding mode
+  The original's value is a full step below the floor, ~1.21 ULP low.  A
+  truncating compiler would have produced ED8D.  And it is isolated: GO8ORB's
+  literal pool holds 389 literals and only this one disagrees.
+- OUR ED8E is our own separate, fixable bug: it is the CEILING, which is what a
+  via-double round trip must give, since binary64's nearest value to 1e-6 lies
+  slightly ABOVE the true decimal.
+- Chased the via-double call site and NARROWED it, but did not close it:
+    * SCAN.xpl:690 passes the whole literal text to MONITOR(10), which uses
+      ibm_dp_from_string; every spelling ('.000001', '1E-6', '0.000001',
+      '1.0E-06') gives ED8D, as does ibm_dp_div(1,1000000).
+    * PASS1B.build's runtimeC.c/ibmFloat.c are byte-identical to XCOM-I's, and
+      the built HALSFC-PASS1 (2026-08-04 18:36) is NEWER than runtimeC.c
+      (15:04), so the binary is not stale.
+    * DECISIVE: in the SAME literal pool, .040 matches ibm_dp_from_string
+      exactly (from_double would give ...D8) while .000001 matches
+      ibm_dp_from_double.  So it is neither a global policy nor a stale build
+      -- it is CONTEXT-dependent.
+    * .000001 is used as "SCALAR$(@DOUBLE)" in INCL80/GKPMNV.hal:365, and
+      ARITHLIT.xpl carries DR109083 "CONSTANT DOUBLE SCALAR CONVERTED TO ...".
+      The double-precision constant path is the suspect.  Resume there.
+- BLOCKED until the sweep finishes: both fixes touch live editable installs
+  (fcmcmp) or need the compiler passes rebuilt (the literal fix), and editing
+  either mid-run is the mistake already recorded above.
