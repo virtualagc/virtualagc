@@ -467,12 +467,17 @@ def main():
         for line in lines:
             f.write(line + "\n")
         if entries:
+            # The "-n = text" line is a declaration fcmcmp reads: it prints
+            # that text against the count instead of "known discrepancy of
+            # type -1".  Older fcmcmp strips comments and simply ignores it,
+            # so writing it costs nothing either way.
             f.write(f"\n# Differences attributable to the source being OI-34.06 "
                     f"where the dump is OI-34.07.\n"
                     f"# Value -1: ignore the address, no claim about its "
                     f"contents.  The evidence is the unit's\n"
                     f"# revision level, which is per file; see "
-                    f"dass-versions.py.\n")
+                    f"dass-versions.py.\n"
+                    f"# -1 = Probable version-change related difference\n")
             for address, name in sorted(entries):
                 f.write(f"{address:05X} -1 {name}\n")
 
