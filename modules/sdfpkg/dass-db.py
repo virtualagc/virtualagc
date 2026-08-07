@@ -179,6 +179,9 @@ CREATE TABLE IF NOT EXISTS attribution (
 CREATE INDEX IF NOT EXISTS ix_csect_source ON csect(source_id);
 CREATE INDEX IF NOT EXISTS ix_section_run ON section(run_id);
 CREATE INDEX IF NOT EXISTS ix_run_source ON run(config, source_id);
+-- Without this, purging one configuration scans the whole diff table,
+-- and it does so holding the write lock that every other reader waits on.
+CREATE INDEX IF NOT EXISTS ix_diff_section ON diff(section_id);
 '''
 
 
