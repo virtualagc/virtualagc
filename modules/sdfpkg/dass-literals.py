@@ -117,7 +117,21 @@ def recoverLiterals(path):
 STARRED_LINE_RE = re.compile(
     r"^\s*([0-9A-F]{6})(?:-([0-9A-F]{6}))?\s+(\S+)\s+(.*)$")
 HEXWORD_RE = re.compile(r"^(\*?)([0-9A-F]{4})$")
-GLUED_RE = re.compile(r"^(.*[^0-9A-F*])(\*?[0-9A-F]{4})$")
+# A name wide enough to fill its column runs into the first value.  Where the
+# value is starred the split is unambiguous -- it begins at the '*' -- and that
+# is the case worth getting right, because a starred value is an exception we
+# must record.  The older single pattern demanded a non-hex character before the
+# value, which silently failed for every name ending in one:
+# GFK_FWD_RCS_RTLS_DUMP_START_TIME*0000 and CDUV_NSP_VEHICLE_ILOAD*0005 both end
+# in a hex letter, so their patches went unrecorded and counted as differences
+# against locations the build never wrote.  Unstarred glue stays on the stricter
+# rule, since nothing marks where the name ends there.
+GLUED_STAR_RE = re.compile(r"^(.+?)(\*[0-9A-F]{4})$")
+GLUED_PLAIN_RE = re.compile(r"^(.*[^0-9A-F*])([0-9A-F]{4})$")
+
+
+def gluedSplit(token):
+    return GLUED_STAR_RE.match(token) or GLUED_PLAIN_RE.match(token)
 
 
 def leadingRun(tokens, limit):
@@ -169,7 +183,7 @@ def recoverStarred(path):
             # Split it only where doing so supplies the number of halfwords
             # the address range says the row carries, so the split validates
             # itself rather than guessing where a name ends.
-            glued = GLUED_RE.match(name)
+            glued = gluedSplit(name)
             if glued and len(leadingRun(tokens[1:], span)) < span:
                 name = glued.group(1)
                 tokens = [glued.group(2)] + tokens[1:]
