@@ -236,20 +236,32 @@ def main():
         body = csect[2:] if csect[:1] in "#$@" else csect
         return body
 
-    revisedUnits = {}
-    for csect in index:
+    def revisionOf(csect):
+        '''(stem, our revision, the build's) if the build revised this unit
+        since our source, else None.  Works for a CSECT this configuration does
+        not contain, which matters because an unresolved relocation names one.'''
         stem = unitOf(csect)
         theirs = revisions.get(stem)
         if theirs is None:
-            continue
+            return None
         ours = None
         for d in ("APPLSRC", "SSSRC"):
             p = Path(d) / f"{stem}.hal"
             if p.is_file():
                 ours = sourceRevision(p)
                 break
-        if ours is not None and theirs > ours:
-            revisedUnits[csect] = (stem, ours, theirs)
+        return (stem, ours, theirs) if ours is not None and theirs > ours \
+               else None
+
+    revisedUnits = {}
+    for csect in index:
+        r = revisionOf(csect)
+        if r is not None:
+            revisedUnits[csect] = r
+
+    # Sizes from HALSTAT's own offset table, for bounding an offset into a
+    # CSECT this configuration does not contain.
+    halstatRows = halstatExtents(halstat)
 
     # A CSECT's extent, widened by HALSTAT's own offset table where it reaches
     # past the index entry.  MAFGEN labels only the part of a CSECT it walked,
@@ -330,6 +342,25 @@ def main():
         for r in symbols.get("relocations") or []:
             if r.get("targetName") and "target" in r:
                 relocated[r["address"]] = (r["targetName"], r["target"])
+
+        # An UNRESOLVED relocation is evidence too, and of an unusually direct
+        # kind.  lnk101 leaves the addend in place, so the halfword holds a bare
+        # offset into the named symbol -- and where the original build could not
+        # resolve it either, the dump holds the build's offset into the same
+        # symbol.  Both sides are then offsets into one CSECT, and any
+        # difference between them IS the layout change.
+        #
+        # G9's #PCSDMD1 is the case: 24 halfwords, every one an unresolved
+        # reference to #PCSAPDT, whose CSA_PDT the build revised CC->CD.  The
+        # differences are 0x31A, 0x330, 0x329 and 0xC1, and all four appear in
+        # the name-matched offset comparison between our SDF and HALSTAT as
+        # shifts that revision really produced.  Nothing else could see this:
+        # the values are offsets, not addresses, so owner() reads them as
+        # pointers into whatever happens to live at 0x15B8 and 0x129E -- in G9,
+        # @0ARBIDL and #DVKISAC, two unrelated modules.
+        unresolvedAt = {}
+        for r in symbols.get("unresolvedRelocations") or []:
+            unresolvedAt[r["imageOffsetHW"]] = r["symbol"]
         n = 0
         for section in symbols.get("sections", []):
             if section.get("module") in ("<external-syms>",):
@@ -355,6 +386,23 @@ def main():
                 # that is the layout-shift signature, and it is much narrower
                 # than "the value looks like an address into a revised unit",
                 # which any coincidence could satisfy.
+                if address in unresolvedAt:
+                    sym = unresolvedAt[address]
+                    rev = revisionOf(sym)
+                    size = halstatRows.get(sym)
+                    # Both halfwords must be offsets the symbol could really
+                    # hold.  Without the bound this would accept any difference
+                    # at an unresolved site, which is far too much.
+                    if rev is not None and size and a < size and b < size:
+                        tstem, tours, ttheirs = rev
+                        entries.append(
+                            (address,
+                             f"{stem}-references-{sym}"
+                             f"-revised-{tours}-to-{ttheirs}"))
+                        already.add(address)
+                        referenced[(stem, tstem, tours, ttheirs)] += 1
+                        continue
+
                 named = None
                 if address in dass:
                     value, effective, symbol, continuation = dass[address]
