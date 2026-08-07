@@ -114,10 +114,56 @@ def sourceRevision(path):
     return best
 
 
+# A MAFGEN instruction line, which resolves the operand for us:
+#
+#  010C16    $0SPSPSP+0136   A1B6   00A859   ZH   X'002D'(R2)   CSPB_GCIL_CMD_SENT
+#  ^address                  ^value ^effective    ^operand      ^what it names
+#
+# The effective address is the discriminator this file needs and cannot get any
+# other way.  lnk101's RLDs cover only relocated halfwords; a base-register
+# reference into a COMPOOL needs no relocation, so nothing in the object file
+# says what it points at -- but the disassembly says outright.
+#
+# A two-halfword instruction prints both halfwords and covers an address range:
+#
+#  010D48-010D49  A6SPSPSP+0040  B2B6 0001  00A859  SB  X'002D'(R2),1  CSPB_...
+#  010CE8-010CE9  A5SPSPSP+002A  68F6 A02E  00A85A  DE  F0,X'002E'(R5,R2) ? #PCSPCLB+108
+#
+# Both halfwords are recorded, because the differing one is often the second --
+# where the whole halfword is operand data rather than opcode.  A '?' in the
+# name column means MAFGEN resolved the address but had no symbol for it; the
+# effective address is still good, so it is kept with no name.
+# EQU pseudo-lines carry no value at all and do not match.
+DASS_OPERAND = re.compile(
+    r"^\s*([0-9A-F]{6})(?:-([0-9A-F]{6}))?\s+\S+\s+"
+    r"([0-9A-F]{4})(?:\s+([0-9A-F]{4}))?\s+([0-9A-F]{6})\s+(\S+)\s+(\S+)\s*(\S*)")
+
+
+def parseDassOperands(path):
+    '''halfword address -> (value MAFGEN read there, effective address, what it
+    names, whether this is a continuation halfword).  The value is kept so the
+    caller can insist the listing and the image agree before believing the
+    resolution.'''
+    out = {}
+    for line in open(path, errors="replace"):
+        m = DASS_OPERAND.match(line)
+        if not m:
+            continue
+        first, last, v0, v1, effective, _mnem, _operand, names = m.groups()
+        if names == "?":
+            names = None
+        effective = int(effective, 16)
+        out[int(first, 16)] = (int(v0, 16), effective, names, False)
+        if last is not None and v1 is not None:
+            out[int(last, 16)] = (int(v1, 16), effective, names, True)
+    return out
+
+
 def main():
     config = "SSW"
     halstat = DEFAULT_HALSTAT
     mafgen = DEFAULT_MAFGEN
+    dassPath = None
     linkDir = "work"
     baseExceptions = None
     out = None
@@ -129,6 +175,8 @@ def main():
             halstat = Path(p.partition("=")[2]).expanduser()
         elif p.startswith("--mafgen="):
             mafgen = Path(p.partition("=")[2]).expanduser()
+        elif p.startswith("--dass="):
+            dassPath = Path(p.partition("=")[2]).expanduser()
         elif p.startswith("--link-dir="):
             linkDir = p.partition("=")[2]
         elif p.startswith("--exceptions="):
@@ -142,6 +190,17 @@ def main():
             sys.exit(1)
     if out is None:
         out = f"exceptions-{config}-with-versions.txt"
+
+    # SSW's listing is DASS_SSW_(PostIPL).ASC, so glob rather than assume.
+    if dassPath is None:
+        candidates = sorted(mafgen.glob(f"DASS_{config}.ASC")) \
+                     or sorted(mafgen.glob(f"DASS_{config}_*.ASC"))
+        dassPath = candidates[0] if candidates else None
+    dass = parseDassOperands(dassPath) if dassPath else {}
+    if dassPath:
+        print(f"{config}: {len(dass)} resolved operand(s) from {dassPath.name}")
+    else:
+        print(f"{config}: no DASS listing found; operand resolution disabled")
 
     revisions = halstatRevisions(halstat)
     # Only CSECTs this configuration really contains.  A module also
@@ -296,6 +355,36 @@ def main():
                 # that is the layout-shift signature, and it is much narrower
                 # than "the value looks like an address into a revised unit",
                 # which any coincidence could satisfy.
+                named = None
+                if address in dass:
+                    value, effective, symbol, continuation = dass[address]
+                    # The listing must agree with the image about what is at
+                    # this address before its resolution is worth anything.
+                    ok = value == b
+                    # On the first halfword the operand shares the halfword
+                    # with the opcode and register, so ours must be the SAME
+                    # instruction with a moved operand rather than different
+                    # code: opcode byte and register field both have to match.
+                    # A continuation halfword is operand data end to end and
+                    # has no opcode to compare, so that test does not apply --
+                    # G9's 010CE9 is the second halfword of a DE at 010CE8 and
+                    # would be refused by it for no reason.
+                    if ok and not continuation:
+                        ok = a >> 8 == b >> 8 and a & 3 == b & 3
+                    if ok:
+                        named = (owner(effective), symbol)
+
+                if named is not None and named[0] in revisedUnits:
+                    target, symbol = named
+                    tstem, tours, ttheirs = revisedUnits[target]
+                    entries.append(
+                        (address,
+                         f"{stem}-references-{symbol or target}-in-{tstem}"
+                         f"-revised-{tours}-to-{ttheirs}"))
+                    already.add(address)
+                    referenced[(stem, tstem, tours, ttheirs)] += 1
+                    continue
+
                 if address in relocated:
                     # lnk101 named the target, so there is nothing to infer for
                     # our side.  Ask only whether the dump's halfword, decoded
