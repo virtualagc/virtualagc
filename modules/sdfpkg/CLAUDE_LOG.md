@@ -1014,3 +1014,39 @@
   section of an ORB/ASC/ENT-family unit.  Likely one mechanism; not yet looked
   at.  #PCSDMD1 cleared in S2 via the reference-site rule but not in G9, worth
   checking why (probably CSAPDT absent from G9's index).
+
+### [2026-08-07] Target: mafgenComparison.md
+- G8/S2 re-run with the forced-image comparison: ALL ERRORS GONE.
+    G8 1737/1739  2 differ 0 err   (was 1635/1637, 2, 7)
+    S2 1236/1252 16 differ 0 err   (was 1233/1249, 16, 1)
+  Section totals ROSE (G8 1637->1739, S2 1249->1252) because the eight files
+  that previously produced nothing now contribute their sections.
+  OVERALL: 14379/14407 match, 28 differ, 0 errors.  Was 79 differ, 8 errors.
+- A GENUINE DEFECT, not a version artifact, and the best finding so far:
+  three units in three configurations hold the same 32-bit constant and we get
+  it wrong the same way every time --
+      GO8ORB (G8)  @07F5B    GO1ASC (G16) @0B82F    GO3ENT (G3) @0B0D3
+      ours A0B5 ED8E        dump A0B5 ED8C
+  The sites are at DIFFERENT offsets in their units (C3, F3, 10B), so it is a
+  constant, not a shared address.  Every neighbouring halfword matches exactly,
+  including recognisable literals (3FA3D70A is 1.28 in IEEE-754 single), so it
+  is specific to this one value.  Units and target COMPOOLs are all at the
+  build's own revision, #PCGCUN1 compares clean at its correct size, and there
+  is no RLD -- a compile-time constant our compiler converts differently.
+  NOT DECODED: whether the low byte is mantissa or exponent decides whether
+  this is a 2-ULP rounding difference or a factor-of-four error.  Do not guess;
+  get the AP-101S float format, or recompile GO8ORB and read the listing to
+  find the source literal.  The three sources share only four decimal literals
+  (0.040, 19.06, 19.07, 21.01) and the last three look like version numbers in
+  comments, so 0.040 is a candidate but is NOT confirmed.
+- The foreign-symbol withdrawal fixes two more, both verified by hand:
+    G3  #DGZ1ALT  456A vs 0000  -- #EGZRBRG absent from G3; now all 7 match
+    G8  #PCGA2MC  E3C5 vs 0019  -- #PCGNMC2 absent from G8's index, dass-syms
+        had placed it at 0E3AC, and 0E3AC+19 = E3C5 exactly.  The dump's 0019
+        is the raw addend: the real build left it unresolved.  Now 1/1 match.
+  Still needs the full run to confirm it costs nothing in SSW/P9/G2.
+- G9 #PCSDMD1 (24 hw) NOT SOLVED: all 24 are unresolved relocations to
+  #PCSAPDT, which is in neither G9's index nor HALSTAT.  Dump values land in
+  #DVKISAC/#EDGRGSE and ours in @0ARBIDL -- incoherent as offsets into one
+  CSECT -- and dump-existing is not constant (13/6/3/2), so `existing` is not
+  a reliable addend and there is no honest base to recover.
