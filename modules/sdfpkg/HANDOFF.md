@@ -592,66 +592,112 @@ numbers.
 11. DASS COMPARISON -- CURRENT STATE AND NEXT STEPS  (2026-08-07)
 ================================================================================
 
-STATE.  14379 of 14407 in-index sections match, 28 differ, 0 errors.  SSW, P9
-and G2 are exact.  A full eight-configuration sweep is running as this is
-written; ~/ForClaude/run-configs.log is the live record and holds a "RESULT"
-line per configuration.  Process detail is in PFS/mafgenComparison.md, outcomes
-in modules/sdfpkg/compileLinkCompare.md.
+STATE.  The last COMPLETED sweep gave 14379 of 14407 in-index sections matching,
+28 differing, 0 errors, with SSW, P9 and G2 exact.  Those numbers PREDATE the
+2026-08-07 fixes below and are expected to improve; a re-measuring sweep is
+running as this is written.  ~/ForClaude/run-configs.log is the live record and
+holds a "RESULT" line per configuration.  Process detail is in
+PFS/mafgenComparison.md, outcomes in modules/sdfpkg/compileLinkCompare.md.
+
+DONE 2026-08-07, all committed, all pending re-measurement:
+
+  - FOREIGN SYMBOLS, per site (c90e0f9f9).  A symbol absent from a configuration
+    is no longer given a borrowed address unconditionally, nor withheld
+    unconditionally; the dump decides per symbol.  Only ANCHORED sites count --
+    the referencing section must sit in the index at exactly the address lnk101
+    placed it -- and a site holding the bare addend, or the addend with bit 15
+    set, says the build left it alone.  --foreign-symbols became
+    --no-foreign-symbols.  Recovers #EVRPRAM in seven configurations and
+    #EASCTIM in G3/G16; withdraws nothing.
+
+  - NONHAL COMPOOLS (8857e5f3c).  S2's SAFACQ references #PCSADAR, #PCSAINB,
+    #PCSAIXP and #PCSAPAR, which no configuration and no HALSTAT phase defines.
+    HALSTAT's compilation layout marks them NONHAL: nothing in HAL/S defines
+    them and the configuration supplies the storage, here #PCS2DAR, #PCS2INB,
+    #PCS2IXP, #PCS2PAR.  All thirteen address references land exactly on those
+    CSECT starts, including two negative displacements and one sector-encoded
+    ZCON.  basesFrom() honours the RLD sign bit and bit-15 encoding and excludes
+    BSR-only/DSR-only relocations, which patch a register field not an address.
+    A uniqueness guard refuses an address several symbols derive -- which is
+    what refuses S2's seven #ZP symbols all deriving 0x298.
+
+  - ATTRIBUTION FROM RESOLVED OPERANDS (932f48219, then 4ee23d41a).  The
+    planned sector-decoding fix was unnecessary.  At a relocation site lnk101
+    already names the target and says what it resolved to, so decode the dump's
+    halfword by the same amount and judge containment against the DUMP's extent.
+    Better still, MAFGEN's own disassembly resolves EVERY instruction operand to
+    an effective address and usually names the variable, which is evidence
+    exactly where relocation records do not exist.  dass-versions.py now reads
+    it.  This closed the SPSPSP family; see PFS/mafgenComparison.md.
+
+  - owner() takes the NARROWEST containing CSECT (ae3dee531).  Spans nest by
+    design.  Changes nothing measurable today and is kept as a guard.
+
+  - SWEEP SANDBOX.  run-configs.sh now copies dass-*.py AND nsts-sdl-dps/src
+    into a mktemp directory and runs from there, exporting PYTHONPATH so the
+    copy shadows the build venv's editable .pth.  Both toolchain commits are
+    logged at launch.
+
+    TWO TRAPS, both paid for.  First: a snapshot only isolates if every path the
+    snapshotted code derives from ITS OWN LOCATION is redirected too.  dass-db.py
+    sets DEFAULT_DB from Path(__file__).parent, so results went into the
+    snapshot's own database and the EXIT trap deleted them, while the
+    inter-sweep resets still hit the real one -- so sweeps 2 and 3 never ran.
+    The tell was "RESULT S2: 0/0 sections match".  Fixed by passing --db
+    explicitly at every call site.  Second: bash reads a script incrementally,
+    so run-configs.sh must be replaced with mv, never edited in place, while a
+    sweep is running.
+
+  - WORKING DISCIPLINE.  The sandbox lets you EDIT during a sweep; it does not
+    make a running sweep's results current.  Three restarts in one day.  A sweep
+    is a measurement: start it after changes have stopped, investigate freely
+    while it runs, and expect to discard and re-run if the investigation lands a
+    fix.  Killing a sweep can leak rows for the config it was mid-way through --
+    check "SELECT config, COUNT(*) FROM run" before relaunching.
 
 NEXT STEPS, in order, once that sweep finishes:
 
-  1. SNAPSHOT run-configs.sh.  A sweep currently consumes its dependencies
-     LIVE, which has cost two restarts.  lnk101 and fcmcmp are EDITABLE installs
-     (build/venv/.../_editable_impl_ap101.pth points at the working tree), so a
-     branch switch changes the linker mid-run; dass-*.py are invoked by absolute
-     path out of the git tree; rebuilding the compiler replaces HALSFC-PASS1
-     underneath a running sweep.  Fix: at launch, copy or "git worktree add"
-     nsts-sdl-dps, the PASS.REL32V0 passes and the dass-*.py scripts into
-     ~/ForClaude/snap-<ts>/, and set PATH/PYTHONPATH so the sweep resolves them
-     ONLY from there.  Also makes each sweep reproducible after the fact.
-     NOTE: bash reads a script incrementally, so run-configs.sh itself must
-     never be edited while it is running.
+  1. RE-TEST G9 #PCSDMD1 (24 halfwords).  Called a dead end -- "no honest base
+     to recover" -- but that was concluded while decoding raw halfwords, the
+     very error the operand-column work corrects.  Treat the earlier verdict as
+     suspect.  This is also the cheapest test of whether that work generalises
+     beyond the family it was built for.
 
-  2. SECTOR-DECODING FIX in dass-versions.py.  Verified by hand, NOT applied.
-     Before the owner lookup, decode a value with bit 15 set as
-     (sector<<15)|(v & 0x7FFF), trying sectors 0..15 and accepting only where
-     ours and the dump's decode with the SAME sector into the SAME CSECT.
-     Without it, a sector-encoded reference into a revised unit is invisible:
-     S2's #PCZ4COM, #DSTCCYC, #DSCKPNT, #DSRESTO and #DSULUPL all differ by
-     +0x1E into #PCSASAT (30AC2..31875, revised BZ->CA), and the raw halfword
-     914C is really 3114C.
+  2. RE-EXAMINE THE FCOS CASES against the DASS operand column.  References into
+     FIOCDATS, FIOMODSM and FCMPSA were called "not attributable at all", partly
+     on the reasoning that a base-register reference names no target.  That
+     reasoning is now known to be wrong in general -- MAFGEN names it.  A
+     related claim already fell: what looked like references into FIOCBLKS were
+     sector-encoded ZCON halfwords pointing into #PCSASAT, a revised HAL/S
+     COMPOOL.  This is the largest outstanding change to the document's
+     conclusions.
 
-  3. RE-RUN S2 and any configuration step 2 touches.
+  3. THE REST OF THE S2 UNRESOLVED-SYMBOL CLASS.  The NONHAL work covered
+     SAFACQ.  Still open: SCKPNT, SRESTO, STMTAB and SULUPLIN leave references
+     to #PCSAPDT as "8002 0000" where the dump holds "B8C0 0006", and #PCSAPDT
+     IS in S2's index at 0xB040.  That makes it ours to fix, not version drift.
 
-  4. RE-TEST G9 #PCSDMD1 (24 halfwords).  It was called a dead end -- "no honest
-     base to recover" -- but that was concluded while decoding raw halfwords,
-     the very bug step 2 fixes.  Treat the earlier verdict as suspect.
+  4. G16 #DGFKGRT at 07DFE holds 4232 against the dump's 0000, with NO
+     relocation at that site -- so it is compile-time data, not a link artefact.
+     Possibly an I-LOAD that MAFGEN did not mark.  4232 coincides with
+     #PCAASCC's address in other configurations, which may be a red herring.
 
-  5. UNRESOLVED-SYMBOL CLASS in S2.  ZCONs we leave as "8002 0000" where the
-     dump holds an address with DSR=6 (SCKPNT, SRESTO, STMTAB x2, SULUPLIN;
-     SAFACQ is the same shape).  The target IS in the configuration, so
-     dass-syms ought to recover it.  This is ours to fix, not version drift.
+  5. THE .000001 LITERAL.  Not blocked after all: HALSFC is a plain Python
+     program invoked by path, so it can be copied and instrumented without
+     disturbing anything.  The unknown is the PASS1 call site that reaches a
+     via-double conversion instead of MONITOR(10)'s ibm_dp_from_string.  See
+     virtualagc issue #1296, where the evidence is already posted.
 
-  0. FIRST -- REFINE THE FOREIGN-SYMBOL WITHDRAWAL.  It is currently BLANKET
-     (dass-syms.py, inventForeignAddresses=False) and that is too crude.  The
-     completed sweep shows it fixed two and broke one:
-         G3  #DGZ1ALT  FIXED    (we wrote 456A, dump holds 0000)
-         G8  #PCGA2MC  FIXED    (we wrote E3C5, dump holds 0019 = raw addend)
-         G3  #PCDMUIC  BROKE    (we now write 0000, dump holds 40D4)
-         G16 #PCDMUIC  BROKE    (same)
-     Net zero: 28 differences before and after.  The two cases are INVERSE, and
-     the dump distinguishes them without ambiguity:
-         dump holds 0000 or the raw addend -> the original build did NOT resolve
-             the reference, so inventing an address is wrong: suppress.
-         dump holds a real address         -> the symbol IS present in this
-             configuration, so the address is wanted: recover it.
-     So make the suppression per-site and evidence-driven rather than global.
-     Note dass-syms's existing relocation-evidence pass already derives an
-     address exactly this way (dump value minus addend), so the likely fix is to
-     let that pass own these symbols and suppress only where the dump shows the
-     site unresolved.  Keep --foreign-symbols as the escape hatch.
+  6. THE "-2" NO-CLAIM CATEGORY.  Also unblocked, now that the sweep snapshots
+     nsts-sdl-dps/src.  Needs a third upstream PR: fcmcmp cannot take -2 as-is
+     because int("-2",16) parses, making it a CHECKED value that fails and still
+     counts.  PRs #31 (lnk101 absent-section relocations) and #32 (fcmcmp size
+     reporting) have been open since 2026-08-06; #27-#30 are merged.
 
-  6. CONVERT CLAUDE_LOG.md TO A DATABASE (user's instruction, 2026-08-07).
+  7. A "reset one configuration" helper for dass-compare.db.  The SQL has been
+     hand-written three times and leaked stale rows twice.
+
+  8. CONVERT CLAUDE_LOG.md TO A DATABASE (user's instruction, 2026-08-07).
      Table (timestamp, target, entry, applied), so capture is an INSERT, a
      "Full Documentation Sync" is SELECT ... WHERE applied=0 AND target=?, and
      completing one is an UPDATE.  Rationale is context cost: today's sync read

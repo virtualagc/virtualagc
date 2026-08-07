@@ -98,7 +98,47 @@ first: without them it cannot know which symbols went unresolved, or where.
 patches and checksums, applied after the build -- as comparison exceptions.
 
 `dass-versions.py` records, as no-claim exceptions, differences attributable to
-our source holding a unit at an older revision than the dumped build.
+our source holding a unit at an older revision than the dumped build.  It reads
+MAFGEN's own disassembly as well as lnk101's output, because each instruction
+line there resolves the operand to an effective address and usually names the
+variable -- evidence that exists precisely where a relocation record does not.
+
+# Reading a compiled SDF
+
+Occasionally a question is best answered from an SDF directly: what offset our
+compiler assigned a variable, what a COMPOOL declares, how big its
+initialization table is.  `modules/sdf` will do that, but its entry point is not
+obvious, because the reader never opens the file.  `cmem` -- the compiler's own
+virtual-memory manager, reimplemented in `modules/cmem` -- pages the SDF into a
+flat `bytearray` first, and `sdf` then walks the structure through it from the
+Master Directory Cell.  So `parseSDF()` takes no filename; handing it a path
+fails with `'str' object has no attribute 'offsetForGet'`.
+
+    from cmem import cmem
+    from sdf import sdf
+
+    c = cmem(bytearray(0x400000), "SDFLIB")
+    c.fromNative({"MISC": 0, "APGAREA": 0x2000, "AFCBAREA": 0, "NPAGES": 64,
+                  "NBYTES": 0x400, "ADDR": 0, "PNTR": 0}, commtabl=0x100)
+    c.monitor22(0, 0x100)                    # mode 0, initialise
+    c.fromNative({"SDFNAM": "##CSPCLB"})
+    c.monitor22(4)                           # mode 4, select
+    s = sdf(c)
+    s.parseSDF()
+
+Only initialisation and selection need `MONITOR(22)` mode calls, since those are
+`cmem` state changes; everything after reads Python objects rather than querying
+through the historical interface.  The parse yields `masterDirectoryCell`,
+`directoryRootCell`, `blockIndexTable`, `symbolIndexTable`, `statementIndexTable`,
+`initializationTable`, `titleDataCell`, `cardtypeDataCell` and `includeTextData`.
+`s.fullSymbolASCII(entry)` decodes the EBCDIC names.
+
+Two things that are easy to miss.  A variable's offset within its CSECT is
+`symbolDataCell.relativeMemoryAddressOfSymbol`, present on `symbolClass` 1;
+LABEL symbols carry `statementNumber` instead and have no address, so sampling
+one of those suggests -- wrongly -- that the SDF does not record allocation at
+all.  And `blockIndexTable[0].blockCsectName` gives the CSECT the block belongs
+to, in EBCDIC.
 
 # Extracted references
 
