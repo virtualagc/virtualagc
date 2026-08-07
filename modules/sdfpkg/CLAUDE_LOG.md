@@ -919,3 +919,31 @@
   LAST CHANGED, that complicates the tidy "34.06 vs 34.07" story rather than
   confirming it -- but it leaves the per-unit revision attribution untouched,
   which stands on its own control: same-revision units never differ.
+
+### [2026-08-06] Target: mafgenComparison.md
+- MY ERROR, recorded so it is not repeated: nsts-sdl-dps installs lnk101 and
+  fcmcmp into build/venv as EDITABLE packages (_editable_impl_ap101.pth,
+  sdl.pth), so both run straight from the working tree.  Switching branches
+  changes the toolchain instantly.  I switched branches three times while the
+  G16 sweep was running, so part of G16 linked with master and part with the
+  fix.  Rule: never switch branches in that repo while a sweep is running;
+  build an integration branch first and leave it alone.  Costs little here
+  only because every configuration needs re-running anyway.
+- lnk101 fix written and verified, on branch lnk101-absent-section-relocs
+  (commit 8579162, NOT pushed, no PR -- awaiting review):
+  a relocation whose target section is absent from the CSECT table is now
+  treated exactly as unresolved, taking the existing issue-#22 path.  Gated on
+  a table being loaded, and on truthiness rather than "is not None", since
+  csectTable defaults to {} and testing for None would have found every
+  section absent on links passing no table.
+    * all 7 G8 files now produce 8000 0E00, matching the dump exactly;
+    * every in-index section across the 7 compares clean -- 0 in-index
+      failures, where before the link failed and nothing was compared at all;
+    * 12 modules from P9 (already 509/509) still match, so no regression.
+- fcmcmp size-mismatch reporting on branch fcmcmp-size-mismatch (commit
+  1d6ce6d, NOT pushed): mismatches always listed; --strict-sizes makes them
+  fail; default exit status unchanged (verified 0 default, 1 strict).
+- NEXT: let G16 finish, build a local integration branch (master + both
+  fixes), then re-run all 8 configurations.  The branch-name check is gone, so
+  integration no longer has a special status -- the capability test will pass
+  on any branch carrying the features.
