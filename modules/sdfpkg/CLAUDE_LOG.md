@@ -1351,3 +1351,34 @@
   6 puts all four values inside #PCSASAT.
   NOT APPLIED: dass-versions.py is used by the running sweep.  Apply after it
   finishes, then re-run S2 (and any other configuration it touches).
+
+### [2026-08-07] Target: mafgenComparison.md
+- Characterised the rest of S2's residue.  Three distinct classes, and most of
+  it is NOT version drift:
+  (A) UNPATCHED ZCON, ours "8002 0000" against the dump's "<addr> 0006":
+        SCKPNT @06FEE, SRESTO @066F4, STMTAB @05A26 and @05A2A,
+        SULUPLIN @07396
+      HW0 8002 with HW1 0000 is the as-assembled, never-patched ZCON (same
+      signature as the G8 seven).  But here the DUMP HAS IT PATCHED -- HW1
+      0006 means DSR=6 -- so the target IS in this configuration and WE are
+      failing to resolve it.  That is a missing symbol address, not a version
+      difference, and it should be recoverable.  Note sector 6 is where
+      #PCSASAT lives (30AC2..31875), so these likely point into the same
+      sector-6 data region.
+  (B) SECTOR-ENCODED reference into revised #PCSASAT, +0x1E:
+        SRESTO @066F0, SULUPLIN @07392, plus CZ4COM/STCCYCL/SCKPNT already
+        noted.  Fixed by the pending sector-decoding change.
+  (C) SAFACQ: ours 00A4/0042/0000 against the dump's 7E1C/7DBA/77D8/7D78 --
+      small values against real addresses, i.e. the same "we left it
+      unresolved" shape as (A).
+- So S2's 16 is roughly: a recoverable-symbol class (A and C), a
+  sector-decoding class (B), and the genuinely unattributable FCOS remainder.
+  The first two are ours to fix, which is a better position than the
+  version-difference reading I had been assuming for all of it.
+- #PCSSSPA (76 hw) is separate again: the dump holds an evenly spaced pointer
+  table (C5A0 C5A2 C5A4 C5A6 ... stride 2) where ours is scattered with stride
+  ~0x31, both via RLDs naming #PCSAPDT/#PCSAPCT -- BOTH of which are revised
+  (CC->CD, BX->BY).  A revision that restructured the table is the likely
+  cause; 138 halfwords in that section were attributed, these 76 were not,
+  presumably because our value and the dump's fall in different CSECTs and the
+  same-CSECT guard correctly declines.
