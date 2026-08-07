@@ -58,3 +58,56 @@ to just use an adequate worst-case size for the Paging and FCB areas to begin
 with.  Of course, this is a limitation of `cmem` more than `sdf` or `sdfParser`.
 
 "Rescinding" the Paging Area Augments:  Same thing!
+
+# DASS comparison tooling
+
+These scripts compare HAL/S-FC compilation and linking against the MAFGEN
+AP-101S memory dumps.  The end-to-end process is written up separately, in
+`PFS/mafgenComparison.md`; what follows is what each script is for.
+
+`dass-db.py` holds the schema and the CSECT-to-source mapping for all eight
+memory configurations.
+
+`dass-run.py` drives `compileLinkCompare` over a configuration's source files,
+parses `fcmcmp`'s output, and records runs, sections and differences in
+`dass-compare.db`.  Two options matter more than they look:
+
+  --reparse    rebuilds the database from the saved logs without recompiling
+               anything.  This is what makes improving the parser cheap: the
+               first SSW survey had to be re-read twice, once for an em-dash in
+               fcmcmp's output and once for its shift analysis.
+  --jobs-root  gives each parallel compile its own source tree.  This is not a
+               convenience.  HALSFC writes halmat.bin, litfile.bin and
+               COMMON*.out into its working directory under fixed names, so two
+               compilations sharing a directory destroy each other -- and that
+               is true of two *live* sweeps just as much as of a killed run
+               leaving debris.  It cost one option sweep and one SDL sweep,
+               both restarted, before the cause was understood.
+
+A full SSW sweep is about eleven minutes at roughly three seconds a file, which
+is cheap enough that building a driver was worth it immediately.
+
+`dass-syms.py` recovers CSECT addresses that the MAFGEN scrape could not.  It
+parses HALSTAT's CSECT INFORMATION blocks and cross-validates each candidate
+against the memory dump using the unresolved relocations `lnk101` reports, then
+emits an augmented external-symbol table to pass to `compileLinkCompare` as
+`--ext-syms`.  It needs a sweep's link outputs, so run one with `--out-dir` kept
+first: without them it cannot know which symbols went unresolved, or where.
+
+`dass-literals.py` records the locations MAFGEN marks with `*` -- I-LOADs,
+patches and checksums, applied after the build -- as comparison exceptions.
+
+`dass-versions.py` records, as no-claim exceptions, differences attributable to
+our source holding a unit at an older revision than the dumped build.
+
+# Extracted references
+
+Plain-text extracts live in `refs/`, so they can be grepped rather than
+re-opened as PDFs:
+
+  refs/HAL_S-FC-Users-Manual-2005.txt
+      from USA003090, the November 2005 HAL/S-FC User's Manual.
+
+  refs/IBM-82-SS-4556-Programming-Standards-Rev4.txt
+      the Orbiter Avionics Software Programming Standards Document, for its
+      CSECT and block naming standards.
