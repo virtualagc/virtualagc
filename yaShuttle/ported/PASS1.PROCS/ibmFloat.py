@@ -34,9 +34,19 @@ conversion:
 1. **Types and Overflow**: Python's `int` has arbitrary precision, so 
    `& U32_MASK` (0xFFFFFFFF) and `& U64_MASK` (0xFFFFFFFFFFFFFFFF) were used 
    to simulate the wrapping behavior of C's `uint32_t` and `uint64_t`.
-2. **llround**: In `ibm_dp_from_double`, `llround(d)` was translated to 
-   `int(d + 0.5)` because `d` is guaranteed to be positive at that point in 
-   the logic. This correctly implements rounding to the nearest integer.
+2. **llround**: In `ibm_dp_from_double`, `llround(d)` was translated to
+   `int(d + 0.5)` because `d` is guaranteed to be positive at that point in
+   the logic. CodeConvert's claim that this "correctly implements rounding to
+   the nearest integer" is FALSE, and was corrected on 2026-08-07. It holds for
+   real arithmetic, where floor(x + 0.5) is round-half-up for positive x, but
+   not for floating point: by that point `d` has been normalised into
+   [2^52, 2^56), where the gap between representable doubles is at least 1, so
+   `d + 0.5` is not representable and the ADDITION ITSELF rounds to even. Every
+   odd mantissa was pushed up one ULP -- 100% of them, measured. `d` is already
+   an integer in that range, so `int(d)` is exact and no rounding rule is needed
+   at all. That also keeps this file and ibmFloat.c from resting on two
+   different tie-breaking conventions, Python's round() being banker's rounding
+   while C's llround() is half-away-from-zero.
 3. **Pointers**: C functions returning values via pointers (`*msw`, `*lsw`) 
    were converted to return a tuple `(msw, lsw)` in Python.
 4. **Static Variables and Macros**: 
@@ -161,7 +171,12 @@ def ibm_dp_from_double(d):
     if e > IBM_DP_EXP_MAX:
         return IBM_DP_OVERFLOW_MSW, 0x00000000
         
-    f = int(d + 0.5) # llround equivalent for positive d
+    # No rounding is required or wanted here: the loops above have normalised d
+    # into [2^52, 2^56), where every double is an integer, so int() is exact.
+    # int(d + 0.5) was NOT an llround equivalent -- d + 0.5 is unrepresentable
+    # at these magnitudes, so the addition rounds to even and pushes every odd
+    # mantissa up one ULP.  See the note above.
+    f = int(d)
     msw = ((s << 31) | (e << 24) | ((f >> 32) & 0xffffffff)) & U32_MASK
     lsw = f & 0xffffffff
     return msw, lsw
