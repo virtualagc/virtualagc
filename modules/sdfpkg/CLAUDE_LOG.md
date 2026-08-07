@@ -1145,3 +1145,31 @@
 - BLOCKED until the sweep finishes: both fixes touch live editable installs
   (fcmcmp) or need the compiler passes rebuilt (the literal fix), and editing
   either mid-run is the mistake already recorded above.
+
+### [2026-08-07] Target: mafgenComparison.md
+- Ron asked whether I had accounted for PASS1 writing the literal file and
+  PASS2 reading and re-processing it.  I had NOT -- I treated the conversion as
+  one step.  Checked it now, and PASS2 is NOT implicated:
+      litfile0.bin (copied immediately after PASS1)  3C10C6F7,A0B5ED8E
+      litfile2.bin                                   3C10C6F7,A0B5ED8E
+      litfile4.bin                                   3C10C6F7,A0B5ED8E
+  literals1.txt is the decode of litfile0.bin, so the ED8E I had been reading
+  was already PASS1's output.  The value is wrong before PASS2 sees it and is
+  carried through byte-identical.
+- That localises it to PASS1, and .040 is CORRECT in the same PASS1 literal
+  file, so PASS1 uses two different conversions.
+- NEXT SUSPECT, and a specific one: PREP_LITERAL (PREPLITE.xpl) is inline S/360
+  floating-point instructions emulated by XCOM-I.  Its sequence loads the
+  MONITOR(10) result, then does "AW 0,0(,1)" against ADDR_FIXER -- the
+  add-a-large-constant trick for testing exactness -- and stores FR6.
+  ibmFloat.py's counterpart is
+      def fix(d):
+          msw, lsw = ibm_dp_from_double(d)     # <-- enters via a C double
+          result = ibm_dp_addsub((msw<<32)|lsw, 0x4E00000000000000, 0, 0)
+  and 0x4E00000000000000 is exactly the FIXER constant that AW sequence uses.
+  If the C emulation of AW/LDR/STD round-trips FR through a double, that is the
+  via-double entry we are looking for, sitting directly in PREP_LITERAL's path.
+  Caveat before believing it: an IBM->double->IBM round trip loses 3 bits
+  (56-bit vs 53-bit mantissa), yet 0x10C6F7A0B5ED8D has a leading nibble of 1,
+  so only 53 significant bits, and should survive exactly.  So the mechanism is
+  not yet proven -- verify against the actual C INLINE emulation.
