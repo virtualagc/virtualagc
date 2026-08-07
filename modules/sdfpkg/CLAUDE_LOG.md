@@ -1382,3 +1382,29 @@
   cause; 138 halfwords in that section were attributed, these 76 were not,
   presumably because our value and the dump's fall in different CSECTs and the
   same-CSECT guard correctly declines.
+
+### [2026-08-07] Target: mafgenComparison.md
+- HANDOFF / plan for unsupervised work, in order, once the sweep completes:
+  1. SNAPSHOT run-configs.sh so a sweep never again consumes its dependencies
+     live.  At launch, copy (or git worktree) nsts-sdl-dps, the PASS.REL32V0
+     compiler passes, and the dass-*.py scripts into ~/ForClaude/snap-<ts>/ and
+     set PATH/PYTHONPATH so the sweep resolves lnk101, fcmcmp, HALSFC and the
+     scripts ONLY from there.  Rationale: lnk101/fcmcmp are EDITABLE installs
+     (_editable_impl_ap101.pth) so a branch switch changes the toolchain live;
+     dass-*.py are invoked by absolute path out of the git tree; rebuilding the
+     passes replaces HALSFC-PASS1 under a running sweep.  Snapshotting also
+     makes each sweep reproducible after the fact.  NOTE: bash reads a script
+     incrementally, so run-configs.sh itself must never be edited while running.
+  2. SECTOR-DECODING FIX in dass-versions.py (verified by hand, not applied):
+     before the owner lookup, decode a value with bit 15 set as
+     (sector<<15)|(v & 0x7FFF), trying sectors 0..15 and accepting only where
+     ours and the dump's decode with the SAME sector into the SAME CSECT.
+  3. RE-RUN S2 (and any configuration the fix touches).
+  4. RE-TEST G9 #PCSDMD1 with sector decoding -- the earlier "no honest base to
+     recover" conclusion was reached while decoding raw halfwords and is
+     suspect.
+  5. Then the unresolved-symbol class (A)/(C) in S2: ZCONs we leave as
+     "8002 0000" where the dump has them patched with DSR=6.  Those targets ARE
+     in the configuration, so dass-syms should be able to recover them.
+  6. Still blocked on a rebuild: the via-double literal conversion in PASS1.
+  7. Still needs the trigger phrase: PFS/mafgenComparison.md write-up.
