@@ -849,3 +849,73 @@
   a check stops being read.  Replaced the branch test with a capability test
   (--no-data, --exceptions, --external-syms, patchStackPDEs, ZCon.apply flags).
   Verified all five present on master, so THIS RUN'S RESULTS ARE VALID.
+
+### [2026-08-06] Target: mafgenComparison.md
+- S2's SPSPSP family is a VERSION difference, not a compiler or linker defect.
+  SPSPSP itself is at the build's own revision (BP = BP).  What moved is the
+  COMPOOLs it references, which were revised between OI-34.06 and OI-34.07 and
+  grew, so every reference past an insertion point resolves a few halfwords low.
+- Proof for CSPCLB, the largest contributor:
+    HALSTAT RVL BO, our source BN -- revised.
+    fcmcmp: "#PCSPCLB @ 0AF6E (134 halfwords vs 140 expected)" -- ours is 6 short.
+    HALSTAT's 37 offset/address rows all imply base AF6E, agreeing with our
+    link and the index, so the BASE is right and the OFFSETS differ.
+    The dump's targets AFD5/AFF4/AFF6 ARE real HALSTAT variables, at offsets
+    67/86/88.  OUR targets AFD0/AFEE/AFF0 appear in HALSTAT NOWHERE.  We place
+    the same variables at 62/80/82.  max(offset+size) = 8C = 140 = index size.
+- All 40 SPSPSP-family differences classify: 23 -> #PCSPCLB (BN->BO),
+  7 -> #PCPGSPL (AA->AD), 3 -> #PCSAPDT (CC->CD), 2 -> #PFCMCOM (CK->CQ),
+  5 -> FIOCDATS/FIOMODSM (FCOS, no HAL/S source, so no RVL to read).
+- Across ALL of S2's differing sections, 251 differences point into a unit
+  revised since our source and 23 into CSECTs with no HAL/S source.  ZERO
+  point into a same-revision unit.  That zero is the control that makes the
+  attribution credible -- it is the same control dass-versions.py already
+  relies on ("not one same-revision file gives any trouble").
+- NOT FIXABLE without OI-34.07 source for CSPCLB/CPGSPL/CSAPDT/FCMCOM.  A real
+  hard blocker, the same class as the missing S4 DASS -- not "expensive".
+- PROPOSED, needs a decision: dass-versions.py currently emits -1 no-claim
+  entries only for a revised unit's OWN sections.  The observable difference
+  is in every unit that REFERENCES it, and those are unrevised, so nothing
+  flags them.  Extending no-claim to reference sites would close S2, but it
+  WIDENS a suppression mechanism, so the guard matters: emit only where the
+  differing halfword's DUMP value lands in a CSECT whose HALSTAT RVL exceeds
+  our source's, never blanket-by-file.
+- SEPARATE fcmcmp weakness: 44 S2 sections have a size mismatch against the
+  index and 42 of them report OK, because only the overlap is compared.
+  "#PCSPCLB (134 halfwords vs 140 expected)" passed.  A section short by 6
+  halfwords should not be a PASS.  Worth raising upstream.
+
+### [2026-08-06] Target: mafgenComparison.md
+- dass-versions.py now also records reference-site no-claims: a halfword in an
+  UNREVISED unit whose difference is explained by a unit it REFERENCES having
+  been revised.  Guards, deliberately narrow:
+    * both our value and the dump's must resolve into the SAME CSECT -- the
+      layout-shift signature, far narrower than "looks like an address into a
+      revised unit", which coincidence could satisfy;
+    * containment only, no nearest-preceding fallback (that fallback had
+      attributed differences to a CSECT 4000 halfwords away, inventing deltas
+      of 18396 and 55948);
+    * CSECT extents widened by HALSTAT's own offset table where it reaches past
+      MAFGEN's index, so the reach is primary evidence, not a proximity guess.
+- Effect on S2: 190 halfwords attributed, CSDMD1 and SPRPRB fully clean,
+  SPSPSP 7 -> 4 sections, ~22 -> ~16 differing sections overall.
+  G9: 35 halfwords, incl. SPSPSP->GMAMIN BK->BO and VG9OPS9->CSPCLB.
+- What remains in S2 is the honest floor on present evidence: every survivor
+  targets either an FCOS CSECT (FIOCDATS, FIOMODSM, FIOCBLKS, FCMPSA -- NOT in
+  HALSTAT at all, since HALSTAT covers only HAL/S compilations, so no RVL
+  exists to read) or an address no indexed CSECT claims and S2's DASS does not
+  disassemble.  Checked #PCPGSPL specifically: HALSTAT gives it extent 338,
+  identical to the index, so it really does end at 0DCE5 and the EC** targets
+  are outside it.  The strict rule correctly refused these.
+- Corroboration for the FCOS group, short of proof: their deltas rise
+  monotonically with address exactly as the HAL/S cases do --
+  FIOCDATS +6,+12,+12,+20,+28 over rising addresses; FIOCBLKS +30 twice;
+  FIOMODSM +28; FCMPSA +6.  That is the insertion signature, but with no
+  revision level to check it stays circumstantial.
+- HALSTAT provenance, checked rather than assumed: its CSECT bases match a
+  configuration index in 1221 cases against 213 not, so HALSTAT describes the
+  DUMPED build.  Its newest dataset qualifier is OI340600 and no OI340700
+  exists anywhere in it.  Since the qualifier records where a unit's source
+  LAST CHANGED, that complicates the tidy "34.06 vs 34.07" story rather than
+  confirming it -- but it leaves the per-unit revision attribution untouched,
+  which stands on its own control: same-revision units never differ.

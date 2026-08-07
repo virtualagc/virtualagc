@@ -49,6 +49,7 @@ import sys
 import os
 import re
 import json
+import bisect
 import struct
 import collections
 from pathlib import Path
@@ -75,6 +76,30 @@ def halstatRevisions(path):
         if m and unit:
             revisions.setdefault(m.group(1), m.group(2))
     return revisions
+
+
+CSECT_ROW_RE = re.compile(
+    r"\(CSECT: (\S+) OFFSET: ([0-9A-F]+)\) SIZE: \d+\((\d+)\)")
+
+
+def halstatExtents(path):
+    '''CSECT -> the number of halfwords the compiler assigned to it.
+
+    HALSTAT records an offset and size for every item it placed, so the
+    largest offset+size is the CSECT's true extent.  MAFGEN's index gives only
+    the part of the CSECT its disassembly walked, which understates several
+    COMPOOLs badly -- #PCPGSPL's references run 4000 halfwords past its index
+    entry.  Using this in place of a proximity guess keeps the attribution on
+    primary evidence.
+    '''
+    extents = collections.Counter()
+    for line in open(path, errors="replace"):
+        m = CSECT_ROW_RE.search(line)
+        if m:
+            reach = int(m.group(2), 16) + int(m.group(3))
+            if reach > extents[m.group(1)]:
+                extents[m.group(1)] = reach
+    return extents
 
 
 def sourceRevision(path):
@@ -145,8 +170,59 @@ def main():
             if text:
                 already.add(int(text[0], 16))
 
+    # Which unit was revised, for the CSECTs of this configuration.  A CSECT
+    # name is the descored unit name truncated to six characters, so the map is
+    # from CSECT to the source stem, and only where the stem is unambiguous.
+    def unitOf(csect):
+        body = csect[2:] if csect[:1] in "#$@" else csect
+        return body
+
+    revisedUnits = {}
+    for csect in index:
+        stem = unitOf(csect)
+        theirs = revisions.get(stem)
+        if theirs is None:
+            continue
+        ours = None
+        for d in ("APPLSRC", "SSSRC"):
+            p = Path(d) / f"{stem}.hal"
+            if p.is_file():
+                ours = sourceRevision(p)
+                break
+        if ours is not None and theirs > ours:
+            revisedUnits[csect] = (stem, ours, theirs)
+
+    # A CSECT's extent, widened by HALSTAT's own offset table where it reaches
+    # past the index entry.  MAFGEN labels only the part of a CSECT it walked,
+    # so the index understates several COMPOOLs; HALSTAT records every offset
+    # the compiler assigned, which is primary evidence rather than a guess at
+    # how far a CSECT "probably" runs.
+    extents = {}
+    for csect, entry in index.items():
+        extents[csect] = [entry["start"], entry["end"]]
+    for csect, rows in halstatExtents(halstat).items():
+        if csect in extents:
+            base = extents[csect][0]
+            reach = base + rows - 1
+            if reach > extents[csect][1]:
+                extents[csect][1] = reach
+    spans = sorted((s, e, k) for k, (s, e) in extents.items())
+    starts = [s for s, _, _ in spans]
+
+    def owner(address):
+        '''The CSECT containing an address, or None.  Containment only -- no
+        nearest-preceding fallback, which attributed a difference to a CSECT
+        4000 halfwords away and produced deltas of 18396 and 55948.'''
+        i = bisect.bisect_right(starts, address) - 1
+        while i >= 0 and spans[i][0] <= address:
+            if address <= spans[i][1]:
+                return spans[i][2]
+            i -= 1
+        return None
+
     entries = []
     acted = []
+    referenced = collections.Counter()
     for f in sorted(Path(linkDir).glob("*.json")):
         if f.name.endswith(".repro.json"):
             continue
@@ -158,8 +234,8 @@ def main():
             if p.is_file():
                 ours = sourceRevision(p)
                 break
-        if ours is None or theirs is None or theirs <= ours:
-            continue        # same revision, or nothing to compare -- no claim
+        selfRevised = (ours is not None and theirs is not None
+                       and theirs > ours)
         try:
             symbols = json.load(open(f))
             image = open(f.with_suffix(".fcm"), "rb").read()
@@ -178,9 +254,29 @@ def main():
                 a, b = halfword(image, address), halfword(reference, address)
                 if a is None or b is None or a == b or b in FILL:
                     continue
-                entries.append((address, f"{stem}-revised-{ours}-to-{theirs}"))
+                if selfRevised:
+                    entries.append((address,
+                                    f"{stem}-revised-{ours}-to-{theirs}"))
+                    already.add(address)
+                    n += 1
+                    continue
+                # This unit is at the build's own revision, but a unit it
+                # REFERENCES was revised, and the revision moved the variable
+                # within it.  Both halfwords must resolve into the SAME CSECT:
+                # that is the layout-shift signature, and it is much narrower
+                # than "the value looks like an address into a revised unit",
+                # which any coincidence could satisfy.
+                target = owner(b)
+                if target is None or target != owner(a):
+                    continue
+                if target not in revisedUnits:
+                    continue
+                tstem, tours, ttheirs = revisedUnits[target]
+                entries.append(
+                    (address,
+                     f"{stem}-references-{tstem}-revised-{tours}-to-{ttheirs}"))
                 already.add(address)
-                n += 1
+                referenced[(stem, tstem, tours, ttheirs)] += 1
         if n:
             acted.append((stem, ours, theirs, n))
 
@@ -201,6 +297,12 @@ def main():
           f"{len(entries)} halfword(s) recorded as no-claim -> {out}")
     for stem, ours, theirs, n in sorted(acted, key=lambda r: -r[3]):
         print(f"   {stem:10s} revision {ours} -> {theirs}   {n:5d} halfword(s)")
+    if referenced:
+        print(f"   -- and {sum(referenced.values())} halfword(s) in unrevised "
+              f"units, referencing a unit that was revised:")
+        for (stem, tstem, tours, ttheirs), n in referenced.most_common():
+            print(f"   {stem:10s} -> {tstem:8s} revision {tours} -> {ttheirs}"
+                  f"   {n:5d} halfword(s)")
 
 
 if __name__ == "__main__":
