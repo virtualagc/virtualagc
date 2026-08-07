@@ -332,6 +332,15 @@ def main():
     # all.  So it costs correctness and buys nothing, and is off unless asked
     # for.
     permitSoleCandidate = False
+    # Giving a symbol this configuration does not contain an address borrowed
+    # from one that does.  It existed for one reason: a link that failed on an
+    # undefined #E produced no comparison at all, which is worse than a
+    # difference.  compileLinkCompare now compares the forced image instead, so
+    # the rescue is unnecessary -- and it is WRONG, because the original build
+    # had nothing to resolve such a reference against either and left the slot
+    # alone.  G3's #DGZ1ALT held 456A against the dump's 0000 for exactly this
+    # reason, and passes once the invented address is withdrawn.
+    inventForeignAddresses = False
     base = None
     out = None
     report = False
@@ -352,6 +361,8 @@ def main():
             out = p.partition("=")[2]
         elif p == "--sole-candidates":
             permitSoleCandidate = True
+        elif p == "--foreign-symbols":
+            inventForeignAddresses = True
         elif p == "--report":
             report = True
         else:
@@ -489,7 +500,8 @@ def main():
     # produces no JSON at all.
     foreignReport = []
     foreign = recoverForeignSymbols(collectUndefined(logDir), index, phases,
-                                    others, foreignReport)
+                                    others, foreignReport) \
+              if inventForeignAddresses else {}
     for symbol, (address, n, why) in foreign.items():
         augmented[symbol] = {"start": address, "end": address + n - 1,
                              "type": "HALSTAT", "hal": None}
