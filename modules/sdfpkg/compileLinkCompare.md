@@ -110,3 +110,104 @@ FAIL: 1/11 section(s) differ
 Conclusion: the *code* (`#CGSRRSL`) all matches, but the *data* (`#DGSRRSL`) does not.  The next step in diagnosis would be to compare the assembly language in current.results/pass2.rpt against the assembly language in CSECT `#DGSRRSL` in file PFS/mafgen/DASS_G16.ASC.
 
 Whether that code/data split holds generally is itself a cheap early measurement, and a valuable one: if code sections usually match and data sections usually do not, the whole phase points at data generation rather than code generation.
+
+## Outcome
+
+The plan above was carried out across all eight memory configurations. What
+follows records what was found, what was fixed, and where the plan's own
+assumptions turned out to be wrong. The end-to-end process is written up
+separately in `PFS/mafgenComparison.md`.
+
+### Where the plan held, and where it did not
+
+The CSECT-to-source join works exactly as described: strip the two-character
+prefix, match six characters against the descored source stem. Over all eight
+configurations it maps every HAL/S CSECT to a file, with no collisions and
+nothing left over. HAL/S units must be told from assembly and runtime by the
+presence of `unlinkMAFGEN2`'s `hal` field, not by name.
+
+The **code/data split did not hold**. The plan expected code to be the harder
+class; both differed, and the worst was neither -- PDE (`#E`) failed 29 of 29.
+Against that, every `HAL_LIBRARY_*` section matched, 110 of 110, exactly as
+predicted.
+
+The per-configuration counts in the plan's table do not match the index. For
+SSW the document says 387 HAL/S, 154 assembly, 119 runtime; counting by type
+gives 401 HAL/S, 72 `HAL_LIBRARY_*`, 187 other. The totals agree at 660, so the
+disagreement is in classification, not coverage.
+
+**Compiler version and options are closed as leads.** HALSTAT records the
+compiler and switches per unit, and they match what we use.
+
+### Mechanisms found
+
+Each was a single root cause behind many differing halfwords, as the plan
+anticipated.
+
+  * **Stack addresses in process directory entries.** Fixed in `lnk101` itself.
+    A PDE slot is six halfwords and offset +4 is the stack CSECT address.
+  * **ZCONs**, all 18 in SSW -- and not what was guessed. These are not code
+    addresses in the ordinary sense but sector-encoded pairs whose second
+    halfword carries `XC/C/BSR/DSR` bit fields.
+  * **The RLD sign bit.** `lnk101` built the address constant from the masked
+    flag type, dropping bit 7, so every negative-displacement ZCON came out
+    twice the displacement too high. The cleanest defect of the set.
+  * **Post-build changes** -- I-LOADs, patches, checksums -- which MAFGEN marks
+    itself and no compilation can reproduce.
+  * **Revision drift**, both in a unit directly and, more often, in the
+    unrevised units that *reference* a revised one.
+  * **Relocations to sections absent from the configuration**, which we resolved
+    against a fabricated address where the original build left them alone.
+
+After the code fixes, **every CODE CSECT in SSW matched** -- PROCEDURE 120/120,
+PROGRAM 29/29.
+
+### Results
+
+    SSW   138/138 HAL/S files, 476/476 in-index sections, zero differences
+    P9    158/158 files -- and NO new mechanism was needed, which is the real
+          result: the SSW mechanisms were general, not SSW-specific
+    all 8  14175/14300 sections at first completion (99.13%), improving to
+           14379/14407 with 28 differing and no errors
+
+### Upstream
+
+Four pull requests were opened against `nsts-sdl-dps` and all four merged,
+three of them reworked by the maintainer: PDE stack addresses, `fcmcmp
+--no-data`, the ZCON sign fix, and `fcmcmp --exceptions`. Two more are open:
+leaving absent-section relocations unpatched, and reporting sections whose size
+disagrees with the CSECT table.
+
+### Corrections worth keeping
+
+**SDL means the opposite of what I assumed.** SDL generates code for the
+Software Development Lab, a ground facility; NOSDL generates flight code. It is
+adopted for `compileLinkCompare` only, via `halsParms.DEFAULT_SDL`.
+
+**"Unfixable" was the wrong category for the starred locations.** They are gaps
+in `fcmcmp` and `unlinkMAFGEN2`, not facts of nature, and treating them as
+unfixable would have left a real class of differences permanently unexamined.
+
+**Refusing to link is worse than differing.** Two files could not be linked at
+all, and writing them off would have been wrong -- an absence cannot be
+explained, while a difference can. Both were fixed.
+
+**Attributing a discrepancy is not the end of it.** Naming the mechanism behind
+a difference does not discharge it; the standard is elimination. Only a real
+blocker -- missing source, a missing dump, a defect in a tool we do not have --
+justifies leaving one in place.
+
+**What this phase is for.** The comparison is a test of `HALSC` and `lnk101`.
+It proceeds one file at a time because we do not yet have all the object files,
+and because the ordering of CSECTs within the DASS files is not understood.
+Once the tools are validated, the next phase builds memory images without
+reference to the CSECT indexes at all.
+
+### One process failure worth recording
+
+`dass-run.py`'s parallel sweeps assigned job *i* to tree *i mod N*, which does
+not guarantee that only one compile is ever live in a tree. It produced 60
+spurious failures across a whole configuration before the cause was found. The
+fix is a queue: a worker takes a tree for the duration of a compile and returns
+it. The lesson is not about queues -- it is that a plausible-looking result from
+a broken harness is more expensive than an obvious crash.
