@@ -156,8 +156,23 @@ def collectUnresolved(linkDir):
         for r in sym.get("unresolvedRelocations") or []:
             out.append((r["symbol"], r["imageOffsetHW"], r["existing"],
                         (r.get("section") or "").strip(),
-                        r["imageOffsetHW"] - r.get("sectionOffset", 0) // 2))
+                        r["imageOffsetHW"] - r.get("sectionOffset", 0) // 2,
+                        r.get("flags", 0)))
     return out
+
+
+def basesFrom(value, addend, flags):
+    '''What base addresses a halfword could have been patched from, given the
+    RLD flags.  Bit 7 is the sign, so a negative displacement was subtracted
+    rather than added; and a ZCON's address halfword is sector-encoded, so bit
+    15 may have been set over it.  Returns an empty set for a relocation that
+    patches a register field rather than an address -- BSR-only and DSR-only
+    touch four bits of an instruction, and reading them as addresses derives
+    nonsense (S2 has three that yield 0xFE5A against a real base of 0x7D78).'''
+    if flags & 0x70 in (0x20, 0x40):
+        return set()
+    signed = -addend if flags & 0x80 else addend
+    return {(value - signed) & 0xFFFF, ((value & 0x7FFF) - signed) & 0xFFFF}
 
 
 # lnk101 prints this for a symbol it cannot resolve and will not tolerate.
@@ -225,10 +240,34 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
     share and no candidate confirms.
     """
     sites = collections.defaultdict(list)
-    for symbol, address, addend, section, base in relocations:
+    for symbol, address, addend, section, base, flags in relocations:
         e = index.get(section)
         if e is not None and e.get("start") == base:
-            sites[symbol].append((address, addend))
+            sites[symbol].append((address, addend, flags))
+    startsHere = {}
+    for name, e in index.items():
+        if "start" in e:
+            startsHere.setdefault(e["start"], name)
+
+    # Two CSECTs cannot begin at the same address, so an address several
+    # symbols derive is one none of them may claim.  S2 has seven distinct #ZP
+    # symbols whose lone references each derive 0x298 -- where #ZSMNCLN really
+    # does begin, which is why the corroboration below would otherwise accept
+    # all seven.  Whatever those references mean, at most one can be an alias
+    # for #ZSMNCLN, and nothing here says which.
+    claims = collections.Counter()
+    for symbol in undefined:
+        if symbol in index:
+            continue
+        derived = None
+        for address, addend, flags in sites.get(symbol, []):
+            v = halfword(address)
+            if v is None or v in FILL or v == addend or v == (addend | 0x8000):
+                continue
+            b = basesFrom(v, addend, flags)
+            derived = b if derived is None else derived & b
+        for a in (derived or ()):
+            claims[a] += 1
 
     recovered = {}
     for symbol in sorted(undefined):
@@ -244,14 +283,18 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
             if symbol in d:
                 candidates[f"HALSTAT phase {phase}"] = d[symbol]
 
-        usable, implied = [], collections.Counter()
-        for address, addend in sites.get(symbol, []):
+        usable, implied, common = [], collections.Counter(), None
+        for address, addend, flags in sites.get(symbol, []):
             v = halfword(address)
             if v is None or v in FILL:
+                continue
+            bases = basesFrom(v, addend, flags)
+            if not bases:
                 continue
             usable.append(address)
             if v != addend and v != (addend | 0x8000):
                 implied[(v - addend) & 0xFFFF] += 1
+                common = bases if common is None else common & bases
 
         if not usable:
             report.append((symbol, "no anchored reference, so nothing in the "
@@ -264,24 +307,59 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
                                    f"unpatched: the build did not resolve it "
                                    f"either"))
             continue
-        if len(implied) != 1:
-            report.append((symbol, "anchored references disagree: "
+        # A base every anchored reference could have been patched from.  Taking
+        # the intersection rather than a majority vote means one reference in a
+        # form we read wrongly refuses the symbol instead of being outvoted.
+        if not common:
+            report.append((symbol, "anchored references cannot share a base: "
                            + ", ".join(f"{a:#07x}x{c}"
-                                       for a, c in implied.most_common())))
+                                       for a, c in implied.most_common(4))))
             continue
-        address = next(iter(implied))
-        agreeing = {k: v for k, v in candidates.items() if v[0] == address}
-        if not agreeing:
+
+        # Corroboration.  Another configuration's index or a HALSTAT phase
+        # naming this symbol is the usual source.  Failing that, an address
+        # that is exactly where a CSECT in THIS configuration begins is
+        # evidence in its own right, and it is what the NONHAL COMPOOLs need:
+        # S2's SAFACQ references #PCSADAR, #PCSAINB, #PCSAIXP and #PCSAPAR --
+        # the four its HALSTAT compilation layout marks NONHAL -- and the
+        # storage for them in this configuration is #PCS2DAR, #PCS2INB,
+        # #PCS2IXP and #PCS2PAR.  All thirteen address references land exactly
+        # on those four CSECT starts, including two negative displacements and
+        # one sector-encoded ZCON.  The alias is reported, not assumed: nothing
+        # here infers it from the names.
+        taken = None
+        for address in sorted(common):
+            agreeing = {k: v for k, v in candidates.items() if v[0] == address}
+            if agreeing:
+                source = sorted(agreeing)[0]
+                taken = (agreeing[source], address,
+                         f"{len(agreeing)} source(s) corroborate ({source})")
+                break
+            alias = startsHere.get(address)
+            if alias is None:
+                continue
+            if claims[address] > 1:
+                report.append((symbol, f"derives {address:#07x}, where "
+                               f"{alias} begins, but so do "
+                               f"{claims[address] - 1} other symbol(s)"))
+                break
+            e = index[alias]
+            taken = ((address, e["end"] - address + 1), address,
+                     f"{alias} begins there in this configuration")
+            break
+        else:
             report.append((symbol, f"{n}/{len(usable)} anchored references "
-                           f"imply {address:#07x}, corroborated by nothing"
+                           f"imply {sorted(common)[0]:#07x}, corroborated by "
+                           f"nothing"
                            + (": " + ", ".join(f"{k}={v[0]:#x}" for k, v
                                                in sorted(candidates.items()))
                               if candidates else "")))
+        if taken is None:
             continue
-        source = sorted(agreeing)[0]
-        recovered[symbol] = agreeing[source] + (
+        entry, address, why = taken
+        recovered[symbol] = entry + (
             f"{n}/{len(usable)} anchored references imply {address:#07x}, "
-            f"{len(agreeing)} source(s) corroborate ({source})",)
+            + why,)
     return recovered
 
 
@@ -460,7 +538,7 @@ def main():
 
     votes = collections.defaultdict(collections.Counter)
     seen = collections.Counter()
-    for symbol, address, addend, _section, _base in relocations:
+    for symbol, address, addend, _section, _base, _flags in relocations:
         seen[symbol] += 1
         v = halfword(address)
         if v is None or v in FILL:
@@ -557,8 +635,15 @@ def main():
     # lnk101 will not tolerate for anything but a COMPOOL.  Read from the sweep
     # LOGS rather than the symbol JSONs, because a link that fails this way
     # produces no JSON at all.
+    # lnk101 announces a symbol as undefined only when it has nowhere to put
+    # it; a NONHAL COMPOOL simply goes unresolved, with no message.  S2's
+    # #PCSADAR is one -- SAFACQ's HALSTAT compilation layout marks CSA_DART
+    # NONHAL -- so drive the pass from the relocations as well, minus whatever
+    # the evidence pass above already accounted for.
     foreignReport = []
-    foreign = recoverForeignSymbols(collectUndefined(logDir), index, phases,
+    absent = collectUndefined(logDir) | (set(seen) - set(accepted)
+                                         - set(augmented))
+    foreign = recoverForeignSymbols(absent, index, phases,
                                     others, relocations, halfword,
                                     foreignReport) \
               if recoverForeignAddresses else {}
