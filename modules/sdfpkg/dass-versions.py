@@ -208,17 +208,32 @@ def main():
                 extents[csect][1] = reach
     spans = sorted((s, e, k) for k, (s, e) in extents.items())
     starts = [s for s, _, _ in spans]
+    widest = max((e - s for s, e, _ in spans), default=0)
 
     def owner(address):
-        '''The CSECT containing an address, or None.  Containment only -- no
-        nearest-preceding fallback, which attributed a difference to a CSECT
-        4000 halfwords away and produced deltas of 18396 and 55948.'''
+        '''The narrowest CSECT containing an address, or None.
+
+        Containment only -- no nearest-preceding fallback, which attributed a
+        difference to a CSECT 4000 halfwords away and produced deltas of 18396
+        and 55948.
+
+        Narrowest, because spans genuinely nest: a COMPOOL whose storage is
+        owned by an assembly module has no CSECT of its own and lives inside
+        the assembly CSECT that contains it, which is the whole reason
+        dass-syms.py exists.  Returning the first match found scanning back
+        from the address returns whichever span happens to start latest, and
+        where two overlap without nesting -- S2 has #PCVTTCS at 0xBE1A-0xD718
+        across #PCSAPDT at 0xB040-0xC6BB -- that is the wrong one.  The
+        narrowest is the most specific claim about what the address belongs to.
+        '''
+        best = None
         i = bisect.bisect_right(starts, address) - 1
-        while i >= 0 and spans[i][0] <= address:
-            if address <= spans[i][1]:
-                return spans[i][2]
+        while i >= 0 and spans[i][0] >= address - widest:
+            s, e, k = spans[i]
+            if address <= e and (best is None or e - s < best[0]):
+                best = (e - s, k)
             i -= 1
-        return None
+        return None if best is None else best[1]
 
     entries = []
     acted = []
