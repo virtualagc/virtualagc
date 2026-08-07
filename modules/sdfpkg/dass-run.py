@@ -118,7 +118,12 @@ def parseOutput(text):
     if "Compilation failed" in text and "object file was created anyway" \
             not in text:
         return "compile_failed", [], None
-    if "Linking failed" in text:
+    # "Linking failed" alone is no longer the end of the story: compileLinkCompare
+    # re-links with -f and compares the forced image, which is legitimate now
+    # that lnk101 leaves a relocation to an absent section unpatched rather than
+    # inventing an address.  Such a run is scored on its sections like any
+    # other; its log carries the FORCED LINK banner, so it stays identifiable.
+    if "Linking failed" in text and "FORCED LINK:" not in text:
         return "link_failed", [], None
 
     sections = []

@@ -265,6 +265,30 @@ except subprocess.CalledProcessError as e:
     else:
         print("Forced re-link produced no symbol file.")
         print("STDERR:", forced.stderr)
+    # And then COMPARE the forced image rather than throwing it away.
+    #
+    # This used to stop here, so a file that failed to link contributed nothing
+    # at all -- no sections, no comparison, only an error.  That is strictly
+    # worse than a difference, because a difference can be explained and an
+    # absence cannot.  G8 had seven such files, and every one of them turned
+    # out to place all of its in-index sections correctly.
+    #
+    # It is legitimate now, and was not before, because lnk101 leaves a
+    # relocation to a section absent from the CSECT table unpatched instead of
+    # inventing an address for it -- which is what the original build did, the
+    # section not being in that configuration.  What the forced image contains
+    # is therefore what the build contained, not a fabrication.
+    #
+    # The failure is still reported, loudly, and the comparison below is
+    # labelled, so a forced result is never quietly taken for a clean link.
+    if Path(fcmfile).is_file():
+        print(f"FORCED LINK: the link above failed; comparing the forced "
+              f"image.  Unresolved references are left unpatched, which is "
+              f"what the original build did for a section absent from this "
+              f"configuration.")
+    else:
+        print("Forced re-link produced no image; nothing to compare.")
+        die()
     # Both paths here were wrong: "../{config}.fcm" and "../csects-{config}.json"
     # duplicated the defaults computed above one directory too high, and the
     # second was missing its f prefix besides, so it named a literal file
@@ -279,7 +303,7 @@ except subprocess.CalledProcessError as e:
         print(f"rldanalyze failed with exit code {e.returncode}.")
         print("STDOUT:", e.stdout)
         print("STDERR:", e.stderr)
-    die()
+    # No die() here: fall through to the comparison, on the forced image.
 
 # Next, compare.
 # --no-data C9FB,C6C6: unlinkMAFGEN2 writes those two values for any halfword
