@@ -592,12 +592,16 @@ numbers.
 11. DASS COMPARISON -- CURRENT STATE AND NEXT STEPS  (2026-08-07)
 ================================================================================
 
-STATE (2026-08-07 evening).  14404 of 14407 in-index sections match, 3 differ, 0
-errors.  Five configurations are exact.  The three differences are ONE difference
-in three places -- the .000001 literal in #DGO8ORB, #DGO3ENT and #DGO1ASC -- and
-after the ibmFloat fix our value for it is ...ED8D against the dump's ...ED8C,
-so it is now a suspected defect in the ORIGINAL compiler rather than in ours.
-It is entered in PFS/mafgen/defects.txt as the first -2.
+STATE (2026-08-08).  14407 of 14407 in-index sections match, 0 differ, 0 errors.
+No section differs anywhere and no in-index section holds a single differing
+halfword.  On the morning of 2026-08-07 this was 14379/14407 with 28 differing.
+
+Three halfwords are suppressed on a JUDGEMENT rather than a measurement: the
+.000001 literal in #DGO8ORB, #DGO3ENT and #DGO1ASC, where we hold ...ED8D and the
+dump holds ...ED8C.  Ours is what truncation, round-to-nearest and the genuine
+IHCFDXPI all give; no rounding mode of the exact decimal gives the dump's.  That
+is a strong case, not a proof, and it is the first and only entry in
+PFS/mafgen/defects.txt.  noclaim.py says so every time it reports.
 
 Read the counts with the no-claim share, which run-configs.sh now prints after
 every RESULT line: G2 0.87%, G8 1.02%, P9 1.21%, SSW 1.89%, G9 10.75%, S2
@@ -642,6 +646,19 @@ INFRASTRUCTURE, and the traps that produced it:
     verify a kill with `ps | grep` on this machine: grep is rewritten to `rtk
     grep` and returns nothing, which reported "0 remaining, clean" three times
     while six orphans were running.  pgrep tells the truth.
+  - ELAPSED TIME IS NOT WORKING TIME.  G16 once showed 304.7 minutes against
+    43.8 in the previous run while G8 and G3 in that same run were normal.  Every
+    direct measurement pointed away from a code cause -- compile times normal at a
+    3.7s median, nothing hung, the watchdog empty, no strays, memory and disk
+    fine, load steady -- and the conclusion drawn anyway was "roughly four hours
+    in dass-syms and dass-versions".  The machine had been asleep: journalctl
+    shows suspend at 01:04:57 and resume at 05:38:54, 4h34m, leaving about 41
+    minutes of real work.  Check `journalctl | grep -i suspend` BEFORE theorising
+    about a slow step.  The invariant worth keeping: for a sweep, elapsed
+    wall-clock should be close to accumulated compile time divided by the job
+    count, and when it is not, suspect the clock before the code.  All six stage
+    banners now carry $(date -Is), which would have shown the gap immediately.
+
   - ~/ForClaude/hang-watch.sh captures /proc/PID/cwd and /proc/PID/fd for any
     pass running over ten minutes, so the next intermittent HALSFC hang can be
     diagnosed rather than merely cleaned up.  Its cause is still unknown.
@@ -652,47 +669,30 @@ INFRASTRUCTURE, and the traps that produced it:
 
 NEXT STEPS, in order.
 
-  1. CONFIRM THE -2 ENTRIES.  mafgen/defects.txt now carries the three .000001
-     locations, and dass-versions.py appends them to exceptions-<CFG>-full.txt.
-     Regenerate G8, G3 and G16, re-run those three, and check each site is
-     suppressed with the declared note and that nothing ELSE became suppressed.
-     BEFORE doing so, make noclaim.py count -2 separately: a -2 currently reads
-     as "[1 ignored]" on the section line, identical to a -1, so applying it
-     would take the corpus to 14407/14407 with the accusation against the
-     original compiler visible only in a summary line.  A clean score must not
-     be able to hide what it rests on -- that is the same failure as S2's 22%.
+  1. THE NEXT PHASES, both currently blocked and set aside by the user on
+     2026-08-07.  .dfg needs a preprocessor to convert to .hal, which does not
+     exist.  .asm needs changes to ASM101S that are under way elsewhere and are
+     not yet available.  Nothing here can proceed until one of those arrives.
 
-  2. RE-EXAMINE THE FCOS CATEGORY.  FIOCDATS, FIOMODSM and FCMPSA were called
-     "not attributable at all", partly on reasoning the operand column has since
-     disproved, and no difference remains in any of them.  Determine whether the
-     category is EMPTY or merely unexamined, and say which in
-     mafgenComparison.md.  ~/ForClaude/dass-explain.py prints, for every
-     surviving difference, what each of the four sources of evidence makes of it.
+  2. WHEN THE CROSS-CHECK IS FINALLY COMPLETE -- meaning after .dfg and .asm, not
+     now -- weed ~/ForClaude of obsolete material, chiefly sweeps too old to
+     matter, and compress what remains into one archive.  Decide then whether the
+     exceptions-*-full.txt files are worth keeping: they are ~2.6 MB across the
+     eight, S2's alone 1.5 MB and 46295 lines, and every sweep regenerates them
+     from the plain files plus HALSTAT, so they are derived output rather than
+     evidence.  The plain exceptions-<CFG>.txt are also derived, from listings
+     that are themselves in mafgen/, which is why neither is tracked.
 
-  3. MIGRATE CLAUDE_LOG.md INTO dass-notes.db.  The tool exists and is tested
-     (modules/sdfpkg/dass-notes.py: add / pending / done / render / import).
-     `dass-notes.py import CLAUDE_LOG.md` then a final flat sync.  The reason is
-     supersession: 2026-08-07 alone produced three chains where a later entry
-     replaced an earlier one, and applying that log in order would have written
-     contradictory accounts into one document.  `pending` excludes superseded
-     entries; `render` still shows them, marked.
-
-  4. THE INTERMITTENT HALSFC HANG is unexplained.  Six occurred on 2026-08-07,
+  3. THE INTERMITTENT HALSFC HANG is unexplained.  Six occurred on 2026-08-07,
      on six different files, each once.  Three were orphaned by imperfect sweep
      kills (now fixed); three began minutes into a healthy run and had already
      reported success.  hang-watch.sh is armed to capture the next one live.
 
-  5. UPSTREAM.  PRs #31, #32 and #33 are open at ColanderCombo/nsts-sdl-dps.
+  4. UPSTREAM.  PRs #31, #32 and #33 are open at ColanderCombo/nsts-sdl-dps.
      #33 is what makes -2 work; without it fcmcmp treats -2 as a checked value
      that never matches, which warns rather than breaks.
 
-NOT YET, and deliberately.
-
-  - The ~/ForClaude weeding and archive.  The user tied that to the cross-check
-    being FINALLY complete, which it is not: see below.
-
-  - .dfg and .asm.  Both blocked, and set aside by the user on 2026-08-07.  .dfg
-    needs a preprocessor to convert to .hal, which does not exist.  .asm needs
-    changes to ASM101S that are under way elsewhere and not yet available.  The
-    HAL/S phase is 3212 of the 3859 CSECTs in the indices; finishing it does not
-    finish the comparison.
+SCOPE, so the numbers above are not misread.  The HAL/S phase is 3212 of the 3859
+CSECTs in the indices; the rest are assembly and HAL/S runtime library routines.
+Reaching 14407/14407 finishes one phase of three, not the comparison.  Both
+remaining phases are blocked as described in step 1.
