@@ -518,7 +518,11 @@ def main():
             print(__doc__)
             sys.exit(1)
     if out is None:
-        out = f"csects-{config}-augmented.json"
+        # Deliberately not csects-<config>-augmented.json.  That name matches the
+        # csects-*.json glob used above to find the other configurations, so
+        # writing it into the MAFGEN directory would make this script's output an
+        # input to its next run, under a configuration name that does not exist.
+        out = f"augmented-{config}.json"
 
     # The relocation-evidence pass can only see a symbol that was unresolved in
     # the sweep it reads, so re-running it against a sweep that already had the
@@ -652,8 +656,20 @@ def main():
 
     # The other configurations' own indexes, used by both passes below.
     others = {}
+    # A configuration name, and nothing else.  The glob is the whole reason this
+    # is here: anything called csects-SOMETHING.json in the MAFGEN directory is
+    # otherwise read as a configuration named SOMETHING, and this script's own
+    # default output was csects-<config>-augmented.json, so one hand-run in that
+    # directory would have introduced a phantom "G3-augmented" configuration
+    # holding a superset of G3's own sections.  Measured, it changed nothing
+    # today -- the augmented tables published alongside are called
+    # augmented-<config>.json precisely so the glob cannot see them -- but a rule
+    # that happens to be harmless is not a rule.  Real names are SSW, P9, G8, S2,
+    # G9, G2, G3, G16: capitals and digits, never a hyphen.
     for f in sorted(Path(mafgen).glob("csects-*.json")):
         name = f.stem[len("csects-"):]
+        if not re.fullmatch(r"[A-Z0-9]+", name):
+            continue
         if name != config:
             try:
                 others[name] = json.load(open(f))
