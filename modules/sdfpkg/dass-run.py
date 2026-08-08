@@ -46,8 +46,10 @@ import os
 import re
 import json
 import time
+import fcntl
 import queue
 import signal
+import contextlib
 import sqlite3
 import subprocess
 import datetime
@@ -223,7 +225,50 @@ def parseOutput(text):
 # and COMMON*.out and end in "Unable to open COMMON input file".  Exactly the
 # failure HANDOFF.md section 3 describes, and exactly what this option exists
 # to prevent.  Exclusion has to be by possession, not by arithmetic.
+#
+# AND POSSESSION HAS TO BE ACROSS PROCESSES.  treePool is a queue inside ONE
+# interpreter, so it excludes this run's own threads and nothing else.  Every
+# sweep computes the same tree list -- jobs-root/1 .. jobs-root/N -- so two
+# concurrent sweeps hand the SAME directory to a compile each, and the guard
+# below ("--jobs=N but only M tree(s)") only ever checks its own arithmetic.
+# Six sweeps were once started before earlier ones had finished: 24 compiles
+# over four trees, six per directory, each overwriting the others' halmat.bin,
+# litfile.bin and COMMON*.out under fixed names while they were being read.
+# Six compiles hung for the full hour that day and none has since.
+#
+# So the tree is also locked on the filesystem, which is the only lock every
+# process can see.  It is held for the whole compile and released in the same
+# `finally` that returns the tree to the queue.
 treePool = None
+
+
+@contextlib.contextmanager
+def heldTree(cwd):
+    '''Hold `cwd` against every other process for the duration of a compile.
+
+    Blocking, deliberately.  Returning "busy" would mean either failing a file
+    that is perfectly good or silently compiling in a shared directory, and the
+    second is the bug this exists to prevent.  Waiting makes two concurrent
+    sweeps take turns: slower than either alone, which is honest, and the
+    alternative is two sweeps that both produce nonsense quickly.
+
+    The lock file lives in the tree and is never removed -- an empty lock file
+    is cheap, and unlinking one is a race in itself.  run-configs.sh's
+    inter-sweep cleanup only deletes archive.results and current*.results, so
+    it does not disturb this.
+    '''
+    lockPath = Path(cwd) / ".dass-tree.lock"
+    fd = os.open(str(lockPath), os.O_CREAT | os.O_WRONLY, 0o644)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield cwd
+    finally:
+        # Released by the close in any case; explicit for the reader's sake.
+        try:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        except OSError:
+            pass
+        os.close(fd)
 
 
 def runOne(job):
@@ -262,20 +307,23 @@ def runOne(job):
     # into the tree pool the moment the timeout is handled.  An orphan still
     # running there is writing those files underneath whichever compile is handed
     # the tree next.
-    proc = subprocess.Popen(command, cwd = cwd, env = env,
-                            stdout = subprocess.PIPE, stderr = subprocess.PIPE,
-                            text = True, start_new_session = True)
     try:
-        out, err = proc.communicate(timeout = 3600)
-        text = out + "\n" + err
-    except subprocess.TimeoutExpired:
-        try:
-            os.killpg(proc.pid, signal.SIGKILL)
-        except (ProcessLookupError, PermissionError):
-            proc.kill()
-        out, err = proc.communicate()
-        text = ("TIMEOUT after 3600 seconds; process group killed\n"
-                + (out or "") + "\n" + (err or ""))
+        with heldTree(cwd):
+            proc = subprocess.Popen(command, cwd = cwd, env = env,
+                                    stdout = subprocess.PIPE,
+                                    stderr = subprocess.PIPE,
+                                    text = True, start_new_session = True)
+            try:
+                out, err = proc.communicate(timeout = 3600)
+                text = out + "\n" + err
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except (ProcessLookupError, PermissionError):
+                    proc.kill()
+                out, err = proc.communicate()
+                text = ("TIMEOUT after 3600 seconds; process group killed\n"
+                        + (out or "") + "\n" + (err or ""))
     finally:
         if treePool is not None:
             treePool.put(cwd)
