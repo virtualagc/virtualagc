@@ -478,6 +478,27 @@ def main():
                     f"# revision level, which is per file; see "
                     f"dass-versions.py.\n"
                     f"# -1 = Probable version-change related difference\n")
+
+        # Suspected defects in the ORIGINAL compiler, from mafgen/defects.txt.
+        # These cannot be derived: each is a judgement that our output is right
+        # and the dump wrong, made per location on evidence recorded in that
+        # file.  Keeping them in a tracked file rather than in this script means
+        # the claim can be reviewed; keeping them out of the generated sections
+        # means a sweep cannot quietly invent one.
+        defects = mafgen / "defects.txt"
+        rows = []
+        if defects.is_file():
+            for line in open(defects, errors="replace"):
+                fields = line.split("#", 1)[0].split()
+                if len(fields) >= 3 and fields[0] == config:
+                    rows.append((int(fields[1], 16), fields[2],
+                                 "-".join(fields[3:])))
+        if rows:
+            f.write("\n# Suspected defects in the ORIGINAL compiler; see "
+                    "mafgen/defects.txt for the evidence.\n"
+                    "# -2 = Probable floating-point bug in original compiler\n")
+            for address, marker, note in sorted(rows):
+                f.write(f"{address:05X} {marker} {note}\n")
             for address, name in sorted(entries):
                 f.write(f"{address:05X} -1 {name}\n")
 
