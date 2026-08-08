@@ -6,3 +6,9 @@
 
 ### [2026-08-08] Target: [mafgenComparison.md]
 - The -2 mechanism is verified end to end. G8 reads 1739/1739 and G3 2905/2905, both 0 differing, with the suppression reported in the exceptions file's own words: "Probable floating-point bug in original compiler". noclaim.py prints the breakdown by kind and an unconditional NOTE whenever anything is suppressed as a suspected original-compiler defect, so a perfect count and the unproved claim it rests on always appear together. G16 still running.
+
+### [2026-08-08] Target: [HANDOFF.md]
+- UNEXPLAINED SLOWDOWN, and the logging gap that keeps it unexplained. In the G8/G3/G16 run of 2026-08-07 23:32, G16 took 304.7 minutes against 43.8 in the immediately preceding run, while G8 (28.4 vs 30.1) and G3 (38.4 vs 38.9) were normal in that same run. Compile times were normal throughout (median 3.7s against 4.0s), nothing was hung, the hang watchdog captured nothing, no stray processes existed, and memory and disk were fine.
+- By arithmetic the time is in the two dass-syms passes and dass-versions -- three sweeps at the observed 22 compiles/minute is about 66 minutes, leaving roughly four hours in the steps between them. G16 is the largest configuration and DASS_G16.ASC the largest listing at 37 MB, which dass-versions.py now parses in full for the operand column. But that is INFERENCE: run-configs.sh timestamped each configuration and each compile and nothing in between, so the four hours cannot be attributed to a specific step.
+- Fixed for next time: all six stage banners now carry $(date -Is). If it recurs, the log will say which step.
+- Worth timing dass-syms.py and dass-versions.py on G16 directly when the machine is idle. If dass-versions is the cost, parseDassOperands over a 37 MB listing is the obvious candidate and could be cached per configuration rather than reparsed on every invocation.
