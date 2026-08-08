@@ -1,20 +1,27 @@
+# This log has moved into a database.
 
-### [2026-08-08] Target: [mafgenComparison.md]
-- THE FCOS CATEGORY IS EMPTY, not merely unexamined, and the section "Not attributable -- and this category needs re-examining" should be rewritten to say so. Tested directly: across all eight configurations, ZERO -1 entries name FIOCDATS, FIOMODSM, FIOCBLKS, FCMPSA, FCMTBLS or PCH2SAIL as their target, in any of the three attribution forms the file uses. Enumerating every distinct attribution in S2 gives only HAL/S unit stems -- CDIMMUTI 14275, PGGPCF 8941, CSAPDT 5163, CSASAT 2139, CDQANNUN 1981, and so on down.
-- So every reference that once appeared to point into an FCOS CSECT was an artefact of reading a halfword that is not an address as though it were one. FIOCBLKS was the first to fall (sector-encoded ZCONs into #PCSASAT); the rest went the same way once lnk101's RLDs, MAFGEN's operand column and unresolved-relocation symbols replaced owner() as the source of the target. None of them was ever assembly we could not account for.
-- The document should keep the episode rather than delete it: the category existed for months on the strength of an inference nobody had tested, and the warning it now carries -- that "not attributable" can describe our analysis rather than the evidence -- is worth more than the category ever was.
+Notes now live in `dass-notes.db` beside this file, managed by `dass-notes.py`.
+Do not append here: an entry written below would not be seen by a sync.
 
-### [2026-08-08] Target: [mafgenComparison.md]
-- The -2 mechanism is verified end to end. G8 reads 1739/1739 and G3 2905/2905, both 0 differing, with the suppression reported in the exceptions file's own words: "Probable floating-point bug in original compiler". noclaim.py prints the breakdown by kind and an unconditional NOTE whenever anything is suppressed as a suspected original-compiler defect, so a perfect count and the unproved claim it rests on always appear together. G16 still running.
+    dass-notes.py add --target=FILE.md "text"    capture a note
+    dass-notes.py pending [--target=FILE.md]     what a sync must apply
+    dass-notes.py done N [N ...]                 mark applied
+    dass-notes.py supersede NEWER OLDER          NEWER replaces OLDER
+    dass-notes.py render [--pending]             the whole queue as Markdown
 
-### [2026-08-08] Target: [HANDOFF.md]
-- A "SLOWDOWN" THAT WAS THE MACHINE ASLEEP. G16 showed 304.7 minutes elapsed against 43.8 previously; the journal shows suspend at 01:04:57 and resume at 05:38:54, 4h34m, leaving about 41 minutes of real work. Nothing was slow. Every direct measurement had pointed away from a code cause and the conclusion drawn anyway was "four hours in dass-syms and dass-versions". Check `journalctl | grep -i suspend` before theorising. Stage timestamps were added regardless and are still worth having: they would have shown a four-hour gap between adjacent banners with no compiles between them.
+Why it moved, from the day that prompted it.  Three costs grew with the flat
+file.  A sync meant reading the entire log plus every target document -- 96 KB of
+log on one occasion -- and sorting entries by target by hand.  "Which of these
+did I already apply?" had no answer except re-reading.  And entries that
+SUPERSEDED earlier ones were the real hazard: on 2026-08-07 the SPSPSP analysis
+was rewritten twice and an SDF finding reversed outright, so applying that log in
+order would have written three contradictory accounts into one document.  Catching
+it depended on remembering.  `pending` now excludes superseded entries, while
+`render` still shows them with the relationship marked, so nothing is lost.
 
-### [2026-08-08] Target: [mafgenComparison.md]
-- ALL EIGHT CONFIGURATIONS NOW REACH 14407 of 14407 SECTIONS, 0 differing, 0 errors. The results table needs replacing again, and so does the "What is left" section, since nothing is left in it that is not a recorded judgement. Per configuration: SSW 476, P9 509, G8 1739, S2 1252, G9 1369, G2 2558, G3 2905, G16 3599. Zero differing halfwords in any in-index section. On 2026-08-07 morning this stood at 14379/14407 with 28 differing.
-- THE THREE CAVEATS THAT MUST TRAVEL WITH THAT NUMBER, or it misleads:
-  * Three halfwords are suppressed as a JUDGEMENT, not a measurement -- the .000001 literal in #DGO8ORB, #DGO3ENT and #DGO1ASC, where we hold ED8D and the dump holds ED8C. Our value is what truncation, round-to-nearest and the genuine IHCFDXPI all give, and no rounding mode of the exact decimal gives the dump's. A strong case, not a proof. noclaim.py prints it every time.
-  * Coverage varies hugely: G2 excuses 0.87% of its halfwords, S2 22.15%, because 70 of S2's units were revised against 5 of SSW's. #PCSSSPA passes with 84% of it unverified. "S2 matches" and "G2 matches" are not the same statement.
-  * This is one phase of three. 3212 HAL/S-derived CSECTs of the 3859 in the indices; .dfg and .asm remain, both blocked.
-- Some of the day's gains were REPAIRS and some were ATTRIBUTIONS, and the document should keep them apart. The NONHAL alias recoveries mean correct addresses are now written and verified against the dump; the ibmFloat fix corrected a general defect that corrupted every odd mantissa passing through a double. #PCSSSPA and the SPSPSP family are explained, not fixed.
-- Three of the day's bugs were in the MEASURING APPARATUS, not the compiler: a __file__-relative database path that discarded four configurations' results into a directory the exit trap deleted, SQLite locking that lost P9 entirely, and a timeout that killed only its direct child and left orphans stealing cores for hours. All three announced themselves as ABSENCES rather than errors -- a missing RESULT line, a silent skip, a slow machine. That is the pattern worth carrying into the .dfg and .asm phases.
+The documents remain the product.  This replaces the staging queue, which was
+never prose.  Run `dass-notes.py render` whenever you want it back as Markdown.
+
+The four entries that were here on 2026-08-08 were imported and are still
+pending; the import was verified character-for-character before this file was
+replaced.

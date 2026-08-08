@@ -8,6 +8,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 Usage:      dass-notes.py add --target=FILE.md [--supersedes=N] "text"
             dass-notes.py pending [--target=FILE.md]
             dass-notes.py done N [N ...]
+            dass-notes.py supersede NEWER OLDER
             dass-notes.py render [--pending] [--target=FILE.md]
             dass-notes.py import CLAUDE_LOG.md
             dass-notes.py targets
@@ -75,6 +76,19 @@ def add(db, target, body, supersedes = None):
                                           supersedes))
     db.commit()
     return cur.lastrowid
+
+
+def supersede(db, newer, older):
+    '''Record that note `newer` replaces note `older`.
+
+    Supersession is usually noticed after the fact -- you write an entry, and
+    only later find it wrong -- so declaring it at insert time is not enough.
+    '''
+    for i in (newer, older):
+        if db.execute("SELECT id FROM note WHERE id=?", (i,)).fetchone() is None:
+            raise SystemExit(f"no note {i}")
+    db.execute("UPDATE note SET supersedes=? WHERE id=?", (older, newer))
+    db.commit()
 
 
 def pending(db, target = None):
@@ -199,6 +213,11 @@ def main():
             for r in rows:
                 byTarget[r["target"]] = byTarget.get(r["target"], 0) + 1
             print("\n" + ", ".join(f"{k}: {v}" for k, v in byTarget.items()))
+    elif command == "supersede":
+        if len(args) < 3:
+            raise SystemExit("supersede needs: NEWER OLDER")
+        supersede(db, int(args[1]), int(args[2]))
+        print(f"note {args[1]} now supersedes note {args[2]}")
     elif command == "done":
         ids = [int(a) for a in args[1:]]
         if not ids:
