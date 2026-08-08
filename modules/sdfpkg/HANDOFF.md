@@ -595,6 +595,8 @@ numbers.
 STATE (2026-08-08).  14407 of 14407 in-index sections match, 0 differ, 0 errors.
 No section differs anywhere and no in-index section holds a single differing
 halfword.  On the morning of 2026-08-07 this was 14379/14407 with 28 differing.
+The individual reports now agree with that number as well, which they did not
+before: see DONE 2026-08-08 below.
 
 Three halfwords are suppressed on a JUDGEMENT rather than a measurement: the
 .000001 literal in #DGO8ORB, #DGO3ENT and #DGO1ASC, where we hold ...ED8D and the
@@ -630,6 +632,92 @@ DONE 2026-08-07.  Twenty-odd commits; the ones that changed results:
   - -2 exception marker: fcmcmp accepts any negative marker (upstream PR #33,
     still open), meanings declared in the exceptions file itself, and
     dass-versions.py emits entries from PFS/mafgen/defects.txt (868b387df).
+
+DONE 2026-08-08.  The reports now agree with the score.
+
+Auditing a report used to turn up failures the headline number denies.  G3's
+DKFCM2 read "FAIL: 2/3 section(s) differ" while G3 scored 2905/2905, and both
+were right: #DDKFCM2 and #CDKFCM2 are not in G3 at all, so fcmcmp compared them
+against whatever G3 keeps at those addresses, while the scoring had already
+excluded them.
+
+fcmcmp now prints "N/A:" for such a section instead of FAIL, naming what the
+memory really belongs to:
+
+    N/A:  #DDKFCM2 @ 0B728 (15 halfwords) -- not in this configuration;
+          this span belongs to #PCGZFLD
+
+dass-syms.py supplies two fields for it.  "inConfig": false says only which pass
+recovered the ADDRESS.  "spanOwner" names a DIFFERENT section, in this
+configuration's own index, covering that address.  Both are required, and the
+test runs AFTER the comparison has already found a difference.
+
+THAT ORDERING IS THE WHOLE SAFETY PROPERTY, and it was arrived at by getting it
+wrong twice in opposite directions:
+
+  - Marking by absence from the scrape hides sections that are PRESENT.
+    #PCDHMMU is absent from the scrape and genuinely there, 788 halfwords inside
+    FCMBMTPG with 170 agreeing references.
+  - Marking by provenance and skipping BEFORE comparing hides AGREEMENT.  A
+    configuration can carry both a module's ZCON and the module, so across the
+    eight configurations 79 marked sections MATCH the dump, 59 verifying content
+    the --no-data patterns do not cover, up to 477 halfwords in SSW's #DDCDDG3.
+    That rule would have silenced 36 of those, 28 with real content.
+
+Testing only a failure, and only where the span has a named owner, cannot lose a
+match however wrong the mark is.  SSW's #DDKFCM2 matches on an unclaimed span
+while G3's sits inside #PCGZFLD -- same section, same address, opposite
+meanings, which is why no static property of a name can decide it.
+
+Verified by isolation, not assertion: all 439 G3 comparisons re-run with the
+code held constant and only the table varying gave 2910 OK unchanged, 40
+spurious FAILs reported as N/A, 15 FAILs unchanged, zero unintended
+transitions.  Every one of the 231 suppressed failures across the eight
+configurations has a named owner.  14407/14407 is unaffected -- none of the
+marked sections was ever counted.
+
+The verdict is spelled "N/A:" so it occupies the same 8-column field as "OK:"
+and "FAIL:", keeping section names in one column, and so that it does not read
+as an alarm.  dass-run.py spells N/A out separately in SECTION_RE, the slash not
+being a word character, records it as verdict "not_in_config", and keeps it out
+of both the run outcome and the run's section totals: counting it as differing
+would contradict fcmcmp's own PASS and drop a matching unit out of the score,
+while counting it as matching would claim something nobody checked.  Its n_diffs
+is NULL rather than 0.
+
+Augmented CSECT tables are now PUBLISHED, in PFS/mafgen/augmented-<CFG>.json for
+all eight configurations, from the same two-pass procedure the sweep uses.
+csects-<CFG>.json remains the unlinkMAFGEN2 scrape and is never rewritten:
+folding recovered addresses back into it would make dass-syms.py's output its
+own input and erase the line between what MAFGEN said and what we inferred.
+
+THE NAME IS NOT COSMETIC.  dass-syms.py finds the other configurations by
+globbing csects-*.json and taking whatever follows the prefix as a configuration
+name, and its own default --out was csects-<config>-augmented.json.  Two such
+files, csects-P9-augmented.json and csects-SSW-augmented.json, have sat in
+PFS/mafgen since 2026-08-06, so every run since has seen ten configurations
+rather than eight.  Measured before anything was changed, it altered nothing --
+all eight augmented tables are byte-identical with and without them, the
+phantoms only ever offering entries the real configurations already offered --
+but a rule that happens to be harmless is not a rule.  A configuration name is
+now capitals and digits throughout, never a hyphen, and the default --out is
+augmented-<config>.json.  The two strays were left in place: superseded, now
+ignored, and deleting published data is not a decision to take in passing.
+
+NOT DONE, DELIBERATELY.  The marking is not extended to units a configuration
+carries as ZCON-only -- GLUACC, GH2RTL, GRWIMU, ASLTMC, DXRDMM, DPDSPC and
+DSPSPC in G3.  Their sections get placeholder addresses, six of them landing on
+00140 in G3 which belongs to FCMPSA, and still report FAIL.  They are the same
+disease, and each has a named owner available, so closing it would be easy.  The
+user's decision on 2026-08-08 was to leave it until an actual unwanted effect is
+observed.  Reducing a FAIL count from 15 to 1 is not the point; a non-zero FAIL
+count is the disturbing thing either way, so do not re-propose this on the
+grounds that it lowers a number.
+
+The pre-change logs for all eight configurations are preserved under
+~/ForClaude/baseline-preNOTINDEX/, with a README saying what to diff and why.
+The next full sweep should be diffed against them: this change makes fcmcmp
+SUPPRESS output, and suppression is how real data goes missing quietly.
 
 INFRASTRUCTURE, and the traps that produced it:
 
@@ -688,9 +776,25 @@ NEXT STEPS, in order.
      kills (now fixed); three began minutes into a healthy run and had already
      reported success.  hang-watch.sh is armed to capture the next one live.
 
-  4. UPSTREAM.  PRs #31, #32 and #33 are open at ColanderCombo/nsts-sdl-dps.
-     #33 is what makes -2 work; without it fcmcmp treats -2 as a checked value
-     that never matches, which warns rather than breaks.
+  4. UPSTREAM.  PRs #31, #32, #33 and #34 are open at
+     ColanderCombo/nsts-sdl-dps.  #33 is what makes -2 work; without it fcmcmp
+     treats -2 as a checked value that never matches, which warns rather than
+     breaks.  #34 is the N/A verdict.
+
+     The two interact, and it looks like a bug if they are tried together.  #34
+     does not contain #33, so on #34's branch ALONE the -2 exception at G3 0B0D3
+     is not understood and GO3ENT reports one differing halfword.  That is
+     branch composition, not either change: a control run with a table carrying
+     no inConfig fields at all fails identically.  It resolves once both land.
+
+     Don already consumes our CSECT tables -- tools/retest_open_issues.sh is his
+     own commit, bb4e26c of 2026-07-25, passing ../csects-G9.json to BOTH
+     lnk101 --external-syms and fcmcmp --csect-table -- and lnk101 CONSUMES a
+     csect table (linker.py:2142), it never produces one.  So #34 needs no
+     workflow change at his end, only a table carrying the two fields, which the
+     scrape does not.  The PR says so in an italicised note at the top, because
+     the one-word substitution to augmented-<CFG>.json is otherwise easy to miss
+     and the failure mode is merging it and seeing nothing happen.
 
 SCOPE, so the numbers above are not misread.  The HAL/S phase is 3212 of the 3859
 CSECTs in the indices; the rest are assembly and HAL/S runtime library routines.
