@@ -215,14 +215,23 @@ def nextOrd(db, after):
     return lo + 1000.0 if nxt is None else (lo + nxt) / 2.0
 
 
-def add(db, after, body, title = None, why = None):
+def add(db, after, body, title = None, why = None, kind = "prose",
+        section = None):
+    '''Insert after entry `after`.
+
+    `section` defaults to the section `after` belongs to, which is right for
+    an ordinary paragraph and wrong for the first entry of a NEW section --
+    pass it explicitly there, along with kind='rule' for the header itself,
+    or everything below it is filed under the previous section.
+    '''
     body = body.rstrip("\n") + "\n\n"
     ord_ = nextOrd(db, after)
-    sec = db.execute("SELECT section FROM entry WHERE id=?",
-                     (after,)).fetchone()["section"]
+    if section is None:
+        section = db.execute("SELECT section FROM entry WHERE id=?",
+                             (after,)).fetchone()["section"]
     cur = db.execute("INSERT INTO entry (ord, section, kind, title, body, why,"
-                     " stamp, updated) VALUES (?,?,'prose',?,?,?,?,?)",
-                     (ord_, sec, title or leadIn(body), body, why,
+                     " stamp, updated) VALUES (?,?,?,?,?,?,?,?)",
+                     (ord_, section, kind, title or leadIn(body), body, why,
                       today(), today()))
     db.commit()
     return cur.lastrowid
@@ -241,6 +250,8 @@ def setField(db, ident, field, value):
 def main():
     dbPath, mdPath = DEFAULT_DB, DEFAULT_MD
     args, after, title, why, section, by, noWrite = [], None, None, None, None, None, False
+    kind = "prose"
+    bodyFile = None
     for p in sys.argv[1:]:
         if p.startswith("--db="):
             dbPath = Path(p.partition("=")[2]).expanduser()
@@ -254,6 +265,12 @@ def main():
             why = p.partition("=")[2]
         elif p.startswith("--section="):
             section = p.partition("=")[2]
+        elif p.startswith("--kind="):
+            kind = p.partition("=")[2]
+        elif p.startswith("--body-file="):
+            # Prose with apostrophes and quotes does not survive a shell
+            # command line intact; a file does.
+            bodyFile = Path(p.partition("=")[2]).expanduser()
         elif p.startswith("--by="):
             by = int(p.partition("=")[2])
         elif p == "--no-write":
@@ -307,15 +324,18 @@ def main():
                             (pat, pat)):
             print(f"  #{r['id']:<4} [{r['section'] or '-'}] {r['title'][:60]}")
     elif command == "add":
-        if after is None or len(args) < 2:
+        text = bodyFile.read_text() if bodyFile else " ".join(args[1:])
+        if after is None or not text.strip():
             raise SystemExit("add needs --after=ID and a body")
-        print(f"entry {add(db, after, ' '.join(args[1:]), title, why)} added")
+        new = add(db, after, text, title, why, kind, section)
+        print(f"entry {new} added")
         mutated = True
     elif command in ("set", "why", "title"):
-        if len(args) < 3:
+        text = bodyFile.read_text() if bodyFile else " ".join(args[2:])
+        if len(args) < 2 or not text.strip():
             raise SystemExit(f"{command} needs an id and text")
         field = {"set": "body", "why": "why", "title": "title"}[command]
-        setField(db, int(args[1]), field, " ".join(args[2:]))
+        setField(db, int(args[1]), field, text)
         print(f"entry {args[1]} {field} updated")
         mutated = True
     elif command == "move":

@@ -21,11 +21,21 @@ the next command silently overwrites it.  Notes awaiting a documentation sync
 live in dass-notes.db, managed by dass-notes.py, which is a different thing:
 that is a queue for OTHER documents, and no longer for this one.
 
-THIS PHASE IS COMPLETE.  Both corpora compile in full, and nothing in here is
-blocking.  The next phase is described in compileLinkCompare.md, beside this
-file: comparing our linked binary against the actual AP-101S memory dumps.
-Sections 1 through 7 remain the working knowledge a corpus run needs; section 8
-records how the last failures were resolved, and 9 what not to re-litigate.
+THE CORPUS PHASE IS COMPLETE.  Both corpora compile in full, and nothing in
+sections 1 through 10 is blocking.  Sections 1 through 7 remain the working
+knowledge a corpus run needs; section 8 records how the last failures were
+resolved, and 9 what not to re-litigate.
+
+THREE PHASES HAVE FOLLOWED IT, and a fresh session should start from whichever
+it has been asked about rather than reading forwards:
+
+    12.  the DASS comparison -- our linked binary against the AP-101S memory
+         dumps.  14407 of 14407 in-index HAL/S sections match.  Process detail
+         is in compileLinkCompare.md and PFS/mafgenComparison.md.
+    13.  assembling the AP-101S sources with ASM101S.  Measured and largely
+         already met; what remains is blocked on obtaining FCOS source.
+    --   .dfg, which has not started and needs a preprocessor that does not
+         exist.  See section 12's step 1.
 
 --------------------------------------------------------------------------------
 1.  THE GOAL, AND WHERE IT STANDS
@@ -896,10 +906,19 @@ INFRASTRUCTURE, and the traps that produced it:
 
 NEXT STEPS, in order.
 
-  1. THE NEXT PHASES, both currently blocked and set aside by the user on
-     2026-08-07.  .dfg needs a preprocessor to convert to .hal, which does not
-     exist.  .asm needs changes to ASM101S that are under way elsewhere and are
-     not yet available.  Nothing here can proceed until one of those arrives.
+  1. THE NEXT PHASES.  .dfg is still blocked and still set aside by the user on
+     2026-08-07: it needs a preprocessor to convert to .hal, which does not
+     exist.
+
+     .asm IS NO LONGER BLOCKED, and the reason it was thought to be was wrong.
+     This used to read "needs changes to ASM101S that are under way elsewhere",
+     meaning Don's -- but he has not touched virtualagc/ASM101S since
+     2026-04-29, and what he has been building is a separate assembler in his
+     own repository that cannot be merged back.  The user's decision on
+     2026-08-08 was to advance our own ASM101S instead, and measurement that
+     day found it already assembles everything we hold.  Section 13 has the
+     whole of it, including the one thing that IS still blocking: FCOS source
+     does not exist in any tree we can see.
 
   2. WHEN THE CROSS-CHECK IS FINALLY COMPLETE -- meaning after .dfg and .asm, not
      now -- weed ~/ForClaude of obsolete material, chiefly sweeps too old to
@@ -1009,3 +1028,236 @@ SCOPE, so the numbers above are not misread.  The HAL/S phase is 3212 of the 385
 CSECTs in the indices; the rest are assembly and HAL/S runtime library routines.
 Reaching 14407/14407 finishes one phase of three, not the comparison.  Both
 remaining phases are blocked as described in step 1.
+================================================================================
+13. ASSEMBLING THE AP-101S SOURCES  (2026-08-08)
+================================================================================
+
+THE GOAL.  Advance ASM101S until it assembles the entirety of our stock of
+AP-101S assembly language, correctly.  This section is the starting line: what
+the stock actually is, what already works, what does not, and where the first
+work is.  It was written on 2026-08-08 with the measurements below taken that
+day, so they can be re-run and compared rather than believed.
+
+THE DECISION BEHIND IT, taken by the user on 2026-08-08.  There will be TWO
+assemblers, ours (virtualagc/ASM101S) and Don Schmidt's (asm101, in
+nsts-sdl-dps/src/asm101), and we will use whichever proves better.  This is
+deliberate and is not a fork to be reconciled: there is room for two, and the
+comparison is itself informative.  The user intends to discuss it with Don and
+may revise it afterwards, so treat it as the current decision rather than a
+settled one.
+
+WHAT CHANGED TO PROMPT THAT, since the previous section still says the .asm
+phase is "blocked on ASM101S changes under way elsewhere".  IT IS NOT BLOCKED,
+and that description was wrong in a specific way worth recording so nobody waits
+on it again.  Don is not making ASM101S changes.  His last commit to
+virtualagc/ASM101S is 3734237af, 2026-04-29, and he has 11 there in total, all
+between February and April 2026.  He has been active in virtualagc since --
+XCOM-I and HAL/S-FC as recently as 2026-08-04 -- just not in ASM101S.  There was
+never a held-back patch series to wait for.
+
+WHAT DON'S asm101 IS, so the comparison is not made from scratch again.  It is a
+declared derivative of ASM101S that has been rewritten.  Every file carries
+attribution -- assemble.py names ASM101S.py with its GitHub URL, and
+model101tables.py says outright that it was "significantly refactored for
+asm101, most of the encoding moving to instrdefs.py/instrset.py which reads
+instruction descriptors from instr_defs.json".  Provenance is not in question.
+
+At the line level almost nothing is shared.  The two totals are nearly equal --
+9814 lines for ASM101S against 9755 for asm101 -- and entirely redistributed:
+
+    parser        tatsu (PEG)          lark, with an asm.lark grammar and an AST
+    CLI           argparse             typer
+    layout        flat modules         a package, relative imports
+    encoding      in code              data, instr_defs.json, 1613 lines
+    model101.py   2362 lines           3422 lines
+
+On a crude sorted-unique-line comparison model101.py shares about 51 lines
+against roughly 1875 and 2848 unique to each side.
+
+WHY THERE IS NO PULL REQUEST TO WAIT FOR, and why this is structural rather than
+reluctance.  asm101 imports ap101Utils -- addr, addrcon, objModule, codepages,
+ibmhex -- a sibling package of 10286 lines in his repository, which also holds
+sdf.py, halorder.py and cards.py.  asm101 cannot be lifted into virtualagc
+without it.  His most recent assembler commit makes the point better than the
+import list: 5638d2e touches ap101Utils/sdf.py, ap101Utils/halorder.py,
+asm101/assemble.py and asm101/model101.py in ONE commit, to make the assembler
+emit .asmg.json sidecars feeding SDF generation.  That is not an assembler
+improvement, it is build-pipeline integration.  The assembler has become a
+component of his system rather than a standalone tool, and "merge it back" would
+mean importing his infrastructure or him un-picking the assembler from it.
+
+WHAT IS WORTH TAKING FROM IT ANYWAY.  Not the rewrite -- a handful of citable
+semantic findings buried in it, which port even though the patches do not:
+
+  - 74fb403, a null &SYSLIST(k) coerces to zero in arithmetic context, citing
+    GC26-3758-3 p.19 and SC26-4940 Table 58.  It ships with tests.  This is
+    language semantics and applies to any correct AP-101 assembler.
+  - d983348, Z(code,data,flags) names a second target: the linkage editor
+    patches the data subfield's sector into HW1's DSR through a DSR-only RLD
+    (0x40) at the ZCON's position.
+
+Both are verifiable against the IBM manuals rather than against his code, which
+is the only reason they are worth having.  d983348's implementation is written
+in terms of his lark front-end and does not transfer.
+
+ONE THING asm101 IS NOT: a drop-in replacement for our RTL work.  It contains no
+&ASM101S at all and only two mentions of GBLB, so the conditional-assembly idiom
+every one of our gated RTL fixes depends on is absent.  Do not assume adopting
+it would be a shortcut.
+
+THE STOCK, counted on 2026-08-08.  All of it is under
+yaShuttle/Source Code/PASS.REL32V0/:
+
+    RUNASM/     205 .asm    the AP-101S runtime library.  THE REAL CORPUS.
+    ZCONASM/    285 .asm    ZCON stubs, 48-56 bytes each
+    RUNMAC/      20 .asm    the macro library, not assembled on its own
+    RUNLST/     206 .txt    contemporary listings, the reference for RUNASM
+
+ZCONASM is not the work it appears to be.  Every file is four lines of the same
+shape and they are mechanically generated:
+
+    #QACOS   CSECT
+     DC Z(ACOS,,X'E')
+     EXTRN ACOS
+     END
+
+There are no ZCON listings anywhere -- RUNLST is the only *LST* directory -- so
+ZCONASM can be assembled but not checked against a contemporary reference.
+Treat 285 of the 490 files as volume rather than difficulty.
+
+MONITOR.ASM/ (19 files) and SDFPKG.ASM/ (7) are NOT part of this.  They are .bal
+-- IBM 360 Basic Assembler Language for the HAL/S-FC compiler itself -- a
+different target and a different assembler.
+
+FCOS IS NOT IN THE TREE.  This matters because the goal names it.  There is no
+FCOS source anywhere in virtualagc, nor in nsts-sdl-dps, ~/workspace/PFS or
+~/ForClaude; a search of all four found nothing.  No CSECT name in any
+csects-<CFG>.json index contains "FCOS" either, so it is not merely unextracted
+from the DASS material under that name.  The only occurrences anywhere are HAL/S
+comments reading "FOR 128 FCOS CHECKSUM".  Do not spend a session looking for
+it: it has to be obtained or identified under another name first, and that is a
+question for the user rather than a search.
+
+HOW TO MEASURE WHERE YOU ARE.  ASM101S/regressionASM101S.sh assembles all 205
+RUNASM files and compares each against its RUNLST listing.  It takes minutes,
+not hours, and is the loop to work in:
+
+    cd ASM101S && ./regressionASM101S.sh              # our fixes ON, the default
+    cd ASM101S && ./regressionASM101S.sh --no-rtl-fixes
+    cd ASM101S && ./regressionASM101S.sh --copy       # keep each listing as .lst
+
+It prints each module name, and prints the last line of the assembly only when
+that line is NOT "0 bytes mismatched and 0 bytes missing".  So a run where every
+name appears and nothing else does is a clean run, and any other text is a
+finding.  Redirect through `sed 's/\x1b\[[0-9;]*m//g'` to strip its colours.
+
+*** READ THE RESULT WITH --no-rtl-fixes IN MIND. ***  RUNLST is HISTORICAL, and
+our RTL fixes deliberately depart from it.  They live behind &ASM101S gates in
+the .asm sources, &ASM101S is true by default, and cb63663cd added
+--no-rtl-fixes to force it false so a build can reproduce the historical image
+including its bugs.  A file carrying a gated fix therefore MUST differ from its
+listing on a default run.  Comparing the two runs is what separates "our fix"
+from "our defect": --no-rtl-fixes measures the assembler alone, the default run
+measures the assembler plus our intentional deviations.
+
+A single file, which is how you will actually iterate:
+
+    cd "yaShuttle/Source Code/PASS.REL32V0/RUNASM"
+    ASM101S --library --tolerable=4 --compare=../RUNLST/NAME.txt NAME.asm
+
+ASM101S is a two-line wrapper on $PATH at ASM101S/ASM101S and runs ASM101S.py.
+--library loads the default macro library (RUNMAC); without it no macros are
+loaded at all and nothing in RUNASM will assemble.  --tolerable=4 accepts MNOTE
+severities up to 4, which the sources use for information messages.
+
+To deploy a hand-assembled object into Don's build tree, which is a separate
+matter and covered in the memory on &ASM101S-gated fixes, add --object=NAME.obj
+and copy the result; do NOT run `make runtime` there expecting it to preserve
+gated fixes, because asm101 does not implement them.
+
+THE BASELINE, measured 2026-08-08, and it is much better than the phrase
+"advance ASM101S until it assembles everything" implies.  ASM101S ALREADY
+ASSEMBLES THE WHOLE OF THE PRESENT STOCK.
+
+    RUNASM    205 of 205   assemble AND match their contemporary listings
+                           byte for byte, with --no-rtl-fixes
+    ZCONASM   284 of 284   assemble with exit status 0
+    FCOS            -      no source exists to assemble
+
+The RUNASM figure is the strong one, because it is not "no errors" but "0 bytes
+mismatched and 0 bytes missing" against a listing printed by the original
+assembler, for every module.
+
+ON A DEFAULT RUN, EXACTLY SIX FILES FAIL, AND THAT IS BY DESIGN.  They are
+CINDEX, MM14SN, MM6SN, MV6SN, VV6S3 and VX6S3 -- and independently, those six
+are precisely the six files in RUNASM that contain &ASM101S at all.  The set of
+failures and the set of gated files are the same set.  Their fixes change the
+generated code, the historical listing does not have that code, so a comparison
+against the listing must fail.  Nothing here is an assembler defect.
+
+DO NOT REPEAT THE MISREADING THAT COST TIME ON THE DAY.  A first pass through
+the default run counted five of them as "the known gated files" and CINDEX as a
+sixth, unexplained failure, on the strength of remembering which files had been
+fixed.  CINDEX is gated too -- grep -l ASM101S RUNASM/*.asm returns exactly the
+six -- and the memory was simply incomplete.  Establish the set by grepping,
+never by recall.
+
+THE ONE REAL DEFECT THE BASELINE EXPOSES is how that failure presents.  When
+generated code runs past the end of the listing being compared against, ASM101S
+does not report it; it dies with a Python traceback:
+
+    File "ASM101S.py", line 1144, in <module>
+      if b != comparisonMemory[oaddress]:
+    IndexError: list index out of range
+
+An intentional, expected, well-understood deviation should not look like a
+crash.  It also truncates the report, so the real mismatches printed just above
+it -- CINDEX shows a run of them before dying -- are easy to miss entirely.
+
+WHAT THIS MEANS FOR THE GOAL, stated plainly because it reframes the work.  The
+constraint is not the assembler.  For everything we hold, ASM101S is already
+there.  The goal as written -- assemble the entirety of our stock, including
+FCOS -- is therefore blocked on OBTAINING SOURCE, not on writing code, and the
+sole reason it is not already met is that FCOS is not in the tree.
+
+NEXT STEPS, in order.
+
+  1. ASK THE USER ABOUT FCOS BEFORE ANYTHING ELSE.  Everything else in this
+     section is small by comparison, and the answer determines whether there is
+     a phase here at all.  The questions worth asking are narrow: does FCOS
+     source exist in a form we can obtain; is it perhaps held under another name
+     (nothing in any csects-<CFG>.json index contains the string, so it is not
+     simply unextracted under that name); and is it expected to arrive from the
+     DASS listings, from Don, or from elsewhere.  Do NOT open with a search --
+     four trees were searched on 2026-08-08 and it is not in any of them.
+
+  2. FIX THE IndexError AT ASM101S.py:1144.  Small, self-contained, and worth
+     doing whatever happens with FCOS: when the generated code is longer than
+     the listing, say so and count it, rather than raising.  The natural report
+     is the one the tool already gives -- "N bytes mismatched and M bytes
+     missing" -- extended to cover generated bytes with no counterpart.  After
+     it, a default regression run should report six understood deviations
+     instead of six tracebacks, which is the difference between a suite that
+     tells you something and one you have learned to ignore.
+
+  3. CONSIDER PORTING THE TWO FINDINGS FROM asm101 described above, the
+     &SYSLIST null-to-zero coercion (74fb403) and the two-target ZCON DSR-only
+     RLD (d983348).  Neither is provably needed by anything we currently
+     assemble -- all 205 RUNASM modules already match -- so this is insurance
+     against sources we do not yet have rather than a fix for a present defect.
+     Both are checkable against the IBM manuals cited, which is the only reason
+     to trust them without his test suite.
+
+  4. ZCONASM HAS NO REFERENCE AND SO IS UNVERIFIED.  All 284 assemble, but
+     "assembles" is a far weaker claim than the one RUNASM supports, and there
+     are no ZCON listings to compare against.  If a stronger claim is ever
+     wanted, the objects can be checked against the linked memory images the
+     DASS work already compares -- which is what section 12's machinery does --
+     rather than against a listing that does not exist.
+
+WHAT NOT TO DO.  Do not start by rewriting or restructuring ASM101S, and do not
+adopt asm101 to "get ahead": ASM101S passes everything we can measure, and
+asm101 lacks the &ASM101S conditional assembly that all six of our gated fixes
+depend on.  A rewrite would be trading a measured 205-of-205 for an unmeasured
+one.
+
