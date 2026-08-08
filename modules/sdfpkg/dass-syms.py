@@ -637,6 +637,13 @@ def main():
                               + (f"{len(candidates)} candidate(s)"
                                  if candidates else "not in HALSTAT"))))
 
+    # The scrape's index plus every address recovered below.  A recovered
+    # address does NOT imply the section is in this configuration -- a
+    # configuration can carry a module's ZCON without carrying the module -- so
+    # the two questions are answered separately: this dictionary says where a
+    # name lives, while the "inConfig" and "spanOwner" fields added at the end
+    # say how much reason there is to think it is not here.  See the note there;
+    # neither field is proof of absence, and one of them is much weaker.
     augmented = dict(index)
     for symbol, (address, phase, why) in accepted.items():
         n = sizeOf.get((symbol, address), 1)
@@ -682,6 +689,53 @@ def main():
     for symbol, (address, n, phase, target) in crossConfig.items():
         augmented[symbol] = {"start": address, "end": address + n - 1,
                              "type": "HALSTAT", "hal": None}
+    # Mark the sections this configuration does NOT contain, so fcmcmp need not
+    # report a meaningless difference as a failure -- which is what G3's DKFCM2
+    # did, reporting "FAIL: 2/3" for two sections that are not in G3 at all
+    # while the scoring, correctly, had already excluded them.
+    #
+    # Two things are recorded, and the second is what makes the first safe to
+    # act on.
+    #
+    # "inConfig": false says only where the ADDRESS came from: one of the two
+    # foreign passes, rather than the relocation-evidence pass.  That is weak
+    # evidence of absence and must not be treated as proof.  #PCDHMMU shows why
+    # in one direction -- absent from the scrape, yet genuinely present, its 788
+    # halfwords inside FCMBMTPG with 170 agreeing references -- so the
+    # relocation-evidence pass marks nothing.  But the foreign passes are not
+    # safe either.  A configuration can carry both the ZCON and the module, and
+    # across the eight configurations 79 marked sections MATCH the dump, 59 of
+    # them verifying content the --no-data patterns do not cover -- up to 477
+    # halfwords, in SSW's #DDCDDG3.  Acting on the mark alone would have hidden
+    # 36 of those agreements.
+    #
+    # "spanOwner" is the positive evidence: the name of a DIFFERENT section in
+    # this configuration's own index that covers the same address.  Where one
+    # exists, we can say what the memory actually belongs to, and a difference
+    # against it means nothing.  In G3, 0xB728 lies inside #PCGZFLD, so the
+    # foreign #DDKFCM2 was compared against unrelated code; in SSW the same
+    # address is unclaimed, and there #DDKFCM2 matches.  Every one of the 231
+    # spurious failures has such an owner, which is why naming it is enough.
+    for name in list(foreign) + [c for c in crossConfig]:
+        if name not in augmented:
+            continue
+        augmented[name]["inConfig"] = False
+        start = augmented[name].get("start")
+        if start is None:
+            continue
+        # Narrowest containing span, so a nested CSECT is named in preference to
+        # whatever encloses it -- the same rule dass-versions.py owner() uses.
+        best = None
+        for other, info in index.items():
+            if other == name or not isinstance(info, dict):
+                continue
+            s, e = info.get("start"), info.get("end")
+            if s is None or e is None or not s <= start <= e:
+                continue
+            if best is None or (e - s) < best[1]:
+                best = (other, e - s)
+        if best:
+            augmented[name]["spanOwner"] = best[0]
     json.dump(augmented, open(out, "w"))
 
     print(f"{config}: {len(index)} CSECTs in the index, "

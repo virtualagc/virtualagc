@@ -84,7 +84,9 @@ dassDb = importlib.import_module("dass-db")
 # parenthesis does not always follow "halfwords".  And the shift block is the
 # whole diagnosis for this file: eleven differing halfwords, one cause.
 SECTION_RE = re.compile(
-    r"^\s*(OK|FAIL|MISSING):\s+(\S+)\s+@\s+([0-9A-Fa-f]+)\s+"
+    # N/A carries a slash, so it must be spelled out rather than folded into the
+    # \w-ish alternation above it.
+    r"^\s*(OK|FAIL|MISSING|N/A):\s+(\S+)\s+@\s+([0-9A-Fa-f]+)\s+"
     r"\((\d+)\s+halfwords(?:\s+vs\s+(\d+)\s+expected)?\)"
     # Any bracketed note, parsed afterwards rather than matched literally.
     # fcmcmp has twice gained a new one -- "[N no reference data]", then
@@ -154,9 +156,21 @@ def parseOutput(text):
                 # expected on grounds recorded elsewhere and nothing is claimed
                 # about the contents.  Here, the four units OI-34.07 revised.
                 "ignored": counts.get("ignored", 0),
-                "n_diffs": 0 if verdict == "OK" else n,
+                # NULL for N/A, and deliberately so.  0 would read as "compared
+                # and identical" and a count would read as a failure; the truth
+                # is that nothing was claimed.  It falls out of the parse anyway,
+                # there being no "N halfwords differ" phrase to find, but leaving
+                # that to chance would be an accident waiting to be tidied away.
+                "n_diffs": 0 if verdict == "OK"
+                           else None if verdict == "N/A" else n,
                 "verdict": {"OK": "ok", "FAIL": "differ",
-                            "MISSING": "missing"}[verdict],
+                            "MISSING": "missing",
+                            # Differs, but is not in this configuration and its
+                            # span belongs to another section, so fcmcmp makes no
+                            # claim.  Recorded rather than dropped: a section that
+                            # vanishes from the database is how this file has been
+                            # misled twice before.
+                            "N/A": "not_in_config"}[verdict],
                 "shift": None, "shifted_in": None, "after_shift": None,
                 "detail": (tail or "").strip(),
                 "diffs": [],
@@ -186,8 +200,14 @@ def parseOutput(text):
 
     if not sections:
         return "compare_failed", [], None
-    outcome = "match" if all(s["verdict"] == "ok" for s in sections) \
-              else "differ"
+    # "not_in_config" is not a difference.  fcmcmp reports it for a section that
+    # is not in this configuration and whose span demonstrably belongs to
+    # another, so it prints PASS on the sections that remain; treating the
+    # verdict as differing would contradict fcmcmp and drop a matching unit out
+    # of the score.  It is not a match either -- no claim was made about it -- so
+    # it is simply not consulted here, exactly as "no_data" is not.
+    outcome = "match" if all(s["verdict"] in ("ok", "not_in_config")
+                             for s in sections) else "differ"
     return outcome, sections, None
 
 
@@ -274,7 +294,14 @@ def runOne(job):
 
 
 def record(db, rec):
-    n_ok = sum(1 for s in rec["sections"] if s["verdict"] == "ok")
+    # The run's totals count only the sections a claim was made about, which is
+    # what fcmcmp's own "PASS: all N sections match" counts.  A not_in_config
+    # section left in the denominator would reproduce, inside the database, the
+    # very arithmetic that made G3's DKFCM2 report read "FAIL: 2/3" while the
+    # score said 2905/2905.  Every section still gets a row below; only the
+    # summary excludes them.
+    claimed = [s for s in rec["sections"] if s["verdict"] != "not_in_config"]
+    n_ok = sum(1 for s in claimed if s["verdict"] == "ok")
     # Which CSECTs the target configuration actually contains.  A section we
     # linked that is absent from the index was placed wherever the linker chose
     # and compared against whatever the dump happens to hold there, so its
@@ -287,7 +314,7 @@ def record(db, rec):
         "INSERT INTO run(config, source_id, started, seconds, outcome,"
         " n_sections, n_ok, log, results_dir) VALUES (?,?,?,?,?,?,?,?,?)",
         (rec["config"], rec["source_id"], rec["started"], rec["seconds"],
-         rec["outcome"], len(rec["sections"]), n_ok, rec["log"],
+         rec["outcome"], len(claimed), n_ok, rec["log"],
          rec["results_dir"]))
     runId = cur.lastrowid
     for s in rec["sections"]:
