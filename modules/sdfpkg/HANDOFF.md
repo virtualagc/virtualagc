@@ -2,8 +2,24 @@
 HANDOFF -- PASS corpus compilation, 2026-08-05
 ================================================================================
 Written so a fresh session can restart from this file alone.  Companion
-material: modules/sdfpkg/CLAUDE_LOG.md, and two helper scripts beside this
-file, corpus-classify.py and corpus-run.sh.
+material: two helper scripts beside this file, corpus-classify.py and
+corpus-run.sh.
+
+*** THIS FILE IS GENERATED.  DO NOT EDIT IT BY HAND. ***  The source is
+dass-handoff.db beside it, and dass-handoff.py is how you change it:
+
+    dass-handoff.py list                      what is in here, by section
+    dass-handoff.py show ID                   one entry in full
+    dass-handoff.py search TEXT               find the entry to change
+    dass-handoff.py set ID "new text"         replace it
+    dass-handoff.py add --after=ID "text"     insert after an entry
+    dass-handoff.py check                     has this file drifted?
+
+Every command that changes an entry regenerates this file immediately, so the
+two cannot drift apart -- but a hand edit here is invisible to the database and
+the next command silently overwrites it.  Notes awaiting a documentation sync
+live in dass-notes.db, managed by dass-notes.py, which is a different thing:
+that is a queue for OTHER documents, and no longer for this one.
 
 THIS PHASE IS COMPLETE.  Both corpora compile in full, and nothing in here is
 blocking.  The next phase is described in compileLinkCompare.md, beside this
