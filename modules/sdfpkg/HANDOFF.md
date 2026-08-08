@@ -714,10 +714,42 @@ observed.  Reducing a FAIL count from 15 to 1 is not the point; a non-zero FAIL
 count is the disturbing thing either way, so do not re-propose this on the
 grounds that it lowers a number.
 
-The pre-change logs for all eight configurations are preserved under
-~/ForClaude/baseline-preNOTINDEX/, with a README saying what to diff and why.
-The next full sweep should be diffed against them: this change makes fcmcmp
-SUPPRESS output, and suppression is how real data goes missing quietly.
+VERIFIED ACROSS ALL EIGHT, and the evidence is kept as a matched pair:
+
+    ~/ForClaude/baseline-preNOTINDEX/      the logs immediately BEFORE
+    ~/ForClaude/verify-NA-2026-08-08/      the same 2558 units AFTER
+
+Keep them together; either alone proves nothing.  This change makes fcmcmp
+SUPPRESS output, and suppression is how real data goes missing quietly, so the
+claim that it removes only noise is worth nothing unless every verdict is
+compared before and after.  Comparing them gives:
+
+    OK   -> OK      14551      every match preserved
+    FAIL -> N/A       231      the intended effect, all with a named owner
+    FAIL -> FAIL      115      unchanged
+    OK   -> FAIL        3      NOT a regression, see below
+
+The three are #DGO8ORB @07F5B, #DGO3ENT @0AFC8 and #DGO1ASC @0B73C, one halfword
+each, ED8D vs ED8C -- exactly the three entries of PFS/mafgen/defects.txt.  They
+go unsuppressed because the fcmcmp used (71c07a3, PR #34) does not contain
+fcmcmp-markers (PR #33), so a -2 is treated as a checked value that never
+matches.  Confirmed independently by a control run against a CSECT table with no
+inConfig fields at all, which fails identically.  They resolve when #33 lands.
+
+The 115 are the ZCON-only units described just above, which are excluded from
+the score and were left alone deliberately.
+
+A FULL SWEEP IS NOT NEEDED to redo this.  fcmcmp needs only the .fcm and .json
+the last sweep already left in <CFG>work3, so re-running the comparison alone
+took 99 seconds for all 2558 units against roughly four hours for a sweep --
+compilation and linking dominate, and neither is involved.
+verify-NA-2026-08-08/rerun-fcmcmp-only.sh does it (self-contained, and tested to
+regenerate byte-identical logs), and compare-against-baseline.py redoes the
+comparison.  The real sweep logs in <CFG>logs/ were NOT overwritten.
+
+One trap those directories will spring on anyone who returns to them: EVERY
+fcmcmp log begins with its commit hash, date and source hash, so a plain diff of
+two logs is never empty even when nothing changed.  Compare verdicts, not files.
 
 INFRASTRUCTURE, and the traps that produced it:
 
@@ -770,6 +802,13 @@ NEXT STEPS, in order.
      from the plain files plus HALSTAT, so they are derived output rather than
      evidence.  The plain exceptions-<CFG>.txt are also derived, from listings
      that are themselves in mafgen/, which is why neither is tracked.
+
+     TWO DIRECTORIES MUST SURVIVE THAT WEEDING: baseline-preNOTINDEX/ and
+     verify-NA-2026-08-08/, 23 MB together.  They look like old sweep output and
+     are not -- they are the before-and-after evidence for the N/A change, and
+     each is meaningless without the other.  Anything else in ~/ForClaude that
+     turns out to be evidence rather than output should be labelled the same way
+     before that step, since by then the distinction will not be obvious.
 
   3. THE INTERMITTENT HALSFC HANG is unexplained.  Six occurred on 2026-08-07,
      on six different files, each once.  Three were orphaned by imperfect sweep
