@@ -779,9 +779,30 @@ INFRASTRUCTURE, and the traps that produced it:
     count, and when it is not, suspect the clock before the code.  All six stage
     banners now carry $(date -Is), which would have shown the gap immediately.
 
+  - JOB TREES ARE LOCKED ACROSS PROCESSES, not merely across threads.  Each
+    compile flocks its tree for its whole duration, so two sweeps take turns
+    rather than rewriting each other's fixed-name files.  See step 3 below for
+    what that cost before it existed.  The general lesson: an in-process pool,
+    mutex or queue guarantees nothing about a second copy of the same program,
+    and every one of these scripts can be run twice at once.
   - ~/ForClaude/hang-watch.sh captures /proc/PID/cwd and /proc/PID/fd for any
-    pass running over ten minutes, so the next intermittent HALSFC hang can be
-    diagnosed rather than merely cleaned up.  Its cause is still unknown.
+    pass running over ten minutes.  run-configs.sh now ARMS IT AT THE START OF
+    EVERY SWEEP -- the only time it can catch anything -- and hang-watch.sh
+    takes an flock, so arming it repeatedly exits 0 and leaves exactly one
+    running.  The sweep does not stop it afterwards: it is read-only, kills
+    nothing, and costs about two seconds of CPU a day.  It was previously
+    started by hand, which meant it died at the first reboot while this document
+    went on asserting it was armed -- a claim with a lifetime.  Expecting a
+    person to remember a step is how the step gets forgotten; put it in whatever
+    needs it.
+  - PROCESS CHECKS LIE IN TWO DIFFERENT WAYS ON THIS MACHINE, and both have
+    produced confidently wrong answers.  `ps | grep` returns nothing, as above.
+    And `pgrep -f PATTERN` matches the shell running the check whenever the
+    pattern appears in its own command line -- filtering $$ is NOT enough,
+    because command-substitution subshells inherit that command line too.  The
+    reliable form is `pgrep -x -f "<exact full command line>"`, which a long
+    shell invocation cannot equal.  Both traps cost a wrong conclusion on
+    2026-08-08 alone.
   - PFS carries runnable copies of dass-*.py and mafgen/defects.txt so
     mafgenComparison.md can be followed from there.  The generated
     exceptions-*.txt are NOT tracked -- they are derivable from the listings
@@ -810,10 +831,49 @@ NEXT STEPS, in order.
      turns out to be evidence rather than output should be labelled the same way
      before that step, since by then the distinction will not be obvious.
 
-  3. THE INTERMITTENT HALSFC HANG is unexplained.  Six occurred on 2026-08-07,
-     on six different files, each once.  Three were orphaned by imperfect sweep
-     kills (now fixed); three began minutes into a healthy run and had already
-     reported success.  hang-watch.sh is armed to capture the next one live.
+  3. THE INTERMITTENT HALSFC HANG IS EXPLAINED AND FIXED (2026-08-08).  Six
+     occurred on 2026-08-07, on six different files, each once, and none before
+     or since.  The user identified the mechanism: SWEEPS WERE SHARING JOB
+     TREES.  There are four, ~/ForClaude/jobs/1..4, and every sweep computes the
+     same list from the same hard-coded root, so the six sweeps running that
+     afternoon put 24 compiles through 4 directories.  HALSFC writes halmat.bin,
+     litfile.bin and COMMON*.out into its working directory under FIXED names,
+     so they were rewriting each other's files mid-read.
+
+     dass-run.py's treePool existed to prevent exactly this, and its comment
+     insists exclusion must be "by possession, not by arithmetic" -- but
+     possession was a queue.Queue inside ONE interpreter, and the guard beneath
+     it ("--jobs=N but only M tree(s); two compiles would share a directory and
+     corrupt each other") checks only its own arithmetic.  All six sweeps passed
+     it and then collided.  A lock that protects against your own threads and no
+     one else's is the shape of bug to look for elsewhere in this tooling.
+
+     Each tree is now flock'd for the whole compile, which every process can
+     see, so concurrent sweeps take turns instead of corrupting each other, and
+     run-configs.sh says so when it finds another sweep running.  Verified by
+     two processes contending -- the second acquired the instant the first
+     released -- and by a real compile through the locked path.
+
+     This also accounts for the detail that no overload theory could: a process
+     that had already reported success and went on spinning for an hour.
+     Contention makes things slow; it does not do that.  Having your input
+     replaced underneath you does.
+
+     NO RESULT WAS AFFECTED, checked rather than assumed.  Every one of the 2558
+     scored runs is match or differ -- none compare_failed, none timed out --
+     and all fall between 19:34 and 06:00, inside the two sessions that ran
+     alone, both of which re-ran the full six-stage pipeline per configuration.
+     The slowest compile anywhere is 36.7s against 3600s for a hang.  And a
+     corrupted compile that still reported success would have had to emit code
+     matching the AP-101S dump exactly to escape notice.
+
+     BEWARE ONE PIECE OF ARITHMETIC THAT LOOKED LIKE EVIDENCE.  A first pass at
+     this counted concurrent sweeps as +1 per "started" and -1 per "all done" in
+     run-configs.log, and produced a tidy dose-response table.  It was wrong: 9
+     sessions started and only 4 printed "all done", the other five having been
+     killed, so the counter never came down.  What survives is that all six
+     hangs fall in the 12:44-18:56 pile-up and the two later solo sessions had
+     none.  The mechanism is established from the code, not from that table.
 
   4. UPSTREAM.  PRs #31, #32, #33 and #34 are open at
      ColanderCombo/nsts-sdl-dps.  #33 is what makes -2 work; without it fcmcmp
