@@ -592,143 +592,107 @@ numbers.
 11. DASS COMPARISON -- CURRENT STATE AND NEXT STEPS  (2026-08-07)
 ================================================================================
 
-STATE.  The last COMPLETED sweep gave 14379 of 14407 in-index sections matching,
-28 differing, 0 errors, with SSW, P9 and G2 exact.  Those numbers PREDATE the
-2026-08-07 fixes below and are expected to improve; a re-measuring sweep is
-running as this is written.  ~/ForClaude/run-configs.log is the live record and
-holds a "RESULT" line per configuration.  Process detail is in
-PFS/mafgenComparison.md, outcomes in modules/sdfpkg/compileLinkCompare.md.
+STATE (2026-08-07 evening).  14404 of 14407 in-index sections match, 3 differ, 0
+errors.  Five configurations are exact.  The three differences are ONE difference
+in three places -- the .000001 literal in #DGO8ORB, #DGO3ENT and #DGO1ASC -- and
+after the ibmFloat fix our value for it is ...ED8D against the dump's ...ED8C,
+so it is now a suspected defect in the ORIGINAL compiler rather than in ours.
+It is entered in PFS/mafgen/defects.txt as the first -2.
 
-DONE 2026-08-07, all committed, all pending re-measurement:
+Read the counts with the no-claim share, which run-configs.sh now prints after
+every RESULT line: G2 0.87%, G8 1.02%, P9 1.21%, SSW 1.89%, G9 10.75%, S2
+22.15%.  A perfect section count can rest on excusing a fifth of the halfwords in
+those sections, and S2's does.
 
-  - FOREIGN SYMBOLS, per site (c90e0f9f9).  A symbol absent from a configuration
-    is no longer given a borrowed address unconditionally, nor withheld
-    unconditionally; the dump decides per symbol.  Only ANCHORED sites count --
-    the referencing section must sit in the index at exactly the address lnk101
-    placed it -- and a site holding the bare addend, or the addend with bit 15
-    set, says the build left it alone.  --foreign-symbols became
-    --no-foreign-symbols.  Recovers #EVRPRAM in seven configurations and
-    #EASCTIM in G3/G16; withdraws nothing.
+Process detail is in PFS/mafgenComparison.md, which was brought fully up to date
+the same evening and is the document to read first.
 
-  - NONHAL COMPOOLS (8857e5f3c).  S2's SAFACQ references #PCSADAR, #PCSAINB,
-    #PCSAIXP and #PCSAPAR, which no configuration and no HALSTAT phase defines.
-    HALSTAT's compilation layout marks them NONHAL: nothing in HAL/S defines
-    them and the configuration supplies the storage, here #PCS2DAR, #PCS2INB,
-    #PCS2IXP, #PCS2PAR.  All thirteen address references land exactly on those
-    CSECT starts, including two negative displacements and one sector-encoded
-    ZCON.  basesFrom() honours the RLD sign bit and bit-15 encoding and excludes
-    BSR-only/DSR-only relocations, which patch a register field not an address.
-    A uniqueness guard refuses an address several symbols derive -- which is
-    what refuses S2's seven #ZP symbols all deriving 0x298.
+DONE 2026-08-07.  Twenty-odd commits; the ones that changed results:
 
-  - ATTRIBUTION FROM RESOLVED OPERANDS (932f48219, then 4ee23d41a).  The
-    planned sector-decoding fix was unnecessary.  At a relocation site lnk101
-    already names the target and says what it resolved to, so decode the dump's
-    halfword by the same amount and judge containment against the DUMP's extent.
-    Better still, MAFGEN's own disassembly resolves EVERY instruction operand to
-    an effective address and usually names the variable, which is evidence
-    exactly where relocation records do not exist.  dass-versions.py now reads
-    it.  This closed the SPSPSP family; see PFS/mafgenComparison.md.
+  - Foreign symbols decided per site from what the dump holds (c90e0f9f9), and
+    NONHAL COMPOOLs recovered from the CSECT that supplies them (8857e5f3c,
+    56512bd03).  Between them these fixed S2 outright.
+  - Attribution from three new sources of evidence in dass-versions.py: lnk101's
+    RLD at a resolved relocation (932f48219), MAFGEN's own resolved operand
+    column (4ee23d41a), and the symbol named by an UNRESOLVED relocation
+    (7cd211987).  These closed the SPSPSP family and G9's #PCSDMD1.
+  - dass-literals.py splits a glued name at the '*' (9554cf34f), recovering
+    I-LOADs whose variable name ends in a hex letter.
+  - ibmFloat: `f = (long long)d` in place of `(long long)(d + 0.5)`, in
+    XCOM-I/ibmFloat.c and both Python copies (4a4324b32).  A GENERAL defect --
+    100% of odd mantissas corrupted -- and the reason our literal read ...ED8E.
+    All eleven HAL/S-FC passes were rebuilt afterwards; editing the source is not
+    enough, since XCOM-I copies ibmFloat.c into each *.build directory.
+  - -2 exception marker: fcmcmp accepts any negative marker (upstream PR #33,
+    still open), meanings declared in the exceptions file itself, and
+    dass-versions.py emits entries from PFS/mafgen/defects.txt (868b387df).
 
-  - owner() takes the NARROWEST containing CSECT (ae3dee531).  Spans nest by
-    design.  Changes nothing measurable today and is kept as a guard.
+INFRASTRUCTURE, and the traps that produced it:
 
-  - SWEEP SANDBOX.  run-configs.sh now copies dass-*.py AND nsts-sdl-dps/src
-    into a mktemp directory and runs from there, exporting PYTHONPATH so the
-    copy shadows the build venv's editable .pth.  Both toolchain commits are
-    logged at launch.
+  - dass-compare.db is opened WAL with a two-minute busy timeout (3b95729f9).
+    Under the default rollback journal a writer blocks every reader and the
+    5-second default is easily exceeded; P9's entire sweep once produced nothing
+    and the only sign was a missing RESULT line.  run-configs.sh now shouts if a
+    configuration produces no RESULT.
+  - A timed-out compile has its whole process group killed (766cf06a9).  Six
+    orphans once accumulated, each spinning on a full core, two for over three
+    hours -- and worse than the waste, an orphan keeps writing halmat.bin into a
+    job tree that has already been handed to another compile.
+  - ~/ForClaude/stop-sweep.sh kills a sweep completely and proves it.  NEVER
+    verify a kill with `ps | grep` on this machine: grep is rewritten to `rtk
+    grep` and returns nothing, which reported "0 remaining, clean" three times
+    while six orphans were running.  pgrep tells the truth.
+  - ~/ForClaude/hang-watch.sh captures /proc/PID/cwd and /proc/PID/fd for any
+    pass running over ten minutes, so the next intermittent HALSFC hang can be
+    diagnosed rather than merely cleaned up.  Its cause is still unknown.
+  - PFS carries runnable copies of dass-*.py and mafgen/defects.txt so
+    mafgenComparison.md can be followed from there.  The generated
+    exceptions-*.txt are NOT tracked -- they are derivable from the listings
+    already present.
 
-    TWO TRAPS, both paid for.  First: a snapshot only isolates if every path the
-    snapshotted code derives from ITS OWN LOCATION is redirected too.  dass-db.py
-    sets DEFAULT_DB from Path(__file__).parent, so results went into the
-    snapshot's own database and the EXIT trap deleted them, while the
-    inter-sweep resets still hit the real one -- so sweeps 2 and 3 never ran.
-    The tell was "RESULT S2: 0/0 sections match".  Fixed by passing --db
-    explicitly at every call site.  Second: bash reads a script incrementally,
-    so run-configs.sh must be replaced with mv, never edited in place, while a
-    sweep is running.
+NEXT STEPS, in order.
 
-  - WORKING DISCIPLINE.  The sandbox lets you EDIT during a sweep; it does not
-    make a running sweep's results current.  Three restarts in one day.  A sweep
-    is a measurement: start it after changes have stopped, investigate freely
-    while it runs, and expect to discard and re-run if the investigation lands a
-    fix.  Killing a sweep can leak rows for the config it was mid-way through --
-    check "SELECT config, COUNT(*) FROM run" before relaunching.
+  1. CONFIRM THE -2 ENTRIES.  mafgen/defects.txt now carries the three .000001
+     locations, and dass-versions.py appends them to exceptions-<CFG>-full.txt.
+     Regenerate G8, G3 and G16, re-run those three, and check each site is
+     suppressed with the declared note and that nothing ELSE became suppressed.
+     BEFORE doing so, make noclaim.py count -2 separately: a -2 currently reads
+     as "[1 ignored]" on the section line, identical to a -1, so applying it
+     would take the corpus to 14407/14407 with the accusation against the
+     original compiler visible only in a summary line.  A clean score must not
+     be able to hide what it rests on -- that is the same failure as S2's 22%.
 
-NEXT STEPS, in order, once that sweep finishes:
+  2. RE-EXAMINE THE FCOS CATEGORY.  FIOCDATS, FIOMODSM and FCMPSA were called
+     "not attributable at all", partly on reasoning the operand column has since
+     disproved, and no difference remains in any of them.  Determine whether the
+     category is EMPTY or merely unexamined, and say which in
+     mafgenComparison.md.  ~/ForClaude/dass-explain.py prints, for every
+     surviving difference, what each of the four sources of evidence makes of it.
 
-  1. RE-TEST G9 #PCSDMD1 (24 halfwords).  Called a dead end -- "no honest base
-     to recover" -- but that was concluded while decoding raw halfwords, the
-     very error the operand-column work corrects.  Treat the earlier verdict as
-     suspect.  This is also the cheapest test of whether that work generalises
-     beyond the family it was built for.
+  3. MIGRATE CLAUDE_LOG.md INTO dass-notes.db.  The tool exists and is tested
+     (modules/sdfpkg/dass-notes.py: add / pending / done / render / import).
+     `dass-notes.py import CLAUDE_LOG.md` then a final flat sync.  The reason is
+     supersession: 2026-08-07 alone produced three chains where a later entry
+     replaced an earlier one, and applying that log in order would have written
+     contradictory accounts into one document.  `pending` excludes superseded
+     entries; `render` still shows them, marked.
 
-  2. RE-EXAMINE THE FCOS CASES against the DASS operand column.  References into
-     FIOCDATS, FIOMODSM and FCMPSA were called "not attributable at all", partly
-     on the reasoning that a base-register reference names no target.  That
-     reasoning is now known to be wrong in general -- MAFGEN names it.  A
-     related claim already fell: what looked like references into FIOCBLKS were
-     sector-encoded ZCON halfwords pointing into #PCSASAT, a revised HAL/S
-     COMPOOL.  This is the largest outstanding change to the document's
-     conclusions.
+  4. THE INTERMITTENT HALSFC HANG is unexplained.  Six occurred on 2026-08-07,
+     on six different files, each once.  Three were orphaned by imperfect sweep
+     kills (now fixed); three began minutes into a healthy run and had already
+     reported success.  hang-watch.sh is armed to capture the next one live.
 
-  3. THE REST OF THE S2 UNRESOLVED-SYMBOL CLASS.  The NONHAL work covered
-     SAFACQ.  Still open: SCKPNT, SRESTO, STMTAB and SULUPLIN leave references
-     to #PCSAPDT as "8002 0000" where the dump holds "B8C0 0006", and #PCSAPDT
-     IS in S2's index at 0xB040.  That makes it ours to fix, not version drift.
+  5. UPSTREAM.  PRs #31, #32 and #33 are open at ColanderCombo/nsts-sdl-dps.
+     #33 is what makes -2 work; without it fcmcmp treats -2 as a checked value
+     that never matches, which warns rather than breaks.
 
-  4. G16 #DGFKGRT at 07DFE holds 4232 against the dump's 0000, with NO
-     relocation at that site -- so it is compile-time data, not a link artefact.
-     Possibly an I-LOAD that MAFGEN did not mark.  4232 coincides with
-     #PCAASCC's address in other configurations, which may be a red herring.
+NOT YET, and deliberately.
 
-  5. THE .000001 LITERAL.  Not blocked after all: HALSFC is a plain Python
-     program invoked by path, so it can be copied and instrumented without
-     disturbing anything.  The unknown is the PASS1 call site that reaches a
-     via-double conversion instead of MONITOR(10)'s ibm_dp_from_string.  See
-     virtualagc issue #1296, where the evidence is already posted.
+  - The ~/ForClaude weeding and archive.  The user tied that to the cross-check
+    being FINALLY complete, which it is not: see below.
 
-  6. THE "-2" NO-CLAIM CATEGORY.  Also unblocked, now that the sweep snapshots
-     nsts-sdl-dps/src.  Needs a third upstream PR: fcmcmp cannot take -2 as-is
-     because int("-2",16) parses, making it a CHECKED value that fails and still
-     counts.  PRs #31 (lnk101 absent-section relocations) and #32 (fcmcmp size
-     reporting) have been open since 2026-08-06; #27-#30 are merged.
-
-  7. A "reset one configuration" helper for dass-compare.db.  The SQL has been
-     hand-written three times and leaked stale rows twice.
-
-  8. CONVERT CLAUDE_LOG.md TO A DATABASE (user's instruction, 2026-08-07).
-     Table (timestamp, target, entry, applied), so capture is an INSERT, a
-     "Full Documentation Sync" is SELECT ... WHERE applied=0 AND target=?, and
-     completing one is an UPDATE.  Rationale is context cost: today's sync read
-     96 KB of log plus every target file, and hand-sorting 53 entries across two
-     passes nearly lost track of which were applied.
-     The design point that makes this work, from the user: a database can RENDER
-     .md as a one-time operation whenever wanted.  So the DB is the store and
-     the document is a generated view -- commit the rendering, which keeps it
-     readable and diffable even though the store is binary.  Do not treat this
-     as replacing prose; it replaces the flat staging file.
-
-BLOCKED, needing a decision or a rebuild:
-
-  * The .000001 literal.  Our compiler emits the CEILING (A0B5ED8E), which is
-    what a round trip through a C double gives; ibm_dp_from_string gives the
-    correctly rounded A0B5ED8D.  The literal is already wrong in litfile0.bin,
-    so PASS1 is at fault and PASS2 is not involved.  The via-double call site is
-    NOT yet found: MONITOR10 uses ibm_dp_from_string, inline360.c is clean, and
-    the built HALSFC-PASS1 is newer than its runtimeC.c.  Confirming needs an
-    instrumented PASS1 rebuild.  Separately the dump's A0B5ED8C is reachable by
-    no rounding mode and not by the genuine S/360 IHCFDXPI either, so it is
-    recorded as a suspected original-compiler defect -- see virtualagc issue
-    #1296, where the case is written up.
-
-  * Recording that residue as -2 rather than -1, to keep it distinct from the
-    FCOS version differences.  fcmcmp CANNOT take -2 as it stands: int("-2",16)
-    parses, so the entry becomes a CHECKED value of -2, fails its check, is
-    ignored, and the difference still counts.  Needs a third upstream PR.
-
-REFERENCE.  ~/ForClaude/mvt/extracted/ holds the System/360 FORTRAN library
-recovered from Jay Moseley's tape -- 424 assembler listings (source AND object
-code) including IHCFDXPI, IHCFDXPD, IHCFRXPI, IHCFRXPR, IHCLEXP, IHCLLOG,
-IHCLSQRT, and IEYFORT itself.  README.txt there explains how the .het was read
-without Hercules utilities.
+  - .dfg and .asm.  Both blocked, and set aside by the user on 2026-08-07.  .dfg
+    needs a preprocessor to convert to .hal, which does not exist.  .asm needs
+    changes to ASM101S that are under way elsewhere and not yet available.  The
+    HAL/S phase is 3212 of the 3859 CSECTs in the indices; finishing it does not
+    finish the comparison.
