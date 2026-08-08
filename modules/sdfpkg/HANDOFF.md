@@ -630,8 +630,9 @@ DONE 2026-08-07.  Twenty-odd commits; the ones that changed results:
     All eleven HAL/S-FC passes were rebuilt afterwards; editing the source is not
     enough, since XCOM-I copies ibmFloat.c into each *.build directory.
   - -2 exception marker: fcmcmp accepts any negative marker (upstream PR #33,
-    still open), meanings declared in the exceptions file itself, and
-    dass-versions.py emits entries from PFS/mafgen/defects.txt (868b387df).
+    MERGED 2026-08-08 as a21fda2), meanings declared in the exceptions file
+    itself, and dass-versions.py emits entries from PFS/mafgen/defects.txt
+    (868b387df).
 
 DONE 2026-08-08.  The reports now agree with the score.
 
@@ -685,6 +686,23 @@ would contradict fcmcmp's own PASS and drop a matching unit out of the score,
 while counting it as matching would claim something nobody checked.  Its n_diffs
 is NULL rather than 0.
 
+THE TRAILING SUMMARY USED TO BE SWALLOWED ON EXACTLY THE RUNS THAT NEEDED IT.
+The "N section(s) differ but are not in this configuration" line sat BELOW
+"raise typer.Exit(1)" in main(), so it printed only where nothing had failed.
+That is backwards: an N/A section is most worth accounting for precisely when
+something else in the same unit failed, because that is when the reader is
+deciding what the failure means and needs to know which spans carry no claim.
+Of the 2558 units, 137 reports contain at least one N/A section and 34 of those
+also fail, so a quarter were losing it.  The summary now prints before the
+verdict and all 137 carry it -- 103 to 137, exactly the 34.  No verdict moved:
+every OK/FAIL/MISSING/N/A section line in all 2558 is byte-identical before and
+after, and the exit status is unchanged.  The per-section "N/A:" lines were
+never affected, being emitted inside compare() rather than main().
+
+This went out as a FOLLOW-UP (PR #35), not as an amendment to the already
+approved commit.  The wart predated the approval, and quietly changing reviewed
+code because you happen to be in it is how a review stops meaning anything.
+
 Augmented CSECT tables are now PUBLISHED, in PFS/mafgen/augmented-<CFG>.json for
 all eight configurations, from the same two-pass procedure the sweep uses.
 csects-<CFG>.json remains the unlinkMAFGEN2 scrape and is never rewritten:
@@ -714,27 +732,39 @@ observed.  Reducing a FAIL count from 15 to 1 is not the point; a non-zero FAIL
 count is the disturbing thing either way, so do not re-propose this on the
 grounds that it lowers a number.
 
-VERIFIED ACROSS ALL EIGHT, and the evidence is kept as a matched pair:
+VERIFIED ACROSS ALL EIGHT, and the evidence is kept as a matched TRIO:
 
-    ~/ForClaude/baseline-preNOTINDEX/      the logs immediately BEFORE
-    ~/ForClaude/verify-NA-2026-08-08/      the same 2558 units AFTER
+    ~/ForClaude/baseline-preNOTINDEX/          the logs immediately BEFORE
+    ~/ForClaude/verify-NA-2026-08-08/          the change in ISOLATION
+    ~/ForClaude/verify-NA-postPR33-2026-08-08/ the change AS MERGED
 
-Keep them together; either alone proves nothing.  This change makes fcmcmp
+Keep all three; no one of them proves anything alone.  This change makes fcmcmp
 SUPPRESS output, and suppression is how real data goes missing quietly, so the
 claim that it removes only noise is worth nothing unless every verdict is
-compared before and after.  Comparing them gives:
+compared before and after.  Comparing each against the baseline gives:
 
-    OK   -> OK      14551      every match preserved
-    FAIL -> N/A       231      the intended effect, all with a named owner
-    FAIL -> FAIL      115      unchanged
-    OK   -> FAIL        3      NOT a regression, see below
+                        in isolation    as merged
+    OK   -> OK             14551          14554
+    FAIL -> N/A              231            231
+    FAIL -> FAIL             115            115
+    OK   -> FAIL               3              0
 
-The three are #DGO8ORB @07F5B, #DGO3ENT @0AFC8 and #DGO1ASC @0B73C, one halfword
-each, ED8D vs ED8C -- exactly the three entries of PFS/mafgen/defects.txt.  They
-go unsuppressed because the fcmcmp used (71c07a3, PR #34) does not contain
-fcmcmp-markers (PR #33), so a -2 is treated as a checked value that never
-matches.  Confirmed independently by a control run against a CSECT table with no
-inConfig fields at all, which fails identically.  They resolve when #33 lands.
+    unintended                 3              0
+
+The three were #DGO8ORB @07F5B, #DGO3ENT @0AFC8 and #DGO1ASC @0B73C, one
+halfword each, ED8D vs ED8C -- exactly the three entries of
+PFS/mafgen/defects.txt.  They went unsuppressed because the fcmcmp used
+(71c07a3, PR #34) did not yet contain fcmcmp-markers (PR #33), so a -2 was
+treated as a checked value that never matches.  That diagnosis was written down
+as a PREDICTION -- "they resolve when #33 lands" -- and #33 landed, the branch
+was rebased onto it, and all three resolved.  The +3 in OK -> OK is exactly
+them.  Confirmed independently beforehand by a control run against a CSECT table
+with no inConfig fields at all, which failed identically.
+
+THE TWO UNCHANGED ROWS ARE THE LOAD-BEARING PART of the merged column.  Rebasing
+onto a master that had also absorbed #31 and #32 preserved every one of the 231
+intended suppressions and introduced no new failure; had the rebase gone wrong,
+those totals are where it would have shown.
 
 The 115 are the ZCON-only units described just above, which are excluded from
 the score and were left alone deliberately.
@@ -750,6 +780,20 @@ comparison.  The real sweep logs in <CFG>logs/ were NOT overwritten.
 One trap those directories will spring on anyone who returns to them: EVERY
 fcmcmp log begins with its commit hash, date and source hash, so a plain diff of
 two logs is never empty even when nothing changed.  Compare verdicts, not files.
+
+A SECOND TRAP, since fixed but worth knowing about.  fcmcmp's --repro defaults to
+TRUE and writes <stem>.fcmcmp.repro.json into the CURRENT directory, so a full
+re-run dropped 1106 files into modules/sdfpkg before anyone noticed.  --no-repro
+is NOT the fix: the commit/date/source-hash banner just described, the thing that
+makes each log self-identifying, is printed under the same flag.  The script now
+gives each configuration its own scratch cwd under $OUT/.repro/$C and removes it
+at the end.  Per-configuration matters: unit names are unique within a
+configuration but REPEAT across them, so one shared scratch directory would have
+had six parallel workers writing a single path -- the same
+shared-fixed-filename-under-parallelism shape as the HALSFC job-tree collision
+described in step 3 below, benign here only because nothing reads these files.
+Verified on P9: no stray files, scratch removed, all 158 logs produced, every
+verdict line byte-identical to the recorded run.
 
 INFRASTRUCTURE, and the traps that produced it:
 
@@ -851,12 +895,13 @@ NEXT STEPS, in order.
      evidence.  The plain exceptions-<CFG>.txt are also derived, from listings
      that are themselves in mafgen/, which is why neither is tracked.
 
-     TWO DIRECTORIES MUST SURVIVE THAT WEEDING: baseline-preNOTINDEX/ and
-     verify-NA-2026-08-08/, 23 MB together.  They look like old sweep output and
-     are not -- they are the before-and-after evidence for the N/A change, and
-     each is meaningless without the other.  Anything else in ~/ForClaude that
-     turns out to be evidence rather than output should be labelled the same way
-     before that step, since by then the distinction will not be obvious.
+     THREE DIRECTORIES MUST SURVIVE THAT WEEDING: baseline-preNOTINDEX/,
+     verify-NA-2026-08-08/ and verify-NA-postPR33-2026-08-08/, 32 MB together.
+     They look like old sweep output and are not -- they are the before, the
+     change in isolation and the change as merged, for the N/A change, and no one
+     of them means anything without the others.  Anything else in ~/ForClaude
+     that turns out to be evidence rather than output should be labelled the same
+     way before that step, since by then the distinction will not be obvious.
 
   3. THE INTERMITTENT HALSFC HANG IS EXPLAINED AND FIXED (2026-08-08).  Six
      occurred on 2026-08-07, on six different files, each once, and none before
@@ -902,16 +947,39 @@ NEXT STEPS, in order.
      hangs fall in the 12:44-18:56 pile-up and the two later solo sessions had
      none.  The mechanism is established from the code, not from that table.
 
-  4. UPSTREAM.  PRs #31, #32, #33 and #34 are open at
-     ColanderCombo/nsts-sdl-dps.  #33 is what makes -2 work; without it fcmcmp
-     treats -2 as a checked value that never matches, which warns rather than
-     breaks.  #34 is the N/A verdict.
+  4. UPSTREAM, as of 2026-08-08.  PRs #31, #32 and #33 are MERGED at
+     ColanderCombo/nsts-sdl-dps.  Two remain open and both are MERGEABLE/CLEAN,
+     waiting only on Don: #34, the N/A verdict, approved "lgtm"; and #35, the
+     summary-ordering follow-up described above, stacked on #34.  Nothing of ours
+     is open and blocked.
 
-     The two interact, and it looks like a bug if they are tried together.  #34
-     does not contain #33, so on #34's branch ALONE the -2 exception at G3 0B0D3
-     is not understood and GO3ENT reports one differing halfword.  That is
-     branch composition, not either change: a control run with a table carrying
-     no inConfig fields at all fails identically.  It resolves once both land.
+     The #33/#34 interaction that used to look like a bug is GONE, and how it
+     went is worth keeping.  #34 did not contain #33, so on #34's branch alone a
+     -2 exception was not understood and three units reported one differing
+     halfword each.  #33 merging turned #34 CONFLICTING, and the rebase both
+     resolved that and absorbed #33, after which the three resolved exactly as
+     predicted.
+
+     THE REBASE HAD ONE REAL TRAP IN IT, of a kind that will recur.  Master's
+     size_mismatches (from #32) and our skipped (from #34) are two DIFFERENT
+     lists that happen to be declared, appended and returned at the same three
+     places, so all three conflicts read as one variable renamed.  They are not,
+     and resolving them as a rename would have silently deleted a feature while
+     leaving code that compiles and runs.  Checking the merge base settled it in
+     a minute; the resolution keeps both, and compare() returns four values now
+     rather than three.  Expect this shape again -- Don reworks our PRs on merge
+     (#32 became ce12d33, dropping --strict-sizes and making a size mismatch
+     always fail), so our branches and his master drift in the same regions.
+
+     ONE PROCESS LESSON, from a mistake made here.  A comment on #34 recorded the
+     rebase and the re-verification, and buried in its last paragraph an offer to
+     fix the ordering wart here or in a follow-up.  The user's objection was
+     immediate and correct: the natural action, merging an approved PR, would
+     have silently answered a question the reviewer never saw.  An offer in the
+     fourth paragraph of a long comment is not an offer.  The remedy was not to
+     word it better but to remove the question -- a correction comment retracting
+     it, and the fix sent as its own PR -- so that the default action became
+     simply correct.
 
      Don already consumes our CSECT tables -- tools/retest_open_issues.sh is his
      own commit, bb4e26c of 2026-07-25, passing ../csects-G9.json to BOTH
