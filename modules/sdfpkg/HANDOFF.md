@@ -803,6 +803,33 @@ INFRASTRUCTURE, and the traps that produced it:
     reliable form is `pgrep -x -f "<exact full command line>"`, which a long
     shell invocation cannot equal.  Both traps cost a wrong conclusion on
     2026-08-08 alone.
+  - A KILLED COMMAND LOSES ALL ITS PIPED OUTPUT, not some of it.  Writing to a
+    pipe is block-buffered rather than line-buffered, so a timeout, a Ctrl-C or
+    an os._exit() discards the whole buffer: measured here, a program printing
+    every 0.3s and killed at 2s delivered ZERO lines through a pipe, where the
+    same program on a terminal had shown six.  This is why dass-run.py sets
+    PYTHONUNBUFFERED=1 on its children -- compileLinkCompare's failure paths end
+    in os._exit() -- and the same applies to anything WE run and then read:
+
+        python3 -u ...            for Python; no side effects, always correct
+        PYTHONUNBUFFERED=1        same, for a whole subtree of Python children
+        unbuffer CMD              /usr/bin/unbuffer, for non-Python commands
+        stdbuf -oL CMD            DOES NOT WORK for Python; libc stdio only
+
+    stdbuf is the trap of the three: it reads as the general answer and does
+    nothing for a program that buffers above libc, which Python does.
+
+    unbuffer's cost is that it runs the command under a pty, so anything that
+    adapts to a terminal changes shape -- `unbuffer ls --color=auto` emits ANSI
+    escapes and switches to multi-column, which will corrupt whatever parses it.
+    Force the non-terminal form alongside it: --color=never, ls -1,
+    git --no-pager.  It does preserve exit status and does NOT convert line
+    endings to CRLF, both of which were checked.
+
+    The reason this matters and is easy to miss: the commands worth reading are
+    the slow ones, and the slow ones are exactly the ones that get killed.  A
+    silent empty result then reads as "it produced nothing" rather than "its
+    output was thrown away".
   - PFS carries runnable copies of dass-*.py and mafgen/defects.txt so
     mafgenComparison.md can be followed from there.  The generated
     exceptions-*.txt are NOT tracked -- they are derivable from the listings
