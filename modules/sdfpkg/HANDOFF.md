@@ -602,10 +602,9 @@ The corpus tooling here is directly reusable: corpus-run.sh's discipline of
 starting from source alone, the argv[0] check for stray compilers, setsid for
 launching, and the habit of verifying a run finished before believing its
 numbers.
-================================================================================
 
 ================================================================================
-11. DASS COMPARISON -- CURRENT STATE AND NEXT STEPS  (2026-08-07)
+12. DASS COMPARISON -- CURRENT STATE AND NEXT STEPS  (2026-08-07)
 ================================================================================
 
 STATE (2026-08-08).  14407 of 14407 in-index sections match, 0 differ, 0 errors.
