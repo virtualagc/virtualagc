@@ -489,7 +489,12 @@ def main():
         rows = []
         if defects.is_file():
             for line in open(defects, errors="replace"):
-                fields = line.split("#", 1)[0].split()
+                # A comment is a line that STARTS with '#'.  Notes routinely
+                # contain '#' as part of a CSECT name -- "#DGO8ORB" -- and
+                # treating that as a comment truncated every one of them.
+                if line.lstrip().startswith("#"):
+                    continue
+                fields = line.split()
                 if len(fields) >= 3 and fields[0] == config:
                     rows.append((int(fields[1], 16), fields[2],
                                  "-".join(fields[3:])))
