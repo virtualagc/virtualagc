@@ -32,8 +32,9 @@ it has been asked about rather than reading forwards:
     12.  the DASS comparison -- our linked binary against the AP-101S memory
          dumps.  14407 of 14407 in-index HAL/S sections match.  Process detail
          is in compileLinkCompare.md and PFS/mafgenComparison.md.
-    13.  assembling the AP-101S sources with ASM101S.  Measured and largely
-         already met; what remains is blocked on obtaining FCOS source.
+    13.  assembling the AP-101S sources with ASM101S.  The runtime library is
+         finished and verified; FCOS is where the work is, and most of it is
+         one defect in macro keyword-parameter handling.
     --   .dfg, which has not started and needs a preprocessor that does not
          exist.  See section 12's step 1.
 
@@ -908,17 +909,18 @@ NEXT STEPS, in order.
 
   1. THE NEXT PHASES.  .dfg is still blocked and still set aside by the user on
      2026-08-07: it needs a preprocessor to convert to .hal, which does not
-     exist.
+     exist.  The .dfg files themselves are in PFS/<VER>/SSSRC alongside the
+     assembly, 17 of them in OI340600.
 
      .asm IS NO LONGER BLOCKED, and the reason it was thought to be was wrong.
      This used to read "needs changes to ASM101S that are under way elsewhere",
      meaning Don's -- but he has not touched virtualagc/ASM101S since
      2026-04-29, and what he has been building is a separate assembler in his
      own repository that cannot be merged back.  The user's decision on
-     2026-08-08 was to advance our own ASM101S instead, and measurement that
-     day found it already assembles everything we hold.  Section 13 has the
-     whole of it, including the one thing that IS still blocking: FCOS source
-     does not exist in any tree we can see.
+     2026-08-08 was to advance our own ASM101S instead.  Section 13 is that
+     phase in full: the runtime library is finished and verified, FCOS is in
+     PFS/<VER>/SSSRC, and most of what stands between us and it is one defect
+     in macro keyword-parameter handling.
 
   2. WHEN THE CROSS-CHECK IS FINALLY COMPLETE -- meaning after .dfg and .asm, not
      now -- weed ~/ForClaude of obsolete material, chiefly sweeps too old to
@@ -1105,13 +1107,22 @@ ONE THING asm101 IS NOT: a drop-in replacement for our RTL work.  It contains no
 every one of our gated RTL fixes depends on is absent.  Do not assume adopting
 it would be a shortcut.
 
-THE STOCK, counted on 2026-08-08.  All of it is under
-yaShuttle/Source Code/PASS.REL32V0/:
+THE STOCK, counted on 2026-08-08.  It is in TWO places, and the second is the
+one that matters.
 
-    RUNASM/     205 .asm    the AP-101S runtime library.  THE REAL CORPUS.
-    ZCONASM/    285 .asm    ZCON stubs, 48-56 bytes each
-    RUNMAC/      20 .asm    the macro library, not assembled on its own
+In virtualagc, under yaShuttle/Source Code/PASS.REL32V0/ -- the RUNTIME LIBRARY:
+
+    RUNASM/     205 .asm    the AP-101S runtime library
+    ZCONASM/    284 .asm    ZCON stubs, 48-56 bytes each
+    RUNMAC/      20 .asm    the macro library for those
     RUNLST/     206 .txt    contemporary listings, the reference for RUNASM
+
+In ~/workspace/PFS, per PASS version -- FCOS, THE FLIGHT SOFTWARE ITSELF:
+
+    OI340600/SSSRC/    225 .asm    (also 134 .hal and 17 .dfg)
+    OI301700/SSSRC/    272 .asm    (also 151 .hal)
+    BFS.SRC/SSSRC/       1 .asm
+    <VER>/MLIB80/      278 files   the macro library these need
 
 ZCONASM is not the work it appears to be.  Every file is four lines of the same
 shape and they are mechanically generated:
@@ -1121,22 +1132,16 @@ shape and they are mechanically generated:
      EXTRN ACOS
      END
 
-There are no ZCON listings anywhere -- RUNLST is the only *LST* directory -- so
-ZCONASM can be assembled but not checked against a contemporary reference.
-Treat 285 of the 490 files as volume rather than difficulty.
+There are no ZCON listings anywhere, so ZCONASM can be assembled but not checked
+against a contemporary reference.  Treat those 284 as volume, not difficulty.
 
 MONITOR.ASM/ (19 files) and SDFPKG.ASM/ (7) are NOT part of this.  They are .bal
 -- IBM 360 Basic Assembler Language for the HAL/S-FC compiler itself -- a
 different target and a different assembler.
 
-FCOS IS NOT IN THE TREE.  This matters because the goal names it.  There is no
-FCOS source anywhere in virtualagc, nor in nsts-sdl-dps, ~/workspace/PFS or
-~/ForClaude; a search of all four found nothing.  No CSECT name in any
-csects-<CFG>.json index contains "FCOS" either, so it is not merely unextracted
-from the DASS material under that name.  The only occurrences anywhere are HAL/S
-comments reading "FOR 128 FCOS CHECKSUM".  Do not spend a session looking for
-it: it has to be obtained or identified under another name first, and that is a
-question for the user rather than a search.
+THE .dfg FILES SIT IN SSSRC TOO, 17 of them in OI340600.  They are the other
+phase, still blocked for want of a preprocessor; do not be surprised to meet
+them here.
 
 HOW TO MEASURE WHERE YOU ARE.  ASM101S/regressionASM101S.sh assembles all 205
 RUNASM files and compares each against its RUNLST listing.  It takes minutes,
@@ -1175,89 +1180,160 @@ matter and covered in the memory on &ASM101S-gated fixes, add --object=NAME.obj
 and copy the result; do NOT run `make runtime` there expecting it to preserve
 gated fixes, because asm101 does not implement them.
 
-THE BASELINE, measured 2026-08-08, and it is much better than the phrase
-"advance ASM101S until it assembles everything" implies.  ASM101S ALREADY
-ASSEMBLES THE WHOLE OF THE PRESENT STOCK.
+HOW TO ASSEMBLE FCOS, which is not the same command as the runtime library.  Run
+it from the VERSION directory, not from SSSRC, and point --library at MLIB80
+rather than the default RUNMAC:
 
-    RUNASM    205 of 205   assemble AND match their contemporary listings
-                           byte for byte, with --no-rtl-fixes
-    ZCONASM   284 of 284   assemble with exit status 0
-    FCOS            -      no source exists to assemble
+    cd ~/workspace/PFS/OI340600
+    ASM101S --library=MLIB80 --force-d SSSRC/FPMSWTCH.asm
 
-The RUNASM figure is the strong one, because it is not "no errors" but "0 bytes
-mismatched and 0 bytes missing" against a listing printed by the original
-assembler, for every module.
+*** --object= MUST END IN .obj. ***  ASM101S rejects any other name before it
+assembles a line, and it says so in one line on stderr.  A sweep that hands it
+mktemp names therefore fails on every module identically, with empty output and
+a uniform exit status -- which looks exactly like a real measurement of a
+thoroughly broken assembler.  That happened on 2026-08-08 and produced a
+confident 497-of-497 failure table that meant nothing.  If a sweep reports every
+module failing the same way, suspect the harness before the assembler.
 
-ON A DEFAULT RUN, EXACTLY SIX FILES FAIL, AND THAT IS BY DESIGN.  They are
-CINDEX, MM14SN, MM6SN, MV6SN, VV6S3 and VX6S3 -- and independently, those six
-are precisely the six files in RUNASM that contain &ASM101S at all.  The set of
-failures and the set of gated files are the same set.  Their fixes change the
-generated code, the historical listing does not have that code, so a comparison
-against the listing must fail.  Nothing here is an assembler defect.
+USE --trace.  It was added for precisely this problem and prints each macro
+invocation as it is entered, with its &SYSLIST, indented by nesting depth:
 
-DO NOT REPEAT THE MISREADING THAT COST TIME ON THE DAY.  A first pass through
-the default run counted five of them as "the known gated files" and CINDEX as a
-sixth, unexplained failure, on the strength of remembering which files had been
-fixed.  CINDEX is gated too -- grep -l ASM101S RUNASM/*.asm returns exactly the
-six -- and the memory was simply incomplete.  Establish the set by grepping,
-never by recall.
+    Trace:  AMAIN []
+    Trace:      WORKAREA []
+    Trace:  INPUT ['F0']
 
-THE ONE REAL DEFECT THE BASELINE EXPOSES is how that failure presents.  When
-generated code runs past the end of the listing being compared against, ASM101S
-does not report it; it dies with a Python traceback:
+That is how the root cause below was found, and it is the only practical way to
+see what a nested expansion is actually receiving.
 
-    File "ASM101S.py", line 1144, in <module>
-      if b != comparisonMemory[oaddress]:
-    IndexError: list index out of range
+THE ROOT CAUSE IS ALREADY DIAGNOSED, in virtualagc issue #1331, "Many bugs in
+ASM101S macro processing".  READ IT BEFORE TOUCHING ANYTHING.  It is open, it is
+the user's own analysis, and it goes considerably further than the traceback it
+opens with.
 
-An intentional, expected, well-understood deviation should not look like a
-crash.  It also truncates the report, so the real mismatches printed just above
-it -- CINDEX shows a run of them before dying -- are easy to miss entirely.
+MACRO KEYWORD PARAMETERS ARE BEING LOST.  A macro can take both positional and
+keyword parameters; the positional ones survive and the keyword ones do not.
+The trace for ACOS.asm shows AMAIN entered with an empty &SYSLIST when the
+source says
 
-WHAT THIS MEANS FOR THE GOAL, stated plainly because it reframes the work.  The
-constraint is not the assembler.  For everything we hold, ASM101S is already
-there.  The goal as written -- assemble the entirety of our stock, including
-FCOS -- is therefore blocked on OBTAINING SOURCE, not on writing code, and the
-sole reason it is not already met is that FCOS is not in the tree.
+    ACOS     AMAIN   ACALL=YES
+
+and FPMSWTCH's PROGRAM is entered with [None] against a source line reading
+PROGRAM TITLE='PROCESS SWITCH ROUTINE'.  Parameters spread over CONTINUATION
+LINES are lost as well -- FPMSWTCH's IFPROC passes &P1 through &P50 across five
+continuation cards, and they do not arrive.
+
+THE CRASHES ARE DOWNSTREAM OF THAT, which is why there are so few distinct
+signatures for so many files.  A macro that did not receive its arguments then
+evaluates a conditional against whatever it did receive:
+
+    AIF (&SYSLIST(1) LE 0 OR &SYSLIST(1) GE 07).INVALCC
+
+where &SYSLIST(1) has become ',' -- a string, incomparable to a number -- and
+expressions.py line 521 raises TypeError.  Do not fix line 521 by coercing the
+comparison.  It is reporting a real defect upstream of itself, and making it
+compare cleanly would convert a loud failure into a wrong assembly.
+
+THE OTHER OPEN ONE IS #1333, a feature request for the ORG pseudo-op, from an
+outside user assembling compiler-generated code.  It also carries a second,
+separable defect: "ST#1 EQU *" crashes with KeyError None at model101.py:1237.
+The remaining ASM101S issues -- 1317, 1320, 1324 through 1329, 1332, 1271 -- are
+all CLOSED and are useful mainly as worked examples of how such a defect gets
+pinned down.
+
+THE BASELINE, measured 2026-08-08.  It has two halves and they are nothing alike.
+
+THE RUNTIME LIBRARY IS FINISHED.  ASM101S assembles all of it, and RUNASM is
+verified rather than merely error-free:
+
+    RUNASM    205 of 205   assemble AND match their contemporary listings byte
+                           for byte under --no-rtl-fixes: "0 bytes mismatched
+                           and 0 bytes missing", every module
+    ZCONASM   284 of 284   assemble.  No listings exist, so this is the weaker
+                           claim of the two
+
+On a default run exactly six RUNASM files fail, and those six are precisely the
+six containing &ASM101S -- CINDEX, MM14SN, MM6SN, MV6SN, VV6S3 and VX6S3.  Their
+gated fixes change the generated code and the historical listing does not have
+it, so the comparison must fail.  None of that is an assembler defect.  Establish
+that set with `grep -l ASM101S RUNASM/*.asm`, not from memory: a first pass on
+the day recalled five of them and wrote CINDEX up as an unexplained sixth.
+
+FCOS IS WHERE THE WORK IS.  Of OI340600's 225 modules, assembled against MLIB80:
+
+    OK        21     assembles, exit 0
+    ERRORS    34     diagnosed errors, severity 255, no crash
+    CRASH    170     a Python traceback
+    HANG       1     FIOADCNS, 99.9% CPU, still going when killed at 120s
+
+The 170 crashes carry only EIGHT distinct signatures, which is the encouraging
+part -- this is a handful of defects seen many times, not 170 problems:
+
+     91  TypeError: '<=' not supported, str and int   expressions.py:521
+     39  KeyError: 'ast'                              model101.py:2207
+     16  NameError: name 'expression' is not defined  expressions.py:570
+     14  IndexError: bytearray index out of range     model101.py:1527
+      5  TypeError: argument of type 'NoneType'       model101.py:1735
+      3  TypeError: unsupported operand &, float/int
+      1  KeyError: 'preliminaryOffset'                model101.py:1243
+      1  KeyError: 'ICCLGTH'
+
+OI301700 COULD NOT BE MEASURED AT ALL, and the reason is not the assembler.  Its
+MLIB80 holds 41 files against OI340600's 278, and NOT ONE of them is a macro
+definition -- every core macro the sources use, PROGRAM, IF, DO, PROC, EQUATE,
+IFPROC among 237 others, is simply absent.  It also has no MACROFILES.txt, so
+ASM101S stops immediately with "Cannot open ../MLIB80/MACROFILES.txt".  The user
+confirmed on the day that OI301700 needs files borrowed from OI340600 and that
+this has never yet been done.  Until it is, every OI301700 number is vacuous.
+
+DO NOT "FIX" THIS BY GENERATING MACROFILES.txt THERE.  It was tried on the day.
+makeMACROFILES.py runs happily and produces an index naming ZERO macro files,
+because there are none to name, and ASM101S then loads no macros at all and
+buries you in errors instead of stopping with one clear message.  The generated
+file was deleted again for exactly that reason.  Borrow the macros first.
 
 NEXT STEPS, in order.
 
-  1. ASK THE USER ABOUT FCOS BEFORE ANYTHING ELSE.  Everything else in this
-     section is small by comparison, and the answer determines whether there is
-     a phase here at all.  The questions worth asking are narrow: does FCOS
-     source exist in a form we can obtain; is it perhaps held under another name
-     (nothing in any csects-<CFG>.json index contains the string, so it is not
-     simply unextracted under that name); and is it expected to arrive from the
-     DASS listings, from Don, or from elsewhere.  Do NOT open with a search --
-     four trees were searched on 2026-08-08 and it is not in any of them.
+  1. FIX MACRO KEYWORD-PARAMETER HANDLING, issue #1331.  This is the whole job in
+     one item.  91 of the 170 crashes are the single TypeError it describes, and
+     the KeyError 'ast' and NameError families sitting behind it are the same
+     story a few frames later: a macro that never received its arguments.  Read
+     the issue first, reproduce with --trace on ACOS.asm, where AMAIN is entered
+     with an empty &SYSLIST against a source line reading AMAIN ACALL=YES, and
+     the defect is visible in one screen.  Fix the loss, not the comparison at
+     expressions.py:521 -- coercing that would turn a loud failure into a wrong
+     assembly.  Continuation lines are part of the same item: FPMSWTCH's IFPROC
+     passes &P1 through &P50 across five cards and they do not arrive.
 
-  2. FIX THE IndexError AT ASM101S.py:1144.  Small, self-contained, and worth
-     doing whatever happens with FCOS: when the generated code is longer than
-     the listing, say so and count it, rather than raising.  The natural report
-     is the one the tool already gives -- "N bytes mismatched and M bytes
-     missing" -- extended to cover generated bytes with no counterpart.  After
-     it, a default regression run should report six understood deviations
-     instead of six tracebacks, which is the difference between a suite that
-     tells you something and one you have learned to ignore.
+  2. RE-RUN THE SWEEP AND SEE WHAT IS LEFT.  modules/sdfpkg/fcos-sweep.sh does
+     all 225 in a few minutes and classifies each as OK/ERRORS/CRASH.  The
+     numbers above are its output for 2026-08-08 and are the thing to beat.
+     Expect the remaining signatures to re-sort themselves substantially once
+     step 1 lands, so do not plan past this point in detail.
 
-  3. CONSIDER PORTING THE TWO FINDINGS FROM asm101 described above, the
-     &SYSLIST null-to-zero coercion (74fb403) and the two-target ZCON DSR-only
-     RLD (d983348).  Neither is provably needed by anything we currently
-     assemble -- all 205 RUNASM modules already match -- so this is insurance
-     against sources we do not yet have rather than a fix for a present defect.
-     Both are checkable against the IBM manuals cited, which is the only reason
-     to trust them without his test suite.
+  3. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
+     The user has never done this, so treat it as unexplored: the two versions
+     are years apart and a macro that merely has the same name may not have the
+     same definition.  Diff a few that DO exist in both before assuming the rest
+     can be copied wholesale, and expect to justify the choice later, since the
+     corpus goal covers both PASS versions.
 
-  4. ZCONASM HAS NO REFERENCE AND SO IS UNVERIFIED.  All 284 assemble, but
-     "assembles" is a far weaker claim than the one RUNASM supports, and there
-     are no ZCON listings to compare against.  If a stronger claim is ever
-     wanted, the objects can be checked against the linked memory images the
-     DASS work already compares -- which is what section 12's machinery does --
-     rather than against a listing that does not exist.
+  4. FIOADCNS HANGS.  One module, 99.9% CPU, no output, still running at 120s.
+     It is worth a look on its own because a hang is the one failure a sweep
+     cannot survive -- this one blocked the whole run until it was killed, and
+     the run reported DONE with 496 of 497 rows and no indication anything was
+     missing.  Any sweep of this corpus needs a timeout.
 
-WHAT NOT TO DO.  Do not start by rewriting or restructuring ASM101S, and do not
-adopt asm101 to "get ahead": ASM101S passes everything we can measure, and
-asm101 lacks the &ASM101S conditional assembly that all six of our gated fixes
-depend on.  A rewrite would be trading a measured 205-of-205 for an unmeasured
-one.
+  5. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
+     feature request from an outside user (#1333), which also carries a
+     KeyError-None crash on "ST#1 EQU *" at model101.py:1237.  DC cannot parse a
+     hex literal with comma-separated groups, as in
+     DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' -- that alone is all 328 of
+     FAZ2's diagnosed errors.  And ASM101S.py:1144 raises IndexError when
+     generated code runs past the end of a --compare listing, instead of
+     reporting it; that is what makes the six intentional RUNASM deviations look
+     like crashes.
+
+WHAT NOT TO DO.  Do not adopt asm101 to skip this: it has no &ASM101S and only
+two mentions of GBLB, so all six of our gated RTL fixes would be lost, and
+RUNASM's verified 205 of 205 would be traded for an unmeasured number.
 
