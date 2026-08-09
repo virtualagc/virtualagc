@@ -209,6 +209,18 @@ for _mnemonic in [_m[:-1] for _m in list(argsRSonly) if _m.endswith("@")]:
             argsRSonly[_mnemonic + "$"] = _table[_mnemonic]
             break
 
+# The no-op each flavour of CNOP pads with.  These are three different
+# processors' alignment directives, not three spellings of one:  CNOP is the
+# CPU's and pads with D800, which is exactly what `NOP 0` assembles to, and
+# @CNOP is the MSC's and pads with C000.  Both were read off the original
+# build in ~/workspace/PFS/"OI301700 as received".
+#
+# #CNOP is the BCE's.  Its two appearances there both fell on an already
+# aligned address and so emitted nothing, which leaves its padding unknown;
+# None means "align, but say so rather than guess if padding is actually
+# needed".  Fill it in when the BCE instructions are encoded.
+cnopFills = { "CNOP": b"\xD8\x00", "@CNOP": b"\xC0\x00", "#CNOP": None }
+
 argsSRSorRS = argsSRSandRS | argsSRSonly | argsRSonly
 
 # The 14-bit numerical codes are what's encoded in bits 0-12
@@ -281,6 +293,14 @@ for operation in argsMSC:
     appropriateRules[operation] = "mscAll"
 for operation in argsBCE:
     appropriateRules[operation] = "bceAll"
+
+# LAST, because @CNOP and #CNOP are members of argsMSC and argsBCE and the two
+# loops above would otherwise give them an instruction operand rule.  They are
+# not instructions:  all three CNOPs are alignment directives whose single
+# operand is an ordinary arithmetic expression, which is what equOperand
+# parses, stopping at the first blank so a trailing comment does no harm.
+for operation in cnopFills:
+    appropriateRules[operation] = "equOperand"
 
 ##############################################################################
 # Low-level machine-code generators.  Each returns a `bytearray` of the 

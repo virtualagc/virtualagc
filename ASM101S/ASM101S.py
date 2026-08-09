@@ -62,7 +62,9 @@ pseudoOps = {
     "AIF": [1,1],
     "ANOP": [0,0],
     "CCW": [4,4],
-    "CNOP": [2,2],
+    # One operand, not two.  IBM's CNOP takes `b,w`; the AP-101S sources
+    # write only `b`, counted in halfwords, with `w` fixed at a fullword.
+    "CNOP": [1,1],
     "COM": [0,0],
     "COPY": [1,1],
     "CSECT": [0,0],

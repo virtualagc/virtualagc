@@ -2262,6 +2262,49 @@ def generateObjectCode(source, macros):
                 toMemory(data)
                 continue
                 
+            if operation in cnopFills:
+                # CNOP aligns the location counter and FILLS the gap with
+                # no-ops, which is what distinguishes it from the silent
+                # alignment commonProcessing() performs for DC and DS.
+                #
+                # The operand is a number of HALFWORDS within a fullword, and
+                # the target is simply its parity:  `CNOP 2` aligns to an even
+                # halfword address, which is a fullword boundary, and `CNOP 1`
+                # to an odd one.  That is IBM's `CNOP b,w` with w fixed at a
+                # fullword and b counted in halfwords, 2 standing where 0
+                # would.
+                #
+                # The three spellings are three processors and they fill with
+                # their own no-ops:  CNOP is the CPU's and fills with D800,
+                # which is what ASM101S already generates for `NOP 0`, and
+                # @CNOP is the MSC's and fills with C000.  Both were read off
+                # the original build in ~/workspace/PFS/"OI301700 as
+                # received" -- 10 and 59 filled instances respectively, plus
+                # 42 more that needed no fill and emitted nothing, and the
+                # parity rule holds for every one.
+                commonProcessing(1)
+                ast = properties["ast"]
+                fill = cnopFills[operation]
+                if fill == None:
+                    error(properties, \
+                          "%s is not implemented: its fill instruction is " \
+                          "unknown, no instance needing one having been seen " \
+                          "in the original build" % operation)
+                    continue
+                if ast == None:
+                    error(properties, "%s requires an operand" % operation)
+                    continue
+                err, halfwords = evalInstructionSubfield(properties, "v", ast, \
+                                                         symtab)
+                if err or halfwords == None:
+                    error(properties, "Could not evaluate %s operand" % operation)
+                    continue
+                target = halfwords % 2
+                # `pos1` is a byte offset, so the halfword address is pos1//2.
+                while (sects[sect]["pos1"] // 2) % 2 != target:
+                    toMemory(bytearray(fill))
+                continue
+
             if operation in argsMSC:
                 # MSC operations are really standardized enough for there to be
                 # any advantage in segregating them this way, but it might provide
