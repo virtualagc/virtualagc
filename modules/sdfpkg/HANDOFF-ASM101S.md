@@ -293,8 +293,7 @@ point on the day, which is how it was noticed.  The wrapper now `exec`s.  If
 you ever see a sweep's timeouts "working" while the load average says
 otherwise, check this first.
 
-THE BASELINE, measured 2026-08-08 after the day's three commits.  It has two
-halves and they are nothing alike.
+THE BASELINE, measured 2026-08-09.  It has two halves and they are nothing alike.
 
 THE RUNTIME LIBRARY IS FINISHED.  ASM101S assembles all of it, and RUNASM is
 verified rather than merely error-free:
@@ -312,55 +311,52 @@ it, so the comparison must fail.  None of that is an assembler defect.  Establis
 that set with `grep -l ASM101S RUNASM/*.asm`, not from memory: a first pass on
 the day recalled five of them and wrote CINDEX up as an unexplained sixth.
 
-RUNASM IS A WEAK GUARD ON MACRO PROCESSING, which is easy to mistake for a
-strong one.  RUNMAC uses no multilevel sublists and no ACTR at all, so both can
-be completely broken while the score stays at 205 of 205.  Run
+RUNASM IS A WEAK GUARD ON MOST OF WHAT MATTERS NOW, which is easy to mistake for
+a strong one.  RUNMAC uses no multilevel sublists and no ACTR at all, and it
+never exercises the numeric branch of T', so all three can be completely broken
+while the score stays at 205 of 205.  Run
 ASM101S/macroTests/regressionMacros.sh as well; it takes seconds and it is the
 only check that covers the conditional-assembly language itself.
 
 FCOS IS WHERE THE WORK IS.  Of OI340600's 225 modules, assembled against MLIB80,
-at the start of 2026-08-08 and at the end of it:
+before this stretch of work began and now:
 
                     before   after
-    OK                  21      21
-    ERRORS              33      38
-    CRASH              170     165
-    HANG                 1       1
+    OK                  21      23
+    ERRORS              33     155
+    CRASH              170      47
+    HANG                 1       0
 
-NOTHING HANGS ANY MORE, which the table hides.  Every one of the 225 modules now
-terminates.  The single HANG row is DCICYC exceeding the sweep's 600s timeout,
-and it was run out to completion separately: it finishes in 861s with diagnosed
-errors.  Set FCOS_TIMEOUT to 900 or more and the row disappears.  CRASH barely
-moved because the win was not modules ceasing to fail -- it was modules failing
-LATER, and ten that previously spun for ever now terminate and reach a
-diagnosable crash instead.
+NOTHING HANGS, and CRASH has fallen by two thirds.  Read the ERRORS column as
+the real measure of progress: a module there has been assembled far enough to
+produce a diagnosis, which is what the next defect gets found from.  The two
+crash families that dominated -- 92 of `TypeError: NoneType is not iterable` and
+42 of `KeyError: 'ast'` -- are gone outright.  What is left:
 
-     92  TypeError: argument of type 'NoneType'       model101.py:1735
-     42  KeyError: 'ast'                              model101.py:2207
-     17  IndexError: bytearray index out of range     model101.py:1527
-     11  TypeError: unsupported operand &, float/int
-      1  KeyError: 'preliminaryOffset'                model101.py:1243
-      1  KeyError: None                               model101.py:1243
+     23  IndexError: bytearray index out of range     model101.py:1537
+     14  TypeError: unsupported operand &, float/int  expressions.py:255
+      7  KeyError: 'preliminaryOffset'                model101.py:1253
+      1  KeyError: None                               model101.py:1253
       1  KeyError: 'ICCLGTH'
+      1  AttributeError: Buffer has no attribute _pos (inside tatsu)
 
-DO NOT CLASSIFY A LOOP BY WATCHING &SYSNDX.  This was asserted earlier in the day
-and it is WRONG, so it is recorded here to stop it being re-derived.  &SYSNDX
-advances only when a new macro is INVOKED, so a long AIF/AGO loop inside a single
-expansion shows a frozen &SYSNDX with the trace still scrolling -- identical to
-an infinite loop.  FIOPDISP was called LOOPING on exactly that evidence and in
-fact terminates in 307s.  The reliable discriminator is ACTR: it fires on a
-genuinely unbounded loop and stays silent on a merely slow one.  Failing that,
-give it a much longer timeout and see.
+DO NOT CLASSIFY A LOOP BY WATCHING &SYSNDX.  This was asserted earlier and it is
+WRONG, so it is recorded here to stop it being re-derived.  &SYSNDX advances only
+when a new macro is INVOKED, so a long AIF/AGO loop inside a single expansion
+shows a frozen &SYSNDX with the trace still scrolling -- identical to an infinite
+loop.  FIOPDISP was called LOOPING on exactly that evidence and in fact
+terminates in 307s.  The reliable discriminator is ACTR: it fires on a genuinely
+unbounded loop and stays silent on a merely slow one.
 
 OI301700 COULD NOT BE MEASURED AT ALL, and the reason is not the assembler.  Its
 MLIB80 holds 41 files against OI340600's 278, and NOT ONE of them is a macro
 definition -- every core macro the sources use, PROGRAM, IF, DO, PROC, EQUATE,
 IFPROC among 237 others, is simply absent.  It also has no MACROFILES.txt, so
 ASM101S stops immediately with "Cannot open ../MLIB80/MACROFILES.txt".  The user
-confirmed on the day that OI301700 needs files borrowed from OI340600 and that
-this has never yet been done.  Until it is, every OI301700 number is vacuous.
+confirmed that OI301700 needs files borrowed from OI340600 and that this has
+never yet been done.  Until it is, every OI301700 number is vacuous.
 
-DO NOT "FIX" THIS BY GENERATING MACROFILES.txt THERE.  It was tried on the day.
+DO NOT "FIX" THIS BY GENERATING MACROFILES.txt THERE.  It was tried.
 makeMACROFILES.py runs happily and produces an index naming ZERO macro files,
 because there are none to name, and ASM101S then loads no macros at all and
 buries you in errors instead of stopping with one clear message.  Borrow the
@@ -373,52 +369,63 @@ That is original-build primary evidence, so it is the reference to check a
 borrowed macro library against, in the same way RUNLST is the reference for
 RUNASM.  It has not been used yet.
 
-NEXT STEPS, in order.  The previous list's step 1 -- fix macro keyword and
-sublist handling, issue #1331 -- and step 4, the hangs, were both done on
-2026-08-08, in commits 0f5ab2939 and 91af304f0.  What follows is what they left.
+NEXT STEPS, in order.  The previous list's steps 1 and 4 -- macro sublists and
+keyword parameters (issue #1331), the hangs, and the NoneType/KeyError crash
+family -- were done on 2026-08-08 and 2026-08-09, in commits 0f5ab2939,
+91af304f0 and 60a12bf9f.  What follows is what they left.
 
-  1. THE NoneType CRASH AT model101.py:1735 IS NOW THE WHOLE JOB, 92 of the 165
-     remaining crashes and up from 5 at the start of the day, because so many
-     modules now reach it.  Nothing else comes close, and it is the same shape
-     of win the last two steps were.  Take one of the 92, run it with --trace,
-     and find where the None was PRODUCED rather than where it was
-     dereferenced -- that was what cracked both of the previous ones.
+  1. IndexError AT model101.py:1537, 23 of the 47 remaining crashes and now the
+     largest single family.  Work it the way the last three were worked, which
+     is the method that has paid every time:  do not start at the line that
+     raised.  Log what the failing input actually was -- for the crash family
+     just fixed, wrapping `parserASM` and printing every call that returned None
+     produced the three grammar gaps in one run -- and fix where the bad value
+     was PRODUCED.
 
-  2. RE-RUN THE SWEEP AND SEE WHAT IS LEFT.  modules/sdfpkg/fcos-sweep.sh does
+  2. THE float/int OPERAND CLASH AT expressions.py:255, 14 crashes.  Something is
+     reaching a bitwise AND as a float.  Small and self-contained; a good second
+     item, and possibly the same root cause as some of the IndexErrors, since
+     both smell like an address computed in the wrong units.
+
+  3. RE-RUN THE SWEEP AND SEE WHAT IS LEFT.  modules/sdfpkg/fcos-sweep.sh does
      all 225 and classifies each as OK/ERRORS/CRASH/HANG.  USE FCOS_TIMEOUT=900
-     OR MORE: the default of 120 misclassifies several slow-but-terminating
-     modules, and DCICYC alone needs 861s.  The table above is its output for
-     2026-08-08 and is the thing to beat.  Expect the histogram to be redrawn
-     rather than merely shortened, so do not plan past this point in detail.
+     OR MORE; the default of 120 misclassifies slow-but-terminating modules, and
+     DCICYC alone needs 861s.  The table above is its output for 2026-08-09.
 
-  3. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
+  4. START READING THE ERRORS, which is a new option and probably the most
+     valuable one.  155 modules now assemble far enough to produce diagnosed
+     errors rather than dying, and nobody has yet looked at what those
+     diagnostics say in bulk.  Sort them by message and the common ones will
+     name the next round of work directly, without any crash to chase.
+
+  5. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
      The user has never done this, so treat it as unexplored: the two versions
      are years apart and a macro that merely has the same name may not have the
      same definition.  Diff a few that DO exist in both before assuming the rest
      can be copied wholesale.  Check the result against the listings in
-     ~/workspace/PFS/"OI301700 as received"/ described above, which are primary
-     evidence of what the original build actually produced.  Expect to justify
-     the choice later, since the corpus goal covers both PASS versions.
+     ~/workspace/PFS/"OI301700 as received"/, which are primary evidence of what
+     the original build actually produced.  Expect to justify the choice later,
+     since the corpus goal covers both PASS versions.
 
-  4. ASM101S IS SLOW, which only became visible once modules stopped crashing
+  6. ASM101S IS SLOW, which only became visible once modules stopped crashing
      early.  DCICYC takes 861s and FIOPDISP 307s, and the cost is dominated by
-     re-parsing every line through tatsu on every pass.  This is not urgent, but
-     it is what makes the sweep an hour's work rather than a few minutes', and
-     it will get worse as more modules run further.
+     re-parsing every line through tatsu on every pass.  Not urgent, but it is
+     what makes a sweep an hour's work rather than a few minutes', and it will
+     get worse as more modules run further.
 
-  5. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
+  7. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
      feature request from an outside user (#1333), which also carries a
      KeyError-None crash on "ST#1 EQU *" at model101.py:1237.  DC cannot parse a
      hex literal with comma-separated groups, as in
      DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' -- that alone is all 328 of
-     FAZ2's diagnosed errors.  ASM101S.py:1158 raises IndexError when generated
-     code runs past the end of a --compare listing, instead of reporting it;
-     that is what makes the six intentional RUNASM deviations look like crashes
-     on a default regression run.  Created variable symbols `&(...)` and the
-     T'/D' attributes on a subscripted variable are the 26 AIF operands that
-     still do not parse.  And free-standing "*" comment lines between macro
-     definitions confuse the MACRO/MEND block tracking, so the definitions leak
-     into code generation and die with AttributeError on a None operand at
-     model101.py:984; this was found while writing macroTests/sublists.asm and
-     is why that file keeps its prose in the "*/" header instead.
+     FAZ2's diagnosed errors.  ASM101S.py raises IndexError when generated code
+     runs past the end of a --compare listing instead of reporting it, which is
+     what makes the six intentional RUNASM deviations look like crashes on a
+     default regression run.  Created variable symbols, `&(SRC&UPDDSN&NAME)`,
+     are the last AIF operands that still do not parse.  And free-standing "*"
+     comment lines between macro definitions confuse the MACRO/MEND block
+     tracking, so the definitions leak into code generation and die with
+     AttributeError on a None operand; this was found while writing
+     macroTests/sublists.asm and is why that file keeps its prose in the "*/"
+     header instead.
 
