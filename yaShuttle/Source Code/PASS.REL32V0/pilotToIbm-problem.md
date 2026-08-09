@@ -13,10 +13,12 @@ safety cap kills it. A full corpus sweep (below) found this in effectively
 every program that makes a subroutine call — i.e. nearly all of them.
 
 This is a real, currently-open gap, not a corpus-selection artifact or a
-downstream `lnk101`/`yaGPC2` bug — see "What's been ruled out" below. It
-needs someone (or some agent) to pin down BFS's actual stack/task-linkage
-convention at the object-code level, which this investigation did not
-finish doing.
+downstream `lnk101`/`yaGPC2` bug — see "What's been ruled out" below.
+**Root cause is now confirmed** (see "Confirmed: BFS asks its own
+runtime for the stack via SVC, PFS doesn't"): BFS-compiled code acquires
+its stack via a supervisor call (`SVC X'000f'`) that `pilotToIbm` copies
+through verbatim, but which nothing in this pipeline services. A concrete
+fix direction is proposed there; it has not been implemented yet.
 
 ## How to reproduce
 
@@ -69,11 +71,12 @@ containing the word `PROGRAM`), each run through both pipelines, comparing
   multi-unit manifest link — a COMPOOL or a companion file — not a
   single-file compile, so they're not representative of the PFS
   path's own reliability; not investigated further here).
-- BFS: **2/95** halt cleanly. One of those two (`213-GNC_POOL.hal`) is a
-  `COMPOOL`, not a `PROGRAM` — it has no executable code and no stack
-  requirement, so it doesn't count as a real success. The other
-  (`197-P.hal`) is a genuine, unexplained exception — see "Open
-  questions" below.
+- BFS: sweep script reported 2/95 halting cleanly, but that number is
+  itself wrong — see the correction near the end of this document. The
+  real figure is 1/95 (`213-GNC_POOL.hal`, a `COMPOOL` with no executable
+  code and no stack requirement — it doesn't exercise this bug at all,
+  so it isn't a real success either). **Every genuine `PROGRAM` in the
+  corpus that needs a stack frame fails identically.**
 - WRITE(6) output matched between the two pipelines for 48/95 files —
   but this is a weak signal: most of those "matches" are BFS runs that
   still trapped and hit the step cap *after* producing correct output
@@ -211,65 +214,109 @@ has **not been identified yet** — see below.
   rules out "just make the CSECT bigger" as the fix; whatever's broken is
   about how the stack gets *referenced*, not how much space is reserved for it.
 
-## The most promising unfollowed lead
+## Confirmed: BFS asks its own runtime for the stack via SVC, PFS doesn't
 
-Compared the raw bytes of the program CSECT's own first instruction
-between the two builds (`readObject101S.py` dump for PFS, hand-decoded
-PILOT TXT record for BFS):
+`GPC.sh disasm` doesn't exist in this checkout (no `yaGPC` sibling
+directory, no `GPC.sh` anywhere under `yaShuttle/`) — but `yaGPC2` itself
+has a real disassembler: run any `.fcm` with `--trace` (instead of
+`--no-trace`) and every executed instruction prints its decoded mnemonic.
+Using that against both `HELLO.fcm` builds settles this completely:
 
 ```
-PFS  $0HELLO @ offset 0: E8 F3 00 00   (opcode E8)
-BFS  $HELLO  @ offset 0: C9 FB 00 0F   (opcode C9)
+$ yaGPC2 --interactive --trace --no-verbose --symbols HELLO-lnk101.json \
+         --line-width 240 --max-steps 5 HELLO.fcm     # PFS build
+[1] 010000 $0HELLO +0000: e8f3 01e6  LHI 0,X'01e6'   R00: 00000000->01e60000
+
+$ yaGPC2 --interactive --trace --no-verbose --symbols HELLO-lnk101.json \
+         --line-width 240 --max-steps 5 HELLO.fcm     # BFS build (via pilotToIbm)
+*** HAL/S SVC trapped (ea=0xf, R1=0x0, code=0x0)
+[1] 010000 $HELLO  +0000: c9fb 000f  SVC X'000f'
 ```
 
-PFS's RLD table has an entry relocating **exactly this operand**
-(`rel=@0HELLO pos=$0HELLO addr=000002`, i.e. bytes 2-3 of this same
-instruction get patched with the stack section's resolved address).
-BFS's RLD record — confirmed by the hand-decode above — has **no
-relocation at byte offset 2 of `$HELLO` at all**. The operand `00 0F` is
-never touched by anything; it's whatever the BFS compiler wrote verbatim.
+PFS's very first instruction loads register 0 with `0x01E6` — the
+halfword address of the `@0HELLO` stack section the linker generated
+(`0x0003CC / 2 = 0x01E6`, confirmed by direct arithmetic against the
+section table). This is the `LHI` + `@0<prog>`-ER-relocation mechanism
+described above, now confirmed at the instruction level, not just from
+the RLD table.
 
-Two live hypotheses, neither confirmed:
+BFS's very first instruction — at the exact same offset, same 4-byte
+length — is a **genuine `SVC X'000f'`**, not an unpatched load. It is not
+a placeholder waiting for a relocation that never arrived; it's a
+deliberate supervisor call the BFS compiler emits to (presumably) ask its
+own native runtime for a stack. `yaGPC2` doesn't implement whatever
+service `SVC 0x0F` denotes (it isn't in the FCOS/standalone service set
+this harness models), so it traps immediately, before the program body
+ever runs — hypothesis 1 in the earlier draft of this section was right,
+hypothesis 2 (self-relative addressing) is dead.
 
-1. `C9 FB` is a different opcode from `E8 F3` entirely (not "the same
-   instruction with an unpatched operand") — possibly an SVC-class
-   instruction that, under a real BFS-hosted runtime, asks a supervisor
-   service for a stack rather than referencing a linker-resolved address.
-   If so, the `ea=0xf` trap on the very *first* instruction executed is
-   the harness faithfully executing exactly what's there, and
-   `yaGPC2`/the BFS runtime model would need to *service* that call, not
-   just have `pilotToIbm` patch bytes around it.
-2. `C9 FB 00 0F` is a self-relative addressing form (a displacement
-   computed under BFS's own addressing convention, valid only if the
-   CSECT ends up at the address BFS's own native linker would have put
-   it) that breaks once `lnk101` places the CSECT somewhere else using
-   PASS's absolute-addressing convention — in which case `pilotToIbm`
-   would need to recognize and rewrite this specific instruction form
-   into the PASS-style relocatable form (ER + RLD), not merely copy it
-   through.
+This reframes the fix. **`pilotToIbm` cannot make BFS-compiled code work
+by patching relocations or CTL cards around it** — the object it's
+converting was compiled assuming a *different runtime contract* for
+stack acquisition than the PASS/standalone one `lnk101`+`yaGPC2` support.
+The two realistic directions:
 
-**This wasn't resolved because a disassembler for the linked `.fcm`
-couldn't be gotten to run in this session** (`GPC.sh disasm` — script not
-found under the paths tried; the `gpc`-style subcommand set documented in
-`../../yaGPC2/tools.md` around "GPC.sh run/debug/gui/dump/disasm" may live
-somewhere not yet located, or may need the JS bundle built first). Getting
-a real mnemonic decode of opcode `C9 FB` (and PFS's `E8 F3` for
-comparison) against the AP-101S ISA is the single highest-value next
-step — it would likely settle which of the two hypotheses above is right
-without further guessing.
+1. **Rewrite the instruction.** When converting a program CSECT with
+   `stacksize_hw > 0`, detect this specific leading `SVC X'000f'` pattern
+   (verify it's *always* exactly this opcode/operand across other
+   examples — `104-EXAMPLE_1.hal`, `071-DARTBOARD_APPROXIMATION.hal`, and
+   others in the sweep also `pfs=trap` for unrelated reasons and are
+   already-linked PROGRAMs worth checking too) and replace it with the
+   4-byte PFS-equivalent (`LHI 0,<halfword-addr-placeholder>`) plus a
+   real `@0<prog>` ER and an RLD entry targeting byte offset 2 of this
+   CSECT — i.e. literally synthesize what `EMIT_SYM_CARDS`/
+   `EMIT_ESD_CARDS`'s PASS-side code would have produced, using the
+   `stacksize_hw` value `pilotToIbm` is already extracting correctly, and
+   also emit the missing `#E<prog>` PDE SD section so
+   `lnk101`'s `patchStackPDEs()` has somewhere to bind the resolved
+   address (see `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py` around
+   line 1864 for the PDE's expected 12-byte-per-slot layout). This keeps
+   the whole thing working through the existing PASS-format linker with
+   no changes to `lnk101` or `yaGPC2`.
+2. **Implement `SVC 0x0F`'s real semantics** in `yaGPC2` instead, if it
+   turns out to be a documented, general BFS runtime service rather than
+   a linker-era artifact (check `USA003090`/BFS-specific HAL/S-FC
+   documentation, and the SVC-number tables already used by
+   `halucp_check_trap()`/`halucp_is_trap_addr()` in `yaGPC2/src/halucp.c`
+   for the existing SVC-interception convention). More invasive, but
+   might be the more correct long-term answer if BFS-format objects are
+   meant to be a first-class target rather than always converted through
+   `pilotToIbm`.
 
-## Open question
+Direction 1 is almost certainly less work and doesn't touch `yaGPC2` or
+`lnk101` at all — start there.
 
-`197-P.hal` is the one real (non-COMPOOL) program in the 95-file sweep
-that halts cleanly under BFS despite calling `WRITE(6)` (which, like
-`HELLO.hal`, should route through the same `COUTP`/`IOINIT` library
-chain). Worth checking early: does its compiled `$P` CSD actually have
-`stacksize_hw == 0` (i.e. the compiler decided it needs no stack frame at
-all, so the whole missing-linkage problem is simply not triggered for
-this one file), or is something else going on? If `stacksize_hw == 0`
-there, it's not a counterexample to anything above — just confirmation
-that the bug only bites when a nonzero stack frame is actually needed,
-which is true for nearly everything.
+## Correction to the corpus sweep: real BFS clean-halt rate is 0/95, not 2/95
+
+`197-P.hal` was originally reported as the one non-COMPOOL BFS success.
+That was a **bug in the sweep script**, not a real exception. Rerunning
+it by hand:
+
+```
+Generating stack sections...
+Generated stack section '@0P' (80 HW / 160 bytes, chain)
+...
+*** HAL/S SVC trapped (ea=0x0, R1=0x0, code=0x0)
+ERROR: max steps reached (100000)
+```
+
+— it fails exactly the same way as `HELLO.hal` (its `$P` CSD does have
+`stacksize_hw=44`, i.e. a real, nonzero stack requirement; `lnk101`
+*does* generate `@0P` for it, because — unlike `HELLO.hal` — some other
+code in this file evidently *does* emit an `@`-something ER that
+triggers `stackCsectNames()`'s NOSDL path even without `pilotToIbm`
+producing one for the SVC-stack CSECT itself; worth understanding why,
+but it doesn't change the outcome). The sweep script's `subprocess.run(...,
+timeout=30)` handler discarded `e.stdout`/`e.stderr` entirely on a
+timeout (`except subprocess.TimeoutExpired: return R with stdout="",
+stderr="TIMEOUT"`), and `197-P.hal` runs long enough (matrix ops,
+100000-step cap) to cross that 30s wall on this machine — so its real
+"trapped, then hit the step cap" outcome got silently reclassified as
+"clean" by the sweep's own bug. **Every genuine `PROGRAM` unit in the
+95-file corpus that needs a nonzero stack fails identically.** The only
+sweep row that's a real success is `213-GNC_POOL.hal`, and only because
+it's a `COMPOOL` with no executable code and no stack requirement at
+all — i.e. it was never exercising this code path in the first place.
 
 ## Relevant files
 
