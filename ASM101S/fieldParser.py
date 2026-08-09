@@ -511,10 +511,22 @@ def parserASM(text, rule):
 #    `invoke`   False for macro-argument lines.
 # Returns True,operand,skipCount on success or False,None,skipCount on error.  
 # `skipCount` is the number of continuation lines processed.
-# Where the operand field of a statement ends: at the first blank that is not
-# inside a quoted string.  Everything after it is a comment.
+# Where the operand field of a statement ends: at the first blank that is
+# neither inside a quoted string NOR inside parentheses.  Everything after it
+# is a comment.
+#
+# The parentheses matter as much as the quotes.  A conditional-assembly
+# expression is full of blanks that are outside any quoted string --
+#     AIF   ('&P2' EQ '' OR '&P2' EQ 'OR' OR '&P2' EQ 'AND' OR '        X
+#           &P2' EQ 'ORIF').SGLOPR
+# -- and stopping at the first of them truncated the operand and then joined
+# the continuation card onto the stump, silently producing a different
+# condition from the one written.  In STKINS that turned a test for five
+# alternatives into a test for two, and the IF macro stopped recognising its
+# own condition mnemonics.
 def operandFieldEnd(text):
     quoted = False
+    depth = 0
     i = 0
     while i < len(text):
         c = text[i]
@@ -524,8 +536,14 @@ def operandFieldEnd(text):
                 i += 2
                 continue
             quoted = not quoted
-        elif c == " " and not quoted:
-            return i
+        elif not quoted:
+            if c == "(":
+                depth += 1
+            elif c == ")":
+                if depth > 0:
+                    depth -= 1
+            elif c == " " and depth == 0:
+                return i
         i += 1
     return len(text)
 
