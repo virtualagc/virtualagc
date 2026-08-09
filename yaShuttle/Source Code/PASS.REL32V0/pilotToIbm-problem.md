@@ -9,38 +9,45 @@ compile, link, and run correctly end to end — `synthesize_pass_stack_linkage()
 already handles the case where a program's entry is the "request a stack via
 `SVC X'000f'`" pattern.
 
-**`197-P.hal` (below) is now fixed** — verified directly, output matches
-its PFS build exactly. Keep it as a regression check. `ON ERROR` is not
-fully solved, though: **`193-TEST_X.hal`** still fails the same way
-`197-P.hal` used to. Its `ON ERROR` has an explicit `GOTO` target
-(`ON ERROR GO TO DONE;`, vs. `197-P.hal`'s plain `DO; ...; END;` form) and
-the program also has a nested `PROCEDURE X` — whatever now handles
-`197-P.hal`'s shape doesn't recognize this one. Symptom is the same:
-`*** HAL/S SVC trapped (ea=0x0, ...)` then `ERROR: max steps reached
-(100000)`, `out6.txt` empty, while PFS's build prints
-`RESULTS OF TESTING X ...` correctly. Reproduce the same way as below,
-substituting `193-TEST_X` for `197-P` throughout (add `--verbose` to the
-`pilotToIbm` call to see what it recognizes).
+**`197-P.hal`, `193-TEST_X.hal` (a `GOTO`-target `ON ERROR` + nested
+`PROCEDURE` shape), and `037-ROOTS.hal` (a `READ`-driven interactive
+program, no `ON ERROR` at all) are now all fixed** — verified directly
+with real stdin where needed, output matches PFS exactly in each case.
+Keep all three as regression checks (same steps as below, substituting
+the filename).
 
-There's also a second, apparently unrelated failure: **`037-ROOTS.hal`**
-has no `ON ERROR` at all — it's a `READ`-driven interactive program (reads
-`A,B,C` via `READ(5)` in a loop, reports complex roots). With real stdin
-piped in (e.g. `printf "1,2,3\n0,0,0\n" | yaGPC2 ...` — without real input
-both builds just print the prompt and stop, which looks misleadingly like
-success), PFS computes the correct result; BFS fails differently from the
-`ON ERROR` cases:
+A full corpus sweep (95 standalone `PROGRAM` files in
+`../Programming in HAL-S/`, both pipelines, `--outfile6` capture +
+run status) now shows **60/95 halting cleanly under BFS**, up from
+essentially 0 before the fixes above landed. 9 files still have PFS
+clean / BFS not clean:
 
-```
-*** HAL/S SVC trapped (ea=0x6, R1=0x2448000, code=0x0)
-
-ERROR: invalid instruction 0xc0bd at 0x023f
-[IOCODE=6?]     [IOCODE=6?]     [IOCODE=5?]     [IOCODE=5?] ...
-```
-
-An actual invalid-instruction decode, not a trap-then-spin — treat as a
-separate investigation. A `--trace` disassembly around address `0x023f`
-(the reported invalid-instruction address) would be the way to see what
-`pilotToIbm`'s conversion actually produced there.
+- **6 are not a `pilotToIbm` problem at all**: `029-DATATYPES.hal`,
+  `198-P.hal`, `199-P.hal`, `200-A.hal`, `203-A.hal`, `205-LOG10.hal`
+  fail to compile under `HALSFC --bfs` itself (PASS2 rejects them before
+  `pilotToIbm` ever runs) with `ONLY ONE <ON ERROR> ALTERNATE ENTRY POINT
+  IS ALLOWED PER TASK OR PROGRAM` / `INDIRECT STACK USAGE CONFLICT` —
+  a genuine BFS-compiler-level limitation (these files use more than one
+  `ON ERROR$(...)` alternate entry point), not a conversion bug. Out of
+  scope for this document.
+- **`130-EXAMPLE_N.hal` and `219-P.hal`**: output is byte-correct
+  (`THE ANSWER IS ...` / `P: TASKS DEFINED` respectively), but a trailing
+  `SVC trapped` still happens after the real work is done. `219-P.hal` is
+  notable: it's a multi-tasking program (hence "TASKS DEFINED"), and its
+  trap (`ea=0x14a, R1=0x14a0000, code=0x1`) repeats identically three
+  times in a row rather than spinning through zeroed memory — worth
+  checking whether the stack-linkage synthesis only handles a
+  `PROGRAM`'s own `@0<char>` stack and not the `@1<char>`, `@2<char>`, …
+  per-`TASK` stacks (`lnk101`'s own comment on `STACK_SEQUENCE`,
+  `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py` ~1850, documents this
+  `@`+sequence-char+characteristic naming for exactly that case).
+- **`222-MULTI.hal`**: a more serious, distinct failure — `out6.txt` is
+  completely empty under BFS (PFS prints
+  `A=... B=... C=...` correctly), and the run hits a genuine
+  `*** HAL/S SEND ERROR: RUNTIME: #17 ILLEGAL CHARACTER SUBSCRIPT`
+  before spinning to the step cap. This is runtime corruption during
+  actual execution, not just a tail-end halt-sequence gap — treat as a
+  separate bug from the trailing-trap cases above.
 
 ## How to reproduce
 
@@ -55,7 +62,9 @@ pilotToIbm -o 197-P.obj current.results/cards/ --verbose
 lnk101 197-P.obj -o 197-P.fcm --json-symbols 197-P-lnk101.json
 yaGPC2 --interactive --no-trace --no-verbose --symbols 197-P-lnk101.json \
        --line-width 240 --outfile6 out6.txt 197-P.fcm
-# *** HAL/S SVC trapped (ea=0x0, ...) then ERROR: max steps reached (100000)
+# now exits 0 with correct output -- this file is fixed; substitute
+# 130-EXAMPLE_N, 219-P, or 222-MULTI for 197-P to reproduce the open
+# problems below instead.
 ```
 
 Use `--trace` in place of `--no-trace` (with `--max-steps N` to keep the
@@ -69,42 +78,54 @@ with exit 0 and correct output.
 
 ## Likely cause / where to look
 
-`synthesize_pass_stack_linkage()` in `pilotToIbm` only rewrites a program's
-entry when the text chunk at `address_hw == 0` starts with exactly the
-2-byte opcode `C9 FB` (the plain stack-request pattern). `197-P.hal`'s
-compiled entry is a different instruction shape entirely, most likely
-because `ON ERROR` inserts its own dispatch/setup code ahead of (or instead
-of) the plain stack-request prologue. That shape isn't recognized, so
-whatever relocation/setup it needs is never synthesized.
+(This section originally covered `197-P.hal`'s now-fixed entry-prologue
+gap; the hand-decode/compare approach below is the same one that found
+that fix and is the natural starting point for the open cases too.)
 
-- Hand-decode the raw PILOT member for `$P` (`current.results/cards/$P` in
-  the reproduction above) the same way `parse_pilot_member()` does, and
-  compare its ESD/RLD/TXT records against the equivalent PFS-compiled `$0P`
-  module (dump the PFS `.obj` with
-  `/home/rburkey/git/virtualagc/ASM101S/readObject101S.py`) to see what
-  PFS's compiler does differently for an `ON ERROR` program's entry.
+For the trailing-trap cases (`130-EXAMPLE_N.hal`, `219-P.hal`) and
+`222-MULTI.hal`'s runtime corruption:
+
+- Hand-decode the raw PILOT member the same way `parse_pilot_member()`
+  does, and compare its ESD/RLD/TXT records against the equivalent
+  PFS-compiled module (dump the PFS `.obj` with
+  `/home/rburkey/git/virtualagc/ASM101S/readObject101S.py`) — this is
+  what found the original `@0<prog>` ER / `#E<prog>` PDE gap.
+- For `219-P.hal` specifically: check whether `synthesize_pass_stack_linkage()`
+  (or whatever superseded it) only synthesizes the `@0<char>` stack for
+  the `PROGRAM` itself, and not `@1<char>`, `@2<char>`, … for each `TASK`
+  — see `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py`'s
+  `STACK_SEQUENCE` comment (~1850) for the naming convention a multi-task
+  program needs.
 - `../PASS2.PROCS/OBJECTGE.xpl` is the original historical PASS2
   object-emission source (`?P`/`?B`-conditionalized for PASS vs. BFS, no
-  Python port exists yet) — worth checking for how `ON ERROR` affects
-  entry-point/prologue generation on either side.
+  Python port exists yet) — worth checking for how `ON ERROR`/`TASK`
+  affect entry-point/prologue generation on either side.
 - `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py` (someone else's repo,
   read-only) — `stackCsectNames()` and `patchStackPDEs()` document what
-  triggers stack-section generation and PDE binding, in case the `ON
-  ERROR` prologue needs something from that same mechanism.
+  triggers stack-section generation and PDE binding.
 
 ## Next steps
 
-- Extend whatever now handles `197-P.hal`'s `ON ERROR` entry shape to also
-  cover `193-TEST_X.hal`'s (`GOTO`-target `ON ERROR` + nested `PROCEDURE`).
-- Investigate `037-ROOTS.hal` separately — it isn't an `ON ERROR` case and
-  fails with a different symptom (invalid-instruction decode, not
-  trap-then-spin).
-- Once both are fixed, sweep the rest of `../Programming in HAL-S/*.hal`
-  (98 files, ~90 standalone single-unit `PROGRAM`s) rather than
-  hand-picking further cases — `ON ERROR` and `READ`-driven I/O are both
-  common enough that a fix for one file's shape risks missing siblings
-  with slightly different shapes, the same way `197-P.hal`'s fix didn't
-  cover `193-TEST_X.hal`.
-- Keep `HELLO.hal` and `197-P.hal` passing as regression checks (same
-  reproduction steps as below, dropping `--verbose`) — they already work
-  and should stay working.
+- Investigate `219-P.hal`'s per-`TASK` stack linkage (see above) —
+  probably the highest-value next fix, since multi-tasking is likely
+  common across the corpus, not a one-off shape like some earlier cases.
+- Investigate `130-EXAMPLE_N.hal`'s trailing trap — it does *not* use
+  `TASK`/`SCHEDULE` (checked directly), so it's a different shape from
+  `219-P.hal` despite the similar symptom; don't assume the same fix
+  covers both.
+- Investigate `222-MULTI.hal` separately — it *does* use `TASK` (checked
+  directly), so it may share a root cause with `219-P.hal`'s per-`TASK`
+  stack gap even though its symptom (runtime corruption, not a trailing
+  trap) looks different; worth checking after `219-P.hal` rather than
+  assuming it's unrelated.
+- Once those are fixed, rerun the full corpus sweep (95 standalone
+  `PROGRAM` files in `../Programming in HAL-S/`, both pipelines,
+  compare `--outfile6` + run status) rather than hand-picking further
+  cases — it's what found `219-P.hal`/`130-EXAMPLE_N.hal`/`222-MULTI.hal`
+  after the earlier fixes looked complete from a handful of manual
+  checks alone. Current baseline: 60/95 clean under BFS.
+- Keep `HELLO.hal`, `197-P.hal`, `193-TEST_X.hal`, and `037-ROOTS.hal`
+  passing as regression checks (same reproduction steps as below,
+  dropping `--verbose`) — they already work and should stay working.
+- The 6 BFS-compile-rejected files (`029-DATATYPES.hal` etc., see above)
+  are not this document's problem — don't spend time on them here.
