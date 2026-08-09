@@ -341,9 +341,10 @@ the day recalled five of them and wrote CINDEX up as an unexplained sixth.
 RUNASM IS A WEAK GUARD ON MOST OF WHAT MATTERS NOW, which is easy to mistake for
 a strong one.  RUNMAC uses no multilevel sublists and no ACTR at all, it
 never exercises the numeric branch of T', and RUNASM contains no DC duplication
-factor and no multi-valued DC anywhere.  Assembly-time division was returning a
-Python float for years without moving the score either.  All six can be
-completely broken while it stays at 205 of 205.  Run
+factor, no multi-valued DC, NO LENGTH MODIFIER and no `DC C'...'` anywhere.
+Assembly-time division was returning a Python float for years without moving
+the score either, and character constants generated nothing whatever.  All
+eight can be completely broken while it stays at 205 of 205.  Run
 ASM101S/macroTests/regressionMacros.sh as well; it takes seconds and it is the
 only check that covers the conditional-assembly language itself.
 
@@ -351,8 +352,8 @@ FCOS IS WHERE THE WORK IS.  Of OI340600's 225 modules, assembled against MLIB80,
 before this stretch of work began and now:
 
                     before   after
-    OK                  21      51
-    ERRORS              33     161
+    OK                  21      52
+    ERRORS              33     160
     CRASH              170      13
     HANG                 1       0
 
@@ -445,126 +446,81 @@ cheapest way to find the defect.  "Unrecognized line" hid 35 distinct causes;
 problem and should probably be given the same treatment before anyone tries to
 fix what it is reporting.
 
-NEXT STEPS, in order.  The previous list's first item -- read the diagnostics
-in bulk -- was done on 2026-08-09 and is written up above; it moved OK from 25
-to 51.  What follows is what it left.
+NEXT STEPS, in order.  The previous list's first two items are done, on
+2026-08-09:  "Eval error type" was made to name what it could not evaluate,
+and the BCE half of the instruction work landed.  What follows is what they
+left, with the diagnostic counts re-measured afterwards rather than carried
+over.
 
-  1. GIVE "Eval error type 3" A REAL MESSAGE, then fix what it turns out to be.
-     It is the top of the list at 62 modules and 3455 occurrences, and it says
-     nothing whatever about what failed to evaluate.  This is the same shape as
-     "Unrecognized line", which hid 35 distinct causes until it was made to
-     name the operation and then resolved in a single run.  Do the message
-     first; do not try to guess the defect from the call site.
+  1. "Undefined symbol 'X'" IS THE NEW TOP OF THE LIST, 64 of the 225 modules
+     and 641 occurrences, and it is worth taking seriously precisely because
+     it was invisible until this week:  it used to be reported as "Eval error
+     type 1", which named nothing.  Sixty-four modules referring to symbols
+     that do not exist is more likely to be one systemic cause than sixty-four
+     separate ones -- a class of definition ASM101S is not recording, most
+     likely -- so find what the missing symbols have in common before fixing
+     anything.  `fcos-diagnostics.py DIR --message="Undefined symbol"` lists
+     them by module.
 
-  2. IMPLEMENT THE IOP/MSC INSTRUCTION SET, which is where 60 of the 225
-     modules are stuck and which was MISDIAGNOSED HERE as a corpus gap of
-     missing macros until the user corrected it on 2026-08-09.  The
-     '#'-prefixed operations -- #MIN, #MOUT, #BU, #WAT, #LBR, #DLYI, #CMDI,
-     #RDS and the rest -- are INSTRUCTIONS in the AP-101S instruction set, not
-     macros, and ASM101S already knows all 96 of them by name in
-     model101tables.py's argsMSC and argsBCE.
+  2. "Could not evaluate D2 subfield", 48 modules and 396 occurrences, and
+     "Could not interpret operand", 41 and 119.  Both are about instruction
+     operands rather than the macro language, and both may well fall out of
+     whatever step 1 turns out to be, since an unresolved symbol is exactly
+     what would make a displacement inexpressible.  Do step 1 first and
+     re-measure.
 
-WHAT IS MISSING IS THEIR ENCODING.  model101tables.py comments that an
-     opcode of -1 marks "a special case in terms of how the code is
-     generated", which reads as though a function elsewhere does the work.
-     For these two families no such function was ever written, and the two
-     families fail in DIFFERENT ways.
+  3. THE TWO-BYTE BCE INSTRUCTIONS, 39 modules and 2829 occurrences, which is
+     ASM101S saying honestly that it does not know their encoding and is
+     emitting four zero bytes.  Their opcode/operand boundary cannot be read
+     off the listings -- #WAT occurs 1105 times as 0800 and never otherwise --
+     so this one needs the POO rather than the original build.  The four-byte
+     BCE instructions ARE done and verified byte for byte.
 
-     THE '@' FAMILY IS SILENTLY WRONG.  model101.py reaches argsMSC, calls
-     commonProcessing(2) and then emits bytearray(4) -- four zero bytes,
-     with no opcode consulted.  "@BU X" and "@L X" are different instructions
-     and both assemble to 0000 0000.  Five modules currently counted OK use
-     them -- FCMINMSC, FCMSFCAM, FCMSVOTE, FIOCDATS, FIOMMMSC -- so the OK
-     column overstates what is correct by at least that many.
+  4. THE '@' MSC INSTRUCTIONS, 61 of them, still emit four zero bytes SILENTLY.
+     That is the one remaining place where ASM101S produces wrong object code
+     without saying so, and five modules counted OK use them, so the OK column
+     overstates what is correct.  Either encode them -- 48 of the 61 appear in
+     the original build with their real encodings, and the branches are
+     already worked out as high nibble 2 over the condition code -- or make
+     them say what the BCE ones now say.  DO NOT LEAVE THEM SILENT.
 
-     THE '#' FAMILY NEVER GETS THAT FAR, for a separate reason worth fixing on
-     its own:  model101tables.py:213 says
-     "instructionsWithoutOperands = argsBCE", so all 35 have their operand
-     field DISCARDED before parsing.
-     The document plainly gives them operands -- #MIN and #MOUT take
-     "Displacement, Transfer Count", #MINC and #MOUTC take "IUA, Command" --
-     so that declaration is simply wrong.  With no operand there is no AST,
-     and they fall through to "Unrecognized operation".  This is why no OK
-     module uses one:  they always fail loudly.
+  5. READ THE DIAGNOSTICS AGAIN afterwards.  The ordering has been redrawn
+     completely by every round so far.  Use modules/sdfpkg/fcos-diagnostics.sh
+     and .py, count by BREADTH, and separate the modules that report undefined
+     operations from those that do not before drawing conclusions.
 
-     THE DECISIVE POINT, if anyone doubts that these are unimplemented rather
-     than handled somewhere else:  THE OPCODE VALUES ARE NOWHERE IN ASM101S.
-     All 96 table entries are -1, no mnemonic is special-cased by name in
-     model101.py, and model390.py is an explicit placeholder for speculative
-     System/390 support.  The information needed to encode them is not in the
-     program, so it cannot be generating correct code for them by any route.
+  6. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
+     Unexplored:  the two versions are years apart and a macro that merely has
+     the same name may not have the same definition.  Diff a few that DO exist
+     in both before assuming the rest can be copied wholesale.
 
-     They are defined in Appendix A, "IOP MSC Instruction Repertoire", of the
-     Shuttle GPC Software Model AP-101S document.  Its text is extracted to
-     ASM101S/AP-101S-instruction-set.txt -- grep that rather than the 95 MB
-     PDF.  mscAll is also too narrow: it rejects two-operand forms such
-     as `0,0` and `IUA,IMMED` that bceAll accepts.  Do NOT widen it on its
-     own, since that only converts a loud failure into silent zeros.
+  7. VERIFY, WHICH IS STILL THE REAL GAP.  52 modules exit 0, which means the
+     assembler did not complain, not that the bytes are right.  The "as
+     received" listings are the evidence -- see the section above -- and
+     --compare needs to learn about their carriage-control column before it
+     can be pointed at them.  Until then the OK column is a much weaker claim
+     than it looks.
 
-     CNOP AND THE '$' SUFFIX ARE DONE, in commits 947cb05e6 and 079cb27ae,
-     both derived from the original build rather than from the POO.  A
-     record of both, and of everything else learned about the undocumented
-     parts of the language, is kept in ASM101S/ap101s-notes.db --
-     ap101s-notes.py reads and writes it and renders
-     AP-101S-language-notes.md.  Put what you discover into it as you go;
-     the evidence field, saying how a thing was established, is the point.
+  8. THE REMAINING 13 CRASHES, a long tail:  7 of KeyError 'preliminaryOffset'
+     with 2 of KeyError None at the same line, and four singletons including
+     an AttributeError raised inside tatsu itself.
 
-     THE TOOL FOR THE REMAINING WORK IS modules/sdfpkg/fcos-encodings.py,
-     which reads the object code the original build generated statement by
-     statement out of the "as received" listings.  75 of the 96 '@' and '#'
-     instructions appear there WITH their real encodings, many of them
-     hundreds of times, which is enough to derive most of the set
-     empirically and to check the rest against the POO.  The regularities
-     are already visible: the MSC branches are high nibble 2 with the
-     condition code in the low nibble, and the BCE long forms are 0xF0 |
-     opcode with 0x08 distinguishing the @ variants.  DO NOT GUESS an
-     encoding -- a wrong one is silently wrong object code, which is the
-     one outcome worse than the present four zero bytes.
+  9. ASM101S IS SLOW.  DCICYC takes 861s, dominated by re-parsing every line
+     through tatsu on every pass, which is what makes a sweep or a diagnostics
+     run the better part of an hour.
 
-  3. RE-READ THE DIAGNOSTICS after step 1, and expect the ordering to have
-     changed completely, as it did this time.  Separate the modules that report
-     undefined operations from those that do not before drawing conclusions:
-     the 60 blocked ones generate diagnostics that say more about the missing
-     macros than about the assembler, and mixing them in distorts everything.
-     fcos-diagnostics.py has no flag for that yet; it was done by copying the
-     unblocked .diag files into their own directory.
-
-  4. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
-     The user has never done this, so treat it as unexplored: the two versions
-     are years apart and a macro that merely has the same name may not have the
-     same definition.  Diff a few that DO exist in both before assuming the rest
-     can be copied wholesale.  Check the result against the listings in
-     ~/workspace/PFS/"OI301700 as received"/, which are primary evidence of what
-     the original build actually produced.
-
-  5. NOTHING IN FCOS IS VERIFIED, only assembled, and this is the gap that
-     matters most for the phase goal.  51 modules now exit 0, which means the
-     assembler did not complain; it does not mean the bytes are right.  RUNASM
-     is verified because RUNLST exists to check it against.  The OI301700
-     listings named above are the first primary evidence that could put FCOS on
-     the same footing, and until something like that is in place the OK column
-     is a much weaker claim than it looks.
-
-  6. THE REMAINING 13 CRASHES, which are now a long tail: 7 of KeyError
-     'preliminaryOffset' at model101.py:1287 with 2 of KeyError None at the
-     same line, and four singletons including an AttributeError raised inside
-     tatsu itself.  Worth doing to get the count to zero, but no longer the
-     best use of a session.
-
-  7. ASM101S IS SLOW.  DCICYC takes 861s and FIOPDISP 307s, dominated by
-     re-parsing every line through tatsu on every pass.  It is what makes a
-     sweep or a diagnostics run the better part of an hour.
-
-  8. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
-     feature request from an outside user (#1333), which also carries a
-     KeyError-None crash on "ST#1 EQU *".  DC cannot parse a hex literal with
-     comma-separated groups, as in DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' --
-     all 328 of FAZ2's diagnosed errors, and the same shape as the multi-valued
-     DC defect already fixed, so look there first.  ASM101S.py raises IndexError
-     when generated code runs past the end of a --compare listing instead of
-     reporting it, which is what makes the six intentional RUNASM deviations
-     look like crashes on a default regression run.  Created variable symbols,
-     `&(SRC&UPDDSN&NAME)`, are the last AIF operands that still do not parse.
+ 10. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
+     feature request from an outside user, issue #1333, which the user has
+     asked to have incorporated; it also carries a KeyError-None crash on
+     "ST#1 EQU *".  DC cannot parse a hex literal with comma-separated groups,
+     as in DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' -- all 328 of FAZ2's
+     diagnosed errors, and the same shape as the multi-valued DC defect
+     already fixed.  ASM101S.py raises IndexError when generated code runs
+     past the end of a --compare listing instead of reporting it, which is
+     what makes the six intentional RUNASM deviations look like crashes.
+     Created variable symbols, `&(SRC&UPDDSN&NAME)`, are the last AIF operands
+     that do not parse.  And a bit length modifier that is not a whole number
+     of bytes is diagnosed rather than implemented.
 
 THE "AS RECEIVED" LISTINGS ARE THE PRIMARY EVIDENCE FCOS HAS BEEN LACKING.
 ~/workspace/PFS/"OI301700 as received"/SSSRC holds, for each module, a listing
