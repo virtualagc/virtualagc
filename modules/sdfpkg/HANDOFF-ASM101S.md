@@ -369,7 +369,7 @@ the numbers above are the result.  What follows is what it left.
      KeyError-None crash on "ST#1 EQU *" at model101.py:1237.  DC cannot parse a
      hex literal with comma-separated groups, as in
      DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' -- that alone is all 328 of
-     FAZ2's diagnosed errors.  ASM101S.py:1144 raises IndexError when generated
+     FAZ2's diagnosed errors.  ASM101S.py:1158 raises IndexError when generated
      code runs past the end of a --compare listing, instead of reporting it;
      that is what makes the six intentional RUNASM deviations look like crashes
      on a default regression run.  And free-standing "*" comment lines between
