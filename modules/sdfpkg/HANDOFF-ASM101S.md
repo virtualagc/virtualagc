@@ -355,9 +355,9 @@ FCOS IS WHERE THE WORK IS.  Of OI340600's 225 modules, assembled against MLIB80,
 before this stretch of work began and now:
 
                     before   after
-    OK                  21      54
-    ERRORS              33     154
-    CRASH              170      15
+    OK                  21      70
+    ERRORS              33     137
+    CRASH              170      16
     HANG                 1       2
 
 NOTHING HANGS, and CRASH has fallen by more than nine tenths.  Read the ERRORS column as
@@ -449,89 +449,67 @@ cheapest way to find the defect.  "Unrecognized line" hid 35 distinct causes;
 problem and should probably be given the same treatment before anyone tries to
 fix what it is reporting.
 
-NEXT STEPS, in order.  The previous list's first item -- investigate the
-undefined symbols -- was done on 2026-08-09 and is written up above.  It found
-three defects, none of them about undefined symbols, and the counts below were
-re-measured afterwards.
+NEXT STEPS, in order.  Everything above item 1 in the previous list is done:
+the runaway loops, the continued-macro-invocation defect behind them, and the
+EXTRN-with-displacement defect.  Counts below were re-measured after the first
+two; the EXTRN fix landed afterwards and will have moved them again, so
+RE-MEASURE BEFORE CHOOSING.
 
-READ THE TOTAL BEFORE THE ORDERING.  Diagnostics at severity 8 or above rose
-from 10913 to 33739 while the modules producing none rose from 65 to 71.  That
-is not a regression; it is modules assembling their whole source and evaluating
-their conditionals instead of stopping early and silently taking the false
-branch.  There is simply much more of the corpus being looked at now.
+  1. RE-READ THE DIAGNOSTICS FIRST.  Total occurrences at severity 8 or above
+     fell from 33739 to 9372 over the last two fixes, and the EXTRN fix then
+     took OK from 57 to 70 without being measured for diagnostics at all.  The
+     ordering has been redrawn by every single round so far, twice by defects
+     that were invisible until something else was fixed.  Use
+     modules/sdfpkg/fcos-diagnostics.sh and .py with --min-severity=8, and
+     SPLIT ANY LARGE FAMILY BY MODULE before believing its size.
 
-  1. THREE RUNAWAY CONDITIONAL-ASSEMBLY LOOPS ACCOUNT FOR MOST OF THE NOISE,
-     and this is worth reading carefully because the raw counts point
-     somewhere else entirely.  Subscript-out-of-range looks like the largest
-     family in the corpus -- "Index of &X(N) out of range" at 34 modules and
-     3518 occurrences, plus "Index out of range: &X(&Y)" at 30 and 898.  It
-     is not 34 defects.  Of the 16479 &LB subscript errors, 16414 ARE IN
-     THREE MODULES -- FCMSFAIL, FIOPDISP and FPMTMENQ -- and those three are
-     exactly the three where ACTR fires.  The remaining twelve modules have
-     65 between them.
-
-     The mechanism is visible in the numbers:  &LB is indexed down to about
-     -4096, which is the ACTR default, so a loop runs away, decrements its
-     label index once per iteration, emits a diagnostic each time, and is
-     eventually cut off by ACTR.  Fix the loop and thousands of diagnostics
-     go with it.  Start with FCMSFAIL, which has half of them, and find why
-     the loop does not terminate rather than why the subscript is negative.
-
-     &NEST underflows the same way, always to 0 or below, never above its
-     dimension of 50.  &NI is the structured-programming nesting depth and
-     the pushes and pops are balanced across IF/ENDIF, DO/ENDDO and
-     CASENTRY/ENDCASE, so the underflow is downstream of the same runaway
-     rather than a mismatched construct.
-
-     THIS IS THE BREADTH-VERSUS-VOLUME TRAP the diagnostics tool warns about,
-     and it caught me:  breadth said 34 modules, volume said 3518, and the
-     truth was three modules with one defect apiece.  Always split a large
-     family by module before believing it.
-
-  2. "Could not interpret operand", 44 modules and 250 occurrences, now the
-     broadest single message.  Like "Eval error type" before it, the wording
-     names nothing; give it the failing operand first and it may well answer
-     itself.
+  2. THE '@' MSC INSTRUCTIONS, 61 of them, still emit four zero bytes
+     SILENTLY.  This is now the only place in the assembler that produces
+     wrong object code without saying so, and modules counted OK use them, so
+     the OK column overstates what is correct.  Either encode them -- 48 of
+     the 61 appear in the original build with their real encodings, and the
+     branches are already worked out as high nibble 2 over the condition code
+     -- or make them announce themselves as the BCE ones now do.  DO NOT LEAVE
+     THEM SILENT.  This is the most important item on the list even though it
+     is not the largest.
 
   3. THE TWO-BYTE BCE INSTRUCTIONS, 40 modules and 2845 occurrences, which is
      ASM101S saying honestly that it does not know their encoding.  Needs the
-     POO rather than the original build, the listings being dominated by zero
-     operands.
+     POO, the listings being dominated by zero operands.
 
-  4. THE '@' MSC INSTRUCTIONS, 61 of them, still emit four zero bytes
-     SILENTLY.  That is the one remaining place where ASM101S produces wrong
-     object code without saying so.  Either encode them -- 48 of the 61 appear
-     in the original build with their real encodings -- or make them say what
-     the BCE ones now say.  DO NOT LEAVE THEM SILENT.
+  4. "Cannot parse macro-invocation operands" (33 modules) and "Could not parse
+     operands" (31).  Both name nothing.  Give them the operand they choked on
+     before trying to guess the defect; that has been the cheapest way in four
+     times running.
 
-  5. RE-READ THE DIAGNOSTICS after each of the above, with --min-severity=8.
-     The ordering has been redrawn completely by every round so far, and
-     twice by defects that were invisible until something else was fixed.
-
-  6. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
+  5. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
      Unexplored; the two versions are years apart, so diff a few macros that
      exist in both before assuming the rest can be copied wholesale.
 
-  7. VERIFY, WHICH IS STILL THE REAL GAP.  54 modules exit 0, which means the
+  6. VERIFY, WHICH IS STILL THE REAL GAP.  70 modules exit 0, which means the
      assembler did not complain, not that the bytes are right.  The "as
-     received" listings are the evidence -- see the section above -- and
-     --compare needs to learn about their carriage-control column before it
-     can be pointed at them.
+     received" listings are the evidence and --compare needs to learn about
+     their carriage-control column before it can be pointed at them.  Every
+     encoding derived from those listings so far has matched byte for byte,
+     so the method works; nobody has yet applied it to a whole module.
 
-  8. THE REMAINING 15 CRASHES AND 2 HANGS, a long tail led by KeyError
-     'preliminaryOffset'.
+  7. THE CRASHES, 16 of them, led by KeyError 'preliminaryOffset'.  Several
+     are latent faults newly reached as modules get further, which has
+     happened after almost every fix this week; expect a couple more each
+     time.
 
-  9. ASM101S IS SLOW.  A sweep or a diagnostics run is the better part of an
+  8. ASM101S IS SLOW.  A sweep or a diagnostics run is the better part of an
      hour, dominated by re-parsing every line through tatsu on every pass.
 
- 10. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is issue #1333,
+  9. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is issue #1333,
      which the user has asked to have incorporated; it also carries a
      KeyError-None crash on "ST#1 EQU *".  DC cannot parse a hex literal with
      comma-separated groups.  ASM101S.py raises IndexError when generated code
      runs past the end of a --compare listing.  Created variable symbols,
      `&(SRC&UPDDSN&NAME)`, are the last AIF operands that do not parse.  A bit
      length modifier that is not a whole number of bytes is diagnosed rather
-     than implemented.  And #CNOP's padding instruction is still unknown.
+     than implemented, and accounts for 1758 occurrences in 3 modules.  And
+     #CNOP's padding instruction is still unknown.
 
 THE "AS RECEIVED" LISTINGS ARE THE PRIMARY EVIDENCE FCOS HAS BEEN LACKING.
 ~/workspace/PFS/"OI301700 as received"/SSSRC holds, for each module, a listing
