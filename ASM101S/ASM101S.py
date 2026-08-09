@@ -397,6 +397,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
     prototypeIndex = -1
     continuePrototype = False
     lineCorrespondence = [] # How `thisSource` line numbers match to files.
+    mendLabel = None        # A sequence symbol on this macro's MEND, if any.
     
     if fromWhere in macros:
         # Load the macro definition into the list of source-code lines.
@@ -405,6 +406,13 @@ def readSourceFile(fromWhere, svLocals, sequence, \
         macroWhere = macros[macroname]
         thisSource = []
         sequence = {}
+        # The MEND line is excluded from the body below, but a sequence symbol
+        # written ON it -- `.MEND    MEND` -- is the ordinary way to jump to
+        # the end of a macro, so remember it.  Branching there is not an error;
+        # running off the end of the body IS the branch.
+        mendLabel = source[macroWhere[4]]["name"].strip()
+        if mendLabel[:1] != ".":
+            mendLabel = None
         prototypeIndex = macroWhere[3] - macroWhere[2]
         for i in range(macroWhere[2], macroWhere[4] + 1):
             if i == macroWhere[2]:
@@ -456,6 +464,19 @@ def readSourceFile(fromWhere, svLocals, sequence, \
         lineNumber += 1
         line = thisSource[lineNumber]
         if skipToSeq != None and not line.startswith(skipToSeq + " "):
+            # RECORD ANY SEQUENCE SYMBOL WE SKIP PAST.  A skipped line is never
+            # parsed, so its symbol never reached `sequence`; a later branch
+            # BACK to it then found nothing there, set `skipToSeq`, scanned
+            # FORWARD to the end of the file, and silently discarded everything
+            # after it -- no diagnostic, no generated code, no clue.  In
+            # FIOCMPLT that swallowed the last thousand lines, including the
+            # `GENERATE COPY=` statements that define the control-block DSECTs,
+            # which is why seven modules reported TFIOQ and its neighbours as
+            # undefined symbols.
+            symbol = line.split()[0] if line.split() else ""
+            if len(symbol) > 1 and symbol[0] == "." and symbol[1] != "*" \
+                    and symbol not in sequence:
+                sequence[symbol] = (fromWhere, lineNumber)
             continue
         skipToSeq = None
         
@@ -610,7 +631,13 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             if actr < 0:
                 error(properties, actrMessage(fromWhere))
                 break
-            target = operand.rstrip()
+            # The operand field ends at the first blank; what follows is a
+            # comment.  `rstrip()` alone left the comment attached to the
+            # target, so `AGO .LOOP    *** LABEL ...` looked for a sequence
+            # symbol whose name included the comment, never found it, and
+            # silently skipped the rest of the macro or file.  Same family as
+            # the trailing comment that used to defeat SETA.
+            target = operand.split()[0] if operand.split() else ""
             if target in sequence:
                 if fromWhere != sequence[target][0]:
                     error(properties, "Target out of this macro")
@@ -800,6 +827,15 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             readSourceFile(operation, newLocals, sequence, copy=copy, \
                            printable=printable, depth=depth+1)
         continue
+
+    # Falling off the end still looking for a sequence symbol means everything
+    # from the branch onwards was discarded.  Say so.  Silently swallowing the
+    # rest of a file or a macro is the worst way for this to fail, and it is
+    # how it used to fail.
+    if skipToSeq != None and skipToSeq != mendLabel:
+        error(properties, \
+              "Branch to %s in %s: the sequence symbol was never found, so " \
+              "the rest of it was skipped" % (skipToSeq, fromWhere))
 
 # Read an entire macro library.
 def readMacroLibrary(dir):

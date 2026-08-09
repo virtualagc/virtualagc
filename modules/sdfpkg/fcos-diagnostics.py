@@ -20,6 +20,16 @@ VOLUME is the total number of occurrences, and is mostly a measure of how
 often the offending construct appears -- one module with a 300-line table can
 dominate it entirely and mean nothing.
 
+COUNT ONLY WHAT FAILS THE ASSEMBLY, unless you have a reason not to.  A
+diagnostic below the tolerable severity does not stop anything, and the corpus
+is full of them:  a forward reference is reported at severity 0 on the first
+pass and resolves on a later one, and the macro library issues informational
+MNOTEs at severities 1 to 6.  Counting those alongside the real errors
+overstates a message's reach badly -- "Undefined symbol" looked like 64 modules
+and 641 occurrences until they were separated, and is 38 and 464 once the
+tolerated ones are dropped.  `--min-severity=8` applies the System/360
+boundary, which is the same one `--tolerable` defaults to.
+
 EACH DIAGNOSTIC IS EMITTED ONCE PER ASSEMBLY PASS, so the same complaint
 appears with Pass 1, Pass 2 and Pass 3 prefixes.  Counting all of them would
 treble every number.  Pass -1 is macro-expansion time and does not repeat.
@@ -27,11 +37,15 @@ This counts the highest-numbered pass present plus all of Pass -1.
 
 Usage:
     fcos-diagnostics.py DIR [--top=N] [--raw] [--message=TEXT]
+                            [--min-severity=N]
 
     --top=N        show N messages, default 25
     --raw          do not normalise identifiers out of the messages
     --message=TEXT show the modules producing messages matching TEXT, and
                    stop; use it to drill into one finding
+    --min-severity=N
+                   ignore diagnostics below severity N.  Use 8 to see only
+                   what actually fails the assembly; see above.
 '''
 
 import sys, os, re, collections
@@ -52,14 +66,16 @@ def normalise(msg):
 
 LINE = re.compile(r'^\(Pass (-?\d+), Severity (\d+)\)\s*(.*)$')
 
-def readModule(path):
+def readModule(path, minSeverity=0):
     '''Return the diagnostics of one module as a list of (severity, message),
-    counting each complaint once rather than once per pass.'''
+    counting each complaint once rather than once per pass.  Diagnostics below
+    `minSeverity` are dropped, which is how the tolerated ones are kept from
+    drowning the real errors.'''
     byPass = collections.defaultdict(list)
     try:
         for line in open(path, errors='replace'):
             m = LINE.match(line.rstrip('\n'))
-            if m:
+            if m and int(m.group(2)) >= minSeverity:
                 byPass[int(m.group(1))].append((int(m.group(2)), m.group(3)))
     except OSError:
         return []
@@ -73,7 +89,7 @@ def readModule(path):
 
 def main():
     args = [a for a in sys.argv[1:]]
-    top, raw, drill = 25, False, None
+    top, raw, drill, minSeverity = 25, False, None, 0
     positional = []
     for a in args:
         if a.startswith('--top='):
@@ -82,6 +98,8 @@ def main():
             raw = True
         elif a.startswith('--message='):
             drill = a.split('=', 1)[1]
+        elif a.startswith('--min-severity='):
+            minSeverity = int(a.split('=', 1)[1])
         else:
             positional.append(a)
     if not positional:
@@ -100,7 +118,7 @@ def main():
             continue
         modules += 1
         module = name[:-5]
-        diags = readModule(os.path.join(directory, name))
+        diags = readModule(os.path.join(directory, name), minSeverity)
         if not diags:
             silent.append(module)
             continue
@@ -116,15 +134,17 @@ def main():
         for name in sorted(os.listdir(directory)):
             if not name.endswith('.diag'):
                 continue
-            hits = [m for s, m in readModule(os.path.join(directory, name))
+            hits = [m for s, m in readModule(os.path.join(directory, name),
+                                             minSeverity)
                     if drill in m]
             if hits:
                 sample = collections.Counter(hits).most_common(2)
                 print('  %-28s %4d   %s' % (name[:-5], len(hits), sample[0][0][:70]))
         return 0
 
-    print('%d modules examined, %d produced no diagnostics at all.' %
-          (modules, len(silent)))
+    print('%d modules examined, %d produced no diagnostics%s.' %
+          (modules, len(silent),
+           ' at or above severity %d' % minSeverity if minSeverity else ' at all'))
     print('%d distinct messages, %d occurrences in total.\n' %
           (len(volume), sum(volume.values())))
 
