@@ -240,6 +240,11 @@ srsCeiling = 56
 
 random.seed(16134176201611561415)
 hashcodeLookup = {}
+# The bits of a hashed value that name the symbol, as used by `unhash`.  A
+# displacement added to a symbol lands in the low bits, so masking with this
+# recovers the symbol the displacement is relative to.
+hashcodeMask = 0xFFFFFFF000000000
+
 def getHashcode(symbol):
     for h in hashcodeLookup:
         if hashcodeLookup[h] == symbol:
@@ -2231,13 +2236,36 @@ def generateObjectCode(source, macros):
                                                 pass
                                             if b2 != None:
                                                 d0 = d2 & 0xFFFF
-                                            elif d2 in rextrns:
+                                            elif (d2 in rextrns) or \
+                                                    ((d2 & hashcodeMask) in rextrns):
+                                                # An EXTRN, with or without a
+                                                # displacement.  Only the bare
+                                                # symbol used to be recognised,
+                                                # because `rextrns` is keyed by
+                                                # the hashcode alone and
+                                                # `FP$COMSA+14` carries the 14
+                                                # in the low bits.  Such a
+                                                # reference then fell through
+                                                # to the search for a base
+                                                # register, found none -- an
+                                                # external address is resolved
+                                                # by the linker, not by a USING
+                                                # -- and was reported as an
+                                                # uninterpretable operand.  It
+                                                # was the broadest complaint in
+                                                # the corpus, across 44 modules.
+                                                if d2 in rextrns:
+                                                    externalSymbol = rextrns[d2]
+                                                    d0 = 0
+                                                else:
+                                                    externalSymbol = \
+                                                        rextrns[d2 & hashcodeMask]
+                                                    d0 = d2 & 0xFFFFFFFF
                                                 b2 = 3
-                                                d0 = 0
                                                 if passCount == 3:
                                                     rldAddr = sects[sect]["pos1"] + 2  # byte offset of displacement field
                                                     relocations.append({
-                                                        'symbol': rextrns[d2],
+                                                        'symbol': externalSymbol,
                                                         'section': sect,
                                                         'address': rldAddr,
                                                         'type': 'Y'
@@ -2266,7 +2294,25 @@ def generateObjectCode(source, macros):
                                                             'type': 'Y'
                                                         })
                                                 if b2 == None:
-                                                    error(properties, "Could not interpret operand")
+                                                    # There is no base register
+                                                    # from which the operand's
+                                                    # address can be reached --
+                                                    # no USING covers it.  The
+                                                    # message used to say only
+                                                    # "Could not interpret
+                                                    # operand", which named
+                                                    # neither the instruction
+                                                    # nor the address and was
+                                                    # the broadest complaint in
+                                                    # the corpus.
+                                                    whichSect, whichOffset = \
+                                                        unhash(d2)
+                                                    error(properties, \
+                                                          "No USING covers the operand of "
+                                                          "'%s %s' (section %s, offset %s)" % \
+                                                          (operation,
+                                                           properties["operand"].strip()[:32],
+                                                           whichSect, whichOffset))
                                                     continue
                                             data = generateRS0(properties, operation, r1, d0, b2)
                                         else:
