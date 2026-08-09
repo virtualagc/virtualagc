@@ -10,11 +10,12 @@ already handles the case where a program's entry is the "request a stack via
 `SVC X'000f'`" pattern.
 
 **`197-P.hal`, `193-TEST_X.hal` (a `GOTO`-target `ON ERROR` + nested
-`PROCEDURE` shape), and `037-ROOTS.hal` (a `READ`-driven interactive
-program, no `ON ERROR` at all) are now all fixed** — verified directly
-with real stdin where needed, output matches PFS exactly in each case.
-Keep all three as regression checks (same steps as below, substituting
-the filename).
+`PROCEDURE` shape), `037-ROOTS.hal` (a `READ`-driven interactive
+program, no `ON ERROR` at all), and `219-P.hal` (a multi-tasking
+program) are now all fixed** — verified directly with real stdin where
+needed, output matches PFS exactly in each case, including no more
+trailing traps for `219-P.hal`. Keep all four as regression checks (same
+steps as below, substituting the filename).
 
 A full corpus sweep (95 standalone `PROGRAM` files in
 `../Programming in HAL-S/`, both pipelines, `--outfile6` capture +
@@ -30,24 +31,32 @@ clean / BFS not clean:
   a genuine BFS-compiler-level limitation (these files use more than one
   `ON ERROR$(...)` alternate entry point), not a conversion bug. Out of
   scope for this document.
-- **`130-EXAMPLE_N.hal` and `219-P.hal`**: output is byte-correct
-  (`THE ANSWER IS ...` / `P: TASKS DEFINED` respectively), but a trailing
-  `SVC trapped` still happens after the real work is done. `219-P.hal` is
-  notable: it's a multi-tasking program (hence "TASKS DEFINED"), and its
-  trap (`ea=0x14a, R1=0x14a0000, code=0x1`) repeats identically three
-  times in a row rather than spinning through zeroed memory — worth
-  checking whether the stack-linkage synthesis only handles a
-  `PROGRAM`'s own `@0<char>` stack and not the `@1<char>`, `@2<char>`, …
-  per-`TASK` stacks (`lnk101`'s own comment on `STACK_SEQUENCE`,
-  `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py` ~1850, documents this
-  `@`+sequence-char+characteristic naming for exactly that case).
-- **`222-MULTI.hal`**: a more serious, distinct failure — `out6.txt` is
-  completely empty under BFS (PFS prints
-  `A=... B=... C=...` correctly), and the run hits a genuine
-  `*** HAL/S SEND ERROR: RUNTIME: #17 ILLEGAL CHARACTER SUBSCRIPT`
-  before spinning to the step cap. This is runtime corruption during
-  actual execution, not just a tail-end halt-sequence gap — treat as a
-  separate bug from the trailing-trap cases above.
+**Update after the `TASK`-stack fix landed**: `219-P.hal` is now clean
+(moved above). The other two no longer crash/trap at all — both now exit
+0 — but still produce *wrong output*, a more subtle class of remaining
+bug:
+
+- **`130-EXAMPLE_N.hal`**: a real, small numeric discrepancy. PFS prints
+  `THE ANSWER IS      2.4990000E+05`; BFS prints
+  `THE ANSWER IS      2.4989994E+05` — off by ~0.06. The program is a
+  `DO FOR V = 250000 TO 0 BY -100 UNTIL ...` loop whose `ALMOST_EQUAL`
+  condition is unconditionally `TRUE`, so it should run exactly one
+  iteration and exit with `V` at exactly `249900` — PFS gets that
+  exactly, BFS doesn't. Does not use `TASK`/`SCHEDULE` (checked), so this
+  is unrelated to the stack-linkage work — looks like a genuine
+  floating-point/loop-control codegen difference somewhere in the
+  BFS→PILOT→`pilotToIbm` path, not a linkage gap.
+- **`222-MULTI.hal`**: **likely not a real bug at all.** Its `A`/`B`/`C`
+  are declared `DECLARE SCALAR, A, B, C INITIAL(20);` — in HAL/S,
+  `INITIAL` binds only to the immediately-preceding name, so only `C`
+  is actually initialized; `A` and `B` are genuinely uninitialized. PFS's
+  build happens to leave nonzero garbage in `A` (so the `IF A NOT = 0`
+  branch runs, computing a real `B`); BFS's build happens to leave `A`
+  zeroed (so that branch is skipped, `B` stays at its own garbage-now-
+  zero value). Both are "correct" readings of an uninitialized variable —
+  there's no reference answer for this file to converge to. Don't spend
+  further effort chasing this one; if anything, it's a candidate to drop
+  from the regression corpus rather than a target to fix.
 
 ## How to reproduce
 
@@ -79,53 +88,57 @@ with exit 0 and correct output.
 ## Likely cause / where to look
 
 (This section originally covered `197-P.hal`'s now-fixed entry-prologue
-gap; the hand-decode/compare approach below is the same one that found
-that fix and is the natural starting point for the open cases too.)
+gap, then `219-P.hal`'s now-fixed per-`TASK` stack gap; the hand-decode/
+compare approach below is the same one that found both and is the
+natural starting point for `130-EXAMPLE_N.hal` too.)
 
-For the trailing-trap cases (`130-EXAMPLE_N.hal`, `219-P.hal`) and
-`222-MULTI.hal`'s runtime corruption:
+For `130-EXAMPLE_N.hal`'s numeric discrepancy (the only case left that
+looks like a real `pilotToIbm`/BFS-codegen bug — see above for why
+`222-MULTI.hal` probably isn't one):
 
 - Hand-decode the raw PILOT member the same way `parse_pilot_member()`
   does, and compare its ESD/RLD/TXT records against the equivalent
   PFS-compiled module (dump the PFS `.obj` with
   `/home/rburkey/git/virtualagc/ASM101S/readObject101S.py`) — this is
-  what found the original `@0<prog>` ER / `#E<prog>` PDE gap.
-- For `219-P.hal` specifically: check whether `synthesize_pass_stack_linkage()`
-  (or whatever superseded it) only synthesizes the `@0<char>` stack for
-  the `PROGRAM` itself, and not `@1<char>`, `@2<char>`, … for each `TASK`
-  — see `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py`'s
-  `STACK_SEQUENCE` comment (~1850) for the naming convention a multi-task
-  program needs.
+  what found the original `@0<prog>` ER / `#E<prog>` PDE gap and the
+  per-`TASK` one.
+- Since output is only *slightly* off (not garbage), a `--trace`
+  disassembly of the `DO FOR ... BY -100` loop's step/compare
+  instructions (both builds, side by side) is probably more direct here
+  than the ESD/RLD comparison — look for where the loop-control
+  arithmetic diverges between the two builds.
 - `../PASS2.PROCS/OBJECTGE.xpl` is the original historical PASS2
   object-emission source (`?P`/`?B`-conditionalized for PASS vs. BFS, no
-  Python port exists yet) — worth checking for how `ON ERROR`/`TASK`
-  affect entry-point/prologue generation on either side.
+  Python port exists yet) — may or may not be relevant here since this
+  isn't obviously a linkage issue; worth a quick check for `DO FOR`
+  step-arithmetic codegen differences between the two conditionals.
 - `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py` (someone else's repo,
   read-only) — `stackCsectNames()` and `patchStackPDEs()` document what
-  triggers stack-section generation and PDE binding.
+  triggers stack-section generation and PDE binding; kept for reference
+  in case `130-EXAMPLE_N.hal` turns out to be linkage-related after all,
+  but the symptom doesn't point that way.
 
 ## Next steps
 
-- Investigate `219-P.hal`'s per-`TASK` stack linkage (see above) —
-  probably the highest-value next fix, since multi-tasking is likely
-  common across the corpus, not a one-off shape like some earlier cases.
-- Investigate `130-EXAMPLE_N.hal`'s trailing trap — it does *not* use
-  `TASK`/`SCHEDULE` (checked directly), so it's a different shape from
-  `219-P.hal` despite the similar symptom; don't assume the same fix
-  covers both.
-- Investigate `222-MULTI.hal` separately — it *does* use `TASK` (checked
-  directly), so it may share a root cause with `219-P.hal`'s per-`TASK`
-  stack gap even though its symptom (runtime corruption, not a trailing
-  trap) looks different; worth checking after `219-P.hal` rather than
-  assuming it's unrelated.
-- Once those are fixed, rerun the full corpus sweep (95 standalone
-  `PROGRAM` files in `../Programming in HAL-S/`, both pipelines,
-  compare `--outfile6` + run status) rather than hand-picking further
+- Investigate `130-EXAMPLE_N.hal`'s small numeric discrepancy (see
+  above) — the one remaining case that's plausibly still a real
+  `pilotToIbm`/BFS-codegen bug.
+- Don't chase `222-MULTI.hal` further without first confirming the
+  uninitialized-variable read above is wrong — as analyzed, its
+  mismatch looks like inherent nondeterminism in the test file itself,
+  not something fixable in `pilotToIbm`.
+- Rerun the full corpus sweep (95 standalone `PROGRAM` files in
+  `../Programming in HAL-S/`, both pipelines, compare `--outfile6` +
+  run status) after any further fix, rather than hand-picking further
   cases — it's what found `219-P.hal`/`130-EXAMPLE_N.hal`/`222-MULTI.hal`
-  after the earlier fixes looked complete from a handful of manual
-  checks alone. Current baseline: 60/95 clean under BFS.
-- Keep `HELLO.hal`, `197-P.hal`, `193-TEST_X.hal`, and `037-ROOTS.hal`
-  passing as regression checks (same reproduction steps as below,
-  dropping `--verbose`) — they already work and should stay working.
+  after earlier fixes looked complete from a handful of manual checks
+  alone, and then found that `219-P.hal` needed a second look after the
+  first "fix" claim for it too. Baseline before the `TASK`-stack fix:
+  60/95 clean under BFS; expect that number to have moved with `219-P.hal`
+  now fixed — get a fresh count rather than assuming.
+- Keep `HELLO.hal`, `197-P.hal`, `193-TEST_X.hal`, `037-ROOTS.hal`, and
+  `219-P.hal` passing as regression checks (same reproduction steps as
+  below, dropping `--verbose`) — they already work and should stay
+  working.
 - The 6 BFS-compile-rejected files (`029-DATATYPES.hal` etc., see above)
   are not this document's problem — don't spend time on them here.
