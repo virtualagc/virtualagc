@@ -54,7 +54,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DEFAULT_DB = HERE / "dass-handoff.db"
-DEFAULT_MD = HERE / "HANDOFF.md"
+DEFAULT_DOC = "HANDOFF.md"
 
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS entry (
@@ -85,7 +85,21 @@ def connect(path):
     db.row_factory = sqlite3.Row
     db.executescript(SCHEMA)
     db.execute("PRAGMA journal_mode = WAL")
+    # Migration: `doc` arrived after the first import, and CREATE TABLE IF NOT
+    # EXISTS will not add it to a table that already exists.
+    cols = {r["name"] for r in db.execute("PRAGMA table_info(entry)")}
+    if "doc" not in cols:
+        db.execute("ALTER TABLE entry ADD COLUMN doc TEXT")
+        db.execute("UPDATE entry SET doc = ?", (DEFAULT_DOC,))
+        db.commit()
     return db
+
+
+def docs(db):
+    '''Every document the database renders to, in the order they begin.'''
+    return [r["doc"] for r in db.execute(
+        "SELECT doc, MIN(ord) m FROM entry WHERE status != 'dropped' "
+        "GROUP BY doc ORDER BY m")]
 
 
 def today():
@@ -156,9 +170,13 @@ def leadIn(body):
     return ""
 
 
-def render(db):
-    rows = db.execute("SELECT * FROM entry WHERE status != 'dropped' "
-                      "ORDER BY ord").fetchall()
+def render(db, doc = None):
+    q = "SELECT * FROM entry WHERE status != 'dropped'"
+    args = []
+    if doc is not None:
+        q += " AND doc = ?"
+        args.append(doc)
+    rows = db.execute(q + " ORDER BY ord", args).fetchall()
     out = []
     for r in rows:
         out.append(r["body"])
@@ -169,14 +187,16 @@ def render(db):
     return "".join(out)
 
 
-def writeOut(db, path = DEFAULT_MD, quiet = False):
-    text = render(db)
-    Path(path).write_text(text)
-    if not quiet:
-        # Bytes, not len(): the document uses em dashes, so the two differ and
-        # a byte count is what `wc -c` and `cmp` will agree with.
-        print(f"wrote {path} ({len(text.encode())} bytes, "
-              f"{text.count(chr(10))} lines)")
+def writeOut(db, quiet = False):
+    '''Regenerate every document the database renders to.'''
+    for doc in docs(db):
+        text = render(db, doc)
+        (HERE / doc).write_text(text)
+        if not quiet:
+            # Bytes, not len(): the documents use em dashes, so the two differ
+            # and a byte count is what `wc -c` and `cmp` will agree with.
+            print(f"wrote {doc} ({len(text.encode())} bytes, "
+                  f"{text.count(chr(10))} lines)")
 
 
 def importFile(db, path):
@@ -226,13 +246,17 @@ def add(db, after, body, title = None, why = None, kind = "prose",
     '''
     body = body.rstrip("\n") + "\n\n"
     ord_ = nextOrd(db, after)
+    prev = db.execute("SELECT section, doc FROM entry WHERE id=?",
+                      (after,)).fetchone()
     if section is None:
-        section = db.execute("SELECT section FROM entry WHERE id=?",
-                             (after,)).fetchone()["section"]
+        section = prev["section"]
+    # The document is ALWAYS inherited from the neighbour.  An entry that landed
+    # in the wrong file would render into a document it does not belong to and
+    # vanish from the one it does, silently and in both directions.
     cur = db.execute("INSERT INTO entry (ord, section, kind, title, body, why,"
-                     " stamp, updated) VALUES (?,?,?,?,?,?,?,?)",
+                     " doc, stamp, updated) VALUES (?,?,?,?,?,?,?,?,?)",
                      (ord_, section, kind, title or leadIn(body), body, why,
-                      today(), today()))
+                      prev["doc"] or DEFAULT_DOC, today(), today()))
     db.commit()
     return cur.lastrowid
 
@@ -248,15 +272,16 @@ def setField(db, ident, field, value):
 
 
 def main():
-    dbPath, mdPath = DEFAULT_DB, DEFAULT_MD
+    dbPath = DEFAULT_DB
     args, after, title, why, section, by, noWrite = [], None, None, None, None, None, False
     kind = "prose"
     bodyFile = None
+    doc = None
     for p in sys.argv[1:]:
         if p.startswith("--db="):
             dbPath = Path(p.partition("=")[2]).expanduser()
-        elif p.startswith("--md="):
-            mdPath = Path(p.partition("=")[2]).expanduser()
+        elif p.startswith("--doc="):
+            doc = p.partition("=")[2]
         elif p.startswith("--after="):
             after = int(p.partition("=")[2])
         elif p.startswith("--title="):
@@ -355,20 +380,40 @@ def main():
         print(f"entry {args[1]} is now {args[2]}")
         mutated = True
     elif command == "render":
-        sys.stdout.write(render(db))
+        sys.stdout.write(render(db, doc))
     elif command == "write":
-        writeOut(db, mdPath)
+        writeOut(db)
+    elif command == "docs":
+        for d in docs(db):
+            n = db.execute("SELECT COUNT(*) c, SUM(LENGTH(body)) b FROM entry "
+                           "WHERE doc=? AND status != 'dropped'", (d,)).fetchone()
+            print(f"  {d:28s} {n['c']:4d} entries  {n['b'] or 0:7d} bytes")
+    elif command == "setdoc":
+        # Move a whole section into its own document.  Splitting is metadata
+        # here, not a fork: one database still renders every file.
+        if not section or len(args) < 2:
+            raise SystemExit("setdoc needs --section=TEXT and a document name")
+        cur = db.execute("UPDATE entry SET doc=?, updated=? WHERE section LIKE ?",
+                         (args[1], today(), f"%{section}%"))
+        db.commit()
+        print(f"{cur.rowcount} entries now render to {args[1]}")
+        mutated = True
     elif command == "check":
-        cur = Path(mdPath).read_text() if Path(mdPath).exists() else ""
-        want = render(db)
-        if cur == want:
-            print(f"{mdPath} matches the database")
-        else:
-            print(f"{mdPath} DIFFERS from the database; run `write`")
-            sys.stdout.writelines(
-                list(difflib.unified_diff(cur.splitlines(True),
-                                          want.splitlines(True),
-                                          "HANDOFF.md", "render", n = 1))[:40])
+        bad = 0
+        for d in docs(db):
+            p = HERE / d
+            cur = p.read_text() if p.exists() else ""
+            want = render(db, d)
+            if cur == want:
+                print(f"{d} matches the database")
+            else:
+                bad += 1
+                print(f"{d} DIFFERS from the database; run `write`")
+                sys.stdout.writelines(
+                    list(difflib.unified_diff(cur.splitlines(True),
+                                              want.splitlines(True),
+                                              d, "render", n = 1))[:40])
+        if bad:
             sys.exit(1)
     else:
         print(__doc__)
@@ -378,7 +423,7 @@ def main():
     # from the database.  A step that has to be remembered is a step that gets
     # forgotten, and the failure here is silent.
     if mutated and not noWrite:
-        writeOut(db, mdPath)
+        writeOut(db)
     db.close()
 
 
