@@ -902,36 +902,54 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
         return (not right)
     # AND, OR
     if len(expression) == 2:
+        # `booleanExpression = booleanTerm { 'OR' booleanTerm }` gives one
+        # repetition per additional term, so a chain of N terms arrives as
+        # N-1 of them.  This used to accept ONE and nothing else, testing
+        # `len(right) == 4` against a single repetition -- so `A OR B` worked
+        # and `A OR B OR C` could not be evaluated at all, nor could any AND
+        # chain longer than two.  STKINS tests five alternatives, which is why
+        # the IF macro stopped recognising its own condition mnemonics.
         left = unroll(expression[0])
-        right = unroll(expression[1])
-        if isinstance(right, (tuple,list)) and \
-                len(right) == 4 and \
-                right[1] in ["AND", "OR"]:
-            op = right[1]
-            valLeft = evalBooleanExpression(left, svLocals, properties)
-            if valLeft == None:
+        rest = expression[1]
+        single = unroll(rest)
+        if isinstance(single, (tuple,list)) and len(single) == 4 and \
+                single[1] in ["AND", "OR"]:
+            repetitions = [single]
+        elif isinstance(rest, (tuple,list)):
+            repetitions = list(rest)
+        else:
+            repetitions = []
+        if repetitions and all(isinstance(r, (tuple,list)) and len(r) == 4 \
+                               and r[1] in ["AND", "OR"] for r in repetitions):
+            value = evalBooleanExpression(left, svLocals, properties)
+            if value == None:
                 error(properties, \
-                      "Cannot evaluate boolean expression %s" \
-                      % str(left))
+                      "Cannot evaluate boolean expression '%s'" \
+                      % describeExpression(left))
                 return None
-            valRight = evalBooleanExpression(right[3], svLocals, properties)
-            if valRight == None:
-                error(properties, \
-                      "Cannot evaluate boolean expression %s" \
-                      % str(right[3]))
-                return None
-            if op == "OR":
-                return (valLeft or valRight)
-            else:
-                return (valLeft and valRight)
+            # AND binds tighter than OR in the grammar, so every operator at
+            # this level is the same one and left-to-right is correct.
+            for repetition in repetitions:
+                operand = evalBooleanExpression(repetition[3], svLocals, \
+                                                properties)
+                if operand == None:
+                    error(properties, \
+                          "Cannot evaluate boolean expression '%s'" \
+                          % describeExpression(repetition[3]))
+                    return None
+                if repetition[1] == "OR":
+                    value = value or operand
+                else:
+                    value = value and operand
+            return value
     # Relational expressions:
     if len(expression) == 5 and \
             expression[2] in ["EQ", "NE", "LT", "LE", "GT", "GE"]:
         return evaluateRelation(expression[0], expression[2], expression[4],
                                 svLocals, properties)
     error(properties, \
-          "Cannot evaluate boolean expression %s" \
-          % str(expression))
+          "Cannot evaluate boolean expression '%s'" \
+          % describeExpression(expression))
     return None
 
 # Evaluate a character expression to string and return it, or else `None`
