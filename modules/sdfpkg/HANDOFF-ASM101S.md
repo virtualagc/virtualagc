@@ -187,42 +187,75 @@ invocation as it is entered, with its &SYSLIST, indented by nesting depth:
 That is how the root cause below was found, and it is the only practical way to
 see what a nested expansion is actually receiving.
 
-THE ROOT CAUSE IS ALREADY DIAGNOSED, in virtualagc issue #1331, "Many bugs in
-ASM101S macro processing".  READ IT BEFORE TOUCHING ANYTHING.  It is open, it is
-the user's own analysis, and it goes considerably further than the traceback it
-opens with.
+THE MACRO-PROCESSING ROOT CAUSE IS FIXED, issue #1331, in commit 0f5ab2939 on
+2026-08-08.  The issue itself is worth reading anyway -- it is the user's own
+analysis plus two outside contributors, and it is where the semantics below are
+justified from the manuals.  What follows is what the fix established, so that
+nobody re-derives it.
 
-MACRO KEYWORD PARAMETERS ARE BEING LOST.  A macro can take both positional and
-keyword parameters; the positional ones survive and the keyword ones do not.
-The trace for ACOS.asm shows AMAIN entered with an empty &SYSLIST when the
-source says
+A MACRO ARGUMENT IS A CHARACTER STRING, except where the source wrapped it in
+parentheses, in which case it is a SUBLIST passed through verbatim and
+subscriptable to any depth:
 
-    ACOS     AMAIN   ACALL=YES
+    RON 1,(10,(100,200,300),30),3
 
-and FPMSWTCH's PROGRAM is entered with [None] against a source line reading
-PROGRAM TITLE='PROCESS SWITCH ROUTINE'.  Parameters spread over CONTINUATION
-LINES are lost as well -- FPMSWTCH's IFPROC passes &P1 through &P50 across five
-continuation cards, and they do not arrive.
+    &SYSLIST(2)      (10,(100,200,300),30)     the source text, parens and all
+    &SYSLIST(2,2)    (100,200,300)
+    &SYSLIST(2,2,3)  300
+    &SYSLIST(2,9)    null                      past the end is not an error
+    &SYSLIST(1,1)    1                         a non-sublist is a sublist of one
 
-THE CRASHES ARE DOWNSTREAM OF THAT, which is why there are so few distinct
-signatures for so many files.  A macro that did not receive its arguments then
-evaluates a conditional against whatever it did receive:
+ASM101S flattened one level and never recursed, so the second operand arrived as
+the unusable (10,((,(100,((,,200),(,,300))),)),30), and &SYSLIST(n,m) did not
+exist at all.  MLIB80 uses multilevel subscripts heavily -- 16 of &SYSLIST(&I,2)
+alone, and &SYSLIST(&I,2,&J) at three levels -- which is why most of FCOS could
+not assemble.  RUNMAC uses NONE of it, which is why RUNASM's 205 of 205 never
+noticed.
 
-    AIF (&SYSLIST(1) LE 0 OR &SYSLIST(1) GE 07).INVALCC
+MULTILEVEL SUBLISTS ARE PERIOD-CORRECT and not an AP-101S invention.  They are
+an Assembler H feature, GC26-3758-3 (January 1974) p.13; the Assembler F manual
+of 1967 describes a different assembler and has nothing to say about them, which
+is why looking there came up empty.  The same rules survive as Tables 48 and 49
+of the HLASM Language Reference, SC26-4940.
 
-where &SYSLIST(1) has become ',' -- a string, incomparable to a number -- and
-expressions.py line 521 raises TypeError.  Do not fix line 521 by coercing the
-comparison.  It is reporting a real defect upstream of itself, and making it
-compare cleanly would convert a loud failure into a wrong assembly.
+COUNTING.  N' is the number of entries, and an omitted entry still counts, so
+N'(A,,C) and N'(A,B,) are both 3.  N'() is 1, the null string being its single
+entry, and N' of a non-sublist is 1.  K' is the width of the argument's text.
 
-THE OTHER OPEN ONE IS #1333, a feature request for the ORG pseudo-op, from an
+ARITHMETIC CONTEXT HAS EXACTLY THREE CASES, GC26-3758-3 p.19 and SC26-4940
+Table 58: null is zero, a valid self-defining term is its value, and anything
+else -- a sublist, a symbol -- is a program error to DIAGNOSE.  It is not
+coerced.  The old TypeError at expressions.py:521 was reporting a real defect
+upstream of itself; making that comparison succeed would have converted a loud
+failure into a wrong assembly, and the fix went upstream instead.
+
+COLLATION was already right and is worth not re-opening: character relations
+compare in EBCDIC, and of two values of unequal length the shorter is always the
+lesser (SC26-4940 p.388).  macroTests/sublists.asm pins both down with two
+comparisons that invert under ASCII.
+
+A SEPARATE DEFECT WAS FIXED IN THE SAME COMMIT because the first fix made it
+reachable.  A SETA/SETB/SETC whose operand carried a trailing comment --
+
+    &MSGCNT  SETA  &MSGCNT+1        ARRAY INDEX=INDEX+1
+
+-- failed to parse, and svSet then returned WITHOUT ASSIGNING, so the variable
+silently kept its old value.  In MACSMITH's RTURNTBL that left the loop bound
+&STOP at zero while &A counted up from 1, and the assembly never terminated.
+These operands now end at the first blank outside a quoted string, as the
+instruction grammars already did.  This is the shape to watch for: a silently
+skipped assignment shows up much later as a non-terminating loop.
+
+THE OTHER OPEN ISSUE IS #1333, a feature request for the ORG pseudo-op, from an
 outside user assembling compiler-generated code.  It also carries a second,
 separable defect: "ST#1 EQU *" crashes with KeyError None at model101.py:1237.
 The remaining ASM101S issues -- 1317, 1320, 1324 through 1329, 1332, 1271 -- are
 all CLOSED and are useful mainly as worked examples of how such a defect gets
 pinned down.
 
-THE BASELINE, measured 2026-08-08.  It has two halves and they are nothing alike.
+THE BASELINE.  It has two halves and they are nothing alike.  The RUNASM numbers
+were re-measured on 2026-08-08 after the issue #1331 fix; the FCOS numbers are
+that fix's output on the same day.
 
 THE RUNTIME LIBRARY IS FINISHED.  ASM101S assembles all of it, and RUNASM is
 verified rather than merely error-free:
@@ -240,24 +273,43 @@ it, so the comparison must fail.  None of that is an assembler defect.  Establis
 that set with `grep -l ASM101S RUNASM/*.asm`, not from memory: a first pass on
 the day recalled five of them and wrote CINDEX up as an unexplained sixth.
 
-FCOS IS WHERE THE WORK IS.  Of OI340600's 225 modules, assembled against MLIB80:
+RUNASM IS A WEAK GUARD ON MACRO PROCESSING, which is easy to mistake for a
+strong one.  RUNMAC uses no multilevel sublists at all, so the whole of that
+machinery can be broken while the score stays at 205 of 205.  Run
+ASM101S/macroTests/regressionMacros.sh as well; it takes seconds and it is the
+only check that covers the conditional-assembly language itself.
 
-    OK        21     assembles, exit 0
-    ERRORS    34     diagnosed errors, severity 255, no crash
-    CRASH    170     a Python traceback
-    HANG       1     FIOADCNS, 99.9% CPU, still going when killed at 120s
+FCOS IS WHERE THE WORK IS.  Of OI340600's 225 modules, assembled against MLIB80,
+before and after the #1331 fix:
 
-The 170 crashes carry only EIGHT distinct signatures, which is the encouraging
-part -- this is a handful of defects seen many times, not 170 problems:
+                    before   after
+    OK                  21      21
+    ERRORS              33      38
+    CRASH              170     155
+    HANG                 1      11
 
-     91  TypeError: '<=' not supported, str and int   expressions.py:521
+No module regressed, and the two dominant crash signatures are gone entirely --
+91 TypeError at expressions.py:521 and 16 NameError at :570.  The survivors
+mostly did not stop failing, they got further before failing, which is why CRASH
+fell by only 15 while the histogram was redrawn:
+
+     85  TypeError: argument of type 'NoneType'       model101.py:1735
      39  KeyError: 'ast'                              model101.py:2207
-     16  NameError: name 'expression' is not defined  expressions.py:570
-     14  IndexError: bytearray index out of range     model101.py:1527
-      5  TypeError: argument of type 'NoneType'       model101.py:1735
-      3  TypeError: unsupported operand &, float/int
+     17  IndexError: bytearray index out of range     model101.py:1527
+     11  TypeError: unsupported operand &, float/int
       1  KeyError: 'preliminaryOffset'                model101.py:1243
+      1  KeyError: None                               model101.py:1243
       1  KeyError: 'ICCLGTH'
+
+READ "HANG" AS "EXCEEDED THE TIMEOUT", not as "looping".  All 11 are modules
+that previously crashed early and now run much further; the count went as high
+as 38 before the trailing-comment defect described above was fixed.  DCICYC was
+checked individually and is making steady progress, its &SYSNDX climbing 401 ->
+829 -> 1086 over 90s, so it is slow rather than stuck.  The others were not
+checked individually.  That distinction is cheap to make and worth making before
+treating one as a defect: run it with --trace and watch whether the &SYSNDX in
+column 2 keeps rising.  A frozen &SYSNDX with the trace still scrolling is a
+conditional-assembly loop; a rising one is just work.
 
 OI301700 COULD NOT BE MEASURED AT ALL, and the reason is not the assembler.  Its
 MLIB80 holds 41 files against OI340600's 278, and NOT ONE of them is a macro
@@ -270,52 +322,59 @@ this has never yet been done.  Until it is, every OI301700 number is vacuous.
 DO NOT "FIX" THIS BY GENERATING MACROFILES.txt THERE.  It was tried on the day.
 makeMACROFILES.py runs happily and produces an index naming ZERO macro files,
 because there are none to name, and ASM101S then loads no macros at all and
-buries you in errors instead of stopping with one clear message.  The generated
-file was deleted again for exactly that reason.  Borrow the macros first.
+buries you in errors instead of stopping with one clear message.  Borrow the
+macros first.
 
-NEXT STEPS, in order.
+THERE IS A SECOND SOURCE FOR OI301700, pointed out by the user on 2026-08-08:
+~/workspace/PFS/"OI301700 as received"/ holds the FCOS assembly-language files
+as assembly LISTINGS, showing the assembled form rather than the source as such.
+That is original-build primary evidence, so it is the reference to check a
+borrowed macro library against, in the same way RUNLST is the reference for
+RUNASM.  It has not been used yet.
 
-  1. FIX MACRO KEYWORD-PARAMETER HANDLING, issue #1331.  This is the whole job in
-     one item.  91 of the 170 crashes are the single TypeError it describes, and
-     the KeyError 'ast' and NameError families sitting behind it are the same
-     story a few frames later: a macro that never received its arguments.  Read
-     the issue first, reproduce with --trace on ACOS.asm, where AMAIN is entered
-     with an empty &SYSLIST against a source line reading AMAIN ACALL=YES, and
-     the defect is visible in one screen.  Fix the loss, not the comparison at
-     expressions.py:521 -- coercing that would turn a loud failure into a wrong
-     assembly.  Continuation lines are part of the same item: FPMSWTCH's IFPROC
-     passes &P1 through &P50 across five cards and they do not arrive.
+NEXT STEPS, in order.  Step 1 of the previous list -- fix macro keyword and
+sublist handling, issue #1331 -- was done on 2026-08-08 in commit 0f5ab2939 and
+the numbers above are the result.  What follows is what it left.
+
+  1. THE NoneType CRASH AT model101.py:1735 IS NOW THE WHOLE JOB, 85 of the 155
+     remaining crashes and up from 5 before, because so many modules now reach
+     it.  Nothing else comes close, and it is the same shape of win the last
+     step was.  Take one of the 85 and work it the same way: reproduce, run with
+     --trace, and find where the None was produced rather than where it was
+     dereferenced.
 
   2. RE-RUN THE SWEEP AND SEE WHAT IS LEFT.  modules/sdfpkg/fcos-sweep.sh does
-     all 225 in a few minutes and classifies each as OK/ERRORS/CRASH.  The
-     numbers above are its output for 2026-08-08 and are the thing to beat.
-     Expect the remaining signatures to re-sort themselves substantially once
-     step 1 lands, so do not plan past this point in detail.
+     all 225 and classifies each as OK/ERRORS/CRASH/HANG; it now runs every
+     module under `timeout`, overridable with FCOS_TIMEOUT, which defaults to
+     120s.  The table above is its output for 2026-08-08 and is the thing to
+     beat.  Expect the histogram to be redrawn again rather than merely
+     shortened, so do not plan past this point in detail.
 
   3. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
      The user has never done this, so treat it as unexplored: the two versions
      are years apart and a macro that merely has the same name may not have the
      same definition.  Diff a few that DO exist in both before assuming the rest
-     can be copied wholesale, and expect to justify the choice later, since the
-     corpus goal covers both PASS versions.
+     can be copied wholesale.  Check the result against the listings in
+     ~/workspace/PFS/"OI301700 as received"/ described above, which are primary
+     evidence of what the original build actually produced.  Expect to justify
+     the choice later, since the corpus goal covers both PASS versions.
 
-  4. FIOADCNS HANGS.  One module, 99.9% CPU, no output, still running at 120s.
-     It is worth a look on its own because a hang is the one failure a sweep
-     cannot survive -- this one blocked the whole run until it was killed, and
-     the run reported DONE with 496 of 497 rows and no indication anything was
-     missing.  Any sweep of this corpus needs a timeout.
+  4. THE 11 REMAINING HANGS, but measure before assuming.  Read the note above
+     on telling a slow module from a looping one by watching &SYSNDX under
+     --trace; only the looping ones are defects.  FIOADCNS, which was the single
+     hang before and blocked a whole sweep, now terminates and reports ERRORS.
 
   5. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
      feature request from an outside user (#1333), which also carries a
      KeyError-None crash on "ST#1 EQU *" at model101.py:1237.  DC cannot parse a
      hex literal with comma-separated groups, as in
      DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' -- that alone is all 328 of
-     FAZ2's diagnosed errors.  And ASM101S.py:1144 raises IndexError when
-     generated code runs past the end of a --compare listing, instead of
-     reporting it; that is what makes the six intentional RUNASM deviations look
-     like crashes.
-
-WHAT NOT TO DO.  Do not adopt asm101 to skip this: it has no &ASM101S and only
-two mentions of GBLB, so all six of our gated RTL fixes would be lost, and
-RUNASM's verified 205 of 205 would be traded for an unmeasured number.
+     FAZ2's diagnosed errors.  ASM101S.py:1144 raises IndexError when generated
+     code runs past the end of a --compare listing, instead of reporting it;
+     that is what makes the six intentional RUNASM deviations look like crashes
+     on a default regression run.  And free-standing "*" comment lines between
+     macro definitions confuse the MACRO/MEND block tracking, so the definitions
+     leak into code generation and die with AttributeError on a None operand at
+     model101.py:984; this was found while writing macroTests/sublists.asm and
+     is why that file keeps its prose in the "*/" header instead.
 
