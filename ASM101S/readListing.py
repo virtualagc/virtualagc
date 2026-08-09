@@ -13,6 +13,7 @@ History:    2024-10-13 RSB  Began.
 '''
 
 import sys
+import re
 
 # Upon error, returns `None`.  Upon success, returns a dictionary whose keys
 # are CSECT name, and whose values are themselves dictionaries representing the 
@@ -37,6 +38,26 @@ def readListing(filename):
     except:
         return None
     
+    # NOT EVERY LISTING STARTS IN COLUMN 1.  RUNLST's do, but the "as
+    # received" listings in ~/workspace/PFS carry an ANSI carriage-control
+    # character ahead of everything, so every field sits one column further
+    # right and this reader -- which addresses its fields by column number --
+    # would find no object code at all in them.
+    #
+    # The shift is not assumed.  Both alignments are tried and the one that
+    # actually produces address lines wins, so a listing with some other
+    # prefix would be handled too, and a file with no object code in it stays
+    # at zero rather than being silently re-cut.
+    def addressLines(offset):
+        return sum(1 for line in source
+                   if re.match(r"[0-9A-F]{5} ", line[offset:offset + 6]))
+    shift = 0
+    for candidate in range(1, 4):
+        if addressLines(candidate) > addressLines(shift):
+            shift = candidate
+    if shift > 0:
+        source = [line[shift:] for line in source]
+
     sect = None
     for line in source:
         if len(line) > 20 and line[20] == " ":

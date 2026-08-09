@@ -1345,7 +1345,31 @@ def generateObjectCode(source, macros):
                     continue
                 err, v = evalInstructionSubfield(properties, "v", ast, symtab)
                 if operand.startswith("*") and sect != firstCSECT:
-                    v = (v & 0xFFFFFF) + symtab[firstCSECT]["value"] + symtab[sect]["preliminaryOffset"]
+                    # `EQU *` in a section other than the first has to be
+                    # converted from section-relative to absolute.  A DSECT
+                    # is the exception and must be left alone: it is a
+                    # template describing the shape of storage somebody else
+                    # owns, it occupies no address of its own, and
+                    # `preliminaryOffset` is deliberately not computed for
+                    # one.  Reaching for it anyway was a KeyError and the
+                    # commonest crash in the FCOS corpus -- five lines
+                    # reproduce it, a DSECT with an `EQU *` in it.
+                    if sects.get(sect, {}).get("dsect", False):
+                        pass
+                    elif sect is None or firstCSECT is None:
+                        # `EQU *` before any CSECT has been opened, which is
+                        # how issue #1333 met this line: KeyError(None) rather
+                        # than KeyError('preliminaryOffset'), same statement.
+                        # Nothing precedes it, so there is nothing to add.
+                        pass
+                    elif "preliminaryOffset" not in symtab.get(sect, {}):
+                        error(properties, \
+                              "EQU * appears in section %s, whose position " \
+                              "has not been established; the value is left " \
+                              "relative to that section" % sect)
+                    else:
+                        v = (v & 0xFFFFFF) + symtab[firstCSECT]["value"] \
+                            + symtab[sect]["preliminaryOffset"]
                 if err:
                     error(properties, "Cannot evaluate EQU")
                     continue
@@ -1610,6 +1634,19 @@ def generateObjectCode(source, macros):
                             continue
                         # Deal with memory.
                         if operation == "DC":
+                            if not isinstance(hexString, str):
+                                # `flattened[0]["v"][0][1]` is not always the
+                                # digit string it is assumed to be -- a hex
+                                # constant written as comma-separated groups
+                                # parses to a different shape, and indexing it
+                                # produced a TypeError out of int() rather
+                                # than anything a reader could act on.
+                                error(properties, \
+                                      "Cannot parse the hexadecimal value of " \
+                                      "%s; a constant written as several " \
+                                      "comma-separated groups is not " \
+                                      "supported" % operation)
+                                continue
                             bytes = bytearray()
                             for i in range(0, count, 2):
                                 b = hexString[i:i+2]

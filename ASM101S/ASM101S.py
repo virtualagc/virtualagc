@@ -1124,6 +1124,7 @@ pageNumber = 0
 linesPerPage = 80
 linesThisPage = 1000
 mismatchCount = 0
+beyondCount = 0
 pageSeparator = "\f%s" % ('-'*120)
 
 title = "EXTERNAL SYMBOL DICTIONARY".center(100)
@@ -1280,6 +1281,21 @@ for i in range(endLibraries, len(source)):
                 b = properties["assembled"][i]
                 if comparisonMemory != None:
                     oaddress = address + offset * 2
+                    if oaddress >= len(comparisonMemory):
+                        # Generated code running past the end of the listing
+                        # used to be an IndexError, which killed the run and
+                        # took the whole comparison with it -- and it is
+                        # exactly the shape of failure --compare exists to
+                        # report, since a build that emits MORE than the
+                        # listing did has a real discrepancy.  Count it and
+                        # carry on.
+                        beyondCount += 1
+                        address += 1
+                        if i == 0 or ((i & 1) == 0 and \
+                                      properties["operation"] != "DC"):
+                            prefix += " "
+                        prefix += "%02X" % b
+                        continue
                     if b != comparisonMemory[oaddress]:
                         mismatchCount += 1
                         try:
@@ -1457,8 +1473,13 @@ if comparisonSects != None:
                 headerShown = True
             print("\t%05X(%c): %02X" % (address // 2, c, memory[address]))
             mismatchCount1 += 1
-    print("%s: %d bytes mismatched and %d bytes missing in generated code" % \
-          (",".join(sourceFileNames), mismatchCount, mismatchCount1))
+    if beyondCount > 0:
+        print("%d byte(s) of generated code lie past the end of the "
+              "comparison listing and could not be compared" % beyondCount)
+    print("%s: %d bytes mismatched and %d bytes missing in generated code%s" % \
+          (",".join(sourceFileNames), mismatchCount, mismatchCount1,
+           "" if beyondCount == 0 else \
+           ", and %d bytes past the end of the listing" % beyondCount))
     
 if False:
     import pprint
