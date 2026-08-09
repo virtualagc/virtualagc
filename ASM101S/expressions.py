@@ -384,10 +384,16 @@ def evalArithmeticExpression(expression, \
         elif datatype in ["E", "D"]:
             return float("".join(expression))
         elif datatype in ["F", "H"]:
+            # F and H are FIXED-point types, so an integral value must come
+            # back as an int.  Testing with `isdigit` sent every negative one
+            # down the float path -- `=F'-5'` became -5.0 -- and a float in an
+            # address context is what raises TypeError on a bitwise AND
+            # further down.  Only E and D are floating point.
             s = "".join(expression)
-            if s.isdigit():
+            try:
                 return int(s)
-            return float(s)
+            except ValueError:
+                return float(s)
         elif datatype == "Y":
             if expression not in symtab:
                 error(properties, "Symbol %s not found" % expression)
@@ -592,10 +598,21 @@ def evalArithmeticExpression(expression, \
                         if op == "*":
                             left *= right
                         if op == "/":
+                            # Assembler division is INTEGER division with the
+                            # remainder discarded, and division by zero yields
+                            # zero rather than failing (GC28-6514-8 p.28).
+                            # Python's `/` is true division, so this produced a
+                            # float, which then reached `unhash` and raised
+                            # TypeError on a bitwise AND.  Truncation is toward
+                            # zero rather than floor, so -7/2 is -3 and not -4,
+                            # which is why this is not simply `//`.
                             if right == 0:
                                 left = 0
                             else:
-                                left /= right
+                                quotient = abs(left) // abs(right)
+                                if (left < 0) != (right < 0):
+                                    quotient = -quotient
+                                left = int(quotient)
                     else:
                         error(properties, "Eval error type 2", severity)
                         return None
