@@ -509,6 +509,24 @@ def parserASM(text, rule):
 #    `invoke`   False for macro-argument lines.
 # Returns True,operand,skipCount on success or False,None,skipCount on error.  
 # `skipCount` is the number of continuation lines processed.
+# Where the operand field of a statement ends: at the first blank that is not
+# inside a quoted string.  Everything after it is a comment.
+def operandFieldEnd(text):
+    quoted = False
+    i = 0
+    while i < len(text):
+        c = text[i]
+        if c == "'":
+            # A doubled quote inside a string is an escaped quote, not the end.
+            if quoted and text[i+1:i+2] == "'":
+                i += 2
+                continue
+            quoted = not quoted
+        elif c == " " and not quoted:
+            return i
+        i += 1
+    return len(text)
+
 def joinOperand(lines, index, column, proto=False, invoke=False):
     continuation = False
     skipCount = -1
@@ -524,7 +542,25 @@ def joinOperand(lines, index, column, proto=False, invoke=False):
         if done:
             pass
         elif continuation:
-            operand = operand.rstrip("\r\n") + line[15:71]
+            if invoke or proto:
+                # These two trim the accumulated operand with the parser, via
+                # `endpos` below, so leave them alone.
+                operand = operand.rstrip("\r\n") + line[15:71]
+            else:
+                # Everything else was joined by simple concatenation, which
+                # kept the blanks between the end of one card's operand and
+                # column 72, so the two cards' operands never actually met.
+                #     LCLC  &AA,&BB,                              X
+                #           &CC,&DD
+                # arrived as "&AA,&BB,<58 blanks>&CC,&DD".  `svDeclare` then
+                # took the first blank-delimited token, declared &AA and &BB,
+                # complained about the empty field left by the trailing comma,
+                # and silently dropped &CC and &DD -- which for a GBLx meant a
+                # global quietly became a local when something later assigned
+                # to it.  Eight declarations in OI340600's MLIB80 are written
+                # this way.
+                operand = operand[:operandFieldEnd(operand)] \
+                          + line[15:71].rstrip("\r\n")
         else:
             operand = line[column:71].rstrip("\r\n")
         if len(line) < 72:

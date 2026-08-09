@@ -671,7 +671,14 @@ ignore = { "TITLE",
            "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
            "LCLC", "SETA", "SETB", "SETC", "AIF",
            "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE", "SPON", "SPOFF",
-           "PRINT", "ACTR" }
+           "PRINT", "ACTR",
+           # COPY is acted on during macro expansion, which splices the copied
+           # file into the source; the COPY statement itself then reaches the
+           # code generator with nothing left to do, exactly as ACTR did.  It
+           # was the single commonest diagnostic in the corpus, 2332 of them in
+           # five modules alone.  EJECT is listing control and generates
+           # nothing either.
+           "COPY", "EJECT" }
 hexDigits = "0123456789ABCDEF"
 
 '''
@@ -2275,7 +2282,12 @@ def generateObjectCode(source, macros):
                     toMemory(bytearray(4))
                     continue
                 
-            error(properties, "Unrecognized line")
+            # Name the operation.  This is the catch-all at the end of the
+            # instruction dispatch, and it accounted for 16720 diagnostics
+            # across 166 of OI340600's 225 modules -- by far the commonest
+            # thing the assembler says -- while giving no clue whatever as to
+            # what it had failed to recognise.
+            error(properties, "Unrecognized operation '%s'" % operation)
             continue
         
         if collect and not asis:
