@@ -19,9 +19,15 @@ steps as below, substituting the filename).
 
 A full corpus sweep (95 standalone `PROGRAM` files in
 `../Programming in HAL-S/`, both pipelines, `--outfile6` capture +
-run status) now shows **60/95 halting cleanly under BFS**, up from
-essentially 0 before the fixes above landed. 9 files still have PFS
-clean / BFS not clean:
+run status) shows **61/95 halting cleanly under BFS**, up from
+essentially 0 before the fixes above landed. **But watch the other
+number, not just the clean-halt count**: the number of files whose
+*output actually matches PFS* dropped from 63/95 to 53/95 across the
+same two sweeps — some previously-correct files regressed to producing
+wrong-but-non-crashing output. See "New regression" below before trusting
+a rising clean-halt count as proof of progress.
+
+9 files still have PFS clean / BFS not clean:
 
 - **6 are not a `pilotToIbm` problem at all**: `029-DATATYPES.hal`,
   `198-P.hal`, `199-P.hal`, `200-A.hal`, `203-A.hal`, `205-LOG10.hal`
@@ -31,10 +37,10 @@ clean / BFS not clean:
   a genuine BFS-compiler-level limitation (these files use more than one
   `ON ERROR$(...)` alternate entry point), not a conversion bug. Out of
   scope for this document.
-**Update after the `TASK`-stack fix landed**: `219-P.hal` is now clean
-(moved above). The other two no longer crash/trap at all — both now exit
-0 — but still produce *wrong output*, a more subtle class of remaining
-bug:
+
+The other 2 (of the original 9 — `219-P.hal` moved to fixed above) no
+longer crash/trap at all — both now exit 0, and one has since been fixed
+at the source-file level:
 
 - **`130-EXAMPLE_N.hal`**: a real, small numeric discrepancy. PFS prints
   `THE ANSWER IS      2.4990000E+05`; BFS prints
@@ -46,17 +52,59 @@ bug:
   is unrelated to the stack-linkage work — looks like a genuine
   floating-point/loop-control codegen difference somewhere in the
   BFS→PILOT→`pilotToIbm` path, not a linkage gap.
-- **`222-MULTI.hal`**: **likely not a real bug at all.** Its `A`/`B`/`C`
-  are declared `DECLARE SCALAR, A, B, C INITIAL(20);` — in HAL/S,
-  `INITIAL` binds only to the immediately-preceding name, so only `C`
-  is actually initialized; `A` and `B` are genuinely uninitialized. PFS's
-  build happens to leave nonzero garbage in `A` (so the `IF A NOT = 0`
-  branch runs, computing a real `B`); BFS's build happens to leave `A`
-  zeroed (so that branch is skipped, `B` stays at its own garbage-now-
-  zero value). Both are "correct" readings of an uninitialized variable —
-  there's no reference answer for this file to converge to. Don't spend
-  further effort chasing this one; if anything, it's a candidate to drop
-  from the regression corpus rather than a target to fix.
+- **`222-MULTI.hal`**: **fixed at the source-file level, not a
+  `pilotToIbm` bug.** It was `DECLARE SCALAR, A, B, C INITIAL(20);` —
+  `INITIAL` binds only to the immediately-preceding name in HAL/S, so
+  only `C` was actually initialized; `A`/`B` were genuinely uninitialized
+  stack garbage, differing incidentally between PFS's and BFS's memory
+  layouts. Checked the real book source (NASA-CR-... "Programming in
+  HAL/S" p.222): the original has no `INITIAL` at all — the example is
+  deliberately illustrating an *unprotected race condition* (task `T`
+  sets `A=0` asynchronously; the book's whole point is that this file's
+  behavior is inherently timing-dependent, contrasted with a
+  `LOCK`/`UPDATE`-block fix shown right after it). Whoever adapted it
+  into a standalone `.hal` file left `A`/`B` uninitialized rather than
+  reproducing that race with real concurrency, which just made the file
+  useless as a byte-exact regression check. Fixed by giving `A` a real
+  `INITIAL(1)` (see git history for `222-MULTI.hal`) — verified both
+  builds now print `A= 1.0000000E+00 B= 2.0000000E+01 C= 2.0000000E+01`
+  identically, and this also confirms `219-P.hal`'s per-`TASK`-stack fix
+  (`@1MULTI`) is structurally correct, since `222-MULTI.hal` uses the
+  same `@1<char>` mechanism. Moved to the fixed list above.
+
+## New regression: several previously-correct files now produce wrong output
+
+Comparing the sweep that found the fixes above against a fresh sweep of
+the *current* `pilotToIbm`: 7 files that previously matched PFS exactly
+now produce silently wrong (but non-crashing) output. Symptoms range from
+tiny to severe:
+
+- Small floating-point drift: `031-DECLARE3.hal` (`3.0000000E+00` →
+  `3.0000200E+00`), `080-EXAMPLE_4A.hal` (`4.0000000E+02` →
+  `4.0000513E+02`), `137-STATISTICS.hal` (`5.0500000E+01` →
+  `5.0499832E+01`), `138-FILTER.hal` (two values, both off by ~1e-5
+  relative), `177-P.hal` (`9.0000000E+00` → `9.0000200E+00`).
+- Exact-integer drift: `052-TABLE.hal` — `1073741824` (2^30, part of a
+  doubling sequence) → `1073741845`, off by exactly 21.
+- Severe: `GOOGLE-PARALLAX.hal` — `6.2814549896283003E+13` →
+  `1.8600000000000001E+08`, a completely different magnitude, not a
+  rounding error.
+
+Note `031-DECLARE3.hal` and `177-P.hal` both end in the exact same
+suffix, `...0000200E+00` — both are the *last element of a 3-vector*
+being printed, which may be a real clue (a fixed-offset corruption
+pattern rather than random noise). None of these 7 files use `TASK`;
+whatever changed between the sweep that found the `TASK`-stack fix and
+this one appears to have introduced a new, distinct bug — possibly in
+how much stack space gets allocated/laid out for non-`TASK` programs now
+that the `TASK`-stack code path exists, since several of the affected
+files use vectors/arrays (more stack-resident temporaries) rather than
+plain scalars. **Not yet root-caused — flagging so it doesn't get missed
+under the "clean-halt count went up" headline number.**
+
+Two more `DIFF` rows in the fresh sweep, `097-SAMPLE_FLOW.hal` and
+`184-EXAMPLE_N.hal`, are **not** new — both already mismatched before
+this round of fixes too; not investigated yet either way.
 
 ## How to reproduce
 
@@ -72,8 +120,9 @@ lnk101 197-P.obj -o 197-P.fcm --json-symbols 197-P-lnk101.json
 yaGPC2 --interactive --no-trace --no-verbose --symbols 197-P-lnk101.json \
        --line-width 240 --outfile6 out6.txt 197-P.fcm
 # now exits 0 with correct output -- this file is fixed; substitute
-# 130-EXAMPLE_N, 219-P, or 222-MULTI for 197-P to reproduce the open
-# problems below instead.
+# 130-EXAMPLE_N to reproduce that open problem, or 031-DECLARE3 /
+# 052-TABLE / 080-EXAMPLE_4A / 137-STATISTICS / 138-FILTER / 177-P /
+# GOOGLE-PARALLAX to reproduce the new regression below.
 ```
 
 Use `--trace` in place of `--no-trace` (with `--max-steps N` to keep the
@@ -90,11 +139,23 @@ with exit 0 and correct output.
 (This section originally covered `197-P.hal`'s now-fixed entry-prologue
 gap, then `219-P.hal`'s now-fixed per-`TASK` stack gap; the hand-decode/
 compare approach below is the same one that found both and is the
-natural starting point for `130-EXAMPLE_N.hal` too.)
+natural starting point for the open cases too.)
 
-For `130-EXAMPLE_N.hal`'s numeric discrepancy (the only case left that
-looks like a real `pilotToIbm`/BFS-codegen bug — see above for why
-`222-MULTI.hal` probably isn't one):
+**For the new regression (7 files, see above) — probably the
+higher-priority investigation now**, since it affects files that used to
+work: whatever change fixed `219-P.hal`'s per-`TASK` stack likely also
+touched how stack space is computed/laid out for plain (non-`TASK`)
+programs. Compare `lnk101`'s section-table output (stack section size,
+`#D<char>` size/placement) for one regressed file, e.g. `031-DECLARE3.hal`,
+against a git-stashed prior version of `pilotToIbm` (or against a file
+that still works, e.g. `HELLO.hal`) to see what's different about how
+its stack/data sections are now sized or placed. The repeated
+`...0000200E+00` suffix on two unrelated files' *last vector element* is
+worth chasing specifically — sounds like a fixed-offset write landing one
+element past where it should.
+
+For `130-EXAMPLE_N.hal`'s numeric discrepancy (unrelated to the above —
+it was already wrong before this round of fixes):
 
 - Hand-decode the raw PILOT member the same way `parse_pilot_member()`
   does, and compare its ESD/RLD/TXT records against the equivalent
@@ -120,25 +181,28 @@ looks like a real `pilotToIbm`/BFS-codegen bug — see above for why
 
 ## Next steps
 
+- **Root-cause the new 7-file regression first** — it's the highest
+  priority: real, previously-working files broke. Start with
+  `031-DECLARE3.hal` or `177-P.hal` (small, single vectors, easy to
+  hand-trace) rather than `GOOGLE-PARALLAX.hal` (bigger discrepancy but
+  a bigger program).
 - Investigate `130-EXAMPLE_N.hal`'s small numeric discrepancy (see
-  above) — the one remaining case that's plausibly still a real
-  `pilotToIbm`/BFS-codegen bug.
-- Don't chase `222-MULTI.hal` further without first confirming the
-  uninitialized-variable read above is wrong — as analyzed, its
-  mismatch looks like inherent nondeterminism in the test file itself,
-  not something fixable in `pilotToIbm`.
+  above) — unrelated to the regression, was already wrong before this
+  round of fixes.
+- Track `out6`-match count, not just clean-halt count, on every future
+  sweep — this round is exactly why: clean-halt count went up (60→61)
+  while match count went down (63→53) in the same comparison. A rising
+  clean-halt number alone is not evidence of progress.
 - Rerun the full corpus sweep (95 standalone `PROGRAM` files in
   `../Programming in HAL-S/`, both pipelines, compare `--outfile6` +
   run status) after any further fix, rather than hand-picking further
-  cases — it's what found `219-P.hal`/`130-EXAMPLE_N.hal`/`222-MULTI.hal`
-  after earlier fixes looked complete from a handful of manual checks
-  alone, and then found that `219-P.hal` needed a second look after the
-  first "fix" claim for it too. Baseline before the `TASK`-stack fix:
-  60/95 clean under BFS; expect that number to have moved with `219-P.hal`
-  now fixed — get a fresh count rather than assuming.
-- Keep `HELLO.hal`, `197-P.hal`, `193-TEST_X.hal`, `037-ROOTS.hal`, and
-  `219-P.hal` passing as regression checks (same reproduction steps as
-  below, dropping `--verbose`) — they already work and should stay
-  working.
+  cases or trusting a single number — every fix so far has been
+  confirmed genuine only by rerunning the whole corpus, not by trusting
+  the specific case it was aimed at.
+- Keep `HELLO.hal`, `197-P.hal`, `193-TEST_X.hal`, `037-ROOTS.hal`,
+  `219-P.hal`, and `222-MULTI.hal` passing as regression checks (same
+  reproduction steps as below, dropping `--verbose`) — they already work
+  and should stay working. Also watch the 7 regressed files above: once
+  fixed, add them too.
 - The 6 BFS-compile-rejected files (`029-DATATYPES.hal` etc., see above)
   are not this document's problem — don't spend time on them here.
