@@ -341,8 +341,9 @@ the day recalled five of them and wrote CINDEX up as an unexplained sixth.
 RUNASM IS A WEAK GUARD ON MOST OF WHAT MATTERS NOW, which is easy to mistake for
 a strong one.  RUNMAC uses no multilevel sublists and no ACTR at all, it
 never exercises the numeric branch of T', and RUNASM contains no DC duplication
-factor and no multi-valued DC anywhere, so all five can be completely broken
-while the score stays at 205 of 205.  Run
+factor and no multi-valued DC anywhere.  Assembly-time division was returning a
+Python float for years without moving the score either.  All six can be
+completely broken while it stays at 205 of 205.  Run
 ASM101S/macroTests/regressionMacros.sh as well; it takes seconds and it is the
 only check that covers the conditional-assembly language itself.
 
@@ -351,18 +352,18 @@ before this stretch of work began and now:
 
                     before   after
     OK                  21      25
-    ERRORS              33     173
-    CRASH              170      27
+    ERRORS              33     187
+    CRASH              170      13
     HANG                 1       0
 
-NOTHING HANGS, and CRASH has fallen by six sevenths.  Read the ERRORS column as
+NOTHING HANGS, and CRASH has fallen by more than nine tenths.  Read the ERRORS column as
 the real measure of progress: a module there has been assembled far enough to
-produce a diagnosis, which is what the next defect gets found from.  The three
+produce a diagnosis, which is what the next defect gets found from.  The four
 crash families that dominated -- 92 of `TypeError: NoneType is not iterable`,
-42 of `KeyError: 'ast'` and 23 of `IndexError: bytearray index out of range` --
-are gone outright.  What is left:
+42 of `KeyError: 'ast'`, 23 of `IndexError: bytearray index out of range` and
+14 of a float reaching a bitwise AND -- are gone outright.  What is left is a
+long tail, and no single item in it is now worth calling the next job:
 
-     14  TypeError: unsupported operand &, float/int  expressions.py:255
       7  KeyError: 'preliminaryOffset'                model101.py:1287
       2  KeyError: None                               model101.py:1287
       1  TypeError: int() with explicit base           model101.py:1524
@@ -399,34 +400,38 @@ That is original-build primary evidence, so it is the reference to check a
 borrowed macro library against, in the same way RUNLST is the reference for
 RUNASM.  It has not been used yet.
 
-NEXT STEPS, in order.  The previous list's steps 1 and 2 -- the NoneType/ast
-crash family and the IndexError at model101.py:1537 -- were done on 2026-08-09
-in commits 60a12bf9f and 9d197877a.  What follows is what they left.
+NEXT STEPS, in order.  The previous list's first two items -- the float/int
+clash and, before it, the IndexError and the NoneType/ast family -- are done,
+in commits 60a12bf9f, 9d197877a and d01007f21.  The character of the remaining
+work has now changed, and the ordering below reflects that.
 
-  1. THE float/int OPERAND CLASH AT expressions.py:255, 14 of the 27 remaining
-     crashes and now the largest family.  Something reaches a bitwise AND as a
-     float.  Work it the way the last four were worked, which is the method
-     that has paid every time: do not start at the line that raised.  Log what
-     the failing input actually was -- wrapping `parserASM` and printing every
-     call that returned None produced three grammar gaps in one run -- and fix
-     where the bad value was PRODUCED.
+THERE IS NO LONGER A DOMINANT CRASH TO CHASE.  Of the 13 that remain the
+largest group is 7, and several are singletons.  Four rounds of "find the
+biggest signature and fix it" have taken CRASH from 170 to 13; that method has
+essentially run out, and continuing to apply it will buy less and less.
 
-  2. KeyError 'preliminaryOffset' AT model101.py:1287, 7 more, with 2 of
-     KeyError None at the same line.  Probably one defect, and small.
+  1. READ THE DIAGNOSTICS IN BULK.  This is now the most valuable item by a
+     wide margin and it needs no crash to chase.  187 modules assemble far
+     enough to produce diagnosed errors and nobody has yet looked at what those
+     say across the corpus.  Sort them by message, count them, and the common
+     ones will name the next round of work directly.  Expect this to find
+     defects that no crash would ever have exposed, because a wrong answer that
+     does not raise is invisible to a sweep that classifies by exit status --
+     and note that several of the defects fixed in the last two days were
+     exactly that shape, silently wrong for years while RUNASM stayed at 205 of
+     205.
 
-  3. RE-RUN THE SWEEP AND SEE WHAT IS LEFT.  modules/sdfpkg/fcos-sweep.sh does
-     all 225 and classifies each as OK/ERRORS/CRASH/HANG.  USE FCOS_TIMEOUT=900
-     OR MORE; the default of 120 misclassifies slow-but-terminating modules,
-     and DCICYC alone needs 861s.  The table above is its output for
-     2026-08-09.
+  2. KeyError 'preliminaryOffset' AT model101.py:1287, 7 crashes, with 2 of
+     KeyError None at the same line.  Probably one defect, and probably small.
+     Worth doing simply to get the crash count into single figures.
 
-  4. START READING THE ERRORS, which is probably now the most valuable item on
-     this list and needs no crash to chase.  173 modules assemble far enough to
-     produce diagnosed errors, and nobody has yet looked at what those say in
-     bulk.  Sort them by message and the common ones will name the next round
-     of work directly.
+  3. THE REMAINING SINGLETONS, once the above are done: an int() conversion at
+     model101.py:1524, two missing symbol-table keys, and an AttributeError
+     raised inside tatsu itself, which is likely a parser edge case rather than
+     an ASM101S defect and should be reduced to a minimal input before anyone
+     spends time on it.
 
-  5. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
+  4. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
      The user has never done this, so treat it as unexplored: the two versions
      are years apart and a macro that merely has the same name may not have the
      same definition.  Diff a few that DO exist in both before assuming the rest
@@ -435,11 +440,18 @@ in commits 60a12bf9f and 9d197877a.  What follows is what they left.
      the original build actually produced.  Expect to justify the choice later,
      since the corpus goal covers both PASS versions.
 
-  6. ASM101S IS SLOW, which only became visible once modules stopped crashing
-     early.  DCICYC takes 861s and FIOPDISP 307s, and the cost is dominated by
-     re-parsing every line through tatsu on every pass.  Not urgent, but it is
-     what makes a sweep an hour's work rather than a few minutes', and it will
-     get worse as more modules run further.
+  5. NOTHING IN FCOS IS VERIFIED, only assembled, and this is the gap that
+     matters most for the phase goal.  "OK, exit 0" means the assembler did not
+     complain; it does not mean the bytes are right.  RUNASM is verified because
+     RUNLST exists to check it against.  The OI301700 listings named above are
+     the first primary evidence that could put FCOS on the same footing, and
+     until something like that is in place the OK column is a much weaker claim
+     than it looks.
+
+  6. ASM101S IS SLOW.  DCICYC takes 861s and FIOPDISP 307s, and the cost is
+     dominated by re-parsing every line through tatsu on every pass.  Not
+     urgent, but it is what makes a sweep an hour's work rather than a few
+     minutes'.
 
   7. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
      feature request from an outside user (#1333), which also carries a
@@ -447,8 +459,8 @@ in commits 60a12bf9f and 9d197877a.  What follows is what they left.
      hex literal with comma-separated groups, as in
      DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' -- that alone is all 328 of
      FAZ2's diagnosed errors, and it is the same shape as the multi-valued DC
-     defect just fixed, so look there first.  ASM101S.py raises IndexError when
-     generated code runs past the end of a --compare listing instead of
+     defect already fixed, so look there first.  ASM101S.py raises IndexError
+     when generated code runs past the end of a --compare listing instead of
      reporting it, which is what makes the six intentional RUNASM deviations
      look like crashes on a default regression run.  Created variable symbols,
      `&(SRC&UPDDSN&NAME)`, are the last AIF operands that still do not parse.
