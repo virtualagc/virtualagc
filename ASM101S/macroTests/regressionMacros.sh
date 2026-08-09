@@ -26,17 +26,59 @@ cd "$(dirname "$0")" || exit 1
 UPDATE=no
 [ $# -gt 0 ] && [ "$1" = "--update" ] && UPDATE=yes
 
-# Keep only the macro-generated lines of the listing (those flagged with '+'),
-# and strip the line numbers and the right-hand macro-name column, so that the
-# comparison is over the MNOTE text alone.
+# Reduce a listing to the two things worth comparing.
+#
+#   - Macro-generated lines, those flagged with '+', carry the MNOTE text that
+#     the conditional-assembly tests assert on.  Line numbers and the
+#     right-hand macro-name column are dropped, since both shift whenever a
+#     test file is edited.
+#   - Lines that generated object code carry an address and the bytes.  Those
+#     are kept as "address data statement", which is what a constants test
+#     needs:  a DC that emits the wrong number of bytes, or the right number
+#     with the wrong contents, shows up here and nowhere else.
 distill() {
-    grep -E "^ +[0-9]+\+" \
-        | sed -E 's/^ +[0-9]+\+//; s/ +0[0-9]-[A-Z@#$]+ *$//' \
-        | sed 's/ *$//'
+    sed -E 's/\r$//' \
+        | awk '
+            /^ +[0-9]+\+/ {
+                sub(/^ +[0-9]+\+/, "")
+                sub(/ +0[0-9]-[A-Z@#$]+ *$/, "")
+                sub(/ +$/, "")
+                print
+                next
+            }
+            /^[0-9A-F]{5} / {
+                # Fixed columns, because the line-number field sits between
+                # the data and the statement and picking fields by whitespace
+                # mistakes it for data on any line that generated none.
+                # 1-5 address, 7-30 data, ending col 35 line number, 37+ text.
+                addr = substr($0, 1, 5)
+                data = substr($0, 7, 24)
+                stmt = substr($0, 37)
+                sub(/ +$/, "", data)
+                sub(/ +$/, "", stmt)
+                print addr " " data "  " stmt
+                next
+            }
+        '
 }
 
+# Column 72 is the continuation column.  A COMMENT line that reaches it is a
+# continued comment, and the statement on the next card is swallowed as its
+# continuation -- silently, with no diagnostic and no generated code.  That is
+# correct assembler behaviour and a trap for anyone writing a test file in an
+# editor that does not show column 72:  it cost an afternoon here, and was
+# briefly written up as an ASM101S defect in MACRO/MEND tracking before being
+# recognised for what it was.  A statement line may of course reach column 72,
+# which is how a real continuation is written.
 status=0
 for src in *.asm; do
+    long=$(awk '/^\*/ && length($0) > 71 { print NR }' "$src")
+    if [ -n "$long" ]; then
+        echo "$src: FAILED -- comment lines reach column 72 (continuation"
+        echo "  column), so the next statement is swallowed.  Lines: $(echo $long | tr '\n' ' ')"
+        status=1
+        continue
+    fi
     name=${src%.asm}
     expected="$name.txt"
     actual=$(timeout 120 ASM101S --tolerable=255 "$src" 2>&1 | distill)

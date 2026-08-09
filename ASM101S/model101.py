@@ -741,6 +741,40 @@ for n in list(impliedR1):
 # I've simply chosen a number here that while far less than the maximum, should
 # be overkill for Shuttle flight software.
 dcBuffer = bytearray(1024)
+
+# Replicate the first `length` bytes of `dcBuffer`, which are one copy of the
+# data a DC generates, until the buffer holds `duplicationFactor` copies of
+# them.  Returns the resulting buffer length.
+#
+# All four of the DC paths that need this had written the loop as
+#     while duplicationFactor > 1:
+#         for i in range(length):
+#             dcBuffer[dcBufferPtr] = dcBuffer[i]
+#             dcBufferPtr += 1
+# with nothing decrementing `duplicationFactor`, so the loop never ended and
+# any DC with a factor above 1 copied until it ran off the end of the buffer
+# and raised IndexError.  RUNASM has no DC duplication factors at all, which is
+# why 205 of 205 never noticed; OI340600 has 165 of `DC 2F'...'` alone.
+#
+# A factor of zero is legal and generates no data whatever -- it is written to
+# fix an alignment or to attach a label and a length attribute -- which the old
+# shape also got wrong, by emitting one copy.
+def replicateDC(properties, length, duplicationFactor):
+    if duplicationFactor <= 0:
+        return 0
+    total = length * duplicationFactor
+    if total > len(dcBuffer):
+        error(properties, \
+              "DC generates %d bytes, more than the %d-byte assembly buffer" % \
+              (total, len(dcBuffer)))
+        return length
+    pointer = length
+    for copy in range(duplicationFactor - 1):
+        for i in range(length):
+            dcBuffer[pointer] = dcBuffer[i]
+            pointer += 1
+    return pointer
+
 firstCSECT = None
 def generateObjectCode(source, macros):
     global dcBuffer, firstCSECT, literalPools
@@ -1511,8 +1545,15 @@ def generateObjectCode(source, macros):
                         if lengthModifier != None:
                             pass
                         if operation == "DC":
-                            for exp in suboperand["v"]:
-                                exp1 = exp[1]
+                            # `suboperand["v"]` holds ONE quotedFloatList, and
+                            # every value after the first lives inside its
+                            # repetition element.  Iterating it directly saw
+                            # only `exp[1]`, the first, so `DC F'1,2'` silently
+                            # generated just the 1 -- and once the duplication
+                            # factor worked, `DC 2F'1,2'` silently generated
+                            # 1,1.  The E/D path below already flattened it
+                            # properly; this is the same shape.
+                            for exp1 in astFlattenList(suboperand["v"][0][1:-1]):
                                 if isinstance(exp1, str) and exp1.isdigit():
                                     v = int(exp1) & mask
                                 elif isinstance(exp1, tuple) and len(exp1) == 2 \
@@ -1532,10 +1573,8 @@ def generateObjectCode(source, macros):
                                     dcBufferPtr += 1
                                     j -= 8
                             length = dcBufferPtr
-                            while duplicationFactor > 1:
-                                for i in range(length):
-                                    dcBuffer[dcBufferPtr] = dcBuffer[i]
-                                    dcBufferPtr += 1
+                            dcBufferPtr = replicateDC(properties, length, \
+                                                      duplicationFactor)
                             toMemory(dcBuffer[:dcBufferPtr])
                             continue
                         toMemory(duplicationFactor * length)
@@ -1569,10 +1608,8 @@ def generateObjectCode(source, macros):
                                         dcBufferPtr += 1
                                         j -= 8
                             length = dcBufferPtr
-                            while duplicationFactor > 1:
-                                for i in range(length):
-                                    dcBuffer[dcBufferPtr] = dcBuffer[i]
-                                    dcBufferPtr += 1
+                            dcBufferPtr = replicateDC(properties, length, \
+                                                      duplicationFactor)
                             toMemory(dcBuffer[:dcBufferPtr])
                             continue
                         toMemory(duplicationFactor * length)
@@ -1590,10 +1627,8 @@ def generateObjectCode(source, macros):
                                     dcBufferPtr += 1
                                     j -= 8
                                 length = dcBufferPtr
-                                while duplicationFactor > 1:
-                                    for i in range(length):
-                                        dcBuffer[dcBufferPtr] = dcBuffer[i]
-                                        dcBufferPtr += 1
+                                dcBufferPtr = replicateDC(properties, length, \
+                                                          duplicationFactor)
                                 toMemory(dcBuffer[:dcBufferPtr])
                                 continue
                             pass
@@ -1607,7 +1642,14 @@ def generateObjectCode(source, macros):
                         if lengthModifier != None:
                             pass
                         if operation == "DC":
-                            for exp in suboperand["v"]:
+                            # As in the integer path above, every address after
+                            # the first lives inside the repetition element of
+                            # a single `addresses`, so iterating "v" directly
+                            # handed the whole `( e1, [[',',e2],...] , )` tuple
+                            # to the evaluator.  `DC Y(L1,L2)` therefore
+                            # produced one halfword and an "Eval error type 3"
+                            # rather than two addresses.
+                            for exp in astFlattenList(suboperand["v"][0][1:-1]):
                                 v = evalArithmeticExpression(exp, {}, \
                                                              properties, \
                                                              symtab, \
@@ -1641,10 +1683,8 @@ def generateObjectCode(source, macros):
                                 dcBuffer[dcBufferPtr] = v & 0xFF
                                 dcBufferPtr += 1
                             length = dcBufferPtr
-                            while duplicationFactor > 1:
-                                for i in range(length):
-                                    dcBuffer[dcBufferPtr] = dcBuffer[i]
-                                    dcBufferPtr += 1
+                            dcBufferPtr = replicateDC(properties, length, \
+                                                      duplicationFactor)
                             toMemory(dcBuffer[:dcBufferPtr])
                             continue
                         toMemory(duplicationFactor * 2)

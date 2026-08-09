@@ -1,46 +1,59 @@
 */ Access:      Public Domain, no restrictions believed to exist.
 */ Filename:    sublists.asm
-*/ Purpose:     Regression test for ASM101S macro-argument semantics --
-*/              multilevel sublists, the N' attribute over them, keyword
-*/              parameters, arithmetic coercion of macro arguments, EBCDIC
-*/              collation of character relations, and a SETA carrying a
+*/ Purpose:     Regression test for ASM101S macro-argument
+*/              semantics: multilevel sublists, the N' attribute
+*/              over them, keyword parameters, arithmetic
+*/              coercion of macro arguments, EBCDIC collation of
+*/              character relations, and a SETA carrying a
 */              trailing comment.
-*/ Reference:   virtualagc issue #1331.  The expected values are those of
-*/              the Assembler H General Information Manual, GC26-3758-3
-*/              (January 1974), p.13 and p.19, and of Tables 48, 49 and 58
-*/              of the HLASM Language Reference, SC26-4940.  They were
-*/              confirmed independently against IBM HLASM behaviour (z390
-*/              mz390) and against Don Schmidt's asm101.
+*/ Reference:   virtualagc issue #1331.  The expected values are
+*/              those of the Assembler H General Information
+*/              Manual, GC26-3758-3 (January 1974), p.13 and
+*/              p.19, and of Tables 48, 49 and 58 of the HLASM
+*/              Language Reference, SC26-4940.  They were
+*/              confirmed independently against IBM HLASM
+*/              behaviour (z390 mz390) and against Don Schmidt's
+*/              asm101.
 */ Language:    IBM AP-101S assembly language.
 */ Contact:     The Virtual AGC Project (www.ibiblio.org/apollo).
-*/ Note:        Run via regressionMacros.sh, which compares the MNOTE
-*/              output against sublists.txt.
+*/ Note:        Run via regressionMacros.sh.
 */
-*/              PROBE   a sublist is passed through verbatim, and
-*/                      subscripts index into it to any depth.  A
-*/                      subscript past the end yields a null string.
-*/              CNT     N' counts entries, and an omitted entry still
-*/                      counts.  N' of () is 1, the null string being its
-*/                      single entry, and N' of a non-sublist is 1.
-*/              NAMED   a named positional parameter carries a sublist the
-*/                      same way, and an argument that is not a sublist
-*/                      behaves as a sublist of one entry.
-*/              AMAIN   keyword parameters, quoted and unquoted, and the
-*/                      name field.
-*/              IFPROC  a null argument is zero in an arithmetic context,
-*/                      so the AIF is true and branches.  A sublist has no
-*/                      arithmetic value at all, which is a program error
-*/                      to diagnose rather than something to coerce.
-*/              COLL    character relations collate in EBCDIC, in which a
-*/                      letter sorts below a digit and lower case below
-*/                      upper, and the shorter of two values of unequal
-*/                      length is the lesser.  Both tests invert under
-*/                      ASCII, so they pin the collation down rather than
-*/                      merely being consistent with it.
-*/              CMT     a SETA whose operand carries a trailing comment
-*/                      must still take effect.  While it silently did
-*/                      not, MACSMITH's RTURNTBL loop bound stayed at zero
-*/                      and the assembly never terminated.
+*/              NOTHING HERE MAY REACH COLUMN 72.  That is the
+*/              continuation column, and a comment line that
+*/              reaches it swallows the statement below it.
+*/
+*/              PROBE   a sublist is passed through verbatim,
+*/                      and subscripts index into it to any
+*/                      depth.  A subscript past the end yields
+*/                      a null string.
+*/              CNT     N' counts entries, and an omitted entry
+*/                      still counts.  N' of () is 1, the null
+*/                      string being its single entry, and N' of
+*/                      a non-sublist is 1.
+*/              NAMED   a named positional parameter carries a
+*/                      sublist the same way, and an argument
+*/                      that is not a sublist behaves as a
+*/                      sublist of one entry.
+*/              AMAIN   keyword parameters, quoted and unquoted,
+*/                      and the name field.
+*/              IFPROC  a null argument is zero in an arithmetic
+*/                      context, so the AIF is true and
+*/                      branches.  A sublist has no arithmetic
+*/                      value at all, which is a program error
+*/                      to diagnose rather than to coerce.
+*/              COLL    character relations collate in EBCDIC,
+*/                      in which a letter sorts below a digit
+*/                      and lower case below upper, and the
+*/                      shorter of two values of unequal length
+*/                      is the lesser.  Both tests invert under
+*/                      ASCII, so they pin the collation down
+*/                      rather than merely being consistent
+*/                      with it.
+*/              CMT     a SETA whose operand carries a trailing
+*/                      comment must still take effect.  While
+*/                      it silently did not, MACSMITH's RTURNTBL
+*/                      loop bound stayed at zero and the
+*/                      assembly never terminated.
          GBLA  &A,&B,&C
 &A       SETA  100
 &B       SETA  200
