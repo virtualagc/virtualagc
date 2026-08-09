@@ -733,8 +733,10 @@ class asmParser(Parser):
         with self._choice():
             with self._option():
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
                 self._token('(')
                 self._constant_()
+                self.add_last_node_to_name('A2')
                 self._token(')')
                 with self._group():
                     with self._choice():
@@ -745,10 +747,16 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+                self._define(
+                    [],
+                    ['A1', 'A2'],
+                )
             with self._option():
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
                 self._token(',')
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('A2')
                 with self._group():
                     with self._choice():
                         with self._option():
@@ -758,8 +766,13 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+                self._define(
+                    [],
+                    ['A1', 'A2'],
+                )
             with self._option():
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
                 with self._group():
                     with self._choice():
                         with self._option():
@@ -769,6 +782,10 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+                self._define(
+                    [],
+                    ['A1'],
+                )
             self._error(
                 'expecting one of: '
                 '<arithmeticExpression> <term>'

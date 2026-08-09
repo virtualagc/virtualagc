@@ -535,6 +535,11 @@ def optimizeScratch():
             if operation == "EQU":
                 if "name" not in entry:
                     continue
+                if properties["ast"] == None:
+                    # The EQU's operand did not parse, which was diagnosed
+                    # where it was parsed.  Subscripting the None here turned
+                    # that diagnosis into a traceback.
+                    continue
                 v = evalArithmeticExpression(properties["ast"]["v"], {}, \
                                              properties, symtab, \
                                              symtab[sect]["value"] + entry["pos1"] // 2, \
@@ -2315,16 +2320,76 @@ def generateObjectCode(source, macros):
                     toMemory(bytearray(4))
                     continue
                 
-            if operation in argsBCE:
-                # BCE operations are really standardized enough for there to be
-                # any advantage in segregating them this way, but it might provide
-                # some clarity in maintenance to do so.
+            if operation in bceLong:
+                # The four-byte BCE instructions.  See `bceLong` for where the
+                # opcodes and the three operand layouts come from; they were
+                # derived from the original build rather than from the POO,
+                # which names the operands but not the bit layout.
                 commonProcessing(2)
                 ast = properties["ast"]
-                if ast != None:
-                    toMemory(bytearray(4))
+                opcode, layout = bceLong[operation]
+                data = bytearray(4)
+                data[0] = opcode
+                if ast == None:
+                    error(properties, "%s requires an operand" % operation)
+                    toMemory(data)
                     continue
-                
+
+                def bceField(subfield):
+                    '''Evaluate one BCE operand.  An address comes back hashed
+                    and has to be resolved to its combined offset, exactly as a
+                    Y-type address constant does.'''
+                    err, value = evalInstructionSubfield(properties, subfield, \
+                                                         ast, symtab)
+                    if err or value == None:
+                        return None
+                    section, offset = unhash(value)
+                    if section is None:
+                        return value
+                    return offset + sects.get(section, {}).get("offset", 0)
+
+                first = bceField("A1")
+                if first == None:
+                    error(properties, "Could not evaluate %s operand" % operation)
+                    toMemory(data)
+                    continue
+                second = bceField("A2") if "A2" in ast else 0
+                if second == None:
+                    error(properties, \
+                          "Could not evaluate second operand of %s" % operation)
+                    second = 0
+
+                if layout == "ADDRESS":
+                    field = first & 0xFFFFFF
+                    data[1] = (field >> 16) & 0xFF
+                    data[2] = (field >> 8) & 0xFF
+                    data[3] = field & 0xFF
+                else:
+                    # DISPCOUNT, IUACOMMAND and PARAMETER share a shape: one
+                    # byte then one halfword.  For PARAMETER the opcode byte is
+                    # 00 and the operands are an IUA and a command, the word
+                    # being data that follows a #MIN or #MOUT rather than an
+                    # instruction in its own right.
+                    data[1] = first & 0xFF
+                    data[2] = (second >> 8) & 0xFF
+                    data[3] = second & 0xFF
+                toMemory(data)
+                continue
+
+            if operation in argsBCE:
+                # The two-byte BCE instructions, which are NOT encoded:  their
+                # opcode/operand boundary could not be read off the original
+                # build, most of their observed operands being zero.  Say so
+                # rather than emit a guess, since wrong object code that
+                # assembles quietly is worse than none.
+                commonProcessing(2)
+                error(properties, \
+                      "%s is a BCE instruction whose encoding has not been " \
+                      "established; four zero bytes are generated in its " \
+                      "place and the object code is WRONG" % operation)
+                toMemory(bytearray(4))
+                continue
+
             # Name the operation.  This is the catch-all at the end of the
             # instruction dispatch, and it accounted for 16720 diagnostics
             # across 166 of OI340600's 225 modules -- by far the commonest

@@ -264,6 +264,40 @@ argsBCE = { "#BU": -1, "#BU@": -1, "#CMD": -1, "#CMDI": -1,
            "#TDL": -1, "#TDLI": -1, "#TDS": -1, "#WAT": -1, "#WIX": -1
        }
 
+# THE FOUR-BYTE BCE INSTRUCTIONS:  opcode byte, then the layout of bytes 1-3.
+#
+#   ADDRESS     one 24-bit value.  In the original build this field equals the
+#               resolved effective address exactly, unlike a CPU instruction
+#               where it is a displacement from a base register.
+#   DISPCOUNT   byte 1 the displacement, bytes 2-3 the transfer count.  The
+#               POO gives #MIN and #MOUT the operands "Displacement, Transfer
+#               Count".
+#   IUACOMMAND  byte 1 the IUA, bytes 2-3 the command.
+#   PARAMETER   not an instruction at all but the parameter word that follows
+#               a #MIN or #MOUT; opcode byte 00, then IUA and command.
+#
+# Derived from about 5500 instances in the original build, and pinned by the
+# ones whose operands are literal and so need no symbol table:  `#MIN 0,13` is
+# F100000D, `#MOUT 2,0` is F5020000, `#TDLI 511` is F40001FF.  The two fields
+# of IUACOMMAND are pinned by `#CMDI FIOLMIUA,FIOFFIUA*256+12` giving F6400A0C,
+# whose *256+12 could only land that way if byte 1 and bytes 2-3 were separate.
+# 0x08 distinguishes the indirect "@" forms.  See ap101s-notes.db.
+#
+# The two-byte BCE instructions are deliberately absent.  Their opcode/operand
+# boundary cannot be read off the listings, most of their observed operands
+# being zero -- #WAT occurs 1105 times as 0800 and never otherwise -- so
+# encoding them would be guesswork.
+bceLong = {
+    "#BU":    (0xF0, "ADDRESS"),    "#BU@":   (0xF8, "ADDRESS"),
+    "#MIN":   (0xF1, "DISPCOUNT"),  "#MIN@":  (0xF9, "ADDRESS"),
+    "#LBR":   (0xF2, "ADDRESS"),    "#LBR@":  (0xFA, "ADDRESS"),
+    "#RDLI":  (0xF3, "ADDRESS"),    "#RDL":   (0xFB, "ADDRESS"),
+    "#TDLI":  (0xF4, "ADDRESS"),    "#TDL":   (0xFC, "ADDRESS"),
+    "#MOUT":  (0xF5, "DISPCOUNT"),  "#MOUT@": (0xFD, "ADDRESS"),
+    "#CMDI":  (0xF6, "IUACOMMAND"), "#CMD":   (0xFE, "ADDRESS"),
+    "#MINC":  (0x00, "PARAMETER"),  "#MOUTC": (0x00, "PARAMETER"),
+    }
+
 # EMPTY, where it used to be the whole of argsBCE.  Every BCE instruction
 # observed in the original build carries an operand -- the POO gives #MIN and
 # #MOUT "Displacement, Transfer Count" and #CMDI "IUA, Command" -- so treating

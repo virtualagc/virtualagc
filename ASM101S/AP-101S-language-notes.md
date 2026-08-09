@@ -7,6 +7,19 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 ## Convention
 
+### `#MINC / #MOUTC`
+
+**Processor:** BCE  
+**Confidence:** derived  
+**Encoding certainty:** verified  
+**POO:** Appendix A lists them among the instructions
+
+**What it does.** NOT instructions, despite being listed with them: they are the parameter words that follow a #MIN or a #MOUT.  The word is 00, then the IUA, then the command as a halfword.
+
+**Encoding.** 00 iua cc cc.  Opcode byte zero, byte 1 the IUA, bytes 2-3 the command.
+
+**How this was established.** 387 and 491 instances in "OI301700 as received".  The giveaway is that #MINC and #MOUTC carry the SAME opcode byte, 00, and that "#MINC FIOFFIUA,FIOMDMRT" is 00531C20 where "#CMDI FIOFFIUA,FIOMDMRT" is F6531C20 -- identical operands, identical operand encoding, and an opcode byte of zero where the instruction has F6.  A real instruction pair could not share an opcode.
+
 ### `continuation column`
 
 **Processor:** assembler  
@@ -26,14 +39,14 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Processor:** BCE  
 **Confidence:** derived  
-**Encoding certainty:** derived  
+**Encoding certainty:** verified  
 **POO:** Appendix A gives the operand names but not the bit layout
 
 **What it does.** The four-byte BCE instructions.  ASM101S knows all of them by name but every opcode in argsBCE is -1 and it emits four zero bytes, so any module using one is assembled wrongly and silently.
 
 **Encoding.** Four bytes.  Byte 0 is the opcode, bytes 1-3 the operand field.  Observed opcodes: #BU F0, #MIN F1, #LBR F2, #RDLI F3, #TDLI F4, #MOUT F5, #CMDI F6, and with bit 0x08 set for the indirect "@" forms #BU@ F8, #MIN@ F9, #LBR@ FA, #MOUT@ FD.  #RDL FB, #TDL FC and #CMD FE also carry 0x08 but are separate instructions rather than @ variants.  Three operand layouts: ADDRESS, one 24-bit value in bytes 1-3 (#BU, #LBR, #RDL, #TDL, #CMD and the @ forms); DISPLACEMENT+COUNT, byte 1 the displacement and bytes 2-3 the transfer count (#MIN, #MOUT); IUA+COMMAND, byte 1 the IUA and bytes 2-3 the command (#CMDI).  #MINC and #MOUTC are not instructions but the parameter words that follow a #MIN or #MOUT: byte 0 is 00, then IUA and command.
 
-**How this was established.** Derived 2026-08-09 from ~5500 instances in ~/workspace/PFS/"OI301700 as received"/SSSRC via modules/sdfpkg/fcos-encodings.py.  The operand layouts are pinned by the cases with literal operands, which need no symbol table: "#MIN 0,13" is F100000D, "#MOUT 2,0" is F5020000, "#MOUT 0,2" is F5000002, "#TDLI 511" is F40001FF (511 = 0x1FF).  The IUA layout is pinned by "#CMDI FIOLMIUA,FIOFFIUA*256+12" giving F6400A0C, where the second operand s *256+12 shows byte 1 and bytes 2-3 are separate fields.  The POO names the operands -- #MIN and #MOUT take "Displacement, Transfer Count", #CMDI and #MINC take "IUA, Command" -- which agrees.
+**How this was established.** Derived 2026-08-09 from ~5500 instances in ~/workspace/PFS/"OI301700 as received"/SSSRC via modules/sdfpkg/fcos-encodings.py, and then VERIFIED by implementing it: ASM101S now reproduces the original build byte for byte on every case checked -- "#MIN 0,13" F100000D, "#MOUT 2,0" F5020000, "#MOUT 0,2" F5000002, "#TDLI 511" F40001FF, "#CMDI 64,10*256+12" F6400A0C, "#MINC 83,7200" 00531C20, and the ADDRESS layout with a symbol at halfword 0x608 giving "#LBR" F2000608 exactly as the original build does.  The operand layouts were pinned by the literal-operand cases, which need no symbol table, and the two fields of IUACOMMAND by the *256+12 in that #CMDI, which could only land that way if byte 1 and bytes 2-3 were separate.  The POO names the operands and agrees.  ONE THING REMAINS OPEN: whether a BCE ADDRESS field needs a linker relocation, and with what RLD flag.  In the listings the field equals the resolved effective address exactly, unlike a CPU instruction where it is a displacement from a base register, but that does not settle whether the BCE program is relocated.  ASM101S emits no RLD for it.
 
 ### `BCE short form`
 
@@ -121,4 +134,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-8 entries.
+9 entries.

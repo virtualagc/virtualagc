@@ -192,11 +192,13 @@ mscAll =
     | arithmeticExpression  ( / / | $ )
     ;
 
-# Operand field for an BCE instruction.
-bceAll = 
-    | arithmeticExpression '(' constant ')'  ( / / | $ )
-    | arithmeticExpression ',' arithmeticExpression  ( / / | $ )
-    | arithmeticExpression  ( / / | $ )
+# Operand field for a BCE instruction.  A1 and A2 are named so that the code
+# generator can reach them:  depending on the instruction they are an address,
+# a displacement and transfer count, or an IUA and a command.
+bceAll =
+    | A1+: arithmeticExpression '(' A2+: constant ')'  ( / / | $ )
+    | A1+: arithmeticExpression ',' A2+: arithmeticExpression  ( / / | $ )
+    | A1+: arithmeticExpression  ( / / | $ )
     ;
 
 # Operand field of an AIF.  Blanks are permitted inside the parentheses --

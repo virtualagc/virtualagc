@@ -834,7 +834,17 @@ if False:
 # Parse the command-line options.
 objectFileName = None
 sourceFileCount = 0
-tolerableSeverity = 1
+# 7, so that severities up to and including 7 are tolerated and 8 upwards are
+# not.  That is the System/360 convention:  MNOTE severities become the
+# assembly's return code, and 0/4 are informational and warning while 8 is an
+# error, 12 severe and 16 terminal.  A return code of 8 or more is a failed
+# assembly.
+#
+# The AP-101S sources are written to it.  Across MLIB80 and RUNMAC the MNOTE
+# severities are 1 (50 of them), 2, 3, 4 (54), 5 and 6 -- and then jump
+# straight to 8 (73), 9, 10, 12 and 16, with nothing in between.  The gap
+# between 6 and 8 is where the boundary belongs.
+tolerableSeverity = 7
 svGlobals["&SYSPARM"] = "PASS"
 # Always-true (by default) global SETB, undeclared by default (no GBLB
 # here) so that any source file can reference &ASM101S directly without
@@ -935,7 +945,7 @@ for parm in sys.argv[1:]:
         print("                    Note that while accepted, the BFS option")
         print("                    is presently ignored and produces identical")
         print("                    results to PASS.")
-        print("--tolerable=N       (Default 1.) Sets the maximumn tolerable")
+        print("--tolerable=N       (Default 7.) Sets the maximum tolerable")
         print("                    error severity.  All errors detected by")
         print("                    ASM101S itself are severity 255. Errors")
         print("                    reported by MNOTE instructions have a")
