@@ -21,20 +21,42 @@
 # OI340600 members would produce differences that have nothing to do with
 # ASM101S and would poison exactly the comparison this script exists to make.
 #
-# NEITHER LIBRARY CONTAINS A SINGLE `MACRO` STATEMENT.  Both are COPY
-# libraries, and MACROFILES.txt is the list of members ASM101S reads as OPEN
-# CODE before the module itself.  That works for OI340600, whose members open
-# their own control section with `PROC`, and is actively WRONG for OI301700,
-# whose members are fragments meant to be copied INTO one: pre-reading them
-# put a `DS` outside any control section and every module failed with
-# "Instruction outside of control section (undefined macro 'DS'?)", a message
-# whose parenthetical guess sends you looking for a missing macro that does
-# not exist.  DCI#STK goes from that to a clean byte-for-byte match simply by
-# not pre-reading them.
+# MACROFILES.txt IS THE LIST OF MEMBERS ASM101S READS AS OPEN CODE ahead of
+# the module, and the two libraries are not the same kind of thing.  Of
+# OI340600's 278 members, 214 are macro DEFINITIONS.  Of OI301700's 40, ONE
+# is -- MACSMITH -- and the other 39 are COPY fragments meant to be pulled
+# INTO a control section, not assembled ahead of one.
 #
-# So the library directory here exists only to give COPY somewhere to look:
-# symlinks to OI301700's members and an EMPTY MACROFILES.txt.  PFS is somebody
-# else's repository and is not written to.
+# (When counting these, look only at columns 1-71.  The cards carry sequence
+# numbers in 73-80, so a `MACRO` statement does not end its line and a regexp
+# anchored at end-of-line finds NONE of them.  That mistake was made here
+# first and gave exactly the wrong answer, that neither library held any
+# macros at all.)
+#
+# Listing all 40 therefore put a `DS` outside any control section and every
+# OI301700 module failed with "Instruction outside of control section
+# (undefined macro 'DS'?)", a message whose parenthetical guess sends you
+# hunting a macro that does not exist.  DCI#STK goes from that to a clean
+# byte-for-byte match once the fragments are left alone.
+#
+# NOR CAN MACSMITH BE PRE-READ, though it is the one member that does contain
+# a MACRO statement.  It is really a symbolic-equates member -- it is where
+# R0 through R7, B0 through B3 and F0 through F5 are defined -- with a macro
+# block inside it, no OI301700 source invokes it as a macro, and pre-reading
+# it gives every module 153 intolerable lines.  (Listing it and nothing else
+# was tried, and turned 127 matches into 272 failures.  A uniform result
+# across a whole corpus means the harness is broken.)
+#
+# So the index is EMPTY: nothing in this library is meant to be read ahead of
+# the module, and the directory exists only to give COPY somewhere to look.
+#
+# What this cannot fix is that OI301700 genuinely HAS no PROC, DO, ENDDO, IF,
+# ELSE, ENDIF or LARGE -- the structured-programming macros its sources use
+# and OI340600's library defines.  Modules needing them cannot be assembled
+# from what survives, and borrowing OI340600's versions is the poisoning
+# described above.  That is a gap in the archive, not in ASM101S.
+#
+# PFS is somebody else's repository and is not written to.
 set -u
 OUT=${1:?usage: verify-sweep.sh OUTFILE}
 PFS=~/workspace/PFS
