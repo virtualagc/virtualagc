@@ -2478,7 +2478,25 @@ def generateObjectCode(source, macros):
                         error(properties, \
                               "%s operand %d does not fit in the 8-bit " \
                               "immediate field" % (operation, value))
+                    if value != 0 and operation in mscImmediateZeroOnly:
+                        error(properties, \
+                              "%s is written with a non-zero operand, %d.  " \
+                              "It appears only ever with zero in the original " \
+                              "build, so where its opcode ends and its " \
+                              "operand begins is not established and the " \
+                              "object code here may be WRONG" \
+                              % (operation, value))
                     data[0] = mscImmediate[operation]
+                    if "X1" in ast:
+                        if operation in mscImmediateIndexable:
+                            data[0] |= 0x08
+                        else:
+                            error(properties, \
+                                  "%s is written with an index, which does " \
+                                  "not appear in the original build for this " \
+                                  "instruction; the index bit is not encoded " \
+                                  "and the object code here is WRONG" \
+                                  % operation)
                     data[1] = value & 0xFF
                     toMemory(data)
                     continue
@@ -2531,6 +2549,69 @@ def generateObjectCode(source, macros):
                            (displacement & 0xFF)
                 data[0] = (word >> 8) & 0xFF
                 data[1] = word & 0xFF
+                toMemory(data)
+                continue
+
+            if operation in mscLong:
+                # The four-byte MSC instructions.  See `mscLong` for the
+                # layout and where it comes from.
+                commonProcessing(2)
+                ast = properties["ast"]
+                subop, mbit, field = mscLong[operation]
+                data = bytearray(4)
+                if ast == None:
+                    error(properties, "%s requires an operand" % operation)
+                    toMemory(data)
+                    continue
+
+                def mscLongField(subfield):
+                    err, value = evalInstructionSubfield(properties, subfield, \
+                                                         ast, symtab)
+                    if err or value == None:
+                        return None
+                    section, offset = unhash(value)
+                    if section is None:
+                        return value
+                    return offset + sects.get(section, {}).get("offset", 0)
+
+                if field == "operand":
+                    # The delta of @CALL, or the BCE number of @LBB and @LBP,
+                    # which is written as the first of the two operands.
+                    if "CC" not in ast:
+                        error(properties, \
+                              "%s requires two operands" % operation)
+                        toMemory(data)
+                        continue
+                    field = mscLongField("CC")
+                    if field == None:
+                        error(properties, \
+                              "Could not evaluate the first operand of %s" \
+                              % operation)
+                        toMemory(data)
+                        continue
+                    if not 0 <= field <= 31:
+                        error(properties, \
+                              "The first operand of %s is %d, outside the " \
+                              "5-bit field it is placed in" \
+                              % (operation, field))
+                address = mscLongField("A1")
+                if address == None:
+                    error(properties, \
+                          "Could not evaluate the address operand of %s" \
+                          % operation)
+                    toMemory(data)
+                    continue
+                if not -0x20000 <= address <= 0x3FFFF:
+                    error(properties, \
+                          "The address operand of %s is %d, outside the " \
+                          "18-bit address field" % (operation, address))
+                word = (0xF << 28) | ((1 if "X1" in ast else 0) << 27) | \
+                       (subop << 24) | ((field & 0x1F) << 19) | \
+                       (mbit << 18) | (address & 0x3FFFF)
+                data[0] = (word >> 24) & 0xFF
+                data[1] = (word >> 16) & 0xFF
+                data[2] = (word >> 8) & 0xFF
+                data[3] = word & 0xFF
                 toMemory(data)
                 continue
 

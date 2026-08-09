@@ -299,7 +299,60 @@ mscBranch = { "@B": (0, 7), "@BN": (0, 2), "@BNN": (0, 5), "@BNZ": (0, 3),
 # high byte varies, so it carries a modifier this does not yet account for.
 mscImmediate = { "@LI": 0xEF, "@LXI": 0xEB, "@TXI": 0xEA, "@TXA": 0xEC,
                  "@TI": 0xED, "@SAI": 0xEE, "@RAI": 0xD4, "@RNI": 0xD5,
-                 "@LAR": 0xE0 }
+                 "@LAR": 0xE0, "@RAW": 0xD0,
+                 # These nine are written with a LITERAL ZERO operand
+                 # everywhere in the corpus -- `@XAX 0`, `@SIO 0` -- and the
+                 # halfword emitted is invariant, so the value below is not an
+                 # extrapolation from anything: it is what the original build
+                 # emits for exactly the source line the sources contain.  The
+                 # opcode/operand BOUNDARY is still unattested, though, so a
+                 # non-zero operand is diagnosed rather than encoded.
+                 "@XAX": 0xE5, "@SIO": 0xE4, "@WAT": 0x08, "@RFD": 0xE2,
+                 "@SFD": 0xE1, "@LMS": 0xE3, "@NIX": 0xE8, "@RBI": 0xE7,
+                 "@TAX": 0xE9 }
+
+# Those of the immediates whose operand is only ever zero, so that a non-zero
+# one can be diagnosed instead of guessed at.  See the comment above.
+mscImmediateZeroOnly = { "@XAX", "@SIO", "@WAT", "@RFD", "@SFD", "@LMS",
+                         "@NIX", "@RBI", "@TAX" }
+
+# Bit 4 of the halfword, 0x08 in the first byte, is the index flag -- the same
+# position it occupies in the long format.  Only @RAW attests it among the
+# short immediates: it is 0xD0 written plain and 0xD8 written `@RAW 0(1)`.
+# For the others an index is diagnosed rather than assumed to work the same
+# way, since a wrongly-placed index bit is silently wrong object code.
+mscImmediateIndexable = { "@RAW" }
+
+# THE FOUR-BYTE MSC INSTRUCTIONS.  The POO gives the layout on the @BU and
+# @CALL pages (II-40, II-41):
+#
+#   OP(4)=1111  I(1)  SUBOP(3)  FIELD(5)  M(1)  ADDRESS(18)
+#
+# I is the index flag, set when the operand carries an index.  M is the
+# INDIRECT flag, and the POO's effective-value tables are uniform about what
+# it means: M=0 gives Address, M=1 gives (Address).  That is what the '@'
+# mnemonic suffix sets, and it is also the whole difference between @CI
+# (compare against the address itself) and @C (compare against what it points
+# at).  The 18-bit address is in the same halfword units as the location
+# counter, with no scaling for the fullword operations.
+#
+# FIELD is 5 bits whose meaning goes with the sub-opcode: the delta for
+# @CALL, the BCE number for @LBB and @LBP -- both taken from the first
+# operand -- and an operand-size selector for the loads and stores, 0 for a
+# fullword and 1 for a halfword.  'operand' below means take it from the
+# first operand.
+#
+# @TMI and @TM are the one pair of long forms NOT here.  They appear nowhere
+# in the original build, and the POO's figure for them is too badly OCR'd to
+# read the sub-opcode off.  7 would be the obvious guess and a guess is
+# exactly what must not be made.
+mscLong = { "@BU":   (0, 0, 0),        "@BU@":   (0, 1, 0),
+            "@CALL": (1, 0, "operand"), "@CALL@": (1, 1, "operand"),
+            "@LBB":  (2, 0, "operand"), "@LBB@":  (2, 1, "operand"),
+            "@LBP":  (3, 0, "operand"), "@LBP@":  (3, 1, "operand"),
+            "@LF":   (4, 0, 0),        "@LH":    (4, 0, 1),
+            "@STF":  (5, 0, 0),        "@STH":   (5, 0, 1),
+            "@CI":   (6, 0, 0),        "@C":     (6, 1, 0) }
 
 # THE FOUR-BYTE BCE INSTRUCTIONS:  opcode byte, then the layout of bytes 1-3.
 #

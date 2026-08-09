@@ -24,13 +24,26 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Processor:** MSC  
 **Confidence:** derived  
-**Encoding certainty:** guess
+**Encoding certainty:** derived
 
-**What it does.** What the MSC encoding work deliberately did NOT settle. @DLY, @INT, @RAW and @STP have a VARYING high byte (@DLY 0xC0/0xC8, @INT 0x30/0x38/0x3B, @RAW 0xD0/0xD8, @STP 0x10/0x12), so byte 0 carries a modifier that the simple opcode-over-operand split does not account for; encoding them as if it did would be silently wrong. @LMS, @NIX, @RBI, @RFD, @SFD, @SIO, @TAX, @XAX and @WAT appear only ever with a ZERO operand, so their opcode/operand boundary is unconstrained by the evidence even though their high byte is constant (0xE3, 0xE8, 0xE7, 0xE2, 0xE1, 0xE4, 0xE9, 0xE5, 0x08). The long forms F0 through FD are not worked out at all. All of these still announce themselves as unencoded rather than emitting a guess.
+**What it does.** What the MSC encoding work deliberately did NOT settle, after the short and long formats were both established. @TMI and @TM, the only long forms left: absent from the original build, and the POO's figure for them too badly OCR'd to read a sub-opcode from. @INT, whose first byte varies over 0x30, 0x38 and 0x3B -- 0x38 is the index flag in its usual bit 4, but 0x3B carries a further 3-bit subfield nobody has decoded. @DLY (0xC0/0xC8) and @STP (0x10/0x12) for the same reason. @REC, @RNW and @SEC, which appear in the POO's repertoire but in no listing. Nine more -- @XAX @SIO @WAT @RFD @SFD @LMS @NIX @RBI @TAX -- ARE now encoded but only for a zero operand, which is the only way the corpus ever writes them; a non-zero operand is diagnosed rather than guessed at, because their opcode/operand boundary is unattested. Likewise an index on any short immediate other than @RAW, which is the only one that attests the bit.
 
 **Encoding.** unknown
 
-**How this was established.** Derived from the same survey of ~/workspace/PFS/'OI301700 as received'/SSSRC that established the three short formats. The operand values actually observed are the constraint: a mnemonic whose every observed operand is zero cannot distinguish OP(8)+VALUE(8) from any other split.
+**How this was established.** Derived from a survey of every MSC instruction in ~/workspace/PFS/'OI301700 as received'/SSSRC. The operand values actually observed are the constraint: a mnemonic whose every observed operand is zero cannot distinguish OP(8)+VALUE(8) from any other split, so the halfword it emits is right for the source the corpus contains and unproven for anything else. @RAW is what showed the index bit sits at bit 4 in the short immediates too, being 0xD0 written plain and 0xD8 written '@RAW 0(1)'.
+
+### `MSC long format`
+
+**Processor:** MSC  
+**Confidence:** derived  
+**Encoding certainty:** verified  
+**POO:** II-40, II-41, II-47, II-48, II-50, II-51
+
+**What it does.** The four-byte MSC instructions. I is the index flag, set when the operand carries an index. M is the INDIRECT flag: the POO's effective-value tables are uniform that M=0 means Address and M=1 means (Address), which is what the '@' mnemonic suffix sets and is also the entire difference between @CI, comparing against the address itself, and @C, comparing against what it points at. The 18-bit address is in the same halfword units as the location counter, with no scaling for the fullword operations. SUBOP: 0 @BU, 1 @CALL, 2 @LBB, 3 @LBP, 4 load, 5 store, 6 compare. FIELD is 5 bits whose meaning goes with the sub-opcode -- the delta of @CALL and the BCE number of @LBB and @LBP, both written as the first operand, and an operand-size selector for the loads and stores, 0 fullword and 1 halfword, which is the only thing separating @LF from @LH and @STF from @STH.
+
+**Encoding.** OP(4)=1111 I(1) SUBOP(3) FIELD(5) M(1) ADDRESS(18)
+
+**How this was established.** The layout is the POO's, from the @BU and @CALL pages (manual II-40 and II-41); the sub-opcode values are not given there and were read off the original build in ~/workspace/PFS/'OI301700 as received'/SSSRC. Verified by re-encoding: 692 long-form instructions reproduce their opcode and flag bits exactly with zero mismatches, and of those, the 203 whose operand symbol is defined in the same listing reproduce the full 32-bit word including the address, also with zero mismatches. A later combined pass over all four MSC formats matched 658 instructions across 43 mnemonics with zero mismatches. @TMI and @TM are the one long-form pair NOT established: they appear nowhere in the original build and the POO's figure for them is too badly OCR'd to read the sub-opcode from. 7 is the obvious guess, which is exactly why it must not be made.
 
 ### `MSC short formats`
 
@@ -123,7 +136,7 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Encoding.** NOT YET IMPLEMENTED IN ASM101S -- all 61 opcodes in argsMSC are -1.  Three regular groups are visible in the original build.  SHORT MEMORY REFERENCE, two bytes, an 8-bit opcode over an 8-bit address: @L 47xx, @ST 80xx, @A 50xx, @N 67xx, @X 77xx.  SHORT IMMEDIATE, two bytes, 8-bit opcode over an 8-bit signed operand: @LI EFxx (EF00 for 0, EFFF for -1), @LXI EBxx (EB66 for 102), @TXI EAxx (EAFE for -2), @TXA ECxx (ECE1 for -31), @RAI D4xx (D464 for 100), @RNI D5xx, @LAR E0xx (E003 for 3).  BRANCHES, two bytes, high nibble 2 over the condition code then an 8-bit displacement: @BN 22, @BNZ 23, @BZ 24, @BNN 25, @B 27, @BXNN 2D.  LONG FORMS, four bytes, F0 to FD: @BU F0, @LBP F3 with the register in byte 1 shifted left 3 (10 gives 0x50, 11 gives 0x58), @LF F4, @STF F5, @C F6, @STH FD.  @STP is different again, a 4-bit operand in the low nibble of byte 0: 1000 for 0, 1200 for 2.
 
-**How this was established.** ASM101S now ENCODES 31 of the 61: the six memory references, the branches, and nine immediates, all verified byte for byte against the original build. The rest still announce themselves rather than emitting a guess; see 'MSC instructions still unencoded' for exactly which and why.
+**How this was established.** ASM101S now ENCODES essentially all of the MSC set as the corpus uses it: the six memory references, both branch families, the long forms, and the immediates. A combined re-encoding pass over the original build matched 658 instructions across 43 mnemonics with zero mismatches. See 'MSC short formats' and 'MSC long format' for the layouts and 'MSC instructions still unencoded' for the handful left.
 
 
 ## Pseudo-op
@@ -185,4 +198,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-13 entries.
+14 entries.
