@@ -551,3 +551,41 @@ WHAT IS MISSING IS THEIR ENCODING.  model101tables.py comments that an
      look like crashes on a default regression run.  Created variable symbols,
      `&(SRC&UPDDSN&NAME)`, are the last AIF operands that still do not parse.
 
+THE "AS RECEIVED" LISTINGS ARE THE PRIMARY EVIDENCE FCOS HAS BEEN LACKING.
+~/workspace/PFS/"OI301700 as received"/SSSRC holds, for each module, a listing
+that gives the OBJECT CODE THE ORIGINAL BUILD GENERATED for every statement,
+before relocation by the linker.  That is to FCOS what RUNLST is to RUNASM,
+and until 2026-08-09 nobody had used it.  The format is
+
+    00C14 C7F2 0000      0000      6526 STM1392  BC$   7,0(R2)   comment
+
+    address    object code    resolved effective address    line number
+
+with the address and the effective address in halfwords.
+
+IT ALREADY PAID FOR ITSELF.  The '$'-suffixed mnemonics -- LA$, B$, BC$, L$,
+ST$ and nine more -- appear nowhere in the AP-101S POO and had been written up
+here as unidentified.  Comparing their assembled binaries against ASM101S's
+output for the same instruction settled what they are in a few minutes: '$'
+forces the LONG (RS) form of an instruction that would otherwise be assembled
+short.  Twelve forms now match the original build byte for byte, including a
+negative displacement (LH$ -> 9FF3 FFF5) and BAL$ -> E7F2 0000.
+
+TO USE IT WITH --compare THERE IS ONE OBSTACLE, pointed out by the user.
+These listings carry an ANSI CARRIAGE-CONTROL CHARACTER IN COLUMN 1 and RUNLST
+does not, so every field is one column further right than --compare expects.
+Measured on BILDNEW5: column 1 is blank on 31937 lines and '1' -- page eject --
+on 550, and the content begins in column 2.  RUNLST has no such column; its
+text begins in column 1.  So --compare needs to know which convention a
+listing follows.  Do not "fix" it by stripping the first character of every
+line unconditionally, because that would corrupt RUNLST; detect it, or give
+--compare an option.
+
+WHY THIS MATTERS MORE THAN THE OK COLUMN.  A module that exits 0 has been
+assembled without complaint, which is not the same as assembled correctly --
+and the '@'-family instructions assembling to four zero bytes proves the
+difference is real.  Comparing against these listings is the only thing that
+turns "assembles" into "verified", which is what the phase goal actually asks
+for.  It also covers OI301700 rather than OI340600, so it bears directly on
+the item about borrowing that version's macro library.
+

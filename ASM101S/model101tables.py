@@ -177,6 +177,38 @@ argsRSonly = {
    "ZH#": 0b1010011110    
    }
 
+# A '$' SUFFIX FORCES THE LONG (RS) FORM of an instruction that would
+# otherwise be assembled in the short (SRS) form.  It is not a fourth
+# addressing variant alongside @, # and @#; it selects the FORM, and the
+# addressing bits stay clear.
+#
+# The AP-101S POO does not mention it, so it was established from the
+# assembled binaries in ~/workspace/PFS/"OI301700 as received", which list the
+# object code each statement generated in the original build.  BILDNEW5 has
+#
+#     00C14 C7F2 0000      0000      6526 STM1392  BC$   7,0(R2)
+#
+# and ASM101S already produces C7F2 0064 for `BC 7,100(R2)`, the same opcode
+# and base with a displacement large enough to have forced the long form by
+# itself.  It differs from BC@ (C7F6 5000), BC# (C7F6 4800) and BC@# (C7F6
+# 5800), so '$' is none of those.  The pattern holds across all twelve forms
+# that appear in the corpus -- B$, BAL$, BC$, BL$, BNZ$, BZ$, IAL$, L$, LA$,
+# LH$, ST$, STH$ -- every one of which assembles to four bytes whose second
+# byte is 0xF0 | base register.
+#
+# Membership of argsRSonly is exactly what sets `forceRS` in model101.py, and
+# since '$' contains neither '@' nor '#' the `ia` and `i` bits derived from
+# the mnemonic stay zero.  So the entry needs no code of its own.
+#
+# Why the sources use it: an instruction whose length must be known in advance
+# cannot be left to the assembler's choice between the two forms.  BILDNEW5's
+# BC$ is preceded by `CNOP 2` and commented "EXECUTE AN UNPROTECTED BRANCH".
+for _mnemonic in [_m[:-1] for _m in list(argsRSonly) if _m.endswith("@")]:
+    for _table in (argsSRSandRS, argsSRSonly, argsRSonly):
+        if _mnemonic in _table:
+            argsRSonly[_mnemonic + "$"] = _table[_mnemonic]
+            break
+
 argsSRSorRS = argsSRSandRS | argsSRSonly | argsRSonly
 
 # The 14-bit numerical codes are what's encoded in bits 0-12
