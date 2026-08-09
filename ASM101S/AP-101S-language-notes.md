@@ -74,6 +74,19 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** The condition-code table is in the POO, but the mapping onto the opcode nibble was confirmed against the original build in "OI301700 as received" on 2026-08-09: every observed encoding has high nibble 2 and low nibble equal to the documented condition code.  NOT YET IMPLEMENTED in ASM101S, whose argsMSC gives every MSC instruction an opcode of -1.
 
+### `MSC instruction set`
+
+**Processor:** MSC  
+**Confidence:** derived  
+**Encoding certainty:** derived  
+**POO:** Appendix A, IOP MSC Instruction Repertoire
+
+**What it does.** The 61 IOP/MSC instructions.  ASM101S knows every one by name and encodes none of them.
+
+**Encoding.** NOT YET IMPLEMENTED IN ASM101S -- all 61 opcodes in argsMSC are -1.  Three regular groups are visible in the original build.  SHORT MEMORY REFERENCE, two bytes, an 8-bit opcode over an 8-bit address: @L 47xx, @ST 80xx, @A 50xx, @N 67xx, @X 77xx.  SHORT IMMEDIATE, two bytes, 8-bit opcode over an 8-bit signed operand: @LI EFxx (EF00 for 0, EFFF for -1), @LXI EBxx (EB66 for 102), @TXI EAxx (EAFE for -2), @TXA ECxx (ECE1 for -31), @RAI D4xx (D464 for 100), @RNI D5xx, @LAR E0xx (E003 for 3).  BRANCHES, two bytes, high nibble 2 over the condition code then an 8-bit displacement: @BN 22, @BNZ 23, @BZ 24, @BNN 25, @B 27, @BXNN 2D.  LONG FORMS, four bytes, F0 to FD: @BU F0, @LBP F3 with the register in byte 1 shifted left 3 (10 gives 0x50, 11 gives 0x58), @LF F4, @STF F5, @C F6, @STH FD.  @STP is different again, a 4-bit operand in the low nibble of byte 0: 1000 for 0, 1200 for 2.
+
+**How this was established.** Harvested 2026-08-09 from ~/workspace/PFS/"OI301700 as received" via modules/sdfpkg/fcos-encodings.py; 47 of the 61 appear there with object code, several hundred times over.  The immediate forms are pinned by instances with non-zero operands, which is what makes the field split legible -- @LI -1 giving EFFF and @LXI 102 giving EB66 could not both be true of any other layout.  The branch mapping matches the condition-code table in the POO exactly.  THE REMAINING 14 HAVE NO OBSERVED ENCODING and most of the rest are dominated by zero operands, so the opcode/operand boundary is settled only where a non-zero operand happens to appear.  Until they are encoded ASM101S emits four zero bytes and says so.
+
 
 ## Pseudo-op
 
@@ -134,4 +147,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-9 entries.
+10 entries.

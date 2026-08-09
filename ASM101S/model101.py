@@ -2442,14 +2442,34 @@ def generateObjectCode(source, macros):
                 continue
 
             if operation in argsMSC:
-                # MSC operations are really standardized enough for there to be
-                # any advantage in segregating them this way, but it might provide
-                # some clarity in maintenance to do so.
+                # The '@' MSC instructions are NOT ENCODED.  Every opcode in
+                # argsMSC is -1 and this emitted four zero bytes, so `@BU X`
+                # and `@L X` -- different instructions -- assembled to the
+                # same 0000 0000, quietly.  Modules using them were counted
+                # OK while containing wrong object code, which is the worst
+                # way for an assembler to fail and the last place ASM101S
+                # still did it.
+                #
+                # It says so now, as the two-byte BCE instructions already do.
+                # The length is kept at four bytes so the location counter
+                # still advances by something; that is a guess in itself, but
+                # a visible one.
+                #
+                # 47 of the 61 appear in ~/workspace/PFS/"OI301700 as
+                # received" WITH their real encodings, in three regular
+                # groups -- short memory references such as `@L` 47xx and
+                # `@ST` 80xx, short immediates such as `@LI` EFxx and `@LXI`
+                # EBxx, and long forms F0 to FD.  The branches are already
+                # worked out: high nibble 2 over the condition code, so @BN
+                # is 22, @BNZ 23, @BZ 24, @BNN 25 and @B 27.  See
+                # ap101s-notes.db.
                 commonProcessing(2)
-                ast = properties["ast"]
-                if ast != None:
-                    toMemory(bytearray(4))
-                    continue
+                error(properties, \
+                      "%s is an MSC instruction whose encoding has not been " \
+                      "established; four zero bytes are generated in its " \
+                      "place and the object code is WRONG" % operation)
+                toMemory(bytearray(4))
+                continue
                 
             if operation in bceLong:
                 # The four-byte BCE instructions.  See `bceLong` for where the
