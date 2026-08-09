@@ -278,6 +278,16 @@ class asmParser(Parser):
                 self._token('(')
                 self._arithmeticExpression_()
                 self.add_last_node_to_name('exp')
+
+                def block0():
+                    self._token(',')
+                    self._arithmeticExpression_()
+                    self.add_last_node_to_name('exp')
+                    self._define(
+                        [],
+                        ['exp'],
+                    )
+                self._closure(block0)
                 self._token(')')
                 self._check_eof()
                 self._define(
@@ -298,6 +308,16 @@ class asmParser(Parser):
                 self._token('(')
                 self._arithmeticExpression_()
                 self.add_last_node_to_name('exp')
+
+                def block0():
+                    self._token(',')
+                    self._arithmeticExpression_()
+                    self.add_last_node_to_name('exp')
+                    self._define(
+                        [],
+                        ['exp'],
+                    )
+                self._closure(block0)
                 self._token(')')
                 self._define(
                     [],
@@ -817,6 +837,11 @@ class asmParser(Parser):
                 self._subvar_()
                 self._token('(')
                 self._arithmeticExpression_()
+
+                def block0():
+                    self._token(',')
+                    self._arithmeticExpression_()
+                self._closure(block0)
                 self._token(')')
             with self._option():
                 self._subvar_()
@@ -1761,9 +1786,6 @@ class asmParser(Parser):
                 self._closure(block0)
             with self._option():
                 self._token("T'")
-                self._arithmeticExpressionOnly_()
-            with self._option():
-                self._token("T'")
                 self._identifier_()
             with self._option():
                 self._token("T'")
@@ -1971,6 +1993,60 @@ class asmParser(Parser):
     @tatsumasu()
     def _equOperand_(self):
         self._arithmeticExpression_()
+        self.add_last_node_to_name('v')
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
+        self._define(
+            [],
+            ['v'],
+        )
+
+    @tatsumasu()
+    def _setaOperand_(self):
+        self._arithmeticExpression_()
+        self.add_last_node_to_name('v')
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
+        self._define(
+            [],
+            ['v'],
+        )
+
+    @tatsumasu()
+    def _setbOperand_(self):
+        self._booleanExpression_()
+        self.add_last_node_to_name('v')
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
+        self._define(
+            [],
+            ['v'],
+        )
+
+    @tatsumasu()
+    def _setcOperand_(self):
+        self._characterExpression_()
         self.add_last_node_to_name('v')
         with self._group():
             with self._choice():

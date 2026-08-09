@@ -119,13 +119,20 @@ nameCode =
     | id+: identifier
     ;
 
+# Note the repeated subscripts.  A macro argument that is a sublist can be
+# subscripted to any depth -- `&SYSLIST(2,2,3)`, `&COPY(&J,1)` -- which is a
+# feature of Assembler H (GC26-3758-3, January 1974, p.13) rather than of
+# Assembler F, and is used heavily by the FCOS macro library.  A SETA/SETB/SETC
+# array still accepts only one subscript, but that is enforced when the
+# variable is evaluated rather than here, since the grammar cannot tell the two
+# apart.
 nameSet =
     | sv+: sv $
-    | sv+: sv '(' exp+: arithmeticExpression ')' $
+    | sv+: sv '(' exp+: arithmeticExpression { ',' exp+: arithmeticExpression } ')' $
     ;
-    
+
 nameSet0 =
-    | sv+: sv '(' exp+: arithmeticExpression ')'
+    | sv+: sv '(' exp+: arithmeticExpression { ',' exp+: arithmeticExpression } ')'
     | sv+: sv
     ;
 
@@ -200,11 +207,16 @@ quotedString = "'" /[^']*/ { "''" /[^']*/ } "'" ;
     
 identifier = /(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*/ ;
 
-variable = 
+# The multiple subscripts are safe here even though `&D(&X,&B)` is
+# indistinguishable from a base-index address:  every operand reaches the
+# instruction grammars only after `svReplace` has substituted its symbolic
+# variables, so no text containing '&' is ever parsed as an instruction.  Only
+# AIF, SETA/SETB/SETC and MNOTE are evaluated with their variables intact.
+variable =
     | subvar variable
     | subvar '.' variable
-    | subvar '(' arithmeticExpression ')'
-    | subvar 
+    | subvar '(' arithmeticExpression { ',' arithmeticExpression } ')'
+    | subvar
     ;
 subvar = sv ;
 
@@ -368,6 +380,18 @@ pidentifier = /[#@$A-Z][#@$A-Z0-9]*/ ;
 anything = /.*/ $ ;
 
 equOperand = v+: arithmeticExpression ( / / | $ ) ;
+
+# Operand field of SETA, SETB and SETC.  The operand field ends at the first
+# blank that is not inside a quoted string, and whatever follows it is a
+# comment -- which is why these stop at `( / / | $ )` rather than at `$` as
+# the `...Only` rules do.  Requiring end-of-input here made a SETA such as
+#    &MSGCNT  SETA  &MSGCNT+1        ARRAY INDEX=INDEX+1
+# fail to parse, and `svSet` then returned without assigning anything, so the
+# variable silently kept its old value.  In MACSMITH's RTURNTBL that left the
+# loop bound at zero and the assembly never terminated.
+setaOperand = v+: arithmeticExpression ( / / | $ ) ;
+setbOperand = v+: booleanExpression ( / / | $ ) ;
+setcOperand = v+: characterExpression ( / / | $ ) ;
 
 expressions = r+: arithmeticExpression { ',' r+: arithmeticExpression }* ( / / | $ ) ;
 

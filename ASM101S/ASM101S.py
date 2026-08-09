@@ -255,6 +255,33 @@ def printTraceMessage(depth, name, operation, operand, extra=""):
             print(msg)
         sys.stdout.flush()
 
+# Convert the parsed form of a sublist into a `Sublist` of strings, nested to
+# whatever depth the source text was.  The parser hands a sublist over as
+#    ( '(', ( first, [ [',', item], ... ] ), ')' )
+# in which any item may itself be a sublist of the same shape.  Failing to
+# recurse here is what turned `(10,(100,200,300),30)` into the unusable
+# `(10,((,(100,((,,200),(,,300))),)),30)`.
+def evalSublist(properties, ast):
+    inner = ast[1]
+    entries = [ evalSublistEntry(properties, inner[0]) ]
+    for e in inner[1]:
+        entries.append(evalSublistEntry(properties, e[1]))
+    return Sublist(entries)
+
+def evalSublistEntry(properties, entry):
+    if isinstance(entry, str):
+        return entry
+    if isinstance(entry, (list,tuple)) and len(entry) == 3 and \
+            entry[0] == '(' and entry[2] == ')':
+        return evalSublist(properties, entry)
+    try:
+        # Something like `4(R3)`, which parses as a tuple of strings.
+        return "".join(entry)
+    except:
+        error(properties, \
+              "Implementation error in sublist entry " + str(entry))
+        return ""
+
 # Tries to evaluate suboperand in a macro invocation, as returned by
 # `parserASM(...,"operandInvocation")`.  I don't have any full theory as to
 # what the parser should return for these, so I'm just adding cases into the
@@ -284,18 +311,11 @@ def evalMacroArgument(properties, suboperand):
             suboperand[4] == [] and \
             isinstance(suboperand[3], str):
         return ("&" + suboperand[0]),("'" + suboperand[3] + "'")
-    # Non-positional parameter that's a list.
+    # Non-positional parameter that's a sublist.
     elif isinstance(suboperand, (list, tuple)) and len(suboperand) == 5 and \
             suboperand[1] == "=" and suboperand[2] == "(" and \
             isinstance(suboperand[3], tuple) and suboperand[4] == ")":
-        parmName = "&" + suboperand[0]
-        replacementList = []
-        if len(suboperand[3]) > 0:
-            replacementList.append(suboperand[3][0])
-            if len(suboperand[3]) > 1:
-                for e in suboperand[3][1]:
-                    replacementList.append(e[1])
-            return parmName,tuple(replacementList)
+        return ("&" + suboperand[0]),evalSublist(properties, suboperand[2:5])
     # This is the case of a positional parameter that's a quoted string.
     elif isinstance(suboperand, tuple) and \
             len(suboperand) == 4 and \
@@ -303,18 +323,12 @@ def evalMacroArgument(properties, suboperand):
             suboperand[2] == [] and \
             isinstance(suboperand[1], str):
         return None,("'" + suboperand[1] + "'")
-    # This is the case of a positional parameter being a list, such as
+    # This is the case of a positional parameter being a sublist, such as
     #    (1,2,A).
     elif isinstance(suboperand, tuple) and len(suboperand) == 3 and \
             suboperand[0] == '(' and suboperand[2] == ')' and \
             isinstance(suboperand[1], tuple):
-        replacementList = []
-        if len(suboperand[1]) > 0:
-            replacementList.append(suboperand[1][0])
-            if len(suboperand[1]) > 1:
-                for e in suboperand[1][1]:
-                    replacementList.append(e[1])
-            return None,tuple(replacementList)
+        return None,evalSublist(properties, suboperand)
     else:
         # There are some replacements, like "4(R3)" that will parses as a
         # tuple of strings, such as (for the example just given)
@@ -728,7 +742,7 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                     keyFormals.append(key)
                     newLocals[key] = value
                     newLocals["_" + key]["omitted"] = False
-            newLocals["&SYSLIST"] = syslist
+            newLocals["&SYSLIST"] = Sublist(syslist)
             newLocals["&SYSLIST0"] = syslist0
             newLocals["&SYSNDX"] = sysndx
             if trace:

@@ -1,0 +1,29 @@
+SYSLIST(1)     = >1<
+SYSLIST(2)     = >(10,(100,200,300),30)<
+SYSLIST(3)     = >3<
+SYSLIST(2,1)    = >10<
+SYSLIST(2,2)    = >(100,200,300)<
+SYSLIST(2,2,1)  = >100<
+SYSLIST(2,2,3)  = >300<
+SYSLIST(2,9)    = ><
+SYSLIST(9)      = ><
+SYSLIST(1,1)    = >1<
+N SYSLIST=3  N SYSLIST(2)=3
+operand 2 = >(10,(100,200,300),30)<
+  N=3 N(1)=1 N(2)=3 N(2,2)=3
+operand 2 = >(A,,C)<
+  N=3 N(1)=1 N(2)=3 N(2,2)=1
+operand 2 = >()<
+  N=3 N(1)=1 N(2)=1 N(2,2)=1
+operand 2 = >PLAIN<
+  N=3 N(1)=1 N(2)=1 N(2,2)=1
+operand 2 = >(A,B,)<
+  N=3 N(1)=1 N(2)=3 N(2,2)=1
+P=>(X,Y,Z)< P(1)=>X< P(2)=>Y<
+P=>Q< P(1)=>Q< P(2)=><
+AMAIN NAME=ACOS ACALL=YES TITLE=
+AMAIN NAME= ACALL=NO TITLE='PROCESS SWITCH ROUTINE'
+IFPROC CC=>< null LE 0 -> .INVALCC
+IFPROC P1=>(CH,R4,GE,TPCTPRI)< N=45 LAST=>LAST<
+EBCDIC COLLATION OK: A LT 1 and B LT AB
+SETA WITH COMMENT: N=2

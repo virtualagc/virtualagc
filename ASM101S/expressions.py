@@ -79,6 +79,127 @@ def error(properties, msg, severity=255):
 def getErrorCount():
     return errorCount, maxSeverity
 
+#=============================================================================
+# Macro arguments and sublists.
+#
+# A macro argument is a character string, except where the source text wrapped
+# it in parentheses, in which case it is a *sublist* whose entries are
+# themselves macro arguments, nested to any depth.  The argument is passed
+# through verbatim:  for an operand written `(10,(100,200,300),30)`,
+# `&SYSLIST(2)` yields that text back, parentheses and all, and further
+# subscripts index into it -- `&SYSLIST(2,2)` is `(100,200,300)` and
+# `&SYSLIST(2,2,3)` is `300`.  Multilevel sublists are an Assembler H feature,
+# described in the Assembler H General Information Manual, GC26-3758-3
+# (January 1974), p.13; the same rules survive as Table 49 of the HLASM
+# Language Reference, SC26-4940.  They are not an AP-101S invention, which is
+# why the Assembler F manual of 1967 has nothing to say about them.
+#
+# `Sublist` is a tuple subclass, so that a sublist is distinguishable from a
+# SETA/SETB/SETC array (a plain Python list) and from the anonymous tuples that
+# make up a parse tree.
+class Sublist(tuple):
+    pass
+
+# Render a macro argument back into the source text it was written as.  A
+# sublist is always parenthesised, so the empty sublist `()` -- which is one
+# null entry, not zero entries -- renders as `()` rather than as nothing.
+def renderMacroArgument(value):
+    if isinstance(value, Sublist):
+        return "(" + ",".join(map(renderMacroArgument, value)) + ")"
+    if value == None:
+        return ""
+    if isinstance(value, bool):
+        return "1" if value else "0"
+    if isinstance(value, str):
+        return value
+    return str(value)
+
+# Apply macro-argument subscripts, 1-based, in order.  An argument that is not
+# a sublist behaves as a sublist of one entry, so `&P(1)` is `&P`; a subscript
+# past the end yields a null string rather than an error.
+def subscriptMacroArgument(value, indices):
+    for index in indices:
+        if not isinstance(value, Sublist):
+            value = Sublist((value,))
+        if index < 1 or index > len(value):
+            return ""
+        value = value[index - 1]
+    return value
+
+# N' of a macro argument:  the number of entries in a sublist, and 1 for
+# anything else.  An omitted entry still counts, so N' of `(A,,C)` and of
+# `(A,B,)` are both 3, and N' of `()` is 1.
+def countMacroArgument(value):
+    if isinstance(value, Sublist):
+        return len(value)
+    return 1
+
+# Whether a value can be used as an arithmetic term, and what it is worth if
+# so.  GC26-3758-3 p.19:  a character string may be used as an arithmetic term
+# when it represents a valid self-defining term, and "a null value is treated
+# as zero".  SC26-4940 Table 58 extends that to symbolic parameters and to
+# `&SYSLIST(n)`/`&SYSLIST(n,m)`.  That leaves exactly three cases -- null,
+# which is zero; a self-defining term, which is its value; and anything else,
+# including a whole sublist, which is a program error to diagnose rather than
+# something to coerce.  Returns an (ok, value) pair.
+def selfDefiningTerm(value):
+    if isinstance(value, bool):
+        return True, (1 if value else 0)
+    if isinstance(value, int):
+        return True, value
+    if not isinstance(value, str):
+        return False, None
+    s = value.strip()
+    if s == "":
+        return True, 0
+    try:
+        if s[:2] == "X'" and s[-1:] == "'":
+            return True, int(s[2:-1], 16)
+        if s[:2] == "B'" and s[-1:] == "'":
+            return True, int(s[2:-1], 2)
+        if s[:2] == "C'" and s[-1:] == "'":
+            n = 0
+            for c in s[2:-1]:
+                n = (n << 8) | asciiToEbcdic[ord(c)]
+            return True, n
+        if s.isdigit() or (s[:1] in ["+", "-"] and s[1:].isdigit()):
+            return True, int(s)
+    except:
+        return False, None
+    return False, None
+
+# Whether `name` is a macro argument -- &SYSLIST, or a symbolic parameter of
+# the macro currently being expanded -- as opposed to a SETA/SETB/SETC
+# variable.  Only macro arguments can be sublists, and only they may carry
+# more than one subscript.  Symbolic parameters are recognised by the metadata
+# entry that `readSourceFile` records alongside them.
+def isMacroArgument(name, value, svLocals):
+    return name == "&SYSLIST" or isinstance(value, Sublist) or \
+           ("_" + name) in svLocals
+
+# Evaluate the subscripts of a parsed `&NAME(exp{,exp})`, which the grammar
+# hands over as the first expression and the AST of the repetition that
+# follows it.  Returns a list of integers, or `None` if any of them cannot be
+# evaluated.
+def subscriptList(first, rest, svLocals, properties, symtab = {}, star = None, \
+                  severity = 255):
+    expressions = [first]
+    for e in rest:
+        if isinstance(e, (list,tuple)) and len(e) == 2 and e[0] == ",":
+            expressions.append(e[1])
+        else:
+            error(properties, "Unrecognized subscript %s" % str(e), severity)
+            return None
+    indices = []
+    for e in expressions:
+        n = evalArithmeticExpression(e, svLocals, properties, symtab, star, \
+                                     severity)
+        if n == None:
+            error(properties, "Cannot evaluate subscript %s" % str(e), severity)
+            return None
+        indices.append(n)
+    return indices
+
 '''
 This function replaces all symbolic variables (e.g., &A) given by 
 `svGlobals` and `svLocals` in a string.  `svPattern` is a compiled regular
@@ -124,41 +245,66 @@ def svReplace(properties, text, svLocals):
         else:
             continue
         if "exp" in ast:
-            if not isinstance(replacement, (list,tuple)):
-                error(properties, "Not a list: " + str(replacement))
+            indices = []
+            for e in ast["exp"]:
+                n = evalArithmeticExpression(e, svLocals, properties)
+                if n == None:
+                    error(properties, "Cannot evaluate index of %s: %s" % \
+                          (sv, str(ast["exp"])))
+                    break
+                indices.append(n)
+            if len(indices) != len(ast["exp"]):
                 continue
-            n = evalArithmeticExpression(ast["exp"], svLocals, properties)
-            if n == None:
-                error(properties, "Cannot evaluate index of %s: %s" % \
-                      (sv, str(ast["exp"])))
-                continue
-            n -= 1
-            if n < 0 or n >= len(replacement):
-                error(properties, "Index of %s(%d) out of range" % (sv, n+1))
-                continue
-            replacement = replacement[n]
-            end = start + ast.parseinfo.endpos
+            if isMacroArgument(sv, replacement, svLocals):
+                if sv == "&SYSLIST" and indices[0] == 0:
+                    # &SYSLIST(0) is the name field of the macro invocation.
+                    replacement = subscriptMacroArgument( \
+                                        svLocals.get("&SYSLIST0", ""), indices[1:])
+                else:
+                    replacement = subscriptMacroArgument(replacement, indices)
+                end = start + ast.parseinfo.endpos
+            elif isinstance(replacement, (list,tuple)):
+                # A SETA/SETB/SETC array, which takes exactly one subscript.
+                if len(indices) != 1:
+                    error(properties, "Too many subscripts for %s" % sv)
+                    continue
+                n = indices[0] - 1
+                if n < 0 or n >= len(replacement):
+                    error(properties, "Index of %s(%d) out of range" % (sv, n+1))
+                    continue
+                replacement = replacement[n]
+                end = start + ast.parseinfo.endpos
+            else:
+                # Not subscriptable at all, so the parentheses are not a
+                # subscript:  they belong to whatever the variable is embedded
+                # in, as in the address `&D(&X,&B)`.  Replace the bare variable
+                # and leave the rest of the text alone.
+                pass
         if end < len(text) and text[end] == ".": # Optional "join" character.
             end += 1
-        if isinstance(replacement, int):
+        if isinstance(replacement, Sublist):
+            # K' is the length of the sublist's text, N' its number of entries.
+            if text[start-2:start] == "N'":
+                start -= 2
+                replacement = str(countMacroArgument(replacement))
+            elif text[start-2:start] == "K'":
+                start -= 2
+                replacement = str(len(renderMacroArgument(replacement)))
+            else:
+                replacement = renderMacroArgument(replacement)
+        elif isinstance(replacement, bool):
+            # Before the `int` case:  a Python bool *is* an int.
+            replacement = "1" if replacement else "0"
+        elif isinstance(replacement, int):
             replacement = str(replacement)
-        elif replacement == False:
-            replacement = "0"
-        elif replacement == True:
-            replacement = "1"
         elif isinstance(replacement, (list,tuple)):
             if text[start-2:start] in ["K'", "N'"]:
                 start -= 2
                 replacement = str(len(replacement))
             else:
-                if True: ###DEBUG###
-                    if "TPCTPRI" in replacement:
-                        pass
-                    replacement = stringifyTuple(replacement, svLocals, properties)
-                else:
-                    error(properties, "Cannot use list as a replacement: %s=%s" % \
-                          (sv, str(replacement)))
-                    continue
+                error(properties, "Cannot use array as a replacement: %s=%s" % \
+                      (sv, str(replacement)))
+                continue
         try:
             text = text[:start] + replacement + text[end:]
         except:
@@ -263,13 +409,12 @@ def evalArithmeticExpression(expression, \
             sv = svGlobals
         if sv != None:
             sv = sv[expression]
-            if isinstance(sv, int):
-                return sv
-            if isinstance(sv, str) and sv.isdigit():
-                return int(sv)
+            ok, value = selfDefiningTerm(sv)
+            if ok:
+                return value
             error(properties, \
                   "Cannot be interpreted as an integer value: '%s' (%s)" % \
-                  (sv, expression), severity)
+                  (renderMacroArgument(sv), expression), severity)
             return None
         if expression == "*" and star != None:
             return star
@@ -295,7 +440,7 @@ def evalArithmeticExpression(expression, \
     if not isinstance(expression, (list, tuple)):
         error(properties, "Eval error type 1", severity)
         return None
-    if len(expression) == 4 and expression[1] == "(" and expression[3] == ")" \
+    if len(expression) == 5 and expression[1] == "(" and expression[4] == ")" \
             and isinstance(expression[0], str) and expression[0].startswith("&"):
         arrayName = expression[0]
         if arrayName in svLocals:
@@ -305,20 +450,44 @@ def evalArithmeticExpression(expression, \
         else:
             error(properties, "Cannot find %s" % arrayName)
             return None
+        indices = subscriptList(expression[2], expression[3], svLocals, \
+                                properties, symtab, star, severity)
+        if indices == None:
+            return None
+        if isMacroArgument(arrayName, arrayData, svLocals):
+            if arrayName == "&SYSLIST" and indices[0] == 0:
+                value = subscriptMacroArgument(svLocals.get("&SYSLIST0", ""), \
+                                               indices[1:])
+            else:
+                value = subscriptMacroArgument(arrayData, indices)
+            ok, n = selfDefiningTerm(value)
+            if ok:
+                return n
+            # Not a coercion failure to paper over.  A sublist or a symbol has
+            # no arithmetic value, and saying so is the whole point:  comparing
+            # it cleanly would turn a loud failure into a wrong assembly.
+            error(properties, \
+                  "%s is not a self-defining term: '%s'" % \
+                  (arrayName, renderMacroArgument(value)), severity)
+            return None
         if not isinstance(arrayData, list):
             error(properties, "%s is not an array" % arrayName)
             return None
-        index = evalArithmeticExpression(expression[2], svLocals, properties, \
-                                         symtab, star, severity)
-        if index == None:
-            error(properties, "Cannot evaluate index")
+        if len(indices) != 1:
+            error(properties, "Too many subscripts for %s" % arrayName)
             return None
-        index -= 1
+        index = indices[0] - 1
         if index < 0 or index >= len(arrayData):
             error(properties, "Index is out of range (%d > %d)" % \
                   (index+1, len(arrayData)))
             return None
-        return arrayData[index]
+        ok, n = selfDefiningTerm(arrayData[index])
+        if ok:
+            return n
+        error(properties, \
+              "Cannot be interpreted as an integer value: '%s' (%s)" % \
+              (renderMacroArgument(arrayData[index]), arrayName), severity)
+        return None
     if len(expression) == 3 and expression[0] == '(' and expression[2] == ')':
         return evalArithmeticExpression(expression[1], svLocals, properties, \
                                         symtab, star, severity)
@@ -338,19 +507,17 @@ def evalArithmeticExpression(expression, \
             expression[0] in ["N'", "K'", "L'", "S'", "I'"]:
         op = expression[0]
         symvar = expression[1]
-        index = None
+        indices = None
         if isinstance(symvar, (tuple,list)):
-            if len(symvar) == 4 and symvar[1] == '(' and symvar[3] == ')':
+            if len(symvar) == 5 and symvar[1] == '(' and symvar[4] == ')':
                 pass
             else:
                 error(properties, "Unrecognized operand of %s: %s" % \
-                      (op, symvar[2]), severity)
+                      (op, str(symvar)), severity)
                 return None
-            index = evalArithmeticExpression(symvar[2], svLocals, properties, \
-                                             symtab, star, severity)
-            if index == None:
-                error(properties, "Cannot compute index of %s: %s" %\
-                      (symvar[0], str(symvar[2])), severity)
+            indices = subscriptList(symvar[2], symvar[3], svLocals, properties, \
+                                    symtab, star, severity)
+            if indices == None:
                 return None
             symvar = symvar[0]
         if symvar in svLocals:
@@ -361,11 +528,18 @@ def evalArithmeticExpression(expression, \
             error(properties, "Symbolic variable %s not found" % symvar, severity)
             return None
         var = sv[symvar]
-        if index != None:
-            if symvar == "&SYSLIST" and index == 0:
-                var = svLocals["&SYSLIST0"]
+        if indices != None:
+            if isMacroArgument(symvar, var, sv):
+                if symvar == "&SYSLIST" and indices[0] == 0:
+                    var = subscriptMacroArgument(svLocals.get("&SYSLIST0", ""), \
+                                                 indices[1:])
+                else:
+                    var = subscriptMacroArgument(var, indices)
+            elif len(indices) != 1:
+                error(properties, "Too many subscripts for %s" % symvar, severity)
+                return None
             else:
-                index -= 1 # Change 1-based to 0-based.
+                index = indices[0] - 1 # Change 1-based to 0-based.
                 if index < 0 or index >= len(var):
                     error(properties, "Index out of range", severity)
                     return None
@@ -381,14 +555,11 @@ def evalArithmeticExpression(expression, \
                 return None
             if symvar != "&SYSLIST" and meta["omitted"]:
                 return 0
-            if not isinstance(var, (tuple, list)):
-                return 1
-            return len(var)
+            return countMacroArgument(var)
         elif op == "K'":
-            if isinstance(var, str):
-                return len(var)
-            error(properties, "Not a string: %s" % str(var), severity)
-            return None
+            # The number of characters in the value, which for a sublist is the
+            # width of its source text rather than its number of entries.
+            return len(renderMacroArgument(var))
         else:
             error(properties, "Not yet implemented: %s" % op, severity)
             return None
@@ -443,49 +614,6 @@ def printMultiLevelTuple(tin, depth=0):
             printMultiLevelTuple(t, depth+1)
     print(f"{indent(depth)})")
     
-# Recursively stringify a tuple.
-rawTuple = ()
-def stringifyTuple(tin, svLocals, properties, depth=0):
-    global rawTuple
-    
-    if depth == 0:
-        rawTuple = tin
-        #printMultiLevelTuple(tin)
-        
-    if len(tin) > 1 and tin[0] == "'" and tin[-1] == "'":
-        tin = tin[1:-1]
-    
-    #print(f"@ {depth} {tin}", file=sys.stderr)
-    tout = []
-    for t in tin:
-        if isinstance(t, str):
-            tout.append(t)
-            continue
-        if isinstance(t, (tuple,list)):
-            if len(t) != 0:
-                tout.append(stringifyTuple(t, svLocals, properties, depth+1))
-            continue
-        if isinstance(t, int):
-            tout.append(str(t))
-            continue
-        value = evalArithmeticExpression(unroll(t), svLocals, properties)
-        if value != None:
-            tout.append(str(value))
-            continue
-        error(properties, f"Cannot stringify tuple element {t}")
-        return ""
-    try:
-        if len(tout) == 0:
-            return ""
-        elif len(tout) == 1:
-            return tout[0]
-        return '(' + ','.join(tout) + ')'
-    except:
-        print(f"Failure of `stringifyTuple`:", file=sys.stderr)
-        printMultiLevelTuple(tout)
-        printMultiLevelTuple(rawTuple)
-    sys.exit(1)
-
 # Evaluate the relations EQ, NE, LT, LE, GT, and GE.
 def evaluateRelation(rawLeft, op, rawRight, svLocals, properties):
     left = unroll(rawLeft)
@@ -525,8 +653,8 @@ def evaluateRelation(rawLeft, op, rawRight, svLocals, properties):
                     return valLeft >= valRight
                 # Can't get here.
             error(properties, \
-                  "Cannot evaluate relational expression %s" \
-                  % str(expression))
+                  "Cannot evaluate relational expression %s %s %s" \
+                  % (str(rawLeft), op, str(rawRight)))
             return False
     # Character
     if leftIsString and rightIsString:
@@ -566,10 +694,10 @@ def evaluateRelation(rawLeft, op, rawRight, svLocals, properties):
                     return cmp >= 0
                 # Can't get here.
     error(properties, \
-          "Cannot evaluate relational expression %s" \
-          % str(expression))
+          "Cannot evaluate relational expression %s %s %s" \
+          % (str(rawLeft), op, str(rawRight)))
     return False
-    
+
 # Evaluate a boolean expression, returning True, False, or None (error).
 def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
     global svGlobals
@@ -605,35 +733,39 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
         symbol = svReplace(properties, expression[1], svLocals)
         return (symbol in definedNormalSymbols)
     # &A(...)
-    if len(expression) == 4 and isinstance(expression[0], str) and \
+    if len(expression) == 5 and isinstance(expression[0], str) and \
             expression[0][:1] == "&" and \
-            expression[1] == '(' and expression[3] == ')':
+            expression[1] == '(' and expression[4] == ')':
         sv = expression[0]
-        n = evalArithmeticExpression(expression[2], svLocals, properties)
-        if n == None:
-            return None
-        n -= 1  # Convert 1-based to 0-based
         if sv in svLocals:
-            if not isinstance(svLocals[sv], list):
-                error(properties, \
-                      "Access to non-subscripted local %s(%d)" % (sv, n))
-                return None
-            if n < 0 or n >= len(svLocals[sv]):
-                error(properties, \
-                      "Subscript out of range for local %s(%d)" % (sv, n))
-            return svLocals[sv][n]
-        if sv in svGlobals:
-            if not isinstance(svGlobals[sv], list):
-                error(properties, \
-                      "Access to non-subscripted global %s(%d)" % (sv, n))
-                return None
-            if n < 0 or n >= len(svGlobals[sv]):
-                error(properties, \
-                      "Subscript out of range for global %s(%d)" % (sv, n))
-            return svGlobals[sv][n]
-        error(properties, \
-              "Symbolic variable %s not found in local or global scope" % sv)
-        return None
+            scope, what = svLocals, "local"
+        elif sv in svGlobals:
+            scope, what = svGlobals, "global"
+        else:
+            error(properties, \
+                  "Symbolic variable %s not found in local or global scope" % sv)
+            return None
+        indices = subscriptList(expression[2], expression[3], svLocals, properties)
+        if indices == None:
+            return None
+        if isMacroArgument(sv, scope[sv], scope):
+            if sv == "&SYSLIST" and indices[0] == 0:
+                return subscriptMacroArgument(svLocals.get("&SYSLIST0", ""), \
+                                              indices[1:])
+            return subscriptMacroArgument(scope[sv], indices)
+        if not isinstance(scope[sv], list):
+            error(properties, \
+                  "Access to non-subscripted %s %s" % (what, sv))
+            return None
+        if len(indices) != 1:
+            error(properties, "Too many subscripts for %s" % sv)
+            return None
+        n = indices[0] - 1  # Convert 1-based to 0-based
+        if n < 0 or n >= len(scope[sv]):
+            error(properties, \
+                  "Subscript out of range for %s %s(%d)" % (what, sv, n+1))
+            return None
+        return scope[sv][n]
     # NOT
     if len(expression) == 4 and expression[1] == "NOT":
         right = evalBooleanExpression(expression[3], svLocals, properties)
@@ -880,24 +1012,27 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
     elif "exp" in pname:
         error(properties, "Is not subscripted: %s" % sname)
         return
+    # Note that these stop at the first blank outside a quoted string, so that
+    # a trailing comment on the line is ignored rather than making the whole
+    # operand unparsable.
     if operation == "SETA" and isinstance(v, int):
-        ast = parserASM(operand, "arithmeticExpressionOnly")
+        ast = parserASM(operand, "setaOperand")
         if ast == None:
             error(properties, "Cannot parse arithmetic expression %s" % operand)
             return
-        value = evalArithmeticExpression(ast, svLocals, properties)
+        value = evalArithmeticExpression(ast["v"], svLocals, properties)
     elif operation == "SETB" and isinstance(v, bool):
-        ast = parserASM(operand, "booleanExpressionOnly")
+        ast = parserASM(operand, "setbOperand")
         if ast == None:
             error(properties, "Cannot parse boolean expression %s" % operand)
             return
-        value = evalBooleanExpression(ast, svLocals, properties)
+        value = evalBooleanExpression(ast["v"], svLocals, properties)
     elif operation == "SETC" and isinstance(v, str):
-        ast = parserASM(operand, "characterExpressionOnly")
+        ast = parserASM(operand, "setcOperand")
         if ast == None:
             error(properties, "Cannot parse character expression %s" % operand)
             return
-        value = evalCharacterExpression(ast, svLocals, properties)
+        value = evalCharacterExpression(ast["v"], svLocals, properties)
         if value != None:
             value = value[:8] # Max length of a SETC symbol is 8 characters.
     else:
@@ -909,7 +1044,12 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
     if "exp" not in pname:
         sv[sname] = value
         return
-    index = evalArithmeticExpression(pname["exp"], svLocals, properties)
+    if len(pname["exp"]) != 1:
+        # The target of a SETx is a scalar or one element of an array.  Only a
+        # macro argument, which cannot be assigned to, has multiple subscripts.
+        error(properties, "Too many subscripts in %s" % name)
+        return
+    index = evalArithmeticExpression(pname["exp"][0], svLocals, properties)
     if index == None:
         error(properties, "Cannot evaluate subscript in %s" % name)
         return
