@@ -522,8 +522,29 @@ def readSourceFile(fromWhere, svLocals, sequence, \
         if properties["empty"] or properties["fullComment"] or \
                 properties["dotComment"]:
             continue
-        if len(source) >1 and source[-2]["continues"]:
-            continue
+        # Skip a card that is the continuation of the one before it.  "The one
+        # before it" means the previous line of THIS source -- this file, or
+        # this macro body -- and it used to be read as `source[-2]`, the
+        # previous entry of the GLOBAL line list, which is a different thing
+        # at the boundary between them.  When a macro body began expanding,
+        # `source[-2]` was the caller's invocation line, so a CONTINUED
+        # INVOCATION made the assembler discard the FIRST STATEMENT OF THE
+        # MACRO BODY.
+        #
+        # In FCMSFAIL that lost the `PUSHNEST IF` from all seven of the IF
+        # invocations written across two cards, while the thirty-one written
+        # on one card kept it; the nesting stack then went negative, and
+        # EXIT's search loop -- which starts at the nesting depth and tests
+        # only for zero -- ran until ACTR stopped it 4096 iterations later.
+        # That one line accounted for over sixteen thousand diagnostics.
+        if lineNumber > 0:
+            # Normalised exactly as the current line is a few lines above, so
+            # that this decides continuation the same way `continues` does and
+            # the ONLY change is that it no longer looks across the boundary
+            # between a caller and the macro body it is expanding.
+            previous = "%-80s" % thisSource[lineNumber - 1].rstrip()[:80]
+            if previous[71] != " ":
+                continue
         
         # Note that while `parseSubOperations` determines how 
         # `inMacroDefinition` and `inMacroProto` will change, and returns
@@ -1155,8 +1176,19 @@ title = ""
 subtitle = ""
 literalPoolNumber = 0
 continuation = False
+previousContext = None
 for i in range(endLibraries, len(source)):
     properties = source[i]
+    # A continuation only continues the line before it IN THE SAME FILE OR
+    # MACRO BODY.  `source` is one flat list spanning both, so at the boundary
+    # the previous entry is the macro INVOCATION -- and if that was written
+    # across two cards, its `continues` swallowed the first line of the body
+    # from the listing.  Same shape as the execution-side defect fixed
+    # alongside this, which lost the statement itself rather than its listing.
+    context = (properties["depth"], properties["macro"], properties["file"])
+    if context != previousContext:
+        continuation = False
+    previousContext = context
     anyErrors = False
     if "errors" in properties and len(properties["errors"]) > 0:
         print("=====================================================")
