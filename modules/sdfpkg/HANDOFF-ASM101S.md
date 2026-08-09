@@ -464,13 +464,35 @@ to 51.  What follows is what it left.
      macros, and ASM101S already knows all 96 of them by name in
      model101tables.py's argsMSC and argsBCE.
 
-     WHAT IS MISSING IS THEIR ENCODING.  Every one of those 96 opcodes is -1,
-     and the code generator emits four zero bytes for them.  So an IOP/MSC
-     instruction whose operand happens to parse is assembled WRONGLY AND
-     SILENTLY, and one whose operand does not parse falls through to
-     "Unrecognized operation".  That is the worse of the two outcomes hiding
-     behind the better-looking one, and it means some modules in the OK column
-     contain wrong object code.
+WHAT IS MISSING IS THEIR ENCODING.  model101tables.py comments that an
+     opcode of -1 marks "a special case in terms of how the code is
+     generated", which reads as though a function elsewhere does the work.
+     For these two families no such function was ever written, and the two
+     families fail in DIFFERENT ways.
+
+     THE '@' FAMILY IS SILENTLY WRONG.  model101.py reaches argsMSC, calls
+     commonProcessing(2) and then emits bytearray(4) -- four zero bytes,
+     with no opcode consulted.  "@BU X" and "@L X" are different instructions
+     and both assemble to 0000 0000.  Five modules currently counted OK use
+     them -- FCMINMSC, FCMSFCAM, FCMSVOTE, FIOCDATS, FIOMMMSC -- so the OK
+     column overstates what is correct by at least that many.
+
+     THE '#' FAMILY NEVER GETS THAT FAR, for a separate reason worth fixing on
+     its own:  model101tables.py:213 says
+     "instructionsWithoutOperands = argsBCE", so all 35 have their operand
+     field DISCARDED before parsing.
+     The document plainly gives them operands -- #MIN and #MOUT take
+     "Displacement, Transfer Count", #MINC and #MOUTC take "IUA, Command" --
+     so that declaration is simply wrong.  With no operand there is no AST,
+     and they fall through to "Unrecognized operation".  This is why no OK
+     module uses one:  they always fail loudly.
+
+     THE DECISIVE POINT, if anyone doubts that these are unimplemented rather
+     than handled somewhere else:  THE OPCODE VALUES ARE NOWHERE IN ASM101S.
+     All 96 table entries are -1, no mnemonic is special-cased by name in
+     model101.py, and model390.py is an explicit placeholder for speculative
+     System/390 support.  The information needed to encode them is not in the
+     program, so it cannot be generating correct code for them by any route.
 
      They are defined in Appendix A, "IOP MSC Instruction Repertoire", of the
      Shuttle GPC Software Model AP-101S document.  Its text is extracted to
