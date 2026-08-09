@@ -501,10 +501,25 @@ WHAT IS MISSING IS THEIR ENCODING.  model101tables.py comments that an
      as `0,0` and `IUA,IMMED` that bceAll accepts.  Do NOT widen it on its
      own, since that only converts a loud failure into silent zeros.
 
-     CNOP is a genuine unimplemented pseudo-op and is separable and small.  A
-     handful of '$'-suffixed names -- LA$, B$, IAL$, L$, BAL$, ST$, BC$,
-     STH$, LH$ -- are still unaccounted for: they are not in the instruction
-     tables and not in MLIB80, and nobody has yet established what they are.
+     CNOP AND THE '$' SUFFIX ARE DONE, in commits 947cb05e6 and 079cb27ae,
+     both derived from the original build rather than from the POO.  A
+     record of both, and of everything else learned about the undocumented
+     parts of the language, is kept in ASM101S/ap101s-notes.db --
+     ap101s-notes.py reads and writes it and renders
+     AP-101S-language-notes.md.  Put what you discover into it as you go;
+     the evidence field, saying how a thing was established, is the point.
+
+     THE TOOL FOR THE REMAINING WORK IS modules/sdfpkg/fcos-encodings.py,
+     which reads the object code the original build generated statement by
+     statement out of the "as received" listings.  75 of the 96 '@' and '#'
+     instructions appear there WITH their real encodings, many of them
+     hundreds of times, which is enough to derive most of the set
+     empirically and to check the rest against the POO.  The regularities
+     are already visible: the MSC branches are high nibble 2 with the
+     condition code in the low nibble, and the BCE long forms are 0xF0 |
+     opcode with 0x08 distinguishing the @ variants.  DO NOT GUESS an
+     encoding -- a wrong one is silently wrong object code, which is the
+     one outcome worse than the present four zero bytes.
 
   3. RE-READ THE DIAGNOSTICS after step 1, and expect the ordering to have
      changed completely, as it did this time.  Separate the modules that report
