@@ -198,8 +198,13 @@ mscAll =
 # Operand field for a BCE instruction.  A1 and A2 are named so that the code
 # generator can reach them:  depending on the instruction they are an address,
 # a displacement and transfer count, or an IUA and a command.
+# X1 is the index, which the POO says the assembler recognises as "(1)"
+# following a BCE operand and which means indexing by twice the BCE's number.
+# It USED to be captured as A2, the same name as the second operand, so an
+# indexed operand and a two-operand instruction were indistinguishable and an
+# index could be encoded as a displacement.
 bceAll =
-    | A1+: arithmeticExpression '(' A2+: constant ')'  ( / / | $ )
+    | A1+: arithmeticExpression '(' X1+: constant ')'  ( / / | $ )
     | A1+: arithmeticExpression ',' A2+: arithmeticExpression  ( / / | $ )
     | A1+: arithmeticExpression  ( / / | $ )
     ;

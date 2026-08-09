@@ -354,6 +354,39 @@ mscLong = { "@BU":   (0, 0, 0),        "@BU@":   (0, 1, 0),
             "@STF":  (5, 0, 0),        "@STH":   (5, 0, 1),
             "@CI":   (6, 0, 0),        "@C":     (6, 1, 0) }
 
+# THE TWO-BYTE BCE INSTRUCTIONS.  The POO gives both short formats (III-9):
+#
+#   short format 1   OP(4) M(1) DISP(11)     the BCE register operations
+#   short format 2   OP(3) TC(5) DISP(8)     the transmit and receive pair
+#
+# and says of format 1 that DISP "serves either as immediate data or as a PC
+# relative address displacement", the PC being the UPDATED BCE program
+# counter, and that M "serves either as an Opcode extension or as an index
+# mode specification".  Both readings of M occur here.  It is an opcode
+# extension for #RIB against #SIB, which share OP=1110 and differ only in it,
+# and for #LTOI against #LTO.  It is the index for #SSC and #SST, where the
+# POO's own description of the effective address is "PC + DISP" when it is 0
+# and "PC + DISP + 2xBCENO" when it is 1 -- the "(1)" the assembler recognises
+# after a BCE operand.
+#
+# Third element: 'immediate' puts the operand in DISP as it stands,
+# 'relative' makes it a displacement from the updated PC.
+bceShort1 = { "#DLYI": (0xC, 0, "immediate"), "#LTOI": (0xB, 0, "immediate"),
+              "#RIB":  (0xE, 0, "immediate"), "#SIB":  (0xE, 1, "immediate"),
+              "#WAT":  (0x0, 1, "immediate"), "#STP":  (0x1, 0, "immediate"),
+              "#SSC":  (0x4, "index", "relative"),
+              "#SST":  (0x5, "index", "relative") }
+
+# Short format 2, whose operands are written `TC,DISP`.
+bceShort2 = { "#RDS": 0b011, "#TDS": 0b100 }
+
+# NOT here, and still announcing themselves: #WIX, which appears in no
+# listing, and #DLY and #LTO.  Those two have exactly one use each in the
+# whole corpus and BOTH encode their displacement as zero -- `#LTO TIMOUT-36`
+# is B800 -- so whatever their operand does, it is not the PC-relative
+# displacement their immediate counterparts use, and one instance is not
+# enough to say what it is instead.
+
 # THE FOUR-BYTE BCE INSTRUCTIONS:  opcode byte, then the layout of bytes 1-3.
 #
 #   ADDRESS     one 24-bit value.  In the original build this field equals the
@@ -362,21 +395,29 @@ mscLong = { "@BU":   (0, 0, 0),        "@BU@":   (0, 1, 0),
 #   DISPCOUNT   byte 1 the displacement, bytes 2-3 the transfer count.  The
 #               POO gives #MIN and #MOUT the operands "Displacement, Transfer
 #               Count".
-#   IUACOMMAND  byte 1 the IUA, bytes 2-3 the command.
-#   PARAMETER   not an instruction at all but the parameter word that follows
-#               a #MIN or #MOUT; opcode byte 00, then IUA and command.
+#   IUACOMMAND  a 5-BIT IUA in bits 8-12 over a 19-BIT COMMAND in bits 13-31.
+#               #MINC and #MOUTC share it and are not instructions at all but
+#               the parameter word that follows a #MIN or #MOUT, which is why
+#               their opcode byte is 00.
 #
 # Derived from about 5500 instances in the original build, and pinned by the
 # ones whose operands are literal and so need no symbol table:  `#MIN 0,13` is
 # F100000D, `#MOUT 2,0` is F5020000, `#TDLI 511` is F40001FF.  The two fields
-# of IUACOMMAND are pinned by `#CMDI FIOLMIUA,FIOFFIUA*256+12` giving F6400A0C,
-# whose *256+12 could only land that way if byte 1 and bytes 2-3 were separate.
 # 0x08 distinguishes the indirect "@" forms.  See ap101s-notes.db.
 #
-# The two-byte BCE instructions are deliberately absent.  Their opcode/operand
-# boundary cannot be read off the listings, most of their observed operands
-# being zero -- #WAT occurs 1105 times as 0800 and never otherwise -- so
-# encoding them would be guesswork.
+# IUACOMMAND WAS WRONG UNTIL 2026-08-09 and is worth reading as a warning.  It
+# was taken to be a byte over a halfword, "pinned" by `#CMDI FIOLMIUA,
+# FIOFFIUA*256+12` assembling to F6400A0C -- which fits a byte over a halfword
+# only if FIOLMIUA is 0x40.  Nobody looked it up.  It is EQU 8, and 8 shifted
+# into bits 8-12 is 0x400000, so the very instance offered as proof disproves
+# it.  Every other instance in the corpus writes its operands as EXTRN symbols
+# that assemble to zero under either reading, so the corpus could never have
+# caught it; the three that use literals all did, the moment they were looked
+# at.  `#CMDI 15,0` even carries the answer in its own comment,
+# CMD WORD=X'00780000', and 0x780000 is 15 shifted by 19.
+#
+# LOOK THE SYMBOL UP.  An encoding "confirmed" by an instance whose operands
+# were never evaluated is not confirmed by anything.
 bceLong = {
     "#BU":    (0xF0, "ADDRESS"),    "#BU@":   (0xF8, "ADDRESS"),
     "#MIN":   (0xF1, "DISPCOUNT"),  "#MIN@":  (0xF9, "ADDRESS"),
@@ -385,7 +426,7 @@ bceLong = {
     "#TDLI":  (0xF4, "ADDRESS"),    "#TDL":   (0xFC, "ADDRESS"),
     "#MOUT":  (0xF5, "DISPCOUNT"),  "#MOUT@": (0xFD, "ADDRESS"),
     "#CMDI":  (0xF6, "IUACOMMAND"), "#CMD":   (0xFE, "ADDRESS"),
-    "#MINC":  (0x00, "PARAMETER"),  "#MOUTC": (0x00, "PARAMETER"),
+    "#MINC":  (0x00, "IUACOMMAND"), "#MOUTC": (0x00, "IUACOMMAND"),
     }
 
 # EMPTY, where it used to be the whole of argsBCE.  Every BCE instruction

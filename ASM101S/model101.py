@@ -2668,6 +2668,15 @@ def generateObjectCode(source, macros):
                     error(properties, "Could not evaluate %s operand" % operation)
                     toMemory(data)
                     continue
+                if "X1" in ast:
+                    # An index used to be captured under the same name as the
+                    # second operand, so this silently became a displacement.
+                    # Where the long format puts the index bit is not known.
+                    error(properties, \
+                          "%s is written with an index, whose bit position " \
+                          "in the long BCE format is not established; it is " \
+                          "not encoded and the object code here is WRONG" \
+                          % operation)
                 second = bceField("A2") if "A2" in ast else 0
                 if second == None:
                     error(properties, \
@@ -2676,6 +2685,25 @@ def generateObjectCode(source, macros):
 
                 if layout == "ADDRESS":
                     field = first & 0xFFFFFF
+                    data[1] = (field >> 16) & 0xFF
+                    data[2] = (field >> 8) & 0xFF
+                    data[3] = field & 0xFF
+                elif layout == "IUACOMMAND":
+                    # A 5-BIT IUA over a 19-BIT COMMAND, not a byte over a
+                    # halfword.  This was wrong for years and could not have
+                    # been caught by the corpus, whose operands here are
+                    # EXTRN symbols that assemble to zero either way.  The
+                    # one source line that settles it says so in its own
+                    # comment:  `#CMDI 15,0    CMD WORD=X'00780000'`, and
+                    # 0x780000 is 15 shifted by 19, not by 16.  It checks out
+                    # against the symbolic form too -- FIOFFIUA EQU 10 and
+                    # FIOMDMRT EQU X'00031C20' give F6531C20, which is
+                    # exactly what the original build emits.
+                    if not 0 <= first <= 31:
+                        error(properties, \
+                              "The IUA of %s is %d, outside its 5-bit field" \
+                              % (operation, first))
+                    field = ((first & 0x1F) << 19) | (second & 0x7FFFF)
                     data[1] = (field >> 16) & 0xFF
                     data[2] = (field >> 8) & 0xFF
                     data[3] = field & 0xFF
@@ -2688,6 +2716,82 @@ def generateObjectCode(source, macros):
                     data[1] = first & 0xFF
                     data[2] = (second >> 8) & 0xFF
                     data[3] = second & 0xFF
+                toMemory(data)
+                continue
+
+            if operation in bceShort1 or operation in bceShort2:
+                # The two-byte BCE instructions.  See `bceShort1` and
+                # `bceShort2` for the layouts and where they come from.
+                commonProcessing(2)
+                ast = properties["ast"]
+                data = bytearray(2)
+                if ast == None:
+                    error(properties, "%s requires an operand" % operation)
+                    toMemory(data)
+                    continue
+
+                def bceShortField(subfield):
+                    err, value = evalInstructionSubfield(properties, subfield, \
+                                                         ast, symtab)
+                    if err or value == None:
+                        return None
+                    section, offset = unhash(value)
+                    if section is None:
+                        return value
+                    return offset + sects.get(section, {}).get("offset", 0)
+
+                first = bceShortField("A1")
+                if first == None:
+                    error(properties, \
+                          "Could not evaluate %s operand" % operation)
+                    toMemory(data)
+                    continue
+
+                if operation in bceShort2:
+                    # `TC,DISP`:  a 5-bit transfer count over an 8-bit
+                    # displacement off the BCE's base register.
+                    count = first
+                    displacement = bceShortField("A2") if "A2" in ast else 0
+                    if displacement == None:
+                        error(properties, \
+                              "Could not evaluate the displacement of %s" \
+                              % operation)
+                        displacement = 0
+                    if not 0 <= count <= 31:
+                        error(properties, \
+                              "The transfer count of %s is %d, outside the " \
+                              "5-bit field it is placed in" \
+                              % (operation, count))
+                    if not -128 <= displacement <= 255:
+                        error(properties, \
+                              "The displacement of %s is %d, outside its " \
+                              "8-bit field" % (operation, displacement))
+                    word = (bceShort2[operation] << 13) | \
+                           ((count & 0x1F) << 8) | (displacement & 0xFF)
+                else:
+                    opcode, mbit, kind = bceShort1[operation]
+                    if mbit == "index":
+                        mbit = 1 if "X1" in ast else 0
+                    displacement = first
+                    if kind == "relative":
+                        # PC-relative from the updated BCE program counter,
+                        # which is the halfword after this instruction.
+                        displacement -= (sects[sect]["pos1"] + \
+                                sects.get(sect, {}).get("offset", 0) + 2) // 2
+                        if not -1024 <= displacement <= 1023:
+                            error(properties, \
+                                  "%s is %d halfwords away, out of range of " \
+                                  "the 11-bit displacement" \
+                                  % (operation, displacement))
+                    elif not -1024 <= displacement <= 2047:
+                        error(properties, \
+                              "The operand of %s is %d, outside the 11-bit " \
+                              "field it is placed in" \
+                              % (operation, displacement))
+                    word = (opcode << 12) | (mbit << 11) | \
+                           (displacement & 0x7FF)
+                data[0] = (word >> 8) & 0xFF
+                data[1] = word & 0xFF
                 toMemory(data)
                 continue
 

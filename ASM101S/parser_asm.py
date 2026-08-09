@@ -759,7 +759,7 @@ class asmParser(Parser):
                 self.add_last_node_to_name('A1')
                 self._token('(')
                 self._constant_()
-                self.add_last_node_to_name('A2')
+                self.add_last_node_to_name('X1')
                 self._token(')')
                 with self._group():
                     with self._choice():
@@ -772,7 +772,7 @@ class asmParser(Parser):
                         )
                 self._define(
                     [],
-                    ['A1', 'A2'],
+                    ['A1', 'X1'],
                 )
             with self._option():
                 self._arithmeticExpression_()
