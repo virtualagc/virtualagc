@@ -124,9 +124,19 @@ def readListing(filename):
         
         # Now actually add the stuff to memory.
         for value in values:
-            if sect not in sects: ###DEBUG###
-                pass
-                pass
+            if sect not in sects:
+                # A DSECT sets `sect` above without creating an entry here,
+                # because a dummy section defines no storage of its own.  A
+                # listing can still carry object code under one, and indexing
+                # the missing entry was a KeyError that took the whole
+                # comparison down before it began -- six OI301700 modules,
+                # all of them naming the DSECT in the message and none of them
+                # hinting that the listing reader was at fault.  Create it and
+                # keep the bytes.
+                sects[sect] = {
+                    "pos": 0,
+                    "memory": [None]*chunkSize
+                    }
             while address >= len(sects[sect]["memory"]):
                 sects[sect]["memory"] = sects[sect]["memory"] + ([None]*chunkSize)
             if sects[sect]["memory"][address] not in [None, value]:

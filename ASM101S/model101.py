@@ -412,7 +412,18 @@ def evalLiteralAttributes(properties, ast, symtab):
     t = ast["T"][0]
     scale = 1
     if "S" in ast and len(ast["S"]) > 0:
-        scale = pow(2.0, -int(ast["S"]))
+        # The scale modifier arrives as a captured LIST, the same shape as
+        # `ast["T"]` and `ast[t]` just above, which are both indexed with [0].
+        # This one was not, so int() got the list and raised TypeError.
+        s = ast["S"]
+        if isinstance(s, (list, tuple)):
+            s = s[0]
+        try:
+            scale = pow(2.0, -int(s))
+        except (TypeError, ValueError):
+            error(properties, \
+                  "Cannot evaluate the scale modifier of a literal")
+            return None
     numerical = True
     if t == "C":
         numerical = False
@@ -523,7 +534,14 @@ def optimizeScratch():
                 entry2["properties"]["pos1"] = nextPos1
                 entry2["pos2"] = nextPos2
                 entry2["debug"] = "%05X" % nextPos2
-                if "name" in entry2:
+                if "name" in entry2 and entry2["name"] in symtab:
+                    # A labelled statement whose label is not in the symbol
+                    # table YET.  This pass only slides locations about, and a
+                    # symbol with no entry has no location to slide; `EQU
+                    # FCMBEND-FCMBSTRT` is the shape that gets here, its value
+                    # not being computable until both ends are known.  The EQU
+                    # pass below sets it.  Indexing unconditionally was a
+                    # KeyError that killed nine OI301700 modules outright.
                     name = entry2["name"]
                     sym2 = symtab[name]
                     sym2["address"] = nextPos2
@@ -550,7 +568,22 @@ def optimizeScratch():
                                              properties, symtab, \
                                              symtab[sect]["value"] + entry["pos1"] // 2, \
                                              severity=0)
+                if v == None:
+                    # The EQU's operand parsed but could not be evaluated,
+                    # which is diagnosed where it was evaluated.  Passing the
+                    # None on to unhash() turned that into a TypeError.
+                    continue
                 n = entry["name"]
+                if n not in symtab:
+                    # The EQU never made it into the symbol table, which is
+                    # what happens when its operand could not be evaluated on
+                    # an earlier pass -- `EQU FCMBEND-FCMBSTRT` cannot be,
+                    # until both ends have been placed.  This pass is where
+                    # the value gets established, so create the entry rather
+                    # than index one that is not there; that KeyError killed
+                    # nine OI301700 modules outright.
+                    symtab[n] = { "type": "EQU", "value": v,
+                                  "properties": properties }
                 symtab[n]["value"] = v
                 s, d = unhash(v)
                 if s != None:
@@ -758,6 +791,10 @@ for n in list(impliedR1):
 # maximum amount of data a single `DC` can generate ... but it's a *lot*.
 # I've simply chosen a number here that while far less than the maximum, should
 # be overkill for Shuttle flight software.
+#
+# It was not overkill.  The Shuttle flight software contains sixteen patch-space
+# modules whose entire content is one `DC 594X'C6C6'`, which is 1188 bytes, and
+# the buffer grows to fit now rather than refusing to assemble them.
 dcBuffer = bytearray(1024)
 
 # Evaluate a DC or DS length modifier and return it in BYTES.
@@ -821,14 +858,15 @@ def evalLengthModifier(properties, tokens):
 # fix an alignment or to attach a label and a length attribute -- which the old
 # shape also got wrong, by emitting one copy.
 def replicateDC(properties, length, duplicationFactor):
+    global dcBuffer
     if duplicationFactor <= 0:
         return 0
     total = length * duplicationFactor
     if total > len(dcBuffer):
-        error(properties, \
-              "DC generates %d bytes, more than the %d-byte assembly buffer" % \
-              (total, len(dcBuffer)))
-        return length
+        # Grow rather than refuse.  The buffer is a working area, not a limit
+        # the language imposes, and treating it as one turned sixteen ordinary
+        # patch-space modules into failures.
+        dcBuffer = dcBuffer + bytearray(total - len(dcBuffer))
     pointer = length
     for copy in range(duplicationFactor - 1):
         for i in range(length):
@@ -1623,7 +1661,11 @@ def generateObjectCode(source, macros):
                             hexString = flattened[0]["v"][0][1]
                             if lengthModifier == None:
                                 count = len(hexString)
-                                count += (count % 1)
+                                # An odd number of digits is padded to an even
+                                # one.  This was `count % 1`, which is zero
+                                # for every integer there is, so it never
+                                # padded anything.
+                                count += (count & 1)
                             else:
                                 count = lengthModifier * 2
                             while len(hexString) < count:
@@ -1647,13 +1689,24 @@ def generateObjectCode(source, macros):
                                       "comma-separated groups is not " \
                                       "supported" % operation)
                                 continue
-                            bytes = bytearray()
+                            # THE DUPLICATION FACTOR USED TO BE IGNORED HERE,
+                            # and only here -- every other constant type
+                            # applies it.  `DC 594X'C6C6'` therefore generated
+                            # one halfword instead of 594 of them, silently.
+                            # The whole of PCH27SRC and its fifteen siblings
+                            # are a single such statement, patch space filled
+                            # with C6, so each of them was short by 1186
+                            # bytes.
+                            dcBufferPtr = 0
                             for i in range(0, count, 2):
-                                b = hexString[i:i+2]
-                                bytes.append(int(b, 16))
-                            toMemory(bytes)
+                                dcBuffer[dcBufferPtr] = \
+                                    int(hexString[i:i+2], 16)
+                                dcBufferPtr += 1
+                            dcBufferPtr = replicateDC(properties, dcBufferPtr, \
+                                                      duplicationFactor)
+                            toMemory(dcBuffer[:dcBufferPtr])
                         else:
-                            toMemory(count // 2)
+                            toMemory(duplicationFactor * (count // 2))
                     elif suboperandType == "B":
                         commonProcessing(1)
                         
