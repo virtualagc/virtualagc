@@ -1,2 +1,9 @@
 #!/bin/bash
-ASM101S.py "$@"
+# `exec` matters here.  Without it this shell stays alive as the parent of
+# ASM101S.py, so its PID is what `timeout` and `kill` see:  they terminate the
+# wrapper and leave the assembler itself running, orphaned and unkillable by
+# whoever thought they had stopped it.  A sweep that runs modules under
+# `timeout` then reports them as HANG while they quietly continue to consume a
+# core apiece, which is exactly what happened.  With `exec`, this process is
+# replaced by the assembler and signals reach the right thing.
+exec ASM101S.py "$@"

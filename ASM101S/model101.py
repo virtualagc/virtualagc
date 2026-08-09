@@ -667,11 +667,11 @@ the assembly.
 
 Note that addresses are in units of bytes.
 '''
-ignore = { "TITLE", 
+ignore = { "TITLE",
            "GBLA", "GBLB", "GBLC", "LCLA", "LCLB",
            "LCLC", "SETA", "SETB", "SETC", "AIF",
            "AGO", "ANOP", "SPACE", "MEXIT", "MNOTE", "SPON", "SPOFF",
-           "PRINT" }
+           "PRINT", "ACTR" }
 hexDigits = "0123456789ABCDEF"
 
 '''

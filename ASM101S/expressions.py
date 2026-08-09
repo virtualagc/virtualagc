@@ -704,9 +704,11 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
     
     expression = unroll(expression)
     
-    while isinstance(expression, (tuple,list)) and len(expression) == 3 and \
-            expression[0] == '(' and expression[2] == ')':
-        expression = unroll(expression[1])
+    # A parenthesised sub-expression, which may have blanks inside the
+    # parentheses:  ( '(', blanks, expression, blanks, ')' ).
+    while isinstance(expression, (tuple,list)) and len(expression) == 5 and \
+            expression[0] == '(' and expression[4] == ')':
+        expression = unroll(expression[2])
     
     if isinstance(expression, str):
         if expression == '0':

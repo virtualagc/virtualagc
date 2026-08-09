@@ -781,9 +781,17 @@ class asmParser(Parser):
     @tatsumasu()
     def _aifAll_(self):
         self._token('(')
+        self._pattern(' *')
         self._booleanExpression_()
+        self.add_last_node_to_name('exp')
+        self._pattern(' *')
         self._token(')')
         self._sequenceSymbol_()
+        self.add_last_node_to_name('seq')
+        self._define(
+            [],
+            ['exp', 'seq'],
+        )
 
     @tatsumasu()
     def _orgAll_(self):
@@ -1700,7 +1708,9 @@ class asmParser(Parser):
                 self._variable_()
             with self._option():
                 self._token('(')
+                self._pattern(' *')
                 self._booleanExpression_()
+                self._pattern(' *')
                 self._token(')')
             with self._option():
                 self._booleanLiteral_()

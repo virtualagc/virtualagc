@@ -246,6 +246,16 @@ def parseLine(lines, lineNumber, inMacroDefinition, inMacroProto):
     
     return skipped
 
+# The diagnostic for an exhausted ACTR.  It names where the loop was, because
+# the alternative -- an assembly that simply never returns -- gives no clue at
+# all, and because the count is very often correct and the loop's exit
+# condition is what is wrong.
+def actrMessage(fromWhere):
+    where = fromWhere if isinstance(fromWhere, str) else str(fromWhere)
+    return "ACTR exhausted: too many AIF/AGO branches in %s.  This is a " \
+           "conditional-assembly loop that never terminates; the assembler " \
+           "has abandoned the expansion." % where
+
 def printTraceMessage(depth, name, operation, operand, extra=""):
     if trace:
         msg = f"Trace: {'%04d'%sysndx} {'%02d'%depth}    {'%-16s'%name} {'%-8s'%operation} {operand}"
@@ -431,6 +441,15 @@ def readSourceFile(fromWhere, svLocals, sequence, \
     skipCount = 0
     lineNumber = -1
     skipToSeq = None
+    # The conditional-assembly loop counter.  It is decremented every time an
+    # AIF or AGO branch is actually taken, and when it goes negative this
+    # expansion is abandoned with a diagnostic.  That is the assembler's own
+    # guard against a runaway AIF/AGO loop, and the AP-101S sources rely on it
+    # -- five files in MLIB80 set it explicitly, ENDCASE with `ACTR 30000`.
+    # Because `readSourceFile` recurses once per macro expansion, a plain local
+    # gives each expansion its own counter, which is the required scope.
+    # 4096 is the default when no ACTR appears (SC26-4940).
+    actr = 4096
     while lineNumber + 1 < len(thisSource):
         lineNumber += 1
         line = thisSource[lineNumber]
@@ -565,8 +584,24 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             printTraceMessage(depth, name, operation, operand)
             svSet(operation, name, operand, svLocals, properties)
             continue
+        if operation == "ACTR":
+            printTraceMessage(depth, name, operation, operand)
+            ast = parserASM(operand.rstrip(), "setaOperand")
+            if ast == None:
+                error(properties, "Cannot parse ACTR operand %s" % operand)
+                continue
+            n = evalArithmeticExpression(ast["v"], svLocals, properties)
+            if n == None:
+                error(properties, "Cannot evaluate ACTR operand %s" % operand)
+                continue
+            actr = n
+            continue
         if  operation == "AGO":
             printTraceMessage(depth, name, operation, operand)
+            actr -= 1
+            if actr < 0:
+                error(properties, actrMessage(fromWhere))
+                break
             target = operand.rstrip()
             if target in sequence:
                 if fromWhere != sequence[target][0]:
@@ -580,10 +615,9 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             printTraceMessage(depth, name, operation, operand)
             operand = operand.rstrip()
             ast = parserASM(operand, "aifAll")
-            if isinstance(ast, tuple) and len(ast) == 4 and \
-                    ast[0] == '(' and ast[2] == ')':
-                target = ast[3]
-                expression = ast[1]
+            if isinstance(ast, dict) and "exp" in ast and "seq" in ast:
+                target = ast["seq"][0]
+                expression = ast["exp"]
                 passFail = evalBooleanExpression(expression, svLocals, properties)
                 if passFail == None:
                     error(properties, "Cannot evaluate %s" % str(expression))
@@ -591,8 +625,13 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 if not passFail:
                     continue
                 # The conditional test has passed.  We must now "go to" the
-                # selected sequence symbol
-                #print("***DEBUG***")
+                # selected sequence symbol.  Only a branch actually taken is
+                # counted against ACTR; an AIF whose condition is false is not
+                # a branch.
+                actr -= 1
+                if actr < 0:
+                    error(properties, actrMessage(fromWhere))
+                    break
                 if target in sequence:
                     if fromWhere != sequence[target][0]:
                         error(properties, "Target out of this macro")

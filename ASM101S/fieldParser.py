@@ -190,8 +190,15 @@ bceAll =
     | arithmeticExpression  ( / / | $ )
     ;
 
-# Operand field of an AIF.
-aifAll = '(' booleanExpression ')' sequenceSymbol ;
+# Operand field of an AIF.  Blanks are permitted inside the parentheses --
+# they have to be, since AND, OR and NOT are written surrounded by them -- and
+# that includes immediately after the '(' and before the ')'.  Rejecting those
+# two positions was not a cosmetic matter: a failed AIF parse is reported and
+# then execution simply continues without branching, so an AIF that is a loop's
+# only exit turns the assembly into an infinite loop.  BTBCEGEN's
+#     AIF   ( &ELE  EQ 15).BT106
+# did exactly that, and is why FIOMVUPG and its siblings never terminated.
+aifAll = '(' / */ exp+: booleanExpression / */ ')' seq+: sequenceSymbol ;
 
 # Operand field of an ORG.
 orgAll = 
@@ -324,9 +331,9 @@ booleanFactor =
     | "D'" identifier
     | "D'" sv
     | relationalExpression
-    | variable 
-    | '(' booleanExpression ')' 
-    | booleanLiteral 
+    | variable
+    | '(' / */ booleanExpression / */ ')'
+    | booleanLiteral
     ;
 booleanLiteral = '0' | '1' ;
 relationalExpression = 
