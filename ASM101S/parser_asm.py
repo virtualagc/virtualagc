@@ -455,7 +455,7 @@ class asmParser(Parser):
         with self._choice():
             with self._option():
                 with self._optional():
-                    self._register_()
+                    self._arithmeticExpression_()
                     self.add_last_node_to_name('R1')
                     self._token(',')
                     self._define(
@@ -480,7 +480,7 @@ class asmParser(Parser):
                 )
             with self._option():
                 with self._optional():
-                    self._register_()
+                    self._arithmeticExpression_()
                     self.add_last_node_to_name('R1')
                     self._token(',')
                     self._define(
@@ -508,7 +508,7 @@ class asmParser(Parser):
                 )
             with self._option():
                 with self._optional():
-                    self._register_()
+                    self._arithmeticExpression_()
                     self.add_last_node_to_name('R1')
                     self._token(',')
                     self._define(
@@ -539,7 +539,7 @@ class asmParser(Parser):
                 )
             with self._option():
                 with self._optional():
-                    self._register_()
+                    self._arithmeticExpression_()
                     self.add_last_node_to_name('R1')
                     self._token(',')
                     self._define(
@@ -565,7 +565,7 @@ class asmParser(Parser):
                 )
             with self._option():
                 with self._optional():
-                    self._register_()
+                    self._arithmeticExpression_()
                     self.add_last_node_to_name('R1')
                     self._token(',')
                     self._define(
@@ -589,11 +589,7 @@ class asmParser(Parser):
                 )
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" \'*\' \'=\''
-                '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '-?[0-9]+ <arithmeticExpression>'
-                '<constant> <identifier> <register>'
-                '<subvar> <term> <variable>'
+                "'=' <arithmeticExpression> <term>"
             )
 
     @tatsumasu()
@@ -1701,7 +1697,7 @@ class asmParser(Parser):
                 self._identifier_()
             with self._option():
                 self._token("D'")
-                self._sv_()
+                self._variable_()
             with self._option():
                 self._relationalExpression_()
             with self._option():
@@ -1799,7 +1795,7 @@ class asmParser(Parser):
                 self._identifier_()
             with self._option():
                 self._token("T'")
-                self._sv_()
+                self._variable_()
             self._error(
                 'expecting one of: '
                 '"\'" "T\'" <quotedString>'
@@ -1989,7 +1985,15 @@ class asmParser(Parser):
             self._token(',')
             self._pidentifier_()
         self._closure(block0)
-        self._check_eof()
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._pattern(' ')
+                with self._option():
+                    self._check_eof()
+                self._error(
+                    'expecting one of: '
+                )
 
     @tatsumasu()
     def _pidentifier_(self):

@@ -477,6 +477,12 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             "fullComment": line.startswith("*"),
             "dotComment": line.startswith(".*"),
             "endComment": "",
+            # The parsed operand field, filled in by `generateObjectCode`.  It
+            # is created here, as None, so that the key always exists:  the
+            # code generator tests it for None in a dozen places, and a line
+            # that never reached the parsing step used to raise KeyError there
+            # instead.
+            "ast": None,
             "errors": [],
             "inMacroDefinition": inMacroDefinition,
             "copy": copy,

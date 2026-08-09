@@ -987,6 +987,7 @@ def generateObjectCode(source, macros):
                 ast = parserASM(operand, appropriateRules[operation])
                 if ast == None:
                     error(properties, "Could not parse operands")
+                    properties["astFailed"] = True
                 properties["ast"] = ast
         
         # We need to create "preliminary" entries in the symbol table, for
@@ -1142,7 +1143,16 @@ def generateObjectCode(source, macros):
             operation = properties["operation"]
             if operation in ignore:
                 continue
-            
+            if properties.get("astFailed", False):
+                # The operand did not parse, which was diagnosed where it was
+                # parsed.  There is nothing to generate from a null AST, and
+                # going on regardless is what turned that diagnosis into a
+                # traceback -- `if "L2" in ast` on a None, and a bare
+                # `properties["ast"]` lookup on a line that never had one.  The
+                # condition holds identically on every pass, so skipping here
+                # does not put the passes out of step with each other.
+                continue
+
             name = properties["name"]
             if name.startswith("."):
                 name = ""
@@ -1729,9 +1739,14 @@ def generateObjectCode(source, macros):
                     dataSize = 2
                 ast = properties["ast"]
                 literalAttributes = None
-                if ast == None: ###DEBUG###
-                    for p in range(propNum -10, propNum+1):
-                        print(p, source[p])
+                if ast == None:
+                    # An RS/SRS mnemonic with no operand field at all, so
+                    # there was nothing to parse and nothing to generate from.
+                    # This used to print the surrounding lines and then fall
+                    # straight into `"L2" in ast` and raise TypeError.
+                    error(properties, \
+                          "%s requires an operand" % operation)
+                    continue
                 if "L2" in ast:
                     literalAttributes = evalLiteralAttributes(properties, ast, symtab)
                     if literalAttributes == None:
@@ -2176,14 +2191,25 @@ def generateObjectCode(source, macros):
                                 b2, d2 = unUsing(using, d2)
                             if b2 != None and b2 >= 0 and b2 <= 3:
                                 err, i1 = evalInstructionSubfield(properties, "I1", ast, symtab)
-                                i1 &= 0xFFFF
-                                properties["adr2"] = i1
-                                d2 &= 0b111111
-                                op = argsSI[operation]
-                                data[0] = op
-                                data[1] = (d2 << 2) | b2
-                                data[2] = i1 >> 8
-                                data[3] = i1 & 0xFF
+                                # Alone among the subfield evaluations here,
+                                # this one used to ignore `err` and go straight
+                                # to `i1 &= 0xFFFF`, which raises TypeError when
+                                # I1 could not be evaluated or was simply
+                                # absent.  Report it and leave the instruction
+                                # zeroed, as the base-register failure below
+                                # already does.
+                                if err or i1 == None:
+                                    error(properties, \
+                                          "Could not evaluate I1 subfield")
+                                else:
+                                    i1 &= 0xFFFF
+                                    properties["adr2"] = i1
+                                    d2 &= 0b111111
+                                    op = argsSI[operation]
+                                    data[0] = op
+                                    data[1] = (d2 << 2) | b2
+                                    data[2] = i1 >> 8
+                                    data[3] = i1 & 0xFF
                             else:
                                 error(properties, "Cannot identify base register")
                 toMemory(data)

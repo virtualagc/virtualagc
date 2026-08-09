@@ -158,12 +158,21 @@ rrAll = [ R1+: arithmeticExpression ',' ] R2+: arithmeticExpression ( / / | $ ) 
 lfxiAll = [ R1+: register ',' ] R2+: ( '-2' | '-1' | register ) ( / / | $ ) ;
 
 # Operand field for an RS or SRS instruction.
-rsAll = 
-    | [ R1+: register ',' ] "=" L2+: lconstant ( / / | $ )
-    | [ R1+: register ',' ] D2+: arithmeticExpression '(' B2+: register ')'  ( / / | $ )
-    | [ R1+: register ',' ] D2+: arithmeticExpression '(' X2+: register ',' B2+: register ')'  ( / / | $ )
-    | [ R1+: register ',' ] D2+: arithmeticExpression '(' ')'  ( / / | $ )
-    | [ R1+: register ',' ] D2+: arithmeticExpression  ( / / | $ )
+#
+# R1 is an arithmeticExpression rather than a bare register because for the
+# branch-on-condition instructions it is not a register at all but a mask,
+# and the macro library computes it:  DOPROC generates `BC 07-&CCVAL,...`,
+# which reaches the assembler as `BC 07-7,#@LB5`.  `evalInstructionSubfield`
+# already evaluates each subfield as an arithmetic expression, so nothing
+# downstream had to change.  B2 and X2 stay bare registers, since those really
+# are register numbers and widening them invites ambiguity with the D2(B2)
+# form.
+rsAll =
+    | [ R1+: arithmeticExpression ',' ] "=" L2+: lconstant ( / / | $ )
+    | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' B2+: register ')'  ( / / | $ )
+    | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' X2+: register ',' B2+: register ')'  ( / / | $ )
+    | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' ')'  ( / / | $ )
+    | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression  ( / / | $ )
     ;
 
 # Operand field for an RI instruction.
@@ -327,9 +336,12 @@ booleanExpressionOnly = booleanExpression $ ;
 booleanExpression = booleanTerm { / */ 'OR' / */ booleanTerm } ;
 booleanTerm = notFactor { / */ 'AND' / */ notFactor } ;
 notFactor = [ / */ 'NOT' / */ ] booleanFactor ;
-booleanFactor = 
+# T' and D' take a `variable` rather than a bare `sv` so that they can be
+# applied to a subscripted macro argument -- `T'&SYSLIST(1)`, `D'&SYSLIST(&I,3)`
+# -- which MLIB80 does in several places.
+booleanFactor =
     | "D'" identifier
-    | "D'" sv
+    | "D'" variable
     | relationalExpression
     | variable
     | '(' / */ booleanExpression / */ ')'
@@ -343,10 +355,10 @@ relationalExpression =
 relOp = 'EQ' | 'NE' | 'LT' | 'GT' | 'LE' | 'GE' ;
 
 characterExpressionOnly = characterExpression $ ;
-characterExpression = 
-    | quotedString [ substringNotation ] { [ '.' ] characterExpression } 
+characterExpression =
+    | quotedString [ substringNotation ] { [ '.' ] characterExpression }
     | "T'" identifier
-    | "T'" sv
+    | "T'" variable
     ;
 substringNotation = '(' arithmeticExpression ',' arithmeticExpression ')' ;
 
@@ -381,7 +393,12 @@ mnote =
     | msg+: quotedString
     ;
 
-identifierList = pidentifier { ',' pidentifier } $ ;
+# The operand of ENTRY and EXTRN.  It ends at the first blank, after which the
+# rest of the statement is a comment -- `EXTRN FSVC0030    GENERATE ALTERNATE
+# ENTRY POINT` is a real line from FCMASYNC.  Requiring end-of-input here made
+# the whole operand unparsable, which left `properties["ast"]` as None for the
+# code generator to trip over later.
+identifierList = pidentifier { ',' pidentifier } ( / / | $ ) ;
 pidentifier = /[#@$A-Z][#@$A-Z0-9]*/ ;
 
 anything = /.*/ $ ;

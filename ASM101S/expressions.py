@@ -614,6 +614,70 @@ def printMultiLevelTuple(tin, depth=0):
             printMultiLevelTuple(t, depth+1)
     print(f"{indent(depth)})")
     
+# Resolve the operand of a T' or D' attribute -- a bare symbol, a symbolic
+# variable, or a subscripted one such as `&SYSLIST(1)` or `&SYSLIST(&I,3)` --
+# to the text it stands for.  Returns a (found, text, isArgument) triple, where
+# `found` is False when the variable is not defined at all and `isArgument`
+# says whether it is a macro argument rather than a SET variable or an
+# ordinary symbol.
+def attributeOperand(properties, operand, svLocals):
+    indices = None
+    if isinstance(operand, str):
+        if operand[:1] != "&":
+            return True, operand, False        # an ordinary symbol
+        name = operand
+    elif isinstance(operand, (list,tuple)) and len(operand) == 5 and \
+            operand[1] == "(" and operand[4] == ")" and \
+            isinstance(operand[0], str) and operand[0][:1] == "&":
+        name = operand[0]
+        indices = subscriptList(operand[2], operand[3], svLocals, properties)
+        if indices == None:
+            return False, "", False
+    else:
+        return False, "", False
+    if name in svLocals:
+        value = svLocals[name]
+    elif name in svGlobals:
+        value = svGlobals[name]
+    else:
+        return False, "", False
+    isArgument = isMacroArgument(name, value, svLocals)
+    if indices != None:
+        if isArgument:
+            if name == "&SYSLIST" and indices[0] == 0:
+                value = subscriptMacroArgument(svLocals.get("&SYSLIST0", ""), \
+                                               indices[1:])
+            else:
+                value = subscriptMacroArgument(value, indices)
+        elif len(indices) == 1 and isinstance(value, (list,tuple)):
+            i = indices[0] - 1
+            value = value[i] if 0 <= i < len(value) else ""
+        else:
+            return False, "", False
+    return True, renderMacroArgument(value), isArgument
+
+# The type attribute T'.  The AP-101S macro library tests only two of its
+# values, and they are the two the manuals define for a macro argument
+# (SC26-4940 Table 58):  'O' when the operand was omitted or is null, and 'N'
+# when it is a self-defining term.  A macro argument that is neither -- a
+# symbol name, a sublist -- is 'U', undefined.
+#
+# For anything that is not a macro argument the previous answer of 'C' is
+# kept.  Distinguishing the storage types of an ordinary symbol would need
+# information this function does not have, and inventing an answer would be
+# worse than continuing to give the one the rest of the assembler was written
+# against.
+def typeAttribute(properties, operand, svLocals):
+    found, text, isArgument = attributeOperand(properties, operand, svLocals)
+    if not found:
+        return "U"
+    if not isArgument:
+        return "C"
+    if text == "":
+        return "O"
+    ok, value = selfDefiningTerm(text)
+    return "N" if ok else "U"
+
 # Evaluate the relations EQ, NE, LT, LE, GT, and GE.
 def evaluateRelation(rawLeft, op, rawRight, svLocals, properties):
     left = unroll(rawLeft)
@@ -730,9 +794,11 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
         error(properties, "Implementation error:  %s as boolean expression" \
               % expression)
         return None
-    if len(expression) == 2 and expression[0] == "D'" and \
-            isinstance(expression[1], str):
-        symbol = svReplace(properties, expression[1], svLocals)
+    if len(expression) == 2 and expression[0] == "D'":
+        found, symbol, isArgument = attributeOperand(properties, expression[1], \
+                                                     svLocals)
+        if not found:
+            return False
         return (symbol in definedNormalSymbols)
     # &A(...)
     if len(expression) == 5 and isinstance(expression[0], str) and \
@@ -835,15 +901,8 @@ def evalCharacterExpression(expression, svLocals, properties = { "errors": [] })
                           str(expression))
                     return None
                 s = s + ss[1]
-        elif len(expression) == 2 and expression[0] == "T'" and \
-                isinstance(expression[1], str):
-            symbol = svReplace(properties, expression[1], svLocals)
-            # I only support a tiny percentage of the number of possibilities
-            # presented by the assembly-language manual.  At least for right now.
-            if isinstance(symbol, str):
-                return "C"
-            error(properties, "Implementation error in T'")
-            return None
+        elif len(expression) == 2 and expression[0] == "T'":
+            return typeAttribute(properties, expression[1], svLocals)
         elif len(expression) in [2,3]:
             s = evalCharacterExpression(expression[0], svLocals, properties)
             if s == None:
