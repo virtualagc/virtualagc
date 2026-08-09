@@ -26,8 +26,9 @@ import sys
 import copy
 import random
 from expressions import error, unroll, astFlattenList, \
-    evalArithmeticExpression, svGlobals
+    evalArithmeticExpression, svGlobals, describeExpression
 from fieldParser import parserASM
+from asciiToEbcdic import asciiToEbcdic
 from ibmHex import *
 
 forceDisplacement = True
@@ -753,6 +754,49 @@ for n in list(impliedR1):
 # I've simply chosen a number here that while far less than the maximum, should
 # be overkill for Shuttle flight software.
 dcBuffer = bytearray(1024)
+
+# Evaluate a DC or DS length modifier and return it in BYTES.
+#
+# `Ln` is a length in bytes and `L.n` one in BITS (GC28-6514-8).  The whole
+# token list, leading 'L' and all, used to be handed straight to the arithmetic
+# evaluator, which could make nothing of a bare 'L' -- so EVERY length modifier
+# failed, not merely the bit form, and `XL8`, `CL4` and `FL2` were as broken as
+# `XL.8`.  RUNASM contains no length modifier at all, which is why 205 of 205
+# never noticed; one FCOS module alone produced 312 of the resulting
+# diagnostics.
+#
+# A bit length that is a whole number of bytes is simply that many bytes, which
+# covers `L.8` -- by far the commonest form in the corpus, and just a way of
+# writing one byte.  Anything else would change how the value is packed and is
+# diagnosed rather than approximated.
+def evalLengthModifier(properties, tokens):
+    tokens = unroll(tokens)
+    if isinstance(tokens, str):
+        tokens = [tokens]
+    tokens = list(tokens)
+    if tokens and tokens[0] == "L":
+        tokens = tokens[1:]
+    bits = False
+    if tokens and tokens[0] == ".":
+        bits = True
+        tokens = tokens[1:]
+    sign = 1
+    if tokens and tokens[0] in ("+", "-"):
+        if tokens[0] == "-":
+            sign = -1
+        tokens = tokens[1:]
+    value = evalArithmeticExpression(tokens, {}, properties)
+    if value == None:
+        return None
+    value *= sign
+    if not bits:
+        return value
+    if value % 8 != 0:
+        error(properties, \
+              "A bit length modifier that is not a whole number of bytes "
+              "(L.%d) is not implemented" % value)
+        return None
+    return value // 8
 
 # Replicate the first `length` bytes of `dcBuffer`, which are one copy of the
 # data a DC generates, until the buffer holds `duplicationFactor` copies of
@@ -1501,16 +1545,47 @@ def generateObjectCode(source, macros):
                         lengthModifier = None
                     else:
                         lengthModifier = \
-                            evalArithmeticExpression(suboperand["l"], {}, \
-                                                     properties)
+                            evalLengthModifier(properties, suboperand["l"])
                         if lengthModifier == None:
-                            error(properties, "Could not evaluate length modifier")
+                            error(properties, \
+                                  "Could not evaluate the length modifier '%s'" \
+                                  % describeExpression(suboperand["l"]))
                             continue
                     astValue = suboperand.get("v")
                     if suboperandType == "C":
+                        # Character constants used to generate NOTHING here --
+                        # no bytes, no advance of the location counter, and no
+                        # diagnostic either.  RUNASM contains no `DC C'...'`
+                        # anywhere, so 205 of 205 never showed it.
                         commonProcessing(1)
-                        
-                        pass
+                        if operation == "DC":
+                            quoted = suboperand["v"][0]
+                            text = quoted[1]
+                            for piece in quoted[2]:
+                                # "''" inside a string is one quote.
+                                text += "'" + piece[1]
+                            text = text.replace("&&", "&")
+                            if lengthModifier != None:
+                                # Padded on the RIGHT with blanks, or truncated
+                                # on the right, which is what distinguishes a
+                                # character constant from the numeric types.
+                                text = text[:lengthModifier]
+                                text += " " * (lengthModifier - len(text))
+                            dcBufferPtr = 0
+                            for character in text:
+                                dcBuffer[dcBufferPtr] = \
+                                    asciiToEbcdic[ord(character)]
+                                dcBufferPtr += 1
+                            length = dcBufferPtr
+                            dcBufferPtr = replicateDC(properties, length, \
+                                                      duplicationFactor)
+                            toMemory(dcBuffer[:dcBufferPtr])
+                            continue
+                        length = lengthModifier
+                        if length == None:
+                            length = len(suboperand["v"][0][1])
+                        toMemory(duplicationFactor * length)
+                        continue
                     elif suboperandType == "X":
                         commonProcessing(1)
                         # Adjust the string to have an even number of digits,
@@ -1555,7 +1630,17 @@ def generateObjectCode(source, macros):
                         else:
                             commonProcessing(length)
                         if lengthModifier != None:
-                            pass
+                            # Honour it, rather than the `pass` that used to
+                            # stand here and left F and H at their natural 4
+                            # and 2 bytes however they were written.
+                            if lengthModifier < 1:
+                                error(properties, \
+                                      "Length modifier %d is out of range" % \
+                                      lengthModifier)
+                                continue
+                            length = lengthModifier
+                            multiplier = 1 << (8 * length - 1)
+                            mask = (1 << (8 * length)) - 1
                         if operation == "DC":
                             # `suboperand["v"]` holds ONE quotedFloatList, and
                             # every value after the first lives inside its

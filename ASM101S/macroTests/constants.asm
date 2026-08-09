@@ -45,4 +45,20 @@ BA       DC    Y(B1)
 BB       DC    Y(B1,B2)
 BC       DC    2Y(B1,B2)
 BZ       DC    F'9'
+*/ Length modifiers.  Ln is a length in bytes, L.n one in bits.
+*/ RUNASM contains no length modifier at all, so none of this is
+*/ covered by regressionASM101S.sh.
+C1       DC    XL8'A'
+C2       DC    XL.8'A'
+C3       DC    FL2'1'
+C4       DC    HL4'1'
+*/ Character constants, which generated nothing whatever before
+*/ 2026-08-09 -- no bytes, no advance, and no diagnostic.  They
+*/ are EBCDIC, right-padded with blanks or truncated on the
+*/ right to the length modifier, and '' is one quote.
+C5       DC    C'AB'
+C6       DC    CL4'AB'
+C7       DC    CL1'AB'
+C8       DC    C'A''B'
+C9       DC    2C'X'
          END

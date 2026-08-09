@@ -354,6 +354,25 @@ def astFlattenList(ast):
         import sys
         sys.exit(1)
 
+# Render a parsed expression back into something close to the source text it
+# came from, for use in diagnostics.  The AST is mostly nested lists of the
+# original tokens, so flattening it recovers the text well enough to identify
+# which statement is at fault -- which is the whole difficulty with a message
+# like "Eval error type 3", that names nothing at all.
+def describeExpression(expression, depth=0):
+    if depth > 12:
+        return "..."
+    if isinstance(expression, str):
+        return expression
+    if isinstance(expression, dict):
+        return ''.join(describeExpression(v, depth + 1)
+                       for k, v in expression.items() if k != "parseinfo")
+    if isinstance(expression, (list, tuple)):
+        return ''.join(describeExpression(e, depth + 1) for e in expression)
+    if expression == None:
+        return ""
+    return str(expression)
+
 # Evaluate an arithmetic expression to an integer and return it, or else `None`
 # on failure.  `properties` is for the line of source code.  `expression` is
 # the parsed expression, as returned by the parser function.  `svLocals` and
@@ -444,7 +463,20 @@ def evalArithmeticExpression(expression, \
                     pass
                 return value
     if not isinstance(expression, (list, tuple)):
-        error(properties, "Eval error type 1", severity)
+        # A bare term that resolved to nothing.  Having got this far it is not
+        # a number, not a symbolic variable, not '*', and either absent from
+        # the symbol table or present without a value yet -- and those two are
+        # worth telling apart, because the second is an ordinary forward
+        # reference on an early pass and the first is a real undefined symbol.
+        if isinstance(expression, str):
+            if expression in symtab:
+                error(properties, \
+                      "Symbol '%s' has no value yet" % expression, severity)
+            else:
+                error(properties, "Undefined symbol '%s'" % expression, severity)
+        else:
+            error(properties, "Not an arithmetic term: %s" % \
+                  describeExpression(expression), severity)
         return None
     if len(expression) == 5 and expression[1] == "(" and expression[4] == ")" \
             and isinstance(expression[0], str) and expression[0].startswith("&"):
@@ -614,10 +646,18 @@ def evalArithmeticExpression(expression, \
                                     quotient = -quotient
                                 left = int(quotient)
                     else:
-                        error(properties, "Eval error type 2", severity)
+                        # The right-hand operand of an arithmetic operator.
+                        error(properties, \
+                              "Cannot evaluate '%s' in the expression '%s'" % \
+                              (describeExpression(entry[1]),
+                               describeExpression(expression)), severity)
                         return None
                 return left
-    error(properties, "Eval error type 3", severity)
+    # Nothing in the evaluator recognised the shape of this expression.  Show
+    # it, because the alternative -- the bare "Eval error type 3" this replaced
+    # -- was the commonest diagnostic in the FCOS corpus and identified nothing.
+    error(properties, "Cannot evaluate the expression '%s'" % \
+          describeExpression(expression), severity)
     return None
 
 # For debugging ...
