@@ -6,18 +6,25 @@
 (`cards/`) into a PASS/OS360-style object deck that `lnk101` can link and
 `yaGPC2` can run. A full corpus sweep (95 standalone `PROGRAM` files in
 `../Programming in HAL-S/`, both pipelines, `--outfile6` capture + run
-status) now shows **63/95 halting cleanly under BFS, 64/95 matching PFS's
-output exactly** — every known category of bug chased in this document
-(stack/PDE linkage for plain programs, `ON ERROR` entry shapes, `TASK`
-per-task stacks, and a halt-code write that corrupted real program data)
-is fixed and verified. What's left is small and separately scoped — see
-"Open items" below.
+status) showed **63/95 halting cleanly under BFS, 64/95 matching PFS's
+output exactly** as of the last sweep — every known category of bug
+chased in this document (stack/PDE linkage for plain programs,
+`ON ERROR` entry shapes, `TASK` per-task stacks, and a halt-code write
+that corrupted real program data) is fixed and verified, and the two
+files that were open at that point (`097-SAMPLE_FLOW.hal`,
+`184-EXAMPLE_N.hal`) have since also been resolved — at the source-file
+level, not as `pilotToIbm` bugs. **No known open `pilotToIbm` bugs
+remain** as of this writing; what's left (below) is out of scope for
+this tool. A fresh full sweep hasn't been re-run since the last two
+fixes landed — expect ~66/95 matching, but verify before relying on that
+number for anything load-bearing.
 
 **Fixed and verified** (regression checks — same steps as below,
 substituting the filename, dropping `--verbose`): `HELLO.hal`,
 `197-P.hal`, `193-TEST_X.hal`, `037-ROOTS.hal`, `219-P.hal`,
-`222-MULTI.hal` (fixed at the *source* level — see below),
-`130-EXAMPLE_N.hal`, `031-DECLARE3.hal`, `052-TABLE.hal`,
+`222-MULTI.hal`, `097-SAMPLE_FLOW.hal`, `184-EXAMPLE_N.hal` (all four of
+these last fixed at the *source* level, not in `pilotToIbm` — see
+below), `130-EXAMPLE_N.hal`, `031-DECLARE3.hal`, `052-TABLE.hal`,
 `080-EXAMPLE_4A.hal`, `137-STATISTICS.hal`, `138-FILTER.hal`,
 `177-P.hal`, `GOOGLE-PARALLAX.hal`.
 
@@ -62,13 +69,35 @@ illustrates an unprotected race condition between the program and its
 `INITIAL(1)` so the file is deterministic; both builds now print
 identical output.
 
-## Open items
+## Fixed: two more uninitialized-variable test files (not `pilotToIbm` bugs)
 
-- **`097-SAMPLE_FLOW.hal` and `184-EXAMPLE_N.hal`**: both exit 0 under
-  both PFS and BFS, but output differs. Predate all the fixes above (not
-  a new regression) and haven't been investigated — unknown whether
-  they're a real `pilotToIbm` bug or something else (e.g. another
-  uninitialized-variable case like the original `222-MULTI.hal`).
+Both turned out to be the same class of issue as `222-MULTI.hal` — an
+`INTEGER` `WRITE(6)`'d without the real program logic ever assigning it.
+Checked the HAL/S Language Specification (USA003088, Nov 2005, Sec 4.8)
+to settle whether one build's behavior was more "correct": it explicitly
+guarantees a zero/FALSE default for BIT/BOOLEAN/EVENT types when
+`INITIAL` is omitted, but conspicuously makes **no** such guarantee for
+INTEGER/SCALAR types — so neither PFS's stack garbage nor BFS's `0` was
+more right than the other; both are legitimate readings of genuinely
+undefined behavior.
+
+- `097-SAMPLE_FLOW.hal`: `K`/`L` are only ever set inside `LOOP2`/`LOOP3`,
+  but tracing the control flow shows the outer `DO UNTIL FALSE` always
+  exits via `ELSE EXIT` before reaching them (`I` becomes `-1` after the
+  first `REPEAT`) — `LOOP2`/`LOOP3` are dead code as adapted from the
+  book. Gave `K`/`L` real `INITIAL(0)`.
+- `184-EXAMPLE_N.hal`: `SELECT_BEST`'s `ASSIGN(SELECTED)` parameter is
+  never assigned anywhere in the visible/elided procedure body, so `BEST`
+  (which receives it via `CALL ... ASSIGN(BEST)`) read `SELECTED`'s own
+  garbage. `INITIAL` isn't legal on a formal `ASSIGN` parameter (HAL/S
+  rejects it outright — a real compile error hit while fixing this, not
+  a hypothetical), so used a real assignment statement (`SELECTED = 1;`)
+  at the top of the procedure instead.
+
+Verified directly: both now produce byte-identical PFS/BFS output.
+
+## Open items (out of scope for `pilotToIbm`)
+
 - **6 files fail to compile under `HALSFC --bfs` itself**
   (`029-DATATYPES.hal`, `198-P.hal`, `199-P.hal`, `200-A.hal`,
   `203-A.hal`, `205-LOG10.hal`) — PASS2 rejects them with `ONLY ONE
@@ -126,5 +155,6 @@ Useful tools used throughout this investigation:
 - `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py` — someone else's repo,
   read-only: `stackCsectNames()`/`patchStackPDEs()` document what
   triggers stack-section generation and PDE binding.
-- `../Programming in HAL-S/*.hal` — the corpus; `097-SAMPLE_FLOW.hal` and
-  `184-EXAMPLE_N.hal` are the only known open cases.
+- `../Programming in HAL-S/*.hal` — the corpus; no known open cases as of
+  this writing (see "Status" above for the one caveat: re-run the full
+  sweep before relying on that).
