@@ -518,6 +518,67 @@ RE-MEASURE BEFORE CHOOSING.
      than implemented, and accounts for 1758 occurrences in 3 modules.  And
      #CNOP's padding instruction is still unknown.
 
+Item 2 of the list above is done for the short forms, 2026-08-09.  Three
+formats, 31 of the 61 mnemonics, in ASM101S/model101tables.py as mscMemory,
+mscBranch and mscImmediate:
+
+  memory reference   OP(4) M(1) DISP(11)   @L 4 @A 5 @N 6 @X 7 @ST 8 @TSZ 9
+  branch             OP(4)=0010 M(1) CC(3) DISP(8)
+  immediate          OP(8) VALUE(8)        @LI EF @LXI EB @TXI EA and six more
+
+Both PC-relative forms count in HALFWORDS from the UPDATED PC, the halfword
+after the instruction.  M is the index-mode flag and is 1 exactly when the
+operand carries an index, `@L TSTMASK(1)`; it is also the only thing that
+separates @BXNN (0x2D) from @BNN (0x25).
+
+THE BRANCH FORMAT IS DOCUMENTED and the earlier note that it was not is wrong.
+The POO's @BC and @BXC pages, manual II-38 and II-39, give the layout, say the
+displacement is added to the updated MSC program counter, and tabulate all
+eight condition codes against both the accumulator and the index mnemonics.
+Beware the opposite error too: the POO's "Short format 1 ... OP M DISP"
+passage is in its BCE section and does NOT describe the MSC memory references,
+which are in no manual and were read off the original build.
+
+HOW IT WAS VERIFIED, which is the part worth copying.  Every MSC instruction
+in ~/workspace/PFS/"OI301700 as received"/SSSRC whose operand symbol is
+defined in the same listing was re-encoded from scratch -- displacement
+recomputed from that listing's own label addresses -- and compared against the
+listing's object code.  318 instructions, 21 mnemonics, ZERO mismatches.  That
+is the standard for the rest, and it is cheap: the listings carry both the
+symbol definitions and the answer.
+
+WHAT IS DELIBERATELY LEFT UNENCODED, and why it must stay that way.  The long
+forms F0 to FD.  @DLY, @INT, @RAW and @STP, whose HIGH BYTE VARIES (@DLY
+C0/C8, @INT 30/38/3B, @RAW D0/D8, @STP 10/12), so byte 0 carries a modifier
+the simple split does not explain.  And @LMS @NIX @RBI @RFD @SFD @SIO @TAX
+@XAX @WAT, which appear only ever with a ZERO operand -- their high byte is
+constant but a zero operand fits any layout, so the evidence does not
+constrain the boundary.  All of these still announce themselves.  A wrong
+halfword that assembles quietly is worse than four zero bytes and an error.
+
+THREE MNEMONICS ASM101S DID NOT KNOW turned up on the way, all in argsMSC.
+@BP was simply absent.  @BXC and @CALL were lost to a MISSING COMMA -- the
+table read "@BXC" "@CALL": -1, which Python concatenates into the single
+nonexistent key @BXC@CALL, so two real mnemonics vanished and an impossible
+one stood in for them.  Worth grepping the other tables for the same shape.
+
+MEASUREMENTS.  RUNASM stays 205 of 205 byte-exact under --no-rtl-fixes.  The
+FCOS sweep is UNMOVED at OK 64 / ERRORS 143 / CRASH 16 / HANG 2, and that is
+the expected result rather than a disappointment: what changed is the
+correctness of the bytes, which the sweep does not measure.  118 of the 284
+MSC uses in the OI340600 sources now assemble instead of diagnosing; the
+remainder are led by @LBP 37, @LF 17, @BU 15, @STH 12, @STF 10, all long
+forms, so the long forms are where the next MSC effort pays.
+
+A TIMEOUT TRAP, since it cost a wrong reading here.  At FCOS_TIMEOUT=120 the
+sweep reported CRASH 14 / HANG 6, and the six were the MSC-heavy modules,
+which looks exactly like a new runaway loop.  It was not.  FIOCMPLT takes 113
+seconds and ends in the known KeyError 'preliminaryOffset'.  Modules that now
+generate code take longer than modules that bailed out early, so a fix that
+makes progress can manufacture HANGs out of nothing.  Re-run at 600 before
+believing a HANG, and note that a sweep run concurrently with the regression
+inflates every time on the machine.
+
 THE "AS RECEIVED" LISTINGS ARE THE PRIMARY EVIDENCE FCOS HAS BEEN LACKING.
 ~/workspace/PFS/"OI301700 as received"/SSSRC holds, for each module, a listing
 that gives the OBJECT CODE THE ORIGINAL BUILD GENERATED for every statement,
