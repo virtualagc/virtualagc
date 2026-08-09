@@ -71,6 +71,16 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** THE BRANCH FORMAT IS DOCUMENTED. The POO's @BC and @BXC pages (extracted text around line 17700 of AP-101S-instruction-set.txt, manual pages II-38 and II-39) give the layout, state explicitly that the 8-bit two's complement signed displacement 'is added to the updated MSC program counter' with a range of -128 to +127 halfwords, and tabulate all eight condition codes with their extended mnemonics: 1 @BP/@BXP, 2 @BN/@BXN, 3 @BNZ/@BXNZ, 4 @BZ/@BXZ, 5 @BNN/@BXNN, 6 @BNP/@BXNP, 7 @B. The accumulator and index-register forms differ only in the M bit, which is why @BNN is 0x25 and @BXNN 0x2D. THE MEMORY-REFERENCE AND IMMEDIATE FORMATS ARE NOT documented anywhere findable; beware that the POO's 'Short format 1 ... OP(4) M(1) DISP(11)' passage belongs to the BCE section, not the MSC one, and citing it for MSC would be a misattribution. Those two formats were derived from the original build in ~/workspace/PFS/'OI301700 as received'/SSSRC. ALL THREE were then verified by re-encoding from scratch: for every MSC instruction in those listings whose operand symbol is defined in the same listing, the expected halfword was computed from the listing's own label addresses and compared against the listing's object code. 318 instructions across 21 mnemonics matched byte for byte, with ZERO mismatches. The immediate split is listed only for mnemonics proven by a NON-ZERO operand somewhere in the corpus; one seen only with a zero operand would fit any layout and was deliberately left unencoded.
 
+### `R0-R7 and the symbolic equates`
+
+**Processor:** assembler  
+**Confidence:** derived  
+**Encoding certainty:** verified
+
+**What it does.** ASM101S does NOT predefine the register symbols R0 through R7, and nothing says it should. They come from a macro-library member: MACSMITH defines R0-R7 as 0-7, B0-B3 as 0-3 and F0-F5 as 0-5, and OI340600 carries the same equates in FAZ2MAC, DCIEQUAT and FTBEGIN as well. A source that writes R3 without copying one of those members has an undefined symbol, correctly.
+
+**How this was established.** Measured rather than assumed. RUNASM contains 6809 textual occurrences of R0-R7 and defines none of them, because every one is inside a comment; it assembles 205 of 205 byte-exact regardless. The FCOS modules that use them as symbols define them, 54 EQUs across OI340600. MACSMITH.asm in both versions' MLIB80 is the library member that does it. This settles the remaining half of issue #1333, whose HAL/S-compiler output uses R0-R7 as symbols: what it needs is the equates member, not a change to the assembler.
+
 ### `continuation column`
 
 **Processor:** assembler  
@@ -211,4 +221,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-15 entries.
+16 entries.
