@@ -39,19 +39,14 @@ a rising clean-halt count as proof of progress.
   scope for this document.
 
 The other 2 (of the original 9 — `219-P.hal` moved to fixed above) no
-longer crash/trap at all — both now exit 0, and one has since been fixed
-at the source-file level:
+longer crash/trap at all — both now exit 0, and both have since been
+root-caused (`130-EXAMPLE_N.hal` below; `222-MULTI.hal` fixed at the
+source level):
 
-- **`130-EXAMPLE_N.hal`**: a real, small numeric discrepancy. PFS prints
+- **`130-EXAMPLE_N.hal`**: a real, small numeric discrepancy — PFS prints
   `THE ANSWER IS      2.4990000E+05`; BFS prints
-  `THE ANSWER IS      2.4989994E+05` — off by ~0.06. The program is a
-  `DO FOR V = 250000 TO 0 BY -100 UNTIL ...` loop whose `ALMOST_EQUAL`
-  condition is unconditionally `TRUE`, so it should run exactly one
-  iteration and exit with `V` at exactly `249900` — PFS gets that
-  exactly, BFS doesn't. Does not use `TASK`/`SCHEDULE` (checked), so this
-  is unrelated to the stack-linkage work — looks like a genuine
-  floating-point/loop-control codegen difference somewhere in the
-  BFS→PILOT→`pilotToIbm` path, not a linkage gap.
+  `THE ANSWER IS      2.4989994E+05`. **Root-caused, see below** — same
+  bug as the 7-file regression in the next section.
 - **`222-MULTI.hal`**: **fixed at the source-file level, not a
   `pilotToIbm` bug.** It was `DECLARE SCALAR, A, B, C INITIAL(20);` —
   `INITIAL` binds only to the immediately-preceding name in HAL/S, so
@@ -72,39 +67,94 @@ at the source-file level:
   (`@1MULTI`) is structurally correct, since `222-MULTI.hal` uses the
   same `@1<char>` mechanism. Moved to the fixed list above.
 
-## New regression: several previously-correct files now produce wrong output
+## Root cause found: hardcoded halt-SVC displacement corrupts real data
 
-Comparing the sweep that found the fixes above against a fresh sweep of
-the *current* `pilotToIbm`: 7 files that previously matched PFS exactly
-now produce silently wrong (but non-crashing) output. Symptoms range from
-tiny to severe:
+This explains both `130-EXAMPLE_N.hal`'s discrepancy and the 7-file
+regression below — they're the same bug, **fully confirmed, with an
+exact fix identified.**
 
-- Small floating-point drift: `031-DECLARE3.hal` (`3.0000000E+00` →
-  `3.0000200E+00`), `080-EXAMPLE_4A.hal` (`4.0000000E+02` →
-  `4.0000513E+02`), `137-STATISTICS.hal` (`5.0500000E+01` →
-  `5.0499832E+01`), `138-FILTER.hal` (two values, both off by ~1e-5
-  relative), `177-P.hal` (`9.0000000E+00` → `9.0000200E+00`).
-- Exact-integer drift: `052-TABLE.hal` — `1073741824` (2^30, part of a
-  doubling sequence) → `1073741845`, off by exactly 21.
-- Severe: `GOOGLE-PARALLAX.hal` — `6.2814549896283003E+13` →
-  `1.8600000000000001E+08`, a completely different magnitude, not a
-  rounding error.
+`pilotToIbm`'s halt-code synthesis (whatever superseded
+`synthesize_pass_stack_linkage()`) appends a `C9 F9 00 00` halt SVC to
+every program's code and unconditionally writes `0x0015` into
+`#D<char>[0:2]` (displacement 0), matching what it observed in
+`HELLO.hal` and `197-P.hal`. **But displacement 0 is not a universal
+constant — it's specific to those two files' particular data layout.**
+Confirmed directly by dumping PFS's own real object files with
+`readObject101S.py`:
 
-Note `031-DECLARE3.hal` and `177-P.hal` both end in the exact same
-suffix, `...0000200E+00` — both are the *last element of a 3-vector*
-being printed, which may be a real clue (a fixed-offset corruption
-pattern rather than random noise). None of these 7 files use `TASK`;
-whatever changed between the sweep that found the `TASK`-stack fix and
-this one appears to have introduced a new, distinct bug — possibly in
-how much stack space gets allocated/laid out for non-`TASK` programs now
-that the `TASK`-stack code path exists, since several of the affected
-files use vectors/arrays (more stack-resident temporaries) rather than
-plain scalars. **Not yet root-caused — flagging so it doesn't get missed
-under the "clean-halt count went up" headline number.**
+- `HELLO.hal` PFS: halt SVC is `C9 F9 00 00` — displacement 0.
+- `197-P.hal` PFS: halt SVC is `C9 F9 00 00` — displacement 0.
+- `130-EXAMPLE_N.hal` PFS: halt SVC is **`C9 F9 00 02`** — displacement
+  **2**, not 0.
 
-Two more `DIFF` rows in the fresh sweep, `097-SAMPLE_FLOW.hal` and
-`184-EXAMPLE_N.hal`, are **not** new — both already mismatched before
-this round of fixes too; not investigated yet either way.
+So for any file where the real slot isn't at offset 0 (like
+`130-EXAMPLE_N.hal`), `pilotToIbm`'s write lands on top of whatever real
+data happens to be there instead — and the write doesn't even need to
+happen: `130-EXAMPLE_N.hal` still halts correctly (exit 0) with the
+"wrong"-displacement `C9F9 0000` and no `0x0015` at `#D+0`, meaning
+`yaGPC2`'s halt detection doesn't actually check the referenced memory
+value — it's triggered by the `C9F9`-pattern SVC instruction itself. **The
+`0x0015` write is pure damage with no corresponding benefit.**
+
+Traced `130-EXAMPLE_N.hal`'s exact discrepancy to this directly
+(`yaGPC2 --trace`): the `-100.0` step-constant in its `DO FOR` loop is
+stored at `#DEXAMPL[0:2]` — clean `C2 64 00 00` under PFS, corrupted to
+`C2 64 00 15` under BFS, i.e. exactly the halt code overwriting the
+constant's low mantissa bytes. `-100.0000032...` instead of exactly
+`-100.0` (both should be bit-identical, since 250000 and all `DO FOR`
+step values here are small integers exactly representable in IBM hex
+float — this is corruption, not rounding).
+
+The same mechanism explains most of the 7-file regression below —
+verified numerically for several by reconstructing "clean value, low 2
+mantissa bytes forced to `0x0015`" and matching the observed BFS output
+exactly:
+
+- `031-DECLARE3.hal`: `3.0` → `41300015` = `3.0000200271606445` — matches
+  observed `3.0000200E+00` exactly.
+- `177-P.hal`: same `...0015` pattern, matches `9.0000200E+00` exactly.
+- `052-TABLE.hal`: `1073741824` → `+21` — **`0x0015` = 21 decimal**,
+  matches the observed exact-integer offset precisely.
+- `080-EXAMPLE_4A.hal`: `400.0` → `43190015` = `400.005126953125` —
+  matches observed `4.0000513E+02` closely (rounding in the printed
+  digits).
+- `137-STATISTICS.hal`, `138-FILTER.hal`: didn't match a naive
+  "corrupt-the-displayed-literal-directly" reconstruction — these values
+  are *computed* (a mean, a running average), so the corruption is
+  probably hitting a different literal (a divisor, an accumulator) that
+  then propagates through arithmetic rather than appearing verbatim in
+  the output. Same root cause is still the leading hypothesis; not
+  independently confirmed byte-for-byte the way the others were.
+- `GOOGLE-PARALLAX.hal`: **doesn't fit this pattern** — its `pilotToIbm
+  --verbose` log shows no `set #D...` line at all (meaning `#D[0:2]` was
+  already `0x0015` before this step, so nothing was written), yet its
+  output is wrong by 5 orders of magnitude. Needs its own investigation;
+  don't assume it's covered by the fix below.
+
+`031-DECLARE3.hal` and `177-P.hal` both corrupting their vector's *last
+element* to the exact same value is not a coincidence — it's the same
+fixed-displacement-0 write landing on the same relative position in
+both files' data layout.
+
+Two more `DIFF` rows from the sweep, `097-SAMPLE_FLOW.hal` and
+`184-EXAMPLE_N.hal`, are **not** part of this regression — both already
+mismatched before this round of fixes too; not investigated yet either
+way.
+
+### The fix
+
+Given the halt SVC works regardless of its displacement or of what's in
+memory there, the simplest correct fix is almost certainly to **stop
+writing `0x0015` into `#D<char>` at all** — it was reverse-engineered
+from two files where it happened to be harmless, isn't actually needed
+for `yaGPC2` to detect the halt, and actively corrupts real data in every
+other file's layout. If full fidelity to PFS's exact halt-SVC
+displacement is wanted for some other reason, the real displacement
+would need to be computed from the program's actual data layout (visible
+in PFS's own compiled output per file), not hardcoded — but given the
+write isn't required for correct behavior, removing it outright is
+probably the right call rather than trying to compute the "real"
+offset.
 
 ## How to reproduce
 
@@ -120,9 +170,10 @@ lnk101 197-P.obj -o 197-P.fcm --json-symbols 197-P-lnk101.json
 yaGPC2 --interactive --no-trace --no-verbose --symbols 197-P-lnk101.json \
        --line-width 240 --outfile6 out6.txt 197-P.fcm
 # now exits 0 with correct output -- this file is fixed; substitute
-# 130-EXAMPLE_N to reproduce that open problem, or 031-DECLARE3 /
-# 052-TABLE / 080-EXAMPLE_4A / 137-STATISTICS / 138-FILTER / 177-P /
-# GOOGLE-PARALLAX to reproduce the new regression below.
+# 130-EXAMPLE_N / 031-DECLARE3 / 052-TABLE / 080-EXAMPLE_4A / 177-P to
+# reproduce the now-root-caused halt-SVC-displacement bug below, or
+# GOOGLE-PARALLAX (still unexplained) or 137-STATISTICS / 138-FILTER
+# (same root cause suspected, not independently confirmed).
 ```
 
 Use `--trace` in place of `--no-trace` (with `--max-steps N` to keep the
@@ -138,57 +189,34 @@ with exit 0 and correct output.
 
 (This section originally covered `197-P.hal`'s now-fixed entry-prologue
 gap, then `219-P.hal`'s now-fixed per-`TASK` stack gap; the hand-decode/
-compare approach below is the same one that found both and is the
-natural starting point for the open cases too.)
+compare + `--trace` approach that found both is also what found the
+halt-SVC-displacement bug above.)
 
-**For the new regression (7 files, see above) — probably the
-higher-priority investigation now**, since it affects files that used to
-work: whatever change fixed `219-P.hal`'s per-`TASK` stack likely also
-touched how stack space is computed/laid out for plain (non-`TASK`)
-programs. Compare `lnk101`'s section-table output (stack section size,
-`#D<char>` size/placement) for one regressed file, e.g. `031-DECLARE3.hal`,
-against a git-stashed prior version of `pilotToIbm` (or against a file
-that still works, e.g. `HELLO.hal`) to see what's different about how
-its stack/data sections are now sized or placed. The repeated
-`...0000200E+00` suffix on two unrelated files' *last vector element* is
-worth chasing specifically — sounds like a fixed-offset write landing one
-element past where it should.
+For `GOOGLE-PARALLAX.hal`, the one case the halt-SVC fix above doesn't
+explain:
 
-For `130-EXAMPLE_N.hal`'s numeric discrepancy (unrelated to the above —
-it was already wrong before this round of fixes):
-
-- Hand-decode the raw PILOT member the same way `parse_pilot_member()`
-  does, and compare its ESD/RLD/TXT records against the equivalent
-  PFS-compiled module (dump the PFS `.obj` with
-  `/home/rburkey/git/virtualagc/ASM101S/readObject101S.py`) — this is
-  what found the original `@0<prog>` ER / `#E<prog>` PDE gap and the
-  per-`TASK` one.
-- Since output is only *slightly* off (not garbage), a `--trace`
-  disassembly of the `DO FOR ... BY -100` loop's step/compare
-  instructions (both builds, side by side) is probably more direct here
-  than the ESD/RLD comparison — look for where the loop-control
-  arithmetic diverges between the two builds.
-- `../PASS2.PROCS/OBJECTGE.xpl` is the original historical PASS2
-  object-emission source (`?P`/`?B`-conditionalized for PASS vs. BFS, no
-  Python port exists yet) — may or may not be relevant here since this
-  isn't obviously a linkage issue; worth a quick check for `DO FOR`
-  step-arithmetic codegen differences between the two conditionals.
-- `~/donschmidt/nsts-sdl-dps/src/lnk101/linker.py` (someone else's repo,
-  read-only) — `stackCsectNames()` and `patchStackPDEs()` document what
-  triggers stack-section generation and PDE binding; kept for reference
-  in case `130-EXAMPLE_N.hal` turns out to be linkage-related after all,
-  but the symptom doesn't point that way.
+- Same approach as before: `readObject101S.py`-dump the PFS `.obj`,
+  hand-decode the BFS PILOT member, compare ESD/RLD/TXT, and use
+  `yaGPC2 --trace` to find exactly where the two builds' instruction
+  streams or register values diverge — this worked for every case so far
+  and there's no reason to expect it won't here too.
+- Since the halt-SVC write wasn't the cause here (confirmed — no
+  `set #D...` line in `pilotToIbm --verbose`'s output for this file),
+  look elsewhere in whatever synthesizes stack/PDE/halt linkage for
+  another place a fixed offset might be assumed instead of computed.
 
 ## Next steps
 
-- **Root-cause the new 7-file regression first** — it's the highest
-  priority: real, previously-working files broke. Start with
-  `031-DECLARE3.hal` or `177-P.hal` (small, single vectors, easy to
-  hand-trace) rather than `GOOGLE-PARALLAX.hal` (bigger discrepancy but
-  a bigger program).
-- Investigate `130-EXAMPLE_N.hal`'s small numeric discrepancy (see
-  above) — unrelated to the regression, was already wrong before this
-  round of fixes.
+- **Remove the `#D<char>[0:2] = 0x0015` write** (see "The fix" above) —
+  root-caused and fixes `130-EXAMPLE_N.hal` plus most/all of the 7-file
+  regression in one change. Re-verify `HELLO.hal`/`197-P.hal`/etc. still
+  halt correctly afterward (they should, since the write was never what
+  made them halt).
+- After that fix, re-check `137-STATISTICS.hal` and `138-FILTER.hal`
+  specifically — same root cause suspected but not independently
+  confirmed byte-for-byte the way the others were.
+- `GOOGLE-PARALLAX.hal` is not covered by the fix above — investigate
+  separately (see "Likely cause" above).
 - Track `out6`-match count, not just clean-halt count, on every future
   sweep — this round is exactly why: clean-halt count went up (60→61)
   while match count went down (63→53) in the same comparison. A rising
