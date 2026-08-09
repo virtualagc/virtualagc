@@ -355,10 +355,16 @@ FCOS IS WHERE THE WORK IS.  Of OI340600's 225 modules, assembled against MLIB80,
 before this stretch of work began and now:
 
                     before   after
-    OK                  21      70
-    ERRORS              33     137
+    OK                  21      64
+    ERRORS              33     143
     CRASH              170      16
     HANG                 1       2
+
+THE OK COLUMN IS NOW HONEST, WHICH COST IT SIX.  It stood at 70 until the MSC
+instructions were made to admit that they are not encoded; six modules using
+them dropped to ERRORS, having contained wrong object code all along.  Read a
+fall in OK for that reason as the column becoming truthful rather than the
+assembler getting worse.
 
 NOTHING HANGS, and CRASH has fallen by more than nine tenths.  Read the ERRORS column as
 the real measure of progress: a module there has been assembled far enough to
@@ -463,15 +469,16 @@ RE-MEASURE BEFORE CHOOSING.
      modules/sdfpkg/fcos-diagnostics.sh and .py with --min-severity=8, and
      SPLIT ANY LARGE FAMILY BY MODULE before believing its size.
 
-  2. THE '@' MSC INSTRUCTIONS, 61 of them, still emit four zero bytes
-     SILENTLY.  This is now the only place in the assembler that produces
-     wrong object code without saying so, and modules counted OK use them, so
-     the OK column overstates what is correct.  Either encode them -- 48 of
-     the 61 appear in the original build with their real encodings, and the
-     branches are already worked out as high nibble 2 over the condition code
-     -- or make them announce themselves as the BCE ones now do.  DO NOT LEAVE
-     THEM SILENT.  This is the most important item on the list even though it
-     is not the largest.
+  2. ENCODE THE '@' MSC INSTRUCTIONS.  They no longer fail silently -- that
+     was done on 2026-08-09 and cost the OK column six modules that had been
+     wrong all along -- but they are still not encoded, and 40-odd modules
+     cannot be correct until they are.  Everything needed is in
+     ASM101S/ap101s-notes.db under "MSC instruction set": 47 of the 61 appear
+     in the original build with their real encodings, in three regular groups,
+     with the branch mapping already matched against the POO's condition-code
+     table.  The 14 with no observed encoding will need the POO.  Verify each
+     one against the listings as the BCE long forms were, which matched byte
+     for byte.
 
   3. THE TWO-BYTE BCE INSTRUCTIONS, 40 modules and 2845 occurrences, which is
      ASM101S saying honestly that it does not know their encoding.  Needs the
