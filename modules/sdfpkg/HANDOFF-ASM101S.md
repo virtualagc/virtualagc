@@ -456,16 +456,33 @@ to 51.  What follows is what it left.
      name the operation and then resolved in a single run.  Do the message
      first; do not try to guess the defect from the call site.
 
-  2. THE MISSING MACROS ARE A CORPUS GAP, NOT AN ASSEMBLER DEFECT, and 60 of
-     the 225 modules are blocked behind them.  Thirty-five operations are
-     undefined, 23 of them beginning with '#' -- #DLYI, #BU, #WAT, #LBR,
-     #MOUT, #MIN and so on -- plus a family of '$'-suffixed mnemonics (BC$,
-     L$, ST$, LH$) and CNOP, which is a real pseudo-op that is simply
-     unimplemented.  None of the '#' or '$' ones exist in OI340600/MLIB80 or in
-     "OI340600 as received"/MLIB80.  NO AMOUNT OF ASSEMBLER WORK WILL FIX
-     THOSE; they have to be found.  Ask the user where they might have come
-     from before spending time on it.  CNOP is ours to implement and is worth
-     doing on its own.
+  2. IMPLEMENT THE IOP/MSC INSTRUCTION SET, which is where 60 of the 225
+     modules are stuck and which was MISDIAGNOSED HERE as a corpus gap of
+     missing macros until the user corrected it on 2026-08-09.  The
+     '#'-prefixed operations -- #MIN, #MOUT, #BU, #WAT, #LBR, #DLYI, #CMDI,
+     #RDS and the rest -- are INSTRUCTIONS in the AP-101S instruction set, not
+     macros, and ASM101S already knows all 96 of them by name in
+     model101tables.py's argsMSC and argsBCE.
+
+     WHAT IS MISSING IS THEIR ENCODING.  Every one of those 96 opcodes is -1,
+     and the code generator emits four zero bytes for them.  So an IOP/MSC
+     instruction whose operand happens to parse is assembled WRONGLY AND
+     SILENTLY, and one whose operand does not parse falls through to
+     "Unrecognized operation".  That is the worse of the two outcomes hiding
+     behind the better-looking one, and it means some modules in the OK column
+     contain wrong object code.
+
+     They are defined in Appendix A, "IOP MSC Instruction Repertoire", of the
+     Shuttle GPC Software Model AP-101S document.  Its text is extracted to
+     ASM101S/AP-101S-instruction-set.txt -- grep that rather than the 95 MB
+     PDF.  mscAll is also too narrow: it rejects two-operand forms such
+     as `0,0` and `IUA,IMMED` that bceAll accepts.  Do NOT widen it on its
+     own, since that only converts a loud failure into silent zeros.
+
+     CNOP is a genuine unimplemented pseudo-op and is separable and small.  A
+     handful of '$'-suffixed names -- LA$, B$, IAL$, L$, BAL$, ST$, BC$,
+     STH$, LH$ -- are still unaccounted for: they are not in the instruction
+     tables and not in MLIB80, and nobody has yet established what they are.
 
   3. RE-READ THE DIAGNOSTICS after step 1, and expect the ordering to have
      changed completely, as it did this time.  Separate the modules that report
