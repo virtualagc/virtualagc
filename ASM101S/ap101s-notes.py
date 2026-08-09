@@ -42,6 +42,8 @@ Usage:
     kind        instruction | pseudo-op | suffix | convention
     processor   CPU | MSC | BCE | assembler
     confidence  documented | derived | inferred | unknown
+    uncertainty verified | derived | inferred | analogous | guess
+                -- grades the ENCODING alone.  See UNCERTAINTY below.
 '''
 
 import sys, os, sqlite3, datetime
@@ -60,12 +62,29 @@ CREATE TABLE IF NOT EXISTS entries (
     evidence    TEXT,
     poo         TEXT,
     confidence  TEXT,
+    uncertainty TEXT,
     updated     TEXT
 );
 '''
 
 FIELDS = ('mnemonic', 'kind', 'processor', 'encoding', 'description',
-          'evidence', 'poo', 'confidence')
+          'evidence', 'poo', 'confidence', 'uncertainty')
+
+# `uncertainty` grades the ENCODING specifically, and separately from
+# `confidence`, which is about the entry as a whole.  An encoding that is
+# merely plausible must never be presented as though it were checked, because
+# a wrong encoding is silently wrong object code -- the one outcome worse than
+# generating nothing at all.
+#
+#   verified    matched byte for byte against the original build
+#   derived     a consistent pattern over many observed instances
+#   inferred    read from the POO but not seen in any listing
+#   analogous   assumed from the regularity of its family; NOT observed
+#   guess       no evidence either way
+#
+# Anything below `derived` should be treated as a lead, not as fact, and
+# ASM101S should say so when it acts on one.
+UNCERTAINTY = ('verified', 'derived', 'inferred', 'analogous', 'guess')
 
 def connect():
     db = sqlite3.connect(DB)
@@ -106,10 +125,11 @@ def wrap(text, width, indent):
     return out
 
 def showEntry(row):
-    print('%s   [%s%s]  %s' % (
+    print('%s   [%s%s]  %s%s' % (
         row['mnemonic'], row['kind'],
         '/' + row['processor'] if row['processor'] else '',
-        row['confidence'] or ''))
+        row['confidence'] or '',
+        '   encoding: ' + row['uncertainty'] if row['uncertainty'] else ''))
     for label in ('encoding', 'description', 'evidence', 'poo'):
         if row[label]:
             print('  %-12s' % (label + ':'), end='')
@@ -134,9 +154,10 @@ def main():
         if where: sql += ' WHERE ' + ' AND '.join(where)
         rows = db.execute(sql + ' ORDER BY kind, mnemonic', params).fetchall()
         for r in rows:
-            print('  %-10s %-12s %-10s %-11s %s' % (
+            print('  %-10s %-12s %-6s %-11s %-10s %s' % (
                 r['mnemonic'], r['kind'], r['processor'] or '',
-                r['confidence'] or '', (r['description'] or '').split('\n')[0][:44]))
+                r['confidence'] or '', r['uncertainty'] or '',
+                (r['description'] or '').split('\n')[0][:34]))
         print('\n  %d entries' % len(rows))
 
     elif command == 'show':
@@ -200,6 +221,8 @@ def main():
             bits = []
             if r['processor']: bits.append('**Processor:** %s' % r['processor'])
             if r['confidence']: bits.append('**Confidence:** %s' % r['confidence'])
+            if r['uncertainty']:
+                bits.append('**Encoding certainty:** %s' % r['uncertainty'])
             if r['poo']: bits.append('**POO:** %s' % r['poo'])
             if bits: print('  \n'.join(bits)); print()
             for label, title in (('description', 'What it does'),

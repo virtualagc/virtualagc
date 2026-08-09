@@ -22,10 +22,37 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 ## Instruction
 
+### `BCE long form`
+
+**Processor:** BCE  
+**Confidence:** derived  
+**Encoding certainty:** derived  
+**POO:** Appendix A gives the operand names but not the bit layout
+
+**What it does.** The four-byte BCE instructions.  ASM101S knows all of them by name but every opcode in argsBCE is -1 and it emits four zero bytes, so any module using one is assembled wrongly and silently.
+
+**Encoding.** Four bytes.  Byte 0 is the opcode, bytes 1-3 the operand field.  Observed opcodes: #BU F0, #MIN F1, #LBR F2, #RDLI F3, #TDLI F4, #MOUT F5, #CMDI F6, and with bit 0x08 set for the indirect "@" forms #BU@ F8, #MIN@ F9, #LBR@ FA, #MOUT@ FD.  #RDL FB, #TDL FC and #CMD FE also carry 0x08 but are separate instructions rather than @ variants.  Three operand layouts: ADDRESS, one 24-bit value in bytes 1-3 (#BU, #LBR, #RDL, #TDL, #CMD and the @ forms); DISPLACEMENT+COUNT, byte 1 the displacement and bytes 2-3 the transfer count (#MIN, #MOUT); IUA+COMMAND, byte 1 the IUA and bytes 2-3 the command (#CMDI).  #MINC and #MOUTC are not instructions but the parameter words that follow a #MIN or #MOUT: byte 0 is 00, then IUA and command.
+
+**How this was established.** Derived 2026-08-09 from ~5500 instances in ~/workspace/PFS/"OI301700 as received"/SSSRC via modules/sdfpkg/fcos-encodings.py.  The operand layouts are pinned by the cases with literal operands, which need no symbol table: "#MIN 0,13" is F100000D, "#MOUT 2,0" is F5020000, "#MOUT 0,2" is F5000002, "#TDLI 511" is F40001FF (511 = 0x1FF).  The IUA layout is pinned by "#CMDI FIOLMIUA,FIOFFIUA*256+12" giving F6400A0C, where the second operand s *256+12 shows byte 1 and bytes 2-3 are separate fields.  The POO names the operands -- #MIN and #MOUT take "Displacement, Transfer Count", #CMDI and #MINC take "IUA, Command" -- which agrees.
+
+### `BCE short form`
+
+**Processor:** BCE  
+**Confidence:** derived  
+**Encoding certainty:** inferred  
+**POO:** Appendix A
+
+**What it does.** The two-byte BCE instructions.  Enough is known to identify them but not to encode them safely.
+
+**Encoding.** Two bytes.  NOT YET FULLY DERIVED.  Some are a 4-bit opcode with a 12-bit operand -- #DLYI is 0xC with the operand in the low 12 bits (C000 for 0, C005 for 5, C716 for 1814 = 0x716), and #LTOI is 0xB (B12F for 303 = 0x12F).  Others do not fit that: #WAT 0 is 0800, #RIB 0 is E000, #SIB 0 is E800, #STP 0 is 1000, #RDS 0,0 is 6000, #TDS 1,0 is 8100.  The split between opcode and operand for those is undetermined, most of the observed operands being zero.
+
+**How this was established.** Observed 2026-08-09 in "OI301700 as received".  #DLYI and #LTOI are settled by instances with large operands: C716 for 1814 and B12F for 303 both put the operand in the low 12 bits.  The rest are dominated by zero operands -- #WAT appears 1105 times as 0800 and never otherwise -- so the field boundary cannot be read off them.  DO NOT ENCODE THESE until the POO has been read for the formats; guessing produces silently wrong object code.
+
 ### `@Bcc`
 
 **Processor:** MSC  
 **Confidence:** derived  
+**Encoding certainty:** derived  
 **POO:** Appendix A, IOP MSC Instruction Repertoire; extended-mnemonic table under BRANCH ON ACCUMULATOR
 
 **What it does.** The MSC conditional branches.  The POO gives the condition codes as 0 never, 1 ACC>0 (@BP), 2 ACC<0 (@BN), 3 ACC!=0 (@BNZ), 4 ACC=0 (@BZ), 5 ACC>=0 (@BNN), 6 ACC<=0 (@BNP), 7 always (@B).  The extended mnemonics are just @BC with the condition baked in.
@@ -41,6 +68,7 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Processor:** BCE  
 **Confidence:** unknown  
+**Encoding certainty:** guess  
 **POO:** absent
 
 **What it does.** The BCE s alignment directive, by analogy with CNOP and @CNOP.  The operand convention is presumed the same.
@@ -53,6 +81,7 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Processor:** CPU  
 **Confidence:** derived  
+**Encoding certainty:** verified  
 **POO:** absent (an assembler directive, not an instruction)
 
 **What it does.** Aligns the location counter and FILLS the gap with no-ops, which is what distinguishes it from the silent alignment performed for DC and DS.  The operand counts HALFWORDS within a fullword and the target is its parity: CNOP 2 aligns to an EVEN halfword address, which is a fullword boundary, and CNOP 1 to an ODD one.  That is IBM s CNOP b,w with w fixed at a fullword and b counted in halfwords, 2 standing where 0 would.  The AP-101S sources write one operand, not IBM s two.
@@ -65,6 +94,7 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Processor:** MSC  
 **Confidence:** derived  
+**Encoding certainty:** verified  
 **POO:** absent
 
 **What it does.** The MSC s alignment directive.  Same operand convention as CNOP -- halfwords within a fullword, target is the parity -- but it pads with the MSC no-op rather than the CPU s.  CNOP, @CNOP and #CNOP are three processors directives, not three spellings of one.
@@ -80,6 +110,7 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Processor:** CPU  
 **Confidence:** derived  
+**Encoding certainty:** verified  
 **POO:** absent
 
 **What it does.** Forces the LONG (RS) form of an instruction that would otherwise be assembled in the short (SRS) form.  It is not a fourth addressing variant alongside @, # and @#: those select addressing, $ selects the FORM.  Used where an instruction s length must be known in advance -- BILDNEW5 precedes a BC$ with CNOP 2 and comments it "EXECUTE AN UNPROTECTED BRANCH".
@@ -90,4 +121,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-6 entries.
+8 entries.

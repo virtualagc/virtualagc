@@ -247,14 +247,33 @@ argsMSC = { "@A": -1, "@B": -1, "@BN": -1, "@BNN": -1, "@BNP": -1, "@BNZ": -1, "
          "@LBP@": -1 }
 
 # And BCE instructions.
-argsBCE = { "#@#DEC": -1, "#@#HEX": -1, "#@#SCN": -1, "#BU": -1, "#BU@": -1, "#CMD": -1, "#CMDI": -1, 
+# #@#DEC, #@#HEX, #@#SCN, #ORG and #SPLIT USED TO BE LISTED HERE and are not
+# BCE instructions at all.  They are MACROS, and the five files of those names
+# in ~/workspace/PFS/"OI340600 as received"/MLIB80 each begin with a MACRO
+# statement and a prototype.  Listing them here did real harm, because
+# `instructionsWithoutOperands` was this same table and so their operands were
+# discarded before anything could look at them.
+#
+# #CNOP is not an instruction either -- it is the BCE's alignment directive,
+# handled with CNOP and @CNOP through `cnopFills` -- but it stays here because
+# it is genuinely a BCE mnemonic and the dispatch reaches the CNOP case first.
+argsBCE = { "#BU": -1, "#BU@": -1, "#CMD": -1, "#CMDI": -1,
            "#CNOP": -1, "#DLY": -1, "#DLYI": -1, "#LBR": -1, "#LBR@": -1, "#LTO": -1, "#LTOI": -1, "#MIN": -1,
-           "#MIN@": -1, "#MINC": -1, "#MOUT": -1, "#MOUT@": -1, "#MOUTC": -1, "#ORG": -1, "#RDL": -1, 
-           "#RDLI": -1, "#RDS": -1, "#RIB": -1, "#SIB": -1, "#SPLIT": -1, "#SSC": -1, "#SST": -1, "#STP": -1, 
+           "#MIN@": -1, "#MINC": -1, "#MOUT": -1, "#MOUT@": -1, "#MOUTC": -1, "#RDL": -1,
+           "#RDLI": -1, "#RDS": -1, "#RIB": -1, "#SIB": -1, "#SSC": -1, "#SST": -1, "#STP": -1,
            "#TDL": -1, "#TDLI": -1, "#TDS": -1, "#WAT": -1, "#WIX": -1
        }
 
-instructionsWithoutOperands = argsBCE
+# EMPTY, where it used to be the whole of argsBCE.  Every BCE instruction
+# observed in the original build carries an operand -- the POO gives #MIN and
+# #MOUT "Displacement, Transfer Count" and #CMDI "IUA, Command" -- so treating
+# them as operandless threw those operands away in the operand-joining phase,
+# long before the code generator could object.  With no operand there was no
+# AST, and every one of them fell through to the unrecognized-operation
+# catch-all.  That is why no module using a BCE instruction ever reached the
+# silently-wrong four zero bytes the MSC instructions produce: they always
+# failed loudly instead.
+instructionsWithoutOperands = { }
 instructionsWithOperands = argsRR | argsSRSorRS | argsRSonly | argsSRSonly | \
                            argsSI | argsMSC
 knownInstructions = instructionsWithoutOperands | instructionsWithOperands
