@@ -288,8 +288,8 @@ def INITIALIZATION():
                 g.S = VALS[SORT2[g.I]];  # DECIMAL VALUE
             else:
                 g.S = STRING(VALS[SORT2[g.I]], VALS);  # DESCRIPTER
-            if SORT2[g.I] != 12: 
-                OUTPUT(0, g.C[0] + EQUALS + g.S);
+            if SORT2[g.I] != 12:
+                OUTPUT(0, g.C[0] + EQUALS + str(g.S));
     g.LISTING2 = (g.OPTIONS_CODE() & 0x02) != 0;
     g.SREF_OPTION = (g.OPTIONS_CODE() & 0x2000) != 0;
     g.PARTIAL_PARSE = (g.OPTIONS_CODE() & 0x010000) != 0;
