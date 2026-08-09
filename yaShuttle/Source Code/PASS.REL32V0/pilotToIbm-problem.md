@@ -18,7 +18,47 @@ downstream `lnk101`/`yaGPC2` bug — see "What's been ruled out" below.
 runtime for the stack via SVC, PFS doesn't"): BFS-compiled code acquires
 its stack via a supervisor call (`SVC X'000f'`) that `pilotToIbm` copies
 through verbatim, but which nothing in this pipeline services. A concrete
-fix direction is proposed there; it has not been implemented yet.
+fix direction is proposed there.
+
+## Status update: the SVC-15 stack fix landed and works, but is not the whole story
+
+`pilotToIbm` has since gained `synthesize_pass_stack_linkage()` (see the
+working tree — not committed as of this update), which does essentially
+what "Direction 1" below proposed: renames the program SD to `$0<char>`,
+adds the `#E<char>` PDE and `@0<char>` ER, rewrites the leading `SVC
+X'000f'` into `LHI R0,@0<char>` with a YCON RLD, and additionally
+synthesizes a trailing halt SVC (`C9F9 0000`) plus a `0x0015` halt code at
+`#D<char>+0` that this document hadn't identified (PFS's `$0HELLO` ends
+with exactly those 4 bytes; BFS's converted `$HELLO` didn't have them —
+a second, real gap this fix also closes).
+
+**Verified directly, not taken on trust**: re-ran `HELLO.hal` through the
+current uncommitted `pilotToIbm` end to end.
+`lnk101` now logs `Generating stack sections...` / `Generated stack
+section '@0HELLO'`, and the program runs to completion with `exit=0` and
+correct `HELLO, WORLD!` output — genuinely fixed.
+
+**But `197-P.hal` — already named as a test case in this document's
+"Open question" section — still fails**, with a *different* symptom.
+`pilotToIbm --verbose` shows the rewrite firing (`rewrite $0P prologue
+SVC15 -> LHI R0,@stack`) and `lnk101` does generate `@0P`, but at
+runtime the program's very first instruction is `BC 7,X'8202'` — a
+branch straight into never-allocated memory, nothing to do with the
+stack mechanism. (Confirmed with `yaGPC2 --trace`: the zeroed memory
+past the branch target decodes harmlessly as `A 0,X'0000'` for tens of
+thousands of steps until something eventually trips `*** HAL/S SVC
+trapped (ea=0x0, ...)`, then the run hits the step cap.) PFS's own build
+of the same file runs cleanly (`exit=0`, correct 3×3 zero-matrix
+output), so this isn't a bad test file — it's a second, still-open BFS
+gap, most likely related to `197-P.hal`'s `ON ERROR` handling installing
+some other program-entry prologue ahead of (or instead of) the plain
+`SVC X'000f'` pattern `synthesize_pass_stack_linkage()` currently
+matches (it only looks at the text chunk whose `address_hw == 0`, and
+only rewrites it if its first two bytes are exactly `C9 FB`). **Do not
+treat this document as fully resolved just because the stack-SVC fix
+landed** — re-run the `197-P.hal` repro below before considering the
+job done, and treat programs using `ON ERROR` as a distinct, unverified
+case from plain subroutine-calling programs like `HELLO.hal`.
 
 ## How to reproduce
 
