@@ -460,16 +460,33 @@ is not a regression; it is modules assembling their whole source and evaluating
 their conditionals instead of stopping early and silently taking the false
 branch.  There is simply much more of the corpus being looked at now.
 
-  1. SUBSCRIPT-OUT-OF-RANGE IS THE LARGEST THING BY FAR, and it is new to the
-     top of the list because it was previously hidden behind truncation.
-     "Index of &X(N) out of range" is 34 modules and 3518 occurrences, and
-     "Index out of range: &X(&Y)" another 30 and 898.  These are SETA/SETC
-     ARRAY subscripts, not macro-argument subscripts -- a macro argument
-     subscripted past its end yields a null string and no diagnostic, per
-     SC26-4940 Table 48.  Something is indexing a dimensioned SET symbol
-     beyond its declaration.  Find out whether the dimension is being read
-     wrongly, or a counter is not being reset, or the declaration itself is
-     being lost, before assuming which.
+  1. THREE RUNAWAY CONDITIONAL-ASSEMBLY LOOPS ACCOUNT FOR MOST OF THE NOISE,
+     and this is worth reading carefully because the raw counts point
+     somewhere else entirely.  Subscript-out-of-range looks like the largest
+     family in the corpus -- "Index of &X(N) out of range" at 34 modules and
+     3518 occurrences, plus "Index out of range: &X(&Y)" at 30 and 898.  It
+     is not 34 defects.  Of the 16479 &LB subscript errors, 16414 ARE IN
+     THREE MODULES -- FCMSFAIL, FIOPDISP and FPMTMENQ -- and those three are
+     exactly the three where ACTR fires.  The remaining twelve modules have
+     65 between them.
+
+     The mechanism is visible in the numbers:  &LB is indexed down to about
+     -4096, which is the ACTR default, so a loop runs away, decrements its
+     label index once per iteration, emits a diagnostic each time, and is
+     eventually cut off by ACTR.  Fix the loop and thousands of diagnostics
+     go with it.  Start with FCMSFAIL, which has half of them, and find why
+     the loop does not terminate rather than why the subscript is negative.
+
+     &NEST underflows the same way, always to 0 or below, never above its
+     dimension of 50.  &NI is the structured-programming nesting depth and
+     the pushes and pops are balanced across IF/ENDIF, DO/ENDDO and
+     CASENTRY/ENDCASE, so the underflow is downstream of the same runaway
+     rather than a mismatched construct.
+
+     THIS IS THE BREADTH-VERSUS-VOLUME TRAP the diagnostics tool warns about,
+     and it caught me:  breadth said 34 modules, volume said 3518, and the
+     truth was three modules with one defect apiece.  Always split a large
+     family by module before believing it.
 
   2. "Could not interpret operand", 44 modules and 250 occurrences, now the
      broadest single message.  Like "Eval error type" before it, the wording
