@@ -243,7 +243,7 @@ argsMSC = { "@A": -1, "@B": -1, "@BN": -1, "@BNN": -1, "@BNP": -1, "@BNZ": -1, "
          "@LXI": -1, "@N": -1, "@NIX": -1, "@RAI": -1, "@RAW": -1, "@RBI": -1, "@REC": -1, "@RFD": -1, "@RNI": -1, 
          "@RNW": -1, "@SAI": -1, "@SEC": -1, "@SFD": -1, "@SIO": -1, "@ST": -1, "@STF": -1, "@STH": -1, "@STP": -1, 
          "@TAX": -1, "@TI": -1, "@TM": -1, "@TMI": -1, "@TSZ": -1, "@TXA": -1, "@TXI": -1, "@WAT": -1, "@X": -1, 
-         "@XAX": -1, "@BC": -1, "@BXC" "@CALL": -1, "@CALL@": -1, "@LBB": -1, "@LBB@": -1, "@LBP": -1, 
+         "@XAX": -1, "@BC": -1, "@BP": -1, "@BXC": -1, "@CALL": -1, "@CALL@": -1, "@LBB": -1, "@LBB@": -1, "@LBP": -1, 
          "@LBP@": -1 }
 
 # And BCE instructions.
@@ -263,6 +263,43 @@ argsBCE = { "#BU": -1, "#BU@": -1, "#CMD": -1, "#CMDI": -1,
            "#RDLI": -1, "#RDS": -1, "#RIB": -1, "#SIB": -1, "#SSC": -1, "#SST": -1, "#STP": -1,
            "#TDL": -1, "#TDLI": -1, "#TDS": -1, "#WAT": -1, "#WIX": -1
        }
+
+# THE TWO-BYTE MSC INSTRUCTIONS, in three formats, all derived from the
+# original build in ~/workspace/PFS/"OI301700 as received" and checked against
+# the format descriptions in the POO.  See ap101s-notes.db.
+#
+# MEMORY REFERENCE -- OP(4) M(1) DISP(11).  The displacement is PC-RELATIVE
+# from the UPDATED PC, that is from the halfword after this instruction, and
+# is signed.  M is the index-mode flag: it is 1 exactly when the operand is
+# written with an index in parentheses, `@L TSTMASK(1)`, and 0 otherwise.
+# This format is NOT in the POO in any findable form and was read off the
+# original build.  (The POO's "Short format 1 ... OP M DISP" passage is in its
+# BCE section and does not describe these.)
+mscMemory = { "@L": 0x4, "@A": 0x5, "@N": 0x6, "@X": 0x7,
+              "@ST": 0x8, "@TSZ": 0x9 }
+
+# BRANCHES -- OP(4)=0010 M(1) CC(3) DISP(8), the displacement again signed and
+# relative to the updated PC.  This one IS documented: the POO's @BC and @BXC
+# pages (II-38 and II-39) give the layout, say the displacement is added to
+# the updated MSC program counter with a range of -128 to +127 halfwords, and
+# tabulate the condition codes -- 1 >0, 2 <0, 3 !=0, 4 =0, 5 >=0, 6 <=0,
+# 7 always -- against both the accumulator mnemonics and the index-register
+# ones.  The two families differ only in M, which is why @BNN is 0x25 and
+# @BXNN 0x2D.  @BC and @BXC state the condition as an operand instead and are
+# handled separately.
+mscBranch = { "@B": (0, 7), "@BN": (0, 2), "@BNN": (0, 5), "@BNZ": (0, 3),
+              "@BZ": (0, 4), "@BP": (0, 1), "@BNP": (0, 6),
+              "@BXNN": (1, 5), "@BXN": (1, 2), "@BXP": (1, 1),
+              "@BXNP": (1, 6), "@BXZ": (1, 4), "@BXNZ": (1, 3) }
+
+# IMMEDIATE -- an 8-bit opcode over an 8-bit operand.  Only those whose split
+# is PROVEN by a non-zero operand somewhere in the corpus are listed; an
+# instruction seen only with a zero operand would fit any layout and is left
+# out deliberately.  @DLY, @INT, @RAW and @STP are also left out because their
+# high byte varies, so it carries a modifier this does not yet account for.
+mscImmediate = { "@LI": 0xEF, "@LXI": 0xEB, "@TXI": 0xEA, "@TXA": 0xEC,
+                 "@TI": 0xED, "@SAI": 0xEE, "@RAI": 0xD4, "@RNI": 0xD5,
+                 "@LAR": 0xE0 }
 
 # THE FOUR-BYTE BCE INSTRUCTIONS:  opcode byte, then the layout of bytes 1-3.
 #

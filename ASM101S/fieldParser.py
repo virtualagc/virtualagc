@@ -185,11 +185,14 @@ siAll =
     ;
 
 # Operand field for an MSC instruction.
-mscAll = 
-    | constant ',' identifier '(' constant ')'  ( / / | $ )
-    | constant ',' identifier  ( / / | $ )
-    | arithmeticExpression '(' constant ')'  ( / / | $ )
-    | arithmeticExpression  ( / / | $ )
+# CC is the condition code, which only @BC states explicitly; A1 is the
+# address or the immediate value; X1 is the index register, whose mere
+# PRESENCE sets the M bit of a memory-reference instruction.
+mscAll =
+    | CC+: arithmeticExpression ',' A1+: arithmeticExpression '(' X1+: arithmeticExpression ')'  ( / / | $ )
+    | CC+: arithmeticExpression ',' A1+: arithmeticExpression  ( / / | $ )
+    | A1+: arithmeticExpression '(' X1+: arithmeticExpression ')'  ( / / | $ )
+    | A1+: arithmeticExpression  ( / / | $ )
     ;
 
 # Operand field for a BCE instruction.  A1 and A2 are named so that the code

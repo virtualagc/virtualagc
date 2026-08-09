@@ -669,11 +669,14 @@ class asmParser(Parser):
     def _mscAll_(self):
         with self._choice():
             with self._option():
-                self._constant_()
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('CC')
                 self._token(',')
-                self._identifier_()
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
                 self._token('(')
-                self._constant_()
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('X1')
                 self._token(')')
                 with self._group():
                     with self._choice():
@@ -684,10 +687,16 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+                self._define(
+                    [],
+                    ['A1', 'CC', 'X1'],
+                )
             with self._option():
-                self._constant_()
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('CC')
                 self._token(',')
-                self._identifier_()
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
                 with self._group():
                     with self._choice():
                         with self._option():
@@ -697,10 +706,16 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+                self._define(
+                    [],
+                    ['A1', 'CC'],
+                )
             with self._option():
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
                 self._token('(')
-                self._constant_()
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('X1')
                 self._token(')')
                 with self._group():
                     with self._choice():
@@ -711,8 +726,13 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+                self._define(
+                    [],
+                    ['A1', 'X1'],
+                )
             with self._option():
                 self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
                 with self._group():
                     with self._choice():
                         with self._option():
@@ -722,10 +742,13 @@ class asmParser(Parser):
                         self._error(
                             'expecting one of: '
                         )
+                self._define(
+                    [],
+                    ['A1'],
+                )
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" \'*\' -?[0-9]+'
-                '<arithmeticExpression> <constant> <term>'
+                '<arithmeticExpression> <term>'
             )
 
     @tatsumasu()

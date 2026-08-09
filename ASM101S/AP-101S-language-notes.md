@@ -20,6 +20,31 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** 387 and 491 instances in "OI301700 as received".  The giveaway is that #MINC and #MOUTC carry the SAME opcode byte, 00, and that "#MINC FIOFFIUA,FIOMDMRT" is 00531C20 where "#CMDI FIOFFIUA,FIOMDMRT" is F6531C20 -- identical operands, identical operand encoding, and an opcode byte of zero where the instruction has F6.  A real instruction pair could not share an opcode.
 
+### `MSC instructions still unencoded`
+
+**Processor:** MSC  
+**Confidence:** derived  
+**Encoding certainty:** guess
+
+**What it does.** What the MSC encoding work deliberately did NOT settle. @DLY, @INT, @RAW and @STP have a VARYING high byte (@DLY 0xC0/0xC8, @INT 0x30/0x38/0x3B, @RAW 0xD0/0xD8, @STP 0x10/0x12), so byte 0 carries a modifier that the simple opcode-over-operand split does not account for; encoding them as if it did would be silently wrong. @LMS, @NIX, @RBI, @RFD, @SFD, @SIO, @TAX, @XAX and @WAT appear only ever with a ZERO operand, so their opcode/operand boundary is unconstrained by the evidence even though their high byte is constant (0xE3, 0xE8, 0xE7, 0xE2, 0xE1, 0xE4, 0xE9, 0xE5, 0x08). The long forms F0 through FD are not worked out at all. All of these still announce themselves as unencoded rather than emitting a guess.
+
+**Encoding.** unknown
+
+**How this was established.** Derived from the same survey of ~/workspace/PFS/'OI301700 as received'/SSSRC that established the three short formats. The operand values actually observed are the constraint: a mnemonic whose every observed operand is zero cannot distinguish OP(8)+VALUE(8) from any other split.
+
+### `MSC short formats`
+
+**Processor:** MSC  
+**Confidence:** derived  
+**Encoding certainty:** verified  
+**POO:** Short format 1, instruction formats section
+
+**What it does.** The three two-byte MSC instruction formats. Both PC-relative forms count in HALFWORDS from the UPDATED PC, that is from the halfword following the instruction, and the displacement is signed. In a memory reference M is the index-mode flag and is 1 exactly when the operand is written with an index in parentheses, '@L TSTMASK(1)', and 0 otherwise. In a branch M selects the index form, which is the only thing distinguishing @BXNN (0x2D) from @BNN (0x25). Opcodes: memory reference @L 4, @A 5, @N 6, @X 7, @ST 8, @TSZ 9. Branch condition codes: 1 ACC>0, 2 ACC<0, 3 ACC!=0, 4 ACC=0, 5 ACC>=0, 6 ACC<=0, 7 unconditional, so @BN 0x22, @BNZ 0x23, @BZ 0x24, @BNN 0x25, @B 0x27; @BC takes its condition as a first operand and assembles identically. Immediates: @LI 0xEF, @LXI 0xEB, @TXI 0xEA, @TXA 0xEC, @TI 0xED, @SAI 0xEE, @RAI 0xD4, @RNI 0xD5, @LAR 0xE0.
+
+**Encoding.** memory reference OP(4) M(1) DISP(11); branch OP(4)=0010 M(1) CC(3) DISP(8); immediate OP(8) VALUE(8)
+
+**How this was established.** THE BRANCH FORMAT IS DOCUMENTED. The POO's @BC and @BXC pages (extracted text around line 17700 of AP-101S-instruction-set.txt, manual pages II-38 and II-39) give the layout, state explicitly that the 8-bit two's complement signed displacement 'is added to the updated MSC program counter' with a range of -128 to +127 halfwords, and tabulate all eight condition codes with their extended mnemonics: 1 @BP/@BXP, 2 @BN/@BXN, 3 @BNZ/@BXNZ, 4 @BZ/@BXZ, 5 @BNN/@BXNN, 6 @BNP/@BXNP, 7 @B. The accumulator and index-register forms differ only in the M bit, which is why @BNN is 0x25 and @BXNN 0x2D. THE MEMORY-REFERENCE AND IMMEDIATE FORMATS ARE NOT documented anywhere findable; beware that the POO's 'Short format 1 ... OP(4) M(1) DISP(11)' passage belongs to the BCE section, not the MSC one, and citing it for MSC would be a misattribution. Those two formats were derived from the original build in ~/workspace/PFS/'OI301700 as received'/SSSRC. ALL THREE were then verified by re-encoding from scratch: for every MSC instruction in those listings whose operand symbol is defined in the same listing, the expected halfword was computed from the listing's own label addresses and compared against the listing's object code. 318 instructions across 21 mnemonics matched byte for byte, with ZERO mismatches. The immediate split is listed only for mnemonics proven by a NON-ZERO operand somewhere in the corpus; one seen only with a zero operand would fit any layout and was deliberately left unencoded.
+
 ### `continuation column`
 
 **Processor:** assembler  
@@ -61,18 +86,31 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** Observed 2026-08-09 in "OI301700 as received".  #DLYI and #LTOI are settled by instances with large operands: C716 for 1814 and B12F for 303 both put the operand in the low 12 bits.  The rest are dominated by zero operands -- #WAT appears 1105 times as 0800 and never otherwise -- so the field boundary cannot be read off them.  DO NOT ENCODE THESE until the POO has been read for the formats; guessing produces silently wrong object code.
 
+### `@BP / @BXC / @CALL`
+
+**Processor:** MSC  
+**Confidence:** documented  
+**Encoding certainty:** verified  
+**POO:** II-38, II-39
+
+**What it does.** Three MSC mnemonics that ASM101S did not recognise at all. @BP (branch if accumulator > 0, condition code 1) was simply absent from the mnemonic table. @BXC and @CALL were lost to a missing comma in that table -- written as '"@BXC" "@CALL": -1', which Python concatenates into the single nonexistent key '@BXC@CALL', so both real mnemonics disappeared and an impossible one took their place. @BXC is the index-register counterpart of @BC, taking its condition as a first operand; it assembles identically to the corresponding @BXcc.
+
+**Encoding.** @BP 0x21; @BXC condition-in-operand form of the index branches, 0x28|CC; @CALL unknown
+
+**How this was established.** The POO tabulates @BP at condition code 1 on manual page II-38 and documents @BXC on II-39; @CALL appears nine times in the extracted text. The missing comma is visible at model101tables.py in argsMSC. All three were added and the branch forms checked against the documented condition-code table: @BXNN and @BXC 5 assemble to the same 0x2D, as the POO requires.
+
 ### `@Bcc`
 
 **Processor:** MSC  
 **Confidence:** derived  
-**Encoding certainty:** derived  
+**Encoding certainty:** verified  
 **POO:** Appendix A, IOP MSC Instruction Repertoire; extended-mnemonic table under BRANCH ON ACCUMULATOR
 
 **What it does.** The MSC conditional branches.  The POO gives the condition codes as 0 never, 1 ACC>0 (@BP), 2 ACC<0 (@BN), 3 ACC!=0 (@BNZ), 4 ACC=0 (@BZ), 5 ACC>=0 (@BNN), 6 ACC<=0 (@BNP), 7 always (@B).  The extended mnemonics are just @BC with the condition baked in.
 
 **Encoding.** Short form, two bytes.  High nibble 2, low nibble the condition code, then a one-byte displacement.  Observed: @BN 22xx, @BNZ 23xx, @BZ 24xx, @BNN 25xx, @B 27xx, and @BC 27xx when written with condition 7.  The branch-on-index family sits at 0x28 + cc: @BXNN is 2Dxx (8 + 5).
 
-**How this was established.** The condition-code table is in the POO, but the mapping onto the opcode nibble was confirmed against the original build in "OI301700 as received" on 2026-08-09: every observed encoding has high nibble 2 and low nibble equal to the documented condition code.  NOT YET IMPLEMENTED in ASM101S, whose argsMSC gives every MSC instruction an opcode of -1.
+**How this was established.** Confirmed by re-encoding: all 87 branches in ~/workspace/PFS/'OI301700 as received'/SSSRC whose target is defined in the same listing reproduce the listing's object code exactly from OP(4)=0010, M(1), CC(3), DISP(8) PC-relative to the updated PC. See the 'MSC short formats' entry.
 
 ### `MSC instruction set`
 
@@ -85,7 +123,7 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Encoding.** NOT YET IMPLEMENTED IN ASM101S -- all 61 opcodes in argsMSC are -1.  Three regular groups are visible in the original build.  SHORT MEMORY REFERENCE, two bytes, an 8-bit opcode over an 8-bit address: @L 47xx, @ST 80xx, @A 50xx, @N 67xx, @X 77xx.  SHORT IMMEDIATE, two bytes, 8-bit opcode over an 8-bit signed operand: @LI EFxx (EF00 for 0, EFFF for -1), @LXI EBxx (EB66 for 102), @TXI EAxx (EAFE for -2), @TXA ECxx (ECE1 for -31), @RAI D4xx (D464 for 100), @RNI D5xx, @LAR E0xx (E003 for 3).  BRANCHES, two bytes, high nibble 2 over the condition code then an 8-bit displacement: @BN 22, @BNZ 23, @BZ 24, @BNN 25, @B 27, @BXNN 2D.  LONG FORMS, four bytes, F0 to FD: @BU F0, @LBP F3 with the register in byte 1 shifted left 3 (10 gives 0x50, 11 gives 0x58), @LF F4, @STF F5, @C F6, @STH FD.  @STP is different again, a 4-bit operand in the low nibble of byte 0: 1000 for 0, 1200 for 2.
 
-**How this was established.** Harvested 2026-08-09 from ~/workspace/PFS/"OI301700 as received" via modules/sdfpkg/fcos-encodings.py; 47 of the 61 appear there with object code, several hundred times over.  The immediate forms are pinned by instances with non-zero operands, which is what makes the field split legible -- @LI -1 giving EFFF and @LXI 102 giving EB66 could not both be true of any other layout.  The branch mapping matches the condition-code table in the POO exactly.  THE REMAINING 14 HAVE NO OBSERVED ENCODING and most of the rest are dominated by zero operands, so the opcode/operand boundary is settled only where a non-zero operand happens to appear.  Until they are encoded ASM101S emits four zero bytes and says so.
+**How this was established.** ASM101S now ENCODES 31 of the 61: the six memory references, the branches, and nine immediates, all verified byte for byte against the original build. The rest still announce themselves rather than emitting a guess; see 'MSC instructions still unencoded' for exactly which and why.
 
 
 ## Pseudo-op
@@ -147,4 +185,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-10 entries.
+13 entries.

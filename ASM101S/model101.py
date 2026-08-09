@@ -2441,28 +2441,111 @@ def generateObjectCode(source, macros):
                     toMemory(bytearray(fill))
                 continue
 
+            if operation in mscMemory or operation in mscBranch or \
+                    operation in mscImmediate or operation in ["@BC", "@BXC"]:
+                # The two-byte MSC instructions, in the three formats derived
+                # and checked against the original build.  See `mscMemory`,
+                # `mscBranch` and `mscImmediate` for where each opcode comes
+                # from and how far it is verified.
+                commonProcessing(2)
+                ast = properties["ast"]
+                data = bytearray(2)
+                if ast == None:
+                    error(properties, "%s requires an operand" % operation)
+                    toMemory(data)
+                    continue
+
+                def mscField(subfield):
+                    '''Evaluate one MSC operand, resolving a hashed address to
+                    its combined offset the way the BCE generator does.'''
+                    err, value = evalInstructionSubfield(properties, subfield, \
+                                                         ast, symtab)
+                    if err or value == None:
+                        return None
+                    section, offset = unhash(value)
+                    if section is None:
+                        return value
+                    return offset + sects.get(section, {}).get("offset", 0)
+
+                if operation in mscImmediate:
+                    value = mscField("A1")
+                    if value == None:
+                        error(properties, \
+                              "Could not evaluate %s operand" % operation)
+                        toMemory(data)
+                        continue
+                    if not -128 <= value <= 255:
+                        error(properties, \
+                              "%s operand %d does not fit in the 8-bit " \
+                              "immediate field" % (operation, value))
+                    data[0] = mscImmediate[operation]
+                    data[1] = value & 0xFF
+                    toMemory(data)
+                    continue
+
+                # What is left is PC-relative, so it needs the address of the
+                # halfword AFTER this instruction.  `pos1` is a byte offset
+                # and `commonProcessing` has not yet advanced it past these
+                # two bytes, hence the +2.
+                target = mscField("A1")
+                if target == None:
+                    error(properties, \
+                          "Could not evaluate %s operand" % operation)
+                    toMemory(data)
+                    continue
+                updatedPC = (sects[sect]["pos1"] + \
+                             sects.get(sect, {}).get("offset", 0) + 2) // 2
+                displacement = target - updatedPC
+                indexed = 1 if "X1" in ast else 0
+
+                if operation in mscMemory:
+                    if not -1024 <= displacement <= 1023:
+                        error(properties, \
+                              "%s is %d halfwords away, out of range of the " \
+                              "11-bit PC-relative displacement" \
+                              % (operation, displacement))
+                    word = (mscMemory[operation] << 12) | (indexed << 11) | \
+                           (displacement & 0x7FF)
+                else:
+                    if operation in ["@BC", "@BXC"]:
+                        # @BC and @BXC state the condition as their first
+                        # operand rather than in the mnemonic, the branch
+                        # target being the second.  @BXC is the index-register
+                        # form, which is what M distinguishes.
+                        indexed = 1 if operation == "@BXC" else 0
+                        condition = mscField("CC")
+                        if condition == None or not 0 <= condition <= 7:
+                            error(properties, \
+                                  "%s requires a condition code of 0 to 7 " \
+                                  "as its first operand" % operation)
+                            toMemory(data)
+                            continue
+                    else:
+                        indexed, condition = mscBranch[operation]
+                    if not -128 <= displacement <= 127:
+                        error(properties, \
+                              "%s is %d halfwords away, out of range of the " \
+                              "8-bit PC-relative displacement" \
+                              % (operation, displacement))
+                    word = (0x20 | (indexed << 3) | condition) << 8 | \
+                           (displacement & 0xFF)
+                data[0] = (word >> 8) & 0xFF
+                data[1] = word & 0xFF
+                toMemory(data)
+                continue
+
             if operation in argsMSC:
-                # The '@' MSC instructions are NOT ENCODED.  Every opcode in
-                # argsMSC is -1 and this emitted four zero bytes, so `@BU X`
-                # and `@L X` -- different instructions -- assembled to the
-                # same 0000 0000, quietly.  Modules using them were counted
-                # OK while containing wrong object code, which is the worst
-                # way for an assembler to fail and the last place ASM101S
-                # still did it.
+                # The MSC instructions the survey of the original build did
+                # NOT settle:  the long forms F0 to FD, the four whose high
+                # byte varies and so carries a modifier, and those seen only
+                # ever with a zero operand, whose opcode/operand boundary is
+                # therefore unconstrained by the evidence.  See the entry
+                # "MSC instructions still unencoded" in ap101s-notes.db for
+                # the list and the reasoning.
                 #
-                # It says so now, as the two-byte BCE instructions already do.
-                # The length is kept at four bytes so the location counter
-                # still advances by something; that is a guess in itself, but
-                # a visible one.
-                #
-                # 47 of the 61 appear in ~/workspace/PFS/"OI301700 as
-                # received" WITH their real encodings, in three regular
-                # groups -- short memory references such as `@L` 47xx and
-                # `@ST` 80xx, short immediates such as `@LI` EFxx and `@LXI`
-                # EBxx, and long forms F0 to FD.  The branches are already
-                # worked out: high nibble 2 over the condition code, so @BN
-                # is 22, @BNZ 23, @BZ 24, @BNN 25 and @B 27.  See
-                # ap101s-notes.db.
+                # These say so rather than emit a guess.  Four zero bytes are
+                # obviously wrong; a plausible but wrong halfword is not, and
+                # that is the worse failure.
                 commonProcessing(2)
                 error(properties, \
                       "%s is an MSC instruction whose encoding has not been " \
