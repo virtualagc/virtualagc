@@ -351,8 +351,8 @@ FCOS IS WHERE THE WORK IS.  Of OI340600's 225 modules, assembled against MLIB80,
 before this stretch of work began and now:
 
                     before   after
-    OK                  21      25
-    ERRORS              33     187
+    OK                  21      51
+    ERRORS              33     161
     CRASH              170      13
     HANG                 1       0
 
@@ -400,36 +400,80 @@ That is original-build primary evidence, so it is the reference to check a
 borrowed macro library against, in the same way RUNLST is the reference for
 RUNASM.  It has not been used yet.
 
-NEXT STEPS, in order.  The previous list's first two items -- the float/int
-clash and, before it, the IndexError and the NoneType/ast family -- are done,
-in commits 60a12bf9f, 9d197877a and d01007f21.  The character of the remaining
-work has now changed, and the ordering below reflects that.
+THE SWEEP'S CLASSIFICATION IS THE WRONG INSTRUMENT NOW, and this is the single
+most useful thing to understand about the state of the work.  fcos-sweep.sh
+sorts modules by exit status, which was right while most of the corpus was
+crashing.  It cannot see a module that assembles two hundred lines wrongly and
+says nothing, and it cannot tell a module with two diagnostics from one with
+three hundred.
 
-THERE IS NO LONGER A DOMINANT CRASH TO CHASE.  Of the 13 that remain the
-largest group is 7, and several are singletons.  Four rounds of "find the
-biggest signature and fix it" have taken CRASH from 170 to 13; that method has
-essentially run out, and continuing to apply it will buy less and less.
+USE modules/sdfpkg/fcos-diagnostics.sh AND .py.  The first collects every
+diagnostic over the corpus, one file per module; the second counts them.
 
-  1. READ THE DIAGNOSTICS IN BULK.  This is now the most valuable item by a
-     wide margin and it needs no crash to chase.  187 modules assemble far
-     enough to produce diagnosed errors and nobody has yet looked at what those
-     say across the corpus.  Sort them by message, count them, and the common
-     ones will name the next round of work directly.  Expect this to find
-     defects that no crash would ever have exposed, because a wrong answer that
-     does not raise is invisible to a sweep that classifies by exit status --
-     and note that several of the defects fixed in the last two days were
-     exactly that shape, silently wrong for years while RUNASM stayed at 205 of
-     205.
+    ./fcos-diagnostics.sh DIR OI340600      # ~40 minutes, FCOS_TIMEOUT=900
+    ./fcos-diagnostics.py DIR --top=20
+    ./fcos-diagnostics.py DIR --message=TEXT   # drill into one finding
 
-  2. KeyError 'preliminaryOffset' AT model101.py:1287, 7 crashes, with 2 of
-     KeyError None at the same line.  Probably one defect, and probably small.
-     Worth doing simply to get the crash count into single figures.
+COUNT BY BREADTH, NOT BY VOLUME.  Breadth is how many modules produce a
+message; volume is total occurrences.  They point in completely different
+directions and breadth is the one that matters, because a severity-255 message
+appearing twice in each of forty modules FAILS FORTY MODULES, while ten
+thousand occurrences of one message in one module fails one.  The first bulk
+read had "Could not evaluate length modifier" at 2758 occurrences from 10
+modules and "In LCLx, is not a symbolic variable" at 77 from 42; the second was
+worth an order of magnitude more and volume ordering buries it.  The tool
+prints both, breadth first, deliberately.
 
-  3. THE REMAINING SINGLETONS, once the above are done: an int() conversion at
-     model101.py:1524, two missing symbol-table keys, and an AttributeError
-     raised inside tatsu itself, which is likely a parser edge case rather than
-     an ASM101S defect and should be reduced to a minimal input before anyone
-     spends time on it.
+WHAT THE FIRST READ FOUND, on 2026-08-09, in one pass:
+
+  - Continuation cards were not being joined at all except for macro
+    prototypes and invocations, so a declaration continued onto a second card
+    silently lost every variable on that card.  Fixing it moved 26 modules
+    straight from ERRORS to OK -- the largest single gain of the whole effort,
+    and invisible to the sweep because the modules had been failing on two
+    diagnostics apiece.
+  - COPY and EJECT were leaking into the code generator, 2332 diagnostics in
+    five modules alone.
+  - "Unrecognized line", the commonest message in the corpus at 16720
+    occurrences across 166 modules, did not say WHAT it had failed to
+    recognise.  Naming the operation resolved the entire family in one run.
+
+THE LESSON WORTH KEEPING is that a diagnostic which does not identify its
+subject is nearly worthless in bulk, and that fixing the message is often the
+cheapest way to find the defect.  "Unrecognized line" hid 35 distinct causes;
+"Eval error type 3", still the top of the list at 62 modules, is the same
+problem and should probably be given the same treatment before anyone tries to
+fix what it is reporting.
+
+NEXT STEPS, in order.  The previous list's first item -- read the diagnostics
+in bulk -- was done on 2026-08-09 and is written up above; it moved OK from 25
+to 51.  What follows is what it left.
+
+  1. GIVE "Eval error type 3" A REAL MESSAGE, then fix what it turns out to be.
+     It is the top of the list at 62 modules and 3455 occurrences, and it says
+     nothing whatever about what failed to evaluate.  This is the same shape as
+     "Unrecognized line", which hid 35 distinct causes until it was made to
+     name the operation and then resolved in a single run.  Do the message
+     first; do not try to guess the defect from the call site.
+
+  2. THE MISSING MACROS ARE A CORPUS GAP, NOT AN ASSEMBLER DEFECT, and 60 of
+     the 225 modules are blocked behind them.  Thirty-five operations are
+     undefined, 23 of them beginning with '#' -- #DLYI, #BU, #WAT, #LBR,
+     #MOUT, #MIN and so on -- plus a family of '$'-suffixed mnemonics (BC$,
+     L$, ST$, LH$) and CNOP, which is a real pseudo-op that is simply
+     unimplemented.  None of the '#' or '$' ones exist in OI340600/MLIB80 or in
+     "OI340600 as received"/MLIB80.  NO AMOUNT OF ASSEMBLER WORK WILL FIX
+     THOSE; they have to be found.  Ask the user where they might have come
+     from before spending time on it.  CNOP is ours to implement and is worth
+     doing on its own.
+
+  3. RE-READ THE DIAGNOSTICS after step 1, and expect the ordering to have
+     changed completely, as it did this time.  Separate the modules that report
+     undefined operations from those that do not before drawing conclusions:
+     the 60 blocked ones generate diagnostics that say more about the missing
+     macros than about the assembler, and mixing them in distorts everything.
+     fcos-diagnostics.py has no flag for that yet; it was done by copying the
+     unblocked .diag files into their own directory.
 
   4. BORROW OI301700'S MACRO LIBRARY FROM OI340600, ~237 files, then sweep it.
      The user has never done this, so treat it as unexplored: the two versions
@@ -437,29 +481,32 @@ essentially run out, and continuing to apply it will buy less and less.
      same definition.  Diff a few that DO exist in both before assuming the rest
      can be copied wholesale.  Check the result against the listings in
      ~/workspace/PFS/"OI301700 as received"/, which are primary evidence of what
-     the original build actually produced.  Expect to justify the choice later,
-     since the corpus goal covers both PASS versions.
+     the original build actually produced.
 
   5. NOTHING IN FCOS IS VERIFIED, only assembled, and this is the gap that
-     matters most for the phase goal.  "OK, exit 0" means the assembler did not
-     complain; it does not mean the bytes are right.  RUNASM is verified because
-     RUNLST exists to check it against.  The OI301700 listings named above are
-     the first primary evidence that could put FCOS on the same footing, and
-     until something like that is in place the OK column is a much weaker claim
-     than it looks.
+     matters most for the phase goal.  51 modules now exit 0, which means the
+     assembler did not complain; it does not mean the bytes are right.  RUNASM
+     is verified because RUNLST exists to check it against.  The OI301700
+     listings named above are the first primary evidence that could put FCOS on
+     the same footing, and until something like that is in place the OK column
+     is a much weaker claim than it looks.
 
-  6. ASM101S IS SLOW.  DCICYC takes 861s and FIOPDISP 307s, and the cost is
-     dominated by re-parsing every line through tatsu on every pass.  Not
-     urgent, but it is what makes a sweep an hour's work rather than a few
-     minutes'.
+  6. THE REMAINING 13 CRASHES, which are now a long tail: 7 of KeyError
+     'preliminaryOffset' at model101.py:1287 with 2 of KeyError None at the
+     same line, and four singletons including an AttributeError raised inside
+     tatsu itself.  Worth doing to get the count to zero, but no longer the
+     best use of a session.
 
-  7. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
+  7. ASM101S IS SLOW.  DCICYC takes 861s and FIOPDISP 307s, dominated by
+     re-parsing every line through tatsu on every pass.  It is what makes a
+     sweep or a diagnostics run the better part of an hour.
+
+  8. THE SMALLER, SEPARABLE ONES.  ORG is unimplemented and is a standing
      feature request from an outside user (#1333), which also carries a
-     KeyError-None crash on "ST#1 EQU *" at model101.py:1237.  DC cannot parse a
-     hex literal with comma-separated groups, as in
-     DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' -- that alone is all 328 of
-     FAZ2's diagnosed errors, and it is the same shape as the multi-valued DC
-     defect already fixed, so look there first.  ASM101S.py raises IndexError
+     KeyError-None crash on "ST#1 EQU *".  DC cannot parse a hex literal with
+     comma-separated groups, as in DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2' --
+     all 328 of FAZ2's diagnosed errors, and the same shape as the multi-valued
+     DC defect already fixed, so look there first.  ASM101S.py raises IndexError
      when generated code runs past the end of a --compare listing instead of
      reporting it, which is what makes the six intentional RUNASM deviations
      look like crashes on a default regression run.  Created variable symbols,
