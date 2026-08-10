@@ -624,7 +624,9 @@ def optimizeScratch():
             # to determine the target address we want to reach.
             #ast = parserASM(entry["operand"], "rsAll")
             ast = properties["ast"]
-            if ast == None or "X2" in ast:
+            if ast == None or "X2" in ast or "noX" in ast:
+                # `D2(,B2)` is as unambiguous as `D2(X2,B2)`: both are the
+                # indexed form and neither has a short version.
                 entry["ambiguous"] = False
                 continue
             if "B2" in ast:
@@ -2272,6 +2274,14 @@ def generateObjectCode(source, macros):
                             err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
                             if not err: 
                                 err, x2 = evalInstructionSubfield(properties, "X2", ast, symtab)
+                                if x2 == None and "noX" in ast:
+                                    # `D2(,B2)` names no index but still
+                                    # selects the indexed addressing mode: the
+                                    # original build assembles `LH R2,d(,R2)`
+                                    # as 9AF6 000A, which is generateRS1 with
+                                    # b2=2, x2=0 and the 0b100 bit set, and
+                                    # never as the two-byte short form.
+                                    x2 = 0
                                 if not err:
                                     if operation in ["ST"]: ###DEBUG###TRAP###
                                         pass

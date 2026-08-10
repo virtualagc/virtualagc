@@ -550,6 +550,7 @@ class asmParser(Parser):
                 self.add_last_node_to_name('D2')
                 self._token('(')
                 self._token(',')
+                self.add_last_node_to_name('noX')
                 self._register_()
                 self.add_last_node_to_name('B2')
                 self._token(')')
@@ -564,7 +565,7 @@ class asmParser(Parser):
                         )
                 self._define(
                     [],
-                    ['B2', 'D2', 'R1'],
+                    ['B2', 'D2', 'R1', 'noX'],
                 )
             with self._option():
                 with self._optional():

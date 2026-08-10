@@ -173,7 +173,7 @@ rsAll =
     | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' X2+: register ',' B2+: register ')'  ( / / | $ )
     # An OMITTED index, `D2(,B2)`, which System/360 allows wherever `D2(X2,B2)`
     # is written and which four OI301700 modules use -- `LH R0,#@LB39-*-3(,R0)`.
-    | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' ',' B2+: register ')'  ( / / | $ )
+    | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' noX+: ',' B2+: register ')'  ( / / | $ )
     | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' ')'  ( / / | $ )
     | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression  ( / / | $ )
     ;
