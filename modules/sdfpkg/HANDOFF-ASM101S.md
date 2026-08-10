@@ -458,6 +458,82 @@ WHERE TO GO NEXT, in order.
      ENTIRE macro library as open code before every module, 278 members for
      OI340600, which is a large part of it.
 
+2026-08-10.  Three things in the entry above are now wrong, and each was wrong
+in a way worth keeping.
+
+THE ARCHIVE GAP DOES NOT EXIST.  DCHAR, XPOS, ENDIF and ELSE are all in
+OI340600/MLIB80.  They were not missing from the archive; verify-sweep.sh was
+withholding them, on the stated grounds that an invocation surviving beside
+its own expansion would expand twice.  That was true when it was written and
+stopped being true at 5c35b774, which commented out all 374 such cards --
+PCH10SRC's `IS`, the case the old note cites, among them.  The denominator is
+272, not 262.
+
+COPYING MEMBERS INTO THE LIBRARY DOES NOTHING BY ITSELF.  `readMacroLibrary`
+opens only what MACROFILES.txt names, so the first attempt at borrowing
+changed not one module in the whole corpus.
+
+DO NOT HAND-ROLL MACROFILES.txt.  ASM101S/makeMACROFILES.py maintains it and
+is meant to be re-run whenever a library gains members.  Its rule -- a member
+qualifies only if it defines macros AND has no code outside them -- is the one
+that matters.  Two hand-written approximations were tried here and both
+admitted a member whose open code does something.  The second, MACROS.asm,
+took the corpus to 272 of 272 NOCOMPARE; the rule in CLAUDE.md about uniform
+results across a corpus earned its place again.  The tool also classifies none
+of OI301700's own 40 members as definitions, MACSMITH included, so it needs no
+special case to reproduce the empty index it replaced.
+
+THE LIBRARY IS NO LONGER READ AHEAD OF THE MODULE.  Item 4 of the old "where
+to go next" called that a performance problem.  It is a CORRECTNESS problem:
+
+  - Sequence symbols are file-level.  A pre-read member's `.END` or `.FIOMTU`
+    is visible to the module's own open code.  FIOPDISP has no COPY statement
+    and invokes no library macro, and its `AGO .FIOMTU` -- target on the very
+    next card -- still began failing as "Target out of this macro".  asm101
+    has the same scar: a leaked `.END` made FPMIHPC2's open-code `AGO .END`
+    resolve into the wrong file and no-op, so its deferred block re-ran until
+    ACTR tripped.  FPMIHPC2 is NOCOMPARE here too, and that is where to look.
+  - A member's open code runs.  MACROS.asm is a COPY member -- a TITLE, 51
+    open-code PDEF invocations, one MACRO/MEND -- and reading it defined P1
+    through P51 ahead of every module.  Moving those PDEFs into a macro is NOT
+    the fix: OI340600's MENU12 does `COPY MACROS` and needs them as open code,
+    and they would then be defined twice over.
+
+Members are now fetched when named, OS/360 SYSLIB style, member name = macro
+name, each with its own sequence-symbol namespace, misses cached.
+MACROFILES.txt keeps its meaning and now says which members are ELIGIBLE
+rather than which are pre-read.  `preReadLibraries` in ASM101S.py restores the
+old behaviour.  Load BEFORE the name field is registered, not at expansion:
+the block that declines to register the name of a macro invocation asks
+whether the operation is a known macro, so loading later made `ASIN AENTRY
+...` register ASIN and then expand a macro defining it.
+
+WHERE THE CORPUS STANDS, 2026-08-10:
+
+    MATCH        188        bytes identical to the original build
+    MATCH?         3
+    DIFFERS       53
+    NOCOMPARE     27
+    HANG           1        BILDNEW5, over 1800s
+
+RUNASM stays 205 of 205 byte-exact under --no-rtl-fixes throughout.
+
+WHAT FELL THIS ROUND, all measured the same way.  The six undocumented branch
+aliases the listings name -- BZR, BNZR, BNER, BHR, BOV, BOC -- read off their
+object code, there being no AP-101S manual; a sweep for mnemonics carrying
+object code that appear in no table now returns nothing.  The blank-named
+DSECT.  Negative bit-length constants.  EQU's three-operand form, which GIVES
+a symbol its L' and T' -- that is how PDEF builds position symbols.  L'
+itself, which is GC28-6514-8's definition rebased on halfwords because the
+AP-101S is halfword-addressed.  And `=Y(...)`, which had never worked in four
+independent ways at once, the last being that the literal pool identified an
+entry by its whole attribute dictionary, value included -- fine while every
+literal is absolute, wrong for the first relocatable type the grammar admits.
+
+NEXT.  DCICYC still reports "Literal not in literal pool"; FPMIHPC2 is the
+sequence-symbol case named above; and item 1 of the old list, FPMIDLE's single
+wrong displacement, is untouched and still the cheapest bug report here.
+
 THE MACRO-PROCESSING ROOT CAUSE IS FIXED, issue #1331, in commit 0f5ab2939 on
 2026-08-08.  The issue itself is worth reading anyway -- it is the user's own
 analysis plus two outside contributors, and it is where the semantics below are
