@@ -933,6 +933,7 @@ svGlobals["&SYSPARM"] = "PASS"
 svGlobals["&ASM101S"] = "--no-rtl-fixes" not in sys.argv[1:]
 endLibraries = 0 # First line in `source` following macro-library definitions.
 comparisonSects = None
+comparisonAssigned = {}
 comparisonFile = None
 sourceFileNames = []
 
@@ -961,6 +962,12 @@ for parm in sys.argv[1:]:
     elif parm.startswith("--compare="):
         comparisonFile = parm.partition("=")[2]
         comparisonSects = readListing(comparisonFile)
+        # Snapshot which addresses the listing actually assigns, BEFORE the
+        # comparison starts blanking them as it consumes them.  It is what
+        # lets an uncovered byte be checked against the gap it sits in.
+        if comparisonSects != None:
+            comparisonAssigned = { s: [b != None for b in v["memory"]]
+                                   for s, v in comparisonSects.items() }
         if comparisonSects == None:
             print("Could not load comparison file %s" % parm.partition("=")[2], file=sys.stderr)
             sys.exit(1)
@@ -1494,9 +1501,36 @@ if comparisonSects != None:
             print("\t%05X(%c): %02X" % (address // 2, c, memory[address]))
             mismatchCount1 += 1
     if uncoveredCount > 0:
+        # An uncovered byte is safe to disregard when it lies in an INTERIOR
+        # GAP -- a run the listing leaves blank with assigned bytes on BOTH
+        # sides.  The gap then pins how many bytes belong there even though it
+        # says nothing about their values, and our filling it exactly is why
+        # everything after it still lines up.  An uncovered byte NOT in such a
+        # gap is a different matter and is called out separately, because
+        # nothing bounds it.
+        bounded = 0
+        gaps = 0
+        for s, assigned in comparisonAssigned.items():
+            i = 0
+            while i < len(assigned):
+                if not assigned[i]:
+                    j = i
+                    while j < len(assigned) and not assigned[j]:
+                        j += 1
+                    if i > 0 and assigned[i-1] and j < len(assigned) and assigned[j]:
+                        bounded += j - i
+                        gaps += 1
+                    i = j
+                else:
+                    i += 1
         print("%d byte(s) lie at addresses the comparison listing shows no "
-              "object code for, and are neither confirmed nor contradicted"
-              % uncoveredCount)
+              "object code for, of which %d fall in %d interior gap(s) the "
+              "listing brackets on both sides -- their COUNT is pinned by the "
+              "gap, their VALUES are not shown and stay unverified"
+              % (uncoveredCount, min(uncoveredCount, bounded), gaps))
+        if uncoveredCount > bounded:
+            print("%d of them are NOT bounded by a gap and nothing constrains "
+                  "them at all" % (uncoveredCount - bounded))
     if beyondCount > 0:
         print("%d byte(s) of generated code lie past the end of the "
               "comparison listing and could not be compared" % beyondCount)
