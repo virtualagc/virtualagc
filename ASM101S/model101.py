@@ -1489,11 +1489,21 @@ def generateObjectCode(source, macros):
             elif operation == "LTORG":
                 commonProcessing(4)
                 #commonProcessing(2)
-                if collect:
-                    if not asis:
-                        ltorg(sect)
-                    else:
-                        literalPools[literalPoolNumber][1] = sects[sect]["pos1"]
+                if collect and not asis:
+                    ltorg(sect)
+                elif literalPoolNumber < len(literalPools):
+                    # RE-RECORD THE POOL'S POSITION ON EVERY LATER PASS, not
+                    # only the collecting ones.  This update sat inside
+                    # `if collect:`, so the position was frozen at whatever
+                    # pass 2 computed and the COMPILE passes -- the ones that
+                    # get it right -- never corrected it.
+                    #
+                    # In FCMNINIT pass 2 puts the LTORG at 001CA and pass 3 at
+                    # 001D2, which is where the original build has it.  The
+                    # pool was therefore written 16 bytes early, straight over
+                    # FCM25MS and FCMDLTIM.  Nothing was missing from the
+                    # module; only the pool was misplaced.
+                    literalPools[literalPoolNumber][1] = sects[sect]["pos1"]
                 literalPoolNumber += 1
                 continue
             elif operation in ["USING", "DROP"]:
