@@ -171,6 +171,9 @@ rsAll =
     | [ R1+: arithmeticExpression ',' ] "=" L2+: lconstant ( / / | $ )
     | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' B2+: register ')'  ( / / | $ )
     | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' X2+: register ',' B2+: register ')'  ( / / | $ )
+    # An OMITTED index, `D2(,B2)`, which System/360 allows wherever `D2(X2,B2)`
+    # is written and which four OI301700 modules use -- `LH R0,#@LB39-*-3(,R0)`.
+    | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' ',' B2+: register ')'  ( / / | $ )
     | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression '(' ')'  ( / / | $ )
     | [ R1+: arithmeticExpression ',' ] D2+: arithmeticExpression  ( / / | $ )
     ;
@@ -289,7 +292,12 @@ dcOperand =
     | [ d+: number ] t+: /[FHED]/ [ l+: len ] v+: quotedFloatList 
     | [ d+: number ] t+: /[AY]/ [ l+: len ] v+: addresses 
     | [ d+: number ] t+: 'A'[ l+: len ] h+: quotedHexString
-    | [ d+: number ] t+: 'Z' '(' z: identifier [ ',' [ arithmeticExpression ] [ ',' f: arithmeticExpression ] ] ')'
+    | [ d+: number ] t+: 'Z' '(' z: identifier [ ',' [ A1+: arithmeticExpression ] [ ',' f: arithmeticExpression ] ] ')'
+    # An OMITTED symbol, `Z(,expression,flags)`, the same shape the literal
+    # `=Z(,expression,flags)` has always taken.  The symbol to relocate is then
+    # the leading identifier of the expression, there being no separate field
+    # for it.
+    | [ d+: number ] t+: 'Z' '(' ',' A1+: arithmeticExpression [ ',' f: arithmeticExpression ] ')'
     ;
 dsOperands = dsOperand { ',' dsOperand }  ( / / | $ ) ;
 dsOperand = 

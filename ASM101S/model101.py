@@ -1719,8 +1719,19 @@ def generateObjectCode(source, macros):
                         # Creates an external reference with relocation
                         commonProcessing(4)
                         if operation == "DC":
-                            # Get the symbol name from the 'z' field
+                            # Get the symbol name from the 'z' field, or --
+                            # for the `Z(,expression,flags)` form, which has no
+                            # such field -- from the leading identifier of the
+                            # expression, exactly as the `=Z(,...)` literal
+                            # does.  Without this the constant still assembles
+                            # to the right bytes but carries NO relocation, so
+                            # the linker never fills its address in.
                             symbolName = suboperand.get('z')
+                            if not symbolName and suboperand.get('A1'):
+                                a1 = describeExpression(suboperand['A1'])
+                                mz = re.match(r"[A-Z@#$][A-Z0-9@#$]*", a1)
+                                if mz:
+                                    symbolName = mz.group(0)
                             flags = 0
                             if 'f' in suboperand and suboperand['f'] is not None:
                                 flags = evalArithmeticExpression(suboperand['f'], {},

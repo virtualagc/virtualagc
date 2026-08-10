@@ -549,6 +549,35 @@ class asmParser(Parser):
                 self._arithmeticExpression_()
                 self.add_last_node_to_name('D2')
                 self._token('(')
+                self._token(',')
+                self._register_()
+                self.add_last_node_to_name('B2')
+                self._token(')')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._pattern(' ')
+                        with self._option():
+                            self._check_eof()
+                        self._error(
+                            'expecting one of: '
+                        )
+                self._define(
+                    [],
+                    ['B2', 'D2', 'R1'],
+                )
+            with self._option():
+                with self._optional():
+                    self._arithmeticExpression_()
+                    self.add_last_node_to_name('R1')
+                    self._token(',')
+                    self._define(
+                        [],
+                        ['R1'],
+                    )
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('D2')
+                self._token('(')
                 self._token(')')
                 with self._group():
                     with self._choice():
@@ -1312,16 +1341,40 @@ class asmParser(Parser):
                     self._token(',')
                     with self._optional():
                         self._arithmeticExpression_()
+                        self.add_last_node_to_name('A1')
                     with self._optional():
                         self._token(',')
                         self._arithmeticExpression_()
                         self.name_last_node('f')
                         self._define(['f'], [])
-                    self._define(['f'], [])
+                    self._define(
+                        ['f'],
+                        ['A1'],
+                    )
                 self._token(')')
                 self._define(
                     ['f', 'z'],
-                    ['d', 't'],
+                    ['A1', 'd', 't'],
+                )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._token('Z')
+                self.add_last_node_to_name('t')
+                self._token('(')
+                self._token(',')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('A1')
+                with self._optional():
+                    self._token(',')
+                    self._arithmeticExpression_()
+                    self.name_last_node('f')
+                    self._define(['f'], [])
+                self._token(')')
+                self._define(
+                    ['f'],
+                    ['A1', 'd', 't'],
                 )
             self._error(
                 'expecting one of: '
