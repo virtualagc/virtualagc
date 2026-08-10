@@ -35,8 +35,21 @@ argsRR = {   "AR": 0b000000,   "CR": 0b000100,   "CBL": 0b000011,
            "MEDR": 0b001101,  "MER": 0b011000,  "SEDR": 0b010111, 
             "SER": 0b010110,  "MVH": 0b011011,   "SPM": 0b110011, 
            "SRET": 0b100101, "LXAR": 0b010001, "STXAR": 0b101001, 
-            "ICR": 0b110110,   "BR": 0b110000,  "NOPR": 0b110000,  
-           "LACR": 0b111011,   "PC": 0b110111 }
+            "ICR": 0b110110,   "BR": 0b110000,  "NOPR": 0b110000,
+           "LACR": 0b111011,   "PC": 0b110111,
+            "BZR": 0b110000,  "BNZR": 0b110000, "BNER": 0b110000,
+            "BHR": 0b110000 }
+
+# The RR-form branch aliases.  `BZR R7` is `BCR 4,R7` -- the condition mask
+# rides in the mnemonic instead of R1, so the one operand written is R2.  The
+# values here are those masks.  No AP-101S assembly-language manual survives to
+# take them from, so each was read off the object code the original assembler
+# emitted:  BZR C4E7, BNZR C3E7, BNER C3E7, BHR C1E7, all in BILDNEW5, against
+# `data[0] = 0xC0 | mask` and `data[1] = 0xE0 | r2`.  Each agrees with the mask
+# its non-R counterpart already carries in `branchAliases` below.  Expect more
+# of these to turn up; harvest them the same way.
+rrBranchAliases = { "BR": 7, "NOPR": 0, "BZR": 4, "BNZR": 3, "BNER": 3,
+                    "BHR": 1 }
 
 # The 10-bit numerical codes are the codes in encoded positions 0-4 (in both
 # the RS and SRS forms of the instruction) suffixed by the bits in positions
@@ -58,9 +71,9 @@ argsSRSandRS = {
  "BNL": 0b1100000000,  "BNE": 0b1100000000,   "BO": 0b1101100000,   
   "BP": 0b1100000000,   "BM": 0b1100000000,   "BZ": 0b1100000000,  
  "BNP": 0b1100000000,  "BNM": 0b1100000000,  "BNN": 0b1100000000,
- "BNZ": 0b1100000000,  "BNO": 0b1100000000,  "BLE": 0b1100000000,   
+ "BNZ": 0b1100000000,  "BNO": 0b1100000000,  "BLE": 0b1100000000,
   "BN": 0b1100000000,  "BHE": 0b1100000000,  "BNC": 0b1101100000,
- "BVC": 0b1100111110, 
+ "BVC": 0b1100111110, "BOV": 0b1101100000,  "BOC": 0b1101100000,
 }
 
 argsSRSonly = {
@@ -78,7 +91,16 @@ shiftOperations = { # Special cases of SRS. Values are least-sig bits of code.
 branchAliases = {"B": 7, "BR": 7, "NOP": 0, "NOPR": 0, "BH": 1, "BL": 2, 
                  "BE": 4, "BNH": 6, "BNL": 5, "BNE": 3, "BO": 1, "BP": 1, 
                  "BM": 2, "BZ": 4, "BNP": 6, "BNM": 5, "BNN": 5, "BNZ": 3, 
-                 "BNO": 6, "BLE": 6, "BN": 2, "BHE": 5, "BNC": 6 }
+                 "BNO": 6, "BLE": 6, "BN": 2, "BHE": 5, "BNC": 6,
+                 # `BOV` and `BOC` test the overflow/carry register rather
+                 # than the condition register, so they take the `BVCF`
+                 # two-bit form the way `BNC` does, not `BCF`.  Masks read
+                 # off BILDNEW5:  BOV D909, BOC DA09, both branching three
+                 # halfwords forward.  Note `BO` is a different instruction
+                 # -- same mask 1, but `BCF`, as its D984 there shows.
+                 "BOV": 1, "BOC": 2 }
+# Which of the above take `BVCF` rather than `BCF` in their short forward form.
+bvcfAliases = [ "BNC", "BOV", "BOC" ]
 
 argsRSonly = { 
    "AST": 0b0000011111,    "IHL": 0b1000011111,     "LM": 0b1100111111, 

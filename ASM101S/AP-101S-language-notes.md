@@ -83,6 +83,17 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** THE BRANCH FORMAT IS DOCUMENTED. The POO's @BC and @BXC pages (extracted text around line 17700 of AP-101S-instruction-set.txt, manual pages II-38 and II-39) give the layout, state explicitly that the 8-bit two's complement signed displacement 'is added to the updated MSC program counter' with a range of -128 to +127 halfwords, and tabulate all eight condition codes with their extended mnemonics: 1 @BP/@BXP, 2 @BN/@BXN, 3 @BNZ/@BXNZ, 4 @BZ/@BXZ, 5 @BNN/@BXNN, 6 @BNP/@BXNP, 7 @B. The accumulator and index-register forms differ only in the M bit, which is why @BNN is 0x25 and @BXNN 0x2D. THE MEMORY-REFERENCE AND IMMEDIATE FORMATS ARE NOT documented anywhere findable; beware that the POO's 'Short format 1 ... OP(4) M(1) DISP(11)' passage belongs to the BCE section, not the MSC one, and citing it for MSC would be a misattribution. Those two formats were derived from the original build in ~/workspace/PFS/'OI301700 as received'/SSSRC. ALL THREE were then verified by re-encoding from scratch: for every MSC instruction in those listings whose operand symbol is defined in the same listing, the expected halfword was computed from the listing's own label addresses and compared against the listing's object code. 318 instructions across 21 mnemonics matched byte for byte, with ZERO mismatches. The immediate split is listed only for mnemonics proven by a NON-ZERO operand somewhere in the corpus; one seen only with a zero operand would fit any layout and was deliberately left unencoded.
 
+### `DC FL.n'-v'`
+
+**Processor:** assembler  
+**Confidence:** derived
+
+**What it does.** A bit-length modifier on a fixed-point constant accepts a negative value.  Nothing about the encoding is special; the point is that ASM101S used to reject it while accepting the positive constant beside it, because its parser returns the sign and the digits as separate tokens and the packing path read the value back as if it were one string.
+
+**Encoding.** The low n bits of the value's two's complement, packed into the bit stream in the order written, exactly as a positive value would be.
+
+**How this was established.** MENU12 writes 29 such cards, DC BL.5'10000',FL.11'-38' among them.  -38 in eleven bits is 11111011010, and with the five bits of the B constant ahead of it the halfword is 0x87DA, which is what ASM101S now emits and what the arithmetic requires.  Also DC YL.5(15),YL.3(0),FL.8'-27' -> 0x78E5.
+
 ### `R0-R7 and the symbolic equates`
 
 **Processor:** assembler  
@@ -170,6 +181,28 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 **Encoding.** Two bytes.  NOT YET FULLY DERIVED.  Some are a 4-bit opcode with a 12-bit operand -- #DLYI is 0xC with the operand in the low 12 bits (C000 for 0, C005 for 5, C716 for 1814 = 0x716), and #LTOI is 0xB (B12F for 303 = 0x12F).  Others do not fit that: #WAT 0 is 0800, #RIB 0 is E000, #SIB 0 is E800, #STP 0 is 1000, #RDS 0,0 is 6000, #TDS 1,0 is 8100.  The split between opcode and operand for those is undetermined, most of the observed operands being zero.
 
 **How this was established.** Observed 2026-08-09 in "OI301700 as received".  #DLYI and #LTOI are settled by instances with large operands: C716 for 1814 and B12F for 303 both put the operand in the low 12 bits.  The rest are dominated by zero operands -- #WAT appears 1105 times as 0800 and never otherwise -- so the field boundary cannot be read off them.  DO NOT ENCODE THESE until the POO has been read for the formats; guessing produces silently wrong object code.
+
+### `BOV/BOC`
+
+**Processor:** CPU  
+**Confidence:** derived
+
+**What it does.** Branch on overflow and branch on carry.  These test the overflow/carry register rather than the condition register, which is what the BVCF selector means; BNC is the third member of that family and was the only one ASM101S knew.  ASM101S lists them in bvcfAliases.  Do not confuse BOV with BO -- BO carries mask 1 as well but is an ordinary BCF condition-register branch.
+
+**Encoding.** Short forward form is SRS with the BVCF two-bit selector (0b01), not BCF: data[0] = 0xD8 | mask, data[1] = (d << 2) | 0b01, d counted in halfwords from the halfword after the instruction.  Masks: BOV 1, BOC 2.
+
+**How this was established.** OI301700 listing of BILDNEW5.  BOV STM1150 at 00B0E assembles D909 and BOC STM1160 at 00B11 assembles DA09, each branching three halfwords forward, so d=2 and the low two bits of the second byte are 01.  Two lines later BP STM1170 at 00B14 assembles D908 -- same displacement, selector 00 -- which is what shows the 01 in BOV and BOC to be deliberate rather than part of the displacement.  Attested once each, in the short forward form only; the long RS form is unattested and ASM101S still degenerates it to BC as it does for BNC.
+
+### `BZR/BNZR/BNER/BHR`
+
+**Processor:** CPU  
+**Confidence:** derived
+
+**What it does.** RR-form branch aliases, the register counterparts of BZ, BNZ, BNE and BH.  BR (mask 7) and NOPR (mask 0) are the two of this family that ASM101S already knew.  ASM101S holds them in rrBranchAliases, separate from branchAliases so the RS/SRS branch path is not disturbed.
+
+**Encoding.** RR form, one operand.  data[0] = 0xC0 | mask, data[1] = 0xE0 | R2 -- that is, BCR with the condition mask carried in the mnemonic instead of R1, so the single register written is R2.  Masks: BZR 4, BNZR 3, BNER 3, BHR 1.
+
+**How this was established.** No AP-101S assembly-language manual survives, so the masks were read off the object code the original assembler emitted, in the OI301700 listing of BILDNEW5: BZR R7 C4E7 (5 times) and BZR R5 C4E5, BNZR R7 C3E7 (12), BNER R7 C3E7 (3), BHR R7 C1E7.  Each mask so recovered equals the one its non-R counterpart already carried, which is the cross-check.  A sweep of every OI301700 listing for mnemonics that carry object code and are in none of ASM101S's tables returned these four, BOV and BOC, and nothing else.
 
 ### `@BP / @BXC / @CALL`
 
@@ -265,6 +298,28 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** All 658 such constants across BOTH PASS versions are written in groups of exactly eight digits, one fullword each, so concatenating them is right for every one -- FAZ2 and MMUPURTB assemble byte-exact against their listings that way. But uniform groups cannot distinguish concatenation from padding each group separately, which is what the multiple-constant reading would imply. The two readings agree whenever the groups have an even number of digits and differ when they do not: X'1,1' is 01 01 padded per group and 11 concatenated. No such constant exists in the corpus, so ASM101S diagnoses any constant whose groups are not all one fullword instead of guessing.
 
+### `DSECT (unnamed)`
+
+**Processor:** assembler  
+**Confidence:** derived
+
+**What it does.** The name field of DSECT is optional.  ASM101S rejected the blank form outright because it keyed sections by name and the empty string already belonged to the unnamed CONTROL section; it now keys the dummy one as *DSECT*, which no source can name.  Symbols defined inside it behave as in any other DSECT.
+
+**Encoding.** No object code.  A blank name field defines the single unnamed dummy section; later blank-named DSECT statements continue it.
+
+**How this was established.** FCMBMASK is the only module in either version that writes one -- statement 786 of its OI301700 listing, assembled at 00000 with no ESD entry -- and that one card rejected the whole module.  Consistent with the OS/VS assembler, where the name field of DSECT is 'a symbol or blank'.
+
+### `EQU value,length,type`
+
+**Processor:** assembler  
+**Confidence:** derived
+
+**What it does.** EQU takes up to three operands.  ASM101S parses all three and applies only the first: it has no L' at all, and its T' answers from the symbol's own definition.
+
+**Encoding.** No object code.  The second and third operands are the length and type attributes to give the symbol.
+
+**How this was established.** MENU12's 46 cards of the form '#CYCNT EQU *,0+1,0+1', all generated by the DCHAR macro, are the only instances in either version.  Nothing in MENU12 asks for L' or T' of any symbol they define, so ignoring the attributes changes no assembled byte -- but that is a property of this corpus, not of the statement.
+
 ### `Z-type constant and literal`
 
 **Processor:** assembler  
@@ -295,4 +350,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-22 entries.
+27 entries.

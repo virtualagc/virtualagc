@@ -435,7 +435,14 @@ pidentifier = /[#@$A-Z][#@$A-Z0-9]*/ ;
 
 anything = /.*/ $ ;
 
-equOperand = v+: arithmeticExpression ( / / | $ ) ;
+# The second and third operands of EQU are the length and type attributes to
+# give the symbol, as in MENU12's `#CYCNT EQU *,0+1,0+1`.  They are captured so
+# the statement parses; see the EQU case in model101.py for why nothing is done
+# with them yet.
+equOperand = v+: arithmeticExpression
+             [ ',' len+: arithmeticExpression
+               [ ',' typ+: arithmeticExpression ] ]
+             ( / / | $ ) ;
 
 # Operand field of SETA, SETB and SETC.  The operand field ends at the first
 # blank that is not inside a quoted string, and whatever follows it is a

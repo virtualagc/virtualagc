@@ -258,6 +258,19 @@ def getHashcode(symbol):
 #    sect,number
 # where sect==None for a pure numerical result, or is the name of an EXTRN
 # or CSECT for an address result.  In case of error None,None is returned.
+# Rejoin the text of an AST fragment that the parser broke into tokens.  A
+# `floatNumber` keeps its sign, digits, fraction and exponent as separate
+# tokens, and anything that wants to read the number back as written has to put
+# them together again.
+def joinTokens(ast):
+    if ast == None:
+        return ""
+    if isinstance(ast, str):
+        return ast
+    if isinstance(ast, (list, tuple)):
+        return "".join(joinTokens(i) for i in ast)
+    return str(ast)
+
 def unhash(result):
     offset   = result & 0x00000000FFFFFFFF
     buffer   = result & 0x0000000F00000000
@@ -292,6 +305,10 @@ fillPattern = [0x00, 0x00]  # Uninitialized memory fill; set via --fill
 from model101tables import *
 
 sects = {} # CSECTS and DSECTS.
+# The internal key of the unnamed dummy section.  Deliberately not a legal
+# symbol, so it cannot collide with a section the source names, nor with "",
+# which is the unnamed CONTROL section.
+unnamedDsect = "*DSECT*"
 entries = set() # For `ENTRY`.
 extrns = set() # For `EXTRN`.
 rextrns = {} # For `EXTRN`
@@ -1421,7 +1438,20 @@ def generateObjectCode(source, macros):
                     firstCSECT = name
                     symtab["_firstCSECT"] = firstCSECT
                 if name == "" and not cVsD:
-                    error(properties, "Unnamed DSECT not allowed.")
+                    # The name field of DSECT may be blank.  FCMBMASK's
+                    # listing assembles one at statement 786.  It is the only
+                    # module in either version that writes one -- one card, so
+                    # this rejected an entire module over a single statement.
+                    # A blank name defines the one UNNAMED dummy section,
+                    # which any later blank-named DSECT continues.
+                    # It needs an internal name only because "" is already the
+                    # unnamed CONTROL section and merging the two would put
+                    # dummy storage in the object.  The name below is not a
+                    # legal symbol, so no source can name the section -- which
+                    # is correct, since a blank name is exactly what makes it
+                    # unnameable.  Symbols defined inside it still work; they
+                    # carry their section with them.
+                    name = unnamedDsect
                 sect = name
                 if sect not in sects:
                     sects[sect] = {
@@ -1493,6 +1523,14 @@ def generateObjectCode(source, macros):
                     error(properties, "Cannot parse operand of EQU")
                     continue
                 err, v = evalInstructionSubfield(properties, "v", ast, symtab)
+                # EQU's optional second and third operands set the symbol's
+                # length and type attributes.  They are parsed but not applied:
+                # ASM101S has no L' at all, and its T' answers from the symbol's
+                # own definition.  The only statements in either version that
+                # use the form are MENU12's 46 `EQU *,0+1,0+1` cards, and
+                # nothing in MENU12 asks for L' or T' of any symbol they define,
+                # so applying them would change no assembled byte.  Should a
+                # source turn up that does ask, this is where to start.
                 if operand.startswith("*") and sect != firstCSECT:
                     # `EQU *` in a section other than the first has to be
                     # converted from section-relative to absolute.  A DSECT
@@ -1715,13 +1753,36 @@ def generateObjectCode(source, macros):
                         else:
                             inner = []
                             try:
-                                digits = values[0][1].replace(",", "")
                                 if thisType == "X":
-                                    literal = int(digits, 16)
+                                    literal = int(values[0][1].replace(",", ""), 16)
                                 elif thisType == "B":
-                                    literal = int(digits, 2)
+                                    literal = int(values[0][1].replace(",", ""), 2)
                                 elif thisType in ("F", "H"):
-                                    literal = int(digits)
+                                    # `quotedFloatList` hands back the sign and
+                                    # the digits as SEPARATE tokens, so `-38`
+                                    # arrives as ('-', '38') rather than as a
+                                    # string.  `int()` of that raises, `literal`
+                                    # stayed None and the statement was rejected
+                                    # -- which is why every negative packed
+                                    # constant failed while the positive ones
+                                    # beside them assembled.  MENU12 writes 29
+                                    # of them, `DC BL.5'10000',FL.11'-38'` and
+                                    # the like.
+                                    #
+                                    # A COMMA IS NOT COSMETIC HERE, unlike in an
+                                    # X constant: inside F or H it separates
+                                    # whole constants, and this path packs one
+                                    # value into one field.  Fail rather than
+                                    # concatenate the digits into a number that
+                                    # appears nowhere in the source.
+                                    # `quotedFloatList` is
+                                    # ["'", first, [more...], "'"], so the
+                                    # extra values sit in element 2 and an
+                                    # empty list there means there is just one.
+                                    if values[0][2]:
+                                        literal = None
+                                    else:
+                                        literal = int(joinTokens(values[0][1]))
                             except:
                                 literal = None
                             if literal == None:
@@ -2259,18 +2320,21 @@ def generateObjectCode(source, macros):
                 ast = properties["ast"]
                 if ast != None:
                     # Make sure we trap some special mnemonics:
+                    err = False    # The mnemonics below supply R1 themselves,
+                                   # and left `err` holding whatever the last
+                                   # RR instruction assembled had put there --
+                                   # or unset, if they came first.
                     if operation in ["SPM"]:
                         if "r1" in ast and len(ast["r1"]) != 0:
                             error(properties, f"Cannot specify register R1.")
                         r1 = 0
-                    elif operation in ["NOPR"]: # Alias for NOP.
+                    elif operation in rrBranchAliases:
+                        # `BR`, `NOPR`, `BZR` and the rest are all `BCR` with
+                        # the condition mask written into the mnemonic, so the
+                        # single operand is R2 and R1 must not be given.
                         if "r1" in ast and len(ast["r1"]) != 0:
                             error(properties, f"Cannot specify condition.")
-                        r1 = 0
-                    elif operation == "BR": # Alias for unconditional branch.
-                        if "r1" in ast and len(ast["r1"]) != 0:
-                            error(properties, f"Cannot specify condition.")
-                        r1 = 7
+                        r1 = rrBranchAliases[operation]
                     else:
                         err, r1 = evalInstructionSubfield(properties, "R1", \
                                                           ast, symtab)
@@ -2485,7 +2549,7 @@ def generateObjectCode(source, macros):
                                         d = d2 - (properties["pos1"] // 2 + symtab[sect]["value"] + 1)
                                         if d >= 0 and d < 0b111000:
                                             d = d & 0b111111
-                                            if operation in ["BNC"]:
+                                            if operation in bvcfAliases:
                                                 o = "BVCF"
                                                 b = 0b01
                                             else:

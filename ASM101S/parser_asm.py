@@ -2134,6 +2134,22 @@ class asmParser(Parser):
     def _equOperand_(self):
         self._arithmeticExpression_()
         self.add_last_node_to_name('v')
+        with self._optional():
+            self._token(',')
+            self._arithmeticExpression_()
+            self.add_last_node_to_name('len')
+            with self._optional():
+                self._token(',')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('typ')
+                self._define(
+                    [],
+                    ['typ'],
+                )
+            self._define(
+                [],
+                ['len', 'typ'],
+            )
         with self._group():
             with self._choice():
                 with self._option():
@@ -2145,7 +2161,7 @@ class asmParser(Parser):
                 )
         self._define(
             [],
-            ['v'],
+            ['len', 'typ', 'v'],
         )
 
     @tatsumasu()
