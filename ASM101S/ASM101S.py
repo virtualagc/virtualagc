@@ -382,6 +382,11 @@ def evalMacroArgument(properties, suboperand):
 # macro expansion.  
 source = []
 libraries = []
+# Which members of each library define macros, from its MACROFILES.txt.
+libraryMembers = {}
+# Read every listed member ahead of the module, as this always used to.
+# Off: members are fetched by name when invoked.  See `loadLibraryMacro`.
+preReadLibraries = False
 metadata = {} # Metadata for the assembly, such as the TTILE.
 sysndx = -1
 def readSourceFile(fromWhere, svLocals, sequence, \
@@ -735,6 +740,16 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             properties["operation"] = operation
             properties["operand"] = operand
         
+        # FETCH THE MACRO BEFORE ANYTHING ASKS WHETHER THIS IS ONE.  The
+        # block just below declines to register the name field of a macro
+        # invocation, leaving that to the expansion, and it decides by asking
+        # whether the operation is a known macro.  Loading at the point of
+        # expansion instead is too late by exactly those few lines:
+        # `ASIN AENTRY ...` registered ASIN as an ordinary label AND then
+        # expanded a macro that defines it, so every RUNASM module carrying a
+        # secondary entry point died with "Already defined".
+        if operation not in macros and operation not in pseudoOps:
+            loadLibraryMacro(operation)
         if name != "" and name[:1] not in [".", "&"] and \
                 operation not in ["TITLE", "CSECT", "DSECT"] \
                 and operation not in macros:
@@ -858,9 +873,60 @@ def readSourceFile(fromWhere, svLocals, sequence, \
               "Branch to %s in %s: the sequence symbol was never found, so " \
               "the rest of it was skipped" % (skipToSeq, fromWhere))
 
+# A member that was looked for and is not there, so the library is not
+# re-scanned for it once per invocation.
+noLibraryMember = set()
+
+# FETCH A LIBRARY MACRO ON DEMAND, by name, the way OS/360 fetches a SYSLIB
+# member: the member's name IS the macro's name.  Returns True if `name` is
+# defined as a macro afterwards.
+#
+# WHY NOT SIMPLY READ THE WHOLE LIBRARY UP FRONT, which is what this did.  Every
+# member read that way puts its cards into `source` AHEAD of the module, and
+# OI340600's library is 26,566 of them.  That is not merely slow:
+#
+#   - Sequence symbols are file-level, so a library member's `.END` becomes
+#     visible to the module's own open code.  FIOPDISP's `AGO .FIOMTU`, whose
+#     target is the very next card, started failing with "Target out of this
+#     macro" the moment the library was pre-read, and it has no COPY statement
+#     and invokes no library macro at all.
+#   - A member's OPEN code runs.  MACROS.asm is fifty-one open-code PDEF
+#     invocations behind a TITLE, and pre-reading it defined P1-P51 ahead of
+#     every module in the corpus.
+#
+# Reading a member only when something asks for it by name avoids both: a
+# member nobody invokes is never opened.  Don Schmidt reached the same
+# conclusion independently in asm101, which is where the SYSLIB model here
+# comes from.
+#
+# The member is read with its OWN sequence-symbol namespace rather than the
+# shared one, for the first reason above.
+def loadLibraryMacro(name):
+    global macros, noLibraryMember
+    if name in macros:
+        return True
+    if name in noLibraryMember or name == "" or name[:1] in [".", "&", "="]:
+        return False
+    for library in libraries:
+        if name not in libraryMembers.get(library, set()):
+            # Not a macro member of this library.  The index says which of its
+            # members define macros and which are COPY fragments, and a COPY
+            # fragment read as open code is what puts a DS outside any control
+            # section.
+            continue
+        for candidate in [name, name + ".asm"]:
+            path = os.path.join(library, candidate)
+            if os.path.isfile(path):
+                readSourceFile(path, svGlobalLocals, {}, \
+                               copy=False, printable=False, depth=0)
+                if name in macros:
+                    return True
+    noLibraryMember.add(name)
+    return False
+
 # Read an entire macro library.
 def readMacroLibrary(dir):
-    global libraries
+    global libraries, libraryMembers
     path = os.path.join(dir, "MACROFILES.txt")
     try:
         f = open(path, "rt")
@@ -875,6 +941,16 @@ def readMacroLibrary(dir):
             continue
         macroFiles.add(line.strip())
     f.close()
+    # WHAT THE INDEX NOW DRIVES.  It used to be the list of members read ahead
+    # of the module; it is now the list of members ELIGIBLE to be fetched when
+    # something invokes them.  Same file, same meaning -- which members define
+    # macros and which are for COPY -- but consulted at the moment of use.
+    # `makeMACROFILES.py` is what maintains it and must be re-run whenever the
+    # library gains members.
+    libraryMembers[dir] = { m[:-4] if m.endswith(".asm") else m \
+                            for m in macroFiles }
+    if not preReadLibraries:
+        return
     for file in os.listdir(dir):
         if file not in macroFiles:
             continue
