@@ -24,6 +24,7 @@ History:    2024-09-05 RSB  Began.
 
 import sys
 import copy
+import re
 import random
 from expressions import error, unroll, astFlattenList, \
     evalArithmeticExpression, svGlobals, describeExpression
@@ -500,8 +501,24 @@ def evalLiteralAttributes(properties, ast, symtab):
         operand += "L%s" % ast["L"][0]
     if "S" in ast and len(ast["S"]) > 0:
         operand += "S%s" % ast["S"][0]
-    operand += "'%s'" % "".join(ast[t][0])
+    zsymbol = None
+    if t == "Z":
+        # A Z literal has no quoted value; it carries an address expression
+        # and a flags expression, and the pool key has to distinguish two
+        # literals that differ only in those.
+        a1 = describeExpression(ast["A1"])
+        operand += "(,%s,%s)" % (a1, describeExpression(ast["A2"]))
+        # The leading identifier of the address expression is the symbol the
+        # linker must relocate, exactly as the identifier in `DC Z(sym,...)`
+        # is.  Everything after it is the absolute part already in bytes 0-1.
+        m = re.match(r"[A-Z@#$][A-Z0-9@#$]*", a1)
+        if m:
+            zsymbol = m.group(0)
+    else:
+        operand += "'%s'" % "".join(ast[t][0])
     attributes = { "value": l2, "T": t, "L": l, "operand": operand, "assembled": bytes }
+    if zsymbol != None:
+        attributes["zsymbol"] = zsymbol
     return attributes
 
 #=============================================================================
@@ -3182,6 +3199,17 @@ def generateObjectCode(source, macros):
             offset = pool[1] + pool[3][i]
             lassembled = pool[i]["assembled"]
             assembled[offset:offset+len(lassembled)] = lassembled
+            # A ZCON in the pool needs the same relocation a `DC Z(...)` gets,
+            # or the linker never fills in its address.
+            zsymbol = pool[i].get("zsymbol")
+            if zsymbol != None:
+                relocations.append({
+                    "symbol": zsymbol,
+                    "section": pool[0],
+                    "address": offset,
+                    "flags": (pool[i]["value"] >> 8) & 0xFF,
+                    "type": "Z"
+                    })
         sects[pool[0]]["used"] = desiredLength
     
     return metadata

@@ -203,6 +203,18 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** 59 padded and 28 unpadded instances in "OI301700 as received", 2026-08-09.  Every padded one is at an odd halfword address and emits C000; every unpadded one is at an even address.
 
+### `Z-type constant and literal`
+
+**Processor:** assembler  
+**Confidence:** derived  
+**Encoding certainty:** verified
+
+**What it does.** The ZCON, written either as a constant, DC Z(symbol,address,flags), or as a literal, =Z(,address,flags), whose first field is empty. Bytes 0-1 hold the ABSOLUTE part of the address expression and the symbolic part becomes a relocation for the linker to fill in; byte 2 holds the flags; byte 3 is reserved and always zero. The literal form takes its relocated symbol from the leading identifier of the address expression, there being no separate symbol field.
+
+**Encoding.** 4 bytes: ADDRESS(16) FLAGS(8) RESERVED(8), fullword aligned
+
+**How this was established.** The encoding is documented nowhere the user could point to. It was derived from two instances in the original build, which between them fix all four bytes. FCMPSA's 'TPSATZCN DC Z(FCMTRACE,FCMTRCLG,15)' assembles to 00000F00, putting the flags 15 in byte 2 and nothing anywhere else, both symbolic operands being relocated to zero. FCMNINIT's literal '=Z(,FPMXQETB+2,0)' assembles to 00020000, putting the +2 -- the absolute part of the address expression -- in bytes 0-1 with flags of zero. ASM101S's existing DC Z path already emitted exactly this layout; only the literal form was missing, and it now reproduces both values.
+
 
 ## Suffix
 
@@ -221,4 +233,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-16 entries.
+17 entries.

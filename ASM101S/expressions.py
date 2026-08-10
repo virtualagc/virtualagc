@@ -391,6 +391,7 @@ def evalArithmeticExpression(expression, \
     
     if isinstance(expression, dict) and "T" in expression:
         datatype = expression["T"][0]
+        literal = expression        # kept whole; a Z literal needs A1 and A2
         expression = unroll(expression[datatype])
         if datatype == "C":
             error(properties, \
@@ -419,8 +420,30 @@ def evalArithmeticExpression(expression, \
                 return None
             return symtab[expression]["pos1"] // 2
         elif datatype == "Z":
-            error(properties, "Literals =Z(...) not yet implemented")
-            return None
+            # A ZCON literal, `=Z(,address,flags)`.  Its encoding is not
+            # documented anywhere; it was derived from the original build,
+            # where `DC Z(FCMTRACE,FCMTRCLG,15)` assembles to 00000F00 and
+            # `=Z(,FPMXQETB+2,0)` to 00020000.  Those two between them fix all
+            # four bytes:
+            #
+            #     bytes 0-1   the ABSOLUTE part of the address expression,
+            #                 the "+2" above; the symbolic part becomes a
+            #                 relocation the linker fills in
+            #     byte 2      the flags, 15 above
+            #     byte 3      reserved, always zero
+            #
+            # which is the same layout `DC Z(...)` already emitted.
+            address = evalArithmeticExpression(literal["A1"], svLocals, \
+                                               properties, symtab, star, \
+                                               severity)
+            flags = evalArithmeticExpression(literal["A2"], svLocals, \
+                                             properties, symtab, star, \
+                                             severity)
+            if address == None or flags == None:
+                error(properties, \
+                      "Cannot evaluate the operands of a Z-type literal")
+                return None
+            return ((address & 0xFFFF) << 16) | ((flags & 0xFF) << 8)
         error(properties, "Literals =%s not implemented" % datatype)
         return None
             
