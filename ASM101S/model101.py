@@ -2357,8 +2357,46 @@ def generateObjectCode(source, macros):
                                                           duplicationFactor)
                                 toMemory(dcBuffer[:dcBufferPtr])
                                 continue
-                            pass
-                        
+                            # `DC A(expression)` NEVER EMITTED ITS VALUE.  Only
+                            # the `A'hexadecimal'` form above wrote anything;
+                            # the ordinary parenthesised form fell through to
+                            # the `toMemory(count)` below, and that call only
+                            # ADVANCES the location counter -- toMemory writes
+                            # into memory only when handed a bytearray.  So the
+                            # four bytes were never assigned and the comparison
+                            # reported them missing.
+                            #
+                            # It went unnoticed because an A constant inside a
+                            # DSECT generates no object code to compare, and
+                            # that is where most of them are.  FIOMGTQE's
+                            # `FIOMMTXD DC A(FIOMMCTM)` is in the CSECT: the
+                            # original assembles 00030D40, being the 200000 its
+                            # EQU gives, and ASM101S assembled nothing at all.
+                            for exp in astFlattenList(suboperand["v"][0][1:-1]):
+                                v = evalArithmeticExpression(exp, {}, \
+                                                             properties, symtab, \
+                                                             currentHash(), \
+                                                             severity = \
+                                                               255 if compile \
+                                                               else 0)
+                                if v == None:
+                                    if compile:
+                                        error(properties, \
+                                              "Cannot evaluate A-type constant")
+                                    v = 0
+                                aSect, aOffset = unhash(v)
+                                if aSect != None:
+                                    v = aOffset + \
+                                        sects.get(aSect, {}).get("offset", 0)
+                                for j in (24, 16, 8, 0):
+                                    dcBuffer[dcBufferPtr] = (v >> j) & 0xFF
+                                    dcBufferPtr += 1
+                            length = dcBufferPtr
+                            dcBufferPtr = replicateDC(properties, length, \
+                                                      duplicationFactor)
+                            toMemory(dcBuffer[:dcBufferPtr])
+                            continue
+
                         toMemory(duplicationFactor * 4)
                     elif suboperandType == "Y":
                         if lengthModifier != None:

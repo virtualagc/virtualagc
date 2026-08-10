@@ -1294,7 +1294,14 @@ for i in range(endLibraries, len(source)):
         properties["printedLineNumber"] = printedLineNumber
         linesThisPage += space
     elif properties["operation"] == "TITLE":
-        title = properties["operand"].rstrip()[1:-1]
+        # A TITLE MAY HAVE NO OPERAND, in which case it merely ejects and the
+        # heading is left as it was.  The operand arrives as None then, and
+        # `.rstrip()` on it is an AttributeError that kills the assembly
+        # outright rather than diagnosing anything -- the listing simply stops.
+        # It is reachable from ordinary source: FPMIHPC2 hits it once its
+        # truncated tail is restored.
+        operandText = properties["operand"]
+        title = operandText.rstrip()[1:-1] if operandText != None else ""
         subtitle = "%-95s" % "  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT" \
                    + "%16s %s" % (program + " " + version, currentDate)
         printedLineNumber += 1
