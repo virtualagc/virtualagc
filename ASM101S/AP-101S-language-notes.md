@@ -43,7 +43,7 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **Encoding.** SRS: OP(4+) R1(3) DISP(6) B2(2); DISP counts OPERANDS, not halfwords
 
-**How this was established.** Measured in FCMNINIT's own listing against the DSECT offsets it prints. 'L TPSAMCOP' with TPSAMCOP at halfword 64 encodes displacement 32; 'ST TPSAHISM' at 24 encodes 12; 'ST R0,TCVTIOQ' at 78 encodes 39 -- all of them offset/2. The halfword instructions on the same symbols do not scale: 'LH TCVTIFLG' and 'STH TCVTIFLG' with TCVTIFLG at 24 both encode 24. ASM101S does not do this: for ST R0,TCVTIOQ it computes a displacement of 220, which fits no 6-bit field, so it emits the long form 30F5 00DC where the original build emits the short form 309D. Where its 220 comes from is not yet explained -- the symbol is at 0x4E in both listings -- so scaling alone may not be the whole story.
+**How this was established.** Measured in FCMNINIT's own listing against the DSECT offsets it prints. 'L TPSAMCOP' with TPSAMCOP at halfword 64 encodes displacement 32; 'ST TPSAHISM' at 24 encodes 12; 'ST R0,TCVTIOQ' at 78 encodes 39 -- all of them offset/2. The halfword instructions on the same symbols do not scale: 'LH TCVTIFLG' and 'STH TCVTIFLG' with TCVTIFLG at 24 both encode 24. ASM101S ALREADY IMPLEMENTS THIS CORRECTLY, contrary to what this entry first said. It appeared not to only because 'DS A' labels kept a preliminary placeholder value instead of their real one, so the displacement fed to the rule was wrong before the rule ever saw it; given the right symbol value ASM101S emits 309D for ST R0,TCVTIOQ, exactly as the original build does.
 
 ### `MSC instructions still unencoded`
 

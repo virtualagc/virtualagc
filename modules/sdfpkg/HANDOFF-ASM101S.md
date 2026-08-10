@@ -358,27 +358,34 @@ these was invisible to a sweep that only asks whether ASM101S complains:
     commit and ap101s-notes.db; the short version is that the instance offered
     as proof was never evaluated, and LOOKING THE SYMBOL UP disproves it.
 
-THE SRS/RS CHOICE IS THE NEXT BIG ONE, and the rule is now known.  The short
-form's 6-bit displacement is SCALED BY THE OPERAND SIZE: a fullword
-instruction counts fullwords, a halfword instruction counts halfwords.
-Measured in FCMNINIT's own listing against the DSECT offsets it prints --
-`L TPSAMCOP` at halfword 64 encodes 32, `ST TPSAHISM` at 24 encodes 12,
-`ST R0,TCVTIOQ` at 78 encodes 39, all offset/2; while `LH TCVTIFLG` and
-`STH TCVTIFLG` on a symbol at 24 both encode 24, unscaled.  The SRS base field
-is also only 2 bits, so a short-form base must be R0 to R3.
+`DS A` LABELS KEPT A PLACEHOLDER VALUE, which was worth more than it looked.
 
-That is what decides the form, and the FIXME in model101.py guessing at
-"0 <= D2 < 56 -> SRS" can be replaced by it.  ASM101S emits the long form
-`30F5 00DC` for `ST R0,TCVTIOQ` where the original emits the short `309D`, and
-that single extra halfword is what puts FCMNINIT 544 bytes out for the rest of
-its listing.
+The preliminary symbol pass gives every labelled statement a provisional value
+of four bytes times its position in the section, and `commonProcessing` is
+what later replaces that with the real one.  The A-type branch called
+commonProcessing for `DC A` and for anything with a length modifier, and for
+`DS A` called it NEITHER way -- so every `DS A` label kept the placeholder for
+good.  TCVTIOQ came out as 220, being the 56th label in TFCVT, where it
+belongs at 78.  The listing printed it at 0x4E throughout; only the symbol
+table was wrong.
 
-ONE THING IS UNEXPLAINED and should be settled before implementing.  ASM101S
-computes a displacement of 220 for that instruction.  findB2D2 picks base
-register 1, which is right, and TCVTIOQ sits at 0x4E in the DSECT in BOTH
-listings -- 78 halfwords, 156 bytes.  220 is neither, so scaling alone does
-not account for it and something else is wrong with the offset as well.  Find
-out what 220 is before assuming a divide by two fixes this.
+What that cost was invisible until traced.  Instructions referring to such a
+symbol got a displacement out of range of the short form and were assembled
+LONG, which shifts every address after them.  `ST R0,TCVTIOQ` came out as
+30F5 00DC where the original build has 309D, and that one extra halfword put
+FCMNINIT 544 bytes out.  With the value right it is 309D, byte for byte, and
+FCMNINIT falls to 57.  `DS A` was also missing the fullword alignment an
+A-type constant is due.
+
+AND THE SRS/RS MACHINERY WAS INNOCENT.  The short form's displacement is
+scaled by the operand size -- fullword instructions count fullwords, halfword
+instructions halfwords, so a symbol 78 halfwords in is displacement 39 to a
+`ST` and 78 to a `STH` -- and ASM101S implements that correctly.  It only
+looked broken because it was being handed a wrong symbol value.  An earlier
+version of this entry said the rule was unimplemented and the FIXME in
+model101.py should be replaced by it; that was wrong on both counts.  BEFORE
+TOUCHING THAT ALGORITHM, check whether the symbol values reaching it are
+right.
 
 WHERE TO GO NEXT, in order.
 

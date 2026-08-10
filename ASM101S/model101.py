@@ -1965,7 +1965,21 @@ def generateObjectCode(source, macros):
                     elif suboperandType == "A":
                         if lengthModifier != None:
                             commonProcessing(1)
-                            pass
+                        elif operation != "DC":
+                            # `DS A` reached NEITHER of the commonProcessing
+                            # calls below, and commonProcessing is what
+                            # replaces a label's PRELIMINARY value with its
+                            # real one.  So every `DS A` label kept the
+                            # placeholder the preliminary pass gave it, which
+                            # is 4 bytes times the number of labels before it
+                            # in the section -- TCVTIOQ came out as 220, being
+                            # the 56th label in TFCVT, where it belongs at 78.
+                            # Its listing address was right the whole time;
+                            # only the symbol table was wrong, so instructions
+                            # referring to it got a displacement out of range
+                            # and were assembled long.  It also never got the
+                            # fullword alignment an A-type constant is due.
+                            commonProcessing(4)
                         if operation == "DC":
                             commonProcessing(4)
                             if 'h' in suboperand:
