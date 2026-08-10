@@ -298,6 +298,11 @@ dsOperand =
     | [ d+: number ] t+: 'B' [ l+: len ] [ v+: quotedBinaryString ]
     | [ d+: number ] t+: /[FHED]/ [ l+: len ] [ v+: quotedFloatList ]
     | [ d+: number ] t+: /[AY]/ [ l+: len ] [ v+: addresses ]
+    # `DS Z` reserves the four bytes a ZCON occupies without defining one, and
+    # the generator has always handled it -- but there was no Z alternative
+    # here at all, so the operand simply would not parse.  The parenthesised
+    # part is optional for the same reason it is on every other DS type.
+    | [ d+: number ] t+: 'Z' [ '(' z: identifier [ ',' [ arithmeticExpression ] [ ',' f: arithmeticExpression ] ] ')' ]
     ;
 addresses = '(' arithmeticExpression { ',' arithmeticExpression } ')' ;
 decimal = /[0-9]+/ ;

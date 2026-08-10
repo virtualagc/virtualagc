@@ -1785,7 +1785,13 @@ def generateObjectCode(source, macros):
                         # Adjust the string to have an even number of digits,
                         # 0-padded or truncated to the length modifier, if any.
                         try:
-                            hexString = flattened[0]["v"][0][1]
+                            # `flattened[0]`, not `suboperand`: the FIRST
+                            # suboperand of the statement rather than the one
+                            # being generated.  `DC Y(0),X'000000020000'`
+                            # therefore fetched the Y constant's value for the
+                            # X constant, and every X constant that is not the
+                            # first operand of its DC was wrong or refused.
+                            hexString = suboperand["v"][0][1]
                             if lengthModifier == None:
                                 count = len(hexString)
                                 # An odd number of digits is padded to an even
@@ -1804,17 +1810,14 @@ def generateObjectCode(source, macros):
                         # Deal with memory.
                         if operation == "DC":
                             if not isinstance(hexString, str):
-                                # `flattened[0]["v"][0][1]` is not always the
-                                # digit string it is assumed to be -- a hex
-                                # constant written as comma-separated groups
-                                # parses to a different shape, and indexing it
-                                # produced a TypeError out of int() rather
-                                # than anything a reader could act on.
+                                # Whatever was found is not the digit string
+                                # this path assumes.  The message used to
+                                # blame comma-separated groups, which was a
+                                # guess and was usually wrong -- the real
+                                # cause was the `flattened[0]` above.
                                 error(properties, \
                                       "Cannot parse the hexadecimal value of " \
-                                      "%s; a constant written as several " \
-                                      "comma-separated groups is not " \
-                                      "supported" % operation)
+                                      "%s: %s" % (operation, repr(hexString)))
                                 continue
                             # THE DUPLICATION FACTOR USED TO BE IGNORED HERE,
                             # and only here -- every other constant type
