@@ -2226,6 +2226,29 @@ def generateObjectCode(source, macros):
                                                                {"BC":0b10, 
                                                                 "BCT":0b11}[operation])
                                             done = True
+                                        elif operation == "BC" and \
+                                                d >= 0 and d < 0b111000:
+                                            # A FORWARD `BC` also has a short
+                                            # form, and only the backward one
+                                            # was written here.  The two-bit
+                                            # field distinguishes them -- BCF
+                                            # 00 forward, BVCF 01, BCB 10
+                                            # backward, BCTB 11 -- so there is
+                                            # a short forward BC but no short
+                                            # forward BCT, which is why the
+                                            # backward case alone looked like
+                                            # the whole story.
+                                            #
+                                            # FIOPDHF's `BC 07-4,#@LB3` jumps
+                                            # 48 halfwords forward, well within
+                                            # the 56 the field holds, and the
+                                            # original build assembles it DBC0
+                                            # while this emitted C3F7 0030.
+                                            data = generateSRS(properties, \
+                                                               "BCF", r1, \
+                                                               d & 0b111111, \
+                                                               0b00)
+                                            done = True
                                     elif operation in branchAliases:
                                         d = d2 - (properties["pos1"] // 2 + symtab[sect]["value"] + 1)
                                         if d >= 0 and d < 0b111000:
