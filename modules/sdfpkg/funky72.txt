@@ -22,12 +22,22 @@ So the extraction of OI301700 DROPPED 364 CONTINUATION CARDS, and the markers
 below point at cards that are no longer there.  That is why they look like
 flags and why FPMREL line 93 glues a comment onto a `ZH`.
 
-Most of the lost cards carried only the tail of a COMMENT -- `HAS PASSED`,
-`AND WAIT` -- so the object code does not depend on them, but ASM101S still
-joins the following card and wrecks the statement.  Two ways forward: blank
-column 72 wherever the continuation is missing, which assembles correctly
-without inventing text; or restore the cards from OI340600's decks, which is
-more faithful but crosses versions.  Neither has been done.
+THE LOST CARDS ARE NOW RESTORED, PFS commit 705e56e4 -- 425 cards covering 349
+of the 364, taken from OI340600's decks and macro library and matched on card
+text plus the sequence number in columns 73-80, or on the 'nn-MACRO'
+identifier, or on the label where a macro variable had been substituted.
+
+Fifteen were not restored, all in FCMPSA and all from TFPSA, because nothing
+exists to restore: those model cards have a BLANK column 72, so the macro
+never emitted a continuation.
+
+The binaries confirmed the restoration.  The verification sweep went from 128
+byte-exact matches to 134 and every transition was forward -- six modules from
+NOCOMPARE to MATCH, two to DIFFERS, and NO module lost a match.  A wrongly
+chosen card would have shown up as a match turning into a difference.
+
+The listing below is therefore a record of where the damage WAS, not of
+outstanding work.  Regenerate it if you want the current state.
 
 THE FOUR EXCEPTIONS WERE REAL TRUNCATION, AND ARE NOW RECOVERED (PFS commit
 ec601001).  They are not macro parameters -- they are DC statements whose

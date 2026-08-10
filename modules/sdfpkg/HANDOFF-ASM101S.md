@@ -252,13 +252,24 @@ prepared sources keep 18 of 382.  THE EXTRACTION DROPPED 364 CONTINUATION
 CARDS, which is why the markers there point at nothing and why they looked
 like flags.
 
-Recovering those 364 is the open question for the OI301700 sources.  Most
-carried only the tail of a COMMENT -- `HAS PASSED`, `AND WAIT` -- so the object
-code does not depend on them, but ASM101S still glues the following card onto
-the statement and wrecks it.  Blanking column 72 where the continuation is
-missing would assemble correctly without inventing text; restoring the cards
-from OI340600's decks would be more faithful but crosses versions.  Not
-decided.
+THEY ARE RESTORED, PFS commit 705e56e4: 425 cards covering 349 of the 364.
+221 were matched in the module's own OI340600 deck on card text AND the
+sequence number in columns 73-80; 122 in the OI340600 macro member named by
+the card's own 'nn-MACRO' identifier, on text; 6 in that member on the LABEL,
+for cards whose text differs from the model because a macro variable was
+substituted.  Some statements need more than one continuation card, hence 425
+for 349.
+
+The 15 not restored are all in FCMPSA, all from TFPSA, and nothing exists to
+restore -- those model cards have a BLANK column 72, so the macro never
+emitted a continuation.  Whatever put an 'X' in column 72 of the generated
+card, it was not the macro.
+
+THE BINARIES CONFIRMED IT.  128 matches to 134, and every transition forward:
+six modules NOCOMPARE to MATCH (FCMPMOD, FIOGNCDL, FIOMGMTR, FIOMGSNC,
+FPMFXMTU, FPMMTUFX), two to DIFFERS (FCMBUSPC by 2 bytes, FIOMGSTR by 3
+missing), and NO module lost a byte-exact match.  That last is the check that
+mattered -- a wrongly chosen card would have turned a match into a difference.
 
 FOUR CARDS LOST ACTUAL OPERAND TEXT and are recovered, PFS commit ec601001:
 FCMINSSL 1073/1075/1077 `AL.15(FCMMZE` -> `AL.15(FCMMZERO)`, and FIOMGDSP 1041
