@@ -6,31 +6,28 @@ Generated 2026-08-09.  Scope: every *.asm in
 
 382 cards in 73 files.
 
-THESE ARE ALMOST CERTAINLY NOT CONTINUATION MARKERS, despite column 72 being
-the continuation column, which is what ASM101S treats them as.  The evidence:
+THESE ARE CONTINUATION MARKERS, AND OI301700 HAS LOST THE CARDS THEY POINT AT.
 
-  - 350 of the 382 do not even REACH column 71.  Their text stops short and the
-    marker sits alone in 72, so it cannot be statement text overflowing.
-  - Only 4 have an operand left syntactically OPEN, which is what a genuine
-    continuation looks like.  The other 378 are complete statements.
-  - NOT ONE is followed by a card in continuation position.  The 14 whose next
-    card begins at column 16 are followed by MACRO-GENERATED cards -- `NR R3,R4`,
-    `BC 07,#@LB2` -- the expansion of an IF or DO whose invocation the extraction
-    dropped.  Column 16 here means 'generated', not 'continued'.
-  - Where a marked card's text is cut at column 71 it is the COMMENT that is cut,
-    mid-phrase: 'REMOVE GPC FROM MASK OF GPC TO BE', 'INITIALIZE INDIRECT ADDR
-    MODIFICA-'.  The character in column 72 does not continue those phrases.
+An earlier version of this file argued they were revision flags -- 350 of the
+382 do not reach column 71, 378 are complete statements, and none is followed
+by anything resembling a continuation.  All true, all beside the point.
 
-A REVISION FLAG fits all of that: '+' a line added at some revision, 'D' a line
-deleted from that position, '*' a line edited, 'X' something less easily
-described.  Nothing here contradicts that reading, and the counts are suggestive
--- '*' and 'X' common, '+' occasional, 'D' twice.  This file does not prove it.
+The OI340600 "as received" directory holds genuine CARD DECKS rather than
+listings, and settles it: 688 cards there carry a non-blank column 72 and 688
+of them are followed by a continuation card.  No exceptions, for any marker --
+X, *, +, D and C alike.  OI340600's PREPARED sources keep all 688.  OI301700's
+prepared sources keep 18 of 382.
 
-FPMREL.asm line 93 is the demonstrated error under the continuation reading: it
-carries '+', ASM101S glues line 94 onto it and gets the unparsable
-`ZH 0(R2)R1,FPMXQETB`, while the original listing has `ZH 0(R2)` and
-`LA R1,FPMXQETB` as separate statements 74 and 75 with object code at 00008 and
-00009.
+So the extraction of OI301700 DROPPED 364 CONTINUATION CARDS, and the markers
+below point at cards that are no longer there.  That is why they look like
+flags and why FPMREL line 93 glues a comment onto a `ZH`.
+
+Most of the lost cards carried only the tail of a COMMENT -- `HAS PASSED`,
+`AND WAIT` -- so the object code does not depend on them, but ASM101S still
+joins the following card and wrecks the statement.  Two ways forward: blank
+column 72 wherever the continuation is missing, which assembles correctly
+without inventing text; or restore the cards from OI340600's decks, which is
+more faithful but crosses versions.  Neither has been done.
 
 THE FOUR EXCEPTIONS WERE REAL TRUNCATION, AND ARE NOW RECOVERED (PFS commit
 ec601001).  They are not macro parameters -- they are DC statements whose

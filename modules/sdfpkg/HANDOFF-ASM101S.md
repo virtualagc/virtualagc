@@ -237,16 +237,34 @@ cleared the noise; underneath, FCMBOOT has 14 intolerable lines, FIOERRLC 10,
 FIOPDISP 7, FPMRES 3, FPMMTURM 2, FPMREL 6, FPMUPMTU 21, FPMIHPC2 148 and
 MENU12 726.  Those are real work.
 
-COLUMN 72 IS A DEAD END, and it is written down so nobody spends the day on it
-twice.  FPMREL's card 93 carries a '+' there, so ASM101S joins it to card 94
-and gets the unparsable `ZH 0(R2)R1,FPMXQETB`; the original build kept them as
-separate statements 74 and 75 with object code at 00008 and 00009, and the '+'
-is in the original card image too.  That looks like a rich seam.  It is not.
-382 cards across 73 modules have a non-blank column 72 -- X 249, * 106, + 25,
-D 2 -- and nearly all are syntactically COMPLETE statements, 245 of the 249
-X's included.  Restricting continuation to X and re-running those 73 modules
-gives 7 matches, exactly what accepting any non-blank gives.  The rule is
-unchanged.
+COLUMN 72 IS THE CONTINUATION COLUMN AFTER ALL, and the reasoning that said
+otherwise is worth reading as a warning.  It looked like a revision flag: of
+OI301700's 382 marked cards, 350 do not even reach column 71, 378 are complete
+statements, and none is followed by anything resembling a continuation.  Every
+one of those observations is true and the conclusion drawn from them was
+wrong.
+
+The OI340600 "as received" directory holds genuine CARD DECKS rather than
+listings, and there the question answers itself: 688 marked cards, 688 of them
+followed by a continuation card, no exceptions, across every marker -- X, *,
++, D and C alike.  OI340600's PREPARED sources keep all 688 too.  OI301700's
+prepared sources keep 18 of 382.  THE EXTRACTION DROPPED 364 CONTINUATION
+CARDS, which is why the markers there point at nothing and why they looked
+like flags.
+
+Recovering those 364 is the open question for the OI301700 sources.  Most
+carried only the tail of a COMMENT -- `HAS PASSED`, `AND WAIT` -- so the object
+code does not depend on them, but ASM101S still glues the following card onto
+the statement and wrecks it.  Blanking column 72 where the continuation is
+missing would assemble correctly without inventing text; restoring the cards
+from OI340600's decks would be more faithful but crosses versions.  Not
+decided.
+
+FOUR CARDS LOST ACTUAL OPERAND TEXT and are recovered, PFS commit ec601001:
+FCMINSSL 1073/1075/1077 `AL.15(FCMMZE` -> `AL.15(FCMMZERO)`, and FIOMGDSP 1041
+`AL.4(FIOM` -> `AL.4(FIOMWBLC)`.  Both were confirmed verbatim afterwards
+against OI340600's card decks, which still hold the continuation cards `RO)`
+and `WBLC)`.
 
 THE MISSING MACROS DO NOT NEED BORROWING, AND MUST NOT BE.  Not for the
 reason first given here, which was wrong: "of the 40 members in both versions,
