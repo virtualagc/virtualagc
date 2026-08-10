@@ -358,6 +358,28 @@ these was invisible to a sweep that only asks whether ASM101S complains:
     commit and ap101s-notes.db; the short version is that the instance offered
     as proof was never evaluated, and LOOKING THE SYMBOL UP disproves it.
 
+THE SRS/RS CHOICE IS THE NEXT BIG ONE, and the rule is now known.  The short
+form's 6-bit displacement is SCALED BY THE OPERAND SIZE: a fullword
+instruction counts fullwords, a halfword instruction counts halfwords.
+Measured in FCMNINIT's own listing against the DSECT offsets it prints --
+`L TPSAMCOP` at halfword 64 encodes 32, `ST TPSAHISM` at 24 encodes 12,
+`ST R0,TCVTIOQ` at 78 encodes 39, all offset/2; while `LH TCVTIFLG` and
+`STH TCVTIFLG` on a symbol at 24 both encode 24, unscaled.  The SRS base field
+is also only 2 bits, so a short-form base must be R0 to R3.
+
+That is what decides the form, and the FIXME in model101.py guessing at
+"0 <= D2 < 56 -> SRS" can be replaced by it.  ASM101S emits the long form
+`30F5 00DC` for `ST R0,TCVTIOQ` where the original emits the short `309D`, and
+that single extra halfword is what puts FCMNINIT 544 bytes out for the rest of
+its listing.
+
+ONE THING IS UNEXPLAINED and should be settled before implementing.  ASM101S
+computes a displacement of 220 for that instruction.  findB2D2 picks base
+register 1, which is right, and TCVTIOQ sits at 0x4E in the DSECT in BOTH
+listings -- 78 halfwords, 156 bytes.  220 is neither, so scaling alone does
+not account for it and something else is wrong with the offset as well.  Find
+out what 220 is before assuming a divide by two fixes this.
+
 WHERE TO GO NEXT, in order.
 
   1. THE 8 BUILDABLE DIFFERS.  Several are one to three bytes.  FPMIDLE is a

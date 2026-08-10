@@ -33,6 +33,18 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** Both formats are given in the POO at III-9. The opcode values are not, and were read off the original build in ~/workspace/PFS/'OI301700 as received'/SSSRC. Verified by re-encoding against those listings: 4655 BCE instructions matched with zero mismatches, the immediates pinning the field boundary outright -- #DLYI 1814 is C716 and #LTOI 303 is B12F, both of which put the operand in the low 11 bits exactly. #WAT alone accounts for 1105 of them and #DLYI 856. NOT established: #WIX, which appears in no listing, and #DLY and #LTO, which have one use each and BOTH encode their displacement as zero, so whatever their operand does it is not the PC-relative displacement their immediate counterparts use.
 
+### `SRS displacement scaling`
+
+**Processor:** CPU  
+**Confidence:** derived  
+**Encoding certainty:** verified
+
+**What it does.** The short RS form's 6-bit displacement is scaled by the size of the operand the instruction addresses. A fullword instruction counts FULLWORDS and a halfword instruction counts HALFWORDS, so the same symbol yields different displacements depending on the mnemonic. Note also that the SRS base field is only 2 bits, so a short-form base register must be R0 through R3. This is what decides SRS against RS: a symbol 78 halfwords into a DSECT is displacement 39 to a fullword instruction, which fits the 6-bit field and assembles short, but 78 to a halfword instruction, which does not and assembles long.
+
+**Encoding.** SRS: OP(4+) R1(3) DISP(6) B2(2); DISP counts OPERANDS, not halfwords
+
+**How this was established.** Measured in FCMNINIT's own listing against the DSECT offsets it prints. 'L TPSAMCOP' with TPSAMCOP at halfword 64 encodes displacement 32; 'ST TPSAHISM' at 24 encodes 12; 'ST R0,TCVTIOQ' at 78 encodes 39 -- all of them offset/2. The halfword instructions on the same symbols do not scale: 'LH TCVTIFLG' and 'STH TCVTIFLG' with TCVTIFLG at 24 both encode 24. ASM101S does not do this: for ST R0,TCVTIOQ it computes a displacement of 220, which fits no 6-bit field, so it emits the long form 30F5 00DC where the original build emits the short form 309D. Where its 220 comes from is not yet explained -- the symbol is at 0x4E in both listings -- so scaling alone may not be the whole story.
+
 ### `MSC instructions still unencoded`
 
 **Processor:** MSC  
@@ -233,4 +245,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-17 entries.
+18 entries.
