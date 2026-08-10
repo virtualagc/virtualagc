@@ -225,6 +225,29 @@ others being R0-R7 counted in RUNASM comments and MACRO statements sought with
 an end-of-line anchor.  When counting anything in these sources, decide first
 which COLUMNS carry the thing being counted.
 
+THE VESTIGIAL INVOCATIONS ARE COMMENTED OUT, 2026-08-09, 374 cards across the
+ten modules, in ~/workspace/PFS (uncommitted there; a patch is in this
+session's scratchpad).  Each was verified to be followed by its own expansion
+before being touched, none was a continuation, and none had anything in column
+71, so a '*' went in column 1 and columns 72-80 were left alone.  PCH10SRC
+went straight to 0 mismatched and 0 missing.  The score is 128 of 272.
+
+Do not expect the other nine to follow.  Commenting the invocations only
+cleared the noise; underneath, FCMBOOT has 14 intolerable lines, FIOERRLC 10,
+FIOPDISP 7, FPMRES 3, FPMMTURM 2, FPMREL 6, FPMUPMTU 21, FPMIHPC2 148 and
+MENU12 726.  Those are real work.
+
+COLUMN 72 IS A DEAD END, and it is written down so nobody spends the day on it
+twice.  FPMREL's card 93 carries a '+' there, so ASM101S joins it to card 94
+and gets the unparsable `ZH 0(R2)R1,FPMXQETB`; the original build kept them as
+separate statements 74 and 75 with object code at 00008 and 00009, and the '+'
+is in the original card image too.  That looks like a rich seam.  It is not.
+382 cards across 73 modules have a non-blank column 72 -- X 249, * 106, + 25,
+D 2 -- and nearly all are syntactically COMPLETE statements, 245 of the 249
+X's included.  Restricting continuation to X and re-running those 73 modules
+gives 7 matches, exactly what accepting any non-blank gives.  The rule is
+unchanged.
+
 THE MISSING MACROS DO NOT NEED BORROWING, AND MUST NOT BE.  Not for the
 reason first given here, which was wrong: "of the 40 members in both versions,
 zero are identical" is a fact about the members OI301700 HAS, and those are
