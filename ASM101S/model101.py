@@ -2217,7 +2217,20 @@ def generateObjectCode(source, macros):
                                     forceAM0 = False
                                     forceAM1 = False
                                     if operation in ["BC", "BCT"]:
-                                        d = d2 - (currentHash() + 1)
+                                        # From the STATEMENT's own position,
+                                        # not `currentHash()`, which is the
+                                        # section's running position and by
+                                        # here can be a halfword further on.
+                                        # The displacement then comes out one
+                                        # short forward and one long backward.
+                                        # The alias path a few lines below has
+                                        # always computed it this way; these
+                                        # two disagreeing was the bug.
+                                        #
+                                        # FIOPDHF falls from 22 wrong bytes to
+                                        # 2 on this alone.
+                                        d = d2 - (properties["pos1"] // 2 \
+                                                  + symtab[sect]["value"] + 1)
                                         if d < 0 and d > -0b111000:
                                             d = (-d & 0b111111)
                                             data = generateSRS(properties, \
