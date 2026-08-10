@@ -1735,6 +1735,14 @@ def generateObjectCode(source, macros):
                 # length section "DC -- DEFINE CONSTANT" (pdf p. 46, numbered
                 # p. 36) of the assembly-language manual (GC28-6514-8).
                 for suboperand in flattened:
+                    # RESET THE BUFFER FOR EACH SUBOPERAND.  `toMemory` is
+                    # called once per suboperand, so whatever a suboperand
+                    # leaves in `dcBuffer` must not be written again by the
+                    # next one.  Only some of the type handlers zeroed the
+                    # pointer themselves, so `DC X'1401D058',H'0'` wrote
+                    # 1401D058 at offset 0 and then 1401D0580000 at offset 4 --
+                    # ten bytes for a six-byte constant, with the X repeated.
+                    dcBufferPtr = 0
                     if suboperand["d"] == []:
                         duplicationFactor = 1
                     else:
