@@ -387,35 +387,48 @@ model101.py should be replaced by it; that was wrong on both counts.  BEFORE
 TOUCHING THAT ALGORITHM, check whether the symbol values reaching it are
 right.
 
-THE DIFFERS MODULES ARE DOWN TO 204 WRONG BYTES, from 1488, on four fixes
-found by comparing addresses statement by statement against the listing and
-then reading the individual mismatched bytes.  In order of what they were
-worth:
+THE DIFFERS MODULES ARE DOWN TO 136 WRONG BYTES, from 1488, on six fixes.  In
+order of what they were worth:
 
-  - `DS A` labels kept a preliminary placeholder value.  FCMNINIT 544 -> 57.
-  - A forward `BC` has a short form; only the backward one was written.
-    FIOPDHF 542 -> 22, corpus 1001 -> 255.
+  - `DS A` labels kept a preliminary placeholder value, because the A-type
+    branch called commonProcessing for `DC A` and for a length modifier and
+    for `DS A` neither way.  FCMNINIT 544 -> 57.
+  - A forward `BC` has a short form and only the backward one was written.
+    The two-bit field carries direction as well as kind -- BCF 00, BVCF 01,
+    BCB 10, BCTB 11 -- so there is a short forward BC but no short forward
+    BCT.  FIOPDHF 542 -> 22.
+  - Label positions were recorded only on the COLLECTING passes, while
+    instruction lengths go on settling through the compile passes.  A label
+    after an instruction that grew kept its earlier position.  FCMNINIT
+    57 -> 7.
+  - A parenthesised register with no active USING, on a relocatable symbol, is
+    an INDEX rather than a base, and an indexed operand has no short form.
+    ASM101S had this as `b2 > 3`, which misses the low registers.  FPMEVENQ
+    28 -> 5.
   - `BC` took its displacement from `currentHash()` where the alias path uses
-    the statement's own pos1.  FIOPDHF 22 -> 2, corpus 255 -> 204.
-  - The literal pool was placed at a stale address.  FCMNINIT's pool moved
-    from 001CA to 001D2, where the original build has it.
+    the statement's own pos1.  FIOPDHF 22 -> 2.
+  - The literal pool was placed at a stale address, over the top of two
+    constants.  FCMNINIT's pool 001CA -> 001D2.
 
-THE METHOD IS WORTH REUSING.  Assemble with --compare, then align our listing
-against the "as received" one on statement text and watch where the ADDRESS
-DELTA changes -- that names the one instruction whose length is wrong, and
-everything after it is consequence rather than cause.  Once the delta is
-flat, the remaining mismatches are pure encoding and can be read byte by byte;
-`whichbytes.py` in this session's scratchpad pairs each "Comparison mismatch"
-line with the statement that follows it.
+What is left is 27 modules and 136 bytes: FPMSDERR 17, FIOMS4DT 16, FIOMS2DT
+16, FCMBCEMD 11, FIOCDATS 10, FCMNINIT 7, FIOMDPPG 6, then a tail of fives and
+fours.  FIOMS4DT and FIOMS2DT being equal is a hint they share a cause.
 
-FCMNINIT'S REMAINING 57 IS THE NEXT THREAD, and it is half-traced.  Its
-addresses are now perfectly aligned with the original, so every one of the 57
-is a wrong displacement rather than a wrong length.  The branches are one out:
-`BC 07-5,#@LB1` at 0000F targeting 00042 encodes 49 where the original has 50,
-and the backward ones are one long in the same way.  generateSRS is called
-TWICE for that statement, once with 50 and once with 49, and the second call
-wins -- so something re-derives the displacement on a later pass from a
-position that has moved.  Find the second caller.
+THE METHOD IS WORTH REUSING, and is most of why these went quickly.  Assemble
+with --compare, align our listing against the "as received" one on statement
+text, and watch where the ADDRESS DELTA changes: that names the single
+instruction whose LENGTH is wrong, and everything after it is consequence
+rather than cause.  Fix that one and the module often collapses from hundreds
+of wrong bytes to a handful.  Once the delta is flat the rest is pure
+encoding, and `whichbytes.py` in this session's scratchpad pairs each
+"Comparison mismatch" with the statement it belongs to.
+
+AND THE ARBITER IS ALWAYS THE SWEEP.  Three of the six are heuristics about
+ambiguous syntax that mimic the original assembler rather than follow from
+anything, and the original did not always choose the shorter form.  For each,
+the evidence that it is right is that RUNASM stays 205 of 205 byte-exact, no
+module lost a match, and the corpus total fell.  Do not accept such a change
+on one module's improvement alone.
 
 WHERE TO GO NEXT, in order.
 
