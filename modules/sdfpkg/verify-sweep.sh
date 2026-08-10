@@ -78,9 +78,16 @@
 set -u
 OUT=${1:?usage: verify-sweep.sh OUTFILE}
 PFS=~/workspace/PFS
+# The top of this working tree, worked out from where this script sits, so the
+# script runs from anywhere.
+VAGC=$(cd "$(dirname "$0")/../.." && pwd)
 SRC="$PFS/OI301700/SSSRC"
 LST="$PFS/OI301700 as received/SSSRC"
-export VERIFY_TIMEOUT=${VERIFY_TIMEOUT:-600}
+# 1800, not the 600 that served while the library was empty.  Every module now
+# reads 210 macro definitions ahead of itself -- 26,566 cards -- and the
+# slowest, BILDNEW5, exceeded 1200s and was classified HANG when it was merely
+# slow.  A HANG should mean hung.
+export VERIFY_TIMEOUT=${VERIFY_TIMEOUT:-1800}
 
 [ -d "$SRC" ] || { echo "missing $SRC" >&2; exit 1; }
 [ -d "$LST" ] || { echo "missing $LST" >&2; exit 1; }
@@ -89,13 +96,73 @@ export VERIFY_TIMEOUT=${VERIFY_TIMEOUT:-600}
 # file ASM101S wants and that directory lacks.
 MLIB=$(mktemp -d)
 trap 'rm -rf "$MLIB"' EXIT
+#
+# NEVER SYMLINK MACROFILES.txt.  This directory is a directory of SYMLINKS, and
+# the `: >` below writes THROUGH one -- it truncated OI340600's real index in
+# PFS, twice, once through exactly this loop.  The index here is written from
+# scratch and must be a plain file, so every loop that populates the directory
+# skips that name.
 for d in "$PFS"/OI301700/MLIB80 "$PFS"/OI301700/INCL80 "$PFS"/OI301700/INCLIB; do
     [ -d "$d" ] || continue
     for f in "$d"/*; do
-        [ -f "$f" ] && ln -sf "$f" "$MLIB/$(basename "$f")"
+        b=$(basename "$f")
+        [ "$b" = MACROFILES.txt ] && continue
+        [ -f "$f" ] && ln -sf "$f" "$MLIB/$b"
     done
 done
-: > "$MLIB/MACROFILES.txt"      # deliberately empty; see the note above
+# BORROWING THE MACROS OI301700 LACKS, from OI340600, and ONLY those it lacks
+# -- an existing member is never overwritten, so where both versions have a
+# member OI301700's own is used.
+#
+# The header above says not to do this, on the grounds that an invocation
+# surviving beside its own expansion would expand a second time.  That was
+# true when it was written.  It stopped being true at 5c35b774, which commented
+# out all 374 such cards in the 10 files that had them -- PCH10SRC's `IS`, the
+# case the header cites, among them.  With the vestigial invocations gone, the
+# modules that are pre-expanded invoke nothing and cannot notice the library,
+# while the ones that were never expanded at all -- BILDNEW5 has not a single
+# generated card -- get the definitions they have always needed.
+#
+# COPYING THE FILES IN IS NOT ENOUGH, and doing only that is why the first
+# attempt at this changed not one module.  `readMacroLibrary` reads ONLY the
+# members named in MACROFILES.txt; a member sitting in the directory unlisted
+# is never opened, so an empty index means no macro is defined no matter what
+# the directory holds.
+#
+# DO NOT HAND-ROLL THE INDEX.  ASM101S/makeMACROFILES.py is what maintains it,
+# it is meant to be re-run whenever the library gains members, and its rule is
+# the one that matters:  a member qualifies only if it defines macros AND has
+# NO code outside them.  Two hand-written approximations of that rule were
+# tried here and both were wrong in the same direction, by admitting a member
+# whose open code does something:
+#
+#   FPMSWTCC.hal   a HAL/S source, whose `C/ License:` header arrives as
+#                  "Already defined: C/" and "undefined macro 'Note'".
+#   MACROS.asm     opens with TITLE and then FIFTY-ONE open-code PDEF
+#                  invocations, so P1 through P51 are defined ahead of every
+#                  module and every module in the corpus fails with
+#                  "Already defined: P2".  272 of 272 NOCOMPARE.
+#
+# It also, for free, keeps OI301700's own 40 members commented out -- none of
+# them qualifies, MACSMITH included, which is the answer the header above
+# arrived at the hard way.
+if [ "${VERIFY_BORROW:-1}" != 0 ]; then
+    for d in "$PFS"/OI340600/MLIB80 "$PFS"/OI340600/INCL80; do
+        [ -d "$d" ] || continue
+        for f in "$d"/*; do
+            b=$(basename "$f")
+            [ "$b" = MACROFILES.txt ] && continue
+            [ -f "$f" ] || continue
+            [ -e "$MLIB/$b" ] && continue
+            ln -s "$f" "$MLIB/$b"
+        done
+    done
+fi
+rm -f "$MLIB/MACROFILES.txt"    # never write through a symlink; see above
+( cd "$MLIB" && python3 "$VAGC/ASM101S/makeMACROFILES.py" ) \
+    > "$MLIB/MACROFILES.txt.tmp" \
+    && mv "$MLIB/MACROFILES.txt.tmp" "$MLIB/MACROFILES.txt"
+echo "macro definitions in the library: $(grep -vc '^;' "$MLIB/MACROFILES.txt")" >&2
 export MLIB LST SRC
 
 : > "$OUT"

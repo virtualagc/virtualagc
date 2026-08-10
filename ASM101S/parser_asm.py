@@ -1141,12 +1141,12 @@ class asmParser(Parser):
                         ['L'],
                     )
                 self._token('(')
-                self._identifier_()
-                self.add_last_node_to_name('T')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('Y')
                 self._token(')')
                 self._define(
                     [],
-                    ['L', 'T'],
+                    ['L', 'T', 'Y'],
                 )
             with self._option():
                 self._pattern('Z')
@@ -2140,15 +2140,25 @@ class asmParser(Parser):
             self.add_last_node_to_name('len')
             with self._optional():
                 self._token(',')
-                self._arithmeticExpression_()
-                self.add_last_node_to_name('typ')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._characterTerm_()
+                            self.add_last_node_to_name('typc')
+                        with self._option():
+                            self._arithmeticExpression_()
+                            self.add_last_node_to_name('typ')
+                        self._error(
+                            'expecting one of: '
+                            '<arithmeticExpression> <characterTerm>'
+                        )
                 self._define(
                     [],
-                    ['typ'],
+                    ['typ', 'typc'],
                 )
             self._define(
                 [],
-                ['len', 'typ'],
+                ['len', 'typ', 'typc'],
             )
         with self._group():
             with self._choice():
@@ -2161,8 +2171,14 @@ class asmParser(Parser):
                 )
         self._define(
             [],
-            ['len', 'typ', 'v'],
+            ['len', 'typ', 'typc', 'v'],
         )
+
+    @tatsumasu()
+    def _characterTerm_(self):
+        self._token("C'")
+        self._pattern("[^']*")
+        self._token("'")
 
     @tatsumasu()
     def _setaOperand_(self):

@@ -27,9 +27,10 @@ import copy
 import re
 import random
 from expressions import error, unroll, astFlattenList, \
-    evalArithmeticExpression, svGlobals, describeExpression
+    evalArithmeticExpression, svGlobals, describeExpression, \
+    selfDefiningTerm, setProgramSymtab
 from fieldParser import parserASM
-from asciiToEbcdic import asciiToEbcdic
+from asciiToEbcdic import asciiToEbcdic, ebcdicToAscii
 from ibmHex import *
 
 forceDisplacement = True
@@ -313,6 +314,7 @@ entries = set() # For `ENTRY`.
 extrns = set() # For `EXTRN`.
 rextrns = {} # For `EXTRN`
 symtab = {}
+setProgramSymtab(symtab)   # so T' can reach it; see expressions.py
 if False:
     for i in range(8):
         symtab[f"R{i}"] = {
@@ -415,8 +417,28 @@ def endOfSource():
 def addLiteral(attributeDict):
     global literalPools
     literalPool = literalPools[-1]
-    if attributeDict not in literalPool:
+    if literalIndex(literalPool, attributeDict) == None:
         literalPool.append(copy.deepcopy(attributeDict))
+
+# WHICH ENTRY OF A POOL IS THIS LITERAL, by the text the source wrote --
+# `operand` -- and not by the whole attribute dictionary.
+#
+# Two literals are the same literal when they are written the same way; that is
+# what pooling means.  Comparing the dictionaries also compares `value` and
+# `assembled`, which is harmless for an absolute literal because those never
+# move, and wrong for a RELOCATABLE one because they settle over the passes.
+# `=Y(#DDCICYC)` is pooled on the collecting pass with whatever address the
+# symbol had then, and looked up on a compile pass with the address it has
+# ended up at, so it was never found:  "Literal not in literal pool", and
+# "Literal has changed value" at the other site.  Y is the first relocatable
+# literal type the grammar admits, which is why nothing met this before.
+def literalIndex(literalPool, attributeDict):
+    key = attributeDict.get("operand")
+    for i in range(len(literalPool)):
+        entry = literalPool[i]
+        if isinstance(entry, dict) and entry.get("operand") == key:
+            return i
+    return None
 # Evaluates AST of what System/360 calls a literal, returning either an 
 # attributes dictionary for the literal pool or else None.
 hMax = 1 << 15
@@ -486,7 +508,13 @@ def evalLiteralAttributes(properties, ast, symtab):
         value = (msw << 32) | lsw
     elif t == "Y":
         l = 2
+        # Resolved the way `DC Y(...)` resolves its own operand: a relocatable
+        # value arrives hashed, and the halfword wanted is the offset within
+        # its section plus wherever that section landed.
         value = l2
+        ySect, yOffset = unhash(l2)
+        if ySect != None:
+            value = yOffset + sects.get(ySect, {}).get("offset", 0)
     elif t == "Z":
         l = 4
         value = l2
@@ -531,6 +559,11 @@ def evalLiteralAttributes(properties, ast, symtab):
         m = re.match(r"[A-Z@#$][A-Z0-9@#$]*", a1)
         if m:
             zsymbol = m.group(0)
+    elif t == "Y":
+        # A Y literal is parenthesised too, and its value is an EXPRESSION, so
+        # the pool key has to be written the way the source writes it.  The
+        # quoted form below would have joined the expression's tokens.
+        operand += "(%s)" % describeExpression(ast["Y"][0])
     else:
         operand += "'%s'" % "".join(ast[t][0])
     attributes = { "value": l2, "T": t, "L": l, "operand": operand, "assembled": bytes }
@@ -665,9 +698,8 @@ def optimizeScratch():
                     entry["ambiguous"] = False
                     continue
                 literalPool = literalPools[literalPoolNumber]
-                try:
-                    index = literalPool.index(attributes)
-                except:
+                index = literalIndex(literalPool, attributes)
+                if index == None:
                     error(properties, "Literal not in literal pool")
                     entry["ambiguous"] = False
                     continue
@@ -1561,14 +1593,34 @@ def generateObjectCode(source, macros):
                     error(properties, "Cannot parse operand of EQU")
                     continue
                 err, v = evalInstructionSubfield(properties, "v", ast, symtab)
-                # EQU's optional second and third operands set the symbol's
-                # length and type attributes.  They are parsed but not applied:
-                # ASM101S has no L' at all, and its T' answers from the symbol's
-                # own definition.  The only statements in either version that
-                # use the form are MENU12's 46 `EQU *,0+1,0+1` cards, and
-                # nothing in MENU12 asks for L' or T' of any symbol they define,
-                # so applying them would change no assembled byte.  Should a
-                # source turn up that does ask, this is where to start.
+                # EQU's optional second and third operands GIVE the symbol its
+                # length and type attributes outright, rather than the
+                # assembler deducing them from a DC or DS.  That is how the
+                # position symbols are built: PDEF writes
+                # `&N.X EQU &X,&X+1025,C'@'`, and the POS macro then reads
+                # L'&N.X.  The value of the second operand is stored exactly as
+                # written -- it is not a halfword count and must not be scaled
+                # like the one a DC or DS implies.  The third is a character
+                # self-defining term whose value IS the type character.
+                if len(ast.get("len", [])) > 0:
+                    lv = evalArithmeticExpression(ast["len"][0], {}, properties,
+                                                  symtab, currentHash(),
+                                                  severity = 0)
+                    if lv != None:
+                        symtab.setdefault(name, {})["lengthAttribute"] = lv
+                if len(ast.get("typc", [])) > 0:
+                    tc = joinTokens(ast["typc"][0])
+                    ok, tv = selfDefiningTerm("C'%s'" % tc)
+                    if ok:
+                        symtab.setdefault(name, {})["typeAttribute"] = tc[:1]
+                elif len(ast.get("typ", [])) > 0:
+                    tv = evalArithmeticExpression(ast["typ"][0], {}, properties,
+                                                  symtab, currentHash(),
+                                                  severity = 0)
+                    if tv != None and 0 <= tv < 256:
+                        symtab.setdefault(name, {})["typeAttribute"] = \
+                            ebcdicToAscii[tv] if tv < len(ebcdicToAscii) \
+                            else "U"
                 if operand.startswith("*") and sect != firstCSECT:
                     # `EQU *` in a section other than the first has to be
                     # converted from section-relative to absolute.  A DSECT
@@ -2484,14 +2536,25 @@ def generateObjectCode(source, macros):
                     if literalAttributes == None:
                         continue
                     if collect and not asis:
-                        if literalAttributes not in literalPools[-1]:
+                        if literalIndex(literalPools[-1], \
+                                        literalAttributes) == None:
                             literalPools[-1].append(literalAttributes)
-                    elif literalAttributes in literalPools[literalPoolNumber]:
-                        pass
                     else:
-                        error(properties, \
-                              "Literal has changed value: %s" % str(literalAttributes))
-                        continue
+                        pool = literalPools[literalPoolNumber]
+                        i = literalIndex(pool, literalAttributes)
+                        if i == None:
+                            error(properties, \
+                                  "Literal is not in the pool: %s" \
+                                  % literalAttributes.get("operand"))
+                            continue
+                        # A RELOCATABLE LITERAL SETTLES like anything else that
+                        # depends on an address, so a changed value is news to
+                        # act on rather than an error: store it and go round
+                        # again.  Treating it as an error was right only while
+                        # every literal was absolute.
+                        if pool[i].get("value") != literalAttributes.get("value"):
+                            pool[i] = literalAttributes
+                            repeatPass = True
                 if not compile:
                     toMemory(dataSize)
                     continue

@@ -271,7 +271,13 @@ lconstant =
     | T+: /H/ [ "L" L+: /[0-9]+/ ] [ "S" S+: /-?[0-9]+/ ] "'" H+: floatNumber "'"
     | T+: /E/ [ "L" L+: /[0-9]+/ ] [ "S" S+: /-?[0-9]+/ ] "'" E+: floatNumber "'"
     | T+: /D/ [ "L" L+: /[0-9]+/ ] [ "S" S+: /-?[0-9]+/ ] "'" D+: floatNumber "'"
-    | T+: /Y/ [ "L" L+: /[0-9]+/ ] "(" T+: identifier ")"
+    # THE VALUE GOES UNDER ITS OWN KEY.  It used to be captured into `T`, the
+    # very key the type letter uses, so `ast["T"]` came back as ["Y", "SYMBOL"]
+    # and `ast["Y"]` never existed at all -- the evaluator's `expression[
+    # datatype]` then yielded None and every `=Y(...)` in the corpus died as
+    # "Symbol None not found".  And the operand is an EXPRESSION, not a bare
+    # identifier:  DCICYC writes `=Y(DCIDOUT+508)`, which could not parse.
+    | T+: /Y/ [ "L" L+: /[0-9]+/ ] "(" Y+: arithmeticExpression ")"
     | T+: /Z/ [ "L" L+: /[0-9]+/ ] "(" "," A1+: arithmeticExpression "," A2+: arithmeticExpression ")"
     ;
 
@@ -439,10 +445,16 @@ anything = /.*/ $ ;
 # give the symbol, as in MENU12's `#CYCNT EQU *,0+1,0+1`.  They are captured so
 # the statement parses; see the EQU case in model101.py for why nothing is done
 # with them yet.
+#
+# The third is a CHARACTER SELF-DEFINING TERM in the sources that matter --
+# PDEF writes `EQU 1,1,C'#'` and `EQU 0,0+1025,C'@'` to type a position symbol
+# -- and that form is not an arithmeticExpression, so it gets its own
+# alternative ahead of one.
 equOperand = v+: arithmeticExpression
              [ ',' len+: arithmeticExpression
-               [ ',' typ+: arithmeticExpression ] ]
+               [ ',' ( typc+: characterTerm | typ+: arithmeticExpression ) ] ]
              ( / / | $ ) ;
+characterTerm = "C'" /[^']*/ "'" ;
 
 # Operand field of SETA, SETB and SETC.  The operand field ends at the first
 # blank that is not inside a quoted string, and whatever follows it is a

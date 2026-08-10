@@ -415,10 +415,15 @@ def evalArithmeticExpression(expression, \
             except ValueError:
                 return float(s)
         elif datatype == "Y":
-            if expression not in symtab:
-                error(properties, "Symbol %s not found" % expression)
-                return None
-            return symtab[expression]["pos1"] // 2
+            # A Y LITERAL HOLDS AN EXPRESSION, evaluated exactly as the
+            # generator evaluates the one in `DC Y(...)`.  What stood here
+            # looked the operand up as a bare symbol name and then read a
+            # "pos1" key that symbol table entries do not have -- they carry
+            # "address" -- so it could not have worked for any input.  The
+            # value comes back hashed if it is relocatable, which is what the
+            # caller wants; see the Y case of `evalLiteralAttributes`.
+            return evalArithmeticExpression(expression, svLocals, properties, \
+                                            symtab, star, severity)
         elif datatype == "Z":
             # A ZCON literal, `=Z(,address,flags)`.  Its encoding is not
             # documented anywhere; it was derived from the original build,
@@ -757,6 +762,17 @@ def attributeOperand(properties, operand, svLocals):
             return False, "", False
     return True, renderMacroArgument(value), isArgument
 
+# The symbol table of the assembly in progress.  `evalCharacterExpression` and
+# the chain beneath it take no symtab argument -- they were written for the
+# macro-time expressions, where there is not yet a symbol table to take -- but
+# T' of a program symbol has to be answered out of one.  model101.py points
+# this at the real table rather than eight signatures being widened, and every
+# lookup through it treats an absent symbol exactly as before.
+programSymtab = {}
+def setProgramSymtab(table):
+    global programSymtab
+    programSymtab = table
+
 # The type attribute T'.  The AP-101S macro library tests only two of its
 # values, and they are the two the manuals define for a macro argument
 # (SC26-4940 Table 58):  'O' when the operand was omitted or is null, and 'N'
@@ -768,11 +784,24 @@ def attributeOperand(properties, operand, svLocals):
 # information this function does not have, and inventing an answer would be
 # worse than continuing to give the one the rest of the assembler was written
 # against.
-def typeAttribute(properties, operand, svLocals):
+def typeAttribute(properties, operand, svLocals, symtab=None):
+    if symtab == None:
+        symtab = programSymtab
     found, text, isArgument = attributeOperand(properties, operand, svLocals)
     if not found:
+        # A SYMBOL MAY CARRY ITS OWN TYPE ATTRIBUTE, given outright by the
+        # third operand of a three-operand EQU.  That is how the position
+        # symbols are typed -- PDEF writes `EQU 1,1,C'#'` -- and the POS macro
+        # branches on the answer, so it cannot be the blanket "U" that every
+        # unknown operand used to get.
+        entry = symtab.get(operand) if isinstance(operand, str) else None
+        if entry != None and "typeAttribute" in entry:
+            return entry["typeAttribute"]
         return "U"
     if not isArgument:
+        entry = symtab.get(text) if isinstance(text, str) else None
+        if entry != None and "typeAttribute" in entry:
+            return entry["typeAttribute"]
         return "C"
     if text == "":
         return "O"
