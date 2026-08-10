@@ -265,11 +265,27 @@ restore -- those model cards have a BLANK column 72, so the macro never
 emitted a continuation.  Whatever put an 'X' in column 72 of the generated
 card, it was not the macro.
 
-THE BINARIES CONFIRMED IT.  128 matches to 134, and every transition forward:
-six modules NOCOMPARE to MATCH (FCMPMOD, FIOGNCDL, FIOMGMTR, FIOMGSNC,
-FPMFXMTU, FPMMTUFX), two to DIFFERS (FCMBUSPC by 2 bytes, FIOMGSTR by 3
-missing), and NO module lost a byte-exact match.  That last is the check that
-mattered -- a wrongly chosen card would have turned a match into a difference.
+THE BINARIES CONFIRMED IT.  128 matches to 134, every transition forward, and
+NO module lost a byte-exact match -- which is the check that mattered, since a
+wrongly chosen card would have turned a match into a difference.
+
+TWO MORE ARTIFACTS OF THE SAME FAMILY were then found and cleared, PFS commit
+80c5489a, taking the score to 145.  After an LTORG the listing prints the pool
+it generated, and 35 of those entries were captured as source cards -- `=Z(..)`
+and `=X'..'`, recognisable by a BLANK sequence field in columns 73-80, which no
+real card has; DCICYC alone held 23.  And FCMPSA's 15 leftover column-72 marks,
+the ones with no continuation to restore, were cleared: their TFPSA model cards
+have a blank column 72 so the macro never emitted one, and the listing prints
+TPSAPWR and TPSATENT as consecutive statements 39 and 40, so the original
+assembler consumed nothing there either.
+
+A WARNING ABOUT ONE TEST THAT DOES NOT WORK.  It is tempting to ask whether the
+listing's STATEMENT NUMBERS jump across a card, on the theory that a consumed
+continuation would take a number.  IT DOES NOT.  Continuation cards are neither
+printed nor numbered; a gap means something else was unprinted, usually a
+SPACE.  That test was run here and confidently declared 128 correct
+restorations wrong, and then 126 more, before the flaw was spotted.  The only
+instrument that settles a restoration is the byte comparison.
 
 FOUR CARDS LOST ACTUAL OPERAND TEXT and are recovered, PFS commit ec601001:
 FCMINSSL 1073/1075/1077 `AL.15(FCMMZE` -> `AL.15(FCMMZERO)`, and FIOMGDSP 1041
