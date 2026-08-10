@@ -253,10 +253,15 @@ WHERE TO GO NEXT, in order.
   1. THE 8 BUILDABLE DIFFERS.  Several are one to three bytes.  FPMIDLE is a
      single byte: `LH R3,TTQEFLGS` under `USING TFTQE,R3` assembles to 9BD7
      where the listing has 9B17, and ASM101S emits a second address field
-     FFF5 where the listing has none.  That is base-displacement resolution
-     against a DSECT through USING, and one defect probably accounts for most
-     of the eight.  A one-byte difference in a whole module is the cheapest
-     bug report this project will ever get; do not waste it.
+     FFF5 where the listing has none.  IT IS DECODED ALREADY:  generateSRS
+     builds byte 1 as `(d2 << 2) | b2`, so 0x17 is displacement 5 with base
+     register 3 and 0xD7 is displacement 53 with base register 3.  THE BASE
+     REGISTER IS RIGHT AND ONLY THE DISPLACEMENT IS WRONG, 53 against 5, with
+     the symbol itself resolved correctly -- both runs print adr1 as 0005.  So
+     look at the USING/DSECT displacement arithmetic, not at symbol
+     resolution and not at base-register selection.  One defect probably
+     accounts for most of the eight.  A one-byte difference in a whole module
+     is the cheapest bug report this project will ever get; do not waste it.
   2. THE 23 BUILDABLE NOCOMPARE.  Rank their diagnostics FIRST -- the leaders
      over a 40-module sample were "Undefined symbol", "Could not parse
      operands", "Cannot evaluate the expression" and "Could not evaluate
