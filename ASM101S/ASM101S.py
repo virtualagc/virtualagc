@@ -1292,6 +1292,17 @@ for i in range(endLibraries, len(source)):
                 paddress += offset
             prefix = "%05X" % paddress
         if "assembled" in properties:
+            # EIGHT BYTES, and the cap is not arbitrary: a listing line shows
+            # FOUR HALFWORDS and never more, so eight is all the evidence
+            # there is.  It is a fixed field width rather than elision of
+            # repeats -- FAZ2's `DC X'A92F0A3C,A2DFA000,0000A35...'` generates
+            # sixteen bytes of entirely different data and the listing prints
+            # A92F0A3CA2DFA000 and stops, with consecutive such statements at
+            # 00000, 00008, 00010 and 00018.
+            #
+            # Comparing beyond it was tried and produced 1180 bytes of "past
+            # the end of the listing" for one patch-space module: noise, not
+            # verification.
             for i in range(min(8, len(properties["assembled"]))):
                 b = properties["assembled"][i]
                 if comparisonMemory != None:
@@ -1332,7 +1343,8 @@ for i in range(endLibraries, len(source)):
                               (b, comparisonMemory[oaddress]))
                     comparisonMemory[oaddress] = None
                     address += 1
-                if i == 0 or ((i & 1) == 0 and properties["operation"] != "DC"):
+                if i == 0 or ((i & 1) == 0 and \
+                              properties["operation"] != "DC"):
                     prefix += " "
                 prefix += "%02X" % b
         if "adr1" in properties:

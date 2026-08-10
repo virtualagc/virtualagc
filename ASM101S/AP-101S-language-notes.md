@@ -117,6 +117,18 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** Cost an afternoon twice on 2026-08-09, in two disguises: an over-long comment header ate a MACRO statement and was briefly written up as a defect in ASM101S s MACRO/MEND tracking, and later the same cause ate a DC from the middle of a constants test.  ASM101S/macroTests/regressionMacros.sh now rejects any test source with a comment line past column 71.
 
+### `listing object-code field`
+
+**Processor:** assembler  
+**Confidence:** derived  
+**Encoding certainty:** verified
+
+**What it does.** A listing line shows at most FOUR HALFWORDS of object code for a statement, whatever the statement generates. It is a fixed field width, not an elision of repeated data: a constant of sixteen entirely different bytes prints its first eight and stops, exactly as a patch-space constant of 1188 identical bytes does. The location counter still advances over everything, so the addresses of subsequent statements are the only evidence of what a long statement really occupied.
+
+**Encoding.** four halfwords, always
+
+**How this was established.** Measured across the whole OI301700 listing corpus: no line anywhere shows more than 16 hex digits of object code. FAZ2's 'DC X'A92F0A3C,A2DFA000,0000A35...'' generates 16 bytes of non-uniform data and prints A92F0A3CA2DFA000, with consecutive such statements at 00000, 00008, 00010 and 00018 -- advancing eight halfwords each while showing four. PCH27SRC's 'DC 594X'C6C6'' generates 1188 identical bytes and prints the same eight. This is why --compare checks eight bytes per statement and no more: beyond that the listing offers no evidence, and comparing further produced 1180 bytes of spurious 'past the end of the listing' for a single patch module.
+
 
 ## Instruction
 
@@ -257,4 +269,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-19 entries.
+20 entries.

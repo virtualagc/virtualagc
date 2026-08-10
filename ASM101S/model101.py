@@ -996,7 +996,6 @@ def generateObjectCode(source, macros):
         #    if len(bytes) == 0:
         #        return
         properties["section"] = sect
-        properties["pos1"] = pos1
         if isinstance(bytes, bytearray):
             end = pos1 + len(bytes)
             if cVsD and compile:
@@ -1005,9 +1004,42 @@ def generateObjectCode(source, macros):
                     memory.extend(defaultChunk)
                 for i in range(len(bytes)):
                     memory[pos1 + i] = bytes[i]
-            properties["assembled"] = bytes
+            # ACCUMULATE ACROSS THE SUBOPERANDS OF ONE STATEMENT.  toMemory is
+            # called once per suboperand, and both `pos1` and `assembled` used
+            # to be overwritten by each call, so a statement was recorded as
+            # its LAST suboperand alone -- `DC X'1122',X'33'` listed as
+            # `00001 33`.  Everything downstream believed that: the listing
+            # printed one suboperand, and --compare checked one suboperand and
+            # left the others unexamined against the original build.
+            #
+            # A new statement, or a new pass over the same one, starts the run
+            # again; a suboperand that continues where the last left off
+            # extends it.  A gap -- alignment inserted between suboperands --
+            # is filled from memory so the run stays contiguous, which is what
+            # the consumers assume.
+            samePass = properties.get("_assembledPass") == passCount
+            if samePass and properties.get("_assembledEnd") != None and \
+                    pos1 >= properties["_assembledEnd"] and \
+                    pos1 - properties["_assembledEnd"] < 16 and \
+                    "assembled" in properties:
+                run = properties["assembled"]
+                gap = pos1 - properties["_assembledEnd"]
+                if gap > 0:
+                    memory = sects[sect]["memory"]
+                    for i in range(gap):
+                        a = properties["_assembledEnd"] + i
+                        run.append(memory[a] if a < len(memory) and \
+                                   memory[a] != None else 0)
+                run.extend(bytes)
+                properties["assembled"] = run
+            else:
+                properties["pos1"] = pos1
+                properties["assembled"] = bytearray(bytes)
+            properties["_assembledEnd"] = end
+            properties["_assembledPass"] = passCount
             sects[sect]["pos1"] = end
         else:
+            properties["pos1"] = pos1
             sects[sect]["pos1"] += bytes
         if sects[sect]["pos1"] > sects[sect]["used"]:
             sects[sect]["used"] = sects[sect]["pos1"]
