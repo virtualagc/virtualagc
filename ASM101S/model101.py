@@ -836,9 +836,33 @@ def evalLengthModifier(properties, tokens):
     if value % 8 != 0:
         error(properties, \
               "A bit length modifier that is not a whole number of bytes "
-              "(L.%d) is not implemented" % value)
+              "(L.%d) reached the byte-oriented path" % value)
         return None
     return value // 8
+
+# The same thing in BITS, for the packed-bit-field path below.  Returns None
+# when the modifier was not written as `L.n` at all, so the caller can tell
+# `AL.8(...)`, which is a bit specification that happens to be a whole byte,
+# from `AL8(...)`, which is a byte count.
+def evalBitLengthModifier(properties, tokens):
+    tokens = unroll(tokens)
+    if isinstance(tokens, str):
+        tokens = [tokens]
+    tokens = list(tokens)
+    if tokens and tokens[0] == "L":
+        tokens = tokens[1:]
+    if not tokens or tokens[0] != ".":
+        return None
+    tokens = tokens[1:]
+    sign = 1
+    if tokens and tokens[0] in ("+", "-"):
+        if tokens[0] == "-":
+            sign = -1
+        tokens = tokens[1:]
+    value = evalArithmeticExpression(tokens, {}, properties)
+    if value == None:
+        return None
+    return sign * value
 
 # Replicate the first `length` bytes of `dcBuffer`, which are one copy of the
 # data a DC generates, until the buffer holds `duplicationFactor` copies of
@@ -1098,7 +1122,17 @@ def generateObjectCode(source, macros):
     # Process source code, line-by-line
     for properties in source:
         #******** Should this line be processed or discarded? ********
+        # A card already CONSUMED as a continuation still has to update the
+        # flag, because its own column 72 says whether the card after it
+        # continues too.  Returning early on "skip" left the flag set from the
+        # statement that started the sequence, so the next real statement was
+        # taken for a continuation and silently dropped -- its operand never
+        # parsed, its `ast` left None, and the only symptom a "Cannot parse"
+        # further down.  It bites the SECOND of two continued statements in a
+        # row, which is why FCMINSSL assembles its first command-word skeleton
+        # and neither of the two after it.
         if "skip" in properties:
+            continuation = properties["continues"]
             continue
         if properties["inMacroDefinition"] or properties["fullComment"] or \
                 properties["dotComment"] or properties["empty"]:
@@ -1119,7 +1153,15 @@ def generateObjectCode(source, macros):
             if operation in appropriateRules:
                 ast = parserASM(operand, appropriateRules[operation])
                 if ast == None:
-                    error(properties, "Could not parse operands")
+                    # Name the operand and the rule.  This message used to say
+                    # only "Could not parse operands", which identifies
+                    # neither what failed nor which grammar rejected it, and
+                    # it is one of the two commonest diagnostics in the FCOS
+                    # corpus.
+                    error(properties, \
+                          "Could not parse the operand of %s against rule " \
+                          "'%s': %s" % (operation, \
+                                        appropriateRules[operation], operand))
                     properties["astFailed"] = True
                 properties["ast"] = ast
         
@@ -1260,6 +1302,8 @@ def generateObjectCode(source, macros):
             properties = source[propNum]
             
             if "skip" in properties:
+                # See the note on the same line in the preliminary pass above.
+                continuation = properties["continues"]
                 continue
             # We only need to look at the first line of any sequence of continued
             # lines.
@@ -1518,10 +1562,93 @@ def generateObjectCode(source, macros):
             elif operation in ["DC", "DS"]:
                 ast = properties["ast"]
                 if ast == None:
-                    error(properties, "Cannot parse %s operand" % operation)
+                    error(properties, \
+                          "Cannot parse %s operand: %s" \
+                          % (operation, repr(properties["operand"])))
                     continue
                 flattened = astFlattenList(ast)
                 dcBufferPtr = 0
+
+                # BIT-LENGTH CONSTANTS, `DC AL.8(a),AL.5(b),AL.4(c),AL.15(d)`.
+                # The operands are packed CONTIGUOUSLY, without regard to byte
+                # boundaries, and the last byte is padded with zeros.  An
+                # explicit length modifier also suppresses the alignment the
+                # type would otherwise force.
+                #
+                # This is confirmed by the original build rather than assumed:
+                # FCMINSSL's three command-word skeletons are
+                # AL.8(FCMMSYNC=0), AL.5(FCMMIUA=B'01011'), AL.4 of an op-code
+                # and AL.15(FCMMZERO=0), and the listing assembles them to
+                # 00580000, 005C8000 and 00598000 -- which is what contiguous
+                # packing of 8+5+4+15 bits gives and nothing else does.
+                bitLengths = []
+                packed = False
+                for suboperand in flattened:
+                    b = None
+                    if suboperand.get("l", []) != []:
+                        b = evalBitLengthModifier(properties, suboperand["l"])
+                    bitLengths.append(b)
+                    if b != None and b % 8 != 0:
+                        packed = True
+                if packed:
+                    commonProcessing(1)
+                    bits = []
+                    failed = False
+                    for suboperand, width in zip(flattened, bitLengths):
+                        if width == None or width <= 0:
+                            error(properties, \
+                                  "A constant without a bit length modifier " \
+                                  "cannot be packed with ones that have")
+                            failed = True
+                            break
+                        if suboperand["d"] == []:
+                            repeats = 1
+                        else:
+                            repeats = evalArithmeticExpression( \
+                                          suboperand["d"], {}, properties)
+                            if repeats == None:
+                                error(properties, \
+                                      "Could not evaluate duplication factor")
+                                failed = True
+                                break
+                        values = suboperand.get("v", [])
+                        # An address constant's value arrives parenthesised,
+                        # exactly as the Y-type path finds it.
+                        try:
+                            inner = astFlattenList(values[0][1:-1])
+                        except:
+                            inner = astFlattenList(values)
+                        for expression in inner:
+                            v = evalArithmeticExpression(expression, {}, \
+                                                         properties, symtab, \
+                                                         currentHash())
+                            if v == None:
+                                error(properties, \
+                                      "Cannot evaluate a bit-length constant")
+                                failed = True
+                                break
+                            section, offset = unhash(v)
+                            if section != None:
+                                v = offset + \
+                                    sects.get(section, {}).get("offset", 0)
+                            for _ in range(repeats):
+                                for shift in range(width - 1, -1, -1):
+                                    bits.append((v >> shift) & 1)
+                        if failed:
+                            break
+                    if failed:
+                        continue
+                    while len(bits) % 8 != 0:      # pad the last byte
+                        bits.append(0)
+                    data = bytearray(len(bits) // 8)
+                    for i, bit in enumerate(bits):
+                        if bit:
+                            data[i // 8] |= 0x80 >> (i % 8)
+                    if operation == "DC":
+                        toMemory(data)
+                    else:
+                        toMemory(len(data))
+                    continue
                 # At this point, `flattened` should be a list with one entry for
                 # each suboperand.  Those suboperands are in the form of 
                 # dicts with the keys:
