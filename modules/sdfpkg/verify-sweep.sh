@@ -14,12 +14,20 @@
 # its 272 sources has one.  OI340600's "as received" directory holds SOURCES,
 # not listings, so there is nothing there to compare against.
 #
-# DO NOT BORROW OI340600'S MACRO LIBRARY, which the earlier plan for this
-# phase proposed doing to make up OI301700's 40 members against OI340600's
-# 278.  Of the 40 that exist in BOTH versions, ZERO are identical -- every
-# single one changed between the two -- so assembling OI301700 sources with
-# OI340600 members would produce differences that have nothing to do with
-# ASM101S and would poison exactly the comparison this script exists to make.
+# DO NOT BORROW OI340600'S MACRO LIBRARY to make up OI301700's 13 macro
+# definitions against OI340600's 235.  NOT for the reason first given here --
+# that of the 40 members existing in both versions none are identical, which
+# is a fact about the members OI301700 HAS and says nothing about the ones it
+# lacks -- but because THE PREPARED SOURCES ARE ALREADY MACRO-EXPANDED.
+#
+# Whoever built them kept the generated cards, the ones the listing marks with
+# `+` after the statement number, so the .asm holds the expansion as ordinary
+# source; DFLDCU's listing has 51 of them, all 51 are in its .asm, and it
+# matches byte for byte.  That is why the library barely has any macros.  Where
+# an invocation also survived it sits BESIDE its own expansion, so supplying
+# the macro would expand it a second time.  PCH10SRC settles it in four lines:
+# with OI340600's `IS` it fails outright, and with `IS` undefined and the
+# leftover card ignored it is 0 mismatched and 0 missing.
 #
 # MACROFILES.txt IS THE LIST OF MEMBERS ASM101S READS AS OPEN CODE ahead of
 # the module, and the two libraries are not the same kind of thing.  Of

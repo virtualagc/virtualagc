@@ -225,11 +225,38 @@ others being R0-R7 counted in RUNASM comments and MACRO statements sought with
 an end-of-line anchor.  When counting anything in these sources, decide first
 which COLUMNS carry the thing being counted.
 
-DO NOT BORROW OI340600'S MACRO LIBRARY to close that gap, which is what item 5
-of the old list proposed.  Of the 40 members that exist in BOTH versions, ZERO
-are identical -- every single one changed -- so it would inject differences
-that have nothing to do with ASM101S into the one comparison that can detect
-them.  Item 5 should be considered answered and closed, not attempted.
+THE MISSING MACROS DO NOT NEED BORROWING, AND MUST NOT BE.  Not for the
+reason first given here, which was wrong: "of the 40 members in both versions,
+zero are identical" is a fact about the members OI301700 HAS, and those are
+never the ones anybody would borrow.  It was no evidence at all about the ones
+it lacks, which have no counterpart to differ from.
+
+The real reason is better.  THE PREPARED OI301700 SOURCES ARE ALREADY
+MACRO-EXPANDED.  Whoever built them kept the generated cards -- the ones the
+listing marks with `+` after the statement number -- so the .asm holds the
+expansion as ordinary source.  DFLDCU's listing has 51 generated cards, all 51
+appear verbatim in its .asm, and it matches byte for byte.  That is why the
+library has almost no macros in it: nothing needs them.
+
+Where an invocation ALSO survived, it sits beside its own expansion, and
+supplying the macro would expand it a SECOND time.  PCH10SRC proves both
+halves in four lines: given OI340600's `IS` it fails outright, and with `IS`
+simply undefined and the leftover card ignored it is 0 bytes mismatched and 0
+bytes missing.
+
+So the open question is not which macros to fetch.  It is what ASM101S should
+do with a vestigial invocation of an undefined macro, which today is an
+intolerable error.  Sixteen macros are invoked this way -- DCHAR, XPOS, YPOS,
+CASE, VR, LVC, IF, PROGRAM, ELSE, EXIT, IS, ENDPROC, EXECUTE, DO, ENDDO, PROC
+-- across ten modules: FCMBOOT, FIOERRLC, FIOPDISP, FPMIHPC2, FPMMTURM,
+FPMREL, FPMRES, FPMUPMTU, MENU12, PCH10SRC.
+
+Do not expect the other nine to fall out as PCH10SRC did.  Tolerating
+everything and comparing anyway gives them hundreds or thousands of mismatched
+bytes, so they have real faults underneath, and three of them reach fresh
+crashes that way -- KeyError 'using' in FPMIHPC2 and FPMREL, KeyError
+'FPMUGTQE' in FPMUPMTU, KeyError '#CYCNT' in MENU12.  Those are worth having
+whatever is decided about the invocations.
 
 TWO MEASUREMENT TRAPS, both of which produced confident wrong answers here
 within an hour of each other.
