@@ -1688,7 +1688,9 @@ def generateObjectCode(source, macros):
                             repeats = 1
                         else:
                             repeats = evalArithmeticExpression( \
-                                          suboperand["d"], {}, properties)
+                                          suboperand["d"], {}, properties, \
+                                          symtab, currentHash(), \
+                                          severity = 255 if compile else 0)
                             if repeats == None:
                                 error(properties, \
                                       "Could not evaluate duplication factor")
@@ -1786,11 +1788,24 @@ def generateObjectCode(source, macros):
                     if suboperand["d"] == []:
                         duplicationFactor = 1
                     else:
+                        # WITH THE SYMBOL TABLE.  A duplication factor may
+                        # be a parenthesised expression naming symbols --
+                        # `DC (TTIOTNUM*2)H'0'`, `DC (TTQELNTH-1)C'TQ'` -- and
+                        # this was evaluating it against an EMPTY symtab, so
+                        # every such symbol was undefined by construction and
+                        # seven modules could not assemble.  Quiet on the
+                        # collecting passes, since the symbol may be defined
+                        # further down.
                         duplicationFactor = \
                             evalArithmeticExpression(suboperand["d"], {}, \
-                                                     properties)
+                                                     properties, symtab, \
+                                                     currentHash(), \
+                                                     severity = \
+                                                       255 if compile else 0)
                         if duplicationFactor == None:
-                            error(properties, "Could not evaluate duplication factor")
+                            if compile:
+                                error(properties, \
+                                      "Could not evaluate duplication factor")
                             continue
                     try:
                         suboperandType = suboperand["t"][0]
