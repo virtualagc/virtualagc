@@ -1,1113 +1,1122 @@
 funky72.txt -- cards with a NON-BLANK COLUMN 72 in the OI301700 assembly sources
 ==============================================================================
 
-Generated 2026-08-09 by Claude for Ron Burkey.
-Scope: every *.asm in
+Generated 2026-08-09.  Scope: every *.asm in
     /home/rburkey/workspace/PFS/OI301700/SSSRC
 
-WHY THESE MATTER.  Column 72 is the continuation column: System/360 treats
-ANY non-blank character there as meaning the statement continues onto the
-next card.  ASM101S follows that rule, so each card below causes the FOLLOWING
-card to be glued onto it.
+382 cards in 73 files.
 
-At least some of these are wrong.  FPMREL.asm line 93 carries '+' and is
-glued to line 94, producing the unparsable `ZH 0(R2)R1,FPMXQETB`.  The
-original build did not do that: its listing shows `ZH 0(R2)` and `LA
-R1,FPMXQETB` as separate statements 74 and 75, with their own object code at
-00008 and 00009.  The '+' is present in the 'as received' listing's card
-image too, at column 72, so it did not come from the extraction alone.
+THESE ARE ALMOST CERTAINLY NOT CONTINUATION MARKERS, despite column 72 being
+the continuation column, which is what ASM101S treats them as.  The evidence:
 
-THE 'CONT?' COLUMN is a hint, not a verdict.  It is set when the operand
-field looks syntactically INCOMPLETE -- a trailing comma, an unclosed quote,
-an unclosed parenthesis -- which is what a genuine continuation nearly always
-looks like.  Everything else is a complete statement that has no business
-being continued.
+  - 350 of the 382 do not even REACH column 71.  Their text stops short and the
+    marker sits alone in 72, so it cannot be statement text overflowing.
+  - Only 4 have an operand left syntactically OPEN, which is what a genuine
+    continuation looks like.  The other 378 are complete statements.
+  - NOT ONE is followed by a card in continuation position.  The 14 whose next
+    card begins at column 16 are followed by MACRO-GENERATED cards -- `NR R3,R4`,
+    `BC 07,#@LB2` -- the expansion of an IF or DO whose invocation the extraction
+    dropped.  Column 16 here means 'generated', not 'continued'.
+  - Where a marked card's text is cut at column 71 it is the COMMENT that is cut,
+    mid-phrase: 'REMOVE GPC FROM MASK OF GPC TO BE', 'INITIALIZE INDIRECT ADDR
+    MODIFICA-'.  The character in column 72 does not continue those phrases.
 
-SUMMARY:  382 cards in 73 files
+A REVISION FLAG fits all of that: '+' a line added at some revision, 'D' a line
+deleted from that position, '*' a line edited, 'X' something less easily
+described.  Nothing here contradicts that reading, and the counts are suggestive
+-- '*' and 'X' common, '+' occasional, 'D' twice.  This file does not prove it.
 
-    col 72     cards   of which look incomplete
-    '*'          106                           0
-    '+'           25                           0
-    'D'            2                           0
-    'X'          249                           4
+FPMREL.asm line 93 is the demonstrated error under the continuation reading: it
+carries '+', ASM101S glues line 94 onto it and gets the unparsable
+`ZH 0(R2)R1,FPMXQETB`, while the original listing has `ZH 0(R2)` and
+`LA R1,FPMXQETB` as separate statements 74 and 75 with object code at 00008 and
+00009.
 
-SPLIT BY WHERE THE CARD CAME FROM.  Columns 73-80 hold a sequence number on an
-original card and an 'nn-MACRO' identifier on one a macro generated.  That
-splits the 382 cleanly and is probably the most useful triage available:
+THE FOUR EXCEPTIONS ARE REAL TRUNCATION, and they are not macro parameters --
+they are DC statements whose bit-field operand overruns column 71 and loses
+characters.  These four need their lost text recovered, whatever is decided
+about the other 378:
 
-    col 72     macro-generated     original card
-    '*'                      0               106
-    '+'                      0                25
-    'D'                      0                 2
-    'X'                    143               106
+    FCMINSSL.asm  line 1073  col72='X'
+      |FCMMPTCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMPTCD),AL.15(FCMMZE|
+    FCMINSSL.asm  line 1075  col72='X'
+      |FCMMRDCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMRDCD),AL.15(FCMMZE|
+    FCMINSSL.asm  line 1077  col72='X'
+      |FCMMEBCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMEBCD),AL.15(FCMMZE|
+    FIOMGDSP.asm  line 1041  col72='X'
+      |FIOMMWTC DC    AL.8(0),AL.5(FIOMMUAD),AL.4(FIOMWRTC),AL.11(0),AL.4(FIOM|
 
-Every '*', '+' and 'D' is on an ORIGINAL card, and so is 106 of the 249 'X'.
-The 143 'X' cards on macro-generated lines are a different question -- what a
-macro emitted into column 72 -- and can be triaged separately from the rest.
+BY MARKER, split by whether columns 73-80 hold a sequence number (an original
+card) or an 'nn-MACRO' identifier (a card a macro generated):
 
-WHAT WAS ALREADY TRIED, so it is not tried twice.  Restricting continuation to
-'X' alone and re-assembling the 73 files below gives 7 byte-exact matches --
-exactly as many as ASM101S's present rule of accepting any non-blank.  So
-these cards are real, and at least the FPMREL one is demonstrably wrong, but
+    col 72   original card   macro-generated
+    '*'                106                 0
+    '+'                 25                 0
+    'D'                  2                 0
+    'X'                106               143
+
+ALREADY TRIED, so nobody tries it twice: restricting continuation to 'X' alone
+and re-assembling these 73 files gives 7 byte-exact matches, exactly as many as
+ASM101S's present rule of accepting any non-blank.  Whatever these markers mean,
 they are not what is holding the corpus back.
 
-Columns below: line number in the file, the column-72 character, the card's
-own sequence field from columns 73-80 (which is how to find it in a listing),
-then the statement itself, columns 1-71.
+Below: line number, the column-72 character, the card's sequence field from
+columns 73-80, 'GEN' if a macro generated the card, 'TRUNC' if characters were
+lost, then the statement itself, columns 1-71.
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMASYNC.asm
 ------------------------------------------------------------------------------
-  line 380    col72='X'  seq=01-TFCVT      
+  line 380    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 381    col72='X'  seq=01-TFCVT      
+  line 381    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMBMAN.asm
 ------------------------------------------------------------------------------
-  line 412    col72='X'  seq=02-TFBMW      
+  line 412    col72='X'  seq=02-TFBMW GEN 
       |         DS    F                   BUS/STRING/GPC ID (H.O. HALFWORD)|
-  line 414    col72='X'  seq=02-TFBMW      
+  line 414    col72='X'  seq=02-TFBMW GEN 
       |TBMWFLMK DS    H                   SYNC FAIL FLAGS (BITS 0-7)|
-  line 495    col72='X'  seq=01-TFCVT      
+  line 495    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 496    col72='X'  seq=01-TFCVT      
+  line 496    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMBMASK.asm
 ------------------------------------------------------------------------------
-  line 565    col72='+'  seq=019381BE      
+  line 565    col72='+'  seq=019381BE     
       |         OST   R2,FIOBCEB1+4       TURN ON BYPASS IND FOR UNUSED NSP|
-  line 767    col72='X'  seq=01-TFCVT      
+  line 767    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 768    col72='X'  seq=01-TFCVT      
+  line 768    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMBUSCM.asm
 ------------------------------------------------------------------------------
-  line 609    col72='+'  seq=068950BI      
+  line 609    col72='+'  seq=068950BI     
       |FCMPCMAD DS    0H                  PATCH NEXT INSTR TO 'B2E4,0060' TO|
-  line 693    col72='+'  seq=070400BI      
+  line 693    col72='+'  seq=070400BI     
       |         SHW   TFCMNOCH            TELL FCMBCEMD THAT ALL ELEMENTS ON|
-  line 969    col72='+'  seq=080500BI      
+  line 969    col72='+'  seq=080500BI     
       |         STH   R6,TTQEPCT          SAVE MASK OF BUS ON WHICH I/O IS TO|
-  line 1266   col72='X'  seq=02-TFBMW      
+  line 1266   col72='X'  seq=02-TFBMW GEN 
       |         DS    F                   BUS/STRING/GPC ID (H.O. HALFWORD)|
-  line 1268   col72='X'  seq=02-TFBMW      
+  line 1268   col72='X'  seq=02-TFBMW GEN 
       |TBMWFLMK DS    H                   SYNC FAIL FLAGS (BITS 0-7)|
-  line 1525   col72='X'  seq=01-TFCVT      
+  line 1525   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 1526   col72='X'  seq=01-TFCVT      
+  line 1526   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMBUSPC.asm
 ------------------------------------------------------------------------------
-  line 171    col72='X'  seq=02-TFBMW      
+  line 171    col72='X'  seq=02-TFBMW GEN 
       |         DS    F                   BUS/STRING/GPC ID (H.O. HALFWORD)|
-  line 173    col72='X'  seq=02-TFBMW      
+  line 173    col72='X'  seq=02-TFBMW GEN 
       |TBMWFLMK DS    H                   SYNC FAIL FLAGS (BITS 0-7)|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMCBLKS.asm
 ------------------------------------------------------------------------------
-  line 666    col72='*'  seq=032100BW      
+  line 666    col72='*'  seq=032100BW     
       |FCMIMTUR DC    H'0'                MTU READ INHIBIT FLAG WORD|
-  line 742    col72='*'  seq=036100BW      
+  line 742    col72='*'  seq=036100BW     
       |FCMNGPCF DC    H'0'                ZERO - NO NEW GPC|
-  line 748    col72='*'  seq=036306CE      
+  line 748    col72='*'  seq=036306CE     
       |FCMLWORD DC    H'0'                SET TO ZERO IF COMMANDER|
-  line 754    col72='*'  seq=036313CE      
+  line 754    col72='*'  seq=036313CE     
       |FCMPCADR DC    H'0'                PLACE TO STORE ADDR OF PC TABLE|
-  line 842    col72='*'  seq=043100BW      
+  line 842    col72='*'  seq=043100BW     
       |FPMSRPC1 DC    F'0'                PC1 SAVE AREA FOR SYSTEM RESET|
-  line 843    col72='*'  seq=043300BW      
+  line 843    col72='*'  seq=043300BW     
       |FPMSRPC2 DC    F'0'                PC2 SAVE AREA FOR SYSTEM RESET|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMCSYNC.asm
 ------------------------------------------------------------------------------
-  line 163    col72='*'  seq=021500BA      
+  line 163    col72='*'  seq=021500BA     
       |         L     R6,TFCMGTAM         GET MASK OF GPC(S) TO BE ADDED TO|
-  line 166    col72='X'  seq=022000BA      
+  line 166    col72='X'  seq=022000BA     
       |         XST   R6,TFCMGTAM         REMOVE GPC FROM MASK OF GPC TO BE|
-  line 192    col72='*'  seq=024100BA      
+  line 192    col72='*'  seq=024100BA     
       |         OST   R1,TFCMGTAM          DD TO MASK OF GPC TO BE ADDED TO|
-  line 213    col72='*'  seq=026000BA      
+  line 213    col72='*'  seq=026000BA     
       |         ZB    0(R2),X'0080'       INHIBIT TMP FROCESSING FOR THIS|
-  line 271    col72='*'  seq=008700BA      
+  line 271    col72='*'  seq=008700BA     
       |         BNZ$  FCMCSLPE            IF SYNC FAIL INDICATOR IS SET, DO|
-  line 278    col72='*'  seq=009600BA      
+  line 278    col72='*'  seq=009600BA     
       |         PC    R5,R4               ISSUE SIP SYNC CODE BY RESETTING THE|
-  line 282    col72='*'  seq=010200BA      
+  line 282    col72='*'  seq=010200BA     
       |         N     R5,TCVTSIPM         ISOLATE SYNC MASK BITS TO BE|
-  line 297    col72='*'  seq=011300BA      
+  line 297    col72='*'  seq=011300BA     
       |         SLL   R4,4                ALIGN SECOND SIP SYNC DISCRETE BIT|
-  line 298    col72='*'  seq=011500BA      
+  line 298    col72='*'  seq=011500BA     
       |         XR    R2,R4               MATCH FIRST/SECOND SIP SYNC|
-  line 302    col72='*'  seq=011700BG      
+  line 302    col72='*'  seq=011700BG     
       |         BZ    FCMDIAR2            CHECK TIMEOUT--IF TIMEOUT HAS NOT|
-  line 326    col72='*'  seq=013200BA      
+  line 326    col72='*'  seq=013200BA     
       |         SLL   R4,4                ALIGN SECOND SIP SYNC DISCRETE BIT|
-  line 327    col72='*'  seq=013400BA      
+  line 327    col72='*'  seq=013400BA     
       |         XR    R3,R4               MATCH FIRST/SECOND SIP SYNC|
-  line 339    col72='*'  seq=014700BA      
+  line 339    col72='*'  seq=014700BA     
       |         XR    R3,R0               CHECK FOR CHANGE IN LEADING EDGE|
-  line 341    col72='*'  seq=015000BM      
+  line 341    col72='*'  seq=015000BM     
       |         BNZ$  FCMCSOUL            IF A CHANGE WAS DETECTED, BRANCH TO|
-  line 344    col72='*'  seq=015400BA      
+  line 344    col72='*'  seq=015400BA     
       |         B$    FCMCSMNL            NO CHANGE--BRANCH BACK TO MAIL LOOP|
-  line 510    col72='X'  seq=01-TFCVT      
+  line 510    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 511    col72='X'  seq=01-TFCVT      
+  line 511    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMDSCRM.asm
 ------------------------------------------------------------------------------
-  line 185    col72='*'  seq=013700AJ      
+  line 185    col72='*'  seq=013700AJ     
       |         ST    R6,TDWARCSM         SAVE RM COMMON SET MASK(BITS 16-31|
-  line 224    col72='*'  seq=019560AL      
+  line 224    col72='*'  seq=019560AL     
       |         LR    R5,R4               R4 HAS EITHER RM'D DISCRETES|
-  line 227    col72='*'  seq=019590AL      
+  line 227    col72='*'  seq=019590AL     
       |         XHI   R5,FCMDMASK         INVERT BCE BUSY INDICATOR  AND|
-  line 228    col72='*'  seq=019630AL      
+  line 228    col72='*'  seq=019630AL     
       |         NR    R4,R5               COMBINE BUSY/READY INDICATIONS|
-  line 274    col72='*'  seq=025500AJ      
+  line 274    col72='*'  seq=025500AJ     
       |         SRL   R3,1                SHIFT SYNC TEST MASK TO NEXT TEST|
-  line 335    col72='*'  seq=030800AJ      
+  line 335    col72='*'  seq=030800AJ     
       |         SRL   R3,1                SHIFT TEST MASK TO NEXT BFS RUN|
-  line 391    col72='*'  seq=036100AJ      
+  line 391    col72='*'  seq=036100AJ     
       |         SRL   R3,8                YES-ALIGN BFS CRT SELECT IN BITS|
-  line 413    col72='*'  seq=016000AJ      
+  line 413    col72='*'  seq=016000AJ     
       |         NHI   R4,FCMSMPXD         ZERO ALL DISCRETES IN SELF'S DIA|
-  line 414    col72='*'  seq=016200AJ      
+  line 414    col72='*'  seq=016200AJ     
       |         OST   R4,0(R2)            OR SELF'S NON-RM'ED DISCRETES INTO|
-  line 486    col72='*'  seq=039000AJ      
+  line 486    col72='*'  seq=039000AJ     
       |FCMGBRM  EQU   X'4000'             USED TO CREATE A MASK OF THE GPC|
-  line 555    col72='*'  seq=040600AJ      
+  line 555    col72='*'  seq=040600AJ     
       |TDWARCSM DS    F                   RM COMMON SET MASK(INCLUDES SELF'S|
-  line 556    col72='*'  seq=040800AJ      
+  line 556    col72='*'  seq=040800AJ     
       |TDWASBT  DS    6H                  RM SCOREBOARD TABLE.  THIS TABLE IS|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMINSSL.asm
 ------------------------------------------------------------------------------
-  line 236    col72='X'  seq=005700AT      
+  line 236    col72='X'  seq=005700AT     
       |         NHI   R7,X'000F'          ISOLATE SYSTEM ID PASSED BY STP IN|
-  line 256    col72='X'  seq=007600AT      
+  line 256    col72='X'  seq=007600AT     
       |         XR    R0,R0               FOR FCOS REGISTER SET RESET|
-  line 279    col72='X'  seq=008900AT      
+  line 279    col72='X'  seq=008900AT     
       |         SSM   FCMWAIT             NEITHER MMU 1/2 SELECTED FOR IPL|
-  line 327    col72='X'  seq=012600AY      
+  line 327    col72='X'  seq=012600AY     
       |         LH    R2,0(R4,R1)         GET THE SYSTEM SELECTED IPL PHASE|
-  line 337    col72='X'  seq=013600AT      
+  line 337    col72='X'  seq=013600AT     
       |         STH   R4,FCMSYSID         STORE THE SELECTED SYSTEM ID IN|
-  line 343    col72='X'  seq=013910BE      
+  line 343    col72='X'  seq=013910BE     
       |         LH    R3,3(R0)            LOAD DISPLACEMENT TO PHASE 2 FIRST|
-  line 396    col72='X'  seq=028325AW      
+  line 396    col72='X'  seq=028325AW     
       |         LH    R1,TPSASINP         GET THE PASS BOOTSTRAP ADDRESS FROM|
-  line 495    col72='X'  seq=035200AT      
+  line 495    col72='X'  seq=035200AT     
       |         AHI   R4,511              ROUNDUP LENGTH TO ACCOUNT FOR|
-  line 574    col72='+'  seq=042232BD      
+  line 574    col72='+'  seq=042232BD     
       |         LA    R0,FCMBCTXT         LOAD ADDR. OF ARRAY OF POINTERS TO|
-  line 593    col72='+'  seq=042304BD      
+  line 593    col72='+'  seq=042304BD     
       |         LA    R2,FCMLBRTB         LOAD ADDR. OF ARRAY OF 18-BIT|
-  line 705    col72='X'  seq=046100BD      
+  line 705    col72='X'  seq=046100BD     
       |FCMSSLBS LHI   R4,639              GET MM BLOCK SIZE MINUS ONE PLUS 128|
-  line 729    col72='+'  seq=048206BD      
+  line 729    col72='+'  seq=048206BD     
       |         LA    R0,FCMBCTXT         LOAD ADDR. OF ARRAY OF POINTERS TO|
-  line 745    col72='X'  seq=048800AT      
+  line 745    col72='X'  seq=048800AT     
       |         ST    R5,FCMRSADD         SWITCH ADDRESSES OF CURRENT AND NEXT|
-  line 768    col72='+'  seq=049310BD      
+  line 768    col72='+'  seq=049310BD     
       |         LA    R0,FCMBCTXT         LOAD ADDR. OF ARRAY OF POINTERS TO|
-  line 769    col72='+'  seq=049316BD      
+  line 769    col72='+'  seq=049316BD     
       |         LH    R0,0(R5,R0)         LOAD ADDR. OF BCE_SEQ_CONTEXT FOR|
-  line 826    col72='X'  seq=054300BE      
+  line 826    col72='X'  seq=054300BE     
       |         LH    R7,FCMSVR2          GET NUMBER OF LOAD BLOCKS TO BE|
-  line 1010   col72='+'  seq=066186BD      
+  line 1010   col72='+'  seq=066186BD     
       |         LA    R1,FCMBFZCN         LOAD ADDR. OF ARRAY OF Z-CONS TO|
-  line 1030   col72='+'  seq=066232BD      
+  line 1030   col72='+'  seq=066232BD     
       |         LA    R1,FCMBFZCN         LOAD ADDR. OF ARRAY OF Z-CONS TO|
-  line 1073   col72='X'  seq=070800AT CONT?
+  line 1073   col72='X'  seq=070800AT     TRUNC
       |FCMMPTCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMPTCD),AL.15(FCMMZE|
-  line 1075   col72='X'  seq=071200AT CONT?
+  line 1075   col72='X'  seq=071200AT     TRUNC
       |FCMMRDCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMRDCD),AL.15(FCMMZE|
-  line 1077   col72='X'  seq=071600AT CONT?
+  line 1077   col72='X'  seq=071600AT     TRUNC
       |FCMMEBCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMEBCD),AL.15(FCMMZE|
-  line 1173   col72='+'  seq=085402BD      
+  line 1173   col72='+'  seq=085402BD     
       |FCMLBRTB DS    2F                  LBR_ADDR_ARRAY: ARRAY OF 18-BIT|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMISYNC.asm
 ------------------------------------------------------------------------------
-  line 163    col72='*'  seq=009810BB      
+  line 163    col72='*'  seq=009810BB     
       |         L     R4,TPSAE2OP-TPSASTRT(R3) GET FIRST FULLWORD OF LEVEL C|
-  line 165    col72='*'  seq=009825BB      
+  line 165    col72='*'  seq=009825BB     
       |         L$    R2,TIOQDVID-TIOQSTRT(R2) GET TRACE DETAIL (DEVICE ID AND|
-  line 179    col72='*'  seq=010300AZ      
+  line 179    col72='*'  seq=010300AZ     
       |         NR    R0,R5               DETERMINE WHICH DISCRETE TO LOOK FOR|
-  line 180    col72='*'  seq=010500AZ      
+  line 180    col72='*'  seq=010500AZ     
       |         N     R5,TCVTIOCM         DETERMINE WHICH SYNC DISCRETES ARE|
-  line 201    col72='*'  seq=012330BB      
+  line 201    col72='*'  seq=012330BB     
       |         NR    R2,R5               ISOLATE SYNC DISCRETES FOR GPC'S|
-  line 203    col72='*'  seq=012500BF      
+  line 203    col72='*'  seq=012500BF     
       |         BNZ$  FCMNOIOS            IF NZ, THEN NOT ALL GPC'S HAVE|
-  line 211    col72='*'  seq=013400AZ      
+  line 211    col72='*'  seq=013400AZ     
       |         L     R4,TPSAE2OP-TPSASTRT(R3) GET FIRST FULLWORD OF LEVEL C|
-  line 213    col72='*'  seq=013700AZ      
+  line 213    col72='*'  seq=013700AZ     
       |         L$    R2,TIOQDVID-TIOQSTRT(R2) GET TRACE DETAIL (DEVICE ID AND|
-  line 216    col72='*'  seq=014200AZ      
+  line 216    col72='*'  seq=014200AZ     
       |         LHI   R6,DIACW            RELOAD COMMAND WORD TO READ|
-  line 232    col72='*'  seq=014930BB      
+  line 232    col72='*'  seq=014930BB     
       |         NR    R2,R5               ISOLATE SYNC DISCRETES FOR GPC'S|
-  line 234    col72='*'  seq=015100BF      
+  line 234    col72='*'  seq=015100BF     
       |         BZ    FCMISLPE            IF ZERO, GPC'S ARE IN SYNC AND|
-  line 258    col72='*'  seq=017300BB      
+  line 258    col72='*'  seq=017300BB     
       |         XR    R4,R0               CHECK FOR CHANGE IN LEADING EDGE|
-  line 260    col72='*'  seq=017600BF      
+  line 260    col72='*'  seq=017600BF     
       |         BNZ$  FCMISOLP            IF NON-ZERO, A CHANGE WAS DETECTED|
-  line 266    col72='*'  seq=018300BF      
+  line 266    col72='*'  seq=018300BF     
       |         BZ$   FCMISMLP            CHECK TIMEOUT--IF TIMEOUT HAS NOT|
-  line 286    col72='*'  seq=027700AZ      
+  line 286    col72='*'  seq=027700AZ     
       |         L     R4,TPSAE2OP-TPSASTRT(R3)   GET FIRST FULLWORD OF LEVEL C|
-  line 289    col72='*'  seq=028100AZ      
+  line 289    col72='*'  seq=028100AZ     
       |         L$    R2,TIOQDVID-TIOQSTRT(R2) GET TRACE DETAIL (DEVICE ID AND|
-  line 292    col72='*'  seq=028600AZ      
+  line 292    col72='*'  seq=028600AZ     
       |         LHI   R6,DIACW            RELOAD COMMAND WORD TO READ|
-  line 313    col72='*'  seq=031000AZ      
+  line 313    col72='*'  seq=031000AZ     
       |         NR    R0,R3               DETERMINE GPC'S NOT PRESENT AT FINAL|
-  line 317    col72='*'  seq=031500BA      
+  line 317    col72='*'  seq=031500BA     
       |         NHI   R0,X'3FFF'          DETERMINE HOW MANY GPC(S) HAD NO|
-  line 689    col72='X'  seq=01-TFCVT      
+  line 689    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 690    col72='X'  seq=01-TFCVT      
+  line 690    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMLINIT.asm
 ------------------------------------------------------------------------------
-  line 701    col72='X'  seq=01-TFCVT      
+  line 701    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 702    col72='X'  seq=01-TFCVT      
+  line 702    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMMGBOV.asm
 ------------------------------------------------------------------------------
-  line 183    col72='*'  seq=006300AF      
+  line 183    col72='*'  seq=006300AF     
       |         SHI   R4,3                ACCOUNT FOR NO PHASE TABLE ENTRIES|
-  line 184    col72='X'  seq=006500AF      
+  line 184    col72='X'  seq=006500AF     
       |         SLL   R4,2                MULTIPLY MF/PROGRAM OVERLAY/PHASE ID|
-  line 191    col72='X'  seq=007300AF      
+  line 191    col72='X'  seq=007300AF     
       |         STH   R5,TDBGPTIX         STORE INDEX IN WORK AREA TO FIRST|
-  line 200    col72='X'  seq=008100AF      
+  line 200    col72='X'  seq=008100AF     
       |         SLL   R6,1                CALCULATE THE BCE PROGRAM STATUS|
-  line 201    col72='X'  seq=008300AF      
+  line 201    col72='X'  seq=008300AF     
       |         SR    R5,R6               CALCULATE THE STATUS TABLE CSECT|
-  line 209    col72='X'  seq=009200AF      
+  line 209    col72='X'  seq=009200AF     
       |         SHI   R5,4                ADJUST INDEX/DISPLACEMENT TO ACCOUNT|
-  line 220    col72='X'  seq=010400AF      
+  line 220    col72='X'  seq=010400AF     
       |         SLL   R6,1                CALCULATE THE DELAY COUNT AND STATUS|
-  line 221    col72='X'  seq=010600AF      
+  line 221    col72='X'  seq=010600AF     
       |         SR    R5,R6               CALCULATE THE DELAY COUNT TABLE|
-  line 222    col72='X'  seq=010800AF      
+  line 222    col72='X'  seq=010800AF     
       |         SHI   R5,3                CALCULATE DISPLACEMENT MINUS 1 FROM|
-  line 224    col72='X'  seq=011300AF      
+  line 224    col72='X'  seq=011300AF     
       |         SR    R5,R7               CALCULATE #DLY INSTRUCTION DELAY|
-  line 225    col72='X'  seq=012100AF      
+  line 225    col72='X'  seq=012100AF     
       |         SRL   R7,1                RESTORE BCE NO BY DIVIDING GPR|
-  line 231    col72='X'  seq=012700AF      
+  line 231    col72='X'  seq=012700AF     
       |         SR    R5,R6               CALCULATE THE DELAY COUNT TABLE|
-  line 232    col72='X'  seq=012900AF      
+  line 232    col72='X'  seq=012900AF     
       |         SRL   R5,1                CALCULATE THE DELAY COUNT TABLE|
-  line 236    col72='X'  seq=013060AP      
+  line 236    col72='X'  seq=013060AP     
       |         LR    R6,R7               LOAD R6 FOR INPUT TO FIOMMCMD (ALSO|
-  line 293    col72='*'  seq=013300AF      
+  line 293    col72='*'  seq=013300AF     
       |         L     R4,FCMGTHDC         GET EXECUTION OVERHEAD FOR|
-  line 484    col72='X'  seq=027400AH      
+  line 484    col72='X'  seq=027400AH     
       |         AHI   R4,128              ADJUST DELAY COUNT BY PLUS 128 TO|
-  line 857    col72='*'  seq=022800AN      
+  line 857    col72='*'  seq=022800AN     
       |         SVC   FCMMMSVC            DUMMY(CLOCKTIME) SVC FORCING GPCS|
-  line 870    col72='X'  seq=014840AO      
+  line 870    col72='X'  seq=014840AO     
       |         OST@# R4,0(R4,R1)                     UPDATE LAST EBC VALUE|
-  line 904    col72='*'  seq=049200AF      
+  line 904    col72='*'  seq=049200AF     
       |FCMGNBDC EQU   FCMGTHDC            DELAY COUNT FOR NONPARTICIPATING|
-  line 946    col72='X'  seq=052000AF      
+  line 946    col72='X'  seq=052000AF     
       |         CNOP  1                   FORCED ODD BOUNDRY ALIGNMENT SO THAT|
-  line 1095   col72='X'  seq=01-TFDBG      
+  line 1095   col72='X'  seq=01-TFDBG GEN 
       |TDBGSSTD DS    H                   DISPLACEMENT FROM SST INSTRUCTION|
-  line 1097   col72='X'  seq=01-TFDBG      
+  line 1097   col72='X'  seq=01-TFDBG GEN 
       |TDBGDLYD DS    H                   DISPLACEMENT FROM DLY INSTRUCTION|
-  line 1099   col72='X'  seq=01-TFDBG      
+  line 1099   col72='X'  seq=01-TFDBG GEN 
       |TDBGWCNT DS    H                   WORD COUNT LEFT AFTER BIG BLOCK|
-  line 1100   col72='X'  seq=01-TFDBG      
+  line 1100   col72='X'  seq=01-TFDBG GEN 
       |TDBGBPEO DS    F                   BCE PGM EXECUTION TIME (16.5 MICRO-|
-  line 1102   col72='X'  seq=01-TFDBG      
+  line 1102   col72='X'  seq=01-TFDBG GEN 
       |TDBGOHSV DS    F                   GTG BIG BLOCK BREAKUP BCE OVERHEAD|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMMGPOV.asm
 ------------------------------------------------------------------------------
-  line 296    col72='X'  seq=016700AL      
+  line 296    col72='X'  seq=016700AL     
       |         STM   TPCTGPR0                 SAVE THE USER GPR CONTENTS|
-  line 436    col72='*'  seq=028500AL      
+  line 436    col72='*'  seq=028500AL     
       |         SHI   R7,3                ACCOUNT FOR NO PHASE TABLE ENTRIES|
-  line 456    col72='X'  seq=030600AR      
+  line 456    col72='X'  seq=030600AR     
       |         LH    R2,TCVTODBR              GET BUFFER RESERVATION|
-  line 468    col72='X'  seq=031600AL      
+  line 468    col72='X'  seq=031600AL     
       |         LA    R2,FCMMGIOS              GET THE MM/GTG I/O SVC|
-  line 469    col72='X'  seq=031800AL      
+  line 469    col72='X'  seq=031800AL     
       |         LH    R2,7(R2)                 GET THE I/O COMPLETION EVENT|
-  line 573    col72='X'  seq=01-TFCVT      
+  line 573    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 574    col72='X'  seq=01-TFCVT      
+  line 574    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMNINIT.asm
 ------------------------------------------------------------------------------
-  line 310    col72='*'  seq=022300BG      
+  line 310    col72='*'  seq=022300BG     
       |         LA    R6,X'0808'          PCI COMMAND WORD TO READ LEVEL C|
-  line 1020   col72='X'  seq=01-TFCVT      
+  line 1020   col72='X'  seq=01-TFCVT GEN 
       |TCVTSITK DS    F                   LEADING EDGE DETECTION MASK FOR|
-  line 1021   col72='X'  seq=01-TFCVT      
+  line 1021   col72='X'  seq=01-TFCVT GEN 
       |TCVTSVCK DS    F                   LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMPMOD.asm
 ------------------------------------------------------------------------------
-  line 231    col72='*'  seq=015800AL      
+  line 231    col72='*'  seq=015800AL     
       |         IHL   R2,TMODHWDS         # OF HALFWORDS TO WRITE IN R2|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMPSA.asm
 ------------------------------------------------------------------------------
-  line 58     col72='X'  seq=01-TFPSA      
+  line 58     col72='X'  seq=01-TFPSA GEN 
       |TPSAPWR  DC    Y(0),X'000000020000'|
-  line 63     col72='X'  seq=01-TFPSA      
+  line 63     col72='X'  seq=01-TFPSA GEN 
       |TPSATZCN DC    Z(FCMTRACE,FCMTRCLG,15)|
-  line 66     col72='X'  seq=01-TFPSA      
+  line 66     col72='X'  seq=01-TFPSA GEN 
       |TPSAPWRF DC    Y(0),X'000000020000'|
-  line 67     col72='X'  seq=01-TFPSA      
+  line 67     col72='X'  seq=01-TFPSA GEN 
       |TPSASRP  DC    Y(FCMINSSL),X'0000000C0000'|
-  line 84     col72='X'  seq=01-TFPSA      
+  line 84     col72='X'  seq=01-TFPSA GEN 
       |TPSAMCNP DC    Y(0),X'0000000A0000'|
-  line 86     col72='X'  seq=01-TFPSA      
+  line 86     col72='X'  seq=01-TFPSA GEN 
       |TPSAPINP DC    Y(FPMIHPGM),X'0000000A0000'|
-  line 90     col72='X'  seq=01-TFPSA      
+  line 90     col72='X'  seq=01-TFPSA GEN 
       |TPSASNP  DC    Y(FPMSVC),X'0000000A0000'|
-  line 92     col72='X'  seq=01-TFPSA      
+  line 92     col72='X'  seq=01-TFPSA GEN 
       |TPSAC1NP DC    Y(FPMIHPC1),X'0000000A0000'|
-  line 94     col72='X'  seq=01-TFPSA      
+  line 94     col72='X'  seq=01-TFPSA GEN 
       |TPSAC2NP DC    Y(FPMIHPC2),X'0000000A0000'|
-  line 96     col72='X'  seq=01-TFPSA      
+  line 96     col72='X'  seq=01-TFPSA GEN 
       |TPSAIMNP DC    Y(FPMIHIM),X'0000000A0000'|
-  line 98     col72='X'  seq=01-TFPSA      
+  line 98     col72='X'  seq=01-TFPSA GEN 
       |TPSAENP  DC    Y(FIOERRLA),X'0000000A0000'|
-  line 100    col72='X'  seq=01-TFPSA      
+  line 100    col72='X'  seq=01-TFPSA GEN 
       |TPSAE1NP DC    Y(FIOERRLB),X'0000000A0000'|
-  line 102    col72='X'  seq=01-TFPSA      
+  line 102    col72='X'  seq=01-TFPSA GEN 
       |TPSAE2NP DC    Y(FIOCMPLT),X'0000000A0000'|
-  line 104    col72='X'  seq=01-TFPSA      
+  line 104    col72='X'  seq=01-TFPSA GEN 
       |TPSAE3NP DC    Y(0),X'0000000A0000'|
-  line 106    col72='X'  seq=01-TFPSA      
+  line 106    col72='X'  seq=01-TFPSA GEN 
       |TPSASINP DC    Y(FCMLINIT),X'0000000A0000'|
-  line 225    col72='X'  seq=02-TFCVT      
+  line 225    col72='X'  seq=02-TFCVT GEN 
       |TCVTSITK DC    X'00000F00'         LEADING EDGE DETECTION MASK FOR|
-  line 226    col72='X'  seq=02-TFCVT      
+  line 226    col72='X'  seq=02-TFCVT GEN 
       |TCVTSVCK DC    X'0000000F'         LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMSFAIL.asm
 ------------------------------------------------------------------------------
-  line 348    col72='+'  seq=023800AV      
+  line 348    col72='+'  seq=023800AV     
       |         OST   R0,TBMWBDPM+1       ADD BUS TO MASK OF BUSES IN|
-  line 360    col72='+'  seq=024600AV      
+  line 360    col72='+'  seq=024600AV     
       |         ST    R0,TBMWBDPM+1       (THIS ALLOWS ALL GPC'S INVOLVED TO|
-  line 724    col72='X'  seq=02-TFBMW      
+  line 724    col72='X'  seq=02-TFBMW GEN 
       |         DS    F                   BUS/STRING/GPC ID (H.O. HALFWORD)|
-  line 726    col72='X'  seq=02-TFBMW      
+  line 726    col72='X'  seq=02-TFBMW GEN 
       |TBMWFLMK DS    H                   SYNC FAIL FLAGS (BITS 0-7)|
-  line 847    col72='X'  seq=01-TFCVT      
+  line 847    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 848    col72='X'  seq=01-TFCVT      
+  line 848    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMSMASK.asm
 ------------------------------------------------------------------------------
-  line 261    col72='X'  seq=01-TFCVT      
+  line 261    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 262    col72='X'  seq=01-TFCVT      
+  line 262    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMSSYNC.asm
 ------------------------------------------------------------------------------
-  line 157    col72='*'  seq=007105AX      
+  line 157    col72='*'  seq=007105AX     
       |         L$    R4,TPSASOP-TPSASTRT(R3)  GET FIRST WORD OF OLD SVC PSW|
-  line 166    col72='*'  seq=007400AV      
+  line 166    col72='*'  seq=007400AV     
       |         PC    R4,R6               ISSUE SVC SYNC CODE (BASED ON NULL|
-  line 168    col72='*'  seq=007800AV      
+  line 168    col72='*'  seq=007800AV     
       |         N     R0,TCVTRSSM         ISOLATE EDGE DETECTION BITS FOR|
-  line 171    col72='*'  seq=008500AV      
+  line 171    col72='*'  seq=008500AV     
       |         LHI   R6,DIACW            CONTROL WORD TO READ|
-  line 185    col72='*'  seq=009600BB      
+  line 185    col72='*'  seq=009600BB     
       |         BNZ   FCMSSNOS            IF-NON-ZERO, THEN NOT IN SYNC|
-  line 186    col72='*'  seq=010200AV      
+  line 186    col72='*'  seq=010200AV     
       |         L$    R4,TPSASOP-TPSASTRT(R3)  GET FIRST WORD OF OLD SVC PSW|
-  line 191    col72='*'  seq=011300AV      
+  line 191    col72='*'  seq=011300AV     
       |         LHI   R6,DIACW            RELOAD CONTROL WORD TO READ|
-  line 205    col72='*'  seq=011900BB      
+  line 205    col72='*'  seq=011900BB     
       |         BZ$   FCMSSELP            IF-ZERO, THEN IN SYNC-EXIT LOOP|
-  line 228    col72='*'  seq=014300AV      
+  line 228    col72='*'  seq=014300AV     
       |         BNZ$  FCMSSOUL            IF-NON-ZERO, THEN A CHANGE WAS|
-  line 235    col72='*'  seq=014900AX      
+  line 235    col72='*'  seq=014900AX     
       |         BZ    FCMSSMNL            CHECK TIMEOUT--IF NO TIMEOUT, THEN|
-  line 249    col72='*'  seq=017900AV      
+  line 249    col72='*'  seq=017900AV     
       |         L$    R4,TPSASOP-TPSASTRT(R3)  GET FIRST WORD OF OLD SVC PSW|
-  line 254    col72='*'  seq=018500AV      
+  line 254    col72='*'  seq=018500AV     
       |         LHI   R6,DIACW            RELOAD CONTROL WORD TO READ|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMSVC.asm
 ------------------------------------------------------------------------------
-  line 141    col72='*'  seq=006100AM      
+  line 141    col72='*'  seq=006100AM     
       |         STH   R2,TPSATAMW         INITIALIZE INDIRECT ADDR MODIFICA-|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMSWMON.asm
 ------------------------------------------------------------------------------
-  line 167    col72='X'  seq=01-TFCVT      
+  line 167    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 168    col72='X'  seq=01-TFCVT      
+  line 168    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMTRACE.asm
 ------------------------------------------------------------------------------
-  line 123    col72='*'  seq=008100AB      
+  line 123    col72='*'  seq=008100AB     
       |         BL$   FCMWRAP(R3)         IF NO WRAP, GO TO FILLER LOGIC.|
-  line 124    col72='*'  seq=008400AB      
+  line 124    col72='*'  seq=008400AB     
       |         LH    R3,TPSATBGN         TABLE WRAP-RESET TO START|
-  line 138    col72='*'  seq=009900AB      
+  line 138    col72='*'  seq=009900AB     
       |         AHI   R4,X'0020'          CONVERT TO GMT(BUT 1 MICROSECOND|
-  line 140    col72='*'  seq=010200AB      
+  line 140    col72='*'  seq=010200AB     
       |         ST@#  R4,0(R2)            PUT TIME IN LOG ENTRY|
-  line 142    col72='*'  seq=010700AB      
+  line 142    col72='*'  seq=010700AB     
       |         BCRE  7,R7                RETURN TO CALLING ROUTINE (BSR/DSR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMTSYNC.asm
 ------------------------------------------------------------------------------
-  line 123    col72='*'  seq=007600AR      
+  line 123    col72='*'  seq=007600AR     
       |         N     R0,TCVTRSSM         ISOLATE EDGE BITS ASSOCIATED WITH|
-  line 124    col72='*'  seq=007900AR      
+  line 124    col72='*'  seq=007900AR     
       |         N     R5,TCVTTIMM         ISOLATE SYNC DISCRETES TO BE|
-  line 125    col72='*'  seq=008100AR      
+  line 125    col72='*'  seq=008100AR     
       |         LHI   R6,DIACW            COMMAND WORD TO READ DISCRETE-|
-  line 144    col72='*'  seq=009300AT      
+  line 144    col72='*'  seq=009300AT     
       |         BZ    FCMTSRD2            CHECK TIMEOUT|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FCMUPLOD.asm
 ------------------------------------------------------------------------------
-  line 128    col72='*'  seq=010100AD      
+  line 128    col72='*'  seq=010100AD     
       |         STH   R6,TFDWORD1         SAVE PHASE/LOAD BLOCK NO. IN 1ST|
-  line 140    col72='*'  seq=011200AD      
+  line 140    col72='*'  seq=011200AD     
       |         STH   R6,TFDWORD1         SAVE PHASE/LOAD BLOCK NO. IN 1ST|
-  line 143    col72='*'  seq=011600AD      
+  line 143    col72='*'  seq=011600AD     
       |         MSTH  TFWNDX-TFWSTRT(R3),3    BUMP INDEX TO POINT TO MEXT|
-  line 185    col72='*'  seq=015400AD      
+  line 185    col72='*'  seq=015400AD     
       |         LH@#  R6,0(R5,R2)         GET GPC MEMORY ADDRESS FROM THE|
-  line 204    col72='*'  seq=017300AD      
+  line 204    col72='*'  seq=017300AD     
       |         SHW   TFDWORD4            DL.WD.4 = -1 SINCE CMD WORD ADDR|
-  line 272    col72='*'  seq=023300AD      
+  line 272    col72='*'  seq=023300AD     
       |         MSTH  TFWXLDBK-TFWSTRT(R3),-1  DECREMENT EXPECTED LOAD BLOCK|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOCBLKS.asm
 ------------------------------------------------------------------------------
-  line 771    col72='X'  seq=039300BA      
+  line 771    col72='X'  seq=039300BA     
       |         DC    A(FIOMMGTG)         MM/GTG OVERLAY BCE PROGRAM CSECT OR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOCGR.asm
 ------------------------------------------------------------------------------
-  line 94     col72='X'  seq=006200AA      
+  line 94     col72='X'  seq=006200AA     
       |         AR    R5,R6               INCREMENT WORD COUNT BY CHECKSUM|
-  line 96     col72='X'  seq=006500AA      
+  line 96     col72='X'  seq=006500AA     
       |         SHI   R5,2                CALCULATE LAST HALFWORD TO SUM|
-  line 97     col72='X'  seq=006800AA      
+  line 97     col72='X'  seq=006800AA     
       |         SHI   R3,1                CALCULATE CHECKSUM RETURN AREA|
-  line 98     col72='X'  seq=007100AA      
+  line 98     col72='X'  seq=007100AA     
       |         LR    R2,R7               GET LOCAL/REMOTE I/O DATA BUFFER|
-  line 111    col72='X'  seq=008700AA      
+  line 111    col72='X'  seq=008700AA     
       |         SHI   R5,2                DECREMENT FROM THE LAST HALFWORD|
-  line 112    col72='X'  seq=009000AA      
+  line 112    col72='X'  seq=009000AA     
       |         SHI   R3,2                DECREMENT FROM THE CHECKSUM RETURN|
-  line 168    col72='X'  seq=015100AA      
+  line 168    col72='X'  seq=015100AA     
       |         DC    Z(#CFIOCGR,,X'E')   LOCAL DATA AREA FCOS CHECKSUM|
-  line 170    col72='X'  seq=015500AA      
+  line 170    col72='X'  seq=015500AA     
       |         DC    Z(#CFIOCGR,,X'E')   REMOTE DATA AREA FCOS CHECKSUM|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOCMPLT.asm
 ------------------------------------------------------------------------------
-  line 1929   col72='+'  seq=122500BK      
+  line 1929   col72='+'  seq=122500BK     
       |IPRERMSK DS    H                   *MASK OF SYNC CODES (BITS 11-15)|
-  line 2235   col72='X'  seq=01-TFCVT      
+  line 2235   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 2236   col72='X'  seq=01-TFCVT      
+  line 2236   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOERRLC.asm
 ------------------------------------------------------------------------------
-  line 2141   col72='X'  seq=01-TFCVT      
+  line 2141   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 2142   col72='X'  seq=01-TFCVT      
+  line 2142   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOGNCDL.asm
 ------------------------------------------------------------------------------
-  line 109    col72='+'  seq=005935AG      
+  line 109    col72='+'  seq=005935AG     
       |         ZH    FIODLERR            INDICATE DL IO ERROR IN ORDER TO|
-  line 163    col72='+'  seq=013140AG      
+  line 163    col72='+'  seq=013140AG     
       |         ZH    FIODLERR            RESET INDICATOR SO OTHER NON-D/L|
-  line 274    col72='X'  seq=01-TFBMW      
+  line 274    col72='X'  seq=01-TFBMW GEN 
       |         DS    F                   BUS/STRING/GPC ID (H.O. HALFWORD)|
-  line 276    col72='X'  seq=01-TFBMW      
+  line 276    col72='X'  seq=01-TFBMW GEN 
       |TBMWFLMK DS    H                   SYNC FAIL FLAGS (BITS 0-7)|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOLGERR.asm
 ------------------------------------------------------------------------------
-  line 131    col72='+'  seq=007700AN      
+  line 131    col72='+'  seq=007700AN     
       |         LH    R1,TCVTIERA         BASE FOR GPC ENTRY|
-  line 223    col72='*'  seq=014200AN      
+  line 223    col72='*'  seq=014200AN     
       |         MVH   R1,R2               MOVE STACK ENTRY TO SECOND COPY FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMGCMP.asm
 ------------------------------------------------------------------------------
-  line 125    col72='X'  seq=009700AC      
+  line 125    col72='X'  seq=009700AC     
       |         LA    R2,FIOMMICC+1            GET THE MM/GTG BCE INTERRUPT|
-  line 222    col72='X'  seq=01-TFCVT      
+  line 222    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 223    col72='X'  seq=01-TFCVT      
+  line 223    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMGCV.asm
 ------------------------------------------------------------------------------
-  line 166    col72='X'  seq=008900AA      
+  line 166    col72='X'  seq=008900AA     
       |         LH    R0,TCVTPCTP              GET TOP PCT IN FREE POOL AND|
-  line 175    col72='X'  seq=009800AE      
+  line 175    col72='X'  seq=009800AE     
       |         ZB    TPCTPSW+1,X'FF00'        INHIBIT GPC(/CPU) STATUS|
-  line 183    col72='X'  seq=010600AA      
+  line 183    col72='X'  seq=010600AA     
       |         LM    FI$MGMTR                 RESTORE GPRS FROM CALLING|
-  line 275    col72='D'  seq=015540AS      
+  line 275    col72='D'  seq=015540AS     
       |         SVC   FCMMMSVC                 DUMMY SVC(CLOCKTIME) TO SYNC AN|
-  line 282    col72='X'  seq=016000AE      
+  line 282    col72='X'  seq=016000AE     
       |         ZB    TPCTPSW+1,X'FF00'        INHIBIT GPC(/CPU) STATUS|
-  line 296    col72='X'  seq=017800AC      
+  line 296    col72='X'  seq=017800AC     
       |         SHI   R4,3                     ADJUST ID TO ACCOUNT FOR THE|
-  line 384    col72='*'  seq=024700AA      
+  line 384    col72='*'  seq=024700AA     
       |         CNOP  2                   FORCE FULLWORD ALIGNMENT FOR|
-  line 393    col72='*'  seq=025700AA      
+  line 393    col72='*'  seq=025700AA     
       |         CNOP  2                   FORCE FULLWORD ALIGNMENT FOR|
-  line 401    col72='*'  seq=027225AS      
+  line 401    col72='*'  seq=027225AS     
       |         SVC   FCMMMSVC            FORCE SYNC AFTER PROCESSING EACH|
-  line 416    col72='D'  seq=028340AS      
+  line 416    col72='D'  seq=028340AS     
       |         SVC   FCMMMSVC                 DUMMY SVC(CLOCKTIME) TO SYNC AN|
-  line 423    col72='X'  seq=028800AE      
+  line 423    col72='X'  seq=028800AE     
       |         ZB    TPCTPSW+1,X'FF00'        INHIBIT GPC(/CPU) STATUS|
-  line 528    col72='X'  seq=01-TFCVT      
+  line 528    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 529    col72='X'  seq=01-TFCVT      
+  line 529    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
-  line 743    col72='X'  seq=01-TFDBG      
+  line 743    col72='X'  seq=01-TFDBG GEN 
       |TDBGSSTD DS    H                   DISPLACEMENT FROM SST INSTRUCTION|
-  line 745    col72='X'  seq=01-TFDBG      
+  line 745    col72='X'  seq=01-TFDBG GEN 
       |TDBGDLYD DS    H                   DISPLACEMENT FROM DLY INSTRUCTION|
-  line 747    col72='X'  seq=01-TFDBG      
+  line 747    col72='X'  seq=01-TFDBG GEN 
       |TDBGWCNT DS    H                   WORD COUNT LEFT AFTER BIG BLOCK|
-  line 748    col72='X'  seq=01-TFDBG      
+  line 748    col72='X'  seq=01-TFDBG GEN 
       |TDBGBPEO DS    F                   BCE PGM EXECUTION TIME (16.5 MICRO-|
-  line 750    col72='X'  seq=01-TFDBG      
+  line 750    col72='X'  seq=01-TFDBG GEN 
       |TDBGOHSV DS    F                   GTG BIG BLOCK BREAKUP BCE OVERHEAD|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMGDSP.asm
 ------------------------------------------------------------------------------
-  line 258    col72='X'  seq=008550AG      
+  line 258    col72='X'  seq=008550AG     
       |         L     R4,TIOQMNTM              GET THE HALT/ENABLE PCO DATA|
-  line 259    col72='X'  seq=008650AG      
+  line 259    col72='X'  seq=008650AG     
       |         PC    R4,R5                    ISSUE THE PCO TO HALT THE MM OR|
-  line 264    col72='X'  seq=008950AG      
+  line 264    col72='X'  seq=008950AG     
       |         PC    R4,R5                    ISSUE THE PCO TO (RE)ENABLE THE|
-  line 270    col72='X'  seq=009450AG      
+  line 270    col72='X'  seq=009450AG     
       |         OST   R4,TCVTBCEB              SET THE MM/GTG BCE MONITOR MASK|
-  line 271    col72='X'  seq=009550AG      
+  line 271    col72='X'  seq=009550AG     
       |         ST    R4,TCVTSIOM              STORE THE MM/GTG MASK IN THE|
-  line 272    col72='X'  seq=009650AG      
+  line 272    col72='X'  seq=009650AG     
       |         NCT   R3,R4                    CALCULATE THE MM/GTG BCE NUMBER|
-  line 278    col72='X'  seq=010000AG      
+  line 278    col72='X'  seq=010000AG     
       |         ST@#  R5,0(R5,R2)              INITIALIZE THE MM/GTG STATUS|
-  line 279    col72='X'  seq=010100AG      
+  line 279    col72='X'  seq=010100AG     
       |         SLL   R5,4                     POSITION THE MM/GTG BCE NUMBER|
-  line 280    col72='X'  seq=010200AG      
+  line 280    col72='X'  seq=010200AG     
       |         OHI   R5,FIOMIUA1              ADD LOGICALLY INTO THE 1ST HALF|
-  line 281    col72='X'  seq=010400AG      
+  line 281    col72='X'  seq=010400AG     
       |         IAL   R5,FIOMIUA2              INSERT INTO THE 2ND HALF OF THE|
-  line 285    col72='X'  seq=010800AG      
+  line 285    col72='X'  seq=010800AG     
       |         XR    R4,R4                    RESET(/ZERO) THE LOCAL STORE|
-  line 286    col72='X'  seq=010900AG      
+  line 286    col72='X'  seq=010900AG     
       |         IAL   R4,FIOMMUAD              INSERT THE MMU IUA INTO DATA|
-  line 289    col72='X'  seq=011400AF      
+  line 289    col72='X'  seq=011400AF     
       |         IAL   R4,FIOGTGAD              YES, REPLACE MMU IUA WITH|
-  line 291    col72='X'  seq=011600AS      
+  line 291    col72='X'  seq=011600AS     
       |         SB    TIOQFLG1,TIOQLTMM        SET LAST MM TRANSACTION FLAG,|
-  line 296    col72='X'  seq=012000AG      
+  line 296    col72='X'  seq=012000AG     
       |         PC    R4,R5                    ISSUE PCO TO LOAD MMU 1/2 BCE|
-  line 340    col72='X'  seq=014068AP      
+  line 340    col72='X'  seq=014068AP     
       |FIOMMIIC EQU   50                       MM IIC OF 10 SEC FOR ALL OPCDS|
-  line 345    col72='X'  seq=014075AP      
+  line 345    col72='X'  seq=014075AP     
       |         STH   R5,0(R3,R0)              SAVE IN TBL FOR MM1 OR MM2,|
-  line 484    col72='X'  seq=015700AF      
+  line 484    col72='X'  seq=015700AF     
       |         MIH   R4,FIONBATS              MULTIPLY RESULT BY NBAT MC|
-  line 497    col72='X'  seq=016035AI      
+  line 497    col72='X'  seq=016035AI     
       |         SRL   R4,0(R5)                 PUT MASK OF MM COMMANDER IN|
-  line 743    col72='X'  seq=038630AO      
+  line 743    col72='X'  seq=038630AO     
       |         LFXI  R0,2                     USED TO REF FIOMMMUE+2|
-  line 752    col72='+'  seq=038680AO      
+  line 752    col72='+'  seq=038680AO     
       |         SRL   R5,13                    MULTIPLY EBC BY XMIT SEQ LGTH|
-  line 761    col72='X'  seq=039400AO      
+  line 761    col72='X'  seq=039400AO     
       |         LH    R2,FIOBRUZC-*-2(R0,R0)   GET 1ST HALF OF BASE REG|
-  line 769    col72='X'  seq=039910AO      
+  line 769    col72='X'  seq=039910AO     
       |         IHL   R2,FIOBRUZC-*-1(R0,R0)   BASE REGISTER TABLE|
-  line 770    col72='X'  seq=039930AF      
+  line 770    col72='X'  seq=039930AF     
       |         ST    R2,FIOBCEZC              STORE THE BASE REGISTER TABLE|
-  line 783    col72='X'  seq=040125AF      
+  line 783    col72='X'  seq=040125AF     
       |         ST@#  R5,0(R3,R2)              STORE THE ADDRESS IN 1ST/NEXT|
-  line 784    col72='X'  seq=040175AF      
+  line 784    col72='X'  seq=040175AF     
       |         LH    R0,0(R2)                 GET THE CURRENT BASE REGISTER|
-  line 785    col72='X'  seq=040250AF      
+  line 785    col72='X'  seq=040250AF     
       |         LA    R0,4(R0)                 INCREMENT THE ADDRESS TO THE|
-  line 786    col72='X'  seq=040300AF      
+  line 786    col72='X'  seq=040300AF     
       |         STH   R0,0(R2)                 STORE THE ADDRESS IN THE ZCON|
-  line 797    col72='X'  seq=041300AD      
+  line 797    col72='X'  seq=041300AD     
       |         LA    R2,FIOMMUWT              GET UTILITY WRITE BCE PCP|
-  line 915    col72='X'  seq=048500AD      
+  line 915    col72='X'  seq=048500AD     
       |         LA    R2,FIOMMOVR              GET OVERLAY READ BCE PCP TABLE|
-  line 984    col72='X'  seq=055000AD      
+  line 984    col72='X'  seq=055000AD     
       |         LA    R2,FIOMMPTO              GET POSITION TAPE BCE PCP|
-  line 1041   col72='X'  seq=065800AD CONT?
+  line 1041   col72='X'  seq=065800AD     TRUNC
       |FIOMMWTC DC    AL.8(0),AL.5(FIOMMUAD),AL.4(FIOMWRTC),AL.11(0),AL.4(FIOM|
-  line 1223   col72='X'  seq=01-TFCVT      
+  line 1223   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 1224   col72='X'  seq=01-TFCVT      
+  line 1224   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMGMTR.asm
 ------------------------------------------------------------------------------
-  line 345    col72='X'  seq=01-TFCVT      
+  line 345    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 346    col72='X'  seq=01-TFCVT      
+  line 346    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
-  line 560    col72='X'  seq=01-TFDBG      
+  line 560    col72='X'  seq=01-TFDBG GEN 
       |TDBGSSTD DS    H                   DISPLACEMENT FROM SST INSTRUCTION|
-  line 562    col72='X'  seq=01-TFDBG      
+  line 562    col72='X'  seq=01-TFDBG GEN 
       |TDBGDLYD DS    H                   DISPLACEMENT FROM DLY INSTRUCTION|
-  line 564    col72='X'  seq=01-TFDBG      
+  line 564    col72='X'  seq=01-TFDBG GEN 
       |TDBGWCNT DS    H                   WORD COUNT LEFT AFTER BIG BLOCK|
-  line 565    col72='X'  seq=01-TFDBG      
+  line 565    col72='X'  seq=01-TFDBG GEN 
       |TDBGBPEO DS    F                   BCE PGM EXECUTION TIME (16.5 MICRO-|
-  line 567    col72='X'  seq=01-TFDBG      
+  line 567    col72='X'  seq=01-TFDBG GEN 
       |TDBGOHSV DS    F                   GTG BIG BLOCK BREAKUP BCE OVERHEAD|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMGSNC.asm
 ------------------------------------------------------------------------------
-  line 191    col72='X'  seq=011700AM      
+  line 191    col72='X'  seq=011700AM     
       |         SB    TIOQFLG1,TIOQTRER        INDICATE THAT THE TRANSACTION|
-  line 230    col72='X'  seq=015800AM      
+  line 230    col72='X'  seq=015800AM     
       |         LHI   R3,FIOSYSMK              GET SYSTEM MASK WITH TIMER|
-  line 337    col72='X'  seq=025700AM      
+  line 337    col72='X'  seq=025700AM     
       |FIOSYSMK EQU   X'A00C'                  SYSTEM MASK WITH TIMER|
-  line 397    col72='X'  seq=01-TFCVT      
+  line 397    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 398    col72='X'  seq=01-TFCVT      
+  line 398    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMGSTR.asm
 ------------------------------------------------------------------------------
-  line 155    col72='X'  seq=009800AH      
+  line 155    col72='X'  seq=009800AH     
       |         STH   R2,TIOQPRI               NO, STORE AND USE THE DSR|
-  line 158    col72='X'  seq=010300AK      
+  line 158    col72='X'  seq=010300AK     
       |         LH    R3,0(R2)                 LOAD 1ST HALF OF MM/GTG OVERLAY|
-  line 159    col72='X'  seq=010350AK      
+  line 159    col72='X'  seq=010350AK     
       |         IHL   R3,1(R2)                 LOAD REMAINDER OF MASK INTO GPR|
-  line 174    col72='X'  seq=011116AP      
+  line 174    col72='X'  seq=011116AP     
       |         SB    TIOQFLG1,TIOQLTMM+TIOQPTMM MARK TRANSACTION AS COMPLETE|
-  line 308    col72='*'  seq=024800AH      
+  line 308    col72='*'  seq=024800AH     
       |         SLL   R5,1                PREALIGN R5 SO THAT THE RESULT OF|
-  line 311    col72='*'  seq=025200AH      
+  line 311    col72='*'  seq=025200AH     
       |         AHI   R4,1                INCREMENT BY 1 POLLING CYCLE TO MAKE|
-  line 542    col72='X'  seq=01-TFCVT      
+  line 542    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 543    col72='X'  seq=01-TFCVT      
+  line 543    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
-  line 776    col72='X'  seq=01-TFDBG      
+  line 776    col72='X'  seq=01-TFDBG GEN 
       |TDBGSSTD DS    H                   DISPLACEMENT FROM SST INSTRUCTION|
-  line 778    col72='X'  seq=01-TFDBG      
+  line 778    col72='X'  seq=01-TFDBG GEN 
       |TDBGDLYD DS    H                   DISPLACEMENT FROM DLY INSTRUCTION|
-  line 780    col72='X'  seq=01-TFDBG      
+  line 780    col72='X'  seq=01-TFDBG GEN 
       |TDBGWCNT DS    H                   WORD COUNT LEFT AFTER BIG BLOCK|
-  line 781    col72='X'  seq=01-TFDBG      
+  line 781    col72='X'  seq=01-TFDBG GEN 
       |TDBGBPEO DS    F                   BCE PGM EXECUTION TIME (16.5 MICRO-|
-  line 783    col72='X'  seq=01-TFDBG      
+  line 783    col72='X'  seq=01-TFDBG GEN 
       |TDBGOHSV DS    F                   GTG BIG BLOCK BREAKUP BCE OVERHEAD|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMM128.asm
 ------------------------------------------------------------------------------
-  line 132    col72='+'  seq=010500AA      
+  line 132    col72='+'  seq=010500AA     
       |         SRL   R4,4                  DIVIDE EBC BY 16, YIELDS VALUE 0-7|
-  line 255    col72='+'  seq=022700AA      
+  line 255    col72='+'  seq=022700AA     
       |         SRL   R4,13                 DIVIDE BY 8192 - YIELDS - 0 TO 7|
-  line 297    col72='+'  seq=026700AA      
+  line 297    col72='+'  seq=026700AA     
       |         SLL   R5,2                * (BUFFER COUNT LESS 1) X (READ|
-  line 383    col72='+'  seq=035800AA      
+  line 383    col72='+'  seq=035800AA     
       |         SRL   R3,13                 DIVIDE BY 8192 (# OF WORDS PER 16|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMUWP9.asm
 ------------------------------------------------------------------------------
-  line 871    col72='X'  seq=084100AA      
+  line 871    col72='X'  seq=084100AA     
       |         #BU   FIOM1RWT            BRANCH TO STORE MMU 1/2 BCE STATUS|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOMUWPG.asm
 ------------------------------------------------------------------------------
-  line 282    col72='X'  seq=022100AH      
+  line 282    col72='X'  seq=022100AH     
       |         #BU   FIOM1RWT            BRANCH TO STORE MMU 1/2 BCE STATUS|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOPDISP.asm
 ------------------------------------------------------------------------------
-  line 2098   col72='X'  seq=01-TFCVT      
+  line 2098   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 2099   col72='X'  seq=01-TFCVT      
+  line 2099   col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOPDSM2.asm
 ------------------------------------------------------------------------------
-  line 495    col72='X'  seq=01-TFCVT      
+  line 495    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 496    col72='X'  seq=01-TFCVT      
+  line 496    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOPURGE.asm
 ------------------------------------------------------------------------------
-  line 382    col72='X'  seq=01-TFCVT      
+  line 382    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 383    col72='X'  seq=01-TFCVT      
+  line 383    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FIOSVCP.asm
 ------------------------------------------------------------------------------
-  line 314    col72='X'  seq=01-TFCVT      
+  line 314    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 315    col72='X'  seq=01-TFCVT      
+  line 315    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMCANCL.asm
 ------------------------------------------------------------------------------
-  line 277    col72='X'  seq=01-TFCVT      
+  line 277    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 278    col72='X'  seq=01-TFCVT      
+  line 278    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMCHPCT.asm
 ------------------------------------------------------------------------------
-  line 212    col72='X'  seq=01-TFCVT      
+  line 212    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 213    col72='X'  seq=01-TFCVT      
+  line 213    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMCLOSE.asm
 ------------------------------------------------------------------------------
-  line 276    col72='X'  seq=01-TFCVT      
+  line 276    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 277    col72='X'  seq=01-TFCVT      
+  line 277    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMCVTFX.asm
 ------------------------------------------------------------------------------
-  line 143    col72='*'  seq=011500AD      
+  line 143    col72='*'  seq=011500AD     
       |FPMK4    DC    X'4910000000000005' FORCE SCALING AND ROUND--EQUIVALENT|
-  line 144    col72='*'  seq=011620AD      
+  line 144    col72='*'  seq=011620AD     
       |FPMK5    DC    X'46800000'         SCALE FLOATING POINT NUMBER TO|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMDISP.asm
 ------------------------------------------------------------------------------
-  line 336    col72='X'  seq=01-TFCVT      
+  line 336    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 337    col72='X'  seq=01-TFCVT      
+  line 337    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMERLOG.asm
 ------------------------------------------------------------------------------
-  line 345    col72='X'  seq=01-TFCVT      
+  line 345    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 346    col72='X'  seq=01-TFCVT      
+  line 346    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMEVAL.asm
 ------------------------------------------------------------------------------
-  line 459    col72='X'  seq=01-TFCVT      
+  line 459    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 460    col72='X'  seq=01-TFCVT      
+  line 460    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMEVDEQ.asm
 ------------------------------------------------------------------------------
-  line 343    col72='X'  seq=01-TFCVT      
+  line 343    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 344    col72='X'  seq=01-TFCVT      
+  line 344    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMEVENQ.asm
 ------------------------------------------------------------------------------
-  line 258    col72='X'  seq=01-TFCVT      
+  line 258    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 259    col72='X'  seq=01-TFCVT      
+  line 259    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMFCLOS.asm
 ------------------------------------------------------------------------------
-  line 270    col72='X'  seq=01-TFCVT      
+  line 270    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 271    col72='X'  seq=01-TFCVT      
+  line 271    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMFRPCT.asm
 ------------------------------------------------------------------------------
-  line 184    col72='X'  seq=01-TFCVT      
+  line 184    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 185    col72='X'  seq=01-TFCVT      
+  line 185    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMFXMTU.asm
 ------------------------------------------------------------------------------
-  line 125    col72='X'  seq=011400AA      
+  line 125    col72='X'  seq=011400AA     
       |         SRL   R5,17               CONVERT TO HOURS(DIVIDE BY 2) AND|
-  line 209    col72='X'  seq=019000AA      
+  line 209    col72='X'  seq=019000AA     
       |         SLL   R4,17               ADJUST QUOTIENT AND ALIGN IT IN|
-  line 216    col72='X'  seq=005400AA      
+  line 216    col72='X'  seq=005400AA     
       |FPM125   DC    F'125'              125 MICROSECONDS = 1 MTU MILLISECOND|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMIHIM.asm
 ------------------------------------------------------------------------------
-  line 375    col72='X'  seq=01-TFCVT      
+  line 375    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 376    col72='X'  seq=01-TFCVT      
+  line 376    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMIHPC1.asm
 ------------------------------------------------------------------------------
-  line 174    col72='X'  seq=01-TFCVT      
+  line 174    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 175    col72='X'  seq=01-TFCVT      
+  line 175    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMIHPC2.asm
 ------------------------------------------------------------------------------
-  line 422    col72='*'  seq=059400BO      
+  line 422    col72='*'  seq=059400BO     
       |         SR    R7,R2               SUBTRACT PC2 COMPLEMENT FROM PC1|
-  line 519    col72='*'  seq=068300BO      
+  line 519    col72='*'  seq=068300BO     
       |         SR    R4,R7               SUBTRACT PC1 DELTA FROM NEW SOFTWARE|
-  line 551    col72='*'  seq=071400BO      
+  line 551    col72='*'  seq=071400BO     
       |         SHW   TCVTSREF            SET SYSTEM RESET EMULATION FLAG|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMIHPGM.asm
 ------------------------------------------------------------------------------
-  line 414    col72='X'  seq=01-TFCVT      
+  line 414    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 415    col72='X'  seq=01-TFCVT      
+  line 415    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMMTUFX.asm
 ------------------------------------------------------------------------------
-  line 82     col72='X'  seq=003300AA      
+  line 82     col72='X'  seq=003300AA     
       |         MHI   R6,50               MULTIPLY BY SCALE FACTOR(50 IS USED|
-  line 87     col72='X'  seq=004000AA      
+  line 87     col72='X'  seq=004000AA     
       |         MHI   R6,5                MULTIPLY BY SCALE FACTOR(5 IS USED|
-  line 93     col72='X'  seq=004800AA      
+  line 93     col72='X'  seq=004800AA     
       |         MHI   R5,24               CONVERT TO HALF HOURS(24 IS USED|
-  line 98     col72='X'  seq=005500AA      
+  line 98     col72='X'  seq=005500AA     
       |         MHI   R6,10               MULTIPLY BY SCALE FACTOR--RESULT IS|
-  line 101    col72='X'  seq=005900AA      
+  line 101    col72='X'  seq=005900AA     
       |         SLDL  R6,5                ISOLATE 1-9 HOUR PORTION(MULTIPLIED|
-  line 111    col72='X'  seq=007000AA      
+  line 111    col72='X'  seq=007000AA     
       |         MHI   R6,5                MULTIPLY BY SCALE FACTOR(5 IS USED|
-  line 122    col72='X'  seq=008200AA      
+  line 122    col72='X'  seq=008200AA     
       |         MHI   R2,30               CONVERT MIN TO SEC(30 IS USED|
-  line 127    col72='X'  seq=008900AA      
+  line 127    col72='X'  seq=008900AA     
       |         MHI   R6,5                MULTIPLY BY SCALE FACTOR(5 IS USED|
-  line 148    col72='X'  seq=011100AA      
+  line 148    col72='X'  seq=011100AA     
       |FPMMICSF DC    F'500000'           MICROSEC/HALF SEC  -- THIS SCALE|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMMTURM.asm
 ------------------------------------------------------------------------------
-  line 599    col72='*'  seq=040500BI      
+  line 599    col72='*'  seq=040500BI     
       |         NHI   R2,FPMTIMSR         ZERO ALL BITS EXCEPT SELECTED TIME|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMOPSCN.asm
 ------------------------------------------------------------------------------
-  line 332    col72='X'  seq=01-TFCVT      
+  line 332    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 333    col72='X'  seq=01-TFCVT      
+  line 333    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMREL.asm
 ------------------------------------------------------------------------------
-  line 93     col72='+'  seq=005000AL      
+  line 93     col72='+'  seq=005000AL     
       |         ZH    0(R2)               ZERO EXCLUSIVE CONTROL WORD|
-  line 267    col72='X'  seq=01-TFCVT      
+  line 267    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 268    col72='X'  seq=01-TFCVT      
+  line 268    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMRES.asm
 ------------------------------------------------------------------------------
-  line 378    col72='X'  seq=01-TFCVT      
+  line 378    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 379    col72='X'  seq=01-TFCVT      
+  line 379    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMRLPCT.asm
 ------------------------------------------------------------------------------
-  line 203    col72='X'  seq=01-TFCVT      
+  line 203    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 204    col72='X'  seq=01-TFCVT      
+  line 204    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMSCHED.asm
 ------------------------------------------------------------------------------
-  line 772    col72='X'  seq=01-TFCVT      
+  line 772    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 773    col72='X'  seq=01-TFCVT      
+  line 773    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMSDERR.asm
 ------------------------------------------------------------------------------
-  line 489    col72='X'  seq=01-TFCVT      
+  line 489    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 490    col72='X'  seq=01-TFCVT      
+  line 490    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMSVC.asm
 ------------------------------------------------------------------------------
-  line 335    col72='X'  seq=01-TFCVT      
+  line 335    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 336    col72='X'  seq=01-TFCVT      
+  line 336    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMSWTCH.asm
 ------------------------------------------------------------------------------
-  line 250    col72='X'  seq=02-TFCVT      
+  line 250    col72='X'  seq=02-TFCVT GEN 
       |TCVTSITK DS    F                   LEADING EDGE DETECTION MASK FOR|
-  line 251    col72='X'  seq=02-TFCVT      
+  line 251    col72='X'  seq=02-TFCVT GEN 
       |TCVTSVCK DS    F                   LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMTERM.asm
 ------------------------------------------------------------------------------
-  line 409    col72='X'  seq=01-TFCVT      
+  line 409    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 410    col72='X'  seq=01-TFCVT      
+  line 410    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMTMENQ.asm
 ------------------------------------------------------------------------------
-  line 210    col72='+'  seq=029800AZ      
+  line 210    col72='+'  seq=029800AZ     
       |         LH    R6,TTQEPCT          GET COINCIDENT TIME (PASSED IN PCT|
-  line 222    col72='*'  seq=030800AZ      
+  line 222    col72='*'  seq=030800AZ     
       |         ZH    TTQEPCT             ZERO PCT ADDR FIELD(INDICATES FCOS|
-  line 239    col72='*'  seq=032500AZ      
+  line 239    col72='*'  seq=032500AZ     
       |         AST   R4,TFCMMTUH        ADD DELTA TO UPDATED TIME SO THAT|
-  line 573    col72='*'  seq=047400AZ      
+  line 573    col72='*'  seq=047400AZ     
       |         D     R4,FPM40MSC         DIVIDE TIME_UNTIL_COIN_TIME BY 40|
-  line 574    col72='*'  seq=047700AZ      
+  line 574    col72='*'  seq=047700AZ     
       |         M     R4,FPM40MSC         MULTIPLY BY 40 MSEC TO GET TIME OF|
-  line 634    col72='X'  seq=01-TFCVT      
+  line 634    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 635    col72='X'  seq=01-TFCVT      
+  line 635    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMUPMTU.asm
 ------------------------------------------------------------------------------
-  line 191    col72='*'  seq=007100BJ      
+  line 191    col72='*'  seq=007100BJ     
       |**       EXECUTE FPMDMAN           DETERMINE WHICH ACCUMULATOR TO WRITE|
-  line 629    col72='*'  seq=052800BJ      
+  line 629    col72='*'  seq=052800BJ     
       |         STH   R4,TTQEPCT          SAVE IN PCT ADDR FIELD OF TQE--PCT|
-  line 693    col72='*'  seq=058900BJ      
+  line 693    col72='*'  seq=058900BJ     
       |         OR    R6,R7               COMBINE 10'S UNITS AND 1'S UNITS|
-  line 942    col72='*'  seq=080300BJ      
+  line 942    col72='*'  seq=080300BJ     
       |FPM10    DC    F'5'                SCALE FACTOR USED TO DO BCE CONV.|
-  line 952    col72='X'  seq=081700BJ      
+  line 952    col72='X'  seq=081700BJ     
       |FPMUGTQE EQU   X'200A'             TQE FLAG FIELD FOR RUNTIME UPDATE|
-  line 953    col72='X'  seq=081900BJ      
+  line 953    col72='X'  seq=081900BJ     
       |FPMPTTQE EQU   X'300A'             TQE FLAG FIELD FOR RUNTIME UPDATE|
 
 ==============================================================================
 /home/rburkey/workspace/PFS/OI301700/SSSRC/FPMWAIT.asm
 ------------------------------------------------------------------------------
-  line 124    col72='X'  seq=005300AK      
+  line 124    col72='X'  seq=005300AK     
       |         LFXI  R4,1                LOAD OFFSET INTO P/L OF WAIT_EVENT|
-  line 383    col72='X'  seq=01-TFCVT      
+  line 383    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSITK            LEADING EDGE DETECTION MASK FOR|
-  line 384    col72='X'  seq=01-TFCVT      
+  line 384    col72='X'  seq=01-TFCVT GEN 
       |         EXTRN TCVTSVCK            LEADING EDGE DETECTION MASK FOR|
 
