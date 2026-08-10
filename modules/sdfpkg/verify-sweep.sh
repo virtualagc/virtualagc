@@ -50,11 +50,21 @@
 # So the index is EMPTY: nothing in this library is meant to be read ahead of
 # the module, and the directory exists only to give COPY somewhere to look.
 #
-# What this cannot fix is that OI301700 genuinely HAS no PROC, DO, ENDDO, IF,
-# ELSE, ENDIF or LARGE -- the structured-programming macros its sources use
-# and OI340600's library defines.  Modules needing them cannot be assembled
-# from what survives, and borrowing OI340600's versions is the poisoning
-# described above.  That is a gap in the archive, not in ASM101S.
+# WHAT THIS CANNOT FIX is that 213 of the 214 macros OI340600 defines are
+# absent from OI301700's library, PROC and PROGRAM and the IF/ELSE/CASE/DO
+# family among them.  But only SIXTEEN of the 213 are actually invoked, by TEN
+# of the 272 modules, so the archive gap is small and the buildable
+# denominator is 262.
+#
+# COUNT THOSE INVOCATIONS ON OPERATION FIELDS ONLY.  A regexp that takes the
+# second word of any line counts COMMENT CARDS, and these sources carry long
+# comment blocks that spell out the macro syntax -- FPMIDLE has a block
+# listing "WAIT UNTIL", "SCHEDULE AT", "REPEAT AFTER" and the rest, none of
+# it code.  Counting that way said 139 modules were blocked when the true
+# figure is 10, and it made the assembler look nine times better than it is
+# by shrinking the denominator it is judged against.  Skip cards beginning
+# with `*` or `.*`, and skip the card after any card with a non-blank column
+# 72, which is a continuation and has no operation field at all.
 #
 # PFS is somebody else's repository and is not written to.
 set -u

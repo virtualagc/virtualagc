@@ -197,18 +197,33 @@ header before running it; the setup matters more than the script does.
     DIFFERS       19
     CRASH          0
 
-BUT 272 IS THE WRONG DENOMINATOR.  213 of the macros OI301700's sources use
-are absent from its 40-member library, and 139 of the 272 modules invoke at
-least one of them.  Those cannot be assembled from what survives.  Against
-the 133 that can be:
+THE DENOMINATOR IS 262, NOT 272 AND NOT 133.  213 of the 214 macros
+OI340600 defines are absent from OI301700's library, but only SIXTEEN of them
+are ever invoked, by TEN modules:
 
-                   buildable    needs missing macros
-        MATCH            102                      25
-        DIFFERS            8                      11
-        NOCOMPARE         23                     103
+                   buildable    blocked by the archive
+        MATCH            127                         0
+        DIFFERS           19                         0
+        NOCOMPARE        116                        10
 
-So 102 of 133, and the actionable remainder is 31 modules, not 145.  The rest
-is a gap in the archive.
+So 127 of 262, and the actionable remainder is 135 modules.
+
+IT WAS FIRST REPORTED AS 102 OF 133, WHICH WAS WRONG, and the mistake is more
+useful than the number.  "Which modules invoke a missing macro" was measured
+by taking the second word of every line, which counts COMMENT CARDS -- and
+these sources carry long comment blocks spelling out the very macro syntax
+being searched for.  FPMIDLE has a block listing "WAIT UNTIL", "SCHEDULE AT",
+"REPEAT AFTER" and the rest, not one line of it code, and it was scored as
+needing four missing macros.  That inflated the blocked set from 10 modules to
+139 and shrank the denominator from 262 to 133, which made the assembler look
+about nine times better than it is.  MEASURE OPERATION FIELDS ONLY: skip cards
+beginning with `*` or `.*`, and skip the card after any card with a non-blank
+column 72, which is a continuation and has no operation field.
+
+That is the third measurement of this kind to go wrong here in one day -- the
+others being R0-R7 counted in RUNASM comments and MACRO statements sought with
+an end-of-line anchor.  When counting anything in these sources, decide first
+which COLUMNS carry the thing being counted.
 
 DO NOT BORROW OI340600'S MACRO LIBRARY to close that gap, which is what item 5
 of the old list proposed.  Of the 40 members that exist in BOTH versions, ZERO
