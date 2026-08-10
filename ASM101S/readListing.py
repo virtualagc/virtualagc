@@ -59,6 +59,7 @@ def readListing(filename):
         source = [line[shift:] for line in source]
 
     sect = None
+    firstCSECT = None   # owns the literal pool; see below
     for line in source:
         if len(line) > 20 and line[20] == " ":
             front = line[:21]
@@ -105,7 +106,19 @@ def readListing(filename):
         elif len(backFields) > 1 and col1 != " ":
             name = backFields[0]
             operation = backFields[1]
-        if operation == "DSECT":
+        # THE LITERAL POOL BELONGS TO THE FIRST CONTROL SECTION, wherever it is
+        # printed.  GC28-6514-8 page 23: the first control section "contains the
+        # literals of the program, unless their positioning has been altered by
+        # LTORG statements."  A listing prints the pool after everything else,
+        # which in these modules is after the last DSECT and with no CSECT card
+        # to end it -- so this reader was still inside the DSECT and filed the
+        # pool's bytes there.  Nothing generates object code in a DSECT, so they
+        # came back as missing:  FPMUPMTU's `=FS32'60E6'` at 002A6 was charged to
+        # TFMTUSPL, and FPMCANCL's `=H'4'` to TFPDE.
+        if operation[:1] == "=" or (name[:1] == "=" if name else False):
+            if firstCSECT != None:
+                sect = firstCSECT
+        elif operation == "DSECT":
             sect = name
             continue
         elif operation == "CSECT" or (sect == None and len(values) > 0):
@@ -117,6 +130,8 @@ def readListing(filename):
                     "memory": [None]*chunkSize
                     }
             sect = name
+            if firstCSECT == None:
+                firstCSECT = name
             #address *= 2
             #sects[sect]["pos"] = address
             #sects[sect]["memory"] = [None]*chunkSize
