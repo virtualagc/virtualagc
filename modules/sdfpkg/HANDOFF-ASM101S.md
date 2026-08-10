@@ -215,61 +215,66 @@ WHY IT MATTERS MORE THAN IT LOOKS.  PFS is a git repository that is managed
 elsewhere, and untracked droppings there are indistinguishable from work in
 progress to whoever looks next.
 
-2026-08-10.  FPMIHPC2 and FIOSVC do not assemble because their OI301700 sources
-are INCOMPLETE, not because of anything ASM101S does.  Both end on an
-unnumbered `COPY` card -- blank in columns 73-80 where every other card carries
-a sequence number -- and their listings run on well past it to an END:
+2026-08-10.  FPMIHPC2 and FIOSVC are the only two modules whose OI301700
+sources have lost cards.  Both end on an unnumbered `COPY` card -- blank in
+columns 73-80 where every other card carries a sequence number -- and their
+listings run on past it to an END:
 
     FIOSVC     236 cards, ends `COPY FIOSTEVT`   listing runs to statement  701
     FPMIHPC2  1380 cards, ends `COPY FIOSGEVT`   listing runs to statement 2284
 
-THE TEST THAT FINDS THEM is simply which sources have no END card:
+TWO CHEAP TESTS FIND THEM, and they agree.  The first is which sources have no
+END card at all:
 
     for f in *.asm; do cut -c1-71 "$f" | grep -qE '^ +END *$' || echo "$f"; done
 
-Exactly two of the 272 answer, and they are exactly the two above.  Nothing
-else in the corpus is truncated, so this is a bounded defect and not a general
-worry about the extraction.
+Exactly two of 272 answer.  The second is the SRN comparison below, run over the
+whole corpus, which flags the same two and nothing else above the noise.
+
+THE DAMAGE IS NOT ONLY AT THE END, which an earlier version of this entry got
+wrong.  FPMIHPC2 loses about 51 cards and FIOSVC about 33, scattered rather than
+terminal -- FPMIHPC2 is missing `FPMSWTCC` invocations from the middle of the
+module as well as its whole tail.
+
+COMPARING BY SRN IS HOW TO SEE IT.  Card text cannot be aligned between a
+listing and one of these sources, because the sources are PRE-EXPANDED: they
+hold the generated cards and not the invocations that produced them.  Aligning
+text with difflib silently matches unrelated cards and reported one tidy
+contiguous gap that does not exist.  The sequence number in columns 73-78 is a
+stable card identity and is what to compare.
+
+    across all 272 modules, listing cards absent from the source:
+        11091 total
+         5889  macro invocations      -- absent BY DESIGN, pre-expansion
+         2498  COPY member content    -- absent BY DESIGN, the COPY card remains
+          103  everything else        -- of which FPMIHPC2 51, FIOSVC 33,
+                                         BILDNEW5 11, and 1-2 each in seven
+                                         others
+
+CALIBRATE THE TEST AGAINST THE MODULES THAT MATCH.  A module whose bytes are
+identical to the original build cannot be missing anything that matters, so any
+"loss" it reports is a false positive and sets the noise floor.  Three of the
+188 MATCH modules report exactly one card each, so ONE is the floor and only
+FPMIHPC2, FIOSVC and BILDNEW5 stand above it.  BILDNEW5 is confounded: it is
+the one module in the corpus that is NOT pre-expanded, so the classifier has no
+expansion tags to learn its macros from.
+
+THE COLUMN LAYOUT, because getting it wrong produced three confidently wrong
+answers in a row.  Detect the carriage-control shift as readListing.py does --
+try offsets 0 to 3, keep whichever yields the most lines matching
+`[0-9A-F]{5} `.  Then the card image begins at column 36 and the SRN is at the
+column where `\d{6}[A-Z0-9]{2}` most often appears, which is 108 for these
+listings but should be MEASURED, not assumed.  DO NOT look for the statement
+number at a fixed column: a card with two object-code fields pushes it right,
+and a window at [28:35] skips those lines entirely -- 78 of them in FPMIHPC2,
+whose source counterparts then look like additions.  The SRN column is the only
+anchor in these listings that does not move.
 
 WHAT IT COSTS FPMIHPC2.  Its missing tail contains
-`GENERATE COPY=(TFPSA,TFPCT,TFTQE,TFPDE,TFGST,TFIOQ)` at statement 1834, whose
-expansion is the DSECT maps.  So TFGST, TFPCT, TFICC and the rest are never
-defined, every `USING TFGST,R2` fails, and the 146 diagnostics are almost all
-consequences of that one absent card.  Do not go looking for a symbol
-resolution bug.
-
-RESTORING THE TAIL FROM THE LISTING IS HARDER THAN IT LOOKS, and the reason is
-worth writing down because the first attempt looked like it worked.
-
-These sources are PRE-EXPANDED: they hold macro-generated cards, tagged
-`nn-MACRO` in columns 73-80, and not the invocations that produced them --
-FPMIHPC2 has 421 such cards.  A listing, though, holds BOTH: the invocation
-(no mark) and its expansion (`+` after the statement number).  So the obvious
-rule is to keep every `+` card, keep every unmarked card that is not followed
-by an expansion, and drop the COPY markers.  That reconstructs 626 cards ending
-correctly in `AGO .END`, `.END ANOP`, `END`, and it assembles -- to ONE
-diagnostic, `IF MACRO AT SAME LEVEL AS DO TERMINATOR`, severity 8.
-
-That MNOTE is the whole problem.  PRINT NOGEN suppresses some expansions, so
-those invocations are NOT followed by a `+` card, the rule keeps them, and the
-result interleaves live invocations with inline expansions.  IF and DO keep
-their nesting depth in GLOBAL SET symbols, which an inline expansion does not
-update, so the next live IF sees the wrong depth.  A tail has to be ALL
-expansions or ALL invocations.  All-expansions is not recoverable from the
-listing where PRINT NOGEN suppressed them; all-invocations needs to know which
-cards belong to the COPY members, and the listing's own START/END OF COPY
-MEMBER markers are unpaired and out of order (END at 425 and 1141, START at
-1612 and 1740), so they cannot be used to bound the members.
-
-READING THE LISTING PROPERLY.  Do not invent a column layout.  Detect the
-carriage-control shift the way readListing.py does -- try offsets 0 to 3 and
-keep whichever yields the most lines matching `[0-9A-F]{5} ` -- and then the
-statement number ends at column 35, the `+` mark is column 35, and the card
-image is columns 36 to 116.  A regexp anchored as `.{32}(\d+)` instead picked
-up 1266 of the 1995 printed statements and produced two confidently wrong
-answers before anyone checked it.  VALIDATE ANY SUCH EXTRACTION: the statement
-numbers must come out strictly increasing, and the count must be close to the
-last statement number.
+`GENERATE COPY=(TFPSA,TFPCT,TFTQE,TFPDE,TFGST,TFIOQ)`, whose expansion is the
+DSECT maps.  So TFGST, TFPCT, TFICC and the rest are never defined, every
+`USING TFGST,R2` fails, and the 146 diagnostics are almost all consequences of
+that one absent card.  Do not go looking for a symbol resolution bug.
 
 2026-08-10, measured rather than argued.  Appending an END card alone changes
 NOTHING -- still 146 diagnostics -- because the DSECT maps are what is missing
