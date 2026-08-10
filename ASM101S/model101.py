@@ -2212,8 +2212,29 @@ def generateObjectCode(source, macros):
                                 if not err:
                                     if operation in ["ST"]: ###DEBUG###TRAP###
                                         pass
+                                    # A register in parentheses is the BASE
+                                    # only if it can be one.  If no USING is
+                                    # active for it and the displacement is a
+                                    # RELOCATABLE symbol -- which therefore
+                                    # already draws its base from some other
+                                    # USING -- then the register is an INDEX,
+                                    # and an indexed operand cannot take the
+                                    # short form.
+                                    #
+                                    # `b2 > 3` was a narrower version of the
+                                    # same idea.  It misses FPMEVENQ's
+                                    # `LH R2,TEQEVAR1(R1)`, where TEQEVAR1 is
+                                    # based on R0 by `USING TFEQE,R0` and R1
+                                    # was DROPped forty lines earlier: ASM101S
+                                    # read R1 as a base and emitted 9A11 where
+                                    # the original build has 9AF4 2004.
+                                    droppedBase = False
+                                    if b2 != None and 0 <= b2 < len(using) \
+                                            and using[b2] == None and \
+                                            d2 != None and unhash(d2)[0] != None:
+                                        droppedBase = True
                                     atStar = "@" in operation or "#" in operation \
-                                        or (b2 != None and b2 > 3)
+                                        or (b2 != None and b2 > 3) or droppedBase
                                     if atStar and x2 == None:
                                         x2 = b2
                                         b, d = unUsing(using, d2)
