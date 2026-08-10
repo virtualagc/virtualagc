@@ -501,7 +501,8 @@ def evalLiteralAttributes(properties, ast, symtab):
     elif t == "E":
         l = 4
         msw, lsw = toFloatIBM("".join(ast["E"][0]), scale)
-        value = msw
+        # Rounded to short precision, not truncated; see roundFloatIBMShort.
+        value = roundFloatIBMShort(msw, lsw)
     elif t == "D":
         l = 8
         msw, lsw = toFloatIBM("".join(ast["D"][0]), scale)
@@ -2308,6 +2309,11 @@ def generateObjectCode(source, macros):
                                 # precision (`fpLength==4`) or double 
                                 # precision (`fpLength==8`). 
                                 msw, lsw = toFloatIBM(''.join(value))
+                                if fpLength == 4:
+                                    # A short constant keeps only the top 24
+                                    # bits of the fraction, and the original
+                                    # ROUNDS the rest rather than dropping it.
+                                    msw = roundFloatIBMShort(msw, lsw)
                                 j = 24
                                 for i in range(4):
                                     dcBuffer[dcBufferPtr] = (msw >> j) & 0xFF

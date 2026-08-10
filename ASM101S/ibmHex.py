@@ -92,6 +92,27 @@ def toFloatIBM(x, scale=1):
     return msw, lsw
 
 
+# ROUND A DOUBLE-PRECISION RESULT TO SHORT (E) PRECISION.  toFloatIBM builds a
+# 56-bit fraction and hands it back as (msw, lsw); a short constant keeps only
+# the top 24 bits of it.  Simply dropping `lsw` TRUNCATES, and the original
+# assembler rounds.  `DC E'0.015'` has the exact fraction 4026531.84, so
+# truncation gives 3F3D70A3 where the original build has 3F3D70A4.
+#
+# The carry out of a 24-bit fraction is a shift of one hexadecimal digit, not
+# one bit, because the exponent is a power of SIXTEEN.
+def roundFloatIBMShort(msw, lsw):
+    if lsw < 0x80000000:
+        return msw
+    s = msw & 0x80000000
+    e = (msw >> 24) & 0x7f
+    f = (msw & 0xffffff) + 1
+    if f > 0xffffff:
+        f >>= 4
+        e += 1
+        if e > 127:
+            return 0xff000000
+    return s | (e << 24) | f
+
 # Inverse of toFloatIBM(): Converts more-significant and less-significant 
 # 32-bit words of an IBM DP float to a Python float.
 def fromFloatIBM(msw, lsw):
