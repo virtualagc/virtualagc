@@ -1134,8 +1134,16 @@ def generateObjectCode(source, macros):
         value = evalArithmeticExpression(expression, {}, properties, symtab, \
                                          currentHash(), severity=0)
         if value == None:
+            # QUIET ON THE COLLECTING PASSES.  A subfield naming a symbol
+            # defined further down the module cannot be evaluated on pass 1,
+            # and that is what the later passes are for; reporting it at
+            # severity 255 there aborted the assembly before it could reach
+            # them.  29 OI301700 modules had subfield errors on pass 1 and on
+            # no later pass, which is what identifies them as premature.  A
+            # subfield that is still unevaluable when compiling is reported
+            # exactly as before.
             error(properties, "Could not evaluate %s subfield" % subfield, \
-                  severity=255)
+                  severity = 255 if compile else 0)
             return True, None
         return False, value
     
@@ -2872,7 +2880,8 @@ def generateObjectCode(source, macros):
                 err, halfwords = evalInstructionSubfield(properties, "v", ast, \
                                                          symtab)
                 if err or halfwords == None:
-                    error(properties, "Could not evaluate %s operand" % operation)
+                    error(properties, "Could not evaluate %s operand" % operation, \
+                          severity = 255 if compile else 0)
                     continue
                 target = halfwords % 2
                 # `pos1` is a byte offset, so the halfword address is pos1//2.
@@ -2947,7 +2956,8 @@ def generateObjectCode(source, macros):
                 target = mscField("A1")
                 if target == None:
                     error(properties, \
-                          "Could not evaluate %s operand" % operation)
+                          "Could not evaluate %s operand" % operation, \
+                          severity = 255 if compile else 0)
                     toMemory(data)
                     continue
                 updatedPC = (sects[sect]["pos1"] + \
@@ -3104,7 +3114,8 @@ def generateObjectCode(source, macros):
 
                 first = bceField("A1")
                 if first == None:
-                    error(properties, "Could not evaluate %s operand" % operation)
+                    error(properties, "Could not evaluate %s operand" % operation, \
+                          severity = 255 if compile else 0)
                     toMemory(data)
                     continue
                 if "X1" in ast:
@@ -3182,7 +3193,8 @@ def generateObjectCode(source, macros):
                 first = bceShortField("A1")
                 if first == None:
                     error(properties, \
-                          "Could not evaluate %s operand" % operation)
+                          "Could not evaluate %s operand" % operation, \
+                          severity = 255 if compile else 0)
                     toMemory(data)
                     continue
 
