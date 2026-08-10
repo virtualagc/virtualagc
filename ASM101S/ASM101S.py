@@ -1262,7 +1262,14 @@ for i in range(endLibraries, len(source)):
         if properties["operation"] == "EQU":
             prefix = "%07X" % (symtab[properties["name"]]["value"] & 0xFFFFFFF)
         elif properties["operation"] == "USING":
-            prefix = "%07X" % properties["using"]
+            # A USING whose base could not be established has no value to
+            # print.  It is set only when the first operand evaluates, so
+            # every diagnosed USING -- unparsable operand, no value, bad
+            # location -- reached this with the key absent and took the whole
+            # assembly down with a KeyError, AFTER the diagnostic that
+            # explained the real problem had already been printed.
+            using = properties.get("using")
+            prefix = "" if using is None else "%07X" % using
         elif properties["operation"] == "LTORG":
             pass
         elif "pos1" in properties and properties["pos1"] != None:
