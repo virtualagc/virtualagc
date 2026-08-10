@@ -271,6 +271,61 @@ answers before anyone checked it.  VALIDATE ANY SUCH EXTRACTION: the statement
 numbers must come out strictly increasing, and the count must be close to the
 last statement number.
 
+2026-08-10, measured rather than argued.  Appending an END card alone changes
+NOTHING -- still 146 diagnostics -- because the DSECT maps are what is missing
+and END cannot conjure them.  But the four cards the listing actually shows at
+the end of the module, now that OI301700/MLIB80 HAS the macros, take it from
+146 diagnostics to 22:
+
+         GENERATE COPY=(TFPSA,TFPCT,TFTQE,TFPDE,TFGST,TFIOQ)
+         TFIOS
+         TFICC
+    .END     ANOP
+         END
+
+ASM101S expands them into the DSECT maps itself, so nothing has to be spliced
+out of the listing to define TFGST, TFPCT, TFICC and the rest.
+
+ADDING THE DECLARATION CARDS takes 22 to 6.  Statements 1613-1833 of the
+listing hold about fifty unmarked EQU, DC and EXTRN cards -- FPMSIPFL,
+FPMSETDS, FPMTQERT, TMPINDIC, EXTRN CZ2VIF1 and so on -- and being unmarked
+cards with no expansion behind them they splice in safely.
+
+DROPPING THE TRAILING `COPY FIOSGEVT` takes 6 to 5, and the reason is worth
+keeping.  A PRE-EXPANDED COPY MEMBER CAN ONLY BE INCLUDED ONCE.  The original
+build copied FIOSGEVT twice and the macro counter gave each expansion its own
+labels; our FIOSGEVT.asm holds one expansion with `#@LB1` frozen into it, so a
+second inclusion is a duplicate definition.  The module's first inclusion is
+already inlined in its own cards, so the surviving COPY card is the redundant
+one.
+
+THE LAST FIVE CANNOT BE FIXED THIS WAY.  They are `BAL R6,FPMACCM1`,
+`BAL R5,FPMSWCM` and the like -- branches to three subroutines, FPMACCM1,
+FPMSWCM and FIOICCCK, whose bodies are in the truncated tail at statements
+1636-1719.  Splicing those 63 cards by the same rule makes matters WORSE, not
+better:
+
+    Severity 255  Unrecognized operation '&IIND1(0)'
+    Severity 255  Index of &IIND4(0) out of range
+    Severity 8    NEGATIVE INSTRUCTION STACK PTR. EXPANSION INVALID.
+    Severity 8    IF MACRO AT SAME LEVEL AS DO TERMINATOR.
+
+because those bodies contain IF, ELSE and DO, and PRINT NOGEN suppressed some
+of their expansions.  The kept invocations then run against an instruction
+stack that the inlined expansions never pushed.  Declarations can be spliced
+from a listing; CONTROL STRUCTURES CANNOT.
+
+SO IT IS LEFT UNAPPLIED.  Taking the module from 146 diagnostics to 5 does not
+make it assemble, so it does not move the sweep, and it would put hand-built
+cards into an archival source in exchange for nothing measurable.  If the three
+subroutine bodies are ever recovered -- OI340600's FPMIHPC2 has them, though it
+is a different release -- apply the whole thing at once and let the byte
+comparison judge.  The candidate as far as it goes is reproducible from this
+entry in about ten minutes.
+
+FIOSVC IS THE SAME DEFECT AND FOUR TIMES SMALLER, 236 cards against 1380, and
+is the better place to prove any of this out.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
