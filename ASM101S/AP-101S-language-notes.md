@@ -94,6 +94,17 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** MENU12 writes 29 such cards, DC BL.5'10000',FL.11'-38' among them.  -38 in eleven bits is 11111011010, and with the five bits of the B constant ahead of it the halfword is 0x87DA, which is what ASM101S now emits and what the arithmetic requires.  Also DC YL.5(15),YL.3(0),FL.8'-27' -> 0x78E5.
 
+### `L'`
+
+**Processor:** assembler  
+**Confidence:** derived
+
+**What it does.** The length attribute.  GC28-6514-8 page 15 defines it for System/360, where it counts BYTES -- 'A1 DS CL8' gives L'A1 = 8.  On the AP-101S it counts halfwords instead, because the machine is halfword-addressed and every other term of the expressions L' appears in is in halfwords too.  The manual also declares L' of a symbol whose length is given by an expression to be invalid, and nothing in the corpus writes one.  ASM101S parsed the term but only ever resolved it for symbolic variables, so L' of a program symbol was reported as a missing symbolic variable.
+
+**Encoding.** L'symbol is the size of the storage the symbol names, taken from the FIRST suboperand of its DC or DS and ignoring the duplication factor, expressed in HALFWORDS: ceil(bytes/2), minimum 1.
+
+**How this was established.** FIOCBLKS settles the unit without reference to any manual.  Its DC (TIOQPRI-(TIOQSELF+L'TIOQSELF))H'0' runs from 000A4 to 000A9 in the original listing, so the duplication factor is 5; TIOQPRI-TIOQSELF is 7, which forces L'TIOQSELF to 2, and TIOQSELF is DS F -- four bytes, two halfwords.  Don Schmidt's asm101 computes it the same way and says so: 'bytes -> halfwords (round up): the unit L' is consumed in'.  FIOCBLKS is the ONLY module in either version with a genuine L'; the seven others that match the text are apostrophes in English comments.
+
 ### `R0-R7 and the symbolic equates`
 
 **Processor:** assembler  
@@ -350,4 +361,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-27 entries.
+28 entries.

@@ -585,6 +585,27 @@ def evalArithmeticExpression(expression, \
             sv = svLocals
         elif symvar in svGlobals:
             sv = svGlobals
+        elif op == "L'" and indices == None:
+            # L' OF A PROGRAM SYMBOL, not of a symbolic variable.  This branch
+            # existed only for the macro-time attributes, so `L'TIOQSELF` --
+            # a symbol defined by a DS in a DSECT -- was diagnosed as a missing
+            # symbolic variable, which is what blocks FIOCBLKS.  The attribute
+            # is recorded where the symbol is defined; see the comment on
+            # `lengthAttribute` in model101.py for the unit and the evidence.
+            #
+            # A symbol that exists but carries no length attribute is NOT the
+            # same as one that does not exist, and the two are reported
+            # separately so the next such case says which it was.
+            entry = symtab.get(symvar)
+            if entry == None:
+                error(properties, "Symbol %s not found for L'" % symvar, \
+                      severity)
+                return None
+            if "lengthAttribute" not in entry:
+                error(properties, \
+                      "Symbol %s has no length attribute" % symvar, severity)
+                return None
+            return entry["lengthAttribute"]
         else:
             error(properties, "Symbolic variable %s not found" % symvar, severity)
             return None

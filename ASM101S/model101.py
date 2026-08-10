@@ -880,6 +880,44 @@ def evalLengthModifier(properties, tokens):
 # when the modifier was not written as `L.n` at all, so the caller can tell
 # `AL.8(...)`, which is a bit specification that happens to be a whole byte,
 # from `AL8(...)`, which is a byte count.
+# The size in BYTES of one element of a DC/DS suboperand, ignoring the
+# duplication factor -- which is what the length attribute L' is built from.
+# Returns None when the size cannot be established, and the caller then leaves
+# the symbol without a length attribute rather than inventing one.
+def dcSuboperandBytes(properties, suboperand):
+    try:
+        thisType = suboperand["t"][0]
+    except:
+        return None
+    if suboperand.get("l", []) != []:
+        # An explicit BIT length is a count of bits, and GC28-6514-8 says L' of
+        # a symbol whose length is given by an expression is invalid anyway --
+        # so this only rounds the bit form up to whole bytes and otherwise
+        # takes the modifier as the byte count it is.
+        bits = evalBitLengthModifier(properties, suboperand["l"])
+        if bits != None:
+            return max(1, (bits + 7) // 8)
+        modifier = evalLengthModifier(properties, suboperand["l"])
+        if modifier != None:
+            return modifier
+        return None
+    natural = { "F": 4, "E": 4, "A": 4, "Z": 4, "D": 8, "H": 2, "Y": 2,
+                "S": 2, "V": 4 }
+    if thisType in natural:
+        return natural[thisType]
+    # The remaining types take their size from the value as written.
+    try:
+        text = suboperand["v"][0][1]
+    except:
+        return None
+    if thisType == "C":
+        return max(1, len(text))
+    if thisType == "X":
+        return max(1, (len(text.replace(",", "")) + 1) // 2)
+    if thisType == "B":
+        return max(1, (len(text) + 7) // 8)
+    return None
+
 def evalBitLengthModifier(properties, tokens):
     tokens = unroll(tokens)
     if isinstance(tokens, str):
@@ -1684,6 +1722,31 @@ def generateObjectCode(source, macros):
                 flattened = astFlattenList(ast)
                 dcBufferPtr = 0
 
+                # THE LENGTH ATTRIBUTE, L'.  GC28-6514-8 page 15 defines it as
+                # the length of the storage the symbol names -- `A1 DS CL8`
+                # gives L'A1 = 8 -- taken from the FIRST suboperand and
+                # ignoring the duplication factor.  There it is a count of
+                # BYTES.  Here it is a count of HALFWORDS, because the AP-101S
+                # is halfword-addressed and every other term of the expressions
+                # L' appears in is in halfwords too.
+                #
+                # FIOCBLKS establishes that without reference to any manual.
+                # Its `DC (TIOQPRI-(TIOQSELF+L'TIOQSELF))H'0'` runs from 000A4
+                # to 000A9 in the original listing, so the duplication factor
+                # is 5; with TIOQPRI-TIOQSELF = 7 that forces L'TIOQSELF to 2,
+                # and TIOQSELF is `DS F`, four bytes.  asm101 computes it the
+                # same way and says so in as many words.
+                # Recorded only into an entry that already exists -- the
+                # preliminary pass makes one for every named DC/DS -- so that a
+                # name arriving here without one still fails where it used to
+                # rather than acquiring a symbol table entry with nothing in it
+                # but a length.
+                if name in symtab and len(flattened) > 0:
+                    lengthBytes = dcSuboperandBytes(properties, flattened[0])
+                    if lengthBytes != None:
+                        symtab[name]["lengthAttribute"] = \
+                            max(1, (lengthBytes + 1) // 2)
+
                 # BIT-LENGTH CONSTANTS, `DC AL.8(a),AL.5(b),AL.4(c),AL.15(d)`.
                 # The operands are packed CONTIGUOUSLY, without regard to byte
                 # boundaries, and the last byte is padded with zeros.  An
@@ -1796,12 +1859,24 @@ def generateObjectCode(source, macros):
                             if literal != None:
                                 v = literal
                             else:
+                                # QUIET ON THE COLLECTING PASSES.  This site
+                                # took the default severity of 255, so a plain
+                                # forward reference was fatal on pass 1 even
+                                # though pass 3 resolves it -- FIOCBLKS uses
+                                # `AL.4(FIOMEBCC)` four statements before the
+                                # `FIOMEBCC EQU B'0011'` that defines it.  The
+                                # rest of the DC path already evaluates this
+                                # way; only the bit-packing branch did not.
                                 v = evalArithmeticExpression(expression, {}, \
                                                              properties, symtab, \
-                                                             currentHash())
+                                                             currentHash(), \
+                                                             severity = \
+                                                               255 if compile \
+                                                               else 0)
                             if v == None:
-                                error(properties, \
-                                      "Cannot evaluate a bit-length constant")
+                                if compile:
+                                    error(properties, \
+                                          "Cannot evaluate a bit-length constant")
                                 failed = True
                                 break
                             section, offset = unhash(v)
