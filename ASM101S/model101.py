@@ -1623,7 +1623,13 @@ def generateObjectCode(source, macros):
                     if suboperand.get("l", []) != []:
                         b = evalBitLengthModifier(properties, suboperand["l"])
                     bitLengths.append(b)
-                    if b != None and b % 8 != 0:
+                    if b != None:
+                        # ANY bit-length modifier packs, not only one that is
+                        # not a whole byte.  `DC XL.8'24',YL.8(a-b)` is two
+                        # bytes in the original build and was three here: the
+                        # test below was `b % 8 != 0`, so a pair of L.8 fields
+                        # missed the packing path entirely and the Y constant
+                        # generated its natural halfword.
                         packed = True
                 if packed:
                     commonProcessing(1)
@@ -1647,16 +1653,47 @@ def generateObjectCode(source, macros):
                                 failed = True
                                 break
                         values = suboperand.get("v", [])
-                        # An address constant's value arrives parenthesised,
-                        # exactly as the Y-type path finds it.
-                        try:
-                            inner = astFlattenList(values[0][1:-1])
-                        except:
-                            inner = astFlattenList(values)
+                        # HOW THE VALUE ARRIVES DEPENDS ON THE TYPE.  An
+                        # address constant is parenthesised and may hold
+                        # several expressions -- `[('(', expr, [], ')')]` --
+                        # while a quoted one is a single literal in the shape
+                        # `[("'", '24', "'")]`.  Slicing parentheses off a
+                        # quoted constant produced a malformed AST and the
+                        # message "Implementation error: AST for X{',',X} not
+                        # appropriate", which is how BILDNEW5 and MENU12 fail.
+                        thisType = suboperand["t"][0]
+                        literal = None
+                        if thisType in ("A", "Y", "Z", "S", "V"):
+                            try:
+                                inner = astFlattenList(values[0][1:-1])
+                            except:
+                                inner = astFlattenList(values)
+                        else:
+                            inner = []
+                            try:
+                                digits = values[0][1]
+                                if thisType == "X":
+                                    literal = int(digits, 16)
+                                elif thisType == "B":
+                                    literal = int(digits, 2)
+                                elif thisType in ("F", "H"):
+                                    literal = int(digits)
+                            except:
+                                literal = None
+                            if literal == None:
+                                error(properties, \
+                                      "Cannot pack a %s constant of this form " \
+                                      "into a bit field" % thisType)
+                                failed = True
+                                break
+                            inner = [None]
                         for expression in inner:
-                            v = evalArithmeticExpression(expression, {}, \
-                                                         properties, symtab, \
-                                                         currentHash())
+                            if literal != None:
+                                v = literal
+                            else:
+                                v = evalArithmeticExpression(expression, {}, \
+                                                             properties, symtab, \
+                                                             currentHash())
                             if v == None:
                                 error(properties, \
                                       "Cannot evaluate a bit-length constant")
