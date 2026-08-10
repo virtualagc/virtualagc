@@ -193,21 +193,83 @@ of them accumulated in ~/workspace/PFS/OI301700/SSSRC in one afternoon before
 anybody noticed, and `git status` there is how they were noticed rather than
 anything going wrong.
 
-THE RULE: run single-module diagnostics with the object file aimed somewhere
-harmless, and do not rely on cleaning up afterwards.
+THE RULE: copy the module into a scratch directory and assemble it there.  The
+library and the listing are given by absolute path, so nothing else needs to
+move:
 
-    ASM101S --library=... --tolerable=4 --object=/dev/null \
-            --compare="$LST/NAME" NAME.asm
+    cp "$PFS/OI301700/SSSRC/NAME.asm" "$SCRATCH" && cd "$SCRATCH"
+    ASM101S --library="$PFS/OI301700/MLIB80" --tolerable=4 \
+            --compare="$PFS/OI301700 as received/SSSRC/NAME" NAME.asm
 
-verify-sweep.sh already does the equivalent -- it passes a `mktemp` path and
-deletes it -- so the sweep is not the problem; ad-hoc runs are.  If some do get
-left behind, `find OI301700/SSSRC -name '*.obj' -newermt YYYY-MM-DD` picks out
-the ones from a given day without touching anything older that may be somebody
-else's.
+--object=/dev/null DOES NOT WORK; ASM101S rejects any object filename that
+does not end in .obj, which is worth knowing before reaching for it as the
+obvious fix.  It was written into this entry as the rule and had to be
+corrected an hour later.
+
+verify-sweep.sh is not the problem -- it passes a `mktemp` path and deletes
+it.  Ad-hoc runs are.  If some do get left behind,
+`find OI301700/SSSRC -name '*.obj' -newermt YYYY-MM-DD` picks out the ones
+from a given day without touching anything older that may be somebody else's.
 
 WHY IT MATTERS MORE THAN IT LOOKS.  PFS is a git repository that is managed
 elsewhere, and untracked droppings there are indistinguishable from work in
 progress to whoever looks next.
+
+2026-08-10.  FPMIHPC2 and FIOSVC do not assemble because their OI301700 sources
+are INCOMPLETE, not because of anything ASM101S does.  Both end on an
+unnumbered `COPY` card -- blank in columns 73-80 where every other card carries
+a sequence number -- and their listings run on well past it to an END:
+
+    FIOSVC     236 cards, ends `COPY FIOSTEVT`   listing runs to statement  701
+    FPMIHPC2  1380 cards, ends `COPY FIOSGEVT`   listing runs to statement 2284
+
+THE TEST THAT FINDS THEM is simply which sources have no END card:
+
+    for f in *.asm; do cut -c1-71 "$f" | grep -qE '^ +END *$' || echo "$f"; done
+
+Exactly two of the 272 answer, and they are exactly the two above.  Nothing
+else in the corpus is truncated, so this is a bounded defect and not a general
+worry about the extraction.
+
+WHAT IT COSTS FPMIHPC2.  Its missing tail contains
+`GENERATE COPY=(TFPSA,TFPCT,TFTQE,TFPDE,TFGST,TFIOQ)` at statement 1834, whose
+expansion is the DSECT maps.  So TFGST, TFPCT, TFICC and the rest are never
+defined, every `USING TFGST,R2` fails, and the 146 diagnostics are almost all
+consequences of that one absent card.  Do not go looking for a symbol
+resolution bug.
+
+RESTORING THE TAIL FROM THE LISTING IS HARDER THAN IT LOOKS, and the reason is
+worth writing down because the first attempt looked like it worked.
+
+These sources are PRE-EXPANDED: they hold macro-generated cards, tagged
+`nn-MACRO` in columns 73-80, and not the invocations that produced them --
+FPMIHPC2 has 421 such cards.  A listing, though, holds BOTH: the invocation
+(no mark) and its expansion (`+` after the statement number).  So the obvious
+rule is to keep every `+` card, keep every unmarked card that is not followed
+by an expansion, and drop the COPY markers.  That reconstructs 626 cards ending
+correctly in `AGO .END`, `.END ANOP`, `END`, and it assembles -- to ONE
+diagnostic, `IF MACRO AT SAME LEVEL AS DO TERMINATOR`, severity 8.
+
+That MNOTE is the whole problem.  PRINT NOGEN suppresses some expansions, so
+those invocations are NOT followed by a `+` card, the rule keeps them, and the
+result interleaves live invocations with inline expansions.  IF and DO keep
+their nesting depth in GLOBAL SET symbols, which an inline expansion does not
+update, so the next live IF sees the wrong depth.  A tail has to be ALL
+expansions or ALL invocations.  All-expansions is not recoverable from the
+listing where PRINT NOGEN suppressed them; all-invocations needs to know which
+cards belong to the COPY members, and the listing's own START/END OF COPY
+MEMBER markers are unpaired and out of order (END at 425 and 1141, START at
+1612 and 1740), so they cannot be used to bound the members.
+
+READING THE LISTING PROPERLY.  Do not invent a column layout.  Detect the
+carriage-control shift the way readListing.py does -- try offsets 0 to 3 and
+keep whichever yields the most lines matching `[0-9A-F]{5} ` -- and then the
+statement number ends at column 35, the `+` mark is column 35, and the card
+image is columns 36 to 116.  A regexp anchored as `.{32}(\d+)` instead picked
+up 1266 of the 1995 printed statements and produced two confidently wrong
+answers before anyone checked it.  VALIDATE ANY SUCH EXTRACTION: the statement
+numbers must come out strictly increasing, and the count must be close to the
+last statement number.
 
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
