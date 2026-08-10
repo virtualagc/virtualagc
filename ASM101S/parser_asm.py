@@ -1596,7 +1596,7 @@ class asmParser(Parser):
     @tatsumasu()
     def _quotedHexString_(self):
         self._token("'")
-        self._pattern('[A-F0-9]+')
+        self._pattern('[A-F0-9,]+')
         self._token("'")
 
     @tatsumasu()

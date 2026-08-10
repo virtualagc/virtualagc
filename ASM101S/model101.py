@@ -1713,7 +1713,7 @@ def generateObjectCode(source, macros):
                         else:
                             inner = []
                             try:
-                                digits = values[0][1]
+                                digits = values[0][1].replace(",", "")
                                 if thisType == "X":
                                     literal = int(digits, 16)
                                 elif thisType == "B":
@@ -1924,7 +1924,29 @@ def generateObjectCode(source, macros):
                             # therefore fetched the Y constant's value for the
                             # X constant, and every X constant that is not the
                             # first operand of its DC was wrong or refused.
+                            # Commas inside a hex constant separate FULLWORDS
+                            # for the reader and are not part of the value.
+                            # Every one of the 658 such constants across both
+                            # PASS versions is written in groups of exactly
+                            # eight digits, so concatenating them is right for
+                            # all of them -- but that also means the corpus
+                            # cannot distinguish concatenation from padding
+                            # each group to a fullword on its own.  A constant
+                            # whose groups are NOT uniform would tell the two
+                            # apart, and none exists, so say so rather than
+                            # guess.
                             hexString = suboperand["v"][0][1]
+                            if "," in hexString:
+                                widths = {len(g) for g in hexString.split(",")}
+                                if len(widths) > 1 or widths != {8}:
+                                    error(properties, \
+                                          "The groups of this hexadecimal " \
+                                          "constant are not all one fullword; " \
+                                          "whether they concatenate or are " \
+                                          "each padded separately is not " \
+                                          "established, and the object code " \
+                                          "here may be WRONG")
+                            hexString = hexString.replace(",", "")
                             if lengthModifier == None:
                                 count = len(hexString)
                                 # An odd number of digits is padded to an even

@@ -318,7 +318,11 @@ len = 'L' [ '.' ] [ '+' | '-' ] number ;
 scale = 'S' [ '+' | '-' ] number;
 exp = 'E' [ '+' | '-' ] number;
 number = ( /[0-9]+/ | '(' arithmeticExpression ')' );
-quotedHexString = "'" /[A-F0-9]+/ "'" ;
+# COMMAS ARE COSMETIC SEPARATORS inside a hexadecimal constant.  FAZ2 and
+# MMUPURTB write `DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2'` and the original
+# build assembles the concatenation, sixteen bytes, printing the first eight as
+# A92F0A3CA2DFA000.  The generator strips them.
+quotedHexString = "'" /[A-F0-9,]+/ "'" ;
 quotedBinaryString = "'" /[01]+/ "'" ;
 quotedFloatList = "'" floatNumber { ',' floatNumber } "'" ;
 floatNumber = 

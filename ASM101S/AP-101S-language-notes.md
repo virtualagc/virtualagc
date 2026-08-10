@@ -239,6 +239,19 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** 59 padded and 28 unpadded instances in "OI301700 as received", 2026-08-09.  Every padded one is at an odd halfword address and emits C000; every unpadded one is at an even address.
 
+### `DC X with comma-separated groups`
+
+**Processor:** assembler  
+**Confidence:** derived  
+**Encoding certainty:** derived  
+**POO:** GC28-6514-8, Hexadecimal Constant -- X; Character Constant -- C
+
+**What it does.** AP-101S accepts a hexadecimal constant written in comma-separated groups, DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2'. This is NOT System/360 syntax: GC28-6514-8 states plainly that only ONE hexadecimal constant can be specified per operand, and that commas within an operand separate MULTIPLE CONSTANTS -- for a character constant it even notes that a comma between two of them is taken as a character rather than a separator. So the AP-101S form is an extension, and the manual gives no rule for it. ASM101S concatenates the groups.
+
+**Encoding.** groups concatenated; each is one fullword in every observed case
+
+**How this was established.** All 658 such constants across BOTH PASS versions are written in groups of exactly eight digits, one fullword each, so concatenating them is right for every one -- FAZ2 and MMUPURTB assemble byte-exact against their listings that way. But uniform groups cannot distinguish concatenation from padding each group separately, which is what the multiple-constant reading would imply. The two readings agree whenever the groups have an even number of digits and differ when they do not: X'1,1' is 01 01 padded per group and 11 concatenated. No such constant exists in the corpus, so ASM101S diagnoses any constant whose groups are not all one fullword instead of guessing.
+
 ### `Z-type constant and literal`
 
 **Processor:** assembler  
@@ -269,4 +282,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-20 entries.
+21 entries.
