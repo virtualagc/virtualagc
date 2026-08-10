@@ -331,6 +331,61 @@ entry in about ten minutes.
 FIOSVC IS THE SAME DEFECT AND FOUR TIMES SMALLER, 236 cards against 1380, and
 is the better place to prove any of this out.
 
+2026-08-10.  The corpus is at 209/3/32/27 MATCH/MATCH?/DIFFERS/NOCOMPARE, from
+187/3/48/34 at the start of the day, with RUNASM at 205 of 205 throughout.
+
+TWO DEFECTS ACCOUNTED FOR TWENTY-ONE OF THOSE, and both were structural rather
+than matters of degree.  `DC A(expression)` never emitted its value at all, and
+a USING-derived base register 3 was being mistaken for the sentinel meaning "no
+base register".  Neither showed up as a plausible-looking wrong answer; one
+emitted nothing and the other emitted a masked negative number.  Both are in
+the commits that fixed them.
+
+HOW TO WORK THE REST.  Rank the DIFFERS by bytes mismatched and take the
+cheapest first, because the small ones are decodable by hand and the same root
+cause usually explains a dozen modules.  Sort with
+
+    awk -F'\t' '$3=="DIFFERS"{ m=$4; sub(/.*: /,"",m); split(m,a," ");
+                               print a[1], $1 }' SWEEP.tsv | sort -n
+
+and note that a module with ZERO mismatched and some missing is not a wrong
+answer at all -- it is output that never happened, which is a different and
+usually easier kind of bug.  Fourteen such modules led straight to the A
+constant.
+
+THE THREE LEADS THAT REMAIN, from decoding the cheapest cases:
+
+  1. FLOATING-POINT ROUNDING.  FPMUPMTU's `FPM15MS DC E'0.015'` assembles
+     3F3D70A3 where the original has 3F3D70A4, one in the last place.  Look at
+     toFloatIBM's rounding, not at anything structural.  Several other E and D
+     constants across the corpus are likely the same.
+
+  2. AN OFF-BY-FIVE DISPLACEMENT THAT IS NOT UNDERSTOOD.  FPMZSYNC's
+     `LH R5,TICCXMTR` under a single `USING TFICC,R2` assembles 9DF6,
+     displacement 61, where the original has 9DF2, displacement 60.  BUT the
+     DSECT layouts are byte-identical in both listings -- TICCXMTR sits at
+     offset 0x41, 65 -- and 65 does not fit the six-bit SRS displacement field
+     at all.  So neither 60 nor 61 is simply the offset, and the unit or the
+     origin of an SRS displacement into a DSECT is not what it appears.  DO NOT
+     patch this by adding a constant until that is understood; the same
+     instruction appears twice in FPMZSYNC and both are wrong by one.
+
+  3. FPMCANCL AND FPMTMHAL are 0 mismatched with 1 and 2 bytes missing, and the
+     missing bytes are inside DSECTs -- "Missing object code from section
+     TFPDE", "... TFTHALPL".  A DSECT emits no object code, so either those
+     listings are showing something a DSECT can legitimately produce, or the
+     comparison should not be looking there.  Settle which before writing code.
+
+AND THE ALGORITHM ITSELF MAY BE DUE FOR SIMPLIFICATION.  Ron notes that the
+SRS/RS selection was devised empirically without knowing what USING was.  Half
+the problem it solves is documented and already coded: GC28-6514-8 page 21
+gives the base-and-displacement rule, smallest displacement and highest
+register on a tie, and findB2D2 implements exactly that.  What is genuinely
+undocumented for the AP-101S is only the choice of instruction FORM, and the
+original assembler's habit of not always minimising it.  A rewrite that lets
+USING decide base and displacement, and keeps empiricism for form alone, would
+be a good deal smaller -- and lead 2 above may well dissolve in it.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
