@@ -187,6 +187,90 @@ invocation as it is entered, with its &SYSLIST, indented by nesting depth:
 That is how the root cause below was found, and it is the only practical way to
 see what a nested expansion is actually receiving.
 
+Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
+2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
+and compares it against its own contemporary listing.  Read that script's
+header before running it; the setup matters more than the script does.
+
+    MATCH        127        bytes identical to the original build
+    NOCOMPARE    126        never reached a comparison
+    DIFFERS       19
+    CRASH          0
+
+BUT 272 IS THE WRONG DENOMINATOR.  213 of the macros OI301700's sources use
+are absent from its 40-member library, and 139 of the 272 modules invoke at
+least one of them.  Those cannot be assembled from what survives.  Against
+the 133 that can be:
+
+                   buildable    needs missing macros
+        MATCH            102                      25
+        DIFFERS            8                      11
+        NOCOMPARE         23                     103
+
+So 102 of 133, and the actionable remainder is 31 modules, not 145.  The rest
+is a gap in the archive.
+
+DO NOT BORROW OI340600'S MACRO LIBRARY to close that gap, which is what item 5
+of the old list proposed.  Of the 40 members that exist in BOTH versions, ZERO
+are identical -- every single one changed -- so it would inject differences
+that have nothing to do with ASM101S into the one comparison that can detect
+them.  Item 5 should be considered answered and closed, not attempted.
+
+TWO MEASUREMENT TRAPS, both of which produced confident wrong answers here
+within an hour of each other.
+
+Judging "is this member a macro definition" with a regexp anchored at
+end-of-line finds NOTHING.  The cards carry sequence numbers in columns 73-80,
+so a MACRO statement never ends its line.  CUT TO COLUMNS 1-71 FIRST.  Believed
+for a while, and written into a commit message, that neither library contained
+a single macro; OI340600 has 214.
+
+And listing OI301700's one real macro member in MACROFILES.txt turned 127
+matches into 272 failures.  MACSMITH is a symbolic-equates member with a macro
+block inside it, nothing invokes it, and pre-reading it gives every module 153
+intolerable lines.  A uniform result across a whole corpus means the harness is
+broken -- that rule paid for itself twice in one afternoon.
+
+WHAT THE COMPARISON FOUND that the OK/ERRORS sweep never could.  Every one of
+these was invisible to a sweep that only asks whether ASM101S complains:
+
+  - DC ignored its duplication factor for HEXADECIMAL constants, and only for
+    those.  `DC 594X'C6C6'` generated one halfword instead of 594.  Sixteen
+    patch-space modules are a single such statement and were each short by
+    1186 bytes, silently.  Beside it, the odd-digit rounding was `count % 1`,
+    zero for every integer there is.
+  - The 1024-byte DC buffer was treated as a language limit rather than a
+    working area.  It grows now.
+  - Nine modules died on KeyError from three places that assume a symbol is in
+    the table, including readListing, which sets the current section from a
+    DSECT without creating its entry.  Two TypeErrors surfaced behind them.
+  - IUACOMMAND in the long BCE format was WRONG for years.  See the ASM101S
+    commit and ap101s-notes.db; the short version is that the instance offered
+    as proof was never evaluated, and LOOKING THE SYMBOL UP disproves it.
+
+WHERE TO GO NEXT, in order.
+
+  1. THE 8 BUILDABLE DIFFERS.  Several are one to three bytes.  FPMIDLE is a
+     single byte: `LH R3,TTQEFLGS` under `USING TFTQE,R3` assembles to 9BD7
+     where the listing has 9B17, and ASM101S emits a second address field
+     FFF5 where the listing has none.  That is base-displacement resolution
+     against a DSECT through USING, and one defect probably accounts for most
+     of the eight.  A one-byte difference in a whole module is the cheapest
+     bug report this project will ever get; do not waste it.
+  2. THE 23 BUILDABLE NOCOMPARE.  Rank their diagnostics FIRST -- the leaders
+     over a 40-module sample were "Undefined symbol", "Could not parse
+     operands", "Cannot evaluate the expression" and "Could not evaluate
+     duplication factor", but that sample was dominated by modules that are
+     unbuildable anyway, so re-rank over the buildable 23 alone.
+  3. LITERALS.  `=X'...'`, `=F'...'`, `=Y(...)` and `=Z(...)` appear as
+     "Unrecognized operation", and "Literal not in literal pool" appears 27
+     times.  ASM101S seems to be feeding its own literal-pool lines back
+     through the parser.  Unexamined.
+  4. PERFORMANCE, which now costs real time: the sweep is over an hour, and
+     several modules take two minutes each.  Note that ASM101S reads the
+     ENTIRE macro library as open code before every module, 278 members for
+     OI340600, which is a large part of it.
+
 THE MACRO-PROCESSING ROOT CAUSE IS FIXED, issue #1331, in commit 0f5ab2939 on
 2026-08-08.  The issue itself is worth reading anyway -- it is the user's own
 analysis plus two outside contributors, and it is where the semantics below are
