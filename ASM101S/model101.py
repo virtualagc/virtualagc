@@ -2742,6 +2742,11 @@ def generateObjectCode(source, macros):
                                             forceRS = True
                                     isConstant = False
                                     specifiedB2 = (b2 != None)
+                                    # DID B2 COME FROM A `USING`, or from the fallback below that
+                                    # means "no USING matched, but the target is in this section"?
+                                    # Both can leave b2 == 3, and the two want opposite
+                                    # displacements.
+                                    usingB2 = False
                                     if not done and b2 == None:
                                         # Recall that `findB2D2` returns
                                         #    None,constantValue        or
@@ -2767,6 +2772,7 @@ def generateObjectCode(source, macros):
                                                 forceRS = True
                                         else:
                                             d2 = newd2
+                                            usingB2 = True
                                     if b2 != None and (b2 < 0 or b2 > 3) and \
                                             operation not in shiftOperations:
                                         if x2 == None and b2 >= 4 and b2 <= 7:
@@ -2832,7 +2838,16 @@ def generateObjectCode(source, macros):
                                             ib2 = 3
                                         else:
                                             ib2 = b2
-                                        if ib2 == 3:
+                                        # `ib2 == 3` WAS DOING DOUBLE DUTY: the sentinel for "no base
+                                        # register", and the legitimate base register B3.  A symbol
+                                        # reached through `USING TFTQE,R3` therefore took the
+                                        # section-relative path and got a NEGATIVE displacement, which
+                                        # generateSRS masked into six bits and turned into a large
+                                        # positive one.  FPMIDLE's `LH R3,TTQEFLGS` assembled 9BD7,
+                                        # displacement 53, where the original has 9B17, displacement 5:
+                                        # the base register right and only the displacement wrong,
+                                        # 64 + (-11).
+                                        if ib2 == 3 and not usingB2:
                                             d = dSRS
                                             d1 = dRSAM1
                                         else:
