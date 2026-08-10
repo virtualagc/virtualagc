@@ -387,6 +387,36 @@ model101.py should be replaced by it; that was wrong on both counts.  BEFORE
 TOUCHING THAT ALGORITHM, check whether the symbol values reaching it are
 right.
 
+THE DIFFERS MODULES ARE DOWN TO 204 WRONG BYTES, from 1488, on four fixes
+found by comparing addresses statement by statement against the listing and
+then reading the individual mismatched bytes.  In order of what they were
+worth:
+
+  - `DS A` labels kept a preliminary placeholder value.  FCMNINIT 544 -> 57.
+  - A forward `BC` has a short form; only the backward one was written.
+    FIOPDHF 542 -> 22, corpus 1001 -> 255.
+  - `BC` took its displacement from `currentHash()` where the alias path uses
+    the statement's own pos1.  FIOPDHF 22 -> 2, corpus 255 -> 204.
+  - The literal pool was placed at a stale address.  FCMNINIT's pool moved
+    from 001CA to 001D2, where the original build has it.
+
+THE METHOD IS WORTH REUSING.  Assemble with --compare, then align our listing
+against the "as received" one on statement text and watch where the ADDRESS
+DELTA changes -- that names the one instruction whose length is wrong, and
+everything after it is consequence rather than cause.  Once the delta is
+flat, the remaining mismatches are pure encoding and can be read byte by byte;
+`whichbytes.py` in this session's scratchpad pairs each "Comparison mismatch"
+line with the statement that follows it.
+
+FCMNINIT'S REMAINING 57 IS THE NEXT THREAD, and it is half-traced.  Its
+addresses are now perfectly aligned with the original, so every one of the 57
+is a wrong displacement rather than a wrong length.  The branches are one out:
+`BC 07-5,#@LB1` at 0000F targeting 00042 encodes 49 where the original has 50,
+and the backward ones are one long in the same way.  generateSRS is called
+TWICE for that statement, once with 50 and once with 49, and the second call
+wins -- so something re-derives the displacement on a later pass from a
+position that has moved.  Find the second caller.
+
 WHERE TO GO NEXT, in order.
 
   1. THE 8 BUILDABLE DIFFERS.  Several are one to three bytes.  FPMIDLE is a
