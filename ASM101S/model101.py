@@ -1054,7 +1054,15 @@ def generateObjectCode(source, macros):
                     sects[sect]["used"] = pos1
         
         # Add `name` (if any) to the symbol table.
-        if collect and name != "":
+        #
+        # ON EVERY PASS, not only the collecting ones.  Instruction lengths are
+        # still settling during the compile passes -- `repeatPass` exists
+        # precisely because they are -- and a label recorded only while
+        # collecting therefore keeps a position from before the instruction
+        # ahead of it grew.  FCMNINIT's `#@LB1` was recorded at 00041, inside
+        # the four-byte SSM that precedes it, while its listing address is
+        # 00042; every branch to it was then one halfword short.
+        if name != "":
             pos2 = sects[sect]["pos1"] // 2
             if name in symtab and "preliminary" not in symtab[name]:
                 oldSect = symtab[name]["section"]
