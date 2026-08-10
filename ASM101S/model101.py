@@ -2021,6 +2021,28 @@ def generateObjectCode(source, macros):
                             length = lengthModifier
                             multiplier = 1 << (8 * length - 1)
                             mask = (1 << (8 * length)) - 1
+                        # THE SCALE MODIFIER moves the binary point: the value
+                        # is multiplied by two to the MINUS scale before being
+                        # taken as a fraction of the full word.  Checked
+                        # against the original build, which assembles
+                        # `DC FS4'10'` as 50000000 -- 10 x 2^-4 is 0.625, and
+                        # 0.625 x 2^31 is 0x50000000 -- `DC FS20'100000'` as
+                        # 0C350000, and `DC FS-19'1E-6'` as 431BDE83.  That
+                        # last comes out right only when the product is
+                        # ROUNDED rather than truncated, which is what the
+                        # literal path has always done.
+                        scaleFactor = 1.0
+                        if suboperand.get("s", []) != []:
+                            sv = unroll(suboperand["s"])
+                            if isinstance(sv, str):
+                                sv = [sv]
+                            digits = "".join(x for x in sv if x != "S")
+                            try:
+                                scaleFactor = pow(2.0, -int(digits))
+                            except:
+                                error(properties, \
+                                      "Cannot evaluate the scale modifier")
+                                continue
                         if operation == "DC":
                             # `suboperand["v"]` holds ONE quotedFloatList, and
                             # every value after the first lives inside its
@@ -2031,19 +2053,29 @@ def generateObjectCode(source, macros):
                             # 1,1.  The E/D path below already flattened it
                             # properly; this is the same shape.
                             for exp1 in astFlattenList(suboperand["v"][0][1:-1]):
-                                if isinstance(exp1, str) and exp1.isdigit():
+                                # A SCALE MODIFIER APPLIES TO A WHOLE NUMBER
+                                # TOO.  It is not that S cannot appear on an
+                                # integer -- `DC FS4'10'` is exactly that --
+                                # nor that it may be ignored there.  It must be
+                                # applied: ten under a scale of four is 0.625
+                                # of a fullword, 50000000, not the integer ten.
+                                # The fast path for digit-only values silently
+                                # dropped it.
+                                if scaleFactor == 1.0 and \
+                                        isinstance(exp1, str) and exp1.isdigit():
                                     v = int(exp1) & mask
-                                elif isinstance(exp1, tuple) and len(exp1) == 2 \
+                                elif scaleFactor == 1.0 and \
+                                        isinstance(exp1, tuple) and len(exp1) == 2 \
                                         and exp1[0] == '-' and exp1[1].isdigit():
                                     v = int("".join(exp1)) & mask
                                 else:
                                     exp1 = "".join(exp1)
-                                    v = float(exp1) * multiplier
+                                    v = float(exp1) * scaleFactor * multiplier
                                     if v >= multiplier:
                                         v = multiplier - 1
                                     elif v <= -multiplier:
                                         v = -multiplier + 1
-                                    v = int(v) & mask
+                                    v = round(v) & mask
                                 j = (length - 1) * 8
                                 for i in range(length):
                                     dcBuffer[dcBufferPtr] = (v >> j) & 0xFF

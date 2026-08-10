@@ -155,7 +155,12 @@ subOperation =
 
 # Operand field for an RR instruction.
 rrAll = [ R1+: arithmeticExpression ',' ] R2+: arithmeticExpression ( / / | $ ) ;
-lfxiAll = [ R1+: register ',' ] R2+: ( '-2' | '-1' | register ) ( / / | $ ) ;
+# R2 of LFXI is an IMMEDIATE, not a register: the generator range-checks it
+# against -2 through 13 and encodes r2+2.  Restricting the grammar to a bare
+# register or -1/-2 rejected the ordinary way of writing one, an offset within
+# a parameter list -- `LFXI R1,TMHALMET-TMHALSRT`.  The literals stay ahead of
+# the expression so nothing that parsed before parses differently now.
+lfxiAll = [ R1+: register ',' ] R2+: ( '-2' | '-1' | arithmeticExpression ) ( / / | $ ) ;
 
 # Operand field for an RS or SRS instruction.
 #
@@ -289,7 +294,7 @@ dcOperand =
     | [ d+: number ] t+: 'C' [ l+: len ] v+: quotedString 
     | [ d+: number ] t+: 'X' [ l+: len ] v+: quotedHexString 
     | [ d+: number ] t+: 'B' [ l+: len ] v+: quotedBinaryString 
-    | [ d+: number ] t+: /[FHED]/ [ l+: len ] v+: quotedFloatList 
+    | [ d+: number ] t+: /[FHED]/ [ l+: len ] [ s+: scale ] v+: quotedFloatList 
     | [ d+: number ] t+: /[AY]/ [ l+: len ] v+: addresses 
     | [ d+: number ] t+: 'A'[ l+: len ] h+: quotedHexString
     | [ d+: number ] t+: 'Z' '(' z: identifier [ ',' [ A1+: arithmeticExpression ] [ ',' f: arithmeticExpression ] ] ')'
@@ -304,7 +309,7 @@ dsOperand =
     | [ d+: number ] t+: 'C' [ l+: len ] [ v+: quotedString ]
     | [ d+: number ] t+: 'X' [ l+: len ] [ v+: quotedHexString ]
     | [ d+: number ] t+: 'B' [ l+: len ] [ v+: quotedBinaryString ]
-    | [ d+: number ] t+: /[FHED]/ [ l+: len ] [ v+: quotedFloatList ]
+    | [ d+: number ] t+: /[FHED]/ [ l+: len ] [ s+: scale ] [ v+: quotedFloatList ]
     | [ d+: number ] t+: /[AY]/ [ l+: len ] [ v+: addresses ]
     # `DS Z` reserves the four bytes a ZCON occupies without defining one, and
     # the generator has always handled it -- but there was no Z alternative

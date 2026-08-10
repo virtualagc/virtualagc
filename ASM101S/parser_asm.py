@@ -430,10 +430,10 @@ class asmParser(Parser):
                 with self._option():
                     self._token('-1')
                 with self._option():
-                    self._register_()
+                    self._arithmeticExpression_()
                 self._error(
                     'expecting one of: '
-                    "'-1' '-2' <register>"
+                    "'-1' '-2' <arithmeticExpression>"
                 )
         self.add_last_node_to_name('R2')
         with self._group():
@@ -1293,11 +1293,14 @@ class asmParser(Parser):
                 with self._optional():
                     self._len_()
                     self.add_last_node_to_name('l')
+                with self._optional():
+                    self._scale_()
+                    self.add_last_node_to_name('s')
                 self._quotedFloatList_()
                 self.add_last_node_to_name('v')
                 self._define(
                     [],
-                    ['d', 'l', 't', 'v'],
+                    ['d', 'l', 's', 't', 'v'],
                 )
             with self._option():
                 with self._optional():
@@ -1462,11 +1465,14 @@ class asmParser(Parser):
                     self._len_()
                     self.add_last_node_to_name('l')
                 with self._optional():
+                    self._scale_()
+                    self.add_last_node_to_name('s')
+                with self._optional():
                     self._quotedFloatList_()
                     self.add_last_node_to_name('v')
                 self._define(
                     [],
-                    ['d', 'l', 't', 'v'],
+                    ['d', 'l', 's', 't', 'v'],
                 )
             with self._option():
                 with self._optional():

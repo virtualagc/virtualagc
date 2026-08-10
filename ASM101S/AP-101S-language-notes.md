@@ -129,6 +129,19 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** Measured across the whole OI301700 listing corpus: no line anywhere shows more than 16 hex digits of object code. FAZ2's 'DC X'A92F0A3C,A2DFA000,0000A35B,A35DA5B2'' generates 16 bytes of non-uniform data and prints A92F0A3CA2DFA000, with consecutive such statements at 00000, 00008, 00010 and 00018 -- advancing eight halfwords each while showing four. PCH27SRC's 'DC 594X'C6C6'' generates 1188 identical bytes and prints the same eight. THIS BOUNDS THE LISTING, NOT THE EVIDENCE, and an earlier version of this entry wrongly said eight bytes was all the evidence obtainable. For a constant whose value is written out in full on the card -- X, C, and plain F or H literals, with or without a duplication factor -- the SOURCE determines every byte with no ambiguity, so a few lines of Python could check the lot. That would not be agreement with the original build, which is what --compare measures; it would be ASM101S checked against a second and much simpler implementation of the same rule. Worth remembering that it would have caught at least three bugs found on 2026-08-10 -- the duplication factor ignored for hex constants, dcBufferPtr carrying one suboperand into the next, and the multi-suboperand truncation -- every one of them on constants of exactly that readable kind. Not implemented.
 
+### `scale modifier on F and H`
+
+**Processor:** assembler  
+**Confidence:** derived  
+**Encoding certainty:** verified  
+**POO:** GC28-6514-8, Scale Modifier for Fixed-Point Constants
+
+**What it does.** The scale modifier on a fixed-point constant gives the number of INTEGER bits, the binary point being assumed at the left of the word, so the constant is stored as a fraction of the full word. DC FS4'10' is ten with four integer bits, which is 0.625 of a fullword. It applies equally to a value written as a whole number -- that is the usual way they are written -- and dropping it there is silently wrong rather than an error. The product is ROUNDED, not truncated.
+
+**Encoding.** stored = value x 2^(bits-1-scale); the binary point is at the LEFT
+
+**How this was established.** THIS IS NOT THE SYSTEM/360 RULE, and the divergence matters. GC28-6514-8 says the scale modifier is 'the power of two by which the constant must be multiplied after it has been converted to its binary representation', with 'the assumed position being to the right of the rightmost position' -- an integer convention, under which DC FS4'10' would be 10 x 2^4 = 000000A0. The original build assembles it as 50000000, which is 10 x 2^-4 taken as a fraction of a fullword. AP-101S puts the binary point at the LEFT, as flight-control fixed-point arithmetic does. Three values from the original build fix the rule: FS20'100000' is 0C350000, FS4'10' is 50000000, and FS-19'1E-6' is 431BDE83 -- the last only if the product is rounded rather than truncated, which is also what the literal path has always done.
+
 
 ## Instruction
 
@@ -282,4 +295,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-21 entries.
+22 entries.
