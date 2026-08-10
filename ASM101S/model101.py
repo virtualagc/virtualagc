@@ -2032,12 +2032,27 @@ def generateObjectCode(source, macros):
                             # produced one halfword and an "Eval error type 3"
                             # rather than two addresses.
                             for exp in astFlattenList(suboperand["v"][0][1:-1]):
+                                # QUIET ON THE COLLECTING PASSES.  A Y constant
+                                # may name a symbol EQU'd further down the
+                                # module -- FCMBMT02's `DC Y(FCMCNT)` at line
+                                # 328 against `FCMCNT EQU 52` at line 837 --
+                                # which is exactly what the later passes are
+                                # for.  Reporting it at severity 255 on pass 1
+                                # aborted the assembly over a symbol that was
+                                # in the table, with the right value, by the
+                                # end.  58 modules were blocked by forward
+                                # references of this kind.
                                 v = evalArithmeticExpression(exp, {}, \
                                                              properties, \
                                                              symtab, \
-                                                             currentHash())
+                                                             currentHash(), \
+                                                             severity = \
+                                                               255 if compile \
+                                                               else 0)
                                 if v == None:
-                                    error(properties, "Cannot evaluate Y-type constant")
+                                    if compile:
+                                        error(properties, \
+                                              "Cannot evaluate Y-type constant")
                                     v = 0
                                 ySect, yOffset = unhash(v)
                                 if ySect is not None and passCount == 3:
