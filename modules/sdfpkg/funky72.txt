@@ -32,19 +32,32 @@ carries '+', ASM101S glues line 94 onto it and gets the unparsable
 `LA R1,FPMXQETB` as separate statements 74 and 75 with object code at 00008 and
 00009.
 
-THE FOUR EXCEPTIONS ARE REAL TRUNCATION, and they are not macro parameters --
-they are DC statements whose bit-field operand overruns column 71 and loses
-characters.  These four need their lost text recovered, whatever is decided
-about the other 378:
+THE FOUR EXCEPTIONS WERE REAL TRUNCATION, AND ARE NOW RECOVERED (PFS commit
+ec601001).  They are not macro parameters -- they are DC statements whose
+bit-field operand overruns column 71 and lost its tail.  Each was restored as
+a proper continuation card, resuming at column 16:
 
-    FCMINSSL.asm  line 1073  col72='X'
-      |FCMMPTCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMPTCD),AL.15(FCMMZE|
-    FCMINSSL.asm  line 1075  col72='X'
-      |FCMMRDCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMRDCD),AL.15(FCMMZE|
-    FCMINSSL.asm  line 1077  col72='X'
-      |FCMMEBCW DC    AL.8(FCMMSYNC),AL.5(FCMMIUA),AL.4(FCMMEBCD),AL.15(FCMMZE|
-    FIOMGDSP.asm  line 1041  col72='X'
-      |FIOMMWTC DC    AL.8(0),AL.5(FIOMMUAD),AL.4(FIOMWRTC),AL.11(0),AL.4(FIOM|
+    FCMINSSL 1073   AL.15(FCMMZE  ->  AL.15(FCMMZERO)     certain
+    FCMINSSL 1075   AL.15(FCMMZE  ->  AL.15(FCMMZERO)     certain
+    FCMINSSL 1077   AL.15(FCMMZE  ->  AL.15(FCMMZERO)     certain
+    FIOMGDSP 1041   AL.4(FIOM     ->  AL.4(FIOMWBLC)      inferred
+
+The three FCMINSSL ones are certain: FCMMZERO is the only symbol in the corpus
+beginning FCMMZE, and the arithmetic agrees with the listing's own assembled
+words -- AL.8(FCMMSYNC=0), AL.5(FCMMIUA=B'01011'), AL.4 of the op-code,
+AL.15(0) gives 00580000, 005C8000 and 00598000 at 0031A, 0031C and 0031E.
+
+FIOMGDSP is an inference.  The candidates are FIOMWBLC, FIOMPOSC and FIOMZERO,
+all three of them zero, so the assembled word is 005C0000 whichever it is and
+no object code can tell them apart.  FIOMWBLC was chosen because it is the only
+op-code symbol in that module used NOWHERE, while FIOMEWTC, FIOMPOSC and
+FIOMWRTC each appear in exactly one command word, and because "WRITE BLOCK
+COUNT" belongs in a write command word.  If better evidence turns up, that is
+the one card to revisit.
+
+Neither is verifiable by assembling yet: ASM101S reports "A bit length modifier
+that is not a whole number of bytes (L.5) is not implemented", so these cards
+generate no object code whatever text they carry.
 
 BY MARKER, split by whether columns 73-80 hold a sequence number (an original
 card) or an 'nn-MACRO' identifier (a card a macro generated):
