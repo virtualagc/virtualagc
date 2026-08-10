@@ -115,8 +115,24 @@ ls "$SRC"/*.asm | xargs -n 1 basename | sed 's/\.asm$//' | xargs -P 6 -n 1 bash 
     elif [ -n "$summary" ]; then
         mm=$(sed -n "s/.*: \([0-9]*\) bytes mismatched.*/\1/p" <<< "$summary")
         ms=$(sed -n "s/.*and \([0-9]*\) bytes missing.*/\1/p" <<< "$summary")
-        if [ "$mm" = 0 ] && [ "$ms" = 0 ]; then class=MATCH; else class=DIFFERS; fi
-        detail="$summary"
+        unc=""
+        unc=$(sed -n "s/^\([0-9]*\) byte(s) lie at addresses.*/\1/p" "$so" | tail -1 || true)
+        if [ "$mm" = 0 ] && [ "$ms" = 0 ]; then
+            # MATCH? rather than MATCH when some bytes of the module sit at
+            # addresses the listing shows nothing for.  Nothing contradicts
+            # them, but nothing confirms them either, and calling that a
+            # byte-for-byte match would overstate it.  NOTE: no apostrophes
+            # in here -- this block lives inside a single-quoted bash -c
+            # string, and one apostrophe ends it and breaks the script.
+            if [ -n "${unc:-}" ] && [ "${unc:-0}" != 0 ]; then
+                class="MATCH?"
+            else
+                class=MATCH
+            fi
+        else
+            class=DIFFERS
+        fi
+        detail="$summary${unc:+  [$unc byte(s) uncovered by the listing]}"
     elif grep -q "Traceback" "$se"; then
         class=CRASH; detail=$(grep -v "^ " "$se" | tail -1)
     elif grep -qi "for COPY not found" "$so" "$se"; then

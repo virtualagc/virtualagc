@@ -1125,6 +1125,7 @@ linesPerPage = 80
 linesThisPage = 1000
 mismatchCount = 0
 beyondCount = 0
+uncoveredCount = 0
 pageSeparator = "\f%s" % ('-'*120)
 
 title = "EXTERNAL SYMBOL DICTIONARY".center(100)
@@ -1303,13 +1304,25 @@ for i in range(endLibraries, len(source)):
                             prefix += " "
                         prefix += "%02X" % b
                         continue
-                    if b != comparisonMemory[oaddress]:
+                    if comparisonMemory[oaddress] == None:
+                        # THE LISTING SAYS NOTHING ABOUT THIS ADDRESS, so it
+                        # cannot contradict us.  It happens where the original
+                        # listing prints a statement with neither location nor
+                        # object code while the location counter still
+                        # advances over it -- FIOMS4DT's
+                        # `DC Y((&HPLIIC+792+15)/16)` is one, sitting between
+                        # constants at 00000 and 00002 with 00001 plainly
+                        # consumed and nothing shown for it.
+                        #
+                        # Counting those as mismatches made 32 bytes across
+                        # two modules look wrong when the listing simply had
+                        # no opinion.  They are reported separately: not
+                        # verified, but not contradicted either.
+                        uncoveredCount += 1
+                    elif b != comparisonMemory[oaddress]:
                         mismatchCount += 1
-                        try:
-                            print("Comparison mismatch: %02X vs %02X" % \
-                                  (b, comparisonMemory[oaddress]))
-                        except:
-                            print("Comparison mismatch: %02X vs unassigned" % b)
+                        print("Comparison mismatch: %02X vs %02X" % \
+                              (b, comparisonMemory[oaddress]))
                     comparisonMemory[oaddress] = None
                     address += 1
                 if i == 0 or ((i & 1) == 0 and properties["operation"] != "DC"):
@@ -1480,6 +1493,10 @@ if comparisonSects != None:
                 headerShown = True
             print("\t%05X(%c): %02X" % (address // 2, c, memory[address]))
             mismatchCount1 += 1
+    if uncoveredCount > 0:
+        print("%d byte(s) lie at addresses the comparison listing shows no "
+              "object code for, and are neither confirmed nor contradicted"
+              % uncoveredCount)
     if beyondCount > 0:
         print("%d byte(s) of generated code lie past the end of the "
               "comparison listing and could not be compared" % beyondCount)

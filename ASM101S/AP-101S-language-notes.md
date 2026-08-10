@@ -93,6 +93,18 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** Measured rather than assumed. RUNASM contains 6809 textual occurrences of R0-R7 and defines none of them, because every one is inside a comment; it assembles 205 of 205 byte-exact regardless. The FCOS modules that use them as symbols define them, 54 EQUs across OI340600. MACSMITH.asm in both versions' MLIB80 is the library member that does it. This settles the remaining half of issue #1333, whose HAL/S-compiler output uses R0-R7 as symbols: what it needs is the equates member, not a change to the assembler.
 
+### `card columns 73-80`
+
+**Processor:** assembler  
+**Confidence:** documented  
+**Encoding certainty:** verified
+
+**What it does.** Columns 73-80 of a card are TWO fields, not one. Columns 73-78 hold the SRN, the punchcard sequence number, and columns 79-80 a two-letter revision level. So a card reading 002300AD has SRN 002300 at revision AD, and its neighbours reading 002200AA and 002400AA are at revision AA -- that card was revised separately from the ones around it. A card a macro generated carries an 'nn-MACRO' identifier in the same columns instead, which is how a generated card can be told from an original one at a glance.
+
+**Encoding.** 73-78 SRN (sequence number), 79-80 revision level
+
+**How this was established.** Stated by the user, 2026-08-10, when asked which card a particular DC belonged to. It fits what the corpus shows: the first six columns are always digits and step in regular increments, and the last two are letter pairs that vary independently of them. Worth knowing because it makes the SRN a stable key for matching a card between two versions of a module, while the revision level deliberately is not -- the continuation-card restoration keyed on all eight columns, which was stricter than necessary but safe.
+
 ### `continuation column`
 
 **Processor:** assembler  
@@ -245,4 +257,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-18 entries.
+19 entries.
