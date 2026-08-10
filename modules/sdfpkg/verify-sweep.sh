@@ -110,54 +110,31 @@ for d in "$PFS"/OI301700/MLIB80 "$PFS"/OI301700/INCL80 "$PFS"/OI301700/INCLIB; d
         [ -f "$f" ] && ln -sf "$f" "$MLIB/$b"
     done
 done
-# BORROWING THE MACROS OI301700 LACKS, from OI340600, and ONLY those it lacks
-# -- an existing member is never overwritten, so where both versions have a
-# member OI301700's own is used.
+# THE MACROS ARE IN OI301700'S OWN LIBRARY NOW, so nothing is borrowed here.
+# This script used to symlink OI340600's members in, which made them available
+# to the sweep and to nothing else.  They were instead COPIED into
+# OI301700/MLIB80, each carrying a History note saying where it came from and
+# warning that the two releases differ, and MACROFILES.txt was regenerated
+# there with ASM101S/makeMACROFILES.py.
 #
-# The header above says not to do this, on the grounds that an invocation
-# surviving beside its own expansion would expand a second time.  That was
-# true when it was written.  It stopped being true at 5c35b774, which commented
-# out all 374 such cards in the 10 files that had them -- PCH10SRC's `IS`, the
-# case the header cites, among them.  With the vestigial invocations gone, the
-# modules that are pre-expanded invoke nothing and cannot notice the library,
-# while the ones that were never expanded at all -- BILDNEW5 has not a single
-# generated card -- get the definitions they have always needed.
+# Which matters because OI301700 AS EXTRACTED HAS NO MACRO DEFINITIONS AT ALL.
+# Not "213 of 214 are missing" as the handoff long said -- all of them are.
+# Its forty members are COPY fragments to a man, so every macro its sources
+# invoke had to come from OI340600 one way or another.
 #
-# COPYING THE FILES IN IS NOT ENOUGH, and doing only that is why the first
-# attempt at this changed not one module.  `readMacroLibrary` reads ONLY the
-# members named in MACROFILES.txt; a member sitting in the directory unlisted
-# is never opened, so an empty index means no macro is defined no matter what
-# the directory holds.
+# The header above says not to borrow, on the grounds that an invocation
+# surviving beside its own expansion would expand a second time.  That was true
+# when written and stopped being true at 5c35b774, which commented out all 374
+# such cards -- PCH10SRC's `IS`, the case it cites, among them.
 #
-# DO NOT HAND-ROLL THE INDEX.  ASM101S/makeMACROFILES.py is what maintains it,
-# it is meant to be re-run whenever the library gains members, and its rule is
-# the one that matters:  a member qualifies only if it defines macros AND has
-# NO code outside them.  Two hand-written approximations of that rule were
-# tried here and both were wrong in the same direction, by admitting a member
-# whose open code does something:
-#
-#   FPMSWTCC.hal   a HAL/S source, whose `C/ License:` header arrives as
-#                  "Already defined: C/" and "undefined macro 'Note'".
-#   MACROS.asm     opens with TITLE and then FIFTY-ONE open-code PDEF
-#                  invocations, so P1 through P51 are defined ahead of every
-#                  module and every module in the corpus fails with
-#                  "Already defined: P2".  272 of 272 NOCOMPARE.
-#
-# It also, for free, keeps OI301700's own 40 members commented out -- none of
-# them qualifies, MACSMITH included, which is the answer the header above
-# arrived at the hard way.
-if [ "${VERIFY_BORROW:-1}" != 0 ]; then
-    for d in "$PFS"/OI340600/MLIB80 "$PFS"/OI340600/INCL80; do
-        [ -d "$d" ] || continue
-        for f in "$d"/*; do
-            b=$(basename "$f")
-            [ "$b" = MACROFILES.txt ] && continue
-            [ -f "$f" ] || continue
-            [ -e "$MLIB/$b" ] && continue
-            ln -s "$f" "$MLIB/$b"
-        done
-    done
-fi
+# DO NOT HAND-ROLL MACROFILES.txt if this ever needs regenerating.
+# makeMACROFILES.py is what maintains it and its rule is the one that matters:
+# a member qualifies only if it defines macros AND has no code outside them.
+# Two hand-written approximations were tried and both admitted a member whose
+# open code does something -- FPMSWTCC.hal, whose `C/ License:` header arrives
+# as "Already defined: C/", and MACROS.asm, fifty-one open-code PDEF
+# invocations behind a TITLE, which defined P1-P51 ahead of every module and
+# took the corpus to 272 of 272 NOCOMPARE.
 rm -f "$MLIB/MACROFILES.txt"    # never write through a symlink; see above
 ( cd "$MLIB" && python3 "$VAGC/ASM101S/makeMACROFILES.py" ) \
     > "$MLIB/MACROFILES.txt.tmp" \

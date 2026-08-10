@@ -187,6 +187,28 @@ invocation as it is entered, with its &SYSLIST, indented by nesting depth:
 That is how the root cause below was found, and it is the only practical way to
 see what a nested expansion is actually receiving.
 
+ASM101S WRITES NAME.obj BESIDE THE SOURCE WHETHER OR NOT --object IS GIVEN, so
+every hand run of a module drops a file into somebody else's repository.  Eight
+of them accumulated in ~/workspace/PFS/OI301700/SSSRC in one afternoon before
+anybody noticed, and `git status` there is how they were noticed rather than
+anything going wrong.
+
+THE RULE: run single-module diagnostics with the object file aimed somewhere
+harmless, and do not rely on cleaning up afterwards.
+
+    ASM101S --library=... --tolerable=4 --object=/dev/null \
+            --compare="$LST/NAME" NAME.asm
+
+verify-sweep.sh already does the equivalent -- it passes a `mktemp` path and
+deletes it -- so the sweep is not the problem; ad-hoc runs are.  If some do get
+left behind, `find OI301700/SSSRC -name '*.obj' -newermt YYYY-MM-DD` picks out
+the ones from a given day without touching anything older that may be somebody
+else's.
+
+WHY IT MATTERS MORE THAN IT LOOKS.  PFS is a git repository that is managed
+elsewhere, and untracked droppings there are indistinguishable from work in
+progress to whoever looks next.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
