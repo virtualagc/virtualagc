@@ -1087,7 +1087,8 @@ for parm in sys.argv[1:]:
             sys.exit(1)
         sourceFileNames.append(parm[:-4])
         if objectFileName == None:
-            objectFileName = parm[:-4] + ".obj"
+            basename = Path(parm).stem
+            objectFileName = basename + ".obj"
         readSourceFile(parm, svGlobalLocals, sequenceGlobalLocals, \
                        copy=False, printable=True, depth=0)
         sourceFileCount += 1
