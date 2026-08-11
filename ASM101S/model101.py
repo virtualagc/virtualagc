@@ -2503,6 +2503,35 @@ def generateObjectCode(source, macros):
                                 if aSect != None:
                                     v = aOffset + \
                                         sects.get(aSect, {}).get("offset", 0)
+                                    # AND IT NEEDS AN RLD ENTRY.  Emitting the
+                                    # resolved value satisfies a comparison
+                                    # against the LISTING, which shows that
+                                    # value whether or not the constant
+                                    # relocates -- so the sweep cannot see this
+                                    # missing and did not.  A link can:  without
+                                    # it an A constant naming an external symbol
+                                    # is never relocated.  objectWriter gives
+                                    # anything that is not Y or Z the 4-byte
+                                    # flags, 0x1C, which is what this wants.
+                                    if passCount == 3:
+                                        rldSymbol = aSect
+                                        for sn, sd in sects.items():
+                                            if sd.get("dsect") or \
+                                                    "offset" not in sd:
+                                                continue
+                                            so = sd["offset"]
+                                            su = sd["used"] // 2
+                                            if v >= so and v < so + su \
+                                                    and sn != sect:
+                                                rldSymbol = sn
+                                                break
+                                        relocations.append({
+                                            'symbol': rldSymbol,
+                                            'section': sect,
+                                            'address': sects[sect]["pos1"] \
+                                                       + dcBufferPtr,
+                                            'type': 'A'
+                                        })
                                 for j in (24, 16, 8, 0):
                                     dcBuffer[dcBufferPtr] = (v >> j) & 0xFF
                                     dcBufferPtr += 1
