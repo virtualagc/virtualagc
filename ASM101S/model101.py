@@ -2134,11 +2134,22 @@ def generateObjectCode(source, macros):
                                                describeExpression(zxExpression))
                                 if mzx:
                                     symbolName = mzx.group(0)
+                            # THE `Z(,expr,flags)` FORM CARRIES ITS ADDRESS IN
+                            # THAT EXPRESSION and only the SYMBOL was being
+                            # taken from it, so any displacement was dropped and
+                            # the address field emitted as zero.
+                            # FIOMM128's `DC Z(,FIOMUWB1+8192,0)` wants 2000 and
+                            # assembled 0000; FIOMGDSP's `Z(,FIOBRU+4,0)` wants
+                            # 0004.  A LOCAL symbol shows it too -- FIOMM128's
+                            # `Z(,FIOMACNS+36,8)` is 00F4 where FIOMACNS alone
+                            # is 00D0, exactly 36 short.
+                            a1Expression = None
                             if not symbolName and suboperand.get('A1'):
                                 a1 = describeExpression(suboperand['A1'])
                                 mz = re.match(r"[A-Z@#$][A-Z0-9@#$]*", a1)
                                 if mz:
                                     symbolName = mz.group(0)
+                                    a1Expression = suboperand['A1']
                             flags = 0
                             if 'f' in suboperand and suboperand['f'] is not None:
                                 flags = evalArithmeticExpression(suboperand['f'], {},
@@ -2184,9 +2195,15 @@ def generateObjectCode(source, macros):
                             # at 42; the original build assembles those
                             # addresses and ASM101S assembled 0000 for both.
                             zAddress = 0
-                            if zxExpression != None:
+                            # `zx` is the `Z(sym+n,...)` form and `A1` the
+                            # `Z(,sym+n,...)` one; both put the address in an
+                            # expression and both resolve the same way.
+                            zaExpression = zxExpression \
+                                           if zxExpression != None \
+                                           else a1Expression
+                            if zaExpression != None:
                                 zv = evalArithmeticExpression( \
-                                        zxExpression, {}, properties, symtab, \
+                                        zaExpression, {}, properties, symtab, \
                                         currentHash(), \
                                         severity = 255 if compile else 0)
                                 if zv != None:
@@ -2196,7 +2213,7 @@ def generateObjectCode(source, macros):
                                         if zxSect != None else zv
                             zEntry = symtab.get(symbolName) if symbolName \
                                      else None
-                            if zxExpression != None:
+                            if zaExpression != None:
                                 pass          # already resolved just above
                             elif zEntry != None and \
                                     zEntry.get("type") != "EXTERNAL":
