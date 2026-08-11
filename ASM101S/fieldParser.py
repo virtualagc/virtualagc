@@ -312,6 +312,12 @@ dcOperand =
     # the leading identifier of the expression, there being no separate field
     # for it.
     | [ d+: number ] t+: 'Z' '(' ',' A1+: arithmeticExpression [ ',' f: arithmeticExpression ] ')'
+    # THE FIRST OPERAND MAY BE AN EXPRESSION, not only a bare symbol.
+    # FPMFCLOS writes `DC Z(FPMSVCL+2,FPMSVC21,8)`.  This alternative comes
+    # last so that every Z already parsing keeps parsing exactly as it did:
+    # the identifier form above is tried first and only a `+` or `-` after the
+    # symbol falls through to here.
+    | [ d+: number ] t+: 'Z' '(' zx+: arithmeticExpression [ ',' [ A1+: arithmeticExpression ] [ ',' f: arithmeticExpression ] ] ')'
     ;
 dsOperands = dsOperand { ',' dsOperand }  ( / / | $ ) ;
 dsOperand = 

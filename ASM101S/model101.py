@@ -2052,6 +2052,17 @@ def generateObjectCode(source, macros):
                             # to the right bytes but carries NO relocation, so
                             # the linker never fills its address in.
                             symbolName = suboperand.get('z')
+                            # The expression form, `Z(sym+n,...)`: the symbol
+                            # to relocate is its leading identifier, exactly as
+                            # for the `Z(,expr,flags)` form below, and the
+                            # address is the whole expression's value.
+                            zxExpression = None
+                            if not symbolName and suboperand.get('zx'):
+                                zxExpression = suboperand['zx'][0]
+                                mzx = re.match(r"[A-Z@#$][A-Z0-9@#$]*", \
+                                               describeExpression(zxExpression))
+                                if mzx:
+                                    symbolName = mzx.group(0)
                             if not symbolName and suboperand.get('A1'):
                                 a1 = describeExpression(suboperand['A1'])
                                 mz = re.match(r"[A-Z@#$][A-Z0-9@#$]*", a1)
@@ -2102,9 +2113,21 @@ def generateObjectCode(source, macros):
                             # at 42; the original build assembles those
                             # addresses and ASM101S assembled 0000 for both.
                             zAddress = 0
+                            if zxExpression != None:
+                                zv = evalArithmeticExpression( \
+                                        zxExpression, {}, properties, symtab, \
+                                        currentHash(), \
+                                        severity = 255 if compile else 0)
+                                if zv != None:
+                                    zxSect, zxOffset = unhash(zv)
+                                    zAddress = zxOffset + \
+                                        sects.get(zxSect, {}).get("offset", 0) \
+                                        if zxSect != None else zv
                             zEntry = symtab.get(symbolName) if symbolName \
                                      else None
-                            if zEntry != None and \
+                            if zxExpression != None:
+                                pass          # already resolved just above
+                            elif zEntry != None and \
                                     zEntry.get("type") != "EXTERNAL":
                                 zSect, zOffset = unhash(zEntry.get("value", 0))
                                 if zSect != None:
@@ -3483,9 +3506,15 @@ def generateObjectCode(source, macros):
                               % (operation, field))
                 address = mscLongField("A1")
                 if address == None:
-                    error(properties, \
-                          "Could not evaluate the address operand of %s" \
-                          % operation)
+                    # Quiet on the collecting passes.  FIOHISAM writes
+                    # `DATALOAD @LH DATA(1)` at card 171 and `DATA EQU 0` at
+                    # card 255, an ordinary forward reference that pass 3
+                    # resolves; diagnosing it at full severity on pass 1 threw
+                    # the module away.  Sixth site of this kind.
+                    if compile:
+                        error(properties, \
+                              "Could not evaluate the address operand of %s" \
+                              % operation)
                     toMemory(data)
                     continue
                 if not -0x20000 <= address <= 0x3FFFF:

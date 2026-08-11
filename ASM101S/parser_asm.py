@@ -1380,6 +1380,34 @@ class asmParser(Parser):
                     ['f'],
                     ['A1', 'd', 't'],
                 )
+            with self._option():
+                with self._optional():
+                    self._number_()
+                    self.add_last_node_to_name('d')
+                self._token('Z')
+                self.add_last_node_to_name('t')
+                self._token('(')
+                self._arithmeticExpression_()
+                self.add_last_node_to_name('zx')
+                with self._optional():
+                    self._token(',')
+                    with self._optional():
+                        self._arithmeticExpression_()
+                        self.add_last_node_to_name('A1')
+                    with self._optional():
+                        self._token(',')
+                        self._arithmeticExpression_()
+                        self.name_last_node('f')
+                        self._define(['f'], [])
+                    self._define(
+                        ['f'],
+                        ['A1'],
+                    )
+                self._token(')')
+                self._define(
+                    ['f'],
+                    ['A1', 'd', 't', 'zx'],
+                )
             self._error(
                 'expecting one of: '
                 "'(' 'A' 'B' 'C' 'X' 'Z' <number> [0-9]+"
