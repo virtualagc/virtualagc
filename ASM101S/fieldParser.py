@@ -605,6 +605,13 @@ def operandFieldEnd(text):
         i += 1
     return len(text)
 
+# Does a card carry the expander's stamp in columns 73-80?  A generated card
+# reads `nn-NAME` there -- `03-POPIN`, `02-IFPRO` -- where a typed card carries
+# a sequence number.
+def macroStamped(card):
+    field = "%-80s" % card.rstrip("\r\n")[:80]
+    return field[72].isdigit() and field[73].isdigit() and field[74] == "-"
+
 def joinOperand(lines, index, column, proto=False, invoke=False):
     continuation = False
     skipCount = -1
@@ -655,6 +662,25 @@ def joinOperand(lines, index, column, proto=False, invoke=False):
                 if operandFieldEnd(operand) >= len(operand.rstrip()) \
                         or _field.rstrip().endswith(","):
                     operand = _field + line[15:71].rstrip("\r\n")
+                elif macroStamped(line):
+                    # AND A MACRO-GENERATED CARD IS NOT EVEN SWALLOWED.  The
+                    # case above correctly declines to append a comment
+                    # continuation to the operand, but the card was consumed
+                    # all the same and its content thrown away.  That is right
+                    # for a comment and wrong for an expansion: columns 73-80
+                    # reading `nn-NAME` say the expander produced this card, so
+                    # it was not in the deck when the column 72 above it was
+                    # punched and cannot be part of that statement.
+                    #
+                    # OI301700 IS PRE-EXPANDED and the expansions were spliced
+                    # in.  FIOCGR's `LR R2,R7` carries an X in column 72
+                    # pointing at a comment continuation the splice displaced,
+                    # and the `CHI R6,2` now standing there was eaten as that
+                    # continuation and never assembled at all -- the original
+                    # has 00009 B5E6 0002 and we generated nothing, putting
+                    # every later address four bytes low.
+                    skipCount -= 1
+                    break
         else:
             operand = line[column:71].rstrip("\r\n")
         if len(line) < 72:

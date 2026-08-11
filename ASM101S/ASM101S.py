@@ -169,6 +169,18 @@ sequenceGlobalLocals = { }
 # is the number of contiuation lines processed.
 # Lines in macro definitions are not parsed beyond their prototypes; that's 
 # done only during expansion.
+# Does this card continue onto the next one?  Column 72 says so, except that a
+# typed card is never continued by a macro-generated card; see the note at the
+# call site.
+def _continuesOnto(line, lines, lineNumber):
+    if line[71] == " ":
+        return False
+    if lineNumber + 1 < len(lines):
+        nextCard = "%-80s" % lines[lineNumber + 1].rstrip()[:80]
+        if macroStamped(nextCard) and not macroStamped(line):
+            return False
+    return True
+
 def parseLine(lines, lineNumber, inMacroDefinition, inMacroProto):
     global source
     if "IFPROC" in lines[lineNumber] and not inMacroDefinition and not inMacroProto:
@@ -499,7 +511,24 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             "file": filename,
             "macro": macroname,
             "lineNumber": lineNumber + 1,
-            "continues": (line[71] != " "),
+            # A CARD DOES NOT CONTINUE ONTO AN EXPANSION.  Columns 73-80
+            # read `nn-NAME` on a card the expander produced and a sequence
+            # number on one somebody typed, so a typed card cannot be
+            # continued by a generated card -- that card was not in the deck
+            # when this column 72 was punched.
+            #
+            # OI301700 IS PRE-EXPANDED and the expansions were spliced in,
+            # displacing what the continuation actually pointed at.  FIOCGR's
+            # `LR R2,R7` carries an X in column 72 and the `CHI R6,2` now
+            # standing after it was eaten as its continuation and never
+            # assembled: the original has 00009 B5E6 0002 and we generated
+            # nothing, putting every later address four bytes low.
+            #
+            # Corrected HERE rather than at the three places that consume it,
+            # which is what makes one edit do the work: `joinOperand` still
+            # reads column 72 off the card itself and needs its own guard, but
+            # the two gates that DISCARD the card both read this flag.
+            "continues": _continuesOnto(line, thisSource, lineNumber),
             "identification": line[72:],
             "empty": (text.strip() == ""),
             "fullComment": line.startswith("*"),
@@ -548,7 +577,12 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             # the ONLY change is that it no longer looks across the boundary
             # between a caller and the macro body it is expanding.
             previous = "%-80s" % thisSource[lineNumber - 1].rstrip()[:80]
-            if previous[71] != " ":
+            # Asked of the PREVIOUS card the same way the flag above is
+            # computed, so that a card the expander spliced in is not
+            # discarded here after `continues` has already said it is nobody's
+            # continuation.  Reading column 72 raw is what left FIOCGR's
+            # `CHI R6,2` dropped even once the flag was right.
+            if _continuesOnto(previous, thisSource, lineNumber - 1):
                 continue
         
         # Note that while `parseSubOperations` determines how 
