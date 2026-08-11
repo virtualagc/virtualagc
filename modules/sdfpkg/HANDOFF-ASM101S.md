@@ -971,6 +971,49 @@ COMPUTED fixes both; that is the edit worth copying if this comes up again.
 When a change to continuation handling appears to do nothing, suspect a second
 gate before suspecting the rule.
 
+256 of 272.  FCMINSSL, FIOMGDSP and FIOMM128 went byte-exact on the ZCON fix.
+3316a769b.
+
+    MATCH       256      MATCH?       3
+    DIFFERS      10      NOCOMPARE    3
+
+THE ZCON DEFECT was that `Z(,sym+n,flags)` had only its leading IDENTIFIER
+taken -- to hang the relocation on -- and the expression itself thrown away, so
+the address field went out as zero.  `Z(sym+n,...)` already resolved properly
+and the two now share a path.  A LOCAL symbol is the clean demonstration:
+FIOMM128's `Z(,FIOMACNS+36,8)` is 00F4 in the original against our 00D0, and
+FIOMACNS alone is 00D0.
+
+TWO THINGS EXAMINED AND NOT FIXED, both left with the evidence so the next
+session starts from the finding rather than the symptom.
+
+DCI#DATA, 2 bytes.  Our symbol table records DCIDOUT at 0000A6 while the
+statement that defines it is placed at 000A4 -- the label takes a value two
+halfwords past its own statement, which is exactly the width of the two Y
+constants opening it.  The consequences are inconsistent and that is the
+interesting part: statement 19's `DC Y(DCIDOUT)` emits 00A6, two high, but the
+`Y(DCIDOUT+2)` inside the defining statement emits 00A6, which is correct for a
+base of 00A4, while `Y(DCIDOUT+508)` emits 02A1 against the original's 02A0,
+one high.  Three different effective bases in one module.  Start by finding
+where a DC's label value is recorded relative to its subfield emission.
+
+FCMTRACE, 47 bytes, and FCMTSYNC beside it.  `BL$ FCMWRAP(R3)` assembles as the
+two-byte DA54, a short forward branch, where the original has the four-byte
+C2F3 form.  In the SRS BRANCH encoding the two-bit field is the FORM selector
+-- BCF 00, BVCF 01, BCB 10, BCTB 11 -- not a base register, so the short form
+has nowhere to put R3 and shortening discards it; the branch reaches the right
+address anyway, by luck of the displacement, which is why it shows up as a
+length difference rather than a wrong target.
+
+GUARDING IT ON `specifiedB2` DOES NOT WORK and was tried and reverted: the
+`(R3)` never reaches that flag, so it is being parsed as an INDEX rather than a
+base register.  Establish which of `X2` and `B2` the grammar puts it in before
+writing any condition on it.  The site that actually emits this is the
+`elif operation in branchAliases:` arm, found by instrumenting `generateSRS`
+and printing its caller -- and it carries the THIRD copy of the SRS limit as
+its own `0b111000`, the others being in the forward-`BC` special case and in
+the main SRS arm.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
