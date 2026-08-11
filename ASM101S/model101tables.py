@@ -358,6 +358,12 @@ mscImmediateIndexable = { "@RAW", "@INT" }
 #
 # so the opcode nibble is 3, bit 4 is the index flag exactly as it is for @RAW,
 # and the remaining eleven bits are the operand.
+#
+# THE POO CONFIRMS ALL OF THAT at II-94, "INTERRUPT CPU":  the format is
+# `0011 | I | INTERRUPT LIST` over bits 0-3, 4 and 5-15, and the I bit chooses
+# between the list as written and "X OR Interrupt List" -- so the `(1)` is
+# index register 1 ORed into the list rather than an address index.  (Finding
+# the page at all took searching the OCR for "@IN"; the sigil is often lost.)
 mscImmediate11 = { "@INT": 0x3 }
 
 # THE FOUR-BYTE MSC INSTRUCTIONS.  The POO gives the layout on the @BU and

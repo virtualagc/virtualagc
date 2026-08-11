@@ -1670,7 +1670,11 @@ def generateObjectCode(source, macros):
                         v = (v & 0xFFFFFF) + symtab[firstCSECT]["value"] \
                             + symtab[sect]["preliminaryOffset"]
                 if err:
-                    error(properties, "Cannot evaluate EQU")
+                    # Quiet on the collecting passes: an EQU whose operands are
+                    # defined further down is ordinary, and FIOADCCL's
+                    # `ICCLGTH EQU ICCEND-ICCSTRT` is exactly that.
+                    if compile:
+                        error(properties, "Cannot evaluate EQU")
                     continue
                 if oldValue != v and compile:  ###DEBUG###
                     repeatPass = True
@@ -1708,6 +1712,15 @@ def generateObjectCode(source, macros):
                 continue
             elif operation in ["USING", "DROP"]:
                 ast = copy.deepcopy(properties["ast"])
+                if operation == "DROP" and properties["operand"].strip() == "":
+                    # A DROP WITH NO OPERAND DROPS EVERY ACTIVE BASE REGISTER.
+                    # No source card in the corpus writes one, but a macro
+                    # generates one -- FIOCMPLT meets it in an expansion -- and
+                    # it arrived here as a null AST and was rejected as
+                    # unparseable.
+                    for _r in range(len(using)):
+                        using[_r] = None
+                    continue
                 if ast == None or "r" not in ast or not isinstance(ast["r"], list):
                     error(properties, "Cannot parse operand of " + operation)
                     continue

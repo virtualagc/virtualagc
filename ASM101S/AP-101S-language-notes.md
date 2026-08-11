@@ -241,6 +241,17 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 **How this was established.** Confirmed by re-encoding: all 87 branches in ~/workspace/PFS/'OI301700 as received'/SSSRC whose target is defined in the same listing reproduce the listing's object code exactly from OP(4)=0010, M(1), CC(3), DISP(8) PC-relative to the updated PC. See the 'MSC short formats' entry.
 
+### `@INT`
+
+**Processor:** MSC  
+**Confidence:** documented
+
+**What it does.** Interrupt CPU.  Loads the 12-bit IOP Interrupt Register C and raises an interrupt to the GPC if any bit is set.  Its operand field is ELEVEN bits, not the eight every other MSC immediate uses, so the value spills into the low three bits of the first byte -- the same shape the BCE short formats have, and the reason it needed its own table rather than joining mscImmediate.
+
+**Encoding.** Two bytes: 0011 in bits 0-3, the I flag in bit 4, and an eleven-bit INTERRUPT LIST in bits 5-15.  I=0 uses the list as written; I=1 uses X OR the list, X being the index register named in parentheses.
+
+**How this was established.** POO II-94, PDF page 430.  Independently harvested first from six instances in the OI301700 listings -- @INT X'001' 3001, X'002' 3002, X'004' 3004, X'3FF'(1) 3BFF, 0(1) 3800 twice -- which agree with the documented layout in every bit.  FIOMCNTL's  corroborates the immediate reading a third way: FIOCMPLT is an EQU of 4, an interrupt level rather than an address, and both builds emit 3004.
+
 ### `MSC instruction set`
 
 **Processor:** MSC  
@@ -372,4 +383,4 @@ The POO -- *Shuttle GPC Software Model AP-101S* -- is the authority on the instr
 
 
 ---
-29 entries.
+30 entries.
