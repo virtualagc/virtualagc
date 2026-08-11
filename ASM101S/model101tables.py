@@ -547,6 +547,19 @@ for operation in cnopFills:
 # be legitimate SRS or RS mnemonics, and all numeric fields are assumed to be
 # actual number in the correct range.)
 
+# A BRANCH ALIAS HAS NO OPCODE OF ITS OWN IN THE LONG FORMS.  `B`, `BL`, `BE`
+# and the rest all carry 0b1100000000 above, which is the SRS form's opcode;
+# the RS forms need the low bits that only `BC` (and `BVC`, for the aliases
+# that test the overflow/carry register) supplies.  The condition mask already
+# rides in R1, so the long form is simply a `BC` with that mask.
+#
+# FCMTRACE's `BL$ FCMWRAP(R3)` assembled C207 against the original's C2F3:
+# right register, right mask, opcode short by its low five bits.
+def rsMnemonic(mnemonic):
+    if mnemonic in branchAliases:
+        return "BVC" if mnemonic.rstrip("$@#") in bvcfAliases else "BC"
+    return mnemonic
+
 def generateSRS(properties, mnemonic, r1, d2, b2):
     data = bytearray(2)
     data[0] = ((argsSRSorRS[mnemonic] & 0b1111100000) >> 2) | r1
@@ -558,7 +571,7 @@ def generateSRS(properties, mnemonic, r1, d2, b2):
 
 def generateRS0(properties, mnemonic, r1, d2, b2):
     data = bytearray(4)
-    opcode = argsSRSorRS[mnemonic]
+    opcode = argsSRSorRS[rsMnemonic(mnemonic)]
     data[0] = ((opcode & 0b1111100000) >> 2) | r1
     data[1] = ((opcode & 0b11111) << 3) | b2
     data[2] = (d2 & 0xFF00) >> 8
@@ -570,7 +583,7 @@ def generateRS0(properties, mnemonic, r1, d2, b2):
 
 def generateRS1(properties, mnemonic, ia, i, r1, d2, x2, b2):
     data = bytearray(4)
-    opcode = argsSRSorRS[mnemonic]
+    opcode = argsSRSorRS[rsMnemonic(mnemonic)]
     data[0] = ((opcode & 0b1111100000) >> 2) | r1
     data[1] = ((opcode & 0b11111) << 3) | 0b100 | b2
     data[2] = (x2 << 5) | (ia << 4) | (i << 3) | ((d2 & 0x700) >> 8)

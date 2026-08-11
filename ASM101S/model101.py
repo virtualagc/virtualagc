@@ -3035,7 +3035,26 @@ def generateObjectCode(source, macros):
                                                                d & 0b111111, \
                                                                0b00)
                                             done = True
-                                    elif operation in branchAliases:
+                                    # NOT WHEN A REGISTER IS INDEXING IT.  The
+                                    # short branch form has neither an index
+                                    # field nor a base field -- its two bits
+                                    # are the FORM selector, BCF 00, BVCF 01,
+                                    # BCB 10, BCTB 11 -- so shortening simply
+                                    # drops the register.  FCMTRACE's
+                                    # `BL$ FCMWRAP(R3)` assembled DA54, a short
+                                    # forward branch that happens to reach the
+                                    # right place, where the original keeps the
+                                    # four-byte form that can still name R3.
+                                    #
+                                    # THE TEST IS `x2`, NOT `specifiedB2`.  The
+                                    # `$` suffix puts the register in the INDEX,
+                                    # and `specifiedB2` is computed from `b2`
+                                    # earlier still, while it is None; it reads
+                                    # False here even though the operand plainly
+                                    # carries `(R3)`.  Guarding on it changes
+                                    # nothing at all, which cost two attempts.
+                                    elif operation in branchAliases and \
+                                            x2 in [None, 0]:
                                         d = d2 - (properties["pos1"] // 2 + symtab[sect]["value"] + 1)
                                         if d >= 0 and d < 0b111000:
                                             d = d & 0b111111
