@@ -691,6 +691,49 @@ point should settle this first, because the iteration count is the mechanism.
 Nothing was changed.  The instrumentation was removed and the tree is clean at
 this entry; 243 of 272 stands.
 
+DID THE ORIGINAL ASSEMBLER LEAVE ITSELF A MARGIN?  Asked because it is the
+natural engineering choice -- given a two-byte form that might just barely
+reach and a four-byte form guaranteed to, and a case that arises rarely, take
+the four-byte form -- and because it would have dissolved the fixed-point
+problem entirely: refuse the marginal shortenings and the shortcut that makes
+itself legal is never taken.
+
+MEASURED, AND THE ANSWER IS NO.  `optimizeScratch` was instrumented to log the
+displacement of every shortening it accepts, all 272 modules were assembled,
+and the 2951 shortenings that occur inside the 243 BYTE-EXACT modules were
+separated out.  Those are shortenings the ORIGINAL assembler necessarily took
+too, since the object code agrees with its listing.  By decision arm:
+
+    forward branch    n=1452   max 55
+    backward branch   n=155    max 54
+    absolute D2       n=369    max 48
+    via USING         n=975    max 4
+
+The forward arm reaches 55, which is the largest value the six-bit field can
+hold with `srsCeiling` at 56.  Four separate byte-exact modules do it --
+FCMBCEMD, FCMNINIT, FIOERRLC and FPMOPSCN -- and FCMSFAIL shortens at 54.  So
+the original used the full range and left no margin at all, and any threshold
+below 56 breaks at least five modules that match today.
+
+WHAT THIS RULES OUT, which is the value of it.  A whole class of candidate
+fixes is now dead: there is no "shorten only if d < 54" or similar to be tuned,
+and the DCICYC branch at line 646 is not being refused for being close to the
+limit.  Our 55 there is legal by exactly the rule the original applied
+elsewhere.
+
+WHAT IT LEAVES.  The difference must be the layout the decision is taken
+against, not the threshold applied to it.  In the original's layout the target
+sits at 00670 and the short form would need 56, which does not fit, so the long
+form is forced; in ours the target sits at 0066F and 55 fits.  Neither
+assembler is applying a different rule -- they are applying the same rule to
+different intermediate layouts, and the layouts differ only because of this
+instruction.  So the question really is which fixed point the iteration lands
+on, and the `for sect in sects: optimizeScratch()` iteration count noted in the
+entry above is the mechanism that decides it.  Settle that first.
+
+The instrumentation was removed; nothing in the assembler changed and 243 of
+272 stands.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
