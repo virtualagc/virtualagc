@@ -628,8 +628,24 @@ def joinOperand(lines, index, column, proto=False, invoke=False):
                 # global quietly became a local when something later assigned
                 # to it.  Eight declarations in OI340600's MLIB80 are written
                 # this way.
-                operand = operand[:operandFieldEnd(operand)] \
-                          + line[15:71].rstrip("\r\n")
+                # A CONTINUATION CONTINUES THE OPERAND ONLY IF THE OPERAND WAS
+                # STILL RUNNING -- either it reached the end of the card, or it
+                # broke on a comma with more to come.  Otherwise the operand
+                # field ended at a blank, the rest of the card is a COMMENT, and
+                # what a non-blank column 72 continues is that comment, which
+                # generates nothing.  Appending regardless spliced a comment's
+                # continuation onto the operand:
+                #
+                #   ST    R6,TDWARCSM   SAVE RM COMMON SET MASK(BITS 16-31  *
+                #         TB         TDWARTOC,FCMMMRMR
+                #
+                # became `R6,TDWARCSMTB ...` and FCMDSCRM died on an undefined
+                # symbol.  The original assembles that ST as a complete 3604 and
+                # reads the next card as its own statement.
+                _field = operand[:operandFieldEnd(operand)]
+                if operandFieldEnd(operand) >= len(operand.rstrip()) \
+                        or _field.rstrip().endswith(","):
+                    operand = _field + line[15:71].rstrip("\r\n")
         else:
             operand = line[column:71].rstrip("\r\n")
         if len(line) < 72:
