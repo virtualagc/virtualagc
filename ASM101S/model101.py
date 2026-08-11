@@ -1425,6 +1425,26 @@ def generateObjectCode(source, macros):
         if "name" not in properties:
             continue
         name = properties["name"]
+        # AN UNNAMED DSECT STILL SWITCHES SECTIONS.  The guard below skips any
+        # statement without a label, which is right for everything except this:
+        # a bare `DSECT` carries no name and was therefore skipped BEFORE the
+        # section switch, so `sect` stayed at the enclosing CSECT and every
+        # symbol in the dummy section was given a preliminary address inside
+        # the control section.
+        #
+        # The main pass already gives it `unnamedDsect`, deliberately not a
+        # legal symbol so it cannot collide with "" -- the unnamed CONTROL
+        # section -- and this pass simply never learned the same trick.
+        #
+        # FCMBMASK is what it costs.  `USING TFBMP,R0` resolves TFBMP to
+        # FCMBMASK+272 on pass 1 and to *DSECT*+0 on every pass after, and
+        # `optimizeScratch` runs at the END of pass 1 against the pass-1
+        # snapshot, so the arm that would have shortened `LH R4,TBMPVAR` could
+        # never match its section.  The original assembles it 9C04, two bytes;
+        # we emitted the four-byte 9CF0 0001 and every later address was a
+        # halfword out.
+        if operation == "DSECT" and name in [None, ""]:
+            name = unnamedDsect
         if name in [None, ""]:
             continue
         if operation in ["CSECT", "DSECT"]:

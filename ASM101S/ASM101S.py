@@ -1362,7 +1362,12 @@ for i in range(endLibraries, len(source)):
         continue # "Modern" comment
     if properties["copy"]:
         if not inCopy:
-            memberName = Path(properties["file"]).stem
+            # A COPIED LINE NEED NOT NAME A FILE.  `Path(None)` raised a
+            # TypeError out of the LISTING, so a module that assembled
+            # perfectly well died on the way to being printed -- MENU12, once
+            # its `COPY MACROS` card was restored.
+            memberName = Path(properties["file"]).stem \
+                         if properties["file"] else "?"
             if properties["printable"] and properties["listOn"]:
                 linesThisPage += 1
                 print("         START OF COPY MEMBER %-8s RVL %02d CONCATENATION NO. %03d  NEST %03d" \
