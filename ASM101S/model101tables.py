@@ -397,17 +397,27 @@ bceShort1 = { "#DLYI": (0xC, 0, "immediate"), "#LTOI": (0xB, 0, "immediate"),
               "#RIB":  (0xE, 0, "immediate"), "#SIB":  (0xE, 1, "immediate"),
               "#WAT":  (0x0, 1, "immediate"), "#STP":  (0x1, 0, "immediate"),
               "#SSC":  (0x4, "index", "relative"),
-              "#SST":  (0x5, "index", "relative") }
+              "#SST":  (0x5, "index", "relative"),
+              # THE ADDRESS FORMS OF THE TWO PAIRS ABOVE.  The POO documents
+              # both -- DELAY at III-78 and LOAD TIME OUT REGISTER at III-30 --
+              # and the M bit is what tells the pair apart:  M=0 takes the
+              # operand as an immediate COUNT, M=1 as an ADDRESS, the effective
+              # one being PC(updated) + DISP + 2 x BCE#.  The opcode is
+              # unchanged from the immediate form.  The 2 x BCE# term is added
+              # by the hardware, so `relative` here is right as it stands.
+              "#DLY":  (0xC, 1, "relative"),
+              "#LTO":  (0xB, 1, "relative") }
 
 # Short format 2, whose operands are written `TC,DISP`.
 bceShort2 = { "#RDS": 0b011, "#TDS": 0b100 }
 
-# NOT here, and still announcing themselves: #WIX, which appears in no
-# listing, and #DLY and #LTO.  Those two have exactly one use each in the
-# whole corpus and BOTH encode their displacement as zero -- `#LTO TIMOUT-36`
-# is B800 -- so whatever their operand does, it is not the PC-relative
-# displacement their immediate counterparts use, and one instance is not
-# enough to say what it is instead.
+# NOT here, and still announcing itself: #WIX, which appears in no listing.
+#
+# #DLY and #LTO WERE excluded on the same grounds -- one use each, both
+# encoding a displacement of zero -- and the POO settles them.  Their zeros are
+# correct: `#DLY FCMGNDLC+1` sits at 00301 and FCMGNDLC+1 is 00302, which is
+# PC(updated) exactly, so the displacement IS zero.  C800 decodes as opcode C,
+# M=1, displacement 0, and B800 the same with opcode B.
 
 # THE FOUR-BYTE BCE INSTRUCTIONS:  opcode byte, then the layout of bytes 1-3.
 #
