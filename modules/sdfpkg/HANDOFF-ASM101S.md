@@ -768,6 +768,54 @@ shortening whose displacement is within the amount that shortening itself
 removes, and measure.  It is expected to cost some of the 55s measured in the
 entry above, which is precisely what the sweep will show.
 
+THE CHEAP SOURCE SWEEP IS CLEAN.  The two detectors that found DCICYC's defects
+-- a macro invocation whose operation names the macro stamped into the next
+card's columns 73-80, and a card whose operation field begins with '=' -- were
+run over every .asm in OI301700, OI340600 and BFS.SRC.  Zero vestigial
+invocations anywhere; the ten literal-pool hits are all `.*` macro-comment
+cards reading "=8 (FULLWORD, = 4 (HALFWORD)" and the detector should exclude
+that form.  MLIB80 was the last of the residue.
+
+AND A CORRECTION TO THE ENTRY ABOVE.  "The original left no margin, forward
+displacements reach 55" measured the wrong quantity: the displacement
+`optimizeScratch` sees when it DECIDES, which is not the displacement finally
+encoded.  DCICYC's line 646 decides on 48 and encodes 55.
+
+MEASURED PROPERLY, off the as-received listings and depending on nothing in our
+assembler -- a two-byte encoding of a branch mnemonic is the SRS form and its
+displacement is byte1 >> 2 -- across 803 such encodings in the 243 byte-exact
+modules:
+
+    45:3  46:2  47:2  49:2  50:2  51:1  52:1  53:1  54:0  55:0
+
+THE ORIGINAL NEVER ENCODED 54 OR 55.  The margin is real.  The tail is thin, so
+the two zeroes are suggestive rather than conclusive on their own, but they
+agree with DCICYC, where the original refuses the short form and our layout
+encodes exactly 55.
+
+IMPLEMENTING IT AS A DECISION THRESHOLD DOES NOT WORK, and this is the useful
+negative.  `srsCeiling = 54` leaves the corpus at 243 with no module changing
+classification, breaks DMOD in RUNASM, and makes DCICYC WORSE -- 1983 mismatched
+bytes to 4756.  The reason is the same one that invalidated the first
+measurement: the number the decision tests is not the number that gets encoded,
+so tightening the test refuses shortenings that were correct while still
+permitting the one that is wrong.
+
+WHY THEY DIFFER, which is where the next attempt should start.
+`optimizeScratch` runs at the END OF PASS 1 and nowhere else, and the positions
+in `scratch` were recorded DURING pass 1.  The advance over a literal pool
+happens only on the compile passes -- it is in the `elif` arm of the LTORG
+handler, deliberately, see 9446fdc5f -- so the layout the decision is taken
+against is missing every pool's bytes and is systematically too compact.  In
+DCICYC that is three pools.  The decision is not wrong by a threshold; it is
+taken against the wrong addresses.
+
+So the fix is not a number.  Either the ambiguity resolution has to run on a
+pass whose addresses are real, or the collect pass has to advance over pools
+using the previous pass's sizes so that its addresses are.  Both are structural
+and neither should be attempted without both harnesses and someone watching:
+243 byte-exact modules currently depend on the present behaviour.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
