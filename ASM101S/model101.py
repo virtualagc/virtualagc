@@ -2996,10 +2996,23 @@ def generateObjectCode(source, macros):
                                     # against our C2F7 601C with R3 indexed.
                                     atStar = "@" in operation or "#" in operation \
                                         or (b2 != None and b2 > 3) or droppedBase
+                                    # ONLY IF SOMETHING ELSE SUPPLIES THE BASE.
+                                    # The register can be read as an INDEX only
+                                    # when a USING provides a base to replace
+                                    # it with; otherwise it IS the base and
+                                    # moving it into x2 while leaving b2 alone
+                                    # puts the same register in both fields.
+                                    # FCMTRACE's `ST@# R4,0(R2)` assembled
+                                    # 34F6 5800 -- b2=2 in the F6 AND x2=2 in
+                                    # the 58 -- where the original has
+                                    # 34F6 1800, the same base with no index.
+                                    # Its displacement is an absolute 0, so
+                                    # `unUsing` has nothing to match and there
+                                    # was never a second base to be had.
                                     if atStar and x2 == None:
-                                        x2 = b2
                                         b, d = unUsing(using, d2)
                                         if b != None:
+                                            x2 = b2
                                             b2 = b
                                             d2 = d
                                     done = False
