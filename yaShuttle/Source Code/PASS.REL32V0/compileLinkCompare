@@ -38,9 +38,10 @@ Prerequisites:  * The programs HALSFC, ASM101S, etc., from virtualagc.
                 * MAFGEN disassemblies for each PASS configuration of interest.
                 * PASS source code files.
 Preparation:    The MAFGEN disassembly of PASS configuration XXX must have  
-                been preprocessed by the utility unlinkMAFGEN2.py to produce:
+                been preprocessed by the utility unlinkMAFGEN2.py and 
+                dass-TBD.py to produce:
                    1. A memory image named XXX.fcm.
-                   2. A CSECT/DSECT index named csects-XXX.json
+                   2. A CSECT/DSECT index named augmented-XXX.json
                 In the case of HAL/S source-code, any templates or include-files
                 needed for compiler directives "D INCLUDE ..." must already be
                 available in the template library or inclusion library; 
@@ -49,7 +50,7 @@ Preparation:    The MAFGEN disassembly of PASS configuration XXX must have
                 libraries.
 Storage:        The only MAFGEN files we presently have, or have any prospect
                 for obtaining (as far as I know) are believed to be for OI340700
-                and are stored in PFS/mafgen/.  The XXX.fcm and csects-XXX.json
+                and are stored in PFS/mafgen/.  The XXX.fcm and augmented-XXX.json
                 files for them are stored there as well.  Whereas the only
                 PASS source code we have is for OI340600 (PFS/OI340600/) and
                 OI301700 (PFS/OI301700/).
@@ -74,7 +75,7 @@ OPTIONs:        --config=XXX.     PASS configuration:  G16 (default), G2, G3, G8
                                   if you leave it off.
                 --memory=F.fcm    F.fcm (default ../mafgen/XXX.fcm) is the path 
                                   to a GPC memory image.
-                --ext-syms=F.json F.json (default ../mafgen/csects-XXX.json) is the
+                --ext-syms=F.json F.json (default ../mafgen/augmented-XXX.json) is the
                                   path to CSECT/DSECT index file.
                 --sdfi=D          Directory HALSFC reads SDFs from, so that a
                                   "D INCLUDE TEMPLATE" is satisfied from an SDF
@@ -162,7 +163,7 @@ for parameter in sys.argv[1:]:
         print(helpMsg)
         sys.exit(1)
 if externalSymbolFile == None:
-    externalSymbolFile = f"{dataDir}csects-{config}.json"
+    externalSymbolFile = f"{dataDir}augmented-{config}.json"
 if memoryFile == None:
     memoryFile = f"{dataDir}{config}.fcm"
 if parmList == None:
@@ -220,7 +221,7 @@ if fileType in ["hal", "dfg"]:
             die()
 
 elif fileType == "asm":
-    command = ["ASM101S", "--library=MLIB80", "--fill=C6C6", "--force-d", filename]
+    command = ["ASM101S", "--library=MLIB80", "--fill=C6C6", "--no-rtl-fixes", filename]
     print(" ".join(command))
     try:
         result = subprocess.run(command, capture_output = True, text = True, check = True)
@@ -289,10 +290,10 @@ except subprocess.CalledProcessError as e:
     else:
         print("Forced re-link produced no image; nothing to compare.")
         die()
-    # Both paths here were wrong: "../{config}.fcm" and "../csects-{config}.json"
+    # Both paths here were wrong: "../{config}.fcm" and "../augmented-{config}.json"
     # duplicated the defaults computed above one directory too high, and the
     # second was missing its f prefix besides, so it named a literal file
-    # "../csects-{config}.json".  Use the same two files the comparison does.
+    # "../augmented-{config}.json".  Use the same two files the comparison does.
     command = ["rldanalyze", symfile, fcmfile, memoryFile,
                "--csect-table", externalSymbolFile, "--show-gaps",
                "--show-csects", "--scan-gaps"]
