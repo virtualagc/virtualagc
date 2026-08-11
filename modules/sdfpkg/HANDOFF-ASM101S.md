@@ -509,6 +509,76 @@ is invisible to it.  A missing RLD entry hid behind a green result today.  When
 a fix touches the object module, measure the object module -- and note that it
 is EBCDIC, so a card-type test against ASCII b'RLD' reports zero of everything.
 
+2026-08-10, later the same day.  242 of 272 byte-exact, from 223, with no
+module moving the other way at any point and RUNASM at 205 of 205 throughout.
+
+    MATCH       242      MATCH?       3
+    DIFFERS      24      NOCOMPARE    3
+
+Nineteen modules gained, and DCICYC moved from NOCOMPARE to DIFFERS.  Five
+defects, all in the addressing logic or the constant generators, and every one
+of them found the same way: sort the DIFFERS by mismatched-byte count, take the
+smallest, and print each "Comparison mismatch" beside the statement it was
+raised on.  Modules with one to four bad bytes are single-instruction defects
+and they CLUSTER -- eight of the first nine shared one bit.
+
+  THE AM BIT, nine modules.  RS AM=1 exists to supply an index register, a
+  negative displacement, or `@`/`#` addressing, and the test that chose it had a
+  fourth clause asking for none of those: any displacement that fit eleven bits.
+  A symbol already resolved through a USING to a real base register took the
+  indexed form anyway.  Guarded with `not usingB2`.  2cf2e3615.
+
+  BCT MISSING FROM THE BACKWARD-BRANCH LIST, five modules.  BC, BIX and BAL
+  reached the negative form and BCT did not, so a backward BCT wrote its target
+  as an absolute section offset.  `*+2` goes with it: the original writes a zero
+  displacement as the negative form too, so the test is `d1 <= 0`.  a1012c56a.
+
+  LA DISCARDING ITS BASE REGISTER, two modules.  An `LA`-only branch tests
+  `d2 > -2048 and d2 < 2048`, but by then `d2` has been REPLACED by the offset
+  from the base register findB2D2 supplied, so a USING-relative symbol matches
+  the range test and the branch then addresses it PC-relative instead.
+  3a091286d.
+
+  DC F MULTIPLYING BY THE FIELD WIDTH, one module.  `evalLiteralAttributes`
+  scales a value only when it IS a fraction; this path scaled unconditionally
+  and clamped `DC F'1800E6'` to 7FFFFFFF.  3a091286d.
+
+  LITERAL POOL ALIGNMENT, two modules.  The pool's alignment came from its
+  contents, seeded at 2, so a halfword-only pool started two bytes early
+  wherever the section ended odd.  Fullword is the LTORG rule.  e84380552.
+
+TWO OF THE FIVE WERE WRONG ON THE FIRST TRY and the harnesses caught both.
+"Unscaled F means integer" broke CTOI, ETOC, ITOC and KTOC, which write
+`DC F'0.625'` and expect 50000000 -- magnitude decides, not the presence of an
+S.  And the AM-bit fix had been tried once before and reverted, because it was
+written into `forceAM0`, which suppresses AM=1 even where an index register
+requires it.  RUN BOTH HARNESSES ON ANYTHING THAT TOUCHES THE ENCODER; the
+corpus sweep alone would have passed the F-constant error, because no OI301700
+module writes a fractional F constant and four RUNASM modules do.
+
+AND INSTRUMENT RATHER THAN READ when the base-register logic is involved.  Two
+careful readings said `findB2D2` was failing to match DCICYC's `USING
+CDDLOCAL,R1`; one print at its call site showed it returning b2=1 and the right
+offset, with the fault three hundred lines further on in a branch that had
+looked irrelevant.  That chain has too many arms to follow by eye.
+
+WHAT IS LEFT, by size, and the small ones are still the cheap ones:
+
+    DCI#DATA 2   FIOLGERR 4   FIOMDPPG 6   FCMBOOT 9   FCMCBLKS 12
+    FPMSDERR 12  then a gap to FIOCGR 43 and eighteen more up to
+    MENU12 1128 and DCICYC 4479.
+
+  FIOLGERR is `DC Z(,CZ2VIOER,0)` generating four zero bytes -- a Z constant
+  with an EMPTY first subfield, which the Z work did not cover.
+  FIOMDPPG is `#LBR@ FIOBRE-2` and its fellow, BCE instructions generating a
+  negative displacement where the original has a positive one.
+  DCI#DATA has `DC Y(DCIDOUT)` two bytes low, so something ahead of DCIDOUT is
+  sized wrong.
+  DCICYC's remaining 4479 are two systematic patterns: backward BC targets
+  uniformly 5 halfwords out, and BAL targets 11 and 13 out, which is cumulative
+  drift and says a label ahead of them has moved rather than that the branches
+  are miscoded.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
