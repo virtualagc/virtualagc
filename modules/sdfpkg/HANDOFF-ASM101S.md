@@ -1065,6 +1065,61 @@ even halfword address, so the original pads nothing and the 77E7 there is the
   statement's assembled bytes are stored and make a pass that emits nothing
   clear them.
 
+262 of 272.  FCMSSYNC byte-exact and FCMISYNC from MATCH? to MATCH, both from
+one fix.  c4e961fc7.
+
+    MATCH       262      MATCH?       3
+    DIFFERS       4      NOCOMPARE    3
+
+A STATEMENT THAT EMITS NOTHING KEPT THE BYTES IT EMITTED LAST TIME.
+`toMemory` accumulates into `properties["assembled"]` and restarts the run when
+the pass changes -- but a statement that emits nothing on a later pass never
+calls `toMemory` at all, so the restart never happens.  FCMSSYNC's `CNOP 2`
+showed D800 from a pass on which it did pad, printed at 00020 where the
+`XR R7,R7` that follows also printed: THE SAME ADDRESS TWICE IN ONE LISTING,
+which is the signature to look for.  Cleared per statement per pass.
+
+That also accounted for one of the MATCH? results, which is worth knowing: a
+stale run looks from outside exactly like "bytes at an address the listing
+shows nothing for", because that is what it is.
+
+MENU12 NEEDS A DECISION AND IS NOT AN ASSEMBLER DEFECT.  Its 1128 mismatches
+are one halfword of shift, present from the very first statement: the original
+has `MENU DS 0H` at 00001 and we have it at 00000.  The two bytes before it are
+in a region the original listing SUPPRESSED with `PRINT OFF`, and the statement
+numbers prove the deck had ~250 statements there that OI301700's extracted
+source does not:  the three PRINT cards are numbered 4, 19 and 257 in the
+listing, and the source jumps from SRN 000400AB straight to 001900AB.
+
+OI340600 HAS THE MISSING RANGE -- an `ENTRY MENU,MENUA`, a change log, and
+`MENUA DC Y(PAGE2-#VAR)`, which is exactly one halfword.  It is the obvious
+candidate and I did NOT insert it, because MENUA appears NOWHERE in OI301700's
+listing and nothing in OI301700's source references it, and that listing has no
+symbol table to settle it either way.  Copying a card from another release into
+a gap the listing cannot show is a judgement about what this release contained,
+not a repair.  Ask before doing it.
+
+FCMBMASK IS A THIRD THING AGAIN.  Its 702 mismatches are also one halfword of
+shift, from 00038, where `LH R4,TBMPVAR` is the two-byte 9C04 in the original
+-- base 0, displacement 1 -- and the four-byte 9CF0 0001 here.  Same base, same
+displacement, long form.  So we FAIL to shorten where the original does, which
+is the opposite of every length defect fixed today.
+
+The arm of `optimizeScratch` that should have shortened it cannot: TBMPVAR
+resolves into the unnamed DSECT `*DSECT*` while the only active USING names
+section FCMBMASK, so its `section == u[1]` test never matches.  The DSECT is
+evidently mapped over the CSECT and the assembler does not know it.
+
+AND THAT ARM IS MALFORMED IN TWO WAYS, which is worth recording even though
+correcting it did not help:  it puts `u[1]`, the section NAME, where a register
+number belongs, so `b` is only ever tested for being non-None; and it compares
+the USING's OWN address against `srsCeiling` instead of the displacement from
+it to the symbol.  Correcting both -- displacement `value - u[2]`, `b` the
+register index, ties to the higher register -- changes FCMBMASK not at all and
+BREAKS FOUR RUNASM MODULES: DSNCS, DSQRT, SNCS and SQRT.  The broken test is
+load-bearing; it suppresses shortenings that would otherwise be wrong.  Reverted.
+Anything done here has to fix the DSECT mapping FIRST and the arm second.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
