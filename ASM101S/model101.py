@@ -1725,6 +1725,32 @@ def generateObjectCode(source, macros):
                     # FCM25MS and FCMDLTIM.  Nothing was missing from the
                     # module; only the pool was misplaced.
                     literalPools[literalPoolNumber][1] = sects[sect]["pos1"]
+                    # AND ADVANCE PAST IT.  `commonProcessing(4)` aligns the
+                    # location counter and nothing moved it over the pool's own
+                    # bytes, so whatever followed an LTORG was assembled on top
+                    # of the literals.  FIOLGERR puts two Z constants after its
+                    # LTORG and both landed at 00086, the address of the
+                    # `=X'000007FF'` the pool holds; the original has them at
+                    # 00088.
+                    #
+                    # This was invisible in 242 of 272 modules because their
+                    # LTORG is the last statement that occupies space, so the
+                    # overlap had nothing to collide with.
+                    # `pos1` ONLY, DELIBERATELY NOT `used`.  Everywhere else
+                    # those two move together, but "used" is documented at the
+                    # between-passes bookkeeping above as NOT including a
+                    # trailing pool, and that code adds `pool[4]` back to get a
+                    # section's true length.  Forcing "used" here would make a
+                    # TRAILING pool count twice and move every following CSECT:
+                    # CTOE's #LCTOE went from 00140 to 00154, exactly its
+                    # pool's 40 bytes, and eight RUNASM modules broke.
+                    #
+                    # Left alone, "used" still grows by itself for an INTERIOR
+                    # pool, because the statements after the LTORG advance past
+                    # it and carry "used" with them.
+                    poolBytes = literalPools[literalPoolNumber][4]
+                    if poolBytes:
+                        sects[sect]["pos1"] += poolBytes
                 literalPoolNumber += 1
                 continue
             elif operation in ["USING", "DROP"]:
