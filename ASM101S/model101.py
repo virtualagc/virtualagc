@@ -3860,7 +3860,13 @@ def generateObjectCode(source, macros):
                 if len(pool) == len(emptyPool):
                     continue
                 offset = 0
-                pool[2] = 2
+                # A LITERAL POOL BEGINS ON A FULLWORD BOUNDARY whatever it
+                # holds.  Seeded at 2, a pool whose widest member is a halfword
+                # was aligned to a halfword and started two bytes early wherever
+                # the section happened to end odd.  FPMWAIT's pool holds one
+                # `=H'1'` and nothing else; the original build puts it at 00056
+                # and we put it at 00055.  FPMRES is the same with `=Y(...)`.
+                pool[2] = 4
                 pool[3] = [None] * len(pool)
                 pool[4] = 0
                 for alignment in [8, 4, 2, 1]:
