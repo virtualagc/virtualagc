@@ -3136,8 +3136,25 @@ def generateObjectCode(source, macros):
                                             d1 = (pool[1] + pool[3][pool.index(literalAttributes)]) // 2 \
                                                  - icRS
                                             data = generateRS1(properties, operation, 0, 0, r1, d1, 0, 3)
-                                        elif operation in ["BC", "BIX", "BAL"] and x2 in [None, 0] and \
-                                                d1 > -2048 and d1 < 0:
+                                        # `BCT` BELONGS IN THIS LIST and was
+                                        # missing, so a backward BCT fell past
+                                        # here to the AM=0 form and encoded its
+                                        # target as an absolute section offset.
+                                        # FCMBCEMD's `BCT R5,#@LB34` assembled
+                                        # D5F3 007B where the original has
+                                        # D5F7 08BD -- the same address reached
+                                        # as 0x138 - 0xBD instead of as 0x7B.
+                                        #
+                                        # `d1 <= 0` rather than `d1 < 0` because
+                                        # the original build writes `*+2` -- a
+                                        # displacement of exactly zero -- as the
+                                        # negative form too, i=1 with magnitude
+                                        # 0.  PC-0 and PC+0 are the same address,
+                                        # so both encodings are correct and only
+                                        # one of them is what was built.
+                                        elif operation in ["BC", "BIX", "BAL", "BCT"] and \
+                                                x2 in [None, 0] and \
+                                                d1 > -2048 and d1 <= 0:
                                             if extrnD2:
                                                 data = generateRS0(properties, operation, r1, 0, 3)
                                                 if compile:
