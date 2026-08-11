@@ -386,6 +386,57 @@ original assembler's habit of not always minimising it.  A rewrite that lets
 USING decide base and displacement, and keeps empiricism for form alone, would
 be a good deal smaller -- and lead 2 above may well dissolve in it.
 
+2026-08-10.  214 of 272 byte-exact, from 187 that morning, RUNASM 205 of 205
+throughout.  Twenty-seven DIFFERS remain and they are a different population
+from the ones that fell today.
+
+WHAT FELL WAS ALL ONE SHAPE:  a generator that never wrote its value.
+`DC A(expression)` emitted nothing at all; `DC B'...'` was a stub that emitted
+nothing AND reserved no space; `DC Z(sym,...)` wrote zeros into its address
+field; and the literal pool's bytes were written but filed under whichever
+DSECT happened to be open.  Twelve, one, one and three modules.  The audit that
+finds this class takes two minutes:  assemble one constant of each type the
+grammar accepts and look at whether bytes appear.  DO IT AGAINST A NON-ZERO
+TARGET -- the first attempt put the label at address 0, so A, Y and Z emitting
+zeros looked correct.  S and V were checked and need nothing: neither appears
+in either version and the grammar does not accept them.
+
+THE REMAINING LEAD, and it is worth the next session's time because four or
+more modules share it.  FCMBMASK, FIOG9ADB, FIOPDHF and FIOPDISP all first
+mismatch on a `BC 07-n,#@LBx`.  The branch encoding is NOT the bug:
+
+    FIOPDHF   original  0x44 - 0x13 - 1 = 48    2-byte instruction
+    FIOPDISP  original  0x37A - 0x26 - 2 = 0x352    4-byte instruction
+
+so the displacement is target minus the address AFTER the instruction, in both
+forms, and OUR displacements are right for where WE think the label is.
+
+WHAT IS ACTUALLY WRONG is that a label's value used in an expression disagrees
+with the address printed for that same label in our own listing.  FIOPDHF
+prints `#@LB3 DS 0H` at 00044 -- the same as the original -- and then resolves
+`BC 07-4,#@LB3` to adr1 = 0045.  DCI#DATA is the same illness elsewhere:
+DCIDOUT sits at 000A4 in both listings, `DC Y(DCIDOUT+2)` gives the right
+00A6, and `DC Y(DCIDOUT)` gives 00A6 as well -- as though the symbol were 166
+in one card and 164 in another.
+
+NOTE WHAT SURROUNDS IT.  In FIOPDHF the target is the second of TWO
+zero-length labels at the same address, `#@LB16 DS 0H` immediately followed by
+`#@LB3 DS 0H`.  That is where to look first:  how a label on a zero-length DS
+gets its value when another zero-length label precedes it, and whether the
+value the branch resolver reads comes from the symbol table or from the
+scratch pass that decided the instruction lengths.
+
+DO NOT FIX THIS BY ADJUSTING THE DISPLACEMENT.  The arithmetic above is
+confirmed against two modules and two instruction lengths; a constant added
+there would make one module match and silently break others.
+
+TWO OTHERS, DECODED BUT NOT UNDERSTOOD.  FPMZSYNC's `LH R5,TICCXMTR` under a
+single `USING TFICC,R2` wants displacement 60 and gets 61, but the DSECT
+layouts are byte-identical and TICCXMTR's offset, 65, does not fit the six-bit
+field at all -- so neither number is the offset and something about the unit or
+origin of an SRS displacement into a DSECT is not understood.  FIOERRLC differs
+by one byte on `BAL R3,*+2`.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
