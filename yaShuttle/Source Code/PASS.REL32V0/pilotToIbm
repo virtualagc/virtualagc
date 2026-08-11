@@ -2,11 +2,19 @@
 """Convert BFS PILOT object members (cards/) to PASS/OS360-style cards.bin.
 
 Usage:
-    pilotToIbm.py [-o cards.bin] [--no-stack-sym] [--no-ctl] [--verbose] cards_dir
+    pilotToIbm [-o cards.bin] [--no-stack-sym] [--no-ctl] [--verbose] cards_dir
 
 Each file in cards_dir is one PILOT object member and becomes one PASS
 module (ESD/TXT/RLD/SYM/END).  Modules are concatenated into a single deck
 that lnk101 can read.
+
+Stack / halt / ON ERROR linkage (pilotToIbm-problem.md):
+    BFS puts stack size on the CSD and normally starts with SVC 15; ON ERROR
+    programs overlay that with a BC.  PASS/lnk101 NOSDL needs @0PROG ER,
+    #EPROG PDE, STACKEND SYM, LHI R0,@0PROG+YCON, and a trailing halt SVC
+    (C9F9 halt SVC; 0x0015 is *appended* to #D if missing — never overwrites
+    existing data).  synthesize_pass_stack_linkage() rebuilds that contract on
+    the scattered program image after each PILOT member is parsed.
 
 Units:
     PILOT lengths/addresses are halfword-oriented; PASS card fields use bytes.
@@ -108,8 +116,9 @@ class TextChunk:
 class RldItem:
     rel_id: int
     pos_id: int
-    flags: int  # PILOT 16-bit
+    flags: int  # PILOT 16-bit (ignored when pass_flags is set)
     address_hw: int
+    pass_flags: int | None = None  # if set, emit this PASS flag byte as-is
 
 
 @dataclass
@@ -122,6 +131,372 @@ class PilotMember:
     end_hal: str = ""
     end_xpl: str = ""
     lec: list[bytes] = field(default_factory=list)
+    # PASS-style CTL STACK operand names ($0PROG) synthesized for stack linkage
+    stack_ctl_names: list[str] = field(default_factory=list)
+
+
+def program_characteristic(name: str) -> str | None:
+    """HAL/S characteristic stem used in #E/#D/@n/$n names (max 6 chars).
+
+    Examples: $HELLO -> HELLO, $0HELLO -> HELLO, $EXAMPLE -> EXAMPL, $P -> P.
+    """
+    if not name.startswith("$"):
+        return None
+    rest = name[1:]
+    if rest and rest[0].isdigit():
+        rest = rest[1:]
+    if not rest:
+        return None
+    return rest[:6]
+
+
+# lnk101 STACK_SEQUENCE: stack/task index char in @nCHAR / $nCHAR names.
+_STACK_SEQUENCE = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+# BFS NOSDL-style program prolog: SVC 15 (C9FB 00xx) requests a stack from a
+# supervisor that yaGPC2/lnk101 do not provide.  PASS instead does
+# LHI R0,@nPROG (E8F3 0000) with a YCON RLD so the linker fills the stack
+# address.  See pilotToIbm-problem.md.
+_BFS_STACK_SVC0 = 0xC9
+_BFS_STACK_SVC1 = 0xFB
+_PASS_LHI_R0 = bytes([0xE8, 0xF3, 0x00, 0x00])
+# PASS-style program close: C9F9 + displacement to a 0x0015 halfword in #D.
+# Default disp 0; synthesize_pass_stack_linkage appends 0x0015 at end of #D
+# when needed so real data is never overwritten.
+_PASS_HALT_SVC = bytes([0xC9, 0xF9, 0x00, 0x00])
+# PDE slot size in halfwords (TERMINAT / patchStackPDEs).
+_PDE_SLOT_HW = 6
+# Last halfword of each PDE slot as seen on multi-task PASS objects (219-P):
+# program slot 0005, first task 0003, further tasks 0000.
+_PDE_SLOT_TAIL = (0x0005, 0x0003)
+
+
+def _pde_slot_bytes(slot_index: int) -> bytes:
+    """12-byte PDE slot image (zeros, 0x0700, tail word)."""
+    tail = (
+        _PDE_SLOT_TAIL[slot_index]
+        if slot_index < len(_PDE_SLOT_TAIL)
+        else 0x0000
+    )
+    return bytes.fromhex("00000000000007000000") + tail.to_bytes(2, "big")
+
+
+def _scatter_section(member: PilotMember, esd_id: int, length_hw: int) -> bytearray:
+    """Build a contiguous halfword image for one CSECT from TXT chunks."""
+    img = bytearray(max(length_hw, 0) * 2)
+    for t in member.text:
+        if t.esd_id != esd_id:
+            continue
+        start = t.address_hw * 2
+        end = start + len(t.data)
+        if end > len(img):
+            img.extend(bytes(end - len(img)))
+        img[start:end] = t.data
+    return img
+
+
+def _replace_section_text(
+    member: PilotMember, esd_id: int, image: bytes, *, protected: bool = True
+) -> None:
+    member.text = [t for t in member.text if t.esd_id != esd_id]
+    if image:
+        member.text.append(
+            TextChunk(
+                esd_id=esd_id,
+                address_hw=0,
+                data=bytes(image),
+                protected=protected,
+            )
+        )
+
+
+def _drop_rlds_at(member: PilotMember, pos_id: int, address_hw: int) -> None:
+    """Remove every RLD that patches halfword address_hw in section pos_id."""
+    member.rlds = [
+        r
+        for r in member.rlds
+        if not (r.pos_id == pos_id and r.address_hw == address_hw)
+    ]
+
+
+def _ensure_ycon_rld(
+    member: PilotMember, rel_id: int, pos_id: int, address_hw: int
+) -> None:
+    for r in member.rlds:
+        if r.pos_id == pos_id and r.address_hw == address_hw and r.rel_id == rel_id:
+            r.pass_flags = 0x00
+            return
+    member.rlds.insert(
+        0,
+        RldItem(
+            rel_id=rel_id,
+            pos_id=pos_id,
+            flags=0,
+            address_hw=address_hw,
+            pass_flags=0x00,
+        ),
+    )
+
+
+def synthesize_pass_stack_linkage(member: PilotMember, *, verbose: bool = False) -> None:
+    """Add PASS NOSDL stack/halt contract items missing from BFS PILOT.
+
+    BFS emits one ``$NAME`` CSECT per PROGRAM/TASK with a CSD stacksize.
+    PASS names them ``$nCHAR`` / ``@nCHAR`` sharing one multi-slot ``#ECHAR``
+    PDE (n from STACK_SEQUENCE: 0=PROGRAM, 1..=TASK).  BFS task CSECTs keep
+    the full task name (``$GUIDANC``) — we remap to ``$1P`` etc. using the
+    *program* characteristic (from the first ``$`` stack unit / its HAL name).
+
+    Per stack unit, also rewrite entry (SVC15 or ON ERROR BC) to
+    ``LHI R0,@n`` and append a ``C9F9`` halt SVC (without mutating ``#D``).
+    """
+    # ESD order: first $ stack unit is the PROGRAM; further ones are TASKs.
+    units = [
+        e
+        for e in list(member.esd)
+        if e.kind == "SD" and e.stacksize_hw > 0 and e.name.startswith("$")
+    ]
+    if not units:
+        return
+    if len(units) > len(_STACK_SEQUENCE):
+        raise ValueError(
+            f"too many PROGRAM/TASK stack units ({len(units)}); "
+            f"STACK_SEQUENCE only has {len(_STACK_SEQUENCE)} slots"
+        )
+
+    # Characteristic from PROGRAM (first unit): use the $ CSECT stem so we
+    # match existing #D/#E-style names ($TESTX -> TESTX -> #DTESTX).  HAL
+    # names may include '_' (TEST_X) and would miss the ESD.
+    prog0 = units[0]
+    char = program_characteristic(prog0.name)
+    if not char:
+        return
+    char = char[:6]
+    d_name = ("#D" + char)[:8]
+    e_name = ("#E" + char)[:8]
+
+    by_name = {e.name: e for e in member.esd}
+    # If #D{char} is absent, try alnum-only HAL name (rare alternate spelling).
+    if d_name not in by_name and prog0.hal_name:
+        alt = "".join(c for c in prog0.hal_name if c.isalnum())[:6]
+        if alt and ("#D" + alt)[:8] in by_name:
+            char = alt
+            d_name = ("#D" + char)[:8]
+            e_name = ("#E" + char)[:8]
+    next_id = max(e.esd_id for e in member.esd)
+
+    def alloc_id() -> int:
+        nonlocal next_id
+        next_id += 1
+        return next_id
+
+    # --- rename $ units to $nCHAR and create @nCHAR ERs ---
+    unit_meta: list[tuple[EsdItem, str, str, int]] = []  # item, $n, @n, slot
+    for slot, unit in enumerate(units):
+        seq = _STACK_SEQUENCE[slot]
+        pass_name = ("$" + seq + char)[:8]
+        at_name = ("@" + seq + char)[:8]
+        old = unit.name
+        if unit.name != pass_name:
+            if verbose:
+                print(
+                    f"  rename stack unit {old!r} -> {pass_name!r} (slot {slot})",
+                    file=sys.stderr,
+                )
+            by_name.pop(old, None)
+            unit.name = pass_name
+            by_name[pass_name] = unit
+        if at_name not in by_name:
+            at_id = alloc_id()
+            member.esd.append(EsdItem(esd_id=at_id, kind="ER", name=at_name))
+            by_name[at_name] = member.esd[-1]
+            if verbose:
+                print(f"  add stack ER {at_name} esdid={at_id}", file=sys.stderr)
+        else:
+            at_id = by_name[at_name].esd_id
+        unit_meta.append((unit, pass_name, at_name, slot))
+        if pass_name not in member.stack_ctl_names:
+            member.stack_ctl_names.append(pass_name)
+
+    # --- single multi-slot PDE #ECHAR ---
+    n_slots = len(units)
+    pde_len_hw = _PDE_SLOT_HW * n_slots
+    d_item = by_name.get(d_name)
+    if e_name not in by_name:
+        e_id = alloc_id()
+        e_item = EsdItem(
+            esd_id=e_id,
+            kind="SD",
+            name=e_name,
+            length_hw=pde_len_hw,
+            stacksize_hw=0,
+            flags=0x4000,
+        )
+        member.esd.append(e_item)
+        by_name[e_name] = e_item
+        if verbose:
+            print(
+                f"  add PDE SD {e_name} esdid={e_id} slots={n_slots}",
+                file=sys.stderr,
+            )
+    else:
+        e_item = by_name[e_name]
+        e_id = e_item.esd_id
+        e_item.length_hw = max(e_item.length_hw, pde_len_hw)
+
+    # Drop any prior PDE text/RLDs we may re-emit (idempotent re-run safety).
+    member.text = [t for t in member.text if t.esd_id != e_id]
+    member.rlds = [
+        r
+        for r in member.rlds
+        if not (r.pos_id == e_id and r.pass_flags in (0x10, 0x40))
+    ]
+
+    for unit, pass_name, at_name, slot in unit_meta:
+        slot_off = slot * _PDE_SLOT_HW  # halfwords
+        member.text.append(
+            TextChunk(
+                esd_id=e_id,
+                address_hw=slot_off,
+                data=_pde_slot_bytes(slot),
+                protected=True,
+            )
+        )
+        # ZCON/addr: code CSECT into this PDE slot at hw offset +2
+        member.rlds.append(
+            RldItem(
+                rel_id=unit.esd_id,
+                pos_id=e_id,
+                flags=0,
+                address_hw=slot_off + 2,
+                pass_flags=0x10,
+            )
+        )
+        if d_item is not None and d_item.kind == "SD":
+            member.rlds.append(
+                RldItem(
+                    rel_id=d_item.esd_id,
+                    pos_id=e_id,
+                    flags=0,
+                    address_hw=slot_off + 2,
+                    pass_flags=0x40,
+                )
+            )
+
+    # Program-end halt SVC (C9F9 + disp).  yaGPC2 reads mem[R1+disp] and
+    # treats halfword 0x0015 as clean halt.  Never *overwrite* existing #D
+    # payload (that corrupted DO-FOR steps / literals — see
+    # pilotToIbm-problem.md).  Reuse an existing 0x0015 if present; otherwise
+    # *append* one halfword at the end of #D and point the SVC there.
+    halt_svc = _PASS_HALT_SVC
+    if d_item is not None and d_item.kind == "SD":
+        d_img = bytearray(
+            _scatter_section(member, d_item.esd_id, d_item.length_hw)
+        )
+        if len(d_img) % 2:
+            d_img.append(0)
+        halt_disp_hw = None
+        for off in range(0, len(d_img) - 1, 2):
+            if d_img[off : off + 2] == bytes([0x00, 0x15]):
+                halt_disp_hw = off // 2
+                break
+        if halt_disp_hw is None:
+            halt_disp_hw = len(d_img) // 2
+            d_img.extend(bytes([0x00, 0x15]))
+            d_item.length_hw = len(d_img) // 2
+            _replace_section_text(member, d_item.esd_id, bytes(d_img))
+            if verbose:
+                print(
+                    f"  append halt word 0x0015 to {d_name} at hw {halt_disp_hw}",
+                    file=sys.stderr,
+                )
+        halt_svc = bytes([0xC9, 0xF9]) + int(halt_disp_hw).to_bytes(2, "big")
+
+    # BFS nested FUNCTION bodies often end with ``C9FB FFFF`` (SVC ea=0x7FFF)
+    # immediately before ``97E8`` SRET.  That SVC traps in yaGPC2; PASS uses a
+    # different epilogue.  Neutralize the bad SVC with NOPs and keep SRET so
+    # the function still returns (do *not* turn this into a program-halt SVC).
+    # Two BCR 0,0 (no-op branches) — same filler IOINIT uses as a pad.
+    _NOP4 = bytes([0xC0, 0xE0, 0xC0, 0xE0])
+
+    def _rewrite_ffff_svcs(img: bytearray) -> int:
+        n = 0
+        for i in range(0, len(img) - 3, 2):
+            if img[i : i + 4] == bytes([0xC9, 0xFB, 0xFF, 0xFF]):
+                img[i : i + 4] = _NOP4
+                n += 1
+        return n
+
+    for e in list(member.esd):
+        if e.kind != "SD" or e.name.startswith("#"):
+            continue
+        # Nested code blocks A1… / B0… (not the $ PROGRAM/TASK units — those
+        # get a real halt below).
+        if not (len(e.name) >= 2 and e.name[0].isalpha() and e.name[1].isdigit()):
+            continue
+        img = bytearray(_scatter_section(member, e.esd_id, e.length_hw))
+        n = _rewrite_ffff_svcs(img)
+        if n:
+            e.length_hw = max(e.length_hw, (len(img) + 1) // 2)
+            _replace_section_text(member, e.esd_id, bytes(img))
+            if verbose:
+                print(
+                    f"  neutralize {n}x C9FB FFFF in nested {e.name}",
+                    file=sys.stderr,
+                )
+
+    # --- per-unit entry rewrite + halt ---
+    for unit, pass_name, at_name, slot in unit_meta:
+        at_id = by_name[at_name].esd_id
+        p_img = bytearray(
+            _scatter_section(member, unit.esd_id, unit.length_hw)
+        )
+        if len(p_img) < 4:
+            continue
+
+        entry0, entry1 = p_img[0], p_img[1]
+        if entry0 == _BFS_STACK_SVC0 and entry1 == _BFS_STACK_SVC1:
+            p_img[0:4] = _PASS_LHI_R0
+            _drop_rlds_at(member, unit.esd_id, 1)
+            _ensure_ycon_rld(member, at_id, unit.esd_id, 1)
+            if verbose:
+                print(
+                    f"  rewrite {pass_name} entry SVC15 -> LHI R0,{at_name}",
+                    file=sys.stderr,
+                )
+        elif entry0 == 0xC7:
+            p_img[0:4] = _PASS_LHI_R0
+            _drop_rlds_at(member, unit.esd_id, 1)
+            _ensure_ycon_rld(member, at_id, unit.esd_id, 1)
+            body_hw = 0x11
+            if len(p_img) >= (body_hw + 1) * 2:
+                p_img[9 * 2 : 9 * 2 + 2] = bytes([0xC7, 0xF3])
+                p_img[9 * 2 + 2 : 9 * 2 + 4] = body_hw.to_bytes(2, "big")
+                _drop_rlds_at(member, unit.esd_id, 10)
+                _ensure_ycon_rld(member, unit.esd_id, unit.esd_id, 10)
+            if verbose:
+                print(
+                    f"  rewrite {pass_name} ON ERROR BC entry -> "
+                    f"LHI R0,{at_name} + BC to body@{body_hw:#x}",
+                    file=sys.stderr,
+                )
+        else:
+            if verbose:
+                print(
+                    f"  note: {pass_name} entry opcode "
+                    f"{entry0:02x}{entry1:02x} not SVC15/BC — stack ER only",
+                    file=sys.stderr,
+                )
+
+        if len(p_img) >= 4 and p_img[-4:-2] == bytes([0xC9, 0xF9]):
+            p_img[-4:] = halt_svc
+        else:
+            if verbose:
+                print(f"  append halt SVC to {pass_name}", file=sys.stderr)
+            p_img.extend(halt_svc)
+
+        unit.length_hw = max(unit.length_hw, (len(p_img) + 1) // 2)
+        _replace_section_text(member, unit.esd_id, bytes(p_img))
 
 
 def parse_pilot_member(path: Path) -> PilotMember:
@@ -224,11 +599,12 @@ def parse_pilot_member(path: Path) -> PilotMember:
         elif typ == 0x08:  # RLD
             end = offset + 2 * typ2
             i = offset + 2
+            # OBJECTGE ADD_RLD: a full entry is R,P,flags,addr (4 hw).  If
+            # flags bit0 is set, one or more *short* entries follow (flags,addr
+            # only), reusing the same R/P until a short entry clears bit0.
             last_rel = last_pos = None
             while i + 4 <= end:
-                # Full ACD: rel, pos, flags, addr (8 bytes).  Grouped short
-                # form (flags, addr only) follows an entry whose flag bit0=1.
-                if last_rel is not None and i + 8 > end:
+                if last_rel is not None:
                     fl = u16(data, i)
                     adr = u16(data, i + 2)
                     member.rlds.append(
@@ -239,7 +615,8 @@ def parse_pilot_member(path: Path) -> PilotMember:
                             address_hw=adr,
                         )
                     )
-                    last_rel = last_pos = None
+                    if (fl & 1) == 0:
+                        last_rel = last_pos = None
                     i += 4
                     continue
                 if i + 8 > end:
@@ -253,8 +630,6 @@ def parse_pilot_member(path: Path) -> PilotMember:
                 )
                 if fl & 1:
                     last_rel, last_pos = rel, pos
-                else:
-                    last_rel = last_pos = None
                 i += 8
             offset = end
 
@@ -287,10 +662,14 @@ def pilot_rld_flags_to_pass(pilot_flags: int) -> int:
     PASS (ap101Utils.addrcon):
       0x00 YCON, 0x04 ZCON/code, 0x10 ZCON/addr, 0x1C ACON,
       0x20 BSR-only, 0x40 DSR-only, 0x50 ZCON/data; bit7 = negate.
+
+    Continuations (bit0) are expanded to full RLD entries at parse time, so
+    the emitted PASS flag never sets the continuation bit.
     """
     f = pilot_flags & 0xFF
     sign = 0x80 if (f & 0x80) else 0
-    low = f & 0x7F
+    # Ignore PILOT continuation bit — we only punch full 8-byte RLD items.
+    low = f & 0x7E
 
     # Explicit ZCON-ish BFS values produced by ASSEMBLE_RLD_FLAGS
     if low in (0x2C, 0x28):  # code ZCON sector / sector+address
@@ -432,7 +811,10 @@ def write_pass_module(
             o = 12 + j * 8
             data[o : o + 2] = be16(r.rel_id)
             data[o + 2 : o + 4] = be16(r.pos_id)
-            data[o + 4] = pilot_rld_flags_to_pass(r.flags)
+            if r.pass_flags is not None:
+                data[o + 4] = r.pass_flags & 0xFF
+            else:
+                data[o + 4] = pilot_rld_flags_to_pass(r.flags)
             data[o + 5 : o + 8] = be24(r.address_hw * 2)
         out.write(make_card("RLD", data, seq))
         seq += 1
@@ -449,17 +831,23 @@ def write_pass_module(
     out.write(make_card("END", end_data, seq))
     seq += 1
 
-    # Optional CTL STACK for each SD that has stacksize (PASS standalone decks)
+    # Optional CTL STACK cards.  Prefer synthesized $0PROG names so
+    # lnk101's $ -> @ mapping yields @0PROG (same as PASS / stacksizer).
     if emit_ctl_stack:
-        for e in esd_items:
-            if e.kind == "SD" and e.stacksize_hw > 0:
-                # Free-format control card: not 0x02-led. PASS uses " STACK name"
-                text = f" STACK {e.name}"
-                card = blanks(80)
-                eb = to_ebcdic(text, min(len(text), 72))
-                card[0 : len(eb)] = eb
-                # Control cards don't use object sequence the same way; leave seq alone
-                out.write(bytes(card))
+        ctl_names = list(member.stack_ctl_names)
+        if not ctl_names:
+            ctl_names = [
+                e.name
+                for e in esd_items
+                if e.kind == "SD" and e.stacksize_hw > 0 and e.name.startswith("$")
+            ]
+        for cname in ctl_names:
+            # Free-format control card (not 0x02-led). PASS uses " STACK $0PROG"
+            text = f" STACK {cname}"
+            card = blanks(80)
+            eb = to_ebcdic(text, min(len(text), 72))
+            card[0 : len(eb)] = eb
+            out.write(bytes(card))
 
     return seq
 
@@ -555,10 +943,21 @@ def convert_cards_dir(
                     f"rld={len(member.rlds)}",
                     file=sys.stderr,
                 )
-            # Prefer $-prefixed SD with stack as the program CSECT (HAL/S PROGRAM)
-            for e in member.esd:
-                if e.kind == "SD" and e.stacksize_hw > 0 and e.name.startswith("$"):
-                    program_csect = e.name
+            # BFS PILOT omits PASS NOSDL stack linkage (@0 ER, #E PDE, LHI
+            # prologue).  Synthesize it so lnk101 allocates @-stacks.
+            synthesize_pass_stack_linkage(member, verbose=verbose)
+            # START must enter the PROGRAM ($0…), not a later TASK ($1…).
+            if member.stack_ctl_names:
+                program_csect = member.stack_ctl_names[0]
+            else:
+                for e in member.esd:
+                    if (
+                        e.kind == "SD"
+                        and e.stacksize_hw > 0
+                        and e.name.startswith("$")
+                    ):
+                        program_csect = e.name
+                        break
             seq = write_pass_module(
                 out,
                 member,
