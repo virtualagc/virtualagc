@@ -2975,8 +2975,25 @@ def generateObjectCode(source, macros):
                                     droppedBase = False
                                     if b2 != None and 0 <= b2 < len(using) \
                                             and using[b2] == None and \
-                                            d2 != None and unhash(d2)[0] != None:
+                                            d2 != None and unhash(d2)[0] != None \
+                                            and "$" not in operation:
                                         droppedBase = True
+                                    # `$` NAMES A BASE REGISTER, NOT AN INDEX.
+                                    # It selects the FORM, not the addressing:
+                                    # ap101s-notes.py records it as long-form
+                                    # with the addressing bits CLEAR and the
+                                    # second byte 0xF0 | base, established from
+                                    # the original binaries -- BILDNEW5's
+                                    # `BC$ 7,0(R2)` is C7F2 0000 where `BC@` is
+                                    # C7F6 5000.  So the reasoning above, that
+                                    # a register with no active USING against a
+                                    # relocatable symbol must be an index, does
+                                    # not apply: under `$` the programmer is
+                                    # promising the register holds the base.
+                                    # FCMTRACE's `BL$ FCMWRAP(R3)` is C2F3 001C
+                                    # in the original -- base 3, AM=0, and the
+                                    # displacement the symbol's own offset --
+                                    # against our C2F7 601C with R3 indexed.
                                     atStar = "@" in operation or "#" in operation \
                                         or (b2 != None and b2 > 3) or droppedBase
                                     if atStar and x2 == None:
@@ -3053,8 +3070,13 @@ def generateObjectCode(source, macros):
                                     # False here even though the operand plainly
                                     # carries `(R3)`.  Guarding on it changes
                                     # nothing at all, which cost two attempts.
+                                    # AND NOT WHEN THE FORM IS FORCED.  `$`
+                                    # selects the long form and sets `forceRS`
+                                    # through `argsRSonly`, which every other
+                                    # shortening path honours and this one did
+                                    # not, so a `BL$` was shortened anyway.
                                     elif operation in branchAliases and \
-                                            x2 in [None, 0]:
+                                            x2 in [None, 0] and not forceRS:
                                         d = d2 - (properties["pos1"] // 2 + symtab[sect]["value"] + 1)
                                         if d >= 0 and d < 0b111000:
                                             d = d & 0b111111
