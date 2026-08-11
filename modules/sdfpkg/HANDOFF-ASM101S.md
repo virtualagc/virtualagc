@@ -1014,6 +1014,57 @@ and printing its caller -- and it carries the THIRD copy of the SRS limit as
 its own `0b111000`, the others being in the forward-`BC` special case and in
 the main SRS arm.
 
+260 of 272, from 223 at the start of the day.
+
+    MATCH       260      MATCH?       4
+    DIFFERS       5      NOCOMPARE    3
+
+THE `$` SUFFIX WAS THREE SEPARATE DEFECTS and all three fell out of two
+sentences already recorded in `ap101s-notes.py` -- which is the lesson worth
+carrying: that database exists for undocumented corners of the language, the
+`$` entry was written on 2026-08-09 from the original binaries, and an hour was
+spent re-deriving it from listings before anybody looked.  SEARCH IT FIRST.
+
+    it forces the LONG form ..... `forceRS` is set through argsRSonly and every
+                                  shortening path honoured it except the
+                                  `elif operation in branchAliases` arm
+    it names a BASE register ..... `droppedBase` reclassified it as an index
+    it clears the ADDRESSING bits  so AM=0 and the displacement is absolute,
+                                  not PC-relative
+
+FCMTRACE, FCMTSYNC, FCMCSYNC and FCMISYNC came from those.  EACH FIX ALONE
+LOOKS LIKE A REGRESSION -- suppressing `droppedBase` without honouring
+`forceRS` took FCMTRACE from 5 mismatched bytes back to 47, because with `x2`
+unset the shortener ran again.
+
+AND A REGISTER IS AN INDEX ONLY IF SOMETHING ELSE IS THE BASE.  `@` and `#`
+select MSC and BCE addressing, which the code read as "the register in
+parentheses is an index"; it moved the register to `x2` and left `b2` alone
+when `unUsing` found no replacement, putting the same register in both fields.
+FCMTRACE's `ST@# R4,0(R2)` was 34F6 5800 against 34F6 1800.
+
+FCMSSYNC'S REMAINING 2 BYTES ARE NOT WHAT THEY LOOK LIKE, and two hypotheses
+were tested and killed before the real shape appeared.  Its `CNOP 2` is at an
+even halfword address, so the original pads nothing and the 77E7 there is the
+`XR R7,R7` that follows; we show D800.
+
+  NOT a CNOP parity bug.  Instrumenting the fill loop on the compile pass
+  prints `pass=3 pos1=40 halfword=20 target=0` -- even address, target 0, the
+  loop does not run.  Nothing is emitted.
+
+  NOT stale SECTION memory, though that is real and worth knowing: `memory` is
+  allocated once as `bytearray(defaultChunk)` and never cleared between passes,
+  so any byte a pass writes survives wherever a later pass does not write over
+  it.  Clearing it every pass was tried and changed NOTHING here.
+
+  IT IS STALE PER-STATEMENT BYTES.  The listing prints `00020 D800` for the
+  CNOP and `00020 77E7` for the XR -- the same address twice -- and the
+  comparison counts the assembled bytes recorded on each STATEMENT, not the
+  section image.  The CNOP is carrying object code from a pass on which it did
+  pad, and nothing clears it when a later pass emits nothing.  Look for where a
+  statement's assembled bytes are stored and make a pass that emits nothing
+  clear them.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
