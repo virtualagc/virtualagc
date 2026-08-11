@@ -936,7 +936,7 @@ class asmParser(Parser):
     def _constant_(self):
         with self._choice():
             with self._option():
-                self._pattern('-?[0-9]+')
+                self._pattern('[-+]?[0-9]+')
             with self._option():
                 self._token("X'")
                 self._pattern('[0-9A-F]+')
@@ -952,7 +952,7 @@ class asmParser(Parser):
                 self._token('*')
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" \'*\' -?[0-9]+'
+                '"B\'" "L\'" "X\'" \'*\' [-+]?[0-9]+'
             )
 
     @tatsumasu()
@@ -1692,8 +1692,8 @@ class asmParser(Parser):
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '-?[0-9]+ <constant> <identifier>'
-                '<subvar> <sv> <variable>'
+                '<constant> <identifier> <subvar> <sv>'
+                '<variable> [-+]?[0-9]+'
             )
 
     @tatsumasu()
@@ -1709,8 +1709,8 @@ class asmParser(Parser):
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '-?[0-9]+ <constant> <identifier>'
-                '<subvar> <sv> <variable>'
+                '<constant> <identifier> <subvar> <sv>'
+                '<variable> [-+]?[0-9]+'
             )
 
     @tatsumasu()
@@ -1776,8 +1776,8 @@ class asmParser(Parser):
                 'expecting one of: '
                 '"B\'" "L\'" "X\'" \'(\' \'*\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
-                '-?[0-9]+ <constant> <identifier>'
-                "<subvar> <sv> <variable> [NKLSI]'"
+                '<constant> <identifier> <subvar> <sv>'
+                "<variable> [-+]?[0-9]+ [NKLSI]'"
             )
 
     @tatsumasu()

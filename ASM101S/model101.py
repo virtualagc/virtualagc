@@ -3302,7 +3302,8 @@ def generateObjectCode(source, macros):
                 continue
 
             if operation in mscMemory or operation in mscBranch or \
-                    operation in mscImmediate or operation in ["@BC", "@BXC"]:
+                    operation in mscImmediate or operation in mscImmediate11 \
+                    or operation in ["@BC", "@BXC"]:
                 # The two-byte MSC instructions, in the three formats derived
                 # and checked against the original build.  See `mscMemory`,
                 # `mscBranch` and `mscImmediate` for where each opcode comes
@@ -3327,14 +3328,20 @@ def generateObjectCode(source, macros):
                         return value
                     return offset + sects.get(section, {}).get("offset", 0)
 
-                if operation in mscImmediate:
+                if operation in mscImmediate or operation in mscImmediate11:
                     value = mscField("A1")
                     if value == None:
                         error(properties, \
-                              "Could not evaluate %s operand" % operation)
+                              "Could not evaluate %s operand" % operation, \
+                                    severity = 255 if compile else 0)
                         toMemory(data)
                         continue
-                    if not -128 <= value <= 255:
+                    if operation in mscImmediate11:
+                        if not 0 <= value <= 0x7FF:
+                            error(properties, \
+                                  "%s operand %d does not fit in the 11-bit " \
+                                  "immediate field" % (operation, value))
+                    elif not -128 <= value <= 255:
                         error(properties, \
                               "%s operand %d does not fit in the 8-bit " \
                               "immediate field" % (operation, value))
@@ -3346,7 +3353,13 @@ def generateObjectCode(source, macros):
                               "operand begins is not established and the " \
                               "object code here may be WRONG" \
                               % (operation, value))
-                    data[0] = mscImmediate[operation]
+                    if operation in mscImmediate11:
+                        # An eleven-bit operand: opcode nibble, index flag,
+                        # then the value across both bytes.
+                        data[0] = (mscImmediate11[operation] << 4) \
+                                  | ((value >> 8) & 0x07)
+                    else:
+                        data[0] = mscImmediate[operation]
                     if "X1" in ast:
                         if operation in mscImmediateIndexable:
                             data[0] |= 0x08

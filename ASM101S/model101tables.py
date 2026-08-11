@@ -343,7 +343,22 @@ mscImmediateZeroOnly = { "@XAX", "@SIO", "@WAT", "@RFD", "@SFD", "@LMS",
 # short immediates: it is 0xD0 written plain and 0xD8 written `@RAW 0(1)`.
 # For the others an index is diagnosed rather than assumed to work the same
 # way, since a wrongly-placed index bit is silently wrong object code.
-mscImmediateIndexable = { "@RAW" }
+mscImmediateIndexable = { "@RAW", "@INT" }
+
+# THE MSC IMMEDIATES WHOSE FIELD IS ELEVEN BITS, not eight.  @INT's operand
+# reaches X'3FF', which does not fit the eight-bit field the others use, so the
+# value spills into the low three bits of the first byte and the opcode is a
+# nibble rather than a whole byte -- the same shape the BCE short formats have.
+#
+# Read off six instances in the OI301700 listings, all in FIOMCNTL's region:
+#
+#     @INT X'001'      3001        @INT X'3FF'(1)   3BFF
+#     @INT X'002'      3002        @INT 0(1)        3800
+#     @INT X'004'      3004        @INT 0(1)        3800
+#
+# so the opcode nibble is 3, bit 4 is the index flag exactly as it is for @RAW,
+# and the remaining eleven bits are the operand.
+mscImmediate11 = { "@INT": 0x3 }
 
 # THE FOUR-BYTE MSC INSTRUCTIONS.  The POO gives the layout on the @BU and
 # @CALL pages (II-40, II-41):

@@ -453,7 +453,11 @@ def evalArithmeticExpression(expression, \
         return None
             
     if isinstance(expression, str):
-        if expression.isdigit() or (expression.startswith("-") and expression[1:].isdigit()):
+        # A LEADING PLUS COUNTS AS A NUMBER, as a leading minus already did.
+        # FIOMCNTL writes `@TI +1`, and the token reached here as the string
+        # "+1", failed this test, and was looked up as a symbol of that name.
+        if expression.isdigit() or (expression[:1] in ["+", "-"] \
+                                    and expression[1:].isdigit()):
             return int(expression)
         sv = None
         if expression in svLocals:

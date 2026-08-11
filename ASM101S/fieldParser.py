@@ -257,7 +257,10 @@ subvar = sv ;
 sequenceSymbol = /[.][@#$A-Z][@#$A-Z0-9]*/ ;
 
 constant = 
-    | /-?[0-9]+/ 
+    # A LEADING PLUS IS ALLOWED, not only a leading minus.  FIOMCNTL writes
+    # `@TI +1`, which parsed as nothing at all.  The outer arithmeticExpression
+    # consumes an infix '+' before a term is tried, so `A+1` is unaffected.
+    | /[-+]?[0-9]+/ 
     | "X'" /[0-9A-F]+/ "'"
     | "B'" /[0-1]+/ "'" 
     | "L'" identifier
