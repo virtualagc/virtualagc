@@ -856,6 +856,45 @@ was masking.  It is still the largest single DIFFERS and still the best target;
 re-run the aligner in the entry above to find where its addresses first part
 company now.
 
+248 of 272.  FCMBOOT, FCMCBLKS, FIOMDPPG and FPMSDERR go byte-exact, RUNASM
+stays 205 of 205, nothing moves the other way.  6c89c6b6e.
+
+    MATCH       248      MATCH?       3
+    DIFFERS      18      NOCOMPARE    3
+
+A CORRECTION THAT MATTERS MORE THAN THE COUNT.  An earlier entry recorded
+FIOMDPPG's six bytes as an ORIGINAL-BUILD ANOMALY -- the magnitude of a
+negative offset in an unsigned field -- and said two samples was not enough to
+write a rule from.  That was wrong.  It was our defect, and the reasoning that
+declined to fix it was sound only because the evidence was thin; six more
+samples in FCMCBLKS made it legible.  The lesson is not "guess sooner" but
+that a deferred finding is worth re-opening when a second module joins it.
+
+THE MECHANISM.  A hashcode is `random << 36`, so a bare EXTRN has nothing below
+bit 36 and `FIOBRE-2` is `((random-1) << 36) + (2**36 - 2)`.  The borrow comes
+out of the HASHCODE ITSELF, not out of the four-bit buffer above the offset
+that exists to catch exactly this, so `unhash` returns None,None and the whole
+relocation branch is skipped; the raw low bits reach the object module.  The
+symbol is recoverable because its hashcode is one greater than the masked
+value.  Anything else that adds to or subtracts from a hashed symbol has this
+same trap under it.
+
+OST, LPS AND SSM reach backward with the AM=1 form and the `i` bit exactly as
+branches do -- there is nothing branch-specific about that encoding -- BUT ONLY
+FOR A LOCAL TARGET.  Adding them unguarded broke FIOPDHF, whose `OST
+R2,FIOBCES1+2` names an EXTRN and keeps the absolute form with its relocation.
+The guard needed a new test, because `extrnD2` is `d2 in rextrns` and `rextrns`
+is keyed by the bare hashcode, so an EXTRN carrying a displacement is absent
+from it.  `extrnBase` allows for the offset.  EXPECT THAT DISTINCTION AGAIN:
+several places test for an external operand and most of them test the bare form
+only.
+
+AND A NOTE ON THE HARNESS.  An intermediate `extrnBase` crashed on a None
+operand and the sweep reported FIOSVC and FPMIHPC2 as CRASH rather than
+NOCOMPARE.  That the classification changed at all is why the crash was noticed
+within one run; a harness that had lumped both under "failed" would have hidden
+it.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
