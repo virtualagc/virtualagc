@@ -548,3 +548,16 @@ def generateRS1(properties, mnemonic, ia, i, r1, d2, x2, b2):
         properties["adr2"] = d2
     return data
     
+
+# A SUFFIXED BRANCH ALIAS TAKES THE SAME CONDITION MASK as the plain one.
+# `$`, `@` and `#` select the instruction's form and set the `ia` and `i` bits,
+# both of which are derived from the mnemonic's text elsewhere; none of them
+# changes which condition is being tested.  The suffixed spellings were being
+# generated into `argsRSonly` and `argsSRSorRS` above, so they were recognised
+# as operations, but not into `branchAliases` -- so no mask was supplied, the
+# empty R1 field was evaluated as an expression instead, and five modules died
+# on "Could not evaluate R1 subfield" at cards like `BNZ$ FCMCSLPE` and
+# `BL$ FCMWRAP(R3)`.
+for _mnemonic in [_m for _m in list(argsRSonly) + list(argsSRSorRS)
+                  if _m[-1:] in ("$", "@", "#") and _m[:-1] in branchAliases]:
+    branchAliases[_mnemonic] = branchAliases[_mnemonic[:-1]]
