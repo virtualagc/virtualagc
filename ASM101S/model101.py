@@ -1138,6 +1138,7 @@ def generateObjectCode(source, macros):
     # unchanged if `False`.
     def commonProcessing(alignment=1, zero=False):
         global firstCSECT
+        nonlocal repeatPass
         nonlocal cVsD, sect, name, operation
         
         # Make sure we're in *some* CSECT or DSECT
@@ -1190,9 +1191,26 @@ def generateObjectCode(source, macros):
                 oldSect = symtab[name]["section"]
                 oldPos = symtab[name]["address"]
                 if oldSect != sect or oldPos != pos2:
-                    error(properties, 
-                          "Symbol %s address has changed: (%s,%d) -> (%s,%d)" \
-                          % (name, oldSect, oldPos, sect, pos2 ))
+                    # A LABEL THAT MOVES ASKS FOR ANOTHER PASS.  It is not an
+                    # error: instruction lengths are still settling, so a label
+                    # naturally shifts, and every instruction ALREADY assembled
+                    # on this pass used its old value.  Raising a diagnostic
+                    # and carrying on leaves those instructions wrong.
+                    #
+                    # This never fired anyway.  The guard above asks for
+                    # "preliminary" not to be in the entry, and nothing ever
+                    # removes that flag once the preliminary pass sets it, so
+                    # the whole check was dead for every label in the corpus.
+                    #
+                    # FIOPDHF is what it costs.  `BC 07-4,#@LB3` is assembled
+                    # at halfword 13 while #@LB3 still holds 45 from the pass
+                    # before; the label then settles to 44 further down the
+                    # same pass, and the branch keeps a displacement one too
+                    # large.  Its own listing prints the label at 00044 and the
+                    # branch reaching 00045.
+                    if compile:
+                        repeatPass = True
+            symtab[name].pop("preliminary", None)
             symtab[name].update( { "section": sect,  "address": pos2,
                              "value": symtab[sect]["value"] + pos2,
                              "debug": "%05X" % pos2,
@@ -1418,7 +1436,10 @@ def generateObjectCode(source, macros):
     
     repeatPass = False
     passCount = 0
-    while passCount < 3 or repeatPass:
+    # BOUNDED.  A layout that oscillates rather than settling would otherwise
+    # spin here forever; 20 is far above anything the corpus needs, the worst
+    # observed being 6.
+    while passCount < 3 or (repeatPass and passCount < 20):
         repeatPass = False
         passCount += 1
         metadata["passCount"] = passCount
