@@ -645,6 +645,52 @@ long-form addresses, and check that in DCICYC the 00637 branch exceeds 55 there
 and the 0063A branch does not.  If that holds, the rule is confirmed and worth
 implementing; if it does not, the hypothesis is dead and nothing was risked.
 
+THE EXPERIMENT PROPOSED IN THE ENTRY ABOVE WAS RUN, and it kills the
+"decide once from long-form addresses" hypothesis while replacing it with
+something sharper.  Instrumenting the forward-branch arm of `optimizeScratch`
+to print its decision for DCICYC's two branches gives:
+
+    run 1   #@LB260  pos1/2=606  value=64D  d=70  keep long
+    run 1   #@LB262  pos1/2=609  value=64C  d=66  keep long
+    run 2   #@LB260  pos1/2=605  value=636  d=48  SHORTEN
+    run 2   #@LB262  pos1/2=607  value=635  d=45  SHORTEN
+
+Deciding once, on the first look, would leave BOTH long.  Iterating to a fixed
+point, which is what we do, shortens BOTH.  The original does neither: it keeps
+#@LB260 long and shortens #@LB262.
+
+WHY THE ORIGINAL'S ANSWER IS THE SELF-CONSISTENT ONE, and this is the useful
+part.  In the original's converged layout #@LB260 and #@LB262 both sit at 00670.
+Shortening the branch at 00637 would put its SRS displacement at
+0x670 - 0x638 = 56, and `srsCeiling` is 56 exclusive, so it does NOT fit and the
+long form is forced.  The branch at 0063A gets 0x670 - 0x63B = 53, which fits.
+Each decision is correct GIVEN the layout it produces.
+
+Ours is equally self-consistent and equally correct as an assembly: shortening
+the first branch pulls the labels back to 0066F, whereupon its displacement is
+55 and does fit.  TWO FIXED POINTS EXIST and the question is only which one the
+original build settled on -- the conservative one, reached from above.
+
+So the rule to look for is not "when is the decision made" but "which direction
+is it approached from".  A shortening that is only valid BECAUSE it was taken is
+the thing to refuse; the original refuses it and we accept it.
+
+AND NOTE, unrelated but found on the way:  `optimizeScratch` is invoked as
+
+    for sect in sects:
+        optimizeScratch()
+
+and the function takes no argument and does not use `sect`.  It therefore runs
+once per control section over the whole source, which is why the trace above has
+two runs with different answers.  Whether that repetition is deliberate -- a
+crude way of iterating toward convergence -- or accidental is not established,
+but the number of iterations is currently the number of CSECTs and DSECTs in the
+module, which cannot be what anyone intended.  Anything done about the fixed
+point should settle this first, because the iteration count is the mechanism.
+
+Nothing was changed.  The instrumentation was removed and the tree is clean at
+this entry; 243 of 272 stands.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
