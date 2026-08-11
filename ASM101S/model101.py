@@ -701,7 +701,17 @@ def optimizeScratch():
                 literalPool = literalPools[literalPoolNumber]
                 index = literalIndex(literalPool, attributes)
                 if index == None:
-                    error(properties, "Literal not in literal pool")
+                    # NOT AN ERROR HERE.  `optimizeScratch` runs at the end of
+                    # pass 1 and nowhere else, and the pool it is consulting is
+                    # built during that same pass, so a literal whose operand is
+                    # a forward reference is legitimately absent at this moment.
+                    # All that follows is that this one instruction cannot have
+                    # its SRS/RS ambiguity resolved early; the compile passes
+                    # resolve it with a complete pool.  Raised at severity 255
+                    # it aborted the assembly instead, which is what made
+                    # DCICYC's 34 such literals fatal.
+                    error(properties, "Literal not in literal pool", \
+                          severity = 0)
                     entry["ambiguous"] = False
                     continue
                 offset = literalPool[3][index] + literalPool[1]
