@@ -895,6 +895,40 @@ NOCOMPARE.  That the classification changed at all is why the crash was noticed
 within one run; a harness that had lumped both under "failed" would have hidden
 it.
 
+TRIED AND REVERTED.  The proper fix for the borrow described above is not to
+recover the symbol afterwards but to stop the borrow happening: give a hashed
+symbol a non-zero value below bit 36 so subtraction has somewhere to borrow
+from.  The four-bit buffer field between the offset and the hashcode exists for
+exactly that and is simply never primed.
+
+The minimal form was tried -- `hashcodeBias = 1 << 32`, added by `getHashcode`
+and understood by `unhash`, which then reports a NEGATIVE offset (buffer
+borrowed to zero) instead of returning None,None.  The bias sits above every
+mask that reads an offset and below `hashcodeMask`, so positive offsets read
+correctly everywhere and the lookup key is unchanged.  Three `rextrns` lookups
+that mask the bias off needed it added back; the two point fixes above
+collapsed into one-line magnitude rules, which is the tidiness the change was
+for.
+
+It works for the modules it was aimed at -- FCMCBLKS, FIOMDPPG, FIOPDIPG and
+FIOPDHF all byte-exact -- AND IT BREAKS 51 OF THE 205 RUNASM MODULES, most with
+a signature of a few mismatched bytes and three missing.  So the representation
+is assumed in more places than the twenty masks that read it: `bceField`, for
+one, already resolves a hash and hands back a signed displacement, so code
+downstream of it sees a plain number and the ADDRESS layout had to test
+`first < 0` rather than unhash again.  There will be more of that shape.
+
+WORTH DOING PROPERLY, NOT WORTH BOLTING ON.  The payoff is latent-bug
+prevention across every arithmetic on a hashed symbol, and the corpus cannot
+show a gain because both symptoms are already fixed at 6c89c6b6e -- the only
+experimental outcomes available are "unchanged" and "regression", which is a
+poor position to iterate from.  Anyone taking it up should expect to chase the
+51 rather than to land it in one pass, and should start by asking which callers
+receive a hashed value and which receive an already-resolved one, because the
+code does not distinguish them by type and that is the actual defect underneath.
+
+The tree is clean at 248 of 272; nothing of this was kept.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
