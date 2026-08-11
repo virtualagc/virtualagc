@@ -2867,13 +2867,72 @@ MONITOR9(uint32_t op) {
     r = ibm_dp_div(op0, op1);
   }
   else if (op == 5) {
-    /* a**b — fall back to libm. Convert IBM->IEEE, pow, IEEE->IBM. */
-    double a = ibm_dp_to_double(op0 >> 32, (uint32_t)op0);
-    double b = ibm_dp_to_double(op1 >> 32, (uint32_t)op1);
-    if (a == 0 && b == 0)
-      abend("Zero to the power zero");
-    ibm_dp_from_double(&msw, &lsw, pow(a, b));
-    r = ((uint64_t)msw << 32) | lsw;
+    /* a**b — port of the original MONITOR.bal EXPON routine (cards
+     * 00289400-00293000).  When the exponent b is an exact integer n with
+     * |n| < 2**24 (EXPON's AW-unnormalize test plus its OC 9(4,4) size
+     * check), the original does LSB-first binary square-and-multiply in
+     * S/360 truncating hex FP; for a NEGATIVE exponent it patches the MDR
+     * into DDR, i.e. the accumulator (init 1.0) is DIVIDED by the running
+     * power at each set bit — never positive-power-then-reciprocal.  The
+     * truncation points matter: e.g. 10**(-6) must come out as
+     * X'3C10C6F7A0B5ED8C' (= (1.0 DDR 100) DDR 10000), where the libm
+     * round-trip lands an ULP away.  Non-integer or oversized exponents fall back to libm pow() as
+     * before (the original went through its hex LOG/EXP routines there).
+     */
+    uint64_t b_mant = IBM_DP_MANT(op1);
+    int b_exp = IBM_DP_EXP(op1);
+    int b_neg = IBM_DP_SIGN(op1) != 0;
+    int is_int = 0;
+    uint32_t n = 0;
+    if (b_mant == 0) {          /* b == +/-0 → n = 0 */
+      is_int = 1;
+      n = 0;
+      b_neg = 0;
+    } else {
+      /* Number of hex digits of the mantissa below the binary point. */
+      int k = IBM_DP_EXP_BIAS + IBM_DP_MANT_HEXDIGITS - b_exp;
+      if (k <= 0) {
+        ;  /* |b| >= 16**14: far beyond EXPON's 24-bit limit — fallback */
+      } else if (k < IBM_DP_MANT_HEXDIGITS &&
+                 (b_mant & ((1ULL << (4 * k)) - 1)) == 0) {
+        uint64_t mag = b_mant >> (4 * k);
+        if (mag < (1ULL << 24)) {
+          is_int = 1;
+          n = (uint32_t)mag;
+        }
+      }
+      /* k >= 14 with a nonzero mantissa: |b| < 1 and non-integer. */
+    }
+    if (is_int) {
+      /* EXPON returns RC=1 (error) for 0 ** nonpositive-integer. */
+      if ((op0 & IBM_DP_MANT_MASK) == 0 && (b_neg || n == 0))
+        return 1;
+      uint64_t acc = 0x4110000000000000ULL;  /* D#ONE */
+      uint64_t base = op0;
+      while (n != 0) {
+        int bit = n & 1;
+        n >>= 1;
+        if (bit) {
+          if (b_neg) {
+            if ((base & IBM_DP_MANT_MASK) == 0)
+              return 1;  /* running power underflowed to 0: divide fault */
+            acc = ibm_dp_div(acc, base);
+          } else
+            acc = ibm_dp_mul(acc, base);
+        }
+        if (n != 0)
+          base = ibm_dp_mul(base, base);  /* MDR 0,0 */
+      }
+      r = acc;
+    } else {
+      /* Fall back to libm. Convert IBM->IEEE, pow, IEEE->IBM. */
+      double a = ibm_dp_to_double(op0 >> 32, (uint32_t)op0);
+      double b = ibm_dp_to_double(op1 >> 32, (uint32_t)op1);
+      if (a == 0 && b == 0)
+        abend("Zero to the power zero");
+      ibm_dp_from_double(&msw, &lsw, pow(a, b));
+      r = ((uint64_t)msw << 32) | lsw;
+    }
   }
   else if (op >= 6 && op <= 11) {
     /* Unary transcendentals — same IEEE round-trip as before. */
