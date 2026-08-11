@@ -929,6 +929,48 @@ code does not distinguish them by type and that is the actual defect underneath.
 
 The tree is clean at 248 of 272; nothing of this was kept.
 
+253 of 272.  FCMDSCRM, FCMMGPOV, FCMSVC, FIOMGCV and FPMTMENQ go byte-exact and
+FIOCGR loses all 43 of its mismatches.  RUNASM 205 of 205.  1516690d8.
+
+    MATCH       253      MATCH?       3
+    DIFFERS      13      NOCOMPARE    3
+
+THE DEFECT IS ANOTHER CONSEQUENCE OF PRE-EXPANSION, and the third distinct kind
+found this way -- after the vestigial invocations and the stray literal-pool
+cards, both of which were fixed in the SOURCE.  This one had to be fixed in the
+ASSEMBLER, because the residue is not a spurious card but a MISSING one: a
+continuation marker pointing at a card the splice displaced.
+
+    103  LR    R2,R7    GET LOCAL/REMOTE I/O DATA BUFFER    X007100AA
+    104        CHI      R6,2                                 03-POPIN
+
+The X continues onto what used to be a comment card.  The expansion now stands
+there and was eaten as the continuation, so `CHI R6,2` never assembled and every
+later address ran four bytes low.  Note how it PRESENTED: 43 scattered
+mismatches spread through the module, not "an instruction is missing".  A
+uniform shift downstream of one dropped statement looks like widespread
+corruption, and the aligner is what turns it back into a single cause.
+
+THE RULE.  Columns 73-80 read `nn-NAME` on a generated card and a sequence
+number on a typed one, so a generated card cannot be the continuation of a
+typed card -- it was not in the deck when that column 72 was punched.
+
+THREE GATES CONSUME A CONTINUATION and a spliced card has to clear all of them.
+Two attempts changed NOTHING MEASURABLE because each fixed one gate and the
+next still dropped the card:
+
+  - `joinOperand` in fieldParser.py reads column 72 off the card itself.  It
+    already declined to APPEND a comment continuation to the operand but
+    consumed it regardless; it needed its own guard because it never consults
+    the flag.
+  - the caller of `parseLine` discards a card whose predecessor continues.
+  - `generateObjectCode` keeps its own `continuation` flag and skips likewise.
+
+The last two read `properties["continues"]`, so correcting that flag where it is
+COMPUTED fixes both; that is the edit worth copying if this comes up again.
+When a change to continuation handling appears to do nothing, suspect a second
+gate before suspecting the rule.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
