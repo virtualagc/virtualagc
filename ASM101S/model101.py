@@ -1442,6 +1442,13 @@ def generateObjectCode(source, macros):
     while passCount < 3 or (repeatPass and passCount < 20):
         repeatPass = False
         passCount += 1
+        # THE RELOCATIONS BELONG TO THE PASS THAT PRODUCED THEM.  They used to
+        # be recorded on pass 3 exactly and never cleared, which was safe only
+        # while pass 3 was always the last.  It no longer is: a label that moves
+        # now asks for another pass, so a module can run to 4 or beyond and would
+        # have kept addresses from a layout that later shifted.  Clearing here and
+        # recording on every compile pass leaves the final pass's set standing.
+        relocations.clear()
         metadata["passCount"] = passCount
         svGlobals["_passCount"] = passCount
         collect = (passCount in [1, 2])
@@ -2089,7 +2096,7 @@ def generateObjectCode(source, macros):
                                     if symbolName not in extrns:
                                         extrns.add(symbolName)
 
-                                if passCount == 3:
+                                if compile:
                                     pos1 = sects[sect]["pos1"]
                                     relocations.append({
                                         'symbol': symbolName,
@@ -2513,7 +2520,7 @@ def generateObjectCode(source, macros):
                                     # is never relocated.  objectWriter gives
                                     # anything that is not Y or Z the 4-byte
                                     # flags, 0x1C, which is what this wants.
-                                    if passCount == 3:
+                                    if compile:
                                         rldSymbol = aSect
                                         for sn, sd in sects.items():
                                             if sd.get("dsect") or \
@@ -2581,7 +2588,7 @@ def generateObjectCode(source, macros):
                                               "Cannot evaluate Y-type constant")
                                     v = 0
                                 ySect, yOffset = unhash(v)
-                                if ySect is not None and passCount == 3:
+                                if ySect is not None and compile:
                                     combinedOffset = yOffset + sects.get(ySect, {}).get("offset", 0)
                                     # Resolve actual CSECT from combined offset
                                     rldSymbol = ySect
@@ -3119,7 +3126,7 @@ def generateObjectCode(source, macros):
                                                 d1 > -2048 and d1 < 0:
                                             if extrnD2:
                                                 data = generateRS0(properties, operation, r1, 0, 3)
-                                                if passCount == 3:
+                                                if compile:
                                                     rldAddr = sects[sect]["pos1"] + 2  # byte offset of displacement field
                                                     relocations.append({
                                                         'symbol': rextrns[originalD2],
@@ -3177,7 +3184,7 @@ def generateObjectCode(source, macros):
                                                         rextrns[d2 & hashcodeMask]
                                                     d0 = d2 & 0xFFFFFFFF
                                                 b2 = 3
-                                                if passCount == 3:
+                                                if compile:
                                                     rldAddr = sects[sect]["pos1"] + 2  # byte offset of displacement field
                                                     relocations.append({
                                                         'symbol': externalSymbol,
@@ -3191,7 +3198,7 @@ def generateObjectCode(source, macros):
                                                         "offset" in sects[section]:
                                                     d0 = offset + sects[section].get("offset", 0) - sects[sect].get("offset", 0)
                                                     b2 = 3
-                                                    if passCount == 3:
+                                                    if compile:
                                                         rldSymbol = section
                                                         for sn, sd in sects.items():
                                                             if sd.get("dsect") or "offset" not in sd:
