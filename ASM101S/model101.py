@@ -1795,7 +1795,8 @@ def generateObjectCode(source, macros):
                     continue
                 newPos = startingPos1 + 2 * offset
                 if newPos < 0:
-                    error(properties, "ORG out of range")
+                    error(properties, "ORG out of range", \
+                          severity = 255 if compile else 0)
                     continue
                 sects[sect]["pos1"] = newPos
                 if newPos > sects[sect]["used"]:
@@ -2336,7 +2337,8 @@ def generateObjectCode(source, macros):
                             if lengthModifier < 1:
                                 error(properties, \
                                       "Length modifier %d is out of range" % \
-                                      lengthModifier)
+                                      lengthModifier, \
+                                            severity = 255 if compile else 0)
                                 continue
                             length = lengthModifier
                             multiplier = 1 << (8 * length - 1)
@@ -2930,7 +2932,8 @@ def generateObjectCode(source, macros):
                                             x2 = b2
                                             b2 = None
                                         else:
-                                            error(properties, "B2 out of range")
+                                            error(properties, "B2 out of range", \
+                                                  severity = 255 if compile else 0)
                                             done = True
                                     opcode = argsSRSorRS[operation]
                                     # `forceAM0` is purely empirical.
@@ -3109,7 +3112,8 @@ def generateObjectCode(source, macros):
                                             elif operation == "BCTB":
                                                 ib2 = 0b11
                                             if d >= srsCeiling:
-                                                error(properties, "SRS displacement out of range")
+                                                error(properties, "SRS displacement out of range", \
+                                                      severity = 255 if compile else 0)
                                             if len(data) == 4: ###DEBUG###
                                                 pass
                                             data = generateSRS(properties, operation, r1, d, ib2)
@@ -3149,7 +3153,8 @@ def generateObjectCode(source, macros):
                                             if x2 == None:
                                                 x2 = 0
                                             if x2 < 0 or x2 > 7:
-                                                error(properties, "X2 out of range")
+                                                error(properties, "X2 out of range", \
+                                                      severity = 255 if compile else 0)
                                                 x2 = 0
                                             data = generateRS1(properties, operation, ia, i, r1, d1, x2, ib2)
                                         elif x2 == None and not ia and not i:
@@ -3412,11 +3417,13 @@ def generateObjectCode(source, macros):
                         if not 0 <= value <= 0x7FF:
                             error(properties, \
                                   "%s operand %d does not fit in the 11-bit " \
-                                  "immediate field" % (operation, value))
+                                  "immediate field" % (operation, value), \
+                                        severity = 255 if compile else 0)
                     elif not -128 <= value <= 255:
                         error(properties, \
                               "%s operand %d does not fit in the 8-bit " \
-                              "immediate field" % (operation, value))
+                              "immediate field" % (operation, value), \
+                                    severity = 255 if compile else 0)
                     if value != 0 and operation in mscImmediateZeroOnly:
                         error(properties, \
                               "%s is written with a non-zero operand, %d.  " \
@@ -3467,7 +3474,8 @@ def generateObjectCode(source, macros):
                         error(properties, \
                               "%s is %d halfwords away, out of range of the " \
                               "11-bit PC-relative displacement" \
-                              % (operation, displacement))
+                              % (operation, displacement), \
+                                    severity = 255 if compile else 0)
                     word = (mscMemory[operation] << 12) | (indexed << 11) | \
                            (displacement & 0x7FF)
                 else:
@@ -3490,7 +3498,8 @@ def generateObjectCode(source, macros):
                         error(properties, \
                               "%s is %d halfwords away, out of range of the " \
                               "8-bit PC-relative displacement" \
-                              % (operation, displacement))
+                              % (operation, displacement), \
+                                    severity = 255 if compile else 0)
                     word = (0x20 | (indexed << 3) | condition) << 8 | \
                            (displacement & 0xFF)
                 data[0] = (word >> 8) & 0xFF
@@ -3539,7 +3548,8 @@ def generateObjectCode(source, macros):
                         error(properties, \
                               "The first operand of %s is %d, outside the " \
                               "5-bit field it is placed in" \
-                              % (operation, field))
+                              % (operation, field), \
+                                    severity = 255 if compile else 0)
                 address = mscLongField("A1")
                 if address == None:
                     # Quiet on the collecting passes.  FIOHISAM writes
@@ -3556,7 +3566,8 @@ def generateObjectCode(source, macros):
                 if not -0x20000 <= address <= 0x3FFFF:
                     error(properties, \
                           "The address operand of %s is %d, outside the " \
-                          "18-bit address field" % (operation, address))
+                          "18-bit address field" % (operation, address), \
+                                severity = 255 if compile else 0)
                 word = (0xF << 28) | ((1 if "X1" in ast else 0) << 27) | \
                        (subop << 24) | ((field & 0x1F) << 19) | \
                        (mbit << 18) | (address & 0x3FFFF)
@@ -3655,7 +3666,8 @@ def generateObjectCode(source, macros):
                     if not 0 <= first <= 31:
                         error(properties, \
                               "The IUA of %s is %d, outside its 5-bit field" \
-                              % (operation, first))
+                              % (operation, first), \
+                                    severity = 255 if compile else 0)
                     field = ((first & 0x1F) << 19) | (second & 0x7FFFF)
                     data[1] = (field >> 16) & 0xFF
                     data[2] = (field >> 8) & 0xFF
@@ -3715,11 +3727,13 @@ def generateObjectCode(source, macros):
                         error(properties, \
                               "The transfer count of %s is %d, outside the " \
                               "5-bit field it is placed in" \
-                              % (operation, count))
+                              % (operation, count), \
+                                    severity = 255 if compile else 0)
                     if not -128 <= displacement <= 255:
                         error(properties, \
                               "The displacement of %s is %d, outside its " \
-                              "8-bit field" % (operation, displacement))
+                              "8-bit field" % (operation, displacement), \
+                                    severity = 255 if compile else 0)
                     word = (bceShort2[operation] << 13) | \
                            ((count & 0x1F) << 8) | (displacement & 0xFF)
                 else:
@@ -3736,12 +3750,14 @@ def generateObjectCode(source, macros):
                             error(properties, \
                                   "%s is %d halfwords away, out of range of " \
                                   "the 11-bit displacement" \
-                                  % (operation, displacement))
+                                  % (operation, displacement), \
+                                        severity = 255 if compile else 0)
                     elif not -1024 <= displacement <= 2047:
                         error(properties, \
                               "The operand of %s is %d, outside the 11-bit " \
                               "field it is placed in" \
-                              % (operation, displacement))
+                              % (operation, displacement), \
+                                    severity = 255 if compile else 0)
                     word = (opcode << 12) | (mbit << 11) | \
                            (displacement & 0x7FF)
                 data[0] = (word >> 8) & 0xFF
