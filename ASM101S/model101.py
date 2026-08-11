@@ -2674,6 +2674,39 @@ def generateObjectCode(source, macros):
                                               "Cannot evaluate Y-type constant")
                                     v = 0
                                 ySect, yOffset = unhash(v)
+                                if ySect == None:
+                                    # A NEGATIVE OFFSET FROM AN EXTERNAL SYMBOL
+                                    # borrows out of the 32-bit offset field
+                                    # into the four-bit buffer above it, and
+                                    # `unhash` returns None,None for any value
+                                    # whose buffer is dirty.  The relocation
+                                    # below was therefore never emitted and the
+                                    # low sixteen bits fell through raw:
+                                    # FCMCBLKS' `DC Y(CZ2VNOMB-1)` assembled
+                                    # FFFF where the original has 0001.  The
+                                    # hashcode itself survives the borrow, so
+                                    # the symbol is still recoverable.
+                                    #
+                                    # THE ORIGINAL EMITS THE MAGNITUDE, not the
+                                    # two's complement -- eight instances, six
+                                    # at -1 in FCMCBLKS and two at -2 in
+                                    # FIOMDPPG, and the field is an unsigned
+                                    # address the linker adds the symbol to.
+                                    # Positive offsets are untouched and go on
+                                    # matching, as FIOPDIPG's dozens do.
+                                    # A hashcode is `random << 36`, so a bare
+                                    # symbol has zeros below bit 36 and
+                                    # subtracting from it borrows out of the
+                                    # HASHCODE, not out of the buffer field:
+                                    # `hash - n` is `((random-1) << 36) +
+                                    # (2**36 - n)`.  The symbol is therefore
+                                    # the one whose hashcode is one greater.
+                                    _yHash = (v & hashcodeMask) + (1 << 36)
+                                    _yLow = v & 0xFFFFFFFFF
+                                    if _yHash in hashcodeLookup and \
+                                            _yLow >= (1 << 35):
+                                        ySect = hashcodeLookup[_yHash]
+                                        yOffset = abs(_yLow - (1 << 36))
                                 if ySect is not None and compile:
                                     combinedOffset = yOffset + sects.get(ySect, {}).get("offset", 0)
                                     # Resolve actual CSECT from combined offset
@@ -2863,6 +2896,14 @@ def generateObjectCode(source, macros):
                             err, d2 = evalInstructionSubfield(properties, "D2", ast, symtab)
                         originalD2 = d2
                         extrnD2 = (d2 in rextrns)
+                        # IS THE OPERAND EXTERNAL AT ALL, offset or not?
+                        # `rextrns` is keyed by the bare hashcode, so an EXTRN
+                        # carrying a displacement -- `FIOBCES1+2`, which keeps
+                        # the symbol in the hashcode and the 2 in the low bits
+                        # -- is absent from it and `extrnD2` is False.
+                        extrnBase = extrnD2 or \
+                                    (d2 != None and \
+                                     (d2 & hashcodeMask) in rextrns)
                         if not err and d2 != None: 
                             properties["adr1"] = d2 & 0xFFFF
                             err, b2 = evalInstructionSubfield(properties, "B2", ast, symtab)
@@ -3247,7 +3288,32 @@ def generateObjectCode(source, macros):
                                         # 0.  PC-0 and PC+0 are the same address,
                                         # so both encodings are correct and only
                                         # one of them is what was built.
-                                        elif operation in ["BC", "BIX", "BAL", "BCT"] and \
+                                        # `OST`, `LPS` and `SSM` REACH BACKWARD
+                                        # THE SAME WAY.  Nothing about this
+                                        # encoding is peculiar to branches: a
+                                        # section-relative reference to a lower
+                                        # address is written AM=1 with the `i`
+                                        # bit and the magnitude, whatever the
+                                        # operation.  FCMBOOT's
+                                        # `OST R5,FCMBEX0N+2` assembled
+                                        # 2DFB 007E -- AM=0 with the absolute
+                                        # section offset 0x7E -- where the
+                                        # original has 2DFF 08C9, the same
+                                        # address reached as 0x147 - 0xC9.
+                                        # FPMSDERR's `SSM FPMAREGS` is the same
+                                        # instruction shape.
+                                        # ONLY FOR A LOCAL TARGET.  An EXTRN is
+                                        # resolved by the linker, so it keeps
+                                        # the absolute form and its relocation:
+                                        # FIOPDHF's `OST R2,FIOBCES1+2` is the
+                                        # same instruction against an EXTRN and
+                                        # the original assembles it 2AFB 0002,
+                                        # not the backward form.  Guarding only
+                                        # the three new operations leaves the
+                                        # branch mnemonics exactly as they were.
+                                        elif (operation in ["BC", "BIX", "BAL", "BCT"] or \
+                                              (operation in ["OST", "LPS", "SSM"] \
+                                               and not extrnBase)) and \
                                                 x2 in [None, 0] and \
                                                 d1 > -2048 and d1 <= 0:
                                             if extrnD2:
@@ -3771,6 +3837,19 @@ def generateObjectCode(source, macros):
                     second = 0
 
                 if layout == "ADDRESS":
+                    # THE SAME BORROW as the Y constant above.  `#LBR@ FIOBRE-2`
+                    # with FIOBRE an EXTRN evaluates to `hash - 2`, whose low
+                    # 24 bits are FFFFFE; FIOMDPPG assembled FAFF FFFE where
+                    # the original has FA00 0002.  The POO gives this field as
+                    # an 18-bit unsigned address, in which a negative constant
+                    # cannot be represented at all, and the original writes the
+                    # magnitude.  Positive offsets already work -- FIOPDIPG's
+                    # `#LBR@ FIOPDBR+2` and its dozens of fellows match -- and
+                    # are untouched, the test below being false for them.
+                    _bHash = (first & hashcodeMask) + (1 << 36)
+                    _bLow = first & 0xFFFFFFFFF
+                    if _bHash in hashcodeLookup and _bLow >= (1 << 35):
+                        first = abs(_bLow - (1 << 36))
                     field = first & 0xFFFFFF
                     data[1] = (field >> 16) & 0xFF
                     data[2] = (field >> 8) & 0xFF
