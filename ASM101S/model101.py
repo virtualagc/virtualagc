@@ -2402,11 +2402,32 @@ def generateObjectCode(source, macros):
                                     v = int("".join(exp1)) & mask
                                 else:
                                     exp1 = "".join(exp1)
-                                    v = float(exp1) * scaleFactor * multiplier
-                                    if v >= multiplier:
-                                        v = multiplier - 1
-                                    elif v <= -multiplier:
-                                        v = -multiplier + 1
+                                    # THE SCALED VALUE IS TAKEN AS A FRACTION OF
+                                    # THE FIELD ONLY WHEN IT IS ONE, which is
+                                    # the rule `evalLiteralAttributes` has
+                                    # always applied to the identical constant
+                                    # written as a literal, and this path did
+                                    # not: it multiplied by the field width
+                                    # unconditionally.  `DC F'1800E6'` is
+                                    # 1800000000, a fullword integer with room
+                                    # to spare, and became 1.8e9 x 2^31 clamped
+                                    # to 7FFFFFFF.
+                                    #
+                                    # IT IS NOT "UNSCALED MEANS INTEGER".  That
+                                    # was tried and it broke CTOI, ETOC, ITOC
+                                    # and KTOC, all of which write `DC F'0.625'`
+                                    # with no scale modifier at all and expect
+                                    # 50000000.  Magnitude decides it, not the
+                                    # presence of an S:  0.625 is a fraction,
+                                    # 1800E6 is a count, and `DC FS4'10'` is
+                                    # 0.625 once the scale has been applied.
+                                    v = float(exp1) * scaleFactor
+                                    if v > -1.0 and v < 1.0:
+                                        v *= multiplier
+                                        if v >= multiplier:
+                                            v = multiplier - 1
+                                        elif v <= -multiplier:
+                                            v = -multiplier + 1
                                     v = round(v) & mask
                                 j = (length - 1) * 8
                                 for i in range(length):
@@ -3086,7 +3107,22 @@ def generateObjectCode(source, macros):
                                             if "adr1" in properties:
                                                 properties.pop("adr1")
                                             properties["adr2"] = d2 & 0x3F
+                                        # NOT WHEN A `USING` SUPPLIED THE BASE
+                                        # REGISTER.  By this point `d2` has been
+                                        # replaced by the offset from that
+                                        # register, so a symbol reached through
+                                        # `USING CDDLOCAL,R1` arrives here as a
+                                        # small number and matches -- and this
+                                        # branch then throws the register away
+                                        # and addresses the symbol relative to
+                                        # the instruction counter instead.
+                                        # DCICYC's `LA R2,CLOCIOR` assembled
+                                        # EAF7 0012, the 0x12 being 0x58 - 0x46,
+                                        # where the original has EAF1 0058:
+                                        # base register 1, displacement 0x58,
+                                        # exactly what the USING says.
                                         elif operation == "LA" and \
+                                                not usingB2 and \
                                                 x2 == None and b2 != None \
                                                 and d2 > -2048 and d2 < 2048:
                                             if d2 >= 0 and d2 < srsCeiling and len(data) == 2:
