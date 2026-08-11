@@ -3271,12 +3271,6 @@ def generateObjectCode(source, macros):
                 commonProcessing(1)
                 ast = properties["ast"]
                 fill = cnopFills[operation]
-                if fill == None:
-                    error(properties, \
-                          "%s is not implemented: its fill instruction is " \
-                          "unknown, no instance needing one having been seen " \
-                          "in the original build" % operation)
-                    continue
                 if ast == None:
                     error(properties, "%s requires an operand" % operation)
                     continue
@@ -3288,7 +3282,22 @@ def generateObjectCode(source, macros):
                     continue
                 target = halfwords % 2
                 # `pos1` is a byte offset, so the halfword address is pos1//2.
+                # AN ALREADY-ALIGNED CNOP NEEDS NO FILL, and so needs no known fill
+                # instruction.  The diagnostic below used to be raised on sight of
+                # the directive, rejecting a whole module over an alignment that was
+                # already satisfied:  FIODDUPG's `#CNOP 2` sits at 00018 and the
+                # statement after it is at 00018 too, so the original build emitted
+                # nothing there either.  Complain only when a gap must actually be
+                # filled -- which is also the only case in which the fill value could
+                # be read off a listing.
                 while (sects[sect]["pos1"] // 2) % 2 != target:
+                    if fill == None:
+                        error(properties, \
+                              "%s needs to fill a gap here, and its fill " \
+                              "instruction is unknown -- no instance needing " \
+                              "one has been seen in the original build" \
+                              % operation)
+                        break
                     toMemory(bytearray(fill))
                 continue
 
