@@ -816,6 +816,46 @@ using the previous pass's sizes so that its addresses are.  Both are structural
 and neither should be attempted without both harnesses and someone watching:
 243 byte-exact modules currently depend on the present behaviour.
 
+IT WORKED, and the entry above was right about where it had to go.
+
+`srsBranchCeiling = 54`, applied where the instruction is ENCODED rather than
+where `optimizeScratch` decides.  FCMBMAN goes from 157 mismatched bytes to
+zero, the corpus goes 243 to 244, RUNASM stays 205 of 205, and DCICYC's
+`BC 07-1,#@LB260` at DCICYC.asm line 646 finally assembles as C6F7 0037
+reaching 00670 -- the original's bytes exactly.
+
+    MATCH       244      MATCH?       3
+    DIFFERS      22      NOCOMPARE    3
+
+THE SAFETY ARGUMENT, which is why this was worth trying rather than agonising
+over: the 243 modules that already matched ARE the original's bytes, so every
+SRS branch displacement in them is 53 or less, and a limit that only bites at
+54 cannot fire in any of them.  The sweep bears it out -- exactly one module
+changes and it changes to MATCH.
+
+TWO ATTEMPTS PLACED THE LIMIT IN THE WRONG ARM AND CHANGED NOTHING AT ALL.  The
+obvious home is the `# Is SRS.` arm of the big if-chain, and a print there shows
+it is never reached for this instruction.  A forward `BC` is caught earlier by
+a special case of its own --
+
+    elif operation == "BC" and d >= 0 and d < 0b111000:
+        data = generateSRS(properties, "BCF", r1, d & 0b111111, 0b00)
+        done = True
+
+-- which carries its own copy of the limit as a literal and sets `done`,
+bypassing the chain.  Instrumenting `generateSRS` itself, and printing the
+caller from `traceback.extract_stack()`, is what found it in one run after two
+readings of the chain had failed.  THERE MAY BE MORE COPIES OF THAT CONSTANT:
+`0b111000` and `0x38` both appear as SRS limits elsewhere, and anything else
+that changes the SRS rule should grep for both before assuming one edit covers
+it.
+
+DCICYC IS NOT FIXED and rose slightly, 1983 mismatched bytes to 2067.  Its line
+646 is now correct, so what remains is something further on that the old layout
+was masking.  It is still the largest single DIFFERS and still the best target;
+re-run the aligner in the entry above to find where its addresses first part
+company now.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
