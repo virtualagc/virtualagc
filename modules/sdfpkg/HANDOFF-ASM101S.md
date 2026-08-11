@@ -354,27 +354,26 @@ usually easier kind of bug.  Fourteen such modules led straight to the A
 constant.
 
 THE THREE LEADS THAT REMAIN, from decoding the cheapest cases:
+[ALL THREE ARE NOW RESOLVED; kept because two of them show how the reasoning
+ went wrong.  See the entry below for where the DIFFERS actually stand.]
 
-  1. FLOATING-POINT ROUNDING.  FPMUPMTU's `FPM15MS DC E'0.015'` assembles
-     3F3D70A3 where the original has 3F3D70A4, one in the last place.  Look at
-     toFloatIBM's rounding, not at anything structural.  Several other E and D
-     constants across the corpus are likely the same.
+  1. FLOATING-POINT ROUNDING.  FIXED.  toFloatIBM builds a 56-bit fraction and
+     a short E constant keeps only its top 24 bits; dropping the rest truncated
+     where the original rounds.  `DC E'0.015'` gave 3F3D70A3 for 3F3D70A4.
 
-  2. AN OFF-BY-FIVE DISPLACEMENT THAT IS NOT UNDERSTOOD.  FPMZSYNC's
-     `LH R5,TICCXMTR` under a single `USING TFICC,R2` assembles 9DF6,
-     displacement 61, where the original has 9DF2, displacement 60.  BUT the
-     DSECT layouts are byte-identical in both listings -- TICCXMTR sits at
-     offset 0x41, 65 -- and 65 does not fit the six-bit SRS displacement field
-     at all.  So neither 60 nor 61 is simply the offset, and the unit or the
-     origin of an SRS displacement into a DSECT is not what it appears.  DO NOT
-     patch this by adding a constant until that is understood; the same
-     instruction appears twice in FPMZSYNC and both are wrong by one.
+  2. AN OFF-BY-FIVE DISPLACEMENT THAT IS NOT UNDERSTOOD.  THIS DIAGNOSIS WAS
+     WRONG.  It read FPMZSYNC's `9DF6 0041` as a two-byte SRS instruction whose
+     six-bit displacement could not hold TICCXMTR's offset of 65, and built a
+     puzzle on that.  It is a FOUR-byte RS instruction; its displacement 0x0041
+     is correct in both builds; and the single wrong bit is 0b100, the AM=1
+     marker.  COUNT THE BYTES IN THE OBJECT-CODE FIELD BEFORE THEORISING --
+     two hexadecimal groups are four bytes, not two.
 
-  3. FPMCANCL AND FPMTMHAL are 0 mismatched with 1 and 2 bytes missing, and the
-     missing bytes are inside DSECTs -- "Missing object code from section
-     TFPDE", "... TFTHALPL".  A DSECT emits no object code, so either those
-     listings are showing something a DSECT can legitimately produce, or the
-     comparison should not be looking there.  Settle which before writing code.
+  3. FPMCANCL AND FPMTMHAL, missing bytes inside DSECTs.  FIXED, and it was the
+     comparison at fault rather than the assembler: a listing prints the
+     literal pool after the last DSECT with no CSECT card to close it, so
+     readListing filed the pool's bytes under the dummy section.  The bytes
+     were right all along.
 
 AND THE ALGORITHM ITSELF MAY BE DUE FOR SIMPLIFICATION.  Ron notes that the
 SRS/RS selection was devised empirically without knowing what USING was.  Half
@@ -386,9 +385,9 @@ original assembler's habit of not always minimising it.  A rewrite that lets
 USING decide base and displacement, and keeps empiricism for form alone, would
 be a good deal smaller -- and lead 2 above may well dissolve in it.
 
-2026-08-10.  214 of 272 byte-exact, from 187 that morning, RUNASM 205 of 205
-throughout.  Twenty-seven DIFFERS remain and they are a different population
-from the ones that fell today.
+2026-08-10.  217 of 272 byte-exact, from 187 that morning, RUNASM 205 of 205
+throughout.  Twenty-four DIFFERS remain, ALL of them pure value disagreements:
+not one has a missing byte any more.
 
 WHAT FELL WAS ALL ONE SHAPE:  a generator that never wrote its value.
 `DC A(expression)` emitted nothing at all; `DC B'...'` was a stub that emitted
@@ -401,41 +400,43 @@ TARGET -- the first attempt put the label at address 0, so A, Y and Z emitting
 zeros looked correct.  S and V were checked and need nothing: neither appears
 in either version and the grammar does not accept them.
 
-THE REMAINING LEAD, and it is worth the next session's time because four or
-more modules share it.  FCMBMASK, FIOG9ADB, FIOPDHF and FIOPDISP all first
-mismatch on a `BC 07-n,#@LBx`.  The branch encoding is NOT the bug:
+A LABEL THAT MOVES NOW ASKS FOR ANOTHER PASS, which fixed the short-branch
+cluster (FIOG9ADB, FIOPDHF, FPMEVENQ).  The check for it existed but was dead:
+guarded by "preliminary" not being in the symbol table entry, and nothing ever
+removed that flag.  Its response was also wrong -- a diagnostic rather than a
+repeat -- which left every instruction already assembled on that pass pointing
+at a stale address.  The pass loop is now bounded, which it was not.
 
-    FIOPDHF   original  0x44 - 0x13 - 1 = 48    2-byte instruction
-    FIOPDISP  original  0x37A - 0x26 - 2 = 0x352    4-byte instruction
+THE LEAD THAT REMAINS IS THE AM BIT, and it is worth care because the obvious
+fix is WRONG and was tried.
 
-so the displacement is target minus the address AFTER the instruction, in both
-forms, and OUR displacements are right for where WE think the label is.
+FPMIHIM, FPMZSYNC, FPMEVDEQ and others differ from the original by exactly one
+bit, 0b100 in the second byte -- the AM=1 marker that `generateRS1` sets and
+`generateRS0` does not.  `L R3,TPSAIMOP` assembles 1BF6 here and 1BF2 there.
+THE DISPLACEMENT IS CORRECT IN EVERY ONE OF THESE; only the form differs.
 
-WHAT IS ACTUALLY WRONG is that a label's value used in an expression disagrees
-with the address printed for that same label in our own listing.  FIOPDHF
-prints `#@LB3 DS 0H` at 00044 -- the same as the original -- and then resolves
-`BC 07-4,#@LB3` to adr1 = 0045.  DCI#DATA is the same illness elsewhere:
-DCIDOUT sits at 000A4 in both listings, `DC Y(DCIDOUT+2)` gives the right
-00A6, and `DC Y(DCIDOUT)` gives 00A6 as well -- as though the symbol were 166
-in one card and 164 in another.
+The plain-RS branch requires `"B2" in ast`, so a base register that came from a
+USING rather than from the operand text is treated as no base at all and the
+operand falls through to the indexed form.  That is verbatim the misconception
+behind the `ib2 == 3` bug fixed earlier the same day, so widening the test to
+`("B2" in ast or usingB2)` looks obviously right.
 
-NOTE WHAT SURROUNDS IT.  In FIOPDHF the target is the second of TWO
-zero-length labels at the same address, `#@LB16 DS 0H` immediately followed by
-`#@LB3 DS 0H`.  That is where to look first:  how a label on a zero-length DS
-gets its value when another zero-length label precedes it, and whether the
-value the branch resolver reads comes from the symbol table or from the
-scratch pass that decided the instruction lengths.
+IT IS NOT.  Measured: FPMZSYNC goes to byte-exact, and FPMIHIM goes from 2
+wrong bytes to 56, FPMEVDEQ from 3 to 147, FPMDISP from 3 to 39.  A USING base
+does not by itself imply AM=0; the original assembler is choosing on something
+further that is not yet identified.  The change was reverted.  Whoever picks
+this up should find the discriminator FIRST -- compare the AM=0 and AM=1 cases
+across all of these modules and look for what separates them -- and not reach
+for the one-line widening, which has already been tried and costs more than it
+gains.
 
-DO NOT FIX THIS BY ADJUSTING THE DISPLACEMENT.  The arithmetic above is
-confirmed against two modules and two instruction lengths; a constant added
-there would make one module match and silently break others.
-
-TWO OTHERS, DECODED BUT NOT UNDERSTOOD.  FPMZSYNC's `LH R5,TICCXMTR` under a
-single `USING TFICC,R2` wants displacement 60 and gets 61, but the DSECT
-layouts are byte-identical and TICCXMTR's offset, 65, does not fit the six-bit
-field at all -- so neither number is the offset and something about the unit or
-origin of an SRS displacement into a DSECT is not understood.  FIOERRLC differs
-by one byte on `BAL R3,*+2`.
+A CORRECTION TO THE PREVIOUS VERSION OF THIS ENTRY.  It described FPMZSYNC as
+an off-by-one SRS displacement whose arithmetic was not understood, noting that
+TICCXMTR's offset of 65 does not fit a six-bit field.  That was wrong, and
+wrong in an avoidable way: `9DF6 0041` is a FOUR-byte RS instruction, not a
+two-byte SRS one, its displacement 0x0041 is correct in both builds, and only
+the AM bit differs.  A puzzle was built on a misread instruction length.  When
+a listing line shows two hexadecimal groups, count the bytes before theorising.
 
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
