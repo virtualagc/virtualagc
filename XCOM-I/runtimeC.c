@@ -886,6 +886,8 @@ parseParmField(int print) {
     putCHARACTER(address + 4 * i, &type1Actual[i]);
 }
 
+static int writeCommonImage = 1;
+
 static void
 openCommonOutFile(char *filename)
 {
@@ -901,6 +903,8 @@ openCommonOutFile(char *filename)
       COMMON_OUT = fopen(filename, "w");
       if (COMMON_OUT == NULL)
 	    abend("Unable to open COMMON output file");
+      if (!writeCommonImage)
+        return;
       sprintf(s, "%s.bin.gz", filename);
       COMMON_OUTz = gzopen(s, "wb");
       if (COMMON_OUTz == NULL)
@@ -941,6 +945,11 @@ parseCommandLine(int argc, char **argv)
   DCB_INS[0].fp = DCB_INS[1].fp = stdin;
   DCB_OUTS[0].fp = DCB_OUTS[1].fp = stdout;
 
+  // Before the main loop, so it cannot depend on switch order.
+  for (i = 1; i < argc; i++)
+    if (!strcmp("--no-common-image", argv[i]))
+      writeCommonImage = 0;
+
   for (i = 1; i < argc; i++)
     {
       int n, lun, recordSize;
@@ -948,6 +957,8 @@ parseCommandLine(int argc, char **argv)
       n = 0;
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
+      else if (!strcmp("--no-common-image", argv[i]))
+        ;                       // already handled, above
 #ifdef RSB_TRACE
       else if (1 == sscanf(argv[i], "--rsb-trace=%d", &j))
 	productionTrigger = j;
@@ -1214,6 +1225,8 @@ parseCommandLine(int argc, char **argv)
           printf("              default, the file COMMON.out is used.\n");
           printf("              Note that COMMON is a feature of XPL/I, and\n");
           printf("              hence is disabled for standard XPL programs.\n");
+          printf("--no-common-image\n");
+          printf("              Disable writing the COMMON memory image.\n");
           printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
           printf("              have been provided in JCL.\n");
           printf("--sdfi=D      Name of a directory used for reading Simulation Data\n");
