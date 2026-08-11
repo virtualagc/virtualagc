@@ -734,6 +734,40 @@ entry above is the mechanism that decides it.  Settle that first.
 The instrumentation was removed; nothing in the assembler changed and 243 of
 272 stands.
 
+THE ITERATION COUNT IS FIXED, and it changed nothing.  `optimizeScratch` now
+runs until a pass shortens nothing rather than once per control section.
+Measured three ways: once gives 242 and breaks DMOD and DSNCS; once per
+control section gives 243; to a fixed point gives 243 with no module changing
+a single byte.  So the repetition was load-bearing but its count was arbitrary,
+and the count is now a property of the algorithm.  8964ece53.
+
+WHICH LEAVES A MUCH MORE USEFUL CONCLUSION, arrived at from the observation
+that a deterministic scheme ought to exist.  It does, and it is not directional:
+start with EVERY ambiguous branch short and repeatedly lengthen only those that
+do not fit.  Lengthening pushes targets further apart and never brings them
+closer, so a branch forced long never becomes short again; the iteration is
+monotonic, terminates, and reaches a UNIQUE least fixed point whatever order it
+visits things in.  That is the minimum-size layout.
+
+We do the opposite -- start long, shrink -- which is order-dependent and can
+stop at any of several fixed points.
+
+AND THAT IS THE POINT: at DCICYC line 646 OUR code is SMALLER than the original
+build's, and ours is a valid assembly.  If the original had been minimizing,
+no smaller valid layout could exist, and one demonstrably does.  THE ORIGINAL
+BUILD WAS NOT MINIMIZING CODE SIZE.
+
+So the goal is not a better minimizer.  Every instinct to improve the
+optimization is pointed the wrong way; what is wanted is to reproduce a
+procedure that stopped short of the minimum, and to find where it stopped.
+Note also that "shorten only when the shortening is not self-justifying" -- when
+the short form fits ONLY because taking it pulled the target closer -- describes
+the difference at line 646 exactly, and is a rule about the ORDER of approach
+rather than a threshold.  It is the next thing to try, and it is cheap: refuse a
+shortening whose displacement is within the amount that shortening itself
+removes, and measure.  It is expected to cost some of the 55s measured in the
+entry above, which is precisely what the sweep will show.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
