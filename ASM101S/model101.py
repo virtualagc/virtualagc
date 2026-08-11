@@ -1177,6 +1177,7 @@ def generateObjectCode(source, macros):
         global firstCSECT
         nonlocal repeatPass
         nonlocal cVsD, sect, name, operation
+        nonlocal nameAssigned
         
         # Make sure we're in *some* CSECT or DSECT
         if sect == None:
@@ -1222,7 +1223,22 @@ def generateObjectCode(source, macros):
         # ahead of it grew.  FCMNINIT's `#@LB1` was recorded at 00041, inside
         # the four-byte SSM that precedes it, while its listing address is
         # 00042; every branch to it was then one halfword short.
-        if name != "":
+        # ONCE PER STATEMENT.  `commonProcessing` runs once per SUBOPERAND of a
+        # `DC`, and it recorded the label at whatever the location counter had
+        # reached, so a multi-suboperand constant walked its own label forward
+        # through itself.  DCI#DATA's
+        #
+        #     DCIDOUT  DC  Y(DCIDOUT+2),Y(DCIDOUT+508),510H'0'
+        #
+        # sits at 000A4 and left DCIDOUT holding 0000A6.  Every value in the
+        # module was computed against a different base: the first Y saw 00A4
+        # and came out right, the second saw 00A5 and emitted 02A1 for the
+        # original's 02A0, and a `DC Y(DCIDOUT)` elsewhere saw the 00A6 left
+        # behind and emitted that for the original's 00A4.  Three bases, one
+        # statement, which is why the module looked like two unrelated
+        # off-by-small errors.
+        if name != "" and not nameAssigned:
+            nameAssigned = True
             pos2 = sects[sect]["pos1"] // 2
             if name in symtab and "preliminary" not in symtab[name]:
                 oldSect = symtab[name]["section"]
@@ -1553,6 +1569,9 @@ def generateObjectCode(source, macros):
             name = properties["name"]
             if name.startswith("."):
                 name = ""
+            # A LABEL IS PLACED ONCE PER STATEMENT, not once per suboperand;
+            # see `commonProcessing`.
+            nameAssigned = False
             operand = properties["operand"].rstrip()
             if operand == "R7,=XL2'F'": ###DEBUG###
                 pass
