@@ -4255,10 +4255,71 @@ def generateObjectCode(source, macros):
             # perhaps one with a special name (like "#L" plus the name of
             # another section), or who knows?  At any rate, this may perhaps
             # be revisited if more info becomes available somehow.
+            # A SECTION OF ZCONS AND NOTHING ELSE.  Measured off the
+            # as-received listings, the original aligns control sections one
+            # way and ZCON sections another, and the alignment now happens at
+            # the TOP of the loop so it can differ per section.
+            def zconOnlySection(sect):
+                items = [e for e in sects[sect].get("scratch", []) \
+                         if e.get("length")]
+                if not items:
+                    return False
+                for e in items:
+                    if e.get("operation") != "DC":
+                        return False
+                    if not str(e.get("operand", "")).lstrip().startswith("Z("):
+                        return False
+                return True
+
+            # THE RULE, from 132 inter-CSECT boundaries in the corpus:
+            #
+            #   ordinary section after ordinary   127 cases, FULLWORD
+            #   first ZCON section after one        1 case,  DOUBLEWORD
+            #   ZCON section after a ZCON section   1 case,  PACKED, no padding
+            #
+            # The 127 are what rule out a blanket doubleword: they land on
+            # byte 4, which is not a doubleword boundary.  FIOCGR is the only
+            # module in the corpus with ZCON sections and supplies both of the
+            # other cases -- #ZFIOCGR at byte 48 after a section ending at 44,
+            # and #ZRIOCGR packed against it at 4C.
+            #
+            # THIS IS PROBABLY THE RIGHT BYTES FOR THE WRONG REASON, and it is
+            # recorded that way deliberately.  PFS/mafgen/DASS_G16.ASC, the
+            # linked memory map, shows what is actually going on:
+            #
+            #     000000-0001A5  FCMPSA    01A6   N O N H A L
+            #     0001A6-0001A7  --------  0002   C H E C K S U M
+            #     0001A8-0001A9  #ZFIOCGR  0002
+            #     0001AA-0001AB  #ZRIOCGR  0002
+            #
+            # -- addresses in halfwords, so that CHECKSUM is a FULLWORD.  A
+            # checksummed section is followed by a checksum word and the ZCONs
+            # then pack tight behind it.  Applied inside FIOCGR's own module
+            # that accounts for BOTH boundaries with one mechanism: #CFIOCGR
+            # ends at byte 44, a checksum fullword occupies 44-47, #ZFIOCGR
+            # lands at 48 and #ZRIOCGR packs at 4C.  It also explains why the
+            # other 127 boundaries show plain fullword rounding -- those
+            # sections are not checksummed.
+            #
+            # What nothing here explains is how the ASSEMBLER knew to reserve
+            # the word, since the gap is in the assembly listing, before any
+            # linking.  Until that is understood, this reproduces the layout by
+            # asserting an alignment rule instead, which is fitted to n=1 in
+            # each ZCON case and is the only module in the corpus with ZCON
+            # sections at all.  If a second one turns up, or if the reservation
+            # mechanism is found, replace this rather than extend it.
             lastOffset = 0
+            previousWasZcon = False
             for sect in sects:
                 if sects[sect]["dsect"]:
                     continue
+                thisIsZcon = zconOnlySection(sect)
+                if thisIsZcon and previousWasZcon:
+                    pass                                  # packed
+                elif thisIsZcon:
+                    lastOffset = (lastOffset + 3) & 0xFFFFFC   # doubleword
+                else:
+                    lastOffset = (lastOffset + 1) & 0xFFFFFE   # fullword
                 sects[sect]["offset"] = lastOffset
                 offset = sects[sect]["used"]
                 for pool in literalPools:
@@ -4268,7 +4329,7 @@ def generateObjectCode(source, macros):
                         offset = pool[1] + pool[4]
                         break
                 lastOffset += offset // 2
-                lastOffset = (lastOffset + 1) & 0xFFFFFE
+                previousWasZcon = thisIsZcon
         pass
     
     # Let's append the literal pools to their CSECTs.
