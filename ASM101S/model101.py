@@ -1572,6 +1572,20 @@ def generateObjectCode(source, macros):
             # A LABEL IS PLACED ONCE PER STATEMENT, not once per suboperand;
             # see `commonProcessing`.
             nameAssigned = False
+            # AND THE STATEMENT'S OBJECT CODE BELONGS TO THIS PASS.  `toMemory`
+            # accumulates into `assembled` and restarts the run when the pass
+            # changes, which is right for a statement that emits something --
+            # but a statement that emits NOTHING on this pass never calls
+            # `toMemory` at all, so last pass's bytes simply stayed, and the
+            # listing and --compare both read them.
+            #
+            # FCMSSYNC's `CNOP 2` is the case: on the compile pass it sits at
+            # an even halfword address and correctly pads nothing, yet still
+            # showed D800 from a pass on which it did pad, printed at 00020
+            # where the `XR R7,R7` that follows also prints.  The comparison
+            # counted the D800 and the original has 77E7 there.
+            properties.pop("assembled", None)
+            properties.pop("_assembledEnd", None)
             operand = properties["operand"].rstrip()
             if operand == "R7,=XL2'F'": ###DEBUG###
                 pass
