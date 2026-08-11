@@ -579,8 +579,13 @@ def evalLiteralAttributes(properties, ast, symtab):
 
 def optimizeScratch():
     global symtab, sects, literalPools
-    
+    # How many instructions this run shortened, so the caller can iterate to a
+    # fixed point instead of guessing a repeat count.
+    adjustments = 0
+
     def adjust(scratch, properties, i):
+        nonlocal adjustments
+        adjustments += 1
         entry = scratch[i]
         entry["length"] = 2
         properties["length"] = 2
@@ -764,7 +769,7 @@ def optimizeScratch():
             if b != None and d >= srsFloor and d < srsCeiling:
                 adjust(scratch, properties, i)
                 continue
-    return
+    return adjustments
 
 #=============================================================================
 # Generate object code for AP-101S.
@@ -3916,8 +3921,18 @@ def generateObjectCode(source, macros):
                     offset += pool[2] - rem
                 pool[1] = offset
             # Eliminate ambiguity between SRS and RS instructions.
-            for sect in sects:
-                optimizeScratch()
+            # TO A FIXED POINT.  This was `for sect in sects:
+            # optimizeScratch()`, and the function takes no argument and never
+            # reads `sect`, so the number of times it ran was the number of
+            # control sections the module happened to have.  Each run gives
+            # instructions left ambiguous by the last one another chance
+            # against shorter addresses, so the count is not cosmetic -- it
+            # decides how far the shortening goes.  Running it ONCE was tried
+            # and is worse: 242 rather than 243, and DMOD and DSNCS stop being
+            # byte-exact, so some modules genuinely need the second look.
+            for _optimizePass in range(20):
+                if optimizeScratch() == 0:
+                    break
             if False: ###DEBUG###
                 # This prints a stylized form of the source code.  We haven't generated
                 # any object code at this point, but we should know all addresses,
