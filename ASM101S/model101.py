@@ -3017,7 +3017,20 @@ def generateObjectCode(source, macros):
                                             d2 = d
                                     done = False
                                     forceRS = (operation in argsRSonly)
-                                    forceAM0 = False
+                                    # `$` CLEARS THE ADDRESSING BITS TOO.
+                                    # ap101s-notes.py: "the opcode is unchanged
+                                    # from the unsuffixed mnemonic and the
+                                    # addressing bits stay clear ... in the long
+                                    # form the second byte is 0xF0 | base
+                                    # register".  So the form is not merely
+                                    # long, it is AM=0 with the displacement
+                                    # taken absolutely.  FCMCSYNC's
+                                    # `BNZ$ FCMCSLPE` is C3F3 00DA in the
+                                    # original -- AM=0, base 3, the symbol's own
+                                    # section offset -- against our C3F7 0042,
+                                    # AM=1 with a PC-relative displacement that
+                                    # reaches the same place.
+                                    forceAM0 = ("$" in operation)
                                     forceAM1 = False
                                     if operation in ["BC", "BCT"]:
                                         # From the STATEMENT's own position,
