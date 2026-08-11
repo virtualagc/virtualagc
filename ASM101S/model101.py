@@ -2054,13 +2054,33 @@ def generateObjectCode(source, macros):
                                         'type': 'Z'
                                     })
 
-                            # emit 4 bytes: [0, 0, flags, 0]
-                            # Bytes 0-1: Address (filled by linker)
+                            # emit 4 bytes: [address, address, flags, 0]
+                            # Bytes 0-1: Address
                             # Byte 2: Flags
                             # Byte 3: Reserved
-                            dcBuffer[dcBufferPtr] = 0
+                            #
+                            # A LOCALLY DEFINED SYMBOL GETS ITS ADDRESS HERE.
+                            # Zero is right only when the linker will fill the
+                            # field, which is to say when the symbol is
+                            # external.  FCMG3INT's
+                            # `DC Z(FCG3INL1,FCMCBLKS,X'D')` names a label of
+                            # its own at 0B, and the one below it names FCG3INL2
+                            # at 42; the original build assembles those
+                            # addresses and ASM101S assembled 0000 for both.
+                            zAddress = 0
+                            zEntry = symtab.get(symbolName) if symbolName \
+                                     else None
+                            if zEntry != None and \
+                                    zEntry.get("type") != "EXTERNAL":
+                                zSect, zOffset = unhash(zEntry.get("value", 0))
+                                if zSect != None:
+                                    zAddress = zOffset + \
+                                        sects.get(zSect, {}).get("offset", 0)
+                                else:
+                                    zAddress = zEntry.get("address", 0)
+                            dcBuffer[dcBufferPtr] = (zAddress >> 8) & 0xFF
                             dcBufferPtr += 1
-                            dcBuffer[dcBufferPtr] = 0
+                            dcBuffer[dcBufferPtr] = zAddress & 0xFF
                             dcBufferPtr += 1
                             dcBuffer[dcBufferPtr] = flags & 0xFF
                             dcBufferPtr += 1
@@ -2198,8 +2218,40 @@ def generateObjectCode(source, macros):
                             toMemory(duplicationFactor * (count // 2))
                     elif suboperandType == "B":
                         commonProcessing(1)
-                        
-                        pass
+                        # THIS WAS A STUB -- `commonProcessing(1)` and nothing
+                        # else -- so `DC B'...'` emitted no bytes AND reserved
+                        # no space, silently.  A bit-length modifier goes to the
+                        # packing path above and never arrives here, which is
+                        # why the form that IS common in the corpus worked and
+                        # the plain one did not.
+                        #
+                        # FIOCBLKS writes 81 of them, `TBCD0000 DC B'0000...'`
+                        # and its fellows, each a full word; the original build
+                        # assembles 324 bytes that ASM101S did not assemble at
+                        # all.
+                        #
+                        # A binary constant is padded or truncated on the LEFT,
+                        # like the other numeric types.
+                        try:
+                            digits = suboperand["v"][0][1]
+                        except:
+                            error(properties, "Cannot parse B value")
+                            continue
+                        if lengthModifier != None:
+                            nBytes = lengthModifier
+                        else:
+                            nBytes = max(1, (len(digits) + 7) // 8)
+                        digits = digits.rjust(nBytes * 8, "0")[-nBytes * 8:]
+                        if operation == "DC":
+                            dcBufferPtr = 0
+                            for i in range(0, nBytes * 8, 8):
+                                dcBuffer[dcBufferPtr] = int(digits[i:i+8], 2)
+                                dcBufferPtr += 1
+                            dcBufferPtr = replicateDC(properties, dcBufferPtr, \
+                                                      duplicationFactor)
+                            toMemory(dcBuffer[:dcBufferPtr])
+                        else:
+                            toMemory(duplicationFactor * nBytes)
                     elif suboperandType in ["F", "H"]:
                         if suboperandType == "H":
                             length = 2
