@@ -3152,7 +3152,8 @@ def generateObjectCode(source, macros):
                                                 data = generateRS1(properties, operation, 0, 1, r1, 0x3FF & -d1, 0, ib2)
                                         elif not forceAM0 and \
                                                 (x2 != None or ia or \
-                                                 i or (d1 >= 0 and d1 < 2048)):
+                                                 i or (not usingB2 and \
+                                                       d1 >= 0 and d1 < 2048)):
                                             if operation in ["B"]: ###DEBUG###
                                                 pass
                                             # RS AM=1 here
