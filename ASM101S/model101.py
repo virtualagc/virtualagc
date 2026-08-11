@@ -239,6 +239,28 @@ Here are the rules to classify an instruction in this group.
 srsFloor = 0
 srsCeiling = 56
 #srsCeiling = 55
+# THE ORIGINAL BUILD NEVER ENCODED AN SRS *BRANCH* DISPLACEMENT ABOVE 53.
+# Measured off the as-received listings, independently of anything here: a
+# two-byte encoding of a branch mnemonic is the SRS form and its displacement
+# is byte1 >> 2.  Across 803 such encodings in the byte-exact modules the tail
+# runs 49:2 50:2 51:1 52:1 53:1 and then stops -- 54 and 55 do not occur.
+#
+# This is applied where the instruction is ENCODED, not where `optimizeScratch`
+# decides, because those see different numbers: the optimizer runs at the end of
+# pass 1 against positions that do not yet include any literal pool, so DCICYC's
+# `BC 07-1,#@LB260` decides on 48 and encodes 55.  Applying it as a decision
+# threshold (srsCeiling = 54) breaks DMOD and takes DCICYC from 1983 mismatched
+# bytes to 4756.
+#
+# Applying it here is safe for everything that already matches: those modules
+# ARE the original's bytes, so every SRS branch displacement in them is 53 or
+# less and this limit cannot fire.
+srsBranchCeiling = 54
+# `branchAliases` holds the mnemonics that CARRY their condition -- B, BE, BH
+# and their suffixed forms -- and does NOT hold `BC`, which takes its mask as an
+# operand.  DCICYC's case is a `BC`, so the limit has to name these too or it
+# never fires where it is wanted.
+srsBranchOperations = ("BC", "BCF", "BVC", "BVCF", "BCB", "BCT", "BCTB")
 
 random.seed(16134176201611561415)
 hashcodeLookup = {}
@@ -2914,7 +2936,7 @@ def generateObjectCode(source, macros):
                                                                 "BCT":0b11}[operation])
                                             done = True
                                         elif operation == "BC" and \
-                                                d >= 0 and d < 0b111000:
+                                                d >= 0 and d < srsBranchCeiling:
                                             # A FORWARD `BC` also has a short
                                             # form, and only the backward one
                                             # was written here.  The two-bit
@@ -3167,12 +3189,18 @@ def generateObjectCode(source, macros):
                                                 data = generateRS1(properties, operation, 0, 1, r1, icRS - d2, 0, 3)
                                             else: # d2 >= ic + 2
                                                 data = generateRS1(properties, operation, 0, 0, r1, d2 - icRS, 0, 3)
-                                        elif (len(data) == 2 and d < srsCeiling) or \
+                                        elif (len(data) == 2 and \
+                                              d < (srsBranchCeiling \
+                                                   if (operation in branchAliases \
+                                                       or operation in \
+                                                          srsBranchOperations) \
+                                                   else srsCeiling)) or \
                                                (not (ib2 == 3 and \
                                                      operation in fpOperationsSP) and \
                                                 not forceRS and x2 == None and \
                                                 (specifiedB2 or ib2 == 3) and \
-                                                d >= srsFloor and d < srsCeiling and \
+                                                d >= srsFloor and \
+                                                d < srsBranchCeiling and \
                                                 not forbiddenSRS and \
                                                 operation in branchAliases):
                                             # Is SRS.
