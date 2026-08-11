@@ -438,11 +438,11 @@ two-byte SRS one, its displacement 0x0041 is correct in both builds, and only
 the AM bit differs.  A puzzle was built on a misread instruction length.  When
 a listing line shows two hexadecimal groups, count the bytes before theorising.
 
-2026-08-10, end of a long day.  223 of 272 byte-exact, from 187 that morning,
-with RUNASM at 205 of 205 throughout and NOCOMPARE down from 34 to 3.
+2026-08-10.  223 of 272 byte-exact, from 187 that morning, with RUNASM at 205
+of 205 throughout and NOCOMPARE down from 34 to 3.
 
     MATCH       223      MATCH?       3
-    DIFFERS      42      NOCOMPARE    3
+    DIFFERS      43      NOCOMPARE    3
 
 THE PATTERN THAT PAID BEST was asking, of each generator, whether it actually
 writes a value -- not whether the value is right.  Four defects of that shape:
@@ -453,38 +453,55 @@ found the first two independently in June and fixed them the same way; his
 AS037F1_COMPARISON.md is worth reading before starting anything here.
 
 THE SECOND PATTERN was the premature diagnostic:  a collecting-pass failure
-treated as fatal when it only means "not resolved yet".  SEVEN sites, the last
-of them a whole class -- sixteen value-range checks testing numbers computed
-from symbols that were not yet placed.  Find them mechanically:  assemble every
-failing module, keep each diagnostic with its pass number, and report those
-whose highest pass is below 3, because a real error recurs on the compile pass
-and a premature one does not.
+treated as fatal when it only means "not resolved yet".  EIGHT sites now.  The
+seventh was a whole class -- sixteen value-range checks testing numbers
+computed from symbols that were not yet placed.  Find that kind mechanically:
+assemble every failing module, keep each diagnostic with its pass number, and
+report those whose highest pass is below 3, because a real error recurs on the
+compile pass and a premature one does not.
 
-THE THREE THAT REMAIN are not more of the same.
+THE EIGHTH DID NOT ANSWER TO THAT METHOD, and the reason is worth keeping.
+`optimizeScratch` runs in one place only, at the end of pass 1, and the literal
+pool it consults is built during that same pass; "Literal not in literal pool"
+was therefore raised at severity 255 on a condition that is expected there.
+Having no reachable pass but the collecting one, it looks exactly like a
+genuine pass-1 error and always will.  The sweep cannot see it.  What exposed
+it was removing the noise around it, and that is the transferable part: fix the
+loud faults first and read what survives.
 
-  DCICYC has three independent faults and is the one to take next.
-    - 34 x "Literal not in literal pool", all at pass 1, raised by
-      `optimizeScratch`, which runs at the END of pass 1 -- `collect and not
-      asis`.  The pool is built during that same pass and nowhere else, so a
-      literal whose operand is a forward reference (`=Y(FSPBUFF)`) is never
-      pooled at all.  Giving it a provisional zero-valued slot was tried and
-      changed NOTHING measurable, so the add is not failing where it looks like
-      it is; instrument the pool before theorising further.  DCICYC has two
-      LTORGs, so `literalPoolNumber` is walking between three pools and the
-      lookup may simply be in the wrong one.
-    - It does not converge:  `Could not evaluate D2 subfield` recurs on passes
-      3 through 9.  The pass loop is capped at 20 and so it terminates, but a
-      layout that is still moving on pass 9 is a finding in itself.
-    - `Index of &LIND(0) out of range` and its fellows, at pass -1.  This is
-      macro-language state, the structured-programming macros' nesting stack
-      going negative.  Don's assemble.py carries a comment on exactly this
-      failure in his assembler, where a lost column-72 continuation drove the
-      stack negative and EXIT's search loop ran until ACTR stopped it -- "that
-      one line accounted for over sixteen thousand diagnostics."  Since
-      continuation handling changed here today, read that comment first.
+DCICYC IS DONE, and it was not three faults but one source defect and one
+assembler defect.  Commit 5c35b774 commented out 374 cards where a macro
+invocation survived beside its own expansion -- AND IT SWEPT SSSRC ONLY.  The
+COPY members in MLIB80 were never looked at, which is exactly why this stayed
+hidden: the bad cards are not in the module that fails, they are in what it
+copies.  DCI#CON carried four ELSE/ENDIF invocations beside their expansions
+(the assembler said NEGATIVE NEST STACK POINTER, CHECK NUMBER OF ENDS, which is
+literally what an ELSE with no IF does), and DCI#FMT carried five uncommented
+literal-pool dump cards.  226 diagnostics fell to 64, then to 34, then to none
+that stop the assembly.  PFS 1092c9ea, ASM101S 2749ac816.
 
-  FIOSVC and FPMIHPC2 have TRUNCATED SOURCES and are not assembler defects at
-  all; see the entry above for how far each can be taken and what it costs.
+TWO THINGS THIS ENTRY USED TO SAY ARE WRONG, and were disproved by measurement:
+the run that would not converge before pass 20, and the 36 "Could not evaluate
+D2 subfield" that recurred through it, were NOT independent faults.  Both were
+consequences of the corrupted macro nesting stack and both vanished with it.
+And the literal-pool failure was not a pool-indexing bug -- the provisional
+zero-valued slot changed nothing because it was fixing the wrong half.  Two
+successive theories about this module were wrong before the third was right;
+the thing that worked was comparing OI301700's copy against OI340600's
+unexpanded one, which is what showed the expansions were the anomaly.
+
+THE THREE THAT REMAIN are not assembler defects.  FIOSVC and FPMIHPC2 have
+TRUNCATED SOURCES; see the entry above for how far each can be taken and what
+it costs.  BILDNEW5 is oversized -- 7932 intolerable lines -- and Don reports he
+can build it, so his git log is the place to start.
+
+THE REGRESSION HARNESS READS AS A FAILURE AND IS NOT.  `regressionASM101S.sh`
+with no arguments reports six mismatches -- CINDEX, MM14SN, MM6SN, MV6SN,
+VV6S3, VX6S3 -- and reports them at every commit, before any change as well as
+after.  The RUNASM sources carry &ASM101S-gated corrections and the listings
+predate them.  Pass `--no-rtl-fixes` and all 205 are byte-exact.  That flag is
+the measurement, not an option; a bare run has been mistaken for a regression
+here at least twice.
 
 AND THE MEASUREMENT HAS A BLIND SPOT worth stating plainly:  the sweep compares
 assembled bytes against listings, so anything that does not alter a listed byte
