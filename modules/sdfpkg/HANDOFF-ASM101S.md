@@ -4129,6 +4129,52 @@ WHAT TO ESTABLISH FIRST, and none of it needs the full build now that
     AND NOTE HOW MUCH IS RIDING ON IT -- 9225 of BILDNEW5's 10174 remaining
     mismatched bytes, per 193.  This is the last large thing.
 
+200 IS WRONG ON ITS CENTRAL POINT and this withdraws it.
+
+IT SAID the recomputation loop sees `\$PON047` where the listing shows
+`\$PON056`, nine apart, and concluded the loop walks a different card sequence.
+THE TRACE CAME FROM THE TLINES RIG AND THE `\$PON056` FROM THE FULL BUILD.  The
+rig has seventeen members and therefore fewer `\$PON` invocations before this
+point, so its counter is lower for a reason that has nothing to do with the
+defect.  In the RIG'S OWN listing the card is `\$PON047`, exactly what the loop
+reports.  THE LOOP AND THE LISTING AGREE.
+
+    COMPARING A CUT-DOWN RIG'S TRACE AGAINST THE FULL BUILD'S LISTING is the
+    mistake, and it is an easy one to repeat: the rigs reproduce ADDRESSES
+    faithfully, which is what makes them useful, but anything COUNTED --
+    `&SYSNDX`, macro sequence numbers, `\$PON` labels -- is counted over the
+    members present.  Compare a rig against ITS OWN listing or not at all.
+
+WHAT THE LISTING DOES SHOW, at COMDATA's SRN 042400AF:
+
+    16344+         PRINT   NOGEN
+    16345+         PRINT   NOGEN
+    16346+\$PON047  DS      0H
+    16347+         PRINT   GEN
+    16348          PRINT   NOGEN
+    16349          PRINT   NOGEN
+    16350          PRINT   GEN
+
+    ONE EXPANSION, MARKED `+`, AND THEN THE SAME `PRINT` TRIO AGAIN WITHOUT
+    THE MARK.  The extraction kept `\$PON`'s expansion as ordinary source and
+    `restore-pofpon.py` put the invocation back on top of it, so the visible
+    body is emitted twice.  That is the vestigial-invocation hazard
+    `comment-vestigial.py` exists to prevent, and `\$POF`/`\$PON` are excluded
+    from its treatment by the `KEEP` set on the grounds that their expansions
+    were invisible.  THE `DS 0H` WAS INVISIBLE; THE `PRINT` CARDS WERE NOT.
+
+    IT COSTS NO SPACE, THOUGH.  `PRINT` generates nothing and `DS 0H` is
+    zero-length, so the duplication does not by itself explain eight bytes.
+    It is a real defect in the restored sources and a plausible symptom of
+    something else, not the cause of the shortfall.
+
+SO 199 STANDS AND 200 DOES NOT.  What is established is that GPCIPL's `used`
+ends 8 bytes short of where the listing puts the end of PATCH2, with the
+literal-pool override innocent and every DC length correct.  What is NOT
+established is why -- and the next step is to trace `pos1` through the loop
+against the RIG'S OWN listing addresses, card for card, which was never
+actually done.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
