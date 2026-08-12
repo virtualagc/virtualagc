@@ -1682,6 +1682,38 @@ The 362 are a different question and may be correct refusals; do not assume
 they are all wrong.  The 196 have no base to reach through and are not this
 arm's business at all.
 
+151 predicted that the twelve remaining too-long instructions lived among the
+218 re-resolution failures, and named the likelier of its two causes.  Half of
+that was right and the conclusion was wrong.
+
+THE CAUSE WAS AS PREDICTED.  Instrumented, all 200 of the failures that could
+be attributed report `evaluated to None`, and every one is a `USING *,...`:
+the hashcode argument was passed as None and `*` cannot resolve without a
+location.  The section-mismatch theory is dead.
+
+THE FIX FOR IT CHANGED NOTHING.  Handing back the USING's own `pos1` --
+`symtab[u[1]]["value"] + u[3]["pos1"] // 2`, which `adjust` keeps current as
+it slides statements -- makes those 200 resolve, and BILDNEW5 comes out BYTE
+FOR BYTE IDENTICAL:
+
+        identical 5563  wrong value 1402  too long 12  too short 4
+
+and no module in the corpus changes class.  So the change was reverted rather
+than kept, on the same grounds as the branch guard in 149: code that alters
+nothing is dead weight, and its comment would have claimed an effect it does
+not have.
+
+    WHAT THIS NARROWS.  The twelve are therefore in one of the other two
+    buckets -- the 362 where a base WAS found and the displacement was judged
+    too far, or the 196 where no USING covers the operand at all.  The 362 is
+    the one to look at first, because `L R7,FAILBRTN` has a real displacement
+    of 3 fullwords and something is still calling that out of range.
+
+Instrumenting inside this arm is expensive: a print in the inner loop runs
+tens of millions of times across the twenty iterations and takes the module
+from five minutes to over forty.  Guard any trap on the operation or the SRN
+before the loop, not inside it.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
