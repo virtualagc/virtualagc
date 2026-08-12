@@ -2508,6 +2508,63 @@ WHAT REMAINS: 404, still led by LA 97, BAL 48, STH 47, ISPB 28.  Only 34 of
 the 438 were this arm, so the bulk of the F7-vs-F3 population has a different
 cause and has not been diagnosed at all.
 
+Diagnosed, not fixed.  280 of the 404 are `orig F7 -> ours F3` and another 32
+are `FF -> FB`, and they are all one thing.
+
+THE ORIGINAL USES A FORWARD PC-RELATIVE AM=1 DISPLACEMENT where we emit AM=0
+with the absolute address.  Arithmetic on three of them, `icRS` being the
+instruction's address plus two:
+
+    LA R0,STM4      orig E8F7 07B4    0D26 + 07B4 = 14DA
+    C  R0,SHIFTDAT  orig 10F7 0764    0F98 + 0764 = 16FC
+    LA R5,ERRPLA    orig EDF7 0004    1007 + 0004 = 100B
+
+so the second halfword is the distance from the updated instruction counter,
+and every one of them fits the eleven bits the form has.
+
+WHY WE DECLINE IT, instrumented at the AM decision:
+
+    ###A### forceAM0=True usingB2=False ib2=3 b2=None unhash=5554 icRS=6780
+            d1=-1226 len=4
+
+`forceAM0` is TRUE, and it is set here:
+
+    b2, newd2 = findB2D2(d2)
+    if b2 == None:
+        if newd2 == None:
+            newd2 = d2 - symtab[sect]["value"]
+            if newd2 >= 0 and newd2 < 4096 and newd2 < sects[sect]["used"] // 2:
+                b2 = 3
+                d2 = newd2
+            else:
+                section, offset = unhash(d2)
+                if section != None:
+                    forceAM0 = True
+
+    A SECOND 4096 CAP, and a different one from the one 162 raised.  When no
+    USING covers the operand AND its offset within its own section is 4096 or
+    more, the section-relative fallback is abandoned and AM=0 is FORCED -- so
+    the PC-relative arm below never gets to look, however well the distance
+    would fit.  `unhash` says 5554 for this card, past the cap; the PC-relative
+    distance is 1226.
+
+WHAT MAKES THIS DIFFERENT FROM 162.  That cap was on the distance from a USING
+BASE and the fix was simply that the field is wider than assumed.  This one is
+on the offset within the SECTION, and raising it is not obviously right --
+`newd2 < sects[sect]["used"] // 2` beside it suggests the intent was "is this
+target inside the section we have built so far", which is a different question
+from "does it fit the field".
+
+    DO NOT JUST RAISE IT.  The right change is probably to let the PC-relative
+    arm run instead of forcing AM=0, which is a reordering rather than a
+    widening -- and 163 is the cautionary tale for changing this area without
+    checking all ten of the modules that broke there.
+
+The remaining 92 are not this: FB->F8 18, F3->F0 13, F8->F8 12, F3->F7 8,
+FC->FC 8, F3->F1 6.  The F8->F8 and FC->FC pairs have the RIGHT second byte
+and a wrong displacement, so they are a different fault again and worth
+separating before either is chased.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
