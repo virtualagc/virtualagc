@@ -376,6 +376,22 @@ mscImmediateIndexable = { "@RAW", "@INT", "@DLY" }
 # BILDNEW5 alone.
 mscImmediate11 = { "@INT": 0x3, "@DLY": 0xC }
 
+# THE OPX FORM.  One instruction takes it, @STP, and it is a third shape
+# again: the operand is neither a count nor an address but the OPX field,
+# which selects WHICH stop the instruction performs -- 000 normal, 001 queue
+# overflow, 010 ROS parity, 011 diagnostic.  OPX sits in the SECOND NIBBLE and
+# the low byte is zero, so the operand does not reach the place a count would
+# occupy and encoding it as an immediate would put it in the wrong field
+# entirely.
+#
+# `@STP 0` is 1000 and `@STP 2` is 1200, both in BILDNEW5's as-received
+# listing, and the second card carries its own corroboration: its comment is
+# "ACCESS SPECIAL IOP ROS LOCATION", and 2 is 010, the ROS-parity case the POO
+# names.  The value is mapped as a nibble because that is what the two
+# attested cards show; OPX is documented as three bits, so the fourth is zero
+# for every value the field can take.
+mscOpx = { "@STP": 0x1 }
+
 # THE FOUR-BYTE MSC INSTRUCTIONS.  The POO gives the layout on the @BU and
 # @CALL pages (II-40, II-41):
 #

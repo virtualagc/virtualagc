@@ -1991,11 +1991,28 @@ def generateObjectCode(source, macros):
                     failed = False
                     for suboperand, width in zip(flattened, bitLengths):
                         if width == None or width <= 0:
-                            error(properties, \
-                                  "A constant without a bit length modifier " \
-                                  "cannot be packed with ones that have")
-                            failed = True
-                            break
+                            # AN OPERAND WITHOUT A BIT-LENGTH MODIFIER IS NOT
+                            # PART OF THE PACKING.  It is not an error either:
+                            # the packed run that precedes it is padded out to
+                            # a byte boundary and the plain constant is laid
+                            # down at its own natural length, which is what
+                            # GC28-6514-8 says and what the original build
+                            # does.  BILDNEW5's
+                            #     RDENVPTR DC AL.16(ENVIRONS),X'0001'
+                            # assembles to 80000001 there -- the address
+                            # constant's two bytes, then the hex constant's
+                            # two -- and refusing the statement is how that
+                            # module used to lose it.
+                            width = dcSuboperandBytes(properties, suboperand)
+                            if width == None or width <= 0:
+                                error(properties, \
+                                      "Cannot determine the length of a " \
+                                      "constant packed beside bit-length ones")
+                                failed = True
+                                break
+                            width *= 8
+                            while len(bits) % 8 != 0:
+                                bits.append(0)
                         if suboperand["d"] == []:
                             repeats = 1
                         else:
@@ -3199,8 +3216,28 @@ def generateObjectCode(source, macros):
                                             done = True
                                     opcode = argsSRSorRS[operation]
                                     # `forceAM0` is purely empirical.
+                                    #
+                                    # BUT NOT WHEN THE MNEMONIC CARRIES `@` OR
+                                    # `#`.  Those two bits live in the AM=1
+                                    # form and nowhere else -- every `@`/`#`
+                                    # card in the original build has 0xFC
+                                    # through 0xFF in its second byte -- so
+                                    # forcing AM=0 asks for a form that cannot
+                                    # express the instruction at all, and the
+                                    # AM=0 arm below, which admits neither
+                                    # flag, then rejected the statement with
+                                    # "Could not interpret line as SRS or RS".
+                                    # BILDNEW5's TESTING member writes eight
+                                    # such cards -- `LM@ MOVPOINT` under
+                                    # `USING MOVPOINT,B0` among them -- and
+                                    # they are all it had left of that
+                                    # complaint.  The flags are read off the
+                                    # mnemonic here because `ia` and `i`
+                                    # themselves are not computed until below.
                                     forceAM0 = forceAM0 or ( (opcode & 1) != 0 \
-                                                and b2 not in [3, None] and x2 == None)
+                                                and b2 not in [3, None] and x2 == None \
+                                                and "@" not in operation \
+                                                and "#" not in operation)
                                     if extrnD2:
                                         forceAM0 = True
                                     forceAM1 = forceAM1 or (x2 != None)
@@ -3735,7 +3772,7 @@ def generateObjectCode(source, macros):
 
             if operation in mscMemory or operation in mscBranch or \
                     operation in mscImmediate or operation in mscImmediate11 \
-                    or operation in ["@BC", "@BXC"]:
+                    or operation in mscOpx or operation in ["@BC", "@BXC"]:
                 # The two-byte MSC instructions, in the three formats derived
                 # and checked against the original build.  See `mscMemory`,
                 # `mscBranch` and `mscImmediate` for where each opcode comes
@@ -3759,6 +3796,27 @@ def generateObjectCode(source, macros):
                     if section is None:
                         return value
                     return offset + sects.get(section, {}).get("offset", 0)
+
+                if operation in mscOpx:
+                    # @STP, whose operand is the OPX field in the second
+                    # nibble rather than an immediate value.  See `mscOpx`.
+                    value = mscField("A1")
+                    if value == None:
+                        error(properties, \
+                              "Could not evaluate %s operand" % operation, \
+                                    severity = 255 if compile else 0)
+                        toMemory(data)
+                        continue
+                    if not 0 <= value <= 7:
+                        error(properties, \
+                              "%s operand %d is not an OPX value; OPX is " \
+                              "three bits and the POO names 0 through 3" \
+                              % (operation, value), \
+                                    severity = 255 if compile else 0)
+                    data[0] = (mscOpx[operation] << 4) | (value & 0x0F)
+                    data[1] = 0
+                    toMemory(data)
+                    continue
 
                 if operation in mscImmediate or operation in mscImmediate11:
                     value = mscField("A1")

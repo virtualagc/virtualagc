@@ -1273,6 +1273,93 @@ conditional-assembly machinery, and `@DLY` is a smaller separate matter.
 Don Schmidt reports he can build BILDNEW5, so his assembler resolves that AGO;
 his sources are the place to look before implementing one.
 
+BILDNEW5 now assembles and COMPARES.  It has been the one module that could not
+be measured at all; it is now the one that measures badly, which is a different
+and much better problem.
+
+    MATCH       267      MATCH?       4
+    DIFFERS       1      NOCOMPARE    0
+
+    BILDNEW5: 30782 bytes mismatched and 3223 bytes missing,
+              2642 bytes past the end of the listing
+
+Nothing else moved.  267 MATCH and 4 MATCH? are unchanged across all three
+sweeps of the night, and RUNASM stayed 205/205.
+
+WHAT IT TOOK WAS SEVEN THINGS, and only the first three were the assembler's
+conditional-assembly machinery -- the rest were the SOURCES.
+
+    7906  intolerable lines at the start
+      61  after the computed AGO, list-valued SET and T'-of-null
+      23  after the $POF/$PON cards were put back
+      12  after the vestigial invocations were commented out
+       0  after @STP, the DC packing rule and the AM=1 fix
+
+THE COMPUTED AGO, LIST-VALUED SET AND T' OF A NULL SET SYMBOL are in ASM101S at
+75a76b6d3 and in ap101s-notes.db.  Between them they make CHAR work, which was
+7779 + 2679 of the diagnostics.  CHAR now returns the documented code for every
+class of operand -- A 65, 0 48, _ 22, CR 13, BLK 32, BKSP 8, COMMA 44, LPAREN
+40, RPAREN 41.
+
+THE SOURCES WERE MISSING 35 CARDS, and the reason is worth carrying because it
+will recur.  $POF and $PON wrap their generated `DS 0H` in PRINT NOGEN, so the
+DS never reached the listing; the extraction, which keeps expansions and drops
+invocations, therefore had nothing to keep and dropped the call as well.  The
+original build has 57 $POF/$PON pairs and ours had 41 and 38.  TESTING.asm
+carries the pre-expanded unprotect table naming $POF001 through $POF057, so
+sixteen of its entries pointed at labels that were never defined -- 630 of the
+intolerable lines, every one of them "Cannot evaluate Y-type constant".
+
+    ANY MACRO THAT SUPPRESSES ITS OWN OUTPUT IS INVISIBLE TO THE EXTRACTION.
+    In this library that is $POF, $PON, FTBP and MSGBUFER, and no others.
+
+AND 5287 CARDS WERE VESTIGIAL INVOCATIONS -- calls whose expansion is already in
+the file, so expanding them again emits the code twice.  This is the fault
+5c35b774 fixed by hand in ten SSSRC modules; the MLIB80 members BILDNEW5 copies
+have it at fourteen times the scale.  DCHAR 5229 of them, in GENLINES alone.
+
+    RECOGNISE THEM BY THE CARD THAT FOLLOWS, not by the call itself.  A first
+    attempt asked whether the INVOCATION carried an `nn-MACRO` stamp, which is
+    true of the 5276 DCHAR/XPOS/YPOS calls the original build generated in
+    turn -- but CHRESET's ten calls are ordinary source cards with ordinary
+    SRNs and their expansions are there just the same.  Asking instead whether
+    the next card carries a stamp DEEPER than this one's finds all of them.
+
+    SKIP `PRINT` CARDS WHEN LOOKING AHEAD.  A PRINT emits nothing, and the one
+    place it turns up as the card after a call is where it belongs to a
+    DIFFERENT call whose output was suppressed -- PSA.asm has `PSA EX4`, then
+    the dropped `$POF`, then $POF's PRINT NOGEN/GEN pair with the DS gone from
+    between them.  Reading that pair as PSA's expansion commented out a call
+    the original build really did make.
+
+Both repairs are scripted, in modules/sdfpkg: restore-pofpon.py and
+comment-vestigial.py.  Run restore FIRST -- it anchors on unique (SRN, text)
+pairs and commenting changes the text.
+
+THE LAST THREE WERE ENCODINGS.  @STP's operand is the OPX field in the second
+nibble, not a count; a DC operand without a bit-length modifier is not part of
+the packing beside ones that have it; and a mnemonic carrying `@` or `#` cannot
+take the AM=0 form, because those two bits exist only in AM=1.  All three are
+in ap101s-notes.db with the listing evidence.
+
+A CRASH HIDES BEHIND AN ABORTED ASSEMBLY.  With the intolerable errors gone,
+BILDNEW5 reached the real listing printer for the first time and died there on
+`&C EQU` -- a card inside a macro DEFINITION, echoed but never expanded, whose
+name is still a variable symbol.  An aborted assembly prints the error listing
+instead and never comes near that code.  Expect more of these as modules stop
+aborting.
+
+WHERE TO START NEXT.  The first divergence is at FAILEXEC's SRN 011800AB:
+
+    original   00235 E8F7 0237  046E    FAILEXEC LA  B0,FAILDATA
+    ours       00235 E8F7 0257  048E    FAILEXEC LA  B0,FAILDATA
+
+FAILDATA is 32 halfwords later in our build than in the original, and every
+address after it is shifted.  The `TH UNPRTFLG` on the next card then differs
+for a second, dependent reason -- the original takes the 2-byte SRS form
+(A30C) and we take the 4-byte RS (A3F0 0003).  Fix the layout first; the
+length choice may follow from it.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's

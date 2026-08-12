@@ -1450,7 +1450,17 @@ for i in range(endLibraries, len(source)):
         else:
             offset = 0
         if properties["operation"] == "EQU":
-            prefix = "%07X" % (symtab[properties["name"]]["value"] & 0xFFFFFFF)
+            # THE NAME MAY NOT BE IN THE SYMBOL TABLE.  A card inside a macro
+            # DEFINITION is echoed in the listing without ever being expanded,
+            # so its name field can still be a variable symbol -- MACSMITH has
+            # `&C EQU` in one of its macro bodies -- and no such name is ever
+            # entered.  Sibling of the USING case below, and it hid the same
+            # way: BILDNEW5 only reached this printer once its intolerable
+            # errors were gone, because an aborted assembly prints the error
+            # listing instead and never comes here at all.
+            entry = symtab.get(properties["name"])
+            prefix = "" if entry is None or "value" not in entry \
+                     else "%07X" % (entry["value"] & 0xFFFFFFF)
         elif properties["operation"] == "USING":
             # A USING whose base could not be established has no value to
             # print.  It is set only when the first operand evaluates, so
