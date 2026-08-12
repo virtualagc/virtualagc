@@ -4216,6 +4216,56 @@ exists only to recompute `used` and the per-section `offset`.
     reproduces the boundary exactly.  Trace against ITS listing, never the
     full build's -- 201 records why.
 
+`PRINT` IS NOT THE CULPRIT, checked: it never reaches this loop at all, being
+in the `ignore` list, so it never touches `pos1`.  It is a listing directive,
+implemented at ASM101S.py:655, and emits nothing.  But the suspicion behind the
+question was sound -- something IS wrong with how this loop advances the
+counter, and 202's 8%-agreement now has a mechanism.
+
+TRAPPED, over the whole of GPCIPL in the TLINES rig:
+
+    EQU    align=2  len=None    793 cards
+    DS     align=2  len=0       577
+    DS     align=4  len=0       113
+    DS     align=4  len=4        11
+    ... and a handful of larger DS
+
+    793 CARDS ARRIVE WITH `length` OF `None`.  The loop does
+
+        rem = pos1 % alignment
+        if rem != 0: pos1 += alignment - rem
+        pos1 += properties["length"]        <-- TypeError on None
+        sects[sect]["pos1"] = pos1
+
+    inside a bare `try: ... except: pass`.  So on each of those cards the `+=`
+    RAISES, THE EXCEPTION IS DISCARDED, AND `sects[sect]["pos1"]` IS NEVER
+    ASSIGNED.  The card is dropped silently.
+
+    THAT IS PROBABLY HARMLESS FOR AN `EQU`, WHICH OCCUPIES NO SPACE -- but it
+    is harmless BY ACCIDENT, and the same `except` swallows every other
+    failure in the block with no diagnostic whatever.  A card that throws for
+    any other reason vanishes from the section's length and nothing says so.
+    With 92% of positions wrong, some of them are almost certainly cards this
+    is eating.
+
+WHAT TO DO, and it is a diagnosis step before it is a fix:
+
+  - REPLACE THE BARE `except: pass` WITH ONE THAT COUNTS AND PRINTS.  Run the
+    rig and see which cards are being swallowed and why.  That single change
+    will probably name the defect outright.
+  - `length=None` FOR AN `EQU` IS ITSELF WORTH A LOOK.  Every other card
+    carries an integer.  If `EQU` is meant to be skipped, skip it explicitly
+    rather than by exception, and the loop becomes readable.
+  - THEN 202 STILL APPLIES.  Even repaired, this remains a second computation
+    of a layout the assembler has already performed; the real `pos1` is in
+    `properties` and both `used` and the section `offset` follow from it.
+    Fixing the loop and deleting the loop are not competing options -- fix it
+    enough to learn what it is doing wrong, then delete it.
+
+    A BARE `except: pass` AROUND ARITHMETIC IS HOW A LAYOUT ENDS UP 92% WRONG
+    WITHOUT A SINGLE ERROR MESSAGE.  Worth remembering when the next quantity
+    in this assembler turns out to disagree with itself.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
