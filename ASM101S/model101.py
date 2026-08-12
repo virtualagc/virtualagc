@@ -3542,10 +3542,45 @@ def generateObjectCode(source, macros):
                                         # where the original has EAF1 0058:
                                         # base register 1, displacement 0x58,
                                         # exactly what the USING says.
+                                        # THE RANGE CHECK MUST BE ON THE
+                                        # DISPLACEMENT, NOT ON THE ADDRESS.
+                                        # Both AM=1 forms below encode the
+                                        # DISTANCE from the instruction
+                                        # counter -- `icRS - d2` or
+                                        # `d2 - icRS` -- in eleven bits, but
+                                        # the guard used to admit any `d2`
+                                        # under 2048 and say nothing about how
+                                        # far away it was.  REALEXEC's
+                                        # `LA G4,MCHO` is the case: MCHO is at
+                                        # 0x40, well inside the guard, and the
+                                        # instruction is at 0x8C6, so the
+                                        # distance is 2184.  `generateRS1`
+                                        # keeps eleven bits of it -- 136 -- and
+                                        # the `i` bit supplies the 0x800, so
+                                        # the card assembled ECF7 0888 and
+                                        # addressed 0x840.  Not a different
+                                        # encoding of the right address: the
+                                        # wrong address, silently.  The
+                                        # original writes ECF3 0040, the
+                                        # section offset addressed absolutely,
+                                        # which is what the later AM=0 arms
+                                        # produce once this one declines.
+                                        #     The SRS alternative is spelled
+                                        # out rather than folded in, because it
+                                        # is not PC-relative and its own limit
+                                        # (`srsCeiling`) already applies; a
+                                        # displacement test would wrongly turn
+                                        # away a short form whose target is
+                                        # near zero in a long section.
                                         elif operation == "LA" and \
                                                 not usingB2 and \
                                                 x2 == None and b2 != None \
-                                                and d2 > -2048 and d2 < 2048:
+                                                and d2 > -2048 and d2 < 2048 \
+                                                and ((d2 >= 0 and \
+                                                      d2 < srsCeiling and \
+                                                      len(data) == 2) or \
+                                                     (d2 - icRS > -2048 and \
+                                                      d2 - icRS < 2048)):
                                             if d2 >= 0 and d2 < srsCeiling and len(data) == 2:
                                                 data = generateSRS(properties, operation, r1, d2, ib2)
                                             elif d2 < icRS:

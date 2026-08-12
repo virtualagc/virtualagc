@@ -2926,49 +2926,80 @@ both the forward guard (`d1 >= 0 and d1 < 2048`) and the backward one
 operand MCHO in the TBASE rig -- it reproduces at the same address, 008C6, in
 23 seconds.
 
-Complete, and the fix is identified but NOT applied -- see the end.
+FIXED, and both harnesses agree.  Note that the FIRST diagnosis recorded here
+was wrong, and the way it was wrong is worth keeping.
 
-MEASURED in the TBASE rig for the card at 008C6: `icRS` is 2248, the operand
-MCHO is at 64, so `d1` is -2184.  The emitted second halfword is 0x0888 and
-that is exactly what the code makes of it:
+WHAT IT LOOKED LIKE.  For the card at 008C6 in REALEXEC, `icRS` is 2248 and
+MCHO is at 64, so the distance is 2184 = 0x888.  We emitted `ECF7 0888` where
+the original has `ECF3 0040`.  Eleven bits cannot hold 2184; `generateRS1`
+keeps 136 of it and the `i` bit supplies the 0x800, which is how the two
+halves of 0x888 come back together by coincidence.  So the instruction
+addressed 0x840 -- the WRONG ADDRESS, not a different encoding of the right
+one -- and the listing's resolved column still read 0040 because the assembler
+believed its own arithmetic.
 
-    if ib2 == 3:
-        if d1 < 0:
-            d1 = -d1
-            i = 1
-    ...
-    0x7FF & -d1
+THE FIRST DIAGNOSIS BLAMED THE MASK, and named the `0x7FF & -d1` packing in
+the backward arm.  It was wrong, and reading was what made it wrong: the
+arithmetic worked out, so the arm looked guilty.  A TRAP SETTLED IT IN ONE
+RUN.  Printing from inside each candidate arm when `abs(d1) > 2047` -- inside,
+so the `elif` chain stays intact -- fired ZERO times.  Neither arm ever sees
+an out-of-range displacement, because neither arm is the one that runs.
 
-`-d1` is 2184 = 0x888.  THE MASK LEAVES 0x088, 136, and the `i` flag
-contributes the 0x800, giving 0x0888.  So the instruction addresses 0x840
-where the source asked for 0x40, and the listing's resolved column still says
-0040 because the assembler believes its own arithmetic.
+THE ACTUAL DEFECT is the LA arm, the one added for DCICYC's `LA R2,CLOCIOR`:
 
-    THE MASK IS HIDING AN OVERFLOW.  Eleven bits hold 0 to 2047 and the
-    magnitude is 2184.  Every other range test in this area refuses what will
-    not fit -- `d1 > -2048`, `d1 < 2048`, `d < srsCeiling` -- and this one
-    path masks instead, which turns "cannot be encoded" into "encoded wrongly
-    and silently".
+    elif operation == "LA" and not usingB2 and x2 == None and b2 != None \
+            and d2 > -2048 and d2 < 2048:
+        ...
+        elif d2 < icRS:
+            data = generateRS1(properties, operation, 0, 1, r1, icRS - d2, 0, 3)
 
-    Note the comment above it, from the fix that made the mask 0x7FF rather
-    than 0x3FF: it is right that eleven bits are available, and widening the
-    mask was correct.  What was never added is a check that the value FITS the
-    eleven bits.
+    THE GUARD RANGE-CHECKS `d2` AND THE CODE ENCODES `icRS - d2`.  It admits
+    any target whose ADDRESS is under 2048 and says nothing about how far away
+    that target is.  MCHO at 0x40 sails through, and the distance that
+    actually has to fit in eleven bits is 2184.  A PC-relative form has to be
+    measured against the DISTANCE; the address is not the quantity that is
+    being encoded.
 
-THE FIX is to refuse the short displacement when `-d1` exceeds 0x7FF and let
-the AM=0 arms take it, which is what the original does -- ECF3 0040, the
-section offset addressed absolutely.  A diagnostic would be wrong here: AM=0
-is a perfectly good encoding and the original uses it routinely.
+THE FIX adds the displacement test to the guard, spelling out the SRS
+alternative rather than folding it in -- SRS is not PC-relative, its own
+`srsCeiling` already applies, and a displacement test would wrongly turn away
+a short form whose target is near zero in a long section.  When the guard
+declines, the later AM=0 arms produce `ECF3 0040`, which is what the original
+does.
 
-    I HAVE NOT APPLIED IT.  This arm is on the path of every RS instruction
-    that reaches backward, 163 is the record of what happens when it is
-    changed carelessly, and both harnesses take about ninety minutes.  The
-    change is one condition and the verification is the expensive part.
+MEASURED, whole corpus and RUNASM both:
 
-WHERE TO PUT IT: the guard belongs with the `if ib2 == 3: if d1 < 0:`
-negation, since that is the only path that produces a magnitude without
-having range-checked it first.  Expect the 18 F3->F7 cards to become F3 and
-BILDNEW5's wrong-value count to drop from 149 by about that many.
+    BILDNEW5      10967 -> 10919 bytes mismatched
+    corpus        267 MATCH / 4 MATCH? / 1 DIFFERS    unchanged
+    RUNASM        PASS 205/205                        unchanged
+
+    BILDNEW5 IS THE ONLY LINE IN THE SWEEP THAT MOVED.  Diff the sorted
+    outputs, not the raw ones -- the sweep runs in parallel and its row order
+    is not stable, so a raw diff shows about 190 modules "changed" and every
+    one of them is a reordering.
+
+HOW MANY CARDS THIS IS, I DO NOT KNOW, and three attempts to derive it all
+disagreed.  Recorded so the next attempt does not repeat them:
+
+  - 48 bytes divided by four is not twelve cards.  The change is
+    `ECF7 0888` -> `ECF3 0040`: the opcode byte is unchanged and the other
+    THREE differ, so the divisor is three, not four.
+  - Grouping the assembler's per-byte `Comparison mismatch:` lines onto the
+    following card gives 5749 cards, which cannot be reconciled with anything
+    and means that grouping is not what the earlier card figures measured.
+  - Keying our listing against the as-received one on (address, statement)
+    keyed only 734 of some 7000 cards uniquely, and called 103 too short and
+    91 too long, which is the object-code column window picking up the
+    resolved-operand field.
+  - Counting LA cards in the listing whose ADDRESS fits but whose DISTANCE
+    does not gives 58, but that is an UPPER BOUND: the listing cannot show
+    which of them were reached through a USING, and `not usingB2` keeps those
+    out of this arm entirely.
+
+    THE BYTE COUNT IS THE HARNESS'S OWN AND IS THE ONE TO QUOTE.  A card
+    figure needs the tool that produced the earlier ones, which is not in the
+    scratchpad; the honest options are to find it or to re-run BILDNEW5 with
+    and without the fix and diff the two listings.
 
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
