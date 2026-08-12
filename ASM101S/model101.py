@@ -1425,7 +1425,7 @@ def generateObjectCode(source, macros):
             if e == None:
                 continue
             d = d2 - e[0]
-            if d >= 0 and d < 4096:
+            if d >= 0 and d < 0x10000:
                 # Note that "<=" is required in this test, rather than "<",
                 # because the assembler manual states that if two candidate
                 # registers result in the same D2, the higher-number register
