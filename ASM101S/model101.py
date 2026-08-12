@@ -763,7 +763,8 @@ def optimizeScratch():
                 continue
             # Special cases that branch backward:
             if section == sect and \
-                    (operation in branchAliases or operation in ["BCT", "BC"]):
+                    (operation in branchAliases or operation in ["BCT", "BC"] \
+                     or operation in srsBranchOperations):
                 d = symtab[sect]["value"] + properties["pos1"] // 2 + 1 - d2
                 if d >= srsFloor and d < srsCeiling:
                     adjust(scratch, properties, i)
@@ -774,7 +775,8 @@ def optimizeScratch():
             # Check for the case `OPCODE R1,D2`, where `D2` is a location in
             # the current CSECT.
             if section == sect and \
-                    (operation in branchAliases or operation == "BC"): # operation not in fpOperations:
+                    (operation in branchAliases or operation == "BC" \
+                     or operation in srsBranchOperations): # operation not in fpOperations:
                 d = value - properties["pos1"] // 2 - 1
                 if d >= srsFloor and d < srsCeiling:
                     adjust(scratch, properties, i)
@@ -3424,7 +3426,33 @@ def generateObjectCode(source, macros):
                                         else:
                                             d = uUnhashedValue
                                             d1 = unhashedValue
-                                            
+                                            # A BRANCH'S SHORT FORM IS
+                                            # PC-RELATIVE, and by this point
+                                            # `d2` has been replaced by the
+                                            # offset from the USING's base --
+                                            # so `uUnhashedValue` is a distance
+                                            # to the wrong thing entirely.
+                                            # STM1's `BVC 6,STM1270` reaches a
+                                            # label THREE halfwords ahead and
+                                            # arrived here as 107, the distance
+                                            # from `USING *,0`, which no branch
+                                            # ceiling was ever going to admit.
+                                            # The original assembles it DE09 --
+                                            # displacement 2, form 01 -- so the
+                                            # number wanted is the one the
+                                            # non-USING path already computes,
+                                            # measured from the instruction
+                                            # counter.  `originalD2` still
+                                            # holds the address before the base
+                                            # register was substituted.
+                                            if usingB2 and \
+                                                    (operation in branchAliases or \
+                                                     operation in srsBranchOperations):
+                                                brSect, brAbs = unhash(originalD2)
+                                                if brAbs != None:
+                                                    d = (brAbs - icSRS + dUnitizer - 1) \
+                                                        // dUnitizer
+
                                         #uhSect, uhD2 = unhash(d2)
                                         #uuB2, uuD2 = unUsing(using, d2)
                                         # `forceDisplacement` is an experimental
