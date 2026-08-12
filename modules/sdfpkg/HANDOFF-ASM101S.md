@@ -1599,6 +1599,89 @@ READ THIS BEFORE TOUCHING THE TWELVE.  Two of the four rows in 148's table --
 the count arriving at 4 and the claim that three of them are the arm's fault
 -- were inference.  The count is right; the attribution was not.
 
+With the lengths nearly right the wrong-VALUE pile can finally be read, and it
+is mostly not a pile of wrong values.
+
+Comparing the ADDRESS of every same-length card, ours against the original:
+
+        +12   5302 cards        +1    128
+         +2    870              +6     20
+        +11    351             +13     19
+         +0    239             +10     11
+
+So most of the module sits TWELVE HALFWORDS LATE and the values that differ
+are overwhelmingly addresses carrying that drift.  ONLY 42 OF THE 1402 SIT AT
+ADDRESSES THAT AGREE, and those 42 are the only ones that can be a genuine
+encoding fault rather than a consequence.
+
+    AMCPTEST DC Y(AMCPLIST)   orig 50FA  ours 5106     -- 12
+    AREAPTR  DC Y(MSG132+10)  orig 471B  ours 4727     -- 12
+
+EVERY STEP IN THE DRIFT IS ACCOUNTED FOR, and the card before each step is the
+cause.  The twelve still-too-long instructions supply +1 each:
+
+     +0 -> +1  044000AB  L R7,FAILBRTN     orig 1F0C  ours 1FF00006
+     +1 -> +2  069300AB  L R7,FRTRNXEC     orig 1F10  ours 1FF00008
+     +2 -> +3  023300AB  ST R7,KFINDIRW    orig 3710  ours 37F00008
+     +3 -> +4  024800AB  BVC 6,STM1270     orig DE09  ours CEF0006B
+     +4 -> +5  026900AB  LE F7,KFCON1+2    orig 7F18  ours 7FF0000C
+     +6 -> +7  027700AB  LE F7,KFCON2      orig 7F1C  ours 7FF0000E
+     +7 -> +8  028700AB  LE F2,KFCON3      orig 7A20  ours 7AF00010
+     +8 -> +9  028800AB  AE F2,KFCON4      orig 5224  ours 52F00012
+     +9 ->+10  029000AB  SE F5,KFCON5      orig 5D28  ours 5DF00014
+    +10 ->+11  031700AB  ME F6,KFCON9      orig 6640  ours 66F00020
+    +12 ->+13  035500AB  C R7,KFCON16      orig 1778  ours 17F0003C
+    +12 ->+13  048500AD  BCB B'000',*      orig D806  ours D80001E6
+
+and the four too-short give a halfword back each.  THE CNOP STEPS ARE
+CONSEQUENCES, NOT CAUSES -- `CNOP 1` at 027200AB and 035300AB emit a D800 pad
+here and none in the original, and `CNOP 2` at 040100AB the reverse, purely
+because the drift has changed what is already aligned.  Do not chase them.
+
+    EVERY ONE OF THE TWELVE HAS F0 OR F3 IN ITS SECOND BYTE and a displacement
+    that fits: L 6 halfwords = 3 fullwords against an original 0x0C >> 2 = 3,
+    LE 12 = 6 against 0x18 >> 2 = 6, ME 32 = 16 against 0x40 >> 2 = 16.  So
+    the unit arithmetic is right and something else is refusing them; the arm
+    should have caught every one.  That is the next thing to instrument.
+
+Note the drift returns to +0 before the end, at `PATCH2 DC 50X'C6C6'` and then
+at a Y-constant, so the module's total length already agrees; it is the
+interior that is displaced.
+
+WHAT THIS MEANS FOR PRIORITIES.  Fixing the twelve should collapse most of the
+1402 as well, because they are the same fault seen twice -- once as a length
+and once as every address after it.  The 42 are the only independent value
+defects and should be read individually AFTER the drift is gone, not before.
+
+Instrumented, over every refusal the arm makes across all its iterations:
+
+    362   a USING covers it AND re-resolution found a base
+          -- so the DISPLACEMENT was judged too far, or not a whole unit
+    218   a USING covers it but RE-RESOLUTION FOUND NO BASE
+    196   no USING covers the operand at all
+
+THE 218 ARE THE ARM'S OWN DEFECT.  `entry["using"]` holds a base for the right
+section and the re-evaluation still comes back with nothing, so it is failing
+inside the new code rather than deciding against the operand.  The two
+candidates, in order of suspicion:
+
+  - the hashcode argument is passed as None.  `evalArithmeticExpression(...,
+    symtab, None, severity=0)` is fine for a plain symbol and wrong for any
+    USING whose operand mentions `*`, which cannot resolve without a location.
+    `USING *,B3` and `USING *+2,B0` both occur.
+  - the section test `s2 != section` rejects a base whose hashcode resolves to
+    a different section name than the operand's, which is the FCMBMASK
+    unnamed-DSECT trap all over again.
+
+Both are cheap to distinguish: print `h2` and `s2` beside `section` in the
+same arm.  Whichever it is, these 218 are where the remaining twelve
+too-long instructions live -- `L R7,FAILBRTN` prints `uBase=None` with a
+non-empty using list and `oldd=544`.
+
+The 362 are a different question and may be correct refusals; do not assume
+they are all wrong.  The 196 have no base to reach through and are not this
+arm's business at all.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
