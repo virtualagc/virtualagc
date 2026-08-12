@@ -3591,7 +3591,22 @@ def generateObjectCode(source, macros):
                                                 not forbiddenSRS and \
                                                 operation in branchAliases):
                                             # Is SRS.
-                                            if operation in ["BCB", "BCTB"]: # Backward displacement
+                                            # NOT WHEN THE OPERAND IS A
+                                            # NUMBER.  `BCB` and `BCTB` hold
+                                            # the backward distance as a
+                                            # MAGNITUDE, so a displacement
+                                            # worked out from an address has to
+                                            # be negated to get it -- but a
+                                            # literal operand IS that magnitude
+                                            # already.  STM1's `BCB B'000',1`
+                                            # is D806 in the original,
+                                            # displacement 1 over the form
+                                            # selector 10; negating the 1 and
+                                            # masking it into six bits gave 63
+                                            # and assembled D8FE, a branch 63
+                                            # halfwords back instead of 1.
+                                            if operation in ["BCB", "BCTB"] \
+                                                    and not isNumberD2:
                                                 d = -d
                                             if operation in ["BC", "BCF"]:
                                                 operation = "BCF"
