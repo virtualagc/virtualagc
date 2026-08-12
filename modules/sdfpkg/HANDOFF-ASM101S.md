@@ -2124,6 +2124,48 @@ WHAT REMAINS is 438 wrong values, still led by LA 98, STH 54, BAL 48, ISPB 44.
 The same shape of question -- which base, which addressing mode -- but not the
 same answer, since these all had a base within 4096 and still came out wrong.
 
+The 438 that remain after 162 are 395 whose SECOND BYTE differs and nothing
+else, and 345 of those differ in ONE BIT:
+
+    orig F7 -> ours F3   296        orig FF -> ours FB    49
+
+Same base register, different addressing bit.  Decoded on `LH R4,SVCO` at
+0029F: the original is 9CF7 0A49, and 0x0A49 is 0x800 | 0x249.  0x249 is 585,
+`icRS` is 0x29F + 2 = 673, and 673 - 585 is 88, which is SVCO.  So the original
+takes the RS AM=1 form with a BACKWARD PC-relative displacement, the 0x800 bit
+being the sign.  We emit AM=0 with the absolute address instead.
+
+THE ARM THAT WOULD DO IT IS GUARDED BY AN OPERATION LIST:
+
+    elif (operation in ["BC", "BIX", "BAL", "BCT"] or
+          (operation in ["OST", "LPS", "SSM"] and not extrnBase)) and
+            x2 in [None, 0] and d1 > -2048 and d1 <= 0:
+
+and the comment above it already generalises -- "Nothing about this encoding
+is peculiar to branches: a section-relative reference to a lower address is
+written AM=1 with the `i` bit and the magnitude, whatever the operation."
+
+    THAT GENERALISATION IS WRONG, AND THE LIST IS LOAD BEARING.  Dropping it
+    -- keeping only `not extrnBase` -- fixes the BILDNEW5 cards and BREAKS TEN
+    MODULES that are byte-exact today: DCICYC by 186 bytes, FCMBOOT, FCMCSYNC,
+    FCMISYNC, FCMNINIT, FCMLINIT, FCMSSYNC, FCMTRACE, FCMTSYNC, FIOSVCP by
+    three to nine each.  Reverted.
+
+AND IT IS NOT THE OPERATION THAT DECIDES.  The same mnemonic goes both ways:
+
+    BILDNEW5  L R7,SVCN+2    orig 1FF7 0AF0   AM=1, backward
+    FCMTRACE  L R3,TPSATENT  orig 1BF3 ....   AM=0, absolute
+
+so no list of mnemonics can be right, however long.  Something about the
+OPERAND or its section decides, and that is what to find.  TPSATENT sits at
+offset 0 of its section, which is worth checking first -- a displacement of
+exactly 0 may be the discriminator, since `d1 <= 0` admits it and the sign bit
+cannot express "minus zero" distinctly.
+
+WHAT THE EXPERIMENT WAS WORTH.  BILDNEW5 went 12330 to 12078 bytes mismatched
+with it, so the direction is right and only the condition is wrong.  Both
+numbers are with everything else of 160 through 162 in place.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
