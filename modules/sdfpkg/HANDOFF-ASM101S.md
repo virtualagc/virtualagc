@@ -4035,6 +4035,57 @@ NEXT STEP, and it needs the full build.  Put the same trap back --
     TESTING defines `LINES` would give a two-section rig in well under a
     minute and make this iterable.
 
+LOCATED TO ONE LOOP, and there is now a 64-second rig for it.
+
+A TWO-SECTION RIG EXISTS: `modules/sdfpkg/TLINES.asm`, BILDNEW5 cut to
+seventeen members -- TPURG's sixteen plus GENLINES, which is what defines
+`LINES`.  It reproduces the defect exactly, PATCH2 at 031E0 and LINES at 0320E
+where 03212 is wanted, in 64 SECONDS against the 35-minute full build.  198
+guessed this was worth more than another full run and it was.
+
+THE LITERAL-POOL OVERRIDE IS INNOCENT.  Trapped on that rig:
+
+    GPCIPL   used=25628 (0320E hw)   offset=25628   pool override: NO
+    LINES    used=10676 (014DA hw)   offset=10676   pool override: NO
+
+    `offset` and `used` are the SAME NUMBER; the pool branch never fires for
+    either section.  198's suspect is cleared, as 197's and 196's were before
+    it.
+
+WHAT IS ACTUALLY WRONG IS `used` ITSELF.  The listing puts PATCH2 at 031E0 and
+it is fifty halfwords, so GPCIPL ends at 03212 -- 25636 bytes.  `used` says
+25628.  EIGHT BYTES, and the same eight all the way back to 193.
+
+    THE RECOMPUTATION LOOP PLACES PATCH2 AT 031DC, FOUR HALFWORDS BEFORE THE
+    REAL ASSEMBLY PUTS IT.  Its length is right, 100, and was measured; what
+    is wrong is where the loop thinks it STARTS.  The loop is the one under
+    `asis` that walks `source` doing
+
+        rem = pos1 % alignment
+        if rem: pos1 += alignment - rem
+        pos1 += properties["length"]
+
+    -- a SECOND, INDEPENDENT computation of a layout the assembler has already
+    performed once.  It is the same disease as every other defect in this
+    stretch: two derivations of one quantity, disagreeing.  177, 182, 192, 194
+    and now this.
+
+WHERE TO LOOK, and check these before changing the arithmetic:
+
+  - THE CARDS IMMEDIATELY BEFORE PATCH2 are `$PON056 DS 0H` and `DS 0F`.  The
+    `$PON` cards are the restored ones of 184, their expansions invisible in
+    the original listing, and each generates a `DS 0H`.  If the loop and the
+    assembler disagree about what a zero-length aligned card does to `pos1`,
+    that is eight bytes' worth of opportunity right at the boundary.
+  - ALIGNMENT ALONE DOES NOT EXPLAIN IT.  25528 and 25536 are both divisible
+    by 4 and by 8, so neither a fullword nor a doubleword rule separates the
+    loop's answer from the real one.
+  - THE HONEST FIX MAY BE TO DELETE THE RECOMPUTATION.  The assembler has
+    already laid the section out; recomputing it from `properties["length"]`
+    in a separate loop is what allows the two to differ at all.  Establish
+    first whether the real `pos1` is still available at that point -- if it
+    is, using it is better than making the copy agree.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
