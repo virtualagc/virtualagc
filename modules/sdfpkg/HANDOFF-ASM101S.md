@@ -1177,6 +1177,62 @@ zero, so only FIOCGR is informative -- which is why RUNASM, not the corpus,
 is what killed the DSECT rule.  RUN BOTH HARNESSES ON ANY SECTION-PLACEMENT
 CHANGE; the corpus alone would have accepted it.
 
+FPMIHPC2 IS NO LONGER NOCOMPARE.  It assembles with NO diagnostics and compares
+at 1843 mismatched and 4 missing bytes, from 146 intolerable lines.  Nothing is
+installed; this entry is the recipe, which regenerates the candidate from the
+as-received listing deterministically.
+
+THE CAUSE IS `unprint.py` AND THE LISTING TOGETHER, exactly as for FIOSVC.  A
+copied member is bracketed by "START OF COPY MEMBER" and "END OF COPY MEMBER"
+banners; unprint.py diverts its output to the member's buffer on the first and
+switches back on the second.  FPMIHPC2's listing carries TWO STARTs with no
+matching ENDs -- FIOSGEVT at line 1640 and FICCEQUS at 1769 -- so everything
+after the first was diverted and thrown away.  Run unprint.py on an untouched
+copy and it reproduces the committed 1356-card file exactly.
+
+THE RECIPE, all on a COPY of the listing in scratch, never the original:
+
+  1. Insert an "END OF COPY MEMBER FIOSGEVT" banner after line 1659.  Its last
+     card is 1659 (01-EVTEQ) and the outer module resumes at 1660, SRN 053000BO.
+     Model it on the END banner the same listing carries at line 433.
+  2. Insert an "END OF COPY MEMBER FICCEQUS" banner after line 1863.  Its last
+     card is 1863, `EXTRN CZ2VIF1`, SRN 007900AO; the outer module resumes at
+     1865 with `GENERATE COPY=(TFPSA,TFPCT,TFTQE,TFPDE,TFGST,TFIOQ)`, SRN
+     101800BZ.  Model it on line 1162.
+  3. Re-extract:  unprint.py --file=FPMIHPC2, from a directory with ../MLIB80
+     present or it dies on a FileNotFoundError.  Yields 1888 cards ending with
+     `END` at SRN 110800CC.
+  4. Comment out two vestigial invocations, `*` in column 1:  the `IF` at card
+     246 (SRN 012000BO) and the `GENERATE COPY=(...)` at card 1449 (101800BZ),
+     each standing beside its own expansion.
+  5. Renumber every `#@LBn` to `#@LB(n+2000)`, definitions and references
+     alike, preserving columns.  123 distinct labels, range 1..211.
+
+GET THE FICCEQUS BOUNDARY WRONG AND IT LOOKS LIKE A DIFFERENT BUG.  Placing
+that END at 2315 instead of 1863 swallows ~450 of the OUTER MODULE's cards --
+the GENERATE and the TFIOS/TFICC invocations among them -- and the module then
+reports undefined TFICC, TFIOQ, TFGST and their fellows.  I concluded from that
+that MLIB80/FICCEQUS.asm was itself truncated.  IT IS NOT.  The user spotted it
+from the listing: TFICC is invoked at SRN 102600BZ, which is the outer module's
+own numbering, so its expansion had to be in FPMIHPC2 and I had discarded it.
+
+WHY THE LABELS MUST MOVE.  The `#@LBn` are generated sequentially, and the
+outer module's text is PRE-EXPANDED while FIOSGEVT and FICCEQUS are COPY'd from
+MLIB80 and expand LIVE at assembly time.  Their macros number from 1 and
+collide with the retained expansions, giving `Already defined: #@LB1`.  The
+labels are local and need not be sequential, so any unused range serves.
+
+WHAT REMAINS is a single missing halfword, not 1843 problems.  Every mismatch
+is a displacement one too small -- DE vs DF, C7 vs C8, D7 vs D8 -- against
+targets around 014B, so something ahead of them is one halfword short.  That is
+the same signature that resolved DCICYC and FCMBMASK.  Chase it with the
+address aligner, BUT teach it to ignore `#@LBn` differences first or it reports
+the renumbering as divergence and hides the real one.
+
+AND DECIDE ABOUT THE RENUMBERING BEFORE COMMITTING.  It is safe within the
+file, but FPMIHPC2's labels would no longer match its listing's text, which is
+true of no other module in the corpus.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
