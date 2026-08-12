@@ -3429,6 +3429,44 @@ wrong length and would produce exactly the divergence 174 records.
     distance 22.  If any of their cards differs from the listing, the bug is
     in the source and not in the assembler at all.
 
+CHECKED AGAINST THE LISTING TEXT, as 185 asked.  ALL THREE CARDS ARE
+BYTE-IDENTICAL TO THE LISTING:
+
+    01E02  042100AB  REALEXEC   `BNC   STMMAIN1 ...`      SAME
+    02081  053500AB  GPCRTOPT   `BZ     POLL94 ...`       SAME
+    0249A  181000AB  GPCRTOPT   `B     PURGSAVF`          SAME
+
+    SRNs ARE NOT UNIQUE BETWEEN MEMBERS.  Looking one up returns a card from
+    nearly every member, all but one of them unrelated text.  Match the SRN
+    AND the member, or the answer is nine spurious differences and one real
+    agreement.
+
+SO THE SOURCE IS NOT DAMAGED AND THE BUG IS OURS.  But it is not where 174
+put it either -- THESE THREE ARE NOT TOO SHORT BECAUSE THE FORM WAS CHOSEN
+WRONGLY.  Compare what each side resolves the TARGET to:
+
+    02081  BZ POLL94     ours reaches 20B8,  the original 20B9
+    0249A  B PURGSAVF    ours reaches 24D1,  the original 24D2
+
+    OUR TARGETS SIT ONE HALFWORD EARLIER THAN THE ORIGINAL'S.  Both cards
+    then measure a distance of 54, and 54 fits the short form where 55 does
+    not -- so the short encoding is a CONSEQUENCE of the target being one
+    halfword close, not an independent misjudgement about ceilings.  That is
+    why 174 could find no value of `srsCeiling` that reached them: the ceiling
+    was never the variable.
+
+WHAT TO LOOK FOR.  Something between each branch and its target emits TWO
+BYTES LESS than the original.  The instruction at 0249A is at the same address
+in both builds, so the divergence begins after it and before 24D1 -- a range
+of about 55 halfwords.  Walk the two listings side by side across that range
+and find the first card whose LENGTH differs; that card is the defect and
+these three are downstream of it.
+
+    AND THE SLIDE OF 183 IS THE SAME PHENOMENON AT LARGER SCALE.  024A8 and
+    024AA, which have no counterpart in the original at all, sit inside
+    exactly this range.  One short card explains the branch, the two
+    phantom cards, and everything after.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
