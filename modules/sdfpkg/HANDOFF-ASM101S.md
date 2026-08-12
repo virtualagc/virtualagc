@@ -1714,6 +1714,8 @@ tens of millions of times across the twenty iterations and takes the module
 from five minutes to over forty.  Guard any trap on the operation or the SRN
 before the loop, not inside it.
 
+WHY.  One caveat on the arithmetic: the classification counted 218 re-resolution failures and the reason trap attributed 200 of them, all of them a USING whose operand is star. The other 18 were never attributed, so "the other two buckets" is 362 plus 196 plus those 18, not just the two. Small, but do not let the phrasing send you past them.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
