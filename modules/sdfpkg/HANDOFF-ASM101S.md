@@ -3515,6 +3515,57 @@ justify itself.
     most of BILDNEW5's remaining byte count.  185 counted the mismatches as
     10625 bytes; the great majority of them are downstream of this.
 
+READ AND MEASURED, and it clears `optimizeScratch` entirely.  187 said the
+iteration lands on the wrong fixed point.  IT DOES NOT.
+
+INITIAL SIZES ARE LONG, WHICH IS WHAT THE METHOD REQUIRES.  A scratch entry's
+`length` is set from whatever pass 1 emitted, and `adjust()` only ever writes
+`length = 2` -- it shortens and never lengthens, so the iteration is monotone
+downward from the pass-1 layout.  For `B PURGSAVF` a trap prints
+
+    pass=1 len=4 ambiguous=True
+
+on every iteration: it enters at FOUR BYTES.
+
+AND IT DECLINES TO SHORTEN IT, three times running.  The forward-branch arm
+computes `d = value - pos1//2 - 1` and tests `d < srsCeiling`:
+
+    d=61  value=24D7   keep long
+    d=56  value=24CF   keep long
+    d=55  value=24CE   keep long
+
+    THE THIRD LINE IS THE ORIGINAL'S ANSWER.  55 is not less than 55, so
+    `optimizeScratch` leaves the instruction at four bytes -- exactly what the
+    original build does.  Note the value sliding, 24D7 to 24CF to 24CE, as
+    OTHER instructions shorten around it; the iteration is working correctly
+    and converging.
+
+SO THE SHORTENING HAPPENS AFTER, IN THE COMPILE PATH, and that is where to
+look next.  `optimizeScratch` runs once, at the end of pass 1; the compile
+passes then encode the instruction again through the SRS arm of the big elif
+chain, which applies its OWN ceiling -- `srsBranchCeiling` for branch
+mnemonics, `srsCeiling` otherwise -- and reaches the opposite conclusion.  The
+two decisions are made in different places by different tests and nothing
+reconciles them.
+
+    THE QUESTION TO ANSWER FIRST is which ceiling the compile path applies to
+    `B`, and whether its `d` is the same quantity `optimizeScratch` computed.
+    A one-off difference between `pos1//2 + 1` and `icSRS` would be enough to
+    turn 55 into 54, and 54 fits.  177 and 182 were both exactly that -- a
+    distance measured from the wrong place, or a value read as though it meant
+    something adjacent.
+
+    TRAP INSIDE THE SRS ARM, tagged with `_passCount`, and compare its `d`
+    against the 55 above.  Do NOT adjust a ceiling to make the number come
+    out: 174 spent itself doing that, and if the two paths disagree about
+    WHICH quantity they are testing, moving the threshold only relocates the
+    disagreement.
+
+    THE RIG FOR THIS IS `t/TPURG.asm`, built for it and kept: BILDNEW5 cut to
+    the sixteen members through GPCRTOPT, reproducing the card at 0249A with
+    the same DFD8 in 33 seconds against the 35-minute full build.  TBASE does
+    NOT reach this card.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
