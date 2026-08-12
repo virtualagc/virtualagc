@@ -1994,6 +1994,58 @@ branch and predating all of today's work.
 
 WHY.  SETTLED, and it is the second possibility.  With both arms widened and a trap in the forward one, the rig prints "forward arm REACHED op=BVC d=3 inrange=True len=4" and then "adjust() CALLED" -- so the arm runs, the displacement is 3, and the entry IS shortened to two bytes.  The output is still CEF0 006B, so THE ENCODER DECLINES IT DOWNSTREAM.  optimizeScratch shortening is necessary and not sufficient, and BVC work belongs in the encoder SRS arm rather than in this pass.  Note that arm names BVC explicitly -- "operation not in (BC, BCF, BVC, BVCF)" -- and applies srsBranchCeiling 54 to it, so what to look at is what d comes out as THERE, not here.
 
+`BVC 6,STM1270` assembles DE09 now.  159 recorded two candidates as REFUTED --
+widening the shortening arms, and correcting the encoder -- and both records
+were honest and both were wrong in the same way: each is necessary and neither
+is sufficient.  Testing them one at a time is what hid it.
+
+THE ENCODER MEASURES TO THE WRONG THING.  By the SRS decision, `d2` has been
+replaced by its offset from the USING's base, so `uUnhashedValue` is the
+distance to that base -- 107 halfwords here, from `USING *,0`.  A branch's
+short form is PC-RELATIVE, and the original's DE09 is (2 << 2) | 01: a
+displacement of TWO from the instruction counter, with 01 the form selector
+for BVCF.  `originalD2` still holds the address before the base register was
+substituted, so measure from `icSRS` as the non-USING path already does.
+
+AND THE SHORTENING PASS MUST ADMIT THE OPERATION.  Both PC-relative arms test
+`branchAliases or "BC"`; BVC, BCF, BCB and BCTB are in `srsBranchOperations`
+instead, so the entry stays four bytes and the encoder's SRS arm -- which
+requires `len(data) == 2` -- cannot fire however right its arithmetic is.
+
+    A NOTE ON 107 AND 108.  It was asked whether 107 being almost 2 x 54 is a
+    coincidence, srsBranchCeiling being 54.  It is: 107 is 3045 - 2938,
+    target minus USING base, both fixed by the source.  It would NOT have been
+    a coincidence if this branch's offset were in fullwords, since (107+1)//2
+    is exactly 54 and would sit precisely on the ceiling -- but the original's
+    own encoding settles the unit.  DE09 means displacement 2 with the card at
+    0B8C and the label at 0B8F, and 2 halfwords is the distance; 2 fullwords
+    would put the target at 2961 rather than 2959.  Halfwords, so dUnitizer 1,
+    so the near-miss is inert.  Worth remembering if a branch ever fails at
+    exactly the boundary.
+
+BILDNEW5:
+
+                            before   after
+        byte-identical        5665    6443
+        wrong value           1311     535
+        TOO LONG                 2       0
+        too short                4       4
+        addresses agreeing    1249    6629   of 6982
+        past end of listing      4       0
+        missing                107      30
+
+95% of cards now sit where the original put them, and no instruction is the
+wrong length except the four that are too SHORT.
+
+VERIFIED WIDELY, because this is the broadest change of the series: admitting
+four more operations to the shortening arms affects every module.  Corpus
+267 MATCH, 4 MATCH?, 1 DIFFERS with no module changing class; RUNASM 205/205
+over an identical module set.
+
+WHAT IS LEFT is the four too-short cards of 148 and 149.  No amount of further
+shortening reaches them -- they are already shorter than the original -- so
+they are a different question from everything solved in 157 through 160.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
