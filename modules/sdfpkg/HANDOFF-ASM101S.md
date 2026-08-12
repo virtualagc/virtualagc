@@ -1570,6 +1570,35 @@ small way as well as under-shortening in a large one.  That is the honest
 accounting: the net is 714 -> 12 and 4482 -> 5563 identical, but it is not a
 pure win and the three should be understood before the twelve.
 
+Tested, because 148 asserted it without testing: the USING arm was excluded
+from every branch operation -- `operation in branchAliases or operation in
+srsBranchOperations` -- and BILDNEW5 came out BYTE FOR BYTE THE SAME.
+
+    identical 5563  wrong value 1402  too long 12  too short 4
+
+The same four cards, unchanged.  So the arm is not deciding those branches at
+all; the two PC-relative arms above it are, as they always were.  The change
+was reverted rather than kept, since a guard that alters nothing is dead
+weight carrying a wrong explanation.
+
+WHAT ACTUALLY HAPPENED IS INDIRECT.  Shortening 700 other instructions MOVED
+EVERYTHING, and three branches that were out of PC-relative range in the old
+layout are now within it.  The branch arms then shorten them -- correctly by
+their own rule, and wrongly against the original build, which left all three
+long at CEF7 0816, C4F7 0036 and C7F7 0036.
+
+    So this is not a fault in the new arm.  It is the branch rule's MARGIN,
+    seen for the first time in a layout close enough to the original for the
+    question to arise, and it belongs with sections 129 through 134 -- the
+    srsBranchCeiling of 54 and "the original shortened right up to 55".
+
+The fourth, `STH R2,SECOND##` at 176300AC, is not a branch and predates all of
+this work, so it is a separate question again.
+
+READ THIS BEFORE TOUCHING THE TWELVE.  Two of the four rows in 148's table --
+the count arriving at 4 and the claim that three of them are the arm's fault
+-- were inference.  The count is right; the attribution was not.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
