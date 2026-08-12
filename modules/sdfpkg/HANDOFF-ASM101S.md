@@ -1525,6 +1525,51 @@ another turn of the same handle.  1508 wrong values remain and most were
 always downstream of the lengths, so re-measure them before reading anything
 into the count.
 
+The 66 that survived the USING re-resolution were one thing, and it is now
+fixed too.  FOR A FULLWORD OPERATION THE SRS DISPLACEMENT COUNTS FULLWORDS,
+which doubles the field's reach, and the arm was comparing raw halfwords
+against the ceiling.  `ST R6,FAILENV2+4` is 36B4 in the original -- 0xB4 >> 2
+is 45 -- against a halfword distance of 90.  L 47, LE 6, N 30, ST 33: every
+one exactly half the halfword figure.  63 of the 66.
+
+The unitizer is derived here the same way the encoder derives it, from bits 0
+and 9 of the opcode, and a distance that is not a whole number of units is
+refused outright, which is the test `forbiddenSRS` already makes downstream.
+
+BILDNEW5 across the three states -- and note that only the first column is a
+different assembler, the other two are one arm of one function:
+
+                            v2      v3      v4
+        byte-identical    4482    5403    5563
+        wrong value       1782    1508    1402
+        TOO LONG           714      66      12
+        too short            1       4       4
+        past end of list  2642     224      36
+        missing           3223     678     348
+
+Corpus 267 MATCH, 4 MATCH?, 1 DIFFERS with no module changing class at either
+step, and RUNASM 205/205 over an identical module set both times.
+
+WHAT IS LEFT, AND THE FOUR ARE MORE INTERESTING THAN THE TWELVE.
+
+Twelve too long: LE 3, L 2, ST 1, BVC 1, AE 1, SE 1 and a tail of singles.  No
+shape yet; too few to generalise from and worth reading individually.
+
+FOUR TOO SHORT -- ours shortening where the original did not, which the twelve
+cannot explain away and which no amount of further shortening will fix:
+
+    042100AB  BNC STMMAIN1     orig CEF7 0816   ours DE56
+    053500AB  BZ  POLL94       orig C4F7 0036   ours DCD8
+    181000AB  B   PURGSAVF     orig C7F7 0036   ours DFD8
+    176300AC  STH R2,SECOND##  orig BAF1 0037   ours BADD
+
+Three are branches and all three of those originals carry F7 in the second
+byte -- AM=1, base 3.  ONE OF THE FOUR PREDATES ALL OF THIS WORK and three
+arrived with the USING re-resolution, so that arm is now over-shortening in a
+small way as well as under-shortening in a large one.  That is the honest
+accounting: the net is 714 -> 12 and 4482 -> 5563 identical, but it is not a
+pure win and the three should be understood before the twelve.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
