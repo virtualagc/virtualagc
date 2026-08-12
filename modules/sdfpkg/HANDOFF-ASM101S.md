@@ -1943,6 +1943,55 @@ observation to check rather than act on: BVC and BCB are in
 `srsBranchOperations`, but both of those arms test `branchAliases or "BC"`,
 which excludes them.
 
+Measured in the cut-down module, not reasoned about.  Recorded because the
+obvious next move does NOT work and someone will otherwise try it.
+
+WHAT BVC LOOKS LIKE.  `BVC 6,STM1270` at SRN 024800AB, in the original at
+00B8C reaching STM1270 at 00B8F -- three halfwords, nothing like out of range
+-- and assembled DE09.  Our long form spans the same distance as displacement
+0x6B from a base.  Note the SHORT form's first byte is DE against our CE, so
+the two forms do not share an opcode; this is the FORM selector, not a
+displacement change.
+
+REFUTED: adding `srsBranchOperations` to the two PC-relative arms.  Both test
+`branchAliases or "BC"` and neither admits BVC or BCB, which looks like the
+whole story and is not.  With both arms widened to include them, the rig
+produces CEF0 006B -- BYTE FOR BYTE UNCHANGED.  Do not spend time on it again.
+
+WHAT IS MEASURED ABOUT IT:
+
+    op=BVC  ambiguous=True  section='GPCIPL'  value=3045  pos1=6082
+
+so the entry IS marked ambiguous, the target resolves to halfword 3045, and
+the card sits at 6082 bytes = 3041 halfwords.  The forward arm's own formula,
+`value - pos1//2 - 1`, gives 3 -- inside srsFloor..srsCeiling by a mile.  So
+the arm would accept it if it ran.
+
+TWO POSSIBILITIES REMAIN and the runs so far do not separate them:
+
+  - the arm is not reached, something earlier in the chain taking the entry
+    first.  `if "B2" in ast: ... if b2 in [4,5,6,7]: ambiguous=False; continue`
+    is the suspicious one, because `6,STM1270` could read as B2=6 -- but the
+    trap above sits AFTER that test and still printed, so it did not fire
+    THIS time;
+  - or the arm runs, `adjust` shortens the entry, and the ENCODER still picks
+    RS.  optimizeScratch shortening is necessary, not sufficient.
+
+    Distinguish them by printing inside `adjust` for this SRN.  One rig run.
+
+AND BCB IS A DIFFERENT MATTER AGAIN.  It is not in `argsSRSandRS` at all --
+
+    BVC  argsSRSandRS=True   BCB  argsSRSandRS=False
+
+-- so it is never marked ambiguous and `optimizeScratch` skips it at the top
+of the loop, whatever the arms say.  Whether it BELONGS in that table is a
+question about the instruction, not about this pass, and wants the POO.
+
+THE FOUR TOO-SHORT ONES are untouched by any of this and remain what 148 and
+149 describe: ours shortening where the original did not, three of them
+branches carrying F7 in the original, and one -- STH at 176300AC -- not a
+branch and predating all of today's work.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
