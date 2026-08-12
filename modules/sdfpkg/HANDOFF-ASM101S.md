@@ -3137,6 +3137,62 @@ Settle that before writing the lookup; it is the whole remaining difficulty.
     not mistaken for a fix.  Check a rig's zeroes against the previous run
     before reading anything into them.
 
+STILL NOT FIXED, but the two things 179 left unknown are now known, and the
+remaining condition is written out below ready to try.
+
+THE SECTION LOOKUP.  179 said this needed the target's DEFINING section and
+that the units of `sects[s]["used"]` had to be settled first.  Both are
+answered, and the idiom already exists in this file -- it is spelled out twice
+where an RLD entry has to name the section a value really lands in:
+
+    combined = offset + sects[section]["offset"]
+    for s in sects:
+        if sects[s]["offset"] <= combined \
+                < sects[s]["offset"] + sects[s]["used"] // 2:
+
+    `sects[s]["offset"]` IS THE PLACEMENT and `used // 2` the length.
+    `symtab[s]["value"]` IS NOT THE START -- it is that section's own hashcode
+    over an offset of zero, so every section appears to begin at 0 and only
+    the one placed first ever matches.  I lost a run to that.
+
+    With it, TSECT.asm gives `BBF3 0838` for the cross-section reference and
+    leaves the same-section `BB0C` alone, which is the wanted behaviour.
+
+AND THEN IT WRECKED THE CORPUS.  Dozens of DIFFERS and NOCOMPARE inside the
+first hundred modules -- FCMASYNC, FCMBMAN, FIOCGR and the rest of the FCM/FIO
+families.  The cause is one line of the lookup:
+
+    THE CHECK SKIPS DSECTS AND MOST `USING`S NAME ONE.  FCMASYNC's three are
+    `USING TFBRP,R0`, `USING TFGST,R2`, `USING TFICC,R3` and all three of
+    those are DSECTs; FIOCGR's only one is `USING STACK,R0`, also a DSECT.
+    The lookup passes over DSECTs, so `targetSection` came back as a CSECT or
+    as None, never equalled the DSECT name held in `e[1]`, and EVERY
+    DSECT-BASED USING IN THE CORPUS WAS SWITCHED OFF.
+
+    A DSECT `USING` IS NOT AN ASSERTION ABOUT WHERE ANYTHING SITS.  It is a
+    template: the register points at some storage and the DSECT names the
+    fields laid over it.  There is no "other section" to reach across, so the
+    rule of 179 has nothing to say about it and must not fire.
+
+WHAT TO TRY NEXT -- apply the refusal only when BOTH sides are real control
+sections:
+
+    if targetSection != None and e[1] != None \
+            and e[1] != targetSection \
+            and not sects.get(e[1], {}).get("dsect") \
+            and e[1] in sects:
+        continue
+
+    THEN RUN BOTH HARNESSES BEFORE BELIEVING ANY OF IT.  The toy cannot show
+    this failure -- it has no DSECT -- and neither can the cut-down BILDNEW5
+    rigs, so the corpus is the only witness.  Watch the first hundred modules
+    and kill the run early if the FCM family starts failing again; that is the
+    signature of this same mistake.
+
+    AND KILL THE SWEEP BEFORE REVERTING.  A `git checkout` under a running
+    sweep leaves it assembling against a tree that no longer matches what it
+    is reporting on.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
