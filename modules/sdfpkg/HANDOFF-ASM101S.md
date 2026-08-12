@@ -1752,6 +1752,40 @@ register still roughly triples the run -- ten minutes to about thirty -- so
 the name test is not free either.  Guard on the SRN and bail before touching
 `properties` if this needs doing again.
 
+153 said the twelve are re-resolution failures and "NOT the USING-star kind".
+The first half stands and the second is an invalid inference, because THE TRAP
+RAN ON THE REVERTED CODE.  With the star fix backed out, a USING whose operand
+is star produces uBase=None by construction; observing it proves nothing about
+whether that is the cause.
+
+WHAT THE SOURCE SAYS.  STM1.asm line 178, SRN 018000AB, is
+
+         USING *,0              AND TELL ASSEMBLER
+
+and KFCON1 through KFCON16 are in STM1, so nine of the twelve are governed by
+exactly the star form -- and `*,0` is verbatim what the reason trap printed as
+its example.  The other three, FAILBRTN, FRTRNXEC and KFINDIRW, sit under
+FAILEXEC's `USING FAILDATA,B0`, a plain symbol, and those showed uBase=None
+too, which the star bug does NOT explain.
+
+SO THE STATE IS THIS, AND NO FURTHER:
+
+  - the twelve fail with no base, measured, on the code as committed;
+  - nine of them are under a star USING and three are not;
+  - WITH the star fix applied, BILDNEW5 was byte for byte identical, so the
+    nine still did not shorten even once their USING could resolve.
+
+That last point is the one to chase, and it has two readings that the runs so
+far cannot separate: either the star fix did not actually resolve them --
+`u[3]["pos1"]` may be None, leaving usingHash None after all -- or it did and
+the displacement was then rejected.  ONE RUN DISTINGUISHES THEM: re-apply the
+star fix and trap the twelve by name at the same site.  Do that before
+anything else here.
+
+I have now stated five conclusions in this section that measurement
+contradicted.  The tables and traces are sound; treat every sentence joining
+them as a hypothesis until it has its own run.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
