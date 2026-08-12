@@ -3193,6 +3193,49 @@ sections:
     sweep leaves it assembling against a tree that no longer matches what it
     is reporting on.
 
+FIXED, and both harnesses agree.  The rule of 179 stands unchanged; what took
+three attempts was its SCOPE.
+
+    BILDNEW5      10751 -> 10655 bytes mismatched
+    corpus        267 MATCH / 4 MATCH? / 1 DIFFERS    unchanged
+    RUNASM        PASS 205/205                        unchanged
+
+    BILDNEW5 the only line in the sweep that moved.
+
+THE TWO EXEMPTIONS, and neither was guessable from the rule:
+
+  - A DSECT `USING` asserts NOTHING about where anything sits.  The register
+    points at some storage and the DSECT names the fields laid over it, so
+    there is no other section to reach across.  Most USINGs in this corpus are
+    of that kind and refusing them took the FCM and FIO families down inside
+    the first hundred modules.
+  - A SECTION'S OWN LITERAL POOL IS PART OF IT.  The pool is named "#L" plus
+    the section's name and the ASSEMBLER places it, not the linker.  SQRT's
+    `USING A,R1` reaches its literals in #LSQRT and must keep doing so.
+
+WHY BOTH HARNESSES, stated plainly because this is the case that proves it:
+THE 272-MODULE SWEEP WAS COMPLETELY CLEAN WHILE RUNASM FAILED FOUR -- SQRT,
+DSQRT, SNCS and DSNCS, by 3, 3, 8 and 226 bytes.  Nothing in the PASS corpus
+exercises a USING against a literal pool.  A change to `findB2D2` is on every
+module's path in both, and passing one says nothing about the other.
+
+    THE SPOT-CHECK THAT WOULD HAVE CAUGHT IT COSTS SECONDS.  `one.sh` on two
+    DSECT-heavy modules cleared the first mistake before the sweep started;
+    what it could not clear was the second, because the PASS corpus has no
+    instance.  Run the four RUNASM modules named above by hand as well --
+    `ASM101S --library --tolerable=4 --compare=../RUNLST/M.txt M.asm` from
+    yaShuttle/Source Code/PASS.REL32V0/RUNASM -- before committing a run.
+
+THE SECOND-BYTE CLASSES, re-measured after this: were 46 before it.  Expect
+the base-register groups to have collapsed; measure rather than assume, with
+`classes.py` in the scratchpad, and note that it must be pointed at a SNAPSHOT
+-- `one.sh` writes BILDNEW5.lst in place and reading it mid-run silently
+yields nothing.
+
+    STILL OPEN after this: the F7->F3 ten, which are the AM=1/AM=0 family of
+    177 and not a base-register problem at all -- all ten have displacements
+    UNDER 4096, which is what separates them from everything this fixed.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 

@@ -1423,9 +1423,62 @@ def generateObjectCode(source, macros):
             return None, (d2 & 0xFFFFFF)
         D2 = None
         B2 = None
+        # A `USING` ON A CONTROL SECTION ADDRESSES THAT SECTION AND NO OTHER.
+        # The register holds an address in the section the USING names, and
+        # where a different section will sit relative to it is the linker's
+        # business.  Reaching across anyway produced an arithmetically correct
+        # instruction against the wrong authority: BILDNEW5 has
+        # `USING STM4,R0` in force, STM4 at 0014DA in GPCIPL, and addressed
+        # MSG257A at 00504D in LINES as base 0 plus 3B73.  The sum is right
+        # and the original refuses it, writing the section-relative form.
+        #     THE TEST IS ON THE SECTION, NOT THE SIZE OF THE DISPLACEMENT.
+        # Of the cards addressing through a base with a displacement of 4096
+        # or more, 133 are same-section and correct while 41 are
+        # cross-section and every one is wrong.  Capping the displacement at
+        # 4096 instead would break 331 to fix 34; 81816ec56 widened this to
+        # 16 bits on its own evidence and that stands.
+        #     A DSECT `USING` IS EXEMPT, and this is the whole difficulty.  It
+        # asserts nothing about where anything sits -- the register points at
+        # some storage and the DSECT names the fields laid over it, so there
+        # is no other section to reach across.  Most USINGs in this corpus are
+        # of that kind: FCMASYNC's TFBRP, TFGST and TFICC are all DSECTs, as
+        # is FIOCGR's STACK.  A first attempt let the rule fire on them and
+        # switched off every DSECT-based USING there is, taking the FCM and
+        # FIO families down inside the first hundred modules.
+        #     THE SECTION IS FOUND BY ADDRESS.  `unhash(d2)` will not give it:
+        # its hashcode names the section the REFERENCE OCCURS IN, not the one
+        # the symbol is DEFINED in.  `sects[s]["offset"]` is the placement and
+        # `used // 2` the length, the same lookup written out where an RLD
+        # entry has to name the section a value lands in.  Note that
+        # `symtab[s]["value"]` is NOT a section's start -- it is that
+        # section's own hashcode over an offset of zero.
+        section, offset = unhash(d2)
+        targetSection = None
+        if offset != None:
+            combined = offset + sects.get(section, {}).get("offset", 0) \
+                       if section != None else offset
+            for s in sects:
+                sd = sects[s]
+                if sd.get("dsect") or "offset" not in sd:
+                    continue
+                if sd["offset"] <= combined < sd["offset"] + sd["used"] // 2:
+                    targetSection = s
+                    break
         for i in range(len(using)):
             e = using[i]
             if e == None:
+                continue
+            #     A SECTION'S OWN LITERAL POOL IS PART OF IT.  The pool is
+            # named "#L" plus the section's name and the ASSEMBLER places it,
+            # not the linker, so a USING has to reach it.  Refusing that broke
+            # SQRT, DSQRT, SNCS and DSNCS in RUNASM -- `USING A,R1` in SQRT
+            # against its literals in #LSQRT -- while the 272-module sweep
+            # stayed clean, which is why both harnesses have to run.
+            if targetSection != None and e[1] != None \
+                    and e[1] != targetSection \
+                    and targetSection != "#L" + e[1] \
+                    and e[1] in sects \
+                    and not sects[e[1]].get("dsect"):
                 continue
             d = d2 - e[0]
             if d >= 0 and d < 0x10000:
