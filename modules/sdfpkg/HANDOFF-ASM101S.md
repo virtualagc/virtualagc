@@ -2565,6 +2565,48 @@ FC->FC 8, F3->F1 6.  The F8->F8 and FC->FC pairs have the RIGHT second byte
 and a wrong displacement, so they are a different fault again and worth
 separating before either is chased.
 
+Attempted, verified, REVERTED.  Recorded in full because the fix is most of
+the way right and because the way it nearly slipped through matters more than
+the fix does.
+
+THE CHANGE.  166 identified `forceAM0 = True` being set when no USING covers
+the operand and its offset within its own section reaches 4096, which stops
+the PC-relative arm from ever looking.  Clearing that flag outright makes the
+card assemble to ZEROES -- it is steering, not merely gating, and without it
+nothing downstream claims the statement.  What does work is a second flag:
+
+    sectionOverflowAM0 = (section == sect)     # set beside forceAM0
+    elif (not forceAM0 or sectionOverflowAM0) and (x2 != None or ia or i or
+          (not usingB2 and d1 >= 0 and d1 < 2048)):
+
+so the PC-relative arm gets first refusal and AM=0 still catches everything it
+declines.  `LA R0,STM4` assembles E8F7 07B4, the original's bytes, and a
+sibling whose distance is 3558 correctly stays AM=0.
+
+    BILDNEW5: 6574 byte-identical to 6789, wrong values 404 to 189.
+    Corpus:   267 MATCH, 4 MATCH?, 1 DIFFERS -- NO MODULE CHANGED CLASS.
+
+AND RUNASM BREAKS: 57 MODULES REPORT MISMATCHES, two to six bytes each --
+ACOS, ACOSH, ATANH, CASPV, CASRPV, VV5SN and fifty-one more.  The previous run
+reports none.  So the two harnesses DISAGREE about this change, which is the
+whole reason both exist, and the corpus alone would have blessed it.
+
+    HOW IT NEARLY PASSED.  The failure check used through most of this
+    session is `grep -ciE "error|fail|traceback"`, and RUNASM does not use any
+    of those words -- it prints "N bytes mismatched".  It returned 0 while 57
+    modules were broken.  What caught it was the word count: a clean run is
+    EXACTLY 205 words, module names and nothing else, and this one was 832.
+
+    USE `grep -c "bytes mismatched"` ON THE RUNASM OUTPUT, and check the word
+    count is 205.  Every earlier "205/205, failures 0" in 144 through 165 was
+    confirmed by the word count as well, so those stand -- but the grep alone
+    proves nothing and should not be trusted again.
+
+WHAT TO DO WITH IT.  The direction is right and the corpus evidence is strong;
+something about the RUNASM modules distinguishes them and has not been looked
+at.  ACOS at two bytes is one instruction and is the place to start, with the
+mismatch attached to the card AFTER it per 165.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
