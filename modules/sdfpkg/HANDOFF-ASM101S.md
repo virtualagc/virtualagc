@@ -2760,6 +2760,46 @@ encodes it.
     minute because 162's rule was applied before believing it.  Whoever is
     next: the rule is not optional, and zeroes look exactly like an answer.
 
+171 asked for this and it is done, without assembling anything: the test is
+whether the ORIGINAL's first byte varies with the register the source writes.
+Read straight off the as-received listings, 1287 cards.
+
+    op     cards  distinct first bytes
+    LDM      13   68 69 6B            <- varies, R1 ENCODED
+    STDM     10   90 91 92 97         <- varies, R1 ENCODED
+    LM      123   CC
+    LPS      52   CD
+    SHW      88   A2
+    SSM     117   88
+    STM     120   C8
+    SVC     290   C9
+    TD       28   A0
+    TH      111   A3
+    TS        2   B8
+    ZH      333   A1
+
+THE TEN ARE INVARIANT over 1264 cards, so R1 really is implied for them and
+the table is right.  Only the two 171 removed were ever wrong.
+
+AND THE VALUES CHECK OUT TOO, which was not asked for and is worth having --
+each byte is the opcode with the implied R1 ORed in:
+
+    STM  C8 = C8|0    SVC C9 = C8|1    LM  CC = C8|4    LPS CD = C8|5
+    TD   A0 = A0|0    ZH  A1 = A0|1    SHW A2 = A0|2    TH  A3 = A0|3
+    SSM  88 = 88|0    TS  B8 = B8|0
+
+so every one of the ten is confirmed by the original's own object code rather
+than merely left alone for want of a counterexample.
+
+    TS RESTS ON TWO CARDS and both write no register, so it is the weakest of
+    the ten -- consistent, but a smaller sample than the others by two orders
+    of magnitude.  Nothing suggests it is wrong; it is simply the one to
+    re-check first if an impliedR1 fault is ever suspected again.
+
+`impliedR1` can now be considered settled apart from that caveat, and 169's
+remaining faults are the BCB literal, the four too-short cards, and the
+second-byte 115.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
