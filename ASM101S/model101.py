@@ -849,9 +849,22 @@ def optimizeScratch():
                 opcodeSRS = argsSRSorRS.get(operation)
                 if opcodeSRS != None and (opcodeSRS & 0b1000000001) == 0:
                     unitizer = 2
-                if dd % unitizer != 0:
-                    continue
-                dd //= unitizer
+                # ROUND UP, AS THE ENCODER DOES -- `dSRS = (dSRSa + dUnitizer
+                # - 1) // dUnitizer` a few hundred lines below.  Refusing a
+                # distance that is not a whole number of units was wrong here,
+                # because THE DISTANCE IS STILL MOVING.  `L R7,FAILBRTN` in
+                # FAILEXEC measures 7 halfwords from its base on this pass and
+                # 6 in the finished layout -- FAILBRTN follows a `DS 0F` whose
+                # padding depends on what precedes it, and that changes as
+                # instructions ahead of it shorten.  So an odd 7 was rejected
+                # for an instruction the original build assembles short, 1F0C,
+                # three fullwords.
+                #
+                # Nothing is lost by rounding: this pass only decides whether
+                # the short form is REACHABLE, and `forbiddenSRS` still refuses
+                # a genuinely unaligned displacement where the instruction is
+                # encoded, with the settled numbers to judge it by.
+                dd = (dd + unitizer - 1) // unitizer
                 if dd >= 0 and dd < uDisp:
                     uDisp = dd
                     uBase = r
