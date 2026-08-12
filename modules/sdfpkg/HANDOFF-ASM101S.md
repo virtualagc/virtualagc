@@ -3758,6 +3758,51 @@ addressing-byte defect remains, 012A8 of 183, worth a handful of bytes.  The
 instruction-encoding work of 177 to 190 has run its course, and continuing to
 hunt second-byte classes will find almost nothing.
 
+192 SAID THE `DCHAR` EXPANSIONS HOLD DIFFERENT VALUES.  THEY DO NOT.  Compared
+index by index, all 5356 of them are IDENTICAL in content and order:
+
+    positions where the character pair differs:  0 of 5356
+
+    And yet at 04000 ours reads `DCHAR P,T` and the original `DCHAR E,X`.
+    Both are true because THE STREAM IS AT DIFFERENT ADDRESSES.  I compared
+    what sits at one ADDRESS and concluded the values were wrong; comparing
+    the same INDEX shows the values were never wrong at all.
+
+THE OFFSET IS CONSTANT AND IT IS FOUR HALFWORDS:
+
+    address offset, ours - theirs:  {-4: 5073}     every single card
+    ours    03D24 .. 050F4
+    theirs  03D28 .. 050F8
+
+    FROM THE VERY FIRST CARD, with no drift over 5073 of them.  This is not an
+    arithmetic that wanders, which is what 192 guessed from two samples; it is
+    ONE SHORTFALL OF EIGHT BYTES somewhere before 03D24, and everything after
+    inherits it.
+
+    SO 9225 OF THE REMAINING 10174 BYTES ARE ONE DEFECT.  Not five thousand
+    bad cards -- five thousand correct cards in the wrong place.
+
+WHERE TO LOOK.  Between the start of `LINES` at 03C20 and the first DCHAR card
+at 03D24 there are about 260 halfwords.  Walk the two listings across that
+range, keyed on ADDRESS, and find the first card whose length differs; eight
+bytes have to go missing there.  Check the ESD first -- if the original's
+`LINES` does not start at 03C20 either, the shortfall is before the section
+rather than inside it.
+
+    AND CHECK THE `$POF`/`$PON` CARDS IN THAT RANGE BEFORE ANYTHING ELSE.
+    They are the cards restore-pofpon.py put back, their expansions are
+    invisible in the original listing because PRINT NOGEN suppressed them, and
+    each generates a `DS 0H`.  Four halfwords is a suspiciously round number
+    for a handful of misplaced alignment directives, and 191 records that
+    these cards are exactly where an index-keyed walk goes wrong.
+
+THREE MEASUREMENTS OF THIS ONE THING WERE WRONG BEFORE THIS ONE, and the
+pattern is worth naming: 191 called it a slide in the source cards, 192 called
+it bad values in the expansions, and only an index-versus-address comparison
+separated the two.  WHEN A REGION LOOKS WRONG, ASK SEPARATELY WHETHER THE
+CONTENT IS WRONG OR THE POSITION IS -- comparing by address answers only the
+second, and comparing by index only the first.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
