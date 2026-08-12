@@ -3331,8 +3331,27 @@ def generateObjectCode(source, macros):
                                     # not, so a `BL$` was shortened anyway.
                                     elif operation in branchAliases and \
                                             x2 in [None, 0] and not forceRS:
+                                        # THE CEILING HERE WAS A LITERAL 56 AND
+                                        # NOTHING AGREED WITH IT.  The same
+                                        # short-or-long decision is taken in
+                                        # three places: `optimizeScratch` tests
+                                        # `srsCeiling`, the SRS arm below tests
+                                        # `srsBranchCeiling`, and this one tested
+                                        # 0b111000.  `B PURGSAVF` in GPCRTOPT
+                                        # arrives at a distance of 55, which
+                                        # `optimizeScratch` had already refused
+                                        # to shorten -- correctly, the original
+                                        # writes the four-byte C7F7 0036 -- and
+                                        # 55 < 56 shortened it here regardless.
+                                        #     THAT ONE CARD MOVED EVERY ADDRESS
+                                        # AFTER IT BY A HALFWORD, which is what
+                                        # produced the phantom cards at 024A8
+                                        # and 024AA and most of BILDNEW5's
+                                        # remaining mismatch count.  A branch is
+                                        # what `srsBranchCeiling` is for, and it
+                                        # was measured; the literal never was.
                                         d = d2 - (properties["pos1"] // 2 + symtab[sect]["value"] + 1)
-                                        if d >= 0 and d < 0b111000:
+                                        if d >= 0 and d < srsBranchCeiling:
                                             d = d & 0b111111
                                             if operation in bvcfAliases:
                                                 o = "BVCF"

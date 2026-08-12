@@ -3566,6 +3566,51 @@ reconciles them.
     the same DFD8 in 33 seconds against the 35-minute full build.  TBASE does
     NOT reach this card.
 
+FIXED, both harnesses agree, and it is the largest single gain so far.
+
+    BILDNEW5      10625 -> 10174 bytes mismatched, 24 -> 20 bytes missing
+    corpus        267 MATCH / 4 MATCH? / 1 DIFFERS   unchanged
+    RUNASM        PASS 205/205                       unchanged
+
+WHERE IT WAS.  Not in `optimizeScratch`, which 188 cleared, and NOT IN THE SRS
+ARM OF THE ELIF CHAIN EITHER -- a trap placed there never fired.  A traceback
+from `generateSRS` on the offending bytes put it at model101.py:3343, an
+EARLIER path that handles branch aliases before the chain is ever reached:
+
+    elif operation in branchAliases and x2 in [None, 0] and not forceRS:
+        d = d2 - (properties["pos1"] // 2 + symtab[sect]["value"] + 1)
+        if d >= 0 and d < 0b111000:
+
+    `0b111000` IS 56, AND NOTHING AGREES WITH IT.  The same short-or-long
+    decision is taken in THREE places with THREE limits: `optimizeScratch`
+    tests `srsCeiling` (55), the SRS arm tests `srsBranchCeiling` (54), and
+    this tested a literal 56.  `B PURGSAVF` arrives at a distance of 55.
+    `optimizeScratch` had already refused to shorten it -- correctly; the
+    original writes the four-byte C7F7 0036 -- and then this path shortened it
+    anyway, because 55 < 56.
+
+    ONE CARD, AND IT MOVED EVERY ADDRESS AFTER IT BY A HALFWORD.  That is
+    where the phantom cards at 024A8 and 024AA came from, and 451 of the
+    bytes counted as mismatches were downstream of this single instruction.
+
+The literal is now `srsBranchCeiling`, which is the constant that exists for
+exactly this case and was measured; the 56 never was.
+
+    HOW IT WAS FOUND, because two obvious traps both drew blanks.  A trap in
+    the SRS arm printed nothing, and a trap in `generateSRS` keyed on the
+    mnemonic printed nothing either -- the alias `B` reaches `generateSRS` as
+    `BCF`.  WHAT WORKED WAS KEYING ON THE EMITTED BYTES, `data[0] == 0xDF and
+    data[1] == 0xD8`, and printing a traceback.  When a value is right and you
+    cannot find who wrote it, trap the VALUE and let the stack say where.
+
+STILL OPEN.  The other two branches of 174, `BZ POLL94` at 02081 and
+`BNC STMMAIN1` at 01E02, were not fixed by this and should be re-measured
+first -- 186 shows POLL94 resolving one halfword early too, so they may be the
+same shape at a different ceiling, or downstream of their own short card.  And
+the three-ceiling duplication is still there: `optimizeScratch` and the SRS
+arm still disagree with each other by one.  Reconciling them is worth doing
+deliberately, not by moving numbers until a card comes out right.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
