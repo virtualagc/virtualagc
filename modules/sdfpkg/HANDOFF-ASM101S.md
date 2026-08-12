@@ -2697,6 +2697,42 @@ TAKE THEM SEPARATELY.  Three have a named cause already.
     E8F8 3B73 -- reaches into GENLINES from outside, so those are likely
     cross-section and want looking at with the section in mind.
 
+169 called the 40 off-by-one cards "an `icRS` convention... the cheapest of
+the four".  It is not a convention and it is not an encoding fault at all.
+
+THE ARITHMETIC IS RIGHT EVERYWHERE.  The rule is `d = target - (address + 2)`
+and the original obeys it on all three sampled cards:
+
+    SSM STOPMASK    1E80 - 1829 = 0657
+    B   RETRNJOB    1E7B - 197A = 0501
+    LA  R2,JOBADDR  1EB6 - 1E77 = 003F
+
+and so do we.  What differs is the ADDRESSES, which the resolved column shows
+plainly:
+
+    SSM STOPMASK    ours resolves 1E7F, original 1E80   -- target one early
+    B   RETRNJOB    ours resolves 1E7A, original 1E7B   -- target one early
+    LA  R2,JOBADDR  ours AT 01E74, original 01E75       -- instruction ditto
+
+    ONE MISSING HALFWORD, SEEN FROM BOTH SIDES.  Where the TARGET has moved
+    early the displacement reads one low; where the INSTRUCTION has moved
+    early it reads one high.  That is the whole of the 31-versus-9 split, and
+    nothing in the encoder needs changing.
+
+WHERE IT COMES FROM is the four too-short cards of 148 and 149 -- we emit two
+bytes where the original emits four -- and JOBADDR resolving to 1EB6 in BOTH
+builds says a halfword is regained before it, so the drift opens and closes
+rather than accumulating.
+
+    SO THE 40 ARE NOT A FAULT TO FIX.  They will disappear when the four
+    too-short cards are settled, and any effort spent on them before that is
+    spent twice.  169's ordering was wrong: this is not the cheapest of the
+    four, it is not one of the four.
+
+THAT LEAVES THREE, and 169's other three stand -- LDM/STDM dropping R1 (21),
+`BCB B'000',1` negating a literal (13), and the second-byte 115 of which 18
+are 168 over-applying.  The R1 one is now the cheapest and the best documented.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
