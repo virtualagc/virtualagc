@@ -817,24 +817,40 @@ def optimizeScratch():
             uBase = None
             uDisp = 10000000
             for r, u in enumerate(entry["using"]):
-                if u == None or section != u[1] or len(u) < 5:
+                if u == None or section != u[1]:
                     continue
-                usingAst = u[3].get("ast")
-                if usingAst == None or "r" not in usingAst or not usingAst["r"]:
-                    continue
-                try:
-                    h2 = evalArithmeticExpression(usingAst["r"][0], {}, u[3], \
-                                                  symtab, None, severity=0)
-                except:
-                    continue
-                if h2 == None:
-                    continue
-                s2, a2 = unhash(h2)
-                if s2 != section or a2 == None:
-                    continue
-                # `address` advanced by 4096 for each register in the USING's
-                # list, so this one's window starts that much further on.
-                dd = value - (a2 + 4096 * u[4])
+                # FALL BACK TO THE SNAPSHOT WHEN THE EXPRESSION WILL NOT
+                # RE-EVALUATE, rather than abandoning the register.  The one
+                # form that will not is `USING *,0` -- `*` needs the location
+                # of the card it sat on, which is not available here -- and
+                # for exactly that form the SNAPSHOT IS ALREADY THE RIGHT
+                # NUMBER: `u[2]` was `*`, the USING's own place, and no
+                # forward reference is involved for it to be wrong about.
+                # Skipping it instead cost the eight KFCON instructions in
+                # STM1, which is governed by `USING *,0` at SRN 018000AB.
+                #
+                # `u[2]` already carries this register's 4096 offset, the
+                # capture having advanced `address` per register; a
+                # re-evaluated base is the FIRST operand's and still needs it.
+                base = u[2]
+                # The live location of the card the USING sat in front of.
+                if len(u) >= 6 and u[5] != None and u[1] in sects:
+                    _sc = sects[u[1]]["scratch"]
+                    if u[5] < len(_sc):
+                        base = _sc[u[5]]["pos1"] // 2 + 4096 * u[4]
+                usingAst = u[3].get("ast") if len(u) >= 5 else None
+                if usingAst != None and "r" in usingAst and usingAst["r"]:
+                    try:
+                        h2 = evalArithmeticExpression(usingAst["r"][0], {}, \
+                                                      u[3], symtab, None, \
+                                                      severity=0)
+                    except:
+                        h2 = None
+                    if h2 != None:
+                        s2, a2 = unhash(h2)
+                        if s2 == section and a2 != None:
+                            base = a2 + 4096 * u[4]
+                dd = value - base
                 # AND THE SRS FIELD COUNTS UNITS, NOT HALFWORDS.  For a
                 # fullword operation the displacement is in FULLWORDS, which
                 # doubles the reach: `ST R6,FAILENV2+4` is 36B4 in the
@@ -1959,7 +1975,17 @@ def generateObjectCode(source, macros):
                         # done about that HERE, because the symbol genuinely
                         # is not known yet; `optimizeScratch` re-evaluates
                         # this expression at the end of the pass, when it is.
-                        using[r] = (h, section, address, properties, k)
+                        # ...AND WHERE THE USING ITSELF STANDS.  A USING
+                        # emits nothing, so the NEXT scratch entry appended in
+                        # this section begins at exactly the USING's own
+                        # address -- and `adjust` keeps that entry's `pos1`
+                        # current as it slides.  Recording the index is how
+                        # `optimizeScratch` recovers a LIVE location for
+                        # `USING *,0`, whose base is a place rather than a
+                        # symbol and so cannot be re-evaluated later.
+                        using[r] = (h, section, address, properties, k, \
+                                    len(sects[section]["scratch"]) \
+                                    if section in sects else None)
                         h += 4096
                         address += 4096
                     else: # DROP
