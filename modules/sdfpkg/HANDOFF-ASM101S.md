@@ -1716,6 +1716,42 @@ before the loop, not inside it.
 
 WHY.  One caveat on the arithmetic: the classification counted 218 re-resolution failures and the reason trap attributed 200 of them, all of them a USING whose operand is star. The other 18 were never attributed, so "the other two buckets" is 362 plus 196 plus those 18, not just the two. Small, but do not let the phrasing send you past them.
 
+152 concluded that the twelve remaining too-long instructions must be in the
+362 bucket, and its own caveat said 18 of the 218 re-resolution failures had
+never been attributed.  The caveat was the answer.
+
+Trapped on the twelve by name -- FAILBRTN, FRTRNXEC, KFINDIRW, KFCON1 through
+KFCON16 -- guarded once per scratch entry rather than inside the register
+loop, every one of the 44 prints reads:
+
+    L    value=1157  oldd=544   uDisp=10000000  uBase=None  using=[('GPCIPL'..
+    LE   value=2868  oldd=3160  uDisp=10000000  uBase=None  using=[('GPCIPL'..
+    ME   value=2888  oldd=3160  uDisp=10000000  uBase=None  using=[('GPCIPL'..
+
+    44 of 44 have uBase=None WITH A USING PRESENT.
+
+So they are re-resolution failures after all, and NOT the `USING *` kind --
+resolving those changed nothing, as 152 records.  They are the 18 the reason
+trap never attributed.  The displacement was never judged too far; the arm
+never got a base to judge it from.
+
+WHAT TO LOOK AT.  The re-resolution needs `u[3]["ast"]["r"][0]`, and the
+remaining ways it can come back empty are that the USING statement's
+properties carry no `ast` at all, or an `ast` without an `r` list.  Print
+`u[3].get("ast") is None` and `"r" in (u[3].get("ast") or {})` beside the
+existing reason, guarded the same cheap way.  The three distinct bases -- 544,
+3160 and 3356 -- are worth identifying too; the first is FAILEXEC's
+`USING FAILDATA,B0` and the other two are unidentified.
+
+    AND NOTE WHAT THIS SAYS ABOUT THE 362.  Nothing here has established that
+    any of them is wrong.  152 sent the next reader at that bucket on an
+    inference that has now failed; do not repeat it.
+
+COST NOTE, CONFIRMED.  Guarding the trap once per entry instead of once per
+register still roughly triples the run -- ten minutes to about thirty -- so
+the name test is not free either.  Guard on the SRN and bail before touching
+`properties` if this needs doing again.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
