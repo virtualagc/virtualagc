@@ -3202,6 +3202,7 @@ def generateObjectCode(source, macros):
                                     # AM=1 with a PC-relative displacement that
                                     # reaches the same place.
                                     forceAM0 = ("$" in operation)
+                                    sectionOverflowAM0 = False
                                     forceAM1 = False
                                     if operation in ["BC", "BCT"]:
                                         # From the STATEMENT's own position,
@@ -3316,6 +3317,9 @@ def generateObjectCode(source, macros):
                                                     section,offset = unhash(d2)
                                                     if section != None:
                                                         forceAM0 = True
+                                                        sectionOverflowAM0 = \
+                                                            (section == sect and \
+                                                             newd2 >= 4096)
                                                     else:
                                                         error(properties, "Cannot determine B2(D2)")
                                                         done = True
@@ -3677,7 +3681,7 @@ def generateObjectCode(source, macros):
                                                 # and assembled 0x0D5, reaching
                                                 # 0048D instead of 0008D.
                                                 data = generateRS1(properties, operation, 0, 1, r1, 0x7FF & -d1, 0, ib2)
-                                        elif not forceAM0 and \
+                                        elif (not forceAM0 or sectionOverflowAM0) and \
                                                 (x2 != None or ia or \
                                                  i or (not usingB2 and \
                                                        d1 >= 0 and d1 < 2048)):
