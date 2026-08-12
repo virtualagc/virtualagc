@@ -835,6 +835,23 @@ def optimizeScratch():
                 # `address` advanced by 4096 for each register in the USING's
                 # list, so this one's window starts that much further on.
                 dd = value - (a2 + 4096 * u[4])
+                # AND THE SRS FIELD COUNTS UNITS, NOT HALFWORDS.  For a
+                # fullword operation the displacement is in FULLWORDS, which
+                # doubles the reach: `ST R6,FAILENV2+4` is 36B4 in the
+                # original, and 0xB4 >> 2 is 45 against a halfword distance of
+                # 90.  Comparing halfwords against the ceiling therefore
+                # refused every fullword operand past 56 -- ST, L, C, N and
+                # the floating-point loads, 63 of the 66 this arm still got
+                # wrong.  A distance that is not a whole number of units
+                # cannot use the short form at all, which is the same test
+                # `forbiddenSRS` makes where the instruction is encoded.
+                unitizer = 1
+                opcodeSRS = argsSRSorRS.get(operation)
+                if opcodeSRS != None and (opcodeSRS & 0b1000000001) == 0:
+                    unitizer = 2
+                if dd % unitizer != 0:
+                    continue
+                dd //= unitizer
                 if dd >= 0 and dd < uDisp:
                     uDisp = dd
                     uBase = r
