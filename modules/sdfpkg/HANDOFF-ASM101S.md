@@ -2822,6 +2822,44 @@ the four too-short cards.  So what is actually left is:
 
 The second is the larger pile and the first is the one other things depend on.
 
+Measured off the as-received listings, no assembler involved: at what distance
+does the ORIGINAL keep a branch long?
+
+    SHORT branches, largest displacements:  ... 51:10  52:4  53:6  54:1
+    LONG AM=1 branches, smallest:           2:1  22:1  54:3  55:6  56:2 ...
+
+    THE TWO RANGES OVERLAP AT EXACTLY 54, one card short and three long, and
+    55 upward is always long.  So `srsBranchCeiling` at 54 is very nearly
+    right and cannot be made exactly right: at 54 the original went both ways.
+
+AND THE OUTLIERS KILL THE IDEA OUTRIGHT.  One long branch sits at a distance
+of 2 and another at 22, both far inside the short form's reach.  `BNC
+STMMAIN1`, one of our four, IS the 22.  No ceiling of any value explains a
+long branch at 22 when the same build shortens hundreds at 47 through 53.
+
+WHAT THAT MEANS FOR THE FOUR:
+
+    042100AB  BNC STMMAIN1     backward 22   -- the outlier; not distance
+    053500AB  BZ  POLL94       forward  54   -- the ambiguous band
+    181000AB  B   PURGSAVF     forward  54   -- the ambiguous band
+    176300AC  STH R2,SECOND##  forward  55   -- not a branch at all
+
+so raising `srsBranchCeiling` cannot fix them, and lowering it to 54 would
+break the one card the original DID shorten at 54.  Two of the four are in a
+band where the original is not consistent with itself on distance alone.
+
+THE STH IS DIFFERENT AND MAY BE TRACTABLE.  It is not a branch, so it is
+judged against `srsCeiling` of 56, and at 55 we shorten where the original does
+not.  Before touching that constant, measure the same way -- the largest
+displacement the original gives a SHORT non-branch RS instruction.  If that
+turns out to be 54, then 55 is the honest ceiling for those and one of the
+four falls out; if the original shortens some non-branch at 55, it does not.
+
+    I have NOT changed either constant.  Both were arrived at empirically and
+    the evidence here says distance is not the whole rule, so a change made on
+    distance alone would be trading four known-wrong cards for an unknown
+    number of newly-wrong ones.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
