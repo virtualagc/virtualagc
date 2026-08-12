@@ -3059,11 +3059,22 @@ STILL OPEN: the remaining second-byte classes, which the same instrumentation
 will reach -- F8->FB 12, F0->F3 10, F7->F3 10, F1->F3 7, F9->FB 4, F3->F1 2,
 FC->FD 1.  Re-measure them before starting; this change moved some of them.
 
-    AND NOTE WHAT THE 10751 IS MOSTLY MADE OF.  The commonest mismatched byte
-    pairs are D0/E2/E4/E7/E9/EA against each other -- EBCDIC text, shifted.
-    The instruction encodings are a small minority of that total, so the byte
-    count is a poor guide to how many INSTRUCTIONS are still wrong; count the
-    second-byte classes instead.
+    AND NOTE WHAT THE 10751 IS MOSTLY MADE OF -- NOT WHAT I FIRST WROTE HERE.
+    The commonest mismatched pairs are D0/E2/E4/E7/E9/EA against each other,
+    and I called them EBCDIC text.  THEY ARE OPCODE BYTES that happen to fall
+    in the letter range.  What is actually happening is a SLIDE: at 0249A we
+    write `B PURGSAVF` as the two-byte DFD8 where the original has the
+    four-byte C7F7 0036, and every byte after it compares against the wrong
+    original.  By 03C24 our listing is emitting MSG010 where theirs emits
+    MSG006 -- the same address, DIFFERENT SOURCE STATEMENTS, which no encoding
+    fix can cause and only a length divergence can.
+
+    SO THE BYTE COUNT IS DOMINATED BY FALLOUT FROM A FEW CARDS, and the three
+    too-short branches of 174 are the likely origin.  Fixing them should
+    collapse most of the 10751 at a stroke, and until they are fixed the byte
+    count says almost nothing about how many instructions are wrong.  Count
+    the second-byte classes instead -- those are measured per card and are not
+    subject to the slide.
 
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
