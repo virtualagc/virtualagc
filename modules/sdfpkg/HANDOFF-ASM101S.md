@@ -1360,6 +1360,55 @@ for a second, dependent reason -- the original takes the 2-byte SRS form
 (A30C) and we take the 4-byte RS (A3F0 0003).  Fix the layout first; the
 length choice may follow from it.
 
+BILDNEW5 is 4482 of 6979 cards byte-identical -- 64% -- and the rest divide
+cleanly into two piles, one of which causes most of the other.
+
+    identical                 4482
+    same length, wrong value  1782
+    DIFFERENT LENGTH           715
+
+714 OF THE 715 ARE OURS LONGER: we emit the four-byte RS form where the
+original emitted the two-byte SRS.  One card goes the other way.  By mnemonic:
+STH 204, LH 163, L 66, ZH 50, ST 46, TH 41, SHW 22, LA 21, C 17, CH 16, N 15,
+TD 15.  Since each one adds two bytes, everything after it shifts, which is
+where the 1782 wrong VALUES come from -- the first of those,
+`AMCPTEST DC Y(AMCPLIST)`, is 50FA in the original and 53DA here, and 0x2E0 is
+just accumulated drift.
+
+THE DECISION INPUTS ARE RIGHT AND THE LENGTH IS STALE.  Instrumenting the first
+of them, `TH UNPRTFLG` at FAILEXEC's SRN 011600AB, where the original has A30C
+and we have A3F0 0003:
+
+    d=3  dSRS=-565  uUnhashed=3  dUnitizer=1  b2=0  usingB2=True
+    forceRS=False  forceAM0=False  forbiddenSRS=False  srsCeiling=56
+    len(data)=4
+
+Displacement 3, well under the ceiling of 56, nothing forcing the long form --
+and the SRS arm never gets to look, because its first condition is
+`len(data) == 2` and the length was fixed at 4 several passes earlier.
+model101.py says so itself, in the comment above `if operation in
+argsSRSorRS`, which ends `***FIXME***`:
+
+    if collect and not asis:
+        dataSize = 4
+    else:
+        dataSize = properties["length"]
+
+    "We often cannot determine the size of the instruction without already
+     knowing the size of the instruction."
+
+A MINIMAL REPRODUCTION DOES NOT REPRODUCE.  The same instruction, the same
+`USING FAILDATA,B0`, the same displacement of 3 in a five-statement module
+assembles A300 -- two bytes, correct.  So the rule is not simply "a USING base
+defeats SRS"; something about BILDNEW5's passes leaves `properties["length"]`
+at 4 where a small module's converge to 2.  That is the thread to pull.  The
+base register is not the discriminator either: of the 714, our second byte is
+F1 410 times, F0 242, F2 54 and F3 6, so every base is affected.
+
+This is the same problem sections 129 through 135 circled for DCICYC, reached
+from the other side.  Whatever is tried, RUN BOTH HARNESSES: the corpus alone
+accepted a wrong rule here more than once.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
