@@ -3713,6 +3713,51 @@ divergence that is only an extra LINE, not an extra address.
     members, so walk them in order and pair them off rather than building a
     dictionary -- 186 is the record of what looking one up in isolation does.
 
+191 CALLED THE REMAINDER "A SECOND SLIDE IN LINES".  IT IS NOT A SLIDE AT ALL,
+and the correction matters because it moves the work to a different part of
+the assembler entirely.
+
+WHAT THE EVIDENCE ACTUALLY SHOWS.  Pairing every SRN-bearing card in the two
+listings, in order, and comparing addresses:
+
+    cards keyed   ours 8581   theirs 9044
+    cards whose ADDRESS differs:  ZERO
+
+    NOT ONE REAL SOURCE CARD HAS MOVED.  After 189 the layout agrees
+    everywhere.  191 reached the opposite conclusion from a sample at 04000
+    that looked like two different source cards at one address -- but BOTH
+    SIDES CARRY THE STAMP `03-DCHAR` THERE.  It is the same expansion slot in
+    both builds, holding a different VALUE, and I read a value difference as a
+    position difference.
+
+WHERE THE 10174 BYTES ARE, by the stamp on the card carrying them:
+
+    DCHAR        9225      91%
+    SRN cards     323
+    everything else, in ones and twos
+
+    THE REMAINING PROBLEM IS THE `DCHAR` MACRO EXPANSION and nothing else
+    worth the name.  At 04000 we generate `DC YL.2(03),YL.7(80),...` where the
+    original has `YL.7(69)`; at 04100, `YL.7(84)` against `YL.7(78)`.  The
+    differences are not a constant offset -- 11 and 6 -- so it is not a single
+    wrong base but an arithmetic that drifts.
+
+    `DCHAR` IS THE MACRO WITH 5229 INVOCATIONS IN COMDATA, the largest single
+    class `comment-vestigial.py` deals with.  Its expansion packs a position
+    and a character code into bit fields.  The question is what its operand
+    arithmetic depends on -- a SET symbol, a running counter, `&SYSNDX` -- and
+    where our evaluation of that parts company with the original's.
+
+    START FROM ONE CARD, NOT THE CORPUS.  Take the DCHAR invocation whose
+    expansion lands at 04000, read the macro's own source in MLIB80, and work
+    out by hand what it should produce.  9225 bytes across thousands of nearly
+    identical cards will look like a wall until one of them is understood.
+
+AND NOTE WHAT THIS MEANS FOR THE ENCODER: it is done, or nearly.  One
+addressing-byte defect remains, 012A8 of 183, worth a handful of bytes.  The
+instruction-encoding work of 177 to 190 has run its course, and continuing to
+hunt second-byte classes will find almost nothing.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
