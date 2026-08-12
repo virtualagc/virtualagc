@@ -343,7 +343,7 @@ mscImmediateZeroOnly = { "@XAX", "@SIO", "@WAT", "@RFD", "@SFD", "@LMS",
 # short immediates: it is 0xD0 written plain and 0xD8 written `@RAW 0(1)`.
 # For the others an index is diagnosed rather than assumed to work the same
 # way, since a wrongly-placed index bit is silently wrong object code.
-mscImmediateIndexable = { "@RAW", "@INT" }
+mscImmediateIndexable = { "@RAW", "@INT", "@DLY" }
 
 # THE MSC IMMEDIATES WHOSE FIELD IS ELEVEN BITS, not eight.  @INT's operand
 # reaches X'3FF', which does not fit the eight-bit field the others use, so the
@@ -364,7 +364,17 @@ mscImmediateIndexable = { "@RAW", "@INT" }
 # between the list as written and "X OR Interrupt List" -- so the `(1)` is
 # index register 1 ORed into the list rather than an address index.  (Finding
 # the page at all took searching the OCR for "@IN"; the sigil is often lost.)
-mscImmediate11 = { "@INT": 0x3 }
+# `@DLY` IS THE SAME FORM, nibble C.  The POO gives it at II-92 as a two-byte
+# instruction over `Displacement` / `X+Displacement` with an eleven-bit COUNT,
+# "a positive number in the range 0 to 2047", and the original build settles the
+# encoding beyond doubt:  `@DLY 0` is C000, `@DLY 0(1)` is C800, `@DLY 33` is
+# C021 and `@DLY 10` is C00A -- opcode nibble C, index flag at 0x0800, count in
+# the low eleven bits.  All four are in BILDNEW5's as-received listing.
+#
+# It was previously left out with @RAW and @STP as unestablished, and ASM101S
+# emitted four zero bytes and said the object code was wrong -- 460 times in
+# BILDNEW5 alone.
+mscImmediate11 = { "@INT": 0x3, "@DLY": 0xC }
 
 # THE FOUR-BYTE MSC INSTRUCTIONS.  The POO gives the layout on the @BU and
 # @CALL pages (II-40, II-41):
