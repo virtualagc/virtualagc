@@ -3982,6 +3982,59 @@ or two.  One card will be eight bytes out, or four cards two.
     seconds a question I had spent two handoff entries theorising about, and
     it disproved my own conclusion of an hour earlier.  Build the toy first.
 
+NARROWED, not yet found.  197 suspected a card whose recorded length is short.
+IT IS NOT THAT.
+
+MEASURED, trapping `properties["length"]` in the loop that accumulates `used`:
+
+    DC  50X'C6C6'   length=100      CORRECT   (fifty halfwords)
+    DC  20X'C6C6'   length=40       CORRECT
+    DC  H'0'        length=2        CORRECT
+
+    SO EVERY DC IN SIGHT RECORDS ITS TRUE LENGTH, and `used` is accumulated
+    from exactly those numbers.  That kills the last suspect 196 and 197
+    between them named, and it agrees with the ESD, which prints GPCIPL's
+    length as 003C20 -- the right value.
+
+WHAT IS LEFT IS THE PLACEMENT LOOP ITSELF, and it has an override I had read
+past twice:
+
+    offset = sects[sect]["used"]
+    for pool in literalPools:
+        if pool[0] == sect:
+            offset = pool[1] + pool[4]      # REPLACES used outright
+            break
+    lastOffset += offset // 2
+
+    THE LITERAL-POOL END REPLACES `used` RATHER THAN BEING COMBINED WITH IT.
+    If GPCIPL has a pool that ends before the section's real end -- and PATCH2,
+    the patch area, is the LAST thing in the section -- then the section is
+    measured to the pool and everything after it is not counted.  That is the
+    right shape for a section that ends early while its own length attribute
+    is right, because the ESD and the placement then read two different
+    quantities, which is what 194 saw.
+
+    UNTESTED.  In `t/TPURG.asm` GPCIPL reports `used=25628` and
+    `offset_used=25628` -- identical, no pool override firing -- but THE RIG
+    HAS ONLY ONE SECTION.  The members that carry `LINES` are not among its
+    sixteen, so it cannot exercise the two-section placement at all and proves
+    nothing about the case in question.
+
+NEXT STEP, and it needs the full build.  Put the same trap back --
+
+    print(sect, sects[sect]["used"], offset, sects[sect]["offset"])
+
+    just before `lastOffset += offset // 2` -- and run BILDNEW5 whole, 35
+    minutes.  If GPCIPL's `offset` comes back 8 less than its `used`, the pool
+    override is the defect and the fix is to take the LARGER of the two.  If
+    they are equal, the loss is between `used` and the ESD instead, and the
+    ESD is then the thing to trace.
+
+    EXTENDING TPURG TO REACH `LINES` WOULD BE WORTH MORE THAN ONE FULL RUN.
+    It is BILDNEW5 cut to sixteen members; adding whichever of GENLINES and
+    TESTING defines `LINES` would give a two-section rig in well under a
+    minute and make this iterable.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
