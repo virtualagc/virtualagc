@@ -2046,6 +2046,43 @@ WHAT IS LEFT is the four too-short cards of 148 and 149.  No amount of further
 shortening reaches them -- they are already shorter than the original -- so
 they are a different question from everything solved in 157 through 160.
 
+First look at the wrong-value pile since the layout came right.  Until 160 it
+was mostly drift and unreadable; now 501 OF THE 535 SIT AT ADDRESSES THAT
+AGREE, so they are real.
+
+    LA   127     BAL  49     ZH   18     TH   16
+    STH   70     L    23     B    18     ST   15
+    LH    58     ISPB 22     BZ   13     IAL   9
+
+    AB   454     AC   78     AF    2     AD    1
+
+and they look like this:
+
+    020700AB  LA R4,STMWAIT    orig ECF0 1988   ours ECF3 1DF6
+    022700AB  LA B1,COMSVC     orig E9F0 3254   ours E9F3 36C2
+    027100AB  LH R4,SVCO       orig 9CF7 0A49   ours 9CF3 0058
+    044200AB  L  R6,BUMPWRDN   orig 1EF0 17C2   ours 1EF3 1C30
+    048800AB  L  R7,SVCN+2     orig 1FF7 0AF0   ours 1FF3 005E
+
+THE OPCODE AND THE REGISTER ARE RIGHT EVERY TIME; the second byte differs.
+That byte is 0xF0 | addressing | base, so what is wrong is WHICH BASE REGISTER
+and WHICH ADDRESSING MODE, not the arithmetic of the displacement.  We reach
+these through base 3 with the addressing bits clear where the original uses
+base 0, or base 3 with AM set.
+
+    This is a different question from everything in 144 through 160, all of
+    which was about the LENGTH of an instruction and the distance to its
+    operand.  Nothing here is a length: every one of the 535 is the right
+    size.
+
+    `LA B1,COMSVC` appears four times in the first dozen with identical
+    object code each time -- E9F0 3254 against our E9F336C2 -- so a single
+    wrong decision is being repeated, not 535 separate ones.  Start there and
+    with the member concentration: 454 of the 535 are in one member.
+
+Note 34 of the 535 are NOT at agreeing addresses and are downstream of the
+four too-short cards; do not read those until those four are settled.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
