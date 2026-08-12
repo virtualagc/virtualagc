@@ -3001,6 +3001,70 @@ disagreed.  Recorded so the next attempt does not repeat them:
     scratchpad; the honest options are to find it or to re-run BILDNEW5 with
     and without the fix and diff the two listings.
 
+FIXED, and it is the same misjudgement as 177 seen from the other side: there,
+a range test read the wrong quantity; here, a flag that means one thing was
+read as though it meant another.
+
+THE CLASS.  After 177, BILDNEW5 held 102 mismatches in the SECOND byte of an
+RS instruction, the byte that carries the addressing mode and the base.  The
+largest group, 47 of them, was `F3` where the original has `F7` -- we wrote
+AM=0 with the absolute section offset, the original wrote AM=1 PC-relative.
+EVERY ONE OF THE 47 WAS BACKWARD, between 8 and 1978 bytes, and every one fit
+the eleven-bit field comfortably.
+
+    ESTABLISH THE ORIENTATION BEFORE READING THE CLASSES.  `Comparison
+    mismatch: XX vs YY` prints OURS FIRST.  Confirmed against a card whose
+    bytes are known -- 0100D is `C7F7` in our listing and its pair reads
+    `F7->F3` -- and worth re-confirming, because reading it backwards inverts
+    every conclusion about which side is doing what.
+
+THE CAUSE.  When a symbol has no base register and its offset within the
+section is 4096 or more, the fallback sets `forceAM0` and, beside it,
+`sectionOverflowAM0`.  THE FLAG DOES NOT MEAN THE INSTRUCTION WANTS AN
+ABSOLUTE ADDRESS.  It means only that the offset will not fit AM=0's twelve
+bits.  The AM=1 arm already knew this and carries the escape
+`not forceAM0 or sectionOverflowAM0`; the backward arm was simply never given
+it, so a target a few bytes back in a large section was refused the form the
+original uses.
+
+HOW THE POPULATION WAS MEASURED, because the first two attempts both lied:
+
+  - A trap placed BEFORE the elif chain reported 103 cards, of which 78 looked
+    correct already -- 54 of them `BCB`.  Those never reach the arm at all;
+    the SRS arm takes them far earlier.  A trap before a chain measures
+    candidates, NOT the cards the chain actually disposes of.
+  - Moved INTO the AM=0 arm, it reported 29: 25 wrong, 4 correct.  The 4 were
+    `ISPB`, `LH`, `LM`, and all four are already AM=1 in our own output.  They
+    were caught in an EARLIER PASS, while addresses were still converging.
+  - TAG THE TRAP WITH `svGlobals["_passCount"]` AND KEEP ONLY THE LAST PASS.
+    That gives 24 cards, all 24 currently wrong, none correct -- and that is
+    the number the change is justified by.
+
+MEASURED, whole corpus and RUNASM both:
+
+    BILDNEW5      10919 -> 10751 bytes mismatched
+    corpus        267 MATCH / 4 MATCH? / 1 DIFFERS    unchanged
+    RUNASM        PASS 205/205                        unchanged
+
+    BILDNEW5 the only line in the sweep that moved, again.
+
+THE CONJUNCTS ON THE ESCAPE ARE NOT DECORATION.  It is spelled
+`sectionOverflowAM0 and ib2 == 3 and not usingB2 and not extrnD2` because that
+is the population that was measured, and because `d1` is only a DISTANCE under
+those conditions -- reached through a USING it is an offset from somebody
+else's base, and the range test below would then be reading a quantity that is
+not a distance at all.  That is exactly the error 177 records.
+
+STILL OPEN: the remaining second-byte classes, which the same instrumentation
+will reach -- F8->FB 12, F0->F3 10, F7->F3 10, F1->F3 7, F9->FB 4, F3->F1 2,
+FC->FD 1.  Re-measure them before starting; this change moved some of them.
+
+    AND NOTE WHAT THE 10751 IS MOSTLY MADE OF.  The commonest mismatched byte
+    pairs are D0/E2/E4/E7/E9/EA against each other -- EBCDIC text, shifted.
+    The instruction encodings are a small minority of that total, so the byte
+    count is a poor guide to how many INSTRUCTIONS are still wrong; count the
+    second-byte classes instead.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 

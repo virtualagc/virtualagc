@@ -3707,8 +3707,44 @@ def generateObjectCode(source, macros):
                                         # not the backward form.  Guarding only
                                         # the three new operations leaves the
                                         # branch mnemonics exactly as they were.
+                                        # A SECTION-OVERFLOW `forceAM0` IS NOT A
+                                        # REASON TO REFUSE THIS FORM.  When a
+                                        # symbol has no base register and its
+                                        # offset within the section is 4096 or
+                                        # more, the fallback above sets
+                                        # `forceAM0` -- but that says only that
+                                        # the offset will not fit AM=0's
+                                        # twelve-bit field, not that the
+                                        # instruction wants an absolute
+                                        # address.  If the target is a little
+                                        # way BACK from here, the original
+                                        # writes the backward PC-relative form
+                                        # regardless of how far into the
+                                        # section it sits: STM2's
+                                        # `L R3,ENVCNTL0` is eight bytes back
+                                        # and assembles 1BF7, where we made it
+                                        # 1BF3 with the absolute offset 1BD4.
+                                        # The AM=1 arm below already carries
+                                        # this escape, for the same reason and
+                                        # from the same fallback; this arm was
+                                        # simply never given it.
+                                        #     THE EXTRA CONJUNCTS BOUND THE
+                                        # CHANGE TO WHAT WAS MEASURED.  The
+                                        # cards counted were all local, all
+                                        # reached without a USING, and all with
+                                        # `ib2` defaulted to 3, which is what
+                                        # makes `d1` a distance rather than an
+                                        # offset from somebody else's base --
+                                        # widening past that would let the
+                                        # range test below read a quantity that
+                                        # is not a distance at all, which is
+                                        # the mistake 177 records.
                                         elif (operation in ["BC", "BIX", "BAL", "BCT"] or \
-                                              (not extrnBase and not forceAM0 \
+                                              (not extrnBase \
+                                               and (not forceAM0 or \
+                                                    (sectionOverflowAM0 and \
+                                                     ib2 == 3 and not usingB2 \
+                                                     and not extrnD2)) \
                                                and not ia and not i)) and \
                                                 x2 in [None, 0] and \
                                                 d1 > -2048 and d1 <= 0:
