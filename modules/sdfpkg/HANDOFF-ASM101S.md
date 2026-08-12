@@ -4315,6 +4315,59 @@ to speak: one edit, one 64-second run, one tally.
     and why that is safe should count and report instead.  There is no third
     option that is honest.
 
+ANSWERED.  The 585 swallowed space-occupying cards of 204 are TWO POPULATIONS,
+and only one of them is a defect:
+
+    TUXT + DC   inMacroDefinition=True    MACSMITH.asm    322   HARMLESS
+    DC          inMacroDefinition=False   GENLINES.asm    263   THE DEFECT
+
+    THE 322 ARE MACRO-DEFINITION TEMPLATES.  A `DC` inside a `MACRO` body is
+    never assembled -- it has no section, no length and no position because it
+    is not code, it is a pattern.  Dropping them is correct, and the bare
+    `except` was right about those by accident.
+    THE 263 ARE REAL CARDS in a copied member, and they have
+    `section` of None when they should have `LINES`.
+
+GENLINES IS WHERE THEY LIVE, AND IT HAS AN `ORG`:
+
+    line  21   LINES    CSECT                              000200AA
+    line 296            ORG   *-1                          000500AA
+    line 298   MSG001   EQU   *,0+1,0+1
+
+    5339 DC cards, 286 EQU, one CSECT, ONE ORG -- and the `ORG *-1` sits
+    IMMEDIATELY BEFORE MSG001, which is the first card of the message table.
+    That table is the DCHAR stream 193 measured as uniformly four halfwords
+    early.
+
+    THE LOOP DOES NOT HANDLE `ORG` AND SAYS SO.  Its first line is
+
+        # ###FIXME### This doesn't account for the possibility of
+        # `ORG` pseudo-ops.
+
+    A standing note that the recomputation is knowingly incomplete, sitting
+    directly above the arithmetic that 202 found 92% wrong, in the one member
+    of this build that uses the construct it names.
+
+    THE ARITHMETIC DOES NOT CLOSE YET, AND I AM SAYING SO.  `ORG *-1` backs
+    the counter up ONE halfword and the loop ignores it, which would leave the
+    loop one AHEAD; 202 measured it 36 BEHIND at the end of GPCIPL.  So the
+    ORG is a real, named, unhandled defect in the right place, but it is not
+    by itself the whole of the discrepancy.  Do not stop at it.
+
+NEXT, and the ordering matters:
+
+  - FIX THE SECTION ATTRIBUTION FIRST, not the ORG.  263 real cards carrying
+    `section=None` is wrong regardless of what ORG does, and while they are
+    unattributed no measurement of `LINES` means anything.  Find where
+    `section` is set during assembly and why a card following
+    `LINES CSECT` in a COPY member does not inherit it.
+  - THEN RE-MEASURE before touching ORG.  With 263 cards restored to `LINES`
+    the remaining discrepancy may be a different size or gone.
+  - AND 202 STILL ENDS IT.  The loop recomputes what the assembler has
+    already done; handling ORG inside it is one more thing to keep in step.
+    Deriving `used` from the real `pos1` removes ORG, macro templates and
+    section attribution from the question at once.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
