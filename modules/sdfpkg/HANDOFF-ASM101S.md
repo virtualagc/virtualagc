@@ -3467,6 +3467,54 @@ these three are downstream of it.
     exactly this range.  One short card explains the branch, the two
     phantom cards, and everything after.
 
+186 IS WRONG AND THIS CORRECTS IT.  It said something between the branch and
+its target emits two bytes less.  Nothing does.  Walking the two listings side
+by side from 02490 shows five cards agreeing byte for byte and then:
+
+    ours    0249A  DFD8         2 bytes   B PURGSAVF
+    theirs  0249A  C7F7 0036    4 bytes   B PURGSAVF
+    ours    0249B  PURGSAV0 DS 0H
+    theirs  0249C  PURGSAV0 DS 0H
+
+    THE DIVERGENCE BEGINS AT THE BRANCH CARD ITSELF, and every address after
+    it is one halfword apart for the rest of the module.  I had the causality
+    backwards: the short branch is not caused by an earlier shortfall, it IS
+    the shortfall.
+
+AND IT IS CIRCULAR, WHICH IS WHY IT LOOKED LIKE SOMETHING ELSE.  `PURGSAVF`
+lies AFTER the branch, so its address depends on how long the branch is:
+
+    short (2 bytes)  ->  PURGSAVF at 24D1  ->  distance 54  ->  54 < 55, short
+                                                                fits.  STABLE.
+    long  (4 bytes)  ->  PURGSAVF at 24D2  ->  distance 55  ->  55 >= 55, long
+                                                                required. STABLE.
+
+    BOTH ARE FIXED POINTS.  Neither is a miscalculation -- each is
+    self-consistent, and the difference is only WHICH ONE THE ITERATION LANDS
+    ON.  That is the real reason 174 could not find a ceiling that reached
+    these cards, and 186's hunt for a short card upstream was chasing a
+    consequence.
+
+WHICH ONE THE ORIGINAL PICKS, and it is the standard answer: THE LARGEST.
+Assume every branch is long, then shorten only those that fit AT CURRENT
+SIZES, and repeat.  Starting long, this branch measures 55 and is never
+shortened; the original's encoding falls straight out.  We reach the smallest
+fixed point instead, which means the iteration is either starting from the
+short assumption or re-deriving sizes in a way that lets a shortened branch
+justify itself.
+
+    THE NEXT STEP IS TO ESTABLISH WHICH, and NOT to adjust a ceiling -- 174
+    spent itself doing that and the ceiling was never the variable.  Read
+    `optimizeScratch`: it runs at the END OF PASS 1 and iterates to a fixed
+    point, up to 20 times.  Find what the sizes are when it first runs.  163
+    is the record of what careless change there costs, and any fix has to be
+    judged on both harnesses.
+
+    THE PAYOFF IS LARGE.  This single card puts every address after 0249A one
+    halfword out, which is what makes the phantom cards at 024A8 and 024AA and
+    most of BILDNEW5's remaining byte count.  185 counted the mismatches as
+    10625 bytes; the great majority of them are downstream of this.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
