@@ -3651,8 +3651,8 @@ def generateObjectCode(source, macros):
                                         # the three new operations leaves the
                                         # branch mnemonics exactly as they were.
                                         elif (operation in ["BC", "BIX", "BAL", "BCT"] or \
-                                              (operation in ["OST", "LPS", "SSM"] \
-                                               and not extrnBase)) and \
+                                              (not extrnBase and not forceAM0 \
+                                               and not ia and not i)) and \
                                                 x2 in [None, 0] and \
                                                 d1 > -2048 and d1 <= 0:
                                             if extrnD2:
