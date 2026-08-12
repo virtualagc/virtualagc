@@ -979,8 +979,11 @@ impliedR1 = {
     "LPS":  0x5,
     "SVC":  0x1,
     "TS":   0x0,
-    "STDM": 0x0,
-    "LDM":  0x0,
+    # NOT `LDM` AND `STDM`.  They were listed here with an implied R1 of zero,
+    # and the field is not implied at all -- the original build encodes the
+    # register the source names.  `LDM R3,EXTDATA3` is 6BF8 0140 there, 0x68
+    # over R1=3, and listing it forced the 0x68 and threw the 3 away; 21 cards
+    # in BILDNEW5, every one of them one of these two mnemonics.
     "SHW":  0x2,
     "TD":   0x0,
     "TH":   0x3,
