@@ -2800,6 +2800,28 @@ than merely left alone for want of a counterexample.
 remaining faults are the BCB literal, the four too-short cards, and the
 second-byte 115.
 
+`BCB` and `BCTB` carry the backward distance as a MAGNITUDE, so a displacement
+derived from an address must be negated -- and a LITERAL is that magnitude
+already.  `BCB B'000',1` is D806 in the original, displacement 1 over form 10;
+negating the 1 and masking to six bits gave 63 and assembled D8FE, a branch 63
+halfwords back where the source asked for one.  `isNumberD2` already marks the
+case.  Thirteen cards, all the same statement.
+
+    BILDNEW5 11496 to 11490.  RUNASM PASS.  Corpus unchanged.
+
+169 LISTED FOUR FAULTS AND TWO ARE NOW DONE -- the LDM/STDM R1 of 171 and this
+one.  170 showed the off-by-one 40 were never a fault at all, only drift from
+the four too-short cards.  So what is actually left is:
+
+  - THE FOUR TOO-SHORT CARDS of 148 and 149, which also clear those 40, and
+    which no amount of shortening can reach because they are already shorter
+    than the original.  Three are branches whose originals carry F7.
+  - THE SECOND-BYTE 115, of which 18 are 168 over-applying to symbols that are
+    absolute by nature -- `LA G4,MCHO`, MCHO being a fixed machine location at
+    0x40 rather than anything section-relative.
+
+The second is the larger pile and the first is the one other things depend on.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
