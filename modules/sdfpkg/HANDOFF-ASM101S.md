@@ -3283,6 +3283,58 @@ STILL OPEN, four cards: F3->F1 two, F1->F3 one, FC->FD one.  Those are base
 selection between registers 1 and 3, not the section-versus-USING question 181
 settled, and four cards is thin evidence -- read all four before theorising.
 
+Read as asked, and three of the four are not what the class names said.
+
+THE CLASSIFIER WAS WRONG, and this is the first thing to fix.  `classes.py`
+matched any mismatched pair whose two bytes both lay in F0-FF, wherever it
+fell in the card.  BYTE 1 IS THE ADDRESSING AND BASE BYTE; BYTE 3 IS THE LOW
+HALF OF THE DISPLACEMENT, and it lands in that range often enough to be
+mistaken for one.  Two of the last fourteen were displacement bytes:
+
+    024A8  BAF3 35F1   "F1->F3" is BYTE 3.  The second byte, F3, is correct.
+    02EBE  E5F3 24FC   "FC->FD" is BYTE 3.  Ours 24FC, theirs 24FD -- the
+                       target address is off by ONE.  Nothing to do with form.
+
+    `classes.py` now checks the position and reports 12, not 14.  Earlier
+    counts in 179 and 181 were inflated the same way; the FIXES stand,
+    because every one of them was judged on the byte count and the harnesses
+    rather than on these tallies, but do not quote the old class numbers.
+
+024A8 AND 024AA ARE NOT DEFECTS OF OURS.  The original listing HAS NO CARD AT
+EITHER ADDRESS.  They sit just past 0249A, the too-short `B PURGSAVF` of 174,
+so they are slide fallout -- our addresses and the original's have parted
+company by then and the comparison is lining up cards that are not the same
+cards.  Nothing here can be fixed until the slide is.
+
+    THAT IS THE GENERAL LESSON FOR WHAT REMAINS.  Past the first length
+    divergence, a "mismatch" is evidence about the SLIDE and not about the
+    instruction it appears on.  Check that the original has a card at that
+    address before reading anything into it.
+
+SO ONE REAL CARD IS LEFT, 012A8:
+
+    ours    EDF3 1580     base 3, the section offset
+    theirs  EDF1 00A6     base 1, displacement A6
+
+    `USING STM2DATA,R0` and `USING STM4,R1` are both in force; STM4 is at
+    0014DA and DISABLFL at 001580, so A6 is the offset from STM4 and base 1 is
+    the register holding it.  Same section, well in range.  This is 181's
+    mirror -- a USING that WAS available and we did not take it.
+
+WHERE IT IS LOST, measured and not guessed.  `findB2D2` FINDS IT: a trap on
+d2 == 0x1580 prints `i=1 e1='GPCIPL' d=166 target='GPCIPL'`, which is exactly
+the original's A6, with no cross-section refusal.  The caller then takes the
+`else` arm, sets `d2 = newd2` and `usingB2 = True`, so b2 is 1 and the
+displacement 166 by the time the form is chosen -- AND THE CARD STILL COMES
+OUT BASE 3 WITH THE ABSOLUTE 1580.
+
+    THE BASE IS CHOSEN CORRECTLY AND DISCARDED LATER.  Trap `ib2`, `usingB2`
+    and `d2` inside the arms that emit, not before them -- 178 records why a
+    trap ahead of the chain measures candidates rather than outcomes -- and
+    tag it with `_passCount`.  The TBASE rig reproduces 012A8 byte-identically
+    to the full build in 23 seconds, which was checked, so none of this needs
+    the 35-minute run.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 

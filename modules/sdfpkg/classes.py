@@ -38,11 +38,24 @@ def rows(path):
             continue
         c = CARD.match(line)
         if c:
+            obj = "".join(line[6:30].split())
+            objBytes = [obj[i:i+2] for i in range(0, len(obj), 2)]
             for a, b in pend:
-                # Only the addressing/base byte: both sides in the F0-FF range.
-                if a[0] == 'F' and b[0] == 'F':
-                    out.append((a + "->" + b, int(c.group(1), 16),
-                                line[6:30].strip(), line[40:96].rstrip()))
+                # THE POSITION MATTERS, and leaving it out overcounted.  The
+                # addressing/base byte is byte 1 of the instruction; byte 3 is
+                # the low half of the displacement and lands in F0-FF often
+                # enough to look like one.  Two of BILDNEW5's last fourteen
+                # "second-byte" mismatches were displacement bytes read as
+                # addressing bytes -- `STH R2,BCERDWR+15` and
+                # `BAL R5,UPDTCNT`, neither of which has anything wrong with
+                # its second byte at all.
+                if a[0] != 'F' or b[0] != 'F':
+                    continue
+                where = [i for i, x in enumerate(objBytes) if x == a]
+                if where[:1] != [1]:
+                    continue
+                out.append((a + "->" + b, int(c.group(1), 16),
+                            line[6:30].strip(), line[40:96].rstrip()))
             pend = []
     return out
 
