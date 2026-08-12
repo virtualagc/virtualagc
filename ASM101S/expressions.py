@@ -792,6 +792,15 @@ def typeAttribute(properties, operand, svLocals, symtab=None):
     if symtab == None:
         symtab = programSymtab
     found, text, isArgument = attributeOperand(properties, operand, svLocals)
+    if found and text == "":
+        # NULL IS 'O' FOR A SET SYMBOL TOO, not only for a macro argument.
+        # DCHAR and SCHAR copy their operand into a local SETC and then test
+        # `T'&C EQ 'O'` to decide whether it was supplied -- `DCHAR L,` and
+        # `DCHAR  ,1` are both ordinary in these sources -- so answering 'C'
+        # for the null value let the guard fall through and called CHAR with
+        # nothing, which then said OPERAND MISSING.  BILDNEW5 raised that
+        # 2679 times and the original build raised it not once.
+        return "O"
     if not found:
         # A SYMBOL MAY CARRY ITS OWN TYPE ATTRIBUTE, given outright by the
         # third operand of a three-operand EQU.  That is how the position
@@ -1172,6 +1181,55 @@ def svDeclare(operation, operand, svLocals, properties = { "errors": [] }):
             continue
         sv[field] = value
 
+# Split the operand of a SETx into its comma-separated list of values.
+#
+# The split is at TOP LEVEL only: a comma inside a quoted string, or inside
+# parentheses, belongs to the value it sits in.  Both cases are real -- CHAR
+# writes `'LPAREN','RPAREN'` and also `'&CHAR'(1,&N+4)`, and treating either
+# comma as a separator ruins it.
+#
+# It also stops at the first blank outside a quoted string, because everything
+# after that is a trailing comment.  CHAR has one -- `&CHARFLD SETA  32
+# BLANK CHAR IS DEFAULT FOR OMITTED OPERAND` -- and so does its neighbour
+# CMTX6, whose comment field contains a LONE APOSTROPHE.  Stopping at the
+# blank is what keeps that stray quote from swallowing the rest of the card.
+def splitSetOperands(operand):
+    parts = []
+    current = ""
+    inQuote = False
+    depth = 0
+    i = 0
+    while i < len(operand):
+        c = operand[i]
+        if inQuote:
+            if c == "'":
+                if operand[i+1:i+2] == "'":
+                    # A doubled apostrophe is one literal apostrophe and does
+                    # not end the string.
+                    current += "''"
+                    i += 2
+                    continue
+                inQuote = False
+            current += c
+        elif c == "'":
+            inQuote = True
+            current += c
+        elif c == " ":
+            break
+        else:
+            if c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+            if c == "," and depth == 0:
+                parts.append(current)
+                current = ""
+            else:
+                current += c
+        i += 1
+    parts.append(current)
+    return parts
+
 # Set a symbolic variable.  `operation` is one of "SETA", "SETB", "SETC".
 # `name` and `operand` are strings.
 def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
@@ -1228,33 +1286,37 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
     # Note that these stop at the first blank outside a quoted string, so that
     # a trailing comment on the line is ignored rather than making the whole
     # operand unparsable.
-    if operation == "SETA" and isinstance(v, int):
-        ast = parserASM(operand, "setaOperand")
-        if ast == None:
-            error(properties, "Cannot parse arithmetic expression %s" % operand)
-            return
-        value = evalArithmeticExpression(ast["v"], svLocals, properties)
-    elif operation == "SETB" and isinstance(v, bool):
-        ast = parserASM(operand, "setbOperand")
-        if ast == None:
-            error(properties, "Cannot parse boolean expression %s" % operand)
-            return
-        value = evalBooleanExpression(ast["v"], svLocals, properties)
-    elif operation == "SETC" and isinstance(v, str):
-        ast = parserASM(operand, "setcOperand")
-        if ast == None:
-            error(properties, "Cannot parse character expression %s" % operand)
-            return
-        value = evalCharacterExpression(ast["v"], svLocals, properties)
-        if value != None:
-            value = value[:8] # Max length of a SETC symbol is 8 characters.
-    else:
+    def evaluate(text):
+        if operation == "SETA" and isinstance(v, int):
+            ast = parserASM(text, "setaOperand")
+            if ast == None:
+                error(properties, \
+                      "Cannot parse arithmetic expression %s" % text)
+                return None
+            return evalArithmeticExpression(ast["v"], svLocals, properties)
+        elif operation == "SETB" and isinstance(v, bool):
+            ast = parserASM(text, "setbOperand")
+            if ast == None:
+                error(properties, "Cannot parse boolean expression %s" % text)
+                return None
+            return evalBooleanExpression(ast["v"], svLocals, properties)
+        elif operation == "SETC" and isinstance(v, str):
+            ast = parserASM(text, "setcOperand")
+            if ast == None:
+                error(properties, "Cannot parse character expression %s" % text)
+                return None
+            value = evalCharacterExpression(ast["v"], svLocals, properties)
+            if value != None:
+                value = value[:8] # Max length of a SETC symbol is 8 characters.
+            return value
         error(properties, "Data type doesn't match %s" % sname)
-        return
-    if value == None:
-        error(properties, "Unable to evaluate data expression %s" % operand)
-        return
+        return None
+
     if "exp" not in pname:
+        value = evaluate(operand)
+        if value == None:
+            error(properties, "Unable to evaluate data expression %s" % operand)
+            return
         sv[sname] = value
         return
     if len(pname["exp"]) != 1:
@@ -1267,10 +1329,26 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
         error(properties, "Cannot evaluate subscript in %s" % name)
         return
     index -= 1 # Change from 1-based to 0-based.
-    if index < 0 or index >= len(sv[sname]):
-        error(properties, "Index out of range: %s" % name)
-        return
-    sv[sname][index] = value
+    # A SUBSCRIPTED target may be given a LIST of values, assigned to
+    # consecutive elements starting at that subscript -- so `&CCODE1(1) SETA
+    # 48,49,...,57` fills the first ten, and CHAR builds its 51-entry character
+    # table and its five code tables that way and no other.  An omitted entry,
+    # `43,,45`, leaves that one element as it was.  Only a subscripted target
+    # is split, which is why an unsubscripted SETC operand may still contain a
+    # comma of its own.
+    for offset, text in enumerate(splitSetOperands(operand)):
+        text = text.strip()
+        if text == "":
+            continue
+        value = evaluate(text)
+        if value == None:
+            error(properties, "Unable to evaluate data expression %s" % text)
+            return
+        i = index + offset
+        if i < 0 or i >= len(sv[sname]):
+            error(properties, "Index out of range: %s(%d)" % (sname, i + 1))
+            return
+        sv[sname][i] = value
 
 #=============================================================================
 # Stand-alone test mode (versus the normal usage as an imported module).

@@ -270,6 +270,58 @@ def actrMessage(fromWhere):
            "conditional-assembly loop that never terminates; the assembler " \
            "has abandoned the expansion." % where
 
+# The EXTENDED, or computed, AGO of GC28-6514:
+#
+#       AGO   (arithmetic-expression)seq1,seq2,...,seqN
+#
+# the expression selecting which of the N sequence symbols to branch to, 1 for
+# the first.  A value OUTSIDE 1..N branches nowhere and falls through to the
+# next statement.  That is not an error condition and the sources depend on
+# it: in CHAR and CHAR0 the card after the computed AGO is `AGO .INVCMSG`,
+# reached only when the operand's length is something other than 1 through 6.
+#
+# Returns the chosen sequence symbol, or None when nothing is to be branched
+# to -- either because the value was out of range, which is normal, or because
+# the operand could not be made sense of, in which case it has already
+# complained.
+def computedAgoTarget(operandField, svLocals, properties):
+    # Find the parenthesis matching the one the field opens with.  Counting
+    # rather than searching for the first `)` because the expression may
+    # itself be parenthesised or subscripted -- `(&N+1)`, `(&CCODE1(&I))`.
+    depthParen = 0
+    closeAt = -1
+    for i, c in enumerate(operandField):
+        if c == "(":
+            depthParen += 1
+        elif c == ")":
+            depthParen -= 1
+            if depthParen == 0:
+                closeAt = i
+                break
+    if closeAt < 0:
+        error(properties, "Unbalanced parentheses in computed AGO: %s" \
+                          % operandField)
+        return None
+    expression = operandField[1:closeAt]
+    targets = [t for t in operandField[closeAt+1:].split(",") if t != ""]
+    if not targets:
+        error(properties, "Computed AGO has no sequence symbols: %s" \
+                          % operandField)
+        return None
+    ast = parserASM(expression, "setaOperand")
+    if ast == None:
+        error(properties, "Cannot parse computed AGO expression: %s" \
+                          % expression)
+        return None
+    n = evalArithmeticExpression(ast["v"], svLocals, properties)
+    if n == None:
+        error(properties, "Cannot evaluate computed AGO expression: %s" \
+                          % expression)
+        return None
+    if n < 1 or n > len(targets):
+        return None
+    return targets[n - 1]
+
 def printTraceMessage(depth, name, operation, operand, extra=""):
     if trace:
         msg = f"Trace: {'%04d'%sysndx} {'%02d'%depth}    {'%-16s'%name} {'%-8s'%operation} {operand}"
@@ -687,10 +739,6 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             continue
         if  operation == "AGO":
             printTraceMessage(depth, name, operation, operand)
-            actr -= 1
-            if actr < 0:
-                error(properties, actrMessage(fromWhere))
-                break
             # The operand field ends at the first blank; what follows is a
             # comment.  `rstrip()` alone left the comment attached to the
             # target, so `AGO .LOOP    *** LABEL ...` looked for a sequence
@@ -698,6 +746,17 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             # silently skipped the rest of the macro or file.  Same family as
             # the trailing comment that used to defeat SETA.
             target = operand.split()[0] if operand.split() else ""
+            if target.startswith("("):
+                target = computedAgoTarget(target, svLocals, properties)
+                if target == None:
+                    # Out of range, so no branch is taken at all.  Fall through
+                    # to the next statement WITHOUT charging ACTR: a branch not
+                    # taken is not a branch, the same rule AIF already follows.
+                    continue
+            actr -= 1
+            if actr < 0:
+                error(properties, actrMessage(fromWhere))
+                break
             if target in sequence:
                 if fromWhere != sequence[target][0]:
                     error(properties, "Target out of this macro")
