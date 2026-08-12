@@ -1233,6 +1233,46 @@ AND DECIDE ABOUT THE RENUMBERING BEFORE COMMITTING.  It is safe within the
 file, but FPMIHPC2's labels would no longer match its listing's text, which is
 true of no other module in the corpus.
 
+267 of 272.  FPMIHPC2 byte-exact, 072bdf2f in PFS; only BILDNEW5 remains.
+
+    MATCH       267      MATCH?       4
+    DIFFERS       0      NOCOMPARE    1
+
+FPMIHPC2 WAS THREE EXTRACTION FAULTS, not one, and the recipe is in its commit.
+The last of them is worth carrying: card 059400BO is marked continued and its
+continuations 059500BO/059600BO are absent from the listing, so unprint.py
+swallowed the next genuine instruction -- `SR R4,R7` -- in their place, and
+every later address ran one halfword short.  ONE DROPPED INSTRUCTION WAS THE
+WHOLE OF A 1843-BYTE DISCREPANCY.  FIOSVC has the identical fault at its SRN
+006204.  Expect it wherever a listing's SRNs skip.
+
+AND A RAW RE-EXTRACTION REINTRODUCES THE ENGINEERS' NAMES.  The listings carry
+none of the `^xx` tags the committed sources use -- 69 of them in FPMIHPC2 --
+so a whole-file replacement silently undoes the anonymisation.  Restore them by
+matching SRNs against the previous version, and CHECK before committing.
+
+BILDNEW5 IS NOT AN EXTRACTION PROBLEM.  Its source is 605 cards of which 25 are
+COPY and 32 are anything else.  The first intolerable diagnostic falls in the
+THIRD copy, HISAM, and is `@DLY is an MSC instruction whose encoding has not
+been established` -- 460 of those, where ASM101S emits four zero bytes and says
+so rather than guessing.
+
+But the bulk is one macro.  Of 7930 intolerable lines:
+
+    7779  Branch to (&N).ONELIST,.TWOLIST,.THREEL,.FOURL,.FIVEL,.SIXL in CHAR
+    5229  ANALOG CONTROL BITS NOT GATED FOR CHARACTERS
+    2679  OPERAND MISSING - CHAR SET TO BLANK
+     630  undefined symbols, and Cannot evaluate Y-type constant
+     460  @DLY
+
+The first is a COMPUTED AGO -- a branch to one of six sequence symbols selected
+by an index -- inside a macro named CHAR, and the next two are that macro's own
+MNOTEs firing once the branch has gone wrong.  So BILDNEW5 is blocked on
+conditional-assembly machinery, and `@DLY` is a smaller separate matter.
+
+Don Schmidt reports he can build BILDNEW5, so his assembler resolves that AGO;
+his sources are the place to look before implementing one.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
