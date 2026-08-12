@@ -4175,6 +4175,47 @@ established is why -- and the next step is to trace `pos1` through the loop
 against the RIG'S OWN listing addresses, card for card, which was never
 actually done.
 
+TRACED, card for card, against THE RIG'S OWN listing as 201 insisted.  The
+result is not an eight-byte discrepancy at the end of a section:
+
+    named GPCIPL cards matched to the listing   1904
+    cards where the loop's position AGREES       147     (8%)
+    FIRST DIVERGENCE  FRTRNXEC  loop 00475  listing 00476  -1 halfword
+
+    THE LOOP DISAGREES WITH THE ASSEMBLER ABOUT 92% OF THE SECTION, starting
+    two bytes out at address 00475 and never recovering.  By the end of
+    GPCIPL it is 36 halfwords behind -- constant across the whole tail, which
+    is why the last cards all showed the same offset and looked like one
+    event.
+
+    THE EIGHT BYTES WERE ALWAYS A RESIDUE.  `used` lands 8 short of the true
+    section end, but that is the net of thousands of small disagreements
+    partly cancelling, not a missing quantity to be found.  193 through 200
+    were all, in one way or another, looking for a single lost object.  There
+    isn't one.
+
+SO THE `asis` RECOMPUTATION LOOP SHOULD NOT BE REPAIRED, IT SHOULD GO.  199
+raised that as a possibility and this settles it: a second computation of the
+layout that agrees with the first on 8% of cards is not a computation worth
+correcting.  The assembler has already placed every card -- `properties`
+carries the real `pos1`, which is what the LISTING prints -- and the loop
+exists only to recompute `used` and the per-section `offset`.
+
+    THE WORK IS TO DERIVE BOTH FROM WHAT THE ASSEMBLER ALREADY KNOWS.  `used`
+    is the high-water mark of the real `pos1`; the section `offset` is the
+    running sum of those.  Establish that the real `pos1` is still in
+    `properties` at the point the `asis` block runs -- it is written there
+    during assembly -- and if it is, replace the loop rather than adjust it.
+
+    VERIFY ON RUNASM ABOVE ALL.  BILDNEW5 is the only PASS module with two
+    sections, so the 272-module sweep exercises the section-offset arithmetic
+    almost not at all, while RUNASM's 205 modules all run through `used`.
+    181 is the precedent: a clean sweep with four RUNASM failures.
+
+    THE RIG IS `modules/sdfpkg/TLINES.asm`, 64 seconds, two sections, and it
+    reproduces the boundary exactly.  Trace against ITS listing, never the
+    full build's -- 201 records why.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
