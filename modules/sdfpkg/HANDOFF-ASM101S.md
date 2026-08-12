@@ -2166,6 +2166,38 @@ WHAT THE EXPERIMENT WAS WORTH.  BILDNEW5 went 12330 to 12078 bytes mismatched
 with it, so the direction is right and only the condition is wrong.  Both
 numbers are with everything else of 160 through 162 in place.
 
+163 claimed the same mnemonic goes both ways, citing FCMTRACE's
+`L R3,TPSATENT` as an AM=0 case against BILDNEW5's AM=1 `L R7,SVCN+2`, and
+concluded that no list of mnemonics could ever be right.  THE CITATION IS
+WRONG.
+
+    ###X### op=L  extrnBase=True  extrnD2=True  d1=-32
+    ###X### op=LH extrnBase=True  extrnD2=True  d1=-2
+
+`extrnBase` is TRUE for every TPSATENT card -- TPSATENT is on FCMTRACE's
+`EXTRN` list at line 120 -- so the guard sees it and the widened condition
+excluded it just as the narrow one did.  Those cards cannot have changed.
+
+WHAT WENT WRONG WAS READING THE LISTING.  A mismatch is printed BEFORE the
+card it belongs to, as AMCPTEST shows back in 150, and the diagnosis used
+`grep -B3`, which shows the three lines PRECEDING each mismatch -- that is,
+the cards it does NOT belong to.  So the `F7 vs F3` was attributed to
+`L R3,TPSATENT` when it belongs to a card further down that was never
+identified.
+
+    SO THE COUNTEREXAMPLE IS WITHDRAWN and with it the conclusion that no
+    mnemonic list can work.  That may still be true; nothing here shows it
+    either way.
+
+WHAT STANDS FROM 163: the ten modules really do break -- that came from the
+sweep, not from the listing -- and the direction is right, BILDNEW5 going
+12330 to 12078.  What is unknown again is WHICH cards break in those ten and
+why, and `grep -A` rather than `-B` is how to find out.
+
+    Whoever picks this up: re-read those ten with the mismatch attached to the
+    card AFTER it.  DCICYC at 186 bytes is the loudest and the best place to
+    start.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
