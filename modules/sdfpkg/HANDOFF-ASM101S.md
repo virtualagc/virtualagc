@@ -3335,6 +3335,56 @@ OUT BASE 3 WITH THE ABSOLUTE 1580.
     to the full build in 23 seconds, which was checked, so none of this needs
     the 35-minute run.
 
+MEASURED, and the answer is no for the bulk of them and unnecessary for the
+rest.  Recorded so the question is not re-opened from scratch.
+
+WHAT IS MISSING.  BILDNEW5's listing carries 18641 cards with a real SRN and
+our sources 18143.  The gap is 635 cards by `cards.py`'s reckoning -- 413
+where the SRN is present with OTHER text, 222 absent altogether.
+
+    THE ABSENT ONES ARE MACRO INVOCATIONS AND MUST STAY ABSENT.  By operation:
+    ERROR 250, DCHAR 127, SMS 95, PDEF 50, TEXT 34, POS 28, CR 26.  The
+    extraction kept each macro's EXPANSION, which the listing prints directly
+    underneath the call, so restoring the call would expand it a second time
+    and emit the code twice.  This is the same reasoning `comment-vestigial.py`
+    already applies to 5287 of them.
+
+WHAT OI340600 ACTUALLY HAS.  Of the cards our OI301700 sources lack, 509 are
+present VERBATIM in OI340600/MLIB80 and 854 under the same SRN.  So the text
+is largely there -- and it is still the wrong place to take it from:
+
+    OI340600 IS A DIFFERENT RELEASE AND ITS SOURCES REALLY DO DIFFER.  35 of
+    the 276 shared MLIB80 members differ in their SRN-BEARING CARDS, 3970 card
+    lines in all.  A card lifted from there can silently import another
+    release's code.
+
+    THE OI301700 LISTING IS THE BETTER AUTHORITY ANYWAY.  BILDNEW5 is nothing
+    but COPY statements, so its as-received listing prints the full text of
+    every member it copies, inline.  Whatever is missing is already there, in
+    the right release, which is how `restore-pofpon.py` recovered its 35 cards
+    without consulting OI340600 at all.
+
+AND IT DOES NOT SOLVE THE COLUMN-1 PROBLEM, which was the one thing worth
+hoping for.  Across 12864 SRNs uniquely present in both releases there are
+ZERO cards where OI301700's column 1 is blank and OI340600's carries a
+conditional-assembly letter.  Four go the other way.  OI340600 has no CARDTYPE
+information we lack.
+
+    A MEASUREMENT I NEARLY BELIEVED, AS A WARNING.  Restricting to SRNs
+    uniquely present in both, with exactly one occurrence each, reported ZERO
+    text differences across all 12864 -- which would have said the two
+    releases' macro libraries were identical.  `cmp` says all 276 members
+    differ.  Most of that is the Virtual AGC header block, which carries no
+    SRN, but 35 members differ in real cards and the filter had excluded every
+    member where cards were added or removed.  A clean zero across a whole
+    corpus is the signature of a filter that threw away the evidence.
+
+THE ONE CLASS THAT GENUINELY NEEDED RESTORING is the `$POF`/`$PON` pattern --
+an invocation whose expansion was suppressed by PRINT NOGEN and so never
+reached the listing to be extracted.  Those two are the only macros in this
+build that suppress their own output, all 35 cards are already back, and there
+is no second instance to look for.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
