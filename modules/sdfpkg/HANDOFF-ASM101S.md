@@ -2640,6 +2640,63 @@ at 160.
     alone would have got this right, and it is the first time in this section
     they have actually disagreed rather than agreed.
 
+166 lumped the wrong-value pile together and it was right to at the time; it
+no longer is.  166 of the 189 sit at agreeing addresses, and they divide:
+
+    115   the second byte, base or addressing mode
+     40   the DISPLACEMENT ONLY, and always by exactly one
+     21   the FIRST byte, which is opcode and R1
+     13   two-byte cards
+
+TAKE THEM SEPARATELY.  Three have a named cause already.
+
+(1) OFF BY ONE, 40 cards -- 31 of them ours one LOW, 9 ours one HIGH, never
+    any other amount:
+
+        SSM STOPMASK   orig 88FF 0657   ours 88FF 0656
+        B   RETRNJOB   orig C7F7 0501   ours C7F7 0500
+        LA  R2,JOBADDR orig EAF7 003F   ours EAF7 0040
+
+    All AM=1, so all PC-relative, and the two directions split by which way
+    the branch goes -- the backward ones read one low and the forward one
+    reads one high.  That is an `icRS` convention, `icRS - d2` against
+    `d2 - icRS`, disagreeing by a halfword about where the instruction counter
+    stands.  Should be the cheapest of the four.
+
+(2) R1 IS BEING DROPPED, 21 cards, and it is LDM and STDM every time:
+
+        LDM  R3,EXTDATA3   orig 6BF8 0140   ours 68F8 0140
+        LDM  R1,EXTDATA1   orig 69F8 013C   ours 68F8 013C
+        STDM R1,EXTTEMP    orig 91F8 0148   ours 90F8 0148
+
+    The low nibble of the first byte is R1 and we emit zero.  Both are in
+    `impliedR1`, which exists for mnemonics that supply R1 THEMSELVES -- and
+    the original plainly encodes the register the source names.  So either
+    they do not belong in that table, or a written register must override the
+    implied value.  Check the POO before deciding which.
+
+(3) `BCB B'000',1` ASSEMBLES D8FE FOR D806, 13 cards, all the same statement.
+    The byte is (displacement << 2) | form, form 10 for BCB, so the original
+    is displacement 1 and ours is 63.  The operand is a LITERAL 1, not a
+    label, so this is the backward negation being applied to a number that was
+    never an address -- `0x3F & -d` on a 1 gives 63.
+
+(4) THE SECOND-BYTE 115 are not one thing either.  F7->F3 47 and FF->FB 9 are
+    the same shape 166 described.  But F3->F7 is EIGHTEEN CARDS THE OTHER WAY,
+    ours choosing PC-relative where the original is absolute:
+
+        LA G4,MCHO   orig ECF3 0040   ours ECF7 0888
+
+    MCHO is at 0x40, a fixed machine location rather than anything
+    section-relative, so 168's fix over-applies to symbols that are absolute
+    by nature.  Eighteen cards is the price of the 215 it fixed, but it is a
+    price and it is not recorded anywhere else.
+
+    FB->F8 18 and F3->F0 13 are a base-register difference with the
+    addressing bits agreeing, and `ISPB 0,MSG257A` -- orig E8FB 504D, ours
+    E8F8 3B73 -- reaches into GENLINES from outside, so those are likely
+    cross-section and want looking at with the section in mind.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
