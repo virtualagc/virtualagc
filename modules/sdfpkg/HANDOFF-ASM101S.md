@@ -3803,6 +3803,52 @@ separated the two.  WHEN A REGION LOOKS WRONG, ASK SEPARATELY WHETHER THE
 CONTENT IS WRONG OR THE POSITION IS -- comparing by address answers only the
 second, and comparing by index only the first.
 
+FOUND, not yet fixed.  The eight bytes 193 went looking for are at the CSECT
+BOUNDARY, and the evidence is unambiguous:
+
+    ours     03C1C  LINES    CSECT
+             03C1C  ERRMSGS  DS   0F
+             03C1C  6108     DC   YL.3((MSG002-MSG001)/8),YL.13(MSG001-ERRMSGS)
+
+    theirs   03C20  LINES    CSECT
+             03C20  ERRMSGS  DS   0F
+             03C20  6108     DC   ...
+
+    OUR `LINES` STARTS AT 03C1C AND THE ORIGINAL'S AT 03C20.  Nothing inside
+    the section is wrong -- 193 established the whole DCHAR stream is
+    identical in content and uniformly four halfwords early, and this is why.
+    `GPCIPL` ends four halfwords short and `LINES` is laid down against that
+    short end.
+
+AND OUR OWN ESD CONTRADICTS OUR OWN LISTING, which is the sharpest clue here:
+
+    GPCIPL    SD 0001 000000 003C20
+    LINES     SD 0019 003C20 001593
+
+    THE ESD SAYS `LINES` BEGINS AT 003C20.  The cards say 03C1C.  One of the
+    two is computed from something the other is not, and whichever produces
+    003C20 already has the right answer.  Find where each is derived --
+    `sects[s]["offset"]` is what the placement uses, and 181 records that
+    `sects[s]["used"] // 2` is the length in these units -- and reconcile
+    them.  A defect that reports itself correctly in one place and wrongly in
+    another is usually two derivations of one quantity, which is the shape of
+    177, 182 and 192.
+
+WHAT IT IS WORTH.  9225 of BILDNEW5's 10174 remaining mismatched bytes, and
+they are not damaged data: five thousand correct cards that will fall into
+place the moment the section starts four halfwords later.
+
+    ALIGNMENT IS PROBABLY NOT THE ANSWER, so check it and move on.  Both
+    03C1C and 03C20 are divisible by four in these units, so a fullword or
+    doubleword rule does not separate them; `ERRMSGS DS 0F` would be satisfied
+    at either.  The question is why `GPCIPL` ends where it does, not how the
+    next section is aligned to it.
+
+    AND VERIFY ON THE CORPUS, not just BILDNEW5.  A change to where a CSECT
+    begins touches every module with more than one section.  BILDNEW5 is the
+    only one in the PASS corpus that has two, which means the sweep will say
+    almost nothing -- RUNASM is the harness that will catch a mistake here.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
