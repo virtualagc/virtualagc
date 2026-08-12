@@ -3939,6 +3939,49 @@ HAS NOTHING TO DO WITH THIS ONE.  `GPCIPL`, `LINES`, `ERRMSGS`, `SSLCKSUM` and
     and under pressure; the LISTING is the evidence.  Reading the original's
     own cards settled in one look what the map could never have answered.
 
+196 SAID `DC 50X'C6C6'` ALLOCATES 46 HALFWORDS.  IT DOES NOT.  Assembled on
+its own it is exactly right:
+
+    A        CSECT
+    PATCH2   DC      50X'C6C6'
+    AFTER    DS      0H          <-- lands at 00032, fifty halfwords.  CORRECT.
+
+    `dcSuboperandBytes` sizes `X'C6C6'` at two bytes correctly, and
+    `replicateDC` returns length x factor correctly.  Neither is at fault.
+    PATCH2 is simply the LAST CARD of GPCIPL, so a shortfall anywhere in the
+    section shows up as PATCH2 apparently ending early.  I read the last card
+    as the guilty one because it was the last one.
+
+WHERE IT ACTUALLY GOES WRONG.  Section placement, at the `asis` block:
+
+    lastOffset += sects[sect]["used"] // 2
+
+    `used` IS IN BYTES AND `lastOffset` IN HALFWORDS, which is why it is
+    halved.  For `LINES` to land at 03C1C rather than 03C20, GPCIPL's `used`
+    must be 0x7838 where it should be 0x7840 -- EIGHT BYTES SHORT.
+
+    AND `used` IS ACCUMULATED FROM `properties["length"]`, one card at a time,
+    in the loop just above it.  So some card's RECORDED length is eight bytes
+    less than the data it actually generates.  PATCH2 is the obvious suspect
+    -- 92 against 100 -- but that has NOT been shown, and 196 is what comes of
+    naming a suspect without showing it.
+
+    THE ESD ALREADY DISAGREES WITH THE PLACEMENT, and 194 recorded that
+    without my seeing what it meant: we print GPCIPL's length as 003C20, the
+    RIGHT value, while placing LINES at 03C1C.  Two readings of the same
+    quantity, one correct.  Find what the ESD is printing and what the
+    placement is adding, because they are not the same number.
+
+NEXT STEP, and it is small.  Trap `properties["length"]` against the actual
+generated length for every DC in GPCIPL and print the ones that disagree.
+Do it in a rig if PATCH2 can be reached in one -- it sits at 03BEE, past
+GPCRTOPT, so `t/TPURG.asm` may not cover it and may need extending by a member
+or two.  One card will be eight bytes out, or four cards two.
+
+    AND THE TOY IS THE CHEAPEST WITNESS THERE IS.  Six lines settled in two
+    seconds a question I had spent two handoff entries theorising about, and
+    it disproved my own conclusion of an hour earlier.  Build the toy first.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
