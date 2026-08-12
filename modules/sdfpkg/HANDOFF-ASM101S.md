@@ -3660,6 +3660,59 @@ WHERE TO GO NEXT, in the order I would take it:
     returns the right base and displacement and something downstream discards
     them.
 
+RE-MEASURED on a fresh full listing after 189.
+
+    BILDNEW5                     10174 bytes mismatched, 20 missing
+    SECOND-BYTE MISMATCHES       14 -> 1
+
+    THE ONLY ADDRESSING-BYTE DEFECT LEFT IS 012A8, the `F3->F1` of 183 --
+    `LHI R5,DISABLFL`, where `findB2D2` returns base 1 and displacement A6
+    correctly and something downstream discards them.  The second F3->F1 at
+    024AA is gone: it was slide fallout, as 183 suspected, and 189 removed the
+    slide that produced it.
+
+    SO THE INSTRUCTION ENCODING IS ESSENTIALLY DONE and the remaining 10174
+    bytes are almost entirely something else.
+
+WHERE THEY ARE.  5503 cards carry the mismatched bytes, and they are not
+spread about:
+
+    00000-00FFF        3 cards
+    01000-01FFF       92
+    02000-02FFF        0        <-- the slide 189 closed, now CLEAN
+    03000-03FFF      990
+    04000-04FFF     4017
+    05000-05FFF      401
+
+    THE ESD PUTS `LINES` AT 03C20, so 4418 of those cards are in it and most
+    of the rest are just before it.
+
+AND IT IS A SECOND SLIDE, NOT BAD DATA.  At 04000 we emit
+`DC YL.2(03),YL.7(80),...` where the original has `DC YL.2(03),YL.7(69),...`
+-- DIFFERENT SOURCE CARDS AT THE SAME ADDRESS, which no encoding error can
+produce.  At 03C40 the original has no card at all.  Something in or before
+`LINES` assembles to a different length than the original and everything after
+it compares against the wrong card.
+
+    THIS IS THE WHOLE REMAINING PROBLEM.  It is worth more than every
+    encoding fix in 177 to 190 put together.
+
+HOW TO FIND IT, AND ONE TRAP THAT ALREADY CAUGHT ME.  Walking the two listings
+side by side BY INDEX breaks in this region for a reason that is not a defect:
+OUR LISTING CARRIES THE RESTORED `$POF`/`$PON` CARDS AND THE ORIGINAL'S DO NOT
+APPEAR AT ALL, because PRINT NOGEN suppressed their expansions -- that is
+exactly why they had to be restored, and 184 records it.  At 03B8B ours shows
+`$PON055 DS 0H` against the original's next card, and the walk reported a
+divergence that is only an extra LINE, not an extra address.
+
+    KEY THE COMPARISON ON (SRN, ADDRESS) AND NOT ON POSITION.  Both listings
+    carry a six-digit SRN with a two-letter suffix in columns 73-80 of the
+    card, and the card begins at offset 37 in the as-received file and at
+    offset 0 in ours.  Find the first SRN whose address differs between the
+    two; that is where the slide begins.  Beware that SRNs repeat between
+    members, so walk them in order and pair them off rather than building a
+    dictionary -- 186 is the record of what looking one up in isolation does.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
