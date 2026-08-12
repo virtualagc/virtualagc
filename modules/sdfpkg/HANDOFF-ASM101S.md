@@ -2733,6 +2733,33 @@ THAT LEAVES THREE, and 169's other three stand -- LDM/STDM dropping R1 (21),
 `BCB B'000',1` negating a literal (13), and the second-byte 115 of which 18
 are 168 over-applying.  The R1 one is now the cheapest and the best documented.
 
+169's cheapest real fault, done.  Both mnemonics sat in `impliedR1` with a
+value of zero -- the table for instructions that supply R1 THEMSELVES -- and
+they do not:
+
+    LDM  R3,EXTDATA3      orig 6BF8 0140    ours 68F8 0140
+    LDM  R1,EXTDATA1      orig 69F8 013C    ours 68F8 013C
+    STDM R1,EXTTEMP       orig 91F8 0148    ours 90F8 0148
+    LDM  R1,EXTDATA1(R3)  orig 69FC 613C    ours 68FC 613C
+
+0x68 over R1 and 0x90 over R1.  Membership forced the opcode nibble and threw
+the written register away.  Removing the two entries fixes all four shapes,
+indexed and not.
+
+    BILDNEW5 11517 to 11496 bytes mismatched.  RUNASM PASS, 205 byte-for-byte.
+    Corpus 267 MATCH, no module changing class.
+
+WORTH CHECKING THE REST OF THAT TABLE against the listings.  It still holds
+SSM 0, LM 4, STM 0, LPS 5, SVC 1, TS 0, SHW 2, TD 0, TH 3, ZH 1.  Two of them
+were wrong; the others have never been tested the same way, and the test is
+cheap -- find a card that writes a register and see whether the original
+encodes it.
+
+    AND THE RIG SAID ZEROES FIRST, third time, same cause: EXTDATA1, EXTDATA3
+    and EXTTEMP are all in STPDATA, which the STM1 cut-down omits.  It cost a
+    minute because 162's rule was applied before believing it.  Whoever is
+    next: the rule is not optional, and zeroes look exactly like an answer.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
