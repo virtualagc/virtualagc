@@ -788,7 +788,58 @@ def optimizeScratch():
                     if u[2] < d:
                         d = u[2]
                         b = u[1]
-            if b != None and d >= srsFloor and d < srsCeiling:
+            # THE TEST ABOVE IS NOT THE DISPLACEMENT and never was: `u[2]` is
+            # where the USING was established, `value` is where the operand
+            # is, and only the DISTANCE between them has to fit the SRS field.
+            # It shortens when the base happens to CAPTURE small rather than
+            # when the displacement happens to BE small, which is why 714 of
+            # BILDNEW5's 715 length differences are instructions reached
+            # through a USING.
+            #
+            # It cannot simply be corrected, because `u[2]` and `value` are
+            # from different moments.  Measured on the first of those 714,
+            # `TH UNPRTFLG` in FAILEXEC:
+            #
+            #     captured u[2] = 544
+            #     symtab now    = FAILDATA 1198, UNPRTFLG 1200
+            #
+            # so `value - u[2]` is 656 where the truth is 2.  The snapshot was
+            # taken while `USING FAILDATA,B0` still named a symbol defined 657
+            # cards further on.  RE-EVALUATING THE BASE EXPRESSION HERE gets
+            # it right, because by the end of the pass the symbol is placed --
+            # which is the whole reason this runs at the end of the pass.
+            #
+            # Kept as an ADDITIONAL chance rather than a replacement.  The
+            # accidental test is load bearing: where the base is still wholly
+            # unresolved it captures 0, passes, and shortens correctly for the
+            # wrong reason, and modules that are byte-exact today depend on
+            # that.  An `or` can only shorten more, never less.
+            uBase = None
+            uDisp = 10000000
+            for r, u in enumerate(entry["using"]):
+                if u == None or section != u[1] or len(u) < 5:
+                    continue
+                usingAst = u[3].get("ast")
+                if usingAst == None or "r" not in usingAst or not usingAst["r"]:
+                    continue
+                try:
+                    h2 = evalArithmeticExpression(usingAst["r"][0], {}, u[3], \
+                                                  symtab, None, severity=0)
+                except:
+                    continue
+                if h2 == None:
+                    continue
+                s2, a2 = unhash(h2)
+                if s2 != section or a2 == None:
+                    continue
+                # `address` advanced by 4096 for each register in the USING's
+                # list, so this one's window starts that much further on.
+                dd = value - (a2 + 4096 * u[4])
+                if dd >= 0 and dd < uDisp:
+                    uDisp = dd
+                    uBase = r
+            if (b != None and d >= srsFloor and d < srsCeiling) or \
+                    (uBase != None and uDisp >= srsFloor and uDisp < srsCeiling):
                 adjust(scratch, properties, i)
                 continue
     return adjustments
@@ -1863,11 +1914,22 @@ def generateObjectCode(source, macros):
                         h = rlist.pop(0)
                         section, address = unhash(h)
                         properties["using"] = address
-                for r in rlist:
+                for k, r in enumerate(rlist):
                     if r == None or r < 0 or r > 7:
                         error(properties, "Bad register number")
                     elif operation == "USING":
-                        using[r] = (h, section, address)
+                        # THE BASE EXPRESSION IS CARRIED ALONG, with this
+                        # register's place in the USING's register list.  The
+                        # resolved `address` beside it is a SNAPSHOT taken
+                        # here, and where the base is a forward reference that
+                        # snapshot is wrong by however far the symbol later
+                        # moves -- FAILEXEC's `USING FAILDATA,B0` names a
+                        # symbol defined 657 cards later and captures 544 for
+                        # a location that ends pass 1 at 1198.  Nothing can be
+                        # done about that HERE, because the symbol genuinely
+                        # is not known yet; `optimizeScratch` re-evaluates
+                        # this expression at the end of the pass, when it is.
+                        using[r] = (h, section, address, properties, k)
                         h += 4096
                         address += 4096
                     else: # DROP
