@@ -2607,6 +2607,39 @@ something about the RUNASM modules distinguishes them and has not been looked
 at.  ACOS at two bytes is one instruction and is the place to start, with the
 mismatch attached to the card AFTER it per 165.
 
+167 recorded the fix as breaking RUNASM.  ACOS at two bytes, read forward,
+gives the discriminator and it is not about the operation at all.
+
+    ACOS      SVC AERROR1   orig C9FB 0074   ours C9FF 0022
+    BILDNEW5  LA  R0,STM4   orig E8F7 07B4   ours E8F3 14DA
+
+opposite ways round.  THE FALLBACK HAS THREE TESTS AND TWO MEANINGS:
+
+    if newd2 >= 0 and newd2 < 4096 and newd2 < sects[sect]["used"] // 2:
+
+  - failing the 4096 means the target is too far into its section to be
+    addressed that way, and PC-relative IS the right answer.  BILDNEW5's
+    target is at 5554; icRS + 07B4 lands exactly on 14DA.
+  - failing the `used` test means we have not BUILT the section that far yet
+    -- an ordinary forward reference -- and the original keeps AM=0.  ACOS's
+    target is at 116, nowhere near 4096.
+
+Both landed in the same `else` and both got `forceAM0`.  Gate the PC-relative
+retry on `newd2 >= 4096` and each goes its own way.
+
+    BILDNEW5: 6574 byte-identical to 6789, wrong values 404 to 189.
+    RUNASM 205 words, 0 mismatches.  Corpus 267 MATCH, no class change.
+
+WHAT REMAINS: 189, led by LA 37, ISPB 24, STH 24, BAL 14, and the four
+too-short of 148.  Down from 1402 when the wrong-value pile was first readable
+at 160.
+
+    AND THE HARNESS LESSON, WHICH IS THE DURABLE PART.  The corpus said this
+    change was free at BOTH stages -- 267 MATCH, no module changing class --
+    while RUNASM said 57 modules were broken at the first.  Neither harness
+    alone would have got this right, and it is the first time in this section
+    they have actually disagreed rather than agreed.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
