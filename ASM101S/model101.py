@@ -3367,7 +3367,26 @@ def generateObjectCode(source, macros):
                                                 data = generateRS1(properties, operation, 0, 1, r1, icRS - d2, 0, 3)
                                             else: # d2 >= ic + 2
                                                 data = generateRS1(properties, operation, 0, 0, r1, d2 - icRS, 0, 3)
+                                        # A FORWARD SHORT BRANCH CANNOT HOLD A
+                                        # NEGATIVE DISPLACEMENT.  Only `BCB`
+                                        # and `BCTB` take one, and they negate
+                                        # it a few lines below; everything else
+                                        # arriving here with d < 0 has no short
+                                        # form at all.  The range check further
+                                        # down tests only `d >= srsCeiling`, so
+                                        # a negative value passed it and
+                                        # `generateSRS` masked it into six bits:
+                                        # DCICYC's `BC 6,#@LB259` is 65
+                                        # halfwords BACK and assembled DEFC, a
+                                        # forward branch of 63, where the
+                                        # original has the four-byte C6F7 0842.
+                                        # That is not a different-but-valid
+                                        # encoding, it is a branch to the wrong
+                                        # address.
                                         elif (len(data) == 2 and \
+                                              (d >= srsFloor or operation not in \
+                                               ("BC", "BCF", "BVC", "BVCF") and \
+                                               operation not in branchAliases) and \
                                               d < (srsBranchCeiling \
                                                    if (operation in branchAliases \
                                                        or operation in \
@@ -3464,7 +3483,17 @@ def generateObjectCode(source, macros):
                                                         'type': 'Y'
                                                     })
                                             else:
-                                                data = generateRS1(properties, operation, 0, 1, r1, 0x3FF & -d1, 0, ib2)
+                                                # ELEVEN BITS, NOT TEN.
+                                                # `generateRS1` packs bits 10-8
+                                                # into data[2] and 7-0 into
+                                                # data[3], so the mask is 0x7FF;
+                                                # 0x3FF silently dropped bit 10
+                                                # of any magnitude of 1024 or
+                                                # more.  DCICYC's
+                                                # `BC 07-1,#@LB29` needs 0x4D5
+                                                # and assembled 0x0D5, reaching
+                                                # 0048D instead of 0008D.
+                                                data = generateRS1(properties, operation, 0, 1, r1, 0x7FF & -d1, 0, ib2)
                                         elif not forceAM0 and \
                                                 (x2 != None or ia or \
                                                  i or (not usingB2 and \

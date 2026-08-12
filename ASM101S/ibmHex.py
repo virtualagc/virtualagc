@@ -86,6 +86,25 @@ def toFloatIBM(x, scale=1):
         return 0xff000000, 0x00000000
     # x should now be in the right range, so lets just turn it into an integer.
     f = hround(d)
+    # ROUNDING CAN CARRY OUT OF THE FRACTION.  A value that normalises to just
+    # under twoTo56 rounds up to exactly twoTo56, and `f >> 32` is then
+    # 0x1000000 -- one bit above the 24-bit fraction field -- which the OR
+    # below carries straight into the EXPONENT.  The result looks almost right,
+    # which is what makes it nasty: the exponent comes out one too high and the
+    # fraction comes out zero.
+    #
+    # DCICYC's `DC D'0.232830643653869628E-9'` is that case.  The literal is a
+    # decimal approximation of 2**-32 and lands just below it, so normalisation
+    # takes one step too many; the original build has 3910000000000000 and this
+    # produced 3900000000000000.
+    #
+    # Renormalising by one HEXADECIMAL digit is the correct correction, the
+    # exponent being a power of sixteen.
+    if f >= twoTo56:
+        f = int(f) // 16
+        e += 1
+        if e > 127:
+            return 0xff000000, 0x00000000
     # Convert to a more-significant and less-significant 32-word:
     msw = (s << 31) | (e << 24) | (f >> 32)
     lsw = f & 0xffffffff
