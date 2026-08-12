@@ -1786,6 +1786,42 @@ I have now stated five conclusions in this section that measurement
 contradicted.  The tables and traces are sound; treat every sentence joining
 them as a hypothesis until it has its own run.
 
+The run 154 asked for, with the star fix re-applied AND the twelve trapped at
+the same site.  Every USING entry reports the same thing:
+
+    L   value=1177  uDisp=10000000  uBase=None
+        pos1=[('GPCIPL', 544, None), ('GPCIPL', 8812, None)]   | R7,FAILBRTN
+    LE  value=2868  uDisp=10000000  uBase=None
+        pos1=[('GPCIPL', 3160, None), ('GPCIPL', 3356, None)]  | F7,KFCON1+2
+
+THE THIRD ELEMENT IS `u[3].get("pos1")` AND IT IS None, EVERY TIME.  The star
+fix guarded on exactly that:
+
+    if u[1] in symtab and u[3].get("pos1") != None:
+        usingHash = symtab[u[1]]["value"] + u[3]["pos1"] // 2
+
+so `usingHash` stayed None in every case and the fix NEVER RAN.  That is why
+BILDNEW5 came out byte for byte identical with it applied, and it means the
+second of 154's two readings was never tested: nothing yet says whether the
+displacement would be accepted once a base is found.
+
+    A USING STATEMENT CARRIES NO `pos1` IN ITS PROPERTIES.  It generates no
+    object code, so whatever sets that field for code-generating statements
+    never sets it here.  This is the thing to fix, and it is upstream of the
+    arm entirely.
+
+TWO WAYS, AND THEY ARE NOT EQUIVALENT.  `properties["using"] = address` is
+already set where the USING is processed, so `u[3].get("using")` is available
+today -- but it is a snapshot taken at that moment and stale in exactly the
+way `u[2]` is, so it buys nothing.  Giving the USING statement a real `pos1`
+is the one worth having, because `adjust` updates
+`entry2["properties"]["pos1"]` as it slides statements, so a USING that had
+one would track the layout instead of freezing at pass 1.
+
+Note also that both bases are listed for each card -- 544 and 8812 for the
+FAILEXEC three, 3160 and 3356 for the STM1 nine -- so the arm is seeing two
+candidate registers and failing on both, not picking the wrong one.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
