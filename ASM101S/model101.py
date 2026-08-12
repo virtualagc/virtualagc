@@ -237,7 +237,7 @@ Here are the rules to classify an instruction in this group.
   
 '''
 srsFloor = 0
-srsCeiling = 56
+srsCeiling = 55
 #srsCeiling = 55
 # THE ORIGINAL BUILD NEVER ENCODED AN SRS *BRANCH* DISPLACEMENT ABOVE 53.
 # Measured off the as-received listings, independently of anything here: a
