@@ -1423,44 +1423,62 @@ it does not look at the operand at all:
         adjust(scratch, properties, i)
 
 `using[r]` is `(hashedBase, section, address)`, so `u[2]` is where the USING
-was established within its section.  `value`, computed a few lines above from
-`unhash(d2)`, is where the OPERAND is -- and is never used.  What the ceiling
-test therefore asks is whether the BASE sits in the first 56 halfwords of its
-own section.  It also takes the base with the smallest address rather than the
-one nearest the operand, and puts the SECTION in `b`, which every other use of
-that name treats as a register.
+was established.  `value`, computed a few lines above from `unhash(d2)`, is
+where the OPERAND is -- and is never used.  What the ceiling test therefore
+asks is whether the BASE sits in the first 56 halfwords of its section.  It
+also takes the base with the smallest address rather than the one nearest the
+operand, and puts the SECTION in `b`, which every other use of that name
+treats as a register.
 
-BUT DO NOT SIMPLY CHANGE IT TO `value - u[2]`.  That was tried and it makes
-things worse, and the reason is the whole difficulty:
+BUT `value - u[2]` IS NOT THE FIX.  Measured, not reasoned about -- the arm
+instrumented and BILDNEW5 assembled, against the one card in question:
 
-    ###U### op=TH sect=T section=T value=612 using=[(...,'T',0)] -> b=T d=0
+    ###U### op=TH sect=GPCIPL section=GPCIPL value=1200
+            using=[(..., 'GPCIPL', 544)] -> d=544 ambiguous=True len=4
 
-`optimizeScratch` RUNS AT THE END OF PASS 1 AND NOWHERE ELSE -- iterated to a
-fixed point, but always against the pass-1 snapshot -- and on pass 1 a USING
-whose base is a forward reference has not been resolved, so its `address` is
-still 0.  In that state `u[2]` is 0 by accident, the ceiling test passes, and
-the instruction is shortened correctly for entirely the wrong reason.  Compute
-`value - u[2]` instead and you get 612, no shortening, and a five-statement
-module that used to be right becomes wrong.  Using the hashed base, `d2 -
-u[0]` as findB2D2 does, has the same defect: the offset is in the low bits and
-those are the bits that are stale.
+The true displacement is 3.  `u[2]` is 544 and `value` is 1200, so the
+"corrected" difference is 656 -- as useless as the 544 it replaces.  THE TWO
+NUMBERS ARE FROM DIFFERENT MOMENTS: `u[2]` was captured when the USING card
+was walked, and `value` is re-evaluated at the end of pass 1 out of a symbol
+table that has moved since.  Neither is the pass-1 distance between the two
+symbols, let alone the final one.
 
-    THE OLD CODE IS RIGHT WHEN THE BASE IS UNRESOLVED AND WRONG WHEN IT IS
-    RESOLVED.  BILDNEW5 is the second case at scale: FAILDATA is defined in
-    the same COPY member, so by the end of pass 1 it HAS an address, u[2] is
-    large, and nothing reached through that USING is ever shortened.
+    FAILEXEC.asm, the member BILDNEW5 copies, holds all four cards:
+
+        011400AB  line 128         USING  FAILDATA,B0
+        011600AB  line 129         TH    UNPRTFLG
+        086000AB  line 786  FAILDATA DS    0F
+        086800AB  line 796  UNPRTFLG DC    H'0'
+
+    The USING names a symbol defined 657 cards later in the same member, so it
+    is a forward reference and 544 is not FAILDATA's address at all.  The
+    original assembles the TH as A30C, two bytes; we emit A3F0 0003, four.
+
+AND THE OLD CODE IS RIGHT ONLY BY ACCIDENT.  A five-statement reproduction of
+the same instruction, base and displacement gets `u[2]` = 0, because there the
+USING's forward reference is still wholly unresolved when it is captured; 0
+passes the ceiling test, `adjust` fires, and the instruction is correctly
+shortened for a reason that has nothing to do with its displacement.  Put
+`value - u[2]` in and that module, right today, becomes wrong.  Using the
+hashed base, `d2 - u[0]` as findB2D2 does, has the same defect: the offset is
+in the low bits and those are the bits that are stale.
+
+    SO THE ARM SHORTENS WHEN THE BASE HAPPENS TO CAPTURE SMALL AND NOT WHEN
+    THE DISPLACEMENT HAPPENS TO BE SMALL.  BILDNEW5 captures 544 and gets
+    nothing; the reproduction captures 0 and gets everything.
 
 Which makes this the same fault as the unnamed-DSECT one already recorded
 above `if operation == "DSECT"` in the preliminary pass -- FCMBMASK's
 `USING TFBMP,R0` resolving one way on pass 1 and another way afterwards.  The
 comment there ends "optimizeScratch runs at the END of pass 1 against the
 pass-1 snapshot, so the arm that would have shortened `LH R4,TBMPVAR` could
-never match its section."  It is the same arm.
+never match its section."  It is the same arm and the same cause.
 
-SO THE FIX IS NOT IN THE ARM.  Either the shortening has to run again after a
-pass in which the USING bases are resolved, or `entry["using"]` has to be
-re-resolved from symtab before the arm reads it.  Both are architectural and
-neither should be attempted without running BOTH harnesses -- this arm is load
+SO THE FIX IS NOT IN THE ARM, and it is not a better formula either.  Both
+operands of the subtraction have to be read from ONE settled layout: either
+the shortening runs again after a pass in which the USING bases are resolved,
+or `entry["using"]` is re-resolved from symtab at the moment the arm reads it.
+Neither should be attempted without running BOTH harnesses -- this arm is load
 bearing for modules that are byte-exact today, and the accidental behaviour is
 what makes them so.
 
