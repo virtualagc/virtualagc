@@ -4640,9 +4640,32 @@ def generateObjectCode(source, macros):
                 while offset - alignment >= usage:
                     offset -= alignment
                 pool[1] = offset
-        if asis:
+        if asis or compile:
+            # ON EVERY COMPILE PASS, not on pass 2 alone.  Pass 2 is `asis`: it
+            # lays the module out with the lengths pass 1's optimizer settled
+            # on, and those are not final -- a compile pass can still find that
+            # an instruction needs its long form, which `repeatPass` exists to
+            # accommodate.  Freezing the inter-section offsets at pass 2 froze
+            # them against a layout later passes then revised.
+            #
+            # BILDNEW5 is what it cost, and it is the only module in the PASS
+            # corpus with two control sections, which is why nothing else in
+            # the sweep showed it.  Trapped on `modules/sdfpkg/TLINES.asm`,
+            # the seventeen-member rig for it, GPCIPL ends at byte 641C on
+            # pass 2 and at 6424 from pass 3 onward -- eight bytes, four
+            # instructions that go back to their long form once real addresses
+            # are known.  `LINES` kept the pass-2 answer.  In the full module
+            # that put it at halfword 03C1C where its listing says 03C20, and
+            # the whole of the DCHAR stream behind it followed four halfwords
+            # early: 9225 of BILDNEW5's 10174 mismatched bytes were that one
+            # displacement, and the module now stands at 284.
+            #
+            # A CHANGED OFFSET ASKS FOR ANOTHER PASS, for exactly the reason a
+            # moved label does: every instruction already assembled on this
+            # pass used the old value.
+            previousOffsets = {s: sects[s].get("offset") for s in sects}
             # For reasons I don't grasp, the assembler treats at least some
-            # control sections as contiguous.  I don't grasp the rules for 
+            # control sections as contiguous.  I don't grasp the rules for
             # which sections those are.  For *now*, all CSECTs are treated
             # as contiguous (except for fullword realignment in between).
             # The way this is reflectes is that in `sects`, each CSECT (but not
@@ -4728,6 +4751,11 @@ def generateObjectCode(source, macros):
                         break
                 lastOffset += offset // 2
                 previousWasZcon = thisIsZcon
+            if compile:
+                for s in sects:
+                    if previousOffsets.get(s) != sects[s].get("offset"):
+                        repeatPass = True
+                        break
         pass
     
     # Let's append the literal pools to their CSECTs.

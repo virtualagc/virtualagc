@@ -4413,6 +4413,80 @@ care inside the loop changes that.
     through `used`.  181 is the precedent -- a clean sweep with four RUNASM
     failures.
 
+FIXED, AND THE LOOP 199 TO 206 CHASED WAS NEVER THE CULPRIT.
+
+THE RECOMPUTATION LOOP'S OUTPUT IS THROWN AWAY.  `sects.clear()` at the top of
+pass 2 (model101.py:1689) destroys every `used` the loop computed at the end
+of pass 1.  Its only surviving consumer is the literal-pool pull-down a few
+lines below it, which uses the recomputed `used` to set `pool[1]`.  IT DOES
+NOT PLACE SECTIONS.
+
+    The trap proves it in one run, because it printed both numbers:
+
+        pass 1 NATURAL:     GPCIPL=6D98  LINES=27A6
+        pass 1 RECOMPUTED:  GPCIPL=63DC  LINES=27A8
+        pass 2 PLACE  GPCIPL used=641C advance=641C off=0
+        pass 2 PLACE  LINES  used=29B4  advance=29B4  off=320E
+
+    If the recomputed 63DC had survived, `PLACE` would have shown 63DC.  It
+    shows 641C -- the high-water mark `toMemory` accumulates naturally during
+    pass 2 (model101.py:1271).  Four entries were spent measuring a loop whose
+    answer nothing downstream reads.
+
+WHAT ACTUALLY PLACED `LINES` FOUR HALFWORDS EARLY IS THAT THE OFFSETS ARE
+FROZEN AT PASS 2.  Trapping PATCH2 itself, on the TLINES rig:
+
+        pass 1  PATCH2 enter pos1=6D34
+        pass 2  PATCH2 enter pos1=63B8   = halfword 031DC
+        pass 3  PATCH2 enter pos1=63C0   = halfword 031E0
+        pass 4  PATCH2 enter pos1=63C0
+        pass 5  PATCH2 enter pos1=63C0
+
+    ITS LENGTH WAS NEVER WRONG -- 100 bytes on every pass, as 197 said.  What
+    moves is where GPCIPL's contents END: eight bytes, four instructions that
+    go back to their LONG form once real addresses are known.
+
+    PASS 2 IS `asis`.  It lays the module out with the lengths pass 1's
+    optimizer settled on, and those are provisional -- `repeatPass` exists
+    precisely because compile passes revise them upward.  The `if asis:` block
+    computed the inter-section offsets from that provisional layout and never
+    looked again, so `LINES` kept an answer the module itself had already
+    revised by pass 3.
+
+THE FIX IS TWO LINES OF CONDITION.  `if asis:` becomes `if asis or compile:`,
+and a changed offset sets `repeatPass` -- for exactly the reason a moved label
+does, since every instruction already assembled on this pass used the old
+value.  It converges: the rig changes at pass 3 and is stable through 5.
+
+MEASURED, BOTH HARNESSES, AFTER:
+
+    TLINES rig      LINES at 03212, which is PATCH2's 031E0 plus fifty
+                    halfwords -- the boundary 199 built the rig to reproduce
+    BILDNEW5        PATCH2 at 03BEE, LINES at 03C20, ITS LISTING'S OWN ADDRESS
+                    10174 -> 284 bytes mismatched, 10 missing
+    verify-sweep    267 MATCH, 4 MATCH?, 1 DIFFERS (BILDNEW5).  Unchanged.
+    RUNASM          PASS, all 205 byte-for-byte.  Unchanged.
+
+    9225 of the 10174 were the one displacement 193 measured, and they are
+    gone.  What is left is 284 bytes, which is a different problem and a much
+    smaller one.
+
+WHAT IS STILL TRUE OF 203 TO 206, and what is not.  The recomputation loop
+does still swallow its exceptions, still ignores ORG, and still agrees with
+the assembler on 8% of cards.  All of that stands as measured.  What does NOT
+stand is 206's conclusion that moving it is the work: it places nothing, so
+its errors reach only literal-pool positions, and no corpus module currently
+shows a defect there.  It is worth cleaning up and it is not worth doing next.
+
+THE LESSON IS CHEAPER THAN THE CHASE.  This is still two derivations of one
+quantity disagreeing, as 177, 182, 192 and 194 were.  But the disagreement
+that mattered was BETWEEN PASSES, not between the loop and the assembler, and
+one trap printing both candidate values side by side in a single run would
+have said so before 199 was written.  PRINT THE VALUE THAT IS CONSUMED, NOT
+ONLY THE VALUE THAT IS COMPUTED.
+
+WHY.  199 through 206 measured the wrong loop for four entries running.  The trap that settled it printed the recomputed value and the value actually used in the same run, and they were different numbers -- which is the cheapest possible test and should have been the first one.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
