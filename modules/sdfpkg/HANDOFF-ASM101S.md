@@ -1409,6 +1409,61 @@ This is the same problem sections 129 through 135 circled for DCICYC, reached
 from the other side.  Whatever is tried, RUN BOTH HARNESSES: the corpus alone
 accepted a wrong rule here more than once.
 
+The arm that should shorten those 714 is the last one in `optimizeScratch`, and
+it does not look at the operand at all:
+
+    b = None
+    d = 10000000
+    for u in entry["using"]:
+        if u != None and section == u[1]:
+            if u[2] < d:
+                d = u[2]
+                b = u[1]
+    if b != None and d >= srsFloor and d < srsCeiling:
+        adjust(scratch, properties, i)
+
+`using[r]` is `(hashedBase, section, address)`, so `u[2]` is where the USING
+was established within its section.  `value`, computed a few lines above from
+`unhash(d2)`, is where the OPERAND is -- and is never used.  What the ceiling
+test therefore asks is whether the BASE sits in the first 56 halfwords of its
+own section.  It also takes the base with the smallest address rather than the
+one nearest the operand, and puts the SECTION in `b`, which every other use of
+that name treats as a register.
+
+BUT DO NOT SIMPLY CHANGE IT TO `value - u[2]`.  That was tried and it makes
+things worse, and the reason is the whole difficulty:
+
+    ###U### op=TH sect=T section=T value=612 using=[(...,'T',0)] -> b=T d=0
+
+`optimizeScratch` RUNS AT THE END OF PASS 1 AND NOWHERE ELSE -- iterated to a
+fixed point, but always against the pass-1 snapshot -- and on pass 1 a USING
+whose base is a forward reference has not been resolved, so its `address` is
+still 0.  In that state `u[2]` is 0 by accident, the ceiling test passes, and
+the instruction is shortened correctly for entirely the wrong reason.  Compute
+`value - u[2]` instead and you get 612, no shortening, and a five-statement
+module that used to be right becomes wrong.  Using the hashed base, `d2 -
+u[0]` as findB2D2 does, has the same defect: the offset is in the low bits and
+those are the bits that are stale.
+
+    THE OLD CODE IS RIGHT WHEN THE BASE IS UNRESOLVED AND WRONG WHEN IT IS
+    RESOLVED.  BILDNEW5 is the second case at scale: FAILDATA is defined in
+    the same COPY member, so by the end of pass 1 it HAS an address, u[2] is
+    large, and nothing reached through that USING is ever shortened.
+
+Which makes this the same fault as the unnamed-DSECT one already recorded
+above `if operation == "DSECT"` in the preliminary pass -- FCMBMASK's
+`USING TFBMP,R0` resolving one way on pass 1 and another way afterwards.  The
+comment there ends "optimizeScratch runs at the END of pass 1 against the
+pass-1 snapshot, so the arm that would have shortened `LH R4,TBMPVAR` could
+never match its section."  It is the same arm.
+
+SO THE FIX IS NOT IN THE ARM.  Either the shortening has to run again after a
+pass in which the USING bases are resolved, or `entry["using"]` has to be
+re-resolved from symtab before the arm reads it.  Both are architectural and
+neither should be attempted without running BOTH harnesses -- this arm is load
+bearing for modules that are byte-exact today, and the accidental behaviour is
+what makes them so.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
