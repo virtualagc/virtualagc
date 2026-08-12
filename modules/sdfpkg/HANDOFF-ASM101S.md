@@ -3611,6 +3611,55 @@ the three-ceiling duplication is still there: `optimizeScratch` and the SRS
 arm still disagree with each other by one.  Reconciling them is worth doing
 deliberately, not by moving numbers until a card comes out right.
 
+RE-MEASURED after 189, which fixed more than the card it was found on.
+
+    02081  BZ POLL94     NOW C4F7 0036, matching, target 20B9 matching.  FIXED
+                         by the same ceiling; it was never a separate defect.
+    0249A  B PURGSAVF    fixed in 189.
+    01E02  BNC STMMAIN1  STILL DIFFERS, and is a different shape.
+
+    So 174's "three too-short branches" were two instances of one defect and
+    one unrelated card.
+
+THE REMAINING CARD.  Ours `DE56`, a short backward BCB of magnitude 21; theirs
+`CEF7 0816`, the long form with a magnitude of 22.  BOTH ARE SELF-CONSISTENT
+-- 21 back from a two-byte instruction and 22 back from a four-byte one reach
+the same place, 1DEE, and both listings agree the target IS 1DEE.  This is the
+two-fixed-points shape of 187 again, but the ceiling is not the discriminator:
+the magnitude is 21, nowhere near any of them.
+
+    THE OPCODES DIFFER, DE AGAINST CE.  We reach the short form by emitting a
+    different mnemonic, `BCB`, with the condition in `r1`; the original keeps
+    `BNC` in its long form.
+
+I DID NOT CHANGE ANYTHING FOR IT, and the reason is the evidence:
+BNC OCCURS EXACTLY ONCE IN THE WHOLE OF BILDNEW5.  One card cannot
+distinguish "BNC has no short form" from "this particular BNC happened to come
+out long", and 183 is the record of what thin evidence does here.
+
+    A PATTERN I ALMOST BUILT ON, AND IT WAS AN ARTIFACT.  A first tally said
+    the original NEVER shortens BZ (191 long, 0 short) or BNZ, while B and BE
+    do -- which would have been a real rule about which aliases may shorten.
+    IT WAS MY OBJECT-FIELD EXTRACTION running into the resolved-operand
+    columns, so every card looked long.  Cut the object field at the first run
+    of two or more spaces; done properly the original is BZ 182 short / 13
+    long, BNZ 123 / 10, B 164 / 84, BE 174 / 26 -- every alias shortens freely
+    and there is no such rule.
+
+WHERE TO GO NEXT, in the order I would take it:
+
+  - RE-MEASURE THE SECOND-BYTE CLASSES on a fresh full listing.  189 moved 451
+    bytes and closed a slide, so the counts in 183 are stale, and cards that
+    were slide fallout may now be real comparisons.
+  - THE THREE CEILINGS STILL DISAGREE.  `optimizeScratch` tests `srsCeiling`,
+    the SRS arm `srsBranchCeiling`, and 189 has just made the branch-alias
+    path agree with the SRS arm.  The first two still differ by one for the
+    same instruction.  Reconcile them deliberately, from measurement, not by
+    moving a number until a card comes out right.
+  - 012A8 of 183 is still the one known base-selection defect: findB2D2
+    returns the right base and displacement and something downstream discards
+    them.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
