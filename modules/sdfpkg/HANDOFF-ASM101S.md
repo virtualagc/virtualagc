@@ -2083,6 +2083,47 @@ base 0, or base 3 with AM set.
 Note 34 of the 535 are NOT at agreeing addresses and are downstream of the
 four too-short cards; do not read those until those four are settled.
 
+`findB2D2` capped a candidate register's displacement at 4096:
+
+    d = d2 - e[0]
+    if d >= 0 and d < 4096:
+
+so any symbol further than that from every active USING found NO base and fell
+back to addressing relative to the section with B3.  Raised to 0x10000, which
+is the width the AM=0 form's second halfword actually has.
+
+    LA R4,STMWAIT    orig ECF0 1988 -> 1DF6      ours ECF3 1DF6
+    LA B1,COMSVC     orig E9F0 3254 -> 36C2      ours E9F3 36C2
+    L  R6,BUMPWRDN   orig 1EF0 17C2 -> 1C30      ours 1EF3 1C30
+
+THE TARGET IS IDENTICAL IN EVERY CASE and only the encoding differs, which is
+what made this hard to see as a fault at all.  What gives it away is that
+1DF6-1988, 36C2-3254 and 1C30-17C2 are all exactly 046E -- FAILDATA, the base
+FAILEXEC's `USING FAILDATA,B0` establishes.  The displacements the original
+uses are 6082, 12884 and 6082: past 4096, inside 16 bits.
+
+    AND IT IS NOT COSMETIC.  Nothing guarantees B3 holds the section origin at
+    run time.  Same argument as FIOCGR's -- the linker will not move anything
+    to make our assumption true.
+
+BILDNEW5 6443 byte-identical to 6540, wrong values 535 to 438.  Corpus and
+RUNASM unchanged, which matters more here than usual: `findB2D2` is on the
+path of every instruction that names a symbol.
+
+THE RIG HAD TO GROW, and the way it failed first is the useful part.  Run
+against 157's FAILEXEC cut-down, `LA B1,COMSVC` assembled to ZEROES -- COMSVC
+lives in COMDATA and STMWAIT in REALEXEC, both dropped, so the rig was being
+asked about symbols it did not have.  157 warns about exactly this and it
+still nearly went unnoticed, because zeroes look like an answer.
+
+    CHECK THAT THE TARGET IS DEFINED before believing the rig.  Keeping
+    everything through REALEXEC plus COMDATA reproduces this fault in 23
+    seconds.
+
+WHAT REMAINS is 438 wrong values, still led by LA 98, STH 54, BAL 48, ISPB 44.
+The same shape of question -- which base, which addressing mode -- but not the
+same answer, since these all had a base within 4096 and still came out wrong.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
