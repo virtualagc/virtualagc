@@ -1992,6 +1992,8 @@ THE FOUR TOO-SHORT ONES are untouched by any of this and remain what 148 and
 branches carrying F7 in the original, and one -- STH at 176300AC -- not a
 branch and predating all of today's work.
 
+WHY.  SETTLED, and it is the second possibility.  With both arms widened and a trap in the forward one, the rig prints "forward arm REACHED op=BVC d=3 inrange=True len=4" and then "adjust() CALLED" -- so the arm runs, the displacement is 3, and the entry IS shortened to two bytes.  The output is still CEF0 006B, so THE ENCODER DECLINES IT DOWNSTREAM.  optimizeScratch shortening is necessary and not sufficient, and BVC work belongs in the encoder SRS arm rather than in this pass.  Note that arm names BVC explicitly -- "operation not in (BC, BCF, BVC, BVCF)" -- and applies srsBranchCeiling 54 to it, so what to look at is what d comes out as THERE, not here.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
