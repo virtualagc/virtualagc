@@ -2469,6 +2469,45 @@ WHERE TO GO NEXT, in order.
      ENTIRE macro library as open code before every module, 278 members for
      OI340600, which is a large part of it.
 
+Doing what 164 said to do.  The convention first, established from the bytes
+rather than assumed: OURS is printed first in a mismatch and the card FOLLOWS
+its mismatches.  DCICYC line 1941 reads `C7F7 0BB5` and the three lines above
+it are `F7 vs F3`, `0B vs 01`, `B5 vs 63` -- our bytes, in order, against the
+original's.  So `grep -A`, and 163's counterexample was indeed a misread.
+
+DCICYC'S FIRST THREE NAME THE CULPRIT:
+
+    00516  ours C7F7 0BB5   orig C7F3 0163    BC$  07,#@LB76
+    00518  ours C7F7 0B7F   orig C7F3 019B    BC$  07,#@LB87
+    0051A  ours C7F7 0B4E   orig C7F3 01CE    BC$  07,#@LB95
+
+`BC$`.  THE `$` SUFFIX MEANS AM=0 WITH AN ABSOLUTE DISPLACEMENT -- it is the
+whole point of the suffix, and `forceAM0` is set from it -- so the backward
+AM=1 form contradicts the mnemonic.  The old operation list excluded it by
+ACCIDENT: `BC` is in the list and `BC$` is a different string.
+
+    Which is why the list looked load bearing in 163 and is not, quite.  What
+    is load bearing is `forceAM0`, and the list was standing in for it.
+
+FCMTRACE's last byte is a second, unrelated case: `ST@# R4,0(R2)` came out
+34F6 0800 against 34F6 1800, losing the indirect bit, because the arm calls
+`generateRS1(..., 0, 1, ...)` with ia and i HARDCODED and overwrites what the
+suffixes asked for.
+
+So the guard is `not forceAM0 and not ia and not i` -- a statement about the
+instruction, not a list of mnemonics -- and all ten modules return to 0 bytes
+mismatched.  BILDNEW5 6540 to 6574 byte-identical, 438 to 404 wrong values.
+
+    A CORRECTION TO 163 WHILE HERE.  It said no list of mnemonics could ever
+    be right because the same one goes both ways.  164 withdrew the evidence;
+    this entry supplies the real reason, which is different: a mnemonic list
+    CAN express this, but only by enumerating every suffixed spelling, which
+    is what `forceAM0` already does properly.
+
+WHAT REMAINS: 404, still led by LA 97, BAL 48, STH 47, ISPB 28.  Only 34 of
+the 438 were this arm, so the bulk of the F7-vs-F3 population has a different
+cause and has not been diagnosed at all.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
