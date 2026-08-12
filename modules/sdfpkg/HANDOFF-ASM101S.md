@@ -3849,6 +3849,56 @@ place the moment the section starts four halfwords later.
     only one in the PASS corpus that has two, which means the sweep will say
     almost nothing -- RUNASM is the harness that will catch a mistake here.
 
+ALIGNMENT DOES NOT EXPLAIN IT, checked both ways, and the code already
+contains the likely answer.
+
+WHAT THE ARITHMETIC SAYS.  Addresses in these listings are HALFWORDS -- the
+four-byte `B PURGSAVF` at 0249A is followed by 0249C -- so a doubleword is
+four halfwords:
+
+    03C1C  %2=0  %4=0      ours
+    03C20  %2=0  %4=0      theirs
+
+    BOTH ARE DOUBLEWORD-ALIGNED, so no fullword or doubleword rule separates
+    them.  Only a SIXTEEN-byte rule would (03C1C%8 = 4, 03C20%8 = 0), and
+    nothing else in this assembler aligns to sixteen.
+
+AND THE MEASURED RULE IS FULLWORD ANYWAY.  The comment at the section-placement
+loop records it from 132 inter-CSECT boundaries in the corpus: ordinary section
+after ordinary, 127 cases, FULLWORD.  03C1C already satisfies that.  So the
+original is NOT simply rounding harder than we are.
+
+WHAT IS PROBABLY THERE INSTEAD, and the same comment says it, quoting the
+linked memory map PFS/mafgen/DASS_G16.ASC:
+
+    000000-0001A5  FCMPSA    01A6   N O N H A L
+    0001A6-0001A7  --------  0002   C H E C K S U M
+    0001A8-0001A9  #ZFIOCGR  0002
+
+    A CHECKSUMMED SECTION IS FOLLOWED BY A CHECKSUM WORD, and the next section
+    starts after it.  That is a GAP WITH CONTENT, not a rounding, which is
+    exactly the shape of what we are missing -- we end GPCIPL and start LINES
+    immediately, and the original leaves four halfwords between them.
+
+    BILDNEW5 IS A CHECKSUMMED MODULE ON THE FACE OF IT.  Its own top-level
+    file declares `EXTRN SSLCKSUM`, `EXTRN SSLENGTH` and `EXTRN SSLSTART` --
+    checksum, length and start -- among the 33 cards 185 found there.  That is
+    strong circumstantial evidence and it is NOT yet proof.
+
+HOW TO SETTLE IT, and do this before writing any code:
+
+  - READ THE MEMORY MAP.  `PFS/mafgen/DASS_G16.ASC` is the linked output and
+    is the primary evidence the comment already relies on.  Find GPCIPL and
+    LINES in it and read what lies between them -- if it names a checksum, the
+    question is answered outright and the size comes with it.
+  - FOUR HALFWORDS IS EIGHT BYTES, and the FIOCGR case in the comment shows a
+    checksum of ONE fullword, two halfwords.  So either this is a checksum
+    plus alignment, or a different thing of a different size.  Do not assume
+    the FIOCGR size carries over.
+  - `zconOnlySection` AND THE 132-BOUNDARY RULE ARE MEASURED AND SHOULD NOT BE
+    DISTURBED.  Whatever this is, it is an ADDITION for checksummed sections,
+    not a correction to the alignment those 127 cases established.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
