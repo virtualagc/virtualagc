@@ -2891,6 +2891,41 @@ a distance of 22.  No ceiling reaches those, and `srsBranchCeiling` should be
 left at 54 for the reason 174 gives -- lowering it would break the one branch
 the original did shorten at 54.
 
+Two corrections and one defect, all measured.
+
+CURRENT STATE after 171, 173 and 175: BILDNEW5 is 6830 of 6982 cards
+byte-identical, 149 wrong values, 0 too long, 3 too short.  The second-byte
+pairs are now F7->F3 47, FB->F8 18, F3->F7 18, F3->F0 13, FF->FB 9, F3->F1 6.
+
+THE F3->F7 EIGHTEEN PRODUCE AN UNREACHABLE DISPLACEMENT.  `LA G4,MCHO` sits at
+008C6 in both builds:
+
+    original  ECF3 0040     AM=0, base 3, the section offset 0x40
+    ours      ECF7 0888     AM=1
+
+`icRS` is 0x8C8 and the target 0x40, so the distance is 2184 = 0x888 -- and
+the field is ELEVEN BITS with the sign at 0x800, so 2184 does not fit.  Packed
+anyway it sets the sign bit and leaves a magnitude of 0x88, 136, which
+addresses 0x840.
+
+    SO THIS IS NOT AN ALTERNATIVE ENCODING OF THE SAME ADDRESS.  It is an
+    instruction that reaches the wrong place, and the listing's own resolved
+    column says 0040 while the bytes say otherwise.  Of everything left in
+    BILDNEW5 this is the only class known to be actively wrong rather than
+    merely different, and it should be fixed before the larger piles.
+
+AND 169 BLAMED THE WRONG CHANGE.  It called these "168 over-applying".
+Tested: reverting 165's widening of the backward AM=1 arm leaves the card
+byte for byte unchanged, so neither 165 nor 168 introduced it and it predates
+today.  MCHO, PCHO and EX0O are `DC 4H'0'` at the head of PSA -- ordinary
+section symbols at very low offsets, not absolute EQUs as 169 guessed.
+
+WHAT TO LOOK AT.  Some arm is emitting AM=1 with a displacement of 2184 when
+both the forward guard (`d1 >= 0 and d1 < 2048`) and the backward one
+(`d1 > -2048 and d1 <= 0`) should refuse it.  Find which, with a trap on the
+operand MCHO in the TBASE rig -- it reproduces at the same address, 008C6, in
+23 seconds.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
