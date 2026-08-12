@@ -3385,6 +3385,50 @@ reached the listing to be extracted.  Those two are the only macros in this
 build that suppress their own output, all 35 cards are already back, and there
 is no second instance to look for.
 
+184 SAID "635 MISSING CARDS" AND LEFT THE OBVIOUS QUESTION UNANSWERED: how can
+the module build at all if 635 of its cards are gone?  It builds because
+NOTHING IS ACTUALLY GONE.  The count was an artifact of what the comparison
+looked at.  Full accounting:
+
+    listing, real statement cards with an SRN     18641
+    listing, `nn-MACRO` stamped expansion cards   13054
+    OUR SOURCES, stamped expansion cards          13054   ALL OF THEM
+
+    THE EXPANSIONS ARE PRESENT, CARD FOR CARD, 100%.  That is the whole
+    answer to how it builds: the object code comes from the expansions, and a
+    dropped invocation is redundant with the expansion printed under it, not
+    a hole where code used to be.  I had asserted this in 184 and in
+    `comment-vestigial.py` WITHOUT EVER CHECKING IT -- both counts had been
+    restricted to SRN-bearing cards, and an expansion carries a stamp instead
+    of an SRN, so the evidence for the claim was excluded from the very
+    measurement that was supposed to support it.
+
+OF THE 541 REAL STATEMENT CARDS THE MEMBERS LACK:
+
+    508   macro invocations, expansion present    deliberate, must stay out
+     33   EXTRN 17, ENTRY 13, CSECT, TABLGEN, END
+
+    AND THE 33 ARE NOT MISSING EITHER.  They are `GPCIPL CSECT`,
+    `EXTRN MENU`, `EXTRN MSGTABLE` and the rest, SRNs ending `AH`, and they
+    live in BILDNEW5.asm ITSELF.  The comparison pooled only the members named
+    by its COPY statements and never read the top-level file, so every card
+    belonging to it was reported absent.
+
+    `cards.py` HAS BOTH FLAWS and its 635 is not a count of anything real.
+    Fix it before quoting it again: pool BILDNEW5.asm's own cards along with
+    the members, and count stamped cards rather than discarding them.
+
+WHAT THIS DOES NOT EXPLAIN, and what is therefore still worth chasing: the
+413 cards where the SRN is present with DIFFERENT text.  Those are the only
+remaining candidates for real damage, and the slide of 183 has to come from
+somewhere.  A card whose text was mangled in extraction can assemble to the
+wrong length and would produce exactly the divergence 174 records.
+
+    THE THREE TOO-SHORT BRANCHES SHOULD BE CHECKED AGAINST THEIR LISTING TEXT
+    FIRST -- 02081 `BZ POLL94`, 0249A `B PURGSAVF`, and the `BNC STMMAIN1` at
+    distance 22.  If any of their cards differs from the listing, the bug is
+    in the source and not in the assembler at all.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
