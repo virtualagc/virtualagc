@@ -3823,7 +3823,7 @@ def generateObjectCode(source, macros):
                                                 # and assembled 0x0D5, reaching
                                                 # 0048D instead of 0008D.
                                                 data = generateRS1(properties, operation, 0, 1, r1, 0x7FF & -d1, 0, ib2)
-                                        elif (not forceAM0 or sectionOverflowAM0) and \
+                                        elif (not forceAM0 or (sectionOverflowAM0 and "$" not in operation)) and \
                                                 (x2 != None or ia or \
                                                  i or (not usingB2 and \
                                                        d1 >= 0 and d1 < 2048)):

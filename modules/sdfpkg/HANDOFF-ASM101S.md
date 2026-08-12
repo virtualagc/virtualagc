@@ -3236,6 +3236,53 @@ yields nothing.
     177 and not a base-register problem at all -- all ten have displacements
     UNDER 4096, which is what separates them from everything this fixed.
 
+FIXED, both harnesses agree, and it is a defect I INTRODUCED in 178.
+
+    BILDNEW5      10655 -> 10625 bytes mismatched   30 bytes, exactly the ten
+    corpus        267 MATCH / 4 MATCH? / 1 DIFFERS  unchanged
+    RUNASM        PASS 205/205                      unchanged
+
+RE-MEASURED FIRST, and 181 was worth more than its own count: the second-byte
+classes fell from 46 to 14.  F8->FB 12, F0->F3 10 and F9->FB 4 went to zero
+outright and F1->F3 7 to one.  What was left was F7->F3 ten, F3->F1 two,
+F1->F3 one, FC->FD one.
+
+THE TEN ARE ALL `$` FORMS -- four `B$`, five `ST$`, one `LA$`.  The suffix
+selects the LONG form with an absolute displacement, and `forceAM0` is set
+from it directly:
+
+    forceAM0 = ("$" in operation)
+
+    We emitted AM=1 with the PC-relative distance anyway.  At 0100D,
+    `B$ CPUIP112` assembled C7F7 000E -- 000E being 101D minus the updated
+    IC -- where the original has C7F3 101D, the absolute address the `$`
+    asked for.
+
+THE CAUSE IS THE ESCAPE 178 ADDED.  The AM=1 arm reads
+`not forceAM0 or sectionOverflowAM0`, and every one of these ten targets sits
+at 4096 or beyond, so the section fallback set BOTH flags and the escape then
+fired straight through the `$`.
+
+    `sectionOverflowAM0` MEANS "forceAM0 WAS SET BECAUSE AN OFFSET OVERFLOWED",
+    AND NOTHING ELSE.  It is a statement about arithmetic.  `$` is a statement
+    by the PROGRAMMER about which form to use, and no amount of arithmetic
+    overrules it.  Conflating the two is the same species of error as 177 and
+    178 -- a value read as though it meant something adjacent to what it means.
+
+The guard is now `not forceAM0 or (sectionOverflowAM0 and "$" not in
+operation)`.
+
+    THE BACKWARD ARM CARRIES THE SAME ESCAPE AND HAS NOT BEEN CHANGED.  178
+    gave it `sectionOverflowAM0 and ib2 == 3 and not usingB2 and not extrnD2`,
+    which can override a `$` reaching BACKWARD by exactly this route.  NO CARD
+    IN THE CORPUS DEMONSTRATES IT, so it is left alone -- but it is the same
+    latent defect and should be fixed the moment one turns up, or proved
+    unreachable.
+
+STILL OPEN, four cards: F3->F1 two, F1->F3 one, FC->FD one.  Those are base
+selection between registers 1 and 3, not the section-versus-USING question 181
+settled, and four cards is thin evidence -- read all four before theorising.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
