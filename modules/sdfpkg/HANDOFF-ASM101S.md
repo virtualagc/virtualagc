@@ -3076,6 +3076,67 @@ FC->FD 1.  Re-measure them before starting; this change moved some of them.
     the second-byte classes instead -- those are measured per card and are not
     subject to the slide.
 
+NOT FIXED.  The RULE is established and the reproduction is two seconds; the
+IMPLEMENTATION is blocked on one specific thing, named at the end.
+
+RE-MEASURED after 178, which removed two whole classes: BILDNEW5's second-byte
+mismatches fell from 102 to 46, `F3->F7` (47) and `FB->FF` (9) both to zero,
+and nothing else moved.  What is left decodes as a BASE REGISTER problem --
+the low two bits of that byte are the base:
+
+    F8->FB 12   F0->F3 10   F1->F3 7   F9->FB 4   FC->FD 1   base 0 or 1 -> 3
+    F3->F1  2                                                base 3 -> 1
+    F7->F3 10                                                AM=1 -> AM=0
+
+THE RULE, and it is exceptionless.  Of the cards that address through a base
+register with a displacement of 4096 or more:
+
+    same-section    133 correct,  8 wrong (wrong for other reasons)
+    CROSS-SECTION     0 correct, 41 WRONG
+
+    A `USING` ADDRESSES ITS OWN CONTROL SECTION AND NO OTHER.  BILDNEW5 has
+    `USING STM4,R0` in force -- STM4 at 0014DA in GPCIPL -- and we address
+    MSG257A at 00504D, which the ESD puts in LINES, as base 0 plus 3B73.  The
+    SUM IS RIGHT and the original refuses it anyway, writing the
+    section-relative form with the full offset.  Where a different section
+    sits relative to this one is the linker's business, not the assembler's.
+
+    THE TEST IS ON THE SECTION, NOT ON THE SIZE OF THE DISPLACEMENT.  Capping
+    it at 4096 was the first idea and it is wrong: 331 currently-correct cards
+    use a base with a displacement of 4096 or more, so that trade is 331
+    broken to fix 34.  81816ec56 widened `findB2D2` to 16 bits on its own
+    evidence and that widening stands.
+
+WHY THE OBVIOUS IMPLEMENTATION IS A NO-OP.  Skipping a `using` entry whose
+`e[1]` differs from `unhash(d2)[0]` changes NOTHING -- the corpus came back
+byte-identical, BILDNEW5 included.  The reason is worth knowing:
+
+    THE HASHCODE ON `d2` NAMES THE SECTION THE REFERENCE OCCURS IN, NOT THE
+    ONE THE SYMBOL IS DEFINED IN.  In the two-section test both operands
+    arrive as EFDE11C0_00000003 and EFDE11C0_00000838 -- the SAME hashcode,
+    both unhashing to 'ONE' -- although 0838 is in TWO.  The low half is the
+    ABSOLUTE address, not an offset within the named section.  So the
+    comparison is the current section against itself and can never fire.
+
+WHAT IS ACTUALLY NEEDED is the target's DEFINING section, looked up from the
+absolute address against the sections' extents.  `symtab[s]["value"]` holds a
+section's start; its length is `sects[s]["used"]`, and BEWARE THAT THE UNITS
+ARE NOT BYTES -- the existing test at the `b2 == None` fallback reads
+`sects[sect]["used"] // 2`, and I did not establish what the halving means.
+Settle that before writing the lookup; it is the whole remaining difficulty.
+
+    REPRODUCTION, two seconds, `modules/sdfpkg/TSECT.asm`.  Two CSECTs, a
+    `USING` on the first, one reference each way:
+
+        00000 BBF0 0838   STH R3,FARSYM     cross-section, WRONG, uses base 0
+        00002 BB0C        STH R3,NEARSYM    same-section, right
+
+    THE CUT-DOWN BILDNEW5 RIGS CANNOT SEE THIS AT ALL.  LINES is one of the
+    dropped members, so every MSG symbol assembles as 0000 0000 in TBASE --
+    and it did so BEFORE the change as well, which is the only reason that was
+    not mistaken for a fix.  Check a rig's zeroes against the previous run
+    before reading anything into them.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
