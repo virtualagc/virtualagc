@@ -1858,6 +1858,91 @@ contradicted.  Every number in 144 through 155 came from a run and can be
 relied on; every sentence explaining one should be re-derived before it is
 acted on.
 
+Build this first, before investigating anything in BILDNEW5.  Everything below
+in this section was found in minutes with it and would have taken hours
+without.
+
+BILDNEW5 IS NOTHING BUT `COPY` CARDS, so dropping all but the first few from a
+COPY of the source gives a module that reaches the code you care about and
+assembles in seconds:
+
+    KEEP={"MACSMITH","PSA","HISAM","FAILEXEC"}          # 10 seconds
+    KEEP={... ,"STM0","STPMEM","INTHNDLR","STM1"}       # 15 seconds
+    for line in open("BILDNEW5.asm"):
+        f=line[:71].split()
+        if f[:1]==["COPY"] and f[1] not in KEEP: continue
+        keep.append(line.rstrip("\n"))
+
+against ten to forty minutes for the whole module.  Assemble it with
+`--tolerable=255` and no `--compare`.
+
+THE CAVEAT, AND IT IS A REAL ONE.  The cut-down module has 2068 UNDEFINED
+SYMBOLS -- everything the dropped members would have defined.  The object code
+as a whole is meaningless and this is not a way to assemble members standalone.
+
+    What survives is exactly the question this section keeps asking: whether a
+    given instruction takes the short or the long form.  That decision depends
+    on the operand's distance from its base, and for the cards in question both
+    ends are defined WITHIN the members kept -- KFINDIRW and its `USING *,0`
+    are both in STM1, FAILBRTN and FAILDATA both in FAILEXEC.  Check that
+    before trusting it for a new card: if the operand or the base comes from a
+    dropped member, the rig will tell you nothing.
+
+VERIFY AGAINST THE REAL MODULE BEFORE COMMITTING, always.  The rig is for
+iterating; BILDNEW5 itself plus both harnesses is what decides.  Every fix in
+157 and 158 was found in the rig and confirmed the long way.
+
+Both found in the cut-down module of 157 and confirmed against the real one.
+
+ROUNDING, not refusing an odd distance.  `L R7,FAILBRTN` at FAILEXEC's SRN
+044000AB measures SEVEN halfwords from its base when `optimizeScratch` runs
+and SIX in the finished layout -- FAILBRTN follows a `DS 0F` whose padding
+depends on what precedes it, and that changes as instructions ahead of it
+shorten.  Seven is not a whole number of fullwords, so the unit test rejected
+an instruction the original assembles short, 1F0C.  The encoder itself rounds
+up -- `dSRS = (dSRSa + dUnitizer - 1) // dUnitizer` -- and this pass only
+decides REACHABILITY; `forbiddenSRS` still refuses a genuinely unaligned
+displacement later, with settled numbers.
+
+A LIVE LOCATION FOR `USING *`.  `*` is a place, not a symbol, so it cannot be
+re-evaluated; the snapshot beside it is stale by however far the layout has
+moved.  STM1's is captured at 3160 where the compile pass puts it near 2936,
+so `ST R7,KFINDIRW` measured a NEGATIVE displacement from its own base and was
+skipped -- eight instructions hung on that, KFCON1 through KFCON16.
+
+    A USING EMITS NOTHING, so the next scratch entry appended in its section
+    begins at exactly the USING's own address, and `adjust` keeps that entry's
+    `pos1` current.  Recording the index at capture gives the arm a live
+    location without putting USINGs into `scratch` -- which 156 wanted and
+    which would have been the larger change.
+
+    So 156's conclusion held: a `pos1` on the USING itself would have frozen.
+    The way round it was to borrow someone else's.
+
+BILDNEW5 across the three states:
+
+                            v4      +round   +live
+        byte-identical    5563      5655     5665
+        wrong value       1402      1312     1311
+        TOO LONG            12        10        2
+        too short            4         4        4
+        past end            36        28        4
+        missing            348       308      107
+
+SIX CARDS LEFT, five of them branches:
+
+    024800AB  BVC 6,STM1270    orig DE09      ours CEF0006A   too long
+    048500AD  BCB B'000',*     orig D806      ours D80001E6   too long
+    042100AB  BNC STMMAIN1     orig CEF70816  ours DE56       too short
+    053500AB  BZ  POLL94       orig C4F70036  ours DCD8       too short
+    181000AB  B   PURGSAVF     orig C7F70036  ours DFD8       too short
+    176300AC  STH R2,SECOND##  orig BAF10037  ours BADD       too short
+
+Branches are decided by the two PC-relative arms, not by the USING one.  An
+observation to check rather than act on: BVC and BCB are in
+`srsBranchOperations`, but both of those arms test `branchAliases or "BC"`,
+which excludes them.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
