@@ -2860,6 +2860,37 @@ four falls out; if the original shortens some non-branch at 55, it does not.
     distance alone would be trading four known-wrong cards for an unknown
     number of newly-wrong ones.
 
+174 asked for this and the answer is unambiguous.  Over 3029 SHORT non-branch
+RS instructions in the as-received listings:
+
+    ... 51:18   52:20   53:15   54:58   55:0   56 or more:0
+
+FIFTY-EIGHT CARDS AT 54 AND NOT ONE ABOVE IT, so `d < 55` is exactly the
+original's rule.  `srsCeiling` was 56, permissive by one, and that one admitted
+`STH R2,SECOND##` at a displacement of 55 -- one of 148's four too-short
+cards, which the original assembles long as BAF1 0037.
+
+    The extraction is the same as everywhere in this section: the SRS second
+    byte is (displacement << 2) | B2, and `TH UNPRTFLG` = A30C confirms it,
+    0x0C >> 2 being the 3 halfwords from FAILDATA.  Only mnemonics in
+    `argsSRSandRS` are counted, with every branch excluded, so an RR
+    instruction like `LR R3,R6` -- whose second byte is two register nibbles
+    and not a displacement at all -- cannot creep in.
+
+54 WAS TRIED BEFORE AND REVERTED, having broken DMOD and made DCICYC worse.
+That is consistent: 54 would refuse the 58 cards that legitimately sit there.
+55 is a different value, had never been tried, and DCICYC assembles 0 bytes
+mismatched with it.
+
+    BILDNEW5 11490 bytes mismatched to 10967, missing 30 to 24.
+    RUNASM PASS.  Corpus 267 MATCH, no module changing class.
+
+THE OTHER THREE REMAIN AND 174 STILL STANDS FOR THEM: two sit at 54, in the
+band where the original went both ways, and `BNC STMMAIN1` is a long branch at
+a distance of 22.  No ceiling reaches those, and `srsBranchCeiling` should be
+left at 54 for the reason 174 gives -- lowering it would break the one branch
+the original did shorten at 54.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
