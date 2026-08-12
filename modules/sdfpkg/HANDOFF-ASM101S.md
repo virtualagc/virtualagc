@@ -4086,6 +4086,49 @@ WHERE TO LOOK, and check these before changing the arithmetic:
     first whether the real `pos1` is still available at that point -- if it
     is, using it is better than making the copy agree.
 
+199 SAID THE RECOMPUTATION LOOP DISAGREES ABOUT WHERE PATCH2 STARTS.  It does,
+but not by the eight bytes I assumed, and not for the reason I assumed.
+Tracing the loop across the end of GPCIPL on the TLINES rig:
+
+    pos1=25464 (031BC hw) align=2 len=0   DS   $PON047
+    pos1=25464 (031BC hw) align=4 len=0   DS
+    pos1=25464 (031BC hw) align=2 len=100 DC   PATCH2
+
+    THE LOOP PUTS PATCH2 AT 031BC AND THE LISTING PUTS IT AT 031E0 -- 72
+    BYTES APART, not 8.  And the card it sees immediately before PATCH2 is
+    `$PON047`, where the listing shows `$PON056`.
+
+    SO IT IS NOT AN ALIGNMENT BUG AND NOT AN ARITHMETIC BUG.  THE LOOP IS
+    WALKING A DIFFERENT SEQUENCE OF CARDS.  Nine `$PON` invocations separate
+    047 from 056; whatever `source` holds when this loop runs, it is not what
+    the assembler finally emitted.  I had been comparing two computations over
+    an assumed-identical card list, and the card list is what differs.
+
+    THE EIGHT-BYTE FIGURE STILL STANDS as the NET effect -- `used` ends up
+    25628 against a true 25636 -- but it is the residue of a larger
+    disagreement that mostly cancels, not a single missing quantity.  Do not
+    go looking for eight bytes.
+
+WHAT TO ESTABLISH FIRST, and none of it needs the full build now that
+`TLINES.asm` reproduces this in 64 seconds:
+
+  - WHEN DOES THIS LOOP RUN, relative to macro expansion?  It sits under
+    `asis`, which 188 established is pass 2.  If the `$PON` expansions are
+    still being generated after that, the loop is measuring a section that is
+    not finished, and no amount of care inside the loop will fix it.
+  - WHY $PON047 AND NOT $PON056?  Nine invocations is a specific number.
+    Either nine expansions arrive later, or the loop is skipping cards it
+    should count.  The `$POF`/`$PON` cards are the restored ones of 184 and
+    they are generated, not read from source, which is exactly the class most
+    likely to be absent from an early `source`.
+  - THEN DECIDE WHETHER THE LOOP SHOULD EXIST.  199 already suspected the
+    honest fix is to stop recomputing a layout the assembler has performed
+    once.  This makes that stronger: a copy that walks a different card list
+    cannot be repaired by adjusting its arithmetic.
+
+    AND NOTE HOW MUCH IS RIDING ON IT -- 9225 of BILDNEW5's 10174 remaining
+    mismatched bytes, per 193.  This is the last large thing.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
