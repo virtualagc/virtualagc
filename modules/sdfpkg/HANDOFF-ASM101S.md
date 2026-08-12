@@ -1482,6 +1482,49 @@ Neither should be attempted without running BOTH harnesses -- this arm is load
 bearing for modules that are byte-exact today, and the accidental behaviour is
 what makes them so.
 
+Done, and it is committed.  The USING's own base EXPRESSION is now carried
+along in the snapshot and re-evaluated inside `optimizeScratch`, which works
+precisely because that runs at the END of the pass, when the forward reference
+has been placed.
+
+    using[r] = (h, section, address, properties, k)
+
+`properties` is the USING statement's, so `properties["ast"]["r"][0]` is the
+base expression; `k` is the register's place in the USING's list, because
+`address` advanced by 4096 for each one.  The arm evaluates that expression
+against the current symtab and takes `value - (base + 4096*k)`.
+
+ADDED AS A SECOND CHANCE, NOT A REPLACEMENT.  The old test stays exactly as it
+was and the two are joined by `or`.  Where a base is still wholly unresolved
+it captures 0, passes, and shortens correctly for the wrong reason -- and
+modules that are byte-exact today depend on that, so an `or` can only shorten
+more, never less.  Replacing the test outright was tried and it breaks a
+five-statement reproduction that is right today.
+
+BILDNEW5:
+
+                            before   after
+        byte-identical        4482    5403
+        wrong value           1782    1508
+        WRONG LENGTH           715      70
+        past end of listing   2642     224
+        missing                3223     678
+
+645 of the 715 length errors gone and 921 more cards byte-identical.  The
+module's SIZE is now nearly right, which is what the last two rows say: 2642
+bytes fell past the end of the listing before and 224 do now.
+
+VERIFIED BOTH WAYS.  The corpus is 267 MATCH, 4 MATCH?, 1 DIFFERS with no
+module changing class against the sweep before the change, and RUNASM is
+205/205 with --no-rtl-fixes over the identical module set.
+
+WHAT IS LEFT IS A DIFFERENT SHAPE.  The 66 still long are led by ST 26, L 19
+and C 5, where the 714 were led by STH 204 and LH 163 -- so this is not the
+same fault in a smaller quantity, and it wants its own measurement rather than
+another turn of the same handle.  1508 wrong values remain and most were
+always downstream of the lengths, so re-measure them before reading anything
+into the count.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
