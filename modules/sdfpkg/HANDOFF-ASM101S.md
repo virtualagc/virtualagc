@@ -4266,6 +4266,55 @@ WHAT TO DO, and it is a diagnosis step before it is a fix:
     WITHOUT A SINGLE ERROR MESSAGE.  Worth remembering when the next quantity
     in this assembler turns out to disagree with itself.
 
+REPLACED THE BARE `except: pass` WITH ONE THAT COUNTS AND REPORTS, ran the
+TLINES rig, and it named the defect on the first try.  Over SIXTEEN THOUSAND
+cards were being swallowed:
+
+    (blank)  KeyError:None    12185
+    SETC     KeyError:None     2606
+    SETA     KeyError:None      869
+    EQU      TypeError          793     unsupported operand -- `length` is None
+    PRINT    KeyError:None      477
+    AIF/ANOP/AGO               1317
+    DC       KeyError:None      320     <-- THESE OCCUPY SPACE
+    TUXT     KeyError:None      265     <-- SO DO THESE
+    ... USING, DROP, $POF, $PON, EXTRN, COPY, ENTRY
+
+    THE KEY THAT IS MISSING IS `None` ITSELF.  `properties["section"]` is
+    None on those cards, so `sects[None]` raises.  Most of the sixteen
+    thousand are conditional-assembly and listing directives that occupy no
+    space and were harmlessly dropped -- but 320 `DC` cards and 265 `TUXT`
+    cards DO occupy space, and every one of them was silently missing from
+    the section's length.
+
+    THAT IS THE 92% OF 202.  Not one lost object, and not an arithmetic
+    error: nearly six hundred space-occupying cards attributed to no section
+    and therefore never counted.
+
+WHAT REMAINS TO BE ESTABLISHED, and it is the real question now:
+WHY IS `properties["section"]` NONE ON A `DC`?  A constant has to live
+somewhere.  Find where `section` is assigned during assembly and what these
+320 have in common -- 184 and 201 make macro-generated cards the obvious first
+suspect, since `TUXT` sits right beside them in the tally and is itself a
+macro.  It may be that these cards are attributed correctly elsewhere and only
+this loop sees them bare, which would be another instance of the second
+computation seeing a different world from the first.
+
+    AND THE FIX IS STILL 202's.  Even with the sections repaired, this loop
+    recomputes a layout the assembler has already performed.  The right end
+    state is that it does not exist.
+
+`try: ... except: ...` IS A MENACE, and this is the demonstration.  A bare
+`except` wrapped around three lines of arithmetic hid sixteen thousand
+failures, six hundred of them material, produced a section length 92% wrong,
+and cost 193 through 202 -- ten handoff entries chasing eight bytes that were
+never a single quantity.  IT COST NOTHING TO FIND once the `except` was made
+to speak: one edit, one 64-second run, one tally.
+
+    THE RULE FOR THIS TREE: an `except` that cannot name what it is catching
+    and why that is safe should count and report instead.  There is no third
+    option that is honest.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
