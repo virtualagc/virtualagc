@@ -1822,6 +1822,42 @@ Note also that both bases are listed for each card -- 544 and 8812 for the
 FAILEXEC three, 3160 and 3356 for the STM1 nine -- so the arm is seeing two
 candidate registers and failing on both, not picking the wrong one.
 
+155 said that giving a USING statement a real `pos1` is "the one worth having,
+because `adjust` updates `entry2["properties"]["pos1"]` as it slides".  Checked
+in the source rather than assumed, and it is wrong.
+
+`scratch` is appended to in ONE place, inside the code-emitting path:
+
+    sects[sect]["scratch"].append(newScratch)
+    properties["scratch"] = newScratch
+
+A USING emits nothing and never reaches it, so it has no scratch entry, and
+`adjust` -- which walks `scratch` -- never touches its properties.  A `pos1`
+set at the USING handler would be a pass-1 snapshot that never moves again:
+exactly as stale as the `u[2]` it was meant to replace, and worth nothing.
+
+    SO BOTH OF 155's TWO WAYS ARE DEAD.  `properties["using"]` is stale, and a
+    `pos1` on a statement outside `scratch` would be stale the same way.
+
+WHAT WOULD ACTUALLY WORK is to put USING statements INTO the sliding -- a
+zero-length scratch entry per USING, so `adjust` moves them with everything
+else and their location stays true as instructions shrink around them.  That
+is a design change to the collect pass, not a line, and it wants deciding
+rather than trying: zero-length entries would appear in a structure whose
+other consumers all assume a length, and `optimizeScratch` itself iterates
+over it.
+
+    Which may be why the arm was written the way it was.  Reading `u[2]` and
+    hoping is what you do when there is no live location to read, and the real
+    defect may be that the shortening runs at the end of pass 1 at all rather
+    than after a pass in which everything has settled -- which is where 146
+    came out, three corrections ago.
+
+This is the sixth conclusion in this section that measurement or a source read
+contradicted.  Every number in 144 through 155 came from a run and can be
+relied on; every sentence explaining one should be re-derived before it is
+acted on.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
