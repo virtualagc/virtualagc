@@ -1120,6 +1120,63 @@ BREAKS FOUR RUNASM MODULES: DSNCS, DSQRT, SNCS and SQRT.  The broken test is
 load-bearing; it suppresses shortenings that would otherwise be wrong.  Reverted.
 Anything done here has to fix the DSECT mapping FIRST and the arm second.
 
+265 of 272 and NOTHING IS LEFT IN DIFFERS.  77d9fa883 and the commits before
+it.
+
+    MATCH       265      MATCH?       4
+    DIFFERS       0      NOCOMPARE    3
+
+The three NOCOMPAREs are not assembler defects -- FIOSVC and FPMIHPC2 have
+truncated sources, BILDNEW5 is oversized -- and the four MATCH? have no
+mismatched bytes, only bytes at addresses their listings do not cover.
+
+DCICYC WAS THREE DEFECTS, none of them the SRS/RS fixed point that earlier
+entries spent so long on.  That framing was WRONG and is corrected here: it
+said the two encodings were both valid and the question was which fixed point
+the iteration lands on.  One of them was not valid.
+
+  A FORWARD SHORT BRANCH CANNOT HOLD A NEGATIVE DISPLACEMENT.  Only BCB and
+  BCTB take one, and they negate it first.  The range check tested
+  `d >= srsCeiling` and never the low end, so a negative value passed and
+  `generateSRS` masked it into six bits: `BC 6,#@LB259` is 65 halfwords BACK
+  and assembled DEFC, a forward branch of 63.  A branch to the wrong address,
+  not an alternative encoding.
+    THE GUARD MUST NAME THE FORWARD BRANCH FORMS.  That arm covers everything
+    `optimizeScratch` shortened, not only branches, and written broadly it cost
+    DSNCS 3 bytes.
+
+  ELEVEN BITS, NOT TEN.  `generateRS1` packs bits 10-8 into data[2], and the
+  backward-branch call masked with 0x3FF, dropping bit 10 of any magnitude of
+  1024 or more.
+
+  A ROUNDING CARRY OUT OF AN IBM FLOAT'S FRACTION.  A value normalising to just
+  under twoTo56 rounds up to exactly twoTo56, and `f >> 32` then carries into
+  the EXPONENT.  `DC D'0.232830643653869628E-9'` is a decimal approximation of
+  2**-32 landing just below it, so normalisation takes one step too many; the
+  exponent comes out right BY ACCIDENT and the fraction comes out zero.
+
+FIOCGR'S FOUR BYTES OF INTER-SECTION PADDING remain unexplained, and three
+hypotheses have now been tested against the corpus rather than argued about:
+
+    blanket doubleword alignment   REFUTED.  127 of 132 inter-CSECT boundaries
+                                   land on a byte that is 4 mod 8 -- a
+                                   fullword, not a doubleword.
+    CSECT following a DSECT        REFUTED.  Implemented, it breaks 20 RUNASM
+                                   modules, which have exactly that shape at
+                                   non-zero addresses and are not aligned.
+    a reserved checksum fullword   UNREFUTED but unimplementable: the linked
+                                   map PFS/mafgen/DASS_G16.ASC shows a CHECKSUM
+                                   fullword ahead of #ZFIOCGR, but nothing in
+                                   FIOCGR's source could tell the ASSEMBLER one
+                                   was coming, and the gap is in the assembly
+                                   listing.
+    first ZCON aligned, rest packed  UNREFUTED, n=1.  What is implemented.
+
+The corpus has exactly four CSECTs following a DSECT and three sit at address
+zero, so only FIOCGR is informative -- which is why RUNASM, not the corpus,
+is what killed the DSECT rule.  RUN BOTH HARNESSES ON ANY SECTION-PLACEMENT
+CHANGE; the corpus alone would have accepted it.
+
 Item 6 of the list above -- "VERIFY, WHICH IS STILL THE REAL GAP" -- is open,
 2026-08-09.  modules/sdfpkg/verify-sweep.sh assembles every OI301700 module
 and compares it against its own contemporary listing.  Read that script's
