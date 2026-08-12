@@ -2926,6 +2926,50 @@ both the forward guard (`d1 >= 0 and d1 < 2048`) and the backward one
 operand MCHO in the TBASE rig -- it reproduces at the same address, 008C6, in
 23 seconds.
 
+Complete, and the fix is identified but NOT applied -- see the end.
+
+MEASURED in the TBASE rig for the card at 008C6: `icRS` is 2248, the operand
+MCHO is at 64, so `d1` is -2184.  The emitted second halfword is 0x0888 and
+that is exactly what the code makes of it:
+
+    if ib2 == 3:
+        if d1 < 0:
+            d1 = -d1
+            i = 1
+    ...
+    0x7FF & -d1
+
+`-d1` is 2184 = 0x888.  THE MASK LEAVES 0x088, 136, and the `i` flag
+contributes the 0x800, giving 0x0888.  So the instruction addresses 0x840
+where the source asked for 0x40, and the listing's resolved column still says
+0040 because the assembler believes its own arithmetic.
+
+    THE MASK IS HIDING AN OVERFLOW.  Eleven bits hold 0 to 2047 and the
+    magnitude is 2184.  Every other range test in this area refuses what will
+    not fit -- `d1 > -2048`, `d1 < 2048`, `d < srsCeiling` -- and this one
+    path masks instead, which turns "cannot be encoded" into "encoded wrongly
+    and silently".
+
+    Note the comment above it, from the fix that made the mask 0x7FF rather
+    than 0x3FF: it is right that eleven bits are available, and widening the
+    mask was correct.  What was never added is a check that the value FITS the
+    eleven bits.
+
+THE FIX is to refuse the short displacement when `-d1` exceeds 0x7FF and let
+the AM=0 arms take it, which is what the original does -- ECF3 0040, the
+section offset addressed absolutely.  A diagnostic would be wrong here: AM=0
+is a perfectly good encoding and the original uses it routinely.
+
+    I HAVE NOT APPLIED IT.  This arm is on the path of every RS instruction
+    that reaches backward, 163 is the record of what happens when it is
+    changed carelessly, and both harnesses take about ninety minutes.  The
+    change is one condition and the verification is the expensive part.
+
+WHERE TO PUT IT: the guard belongs with the `if ib2 == 3: if d1 < 0:`
+negation, since that is the only path that produces a magnitude without
+having range-checked it first.  Expect the 18 F3->F7 cards to become F3 and
+BILDNEW5's wrong-value count to drop from 149 by about that many.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
