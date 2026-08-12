@@ -3899,6 +3899,46 @@ HOW TO SETTLE IT, and do this before writing any code:
     DISTURBED.  Whatever this is, it is an ADDITION for checksummed sections,
     not a correction to the alignment those 127 cases established.
 
+195 WAS WRONG AND SO WAS THE PREMISE UNDER IT.  There is no checksum, no
+alignment rule, and no gap of any kind between the sections.  The original:
+
+    03BEE  PATCH2  DC   50X'C6C6'    ****  PATCH AREA  *****
+    03C20  LINES   CSECT
+
+    `X'C6C6'` IS ONE HALFWORD AND FIFTY OF THEM IS 0x32, so 03BEE + 0x32 is
+    exactly 03C20.  GPCIPL ends flush against LINES with nothing in between.
+
+OURS ALLOCATES 46 HALFWORDS FOR THE SAME CARD.  Same start, 03BEE; LINES
+follows at 03C1C, which is 0x2E further on.  92 bytes where the card asks for
+100.  THAT EIGHT-BYTE SHORTFALL IS THE ENTIRE REMAINING DEFECT -- it displaces
+`LINES` and every one of the 5073 DCHAR cards inside it, and 9225 of
+BILDNEW5's 10174 mismatched bytes are downstream of this one `DC`.
+
+    AND OUR OWN CROSS-REFERENCE CONTRADICTS OUR OWN ALLOCATION.  It reports
+    `PATCH2 50 003BEE` -- length fifty -- while the space actually taken is
+    forty-six.  Two derivations of one quantity disagreeing, which is the
+    shape of 177, 182, 192 and 194.  The one that says 50 already has it
+    right.
+
+    START AT THE DUPLICATION FACTOR ON A HEX CONSTANT.  Fifty items of two
+    bytes is a hundred; we produce ninety-two, which is forty-six items.  Four
+    items short, not a rounding and not an alignment.
+
+WHAT I GOT WRONG, AND WHY IT MATTERED.  I built 195 on a comment in the
+placement loop that cites 132 measured boundaries and quotes a checksum out of
+`PFS/mafgen/DASS_G16.ASC`.  THE QUOTE IS GENUINE -- lines 859-862 of that file
+say exactly what the comment says -- BUT THE FILE IS THE DASS BUILD'S MAP AND
+HAS NOTHING TO DO WITH THIS ONE.  `GPCIPL`, `LINES`, `ERRMSGS`, `SSLCKSUM` and
+`BILDNEW5` occur in it ZERO times; `FIOCGR` occurs 43.  No map under
+`PFS/mafgen` covers the GPC IPL build at all.
+
+    THE COMMENT IS ALSO NOT AUTHORITATIVE.  Ron says it was written this
+    morning to get FIOCGR working and was doubted at the time.  I read it as
+    established fact and reasoned outward from it for two entries.  A comment
+    in this tree is a record of what someone concluded, sometimes an hour ago
+    and under pressure; the LISTING is the evidence.  Reading the original's
+    own cards settled in one look what the map could never have answered.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
