@@ -4368,6 +4368,51 @@ NEXT, and the ordering matters:
     Deriving `used` from the real `pos1` removes ORG, macro templates and
     section attribution from the question at once.
 
+THERE IS NOTHING TO FIX IN THE ATTRIBUTION.  The 263 cards are GENLINES lines
+31 to 293 -- THE WHOLE `ERRMSGS` ADDRESS TABLE, one entry per message,
+MSG001 through MSG264:
+
+    line  31   DC  YL.3((MSG002-MSG001)/8),YL.13(MSG001-ERRMSGS)
+    line 293   DC  YL.3((MSG264-MSG263)/8),YL.13(MSG263-ERRMSGS)
+
+    THEY ASSEMBLE PERFECTLY WELL.  The listing places them from 03C1C with
+    the values 6108, 6120, 6138 and so on, and 192 established that the
+    content of this region matches the original card for card.  What they do
+    not have, AT THE MOMENT THIS LOOP RUNS, is a `section` or a `length` --
+    both are None -- because THEY HAVE NOT BEEN ASSEMBLED YET.
+
+    `properties["section"]` IS SET AT model101.py:1225, on the path where a
+    card actually produces bytes.  A card that has not reached that path has
+    no section for the same reason it has no length: there is nothing to
+    record yet.  The attribution is correct; the TIMING is wrong.
+
+    AND THESE ARE EXACTLY THE CARDS THAT WOULD BE LATE.  Every one of them is
+    a forward reference -- `MSG002-MSG001` and `MSG001-ERRMSGS` -- to symbols
+    defined thousands of cards further into the member.  A table of forward
+    references is the last thing an assembler can place, and this loop, which
+    188 established runs at the end of pass 1 under `asis`, is asking for its
+    size before the question can be answered.
+
+SO 202'S CONCLUSION IS NOT ONE OPTION AMONG SEVERAL, IT IS THE ONLY ONE.
+Every attempt to repair this loop in place -- handling ORG, attributing
+sections, fixing the arithmetic -- founders on the same thing: IT IS ASKING A
+QUESTION THAT DOES NOT HAVE AN ANSWER YET.  A section's length cannot be
+computed before its forward-referencing cards are placed, and no amount of
+care inside the loop changes that.
+
+    THE WORK IS TO MOVE THE COMPUTATION, NOT MEND IT.  `used` and the
+    per-section `offset` must be derived AFTER assembly, from the real `pos1`
+    the assembler has already written into `properties` -- which is what the
+    LISTING prints and what 202 measured as right on the cards the loop gets
+    wrong.  Doing that removes ORG handling, macro templates, section
+    attribution and the swallowed exceptions from the question in one stroke,
+    because none of them are questions any more.
+
+    RUNASM IS THE HARNESS.  BILDNEW5 is the only PASS module with two
+    sections, so the sweep barely exercises this; all 205 RUNASM modules run
+    through `used`.  181 is the precedent -- a clean sweep with four RUNASM
+    failures.
+
 2026-08-10.  Three things in the entry above are now wrong, and each was wrong
 in a way worth keeping.
 
