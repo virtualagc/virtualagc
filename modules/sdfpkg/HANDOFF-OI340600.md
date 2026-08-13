@@ -779,6 +779,45 @@ WHY.  A recovery that fixes one configuration and quietly breaks another is wors
 than none, and neither recovered file is configuration-specific: FCMBMTMC
 builds every FCMBMT module and FIOMDPVU is read by all of them.
 
+FIXED (virtualagc 75fd39842, ASM101S/expressions.py).  svSet already declared
+an undeclared SCALAR SET symbol on first assignment.  Its own comment gives the
+reason: the System/360 manual requires a declaration, but AP-101S assembly
+language is expected to have a convenience feature supplying one.  The
+SUBSCRIPTED form was never extended the same way and fell through to 'Symbolic
+variable undeclared'.
+
+FCMBMTMC needs it.  It assigns four payload high-rate comfault mask tables --
+APLHRM, APLHRNM, BPLHRM, BPLHRNM -- with no LCLC or GBLC anywhere; the entire
+file declares only HWORD0/1/3 and PASSOPS.  Only one OPS reaches that block, so
+FCMBMTS2 alone failed: 81 intolerable errors, 64 of them those four names at 16
+uses each, and 4 more DC operands unparsable because the substitution had not
+happened.  The remaining 11 diagnostics are Pass 1 Severity 0 undefined
+symbols, which are forward references and normal.
+
+ON PROVENANCE, because it decides whether this is a fix or a licence.  The rule
+being relaxed can only have come from System/360 documentation -- there is no
+AP-101S macro-language manual -- and this dialect is already known to extend
+System/360.  The evidence for the extension is the flight software: these decks
+were assembled successfully at the time, and this one has no declaration.  An
+implicitly declared array takes its dimension from the highest subscript
+assigned, so it grows.  ONE DECLARED WITH LCLC OR GBLC STILL ERRORS on an index
+past its stated dimension, and that must stay: there the out-of-range index is
+a real defect.
+
+NO REGRESSION, measured rather than argued.  Every configuration is unchanged
+after the fix: G16 1076/7, G2 936/3, G3 984/7, G8 984/7, G9 1334/12, SSW
+1172/9, P9 PASS.
+
+WHAT S2 NEEDS NEXT.  FCMBMTS2 now links, at 516 halfwords against 368 expected
+-- LONG BY 148, by far the largest surplus in the family, and 434 halfwords
+differ.  That is a fresh problem and almost certainly a source difference of
+the kind already seen twice here.  Start with the element-set enumeration that
+settled G9; do not start with an alignment.
+
+WHY.  This is the first defect of the phase that was genuinely ASM101S's rather than
+a source difference, and the reasoning that justifies it is the same reasoning
+already written into the code for the scalar case.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
