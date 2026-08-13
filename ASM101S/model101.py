@@ -2431,11 +2431,33 @@ def generateObjectCode(source, macros):
 
                                 if compile:
                                     pos1 = sects[sect]["pos1"]
+                                    # WHICH SECTOR REGISTER THE LINKER PATCHES
+                                    # IS THE RLD FLAG'S JOB, and every ZCON was
+                                    # being given the same one.  lnk101 reads it
+                                    # (ap101Utils/addrcon.py, ZCon.apply): 0x04
+                                    # and 0x10 write the address and patch BSR,
+                                    # 0x50 writes it and patches DSR, 0x20 and
+                                    # 0x40 patch one field alone.  With 0x04 for
+                                    # all of them a data ZCON had its sector put
+                                    # in BSR, bits 7-4, where the original build
+                                    # has it in DSR, bits 3-0: FCMZCONS reads
+                                    # 0030 against DASS_SSW's 0003, twenty-one
+                                    # times over.  objectWriter.py's own comment
+                                    # predicted this, noting that the format
+                                    # documents 0x20/0x40/0x50 and that 0x04
+                                    # merely happened to work.
+                                    #
+                                    # `Z(sym,,flags)` and `Z(sym+n,...)` name a
+                                    # symbol first and are code; `Z(,expr,flags)`
+                                    # names none and is data.
+                                    isCode = bool(suboperand.get('z')) \
+                                             or bool(suboperand.get('zx'))
                                     relocations.append({
                                         'symbol': symbolName,
                                         'section': sect,
                                         'address': pos1,
                                         'flags': flags,
+                                        'rldFlags': 0x04 if isCode else 0x50,
                                         'type': 'Z'
                                     })
 

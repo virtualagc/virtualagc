@@ -202,7 +202,11 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
         if r.get('symbol') not in esdIdMap or r.get('section') not in sectIdMap:
             continue
         # Determine RLD flags based on relocation type
-        if r.get('type') == 'Z':
+        if r.get('type') == 'Z' and 'rldFlags' in r:
+            # The caller has worked out whether this ZCON is code or data; see
+            # the note where it does.  0x04/0x10 patch BSR, 0x50 patches DSR.
+            rldFlags = r['rldFlags']
+        elif r.get('type') == 'Z':
             # ZCON uses flag byte 0x04 (2-byte address relocation, no negation)
             # Note: The AP-101S object format spec documents ZCON flags as
             # 0x20/0x40/0x50, not 0x04.  Flag 0x04 works with the current
