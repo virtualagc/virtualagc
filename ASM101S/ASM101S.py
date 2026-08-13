@@ -841,8 +841,30 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 properties["mnote"] = True
             continue
         
-        # Symbolic-variable replacement
-        if "&" in line:
+        # Symbolic-variable replacement.
+        #
+        # THE TEST IS ON THE JOINED FIELDS, NOT ON THE FIRST CARD.  `line` is
+        # only the card the statement starts on, and a continued statement can
+        # carry its only variable on a LATER card.  FCMBMTMC has three BMTENT
+        # invocations within a few lines of each other, all continued and all
+        # ending in `&AERRLBL`:
+        #
+        #     BMTENT TFIVR100,...,&NBRRTWD,,,,,        C   <- substituted
+        #     BMTENT TFIVAN14,PLCMDLST,129,DGC,...,9,  C   <- NOT substituted
+        #     BMTENT TFIVPF12,...,&LPF1ELM(2),         C   <- substituted
+        #
+        # The first and third have a variable on the first card, so the guard
+        # was true and the whole joined operand went through svReplace.  The
+        # second has none, so nothing was substituted and `&AERRLBL` reached
+        # BMTENT as the literal text of its &ERTBL parameter, which then
+        # assembled as an undefined symbol: `Cannot evaluate the expression
+        # '&AERRLBL-FIOERRTB'`, and FCMBMTG9 failed to assemble at all.
+        #
+        # svReplace already returns immediately when there is no `&`, so the
+        # guard was only ever an optimisation; computing it from the wrong text
+        # made it a filter.
+        if "&" in line or "&" in "%s%s%s" % (name, operation,
+                                             operand if operand else ""):
             properties["rawName"] = name
             properties["rawOperation"] = operation
             properties["rawOperand"] = operand
