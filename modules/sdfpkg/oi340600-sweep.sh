@@ -59,7 +59,11 @@ ls "$SRC"/*.asm | xargs -n 1 basename | sed 's/\.asm$//' | grep -Ev "$SKIP" \
   | xargs -P 6 -n 1 bash -c '
     m=$0
     cd "$SRC" || exit 1
-    se=$(mktemp)
+    # STDERR IS KEPT beside the listing, not discarded with a mktemp.  It is
+    # where tracebacks land, and now also where ASM101S reports a library
+    # member that exists but is not indexed -- a warning that is useless if
+    # the file it was written to is deleted before anyone reads it.
+    se="$OBJDIR/$m.err"
     timeout -k 5 "$SWEEP_TIMEOUT" \
     ASM101S --library="$MLIB" --tolerable=4 --object="$OBJDIR/$m.obj" \
             "$m.asm" > "$OBJDIR/$m.lst" 2> "$se"
@@ -99,7 +103,7 @@ ls "$SRC"/*.asm | xargs -n 1 basename | sed 's/\.asm$//' | grep -Ev "$SKIP" \
         fi
     fi
     printf "%s\t%s\t%s\t%s\n" "$m" "$rc" "$class" "$detail"
-    rm -f "$se"
+    # $se is $OBJDIR/$m.err now and is deliberately retained; see above.
 ' >> "$OUT"
 echo "DONE: $(wc -l < "$OUT") rows in $OUT; objects and listings in $OBJDIR"
 awk -F'\t' '{print $3}' "$OUT" | sort | uniq -c | sort -rn
