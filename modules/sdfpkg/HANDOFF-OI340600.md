@@ -1106,36 +1106,34 @@ ASM101S once read every macro definition ahead of the module.  It needed to
 know which members were which so it would never preload a COPY deck.
 makeMACROFILES.py produced that list.
 
-IT NO LONGER DOES THAT.  ASM101S.py has preReadLibraries = False, and
-readMacroLibrary returns before the preload loop.  Its own comment says so:
+THE PRELOAD IS GONE.  ASM101S.py has preReadLibraries = False and
+readMacroLibrary returns before the preload loop.  Its own comment says the
+index is now 'the list of members ELIGIBLE to be fetched when something invokes
+them'.
 
-    WHAT THE INDEX NOW DRIVES.  It used to be the list of members read ahead
-    of the module; it is now the list of members ELIGIBLE to be fetched when
-    something invokes them.
+BUT THE INDEX IS STILL LOad-BEARING, and an earlier draft of this entry said
+otherwise and was WRONG.  The gate at ASM101S.py line 1070 guards
+loadLibraryMacro, and that function does not merely scan a member for a MACRO
+definition -- it calls
 
-The only remaining use is the gate at ASM101S.py line 1070:
+    readSourceFile(path, svGlobalLocals, {}, copy=False, printable=False, ...)
 
-    if name not in libraryMembers.get(library, set()):
+reading the member AS OPEN CODE.  The comment on the gate states the
+consequence: 'a COPY fragment read as open code is what puts a DS outside any
+control section.'  So a wrong entry is damaging in BOTH directions, not one.
 
-which refuses to fetch a member as a macro unless the index lists it.
+THE DISTINCTION THAT MATTERS IS OPEN CODE, not the macro/COPY label.  RSB's
+point: a COPY member holding only macro definitions would be harmless to fetch,
+and would not fail.  The harm comes from a member with open code -- MACSMITH,
+a deck of EQUs and PDEF invocations, is exactly that.  So the index is a proxy
+for 'does this member contain open code', and it is that property a replacement
+would have to test.
 
-THE RISK HAS INVERTED, and this is the point.  As a preload filter, a wrong
-entry was harmless in one direction -- a COPY deck read early, wasteful but
-visible.  As a fetch gate, a wrong entry is fatal in the other: a genuine macro
-becomes UNREACHABLE AND SILENT.  That is precisely FPMSWTCC, where five modules
-failed because a member was classified ineligible, and the diagnosis looked
-like an undefined macro rather than an index error.
-
-WHAT THE GATE STILL BUYS is narrow: it prevents a member being fetched as a
-macro when a module invokes an operation whose name collides with a COPY deck's
-name.  Weigh that against the failure above.
-
-TWO SAFE SHAPES IF IT IS TO CHANGE: fetch any member whose name matches the
-invoked operation and let a COPY deck fail on its own contents; or keep the
-gate but make a miss emit a diagnostic naming the member and the index, so an
-index error announces itself instead of impersonating a missing macro.  EITHER
-IS A CORPUS-WIDE CHANGE and needs a kept-baseline sweep, the habit established
-with the unary fix.
+SO DO NOT SIMPLY DROP THE GATE.  The safe change is the diagnostic one: keep
+it, and make a miss emit a message naming the member and the index, so an index
+error announces itself instead of impersonating a missing macro -- which is
+what FPMSWTCC did, costing five modules before it was found.  A corpus-wide
+change either way, needing a kept-baseline sweep.
 
 WHY.  RSB asked whether it is still needed.  The answer is in the code and is worth
 recording, because the failure mode it now produces is the one that cost five
