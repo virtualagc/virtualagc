@@ -102,6 +102,13 @@ OPTIONs:        --config=XXX.     PASS configuration:  G16 (default), G2, G3, G8
                                   material, and debugging happened in the lab.
                                   See DEFAULT_SDL in halsParms.py; the evidence
                                   is not unanimous.
+                --library=D       (Default MLIB80.)  The macro library ASM101S
+                                  assembles against.  MLIB80 is the FCOS macro
+                                  library and is what SSSRC/*.asm needs; the
+                                  runtime library in RUNASM/ needs RUNMAC
+                                  instead.  (INCL80 and INCLIB belong to the
+                                  HAL/S compiler and are not assembler macro
+                                  libraries at all.)  Ignored for .hal files.
                 --out-dir=D       Write the per-file products (BASENAME.obj,
                                   BASENAME.fcm, BASENAME.json, and the .LIST and
                                   .repro.json files lnk101 and fcmcmp drop beside
@@ -122,6 +129,7 @@ OPTIONs:        --config=XXX.     PASS configuration:  G16 (default), G2, G3, G8
 filename = None
 parmList = None
 config = "G16"
+library = "MLIB80"
 dataDir = "../mafgen/"
 externalSymbolFile = None
 memoryFile = None
@@ -149,6 +157,8 @@ for parameter in sys.argv[1:]:
         externalSymbolFile = parameter.partition("=")[2]
     elif parameter.startswith("--memory="):
         memoryFile = parameter.partition("=")[2]
+    elif parameter.startswith("--library="):
+        library = parameter.partition("=")[2]
     elif parameter.startswith("--out-dir="):
         outDir = parameter.partition("=")[2]
     elif parameter.startswith("--sdfi="):
@@ -221,7 +231,15 @@ if fileType in ["hal", "dfg"]:
             die()
 
 elif fileType == "asm":
-    command = ["ASM101S", "--library=MLIB80", "--fill=C6C6", "--no-rtl-fixes", filename]
+    # --object is REQUIRED here, not optional.  ASM101S defaults its object file
+    # to basename+".obj" in the CURRENT directory (ASM101S.py:1150), while
+    # everything downstream is named from `prefix` -- so with --out-dir the
+    # assembler wrote ./BASENAME.obj and lnk101 was handed D/BASENAME.obj and
+    # failed with "Input file not found", making every .asm file look like a
+    # link failure.  Without --out-dir, prefix is the basename and this is what
+    # ASM101S was already doing.
+    command = ["ASM101S", f"--library={library}", "--fill=C6C6", "--no-rtl-fixes",
+               f"--object={objfile}", filename]
     print(" ".join(command))
     try:
         result = subprocess.run(command, capture_output = True, text = True, check = True)
