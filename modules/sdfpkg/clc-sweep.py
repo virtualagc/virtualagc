@@ -103,8 +103,15 @@ reDiff = re.compile(r"(\d+) halfwords? differ")
 # LITERAL PARENTHESES.  A `sections?` here matched the PASS line and missed
 # every FAIL line, so each failing module was classified NOCOMPARE, i.e. as a
 # harness problem rather than as the result it actually was.
+# A FOURTH VERDICT FORM: fcmcmp also reports `FAIL: 1 section(s) differ in size`
+# when what we emit is a different LENGTH from what the CSECT table says, having
+# compared only the overlap.  FIOLGERR is 136 halfwords where the table says 140.
+# Unmatched, that verdict read as NOCOMPARE -- a harness failure -- when it is a
+# result, and a distinct one worth its own class rather than being folded in with
+# a content difference.
 reTotal = re.compile(r"^(PASS|FAIL):\s+(?:all (\d+) section\(?s\)? match"
-                     r"|(\d+)/(\d+) section\(?s\)? differ)")
+                     r"|(\d+)/(\d+) section\(?s\)? differ"
+                     r"|(\d+) section\(?s\)? differ in size)")
 
 def classify(m, t, txt):
     '''Reduce one compileLinkCompare report to a row.  This is the ONLY
@@ -138,6 +145,8 @@ def classify(m, t, txt):
         return (m, t, "NOCOMPARE", ok, differ, hwDiff,
                 (first[0] if first else "no fcmcmp verdict"), txt)
     status = "PASS" if tot.group(1) == "PASS" else "FAIL"
+    if tot.group(5):
+        status = "SIZE"
     if forced: status += "-FORCED"
     return (m, t, status, ok, differ, hwDiff,
             (f"{badSize} section(s) sized differently from the CSECT table"

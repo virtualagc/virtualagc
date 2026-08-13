@@ -875,9 +875,33 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             else:
                 error(properties, "Already defined: " + name)
         elif operation == "EXTRN":
-            #print("I am here")
-            symbols = operand.split(",")
+            # STRIP EACH NAME.  The operand arrives padded out to column 71, so
+            # splitting it on commas registered `FC$BUSPC` followed by fifty
+            # blanks, and every later lookup of the bare name missed.  That is
+            # what made `D'` blind to an EXTRN: RETURN decides whether to
+            # restore the registers with
+            #     AIF (D'&SAVAREA).RESTORE   HAS SAVE AREA NAME BEEN EXTRN'ED
+            # and with the test false it generated a bare `BR 7` and no `LM`,
+            # leaving the section TWO HALFWORDS SHORT.  33 SSW modules were
+            # short by exactly that, 5 by 4 and 1 by 6, all of them multiples of
+            # the same missing fullword; FCMBUSPC ends `CCFB 95C6 / C7E7` in
+            # DASS_SSW and ended `C7E7` alone in ours.
+            #
+            # A SHORT SECTION IS WORSE THAN A WRONG HALFWORD, because everything
+            # after it is displaced: FCMDSCRM's later references to CZ2BDIA then
+            # read the dump two halfwords early and appeared to disagree with
+            # its own earlier ones about where CZ2BDIA is.
+            # THE OPERAND FIELD ENDS AT THE FIRST BLANK and what follows is a
+            # comment, which is why taking the whole field was not enough: the
+            # card reads
+            #     EXTRN FC$BUSPC            GENERATE EXTRN FOR SAVE AREA NAME
+            # and the symbol was registered with all of that attached.  Same
+            # family as the comment that used to defeat AGO and SETA.
+            symbols = [s.strip() for s in
+                       (operand.split()[0] if operand.split() else "").split(",")]
             for symbol in symbols:
+                if symbol == "":
+                    continue
                 if symbol not in definedNormalSymbols:
                     definedNormalSymbols[symbol] = { "label": True,
                                                    "fromWhere": fromWhere,
