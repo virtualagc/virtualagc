@@ -1017,6 +1017,48 @@ WHY.  The sweep answers 'where does the corpus stand' but NOT 'what did the fix
 clear', because no pre-fix sweep was kept.  The static bound below answers the
 second question without a second 22-minute run, and its limits are stated.
 
+L' IS IMPLEMENTED (virtualagc 6f659ccf8).  evalArithmeticExpression handled N'
+and K' for a symbolic variable and fell through to 'Not yet implemented' for
+L'.  POS and VECTOR build a symbol name into a SETC and then take its length:
+
+    &#       SETC  '&P#.X'
+    &L       SETA  L'&#-1025
+
+so the operand is the symbol &# names, not &# itself.  An undefined symbol
+returns length attribute 1, as Assembler H gives it; the names these macros
+build -- P1Y, P2X, P37X -- are defined NOWHERE in the module or library and the
+deck subtracts 1025, so it expects the default rather than a diagnostic.
+MENU12's 48 L' errors are gone.
+
+THE BLOCKER IS NOW A UNARY MINUS, 48 of them: 27 of -&#X and 21 of -&#Y, with
+48 'Could not parse the operand of DC' downstream.  The grammar is
+
+    arithmeticExpression = term { ( '+' | '-' ) term } ;
+    factor = /[NKLSI]'/ variable | constant | identifier | variable
+           | '(' arithmeticExpression ')' | '*' ;
+
+No leading unary sign exists.  'constant' permits one -- a note in the file
+records that being added for FIOMCNTL's '@TI +1' -- but 'variable' does not, and
+SETA operands are evaluated with their variables INTACT, so -&#X reaches the
+parser as a minus in front of a variable and has no production.
+
+WHY IT IS SHAPED THAT WAY, from RSB: there was no model for these operand
+expressions, so HAL/S was mimicked.  In HAL/S every integer literal is
+non-negative and a leading minus is therefore an arithmetic expression.  There
+is probably no reason an ASM101S literal could not be negative.  So the fix is
+open in two directions -- a genuine unary operator on the expression, or signed
+literals -- and it is a CHOICE, not a repair of something known.
+
+WHAT MAKES IT DELICATE.  The AST for 'a + b' is [left, [['+', right], ...]] and
+evalArithmeticExpression dispatches on len(expression) == 2.  Adding an optional
+leading sign to arithmeticExpression changes that arity, so the grammar and the
+evaluator must move together.  Do not edit the grammar alone and assume the
+evaluator copes; read the len==2 branch first.
+
+WHY.  The grammar's shape here was inherited from HAL/S rather than from any AP-101S
+document, which is the fact that makes the next change safe to reason about.
+RSB supplied it and it belongs beside the defect.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
