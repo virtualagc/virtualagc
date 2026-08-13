@@ -818,6 +818,46 @@ WHY.  This is the first defect of the phase that was genuinely ASM101S's rather 
 a source difference, and the reasoning that justifies it is the same reasoning
 already written into the code for the scalar case.
 
+WHERE S2 STANDS.  FCMBMTS2 assembles clean since virtualagc 75fd39842 and
+links at 516 halfwords against 368 expected, LONG BY 148.  My two recovered
+OI340700 files make no difference to it at all -- measured both ways, 516 and
+434 differing either way -- so nothing here is a regression from them.
+
+THE SURPLUS IS ALL PAYLOAD.  Comparing label offsets rather than halfwords
+localises it exactly: FCMBPASS is 130 halfwords in the table and 255 in our
+build (26 rows against 51), and the gap between the listener table and
+FCMRESTR is 14 against 37.  The listener table is IDENTICAL, 11 rows in both,
+so the 25 extra BMT rows register no listeners.  By annunciator, the extras are
+17 of 5C, 4 of 5D, and one each of 5B, 5E and two of 5F -- 25 exactly.
+
+S2'S DUMP HOLDS THE SAME PAYLOAD SET AS G9'S, element for element:
+85 86 87 88 89 90 94 105 106 107 108 109, with 105/106 under annunciator 5E and
+107/108/109 under 5F.  Ours holds 105 plus 107-135 spread across 5B, 5C, 5D,
+5E and 5F.
+
+BOTH VEHICLE-UNIQUE FILES ARE READ FOR S2.  FIOMDPS2 assigns LPF 110-115 and
+FLX 116-135; FIOMDPVU assigns FLX 105-112 and LPF1ELM(2)=113.  Zeroing only
+FIOMDPS2's element slots left 388 (+20), because FIOMDPVU's arrays were still
+supplying rows.  Zeroing FIOMDPS2's slots entirely AND using the recovered
+FIOMDPVU gives 362 -- SIX SHORT of 368, from +148.
+
+THE LAST SIX HALFWORDS, and they are not noise.  One row is missing outright,
+element 106, which the dump has under 5E.  Three more elements are emitted
+under the WRONG annunciator: 105 comes out under 5B where the dump has 5E, 108
+under 5E where the dump has 5F, and 109 under 5C where the dump has 5F.  The
+ELEMENT SET is therefore right and the BLOCK that emits each is not, so the
+remaining question is which array slot feeds which block for OPS S2 -- not
+which elements the flight carried.  Note the LPF invocations hardcode their
+annunciator, so a row appearing under 5B or 5C did NOT come from the LPF block.
+
+DO NOT GUESS THE SLOTS.  Read the block for OPS S2 the way the G9 slots were
+read: each invocation ties a slot to a fixed element code, and the dump's rows
+point at those codes.  Nothing about S2 has been committed.
+
+WHY.  S2 stops at a point worth resuming from rather than a dead end, and the last
+six halfwords say something specific about which block emits an element.
+Written down while the measurements are fresh; nothing here is committed.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
