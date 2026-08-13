@@ -370,6 +370,66 @@ is how you learn the change did not reach further than intended.
 
 WHY.  Five defects in one day, four in ASM101S and one in the source, all found by LINKING rather than by any listing.  Recorded per defect because each carries a method lesson that generalises, and because the SSW numbers are meaningless without knowing which fixes were in the tree when they were taken.
 
+THE MODULES THAT LINKED CLEANLY AND STILL DIFFERED are now none.  There were
+30 of them on 2026-08-12; four causes account for all 30, and after them SSW
+stands at 63 modules PASSing, 113 forced links, and ZERO differing silently.
+
+    AN AM=0 DISPLACEMENT NAMING THIS SECTION WAS NOT RELOCATED.  An AM=0
+    displacement is the whole effective address, so where it names a location
+    in the module the linker has to fill it in; nothing was emitted and the
+    field kept the section-relative offset.  `b2 == 3` IS THE "NO BASE
+    REGISTER" SENTINEL HOWEVER IT GOT THERE -- from the fallback meaning "no
+    USING matched but the target is in this section", or written on the card as
+    `FCMWRAP(R3)` -- and only a USING-supplied base must be left alone.  A
+    DSECT target must not be relocated either: `LH R3,TPSATENT` is base 3 and
+    AM=0 too, but TPSATENT is a PSA location at absolute 8.  FCMTRACE is the
+    whole defect in two cards, its only two `$` forms.
+
+    A TAKEN BRANCH LEFT THE CONTINUATION SKIP ARMED.  `parseLine` returns how
+    many continuation cards a statement consumed and the top of the expansion
+    loop skips that many; a taken AIF or AGO sets the line to its target and
+    the count was still the BRANCHING statement's, so a CONTINUED branch
+    SILENTLY ATE ITS OWN TARGET CARD.  No diagnostic of any kind.  STKINS's
+    `.NOTSUBL` AIF is continued and branches to `.SGLOPR GETCC &P1(1)`, so
+    GETCC never ran and &CCVAL kept the PREVIOUS condition's value: a bare
+    `IF (LT)` after an `IF (...EQ...)` assembled with the EQ mask.  THIS HAD
+    THE WIDEST REACH of the four -- 25 modules outside the 30 improved as well.
+
+    DUPLICATE NAMES IN THE CSECT INDEX RESOLVED TO A PRIVATE LABEL.  Not our
+    defect and not lnk101's: augmented-CONFIG.json records the symbols MAFGEN
+    recovered inside each CSECT without marking which were ENTRY points, so
+    where a name occurs twice there is nothing to choose on.  FPMDISP declares
+    `EXTRN FPMAREGS`, FCMCBLKS declares `ENTRY FPMAREGS`, and FPMSDERR happens
+    to have a private one; lnk101 took the private one.  csect-disambig.py
+    rebuilds the index from the sources' own ENTRY declarations.
+
+    BCE AND MSC ADDRESS WORDS CARRIED NO RELOCATION, and the field is wider
+    than a halfword and narrower than a fullword -- 24 bits for the BCE
+    ADDRESS layout, 18 for the MSC long form -- while the format has only YCON
+    at 2 bytes and ACON at 4 (ap101Utils/addrcon.py).  AN ACON OVER THE WHOLE
+    WORD IS THE WAY THROUGH, because a relocation ADDS rather than replaces:
+    lnk101 computes `existing + target` and masks to the length, so the opcode
+    already sitting in the top byte survives and the address fills in beneath
+    it.  FA000000 + 8BC6, F0000000 + 1CB4C and F3080000 + 199CE are all
+    exactly what the dump has.  It needs the addend plus the target not to
+    carry out of the address field, which nothing here approaches.
+
+WHAT NONE OF THIS COULD HAVE BEEN FOUND BY.  All four are invisible to a
+listing: a listing shows the same bytes whether or not an RLD accompanies them,
+and shows nothing at all about the index a linker resolves against.  Both
+listing harnesses stayed green through every one of these commits, and were run
+each time not to test the fix but to show it moved nothing else.  THE
+COMPARISON AGAINST THE DUMP IS THE ONLY TEST THESE CHANGES HAVE, which is the
+argument for this phase's method in its strongest form.
+
+AND ONE CHANGE WAS REVERTED FOR MEASURING NOTHING.  Checking `rextrns` before
+`unhash` can bail out is plausibly more correct -- an external names no section
+of ours -- but the object's relocation count was 354 either way, so it fixed
+nothing real and was backed out rather than committed behind a message
+implying otherwise.
+
+WHY.  Every one of these is a RELOCATION defect or a CSECT-index defect, and not one could have been found from a listing.  Recorded per cause because each generalises well beyond the module that exposed it.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
@@ -382,12 +442,16 @@ WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
     WHERE THE COMPARISON STANDS, SSW, all 176 modules, with the exceptions file
     and the literal-recovered image in use:
 
-        PASS                                        52
+        PASS                                        62
         PASS via a forced link                       1
-        FAIL, links cleanly but halfwords differ    30
-        FAIL via a forced link                      93
+        FAIL, links cleanly but halfwords differ     0
+        FAIL via a forced link                     113
 
-    123 of 245 sections differ, 7199 halfwords in all.  Those totals are NOT
+    113 of 245 sections differ, 5359 halfwords in all.  NOTHING DIFFERS
+    SILENTLY ANY MORE: every remaining discrepancy is a link that FAILED,
+    naming the symbol it could not resolve.  That is the whole of the change
+    on 2026-08-13 and it is worth more than the count of passes, because a
+    forced link says what is wrong and a clean link that differs does not.  Those totals are NOT
     comparable with an earlier run's: fixing an assembly failure RAISES them,
     because the module joins the comparison and brings its differences with it.
     Only per-module deltas mean anything, which is why clc-sweep.py keeps every
@@ -397,10 +461,23 @@ WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
     keeping in view: the runtime library was finished in the previous phase and
     it still is, so a change that breaks one of those 27 is wrong.
 
-    THE 30 THAT LINK CLEANLY AND STILL DIFFER ARE THE INFORMATIVE GROUP, and
-    they are where to start.  The bookkeeping is already accounted for in them
-    -- post-build patches via --exceptions, MAFGEN's own literal annotations via
-    --memory -- so a difference there is ours.
+    THE 30 THAT LINKED CLEANLY AND DIFFERED ARE DONE.  Four causes, all of them
+    relocation or CSECT-index defects and none findable from a listing; see the
+    entry above.  11 of the 30 now PASS and the other 19 became forced links,
+    which is not a regression but the point: a missing relocation let a link
+    SUCCEED with the halfword left as assembled, and emitting the relocation
+    turns that silence into lnk101 naming the symbol it cannot resolve.
+
+    SO THE WORK IS NOW ONE PROBLEM AND NOT MANY.  113 forced links, and what
+    they are short of is addresses for symbols the CSECT index does not record
+    at FIELD granularity -- TFCMLI11, FIOSICCM and their kind, labels inside
+    COMPOOLs and inside assembly CSECTs whose containing CSECT the index knows
+    and whose own offset it does not.  dass-syms.py recovers COMPOOL CSECTs
+    from HALSTAT; this is one level finer.  The evidence for a recovery pass is
+    the dump's own value at each reference site -- FIOLDBPG's `#LBR TFCMLI11`
+    reads 30CE there, which is #PCDVS9C+0xE -- and every such site now carries
+    a relocation pointing at it, which is what makes the recovery mechanical
+    rather than a search.
 
     THE 95 FORCED LINKS ARE A DIFFERENT PROBLEM and mostly not an assembler
     one.  A forced link means lnk101 could not resolve a symbol, and the
@@ -443,6 +520,8 @@ WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 ALSO STILL OPEN, and unchanged: the 88 uncovered bytes in BILDNEW5, which is
 out of scope for this phase anyway, and the duplicated PRINT NOGEN/PRINT GEN
 trio in the restored sources.
+
+[why] The DO WHILE defect is the only remaining assembly failure and it cost hours to localise; the trace and the authoritative reference expansion are recorded so the next session resumes at the point reached rather than repeating the search.
 
 [why] The DO WHILE defect is the only remaining assembly failure and it cost hours to localise; the trace and the authoritative reference expansion are recorded so the next session resumes at the point reached rather than repeating the search.
 
