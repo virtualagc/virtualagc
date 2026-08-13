@@ -1093,7 +1093,11 @@ def dcSuboperandBytes(properties, suboperand):
     if thisType == "C":
         return max(1, len(text))
     if thisType == "X":
-        return max(1, (len(text.replace(",", "")) + 1) // 2)
+        # WHOLE HALFWORDS, as the generator lays them down -- the two used to
+        # disagree for a constant of fewer than four digits, which is the
+        # standing failure mode here.  The fuller note is at the generator.
+        digits = len(text.replace(",", ""))
+        return max(2, 2 * ((digits + 3) // 4))
     if thisType == "B":
         return max(1, (len(text) + 7) // 8)
     return None
@@ -2572,11 +2576,34 @@ def generateObjectCode(source, macros):
                             hexString = hexString.replace(",", "")
                             if lengthModifier == None:
                                 count = len(hexString)
-                                # An odd number of digits is padded to an even
-                                # one.  This was `count % 1`, which is zero
-                                # for every integer there is, so it never
-                                # padded anything.
-                                count += (count & 1)
+                                # A HEXADECIMAL CONSTANT OCCUPIES WHOLE
+                                # HALFWORDS, right-justified.  This was padded
+                                # to an even number of DIGITS -- one byte --
+                                # which is what a System/360 assembler does and
+                                # is not what this one does.
+                                #
+                                # Measured over both corpora, every DC card
+                                # carrying an X suboperand of one or two
+                                # digits: BILDNEW5's `DC X'8'` is 0008 and its
+                                # `DC Y(RETRNJOB),X'11'` is 1E7B 0011; the
+                                # others are X'0', X'1', X'2', X'3', X'5',
+                                # X'F' and MENU12's X'0', sixteen cards, every
+                                # one of them a halfword.  We wrote the value
+                                # in the FIRST byte of the halfword and left
+                                # the second as fill, so the addresses stayed
+                                # right -- the next DC realigns -- and the
+                                # bytes did not.
+                                #
+                                # NO CONSTANT OF FIVE TO SEVEN DIGITS EXISTS
+                                # in either corpus, so it cannot distinguish
+                                # rounding up to a halfword from a halfword
+                                # MINIMUM: 1 to 4 digits give a halfword under
+                                # both, and 8, 12 and 16 are already whole
+                                # halfwords.  This rounds, which is what the
+                                # machine's halfword addressing suggests, and
+                                # says so rather than implying the corpus
+                                # settled it.
+                                count += -count % 4
                             else:
                                 count = lengthModifier * 2
                             while len(hexString) < count:

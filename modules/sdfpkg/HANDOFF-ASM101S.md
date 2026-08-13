@@ -4628,6 +4628,70 @@ WHAT IS LEFT IS 15 BYTES ON 12 CARDS, and it is no longer one problem:
 
 WHY.  The rule was already written down in this file -- the two-bit form selector, BCF 00, BVCF 01, BCB 10, BCTB 11 -- in a comment at the BC path, and bvcfAliases already existed for the forward case.  Reading the encoding I already had would have been quicker than any measurement.
 
+NOT EIGHT WRONG VALUES, ONE WRONG LENGTH.  208's largest remaining group read
+as `08 vs 00` and seven more like it.  The as-received listing says what is
+really going on:
+
+    00460 0008        RSTRSSM1 DC    X'8'
+    00476 1E7B0011    FRTRNXEC DC    Y(RETRNJOB),X'11'
+    0163A 7FFE0003    EXTDAT12 DC    X'7FFE',X'3'
+
+    -- A HALFWORD EACH, RIGHT-JUSTIFIED.  We wrote ONE byte, the value in the
+    high half, and left the low half as fill.  The addresses stayed right
+    because the next `DC` realigns to a halfword anyway, so nothing slid; only
+    the bytes were wrong, which is why this survived every address-based
+    measurement from 191 onward.
+
+MEASURED, BOTH CORPORA, every DC card carrying an X suboperand of one or two
+digits -- sixteen cards, and every one of them a halfword:
+
+    X'0' x8, X'1', X'2' x2, X'3', X'5', X'8', X'11', X'F'
+
+    THE EIGHT `X'0'` CARDS ARE WHY THE COUNT WAS EIGHT AND NOT SIXTEEN.  A
+    one-byte 00 against a halfword 0000 agrees on the byte the listing shows
+    and leaves the other MISSING rather than mismatched, which is exactly the
+    "8 bytes missing" 208 reported and did not explain.
+
+WHAT THE CORPUS DOES NOT SETTLE.  There is no constant of five, six or seven
+digits in either corpus, so it cannot distinguish ROUNDING UP to a halfword
+from a halfword MINIMUM: one to four digits give a halfword under both, and
+eight, twelve and sixteen are already whole halfwords.  The implementation
+rounds, on the grounds that the machine addresses halfwords, and the comment
+says which of the two it is asserting.
+
+BOTH DERIVATIONS CHANGED TOGETHER.  `dcSuboperandBytes` computes the length
+attribute and the generator lays the bytes down; they disagreed below four
+digits.  That is 177's disease and 207's, and fixing one alone would have
+planted the next instance of it.  L' is unaffected either way -- it is in
+halfwords and one byte and two round to the same thing.
+
+MEASURED:
+
+    BILDNEW5        15 -> 7 bytes mismatched, and 8 missing -> 0
+    verify-sweep    267 MATCH, 4 MATCH?, 1 DIFFERS.  Unchanged.
+    RUNASM          PASS, all 205 byte-for-byte.  Unchanged.
+
+    UNCOVERED WENT 57 -> 90 AND IS FULLY ACCOUNTED FOR.  Trapped: 66 of the 90
+    are short X constants in a PRINT NOGEN macro table at 00044-00064 that the
+    listing prints without object code, and they were 33 before this change
+    because each was half as long.  The other 24 are unchanged.  57 = 24 + 33,
+    90 = 24 + 66.  All 90 lie in interior gaps, none is unbounded, and nothing
+    is missing.
+
+WHAT IS LEFT IS FOUR CARDS, 7 BYTES, three unrelated problems:
+
+    012A8 `LHI R5,DISABLFL`   191's last addressing-byte defect, F3->F1.
+                              findB2D2 returns base 1 displacement A6 and
+                              something downstream discards it.
+    03D28 `DC YL.6(12),BL.10'0000000010'`   3002 against E92F.  A bit-packed
+                              constant, and the only one left that is a
+                              DIFFERENT KIND of question.
+    05199, 0519A  `DC Y($POF053)` and `DC Y($PON053-$POF053)`  184's restored
+                              cards.  Two bytes, and they are about the
+                              RESTORATION, not the assembler.
+
+WHY.  The mismatch lines said 08 against 00 and looked like eight wrong VALUES.  The listing text said 0008 against 08 and it was one wrong LENGTH.  Reading the original card rather than the diff would have been the first move, not the third.
+
 THE MACRO-PROCESSING ROOT CAUSE IS FIXED, issue #1331, in commit 0f5ab2939 on
 2026-08-08.  The issue itself is worth reading anyway -- it is the user's own
 analysis plus two outside contributors, and it is where the semantics below are
