@@ -382,9 +382,16 @@ WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
     WHERE THE COMPARISON STANDS, SSW, all 176 modules, with the exceptions file
     and the literal-recovered image in use:
 
-        PASS                                        51
+        PASS                                        52
+        PASS via a forced link                       1
         FAIL, links cleanly but halfwords differ    30
-        FAIL via a forced link                      95
+        FAIL via a forced link                      93
+
+    123 of 245 sections differ, 7199 halfwords in all.  Those totals are NOT
+    comparable with an earlier run's: fixing an assembly failure RAISES them,
+    because the module joins the comparison and brings its differences with it.
+    Only per-module deltas mean anything, which is why clc-sweep.py keeps every
+    report and can reclassify them with --from-reports instead of re-measuring.
 
     ALL 27 RUNASM MODULES PASS, and every failure is in SSSRC.  That is worth
     keeping in view: the runtime library was finished in the previous phase and
@@ -436,6 +443,8 @@ WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 ALSO STILL OPEN, and unchanged: the 88 uncovered bytes in BILDNEW5, which is
 out of scope for this phase anyway, and the duplicated PRINT NOGEN/PRINT GEN
 trio in the restored sources.
+
+[why] The DO WHILE defect is the only remaining assembly failure and it cost hours to localise; the trace and the authoritative reference expansion are recorded so the next session resumes at the point reached rather than repeating the search.
 
 WHY.  The DO WHILE defect is the only remaining assembly failure and it cost hours to localise; the trace and the authoritative reference expansion are recorded so the next session resumes at the point reached rather than repeating the search.
 
