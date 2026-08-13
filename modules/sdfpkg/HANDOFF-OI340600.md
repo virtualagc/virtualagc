@@ -906,6 +906,44 @@ reading the OPS-S2 path, which is exactly what the entry above says not to do.
 The map below is the part that was worth having; the four measurements are
 recorded so nobody repeats them.
 
+PINNED, by resolving each dump row's FIOBY pointer to its element code, which
+names the invocation and therefore the slot:
+
+    LPF1ELM(2) = 105    code LAC     LPF2ELM(2) = 107    code LOC
+    LPF1ELM(3) = 106    code LBC     LPF2ELM(3) = 108    code LPC
+                                     LPF2ELM(4) = 109    code LQC
+
+Everything else in FIOMDPS2 -- every FLX slot, every DUL slot, LPF2ELM(5) --
+is 0.  That is the same arrangement the recovered FIOMDPVU carries, which is
+what one would expect of two vehicle-unique files describing the same flight.
+
+ONLY THE DUMP'S ROWS CAN BE RESOLVED THIS WAY.  In a forced single-object link
+our own FIOBY pointers are unresolved externals reading 0000, so they all
+resolve to FCMPSA+0 and tell you nothing.  Resolve the DUMP and match by
+invocation; do not try to resolve our side.
+
+RESULT: with those five values the payload rows reproduce the dump exactly and
+in order -- annunciator 5E gives 105 106 85 86 87 and 5F gives 94 107 108 109
+88 89 90, both identical to the dump -- against 516 halfwords and rows spread
+over 5B, 5C, 5D, 5E and 5F before.
+
+WHAT IS LEFT: 382 halfwords against 368, THREE extra rows, appended after the
+correct ones -- element 108 under annunciator 5E, 107 under 5F, and 109 under
+5C.  They cannot come from the slots above: LPF1ELM(4) and LPF2ELM(5) are 0, so
+both chains terminate, and every FLX and DUL slot is 0.  The 5E and 5F families
+have 13 invocations each while LPF1ELM(2..9) and LPF2ELM(2..9) account for only
+eight, SO OTHER INVOCATIONS SHARE THOSE ANNUNCIATORS and read some other array.
+Find those five invocations per family and see which array each reads; that is
+a question about FCMBMTMC, not about FIOMDPS2, and nothing further should be
+changed in FIOMDPS2 until it is answered.
+
+NOTHING ABOUT S2 IS COMMITTED; the working copy is verified back to
+contributed source.
+
+WHY.  The slots are read from element codes, the same evidence that settled G9, and
+the payload rows now reproduce the dump's exactly.  The three rows left over
+are a different question and should not be confused with the slots.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
