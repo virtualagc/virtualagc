@@ -430,6 +430,96 @@ implying otherwise.
 
 WHY.  Every one of these is a RELOCATION defect or a CSECT-index defect, and not one could have been found from a listing.  Recorded per cause because each generalises well beyond the module that exposed it.
 
+FCMBMT16's five differing chunks in G16 -- and the same signature in G2, G3
+and G8 -- come from ONE line of MLIB80/FCMBMTMC.asm:
+
+    &GPSFF1  SETA  0   DEFINE GPS FF1 NOT AVAILABLE FOR BYPASS/RESTORE  010912BI
+    &GPSFF3  SETA  0   DEFINE GPS FF3 NOT AVAILABLE FOR BYPASS/RESTORE  010913BI
+
+The contributed OI340600 source switches the GPS FF1/FF3 entries out of the
+bypass/restore tables; the dumps hold them.  Both flags are 1 in the build the
+dumps came from.  ASM101S is not at fault -- nothing is dropped, the macro
+expands correctly, and the OI301700 conclusion that FCMBMTMC assembles right
+still stands.
+
+HOW IT WAS FOUND, because the method generalises and the arithmetic does not.
+Offset arithmetic on the differing chunks gave three mutually inconsistent
+answers in a row: the BMT rows are a regular arithmetic sequence, so a shifted
+table matches itself at many alignments and every one of them looks like a
+find.  What settled it was aligning the two ENTRY SEQUENCES BY SYMBOL --
+resolve each row's first halfword through the CSECT table to its TFIV/TFOV
+buffer name, and compare the name sequences.  That is immune to the repetition.
+It showed our build displaced by 5 halfwords from TFIVMI51 onward and by 10
+from TFIVMI71 onward: precisely the entries following .BCEG1 and .BCEG3, the
+labels the two flags branch to.
+
+THE ROW ENCODING, verified against FCMBMTPG, which matches its dump exactly:
+
+    DC Y(&BUFFER)                        DC Y(TFIVMI13)
+    DC Y(&FLAG+DISP&LSTCNT)              DC Y(CMDRLST+DISP3)
+    DC Y(FIOBY&LMNT)                     DC Y(FIOBY04C)
+    DC Y(&DLAYCNT*256+&NUM)              DC Y(25*256+MF1TACAN)
+    DC XL.8'&ANNUN',YL.8(&ERTBL-FIOERRTB)
+
+DISP is 3*(listener index - 1), so a row names its own listener slot.  Rows are
+five halfwords EXCEPT the RTWD form (BMTENT ... ,RTWD,,...) which is shorter --
+assuming a uniform stride is what produced two of the three wrong answers.
+
+RESULT.  With both flags 1, all 49 locatable G16 entries fall at the dump's
+addresses (7 of 47 before), the size mismatch goes, and 7 halfwords still
+differ -- all of them 0000 against a pointer into the interior of FIOHFE16,
+which no single-object forced link can resolve.  That is the ceiling of this
+method, not a defect.
+
+THE RECONSTRUCTION lives in ~/workspace/PFS/OI340700/MLIB80/FCMBMTMC.asm (PFS
+6c773bd6): the OI340600 file with those two values changed, headers and history
+saying it is recovered rather than contributed, and the derivation inline above
+the changed lines.  Only non-empty directories are created.  CONFIRMATION IS
+NOT AVAILABLE YET and will not be soon: the linker currently forces every CSECT
+to the dump's address, so a full unforced link needs the whole of OI340700
+reconstructed first, and the object ordering for lnk101 is itself unsolved.
+
+WHY.  FCMBMT16 was called a source change on 2026-08-12 on the strength of a
+symbol FCMBMTMC never mentions.  That was right about the conclusion and wrong
+about the reasoning, and the wrong reasoning nearly sent the next session
+disassembling halfwords to invent source that already existed.
+
+Measured 2026-08-13, every FCMBMT module in its own configuration, both flag
+states, identical options (so these numbers are comparable to each other and
+NOT to the sweep's, which resolves more externals):
+
+  G16  FCMBMT16   1036 vs 1076 (-40)  ->  exact, 7 halfwords differ
+  G2   FCMBMT02    896 vs  936 (-40)  ->  exact, 3 halfwords differ
+  G3   FCMBMT38    944 vs  984 (-40)  ->  exact, 7 halfwords differ
+  G8   FCMBMT38    944 vs  984 (-40)  ->  exact, 7 halfwords differ
+  G9   FCMBMTG9   1344 vs 1334 (+10)  ->  1384 vs 1334 (+50), WORSE
+  P9   FCMBMT89   PASS                ->  PASS, no regression
+  S2   FCMBMTS2   ASMFAIL             ->  ASMFAIL, a separate defect
+  SSW  FCMBMTPG   9 halfwords differ  ->  9, untouched by the flag
+
+The flag adds 40 halfwords in every configuration.  Four are short by exactly
+40 and become exact.  EVERY halfword still differing in those four is our 0000
+against a real pointer -- externals a single-object forced link cannot resolve,
+which is this method's ceiling and not a content error.
+
+G9 IS THE ONE TO WORK NEXT.  It is 10 halfwords LONG before the change, so our
+source emits two BMT rows the dump lacks -- the opposite defect -- and the
+flags take it to +50.  Because the two SETAs are unconditional, an
+unconditional 1 would put GPS rows into G9's tables and G9's dump has none.  So
+1 is right for the four and cannot be the whole story: either the original
+gated these flags on &OPS, or G9's surplus masks the real arrangement.  Settle
+G9's +10 first; it is two rows, and the symbol-sequence alignment will name
+them.
+
+A MEASUREMENT TRAP worth knowing: when a section differs in SIZE, fcmcmp
+compares only the overlap and prints no halfword verdict, so a script counting
+'@' lines reports a number that means nothing.  Read the 'N halfwords differ'
+line, and read the '(+N)' size line beside it.
+
+WHY.  The entry above was written from G16 alone.  Measured across the family the
+next hour, four configurations confirm it and one contradicts it, and a
+reconstruction believed settled is worse than one known to be open.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
