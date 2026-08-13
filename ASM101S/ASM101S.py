@@ -448,6 +448,8 @@ source = []
 libraries = []
 # Which members of each library define macros, from its MACROFILES.txt.
 libraryMembers = {}
+# Members reported as present-but-unindexed, so each is named once.
+unindexedMembers = set()
 # Read every listed member ahead of the module, as this always used to.
 # Off: members are fetched by name when invoked.  See `loadLibraryMacro`.
 preReadLibraries = False
@@ -1061,7 +1063,7 @@ noLibraryMember = set()
 # The member is read with its OWN sequence-symbol namespace rather than the
 # shared one, for the first reason above.
 def loadLibraryMacro(name):
-    global macros, noLibraryMember
+    global macros, noLibraryMember, unindexedMembers
     if name in macros:
         return True
     if name in noLibraryMember or name == "" or name[:1] in [".", "&", "="]:
@@ -1072,6 +1074,27 @@ def loadLibraryMacro(name):
             # members define macros and which are COPY fragments, and a COPY
             # fragment read as open code is what puts a DS outside any control
             # section.
+            #
+            # SAY SO WHEN THE MEMBER IS ACTUALLY THERE.  Most misses here are
+            # ordinary -- the name is simply not a macro -- but a member that
+            # EXISTS in the library and is not indexed is a probable index
+            # error, and it is silent: the invocation goes on to fail as an
+            # undefined macro, naming the operation and never the cause.  That
+            # is what FPMSWTCC did, and five modules failed for it before
+            # anyone looked at MACROFILES.txt.  Reported once per member, to
+            # stderr, because it is a library-configuration problem and not a
+            # diagnostic against the line that tripped over it.
+            for candidate in [name, name + ".asm"]:
+                if os.path.isfile(os.path.join(library, candidate)):
+                    key = (library, candidate)
+                    if key not in unindexedMembers:
+                        unindexedMembers.add(key)
+                        print("Warning: %s exists in %s but is not listed in"
+                              " its MACROFILES.txt, so it cannot be fetched"
+                              " as a macro; re-run makeMACROFILES.py if that"
+                              " is wrong" % (candidate, library),
+                              file = sys.stderr)
+                    break
             continue
         for candidate in [name, name + ".asm"]:
             path = os.path.join(library, candidate)
