@@ -698,13 +698,17 @@ def evalArithmeticExpression(expression, \
             name = renderMacroArgument(var)
             entry = symtab.get(name)
             if entry == None:
-                # AN UNDEFINED SYMBOL HAS LENGTH ATTRIBUTE 1, which is what
-                # Assembler H gives it, and the callers depend on it: POS and
-                # VECTOR ask for L' of a name they build -- P1Y, P2X, P37X --
-                # that is defined NOWHERE in the module or the library, then
-                # subtract 1025.  Diagnosing the absence instead makes MENU12
-                # unassemblable; the deck plainly expects the default.
-                return 1
+                # DIAGNOSE IT.  Defaulting to 1 was tried and is WRONG here:
+                # POS documents that the coordinate IS the length attribute --
+                #     THE X-COORD IS THE LENGTH ATTRIBUTE OF &P.X
+                # -- and the caller subtracts 1025, so the symbols it names
+                # (P2X, P25Y, ...) must be real definitions carrying the column
+                # or line in their length.  They are absent from the source we
+                # hold, so a default silently turns every coordinate into
+                # 1-1025.  A module that cannot be assembled correctly must not
+                # be assembled quietly.
+                error(properties, "Symbol %s not found for L'" % name, severity)
+                return None
             if "lengthAttribute" not in entry:
                 error(properties, \
                       "Symbol %s has no length attribute" % name, severity)
