@@ -134,12 +134,32 @@ def writeEND(f, entryEsdId=None, entryAddr=None, ident="ASM101S", seqNum=1):
 
 def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
     esdItems, esdIdMap, nextEsdId = [], {}, 1
-    
+    # SECTIONS NEED THEIR OWN MAP, because `esdIdMap` is keyed by NAME and holds
+    # sections, labels and external references in one namespace -- so an
+    # `ENTRY X` inside `X CSECT` overwrote the SD's id with the LD's, and every
+    # consumer that means "the ESD id of a control section" silently got the id
+    # of a label instead: the TXT card, the RLD posId and the END entry point.
+    # An LD or ER id is never a legitimate answer to any of those three.
+    #
+    # FCMTBLPG is the whole failure in four cards.  Its one card is `BMTBLE PG`,
+    # which expands to `FCMTBLPG CSECT` / `ENTRY FCMTBLPG` / `EXTRN FCMBMTPG` /
+    # `DC Y(FCMBMTPG)`, so the collision is guaranteed; the RLD came out
+    # `R=3 P=2` naming the LD, lnk101 discarded it as not naming a section, and
+    # the halfword stayed 0000 where the dump has A7EE -- which is exactly where
+    # the CSECT table puts FCMBMTPG.
+    #
+    # NOTE THAT NO LISTING COMPARISON CAN CATCH THIS.  An assembly listing prints
+    # 0000 for an unresolved external too, so the entire OI301700 corpus can be
+    # byte-for-byte correct with every relocation in it thrown away.  Linking is
+    # the only thing that reads these records at all.
+    sectIdMap = {}
+
     # Section Definitions (SD) for CSECTs
     for sectName, sectData in sects.items():
         if sectData.get('dsect'):
             continue
         esdIdMap[sectName] = nextEsdId
+        sectIdMap[sectName] = nextEsdId
         esdItems.append({
             'esdId': nextEsdId,
             'name': sectName or '#MAIN',
@@ -155,7 +175,7 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
         if (sym := symtab.get(entryName)):
             # Find the SD (CSECT) that contains this entry
             sectName = sym.get('section', '')
-            ldid = esdIdMap.get(sectName, 1)  # Default to first SD
+            ldid = sectIdMap.get(sectName, 1)  # Default to first SD
             esdIdMap[entryName] = nextEsdId
             esdItems.append({
                 'esdId': nextEsdId,
@@ -179,7 +199,7 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
     # Build RLD entries
     rldEntries = []
     for r in metadata.get('relocations', []):
-        if r.get('symbol') not in esdIdMap or r.get('section') not in esdIdMap:
+        if r.get('symbol') not in esdIdMap or r.get('section') not in sectIdMap:
             continue
         # Determine RLD flags based on relocation type
         if r.get('type') == 'Z':
@@ -197,7 +217,7 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
             rldFlags = 0x1C
         rldEntries.append({
             'relId': esdIdMap[r['symbol']],
-            'posId': esdIdMap[r['section']],
+            'posId': sectIdMap[r['section']],
             'flags': rldFlags,
             'address': r.get('address', 0)
         })
@@ -213,14 +233,14 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
                 continue
             if (used := sectData.get('used', 0)) > 0:
                 memory = sectData.get('memory', bytearray())
-                seqNum = writeTXT(f, esdIdMap.get(sectName, 1), 0, bytes(memory[:used]), seqNum)
+                seqNum = writeTXT(f, sectIdMap.get(sectName, 1), 0, bytes(memory[:used]), seqNum)
         
         if rldEntries:
             seqNum = writeRLD(f, rldEntries, seqNum)
         
         entryEsdId, entryAddr = None, None
         if entries and (firstName := next(iter(entries))) and (sym := symtab.get(firstName)):
-            entryEsdId = esdIdMap.get(sym.get('section', ''), 1)
+            entryEsdId = sectIdMap.get(sym.get('section', ''), 1)
             entryAddr = sym.get('address', 0) * 2
         
         writeEND(f, entryEsdId, entryAddr, "ASM101S 0.00", seqNum)
