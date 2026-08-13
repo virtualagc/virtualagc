@@ -5045,6 +5045,38 @@ def generateObjectCode(source, macros):
                     "flags": (pool[i]["value"] >> 8) & 0xFF,
                     "type": "Z"
                     })
+            # AND SO DOES A Y LITERAL, for exactly the same reason.  Its value
+            # is resolved the way `DC Y(...)` resolves its operand, but no RLD
+            # accompanied it, so `=Y(FPMXQELE)` sat in the pool as 0000 where
+            # DASS_SSW has 8B86.  FPMREL and FPMRES differed in that one
+            # halfword and nothing else -- the last halfword of each section,
+            # which is where the pool lands.
+            #
+            # The symbol is found the same three ways the DC path finds it: the
+            # value keyed in `rextrns` for an EXTRN, that value with its
+            # displacement masked off for `=Y(SYM+2)`, or failing both the
+            # section the value falls in.  A DSECT is excluded, having no load
+            # address, and an absolute literal such as `=Y(128)` unhashes to no
+            # section at all and correctly gets nothing.
+            if pool[i].get("T") == "Y":
+                yvalue = pool[i]["value"]
+                ysymbol = None
+                if yvalue in rextrns:
+                    ysymbol = rextrns[yvalue]
+                elif (yvalue & hashcodeMask) in rextrns:
+                    ysymbol = rextrns[yvalue & hashcodeMask]
+                else:
+                    ySect, _ = unhash(yvalue)
+                    yd = sects.get(ySect)
+                    if yd != None and not yd.get("dsect") and "offset" in yd:
+                        ysymbol = ySect
+                if ysymbol != None:
+                    relocations.append({
+                        "symbol": ysymbol,
+                        "section": pool[0],
+                        "address": offset,
+                        "type": "Y"
+                        })
         sects[pool[0]]["used"] = desiredLength
     
     return metadata
