@@ -858,6 +858,51 @@ WHY.  S2 stops at a point worth resuming from rather than a dead end, and the la
 six halfwords say something specific about which block emits an element.
 Written down while the measurements are fresh; nothing here is committed.
 
+THE MAP, read out of FCMBMTMC rather than guessed.  Each annunciator belongs to
+one array family, and the invocation fixes both:
+
+    5E  <- LPF1ELM(k), k=2..9, giving TFIVPF12..PF19 with element codes
+           LAC LBC LCC LDC LEC LFC LGC LHC
+    5F  <- LPF2ELM(k), the same shape on the B side (LOC LPC LQC LRC ...)
+    5B  <- DUL1ELM and DUL3ELM, the dual-port blocks
+    5C  <- the FLX families, 154 invocations, including FLX5ELM
+    5D  <- the FLX return-word rows
+
+Because the annunciator is a literal in each invocation, A ROW'S ANNUNCIATOR
+NAMES THE ARRAY THAT PRODUCED IT.  That is the lever for S2 and it is why the
+element set alone is not enough here.
+
+BOTH VEHICLE-UNIQUE FILES ARE IN PLAY and they set the SAME globals, including
+the IIC gates: FIOMDPS2 has DUL1ELM(1)=105, DUL1CNT(1)=31, DUL1IIC=1337,
+LPFIIC=1436, FLX1IIC=2129, FLX3IIC=2739; FIOMDPVU has all three DULnIIC at 0,
+FLX1IIC=2096, LPFIIC=611.  Whichever member is read second wins, and I never
+established which that is.  THAT IS THE NEXT THING TO FIND OUT, and it is a
+question about how the library is read, not about flight data.
+
+FOUR MEASUREMENTS, target 368 halfwords:
+
+    contributed both files                              516   (+148)
+    FIOMDPS2 FLX+LPF zeroed, FIOMDPVU contributed       388    (+20)
+    FIOMDPS2 FLX+LPF zeroed, FIOMDPVU recovered         362     (-6)
+    FIOMDPS2 FLX+LPF+DUL zeroed, FIOMDPVU recovered     358    (-10)
+    both files carrying LPF 105-109                     382    (+14)
+
+The dump wants 105 and 106 under 5E and 107, 108, 109 under 5F.  In the -10
+build ours emits 108 under 5E and 109 under 5C and neither 105 nor 106 at all,
+so the LPF1 slots are being fed something other than 105/106 and a FLX family
+is still supplying 109 even with every FLX element slot in both files zeroed.
+THAT LAST POINT IS THE INTERESTING ONE: it means a third source of FLX element
+values exists, or one of these two files is not being read at all.  Settle that
+before touching either file again.
+
+NOTHING ABOUT S2 IS COMMITTED and the working copy is verified back to
+contributed source, all three members compared byte for byte.
+
+WHY.  I went on testing combinations of the two vehicle-unique files instead of
+reading the OPS-S2 path, which is exactly what the entry above says not to do.
+The map below is the part that was worth having; the four measurements are
+recorded so nobody repeats them.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
