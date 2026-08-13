@@ -590,6 +590,40 @@ WHY.  The surplus was assumed to be more of the same file.  It is a different fi
 entirely, and a class of difference -- per-flight configuration data -- that
 will recur across the corpus and should be recognised on sight.
 
+PINNED.  All eight &FLX1ELM/&FLX2ELM element slots were 0 in the build the
+dumps came from.  Recovered file: ~/workspace/PFS/OI340700/MLIB80/FIOMDPVU.asm
+(PFS db6f5bdb), eight lines changed, sequence numbers intact.
+
+THE TEST, and why this one rather than an alignment.  Every payload flex row
+ends in a halfword whose high byte is the annunciator: 5C on the six element
+rows, 5D on the two return-word rows.  Scanning both module images for high
+byte 5C or 5D needs NO shift map at all: ours holds exactly eight, the G9 dump
+holds NONE, anywhere.  Corroboration: zeroing the slots lifts non-relocated
+halfword agreement from 90 to 98 percent, and removes 82 halfwords (1384 ->
+1302).  G9 is the ONLY configuration that reaches this block -- G16, G2, G3,
+G8, P9 and SSW have no 5C/5D halfword in either image -- so nothing else can
+corroborate, and payload MDM assignments are per-flight data anyway.
+
+&FLX1CNT/&FLX2CNT are deliberately left at their contributed values.  With the
+element slots zero nothing reads them, so the dump cannot show what they held;
+changing them would be invention.
+
+WHAT REMAINS.  With the slots zeroed FCMBMTG9 is 1302 against 1334 expected --
+32 halfwords SHORT.  Segmenting the anchors gives four clean regions of 5, 15,
+3 and 9 halfwords, which is four BMT rows and four listener rows the dump holds
+and this source does not.  Cause unknown and NOT in FIOMDPVU.
+
+A WARNING FOR WHOEVER DECODES THEM.  I tried decoding those four rows by
+assuming where each began and got flag=0x5000 and listener #1254 -- readings
+that are not possible, because the row phase was guessed wrong.  A decode whose
+&FLAG is not 0x1000 or 0x0000 and whose listener index exceeds the table is
+mis-phased, not a discovery.  Establish the row boundary from a neighbouring
+row that our own listing names before reading any field.
+
+WHY.  Pinning them needed a test that does not depend on address alignment, because
+every alignment-based attempt on G9 so far has produced a confident wrong
+answer.  The test that worked is worth having written down.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
