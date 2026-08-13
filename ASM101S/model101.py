@@ -4430,6 +4430,12 @@ def generateObjectCode(source, macros):
                     toMemory(data)
                     continue
 
+                # As for the BCE instructions above: an MSC address is
+                # relocatable and was emitted without an RLD, so an EXTRN came
+                # out 0 and stayed 0.  FCMSFCAM is `@LF TCVTRESC` / `@BU
+                # FIOMNTR` and nothing else, and every address in it was zero.
+                mscRelocSymbol = {}
+
                 def mscLongField(subfield):
                     err, value = evalInstructionSubfield(properties, subfield, \
                                                          ast, symtab)
@@ -4438,6 +4444,15 @@ def generateObjectCode(source, macros):
                     section, offset = unhash(value)
                     if section is None:
                         return value
+                    if value in rextrns:
+                        mscRelocSymbol[subfield] = rextrns[value]
+                    elif (value & hashcodeMask) in rextrns:
+                        mscRelocSymbol[subfield] = \
+                            rextrns[value & hashcodeMask]
+                    elif section in sects \
+                            and not sects[section].get("dsect") \
+                            and "offset" in sects[section]:
+                        mscRelocSymbol[subfield] = section
                     return offset + sects.get(section, {}).get("offset", 0)
 
                 if field == "operand":
@@ -4486,6 +4501,17 @@ def generateObjectCode(source, macros):
                 data[1] = (word >> 16) & 0xFF
                 data[2] = (word >> 8) & 0xFF
                 data[3] = word & 0xFF
+                # An ACON over the whole word, for the reasons given at the BCE
+                # site above: the address field is 18 bits, the format has no
+                # relocation that narrow, and a relocation adds rather than
+                # replaces, so the opcode and the M bit in the top half survive.
+                if compile and "A1" in mscRelocSymbol:
+                    relocations.append({
+                        'symbol': mscRelocSymbol["A1"],
+                        'section': sect,
+                        'address': sects[sect]["pos1"],
+                        'type': 'A'
+                    })
                 toMemory(data)
                 continue
 
@@ -4599,21 +4625,29 @@ def generateObjectCode(source, macros):
                     data[1] = (field >> 16) & 0xFF
                     data[2] = (field >> 8) & 0xFF
                     data[3] = field & 0xFF
-                    # THE RLD PATCHES THE LOW HALFWORD, data[2..3], which is
-                    # where the original build puts a BCE address: DASS_SSW has
-                    # FA00 8BC6, high byte zero.  The field itself is wider
-                    # than that -- the POO calls it an 18-bit unsigned address
-                    # -- so a target at or above 0x10000 would need data[1]
-                    # patching too and this would be insufficient.  No BCE
-                    # address in the corpus is that high; if one ever is, the
-                    # comparison against the dump is what will say so, which is
-                    # why this is written down rather than guarded.
+                    # AN ACON OVER THE WHOLE WORD, not a YCON over the low
+                    # halfword.  The address field is 24 bits here and the
+                    # format has no 3-byte relocation -- ap101Utils/addrcon.py
+                    # gives YCON 2 bytes and ACON 4, nothing between -- so a
+                    # YCON at +2 cannot carry a target at or above 0x10000.
+                    # FCMSFCAM proves that matters: DASS_SSW has F001 CB4C for
+                    # its `@BU FIOMNTR`, address 0x1CB4C, whose high byte lands
+                    # in data[1].
+                    #
+                    # An ACON at +0 works because a relocation ADDS: lnk101
+                    # computes `existing + target` and masks to the length
+                    # (AddrCon.apply), so with the opcode in the top byte of
+                    # the emitted word the sum keeps the opcode and fills in the
+                    # low 24 bits.  FA000000 + 8BC6 is FA008BC6, which is what
+                    # the dump has.  It relies on the addend plus the target not
+                    # carrying out of the address field into the opcode, which
+                    # no address in this corpus comes close to doing.
                     if compile and "A1" in bceRelocSymbol:
                         relocations.append({
                             'symbol': bceRelocSymbol["A1"],
                             'section': sect,
-                            'address': sects[sect]["pos1"] + 2,
-                            'type': 'Y'
+                            'address': sects[sect]["pos1"],
+                            'type': 'A'
                         })
                 elif layout == "IUACOMMAND":
                     # A 5-BIT IUA over a 19-BIT COMMAND, not a byte over a
