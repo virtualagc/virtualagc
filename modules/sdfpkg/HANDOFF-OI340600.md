@@ -716,6 +716,32 @@ WHY.  This closes the module, and the 71-column trap it exposed will bite anyone
 adding a comment to any of these files.  Both belong where the next session
 reads them, not in a commit message.
 
+A NON-BLANK in column 72 of a comment line continues it, and the continuation
+swallows the statement that follows.  A SPACE in column 72 does not: the
+standard Virtual AGC anonymization boilerplate reaches 72 columns via two
+trailing spaces and sits in 277 files of MLIB80 doing no harm.
+
+DEMONSTRATED, not inferred.  Taking the recovered FIOMDPVU and changing NOTHING
+but the width of its two rule-off lines, from 71 columns to 75 so a dash lands
+in column 72, takes FCMBMTG9 from 1334 halfwords to 1318.  Restoring the width
+restores 1334.  No diagnostic is issued in either case.
+
+THE CASE IT DOES NOT EXPLAIN.  FCMBMTMC carried 75-column rule-offs immediately
+before its &GPSFF1 SETA statement for a whole session, and FCMBMT16 still built
+exact at 1076 halfwords with 7 differing.  Same shape, no loss.  A plausible
+difference is that FIOMDPVU is open code while FCMBMTMC's note sits inside a
+macro definition, so comment continuation may be handled differently in the two
+contexts -- BUT THAT IS UNTESTED and is written here as a lead, not a fact.  If
+it matters to something you are doing, test it; do not rely on it.
+
+PRACTICAL RULE: keep every added comment inside column 71 in all of these
+files.  It costs nothing, and the failure it avoids is silent -- the module
+assembles clean, reports nothing, and comes out short.
+
+WHY.  The rule was first written down from a guess that happened to be right, and
+half of the guess was wrong.  Both halves are recorded here so nobody has to
+rediscover which is which.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
