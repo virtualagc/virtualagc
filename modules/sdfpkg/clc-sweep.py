@@ -41,7 +41,7 @@ def usage():
 
 work = None; config = "SSW"; out = None; jobs = 6; tree = "both"
 only = None; scopeReport = False; reports = None; fromReports = None
-exceptions = None; memory = None
+exceptions = None; memory = None; extSyms = None
 for p in sys.argv[1:]:
     if p.startswith("--work="): work = p.partition("=")[2]
     elif p.startswith("--config="): config = p.partition("=")[2]
@@ -53,6 +53,7 @@ for p in sys.argv[1:]:
     elif p.startswith("--from-reports="): fromReports = p.partition("=")[2]
     elif p.startswith("--exceptions="): exceptions = p.partition("=")[2]
     elif p.startswith("--memory="): memory = p.partition("=")[2]
+    elif p.startswith("--ext-syms="): extSyms = p.partition("=")[2]
     elif p == "--scope-report": scopeReport = True
     else: usage()
 if work is None: usage()
@@ -156,6 +157,9 @@ def runOne(item):
     # synthesised from the address.  Both come from dass-literals.py.
     if exceptions: cmd.append(f"--exceptions={exceptions}")
     if memory: cmd.append(f"--memory={memory}")
+    # A CSECT index whose duplicate names have been resolved to their ENTRY;
+    # see csect-disambig.py.  Both lnk101 and fcmcmp are handed this file.
+    if extSyms: cmd.append(f"--ext-syms={extSyms}")
     # A TIMEOUT, because one module that never returns otherwise stops the whole
     # run and it reports success with a row missing.  PIPED OUTPUT IS LOST WHEN A
     # COMMAND IS KILLED, which is why the report is written out per module.
