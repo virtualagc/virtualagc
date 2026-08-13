@@ -3446,6 +3446,10 @@ def generateObjectCode(source, macros):
                                     # Both can leave b2 == 3, and the two want opposite
                                     # displacements.
                                     usingB2 = False
+                                    # AND IF IT CAME FROM THE FALLBACK, the
+                                    # displacement is an ADDRESS and needs an
+                                    # RLD.  See the AM=0 arm far below.
+                                    sameSectionB2 = False
                                     if not done and b2 == None:
                                         # Recall that `findB2D2` returns
                                         #    None,constantValue        or
@@ -3459,6 +3463,7 @@ def generateObjectCode(source, macros):
                                                         and newd2 < sects[sect]["used"] // 2:
                                                     b2 = 3
                                                     d2 = newd2
+                                                    sameSectionB2 = True
                                                 else:
                                                     section,offset = unhash(d2)
                                                     if section != None:
@@ -3937,6 +3942,82 @@ def generateObjectCode(source, macros):
                                                 pass
                                             if b2 != None:
                                                 d0 = d2 & 0xFFFF
+                                                # AN AM=0 DISPLACEMENT IS THE
+                                                # WHOLE EFFECTIVE ADDRESS, so
+                                                # where it names a location in
+                                                # this section it has to be
+                                                # RELOCATED -- the section's load
+                                                # address is not known until the
+                                                # link.  `b2 == 3` reaches here
+                                                # two ways and only one of them
+                                                # wants this: from a `USING`,
+                                                # where the displacement is an
+                                                # offset from a base register and
+                                                # must be left alone, or from the
+                                                # fallback above, which means no
+                                                # USING matched and the target is
+                                                # in this section.  That is what
+                                                # `sameSectionB2` distinguishes.
+                                                #
+                                                # FCMTRACE is the whole defect in
+                                                # two cards.  `BL$ FCMWRAP(R3)`
+                                                # and `B$ FCMNOWAP` are its only
+                                                # two `$` forms -- `$` forces
+                                                # AM=0 and an absolute
+                                                # displacement -- and they were
+                                                # its only two differing
+                                                # halfwords: we wrote the
+                                                # section-relative 001C and 000A
+                                                # where DASS_SSW has 98BC and
+                                                # 98AA, which are exactly
+                                                # 198A0 + 1C and 198A0 + 0A.
+                                                # The value we emit is already
+                                                # the addend a relocation wants;
+                                                # only the RLD was missing.
+                                                # B2 == 3 IS THE "NO BASE
+                                                # REGISTER" SENTINEL however it
+                                                # got there -- from the fallback
+                                                # above, or written out as
+                                                # `FCMWRAP(R3)` on the card, which
+                                                # is why both forms need this and
+                                                # the first version of this fix
+                                                # repaired only one of FCMTRACE's
+                                                # two halfwords.  The original
+                                                # agrees with us on the whole
+                                                # first halfword of both, C2F3
+                                                # and C7F3; only the displacement
+                                                # differed.
+                                                #
+                                                # A DSECT TARGET MUST NOT BE
+                                                # RELOCATED.  `LH R3,TPSATENT` is
+                                                # base 3 and AM=0 too, but
+                                                # TPSATENT is a PSA location at
+                                                # absolute 8 -- an address the
+                                                # build knows and the linker must
+                                                # leave alone.  `unhash` names the
+                                                # DSECT, and a DSECT has no load
+                                                # address, so the `dsect` test is
+                                                # what separates the two.
+                                                if compile and b2 == 3 \
+                                                        and not usingB2:
+                                                    if sameSectionB2:
+                                                        rSect, rOff = sect, d2
+                                                    else:
+                                                        rSect, rOff = unhash(d2)
+                                                    rd = sects.get(rSect)
+                                                    if rd != None \
+                                                            and not rd.get("dsect") \
+                                                            and "offset" in rd:
+                                                        d0 = rOff \
+                                                             + rd.get("offset", 0) \
+                                                             - sects[sect].get("offset", 0)
+                                                        relocations.append({
+                                                            'symbol': rSect,
+                                                            'section': sect,
+                                                            'address': \
+                                                                sects[sect]["pos1"] + 2,
+                                                            'type': 'Y'
+                                                        })
                                             elif (d2 in rextrns) or \
                                                     ((d2 & hashcodeMask) in rextrns):
                                                 # An EXTRN, with or without a
