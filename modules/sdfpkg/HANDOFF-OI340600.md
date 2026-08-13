@@ -520,6 +520,38 @@ WHY.  The entry above was written from G16 alone.  Measured across the family th
 next hour, four configurations confirm it and one contradicts it, and a
 reconstruction believed settled is worse than one known to be open.
 
+CORRECTION to the entry above.  The G9 dump DOES hold the GPS rows.  The
+halfwords at FCMBMTG9+04E and +111 decode as
+
+    630A 1024 DD32 4461 68A4   TFIVGPS1, FIOBY1GC, &DLAYCNT=68, num=97
+    6352 1087 DD52 4463 6AAC   TFIVGPS3, FIOBY3GC, &DLAYCNT=68, num=99
+
+which is exactly what the gated invocations at FCMBMTMC lines 455 and 762
+generate, and our build emits only TFIVGPS2, which no flag gates.  Setting the
+flags cuts G9's differing halfwords from 1157 to 893.  So an unconditional 1 is
+supported by G9 as well, and the flags need no &OPS gating.
+
+WHAT IS ACTUALLY WRONG WITH G9 is a surplus of its own: 1344 against an
+expected 1334 before the change, 1384 after.  Roughly 50 halfwords this source
+emits that the dump does not hold, somewhere not yet identified, and while it
+stands the module is misaligned end to end -- which is the whole reason its
+halfword counts are in the hundreds in both states.  G16 read 914 differing
+before its own size was fixed and 7 after; a size shift cascades, and a large
+count is a symptom of that, not a measure of how wrong the content is.
+
+TWO TRAPS THIS COST.  A size mismatch makes fcmcmp compare only the overlap and
+print no halfword verdict, so counting '@' lines yields a meaningless number --
+read 'N halfwords differ' and the '(+N)' beside it.  And the symbol-sequence
+alignment that settled G16 is NOT reliable on G9: only 54 of its dump rows
+resolve to a name, against 93 in our build, so difflib reports most of the
+RTWD rows as deleted when they are merely unresolvable.  Its INSERT results are
+still trustworthy -- that is how the GPS rows above were found -- but its
+deletes are not.
+
+WHY.  The entry above read G9's size as contradicting the flags.  That was wrong,
+and left standing it would have sent the next session hunting a conditional
+that does not exist instead of the surplus that does.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
