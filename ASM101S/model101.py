@@ -4045,8 +4045,43 @@ def generateObjectCode(source, macros):
                                 # with special field values.
                                 op = argsSRSorRS["LA"]
                                 data[0] = ((op & 0b1111100000) >> 2) | r2
-                                data[1] = 0b11110011 # AM=0, B2=11
-                                
+                                # AND BEING AN `LA`, IT REACHES A RELOCATABLE
+                                # OPERAND THROUGH A `USING` LIKE ANY OTHER
+                                # MEMORY REFERENCE.  The base field was the
+                                # literal 0b11110011 -- AM=0, B2=3, the "no
+                                # base register" sentinel -- so the operand's
+                                # own value went into the displacement whatever
+                                # it was.
+                                #
+                                # That is right for a constant, which is what
+                                # `LHI` almost always takes: 901 of the corpus's
+                                # 902 cards are `F3`, their operands device
+                                # command words and literals like `PCOMPC` and
+                                # `X'A201'`.  The exception is BILDNEW5's
+                                # `LHI R5,DISABLFL` at 012A8, where DISABLFL is
+                                # a `DC` at 01580 and a USING covers it: the
+                                # original writes EDF1 00A6, base 1 and a
+                                # displacement, and we wrote EDF3 1580.  The
+                                # same symbol reached by `LH` a few cards
+                                # earlier is 9DF1 00A6 in both builds, which is
+                                # what makes this a defect in `LHI` alone
+                                # rather than in the USING.
+                                #
+                                # Absolute operands cannot reach this by
+                                # accident: `unhash` names a section only for a
+                                # relocatable value, and an unhashed one has no
+                                # hashcode bits for `unUsing` to subtract.
+                                b2 = None
+                                d = None
+                                if unhash(i1)[0] != None:
+                                    b2, d = unUsing(using, i1)
+                                if b2 != None and b2 >= 0 and b2 <= 3 and \
+                                        d != None and d < 0x10000:
+                                    data[1] = 0b11110000 | b2
+                                    i1 = d
+                                else:
+                                    data[1] = 0b11110011 # AM=0, B2=11
+
                             else:
                                 op = argsRI[operation]
                                 data[0] = (op & 0b1111111100000) >> 5

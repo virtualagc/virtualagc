@@ -4692,6 +4692,73 @@ WHAT IS LEFT IS FOUR CARDS, 7 BYTES, three unrelated problems:
 
 WHY.  The mismatch lines said 08 against 00 and looked like eight wrong VALUES.  The listing text said 0008 against 08 and it was one wrong LENGTH.  Reading the original card rather than the diff would have been the first move, not the third.
 
+FIXED, AND THE COMMENT ABOVE IT ALREADY SAID WHY.  191's last addressing-byte
+defect is `LHI R5,DISABLFL` at 012A8:
+
+    ours    EDF3 1580
+    theirs  EDF1 00A6      1580
+
+    -- base register 1 and a displacement of A6, against our "no base
+    register" and the absolute 1580.  Both name the same address; only one of
+    them is what the original wrote.
+
+WHAT THE CODE SAID, at model101.py, unchanged since it was written:
+
+        # LHI is not actually an RI instruction, though it is RI
+        # syntactically, but rather an alias for LA (an RS instruction)
+        # with special field values.
+        op = argsSRSorRS["LA"]
+        data[0] = ((op & 0b1111100000) >> 2) | r2
+        data[1] = 0b11110011 # AM=0, B2=11
+
+    IF IT IS AN `LA`, IT REACHES A RELOCATABLE OPERAND THROUGH A `USING` LIKE
+    EVERY OTHER MEMORY REFERENCE -- and the base field is a LITERAL, so the
+    operand's own value went into the displacement whatever it was.
+
+MEASURED, BOTH CORPORA, all 902 `LHI` cards by second byte:
+
+    F3   901      F1   1
+
+    The 901 are right and must stay right: their operands are device command
+    words and literals -- `PCOMPC` A201, `PCOLMB` 9204, `PCOIPH` 8620,
+    `X'A205'`, `0`, `255` -- absolute values with no section and no USING to
+    reach them through.  The one is this card, and DISABLFL is a `DC` at
+    01580 with a USING covering it.
+
+    THE SAME SYMBOL SETTLES IT.  `LH R5,DISABLFL` appears seven times in the
+    same stretch of BILDNEW5 and is 9DF1 00A6 in BOTH builds, while `LH R5,
+    DISABLFL` at 00894, outside the USING, is 9DF3 1580 in both.  The USING
+    machinery was never wrong here; `LHI` simply never asked it.
+
+    AN ABSOLUTE OPERAND CANNOT REACH THE NEW PATH BY ACCIDENT.  `unhash`
+    names a section only for a relocatable value, and an unhashed one has no
+    hashcode bits for `unUsing` to subtract -- which the 901 F3 cards then
+    confirm empirically, since not one of them moved.
+
+MEASURED:
+
+    BILDNEW5        7 -> 4 bytes mismatched, 0 missing
+    verify-sweep    267 MATCH, 4 MATCH?, 1 DIFFERS.  Unchanged.
+    RUNASM          PASS, all 205 byte-for-byte.  Unchanged.
+
+WHAT IS LEFT IS THREE BYTES ON THREE CARDS, and NEITHER IS AN ADDRESSING
+QUESTION ANY MORE:
+
+    03D28 `DC YL.6(12),BL.10'0000000010'`  3002 against E92F.  A bit-packed
+          constant.  Six bits of 12 is 001100 and ten bits of the literal is
+          0000000010, which packs to 0011 0000 0000 0010 = 3002 -- so OUR
+          arithmetic is what the operands say and the original's E92F is not,
+          which means the operands do not say what we think.  This is the only
+          card left that is a question about the ASSEMBLER.
+
+    05199 `DC Y($POF053)`  and  0519A `DC Y($PON053-$POF053)`  A5 against C1
+          and 05 against 00.  184's restored cards: the labels exist, the
+          arithmetic is ours, and the original's numbers are 0x36A5 and 5.
+          This is a question about the RESTORATION, and it is where 184
+          should be re-read before anything is changed.
+
+WHY.  The base field was a LITERAL, 0b11110011, with a comment three lines above saying LHI is an alias for LA.  Everything needed to see the defect was on the screen together; what was missing was the question of whether the literal could ever be wrong.
+
 THE MACRO-PROCESSING ROOT CAUSE IS FIXED, issue #1331, in commit 0f5ab2939 on
 2026-08-08.  The issue itself is worth reading anyway -- it is the user's own
 analysis plus two outside contributors, and it is where the semantics below are
