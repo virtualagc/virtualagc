@@ -1053,6 +1053,17 @@ def evalCharacterExpression(expression, svLocals, properties = { "errors": [] })
         if len(expression) == 4 and expression[0] == "'" and \
                 expression[3] == "'":
             # This case is for 'string1''string2'...'stringN'
+            #
+            # A DOUBLED QUOTE INSIDE A QUOTED STRING IS ONE QUOTE CHARACTER, and
+            # dropping it silently corrupts the value.  This joined the pieces
+            # AROUND each `''` and threw the quote itself away, so
+            #     &RESERVE SETC  'H''0'''
+            # -- MLIB80/TFPSA.asm:111 -- gave `H0` instead of `H'0'`, and the
+            # card it is substituted into, `&X 4&RESERVE`, arrived as `DC 4H0`,
+            # which no dcOperands rule can parse.  That is FCMPSA's 128
+            # intolerable lines, and FCMNINIT's `DS X0000000` is the same defect
+            # through a different SETC.  23 members of MLIB80 carry
+            # doubled-quote SETC cards.
             s = expression[1]
             for ss in expression[2]:
                 if not isinstance(ss, (list,tuple)) or len(ss) != 2 \
@@ -1061,7 +1072,7 @@ def evalCharacterExpression(expression, svLocals, properties = { "errors": [] })
                           "Cannot evaluate string expression: %s" % \
                           str(expression))
                     return None
-                s = s + ss[1]
+                s = s + "'" + ss[1]
         elif len(expression) == 2 and expression[0] == "T'":
             return typeAttribute(properties, expression[1], svLocals)
         elif len(expression) in [2,3]:
@@ -1307,7 +1318,21 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
                 return None
             value = evalCharacterExpression(ast["v"], svLocals, properties)
             if value != None:
-                value = value[:8] # Max length of a SETC symbol is 8 characters.
+                # 8 IS ASSEMBLER F'S LIMIT AND THIS LIBRARY IS ASSEMBLER H,
+                # where a SETC value may be up to 255 characters.  The old limit
+                # did not reject an over-long value, it silently TRUNCATED one,
+                # so the card built from it was cut off mid-symbol and the error
+                # surfaced as an unparseable operand naming a symbol that does
+                # not exist:
+                #     DC  Y(FCMTRA              ZCON A
+                # every one of them exactly eight characters wide.  TFPSA builds
+                # a whole PSW pair in one SETC --
+                #     &SRSTPSW SETC 'Y('.'&SR'.'),X''00'.'&BSR'.'&DSR'.'000C0000'''
+                # -- which is nowhere near eight.  These are the PSA macro's
+                # new-PSW words, the same family as BILDNEW5's uncovered bytes.
+                # fieldParser.py already relies on Assembler H sublist
+                # subscripting for this library, so H is the right dialect here.
+                value = value[:255]
             return value
         error(properties, "Data type doesn't match %s" % sname)
         return None

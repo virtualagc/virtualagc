@@ -35,11 +35,13 @@ def usage():
     print(__doc__)
     print("Usage: clc-sweep.py --work=DIR --config=XXX [--out=FILE] [--jobs=N]")
     print("                    [--tree=SSSRC|RUNASM|both] [--only=M1,M2,...]")
-    print("                    [--scope-report] [--reports=DIR]")
+    print("                    [--scope-report] [--reports=DIR] [--from-reports=DIR]")
+    print("                    [--exceptions=F.txt] [--memory=F.fcm]")
     sys.exit(1)
 
 work = None; config = "SSW"; out = None; jobs = 6; tree = "both"
 only = None; scopeReport = False; reports = None; fromReports = None
+exceptions = None; memory = None
 for p in sys.argv[1:]:
     if p.startswith("--work="): work = p.partition("=")[2]
     elif p.startswith("--config="): config = p.partition("=")[2]
@@ -49,6 +51,8 @@ for p in sys.argv[1:]:
     elif p.startswith("--only="): only = set(p.partition("=")[2].split(","))
     elif p.startswith("--reports="): reports = p.partition("=")[2]
     elif p.startswith("--from-reports="): fromReports = p.partition("=")[2]
+    elif p.startswith("--exceptions="): exceptions = p.partition("=")[2]
+    elif p.startswith("--memory="): memory = p.partition("=")[2]
     elif p == "--scope-report": scopeReport = True
     else: usage()
 if work is None: usage()
@@ -144,6 +148,14 @@ def runOne(item):
                          text = True).stdout.strip() or "compileLinkCompare"
     cmd = ["python3", "-u", clc, f"--config={config}", f"--library={lib}",
            f"--filename={t}/{m}.asm", f"--out-dir={outDir}"]
+    # WITHOUT THESE TWO THE COUNT IS INFLATED and the inflation is not small.
+    # --exceptions names the locations MAFGEN marks with '*', which the dump
+    # holds but no build produces: I-LOADs, patches and checksums applied after
+    # the build.  SSW has 1199 of them.  --memory names an image with MAFGEN's
+    # own literal annotations recovered into halfwords unlinkMAFGEN2 had merely
+    # synthesised from the address.  Both come from dass-literals.py.
+    if exceptions: cmd.append(f"--exceptions={exceptions}")
+    if memory: cmd.append(f"--memory={memory}")
     # A TIMEOUT, because one module that never returns otherwise stops the whole
     # run and it reports success with a row missing.  PIPED OUTPUT IS LOST WHEN A
     # COMMAND IS KILLED, which is why the report is written out per module.
