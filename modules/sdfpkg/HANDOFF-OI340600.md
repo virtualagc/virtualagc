@@ -1139,6 +1139,31 @@ WHY.  RSB asked whether it is still needed.  The answer is in the code and is wo
 recording, because the failure mode it now produces is the one that cost five
 modules with FPMSWTCC and would look like a missing macro next time.
 
+DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
+library's MACROFILES.txt does not list, and must: it reads a fetched member as
+OPEN CODE, so pulling in a COPY fragment puts a DS outside any control section.
+
+When the member is ACTUALLY PRESENT in the library and simply not indexed, it
+now says so, once per member, on stderr:
+
+    Warning: MACSMITH.asm exists in MLIB80 but is not listed in its
+    MACROFILES.txt, so it cannot be fetched as a macro; re-run
+    makeMACROFILES.py if that is wrong
+
+Only that case is reported.  Most misses are ordinary -- the name is simply not
+a macro -- and warning on those would bury the signal.
+
+Verified by invoking MACSMITH, which is present and unindexed: the warning
+appears exactly once.  NO SWEEP HAS BEEN RUN FOR NOISE.  The change cannot move
+a module's classification -- it writes only to stderr, and the sweep classifies
+on 'Traceback' and 'for COPY not found', neither of which this text matches --
+but whether it chatters on the corpus is unmeasured.  If a member's name
+collides with an operation somewhere, that is where it would show, and it is
+worth a glance at the next sweep's stderr.
+
+WHY.  The gate stays because it is load-bearing; what it lacked was a voice.  The
+silent version of this failure cost five modules once already.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
