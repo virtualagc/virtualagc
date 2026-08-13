@@ -219,31 +219,51 @@ def svReplace(properties, text, svLocals):
     if "&" not in text:  # Quick test for absence of symbolic variables.
         return text
     
-    # We want to do the replacements in reverse order (i.e., from end of the 
-    # string to the beginning of the string), so as to keep the indexes of 
-    # matches that haven't yet been replaced from changing.
-    matches = []
-    for match in svPattern.finditer(text):
-        matches.append(match)
-    for match in reversed(matches):
-        sv = match.group()
+    # EVERY MATCH IS READ OUT OF THE ORIGINAL TEXT, and the result is built up
+    # forward.  This used to walk the matches in REVERSE and re-slice `text`
+    # after each replacement, on the reasoning that later replacements cannot
+    # disturb earlier indexes -- true of the indexes and false of the text.  A
+    # variable whose right-hand neighbour had already been replaced was
+    # re-parsed against that REPLACEMENT: in `X&OPS&CNT`, `&CNT` became `0`
+    # first, `text[start:]` was then `&OPS0`, and `nameSet0` read the whole of
+    # that as the variable name `&OPS0` -- `0` being a perfectly legal character
+    # in a name.  No such variable existing, the occurrence was left alone, so
+    # two adjacent references lost the FIRST one:
+    #
+    #     X&OPS&CNT  ->  X&OPS0        EACH REFERENCE IS REPLACED BY ITS VALUE
+    #     Z&CNT&OPS  ->  Z&CNTTB       WHERE IT STANDS, so with &OPS=TB and
+    #                                  &CNT=0 these mean XTB0 and Z0TB.  `.` is
+    #     Y&OPS.&CNT ->  YTB0          an explicit join, consumed rather than
+    #                                  emitted -- and using one hid the defect.
+    #
+    # That is `ENTRY FIOM&OPS&CNT` in FIOMODMC, which reached the assembler as
+    # `ENTRY FIOM&OPS0` and took FIOMODTB, FIOCYCTB and FIORTBUF with it.
+    # Building forward from an unchanging string cannot go wrong this way,
+    # because nothing is ever parsed out of a replacement.
+    original = text
+    pieces = []
+    pos = 0
+
+    def resolve(start, end):
+        '''(start, end, replacement) for one occurrence, replacement None
+        meaning leave the text as it stands.  `start` may move LEFT, past a
+        K' or N' prefix.'''
+        sv = original[start:end]
         # We have a certain difficulty now, in that while what we've found is
         # most-likely something like &A, it could also be something like 
         # &A(expression).  And the only way we're going to be able to deal with
         # that is via actual parsing.
-        start = match.span()[0]
-        end = match.span()[1]
-        ast = parserASM(text[start:], "nameSet0")
+        ast = parserASM(original[start:], "nameSet0")
         if ast == None:
-            error(properties, "Cannot parse: " + text[start:])
-            continue
+            error(properties, "Cannot parse: " + original[start:])
+            return start, end, None
         sv = ast["sv"][0]
         if sv in svLocals:
             replacement = svLocals[sv]
         elif sv in svGlobals:
             replacement = svGlobals[sv]
         else:
-            continue
+            return start, end, None
         if "exp" in ast:
             indices = []
             for e in ast["exp"]:
@@ -254,7 +274,7 @@ def svReplace(properties, text, svLocals):
                     break
                 indices.append(n)
             if len(indices) != len(ast["exp"]):
-                continue
+                return start, end, None
             if isMacroArgument(sv, replacement, svLocals):
                 if sv == "&SYSLIST" and indices[0] == 0:
                     # &SYSLIST(0) is the name field of the macro invocation.
@@ -267,11 +287,11 @@ def svReplace(properties, text, svLocals):
                 # A SETA/SETB/SETC array, which takes exactly one subscript.
                 if len(indices) != 1:
                     error(properties, "Too many subscripts for %s" % sv)
-                    continue
+                    return start, end, None
                 n = indices[0] - 1
                 if n < 0 or n >= len(replacement):
                     error(properties, "Index of %s(%d) out of range" % (sv, n+1))
-                    continue
+                    return start, end, None
                 replacement = replacement[n]
                 end = start + ast.parseinfo.endpos
             else:
@@ -280,14 +300,14 @@ def svReplace(properties, text, svLocals):
                 # in, as in the address `&D(&X,&B)`.  Replace the bare variable
                 # and leave the rest of the text alone.
                 pass
-        if end < len(text) and text[end] == ".": # Optional "join" character.
+        if end < len(original) and original[end] == ".": # Optional "join".
             end += 1
         if isinstance(replacement, Sublist):
             # K' is the length of the sublist's text, N' its number of entries.
-            if text[start-2:start] == "N'":
+            if original[start-2:start] == "N'":
                 start -= 2
                 replacement = str(countMacroArgument(replacement))
-            elif text[start-2:start] == "K'":
+            elif original[start-2:start] == "K'":
                 start -= 2
                 replacement = str(len(renderMacroArgument(replacement)))
             else:
@@ -298,20 +318,35 @@ def svReplace(properties, text, svLocals):
         elif isinstance(replacement, int):
             replacement = str(replacement)
         elif isinstance(replacement, (list,tuple)):
-            if text[start-2:start] in ["K'", "N'"]:
+            if original[start-2:start] in ["K'", "N'"]:
                 start -= 2
                 replacement = str(len(replacement))
             else:
                 error(properties, "Cannot use array as a replacement: %s=%s" % \
                       (sv, str(replacement)))
-                continue
-        try:
-            text = text[:start] + replacement + text[end:]
-        except:
-            pass
-            print("***DEBUG***")
-    
-    return text
+                return start, end, None
+        if not isinstance(replacement, str):
+            # This was a bare `except: print("***DEBUG***")` around the splice,
+            # which left the occurrence unreplaced and said so only on stdout.
+            error(properties, "Cannot use %s as a replacement for %s" % \
+                  (str(replacement), sv))
+            return start, end, None
+        return start, end, replacement
+
+    for match in svPattern.finditer(original):
+        mStart, mEnd = match.span()
+        # A subscripted variable consumes its own subscript, so a `&` inside
+        # those parentheses has already been dealt with.
+        if mStart < pos:
+            continue
+        start, end, replacement = resolve(mStart, mEnd)
+        pieces.append(original[pos:start])
+        pieces.append(replacement if replacement is not None \
+                      else original[start:end])
+        pos = end
+    pieces.append(original[pos:])
+
+    return "".join(pieces)
 
 # In parsed expressions, remove useless levels of tuple/list embedding, such
 # as [([expression])] -> expression.
