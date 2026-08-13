@@ -686,6 +686,30 @@ def evalArithmeticExpression(expression, \
             # The number of characters in the value, which for a sublist is the
             # width of its source text rather than its number of entries.
             return len(renderMacroArgument(var))
+        elif op == "L'":
+            # L' OF THE SYMBOL A VARIABLE'S VALUE NAMES, not of the variable.
+            # POS builds the name into a SETC and then asks for its length:
+            #     &#       SETC  '&P#.X'
+            #     &L       SETA  L'&#-1025
+            # so the operand is the symbol &# names, not &# itself.  The
+            # program-symbol branch above already does the lookup; this reaches
+            # it for the substituted case, which is the only way MENU12 and the
+            # other POS/VECTOR callers can be assembled at all.
+            name = renderMacroArgument(var)
+            entry = symtab.get(name)
+            if entry == None:
+                # AN UNDEFINED SYMBOL HAS LENGTH ATTRIBUTE 1, which is what
+                # Assembler H gives it, and the callers depend on it: POS and
+                # VECTOR ask for L' of a name they build -- P1Y, P2X, P37X --
+                # that is defined NOWHERE in the module or the library, then
+                # subtract 1025.  Diagnosing the absence instead makes MENU12
+                # unassemblable; the deck plainly expects the default.
+                return 1
+            if "lengthAttribute" not in entry:
+                error(properties, \
+                      "Symbol %s has no length attribute" % name, severity)
+                return None
+            return entry["lengthAttribute"]
         else:
             error(properties, "Not yet implemented: %s" % op, severity)
             return None
