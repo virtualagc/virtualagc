@@ -262,6 +262,183 @@ that has already been made and paid for.
     asked -- and do not commit work that has not been checked.  SHOW
     OUTWARD-FACING TEXT before it is sent.
 
+WHAT WAS FIXED ON 2026-08-12, AND HOW EACH WAS FOUND.  Five defects, four in
+ASM101S and one in the source.  Every one was invisible to the OI301700 phase.
+
+    AN `ENTRY` NAMED AFTER ITS OWN CSECT STOLE THE SECTION'S ESD ID.
+    `esdIdMap` in objectWriter.py is keyed by name and held sections, label
+    definitions and external references in ONE namespace, so `ENTRY X` inside
+    `X CSECT` overwrote the SD's id with the LD's.  The TXT card, the RLD
+    `posId` and the END entry point all then received the id of a label.
+    lnk101 discards an RLD whose posId does not name a section, so EVERY
+    RELOCATION IN SUCH A MODULE WAS THROWN AWAY and the halfwords it should
+    have patched were left as assembled.
+
+        NO LISTING COMPARISON CAN CATCH THIS, and that is the single most
+        important thing on this page.  A listing prints 0000 for an unresolved
+        external exactly as a broken object file does, so the whole OI301700
+        corpus can be byte-for-byte correct with every relocation in it
+        discarded.  Linking is the only thing that reads those records.  This
+        phase's evidence is therefore STRONGER than the last phase's, not
+        weaker, and a defect class of this shape should be expected wherever
+        the object file rather than the listing is what matters.
+
+    A SUBLIST ENTRY MAY CARRY A PARENTHESISED SUFFIX.  `listItem` in
+    fieldParser.py matched a nested `(list)` or a bare token and nothing else,
+    so `0(R0)`, `0(R3,R2)` and `TPCTFLGS-TPCTSTRT(R2)` ended the list at the
+    `(`; `replacement` fell through to its empty-string alternative and every
+    real alternative of `operandInvocation0` failed.  That was all 24 SSW
+    modules invoking the IF/ELSE/DO/CASE macros -- a family OI301700's library
+    does not define at all, so nothing in that phase exercised the rule.
+
+        A TEST THAT OMITS THE TRAILING COMMENT CONFIRMS THE WRONG THING.
+        `operandInvocation0` ends in a catch-all, `/[^ ]+/ / */ $`, which
+        accepts any single non-blank run at end of input.  So
+        `(TB,0(R0),FPMUSED,NZ)` parses and `(TB,0(R0),FPMUSED,NZ) THEN` does
+        not, and every real card has a comment after the operand.  The correct
+        hypothesis was nearly discarded on the strength of a test that left the
+        comment off.  The minimal case is `(A,B(C)) X`.
+
+    TWO DEFECTS IN ONE SETC VALUE.  A doubled quote inside a quoted string is
+    ONE quote character, and evalCharacterExpression joined the pieces around
+    each `''` and dropped the quote, so `&RESERVE SETC 'H''0'''` gave `H0` and
+    `&X 4&RESERVE` arrived as the unparseable `DC 4H0`.  Separately, `value[:8]`
+    imposed ASSEMBLER F's length limit on an ASSEMBLER H library: it did not
+    reject an over-long value, it TRUNCATED one, so a generated card was cut
+    off mid-symbol and surfaced as an operand naming a symbol that does not
+    exist -- `DC Y(FCMTRA`, every such operand exactly eight characters wide,
+    which is what gives it away.  TFPSA builds a whole PSW pair in one SETC.
+    Neither fix alone repairs a module: with only the quote repaired FCMPSA
+    goes from 128 intolerable lines to 55, all of them the truncation.
+
+    TWO ADJACENT VARIABLE REFERENCES LOST THE FIRST ONE.  svReplace walked its
+    matches in REVERSE and re-sliced `text` after each replacement, on the
+    reasoning that later replacements cannot disturb earlier indexes -- true of
+    the indexes, false of the text.  A variable whose right-hand neighbour had
+    already been replaced was re-parsed against that REPLACEMENT: in
+    `X&OPS&CNT` with &OPS=TB and &CNT=0, `&CNT` became `0`, `text[start:]` was
+    then `&OPS0`, and `nameSet0` read all of that as the variable name `&OPS0`,
+    `0` being a legal character in a name.  No such variable existing, the
+    occurrence was left alone.  Each reference is resolved against the ORIGINAL
+    text now and the result built forward, which cannot fail this way because
+    nothing is ever parsed out of a replacement.  An explicit `.` join hid the
+    defect, so `Y&OPS.&CNT` was always right and `X&OPS&CNT` never was.
+
+    FPMSWTCC WAS AN ASSEMBLY MACRO CARRYING A .hal EXTENSION.  A source defect,
+    fixed in PFS (OI340600/MLIB80, commit 332b831b): MACRO / FPMSWTCC /
+    IF-CALL-ENDIF / MEND, with a `Language: HAL/S` header and C/ comment
+    markers.  It failed two independent gates -- makeMACROFILES.py considers
+    only .asm and .bal and read the 25-line C/ header as code outside the
+    macro, and loadLibraryMacro tries only NAME and NAME.asm, so a .hal member
+    is unreachable whatever the index says.  Five modules invoke it and none
+    would assemble.  It is the only such member: no other file in MLIB80
+    outside .asm/.bal contains an assembly MACRO card.
+
+    A CONTINUED OPERAND'S PADDING WAS JOINED INTO THE OPERAND.
+    `operandFieldEnd` tracks parenthesis depth and a blank at depth > 0 does not
+    end the operand field, so when a card ends with a sublist's outer `(` still
+    open it returns len(text) and the padding out to column 71 survived the join.
+    DOPROC's `STKINS (&WHILE(1),...,&WHILE(4),` continued by `&WHILE(5),&LIND(&LI))`
+    joined as `...&WHILE(4),      &WHILE(5)...` and substituted to
+    `(CH,R2,NE,FIELD,      ,#@LB2)`.  A `listItem` cannot match a blank, so the
+    sublist parse died and STKINS was invoked with an EMPTY &P1 -- which sent it
+    down its .NOTSUBL/.SGLOPR path, stacking no comparison and leaving &CCVAL
+    unset.  A DO WHILE therefore emitted its forward branch and its loop top but
+    never the test the branch was aimed at, so `#@LB2` was never defined.  Inside
+    a character literal those blanks are DATA, so the strip is guarded by
+    `insideQuote`.  Eight modules, and the last assembly failure in SSW.
+
+        TWO METHOD NOTES, because this one resisted the longest.  FIVE synthetic
+        reproductions of the failing card all PASSED, including its two cards
+        copied verbatim -- which was not evidence the cards were sound but that
+        the harness did not reproduce the context.  What settled it was trapping
+        the value CONSUMED inside the assembler, which is the rule this file
+        already states and which was reached late.  And two rounds of macro
+        instrumentation reported a FALSE cause because the instrumentation was
+        itself broken: once an MNOTE whose own string was mangled, once an edit
+        that shifted a card 8 columns and pushed its `X` out of column 72,
+        destroying the very continuation under test.  ASSERT THAT NO EXISTING
+        CARD MOVED before believing a trace of a macro library.
+
+EVERY ONE was verified against BOTH harnesses before committing -- RUNASM 205
+of 205 byte-for-byte, and verify-sweep.sh identical module for module at 267
+MATCH, 5 MATCH?, 0 DIFFERS.  Neither harness can FAIL because of an
+objectWriter change, since both compare listings; run them anyway, because that
+is how you learn the change did not reach further than intended.
+
+[why] Five defects in one day, four in ASM101S and one in the source, all found by LINKING rather than by any listing.  Recorded per defect because each carries a method lesson that generalises, and because the SSW numbers are meaningless without knowing which fixes were in the tree when they were taken.
+
+WHY.  Five defects in one day, four in ASM101S and one in the source, all found by LINKING rather than by any listing.  Recorded per defect because each carries a method lesson that generalises, and because the SSW numbers are meaningless without knowing which fixes were in the tree when they were taken.
+
+WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
+
+    NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
+    149 from SSSRC and 27 from RUNASM -- where 47 of them did not at the start
+    of the day.  Six defects account for the difference and every one is
+    described above.  THAT IS NOT THE SAME AS BEING RIGHT: assembling only
+    means ASM101S had nothing to say, and the bytes are settled by the link and
+    the comparison, which is where the open work now is.
+
+    WHERE THE COMPARISON STANDS, SSW, all 176 modules, with the exceptions file
+    and the literal-recovered image in use:
+
+        PASS                                        51
+        FAIL, links cleanly but halfwords differ    30
+        FAIL via a forced link                      95
+
+    ALL 27 RUNASM MODULES PASS, and every failure is in SSSRC.  That is worth
+    keeping in view: the runtime library was finished in the previous phase and
+    it still is, so a change that breaks one of those 27 is wrong.
+
+    THE 30 THAT LINK CLEANLY AND STILL DIFFER ARE THE INFORMATIVE GROUP, and
+    they are where to start.  The bookkeeping is already accounted for in them
+    -- post-build patches via --exceptions, MAFGEN's own literal annotations via
+    --memory -- so a difference there is ours.
+
+    THE 95 FORCED LINKS ARE A DIFFERENT PROBLEM and mostly not an assembler
+    one.  A forced link means lnk101 could not resolve a symbol, and the
+    evidence so far says those divide three ways.  Of FCMBMTPG's 119 unresolved
+    relocations at G16: 46 sit at addresses where the dump holds C6C6 or C9FB,
+    so the dump never stated a value and there is nothing to compare; 43 point
+    at C9FB or 0000 fill, consistent with the user's account of pointers off
+    into nowhere that are probably hooks for patches applied after load; and 30
+    land INSIDE a CSECT the table already knows -- `TFIVMI71` at 0xDD43 inside
+    #PCGGD01, and so on -- which are ordinary references to fields inside HAL/S
+    COMPOOLs that augmented-CONFIG.json indexes only at CSECT granularity.
+    Those 30 are recoverable as CSECT start plus field offset and are the
+    tractable part; dass-syms.py is the existing tool for that recovery.
+
+    A SYMBOL ABSENT FROM THE CSECT TABLE IS THEREFORE NOT AUTOMATICALLY A
+    DEFECT.  Establish which of the three kinds it is before chasing it.
+
+    ONLY SSW HAS BEEN SWEPT.  The other seven configurations are untouched,
+    though their exceptions files and literal-recovered images are built and
+    self-check clean: G16 7955 patched locations, G3 7757, G2 3093, G8 2827,
+    G9 2568, S2 1262, SSW 1199, P9 1128.  G16 is both the largest configuration
+    and much the most patched, so SSW remaining the development target is
+    still the right order.
+
+    THE VERSION QUESTION IS SETTLED AND NEEDS NO MECHANISM.  All eight dumps
+    say `AT RELEASE 034    VERSION 070` and the source is OI-34.06, but the
+    HAL/S half of OI340600 already matches these dumps, and all 27 in-scope
+    RUNASM modules match SSW exactly.  A per-module drift analysis of the kind
+    dass-versions.py does for HAL/S is IMPOSSIBLE for assembly anyway --
+    HALSTAT records a revision level for 1209 HAL/S units and not one assembly
+    module, the DASS listing gives a NONHAL CSECT only its address, name and
+    size, and there is no OI340700 source to diff against.  Treat an assembly
+    difference as ours until shown otherwise; inventing version exceptions for
+    assembly would be the silencing mechanism dass-versions.py is careful to
+    avoid.  (Do not repeat this inference: HALSTAT's source-library column
+    contains no OI340700 entry, which looks like evidence that nothing changed
+    at 34.07 and is not -- HALSTAT is a different, earlier build, R1 of
+    16 DEC 09, against the dumps' C2 of 13 DEC 10.)
+
+ALSO STILL OPEN, and unchanged: the 88 uncovered bytes in BILDNEW5, which is
+out of scope for this phase anyway, and the duplicated PRINT NOGEN/PRINT GEN
+trio in the restored sources.
+
+WHY.  The DO WHILE defect is the only remaining assembly failure and it cost hours to localise; the trace and the authoritative reference expansion are recorded so the next session resumes at the point reached rather than repeating the search.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
