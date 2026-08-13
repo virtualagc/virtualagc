@@ -9,6 +9,8 @@ Usage:      dass-handoff.py list [--section=TEXT]
             dass-handoff.py show ID [ID ...]
             dass-handoff.py search TEXT
             dass-handoff.py add --after=ID [--title=T] [--why=TEXT] "body"
+                              [--doc=FILE.md --section=TEXT --kind=rule]
+                                                   start a NEW document
             dass-handoff.py set ID "body"          replace an entry's text
             dass-handoff.py why ID "text"          set or replace the reasoning
             dass-handoff.py title ID "text"
@@ -236,7 +238,7 @@ def nextOrd(db, after):
 
 
 def add(db, after, body, title = None, why = None, kind = "prose",
-        section = None):
+        section = None, doc = None):
     '''Insert after entry `after`.
 
     `section` defaults to the section `after` belongs to, which is right for
@@ -250,13 +252,25 @@ def add(db, after, body, title = None, why = None, kind = "prose",
                       (after,)).fetchone()
     if section is None:
         section = prev["section"]
-    # The document is ALWAYS inherited from the neighbour.  An entry that landed
-    # in the wrong file would render into a document it does not belong to and
-    # vanish from the one it does, silently and in both directions.
+    # The document is inherited from the neighbour UNLESS `--doc` names another
+    # one.  An entry that landed in the wrong file would render into a document
+    # it does not belong to and vanish from the one it does, silently and in
+    # both directions -- so inheritance is the default and the override has to
+    # be asked for by name.
+    #
+    # STARTING A NEW DOCUMENT is what the override is for: `--doc=NEW.md`
+    # together with `--section=` and `--kind=rule` for its first entry, which
+    # `writeOut` then creates because `docs()` reports every distinct `doc`.
+    # A new document with no section header would file everything below it
+    # under whatever section the neighbour had, so the two are asked for
+    # together.
+    if doc is not None and doc != (prev["doc"] or DEFAULT_DOC) \
+            and doc not in docs(db) and section is None:
+        raise SystemExit("a new document needs --section= for its first entry")
     cur = db.execute("INSERT INTO entry (ord, section, kind, title, body, why,"
                      " doc, stamp, updated) VALUES (?,?,?,?,?,?,?,?,?)",
                      (ord_, section, kind, title or leadIn(body), body, why,
-                      prev["doc"] or DEFAULT_DOC, today(), today()))
+                      doc or prev["doc"] or DEFAULT_DOC, today(), today()))
     db.commit()
     return cur.lastrowid
 
@@ -352,7 +366,7 @@ def main():
         text = bodyFile.read_text() if bodyFile else " ".join(args[1:])
         if after is None or not text.strip():
             raise SystemExit("add needs --after=ID and a body")
-        new = add(db, after, text, title, why, kind, section)
+        new = add(db, after, text, title, why, kind, section, doc)
         print(f"entry {new} added")
         mutated = True
     elif command in ("set", "why", "title"):
