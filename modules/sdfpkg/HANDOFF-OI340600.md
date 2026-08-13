@@ -671,6 +671,51 @@ WHY.  The previous entry pinned the slots at zero on a test that asked the wrong
 question, and a reconstruction was committed on it.  The file has been
 withdrawn (PFS aaeed393).  The corrected reading is testable in one build.
 
+FCMBMTG9 NOW LINKS TO 1334 HALFWORDS, exactly the length the CSECT table
+gives, against 1384 before.  12 halfwords differ: 11 are our 0000 against a
+pointer a single-object forced link cannot resolve, and one, TFIVMCI1, is the
+reverse -- the dump holds 0000 where we hold a pointer.  Recovered file:
+~/workspace/PFS/OI340700/MLIB80/FIOMDPVU.asm (PFS c1e5932d), together with the
+recovered FCMBMTMC.  Both are needed; neither alone gives 1334.
+
+THE SLOT INDICES, read from the element codes rather than inferred from
+position.  FCMBMTMC ties each slot to a fixed element code -- LPF1ELM(2) to
+LAC, (3) to LBC, LPF2ELM(2) to LOC, (3) to LPC, (4) to LQC -- and the dump's
+five added rows point at FIOBYLAC, FIOBYLBC, FIOBYLOC, FIOBYLPC and FIOBYLQC in
+that order.  The counts fall out of the delay halfword, whose high byte is
+12+2*(count+1) because those invocations pass a delay flag of 1:
+
+    LPF1ELM(2)=105 CNT 7        LPF2ELM(2)=107 CNT 7
+    LPF1ELM(3)=106 CNT 0        LPF2ELM(3)=108 CNT 0
+                                LPF2ELM(4)=109 CNT 2
+
+Both chains terminate on the first zero slot -- the AIF branches past all
+higher slots, it does not gate them individually -- so LPF1ELM(4) and
+LPF2ELM(5) staying unset is what ends them.  All eight FLX slots go to 0, and
+113 disappears.
+
+A TRAP THAT COSTS 16 HALFWORDS SILENTLY.  A comment line in these members must
+end by column 71.  At 72 or beyond the assembler sees a non-blank in the
+continuation column and swallows the following statement.  My recovery note had
+75-column separator rules; the module built clean, reported no diagnostic, and
+came out 16 halfwords short.  It was caught only because the length stopped
+matching 1334.  NOTHING WARNS YOU.  Check comment width after editing any of
+these files, and be aware the contributed source itself has a 72-column line
+that is harmless only because of where it sits.
+
+HOW THE SEARCH ACTUALLY WENT, since three of its steps were wrong.  Offset
+arithmetic gave inconsistent boundaries; a symbol-sequence diff mis-reported
+unresolvable rows as deleted; and an 'alignment-independent' scan for
+annunciator 5C/5D found none and produced a confidently wrong conclusion that
+the flex slots were zero, which reached a committed file before it was caught.
+What finally worked was enumerating the ELEMENT NUMBERS present on each side
+and diffing those sets.  The element number is the only field that survives
+re-gating, re-labelling, relocation and re-ordering.  Reach for it first.
+
+WHY.  This closes the module, and the 71-column trap it exposed will bite anyone
+adding a comment to any of these files.  Both belong where the next session
+reads them, not in a commit message.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
