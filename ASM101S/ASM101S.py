@@ -757,6 +757,23 @@ def readSourceFile(fromWhere, svLocals, sequence, \
             if actr < 0:
                 error(properties, actrMessage(fromWhere))
                 break
+            # A BRANCH TAKEN ABANDONS THIS STATEMENT'S CONTINUATION
+            # CARDS.  `skipCount` still holds the number of cards
+            # `parseLine` consumed for THIS statement, and the top of the
+            # loop uses it to skip whatever comes next -- which, after a
+            # branch, is the TARGET, not a continuation.  So a CONTINUED
+            # AIF or AGO landed one card late and the target card was
+            # silently skipped, with no diagnostic of any kind.
+            #
+            # STKINS is where this cost bytes.  Its
+            #     .NOTSUBL AIF ('&P2' EQ '' OR ... OR '&P2'X
+            #              EQ 'ORIF' OR '&P2' EQ 'ANDIF').SGLOPR
+            # branches to `.SGLOPR  GETCC  &P1(1)`, which was skipped, so
+            # GETCC never ran and &CCVAL kept the value left by the
+            # PREVIOUS condition.  `IF (LT)` after an `IF (...EQ...)`
+            # therefore assembled with the EQ mask: FPMCHTQE has
+            # DB10/DB1A where DASS_SSW has DD10/DD1A, mask 3 for mask 5.
+            skipCount = 0
             if target in sequence:
                 if fromWhere != sequence[target][0]:
                     error(properties, "Target out of this macro")
@@ -786,6 +803,9 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                 if actr < 0:
                     error(properties, actrMessage(fromWhere))
                     break
+                # Same as AGO above: a branch taken abandons this
+                # statement's continuation cards.
+                skipCount = 0
                 if target in sequence:
                     if fromWhere != sequence[target][0]:
                         error(properties, "Target out of this macro")
