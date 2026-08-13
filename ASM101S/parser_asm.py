@@ -1999,6 +1999,11 @@ class asmParser(Parser):
                 self._token(')')
             with self._option():
                 self._pattern('[^ ,()]*')
+                self._token('(')
+                self._pattern('[^()]*')
+                self._token(')')
+            with self._option():
+                self._pattern('[^ ,()]*')
             self._error(
                 'expecting one of: '
                 "'(' [^ ,()]*"

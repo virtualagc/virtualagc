@@ -39,7 +39,7 @@ def usage():
     sys.exit(1)
 
 work = None; config = "SSW"; out = None; jobs = 6; tree = "both"
-only = None; scopeReport = False; reports = None
+only = None; scopeReport = False; reports = None; fromReports = None
 for p in sys.argv[1:]:
     if p.startswith("--work="): work = p.partition("=")[2]
     elif p.startswith("--config="): config = p.partition("=")[2]
@@ -48,6 +48,7 @@ for p in sys.argv[1:]:
     elif p.startswith("--tree="): tree = p.partition("=")[2]
     elif p.startswith("--only="): only = set(p.partition("=")[2].split(","))
     elif p.startswith("--reports="): reports = p.partition("=")[2]
+    elif p.startswith("--from-reports="): fromReports = p.partition("=")[2]
     elif p == "--scope-report": scopeReport = True
     else: usage()
 if work is None: usage()
@@ -83,38 +84,38 @@ outDir = str(work / f"clc-{config}")
 # The three lines fcmcmp states a result on.  A per-section line carries the
 # section, its address, its size and -- only when it differs -- how many
 # halfwords do.
-reSect = re.compile(r"^\s+(OK|FAIL|SKIP|WARN|NOTE):\s+(\S+)\s+@\s+([0-9A-F]+)"
-                    r"\s+\((\d+) halfwords?\)(.*)$")
+# THREE line forms, not one, and the third was silently dropped: a section
+# whose size disagrees with the CSECT table reads
+#     FAIL: FPMFXMTU @ 1AC58 (128 halfwords vs 130 expected) - 34 halfwords differ
+# so a pattern ending at `halfwords)` matched neither it nor its difference
+# count, and such a module counted 0 sections of 0.  A size disagreement is a
+# finding in its own right -- we laid down 128 halfwords where the original
+# build had 130 -- so it is counted, not merely parsed.
+reSect = re.compile(r"^\s*(OK|FAIL|SKIP|WARN|NOTE):\s+(\S+)\s+@\s+([0-9A-F]+)"
+                    r"\s+\((\d+) halfwords?(?: vs (\d+) expected)?\)(.*)$")
 reDiff = re.compile(r"(\d+) halfwords? differ")
-reTotal = re.compile(r"^(PASS|FAIL):\s+(?:all (\d+) sections? match"
-                     r"|(\d+)/(\d+) sections? differ)")
+# fcmcmp writes "all 1 sections match" but "1/1 section(s) differ" -- with
+# LITERAL PARENTHESES.  A `sections?` here matched the PASS line and missed
+# every FAIL line, so each failing module was classified NOCOMPARE, i.e. as a
+# harness problem rather than as the result it actually was.
+reTotal = re.compile(r"^(PASS|FAIL):\s+(?:all (\d+) section\(?s\)? match"
+                     r"|(\d+)/(\d+) section\(?s\)? differ)")
 
-def runOne(item):
-    m, t, lib = item
-    cmd = ["python3", "-u", "compileLinkCompare", f"--config={config}",
-           f"--library={lib}", f"--filename={t}/{m}.asm", f"--out-dir={outDir}"]
-    cmd[2] = subprocess.run(["which", "compileLinkCompare"], capture_output = True,
-                            text = True).stdout.strip() or cmd[2]
-    # A TIMEOUT, because one module that never returns otherwise stops the whole
-    # run and it reports success with a row missing.
-    try:
-        r = subprocess.run(cmd, cwd = work, capture_output = True, text = True,
-                           timeout = 1800)
-        txt = r.stdout + r.stderr
-    except subprocess.TimeoutExpired as e:
-        txt = (e.stdout or b"").decode(errors="replace") if isinstance(e.stdout, bytes) else (e.stdout or "")
-        return (m, t, "HANG", 0, 0, 0, "exceeded 1800s", txt)
-    if reports:
-        open(Path(reports) / f"{m}.rpt", "w").write(txt)
-
-    ok = differ = hwDiff = 0
+def classify(m, t, txt):
+    '''Reduce one compileLinkCompare report to a row.  This is the ONLY
+    classifier: a live run and a --from-reports pass both come through here, so
+    the two cannot disagree.  Two derivations of one quantity disagreeing was
+    the cause of most defects in the OI301700 phase.'''
+    ok = differ = hwDiff = badSize = 0
     for line in txt.splitlines():
         mo = reSect.match(line)
         if mo:
+            if mo.group(5) is not None and mo.group(5) != mo.group(4):
+                badSize += 1
             if mo.group(1) == "OK": ok += 1
             else:
                 differ += 1
-                d = reDiff.search(mo.group(5))
+                d = reDiff.search(mo.group(6))
                 hwDiff += int(d.group(1)) if d else 0
     forced = "FORCED LINK:" in txt
     if "Assembly failed with exit code" in txt:
@@ -133,10 +134,46 @@ def runOne(item):
                 (first[0] if first else "no fcmcmp verdict"), txt)
     status = "PASS" if tot.group(1) == "PASS" else "FAIL"
     if forced: status += "-FORCED"
-    return (m, t, status, ok, differ, hwDiff, "", txt)
+    return (m, t, status, ok, differ, hwDiff,
+            (f"{badSize} section(s) sized differently from the CSECT table"
+             if badSize else ""), txt)
+
+def runOne(item):
+    m, t, lib = item
+    clc = subprocess.run(["which", "compileLinkCompare"], capture_output = True,
+                         text = True).stdout.strip() or "compileLinkCompare"
+    cmd = ["python3", "-u", clc, f"--config={config}", f"--library={lib}",
+           f"--filename={t}/{m}.asm", f"--out-dir={outDir}"]
+    # A TIMEOUT, because one module that never returns otherwise stops the whole
+    # run and it reports success with a row missing.  PIPED OUTPUT IS LOST WHEN A
+    # COMMAND IS KILLED, which is why the report is written out per module.
+    try:
+        r = subprocess.run(cmd, cwd = work, capture_output = True, text = True,
+                           timeout = 1800)
+        txt = r.stdout + r.stderr
+    except subprocess.TimeoutExpired as e:
+        out = e.stdout or ""
+        txt = out.decode(errors = "replace") if isinstance(out, bytes) else out
+        if reports: open(Path(reports) / f"{m}.rpt", "w").write(txt)
+        return (m, t, "HANG", 0, 0, 0, "exceeded 1800s", txt)
+    if reports:
+        open(Path(reports) / f"{m}.rpt", "w").write(txt)
+    return classify(m, t, txt)
 
 rows = []
-with ThreadPoolExecutor(max_workers = jobs) as ex:
+if fromReports:
+    # Reclassify reports a previous run saved.  A --reports directory is what
+    # makes a classifier defect cost nothing: the evidence is on disk, so the
+    # 30-minute sweep is not repeated to correct how it was counted.
+    trees = {m: t for m, t, _ in work_items}
+    for i, path in enumerate(sorted(glob.glob(str(Path(fromReports) / "*.rpt"))), 1):
+        m = Path(path).stem
+        r = classify(m, trees.get(m, "?"), open(path).read())
+        rows.append(r[:7])
+        print(f"[{i}] {r[1]}/{r[0]}\t{r[2]}\t{r[4]} of {r[3]+r[4]} sections "
+              f"differ\t{r[5]} halfwords", flush = True)
+else:
+  with ThreadPoolExecutor(max_workers = jobs) as ex:
     for i, r in enumerate(ex.map(runOne, work_items), 1):
         rows.append(r[:7])
         print(f"[{i}/{len(work_items)}] {r[1]}/{r[0]}\t{r[2]}\t"

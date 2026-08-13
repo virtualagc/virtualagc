@@ -417,8 +417,25 @@ parameter =
 sv = /&[@#$A-Z][@#$A-Z0-9]*/ ;
 
 list = listItem { ',' listItem } ;
-listItem = 
+# A SUBLIST ENTRY MAY CARRY A PARENTHESISED SUFFIX -- `0(R0)`, `0(R3,R2)`,
+# `TPCTFLGS-TPCTSTRT(R0)` -- and without that alternative the list ended at the
+# `(`, `replacement` fell through to its empty-string alternative, and every
+# real alternative of `operandInvocation0` then failed.  What made this hard to
+# see is that `(TB,0(R0),FPMUSED,NZ)` ALONE appears to parse: it is matched by
+# the `end4` catch-all, `/[^ ]+/ / */ $`, which accepts any single non-blank run
+# at end of input.  Add a blank and a comment, as every real card has, and the
+# catch-all no longer applies and the parse fails -- which is why the 24 modules
+# that invoke the IF/ELSE/DO/CASE macros all died on
+#     IF    (TB,TBCEFLAG-TBCESTRT(R2),X'0800',O) THEN RETURN WORD
+# THE SUFFIX IS MATCHED AS A FLAT REGEXP, not as a nested `list`, because
+# `evalSublistEntry` reassembles such an entry with `"".join(entry)` and that
+# requires the parse to be a tuple of strings.  Commas inside the parentheses are
+# therefore fine and nested parentheses are not; no card in either corpus has
+# them.  OI301700's library defines none of these macros, so nothing in that
+# phase exercised this rule.
+listItem =
     | '(' list ')'
+    | /[^ ,()]*/ '(' /[^()]*/ ')'
     | /[^ ,()]*/
     ;
 
