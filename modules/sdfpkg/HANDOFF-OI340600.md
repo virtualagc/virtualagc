@@ -624,6 +624,53 @@ WHY.  Pinning them needed a test that does not depend on address alignment, beca
 every alignment-based attempt on G9 so far has produced a confident wrong
 answer.  The test that worked is worth having written down.
 
+THE PREVIOUS ENTRY IS WRONG.  Scanning for annunciator 5C/5D found none in the
+G9 dump and I concluded the payload flex slots were zero.  The elements ARE
+there; they carry a DIFFERENT annunciator.  Listing every payload row by its
+element number, no alignment assumed:
+
+    ours  85 86 87 88 89 90 94 113
+    dump  85 86 87 88 89 90 94 105 106 107 108 109
+
+105-109 are &FLX1ELM(15),(1),(2),(3) and &FLX2ELM(15).  In our build they come
+out of the SINGLE FLEX block with ANNUN 5C/5D and &AERRLBL=FIO52N10.  In the
+dump they come out of the LPF block with ANNUN 5E/5F and FIO52M10/FIO52M11 --
+a different array family, &LPF1ELM/&LPF2ELM, declared beside the FLX arrays in
+FIOGLBL and set in the same vehicle-unique file.
+
+READ BY GROUP, the dump interleaves them exactly where LPF slots would fall:
+
+    5E group   ours 113 85 86 87        dump 105 106 85 86 87
+    5F group   ours  94 88 89 90        dump  94 107 108 109 88 89 90
+
+So 113 is replaced by 105 and 106 in LPF1, and 107, 108, 109 are added to LPF2.
+Our FIOMDPVU sets only &LPF1ELM(2)=113, &LPF1CNT(2)=6 on that side.
+
+THE HYPOTHESIS TO TEST, fully pinned including the counts.  The invocations
+read ...,&LPFnELM(k),&LPFnCNT(k),1,LSTNR,xxL,&LPFnCNT(k),5E/5F,&AERRLBL, so
+&DLAYFLG=1 and the delay high byte is 12+2*(cnt+1).  The dump's high bytes give
+the counts directly:
+
+    105 hi=28 -> cnt=7      106 hi=14 -> cnt=0
+    107 hi=28 -> cnt=7      108 hi=14 -> cnt=0      109 hi=18 -> cnt=2
+
+so FIOMDPVU should read &LPF1ELM=105 cnt 7 and 106 cnt 0, &LPF2ELM=107 cnt 7,
+108 cnt 0, 109 cnt 2, no 113, and all eight &FLX1ELM/&FLX2ELM slots 0.  WHICH
+SLOT INDICES those occupy is NOT pinned -- the group ordering says LPF1 takes
+the two lowest and LPF2 the next three, but the block must be read to confirm.
+One build settles it: FCMBMTG9 should come out at 1334 halfwords exactly.
+
+THE LESSON, which cost two wrong conclusions on this module.  An
+alignment-independent test is only as good as its question.  'No 5C/5D rows
+exist' was true and meant nothing, because the rows had moved annunciator.
+Enumerate the ELEMENTS present on both sides and diff those sets; the element
+number survives every re-gating, re-labelling and relocation, and it is the
+only field here that does.
+
+WHY.  The previous entry pinned the slots at zero on a test that asked the wrong
+question, and a reconstruction was committed on it.  The file has been
+withdrawn (PFS aaeed393).  The corrected reading is testable in one build.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
