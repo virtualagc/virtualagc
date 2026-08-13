@@ -4563,6 +4563,71 @@ NEXT.  DCICYC still reports "Literal not in literal pool"; FPMIHPC2 is the
 sequence-symbol case named above; and item 1 of the old list, FPMIDLE's single
 wrong displacement, is untouched and still the cheapest bug report here.
 
+FOUND, AND IT IS AN ENCODING RULE, NOT A ONE-OFF.
+
+`BNC STMMAIN1` at 01E02 is the last card of 190's three, and it accounted for
+256 of the 284 bytes 207 left -- one halfword short, sliding every address to
+01E82 where the region re-syncs.
+
+WHAT THE ORIGINAL WRITES, from the as-received listing:
+
+    01E02 CEF7 0816      1DEE 0016   BNC   STMMAIN1
+
+    -- the FOUR-byte backward form, magnitude 0x16 from 01E04.  We wrote DE56.
+
+THE SHORT BRANCH'S TWO-BIT FIELD IS THE FORM, and the comment at the `BC`
+path has said so since 187: BCF 00 forward, BVCF 01 forward, BCB 10 backward,
+BCTB 11.  Mapped over the whole corpus by (byte0, low two bits):
+
+    DE|0   BLE fwd 28, BNH fwd 27, BNP fwd 19, BNO fwd 7, BC fwd 239
+    DE|1   BNC fwd 3, BVC fwd 1
+    DE|2   BLE back 14, BNH back 15, BC back 11
+    DE|3   BCT back 31, BCTB fwd 3, BCTB back 44
+
+    `BNC`, `BOV` and `BOC` test the OVERFLOW/CARRY register rather than the
+    condition register, so they take 01.  A BACKWARD one would need 11 --
+    AND 11 IS BCTB.  THE ENCODING DOES NOT EXIST.  The same holds at D9 for
+    BOV and DA for BOC.
+
+    THE CORPUS AGREES WITHOUT AN EXCEPTION.  All six short cards in the 01
+    group -- BNC 3, BOV 1, BOC 1, BVC 1 -- are FORWARD.  Of 825 backward local
+    branches, 741 lie within range and every one of them is short EXCEPT this
+    card, which is the only backward card the 01 group has.
+
+WHAT WE EMITTED WAS NOT A LONGER-THAN-NECESSARY BRANCH, IT WAS THE WRONG
+CONDITION.  `generateSRS(..., "BCB", r1, d, 0b10)` with mask 6 is `BLE`
+backward: correctly formed, reaches the right address, tests low-or-equal
+where the card says no-carry.  A byte comparison called it one halfword; a
+machine would have called it a bug.
+
+TWO PLACES SHORTEN IT AND BOTH NEEDED THE GUARD.  `optimizeScratch`'s
+backward arm decides the LENGTH and the alias path decides the BYTES; fixing
+either alone leaves them disagreeing, which is 177's disease again.
+
+    AND THE LONG FORM NEEDS `BVC`, NOT `BC`.  The fall-through set
+    `operation = "BC"`, and `rsMnemonic` then gives C6 for mask 6 where the
+    original has CE -- the overflow/carry bit is bit 3 of byte0 in the long
+    form too.  Measured: BLE, BNH, BNP and BNO, same mask 6, all take C6; the
+    one long BNC takes CE.
+
+MEASURED, BOTH HARNESSES:
+
+    BILDNEW5        284 -> 15 bytes mismatched, 8 missing
+    verify-sweep    267 MATCH, 4 MATCH?, 1 DIFFERS.  Unchanged.
+    RUNASM          PASS, all 205 byte-for-byte.  Unchanged.
+
+WHAT IS LEFT IS 15 BYTES ON 12 CARDS, and it is no longer one problem:
+
+    EIGHT ONE-BYTE `DC X'n'` SUBOPERANDS where the original has 00 --
+    00460, 00476, 0161C, 0162E, 01632, 01639, 0163A, 036E5.  All of the shape
+    `DC Y(SYMBOL),X'n'` or a bare `DC X'n'`.  This is now the largest group
+    and has never been looked at.
+    012A8 `LHI R5,DISABLFL`  the last addressing-byte defect, 191's F3->F1.
+    03D28 `DC YL.6(12),BL.10'0000000010'`  3002 against E92F.
+    05199 and 0519A  the two `Y($POF053)` cards, which are 184's restored ones.
+
+WHY.  The rule was already written down in this file -- the two-bit form selector, BCF 00, BVCF 01, BCB 10, BCTB 11 -- in a comment at the BC path, and bvcfAliases already existed for the forward case.  Reading the encoding I already had would have been quicker than any measurement.
+
 THE MACRO-PROCESSING ROOT CAUSE IS FIXED, issue #1331, in commit 0f5ab2939 on
 2026-08-08.  The issue itself is worth reading anyway -- it is the user's own
 analysis plus two outside contributors, and it is where the semantics below are

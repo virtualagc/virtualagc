@@ -762,7 +762,15 @@ def optimizeScratch():
                 entry["ambiguous"] = False
                 continue
             # Special cases that branch backward:
+            # THE OVERFLOW/CARRY ALIASES HAVE NO BACKWARD SHORT FORM.  The
+            # short branch's two-bit field selects the form -- BCF 00, BVCF 01,
+            # BCB 10, BCTB 11 -- so `BNC`, `BOV` and `BOC`, which take BVCF's
+            # 01, have nowhere to put the backward bit: 11 is already BCTB.
+            # `generateSRS(..., "BCB", ..., 0b10)` below would emit the
+            # CONDITION-REGISTER branch of the same mask instead, silently
+            # testing something else.  See the fuller note at the encoder.
             if section == sect and \
+                    operation.rstrip("$@#") not in bvcfAliases and \
                     (operation in branchAliases or operation in ["BCT", "BC"] \
                      or operation in srsBranchOperations):
                 d = symtab[sect]["value"] + properties["pos1"] // 2 + 1 - d2
@@ -3361,12 +3369,48 @@ def generateObjectCode(source, macros):
                                                 b = 0b00
                                             data = generateSRS(properties, o, r1, d, b)
                                             done = True
-                                        elif d < 0 and d > -0b111000:
+                                        elif d < 0 and d > -0b111000 and \
+                                                operation.rstrip("$@#") \
+                                                    not in bvcfAliases:
                                             d = (-d & 0b111111)
                                             data = generateSRS(properties, "BCB", r1, d, 0b10)
                                             done = True
                                         else:
-                                            operation = "BC"
+                                            # THERE IS NO BACKWARD SHORT FORM
+                                            # FOR THE OVERFLOW/CARRY ALIASES.
+                                            # The short branch's two-bit field
+                                            # IS the form: BCF 00 forward,
+                                            # BVCF 01 forward, BCB 10 backward,
+                                            # BCTB 11.  `BNC`, `BOV` and `BOC`
+                                            # test the overflow/carry register
+                                            # and so take 01; a backward one
+                                            # would need 11, which is BCTB.
+                                            # Shortening it emitted 0b10 --
+                                            # BCB, the CONDITION-REGISTER
+                                            # branch of the same mask.  Mask 6
+                                            # is `BLE`, so BILDNEW5's
+                                            # `BNC STMMAIN1` assembled DE56, a
+                                            # correctly-formed backward branch
+                                            # ON THE WRONG CONDITION, where the
+                                            # original writes CEF7 0816.
+                                            #     MEASURED, whole corpus: every
+                                            # one of the 6 short 01-form cards
+                                            # (BNC 3, BOV 1, BOC 1, BVC 1) is
+                                            # FORWARD, and of 825 backward local
+                                            # branches all 741 within range are
+                                            # short except this one.  It is the
+                                            # only backward card in the group
+                                            # that exists, and it is long.
+                                            #     `BVC`, NOT `BC`, or the long
+                                            # form loses the distinction too:
+                                            # `rsMnemonic` gives BC's opcode C6
+                                            # for mask 6 and BVC's CE, and the
+                                            # original's byte is CE.  BLE, BNH,
+                                            # BNP and BNO -- same mask, other
+                                            # group -- all take C6.
+                                            operation = "BVC" \
+                                                if operation.rstrip("$@#") \
+                                                    in bvcfAliases else "BC"
                                             forceRS = True
                                     isConstant = False
                                     specifiedB2 = (b2 != None)
