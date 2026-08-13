@@ -981,6 +981,42 @@ WHY.  The HPL family is the trap here and it will recur: rows whose annunciator 
 VARIABLE cannot be grouped by annunciator at all, which is what defeated two
 earlier attempts on this module.
 
+SWEEP of all 225 OI340600 modules against pristine PFS source, 2026-08-13,
+about 22 minutes wall clock with one straggler:
+
+    OK          176
+    OK-EARLY     47
+    HANG          1   BILDNEW5, exceeded 1800s -- known, out of scope
+    ERRORS        1   MENU12, 61 intolerable lines
+
+223 OF 225 ASSEMBLE.  MENU12's commonest diagnostic is 48 of '(Pass -1,
+Severity 255) Unable to evaluate data expression L''&#-1025' -- a LENGTH
+ATTRIBUTE of a symbolic variable, which is a DIFFERENT defect from the one
+fixed today and is the next assembler question worth taking up.
+
+WHAT THE FIX REACHED, bounded statically because no pre-fix sweep was kept and
+re-running one costs another 22 minutes.  Scanning every MLIB80 member for a
+SUBSCRIPTED SETx whose target is declared by no GBLA/GBLB/GBLC/LCLA/LCLB/LCLC
+anywhere in the library gives FOUR members:
+
+    CHAR.asm      CCODE6, CMTX6
+    CHAR0.asm     CCODE6, CMTX6
+    EVNTEXP.asm   VALUE
+    FCMBMTMC.asm  APLHRM, APLHRNM, BPLHRM, BPLHRNM
+
+so the fix can only ever have affected modules invoking those four macros.  The
+one measured case is FCMBMTS2, which went from 81 intolerable errors to zero.
+CAVEAT ON THE BOUND: it counts a symbol as declared if ANY member declares it,
+even one never COPYed into the module in question, so it is an upper bound on
+safety and could understate the reach.  It is a bound, not a measurement.
+
+IF AN EXACT FIGURE IS EVER WANTED, keep a pre-change sweep before touching the
+assembler again.  That is the cheap habit this run lacked.
+
+WHY.  The sweep answers 'where does the corpus stand' but NOT 'what did the fix
+clear', because no pre-fix sweep was kept.  The static bound below answers the
+second question without a second 22-minute run, and its limits are stated.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
