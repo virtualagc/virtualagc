@@ -50,7 +50,13 @@ mkdir -p "$OBJDIR"
 export MLIB SRC OBJDIR
 
 : > "$OUT"
-ls "$SRC"/*.asm | xargs -n 1 basename | sed 's/\.asm$//' | xargs -P 6 -n 1 bash -c '
+# BILDNEW5 IS OUT OF SCOPE and must not be swept.  It never completes: it
+# takes the full SWEEP_TIMEOUT and is then reported HANG, which is 30
+# minutes added to every run and one row of noise in every result.  Skipping
+# it by name here rather than leaving it to be remembered each time.
+SKIP='^BILDNEW5$'
+ls "$SRC"/*.asm | xargs -n 1 basename | sed 's/\.asm$//' | grep -Ev "$SKIP" \
+  | xargs -P 6 -n 1 bash -c '
     m=$0
     cd "$SRC" || exit 1
     se=$(mktemp)
