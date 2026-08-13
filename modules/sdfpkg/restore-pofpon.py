@@ -39,17 +39,23 @@ LISTING = "/mnt/STORAGE/home/rburkey/workspace/PFS/" \
 SRC = os.path.expanduser("~/workspace/PFS/OI301700/SSSRC/BILDNEW5.asm")
 SRN = re.compile(r'^\d{6}[A-Z]{2}$')
 
-def cards(path, off):
+# `wide` also admits GENERATED cards, which carry an `nn-MACRO` stamp in the
+# same columns instead of a six-digit SRN.  Two different jobs need two
+# different answers: WHAT IS MISSING is a question about real source cards and
+# must stay narrow, while WHERE TO PUT IT BACK wants every card the listing and
+# our members have in common, generated or not.  See the anchor search.
+def cards(path, off, wide=False):
     out = []
     for i, line in enumerate(open(path, errors='replace')):
         s = "%-118s" % line.rstrip('\n')
         card = s[off:off+80]
-        if SRN.match(card[72:80]):
+        if SRN.match(card[72:80]) or (wide and card[72:80].strip()):
             out.append((card[72:80], card[:71].rstrip(), i))
     return out
 
 def main(mlib, apply):
     listing = cards(LISTING, 37)
+    listingWide = cards(LISTING, 37, wide=True)
     copies = []
     for line in open(SRC, errors='replace'):
         t = "%-71s" % line.rstrip('\n')[:71]
@@ -61,6 +67,7 @@ def main(mlib, apply):
 
     files = {}
     where = collections.defaultdict(list)   # (srn,text) -> [(member, lineNo)]
+    whereWide = collections.defaultdict(list)
     for m in copies:
         p = os.path.join(mlib, m + ".asm")
         if not os.path.exists(p):
@@ -68,6 +75,8 @@ def main(mlib, apply):
         files[m] = open(p, errors='replace').read().split("\n")
         for srn, text, i in cards(p, 0):
             where[(srn, text)].append((m, i))
+        for srn, text, i in cards(p, 0, wide=True):
+            whereWide[(srn, text)].append((m, i))
 
     have = collections.Counter((srn, text) for k in where
                                for (srn, text) in [k] for _ in where[k])
@@ -97,14 +106,45 @@ def main(mlib, apply):
         # ahead of those bytes instead of after them, at an address the
         # original build never gave it.  The next real card is past the whole
         # expansion, so anchoring to it lands the card where it belongs.
-        # (Only cards with a genuine six-digit SRN are candidates; generated
-        # cards carry an `nn-MACRO` stamp instead and are not in `where`.)
+        #
+        # GENERATED CARDS ARE CANDIDATE ANCHORS TOO, and restricting the search
+        # to six-digit SRNs put two cards in the wrong place.  Between
+        # `$POF 017000AF` and the next real source card lie a `TEXT`
+        # invocation, its whole DCHAR expansion, `$PON 017200AF` and a second
+        # `TEXT` -- and every one of the invocations was DROPPED by the
+        # extraction, so none of them is in `where`.  Both cards therefore
+        # anchored to the same distant card and were inserted side by side.
+        #
+        # BILDNEW5 is where that shows.  $POF053 and $PON053 both landed at
+        # 036C1, on top of $POF054, so `DC Y($POF053)` assembled 36C1 for the
+        # original's 36A5 and `DC Y($PON053-$POF053)` gave a length of ZERO
+        # for the original's 5.  The expansion cards ARE in our members,
+        # stamped `02-DCHAR`, and anchoring to them puts $POF053 at 036A5 on
+        # `BFSLOAD EQU` and $PON053 at 036AA on `AREA1 EQU`, which is where
+        # the original build has them.
+        #
+        # MEASURED: exactly 2 of the 35 anchors move, and they are these two.
         anchor = None
         for j in range(idx + 1, len(listing)):
             k2 = (listing[j][0], listing[j][1])
             if present[k2] == 1:
                 anchor = where[k2][0]
                 break
+        wideAnchor = None
+        # Both lists carry the card's LINE NUMBER in the listing file, which is
+        # what identifies the same card in the two of them; the indices are not
+        # comparable, since the wide list holds far more cards.
+        lineNo = listing[idx][2]
+        wideIdx = next((j for j, c in enumerate(listingWide)
+                        if c[2] == lineNo), None)
+        if wideIdx != None:
+            for j in range(wideIdx + 1, len(listingWide)):
+                k2 = (listingWide[j][0], listingWide[j][1])
+                if len(whereWide.get(k2, ())) == 1:
+                    wideAnchor = whereWide[k2][0]
+                    break
+        if wideAnchor != None:
+            anchor = wideAnchor
         if anchor == None:
             anchorless.append((srn, text))
             continue

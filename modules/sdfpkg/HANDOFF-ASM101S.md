@@ -4822,6 +4822,74 @@ WHAT IS LEFT IS TWO BYTES ON TWO CARDS, AND THEY ARE NOT THE ASSEMBLER'S:
 
 WHY.  The card looked like a bit-packing defect and the arithmetic said our answer was the one the operands support.  When a measurement and the operands disagree that plainly, the next question is whether the MEASUREMENT is right, and here it was not.
 
+ZERO BYTES MISMATCHED AND ZERO MISSING.  BILDNEW5 was the last module in the
+PASS corpus that differed from its listing, and it no longer does.
+
+    verify-sweep    267 MATCH, 5 MATCH?, 0 DIFFERS
+
+THE DEFECT WAS IN THE RESTORATION, NOT THE ASSEMBLER, exactly as 211
+suspected.  In COMDATA the two restored cards sat side by side:
+
+             $POF                                     017000AF
+             $PON                                     017200AF
+
+    -- so $POF053 and $PON053 both landed at 036C1, ON TOP OF $POF054.
+    `DC Y($POF053)` gave 36C1 for the original's 36A5, and
+    `DC Y($PON053-$POF053)` gave a length of ZERO for the original's 5.  A
+    zero-length unprotect region is what made this a restoration question
+    rather than an arithmetic one.
+
+WHERE THEY BELONG, from the listing itself:
+
+    036A4  DC YL.6(12),...          FCW2 expansion
+           $POF                     017000AF
+    036A5  BFSLOAD EQU *,0+1,0+1    the TEXT expansion begins
+    ...
+    036A9  DC ...                   'BSL AREA 1' ends
+           $PON                     017200AF
+    036AA  AREA1 EQU *,0+1,0+1
+
+    -- five halfwords between them, which is the 5 the original build
+    records.
+
+WHY THE TOOL PUT THEM TOGETHER.  `restore-pofpon.py` anchors each missing card
+FORWARD, to the next listing card that occurs exactly once across our members,
+and only cards with a six-digit SRN were candidates.  BETWEEN THESE TWO AND
+THE NEXT REAL SOURCE CARD, EVERY CARD IS ONE THE EXTRACTION DROPPED -- a
+`TEXT` invocation, its DCHAR expansion, the `$PON` itself, a second `TEXT`.
+None is in `where`, so both cards anchored to the same distant card and were
+inserted adjacent.
+
+    THE EXPANSION CARDS ARE THERE ALL ALONG, stamped `02-DCHAR` in the same
+    columns an SRN would occupy.  Admitting them as anchor candidates -- for
+    PLACEMENT only, since WHAT IS MISSING is still a question about real
+    source cards -- puts $POF053 on `BFSLOAD EQU` and $PON053 on `AREA1 EQU`.
+
+    MEASURED BEFORE APPLYING ANYTHING: run against the pre-restoration
+    sources, EXACTLY 2 OF THE 35 ANCHORS MOVE, and they are these two.  The
+    other 33 are unchanged, which is what makes this safe to assert.
+
+WHAT WAS TOUCHED, and it is in SOMEBODY ELSE'S REPOSITORY.  `~/workspace/PFS`
+was pulled first and one file changed, `OI301700/MLIB80/COMDATA.asm`: two
+lines moved, nothing added or deleted.  It is LEFT UNCOMMITTED for the user to
+review, so the corpus result currently rests on a working-tree change there.
+`restore-pofpon.py` itself is fixed in this repository and would now produce
+the corrected placement from scratch.
+
+STILL OPEN, and neither is a byte:
+
+  - 88 BYTES IN BILDNEW5 ARE UNCOVERED, not wrong: 66 are short `X`
+    constants in a PRINT NOGEN macro table the listing prints without object
+    code, 22 the rest.  All lie in interior gaps that pin their count.  Four
+    other modules carry the same flavour of gap, which is what the five
+    MATCH? are.
+  - THE DUPLICATED PRINT TRIO REMAINS.  A restored `$POF` expands afresh
+    beside the vestigial `PRINT NOGEN / PRINT GEN` the extraction kept, so
+    the listing shows both.  It emits nothing and costs no space; it is a
+    tidiness defect in the sources, and it is now the only one known.
+
+WHY.  The two cards were restored by a tool that anchored only to real source cards, and every card between these two and the next real one had been dropped by the extraction.  A rule that skips the evidence lands both cards in the same place and says nothing about it.
+
 THE MACRO-PROCESSING ROOT CAUSE IS FIXED, issue #1331, in commit 0f5ab2939 on
 2026-08-08.  The issue itself is worth reading anyway -- it is the user's own
 analysis plus two outside contributors, and it is where the semantics below are
