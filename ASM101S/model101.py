@@ -4524,6 +4524,15 @@ def generateObjectCode(source, macros):
                     toMemory(data)
                     continue
 
+                # WHAT EACH FIELD MUST BE RELOCATED AGAINST, by subfield name.
+                # A BCE address is as relocatable as a Y constant and was being
+                # emitted without an RLD, so an EXTRN came out as 0 and stayed
+                # 0: FIOICCPG's `#LBR@ FIOBRE` assembled FA00 0000 where
+                # DASS_SSW has FA00 8BC6, which is FIOCBLKS+0, and the object
+                # carried ER cards for FIOBRE and FIOIBRE with no RLD card at
+                # all.
+                bceRelocSymbol = {}
+
                 def bceField(subfield):
                     '''Evaluate one BCE operand.  An address comes back hashed
                     and has to be resolved to its combined offset, exactly as a
@@ -4535,6 +4544,20 @@ def generateObjectCode(source, macros):
                     section, offset = unhash(value)
                     if section is None:
                         return value
+                    # The value itself is computed exactly as before; this only
+                    # records what the linker has to fill in.  An EXTRN is
+                    # keyed in `rextrns` by its hashcode alone, so a reference
+                    # carrying a displacement -- `#LBR@ FIOPDBR+2` -- has to be
+                    # looked up with the low bits masked off.
+                    if value in rextrns:
+                        bceRelocSymbol[subfield] = rextrns[value]
+                    elif (value & hashcodeMask) in rextrns:
+                        bceRelocSymbol[subfield] = \
+                            rextrns[value & hashcodeMask]
+                    elif section in sects \
+                            and not sects[section].get("dsect") \
+                            and "offset" in sects[section]:
+                        bceRelocSymbol[subfield] = section
                     return offset + sects.get(section, {}).get("offset", 0)
 
                 first = bceField("A1")
@@ -4576,6 +4599,22 @@ def generateObjectCode(source, macros):
                     data[1] = (field >> 16) & 0xFF
                     data[2] = (field >> 8) & 0xFF
                     data[3] = field & 0xFF
+                    # THE RLD PATCHES THE LOW HALFWORD, data[2..3], which is
+                    # where the original build puts a BCE address: DASS_SSW has
+                    # FA00 8BC6, high byte zero.  The field itself is wider
+                    # than that -- the POO calls it an 18-bit unsigned address
+                    # -- so a target at or above 0x10000 would need data[1]
+                    # patching too and this would be insufficient.  No BCE
+                    # address in the corpus is that high; if one ever is, the
+                    # comparison against the dump is what will say so, which is
+                    # why this is written down rather than guarded.
+                    if compile and "A1" in bceRelocSymbol:
+                        relocations.append({
+                            'symbol': bceRelocSymbol["A1"],
+                            'section': sect,
+                            'address': sects[sect]["pos1"] + 2,
+                            'type': 'Y'
+                        })
                 elif layout == "IUACOMMAND":
                     # A 5-BIT IUA over a 19-BIT COMMAND, not a byte over a
                     # halfword.  This was wrong for years and could not have
