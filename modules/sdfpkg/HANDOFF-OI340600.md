@@ -1017,43 +1017,40 @@ WHY.  The sweep answers 'where does the corpus stand' but NOT 'what did the fix
 clear', because no pre-fix sweep was kept.  The static bound below answers the
 second question without a second 22-minute run, and its limits are stated.
 
-L' IS IMPLEMENTED (virtualagc 6f659ccf8).  evalArithmeticExpression handled N'
-and K' for a symbolic variable and fell through to 'Not yet implemented' for
-L'.  POS and VECTOR build a symbol name into a SETC and then take its length:
+L' IS IMPLEMENTED (virtualagc 6f659ccf8, corrected by a2207684d).
+evalArithmeticExpression handled N' and K' for a symbolic variable and fell
+through to 'Not yet implemented' for L'.  POS and VECTOR build a symbol name
+into a SETC and then take its length attribute:
 
     &#       SETC  '&P#.X'
     &L       SETA  L'&#-1025
 
-so the operand is the symbol &# names, not &# itself.  An undefined symbol
-returns length attribute 1, as Assembler H gives it; the names these macros
-build -- P1Y, P2X, P37X -- are defined NOWHERE in the module or library and the
-deck subtracts 1025, so it expects the default rather than a diagnostic.
-MENU12's 48 L' errors are gone.
+so the operand is the symbol &# names, not &# itself.  &# is a real variable:
+POS declares LCLC &P#,&#,&N#.  That much is right and stays.
 
-THE BLOCKER IS NOW A UNARY MINUS, 48 of them: 27 of -&#X and 21 of -&#Y, with
-48 'Could not parse the operand of DC' downstream.  The grammar is
+MENU12 IS BLOCKED BY SOURCE WE DO NOT HOLD.  POS documents what it is doing:
 
-    arithmeticExpression = term { ( '+' | '-' ) term } ;
-    factor = /[NKLSI]'/ variable | constant | identifier | variable
-           | '(' arithmeticExpression ')' | '*' ;
+    .*  THE X-COORD IS THE LENGTH ATTRIBUTE OF &P.X , THE Y-COORD
+    .*  IS THE LENGTH ATTRIBUTE OF &P.Y
 
-No leading unary sign exists.  'constant' permits one -- a note in the file
-records that being added for FIOMCNTL's '@TI +1' -- but 'variable' does not, and
-SETA operands are evaluated with their variables INTACT, so -&#X reaches the
-parser as a minus in front of a variable and has no production.
+and MENU12 calls POS (P2,P25), POS (P31,P1), POS (P39,P19) and 21 more, so
+P2X, P25Y, P31X, P1Y and the rest must be REAL DEFINITIONS whose LENGTH carries
+a column or line number, which the caller recovers by subtracting 1025.  NO
+SUCH SYMBOL EXISTS anywhere in SSSRC or MLIB80.  MACROS, the only member MENU12
+copies, is present and copies cleanly, and does not define them.
 
-WHY IT IS SHAPED THAT WAY, from RSB: there was no model for these operand
-expressions, so HAL/S was mimicked.  In HAL/S every integer literal is
-non-negative and a leading minus is therefore an arithmetic expression.  There
-is probably no reason an ASM101S literal could not be negative.  So the fix is
-open in two directions -- a genuine unary operator on the expression, or signed
-literals -- and it is a CHOICE, not a repair of something known.
+A DEFAULT WAS TRIED AND WITHDRAWN.  Returning 1 for the missing symbol, on the
+Assembler H rule for undefined symbols, let MENU12 assemble -- with every
+coordinate silently equal to 1-1025.  That is worse than not assembling, and it
+is why the length attribute is now diagnosed again.  RSB spotted the reading
+was fishy before the measurement did.
 
-WHAT MAKES IT DELICATE.  The AST for 'a + b' is [left, [['+', right], ...]] and
-evalArithmeticExpression dispatches on len(expression) == 2.  Adding an optional
-leading sign to arithmeticExpression changes that arity, so the grammar and the
-evaluator must move together.  Do not edit the grammar alone and assume the
-evaluator copes; read the len==2 branch first.
+SO MENU12 HAS TWO SEPARATE OBSTACLES and only one is ours:
+  1. the missing position symbols, which is a SOURCE gap, not a tool defect;
+  2. 48 unary-minus parse failures, -&#X and -&#Y, which is a real ASM101S
+     defect and is described in the entry below.
+Fixing 2 will not make MENU12 assemble correctly while 1 stands.  DO NOT
+'FIX' 1 WITH A DEFAULT VALUE.
 
 WHY.  The grammar's shape here was inherited from HAL/S rather than from any AP-101S
 document, which is the fact that makes the next change safe to reason about.
