@@ -1278,6 +1278,9 @@ def splitSetOperands(operand):
 
 # Set a symbolic variable.  `operation` is one of "SETA", "SETB", "SETC".
 # `name` and `operand` are strings.
+# SET symbols implicitly declared as arrays, which alone may grow.
+svImplicitArrays = set()
+
 def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
     global svGlobals
     
@@ -1315,8 +1318,28 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
         sv = svLocals
         svLocals[sname] = dv
     else:
-        error(properties, "Symbolic variable %s undeclared" % sname)
-        return
+        # A SUBSCRIPTED target that has not been declared either.  Assembler H
+        # declares that implicitly too, taking the dimension from the highest
+        # subscript ever assigned; processing the deck in order, that means the
+        # array simply grows, which is what the assignment below does.
+        #
+        # FCMBMTMC RELIES ON THIS.  It assigns four payload high-rate comfault
+        # mask tables -- &APLHRM, &APLHRNM, &BPLHRM, &BPLHRNM -- with no LCLC
+        # or GBLC anywhere; the whole file declares only &HWORD0/1/3 and
+        # &PASSOPS.  The block is reached by one OPS, so FCMBMTS2 was the only
+        # module that failed, with 81 errors of which 64 were these four names.
+        if operation == "SETA":
+            dv = 0
+        elif operation == "SETB":
+            dv = False
+        elif operation == "SETC":
+            dv = ""
+        else:
+            error(properties, "Instruction is not SETA, SETB, or SETC")
+            return
+        sv = svLocals
+        svLocals[sname] = [dv]
+        svImplicitArrays.add(sname)
     v = sv[sname]
     if isinstance(v, list):
         if "exp" not in pname:
@@ -1405,6 +1428,12 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
             error(properties, "Unable to evaluate data expression %s" % text)
             return
         i = index + offset
+        if i >= len(sv[sname]) and sname in svImplicitArrays:
+            # Only an IMPLICITLY declared array grows.  One declared with LCLC
+            # or GBLC has a stated dimension, and an index past it is a real
+            # defect that must keep being reported.
+            pad = type(sv[sname][0])()
+            sv[sname].extend([pad] * (i + 1 - len(sv[sname])))
         if i < 0 or i >= len(sv[sname]):
             error(properties, "Index out of range: %s(%d)" % (sname, i + 1))
             return
