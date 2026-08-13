@@ -552,6 +552,44 @@ WHY.  The entry above read G9's size as contradicting the flags.  That was wrong
 and left standing it would have sent the next session hunting a conditional
 that does not exist instead of the surplus that does.
 
+FCMBMTG9's 50 surplus halfwords come from MLIB80/FIOMDPVU.asm ('VU' = vehicle
+unique), which populates the flex-MDM element arrays:
+
+    &FLX1ELM(15) SETA 105     &FLX2ELM(15) SETA 109
+    &FLX1ELM(1)  SETA 106     &FLX2ELM(1)  SETA 110
+    &FLX1ELM(2)  SETA 107     &FLX2ELM(2)  SETA 111
+    &FLX1ELM(3)  SETA 108     &FLX2ELM(3)  SETA 112
+
+FCMBMTMC emits each payload element only when its slot is non-zero --
+AIF (&FLX1ELM(n) EQ 0).ASFLX34 -- and the surplus halfwords carry those exact
+numbers: Y((12+2*(1+1))*256+107), Y((12+2*(0+1))*256+108) and
+Y((12+2*(0+1))*256+112).  Our source enables elements the dump's build had
+zeroed.  Each costs a BMT row plus its listener, return-word and NUM/FCMRST
+companions, which is why the surplus arrives in five regions of 15, 5, 6, 12
+and 12 rather than as one block.
+
+THIS IS FLIGHT DATA, NOT CODE.  Payload MDM assignments change per flight, so
+FIOMDPVU is expected to differ between the source we hold and a 2010 dump.  It
+is the same class of difference as the GPS flags and equally not an ASM101S
+defect.  WHICH slots were zero is NOT yet pinned -- the five regions account
+for the 50 halfwords but their boundaries are approximate, and elements 106
+and 111 sit close enough to the edges that the exact set needs the row-level
+decode before any FIOMDPVU reconstruction is written.
+
+THE METHOD THAT FOUND IT, for the next module whose rows will not align by
+symbol.  Take the LINKED image and its rldanalyze .json, treat every halfword
+NOT named in 'relocations'/'unresolvedRelocations' as an anchor (513 of 1384
+here), then segment greedily: walk the anchors, and at the first mismatch try
+every shift and take the one with the longest forward run of agreement.  That
+gave 0 -> -15 -> -20 -> -26 -> -38 -> -50 with runs of 9, 71, 5, 6 and 9, and
+90 percent of all anchors agreeing under the resulting piecewise map against
+17 percent flat.  Windowed voting was tried first and put the boundaries in
+the wrong places; the greedy run-length version is the one to use.
+
+WHY.  The surplus was assumed to be more of the same file.  It is a different file
+entirely, and a class of difference -- per-flight configuration data -- that
+will recur across the corpus and should be recognised on sight.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
