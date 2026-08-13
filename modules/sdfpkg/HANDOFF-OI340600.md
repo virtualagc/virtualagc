@@ -944,6 +944,43 @@ WHY.  The slots are read from element codes, the same evidence that settled G9, 
 the payload rows now reproduce the dump's exactly.  The three rows left over
 are a different question and should not be confused with the slots.
 
+FCMBMTS2 LINKS TO 368 HALFWORDS, exactly the length the CSECT table gives,
+against 516 before.  Seven halfwords differ, five of them our 0000 against a
+pointer a single-object link cannot resolve.  All eleven listener rows match
+the dump exactly, counts included.  Recovered file:
+~/workspace/PFS/OI340700/MLIB80/FIOMDPS2.asm (PFS 730afbf2).
+
+THE CONTRIBUTED SOURCE SPREADS THIS FLIGHT'S PAYLOAD ELEMENTS OVER FOUR ARRAY
+FAMILIES -- LPF 110-115, FLX 116-135, DUL1ELM(1)=105, and HPL 107/108/109.  The
+dump holds ONE: 105 106 under annunciator 5E and 107 108 109 under 5F, which is
+the LPF block and nothing else.  Recovered values:
+
+    LPF1ELM(2) = 105  code LAC      LPF2ELM(2) = 107  code LOC
+    LPF1ELM(3) = 106  code LBC      LPF2ELM(3) = 108  code LPC
+                                    LPF2ELM(4) = 109  code LQC
+
+every FLX, DUL and HPL element slot 0.  Identical in shape to the recovered
+FIOMDPVU, as two vehicle-unique files describing one flight should be.  The
+LPFnCNT values are already right: no listener count disagrees.
+
+THE HPL FAMILY IS THE TRAP.  HPL1ELM(1)=108, HPL1ELM(15)=109 and HPL2ELM(1)=107
+emit three further rows carrying THE SAME ELEMENT NUMBERS as the LPF ones, and
+their annunciator is a VARIABLE, HPL1ANN(k), so they appeared under 5E, 5C and
+5F and did not look like one family at all.  Two earlier passes stalled at
+'three rows unaccounted' because of this.  GROUPING BY ANNUNCIATOR IS ONLY
+SAFE WHERE THE ANNUNCIATOR IS A LITERAL.  Where it is a variable, only the
+element code -- FIOBYxxC, resolved from the dump -- identifies the invocation.
+That is the general rule for this table and it is what finally worked.
+
+STILL OPEN, and small: two halfwords just before FCMRESTR, 74 and 72 in the
+dump against 72 and 54 here.  They are accumulated word counts, not element
+data, and nothing in the listener rows disagrees, so whatever feeds them is not
+among the slots above.
+
+WHY.  The HPL family is the trap here and it will recur: rows whose annunciator is a
+VARIABLE cannot be grouped by annunciator at all, which is what defeated two
+earlier attempts on this module.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
