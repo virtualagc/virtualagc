@@ -1153,13 +1153,16 @@ now says so, once per member, on stderr:
 Only that case is reported.  Most misses are ordinary -- the name is simply not
 a macro -- and warning on those would bury the signal.
 
-Verified by invoking MACSMITH, which is present and unindexed: the warning
-appears exactly once.  NO SWEEP HAS BEEN RUN FOR NOISE.  The change cannot move
-a module's classification -- it writes only to stderr, and the sweep classifies
-on 'Traceback' and 'for COPY not found', neither of which this text matches --
-but whether it chatters on the corpus is unmeasured.  If a member's name
-collides with an operation somewhere, that is where it would show, and it is
-worth a glance at the next sweep's stderr.
+MEASURED, NOT ASSUMED.  A full 224-module sweep emits the warning ZERO times
+and classifies every module exactly as the kept baseline: 176 OK, 47 OK-EARLY,
+1 ERRORS, nothing moving.  So it is silent in normal operation and speaks only
+when an index is actually wrong, which is what a guard-rail should do.
+
+THE SWEEP NOW KEEPS STDERR (virtualagc, oi340600-sweep.sh).  It used to go to a
+mktemp deleted at the end of each module, which would have made this
+measurement impossible -- and would have thrown away any traceback too.  It is
+$OBJDIR/$m.err now.  The corpus is quiet there: 224 files, 224 lines, one
+'Output obj:' status line each.
 
 WHY.  The gate stays because it is load-bearing; what it lacked was a voice.  The
 silent version of this failure cost five modules once already.
