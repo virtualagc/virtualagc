@@ -858,45 +858,48 @@ WHY.  S2 stops at a point worth resuming from rather than a dead end, and the la
 six halfwords say something specific about which block emits an element.
 Written down while the measurements are fresh; nothing here is committed.
 
-THE MAP, read out of FCMBMTMC rather than guessed.  Each annunciator belongs to
-one array family, and the invocation fixes both:
+THE QUESTION WAS WRONG.  Neither file is read second, because FIOMDPVU IS NOT
+READ FOR S2 AT ALL.  SSSRC/FCMBMTS2.asm copies exactly two members:
 
-    5E  <- LPF1ELM(k), k=2..9, giving TFIVPF12..PF19 with element codes
-           LAC LBC LCC LDC LEC LFC LGC LHC
-    5F  <- LPF2ELM(k), the same shape on the B side (LOC LPC LQC LRC ...)
-    5B  <- DUL1ELM and DUL3ELM, the dual-port blocks
-    5C  <- the FLX families, 154 invocations, including FLX5ELM
-    5D  <- the FLX return-word rows
+         COPY FIOGLBL                                              000600
+         COPY FIOMDPS2                                             000700
 
-Because the annunciator is a literal in each invocation, A ROW'S ANNUNCIATOR
-NAMES THE ARRAY THAT PRODUCED IT.  That is the lever for S2 and it is why the
-element set alone is not enough here.
+and FCMBMTMC states the scheme in its own commentary at line 231: FIOMDPS2 is
+copied in FCMBMTS2, FIOMDPS4 in FCMBMTS4, FIOMDPVU in the others.  The MDP
+members are also commented OUT of MLIB80/MACROFILES.txt, so none of them is
+read as open code either; only the COPY brings one in.  One vehicle-unique
+file per module, chosen by the module.
 
-BOTH VEHICLE-UNIQUE FILES ARE IN PLAY and they set the SAME globals, including
-the IIC gates: FIOMDPS2 has DUL1ELM(1)=105, DUL1CNT(1)=31, DUL1IIC=1337,
-LPFIIC=1436, FLX1IIC=2129, FLX3IIC=2739; FIOMDPVU has all three DULnIIC at 0,
-FLX1IIC=2096, LPFIIC=611.  Whichever member is read second wins, and I never
-established which that is.  THAT IS THE NEXT THING TO FIND OUT, and it is a
-question about how the library is read, not about flight data.
+MY EVIDENCE FOR 'BOTH ARE READ' WAS AN ARTEFACT.  The two runs I compared
+differed in BOTH files, so a change caused by FIOMDPS2 was attributed to
+FIOMDPVU.  The clean single-variable test had already been run and says the
+opposite: contributed versus recovered FIOMDPVU, with FIOMDPS2 untouched, gives
+516 halfwords and 434 differing BOTH TIMES.  FIOMDPVU does not affect S2.
 
-FOUR MEASUREMENTS, target 368 halfwords:
+WHAT THAT MEANS FOR THE MEASUREMENTS.  Only FIOMDPS2 varies, so they reduce to:
 
-    contributed both files                              516   (+148)
-    FIOMDPS2 FLX+LPF zeroed, FIOMDPVU contributed       388    (+20)
-    FIOMDPS2 FLX+LPF zeroed, FIOMDPVU recovered         362     (-6)
-    FIOMDPS2 FLX+LPF+DUL zeroed, FIOMDPVU recovered     358    (-10)
-    both files carrying LPF 105-109                     382    (+14)
+    FIOMDPS2 contributed                        516   (+148)
+    LPF 105-109, FLX 0, DUL 0                   382    (+14)
+    everything 0 except DUL1ELM(1)=105          362     (-6)
+    everything 0                                358    (-10)
 
-The dump wants 105 and 106 under 5E and 107, 108, 109 under 5F.  In the -10
-build ours emits 108 under 5E and 109 under 5C and neither 105 nor 106 at all,
-so the LPF1 slots are being fed something other than 105/106 and a FLX family
-is still supplying 109 even with every FLX element slot in both files zeroed.
-THAT LAST POINT IS THE INTERESTING ONE: it means a third source of FLX element
-values exists, or one of these two files is not being read at all.  Settle that
-before touching either file again.
+target 368.
 
-NOTHING ABOUT S2 IS COMMITTED and the working copy is verified back to
-contributed source, all three members compared byte for byte.
+AND THE 'THIRD SOURCE' IS NOT ONE.  With every element slot in FIOMDPS2 zeroed
+the module still emits rows carrying 107, 108 and 109.  No other file assigns
+these arrays -- FIOGLBL declares them but assigns nothing, and FCMBMTMC assigns
+none.  So those rows are NOT array-driven: they come from invocations that pass
+a literal &NUM whose symbol happens to have that value.  MY ELEMENT-SET METHOD
+CONFLATES THE TWO.  It worked on G9 because the added rows were array-driven;
+on S2 it silently mixes array rows with hardcoded ones, which is why the counts
+would not reconcile.
+
+SO THE NEXT STEP IS TO SEPARATE THEM.  Take the rows by ANNUNCIATOR, which
+names the array family, and within a family match the invocation rather than
+the element number: 5E is LPF1ELM(k) k=2..9 as TFIVPF12..PF19 with codes LAC
+LBC LCC LDC LEC LFC LGC LHC, 5F is LPF2ELM(k) on the B side, 5B is DUL1ELM and
+DUL3ELM, 5C and 5D are the FLX families.  Only the rows whose invocation reads
+an array tell you anything about FIOMDPS2.
 
 WHY.  I went on testing combinations of the two vehicle-unique files instead of
 reading the OPS-S2 path, which is exactly what the entry above says not to do.
