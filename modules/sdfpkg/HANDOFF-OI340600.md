@@ -719,20 +719,29 @@ reads them, not in a commit message.
 A NON-BLANK in column 72 of a comment line continues it, and the continuation
 swallows the statement that follows.  A SPACE in column 72 does not: the
 standard Virtual AGC anonymization boilerplate reaches 72 columns via two
-trailing spaces and sits in 277 files of MLIB80 doing no harm.
+trailing spaces and sits in 277 files of MLIB80 doing no harm.  That
+boilerplate line is the ONLY comment past column 71 in any contributed file
+touched here.
 
 DEMONSTRATED, not inferred.  Taking the recovered FIOMDPVU and changing NOTHING
-but the width of its two rule-off lines, from 71 columns to 75 so a dash lands
-in column 72, takes FCMBMTG9 from 1334 halfwords to 1318.  Restoring the width
+but the width of two rule-off lines, from 71 columns to 75 so a dash lands in
+column 72, takes FCMBMTG9 from 1334 halfwords to 1318.  Restoring the width
 restores 1334.  No diagnostic is issued in either case.
 
-THE CASE IT DOES NOT EXPLAIN.  FCMBMTMC carried 75-column rule-offs immediately
-before its &GPSFF1 SETA statement for a whole session, and FCMBMT16 still built
-exact at 1076 halfwords with 7 differing.  Same shape, no loss.  A plausible
-difference is that FIOMDPVU is open code while FCMBMTMC's note sits inside a
-macro definition, so comment continuation may be handled differently in the two
-contexts -- BUT THAT IS UNTESTED and is written here as a lead, not a fact.  If
-it matters to something you are doing, test it; do not rely on it.
+THE RULE-OFF LINES ARE NOT HISTORICAL.  Neither OI340600's nor OI301700's
+FCMBMTMC contains a line of dashes anywhere; they exist only inside the
+recovery notes written for OI340700, which is to say I introduced them.  Any
+statement below about their behaviour is a statement about those added lines,
+not about contributed source.
+
+THE CASE THE RULE DOES NOT EXPLAIN.  The recovery note added to FCMBMTMC
+carried 75-column rule-offs immediately before its GPS SETA statements for a
+whole session, and FCMBMT16 still built exact at 1076 halfwords with 7
+differing.  Same shape as FIOMDPVU, no loss.  A plausible difference is that
+FIOMDPVU is open code while FCMBMTMC's note sits inside a macro definition, so
+comment continuation may be handled differently in the two contexts -- BUT THAT
+IS UNTESTED and is written here as a lead, not a fact.  If it matters to
+something you are doing, test it; do not rely on it.
 
 PRACTICAL RULE: keep every added comment inside column 71 in all of these
 files.  It costs nothing, and the failure it avoids is silent -- the module
@@ -741,6 +750,34 @@ assembles clean, reports nothing, and comes out short.
 WHY.  The rule was first written down from a guess that happened to be right, and
 half of the guess was wrong.  Both halves are recorded here so nobody has to
 rediscover which is which.
+
+Measured 2026-08-13 with BOTH ~/workspace/PFS/OI340700/MLIB80/FCMBMTMC.asm and
+FIOMDPVU.asm in place, every FCMBMT module in its own configuration:
+
+  G16  FCMBMT16   1076 halfwords, size exact,   7 differ
+  G2   FCMBMT02    936 halfwords, size exact,   3 differ
+  G3   FCMBMT38    984 halfwords, size exact,   7 differ
+  G8   FCMBMT38    984 halfwords, size exact,   7 differ
+  G9   FCMBMTG9   1334 halfwords, size exact,  12 differ
+  P9   FCMBMT89   PASS
+  S2   FCMBMTS2   ASMFAIL, 81 intolerable errors
+  SSW  FCMBMTPG   1172 halfwords, size exact,   9 differ
+
+NOT ONE SIZE MISMATCH REMAINS in the family.  Before the recovery, G16, G2, G3
+and G8 were each short by exactly 40 and G9 was long by 10, and a size shift
+misaligns a module end to end, so those five reported differences in the
+hundreds.  They now report single digits, and every one of those is our 0000
+against a pointer a single-object forced link cannot resolve, except G9's
+TFIVMCI1 which is the reverse.
+
+NO REGRESSION.  P9 passed before and passes now.  SSW was 9 before and is 9
+now, untouched by either change.  S2 fails to assemble with 81 intolerable
+errors, the SAME 81 as at baseline -- checked, not assumed -- and is a separate
+defect that predates all of this work.
+
+WHY.  A recovery that fixes one configuration and quietly breaks another is worse
+than none, and neither recovered file is configuration-specific: FCMBMTMC
+builds every FCMBMT module and FIOMDPVU is read by all of them.
 
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
