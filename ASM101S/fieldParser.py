@@ -622,6 +622,21 @@ def operandFieldEnd(text):
         i += 1
     return len(text)
 
+# Is the end of `text` inside a quoted string?  This is the one case in which a
+# continued operand's trailing blanks are DATA rather than padding, so it decides
+# whether they may be dropped.  Same doubled-quote rule as `operandFieldEnd`.
+def insideQuote(text):
+    quoted = False
+    i = 0
+    while i < len(text):
+        if text[i] == "'":
+            if quoted and text[i+1:i+2] == "'":
+                i += 2
+                continue
+            quoted = not quoted
+        i += 1
+    return quoted
+
 # Does a card carry the expander's stamp in columns 73-80?  A generated card
 # reads `nn-NAME` there -- `03-POPIN`, `02-IFPRO` -- where a typed card carries
 # a sequence number.
@@ -678,6 +693,29 @@ def joinOperand(lines, index, column, proto=False, invoke=False):
                 _field = operand[:operandFieldEnd(operand)]
                 if operandFieldEnd(operand) >= len(operand.rstrip()) \
                         or _field.rstrip().endswith(","):
+                    # A CONTINUED OPERAND'S TRAILING BLANKS ARE PADDING OUT TO
+                    # COLUMN 71, not data, and must not survive the join.  They
+                    # did whenever `operandFieldEnd` ran to the end of the card,
+                    # which is exactly what happens when the operand is still
+                    # inside an unclosed parenthesis: a blank at depth > 0 does
+                    # not end the operand field, so it returns len(text) and
+                    # `_field` kept the padding.  DOPROC's
+                    #     STKINS (&WHILE(1),&WHILE(2),&WHILE(3),&WHILE(4),     X
+                    #           &WHILE(5),&LIND(&LI))
+                    # therefore joined as `...&WHILE(4),      &WHILE(5)...` and
+                    # substituted to `(CH,R2,NE,FIELD,      ,#@LB2)`.  A
+                    # `listItem` cannot match a blank, so the sublist parse died
+                    # and STKINS was invoked with an EMPTY &P1 -- which sent it
+                    # down its `.NOTSUBL`/`.SGLOPR` path, stacking no comparison
+                    # and leaving &CCVAL unset.  That is the whole of the
+                    # `Undefined symbol '#@LB2'` failure in the 8 DO WHILE
+                    # modules: the loop's test was never emitted, so the label
+                    # the test would have carried was never defined.
+                    #
+                    # INSIDE A CHARACTER LITERAL THE BLANKS ARE DATA, which is
+                    # why this is guarded rather than unconditional.
+                    if not insideQuote(_field):
+                        _field = _field.rstrip()
                     operand = _field + line[15:71].rstrip("\r\n")
                 elif macroStamped(line):
                     # AND A MACRO-GENERATED CARD IS NOT EVEN SWALLOWED.  The
