@@ -1356,8 +1356,39 @@ subtitle = ""
 literalPoolNumber = 0
 continuation = False
 previousContext = None
+# THE LAST WRITER OF AN ADDRESS IS THE ONE THAT COUNTS.  `--compare` walks the
+# cards in source order, compares each one's bytes against the listing's memory
+# and then marks that address consumed.  Where an `ORG` sends the location
+# counter BACK and a later card overwrites an earlier one, that is exactly
+# wrong twice over: the FIRST card is compared against the value the LAST one
+# left in the listing, and the last card then finds the address already
+# consumed and is counted as unverified rather than checked.
+#
+# BILDNEW5 is where this surfaced.  GENLINES has
+#
+#     DC    YL.6(12),BL.10'0000000010'      3002
+#     ORG   *-1
+#     DC    YL.2(03),YL.7(82),YL.7(47)      E92F
+#
+# and BOTH builds finish with E92F at 03D28 -- ours is in the object deck, at
+# LINES offset 0210 -- while the comparison reported 3002 against E92F and
+# called it two wrong bytes.  Skipping a card that a later one overwrites
+# compares what the build actually emits, which is the whole point.
+finalWriter = {}
+for _propNum in range(endLibraries, len(source)):
+    _p = source[_propNum]
+    if "assembled" not in _p or _p.get("pos1") is None:
+        continue
+    _sect = _p.get("section")
+    if _sect is None or _sect not in sects:
+        continue
+    _base = _p["pos1"] + sects[_sect].get("offset", 0) * 2
+    for _k in range(min(8, len(_p["assembled"]))):
+        finalWriter[(_sect, _base + _k)] = _propNum
 for i in range(endLibraries, len(source)):
     properties = source[i]
+    # The card's own index, kept because the byte loop below reuses `i`.
+    propNum = i
     # A continuation only continues the line before it IN THE SAME FILE OR
     # MACRO BODY.  `source` is one flat list spanning both, so at the boundary
     # the previous entry is the macro INVOCATION -- and if that was written
@@ -1497,7 +1528,15 @@ for i in range(endLibraries, len(source)):
             # verification.
             for i in range(min(8, len(properties["assembled"]))):
                 b = properties["assembled"][i]
-                if comparisonMemory != None:
+                if comparisonMemory != None and \
+                        finalWriter.get((section, address + offset * 2), \
+                                        propNum) != propNum:
+                    # A LATER CARD OVERWRITES THIS BYTE, so it is not what the
+                    # build emits and the listing's value belongs to that later
+                    # card.  Neither compared nor consumed; see the note where
+                    # `finalWriter` is built.
+                    pass
+                elif comparisonMemory != None:
                     oaddress = address + offset * 2
                     if oaddress >= len(comparisonMemory):
                         # Generated code running past the end of the listing

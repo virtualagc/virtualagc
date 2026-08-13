@@ -4759,6 +4759,69 @@ QUESTION ANY MORE:
 
 WHY.  The base field was a LITERAL, 0b11110011, with a comment three lines above saying LHI is an alias for LA.  Everything needed to see the defect was on the screen together; what was missing was the question of whether the literal could ever be wrong.
 
+THE ASSEMBLER WAS RIGHT AND THE HARNESS WAS WRONG.  210 left `03D28
+DC YL.6(12),BL.10'0000000010'` reporting 3002 against E92F, and noted that
+our arithmetic is what the operands say.  It is.  So is the original's --
+they are TWO DIFFERENT CARDS AT ONE ADDRESS:
+
+    03D28 3002    DC    YL.6(12),BL.10'0000000010'      (FCW2 expansion)
+    03D29 003D28  ORG   *-1
+    0003D28       MSG001 EQU *,0+1,0+1
+    03D28 E92F    DC    YL.2(03),YL.7(82),YL.7(47)      (DCHAR expansion)
+
+    `ORG *-1` SENDS THE LOCATION COUNTER BACK and the message text overwrites
+    the control word.  This is the ORG at GENLINES line 296 that 205 found and
+    could not attach to anything.  Both listings print both cards; OUR LISTING
+    PRINTS THEM IDENTICALLY, 3002 then E92F, which is what should have made
+    this suspect at once.
+
+THE OBJECT DECK SETTLES IT.  Decoding BILDNEW5.obj -- ESD, then the TXT
+records into a memory map -- LINES is esdid 2 and holds
+
+    LINES offset 0210  =  E92F
+
+    -- 0210 bytes into LINES is halfword 03D28, and E92F is the original's
+    value.  WE EMIT THE RIGHT BYTES.  Nothing was ever wrong here.
+
+WHAT `--compare` DOES.  It walks the cards in SOURCE ORDER, compares each
+one's `assembled` bytes against the comparison listing's memory, and then sets
+that address to None to mark it consumed.  Against an overwrite that is wrong
+twice:
+
+  - the FIRST card is compared against the value the LAST one left in the
+    listing's memory -- 3002 against E92F, reported as two wrong bytes;
+  - the LAST card, the one that actually decides the content, then finds the
+    address already consumed and is counted UNVERIFIED.
+
+    So the harness both invented a failure and skipped the check that would
+    have shown there wasn't one.
+
+THE FIX IS TO COMPARE THE FINAL WRITER.  `finalWriter` maps (section, address)
+to the last card that writes it; an earlier card at an overwritten address is
+neither compared nor consumed.  IT STRENGTHENS THE HARNESS RATHER THAN
+LOOSENING IT: the two bytes moved OUT of "uncovered" and INTO checked-and-
+correct, which is why the uncovered count falls at the same time.
+
+MEASURED:
+
+    BILDNEW5        4 -> 2 bytes mismatched; uncovered 90 -> 88
+    verify-sweep    267 MATCH, 4 MATCH?, 1 DIFFERS.  Unchanged.
+    RUNASM          PASS, all 205 byte-for-byte.  Unchanged.
+
+WHAT IS LEFT IS TWO BYTES ON TWO CARDS, AND THEY ARE NOT THE ASSEMBLER'S:
+
+    05199 `DC Y($POF053)`             A5 against our C1
+    0519A `DC Y($PON053-$POF053)`     05 against our 00
+
+    184's restored cards.  The original's numbers are 0x36A5 and 5; ours are
+    0x36C1 and 0.  A count of zero unprotected halfwords is not a plausible
+    thing for the original build to have meant, so the labels are landing in
+    the wrong places rather than the arithmetic being wrong -- READ 184 BEFORE
+    CHANGING ANYTHING, because this is about what was restored, not about how
+    it assembles.
+
+WHY.  The card looked like a bit-packing defect and the arithmetic said our answer was the one the operands support.  When a measurement and the operands disagree that plainly, the next question is whether the MEASUREMENT is right, and here it was not.
+
 THE MACRO-PROCESSING ROOT CAUSE IS FIXED, issue #1331, in commit 0f5ab2939 on
 2026-08-08.  The issue itself is worth reading anyway -- it is the user's own
 analysis plus two outside contributors, and it is where the semantics below are
