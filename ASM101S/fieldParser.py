@@ -374,6 +374,14 @@ factor =
     | /[NKLSI]'/ variable
     | constant 
     | identifier 
+    # A UNARY SIGN, which `constant` supplies only for a numeric literal --
+    # its regex is /[-+]?[0-9]+/, the sign folded into the token, a shape
+    # inherited from HAL/S where integer literals are never negative.  A sign
+    # in front of a VARIABLE had no production at all, so POS's `-&P#` and
+    # MENU12's `-&#X` and `-&#Y` failed to parse: 48 of them, with 48
+    # unparsable DC operands downstream.  Placed AFTER `constant` so a numeric
+    # literal keeps its existing parse and only the remaining cases reach here.
+    | ( '+' | '-' ) factor
     | variable 
     | '('  arithmeticExpression  ')' 
     | '*'

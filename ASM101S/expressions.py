@@ -718,6 +718,16 @@ def evalArithmeticExpression(expression, \
             error(properties, "Not yet implemented: %s" % op, severity)
             return None
         
+    if len(expression) == 2 and expression[0] in ("-", "+"):
+        # UNARY SIGN.  Must be tested before the binary-chain branch below,
+        # which reads expression[0] as a left operand and expression[1] as a
+        # list of (operator, operand) pairs; a unary node is neither.
+        value = evalArithmeticExpression(expression[1], svLocals, properties, \
+                                         symtab, star, severity)
+        if value == None:
+            return None
+        return -value if expression[0] == "-" else value
+
     if len(expression) == 2:
         left = evalArithmeticExpression(expression[0], svLocals, properties, \
                                         symtab, star, severity)
