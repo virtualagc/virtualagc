@@ -1202,6 +1202,81 @@ before believing a clean listing.
 
 WHY.  242 said the restructure was the largest change contemplated in this phase.  It turned out not to need a restructure at all -- recording attributes as the read generates them is a fallback, not a reordering -- and the reason the phase looked blocked was that three FURTHER defects sat behind the first one, each only reachable once the one ahead of it was fixed.  Anyone who reads 242 alone will start the wrong job.
 
+S2 IS FULLY ACCOUNTED FOR.  FCMBMTS2 links to 368 halfwords, the length the
+CSECT table gives, and the two RTWDTAB delay counts before FCMRESTR now match
+the dump.  32 halfwords still differ and EVERY ONE is our 0000 against a
+pointer a single-object link cannot resolve -- lnk101 names them, TFIVPF24,
+TFIVPS12 and TFIVPS22.  Nothing else in the section disagrees.  Recovered
+file: ~/workspace/PFS/OI340700/MLIB80/FIOMDPS2.asm (PFS 15205c37).
+
+    &LPF1CNT(2)  6 -> 7      &LPF2CNT(2)  0 -> 7
+                             &LPF2CNT(4)  0 -> 2
+
+236 ARGUED FROM THE LISTENER TABLE AND THE ARGUMENT IS EMPTY FOR S2.  It said
+the LPFnCNT values had to be right because no listener count disagreed with
+the dump.  BMTENT reads
+
+        AIF   ('&PASSOPS' EQ 'S2').CFDISP        COMMANDER ONLY
+        AIF   ('&PASSOPS' EQ 'S4').CFDISP        COMMANDER ONLY
+        AGO   .LSTNR                             COMMANDER/LISTENER
+
+for a PLCMDLST entry, so under S2 NO PAYLOAD ELEMENT REGISTERS A LISTENER AT
+ALL, and the row itself is written `DC Y(&NUM)` with the count dropped.  An
+LPFnCNT therefore appears NOWHERE in the module except the two delay counts.
+There was never a listener count that could have disagreed, and S2's eleven
+listener rows all come from CMDRLST entries, which is why they matched
+throughout.
+
+    THE GENERAL FORM: "X agrees, therefore Y is right" is only worth
+    anything once you have checked that Y REACHES X.  Here it did not, for a
+    reason visible in four lines of the macro.
+
+THE TWO HALFWORDS ARE THE WHOLE OF THE EVIDENCE AND THEY ARE ENOUGH.
+FCMBMTMC builds each as
+
+    &RWDLYCT SETA &OVHD*(REL)+2*(RWD+REL+1)+&ODEL
+
+and S2 takes the .SMOH arm, &OVHD 10 and &ODEL 4, so the halfword is
+12*REL+2*RWD+6.  The element counts REL were already right, so each halfword
+pins RWD outright:
+
+    BCE 10 (LPF1, FIOBYRAC)   dump 74, was 72   REL 3   RWD 16, was 15
+    BCE 11 (LPF2, FIOBYRBC)   dump 72, was 54   REL 4   RWD  9, was  0
+
+RWD accumulates 9 for the KU-band radar plus LPF1CNT(2)+(3) on BCE 10, and
+LPF2CNT(2)+(3)+(4) on BCE 11, so the required sums are 7 and 9.
+
+THE SPLIT IS NOT FREE, AND THE CORROBORATION IS INDEPENDENT.  Two halfwords
+pin two sums, not five values.  FIOMDPVU was recovered from G9 -- which is
+neither S2 nor S4 and therefore DOES register payload listeners, so its
+counts are pinned by G9's listener rows -- and it holds 7 and 0 for LPF1 and
+7, 0 and 2 for LPF2.  Those sum to exactly the 7 and 9 required here.
+Neither measurement was derived from the other, and two vehicle-unique files
+describing one flight agreeing on the payload's return words is what makes
+the split more than a guess.
+
+HOW TO REPRODUCE, because the counts in 236 were measured a different way and
+do not match this run.  A scratch library of SYMLINKS to OI340600/MLIB80 with
+a REAL copy of the recovered FIOMDPS2 and a REAL MACROFILES.txt (never
+symlink that one -- it has been truncated through a symlink twice), then
+
+    dass-literals.py --config=S2 --out=S2-lit.fcm --exceptions=exceptions-S2.txt
+    cd ~/workspace/PFS/OI340600
+    compileLinkCompare --config=S2 --library=SCRATCHLIB \
+        --filename=SSSRC/FCMBMTS2.asm --out-dir=OUT \
+        --memory=S2-lit.fcm --exceptions=exceptions-S2.txt
+
+compileLinkCompare passes `--max-hw-diffs 10` to fcmcmp, so the report TRUNCATES
+at ten differences and the two that matter are the LAST two.  Re-run fcmcmp by
+hand with `--max-hw-diffs 100` to see them at all.
+
+THE LISTING'S ADDRESS COLUMN IS IN HALFWORDS, not bytes.  Reading it as bytes
+puts you 175 halfwords into the wrong part of the section and lands on
+plausible-looking comfault masks, which is a wrong answer that looks right.
+0D9CD - 0D91E = 0xAF is the listing's own 000AF, directly.
+
+WHY.  236 left these two halfwords open and gave a reason for skipping them that was wrong -- that the listener table vouched for the counts.  Anyone resuming would have believed it and looked somewhere else.  The reason it is wrong is four lines of BMTENT, and the same shape of mistake is easy to repeat: check that the thing you are arguing from actually reaches the thing you are arguing about.
+
 WHAT IT WAS FOR.  MLIB80 stores macro definitions and COPY decks together, and
 ASM101S once read every macro definition ahead of the module.  It needed to
 know which members were which so it would never preload a COPY deck.
