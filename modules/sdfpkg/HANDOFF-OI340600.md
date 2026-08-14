@@ -1757,14 +1757,32 @@ MEASURED, G9, BOTH ARMS OF THE 250 FIX, SAME 306 HAL/S OBJECTS IN EACH:
         before   OK:  FIOLGERR @ 1A05E (136 halfwords vs 140 expected)
         after    OK:  FIOLGERR @ 1A05E (140 halfwords)
 
-    IT READS "OK" IN BOTH, and that is not the improvement it looks like --
-    fcmcmp compares only the OVERLAP when the sizes disagree, so before the
-    fix it was declaring 136 halfwords equal and saying nothing about the
-    other four.  What changed is that the four now exist, and match.
+    IT READS "OK" IN BOTH, and the OK is only the CONTENT verdict, taken over
+    the overlap:  before the fix it declared 136 halfwords equal and asserted
+    nothing about the other four.  What changed is that the four now exist,
+    and match.
 
-    A SECTION THAT IS THE WRONG LENGTH THEREFORE HIDES INSIDE AN "OK" ROW.
-    The size list is the place to read, not the pass/fail column, and that is
-    how this defect survived 247's link in the first place.
+    THE "OK" DOES NOT HIDE ANYTHING, and an earlier draft of this entry said
+    it did.  nsts-sdl-dps PR 32 -- "fcmcmp: report sections whose size
+    disagrees with the CSECT table", merged 2026-08-08 -- put the size on the
+    row itself as `vs 140 expected`, listed it under "N section(s) differ in
+    size from the CSECT table", and made it a HARD FAILURE.  Its second
+    commit is titled "a size mismatch always fails; drop --strict-sizes":
+    THERE IS NO --strict-sizes OPTION ANY MORE, the behaviour is
+    unconditional, and passing the flag is now an error.  Both arms of the
+    link above exited 1 on the size list alone.
+
+    SO THE READING IS THE OTHER WAY ROUND:  fcmcmp is what FOUND this defect.
+    247's SIZE-FORCED rows and 248's opening sentence -- three sections whose
+    length disagrees with the CSECT table -- are that report.  Read the size
+    list beside the pass/fail column, not instead of it.
+
+    AND THE TOOLS ARE CURRENT, which was worth checking rather than assuming:
+    build/bin/fcmcmp and build/bin/lnk101 are CMake-generated shell wrappers
+    around an EDITABLE venv install, so they run
+    ~/donschmidt/nsts-sdl-dps/src/... live and their own mtimes say nothing
+    about their age.  PRs 26 through 33 are ancestors of the local HEAD and
+    34 and 35's changes are present as the fork branch upstream merged.
 
 WHAT IS STILL NOT A REAL LINK.  177 symbols remain undefined and `-f` leaves
 their sites unpatched, and --external-syms still pins the layout rather than
