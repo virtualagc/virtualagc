@@ -1135,6 +1135,73 @@ WHY.  The obvious two fixes both fail for reasons that are not obvious, and the 
 fails circularly.  Anyone picking this up will try them in this order; the
 reasons are recorded so they are tried on paper instead of in code.
 
+MENU12 ASSEMBLES.  The OI340600 corpus is 177 OK and 47 OK-EARLY, with no
+failures of any class, and the ONLY classification change across 224 modules
+is MENU12 ERRORS -> OK.  OI301700 is unmoved at 267 MATCH, 5 MATCH?, 0
+DIFFERS -- 0 bytes mismatched and 0 missing in all 272 -- which matters
+because three of the four fixes affect every module, not just this one.
+Commits 40d2414a3 and 17d569396.
+
+NO RESTRUCTURE WAS NEEDED.  242 proposed interleaving macro expansion with
+symbol definition, a rebuild of `readSourceFile` against model101.py's pass
+loop.  What actually works is far smaller: `readSourceFile` RECORDS an EQU's
+length and type attributes as it generates them, into a table that L' and T'
+consult only as a FALLBACK.  A definition is visible to whatever expands
+after it and to nothing before it -- the ordering a real assembler gives
+them -- and once `symtab` exists the real entry always wins.  Most EQUs still
+cannot be evaluated during the read (`FOO EQU BAR+4` names a symbol no pass
+has defined) and that is normal; the evaluation is done quietly, saving and
+restoring `errorCount` and `maxSeverity`, because `maxSeverity` decides the
+exit status and a speculative failure would otherwise fail the assembly.
+
+FOUR DEFECTS, EACH HIDDEN BEHIND THE ONE AHEAD OF IT.
+
+  1. THE COMPILED PARSER WAS STALE.  The grammar lives as text in
+     fieldParser.py but the parser is IMPORTED from parser_asm.py, which
+     `fieldParser.py --generate-only` writes.  626198a1a edited the grammar
+     and did not regenerate it, so the unary-sign fix was INERT -- and the
+     sweep that followed was clean because the change did nothing.  A grammar
+     edit is not in effect until parser_asm.py is regenerated and committed
+     with it, and NOTHING CHECKS THIS.
+
+  2. SUBSTITUTING AN ARITHMETIC VALUE IS UNSIGNED.  A negative SETA value
+     substituted as -456, so POS's `XPOS -&L` produced `--456`, which no DC
+     can parse.  The value converts to an UNSIGNED decimal and the macro
+     supplies its own sign, which is precisely why POS tests the sign:
+
+                  AIF   (&L GE 0).GENPOSX
+         &N       XPOS  -&L
+
+     OI301700 settles it -- that source came from listings with the macros
+     already expanded, and it holds `FL.11'-456'`, ONE minus, generated from
+     this same line.
+
+  3. THE TYPE OF A THREE-OPERAND EQU WAS ALWAYS 'C'.  `joinTokens` rebuilds
+     the whole term, `C'#'`, so `tc[:1]` answered 'C'.  In model101.py the
+     self-defining test was applied to `C'C'#''`, which fails, so the
+     attribute was never recorded AT ALL -- a defect sitting in the pass
+     code, not only in the read.  `characterTermValue` takes the character
+     from inside the quotes, and both places now use it.
+
+  4. T' OF A SET SYMBOL FOLLOWS ITS VALUE.  A SETC holding a self-defining
+     term is 'N', not 'C'.  The library asks this fifteen times; answering
+     'C' sent `VR 285,-27` into #SPLIT's INVALID FORMAT IN EXPRESSION arm.
+     The test sits below the symbol lookup and above the 'C' fallback, so
+     the only two 'C' comparisons in the library -- both asked of a symbol
+     NAME, never of a literal -- do not move.
+
+THE PROOF IS NOT THAT IT WENT QUIET.  MENU12's 48 generated position
+constants are the SAME 28 DISTINCT VALUES the original assembler emitted in
+OI301700's expanded MENU12; compared as sets they are identical.  A module
+that had merely stopped complaining would not do that.
+
+AN ABORTED ASSEMBLY PRINTS NO LISTING, so a run that crashed showed ZERO
+diagnostics and looked like success.  That is the trap recorded in 240, met
+again from the other direction: check the exit status and grep for Traceback
+before believing a clean listing.
+
+WHY.  242 said the restructure was the largest change contemplated in this phase.  It turned out not to need a restructure at all -- recording attributes as the read generates them is a fallback, not a reordering -- and the reason the phase looked blocked was that three FURTHER defects sat behind the first one, each only reachable once the one ahead of it was fixed.  Anyone who reads 242 alone will start the wrong job.
+
 WHAT IT WAS FOR.  MLIB80 stores macro definitions and COPY decks together, and
 ASM101S once read every macro definition ahead of the module.  It needed to
 know which members were which so it would never preload a COPY deck.
