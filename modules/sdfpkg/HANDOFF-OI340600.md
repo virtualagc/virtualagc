@@ -3109,18 +3109,30 @@ Full-configuration links, differing halfwords by producer:
     in scope.  Reading its 123 against G9's 39 as a statement about ASM101S
     would be wrong.
 
-THE ASSEMBLY-SIDE RESIDUE IS 1272 HALFWORDS OVER THREE CONFIGURATIONS AND IS
-ALMOST ENTIRELY MISSING DEFINITIONS:
+THE ASSEMBLY-SIDE RESIDUE IS 1251 HALFWORDS OVER THREE CONFIGURATIONS AND IS
+ALMOST ENTIRELY MISSING DEFINITIONS.  Measured with the -full exceptions and
+with both halfwords of a 4-byte ACON attributed to its relocation:
 
                                                       G9    S2   SSW  total
         unresolved, our sources do NOT define it      91   345   286    722
         unresolved, but our sources DO define it      23   257   186    466
-        differs with no relocation to explain it      18    54    12     84
+        differs with no relocation to explain it      18    33    12     63
 
-    EIGHTY-FOUR HALFWORDS IS THE WHOLE OF WHAT IS UNEXPLAINED, and it is the
-    only place an ASM101S or lnk101 defect can still be hiding.  It is
-    concentrated in FIOMS2PG (22), FCMBMTS2 (21), FIOGPSPG (8 in G9 and 8 in
-    SSW) and FIOMS2DT (5); nothing else reaches five.
+    SIXTY-THREE HALFWORDS IS THE WHOLE OF WHAT IS UNEXPLAINED, and it is the
+    only place an ASM101S or lnk101 defect can still be hiding.  Sixteen of
+    them are FIOGPSPG's BCE bypass, which 270 identifies and 259 already
+    explains, leaving FIOMS2PG (22), FIOMS2DT (5) and about twenty singletons.
+    FCMBMTS2's 21, which 270 called a source-version difference, are covered by
+    the -full exceptions and are not in this count at all.
+
+    EVERY MODULE THAT WOULD SUPPLY THE SECOND CLASS IS ABSENT FROM ITS
+    CONFIGURATION'S TABLE -- all of them, in all three configurations, without
+    one exception.  G9 wants FIOSMFPG, FIOMUWP9, FIOMUWPG, FIOMM128, FIOPDSM2;
+    S2 wants FIOIMUPG, FIOGPSPG, FIOMDMPG, FIOGNIPG, FIODDUPG, FIONWSPG; SSW
+    wants FIOCDATS, FIOCDATG, FIONWSPG, FIOMM128, FIOPSPPG, FIOMCIPG.  Several
+    are present in a DIFFERENT configuration -- FIOGPSPG is one of G9's own
+    sections -- so this is not a table that lost them, it is a referencing
+    module whose source is the variant belonging to some other build.
 
     THE SECOND CLASS IS NOT A LINKER FAULT.  The defining module is absent from
     the configuration's CSECT table, so it is out of scope for the sweep and
