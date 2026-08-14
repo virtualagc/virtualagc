@@ -1582,6 +1582,38 @@ A ZCON behaves the same way and is not special: ZT3, identical but with
 
 WHY.  Each of the three had a different cause and only one was an assembler fault, so treating them as one class would have wasted the other two.  The FIOMVUPG one also caught a real error in a committed recovery, made by exactly the reasoning 244 had already been burned by.  And the LTORG defect has a known wrong fix that broke eight modules last time, which is worth saying before anyone reaches for it.
 
+SAVED, 2026-08-13, in ~/ForClaude/OI340600-artifacts/ -- the inputs every
+measurement in 243 to 248 was taken with:
+
+    augmented-G9-fields.json    G9 index + 321 recovered COMPOOL fields
+    augmented-G9-disambig.json  the same index BEFORE dass-fields.py, the
+                                baseline arm of the G9 sweep
+    augmented-S2-fields.json    S2 index + 264 recovered fields
+    exceptions-G9.txt           dass-literals.py, 2571 locations
+    exceptions-S2.txt           dass-literals.py, 1262 locations
+    G9-lit.fcm, S2-lit.fcm      literal-recovered images
+    g9-base.tsv, g9-fields.tsv  the two sweep arms, per-module rows
+    mlib-g9/, mlib-s2/          ONLY the recovered members, not a library
+
+    ~/ForClaude/OI340600-clc-G9/    the G9 sweep's objects and link JSONs,
+                                    from the FIELD arm (the baseline arm's
+                                    were overwritten -- outDir is fixed)
+
+A SCRATCH LIBRARY IS NOT SAVED AND MUST BE REBUILT, because it is mostly
+symlinks and a stale one is worse than none.  Rebuild it as 244 describes:
+symlink every OI340600/MLIB80 member, copy MACROFILES.txt as a REAL file --
+never symlink that one, it has been truncated through a symlink twice -- then
+copy the recovered members from ~/ForClaude/OI340600-artifacts/mlib-g9 or
+mlib-s2 over the top.
+
+REGENERATE RATHER THAN TRUST, for anything after an assembler change.  The
+.tsv rows, the objects and the link JSONs are all downstream of ASM101S, so a
+change to the assembler invalidates every one of them; the indices and the
+exceptions files are not, and are cheap to keep.  dass-fields.py --verify is
+the check that says whether an index is still good.
+
+WHY.  Every measurement in 243-248 depends on files that took about forty minutes of sweeps to build and that lived in a session scratch directory.  They are now somewhere durable, and the ones that are NOT are named so nobody assumes a stale file is current.
+
 WHAT IT WAS FOR.  MLIB80 stores macro definitions and COPY decks together, and
 ASM101S once read every macro definition ahead of the module.  It needed to
 know which members were which so it would never preload a COPY deck.
