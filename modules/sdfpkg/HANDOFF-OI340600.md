@@ -2435,6 +2435,85 @@ rather than disagreement.  None of that is the assembler's.
 
 WHY.  Eleven of the twenty-three remaining halfwords turn out not to be assembler defects at all -- four bypass slots holding runtime state and one HAL/S object contradicting HALSTAT -- and both are the kind a sweep would happily 'fix' by fitting the assembler to the dump.  Naming them, with the controls that prove them (FIOBY2* matching, FIOSRBPG matching entirely), is what stops that.
 
+THREE OF 259'S FOUR "PATCH-SHAPED" SITES ARE ACCOUNTED FOR, AND THE FOURTH IS
+NOT PATCH-SHAPED AT ALL.  259 grouped four differences by their shape -- we
+write a value, the original left zero -- and guessed patch areas.  Two are a
+harness leak, one is runtime state, and the last is an ordinary assembler
+question that the grouping obscured.  The shape was a weak signal and is worth
+distrusting.
+
+TWO ARE THE INDEX OFFERING FIELDS OF A COMPOOL IT KNOWS IS NOT IN THE BUILD.
+
+    FIOPF1DW #LBR TFCMPFD1     ours 05C0    dump 0000
+    FIOPF2DW #LBR TFCMPFD2     ours 05C4    dump 0000
+
+TFCMPFD1 and TFCMPFD2 are fields of #DDPLLIG, and the index's own entry for it
+reads
+
+    {'start': 1442, 'end': 1483, 'type': 'HALSTAT',
+     'inConfig': False, 'spanOwner': '#DDG9LIG'}
+
+-- `inConfig: False`.  The index ALREADY RECORDS that the section is not in
+this configuration, and --external-syms pins it anyway and hands out addresses
+for its two fields.  The original build did not resolve them, which is why the
+dump holds 0000; this is 246's TFIVMCI1 exactly, and 246 said so: "A CSECT
+absent from the configuration means the COMPOOL is not in this build and the
+field is skipped, which is correct rather than a shortfall."  The skipping is
+not happening at link time.
+
+    THE LEAK IS EXACTLY TWO HALFWORDS AND NOT A SYSTEMIC FAULT, which is worth
+    measuring before anyone reaches for it:  40 index entries carry
+    `inConfig: False`, 3 of those are still placed by the link, and 2 fields
+    -- these two -- resolve from them.  Nothing else in the corpus is touched.
+
+    EITHER SIDE COULD FIX IT and neither should be done casually.  lnk101
+    could honour `inConfig` in --external-syms, which is somebody else's
+    repository and a second PR for two halfwords.  Or dass-fields.py could
+    stop emitting fields for sections it has already marked absent -- but it
+    records the flag deliberately and 246's reasoning for keeping the entry is
+    not written down, so read that before removing it.
+
+ONE IS THE PERMANENT BYPASS TABLE, WRITTEN TO AFTER LOAD.
+
+    FIOPBYG9 is `FIOPBYMC G9`, "PERMANENT BYPASS TABLE OPS GNC 9", twelve
+    halfwords.  The macro says
+
+        GPS      EQU   X'0500'             WORD 0-L
+        ...
+        WORD0SL  EQU   GPS
+
+    so 0500 is what the source asks for and what we assemble.  The dump holds
+    0000.  A table the software reads to decide what to bypass, differing from
+    its assembled value, was written to after load -- the same subsystem as
+    259's FIOGPSPG overlay and the same category of evidence.
+
+    NOTE THAT IT POINTS THE OTHER WAY FROM 259's FINDING, and that is not a
+    contradiction to be smoothed over:  259 has GPS elements 1 and 3 BYPASSED
+    in the BCE programs, and here the permanent-bypass word for GPS reads
+    CLEAR.  Whatever the relationship between the table and the programs it
+    drives, the dump is a snapshot of a running system and both are its state,
+    not the build's.
+
+THE FOURTH IS NOT A PATCH AREA AND IS THE ONLY REAL ASSEMBLER QUESTION OF THE
+FOUR.
+
+    FIODLCMW DS    0F
+             DC    AL.8(FIOPZERO),AL.5(FIOPGNDA),AL.4(FIOPCMDC)
+
+    ours 00C6, dump 0000, in the second halfword.  All three symbols are LOCAL
+    EQUs with definite values -- FIOPZERO 0, FIOPGNDA X'11', FIOPCMDC 0 -- so
+    the original build computed a definite constant here too and got a
+    different one.  These are BIT-LENGTH address constants, 8 + 5 + 4 = 17
+    bits, and how they pack and pad is the question.  It is one halfword and
+    it is genuinely ours.
+
+    IT WAS FILED UNDER "PATCH AREA" BECAUSE IT LOOKED LIKE THE OTHER THREE.
+    Zero in the dump means "the original wrote nothing here" only when
+    something could have stopped it writing; with three local EQUs nothing
+    could.  Group by MECHANISM, not by the shape of the difference.
+
+WHY.  259 grouped four differences by their shape and called them patch areas; three had three different mechanisms and the fourth was an ordinary assembler question.  Recording that the shape was a weak signal, with the measurement bounding the index leak to exactly two halfwords, is what stops the next pass reaching for a linker change over it.
+
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
 OPEN CODE, so pulling in a COPY fragment puts a DS outside any control section.
