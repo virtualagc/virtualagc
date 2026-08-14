@@ -1342,6 +1342,85 @@ CSECTs from HALSTAT; this is one level finer than that.
 
 WHY.  229 left TFIVMCI1 as the one open item on an otherwise closed module, which makes it look like a small specific defect worth an afternoon.  It is not: it is one site of the general unresolved-COMPOOL-field problem, it currently agrees, and the agreement is luck rather than correctness.  Recording that stops the next session spending the afternoon, and says what would make it evidence again.
 
+THE FIELD-GRANULARITY GAP IS CLOSED, AND HALSTAT CLOSES IT.  221 identified
+the remaining problem as addresses for symbols the CSECT index does not record
+at FIELD granularity, and named dass-syms.py's recovery as the model.  The tool
+is modules/sdfpkg/dass-fields.py (virtualagc 4436cb501).
+
+    dass-fields.py --config=XXX [--base=F.json] --out=F.json
+                   [--verify=LINK.json:IMAGE.fcm]
+
+HALSTAT gives every EQUATEd label its CSECT and its offset inside it:
+
+     31879  TFIVMI12          EQUATE  LABEL   C O M P O O L   CGB_IM1_...
+                (EQUATED TO: CGBV_MFF_SEG1   UNIT/BLOCK: CGB_IM1_...)
+                (CSECT: #PCGBIM1 OFFSET: 00002A) PHASE 2 ADDR: 003C50 ...
+
+An EQUATE LABEL is precisely how a HAL/S COMPOOL field acquires an eight-
+character name that an assembly EXTRN can reference, so this is the right
+record and not an approximation of one.  The field's address is the CSECT's
+start IN THIS CONFIGURATION plus the offset.
+
+NO PHASE LABEL IS CONSULTED.  HALSTAT prints a per-phase ADDR too, and
+dass-syms.py's header explains why the phase-to-configuration mapping is only
+approximate.  None of it is needed: the CSECT's start in this configuration is
+already in the index, so the arithmetic stays inside the configuration being
+built.  A CSECT absent from the configuration means the COMPOOL is not in this
+build and the field is skipped, which is correct rather than a shortfall.
+
+DO NOT RECOVER THESE FROM THE DUMP, and this is the part to hold on to.  The
+obvious alternative is to read the value the original build left at each
+reference site and call that the address.  It is mechanical, every site now
+carries a relocation pointing at it, and IT IS CIRCULAR -- the site then
+matches by construction, and a comparison meant to be evidence has been fitted
+to its own answer.  It was tried first here and abandoned for that reason.
+HALSTAT is a compiler artifact and owes the dump nothing, which is what makes
+the agreement below mean something:
+
+    G9  FCMBMTG9    80 of 80 predict the dump's own value exactly, 0 disagree
+    S2  FCMBMTS2    24 of 24 predict the dump's own value exactly, 0 disagree
+
+Two configurations, different CSECT addresses, 104 predictions and not one
+wrong.  Re-linking with the augmented index:
+
+    FCMBMTG9   116 differing halfwords -> 36      (index gained 321 fields)
+    FCMBMTS2    32 differing halfwords ->  8      (index gained 264 fields)
+
+A NAME EQUATED IN SEVERAL COMPILATIONS IS RESOLVED BY THE CONFIGURATION, not
+by the last record read.  TFIVAN11-14 and TFIVPF12 are of that kind; at most
+one of the COMPOOLs such a name points at is in a given build, so the build
+chooses.  Taking the last would have been right only by luck.  All 15 resolve
+and none is left ambiguous.  Where two live candidates give the SAME address --
+a COMPOOL indexed under two names -- that is accepted; anything genuinely
+ambiguous is skipped and reported, never guessed.
+
+WHAT IS LEFT IS NOT AN INDEX GAP AT ALL.  Every remaining unresolved symbol in
+both modules is FIOBY*, and HALSTAT carries no FIOBY symbol anywhere -- rightly,
+because they are not COMPOOL fields.  They are ENTRY points that BTBCEGEN
+generates inside a SIBLING ASSEMBLY MODULE:
+
+        ENTRY FIOBYRAC
+    FIOBYRAC #BU   FIORW1A          BYPASS ENTRY POINT
+
+in FIOHFE02, FIOMFEG9 and their family.  A single-object link cannot see them
+and a full-configuration link would not need to.  So they are an artifact of
+how the comparison is driven, not something to recover, and chasing them
+through HALSTAT will find nothing because nothing is there.
+
+    WHICH GIVES A COMPLETE ACCOUNT OF FCMBMTG9'S 117 UNRESOLVED REFERENCES:
+    80 COMPOOL fields, now closed; 36 FIOBY sibling-module entry points; and
+    one, TFIVMCI1, whose CSECT is not in this configuration and which the
+    ORIGINAL build did not resolve either -- its dump value is 0000.  See 245.
+
+NOT YET MEASURED: the reach across a whole configuration.  Only two modules
+have been re-linked, both from the FCMBMT family, and both were chosen because
+they were already understood.  A clc-sweep of G9 with --ext-syms pointed at the
+augmented index is the measurement that would say what this is worth in
+aggregate; it has not been run, and the per-module figures above must not be
+generalised into a configuration total.
+
+WHY.  221 named this as the one problem the phase had left, and the obvious way to solve it -- read the address the original build wrote at each reference site -- is circular and would have produced a comparison fitted to its own answer.  The independent source exists and agrees 104 times out of 104.  Recording which source was used, and why the other was refused, is the part that stops it being redone the wrong way.
+
 WHAT IT WAS FOR.  MLIB80 stores macro definitions and COPY decks together, and
 ASM101S once read every macro definition ahead of the module.  It needed to
 know which members were which so it would never preload a COPY deck.
