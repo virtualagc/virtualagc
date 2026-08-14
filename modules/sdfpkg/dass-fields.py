@@ -8,6 +8,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 
 Usage:      dass-fields.py --config=XXX [--base=F.json] [--out=F.json]
                            [--halstat=F.ASC] [--report] [--verify=F.json:F.fcm]
+                           [--mark=F.json:F.fcm]
 
 THE PROBLEM, which is dass-syms.py's problem one level finer.  That script
 recovers a COMPOOL's CSECT ADDRESS.  augmented-XXX.json then indexes the
@@ -136,6 +137,7 @@ def main():
     halstat = DEFAULT_HALSTAT
     report = False
     verify = None
+    mark = None
     for p in sys.argv[1:]:
         if p.startswith("--config="): config = p.partition("=")[2]
         elif p.startswith("--base="): base = Path(p.partition("=")[2]).expanduser()
@@ -143,6 +145,7 @@ def main():
         elif p.startswith("--halstat="): halstat = Path(p.partition("=")[2]).expanduser()
         elif p == "--report": report = True
         elif p.startswith("--verify="): verify = p.partition("=")[2]
+        elif p.startswith("--mark="): mark = p.partition("=")[2]
         elif p in ("--help", "-h"):
             print(__doc__)
             return 0
@@ -212,6 +215,11 @@ def main():
         if rc:
             return rc
 
+    if mark:
+        marked = markFromEvidence(index, mark)
+        print("   %d marked linkInfo=placement from reference-site evidence: "
+              "%s" % (len(marked), " ".join(sorted(marked))), file=sys.stderr)
+
     if out:
         json.dump(index, open(out, "w"), indent=1)
         print("-> %s" % out, file=sys.stderr)
@@ -220,6 +228,109 @@ def main():
     else:
         print("(no --out given; nothing written)", file=sys.stderr)
     return 0
+
+
+# What an address field holds when the build did NOT patch it.  A zero address
+# is the answer "no address was written here": G9's TFCMPFD1 and TFCMPFD2 are
+# 0000 in the RAW MAFGEN scrape, not the C9FB unlinkMAFGEN2 synthesises for a
+# halfword the listing never reported, so the listing states them.
+UNPATCHED = {0x0000, 0xC9FB, 0xC6C6}
+
+# `target` means different things per RLD flag byte: for ACON it is the 32-bit
+# word at `address`, for YCON the halfword there.  The others patch register
+# fields or sector-encoded halves, where `target` is not what gets stored, so
+# they do not vote -- silence is the safe direction.
+TARGET_IS_WORD = {0x1C, 0x9C}
+TARGET_IS_HALFWORD = {0x00, 0x80}
+
+
+def markFromEvidence(index, spec):
+    '''--mark=LINK.json:DUMP.fcm -- mark the sections whose FIELD references
+    the original build left unresolved, read off the sites themselves.
+
+    THE MEMORY MAP WAS TRIED FOR THIS AND IS THE WRONG AUTHORITY.  Marking
+    every section the DASS memory map does not place looked right on G9 and S2
+    and is WRONG on SSW, which it makes worse.  #DDG9LIG and #DDPLLIG are
+    overlay siblings at 0005A2 and the configurations swap which is resident;
+    FIOPDSPG is compiled per configuration and in each one names the fields of
+    whichever sibling is NOT resident.  G9's build left those references at
+    0000 and SSW's build RESOLVED its equivalents, to 05A4 05AC 05B0 05B8 --
+    the same structure with the opposite outcome, so absence from the map does
+    not predict what the build did and no tuning of a map-derived rule will.
+
+    THE SITE PREDICTS IT, AND THE TEST IS NOT WHICH NAME OWNS THE ADDRESS.
+    Overlaid sections need not share names -- these two do not -- so name
+    identity is the wrong question.  LINK.json is a full-configuration link
+    made with NO marks, so everything resolved and its `relocations` say what
+    resolution produced and where; compare that against the flight image:
+
+        the image holds what resolution produced -> the build resolved it, and
+            a match against ANY known symbol's address is a match whichever
+            sibling's name it was written under.  Do not mark.
+        the image holds an unpatched address field -> the build left the site
+            alone.  Mark.
+
+    A section is marked when it has interpretable field references, NONE agrees
+    and at least one is unpatched.  A single agreement spares it.
+
+    THE CRITERION IS PER SITE.  Grouping by section is only how the mark can be
+    EXPRESSED, since "linkInfo" attaches to a table entry and lnk101 withholds
+    that entry's contents as a unit.  It costs nothing here -- each
+    configuration reduces to one section -- but a per-symbol mark would be the
+    faithful form.
+
+    MEASURED, collision-filtered full-configuration links.  Best of the three
+    everywhere, where the map-derived rule was best in only two:
+        G9   39/1116  (map 39, unmarked 40)    marks #DDPLLIG
+        S2  123/1090  (map 123, unmarked 124)  marks #DDG9LIG
+        SSW  33/570   (map 34,  unmarked 33)   marks #0ITOE
+    '''
+    linkPath, _, imagePath = spec.partition(":")
+    if not imagePath:
+        sys.exit("--mark needs LINK.json:DUMP.fcm")
+    link = json.load(open(linkPath))
+    image = open(imagePath, "rb").read()
+
+    def halfword(a):
+        return (image[a * 2] << 8) | image[a * 2 + 1] \
+            if 0 <= a * 2 + 1 < len(image) else None
+
+    # EVERY EXISTING MARK IS CLEARED FIRST, and leaving that out cost a whole
+    # measurement: --base tables still carry the marks the old memory-map rule
+    # wrote, so a pass that only ADDS leaves 79 of them in place in SSW and
+    # scores 34/570 where the evidence alone scores 33.  This pass is the sole
+    # authority on the field, not a contributor to it.
+    fieldOf = {}
+    for name, info in index.items():
+        if isinstance(info, dict):
+            info.pop("linkInfo", None)
+            for f in (info.get("contents") or {}):
+                fieldOf[f] = name
+
+    agree, unpatched = collections.Counter(), collections.Counter()
+    for r in link.get("relocations") or []:
+        section = fieldOf.get(r.get("symbol"))
+        if section is None:
+            continue
+        flags = r.get("flags", 0)
+        if flags in TARGET_IS_WORD:
+            stored = halfword(r["address"] + 1)
+        elif flags in TARGET_IS_HALFWORD:
+            stored = halfword(r["address"])
+        else:
+            continue
+        if stored is None:
+            continue
+        if stored == (r["target"] & 0xFFFF):
+            agree[section] += 1
+        elif stored in UNPATCHED:
+            unpatched[section] += 1
+
+    marked = {n for n in set(agree) | set(unpatched)
+              if not agree[n] and unpatched[n]}
+    for n in marked:
+        index[n]["linkInfo"] = "placement"
+    return marked
 
 
 def doVerify(spec, index, fields):

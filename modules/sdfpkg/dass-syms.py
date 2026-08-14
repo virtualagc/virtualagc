@@ -90,6 +90,14 @@ DEFAULT_MAFGEN = Path("~/workspace/PFS/mafgen").expanduser()
 # site holding one of these tells us nothing, so it gets no vote.
 FILL = {0xC9FB, 0xC6C6}
 
+# What an address field holds when the build did NOT patch it.  0000 belongs
+# here and NOT in FILL above: to the votes pass 0000 is a possible address and
+# must not be read as absence, but markFromEvidence is asking the opposite
+# question -- did the build write an address here at all -- and there a zero
+# address field is the answer "no".  G9's TFCMPFD1 and TFCMPFD2 are 0000 in the
+# raw MAFGEN scrape, not C9FB, so the listing states them.
+UNPATCHED = {0x0000, 0xC9FB, 0xC6C6}
+
 UNIT_RE = re.compile(r"S T A T I S T I C S   F O R   U N I T   (\S+)")
 CSECT_INFO = "**** C S E C T   I N F O R M A T I O N ****"
 PHASE_RE = re.compile(r"^\s*PHASE\s+(\d+):\s*(.*)$")
@@ -505,6 +513,7 @@ def recoverCrossConfigCsects(index, phases, halfword, report, otherConfigs=None)
 
 def main():
     config = "SSW"
+    linkJson = None
     halstat = DEFAULT_HALSTAT
     mafgen = DEFAULT_MAFGEN
     linkDir = "work"
@@ -541,6 +550,10 @@ def main():
             linkDir = p.partition("=")[2]
         elif p.startswith("--log-dir="):
             logDir = p.partition("=")[2]
+        elif p.startswith("--link-json="):
+            # A full-configuration link made with NO linkInfo marks; its
+            # `relocations` are the evidence markFromEvidence reads.
+            linkJson = p.partition("=")[2]
         elif p.startswith("--base="):
             base = p.partition("=")[2]
         elif p.startswith("--out="):
@@ -814,22 +827,55 @@ def main():
     # point where the code lives in the configuration that does load it.  Only
     # the contents are withheld, and only from RESOLUTION.
     #
-    # Measured against the two configurations with full indices:  the map
-    # reproduces every "inConfig": false mark -- 40 of 40 in G9, 48 of 48 in
-    # S2 -- with NO false alarms in either, which is the failure the note above
-    # feared, and finds 11 and 25 more besides.
-    placed = memoryMapSections(dassPath(mafgen, config))
-    if placed:
-        marked = 0
-        for name, info in augmented.items():
-            if isinstance(info, dict) and name not in placed:
-                info["linkInfo"] = "placement"
-                marked += 1
-        print(f"{config}: {len(placed)} sections in the memory map, "
-              f"{marked} marked linkInfo=placement")
-    else:
-        print(f"{config}: WARNING -- no memory map found, "
-              f"nothing marked linkInfo=placement")
+    # THE MEMORY MAP WAS TRIED FOR THIS AND IS THE WRONG AUTHORITY, 2026-08-14.
+    # Marking every map-absent section looked right on G9 and S2 and is WRONG
+    # on SSW, which it makes worse.  #DDG9LIG and #DDPLLIG are overlay siblings
+    # at 0005A2 and the configurations swap which is resident; FIOPDSPG is
+    # compiled per configuration and in each names the fields of the sibling
+    # that is NOT resident.  G9's build left those references at 0000 and SSW's
+    # build RESOLVED its equivalents, to 05A4 05AC 05B0 05B8 -- same structure,
+    # opposite outcome.  (The 0000 is real: the raw MAFGEN scrape holds it, not
+    # the C9FB unlinkMAFGEN2 synthesises for a halfword never reported.)  So
+    # absence from the map does not predict whether the build resolved a site,
+    # and no tuning of a map-derived rule can fix that.
+    #
+    # THE SITE PREDICTS IT, and the test is not which name owns the address.
+    # Overlaid sections need not share names -- these two do not -- so name
+    # identity is the wrong question entirely.  Resolve everything, then ask
+    # what the flight image holds where the reference landed:
+    #
+    #     it holds what resolution produced   -> the build resolved it.  A
+    #                                            match against ANY known
+    #                                            symbol's address is a match,
+    #                                            whichever sibling's name it
+    #                                            was written under.
+    #     it holds fill where an address
+    #     would be                            -> the build left it alone: MARK.
+    #
+    # THE CRITERION IS PER SITE; the grouping by section below is only how the
+    # mark can currently be EXPRESSED, because "linkInfo" attaches to a table
+    # entry and lnk101 withholds that entry's contents as a unit.  It happens
+    # to cost nothing here -- each configuration reduces to a single section --
+    # but a per-symbol mark would be the faithful form.
+    #
+    # ONLY UNAMBIGUOUS RELOCATIONS VOTE.  `target` means different things per
+    # flag byte: for ACON (0x1C, 0x9C) it is the 32-bit word at `address`, for
+    # YCON (0x00, 0x80) the halfword there.  0x10, 0x50 and 0xD0 patch register
+    # fields or sector-encoded halves and `target` is not what gets stored, so
+    # they are SKIPPED rather than guessed at -- silence is the safe direction.
+    #
+    # Measured, collision-filtered full-configuration links, best of the three
+    # in every case where the map-derived rule was best in only two:
+    #     G9   39/1116 (map 39, unmarked 40)   marks #DDPLLIG
+    #     S2  123/1090 (map 123, unmarked 124) marks #DDG9LIG
+    #     SSW  33/570  (map 34,  unmarked 33)  marks #0ITOE
+    # THE MARKING MOVED TO dass-fields.py, because the evidence is read at the
+    # sites that reference a section's FIELDS and `contents` -- the field names
+    # -- is what dass-fields.py adds, after this script has run.  Marking here
+    # saw no contents and marked nothing.  --link-json is accepted and ignored
+    # so an existing command line does not break.
+    if linkJson:
+        print(f"{config}: --link-json is now dass-fields.py's; ignored here")
 
     json.dump(augmented, open(out, "w"))
 
