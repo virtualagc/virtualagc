@@ -1793,6 +1793,18 @@ class asmParser(Parser):
             with self._option():
                 self._identifier_()
             with self._option():
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._token('+')
+                        with self._option():
+                            self._token('-')
+                        self._error(
+                            'expecting one of: '
+                            "'+' '-'"
+                        )
+                self._factor_()
+            with self._option():
                 self._variable_()
             with self._option():
                 self._token('(')
@@ -1802,7 +1814,7 @@ class asmParser(Parser):
                 self._token('*')
             self._error(
                 'expecting one of: '
-                '"B\'" "L\'" "X\'" \'(\' \'*\''
+                '"B\'" "L\'" "X\'" \'(\' \'*\' \'+\' \'-\''
                 '(?<![@#$A-Z0-9&])[@#$A-Z][@#$A-Z0-9]*'
                 '<constant> <identifier> <subvar> <sv>'
                 "<variable> [-+]?[0-9]+ [NKLSI]'"
