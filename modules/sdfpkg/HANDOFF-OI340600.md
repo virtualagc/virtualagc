@@ -1501,6 +1501,87 @@ the disagreement and some of it is still the harness rather than the code.
 
 WHY.  The phase has been comparing one object at a time and attributing what that could not resolve to recovery gaps.  88 per cent of the remainder was sibling modules the linker was never shown, and a multi-object link -- which needs no new tooling and works today -- more than doubles the sections that match.  Anyone continuing should start here rather than recovering more symbols.
 
+THE THREE SIZE MISMATCHES ARE THREE DIFFERENT THINGS.  G9's full link reported
+three sections whose length disagrees with the CSECT table.  Two are now
+closed and the third is an ASM101S defect with a four-line reproduction.
+
+    FCMBMTG9   1344 vs 1334 expected   the OI340700 recovery, already known
+    FIOMVUPG    352 vs  276 expected   CLOSED -- now matches byte for byte
+    FIOLGERR    136 vs  140 expected   ASM101S: content after an LTORG is not
+                                       counted in the section length
+
+FCMBMTG9 IS NOT A DEFECT.  clc-sweep assembles against the contributed
+OI340600 MLIB80, and 1334 needs the recovered OI340700 FIOMDPVU and FCMBMTMC.
+Point --library at a scratch library carrying those two and it is 1334 exactly.
+The sweep cannot do that for the whole corpus without a library that mixes
+releases, so expect this row to stay until the OI340700 reconstruction is
+complete.
+
+FIOMVUPG IS CLOSED, AND IT FOUND A REAL ERROR IN THE FIOMDPVU RECOVERY.  That
+file's note said no CMD was supplied for the slots the payload elements moved
+into, and that LPF1CMD(2) was left at its contributed value, because "nothing
+in the emitted rows reads them".  THAT WAS CHECKED AGAINST FCMBMTG9 ALONE.
+FIOMVUPG COPYs the same file and BTBCEGEN emits
+
+        #MINC FIOPF1AD,X'&LPF1CMD(&ELE-1)'
+
+for every element in the chain, so the unsupplied CMDs reached the assembler as
+X'' and FIOMVUPG WOULD NOT ASSEMBLE AT ALL -- four intolerable lines, which is
+why it never showed up as anything but a size mismatch.
+
+    THE SAME MISTAKE AS 244'S, TWICE IN ONE PHASE: "nothing reads it, so the
+    dump cannot show it" is a claim about EVERY reader, and both times it was
+    made after looking at one.  Enumerate the readers.
+
+The dump does show them, in FIOMVUPG's section.  #MINC emits the port base
+ORed with the command's high byte and then its low halfword -- FIOPF1AD 0050,
+FIOPF2AD 0060 -- so each command reads straight out of the image:
+
+    LPF1CMD(2)  024407   the contributed source has 024406, so it was WRONG
+    LPF1CMD(3)  025840
+    LPF2CMD(2)  024407
+    LPF2CMD(3)  025840
+    LPF2CMD(4)  026C02
+
+With those, FIOMVUPG links to 276 halfwords -- exactly the table's length,
+against 352 -- and MATCHES THE G9 DUMP BYTE FOR BYTE.  FCMBMTG9 is unchanged at
+1334 with its same 36 FIOBY differences.  PFS 4065fddf.
+
+FIOLGERR IS AN ASM101S DEFECT AND IT IS NOT FIXED.  Anything a section emits
+AFTER an LTORG is left out of the section's length.  Four lines reproduce it:
+
+    ZT4      CSECT
+             EXTRN FOO
+             L     R1,=X'000007FF'
+             LTORG
+             DC    H'7'
+             END
+
+The L occupies bytes 0-3, the pool 4-7 and the DC 8-9, so the section is 10
+bytes; the ESD says 8.  After assembly `sects['ZT4']` holds pos1 10 and used 8
+-- the location counter advanced over the DC and the high-water mark did not.
+A ZCON behaves the same way and is not special: ZT3, identical but with
+`DC Z(,FOO,0)`, is 12 bytes and reports 8.
+
+    WHERE IT IS.  model101.py's LTORG arm advances `pos1` past the pool and
+    deliberately does NOT touch `used`, with a comment explaining that forcing
+    it there makes a TRAILING pool count twice -- CTOE's #LCTOE moved by
+    exactly its pool's 40 bytes and eight RUNASM modules broke.  That reasoning
+    is sound.  What is wrong is the sentence after it, which says `used` "still
+    grows by itself for an INTERIOR pool, because the statements after the
+    LTORG advance past it and carry used with them".  IT DOES NOT, and ZT4 is
+    four lines of proof.
+
+    DO NOT JUST FORCE `used` IN THE LTORG ARM.  That is the change the comment
+    already records as having broken eight RUNASM modules.  The trailing-pool
+    accounting -- the between-passes code that adds pool[4] back to `used` to
+    get a section's true length -- has to stay consistent with whatever is
+    done, so interior and trailing pools must end up counted exactly once
+    each.  This wants RUNASM, verify-sweep and the OI340600 sweep before it is
+    believed, which is why it was diagnosed and left rather than patched.
+
+WHY.  Each of the three had a different cause and only one was an assembler fault, so treating them as one class would have wasted the other two.  The FIOMVUPG one also caught a real error in a committed recovery, made by exactly the reasoning 244 had already been burned by.  And the LTORG defect has a known wrong fix that broke eight modules last time, which is worth saying before anyone reaches for it.
+
 WHAT IT WAS FOR.  MLIB80 stores macro definitions and COPY decks together, and
 ASM101S once read every macro definition ahead of the module.  It needed to
 know which members were which so it would never preload a COPY deck.
