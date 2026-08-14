@@ -3083,6 +3083,87 @@ FCMBMTG9 among them, at 1145 halfwords to its 36 real FIOBY differences.
 
 WHY.  264 recorded a limitation that does not exist and a figure that measured something else, and both would have deterred the next attempt.  The SSW result is the concrete payoff of the whole exercise and would have been invisible without a clean run, because SSW had never had the field pass at all.
 
+WHAT IS OPEN, MEASURED 2026-08-14, AND 221'S FRAMING IS OUT OF DATE.  221 said
+the work was "one problem and not many" -- 113 forced links short of
+field-granularity addresses -- and dass-fields.py closed that.  The residue now
+splits by WHICH TOOLCHAIN PRODUCED IT, and the assembler and linker are nearly
+out of it.
+
+Full-configuration links, differing halfwords by producer:
+
+                 assembly-produced          HAL/S-produced
+        G9        18 sections,   132      21 sections,   9714
+        S2        18 sections,   656     105 sections,  40254
+        SSW       29 sections,   484       4 sections,   2034
+
+    S2'S 123 FAILING SECTIONS ARE 105 HAL/S ONES.  It is not a worse
+    configuration for the assembler; it simply carries far more compiled code
+    in scope.  Reading its 123 against G9's 39 as a statement about ASM101S
+    would be wrong.
+
+    ONE COMPOOL IS 1981 HALFWORDS IN ALL THREE.  #PCDQANN (CDQ_ANNUN) differs
+    identically everywhere, and it is compiler output whose CONTENT disagrees:
+    ours begins 0012 0116 023F 0717 where the dump has 001C 01BB 0393 098B,
+    with runs of FFFF against our structured data, and it is 2010 halfwords
+    against the table's 2695.  A source or compiler difference, not a
+    relocation, and no amount of linker work touches it.
+
+THE ASSEMBLY-SIDE RESIDUE IS 1272 HALFWORDS OVER THREE CONFIGURATIONS AND IS
+ALMOST ENTIRELY MISSING DEFINITIONS:
+
+                                                      G9    S2   SSW  total
+        unresolved, our sources do NOT define it      91   345   286    722
+        unresolved, but our sources DO define it      23   257   186    466
+        differs with no relocation to explain it      18    54    12     84
+
+    EIGHTY-FOUR HALFWORDS IS THE WHOLE OF WHAT IS UNEXPLAINED, and it is the
+    only place an ASM101S or lnk101 defect can still be hiding.  It is
+    concentrated in FIOMS2PG (22), FCMBMTS2 (21), FIOGPSPG (8 in G9 and 8 in
+    SSW) and FIOMS2DT (5); nothing else reaches five.
+
+    THE SECOND CLASS IS NOT A LINKER FAULT.  The defining module is absent from
+    the configuration's CSECT table, so it is out of scope for the sweep and
+    never reaches the link: SSW's FIOTBLBF, FIOSWDCT and FIOBUSCT are all
+    defined in FIOCDATS.asm, FIOMACNS in FIOMM128.asm, FIONWSL1 in
+    FIONWSPG.asm, and none of those three modules is in SSW's table.
+
+    AND SSW'S BUILD DID NOT CONTAIN THEM EITHER.  FIOCDATS is placed in G9's
+    memory map at 009ED8-00A11B as an M S C section; SSW's listing names it
+    once, in a module list, and places it nowhere.  Yet SSW's FIOCBLKS
+    references FIOCF302 and the dump holds a real address there -- one that
+    falls inside #PCDHMMU/FCMBMTPG, an unrelated module.  So SSW's build
+    resolved those references to code living somewhere else entirely, and our
+    SSW source for FIOCBLKS is not the source that build used.  That is the
+    OF290103-against-OI340600 gap of 248 seen from the other end, and chasing
+    individual symbols there would be fitting our source to a build it is not.
+
+TWO MEASUREMENT TRAPS, BOTH OF WHICH I FELL INTO AND WHICH INFLATED THE THIRD
+ROW BY A FACTOR OF FIVE BEFORE THEY WERE FOUND:
+
+    --dump-diffs EMITS EVERY DIFFERENCE WITHOUT ELISION -- exception-excused
+    and no-reference-data halfwords included -- while the COUNTS exclude both.
+    A consumer must filter on the exceptions file as well as on C9FB/C6C6.
+    FCMPSA's eight halfwords at 0001C are the giveaway: they are EBCDIC
+    "2901A01B2910000B" in TPSARS5 and TPSARS6, reserved words the build
+    stamped afterwards, and the listing marks every one with '*' and the
+    exceptions file already carries them.
+
+    A 4-BYTE ACON OCCUPIES TWO HALFWORDS AND BOTH BELONG TO ITS RELOCATION.
+    The 18-bit address of a long BCE operation has its top two bits in the
+    FIRST halfword, so an unresolved @LBP differs in both: F350 0000 against
+    F351 EA50.  Attributing only the address half left 187 opcode halves
+    looking unexplained, all of them FIOADCNS, when they are the other end of
+    relocations already counted.  ASM101S emits those ACONs correctly --
+    FIOADCNS.obj carries 354 of them, every one flag 0x1C -- and the sites are
+    unresolved because the symbols are undefined, not because the assembler
+    failed to relocate them.
+
+SO THE ASSEMBLER AND LINKER ARE NOT WHERE THE REMAINING WORK IS.  Eighty-four
+halfwords deserve a pass before anyone calls those tools finished.  Everything
+else needs either the HAL/S compiler or sources we do not have.
+
+WHY.  221 is the entry a fresh session reads to learn what is open, and it described a problem that had been solved.  The raw counts also invite the conclusion that S2 is a bad configuration for the assembler when 105 of its 123 failures are compiler output.  And the two measurement traps recorded here each produced a confident wrong number in this very entry before being caught, which is worth more to the next reader than the numbers themselves.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
