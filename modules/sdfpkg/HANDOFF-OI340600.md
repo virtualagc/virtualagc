@@ -3060,9 +3060,13 @@ THE FINAL PER-MODULE SWEEPS, against those tables.  NO MODULE IS WORSE ANYWHERE:
     SSW'S 855 HALFWORDS ARE dass-fields.py REACHING IT FOR THE FIRST TIME.  Its
     earlier arm ran against augmented-SSW.json, the published table, which has
     no field symbols in it at all, where G9 and S2 already had fields tables.
-    Seventeen modules go to zero: FCMCBLKS, FIOGNIPG, FIOHISAM, FIOLDBPG,
-    FIOMFEPG, FIONSPPG, FIOPDSPG, FIOSRBPG, FIOSVC, FPMDISP, FPMFCLOS,
-    FPMIDLE, FPMIHIM, FPMINMSP, FPMRSCTR, FPMSCHED, FPMUPTOX, FPMZSYNC.
+    TWENTY modules go to zero: FCMBFCCO, FCMCBLKS, FCMUPLOD, FIOGNIPG,
+    FIOHISAM, FIOLDBPG, FIOMFEPG, FIONSPPG, FIOPDSPG, FIOSRBPG, FIOSVC,
+    FPMDISP, FPMFCLOS, FPMIDLE, FPMIHIM, FPMINMSP, FPMRSCTR, FPMSCHED,
+    FPMUPTOX, FPMZSYNC.  (Written as seventeen with eighteen names and two
+    missing when this entry first landed: the list was hand-picked out of a
+    69-line report instead of derived, which is the failure the standing rule
+    about measuring rather than recalling exists to prevent.)
 
     SCOPES GREW because the regenerated tables carry more entries: six modules
     newly in scope in G9 and in S2, none in SSW.  S2's single SIZE-FORCED row,
@@ -3077,7 +3081,7 @@ before anything else was trusted: G9's 153 modules went 2631 -> 1296 differing
 halfwords with no module worse, and all three SIZE-FORCED rows closed --
 FCMBMTG9 among them, at 1145 halfwords to its 36 real FIOBY differences.
 
-[why] 264 recorded a limitation that does not exist and a figure that measured something else, and both would have deterred the next attempt.  The SSW result is the concrete payoff of the whole exercise and would have been invisible without a clean run, because SSW had never had the field pass at all.
+WHY.  264 recorded a limitation that does not exist and a figure that measured something else, and both would have deterred the next attempt.  The SSW result is the concrete payoff of the whole exercise and would have been invisible without a clean run, because SSW had never had the field pass at all.
 
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 

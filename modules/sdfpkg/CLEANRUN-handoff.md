@@ -380,9 +380,12 @@ configuration started from.  NO MODULE IS WORSE ANYWHERE.
     published table, which has no field symbols in it at all -- where G9 and S2
     had augmented-*-fields.json.  So SSW was the configuration that had never
     had the field pass, which is what these runs were meant to give it.
-    Seventeen modules go to zero: FCMCBLKS, FIOGNIPG, FIOHISAM, FIOLDBPG,
-    FIOMFEPG, FIONSPPG, FIOPDSPG, FIOSRBPG, FIOSVC, FPMDISP, FPMFCLOS,
-    FPMIDLE, FPMIHIM, FPMINMSP, FPMRSCTR, FPMSCHED, FPMUPTOX, FPMZSYNC.
+    TWENTY modules go to zero: FCMBFCCO, FCMCBLKS, FCMUPLOD, FIOGNIPG,
+    FIOHISAM, FIOLDBPG, FIOMFEPG, FIONSPPG, FIOPDSPG, FIOSRBPG, FIOSVC,
+    FPMDISP, FPMFCLOS, FPMIDLE, FPMIHIM, FPMINMSP, FPMRSCTR, FPMSCHED,
+    FPMUPTOX, FPMZSYNC.  (First written as seventeen, with eighteen names and
+    two missing, because the list was hand-picked out of a 69-line report
+    instead of derived from the TSVs.)
 
     SCOPES GREW because the regenerated tables carry more entries: six modules
     are newly in scope in G9 and in S2 (FCMG3INT, FCMLINIT, FCMTBLPG,
