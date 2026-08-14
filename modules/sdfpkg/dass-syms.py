@@ -384,6 +384,43 @@ def sectorDecode(hw, sector):
     return ((sector << 15) | (hw & 0x7FFF)) if hw & 0x8000 else hw
 
 
+# The DASS listing for a configuration.  SSW's is the odd one out, exactly as
+# dass-literals.py and dass-db.py already have it.
+def dassPath(mafgen, config):
+    name = "DASS_SSW_(PostIPL).ASC" if config == "SSW" else f"DASS_{config}.ASC"
+    return Path(mafgen) / name
+
+
+# THE SECTIONS THE BUILD ACTUALLY PLACED, read off the listing's own memory map.
+#
+#     M E M O R Y   M A P ---  GNC9
+#     000000-0001A5  FCMPSA   **** 01A6(  422)  N O N H A L
+#     0001A6-0001A7  -------- **** 0002(    2)  C H E C K S U M
+#
+# The `****` is what distinguishes a SECTION line from the field lines that
+# follow the same shape -- those carry `NAME+offset` and a HAL/S variable name
+# instead -- so keying on it is what keeps fields out of the set.  A run of
+# dashes is the checksum filler and is not a section.
+MEMORY_MAP_SECTION = re.compile(
+    r"^ [0-9A-F]{6}-[0-9A-F]{6}  (\S+)\s+\*\*\*\*")
+
+
+def memoryMapSections(path):
+    '''Names of the sections the memory map places, or an empty set if the
+    listing has no map -- in which case nothing should be marked, since an
+    empty set would otherwise mark everything.'''
+    placed = set()
+    try:
+        with open(path, errors="replace") as f:
+            for line in f:
+                m = MEMORY_MAP_SECTION.match(line)
+                if m and not m.group(1).startswith("-"):
+                    placed.add(m.group(1))
+    except OSError:
+        return set()
+    return placed
+
+
 def recoverCrossConfigCsects(index, phases, halfword, report, otherConfigs=None):
     '''Addresses of code that lives in a DIFFERENT memory configuration.
 
@@ -752,6 +789,48 @@ def main():
                 best = (other, e - s)
         if best:
             augmented[name]["spanOwner"] = best[0]
+
+    # "linkInfo": "placement" -- THE MEMORY MAP SAYS WHICH SECTIONS ARE HERE,
+    # and it says so positively.  "inConfig" above is an inference from where
+    # the ADDRESS came from, which is why the comment there calls it weak
+    # evidence; the DASS listing's own
+    #
+    #     M E M O R Y   M A P ---  GNC9
+    #     000000-0001A5  FCMPSA   **** 01A6(  422)  N O N H A L
+    #
+    # is one line per section the build actually placed.  A section named there
+    # is in this configuration; one that is not, is not.
+    #
+    # WHAT THE MARK LICENSES IS NARROW.  lnk101 goes on placing such a section
+    # and defining its contents, so the symbol table it writes is unchanged --
+    # the AP-101S emulators read that table.  What it stops doing is RESOLVING
+    # a relocation against those contents, because no module supplied them and
+    # the original link left the site alone.  GNC9's FIOPDSPG names TFCMPFD1
+    # and TFCMPFD2, fields of #DDPLLIG, which that configuration does not load;
+    # the flight image holds 0000 and we were producing 05C0 and 05C4.
+    #
+    # THE SECTION'S OWN ADDRESS IS STILL PUBLISHED, because a configuration can
+    # carry a module's ZCON without carrying the module and that ZCON has to
+    # point where the code lives in the configuration that does load it.  Only
+    # the contents are withheld, and only from RESOLUTION.
+    #
+    # Measured against the two configurations with full indices:  the map
+    # reproduces every "inConfig": false mark -- 40 of 40 in G9, 48 of 48 in
+    # S2 -- with NO false alarms in either, which is the failure the note above
+    # feared, and finds 11 and 25 more besides.
+    placed = memoryMapSections(dassPath(mafgen, config))
+    if placed:
+        marked = 0
+        for name, info in augmented.items():
+            if isinstance(info, dict) and name not in placed:
+                info["linkInfo"] = "placement"
+                marked += 1
+        print(f"{config}: {len(placed)} sections in the memory map, "
+              f"{marked} marked linkInfo=placement")
+    else:
+        print(f"{config}: WARNING -- no memory map found, "
+              f"nothing marked linkInfo=placement")
+
     json.dump(augmented, open(out, "w"))
 
     print(f"{config}: {len(index)} CSECTs in the index, "

@@ -2764,6 +2764,72 @@ indices is what it would take.  Nothing in dass-syms.py has been changed.
 
 WHY.  The flag dass-syms.py calls weak evidence can be replaced by positive evidence already in the DASS file, and the measurement says it loses nothing -- zero false alarms in both configurations checked.  Recording the numbers, and that S2 would withdraw 44 field definitions against G9's 2, is what the decision needs.
 
+dass-syms.py NOW MARKS `linkInfo: "placement"` FROM THE MEMORY MAP, which is
+263's proposal carried out, and lnk101 has the other half on a branch.
+
+    THE RULE.  A section named in the DASS listing's
+
+        M E M O R Y   M A P ---  GNC9
+        000000-0001A5  FCMPSA   **** 01A6(  422)  N O N H A L
+
+    is in the build; one that is not, is not.  The `****` is what separates a
+    SECTION line from the field lines of the same shape, which carry
+    `NAME+offset` and a HAL/S variable name instead, and the `--------` rows
+    are checksum filler rather than sections.  `memoryMapSections` reads it
+    and `dassPath` names the file, SSW's suffix included, the same way
+    dass-literals.py and dass-db.py already do.
+
+    WHAT THE MARK LICENSES, and it is narrower than it sounds.  lnk101 still
+    PLACES the section and still DEFINES its contents, so the symbol table it
+    writes is unchanged -- the AP-101S emulators read that table.  What it
+    stops doing is RESOLVING a relocation against those contents.  The section
+    name itself still resolves, because the case that needs the address is a
+    ZCON pointing at an unloaded overlay and that names the section.
+
+    AN EMPTY MAP MARKS NOTHING, deliberately.  A listing with no memory map
+    would otherwise produce an empty `placed` set and mark every entry in the
+    table, which is the failure mode worth designing out rather than
+    discovering.
+
+THE ARTIFACTS WERE PATCHED, NOT REGENERATED, AND THE DIFFERENCE MATTERS.
+augmented-G9-fields.json and augmented-S2-fields.json now carry the marks --
+51 and 73 -- added by the same `memoryMapSections` the script uses, with
+nothing else touched and the entry counts unchanged at 1318 and 1296.
+
+    A TRUE REGENERATION IS NOT AVAILABLE.  dass-syms.py's relocation-evidence
+    pass reads a sweep's unresolved-relocation output, and the only saved link
+    JSONs are from the FIELD arm -- downstream of the recovery, so re-running
+    against them recovers nothing (0 from relocation evidence, against the 321
+    the saved table carries) and invents 13 entries the original run did not
+    have.  Pointing --base at the saved table restores the right 1318 but
+    still adds those 13.  The patch is therefore the faithful update and the
+    regeneration is not; say so rather than let a later reader assume the
+    files came out of a clean pipeline run.
+
+MEASURED END TO END, with the updated artifacts and lnk101's branch:
+
+                        before      after
+        G9   FAIL         48          47      FIOPDSPG matches
+        S2   FAIL        129         128      FIOPDSPG matches
+
+    Six halfwords across two configurations, and the same section both times
+    -- `#LBR TFCMPFD1` and `#LBR TFCMPFD2` against a COMPOOL the configuration
+    does not load.  No section regresses in either.
+
+    THE PAYOFF IS SMALL AND WAS EXPECTED TO BE LARGER.  S2 withdraws 44 field
+    definitions to G9's 2, which looked like twenty-two times the effect; it
+    is four halfwords against two, because most of those 44 belong to modules
+    that are not in S2's own link.  An earlier count of "30 of 44 referenced"
+    was taken over ALL OI340600 assembly sources, which is the wrong
+    denominator -- reference by a module outside the configuration is not a
+    reference at all.
+
+    NEITHER HALF IS USEFUL ALONE.  Without the lnk101 branch the marks are
+    inert; without the marks the branch is unreachable code.  lnk101's change
+    is committed on `lnk101-placement-only-external-syms` and is NOT filed.
+
+WHY.  The artifacts were patched rather than regenerated because a clean pipeline run is not available -- the saved link JSONs are downstream of the recovery they feed.  Recording that, and that the S2 payoff came out at four halfwords rather than the twenty-two-fold the field counts suggested, is what stops both being rediscovered.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
