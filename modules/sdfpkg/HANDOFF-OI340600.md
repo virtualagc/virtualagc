@@ -1412,12 +1412,36 @@ through HALSTAT will find nothing because nothing is there.
     one, TFIVMCI1, whose CSECT is not in this configuration and which the
     ORIGINAL build did not resolve either -- its dump value is 0000.  See 245.
 
-NOT YET MEASURED: the reach across a whole configuration.  Only two modules
-have been re-linked, both from the FCMBMT family, and both were chosen because
-they were already understood.  A clc-sweep of G9 with --ext-syms pointed at the
-augmented index is the measurement that would say what this is worth in
-aggregate; it has not been run, and the per-module figures above must not be
-generalised into a configuration total.
+MEASURED ACROSS G9, both arms of a clc-sweep over all 153 in-scope modules,
+the only difference between them being which --ext-syms file was used:
+
+                        baseline    with fields
+    PASS                      34             52
+    PASS-FORCED                2              2
+    FAIL                       2              7
+    FAIL-FORCED              112             89
+    SIZE-FORCED                3              3
+    halfwords differing     3487           2631
+
+    18 modules FAIL-FORCED -> PASS, byte-perfect against the dump
+     5 modules FAIL-FORCED -> FAIL
+     0 regressions: nothing moved to a worse class
+
+FAIL-FORCED -> FAIL IS AN IMPROVEMENT AND NOT A REGRESSION, which is why FAIL
+rises from 2 to 7.  A forced link means lnk101 could not resolve something and
+the halfword was left as assembled; a plain FAIL means it resolved everything
+and the bytes still disagree, which is a real finding that can be worked.
+Their differences shrank as they moved -- FCMNINIT 18 halfwords to 1, FCMCBLKS
+22 to 6, FIOGPSPG 17 to 8 -- so those five are now small, sharp questions
+rather than silence.
+
+FIOLDBPG IS THE ONE TO NOTICE.  221 used it as the worked example of this very
+gap: its `#LBR TFCMLI11` reads 30CE in the dump, which is #PCDVS9C+0xE.  It now
+PASSES, byte for byte.
+
+The sweep writes its per-module products to WORK/clc-CONFIG, which is inside
+PFS; that directory was moved to ~/ForClaude/OI340600-clc-G9 afterwards and PFS
+holds none of it.  The reports are elsewhere and take --reports=DIR.
 
 WHY.  221 named this as the one problem the phase had left, and the obvious way to solve it -- read the address the original build wrote at each reference site -- is circular and would have produced a comparison fitted to its own answer.  The independent source exists and agrees 104 times out of 104.  Recording which source was used, and why the other was refused, is the part that stops it being redone the wrong way.
 
