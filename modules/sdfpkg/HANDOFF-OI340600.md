@@ -1547,7 +1547,7 @@ With those, FIOMVUPG links to 276 halfwords -- exactly the table's length,
 against 352 -- and MATCHES THE G9 DUMP BYTE FOR BYTE.  FCMBMTG9 is unchanged at
 1334 with its same 36 FIOBY differences.  PFS 4065fddf.
 
-FIOLGERR IS AN ASM101S DEFECT AND IT IS NOT FIXED.  Anything a section emits
+FIOLGERR IS AN ASM101S DEFECT, AND 250 FIXES IT.  Anything a section emits
 AFTER an LTORG is left out of the section's length.  Four lines reproduce it:
 
     ZT4      CSECT
@@ -1579,6 +1579,9 @@ A ZCON behaves the same way and is not special: ZT3, identical but with
     done, so interior and trailing pools must end up counted exactly once
     each.  This wants RUNASM, verify-sweep and the OI340600 sweep before it is
     believed, which is why it was diagnosed and left rather than patched.
+    All three were run, in both arms, and 250 has them.  250 also records
+    that the WHERE above is wrong:  the fix is in neither the LTORG arm nor
+    the trailing-pool accounting, and both are correct as they stand.
 
 WHY.  Each of the three had a different cause and only one was an assembler fault, so treating them as one class would have wasted the other two.  The FIOMVUPG one also caught a real error in a committed recovery, made by exactly the reasoning 244 had already been burned by.  And the LTORG defect has a known wrong fix that broke eight modules last time, which is worth saying before anyone reaches for it.
 
@@ -1613,6 +1616,163 @@ exceptions files are not, and are cheap to keep.  dass-fields.py --verify is
 the check that says whether an index is still good.
 
 WHY.  Every measurement in 243-248 depends on files that took about forty minutes of sweeps to build and that lived in a session scratch directory.  They are now somewhere durable, and the ones that are NOT are named so nobody assumes a stale file is current.
+
+THE LTORG SECTION-LENGTH DEFECT OF 248 IS FIXED, AND NOT WHERE IT WAS LOOKED
+FOR.  248 pointed at the LTORG arm and at the trailing-pool accounting around
+it.  Both are correct as they stand and neither was changed.  The bug is the
+LAST LINE of `generateObjectCode`, in the loop that appends each literal pool
+to its section:
+
+    sects[pool[0]]["used"] = desiredLength      # desiredLength = pool[1]+pool[4]
+
+`used` is a HIGH-WATER MARK, and this threw the mark away and replaced it with
+wherever the pool happened to end.  For a pool that IS the last thing in its
+section those are the same number and nothing showed.  For an INTERIOR pool
+the section was truncated back to the end of the pool -- and `used` is both
+what the ESD card reports as the section's length AND what the TXT card is
+sliced to, so ZT4's `DC H'7'` was not merely uncounted, it was not in the
+object at all.
+
+248'S ONE WRONG SENTENCE WAS RIGHT ALL ALONG.  It said `used` "still grows by
+itself for an INTERIOR pool, because the statements after the LTORG advance
+past it and carry used with them", and 248 called that false on the evidence
+of ZT4.  IT IS TRUE.  The statements do carry `used` past the pool, exactly as
+written; three thousand lines later this assignment put it back.  Which is
+also why forcing `used` in the LTORG arm fixed nothing and broke eight
+modules: the value was already right when it was made, and the arm is not
+where it was lost.
+
+    THREE PLACES, ALL THE SAME SHAPE -- a pool EXTENDS its section, it does
+    not DEFINE the end of it:
+
+      the assignment above becomes a high-water update, `if desiredLength >
+      used`, a no-op for a trailing pool because there the pool's end IS the
+      section's end;
+
+      the inter-CSECT `offset` loop takes max(used, pool end) rather than the
+      pool's end outright, and no longer stops at a section's FIRST pool --
+      DCICYC has two and the interior one comes first;
+
+      `preliminaryOffset` adds pool[4] only for a pool ending PAST the
+      high-water mark.  An interior pool is already inside `used`, and adding
+      it again is precisely the double-count that moved CTOE's #LCTOE by its
+      pool's own 40 bytes.
+
+MEASURED IN BOTH ARMS, EVERY NUMBER RE-RUN AGAINST A PRISTINE COPY OF THE
+ASSEMBLER RATHER THAN QUOTED FROM 215:
+
+    RUNASM --no-rtl-fixes    205/205 byte-for-byte           unchanged
+    verify-sweep             267 MATCH  5 MATCH?  0 DIFFERS  unchanged, and
+                             no module changed class
+    oi340600-sweep           177 OK  47 OK-EARLY  0 failures unchanged, and
+                             no module changed class
+
+    THE OBJECTS THEMSELVES, all 224 of OI340600 assembled both ways:  223
+    BYTE-IDENTICAL, one differing, and the one is FIOLGERR.  That is the
+    check worth having -- the sweeps establish that nothing broke, this
+    establishes that nothing else so much as moved.
+
+    ZT4 8 -> 10 bytes; ZT3, the ZCON form, 8 -> 12; ZT5, the same module with
+    nothing after the LTORG and therefore the control, 8 and 8.
+
+    FIOLGERR 272 -> 280 bytes, which is 136 -> 140 HALFWORDS, and 140 is what
+    the CSECT table says.  That closes the third of 248's three size
+    mismatches.
+
+ASM101S IS NOT DETERMINISTIC BETWEEN RUNS, which is a separate finding and was
+very nearly read here as a regression.  The first before-and-after comparison
+of the corpus's objects showed 177 of 224 DIFFERING -- and then two runs of
+the PRISTINE assembler on FCMASYNC differed in the same 400 bytes.
+`PYTHONHASHSEED=0` makes it repeatable, so it is set iteration order reaching
+the ESD or RLD ordering.  The bytes are equivalent rather than wrong, but
+
+    A BEFORE-AND-AFTER COMPARISON OF OBJECT FILES MEANS NOTHING UNLESS
+    PYTHONHASHSEED IS PINNED IN BOTH ARMS.
+
+With it pinned the comparison is exact, and it is what settles this change.
+
+THE ARTIFACTS 249 SAVED ARE NOW STALE, as 249 said they would be the moment
+the assembler changed: g9-base.tsv, g9-fields.tsv and every object and link
+JSON under ~/ForClaude/OI340600-clc-G9 were produced by the old assembler.
+The indices and the exceptions files are not downstream of it and are still
+good.
+
+WHY.  248 named the LTORG arm and the trailing-pool accounting, and both are sound; the bug was a plain assignment three thousand lines away that undid what they had got right.  Recording where it actually was, and that 248's one sentence flagged as false was true, is what stops the next attempt going back to the arm and breaking the eight modules again.
+
+THE HAL/S OBJECTS ALREADY EXIST, AND 247'S "FULL MULTI-OBJECT LINK" WAS THE
+ASSEMBLY THIRD OF THE CONFIGURATION.  247 linked the 153 assembly objects and
+called that linking the whole configuration at once.  It is not.  Of the 1318
+CSECTs in the G9 index only 130 are NONHAL:
+
+    DATA 305   PROCEDURE 229   ZCON 131   NONHAL 130   PROGRAM 80   PDE 80
+    STACK 80   HAL_LIBRARY_ZCON 68   HAL_LIBRARY_CODE 68   HALSTAT 46
+    PATCH 33   HAL_LIBRARY_DATA 25   BCE 24   EXCLUSIVE 11   MSC 8
+
+Everything but the NONHAL and BCE rows is compiler output, and the compiled
+objects were on disk the whole time:
+
+    ~/ForClaude/OI340600-clc/G9work3/    306 .obj, HAL/S, disjoint from the
+                                         153 assembly modules
+    (G9work1 and G9work2 are earlier runs of the same set and differ from
+    work3 in a few bytes per object; use work3.)
+
+    $0AIBGPC  A1AIBGPC  A2AIBGPC  #EAIBGPC  #DAIBGPC -- AIBGPCLO.obj's five
+    sections, which is what compiler output looks like and is nothing an
+    assembly module produces.
+
+    lnk101 -f G9work3/*.obj ASMDIR/*.obj -o g9-all.fcm \
+           --json-symbols g9-all.json --external-syms augmented-G9-fields.json
+
+459 objects, and the comparison then covers 1126 SECTIONS rather than 153.
+
+    DO NOT SET THE TWO SIDE BY SIDE.  247's 30-of-153 and this link's
+    89-of-1126 count different things over different populations, and quoting
+    them as a series would say the disagreement had tripled when the
+    population grew sevenfold.
+
+WHAT IT BUYS IS REAL RESOLUTION INSTEAD OF ASSERTED ADDRESSES.  --external-syms
+pins every CSECT at the table's address, so an assembly-only link resolves a
+reference INTO HAL/S from the index -- which is the same table the comparison
+is being scored against.  With the compiled objects present the linker
+resolves it from the object that actually defines it.  FIOLGERR is the case in
+point: the two ZCONs after its LTORG, the very halfwords 250's defect was
+dropping, are
+
+    FIOELZCN DC    Z(,CZ2VIOER,0)      CZ2VIOER  <- CZ2COMMO.obj, HAL/S
+    FIODLZCN DC    Z(,FIODLERR,0)      FIODLERR  <- FIOCBLKS.obj, assembly
+
+and both now come from a real LD rather than from the index.
+
+MEASURED, G9, BOTH ARMS OF THE 250 FIX, SAME 306 HAL/S OBJECTS IN EACH:
+
+                                   before      after
+        sections compared            1126       1126
+        sections differing             89         89
+        FAIL sections                  80         80    none new, none lost
+        halfwords differing         12203      12203
+        SECTIONS DIFFERING IN SIZE     10          9
+
+    The size row that disappears is FIOLGERR's, and it is the only change:
+
+        before   OK:  FIOLGERR @ 1A05E (136 halfwords vs 140 expected)
+        after    OK:  FIOLGERR @ 1A05E (140 halfwords)
+
+    IT READS "OK" IN BOTH, and that is not the improvement it looks like --
+    fcmcmp compares only the OVERLAP when the sizes disagree, so before the
+    fix it was declaring 136 halfwords equal and saying nothing about the
+    other four.  What changed is that the four now exist, and match.
+
+    A SECTION THAT IS THE WRONG LENGTH THEREFORE HIDES INSIDE AN "OK" ROW.
+    The size list is the place to read, not the pass/fail column, and that is
+    how this defect survived 247's link in the first place.
+
+WHAT IS STILL NOT A REAL LINK.  177 symbols remain undefined and `-f` leaves
+their sites unpatched, and --external-syms still pins the layout rather than
+letting the linker compute it.  So the count remains an upper bound.  But the
+HAL/S half is no longer being asserted from the index, and anyone continuing
+should start from the 459-object link rather than rebuild the 153.
+
+WHY.  The HAL/S objects were on disk and 247 did not use them, so every reference from assembly into HAL/S was being resolved out of the same index the comparison is scored against.  Naming where they are, and that fcmcmp's OK row says nothing about a section that is the wrong length, are the two things that would have found 250's defect a phase earlier.
 
 WHAT IT WAS FOR.  MLIB80 stores macro definitions and COPY decks together, and
 ASM101S once read every macro definition ahead of the module.  It needed to

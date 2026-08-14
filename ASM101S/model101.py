@@ -1707,15 +1707,29 @@ def generateObjectCode(source, macros):
                     if not sects[sect]["dsect"]:
                         ppos1 += ppos1 & 1
                         symtab[sect]["preliminaryOffset"] = ppos1
-                        ppos1 += sects[sect]["used"] // 2
-                        # The following is because the "used" field doesn't 
+                        used = sects[sect]["used"]
+                        ppos1 += used // 2
+                        # The following is because the "used" field doesn't
                         # seem to include the litera pool appended to the end
                         # of it, if any.
+                        #
+                        # ONLY A TRAILING POOL, THOUGH.  An INTERIOR pool -- one
+                        # with statements after its LTORG -- is already inside
+                        # "used", because those statements were assembled past
+                        # it and carried "used" with them, so adding pool[4]
+                        # again counts the pool twice.  A pool that ends at or
+                        # before the section's high-water mark is by definition
+                        # one of those, which is also why the loop no longer
+                        # stops at the FIRST pool of the section:  DCICYC has
+                        # two, and the interior one came first.
                         for pool in literalPools:
-                            if pool[0] == sect:
-                                ppos1 += ppos1 & 1
-                                ppos1 += pool[4] // 2
-                                break
+                            if pool[0] != sect or pool[1] == None:
+                                continue
+                            if pool[1] + pool[4] <= used:
+                                continue
+                            ppos1 += ppos1 & 1
+                            ppos1 += pool[4] // 2
+                            break
                 sects[sect]["pos1"] = 0
         sect = None
         using = [None]*8
@@ -5028,13 +5042,18 @@ def generateObjectCode(source, macros):
                 else:
                     lastOffset = (lastOffset + 1) & 0xFFFFFE   # fullword
                 sects[sect]["offset"] = lastOffset
+                # WHERE THE SECTION ENDS IS THE LATER OF ITS HIGH-WATER MARK
+                # AND ITS POOLS, not the pool alone.  Taking the pool's end
+                # outright is right only when the pool is the last thing in the
+                # section; where statements FOLLOW the LTORG they sit beyond it
+                # and every later CSECT was laid down on top of them.
                 offset = sects[sect]["used"]
                 for pool in literalPools:
                     if len(pool) == len(emptyPool):
                         continue
-                    if pool[0] == sect:
+                    if pool[0] == sect and pool[1] != None and \
+                            pool[1] + pool[4] > offset:
                         offset = pool[1] + pool[4]
-                        break
                 lastOffset += offset // 2
                 previousWasZcon = thisIsZcon
             if compile:
@@ -5103,6 +5122,32 @@ def generateObjectCode(source, macros):
                         "address": offset,
                         "type": "Y"
                         })
-        sects[pool[0]]["used"] = desiredLength
-    
+        # THE POOL EXTENDS ITS SECTION, IT DOES NOT DEFINE ITS END.  This was a
+        # plain assignment, which is right for a pool that is the last thing in
+        # its section and TRUNCATES the section for one that is not -- and the
+        # section's length is what the ESD card reports and what the TXT card
+        # is sliced to, so both the length and the CONTENT after the LTORG were
+        # lost.  Four lines show it:
+        #
+        #     ZT4      CSECT
+        #              EXTRN FOO
+        #              L     R1,=X'000007FF'
+        #              LTORG
+        #              DC    H'7'
+        #              END
+        #
+        # -- instruction at 0-3, pool at 4-7, the DC at 8-9, so ten bytes; the
+        # ESD said eight and the H'7' was not in the object at all.  In
+        # OI340600, FIOLGERR is the module this was found on:  136 halfwords
+        # against the CSECT table's 140.
+        #
+        # FIXING IT HERE AND NOT IN THE LTORG ARM IS THE POINT.  That arm
+        # deliberately advances `pos1` past the pool and leaves `used` alone,
+        # and forcing `used` there makes a TRAILING pool count twice -- it
+        # broke eight RUNASM modules once already.  It is not wrong; `used` is
+        # a high-water mark and the statements after an LTORG raise it by
+        # themselves.  What was wrong was this line throwing that away again.
+        if desiredLength > sects[pool[0]]["used"]:
+            sects[pool[0]]["used"] = desiredLength
+
     return metadata
