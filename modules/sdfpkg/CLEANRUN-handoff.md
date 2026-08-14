@@ -75,6 +75,33 @@ OUT while sweeping -- `lnk101` on PATH is an editable install of `src/`.
 Scopes validated: G9 153 in scope, S2 139, SSW 149.  Sweep writes per-module
 products to `<work>/clc-<config>`, which is inside the scratch trees, not PFS.
 
+## *** THERE ARE TWO EXCEPTIONS FILES AND THE COMMANDS ABOVE USE THE WRONG ONE
+
+    exceptions-XXX.txt        dass-literals.py, from MAFGEN's '*' marks.
+                              Lives beside the other artifacts.  S2: 1265 lines.
+    exceptions-XXX-full.txt   dass-versions.py -- the same PLUS a no-claim
+                              marker for every halfword the unit REVISION
+                              LEVELS attribute to a source vintage we do not
+                              have.  Lives in ~/ForClaude/OI340600-clc/.
+                              S2: 46296 lines, 45027 of them -1.
+
+USE THE -full ONE.  Every measurement in this file and in entries 269, 270 and
+272 was first made with the other, which inflated the HAL/S residue from
+essentially nothing to tens of thousands of halfwords and sent a day after
+COMPOOLs that were never in question.  With -full:
+
+                     base exceptions      -full exceptions
+        G9             39/1116               18/1116
+        S2            123/1090               19/1090
+        SSW            33/570                29/570
+
+and the HAL/S side is 0, 2 and 0 differing halfwords, which is what the
+2026-08-08 run in ~/ForClaude/verify-NA-2026-08-08/ already said: 14551 OK
+over 2558 units of all eight configurations.
+
+Regenerate with `dass-versions.py --config=XXX --link-dir=DIR`.  A clean run
+must do this after the sweep and BEFORE any comparison is believed.
+
 ## THERE ARE TWO ARMS AND THE COMMANDS ABOVE ARE ONLY THE SECOND
 
 Discovered 2026-08-14, on reading `dass-syms.py` rather than recalling it.

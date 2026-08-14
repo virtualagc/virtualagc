@@ -3092,21 +3092,22 @@ out of it.
 Full-configuration links, differing halfwords by producer:
 
                  assembly-produced          HAL/S-produced
-        G9        18 sections,   132      21 sections,   9714
-        S2        18 sections,   656     105 sections,  40254
-        SSW       29 sections,   484       4 sections,   2034
+        G9        18 sections,   132       0 sections,      0
+        S2        17 sections,   635       2 sections,      2
+        SSW       29 sections,   484       0 sections,      0
+
+    *** THE HAL/S COLUMN WAS ORIGINALLY 9714, 40254 AND 2034 AND THAT WAS
+    WRONG.  It was measured with exceptions-XXX.txt where the established
+    method uses exceptions-XXX-full.txt, which carries dass-versions.py's
+    no-claim marker for every halfword the revision levels attribute to a
+    unit our source has at a different vintage -- 45027 of them in S2 alone.
+    See 272.  Everything below about #PCDQANN and the compiler was an artifact
+    of that and is struck. ***
 
     S2'S 123 FAILING SECTIONS ARE 105 HAL/S ONES.  It is not a worse
     configuration for the assembler; it simply carries far more compiled code
     in scope.  Reading its 123 against G9's 39 as a statement about ASM101S
     would be wrong.
-
-    ONE COMPOOL IS 1981 HALFWORDS IN ALL THREE.  #PCDQANN (CDQ_ANNUN) differs
-    identically everywhere, and it is compiler output whose CONTENT disagrees:
-    ours begins 0012 0116 023F 0717 where the dump has 001C 01BB 0393 098B,
-    with runs of FFFF against our structured data, and it is 2010 halfwords
-    against the table's 2695.  A source or compiler difference, not a
-    relocation, and no amount of linker work touches it.
 
 THE ASSEMBLY-SIDE RESIDUE IS 1272 HALFWORDS OVER THREE CONFIGURATIONS AND IS
 ALMOST ENTIRELY MISSING DEFINITIONS:
@@ -3162,7 +3163,14 @@ SO THE ASSEMBLER AND LINKER ARE NOT WHERE THE REMAINING WORK IS.  Eighty-four
 halfwords deserve a pass before anyone calls those tools finished.  Everything
 else needs either the HAL/S compiler or sources we do not have.
 
-WHY.  221 is the entry a fresh session reads to learn what is open, and it described a problem that had been solved.  The raw counts also invite the conclusion that S2 is a bad configuration for the assembler when 105 of its 123 failures are compiler output.  And the two measurement traps recorded here each produced a confident wrong number in this very entry before being caught, which is worth more to the next reader than the numbers themselves.
+WHY.  221 is the entry a fresh session reads to learn what is open, and it described a problem that had been solved.  The producer split is the number that should drive what anyone works on next -- but only when measured with the -full exceptions file; see 272 for what using the other one cost.
+
+*** MEASURED WITH THE WRONG EXCEPTIONS FILE.  The counts below come from
+exceptions-XXX.txt; the established method uses exceptions-XXX-full.txt.
+See 272.  The FIOGPSPG and FCMBMTS2 readings survive because both are
+assembly sections, which the version markers barely touch; the framing of
+"eighty-four" as the whole of what could be a tool defect does not, and
+271 already downgrades the FIOMS2PG lead. ***
 
 THE EIGHTY-FOUR: A FIRST PASS, AND NOT ONE OF THEM IS YET A DEMONSTRATED
 ASM101S OR lnk101 DEFECT.
@@ -3203,7 +3211,7 @@ that are missing rather than wrong, 16 are documented runtime overlay, and 68
 remain unexamined across three configurations.  Anyone looking for an ASM101S
 defect should start at FIOMS2PG and should expect not to find one.
 
-[why] 269 says eighty-four halfwords are all that could still be a tool defect; leaving that as a bare number would invite someone to spend a day on FCMBMTS2, which is almost certainly a source-version difference, or on FIOGPSPG, which is already explained by 259.  The one worth opening is named.
+WHY.  269 says a small number of halfwords are all that could still be a tool defect; leaving that as a bare number would invite someone to spend a day on FCMBMTS2, which is almost certainly a source-version difference, or on FIOGPSPG, which 259 already explains.  The one worth opening is named -- but read 271 and 272 first.
 
 THE FIELD RECOVERY IS NOW CHECKED WHERE IT SUCCEEDS, NOT ONLY WHERE IT FAILS,
 and SSW comes out clean: 1073 resolved field references agree with the dump and
@@ -3352,66 +3360,72 @@ trio in the restored sources.
 
 WHY.  The DO WHILE defect is the only remaining assembly failure and it cost hours to localise; the trace and the authoritative reference expansion are recorded so the next session resumes at the point reached rather than repeating the search.
 
-THE HAL/S RESIDUE IS SOURCE VINTAGE, NOT A COMPILER DEFECT, AND CPCDIT PROVES
-IT ARITHMETICALLY.  269 said the rest "needs the HAL/S compiler"; that is too
-generous to the compiler and too pessimistic about the work.
+THERE ARE TWO EXCEPTIONS FILES PER CONFIGURATION AND USING THE WRONG ONE
+INFLATED EVERY HAL/S FIGURE IN 269, 270 AND THE FIRST VERSION OF THIS ENTRY BY
+ORDERS OF MAGNITUDE.  This entry originally claimed to have DISCOVERED that the
+HAL/S residue is source vintage.  It is source vintage, the project established
+that in August, and dass-versions.py already accounts for it -- which is
+precisely why the residue should not have been showing up at all.
 
-WHERE IT IS.  S2 carries 39 sections whose linked SIZE disagrees with the DASS
-listing, against G9's 4 and SSW's 1, and they are most of its 40254 differing
-halfwords.  Several are multiples out:
+        exceptions-XXX.txt        dass-literals.py, from MAFGEN's '*' marks.
+                                  S2: 1265 lines.
+        exceptions-XXX-full.txt   dass-versions.py, the same PLUS a no-claim
+                                  marker per halfword the REVISION LEVELS say
+                                  belongs to a unit our source has at a
+                                  different vintage.  S2: 46296 lines, 45027
+                                  of them -1.
 
-        #PCDIMMU    17419 halfwords linked, the listing says  3083
-        #PCS2PDT     2573                                      376
-        #PCSARST     2782                                      352
-        #PCPCDIT      336                                       15
+    Its own header says what it is:
 
-    THE OBJECT DECLARES THE SIZE, so this is not lnk101 or fcmcmp:
-    CDIMMUTI.obj's SD for #PCDIMMU is 34838 bytes.  And the sections are
-    genuinely in the configuration -- all 39 appear in DASS_S2.ASC's own memory
-    map -- so they are not a comparison artifact either.
+        # Differences attributable to the source being OI-34.06 where the dump
+        # is OI-34.07.
+        # Value -1: ignore the address, no claim about its contents.  The
+        # evidence is the unit's revision level, which is per file.
 
-    NOR IS IT THE .dfg GAP.  That was the obvious hypothesis, since the S2
-    COMPOOLs are named like the .dfg files and APPLSRC holds 266 of them.  It
-    is wrong: all 35 of the oversized sections whose module could be traced
-    have a .hal source.  Nothing here is waiting on the preprocessor.
+    THE -full FILES LIVE IN ~/ForClaude/OI340600-clc/, NOT in the artifacts
+    directory beside the others, which is how they came to be missed.  Rebuild
+    with `dass-versions.py --config=XXX --link-dir=...`.
 
-    NOR IS IT THE REMOTE-COMPOOL MECHANISM.  Only 6 of the 39 are marked
-    INCLUDE REMOTE in the listing.
+MEASURED BOTH WAYS, same links, same tables, only the exceptions file changed:
 
-CPCDIT SETTLES IT.  CPC_DIT declares one structure of three halfwords --
+                     base exceptions        -full exceptions
+        G9             39/1116                 18/1116
+        S2            123/1090                 19/1090
+        SSW            33/570                  29/570
 
-        1  CPCS_DIT_STAT_PTR   INTEGER,
-        1  CPCS_DIT_RESET      BIT(16),
-        1  CPCS_DIT_SET        BIT(16);
+AND THE HAL/S SIDE IS THEN ESSENTIALLY CLEAN, which is what the 2026-08-08
+verification run already said and what this entry should never have contested:
 
--- and then
+                  FAIL   halfwords   assembly-produced   HAL/S-produced
+        G9         18        132      18 sec,  132 hw     0 sec,   0 hw
+        S2         19        637      17 sec,  635 hw     2 sec,   2 hw
+        SSW        29        484      29 sec,  484 hw     0 sec,   0 hw
 
-        DECLARE CPCS_DIT CPCS_DIT-STRUCTURE
-          (112)  INITIAL( ... )
+    269'S PRODUCER TABLE IS WRONG ON THE HAL/S SIDE and should be read as the
+    row above: not 9714, 40254 and 2034 halfwords but 0, 2 and 0.  Its
+    ASSEMBLY figures stand -- the version markers are per HAL/S unit and barely
+    touch them, 656 becoming 635 in S2 and the others unchanged.
 
-112 copies of three halfwords is 336, and our object is 336 halfwords EXACTLY.
-The compiler did precisely what the source says.  The build's section is 15
-halfwords, which is five copies.  OUR SOURCE DECLARES 112 WHERE THE BUILD HAD
-5; the compiler is not wrong about anything.
+    270 AND 272 WERE BOTH BUILT ON THE INFLATED NUMBERS.  #PCDQANN's 1981
+    halfwords in every configuration, S2's 39 oversized COMPOOLs, #CDCDDG9's
+    6583 -- every one is a no-claim region that dass-versions.py had already
+    accounted for.  The CPCDIT arithmetic in the earlier draft of this entry is
+    still correct as arithmetic -- 112 structures of three halfwords is the 336
+    our object declares, against the build's 15 -- but it is a demonstration of
+    something already known and recorded, not a finding.
 
-    CSARST TELLS THE SAME STORY: CSAS_REMOTE_SCALING is declared (278), our
-    section is 2782 halfwords -- ten per entry -- and the build's 352 is about
-    35 entries.  CPCPCI's ARRAY(20) BIT(16) gives our 20 against the build's
-    18.
+WHAT SURVIVES.  The A/B measurements of this session are unaffected, because
+both arms used the same exceptions file: the overlay filtering's 40, 44 and 5
+sections, the regenerated tables' 7 and 4, and the placement marking's 2 are
+all differences between two runs and stand as measured.  What does not survive
+is every ABSOLUTE residue figure quoted against them.
 
-WHICH IS 248'S GAP AGAIN, ON THE THIRD SIDE OF THE TRIANGLE.  248 found it in
-the FCOS macro library, 269 found it in SSW's assembly references resolving
-into modules that configuration does not place, and here it is in the HAL/S
-COMPOOL declarations: our OI340600 sources are not the sources that built
-OF290103.  Every dump we have is that build.
+    THE 2026-08-08 RUN IS THE RECORD TO TRUST for the HAL/S side:
+    ~/ForClaude/verify-NA-2026-08-08/, 14551 OK, 231 N/A, 115 ZCON-only
+    placeholders and 3 known dump defects, over 2558 units of all eight
+    configurations.  Its README says plainly what it is and what it is not.
 
-SO THE COMPILER IS NOT THE OBSTACLE AND SHOULD NOT BE BLAMED FOR THIS.  A
-smaller, sharper question replaces it: for each oversized COMPOOL, what does
-the array bound have to be for the size to match, and does that bound appear in
-any source we hold?  CPCDIT wants 5 where we have 112, and that is checkable
-against the listing's own size for all 39 without compiling anything.
-
-[why] "It needs the HAL/S compiler" is the kind of conclusion that closes an avenue for good, and it was wrong: the compiler is faithfully compiling a source that differs from the one the dump was built from.  The arithmetic on CPCDIT is exact -- 112 x 3 = 336 -- so this is demonstrated rather than inferred, and it turns the largest remaining block from a compiler problem into a source-archaeology one.
+WHY.  I spent a day measuring a residue the project had already explained and suppressed, then wrote an entry claiming the explanation as new.  The cost was not only the wasted work: 269 and 270 carried numbers that would send the next reader after COMPOOLs that are not in question.  The trap is worth naming -- two exceptions files, differently named, in different directories, and the smaller one is the one sitting beside the other artifacts.
 
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
