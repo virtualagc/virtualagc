@@ -2235,6 +2235,68 @@ MEASURED, G9, with 255's DSR relocation also in place:
 
 WHY.  The assembler already emitted the magnitude and said so in a comment; only the sign bit was missing, so the defect was half-implemented rather than absent.  Recording that the SAME convention is unfixed on the MSC path, where the relocation is not emitted at all, is what keeps the pair together.
 
+`#LBR@ SYM-n` CANNOT BE LINKED CORRECTLY BY lnk101 AS IT STANDS, and the
+assembler is not the thing to change.  256 named this as the next fix and it
+was attempted; the attempt is recorded here because BOTH of the obvious
+encodings are wrong and the evidence pinning them is worth not re-deriving.
+
+    THE CONTEMPORARY LISTING FIXES THE OBJECT BYTES.  OI301700's FIOMDPPG is
+    one of the 272 modules with a real assembly listing, and it says:
+
+        00006 FA00 0002      0002    33    #LBR@ FIOBRE-2
+        00008 FD00 0002      0002    34    #MOUT@ FIOWCE-2
+
+    -- the MAGNITUDE, opcode intact.  That is what ASM101S emits and it is
+    right to.  The note in the BCE ADDRESS arm saying "the original writes the
+    magnitude" is evidence-based and should not be second-guessed:  it comes
+    from this listing, not from the dump.
+
+    THE DUMP FIXES THE LINKED VALUE.  G9 has FA00 8BC4, and FIOBRE is 8BC6,
+    so the linked address field is FIOBRE-2 with the opcode untouched.
+
+    SO THE RELOCATION MUST SUBTRACT THE MAGNITUDE FROM THE ADDRESS FIELD AND
+    LEAVE THE OPCODE ALONE.  Neither flag byte does that:
+
+        0x1C, plain ACON   adds        FA000002 + 8BC6 = FA008BC8, +4 wrong
+        0x9C, ACON|sign    negates the WHOLE existing fullword -- addrcon.py's
+                           `signed_existing = -existing if self.sign else
+                           existing` -- giving 0600 8BC4:  address right,
+                           opcode destroyed.  Measured, not predicted.
+
+    AND THERE IS NO THIRD OPTION IN THE FORMAT AS IMPLEMENTED.  addrcon.py
+    gives YCON two bytes and ACON four and nothing between, so a relocation
+    covering the 24-bit address field alone cannot be expressed.  A YCON at +2
+    would cover the low halfword only and cannot carry a target at or above
+    0x10000, which the arm's own note already explains for FCMSFCAM.
+
+WHAT WOULD FIX IT IS IN lnk101, NOT HERE:  a signed ACON should negate the
+DISPLACEMENT the field carries, not the whole fullword that has an opcode in
+its top byte.  That is somebody else's repository -- see the standing rule --
+so it is written down rather than done.
+
+    ASM101S ALSO EMITS NO RELOCATION AT ALL FOR THIS SITE, which is a second
+    and smaller thing.  `bceField` returns the raw hashed value when `unhash`
+    reports the hashcode borrow and never sets `bceRelocSymbol`, so the site
+    keeps its assembled bytes.  Recording the symbol there is a two-line
+    change and was tested; it is NOT committed, because on its own it makes
+    the halfwords worse rather than better -- with 0x1C the address goes from
+    2 wrong to 4 wrong.  It should land WITH the linker change and not before.
+
+THE COST OF GETTING THIS WRONG WAS ONE SWEEP, and it is the reason the
+OI301700 corpus is in the bar at all.  The two's-complement encoding was
+tried first, on the arithmetic alone:  FA008BC4 - 8BC6 = F9FFFFFE, so put
+that in the field and let a plain ACON add.  It works -- FIOMDPPG MATCHES the
+G9 dump and the failing sections go 48 to 47 -- AND IT IS WRONG, because the
+listing says the object holds FA000002.  verify-sweep caught it as the one
+regression in 272 modules, FIOMDPPG MATCH -> DIFFERS.
+
+    A CHANGE THAT IMPROVES THE LINKED IMAGE CAN STILL BE WRONG ABOUT THE
+    OBJECT.  The dump constrains what comes OUT of the linker; only a listing
+    constrains what goes IN.  Where both exist they have to agree, and where
+    they disagree the listing is the one describing the assembler.
+
+WHY.  The change worked against the dump and was still wrong, and only the OI301700 listing said so.  Recording both encodings with the measurement that kills each, and that the remaining fix is in lnk101 rather than the assembler, is what stops the next attempt repeating a sweep to learn it.
+
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
 OPEN CODE, so pulling in a COPY fragment puts a DS outside any control section.
