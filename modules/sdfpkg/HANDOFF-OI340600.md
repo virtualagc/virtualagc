@@ -2458,20 +2458,40 @@ this configuration, and --external-syms pins it anyway and hands out addresses
 for its two fields.  The original build did not resolve them, which is why the
 dump holds 0000; this is 246's TFIVMCI1 exactly, and 246 said so: "A CSECT
 absent from the configuration means the COMPOOL is not in this build and the
-field is skipped, which is correct rather than a shortfall."  The skipping is
-not happening at link time.
+field is skipped, which is correct rather than a shortfall."
 
-    THE LEAK IS EXACTLY TWO HALFWORDS AND NOT A SYSTEMIC FAULT, which is worth
-    measuring before anyone reaches for it:  40 index entries carry
-    `inConfig: False`, 3 of those are still placed by the link, and 2 fields
-    -- these two -- resolve from them.  Nothing else in the corpus is touched.
+    IT IS A DEFECT IN NEITHER TOOL, and an earlier draft of this entry framed
+    it as a choice between fixing lnk101 and fixing dass-fields.py.  That was
+    a false choice in both directions, and fcmcmp.py settles it -- its
+    `load_not_in_config` docstring is where the design is written down:
 
-    EITHER SIDE COULD FIX IT and neither should be done casually.  lnk101
-    could honour `inConfig` in --external-syms, which is somebody else's
-    repository and a second PR for two halfwords.  Or dass-fields.py could
-    stop emitting fields for sections it has already marked absent -- but it
-    records the flag deliberately and 246's reasoning for keeping the entry is
-    not written down, so read that before removing it.
+        "The linker needs their addresses: a configuration can hold a
+        module's ZCON without holding the module, and the ZCON must point at
+        the address that code has in the configuration where the overlay IS
+        loaded.  So the section gets placed..."
+
+        "...`inConfig: false` is weak evidence.  A configuration can hold
+        both the ZCON and the module, so a section marked absent may be
+        present after all.  Measured across eight PASS configurations, 79
+        marked sections MATCH the reference image."
+
+    So dass-fields.py MUST emit the entry -- spanOwner depends on it -- and
+    lnk101 MUST place it.  Making either "honour the flag" would break the
+    ZCON-into-overlay case both were built for, and the 79 matching sections
+    say the flag cannot carry that weight on its own.
+
+    WHAT IS ACTUALLY WRONG IS NARROWER AND IS NOT CODE.  --external-syms does
+    two jobs at once:  it PLACES sections, which is needed, and it DEFINES
+    symbols, which stands in for a real link.  It cannot tell "resolve this
+    deliberately into an unloaded overlay" from "this symbol was undefined in
+    the original link".  Here nothing but the table defines TFCMPFD1 and
+    TFCMPFD2 -- DPLLIGHT is not linked and DG9LIGHT is -- so the original G9
+    linker had no definition and left 0000, and ours manufactures one.
+
+    THESE TWO HALFWORDS ARE THEREFORE A HARNESS ARTIFACT OF THE SAME FAMILY
+    AS THE ARCHIVE GAP, bounded and known:  40 index entries carry the flag, 3
+    are still placed, and 2 fields resolve from them.  Nothing else in the
+    corpus is touched.  Do not "fix" it in either tool.
 
 ONE IS THE PERMANENT BYPASS TABLE, WRITTEN TO AFTER LOAD.
 
@@ -2514,6 +2534,59 @@ FOUR.
 
 WHY.  259 grouped four differences by their shape and called them patch areas; three had three different mechanisms and the fourth was an ordinary assembler question.  Recording that the shape was a weak signal, with the measurement bounding the index leak to exactly two halfwords, is what stops the next pass reaching for a linker change over it.
 
+A BIT-LENGTH CONSTANT GROUP PADS TO A HALFWORD, NOT TO A BYTE, and 260's last
+open site was that and not a patch area.  `DC AL.8(a),AL.5(b),AL.4(c)` is 17
+bits; ASM101S padded to 24 and the original pads to 32.
+
+    THE LISTINGS DETERMINE THE RULE OUTRIGHT.  Every bit-length group in the
+    OI301700 corpus, with the bytes its listing says it generated:
+
+        15 bits -> 2 bytes        16 bits -> 2 bytes
+        17 bits -> 4 bytes        32 bits -> 4 bytes
+
+    Byte padding predicts THREE for the 17-bit group.  Fullword padding
+    predicts FOUR for the 15-bit one.  Halfword padding is the only rule that
+    fits all four, and the 17-bit group is the single case in the corpus that
+    separates them -- FIOCBLKS'
+
+        FIODLCMW DS    0F
+                 DC    AL.8(FIOPZERO),AL.5(FIOPGNDA),AL.4(FIOPCMDC)
+
+    which its listing assembles to 00880000.
+
+THE BYTE HAS TO COME FROM THE CONSTANT AND NOT FROM THE FILL, which is the
+part worth keeping.  Under byte padding the group was three bytes and the
+fourth was ALIGNMENT padding for the `DS 0F` that follows -- and alignment
+padding takes the fill pattern.  So:
+
+    --fill=0000   0088 0000    right by accident
+    --fill=C6C6   0088 00C6    wrong, and this is what the G9 link compares
+
+    THE SECTION LENGTH IS THE SAME EITHER WAY, 3420 bytes, because the DS 0F
+    absorbs the difference.  Only the byte's VALUE changes.  That is why
+    nothing but a fill-pattern comparison could ever have seen it.
+
+    SO THE OI301700 CORPUS IS BLIND TO THIS ENTIRE CLASS.  verify-sweep runs
+    at the default fill of 0000, where an unwritten byte and a zero byte are
+    indistinguishable, and FIOCBLKS MATCHED throughout.  272 modules compared
+    against contemporary listings, and the defect sat in one of them the whole
+    time.  A byte that is zero in the reference proves nothing unless the fill
+    is something else.
+
+    THE OI340600 PATH PASSES --fill=C6C6 BECAUSE compileLinkCompare DOES, and
+    that is the only reason this surfaced.  Worth remembering as a technique:
+    a non-zero fill turns "we never wrote here" into a visible statement.
+
+MEASURED:
+
+    RUNASM --no-rtl-fixes   205/205 byte-for-byte           unchanged
+    verify-sweep            267 MATCH  5 MATCH?  0 DIFFERS  unchanged, no
+                            module changed class
+    FIOCBLKS  FIODLCMW 0088 00C6 -> 0088 0000 at --fill=C6C6, and unchanged
+              at --fill=0000; SD length 3420 both ways
+
+WHY.  The rule is determined by exactly one group in the corpus -- the 17-bit one -- and the byte it adds is invisible at the default fill, so the OI301700 sweep matched throughout while the defect sat in it.  Recording both, and that a non-zero fill is what makes an unwritten byte visible, is the transferable part.
+
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
 OPEN CODE, so pulling in a COPY fragment puts a DS outside any control section.
@@ -2541,6 +2614,96 @@ $OBJDIR/$m.err now.  The corpus is quiet there: 224 files, 224 lines, one
 
 WHY.  The gate stays because it is load-bearing; what it lacked was a voice.  The
 silent version of this failure cost five modules once already.
+
+THE FLAT SYMBOL TABLE IS A STAND-IN FOR A MECHANISM lnk101 ALREADY HAS --
+`--external-syms` against `--concard` -- and
+that is the answer to 260's question of where the TFCMPFD1 fault lies.  It
+lies in neither tool and it is not inherent in the archive either.
+
+    THE TABLE CANNOT DISTINGUISH TWO THINGS THAT LOOK ALIKE:
+
+        a ZCON in a loaded module pointing at code in an overlay that is NOT
+        loaded now -- which must resolve, to the address that code has in the
+        configuration where the overlay IS loaded; fcmcmp.py's
+        `load_not_in_config` docstring is where that is written down
+
+        a reference to a symbol no module in this build defines -- which must
+        NOT resolve, because the original linker had no definition either and
+        left the field 0000
+
+    A name-to-address map has one address per name and no notion of who owns
+    it, so it answers both the same way.  That is the whole of the defect and
+    it is a property of the substitution, not of lnk101's code.
+
+lnk101 HAS THE MACHINERY THAT TELLS THEM APART.  Not a proposal -- it is in
+the options and in linker.py today:
+
+    --concard DIR         CON80 deck directory, placing csects from its
+                          BANK / OVERLAY / INSERT layout
+    --concard-root NAME   default OFTMP
+    --map-lib N=PHASE0N.lib   earlier-phase load modules for MAP cards
+    --autocall FILE       modules pulled by automatic library call, exempt
+                          from later-phase deferral
+    --link-order FILE     ZCON pool and autocall wave orderings
+    --Wunresolved-phases  per symbol left for CROSS-PHASE RESOLUTION
+
+    linker.py speaks of symbols "left for cross-phase resolution" and of
+    "phaseresolve patches them against the earlier phase's lib".  A mechanism
+    that knows which PHASE owns a csect can defer a reference into an unloaded
+    overlay and leave a genuinely undefined one alone.  The flat table cannot,
+    because it has thrown that structure away.
+
+AND THE DATA IS IN THE ARCHIVE.  ~/workspace/PFS/OI340600/CON80 holds 194
+decks, 91 of them carrying BANK, OVERLAY or INSERT cards, including the OFTMP
+root that --concard-root defaults to.  Its header is the configuration-control
+history of the real link:
+
+    *@ PCR=51777; OI0502  GNC2 DUAL PHASE
+    *@ PCR=58631; OI7C10  RESTRUCTURE ALL LINKEDIT CONCARDS
+    *@ CR=089926; OI8F02 AND OI2001 INCREASE ADDRMAX TO 128K
+
+    So the principled path is to drive lnk101 from the decks rather than from
+    the flat table.  That is a HARNESS change and a large one, and it is
+    likely to subsume 253's alternate-configuration problem as well -- the 19
+    objects excluded there are exactly what deferral and autocall exemption
+    exist to decide.
+
+WHAT IS VERIFIED AND WHAT IS NOT, because the difference matters before anyone
+starts.  VERIFIED: the options above exist, linker.py implements cross-phase
+resolution, the CON80 directory holds those decks, OFTMP is present and is the
+documented default root.  NOT VERIFIED: that a CON80-driven G9 link runs
+today, or how the deck names map to the configurations -- the ones in there
+are G9DLCOM, GNC1, GNC1DISP, GNC1STUB, GNC2 and their kin, and which of those
+is "G9" has not been established.
+
+    DO NOT TREAT 260'S TWO HALFWORDS AS THE REASON TO DO THIS.  They are two
+    halfwords and the flat table is otherwise serving well.  The reason to do
+    it, if there is one, is that the phase structure is the thing the original
+    build actually had, and every question of the form "why does the dump have
+    something here that no link of ours produces" runs into its absence.
+
+IT IS NOT A DROP-IN SWAP, AND IT CHANGES WHAT THE COMPARISON PROVES.  247
+recorded that --external-syms "still pins each CSECT at the address the table
+gives, so this is not yet a link that lays out memory by itself".  --concard
+lays it out from the cards, so the test stops being "given these addresses, do
+the bytes match" and becomes "does our layout reproduce theirs".  That is
+strictly stronger where it matches and much harder to read where it does not,
+and the first run should be expected to look worse.  The CSECT table does not
+go away either:  fcmcmp --csect-table still wants it for annotation and for
+the size check.
+
+    NOR IS --external-syms LEGACY.  It is the SINGLE-MODULE mode, which is
+    what 247 moved away from when it started linking whole configurations.
+    It is the wrong tool for the mode we are now in, which is a different
+    criticism from its being obsolete.
+
+OI301700 NEEDS NONE OF THIS.  Its CON80 directory exists and is EMPTY, and
+there are no memory dumps for it -- the eight DASS files are OI340600's, G2 G3
+G8 G9 G16 P9 S2 and SSW.  With no dump there is no CSECT table, so nothing
+pins anything and nothing needs to; verify-sweep does not link at all, it
+compares the assembler's own output against contemporary listings.
+
+WHY.  260 asked where the --external-syms fault lies and the answer is neither tool: lnk101 already has cross-phase resolution and the CON80 decks are in the archive.  Recording what is verified, what is not, and that --concard changes what the comparison proves keeps the next person from starting a large harness change on an assumption.
 
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 

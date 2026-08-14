@@ -2324,7 +2324,29 @@ def generateObjectCode(source, macros):
                             break
                     if failed:
                         continue
-                    while len(bits) % 8 != 0:      # pad the last byte
+                    # PADDED OUT TO A HALFWORD, NOT TO A BYTE, and zero-filled.
+                    # Measured off the OI301700 listings, which carry every
+                    # bit-length group in the corpus:
+                    #
+                    #     15 bits -> 2 bytes      16 bits -> 2 bytes
+                    #     17 bits -> 4 bytes      32 bits -> 4 bytes
+                    #
+                    # Byte padding predicts 3 bytes for the 17-bit group and
+                    # the listing says 4 -- FIOCBLKS' `DC AL.8(FIOPZERO),
+                    # AL.5(FIOPGNDA),AL.4(FIOPCMDC)` assembles to 00880000
+                    # there.  Halfword padding is the only rule that fits all
+                    # four, fullword padding being ruled out by the 15-bit
+                    # group at two bytes.
+                    #
+                    # THE BYTE IT ADDS HAS TO COME FROM THE CONSTANT, NOT FROM
+                    # THE FILL.  Under byte padding the group was three bytes
+                    # and the fourth was alignment padding for whatever
+                    # followed, which takes the fill pattern:  with
+                    # `--fill=C6C6` FIODLCMW read 0088 00C6 against the dump's
+                    # 0088 0000.  A corpus assembled at the default fill of
+                    # 0000 cannot see the difference at all, which is why
+                    # OI301700 matched throughout.
+                    while len(bits) % 16 != 0:
                         bits.append(0)
                     data = bytearray(len(bits) // 8)
                     for i, bit in enumerate(bits):
