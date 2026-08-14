@@ -2705,6 +2705,65 @@ compares the assembler's own output against contemporary listings.
 
 WHY.  260 asked where the --external-syms fault lies and the answer is neither tool: lnk101 already has cross-phase resolution and the CON80 decks are in the archive.  Recording what is verified, what is not, and that --concard changes what the comparison proves keeps the next person from starting a large harness change on an assumption.
 
+THE DASS MEMORY MAP SETTLES `inConfig` DIRECTLY, AND THE CURRENT FLAG IS AN
+INFERENCE.  262 asked whether the distinction could be got from the archive
+rather than from a harness change.  It can, and the source is a part of the
+DASS file the index generator does not read.
+
+    dass-syms.py SETS THE FLAG FROM WHERE THE ADDRESS CAME FROM -- "one of the
+    two foreign passes, rather than the relocation-evidence pass" -- and says
+    so plainly in its own comment: "That is weak evidence of absence and must
+    not be treated as proof."  The worry it records is false marks: across
+    eight configurations 79 marked sections MATCH the dump, and acting on the
+    mark alone would have hidden 36 real agreements.
+
+    THE MEMORY MAP IS POSITIVE EVIDENCE INSTEAD.  Every DASS file carries
+
+        M E M O R Y   M A P ---  GNC9
+
+        000000-0001A5  FCMPSA   **** 01A6(  422)  N O N H A L
+        0001A6-0001A7  -------- **** 0002(    2)  C H E C K S U M
+
+    -- one line per section actually placed, for THAT configuration.  A
+    section in it is in the build; one not in it is not.  Nothing is inferred
+    from which scrape supplied an address.
+
+MEASURED, on the two configurations whose indices are saved:
+
+                    map     index   absent  flagged  agree  FALSE   missed  fields
+                  names                              ALARMS                 lost
+        G9         1268      1318       51       40     40      0       11       2
+        S2         1224      1296       73       48     48      0       25      44
+
+    THE MAP REPRODUCES EVERY EXISTING MARK AND ADDS MORE.  All 40 of G9's and
+    all 48 of S2's agree; NEITHER configuration has a single false alarm, which
+    is the specific failure dass-syms.py feared.  It catches 11 and 25 further
+    sections the provenance test misses.
+
+    "FIELDS LOST" IS THE COLUMN THAT MATTERS for 260's defect.  Publishing
+    `contents` only for sections the map shows present withdraws exactly the
+    two field definitions -- TFCMPFD1 and TFCMPFD2 -- that make our G9 link
+    resolve what the original left 0000.  `start` and `end` would still be
+    published, so the ZCON-into-overlay placement fcmcmp's docstring depends
+    on is untouched.
+
+    S2 WOULD LOSE 44, WHICH IS NOT THE SAME SIZE OF CHANGE AT ALL, and those
+    are not yet spot-checked against the dump the way G9's two are.  A field
+    ceasing to resolve is right only where the original build did not resolve
+    it either; twenty-two times more of them is twenty-two times more to be
+    wrong about.
+
+WHAT IS NOT DONE.  Six of the eight configurations -- G2, G3, G8, G16, P9, SSW
+-- have no saved index, so the false-alarm count is measured at two of eight
+and the 79-matching-sections claim is not fully retested.  Regenerating those
+indices is what it would take.  Nothing in dass-syms.py has been changed.
+
+    AND spanOwner STAYS EITHER WAY.  It is the positive evidence fcmcmp uses
+    to say what memory belongs to instead, and a map-derived flag makes it
+    easier to compute rather than redundant.
+
+WHY.  The flag dass-syms.py calls weak evidence can be replaced by positive evidence already in the DASS file, and the measurement says it loses nothing -- zero false alarms in both configurations checked.  Recording the numbers, and that S2 would withdraw 44 field definitions against G9's 2, is what the decision needs.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
