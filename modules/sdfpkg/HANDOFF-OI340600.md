@@ -3439,6 +3439,70 @@ is every ABSOLUTE residue figure quoted against them.
 
 WHY.  I spent a day measuring a residue the project had already explained and suppressed, then wrote an entry claiming the explanation as new.  The cost was not only the wasted work: 269 and 270 carried numbers that would send the next reader after COMPOOLs that are not in question.  The trap is worth naming -- two exceptions files, differently named, in different directories, and the smaller one is the one sitting beside the other artifacts.
 
+TWO REAL ASM101S DEFECTS OUT OF THE SIXTY-THREE, AND A GAP IN 267'S FILTER.
+269 said 63 halfwords were the only place an assembler or linker defect could
+still be hiding.  Two were there.  Both are places where ASM101S produced
+something the FORMAT and lnk101 were already prepared to receive, so nothing
+complained and only the dump disagreed.
+
+A ZCON LITERAL TOOK THE CODE RELOCATION INSTEAD OF THE DATA ONE.  The literal
+pool appended its relocation with no rldFlags, leaving objectWriter's fallback
+of 0x04 -- the CODE kind -- so lnk101 patched BSR from the target's sector
+where 0x50 would have patched DSR.  FCMNINIT's `L R3,=Z(,FPMXQETB+2,0)` came
+out 0010 against the dump's 0001, in all three configurations.  Five lines
+reproduce it, with the DC beside the literal as its own control:
+
+        ZT5      CSECT
+                 EXTRN FOO
+                 L     R3,=Z(,FOO+2,0)      -> flags 04, wrong
+                 DC    Z(,FOO+2,0)          -> flags 50, right
+                 LTORG
+                 END
+
+    0x50 IS NOT A CHOICE.  A Z literal parses as `(,A1,A2)` and that is the
+    only shape the literal grammar admits -- there is nowhere to write the
+    leading symbol that makes `DC Z(sym,...)` the code form.  The corpus
+    agrees: `=Z(,FPMXQETB+2,0)` is the only ZCON literal in it.
+
+AN ENTRY MAY SIT BEFORE ITS OWN SECTION, AND WAS EXPORTED AS ZERO.  PCGEN
+writes `&CURLABL EQU *-FIOBUS&STRTBUS` with `FIOBUS1 EQU 2`, so FIOADCNS's
+FIOIPR is a virtual base two halfwords AHEAD of the section, for bus-indexed
+addressing.  A negative section-relative value borrows out of the hashcode --
+the same borrow the YCON and MSC cases in model101.py already handle -- so
+unhash() found no section and the symbol kept address 0.  FIOADCCL's
+`DC Y(FIOIPR)` came out 96D8, FIOADCNS's own start, where the dump has 96D6.
+
+    THE READER WAS ALREADY WAITING FOR IT.  lnk101's objModule.py decodes a
+    24-bit two's complement in that field and its comment names THIS SYMBOL as
+    the case.  be24 raised OverflowError on a negative, so it masks now, and
+    both EQU passes get the recovery -- the second is the one the object is
+    written from, which is why fixing only the first changed nothing.
+
+    ONLY A FULL LINK SHOWS IT.  A per-module sweep takes FIOIPR from the CSECT
+    table, which carries FIOADCNS's start; only a link that actually contains
+    FIOADCNS.obj sees the -2.  So the per-module TSV is the wrong instrument
+    for this class and said nothing.
+
+267'S COLLISION FILTER WAS NEVER APPLIED TO THE ASSEMBLY OBJECTS, and it
+should have been.  Rebuilding G9's objects raised its failing sections from 18
+to 33, all seventeen of the new ones HAL/S -- which an assembler change cannot
+touch.  The cause was the object SET: the regenerated table puts six more
+modules in scope, and five of them collide with sections G9 already has.
+
+        FIOHFEPG  on FIOHFE89      405 halfwords
+        FCMTBLPG  on FCMTBLG9
+        FIOPBYTB  on FIOPBYG9
+        FIOCYCTB  on FIOCYCG9
+        FCMLINIT  on #EVAIMTS
+
+    The `*PG`/`*TB` against `*G9`/`*89` naming is the configuration-variant
+    pattern, and both cannot be resident.  csect-collisions.py already decides
+    this correctly; obj-sections.py was simply never run over the assembly
+    half.  Run over both, G9 comes to 16 of 1117 -- better than the 18 of 1116
+    that stood before either fix.
+
+[why] Two defects in the sixty-three is a better yield than I expected, and both hid the same way: the format tolerated the wrong thing, so only the flight image objected.  The filter gap matters more than either -- it silently cost seventeen sections the moment the object set changed, and it would have been read as a regression from the assembler fixes by anyone who did not check that the regressed sections were compiler output.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
