@@ -2107,6 +2107,134 @@ all the same shape -- the low nibble:
 
 WHY.  An object with ER cards for its own labels is wrong in a way --external-syms hides: the table supplies the symbol, the linker adds it to the offset already in the field, and the result is only ever visible as a wrong address rather than as a link error.  Recording the shape of it, and that the ZCON's second operand is still unused, is what the next pass needs.
 
+THE ZCON'S SECOND OPERAND IS THE DATA BASE, AND IT NOW REACHES THE OBJECT.
+254 left this as the next thing: `DC Z(entry,base,flags)` has three fields and
+ASM101S used only the first and the third, so the DSR nibble came out 0.
+
+    HW1 OF A ZCON IS  XC C CB CD BSR(7-4) DSR(3-0).  The `flags` operand is
+    its HIGH byte -- 15 is 0x0F and both images agree on it.  The low byte is
+    two sector registers and the assembler emits it as zero for the linker to
+    patch.  BSR comes from the ENTRY's sector via the address relocation.  DSR
+    comes from the BASE, and nothing was telling the linker what the base was.
+
+        FIOMGCV   `Z(FIOMMCHK,FIOCBLKS,15)`   0F30 against the dump's 0F31
+        FCMMGPOV  `Z(FCMMGOVP,FCMCBLKS,15)`   0F30 against 0F31
+        FPMFCLOS  `Z(FPMSVCL+2,FPMSVC21,8)`   0830 against 0831
+
+    -- and FIOCBLKS is at 35782, FCMCBLKS at 33050, FPMSVC21 at 33094, all in
+    SECTOR 1, which is the nibble in every case.  The sector is the halfword
+    address shifted right 15.
+
+THE FORMAT ALREADY HAS THE MECHANISM AND IT IS DOCUMENTED IN THE LINKER.
+lnk101's ap101Utils/addrcon.py, ZCon's docstring, says three RLD entries may
+point at one ZCON:
+
+    address   0x04 / 0x10 / 0x50   writes HW0, and patches BSR (or DSR, 0x50)
+    BSR-only  0x20                 patches BSR in HW1 alone
+    DSR-only  0x40                 patches DSR in HW1 alone
+
+So the fix is a SECOND relocation per code ZCON, rldFlags 0x40, naming the
+base.  It is read from the grammar's `A1` field, which is the second operand
+when `z` or `zx` is present and is otherwise the address expression -- which
+is why it was being ignored: the only code that read A1 was the branch for
+`Z(,expr,flags)`, where there IS no base.
+
+    ONLY THE CODE FORM GETS IT.  `Z(,expr,flags)` has no base operand; its
+    DSR is patched by the 0x50 address relocation from the target's own
+    sector, which already worked.  Do not add a second RLD there.
+
+    THE BASE IS RESOLVED THE WAY 254 RESOLVES THE ENTRY -- a section of this
+    module is named as that SECTION, anything else is declared EXTRN -- so a
+    module does not acquire an ER for a base it defines itself.
+
+MEASURED, G9, the alternate-free link with all 153 reassembled:
+
+        FPMFCLOS   1 halfword differing -> 0, the section now MATCHES
+        FIOMGCV    4 -> 1
+        FCMMGPOV   2 -> 1
+        failing sections        50 -> 49
+        same-size residue      316 -> 311 halfwords
+
+    RUNASM --no-rtl-fixes   205/205 byte-for-byte           unchanged
+    verify-sweep            267 MATCH  5 MATCH?  0 DIFFERS  unchanged
+    oi340600-sweep          177 OK  47 OK-EARLY  0 failures unchanged
+
+WHAT IS LEFT IN THOSE TWO IS NOT A ZCON PROBLEM, and saying so is the point:
+
+        FIOMGCV   @1A17F  0000 vs DD22
+        FCMMGPOV  @193DE  8000 vs CBEA
+
+    The first is an unresolved site -- we hold 0000 because the linker could
+    not resolve the symbol, which is the archive gap and not an assembler
+    fault.  The second is neither 0000 nor an address the table knows, and is
+    the one worth looking at next.
+
+    THE THREE ZCON DEFECTS WERE THREE DIFFERENT THINGS, in one operand each:
+    250's was the LTORG accounting underneath the constant, 254's was
+    relocating the FIRST operand against itself, and this is the SECOND
+    operand never being emitted.  Finding one did not suggest the others; each
+    came from reading the halfwords that were still wrong after the last.
+
+WHY.  254 named the second operand as the next thing and this is it, but the useful part is that the format already had the mechanism -- three RLDs may point at one ZCON and the linker documents all three.  The fix was reading the tool that consumes the object, not inventing an encoding.
+
+A NEGATIVE DISPLACEMENT NEEDS THE SIGN BIT, AND HALF THE CONVENTION WAS
+ALREADY IMPLEMENTED.  `DC Y(SYM-1)` emits the MAGNITUDE, 0001, and the note in
+that arm records why -- the original does the same, eight instances, six at -1
+in FCMCBLKS.  What it did not do is tell the linker that the magnitude is
+negative, so the linker ADDED it and every one came out two halfwords high:
+
+    DC    Y(CZ2VNOMB-1)     ours 271B   dump 2719
+    DC    Y(CZ2BMODE-1)          26E4        26E2
+    DC    Y(CZ2BGRTS-1)          26FD        26FB
+    DC    Y(TFCMDEUC-1)          9D67        9D65
+    DC    Y(CZ2VMETM-1)          26D7        26D5
+    DC    Y(CZ2VTSIP-1)          26D1        26CF
+
+THE FLAG BYTE'S BIT 7 IS THE SIGN, from OBJECTGE.xpl, and lnk101 implements it
+-- ap101Utils/addrcon.py: "V (sign) is the sign of the YCON in the text record
+-- V=1 means existing is the absolute value of a negative", and then
+`signed_existing = -existing if self.sign else existing`.  The object was
+being punched with flags 0x00 for every YCON.  It is now 0x80 when the
+displacement is negative, which is the one bit that was missing.
+
+    ASM101S ALREADY KNEW THE DISPLACEMENT WAS NEGATIVE.  A negative offset
+    from an EXTRN borrows out of the hashcode, so `unhash` returns None and
+    the Y arm recovers the symbol by adding 1<<36 back and taking
+    `abs(_yLow - (1 << 36))`.  That `abs` is where the sign was discarded; the
+    branch that computes it now sets the flag as well.
+
+    FCMCBLKS goes from six differing halfwords to a MATCH.
+
+THE SAME CONVENTION ON THE MSC PATH IS NOT FIXED, and it is the next thing.
+FIOMDPPG writes
+
+        #LBR@  FIOBRE-2
+        #MOUT@ FIOWCE-2
+
+and its object holds FA00 0002 and FD00 0002 -- the magnitude again -- WITH NO
+RELOCATION AT ALL.  `mscLongField` calls `unhash` and returns the raw value
+when it gets None, which is exactly the hashcode borrow the Y arm learned to
+recover from; the relocation is simply never appended, so the site keeps the
+bare displacement.  Two halfwords, 8BC4 and 8C92 in the dump.
+
+    IT NEEDS BOTH HALVES:  the same +1<<36 recovery in `mscLongField`, and the
+    ACON's signed flag byte, which addrcon.py names as 0x9C -- ACON|sign --
+    rather than the 0x1C the writer punches for every A-type relocation now.
+
+    FOUR MODULES USE A NEGATIVE DISPLACEMENT AT ALL, which is why so little of
+    the corpus moves:  FCMCBLKS, FIOCBLKS and FIOCDATG in `DC Y(...)`, and
+    FIOMDPPG in the `@` form.  FIOCBLKS's and FIOCDATG's sites name symbols
+    that are unresolved in a G9 link, so they show nothing either way here and
+    are not evidence that the fix did not reach them.
+
+MEASURED, G9, with 255's DSR relocation also in place:
+
+        FCMCBLKS  6 halfwords differing -> 0, the section MATCHES
+        failing sections       49 -> 48
+        same-size residue     311 -> 305 halfwords
+
+WHY.  The assembler already emitted the magnitude and said so in a comment; only the sign bit was missing, so the defect was half-implemented rather than absent.  Recording that the SAME convention is unfixed on the MSC path, where the relocation is not emitted at all, is what keeps the pair together.
+
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
 OPEN CODE, so pulling in a COPY fragment puts a DS outside any control section.

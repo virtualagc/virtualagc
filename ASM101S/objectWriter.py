@@ -214,8 +214,12 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
             # but may not match the documented AP-101S flag encoding.
             rldFlags = 0x04
         elif r.get('type') == 'Y':
-            # YCON: halfword address relocation
-            rldFlags = 0x00
+            # YCON: halfword address relocation.  BIT 7 IS THE SIGN, and a
+            # negative displacement is emitted as its MAGNITUDE with that bit
+            # set -- OBJECTGE.xpl's V flag, which lnk101's addrcon.py reads as
+            # "existing is the absolute value of a negative" and subtracts.
+            # Without it `DC Y(SYM-1)` links as SYM+1.
+            rldFlags = 0x80 if r.get('negative') else 0x00
         else:
             # Standard 4-byte address constant
             rldFlags = 0x1C

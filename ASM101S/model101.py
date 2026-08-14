@@ -2511,6 +2511,68 @@ def generateObjectCode(source, macros):
                                         'rldFlags': 0x04 if isCode else 0x50,
                                         'type': 'Z'
                                     })
+                                    # THE SECOND OPERAND IS THE DATA BASE AND
+                                    # IT WAS BEING THROWN AWAY.  `Z(entry,
+                                    # base, flags)` has three fields and only
+                                    # the first and third were used.  HW1 of a
+                                    # ZCON is XC C CB CD BSR(7-4) DSR(3-0):
+                                    # the address relocation above patches BSR
+                                    # from the ENTRY's sector, and the BASE's
+                                    # sector belongs in DSR, which came out 0.
+                                    # FIOMGCV's `Z(FIOMMCHK,FIOCBLKS,15)` reads
+                                    # 0F30 where the dump has 0F31, FIOCBLKS
+                                    # living at 35782 and so in sector 1.
+                                    #
+                                    # A SEPARATE RLD SAYS SO.  lnk101's
+                                    # addrcon.py ZCon.apply documents the three
+                                    # that may point at one ZCON -- the address
+                                    # (0x04/0x10/0x50), BSR-only 0x20, and
+                                    # DSR-only 0x40 -- so this is the format's
+                                    # own mechanism and not an invention.
+                                    #
+                                    # ONLY FOR THE CODE FORM.  `Z(,expr,flags)`
+                                    # keeps its address in A1 and has no base
+                                    # operand at all; its DSR is patched by the
+                                    # 0x50 above, from the target's own sector.
+                                    if isCode and suboperand.get('A1'):
+                                        zBase = describeExpression( \
+                                                    suboperand['A1'])
+                                        mzb = re.match( \
+                                                r"[A-Z@#$][A-Z0-9@#$]*", zBase)
+                                        if mzb:
+                                            zBaseName = mzb.group(0)
+                                            _zb = symtab.get(zBaseName)
+                                            zBaseSect = None
+                                            if _zb != None and _zb.get("type") \
+                                                    != "EXTERNAL":
+                                                _bs, _bo = unhash( \
+                                                        _zb.get("value", 0))
+                                                if _bs != None and \
+                                                        _bs in sects and not \
+                                                        sects[_bs].get("dsect"):
+                                                    zBaseSect = _bs
+                                            if zBaseName not in symtab:
+                                                extrns.add(zBaseName)
+                                                symtab[zBaseName] = {
+                                                    "type": "EXTERNAL",
+                                                    "value": getHashcode( \
+                                                                zBaseName)
+                                                    }
+                                                rextrns[symtab[zBaseName] \
+                                                        ["value"]] = zBaseName
+                                            elif zBaseSect == None and \
+                                                    zBaseName not in extrns:
+                                                extrns.add(zBaseName)
+                                            relocations.append({
+                                                'symbol': zBaseSect \
+                                                          if zBaseSect != None \
+                                                          else zBaseName,
+                                                'section': sect,
+                                                'address': pos1,
+                                                'flags': 0,
+                                                'rldFlags': 0x40,
+                                                'type': 'Z'
+                                            })
 
                             # emit 4 bytes: [address, address, flags, 0]
                             # Bytes 0-1: Address
@@ -3055,6 +3117,7 @@ def generateObjectCode(source, macros):
                                               "Cannot evaluate Y-type constant")
                                     v = 0
                                 ySect, yOffset = unhash(v)
+                                yNegative = False
                                 if ySect == None:
                                     # A NEGATIVE OFFSET FROM AN EXTERNAL SYMBOL
                                     # borrows out of the 32-bit offset field
@@ -3088,6 +3151,23 @@ def generateObjectCode(source, macros):
                                             _yLow >= (1 << 35):
                                         ySect = hashcodeLookup[_yHash]
                                         yOffset = abs(_yLow - (1 << 36))
+                                        # AND THE RLD HAS TO SAY IT IS
+                                        # NEGATIVE.  Emitting the magnitude is
+                                        # only half the convention: the flag
+                                        # byte's bit 7 is the sign, and
+                                        # lnk101's addrcon.py implements
+                                        # OBJECTGE.xpl's rule -- "V=1 means
+                                        # existing is the absolute value of a
+                                        # negative", `signed_existing =
+                                        # -existing if self.sign else
+                                        # existing`.  Without it the linker
+                                        # ADDS the magnitude, so `Y(SYM-1)`
+                                        # links as SYM+1:  FCMCBLKS' six read
+                                        # 271B, 26E4, 26FD, 9D67, 26D7 and
+                                        # 26D1 where the dump has 2719, 26E2,
+                                        # 26FB, 9D65, 26D5 and 26CF, every one
+                                        # exactly two halfwords high.
+                                        yNegative = True
                                 if ySect is not None and compile:
                                     combinedOffset = yOffset + sects.get(ySect, {}).get("offset", 0)
                                     # Resolve actual CSECT from combined offset
@@ -3105,6 +3185,7 @@ def generateObjectCode(source, macros):
                                         'symbol': rldSymbol,
                                         'section': sect,
                                         'address': yAddr,
+                                        'negative': yNegative,
                                         'type': 'Y'
                                     })
                                     v = combinedOffset
