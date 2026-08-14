@@ -3352,6 +3352,67 @@ trio in the restored sources.
 
 WHY.  The DO WHILE defect is the only remaining assembly failure and it cost hours to localise; the trace and the authoritative reference expansion are recorded so the next session resumes at the point reached rather than repeating the search.
 
+THE HAL/S RESIDUE IS SOURCE VINTAGE, NOT A COMPILER DEFECT, AND CPCDIT PROVES
+IT ARITHMETICALLY.  269 said the rest "needs the HAL/S compiler"; that is too
+generous to the compiler and too pessimistic about the work.
+
+WHERE IT IS.  S2 carries 39 sections whose linked SIZE disagrees with the DASS
+listing, against G9's 4 and SSW's 1, and they are most of its 40254 differing
+halfwords.  Several are multiples out:
+
+        #PCDIMMU    17419 halfwords linked, the listing says  3083
+        #PCS2PDT     2573                                      376
+        #PCSARST     2782                                      352
+        #PCPCDIT      336                                       15
+
+    THE OBJECT DECLARES THE SIZE, so this is not lnk101 or fcmcmp:
+    CDIMMUTI.obj's SD for #PCDIMMU is 34838 bytes.  And the sections are
+    genuinely in the configuration -- all 39 appear in DASS_S2.ASC's own memory
+    map -- so they are not a comparison artifact either.
+
+    NOR IS IT THE .dfg GAP.  That was the obvious hypothesis, since the S2
+    COMPOOLs are named like the .dfg files and APPLSRC holds 266 of them.  It
+    is wrong: all 35 of the oversized sections whose module could be traced
+    have a .hal source.  Nothing here is waiting on the preprocessor.
+
+    NOR IS IT THE REMOTE-COMPOOL MECHANISM.  Only 6 of the 39 are marked
+    INCLUDE REMOTE in the listing.
+
+CPCDIT SETTLES IT.  CPC_DIT declares one structure of three halfwords --
+
+        1  CPCS_DIT_STAT_PTR   INTEGER,
+        1  CPCS_DIT_RESET      BIT(16),
+        1  CPCS_DIT_SET        BIT(16);
+
+-- and then
+
+        DECLARE CPCS_DIT CPCS_DIT-STRUCTURE
+          (112)  INITIAL( ... )
+
+112 copies of three halfwords is 336, and our object is 336 halfwords EXACTLY.
+The compiler did precisely what the source says.  The build's section is 15
+halfwords, which is five copies.  OUR SOURCE DECLARES 112 WHERE THE BUILD HAD
+5; the compiler is not wrong about anything.
+
+    CSARST TELLS THE SAME STORY: CSAS_REMOTE_SCALING is declared (278), our
+    section is 2782 halfwords -- ten per entry -- and the build's 352 is about
+    35 entries.  CPCPCI's ARRAY(20) BIT(16) gives our 20 against the build's
+    18.
+
+WHICH IS 248'S GAP AGAIN, ON THE THIRD SIDE OF THE TRIANGLE.  248 found it in
+the FCOS macro library, 269 found it in SSW's assembly references resolving
+into modules that configuration does not place, and here it is in the HAL/S
+COMPOOL declarations: our OI340600 sources are not the sources that built
+OF290103.  Every dump we have is that build.
+
+SO THE COMPILER IS NOT THE OBSTACLE AND SHOULD NOT BE BLAMED FOR THIS.  A
+smaller, sharper question replaces it: for each oversized COMPOOL, what does
+the array bound have to be for the size to match, and does that bound appear in
+any source we hold?  CPCDIT wants 5 where we have 112, and that is checkable
+against the listing's own size for all 39 without compiling anything.
+
+[why] "It needs the HAL/S compiler" is the kind of conclusion that closes an avenue for good, and it was wrong: the compiler is faithfully compiling a source that differs from the one the dump was built from.  The arithmetic on CPCDIT is exact -- 112 x 3 = 336 -- so this is demonstrated rather than inferred, and it turns the largest remaining block from a compiler problem into a source-archaeology one.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
