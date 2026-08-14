@@ -346,9 +346,16 @@ def doVerify(spec, index, fields):
     image = open(imagePath, "rb").read()
     tally = collections.Counter()
     wrong = []
+    resolvedTally = collections.Counter()
+    resolvedWrong = []
     for u in link.get("unresolvedRelocations", []):
         name = u["symbol"]
-        hw = u["imageOffsetHW"]
+        # THE ADDRESS IS NOT AT imageOffsetHW FOR A 4-BYTE RELOCATION.  That
+        # halfword is the opcode, which is the same however the site resolved,
+        # so reading it compared a full address against an opcode and reported
+        # "the dump holds 0F200" for every ACON site.  The same off-by-one
+        # existed in fcmcmp's RLD annotation (nsts-sdl-dps PR #37).
+        hw = u["imageOffsetHW"] + (max(1, (u.get("length") or 2) // 2) - 1)
         if hw * 2 + 2 > len(image):
             tally["site beyond the image"] += 1
             continue
@@ -367,18 +374,73 @@ def doVerify(spec, index, fields):
             # and emitting an address here would be a NEW disagreement rather
             # than a fix; see the TFIVMCI1 case in the handoff.
             tally["dump holds 0000; original did not resolve it either"] += 1
-        elif got == want:
+        elif (got & 0xFFFF) == want:
             tally["PREDICTS THE DUMP EXACTLY"] += 1
         else:
             tally["DISAGREES WITH THE DUMP"] += 1
             wrong.append((name, csect, got, want))
+    # AND THE RESOLVED ONES, which is where a WRONG recovery hides.  An
+    # unresolved site says only that nothing supplied the symbol; a site this
+    # recovery RESOLVED is a positive claim about an address, and until now
+    # nothing checked it.  FIOMS2PG is why: TFIVAN11-14 and TFIVPF12-13, the
+    # very names scanHalstat's comment calls out as EQUATEd in several
+    # compilations, resolve about 0x18 high in S2 and land in the image as
+    # 7880 against the dump's 7867.  Every one was reported as recovered.
+    for r in link.get("relocations", []):
+        name = r.get("symbol")
+        if name not in fields:
+            continue
+        n = 2 if r.get("flags", 0) in (0x1C, 0x9C) else 1
+        hw = r["address"] + n - 1
+        if hw * 2 + 2 > len(image):
+            continue
+        want = int.from_bytes(image[hw * 2:hw * 2 + 2], "big")
+        chosen, why = resolve(name, fields[name], index)
+        if chosen is None:
+            continue
+        csect, offset = chosen
+        got = index[csect]["start"] + offset
+        # COMPARE AGAINST WHAT THE LINK STORED, NOT AGAINST THE BARE SYMBOL.
+        # A reference carries an addend and it is often not zero: FCMCBLKS
+        # writes `DC Y(CZ2VNOMB-1),H'130'`, so the site legitimately holds the
+        # address MINUS ONE.  Six symbols in every configuration looked wrong
+        # by exactly +1 until this was taken into account, and every one of
+        # them is a `SYM-1` reference.
+        #
+        # BIT 15 IS THE SECTOR FLAG and not part of the address; dass-syms.py's
+        # basesFrom says the same.  Without allowing it every #PCDULNK field
+        # looked wrong -- 03076 against B076 is 0x3076 with bit 15 set.
+        stored = r.get("target", got) & 0xFFFF
+        if want in (stored, stored | 0x8000):
+            resolvedTally["resolved site agrees with the dump"] += 1
+        elif want in (0x0000, 0xC9FB, 0xC6C6):
+            resolvedTally["resolved, but the dump never stated a value"] += 1
+        else:
+            # What address for this symbol would make the site come out as the
+            # dump has it?  That is the number worth printing: the recovery is
+            # what is under test, and the addend cancels out of it.
+            implied = (got + (want - stored)) & 0xFFFFF
+            resolvedTally["RESOLVED TO THE WRONG ADDRESS"] += 1
+            resolvedWrong.append((name, csect, got, implied))
+
     print("\nverify %s" % linkPath, file=sys.stderr)
     for k, v in tally.most_common():
         print("   %-46s %d" % (k, v), file=sys.stderr)
     for name, csect, got, want in wrong[:20]:
-        print("      %-9s %-9s recovered %05X but the dump holds %05X"
+        print("      %-9s %-9s recovered %05X but the dump holds %04X"
               % (name, csect, got, want), file=sys.stderr)
-    return 1 if wrong else 0
+    for k, v in resolvedTally.most_common():
+        print("   %-46s %d" % (k, v), file=sys.stderr)
+    seen = set()
+    for name, csect, got, want in resolvedWrong:
+        if name in seen:
+            continue
+        seen.add(name)
+        if len(seen) > 20:
+            break
+        print("      %-9s %-9s recovered %05X, the dump implies %05X"
+              % (name, csect, got, want), file=sys.stderr)
+    return 1 if wrong or resolvedWrong else 0
 
 
 if __name__ == "__main__":
