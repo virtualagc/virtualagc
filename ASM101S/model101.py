@@ -4722,6 +4722,7 @@ def generateObjectCode(source, macros):
                 # carried ER cards for FIOBRE and FIOIBRE with no RLD card at
                 # all.
                 bceRelocSymbol = {}
+                bceNegative = set()
 
                 def bceField(subfield):
                     '''Evaluate one BCE operand.  An address comes back hashed
@@ -4733,6 +4734,17 @@ def generateObjectCode(source, macros):
                         return None
                     section, offset = unhash(value)
                     if section is None:
+                        # A NEGATIVE DISPLACEMENT FROM AN EXTRN borrows out of
+                        # the offset into the buffer nibble, so `unhash` reports
+                        # None and this returned the raw hashed value with NO
+                        # RELOCATION -- the site kept its bare displacement.
+                        # The magnitude is what the listing shows and the
+                        # ADDRESS arm below emits; the SIGN travels in the RLD.
+                        _bfHash = (value & hashcodeMask) + (1 << 36)
+                        _bfLow = value & 0xFFFFFFFFF
+                        if _bfHash in hashcodeLookup and _bfLow >= (1 << 35):
+                            bceRelocSymbol[subfield] = hashcodeLookup[_bfHash]
+                            bceNegative.add(subfield)
                         return value
                     # The value itself is computed exactly as before; this only
                     # records what the linker has to fill in.  An EXTRN is
@@ -4811,6 +4823,7 @@ def generateObjectCode(source, macros):
                             'symbol': bceRelocSymbol["A1"],
                             'section': sect,
                             'address': sects[sect]["pos1"],
+                            'negative': "A1" in bceNegative,
                             'type': 'A'
                         })
                 elif layout == "IUACOMMAND":

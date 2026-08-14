@@ -221,8 +221,10 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
             # Without it `DC Y(SYM-1)` links as SYM+1.
             rldFlags = 0x80 if r.get('negative') else 0x00
         else:
-            # Standard 4-byte address constant
-            rldFlags = 0x1C
+            # Standard 4-byte address constant.  0x9C is that byte with the
+            # sign bit: the field holds the MAGNITUDE of a negative
+            # displacement, which is what the contemporary listing shows.
+            rldFlags = 0x9C if r.get('negative') else 0x1C
         rldEntries.append({
             'relId': esdIdMap[r['symbol']],
             'posId': sectIdMap[r['section']],
