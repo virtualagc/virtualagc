@@ -1839,6 +1839,16 @@ WHY.  RSB asked whether it is still needed.  The answer is in the code and is wo
 recording, because the failure mode it now produces is the one that cost five
 modules with FPMSWTCC and would look like a missing macro next time.
 
+SUPERSEDED IN ITS NUMBERS BY 253, AND IN ITS CONCLUSION.  Every figure
+below was measured on a link that included nineteen objects belonging to
+OTHER configurations, whose HALSTAT sections were pinned over live memory.
+Without them the residue is 321 halfwords rather than 2603, and the BCE
+finding at the foot of this entry is wrong outright:  19 of the 24 BCE
+sections match byte for byte and FIOPDIPG's 247 differing halfwords are 0.
+The entry is kept for the method -- the decomposition is still the right
+way to read the number -- and as the record of how the wrong conclusion
+was reached.
+
 WHAT THE FULL G9 LINK ACTUALLY LEAVES, decomposed.  251 established the
 459-object link and reported one number, 89 sections and 12203 halfwords.
 That number is mostly two sections, and the workable residue is a quarter of
@@ -1930,6 +1940,90 @@ BCE and the fifth is beside them:
     1312 halfwords are a separate question and are not the assembler's.
 
 WHY.  251 left the phase with one aggregate number, and an aggregate is where work goes to hide: two sections carry seventy per cent of it, the undefined-symbol caveat explains a sixth rather than most, and the assembly-side remainder turns out to be concentrated in fourteen BCE sections rather than spread across thirty-nine.  Recording the decomposition, and that the obvious BCE explanation is already refuted, is what makes the next session's first hour useful instead of repeated.
+
+NINETEEN OF 252'S TWENTY-SIX HUNDRED HALFWORDS WERE THE HARNESS.  252 said the
+assembly-side residue was concentrated in the BCE sections and named FIOPDIPG,
+247 halfwords differing out of 276, as the worst.  IT IS NOW ZERO.  So are
+FIOPMUPG's 201, FIOSRBPG's 82, FIOIMUPG's 135 and FIONWSPG's 29.  Nothing in
+the assembler changed; nineteen object files came out of the link.
+
+    THE LINK WAS BEING GIVEN MODULES FROM OTHER CONFIGURATIONS.  G9work3
+    holds 306 HAL/S objects and nineteen of them are not G9's:
+
+        DCDDG1  DCDDG2  DCDDG3  DCDDG8  DCDDS2  DCDDS4  DCDDS8
+        DKFCM1  DKFCM2  DKFCM3  DKFCM4  DKFCM5  DKFCM6  DKFCM8
+        DPDSPC  DPLLIGHT  DSPSPC  DXCCCSPE  DXRDMM
+
+    -- the G1, G2, G3, G8, S2, S4 and S8 variants of sections G9 has its own
+    version of.  Each contributes one ZCON and TWO SECTIONS THE INDEX TYPES
+    AS `HALSTAT`, and a HALSTAT record is the compiler's statistics block,
+    not loadable memory.  --external-syms pins every CSECT at the address the
+    table gives, so those 46 HALSTAT sections were laid into the image at
+    addresses that are not load addresses at all, 22280 halfwords of them,
+    ON TOP OF 68 REAL SECTIONS and 15783 halfwords of live content.
+
+HOW IT PRESENTED, and why it read as an assembler fault.  FIONWSPG is 34
+halfwords and 29 of them differed.  Its own object is RIGHT -- byte for byte
+against the dump at 30 of the 34 -- and the four that are not are exactly its
+four `#LBR@ FIOBRE` operand slots, which hold 0000 before relocation and 8BC6
+after, 8BC6 being FIOBRE's address of 35782.  The link then overwrote nearly
+the whole section:
+
+        halfword   object   linked   dump
+        1DE6E      FA00     3496     FA00      the object already matched
+        1DE70      C000     F0DE     C000      the object already matched
+        1DE74      0052     3C78     0052      the object already matched
+
+    46 relocations are recorded inside those 34 halfwords and FIONWSPG's
+    object declares FOUR.  The other 42 belong to #CDCDDG1, #CDCDDG2,
+    #CDCDDG3 and #CDCDDG8, three of which are pinned at 122316 and one at
+    122466, each two to three thousand halfwords long, and FIONWSPG lives at
+    122478 inside all four.
+
+    COMPARE THE OBJECT AGAINST THE DUMP BEFORE BLAMING THE ASSEMBLER.  One
+    hexdump of FIONWSPG.obj would have settled this immediately, and instead
+    a whole entry was written about BCE encodings on the strength of the
+    LINKED image.  The object is the assembler's output; the image is the
+    harness's.
+
+MEASURED, G9, the same 153 assembly objects, only the HAL/S list changing:
+
+                                 306 objects   287 objects
+        sections compared               1126          1095
+        OK                              1037          1045
+        FAIL                              89            50
+        N/A, not in configuration         32             0
+        differing halfwords            12203          9881
+        SAME-SIZE RESIDUE               2603           321
+             of it, assembly            1291           167
+             of it, HAL/S               1312           154
+        BCE sections matching          10/24         19/24
+
+    THE N/A GROUP GOES TO ZERO, which is the confirmation that this is the
+    right cut rather than a lucky one:  the 32 sections fcmcmp was reporting
+    as "not in this configuration" ARE the alternate-configuration sections,
+    and once their objects are not linked there is nothing left to report.
+
+WHAT REMAINS IS 321 HALFWORDS OVER 46 SECTIONS, near-evenly assembly and
+HAL/S, plus four sections whose SIZE is wrong and which therefore contribute
+a further 9560 that measures misalignment rather than disagreement:
+
+        #CDCDDG9  6583      #PCDQANN  1981      #DDCDDG9  964
+        FIOCBLKS    55      #PCVAMMD    44      #PCSPCLB   32
+        FIOPDISP    23      FIOMGDSP    10      FIOADCNS    8
+
+250'S RESULT IS UNCHANGED ON THE BETTER BASIS, which is the point of
+re-running both arms rather than only the good one:  50 failing sections in
+each, the same 50, 9881 halfwords in each, and the only difference between
+them is that FIOLGERR's size mismatch is present in the before arm and absent
+in the after.  Size-mismatched sections 7 -> 6.
+
+    THE OBJECT LIST IS PART OF THE MEASUREMENT.  247 introduced the
+    multi-object link and nobody asked what was in the directory; the answer
+    was 94 per cent right, and the other 6 per cent was most of the number
+    the phase has been trying to reduce ever since.
+
+WHY.  252 blamed the assembler for content the linker had overwritten, on the strength of the linked image rather than the object file.  The object was right at 30 of FIONWSPG's 34 halfwords all along.  Recording the object-versus-image check, and that the directory's contents are part of the measurement, is what keeps the next reduction honest.
 
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
