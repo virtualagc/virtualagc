@@ -2842,6 +2842,243 @@ MEASURED END TO END, with the updated artifacts and lnk101's branch:
 
 WHY.  The artifacts were patched rather than regenerated because a clean pipeline run is not available -- the saved link JSONs are downstream of the recovery they feed.  Recording that, and that the S2 payoff came out at four halfwords rather than the twenty-two-fold the field counts suggested, is what stops both being rediscovered.
 
+263 AND 264 ARE WITHDRAWN: THE MEMORY MAP IS THE WRONG AUTHORITY FOR
+`linkInfo`, and the third configuration is what proved it.  Both entries stand
+as a record of what was tried; neither should be acted on.
+
+263 proposed marking every section the DASS memory map does not place, and 264
+carried it out in dass-syms.py (d1d29e22e).  Measured on G9 and S2 it fixed one
+section each.  Measured on SSW it BREAKS one:
+
+                    map-marked   unmarked   evidence-marked
+        G9           39/1116     40/1116        39/1116
+        S2          123/1090    124/1090       123/1090
+        SSW          34/570      33/570         33/570
+
+THE SAME SECTION EVERY TIME, FIOPDSPG, AND SSW GOES THE OTHER WAY.  #DDG9LIG
+and #DDPLLIG are overlay siblings at 0005A2; G9 and S2 place the first, SSW the
+second.  FIOPDSPG is compiled per configuration and in each one names the
+fields of whichever sibling is NOT resident:
+
+        G9   #LBR TFCMPFD1/2   fields of #DDPLLIG   the dump holds 0000
+        SSW  #LBR TFCMPFD1..4  fields of #DDG9LIG   the dump holds 05A4 05AC
+                                                          05B0 05B8
+
+    THE 0000 IS STATED, NOT MISSING.  The RAW MAFGEN scrape holds 0000 at G9's
+    two sites -- not the C9FB unlinkMAFGEN2 synthesises for a halfword the
+    listing never reported.  So G9's build left those references unresolved and
+    SSW's build resolved its equivalents, in the same structural situation.
+    SSW's FIOG9OPG says it again over eleven more halfwords: TFOVG902..905
+    stand at 4F94, 4FF0, 4F8E, 4E4E.
+
+    WHICH MEANS THE MAP CANNOT DECIDE IT.  Whether a reference into a
+    non-resident overlay sibling was resolved is a question about the CON80
+    BANK/OVERLAY/INSERT layout and the phase the reference was deferred to.
+    A rule derived from the map gets it right twice and wrong once, which is
+    not a rule.
+
+WHAT REPLACES IT IS IN 266.  The criterion is the reference SITE, and the
+memory-map helpers are gone from dass-syms.py rather than left as dead code
+(a7038b2c2) precisely so nobody reaches for them again.
+
+[why] 264 was committed and its artifacts published, so the record has to say plainly that it is withdrawn and why, or the next reader will find a mechanism that measures well on two configurations out of three and assume it is sound.  The G9-and-S2-agree, SSW-disagrees shape is exactly what a coincidence with a majority looks like.
+
+THE MARK COMES FROM THE REFERENCE SITE NOW, AND THE TEST IS NOT WHICH NAME
+OWNS THE ADDRESS.  `dass-fields.py --mark=LINK.json:DUMP.fcm`, where LINK.json
+is a full-configuration link made with NO marks so everything resolved.  Read
+the image at each site a section's FIELDS are referenced from:
+
+    it holds what resolution produced   -> the build resolved it.  A match
+                                           against ANY known symbol's address
+                                           is a match, whichever sibling's
+                                           name it was written under.
+    it holds an unpatched address field -> the build left it alone: MARK.
+
+IT LIVES IN dass-fields.py AND NOT dass-syms.py, which is not a preference.
+The evidence is read at references to a section's `contents`, and `contents`
+is what dass-fields.py ADDS -- after dass-syms.py has run.  Marking in
+dass-syms.py saw no contents and marked nothing, which is how the mistake
+announced itself.
+
+    ONLY UNAMBIGUOUS RELOCATIONS VOTE.  `target` is the 32-bit word at
+    `address` for ACON (0x1C, 0x9C) and the halfword there for YCON (0x00,
+    0x80).  0x10, 0x50 and 0xD0 patch register fields or sector-encoded
+    halves, where `target` is not what gets stored; they are skipped rather
+    than guessed at.
+
+    0000 COUNTS AS UNPATCHED HERE AND MUST NOT JOIN dass-syms.py's FILL.  The
+    votes pass asks what address a site implies, where 0000 is a possible
+    answer.  This asks whether an address was written at all, where it is the
+    answer "no".
+
+ONE MARK PER CONFIGURATION -- #DDPLLIG, #DDG9LIG, #0ITOE -- against the 67, 93
+and 79 the map produced, and it takes the better score in all three (see 265).
+
+TWO BUGS OF MINE THAT EACH INVERTED A VERDICT, both found by measuring:
+
+    `imageOffsetHW` and `relocations[].address` address the INSTRUCTION; the
+    relocated address is the halfword AFTER it for a 4-byte ACON.  Comparing
+    the first halfword compares the opcode, which is identical either way, so
+    every site scored as agreeing and G9's #DDPLLIG came back "resolved by the
+    build" when the dump plainly holds 0000.  The same defect existed in
+    fcmcmp's own annotation and is nsts-sdl-dps PR #37.
+
+    The pass must CLEAR every existing linkInfo before marking.  A --base
+    table still carries the old map-derived marks, and a pass that only ADDS
+    left 79 of them in SSW and scored 34/570 instead of 33.
+
+THE MARK IS FITTED TO THE DUMP at the sites it scores, so the gain there is by
+construction and not independent confirmation.  It is the same kind of artifact
+as exceptions-G9.txt: a recorded observation of what the original build did,
+from the only witness there is.  What is NOT fitted is the finding that the map
+is the wrong criterion, which stands on SSW alone.
+
+THE lnk101 CHANGE IS NOT NEEDED FOR ANY OF THIS.  Withholding the field
+definitions from the table's `contents` instead of marking them produces a
+BYTE-IDENTICAL image in all three configurations.  What the linker change buys
+is seven names in the symbol table the AP-101S emulators read -- G9 3326 ->
+3324 losing TFCMPFD1/2, S2 2890 -> 2885 losing #DDG9LIG and TFCMFCW1..4, SSW
+unchanged.  `lnk101-placement-only-external-syms` is therefore NOT filed.
+
+[why] The whole apparatus is worth two sections, both of them FIOPDSPG, in G9 and S2 -- against 40+44+5 from the overlay filtering of 267.  It earns its place by being the only rule that gains those two and breaks nothing, not by being large, and a later reader should not mistake its intricacy for importance.
+
+A FULL-CONFIGURATION LINK WAS WRITING OVERLAY BODIES ON TOP OF RESIDENT CODE,
+and stopping it is the largest single result of this phase: 40, 44 and 5
+sections corrected in G9, S2 and SSW, with NOTHING BROKEN in any of them.
+
+251 fed the link every compiled HAL/S object.  Some of those objects hold an
+overlay the configuration does not load, and linking them anyway places their
+sections at addresses the configuration has given to something else.  G9 had
+TWELVE addresses carrying two or more sections:
+
+    0005A2   #DDG9LIG      and #DDPLLIG
+    01DDCC   FIOSRBPG      and #CDCDDG2, #CDCDDG3, #CDCDDG8
+    01DE62   FIOPDG9       and #CDCDDG1
+
+Whichever object linked last won the bytes.  FIOSRBPG and FIOPDG9 are assembly
+modules the configuration DOES contain, being overwritten by code it does not.
+
+OBJECT GRANULARITY CANNOT EXPRESS THE FIX.  Only three HAL/S objects per
+configuration are wholly absent from the memory map.  The gain is in the ~20
+MIXED ones, every one the same shape:
+
+    DPLLIGHT.obj    #CDPLLIG out    #DDPLLIG out    #ZDPLLIG IN
+
+the resident ZCON kept and the overlay body not.  Dropping the whole object
+stops the overwriting AND discards a section the configuration really holds:
+38 sections left scoring in G9, 27 in SSW, and they had been MATCHING.
+
+    `obj-sections.py --keep=F | --dass=F OBJ... --out-dir=D` re-emits an object
+    carrying only named sections.  ESD and RLD cards are rebuilt from filtered
+    entry lists; TXT, SYM and END are copied byte for byte.
+
+    ESD IDS ARE NEVER RENUMBERED.  TXT, RLD and END all reference sections by
+    id, so renumbering means rewriting all of them and every mistake is silent.
+    Kept entries keep their ids and ESD cards are emitted in runs of
+    CONSECUTIVE ids -- a card stores only its first id and the reader assigns
+    the rest positionally.  Gaps between runs are fine; every consumer looks an
+    id up rather than counting.
+
+    A DROPPED DEFINITION THAT SOMETHING STILL NAMES BECOMES AN ER of the same
+    name and the same id, and this is the part that makes it work.  #ZDPLLIG is
+    four bytes pointing AT #CDPLLIG and must go on saying where that code lives
+    in the configuration that loads it; deleting the relocation would leave the
+    ZCON unrelocated.  As an ER the address comes from the CSECT table, which
+    publishes it for exactly this case.  DPLLIGHT.obj's six ESD entries become
+    two -- `ER #CDPLLIG`, `SD #ZDPLLIG` -- with the ZCON's TXT and its one RLD
+    intact.
+
+ABSENCE FROM THE MAP IS NOT SUFFICIENT EVIDENCE, and using it alone costs real
+agreement: dass-syms.py's own note records 79 map-absent sections MATCHING the
+dump across the eight configurations, up to 477 halfwords in SSW's #DDCDDG3.
+Measured, the blunt rule cost SSW 27 sections that had all been OK.
+
+    `csect-collisions.py TABLE.json DASS.ASC > keep.txt` withholds a map-absent
+    section only where it OCCUPIES THE SAME ADDRESSES as one the map does
+    place.  Both cannot be there, the map says which is, and the other is
+    overwriting it.  One colliding with nothing costs nothing to keep.
+    G9 withholds 59 of 67, S2 72 of 93, SSW 35 of 79.
+
+MEASURED, against the same unfiltered link with the regenerated table:
+
+                  scored    FAIL->OK   OK->FAIL   differing halfwords
+        G9        1116         40          0        12171 -> 9846
+        S2        1090         44          0        49839 -> 40910
+        SSW        570          5          0         4771 -> 2533
+
+    Populations differ between arms, so the FAIL->OK / OK->FAIL columns are the
+    result and the raw pair is context -- 251's warning applies here too.  Nine
+    sections leave scoring in G9, two in S2, three in SSW, having been OK; they
+    collide with a placed section and still matched, most likely both fill.
+
+[why] Twelve colliding addresses in one configuration is not a tail, and the sections it was corrupting -- FIOSRBPG, FIOPDG9, #DDG9LIG -- were being read as assembler or linker faults.  The ER substitution is the non-obvious part and the reason a whole-object filter is not equivalent.
+
+THE CLEAN RUNS: G9, S2 AND SSW REGENERATED RATHER THAN PATCHED, and 264's
+"a true regeneration is not available" is wrong.
+
+WHY IT LOOKED UNAVAILABLE.  dass-syms.py's relocation-evidence pass reads
+`unresolvedRelocations` out of a sweep's per-module link JSONs, and a sweep run
+WITH an augmented table has almost none -- the table already defined the
+symbols.  264 concluded the pass could never be re-run.  Two things are wrong
+with that:
+
+    THERE IS NO TABLE-LESS SWEEP TO RUN.  compileLinkCompare DEFAULTS
+    --ext-syms to ../mafgen/augmented-XXX.json (its line 176), so a sweep
+    without the flag still gets the published table.
+
+    AND A TABLE-LESS SWEEP WOULD BE USELESS ANYWAY.  The pass reads the DUMP at
+    `imageOffsetHW`, which is only a real configuration address because the
+    table placed the section there.  So the pass is inherently a BOOTSTRAP: it
+    recovers only what the table does not already define, and re-running it
+    against a table that has those symbols recovers nothing.  That is not a
+    defect and no clean run can undo it.
+
+`--base` IS THE ANSWER AND IT IS NOT A PATCH -- it is the script's own
+documented carry-forward.  Regenerating with `--base=<published table>` gives a
+table that AGREES WITH THE PUBLISHED ONE ON EVERY SHARED ENTRY (0 differing in
+G9, S2 and SSW), carries the 8 bootstrap entries the pass cannot re-derive
+(#PCDHMMU, #PCSZICC and six more), and adds 16 / 20 / 11 new ones.  Strictly a
+superset: nothing lost, nothing contradicted.
+
+    264'S "321 THE SAVED TABLE CARRIES" IS THE WRONG QUANTITY.  321 is what
+    dass-fields.py adds as field symbols in G9 (264 in S2, 272 in SSW); the
+    relocation-evidence pass contributed 8.  Two different passes.
+
+MEASURED END TO END.  Full-configuration links, regenerated table alone, same
+objects and same population:
+
+        G9   87/1126 -> 80/1126     7 FAIL->OK, 0 OK->FAIL, 3 fewer halfwords
+        S2  171/1092 -> 167/1092    4 FAIL->OK, 0 OK->FAIL, 5 fewer halfwords
+
+THE FINAL PER-MODULE SWEEPS, against those tables.  NO MODULE IS WORSE ANYWHERE:
+
+                  modules   sections      halfwords        on the common set
+        G9        159       93 of 153    1296 -> 1266    15 better,  0 worse
+        S2        145       85 of 140    1720 -> 1691    14 better,  0 worse
+        SSW       149       95 of 149    2053 -> 1198    69 better,  0 worse
+
+    SSW'S 855 HALFWORDS ARE dass-fields.py REACHING IT FOR THE FIRST TIME.  Its
+    earlier arm ran against augmented-SSW.json, the published table, which has
+    no field symbols in it at all, where G9 and S2 already had fields tables.
+    Seventeen modules go to zero: FCMCBLKS, FIOGNIPG, FIOHISAM, FIOLDBPG,
+    FIOMFEPG, FIONSPPG, FIOPDSPG, FIOSRBPG, FIOSVC, FPMDISP, FPMFCLOS,
+    FPMIDLE, FPMIHIM, FPMINMSP, FPMRSCTR, FPMSCHED, FPMUPTOX, FPMZSYNC.
+
+    SCOPES GREW because the regenerated tables carry more entries: six modules
+    newly in scope in G9 and in S2, none in SSW.  S2's single SIZE-FORCED row,
+    FIOG9ADB, is one of the newcomers and NOT a regression -- it was not in the
+    old sweep at all.  Compare on the common set, never on the totals.
+
+THE LIBRARY.  All three recovered members -- FIOMDPVU, FCMBMTMC, FIOMDPS2 --
+were used in EVERY configuration, which is 248's correction: every dump we have
+is one build, OF290103, later than our OI340600 source, so a recovered member
+moves the source toward the image everywhere.  The control arm confirmed it
+before anything else was trusted: G9's 153 modules went 2631 -> 1296 differing
+halfwords with no module worse, and all three SIZE-FORCED rows closed --
+FCMBMTG9 among them, at 1145 halfwords to its 36 real FIOBY differences.
+
+[why] 264 recorded a limitation that does not exist and a figure that measured something else, and both would have deterred the next attempt.  The SSW result is the concrete payoff of the whole exercise and would have been invisible without a clean run, because SSW had never had the field pass at all.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
