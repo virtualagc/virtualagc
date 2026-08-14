@@ -28,7 +28,7 @@ import re
 import random
 from expressions import error, unroll, astFlattenList, \
     evalArithmeticExpression, svGlobals, describeExpression, \
-    selfDefiningTerm, setProgramSymtab
+    selfDefiningTerm, setProgramSymtab, characterTermValue
 from fieldParser import parserASM
 from asciiToEbcdic import asciiToEbcdic, ebcdicToAscii
 from ibmHex import *
@@ -1895,9 +1895,13 @@ def generateObjectCode(source, macros):
                     if lv != None:
                         symtab.setdefault(name, {})["lengthAttribute"] = lv
                 if len(ast.get("typc", [])) > 0:
-                    tc = joinTokens(ast["typc"][0])
-                    ok, tv = selfDefiningTerm("C'%s'" % tc)
-                    if ok:
+                    # THE CHARACTER INSIDE THE QUOTES, not the rebuilt term.
+                    # `joinTokens` gave back `C'#'`, so the self-defining test
+                    # was applied to `C'C'#''` -- which fails, so the attribute
+                    # was never recorded at all -- and `tc[:1]` would have
+                    # answered 'C' if it had.  See `characterTermValue`.
+                    tc = characterTermValue(ast["typc"][0])
+                    if tc:
                         symtab.setdefault(name, {})["typeAttribute"] = tc[:1]
                 elif len(ast.get("typ", [])) > 0:
                     tv = evalArithmeticExpression(ast["typ"][0], {}, properties,

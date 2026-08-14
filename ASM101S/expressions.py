@@ -79,6 +79,76 @@ def error(properties, msg, severity=255):
 def getErrorCount():
     return errorCount, maxSeverity
 
+# ATTRIBUTES OF SYMBOLS DEFINED DURING THE SOURCE READ.
+#
+# The symbol table proper does not exist while the source is being read:
+# `_passCount` is -1 throughout that read, all macro expansion happens in it,
+# and pass 0 -- the first pass that puts anything in `symtab` -- only begins
+# afterwards.  So a macro that asks for an attribute of a symbol an EARLIER
+# macro generated has nowhere to look, and every such reference was diagnosed
+# as a missing symbol.
+#
+# POS is the case that matters.  MACROS carries fifty-one PDEF invocations,
+# each generating `&N.X EQU &X,&X+1025,C'@'`, and a later POS asks
+#     &#       SETC  '&P#.X'
+#     &L       SETA  L'&#-1025
+# for the coordinate PDEF put in the length attribute.  MENU12 is the module
+# that cannot be assembled without it.
+#
+# `readSourceFile` fills this in as it expands, so a definition is visible to
+# everything expanded after it and to nothing expanded before it -- which is
+# the ordering a real assembler gives them.  It is consulted only as a
+# FALLBACK, so once `symtab` is populated the real entry always wins.
+readTimeSymbols = {}
+def symbolEntry(name, symtab):
+    entry = symtab.get(name)
+    if entry != None:
+        return entry
+    return readTimeSymbols.get(name)
+
+def characterTermValue(ast):
+    '''
+    The text inside a `characterTerm`, which the grammar
+        characterTerm = "C'" /[^']*/ "'" ;
+    hands over as the three-element sequence ("C'", text, "'").  Returns None
+    if it does not have that shape.
+
+    JOINING THE TOKENS IS NOT THE SAME THING and was what went wrong: it
+    rebuilds the whole term, `C'#'`, so taking its first character answered
+    'C' for every three-operand EQU in the corpus.  The type attribute of a
+    position symbol is the '#' or '@' INSIDE the quotes -- PDEF writes
+    `&N EQU 1,1,C'#'` -- and VECTOR branches on it with
+            AIF   (T'&T# EQ '#').POSX1
+    so 'C' sent every VECTOR to `INVALID SPECIFICATION`.
+    '''
+    if isinstance(ast, (list,tuple)) and len(ast) == 3 and ast[0] == "C'" \
+            and ast[2] == "'":
+        return ast[1]
+    return None
+
+def evalQuietly(expression, svLocals, symtab = {}):
+    '''
+    Evaluate an expression WITHOUT recording a diagnostic or counting an
+    error, returning None if it cannot be evaluated.  This is for speculative
+    evaluation during the source read, where most operands legitimately cannot
+    be evaluated yet -- `FOO EQU BAR+4` names a symbol no pass has defined --
+    and saying so would be wrong.
+
+    Saving and restoring the counters is not decoration.  `error` bumps
+    `errorCount` and `maxSeverity` whatever severity it is given, and
+    `maxSeverity` decides the assembler's exit status, so a speculative
+    evaluation that merely FAILED would have failed the assembly.
+    '''
+    global errorCount, maxSeverity
+    savedCount, savedSeverity = errorCount, maxSeverity
+    try:
+        value = evalArithmeticExpression(expression, svLocals, \
+                                         { "errors": [] }, symtab, None, 0)
+    except:
+        value = None
+    errorCount, maxSeverity = savedCount, savedSeverity
+    return value
+
 #=============================================================================
 # Macro arguments and sublists.
 #
@@ -316,7 +386,30 @@ def svReplace(properties, text, svLocals):
             # Before the `int` case:  a Python bool *is* an int.
             replacement = "1" if replacement else "0"
         elif isinstance(replacement, int):
-            replacement = str(replacement)
+            # SUBSTITUTION OF AN ARITHMETIC VALUE IS UNSIGNED.  The value is
+            # converted to an unsigned decimal integer with leading zeros
+            # removed, so a NEGATIVE value substitutes as its magnitude and
+            # the caller writes any sign it wants itself.  This is not a
+            # nicety; the macros are written around it.  POS tests the sign
+            # and writes the minus into the text:
+            #     &L       SETA  L'&#-1025          (-456 for P2)
+            #              AIF   (&L GE 0).GENPOSX
+            # &N           XPOS  -&L                <- one minus, not two
+            # and XPOS then reads its argument back with
+            #              AIF   ('&XFLD'(1,1) NE '-').NOTMIN
+            # before generating `DC BL.5'10000',FL.11'&X'` from the ARGUMENT
+            # TEXT.  Rendering the value signed made that operand `--456`,
+            # which no DC can parse, and every POS caller failed on it.
+            #
+            # OI301700 SETTLES IT.  That source was pulled from listings in
+            # which the macros were already expanded, so it holds what the
+            # original assembler actually generated, and MENU12.asm there
+            # reads
+            #     DC    BL.5'10000',FL.11'-456'     P2, x = -456
+            #     DC    BL.5'10000',FL.11'-475'     P1, x = -475
+            # -- one minus apiece, from the same `-&L` that was producing two
+            # here.
+            replacement = str(abs(replacement))
         elif isinstance(replacement, (list,tuple)):
             if original[start-2:start] in ["K'", "N'"]:
                 start -= 2
@@ -640,7 +733,7 @@ def evalArithmeticExpression(expression, \
             # A symbol that exists but carries no length attribute is NOT the
             # same as one that does not exist, and the two are reported
             # separately so the next such case says which it was.
-            entry = symtab.get(symvar)
+            entry = symbolEntry(symvar, symtab)
             if entry == None:
                 error(properties, "Symbol %s not found for L'" % symvar, \
                       severity)
@@ -696,7 +789,7 @@ def evalArithmeticExpression(expression, \
             # it for the substituted case, which is the only way MENU12 and the
             # other POS/VECTOR callers can be assembled at all.
             name = renderMacroArgument(var)
-            entry = symtab.get(name)
+            entry = symbolEntry(name, symtab)
             if entry == None:
                 # DIAGNOSE IT.  Defaulting to 1 was tried and is WRONG here:
                 # POS documents that the coordinate IS the length attribute --
@@ -880,14 +973,34 @@ def typeAttribute(properties, operand, svLocals, symtab=None):
         # symbols are typed -- PDEF writes `EQU 1,1,C'#'` -- and the POS macro
         # branches on the answer, so it cannot be the blanket "U" that every
         # unknown operand used to get.
-        entry = symtab.get(operand) if isinstance(operand, str) else None
+        entry = symbolEntry(operand, symtab) if isinstance(operand, str) else None
         if entry != None and "typeAttribute" in entry:
             return entry["typeAttribute"]
         return "U"
     if not isArgument:
-        entry = symtab.get(text) if isinstance(text, str) else None
+        entry = symbolEntry(text, symtab) if isinstance(text, str) else None
         if entry != None and "typeAttribute" in entry:
             return entry["typeAttribute"]
+        # A SET SYMBOL WHOSE VALUE IS A SELF-DEFINING TERM IS 'N'.  The
+        # attribute follows the VALUE, not the fact that a SETC holds it, and
+        # the library asks this fifteen times -- POS decides a coordinate was
+        # written as a literal with
+        #         AIF   (T'&P# EQ 'N').XSDT
+        # VECTOR rejects its operand with `AIF (T'&T# NE 'N').INVL`, and
+        # #SPLIT tests both halves of a split expression the same way.
+        # Answering 'C' sent every one of them down its error arm:
+        # `VR 285,-27` reached #SPLIT, which took `285` for character data and
+        # raised INVALID FORMAT IN EXPRESSION.
+        #
+        # BELOW THE SYMBOL LOOKUP, so a value that names a real symbol still
+        # takes that symbol's type, and ahead of the 'C' fallback, which the
+        # library uses only for the ALPHABETIC path -- #SPLIT's `T'&#O(1) GT
+        # 'C'` and `EQ 'C'` are asked of a symbol NAME, never of a literal, so
+        # neither answer moves.
+        if isinstance(text, str):
+            ok, value = selfDefiningTerm(text)
+            if ok:
+                return "N"
         return "C"
     if text == "":
         return "O"

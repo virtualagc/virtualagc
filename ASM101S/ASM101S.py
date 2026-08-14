@@ -933,6 +933,49 @@ def readSourceFile(fromWhere, svLocals, sequence, \
                                                    "fromLine": lineCorrespondence[lineNumber]
                                                  }
         
+        # RECORD AN EQU'S LENGTH ATTRIBUTE AS SOON AS IT IS GENERATED.
+        #
+        # This is the interleaving that lets one macro use what an earlier one
+        # defined.  The statement has been through `svReplace` just above, so
+        # `&N.X EQU &X,&X+1025,C'@'` has become `P2X EQU -456,-456+1025,C'@'`
+        # and its length operand is now ordinary arithmetic; recording it here
+        # makes it visible to every POS expanded after this point, and to
+        # nothing expanded before it.  See `readTimeSymbols` in expressions.py.
+        #
+        # MOST EQUs CANNOT BE EVALUATED HERE AND THAT IS NORMAL.  `FOO EQU
+        # BAR+4` names a symbol no pass has defined yet, so the evaluation
+        # fails and nothing is recorded -- the passes settle it later exactly
+        # as before.  `evalQuietly` is what keeps that silent: the ordinary
+        # evaluator would file a diagnostic against this line and bump the
+        # severity that decides the exit status.
+        #
+        # It is a FALLBACK only.  Once the real symbol table is built, the
+        # entry there wins, so nothing recorded here can override a value the
+        # assembler works out properly.
+        if operation == "EQU" and name != "" and name[:1] not in [".", "&"]:
+            equAst = parserASM(operand.rstrip(), "equOperand")
+            if equAst != None:
+                if len(equAst.get("len", [])) > 0:
+                    lv = evalQuietly(equAst["len"][0], svLocals)
+                    if lv != None:
+                        readTimeSymbols.setdefault(name, {})["lengthAttribute"] \
+                            = lv
+                # THE TYPE ATTRIBUTE IS NEEDED HERE TOO, and for the same
+                # reason.  PDEF types its position symbols with a third
+                # operand -- `&N EQU 1,1,C'#'` -- and both POS and VECTOR
+                # branch on the answer:
+                #         AIF   (T'&T# EQ '#').POSX1
+                #         AIF   (T'&T# NE 'N').INVL
+                # so a symbol whose type was not yet recorded fell through to
+                # `INVALID SPECIFICATION: P37`.  Recording the length alone
+                # was tried first and left exactly those four MNOTEs standing
+                # in MENU12.
+                if len(equAst.get("typc", [])) > 0:
+                    tc = characterTermValue(equAst["typc"][0])
+                    if tc:
+                        readTimeSymbols.setdefault(name, {})["typeAttribute"] \
+                            = tc[:1]
+
         if operation in macros:
             sysndx += 1
             macrostats = macros[operation]
