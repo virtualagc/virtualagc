@@ -3205,6 +3205,56 @@ defect should start at FIOMS2PG and should expect not to find one.
 
 [why] 269 says eighty-four halfwords are all that could still be a tool defect; leaving that as a bare number would invite someone to spend a day on FCMBMTS2, which is almost certainly a source-version difference, or on FIOGPSPG, which is already explained by 259.  The one worth opening is named.
 
+THE FIELD RECOVERY IS NOW CHECKED WHERE IT SUCCEEDS, NOT ONLY WHERE IT FAILS,
+and SSW comes out clean: 1073 resolved field references agree with the dump and
+ZERO disagree.
+
+`dass-fields.py --verify` examined only UNRESOLVED relocations.  That was right
+when the recovery was new and every field reference was unresolved, but the
+check evaporates exactly as the recovery succeeds -- G9 is now down to 176
+unresolved sites that are not EQUATE LABELs and almost nothing left to test.
+A site the recovery RESOLVED is a positive claim about an address, and nothing
+was testing it.  It now checks 1488, 945 and 1073 of them.
+
+        G9    1488 agree   136 disagree
+        S2     945 agree    61 disagree
+        SSW   1073 agree     0 disagree
+
+THREE ENCODINGS HAD TO BE GOT RIGHT FIRST AND EACH GAVE A CONFIDENT WRONG
+ANSWER BEFORE IT WAS.  They are worth knowing because they recur:
+
+    THE ADDRESS IS NOT AT imageOffsetHW for a 4-byte relocation -- that
+    halfword is the OPCODE.  Reading it compared a full address against an
+    opcode and reported "the dump holds 0F200" for every ACON site.  This is
+    the same off-by-one as fcmcmp's RLD annotation (nsts-sdl-dps PR #37) and as
+    the one that inverted 266's first verdict.  THREE TOOLS, ONE MISTAKE.
+
+    BIT 15 IS THE SECTOR FLAG and not part of the address -- 03076 against
+    B076 is the same address.  dass-syms.py's basesFrom already says so.
+    Allowing it took SSW from 32 disagreements to 13.
+
+    A REFERENCE CARRIES AN ADDEND, and often not zero.  FCMCBLKS writes
+
+        DC    Y(CZ2VNOMB-1),H'130'  CZ2V_NOM_BUS
+
+    so the site legitimately holds the address MINUS ONE.  Six symbols --
+    CZ2BGRTS, CZ2BMODE, CZ2VMETM, CZ2VNOMB, CZ2VTSIP, TFCMDEUC -- looked wrong
+    by exactly +1 in ALL THREE configurations until the comparison was made
+    against what the link stored rather than against the bare symbol.  What is
+    reported now is the address the dump IMPLIES, from which the addend
+    cancels.
+
+WHAT THE REMAINING 136 AND 61 ARE NOT.  They do not converge: TFIVH133 is
+recovered at 03B8C and the dump implies 0036A, TFIVH144 at 03BF2 implying
+0BEF3.  Different sites naming the SAME symbol imply DIFFERENT addresses --
+FIOMS2PG's site for TFIVAN14 holds exactly the recovered 7867 while another
+site implies 784E -- which is the signature of a section whose CONTENT differs,
+not of a symbol whose address is wrong.  270's FIOMS2PG cluster is of this
+kind, so the "most promising" label it carries should be read down
+accordingly.
+
+[why] The recovery's own check was quietly going out of scope as the recovery worked, which is the worst way for a test to fail.  And the ACON off-by-one has now cost three separate investigations in three different tools; naming it here, with the other two encodings beside it, is cheaper than finding it a fourth time.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
