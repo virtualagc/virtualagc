@@ -1748,9 +1748,18 @@ MEASURED, G9, BOTH ARMS OF THE 250 FIX, SAME 306 HAL/S OBJECTS IN EACH:
                                    before      after
         sections compared            1126       1126
         sections differing             89         89
-        FAIL sections                  80         80    none new, none lost
+        FAIL sections                  89         89    none new, none lost
         halfwords differing         12203      12203
         SECTIONS DIFFERING IN SIZE     10          9
+
+    THE FAIL COUNT IS 89 AND fcmcmp SAYS SO ITSELF, on the line "FAIL:
+    89/1126 section(s) differ".  An earlier draft of this entry said 80,
+    which came from grepping the FAIL rows with a character class that
+    silently dropped twelve of them -- the twelve carrying an annotation
+    such as `[85 no reference data]` between the size and the dash.  The
+    conclusion did not change, both arms being identical section for section
+    and halfword for halfword, but the number was wrong.  READ THE SUMMARY
+    LINE THE TOOL PRINTS RATHER THAN RE-COUNTING ITS ROWS.
 
     The size row that disappears is FIOLGERR's, and it is the only change:
 
@@ -1829,6 +1838,98 @@ change either way, needing a kept-baseline sweep.
 WHY.  RSB asked whether it is still needed.  The answer is in the code and is worth
 recording, because the failure mode it now produces is the one that cost five
 modules with FPMSWTCC and would look like a missing macro next time.
+
+WHAT THE FULL G9 LINK ACTUALLY LEAVES, decomposed.  251 established the
+459-object link and reported one number, 89 sections and 12203 halfwords.
+That number is mostly two sections, and the workable residue is a quarter of
+its size and sits in one place.
+
+    89 FAILING SECTIONS, 12203 HALFWORDS
+
+      5 are ALSO THE WRONG SIZE            9600 hw   and all five are HAL/S
+          #CDCDDG9  6583 hw   10098 vs 10178 (-80)
+          #PCDQANN  1981 hw    2010 vs 2695 (-685)
+          #DDCDDG9   976 hw    1370 vs 1372 (-2)
+          #PCSPCLB    32 hw     134 vs 140  (-6)
+          #PCVNMMU    28 hw   16393 vs 4105 (+12288)
+      84 are THE RIGHT SIZE                2603 hw
+          median 9 halfwords, 32 of the 84 differ by four or fewer
+
+    A SECTION OF THE WRONG LENGTH IS COMPARED ONLY OVER ITS OVERLAP, so its
+    halfword count is an artefact of the misalignment rather than a count of
+    real disagreements, and two sections carry 8564 of the 12203 on their
+    own.  Quote the 2603 as the size of the problem, and the five separately.
+
+BY WHERE THE OBJECT CAME FROM, which is the split that says whose problem it
+is -- the assembler's or the compiler's:
+
+                     sections   halfwords
+        assembly           39        1291
+        HAL/S              45        1312
+                                          (of the same-size 84)
+
+    They are the same size as each other, which is worth knowing before
+    anyone assumes the remainder is assembler work.
+
+THE 177 UNDEFINED SYMBOLS EXPLAIN A SIXTH OF IT AND NO MORE.  `-f` leaves an
+unresolved site as assembled, so the obvious reading is that the residue IS
+those sites.  Measured against the link's own `unresolvedRelocations`, over
+all 2603 differences and not fcmcmp's 32-per-section sample:
+
+        at an unresolved relocation site      428   16%
+        at a site the linker DID resolve     2175   83%
+
+    -- 249 and 1042 on the assembly side, 179 and 1133 on the HAL/S side.  So
+    the archive gap is a caveat on the number, not the explanation of it.
+
+AND THE 177 ARE ACCOUNTED FOR, which closes a question rather than opening
+one:
+
+        56 symbols, 1069 of the 1213 sites, are #PC COMPOOL CSECTS ABSENT
+        FROM THIS CONFIGURATION'S INDEX.  246's TFIVMCI1 is the precedent:
+        the original build did not resolve those either.
+        76 symbols, 88 sites, are FIO* -- the sibling-module BCE entry
+        points of 246.
+        37 symbols, 45 sites, ARE exported by an OI340600 module we build,
+        and 14 modules would supply them -- FIOSMFPG alone closing 19.
+        NONE OF THOSE 14 IS IN THE G9 CSECT INDEX.  The index is the
+        configuration's manifest, so they are not in this build and adding
+        them would be forcing a symbol to resolve against a module the
+        original link never saw.  DO NOT ADD THEM.
+
+WHERE THE ASSEMBLY-SIDE RESIDUE IS: IT IS THE BCE SECTIONS.  Of the 1291
+halfwords, 1063 are in 14 sections of index type BCE -- out of only 24 BCE
+sections in the whole configuration.  The four worst assembly sections are
+BCE and the fifth is beside them:
+
+        FIOPDIPG  247 of 276 halfwords differ    BCE
+        FIOPMUPG  201                            BCE
+        FIOIMUPG  135                            BCE
+        FIOG9ADB  120                            NONHAL
+        FIOSRBPG   82                            BCE
+
+    EVERY ONE IS PLACED AND SIZED EXACTLY AS THE INDEX SAYS -- FIOPDIPG at
+    124452 for 276 halfwords, which is the index's start and its length to
+    the halfword.  So this is not layout.  Nearly the whole CONTENT of these
+    sections disagrees, and ours is a table of relocated addresses where the
+    dump holds what looks like a command stream:
+
+        @ 1E624  2C97 vs F200    FIOPDRBC, RLD TFIVPD16 -> 2C9745F0
+        @ 1E625  45F0 vs D7A4    RLD #PCGBOBF (@0VAASEQ+1C) -> 06E4C
+        @ 1E626  21BC vs C000    RLD #PCDWDOW (FIODBF2P+4) -> 021BC
+
+    NOT THE UNENCODABLE BCE INSTRUCTIONS, which was the first guess and is
+    wrong.  model101.py emits four zero bytes and a diagnostic for a BCE
+    operation whose encoding was never established, so the theory was that
+    these sections were full of them.  The diagnostic fires in NONE of the
+    153 G9 modules -- grep the assembly reports for "BCE instruction whose
+    encoding has not been established" and there are no hits at all.
+    Something else produces these sections and it has not been identified.
+
+    That is the head of the queue for the assembly side.  The HAL/S side's
+    1312 halfwords are a separate question and are not the assembler's.
+
+WHY.  251 left the phase with one aggregate number, and an aggregate is where work goes to hide: two sections carry seventy per cent of it, the undefined-symbol caveat explains a sixth rather than most, and the assembly-side remainder turns out to be concentrated in fourteen BCE sections rather than spread across thirty-nine.  Recording the decomposition, and that the obvious BCE explanation is already refuted, is what makes the next session's first hour useful instead of repeated.
 
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
