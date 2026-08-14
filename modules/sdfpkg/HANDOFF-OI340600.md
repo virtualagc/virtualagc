@@ -672,11 +672,19 @@ question, and a reconstruction was committed on it.  The file has been
 withdrawn (PFS aaeed393).  The corrected reading is testable in one build.
 
 FCMBMTG9 NOW LINKS TO 1334 HALFWORDS, exactly the length the CSECT table
-gives, against 1384 before.  12 halfwords differ: 11 are our 0000 against a
-pointer a single-object forced link cannot resolve, and one, TFIVMCI1, is the
-reverse -- the dump holds 0000 where we hold a pointer.  Recovered file:
-~/workspace/PFS/OI340700/MLIB80/FIOMDPVU.asm (PFS c1e5932d), together with the
-recovered FCMBMTMC.  Both are needed; neither alone gives 1334.
+gives, against 1384 before.  The halfwords that still differ are our 0000
+against a pointer a single-object forced link cannot resolve.
+
+    CORRECTED BY 245.  This paragraph used to say 12 halfwords differ, one of
+    them TFIVMCI1 in reverse -- the dump holding 0000 where we held a pointer.
+    NEITHER SURVIVES RE-MEASUREMENT: the figure is 116 for a single-object
+    link, the two are not comparable across the relocation work of 2026-08-13,
+    and the TFIVMCI1 site AGREES.  The rest of this entry stands; see 245
+    before spending any time on TFIVMCI1.
+
+Recovered file: ~/workspace/PFS/OI340700/MLIB80/FIOMDPVU.asm (PFS c1e5932d),
+together with the recovered FCMBMTMC.  Both are needed; neither alone gives
+1334.
 
 THE SLOT INDICES, read from the element codes rather than inferred from
 position.  FCMBMTMC ties each slot to a fixed element code -- LPF1ELM(2) to
@@ -1276,6 +1284,63 @@ plausible-looking comfault masks, which is a wrong answer that looks right.
 0D9CD - 0D91E = 0xAF is the listing's own 000AF, directly.
 
 WHY.  236 left these two halfwords open and gave a reason for skipping them that was wrong -- that the listener table vouched for the counts.  Anyone resuming would have believed it and looked somewhere else.  The reason it is wrong is four lines of BMTENT, and the same shape of mistake is easy to repeat: check that the thing you are arguing from actually reaches the thing you are arguing about.
+
+G9'S TFIVMCI1 IS NOT A DEFECT AND NOT A SEPARATE PROBLEM.  Measured
+2026-08-13 with both recovered files in a scratch library, the literal-
+recovered image, the exceptions file and a disambiguated CSECT index:
+FCMBMTG9 links to 1334 halfwords, the length the CSECT table gives, and the
+TFIVMCI1 site AGREES WITH THE DUMP.  Its whole BMT row agrees, read straight
+out of both images:
+
+    0FAB6  Y(TFIVMCI1)          0000  0000   the site 229 called a mismatch
+    0FAB7  Y(CMDRLST+DISP64)    10BD  10BD
+    0FAB8  Y(FIOBYMCR)          E608  E608
+    0FAB9  Y(91*256+MCIU)       5B52  5B52
+    0FABA  annunciator/error    5420  5420
+
+229 RECORDED THE REVERSE -- the dump holding 0000 where we held a pointer --
+and that does not reproduce.  We hold 0000 there now.
+
+BUT THE AGREEMENT IS NOT EVIDENCE THAT WE WOULD GET IT RIGHT, and this is the
+part worth keeping.  Our 0000 is produced by the same mechanism that produces
+116 WRONG zeros in the same section: a single-object forced link leaves an
+unresolvable external unpatched.  All 116 differing halfwords are `DC
+Y(symbol)` sites and every one is an external the CSECT index does not carry:
+
+    TFIVMI 20   TFIVH 15   FIOBY 15   TFOVH 8   TFIVAN 7   TFIVPF 6
+    TFIVNC 4    TFCMMTU 3  TFIVIM 3   TFIVIU 3  TFIVGPS 3  TFIVSRL 2  ...
+
+TFIVMCI1 is one of those sites.  It agrees only because the ORIGINAL build
+also left it 0000, so our systematic failure coincides with the dump in this
+one place.  TFIVPS12, the very next halfword at 0FABB, is the same kind of
+symbol and the dump holds A838 there -- the original resolved that one and we
+cannot.
+
+    SO TFIVMCI1 BECOMES A REAL TEST ONLY LATER.  Once the index carries these
+    COMPOOL field addresses and we start patching them, if we then write a
+    pointer where the dump has 0000, THAT is a discrepancy worth the name.
+    Chasing it before then is chasing a property of the link setup.
+
+NEITHER OF 229'S COUNTS REPRODUCES, and 221 already says why: these totals are
+not comparable across the relocation work of 2026-08-13 (4ee9d409d, 22e061b67,
+13ee3616f among them), which turned links that had silently succeeded with the
+halfword left as assembled into links that name what they cannot resolve.  229
+said 12 halfwords differ; the honest figure for a single-object link now is
+116.  Do not treat 229's 12, or 236's 7 for S2, as baselines.
+
+WHAT IS ACTUALLY LEFT FOR G9 is therefore not a module question at all.  It is
+221's known gap -- addresses for symbols the CSECT index does not record at
+FIELD granularity, COMPOOL members among them -- and fixing that fixes all 116
+at once, here and in every other forced link.  dass-syms.py recovers COMPOOL
+CSECTs from HALSTAT; this is one level finer than that.
+
+    MAFGEN CANNOT ARBITRATE IT BY NAME.  TFIVMCI1, TFIVPS12 and TFIVMI01 each
+    occur ZERO times in DASS_G9.ASC -- the disassembly does not carry these
+    field names at all, only the CSECT-level ones like TFIVR100.  So the dump's
+    VALUES are the only evidence about which of them the original resolved, and
+    a recovery pass has to work from the values rather than from a symbol list.
+
+WHY.  229 left TFIVMCI1 as the one open item on an otherwise closed module, which makes it look like a small specific defect worth an afternoon.  It is not: it is one site of the general unresolved-COMPOOL-field problem, it currently agrees, and the agreement is luck rather than correctness.  Recording that stops the next session spending the afternoon, and says what would make it evidence again.
 
 WHAT IT WAS FOR.  MLIB80 stores macro definitions and COPY decks together, and
 ASM101S once read every macro definition ahead of the module.  It needed to
