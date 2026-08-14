@@ -1445,6 +1445,62 @@ holds none of it.  The reports are elsewhere and take --reports=DIR.
 
 WHY.  221 named this as the one problem the phase had left, and the obvious way to solve it -- read the address the original build wrote at each reference site -- is circular and would have produced a comparison fitted to its own answer.  The independent source exists and agrees 104 times out of 104.  Recording which source was used, and why the other was refused, is the part that stops it being redone the wrong way.
 
+MOST OF WHAT WAS LEFT WAS THE HARNESS, NOT THE CODE.  After the field recovery
+G9 still had 92 forced links.  Of the 505 distinct symbols they could not
+resolve -- 1230 reference sites -- 384 SYMBOLS AND 1077 SITES, 88 PER CENT,
+ARE EXPORTED BY ANOTHER OI340600 MODULE WE ALREADY BUILD.  FC$ASYNC is in
+FCMSAVE, the FIOBY family in FIOHFE02 and its siblings, and so on.  Nothing
+about them was missing; compileLinkCompare links ONE OBJECT AT A TIME and the
+linker was never shown the others.
+
+LINKING THE WHOLE CONFIGURATION AT ONCE IS THE FIX, and it works today:
+
+    cd ~/workspace/PFS/OI340600
+    lnk101 -f DIR/*.obj -o g9-all.fcm --json-symbols g9-all.json \
+           --external-syms augmented-G9-fields.json
+    fcmcmp --exceptions exceptions-G9.txt --no-data C9FB,C6C6 \
+           --csect-table augmented-G9-fields.json \
+           g9-all.json g9-all.fcm G9-lit.fcm
+
+using the .obj files clc-sweep has already produced.  --external-syms still
+pins each CSECT at the address the table gives, so this is not yet a link that
+lays out memory by itself.
+
+    ALL THREE ARMS, G9, 153 in-scope modules, same objects, same dump:
+
+                                        matching   halfwords differing
+        single-object, baseline           34/153            3487
+        single-object, + field recovery   52/153            2631
+        FULL MULTI-OBJECT LINK           123/153            1543
+
+123 OF 153 SECTIONS NOW MATCH THE G9 DUMP BYTE FOR BYTE.  The field recovery is
+still carried in that link and is still worth what it was; the point is that it
+was never going to be the whole of it, because most of the remainder was never
+a recovery question at all.
+
+WHAT IS ACTUALLY LEFT IS SMALL AND SHARP.  30 sections differ, the median by
+TWO halfwords and 18 of the 30 by four or fewer.  The exceptions are worth
+naming: FIOCBLKS 55, FIOPDISP 23, FIOMGDSP 10, FIOMDPPG 12, and FIOMVUPG which
+is one of three sections whose SIZE disagrees with the CSECT table (352
+halfwords against 276) and accounts for 204 differences on its own.  A section
+that is the wrong LENGTH is a different kind of problem from one that is the
+right length with wrong halfwords, and the three should be separated before
+either is worked.
+
+CAVEATS, because this is a forced link.  127 symbols are still undefined and
+`-f` leaves their sites unpatched; 121 of the 505 are exported by nothing we
+build, which is the archive gap and not a defect.  So 1543 is an upper bound on
+the disagreement and some of it is still the harness rather than the code.
+
+    THE COMPARISON IS ALSO NOT PERFECTLY LIKE FOR LIKE.  The single-object rows
+    come from clc-sweep's per-MODULE classification and the full-link row from
+    fcmcmp's per-SECTION verdict.  The two agree on what a section is here --
+    fcmcmp reports 30/153 differing against clc-sweep's 153 modules -- but the
+    numbers are not interchangeable in general and should not be quoted as a
+    single series without this note.
+
+WHY.  The phase has been comparing one object at a time and attributing what that could not resolve to recovery gaps.  88 per cent of the remainder was sibling modules the linker was never shown, and a multi-object link -- which needs no new tooling and works today -- more than doubles the sections that match.  Anyone continuing should start here rather than recovering more symbols.
+
 WHAT IT WAS FOR.  MLIB80 stores macro definitions and COPY decks together, and
 ASM101S once read every macro definition ahead of the module.  It needed to
 know which members were which so it would never preload a COPY deck.
