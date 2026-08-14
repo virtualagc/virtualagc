@@ -5240,6 +5240,20 @@ def generateObjectCode(source, macros):
             assembled[offset:offset+len(lassembled)] = lassembled
             # A ZCON in the pool needs the same relocation a `DC Z(...)` gets,
             # or the linker never fills in its address.
+            #
+            # AND THE SAME FLAG BYTE, WHICH IT WAS NOT GETTING.  Omitting
+            # rldFlags leaves objectWriter's fallback of 0x04 -- the CODE kind
+            # -- and lnk101 then patches BSR from the target's sector where the
+            # DATA kind 0x50 would have patched DSR.  FCMNINIT's
+            # `L R3,=Z(,FPMXQETB+2,0)` came out 0010 against the dump's 0001 in
+            # all three configurations measured: our BSR=1 for its DSR=1.
+            #
+            # 0x50 IS NOT A CHOICE HERE.  A literal ZCON is parsed above as
+            # `(,A1,A2)` and that is the only shape the literal grammar
+            # admits: there is nowhere to write the leading symbol that makes
+            # `DC Z(sym,...)` the code form.  So a Z literal is always the data
+            # form, and the corpus agrees -- `=Z(,FPMXQETB+2,0)` is the only
+            # ZCON literal in it.
             zsymbol = pool[i].get("zsymbol")
             if zsymbol != None:
                 relocations.append({
@@ -5247,6 +5261,7 @@ def generateObjectCode(source, macros):
                     "section": pool[0],
                     "address": offset,
                     "flags": (pool[i]["value"] >> 8) & 0xFF,
+                    "rldFlags": 0x50,
                     "type": "Z"
                     })
             # AND SO DOES A Y LITERAL, for exactly the same reason.  Its value
