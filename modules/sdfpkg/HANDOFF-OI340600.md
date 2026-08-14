@@ -2025,6 +2025,88 @@ in the after.  Size-mismatched sections 7 -> 6.
 
 WHY.  252 blamed the assembler for content the linker had overwritten, on the strength of the linked image rather than the object file.  The object was right at 30 of FIONWSPG's 34 halfwords all along.  Recording the object-versus-image check, and that the directory's contents are part of the measurement, is what keeps the next reduction honest.
 
+A MODULE WAS CARRYING EXTERNAL REFERENCES TO ITS OWN LABELS.  `DC Z(sym,...)`
+where `sym` is defined in the same module emitted BOTH the symbol's own offset
+into the address field AND an RLD naming the symbol, so the linker added its
+resolved address on top of its own offset.  FIOMGCV is the case to hold on to:
+
+    FIOMMCHK DS    0H                              at section offset 24
+    ...
+    FIOMMZCN DC    Z(FIOMMCHK,FIOCBLKS,15)         the field holds 0024
+
+    linked   1A17C        = 1A158 + 24, the offset counted twice
+    dump     1A158        = FIOMMCHK
+
+    THE ADDRESS FIELD IS CORRECT AND IS MEANT TO BE.  A note in that code
+    already records why -- FCMG3INT's `Z(FCG3INL1,FCMCBLKS,X'D')` names a
+    label of its own and the original build assembles its address, which
+    ASM101S used to emit as 0000.  What was missing is that a field holding
+    the offset must relocate against the SECTION, so the linker adds the
+    section's BASE, and not against the symbol, whose address already
+    contains the offset.
+
+    IT WAS ALSO DECLARED EXTRN.  FIOMGCV's object carried ER cards for
+    FIOMMCHK, FIOMGPCV and FIOMGCVR -- three labels it defines itself.  Under
+    --external-syms the table supplied them and the double-count followed;
+    in a link WITHOUT that table they are simply undefined and the ZCON keeps
+    the bare offset.  Wrong either way, and only visible as the former.
+
+THE FIX, in model101.py's `DC Z` arm: if the named symbol resolves to a
+non-DSECT section of this module, the RLD names THAT SECTION, the symbol is
+not added to `extrns`, and the emitted address drops the inter-CSECT offset
+so it is section-relative -- a no-op for a single-CSECT module, where the
+first section's offset is 0, and correct for one with several.
+
+MEASURED, and the reach is exactly what it should be:
+
+    RUNASM --no-rtl-fixes   205/205 byte-for-byte           unchanged
+    verify-sweep            267 MATCH  5 MATCH?  0 DIFFERS  unchanged, no
+                            module changed class
+    oi340600-sweep          177 OK  47 OK-EARLY  0 failures unchanged, no
+                            module changed class
+
+    OF 45 OI340600 MODULES ASSEMBLED BOTH WAYS with PYTHONHASHSEED PINNED,
+    SIX DIFFER, AND ALL SIX USE `DC Z(`:  FCMG3INT, FCMMGPOV, FIOCGR,
+    FIOMGCV, FIOMM128, FPMFCLOS.  The other 39 are byte-identical.
+
+    G9, the alternate-free 287+153 link of 253, all 153 reassembled:
+
+        same-size residue      321 -> 316 halfwords
+        failing sections        50 -> 50, the same 50, none new, none lost
+        sections differing in size   6 -> 6
+
+        FIOMGCV   7 halfwords differing -> 4
+        FCMMGPOV  3 -> 2
+        FPMFCLOS  2 -> 1
+
+    ONLY THREE OF THE SIX ARE IN G9 AT ALL.  FCMG3INT, FIOCGR and FIOMM128
+    are not in this configuration's object set, so their objects change and
+    this link cannot show it either way.  Whether they improve is a question
+    for the configuration that does contain them.
+
+WHAT IS UNDERNEATH IT IS THE ZCON'S SECOND OPERAND, and that is the next
+thing.  The halfwords still differing are the ZCON's SECOND word and they are
+all the same shape -- the low nibble:
+
+        FIOMGCV    ours 0F30   dump 0F31
+        FCMPSA     ours 0F30   dump 0F33
+        FCMZCONS   ours 0800   dump 0803
+
+    `Z(FIOMMCHK,FIOCBLKS,15)` has THREE fields and only the first and third
+    are used:  the entry, and the flags that become byte 2.  The SECOND names
+    the BASE SECTION -- FIOCBLKS -- and its sector belongs in the DSR nibble
+    that is coming out 0.  Fixing it needs a SECOND relocation per ZCON,
+    naming the base section with the DSR rldFlags (0x20/0x40/0x50, as the
+    note in the same arm already describes), which changes what one `DC Z`
+    puts in the RLD and is why it was not done in the same pass as this.
+
+    THE THIRD FIELD IS NOT THE SECTOR.  `15` is 0xF and lands in byte 2,
+    where both images agree; the disagreement is entirely in byte 3, which
+    the assembler emits as zero and the linker patches.  Do not conflate
+    them.
+
+WHY.  An object with ER cards for its own labels is wrong in a way --external-syms hides: the table supplies the symbol, the linker adds it to the offset already in the field, and the result is only ever visible as a wrong address rather than as a link error.  Recording the shape of it, and that the ZCON's second operand is still unused, is what the next pass needs.
+
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
 OPEN CODE, so pulling in a COPY fragment puts a DS outside any control section.

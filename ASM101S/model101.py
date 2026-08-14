@@ -2434,6 +2434,36 @@ def generateObjectCode(source, macros):
                                 if flags is None:
                                     flags = 0
 
+                            # A SYMBOL THIS MODULE DEFINES ITSELF RELOCATES
+                            # AGAINST ITS SECTION, NOT AGAINST ITSELF.  The
+                            # address field below already holds the symbol's
+                            # offset -- that is deliberate, see the note there
+                            # -- so an RLD naming the SYMBOL makes the linker
+                            # add its resolved address to its own offset and
+                            # count it twice.  FIOMGCV's
+                            # `Z(FIOMMCHK,FIOCBLKS,15)` names `FIOMMCHK DS 0H`
+                            # 36 halfwords above it: the field held 0024, the
+                            # linker added 1A158, and the ZCON came out 1A17C
+                            # where the dump has 1A158.  Naming the SECTION
+                            # instead makes the linker add the section's base
+                            # to the offset, which is what the field is for.
+                            #
+                            # It was also being declared EXTRN, so the object
+                            # carried an ER for a label of its own; without
+                            # --external-syms supplying it, a real link leaves
+                            # that unresolved and the ZCON keeps the bare
+                            # offset.  Three modules show it -- FIOMGCV,
+                            # FCMMGPOV and FPMFCLOS, ten halfwords between
+                            # them.
+                            zLocalSect = None
+                            _zLocal = symtab.get(symbolName) if symbolName \
+                                      else None
+                            if _zLocal != None and \
+                                    _zLocal.get("type") != "EXTERNAL":
+                                _zs, _zo = unhash(_zLocal.get("value", 0))
+                                if _zs != None and _zs in sects and \
+                                        not sects[_zs].get("dsect"):
+                                    zLocalSect = _zs
                             if symbolName:
                                 # Add to externs if not already declared
                                 if symbolName not in symtab:
@@ -2443,7 +2473,8 @@ def generateObjectCode(source, macros):
                                         "value": getHashcode(symbolName)
                                     }
                                     rextrns[symtab[symbolName]["value"]] = symbolName
-                                elif symtab[symbolName].get("type") != "EXTERNAL":
+                                elif zLocalSect == None and \
+                                        symtab[symbolName].get("type") != "EXTERNAL":
                                     if symbolName not in extrns:
                                         extrns.add(symbolName)
 
@@ -2471,7 +2502,9 @@ def generateObjectCode(source, macros):
                                     isCode = bool(suboperand.get('z')) \
                                              or bool(suboperand.get('zx'))
                                     relocations.append({
-                                        'symbol': symbolName,
+                                        'symbol': zLocalSect \
+                                                  if zLocalSect != None \
+                                                  else symbolName,
                                         'section': sect,
                                         'address': pos1,
                                         'flags': flags,
@@ -2521,6 +2554,16 @@ def generateObjectCode(source, macros):
                                         sects.get(zSect, {}).get("offset", 0)
                                 else:
                                     zAddress = zEntry.get("address", 0)
+                            # SECTION-RELATIVE, because the RLD above names the
+                            # SECTION for a local symbol and the linker adds
+                            # that section's base.  `zAddress` is measured from
+                            # the first CSECT, so a module with more than one
+                            # would otherwise carry the inter-section offset
+                            # twice.  A no-op for a single-CSECT module, where
+                            # the first section's offset is 0.
+                            if zLocalSect != None:
+                                zAddress -= sects.get(zLocalSect, {}) \
+                                                 .get("offset", 0)
                             dcBuffer[dcBufferPtr] = (zAddress >> 8) & 0xFF
                             dcBufferPtr += 1
                             dcBuffer[dcBufferPtr] = zAddress & 0xFF
