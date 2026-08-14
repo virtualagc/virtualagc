@@ -681,6 +681,27 @@ def optimizeScratch():
                                   "properties": properties }
                 symtab[n]["value"] = v
                 s, d = unhash(v)
+                if s == None:
+                    # A NEGATIVE SECTION-RELATIVE EQU BORROWS OUT OF THE
+                    # HASHCODE, exactly as the YCON and MSC cases above do, so
+                    # unhash() finds no section and the symbol kept address 0.
+                    # PCGEN writes `&CURLABL EQU *-FIOBUS&STRTBUS` with
+                    # `FIOBUS1 EQU 2`, making FIOADCNS's FIOIPR the virtual
+                    # base two halfwords BEFORE the section -- and it was
+                    # exported as `LD FIOIPR addr=0`.  FIOADCCL's
+                    # `DC Y(FIOIPR)` then came out 96D8, the section's own
+                    # start, where the dump has 96D6, in all three
+                    # configurations measured.
+                    #
+                    # THE FORMAT EXPECTS IT.  lnk101's objModule.py stores a
+                    # negative section-relative offset as a 24-bit two's
+                    # complement and its comment names this very symbol.
+                    _eHash = (v & hashcodeMask) + (1 << 36)
+                    _eLow = v & 0xFFFFFFFFF
+                    if _eHash in hashcodeLookup and _eLow >= (1 << 35):
+                        _eSect = hashcodeLookup[_eHash]
+                        if _eSect in sects:
+                            s, d = _eSect, -abs(_eLow - (1 << 36))
                 if s != None:
                     symtab[n]["section"] = s
                     symtab[n]["address"] = d
@@ -1966,6 +1987,17 @@ def generateObjectCode(source, macros):
                     "properties": properties
                     }
                 vs, vd = unhash(v)
+                if vs == None:
+                    # A NEGATIVE SECTION-RELATIVE EQU BORROWS OUT OF THE
+                    # HASHCODE, as the YCON and MSC cases elsewhere do, so
+                    # unhash() finds no section and the symbol keeps address 0.
+                    # See the companion recovery in the earlier EQU pass.
+                    _eHash = (v & hashcodeMask) + (1 << 36)
+                    _eLow = v & 0xFFFFFFFFF
+                    if _eHash in hashcodeLookup and _eLow >= (1 << 35):
+                        _eSect = hashcodeLookup[_eHash]
+                        if _eSect in sects:
+                            vs, vd = _eSect, -abs(_eLow - (1 << 36))
                 if vs != None:
                     symtab[name]["section"] = vs
                     symtab[name]["address"] = vd

@@ -16,7 +16,12 @@ def toEbcdic(s, length=8):
     )
 
 def be16(val): return val.to_bytes(2, 'big')
-def be24(val): return val.to_bytes(3, 'big')
+# A NEGATIVE VALUE IS TWO'S COMPLEMENT IN THE THREE BYTES, not an error.  An
+# ENTRY may sit BEFORE its own section: PCGEN's `&CURLABL EQU *-FIOBUS&STRTBUS`
+# puts FIOADCNS's FIOIPR two halfwords ahead of it, as a virtual base for
+# bus-indexed addressing.  lnk101's objModule.py decodes the field that way and
+# its comment names that symbol; without the mask this raised OverflowError.
+def be24(val): return (val & 0xFFFFFF).to_bytes(3, 'big')
 def blanks(n): return bytearray([0x40] * n)  # EBCDIC blanks
 
 def makeCard(recType, data, seqNum):
