@@ -1513,9 +1513,21 @@ closed and the third is an ASM101S defect with a four-line reproduction.
 FCMBMTG9 IS NOT A DEFECT.  clc-sweep assembles against the contributed
 OI340600 MLIB80, and 1334 needs the recovered OI340700 FIOMDPVU and FCMBMTMC.
 Point --library at a scratch library carrying those two and it is 1334 exactly.
-The sweep cannot do that for the whole corpus without a library that mixes
-releases, so expect this row to stay until the OI340700 reconstruction is
-complete.
+
+    WHAT THIS ENTRY SAID NEXT WAS BACKWARDS, corrected 2026-08-14 at the user's
+    insistence after it had been repeated twice.  It said the sweep could not
+    do that corpus-wide "without a library that mixes releases", and so expected
+    the row to stay until the OI340700 reconstruction was complete.
+
+    EVERY DASS DUMP WE HAVE IS ONE BUILD, AND IT IS THE LATER ONE.  `M A F G E N
+    REL 26.020  DASS GNC9  OF290103`, and the same header over SM2 and SSW.
+    OF290103 is later than our OI340600 source, so a recovered OI340700 member
+    moves the source TOWARD the image in EVERY configuration -- there is no
+    release to mix, because there is only one release on the dump side.
+    Withholding those members from S2 and SSW does not keep a configuration
+    pure; it preserves a member already known to be wrong.  All three recovered
+    members -- FIOMDPVU, FCMBMTMC, FIOMDPS2 -- belong in every configuration's
+    library, and the clean runs are set up that way.
 
 FIOMVUPG IS CLOSED, AND IT FOUND A REAL ERROR IN THE FIOMDPVU RECOVERY.  That
 file's note said no CMD was supplied for the slots the payload elements moved
