@@ -392,43 +392,6 @@ def sectorDecode(hw, sector):
     return ((sector << 15) | (hw & 0x7FFF)) if hw & 0x8000 else hw
 
 
-# The DASS listing for a configuration.  SSW's is the odd one out, exactly as
-# dass-literals.py and dass-db.py already have it.
-def dassPath(mafgen, config):
-    name = "DASS_SSW_(PostIPL).ASC" if config == "SSW" else f"DASS_{config}.ASC"
-    return Path(mafgen) / name
-
-
-# THE SECTIONS THE BUILD ACTUALLY PLACED, read off the listing's own memory map.
-#
-#     M E M O R Y   M A P ---  GNC9
-#     000000-0001A5  FCMPSA   **** 01A6(  422)  N O N H A L
-#     0001A6-0001A7  -------- **** 0002(    2)  C H E C K S U M
-#
-# The `****` is what distinguishes a SECTION line from the field lines that
-# follow the same shape -- those carry `NAME+offset` and a HAL/S variable name
-# instead -- so keying on it is what keeps fields out of the set.  A run of
-# dashes is the checksum filler and is not a section.
-MEMORY_MAP_SECTION = re.compile(
-    r"^ [0-9A-F]{6}-[0-9A-F]{6}  (\S+)\s+\*\*\*\*")
-
-
-def memoryMapSections(path):
-    '''Names of the sections the memory map places, or an empty set if the
-    listing has no map -- in which case nothing should be marked, since an
-    empty set would otherwise mark everything.'''
-    placed = set()
-    try:
-        with open(path, errors="replace") as f:
-            for line in f:
-                m = MEMORY_MAP_SECTION.match(line)
-                if m and not m.group(1).startswith("-"):
-                    placed.add(m.group(1))
-    except OSError:
-        return set()
-    return placed
-
-
 def recoverCrossConfigCsects(index, phases, halfword, report, otherConfigs=None):
     '''Addresses of code that lives in a DIFFERENT memory configuration.
 
@@ -513,7 +476,6 @@ def recoverCrossConfigCsects(index, phases, halfword, report, otherConfigs=None)
 
 def main():
     config = "SSW"
-    linkJson = None
     halstat = DEFAULT_HALSTAT
     mafgen = DEFAULT_MAFGEN
     linkDir = "work"
@@ -550,10 +512,6 @@ def main():
             linkDir = p.partition("=")[2]
         elif p.startswith("--log-dir="):
             logDir = p.partition("=")[2]
-        elif p.startswith("--link-json="):
-            # A full-configuration link made with NO linkInfo marks; its
-            # `relocations` are the evidence markFromEvidence reads.
-            linkJson = p.partition("=")[2]
         elif p.startswith("--base="):
             base = p.partition("=")[2]
         elif p.startswith("--out="):
@@ -869,14 +827,12 @@ def main():
     #     G9   39/1116 (map 39, unmarked 40)   marks #DDPLLIG
     #     S2  123/1090 (map 123, unmarked 124) marks #DDG9LIG
     #     SSW  33/570  (map 34,  unmarked 33)  marks #0ITOE
-    # THE MARKING MOVED TO dass-fields.py, because the evidence is read at the
-    # sites that reference a section's FIELDS and `contents` -- the field names
-    # -- is what dass-fields.py adds, after this script has run.  Marking here
-    # saw no contents and marked nothing.  --link-json is accepted and ignored
-    # so an existing command line does not break.
-    if linkJson:
-        print(f"{config}: --link-json is now dass-fields.py's; ignored here")
-
+    # THE MARKING MOVED TO dass-fields.py --mark, and the memory-map rule this
+    # script briefly carried is GONE rather than merely unused: it was wrong.
+    # See that function's comment for the evidence.  It lives there because the
+    # evidence is read at references to a section's FIELDS, and `contents` --
+    # the field names -- is what dass-fields.py adds AFTER this script has run;
+    # marking here saw no contents and marked nothing.
     json.dump(augmented, open(out, "w"))
 
     print(f"{config}: {len(index)} CSECTs in the index, "
