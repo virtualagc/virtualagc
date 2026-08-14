@@ -2355,6 +2355,86 @@ twice.
 
 WHY.  Neither half of this is committable alone -- the assembler change makes the halfwords worse without the linker one, and the linker path is unreachable without the assembler one -- so a bisect landing between them looks like a regression or like dead code.  Saying which commit and which PR, and that both corpora now agree, is what makes that legible later.
 
+THE ASSEMBLY-SIDE RESIDUE IS 23 HALFWORDS AND ELEVEN OF THEM ARE NOT DEFECTS.
+With 258's pair in place the G9 link leaves 149 differing halfwords on the
+assembly side, 126 of them at unresolved relocation fields -- the archive gap,
+where we hold 0000 and the dump holds an address.  The other 23 are the real
+question, and two findings account for eleven:
+
+    FIOGPSPG      8      the BCE bypass, and it is RUNTIME STATE
+    FCMBMTG9 1 + FIOMVUPG 2   TFIVPF12, and it is a HAL/S object
+    the other 12  listed below, still open
+
+FIOGPSPG'S EIGHT ARE THE BYPASS OVERLAY AND THE SOURCE SAYS SO.  Four sites,
+two halfwords each:
+
+    FIOBY1GC #DLYI 68              OVERLAID BY BCE BYPASS CODE
+
+    ours  C044 C000     the #DLYI 68 the assembler is asked for
+    dump  F001 DD36     a long-form branch
+
+and DD36 is FIOEL1GC, the element-exit label four halfwords on.  All four
+agree:  FIOBY1GC -> FIOEL1GC, FIOBY3GC -> FIOEL3GC, FIOBY1GL -> FIOEL1GL,
+FIOBY3GL -> FIOEL3GL.  The assembler is right and the dump holds something no
+assembly produces.
+
+    ELEMENTS 1 AND 3 ARE BYPASSED AND ELEMENT 2 IS NOT.  FIOBY2GC and FIOBY2GL
+    are ENTRY points of the same kind, in the same section, and they MATCH.  A
+    build-time overlay would have patched all six the same way; a per-element
+    difference is the running software's own state at the moment the dump was
+    taken.  These belong with the I-LOADs and patches of the exceptions file,
+    not with anything an assembler could emit.
+
+    SO A BCE BYPASS SLOT IS EVIDENCE ABOUT THE DUMP, NOT ABOUT THE BUILD, and
+    a future sweep that "fixes" one has fitted the assembler to a runtime
+    accident.  FIOSRBPG carries twelve such ENTRY points and matches entirely,
+    which is the control:  its elements were not bypassed.
+
+TFIVPF12 IS A HAL/S OBJECT DISAGREEING WITH HALSTAT AND WITH THE DUMP.  Three
+halfwords, all reading F941 against the dump's F921 -- 32 halfwords high:
+
+    HALSTAT / the index   #PCVHPLD + 17  = F921    agrees with the dump
+    the link              CVHPLD.obj     = F941    63809
+    #PCVHPLD              63760..63802, length 43
+
+63809 IS PAST THE END OF ITS OWN SECTION.  The compiled object declares the
+symbol 49 halfwords into a section 43 long, the linker prefers an object's
+definition to the table's, and the three sites follow it.  246's independent
+source is the one that matches the dump here.
+
+    DO NOT FIX THIS BY PREFERRING THE INDEX.  It would close three halfwords
+    and it is the circular move 246 refused for a different reason:  the index
+    is what the comparison is scored against.  What is wrong is either that
+    object or the compilation it came from, and that is where to look.
+
+THE TWELVE STILL OPEN, for whoever takes them:
+
+    FCMPSA   @D      0F30 vs 0F33     ZCON DSR nibble, target unresolved
+    FCMZCONS @8BB9   0800 vs 0803     same shape; its target is FIOHFEPG,
+                                      which is not in this configuration
+    FIOCBLKS @8D71   00C6 vs 0000     we write, the original leaves zero
+    FIOCBLKS @8F39   0400 vs 0E00
+    FIOADCCL @99F9   96D8 vs 96D6     +2, the negative-displacement signature,
+                                      but FIOIPR is in no index and appears in
+                                      no source -- it comes from a macro
+    FIOPBYG9 @9E65   0500 vs 0000
+    FIOMVUDT @A1DB   0146 vs 00FC
+    FCMNINIT @18B4F  0010 vs 0001
+    FIOMGDSP @1A499  0000 vs 0003
+    FIOMGDSP @1A49B  0000 vs 0003
+    FIOPDSPG @1E4B3  05C0 vs 0000
+    FIOPDSPG @1E4BF  05C4 vs 0000
+
+    FOUR OF THEM ARE "WE WRITE SOMETHING, THE ORIGINAL LEFT ZERO", which is
+    the shape a patch area has.  Check that before checking the assembler.
+
+THE HAL/S SIDE IS NOW THE LARGER HALF -- 130 unexplained halfwords against the
+assembly side's 23 -- plus four sections whose SIZE disagrees with the table
+and which therefore contribute a further 9560 that measures misalignment
+rather than disagreement.  None of that is the assembler's.
+
+WHY.  Eleven of the twenty-three remaining halfwords turn out not to be assembler defects at all -- four bypass slots holding runtime state and one HAL/S object contradicting HALSTAT -- and both are the kind a sweep would happily 'fix' by fitting the assembler to the dump.  Naming them, with the controls that prove them (FIOBY2* matching, FIOSRBPG matching entirely), is what stops that.
+
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
 OPEN CODE, so pulling in a COPY fragment puts a DS outside any control section.
