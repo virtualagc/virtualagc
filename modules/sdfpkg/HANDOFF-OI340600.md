@@ -2297,6 +2297,64 @@ regression in 272 modules, FIOMDPPG MATCH -> DIFFERS.
 
 WHY.  The change worked against the dump and was still wrong, and only the OI301700 listing said so.  Recording both encodings with the measurement that kills each, and that the remaining fix is in lnk101 rather than the assembler, is what stops the next attempt repeating a sweep to learn it.
 
+257'S DEAD END IS OPEN, AND IT TOOK A CHANGE ON BOTH SIDES.  257 established
+that `#LBR@ SYM-n` could not be linked correctly and that the missing piece
+was in lnk101 rather than the assembler.  It is now fixed in both, and neither
+half works alone.
+
+    THE LINKER, nsts-sdl-dps PR #36, `lnk101: a signed ACON negates its
+    address field, not its opcode byte`.  `AddrCon.apply` negated the whole
+    existing value for V=1, which is right for a YCON -- the entire two-byte
+    field is the constant -- and wrong for a four-byte ACON carrying a BCE
+    long-format instruction, whose top byte is the OPCODE.  It now negates the
+    low 24 bits and leaves the rest of the word standing.  `reverse` mirrors
+    it.  Five tests added; the existing 18 pass unchanged.
+
+    THE ASSEMBLER, here, virtualagc 3de3533eb.  `bceField` returned the raw
+    hashed value when
+    `unhash` reported the hashcode borrow and never set `bceRelocSymbol`, so
+    NO relocation was emitted; it now records the symbol and marks the
+    displacement negative, and objectWriter punches 0x9C instead of 0x1C for
+    it.  THE ASSEMBLED BYTES DO NOT CHANGE:  the field keeps the magnitude the
+    contemporary listing shows.
+
+BOTH CONSTRAINTS ARE NOW SATISFIED AT ONCE, which is the whole point and is
+what 257 could not do:
+
+    object    FA00 0002 FD00 0002   byte-identical to OI301700's listing
+    linked    FA00 8BC4 FD00 8C92   byte-identical to the G9 dump
+
+    verify-sweep   267 MATCH  5 MATCH?  0 DIFFERS, FIOMDPPG back to MATCH
+    RUNASM         205/205 byte-for-byte
+    oi340600-sweep 177 OK  47 OK-EARLY  0 failures
+    G9             FIOMDPPG MATCHES; failing sections 48 -> 47
+
+    THE REGRESSION 257 RECORDS IS THE PROOF THE PAIRING IS RIGHT.  The
+    two's-complement encoding matched the dump and broke the listing.  This
+    matches BOTH, because the sign moved out of the data and into the
+    relocation, which is where the format puts it.
+
+    NEITHER HALF IS COMMITTABLE ALONE.  Without the linker change, 0x9C
+    negates the opcode and the halfwords get worse, 2 wrong to 4.  Without the
+    assembler change, nothing in the corpus emits 0x9C at all and the linker
+    path is unreachable.  A bisect that lands between them will show a
+    regression in one direction or dead code in the other; that is expected
+    and is not a defect in either.
+
+IT WAS COMMITTED AND PUSHED AHEAD OF ITS SWEEP FINISHING, deliberately:  the
+PR quotes the assembler side, and without it upstream the change cannot be
+assessed at all.  RUNASM and verify-sweep were already clean when it went;
+the OI340600 sweep confirmed afterwards.  Worth recording as the reason,
+because the commit message is `Updates to ASM101S.` and says none of this.
+
+THE ASM101S SIDE NEEDS lnk101 AT PR #36 OR LATER.  Anyone building against an
+older nsts-sdl-dps will see FIOMDPPG's two halfwords go from wrong to
+differently wrong.  It is two halfwords in one module of 224, so it is not
+worth gating the build on, but it is worth knowing before it is diagnosed
+twice.
+
+WHY.  Neither half of this is committable alone -- the assembler change makes the halfwords worse without the linker one, and the linker path is unreachable without the assembler one -- so a bisect landing between them looks like a regression or like dead code.  Saying which commit and which PR, and that both corpora now agree, is what makes that legible later.
+
 DONE (virtualagc 9d25cd771).  loadLibraryMacro still skips any member the
 library's MACROFILES.txt does not list, and must: it reads a fetched member as
 OPEN CODE, so pulling in a COPY fragment puts a DS outside any control section.
