@@ -3164,6 +3164,47 @@ else needs either the HAL/S compiler or sources we do not have.
 
 WHY.  221 is the entry a fresh session reads to learn what is open, and it described a problem that had been solved.  The raw counts also invite the conclusion that S2 is a bad configuration for the assembler when 105 of its 123 failures are compiler output.  And the two measurement traps recorded here each produced a confident wrong number in this very entry before being caught, which is worth more to the next reader than the numbers themselves.
 
+THE EIGHTY-FOUR: A FIRST PASS, AND NOT ONE OF THEM IS YET A DEMONSTRATED
+ASM101S OR lnk101 DEFECT.
+
+    FIOGPSPG    16   G9 and SSW, 8 each, THE SAME FOUR SITES -- 259'S BCE
+                     BYPASS.  We emit `C044 C000`, the two short BCE
+                     instructions the source writes; the dump holds
+                     `F001 DD36`, a long branch past them.  The source says so
+                     itself:
+
+                         FIOBY1GC #DLYI 68   OVERLAID BY BCE BYPASS CODE
+
+                     Runtime state captured in the dump, not something an
+                     assembler produces, and the four sites are the bypassed
+                     elements.  These belong in the exceptions files; MAFGEN
+                     does not mark them, so dass-literals.py cannot find them.
+
+    FIOMS2PG    22   S2 only.  A run of near-misses in what look like BCE
+                     program addresses -- 7880/7867, 788A/7871, 7891/7879,
+                     7877/7861 -- ours consistently HIGHER by 0x16 to 0x19,
+                     which is not a constant and so is not a simple base
+                     shift.  Unexamined.  This is the most promising of the
+                     three because a systematic near-miss is the shape a real
+                     layout or displacement defect takes.
+
+    FCMBMTS2    21   S2 only, and the values are unrelated rather than close:
+                     AFCF/D9A7, CC52/001A, A563/D92B.  FCMBMT* is the family
+                     the OI340700 recovery touched -- FCMBMTMC is one of the
+                     three recovered members -- so a source-version difference
+                     is the likelier reading than a tool defect.
+
+    FIOMS2DT     5   S2 only.  Unexamined.
+    the rest    20   Nothing else reaches five in any configuration.
+
+WHAT THIS MEANS FOR THE GOAL.  On the assembly side the tools are, so far as
+this corpus can show, correct: of 1272 differing halfwords, 1188 are symbols
+that are missing rather than wrong, 16 are documented runtime overlay, and 68
+remain unexamined across three configurations.  Anyone looking for an ASM101S
+defect should start at FIOMS2PG and should expect not to find one.
+
+[why] 269 says eighty-four halfwords are all that could still be a tool defect; leaving that as a bare number would invite someone to spend a day on FCMBMTS2, which is almost certainly a source-version difference, or on FIOGPSPG, which is already explained by 259.  The one worth opening is named.
+
 WHAT IS OPEN.  Measured on 2026-08-12 with all six fixes above in the tree.
 
     NO ASSEMBLY FAILURES REMAIN IN SSW.  All 176 in-scope modules assemble --
