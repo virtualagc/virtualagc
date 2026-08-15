@@ -37,11 +37,12 @@ def usage():
     print("                    [--tree=SSSRC|RUNASM|both] [--only=M1,M2,...]")
     print("                    [--scope-report] [--reports=DIR] [--from-reports=DIR]")
     print("                    [--exceptions=F.txt] [--memory=F.fcm]")
+    print("                    [--ext-syms=F.json] [--no-filter]")
     sys.exit(1)
 
 work = None; config = "SSW"; out = None; jobs = 6; tree = "both"
 only = None; scopeReport = False; reports = None; fromReports = None
-exceptions = None; memory = None; extSyms = None
+exceptions = None; memory = None; extSyms = None; noFilter = False
 for p in sys.argv[1:]:
     if p.startswith("--work="): work = p.partition("=")[2]
     elif p.startswith("--config="): config = p.partition("=")[2]
@@ -55,6 +56,7 @@ for p in sys.argv[1:]:
     elif p.startswith("--memory="): memory = p.partition("=")[2]
     elif p.startswith("--ext-syms="): extSyms = p.partition("=")[2]
     elif p == "--scope-report": scopeReport = True
+    elif p == "--no-filter": noFilter = True
     else: usage()
 if work is None: usage()
 
@@ -218,3 +220,56 @@ for k in sorted(byStatus, key = lambda k: -byStatus[k]):
 print(f"  sections differing: {sum(r[4] for r in rows)} of "
       f"{sum(r[3] + r[4] for r in rows)}")
 print(f"  halfwords differing: {sum(r[5] for r in rows)}")
+
+# THE OBJECTS A SWEEP LEAVES BEHIND ARE NOT A LINKABLE SET, and forgetting that
+# cost seventeen sections.  A configuration's CSECT table names every module the
+# index knows, including variants of one another -- FIOHFEPG against FIOHFE89,
+# FCMTBLPG against FCMTBLG9, FIOPBYTB against FIOPBYG9 -- and only one of each
+# pair is resident.  Link them all and the absent one overwrites the present
+# one: G9 went from 18 failing sections to 33 the moment six such modules
+# entered scope, every one of the seventeen new failures a HAL/S section that
+# no assembler change could have touched.  See entries 267 and 273.
+#
+# SO THE SWEEP PRODUCES THE FILTERED SET ITSELF rather than leaving it to be
+# remembered.  csect-collisions.py decides what to withhold -- a section is
+# withheld only where it occupies the same addresses as one the DASS memory map
+# does place -- and obj-sections.py re-emits the objects without it, keeping ESD
+# ids and turning a dropped definition that something still names into an ER.
+#
+# THIS IS THE SET A FULL-CONFIGURATION LINK WANTS.  The unfiltered directory is
+# left alone: the per-module comparison above is unaffected by any of this,
+# because each module is linked by itself against the table.
+if not noFilter and not fromReports:
+    here = Path(__file__).resolve().parent
+    dass = work.parent / "mafgen" / (
+        "DASS_SSW_(PostIPL).ASC" if config == "SSW" else f"DASS_{config}.ASC")
+    table = extSyms or str(csectTable)
+    linkable = work / f"clc-{config}-linkable"
+    if not dass.is_file():
+        print(f"\nno {dass.name}; objects NOT filtered, so {outDir} is not a "
+              f"linkable set")
+    else:
+        keep = work / f"keep-{config}.txt"
+        with open(keep, "w") as f:
+            r = subprocess.run([sys.executable, str(here / "csect-collisions.py"),
+                                table, str(dass)], stdout = f,
+                               stderr = subprocess.PIPE, text = True)
+        if r.returncode != 0:
+            print(f"\ncsect-collisions.py failed; {outDir} is not a linkable "
+                  f"set:\n{r.stderr.strip()}")
+        else:
+            withheld = [l for l in r.stderr.splitlines() if "overlaps" in l]
+            objs = sorted(glob.glob(f"{outDir}/*.obj"))
+            r2 = subprocess.run([sys.executable, str(here / "obj-sections.py"),
+                                 f"--keep={keep}", *objs,
+                                 f"--out-dir={linkable}"],
+                                capture_output = True, text = True)
+            if r2.returncode != 0:
+                print(f"\nobj-sections.py failed; {outDir} is not a linkable "
+                      f"set:\n{r2.stdout.strip()}\n{r2.stderr.strip()}")
+            else:
+                summary = [l for l in r2.stdout.splitlines() if "object(s)" in l]
+                print(f"\nlinkable objects -> {linkable}")
+                print(f"  {summary[0] if summary else 'written'}")
+                print(f"  {len(withheld)} section(s) withheld as colliding with "
+                      f"one the memory map places")
