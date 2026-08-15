@@ -5,9 +5,13 @@
     G9   11/1117      S2   13/1090      SSW  26/570
 
 Excluding halfwords whose only fault is an unattributable memory reference,
-**2 halfwords in 2 files** remain — FIOMVUDT in G9 and FIOMS2DT in S2, both a
-division by 16 that cannot be inverted.  Entries 265-279 carry this phase; read
-269 (what is open), 272 (the two exceptions files) and 279 (what is left)
+**NO ASSEMBLY-LANGUAGE HALFWORD REMAINS** in any of the three.  FIOMVUDT and
+FIOMS2DT were the last two and 282 closed them: the IIC family is quantised in
+half bus words of 16.5 microseconds, which inverts the division by 16 that 280
+had called structural.  Two non-assembly halfwords survive and are understood —
+S2's #PCS2IX5 and #PCS2IX6, one each at the same address, our #PCS2IX5 being
+196 halfwords where the map allows 136.  Entries 265-282 carry this phase; read
+269 (what is open), 272 (the two exceptions files) and 282 (how it ended)
 first.  276 to 279 close everything this file used to list as pending: the
 exceptions are generated again, every size row is checked against the build's
 own compiler, FIOMS2PG's thirteen and five more are references into COMPOOLs

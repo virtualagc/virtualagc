@@ -4105,6 +4105,70 @@ NOT BE USED TO PRODUCE AN UNKNOWN ONE, so it was stopped rather than fitted.
 
 WHY.  The user supplied the method and it is the transferable part: a change order names its own affected lines, in every file it touched, through the SRN revision code and the C=(...) list.  That turns 'what else did this change do' from a guess into a search, and it will be worth running again.  What it produced this time is four solid facts and no narrowing, which is worth recording precisely so the next reader does not run it a second time hoping for more.
 
+THE IIC FAMILY IS QUANTISED IN HALF BUS WORDS, AND THAT CLOSES THE LAST TWO
+HALFWORDS.  280 left FIOMS2DT's &LPFIIC somewhere in 1016..1031 and FIOMVUDT's
+&FLX1IIC in 898..913, sixteen values each, on the ground that a division by 16
+cannot be inverted.  It can, once the grid is known.
+
+    THE AP-101S POO SUPPLIES THE GRID.  A bus word is 28 bits -- 3 sync, 24
+    information, 1 parity -- transmitted at ONE BIT PER MICROSECOND (1.1.17),
+    and the gap between words a BCE transmits is 5 microseconds, FIXED at 5
+    for #MOUT (3.3).  So a word costs 33 microseconds and a half-word 16.5,
+    which is the 16.5 the source has been multiplying by all along.
+
+    EVERY IIC IN THE FAMILY IS ceil(16.5 x H) FOR AN INTEGER H.  Eleven
+    distinct values over three chains and two releases -- 231, 462, 512, 611,
+    693, 1337, 1436, 2096, 2129, 2624, 2739 -- and all eleven fit, the even H
+    exactly and the odd H rounded up from a half.  Put as residues, every one
+    is 0 or 17 mod 33, which is 14 of 14 occurrences landing in two of
+    thirty-three classes; by chance that is about one in 10^17.
+
+    AND VALUES ON THAT GRID ARE SPACED 16 OR 17 APART, so a sixteen-wide
+    admissible window holds exactly one.  The division stops costing anything.
+
+        &LPFIIC   1016..1031  ->  1023 = 16.5 x 62, exact
+        &FLX1IIC   898..913   ->   908 = ceil(16.5 x 55)
+
+    Both check against the dumps: (1023+825+15)/16 = 116 = 0074, and
+    (611+908+2508+15)/16 = 252 = 00FC.
+
+WHAT REMAINS AMBIGUOUS IS THE TERM, NOT THE VALUE, and the reconstruction says
+so at both sites.  The emitted halfword is floor((IIC + OVERHEAD + 15)/16), so
+the dump fixes a SUM: S2's must fall by 405..420 and VU's by 1183..1198, and
+any split reproduces the image.  The quantum cannot choose, because the
+overhead constants obey it too -- 825 is 16.5 x 50 and 2508 is 16.5 x 152.  The
+alternatives are equally admissible and equally unique: 825 -> 413, or
+2508 -> 1320.
+
+    THREE ARGUMENTS PICK THE IIC, none of them a proof.  275 recovered four
+    IIC values in this family going to zero in OI-34.07 and no overhead
+    constant has ever been seen to move; 281 showed the overhead constants
+    date from OI23.05 by DR=107094 and are shared per RATE, FIOMS2DT and
+    FIOMS4DT both using 825, so moving one for a single chain would break that
+    sharing; and all three known overhead constants have an EVEN H, where 413
+    would be the first odd one.  Both RECOVERED blocks state the alternative
+    in full and record that restoring the line and changing the DC constant
+    instead is the correction if the judgement is ever overturned.  The image
+    is identical either way, which is exactly why the choice is a judgement.
+
+MEASURED, full-configuration links, PFS 8288b177:
+
+        FIOMVUDT  G9   2 differing halfwords -> 1
+        FIOMS2DT  S2   9 differing halfwords -> 8
+
+    The section counts do not move -- G9 stays 11/1117 and S2 13/1090 --
+    because both sections still carry references to modules their
+    configuration does not contain.  THAT IS THE WHOLE OF THE RESIDUE NOW:
+    excluding halfwords whose only fault is an unattributable memory
+    reference, NO ASSEMBLY-LANGUAGE HALFWORD IS LEFT IN G9, S2 OR SSW.
+
+    TWO NON-ASSEMBLY HALFWORDS SURVIVE and are understood: S2's #PCS2IX5 and
+    #PCS2IX6 differ by one each at the SAME address 0x4ABD, because our
+    #PCS2IX5 is 196 halfwords where the map allows 136 and runs over its
+    neighbour.  277 confirmed that size against the compiler.
+
+WHY.  Two entries ago this was 'a division by 16 cannot be inverted, and that is structural rather than a shortage of evidence'.  It was a shortage of evidence, and the missing piece was a physical constant in a document we already had: 28 bits at a microsecond a bit, plus a 5-microsecond gap.  The lesson is that 'information-theoretically lost' is a claim about the input distribution as much as the arithmetic -- the inputs were never dense in the integers, they were on a 16.5 grid, and eleven independent values said so.  What is left ambiguous is a different thing entirely, a choice between two terms of a sum, and no quantum can settle that.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
