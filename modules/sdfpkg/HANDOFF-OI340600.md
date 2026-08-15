@@ -3426,15 +3426,21 @@ verification run already said and what this entry should never have contested:
     our object declares, against the build's 15 -- but it is a demonstration of
     something already known and recorded, not a finding.
 
-    AND IT IS THE WRONG EXAMPLE ENTIRELY, corrected 2026-08-14.  That draft
-    read the build's 15 as five structures and offered #PCPCDIT as a source
-    difference an OI340700 reconstruction could recover.  S2's memory map marks
-    #PCPCDIT `INCLUDE REMOTE`: its storage is declared elsewhere and 15
-    halfwords is a STUB, so the size says nothing about the declaration.
-    15 = 5 x 3 was a coincidence read as meaning.  Editing CPCDIT.hal's bound
-    would have fabricated a source change to explain a linkage mechanism.
-    Six of the 39 are marked that way; the other 33 are CANDIDATES and no
-    more.  See 275 for when a version difference is genuinely recoverable.
+    AND THE EXAMPLE WAS WITHDRAWN ON A REASON THAT DOES NOT HOLD, twice
+    corrected.  The first draft offered #PCPCDIT as a source difference an
+    OI340700 reconstruction could recover, reading the build's 15 halfwords as
+    five structures of three.  It was then withdrawn on the grounds that S2's
+    map marks #PCPCDIT `INCLUDE REMOTE`, so its storage is declared elsewhere
+    and 15 is a STUB.  277 measured that against HALSTAT and it is wrong:
+    INCLUDE REMOTE does not mean stub -- #PCSASAT carries the same mark and
+    its size is within 218 halfwords of ours -- and the build's own compiler
+    states 15 halfwords at 003DD4 in phase 14 outright.  The arithmetic was
+    right.  What makes it unusable here is not the map but the release: our
+    CPCDIT.hal is at revision BX and the build is at BY, so five zero
+    structures belong to an OI340700 reconstruction and not to this tree.
+    All 40 of S2's size rows are confirmed the same way; none is a stub, and
+    the 33 candidates this entry left open are closed.  See 275 for when a
+    version difference is genuinely recoverable.
 
 WHAT SURVIVES.  The A/B measurements of this session are unaffected, because
 both arms used the same exceptions file: the overlay filtering's 40, 44 and 5
@@ -3659,6 +3665,113 @@ reference:
     Configurations: G9 15/1117, S2 18/1090, SSW 28/570.
 
 [why] The FIOMDPS2 work is the first time this phase RECOVERED source rather than explaining a difference away, and the method generalises: find an emitted constant, invert it, and take a second dump's agreement as the warrant.  The #PCPCDIT correction matters more than it looks -- I reasoned from an arithmetic coincidence to a proposed edit of a HAL/S source, and only the memory map's INCLUDE REMOTE stopped it.  Any future version-recovery claim needs that check first.
+
+THE -full EXCEPTIONS ARE GENERATED AGAIN, AND REGENERATING THEM FOUND THAT THE
+GENERATOR HAD STOPPED EMITTING ITS MAIN PRODUCT.  The eight FIOGPSPG BCE-bypass
+lines were being hand-merged into `exceptions-G9-full+overlay.txt` and
+`exceptions-SSW-full+overlay.txt` because ef84fb34e taught dass-versions.py to
+read `mafgen/runtime-overlay.txt` but the published files predated it.  Running
+it produced files a TENTH the size.
+
+    868b387df ADDED THE defects.txt SECTION AND SWALLOWED THE ENTRIES LOOP.
+    The existing
+
+        for address, name in sorted(entries):
+            f.write(f"{address:05X} -1 {name}\n")
+
+    ended up indented into the new `if rows:` block.  `mafgen/defects.txt`
+    names only G16, G3 and G8, so for the other five configurations `rows` is
+    empty and every -1 marker the pass had just computed was dropped.
+
+    AND THE REPORT STILL PRINTED THEM.  "G9: 34 unit(s) revised since our
+    source, 22047 halfword(s) recorded as no-claim" went to the terminal while
+    the file received none of them.  A summary computed from the data and a
+    file written from the same data disagreed, and nothing compared the two.
+    Seven days.  Fixed in 83a362e18.
+
+REGENERATED ALL EIGHT AND EVERY ONE IS A STRICT SUPERSET -- 0 lines lost
+anywhere, 67 to 310 added.  The additions are the eight overlay lines in G9 and
+SSW plus markers this vintage of the toolchain newly attributes (59, 84, 302).
+
+    AND THE MEASURED STATE IS UNCHANGED, which is the point of saying it:
+
+        G9   15/1117      S2   18/1090      SSW  28/570
+
+    the same counts as the hand-merged files gave, with the FAIL section lists
+    identical line for line in all three.  `~/ForClaude/OI340600-clc/
+    exceptions-<CFG>-full.txt` is now correct on its own and the `+overlay`
+    files are superseded; the previous ones are kept under `$SP/vers/
+    superseded/`.
+
+WHY.  A summary and a file were computed from the same data with nothing comparing them, and the summary was the one anybody read.  Seven days.  Regenerating an artifact rather than patching it is what found it, which is the argument for regenerating on principle even when the patch is two lines.
+
+EVERY OVERSIZED COMPOOL IS CONFIRMED OVERSIZED BY THE BUILD'S OWN COMPILER, SO
+NONE OF THEM IS A STUB AND 272'S REASON FOR WITHDRAWING #PCPCDIT WAS WRONG.
+272 left 33 sections as candidates on the grounds that the memory map might be
+stating a stub rather than a size wherever it does not say INCLUDE REMOTE.
+There is a second witness and it is the primary one.
+
+    HALSTAT PRINTS A CSECT INFORMATION TABLE PER UNIT, ONE ROW PER PHASE, each
+    row an address and a halfword count, and the phases are the memory
+    configurations.  A COMPOOL is compiled once per phase and COMES OUT A
+    DIFFERENT SIZE IN EACH, so a size means nothing until the phase is pinned
+    -- CVN_MM_UTILITY is 16393 halfwords in phase 2, 4105 in phase 8 and 13321
+    in phase 14.  The address pins it: the phase whose address equals the one
+    the configuration's map places the section at is the compilation that
+    configuration loaded.
+
+MEASURED, `halstat-sizes.py --config=XXX FCMCMP-REPORT.txt`, which reads
+fcmcmp's own "differ in size from the CSECT table" block:
+
+        S2   40 of 40   35 oversized and 5 undersized, all CONFIRMED
+        G9    6 of 6    CONFIRMED
+        SSW   1 of 1 the map places, CONFIRMED
+
+    SSW'S OTHER FOUR ARE NOT MAP CLAIMS AT ALL.  #CDCDDS2, #CDCDDS4, #DDCDDS4
+    and #DDCDDG9 appear nowhere in DASS_SSW_(PostIPL).ASC and carry
+    `inConfig: false` in the table, so their size row compares our section
+    against a foreign configuration's placement.  Nothing to check.
+
+    THREE TRAPS IN THE FORMAT, two of which hid a section and one of which
+    answered with the wrong unit.  Column 1 of HALSTAT is CARRIAGE CONTROL, so
+    a row can read `0PHASE 15:` with no space before it.  A phase row lists
+    every CSECT CLASS the unit emitted -- #C code, #D data, #Z the ZCON, #X,
+    A1 -- and only one of them carries the unit's name in the COMPILATION
+    LAYOUT line, so #DPGPPLD, the remote data half of PGP_PLD_DATA_MON, is
+    reachable by address and nothing else.
+
+    AND AN ADDRESS IS NOT A KEY.  Keying on it alone put #PCVNMMU's 020022
+    against AIG_DEU_LOADER's phase 2, which laid 610 halfwords at the same
+    place, and #PCSARST's against CD4_MM_UTILITY -- two confident wrong
+    answers out of forty, the rest unaffected.  The layout name decides first
+    and the address is only the fallback.
+
+AND THE REVISION EVIDENCE IS UNANIMOUS: all 35 of S2's mismatched units are at
+a LATER revision in the build, 31 of them by exactly one step, none the same or
+earlier.  A size mismatch never once occurs in a same-revision unit, which is
+what dass-versions.py's per-file rule predicts and is why every one of these
+halfwords is already a -1.
+
+    SO #PCPCDIT IS A VERSION DIFFERENCE, WHICH IS WHAT 272 CONCLUDED BY A ROUTE
+    THAT DOES NOT HOLD.  The map's `INCLUDE REMOTE` does NOT mean the size is a
+    stub: #PCSASAT is marked the same way and its 3508 is within 218 halfwords
+    of ours.  What settles #PCPCDIT is that HALSTAT states 15 halfwords at
+    003DD4 in phase 14 outright.  Our CPCDIT.hal declares CPCS_DIT-STRUCTURE
+    (112) at revision BX; the build is at BY and holds five structures of
+    three.  The arithmetic in 272's first draft was right all along.
+
+    THE DUMP ALSO STATES THE CONTENT, AND IT IS EMPTY.  003DD4-003DE2 reads
+    0000 in all fifteen halfwords where ours carries the INITIAL list, and
+    003DE3 -- one past the extent -- reads C9FB, so the listing really did
+    report those fifteen rather than leaving them unstated.  BY did not just
+    shrink the bound, it emptied the table.
+
+    WHICH IS RECOVERABLE UNDER 275'S TAXONOMY AND STILL MUST NOT BE APPLIED
+    HERE.  Five zero-initialised structures is a constant the dump states
+    directly.  It belongs to an OI340700 reconstruction; writing it into an
+    OI-34.06 tree would make the source neither release.
+
+WHY.  272's withdrawal of #PCPCDIT reached the right conclusion by reasoning that does not hold, which is worse than being wrong outright because it would have been repeated: the next oversized COMPOOL would have been judged on whether the map said INCLUDE REMOTE.  The rule to take away is that MAFGEN's map is a secondary witness about sizes and HALSTAT is the primary one, and that HALSTAT answers per PHASE.
 
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
