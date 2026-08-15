@@ -474,6 +474,129 @@ def recoverCrossConfigCsects(index, phases, halfword, report, otherConfigs=None)
     return recovered
 
 
+# What an address field holds when the build did NOT patch it.  0000 belongs
+# here and not in FILL: FILL answers "does this site imply an address", where a
+# zero is a possible answer; this asks "did the build write one at all", where
+# it is the answer no.
+UNPATCHED_SITE = {0x0000, 0xC9FB, 0xC6C6}
+
+# `target` means different things per RLD flag byte: for ACON it is the 32-bit
+# word at `address`, for YCON the halfword there.  The rest patch register
+# fields or sector-encoded halves and cannot be compared against a plain
+# address, so they do not vote.
+TARGET_IS_WORD = {0x1C, 0x9C}
+TARGET_IS_HALFWORD = {0x00, 0x80}
+
+
+def verifyResolved(spec, index, mafgen, config):
+    '''--verify=LINK.json:DUMP.fcm -- check the addresses this table SUPPLIED,
+    at the sites that used them.
+
+    recoverForeignSymbols decides from the dump, but only over sites lnk101
+    left UNRESOLVED: once the table carries an address the reference resolves
+    and the evidence never runs again.  So an address that got in early -- from
+    a HALSTAT phase, say -- is never revisited, and nothing says it is wrong.
+    Unlike a missing definition, a wrong one is silent.
+
+    S2 is the case.  FIOG9ADB and FIOCHECK are both `inConfig: false` there,
+    both were given HALSTAT addresses, and both are EXACTLY 0x18000 below what
+    the build used -- a systematic phase-base offset, not two coincidences.
+    FIOG9ADB's right answer was on disk the whole time: G9's own index places
+    it at 01DE90, which is precisely where S2's FIOCMPLT points.
+
+    The comparison is against what the LINK stored, so a reference's addend
+    cancels out, and bit 15 is allowed because a sector-encoded halfword
+    carries it.  What is reported is the address the dump IMPLIES.
+    '''
+    linkPath, _, imagePath = spec.partition(":")
+    if not imagePath:
+        sys.exit("--verify needs LINK.json:DUMP.fcm")
+    link = json.load(open(linkPath))
+    image = open(imagePath, "rb").read()
+
+    # WHAT ANOTHER CONFIGURATION'S INDEX PLACES A SYMBOL AT.  A site gives only
+    # sixteen bits, so it can never distinguish 00DE90 from 01DE90 by itself --
+    # but an index that names the symbol outright can, and that is what turns
+    # an ambiguous reading into a corroborated one.
+    elsewhere = collections.defaultdict(set)
+    for f in sorted(Path(mafgen).glob("csects-*.json")):
+        if f.stem.endswith(("-augmented", f"-{config}")) or f.stem == f"csects-{config}":
+            continue
+        try:
+            other = json.load(open(f))
+        except Exception:
+            continue
+        for n, v in other.items():
+            if isinstance(v, dict) and isinstance(v.get("start"), int):
+                elsewhere[n].add(v["start"])
+
+    def hw(a):
+        return struct.unpack_from(">H", image, a * 2)[0] \
+               if 0 <= a * 2 + 1 < len(image) else None
+
+    agree = 0
+    wrong = {}
+    ambiguous = {}
+    for r in link.get("relocations") or []:
+        name = r.get("symbol")
+        entry = index.get(name)
+        if not isinstance(entry, dict) or not isinstance(entry.get("start"), int):
+            continue
+        flags = r.get("flags", 0)
+        if flags in TARGET_IS_WORD:
+            stored = hw(r["address"] + 1)
+        elif flags in TARGET_IS_HALFWORD:
+            stored = hw(r["address"])
+        else:
+            continue
+        if stored is None:
+            continue
+        want = r["target"] & 0xFFFF
+        if stored == want:
+            agree += 1
+        elif stored == (want | 0x8000):
+            # BIT 15 IS AMBIGUOUS AND MUST NOT BE ABSORBED.  It is the sector
+            # flag a sector-encoded halfword carries -- and it is also what a
+            # genuine address difference of 0x8000 looks like in sixteen bits.
+            # Treating it as agreement hid the very case this check was written
+            # for: S2's FIOG9ADB is at 005E90 in the table and 01DE90 in G9's
+            # own index, and 5E90 | 8000 is DE90, so it scored as a match.
+            # CORROBORATED ONLY IF AN INDEX SAYS SO.  Most of these really are
+            # the sector flag -- S2 has 115, nearly all A1* PROCEDUREs above
+            # 040000 -- and reporting them all would bury the few that are a
+            # real address.  Another configuration's index whose low sixteen
+            # bits match the site is the discriminator that separates them.
+            alt = sorted(a for a in elsewhere.get(name, ())
+                         if (a & 0xFFFF) == stored and a != entry["start"])
+            if alt:
+                ambiguous.setdefault(name, (entry["start"], alt,
+                                            entry.get("type"),
+                                            entry.get("inConfig")))
+        elif stored in UNPATCHED_SITE:
+            continue
+        else:
+            implied = (entry["start"] + (stored - want)) & 0xFFFFF
+            wrong.setdefault(name, (entry["start"], implied, entry.get("type"),
+                                    entry.get("inConfig")))
+    print(f"\nverify {linkPath}", file=sys.stderr)
+    print(f"   {agree} site(s) agree with the table", file=sys.stderr)
+    print(f"   {len(wrong)} symbol(s) the dump CONTRADICTS", file=sys.stderr)
+    if ambiguous:
+        print(f"   {len(ambiguous)} symbol(s) whose site matches ANOTHER "
+              f"configuration's index, not this table's address", file=sys.stderr)
+        for name, (start, alt, typ, inConfig) in sorted(ambiguous.items()):
+            note = f" type={typ}" + ("" if inConfig is None else
+                                     f" inConfig={inConfig}")
+            where = " ".join(f"{a:06X}" for a in alt)
+            print(f"      {name:10} table {start:06X}, an index says {where}"
+                  f"{note}", file=sys.stderr)
+    for name, (start, implied, typ, inConfig) in sorted(wrong.items()):
+        note = f" type={typ}" + ("" if inConfig is None else f" inConfig={inConfig}")
+        print(f"      {name:10} table {start:06X}, the dump implies "
+              f"{implied:06X}  ({implied - start:+#x}){note}", file=sys.stderr)
+    return 1 if wrong else 0
+
+
 def main():
     config = "SSW"
     halstat = DEFAULT_HALSTAT
@@ -501,6 +624,7 @@ def main():
     base = None
     out = None
     report = False
+    verify = None
     for p in sys.argv[1:]:
         if p.startswith("--config="):
             config = p.partition("=")[2]
@@ -520,6 +644,8 @@ def main():
             permitSoleCandidate = True
         elif p == "--no-foreign-symbols":
             recoverForeignAddresses = False
+        elif p.startswith("--verify="):
+            verify = p.partition("=")[2]
         elif p == "--report":
             report = True
         else:
@@ -538,6 +664,13 @@ def main():
     # recovered.  --base carries a previous result forward.  (The
     # cross-configuration pass below has no such dependency: it works from the
     # index and the dump, so it is reproducible from scratch every time.)
+    # --verify checks a table that already EXISTS, so it needs no recovery pass
+    # and must not run one: the point is to audit what was published.
+    if verify:
+        base = base or (mafgen / f"augmented-{config}.json")
+        sys.exit(verifyResolved(verify, json.load(open(base)),
+                                mafgen, config))
+
     index = json.load(open(mafgen / f"csects-{config}.json"))
     if base is not None:
         previous = json.load(open(base))
