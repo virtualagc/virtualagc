@@ -2,15 +2,17 @@
 
 ## WHERE IT ACTUALLY STANDS, end of 2026-08-14
 
-    G9   15/1117      S2   18/1090      SSW  28/570
+    G9   13/1117      S2   17/1090      SSW  28/570
 
 Excluding halfwords whose only fault is an unattributable memory reference,
-**23 halfwords in 8 files** remain — see handoff entry 275 for the table and
-what each one is.  Entries 265-277 carry this phase; read 269 (what is open),
-272 (the two exceptions files) and 275 (version recovery) first.  276 and 277
-close the two items this file used to list as pending: the exceptions are
-generated again, and every section whose size differs from the CSECT table has
-been checked against the build's own compiler.
+**7 halfwords in 5 files** remain — see handoff entry 278 for the table and
+what each one is.  Entries 265-278 carry this phase; read 269 (what is open),
+272 (the two exceptions files) and 278 (what is left) first.  276, 277 and 278
+close the three items this file used to list as pending: the exceptions are
+generated again, every section whose size differs from the CSECT table has been
+checked against the build's own compiler, and FIOMS2PG's thirteen turned out to
+be references into a COMPOOL our source has at the earlier revision — as did
+FCMBMTG9's one and FIOMVUPG's two, which is why the counts above moved.
 
 THE ARTIFACTS THIS STATE WAS MEASURED FROM, all under
 `$SP/clean` where SP is the scratch root named below:

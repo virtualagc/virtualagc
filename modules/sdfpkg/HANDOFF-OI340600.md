@@ -3773,6 +3773,88 @@ halfwords is already a -1.
 
 WHY.  272's withdrawal of #PCPCDIT reached the right conclusion by reasoning that does not hold, which is worse than being wrong outright because it would have been repeated: the next oversized COMPOOL would have been judged on whether the map said INCLUDE REMOTE.  The rule to take away is that MAFGEN's map is a secondary witness about sizes and HALSTAT is the primary one, and that HALSTAT answers per PHASE.
 
+FIOMS2PG'S THIRTEEN ARE NOT AN ASSEMBLY PROBLEM AT ALL: EVERY ONE IS A
+REFERENCE INTO A COMPOOL OUR SOURCE HAS AT THE EARLIER REVISION.  The thirteen
+are the address halves of thirteen 4-byte ACONs -- BCE `#LBR` commands, HW0 the
+command and HW1 the address, which is why thirteen halfwords differ and not
+twenty-six.  lnk101 names each target: TFIVAN11..14, TFIVAN21..23,
+TFIVPF12..13, TFIVPF21..24, all fields of #PCS2INB, the CS2_INB COMPOOL.
+
+    THE CSECT TABLE ALREADY HOLDS THE BUILD'S ANSWER, ALL THIRTEEN OF THEM.
+    #PCS2INB starts at 0x77D8 and the table's field offsets give 0x7861,
+    0x7862, 0x7863, 0x7864, 0x7865, 0x7866, 0x7867, 0x7871, 0x7879, 0x787A,
+    0x787B, 0x7883, 0x7884 -- the DUMP'S THIRTEEN VALUES, exactly, with no
+    exceptions and nothing rounded.  Our link used 0x7877 upward instead
+    because our own compiled CS2INB.obj defines those fields and a real
+    definition beats the table.
+
+    SO THE TOOLCHAIN IS RIGHT AND THE SOURCE IS THE WRONG VINTAGE.  CS2_INB is
+    revision BX in our tree and BY in the build; 277 confirms the size against
+    HALSTAT, 339 halfwords against the build's 180.  The compiler placed the
+    fields of the source it was given.
+
+THE SAME THREE HALFWORDS IN G9, and they were already suspected: FCMBMTG9's one
+and FIOMVUPG's two are TFIVPF12 in #PCVHPLD, CVH_PL_DATA revised BY->BZ, 61
+halfwords against the build's 43.  Ours 00F941 where the table and the dump
+both say 00F921 -- 259 and 260 flagged it as genuinely ambiguous and it is not
+ambiguous any more.
+
+WHY dass-versions.py COULD NOT SEE ANY OF IT.  It walks the per-unit HAL/S
+links, and an assembly module is not a unit, so a reference FROM assembly INTO
+a revised COMPOOL falls in the gap 275 already named from the other side.
+`--asm-link=FULL.json [--fields=TABLE.json]` closes it, reading the address
+constants of a full-configuration link.
+
+    AND THE ATTRIBUTION HAS TO BE BY NAME, NOT BY ADDRESS, which is the part
+    worth remembering.  The pass's rule for a HAL/S site is that our halfword
+    and the dump's must land in the SAME CSECT.  Measured, that reaches EIGHT
+    of the thirteen.  Our fields sit 17 to 25 halfwords LATER than the
+    build's, and five of them -- TFIVPF13, TFIVPF21, TFIVPF22, TFIVPF23,
+    TFIVPF24, at offsets 185 to 189 -- fall past the build's extent of 180
+    into the next CSECT, so the test says they are unrelated.
+
+        NOT BECAUSE OUR SECTION IS 159 HALFWORDS LONGER, which is true (339
+        against 180) and is NOT the reason; the extra length is not all in
+        front of the fields.  The shift that matters is the +17 to +25.  The
+        two got swapped once in writing this up, helped by a coincidence
+        worth naming: TFIVAN11 sits at offset 159 in our layout, the same
+        number as the size difference.  THE RULE IS DEFEATED BY THE SIZE CHANGE IT
+    EXISTS TO DETECT.  Using lnk101's recorded field name instead leaves our
+    side needing no inference at all, and the only question is whether the
+    DUMP's halfword lands in the CSECT that owns the field.  Both variants
+    agreed on the eight, so the name is not admitting coincidence, it is
+    reaching further.
+
+MEASURED, and nothing else moved anywhere:
+
+                    before   after      closed
+        G9        15/1117  13/1117      FCMBMTG9, FIOMVUPG
+        S2        18/1090  17/1090      FIOMS2PG
+        SSW        28/570   28/570      -- none; SSW has no such site
+
+    16 lines added to the exceptions, 0 lost, each naming its own field and
+    revision.  No section went the other way in any configuration.
+
+WHAT IS LEFT, excluding halfwords whose only fault is an unattributable memory
+reference -- SEVEN halfwords in FIVE files, from 23 in 8:
+
+        file        G9   S2  SSW      what it is
+        FIOCBLKS     1    1    1      TBCD0078 device mask, source data
+        FIOPBYG9     1    0    0      WORD0L, ours 0500, the build left 0000
+        FIOMVUDT     1    0    0      recovered FIOMDPVU data
+        FIOMS2DT     0    1    0      &LPFIIC, deliberately not guessed
+        FIOPDISP     0    1    0      FIOCHECK, differs in bit 15 alone
+        TOTAL        3    3    1      = 7 halfwords in 5 files
+
+    TWO NON-ASSEMBLY SITES SURVIVE THE SAME FILTER and are left alone: S2's
+    #PCS2IX5 and #PCS2IX6 differ by one halfword each, at the SAME address
+    0x4ABD, because our #PCS2IX5 is 196 halfwords where the map allows 136 and
+    therefore runs over #PCS2IX6.  The link records two YCONs at that address,
+    one resolving to 0xB042 -- the dump's value -- and one to 0x6082.  A size
+    overrun writing over its neighbour, not a reference problem.
+
+WHY.  I set out to fix thirteen halfwords in an assembly source and there was nothing in the assembly source to fix.  The tell was that the CSECT table already carried the dump's thirteen values -- the build's own answer, sitting in an artifact we generate every run -- so the question was never what FIOMS2PG emits but why our link preferred a definition from a COMPOOL at the wrong revision.  The lesson that generalises is the second one: an evidence rule keyed on an ADDRESS fails exactly where a size changed, and a rule keyed on the NAME the linker recorded does not.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.

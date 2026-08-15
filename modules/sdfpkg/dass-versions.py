@@ -8,6 +8,14 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 
 Usage:      dass-versions.py --config=SSW --link-dir=work
                              [--exceptions=BASE.txt] [--out=F.txt] [--report]
+                             [--asm-link=FULL.json [--fields=TABLE.json]]
+
+--asm-link names a FULL-CONFIGURATION link, whose .fcm must sit beside it.  The
+HAL/S pass below walks the per-unit links, so a reference from an ASSEMBLY
+module into a revised COMPOOL is invisible to it; this reads the address
+constants of that link, takes the field name lnk101 recorded, and asks whether
+the dump's halfword lands in the CSECT that owns the field.  --fields supplies
+the field-to-CSECT map and is an augmented-XXX-fields.json.
 
 WHAT WE ARE COMPARING.  PFS/OI340600 is OI-34.06.  The MAFGEN listings say
 "AT RELEASE 034    VERSION 070", so the memory images are OI-34.07.  Source is
@@ -166,6 +174,8 @@ def main():
     dassPath = None
     linkDir = "work"
     baseExceptions = None
+    asmLink = None
+    fieldsPath = None
     out = None
     report = False
     for p in sys.argv[1:]:
@@ -181,6 +191,10 @@ def main():
             linkDir = p.partition("=")[2]
         elif p.startswith("--exceptions="):
             baseExceptions = p.partition("=")[2]
+        elif p.startswith("--asm-link="):
+            asmLink = p.partition("=")[2]
+        elif p.startswith("--fields="):
+            fieldsPath = p.partition("=")[2]
         elif p.startswith("--out="):
             out = p.partition("=")[2]
         elif p == "--report":
@@ -309,6 +323,80 @@ def main():
     entries = []
     acted = []
     referenced = collections.Counter()
+    asmReferenced = collections.Counter()
+
+    # AN ASSEMBLY MODULE REFERENCING A REVISED COMPOOL IS INVISIBLE TO THE PASS
+    # BELOW, because that walks the HAL/S unit links and an assembly module is
+    # not a unit.  FIOMS2PG's thirteen halfwords are the case: every one is an
+    # ACON into a field of #PCS2INB, whose unit CS2_INB the build revised
+    # BX->BY, and the table's own field offsets -- MAFGEN's, the build's --
+    # equal the dump's values in all thirteen.
+    #
+    # THE ATTRIBUTION IS BY NAME AND NOT BY ADDRESS, which matters here more
+    # than anywhere else.  Asking whether our halfword and the dump's land in
+    # the same CSECT is the rule for a HAL/S site and it reaches only eight of
+    # the thirteen: our copy of CS2_INB is 339 halfwords where the build's is
+    # 180, so five of our field addresses fall PAST the build's extent into
+    # the next CSECT.  The rule is defeated by the size change it exists to
+    # detect.  lnk101 has already recorded WHICH FIELD the reference is to, so
+    # our side needs no inference and the only question left is whether the
+    # dump's halfword lands in the CSECT that owns that field.
+    ADDRESS_FLAGS = {0x00: 0, 0x1C: 1}      # YCON stores at +0, an ACON at +1
+
+    def markAssemblyReferences(linkPath, fieldsPath):
+        link = json.load(open(linkPath))
+        image = open(Path(linkPath).with_suffix(".fcm"), "rb").read()
+        fieldOwner, ambiguous = {}, set()
+        source = json.load(open(fieldsPath)) if fieldsPath else index
+        for csect, e in source.items():
+            if not isinstance(e, dict):
+                continue
+            for name in (e.get("contents") or {}):
+                if name in fieldOwner and fieldOwner[name] != csect:
+                    ambiguous.add(name)
+                fieldOwner[name] = csect
+        for name in ambiguous:
+            fieldOwner.pop(name, None)
+
+        placed = sorted((s["address"], s["address"] + s.get("size", 0) - 1,
+                         s["name"]) for s in link["sections"] if s.get("size"))
+
+        def site(address):
+            best = None
+            for s, e, n in placed:
+                if s <= address <= e and (best is None or e - s < best[0]):
+                    best = (e - s, n)
+            return None if best is None else best[1]
+
+        halCsect = {c for c, e in index.items() if e.get("hal")}
+        for r in link.get("relocations") or []:
+            flags = r.get("flags", 0) & 0x7F
+            if flags not in ADDRESS_FLAGS:
+                continue
+            name = r.get("targetName")
+            target = name if name in revisedUnits else fieldOwner.get(name)
+            if target not in revisedUnits:
+                continue
+            address = r["address"] + ADDRESS_FLAGS[flags]
+            if address in already:
+                continue
+            a, b = halfword(image, address), halfword(reference, address)
+            if a is None or b is None or a == b or b in FILL:
+                continue
+            lo, hi = extents[target]
+            # An address field is sixteen bits where an address may need more.
+            if not any(lo <= b + k * 0x10000 <= hi for k in range(8)):
+                continue
+            where = site(address)
+            if where is None or where == target or where in halCsect:
+                continue
+            tstem, tours, ttheirs = revisedUnits[target]
+            entries.append((address,
+                            f"{where}-references-{name}-in-{tstem}"
+                            f"-revised-{tours}-to-{ttheirs}"))
+            already.add(address)
+            asmReferenced[(where, tstem, tours, ttheirs)] += 1
+
     for f in sorted(Path(linkDir).glob("*.json")):
         if f.name.endswith(".repro.json"):
             continue
@@ -463,6 +551,11 @@ def main():
         if n:
             acted.append((stem, ours, theirs, n))
 
+    # After the HAL/S pass, so `already` carries its marks and the two cannot
+    # both claim a halfword.
+    if asmLink:
+        markAssemblyReferences(asmLink, fieldsPath)
+
     with open(out, "w") as f:
         for line in lines:
             f.write(line + "\n")
@@ -549,6 +642,12 @@ def main():
               f"units, referencing a unit that was revised:")
         for (stem, tstem, tours, ttheirs), n in referenced.most_common():
             print(f"   {stem:10s} -> {tstem:8s} revision {tours} -> {ttheirs}"
+                  f"   {n:5d} halfword(s)")
+    if asmReferenced:
+        print(f"   -- and {sum(asmReferenced.values())} halfword(s) in ASSEMBLY "
+              f"sections, referencing a field of a revised unit:")
+        for (where, tstem, tours, ttheirs), n in asmReferenced.most_common():
+            print(f"   {where:10s} -> {tstem:8s} revision {tours} -> {ttheirs}"
                   f"   {n:5d} halfword(s)")
 
 
