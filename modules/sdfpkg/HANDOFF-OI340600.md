@@ -4040,6 +4040,71 @@ WHERE THE TWO STAND, and neither range has moved:
 
 WHY.  A reader who notices that both files emit the same quantity will try to unify them, as the user did; the arithmetic refuting that is short but not obvious, and the negative result is what stops the next attempt at reconstruction from writing a value into the wrong variable.  The gate asymmetry is the transferable part: I answered from the consumer that cannot see the variable, and the one that can was two files away.
 
+DR=107094 IS A SEARCHABLE CHANGE AND ITS FULL EXTENT IS FIVE FILES, which is
+worth knowing as a method quite apart from what it yielded here.  The user's
+recipe: grep SSSRC for the DR number, read the change-log entry's own SRN in
+columns 73-80 for that FILE's two-letter code, and the continuation line's
+`C=(...)` list names the sequence numbers the change touched.  Every affected
+line then carries that code in its own SRN.  The same lines are findable in the
+"as received" listings, where the SRN sits in a different column.
+
+        file        log SRN     C=(...)                    what those lines are
+        FIOCBLKS    010832CI    115500                     device 16's IIC, 173
+        FIOCDATS    000839AL    07040                      FIOPDIRD, H'1465'
+        FIOMS2DT    001305AH    2203,2400,2803,3000        two FORMULA DCs and
+        FIOMS4DT    001205AD    2103,2300,2703,2900          their two comments
+        FIOMVUDT    001204AI    1803,2200                  the LSUM formula DC
+
+WHAT IT ESTABLISHED, four things, none of which narrows the two open ranges.
+
+    THE CHANGE WAS TO THE FORMULAS AND NOT TO THE IIC VALUES.  In all three
+    *DT files the touched lines are exactly the `DC Y((...))` statements and
+    the comments explaining them.  So +792, +825 and +2508 all date from
+    OI23.05 and are one vintage, which is why they carry AH/AI/AD while the
+    IIC inputs around them carry BK/BL/BG.
+
+    THE OVERHEAD CONSTANTS ARE PER-RATE, NOT PER-CHAIN.  FIOMS4DT uses the
+    same +792 and +825 as FIOMS2DT.  That takes 280's "16.5 x an element
+    count" rule from three samples to five occurrences of three distinct
+    values, every one divisible by 33, and makes it less likely that OI-34.07
+    altered one for a single chain -- which slightly strengthens 280's finding
+    that S2's change is in &LPFIIC rather than in its overhead.
+
+    TWO EXACT IIC-FAMILY VALUES ARE WITNESSED AND UNCHANGED IN OI-34.07.
+    Device 16's 173 sits in FIOCBLKS, whose only difference was the bus mask
+    279 recovered; FIOPDIRD's 1465 sits in FIOCDATS, which comes out OK at 580
+    halfwords in G9.  Neither belongs to the chains in question -- device 16 is
+    an eight-bus FC device and FIOPDIRD is the PDI decom read -- but both show
+    the release left this family alone where it could be checked.
+
+    AND THE RUNTIME COST MODEL IS NOW LEGIBLE, from FIOPDSMU 024400-024900:
+
+        LR    R6,R4          NUMBER OF BCE ELEMENTS
+        MH    R6,FIOOPLRD    BCE EL OVERHEAD (#LBR,#MIN,DATA WD)
+        SLL   R6,15          ... DIVIDE BY 2 TO CORRECT FOR INTEGER MULTIPLY
+        AHI   R6,33          BCE PGM EXIT OVERHEAD (#WAT)
+        SRL   R6,20          OVERHEAD IN 16 USEC
+
+    FIOOPLRD is 182, so 91 microseconds per BCE element, plus 33 for the #WAT
+    exit, in 16-microsecond ticks.  And 16.5 is 33/2, so the assembly-time
+    constant and the runtime code are the same arithmetic seen twice.
+
+THE AVENUE IT OPENED, AND WHY IT IS CLOSED.  If the preprocessor's IIC is a sum
+over the chain's elements, the recovered OI-34.07 element list would give the
+value directly.  TESTED AGAINST A KNOWN ANSWER FIRST, which is the only way to
+use such a model: the OI-34.06 S2 LPF chain should reproduce its own 1436.
+Reading each element's word count from the low byte of its command word -- 06,
+40, 20, 40, 40, 0F -- gives 245 words and about 4042 microseconds, nearly three
+times too large.  So that reading of the command word is wrong; validating the
+model needs the BCE command-word bit layout, which AP-101S-instruction-set.txt
+does not give in usable form.  A MODEL THAT CANNOT REPRODUCE A KNOWN VALUE MUST
+NOT BE USED TO PRODUCE AN UNKNOWN ONE, so it was stopped rather than fitted.
+
+    NOR IS THERE A HOUSE VALUE TO FALL BACK ON.  The same quantity is 1436 in
+    FIOMDPS2, 611 in FIOMDPVU and 231 in FIOMDPS4 -- a factor of six.
+
+WHY.  The user supplied the method and it is the transferable part: a change order names its own affected lines, in every file it touched, through the SRN revision code and the C=(...) list.  That turns 'what else did this change do' from a guess into a search, and it will be worth running again.  What it produced this time is four solid facts and no narrowing, which is worth recording precisely so the next reader does not run it a second time hoping for more.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
