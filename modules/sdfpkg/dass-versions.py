@@ -478,6 +478,14 @@ def main():
                     f"# revision level, which is per file; see "
                     f"dass-versions.py.\n"
                     f"# -1 = Probable version-change related difference\n")
+            # THE ENTRIES BELONG TO THIS BLOCK, and for seven days they were
+            # indented into the defects one below, which writes only when
+            # mafgen/defects.txt names the configuration.  G9, S2, SSW, G2 and
+            # P9 have no row there, so every version marker they had was
+            # dropped while the report still counted them -- the report and
+            # the file disagreed and nothing said so.
+            for address, name in sorted(entries):
+                f.write(f"{address:05X} -1 {name}\n")
 
         # Suspected defects in the ORIGINAL compiler, from mafgen/defects.txt.
         # These cannot be derived: each is a judgement that our output is right
@@ -504,8 +512,6 @@ def main():
                     "# -2 = Probable floating-point bug in original compiler\n")
             for address, marker, note in sorted(rows):
                 f.write(f"{address:05X} {marker} {note}\n")
-            for address, name in sorted(entries):
-                f.write(f"{address:05X} -1 {name}\n")
 
         # Locations the RUNNING system overwrote, from mafgen/runtime-overlay.txt.
         # Not a defect on either side: the source assembles to what the build
