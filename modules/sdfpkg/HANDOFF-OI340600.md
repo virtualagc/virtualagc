@@ -3426,6 +3426,16 @@ verification run already said and what this entry should never have contested:
     our object declares, against the build's 15 -- but it is a demonstration of
     something already known and recorded, not a finding.
 
+    AND IT IS THE WRONG EXAMPLE ENTIRELY, corrected 2026-08-14.  That draft
+    read the build's 15 as five structures and offered #PCPCDIT as a source
+    difference an OI340700 reconstruction could recover.  S2's memory map marks
+    #PCPCDIT `INCLUDE REMOTE`: its storage is declared elsewhere and 15
+    halfwords is a STUB, so the size says nothing about the declaration.
+    15 = 5 x 3 was a coincidence read as meaning.  Editing CPCDIT.hal's bound
+    would have fabricated a source change to explain a linkage mechanism.
+    Six of the 39 are marked that way; the other 33 are CANDIDATES and no
+    more.  See 275 for when a version difference is genuinely recoverable.
+
 WHAT SURVIVES.  The A/B measurements of this session are unaffected, because
 both arms used the same exceptions file: the overlay filtering's 40, 44 and 5
 sections, the regenerated tables' 7 and 4, and the placement marking's 2 are
@@ -3437,7 +3447,7 @@ is every ABSOLUTE residue figure quoted against them.
     placeholders and 3 known dump defects, over 2558 units of all eight
     configurations.  Its README says plainly what it is and what it is not.
 
-WHY.  I spent a day measuring a residue the project had already explained and suppressed, then wrote an entry claiming the explanation as new.  The cost was not only the wasted work: 269 and 270 carried numbers that would send the next reader after COMPOOLs that are not in question.  The trap is worth naming -- two exceptions files, differently named, in different directories, and the smaller one is the one sitting beside the other artifacts.
+WHY.  I spent a day measuring a residue the project had already explained and suppressed, then wrote an entry claiming the explanation as new.  The cost was not only the wasted work: 269 and 270 carried numbers that would send the next reader after COMPOOLs that are not in question.  The trap is worth naming -- two exceptions files, differently named, in different directories, and the smaller one is the one sitting beside the other artifacts.  The #PCPCDIT correction above matters for the same reason: an arithmetic coincidence nearly became an edit to a HAL/S source.
 
 TWO REAL ASM101S DEFECTS OUT OF THE SIXTY-THREE, AND A GAP IN 267'S FILTER.
 269 said 63 halfwords were the only place an assembler or linker defect could
@@ -3521,6 +3531,134 @@ Nothing is worse anywhere:
     the FIOIPR one; S2 carries 179 in that section for unrelated reasons.
 
 WHY.  Two defects in the sixty-three is a better yield than I expected, and both hid the same way: the format tolerated the wrong thing, so only the flight image objected.  The filter gap matters more than either -- it silently cost seventeen sections the moment the object set changed, and it would have been read as a regression from the assembler fixes by anyone who did not check that the regressed sections were compiler output.  It is now the sweep's job rather than a habit.
+
+A WRONG ADDRESS IN AN AUGMENTED TABLE IS SELF-PERPETUATING, AND `--base` IS HOW.
+Three mechanisms have to line up for a recovered address to be revisited, and
+one bad value defeats all three at once.
+
+    THE SWEEP STOPS PRODUCING THE EVIDENCE.  dass-syms.py recovers from
+    lnk101's UNRESOLVED relocations.  A sweep run with a table that already
+    defines the symbol resolves it, so the link JSONs carry nothing, and the
+    next run has no evidence to reconsider.  S2's FIOG9ADB had exactly ZERO
+    unresolved relocations for this reason.
+
+    `--base` CARRIES IT FORWARD UNEXAMINED.  Base entries are merged into the
+    index before the passes run, and recoverForeignSymbols skips any symbol
+    already in the index.  So the value is not re-derived even when the
+    evidence would now support a different one.
+
+    AND NOTHING COMPLAINS.  A missing definition announces itself as an
+    unresolved relocation; a wrong one links silently.
+
+SO `--base` MUST NAME THE PUBLISHED TABLE, NEVER A PREVIOUS REGENERATION.
+Pointing it at the last run's output makes every mistake permanent and
+compounds them: the S2 chain that produced FIOG9ADB at 005E90 was regenerated
+from a base that was itself a regeneration, and PFS's own
+mafgen/augmented-S2.json does not carry the symbol at all.  The published
+tables were never wrong here.  The scratch chain was.
+
+    THE PIPELINE INVITES THE MISTAKE, which is worth saying plainly.
+    dass-syms.py writes augmented-CONFIG.json into the MAFGEN directory
+    because csect-disambig.py reads it from there, so the output of one run
+    sits exactly where the next run's --base would look for it.  Placing it
+    there is correct; using it as the next --base is not.
+
+    A CLEAN REGENERATION THEREFORE COSTS A SWEEP.  The chain is base ->
+    dass-syms -> csect-disambig -> dass-fields -> SWEEP -> dass-syms again.
+    The sweep has to be re-run against the new table, or the recovery pass
+    sees the old one's resolutions and has nothing to work from.
+
+HOW THE WRONG VALUE GOT IN, since the rule is now fixed and the symptom will
+not recur.  A reference site carries sixteen bits and an address may need
+more, so comparing a candidate's whole value made G9's 01DE90 uncorroborable
+against a site reading DE90 -- and basesFrom also offers the same site with
+bit 15 cleared, 005E90, which a HALSTAT phase matched.  `sorted` tried the
+smaller reading first, so the weaker one claimed a candidate before the
+stronger could.  Corroboration is on the low sixteen bits now and the raw
+reading is tried first; see the commit.
+
+[why] I spent this pass believing the published tables carried a bad address and looking for it there.  They do not.  The failure was a regeneration used as the base for the next regeneration, which is a discipline question rather than a defect, and it is invisible: the artifact looks exactly like a clean one.  The audit in dass-syms.py --verify is what makes it findable at all.
+
+A VERSION-RELATED SOURCE CHANGE IS RECOVERABLE WHEN THE DUMP STATES ITS
+EMITTED CONSEQUENCE, and FIOMDPS2 is nine halfwords of proof.  These are pure
+DATA -- not one of the sites carries a relocation -- so the dump states each
+halfword outright: no addend to cancel, no sector bit, no dependence on where
+the section was placed or on which lnk101 branch is checked out.
+
+FIVE COMMAND WORDS, CORROBORATED ACROSS TWO DUMPS.  FIOMS2PG's `#MINC` emits a
+command's low halfword verbatim, so one site is one equation:
+
+        LPF1CMD(2)  024406 -> 024407      LPF2CMD(3)  025440 -> 025840
+        LPF1CMD(3)  025440 -> 025840      LPF2CMD(4)  025840 -> 026C02
+        LPF2CMD(2)  024420 -> 024407
+
+    Those are EXACTLY the five values FIOMDPVU already carries, recovered from
+    the G9 dump in a separate exercise (248), while these come from S2's.  The
+    two files' element codes and counts already agreed outright -- 105/7,
+    106/0, 107/7, 108/0, 109/2 -- so both describe one payload chain and only
+    the commands disagreed.  Two independent dumps landing on five identical
+    values is a far better warrant than either alone.  PFS d6a156d8.
+
+FOUR IIC COUNTS, AND THE ROUNDING DECIDES WHICH ARE RECOVERABLE.  FIOMS2DT
+emits `DC Y((&xxxIIC + k + 15)/16)`: a ceiling to whole 16s, so the halfword is
+a BLOCK COUNT and sixteen inputs collapse onto it.
+
+        &DUL1IIC 1337 -> 0     &FLX1IIC 2129 -> 0     &FLX3IIC 2739 -> 0
+        &HPLIIC   462 -> 0     &LPFIIC  1436 -> LEFT ALONE
+
+    A ZERO EMITTED HALFWORD IS THE ONE UNAMBIGUOUS CASE: x+15 <= 15 forces
+    x = 0 for a count that cannot be negative.  Everything else is ambiguous by
+    construction -- 0032 admits 0..8 and 0074 admits 1016..1031.  &HPLIIC is
+    set to 0 on the file's OWN structure, its HPL element slots all being zero,
+    not because the dump determines it; &LPFIIC is left because nothing
+    corroborates one of its sixteen, and FIOMDPVU's 611 is a different chain.
+    227's call on &FLX1CNT/&FLX2CNT is the precedent.  PFS 22adf35d.
+
+    THE RECOVERY HAD HALF-MADE THIS ALREADY: the HPL, DUL and FLX ELEMENT slots
+    were zeroed and the derived IIC constants were not.  FIOMDPVU carries its
+    &DUL*IIC, &FLX3IIC and &FLX5IIC at 0 for the same reason.
+
+WHY dass-versions.py DID NOT SUPPRESS ANY OF IT, which is luck rather than
+design.  Its evidence is per FILE, from the unit's HALSTAT revision level.
+FIOMDPS2 is not a unit -- it is a COPY'd MLIB80 member -- so a revision bump
+inside it does not move FIOMS2DT's own revision and the pass marks nothing.
+None of these halfwords is in exceptions-S2-full.txt.  Had the marking worked
+at member granularity they would have been silently no-claimed and never
+found.  A blind spot worth knowing in both directions.
+
+THE TAXONOMY, AND I GOT IT WRONG ONCE BEFORE GETTING IT RIGHT:
+
+    recoverable        a constant the dump states directly -- the command words
+    partly             a constant reached through lossy arithmetic -- the IICs
+    NOT A SOURCE       a size set by a LINKAGE mechanism.  272 offered
+    QUESTION AT ALL    #PCPCDIT as a recoverable array bound, 112 structures of
+                       three halfwords against the build's 15, "which is five".
+                       IT IS NOT.  S2's memory map marks #PCPCDIT
+                       `INCLUDE REMOTE`: the storage is declared elsewhere and
+                       15 halfwords is a STUB.  15 = 5 x 3 was a coincidence
+                       read as meaning, and editing CPCDIT.hal's bound would
+                       have fabricated a source change to explain a linkage
+                       mechanism.  The remaining 33 unmarked ones are still
+                       only CANDIDATES; "not marked remote in this
+                       configuration" is weaker evidence than it looks.
+
+WHAT IS LEFT, excluding halfwords whose only fault is an unattributable memory
+reference:
+
+        file        G9   S2  SSW      what it is
+        FIOMS2PG     0   13    0      section content; #LBR TFIV* and #BU@
+        FIOCBLKS     1    1    1      TBCD0078 device mask, source data
+        FIOMVUPG     2    0    0      CVHPLD.obj exports TFIVPF12 at 00F941;
+        FCMBMTG9     1    0    0        table and dump both say 00F921
+        FIOPBYG9     1    0    0      WORD0L, ours 0500, the build left 0000
+        FIOMVUDT     1    0    0      recovered FIOMDPVU data
+        FIOMS2DT     0    1    0      &LPFIIC, deliberately not guessed
+        FIOPDISP     0    1    0      FIOCHECK, no index attests it
+        TOTAL        6   16    1      = 23 halfwords in 8 files
+
+    Configurations: G9 15/1117, S2 18/1090, SSW 28/570.
+
+[why] The FIOMDPS2 work is the first time this phase RECOVERED source rather than explaining a difference away, and the method generalises: find an emitted constant, invert it, and take a second dump's agreement as the warrant.  The #PCPCDIT correction matters more than it looks -- I reasoned from an arithmetic coincidence to a proposed edit of a HAL/S source, and only the memory map's INCLUDE REMOTE stopped it.  Any future version-recovery claim needs that check first.
 
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
