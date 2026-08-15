@@ -3978,6 +3978,68 @@ reference: TWO, in two files, and both are the same shape.
 
 WHY.  Seven halfwords, and only two of them were what the table said they were: two were OI-34.07 source, one was a defect in an artifact we generate, and two are genuinely not recoverable.  The FIOCHECK case is 274 repeating -- a wrong address adopted from an adjusted reading, silent because a wrong definition links cleanly -- and the fix that worked is the one that uses a NAME the published index already records.  The fix that did not work is worth keeping in the record: an existence test over addresses looks principled and quietly accepts coincidences, and only measuring it showed that.
 
+THE TWO SURVIVING HALFWORDS ARE BOTH THE "PF LOW RATE IIC" FOR DEVICE 52 AND
+THEY ARE NOT THE SAME CHANGE.  The user's reading is right as far as it goes:
+FIOMS2DT and FIOMVUDT both emit that one line, both records begin with the
+device id -- FIOPDSMU walks FIOMENTY comparing TBT1DVID against the IOQE's
+TIOQDVID -- and both emitted values fall in OI-34.07.  But FIOMS2DT divides
+&LPFIIC while FIOMVUDT divides &LSUM, a sum that CONTAINS &LPFIIC, and testing
+whether one change explains both refutes itself.
+
+    ASSUME &LSUM'S OTHER TERMS ARE UNCHANGED, which the OI301700 listing lets
+    us state rather than guess: &FLX1IIC 2096, the other six 0, and our own
+    emitted 326 confirms the sum is exactly 611 + 2096.  Then the VU
+    &LPFIIC must satisfy ceil((x + 2096 + 2523)/16) = 252, giving x in
+    -587..-572.  NEGATIVE, so the assumption fails and the VU change is not in
+    &LPFIIC at all.  The other six terms are zero and can only add, so the
+    term that fell is &FLX1IIC.
+
+AND THE WITNESS FOR THAT IS FCMBMTG9, NOT FIOMVUPG, which I claimed first and
+which does not hold.  BTBCEGEN gates its SINGLE FLEX 1/2 block on THREE
+conditions and FIOMDPVU sets `&FLX1ELM(15) SETA 0`, so the block is skipped
+whatever &FLX1IIC holds and FIOMVUPG's match says nothing about it.
+
+    FCMBMTMC GATES THE SAME MATERIAL ON TWO CONDITIONS AND NO MORE:
+
+        AIF   (&FLX1IIC EQ 0).ASFLX34
+        AIF   (&FLX1MIA EQ 0).ASFLX34
+
+    with &FLX1MIA 6 in FIOMDPVU.  FCMBMTG9 is COPY FIOMDPVU + FCMBMTMC G9 and
+    comes out OK at 1334 halfwords, so the block IS in the dump and OI-34.07's
+    VU &FLX1IIC is NON-ZERO.  The tidy hypothesis -- that VU got what 275
+    recovered for S2, &FLX1IIC to zero with &LPFIIC absorbing it -- is dead.
+
+    THE ASYMMETRY IS THE LESSON.  One variable, two consumers, and only one of
+    them is a witness.  Ask BTBCEGEN and the answer is "cannot tell"; ask
+    FCMBMTMC and the answer is definite.  I asked the wrong one first and
+    reported a conclusion from it.
+
+WHERE THE TWO STAND, and neither range has moved:
+
+        FIOMS2DT   &LPFIIC in 1016..1031, and the change is UNIQUELY LOCATED
+                   there: were the overhead the changed quantity it would have
+                   to lie in 405..420, and the family's constants are all
+                   16.5 x an element count -- 792, 825, 2508, every one
+                   divisible by 33 -- while 405..420 contains no multiple of
+                   33.
+        FIOMVUDT   &FLX1IIC in 898..913, non-zero by the above; OR the
+                   overhead constant, which the same rule pins to exactly
+                   1320 = 16.5 x 80, the only multiple of 33 in 1310..1325.
+
+    NOTHING DOWNSTREAM CAN NARROW EITHER, and that is structural rather than a
+    shortage of evidence.  The division happens at ASSEMBLY time, so the object
+    carries only the quotient; FIOPDSMU moves it with LH/STH into FIOIIC(devid)
+    and FIOPDISP stores it in the IOQE as the MSC timeout.  Sixteen inputs
+    produce one halfword and every consumer sees the same halfword.
+
+    THE STATIC TABLE CANNOT HELP EITHER, checked rather than assumed.
+    FIOCBLKS's TFBCD entries for these devices are written (51,(10,11),,16)
+    with the IIC field EMPTY -- TFBCD's own comment says the count is then
+    computed in FIOPDISP -- and TIIC0051, TIIC0052 and TIIC0053 read 0000 in
+    both images.
+
+WHY.  A reader who notices that both files emit the same quantity will try to unify them, as the user did; the arithmetic refuting that is short but not obvious, and the negative result is what stops the next attempt at reconstruction from writing a value into the wrong variable.  The gate asymmetry is the transferable part: I answered from the consumer that cannot see the variable, and the one that can was two files away.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
