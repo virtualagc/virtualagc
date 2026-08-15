@@ -348,11 +348,28 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
         # one sector-encoded ZCON.  The alias is reported, not assumed: nothing
         # here infers it from the names.
         taken = None
-        for address in sorted(common):
-            agreeing = {k: v for k, v in candidates.items() if v[0] == address}
+        # A SITE CARRIES SIXTEEN BITS AND AN ADDRESS MAY NEED MORE, so a
+        # candidate is corroborated when its LOW sixteen match -- and the
+        # candidate's own full address is what gets recorded.  Comparing the
+        # whole value instead made an index above 64K uncorroborable: S2's
+        # FIOG9ADB reads DE90 at its site, G9's index places it at 01DE90, and
+        # `01DE90 == 0xDE90` is false, so the only reading left was the one
+        # basesFrom offers with the sector bit cleared -- 005E90, which a
+        # HALSTAT phase happened to match.  The build points at 01DE90.
+        #
+        # AND THE RAW READING IS TRIED FIRST.  basesFrom offers both the site's
+        # value and that value with bit 15 cleared, and `sorted` put the
+        # cleared one first purely because it is numerically smaller, so the
+        # weaker reading got to claim a candidate before the stronger one
+        # could.  Ordering by how many anchored references imply each puts the
+        # value actually read ahead of the adjustment.
+        for address in sorted(common,
+                              key=lambda a: (-implied.get(a & 0xFFFF, 0), a)):
+            agreeing = {k: v for k, v in candidates.items()
+                        if (v[0] & 0xFFFF) == (address & 0xFFFF)}
             if agreeing:
                 source = sorted(agreeing)[0]
-                taken = (agreeing[source], address,
+                taken = (agreeing[source], agreeing[source][0],
                          f"{len(agreeing)} source(s) corroborate ({source})")
                 break
             alias = startsHere.get(address)
