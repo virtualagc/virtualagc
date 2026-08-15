@@ -3949,11 +3949,27 @@ reference: TWO, in two files, and both are the same shape.
     `DC Y((&LSUM+2508+15)/16)` where LSUM is eight IIC counts from FIOMDPVU.
     The quotient loses four bits outright, and the equation has two unknowns:
     the dump's 252 is satisfied by LSUM in 1509..1524 with the overhead
-    constant unchanged, or by the constant moving instead.  Nothing else in
-    the module constrains either -- &FLX1IIC's only other use anywhere is a
-    test against zero, which FIOMVUPG's matching BCE program already confirms
-    it is not.  FIOMS2DT's &LPFIIC is the same case and 275 declined it for
-    the same reason.
+    constant unchanged, or by the constant moving instead.  FIOMS2DT's
+    `DC Y((&LPFIIC+825+15)/16)` is the same shape: 0074 admits 1016..1031,
+    which is 275's figure and 275's reason for declining it.
+
+    AND THE MODULES ARE NOT SYMMETRICAL, which I got wrong first time.
+    FIOMS2DT emits EIGHT divided constants, one per component -- &HPLIIC,
+    &DUL1..3IIC, &FLX1IIC, &FLX3IIC, &FLX5IIC each on its own -- so its chain
+    is well determined except for the LPF sum.  FIOMVUDT emits exactly ONE,
+    the LSUM line, so its chain has a single equation and two unknowns and
+    nothing else to appeal to.  An earlier draft said &FLX1IIC's only use
+    besides LSUM "anywhere" was a test against zero; that is false, FIOMS2DT
+    line 96 divides it directly.  It is the FIOMDPS2 instance of the global,
+    a separate compilation, and says nothing about FIOMDPVU's 2096 -- so the
+    conclusion is unchanged, but the reason had to be stated per chain rather
+    than per symbol.
+
+    THOSE EIGHT ARE ALSO A CORROBORATION OF 275'S WORK.  FIOMS2DT's nine
+    differing halfwords are eight unattributable references plus the LPF one,
+    so every one of the individual divided constants MATCHES -- which is the
+    zeroed &HPLIIC, &DUL1IIC, &FLX1IIC and &FLX3IIC of the FIOMDPS2 recovery,
+    checked from the emitted side.
 
     TWO NON-ASSEMBLY HALFWORDS ALSO SURVIVE and are not source problems either:
     S2's #PCS2IX5 and #PCS2IX6 differ by one halfword each at the SAME address
