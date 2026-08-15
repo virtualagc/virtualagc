@@ -7,6 +7,9 @@ Purpose:    Recover CSECT addresses that unlinkMAFGEN2 could not, from HALSTAT,
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 
 Usage:      dass-syms.py --config=SSW [--base=F.json] [--out=F.json] [--report]
+            [--entries=DIR[,DIR]]  per-module link JSONs from any sweep, read
+            for the entry points our own objects define; see
+            recoverForeignSymbols
             --base carries a previous augmented table forward; see main().
 
 THE PROBLEM.  csects-XXX.json is incomplete.  A HAL/S COMPOOL whose storage is
@@ -208,6 +211,44 @@ def basesFrom(value, addend, flags, companion=None):
 UNDEFINED_RE = re.compile(r"Undefined (?:symbol|COMPOOL):\s*(\S+?),")
 
 
+def collectEntryPoints(dirs):
+    """symbol -> (section, offset), from the per-module link JSONs of any sweep.
+
+    A name defined at two different offsets is DROPPED rather than guessed at:
+    the whole value of this evidence is that it is unambiguous, and a private
+    label reused in two modules would otherwise place a symbol at whichever
+    sweep happened to be read last.
+    """
+    found, ambiguous = {}, set()
+    for d in dirs:
+        for path in sorted(Path(d).glob("*.json")):
+            if path.name.endswith(".repro.json"):
+                continue
+            try:
+                link = json.load(open(path))
+            except Exception:
+                continue
+            starts = {s["name"]: s["address"]
+                      for s in link.get("sections") or [] if "address" in s}
+            symbols = link.get("symbols")
+            if not isinstance(symbols, list):
+                continue
+            for s in symbols:
+                name, address = s.get("name"), s.get("address")
+                section = s.get("section")
+                if not name or address is None or section not in starts:
+                    continue
+                offset = address - starts[section]
+                if offset < 0:
+                    continue
+                if name in found and found[name] != (section, offset):
+                    ambiguous.add(name)
+                found[name] = (section, offset)
+    for name in ambiguous:
+        found.pop(name, None)
+    return found, len(ambiguous)
+
+
 def collectUndefined(logDir):
     """Every symbol lnk101 reported as undefined, from a sweep's logs."""
     out = set()
@@ -220,7 +261,7 @@ def collectUndefined(logDir):
 
 
 def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
-                          halfword, report):
+                          halfword, report, entryPoints=None):
     """Addresses for symbols this configuration does not contain at all.
 
     A module can SCHEDULE a program that lives in another configuration's
@@ -292,6 +333,29 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
             for field, offset in (e.get("contents") or {}).items():
                 fieldsElsewhere.setdefault(field, {})[f"config {cfg} {section}"] \
                     = (e["start"] + offset, e["end"] - e["start"] - offset + 1)
+
+    # AND MAFGEN'S `contents` IS NOT THE ONLY RECORD OF AN ENTRY POINT.  It
+    # lists only the labels the listing happened to carry -- FIOPDIPG's has
+    # exactly one, FIOBYBSC -- so the lookup above cannot reach FIOPDRSL, which
+    # that same module also exports.  OUR OWN ASSEMBLY KNOWS: a per-module link
+    # JSON names every entry with its section and address, giving (section,
+    # offset), and another configuration's index gives that section's address.
+    # `--entries=DIR` supplies those JSONs, from any sweep.
+    #
+    # STILL NAME-KEYED, which is the whole point.  The offset comes from our
+    # object under the symbol's own name and the base from an index under the
+    # section's own name; no step matches on an address, so the FCMINSSL
+    # coincidence the paragraph above records cannot recur.  Measured over the
+    # eight configurations: 256 entries where this reproduces what the table
+    # already held, 28 where it corrects one the dump contradicts, and none
+    # where it would overwrite a correct entry.
+    for symbol, (section, offset) in (entryPoints or {}).items():
+        for cfg, other in (otherConfigs or {}).items():
+            e = other.get(section)
+            if e and "start" in e and e["end"] - e["start"] >= offset:
+                fieldsElsewhere.setdefault(symbol, {})[
+                    f"config {cfg} {section}+{offset:#x}"] = (
+                        e["start"] + offset, e["end"] - e["start"] - offset + 1)
 
     # Two CSECTs cannot begin at the same address, so an address several
     # symbols derive is one none of them may claim.  S2 has seven distinct #ZP
@@ -645,6 +709,7 @@ def main():
     mafgen = DEFAULT_MAFGEN
     linkDir = "work"
     logDir = "logs"
+    entryDirs = []
     # Accepting a symbol because exactly one HALSTAT phase offers it, with no
     # dump evidence either way, is NOT evidence that the address is right --
     # and it has been shown to supply wrong ones.  #PCSPCLB was rejected in SSW
@@ -678,6 +743,8 @@ def main():
             linkDir = p.partition("=")[2]
         elif p.startswith("--log-dir="):
             logDir = p.partition("=")[2]
+        elif p.startswith("--entries="):
+            entryDirs.extend(p.partition("=")[2].split(","))
         elif p.startswith("--base="):
             base = p.partition("=")[2]
         elif p.startswith("--out="):
@@ -868,12 +935,20 @@ def main():
     # #PCSADAR is one -- SAFACQ's HALSTAT compilation layout marks CSA_DART
     # NONHAL -- so drive the pass from the relocations as well, minus whatever
     # the evidence pass above already accounted for.
+    # Entry points our own objects define, for the pass below.  Any sweep will
+    # do: what is taken from it is a symbol's offset within its own section,
+    # which does not depend on where that section was placed.
+    entryPoints, dropped = collectEntryPoints(entryDirs) if entryDirs else ({}, 0)
+    if entryDirs:
+        print(f"{len(entryPoints)} entry point(s) from {len(entryDirs)} sweep "
+              f"dir(s), {dropped} name(s) dropped as ambiguous")
+
     foreignReport = []
     absent = collectUndefined(logDir) | (set(seen) - set(accepted)
                                          - set(augmented))
     foreign = recoverForeignSymbols(absent, index, phases,
                                     others, relocations, halfword,
-                                    foreignReport) \
+                                    foreignReport, entryPoints) \
               if recoverForeignAddresses else {}
     for symbol, (address, n, why) in foreign.items():
         augmented[symbol] = {"start": address, "end": address + n - 1,
