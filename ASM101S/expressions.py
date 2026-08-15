@@ -1351,12 +1351,22 @@ def evalCharacterExpression(expression, svLocals, properties = { "errors": [] })
 # Check of two quantities are of the same type.  Only supported:
 # int, boolean, string, list of int, list of boolean, list of string.
 # Returns True if different types, False if same type.
+#
+# A DIMENSION IS NOT A TYPE.  Two arrays of the same element type differing
+# only in length used to be reported as a type change, which made a global
+# re-declared at a different size an intolerable error.  BILDNEW5 is where
+# that shows: MACSMITH declares `GBLC ...&T(264),&T2(264)` while TEXT and
+# FAZ2MAC declare the same two globals at (250), and the sequence numbers say
+# why -- MACSMITH's card carries modification level AG and both others AA, so
+# only MACSMITH was re-issued when the tables grew.  596 of BILDNEW5's 2068
+# errors were those two names, every one at severity 255.  Nothing indexes
+# &T past 250 anywhere in that assembly -- `Index out of range: &T` occurs
+# zero times -- so the conflict was declarative noise that aborted a build
+# the original assembler completed.
 def isDifferentType(q0, q1):
     if isinstance(q0, list) and isinstance(q1, list):
-        if len(q0) != len(q1):
-            return True
         return type(q0[0]) != type(q1[0])
-    return type(q0) != type(q1) 
+    return type(q0) != type(q1)
 
 # Declaration of symbolic variables.  The `operation` is a string that's one
 # of "GBLA", ..., "LCLC".  The `operand` string is a comma-separated list
@@ -1415,6 +1425,12 @@ def svDeclare(operation, operand, svLocals, properties = { "errors": [] }):
                 error(properties, \
                       "Attempt to change type of existing symbolic variable %s" \
                       % field)
+            # THE FIRST DECLARATION FIXES THE DIMENSION.  Growing the array to
+            # the largest dimension seen was tried and is WRONG: RUNASM's
+            # VX6S3 then generated 34 mismatched bytes and ran 12 bytes past
+            # the end of its listing, because a longer array is a larger N'
+            # and the data built from it grew to match.  A later declaration
+            # of a different size is accepted in silence and changes nothing.
             continue
         sv[field] = value
 
