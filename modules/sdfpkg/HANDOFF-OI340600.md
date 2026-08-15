@@ -3501,7 +3501,26 @@ modules in scope, and five of them collide with sections G9 already has.
     half.  Run over both, G9 comes to 16 of 1117 -- better than the 18 of 1116
     that stood before either fix.
 
-[why] Two defects in the sixty-three is a better yield than I expected, and both hid the same way: the format tolerated the wrong thing, so only the flight image objected.  The filter gap matters more than either -- it silently cost seventeen sections the moment the object set changed, and it would have been read as a regression from the assembler fixes by anyone who did not check that the regressed sections were compiler output.
+    AND THE SWEEP NOW DOES IT ITSELF.  clc-sweep.py runs csect-collisions.py
+    and obj-sections.py over its own output and writes
+    `<work>/clc-<config>-linkable`, saying how many sections it withheld;
+    --no-filter turns it off.  The per-module comparison is unaffected either
+    way, since each module is linked by itself against the table, and the
+    unfiltered directory is left alone.  Verified: the set the sweep produces
+    links to 16 of 1117 on G9, identical to the hand-filtered set.
+
+MEASURED, ALL THREE, with both assembler fixes and both halves filtered.
+Nothing is worse anywhere:
+
+                    before            after         fixed
+        G9      18/1116, 132 hw   16/1117, 130 hw   FCMNINIT, FIOADCCL
+        S2      19/1090, 637 hw   18/1091, 635 hw   FCMNINIT
+        SSW     29/570,  484 hw   28/570,  482 hw   FCMNINIT
+
+    FIOADCCL clears only in G9 because there it had ONE differing halfword,
+    the FIOIPR one; S2 carries 179 in that section for unrelated reasons.
+
+WHY.  Two defects in the sixty-three is a better yield than I expected, and both hid the same way: the format tolerated the wrong thing, so only the flight image objected.  The filter gap matters more than either -- it silently cost seventeen sections the moment the object set changed, and it would have been read as a regression from the assembler fixes by anyone who did not check that the regressed sections were compiler output.  It is now the sweep's job rather than a habit.
 
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
