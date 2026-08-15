@@ -283,6 +283,44 @@ normally a bare symbolic variable such as &A that's an element of an AST, so
 what we want to "replace" it with is really itself an AST.
 '''
 svPattern = re.compile("(?<!&)&[A-Z#$@][A-Z#$@0-9]*(?![#@_$A-Z0-9])")
+# WHETHER A MACRO MAY SEE A GLOBAL, which is only where it declared GBLx
+# itself, plus the two the ASSEMBLER seeds rather than the source.
+#
+# svGlobals is one dictionary for the whole assembly, so before this a name
+# declared GBLx ANYWHERE was visible EVERYWHERE, and a macro that never
+# mentioned the name still found it.  BILDNEW5 is where that shows: MACSMITH
+# declares `GBLC ...&L(264)...`, POS declares only &LA and &TA and then uses
+# &L as a scalar, and POS was handed MACSMITH's 264-element array.  &L then
+# never took a value, `AIF (&L GE 0)` could not be evaluated, and XPOS was
+# passed the literal text `-&L`, reaching the DC parser as `FL.11'-&L'`.
+# MENU12 is the control: it invokes POS 23 times and assembles clean, because
+# it does not COPY MACSMITH and so nothing declares the global.  The
+# as-received MLIB80/POS declares &LA,&TA and no &L either, so this is what
+# the original assembler did rather than a defect in our copy.
+#
+# THIS DOES NOT COLLAPSE GBLx INTO LCLx.  They still denote different storage
+# -- GBLx binds the name to one shared cell that persists across invocations
+# and is seen by every macro declaring it, LCLx makes a fresh cell per
+# invocation.  Only reaching the shared cell now requires saying so.
+#
+# THE TWO EXEMPTIONS ARE NOT A CONVENIENCE.  &SYSPARM is a system variable
+# symbol, available without declaration by definition, and RUNASM's ACOSH is
+# the module that proves it: with the exemption missing it went from 0 bytes
+# mismatched to 59.  &ASM101S is seeded here deliberately so a source file can
+# write `AIF (&ASM101S)` with no declaration -- the whole gated-RTL-fix
+# mechanism depends on reading it bare, and --no-rtl-fixes flips it.
+GLOBALS_DECLARED = "_globalsDeclared"
+SV_ASSEMBLER_SEEDED = frozenset(("&SYSPARM", "&ASM101S"))
+
+
+def svGlobalVisible(name, svLocals):
+    if name not in svGlobals:
+        return False
+    if name in SV_ASSEMBLER_SEEDED:
+        return True
+    return name in svLocals.get(GLOBALS_DECLARED, ())
+
+
 def svReplace(properties, text, svLocals):
     global svGlobals
     
@@ -330,7 +368,7 @@ def svReplace(properties, text, svLocals):
         sv = ast["sv"][0]
         if sv in svLocals:
             replacement = svLocals[sv]
-        elif sv in svGlobals:
+        elif svGlobalVisible(sv, svLocals):
             replacement = svGlobals[sv]
         else:
             return start, end, None
@@ -590,7 +628,7 @@ def evalArithmeticExpression(expression, \
         sv = None
         if expression in svLocals:
             sv = svLocals
-        elif expression in svGlobals:
+        elif svGlobalVisible(expression, svLocals):
             sv = svGlobals
         if sv != None:
             sv = sv[expression]
@@ -643,7 +681,7 @@ def evalArithmeticExpression(expression, \
         arrayName = expression[0]
         if arrayName in svLocals:
             arrayData = svLocals[arrayName]
-        elif arrayName in svGlobals:
+        elif svGlobalVisible(arrayName, svLocals):
             arrayData = svGlobals[arrayName]
         else:
             error(properties, "Cannot find %s" % arrayName)
@@ -720,7 +758,7 @@ def evalArithmeticExpression(expression, \
             symvar = symvar[0]
         if symvar in svLocals:
             sv = svLocals
-        elif symvar in svGlobals:
+        elif svGlobalVisible(symvar, svLocals):
             sv = svGlobals
         elif op == "L'" and indices == None:
             # L' OF A PROGRAM SYMBOL, not of a symbolic variable.  This branch
@@ -913,7 +951,7 @@ def attributeOperand(properties, operand, svLocals):
         return False, "", False
     if name in svLocals:
         value = svLocals[name]
-    elif name in svGlobals:
+    elif svGlobalVisible(name, svLocals):
         value = svGlobals[name]
     else:
         return False, "", False
@@ -1115,7 +1153,7 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
             # is performed, but it should be okay here anyway.
             if expression in svLocals:
                 return svLocals[expression]
-            elif expression in svGlobals:
+            elif svGlobalVisible(expression, svLocals):
                 return svGlobals[expression]
             else:
                 error(properties, "Not defined: %s" % expression)
@@ -1136,7 +1174,7 @@ def evalBooleanExpression(expression, svLocals, properties = { "errors": [] }):
         sv = expression[0]
         if sv in svLocals:
             scope, what = svLocals, "local"
-        elif sv in svGlobals:
+        elif svGlobalVisible(sv, svLocals):
             scope, what = svGlobals, "global"
         else:
             error(properties, \
@@ -1370,6 +1408,8 @@ def svDeclare(operation, operand, svLocals, properties = { "errors": [] }):
                 continue
             field = subfields[0]
             value = [value] * n
+        if operation.startswith("GBL"):
+            svLocals.setdefault(GLOBALS_DECLARED, set()).add(field)
         if field in sv:
             if isDifferentType(sv[field], value):
                 error(properties, \
@@ -1449,7 +1489,7 @@ def svSet(operation, name, operand, svLocals, properties = { "errors": [] }):
     sname = pname["sv"][0]
     if sname in svLocals:
         sv = svLocals
-    elif sname in svGlobals:
+    elif svGlobalVisible(sname, svLocals):
         sv = svGlobals
     elif "exp" not in pname:
         # The (non-arrayed) SET symbol that's the target of the SETx operation
