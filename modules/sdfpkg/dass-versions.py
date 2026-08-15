@@ -507,6 +507,33 @@ def main():
             for address, name in sorted(entries):
                 f.write(f"{address:05X} -1 {name}\n")
 
+        # Locations the RUNNING system overwrote, from mafgen/runtime-overlay.txt.
+        # Not a defect on either side: the source assembles to what the build
+        # loaded and the dump was taken after something ran over it.  FIOGPSPG's
+        # BCE bypass is the case -- the source labels the very sites "OVERLAID
+        # BY BCE BYPASS CODE" -- and MAFGEN does not mark them with '*', so
+        # dass-literals.py cannot find them and they have to be curated.
+        #
+        # A VALUE, NOT A MARKER.  fcmcmp honours one of these only where the
+        # dumped image really holds that value and calls the file stale if it
+        # does not, so the claim checks itself; a marker could not be caught if
+        # it were wrong.  Same format and same reviewability as defects.txt.
+        overlay = mafgen / "runtime-overlay.txt"
+        orows = []
+        if overlay.is_file():
+            for line in open(overlay, errors="replace"):
+                if line.lstrip().startswith("#"):
+                    continue
+                fields = line.split()
+                if len(fields) >= 3 and fields[0] == config:
+                    orows.append((int(fields[1], 16), fields[2],
+                                  " ".join(fields[3:])))
+        if orows:
+            f.write("\n# Locations the running system overwrote; see "
+                    "mafgen/runtime-overlay.txt for the evidence.\n")
+            for address, value, note in sorted(orows):
+                f.write(f"{address:05X} {value} {note}\n")
+
     print(f"{config}: {len(acted)} unit(s) revised since our source, "
           f"{len(entries)} halfword(s) recorded as no-claim -> {out}")
     for stem, ours, theirs, n in sorted(acted, key=lambda r: -r[3]):
