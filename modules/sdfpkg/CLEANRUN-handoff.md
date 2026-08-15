@@ -2,17 +2,24 @@
 
 ## WHERE IT ACTUALLY STANDS, end of 2026-08-14
 
-    G9   13/1117      S2   17/1090      SSW  28/570
+    G9   11/1117      S2   13/1090      SSW  26/570
 
 Excluding halfwords whose only fault is an unattributable memory reference,
-**7 halfwords in 5 files** remain — see handoff entry 278 for the table and
-what each one is.  Entries 265-278 carry this phase; read 269 (what is open),
-272 (the two exceptions files) and 278 (what is left) first.  276, 277 and 278
-close the three items this file used to list as pending: the exceptions are
-generated again, every section whose size differs from the CSECT table has been
-checked against the build's own compiler, and FIOMS2PG's thirteen turned out to
-be references into a COMPOOL our source has at the earlier revision — as did
-FCMBMTG9's one and FIOMVUPG's two, which is why the counts above moved.
+**2 halfwords in 2 files** remain — FIOMVUDT in G9 and FIOMS2DT in S2, both a
+division by 16 that cannot be inverted.  Entries 265-279 carry this phase; read
+269 (what is open), 272 (the two exceptions files) and 279 (what is left)
+first.  276 to 279 close everything this file used to list as pending: the
+exceptions are generated again, every size row is checked against the build's
+own compiler, FIOMS2PG's thirteen and five more are references into COMPOOLs
+our source has at an earlier revision, FIOCBLKS and FIOPBYG9 are recovered as
+OI340700 source, and FIOPDISP was our own table placing FIOCHECK wrongly.
+
+    THE ARTIFACTS FOR THAT LAST STATE are `$SP/vers/<CFG>-v2.{fcm,json}`,
+    tables `$SP/vers/augmented-<CFG>-v2rule.json`, objects
+    `$SP/vers/objs-<CFG>/`.  The link command is RECONSTRUCTED from the
+    earlier run's repro JSON and its object order differs, so the .fcm md5s do
+    not match the runs above; the control arm reproduces their comparison
+    exactly, 13/1117, 17/1090 and 28/570 with the same FAIL lists.
 
 THE ARTIFACTS THIS STATE WAS MEASURED FROM, all under
 `$SP/clean` where SP is the scratch root named below:

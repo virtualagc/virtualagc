@@ -3855,6 +3855,113 @@ reference -- SEVEN halfwords in FIVE files, from 23 in 8:
 
 WHY.  I set out to fix thirteen halfwords in an assembly source and there was nothing in the assembly source to fix.  The tell was that the CSECT table already carried the dump's thirteen values -- the build's own answer, sitting in an artifact we generate every run -- so the question was never what FIOMS2PG emits but why our link preferred a definition from a COMPOOL at the wrong revision.  The lesson that generalises is the second one: an evidence rule keyed on an ADDRESS fails exactly where a size changed, and a rule keyed on the NAME the linker recorded does not.
 
+THE REMAINING FIVE FILES, AND FOUR OF THE SEVEN HALFWORDS TURNED OUT TO BE
+THREE DIFFERENT KINDS OF THING.  278 left FIOCBLKS, FIOPBYG9, FIOMVUDT,
+FIOMS2DT and FIOPDISP.  Two are genuine OI-34.07 source, one is a defect in our
+own CSECT table, and two are arithmetic that cannot be inverted.
+
+FIOCBLKS: A BUS LIST, AND AN OLDER RELEASE SETTLES THE DIRECTION.  The one
+halfword is TBCD0078, the FIOBCD entry for device ID 78, the GPS operational
+transaction.  TFBCD emits one 32-bit word per device with bit N set for bus N,
+and all three dumps hold 0000 0E00 -- busses 20, 21 and 22 -- where our source's
+`(78,(21),162,FIOGPSOP)` assembles 0000 0400.
+
+    THE ENCODING IS NOT IN DOUBT: the neighbours agree on both sides,
+    (77,(17,23)) giving 4100 and (79,(20,21,22)) giving the same 0E00 this
+    entry wants.  Nor is the direction guessed.  OI301700's source is held as
+    an expanded assembly listing and its own TBCD0078 reads
+    B'00000000000000000000010000000000' -- 0400, bus 21.  Two releases either
+    side of ours agree, so the change is OI-34.07's.
+
+    IT READS AS GPS GAINING THE OTHER TWO FLIGHT-CRITICAL BUSSES, which is the
+    same picture the dumps give from another direction: FIOGPSPG's commander
+    programs are overlaid by BCE bypass branches in the running system (259,
+    270, runtime-overlay.txt).  GPS was in flux in that release.
+
+FIOPBYG9: THE PERMANENT GPS BYPASS IS GONE, and that is the same story again.
+FIOPBYG9 is one line, `FIOPBYMC G9`, and the macro's G9 branch sets
+WORD0SL EQU GPS, X'0500'.  The G9 dump holds 0000 there.  The rest of the
+twelve-halfword table confirms we are reading the right branch: WORD0H is 000E
+which is IMUMFE, WORD1L is 0FC0 which is EIUHFE, both matching.  S2 and SSW
+place their own variants at the same address and both already match, so this
+is a G9-only fact with a single dump behind it -- weaker evidence than
+FIOCBLKS's three, and recorded as such in the file.
+
+    OI301700'S COPY OF THE MACRO IS IDENTICAL, GPS AND ALL.  So a release that
+    bypassed GPS permanently stopped doing so, while the same dumps show it
+    being bypassed dynamically instead.  The two recoveries agree.
+
+    Both are in PFS/OI340700 now, with the history and a RECOVERED block at
+    the change, per the convention FIOMDPS2 set.  FIOCBLKS's note sits above
+    the TFBCD call rather than beside the line: the call is one continued
+    statement and a comment card inside it would end the continuation.
+
+FIOPDISP: OUR TABLE WAS WRONG, NOT OUR SOURCE, and the mechanism is 274's
+exactly.  The site is `CALL FIOCHECK` and the dump holds EA82 where we write
+6A82 -- the same value with bit 15 cleared.  S2's augmented table defines
+FIOCHECK as a SECTION at 0x6A82, `inConfig: false`, spanOwner #DPU4MUP.
+Nothing supports that: S2's map never mentions FIOCHECK, HALSTAT has no such
+symbol anywhere, and the published table does not carry it.  The `--report`
+says where it came from -- "1/1 anchored references imply 0x06a82, #DPU4MUP
+begins there in this configuration" -- which is the weak fallback rule firing
+on the ADJUSTED reading after the raw one found nothing.
+
+    THE RIGHT ANSWER WAS ON DISK IN THE PUBLISHED INDEX.  FIOCHECK is an ENTRY
+    POINT of FIOPDHF, which six configurations place at 0x1EA82, and
+    csects-G9.json records it: `FIOPDHF.contents` lists FIOCHECK at offset 0.
+    recoverForeignSymbols looked the symbol up only as a SECTION NAME, so it
+    could not see one level down.  It does now.
+
+    AND THE EXISTENCE TEST WAS THE WRONG FIX, MEASURED BEFORE IT WAS KEPT.  My
+    first version asked instead which addresses some section begins at in some
+    configuration and matched the site's low sixteen bits against that, with no
+    names involved.  It places FIOCHECK correctly -- and also hands FCMINSSL
+    0x16FBC, because S2's A3RASAUT happens to begin there, which is meaningless.
+    It wrote EFBC into FCMPSA where the dump holds 6FBC, in G9 and SSW both.
+    The name-keyed version cannot do that: FCMINSSL is not a field of anything.
+
+MEASURED, all three configurations, each linked twice from the same objects
+with tables differing only in this pass.  NO SECTION IS WORSE ANYWHERE:
+
+                  sections        halfwords      newly closed
+        G9      13 -> 11        119 -> 110       FIOMGCV, FIOPBYG9
+        S2      17 -> 13        608 -> 527       FCMBCEMD, FIOCMPLT,
+                                                 FIOERRLC, FIOMGCV
+        SSW     28 -> 26        474 -> 424       FIOERRLC, FIOMGCV
+
+    The entry-point corroboration is most of it: 6 new addresses in G9, 57 in
+    S2, 29 in SSW, all of them symbols the table previously left undefined.
+    FIOPDHF alone goes 35 halfwords to 14 in SSW.
+
+    THE LINK COMMAND IS RECONSTRUCTED, and the images are not byte-identical to
+    the ones 276 measured -- the object order differs.  The CONTROL arm
+    reproduces those runs' comparison exactly, 13/1117, 17/1090 and 28/570 with
+    the same FAIL lists, so the arms are comparable to each other and to the
+    record; the .fcm md5s are not.
+
+WHAT IS LEFT, excluding halfwords whose only fault is an unattributable memory
+reference: TWO, in two files, and both are the same shape.
+
+        FIOMVUDT  G9  0A1DB  ours 0146  dump 00FC
+        FIOMS2DT  S2  0A1E1  ours 008E  dump 0074
+
+    BOTH ARE A DIVISION BY 16 AND NEITHER CAN BE INVERTED.  FIOMVUDT emits
+    `DC Y((&LSUM+2508+15)/16)` where LSUM is eight IIC counts from FIOMDPVU.
+    The quotient loses four bits outright, and the equation has two unknowns:
+    the dump's 252 is satisfied by LSUM in 1509..1524 with the overhead
+    constant unchanged, or by the constant moving instead.  Nothing else in
+    the module constrains either -- &FLX1IIC's only other use anywhere is a
+    test against zero, which FIOMVUPG's matching BCE program already confirms
+    it is not.  FIOMS2DT's &LPFIIC is the same case and 275 declined it for
+    the same reason.
+
+    TWO NON-ASSEMBLY HALFWORDS ALSO SURVIVE and are not source problems either:
+    S2's #PCS2IX5 and #PCS2IX6 differ by one halfword each at the SAME address
+    0x4ABD, because our #PCS2IX5 is 196 halfwords where the map allows 136 and
+    runs over its neighbour.  277 confirmed that size against the compiler.
+
+WHY.  Seven halfwords, and only two of them were what the table said they were: two were OI-34.07 source, one was a defect in an artifact we generate, and two are genuinely not recoverable.  The FIOCHECK case is 274 repeating -- a wrong address adopted from an adjusted reading, silent because a wrong definition links cleanly -- and the fix that worked is the one that uses a NAME the published index already records.  The fix that did not work is worth keeping in the record: an existence test over addresses looks principled and quietly accepts coincidences, and only measuring it showed that.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.

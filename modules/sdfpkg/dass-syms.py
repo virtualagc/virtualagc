@@ -269,6 +269,30 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
         if "start" in e:
             startsHere.setdefault(e["start"], name)
 
+    # A SYMBOL MAY BE AN ENTRY POINT INSIDE A SECTION RATHER THAN A SECTION,
+    # and looking it up only as a section name misses it entirely.  S2's
+    # FIOCHECK is the case: it is FIOPDHF's entry, FIOPDHF is absent from S2,
+    # and the six configurations that do contain it place it at 0x1EA82 with
+    # FIOCHECK at offset 0 -- which the INDEX ITSELF records, in `contents`.
+    # So this is the same name-keyed corroboration as the lookup below, one
+    # level down, and not a new kind of evidence.
+    #
+    # AN EXISTENCE TEST WOULD NOT DO.  Asking instead which addresses some
+    # section begins at in some configuration, and matching the site's low
+    # sixteen bits against that, does place FIOCHECK correctly -- and also
+    # hands FCMINSSL 0x16FBC because S2's A3RASAUT happens to begin there,
+    # which is meaningless and is exactly the coincidence the #ZP paragraph
+    # above warns of.  Measured: it wrote EFBC into FCMPSA where the dump
+    # holds 6FBC, in G9 and SSW both.
+    fieldsElsewhere = {}
+    for cfg, other in (otherConfigs or {}).items():
+        for section, e in other.items():
+            if "start" not in e:
+                continue
+            for field, offset in (e.get("contents") or {}).items():
+                fieldsElsewhere.setdefault(field, {})[f"config {cfg} {section}"] \
+                    = (e["start"] + offset, e["end"] - e["start"] - offset + 1)
+
     # Two CSECTs cannot begin at the same address, so an address several
     # symbols derive is one none of them may claim.  S2 has seven distinct #ZP
     # symbols whose lone references each derive 0x298 -- where #ZSMNCLN really
@@ -299,6 +323,7 @@ def recoverForeignSymbols(undefined, index, phases, otherConfigs, relocations,
             if e and "start" in e:
                 candidates[f"config {name}"] = (
                     e["start"], e["end"] - e["start"] + 1)
+        candidates.update(fieldsElsewhere.get(symbol, {}))
         for phase, d in phases.items():
             if symbol in d:
                 candidates[f"HALSTAT phase {phase}"] = d[symbol]
