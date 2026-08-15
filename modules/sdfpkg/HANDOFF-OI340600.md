@@ -4169,6 +4169,159 @@ MEASURED, full-configuration links, PFS 8288b177:
 
 WHY.  Two entries ago this was 'a division by 16 cannot be inverted, and that is structural rather than a shortage of evidence'.  It was a shortage of evidence, and the missing piece was a physical constant in a document we already had: 28 bits at a microsecond a bit, plus a 5-microsecond gap.  The lesson is that 'information-theoretically lost' is a claim about the input distribution as much as the arithmetic -- the inputs were never dense in the integers, they were on a 16.5 grid, and eleven independent values said so.  What is left ambiguous is a different thing entirely, a choice between two terms of a sum, and no quantum can settle that.
 
+ALL EIGHT MEMORY CONFIGURATIONS ARE NOW ASSEMBLED, LINKED AND COMPARED, and no
+assembly-language halfword with an attributable cause is left in any of them.
+The phase had reached G9, S2 and SSW; P9, G8, G2, G3 and G16 went through the
+same pipeline on 2026-08-15.
+
+        cfg   sections   differing halfwords   table that produced it
+        P9      10/578          331            rebuilt + entries
+        SSW     22/570          320            rebuilt + entries
+        G8       8/1124         357            rebuilt + entries
+        G2       8/1311         357            rebuilt + entries
+        G3       8/1524         357            rebuilt + entries
+        G16      8/1716         351            rebuilt + entries
+        G9      11/1117         109            accumulated
+        S2      13/1090         526            accumulated
+
+    The only attributable residue anywhere is S2's #PCS2IX5 and #PCS2IX6, one
+    halfword each at the SAME address, where our #PCS2IX5 is 196 halfwords
+    against the map's 136 and runs over its neighbour.  Compiled COMPOOLs, not
+    assembly.  Everything else differing is a reference to a module its own
+    configuration does not contain.
+
+THE PIPELINE, per configuration, and every step matters: sweep -> dass-syms
+-> csect-disambig -> dass-fields -> collision filter over BOTH object sets ->
+link -> dass-fields --mark from that link -> relink -> dass-versions --asm-link
+-> compare.  `$SP/five/run-config.sh` is the script.
+
+    THE HAL/S OBJECTS COME FROM ~/ForClaude/OI340600-clc/<CFG>work1, which
+    already held a compile for all eight from the 2026-08-08 verification run.
+    Nothing had to be recompiled on that side, which is why only the assembly
+    half of the corpus was ever the open work.
+
+VERSION PINNING, WHICH THE USER ASKED FOR FIRST AND WAS RIGHT TO.  `lnk101` and
+`fcmcmp` on PATH are an editable install importing from whatever is CHECKED OUT
+in ~/donschmidt/nsts-sdl-dps/src, and that checkout was missing PR #37.  A
+detached worktree at origin/master + PR36 + PR37 + PR38 ($SP/lnkall), selected
+by PYTHONPATH, gives one version for all eight without touching their checkout.
+
+    VERIFIED THREE WAYS: its own suite (71 passed, 9 skipped against master's
+    61, so the three PRs add 10 tests and break none); the single failure,
+    test_csect_table_size_mismatch, fails identically on upstream master and is
+    a stale assertion against ce12d33's deliberate exit-status change; and
+    functionally, by reproducing G9 11/1117, S2 13/1090 and SSW 26/570 exactly
+    before anything new was run.
+
+WHAT THE FIVE NEW CONFIGURATIONS CONTRIBUTED BEYOND THEIR OWN NUMBERS, which
+is the part worth keeping.  Three earlier recoveries turned out to be general:
+
+    THE GPS PERMANENT BYPASS is a release-wide OI-34.07 change, not a G9
+    peculiarity.  Every FIOPBYMC branch naming GPS loses exactly X'0500' and
+    lands on a constant the macro already defines -- TRY02 and TRY38
+    EIUMFGPS -> EIUMFE, TRY16 STUGPS -> STU -- witnessed by five dumps, with
+    the three configurations whose branch carries no GPS bit unaffected.  All
+    six variants now assemble to their own dump.  PFS c491556f.
+
+    THE FIOGPSPG BCE BYPASS is byte-identical in SIX configurations, not two:
+    same eight addresses, same C044/C000 from us, same F001/DDxx overlaid.
+    PFS 21976a08 adds G2, G3, G8 and G16 to runtime-overlay.txt, taking each
+    from 10 failing sections to 9.
+
+    AND THE FIOCHECK-CLASS TABLE DEFECT affects four more configurations,
+    which is what produced dass-syms --entries; see 284.
+
+TWO FAULTS OF MINE, both caught by measurement rather than by reading:
+
+    I CHANGED FIOPBYMC WHILE THE BATCH WAS RUNNING, so G8's and G2's sweeps
+    carried the old macro and G3's and G16's the new one -- the very
+    version-mixing this session was meant to avoid, arriving from the source
+    side rather than the tool side.  Repaired by re-assembling and re-linking
+    all five to one vintage.
+
+    AND THE REFRESH SCRIPT THAT REPAIRED IT ADDED FIOPBYTB.obj to
+    configurations that never contained it, because it re-assembled every
+    module that COPYs the macro and its "did the object change" test treats a
+    missing old object as a change.  Three counts moved UP by one, which is
+    how it was noticed.  A configuration's object set is what its SWEEP
+    produced; adding to it is not a refresh.
+
+WHY.  The corpus goal was both PASS versions and all their configurations; this closes the OI340600 half of it.  What the last five contributed was not their own numbers but the generalisation of three recoveries that had rested on one or two dumps each -- the GPS bypass especially, which looked like a G9 quirk and is a release-wide change.  The two faults are recorded because both were version-mixing, the thing the session set out to avoid, arriving from directions I had not guarded: one from editing a source mid-run, one from a repair script that added an object rather than refreshing one.
+
+OUR OWN OBJECTS KNOW WHERE AN ENTRY POINT IS, AND THE INDEX MOSTLY DOES NOT.
+279 taught recoverForeignSymbols to corroborate a symbol that is an ENTRY
+inside another configuration's section, using MAFGEN's `contents`.  That
+reaches FIOCHECK and stops there, because `contents` lists only the labels the
+listing happened to carry: FIOPDIPG's has exactly ONE, FIOBYBSC, and the module
+also exports FIOPDRSL.  So four configurations placed FIOPDRSL at 0x66EE --
+0x1E6EE with bit 15 cleared, 274's signature again -- and FIOADCCL differed by
+one halfword in each.
+
+    A PER-MODULE LINK JSON NAMES EVERY ENTRY with its section and address, so
+    it gives (section, offset); another configuration's index gives that
+    section's address.  `dass-syms.py --entries=DIR[,DIR]` reads those JSONs
+    from any sweep.  STILL NAME-KEYED AT BOTH STEPS -- the offset under the
+    symbol's own name, the base under the section's own name -- so nothing
+    matches on an address and 279's FCMINSSL coincidence cannot recur.  A name
+    defined at two different offsets is dropped: 2757 unambiguous entry points
+    over eight sweeps, 547 dropped.
+
+PROTOTYPED BEFORE IT WAS WRITTEN, at the user's instruction, and the prototype
+earned its keep twice.  Against the entries the tables already held:
+
+        256   the rule REPRODUCES what the table has
+         28   the rule CORRECTS one the dump contradicts
+          0   the rule would overwrite a correct one
+
+    Every one of the 28 restores a cleared high bit rather than pointing at a
+    different symbol, which is exactly how it differs from the existence test.
+
+    AND THE PROTOTYPE UNDER-PREDICTED THE GAIN BY A FACTOR OF THIRTY, because
+    it only asked what the rule does to entries ALREADY in the table.  Most of
+    the effect is symbols that had no entry at all: G8 goes from 4 recovered
+    foreign symbols to 358, and the existing corroboration gate holds every
+    one.  A prototype scoped to the case that motivated it will do that.
+
+MEASURED, identical chains, only the flag differing.  Better in five, neutral
+in three, WORSE IN NONE:
+
+        G8   9/1124 -> 8/1124   391 -> 357 halfwords, FCMBCEMD closes
+        G2   9/1311 -> 8/1311
+        G3   9/1524 -> 8/1524
+        G16  9/1716 -> 8/1716
+        SSW  24/570 -> 22/570
+        G9, S2, P9   unchanged
+
+    G9'S APPARENT 11 -> 18 WAS NOT THIS, and a control arm is the only reason
+    that is known.  Running the same chain with the flag REMOVED gives 18 too.
+    The loss belongs to rebuilding G9's table from the PUBLISHED base instead
+    of carrying its accumulated one forward.
+
+NEITHER BASE DOMINATES, which is 273's bootstrap property showing its other
+edge.  A table accumulated over passes holds entries a fresh regeneration never
+re-derives; a fresh regeneration with new evidence finds entries the
+accumulation never had.
+
+        G9    accumulated 11/1117   rebuilt 18/1117   base+entries 12/1116
+        S2    13/1090 by every route
+        SSW   accumulated 26/570    rebuilt 22/570    base+entries 22/570
+
+    So `--base=<accumulated> --entries=...` matches the best for S2 and SSW and
+    is one section worse for G9, where FCMTBLG9 flips to FAIL and FCMTBLPG
+    leaves scoring altogether.  There is no uniform recipe, and the tables
+    above name which one produced each figure rather than pretending there is.
+
+    A MARK-ORDERING TRAP INSIDE THAT EXPERIMENT, worth recording because it
+    cost two sections and looked like a result.  dass-fields --mark reads a
+    full-configuration link to ask whether the build patched each site; a link
+    made WITH the marks has already withheld exactly those definitions, so the
+    pass finds nothing to mark and reports 0.  An accumulated --base carries
+    marks, so the link fed to --mark must have them stripped first.  Before
+    that fix G9 read 13/1116 with #DDPLLIG unmarked; after it, 12/1116 with
+    #DDPLLIG marked.
+
+WHY.  Two lessons outlast the rule.  A prototype scoped to the case that motivated it will under-predict: mine looked only at entries already in the table and missed thirty times the gain, which sat in symbols that had none.  And an apparent regression must get a control arm before it is believed -- G9's 11 to 18 would have been recorded as the rule's fault, and it belongs to the table base, which in turn is the finding that neither base dominates.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.

@@ -1,6 +1,27 @@
-# Resuming the clean runs (G9, S2, SSW) — written 2026-08-14
+# Resuming the clean runs — written 2026-08-14, all eight configurations 2026-08-15
 
-## WHERE IT ACTUALLY STANDS, end of 2026-08-14
+## WHERE IT ACTUALLY STANDS, end of 2026-08-15
+
+    P9   10/578    SSW  22/570    G8    8/1124   G2    8/1311
+    G3    8/1524   G16   8/1716   G9   11/1117   S2   13/1090
+
+**ALL EIGHT CONFIGURATIONS ARE DONE**, and entry 283 carries the table above
+with the artifact paths.  The five that were outstanding — P9, G8, G2, G3,
+G16 — went through the same pipeline on 2026-08-15; `$SP/five/run-config.sh`
+is the script and `$SP/five/` holds their artifacts.
+
+    USE ONE TOOL VERSION.  `lnk101` and `fcmcmp` on PATH import from whatever
+    is CHECKED OUT in ~/donschmidt/nsts-sdl-dps/src, so the running version
+    follows their branch.  `$SP/lnkall` is a detached worktree at
+    origin/master + PR36 + PR37 + PR38; select it with
+    `PYTHONPATH=$SP/lnkall/src` and their checkout is untouched.  It
+    reproduces G9 11/1117, S2 13/1090 and SSW 26/570 exactly.
+
+    NEITHER TABLE BASE DOMINATES, so the figures above do not come from one
+    recipe: G9 and S2 are their accumulated tables, the other six are rebuilt
+    with `dass-syms --entries`.  Entry 284 has the measurements and says why.
+
+## WHERE THE THREE STOOD, end of 2026-08-14
 
     G9   11/1117      S2   13/1090      SSW  26/570
 
