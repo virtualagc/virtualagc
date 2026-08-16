@@ -171,18 +171,40 @@ meaningfully de-risks Stage 3 below — it's no longer gated on an unknown
 compiler-side fix, just on writing the C-side (or shelling out to the
 Python) integration once this stage actually starts.
 
-**Update (Stage 3 implementation): SDF turned out not to work — SRN is
-never populated by this toolchain.** Compiling `HELLO.hal` without
-`NOTABLES` and loading the resulting SDF directly via `modules/sdf` +
-`modules/sdfpkg` (bypassing the `MONITOR(22)`/`COMMTABL` emulation layer
-by driving `cmem`'s mode-0/mode-4 init/select calls directly, then
-calling `sdf.parseSDF()` against the result) confirmed the SDF loads and
-parses cleanly, and `statementIndexTable` is populated with 14 real
-per-statement entries — but every entry's `srn` field comes back as six
-EBCDIC blanks (`b'@@@@@@'`). This is a real gap in this project's
-Python-ported HAL/S compiler (`HAL_S_FC.py`), not a parsing bug on this
-side: the field is written, just never filled in. Given that, SDF was
-dropped as Stage 3's data source.
+**Update (Stage 3 implementation): SDF was dropped as Stage 3's data
+source — but not for the reason first recorded here.** Compiling
+`HELLO.hal` without `NOTABLES` and loading the resulting SDF directly via
+`modules/sdf` + `modules/sdfpkg` (bypassing the `MONITOR(22)`/`COMMTABL`
+emulation layer by driving `cmem`'s mode-0/mode-4 init/select calls
+directly, then calling `sdf.parseSDF()` against the result) confirmed the
+SDF loads and parses cleanly, and `statementIndexTable` is populated with
+14 real per-statement entries — but every entry's `srn` field came back as
+six EBCDIC blanks (`b'@@@@@@'`).
+
+**Correction (2026-07-30, commit `4467cfa54`): that blank field was not a
+compiler-port gap, and it was never the field to key off anyway.** The
+SDF's `srn` is the *source* SRN, source columns 73–78, which is a
+different and far less reliable thing than the **HAL/S statement
+number** — the 1-based position within `statementIndexTable`, restarting
+at 1 in each SDF. It came back blank simply because `HELLO.hal` carries
+nothing in columns 73–78, not because `HAL_S_FC.py` fails to fill it in.
+A source that does use SRNs populates it.
+
+The practical consequence is small, because the route actually taken was
+right all along: `pass1.rpt`'s leftmost column already **is** the HAL/S
+statement number. It was merely mislabelled `srn` throughout
+(`tools/gen_source_map.py`, `src/sourcemap.h`/`.c`, `src/debugger.c`,
+`test/fixtures/hello.srcmap.json`), and has been renamed to `stmt` with no
+change in logic and no test disturbed.
+
+One real bug hid behind the mislabelling. When a source *does* populate
+columns 73–78, `pass1.rpt` prints the SRN as an **extra leading column**
+ahead of the statement number — `000010    1 M|…` rather than
+`     1 M|…` — which `parse_pass1()`'s anchored regex did not allow for.
+It would not have mislabelled such a file; it would have matched nothing
+and silently dropped every statement line in it. Fixed with an optional
+non-capturing leading digit-run, verified against real SRN-bearing lines,
+with the existing no-SRN fixture unchanged.
 
 **What was used instead: `pass1.rpt`/`pass2.rpt` text reports.**
 `pass1.rpt`'s per-statement listing lines (`SRN M|SOURCE_TEXT|SCOPE`)
@@ -234,14 +256,48 @@ indeed keyed by compilation-unit name the same way the linker's own
 `module` field already is — worth confirming directly against a
 multi-unit compile's own set of SDFs when this stage begins.
 
-**Update (Stage 3 implementation): still open.** The reasoning above was
-built around SDF's own "member" concept, which is moot now that SDF
-isn't used at all (see the pivot noted above). `tools/gen_source_map.py`
-as implemented only handles a single-module compile — one `pass1.rpt`/
-`pass2.rpt` pair, one code CSECT, one `SourceMap`. A linked multi-unit
-image would need one source map per compilation unit, dispatched by
-`symtable_get_section_at`'s existing `module` resolution the same way
-this section originally proposed — that wiring hasn't been built.
+**Update (Stage 3 implementation): resolved.** The reasoning above was
+built around SDF's own "member" concept, which is moot now that SDF isn't
+used at all (see the pivot noted above). The wiring it called for has since
+been built, and along exactly the line this section originally proposed:
+`tools/gen_source_map.py --unit MODULE=PASS1:PASS2` (repeatable, or via an
+`@argsfile` when there are hundreds of units) builds one JSON covering
+every compiled unit in a linked image, `src/symboltable.c` gained
+`symtable_get_module_at()`, and `src/sourcemap.h`/`.c` dispatch lookups by
+that module name.
+
+Two things had to be got right that the proposal did not anticipate.
+
+The **code/data classification of a CSECT** — which `parse_pass2()` needs —
+is not a name-prefix question at all. Reading `lnk101`'s own
+`_ZONE_BY_PREFIX` rule settles it: `#C…` names are code only because CODE
+is the *default* zone, so keying off the prefix would be reading a
+coincidence. It is resolved instead from each CSECT run's own `TIME:`
+instruction annotations, which are self-contained within `pass2.rpt`.
+
+And **statement numbers are only unique within a compilation unit**, so the
+debugger's "only reprint the source line when the statement changes"
+tracking had to carry the module name alongside the number. Without it,
+two different units' own statement *N* look like no change at all.
+
+Verified end to end against a real two-unit link already in this repo's
+corpus — `176-P.hal` calling `176.1-READ_ACC.hal` via `SCAL` and back —
+with new `test/fixtures/debugger_multiunit_*` alongside
+`176-P.fcm`/`176-P-lnk101.json`/`176-P.srcmap.json`.
+
+**A driver for it:** `compileLinkRun --filename=@F`, where `F` lists HAL/S
+file paths one per line in compile order. It loops `HALSFC` over each file,
+links every resulting `.obj` in one `lnk101` call — `lnk101` already
+supports `@LISTFILE` expansion, which is real but undocumented in its
+`--help` — and builds one multi-unit source map through
+`gen_source_map.py`'s own `@argsfile`. A COMPOOL or template-only file such
+as `176.0-SUPER_VECTOR.hal` produces an object with no executable code, and
+including it in the manifest is harmless: `lnk101` links it in as one
+zero-size section and changes nothing else. `build_unit()` now skips such a
+unit with a warning rather than failing the whole build over it. A fresh
+end-to-end run through this path reproduced the checked-in source map
+byte-identically, module order aside, and the linked program ran to
+completion with correct physics output.
 
 ### Backtrace — simplified: recent-instruction history, not a call tree
 

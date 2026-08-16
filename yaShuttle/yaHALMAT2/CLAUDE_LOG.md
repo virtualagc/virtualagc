@@ -1,7 +1,30 @@
-### [2026-07-31] Target: reengineered-documentation/ (yaGpcIntegration.h contract, no specific target doc yet)
-- yaGpcIntegration.h added (src/yaGpcIntegration.h), plus src/yaGpcOps.h/.c (yaHALMAT2_ops adapters: engine=bare interp_step(), debugger wraps new debug_run_command(), initializer=halmat_load()+interp_init()+auto-discovered litfile/COMMON0.out companions -- bare load alone failed on any program with a numeric literal, not just CHARACTER data).
-- debug.c/debug.h refactored: debug_run() split into debug_run_init()+debug_run_command() behind new debugger_state_t, verified behavior-identical via full run_all.sh (incl. --debug fixtures).
-- Two-instance independence smoke test added (src/test_gpc_smoke.c, tests/run_gpc_smoke.sh, wired into run_all.sh) -- confirmed no state bleed between instances under uneven step interleaving.
-- Confirmed: no HAL/S vehicle discrete/analog I/O construct exists in yaHALMAT2 -- GpcServiceNumber/GpcServiceArgs left untouched on this side.
-- Open question resolved (user, 2026-07-31): no per-instance output stream needed in GpcState -- WRITE is never used in the Shuttle-sim scenario, and the standalone-CLI scenario never runs more than one instance. Shared stdout default in yaHALMAT2_engine is correct as-is.
-- Still open: (1) no teardown/cleanup hook in GpcOps (yaHALMAT2_instance_t and its halmat_program_t/literals/symtab are never freed, interp_cleanup() -- which flushes each device's last buffered WRITE line -- is never called by anything in the contract itself); (2) no hook in GpcOps for creating/destroying GpcDebuggerFn's dbgState (yaHALMAT2_debugger_state_create/destroy are out-of-band, non-contract functions -- needs confirming this convention matches the driver's and yaGPC2's own expectations); (3) no error-message channel in GpcInitializerFn (defaults to fprintf(stderr,...)).
+# CLAUDE_LOG.md
+
+(Cleared 2026-08-16 by Full Documentation Sync. The pending 2026-07-31 entry,
+on the `yaGpcIntegration.h` contract, was DISCARDED as overtaken rather than
+applied — at the user's direction, after checking it against the tree.)
+
+Why it was overtaken, recorded so the decision is auditable rather than a
+silent deletion:
+
+- It named `src/yaGpcIntegration.h` and `src/yaGpcOps.h`. Neither exists. The
+  contract header was promoted to a shared `yaShuttle/yaGpcIntegration/`,
+  reached by `-I../../yaGpcIntegration` from both projects' makefiles, and
+  `yaGpcOps.h` is gone entirely — `src/yaGpcOps.c` now includes the shared
+  header directly. `tests/run_gpc_smoke.sh` has moved to `src/tests/`.
+- Two of its three "still open" items are closed in the contract as it now
+  stands. `GpcReleaseFn` is the teardown hook it said was missing, and it
+  flushes output still buffered without a terminating newline.
+  `GpcDebuggerStateCreateFn` and `GpcDebuggerStateDestroyFn` are contract
+  members now, not the out-of-band functions the entry described.
+
+ONE ITEM SURVIVED THE CHECK and is noted here so discarding the entry does not
+lose it: `GpcInitializerFn` still has no error-message channel. Its signature
+takes `state, programPath, symbolsPath, servicer, servicerCtx, output, input,
+ioCtx` and nothing for diagnostics, so an initializer that fails still has
+nowhere to say why except `fprintf(stderr, ...)`.
+
+The parts of the entry that were real work — `yaGpcOps.c`, the
+`debug_run_init()`/`debug_run_command()` split behind `debugger_state_t`, and
+the two-instance independence smoke test — are in the code and its tests, which
+is where they belong; they needed no prose to survive.
