@@ -4412,6 +4412,55 @@ the linked image -- the PHASE10 link reported whichever one it was given.
     NOT been evidenced against an original object deck.  Get that evidence
     first: the fix changes what every one of the 101 emits.
 
+PHASE10 NOW LINKS WITH NOTHING UNRESOLVED AND NO -f, which closes both of the
+things 286 left open.
+
+FIOMUWB2 IS A HAL/S DATUM, AND THE CHAIN TO IT IS WORTH KEEPING because the
+first three searches for it all failed.  FCMINSSL declares `EXTRN FIOMUWB2`
+and builds two Z-cons from it, `Z(,FIOMUWB2,0)` and `Z(,FIOMUWB2+8192,0)`,
+the SSL's buffer 1 and buffer 2 addresses.  No OI340600 assembly defines it
+and no CON80 deck names it, which is not a gap: APPLSRC/CVNMMUTI.hal carries
+
+        EQUATE EXTERNAL FIOMUWB2 TO CDHV_BLOCKS$(1,1);
+
+so the name is an alias for an element of a COMPOOL array, CVNMMUTI.obj
+defines it as an LD at offset 8 of section #PCVNMMU, and the CSECT table
+places #PCVNMMU at 197410.  FIOMUWB2 is therefore halfword 197418, 0x3032A.
+
+    SUPPLY IT, DO NOT LINK IT.  Adding CVNMMUTI.obj would place 16392
+    halfwords of somebody else's program into phase 10; the deck's second
+    card is `NOCALLER  DO NOT ALLOW AUTO-CALL`, so the original build
+    deliberately did not pull it either.  A minimal --external-syms naming
+    that one symbol is the whole fix, and the image is unchanged by it --
+    65024 bytes before and after, with the undefined-symbol diagnostic gone
+    and -f no longer needed.  This is what the `MAP 2,DEUIPLCP` card is for;
+    the address belongs to the loaded system, not to phase 10.
+
+AND A BARE END NAMES NO ENTRY POINT (105ad9afb).  objectWriter took
+`next(iter(entries))` off a Python set and wrote that symbol's address into
+the END record.  It was arbitrary AND unstable -- two BILDNEW5 runs gave
+`END entry=0303C` and `END entry=034FA`, all 5022 other normalized lines
+identical -- and it reached the linked image.
+
+    THE EVIDENCE MADE THE JUDGEMENT UNNECESSARY.  702 of 702 modules across
+    OI340600, OI301700 and RUNASM write a bare END and not one names an
+    operand, and model101.py discards the operand anyway -- `END` breaks out
+    of the loop.  So there was never an entry point to emit.  With every
+    module in the phase built this way the linker derives 00000, the start of
+    the first control section.
+
+    NEITHER EXISTING BAR COULD HAVE CAUGHT IT, which is the part to remember.
+    RUNASM and OI301700 compare GENERATED CODE against a listing and the END
+    record is not generated code; the object bar pins one PYTHONHASHSEED on
+    both arms, so both sides make the same arbitrary choice.  It surfaced only
+    from comparing two objects built minutes apart.
+
+        after the fix, seed unpinned:  raw bytes differ, NORMALIZED IDENTICAL
+
+    The raw bytes still differ because ESD records are still emitted in set
+    order; that is 286's separate issue, and `ibmobjdump --normalize` is how
+    it is compared across.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
