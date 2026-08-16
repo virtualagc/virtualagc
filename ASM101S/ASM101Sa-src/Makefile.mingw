@@ -1,0 +1,21 @@
+# License:    This program is declared by its author, Ronald Burkey, to be the
+#             U.S. Public Domain, and may be freely used, modified, or
+#             distributed for any purpose whatever.
+# Filename:   Makefile.mingw
+# Purpose:    Builds ASM101Sa.exe on Windows under MinGW-w64, MSYS2 or Cygwin,
+#             where a real GNU make and a gcc-compatible compiler are present.
+# Contact:    info@sandroid.org
+#
+# Usage:
+#     mingw32-make -f Makefile.mingw
+#     mingw32-make -f Makefile.mingw CC=clang
+#     mingw32-make -f Makefile.mingw clean
+#
+# This is the ordinary Makefile with the executable renamed and the object
+# suffix left alone; everything else about the build is identical, which is the
+# point of keeping the sources free of platform conditionals.  Like the ordinary
+# Makefile it writes ..\ASM101Sa.exe, beside ASM101S.py and ASM101S.bat.
+
+EXE = ASM101Sa.exe
+
+include Makefile

@@ -124,6 +124,13 @@ OPTIONs:        --config=XXX.     PASS configuration:  G16 (default), G2, G3, G8
                                   the rest -- which is a reason to run in a
                                   scratch copy of the source tree rather than in
                                   PFS/OI340600 itself.
+                --assembler=F     Use F in place of the default ASM101S as the
+                                  AP-101S assembler. F must be a drop-in 
+                                  replacement with identical command-line 
+                                  switches. An available alternative is
+                                  ASM101Sa, which executes much faster but is
+                                  not necessarily up-to-date with respect to
+                                  ASM101S.
 '''
 
 filename = None
@@ -135,6 +142,7 @@ externalSymbolFile = None
 memoryFile = None
 outDir = None
 sdfi = halsParms.DEFAULT_SDFI
+assembler = "ASM101S"
 # Unlike the other two callers, this program is comparing against the memory
 # images in PFS/mafgen, which are of a Software Development Lab build, so it
 # generates SDL code.  See DEFAULT_SDL in halsParms.py.
@@ -169,6 +177,8 @@ for parameter in sys.argv[1:]:
         sdl = False
     elif parameter.startswith("--exceptions="):
         exceptionsFile = parameter.partition("=")[2]
+    elif parameter.startswith("--assembler="):
+        assembler = parameter.partition("=")[2]
     else:
         print(helpMsg)
         sys.exit(1)
@@ -238,7 +248,7 @@ elif fileType == "asm":
     # failed with "Input file not found", making every .asm file look like a
     # link failure.  Without --out-dir, prefix is the basename and this is what
     # ASM101S was already doing.
-    command = ["ASM101S", f"--library={library}", "--fill=C6C6", "--no-rtl-fixes",
+    command = [assembler, f"--library={library}", "--fill=C6C6", "--no-rtl-fixes",
                f"--object={objfile}", filename]
     print(" ".join(command))
     try:

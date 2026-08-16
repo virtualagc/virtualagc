@@ -1,0 +1,84 @@
+# License:    This program is declared by its author, Ronald Burkey, to be the
+#             U.S. Public Domain, and may be freely used, modified, or
+#             distributed for any purpose whatever.
+# Filename:   Makefile.msvc
+# Purpose:    Builds ASM101Sa.exe on Windows with Microsoft's nmake and the
+#             Visual C++ compiler.
+# Contact:    info@sandroid.org
+#
+# Windows does not ship a GNU-compatible make, and nmake's syntax differs from
+# GNU make's in enough places -- no pattern rules of the GNU kind, no `ifdef`
+# spelled that way, no automatic variables past $@ and $** -- that one makefile
+# cannot serve both without becoming unreadable.  Hence this separate file.
+#
+# Usage, from within this directory in a "Developer Command Prompt for VS" so
+# that cl.exe is on the PATH:
+#
+#     nmake /f Makefile.msvc
+#     nmake /f Makefile.msvc DEBUG=1
+#     nmake /f Makefile.msvc clean
+#
+# For MinGW-w64, MSYS2 or Cygwin use Makefile.mingw instead; those have a real
+# GNU make and a POSIX-like toolchain.
+
+# The executable goes into the PARENT directory, beside ASM101S.py and the
+# ASM101S.bat launcher that runs it, so that one directory on the PATH offers
+# both assemblers.  Set BINDIR=. to build it here instead.
+EXE    = ASM101Sa.exe
+BINDIR = ..
+TARGET = $(BINDIR)\$(EXE)
+
+# /W3 rather than /W4:  at /W4 MSVC warns about every `if` whose body is a block
+# and about signed/unsigned comparisons that the C standard defines perfectly
+# well, and the noise hides anything real.
+#
+# There is no MSVC equivalent of -fwrapv.  MSVC does not exploit signed-overflow
+# undefined behaviour for optimisation, so wrapping behaves as the assembler
+# needs; the arithmetic that matters is written through the ASM_ADD/ASM_SUB
+# macros in common.h, which do it on unsigned types and so are well defined for
+# every compiler regardless.
+CFLAGS_COMMON = /nologo /W3 /I. /D_CRT_SECURE_NO_WARNINGS
+
+!IFDEF DEBUG
+CFLAGS = $(CFLAGS_COMMON) /Od /Zi /MDd
+LDFLAGS = /nologo /DEBUG
+!ELSE
+CFLAGS = $(CFLAGS_COMMON) /O2 /MD
+LDFLAGS = /nologo
+!ENDIF
+
+OBJECTS = \
+	asm101s.obj \
+	dec.obj \
+	ebcdic.obj \
+	expressions.obj \
+	fieldparser.obj \
+	ibmhex.obj \
+	model101.obj \
+	objectwriter.obj \
+	parser_asm.obj \
+	pattern.obj \
+	peg.obj \
+	pyutil.obj \
+	readlisting.obj \
+	tables.obj \
+	tablesupport.obj \
+	val.obj
+
+HEADERS = \
+	common.h dec.h ebcdic.h expressions.h fieldparser.h ibmhex.h \
+	model101.h objectwriter.h parser_asm.h pattern.h peg.h pyutil.h \
+	readlisting.h tables.h val.h version.h
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	link $(LDFLAGS) /OUT:$(TARGET) $(OBJECTS)
+
+.c.obj:
+	$(CC) $(CFLAGS) /c $<
+
+$(OBJECTS): $(HEADERS)
+
+clean:
+	-del /q *.obj $(TARGET) *.pdb *.ilk 2>nul
