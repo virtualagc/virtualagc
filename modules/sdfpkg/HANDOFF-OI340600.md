@@ -4322,6 +4322,96 @@ accumulation never had.
 
 WHY.  Two lessons outlast the rule.  A prototype scoped to the case that motivated it will under-predict: mine looked only at entries already in the table and missed thirty times the gain, which sat in symbols that had none.  And an apparent regression must get a control arm before it is believed -- G9's 11 to 18 would have been recorded as the rule's fault, and it belongs to the table base, which in turn is the finding that neither base dominates.
 
+BILDNEW5 ASSEMBLES AND LINKS, and the two defects that stopped it were both
+in conditional assembly rather than anywhere near the module itself.  It had
+been out of scope as a stand-alone program absent from every memory
+configuration; the goal here was only that it build cleanly, there being no
+dump to compare it against.
+
+        baseline          2068 errors, 1019 of them severity 255, aborted
+        scoping fix       298 lines left, every one a &T/&T2 declaration
+        both fixes        exit 0, ZERO intolerable, object written
+
+    The 1049 that remain are the severity-0 diagnostics the baseline already
+    had, unchanged, and the 1019 reduce to exactly two causes -- 596 to the
+    dimension conflict and 423 to the scoping leak, the latter being 141
+    `array as replacement`, 47 each of four consequences, and 94 &XFLD/&YFLD
+    errors that turned out to hold the literal text '&L'.
+
+A MACRO NOW SEES A GLOBAL ONLY WHERE IT DECLARES GBLx ITSELF (6fe2ca005).
+svGlobals is one dictionary for the whole assembly, so a name declared GBLx
+anywhere was visible everywhere: MACSMITH declares `GBLC ...&L(264)...`, POS
+declares only &LA and &TA and uses &L as a scalar, and POS was handed
+MACSMITH's 264-element array.  MENU12 is the control -- it invokes POS 23
+times and assembles clean, because it does not COPY MACSMITH.  &SYSPARM and
+&ASM101S stay exempt; RUNASM's ACOSH went from 0 bytes mismatched to 59 when
+&SYSPARM was not.
+
+AND A DIMENSION IS NOT A TYPE (cb10a480b).  MACSMITH declares &T(264) and
+&T2(264) where TEXT and FAZ2MAC declare the same globals at (250), and the
+sequence numbers say why: MACSMITH's card is modification level AG, both
+others AA, so only MACSMITH was re-issued when the tables grew.  Nothing
+indexes &T past 250 anywhere in the assembly, so it was declarative noise.
+Growing the array to the largest size seen was tried first and is WRONG --
+it changes N', and RUNASM's VX6S3 is the module that says so.
+
+THE LINK WAS THE EASY HALF.  `lnk101 --concard CON80 --concard-root PHASE10`
+lays out all eleven modules and writes a load module at exit 0; GPCIPL goes
+to 0x0 at 15392 halfwords and LINES to 0x7844 at 5523, LINES coming from
+BILDNEW5's own COPY GENLINES.  PCH10TXT is not a problem peculiar to this
+phase -- all 47 PCHnnTXT patch decks are absent corpus-wide.  One symbol is
+left undefined, FIOMUWB2, an EXTRN buffer address FCMINSSL cites and no
+OI340600 assembly defines; it is compiled-side and cross-phase, which the
+deck's `MAP 2,DEUIPLCP` card is the mechanism for.
+
+MEASURED ON ALL THREE CORPORA: RUNASM 205 of 205 byte for byte, OI301700 272
+of 272 with 0 bytes mismatched, and every OI340600 object any sweep produced,
+199 of them, assembled twice from one tree and identical both ways.
+
+    THE RUNASM BAR MUST BE RUN WITH --no-rtl-fixes.  Run bare it reports 6 of
+    205 failing -- CINDEX, MM14SN, MM6SN, MV6SN, VV6S3, VX6S3 -- which are the
+    modules carrying a gated fix, differing from a historical listing exactly
+    as intended.  Those 6 fail identically with the pre-session assembler.
+
+ASM101S DOES NOT EMIT THE SAME OBJECT TWICE, and a byte comparison of two
+objects is not a statement about the program until that is dealt with.
+model101.py keeps ENTRY and EXTRN symbols in Python SETS (lines 335-336), so
+objectWriter emits LD and ER records in whatever order the set iterates, and
+that order varies from process to process.  FCMASYNC assembled THREE times by
+ONE unmodified assembler gave three different objects, 411 of its 3280 bytes
+moving, with no difference in meaning.  `PYTHONHASHSEED=0` pins it; none of
+oi340600-sweep.sh, verify-sweep.sh or regressionASM101S.sh sets it, so every
+stored object captured one arbitrary ordering.
+
+    THE BETTER TOOL IS `ibmobjdump --normalize`, written for this and living
+    in the lnk101 tree.  It drops the ESD index columns -- which are
+    positional and nothing else is, since TXT, RLD and END all name their
+    section -- and sorts the ESD, TXT and RLD groups.  It implies --hex,
+    because a comparison that ignored the code would call two unrelated
+    modules equal.  Validated both ways: the FCMASYNC pair that differs by
+    411 raw bytes normalizes to SAME, and the same module built with another
+    fill byte still reports DIFFER, at 000A8.
+
+AND THE ENTRY POINT IN THE END RECORD IS CHOSEN AT RANDOM.  objectWriter.py
+takes `next(iter(entries))` off that same set, so a module with more than one
+ENTRY gets an arbitrary one of them in its END record -- the local is even
+named `firstName`.  ALL 101 OI340600 modules that declare ENTRY have a BARE
+END naming no entry point, so all 101 are exposed.  Two complete BILDNEW5
+runs differ in that field and nothing else: 5022 of 5024 normalized lines
+identical, `END entry=0303C` against `END entry=034FA`, and the value reaches
+the linked image -- the PHASE10 link reported whichever one it was given.
+
+    NO EXISTING BAR CATCHES IT.  RUNASM and OI301700 compare GENERATED CODE
+    against a listing, and the END record is not generated code; the OI340600
+    object bar pins one seed on both arms, so both sides make the same
+    arbitrary choice.  This is a blind spot of all three, not a gap in any one.
+
+    STILL OPEN, and deliberately not fixed with the two above.  A bare END
+    should mean no entry address is specified, the loader taking the start of
+    the first control section, but that is IBM semantics from memory and has
+    NOT been evidenced against an original object deck.  Get that evidence
+    first: the fix changes what every one of the 101 emits.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
