@@ -17,11 +17,20 @@ of the most-recent version of `ASM101S.py` itself.
 
 ## Building
 
+The source is in `ASM101Sa-src/`, and the build puts the executable in the
+directory above it — this one, alongside `ASM101S.py` — so that a single
+directory on the `PATH` offers both assemblers.
+
 | Platform | Command |
 | --- | --- |
-| Linux, macOS | `make` |
-| Windows, Visual C++ | `nmake /f Makefile.msvc` |
-| Windows, MinGW-w64 / MSYS2 / Cygwin | `make -f Makefile.mingw` |
+| Linux, macOS | `make -C ASM101Sa-src` |
+| Windows, Visual C++ | `cd ASM101Sa-src` then `nmake /f Makefile.msvc` |
+| Windows, MinGW-w64 / MSYS2 / Cygwin | `cd ASM101Sa-src` then `make -f Makefile.mingw` |
+
+The source directory is not itself called `ASM101Sa`, because a directory and a
+file of that name cannot both exist here and the file is the point. On Windows
+the `.exe` suffix would hide the clash, so it would surprise whoever next built
+on Linux rather than failing where it was introduced.
 
 Windows gets its own makefiles because it has no GNU-compatible `make`, and
 `nmake`'s syntax differs from GNU `make`'s in enough places that one file cannot
@@ -31,11 +40,12 @@ platform conditionals beyond the shims in `common.h`.
 Useful options for the GNU makefile:
 
 ```
-make CC=clang            build with clang rather than the default compiler
-make DEBUG=1             unoptimised, with symbols
-make ASAN=1              AddressSanitizer + UndefinedBehaviorSanitizer
-make install PREFIX=...  install to $(PREFIX)/bin, default /usr/local
-make clean
+make -C ASM101Sa-src CC=clang           build with clang rather than the default
+make -C ASM101Sa-src DEBUG=1            unoptimised, with symbols
+make -C ASM101Sa-src ASAN=1             AddressSanitizer + UndefinedBehaviorSanitizer
+make -C ASM101Sa-src install PREFIX=... install to $(PREFIX)/bin, default /usr/local
+make -C ASM101Sa-src BINDIR=.           build the executable in ASM101Sa-src/ instead
+make -C ASM101Sa-src clean
 ```
 
 Both gcc 13 and clang 18 build it clean at `-Wall -Wextra`, and the two
@@ -59,11 +69,39 @@ two lines:
   no entry point, so do not invent one"* — complete, with nothing carried over
   separately and nothing missing.
 
-That is the most recent commit to touch `ASM101S/` at all. The repository was at
-HEAD `dc5b97707` when the parity pass was made, and the four commits between the
-two changed nothing under `ASM101S/`. Naming the last commit that actually
-altered the assembler, rather than whatever HEAD happened to be, is what makes
-the claim checkable with a single `git diff`.
+That is the most recent commit to touch any of the ten ported `.py` files. The
+repository was at HEAD `dc5b97707` when the parity pass was made, and the
+commits between the two changed none of them. Naming the last commit that
+actually altered the assembler, rather than whatever HEAD happened to be, is
+what makes the claim checkable.
+
+**Do not compute it as "the last commit touching `ASM101S/`".** That was the
+rule while the port lived outside the repository, and it broke when
+`ASM101Sa-src/` moved in: the port's own commits now touch `ASM101S/`, so the
+rule answers with them and the constant looks perpetually stale. It first
+misfired at `522a96c84`, *"Added ASM101Sa."* Restrict the pathspec to the
+Python — list the ten files, or exclude the port:
+
+```
+git log -1 -- ASM101S/ ':(exclude)ASM101S/ASM101Sa-src/' \
+                       ':(exclude)ASM101S/ASM101Sa-notes.md'
+```
+
+The distinction matters because a check that cries stale on every commit gets
+ignored, and then a genuinely stale port goes unnoticed.
+
+To ask whether this port *is* stale — the question the constant exists to
+answer, and a one-liner now that the two live in one directory:
+
+```
+git log --oneline 105ad9afb..HEAD -- ASM101S/ASM101S.py ASM101S/expressions.py \
+    ASM101S/fieldParser.py ASM101S/parser_asm.py ASM101S/model101.py \
+    ASM101S/model101tables.py ASM101S/ibmHex.py ASM101S/asciiToEbcdic.py \
+    ASM101S/objectWriter.py ASM101S/readListing.py
+```
+
+Empty output means in sync. Anything listed is exactly what the next parity
+pass must carry over.
 
 `version.h` is the single place any of that is written down —
 `PORTED_FROM_COMMIT`/`_DATE`/`_SUBJECT`, an optional `PORTED_EXTRAS` for
@@ -101,8 +139,12 @@ Two files are **generated and committed**, and must not be hand-edited:
 | `tables.c` | `model101tables.py`, `ASM101S.py` | `tools/gentables.py` |
 
 ```
-make regenerate ASM101S=/path/to/ASM101S
+make -C ASM101Sa-src regenerate
 ```
+
+`ASM101S=` names the directory holding `ASM101S.py` and defaults to `..`, which
+is now the right answer; pass it only to regenerate against a Python assembler
+somewhere else.
 
 Both are generated rather than transcribed for the same reason: their content
 is already the output of a generator or of a loop. `parser_asm.py` is TatSu's
@@ -116,7 +158,7 @@ hand is exactly the sort of thing that goes wrong silently and shows up as one
 wrong opcode in one module.
 
 To change the grammar: edit `fieldParser.py`, run `fieldParser.py --generate`
-to renew `parser_asm.py`, then `make regenerate`.
+to renew `parser_asm.py`, then `make -C ASM101Sa-src regenerate`.
 
 ## How the port is arranged
 
@@ -220,8 +262,13 @@ and the extremes of the double range.
 
 | Release | Modules | Exit status | Listings | Objects, canonical | Objects, raw |
 | --- | --- | --- | --- | --- | --- |
-| OI340600 | 224 | identical, all 0 | **byte-identical** | identical | 180 differ |
-| OI301700 | 271 | identical, all 0 | **byte-identical** | identical | 174 differ |
+| OI340600 | 224 | identical, all 0 | **byte-identical** | identical | 178 differ |
+| OI301700 | 271 | identical, all 0 | **byte-identical** | identical | 181 differ |
+
+The raw counts are worth one significant figure and no more: they came out 180
+and 174 on an earlier pair of runs of the same two programs over the same
+sources. That is Python's per-process `set` ordering, and it is why the
+canonical column is the one that means anything.
 
 With BILDNEW5, compared separately below, that is **497 modules** — OI340600 225
 and OI301700 272 — with byte-identical listings and no canonical object
@@ -244,6 +291,20 @@ The harness is `pfs-test/`, and it is release-parameterised:
 ./sweep.sh py  [RELEASE]
 ./compare.sh   [RELEASE]
 ```
+
+It finds both assemblers in `~/git/virtualagc/ASM101S` — `ASM101S.py`, and
+`ASM101Sa` as built there — overridable by `ASM101SA=` and `ASM101SPY=`, and
+checks they exist before starting so a missing build fails once instead of 224
+times.
+
+**A date stamp in the page heading will fool the comparison.** Every heading
+ends in the assembly date, so two sweeps that straddle midnight differ on every
+module for a reason that has nothing to do with the assemblers. That happened
+once and read convincingly as a regression: all 224 and all 271 listings
+differing, immediately after the port was relocated. Normalising that one field
+gave 0 and 0. `compare.sh` therefore prints the strict count and, beneath it,
+the count with the heading date normalised away — read the second whenever the
+first equals the module count.
 
 Each assembler works in its own subdirectory with its own symlink to the release
 and its own `out-RELEASE/`, because both write `.obj` and `.lst` under fixed
@@ -357,11 +418,14 @@ CPython's `random` module exactly would have bought nothing.
 per process — so **`ASM101S.py` writes a different `.obj` on every run**. CSLD's
 END-record entry address came out 88, 14 and 200 on three consecutive runs.
 
-It shows up as ESD card *order*, and as nothing else. On OI340600, 180 of 224
-objects differ raw and **all 224 are identical once ESD order is
-canonicalised**; on OI301700, 174 of 271 differ raw and all 271 are canonically
-identical. `pfs-test/objcanon.py` re-expresses an object module by symbol
-name rather than by ESD id, which is the only way to compare two of them.
+It shows up as ESD card *order*, and as nothing else. On OI340600, about 180 of
+224 objects differ raw and **all 224 are identical once ESD order is
+canonicalised**; on OI301700, about 180 of 271 differ raw and all 271 are
+canonically identical. "About", because the raw count is itself a function of
+the run: four sweeps of the same two programs over the same sources gave 180,
+178, 174 and 181. The canonical count was 0 in all four.
+`pfs-test/objcanon.py` re-expresses an object module by symbol name rather than
+by ESD id, which is the only way to compare two of them.
 
 The correlation is exact: **every** module whose object differs has two or more
 ENTRY symbols, and **none** of the 137 with one or none does. Note that a single

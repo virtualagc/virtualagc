@@ -35,11 +35,32 @@
 
 /*
  * The commit this program was ported from, in github.com/virtualagc/virtualagc.
- * This is the most recent commit to touch ASM101S/ at all; the repository was
- * at dc5b97707 when the parity pass was made, and the four commits between the
- * two changed nothing under ASM101S/.  Naming the last commit that actually
- * altered the assembler, rather than whatever HEAD happened to be, is what
- * makes the claim checkable with a single `git diff'.
+ * It names the state of the PYTHON assembler that this C program reproduces --
+ * the most recent commit to touch any of the ten ported .py files.  The
+ * repository was at dc5b97707 when the parity pass was made; the commits
+ * between the two changed none of those files.
+ *
+ * DO NOT COMPUTE THIS AS "THE LAST COMMIT TOUCHING ASM101S/".  That was the
+ * rule while the port lived outside the repository, and moving ASM101Sa-src/
+ * into ASM101S/ broke it: the port's own commits now touch ASM101S/, so the
+ * rule answers with them and the constant looks perpetually stale.  It first
+ * misfired at 522a96c84, "Added ASM101Sa."  Restrict the pathspec to the Python
+ * instead -- either list the ten files, or
+ *
+ *   git log -1 -- ASM101S/ ':(exclude)ASM101S/ASM101Sa-src/' \
+ *                          ':(exclude)ASM101S/ASM101Sa-notes.md'
+ *
+ * TO ASK WHETHER THIS PORT IS STALE, which is the question the constant exists
+ * to answer:
+ *
+ *   git log --oneline 105ad9afb..HEAD -- ASM101S/ASM101S.py \
+ *       ASM101S/expressions.py ASM101S/fieldParser.py ASM101S/parser_asm.py \
+ *       ASM101S/model101.py ASM101S/model101tables.py ASM101S/ibmHex.py \
+ *       ASM101S/asciiToEbcdic.py ASM101S/objectWriter.py ASM101S/readListing.py
+ *
+ * Empty output means in sync.  Anything listed is what a parity pass must carry
+ * over.  Living in the same directory as the Python makes that check easier,
+ * not harder -- but only against the right pathspec.
  */
 #define PORTED_FROM_COMMIT "105ad9afb"
 #define PORTED_FROM_DATE "2026-08-15 21:18:29"
