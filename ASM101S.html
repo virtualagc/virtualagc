@@ -45,11 +45,13 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
 
 
 
+
             Aliases</a></li>
         <li><a moz-do-not-send="true" href="#unused">Unused Pseudo-Ops</a></li>
         <li><a moz-do-not-send="true" href="#mystery">Mystery Pseudo-Ops</a></li>
         <li><a moz-do-not-send="true" href="#forbiddenCOPY">Forbidden
             Pseudo-Ops in <font color="#996633"><code>COPY</code></font>'d
+
 
 
 
@@ -62,10 +64,12 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
 
 
 
+
             Prototypes</a></li>
         <li><a moz-do-not-send="true" href="#sillySuffixes">Silly
             Suffixes</a></li>
         <li><a moz-do-not-send="true" href="#mysteryInstructionsMacros">Mystery
+
 
 
 
@@ -89,11 +93,13 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
 
 
 
+
             Peculiarities and Evaluation of Expressions</a></li>
         <li><a moz-do-not-send="true"
             href="#relationalStringExpressions">Relational Expressions
             Involving Strings</a></li>
         <li><a moz-do-not-send="true" href="#characterExpressions">Character
+
 
 
 
@@ -108,6 +114,7 @@ document.write(headerTemplate.replace("@TITLE@","IBM AP-101S / AP-101B").replace
         <li><a moz-do-not-send="true" href="#SRS">SRS-Type Instructions
             Versus RS-Type Instructions</a></li>
         <li><a moz-do-not-send="true" href="#uninitializedMemory">Uninitialized
+
 
 
 
@@ -268,6 +275,7 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
 
 
 
+
         Recall that the Space Shuttle flight software came in two
         distinct flavors, Primary Flight Software (PFS, or loosely but
         more commonly known as PASS) and Backup Flight Software
@@ -296,6 +304,7 @@ href="Shuttle/IBM%20AP-101S%20General%20Purpose%20Computer%20With%20Shuttle%20In
       </li>
       <li>"<a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231">OS
+
 
 
 
@@ -358,12 +367,14 @@ href="Shuttle/Courses/AP-101S%20Assembly%20Language%20Introduction%20Course.pdf"
 
 
 
+
           101S Assembly Language Introduction</a>".</li>
       <li>"Space Shuttle Advanced System/4 Pi Input/Output Processor
         (IOP)":</li>
       <ul>
         <li><a moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf">Parts
+
 
 
 
@@ -418,10 +429,12 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
             III</a>:&nbsp; Principles of Operation for BCE.</li>
       </ul>
       <li>"<a moz-do-not-send="true"
 href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Model%20AP-101%20Central%20Processor%20Unit%20-%20Technical%20Description.pdf">Space
+
 
 
 
@@ -462,6 +475,7 @@ href="Shuttle/IBM-75-A97-001%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi
     indiscriminately in AP-101 assembly-language source code, and share
     memory with it.&nbsp; <a moz-do-not-send="true"
 href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
+
 
 
 
@@ -530,9 +544,11 @@ href="httpsShuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=337">The
 
 
 
+
       II of the AP-101S POO</a> or the seemingly-identical <a
       moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20-%20Input,%20Output%20Processor%20(IOP)%20-%20Principles%20of%20Operation%20for%20PCI,%20PCO,%20MSC,%20and%20BCE.pdf#page=68">Part
+
 
 
 
@@ -605,9 +621,11 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
 
 
 
+
         III of the AP-101S POO</a> or the seemingly-identical <a
         moz-do-not-send="true"
 href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%20Input,%20Output%20Processor%20(IOP)%20-%20Part%203%20-%20Principles%20of%20Operation%20for%20the%20Bus%20Control%20Element.pdf">Part
+
 
 
 
@@ -641,7 +659,19 @@ href="Shuttle/IBM-6246556A%20-%20Space%20Shuttle%20Advanced%20System,%204%20Pi%2
     The modern assembler is invoked as<br>
     <blockquote>
       <pre><font color="#663300">ASM101S [<i>OPTIONS</i>] <i>SOURCE1</i>.asm <i>SOURCE2</i>.asm ...</font><br></pre>
-    </blockquote>
+      <b><font size="-1">Note:</font></b><font size="-1"> <b>ASM101S</b>
+        is the "official" implementation of the assembler, but given
+        that it is written in the Python language can be slow to execute
+        on very large builds. If that becomes annoying to you, there is
+        also an alternative program called <b>ASM101Sa</b> that
+        executes much faster ... up to 50× in the most-extreme cases.
+        Every place that you see <b>ASM101S</b> below, you can simply
+        substitute <b>ASM101Sa</b> and reap the speed benefit.&nbsp;
+        The drawback is that <b>ASM101Sa</b> is a port of <b>ASM101S</b>
+        (to the C language), and is not necessarily always fully
+        up-to-date. Therefore, at any given moment it may not enjoy some
+        of the recently-added features or bug-fixes found in <b>ASM101S</b>.<br>
+      </font></blockquote>
     Some of the more-significant available <i><font color="#663300"><code>OPTIONS</code></font></i>
     are:<br>
     <ul>
@@ -654,11 +684,13 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
           default macro library</a> before processing any of your own
         source-code files.&nbsp; This default macro library is the one
         provided by the HAL/S-FC source code for use in assembling <a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
 
 
 
@@ -703,6 +735,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         BFS object-code files are in a different format than PFS
         object-code files, and <b>ASM101S</b> doesn't presently support
         the BFS file format anyway.<br>
@@ -724,6 +757,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         available, as is the case (for example) for all of <a
           moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNLST">the
+
 
 
 
@@ -787,7 +821,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         and running the command "<code>fieldParser.py --generate</code>";
+
 
 
 
@@ -816,6 +852,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       assembly-language source-code files</a> for which a contemporary
     assembly listing made by the original AP-101S assembler has
     survived, and performing a byte-by-byte comparison of <b>ASM101S</b>'s
+
 
 
 
@@ -870,7 +907,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <p>Here's what the AP-101S assembly-language source code for the
       ACOS module looks like prior to assembly:<br>
     </p>
-    <table cellspacing="2" cellpadding="2" align="center" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
           <td valign="top">
@@ -902,7 +939,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       of study, here's what the source code for that very same macro <font
         color="#ff0000"><code>ACLOSE</code></font> looks like:<br>
     </p>
-    <table cellspacing="2" cellpadding="2" align="center" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
           <td valign="top">
@@ -927,7 +964,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       table.&nbsp; At the same time, I've&nbsp; highlighted the macro
       expansions in <font color="#ff0000">red</font>:<br>
     </p>
-    <table cellspacing="2" cellpadding="2" align="center" border="1">
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
           <td valign="top">
@@ -963,6 +1000,7 @@ href="https://raw.githubusercontent.com/virtualagc/virtualagc/refs/heads/master/
     about it for yourself in the IBM 360 assembler language manual, in
     which <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/59/mode/1up?view=theater">the
+
 
 
 
@@ -1051,6 +1089,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
     <font color="#663300"><code><i>LIBRARY</i></code></font> is just a
     path to a macro-library folder.&nbsp; Macro definitions in any
     libraries specified in this manner are loaded by the assembler along
@@ -1068,6 +1107,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
     Unfortunately, Shuttle flight software (including MLIB80) cannot be
     included in the Virtual AGC repository at this time, so there's no
     alternative other than specifying a full path to it.&nbsp;
@@ -1078,6 +1118,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     pseudo-ops are <i>also</i> located within the macro libraries,
     intermixed with the files intended to contain only macros.&nbsp; But
     we do not want any of the code from these <font color="#663300"><code>COPY</code></font>'able
+
 
 
 
@@ -1181,6 +1222,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
     is natural in your operating system).&nbsp; Additionally, after any
     new version of TatSu has been installed, you'll want to <code>cd</code>
     into the folder ASM101S/ in the Virtual AGC source tree and run the
@@ -1188,7 +1230,33 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     the return key when you're eventually prompted for interactive
     input.&nbsp; We're likely to eventually have a workaround where you
     don't have to manually do this final <code>fieldParser</code> step,
-    I hope, but that's not ready as of this writing either.
+    I hope, but that's not ready as of this writing either.<br>
+    <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+        As mentioned earlier, there is an optional C port (<b>ASM101Sa</b>)
+        of the Python program <b>ASM101S</b>, which executes much
+        faster but risks being out-of-date.&nbsp; <b>ASM101Sa</b> is <i>not</i>
+        automatically available and must be built from source code.
+        That's quite easy to do.&nbsp; None of the prerequisites
+        mentioned above are needed, but you do need the usual C compiler
+        for your platform.&nbsp; If the Virtual AGC source tree is in
+        the directory <i><code>virtualagc</code></i>/ on your local
+        computer, then on Linux or Mac OS you'd do this:<br>
+      </font>
+      <blockquote><font size="-1">cd <i>virtualagc</i>/ASM101S/ASM101Sa-src<br>
+          make<br>
+        </font></blockquote>
+      <font size="-1">Or on Windows (with Visual C++):<br>
+      </font>
+      <blockquote><font size="-1">cd virtualagc\ASM101S\ASM101Sa-src<br>
+          nmake /f Makefile.msvc<br>
+        </font></blockquote>
+      <font size="-1">Or on Windows (with MinGW / MSYS2 / Cygwin):<br>
+      </font>
+      <blockquote><font size="-1">cd virtualagc\ASM101S\ASM101Sa-src<br>
+          make -f Makefile.mingw<br>
+        </font></blockquote>
+      <font size="-1">But I've only tried it on Linux myself.</font><br>
+    </blockquote>
     <blockquote>
       <p> </p>
     </blockquote>
@@ -1218,10 +1286,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
             files</a><br>
         </li>
         <li><a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNLST">"Assembly
+
 
 
 
@@ -1265,9 +1335,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
             library</a></li>
         <li><a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/ZCONASM">Interface
+
 
 
 
@@ -1406,10 +1478,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         folder called RUNLST in our source-code repository</a>, which
       naively appears to be assembly listings generated by assembling
       the files in <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNASM">the
+
 
 
 
@@ -1452,9 +1526,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         macro library folder RUNMAC</a>, and assisted by <a
         moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/ZCONASM">the
+
 
 
 
@@ -1502,6 +1578,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       and <font color="#663300"><code>INPUT</code></font> macros
       respectively.&nbsp; <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/52/mode/1up?view=theater">According
+
 
 
 
@@ -1584,6 +1661,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
         discussion of character encoding on the <b>HALLINK101S</b> page</a>.<br>
     </p>
     But wait, there's more!&nbsp; Any Space Shuttle flight-software
@@ -1610,6 +1688,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         color="#663300"><code></code></font>.&nbsp; These are described
       in <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/33/mode/1up?view=theater">Figure
+
 
 
 
@@ -1711,6 +1790,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
         in analogy to System/360, that's not exactly what's going on</font><font
         size="-1"> in AP-101S.&nbsp; </font><font size="-1">In fact, in
         AP-101S each of these branching instructions (except <font
@@ -1737,6 +1817,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       corresponding to it.&nbsp; There is such an instruction in IBM 360
       assembly language.&nbsp; <a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=79">The
+
 
 
 
@@ -1810,6 +1891,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
       Consider this example:<br>
     </p>
     <blockquote>
@@ -1819,6 +1901,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       to suspect that this is actually an addition.&nbsp; There is
       indeed an <a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=66">Add
+
 
 
 
@@ -1870,6 +1953,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
       and "<font color="#663300"><code>AHI R5,-2</code></font>" would
       indeed assemble as shown.<br>
     </p>
@@ -1896,6 +1980,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       assembly-language.&nbsp; Admittedly, that inference is probably
       wrong in the case of certain of the pseudo-ops.&nbsp;
       Nevertheless, they have not been implemented in <b>ASM101S</b>.&nbsp;
+
 
 
 
@@ -2054,6 +2139,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
         System/360 assembler manual tells us</a> that assembly-language
       files included in other assembly-language files via the <font
         color="#663300"><code>COPY</code></font> pseudo-op cannot
@@ -2074,6 +2160,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     <h2><a name="MacroPrototypes"></a>Macro-Definition Prototypes</h2>
     <p><a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/65/mode/1up?view=theater">The
+
 
 
 
@@ -2147,12 +2234,14 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
         I don't know if anybody will read these words, ever, but my
         sixth sense tells me that some folks who do might be smugly
         saying to themselves right now that "<i>of course</i> full-line
         comments are not 'statements' in any language, so what's this
         fool on about?"&nbsp; As it happens, <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/69/mode/1up?view=theater">on
+
 
 
 
@@ -2233,6 +2322,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
         AP-101S POO tells us</a> that <br>
     </p>
     <blockquote>
@@ -2271,6 +2361,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         because one of the special addressing modes I alluded to earlier
         is <a moz-do-not-send="true"
           href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=41">the
+
 
 
 
@@ -2376,9 +2467,11 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
           form</a>.&nbsp; Technically, the grammars are actually written
         in the modified EBNF (<a moz-do-not-send="true"
           href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form">Extended
+
 
 
 
@@ -2426,6 +2519,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/ASM101S/fieldParser.p
       and CPU Registers</h2>
     <p>Previously in this space I noted that <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/31">according
+
         to contemporary documentation</a>, commonly-used symbols for the
       CPU's general-purpose registers <font color="#663300"><code>R0</code></font>
       through <font color="#663300"><code>R7</code></font> are not
@@ -2458,6 +2552,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     <h2><a name="TypeT"></a>Type Attributes, <font color="#996633"><code>T'</code></font></h2>
     <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/77/mode/1up">The
+
 
 
 
@@ -2564,6 +2659,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
       System/360 assembly-language manual</a> makes it clear that these
     "goto" operations can operate only with the same macro depth, and
     further, if within a macro, only within the <i>same</i>
@@ -2618,6 +2714,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
         expression.&nbsp; (Nor would <font color="#663300"><code>+5</code></font>
         be legal.)&nbsp; <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/16/mode/1up">The
+
 
 
 
@@ -2792,6 +2889,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
       assembly language</a> shares the obnoxious (in my opinion!)
     property of string comparisons in <a moz-do-not-send="true"
       href="XPL-I.html">the XPL language</a> that a shorter string is
@@ -2838,6 +2936,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     </p>
     One flourish which must be mentioned is <a moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/84/mode/1up">the
+
 
 
 
@@ -2990,6 +3089,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
       INPUT macro</a>, provided as part of the AP-101S runtime library
     by the original source code of the HAL/S compiler HAL/S-FC.&nbsp; It
     has four SET symbols that are used without declarations, highlighted
@@ -3009,6 +3109,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
               color="#663300"><code></code></font></i></u></font><i>) is
         the target of a <font color="#663300"><code>SETx</code></font>
       </i><u><i><font color="#663300"><code></code></font></i></u><i>instruction,
+
 
 
 
@@ -3054,6 +3155,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
 
 
 
+
         If this inference is correct, it might seem naively that there's
         no need for the instructions </font><font size="-1"><font
           color="#663300"><code>LCLA</code></font>, <font
@@ -3078,6 +3180,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Co
             convenience feature would not require it.&nbsp; For example,
             consider <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/PASS.REL32V0/RUNMAC/AERROR.asm">this
+
 
 
 
@@ -3161,6 +3264,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
         System/360 assembly-language manual</a> describes a
       quite-complex format for the operands of the <font
         color="#663300"><code>DS</code></font> and <font
@@ -3192,6 +3296,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       be considered "literals":&nbsp; <font color="#663300"><code>=F'1234'</code></font>,
       <font color="#663300"><code>=C'HELLO WORLD'</code></font>, or <font
         color="#663300"><code>=</code></font><font color="#663300"><code>X'3F7C'</code></font>.&nbsp;
+
 
 
 
@@ -3305,6 +3410,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
     So the value it assembles to is instead approximately
     0.013969839.&nbsp; But that still doesn't mean that everything is
     exactly as in System/360.&nbsp; In AP-101S, the fixed-point literals
@@ -3345,6 +3451,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
     the HAL/S compiler (<b>HAL/S-FC</b>), in the words of the "<a
       moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=68">HAL/S-FC
+
 
 
 
@@ -3431,6 +3538,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%20
     hex").&nbsp; Regarding this conversion of decimal to IBM Hex, <a
       moz-do-not-send="true"
 href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_10219231/page/44/mode/1up?view=theater">the
+
 
 
 
@@ -3537,6 +3645,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
 
 
 
+
     Consequently, even if the compiler reports a 100%-successful
     automated comparison, generated data not printed in the assembly
     listings has not been checked and may not match.<br>
@@ -3552,6 +3661,7 @@ href="https://archive.org/details/bitsavers_ibm360asmGLanguageRel21197201_102192
       some are not.&nbsp; I won't bore you with the details, as you can
       read about them in <a moz-do-not-send="true"
         href="Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=34">the
+
 
 
 
@@ -3641,6 +3751,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
           2-2 of the AP-101S Principles of Operation</a> tells us about
         one difference.&nbsp; When an SRS-type instruction specifies a
         base register (<font color="#663300"><code>B2</code></font>)
@@ -3652,6 +3763,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
         What does it mean to use "no" base register?&nbsp; <a
           moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20AP-101S.pdf#page=40">Several
+
 
 
 
@@ -3731,6 +3843,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
       As well, the latter (indexed) of the two cases allows the syntax</p>
     <blockquote>
       <pre><font color="#663300"><i>OPCODE</i>	</font><font color="#663300">	R1,D2(X2)</font></pre>
@@ -3768,6 +3881,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
       card game known as Fizzbin</a> which was developed at roughly the
     same time.<br>
     <h2><a name="uninitializedMemory"></a>Uninitialized Memory</h2>
@@ -3783,6 +3897,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
         AP-101S POO explains (p. 9-16), "causes an interruption and a
         program status word switch".&nbsp; (The second halfword is the
         operand for <font color="#663300"><code>SVC</code></font>.)&nbsp;
+
 
 
 
@@ -3929,6 +4044,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
       discarding the fractional portion, and representing the remaining
       integer in 2's-complement form.<br>
     </p>
@@ -3978,6 +4094,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
 
 
 
+
         ASM101S/ folder of the Virtual AGC software tree</a>, and the
       top-level source-code file is itself called ASM101S.py.&nbsp; The
       reason that you can invoke the program just with the name
@@ -4012,6 +4129,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
         so on.&nbsp; This means that at the end of the acquisition pass,
         no more symbols of the form <code>&amp;<i>SOMETHING</i></code>
         remain, nor any "sequence symbols" (i.e., labels of the form <code>.<i>SOMETHING</i></code>).&nbsp;
+
 
 
 
@@ -4233,7 +4351,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Shuttle%20GPC%20Software%20Model%20
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-05-28<br>
+          2026-08-16<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
