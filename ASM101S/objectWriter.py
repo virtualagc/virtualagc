@@ -253,11 +253,26 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
         if rldEntries:
             seqNum = writeRLD(f, rldEntries, seqNum)
         
-        entryEsdId, entryAddr = None, None
-        if entries and (firstName := next(iter(entries))) and (sym := symtab.get(firstName)):
-            entryEsdId = sectIdMap.get(sym.get('section', ''), 1)
-            entryAddr = sym.get('address', 0) * 2
-        
-        writeEND(f, entryEsdId, entryAddr, "ASM101S 0.00", seqNum)
+        # THE END RECORD CARRIES NO ENTRY POINT, because no source names one.
+        # This used to take `next(iter(entries))` -- an arbitrary element of a
+        # SET -- and write that symbol's address into the END record.  Two
+        # things were wrong with it.
+        #
+        # It was not even deterministic: hash order varies from process to
+        # process, so BILDNEW5 assembled twice gave `END entry=0303C` one time
+        # and `END entry=034FA` the next, with all 5022 other lines of the
+        # normalized dump identical, and the value reached the linked image.
+        #
+        # And there was nothing to choose from in the first place.  An entry
+        # point comes from the END statement's operand, `END SYMBOL`, and
+        # EVERY module here writes a bare END: 702 of 702 across OI340600,
+        # OI301700 and RUNASM, with 101 of them declaring ENTRY symbols that
+        # this code was picking among.  A bare END specifies no entry point,
+        # and the loader takes the start of the first control section.
+        #
+        # If a source ever does name one, model101.py must capture it first --
+        # `END` there simply breaks out of the loop and the operand is
+        # discarded -- and the value should be passed in rather than guessed.
+        writeEND(f, None, None, "ASM101S 0.00", seqNum)
     
     return filename
