@@ -4,3 +4,14 @@ yaGPC2.exe
 *.obj
 *.pdb
 *.ilk
+
+# Run output, written into the source directory by a debug/emulation run
+# rather than into build/.
+COMMON.out
+COMMON.out.bin.gz
+debug-display.txt
+
+# An ELF executable sitting beside the already-ignored yaGPC2.  No rule in
+# this directory's makefile builds it, so it arrived from somewhere else --
+# the shared yaGpcIntegration/ build, most likely -- but a binary is a binary.
+yaGPC
