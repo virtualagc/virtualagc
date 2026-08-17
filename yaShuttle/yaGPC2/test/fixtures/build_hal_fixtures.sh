@@ -1,7 +1,8 @@
 #!/bin/bash
 # Reproduces hello.fcm, read_write.fcm, read_eof_onerror.fcm,
 # countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm,
-# updatepriority.fcm, prio.fcm, runtimeprio.fcm, and processboolean.fcm
+# updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm,
+# schedulein.fcm, scheduleat.fcm, and schedulerepeat.fcm
 # (plus their -lnk101.json symbol tables) via the real HAL/S toolchain
 # documented in ../../tools.md (HALSFC + lnk101, both expected on PATH).
 # Not run automatically (no CI machine has the toolchain) — kept for
@@ -90,6 +91,23 @@
 #                          yaHALMAT2 cross-check: yaHALMAT2 itself errors
 #                          out on this construct (a real yaHALMAT2 gap,
 #                          not a yaGPC2 one -- see problems.md).
+#   schedulein.fcm        <- schedulein.hal (checked in alongside this
+#                          script — SCHEDULE NEXT IN 1.5 PRIORITY(80);,
+#                          the delayed-initiation form, no REPEAT;
+#                          confirmed byte-diffable against yaHALMAT2 --
+#                          see problems.md 7.7).
+#   scheduleat.fcm        <- scheduleat.hal (checked in alongside this
+#                          script — SCHEDULE NEXT AT 1.5 PRIORITY(80);,
+#                          the absolute-time-initiation form, no REPEAT;
+#                          confirmed byte-diffable against yaHALMAT2 --
+#                          see problems.md 7.7).
+#   schedulerepeat.fcm    <- schedulerepeat.hal (checked in alongside
+#                          this script — SCHEDULE NEXT IN 1.5
+#                          PRIORITY(80), REPEAT EVERY 1.0;, proving the
+#                          REPEAT phase anchor is the IN deadline (1.5,
+#                          2.5, 3.5, 4.5), not t=0; confirmed
+#                          byte-diffable against yaHALMAT2 -- see
+#                          problems.md 7.7).
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -104,6 +122,9 @@ UPDATEPRIORITY_HAL="$(dirname "$0")/updatepriority.hal"
 PRIO_HAL="$(dirname "$0")/prio.hal"
 RUNTIMEPRIO_HAL="$(dirname "$0")/runtimeprio.hal"
 PROCESSBOOLEAN_HAL="$(dirname "$0")/processboolean.hal"
+SCHEDULEIN_HAL="$(dirname "$0")/schedulein.hal"
+SCHEDULEAT_HAL="$(dirname "$0")/scheduleat.hal"
+SCHEDULEREPEAT_HAL="$(dirname "$0")/schedulerepeat.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -131,5 +152,8 @@ build "$UPDATEPRIORITY_HAL" updatepriority updatepriority
 build "$PRIO_HAL" prio prio
 build "$RUNTIMEPRIO_HAL" runtimeprio runtimeprio
 build "$PROCESSBOOLEAN_HAL" processboolean processboolean
+build "$SCHEDULEIN_HAL" SCHIN schedulein
+build "$SCHEDULEAT_HAL" SCHAT scheduleat
+build "$SCHEDULEREPEAT_HAL" SCHINREP schedulerepeat
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm (+ -lnk101.json)"

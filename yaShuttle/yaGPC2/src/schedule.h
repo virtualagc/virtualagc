@@ -157,16 +157,28 @@ typedef struct {
 void sched_init(Scheduler *s);
 
 /* Called from halucp.c's SVC dispatch for SVC #1 (SCHEDULE) once its
- * FLAGS word is recognized as the one signature this cut supports
- * (TASK, REPEAT EVERY, nothing else). priority/pdeAddr/repeatIntervalUs
- * are already decoded by the caller (priority from the SVC param byte,
- * pdeAddr via hal_get32, repeatIntervalUs from FPR2-3 via floatIBM.h).
- * Never changes which context is live -- the calling program's own NIA
- * just continues normally afterward, matching how every other
- * already-handled SVC (SEND ERROR, SIGNAL/SET/RESET) behaves. Always
- * returns true (this file only gets called once the FLAGS word is
- * already confirmed recognized). */
-bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr, double repeatIntervalUs);
+ * FLAGS word is recognized as one of the signatures this cut supports
+ * (TASK, with any combination of a plain/AT/IN initiation and a plain/
+ * REPEAT EVERY cycling -- see halucp.c's own FLAGS-bit decode).
+ * priority/pdeAddr/repeatIntervalUs are already decoded by the caller
+ * (priority from the SVC param byte, pdeAddr via mcm_get16,
+ * repeatIntervalUs from FPR2-3 via floatIBM.h). initialWakeDeadlineUs is
+ * the absolute cpu->elapsedTimeUs value at which the task should first
+ * become ready -- plain SCHEDULE passes cpu->elapsedTimeUs itself (due
+ * now, unchanged from this function's original due-immediately-only
+ * behavior); AT/IN pass an already-computed absolute deadline (already
+ * clamped to not be in the past, matching sched_handle_wait_until_svc's
+ * "does not leave READY" precedent for an AT time already passed). This
+ * same value anchors REPEAT EVERY's own phase reference too, so
+ * "SCHEDULE X IN 1.5, REPEAT EVERY 1.0" fires at 1.5, 2.5, 3.5, ...
+ * (anchored to the actual first-due time), not 0, 1, 2, ... Never
+ * changes which context is live -- the calling program's own NIA just
+ * continues normally afterward, matching how every other already-
+ * handled SVC (SEND ERROR, SIGNAL/SET/RESET) behaves. Always returns
+ * true (this file only gets called once the FLAGS word is already
+ * confirmed recognized). */
+bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr,
+                                double initialWakeDeadlineUs, double repeatIntervalUs);
 
 /* Called from halucp.c's SVC dispatch for SVC #6 (delta-time WAIT).
  * Suspends the currently-running context (lazily creating the "primal"

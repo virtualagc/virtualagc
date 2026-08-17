@@ -181,7 +181,8 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
     }
 }
 
-bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr, double repeatIntervalUs) {
+bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr,
+                                double initialWakeDeadlineUs, double repeatIntervalUs) {
     int idx = sched_find_by_pde(s, pdeAddr);
     if (idx < 0) idx = sched_alloc_slot(s);
     if (idx < 0) return true; /* out of task slots -- nothing sensible to
@@ -197,16 +198,20 @@ bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pd
     t->isPrimal = false;
     t->hasRepeat = repeatIntervalUs > 0;
     t->repeatIntervalUs = repeatIntervalUs;
-    t->repeatPhaseRefUs = cpu->elapsedTimeUs;
-    /* REPEAT EVERY's first firing is due immediately at SCHEDULE time,
-     * not after waiting one full interval -- confirmed against
-     * yaHALMAT2's own output for the identical COUNTUP.hal (200 firings
-     * of a REPEAT EVERY 1.0 task inside a 199.5-second WAIT: firings at
-     * phaseRef+0, +1, ..., +199, i.e. 200 of them, not 199). Subsequent
-     * firings (see sched_handle_task_close's re-arm) are still anchored
-     * to this same phaseRef every +N*interval, so this only changes when
-     * firing #1 happens, not the cadence after it. */
-    t->wakeDeadlineUs = t->repeatPhaseRefUs;
+    /* Plain SCHEDULE's first firing is due immediately at SCHEDULE time
+     * (caller passes cpu->elapsedTimeUs itself as initialWakeDeadlineUs
+     * in that case) -- confirmed against yaHALMAT2's own output for the
+     * identical COUNTUP.hal (200 firings of a REPEAT EVERY 1.0 task
+     * inside a 199.5-second WAIT: firings at phaseRef+0, +1, ..., +199,
+     * i.e. 200 of them, not 199). SCHEDULE...AT/IN instead pass an
+     * already-computed, already-clamped-to-the-future absolute deadline
+     * as initialWakeDeadlineUs (see this function's own header comment
+     * in schedule.h). Either way, REPEAT EVERY's own re-arm (see
+     * sched_handle_task_close) stays anchored to this same phaseRef
+     * every +N*interval, so this only changes when firing #1 happens,
+     * not the cadence after it. */
+    t->repeatPhaseRefUs = initialWakeDeadlineUs;
+    t->wakeDeadlineUs = initialWakeDeadlineUs;
     t->state = TASK_STATE_DORMANT;
     sched_set_active_flag(cpu, pdeAddr, true);
 

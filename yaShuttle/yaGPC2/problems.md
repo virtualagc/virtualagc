@@ -3011,6 +3011,49 @@ paths deterministically at the C level.
 New fixture `test/fixtures/processboolean.hal`, exercised by
 `test_scheduler.sh` under both `--pacing` modes.
 
+### 7.7 `SCHEDULE ... IN`/`AT` (delayed initiation) — done
+
+Sixth item in the runtime-feature-survey implementation order. Tracing
+`SCHEDULE NEXT IN 1.5 PRIORITY(80);` and `SCHEDULE NEXT AT 1.5
+PRIORITY(80);` against the real compiled programs showed both compile to
+the same `SVC #1` as plain immediate `SCHEDULE`, distinguished only by
+the FLAGS word (`mem[ea+1]`): `IN` sets bit `0x0008`, `AT` sets bit
+`0x0004` (plain immediate `SCHEDULE` sets neither). In both cases an `LED
+F0,...` immediately before the `SVC` loads the time value into FPR0-1 —
+the identical register pair delta-time `WAIT` and `WAIT UNTIL` already
+use, not a new dedicated pair.
+
+`halucp.c`'s `SCHEDULE` branch (previously an exact match against the
+single signature `0x0081`, the only case needed before this item) was
+generalized to decode the recognized FLAGS bits independently (`TASK`,
+`AT`, `IN`, `REPEAT EVERY`) and reject anything else (still an
+unhandled-SVC trap, same as before — `DEPENDENT`/`ON`/`CANCEL` remain
+out of scope). `sched_handle_schedule_svc` (`schedule.h`/`.c`) gained a
+new `initialWakeDeadlineUs` parameter — an absolute `cpu->elapsedTimeUs`
+value, computed by `halucp.c` per case (`IN`: `elapsedTimeUs + interval`;
+`AT`: the absolute time itself, clamped up to `elapsedTimeUs` if already
+past, mirroring `sched_handle_wait_until_svc`'s existing precedent for a
+past `WAIT UNTIL` deadline; plain `SCHEDULE`: `elapsedTimeUs`, i.e. due
+now, unchanged behavior) — that seeds both the task's first
+`wakeDeadlineUs` and, when combined with `REPEAT EVERY`, its
+`repeatPhaseRefUs`. This was the one design question worth checking
+empirically rather than assuming: does a delayed first firing shift the
+whole repeat cycle's phase, or does the cycle stay anchored to `t=0`
+regardless? A dedicated fixture (`SCHEDULE NEXT IN 1.5 PRIORITY(80),
+REPEAT EVERY 1.0;`) settled it — firings land at 1.5, 2.5, 3.5, 4.5, not
+0.5, 1.5, 2.5, 3.5 — i.e. the repeat phase is anchored to the delayed
+initiation deadline, not to `t=0`. `test_schedule.c`'s new
+`test_schedule_in_delays_first_firing_and_anchors_repeat` is the
+deterministic regression test for this specific interaction.
+
+Three new fixtures, all byte-diffed against `yaHALMAT2` (unlike
+`RUNTIME()`/`UPDATE PRIORITY`'s own timing-sensitive fixtures in 7.4/7.5,
+these are fully deterministic — the wake-up ordering and firing counts
+don't depend on real-instruction-count drift the way two independently
+`SCHEDULE`d, simultaneously-due `REPEAT EVERY` tasks do):
+`test/fixtures/schedulein.hal`, `scheduleat.hal`, `schedulerepeat.hal`,
+each exercised by `test_scheduler.sh` under both `--pacing` modes.
+
 ---
 
 ## Methodology and caveats

@@ -166,20 +166,33 @@ F('Real-Time: Task/Process', 'Process termination paths (RETURN / CLOSE / TERMIN
 F('Real-Time: SCHEDULE', 'SCHEDULE (immediate initiation, PRIORITY, DEPENDENT)',
   'SCHEDULE label PRIORITY(a) DEPENDENT; creates a process, READY immediately.',
   'USA003087 §13.4', 'partial',
-  "PRIORITY and immediate-READY are implemented (sched_handle_schedule_svc). DEPENDENT is parsed "
-  "as part of the recognized FLAGS-word signature (0x0081 = TASK, REPEAT EVERY, no AT/IN/ON/"
-  "DEPENDENT/CANCEL) but any FLAGS word WITH DEPENDENT set falls through unrecognized -- so a "
-  "DEPENDENT SCHEDULE is effectively not_implemented, only non-DEPENDENT is covered.",
+  "PRIORITY and immediate-READY are implemented (sched_handle_schedule_svc). The FLAGS-word decode "
+  "in halucp.c is now general (any combination of TASK/AT/IN/REPEAT EVERY bits, not just the one "
+  "0x0081 signature -- see the IN/AT entries below), but DEPENDENT and ON (event-expression) bits "
+  "are still unrecognized and any FLAGS word carrying them falls through to the unhandled-SVC-trap "
+  "path -- so a DEPENDENT SCHEDULE is effectively not_implemented, only non-DEPENDENT/non-ON forms "
+  "are covered.",
   'tested_dedicated', 'test_schedule.c scenario 1 (two one-shot SCHEDULEs, different priorities).')
 F('Real-Time: SCHEDULE', 'SCHEDULE ... IN interval (delayed initiation, relative)',
   'Process WAITING until interval seconds after schedule time, then READY.',
-  'USA003087 §13.4', 'not_implemented',
-  'Only the single FLAGS-word signature 0x0081 (TASK, REPEAT EVERY, nothing else) is recognized '
-  'by halucp.c; any other combination -- including a plain IN with no REPEAT -- falls through to '
-  'the generic unhandled-SVC-trap path.', 'untested')
+  'USA003087 §13.4', 'implemented',
+  "halucp.c decodes FLAGS bit 0x0008 (IN) and reads the interval from FPR0-1 (the same FPR pair "
+  "delta-time WAIT and WAIT UNTIL already use), computing an absolute wake deadline "
+  "(cpu->elapsedTimeUs + interval) passed to sched_handle_schedule_svc's new initialWakeDeadlineUs "
+  "parameter. Combines correctly with REPEAT EVERY: the repeat phase anchors off the IN deadline, "
+  "not off t=0 (see test/fixtures/schedulerepeat.hal).",
+  'tested_dedicated',
+  "test/fixtures/schedulein.hal (byte-diffed against yaHALMAT2 via test_scheduler.sh) and "
+  "test_schedule.c's test_schedule_in_delays_first_firing_and_anchors_repeat (deterministic, also "
+  "covers the IN+REPEAT EVERY phase-anchoring interaction).")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... AT time (delayed initiation, absolute)',
   'Process WAITING until absolute real time is reached, then READY.',
-  'USA003087 §13.4', 'not_implemented', 'Same FLAGS-word gate as SCHEDULE...IN above.', 'untested')
+  'USA003087 §13.4', 'implemented',
+  "halucp.c decodes FLAGS bit 0x0004 (AT) and reads the absolute time from FPR0-1, clamping to "
+  "cpu->elapsedTimeUs if already past (mirroring sched_handle_wait_until_svc's own precedent for a "
+  "past WAIT UNTIL deadline) before passing it as initialWakeDeadlineUs.",
+  'tested_dedicated',
+  "test/fixtures/scheduleat.hal, byte-diffed against yaHALMAT2 via test_scheduler.sh.")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT (cyclic, immediate recycling)',
   'Next cycle starts immediately when one pass ends, until an UNTIL condition cancels it.',
   'USA003087 §23.5', 'not_implemented', 'Same FLAGS-word gate.', 'untested')

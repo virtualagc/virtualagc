@@ -183,8 +183,8 @@ static void test_priority_ordering_and_context_roundtrip(void) {
     /* Two one-shot SCHEDULEs (repeatIntervalUs=0), both due immediately
      * (elapsedTimeUs is still 0.0 -- freshly zeroed by ageharness_init --
      * so both phaseRefs land on the same instant). */
-    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, 0.0), "SCHEDULE LOWTASK handled");
-    CHECK(sched_handle_schedule_svc(sched, cpu, 200, hiPde, 0.0), "SCHEDULE HITASK handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE LOWTASK handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 200, hiPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE HITASK handled");
     CHECK(psw_get_nia(&cpu->psw) == primalResumeAddr,
           "SCHEDULE never changes which context is live (NIA still the primal's)");
 
@@ -242,7 +242,7 @@ static void test_repeat_every_counter_and_virtual_time(void) {
     const uint32_t primalResumeAddr = 0x3000;
     psw_set_nia(&cpu->psw, primalResumeAddr);
 
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, taskPde, 1000000.0 /* REPEAT EVERY 1.0s */),
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, taskPde, cpu->elapsedTimeUs, 1000000.0 /* REPEAT EVERY 1.0s */),
           "SCHEDULE ... REPEAT EVERY handled");
     CHECK(sched_handle_wait_svc(sched, cpu, 3.5), "WAIT 3.5 handled");
     CHECK(psw_get_nia(&cpu->psw) == taskEntry, "REPEAT task's first firing is dispatched immediately (t=0), not after one full interval");
@@ -314,8 +314,8 @@ static void test_update_priority_flips_dispatch_order(void) {
     uint32_t hiEntry = build_close_only_task(mem, 0x2000);
     uint32_t hiPde = build_pde(mem, 0x2010, hiEntry);
 
-    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, 0.0), "SCHEDULE LOWTASK(10) handled");
-    CHECK(sched_handle_schedule_svc(sched, cpu, 90, hiPde, 0.0), "SCHEDULE HITASK(90) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE LOWTASK(10) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 90, hiPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE HITASK(90) handled");
 
     /* A pdeAddr matching no active task is a documented silent no-op --
      * confirm it doesn't corrupt anything before the real update. */
@@ -357,7 +357,7 @@ static void test_terminate_named_and_self(void) {
     const uint32_t primalResumeAddr = 0x3000;
     psw_set_nia(&cpu->psw, primalResumeAddr);
 
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, repPde, 1000000.0), "SCHEDULE ... REPEAT EVERY 1.0 handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, repPde, cpu->elapsedTimeUs, 1000000.0), "SCHEDULE ... REPEAT EVERY 1.0 handled");
     CHECK(sched_handle_wait_svc(sched, cpu, 0.5), "WAIT 0.5 handled (before the task's first firing)");
     /* WAIT 0.5 doesn't reach the task's own t=0 firing yet (WAIT's own
      * deadline, 0.5s, is earlier than the task's t=0 firing -- both are
@@ -379,7 +379,7 @@ static void test_terminate_named_and_self(void) {
     uint32_t selfPde = build_pde(mem2, 0x1010, selfEntry);
     psw_set_nia(&cpu2->psw, 0x3000);
 
-    CHECK(sched_handle_schedule_svc(sched2, cpu2, 80, selfPde, 0.0), "SCHEDULE (one-shot) handled");
+    CHECK(sched_handle_schedule_svc(sched2, cpu2, 80, selfPde, cpu2->elapsedTimeUs, 0.0), "SCHEDULE (one-shot) handled");
     CHECK(sched_handle_wait_svc(sched2, cpu2, 0.0), "WAIT 0 dispatches the task immediately");
     CHECK(psw_get_nia(&cpu2->psw) == selfEntry, "task dispatched (sanity check before self-TERMINATE)");
     CHECK(sched_handle_terminate_self_svc(sched2, cpu2), "self-TERMINATE handled");
@@ -428,7 +428,7 @@ static void test_runtime_and_prio_builtins(void) {
     Scheduler *sched = &age.halUCP.scheduler;
     uint32_t taskEntry = build_close_only_task(mem, 0x1000);
     uint32_t taskPde = build_pde(mem, 0x1010, taskEntry);
-    CHECK(sched_handle_schedule_svc(sched, cpu, 137, taskPde, 0.0), "SCHEDULE (priority 137) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 137, taskPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE (priority 137) handled");
     CHECK(sched_handle_wait_svc(sched, cpu, 0.0), "WAIT 0 dispatches the task immediately");
     CHECK(psw_get_nia(&cpu->psw) == taskEntry, "task dispatched (sanity check before PRIO SVC)");
 
@@ -472,7 +472,7 @@ static void test_process_name_as_boolean(void) {
     uint32_t pde = build_pde(mem, 0x1010, entry);
 
     CHECK((mcm_get16(mem, pde) & 1) == 0, "PDE+0 bit 0 starts clear (never SCHEDULEd yet)");
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde, 0.0), "SCHEDULE (one-shot) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde, cpu->elapsedTimeUs, 0.0), "SCHEDULE (one-shot) handled");
     CHECK((mcm_get16(mem, pde) & 1) == 1, "PDE+0 bit 0 set immediately after SCHEDULE (ACTIVE)");
 
     CHECK(sched_handle_wait_svc(sched, cpu, 0.0), "WAIT 0 dispatches the task immediately");
@@ -486,10 +486,75 @@ static void test_process_name_as_boolean(void) {
      * clears the flag here). */
     uint32_t entry2 = build_close_only_task(mem, 0x2000);
     uint32_t pde2 = build_pde(mem, 0x2010, entry2);
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde2, 1000000.0), "SCHEDULE (REPEAT EVERY) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde2, cpu->elapsedTimeUs, 1000000.0), "SCHEDULE (REPEAT EVERY) handled");
     CHECK((mcm_get16(mem, pde2) & 1) == 1, "second task's PDE+0 bit 0 set after SCHEDULE");
     CHECK(sched_handle_terminate_named_svc(sched, cpu, &pde2, 1), "TERMINATE (named) handled");
     CHECK((mcm_get16(mem, pde2) & 1) == 0, "second task's PDE+0 bit 0 cleared after TERMINATE, despite being a REPEAT EVERY task");
+
+    ageharness_free(&age);
+}
+
+/* ---------------------------------------------------------------------
+ * 7. SCHEDULE ... IN (delayed initiation, halucp.c's FLAGS bit 0x0008)
+ *    combined with REPEAT EVERY: the task's first firing must wait for
+ *    the IN delay (not fire immediately like a plain SCHEDULE), and
+ *    every subsequent REPEAT firing must be phase-anchored off that same
+ *    delayed initialWakeDeadlineUs (1.5, 2.5, 3.5, ...), not off t=0
+ *    (0.5, 1.5, 2.5, ... would be the wrong anchor). halucp.c itself
+ *    only translates FLAGS/FPR0-1 into initialWakeDeadlineUs -- this
+ *    calls sched_handle_schedule_svc directly with a hand-computed
+ *    deadline, exercising exactly the same schedule.c logic
+ *    deterministically. Cross-checked against a real compiled fixture
+ *    (SCHEDULE NEXT IN 1.5 PRIORITY(80), REPEAT EVERY 1.0) matching
+ *    yaHALMAT2's own output byte-for-byte -- see problems.md 7.7.
+ * ------------------------------------------------------------------- */
+
+static void test_schedule_in_delays_first_firing_and_anchors_repeat(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    const uint32_t counterDisp = 40;
+    mcm_set16(mem, counterDisp, 0, false);
+
+    uint32_t taskEntry = build_increment_and_close_task(mem, 0x200, counterDisp);
+    uint32_t taskPde = build_pde(mem, 0x300, taskEntry);
+
+    const uint32_t primalResumeAddr = 0x3000;
+    psw_set_nia(&cpu->psw, primalResumeAddr);
+
+    /* SCHEDULE NEXT IN 1.5, REPEAT EVERY 1.0 -- initialWakeDeadlineUs is
+     * elapsedTimeUs (0) + 1.5s, exactly what halucp.c's hasIn branch
+     * would compute from FPR0-1. */
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, taskPde, cpu->elapsedTimeUs + 1500000.0, 1000000.0),
+          "SCHEDULE ... IN, REPEAT EVERY handled");
+    CHECK(sched_handle_wait_svc(sched, cpu, 5.0), "WAIT 5.0 handled");
+    CHECK(psw_get_nia(&cpu->psw) == taskEntry, "first firing dispatched only once the IN delay elapses, not immediately");
+    CHECK(close_to(cpu->elapsedTimeUs, 1500000.0), "elapsedTimeUs jumped straight to the IN deadline (1.5s), not t=0");
+
+    /* Expected elapsedTimeUs after each firing's own CLOSE: firings 1-3
+     * hand off to the next REPEAT firing, phase-anchored off 1.5s (2.5,
+     * 3.5, 4.5); firing 4's CLOSE instead hands off to the primal (its
+     * 5.0s WAIT deadline arrives before firing 5's would-be 5.5s). */
+    const double expectedElapsedAfterFiring[] = {2500000.0, 3500000.0, 4500000.0, 5000000.0};
+    const int expectedFirings = 4;
+    int firing = 0;
+    while (psw_get_nia(&cpu->psw) != primalResumeAddr && firing < 8) {
+        for (int i = 0; i < 5; i++) ap101_exec1(&age.gpc);
+        if (firing < expectedFirings) {
+            char label[80];
+            snprintf(label, sizeof label, "elapsedTimeUs approximately %.0f after firing %d",
+                     expectedElapsedAfterFiring[firing], firing + 1);
+            CHECK(close_to(cpu->elapsedTimeUs, expectedElapsedAfterFiring[firing]), label);
+        }
+        firing++;
+    }
+
+    CHECK(firing == expectedFirings, "exactly 4 firings occurred (at 1.5, 2.5, 3.5, 4.5) within the 5.0s WAIT");
+    CHECK(mcm_get16(mem, counterDisp) == 4, "memory counter reached the expected value (4)");
+    CHECK(psw_get_nia(&cpu->psw) == primalResumeAddr, "primal resumed once its own WAIT deadline beat the 5th firing's");
 
     ageharness_free(&age);
 }
@@ -501,6 +566,7 @@ int main(void) {
     test_terminate_named_and_self();
     test_runtime_and_prio_builtins();
     test_process_name_as_boolean();
+    test_schedule_in_delays_first_firing_and_anchors_repeat();
     if (failures == 0) {
         printf("all scheduler-mechanics tests passed\n");
     } else {

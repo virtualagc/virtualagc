@@ -111,4 +111,15 @@ run_case "prio/signal" "signal" "fixtures/prio.fcm" "fixtures/prio-lnk101.json" 
 run_case "processboolean/burst"  "burst"  "fixtures/processboolean.fcm" "fixtures/processboolean-lnk101.json" "fixtures/processboolean_golden.txt"
 run_case "processboolean/signal" "signal" "fixtures/processboolean.fcm" "fixtures/processboolean-lnk101.json" "fixtures/processboolean_golden.txt"
 
+# SCHEDULE ... IN / AT (delayed initiation, halucp.c's FLAGS bits 0x0008/
+# 0x0004) and IN combined with REPEAT EVERY (proving the repeat phase is
+# anchored to the IN deadline, not t=0) -- see sched_handle_schedule_svc
+# (src/schedule.h/.c) and problems.md 7.7.
+run_case "schedulein/burst"  "burst"  "fixtures/schedulein.fcm" "fixtures/schedulein-lnk101.json" "fixtures/schedulein_golden.txt"
+run_case "schedulein/signal" "signal" "fixtures/schedulein.fcm" "fixtures/schedulein-lnk101.json" "fixtures/schedulein_golden.txt"
+run_case "scheduleat/burst"  "burst"  "fixtures/scheduleat.fcm" "fixtures/scheduleat-lnk101.json" "fixtures/scheduleat_golden.txt"
+run_case "scheduleat/signal" "signal" "fixtures/scheduleat.fcm" "fixtures/scheduleat-lnk101.json" "fixtures/scheduleat_golden.txt"
+run_case "schedulerepeat/burst"  "burst"  "fixtures/schedulerepeat.fcm" "fixtures/schedulerepeat-lnk101.json" "fixtures/schedulerepeat_golden.txt"
+run_case "schedulerepeat/signal" "signal" "fixtures/schedulerepeat.fcm" "fixtures/schedulerepeat-lnk101.json" "fixtures/schedulerepeat_golden.txt"
+
 exit $fail

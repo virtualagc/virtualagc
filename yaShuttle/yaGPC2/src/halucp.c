@@ -337,14 +337,26 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         uint32_t svcLow = svcCode & 0xff;
         uint32_t priority = (svcCode >> 8) & 0xff;
         if (svcLow == 0x01) {
-            /* SCHEDULE. Only the one FLAGS-word signature this cut
-             * supports (TASK, REPEAT EVERY, no AT/IN/ON/DEPENDENT/
-             * CANCEL -- confirmed 0x0081 against a real compiled
-             * program) is recognized; anything else falls through to
-             * the unhandled-trap path below, exactly like today, rather
-             * than mishandling a variant this cut doesn't understand. */
+            /* SCHEDULE. FLAGS-word bits confirmed empirically against
+             * real compiled programs, one variant at a time: 0x0001 =
+             * "TASK" marker (set on every signature this cut supports;
+             * a PROGRAM-process target, if that ever sets a different
+             * bit, is out of scope), 0x0004 = AT, 0x0008 = IN, 0x0080 =
+             * REPEAT EVERY (0x0081 was this cut's very first, and still
+             * most-tested, signature: TASK + REPEAT EVERY together).
+             * Neither ON/DEPENDENT/CANCEL/REPEAT-AFTER/REPEAT-UNTIL nor
+             * AT-and-IN-together are recognized -- any FLAGS word with a
+             * bit outside this set, or with both AT and IN set, falls
+             * through to the unhandled-trap path below, exactly like
+             * today, rather than mishandling a variant this cut doesn't
+             * understand. */
             uint32_t flags = mcm_get16(&h->cpu->mainStorage, ea + 1);
-            if (flags == 0x0081) {
+            const uint32_t recognizedMask = 0x0001 | 0x0004 | 0x0008 | 0x0080;
+            bool hasTask = (flags & 0x0001) != 0;
+            bool hasAt = (flags & 0x0004) != 0;
+            bool hasIn = (flags & 0x0008) != 0;
+            bool hasRepeatEvery = (flags & 0x0080) != 0;
+            if (hasTask && !(hasAt && hasIn) && (flags & ~recognizedMask) == 0) {
                 /* The PDE reference is a single halfword (not a 32-bit
                  * hal_get32 read -- confirmed empirically: the halfword
                  * immediately after it is unrelated padding, not a real
@@ -358,9 +370,38 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                  * region after COUNTUP's own), with zero conversion
                  * factor. */
                 uint32_t pdeAddr = mcm_get16(&h->cpu->mainStorage, ea + 2);
-                FloatIBM every = fibm_from64(register_get32(cpu_f(h->cpu, 2)), register_get32(cpu_f(h->cpu, 3)));
-                double repeatIntervalUs = fibm_to_float(&every) * 1e6;
-                return sched_handle_schedule_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr, repeatIntervalUs);
+
+                /* AT/IN's own time value is in FPR0-1 -- confirmed
+                 * empirically (a real compiled SCHEDULE...IN/AT loads
+                 * its argument there), the same register pair delta-time
+                 * WAIT/WAIT UNTIL already use. REPEAT EVERY's own
+                 * interval stays in FPR2-3, unrelated and independent --
+                 * a SCHEDULE can carry both an AT/IN initiation and a
+                 * REPEAT EVERY cycling clause at once. */
+                double initialWakeDeadlineUs;
+                if (hasIn) {
+                    FloatIBM in = fibm_from64(register_get32(cpu_f(h->cpu, 0)), register_get32(cpu_f(h->cpu, 1)));
+                    initialWakeDeadlineUs = h->cpu->elapsedTimeUs + fibm_to_float(&in) * 1e6;
+                } else if (hasAt) {
+                    FloatIBM at = fibm_from64(register_get32(cpu_f(h->cpu, 0)), register_get32(cpu_f(h->cpu, 1)));
+                    initialWakeDeadlineUs = fibm_to_float(&at) * 1e6;
+                    /* USA003087 13.4: "A time already in the past ->
+                     * immediately READY" -- same clamp
+                     * sched_handle_wait_until_svc already applies for
+                     * WAIT UNTIL. */
+                    if (initialWakeDeadlineUs < h->cpu->elapsedTimeUs) initialWakeDeadlineUs = h->cpu->elapsedTimeUs;
+                } else {
+                    initialWakeDeadlineUs = h->cpu->elapsedTimeUs;
+                }
+
+                double repeatIntervalUs = 0.0;
+                if (hasRepeatEvery) {
+                    FloatIBM every = fibm_from64(register_get32(cpu_f(h->cpu, 2)), register_get32(cpu_f(h->cpu, 3)));
+                    repeatIntervalUs = fibm_to_float(&every) * 1e6;
+                }
+
+                return sched_handle_schedule_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr,
+                                                  initialWakeDeadlineUs, repeatIntervalUs);
             }
         } else if (svcLow == 0x06) {
             /* WAIT, delta-time variant. */
