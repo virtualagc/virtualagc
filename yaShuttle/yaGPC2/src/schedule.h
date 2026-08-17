@@ -34,9 +34,64 @@
  *   double-precision seconds: AT/IN in FPR0-1 (unused here), REPEAT
  *   EVERY/AFTER in FPR2-3, UNTIL in FPR4-5 (unused here).
  *
- *   WAIT is SVC #6 (delta-time -- the only variant this file handles),
- *   #7 (UNTIL), #8 (event-expression), or #9 (DEPENDENT); delta-time in
- *   FPR0-1.
+ *   WAIT is SVC #6 (delta-time), #7 (UNTIL), #8 (event-expression), or
+ *   #9 (DEPENDENT, out of scope -- no task is ever created as anyone's
+ *   dependent, since SCHEDULE's own FLAGS-word gate never recognizes
+ *   DEPENDENT); delta-time in FPR0-1.
+ *
+ * Event expressions (WAIT FOR SVC #8, and SCHEDULE ... ON, which reuses
+ * the same descriptor format via the FLAGS-word AT+IN-bits-combined
+ * signature below) -- confirmed empirically against 7 real compiled
+ * signatures (N=1 plain, N=1 NOT, N=2/3/4 AND-chains, N=2/3 OR-chains),
+ * and against the real HAL/S-FC PASS2 compiler's own behavior: it
+ * rejects any *mixed* expression -- (A AND B) OR C, A AND NOT B -- with
+ * "E102 ... INVALID EVENT EXPRESSION", so a single process name, a
+ * single negated process name, or a flat homogeneous AND-chain/OR-chain
+ * are the *entire* legal design space, not a partial case of something
+ * bigger this file is choosing not to support yet.
+ *   SVC #8's own parameter word (mem[ea+1]) is a pointer to a compact
+ *   "event descriptor" living in the program's own static data:
+ *     descAddr+0: opcodeWord -- encodes both operand count and
+ *       AND/OR-ness. Top nibble (bits 12-15) = 2*(N-1), N = operand
+ *       count; each of the remaining three nibbles is a connector code
+ *       (3 = AND, 1 = OR) repeated N-1 times, zero-padded after that.
+ *       N=1 with no connector at all is the literal 0x0000; N=1 negated
+ *       (NOT <task>) is the distinct fixed value 0x1800, unrelated to
+ *       the count/connector scheme above (NOT never combines with
+ *       AND/OR or with N>1 -- the compiler itself forbids it).
+ *     descAddr+1: reserved, always observed 0x0000.
+ *     descAddr+2 .. descAddr+1+N: the N operand PDE addresses, flat
+ *       units (same convention as SCHEDULE/TERMINATE's own PROCESS/
+ *       target fields -- no decode_pde_far_pointer extension needed).
+ *   Each operand's truth value is its own PDE+0 bit 0 (ACTIVE), the
+ *   exact same bit "process name as Boolean" (USA003087 13.5) reads
+ *   directly -- see sched_set_active_flag's own comment in schedule.c.
+ *   USA003087 24.6 governs WAIT FOR's own semantics precisely: "If exp
+ *   is already TRUE when the WAIT statement is executed, the statement
+ *   has no effect" -- i.e. a WAIT FOR whose expression is already
+ *   satisfied does NOT suspend the caller at all, even briefly, and
+ *   does NOT give any other ready task a chance to run first (unlike
+ *   delta-time WAIT, which always hands off to sched_dispatch()
+ *   unconditionally). This is a real, spec-mandated behavioral
+ *   difference from every other WAIT-family SVC this file implements --
+ *   verified from the primary source text directly since no working
+ *   cross-tool oracle exists for this feature (yaHALMAT2 itself has a
+ *   confirmed bug here: it runs the awaited task and then simply never
+ *   resumes the waiting context, for the identical test program, at any
+ *   priority -- relayed upstream, not yet fixed).
+ *   SCHEDULE ... ON reuses the identical descriptor format, referenced
+ *   from SVC #1's own parameter block (ea+3, right after ea+2's PROCESS
+ *   field) whenever FLAGS has the AT bit (0x0004) AND the IN bit
+ *   (0x0008) both set together -- confirmed empirically that the real
+ *   compiler reuses those two existing bits combined as the ON marker,
+ *   rather than allocating ON a dedicated bit of its own. Unlike WAIT
+ *   FOR, SCHEDULE ... ON never blocks the calling context at all (like
+ *   every other SCHEDULE variant) -- it just marks the *target* task's
+ *   own readiness as event-gated instead of deadline-gated, until the
+ *   event fires. Combined with REPEAT EVERY is not empirically
+ *   confirmed and is left unrecognized (falls through to the unhandled-
+ *   SVC-trap path, same as any other FLAGS combination this file
+ *   doesn't understand) -- see halucp.c's own FLAGS decode.
  *
  *   A task's own CLOSE compiles to the exact same SVC 0x0015 ("quit")
  *   the main program's CLOSE does -- confirmed directly (both compile
@@ -141,7 +196,24 @@ typedef struct {
                                 * never "now + interval" (which would drift by
                                 * however late the previous firing ran) */
 
-    double wakeDeadlineUs;    /* meaningful when WAITING or DORMANT */
+    double wakeDeadlineUs;    /* meaningful when WAITING or DORMANT, and
+                                * only when eventDescAddr is 0 -- see below */
+
+    /* Nonzero when this task's own readiness is gated by an event
+     * expression rather than (or in addition to being alongside) a
+     * deadline: either it's blocked in a WAIT FOR (state WAITING,
+     * set by sched_handle_wait_for_svc) or it's a SCHEDULE ... ON
+     * target still pending its trigger event (state DORMANT, set by
+     * sched_handle_schedule_on_svc). Halfword address of the event
+     * descriptor (see the "Event expressions" section of this file's
+     * own header comment); wakeDeadlineUs is meaningless while this is
+     * set -- sched_dispatch() tests the event expression instead, and
+     * never fast-forwards virtual time on this task's account, since no
+     * amount of elapsed time alone can satisfy an event condition.
+     * Cleared by sched_dispatch() the moment this task is actually
+     * dispatched, so a later re-SCHEDULE/WAIT of the same slot never
+     * inherits a stale pointer from this task's previous use of it. */
+    uint32_t eventDescAddr;
 
     TaskContext ctx;      /* saved whenever this task is not RUNNING */
 } ScheduledTask;
@@ -264,5 +336,35 @@ bool sched_handle_terminate_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pd
  * matching any currently-active task is a silent no-op (same precedent
  * as sched_handle_terminate_named_svc). Always returns true. */
 bool sched_handle_update_priority_svc(Scheduler *s, CPU *cpu, int newPriority, uint32_t pdeAddr);
+
+/* Called from halucp.c's SVC dispatch for SVC #8 (WAIT FOR <event-
+ * expression>). eventDescAddr is the descriptor's own halfword address
+ * (already decoded by the caller from the SVC's own parameter word --
+ * see this file's own header comment for the descriptor format).
+ * USA003087 24.6: "If exp is already TRUE when the WAIT statement is
+ * executed, the statement has no effect" -- checked FIRST, before any
+ * lazy primal allocation or dispatch, so an already-true WAIT FOR is a
+ * true no-op with zero side effects, not even a context save/restore.
+ * Otherwise behaves like sched_handle_wait_svc: suspends the calling
+ * context (lazily creating the primal pseudo-task on first use, same as
+ * that function) and dispatches whatever's next -- except the suspended
+ * task's own resumption is gated on the event expression becoming true
+ * (re-evaluated by sched_dispatch() itself, not on a fixed deadline).
+ * Always returns true. */
+bool sched_handle_wait_for_svc(Scheduler *s, CPU *cpu, uint32_t eventDescAddr);
+
+/* Called from halucp.c's SVC dispatch for SVC #1 (SCHEDULE) once its
+ * FLAGS word is recognized as the ON signature (TASK + AT-and-IN-bits-
+ * combined, no REPEAT EVERY -- see this file's own header comment).
+ * Unlike sched_handle_schedule_svc, never blocks or changes which
+ * context is live (matches every other SCHEDULE variant's own "never
+ * changes which context is live" contract) -- it registers the target
+ * task exactly as an immediate SCHEDULE would (PDE decoded, marked
+ * ACTIVE immediately, matching USA003087 13.1's "in the process queue"
+ * definition of ACTIVE, same as AT/IN's own already-established
+ * precedent), except its readiness is gated on eventDescAddr's
+ * expression becoming true instead of a deadline. Always returns
+ * true. */
+bool sched_handle_schedule_on_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr, uint32_t eventDescAddr);
 
 #endif

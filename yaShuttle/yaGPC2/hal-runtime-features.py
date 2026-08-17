@@ -167,11 +167,10 @@ F('Real-Time: SCHEDULE', 'SCHEDULE (immediate initiation, PRIORITY, DEPENDENT)',
   'SCHEDULE label PRIORITY(a) DEPENDENT; creates a process, READY immediately.',
   'USA003087 §13.4', 'partial',
   "PRIORITY and immediate-READY are implemented (sched_handle_schedule_svc). The FLAGS-word decode "
-  "in halucp.c is now general (any combination of TASK/AT/IN/REPEAT EVERY bits, not just the one "
-  "0x0081 signature -- see the IN/AT entries below), but DEPENDENT and ON (event-expression) bits "
-  "are still unrecognized and any FLAGS word carrying them falls through to the unhandled-SVC-trap "
-  "path -- so a DEPENDENT SCHEDULE is effectively not_implemented, only non-DEPENDENT/non-ON forms "
-  "are covered.",
+  "in halucp.c is now general (any combination of TASK/AT/IN/ON/REPEAT EVERY bits, not just the one "
+  "0x0081 signature -- see the IN/AT/ON entries below), but DEPENDENT is still unrecognized and any "
+  "FLAGS word carrying it falls through to the unhandled-SVC-trap path -- so a DEPENDENT SCHEDULE is "
+  "effectively not_implemented, only non-DEPENDENT forms are covered.",
   'tested_dedicated', 'test_schedule.c scenario 1 (two one-shot SCHEDULEs, different priorities).')
 F('Real-Time: SCHEDULE', 'SCHEDULE ... IN interval (delayed initiation, relative)',
   'Process WAITING until interval seconds after schedule time, then READY.',
@@ -222,7 +221,21 @@ F('Real-Time: SCHEDULE', 'SCHEDULE cycle-overrun runtime error',
   'untested', 'No fixture currently makes a REPEAT EVERY cycle overrun its own interval.')
 F('Real-Time: SCHEDULE', 'SCHEDULE ... ON event-expr (event-triggered initiation)',
   'Process WAITING until an event expression becomes TRUE, then READY.',
-  'USA003087 §24.5', 'not_implemented', 'Same FLAGS-word gate; no event-expression evaluation exists anywhere.', 'untested')
+  'USA003087 §24.5', 'implemented',
+  "SVC #1 with FLAGS=0x000d (the AT bit 0x0004 and IN bit 0x0008 reused combined as the ON marker, "
+  "not a dedicated bit of its own -- confirmed empirically), sched_handle_schedule_on_svc "
+  "(src/schedule.c). The target task is marked ACTIVE immediately (matching every other SCHEDULE "
+  "variant's own 'in the process queue' semantics, same precedent as AT/IN) but its own readiness is "
+  "gated on the event expression (ScheduledTask.eventDescAddr) instead of a deadline -- "
+  "sched_dispatch() re-evaluates it every time it runs, which happens naturally on every ACTIVE-flag "
+  "transition (SCHEDULE/CLOSE/TERMINATE), so no separate wake-up/notification mechanism was needed. "
+  "REPEAT EVERY combined with ON is not empirically confirmed and is left unrecognized (falls "
+  "through to the unhandled-SVC-trap path, same as any other unrecognized FLAGS combination).",
+  'tested_dedicated',
+  "test/fixtures/scheduleon.hal (byte-diffed via test_scheduler.sh; no yaHALMAT2 oracle -- see the "
+  "WAIT FOR entry below) and test_schedule.c's test_schedule_on_deferred_dispatch (deterministic, "
+  "confirms a higher-priority ON-pending task correctly does NOT preempt a lower-priority immediately-"
+  "eligible one, and is dispatched only once its own event becomes true).")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT ... WHILE / UNTIL event-expr',
   'Cyclic process cancelled when an event expression goes FALSE (WHILE) or TRUE (UNTIL).',
   'USA003087 §24.5', 'not_implemented', 'Same FLAGS-word gate.', 'untested')
@@ -248,7 +261,29 @@ F('Real-Time: WAIT', 'WAIT UNTIL time (absolute)', 'WAITING until an absolute re
   'test/test_scheduler.sh (waituntil/burst, waituntil/signal): real HALSFC-compiled '
   'test/fixtures/waituntil.hal, output byte-identical to yaHALMAT2.')
 F('Real-Time: WAIT', 'WAIT FOR event-expr', 'WAITING until an event expression becomes TRUE.',
-  'USA003087 §24.6', 'not_implemented', 'SVC #8, unhandled.', 'untested')
+  'USA003087 §24.6', 'implemented',
+  "SVC #8, sched_handle_wait_for_svc (src/schedule.c). The event-expression descriptor format "
+  "(single/NOT-single/AND-chain/OR-chain -- the real HAL/S-FC PASS2 compiler itself rejects any "
+  "mixed form with 'E102 INVALID EVENT EXPRESSION', so these are the entire legal design space, not "
+  "a partial case of something bigger) was reverse-engineered from 7 real compiled signatures (N=1 "
+  "plain, N=1 NOT, N=2/3/4 AND-chains, N=2/3 OR-chains) -- see schedule.h's own header comment for "
+  "the exact bit layout. Correctly implements USA003087 24.6's own 'if exp is already TRUE ... the "
+  "statement has no effect' rule as a true no-op (no context save, no dispatch at all) distinct from "
+  "every other WAIT-family SVC, which always hands off to the dispatcher unconditionally. NO working "
+  "yaHALMAT2 oracle exists for this feature: yaHALMAT2 has a confirmed bug on the identical test "
+  "program (SCHEDULE A; WAIT FOR A;) at any priority -- it runs A and then simply never resumes the "
+  "primal to print its own trailing WRITE, at all -- found and relayed upstream this session, not "
+  "yet fixed. Verified instead directly against USA003087 24.6/24.8's own text (process-name-as-"
+  "event polarity: ACTIVE<->TRUE, same as process-name-as-Boolean's own already-implemented polarity) "
+  "plus multiple real compiled programs whose output matches the spec's own predicted behavior "
+  "exactly, including the one case (WAIT FOR NOT <already-ACTIVE-task>) where the expression is "
+  "genuinely FALSE at entry and a real block-then-resume-on-transition cycle is observed.",
+  'tested_dedicated',
+  "test/fixtures/waitfor.hal (already-TRUE no-op), waitfornot.hal (genuine block+resume), "
+  "waitforand.hal, waitforor.hal (all byte-diffed via test_scheduler.sh, self-consistency goldens "
+  "only -- see above) and test_schedule.c's test_wait_for_event_expressions (deterministic: the "
+  "already-TRUE zero-side-effects case, block+resume via a real ACTIVE-flag transition, and a mixed-"
+  "truth 3-operand AND/OR chain neither real fixture exercises).")
 F('Real-Time: WAIT', 'WAIT FOR DEPENDENT', 'WAITING until all of the process\'s own dependents have terminated.',
   'USA003087 §13.5', 'not_implemented', 'SVC #9, unhandled.', 'untested')
 

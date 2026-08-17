@@ -148,6 +148,35 @@ static uint32_t build_pde(MCM *m, uint32_t addr, uint32_t entryPoint) {
     return addr;
 }
 
+/* A WAIT FOR / SCHEDULE ... ON event-expression descriptor (schedule.h's
+ * own header comment documents the format, reverse-engineered from 7
+ * real compiled signatures): [opcodeWord, reserved, PDE_1, ..., PDE_N].
+ * connector: 0 = plain single operand (opcodeWord 0x0000, operandCount
+ * must be 1), 1 = NOT single operand (0x1800, operandCount must be 1),
+ * 2 = AND-chain, 3 = OR-chain (opcodeWord's top nibble = 2*(N-1), the
+ * next nibble = 3 for AND / 1 for OR, repeated across the remaining
+ * nibbles per the real encoding -- schedule.c's own decoder only reads
+ * the second nibble, but this helper reproduces the full real pattern
+ * for fidelity). Returns addr (the descriptor's own address). */
+typedef enum { EVENT_PLAIN, EVENT_NOT, EVENT_AND, EVENT_OR } EventConnector;
+static uint32_t build_event_desc(MCM *m, uint32_t addr, EventConnector connector,
+                                  const uint32_t *operandPdes, int operandCount) {
+    uint32_t opcode;
+    if (connector == EVENT_PLAIN) {
+        opcode = 0x0000;
+    } else if (connector == EVENT_NOT) {
+        opcode = 0x1800;
+    } else {
+        uint32_t code = (connector == EVENT_AND) ? 3 : 1;
+        opcode = (uint32_t)(2 * (operandCount - 1)) << 12;
+        for (int i = 0; i < operandCount - 1 && i < 3; i++) opcode |= code << (8 - 4 * i);
+    }
+    mcm_set16(m, addr, opcode, false);
+    mcm_set16(m, addr + 1, 0, false);
+    for (int i = 0; i < operandCount; i++) mcm_set16(m, addr + 2 + (uint32_t)i, operandPdes[i], false);
+    return addr;
+}
+
 /* ---------------------------------------------------------------------
  * 1. Two simultaneously-due tasks: the higher-priority one runs first,
  *    and the primal program's own register/PSW state round-trips
@@ -559,6 +588,141 @@ static void test_schedule_in_delays_first_firing_and_anchors_repeat(void) {
     ageharness_free(&age);
 }
 
+/* ---------------------------------------------------------------------
+ * 8. WAIT FOR <event-expression> (SVC #8, sched_handle_wait_for_svc):
+ *    the already-TRUE no-op case (USA003087 24.6: "the statement has no
+ *    effect"), a genuine block-and-resume case (NOT of an already-ACTIVE
+ *    task, resolved only once that task later deactivates), and the
+ *    AND-chain/OR-chain truth tables with a real mixed-truth operand set
+ *    (one real compiled fixture per connector exists, but none exercise
+ *    partial truth -- every fixture either has all operands ACTIVE, or
+ *    none). No yaHALMAT2 oracle exists for any of this (a confirmed
+ *    yaHALMAT2 bug -- see problems.md 7.8); verified directly against
+ *    USA003087 24.6/24.8's own text instead.
+ * ------------------------------------------------------------------- */
+
+static void test_wait_for_event_expressions(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t aEntry = build_close_only_task(mem, 0x1000);
+    uint32_t aPde = build_pde(mem, 0x1010, aEntry);
+    uint32_t bEntry = build_close_only_task(mem, 0x1100);
+    uint32_t bPde = build_pde(mem, 0x1110, bEntry);
+    uint32_t cEntry = build_close_only_task(mem, 0x1200);
+    uint32_t cPde = build_pde(mem, 0x1210, cEntry);
+    (void)bEntry;
+    (void)cEntry;
+
+    /* --- already-TRUE no-op: A is ACTIVE (just SCHEDULEd), so "WAIT
+     * FOR A" must have literally zero effect -- not even lazily
+     * engaging the primal pseudo-task, since nothing was suspended. --- */
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE A handled");
+    uint32_t plainA = build_event_desc(mem, 0x1300, EVENT_PLAIN, &aPde, 1);
+    CHECK(sched_handle_wait_for_svc(sched, cpu, plainA), "WAIT FOR A (already TRUE) handled");
+    CHECK(sched->runningIdx == -1, "already-TRUE WAIT FOR is a true no-op -- primal never even engaged");
+
+    /* --- genuine block + resume: "WAIT FOR NOT A" is FALSE (A is still
+     * ACTIVE), so the primal must block, A must be dispatched (nothing
+     * else is ready), and once A reaches its own CLOSE (deactivating,
+     * since it's one-shot) the primal must resume. --- */
+    const uint32_t primalResumeAddr = 0x3000;
+    psw_set_nia(&cpu->psw, primalResumeAddr);
+    uint32_t notA = build_event_desc(mem, 0x1310, EVENT_NOT, &aPde, 1);
+    CHECK(sched_handle_wait_for_svc(sched, cpu, notA), "WAIT FOR NOT A (initially FALSE) handled");
+    CHECK(psw_get_nia(&cpu->psw) == aEntry, "A dispatched -- it's the only task whose event condition isn't blocking it");
+    ap101_exec1(&age.gpc); /* LHI */
+    ap101_exec1(&age.gpc); /* SVC (CLOSE, no REPEAT -> deactivates, re-triggers dispatch) */
+    CHECK(psw_get_nia(&cpu->psw) == primalResumeAddr,
+          "primal resumed once A's own CLOSE made NOT A true (event re-evaluated on the ACTIVE-flag transition)");
+
+    /* --- AND-chain / OR-chain truth tables, mixed truth (A/B active,
+     * C never scheduled -- INACTIVE): AND must be FALSE (blocks), OR
+     * must be TRUE (no-op). --- */
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 0.0), "re-SCHEDULE A handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, bPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE B handled");
+    /* C intentionally left never-SCHEDULEd -- INACTIVE. */
+
+    uint32_t abcPdes[3] = {aPde, bPde, cPde};
+    uint32_t andAbc = build_event_desc(mem, 0x1320, EVENT_AND, abcPdes, 3);
+    uint32_t orAbc = build_event_desc(mem, 0x1330, EVENT_OR, abcPdes, 3);
+
+    int beforeRunningIdx = sched->runningIdx;
+    CHECK(sched_handle_wait_for_svc(sched, cpu, orAbc), "WAIT FOR A OR B OR C (TRUE: A and B active) handled");
+    CHECK(sched->runningIdx == beforeRunningIdx, "OR already TRUE -- no dispatch, running context unchanged");
+
+    psw_set_nia(&cpu->psw, primalResumeAddr);
+    CHECK(sched_handle_wait_for_svc(sched, cpu, andAbc), "WAIT FOR A AND B AND C (FALSE: C inactive) handled");
+    CHECK(psw_get_nia(&cpu->psw) != primalResumeAddr,
+          "AND with one FALSE operand blocks -- primal does not simply continue");
+
+    ageharness_free(&age);
+}
+
+/* ---------------------------------------------------------------------
+ * 9. SCHEDULE ... ON <event-expression> (SVC #1, FLAGS=0x000d,
+ *    sched_handle_schedule_on_svc): the target task is marked ACTIVE
+ *    immediately (matching every other SCHEDULE variant's own "in the
+ *    process queue" semantics) but must NOT actually be dispatched until
+ *    its own trigger event becomes true -- verified here by forcing a
+ *    real dispatch decision (a delta-time WAIT, which always dispatches
+ *    unconditionally, unlike WAIT FOR) at a moment when a higher-
+ *    priority ON-pending task's event is still FALSE, confirming the
+ *    scheduler correctly skips it in favor of the one task that IS
+ *    immediately eligible, then re-evaluates and dispatches it once its
+ *    event becomes TRUE. Cross-checked against a real compiled fixture
+ *    (SCHEDULE NEXT ON NOT A PRIORITY(80); SCHEDULE A PRIORITY(1);
+ *    WAIT 0.001;) producing exactly this dispatch order -- problems.md
+ *    7.8.
+ * ------------------------------------------------------------------- */
+
+static void test_schedule_on_deferred_dispatch(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t aEntry = build_close_only_task(mem, 0x1000);
+    uint32_t aPde = build_pde(mem, 0x1010, aEntry);
+    uint32_t nextEntry = build_close_only_task(mem, 0x1100);
+    uint32_t nextPde = build_pde(mem, 0x1110, nextEntry);
+
+    uint32_t notA = build_event_desc(mem, 0x1200, EVENT_NOT, &aPde, 1);
+
+    /* NEXT (priority 80, higher than A's) is ON NOT A -- FALSE right
+     * now, since A hasn't been SCHEDULEd/run yet -- so NEXT must NOT
+     * preempt A despite outranking it. */
+    CHECK(sched_handle_schedule_on_svc(sched, cpu, 80, nextPde, notA), "SCHEDULE NEXT ON NOT A handled");
+    CHECK((mcm_get16(mem, nextPde) & 1) == 1, "NEXT marked ACTIVE immediately, before its trigger event ever fires");
+    int nextIdx = find_task_by_pde(sched, nextPde);
+    CHECK(nextIdx >= 0 && sched->tasks[nextIdx].eventDescAddr == notA, "NEXT's own slot records the event descriptor");
+
+    CHECK(sched_handle_schedule_svc(sched, cpu, 1, aPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE A (priority 1, due now) handled");
+
+    const uint32_t primalResumeAddr = 0x3000;
+    psw_set_nia(&cpu->psw, primalResumeAddr);
+    CHECK(sched_handle_wait_svc(sched, cpu, 0.001), "primal WAIT 0.001 handled -- forces a real dispatch decision");
+    CHECK(psw_get_nia(&cpu->psw) == aEntry,
+          "A dispatched despite lower priority -- NEXT's own event is still FALSE, so it isn't a candidate at all");
+
+    ap101_exec1(&age.gpc); /* LHI */
+    ap101_exec1(&age.gpc); /* SVC (A's own CLOSE -- deactivates, makes NOT A true, re-dispatches) */
+    CHECK(psw_get_nia(&cpu->psw) == nextEntry,
+          "NEXT dispatched immediately once A's completion satisfied its ON condition");
+    CHECK(nextIdx >= 0 && sched->tasks[nextIdx].eventDescAddr == 0,
+          "eventDescAddr cleared once NEXT is actually dispatched -- no stale pointer left behind");
+
+    ap101_exec1(&age.gpc); /* LHI */
+    ap101_exec1(&age.gpc); /* SVC (NEXT's own CLOSE -- deactivates, primal's own WAIT deadline is next) */
+    CHECK(psw_get_nia(&cpu->psw) == primalResumeAddr, "primal resumed once its own WAIT deadline was the next thing due");
+
+    ageharness_free(&age);
+}
+
 int main(void) {
     test_priority_ordering_and_context_roundtrip();
     test_repeat_every_counter_and_virtual_time();
@@ -567,6 +731,8 @@ int main(void) {
     test_runtime_and_prio_builtins();
     test_process_name_as_boolean();
     test_schedule_in_delays_first_firing_and_anchors_repeat();
+    test_wait_for_event_expressions();
+    test_schedule_on_deferred_dispatch();
     if (failures == 0) {
         printf("all scheduler-mechanics tests passed\n");
     } else {

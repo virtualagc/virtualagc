@@ -2,7 +2,8 @@
 # Reproduces hello.fcm, read_write.fcm, read_eof_onerror.fcm,
 # countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm,
 # updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm,
-# schedulein.fcm, scheduleat.fcm, and schedulerepeat.fcm
+# schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm,
+# waitfornot.fcm, waitforand.fcm, waitforor.fcm, and scheduleon.fcm
 # (plus their -lnk101.json symbol tables) via the real HAL/S toolchain
 # documented in ../../tools.md (HALSFC + lnk101, both expected on PATH).
 # Not run automatically (no CI machine has the toolchain) — kept for
@@ -108,6 +109,21 @@
 #                          2.5, 3.5, 4.5), not t=0; confirmed
 #                          byte-diffable against yaHALMAT2 -- see
 #                          problems.md 7.7).
+#   waitfor.fcm           <- waitfor.hal, waitfornot.fcm <- waitfornot.hal,
+#   waitforand.fcm        <- waitforand.hal, waitforor.fcm <-
+#                          waitforor.hal, scheduleon.fcm <- scheduleon.hal
+#                          (all checked in alongside this script) -- WAIT
+#                          FOR <event-expr>/SCHEDULE ... ON <event-expr>
+#                          (single/NOT/AND-chain/OR-chain forms, plus a
+#                          genuine SCHEDULE ... ON deferred-dispatch
+#                          case). NO yaHALMAT2 cross-check exists for any
+#                          of these: yaHALMAT2 has a confirmed bug on
+#                          WAIT FOR (relayed upstream, not yet fixed --
+#                          see problems.md 7.8) -- verified instead
+#                          directly against USA003087 24.6/24.8's own
+#                          text ("if exp is already TRUE... the
+#                          statement has no effect"), same reasoning as
+#                          processboolean.fcm above.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -125,6 +141,11 @@ PROCESSBOOLEAN_HAL="$(dirname "$0")/processboolean.hal"
 SCHEDULEIN_HAL="$(dirname "$0")/schedulein.hal"
 SCHEDULEAT_HAL="$(dirname "$0")/scheduleat.hal"
 SCHEDULEREPEAT_HAL="$(dirname "$0")/schedulerepeat.hal"
+WAITFOR_HAL="$(dirname "$0")/waitfor.hal"
+WAITFORNOT_HAL="$(dirname "$0")/waitfornot.hal"
+WAITFORAND_HAL="$(dirname "$0")/waitforand.hal"
+WAITFOROR_HAL="$(dirname "$0")/waitforor.hal"
+SCHEDULEON_HAL="$(dirname "$0")/scheduleon.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -155,5 +176,10 @@ build "$PROCESSBOOLEAN_HAL" processboolean processboolean
 build "$SCHEDULEIN_HAL" SCHIN schedulein
 build "$SCHEDULEAT_HAL" SCHAT scheduleat
 build "$SCHEDULEREPEAT_HAL" SCHINREP schedulerepeat
+build "$WAITFOR_HAL" WAITFOR waitfor
+build "$WAITFORNOT_HAL" WFNOT waitfornot
+build "$WAITFORAND_HAL" WFAND waitforand
+build "$WAITFOROR_HAL" WFOR waitforor
+build "$SCHEDULEON_HAL" SCHON3 scheduleon
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm (+ -lnk101.json)"

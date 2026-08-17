@@ -61,6 +61,48 @@ static void sched_set_active_flag(CPU *cpu, uint32_t pdeAddr, bool active) {
     mcm_set16(&cpu->mainStorage, pdeAddr, hw, false);
 }
 
+/* Reads the same bit sched_set_active_flag writes -- the getter half of
+ * process-name-as-Boolean, and the truth value of a process used as an
+ * operand in an event expression (USA003087 24.8: ACTIVE<->TRUE). */
+static bool sched_task_active(CPU *cpu, uint32_t pdeAddr) {
+    return (mcm_get16(&cpu->mainStorage, pdeAddr) & 0x0001u) != 0;
+}
+
+/* Evaluates a WAIT FOR / SCHEDULE ... ON event-expression descriptor
+ * (format documented in schedule.h's own header comment) against the
+ * current ACTIVE state of its operand PDE(s). */
+static bool sched_event_expr_true(CPU *cpu, uint32_t descAddr) {
+    uint32_t opcode = mcm_get16(&cpu->mainStorage, descAddr);
+
+    if (opcode == 0x1800) {
+        /* NOT <single task> -- the one fixed opcode unrelated to the
+         * count/connector scheme below (never combines with AND/OR or
+         * N>1; the compiler itself forbids it). */
+        uint32_t pde = mcm_get16(&cpu->mainStorage, descAddr + 2);
+        return !sched_task_active(cpu, pde);
+    }
+    if (opcode == 0x0000) {
+        /* plain <single task>, no connector. */
+        uint32_t pde = mcm_get16(&cpu->mainStorage, descAddr + 2);
+        return sched_task_active(cpu, pde);
+    }
+
+    /* AND-chain / OR-chain: top nibble = 2*(N-1); the connector code (3
+     * = AND, 1 = OR) in the next nibble is redundant with -- but cross-
+     * checked against -- the same code repeated N-1 times total, so
+     * reading it once from the second nibble is sufficient. */
+    int n = (int)(((opcode >> 12) & 0xF) / 2) + 1;
+    bool isAnd = ((opcode >> 8) & 0xF) == 3;
+
+    for (int i = 0; i < n; i++) {
+        uint32_t pde = mcm_get16(&cpu->mainStorage, descAddr + 2 + (uint32_t)i);
+        bool active = sched_task_active(cpu, pde);
+        if (isAnd && !active) return false; /* AND: any FALSE operand makes the whole expression FALSE */
+        if (!isAnd && active) return true;  /* OR: any TRUE operand makes the whole expression TRUE */
+    }
+    return isAnd; /* AND: every operand was TRUE; OR: every operand was FALSE */
+}
+
 /* Snapshot/restore the live CPU context -- same field set and access
  * pattern as ageharness.c's ageharness_snapshot_regs() (bank chosen via
  * psw_get_reg_set(), FP always bank 2), duplicated rather than shared
@@ -139,11 +181,23 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
             ScheduledTask *t = &s->tasks[i];
             if (t->state != TASK_STATE_READY && t->state != TASK_STATE_DORMANT && t->state != TASK_STATE_WAITING)
                 continue;
-            if (t->state != TASK_STATE_READY && t->wakeDeadlineUs > cpu->elapsedTimeUs) continue;
+            if (t->state != TASK_STATE_READY) {
+                /* An event-gated task (WAIT FOR's own waiter, or a
+                 * SCHEDULE ... ON target still pending) is eligible
+                 * exactly when its event expression is currently true --
+                 * wakeDeadlineUs is meaningless for it (see schedule.h's
+                 * own ScheduledTask.eventDescAddr comment). */
+                if (t->eventDescAddr != 0) {
+                    if (!sched_event_expr_true(cpu, t->eventDescAddr)) continue;
+                } else if (t->wakeDeadlineUs > cpu->elapsedTimeUs) {
+                    continue;
+                }
+            }
             if (best == -1 || t->priority > s->tasks[best].priority) best = i;
         }
         if (best != -1) {
             ScheduledTask *t = &s->tasks[best];
+            t->eventDescAddr = 0; /* about to run -- don't leave a stale pointer for this slot's next use */
             if (!t->hasRun) {
                 /* Never dispatched before -- a freshly-SCHEDULEd
                  * REPEAT-EVERY task goes straight to DORMANT without
@@ -169,12 +223,17 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
         for (int i = 0; i < s->count; i++) {
             ScheduledTask *t = &s->tasks[i];
             if (t->state != TASK_STATE_WAITING && t->state != TASK_STATE_DORMANT) continue;
+            if (t->eventDescAddr != 0) continue; /* event-gated: no amount of elapsed time alone can satisfy it */
             if (earliest < 0 || t->wakeDeadlineUs < earliest) earliest = t->wakeDeadlineUs;
         }
         if (earliest < 0) {
-            /* Nothing scheduled or waiting anywhere -- leave whatever's
-             * currently marked running (should be the primal task) live
-             * as-is; nothing to dispatch, no time to advance. */
+            /* Nothing scheduled or waiting anywhere that time alone can
+             * satisfy -- leave whatever's currently marked running
+             * (should be the primal task) live as-is; nothing to
+             * dispatch, no time to advance. Any purely event-gated
+             * task(s) left pending here will become eligible the next
+             * time sched_dispatch() runs after some other context flips
+             * the relevant ACTIVE flag(s), not from this loop. */
             return;
         }
         cpu->elapsedTimeUs = earliest;
@@ -313,5 +372,61 @@ bool sched_handle_update_priority_svc(Scheduler *s, CPU *cpu, int newPriority, u
     (void)cpu; /* no dispatch/context change -- see this function's own header comment */
     int idx = sched_find_by_pde(s, pdeAddr);
     if (idx >= 0) s->tasks[idx].priority = newPriority;
+    return true;
+}
+
+bool sched_handle_wait_for_svc(Scheduler *s, CPU *cpu, uint32_t eventDescAddr) {
+    /* USA003087 24.6: "If exp is already TRUE when the WAIT statement is
+     * executed, the statement has no effect" -- checked before even the
+     * lazy primal allocation below, so this really is a complete no-op
+     * (no context save, no dispatch, nothing) when already satisfied,
+     * unlike delta-time WAIT which always hands off to sched_dispatch()
+     * unconditionally. */
+    if (sched_event_expr_true(cpu, eventDescAddr)) return true;
+
+    if (s->runningIdx < 0) {
+        /* First time scheduling has ever been engaged -- see
+         * sched_handle_wait_svc's own identical lazy-primal-allocation
+         * comment for the reasoning; duplicated rather than factored out
+         * since the two callers' surrounding logic differs enough
+         * (this one's own already-true early-return above) that sharing
+         * would need its own parameter to suppress that check. */
+        int idx = sched_alloc_slot(s);
+        s->tasks[idx].isPrimal = true;
+        s->tasks[idx].state = TASK_STATE_RUNNING;
+        s->tasks[idx].hasRun = true;
+        s->runningIdx = idx;
+    }
+
+    ScheduledTask *waiter = &s->tasks[s->runningIdx];
+    sched_save_context(cpu, &waiter->ctx);
+    waiter->state = TASK_STATE_WAITING;
+    waiter->eventDescAddr = eventDescAddr;
+
+    sched_dispatch(s, cpu);
+    return true;
+}
+
+bool sched_handle_schedule_on_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr, uint32_t eventDescAddr) {
+    int idx = sched_find_by_pde(s, pdeAddr);
+    if (idx < 0) idx = sched_alloc_slot(s);
+    if (idx < 0) return true; /* out of task slots -- see sched_handle_schedule_svc's own comment */
+
+    ScheduledTask *t = &s->tasks[idx];
+    memset(t, 0, sizeof(*t));
+    t->pdeAddr = pdeAddr;
+    uint32_t raw = mcm_get16(&cpu->mainStorage, pdeAddr + 2);
+    t->entryPoint = decode_pde_far_pointer(cpu, raw);
+    t->priority = priority;
+    t->isPrimal = false;
+    t->eventDescAddr = eventDescAddr;
+    t->state = TASK_STATE_DORMANT;
+    /* Marked ACTIVE immediately, exactly like every other SCHEDULE
+     * variant (USA003087 13.1: ACTIVE means "in the process queue,"
+     * which this task already is even before its trigger event fires --
+     * see sched_handle_schedule_svc's own AT/IN precedent for the same
+     * reasoning). */
+    sched_set_active_flag(cpu, pdeAddr, true);
+
     return true;
 }

@@ -1,0 +1,14 @@
+ WFAND: PROGRAM;
+    A: TASK;
+       WRITE(6) 'IN A';
+    CLOSE A;
+    B: TASK;
+       WRITE(6) 'IN B';
+    CLOSE B;
+
+    WRITE(6) 'BEFORE';
+    SCHEDULE A PRIORITY(80);
+    SCHEDULE B PRIORITY(80);
+    WAIT FOR A AND B;
+    WRITE(6) 'DONE';
+ CLOSE WFAND;

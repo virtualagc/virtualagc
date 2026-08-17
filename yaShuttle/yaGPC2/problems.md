@@ -3054,6 +3054,91 @@ don't depend on real-instruction-count drift the way two independently
 `test/fixtures/schedulein.hal`, `scheduleat.hal`, `schedulerepeat.hal`,
 each exercised by `test_scheduler.sh` under both `--pacing` modes.
 
+### 7.8 `WAIT FOR`/`SCHEDULE ... ON` event expressions — done, no working `yaHALMAT2` oracle, a real `yaHALMAT2` bug found along the way
+
+Seventh item in the runtime-feature-survey implementation order, and the
+one item this whole pass's original plan flagged in advance as the
+genuinely new subsystem: an event-expression evaluator, rather than an
+extension of an already-working one. Traced `WAIT FOR A;` against a real
+compiled program and found SVC #8's own parameter word is a pointer to a
+compact "event descriptor" in static data — `[opcodeWord, reserved,
+PDE_1, ..., PDE_N]` — not a PDE address directly the way every other SVC
+target field in this file is. Decoding the descriptor's `opcodeWord`
+took 7 separate real compiled signatures (N=1 plain, N=1 `NOT`, N=2/3/4
+`AND`-chains, N=2/3 `OR`-chains) to nail down precisely: top nibble =
+`2*(N-1)`, remaining nibbles repeat a connector code (`3`=`AND`,
+`1`=`OR`) `N-1` times, zero-padded; `NOT <single>` is the one fixed,
+unrelated opcode `0x1800`. Along the way, three attempts at a *mixed*
+expression — `(A AND B) OR C`, `A AND NOT B` — all hit the real
+1980s-vintage HAL/S-FC PASS2 compiler's own `E102 ... INVALID EVENT
+EXPRESSION` error, confirming the decoded format is the *entire* legal
+design space, not a partial case of something bigger left unhandled.
+`SCHEDULE ... ON` reuses the identical descriptor, referenced from
+`SVC #1`'s own parameter block whenever FLAGS has both the `AT` bit
+(`0x0004`) and the `IN` bit (`0x0008`) set together — confirmed
+empirically that the real compiler reuses those two existing bits
+combined as the `ON` marker rather than allocating a dedicated bit.
+
+**The one real semantic surprise this item produced**: my first
+assumption, formed from watching `SCHEDULE A PRIORITY(80); WAIT FOR A;`
+run (`A` printing before the primal's own trailing `WRITE`), was that
+`WAIT FOR` always defers to any ready higher-priority task before
+resuming, the same way delta-time `WAIT` does. Reading `USA003087` 24.6
+directly disproved this: *"If exp is already TRUE when the WAIT
+statement is executed, the statement has no effect."* Since `SCHEDULE A`
+already marks `A` `ACTIVE` (`TRUE` in event-expression terms —
+`USA003087` 24.8's same `ACTIVE`↔`TRUE` polarity process-name-as-Boolean
+already uses) before `WAIT FOR A` ever executes, the spec-correct
+behavior is a *complete* no-op: no context save, no dispatch, not even a
+momentary handoff to `A` — the primal continues straight through,
+and `A` never runs at all if the primal happens to reach its own `CLOSE`
+first (confirmed: `test/fixtures/waitfor.hal` produces `BEFORE` / `DONE`
+only, `A` never printing `IN A`, because the primal's own `CLOSE` halts
+the whole program before the scheduler ever gets a chance to dispatch
+the now-abandoned, still-`DORMANT` `A`). This is implemented as an
+early-return truth check in `sched_handle_wait_for_svc`, *before* even
+the lazy primal-pseudo-task allocation every other `WAIT`-family SVC
+does unconditionally.
+
+**Real `yaHALMAT2` bug found, relayed upstream, not yet fixed**: the
+identical test program (`SCHEDULE A PRIORITY(80); WAIT FOR A;`) run
+through `yaHALMAT2` prints `BEFORE` / `IN A` and then exits 0 —
+`DONE` never prints, at any priority (confirmed with `A` at both
+`PRIORITY(80)` and `PRIORITY(1)`, ruling out a priority-specific fluke).
+The primal is simply never resumed. This means there is **no working
+cross-tool oracle for this feature at all** — the same situation
+7.6 already established for process name as Boolean, but this time
+`yaHALMAT2`'s own gap is a genuine behavioral bug (silently swallowing
+the primal's continuation) rather than an outright unsupported-construct
+error. Relayed to the user for the `yaHALMAT2` agent (with the full
+reverse-engineered SVC/descriptor encoding included, so that side
+doesn't have to re-derive it independently) rather than attempting any
+fix in this repository. Verified instead purely from `USA003087`
+24.6/24.8's own text, cross-checked against 8 real compiled programs
+(the already-`TRUE` no-op case across single/`AND`/`OR`/`N`=3/`N`=4
+forms, the one genuinely-`FALSE`-at-entry case — `WAIT FOR NOT
+<already-ACTIVE task>` — which correctly blocks and resumes once that
+task completes and deactivates, and a `SCHEDULE ... ON` case forcing a
+real deferred-dispatch decision: a higher-priority `ON`-pending task
+correctly does *not* preempt a lower-priority immediately-eligible one,
+and is dispatched only once its own trigger event fires).
+
+Five new fixtures — `test/fixtures/waitfor.hal` (already-`TRUE` no-op),
+`waitfornot.hal` (genuine block+resume), `waitforand.hal`,
+`waitforor.hal`, `scheduleon.hal` (real deferred dispatch) — all
+exercised by `test_scheduler.sh` under both `--pacing` modes, with
+goldens generated from `yaGPC2`'s own output (self-consistency
+regression guards, not cross-tool-verified, same category as
+`processboolean.hal` in 7.6) since no oracle exists. Two new
+`test_schedule.c` scenarios (`test_wait_for_event_expressions`,
+`test_schedule_on_deferred_dispatch`) cover what stdout alone can't:
+the already-`TRUE` no-op's *zero side effects* (asserted via
+`Scheduler.runningIdx` staying `-1`, proving the primal pseudo-task
+isn't even lazily allocated), a mixed-truth 3-operand `AND`/`OR` chain
+neither real fixture exercises, and `eventDescAddr` getting cleared the
+moment a task is actually dispatched (no stale pointer left behind for
+that slot's next use).
+
 ---
 
 ## Methodology and caveats

@@ -344,11 +344,16 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
              * bit, is out of scope), 0x0004 = AT, 0x0008 = IN, 0x0080 =
              * REPEAT EVERY (0x0081 was this cut's very first, and still
              * most-tested, signature: TASK + REPEAT EVERY together).
-             * Neither ON/DEPENDENT/CANCEL/REPEAT-AFTER/REPEAT-UNTIL nor
-             * AT-and-IN-together are recognized -- any FLAGS word with a
-             * bit outside this set, or with both AT and IN set, falls
-             * through to the unhandled-trap path below, exactly like
-             * today, rather than mishandling a variant this cut doesn't
+             * AT-and-IN-together (0x000d combined with TASK) is not a
+             * third initiation mode of its own -- confirmed empirically
+             * that the real compiler reuses those same two bits combined
+             * as the ON (event-expression) marker instead; see the
+             * dedicated branch below and schedule.h's own header
+             * comment. Neither DEPENDENT/CANCEL/REPEAT-AFTER/REPEAT-
+             * UNTIL nor ON-combined-with-REPEAT-EVERY are recognized --
+             * any FLAGS word with a bit outside this set falls through
+             * to the unhandled-trap path below, exactly like today,
+             * rather than mishandling a variant this cut doesn't
              * understand. */
             uint32_t flags = mcm_get16(&h->cpu->mainStorage, ea + 1);
             const uint32_t recognizedMask = 0x0001 | 0x0004 | 0x0008 | 0x0080;
@@ -356,7 +361,20 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
             bool hasAt = (flags & 0x0004) != 0;
             bool hasIn = (flags & 0x0008) != 0;
             bool hasRepeatEvery = (flags & 0x0080) != 0;
-            if (hasTask && !(hasAt && hasIn) && (flags & ~recognizedMask) == 0) {
+            bool hasOn = hasAt && hasIn;
+            if (hasTask && hasOn && !hasRepeatEvery && (flags & ~recognizedMask) == 0) {
+                /* SCHEDULE label ON <event-expr> PRIORITY(p) -- ea+2 is
+                 * the target's own PDE (same PROCESS field as every
+                 * other SCHEDULE variant), ea+3 is a pointer to the
+                 * event-expression descriptor (schedule.h's own header
+                 * comment documents the format) -- confirmed empirically
+                 * against a real compiled program the same way every
+                 * other field in this dispatch was. */
+                uint32_t pdeAddr = mcm_get16(&h->cpu->mainStorage, ea + 2);
+                uint32_t eventDescAddr = mcm_get16(&h->cpu->mainStorage, ea + 3);
+                return sched_handle_schedule_on_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr, eventDescAddr);
+            }
+            if (hasTask && !hasOn && (flags & ~recognizedMask) == 0) {
                 /* The PDE reference is a single halfword (not a 32-bit
                  * hal_get32 read -- confirmed empirically: the halfword
                  * immediately after it is unrelated padding, not a real
@@ -416,6 +434,15 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
              * unhandled, same as any other unrecognized SVC). */
             FloatIBM until = fibm_from64(register_get32(cpu_f(h->cpu, 0)), register_get32(cpu_f(h->cpu, 1)));
             return sched_handle_wait_until_svc(&h->scheduler, h->cpu, fibm_to_float(&until));
+        } else if (svcLow == 0x08) {
+            /* WAIT FOR <event-expression>. mem[ea+1] is a pointer to the
+             * event descriptor -- unlike SCHEDULE's own SVC #1, this SVC
+             * number has no other meaning to guard against, so it's
+             * accepted unconditionally once svcLow matches (matching how
+             * every other single-purpose SVC# in this dispatch, e.g.
+             * WAIT/WAIT UNTIL/TERMINATE-self, is already handled). */
+            uint32_t eventDescAddr = mcm_get16(&h->cpu->mainStorage, ea + 1);
+            return sched_handle_wait_for_svc(&h->scheduler, h->cpu, eventDescAddr);
         } else if (svcLow == 0x02) {
             /* TERMINATE, bare/self form (no target list) -- confirmed
              * empirically: mem[ea+1] is unused padding here, unlike

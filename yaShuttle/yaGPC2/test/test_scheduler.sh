@@ -122,4 +122,21 @@ run_case "scheduleat/signal" "signal" "fixtures/scheduleat.fcm" "fixtures/schedu
 run_case "schedulerepeat/burst"  "burst"  "fixtures/schedulerepeat.fcm" "fixtures/schedulerepeat-lnk101.json" "fixtures/schedulerepeat_golden.txt"
 run_case "schedulerepeat/signal" "signal" "fixtures/schedulerepeat.fcm" "fixtures/schedulerepeat-lnk101.json" "fixtures/schedulerepeat_golden.txt"
 
+# WAIT FOR <event-expr> / SCHEDULE ... ON <event-expr> (SVC #8 / SVC #1
+# FLAGS=0x000d) -- single/NOT/AND-chain/OR-chain forms, plus a genuine
+# SCHEDULE ... ON deferred-dispatch case. No yaHALMAT2 cross-check exists
+# for any of these (yaHALMAT2 has a confirmed bug on WAIT FOR, relayed
+# upstream -- see problems.md 7.8); verified instead directly against
+# USA003087 24.6/24.8's own text, same reasoning as processboolean above.
+run_case "waitfor/burst"  "burst"  "fixtures/waitfor.fcm" "fixtures/waitfor-lnk101.json" "fixtures/waitfor_golden.txt"
+run_case "waitfor/signal" "signal" "fixtures/waitfor.fcm" "fixtures/waitfor-lnk101.json" "fixtures/waitfor_golden.txt"
+run_case "waitfornot/burst"  "burst"  "fixtures/waitfornot.fcm" "fixtures/waitfornot-lnk101.json" "fixtures/waitfornot_golden.txt"
+run_case "waitfornot/signal" "signal" "fixtures/waitfornot.fcm" "fixtures/waitfornot-lnk101.json" "fixtures/waitfornot_golden.txt"
+run_case "waitforand/burst"  "burst"  "fixtures/waitforand.fcm" "fixtures/waitforand-lnk101.json" "fixtures/waitforand_golden.txt"
+run_case "waitforand/signal" "signal" "fixtures/waitforand.fcm" "fixtures/waitforand-lnk101.json" "fixtures/waitforand_golden.txt"
+run_case "waitforor/burst"  "burst"  "fixtures/waitforor.fcm" "fixtures/waitforor-lnk101.json" "fixtures/waitforor_golden.txt"
+run_case "waitforor/signal" "signal" "fixtures/waitforor.fcm" "fixtures/waitforor-lnk101.json" "fixtures/waitforor_golden.txt"
+run_case "scheduleon/burst"  "burst"  "fixtures/scheduleon.fcm" "fixtures/scheduleon-lnk101.json" "fixtures/scheduleon_golden.txt"
+run_case "scheduleon/signal" "signal" "fixtures/scheduleon.fcm" "fixtures/scheduleon-lnk101.json" "fixtures/scheduleon_golden.txt"
+
 exit $fail

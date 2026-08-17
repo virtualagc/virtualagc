@@ -1,0 +1,10 @@
+ WFNOT: PROGRAM;
+    A: TASK;
+       WRITE(6) 'IN A';
+    CLOSE A;
+
+    WRITE(6) 'BEFORE';
+    SCHEDULE A PRIORITY(80);
+    WAIT FOR NOT A;
+    WRITE(6) 'DONE';
+ CLOSE WFNOT;
