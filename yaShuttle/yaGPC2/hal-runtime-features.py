@@ -289,9 +289,18 @@ F('Real-Time: Priority & Control', 'CANCEL statement',
   'shuts down dependents in order rather than force-terminating them.',
   'USA003087 §23.6', 'not_implemented', 'No SVC/mechanism for CANCEL exists.', 'untested')
 F('Real-Time: Priority & Control', 'UPDATE PRIORITY statement', "Changes an active process's priority at runtime.",
-  'USA003087 §13.5', 'not_implemented',
-  'No mechanism to change a ScheduledTask.priority after SCHEDULE exists. Explicitly out of scope '
-  'per schedule.h (real FCOS itself did not support this either).', 'untested')
+  'USA003087 §13.5', 'partial',
+  'Named-target form (SVC #11, sched_handle_update_priority_svc) is implemented -- confirmed '
+  'empirically via a real compiled program that the SVC parameter word is (newPriority<<8)|11 '
+  'followed by the target task\'s own PDE address. The bare/self form ("UPDATE PRIORITY TO alpha;", '
+  'no label) is NOT implemented: a real compiled test case for it hits a genuine HAL/S-FC PASS2 '
+  'compiler limitation ("INDIRECT STACK USAGE CONFLICT") unrelated to yaGPC2 -- there is no compiled '
+  'program to trace its SVC encoding from.',
+  'tested_dedicated',
+  'test_schedule.c scenario 3 (deterministic hand-assembled priority-flip test -- a real compiled '
+  'fixture, test/fixtures/updatepriority.hal, exists for toolchain-encoding provenance but is NOT '
+  'diffed against yaHALMAT2, since its exact firing order is sensitive to a separate, pre-existing '
+  'timing discrepancy for simultaneously-due REPEAT EVERY tasks -- see problems.md).')
 F('Real-Time: Priority & Control', 'RUNTIME() built-in function',
   'Returns the current value of real time as a SCALAR, in seconds.',
   'USA003087 §13.5, Appendix B; USA003090 §8.2 item 18', 'not_implemented',

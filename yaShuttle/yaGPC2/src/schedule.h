@@ -234,4 +234,23 @@ bool sched_handle_terminate_self_svc(Scheduler *s, CPU *cpu);
  * Always returns true. */
 bool sched_handle_terminate_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pdeAddrs, int count);
 
+/* Called from halucp.c's SVC dispatch for SVC #11 (UPDATE PRIORITY
+ * label TO alpha, named-target form only -- USA003087 13.5's bare/self
+ * form, "UPDATE PRIORITY TO alpha;" with no label, is not covered: a
+ * real compiled test case for it hits a genuine HAL/S-FC PASS2 compiler
+ * limitation ("INDIRECT STACK USAGE CONFLICT", statement conversion
+ * abandoned) unrelated to yaGPC2 -- there is no compiled program to
+ * trace its SVC encoding from, so it's left unhandled rather than
+ * guessed at). Confirmed empirically: the SVC parameter word is
+ * (newPriority<<8)|11, followed by the target task's own PDE address
+ * (flat units, same as SCHEDULE/TERMINATE's own PROCESS/target
+ * fields). Mutates the target's priority in place and does NOT
+ * change which context is live or trigger a dispatch -- the new
+ * priority simply takes effect at whatever future dispatch decision
+ * next considers that task, matching how SCHEDULE/TERMINATE-of-another-
+ * task both leave the calling context running unchanged. A pdeAddr not
+ * matching any currently-active task is a silent no-op (same precedent
+ * as sched_handle_terminate_named_svc). Always returns true. */
+bool sched_handle_update_priority_svc(Scheduler *s, CPU *cpu, int newPriority, uint32_t pdeAddr);
+
 #endif

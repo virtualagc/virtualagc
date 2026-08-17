@@ -2832,6 +2832,72 @@ same as it's been for `CLOSE`/`WAIT FOR DEPENDENT` all along — `DEPENDENT`
 itself is still never recognized by `SCHEDULE`'s own FLAGS-word gate,
 so no task is ever created as anyone's dependent in the first place.
 
+**`UPDATE PRIORITY label TO alpha` (SVC #11, named-target form) — done.**
+Traced a real compiled program to confirm the protocol: the SVC
+parameter word is `(newPriority<<8)|11`, followed by the target task's
+own PDE address — the same shape `TERMINATE`'s own named-target field
+already established, and directly confirmed via the linker JSON's own
+relocation entries the same way. Implemented as
+`sched_handle_update_priority_svc` (`src/schedule.c`): mutates the
+target's `priority` field in place, with no dispatch or context change
+(the new priority simply takes effect whenever a future tie next
+considers that task — matching `SCHEDULE`/`TERMINATE`-of-another-task's
+own "never changes which context is live" contract). The bare/self form
+(`UPDATE PRIORITY TO alpha;`, no label) could not be implemented or even
+protocol-traced: every attempt to compile a real test case for it hit a
+genuine HAL/S-FC PASS2 compiler limitation —
+`***** BS122 ERROR ... INDIRECT STACK USAGE CONFLICT ***** CONVERSION ABANDONED`
+— regardless of where in the task body the statement appeared. This is
+the real 1980s-vintage compiler itself rejecting the construct, not a
+`yaGPC2` gap; there is no compiled program to trace an SVC encoding
+from, so the self form is left unhandled rather than guessed at.
+
+Verified with `test_schedule.c`'s scenario 3: two hand-assembled
+`REPEAT EVERY` tasks `SCHEDULE`d simultaneously (priorities 10 and 90),
+`UPDATE PRIORITY`-raising the lower one to 200, and confirming dispatch
+order actually flips. A real compiled fixture
+(`test/fixtures/updatepriority.hal`, two competing `REPEAT EVERY` tasks
+with `UPDATE PRIORITY` mid-run) exists for toolchain-encoding
+provenance and runs without an unhandled-SVC trap, but is deliberately
+**not** added to `test_scheduler.sh`'s byte-diff suite — see the next
+finding.
+
+### 7.4 Simultaneously-due `REPEAT EVERY` tasks: firing order can diverge from `yaHALMAT2` due to real-instruction-timing drift (pre-existing, found incidentally while verifying `UPDATE PRIORITY`)
+
+While building a real-compiled-program regression test for `UPDATE
+PRIORITY`, `yaGPC2` and `yaHALMAT2` disagreed on the exact interleaving
+of two competing `REPEAT EVERY 1.0` tasks (priorities 10 and 90, no
+`UPDATE PRIORITY` involved at all — confirmed with a stripped-down
+`NOPRIO.hal` that reproduces it independent of this session's other
+work): `yaHALMAT2` gives a perfectly clean `HI,LOW,HI,LOW,HI,LOW,...`
+alternation every cycle; `yaGPC2` shows the same alternation for the
+first tie, then a swap (`HI,LOW,LOW,HI,LOW,HI,...`) from the second tie
+onward.
+
+Root cause (not yet fixed, logged for whoever picks this up):
+`SCHEDULE`ing two tasks takes two separate real SVC calls, a few real
+AP-101S instructions apart — so each task's own `repeatPhaseRefUs`
+(`src/schedule.c`, captured as `cpu->elapsedTimeUs` at *that specific
+task's own* `SCHEDULE` call) is not bit-identical between the two tasks,
+only very close. Since `REPEAT EVERY`'s re-arm is phase-anchored
+(`phaseRef + N*interval`, not "now + interval" — deliberately, to avoid
+drift from any *single* firing running long), this tiny initial
+per-task offset is preserved and compounds identically every cycle
+rather than averaging out, and at some point crosses whatever tie-break
+margin `yaHALMAT2`'s own HALMAT-instruction-cost model doesn't hit the
+same way. This is a real, confirmed `yaGPC2`-vs-`yaHALMAT2` divergence
+in *when* (down to sub-microsecond precision) two tasks are considered
+simultaneously due — not a `TASK`/`SCHEDULE`/`WAIT`/`UPDATE PRIORITY`
+correctness bug per se (each individual dispatch decision still
+correctly picks the higher-priority *ready* task at whatever instant it
+checks), but a real fidelity gap worth deeper investigation before
+trusting `yaGPC2` output for any real timing-sensitive multi-task
+Shuttle flight-software scenario. `test_schedule.c`'s own hand-assembled
+scenario 3 sidesteps this entirely (both tasks `SCHEDULE`d via direct C
+calls at the exact same `elapsedTimeUs`, giving bit-identical phase
+references) — which is exactly why it, not the real compiled fixture,
+is this project's regression test for `UPDATE PRIORITY` itself.
+
 ---
 
 ## Methodology and caveats

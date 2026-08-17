@@ -278,9 +278,122 @@ static void test_repeat_every_counter_and_virtual_time(void) {
     ageharness_free(&age);
 }
 
+/* sched_find_by_pde() (schedule.c) is private; Scheduler/ScheduledTask's
+ * own fields are public (schedule.h), so tests can just re-derive the
+ * same lookup directly rather than needing a testing-only export. */
+static int find_task_by_pde(const Scheduler *s, uint32_t pdeAddr) {
+    for (int i = 0; i < s->count; i++) {
+        if (s->tasks[i].state != TASK_SLOT_FREE && s->tasks[i].pdeAddr == pdeAddr) return i;
+    }
+    return -1;
+}
+
+/* ---------------------------------------------------------------------
+ * 3. UPDATE PRIORITY (SVC #11, sched_handle_update_priority_svc): a
+ *    real compiled program's own tie-breaking order between two
+ *    simultaneously-due REPEAT EVERY tasks turned out to be too
+ *    sensitive to per-firing instruction-timing drift (each task's own
+ *    phaseRef is captured at its own real SCHEDULE call, a few real
+ *    instructions apart -- see problems.md's writeup) to make a clean,
+ *    deterministic assertion from a compiled fixture's stdout. Hand-
+ *    assembling both tasks and SCHEDULEing them via direct C calls (so
+ *    both phaseRefs are bit-identical, captured at the same
+ *    elapsedTimeUs) sidesteps that confound entirely.
+ * ------------------------------------------------------------------- */
+
+static void test_update_priority_flips_dispatch_order(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t lowEntry = build_close_only_task(mem, 0x1000);
+    uint32_t lowPde = build_pde(mem, 0x1010, lowEntry);
+    uint32_t hiEntry = build_close_only_task(mem, 0x2000);
+    uint32_t hiPde = build_pde(mem, 0x2010, hiEntry);
+
+    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, 0.0), "SCHEDULE LOWTASK(10) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 90, hiPde, 0.0), "SCHEDULE HITASK(90) handled");
+
+    /* A pdeAddr matching no active task is a documented silent no-op --
+     * confirm it doesn't corrupt anything before the real update. */
+    CHECK(sched_handle_update_priority_svc(sched, cpu, 255, 0xdead), "UPDATE PRIORITY of an unknown PDE is a harmless no-op");
+
+    CHECK(sched_handle_update_priority_svc(sched, cpu, 200, lowPde), "UPDATE PRIORITY LOWTASK TO 200 handled");
+    CHECK(sched->tasks[find_task_by_pde(sched, lowPde)].priority == 200, "LOWTASK's own priority actually mutated to 200");
+
+    CHECK(sched_handle_wait_svc(sched, cpu, 1.0), "WAIT handled");
+    CHECK(psw_get_nia(&cpu->psw) == lowEntry, "LOWTASK (now priority 200) dispatched first, ahead of HITASK (90)");
+
+    ap101_exec1(&age.gpc);
+    ap101_exec1(&age.gpc);
+    CHECK(psw_get_nia(&cpu->psw) == hiEntry, "HITASK dispatched second, after LOWTASK's own CLOSE");
+
+    ageharness_free(&age);
+}
+
+/* ---------------------------------------------------------------------
+ * 4. TERMINATE (SVC #2 self / SVC #3 named,
+ *    sched_handle_terminate_self_svc/_named_svc): a REPEATing task
+ *    TERMINATEd by name must stop repeating (unlike merely reaching its
+ *    own CLOSE, which re-arms it), and a task that TERMINATEs itself
+ *    must switch context away immediately rather than continuing to
+ *    execute its own remaining instructions.
+ * ------------------------------------------------------------------- */
+
+static void test_terminate_named_and_self(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    /* Named form: a REPEATing task, TERMINATEd by the primal instead of
+     * being allowed to reach its own next CLOSE-triggered re-arm. */
+    uint32_t repEntry = build_close_only_task(mem, 0x1000);
+    uint32_t repPde = build_pde(mem, 0x1010, repEntry);
+    const uint32_t primalResumeAddr = 0x3000;
+    psw_set_nia(&cpu->psw, primalResumeAddr);
+
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, repPde, 1000000.0), "SCHEDULE ... REPEAT EVERY 1.0 handled");
+    CHECK(sched_handle_wait_svc(sched, cpu, 0.5), "WAIT 0.5 handled (before the task's first firing)");
+    /* WAIT 0.5 doesn't reach the task's own t=0 firing yet (WAIT's own
+     * deadline, 0.5s, is earlier than the task's t=0 firing -- both are
+     * "due now" from elapsedTimeUs=0, so the primal's own WAIT state
+     * itself isn't what's being tested here; what matters is that
+     * TERMINATE below removes the task before it can ever fire again). */
+    CHECK(sched_handle_terminate_named_svc(sched, cpu, &repPde, 1), "TERMINATE (named) handled");
+    CHECK(find_task_by_pde(sched, repPde) < 0, "TERMINATEd task's slot is fully freed, not just marked WAITING/DORMANT");
+
+    /* Self form, via a fresh independent scheduler instance: a task
+     * that TERMINATEs itself must not execute anything past that SVC. */
+    AGEHarness age2;
+    ageharness_init(&age2);
+    CPU *cpu2 = &age2.gpc.cpu;
+    MCM *mem2 = &cpu2->mainStorage;
+    Scheduler *sched2 = &age2.halUCP.scheduler;
+
+    uint32_t selfEntry = build_close_only_task(mem2, 0x1000); /* body is irrelevant; only reached via direct sched_handle_terminate_self_svc below */
+    uint32_t selfPde = build_pde(mem2, 0x1010, selfEntry);
+    psw_set_nia(&cpu2->psw, 0x3000);
+
+    CHECK(sched_handle_schedule_svc(sched2, cpu2, 80, selfPde, 0.0), "SCHEDULE (one-shot) handled");
+    CHECK(sched_handle_wait_svc(sched2, cpu2, 0.0), "WAIT 0 dispatches the task immediately");
+    CHECK(psw_get_nia(&cpu2->psw) == selfEntry, "task dispatched (sanity check before self-TERMINATE)");
+    CHECK(sched_handle_terminate_self_svc(sched2, cpu2), "self-TERMINATE handled");
+    CHECK(psw_get_nia(&cpu2->psw) == 0x3000, "context switched back to the primal's own saved NIA, not left at the terminating task's own NIA");
+    CHECK(sched2->tasks[sched2->runningIdx].isPrimal, "runningIdx is back on the primal pseudo-task after self-TERMINATE");
+
+    ageharness_free(&age);
+    ageharness_free(&age2);
+}
+
 int main(void) {
     test_priority_ordering_and_context_roundtrip();
     test_repeat_every_counter_and_virtual_time();
+    test_update_priority_flips_dispatch_order();
+    test_terminate_named_and_self();
     if (failures == 0) {
         printf("all scheduler-mechanics tests passed\n");
     } else {

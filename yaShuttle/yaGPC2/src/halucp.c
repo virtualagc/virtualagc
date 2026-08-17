@@ -349,6 +349,17 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                 for (uint32_t i = 0; i < count; i++) pdeAddrs[i] = mcm_get16(&h->cpu->mainStorage, ea + 1 + i);
                 return sched_handle_terminate_named_svc(&h->scheduler, h->cpu, pdeAddrs, (int)count);
             }
+        } else if (svcLow == 0x0b) {
+            /* UPDATE PRIORITY label TO alpha (named-target form only --
+             * see sched_handle_update_priority_svc's own header comment
+             * for why the bare/self form isn't handled). High byte of
+             * the SVC param word is the new priority; the next halfword
+             * is the target task's own PDE address, confirmed
+             * empirically against a real compiled program the same way
+             * TERMINATE's own target field was. */
+            int newPriority = (int)((svcCode >> 8) & 0xff);
+            uint32_t pdeAddr = mcm_get16(&h->cpu->mainStorage, ea + 1);
+            return sched_handle_update_priority_svc(&h->scheduler, h->cpu, newPriority, pdeAddr);
         }
     }
 

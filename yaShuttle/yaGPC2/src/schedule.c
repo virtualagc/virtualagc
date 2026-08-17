@@ -275,3 +275,10 @@ bool sched_handle_terminate_self_svc(Scheduler *s, CPU *cpu) {
     uint32_t ownPde = s->tasks[s->runningIdx].pdeAddr;
     return sched_handle_terminate_named_svc(s, cpu, &ownPde, 1);
 }
+
+bool sched_handle_update_priority_svc(Scheduler *s, CPU *cpu, int newPriority, uint32_t pdeAddr) {
+    (void)cpu; /* no dispatch/context change -- see this function's own header comment */
+    int idx = sched_find_by_pde(s, pdeAddr);
+    if (idx >= 0) s->tasks[idx].priority = newPriority;
+    return true;
+}
