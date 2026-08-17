@@ -2787,6 +2787,12 @@ check, the same way `DEPENDENT`/`UPDATE PRIORITY`/combined process-event
 expressions turned out to be language-spec features FCOS itself didn't
 fully support — see §2.7/§6's own findings on that pattern).
 
+**Resolved by §7.10** (item #9 of the implementation-order pass): checked
+against real FCOS's own documented precedent as suggested above, and
+confirmed this is exactly that same pattern — a genuine spec-vs-real-
+implementation gap, not something to fix. See §7.10 for the full
+research trail.
+
 ### 7.3 Implementation order for the survey's remaining gaps (2026-08-17, ongoing)
 
 Working through `hal-runtime-features.db`'s `not_implemented`/`partial`/
@@ -3214,6 +3220,66 @@ throughout the wait), `test_wait_for_dependent` (the no-dependents no-op
 and a genuine block+resume, restored to `TASK_STATE_READY` not freed),
 and `test_terminate_cascades_to_dependents_transitively` (the 3-level
 chain above).
+
+### 7.10 `SCHEDULE ... REPEAT EVERY` cycle-overrun runtime error — researched, confirmed a real spec-vs-implementation gap, deliberately left unimplemented
+
+Ninth item in the runtime-feature-survey implementation order. §7.2
+already found the discrepancy (`schedule.c`'s re-arm loop silently skips
+missed cycles instead of raising the `USA003087` §23.5-documented "a run
+time error occurs") but explicitly deferred the question of whether it
+was worth fixing to "whether real FCOS itself is the authoritative
+precedent" — this item is that research, not a fix.
+
+`USA003087` §25.1 states plainly that error-group/code *assignment* is
+**"implementation dependent — see appropriate User's Manual"** — the
+generic language guide never claims real FCOS actually implements every
+abstractly-described runtime error. So the generic guide alone can't
+settle this; the Shuttle-specific implementation documents have to.
+Checked both available ones:
+
+- **`USA003090`** (the HAL/S-FC User's Manual, Shuttle-specific) §8.4/
+  Appendix C enumerate exactly **one** runtime error group in full — group
+  4, entirely compiler-emitted arithmetic/library checks (division by
+  zero, `SQRT` of a negative argument, domain errors, etc., 33 entries,
+  none about timing or scheduling). No group 1/2/3/5/6 content appears
+  anywhere in the document. More tellingly, its own §8.3, titled "Real-
+  Time Statements," reads in full: *"This section was deleted by
+  CR13613."* — the Shuttle-specific real-time-statement documentation
+  was itself struck from this manual at some point in its revision
+  history.
+- **`IBM-76-SS-1110` Rev 5** (the HAL/FCOS Interface Control Document —
+  already this whole implementation's own primary source for the entire
+  SVC protocol, cited throughout `schedule.h`) confirms FCOS's error
+  numbering scheme has *six* groups: group 2 "FCOS software defined
+  errors" and group 5 "other FCOS defined system errors" both exist and
+  are the natural home for an RTE-detected condition like a cycle
+  overrun — but **neither group's own contents are ever enumerated**
+  anywhere in the document. Only group 4's table is given (§4.2.3.4),
+  and it's byte-for-byte the identical table `USA003090`'s own Appendix C
+  has. Searched the full extracted text of both documents for "cyclic,"
+  "overrun," "late," "missed," and "deadline" — zero matches in either,
+  outside of the one syntax-diagram mention of the `REPEAT EVERY` keyword
+  itself.
+
+Structurally, this is doubly unfounded even setting the documentation
+gap aside: there is no SVC-level mechanism through which FCOS *could*
+report this back into a running program in the first place. A cyclic
+task's own `CLOSE` compiles to the identical `SVC 0x0015` every other
+`CLOSE` does (confirmed directly, `schedule.h`'s own header comment,
+and re-confirmed this session for the `DEPENDENT` work in §7.9) — no
+separate "cycle overrun" SVC has ever appeared in any protocol traced
+this entire session, across roughly 30 real compiled test programs.
+
+**Conclusion**: this is a genuine spec-vs-real-implementation gap, the
+same category as `DEPENDENT`'s bare self-form and `UPDATE PRIORITY`'s
+bare self-form both hitting real HAL/S-FC compiler limitations earlier
+in this pass — not a `yaGPC2` to-do. `schedule.c`'s re-arm loop is left
+exactly as it was, now with a confirmed rationale rather than an open
+question. `hal-runtime-features.db` row 11 updated accordingly
+(`impl_status` stays `not_implemented`, matching the existing precedent
+for other confirmed-dead-end language-spec features like the `FILE`
+statement; `test_status` set to `not_applicable` — there is nothing to
+test against).
 
 ---
 

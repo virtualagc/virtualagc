@@ -235,10 +235,32 @@ F('Real-Time: SCHEDULE', 'SCHEDULE cycle-overrun runtime error',
   "If a REPEAT EVERY cycle's own execution time exceeds its interval, the language defines this "
   "as a documented runtime error, not a silently-absorbed skip.",
   'USA003087 §23.5', 'not_implemented',
-  "CONFIRMED DISCREPANCY: schedule.c's re-arm loop (`while (next <= elapsedTimeUs) next += "
-  "interval;`) silently catches up by skipping missed cycles instead of raising a runtime error. "
-  "Found by this survey, not previously documented in problems.md -- worth a problems.md entry.",
-  'untested', 'No fixture currently makes a REPEAT EVERY cycle overrun its own interval.')
+  "RESEARCHED (item #9 of the implementation-order pass) and left deliberately unimplemented: this "
+  "is a spec-vs-real-implementation gap, not a to-do, matching the same pattern as DEPENDENT's bare "
+  "self-form and UPDATE PRIORITY's bare self-form (real HAL/S-FC/FCOS not fully supporting a generic "
+  "language-spec feature). USA003087's own §25.1 states error-group/code assignment is 'implementation "
+  "dependent -- see appropriate User's Manual', so the Shuttle-specific manuals are the ones that would "
+  "actually confirm this exists. Checked both: USA003090 (HAL/S-FC User's Manual) §8.4/Appendix C "
+  "enumerates exactly one runtime error group -- group 4, compiler-emitted arithmetic/library checks "
+  "(division by zero, domain errors, etc.) -- with NO group covering RTE/scheduler-detected conditions; "
+  "its own §8.3 'Real-Time Statements' section header reads 'This section was deleted by CR13613'. The "
+  "IBM-76-SS-1110 Rev 5 Interface Control Document (already this whole implementation's own primary "
+  "SVC-protocol source) confirms FCOS's error numbering scheme has 6 groups -- group 2 'FCOS software "
+  "defined errors' and group 5 'other FCOS defined system errors' both exist and are the natural home "
+  "for a scheduler-detected condition -- but neither group's own contents are enumerated anywhere in "
+  "the document; only group 4's table is given (§4.2.3.4, byte-for-byte the same table as USA003090's "
+  "Appendix C). Neither document contains the words 'cyclic', 'overrun', 'late', 'missed', or "
+  "'deadline' anywhere. And structurally, even if this error existed, there is no SVC-level mechanism "
+  "for FCOS to report it back into a running HAL/S program at all: a cyclic task's own CLOSE compiles "
+  "to the identical SVC 0x0015 every other CLOSE does (confirmed directly, schedule.h's own header "
+  "comment), with no separate 'cycle overrun' SVC observed in any traced protocol this whole session. "
+  "schedule.c's own re-arm loop (`while (next <= elapsedTimeUs) next += interval;`) continues to "
+  "silently catch up by skipping missed cycles -- kept as-is, now with a confirmed rationale rather "
+  "than a known gap.",
+  'not_applicable',
+  "Deliberately not tested: there is nothing to test against (no real FCOS documentation, no SVC "
+  "mechanism, and neither yaHALMAT2 nor any real compiled fixture exercises a genuinely overrunning "
+  "cycle). See problems.md 7.10 for the full research trail.")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... ON event-expr (event-triggered initiation)',
   'Process WAITING until an event expression becomes TRUE, then READY.',
   'USA003087 §24.5', 'implemented',
