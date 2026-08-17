@@ -1236,11 +1236,34 @@ before; (2) output correctness — `yaGPC2`'s output for `COUNTUP.hal` is
 byte-identical to `yaHALMAT2`'s own output for the same source (both
 print `1` through `200`, one per line, then halt cleanly), used as the
 independent oracle in the absence of any `gpc`-side implementation to
-compare against. New regression coverage: `test/test_scheduler.sh` (a
-golden-transcript test in the same style as `test_debugger.sh`, now
-run as part of `make test`), fixture sources at
-`test/fixtures/countup.hal`/`.fcm`/`-lnk101.json` (rebuild via
-`test/fixtures/build_hal_fixtures.sh`).
+compare against.
+
+Permanent regression coverage, both run as part of `make test`:
+
+- **Tier 2 — `test/test_scheduler.sh`**: a golden-transcript test in the
+  same style as `test_debugger.sh`, running the real
+  HALSFC/lnk101-compiled `COUNTUP.hal` fixture end-to-end and diffing
+  its output against the yaHALMAT2-oracle golden file above. Fixture
+  sources at `test/fixtures/countup.hal`/`.fcm`/`-lnk101.json` (rebuild
+  via `test/fixtures/build_hal_fixtures.sh`).
+- **Tier 1 — `test/test_schedule.c`**: hand-assembled AP-101 task
+  bodies at flat (non-extended) addresses, driven through `ap101_exec1()`
+  directly (no HAL/S compile step), asserting scheduler internals a
+  compiled fixture's stdout can't show: which of two simultaneously-due
+  tasks the scheduler actually picks by priority, that a suspended
+  task's full register/FP state round-trips exactly across a `WAIT`,
+  and that `elapsedTimeUs` advances in discrete per-firing jumps to each
+  deadline (not free-running with instruction count) across a `REPEAT
+  EVERY` + `WAIT` scenario.
+
+Not added to `test/run_matrix.sh`: that script's whole design is
+diffing `yaGPC2` against the frozen pre-rename `yaGPC` snapshot and the
+original Node.js `gpc` (see this file's own "authoritative parity
+target going forward" policy note near the top) — both permanently
+absent from this checkout by design, not a gap to fix, and neither ever
+had any task-executive code to diff against in the first place (this
+section's own history above). The `test_scheduler.sh`/`test_schedule.c`
+coverage above is authoritative for this feature instead.
 
 ### 2.8 Floating-point LSB-level precision differences (likely not bugs)
 
