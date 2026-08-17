@@ -65,6 +65,20 @@ typedef struct {
      * called. */
     bool debugMode;
     Debugger *dbg;
+
+    /* --time-scale wall-clock pacing (see run.c's batchrunner_pace()).
+     * The CLI's own instruction loop is deliberately just another
+     * consumer of the same pure-virtual-time engine an embedding
+     * integrator would use (ap101_exec1(), via batchrunner_step()) --
+     * pacing is layered on top of it here, in the driver, exactly the
+     * way a real integrator (e.g. a future Space Shuttle simulator) is
+     * expected to pace itself against GpcState.elapsedTime. The engine
+     * itself never knows this is happening. Skipped entirely under
+     * --debug: time spent blocked on debugger input must never count
+     * against real time. */
+    double timeScale;
+    double pacingRefWallSeconds;
+    double pacingRefVirtualUs;
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts);

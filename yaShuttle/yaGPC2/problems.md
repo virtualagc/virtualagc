@@ -1265,6 +1265,51 @@ had any task-executive code to diff against in the first place (this
 section's own history above). The `test_scheduler.sh`/`test_schedule.c`
 coverage above is authoritative for this feature instead.
 
+**Wall-clock pacing added (2026-08-17), standalone CLI only.** The
+implementation above deliberately only tracks *virtual* time
+(`cpu->elapsedTimeUs`, purely instruction-derived) — `sched_dispatch()`'s
+idle fast-forward jumps straight to the next deadline with no real
+sleeping at all, so `COUNTUP.hal`'s ~199.5 program-seconds originally
+ran in a fraction of a real second, unlike `yaHALMAT2`, which paces
+itself against real wall-clock time by default. That asymmetry was
+correct for `yaGpcIntegration.h`'s embeddable `GpcEngineFn` (a future
+Space Shuttle simulator integrator owns its own pacing against
+`GpcState.elapsedTime`; the engine itself must stay wall-clock-unaware,
+matching `yaHALMAT2`'s own `interp_step()`/`debug_run()` split) but left
+the standalone `gpc run` CLI with no real-time behavior at all, unlike
+`yaHALMAT2`'s CLI.
+
+Fixed by adding `--time-scale <factor>` to `yaGPC2`'s CLI, mirroring
+`yaHALMAT2`'s own flag byte-for-byte (name, semantics, default 1.0 =
+genuine real time). Implemented as a burst-execute-then-check pacing
+loop in `run.c` (`batchrunner_pace()`, called from both
+`batchrunner_run()` and `batchrunner_run_interactive()`'s step loops,
+skipped entirely under `--debug` so time blocked on a debugger prompt
+never counts against real time) — the same design `yaHALMAT2`'s
+`interp_run_burst()` already uses, right down to the ~50ms polling
+window. Deliberately layered *outside* `batchrunner_step()`/
+`ap101_exec1()` rather than inside either: the CLI's own loop is just
+another consumer of the same pure-virtual-time engine an embedding
+integrator would use, pacing itself against the identical clock
+(`cpu->elapsedTimeUs`, exposed to an integrator as `GpcState.elapsedTime`)
+an integrator is expected to pace against — demonstrating that pattern
+rather than giving the engine (`ap101_exec1()`, `gpcops.c`'s
+`yagpc2_engine()`) any wall-clock awareness of its own. Confirmed the
+engine layer is untouched: `test_gpcops`/`test_schedule` (which call
+`ap101_exec1()`/`yaGPC2_ops.engine()` directly, never through `run.c`)
+still complete instantly regardless of `--time-scale`.
+
+Verified against `COUNTUP.hal`: `--time-scale 100` completed in 2.012s
+real time against an expected 1.995s (199.5 program-seconds / 100),
+output byte-identical to the unpaced run; the default (no flag, i.e.
+1.0) was confirmed to genuinely pace output roughly one `WRITE` line
+per real second rather than completing instantly. `test_scheduler.sh`
+now passes `--time-scale 1000000` explicitly (matching how the
+`yaHALMAT2` oracle capture itself was sped up) so `make test` isn't a
+199.5-real-second test — this doesn't change the golden file, since
+`--time-scale` never touches program output, only how much real time
+elapses alongside it.
+
 ### 2.8 Floating-point LSB-level precision differences (likely not bugs)
 
 `test_errfix_scalar`, `test_bfnc_hyperbolic`, `test_bfnc_invtrig`,

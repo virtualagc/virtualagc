@@ -14,4 +14,13 @@ char *yagpc_strdup(const char *s);
 /* Same contract as POSIX strcasecmp: ASCII case-insensitive compare. */
 int yagpc_strcasecmp(const char *a, const char *b);
 
+/* Monotonic wall-clock seconds (CLOCK_MONOTONIC) -- for the standalone
+ * CLI's --time-scale wall-clock pacing (see run.c's batchrunner_pace()),
+ * never for anything that affects program behavior/output. Not affected
+ * by wall-clock/NTP adjustments, unlike time()/gettimeofday(). */
+double yagpc_monotonic_seconds(void);
+
+/* Sleeps for the given number of seconds; a no-op if seconds <= 0. */
+void yagpc_sleep_seconds(double seconds);
+
 #endif

@@ -71,6 +71,13 @@ static const char *HELP_TEXT =
 "  --no-debug                      disable the interactive debugger (default)\n"
 "  --source-map <file>             HAL/S source-line map for --debug (see\n"
 "                                  tools/gen_source_map.py)\n"
+"  --time-scale <factor>           wall-clock pacing divisor for SCHEDULE/WAIT\n"
+"                                  real-time throttling (default: 1.0, genuine\n"
+"                                  real time; factor > 0). A larger factor\n"
+"                                  shrinks how long the CLI actually sleeps for\n"
+"                                  a given HAL/S-seconds interval, without\n"
+"                                  changing any SCHEDULE/WAIT tick arithmetic\n"
+"                                  or program output at all (default: \"1.0\")\n"
 "  -h, --help                      display help for command\n";
 
 static void set_defaults(Options *o) {
@@ -80,6 +87,7 @@ static void set_defaults(Options *o) {
     o->lineWidth = "132";
     o->maxSteps = "100000";
     o->dumpInterval = "100";
+    o->timeScale = "1.0";
 }
 
 /* JS parseInt(s, 16) applied after stripping a leading "0x"/"0X" — matches
@@ -200,6 +208,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->debug = false;
         } else if (tok_is(tok, "--source-map", &n)) {
             opts->sourceMap = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--time-scale", &n)) {
+            opts->timeScale = take_value(argc, argv, &i, tok, n);
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {

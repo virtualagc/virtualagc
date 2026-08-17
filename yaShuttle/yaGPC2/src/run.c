@@ -31,6 +31,11 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     r->traceEnabled = opts->trace;
     r->verbose = opts->verbose;
     r->interactive = opts->interactive;
+    r->timeScale = atof(opts->timeScale);
+    if (r->timeScale <= 0.0) {
+        fprintf(stderr, "error: --time-scale must be > 0 (got '%s')\n", opts->timeScale);
+        exit(1);
+    }
 
     r->debugMode = opts->debug;
     r->dbg = opts->debug ? debugger_create(opts) : NULL;
@@ -397,6 +402,71 @@ static bool batchrunner_step(BatchRunner *r) {
     return true;
 }
 
+/* How much virtual time (in cpu->elapsedTimeUs's own units, microseconds)
+ * accumulates between wall-clock checks -- mirrors yaHALMAT2's own
+ * HALMAT_REALTIME_BURST_MS (interp.c): "burst execute some number of
+ * instructions, then sleep to let the operating system do whatever else
+ * it needs to do, then execute a new burst ... on a 50 or 100
+ * millisecond cycle." A window this size keeps the check-then-maybe-
+ * sleep overhead (one elapsedTimeUs subtraction per step; the actual
+ * yagpc_monotonic_seconds() calls only happen once a window's worth of
+ * virtual time has passed) negligible relative to real instruction
+ * throughput, while staying tight enough that a human watching the
+ * output can't tell it's not continuous. */
+#define PACING_WINDOW_MS 50.0
+
+/* Wall-clock pacing for the standalone CLI's own instruction loop --
+ * called after every batchrunner_step() from both batchrunner_run() and
+ * batchrunner_run_interactive(), skipped entirely under --debug (time
+ * spent blocked on a debugger prompt must never count against real
+ * time -- the same exclusion yaHALMAT2's interp_run_burst() makes for
+ * its own debug_run()).
+ *
+ * Deliberately layered *outside* batchrunner_step()/ap101_exec1() rather
+ * than baked into either: the CLI's own loop is just another consumer
+ * of the same pure-virtual-time engine an embedding integrator (e.g. a
+ * future Space Shuttle simulator, via yaGpcIntegration.h's GpcEngineFn)
+ * would use, reading the exact same clock (cpu->elapsedTimeUs, exposed
+ * to an integrator as GpcState.elapsedTime) an integrator would pace
+ * itself against. This function's whole job is to demonstrate that
+ * pattern, not to give the engine any wall-clock awareness of its own --
+ * ap101_exec1()/yagpc2_engine() (gpcops.c) remain exactly as unaware of
+ * real time as before.
+ *
+ * ref_wall/ref_virtual reset together every time a window's worth of
+ * virtual time has accumulated since the last check -- so the
+ * monotonic-clock read happens only ~20x/sec of virtual-equivalent
+ * time, not once per instruction. This also correctly handles
+ * sched_dispatch()'s own idle fast-forward (schedule.c): a single
+ * batchrunner_step() call can jump cpu->elapsedTimeUs a large amount at
+ * once when every task is WAITING/DORMANT and nothing is immediately
+ * ready; that jump alone crosses the window threshold, and the
+ * resulting sleep correctly represents the real time equivalent to it
+ * -- no special-casing needed here for that case.
+ *
+ * If a burst genuinely took longer in wall-clock terms than its
+ * virtual-time equivalent (slow host, heavy/debug build, or a program
+ * that's mostly real instruction execution rather than SCHEDULE/WAIT
+ * fast-forwarding), target_wall_seconds > actual_wall_seconds is false,
+ * nothing sleeps, and the reference pair simply resets to "now" -- no
+ * catch-up/runaway-acceleration debt ever accumulates across windows. */
+static void batchrunner_pace(BatchRunner *r) {
+    if (r->debugMode) return;
+
+    double elapsedVirtualUs = r->age.gpc.cpu.elapsedTimeUs - r->pacingRefVirtualUs;
+    double windowUs = PACING_WINDOW_MS * 1000.0;
+    if (elapsedVirtualUs < windowUs) return;
+
+    double targetWallSeconds = (elapsedVirtualUs / 1e6) / r->timeScale;
+    double actualWallSeconds = yagpc_monotonic_seconds() - r->pacingRefWallSeconds;
+    if (targetWallSeconds > actualWallSeconds) {
+        yagpc_sleep_seconds(targetWallSeconds - actualWallSeconds);
+    }
+
+    r->pacingRefWallSeconds = yagpc_monotonic_seconds();
+    r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
+}
+
 /* Shared by both loops so --watch/--watch-log behave identically in
  * batch and interactive mode. */
 static void batchrunner_init_watchpoints(BatchRunner *r) {
@@ -473,8 +543,11 @@ int batchrunner_run(BatchRunner *r) {
 
     batchrunner_init_watchpoints(r);
 
+    r->pacingRefWallSeconds = yagpc_monotonic_seconds();
+    r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
     while (r->step < r->maxSteps) {
         if (!batchrunner_step(r)) break;
+        batchrunner_pace(r);
     }
 
     /* Whatever reason the loop stopped for -- max-steps exhausted, a
@@ -635,11 +708,14 @@ int batchrunner_run_interactive(BatchRunner *r) {
 
     signal(SIGINT, on_sigint);
 
+    r->pacingRefWallSeconds = yagpc_monotonic_seconds();
+    r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
     while (r->step < r->maxSteps) {
         if (g_sigint_received) {
             interactive_report_and_exit(r, "\n--- INTERRUPTED after %ld steps ---", r->step, 0);
         }
         if (!batchrunner_step(r)) break;
+        batchrunner_pace(r);
     }
 
     /* See batchrunner_run()'s own identical call for the reasoning --

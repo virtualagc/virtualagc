@@ -63,6 +63,21 @@ typedef struct {
      * comment. Default false: an ordinary standalone-compiled HAL/S
      * program run without a real flight OS underneath it. */
     bool fcos;                       /* default false */
+
+    /* Not part of gpc run's own option set -- yaGPC2-specific, mirroring
+     * yaHALMAT2's own --time-scale exactly (same name, same semantics,
+     * same default). Wall-clock pacing divisor for SCHEDULE/WAIT
+     * real-time throttling in the standalone CLI's own instruction loop
+     * (run.c's batchrunner_pace()) -- never touches ap101_exec1()/
+     * cpu->elapsedTimeUs's own tick arithmetic, only how fast real time
+     * elapses alongside it. Only meaningful for TASK/SCHEDULE/WAIT
+     * programs; a program with no SCHEDULE/WAIT never accumulates
+     * enough virtual time between pacing checks to trigger a sleep at
+     * all. See run.h's own comment for why this lives in the CLI loop
+     * and not the embeddable engine -- an integrator (e.g. a future
+     * Shuttle simulator) owns its own pacing against the same
+     * GpcState.elapsedTime this option paces the CLI against. */
+    char *timeScale;                 /* default "1.0"; parsed via atof */
 } Options;
 
 /* Parses argv (starting at argv[1]) exactly as `gpc run` would, except that

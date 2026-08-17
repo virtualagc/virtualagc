@@ -22,7 +22,17 @@ fail=0
 act_out=$(mktemp)
 act_err=$(mktemp)
 
-"$YAGPC2" --interactive --no-trace --no-verbose --symbols "$SYM" --line-width 240 --max-steps 200000 "$FCM" >"$act_out" 2>"$act_err"
+
+# --time-scale: yaGPC2's standalone CLI now paces SCHEDULE/WAIT against
+# real wall-clock time by default (--time-scale 1.0, matching
+# yaHALMAT2's own default -- see run.c's batchrunner_pace()), so this
+# program's genuine ~199.5 virtual seconds would otherwise make this
+# test take ~199.5 real seconds every time `make test` runs. A large
+# factor collapses that to milliseconds without changing any tick
+# arithmetic or program output at all (confirmed: same golden file this
+# was already diffed against, captured with yaHALMAT2 similarly sped up
+# via its own --time-scale).
+"$YAGPC2" --interactive --no-trace --no-verbose --symbols "$SYM" --line-width 240 --max-steps 200000 --time-scale 1000000 "$FCM" >"$act_out" 2>"$act_err"
 act_code=$?
 
 ok=1
