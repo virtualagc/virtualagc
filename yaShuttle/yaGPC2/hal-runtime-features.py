@@ -225,9 +225,14 @@ F('Real-Time: WAIT', 'WAIT (delta-time)', 'WAIT interval; suspends the executing
   'USA003087 §13.5', 'implemented', 'SVC #6, sched_handle_wait_svc.',
   'tested_dedicated', "test_schedule.c scenario 1's WAIT 1.0 and scenario 2's WAIT 3.5, plus countup.hal's WAIT 199.5.")
 F('Real-Time: WAIT', 'WAIT UNTIL time (absolute)', 'WAITING until an absolute real time is reached.',
-  'USA003087 §13.5', 'not_implemented',
-  "SVC #7 (UNTIL) is explicitly named but unhandled in halucp.c's own comment "
-  "('07/08/09 -- UNTIL/event-expression/DEPENDENT -- fall through unhandled').", 'untested')
+  'USA003087 §13.5', 'implemented',
+  'SVC #7, sched_handle_wait_until_svc (src/schedule.c): delegates to sched_handle_wait_svc with a '
+  'delta computed from the absolute target minus cpu->elapsedTimeUs, clamped at zero -- confirmed '
+  'empirically via a real compiled WAIT UNTIL that loads its argument into the same FPR0-1 pair as '
+  'delta-time WAIT.',
+  'tested_dedicated',
+  'test/test_scheduler.sh (waituntil/burst, waituntil/signal): real HALSFC-compiled '
+  'test/fixtures/waituntil.hal, output byte-identical to yaHALMAT2.')
 F('Real-Time: WAIT', 'WAIT FOR event-expr', 'WAITING until an event expression becomes TRUE.',
   'USA003087 §24.6', 'not_implemented', 'SVC #8, unhandled.', 'untested')
 F('Real-Time: WAIT', 'WAIT FOR DEPENDENT', 'WAITING until all of the process\'s own dependents have terminated.',

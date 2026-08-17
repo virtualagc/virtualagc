@@ -316,11 +316,18 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                 return sched_handle_schedule_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr, repeatIntervalUs);
             }
         } else if (svcLow == 0x06) {
-            /* WAIT, delta-time variant (the only one this cut handles;
-             * 07/08/09 -- UNTIL/event-expression/DEPENDENT -- fall
-             * through unhandled, same as any other unrecognized SVC). */
+            /* WAIT, delta-time variant. */
             FloatIBM delta = fibm_from64(register_get32(cpu_f(h->cpu, 0)), register_get32(cpu_f(h->cpu, 1)));
             return sched_handle_wait_svc(&h->scheduler, h->cpu, fibm_to_float(&delta));
+        } else if (svcLow == 0x07) {
+            /* WAIT UNTIL, absolute-time variant. Confirmed empirically
+             * that a real compiled WAIT UNTIL loads its argument into
+             * the same FPR0-1 pair as delta-time WAIT -- see
+             * sched_handle_wait_until_svc's own header comment (08/09 --
+             * event-expression/DEPENDENT -- still fall through
+             * unhandled, same as any other unrecognized SVC). */
+            FloatIBM until = fibm_from64(register_get32(cpu_f(h->cpu, 0)), register_get32(cpu_f(h->cpu, 1)));
+            return sched_handle_wait_until_svc(&h->scheduler, h->cpu, fibm_to_float(&until));
         }
     }
 

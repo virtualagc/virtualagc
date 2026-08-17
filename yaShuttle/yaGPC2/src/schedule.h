@@ -174,6 +174,24 @@ bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pd
  * before) and dispatches whatever's next. Always returns true. */
 bool sched_handle_wait_svc(Scheduler *s, CPU *cpu, double deltaSeconds);
 
+/* Called from halucp.c's SVC dispatch for SVC #7 (WAIT UNTIL, absolute
+ * time). USA003087 13.5: "a time already in the past... does not leave
+ * READY" -- i.e. WAIT UNTIL is defined purely in terms of the same
+ * delta-time semantics sched_handle_wait_svc already implements, with
+ * the delta computed here (absoluteSeconds minus the current virtual
+ * time, floored at zero so an already-past target is a zero-length
+ * wait rather than a negative one) and handed off to it -- this file's
+ * "absolute time origin" is simply cpu->elapsedTimeUs's own t=0 (program
+ * start), matching the Guide's own "normally coincident with the
+ * initiation of the primal process" default for implementations that
+ * don't otherwise define one (confirmed empirically: a real compiled
+ * WAIT UNTIL loads its argument into FPR0-1, the exact same register
+ * pair delta-time WAIT uses -- there is no separate "AT" register pair
+ * reserved for it the way SCHEDULE's own AT/IN/EVERY/AFTER/UNTIL
+ * parameters each get their own FPR pair per schedule.c's header
+ * comment). Always returns true. */
+bool sched_handle_wait_until_svc(Scheduler *s, CPU *cpu, double absoluteSeconds);
+
 /* Called from halucp.c's existing SVC 0x0015 case, before any of its
  * current halt logic. Returns true iff this was a scheduled task's own
  * CLOSE (already fully handled here -- re-armed if REPEATing, freed

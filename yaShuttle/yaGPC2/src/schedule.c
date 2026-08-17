@@ -215,6 +215,12 @@ bool sched_handle_wait_svc(Scheduler *s, CPU *cpu, double deltaSeconds) {
     return true;
 }
 
+bool sched_handle_wait_until_svc(Scheduler *s, CPU *cpu, double absoluteSeconds) {
+    double deltaSeconds = absoluteSeconds - cpu->elapsedTimeUs / 1e6;
+    if (deltaSeconds < 0.0) deltaSeconds = 0.0;
+    return sched_handle_wait_svc(s, cpu, deltaSeconds);
+}
+
 bool sched_handle_task_close(Scheduler *s, CPU *cpu) {
     if (s->runningIdx < 0) return false; /* scheduling never engaged */
 

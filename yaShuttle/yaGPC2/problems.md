@@ -2763,6 +2763,39 @@ check, the same way `DEPENDENT`/`UPDATE PRIORITY`/combined process-event
 expressions turned out to be language-spec features FCOS itself didn't
 fully support — see §2.7/§6's own findings on that pattern).
 
+### 7.3 Implementation order for the survey's remaining gaps (2026-08-17, ongoing)
+
+Working through `hal-runtime-features.db`'s `not_implemented`/`partial`/
+`unresolved`/untested rows one at a time, in an order chosen for
+dependency and value (smallest well-specified extensions of working
+code first; the one genuinely new subsystem — an event-expression
+evaluator — deliberately placed where it unlocks several other rows at
+once). Each item gets implemented, verified against a real
+HALSFC-compiled fixture cross-checked against `yaHALMAT2` as the
+independent oracle (the same discipline `TASK`/`SCHEDULE`/`WAIT`
+itself used), and the database updated in place — see
+`hal-runtime-features.py show <id>` for the current status of any
+specific row rather than duplicating it here.
+
+**`WAIT UNTIL <time>` (SVC #7) — done.** Confirmed via a real compiled
+`WAITUNTIL.hal` (`WRITE; WAIT UNTIL 2.5; WRITE;`) that the absolute-time
+argument loads into the same FPR0-1 pair delta-time `WAIT` (SVC #6)
+already uses. Implemented as `sched_handle_wait_until_svc`
+(`src/schedule.c`), which computes `absoluteSeconds -
+cpu->elapsedTimeUs/1e6` (clamped at zero for an already-past target,
+matching `USA003087` §13.5's "does not leave READY") and delegates to
+the existing `sched_handle_wait_svc` — no new state machine needed.
+Output byte-identical to `yaHALMAT2`'s own run of the same source (once
+a real invocation mistake was caught: `yaHALMAT2`'s `--litfile`/
+`--memory` both default to auto-discovery alongside the HALMAT file;
+passing them explicitly pointing at the same file silently corrupts
+CHARACTER-literal output while still exiting 0 — cost an hour chasing a
+phantom "yaGPC2 vs. yaHALMAT2 discrepancy" that was actually a bad CLI
+invocation. Noted directly in `test/test_scheduler.sh`'s own header
+comment so it isn't rediscovered.). New fixture
+`test/fixtures/waituntil.hal`/`.fcm`/`-lnk101.json`/`_golden.txt`,
+exercised by `test/test_scheduler.sh` under both `--pacing` modes.
+
 ---
 
 ## Methodology and caveats
