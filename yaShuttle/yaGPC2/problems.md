@@ -1154,7 +1154,7 @@ these two specifically. Logged as
 `status=not_a_bug` — no code change, not fixable without the same new
 periodic-timer/interrupt subsystem §2.7 already declined to build.
 
-### 2.7 Real-time task model (`SCHEDULE`/`WAIT`/`TASK`/priority): likely a scope/methodology gap, not a semantic bug
+### 2.7 Real-time task model (`SCHEDULE`/`WAIT`/`TASK`/priority): was a scope boundary, now implemented (2026-08-17)
 
 27 of the 73 are `SCHEDULE`/`WAIT`/task-related:
 `test_canc_control`, `test_countup2`, `test_mshp`,
@@ -1192,6 +1192,55 @@ backing implementation for real-time task semantics to link against at
 all; `gpc`'s bare CPU/IOP simulation genuinely has no task executive.
 Not fixable within yaGPC2's current scope without building an entirely
 new runtime subsystem — no action taken.
+
+**Superseded (2026-08-17): a minimal task executive is now
+implemented in `yaGPC2` itself, at the same SVC-trap level it already
+substitutes for FCOS's SEND ERROR/QUIT/EVENT handling.** The
+"nothing to link against" finding above was correct and remains the
+reason this can't be solved by *linking* anything — real hardware
+never links a task-scheduling module into a compiled program at all
+(confirmed again: no such module in any `.fcm.LIST` for a
+`TASK`-using program). But tracing a real compiled program's exact SVC
+traffic (a user-provided `COUNTUP.hal`: one `TASK`, `SCHEDULE ...
+REPEAT EVERY`, one `WAIT`) showed the SVC protocol matches the real
+Space Shuttle FCOS interface precisely, documented in `IBM-76-SS-1110
+Rev 5` (the HAL/FCOS Interface Control Document) — SCHEDULE is always
+SVC #1 with a well-defined parameter block, WAIT is SVC #6/7/8/9 by
+variant, and a task's own `CLOSE` reuses the same SVC #`0x15` the main
+program's `CLOSE` does. That's a real, well-scoped protocol to
+implement a substitute for, the same way `halucp.c` already
+substitutes for FCOS's other SVCs — it no longer needed "an entirely
+new runtime subsystem" in the open-ended sense the note above meant,
+just one more SVC-trap handler alongside the existing ones.
+
+New files `src/schedule.h`/`schedule.c` implement a minimal,
+cooperative-only (non-preemptive) task executive: `SCHEDULE ...
+PRIORITY(n), REPEAT EVERY <seconds>;`, delta-time `WAIT <seconds>;`,
+and priority-ordered dispatch among simultaneously-due tasks, wired
+into `halucp_handle_svc()`'s existing SVC dispatch (`src/halucp.c`/
+`.h`) with zero changes needed to `gpcops.c`'s or `run.c`'s own
+instruction-step loops (every task switch happens synchronously inside
+an SVC handler, matching `yaHALMAT2`'s own non-preemptive scheduling
+model). `AT`/`IN`/`ON`/event-expression scheduling, `DEPENDENT`,
+`UPDATE PRIORITY`, `CANCEL`, `TERMINATE`, and register-bank-1 context
+save/restore are explicitly out of scope for this cut (real FCOS itself
+didn't support `DEPENDENT`/`UPDATE PRIORITY` either, so this isn't a
+new gap relative to the real system).
+
+Verified end-to-end against `COUNTUP.hal` two ways: (1) zero regression
+— the full existing unit-test suite and `test/test_debugger.sh`'s
+golden-transcript tests pass unchanged, since `sched_handle_task_close`
+returns `false` immediately whenever scheduling was never engaged,
+guaranteeing every fixture with no `TASK`/`SCHEDULE` behaves exactly as
+before; (2) output correctness — `yaGPC2`'s output for `COUNTUP.hal` is
+byte-identical to `yaHALMAT2`'s own output for the same source (both
+print `1` through `200`, one per line, then halt cleanly), used as the
+independent oracle in the absence of any `gpc`-side implementation to
+compare against. New regression coverage: `test/test_scheduler.sh` (a
+golden-transcript test in the same style as `test_debugger.sh`, now
+run as part of `make test`), fixture sources at
+`test/fixtures/countup.hal`/`.fcm`/`-lnk101.json` (rebuild via
+`test/fixtures/build_hal_fixtures.sh`).
 
 ### 2.8 Floating-point LSB-level precision differences (likely not bugs)
 

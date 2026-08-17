@@ -26,6 +26,7 @@
 #include <stdint.h>
 
 #include "cpu.h"
+#include "schedule.h"
 #include "symboltable.h"
 
 #define HALUCP_MAX_CHANNEL 256
@@ -42,6 +43,11 @@ typedef struct {
 
 typedef struct {
     CPU *cpu;
+
+    /* HAL/S TASK/SCHEDULE/WAIT task executive -- see schedule.h. yaGPC2
+     * substitutes for FCOS here at the same SVC-trap level it already
+     * substitutes for SEND ERROR/QUIT/EVENT, below. */
+    Scheduler scheduler;
 
     bool hasTrapAddrs;
     uint32_t outrap, intrap, cntrap;

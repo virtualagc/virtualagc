@@ -1,0 +1,367 @@
+#!/usr/bin/env python
+# Compile, link, and run a HAL/S program, using HALSFC, lnk101, and gpc-batch.
+
+import re
+import shlex
+import sys
+import subprocess
+import os
+import tempfile
+from pathlib import Path
+
+def die(code = 1):
+    '''Exit after flushing.  This used to be a bare os._exit(1), which
+    skips interpreter shutdown and therefore throws away whatever is
+    still sitting in stdout's buffer -- so a failure that had just
+    printed the compiler's own diagnostic exited silently whenever
+    stdout was a pipe rather than a terminal, which is every time the
+    script is run from another program.'''
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(code)
+
+extraParms = ""
+
+# The CARDTYPE table, conditional pairs and option list are shared with
+# compilePASS and compileLinkCompare; see halsParms.py.
+from halsParms import stemOf
+import halsParms
+
+def getParms(filename):
+    return halsParms.getParms(stemOf(filename), extraParms)
+
+helpMsg = '''
+Used for compiling, linking, running a standalone program implemented in a 
+single HAL/S file.
+
+Usage:
+     compileLinkRun [OPTIONS] --filename=F
+     
+The available OPTIONs are:
+    --filename=F    Required.  F is the path to the HAL/S source-code file.
+                    If F starts with "@", it instead names a manifest file
+                    listing multiple HAL/S source-code file paths, one per
+                    line (blank lines and lines starting with "#" are
+                    ignored), in the order they need to be compiled --
+                    e.g. a called procedure/function or a referenced
+                    COMPOOL before whichever unit(s) reference it. Every
+                    listed file is compiled individually, then all of
+                    them are linked together into one image; combined
+                    outputs (the .fcm, -lnk101.json, .srcmap.json) are
+                    named after the manifest file itself rather than any
+                    one compiled unit. A COMPOOL/template-only file (no
+                    executable statements of its own) is fine to include
+                    in the list -- confirmed harmless to link in, and
+                    gen_source_map.py skips it (with a warning) rather
+                    than failing the whole build over it.
+    --bfs           Use the BFS flavor of the compiler. (Default PASS.)
+                    Also causes the PILOT object-code emitted to be converted
+                    to IBM object-code for use in the linker.
+    --parms=P       P is a list of HAL/S-FC compiler options that will
+                    completely override the defaults used by this program.
+    --extra-parms=P P is a list of extra HAL/S-FC compiler options that will
+                    be prefixed to the defaults used by this program.  A
+                    trailing comma is supplied if you leave it off.
+    --extra-pass1=P A list of extra "modern" command-line parameters passed to
+                    the HALSFC.  The extra parameters should be 
+                    separated by spaces, and should not themselves contain 
+                    spaces (even if quoted).  Example: 
+                            --extra-pass1="--pretty-bnf --verbose"
+    --interactive   In running the compiled program, it is assumed by default
+                    that the program does not require interactive user input
+                    (via READ(5)), so output (from WRITE(6)) is captured and
+                    printed out in a way that removes any extraneous messages
+                    from the emulator.  If `--interactive` is used, the raw
+                    output from the emulator is displayed, and user input can
+                    be supplied via READ(5).  This distinction is primarily
+                    to work around deficiencies in the emulator that are
+                    hopefully temporary in nature while development of it
+                    proceeds.
+    --out-dir=D     Write the per-file products (BASENAME.obj, BASENAME.fcm,
+                    BASENAME-lnk101.json, BASENAME.srcmap.json, and the .LIST
+                    and .repro.json files lnk101 drops beside them) into
+                    directory D, which is created if it does not exist, and
+                    keep them there rather than deleting them at the end.
+                    Without this they are written into the current directory
+                    and deleted afterwards.  Note that this does NOT relocate
+                    what HALSFC itself writes into the current directory --
+                    archive.results/, current.results, COMMON*.out, halmat.bin
+                    and the rest.
+    --no-test       Do not use HALSFC's --test option.
+    --debug         Pass the --debug switch to the emulator.
+    --gpc           Use "gpc run ..." as the emulator command.
+    --yaGPC         Use `yaGPC ...` as the emulator command.
+    --yaGPC2        (The default.) Use `yaGPC2 ...` as the emulator command.
+'''
+
+filename = None
+parmList = None
+interactive = True
+extraPass1 = []
+noTest = False
+debug = False
+outDir = None
+bfs = False
+gpcCommand = ["yaGPC2"]
+for parameter in sys.argv[1:]:
+    if parameter.startswith("--parms="):
+        parmList = parameter[8:]
+    elif parameter.startswith("--extra-parms="):
+        extraParms = parameter[14:]
+    elif parameter.startswith("--extra-pass1="):
+        extraPass1 = parameter[14:].strip().split()
+    elif parameter.startswith("--filename="):
+        filename = parameter[11:].replace("~", "$HOME")
+    elif parameter == "--bfs":
+        bfs = True
+    elif parameter == "--interactive":
+        interactive = True
+    elif parameter.startswith("--out-dir="):
+        outDir = parameter[10:]
+    elif parameter == "--no-test":
+        noTest = True
+    elif parameter == "--yaGPC":
+        gpcCommand = ["yaGPC"]
+    elif parameter == "--yaGPC3":
+        gpcCommand = ["yaGPC3"]
+    elif parameter == "--gpc":
+        gpcCommand = ["gpc", "run"]
+    elif parameter == "--debug":
+        debug = True
+    else:
+        print(helpMsg)
+        sys.exit(1)
+if debug:
+    gpcCommand.append("--debug")
+# A plain --filename=F compiles/links just F; --filename=@F instead
+# names a manifest of several HAL/S files (see helpMsg above) to be
+# compiled individually, in the given order, and linked together into
+# one image. Both cases funnel into the same `units` list -- a single-
+# element list for the plain case -- so the compile loop and everything
+# after it doesn't need to know which one it's handling.
+if filename.startswith("@"):
+    manifestPath = os.path.expanduser(os.path.expandvars(filename[1:]))
+    with open(manifestPath) as f:
+        halPaths = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+    if not halPaths:
+        sys.exit(f"error: manifest {manifestPath!r} lists no files")
+    basename = Path(manifestPath).stem
+else:
+    halPaths = [filename]
+    basename = Path(filename).stem
+units = [(Path(p).stem, os.path.expanduser(os.path.expandvars(p))) for p in halPaths]
+
+# Every product is named from `prefix`, so --out-dir moves all of them at once,
+# including the ones no line here names: lnk101 writes its .LIST and
+# .repro.json beside its own -o and --json-symbols arguments.
+prefix = basename
+objPrefix = ""
+if outDir != None:
+    os.makedirs(outDir, exist_ok = True)
+    prefix = os.path.join(outDir, basename)
+    objPrefix = outDir + os.sep
+fcmfile = f"{prefix}.fcm"
+symfile = f"{prefix}-lnk101.json"
+print(f"Producing {fcmfile}, {symfile}")
+
+# First step, compile each unit individually. thisParmList is computed
+# per unit (not just once) so an explicit --parms= override still
+# applies uniformly, but auto-detected parms (getParms(), keyed off
+# each unit's own filename) work correctly for a manifest whose files
+# don't all want the same cardtype.
+objfiles = []
+unitSpecs = []  # (module, pass1Path, pass2Path, halmatPath, sdflibDir) for gen_source_map.py, one per unit that has a captured results folder
+for module, halPath in units:
+    objfile = f"{objPrefix}{module}.obj"
+    thisParmList = parmList if parmList is not None else getParms(halPath)
+    command = ["HALSFC", halPath, f"--parms={thisParmList}"]
+    if bfs:
+        command.append("--bfs")
+    else:
+        command += ["-o", objfile]
+    if not noTest:
+        command += ["--test", "--force", "--clean", "--archive"]
+    command += extraPass1
+    print(" ".join(command))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Compilation of {halPath} failed with exit code {e.returncode}.")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+        die()
+    if bfs:
+        command = ["pilotToIbm", "-o", objfile, "current.results/cards/"]
+        print(" ".join(command))
+        try:
+            result2 = subprocess.run(command, capture_output = True, text = True, check = True)
+            print(result2.stdout)
+        except subprocess.CalledProcessError as e:
+            print(f"PILOT-to-IBM conversion failed with exit code {e.returncode}.")
+            print("STDOUT:", e.stdout)
+            print("STDERR:", e.stderr)
+            die()
+    objfiles.append(objfile)
+
+    # HALSFC prints e.g. 'Results stored in the folder
+    # "archive.results/HALSFC HELLO.hal 2026-07-30 19-28-56.results".'
+    # -- captured here (rather than assuming "current.results", which
+    # only ever points at the *last* compile) since a later unit's own
+    # compile moves that symlink before the source map gets built below.
+    m = re.search(r'Results stored in the folder "([^"]+)"', result.stdout)
+    if m:
+        resultsDir = m.group(1)
+        # optmat.bin (post-optimization HALMAT) is what Phase 2/ASM101
+        # actually generates object code from, so it's what yaGPC2's
+        # --debug 'halmat on' HALMAT-instruction-number display needs to
+        # correlate against; halmat.bin (pre-optimization) is only a
+        # fallback, e.g. for a --no-opt compile where optmat.bin was
+        # never produced at all.
+        halmatPath = None
+        for candidate in ("optmat.bin", "halmat.bin"):
+            candidatePath = f"{resultsDir}/{candidate}"
+            if os.path.exists(candidatePath):
+                halmatPath = candidatePath
+                break
+        # SDFLIB always exists (whenever NOTABLES isn't used), but only
+        # has real embedded HALMAT to cross-check against when the
+        # compile's own --parms included HALMAT (not this script's
+        # default) -- gen_source_map.py's cross-check degrades
+        # gracefully (silently finds nothing to compare) otherwise, so
+        # it's harmless to always pass this along.
+        sdflibDir = f"{resultsDir}/SDFLIB"
+        if not os.path.isdir(sdflibDir):
+            sdflibDir = None
+        unitSpecs.append((module, f"{resultsDir}/pass1.rpt", f"{resultsDir}/pass2.rpt", halmatPath, sdflibDir))
+    else:
+        print(f"Warning: could not determine the results folder for {halPath}; "
+              f"HAL/S source-line display for {module} will be unavailable.")
+
+# Next, link every compiled unit together. lnk101 accepts an "@LISTFILE"
+# argument (one object-file path per line) the same way gen_source_map.py
+# does below -- used here once there's more than one .obj, so a really
+# large manifest can't run into a shell/exec argv-length limit either.
+if len(objfiles) == 1:
+    command = ["lnk101", objfiles[0], "-o", fcmfile, "--json-symbols", symfile]
+    objsListFile = None
+else:
+    with tempfile.NamedTemporaryFile("w", suffix=".objs", delete=False) as f:
+        f.write("\n".join(objfiles) + "\n")
+        objsListFile = f.name
+    command = ["lnk101", f"@{objsListFile}", "-o", fcmfile, "--json-symbols", symfile]
+print(" ".join(command))
+try:
+    result = subprocess.run(command, capture_output = True, text = True, check = True)
+except subprocess.CalledProcessError as e:
+    print(f"Linking failed with exit code {e.returncode}.")
+    print("STDOUT:", e.stdout)
+    print("STDERR:", e.stderr)
+    # This used to fall back on rldanalyze, copied from compileLinkCompare and
+    # never adjusted: rldanalyze requires a BASELINE_FCM to compare against and
+    # there is no such thing here, and the fallback named `config`, which does
+    # not exist in this script at all -- so a link failure raised NameError from
+    # inside the handler rather than reporting the link failure.
+    die()
+if objsListFile:
+    os.remove(objsListFile)
+
+# Next, build a HAL/S source-line map for yaGPC2's --debug --source-map
+# (see yaGPC2/tools/gen_source_map.py), from the pass1.rpt/pass2.rpt
+# reports captured above plus the linker's own section table. Only
+# yaGPC2 understands --source-map, and only when gpcCommand[0] is
+# actually "yaGPC2" is yaGPC2 the emulator that's about to be invoked
+# below -- skipped entirely otherwise. Non-fatal if it fails: source-
+# line display is a debugger nicety, not a requirement for compiling,
+# linking, and running the program.
+#
+# One "--unit MODULE=PASS1:PASS2[:HALMAT_FILE[:SDFLIB_DIR]]" per
+# compiled unit, via an @argsfile (gen_source_map.py's own
+# fromfile_prefix_chars support) rather than directly on the command
+# line, again so a large manifest can't hit an argv-length limit; a
+# COMPOOL/template-only unit with no code markers of its own (e.g. a
+# shared STRUCTURE declaration) is fine to include -- gen_source_map.py
+# skips it with a warning rather than failing. SDFLIB_DIR only enables
+# an optional confidence cross-check (see gen_source_map.py's
+# cross_check_halmat_with_sdf()) against SDF's own per-statement HALMAT
+# data -- harmless to always pass along even when this compile's own
+# --parms never included HALMAT (gen_source_map.py finds nothing to
+# compare against and silently skips it).
+srcmapfile = f"{prefix}.srcmap.json"
+haveSrcmap = False
+if gpcCommand[0] == "yaGPC2" and unitSpecs:
+    with tempfile.NamedTemporaryFile("w", suffix=".args", delete=False) as f:
+        for module, pass1Path, pass2Path, halmatPath, sdflibDir in unitSpecs:
+            spec = f"{module}={shlex.quote(pass1Path)}:{shlex.quote(pass2Path)}"
+            if halmatPath:
+                spec += f":{shlex.quote(halmatPath)}"
+                if sdflibDir:
+                    spec += f":{shlex.quote(sdflibDir)}"
+            f.write(f"--unit {spec}\n")
+        argsFile = f.name
+    command = ["gen_source_map.py", f"@{argsFile}", "--lnk101", symfile, "-o", srcmapfile]
+    print(" ".join(command))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+        print(result.stdout)
+        # Unlike this script's other subprocess calls, stderr is worth
+        # printing here even on success: it's where the optional SDF
+        # HALMAT cross-check (see gen_source_map.py's
+        # cross_check_halmat_with_sdf()) reports its own confirmation/
+        # warnings, which would otherwise be silently lost -- defeating
+        # the point of a cross-*check*.
+        if result.stderr:
+            print(result.stderr)
+        haveSrcmap = True
+    except subprocess.CalledProcessError as e:
+        print(f"Source-map generation failed with exit code {e.returncode} (continuing without it).")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+    os.remove(argsFile)
+
+# Next, run it in the emulator.
+command = gpcCommand + ["--interactive",
+	   "--no-trace", "--no-verbose",
+	   "--symbols", symfile,
+	   "--line-width", "240"]
+if haveSrcmap:
+    command += ["--source-map", srcmapfile]
+command += [fcmfile]
+print(" ".join(command))
+if interactive:
+    result = subprocess.run(command)
+else:
+    try:
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+        #print("STDOUT:", result.stdout)
+        #print("STDERR:", result.stderr)
+        print("Emulation output --------------------------------------------------")
+        lines = result.stdout.split("\n")
+        for line in lines:
+            if line.startswith("OUTPUT(6)"):
+                print(line[11:])
+        print("-------------------------------------------------------------------")
+    except subprocess.CalledProcessError as e:
+        #print(f"Comparison failed with exit code {e.returncode}.")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+        #os._exit(1)
+# Cleanup.  The last three of these used to read "symfile = f'...'" rather than
+# "os.remove(...)", so they deleted nothing at all: every run left a
+# BASENAME-lnk101.json, a BASENAME-lnk101.repro.json and a BASENAME.fcm.LIST
+# behind in whatever directory it was run from, and BASENAME.srcmap.json was
+# never in the list to begin with.  Running over a source tree accumulated
+# thousands of them.
+#
+# With --out-dir all of this went somewhere disposable in the first place, so
+# leave it there: the point of naming a directory is to keep the products, and
+# a caller who wants them gone can remove the directory.
+if outDir == None:
+    for leftover in objfiles + [fcmfile, symfile, srcmapfile,
+                                f"{basename}-lnk101.repro.json",
+                                f"{fcmfile}.LIST"]:
+        try:
+            os.remove(leftover)
+        except:
+            pass
+

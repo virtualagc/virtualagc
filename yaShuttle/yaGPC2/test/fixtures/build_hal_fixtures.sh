@@ -1,9 +1,10 @@
 #!/bin/bash
-# Reproduces hello.fcm, read_write.fcm, and read_eof_onerror.fcm (plus
-# their -lnk101.json symbol tables) via the real HAL/S toolchain
-# documented in ../../tools.md (HALSFC + lnk101, both expected on PATH).
-# Not run automatically (no CI machine has the toolchain) — kept for
-# provenance and to regenerate if the encoding/format ever changes.
+# Reproduces hello.fcm, read_write.fcm, read_eof_onerror.fcm, and
+# countup.fcm (plus their -lnk101.json symbol tables) via the real HAL/S
+# toolchain documented in ../../tools.md (HALSFC + lnk101, both expected
+# on PATH). Not run automatically (no CI machine has the toolchain) —
+# kept for provenance and to regenerate if the encoding/format ever
+# changes.
 #
 # Sources:
 #   hello.fcm            <- HELLO.hal (ported/PASS1.PROCS/HELLO.hal in the
@@ -20,12 +21,18 @@
 #                          add this one to run_matrix.sh's byte-diff
 #                          matrix, its expected output is checked directly
 #                          against yaGPC2 only.
+#   countup.fcm           <- countup.hal (checked in alongside this
+#                          script, not sourced externally — a small
+#                          user-provided TASK/SCHEDULE/WAIT test program;
+#                          see src/schedule.h and test_scheduler.sh, and
+#                          problems.md 2.7).
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
 HELLO_HAL="$HAL_SRC_DIR/ported/PASS1.PROCS/HELLO.hal"
 READ_WRITE_HAL="$HAL_SRC_DIR/yaHALMAT2/src/tests/hal/test_read_write.hal"
 ONERROR_HAL="$HAL_SRC_DIR/yaHALMAT2/src/tests/hal/test_read_eof_onerror.hal"
+COUNTUP_HAL="$(dirname "$0")/countup.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -45,5 +52,6 @@ cd "$(dirname "$0")"
 build "$HELLO_HAL" HELLO hello
 build "$READ_WRITE_HAL" test_read_write read_write
 build "$ONERROR_HAL" test_read_eof_onerror read_eof_onerror
+build "$COUNTUP_HAL" countup countup
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm (+ -lnk101.json)"

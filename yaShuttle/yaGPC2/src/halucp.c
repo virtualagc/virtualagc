@@ -85,6 +85,7 @@ static const char *svc_error_message(int errNum, char *buf, size_t bufSize) {
 void halucp_init(HalUCP *h, CPU *cpu) {
     memset(h, 0, sizeof(*h));
     h->cpu = cpu;
+    sched_init(&h->scheduler);
     h->trapSvcError = true;
     h->iobufAscii = false; /* ebcdic default */
     h->formatNumBlanks = 5;
@@ -163,6 +164,20 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
     uint32_t svcCode = hw0;
 
     if (svcCode == 0x0015) {
+        /* A scheduled TASK's own CLOSE compiles to this identical SVC --
+         * confirmed directly against a real compiled program (see
+         * schedule.h's header comment). Must be checked before any of
+         * this case's own halt/flush logic runs: closing one task must
+         * not flush output buffered for a channel the primal program or
+         * another task may still write to later, and must not halt the
+         * CPU at all. sched_handle_task_close() returns false (falling
+         * through to the existing logic below unchanged) whenever the
+         * currently running context is the primal program itself, or
+         * scheduling was never engaged -- the exact condition under
+         * which every fixture with no TASK/SCHEDULE must behave exactly
+         * as it always has. */
+        if (sched_handle_task_close(&h->scheduler, h->cpu)) return true;
+
         if (h->inputBufferLen > 0) {
             size_t need = h->inputBufferLen + 64;
             char *warnMsg = malloc(need);
@@ -261,6 +276,52 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                                                        : IGNORE_EVENT_SIGNAL;
         apply_ignore_event_action(h, eventAddr, action);
         return true;
+    }
+
+    /* SCHEDULE/WAIT/task-CLOSE -- see schedule.h for the full protocol
+     * derivation (SVC# in svcCode's low byte, PRIORITY in its high byte
+     * for SCHEDULE specifically) and schedule.c for the scheduler
+     * itself. yaGPC2 substitutes for FCOS here exactly as it already
+     * does for SEND ERROR/QUIT/EVENT above -- real hardware never links
+     * a task-scheduling module into the compiled program at all
+     * (confirmed: no SCHD-style module appears in any .fcm.LIST for a
+     * TASK-using program), so there is nothing to call into but this. */
+    {
+        uint32_t svcLow = svcCode & 0xff;
+        uint32_t priority = (svcCode >> 8) & 0xff;
+        if (svcLow == 0x01) {
+            /* SCHEDULE. Only the one FLAGS-word signature this cut
+             * supports (TASK, REPEAT EVERY, no AT/IN/ON/DEPENDENT/
+             * CANCEL -- confirmed 0x0081 against a real compiled
+             * program) is recognized; anything else falls through to
+             * the unhandled-trap path below, exactly like today, rather
+             * than mishandling a variant this cut doesn't understand. */
+            uint32_t flags = mcm_get16(&h->cpu->mainStorage, ea + 1);
+            if (flags == 0x0081) {
+                /* The PDE reference is a single halfword (not a 32-bit
+                 * hal_get32 read -- confirmed empirically: the halfword
+                 * immediately after it is unrelated padding, not a real
+                 * continuation), and its own VALUE is already in the
+                 * same native (halfword-indexed) units mcm_get16 and the
+                 * linker's own JSON address/size fields use throughout
+                 * this codebase -- no /2 needed. Confirmed directly
+                 * against a real compiled program: mem[ea+2] == 0x0166
+                 * == 358 decimal == #ECOUNTU's linked address (352) + 6
+                 * exactly (NEXT's own PDE, 6 halfwords into the PDE
+                 * region after COUNTUP's own), with zero conversion
+                 * factor. */
+                uint32_t pdeAddr = mcm_get16(&h->cpu->mainStorage, ea + 2);
+                FloatIBM every = fibm_from64(register_get32(cpu_f(h->cpu, 2)), register_get32(cpu_f(h->cpu, 3)));
+                double repeatIntervalUs = fibm_to_float(&every) * 1e6;
+                return sched_handle_schedule_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr, repeatIntervalUs);
+            }
+        } else if (svcLow == 0x06) {
+            /* WAIT, delta-time variant (the only one this cut handles;
+             * 07/08/09 -- UNTIL/event-expression/DEPENDENT -- fall
+             * through unhandled, same as any other unrecognized SVC). */
+            FloatIBM delta = fibm_from64(register_get32(cpu_f(h->cpu, 0)), register_get32(cpu_f(h->cpu, 1)));
+            return sched_handle_wait_svc(&h->scheduler, h->cpu, fibm_to_float(&delta));
+        }
     }
 
     char msg[160];

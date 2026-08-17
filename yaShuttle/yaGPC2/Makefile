@@ -80,6 +80,7 @@ UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_
 test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS)) $(TEST_BIN_DIR)/example_gpcops_paced_run
 	./test/run_all.sh
 	./test/test_debugger.sh
+	./test/test_scheduler.sh
 	@for t in $(UNIT_TESTS); do $(TEST_BIN_DIR)/$$t || exit 1; done
 	$(TEST_BIN_DIR)/example_gpcops_paced_run
 
