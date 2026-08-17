@@ -386,7 +386,31 @@ F('Real-Time: Priority & Control', 'TERMINATE statement',
 F('Real-Time: Priority & Control', 'CANCEL statement',
   'Graceful alternative to TERMINATE for cyclic processes: finishes the current cycle first, '
   'shuts down dependents in order rather than force-terminating them.',
-  'USA003087 §23.6', 'not_implemented', 'No SVC/mechanism for CANCEL exists.', 'untested')
+  'USA003087 §23.6', 'implemented',
+  "SVC #4 (bare/self) / SVC #5 (named), confirmed empirically to mirror TERMINATE's own #2/#3 split "
+  "and the named form's identical count-then-PDE-list encoding exactly. sched_cancel_idx_and_dependents "
+  "(src/schedule.c) implements the state-dependent effect USA003087 23.6 describes: a RUNNING target "
+  "(only ever the calling context itself) is just flagged (ScheduledTask.cancelled), checked by "
+  "sched_handle_task_close at that task's own next CLOSE (a cancelled REPEAT EVERY task does not "
+  "re-arm) -- confirmed via a full instruction trace, not just the SVC summary, that a bare self-CANCEL "
+  "does NOT alter control flow at all: the rest of the current cycle's own code (including its own "
+  "WRITE calls) executes completely normally. A DORMANT target ('not yet initiated' or 'waiting "
+  "between cycles', both producing the identical outcome per 23.6's own text) is canceled immediately "
+  "but gracefully -- reusing the same TASK_STATE_WAITING_FOR_DEPENDENTS mechanism a natural "
+  "CLOSE-with-dependents case uses if it has active DEPENDENT children, cascading CANCEL's own graceful "
+  "semantics recursively to each of them (23.6: 'cyclic dependents are allowed to finish their own "
+  "current cycle of execution') rather than TERMINATE's unconditional-immediate cascade. No yaHALMAT2 "
+  "oracle available: it diverges from these traced/spec-derived semantics on all three real fixtures "
+  "checked in for this item (a DORMANT target still runs instead of being removed; a bare self-CANCEL "
+  "skips the rest of its own cycle instead of letting it finish) -- found and will be relayed upstream "
+  "separately, not fixed in this repository.",
+  'tested_dedicated',
+  "test/fixtures/cancel.hal (named CANCEL of a DORMANT target), selfcancel.hal (bare self-CANCEL mid-"
+  "cycle), cancelnamed.hal (two DORMANT targets in one statement), all byte-diffed via "
+  "test_scheduler.sh, plus four test_schedule.c scenarios covering what no real fixture combines: "
+  "graceful deactivation of a DORMANT target with a live RUNNING dependent, transitive propagation of "
+  "that wait up a 3-level chain, and a RUNNING dependent being flagged rather than force-freed "
+  "mid-cycle.")
 F('Real-Time: Priority & Control', 'UPDATE PRIORITY statement', "Changes an active process's priority at runtime.",
   'USA003087 §13.5', 'partial',
   'Named-target form (SVC #11, sched_handle_update_priority_svc) is implemented -- confirmed '

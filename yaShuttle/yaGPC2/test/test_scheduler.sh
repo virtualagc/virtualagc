@@ -155,4 +155,16 @@ run_case "dependentclose/signal" "signal" "fixtures/dependentclose.fcm" "fixture
 run_case "waitfordependent/burst"  "burst"  "fixtures/waitfordependent.fcm" "fixtures/waitfordependent-lnk101.json" "fixtures/waitfordependent_golden.txt"
 run_case "waitfordependent/signal" "signal" "fixtures/waitfordependent.fcm" "fixtures/waitfordependent-lnk101.json" "fixtures/waitfordependent_golden.txt"
 
+# CANCEL (SVC #4 self / SVC #5 named) -- the graceful sibling of
+# TERMINATE (USA003087 13.5/23.6). No yaHALMAT2 cross-check attempted:
+# yaHALMAT2 diverges from these traced/spec-derived semantics on all
+# three fixtures below (relayed upstream separately) -- see problems.md
+# 7.11.
+run_case "cancel/burst"  "burst"  "fixtures/cancel.fcm" "fixtures/cancel-lnk101.json" "fixtures/cancel_golden.txt"
+run_case "cancel/signal" "signal" "fixtures/cancel.fcm" "fixtures/cancel-lnk101.json" "fixtures/cancel_golden.txt"
+run_case "selfcancel/burst"  "burst"  "fixtures/selfcancel.fcm" "fixtures/selfcancel-lnk101.json" "fixtures/selfcancel_golden.txt"
+run_case "selfcancel/signal" "signal" "fixtures/selfcancel.fcm" "fixtures/selfcancel-lnk101.json" "fixtures/selfcancel_golden.txt"
+run_case "cancelnamed/burst"  "burst"  "fixtures/cancelnamed.fcm" "fixtures/cancelnamed-lnk101.json" "fixtures/cancelnamed_golden.txt"
+run_case "cancelnamed/signal" "signal" "fixtures/cancelnamed.fcm" "fixtures/cancelnamed-lnk101.json" "fixtures/cancelnamed_golden.txt"
+
 exit $fail

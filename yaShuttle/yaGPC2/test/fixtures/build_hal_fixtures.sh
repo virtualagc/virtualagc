@@ -5,8 +5,9 @@
 # schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm,
 # waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm,
 # dependent.fcm, dependentin.fcm, dependentrepeat.fcm,
-# dependentclose.fcm, and waitfordependent.fcm (plus their
-# -lnk101.json symbol tables) via the real HAL/S toolchain
+# dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm,
+# and cancelnamed.fcm (plus their -lnk101.json symbol tables) via the
+# real HAL/S toolchain
 # documented in ../../tools.md (HALSFC + lnk101, both expected on PATH).
 # Not run automatically (no CI machine has the toolchain) — kept for
 # provenance and to regenerate if the encoding/format ever changes.
@@ -145,6 +146,21 @@
 #                          handles.
 #   waitfordependent.fcm  <- waitfordependent.hal (checked in alongside
 #                          this script) -- WAIT FOR DEPENDENT (SVC #9).
+#   cancel.fcm            <- cancel.hal (checked in alongside this
+#                          script) -- named CANCEL of a DORMANT ("not
+#                          yet initiated") REPEAT EVERY target; it never
+#                          runs at all.
+#   selfcancel.fcm        <- selfcancel.hal (checked in alongside this
+#                          script) -- bare CANCEL; inside a REPEAT EVERY
+#                          task's own body, followed by more code in the
+#                          same block; confirms the current cycle runs
+#                          to completion normally (that code DOES
+#                          execute) and only the next re-arm is
+#                          suppressed.
+#   cancelnamed.fcm       <- cancelnamed.hal (checked in alongside this
+#                          script) -- CANCEL of two DORMANT REPEAT EVERY
+#                          targets in one statement (the named form's
+#                          count+PDE-list encoding); neither ever runs.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -172,6 +188,9 @@ DEPENDENTIN_HAL="$(dirname "$0")/dependentin.hal"
 DEPENDENTREPEAT_HAL="$(dirname "$0")/dependentrepeat.hal"
 DEPENDENTCLOSE_HAL="$(dirname "$0")/dependentclose.hal"
 WAITFORDEPENDENT_HAL="$(dirname "$0")/waitfordependent.hal"
+CANCEL_HAL="$(dirname "$0")/cancel.hal"
+SELFCANCEL_HAL="$(dirname "$0")/selfcancel.hal"
+CANCELNAMED_HAL="$(dirname "$0")/cancelnamed.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -212,5 +231,8 @@ build "$DEPENDENTIN_HAL" DEPIN dependentin
 build "$DEPENDENTREPEAT_HAL" DEPREP dependentrepeat
 build "$DEPENDENTCLOSE_HAL" DEPCLOSE dependentclose
 build "$WAITFORDEPENDENT_HAL" WFDEP waitfordependent
+build "$CANCEL_HAL" CANCELT cancel
+build "$SELFCANCEL_HAL" SELFCAN selfcancel
+build "$CANCELNAMED_HAL" CANCEL2 cancelnamed
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm (+ -lnk101.json)"

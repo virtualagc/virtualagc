@@ -470,6 +470,22 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                 for (uint32_t i = 0; i < count; i++) pdeAddrs[i] = mcm_get16(&h->cpu->mainStorage, ea + 1 + i);
                 return sched_handle_terminate_named_svc(&h->scheduler, h->cpu, pdeAddrs, (int)count);
             }
+        } else if (svcLow == 0x04) {
+            /* CANCEL, bare/self form (no target list) -- confirmed
+             * empirically: mem[ea+1] is unused padding here, mirroring
+             * TERMINATE's own bare/self form (SVC #2) exactly. */
+            return sched_handle_cancel_self_svc(&h->scheduler, h->cpu);
+        } else if (svcLow == 0x05) {
+            /* CANCEL label[,label...] (named-target form). Identical
+             * count-then-PDE-list encoding to TERMINATE's own named form
+             * (SVC #3), confirmed empirically (mem[ea]=0x0205 for two
+             * named targets). */
+            uint32_t count = (svcCode >> 8) & 0xff;
+            if (count > 0 && count <= 16) {
+                uint32_t pdeAddrs[16];
+                for (uint32_t i = 0; i < count; i++) pdeAddrs[i] = mcm_get16(&h->cpu->mainStorage, ea + 1 + i);
+                return sched_handle_cancel_named_svc(&h->scheduler, h->cpu, pdeAddrs, (int)count);
+            }
         } else if (svcLow == 0x0b) {
             /* UPDATE PRIORITY label TO alpha (named-target form only --
              * see sched_handle_update_priority_svc's own header comment

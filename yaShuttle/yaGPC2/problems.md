@@ -3281,6 +3281,79 @@ for other confirmed-dead-end language-spec features like the `FILE`
 statement; `test_status` set to `not_applicable` — there is nothing to
 test against).
 
+### 7.11 `CANCEL` statement — done, a real `yaHALMAT2` divergence found along the way
+
+Tenth item in the runtime-feature-survey implementation order, `TERMINATE`'s
+graceful sibling (`USA003087` §13.5/§23.6). Traced `CANCEL A;` against a
+real compiled program and found SVC #5 (named form) with the identical
+count-then-PDE-list parameter encoding `TERMINATE`'s own SVC #3 already
+uses; bare `CANCEL;` (self form) is the separate, parameterless SVC #4,
+mirroring `TERMINATE`'s own #2/#3 split exactly.
+
+**One genuinely surprising result, worth tracing a full instruction
+trace over rather than trusting the coarse SVC-only summary**: a real
+compiled task —
+
+    A: TASK;
+       CANCEL;
+       WRITE(6) 'UNREACHABLE';
+    CLOSE A;
+
+— actually prints `'UNREACHABLE'`. A bare self-`CANCEL` does **not**
+alter control flow at all; the rest of the current cycle's own code
+runs completely normally, including its own `WRITE` call. This exactly
+matches `USA003087` §23.6's literal text — *"If the process is in a
+cycle of execution, it is canceled at the end of the cycle"* — not
+immediately, unlike `TERMINATE`. The label `UNREACHABLE` in the test
+source was a bad guess on my own part before tracing the full
+instruction stream (not just the SVC summary) settled it; documented
+here so it isn't second-guessed again.
+
+**Design**: a new `ScheduledTask.cancelled` flag, set only when the
+target is currently RUNNING (which, in this cooperative single-CPU
+model, can only ever be the calling context itself — a named `CANCEL`
+can never observe a *different* task as RUNNING). `sched_handle_task_close`
+checks it alongside `hasRepeat`: a cancelled `REPEAT EVERY` task falls
+through to the same has-active-dependents-or-free path a non-repeating
+task already uses, exactly matching the graceful, end-of-cycle
+semantics. A DORMANT target (`USA003087` §23.6's other two cases — "not
+yet initiated" and "waiting between cycles" — produce the *identical*
+outcome, so both are handled by one code path) is canceled immediately,
+reusing the exact `TASK_STATE_WAITING_FOR_DEPENDENTS` mechanism §7.9's
+`CLOSE`-with-dependents case built, with the cascade to `DEPENDENT`
+children applying CANCEL's own graceful semantics recursively at every
+node (§23.6: *"cyclic dependents are allowed to finish their own
+current cycle of execution"*) rather than `TERMINATE`'s
+unconditional-immediate one. A `test_schedule.c` scenario confirms this
+propagates transitively through a 3-level chain — a `RUNNING`
+grandchild correctly blocks both its parent and grandparent from
+deactivating until it finishes its own cycle.
+
+**Real `yaHALMAT2` divergence found, not yet relayed**: none of the
+three real fixtures checked in for this item match `yaHALMAT2`'s own
+output. `cancel.hal`/`cancelnamed.hal` (`CANCEL`-ing a target before its
+first cycle) still let it run once in `yaHALMAT2` — the "not yet
+initiated → removed" rule isn't implemented there. `selfcancel.hal`
+(bare self-`CANCEL`) does the *opposite* of the surprising finding
+above: `yaHALMAT2` skips the rest of the current cycle entirely (`DONE`
+prints with no `UNREACHABLE` at all), as if self-`CANCEL` behaved like
+self-`TERMINATE`. Both readings are internally consistent with
+`yaHALMAT2` simply not having a distinct `CANCEL` implementation yet
+(one behaving as a no-op, the other as `TERMINATE`) rather than a subtle
+disagreement — worth relaying the same way the `WAIT FOR` finding was,
+but not yet done as of this writing.
+
+Three new fixtures — `cancel.hal`, `selfcancel.hal`, `cancelnamed.hal` —
+all exercised by `test_scheduler.sh` under both `--pacing` modes, goldens
+generated from `yaGPC2`'s own output (no oracle, same category as
+§7.8/§7.9). Four new `test_schedule.c` scenarios cover what stdout can't
+show and no real fixture combines `CANCEL` with `DEPENDENT` at all:
+self-`CANCEL`'s own zero-control-flow-effect (`NIA`/registers unchanged,
+only the `cancelled` flag set), immediate removal of a DORMANT named
+target, the 3-level transitive graceful-wait chain above, and a `RUNNING`
+dependent being flagged rather than force-freed mid-cycle when its
+parent is `CANCEL`ed.
+
 ---
 
 ## Methodology and caveats

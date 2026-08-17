@@ -890,6 +890,204 @@ static void test_terminate_cascades_to_dependents_transitively(void) {
     ageharness_free(&age);
 }
 
+/* ---------------------------------------------------------------------
+ * 13. CANCEL (SVC #4 self / SVC #5 named). Three scenarios, none of
+ *     which a real compiled fixture can fully exercise (combining
+ *     CANCEL with DEPENDENT would need a multi-task program this
+ *     session never built, and there's no yaHALMAT2 oracle for CANCEL
+ *     at all -- it diverges from these traced/spec-derived semantics on
+ *     all three real fixtures checked in alongside this item, see
+ *     problems.md 7.11):
+ *     (a) self-CANCEL defers to the end of the current cycle -- the
+ *         cycle's own remaining code runs completely normally (already
+ *         confirmed via a real compiled fixture, selfcancel.hal), and
+ *         only the *next* re-arm is suppressed.
+ *     (b) a named CANCEL of a DORMANT ("not yet initiated") target
+ *         removes it immediately.
+ *     (c) a named CANCEL of a DORMANT target with a still-active
+ *         DEPENDENT child does not free it directly -- it waits
+ *         (gracefully, the same TASK_STATE_WAITING_FOR_DEPENDENTS
+ *         mechanism a natural CLOSE-with-dependents uses), and if that
+ *         child happens to be RUNNING, cascading to it only flags it
+ *         (cancelled=true) rather than force-freeing it, matching
+ *         USA003087 23.6's own "cyclic dependents are allowed to finish
+ *         their own current cycle of execution."
+ * ------------------------------------------------------------------- */
+
+static void test_cancel_self_defers_to_end_of_cycle(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    const uint32_t counterDisp = 40;
+    mcm_set16(mem, counterDisp, 0, false);
+    uint32_t taskEntry = build_increment_and_close_task(mem, 0x200, counterDisp);
+    uint32_t taskPde = build_pde(mem, 0x300, taskEntry);
+
+    const uint32_t primalResumeAddr = 0x3000;
+    psw_set_nia(&cpu->psw, primalResumeAddr);
+
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, taskPde, cpu->elapsedTimeUs, 1000000.0, false),
+          "SCHEDULE ... REPEAT EVERY handled");
+    CHECK(sched_handle_wait_svc(sched, cpu, 0.001), "primal WAIT handled -- dispatches the task");
+    CHECK(psw_get_nia(&cpu->psw) == taskEntry, "task dispatched");
+
+    /* Self-CANCEL, called directly mid-cycle (before the task's own
+     * remaining LH/AHI/STH/LHI/SVC instructions run) -- must not touch
+     * NIA, registers, or task state at all beyond the cancelled flag. */
+    int taskIdx = sched->runningIdx;
+    CHECK(sched_handle_cancel_self_svc(sched, cpu), "self-CANCEL handled");
+    CHECK(sched->tasks[taskIdx].cancelled, "cancelled flag set");
+    CHECK(sched->tasks[taskIdx].state == TASK_STATE_RUNNING, "task keeps running -- no control-flow change");
+    CHECK(psw_get_nia(&cpu->psw) == taskEntry, "NIA unaffected by self-CANCEL");
+
+    /* The rest of this cycle runs completely normally: LH, AHI, STH,
+     * LHI, SVC (CLOSE) -- see build_increment_and_close_task. */
+    for (int i = 0; i < 5; i++) ap101_exec1(&age.gpc);
+    CHECK(mcm_get16(mem, counterDisp) == 1, "the cycle's own body ran to completion, incrementing the counter once");
+    CHECK(sched->tasks[taskIdx].state == TASK_SLOT_FREE, "task deactivated -- cancelled REPEAT EVERY task does not re-arm");
+    CHECK((mcm_get16(mem, taskPde) & 1) == 0, "task's own PDE+0 ACTIVE bit cleared");
+    CHECK(psw_get_nia(&cpu->psw) == primalResumeAddr, "primal resumed (nothing else due)");
+
+    ageharness_free(&age);
+}
+
+static void test_cancel_named_dormant_target_removed_immediately(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t aEntry = build_close_only_task(mem, 0x1000);
+    uint32_t aPde = build_pde(mem, 0x1010, aEntry);
+    uint32_t bEntry = build_close_only_task(mem, 0x1100);
+    uint32_t bPde = build_pde(mem, 0x1110, bEntry);
+    (void)aEntry;
+    (void)bEntry;
+
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 1000000.0, false), "SCHEDULE A handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, bPde, cpu->elapsedTimeUs, 1000000.0, false), "SCHEDULE B handled");
+
+    uint32_t targets[2] = {aPde, bPde};
+    CHECK(sched_handle_cancel_named_svc(sched, cpu, targets, 2), "CANCEL A, B handled");
+
+    int aIdx = find_task_by_pde(sched, aPde);
+    int bIdx = find_task_by_pde(sched, bPde);
+    CHECK(aIdx < 0, "A removed from the process queue -- never initiated");
+    CHECK(bIdx < 0, "B removed from the process queue -- never initiated");
+    CHECK((mcm_get16(mem, aPde) & 1) == 0, "A's own PDE+0 ACTIVE bit cleared");
+    CHECK((mcm_get16(mem, bPde) & 1) == 0, "B's own PDE+0 ACTIVE bit cleared");
+
+    ageharness_free(&age);
+}
+
+static void test_cancel_dormant_target_with_dependents_waits_gracefully(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    /* A 3-level chain: PARENT -> CHILD -> GRANDCHILD, GRANDCHILD is
+     * RUNNING when PARENT gets CANCELed. A DORMANT dependent with no
+     * active dependents of its own is always immediately freeable (see
+     * this file's own sched_cancel_idx_and_dependents comment) -- so
+     * genuinely testing "PARENT waits" needs the obstruction to be real,
+     * not just DORMANT: only a RUNNING node (or one with its own
+     * still-blocked dependent, recursively) resists immediate
+     * cascade-free. This also confirms the wait propagates transitively
+     * up the whole chain, not just one level. */
+    uint32_t parentEntry = build_close_only_task(mem, 0x1000);
+    uint32_t parentPde = build_pde(mem, 0x1010, parentEntry);
+    uint32_t childEntry = build_close_only_task(mem, 0x1100);
+    uint32_t childPde = build_pde(mem, 0x1110, childEntry);
+    uint32_t grandchildEntry = build_close_only_task(mem, 0x1200);
+    uint32_t grandchildPde = build_pde(mem, 0x1210, grandchildEntry);
+
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, parentPde, cpu->elapsedTimeUs, 1000000.0, false), "SCHEDULE PARENT handled");
+    int parentIdx = find_task_by_pde(sched, parentPde);
+    sched->runningIdx = parentIdx;
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, childPde, cpu->elapsedTimeUs, 0.0, true), "SCHEDULE CHILD DEPENDENT (on PARENT) handled");
+    int childIdx = find_task_by_pde(sched, childPde);
+    sched->runningIdx = childIdx;
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, grandchildPde, cpu->elapsedTimeUs, 0.0, true), "SCHEDULE GRANDCHILD DEPENDENT (on CHILD) handled");
+    int grandchildIdx = find_task_by_pde(sched, grandchildPde);
+
+    /* GRANDCHILD is RUNNING; CHILD and PARENT are both DORMANT (PARENT
+     * "waiting between cycles", CHILD never yet initiated). */
+    sched->tasks[grandchildIdx].state = TASK_STATE_RUNNING;
+    sched->tasks[childIdx].state = TASK_STATE_DORMANT;
+    sched->runningIdx = grandchildIdx;
+
+    CHECK(sched_handle_cancel_named_svc(sched, cpu, &parentPde, 1), "CANCEL PARENT handled");
+    CHECK(sched->tasks[grandchildIdx].state == TASK_STATE_RUNNING, "GRANDCHILD keeps running -- not force-freed mid-cycle");
+    CHECK(sched->tasks[grandchildIdx].cancelled, "GRANDCHILD flagged cancelled");
+    CHECK(sched->tasks[childIdx].state == TASK_STATE_WAITING_FOR_DEPENDENTS,
+          "CHILD waits -- GRANDCHILD (its own dependent) is still active");
+    CHECK(sched->tasks[parentIdx].state == TASK_STATE_WAITING_FOR_DEPENDENTS,
+          "PARENT also waits -- the block propagates transitively up the whole chain");
+    CHECK(sched->tasks[parentIdx].pendingCloseAfterDependents,
+          "PARENT is waiting to be freed (not resumed) once satisfied -- this is CANCEL's own immediate-deactivation path, not an explicit WAIT FOR DEPENDENT");
+    CHECK((mcm_get16(mem, parentPde) & 1) == 1, "PARENT's own PDE+0 ACTIVE bit stays set while waiting");
+    CHECK((mcm_get16(mem, childPde) & 1) == 1, "CHILD's own PDE+0 ACTIVE bit stays set while waiting");
+
+    /* GRANDCHILD now reaches its own natural CLOSE (no dependents of its
+     * own, and cancelled -> no re-arm even though it's one-shot anyway)
+     * -- frees GRANDCHILD and cascade-releases CHILD, which in turn
+     * cascade-releases PARENT. */
+    CHECK(sched_handle_task_close(sched, cpu), "GRANDCHILD's own CLOSE handled");
+    CHECK(sched->tasks[childIdx].state == TASK_SLOT_FREE, "CHILD released once GRANDCHILD finished");
+    CHECK(sched->tasks[parentIdx].state == TASK_SLOT_FREE, "PARENT released in the same cascade, transitively");
+    CHECK((mcm_get16(mem, parentPde) & 1) == 0, "PARENT's own PDE+0 ACTIVE bit cleared once released");
+    CHECK((mcm_get16(mem, childPde) & 1) == 0, "CHILD's own PDE+0 ACTIVE bit cleared once released");
+
+    ageharness_free(&age);
+}
+
+static void test_cancel_cascades_to_running_dependent_by_flagging_not_freeing(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t parentEntry = build_close_only_task(mem, 0x1000);
+    uint32_t parentPde = build_pde(mem, 0x1010, parentEntry);
+    uint32_t childEntry = build_close_only_task(mem, 0x1100);
+    uint32_t childPde = build_pde(mem, 0x1110, childEntry);
+
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, parentPde, cpu->elapsedTimeUs, 1000000.0, false), "SCHEDULE PARENT handled");
+    int parentIdx = find_task_by_pde(sched, parentPde);
+    sched->runningIdx = parentIdx;
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, childPde, cpu->elapsedTimeUs, 1000000.0, true), "SCHEDULE CHILD DEPENDENT (on PARENT), REPEAT EVERY, handled");
+    int childIdx = find_task_by_pde(sched, childPde);
+
+    /* CHILD is now RUNNING ("in a cycle of execution") when PARENT gets
+     * CANCELed -- USA003087 23.6: "cyclic dependents are allowed to
+     * finish their own current cycle of execution," so the cascade must
+     * flag CHILD (cancelled=true), not force-free it mid-cycle. */
+    sched->tasks[childIdx].state = TASK_STATE_RUNNING;
+    sched->runningIdx = childIdx;
+    sched->tasks[parentIdx].state = TASK_STATE_DORMANT; /* PARENT waiting between cycles */
+    CHECK(sched_handle_cancel_named_svc(sched, cpu, &parentPde, 1), "CANCEL PARENT (cascading to running CHILD) handled");
+    CHECK(sched->tasks[childIdx].state == TASK_STATE_RUNNING, "CHILD keeps running -- not force-freed mid-cycle");
+    CHECK(sched->tasks[childIdx].cancelled, "CHILD flagged cancelled -- won't re-arm at its own next CLOSE");
+    CHECK(sched->tasks[parentIdx].state == TASK_STATE_WAITING_FOR_DEPENDENTS,
+          "PARENT waits -- CHILD (though flagged) is still technically active");
+
+    /* CHILD reaches its own CLOSE: cancelled + hasRepeat -> does not
+     * re-arm, falls through to free (no dependents of its own),
+     * cascade-releasing PARENT in turn. */
+    CHECK(sched_handle_task_close(sched, cpu), "CHILD's own CLOSE handled");
+    CHECK(sched->tasks[childIdx].state == TASK_SLOT_FREE, "CHILD deactivated -- cancelled REPEAT EVERY task does not re-arm");
+    CHECK(sched->tasks[parentIdx].state == TASK_SLOT_FREE, "PARENT released once CHILD (its last dependent) finished");
+
+    ageharness_free(&age);
+}
+
 int main(void) {
     test_priority_ordering_and_context_roundtrip();
     test_repeat_every_counter_and_virtual_time();
@@ -903,6 +1101,10 @@ int main(void) {
     test_dependent_close_blocks_until_dependent_finishes();
     test_wait_for_dependent();
     test_terminate_cascades_to_dependents_transitively();
+    test_cancel_self_defers_to_end_of_cycle();
+    test_cancel_named_dormant_target_removed_immediately();
+    test_cancel_dormant_target_with_dependents_waits_gracefully();
+    test_cancel_cascades_to_running_dependent_by_flagging_not_freeing();
     if (failures == 0) {
         printf("all scheduler-mechanics tests passed\n");
     } else {

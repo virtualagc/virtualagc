@@ -176,6 +176,50 @@ static void sched_terminate_idx_and_dependents(Scheduler *s, CPU *cpu, int idx) 
     sched_notify_dependent_finished(s, cpu, idx);
 }
 
+/* CANCELs task idx (USA003087 13.5/23.6 -- see schedule.h's own header
+ * comment for the full state-dependent semantics). If idx is currently
+ * RUNNING -- "in a cycle of execution," which by construction can only
+ * be the calling context itself, never some other task -- this only
+ * flags ScheduledTask.cancelled, checked at this task's own next CLOSE
+ * (sched_handle_task_close); no state change, no cascade, no dispatch.
+ * Otherwise idx is DORMANT ("not yet initiated" or "waiting between
+ * cycles," both producing the identical outcome per 23.6): canceled
+ * immediately but *gracefully* -- deactivated only once any active
+ * DEPENDENT children have themselves finished (the same
+ * TASK_STATE_WAITING_FOR_DEPENDENTS / pendingCloseAfterDependents
+ * mechanism a natural CLOSE-with-dependents uses), with the cascade to
+ * those children applying CANCEL's own graceful semantics recursively
+ * at every node rather than TERMINATE's unconditional-immediate one
+ * (23.6: "cyclic dependents are allowed to finish their own current
+ * cycle of execution" -- i.e. each dependent is itself CANCELed, not
+ * TERMINATEd). Does NOT touch s->runningIdx or call sched_dispatch() --
+ * a target that's RUNNING is always the caller itself (flagging it
+ * changes nothing about control flow), and a target that's immediately
+ * deactivated is by definition not the caller, matching SCHEDULE/
+ * TERMINATE-of-another-task's own "never changes which context is live"
+ * contract -- see sched_handle_cancel_named_svc's own header comment. */
+static void sched_cancel_idx_and_dependents(Scheduler *s, CPU *cpu, int idx) {
+    if (idx == s->runningIdx) {
+        s->tasks[idx].cancelled = true;
+        return;
+    }
+
+    for (int i = 0; i < s->count; i++) {
+        if (s->tasks[i].state != TASK_SLOT_FREE && s->tasks[i].parentIdx == idx) {
+            sched_cancel_idx_and_dependents(s, cpu, i);
+        }
+    }
+
+    if (sched_has_active_dependents(s, idx)) {
+        s->tasks[idx].state = TASK_STATE_WAITING_FOR_DEPENDENTS;
+        s->tasks[idx].pendingCloseAfterDependents = true;
+    } else {
+        s->tasks[idx].state = TASK_SLOT_FREE;
+        sched_set_active_flag(cpu, s->tasks[idx].pdeAddr, false);
+        sched_notify_dependent_finished(s, cpu, idx);
+    }
+}
+
 static void sched_save_context(CPU *cpu, TaskContext *ctx) {
     uint32_t grSet = psw_get_reg_set(&cpu->psw);
     for (int i = 0; i <= 7; i++) ctx->r[i] = register_get32(registerfile_r(&cpu->regFiles[grSet], i));
@@ -398,7 +442,7 @@ bool sched_handle_task_close(Scheduler *s, CPU *cpu) {
     ScheduledTask *t = &s->tasks[s->runningIdx];
     if (t->isPrimal) return false; /* the main program's own CLOSE: real halt */
 
-    if (t->hasRepeat) {
+    if (t->hasRepeat && !t->cancelled) {
         /* Re-arm from the fixed phase reference, not "now" -- avoids
          * drift from however late this particular firing ran (matches
          * yaHALMAT2's own REPEAT EVERY policy). Advance by whole
@@ -541,4 +585,19 @@ bool sched_handle_wait_for_dependent_svc(Scheduler *s, CPU *cpu) {
     s->runningIdx = -1;
     sched_dispatch(s, cpu);
     return true;
+}
+
+bool sched_handle_cancel_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pdeAddrs, int count) {
+    for (int i = 0; i < count; i++) {
+        int idx = sched_find_by_pde(s, pdeAddrs[i]);
+        if (idx < 0) continue; /* not currently active -- silent no-op */
+        sched_cancel_idx_and_dependents(s, cpu, idx);
+    }
+    return true;
+}
+
+bool sched_handle_cancel_self_svc(Scheduler *s, CPU *cpu) {
+    if (s->runningIdx < 0 || s->tasks[s->runningIdx].isPrimal) return false;
+    uint32_t ownPde = s->tasks[s->runningIdx].pdeAddr;
+    return sched_handle_cancel_named_svc(s, cpu, &ownPde, 1);
 }

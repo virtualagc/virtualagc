@@ -69,12 +69,49 @@
  *      cyclic processes specifically: "both the process and its
  *      dependents are terminated, possibly in mid-cycle"). Unlike case 1
  *      above, this is unconditional and immediate -- no graceful
- *      waiting; CANCEL (out of scope, a more graceful alternative -- see
- *      23.6) is the only construct that waits.
- * CANCEL and REPEAT ... WHILE/UNTIL event-expr cancellation conditions
- * remain out of scope (no FLAGS bit for either is recognized), as does
- * DEPENDENT combined with ON (FLAGS 0x000d | 0x0020 = 0x002d is not
- * empirically confirmed and is left unrecognized, falling through
+ *      waiting; CANCEL is the graceful alternative -- see below.
+ *
+ * CANCEL (SVC #4 self / SVC #5 named -- confirmed empirically, mirroring
+ * TERMINATE's own #2 self / #3 named split exactly, including the named
+ * form's identical count-then-PDE-list encoding): the graceful sibling
+ * of TERMINATE, described by USA003087 23.6. Effect depends on the
+ * target's current state at the moment CANCEL executes:
+ *   - RUNNING ("in a cycle of execution"): does NOT interrupt anything --
+ *     confirmed empirically that a real compiled task's own statements
+ *     immediately after a bare CANCEL; still execute completely normally
+ *     (including their own WRITE calls -- this was surprising enough to
+ *     be worth tracing a full instruction trace over, not just the SVC
+ *     summary, before believing it). Only marks ScheduledTask.cancelled,
+ *     checked by sched_handle_task_close at this task's own next CLOSE:
+ *     a cancelled REPEAT EVERY task does not re-arm.
+ *   - DORMANT (never yet initiated, OR waiting between cycles -- both
+ *     produce the identical outcome per 23.6's own text): canceled
+ *     immediately, via the same graceful "wait for any active
+ *     DEPENDENT children to finish on their own, then deactivate"
+ *     mechanism sched_handle_task_close's own CLOSE-with-dependents case
+ *     uses (TASK_STATE_WAITING_FOR_DEPENDENTS / pendingCloseAfterDependents
+ *     -- see schedule.c's sched_cancel_idx_and_dependents), rather than
+ *     TERMINATE's unconditional-immediate free. Cascades to DEPENDENT
+ *     descendants transitively too, but with CANCEL's own graceful
+ *     semantics applied at every node (not TERMINATE's immediate one):
+ *     23.6 -- "non-cyclic dependents are allowed to execute until their
+ *     normal termination; cyclic dependents are allowed to finish their
+ *     own current cycle of execution."
+ *   - Not currently active at all (already terminated/completed, or the
+ *     PDE was never SCHEDULEd): silent no-op, same precedent as
+ *     TERMINATE's own named form for an unmatched target (23.6: "unless
+ *     the process has not yet initiated they have no effect").
+ * A task blocked in its own internal WAIT/WAIT FOR (TASK_STATE_WAITING,
+ * mid-cycle rather than between cycles) is deliberately scoped OUT of
+ * the "in a cycle of execution" bucket above and instead treated as
+ * DORMANT -- no real fixture in this whole session has a TASK call WAIT
+ * internally, so there's nothing to empirically confirm which reading
+ * is correct, and the DORMANT-side outcome (immediate graceful cancel)
+ * is the simpler, more conservative one to guess if this ever comes up.
+ * REPEAT ... WHILE/UNTIL event-expr cancellation conditions remain out
+ * of scope (no FLAGS bit for either is recognized), as does DEPENDENT
+ * combined with ON (FLAGS 0x000d | 0x0020 = 0x002d is not empirically
+ * confirmed and is left unrecognized, falling through
  * safely like any other unconfirmed combination).
  *
  * Event expressions (WAIT FOR SVC #8, and SCHEDULE ... ON, which reuses
@@ -298,6 +335,23 @@ typedef struct {
      * instead. */
     bool pendingCloseAfterDependents;
 
+    /* Set by CANCEL (self or named) when the target is currently RUNNING
+     * -- "in a cycle of execution" per USA003087 13.5/23.6 -- meaning
+     * cancellation can't take effect until this cycle finishes naturally.
+     * Confirmed empirically that a bare self-CANCEL does NOT alter
+     * control flow at all (a real compiled task's own statements *after*
+     * a bare CANCEL; still execute completely normally, including their
+     * own WRITE calls) -- so this flag is purely a marker
+     * sched_handle_task_close checks at the task's own next CLOSE: a
+     * cancelled REPEAT-EVERY task does not re-arm (falls through to the
+     * same has-active-dependents-or-free path a non-repeating task
+     * already uses), exactly matching CANCEL's own graceful,
+     * end-of-cycle semantics. Never set for a target that's DORMANT (not
+     * currently executing) -- USA003087 23.6: "waiting between cycles...
+     * canceled immediately," handled directly by
+     * sched_cancel_idx_and_dependents instead, with no flag involved. */
+    bool cancelled;
+
     TaskContext ctx;      /* saved whenever this task is not RUNNING */
 } ScheduledTask;
 
@@ -479,5 +533,35 @@ bool sched_handle_schedule_on_svc(Scheduler *s, CPU *cpu, int priority, uint32_t
  * file's own header comment) and dispatches whatever's next. Always
  * returns true. */
 bool sched_handle_wait_for_dependent_svc(Scheduler *s, CPU *cpu);
+
+/* Called from halucp.c's SVC dispatch for SVC #4 (bare "CANCEL;",
+ * self-targeting -- USA003087 13.5/23.6: "self, if label omitted", same
+ * convention as bare TERMINATE). Since CANCEL of the RUNNING context
+ * only ever flags ScheduledTask.cancelled (see this file's own header
+ * comment) and never changes control flow, this is implemented directly
+ * in terms of the named form naming its own PDE -- sched_cancel_idx's
+ * own idx == s->runningIdx check always matches for the self case.
+ * Returns false (falls through to the caller's own unhandled-SVC path)
+ * if the running context is the primal program or scheduling was never
+ * engaged -- same out-of-scope reasoning as
+ * sched_handle_terminate_self_svc. Otherwise always returns true. */
+bool sched_handle_cancel_self_svc(Scheduler *s, CPU *cpu);
+
+/* Called from halucp.c's SVC dispatch for SVC #5 ("CANCEL
+ * label[,label...];", named-target form). pdeAddrs/count are already
+ * decoded by the caller, identical convention to
+ * sched_handle_terminate_named_svc's own count-then-PDE-list encoding.
+ * Each named target is canceled per this file's own header comment
+ * (flagged if RUNNING, gracefully deactivated immediately -- cascading
+ * to its own DEPENDENT descendants the same way -- if DORMANT, silently
+ * ignored if not currently active). Never changes which context is live
+ * or triggers a dispatch (a target that's RUNNING is, by construction,
+ * always the calling context itself -- see this file's own header
+ * comment -- and flagging it doesn't change control flow; a target
+ * that's immediately, gracefully deactivated is by definition not the
+ * calling context, matching SCHEDULE/TERMINATE-of-another-task's own
+ * "never changes which context is live" contract). Always returns
+ * true. */
+bool sched_handle_cancel_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pdeAddrs, int count);
 
 #endif
