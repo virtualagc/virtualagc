@@ -13461,6 +13461,19 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         fail(state, "WAIT: FOR expects a plain EVENT symbol or BAND/BOR/BNOT event-expression operand");
                         break;
                     }
+                    /* USA003087 Sec. 24.6: "If exp is already TRUE when the
+                     * WAIT statement is executed, the statement has no
+                     * effect." Evaluate the event now and only block if it
+                     * is currently FALSE. This is essential for a process
+                     * event: `WAIT FOR <task>` issued while the task is
+                     * still ACTIVE (Sec. 24.8: a process name is TRUE while
+                     * active) must NOT block -- if it did, the task would
+                     * run to completion and flip the event back to FALSE
+                     * before the waiter is ever re-checked, wedging the
+                     * primal forever (the reported WaitForBug). */
+                    uint32_t ev_now;
+                    if (!reevaluate_live_bit_operand(state, &ins->operands[0], &ev_now)) break;
+                    if (ev_now != 0) break; /* already TRUE -> no effect */
                     cur->task_state = TASK_WAITING_ON;
                     cur->has_on_event = true;
                     cur->on_event_op = ins->operands[0];
@@ -13738,6 +13751,17 @@ static void sched_wake_waiting(halmat_state_t *state) {
 static bool reevaluate_live_bit_operand(halmat_state_t *state, const halmat_operand_t *op, uint32_t *out) {
     if (op->qual == QUAL_SYT) {
         if (op->data >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "event expression: SYT index out of range"); return false; }
+        /* A process (TASK, SYM_TYPE 0x48) named in an event expression is
+         * TRUE while ACTIVE, FALSE while inactive (USA003087 Sec. 24.8) --
+         * not a stored BIT value. Same interception as resolve_operand's
+         * QUAL_SYT case; used here for SCHEDULE ON / WAIT FOR conditions. */
+        if (state->symtab) {
+            const halmat_symtab_entry_t *psym = halmat_symtab_find_by_index(state->symtab, op->data);
+            if (psym && psym->hal_class == 0x48) {
+                *out = (state->symbol_active_task[op->data] != -1) ? 1u : 0u;
+                return true;
+            }
+        }
         *out = state->syt[op->data].bit_value;
         return true;
     }
