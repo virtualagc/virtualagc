@@ -2862,7 +2862,7 @@ provenance and runs without an unhandled-SVC trap, but is deliberately
 **not** added to `test_scheduler.sh`'s byte-diff suite — see the next
 finding.
 
-### 7.4 Simultaneously-due `REPEAT EVERY` tasks: firing order can diverge from `yaHALMAT2` due to real-instruction-timing drift (pre-existing, found incidentally while verifying `UPDATE PRIORITY`)
+### 7.4 Simultaneously-due `REPEAT EVERY` tasks: firing order can diverge from `yaHALMAT2` — expected, not a bug (found incidentally while verifying `UPDATE PRIORITY`)
 
 While building a real-compiled-program regression test for `UPDATE
 PRIORITY`, `yaGPC2` and `yaHALMAT2` disagreed on the exact interleaving
@@ -2874,29 +2874,39 @@ alternation every cycle; `yaGPC2` shows the same alternation for the
 first tie, then a swap (`HI,LOW,LOW,HI,LOW,HI,...`) from the second tie
 onward.
 
-Root cause (not yet fixed, logged for whoever picks this up):
-`SCHEDULE`ing two tasks takes two separate real SVC calls, a few real
-AP-101S instructions apart — so each task's own `repeatPhaseRefUs`
-(`src/schedule.c`, captured as `cpu->elapsedTimeUs` at *that specific
-task's own* `SCHEDULE` call) is not bit-identical between the two tasks,
-only very close. Since `REPEAT EVERY`'s re-arm is phase-anchored
-(`phaseRef + N*interval`, not "now + interval" — deliberately, to avoid
-drift from any *single* firing running long), this tiny initial
-per-task offset is preserved and compounds identically every cycle
-rather than averaging out, and at some point crosses whatever tie-break
-margin `yaHALMAT2`'s own HALMAT-instruction-cost model doesn't hit the
-same way. This is a real, confirmed `yaGPC2`-vs-`yaHALMAT2` divergence
-in *when* (down to sub-microsecond precision) two tasks are considered
-simultaneously due — not a `TASK`/`SCHEDULE`/`WAIT`/`UPDATE PRIORITY`
-correctness bug per se (each individual dispatch decision still
-correctly picks the higher-priority *ready* task at whatever instant it
-checks), but a real fidelity gap worth deeper investigation before
-trusting `yaGPC2` output for any real timing-sensitive multi-task
-Shuttle flight-software scenario. `test_schedule.c`'s own hand-assembled
-scenario 3 sidesteps this entirely (both tasks `SCHEDULE`d via direct C
-calls at the exact same `elapsedTimeUs`, giving bit-identical phase
-references) — which is exactly why it, not the real compiled fixture,
-is this project's regression test for `UPDATE PRIORITY` itself.
+Mechanism: `SCHEDULE`ing two tasks takes two separate real SVC calls, a
+few real AP-101S instructions apart — so each task's own
+`repeatPhaseRefUs` (`src/schedule.c`, captured as `cpu->elapsedTimeUs`
+at *that specific task's own* `SCHEDULE` call) is not bit-identical
+between the two tasks, only very close. Since `REPEAT EVERY`'s re-arm
+is phase-anchored (`phaseRef + N*interval`, not "now + interval" —
+deliberately, to avoid drift from any *single* firing running long),
+this tiny initial per-task offset is preserved and compounds
+identically every cycle rather than averaging out, until it crosses
+whatever tie-break margin `yaHALMAT2`'s own timing doesn't cross the
+same way.
+
+**Status (corrected by the user, 2026-08-17): not a fidelity gap to
+close, and not fixable even in principle.** `yaHALMAT2` interprets
+HALMAT — an artificial intermediate language with no hardware timing
+semantics of its own and no guarantee any given HALMAT instruction
+takes any particular amount of time. Whatever per-instruction "cost"
+`yaHALMAT2` charges against `virtual_time` is necessarily a convention
+`yaHALMAT2` itself invented, not a measurement of anything real.
+`yaGPC2`, by contrast, executes real AP-101S machine code against
+`timing.c`'s documented real per-instruction costs. Two independently-
+invented timing models can agree on the *broad* shape of elapsed time
+(which is all `--time-scale`/wall-clock pacing or a single WAIT's
+duration ever needed) but have no basis for agreeing at the
+sub-microsecond precision needed to keep two simultaneously-`SCHEDULE`d
+tasks' phase references bit-identical over many cycles — this is the
+same category of finding §2.8 already documents for floating-point
+LSB-level differences, not a new open investigation. `test_schedule.c`'s
+own hand-assembled scenario 3 sidesteps the whole question by
+`SCHEDULE`ing both tasks via direct C calls at the exact same
+`elapsedTimeUs` (bit-identical phase references by construction), which
+is exactly why it, not the real compiled fixture, is this project's
+regression test for `UPDATE PRIORITY` itself.
 
 ---
 
