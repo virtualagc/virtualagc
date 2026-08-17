@@ -857,6 +857,24 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
                 fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "SYT index %u out of range", op->data);
                 return false;
             }
+            /* A PROCESS name (TASK, SYM_TYPE 0x48) used where a value is
+             * expected -- e.g. `IF <task> THEN`, `<task> & <event>` -- is a
+             * BIT that is TRUE while the process is active (scheduled and
+             * not yet terminated), per USA003087's process-event model
+             * (matching yaGPC2's "process name as Boolean"). Intercepted
+             * before the array-shape check below: the task label carries no
+             * ordinary readable value of its own, and its symbol-table
+             * entry can otherwise be mis-read as an aggregate here. Its
+             * active task slot is tracked in symbol_active_task (set at
+             * SCHEDULE, cleared to -1 on TERMINATE/close). */
+            if (state->symtab) {
+                const halmat_symtab_entry_t *psym = halmat_symtab_find_by_index(state->symtab, op->data);
+                if (psym && psym->hal_class == 0x48) {
+                    out->kind = RV_BITS;
+                    out->bits = (state->symbol_active_task[op->data] != -1) ? 1u : 0u;
+                    return true;
+                }
+            }
             if (syt_is_array_shaped(state, op->data)) {
                 if (state->arrayed_index < 0) {
                     fail(state, "SYT index %u is a whole ARRAY/VECTOR/MATRIX referenced outside an arrayed-paragraph replay", op->data);
