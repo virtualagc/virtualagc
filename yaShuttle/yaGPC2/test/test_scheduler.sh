@@ -101,4 +101,14 @@ run_case "selfterminate/signal" "signal" "fixtures/selfterminate.fcm" "fixtures/
 run_case "prio/burst"  "burst"  "fixtures/prio.fcm" "fixtures/prio-lnk101.json" "fixtures/prio_golden.txt"
 run_case "prio/signal" "signal" "fixtures/prio.fcm" "fixtures/prio-lnk101.json" "fixtures/prio_golden.txt"
 
+# Process name as Boolean (USA003087 13.5) -- a task's own PDE+0 bit 0,
+# read directly by compiled code (no SVC at all). Checks both ACTIVE
+# (right after SCHEDULE) and INACTIVE (right after TERMINATE). No
+# yaHALMAT2 cross-check exists for this fixture: yaHALMAT2 itself
+# errors out on this construct ("SYT index 2 is a whole ARRAY/VECTOR/
+# MATRIX referenced outside an arrayed-paragraph replay") -- a real
+# yaHALMAT2 gap, not a yaGPC2 one; see problems.md.
+run_case "processboolean/burst"  "burst"  "fixtures/processboolean.fcm" "fixtures/processboolean-lnk101.json" "fixtures/processboolean_golden.txt"
+run_case "processboolean/signal" "signal" "fixtures/processboolean.fcm" "fixtures/processboolean-lnk101.json" "fixtures/processboolean_golden.txt"
+
 exit $fail

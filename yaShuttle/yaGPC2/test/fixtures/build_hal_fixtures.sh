@@ -1,11 +1,11 @@
 #!/bin/bash
 # Reproduces hello.fcm, read_write.fcm, read_eof_onerror.fcm,
 # countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm,
-# updatepriority.fcm, prio.fcm, and runtimeprio.fcm (plus their
-# -lnk101.json symbol tables) via the real HAL/S toolchain documented in
-# ../../tools.md (HALSFC + lnk101, both expected on PATH). Not run
-# automatically (no CI machine has the toolchain) — kept for provenance
-# and to regenerate if the encoding/format ever changes.
+# updatepriority.fcm, prio.fcm, runtimeprio.fcm, and processboolean.fcm
+# (plus their -lnk101.json symbol tables) via the real HAL/S toolchain
+# documented in ../../tools.md (HALSFC + lnk101, both expected on PATH).
+# Not run automatically (no CI machine has the toolchain) — kept for
+# provenance and to regenerate if the encoding/format ever changes.
 #
 # Sources:
 #   hello.fcm            <- HELLO.hal (ported/PASS1.PROCS/HELLO.hal in the
@@ -82,6 +82,14 @@
 #                          anything real). test_schedule.c's own
 #                          scenario 5 is the deterministic regression
 #                          test for RUNTIME()/PRIO() instead.
+#   processboolean.fcm    <- processboolean.hal (checked in alongside
+#                          this script — a task's own name used as a
+#                          Boolean, both ACTIVE right after SCHEDULE and
+#                          INACTIVE right after TERMINATE; see
+#                          sched_set_active_flag, src/schedule.c). No
+#                          yaHALMAT2 cross-check: yaHALMAT2 itself errors
+#                          out on this construct (a real yaHALMAT2 gap,
+#                          not a yaGPC2 one -- see problems.md).
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -95,6 +103,7 @@ SELFTERMINATE_HAL="$(dirname "$0")/selfterminate.hal"
 UPDATEPRIORITY_HAL="$(dirname "$0")/updatepriority.hal"
 PRIO_HAL="$(dirname "$0")/prio.hal"
 RUNTIMEPRIO_HAL="$(dirname "$0")/runtimeprio.hal"
+PROCESSBOOLEAN_HAL="$(dirname "$0")/processboolean.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -121,5 +130,6 @@ build "$SELFTERMINATE_HAL" selfterminate selfterminate
 build "$UPDATEPRIORITY_HAL" updatepriority updatepriority
 build "$PRIO_HAL" prio prio
 build "$RUNTIMEPRIO_HAL" runtimeprio runtimeprio
+build "$PROCESSBOOLEAN_HAL" processboolean processboolean
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm (+ -lnk101.json)"

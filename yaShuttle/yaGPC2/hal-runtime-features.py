@@ -331,7 +331,21 @@ F('Real-Time: Priority & Control', 'PRIO() built-in function',
   'test_scheduler.sh under both --pacing modes.')
 F('Real-Time: Priority & Control', 'Process name as Boolean (ACTIVE/INACTIVE query)',
   "A process's own name usable directly as TRUE (ACTIVE) / FALSE (INACTIVE) in an expression.",
-  'USA003087 §13.5', 'not_implemented', 'No mechanism exposes scheduler task state to compiled code as a readable value.', 'untested')
+  'USA003087 §13.5', 'implemented',
+  "No SVC at all -- confirmed empirically that 'IF <task> THEN' compiles to a direct TB (test-bit) "
+  "instruction reading bit 0 of the task's own PDE+0 halfword (the 'PROCESS EVENT' field "
+  "schedule.h's own PDE-layout comment had already flagged as unmodeled). Implemented as "
+  "sched_set_active_flag (src/schedule.c), called from sched_handle_schedule_svc (sets the bit), "
+  "sched_handle_task_close's non-REPEAT branch, and sched_handle_terminate_named_svc (both clear "
+  "it) -- ordinary RUNNING/WAITING/DORMANT transitions never touch it, matching USA003087 13.1's "
+  "ACTIVE-means-queued definition.",
+  'tested_dedicated',
+  'test_schedule.c scenario 6 (all three transitions: SCHEDULE sets, CLOSE-with-no-REPEAT clears, '
+  'TERMINATE clears even on a REPEAT EVERY task). test/fixtures/processboolean.hal (real compiled '
+  'fixture, both ACTIVE and INACTIVE paths) exercised by test_scheduler.sh under both --pacing '
+  'modes -- no yaHALMAT2 cross-check exists: yaHALMAT2 itself errors out on this construct '
+  '("SYT index 2 is a whole ARRAY/VECTOR/MATRIX referenced outside an arrayed-paragraph replay"), '
+  'a real yaHALMAT2 gap, not a yaGPC2 one.')
 F('Real-Time: Priority & Control', 'NEXTIME(<label>) built-in function',
   'For a process scheduled with IN/AT and not yet started, returns its future start time; otherwise RUNTIME()-equivalent.',
   'USA003087 Appendix B', 'not_implemented', 'Depends on both RUNTIME() and SCHEDULE...IN/AT, neither implemented.', 'untested')

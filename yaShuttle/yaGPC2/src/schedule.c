@@ -36,6 +36,31 @@ static int sched_find_by_pde(Scheduler *s, uint32_t pdeAddr) {
     return -1;
 }
 
+/* PDE halfword +0 ("PROCESS EVENT" per schedule.h's own PDE-layout
+ * comment) bit 0 -- confirmed empirically that "IF <task-name> THEN"
+ * (USA003087 13.5's process-name-as-Boolean) compiles to a direct `TB
+ * <pdeAddr>(0),X'0001'` reading this bit, no SVC/runtime-library call
+ * at all (real hardware never gets an OS to maintain this for a no-OS
+ * program either, same "yaGPC2 substitutes here" reasoning as every
+ * other SVC-trap substitution in this file -- except this one isn't
+ * SVC-trap-shaped, it's a plain memory location the compiled program
+ * reads directly, so the scheduler has to keep it correct proactively
+ * rather than reactively on a trap). Set true whenever a task becomes
+ * ACTIVE (SCHEDULEd, in USA003087 13.1's sense: EXECUTING/READY/
+ * WAITING/DORMANT-between-REPEAT-firings all count), cleared only when
+ * it goes back to INACTIVE (CLOSE with no REPEAT, or TERMINATE) -- not
+ * touched on ordinary RUNNING<->WAITING<->DORMANT transitions, since
+ * all of those stay ACTIVE. */
+static void sched_set_active_flag(CPU *cpu, uint32_t pdeAddr, bool active) {
+    uint32_t hw = mcm_get16(&cpu->mainStorage, pdeAddr);
+    if (active) {
+        hw |= 0x0001u;
+    } else {
+        hw &= ~0x0001u;
+    }
+    mcm_set16(&cpu->mainStorage, pdeAddr, hw, false);
+}
+
 /* Snapshot/restore the live CPU context -- same field set and access
  * pattern as ageharness.c's ageharness_snapshot_regs() (bank chosen via
  * psw_get_reg_set(), FP always bank 2), duplicated rather than shared
@@ -183,6 +208,7 @@ bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pd
      * firing #1 happens, not the cadence after it. */
     t->wakeDeadlineUs = t->repeatPhaseRefUs;
     t->state = TASK_STATE_DORMANT;
+    sched_set_active_flag(cpu, pdeAddr, true);
 
     return true;
 }
@@ -248,6 +274,7 @@ bool sched_handle_task_close(Scheduler *s, CPU *cpu) {
         t->hasRun = false;
     } else {
         t->state = TASK_SLOT_FREE;
+        sched_set_active_flag(cpu, t->pdeAddr, false);
     }
     s->runningIdx = -1;
 
@@ -262,6 +289,7 @@ bool sched_handle_terminate_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pd
         if (idx < 0) continue; /* not currently active -- silent no-op */
         if (idx == s->runningIdx) selfTerminated = true;
         s->tasks[idx].state = TASK_SLOT_FREE; /* unconditional -- no REPEAT re-arm, unlike sched_handle_task_close */
+        sched_set_active_flag(cpu, s->tasks[idx].pdeAddr, false);
     }
     if (selfTerminated) {
         s->runningIdx = -1;

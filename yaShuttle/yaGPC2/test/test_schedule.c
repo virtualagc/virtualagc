@@ -451,12 +451,56 @@ static void test_runtime_and_prio_builtins(void) {
     ageharness_free(&age2);
 }
 
+/* ---------------------------------------------------------------------
+ * 6. Process name as Boolean (USA003087 13.5): a task's own PDE+0 bit 0
+ *    (compiled "IF <task> THEN" reads this directly, no SVC -- see
+ *    sched_set_active_flag's own comment, src/schedule.c). Checks all
+ *    three transitions: SCHEDULE sets it, TERMINATE clears it, and
+ *    CLOSE-with-no-REPEAT (a one-shot task reaching its own natural end)
+ *    also clears it -- distinct code paths in schedule.c, all three
+ *    need independent coverage.
+ * ------------------------------------------------------------------- */
+
+static void test_process_name_as_boolean(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t entry = build_close_only_task(mem, 0x1000); /* one-shot: no REPEAT */
+    uint32_t pde = build_pde(mem, 0x1010, entry);
+
+    CHECK((mcm_get16(mem, pde) & 1) == 0, "PDE+0 bit 0 starts clear (never SCHEDULEd yet)");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde, 0.0), "SCHEDULE (one-shot) handled");
+    CHECK((mcm_get16(mem, pde) & 1) == 1, "PDE+0 bit 0 set immediately after SCHEDULE (ACTIVE)");
+
+    CHECK(sched_handle_wait_svc(sched, cpu, 0.0), "WAIT 0 dispatches the task immediately");
+    ap101_exec1(&age.gpc); /* LHI */
+    ap101_exec1(&age.gpc); /* SVC (CLOSE, no REPEAT -> deactivates) */
+    CHECK((mcm_get16(mem, pde) & 1) == 0, "PDE+0 bit 0 cleared after reaching its own CLOSE with no REPEAT (INACTIVE)");
+
+    /* Independently: TERMINATE's own deactivation path (a REPEATing
+     * task, so CLOSE's own re-arm path would otherwise leave it ACTIVE
+     * -- proving TERMINATE, not just "task no longer running", is what
+     * clears the flag here). */
+    uint32_t entry2 = build_close_only_task(mem, 0x2000);
+    uint32_t pde2 = build_pde(mem, 0x2010, entry2);
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde2, 1000000.0), "SCHEDULE (REPEAT EVERY) handled");
+    CHECK((mcm_get16(mem, pde2) & 1) == 1, "second task's PDE+0 bit 0 set after SCHEDULE");
+    CHECK(sched_handle_terminate_named_svc(sched, cpu, &pde2, 1), "TERMINATE (named) handled");
+    CHECK((mcm_get16(mem, pde2) & 1) == 0, "second task's PDE+0 bit 0 cleared after TERMINATE, despite being a REPEAT EVERY task");
+
+    ageharness_free(&age);
+}
+
 int main(void) {
     test_priority_ordering_and_context_roundtrip();
     test_repeat_every_counter_and_virtual_time();
     test_update_priority_flips_dispatch_order();
     test_terminate_named_and_self();
     test_runtime_and_prio_builtins();
+    test_process_name_as_boolean();
     if (failures == 0) {
         printf("all scheduler-mechanics tests passed\n");
     } else {

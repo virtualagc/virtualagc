@@ -2967,6 +2967,50 @@ built-in depends on CPU instruction execution, just a single SVC-code
 halfword and a direct `halucp_handle_svc()` call) as the deterministic
 regression test for both.
 
+### 7.6 Process name as Boolean (`IF <task> THEN`) — done, plus a real `yaHALMAT2` gap found along the way
+
+Fifth item in the runtime-feature-survey implementation order. Unlike
+every other real-time construct implemented so far, this one produced
+**no SVC trap at all** when traced against a real compiled program —
+tracing the exact instruction sequence instead of an SVC parameter word
+showed `IF NEXT THEN` compiles to a plain `TB <pdeAddr>(0),X'0001'`
+(test bit) directly against the task's own PDE, no runtime-library call
+in sight. This confirms `schedule.h`'s own PDE-layout comment, written
+back when the PDE format was first reverse-engineered for `TASK`/
+`SCHEDULE`/`WAIT`: "`+0`: PROCESS EVENT (true while scheduled/running)
+— not modeled by this file; HAL/S programs practically never read a
+task's own PDE directly, and nothing in this cut needs it written." One
+now does.
+
+Implemented as `sched_set_active_flag` (`src/schedule.c`), which sets
+bit 0 of PDE+0 when a task becomes `SCHEDULE`d and clears it when it
+goes back to `INACTIVE` — reaching its own `CLOSE` with no `REPEAT`, or
+being `TERMINATE`d (even a `REPEAT EVERY` task, which `CLOSE`'s own
+re-arm path would otherwise leave `ACTIVE`, so this needed independent
+verification, not just "task no longer running"). Ordinary `RUNNING`↔
+`WAITING`↔`DORMANT` transitions never touch it, matching `USA003087`
+§13.1's own definition of `ACTIVE` as "in the process queue" (which
+`DORMANT`-between-firings and `WAITING` both still are).
+
+**Found along the way**: `yaHALMAT2` itself doesn't support this
+construct at all — compiling and running the identical test program
+through it produces `yaHALMAT2: SYT index 2 is a whole ARRAY/VECTOR/
+MATRIX referenced outside an arrayed-paragraph replay` and halts. A
+real `yaHALMAT2` gap (it appears to misinterpret a task-name reference
+as an arrayed-data reference), not a `yaGPC2` one — but it means there
+is no cross-tool oracle available for this fixture at all, unlike every
+other feature implemented so far in this pass. Verified instead by
+direct reasoning from the compiled instruction semantics (`TB`'s own
+`exec_TB`: a plain AND-and-compare against the tested mask, no
+ambiguity in which bit or which sense) plus two independent real
+compiled test cases (`ACTIVE` right after `SCHEDULE`, `INACTIVE` right
+after `TERMINATE`) both producing the expected, self-consistent output,
+plus `test_schedule.c`'s new scenario 6 covering all three transition
+paths deterministically at the C level.
+
+New fixture `test/fixtures/processboolean.hal`, exercised by
+`test_scheduler.sh` under both `--pacing` modes.
+
 ---
 
 ## Methodology and caveats
