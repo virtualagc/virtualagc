@@ -22,6 +22,11 @@
 #include "iohost.h"
 #include "opts.h"
 
+/* Mirrors yaHALMAT2's halmat_pacing_mode_t exactly (same two variants,
+ * same default) -- see run.c's batchrunner_pace_burst()/
+ * batchrunner_pace_signal(). */
+typedef enum { PACING_BURST, PACING_SIGNAL } PacingMode;
+
 typedef struct {
     const Options *opts;
 
@@ -77,6 +82,16 @@ typedef struct {
      * --debug: time spent blocked on debugger input must never count
      * against real time. */
     double timeScale;
+
+    /* --pacing: which implementation of the contract above to use --
+     * see run.c's batchrunner_pace_burst()/batchrunner_pace_signal(),
+     * mirroring yaHALMAT2's own --pacing=MODE (interp_run_burst()/
+     * interp_run_signal()) byte-for-byte. Both fields below are burst
+     * mode's own state; signal mode's platform-specific resources
+     * (POSIX timer/signal-mask handles) live as file-scope statics in
+     * run.c instead, matching g_sigint_received's own existing pattern
+     * there (only one BatchRunner is ever paced per process). */
+    PacingMode pacingMode;
     double pacingRefWallSeconds;
     double pacingRefVirtualUs;
 } BatchRunner;

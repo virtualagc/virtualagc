@@ -1310,6 +1310,30 @@ now passes `--time-scale 1000000` explicitly (matching how the
 `--time-scale` never touches program output, only how much real time
 elapses alongside it.
 
+**`--pacing=signal` added (2026-08-17), matching `yaHALMAT2`'s own
+alternative implementation.** `--time-scale`'s pacing above (now named
+`--pacing=burst`, the default) is a polling design: periodically ask
+"how much wall-clock time has elapsed?" `yaHALMAT2` also ships a second
+implementation, `interp_run_signal()` — a POSIX real-time-timer
+(`timer_create`/`SIGRTMIN+2`) plus `sigsuspend()`-driven design that's
+*notified* on a fixed schedule instead of asking, added there purely
+for side-by-side comparison against its own burst mode ("both implement
+the same pacing contract and produce identical program output, only
+wall-clock jitter/precision differs"). Ported to `run.c` essentially
+line-for-line as `batchrunner_pace_signal()`/
+`batchrunner_pace_signal_setup()`/`_teardown()`, selected via
+`--pacing burst`/`--pacing signal`, gated on a new `HAVE_POSIX_TIMERS`
+build-time probe in the `Makefile` (mirroring `yaHALMAT2`'s own probe
+byte-for-byte — `timer_create`/`timer_settime` have historically been
+unreliable or absent on some BSD-family systems, including macOS) —
+without it, `--pacing=signal` fails loudly at startup with a clear
+message rather than silently falling back to burst mode or crashing.
+Verified against `COUNTUP.hal`: `--pacing signal --time-scale 100`
+completed in 2.004s real time (burst: 2.012s; expected 1.995s), output
+byte-identical to both the unpaced and burst-paced runs.
+`test_scheduler.sh` now runs both `--pacing` modes against the same
+golden file.
+
 ### 2.8 Floating-point LSB-level precision differences (likely not bugs)
 
 `test_errfix_scalar`, `test_bfnc_hyperbolic`, `test_bfnc_invtrig`,

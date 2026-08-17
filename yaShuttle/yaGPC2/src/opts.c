@@ -78,6 +78,18 @@ static const char *HELP_TEXT =
 "                                  a given HAL/S-seconds interval, without\n"
 "                                  changing any SCHEDULE/WAIT tick arithmetic\n"
 "                                  or program output at all (default: \"1.0\")\n"
+"  --pacing <mode>                 wall-clock pacing implementation: burst\n"
+"                                  (default) is the original burst-execute-\n"
+"                                  then-sleep polling design; signal is an\n"
+"                                  alternative POSIX/timer-notification-driven\n"
+"                                  design, added for side-by-side comparison --\n"
+"                                  both implement the same pacing contract and\n"
+"                                  produce identical program output, only\n"
+"                                  wall-clock jitter/precision differs. signal\n"
+"                                  requires this build to have been compiled\n"
+"                                  with POSIX real-time timer support; fails\n"
+"                                  loudly at startup if not available\n"
+"                                  (default: \"burst\")\n"
 "  -h, --help                      display help for command\n";
 
 static void set_defaults(Options *o) {
@@ -88,6 +100,7 @@ static void set_defaults(Options *o) {
     o->maxSteps = "100000";
     o->dumpInterval = "100";
     o->timeScale = "1.0";
+    o->pacing = "burst";
 }
 
 /* JS parseInt(s, 16) applied after stripping a leading "0x"/"0X" — matches
@@ -210,6 +223,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->sourceMap = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--time-scale", &n)) {
             opts->timeScale = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--pacing", &n)) {
+            opts->pacing = take_value(argc, argv, &i, tok, n);
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {

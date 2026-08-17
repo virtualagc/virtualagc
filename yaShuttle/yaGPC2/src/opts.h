@@ -78,6 +78,20 @@ typedef struct {
      * Shuttle simulator) owns its own pacing against the same
      * GpcState.elapsedTime this option paces the CLI against. */
     char *timeScale;                 /* default "1.0"; parsed via atof */
+
+    /* Not part of gpc run's own option set -- yaGPC2-specific, mirroring
+     * yaHALMAT2's own --pacing=MODE (same names/semantics/default): which
+     * --time-scale pacing implementation run.c's batchrunner_pace() uses
+     * -- "burst" (default, a polling design: check accumulated virtual
+     * time periodically, sleep to catch up) or "signal" (a POSIX
+     * real-time-timer/sigsuspend-driven design, added purely for direct
+     * side-by-side comparison -- both implement the exact same pacing
+     * contract and produce identical program output, only wall-clock
+     * jitter/precision differs). "signal" requires this build to have
+     * been compiled with POSIX real-time timer support (see Makefile's
+     * HAVE_POSIX_TIMERS probe); fails loudly at startup if not
+     * available, rather than silently falling back to "burst". */
+    char *pacing;                     /* "burst" (default) or "signal" */
 } Options;
 
 /* Parses argv (starting at argv[1]) exactly as `gpc run` would, except that

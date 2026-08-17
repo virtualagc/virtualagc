@@ -1,9 +1,12 @@
+#define _POSIX_C_SOURCE 200809L /* sigsuspend(), timer_create()/timer_settime() -- see batchrunner_pace_signal_setup() */
 #include "run.h"
 
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "compat.h"
 #include "cpu_instr.h"
@@ -34,6 +37,14 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     r->timeScale = atof(opts->timeScale);
     if (r->timeScale <= 0.0) {
         fprintf(stderr, "error: --time-scale must be > 0 (got '%s')\n", opts->timeScale);
+        exit(1);
+    }
+    if (strcmp(opts->pacing, "burst") == 0) {
+        r->pacingMode = PACING_BURST;
+    } else if (strcmp(opts->pacing, "signal") == 0) {
+        r->pacingMode = PACING_SIGNAL;
+    } else {
+        fprintf(stderr, "error: --pacing expects 'burst' or 'signal' (got '%s')\n", opts->pacing);
         exit(1);
     }
 
@@ -404,23 +415,25 @@ static bool batchrunner_step(BatchRunner *r) {
 
 /* How much virtual time (in cpu->elapsedTimeUs's own units, microseconds)
  * accumulates between wall-clock checks -- mirrors yaHALMAT2's own
- * HALMAT_REALTIME_BURST_MS (interp.c): "burst execute some number of
- * instructions, then sleep to let the operating system do whatever else
- * it needs to do, then execute a new burst ... on a 50 or 100
- * millisecond cycle." A window this size keeps the check-then-maybe-
- * sleep overhead (one elapsedTimeUs subtraction per step; the actual
- * yagpc_monotonic_seconds() calls only happen once a window's worth of
- * virtual time has passed) negligible relative to real instruction
- * throughput, while staying tight enough that a human watching the
- * output can't tell it's not continuous. */
+ * HALMAT_REALTIME_BURST_MS (interp.c, same value: 50) exactly: "burst
+ * execute some number of instructions, then sleep to let the operating
+ * system do whatever else it needs to do, then execute a new burst ...
+ * on a 50 or 100 millisecond cycle." A window this size keeps the
+ * check-then-maybe-sleep overhead (one elapsedTimeUs subtraction per
+ * step; the actual yagpc_monotonic_seconds() calls only happen once a
+ * window's worth of virtual time has passed) negligible relative to
+ * real instruction throughput, while staying tight enough that a human
+ * watching the output can't tell it's not continuous. Shared by both
+ * pacing implementations below (--pacing=burst/signal). */
 #define PACING_WINDOW_MS 50.0
 
 /* Wall-clock pacing for the standalone CLI's own instruction loop --
- * called after every batchrunner_step() from both batchrunner_run() and
+ * batchrunner_pace() (the shared dispatcher, below) is called after
+ * every batchrunner_step() from both batchrunner_run() and
  * batchrunner_run_interactive(), skipped entirely under --debug (time
  * spent blocked on a debugger prompt must never count against real
- * time -- the same exclusion yaHALMAT2's interp_run_burst() makes for
- * its own debug_run()).
+ * time -- the same exclusion yaHALMAT2's interp_run_burst()/
+ * interp_run_signal() make for their own debug_run()).
  *
  * Deliberately layered *outside* batchrunner_step()/ap101_exec1() rather
  * than baked into either: the CLI's own loop is just another consumer
@@ -433,16 +446,17 @@ static bool batchrunner_step(BatchRunner *r) {
  * ap101_exec1()/yagpc2_engine() (gpcops.c) remain exactly as unaware of
  * real time as before.
  *
- * ref_wall/ref_virtual reset together every time a window's worth of
- * virtual time has accumulated since the last check -- so the
- * monotonic-clock read happens only ~20x/sec of virtual-equivalent
- * time, not once per instruction. This also correctly handles
- * sched_dispatch()'s own idle fast-forward (schedule.c): a single
- * batchrunner_step() call can jump cpu->elapsedTimeUs a large amount at
- * once when every task is WAITING/DORMANT and nothing is immediately
- * ready; that jump alone crosses the window threshold, and the
- * resulting sleep correctly represents the real time equivalent to it
- * -- no special-casing needed here for that case.
+ * --pacing=burst (default): ref_wall/ref_virtual reset together every
+ * time a window's worth of virtual time has accumulated since the last
+ * check -- so the monotonic-clock read happens only ~20x/sec of
+ * virtual-equivalent time, not once per instruction. This also
+ * correctly handles sched_dispatch()'s own idle fast-forward
+ * (schedule.c): a single batchrunner_step() call can jump
+ * cpu->elapsedTimeUs a large amount at once when every task is
+ * WAITING/DORMANT and nothing is immediately ready; that jump alone
+ * crosses the window threshold, and the resulting sleep correctly
+ * represents the real time equivalent to it -- no special-casing needed
+ * here for that case.
  *
  * If a burst genuinely took longer in wall-clock terms than its
  * virtual-time equivalent (slow host, heavy/debug build, or a program
@@ -450,9 +464,7 @@ static bool batchrunner_step(BatchRunner *r) {
  * fast-forwarding), target_wall_seconds > actual_wall_seconds is false,
  * nothing sleeps, and the reference pair simply resets to "now" -- no
  * catch-up/runaway-acceleration debt ever accumulates across windows. */
-static void batchrunner_pace(BatchRunner *r) {
-    if (r->debugMode) return;
-
+static void batchrunner_pace_burst(BatchRunner *r) {
     double elapsedVirtualUs = r->age.gpc.cpu.elapsedTimeUs - r->pacingRefVirtualUs;
     double windowUs = PACING_WINDOW_MS * 1000.0;
     if (elapsedVirtualUs < windowUs) return;
@@ -465,6 +477,232 @@ static void batchrunner_pace(BatchRunner *r) {
 
     r->pacingRefWallSeconds = yagpc_monotonic_seconds();
     r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
+}
+
+/* --pacing=signal: the alternative, signal/timer-notification-driven
+ * pacing implementation, added purely for direct side-by-side comparison
+ * against batchrunner_pace_burst() above (both implement the exact same
+ * pacing contract -- see PacingMode's own comment; select with
+ * --pacing=signal). Where burst mode periodically *asks* "how much
+ * wall-clock time has elapsed?" (a design whose reaction granularity is
+ * bounded by how often it happens to check, i.e. PACING_WINDOW_MS), this
+ * implementation is *notified*: a POSIX per-process real-time timer
+ * (CLOCK_MONOTONIC, same clock source as burst mode -- must not be
+ * affected by wall-clock/NTP adjustments) delivers a real-time signal on
+ * a fixed schedule, and the CLI blocks (sigsuspend(), never a busy-poll)
+ * until notified, rather than discovering drift only at its next
+ * scheduled check. Ported from yaHALMAT2's own interp_run_signal()
+ * (interp.c) essentially line-for-line -- same rationale throughout,
+ * same window size, same idle-fast-forward special case below.
+ *
+ * SIGRTMIN+2 (a real-time signal), not SIGALRM: real-time signals queue
+ * rather than coalescing multiple pending instances into one, so if a
+ * batchrunner_step() call occasionally takes a while (a genuinely slow
+ * instruction, or the idle-fast-forward case below) no tick
+ * notifications are silently lost while the CLI is busy -- they are
+ * delivered/counted once it catches up. (+2 rather than bare SIGRTMIN
+ * on the untested-but-plausible theory that SIGRTMIN itself is the
+ * first one anything else sharing this process might reach for --
+ * matching yaHALMAT2's own reasoning exactly.)
+ *
+ * The signal handler (pacing_signal_handler, below) does *only*
+ * `pacing_flag = 1` -- a static volatile sig_atomic_t, nothing else
+ * touched, no calls into interpreter/CPU state -- the same async-
+ * signal-safe pattern yaHALMAT2 uses. Race-free wait: the signal is
+ * blocked up front (sigprocmask), then sigsuspend() atomically unblocks
+ * it and sleeps until *some* unblocked signal arrives, closing the
+ * check-then-sleep missed-wakeup window a naive "if (!pacing_flag)
+ * sleep()" loop would leave open.
+ *
+ * Budget accounting: each timer firing grants
+ * HALMAT_TICKS_PER_SECOND-equivalent budget (this codebase's
+ * elapsedTimeUs is already in microseconds, so the "ticks" here are
+ * just microseconds directly -- no separate ticks-per-second constant
+ * needed) of PACING_WINDOW_MS * 1000 * timeScale microseconds -- exactly
+ * batchrunner_pace_burst()'s own per-window virtual-time budget, for an
+ * apples-to-apples comparison.
+ *
+ * Idle-fast-forward special case: sched_dispatch()'s own fast-forward
+ * (schedule.c) can jump cpu->elapsedTimeUs far ahead in a single
+ * batchrunner_step() call when every task is WAITING/DORMANT and
+ * nothing is immediately ready. batchrunner_pace_burst() handles this
+ * for free (its check is purely "how much virtual time has elapsed",
+ * regardless of how it accumulated) -- but naively letting this fall
+ * through here would mean looping on sigsuspend() through however many
+ * real timer firings the gap represents (a 10-second idle gap at a 50ms
+ * window is ~200 firings): correct, but needlessly granular for a jump
+ * the CLI already knows about in one shot from a single elapsedTimeUs
+ * read. Instead, once a step's consumed-virtual-time delta exceeds a
+ * whole window's worth, this computes the equivalent real-time gap
+ * directly (the same computation batchrunner_pace_burst() already does)
+ * and sleeps that directly, then resumes normal signal-driven pacing for
+ * the next window. */
+#ifdef HAVE_POSIX_TIMERS
+
+/* SIGRTMIN is not a compile-time constant on Linux glibc (it's a function
+ * call, to allow for kernel-reserved real-time signals) -- fine, this is
+ * only ever evaluated at runtime, never in a preprocessor conditional. */
+#define YAGPC_PACING_RT_SIGNAL (SIGRTMIN + 2)
+
+/* File-scope, not a BatchRunner field: only one BatchRunner is ever
+ * paced per process (matches g_sigint_received's own existing pattern
+ * in this file), and a signal handler can only safely touch static
+ * storage duration objects anyway. */
+static volatile sig_atomic_t g_pacing_flag = 0;
+static timer_t g_pacing_timer;
+static sigset_t g_pacing_old_mask;
+static struct sigaction g_pacing_old_sa;
+static double g_pacing_budget_us = 0.0;
+
+static void pacing_signal_handler(int signo) {
+    (void)signo;
+    g_pacing_flag = 1;
+}
+
+/* Called once, before the run loop starts (batchrunner_run()/
+ * batchrunner_run_interactive()) -- installs the signal handler, blocks
+ * the real-time signal (only ever transiently unblocked inside
+ * sigsuspend() below), and arms a repeating POSIX timer at
+ * PACING_WINDOW_MS. Exits the process on any setup failure, matching
+ * this codebase's "fail loudly, don't silently degrade" discipline
+ * (mirrors yaHALMAT2's own fail()-and-return-error-code, adapted to
+ * this codebase's exit()-on-fatal-error convention throughout run.c). */
+static void batchrunner_pace_signal_setup(BatchRunner *r) {
+    (void)r;
+    g_pacing_flag = 0;
+    g_pacing_budget_us = 0.0;
+
+    sigset_t rtSet;
+    sigemptyset(&rtSet);
+    sigaddset(&rtSet, YAGPC_PACING_RT_SIGNAL);
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = pacing_signal_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    if (sigaction(YAGPC_PACING_RT_SIGNAL, &sa, &g_pacing_old_sa) != 0) {
+        fprintf(stderr, "error: --pacing=signal: sigaction failed: %s\n", strerror(errno));
+        exit(1);
+    }
+
+    if (sigprocmask(SIG_BLOCK, &rtSet, &g_pacing_old_mask) != 0) {
+        fprintf(stderr, "error: --pacing=signal: sigprocmask failed: %s\n", strerror(errno));
+        sigaction(YAGPC_PACING_RT_SIGNAL, &g_pacing_old_sa, NULL);
+        exit(1);
+    }
+
+    struct sigevent sev;
+    memset(&sev, 0, sizeof(sev));
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo = YAGPC_PACING_RT_SIGNAL;
+    sev.sigev_value.sival_ptr = &g_pacing_timer;
+    if (timer_create(CLOCK_MONOTONIC, &sev, &g_pacing_timer) != 0) {
+        fprintf(stderr, "error: --pacing=signal: timer_create failed: %s\n", strerror(errno));
+        sigprocmask(SIG_SETMASK, &g_pacing_old_mask, NULL);
+        sigaction(YAGPC_PACING_RT_SIGNAL, &g_pacing_old_sa, NULL);
+        exit(1);
+    }
+
+    double windowSeconds = PACING_WINDOW_MS / 1000.0;
+    struct itimerspec its;
+    its.it_value.tv_sec = (time_t)windowSeconds;
+    its.it_value.tv_nsec = (long)((windowSeconds - (double)its.it_value.tv_sec) * 1e9);
+    its.it_interval = its.it_value;
+    if (timer_settime(g_pacing_timer, 0, &its, NULL) != 0) {
+        fprintf(stderr, "error: --pacing=signal: timer_settime failed: %s\n", strerror(errno));
+        timer_delete(g_pacing_timer);
+        sigprocmask(SIG_SETMASK, &g_pacing_old_mask, NULL);
+        sigaction(YAGPC_PACING_RT_SIGNAL, &g_pacing_old_sa, NULL);
+        exit(1);
+    }
+}
+
+static void batchrunner_pace_signal_teardown(BatchRunner *r) {
+    (void)r;
+    timer_delete(g_pacing_timer);
+    sigprocmask(SIG_SETMASK, &g_pacing_old_mask, NULL);
+    sigaction(YAGPC_PACING_RT_SIGNAL, &g_pacing_old_sa, NULL);
+}
+
+/* Called after every batchrunner_step() (same call site as burst mode).
+ * Accounts this step's just-consumed virtual time against the current
+ * window's budget; once exhausted, blocks for the next timer firing
+ * (or handles an idle-fast-forward step directly -- see this section's
+ * own header comment) before the *following* step is allowed to run. */
+static void batchrunner_pace_signal(BatchRunner *r) {
+    double windowBudgetUs = PACING_WINDOW_MS * 1000.0 * r->timeScale;
+    if (windowBudgetUs < 1.0) windowBudgetUs = 1.0;
+
+    double consumedUs = r->age.gpc.cpu.elapsedTimeUs - r->pacingRefVirtualUs;
+    r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
+
+    if (consumedUs > windowBudgetUs) {
+        double gapSeconds = (consumedUs / 1e6) / r->timeScale;
+        yagpc_sleep_seconds(gapSeconds);
+        g_pacing_budget_us = 0.0;
+        return;
+    }
+
+    g_pacing_budget_us -= consumedUs;
+    if (g_pacing_budget_us <= 0.0) {
+        while (!g_pacing_flag) {
+            sigsuspend(&g_pacing_old_mask);
+        }
+        g_pacing_flag = 0;
+        g_pacing_budget_us += windowBudgetUs;
+    }
+}
+
+#else
+
+/* Neither HAVE_POSIX_TIMERS (Makefile's build-time probe) nor a known
+ * alternative: this target has no known reliable periodic-timer-plus-
+ * notification primitive available (notably, real per-process interval
+ * timers via timer_create()/timer_settime() have historically been
+ * unreliable or absent on some BSD-family systems, including macOS).
+ * Fail loudly and specifically rather than silently falling back to
+ * --pacing=burst's behavior or crashing -- matches yaHALMAT2's own
+ * HAVE_POSIX_TIMERS-gated stub and this project's established "fail
+ * loudly, don't silently degrade" discipline. */
+static void batchrunner_pace_signal_setup(BatchRunner *r) {
+    (void)r;
+    fprintf(stderr,
+            "error: this build was compiled without POSIX real-time timer support -- "
+            "rebuild with HAVE_POSIX_TIMERS, or use --pacing=burst\n");
+    exit(1);
+}
+static void batchrunner_pace_signal_teardown(BatchRunner *r) { (void)r; }
+static void batchrunner_pace_signal(BatchRunner *r) { (void)r; }
+
+#endif
+
+/* Shared dispatcher, called after every batchrunner_step() from both
+ * batchrunner_run() and batchrunner_run_interactive(). */
+static void batchrunner_pace(BatchRunner *r) {
+    if (r->debugMode) return;
+    if (r->pacingMode == PACING_SIGNAL) {
+        batchrunner_pace_signal(r);
+    } else {
+        batchrunner_pace_burst(r);
+    }
+}
+
+/* Called once, before either run loop starts -- --pacing=signal needs
+ * process-wide setup (timer/signal handler); --pacing=burst and --debug
+ * (which skips pacing entirely -- see batchrunner_pace() above) need
+ * none. Always safe to call even when pacing will never actually fire
+ * (--debug): setup happens unconditionally so a mid-run 'set pacing'-
+ * style toggle isn't a concern this codebase has to worry about (no
+ * such toggle exists), matching batchrunner_pace()'s own simplicity. */
+static void batchrunner_pace_setup(BatchRunner *r) {
+    if (r->debugMode) return;
+    if (r->pacingMode == PACING_SIGNAL) batchrunner_pace_signal_setup(r);
+}
+
+static void batchrunner_pace_teardown(BatchRunner *r) {
+    if (r->debugMode) return;
+    if (r->pacingMode == PACING_SIGNAL) batchrunner_pace_signal_teardown(r);
 }
 
 /* Shared by both loops so --watch/--watch-log behave identically in
@@ -545,10 +783,12 @@ int batchrunner_run(BatchRunner *r) {
 
     r->pacingRefWallSeconds = yagpc_monotonic_seconds();
     r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
+    batchrunner_pace_setup(r);
     while (r->step < r->maxSteps) {
         if (!batchrunner_step(r)) break;
         batchrunner_pace(r);
     }
+    batchrunner_pace_teardown(r);
 
     /* Whatever reason the loop stopped for -- max-steps exhausted, a
      * breakpoint, a watchpoint -- flush any still-buffered, not-yet-
@@ -710,6 +950,7 @@ int batchrunner_run_interactive(BatchRunner *r) {
 
     r->pacingRefWallSeconds = yagpc_monotonic_seconds();
     r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
+    batchrunner_pace_setup(r);
     while (r->step < r->maxSteps) {
         if (g_sigint_received) {
             interactive_report_and_exit(r, "\n--- INTERRUPTED after %ld steps ---", r->step, 0);
@@ -717,6 +958,7 @@ int batchrunner_run_interactive(BatchRunner *r) {
         if (!batchrunner_step(r)) break;
         batchrunner_pace(r);
     }
+    batchrunner_pace_teardown(r);
 
     /* See batchrunner_run()'s own identical call for the reasoning --
      * max-steps/breakpoint/watchpoint stops here need the same flush the

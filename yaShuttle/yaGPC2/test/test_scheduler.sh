@@ -19,46 +19,59 @@ GOLDEN="fixtures/countup_golden.txt"
 
 fail=0
 
-act_out=$(mktemp)
-act_err=$(mktemp)
-
-
 # --time-scale: yaGPC2's standalone CLI now paces SCHEDULE/WAIT against
 # real wall-clock time by default (--time-scale 1.0, matching
 # yaHALMAT2's own default -- see run.c's batchrunner_pace()), so this
 # program's genuine ~199.5 virtual seconds would otherwise make this
-# test take ~199.5 real seconds every time `make test` runs. A large
-# factor collapses that to milliseconds without changing any tick
-# arithmetic or program output at all (confirmed: same golden file this
-# was already diffed against, captured with yaHALMAT2 similarly sped up
-# via its own --time-scale).
-"$YAGPC2" --interactive --no-trace --no-verbose --symbols "$SYM" --line-width 240 --max-steps 200000 --time-scale 1000000 "$FCM" >"$act_out" 2>"$act_err"
-act_code=$?
+# test take ~199.5 real seconds every time `make test` runs, once per
+# --pacing mode below. A large factor collapses that to milliseconds
+# without changing any tick arithmetic or program output at all
+# (confirmed: same golden file this was already diffed against, captured
+# with yaHALMAT2 similarly sped up via its own --time-scale).
+run_case() {
+    label="$1"; pacing="$2"
 
-ok=1
+    act_out=$(mktemp)
+    act_err=$(mktemp)
 
-if ! diff -u "$GOLDEN" "$act_out"; then
-    echo "FAIL [scheduler/countup]: stdout differs from $GOLDEN"
-    ok=0
-fi
+    "$YAGPC2" --interactive --no-trace --no-verbose --symbols "$SYM" --line-width 240 --max-steps 200000 \
+        --time-scale 1000000 --pacing "$pacing" "$FCM" >"$act_out" 2>"$act_err"
+    act_code=$?
 
-if [ -s "$act_err" ]; then
-    echo "FAIL [scheduler/countup]: unexpected stderr output"
-    cat "$act_err"
-    ok=0
-fi
+    ok=1
 
-if [ "$act_code" != 0 ]; then
-    echo "FAIL [scheduler/countup]: exit code $act_code (expected 0)"
-    ok=0
-fi
+    if ! diff -u "$GOLDEN" "$act_out"; then
+        echo "FAIL [scheduler/$label]: stdout differs from $GOLDEN"
+        ok=0
+    fi
 
-if [ "$ok" = 1 ]; then
-    echo "PASS [scheduler/countup]"
-else
-    fail=1
-fi
+    if [ -s "$act_err" ]; then
+        echo "FAIL [scheduler/$label]: unexpected stderr output"
+        cat "$act_err"
+        ok=0
+    fi
 
-rm -f "$act_out" "$act_err"
+    if [ "$act_code" != 0 ]; then
+        echo "FAIL [scheduler/$label]: exit code $act_code (expected 0)"
+        ok=0
+    fi
+
+    if [ "$ok" = 1 ]; then
+        echo "PASS [scheduler/$label]"
+    else
+        fail=1
+    fi
+
+    rm -f "$act_out" "$act_err"
+}
+
+# --pacing=burst (default polling design) and --pacing=signal (POSIX
+# timer/sigsuspend-driven alternative, run.c's batchrunner_pace_signal())
+# -- both implement the same pacing contract and must produce byte-
+# identical program output, only wall-clock jitter/precision differs
+# (see run.c's own header comment), so both diff against the same
+# golden file.
+run_case "countup/burst" "burst"
+run_case "countup/signal" "signal"
 
 exit $fail
