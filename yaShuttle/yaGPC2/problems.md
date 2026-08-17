@@ -2690,6 +2690,81 @@ unrelated infra gap; that comparison axis was already superseded by the
 
 ---
 
+## 7. HAL/S runtime-feature coverage survey (2026-08-17)
+
+A systematic survey of `yaGPC2`'s coverage of HAL/S *runtime* features
+(as opposed to compile-time syntax), requested directly rather than
+found via corpus sweeping. Six parallel research passes extracted every
+distinct runtime feature documented in `USA003090` (HAL/S-FC User's
+Manual) and `USA003087` (HAL/S Programmer's Guide), cross-referenced
+against `src/halucp.c`/`src/schedule.c` and this file's own sections 2/3/5
+for test evidence. Full itemized result (143 features, implementation
+status, test status, source citations): `yaGPC2/hal-runtime-features.db`
+(query via `hal-runtime-features.py list`/`show`/`search`/`stats`).
+
+Most of the survey confirmed existing knowledge (the §2.7/§6 SCHEDULE/
+WAIT/TASK scope-out list, the RUNTIME/CLOCKTIME/RANDOM gaps already in
+§2.6, built-in math/vector/matrix functions working "for free" via
+correct CPU execution of the real linked AP-101S runtime library). Two
+findings were new:
+
+### 7.1 `EXCLUSIVE` procedures and `LOCK`/`UPDATE`-block compool protection: unimplemented, not previously tracked
+
+`USA003087` §27.2 (`EXCLUSIVE` procedures/functions: at most one process
+may be executing inside one at a time, others `WAIT`) and §26.4
+(`LOCK(n)`/`LOCK(*)` compool data + `UPDATE` blocks: the RTE enforces
+mutual exclusion across processes contending for overlapping lock
+groups) are both genuine real-time-executive mutual-exclusion
+mechanisms — the same category of OS substitution work as `TASK`/
+`SCHEDULE`/`WAIT` (§2.7/§6), described in nearly identical process-state
+terms (`WAITING`, priority-influenced wake order).
+
+`grep -rln "EXCLUSIVE\|UPDATE.*block\|LOCK(" src/*.c src/*.h` returns
+nothing. Neither mechanism has any implementation anywhere in
+`yaGPC2` — not a partial/scoped-down version, no SVC handler, nothing.
+Whether the real compiled entry/exit sequence for either construct
+traps via an SVC at all (and if so, which code) was not determined by
+this survey; if it does, a program using either construct currently
+falls through to `halucp.c`'s generic unhandled-SVC-trap path today.
+No known fixture in this project's corpus exercises either construct,
+so this has never surfaced as a corpus-sweep discrepancy — status
+`suspected` in spirit (a real risk identified by reading the spec, not
+by a failing repro), same caveat the DB issue tracker's own `suspected`
+status describes.
+
+### 7.2 `SCHEDULE ... REPEAT EVERY` cycle-overrun: silently absorbed instead of raising the documented runtime error
+
+`USA003087` §23.5: if a `REPEAT EVERY interval` cyclic process's own
+cycle execution takes longer than `interval`, the language defines this
+as a runtime error condition ("the next cycle cannot start on time and
+a run time error occurs") — not a silently-skipped/caught-up cycle.
+
+`src/schedule.c`'s re-arm logic (`sched_handle_task_close`, added this
+session for §2.7/§6) reads:
+```c
+double next = t->wakeDeadlineUs;
+while (next <= cpu->elapsedTimeUs) next += t->repeatIntervalUs;
+```
+which silently advances past however many intervals were missed with
+no error raised — a deliberate, documented design choice at the time
+("drift-free... in case a firing ran long enough to miss more than
+one"), but one that doesn't match the language spec's own runtime-error
+contract for this case. `COUNTUP.hal` and `test/test_schedule.c` both
+only exercise the non-overrunning case (each firing's own body is far
+shorter than its 1-second interval), so this has never been exercised
+by any existing test either.
+
+Not fixed as part of this survey (a survey, not a fix pass) — logged
+here as a confirmed, citable discrepancy for whoever picks up further
+`SCHEDULE`/`WAIT` work. Whether it's worth fixing depends on whether
+any real flight-software use case actually relies on the overrun
+being reported (real FCOS itself is the authoritative precedent to
+check, the same way `DEPENDENT`/`UPDATE PRIORITY`/combined process-event
+expressions turned out to be language-spec features FCOS itself didn't
+fully support — see §2.7/§6's own findings on that pattern).
+
+---
+
 ## Methodology and caveats
 
 **Section 1** items were found during `yaGPC`'s original CoffeeScript→C
