@@ -139,4 +139,20 @@ run_case "waitforor/signal" "signal" "fixtures/waitforor.fcm" "fixtures/waitforo
 run_case "scheduleon/burst"  "burst"  "fixtures/scheduleon.fcm" "fixtures/scheduleon-lnk101.json" "fixtures/scheduleon_golden.txt"
 run_case "scheduleon/signal" "signal" "fixtures/scheduleon.fcm" "fixtures/scheduleon-lnk101.json" "fixtures/scheduleon_golden.txt"
 
+# SCHEDULE ... DEPENDENT (FLAGS bit 0x0020) and its two consequences:
+# CLOSE-with-a-live-dependent blocks instead of deactivating (USA003087
+# 13.3), and TERMINATE cascades to dependents (13.3/23.6). Plus WAIT FOR
+# DEPENDENT (SVC #9). No yaHALMAT2 cross-check attempted (same category
+# as WAIT FOR/SCHEDULE ON above -- see problems.md 7.8/7.9).
+run_case "dependent/burst"  "burst"  "fixtures/dependent.fcm" "fixtures/dependent-lnk101.json" "fixtures/dependent_golden.txt"
+run_case "dependent/signal" "signal" "fixtures/dependent.fcm" "fixtures/dependent-lnk101.json" "fixtures/dependent_golden.txt"
+run_case "dependentin/burst"  "burst"  "fixtures/dependentin.fcm" "fixtures/dependentin-lnk101.json" "fixtures/dependentin_golden.txt"
+run_case "dependentin/signal" "signal" "fixtures/dependentin.fcm" "fixtures/dependentin-lnk101.json" "fixtures/dependentin_golden.txt"
+run_case "dependentrepeat/burst"  "burst"  "fixtures/dependentrepeat.fcm" "fixtures/dependentrepeat-lnk101.json" "fixtures/dependentrepeat_golden.txt"
+run_case "dependentrepeat/signal" "signal" "fixtures/dependentrepeat.fcm" "fixtures/dependentrepeat-lnk101.json" "fixtures/dependentrepeat_golden.txt"
+run_case "dependentclose/burst"  "burst"  "fixtures/dependentclose.fcm" "fixtures/dependentclose-lnk101.json" "fixtures/dependentclose_golden.txt"
+run_case "dependentclose/signal" "signal" "fixtures/dependentclose.fcm" "fixtures/dependentclose-lnk101.json" "fixtures/dependentclose_golden.txt"
+run_case "waitfordependent/burst"  "burst"  "fixtures/waitfordependent.fcm" "fixtures/waitfordependent-lnk101.json" "fixtures/waitfordependent_golden.txt"
+run_case "waitfordependent/signal" "signal" "fixtures/waitfordependent.fcm" "fixtures/waitfordependent-lnk101.json" "fixtures/waitfordependent_golden.txt"
+
 exit $fail

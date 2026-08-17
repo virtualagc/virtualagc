@@ -341,28 +341,30 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
              * real compiled programs, one variant at a time: 0x0001 =
              * "TASK" marker (set on every signature this cut supports;
              * a PROGRAM-process target, if that ever sets a different
-             * bit, is out of scope), 0x0004 = AT, 0x0008 = IN, 0x0080 =
-             * REPEAT EVERY (0x0081 was this cut's very first, and still
-             * most-tested, signature: TASK + REPEAT EVERY together).
-             * AT-and-IN-together (0x000d combined with TASK) is not a
-             * third initiation mode of its own -- confirmed empirically
-             * that the real compiler reuses those same two bits combined
-             * as the ON (event-expression) marker instead; see the
-             * dedicated branch below and schedule.h's own header
-             * comment. Neither DEPENDENT/CANCEL/REPEAT-AFTER/REPEAT-
-             * UNTIL nor ON-combined-with-REPEAT-EVERY are recognized --
-             * any FLAGS word with a bit outside this set falls through
-             * to the unhandled-trap path below, exactly like today,
-             * rather than mishandling a variant this cut doesn't
-             * understand. */
+             * bit, is out of scope), 0x0004 = AT, 0x0008 = IN, 0x0020 =
+             * DEPENDENT, 0x0080 = REPEAT EVERY (0x0081 was this cut's
+             * very first, and still most-tested, signature: TASK +
+             * REPEAT EVERY together). AT-and-IN-together (0x000d
+             * combined with TASK) is not a third initiation mode of its
+             * own -- confirmed empirically that the real compiler reuses
+             * those same two bits combined as the ON (event-expression)
+             * marker instead; see the dedicated branch below and
+             * schedule.h's own header comment. DEPENDENT combined with
+             * ON is not empirically confirmed and stays unrecognized.
+             * Neither CANCEL/REPEAT-AFTER/REPEAT-UNTIL nor ON-combined-
+             * with-REPEAT-EVERY are recognized -- any FLAGS word with a
+             * bit outside this set falls through to the unhandled-trap
+             * path below, exactly like today, rather than mishandling a
+             * variant this cut doesn't understand. */
             uint32_t flags = mcm_get16(&h->cpu->mainStorage, ea + 1);
-            const uint32_t recognizedMask = 0x0001 | 0x0004 | 0x0008 | 0x0080;
+            const uint32_t recognizedMask = 0x0001 | 0x0004 | 0x0008 | 0x0020 | 0x0080;
             bool hasTask = (flags & 0x0001) != 0;
             bool hasAt = (flags & 0x0004) != 0;
             bool hasIn = (flags & 0x0008) != 0;
+            bool hasDependent = (flags & 0x0020) != 0;
             bool hasRepeatEvery = (flags & 0x0080) != 0;
             bool hasOn = hasAt && hasIn;
-            if (hasTask && hasOn && !hasRepeatEvery && (flags & ~recognizedMask) == 0) {
+            if (hasTask && hasOn && !hasDependent && !hasRepeatEvery && (flags & ~recognizedMask) == 0) {
                 /* SCHEDULE label ON <event-expr> PRIORITY(p) -- ea+2 is
                  * the target's own PDE (same PROCESS field as every
                  * other SCHEDULE variant), ea+3 is a pointer to the
@@ -419,7 +421,7 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                 }
 
                 return sched_handle_schedule_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr,
-                                                  initialWakeDeadlineUs, repeatIntervalUs);
+                                                  initialWakeDeadlineUs, repeatIntervalUs, hasDependent);
             }
         } else if (svcLow == 0x06) {
             /* WAIT, delta-time variant. */
@@ -443,6 +445,10 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
              * WAIT/WAIT UNTIL/TERMINATE-self, is already handled). */
             uint32_t eventDescAddr = mcm_get16(&h->cpu->mainStorage, ea + 1);
             return sched_handle_wait_for_svc(&h->scheduler, h->cpu, eventDescAddr);
+        } else if (svcLow == 0x09) {
+            /* WAIT FOR DEPENDENT -- no parameters of its own (tests the
+             * calling task's own dependents; USA003087 13.5). */
+            return sched_handle_wait_for_dependent_svc(&h->scheduler, h->cpu);
         } else if (svcLow == 0x02) {
             /* TERMINATE, bare/self form (no target list) -- confirmed
              * empirically: mem[ea+1] is unused padding here, unlike

@@ -3139,6 +3139,82 @@ neither real fixture exercises, and `eventDescAddr` getting cleared the
 moment a task is actually dispatched (no stale pointer left behind for
 that slot's next use).
 
+### 7.9 `SCHEDULE ... DEPENDENT`, `WAIT FOR DEPENDENT`, `TERMINATE` cascading — done, larger scope than originally planned
+
+Eighth item in the runtime-feature-survey implementation order. The
+original plan described this item as three coupled features; reading
+`USA003087` §13.3 directly (rather than just §13.4/13.5's own SCHEDULE/
+WAIT statement descriptions) surfaced a fourth, unplanned piece: *"If
+execution ends on a CLOSE or RETURN statement, the process goes into
+the inactive state directly only if it has no dependents. Otherwise, it
+goes into a waiting state until the dependents have in their turn
+terminated."* A task reaching its own **plain, unconditional `CLOSE`**
+with a still-active `DEPENDENT` child does not deactivate — it blocks,
+implicitly, until every one of its dependents has itself terminated.
+Confirmed this is genuinely this file's own runtime responsibility, not
+something the real compiler inserts extra instructions for: a real
+compiled parent task (`SCHEDULE A PRIORITY(80) DEPENDENT;` followed
+immediately by a bare `CLOSE`, no explicit `WAIT`) emits the exact same
+`SVC 0x0015` every other `CLOSE` does — traced directly, confirmed no
+compiler-inserted `WAIT FOR DEPENDENT` or anything else precedes it.
+
+Traced `SCHEDULE A PRIORITY(80) DEPENDENT;` against a real compiled
+program and found `DEPENDENT` is FLAGS bit `0x0020` — a clean, dedicated
+bit, unlike `ON`'s reuse of two existing bits combined — confirmed to
+compose additively with `AT`/`IN`/`REPEAT EVERY` exactly like every
+other bit (`SCHEDULE A IN 1.0 PRIORITY(80) DEPENDENT;` → `0x0029`;
+`SCHEDULE A PRIORITY(80) DEPENDENT, REPEAT EVERY 1.0;` → `0x00a1`).
+`WAIT FOR DEPENDENT` (traced separately) is SVC `#9` with no parameters
+of its own — it tests the calling task's own dependents, needing
+nothing else.
+
+**Design**: added `int parentIdx` to `ScheduledTask` (`-1` = independent,
+set once at `SCHEDULE` time from whichever task is currently running —
+`USA003087` §13.4: dependency is on the *executing* process, never a
+separately-named one, so no extra SVC field carries it) and a new
+`TASK_STATE_WAITING_FOR_DEPENDENTS` state, deliberately excluded from
+`sched_dispatch()`'s own ready-scan (a task there is invisible to normal
+dispatch — nothing to poll, unlike an event-expression wait, which *is*
+re-evaluated on every dispatch pass) until explicitly released by
+`sched_notify_dependent_finished`, called every time some task fully
+deactivates for *any* reason (natural `CLOSE`, cascade-release one level
+up, or `TERMINATE`). `pendingCloseAfterDependents` distinguishes the two
+ways a released parent can be resolved: freed (the implicit
+`CLOSE`-with-dependents case) or restored to `TASK_STATE_READY` to
+resume execution (the explicit `WAIT FOR DEPENDENT` case) — both funnel
+through the exact same "is this parent still waiting, are there still
+active dependents" check, so the cascade composes correctly in either
+direction (down through `TERMINATE`'s own recursive
+`sched_terminate_idx_and_dependents`, or up through a chain of waiting
+parents) without any code needing to know which triggered it.
+
+`TERMINATE`'s own cascade (`USA003087` §13.3: *"All dependents of the
+process are treated likewise"*; §23.6 confirms this for cyclic processes
+specifically) is unconditional and immediate, transitively down the
+*whole* dependency subtree — deliberately not graceful the way `CANCEL`
+(out of scope, item #10) is documented to be. No real fixture goes more
+than one dependency level deep (compiling a real multi-level chain
+would need little beyond what `dependentclose.hal` already does, but
+wasn't worth the extra fixture given `test_schedule.c`'s own
+deterministic 3-level chain — grandparent → parent → child — already
+proves the transitive case precisely, confirming `TERMINATE`-ing the
+grandparent also frees the child even though it's never named directly).
+
+Six new fixtures — `dependent.hal`, `dependentin.hal`,
+`dependentrepeat.hal` (the `DEPENDENT` bit composing with `IN`/`REPEAT
+EVERY`), `dependentclose.hal` (the key `CLOSE`-blocks-on-a-live-
+dependent case), `waitfordependent.hal` — all exercised by
+`test_scheduler.sh` under both `--pacing` modes, goldens generated from
+`yaGPC2`'s own output (no `yaHALMAT2` oracle attempted, same category as
+7.8's own finding). Three new `test_schedule.c` scenarios cover what
+stdout can't show directly:
+`test_dependent_close_blocks_until_dependent_finishes` (internal state —
+`TASK_STATE_WAITING_FOR_DEPENDENTS`, the `PDE+0` `ACTIVE` bit staying set
+throughout the wait), `test_wait_for_dependent` (the no-dependents no-op
+and a genuine block+resume, restored to `TASK_STATE_READY` not freed),
+and `test_terminate_cascades_to_dependents_transitively` (the 3-level
+chain above).
+
 ---
 
 ## Methodology and caveats

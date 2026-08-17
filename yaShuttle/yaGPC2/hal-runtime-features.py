@@ -155,23 +155,43 @@ F('Real-Time: Task/Process', 'TASK block definition',
 F('Real-Time: Task/Process', 'Process termination paths (RETURN / CLOSE / TERMINATE) + dependent cascading',
   "A process ends via TERMINATE (immediate, cascades to dependents), or reaching CLOSE/RETURN "
   "(waits for its own dependents to finish first, if any).",
-  'USA003087 §13.3', 'partial',
+  'USA003087 §13.3', 'implemented',
   "CLOSE (sched_handle_task_close, SVC 0x0015) and both TERMINATE forms (sched_handle_terminate_self_svc "
-  "SVC #2, sched_handle_terminate_named_svc SVC #3) are implemented. Dependent-cascading is still moot "
-  "since DEPENDENT itself is out of scope (no task is ever created as a dependent).",
+  "SVC #2, sched_handle_terminate_named_svc SVC #3) are implemented, and dependent-cascading now is too: "
+  "a task reaching its own bare CLOSE with a still-active DEPENDENT child transitions to "
+  "TASK_STATE_WAITING_FOR_DEPENDENTS instead of deactivating (confirmed empirically that the real "
+  "compiler emits the identical bare SVC 0x0015 regardless of whether dependents exist -- this really "
+  "is this file's own runtime responsibility, no compiler-inserted wait). "
+  "sched_notify_dependent_finished (src/schedule.c) releases the parent -- freeing it (cascading "
+  "further up in turn) or restoring it to TASK_STATE_READY, depending which path led here -- once its "
+  "last dependent finishes, for any reason (natural CLOSE, or TERMINATE). "
+  "sched_terminate_idx_and_dependents cascades TERMINATE transitively down the whole dependency "
+  "subtree, unconditionally and immediately, per USA003087 13.3/23.6.",
   'tested_dedicated',
-  "test_schedule.c and countup.hal's own CLOSE NEXT; test/fixtures/terminate.hal, selfterminate.hal.")
+  "test_schedule.c (test_dependent_close_blocks_until_dependent_finishes, "
+  "test_terminate_cascades_to_dependents_transitively -- the latter confirmed 2 levels deep, no real "
+  "fixture goes deeper) and countup.hal's own CLOSE NEXT; test/fixtures/terminate.hal, "
+  "selfterminate.hal, dependentclose.hal.")
 
 # --- Real-Time: SCHEDULE variants ---------------------------------------------------
 F('Real-Time: SCHEDULE', 'SCHEDULE (immediate initiation, PRIORITY, DEPENDENT)',
   'SCHEDULE label PRIORITY(a) DEPENDENT; creates a process, READY immediately.',
-  'USA003087 §13.4', 'partial',
-  "PRIORITY and immediate-READY are implemented (sched_handle_schedule_svc). The FLAGS-word decode "
-  "in halucp.c is now general (any combination of TASK/AT/IN/ON/REPEAT EVERY bits, not just the one "
-  "0x0081 signature -- see the IN/AT/ON entries below), but DEPENDENT is still unrecognized and any "
-  "FLAGS word carrying it falls through to the unhandled-SVC-trap path -- so a DEPENDENT SCHEDULE is "
-  "effectively not_implemented, only non-DEPENDENT forms are covered.",
-  'tested_dedicated', 'test_schedule.c scenario 1 (two one-shot SCHEDULEs, different priorities).')
+  'USA003087 §13.4', 'implemented',
+  "PRIORITY and immediate-READY are implemented (sched_handle_schedule_svc). DEPENDENT is FLAGS bit "
+  "0x0020, confirmed empirically to compose additively with AT/IN/REPEAT EVERY exactly like every "
+  "other FLAGS bit (recognizedMask in halucp.c now includes it). sched_handle_schedule_svc's new "
+  "dependent parameter records the new task's own parentIdx as whichever task is currently running at "
+  "SCHEDULE time (USA003087 13.4: dependency is on the executing process, not a separately-named "
+  "parent, so no extra SVC field is needed) -- lazily engaging the primal pseudo-task first if "
+  "scheduling has never been engaged before, same pattern as WAIT's own lazy allocation. DEPENDENT "
+  "combined with ON (SCHEDULE ... ON exp PRIORITY(a) DEPENDENT, legal per USA003087 24.5) is not "
+  "empirically confirmed and stays unrecognized.",
+  'tested_dedicated',
+  "test_schedule.c scenario 1 (two one-shot SCHEDULEs, different priorities) plus the new "
+  "test_dependent_close_blocks_until_dependent_finishes/test_wait_for_dependent/"
+  "test_terminate_cascades_to_dependents_transitively scenarios; test/fixtures/dependent.hal, "
+  "dependentin.hal, dependentrepeat.hal (byte-diffed via test_scheduler.sh, confirming the FLAGS bit "
+  "combines correctly with IN/REPEAT EVERY in real compiled programs).")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... IN interval (delayed initiation, relative)',
   'Process WAITING until interval seconds after schedule time, then READY.',
   'USA003087 §13.4', 'implemented',
@@ -285,7 +305,16 @@ F('Real-Time: WAIT', 'WAIT FOR event-expr', 'WAITING until an event expression b
   "already-TRUE zero-side-effects case, block+resume via a real ACTIVE-flag transition, and a mixed-"
   "truth 3-operand AND/OR chain neither real fixture exercises).")
 F('Real-Time: WAIT', 'WAIT FOR DEPENDENT', 'WAITING until all of the process\'s own dependents have terminated.',
-  'USA003087 §13.5', 'not_implemented', 'SVC #9, unhandled.', 'untested')
+  'USA003087 §13.5', 'implemented',
+  "SVC #9 (confirmed empirically: no parameters of its own, tests the calling task's own dependents), "
+  "sched_handle_wait_for_dependent_svc (src/schedule.c). Implements USA003087 13.5's own 'if there are "
+  "no dependents, the statement has no effect' rule as a true no-op, same precedent as WAIT FOR's own "
+  "already-TRUE case. Distinguishes itself from the implicit CLOSE-with-dependents wait (see the "
+  "Process termination paths entry above) via pendingCloseAfterDependents=false: once satisfied, this "
+  "resumes execution (TASK_STATE_READY, restored from ctx) rather than freeing the slot.",
+  'tested_dedicated',
+  "test_schedule.c's test_wait_for_dependent (no-dependents no-op, and genuine block+resume) and "
+  "test/fixtures/waitfordependent.hal, byte-diffed via test_scheduler.sh.")
 
 # --- Real-Time: Events --------------------------------------------------------------
 F('Real-Time: Events', 'EVENT data declaration (with/without LATCHED)',

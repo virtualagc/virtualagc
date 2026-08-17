@@ -3,8 +3,10 @@
 # countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm,
 # updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm,
 # schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm,
-# waitfornot.fcm, waitforand.fcm, waitforor.fcm, and scheduleon.fcm
-# (plus their -lnk101.json symbol tables) via the real HAL/S toolchain
+# waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm,
+# dependent.fcm, dependentin.fcm, dependentrepeat.fcm,
+# dependentclose.fcm, and waitfordependent.fcm (plus their
+# -lnk101.json symbol tables) via the real HAL/S toolchain
 # documented in ../../tools.md (HALSFC + lnk101, both expected on PATH).
 # Not run automatically (no CI machine has the toolchain) — kept for
 # provenance and to regenerate if the encoding/format ever changes.
@@ -124,6 +126,25 @@
 #                          text ("if exp is already TRUE... the
 #                          statement has no effect"), same reasoning as
 #                          processboolean.fcm above.
+#   dependent.fcm         <- dependent.hal, dependentin.fcm <-
+#                          dependentin.hal, dependentrepeat.fcm <-
+#                          dependentrepeat.hal (all checked in alongside
+#                          this script) -- SCHEDULE ... DEPENDENT (FLAGS
+#                          bit 0x0020), plain and combined with IN/REPEAT
+#                          EVERY, confirming the bit composes additively
+#                          like every other FLAGS bit.
+#   dependentclose.fcm    <- dependentclose.hal (checked in alongside
+#                          this script) -- a parent task reaching its
+#                          own bare CLOSE with a still-active DEPENDENT
+#                          child; proves the real compiler emits the
+#                          identical bare SVC 0x0015 regardless (no
+#                          compiler-inserted wait), so the "don't
+#                          deactivate until dependents finish" behavior
+#                          (USA003087 13.3) is this file's own runtime
+#                          responsibility, not something the compiler
+#                          handles.
+#   waitfordependent.fcm  <- waitfordependent.hal (checked in alongside
+#                          this script) -- WAIT FOR DEPENDENT (SVC #9).
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -146,6 +167,11 @@ WAITFORNOT_HAL="$(dirname "$0")/waitfornot.hal"
 WAITFORAND_HAL="$(dirname "$0")/waitforand.hal"
 WAITFOROR_HAL="$(dirname "$0")/waitforor.hal"
 SCHEDULEON_HAL="$(dirname "$0")/scheduleon.hal"
+DEPENDENT_HAL="$(dirname "$0")/dependent.hal"
+DEPENDENTIN_HAL="$(dirname "$0")/dependentin.hal"
+DEPENDENTREPEAT_HAL="$(dirname "$0")/dependentrepeat.hal"
+DEPENDENTCLOSE_HAL="$(dirname "$0")/dependentclose.hal"
+WAITFORDEPENDENT_HAL="$(dirname "$0")/waitfordependent.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -181,5 +207,10 @@ build "$WAITFORNOT_HAL" WFNOT waitfornot
 build "$WAITFORAND_HAL" WFAND waitforand
 build "$WAITFOROR_HAL" WFOR waitforor
 build "$SCHEDULEON_HAL" SCHON3 scheduleon
+build "$DEPENDENT_HAL" DEPTEST dependent
+build "$DEPENDENTIN_HAL" DEPIN dependentin
+build "$DEPENDENTREPEAT_HAL" DEPREP dependentrepeat
+build "$DEPENDENTCLOSE_HAL" DEPCLOSE dependentclose
+build "$WAITFORDEPENDENT_HAL" WFDEP waitfordependent
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm (+ -lnk101.json)"

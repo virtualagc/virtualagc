@@ -115,6 +115,67 @@ static bool sched_event_expr_true(CPU *cpu, uint32_t descAddr) {
  * always matches whatever reg-set bit its own saved PSW encodes, even
  * though nothing in this cut's own scope (see schedule.h) ever actually
  * changes it from bank 0. */
+/* Whether task idx currently has any live DEPENDENT child (a task whose
+ * own parentIdx points back at it, still occupying a non-FREE slot).
+ * USA003087 13.3/13.5: this is exactly the condition both a natural
+ * CLOSE-with-dependents and an explicit WAIT FOR DEPENDENT need to
+ * check. */
+static bool sched_has_active_dependents(Scheduler *s, int idx) {
+    for (int i = 0; i < s->count; i++) {
+        if (s->tasks[i].state != TASK_SLOT_FREE && s->tasks[i].parentIdx == idx) return true;
+    }
+    return false;
+}
+
+/* Called every time some task fully deactivates (frees its own slot),
+ * for any reason -- a natural CLOSE with no remaining dependents of its
+ * own, a cascade-free triggered by this same function one level down,
+ * or a TERMINATE. Checks whether finishedIdx's own parent (if any) was
+ * sitting in TASK_STATE_WAITING_FOR_DEPENDENTS waiting specifically on
+ * this, and if finishedIdx was the LAST such dependent, releases the
+ * parent: freed too (cascading further up in turn) if it was itself
+ * only waiting to CLOSE, or made TASK_STATE_READY (a normal dispatch
+ * candidate, picked up by whatever sched_dispatch() call happens next)
+ * if it was blocked in an explicit WAIT FOR DEPENDENT instead. */
+static void sched_notify_dependent_finished(Scheduler *s, CPU *cpu, int finishedIdx) {
+    int parentIdx = s->tasks[finishedIdx].parentIdx;
+    if (parentIdx < 0) return;
+    ScheduledTask *parent = &s->tasks[parentIdx];
+    if (parent->state != TASK_STATE_WAITING_FOR_DEPENDENTS) return;
+    if (sched_has_active_dependents(s, parentIdx)) return; /* others still pending */
+
+    if (parent->pendingCloseAfterDependents) {
+        parent->state = TASK_SLOT_FREE;
+        sched_set_active_flag(cpu, parent->pdeAddr, false);
+        sched_notify_dependent_finished(s, cpu, parentIdx); /* cascade further up */
+    } else {
+        parent->state = TASK_STATE_READY; /* explicit WAIT FOR DEPENDENT satisfied */
+    }
+}
+
+/* Terminates task idx and, transitively, every one of its DEPENDENT
+ * descendants (USA003087 13.3: "All dependents of the process are
+ * treated likewise"; 23.6: "both the process and its dependents are
+ * terminated") -- unconditional and immediate, unlike a natural CLOSE's
+ * own graceful wait-for-dependents. Children are terminated before their
+ * parent (order is functionally immaterial here since every step is
+ * unconditional, but avoids a live task ever briefly appearing
+ * dependent-less mid-cascade). Also notifies idx's own parent in case
+ * idx itself was someone else's last pending dependent. Does NOT touch
+ * s->runningIdx or call sched_dispatch() -- that's the caller's job,
+ * exactly like sched_handle_terminate_named_svc's own pre-existing
+ * per-target loop. */
+static void sched_terminate_idx_and_dependents(Scheduler *s, CPU *cpu, int idx) {
+    for (int i = 0; i < s->count; i++) {
+        if (s->tasks[i].state != TASK_SLOT_FREE && s->tasks[i].parentIdx == idx) {
+            sched_terminate_idx_and_dependents(s, cpu, i);
+        }
+    }
+    s->tasks[idx].state = TASK_SLOT_FREE;
+    sched_set_active_flag(cpu, s->tasks[idx].pdeAddr, false);
+    sched_notify_dependent_finished(s, cpu, idx);
+}
+
 static void sched_save_context(CPU *cpu, TaskContext *ctx) {
     uint32_t grSet = psw_get_reg_set(&cpu->psw);
     for (int i = 0; i <= 7; i++) ctx->r[i] = register_get32(registerfile_r(&cpu->regFiles[grSet], i));
@@ -241,7 +302,23 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
 }
 
 bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr,
-                                double initialWakeDeadlineUs, double repeatIntervalUs) {
+                                double initialWakeDeadlineUs, double repeatIntervalUs, bool dependent) {
+    /* DEPENDENT's own parent is whichever task is executing this
+     * SCHEDULE statement (USA003087 13.4) -- lazily engage the primal
+     * first if scheduling has never been engaged before (same pattern as
+     * sched_handle_wait_svc), so there's always a real caller index to
+     * record. Only done when actually needed (dependent==true) so a
+     * program that never uses DEPENDENT never pays for a primal slot it
+     * doesn't otherwise need. */
+    if (dependent && s->runningIdx < 0) {
+        int primalIdx = sched_alloc_slot(s);
+        s->tasks[primalIdx].isPrimal = true;
+        s->tasks[primalIdx].parentIdx = -1;
+        s->tasks[primalIdx].state = TASK_STATE_RUNNING;
+        s->tasks[primalIdx].hasRun = true;
+        s->runningIdx = primalIdx;
+    }
+
     int idx = sched_find_by_pde(s, pdeAddr);
     if (idx < 0) idx = sched_alloc_slot(s);
     if (idx < 0) return true; /* out of task slots -- nothing sensible to
@@ -255,6 +332,7 @@ bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pd
     t->entryPoint = decode_pde_far_pointer(cpu, raw);
     t->priority = priority;
     t->isPrimal = false;
+    t->parentIdx = dependent ? s->runningIdx : -1;
     t->hasRepeat = repeatIntervalUs > 0;
     t->repeatIntervalUs = repeatIntervalUs;
     /* Plain SCHEDULE's first firing is due immediately at SCHEDULE time
@@ -285,6 +363,9 @@ bool sched_handle_wait_svc(Scheduler *s, CPU *cpu, double deltaSeconds) {
          * saving yet since it's about to be saved for real, below. */
         int idx = sched_alloc_slot(s);
         s->tasks[idx].isPrimal = true;
+        s->tasks[idx].parentIdx = -1; /* a reused (previously-freed) slot
+                                        * could otherwise carry a stale
+                                        * value from its last occupant */
         s->tasks[idx].state = TASK_STATE_RUNNING;
         /* The primal task is never dispatched via entryPoint (it has
          * none -- it's simply whatever was already executing when
@@ -336,9 +417,17 @@ bool sched_handle_task_close(Scheduler *s, CPU *cpu) {
          * whichever iteration last populated it, or all-zero if this was
          * the first). */
         t->hasRun = false;
+    } else if (sched_has_active_dependents(s, s->runningIdx)) {
+        /* USA003087 13.3: reaching CLOSE/RETURN with a still-active
+         * DEPENDENT child does not deactivate directly -- wait until it
+         * (and any others) have themselves terminated. ACTIVE stays set
+         * (still "in the process queue" per 13.1) until that happens. */
+        t->state = TASK_STATE_WAITING_FOR_DEPENDENTS;
+        t->pendingCloseAfterDependents = true;
     } else {
         t->state = TASK_SLOT_FREE;
         sched_set_active_flag(cpu, t->pdeAddr, false);
+        sched_notify_dependent_finished(s, cpu, s->runningIdx);
     }
     s->runningIdx = -1;
 
@@ -352,8 +441,7 @@ bool sched_handle_terminate_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pd
         int idx = sched_find_by_pde(s, pdeAddrs[i]);
         if (idx < 0) continue; /* not currently active -- silent no-op */
         if (idx == s->runningIdx) selfTerminated = true;
-        s->tasks[idx].state = TASK_SLOT_FREE; /* unconditional -- no REPEAT re-arm, unlike sched_handle_task_close */
-        sched_set_active_flag(cpu, s->tasks[idx].pdeAddr, false);
+        sched_terminate_idx_and_dependents(s, cpu, idx); /* unconditional -- no REPEAT re-arm, unlike sched_handle_task_close; cascades to dependents too */
     }
     if (selfTerminated) {
         s->runningIdx = -1;
@@ -393,6 +481,7 @@ bool sched_handle_wait_for_svc(Scheduler *s, CPU *cpu, uint32_t eventDescAddr) {
          * would need its own parameter to suppress that check. */
         int idx = sched_alloc_slot(s);
         s->tasks[idx].isPrimal = true;
+        s->tasks[idx].parentIdx = -1;
         s->tasks[idx].state = TASK_STATE_RUNNING;
         s->tasks[idx].hasRun = true;
         s->runningIdx = idx;
@@ -419,6 +508,7 @@ bool sched_handle_schedule_on_svc(Scheduler *s, CPU *cpu, int priority, uint32_t
     t->entryPoint = decode_pde_far_pointer(cpu, raw);
     t->priority = priority;
     t->isPrimal = false;
+    t->parentIdx = -1; /* DEPENDENT combined with ON is not empirically confirmed -- see schedule.h */
     t->eventDescAddr = eventDescAddr;
     t->state = TASK_STATE_DORMANT;
     /* Marked ACTIVE immediately, exactly like every other SCHEDULE
@@ -428,5 +518,27 @@ bool sched_handle_schedule_on_svc(Scheduler *s, CPU *cpu, int priority, uint32_t
      * reasoning). */
     sched_set_active_flag(cpu, pdeAddr, true);
 
+    return true;
+}
+
+bool sched_handle_wait_for_dependent_svc(Scheduler *s, CPU *cpu) {
+    if (s->runningIdx < 0 || !sched_has_active_dependents(s, s->runningIdx)) {
+        /* USA003087 13.5: "If there are no dependents, the statement has
+         * no effect" -- same "already-satisfied is a true no-op"
+         * precedent as sched_handle_wait_for_svc. Also correctly covers
+         * "scheduling never engaged" (runningIdx < 0 -> no dependents
+         * could possibly exist either), so the lazy primal allocation
+         * below is only ever reached when there's something real to
+         * wait for. */
+        return true;
+    }
+
+    ScheduledTask *waiter = &s->tasks[s->runningIdx];
+    sched_save_context(cpu, &waiter->ctx);
+    waiter->state = TASK_STATE_WAITING_FOR_DEPENDENTS;
+    waiter->pendingCloseAfterDependents = false; /* resume execution once satisfied, don't free the slot */
+
+    s->runningIdx = -1;
+    sched_dispatch(s, cpu);
     return true;
 }

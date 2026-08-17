@@ -212,8 +212,8 @@ static void test_priority_ordering_and_context_roundtrip(void) {
     /* Two one-shot SCHEDULEs (repeatIntervalUs=0), both due immediately
      * (elapsedTimeUs is still 0.0 -- freshly zeroed by ageharness_init --
      * so both phaseRefs land on the same instant). */
-    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE LOWTASK handled");
-    CHECK(sched_handle_schedule_svc(sched, cpu, 200, hiPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE HITASK handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE LOWTASK handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 200, hiPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE HITASK handled");
     CHECK(psw_get_nia(&cpu->psw) == primalResumeAddr,
           "SCHEDULE never changes which context is live (NIA still the primal's)");
 
@@ -271,7 +271,7 @@ static void test_repeat_every_counter_and_virtual_time(void) {
     const uint32_t primalResumeAddr = 0x3000;
     psw_set_nia(&cpu->psw, primalResumeAddr);
 
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, taskPde, cpu->elapsedTimeUs, 1000000.0 /* REPEAT EVERY 1.0s */),
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, taskPde, cpu->elapsedTimeUs, 1000000.0 /* REPEAT EVERY 1.0s */, false),
           "SCHEDULE ... REPEAT EVERY handled");
     CHECK(sched_handle_wait_svc(sched, cpu, 3.5), "WAIT 3.5 handled");
     CHECK(psw_get_nia(&cpu->psw) == taskEntry, "REPEAT task's first firing is dispatched immediately (t=0), not after one full interval");
@@ -343,8 +343,8 @@ static void test_update_priority_flips_dispatch_order(void) {
     uint32_t hiEntry = build_close_only_task(mem, 0x2000);
     uint32_t hiPde = build_pde(mem, 0x2010, hiEntry);
 
-    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE LOWTASK(10) handled");
-    CHECK(sched_handle_schedule_svc(sched, cpu, 90, hiPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE HITASK(90) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 10, lowPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE LOWTASK(10) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 90, hiPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE HITASK(90) handled");
 
     /* A pdeAddr matching no active task is a documented silent no-op --
      * confirm it doesn't corrupt anything before the real update. */
@@ -386,7 +386,7 @@ static void test_terminate_named_and_self(void) {
     const uint32_t primalResumeAddr = 0x3000;
     psw_set_nia(&cpu->psw, primalResumeAddr);
 
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, repPde, cpu->elapsedTimeUs, 1000000.0), "SCHEDULE ... REPEAT EVERY 1.0 handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, repPde, cpu->elapsedTimeUs, 1000000.0, false), "SCHEDULE ... REPEAT EVERY 1.0 handled");
     CHECK(sched_handle_wait_svc(sched, cpu, 0.5), "WAIT 0.5 handled (before the task's first firing)");
     /* WAIT 0.5 doesn't reach the task's own t=0 firing yet (WAIT's own
      * deadline, 0.5s, is earlier than the task's t=0 firing -- both are
@@ -408,7 +408,7 @@ static void test_terminate_named_and_self(void) {
     uint32_t selfPde = build_pde(mem2, 0x1010, selfEntry);
     psw_set_nia(&cpu2->psw, 0x3000);
 
-    CHECK(sched_handle_schedule_svc(sched2, cpu2, 80, selfPde, cpu2->elapsedTimeUs, 0.0), "SCHEDULE (one-shot) handled");
+    CHECK(sched_handle_schedule_svc(sched2, cpu2, 80, selfPde, cpu2->elapsedTimeUs, 0.0, false), "SCHEDULE (one-shot) handled");
     CHECK(sched_handle_wait_svc(sched2, cpu2, 0.0), "WAIT 0 dispatches the task immediately");
     CHECK(psw_get_nia(&cpu2->psw) == selfEntry, "task dispatched (sanity check before self-TERMINATE)");
     CHECK(sched_handle_terminate_self_svc(sched2, cpu2), "self-TERMINATE handled");
@@ -457,7 +457,7 @@ static void test_runtime_and_prio_builtins(void) {
     Scheduler *sched = &age.halUCP.scheduler;
     uint32_t taskEntry = build_close_only_task(mem, 0x1000);
     uint32_t taskPde = build_pde(mem, 0x1010, taskEntry);
-    CHECK(sched_handle_schedule_svc(sched, cpu, 137, taskPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE (priority 137) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 137, taskPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE (priority 137) handled");
     CHECK(sched_handle_wait_svc(sched, cpu, 0.0), "WAIT 0 dispatches the task immediately");
     CHECK(psw_get_nia(&cpu->psw) == taskEntry, "task dispatched (sanity check before PRIO SVC)");
 
@@ -501,7 +501,7 @@ static void test_process_name_as_boolean(void) {
     uint32_t pde = build_pde(mem, 0x1010, entry);
 
     CHECK((mcm_get16(mem, pde) & 1) == 0, "PDE+0 bit 0 starts clear (never SCHEDULEd yet)");
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde, cpu->elapsedTimeUs, 0.0), "SCHEDULE (one-shot) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE (one-shot) handled");
     CHECK((mcm_get16(mem, pde) & 1) == 1, "PDE+0 bit 0 set immediately after SCHEDULE (ACTIVE)");
 
     CHECK(sched_handle_wait_svc(sched, cpu, 0.0), "WAIT 0 dispatches the task immediately");
@@ -515,7 +515,7 @@ static void test_process_name_as_boolean(void) {
      * clears the flag here). */
     uint32_t entry2 = build_close_only_task(mem, 0x2000);
     uint32_t pde2 = build_pde(mem, 0x2010, entry2);
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde2, cpu->elapsedTimeUs, 1000000.0), "SCHEDULE (REPEAT EVERY) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, pde2, cpu->elapsedTimeUs, 1000000.0, false), "SCHEDULE (REPEAT EVERY) handled");
     CHECK((mcm_get16(mem, pde2) & 1) == 1, "second task's PDE+0 bit 0 set after SCHEDULE");
     CHECK(sched_handle_terminate_named_svc(sched, cpu, &pde2, 1), "TERMINATE (named) handled");
     CHECK((mcm_get16(mem, pde2) & 1) == 0, "second task's PDE+0 bit 0 cleared after TERMINATE, despite being a REPEAT EVERY task");
@@ -557,7 +557,7 @@ static void test_schedule_in_delays_first_firing_and_anchors_repeat(void) {
     /* SCHEDULE NEXT IN 1.5, REPEAT EVERY 1.0 -- initialWakeDeadlineUs is
      * elapsedTimeUs (0) + 1.5s, exactly what halucp.c's hasIn branch
      * would compute from FPR0-1. */
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, taskPde, cpu->elapsedTimeUs + 1500000.0, 1000000.0),
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, taskPde, cpu->elapsedTimeUs + 1500000.0, 1000000.0, false),
           "SCHEDULE ... IN, REPEAT EVERY handled");
     CHECK(sched_handle_wait_svc(sched, cpu, 5.0), "WAIT 5.0 handled");
     CHECK(psw_get_nia(&cpu->psw) == taskEntry, "first firing dispatched only once the IN delay elapses, not immediately");
@@ -620,7 +620,7 @@ static void test_wait_for_event_expressions(void) {
     /* --- already-TRUE no-op: A is ACTIVE (just SCHEDULEd), so "WAIT
      * FOR A" must have literally zero effect -- not even lazily
      * engaging the primal pseudo-task, since nothing was suspended. --- */
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE A handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE A handled");
     uint32_t plainA = build_event_desc(mem, 0x1300, EVENT_PLAIN, &aPde, 1);
     CHECK(sched_handle_wait_for_svc(sched, cpu, plainA), "WAIT FOR A (already TRUE) handled");
     CHECK(sched->runningIdx == -1, "already-TRUE WAIT FOR is a true no-op -- primal never even engaged");
@@ -642,8 +642,8 @@ static void test_wait_for_event_expressions(void) {
     /* --- AND-chain / OR-chain truth tables, mixed truth (A/B active,
      * C never scheduled -- INACTIVE): AND must be FALSE (blocks), OR
      * must be TRUE (no-op). --- */
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 0.0), "re-SCHEDULE A handled");
-    CHECK(sched_handle_schedule_svc(sched, cpu, 80, bPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE B handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 0.0, false), "re-SCHEDULE A handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, bPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE B handled");
     /* C intentionally left never-SCHEDULEd -- INACTIVE. */
 
     uint32_t abcPdes[3] = {aPde, bPde, cPde};
@@ -701,7 +701,7 @@ static void test_schedule_on_deferred_dispatch(void) {
     int nextIdx = find_task_by_pde(sched, nextPde);
     CHECK(nextIdx >= 0 && sched->tasks[nextIdx].eventDescAddr == notA, "NEXT's own slot records the event descriptor");
 
-    CHECK(sched_handle_schedule_svc(sched, cpu, 1, aPde, cpu->elapsedTimeUs, 0.0), "SCHEDULE A (priority 1, due now) handled");
+    CHECK(sched_handle_schedule_svc(sched, cpu, 1, aPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE A (priority 1, due now) handled");
 
     const uint32_t primalResumeAddr = 0x3000;
     psw_set_nia(&cpu->psw, primalResumeAddr);
@@ -723,6 +723,173 @@ static void test_schedule_on_deferred_dispatch(void) {
     ageharness_free(&age);
 }
 
+/* ---------------------------------------------------------------------
+ * 10. DEPENDENT (FLAGS bit 0x0020): a task's own CLOSE with a live
+ *     DEPENDENT child blocks (TASK_STATE_WAITING_FOR_DEPENDENTS) instead
+ *     of deactivating immediately, resuming (freeing) only once the
+ *     dependent itself finishes (USA003087 13.3). Cross-checked against
+ *     a real compiled fixture (DEPCLOSE.hal: PARENT SCHEDULEs A
+ *     DEPENDENT then reaches its own bare CLOSE with no explicit WAIT --
+ *     confirmed the real compiler emits the exact same bare SVC 0x0015
+ *     regardless, so this really is this file's own runtime
+ *     responsibility, not something compiler-inserted) producing
+ *     "BEFORE / IN PARENT BEFORE / IN PARENT AFTER / IN A / DONE" -- see
+ *     problems.md 7.9.
+ * ------------------------------------------------------------------- */
+
+static void test_dependent_close_blocks_until_dependent_finishes(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t aEntry = build_close_only_task(mem, 0x1000);
+    uint32_t aPde = build_pde(mem, 0x1010, aEntry);
+    uint32_t parentEntry = build_close_only_task(mem, 0x1100);
+    uint32_t parentPde = build_pde(mem, 0x1110, parentEntry);
+
+    const uint32_t primalResumeAddr = 0x3000;
+    psw_set_nia(&cpu->psw, primalResumeAddr);
+
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, parentPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE PARENT handled");
+    CHECK(sched_handle_wait_svc(sched, cpu, 0.001), "primal WAIT handled -- dispatches PARENT");
+    CHECK(psw_get_nia(&cpu->psw) == parentEntry, "PARENT dispatched");
+
+    /* Inside PARENT's own execution (s->runningIdx is now PARENT's own
+     * slot), it SCHEDULEs A DEPENDENT -- A's own parentIdx should
+     * therefore record PARENT, not the primal. */
+    int parentIdx = find_task_by_pde(sched, parentPde);
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 0.0, true), "SCHEDULE A DEPENDENT handled");
+    int aIdx = find_task_by_pde(sched, aPde);
+    CHECK(aIdx >= 0 && sched->tasks[aIdx].parentIdx == parentIdx, "A's own parentIdx records PARENT, the task that SCHEDULEd it");
+
+    /* PARENT reaches its own CLOSE next -- A is still DORMANT (never
+     * dispatched yet), so PARENT must block rather than deactivate. */
+    ap101_exec1(&age.gpc); /* LHI */
+    ap101_exec1(&age.gpc); /* SVC (PARENT's own CLOSE) */
+    CHECK(sched->tasks[parentIdx].state == TASK_STATE_WAITING_FOR_DEPENDENTS,
+          "PARENT waits rather than deactivating -- A is still active");
+    CHECK((mcm_get16(mem, parentPde) & 1) == 1, "PARENT's own PDE+0 ACTIVE bit stays set while waiting on A");
+    CHECK(psw_get_nia(&cpu->psw) == aEntry, "A dispatched next (the only other eligible candidate)");
+
+    /* A reaches its own CLOSE (no dependents of its own) -- frees A AND
+     * cascade-releases PARENT, then dispatches whatever's next (the
+     * primal, whose own 0.001s WAIT deadline is by now due). */
+    ap101_exec1(&age.gpc); /* LHI */
+    ap101_exec1(&age.gpc); /* SVC (A's own CLOSE) */
+    CHECK((mcm_get16(mem, aPde) & 1) == 0, "A deactivated");
+    CHECK(sched->tasks[parentIdx].state == TASK_SLOT_FREE, "PARENT released once its last dependent finished");
+    CHECK((mcm_get16(mem, parentPde) & 1) == 0, "PARENT's own PDE+0 ACTIVE bit cleared once released");
+    CHECK(psw_get_nia(&cpu->psw) == primalResumeAddr, "primal resumed");
+
+    ageharness_free(&age);
+}
+
+/* ---------------------------------------------------------------------
+ * 11. WAIT FOR DEPENDENT (SVC #9, sched_handle_wait_for_dependent_svc):
+ *     the no-dependents no-op case (USA003087 13.5: "If there are no
+ *     dependents, the statement has no effect"), and a genuine block-
+ *     and-resume case -- resumed as TASK_STATE_READY (execution
+ *     continues), not freed, distinguishing this from the implicit
+ *     CLOSE-with-dependents case above. Cross-checked against a real
+ *     compiled fixture (WFDEP.hal) -- see problems.md 7.9.
+ * ------------------------------------------------------------------- */
+
+static void test_wait_for_dependent(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    CHECK(sched_handle_wait_for_dependent_svc(sched, cpu), "WAIT FOR DEPENDENT (no dependents) handled");
+    CHECK(sched->runningIdx == -1, "no-dependents WAIT FOR DEPENDENT is a true no-op -- primal never even engaged");
+
+    uint32_t aEntry = build_close_only_task(mem, 0x1000);
+    uint32_t aPde = build_pde(mem, 0x1010, aEntry);
+
+    const uint32_t primalResumeAddr = 0x3000;
+    psw_set_nia(&cpu->psw, primalResumeAddr);
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, aPde, cpu->elapsedTimeUs, 0.0, true), "SCHEDULE A DEPENDENT (on primal) handled");
+    int primalIdx = sched->runningIdx;
+    CHECK(primalIdx >= 0, "primal lazily engaged as A's own parent");
+
+    CHECK(sched_handle_wait_for_dependent_svc(sched, cpu), "WAIT FOR DEPENDENT (A still active) handled");
+    CHECK(sched->tasks[primalIdx].state == TASK_STATE_WAITING_FOR_DEPENDENTS, "primal blocked on A");
+    CHECK(psw_get_nia(&cpu->psw) == aEntry, "A dispatched (the only other eligible candidate)");
+
+    ap101_exec1(&age.gpc); /* LHI */
+    ap101_exec1(&age.gpc); /* SVC (A's own CLOSE -- releases primal to
+                             * TASK_STATE_READY, which the very same
+                             * sched_dispatch() call then immediately
+                             * picks up, landing it in TASK_STATE_RUNNING
+                             * -- nothing else is competing for it) */
+    CHECK(sched->tasks[primalIdx].state == TASK_STATE_RUNNING,
+          "primal resumed (released to READY, then immediately dispatched -- not freed)");
+    CHECK(psw_get_nia(&cpu->psw) == primalResumeAddr, "primal resumed, execution continuing (not deactivated)");
+
+    ageharness_free(&age);
+}
+
+/* ---------------------------------------------------------------------
+ * 12. TERMINATE cascades to DEPENDENT descendants transitively
+ *     (USA003087 13.3: "All dependents of the process are treated
+ *     likewise"; 23.6 confirms this for cyclic processes specifically).
+ *     Confirmed two levels deep: TERMINATE-ing GRANDPARENT also
+ *     terminates PARENT (its own dependent) and, transitively, CHILD
+ *     (PARENT's own dependent, never named directly). No real fixture
+ *     exercises a 3-level chain (the real compiled fixtures in this
+ *     item's own set only go one level deep) -- this is the
+ *     deterministic regression test for the transitive case
+ *     specifically.
+ * ------------------------------------------------------------------- */
+
+static void test_terminate_cascades_to_dependents_transitively(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t gpEntry = build_close_only_task(mem, 0x1000);
+    uint32_t gpPde = build_pde(mem, 0x1010, gpEntry);
+    uint32_t parentEntry = build_close_only_task(mem, 0x1100);
+    uint32_t parentPde = build_pde(mem, 0x1110, parentEntry);
+    uint32_t childEntry = build_close_only_task(mem, 0x1200);
+    uint32_t childPde = build_pde(mem, 0x1210, childEntry);
+
+    /* Each SCHEDULE ... DEPENDENT records whichever task is currently
+     * "running" (s->runningIdx) as the new task's own parent -- forcing
+     * runningIdx directly (rather than actually dispatching) is
+     * sufficient to test that recording, and is safe here since
+     * sched_handle_schedule_svc never reads anything else about the
+     * running task's own state. */
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, gpPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE GRANDPARENT handled");
+    int gpIdx = find_task_by_pde(sched, gpPde);
+    sched->runningIdx = gpIdx;
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, parentPde, cpu->elapsedTimeUs, 0.0, true), "SCHEDULE PARENT DEPENDENT (on GRANDPARENT) handled");
+    int parentIdx = find_task_by_pde(sched, parentPde);
+    sched->runningIdx = parentIdx;
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, childPde, cpu->elapsedTimeUs, 0.0, true), "SCHEDULE CHILD DEPENDENT (on PARENT) handled");
+    int childIdx = find_task_by_pde(sched, childPde);
+    sched->runningIdx = -1;
+
+    CHECK(sched->tasks[parentIdx].parentIdx == gpIdx, "PARENT's own parentIdx records GRANDPARENT");
+    CHECK(sched->tasks[childIdx].parentIdx == parentIdx, "CHILD's own parentIdx records PARENT");
+
+    CHECK(sched_handle_terminate_named_svc(sched, cpu, &gpPde, 1), "TERMINATE GRANDPARENT (named) handled");
+    CHECK(sched->tasks[gpIdx].state == TASK_SLOT_FREE, "GRANDPARENT terminated");
+    CHECK(sched->tasks[parentIdx].state == TASK_SLOT_FREE, "PARENT (GRANDPARENT's own dependent) also terminated");
+    CHECK(sched->tasks[childIdx].state == TASK_SLOT_FREE,
+          "CHILD (PARENT's own dependent, GRANDPARENT's grandchild) also terminated -- transitive cascade, never named directly");
+    CHECK((mcm_get16(mem, gpPde) & 1) == 0, "GRANDPARENT's own PDE+0 ACTIVE bit cleared");
+    CHECK((mcm_get16(mem, parentPde) & 1) == 0, "PARENT's own PDE+0 ACTIVE bit cleared");
+    CHECK((mcm_get16(mem, childPde) & 1) == 0, "CHILD's own PDE+0 ACTIVE bit cleared");
+
+    ageharness_free(&age);
+}
+
 int main(void) {
     test_priority_ordering_and_context_roundtrip();
     test_repeat_every_counter_and_virtual_time();
@@ -733,6 +900,9 @@ int main(void) {
     test_schedule_in_delays_first_firing_and_anchors_repeat();
     test_wait_for_event_expressions();
     test_schedule_on_deferred_dispatch();
+    test_dependent_close_blocks_until_dependent_finishes();
+    test_wait_for_dependent();
+    test_terminate_cascades_to_dependents_transitively();
     if (failures == 0) {
         printf("all scheduler-mechanics tests passed\n");
     } else {

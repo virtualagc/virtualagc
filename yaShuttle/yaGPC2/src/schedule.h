@@ -8,8 +8,7 @@
  * loads an OS, it has to substitute for FCOS's task-management SVCs
  * itself, at exactly the same level it already substitutes for FCOS's
  * SEND ERROR/QUIT/EVENT SVCs in halucp.c -- this file is that
- * substitute, scoped to what real FCOS itself supported: no DEPENDENT,
- * no UPDATE PRIORITY (see below).
+ * substitute.
  *
  * SVC protocol (confirmed against a real compiled/linked program,
  * cross-checked against IBM-76-SS-1110 Rev 5 S4.2.1, the HAL/FCOS
@@ -35,9 +34,48 @@
  *   EVERY/AFTER in FPR2-3, UNTIL in FPR4-5 (unused here).
  *
  *   WAIT is SVC #6 (delta-time), #7 (UNTIL), #8 (event-expression), or
- *   #9 (DEPENDENT, out of scope -- no task is ever created as anyone's
- *   dependent, since SCHEDULE's own FLAGS-word gate never recognizes
- *   DEPENDENT); delta-time in FPR0-1.
+ *   #9 (DEPENDENT -- USA003087 13.5: "WAITING until all its dependent
+ *   processes have terminated;" no parameters of its own, tests the
+ *   calling task's own dependents); delta-time in FPR0-1.
+ *
+ * DEPENDENT (FLAGS bit 0x0020, confirmed empirically -- composes
+ * additively with AT/IN/REPEAT EVERY exactly like every other FLAGS
+ * bit): "SCHEDULE label PRIORITY(a) DEPENDENT;" makes the newly-created
+ * process dependent on whichever process is executing the SCHEDULE
+ * statement (USA003087 13.4) -- not on some separately-named parent, so
+ * no extra SVC parameter is needed for it, only the one bit. Two
+ * consequences, both confirmed directly from USA003087 13.3/13.5/23.6
+ * (no compiler-inserted instructions accompany either -- confirmed
+ * empirically that a parent task reaching its own bare CLOSE with a
+ * still-active DEPENDENT child emits the exact same bare SVC 0x0015 as
+ * every other CLOSE; this is entirely this file's own runtime
+ * responsibility, the same "yaGPC2 substitutes for FCOS" reasoning as
+ * everything else here):
+ *   1. A task reaching its own natural CLOSE/RETURN with any DEPENDENT
+ *      child still active does NOT deactivate immediately -- it goes
+ *      into a waiting state (TASK_STATE_WAITING_FOR_DEPENDENTS) until
+ *      every one of its DEPENDENT children has itself terminated, THEN
+ *      deactivates (13.3: "the process goes into the inactive state
+ *      directly only if it has no dependents. Otherwise, it goes into a
+ *      waiting state until the dependents have in their turn
+ *      terminated"). This is on top of, not instead of, the "does this
+ *      exact CLOSE re-arm a REPEAT EVERY task" question
+ *      sched_handle_task_close already answers -- it only applies to a
+ *      non-REPEATing CLOSE that would otherwise free the slot.
+ *   2. TERMINATE-ing a task (self or named) unconditionally terminates
+ *      every one of its DEPENDENT descendants too, transitively down the
+ *      whole dependency subtree, at the same time (13.3: "All dependents
+ *      of the process are treated likewise"; 23.6 confirms this for
+ *      cyclic processes specifically: "both the process and its
+ *      dependents are terminated, possibly in mid-cycle"). Unlike case 1
+ *      above, this is unconditional and immediate -- no graceful
+ *      waiting; CANCEL (out of scope, a more graceful alternative -- see
+ *      23.6) is the only construct that waits.
+ * CANCEL and REPEAT ... WHILE/UNTIL event-expr cancellation conditions
+ * remain out of scope (no FLAGS bit for either is recognized), as does
+ * DEPENDENT combined with ON (FLAGS 0x000d | 0x0020 = 0x002d is not
+ * empirically confirmed and is left unrecognized, falling through
+ * safely like any other unconfirmed combination).
  *
  * Event expressions (WAIT FOR SVC #8, and SCHEDULE ... ON, which reuses
  * the same descriptor format via the FLAGS-word AT+IN-bits-combined
@@ -147,13 +185,41 @@
 
 typedef enum {
     TASK_SLOT_FREE = 0,
-    TASK_STATE_READY,    /* scheduled once, not repeating, not yet due (not
-                           * currently produced by anything in this cut --
-                           * REPEAT EVERY tasks go straight to DORMANT --
-                           * kept for a future one-shot SCHEDULE, AT/IN). */
+    TASK_STATE_READY,    /* immediately eligible, no deadline/event check
+                           * needed -- previously never produced by anything
+                           * in this cut (one-shot SCHEDULE/AT/IN go through
+                           * DORMANT with a deadline instead); now also the
+                           * state a task lands in once an explicit WAIT FOR
+                           * DEPENDENT it was blocked on is satisfied (see
+                           * sched_notify_dependent_finished), so it can be
+                           * picked up by the very next sched_dispatch() call
+                           * respecting normal priority ordering against
+                           * whatever else is also eligible at that moment. */
     TASK_STATE_RUNNING,  /* this is the live CPU context right now */
-    TASK_STATE_WAITING,  /* blocked in WAIT, wakeDeadlineUs is when it resumes */
-    TASK_STATE_DORMANT,  /* a REPEATing task between firings */
+    TASK_STATE_WAITING,  /* blocked in WAIT/WAIT FOR, wakeDeadlineUs or
+                           * eventDescAddr is what it's waiting on */
+    TASK_STATE_DORMANT,  /* a REPEATing task between firings, or a
+                           * SCHEDULE ... ON target still pending its
+                           * trigger event */
+    TASK_STATE_WAITING_FOR_DEPENDENTS, /* reached its own CLOSE/RETURN, or
+                           * hit an explicit WAIT FOR DEPENDENT, while at
+                           * least one DEPENDENT child was still active
+                           * (USA003087 13.3: "the process goes into a
+                           * waiting state until the dependents have in
+                           * their turn terminated"). Deliberately NOT one
+                           * of the states sched_dispatch()'s own ready-scan
+                           * recognizes (see its own loop condition) -- a
+                           * task here is invisible to normal dispatch, not
+                           * a candidate for anything, until
+                           * sched_notify_dependent_finished's own cascade
+                           * check (triggered whenever some other task
+                           * fully deactivates) finds it has zero remaining
+                           * active dependents and moves it on:
+                           * pendingCloseAfterDependents decides whether
+                           * that means freeing the slot (the implicit
+                           * CLOSE-with-dependents case) or becoming
+                           * TASK_STATE_READY to resume execution (the
+                           * explicit WAIT FOR DEPENDENT case). */
 } TaskState;
 
 /* Saved AP-101 execution context. Mirrors ageharness.h's RegSnapshot
@@ -215,6 +281,23 @@ typedef struct {
      * inherits a stale pointer from this task's previous use of it. */
     uint32_t eventDescAddr;
 
+    /* Index of the task this one is DEPENDENT on (the task that was
+     * RUNNING when this one's own SCHEDULE ... DEPENDENT executed), or
+     * -1 if independent (USA003087 13.4: "In its absence, the processes
+     * are independent" -- the default, so every SCHEDULE-family function
+     * must explicitly set this, never rely on memset's 0 default, since
+     * 0 is itself a valid slot index). Always -1 for the primal
+     * pseudo-task (it has no parent). */
+    int parentIdx;
+
+    /* Meaningful only in TASK_STATE_WAITING_FOR_DEPENDENTS: true if this
+     * task reached its own natural CLOSE/RETURN and is only waiting to
+     * be freed (the implicit case, USA003087 13.3), false if it hit an
+     * explicit WAIT FOR DEPENDENT mid-execution and should resume
+     * (become TASK_STATE_READY, restored from ctx) once satisfied
+     * instead. */
+    bool pendingCloseAfterDependents;
+
     TaskContext ctx;      /* saved whenever this task is not RUNNING */
 } ScheduledTask;
 
@@ -246,11 +329,17 @@ void sched_init(Scheduler *s);
  * (anchored to the actual first-due time), not 0, 1, 2, ... Never
  * changes which context is live -- the calling program's own NIA just
  * continues normally afterward, matching how every other already-
- * handled SVC (SEND ERROR, SIGNAL/SET/RESET) behaves. Always returns
- * true (this file only gets called once the FLAGS word is already
- * confirmed recognized). */
+ * handled SVC (SEND ERROR, SIGNAL/SET/RESET) behaves. dependent is
+ * whether FLAGS' 0x0020 bit was set (USA003087 13.4's DEPENDENT
+ * keyword): if true, the new task's own parentIdx becomes whichever
+ * task is currently running (lazily engaging the primal pseudo-task
+ * first, same as sched_handle_wait_svc's own lazy-allocation, if
+ * scheduling has never been engaged before -- a program's very first
+ * statement can legally be a DEPENDENT SCHEDULE). Always returns true
+ * (this file only gets called once the FLAGS word is already confirmed
+ * recognized). */
 bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr,
-                                double initialWakeDeadlineUs, double repeatIntervalUs);
+                                double initialWakeDeadlineUs, double repeatIntervalUs, bool dependent);
 
 /* Called from halucp.c's SVC dispatch for SVC #6 (delta-time WAIT).
  * Suspends the currently-running context (lazily creating the "primal"
@@ -278,12 +367,15 @@ bool sched_handle_wait_until_svc(Scheduler *s, CPU *cpu, double absoluteSeconds)
 
 /* Called from halucp.c's existing SVC 0x0015 case, before any of its
  * current halt logic. Returns true iff this was a scheduled task's own
- * CLOSE (already fully handled here -- re-armed if REPEATing, freed
- * otherwise, and the next ready task already dispatched; caller should
- * return without doing anything else). Returns false iff the currently
- * running context is the primal program (or the scheduler has never
- * been engaged at all) -- caller's existing halt-the-CPU behavior must
- * run completely unchanged in that case. This is the whole backward-
+ * CLOSE (already fully handled here -- re-armed if REPEATing; otherwise
+ * freed immediately if it has no currently-active DEPENDENT children, or
+ * parked in TASK_STATE_WAITING_FOR_DEPENDENTS until they all finish if
+ * it does (USA003087 13.3 -- see this file's own header comment); either
+ * way the next ready task is already dispatched; caller should return
+ * without doing anything else). Returns false iff the currently running
+ * context is the primal program (or the scheduler has never been
+ * engaged at all) -- caller's existing halt-the-CPU behavior must run
+ * completely unchanged in that case. This is the whole backward-
  * compatibility guarantee for every fixture that never uses
  * TASK/SCHEDULE. */
 bool sched_handle_task_close(Scheduler *s, CPU *cpu);
@@ -315,7 +407,14 @@ bool sched_handle_terminate_self_svc(Scheduler *s, CPU *cpu);
  * per the Guide), the currently-running context changes and the next
  * ready task is dispatched, exactly like the self form; otherwise the
  * calling context is left running unchanged, exactly like SCHEDULE.
- * Always returns true. */
+ * Every named target's own DEPENDENT descendants (if any) are also
+ * unconditionally terminated, transitively down the whole subtree
+ * (USA003087 13.3/23.6 -- see this file's own header comment), and if
+ * terminating a target leaves ITS OWN parent (if any) with zero
+ * remaining active dependents, that parent is released from
+ * TASK_STATE_WAITING_FOR_DEPENDENTS too (sched_notify_dependent_finished
+ * -- the same mechanism a natural CLOSE-with-dependents uses). Always
+ * returns true. */
 bool sched_handle_terminate_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pdeAddrs, int count);
 
 /* Called from halucp.c's SVC dispatch for SVC #11 (UPDATE PRIORITY
@@ -366,5 +465,19 @@ bool sched_handle_wait_for_svc(Scheduler *s, CPU *cpu, uint32_t eventDescAddr);
  * expression becoming true instead of a deadline. Always returns
  * true. */
 bool sched_handle_schedule_on_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr, uint32_t eventDescAddr);
+
+/* Called from halucp.c's SVC dispatch for SVC #9 (WAIT FOR DEPENDENT).
+ * USA003087 13.5: "the process is to be placed in the waiting [state]
+ * until all its dependent processes have terminated. If there are no
+ * dependents, the statement has no effect" -- the same "already-
+ * satisfied is a true no-op" precedent sched_handle_wait_for_svc
+ * established for event expressions, checked here first (lazily
+ * engaging the primal pseudo-task only if there's something to actually
+ * wait for, same reasoning). Otherwise suspends the calling context in
+ * TASK_STATE_WAITING_FOR_DEPENDENTS with pendingCloseAfterDependents
+ * false (resume execution once satisfied, not free the slot -- see this
+ * file's own header comment) and dispatches whatever's next. Always
+ * returns true. */
+bool sched_handle_wait_for_dependent_svc(Scheduler *s, CPU *cpu);
 
 #endif
