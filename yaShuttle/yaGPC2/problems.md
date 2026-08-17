@@ -1154,6 +1154,30 @@ these two specifically. Logged as
 `status=not_a_bug` — no code change, not fixable without the same new
 periodic-timer/interrupt subsystem §2.7 already declined to build.
 
+**`RUNTIME()` — implemented for real (2026-08-17), correcting the
+"folds into the same boundary" conclusion above.** §2.7's own scope
+boundary got superseded by a real `TASK`/`SCHEDULE`/`WAIT` implementation
+this session, and with it came exactly the missing piece this entry
+assumed `RUNTIME()` needed: `cpu->elapsedTimeUs`, a real, working
+virtual-time clock (`schedule.c` already uses it for every dispatch
+decision). `RUNTIME()`'s own SVC number, confirmed here independently
+back in July from `FPMTMHAL.asm` (SVC 22, i.e. `0x16` hex) and now
+re-confirmed empirically by compiling and tracing a real `T = RUNTIME;`
+program, is simply that clock, converted from microseconds to seconds
+and written into FP0-FP1 — it never needed `FPMGMTIM`'s real hardware-
+timer-interrupt machinery in the first place, only *a* monotonically-
+advancing clock, which `cpu->elapsedTimeUs` already is. Implemented as
+the `svcCode == 0x0016` case in `halucp.c` (`hal-runtime-features.db`
+id 28, `not_implemented` → `implemented`). `RUNTIME()`'s *value* still
+isn't comparable against `yaHALMAT2`'s own output, same as before — but
+now because two independently-invented instruction-timing models can't
+agree at that precision (§7.4/§7.5), not because the feature is
+missing; verified in isolation instead via `test_schedule.c`'s scenario
+5. `CLOCKTIME()`/`DATE()` remain unimplemented and out of scope for this
+pass — `CLOCKTIME()`'s own TQE-tick-machinery tie is a materially
+different (and more involved) mechanism than `RUNTIME()`'s simple clock
+read, not yet investigated for whether the same shortcut applies.
+
 ### 2.7 Real-time task model (`SCHEDULE`/`WAIT`/`TASK`/priority): was a scope boundary, now implemented (2026-08-17)
 
 27 of the 73 are `SCHEDULE`/`WAIT`/task-related:
@@ -2907,6 +2931,41 @@ own hand-assembled scenario 3 sidesteps the whole question by
 `elapsedTimeUs` (bit-identical phase references by construction), which
 is exactly why it, not the real compiled fixture, is this project's
 regression test for `UPDATE PRIORITY` itself.
+
+### 7.5 `RUNTIME()`/`PRIO()` built-ins — done
+
+Fourth item in the runtime-feature-survey implementation order. See
+§2.6's own correction above for the full `RUNTIME()` writeup (SVC 22 /
+`0x0016`, converts `cpu->elapsedTimeUs` to seconds into FP0-FP1, no
+longer blocked on the periodic-timer machinery once assumed necessary).
+
+`PRIO()` (SVC `0x0317`) was traced the same way: a real compiled
+`P = PRIO;` inside a dispatched `TASK` always stores its result via
+general register 5's upper 16 bits, confirmed across two independently
+compiled contexts with different surrounding register pressure — and
+corroborated by `ERRGRP`/`ERRNUM` (`SVC 0x0117`/`0x0217`) already using
+that exact same register for their own INTEGER results, a real
+precedent rather than a one-off coincidence. Implemented as the
+`svcCode == 0x0317` case in `halucp.c`: reads the currently-running
+`ScheduledTask`'s own `priority` field directly (no new scheduler state
+needed). `PRIO()` called with scheduling never engaged (no running task
+at all) returns 0 — a defined, non-crashing default, not confirmed
+against any real fixture since nothing calls `PRIO()` outside a `TASK`
+in practice.
+
+Unlike `RUNTIME()`, `PRIO()`'s result is an exact INTEGER with no timing
+dependency at all — fully deterministic and byte-diffable against
+`yaHALMAT2`. New fixture `test/fixtures/prio.hal` (`PRIO()` from within
+a dispatched task, exact match confirmed), exercised by
+`test_scheduler.sh` under both `--pacing` modes. A second fixture,
+`test/fixtures/runtimeprio.hal` (both built-ins together), is kept for
+toolchain-encoding provenance only, same non-diffed treatment as
+`updatepriority.hal` (§7.3) — its `RUNTIME()` line inherits that
+built-in's own value/ordering incomparability. `test_schedule.c`'s new
+scenario 5 drives both SVCs directly (no hand-assembly needed — neither
+built-in depends on CPU instruction execution, just a single SVC-code
+halfword and a direct `halucp_handle_svc()` call) as the deterministic
+regression test for both.
 
 ---
 

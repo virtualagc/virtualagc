@@ -31,6 +31,7 @@
 #include <stdio.h>
 
 #include "../src/ageharness.h"
+#include "../src/floatIBM.h"
 #include "../src/mcm.h"
 #include "../src/regmem.h"
 #include "../src/schedule.h"
@@ -389,11 +390,73 @@ static void test_terminate_named_and_self(void) {
     ageharness_free(&age2);
 }
 
+/* ---------------------------------------------------------------------
+ * 5. RUNTIME() (SVC 0x0016) and PRIO() (SVC 0x0317, halucp.c): neither
+ *    is scheduler state (RUNTIME() is a pure cpu->elapsedTimeUs read;
+ *    PRIO() a pure read of the running ScheduledTask's own priority),
+ *    so these are driven directly via halucp_handle_svc() -- no hand-
+ *    assembled machine code needed, just a single SVC-code halfword in
+ *    memory and a direct C call. Deliberately NOT compared against
+ *    yaHALMAT2's own RUNTIME() output anywhere in this project (see
+ *    problems.md 7.4/7.5): two independently-invented instruction-
+ *    timing models can't be expected to agree on an elapsed-time value,
+ *    only that yaGPC2's own conversion from cpu->elapsedTimeUs is
+ *    correct in isolation, which is exactly what this scenario checks.
+ * ------------------------------------------------------------------- */
+
+static void test_runtime_and_prio_builtins(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+
+    const uint32_t svcAddr = 0x100;
+
+    /* RUNTIME(): cpu->elapsedTimeUs (microseconds) -> FP0-FP1 as a
+     * double-precision IBM float of seconds. */
+    cpu->elapsedTimeUs = 2500000.0; /* 2.5s */
+    mcm_set16(mem, svcAddr, 0x0016, false);
+    CHECK(halucp_handle_svc(&age.halUCP, svcAddr, 0), "RUNTIME SVC handled");
+    FloatIBM rt = fibm_from64(register_get32(registerfile_r(&cpu->regFiles[2], 0)),
+                               register_get32(registerfile_r(&cpu->regFiles[2], 1)));
+    double rtSeconds = fibm_to_float(&rt);
+    CHECK(rtSeconds > 2.4999 && rtSeconds < 2.5001, "RUNTIME() returned ~2.5 seconds in FP0-FP1");
+
+    /* PRIO(): the running ScheduledTask's own priority -> R5's upper 16
+     * bits (same register ERRGRP/ERRNUM already use for their own
+     * INTEGER results, halucp.c). */
+    Scheduler *sched = &age.halUCP.scheduler;
+    uint32_t taskEntry = build_close_only_task(mem, 0x1000);
+    uint32_t taskPde = build_pde(mem, 0x1010, taskEntry);
+    CHECK(sched_handle_schedule_svc(sched, cpu, 137, taskPde, 0.0), "SCHEDULE (priority 137) handled");
+    CHECK(sched_handle_wait_svc(sched, cpu, 0.0), "WAIT 0 dispatches the task immediately");
+    CHECK(psw_get_nia(&cpu->psw) == taskEntry, "task dispatched (sanity check before PRIO SVC)");
+
+    mcm_set16(mem, svcAddr, 0x0317, false);
+    CHECK(halucp_handle_svc(&age.halUCP, svcAddr, 0), "PRIO SVC handled");
+    uint32_t prio = register_get32(registerfile_r(&cpu->regFiles[0], 5)) >> 16;
+    CHECK(prio == 137, "PRIO() returned the running task's own priority (137)");
+
+    /* PRIO() called with scheduling never engaged (no running task at
+     * all) is documented here as returning 0 -- not confirmed against
+     * any real fixture, but a defined, non-crashing default. */
+    AGEHarness age2;
+    ageharness_init(&age2);
+    mcm_set16(&age2.gpc.cpu.mainStorage, svcAddr, 0x0317, false);
+    CHECK(halucp_handle_svc(&age2.halUCP, svcAddr, 0), "PRIO SVC handled with no task ever scheduled");
+    uint32_t prio2 = register_get32(registerfile_r(&age2.gpc.cpu.regFiles[0], 5)) >> 16;
+    CHECK(prio2 == 0, "PRIO() with scheduling never engaged defaults to 0");
+
+    ageharness_free(&age);
+    ageharness_free(&age2);
+}
+
 int main(void) {
     test_priority_ordering_and_context_roundtrip();
     test_repeat_every_counter_and_virtual_time();
     test_update_priority_flips_dispatch_order();
     test_terminate_named_and_self();
+    test_runtime_and_prio_builtins();
     if (failures == 0) {
         printf("all scheduler-mechanics tests passed\n");
     } else {

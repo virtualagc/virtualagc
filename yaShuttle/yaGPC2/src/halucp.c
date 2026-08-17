@@ -262,6 +262,53 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         return true;
     }
 
+    /* RUNTIME -- USA003087 13.5/Appendix B, USA003090 8.2 item 18:
+     * "returns the current value of real time as a scalar, in
+     * seconds." Confirmed empirically (a real compiled `T = RUNTIME;`)
+     * that the compiled code's own STE/STD choice right after this SVC
+     * reads FP0 alone (single-precision target) or FP0+FP1 (double) --
+     * i.e. the SVC's job is just to deliver a genuine double-precision
+     * result in FP0-FP1 and let the compiler's own narrowing (USA003090
+     * 8.2 item 7: truncate the rightmost 32 bits) handle single vs.
+     * double, the same pattern used everywhere else in this codebase
+     * for a double-precision FPR-pair result. Was blocked (problems.md
+     * 2.6) on RUNTIME() needing FPMGMTIM, a periodic-hardware-timer-
+     * driven OS clock this project confirmed has no equivalent here --
+     * that blocker no longer applies now that cpu->elapsedTimeUs is a
+     * real, working virtual-time clock (added for TASK/SCHEDULE/WAIT,
+     * problems.md 2.7/7): RUNTIME() is simply that same clock,
+     * converted from microseconds to seconds, matching the Guide's own
+     * "seconds since the real-time origin" definition where the origin
+     * is "normally coincident with the initiation of the primal
+     * process" -- exactly cpu->elapsedTimeUs's own t=0. */
+    if (svcCode == 0x0016) {
+        FloatIBM rt = fibm_from_float(h->cpu->elapsedTimeUs / 1e6);
+        register_set32(cpu_f(h->cpu, 0), fibm_to64x(&rt));
+        register_set32(cpu_f(h->cpu, 1), fibm_to64y(&rt));
+        return true;
+    }
+
+    /* PRIO -- USA003087 13.5/Appendix B: "returns the priority of the
+     * process invoking the function as an integer." Confirmed
+     * empirically (two independent compiled `P = PRIO;` contexts, with
+     * different surrounding register pressure) that the result always
+     * lands in general register 5, upper 16 bits -- the same register
+     * ERRGRP/ERRNUM above already use for their own INTEGER results, a
+     * real, corroborating precedent for "R5 is the fixed built-in-
+     * INTEGER-function result register" rather than an artifact of one
+     * compilation's own register allocation. The primal process itself
+     * has no ScheduledTask.priority of its own (it isn't created via
+     * SCHEDULE); PRIO() called directly from the primal (not from
+     * within any TASK) returns 0 -- undocumented by the Guide, not
+     * confirmed against a real fixture, but a reasonable default absent
+     * evidence otherwise. */
+    if (svcCode == 0x0317) {
+        int priority = 0;
+        if (h->scheduler.runningIdx >= 0) priority = h->scheduler.tasks[h->scheduler.runningIdx].priority;
+        register_set32(cpu_r(h->cpu, 5), (uint32_t)priority << 16);
+        return true;
+    }
+
     /* Plain SIGNAL/SET/RESET <event> statements (not part of an ON ERROR
      * IGNORE disposition -- see apply_ignore_event_action's own comment
      * near try_on_error_dispatch() for the EVENT bit representation this

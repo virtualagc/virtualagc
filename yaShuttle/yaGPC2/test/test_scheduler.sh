@@ -94,4 +94,11 @@ run_case "terminate/signal" "signal" "fixtures/terminate.fcm" "fixtures/terminat
 run_case "selfterminate/burst"  "burst"  "fixtures/selfterminate.fcm" "fixtures/selfterminate-lnk101.json" "fixtures/selfterminate_golden.txt"
 run_case "selfterminate/signal" "signal" "fixtures/selfterminate.fcm" "fixtures/selfterminate-lnk101.json" "fixtures/selfterminate_golden.txt"
 
+# PRIO() built-in (SVC 0x0317) -- confirmed deterministic/comparable
+# (unlike RUNTIME(), see problems.md 7.4/7.5: two independently-invented
+# timing models can't be expected to agree on an elapsed-time *value*,
+# but PRIO() returns an exact INTEGER with no timing dependency at all).
+run_case "prio/burst"  "burst"  "fixtures/prio.fcm" "fixtures/prio-lnk101.json" "fixtures/prio_golden.txt"
+run_case "prio/signal" "signal" "fixtures/prio.fcm" "fixtures/prio-lnk101.json" "fixtures/prio_golden.txt"
+
 exit $fail

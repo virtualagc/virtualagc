@@ -1,11 +1,11 @@
 #!/bin/bash
 # Reproduces hello.fcm, read_write.fcm, read_eof_onerror.fcm,
-# countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, and
-# updatepriority.fcm (plus their -lnk101.json symbol tables) via the
-# real HAL/S toolchain documented in ../../tools.md (HALSFC + lnk101,
-# both expected on PATH). Not run automatically (no CI machine has the
-# toolchain) — kept for provenance and to regenerate if the
-# encoding/format ever changes.
+# countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm,
+# updatepriority.fcm, prio.fcm, and runtimeprio.fcm (plus their
+# -lnk101.json symbol tables) via the real HAL/S toolchain documented in
+# ../../tools.md (HALSFC + lnk101, both expected on PATH). Not run
+# automatically (no CI machine has the toolchain) — kept for provenance
+# and to regenerate if the encoding/format ever changes.
 #
 # Sources:
 #   hello.fcm            <- HELLO.hal (ported/PASS1.PROCS/HELLO.hal in the
@@ -60,6 +60,28 @@
 #                          feature instead, same reasoning
 #                          read_eof_onerror.fcm above already documents
 #                          for a different known discrepancy.
+#   prio.fcm              <- prio.hal (checked in alongside this script
+#                          — PRIO() called from within a dispatched TASK;
+#                          confirmed deterministic/byte-diffable against
+#                          yaHALMAT2, unlike RUNTIME() below, since it
+#                          returns an exact INTEGER with no timing
+#                          dependency at all).
+#   runtimeprio.fcm       <- runtimeprio.hal (checked in alongside this
+#                          script — RUNTIME() called from the primal,
+#                          PRIO() from within a dispatched TASK). Kept
+#                          for provenance/smoke-testing only, same
+#                          reasoning as updatepriority.fcm above:
+#                          RUNTIME()'s own returned *value* (and its
+#                          output line's relative order against the
+#                          task's own WRITE) isn't comparable against
+#                          yaHALMAT2 even in principle -- see problems.md
+#                          7.4/7.5 (yaHALMAT2 interprets HALMAT, which
+#                          has no hardware timing semantics of its own,
+#                          so its own per-instruction "cost" is a
+#                          convention it invented, not a measurement of
+#                          anything real). test_schedule.c's own
+#                          scenario 5 is the deterministic regression
+#                          test for RUNTIME()/PRIO() instead.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -71,6 +93,8 @@ WAITUNTIL_HAL="$(dirname "$0")/waituntil.hal"
 TERMINATE_HAL="$(dirname "$0")/terminate.hal"
 SELFTERMINATE_HAL="$(dirname "$0")/selfterminate.hal"
 UPDATEPRIORITY_HAL="$(dirname "$0")/updatepriority.hal"
+PRIO_HAL="$(dirname "$0")/prio.hal"
+RUNTIMEPRIO_HAL="$(dirname "$0")/runtimeprio.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -95,5 +119,7 @@ build "$WAITUNTIL_HAL" waituntil waituntil
 build "$TERMINATE_HAL" terminate terminate
 build "$SELFTERMINATE_HAL" selfterminate selfterminate
 build "$UPDATEPRIORITY_HAL" updatepriority updatepriority
+build "$PRIO_HAL" prio prio
+build "$RUNTIMEPRIO_HAL" runtimeprio runtimeprio
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm (+ -lnk101.json)"

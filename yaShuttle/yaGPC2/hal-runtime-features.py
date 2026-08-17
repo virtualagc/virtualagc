@@ -303,19 +303,32 @@ F('Real-Time: Priority & Control', 'UPDATE PRIORITY statement', "Changes an acti
   'timing discrepancy for simultaneously-due REPEAT EVERY tasks -- see problems.md).')
 F('Real-Time: Priority & Control', 'RUNTIME() built-in function',
   'Returns the current value of real time as a SCALAR, in seconds.',
-  'USA003087 §13.5, Appendix B; USA003090 §8.2 item 18', 'not_implemented',
-  "problems.md §2.6: RUNTIME() calls FPMGMTIM, a continuously-updating GMT-style clock driven by "
-  "a periodic hardware timer interrupt at the OS level -- confirmed not backed by anything in this "
-  "toolchain, and this session's own TASK/SCHEDULE/WAIT work deliberately did NOT install any "
-  "clk1/clk2 timer-interrupt handler (no OS is ever loaded to receive one). WORTH REVISITING: "
-  "cpu->elapsedTimeUs now exists as a real, working virtual-time clock (schedule.c uses it "
-  "directly) -- RUNTIME() could plausibly be implemented as a new SVC returning that same value "
-  "converted to seconds, without needing the timer-interrupt machinery problems.md's finding "
-  "assumed was required. Not attempted in this survey; flagged for a follow-up decision.",
-  'untested')
+  'USA003087 §13.5, Appendix B; USA003090 §8.2 item 18', 'implemented',
+  "SVC 0x0016 (halucp.c): writes cpu->elapsedTimeUs (converted from microseconds to seconds) as a "
+  "double-precision IBM float into FP0-FP1, letting the compiled code's own STE/STD choice handle "
+  "single-vs-double narrowing (confirmed empirically: a real compiled T = RUNTIME; with T declared "
+  "plain SCALAR emits STE reading FP0 alone right after the SVC returns). The problems.md 2.6 "
+  "FPMGMTIM/periodic-timer-interrupt blocker no longer applies now that cpu->elapsedTimeUs is a "
+  "real, working virtual-time clock (added for TASK/SCHEDULE/WAIT).",
+  'tested_dedicated',
+  'test_schedule.c scenario 5 (direct SVC injection, checks the FP0-FP1 conversion in isolation). '
+  'A real compiled fixture (test/fixtures/runtimeprio.hal) exists for toolchain-encoding provenance '
+  'but is NOT diffed against yaHALMAT2 -- its returned value (and output ordering relative to a '
+  'task\'s own WRITE) is inherently incomparable between two independently-invented instruction-'
+  'timing models (see problems.md 7.4/7.5).')
 F('Real-Time: Priority & Control', 'PRIO() built-in function',
   'Returns the priority of the invoking process, as an INTEGER.',
-  'USA003087 §13.5, Appendix B', 'not_implemented', 'No SVC/mechanism exposes the running task\'s priority to compiled code.', 'untested')
+  'USA003087 §13.5, Appendix B', 'implemented',
+  "SVC 0x0317 (halucp.c): writes the running ScheduledTask's own priority into general register 5's "
+  "upper 16 bits -- confirmed empirically across two independent compiled contexts, and corroborated "
+  "by ERRGRP/ERRNUM (SVC 0x0117/0x0217) already using the identical R5 convention for their own "
+  "INTEGER results. Calling PRIO() with scheduling never engaged (no running task at all) returns 0 "
+  "-- a defined, non-crashing default, not confirmed against any real fixture.",
+  'tested_dedicated',
+  'test_schedule.c scenario 5 (direct SVC injection); test/fixtures/prio.hal (real compiled '
+  'fixture, PRIO() from within a dispatched TASK -- deterministic/byte-diffable against yaHALMAT2, '
+  'unlike RUNTIME(), since it\'s an exact INTEGER with no timing dependency), exercised by '
+  'test_scheduler.sh under both --pacing modes.')
 F('Real-Time: Priority & Control', 'Process name as Boolean (ACTIVE/INACTIVE query)',
   "A process's own name usable directly as TRUE (ACTIVE) / FALSE (INACTIVE) in an expression.",
   'USA003087 §13.5', 'not_implemented', 'No mechanism exposes scheduler task state to compiled code as a readable value.', 'untested')
