@@ -80,4 +80,18 @@ run_case "countup/signal" "signal" "fixtures/countup.fcm" "fixtures/countup-lnk1
 run_case "waituntil/burst"  "burst"  "fixtures/waituntil.fcm" "fixtures/waituntil-lnk101.json" "fixtures/waituntil_golden.txt"
 run_case "waituntil/signal" "signal" "fixtures/waituntil.fcm" "fixtures/waituntil-lnk101.json" "fixtures/waituntil_golden.txt"
 
+# TERMINATE, named-target form (SVC #3, sched_handle_terminate_named_svc)
+# -- a REPEAT EVERY task TERMINATEd by the primal mid-stream; asserts it
+# actually stops repeating (4 firings, not 5+), unlike merely reaching
+# its own CLOSE (which would re-arm it).
+run_case "terminate/burst"  "burst"  "fixtures/terminate.fcm" "fixtures/terminate-lnk101.json" "fixtures/terminate_golden.txt"
+run_case "terminate/signal" "signal" "fixtures/terminate.fcm" "fixtures/terminate-lnk101.json" "fixtures/terminate_golden.txt"
+
+# TERMINATE, bare/self form (SVC #2, sched_handle_terminate_self_svc) --
+# a task that TERMINATEs itself; asserts execution actually stops right
+# there (the pre-fix bug: an unhandled SVC just fell through and kept
+# executing the task's own remaining statements).
+run_case "selfterminate/burst"  "burst"  "fixtures/selfterminate.fcm" "fixtures/selfterminate-lnk101.json" "fixtures/selfterminate_golden.txt"
+run_case "selfterminate/signal" "signal" "fixtures/selfterminate.fcm" "fixtures/selfterminate-lnk101.json" "fixtures/selfterminate_golden.txt"
+
 exit $fail

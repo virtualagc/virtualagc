@@ -156,10 +156,11 @@ F('Real-Time: Task/Process', 'Process termination paths (RETURN / CLOSE / TERMIN
   "A process ends via TERMINATE (immediate, cascades to dependents), or reaching CLOSE/RETURN "
   "(waits for its own dependents to finish first, if any).",
   'USA003087 §13.3', 'partial',
-  "Only the task's-own-CLOSE path is implemented (sched_handle_task_close, confirmed the same "
-  "SVC 0x0015 as the primal program's own CLOSE). TERMINATE is not implemented at all. Dependent-"
-  "cascading is moot since DEPENDENT itself is out of scope (no task is ever created as a dependent).",
-  'tested_dedicated', "test_schedule.c and countup.hal's own CLOSE NEXT.")
+  "CLOSE (sched_handle_task_close, SVC 0x0015) and both TERMINATE forms (sched_handle_terminate_self_svc "
+  "SVC #2, sched_handle_terminate_named_svc SVC #3) are implemented. Dependent-cascading is still moot "
+  "since DEPENDENT itself is out of scope (no task is ever created as a dependent).",
+  'tested_dedicated',
+  "test_schedule.c and countup.hal's own CLOSE NEXT; test/fixtures/terminate.hal, selfterminate.hal.")
 
 # --- Real-Time: SCHEDULE variants ---------------------------------------------------
 F('Real-Time: SCHEDULE', 'SCHEDULE (immediate initiation, PRIORITY, DEPENDENT)',
@@ -272,7 +273,17 @@ F('Real-Time: Events', 'Process events (process name as event-expression operand
 # --- Real-Time: Priority & Control ---------------------------------------------------
 F('Real-Time: Priority & Control', 'TERMINATE statement',
   'Forces one or more named processes (or self) to INACTIVE immediately, cascading to dependents.',
-  'USA003087 §13.5', 'not_implemented', 'No SVC/mechanism for TERMINATE exists in halucp.c.', 'untested')
+  'USA003087 §13.5', 'partial',
+  'SVC #2 (bare/self form, sched_handle_terminate_self_svc) and SVC #3 (named-target form, '
+  'sched_handle_terminate_named_svc) are implemented -- confirmed empirically via a real compiled '
+  'program that the named form\'s parameter word is (count<<8)|3 followed by `count` PDE-address '
+  'halfwords, and the self form is SVC #2 with no parameters. Both always deactivate unconditionally '
+  '(no REPEAT re-arm, unlike reaching CLOSE naturally). Dependent-cascading not implemented (DEPENDENT '
+  'itself out of scope); a primal process TERMINATEing itself is not supported (falls through '
+  'unhandled) -- no real fixture needs it.',
+  'tested_dedicated',
+  'test/test_scheduler.sh (terminate/burst, terminate/signal, selfterminate/burst, selfterminate/signal); '
+  'output byte-identical to yaHALMAT2 for both forms.')
 F('Real-Time: Priority & Control', 'CANCEL statement',
   'Graceful alternative to TERMINATE for cyclic processes: finishes the current cycle first, '
   'shuts down dependents in order rather than force-terminating them.',

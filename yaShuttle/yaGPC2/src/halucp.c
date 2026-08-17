@@ -328,6 +328,27 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
              * unhandled, same as any other unrecognized SVC). */
             FloatIBM until = fibm_from64(register_get32(cpu_f(h->cpu, 0)), register_get32(cpu_f(h->cpu, 1)));
             return sched_handle_wait_until_svc(&h->scheduler, h->cpu, fibm_to_float(&until));
+        } else if (svcLow == 0x02) {
+            /* TERMINATE, bare/self form (no target list) -- confirmed
+             * empirically: mem[ea+1] is unused padding here, unlike
+             * SVC#3's own count+PDE-list encoding below. */
+            return sched_handle_terminate_self_svc(&h->scheduler, h->cpu);
+        } else if (svcLow == 0x03) {
+            /* TERMINATE label[,label...] (named-target form). High byte
+             * of the SVC param word is the target count (confirmed
+             * empirically: 0x0103 for one named target); each of the
+             * following `count` halfwords is that target's own PDE
+             * address, already in the same flat, native units
+             * sched_handle_schedule_svc's own PROCESS field uses -- no
+             * decode_pde_far_pointer extension needed here, confirmed
+             * directly against a real compiled program (mem[ea+1] ==
+             * #ETERMTE+6's own linked address exactly). */
+            uint32_t count = (svcCode >> 8) & 0xff;
+            if (count > 0 && count <= 16) {
+                uint32_t pdeAddrs[16];
+                for (uint32_t i = 0; i < count; i++) pdeAddrs[i] = mcm_get16(&h->cpu->mainStorage, ea + 1 + i);
+                return sched_handle_terminate_named_svc(&h->scheduler, h->cpu, pdeAddrs, (int)count);
+            }
         }
     }
 

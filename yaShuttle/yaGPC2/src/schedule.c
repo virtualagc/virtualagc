@@ -254,3 +254,24 @@ bool sched_handle_task_close(Scheduler *s, CPU *cpu) {
     sched_dispatch(s, cpu);
     return true;
 }
+
+bool sched_handle_terminate_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pdeAddrs, int count) {
+    bool selfTerminated = false;
+    for (int i = 0; i < count; i++) {
+        int idx = sched_find_by_pde(s, pdeAddrs[i]);
+        if (idx < 0) continue; /* not currently active -- silent no-op */
+        if (idx == s->runningIdx) selfTerminated = true;
+        s->tasks[idx].state = TASK_SLOT_FREE; /* unconditional -- no REPEAT re-arm, unlike sched_handle_task_close */
+    }
+    if (selfTerminated) {
+        s->runningIdx = -1;
+        sched_dispatch(s, cpu);
+    }
+    return true;
+}
+
+bool sched_handle_terminate_self_svc(Scheduler *s, CPU *cpu) {
+    if (s->runningIdx < 0 || s->tasks[s->runningIdx].isPrimal) return false;
+    uint32_t ownPde = s->tasks[s->runningIdx].pdeAddr;
+    return sched_handle_terminate_named_svc(s, cpu, &ownPde, 1);
+}

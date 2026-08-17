@@ -2796,6 +2796,42 @@ comment so it isn't rediscovered.). New fixture
 `test/fixtures/waituntil.hal`/`.fcm`/`-lnk101.json`/`_golden.txt`,
 exercised by `test/test_scheduler.sh` under both `--pacing` modes.
 
+**`TERMINATE` (SVC #2 self / SVC #3 named) — done.** Traced two real
+compiled programs: `TERMTEST.hal` (a `REPEAT EVERY`-scheduled task
+`TERMINATE`d by name from the primal, mid-stream) and `SELFTERM.hal` (a
+task that `TERMINATE`s itself). Confirmed the named form's SVC parameter
+word is `(count<<8)|3` followed by `count` PDE-address halfwords (a
+relocation in the linker JSON directly ties the parameter word to
+`#ETERMTE+6`, the target task's own PDE, in the same flat units
+`SCHEDULE`'s own `PROCESS` field already uses — no `decode_pde_far_pointer`
+extension needed); the bare/self form is SVC #2 with no parameters at
+all. Implemented as `sched_handle_terminate_named_svc`/
+`sched_handle_terminate_self_svc` (`src/schedule.c`) — both deactivate
+their target(s) *unconditionally*, with no `REPEAT` re-arm, unlike
+reaching `CLOSE` naturally (a real behavioral distinction the language
+draws between the two exit paths). The self form is implemented in
+terms of the named form (a task naming its own PDE), and both share a
+`selfTerminated` check so naming the currently-running task (whether via
+the bare form or by a task naming itself in the list form) correctly
+switches context and dispatches the next ready task, while `TERMINATE`
+of some *other* task leaves the caller running unchanged (matching
+`SCHEDULE`'s own "never changes which context is live" contract).
+
+This also **fixes a real, confirmed bug**: before this change, self-
+`TERMINATE` was an unhandled SVC that silently fell through and let the
+task's own remaining statements keep executing — `SELFTERM.hal`'s
+`WRITE(6) 'UNREACHABLE';` right after its own `TERMINATE;` used to
+print. Verified against `yaHALMAT2` as the independent oracle for both
+fixtures; output byte-identical (and confirms `yaHALMAT2` never had
+this bug — its own output already stopped at `TERMINATE`). New fixtures
+`test/fixtures/terminate.hal`/`selfterminate.hal` (+`.fcm`/
+`-lnk101.json`/`_golden.txt`), exercised by `test/test_scheduler.sh`
+under both `--pacing` modes. Dependent-cascading (a `TERMINATE`d
+process must also terminate its own dependents) remains out of scope,
+same as it's been for `CLOSE`/`WAIT FOR DEPENDENT` all along — `DEPENDENT`
+itself is still never recognized by `SCHEDULE`'s own FLAGS-word gate,
+so no task is ever created as anyone's dependent in the first place.
+
 ---
 
 ## Methodology and caveats

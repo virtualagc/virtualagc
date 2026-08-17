@@ -204,4 +204,34 @@ bool sched_handle_wait_until_svc(Scheduler *s, CPU *cpu, double absoluteSeconds)
  * TASK/SCHEDULE. */
 bool sched_handle_task_close(Scheduler *s, CPU *cpu);
 
+/* Called from halucp.c's SVC dispatch for SVC #2 (bare "TERMINATE;",
+ * self-targeting -- USA003087 13.5: "self, if label omitted"). Unlike
+ * sched_handle_task_close(), TERMINATE always deactivates immediately
+ * regardless of REPEAT status -- a REPEATing task that TERMINATEs
+ * itself does NOT get re-armed, unlike one that simply reaches its own
+ * CLOSE. Returns false (falls through to the caller's own unhandled-SVC
+ * path) if the running context is the primal program or scheduling was
+ * never engaged -- a primal process terminating *itself* is out of
+ * scope for this cut (no real fixture exercises it; real flight
+ * software's primal process ends via its own CLOSE, not self-
+ * TERMINATE). Otherwise always returns true. */
+bool sched_handle_terminate_self_svc(Scheduler *s, CPU *cpu);
+
+/* Called from halucp.c's SVC dispatch for SVC #3 ("TERMINATE
+ * label[,label...];", named-target form). pdeAddrs/count are already
+ * decoded by the caller (each pdeAddr already in the same flat, native
+ * units sched_handle_schedule_svc's own PROCESS field uses). Each named
+ * task, if currently active, is deactivated immediately (same
+ * unconditional-regardless-of-REPEAT semantics as the self form above);
+ * a name that doesn't match any active task is silently ignored (USA003087
+ * 13.5 doesn't define an error for this, and it's a natural no-op --
+ * nothing to terminate). If one of the named targets turns out to be the
+ * task currently running (TERMINATE naming itself, or one process
+ * TERMINATEing another that then turns out to be itself -- both legal
+ * per the Guide), the currently-running context changes and the next
+ * ready task is dispatched, exactly like the self form; otherwise the
+ * calling context is left running unchanged, exactly like SCHEDULE.
+ * Always returns true. */
+bool sched_handle_terminate_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pdeAddrs, int count);
+
 #endif
