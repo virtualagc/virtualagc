@@ -75,7 +75,7 @@ $(BUILD_DIR):
 
 TEST_BIN_DIR := $(BUILD_DIR)/test
 
-UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_gpcops
+UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_gpcops test_schedule
 
 test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS)) $(TEST_BIN_DIR)/example_gpcops_paced_run
 	./test/run_all.sh
@@ -141,6 +141,12 @@ $(TEST_BIN_DIR)/test_iop_exec_processors: test/test_iop_exec_processors.c $(IOP_
 # silently papered over by falling back to source).
 $(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(LIB) $(INTEGRATION_DIR)/yaGpcIntegration.h test/fixtures/hello.fcm | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_gpcops.c $(LIB) $(LDLIBS)
+
+# Tier-1 hand-assembled scheduler-mechanics tests (src/schedule.h/.c) --
+# see test/test_schedule.c's own header comment. No fixture files: every
+# program is hand-assembled directly into MCM by the test itself.
+$(TEST_BIN_DIR)/test_schedule: test/test_schedule.c $(LIB) $(INTEGRATION_DIR)/yaGpcIntegration.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_schedule.c $(LIB) $(LDLIBS)
 
 # Not a unit test -- a runnable example of GpcOps-only usage (see its own
 # header comment), and per its own header comment now the demonstration
