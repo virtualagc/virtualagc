@@ -1136,6 +1136,8 @@ static void handle_control(HalUCP *h) {
                 h->readSkipPending = -1;
                 h->readColumnPending = -1;
                 h->readPositioningApplied = false;
+                h->readSkipApplied = false;
+                h->readAllStatement = (iocode == 1);
                 /* inputBuffer is deliberately NOT wiped here anymore --
                  * see apply_read_positioning(), which defers that
                  * decision until this statement's SKIP/COLUMN control
@@ -1255,6 +1257,29 @@ static void handle_control(HalUCP *h) {
                    * TABs are relative to that instead (ordinary
                    * sequential application). Fixes problems.md 2.5. */
             int ch = h->channel;
+            if (h->inReadIOInit) {
+                /* 10.1.1 rule 3 — on READ/READALL, TAB (like COLUMN)
+                 * overrides the automatic column position instead of
+                 * touching WRITE's own column[ch]/deferred[ch] state,
+                 * which apply_read_positioning() never looks at. Relative
+                 * to whatever this statement's own COLUMN/TAB has already
+                 * set (readColumnPending), or to the actual current input
+                 * column if this is the first one this statement — same
+                 * "leading vs. sequential" rule as the WRITE-side case
+                 * above, applied to readColumnPending instead of
+                 * column[ch]. Previously silently had no effect on input
+                 * at all (only COLUMN/SKIP were wired to inReadIOInit). */
+                int base = (h->readColumnPending >= 1) ? h->readColumnPending : (int)h->inputColumn;
+                int newCol = base + (int)param;
+                if (newCol < 1) {
+                    char msg[64];
+                    snprintf(msg, sizeof msg, "HalUCP: TAB(%d) cannot move left of column 1\n", param);
+                    hal_log(h, msg);
+                    newCol = 1;
+                }
+                h->readColumnPending = newCol;
+                break;
+            }
             if (h->deferred[ch].present) {
                 int base = h->positioned[ch] ? h->deferred[ch].toCol : h->column[ch];
                 int newCol = base + (int)param;
@@ -1498,6 +1523,57 @@ static ExtractedField extract_next_field(HalUCP *h, int iocode) {
     return result;
 }
 
+/* READALL(ch) CHARACTER (USA003087 10.1.2): transfers raw column data,
+ * not a delimited field -- unlike everything above, commas/blanks/
+ * semicolons within the copied range are ordinary data, not separators.
+ * Copies up to the destination CHARACTER variable's own declared length
+ * (maxLen, read from the IOBUF descriptor's high byte -- same
+ * convention as write_char_string()'s own maxLen) starting at the
+ * current input column, clipped to whatever's left of the current line
+ * (never crosses a '\n'/'\r' into whatever record follows). Returns
+ * FIELD_NONE only when nothing at all is buffered yet; a present but
+ * blank/short line still yields a valid (all-blank, or shorter-than-
+ * maxLen) raw field -- READALL has no "skip until non-blank" concept
+ * the way delimited field extraction's leading-whitespace skip does.
+ * Previously, READALL had no distinct runtime path at all and fell
+ * through to extract_next_field()'s ordinary delimited parsing --
+ * confirmed wrong per spec and matching a real upstream `gpc` (JS) fix
+ * (Don Schmidt, 2026-08-06): a raw field containing an embedded comma
+ * or extra internal blank was silently truncated at the first one
+ * instead of being read whole. */
+static ExtractedField extract_readall_field(HalUCP *h) {
+    ExtractedField result = {FIELD_NONE, NULL};
+    if (h->inputBufferLen == 0) {
+        ib_reset(h);
+        return result;
+    }
+    size_t lineLen = 0;
+    while (lineLen < h->inputBufferLen && h->inputBuffer[lineLen] != '\n' && h->inputBuffer[lineLen] != '\r') lineLen++;
+
+    uint32_t descriptor = mcm_get16(&h->cpu->mainStorage, h->iobufAddr);
+    uint32_t maxLen = (descriptor >> 8) & 0xFF;
+    size_t take = (maxLen > 0 && (size_t)maxLen < lineLen) ? (size_t)maxLen : lineLen;
+
+    char *value = malloc(take + 1);
+    memcpy(value, h->inputBuffer, take);
+    value[take] = '\0';
+    ib_consume_prefix(h, take);
+    result.kind = FIELD_VALUE;
+    result.value = value;
+    return result;
+}
+
+/* Routes to extract_readall_field() only for a READALL statement's
+ * CHARACTER argument (READALL is a raw-CHARACTER-stream construct --
+ * USA003087 10.1.2 -- so this is the only iocode it's ever paired with
+ * in practice); every other case (plain READ, or a READALL statement's
+ * non-CHARACTER argument, if that ever occurs) keeps using the ordinary
+ * delimited extract_next_field(). */
+static ExtractedField extract_field_for_read(HalUCP *h, int iocode) {
+    if (h->readAllStatement && iocode == 13) return extract_readall_field(h);
+    return extract_next_field(h, iocode);
+}
+
 /* ---------------------------------------------------------------------
  * JS parseInt/parseFloat-compatible parsing (for _writeInputValue)
  * ------------------------------------------------------------------- */
@@ -1605,7 +1681,30 @@ static void write_char_string(HalUCP *h, const char *text) {
 
 static void write_input_value(HalUCP *h, const char *text) {
     switch (h->pendingIocode) {
-        case 8: { /* BIN - bit string */
+        case 8: { /* BIN - bit string. RUNASM/CTOB.asm: only '0', '1' and
+                   * blank are legal input characters; anything else is
+                   * SEND ERROR 4:29 (ILLEGAL BIT STRING). Previously
+                   * silently stripped every non-0/1 character (including
+                   * genuinely illegal ones) and parsed whatever was left,
+                   * so bad input never surfaced as an error at all --
+                   * just a wrong, unflagged value. */
+            bool illegal = false;
+            for (const char *p = text; *p; p++) {
+                if (*p != '0' && *p != '1' && *p != ' ') {
+                    illegal = true;
+                    break;
+                }
+            }
+            if (illegal) {
+                char msg[128];
+                snprintf(msg, sizeof msg,
+                         "HalUCP: ILLEGAL BIT STRING \"%s\" for BIT input "
+                         "(only 0, 1 and blank accepted -- cf. CTOB, error 4:29); value set to 0",
+                         text);
+                hal_report_error(h, msg);
+                hal_set32(h, h->iobufAddr, 0);
+                break;
+            }
             char *stripped = malloc(strlen(text) + 1);
             size_t si = 0;
             for (const char *p = text; *p; p++) {
@@ -1667,22 +1766,34 @@ static void write_input_value(HalUCP *h, const char *text) {
  * an explicit SKIP(n>=1)): advance to a fresh line, discarding whatever
  * of the old line is still buffered — the traditional/pre-existing
  * behavior. Explicit SKIP(0): stay on the current still-buffered line
- * instead, then let COLUMN(n) reposition forward within it. */
+ * instead, then let COLUMN(n) reposition forward within it.
+ *
+ * May be called more than once per statement: if a COLUMN/TAB target
+ * lands beyond data that isn't buffered yet (this READ is itself what
+ * triggers the fetch -- the common case for the first READ of a new
+ * line under --interactive), this returns without setting
+ * readPositioningApplied, so handle_input()/halucp_provide_input() call
+ * it again once more data has actually arrived. readSkipApplied guards
+ * the SKIP-driven ib_reset() separately, so a retry never re-runs it
+ * (which would wipe the freshly-delivered data being retried against).
+ * Previously this silently clamped the advance to whatever little was
+ * buffered and gave up for the rest of the statement -- confirmed a
+ * real bug via a real fixture (test/fixtures/ioreadfixes.hal): a
+ * COLUMN/TAB target on a not-yet-fetched line was just dropped. */
 static void apply_read_positioning(HalUCP *h) {
     if (h->readPositioningApplied) return;
-    h->readPositioningApplied = true;
 
-    if (h->readSkipPending == 0) {
-        /* Stay on the current line -- leave inputBuffer/inputColumn as-is. */
-    } else {
-        ib_reset(h);
+    if (!h->readSkipApplied) {
+        h->readSkipApplied = true;
+        if (h->readSkipPending != 0) ib_reset(h);
+        /* readSkipPending == 0: stay on the current line, do nothing. */
     }
 
     if (h->readColumnPending >= 1) {
         size_t target = (size_t)h->readColumnPending;
         if (target > h->inputColumn) {
             size_t advance = target - h->inputColumn;
-            if (advance > h->inputBufferLen) advance = h->inputBufferLen;
+            if (advance > h->inputBufferLen) return; /* not buffered yet -- retry later */
             ib_consume_prefix(h, advance);
         } else if (target < h->inputColumn) {
             char msg[96];
@@ -1692,6 +1803,8 @@ static void apply_read_positioning(HalUCP *h) {
             hal_log(h, msg);
         }
     }
+
+    h->readPositioningApplied = true;
 }
 
 static bool handle_input(HalUCP *h) {
@@ -1710,7 +1823,7 @@ static bool handle_input(HalUCP *h) {
         return true; /* 'continue' */
     }
 
-    ExtractedField field = extract_next_field(h, iocode);
+    ExtractedField field = extract_field_for_read(h, iocode);
     if (field.kind != FIELD_NONE) {
         if (field.kind == FIELD_TERMINATED) {
             h->readTerminated = true;
@@ -1756,7 +1869,14 @@ void halucp_provide_input(HalUCP *h, const char *text) {
     ib_append(h, text);
     int iocode = h->pendingIocode;
 
-    ExtractedField field = extract_next_field(h, iocode);
+    /* Retries a COLUMN/TAB target apply_read_positioning() couldn't
+     * reach on the first attempt because the line it targets hadn't
+     * been fetched yet -- a no-op whenever positioning already finished
+     * (the far more common case: readPositioningApplied is already
+     * true, so this returns immediately). */
+    apply_read_positioning(h);
+
+    ExtractedField field = extract_field_for_read(h, iocode);
     if (field.kind == FIELD_NONE) {
         hal_log(h, "HalUCP: provideInput — still no field after appending\n");
         return;
@@ -2037,17 +2157,32 @@ static bool try_on_error_dispatch(HalUCP *h, int errGroup, int errNum) {
      * each as two halfwords at SA+2+2i/SA+2+2i+1 (see halUCP.coffee's
      * _tryOnErrorDispatch doc comment) — so the caller's original R0
      * (saved at SA+2/SA+3) must be recovered first to find its FIXV/
-     * handler slots. */
+     * handler slots.
+     *
+     * Those slots live at caller_stack_base + {18,19} (immediately after
+     * the 18-halfword SCAL save area -- same ON_ERROR_DIRECT_SLOT_BASE
+     * the direct-case walk above scans from), NOT at some computed
+     * "stack end". This function's own callerR0Hi *is* that stack base
+     * (same convention as `sa` above); callerR0Lo was never a stack
+     * *size* to add to it -- summing the two together and indexing
+     * backward from the result was this file's own faithful port of a
+     * real upstream `gpc` (JS) bug, fixed there 2026-08-06 (Don Schmidt,
+     * "ON ERROR cells are read at caller stack base + 18 (past the save
+     * area), not stack end") after confirming a procedure with workspace
+     * beyond its own save area dispatched to the wrong location. Ported
+     * here to match once the direct-case scan above (added independently
+     * of that fix, already using the correct base+18 convention) failed
+     * to find a match and this fallback was noticed still using the old
+     * formula. */
     uint32_t callerR0Hi = mcm_get16(&h->cpu->mainStorage, sa + 2);
-    uint32_t callerR0Lo = mcm_get16(&h->cpu->mainStorage, sa + 3);
-    uint32_t stackEnd = (callerR0Hi + callerR0Lo) & 0xffff;
-    uint32_t fixv = mcm_get16(&h->cpu->mainStorage, stackEnd - 2);
-    uint32_t handlerAddr16 = mcm_get16(&h->cpu->mainStorage, stackEnd - 1);
+    uint32_t errCell = (callerR0Hi + ON_ERROR_DIRECT_SLOT_BASE) & 0xffff;
+    uint32_t fixv = mcm_get16(&h->cpu->mainStorage, errCell);
+    uint32_t handlerAddr16 = mcm_get16(&h->cpu->mainStorage, errCell + 1);
 
     if (!match_error_handler(fixv, errGroup, errNum)) {
         char msg[160];
         snprintf(msg, sizeof msg, "HalUCP: ON ERROR slot FIXV=0x%x at hw 0x%x does not match (group=%d,num=%d)\n",
-                 fixv, stackEnd - 2, errGroup, errNum);
+                 fixv, errCell, errGroup, errNum);
         hal_log(h, msg);
         return false;
     }

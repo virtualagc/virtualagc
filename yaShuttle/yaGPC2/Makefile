@@ -106,6 +106,7 @@ test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS)) $(TEST_BIN_DIR)/example_gp
 	./test/run_all.sh
 	./test/test_debugger.sh
 	./test/test_scheduler.sh
+	./test/test_io_read.sh
 	./test/test_random.sh
 	./test/test_rtl.sh
 	@for t in $(UNIT_TESTS); do $(TEST_BIN_DIR)/$$t || exit 1; done

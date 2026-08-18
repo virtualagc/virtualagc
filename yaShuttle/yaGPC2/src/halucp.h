@@ -135,11 +135,29 @@ typedef struct {
      * readPositioningApplied: guards apply_read_positioning() to run
      * exactly once per READ statement (right before its first argument's
      * field extraction), since SKIP/COLUMN control specifiers can arrive
-     * as multiple separate control-trap calls before any XXAR. */
+     * as multiple separate control-trap calls before any XXAR.
+     * readAllStatement: true iff the current READ-family IOINIT's iocode
+     * was 1 (READALL) rather than 0 (plain READ) -- USA003087 10.1.2:
+     * READALL transfers CHARACTER data as a raw column range (no comma/
+     * blank/semicolon delimiter parsing), unlike everything extract_next_
+     * field() handles. See extract_readall_field() in halucp.c. */
     bool inReadIOInit;
     int readSkipPending;
     int readColumnPending;
     bool readPositioningApplied;
+    /* Guards apply_read_positioning()'s SKIP-driven ib_reset() (the
+     * "advance to a fresh line" step) separately from
+     * readPositioningApplied (the whole-statement completion flag) --
+     * needed because a COLUMN/TAB target can land beyond data that
+     * hasn't been fetched yet (this READ statement is itself what
+     * triggers the fetch, the common case for the first READ of a new
+     * line under --interactive), in which case apply_read_positioning()
+     * must return without finishing (leaving readPositioningApplied
+     * false so it retries once halucp_provide_input() delivers the
+     * awaited line) but must NOT re-run ib_reset() on that retry, which
+     * would wipe the freshly-delivered data it's retrying against. */
+    bool readSkipApplied;
+    bool readAllStatement;
 
     int formatNumBlanks;
     bool verbose;

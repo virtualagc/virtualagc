@@ -407,6 +407,7 @@ PROGRAMPROCESS_HAL="$(dirname "$0")/programprocess.hal"
 PROGRAMPROCESS_SECOND_HAL="$(dirname "$0")/programprocess_second.hal"
 PROGRAMPROCESSREPEAT_HAL="$(dirname "$0")/programprocessrepeat.hal"
 PROGRAMPROCESSREPEAT_SECOND_HAL="$(dirname "$0")/programprocessrepeat_second.hal"
+IOREADFIXES_HAL="$(dirname "$0")/ioreadfixes.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -499,5 +500,6 @@ build "$STRUCTURECOMPARE_HAL" STRUCCMP structurecompare
 build "$CHARACTERSUBBIT_HAL" CHSUBBI2 charactersubbit
 build_multi "$PROGRAMPROCESS_HAL" PRIMARY2 "$PROGRAMPROCESS_SECOND_HAL" SECOND programprocess
 build_multi "$PROGRAMPROCESSREPEAT_HAL" PRIMARY3 "$PROGRAMPROCESSREPEAT_SECOND_HAL" SECONDR programprocessrepeat
+build "$IOREADFIXES_HAL" IOFIX ioreadfixes
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm, randomsequence.fcm, dartboard.fcm, roll.fcm, charactercompare.fcm, remotevectorcopy.fcm, structurecompare.fcm, charactersubbit.fcm, programprocess.fcm, programprocessrepeat.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm, randomsequence.fcm, dartboard.fcm, roll.fcm, charactercompare.fcm, remotevectorcopy.fcm, structurecompare.fcm, charactersubbit.fcm, programprocess.fcm, programprocessrepeat.fcm, ioreadfixes.fcm (+ -lnk101.json)"

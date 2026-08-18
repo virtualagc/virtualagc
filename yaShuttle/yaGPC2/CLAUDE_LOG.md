@@ -87,3 +87,74 @@ document's planning stages, and it is already in the code as
   yaHALMAT2, the yaHALMAT2 peer session needs to make the matching
   change on its side (message sent 2026-08-18; check its reply before
   treating the two repos' copies as back in sync).
+
+### [2026-08-19] Target: problems.md
+- Cross-checked Don Schmidt's actively-developed `~/donschmidt/nsts-sim-gpc`
+  (the live `gpc`/JS project yaGPC2 was originally ported from, forked at
+  commit 3c60088) against yaGPC2's own runtime, per the user's request to
+  look for changes worth incorporating. Only 3 post-fork commits touch the
+  core `gpc/` emulation code (everything else in its recent history predates
+  the fork and is already in yaGPC2's baseline): `f4cf76d` (#RDL's operand is
+  an address field, not a count — an assembler/RLD-relocation fix, not
+  applicable to yaGPC2's own runtime, which never assembles/links);
+  `4d68a61` (per-instruction timing/interval-timers/real-time mode — no
+  action: yaGPC2's own `instr_time_us()` (src/timing.c) is independently
+  ported from the real historical FCOS compiler source
+  (`OBJECTGE.xpl`'s `EXECUTION_TIMES`), arguably more authoritative than
+  Don's IBM-manual-derived tables, and yaGPC2 already has equivalent
+  `--time-scale`/`--pacing` real-time mode); and `af9c4b9` (HAL error-handler
+  dispatch + channel-input fixes), which found four real, confirmed gaps in
+  yaGPC2 (all fixed 2026-08-19, all in `src/halucp.c`/`.h`):
+  1. `TAB(n)` on a READ statement had zero effect on input at all (always
+     mutated WRITE-side state `apply_read_positioning()` never reads) —
+     given an `inReadIOInit` branch mirroring `COLUMN`'s own.
+  2. `READALL` had no distinct runtime path — fell through to the same
+     comma/blank/semicolon-delimited field extraction as an ordinary READ,
+     silently truncating any raw column data containing an embedded
+     delimiter. New `extract_readall_field()`/`readAllStatement`
+     (USA003087 10.1.2: raw column transfer, up to the CHARACTER variable's
+     declared length). `hal-runtime-features.db`'s
+     `readall_statement_raw_character_stream_input` row was wrongly marked
+     `implemented_via_cpu` ("no distinct runtime code needed") — corrected
+     to `implemented`/`tested_dedicated`.
+  3. `BIT` input silently stripped any non-0/1 character (including
+     genuinely illegal ones) instead of raising ILLEGAL BIT STRING (error
+     4:29, matching RUNASM/CTOB.asm's real accepted-character set).
+     `hal-runtime-features.db`'s `conversion_data_errors_14_20_22_29_33_50`
+     row narrowed/corrected for error 29 specifically (the other 5 bundled
+     error numbers weren't re-examined).
+  4. Found *while* fixing #1: `apply_read_positioning()`'s COLUMN/TAB
+     target resolution silently gave up (clamped to whatever little was
+     already buffered) whenever the target landed on data that hadn't been
+     fetched yet — the common case for the first READ of a new line under
+     `--interactive`. Now retries via a `readSkipApplied` guard once
+     `halucp_provide_input()` delivers the awaited line, instead of
+     dropping the positioning request for the rest of the statement.
+  Also found independently while re-reading `try_on_error_dispatch()`'s own
+  SCAL-frame-unwind fallback (the code path used when the "direct case"
+  slot-scan above it finds no match): its own header comment already
+  disclosed it was "matches halUCP.coffee's `_tryOnErrorDispatch` doc
+  comment" — i.e. a faithful port of the *pre-fix* JS algorithm, using a
+  computed "stack end" (`callerR0Hi + callerR0Lo`) to locate the FIXV/
+  handler slots instead of the fixed `caller_stack_base + 18` the direct
+  case (and Don's fix) both use. Fixed to match; not independently covered
+  by a new test (no existing fixture drives an SVC-trapped I/O RTL routine
+  into this specific fallback), but zero regression across the full suite
+  and a direct match to the confirmed-correct formula used everywhere else
+  in this function.
+  New regression test: `test/test_io_read.sh` (`test/fixtures/ioreadfixes.hal`
+  + `_stdin.txt` + `_golden.txt`), wired into `Makefile`'s `test` target.
+  Separately: `nsts-sdl-dps`'s `lnk101` needed no rebuild (its own `HEAD` was
+  already 0 commits behind `origin/master`, and its Python install is
+  editable) — but yaGPC2's committed `.fcm` test fixtures were stale
+  relative to 5 real `lnk101` correctness fixes that landed after they were
+  last built (absent-section-relocs, PDE-stack-binding, ZCON sign bit,
+  CSECT-address-without-X). Re-ran `build_hal_fixtures.sh`; 3 of 57
+  fixtures actually changed bytes (`hello`/`read_write`/`read_eof_onerror`);
+  updated `debugger_hello_golden.txt` to match (pure symbol-table display
+  change). Committed separately (`abbaece05`) before this entry's own fixes.
+  GitHub issue #1343 (GPC-to-peripheral networking design, discussed per
+  the user's own pointer) is unrelated to any of the above — a separate,
+  future servicer-extension discussion, not implemented or acted on here
+  per the user's explicit instruction not to touch networking without
+  discussion first.
