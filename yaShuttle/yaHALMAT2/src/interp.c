@@ -4908,6 +4908,7 @@ static void close_current_process(halmat_state_t *state, bool *branched) {
                     cur->every_phase_ref += cur->repeat_interval;
                     cur->wake_deadline = cur->every_phase_ref;
                     cur->task_state = TASK_WAITING;
+                    cur->awaiting_next_cycle = true; /* now DORMANT between cycles: UNTIL may cancel here (Sec. 23.5) */
                     break;
                 case SCHD_REPEAT_AFTER:
                     /* Delay measured from *this* completion,
@@ -4916,6 +4917,7 @@ static void close_current_process(halmat_state_t *state, bool *branched) {
                      * distinction from EVERY. */
                     cur->wake_deadline = state->virtual_time + cur->repeat_interval;
                     cur->task_state = TASK_WAITING;
+                    cur->awaiting_next_cycle = true; /* now DORMANT between cycles: UNTIL may cancel here (Sec. 23.5) */
                     break;
                 case SCHD_REPEAT_ON:
                     /* Self-reschedule ON <event>, synthesized
@@ -13890,9 +13892,28 @@ static int sched_pick_next(halmat_state_t *state) {
 
 static void sched_wake_waiting(halmat_state_t *state) {
     for (int i = 0; i < state->task_count; i++) {
-        if (state->tasks[i].in_use && state->tasks[i].task_state == TASK_WAITING &&
-            state->tasks[i].wake_deadline <= state->virtual_time) {
-            state->tasks[i].task_state = TASK_READY;
+        halmat_task_t *t = &state->tasks[i];
+        if (!t->in_use || t->task_state != TASK_WAITING) continue;
+        /* Between-cycles UNTIL-time cancellation (USA003087 Sec. 23.5, CONSTANT
+         * INTERCYCLE DELAY): "cancellation takes place in the same way as
+         * before, with the provision that if the cancellation condition is met
+         * in the interval between cycles, cancellation takes place immediately."
+         * A cyclic task (REPEAT AFTER/EVERY) waiting in the gap before its next
+         * cycle, whose UNTIL time falls at or before that next wake and has now
+         * been reached, is cancelled immediately -- NOT run to the next cycle's
+         * CLOSE. (Bare REPEAT has no intercycle gap: it rearms READY and never
+         * lands in TASK_WAITING here, so its "at the end of the first cycle
+         * which finishes later than the specified time" check in
+         * close_current_process, Sec. 23.5 IMMEDIATE RECYCLING, still governs.) */
+        if (t->awaiting_next_cycle && t->stop_kind == SCHD_STOP_UNTIL_TIME &&
+            t->stop_deadline <= t->wake_deadline && state->virtual_time >= t->stop_deadline) {
+            t->task_state = TASK_TERMINATED;
+            if (t->symbol < HALMAT_SYT_MAX) state->symbol_active_task[t->symbol] = -1;
+            continue;
+        }
+        if (t->wake_deadline <= state->virtual_time) {
+            t->task_state = TASK_READY;
+            t->awaiting_next_cycle = false; /* next cycle is starting -- no longer between cycles */
         }
     }
 }
@@ -14090,19 +14111,39 @@ static void sched_wake_exclusive(halmat_state_t *state) {
  * that's a silent-starvation outcome (the ON task just never runs), not a
  * crash or a hang, and no fixture has hit it in practice. */
 static void sched_advance_to_next_wake(halmat_state_t *state) {
-    bool any_ready = false, any_waiting = false;
-    int64_t earliest = 0;
-    for (int i = 0; i < state->task_count; i++) {
-        if (!state->tasks[i].in_use) continue;
-        if (state->tasks[i].task_state == TASK_READY) { any_ready = true; break; }
-        if (state->tasks[i].task_state == TASK_WAITING) {
-            if (!any_waiting || state->tasks[i].wake_deadline < earliest) earliest = state->tasks[i].wake_deadline;
-            any_waiting = true;
+    /* Loop, because a single advance step may only CANCEL a cyclic task at its
+     * between-cycles UNTIL instant (Sec. 23.5) without making anything READY --
+     * e.g. `SCHEDULE W ..., REPEAT EVERY t UNTIL s; WAIT(long);` cancels W at s,
+     * leaving only the primal's own later WAIT wake pending. Without looping,
+     * the dispatch would then see nothing READY and halt before ever reaching
+     * that later wake. Each iteration advances strictly forward and the WAITING
+     * set only shrinks (a cancel removes a task), so this terminates. */
+    for (;;) {
+        bool any_ready = false, any_waiting = false;
+        int64_t earliest = 0;
+        for (int i = 0; i < state->task_count; i++) {
+            if (!state->tasks[i].in_use) continue;
+            if (state->tasks[i].task_state == TASK_READY) { any_ready = true; break; }
+            if (state->tasks[i].task_state == TASK_WAITING) {
+                /* A cyclic task's next event is its next-cycle wake OR, if
+                 * sooner, its UNTIL-time cancellation in the intercycle gap
+                 * (Sec. 23.5) -- stop at whichever comes first so we don't
+                 * overshoot the cancellation instant and run an extra cycle
+                 * (RUNTIME()/DATE()/CLOCKTIME() would then read a later value). */
+                int64_t cand = state->tasks[i].wake_deadline;
+                if (state->tasks[i].awaiting_next_cycle &&
+                    state->tasks[i].stop_kind == SCHD_STOP_UNTIL_TIME &&
+                    state->tasks[i].stop_deadline < cand) {
+                    cand = state->tasks[i].stop_deadline;
+                }
+                if (!any_waiting || cand < earliest) earliest = cand;
+                any_waiting = true;
+            }
         }
-    }
-    if (!any_ready && any_waiting && earliest > state->virtual_time) {
+        if (any_ready || !any_waiting) return;        /* something runnable, or nothing left to wake */
+        if (earliest <= state->virtual_time) return;  /* safety: no forward progress possible */
         state->virtual_time = earliest;
-        sched_wake_waiting(state);
+        sched_wake_waiting(state);                     /* may wake, or only cancel -> loop again */
     }
 }
 
@@ -14149,6 +14190,15 @@ bool interp_step(halmat_state_t *state, FILE *out) {
         next = state->current_task;
     } else {
         sched_advance_to_next_wake(state);
+        /* The fast-forward can itself change task states -- in particular a
+         * between-cycles UNTIL-time cancellation (Sec. 23.5) terminates a
+         * cyclic task at its stop instant -- which may release a WAIT FOR
+         * DEPENDENT / deferred CLOSE that was waiting on it. Re-run the
+         * dependent wake so that resume happens in THIS step; otherwise
+         * pick_next would find nothing ready and halt the whole program before
+         * the freed task ever runs again. */
+        sched_wake_dependents(state);
+        if (state->halted) return true;
         next = sched_pick_next(state);
         if (next == -1) return true; /* nothing left ready (and nothing left to ever wake) */
     }

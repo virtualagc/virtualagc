@@ -1,0 +1,18 @@
+C/ REPEAT AFTER ... UNTIL time, between-cycles cancellation (USA003087 Sec.
+C/ 23.5, CONSTANT INTERCYCLE DELAY): "cancellation takes place in the same way
+C/ as before, with the provision that if the cancellation condition is met in
+C/ the interval between cycles, cancellation takes place immediately."  NEXT
+C/ runs one cycle at t~0, then would wait AFTER 10.0 for its next cycle; but the
+C/ UNTIL 3.0 falls inside that [0,10] intercycle gap, so NEXT is cancelled at
+C/ t=3 and its second cycle never runs.  The primal's WAIT FOR DEPENDENT then
+C/ releases.  Expected: TICK / DONE (exactly one TICK).  (Before the fix the
+C/ stop was only checked at each cycle's CLOSE, so the fast-forward overshot to
+C/ t=10, ran a second cycle, and this printed TICK / TICK / DONE.)
+ TREPUNT: PROGRAM;
+    NEXT: TASK;
+       WRITE(6) 'TICK';
+    CLOSE NEXT;
+    SCHEDULE NEXT PRIORITY(80) DEPENDENT, REPEAT AFTER 10.0 UNTIL 3.0;
+    WAIT FOR DEPENDENT;
+    WRITE(6) 'DONE';
+ CLOSE TREPUNT;

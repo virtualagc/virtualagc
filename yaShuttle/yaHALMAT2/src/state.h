@@ -760,6 +760,14 @@ typedef struct {
     struct { uint16_t sym; uint16_t depth; } excl_held[HALMAT_MAX_EXCL_HELD];
     uint8_t excl_held_sp;
 
+    bool awaiting_next_cycle; /* true only while a cyclic (REPEAT EVERY/AFTER) task is DORMANT in the
+                                * gap between cycles -- i.e. it has completed a cycle and is TASK_WAITING
+                                * for its next one to start. Set at that rearm (close_current_process),
+                                * cleared when the next cycle is dispatched (sched_wake_waiting). It
+                                * distinguishes that intercycle dormancy from a mid-body WAIT (also
+                                * TASK_WAITING), which matters because a between-cycles UNTIL-time
+                                * cancellation (USA003087 Sec. 23.5) may fire ONLY in the former -- Sec.
+                                * 23.6: "cancellation ... cannot occur when a process is in mid-cycle". */
     halmat_schd_repeat_t repeat_kind;
     int32_t repeat_interval; /* ticks; valid iff repeat_kind is EVERY or AFTER. Resolved once, at the
                                * original SCHEDULE statement's execution -- re-evaluating it per cycle

@@ -1089,7 +1089,15 @@ run ./run_raf_fixture.sh file 8 "$(printf '         42\n 3.5000000E+00\n        
 run ./run_local_fixture.sh sched_at "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')" --time-scale 1000000
 run ./run_local_fixture.sh sched_in "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')" --time-scale 1000000
 run ./run_local_fixture.sh sched_on "$(printf 'BEFORE SCHEDULE\nBEFORE SIGNAL\nAFTER SIGNAL')"
-run ./run_local_fixture.sh sched_every "N=               5" --time-scale 1000000
+# sched_every (EVERY 1000 UNTIL 3500) is N=4, not 5: its UNTIL falls in a true
+# intercycle gap ([3000,4000]), so per USA003087 Sec. 23.5 cancellation happens
+# immediately at t=3500 and the 4000-start cycle never runs -- corrected from an
+# earlier at-cycle-end-only check that ran that extra cycle. sched_after
+# (AFTER 1000 UNTIL 4200, worker WAITs 300/cycle) stays N=4: there its UNTIL
+# coincides with a cycle's own completion, so the at-cycle-end termination
+# governs and no between-cycles cancel applies (cancellation never fires mid-
+# cycle, Sec. 23.6). See sched_every_wait (same EVERY case, worker WAITs).
+run ./run_local_fixture.sh sched_every "N=               4" --time-scale 1000000
 run ./run_local_fixture.sh sched_after "N=               4" --time-scale 1000000
 run ./run_local_fixture.sh sched_while "N=               1" --time-scale 1000000
 # User-reported sweep item: SCHEDULE's STOPPING-only form (WHILE/UNTIL
@@ -1112,7 +1120,7 @@ run ./run_local_fixture.sh sched_stopping_only "N=               1" --time-scale
 # itself ON EV1 (never reset -- deliberately, to prove the rearm actually
 # re-fires) up to 3 times, then self-CANCELs.
 run ./run_local_fixture.sh sched_self_on "COUNT=               3" --time-scale 1000000
-run ./run_local_fixture.sh sched_every_wait "N=               5" --time-scale 1000000
+run ./run_local_fixture.sh sched_every_wait "N=               4" --time-scale 1000000
 # User-reported bug: a TASK rescheduling *itself* from inside its own
 # body (`SCHEDULE NEST IN 1.0 PRIORITY(80);` executed by NEST, right
 # before its own CLOSE) failed with "task already active" -- USA003087
@@ -1170,6 +1178,14 @@ run ./run_local_fixture.sh exclusive_cutoff "$(printf 'BEFORE\nIN P\nB CALLS\nOU
 # WAIT 3600. Convention shared with yaGPC2 (start anchor + virtual progression
 # + override) so the two emulators don't diverge.
 run ./run_local_fixture.sh datetime "$(printf '      78032\n 0.0          \n 3.6000000E+03')" --start-time "1978-02-01 00:00:00" --time-scale 1000000
+# REPEAT AFTER ... UNTIL time, between-cycles cancellation (USA003087 Sec. 23.5
+# CONSTANT INTERCYCLE DELAY: "if the cancellation condition is met in the
+# interval between cycles, cancellation takes place immediately"). NEXT runs one
+# cycle, then its UNTIL 3.0 falls inside the AFTER-10.0 intercycle gap, so it's
+# cancelled at t=3 before a second cycle -- the fast-forward now stops at the
+# UNTIL instant instead of overshooting to the next wake. Expected TICK/DONE (a
+# regression here prints TICK/TICK/DONE). Cross-checked with yaGPC2.
+run ./run_local_fixture.sh repeat_after_until "$(printf 'TICK\nDONE')" --time-scale 1000000
 
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale
@@ -1178,7 +1194,7 @@ run ./run_local_fixture.sh datetime "$(printf '      78032\n 0.0          \n 3.6
 # interp_run_burst() path -- this is what would catch a bug in the
 # signal-mode budget/tick-consumption arithmetic itself, independent of
 # real-time precision (see interp.c's interp_run_signal()).
-run ./run_local_fixture.sh sched_every "N=               5" --time-scale 1000000 --pacing=signal
+run ./run_local_fixture.sh sched_every "N=               4" --time-scale 1000000 --pacing=signal
 
 # Proves interp_run()'s wall-clock real-time pacing actually does
 # something -- every sched_*/canc* fixture above passes a large
