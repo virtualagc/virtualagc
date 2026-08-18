@@ -3860,6 +3860,92 @@ entire `SCHEDULE ... REPEAT` family (§7.7 `AT`/`IN`, item #6 `EVERY`,
 §7.16 bare/`AFTER`/numeric-`UNTIL`, this section's `WHILE`/event-`UNTIL`)
 except the two confirmed-out-of-scope rows noted above.
 
+### 7.18 `OFF ERROR`, per-process error environments, dynamic scoping — all three already correctly implemented with zero new code, two real `yaHALMAT2` bugs found
+
+Self-selected from the survey's three `unresolved` `Error Handling` rows
+(55, 57, 58 — genuinely unassessed, not known-missing, unlike this
+section's other work): `OFF ERROR` (`USA003087` §25.2), per-process
+error environments, and dynamic (call-depth) scoping of `ON ERROR`
+modifications (§25.1). Row 57's own old notes had specifically flagged
+per-process isolation as worth re-checking "now that TASK/SCHEDULE/WAIT
+is real" — this is that check.
+
+**All three turn out to already be correctly implemented, for free, by
+the existing `ON ERROR` dispatch mechanism's own design** — reading
+`try_on_error_dispatch()` (`halucp.c`) closely (not just grepping for
+`OFF ERROR`, which finds nothing at all) shows it never consults any
+kind of global or persistent "which handlers are currently active"
+table. Instead, at the exact moment a `SEND ERROR` fires, it reads the
+*live* `R0` register (the AP-101S stack-area/frame pointer) and scans
+the compiler-emitted `FIXV`/handler slots physically present in the
+erroring routine's own compiled stack frame, walking up through saved
+caller `R0` values (at `SA+2`) as needed. This has three consequences,
+none requiring a single line of new `yaGPC2` code:
+
+- **`OFF ERROR`** is a pure compile-time bookkeeping construct: `HALSFC`
+  itself simply stops emitting a `FIXV` registration for code textually
+  after an `OFF ERROR` statement, so there is nothing live left for the
+  scan to find there. Confirmed via a real compiled program (`ON
+  ERROR$(4:5) GO TO CAUGHT; ...SQRT(neg)...; OFF ERROR$(4:5);
+  ...SQRT(neg)... `): the first domain error jumps to `CAUGHT`, the
+  second falls straight through with the default fixup value — byte-
+  identical to `yaHALMAT2`'s own output for the same program.
+- **Per-process isolation** falls out of `R0` being part of the full
+  register bank (`R0`-`R7`) `schedule.c`'s `sched_save_context`/
+  `sched_restore_context` already save and restore on every scheduler
+  context switch — a `TASK`'s own `ON ERROR` environment is
+  automatically isolated from every other task's with zero extra
+  bookkeeping, since each task's own `R0` (and hence its own compiled
+  stack frame and `FIXV` slots) is preserved independently.
+- **Dynamic scoping** falls out of the scan being over the *live* call
+  chain at the exact instant of the error, not a static table: once a
+  `PROCEDURE`/`FUNCTION` returns, its own frame's `FIXV` slots simply
+  fall out of reach of that walk (the caller's own `R0` is restored to
+  its own frame by the callee's epilogue) — nothing needs to be
+  explicitly "removed."
+
+**Two real `yaHALMAT2` bugs found confirming both of the latter two
+empirically**, not just by code inspection — cross-checking is what
+this session repeatedly relies on, and here it caught something
+`yaGPC2`'s own correctness couldn't be validated *against* `yaHALMAT2`
+for, only *contrasted* with it:
+- **Cross-task leak**: a `TASK` with its own `ON ERROR$(4:5) GO TO
+  TASKCAUGHT;` catches its own `SQRT` domain error and closes; the
+  primal (no `ON ERROR` of its own) later triggers the identical error.
+  `yaGPC2`: falls through correctly to the default fixup (`PRIMAL
+  UNCAUGHT 2.0`). `yaHALMAT2`: incorrectly re-triggers the closed
+  task's own `GO TO` a second time.
+- **Stale-after-return leak**: a `FUNCTION P` with its own `ON
+  ERROR$(4:5) GO TO PCAUGHT;` catches its own domain error and
+  `RETURN`s; the calling main line later triggers the identical error
+  (`P` has already returned, no `ON ERROR` of its own in force at that
+  point). `yaGPC2`: falls through correctly. `yaHALMAT2`: incorrectly
+  re-triggers `P`'s own (already-returned) `GO TO` again.
+
+Reported both to `yaHALMAT2` over the direct cross-session channel; they
+confirmed the same root cause explains both (their own `ON ERROR`
+dispatch almost certainly keys off "last handler installed wins" global
+state rather than the live call chain, so a handler is never unwound
+when its installing block returns) — the same architectural family as
+the shared-interpreter-call-stack `REENTRANT` concern raised earlier
+this session, now shown to affect `ON ERROR` scoping too, not just
+local-variable storage. Queued on their side pending their own user's
+prioritization; not blocking here, since `yaHALMAT2` was never a valid
+oracle for either of these two fixtures in the first place (its own bug
+*is* the thing each fixture is checking for) — `yaGPC2`'s own
+correctness rests on the `R0`/`SA`-walk code-level reasoning above, not
+on matching `yaHALMAT2`'s (wrong, in these two cases) output.
+
+Three new fixtures — `offerror.hal`, `errorpertask.hal`,
+`errordynscope.hal` — exercised by `test_scheduler.sh` under both
+`--pacing` modes via a new `run_case_with_stderr` helper (these three
+deliberately trigger a real `SEND ERROR`, so unlike every other case in
+this file they have real, expected stderr content — `hal_report_error()`
+reports every `SEND ERROR` unconditionally, not gated on `--verbose` the
+way `hal_log()`'s own diagnostic messages are — diffed against its own
+golden rather than required empty). `hal-runtime-features.db` rows 55,
+57, 58 updated from `unresolved` to `implemented`/`tested_dedicated`.
+
 ---
 
 ## Methodology and caveats

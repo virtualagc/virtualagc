@@ -246,6 +246,21 @@
 #                          the UNTIL case caught (a stale hasRun re-use
 #                          that couldn't distinguish "never run" from
 #                          "between cycle 2 and 3").
+#   offerror.fcm           <- offerror.hal, errorpertask.fcm <-
+#                          errorpertask.hal, errordynscope.fcm <-
+#                          errordynscope.hal (all checked in alongside
+#                          this script) -- OFF ERROR (USA003087 25.2),
+#                          per-process error environments, and dynamic
+#                          (call-depth) scoping of ON ERROR modifications
+#                          (25.1) -- all three confirmed already
+#                          correctly implemented with zero new code
+#                          (try_on_error_dispatch's own R0/SA-relative
+#                          walk is inherently per-process and call-chain
+#                          scoped, since R0 is part of the register bank
+#                          the scheduler already saves/restores per
+#                          task). A real yaHALMAT2 bug found along the
+#                          way on both the per-task and dynamic-scoping
+#                          fronts -- see problems.md 7.18.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -290,6 +305,9 @@ REPEATAFTERCANCEL_HAL="$(dirname "$0")/repeataftercancel.hal"
 REPEATWHILE_HAL="$(dirname "$0")/repeatwhile.hal"
 REPEATUNTILEVENT_HAL="$(dirname "$0")/repeatuntilevent.hal"
 REPEATWHILEFALSE_HAL="$(dirname "$0")/repeatwhilefalse.hal"
+OFFERROR_HAL="$(dirname "$0")/offerror.hal"
+ERRORPERTASK_HAL="$(dirname "$0")/errorpertask.hal"
+ERRORDYNSCOPE_HAL="$(dirname "$0")/errordynscope.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -347,5 +365,8 @@ build "$REPEATAFTERCANCEL_HAL" REPACNCL repeataftercancel
 build "$REPEATWHILE_HAL" RPWHIL2 repeatwhile
 build "$REPEATUNTILEVENT_HAL" RPUNTL2 repeatuntilevent
 build "$REPEATWHILEFALSE_HAL" RPWHFAL repeatwhilefalse
+build "$OFFERROR_HAL" OFFERR2 offerror
+build "$ERRORPERTASK_HAL" ERRPTASK errorpertask
+build "$ERRORDYNSCOPE_HAL" ERRDYNS errordynscope
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm (+ -lnk101.json)"

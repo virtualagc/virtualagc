@@ -67,6 +67,50 @@ run_case() {
     rm -f "$act_out" "$act_err"
 }
 
+# Like run_case, but for fixtures that deliberately trigger a real
+# SEND ERROR (SVC 0x0014) -- hal_report_error() reports every SEND
+# ERROR unconditionally to stderr (not gated on --verbose, unlike
+# hal_log()'s own diagnostic-only messages), so these fixtures always
+# produce real stderr output, unlike every other case in this file.
+# Diffs stderr against its own golden instead of requiring it empty.
+run_case_with_stderr() {
+    label="$1"; pacing="$2"; fcm="$3"; sym="$4"; golden="$5"; errGolden="$6"
+    shift 6 || true
+    extra_args=("$@")
+
+    act_out=$(mktemp)
+    act_err=$(mktemp)
+
+    "$YAGPC2" --interactive --no-trace --no-verbose --symbols "$sym" --line-width 240 --max-steps 200000 \
+        --time-scale 1000000 --pacing "$pacing" "${extra_args[@]}" "$fcm" >"$act_out" 2>"$act_err"
+    act_code=$?
+
+    ok=1
+
+    if ! diff -u "$golden" "$act_out"; then
+        echo "FAIL [scheduler/$label]: stdout differs from $golden"
+        ok=0
+    fi
+
+    if ! diff -u "$errGolden" "$act_err"; then
+        echo "FAIL [scheduler/$label]: stderr differs from $errGolden"
+        ok=0
+    fi
+
+    if [ "$act_code" != 0 ]; then
+        echo "FAIL [scheduler/$label]: exit code $act_code (expected 0)"
+        ok=0
+    fi
+
+    if [ "$ok" = 1 ]; then
+        echo "PASS [scheduler/$label]"
+    else
+        fail=1
+    fi
+
+    rm -f "$act_out" "$act_err"
+}
+
 # --pacing=burst (default polling design) and --pacing=signal (POSIX
 # timer/sigsuspend-driven alternative, run.c's batchrunner_pace_signal())
 # -- both implement the same pacing contract and must produce byte-
@@ -252,5 +296,20 @@ run_case "repeatuntilevent/burst"  "burst"  "fixtures/repeatuntilevent.fcm" "fix
 run_case "repeatuntilevent/signal" "signal" "fixtures/repeatuntilevent.fcm" "fixtures/repeatuntilevent-lnk101.json" "fixtures/repeatuntilevent_golden.txt"
 run_case "repeatwhilefalse/burst"  "burst"  "fixtures/repeatwhilefalse.fcm" "fixtures/repeatwhilefalse-lnk101.json" "fixtures/repeatwhilefalse_golden.txt"
 run_case "repeatwhilefalse/signal" "signal" "fixtures/repeatwhilefalse.fcm" "fixtures/repeatwhilefalse-lnk101.json" "fixtures/repeatwhilefalse_golden.txt"
+
+# OFF ERROR (USA003087 25.2), per-process error environments, and
+# dynamic (call-depth) scoping of ON ERROR modifications (25.1) --
+# confirmed already correctly implemented with zero new code (see
+# problems.md 7.18). All three deliberately trigger a real domain error
+# (SQRT of a negative number) so run_case_with_stderr's own stderr
+# golden captures the real SEND ERROR report hal_report_error() always
+# emits, unconditionally, for a real error -- unlike every other case
+# in this file, these are NOT expected to have empty stderr.
+run_case_with_stderr "offerror/burst"  "burst"  "fixtures/offerror.fcm" "fixtures/offerror-lnk101.json" "fixtures/offerror_golden.txt" "fixtures/offerror_stderr_golden.txt"
+run_case_with_stderr "offerror/signal" "signal" "fixtures/offerror.fcm" "fixtures/offerror-lnk101.json" "fixtures/offerror_golden.txt" "fixtures/offerror_stderr_golden.txt"
+run_case_with_stderr "errorpertask/burst"  "burst"  "fixtures/errorpertask.fcm" "fixtures/errorpertask-lnk101.json" "fixtures/errorpertask_golden.txt" "fixtures/errorpertask_stderr_golden.txt"
+run_case_with_stderr "errorpertask/signal" "signal" "fixtures/errorpertask.fcm" "fixtures/errorpertask-lnk101.json" "fixtures/errorpertask_golden.txt" "fixtures/errorpertask_stderr_golden.txt"
+run_case_with_stderr "errordynscope/burst"  "burst"  "fixtures/errordynscope.fcm" "fixtures/errordynscope-lnk101.json" "fixtures/errordynscope_golden.txt" "fixtures/errordynscope_stderr_golden.txt"
+run_case_with_stderr "errordynscope/signal" "signal" "fixtures/errordynscope.fcm" "fixtures/errordynscope-lnk101.json" "fixtures/errordynscope_golden.txt" "fixtures/errordynscope_stderr_golden.txt"
 
 exit $fail
