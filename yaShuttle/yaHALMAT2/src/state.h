@@ -1319,6 +1319,30 @@ struct halmat_state {
                              * brackets of whatever nested XXST is active in io_pending
                              * right now); 0 = io_pending is the outermost/only frame. */
 
+    /* Per-task saved execution context, for REENTRANT correctness (USA003087
+     * Sec. 27.3). The call-return stack, the pending-I/O/call frames, and the
+     * AUTOMATIC (per-invocation) local variables above are all single, GLOBAL
+     * structures reflecting whichever task is currently running. When a task is
+     * suspended mid-call (e.g. a REENTRANT procedure WAITing) and another enters
+     * the same procedure, those globals would be shared and clobbered. On every
+     * task switch, swap_task_context() moves the outgoing task's live context
+     * into its slot here and restores the incoming task's -- so each concurrent
+     * invocation keeps its own call chain, ASSIGN/CALL args, and AUTOMATIC
+     * locals. STATIC/COMPOOL data (not AUTOMATIC) is deliberately NOT swapped,
+     * staying shared. saved_auto[t] is lazily allocated (automatic_count
+     * entries, parallel to automatic_syms) the first time task t is switched
+     * away from. Ownership of any heap a swapped entry holds (container
+     * elements, strings, I/O item lists) moves with the copy; the source is
+     * zeroed so it is never double-freed. */
+    size_t saved_call_return_stack[HALMAT_MAX_TASKS][64];
+    uint16_t saved_call_return_sp[HALMAT_MAX_TASKS];
+    struct halmat_io_pending_frame saved_io_pending[HALMAT_MAX_TASKS];
+    struct halmat_io_pending_frame saved_io_pending_stack[HALMAT_MAX_TASKS][8];
+    uint8_t saved_io_pending_sp[HALMAT_MAX_TASKS];
+    halmat_syt_entry_t *saved_auto[HALMAT_MAX_TASKS];
+    uint16_t *automatic_syms; /* SYT indices of AUTOMATIC symbols, built in interp_set_symtab */
+    size_t automatic_count;
+
     /* Pending shaping-function argument list, accumulated between SFST
      * and SFND (class-0/SFST.md/SFAR.md/SFND.md) -- e.g. `V1 =
      * VECTOR(S1, S2, S1);`. Each SFAR's operand is stored raw (not

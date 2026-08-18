@@ -1,0 +1,23 @@
+C/ REENTRANT AUTOMATIC-local isolation (USA003087 Sec. 27.3) -- see run_all.sh.
+ TRE: PROGRAM;
+    DECLARE SCALAR, RA, RB;
+    P: PROCEDURE(X) ASSIGN(Y) REENTRANT;
+       DECLARE X SCALAR, Y SCALAR;
+       DECLARE LOC SCALAR AUTOMATIC;
+       LOC = X;
+       WAIT 1.0;
+       Y = LOC;
+    CLOSE P;
+    TASKA: TASK;
+       CALL P(10.0) ASSIGN(RA);
+    CLOSE TASKA;
+    TASKB: TASK;
+       WAIT 0.5;
+       CALL P(20.0) ASSIGN(RB);
+    CLOSE TASKB;
+    SCHEDULE TASKA PRIORITY(80);
+    SCHEDULE TASKB PRIORITY(80);
+    WAIT 3.0;
+    WRITE(6) 'RA=', RA;
+    WRITE(6) 'RB=', RB;
+ CLOSE TRE;

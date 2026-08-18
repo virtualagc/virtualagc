@@ -3446,6 +3446,29 @@ void interp_set_symtab(halmat_state_t *state, const halmat_symtab_t *symtab) {
             default: break;
         }
     }
+
+    /* Build the list of AUTOMATIC (per-invocation) symbols, used by
+     * swap_task_context() to keep each task's own locals isolated across a task
+     * switch (USA003087 Sec. 27.3, REENTRANT). Only per-invocation locals carry
+     * this flag -- STATIC/COMPOOL shared data does not, so it is never swapped
+     * and stays shared. */
+    free(state->automatic_syms);
+    state->automatic_syms = NULL;
+    state->automatic_count = 0;
+    size_t nauto = 0;
+    for (size_t i = 0; i < symtab->count; i++) {
+        if ((symtab->entries[i].flags & HALMAT_SYM_FLAG_AUTOMATIC) &&
+            symtab->entries[i].index < HALMAT_SYT_MAX) nauto++;
+    }
+    if (nauto) {
+        state->automatic_syms = malloc(nauto * sizeof(uint16_t));
+        for (size_t i = 0; i < symtab->count; i++) {
+            if ((symtab->entries[i].flags & HALMAT_SYM_FLAG_AUTOMATIC) &&
+                symtab->entries[i].index < HALMAT_SYT_MAX) {
+                state->automatic_syms[state->automatic_count++] = (uint16_t)symtab->entries[i].index;
+            }
+        }
+    }
 }
 
 void interp_set_external_units(halmat_state_t *state, const halmat_external_call_map_t *map, size_t count) {
@@ -3597,6 +3620,29 @@ void interp_cleanup(halmat_state_t *state) {
         free(state->syt[i].char_value);
         state->syt[i].char_value = NULL;
     }
+
+    /* Per-task saved REENTRANT context (swap_task_context): free any owned heap
+     * a suspended task's saved AUTOMATIC locals or pending-I/O frames still
+     * hold. Only the currently-running task's context lives in the global
+     * structures freed above; every other task's is here. */
+    for (int t = 0; t < HALMAT_MAX_TASKS; t++) {
+        if (state->saved_auto[t]) {
+            for (size_t i = 0; i < state->automatic_count; i++) {
+                free_syt_container(&state->saved_auto[t][i]);
+                free(state->saved_auto[t][i].char_value);
+            }
+            free(state->saved_auto[t]);
+            state->saved_auto[t] = NULL;
+        }
+        free(state->saved_io_pending[t].items);
+        state->saved_io_pending[t].items = NULL;
+        for (uint8_t s = 0; s < state->saved_io_pending_sp[t]; s++) {
+            free(state->saved_io_pending_stack[t][s].items);
+        }
+    }
+    free(state->automatic_syms);
+    state->automatic_syms = NULL;
+    state->automatic_count = 0;
     for (size_t i = 0; i < HALMAT_VAC_MAX; i++) {
         if (state->vac[i].is_string) free(state->vac[i].string);
         if (state->vac[i].is_container) free(state->vac[i].container);
@@ -14247,6 +14293,59 @@ static void sched_advance_to_next_wake(halmat_state_t *state) {
     }
 }
 
+static void ensure_saved_auto(halmat_state_t *state, int task) {
+    if (state->automatic_count && !state->saved_auto[task]) {
+        state->saved_auto[task] = calloc(state->automatic_count, sizeof(halmat_syt_entry_t));
+    }
+}
+
+/* Swap the global execution context -- call-return stack, pending I/O/call
+ * frames, and AUTOMATIC (per-invocation) locals -- from the outgoing task `old`
+ * to the incoming task `new` on a task switch, so two concurrent invocations of
+ * the same REENTRANT procedure/function each keep their own (USA003087 Sec.
+ * 27.3). Heap ownership (container elements, strings, I/O item lists) MOVES with
+ * each copy; the source slot is then zeroed so nothing is aliased and later
+ * double-freed. A never-suspended task's saved slots are all zero, which
+ * restores as an empty context (fresh call stack, no pending I/O, fresh
+ * AUTOMATIC locals) -- exactly right for a task starting or entering a block. */
+static void swap_task_context(halmat_state_t *state, int old, int new) {
+    /* Call-return stack: plain size_t, no owned heap -- copy both ways. */
+    memcpy(state->saved_call_return_stack[old], state->call_return_stack, sizeof(state->call_return_stack));
+    state->saved_call_return_sp[old] = (uint16_t)state->call_return_sp;
+    memcpy(state->call_return_stack, state->saved_call_return_stack[new], sizeof(state->call_return_stack));
+    state->call_return_sp = state->saved_call_return_sp[new];
+
+    /* Pending-I/O/call frames own heap `items` lists -- MOVE them. old's saved
+     * slot was zeroed when old last became current, so overwriting leaks nothing;
+     * new's saved slot is zeroed after restoring so its items aren't double-freed. */
+    state->saved_io_pending[old] = state->io_pending;
+    memcpy(state->saved_io_pending_stack[old], state->io_pending_stack, sizeof(state->io_pending_stack));
+    state->saved_io_pending_sp[old] = state->io_pending_sp;
+
+    state->io_pending = state->saved_io_pending[new];
+    memcpy(state->io_pending_stack, state->saved_io_pending_stack[new], sizeof(state->io_pending_stack));
+    state->io_pending_sp = state->saved_io_pending_sp[new];
+
+    memset(&state->saved_io_pending[new], 0, sizeof(state->saved_io_pending[new]));
+    memset(state->saved_io_pending_stack[new], 0, sizeof(state->saved_io_pending_stack[new]));
+    state->saved_io_pending_sp[new] = 0;
+
+    /* AUTOMATIC locals: the same 3-way move, per symbol. */
+    if (state->automatic_count) {
+        ensure_saved_auto(state, old);
+        ensure_saved_auto(state, new);
+        if (state->saved_auto[old] && state->saved_auto[new]) {
+            for (size_t i = 0; i < state->automatic_count; i++) {
+                uint16_t sym = state->automatic_syms[i];
+                halmat_syt_entry_t live = state->syt[sym];        /* old's live value (owns heap) */
+                state->syt[sym] = state->saved_auto[new][i];      /* new's suspended value (or zeroed = fresh) */
+                memset(&state->saved_auto[new][i], 0, sizeof(halmat_syt_entry_t));
+                state->saved_auto[old][i] = live;                 /* old's saved slot (was zeroed) now owns it */
+            }
+        }
+    }
+}
+
 /* Runs the scheduler for exactly one instruction (picks the
  * highest-priority TASK_READY task, executes one instruction for it,
  * advances the virtual clock). Returns true once nothing is left to run
@@ -14304,6 +14403,11 @@ bool interp_step(halmat_state_t *state, FILE *out) {
         if (next == -1) return true; /* nothing left ready (and nothing left to ever wake) */
     }
 
+    /* Swap the global call/I-O/AUTOMATIC-local context to the incoming task so
+     * concurrent invocations of a REENTRANT block stay isolated (Sec. 27.3).
+     * Only when the task actually changes -- a task continuing to run keeps its
+     * live context untouched. */
+    if (next != state->current_task) swap_task_context(state, state->current_task, next);
     state->current_task = next;
     state->pc = state->tasks[next].saved_pc;
 

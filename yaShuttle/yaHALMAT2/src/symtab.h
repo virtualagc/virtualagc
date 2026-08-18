@@ -18,6 +18,12 @@
  * process to execute the block at a time. Bit value from unHALMAT.py's own
  * symbolFlags table (0x00080000="EXCLUSIVE"). */
 #define HALMAT_SYM_FLAG_EXCLUSIVE 0x00080000u
+/* AUTOMATIC storage class (unHALMAT.py's symbolFlags table, 0x00000100): a
+ * per-invocation local -- fresh each time its block is entered, and, in a
+ * REENTRANT procedure/function, private to each concurrent invocation. Used by
+ * interp.c to isolate such locals per task across a task switch (USA003087 Sec.
+ * 27.3), as opposed to STATIC (0x200) / COMPOOL data which is shared. */
+#define HALMAT_SYM_FLAG_AUTOMATIC 0x00000100u
 /* SINGLE/DOUBLE precision bits, confirmed against unHALMAT.py's own
  * symbolFlags table (0x00800000="SINGLE", 0x00400000="DOUBLE") -- used
  * by interp.c's bind_call_argument() to determine a MATRIX/VECTOR call

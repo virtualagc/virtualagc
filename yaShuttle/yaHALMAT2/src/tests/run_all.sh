@@ -1206,6 +1206,16 @@ run ./run_local_fixture.sh sched_until_event_between "N=               3" --time
 # clears the event to FALSE, which is what lets a WHILE cyclic task see it go
 # false and cancel (previously the tag was ignored and RESET wrongly set TRUE).
 run ./run_local_fixture.sh sched_while_reset "N=               3" --time-scale 1000000
+# REENTRANT AUTOMATIC-local isolation (USA003087 Sec. 27.3): a REENTRANT
+# PROCEDURE P has an AUTOMATIC local LOC; TASKA calls P(10) and TASKB calls
+# P(20) so both are concurrently inside P (each WAITs mid-body). Each
+# invocation's own LOC must survive its WAIT independent of the other, so TASKA
+# gets 10 back and TASKB gets 20 -- not both 20. Procedure locals are stored by
+# symbol and the call/IO context is global, so this only works because
+# swap_task_context() saves/restores each task's call-return stack, pending-CALL
+# ASSIGN args, and AUTOMATIC locals across the task switch. STATIC RA/RB stay
+# shared (that's how the primal sees the write-backs). Cross-checked with yaGPC2.
+run ./run_local_fixture.sh reentrant_automatic "$(printf 'RA=      1.0000000E+01\nRB=      2.0000000E+01')" --time-scale 1000000
 
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale
