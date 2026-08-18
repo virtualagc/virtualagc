@@ -12,11 +12,23 @@
 # @danielx/civet/register, as the independent reference implementation
 # to interoperate with -- not a stub of our own).
 #
+# IMPORTANT: every Bus construction below uses `new Bus(name,
+# busConfig[name])` -- exactly 2 arguments, matching com/lru.civet's own
+# _setupBuses() (what MEDS itself actually does) -- NOT `new Bus(name,
+# desc, true, iua)`. isShuttleBus defaults to false; a 4-arg
+# shuttle-framed construction is a DIFFERENT wire format (an extra
+# 2-byte IUA header) that a real MEDS session never strips. Confirmed
+# the hard way (2026-08-19): the bridge's own FRAMER_IS_SHUTTLE_BUS used
+# to be `true`, verified only against a listener built the same
+# (wrong) way -- passed here, failed against a real live MEDS.sh
+# session, which showed nothing. Fixed; see bcenet_framer.c's own
+# updated comment for the full story.
+#
 # Confirms, using fixtures/bcenet_smoke.fcm (see its own generator's
 # header comment for the full derivation):
 #   1. Transmit: running the fixture under --bce-network produces a real
 #      UDP multicast packet on DK1's port (6906) that nsts-sim-gpc's own
-#      Bus class parses correctly (IUA=1, one word = 0xBEEF).
+#      Bus class parses correctly (one word = 0xBEEF).
 #   2. Receive: a message sent via nsts-sim-gpc's own Bus#sendMsg() is
 #      correctly received and parsed by bcenet_transport_recv()
 #      directly (see this script's own comment on why the full CPU/BCE
@@ -31,10 +43,9 @@
 #      arbitrary word) -- confirms the framer's buffering/flush logic
 #      and #TDLI long-transmit handling survive a real-sized transfer
 #      intact, matching meds/idp.coffee's recvDK exactly. This is the
-#      shape a live MEDS/IDP instance needs to actually show something
-#      on screen -- see this repo's own CLAUDE_LOG.md for how to try
-#      that (requires a live MEDS.sh Electron session, GUI-only, not
-#      checkable from here).
+#      fixture the user confirmed (2026-08-19) actually renders on a
+#      live MEDS/IDP display, once the shuttle-bus framing bug above
+#      was fixed.
 set -u
 cd "$(dirname "$0")"
 
@@ -52,8 +63,8 @@ echo "=== 1. Transmit: yaGPC2 -> real Bus class ==="
 recv_out=$(mktemp)
 (cd "$NSTS_SIM_GPC" && node -e "
 require('@danielx/civet/register');
-const {Bus} = require('./com/bus.civet');
-const bus = new Bus('DK1', {gpcBceNum:6, port:6906, nom:'Display/Keyboard 1'}, true, 0x01);
+const {Bus, busConfig} = require('./com/bus.civet');
+const bus = new Bus('DK1', busConfig['DK1']);
 bus.onReceive((ctx, busID, msg) => {
   console.log('RECEIVED', busID, Array.from(msg.data16).map(w => '0x' + w.toString(16)).join(','));
   process.exit(0);
@@ -85,8 +96,8 @@ else
     sleep 0.5
     (cd "$NSTS_SIM_GPC" && node -e "
 require('@danielx/civet/register');
-const {Bus, BusMsg} = require('./com/bus.civet');
-const bus = new Bus('DK1', {gpcBceNum:6, port:6906, nom:'Display/Keyboard 1'}, true, 0x01);
+const {Bus, BusMsg, busConfig} = require('./com/bus.civet');
+const bus = new Bus('DK1', busConfig['DK1']);
 const msg = new BusMsg(2);
 msg.data16[0] = 0xCAFE;
 msg.data16[1] = 0xBABE;
@@ -113,10 +124,10 @@ else
     recv_out=$(mktemp)
     (cd "$NSTS_SIM_GPC" && node -e "
 require('@danielx/civet/register');
-const {Bus} = require('./com/bus.civet');
+const {Bus, busConfig} = require('./com/bus.civet');
 const fs = require('fs');
 const dfb = fs.readFileSync('data/TEST-9011-GPC_MEMORY.dfb');
-const bus = new Bus('DK1', {gpcBceNum:6, port:6906, nom:'Display/Keyboard 1'}, true, 0x01);
+const bus = new Bus('DK1', busConfig['DK1']);
 bus.onReceive((ctx, busID, msg) => {
   const words = Array.from(msg.data16);
   const expectedLen = 1 + dfb.length / 2;

@@ -20,7 +20,12 @@ int main(void) {
     uint16_t words[64];
     size_t count = 0;
     for (int i = 0; i < 100; i++) {
-        if (bcenet_transport_recv(t, 6, 1, true, words, 64, &count)) {
+        /* isShuttleBus=false: matches how nsts-sim-gpc's own
+         * com/lru.civet actually constructs its buses (2-arg
+         * `new Bus(name, busConfig[name])`, no IUA-prefix framing) --
+         * see bcenet_framer.c's own header comment on the bug this
+         * mismatch caused. */
+        if (bcenet_transport_recv(t, 6, 1, false, words, 64, &count)) {
             printf("RECEIVED %zu words:", count);
             for (size_t j = 0; j < count; j++) printf(" 0x%04x", words[j]);
             printf("\n");

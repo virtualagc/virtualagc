@@ -14,17 +14,34 @@
  * to spare. */
 #define FRAMER_MAX_WORDS 1024
 
-/* All real BCE-numbered buses (1-23 in the port table -- see
- * bcenet_transport.c) correspond to a real Space Shuttle 1553B-like bus
- * and are IUA-addressed, matching nsts-sim-gpc's own Bus class usage for
- * every gpcBceNum-mapped entry in com/bus.civet's busConfig (as opposed
+/* Was `true` ("every real BCE-numbered bus is IUA-addressed, matching
+ * com/bus.civet's own Bus class usage") -- WRONG, confirmed empirically
+ * against a live MEDS session (2026-08-19): nsts-sim-gpc's own
+ * com/lru.civet _setupBuses() constructs every one of its own Bus
+ * instances (DK1 included) with only 2 constructor arguments --
+ * `new Bus(busName, busConfig[busName])` -- so `isShuttleBus` defaults
+ * to false there, meaning NO 2-byte IUA-prefix header at all on the
+ * wire. Sending shuttle-bus-framed messages (this code's own earlier
+ * assumption) put an extra word (the IUA+reserved header, byte-swapped
+ * into a real data word by the receiver) in front of every real message
+ * MEDS parsed -- confirmed directly: a real MEDS-style Bus construction
+ * receiving this code's old output saw [0x0100, 0xbeef] instead of
+ * [0xbeef], i.e. everything shifted by one word. The real Shuttle 1553B
+ * wire protocol *does* use IUA addressing in principle (bus.civet's own
+ * Bus class fully supports it), but nsts-sim-gpc's actual runtime
+ * construction of its own LRUs doesn't exercise that path -- match what
+ * MEDS actually does, not what the wire format could in principle
+ * support. Revisit if nsts-sim-gpc's own bus construction ever changes.
+ * All real BCE-numbered buses (1-23 in the port table -- see
+ * bcenet_transport.c), formerly assumed IUA-addressed, matching
+ * gpcBceNum-mapped entries in com/bus.civet's busConfig (as opposed
  * to the underscore-prefixed private/point-to-point buses, which have no
  * gpcBceNum at all and aren't reachable through this table). Hardcoded
  * true rather than made configurable per-bus since nothing in this
  * table's scope is ever NOT a shuttle bus -- flagged here as an
  * assumption to confirm once this is actually exchanging real traffic
  * with nsts-sim-gpc (see the plan's own wire-protocol test step). */
-#define FRAMER_IS_SHUTTLE_BUS true
+#define FRAMER_IS_SHUTTLE_BUS false
 
 typedef struct {
     bool used;

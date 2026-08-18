@@ -270,3 +270,34 @@ document's planning stages, and it is already in the code as
   and renders a window at all" is confirmed so far; the actual
   end-to-end `--bce-network`/DFB-relay validation is still pending the
   user's own run.
+
+### [2026-08-19] Target: problems.md
+- The user did run `bcenet_dfb_relay.fcm` against a live MEDS session:
+  the command completed (two harmless "BCE: unknown instruction 0"
+  messages -- BCE6 running past its own 2-instruction program into
+  unfilled memory after finishing real work, `iop_bce_instr.c`'s own
+  unrecognized-opcode path never advances NIA so it just repeats;
+  expected, not a bug), and MEDS's clock kept counting -- but nothing
+  else changed, and the user confirmed the clock runs regardless
+  (unrelated to the test).
+  Root cause, found by reading `com/lru.civet`'s `_setupBuses()`
+  directly: `nsts-sim-gpc` constructs every one of its own real buses
+  (DK1 included) via `new Bus(busName, busConfig[busName])` -- exactly
+  2 arguments, so `isShuttleBus` defaults to `false`, meaning NO 2-byte
+  IUA-prefix header on the wire. `bcenet_framer.c` hardcoded
+  `FRAMER_IS_SHUTTLE_BUS = true`. Confirmed directly: a `Bus`
+  constructed the *real* way (`new Bus('DK1', busConfig['DK1'])`)
+  receiving the bridge's old output saw `[0x0100, 0xbeef]` instead of
+  `[0xbeef]` -- the IUA+reserved header bytes, never stripped, shifted
+  every real word by one position. All of this session's own
+  "verified against the real `Bus` class" checks had been testing
+  against a listener Claude itself built with `isShuttleBus=true` --
+  consistent with the bridge's own (wrong) assumption, not with what
+  `nsts-sim-gpc` actually does.
+  Fixed: `FRAMER_IS_SHUTTLE_BUS` is now `false`. `test/bcenet_smoke.sh`
+  and `test/bcenet_recv_check.c` updated to construct their own test
+  `Bus` instances the same real way (`busConfig[name]`, 2 args) instead
+  of the old 4-arg shuttle-framed form. All three `bcenet_smoke.sh`
+  checks re-verified passing against the corrected construction. Full
+  existing suite stays green. The live MEDS test is worth trying again
+  now that the actual framing bug is fixed.
