@@ -359,35 +359,58 @@ F('Real-Time: Events', 'SIGNAL statement',
 F('Real-Time: Events', 'Event expressions in SCHEDULE/WAIT (RTE-continuous re-evaluation)',
   'A Boolean expression over event operands, re-evaluated by the RTE whenever any operand changes, '
   'not just once at statement execution.',
-  'USA003087 §24.3, §24.5-24.6', 'not_implemented',
-  'No event-expression evaluator exists; nothing in schedule.c consumes event state as a wake '
-  'condition at all -- SET/RESET/SIGNAL change memory but nothing ever blocks on it.', 'untested')
+  'USA003087 §24.3, §24.5-24.6', 'implemented',
+  "Implemented as part of item #7 of the implementation-order pass (WAIT FOR/SCHEDULE ... ON, "
+  "schedule.h/.c's sched_event_expr_true and friends) -- that work was originally traced/tested only "
+  "against process-name operands, but the descriptor format and evaluator turned out to be operand-"
+  "type-agnostic: sched_task_active() just reads bit 0 of whatever memory address a descriptor entry "
+  "points to, whether that's a task's own PDE+0 or a plain EVENT-typed variable's storage cell (both "
+  "use the identical bit-0-is-the-boolean-value convention, confirmed by tracing a real 'SET EV1; WAIT "
+  "FOR EV1;' program). Re-verified directly (this survey's own item, no new code needed) with a "
+  "genuine EVENT LATCHED variable operand: already-TRUE no-op, a real cross-task SET-then-block-then-"
+  "resume, and a 2-operand AND-chain of two EVENT variables, all matching yaHALMAT2's own output "
+  "byte-for-byte (its preemption fix landed independently, elsewhere in this same conversation).",
+  'tested_dedicated',
+  "test/fixtures/waitforeventvar.hal, waitforeventvarblock.hal, waitforeventvarand.hal, byte-diffed "
+  "via test_scheduler.sh.")
 F('Real-Time: Events', 'Events in plain Boolean context (snapshot-evaluated, not RTE-tracked)',
   'Outside SCHEDULE/WAIT, an event reads exactly like an ordinary BOOLEAN, evaluated once.',
   'USA003087 §24.7', 'implemented_via_cpu', 'Ordinary compiled comparison instruction; no runtime substitution needed.',
   'tested_corpus', CORPUS)
 F('Real-Time: Events', 'Process events (process name as event-expression operand)',
   "A process's own ACTIVE/INACTIVE name, usable inside an event expression in SCHEDULE/WAIT.",
-  'USA003087 §24.8', 'not_implemented',
-  "Depends on both event-expression evaluation (not implemented) and a way to query a process's "
-  "current scheduler state from compiled code (also not implemented). Real FCOS itself didn't "
-  "fully support combining this with real events either, per the manual's own footnote 42 (E102 error) "
-  "-- a documented FCOS-vs-language-spec gap, good precedent for deferring.", 'untested')
+  'USA003087 §24.8', 'implemented',
+  "Implemented as part of item #7 (WAIT FOR A;, WAIT FOR NOT A;, AND/OR-chains of process-name "
+  "operands, real cross-task blocking-and-resume all confirmed against real compiled fixtures -- see "
+  "test/fixtures/waitfor*.hal). CORRECTION to the old note here: the real compiler's E102 'INVALID "
+  "EVENT EXPRESSION' rejection (footnote 42's own EV1 & (¬ALPHA) example) is NOT specifically about "
+  "combining a process name with a real EVENT variable -- confirmed directly by testing exactly that "
+  "combination this session and finding it's rejected for the SAME reason a pure-process 'A AND NOT "
+  "B' is: the compiler disallows NOT mixed with AND/OR at all, regardless of whether the operands are "
+  "processes, events, or a mix of both. Single/NOT-single/AND-chain/OR-chain (any operand-type "
+  "combination) is the entire legal design space either way -- see schedule.h's own header comment.",
+  'tested_dedicated',
+  "test/fixtures/waitfor.hal/waitfornot.hal/waitforand.hal/waitforor.hal (pure process operands) plus "
+  "waitforeventvarand.hal (pure event operands) -- the mixed-type NOT+AND rejection was confirmed via "
+  "a real compiler error, not a fixture (there is no compiled program to check, by construction).")
 
 # --- Real-Time: Priority & Control ---------------------------------------------------
 F('Real-Time: Priority & Control', 'TERMINATE statement',
   'Forces one or more named processes (or self) to INACTIVE immediately, cascading to dependents.',
-  'USA003087 §13.5', 'partial',
+  'USA003087 §13.5', 'implemented',
   'SVC #2 (bare/self form, sched_handle_terminate_self_svc) and SVC #3 (named-target form, '
   'sched_handle_terminate_named_svc) are implemented -- confirmed empirically via a real compiled '
   'program that the named form\'s parameter word is (count<<8)|3 followed by `count` PDE-address '
   'halfwords, and the self form is SVC #2 with no parameters. Both always deactivate unconditionally '
-  '(no REPEAT re-arm, unlike reaching CLOSE naturally). Dependent-cascading not implemented (DEPENDENT '
-  'itself out of scope); a primal process TERMINATEing itself is not supported (falls through '
-  'unhandled) -- no real fixture needs it.',
+  '(no REPEAT re-arm, unlike reaching CLOSE naturally). Dependent-cascading IS now implemented (item '
+  '#8 of the implementation-order pass, once DEPENDENT itself was implemented) -- '
+  'sched_terminate_idx_and_dependents cascades transitively down the whole dependency subtree, '
+  'confirmed 2 levels deep via a deterministic test_schedule.c scenario. A primal process TERMINATEing '
+  'itself is still not supported (falls through unhandled) -- no real fixture needs it.',
   'tested_dedicated',
   'test/test_scheduler.sh (terminate/burst, terminate/signal, selfterminate/burst, selfterminate/signal); '
-  'output byte-identical to yaHALMAT2 for both forms.')
+  'output byte-identical to yaHALMAT2 for both forms. test_schedule.c\'s own '
+  'test_terminate_cascades_to_dependents_transitively covers the dependent-cascading case.')
 F('Real-Time: Priority & Control', 'CANCEL statement',
   'Graceful alternative to TERMINATE for cyclic processes: finishes the current cycle first, '
   'shuts down dependents in order rather than force-terminating them.',

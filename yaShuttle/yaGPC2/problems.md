@@ -3510,6 +3510,65 @@ out-of-scope with primary-source citations rather than code (#9's cycle
 overrun, and this section's `FILE`/`NEXTIME`/Program Processes/
 `RANDOM`/`RANDOMG`).
 
+### 7.14 `hal-runtime-features.db` sweep: `EVENT`-variable operands in event expressions confirmed working, three stale entries corrected
+
+With the twelve-item plan closed out, swept the rest of
+`hal-runtime-features.db` for anything else this pass's own work might
+have already resolved without the database being updated to match — the
+same kind of drift already caught once this session (§7.5's `RUNTIME()`
+correction). Found three real cases, one worth its own investigation.
+
+**Rows 22/24 (event-expression evaluation; process names as
+operands) were stale, and checking them surfaced a real, previously
+untested gap: item #7's `WAIT FOR`/`SCHEDULE ... ON` work was only ever
+traced and tested against *process-name* operands (`WAIT FOR A;` and
+friends) — never against a genuine `EVENT`-typed variable (`DECLARE EV1
+EVENT LATCHED; ... SET EV1; WAIT FOR EV1;`), which is the more literal
+reading of both rows' own descriptions.** Traced a real compiled `SET
+EV1; WAIT FOR EV1;` program and found the descriptor format and `SVC`
+protocol are *identical* to the process-name case — down to the exact
+same `SVC #8`, the same 3-halfword descriptor, the same single-operand
+opcode `0x0000`. The only difference is what the operand address
+*means*: for a process, it's the PDE's own `+0` halfword (bit 0 =
+`ACTIVE`); for an `EVENT LATCHED` variable, it's the variable's own
+storage cell, using the identical bit-0-is-the-boolean-value convention.
+Since `schedule.c`'s own `sched_task_active()` never interprets *why* a
+given address holds a 1 or a 0 — it only ever reads bit 0 of whatever
+address a descriptor entry points to — this meant **zero source changes
+were needed**: running the real fixture against the already-committed
+binary produced exactly the spec-predicted output immediately. Verified
+three cases for real: an already-`TRUE` no-op, a genuine cross-task
+`SET`-then-block-then-resume (a `WAIT FOR`ing primal blocked on `EV1`,
+a `SCHEDULE`d task that `SET`s it, matching the exact shape
+`waitfor.hal`'s own process-name test already used), and a 2-operand
+`AND`-chain of two `EVENT` variables — all three byte-identical to
+`yaHALMAT2`'s own output (whose independent preemption fix, landed
+earlier in this same conversation via the direct cross-session channel,
+made this comparison possible at all).
+
+Along the way, also tested the mixed-operand-type case `USA003087`'s
+own footnote 42 example describes (`WAIT FOR EV1 & (¬ALPHA);`, an
+`EVENT` variable combined with a negated process name) and confirmed
+it hits the *same* `E102 INVALID EVENT EXPRESSION` compiler rejection
+already established in §7.8 for pure-process mixed expressions like
+`A AND NOT B` — the restriction is about mixing `NOT` with `AND`/`OR`
+at all, not specifically about combining operand *types*. This
+corrects a misreading in row 24's own old notes, which had cited that
+same footnote as evidence the language spec and real FCOS specifically
+disagreed about combining events with process names — they don't; the
+real restriction is orthogonal to operand type entirely.
+
+**Row 25 (`TERMINATE`) was independently stale** in an unrelated way:
+its own notes still said "dependent-cascading not implemented (`DEPENDENT`
+itself out of scope)," written before item #8 implemented both.
+Corrected to `implemented`, pointing at
+`test_terminate_cascades_to_dependents_transitively` for coverage.
+
+Three new fixtures — `waitforeventvar.hal`, `waitforeventvarblock.hal`,
+`waitforeventvarand.hal` — exercised by `test_scheduler.sh` under both
+`--pacing` modes, byte-diffed directly against `yaHALMAT2` (a genuine
+working oracle this time, unlike most of this pass's later items).
+
 ---
 
 ## Methodology and caveats

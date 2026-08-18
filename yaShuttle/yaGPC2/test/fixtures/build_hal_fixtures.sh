@@ -6,8 +6,9 @@
 # waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm,
 # dependent.fcm, dependentin.fcm, dependentrepeat.fcm,
 # dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm,
-# cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, and
-# exclusivecontend.fcm (plus their -lnk101.json symbol tables) via the
+# cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm,
+# waitforeventvar.fcm, waitforeventvarblock.fcm, and
+# waitforeventvarand.fcm (plus their -lnk101.json symbol tables) via the
 # real HAL/S toolchain
 # documented in ../../tools.md (HALSFC + lnk101, both expected on PATH).
 # Not run automatically (no CI machine has the toolchain) — kept for
@@ -178,6 +179,24 @@
 #                          SCHEDULEd task's own attempt to enter the same
 #                          procedure correctly blocks until the primal
 #                          releases it.
+#   waitforeventvar.fcm   <- waitforeventvar.hal, waitforeventvarblock.fcm
+#                          <- waitforeventvarblock.hal,
+#                          waitforeventvarand.fcm <-
+#                          waitforeventvarand.hal (all checked in
+#                          alongside this script) -- WAIT FOR on a genuine
+#                          EVENT-typed variable (SET/RESET, not a process
+#                          name) as the event-expression operand:
+#                          already-TRUE no-op, a real cross-task block-
+#                          and-resume via SET, and a 2-operand AND-chain
+#                          of two EVENT variables. Confirmed this needed
+#                          zero source changes -- item #7's own event-
+#                          expression descriptor format and evaluator are
+#                          operand-type-agnostic (schedule.c's
+#                          sched_task_active just reads bit 0 of whatever
+#                          address it's given, whether that's a task's own
+#                          PDE+0 or a plain EVENT variable's storage
+#                          cell), so this was a coverage/regression pass,
+#                          not a fix -- see problems.md 7.14.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -211,6 +230,9 @@ CANCELNAMED_HAL="$(dirname "$0")/cancelnamed.hal"
 EXCLUSIVE_HAL="$(dirname "$0")/exclusive.hal"
 EXCLUSIVETWO_HAL="$(dirname "$0")/exclusivetwo.hal"
 EXCLUSIVECONTEND_HAL="$(dirname "$0")/exclusivecontend.hal"
+WAITFOREVENTVAR_HAL="$(dirname "$0")/waitforeventvar.hal"
+WAITFOREVENTVARBLOCK_HAL="$(dirname "$0")/waitforeventvarblock.hal"
+WAITFOREVENTVARAND_HAL="$(dirname "$0")/waitforeventvarand.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -257,5 +279,8 @@ build "$CANCELNAMED_HAL" CANCEL2 cancelnamed
 build "$EXCLUSIVE_HAL" EXCLT exclusive
 build "$EXCLUSIVETWO_HAL" EXCL2 exclusivetwo
 build "$EXCLUSIVECONTEND_HAL" EXCLCONT exclusivecontend
+build "$WAITFOREVENTVAR_HAL" EVTEST waitforeventvar
+build "$WAITFOREVENTVARBLOCK_HAL" EVBLOCK waitforeventvarblock
+build "$WAITFOREVENTVARAND_HAL" EVAND waitforeventvarand
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm (+ -lnk101.json)"

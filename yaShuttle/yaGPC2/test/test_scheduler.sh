@@ -182,4 +182,16 @@ run_case "exclusivetwo/signal" "signal" "fixtures/exclusivetwo.fcm" "fixtures/ex
 run_case "exclusivecontend/burst"  "burst"  "fixtures/exclusivecontend.fcm" "fixtures/exclusivecontend-lnk101.json" "fixtures/exclusivecontend_golden.txt"
 run_case "exclusivecontend/signal" "signal" "fixtures/exclusivecontend.fcm" "fixtures/exclusivecontend-lnk101.json" "fixtures/exclusivecontend_golden.txt"
 
+# WAIT FOR on a genuine EVENT-typed variable operand (SET/RESET, not a
+# process name) -- confirmed this needed zero source changes, since
+# item #7's own event-expression descriptor format and evaluator are
+# operand-type-agnostic. Byte-diffed against yaHALMAT2, matching
+# exactly -- see problems.md 7.14.
+run_case "waitforeventvar/burst"  "burst"  "fixtures/waitforeventvar.fcm" "fixtures/waitforeventvar-lnk101.json" "fixtures/waitforeventvar_golden.txt"
+run_case "waitforeventvar/signal" "signal" "fixtures/waitforeventvar.fcm" "fixtures/waitforeventvar-lnk101.json" "fixtures/waitforeventvar_golden.txt"
+run_case "waitforeventvarblock/burst"  "burst"  "fixtures/waitforeventvarblock.fcm" "fixtures/waitforeventvarblock-lnk101.json" "fixtures/waitforeventvarblock_golden.txt"
+run_case "waitforeventvarblock/signal" "signal" "fixtures/waitforeventvarblock.fcm" "fixtures/waitforeventvarblock-lnk101.json" "fixtures/waitforeventvarblock_golden.txt"
+run_case "waitforeventvarand/burst"  "burst"  "fixtures/waitforeventvarand.fcm" "fixtures/waitforeventvarand-lnk101.json" "fixtures/waitforeventvarand_golden.txt"
+run_case "waitforeventvarand/signal" "signal" "fixtures/waitforeventvarand.fcm" "fixtures/waitforeventvarand-lnk101.json" "fixtures/waitforeventvarand_golden.txt"
+
 exit $fail
