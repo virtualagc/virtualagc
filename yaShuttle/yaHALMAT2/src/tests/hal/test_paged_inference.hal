@@ -1,0 +1,14 @@
+C/ Device-attribute inference (USA003087 Sec. 12.5): a channel is UNPAGED if
+C/ any READ/READALL statement APPEARS for it in the compilation (paged only if
+C/ used exclusively for WRITE). The rule is static -- which statements appear,
+C/ not which execute -- so the READ(6) below, guarded off and never run, still
+C/ makes channel 6 UNPAGED. On an UNPAGED device a CHARACTER WRITE is enclosed
+C/ in apostrophes (USA003087 App. F), so 'HELLO' prints quoted; without the
+C/ READ statement channel 6 would be PAGED and print HELLO unquoted. No input
+C/ is consumed (the READ never executes). See run_all.sh.
+ TPI: PROGRAM;
+    DECLARE C CHARACTER(10);
+    DECLARE B BOOLEAN INITIAL(FALSE);
+    IF B THEN READ(6) C;
+    WRITE(6) 'HELLO';
+ CLOSE TPI;

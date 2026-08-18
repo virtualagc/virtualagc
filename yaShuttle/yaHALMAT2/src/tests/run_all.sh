@@ -339,6 +339,13 @@ run ./run_read_fixture.sh read_skip_column "$(printf 'PHI     1.5\nALPHA   2.5\n
 # second READALL advances one line; line 2 "XYZ12345": C3(5)="XYZ12". (The
 # old READ-alias would have slurped the whole first token into C1.)
 run ./run_read_fixture.sh readall_fixed_width "$(printf 'ABCDEFGHIJ\nXYZ12345\n')" "$(printf 'ABC\nDEFG\nXYZ12')"
+# Device-attribute inference (USA003087 Sec. 12.5): a channel is UNPAGED iff
+# any READ/READALL statement APPEARS for it (paged if used only for WRITE).
+# Static rule -- appears, not executes -- so a guarded-off, never-run READ(6)
+# still makes channel 6 UNPAGED, and a CHARACTER WRITE(6) then prints quoted
+# ('HELLO') where a paged channel 6 would print HELLO. Previously every channel
+# defaulted PAGED unless the user passed --unpaged. Feature-survey gap vs yaGPC2.
+run ./run_local_fixture.sh paged_inference "'HELLO'"
 # User-reported (044-ORTHONORMAL.hal's `READ(5) X;`, X a VECTOR(3)):
 # READ against a whole VECTOR/MATRIX destination failed outright
 # ("only CHARACTER/SCALAR/INTEGER arguments are implemented (got HALMAT

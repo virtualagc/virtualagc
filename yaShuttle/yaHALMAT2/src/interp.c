@@ -3335,6 +3335,36 @@ static void precompute_subprograms(halmat_state_t *state) {
     }
 }
 
+/* USA003087 Sec. 12.5 device-attribute inference: "In the absence of any
+ * specific direction ... if only WRITE statements appear in a compilation for
+ * a given channel, then the device on that channel will be paged. If only READ
+ * statements appear, or if both READ and WRITE statements appear for a given
+ * channel, then the device on that channel will be unpaged." So a channel is
+ * unpaged iff at least one READ/READALL statement targets it. This is a
+ * *static* (which-statements-appear) rule, not an execution-order one -- a
+ * WRITE that runs before the first READ on a dual-use channel must already use
+ * the unpaged format -- so it is resolved here by scanning the whole HALMAT
+ * stream at load time rather than tracking reads as they execute. The device
+ * number is READ/RDAL's own operand 0, an IMD immediate in the overwhelmingly
+ * common literal-channel case (a REPLACE'd or literal channel folds to an
+ * immediate); a genuinely computed channel (not IMD) can't be classified
+ * statically and is left at the paged default. Everything starts paged
+ * (device_unpaged memset-zeroed); the user's own --unpaged override
+ * (interp_set_device_unpaged, applied by main.c AFTER interp_init) still wins. */
+static void precompute_device_paging(halmat_state_t *state) {
+    size_t n = state->prog->count;
+    for (size_t i = 0; i < n; i++) {
+        const halmat_instr_t *ins = &state->prog->instrs[i];
+        if ((ins->opcode == OP_READ || ins->opcode == OP_RDAL) && ins->operand_count >= 1) {
+            const halmat_operand_t *op = &ins->operands[0];
+            if (op->qual == QUAL_IMD) {
+                int dev = (int)op->data;
+                if (dev >= 0 && dev < HALMAT_DEVICE_MAX) state->device_unpaged[dev] = true;
+            }
+        }
+    }
+}
+
 /* DATE()/CLOCKTIME()'s real-world mission-clock anchor, supplied by whatever
  * INTEGRATES this engine (the yaHALMAT2 CLI, a --compile'd F, or an embedding
  * application) -- the engine itself deals only in emulated time from program
@@ -3369,6 +3399,7 @@ void interp_init(halmat_state_t *state, const halmat_program_t *prog,
     precompute_subprograms(state);
     precompute_arrayed_paragraphs(state);
     precompute_stmt_for_pc(state);
+    precompute_device_paging(state);
     state->arrayed_index = -1;
 
     /* Primal process: priority 50 by default (USA003087 Sec. 13.1-13.3),
