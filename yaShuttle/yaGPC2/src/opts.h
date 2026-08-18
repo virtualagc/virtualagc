@@ -92,6 +92,19 @@ typedef struct {
      * HAVE_POSIX_TIMERS probe); fails loudly at startup if not
      * available, rather than silently falling back to "burst". */
     char *pacing;                     /* "burst" (default) or "signal" */
+
+    /* Not part of gpc run's own option set -- yaGPC2-specific. Overrides
+     * DATE()/CLOCKTIME()'s own wall-clock anchor (see cpu.h's
+     * dateTimeAnchorEpochSec), a Unix epoch value (seconds since
+     * 1970-01-01 UTC, e.g. via `date +%s`). Unset (NULL) by default,
+     * meaning: use the real host machine's own current wall-clock time
+     * (in its currently configured timezone) at program start, matching
+     * the ad hoc "just run it and get a sensible answer" case. Set this
+     * for reproducible test runs, where DATE()/CLOCKTIME()'s own output
+     * must not depend on what real day/time the test happens to execute
+     * -- exactly the concern every golden-file fixture in test/fixtures/
+     * already has to avoid for any other reason. */
+    char *dateTimeEpoch;              /* NULL by default; parsed via atof */
 } Options;
 
 /* Parses argv (starting at argv[1]) exactly as `gpc run` would, except that

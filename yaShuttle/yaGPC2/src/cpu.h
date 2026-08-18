@@ -76,6 +76,24 @@ typedef struct CPU {
      * in a larger simulator (see yaGpcIntegration.h) needs this whether
      * or not a debugger is attached. */
     double elapsedTimeUs;
+
+    /* DATE()/CLOCKTIME() wall-clock anchor (USA003090 8.2 items 17/18;
+     * see halucp.c's own SVC #22 TYPE=1/2 handling) -- a Unix epoch
+     * value (seconds since 1970-01-01 UTC). yaGPC2 has no real mission-
+     * epoch the way real FCOS would (an actual launch GMT); DATE()/
+     * CLOCKTIME() report dateTimeAnchorEpochSec + elapsedTimeUs/1e6,
+     * decomposed via localtime() (the process's own configured
+     * timezone) at query time -- this field itself never changes after
+     * being set once. Defaults to the Unix epoch itself (0) here, a
+     * fixed and deterministic value matching fcosMode's own "safe
+     * default for direct/embedded/test use" precedent -- the CLI's own
+     * "default to the real host clock at program start" behavior (see
+     * opts.h's --date-time-epoch) is applied one layer up, in
+     * ageharness_configure_from_opts(), not here, so existing/future
+     * tests that construct an AGEHarness/CPU directly stay
+     * deterministic regardless of what wall-clock time they happen to
+     * run at. */
+    double dateTimeAnchorEpochSec;
 } CPU;
 
 void cpu_init(CPU *cpu);

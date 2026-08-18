@@ -656,13 +656,29 @@ for fn, desc in VM_FNS:
 
 # --- Built-in: Time/Random functions -----------------------------------------------------
 F('Built-in: Time/Random Function', 'DATE()', 'Returns a double-precision INTEGER YYDDD encoding.',
-  'USA003087 Appendix B; USA003090 §8.2 item 17', 'not_implemented',
-  'problems.md §2.6: DATE()/CLOCKTIME() confirmed implemented via real OS wall-clock time in yaHALMAT2, but not comparable/deterministic across runs by design; no equivalent SVC exists in yaGPC2 at all.',
-  'untested')
+  'USA003087 Appendix B; USA003090 §8.2 item 17', 'implemented',
+  "problems.md §7.15: SVC #22 (0x16), TYPE=2 in the high byte, shared with RUNTIME/CLOCKTIME/NEXTIME "
+  "(confirmed via a real compiled `T=CLOCKTIME; D=DATE;`: mem[ea]=0x0116/0x0216). Derived from "
+  "cpu->dateTimeAnchorEpochSec (real host wall-clock at program start by default, or --date-time-epoch) "
+  "plus cpu->elapsedTimeUs progressing virtual time forward, decomposed via localtime() at query time -- "
+  "the user's explicit design direction, aligned with yaHALMAT2's own --start-time. YYDDD (up to 99366) "
+  "overflows INTEGER SINGLE (16-bit, USA003090 8.2 item 1); delivered right-justified across the full 32 "
+  "bits of R5 (an INTEGER DOUBLE), confirmed via a real compiled `D=DATE;`'s own SVC/SLL 5,16/STH 5 "
+  "sequence -- item 8's documented double-to-single conversion, unlike PRIO/ERRGRP/ERRNUM's own "
+  "pre-shifted-upper-half convention (those always fit INTEGER SINGLE directly).",
+  'tested_dedicated', 'test/fixtures/datetimefn.hal -> datetimefn.fcm; test/test_scheduler.sh '
+  '"datetimefn" case; byte-diffed against yaHALMAT2 (--start-time, same epoch, TZ=UTC) -- matches exactly.')
 F('Built-in: Time/Random Function', 'CLOCKTIME()', 'Returns a double-precision SCALAR "time of day".',
-  'USA003087 Appendix B; USA003090 §8.2 item 18', 'not_implemented',
-  "problems.md §2.6: ties to the real FCOS task scheduler's own TQE tick machinery -- WORTH REVISITING now that a real virtual-time scheduler (schedule.c, cpu->elapsedTimeUs) exists; not attempted in this survey.",
-  'untested')
+  'USA003087 Appendix B; USA003090 §8.2 item 18', 'implemented',
+  "problems.md §7.15: SVC #22 (0x16), TYPE=1. No documented sub-second unit exists anywhere in "
+  "USA003087/USA003090/IBM-76-SS-1110 (searched exhaustively for centiseconds/hundredths -- none found); "
+  "implemented as seconds since local midnight of the same wall-clock-anchor-plus-virtual-time value DATE() "
+  "uses (see its own impl_notes), delivered in FP0-FP1 as a double-precision SCALAR, matching RUNTIME()'s "
+  "own FPR-pair convention -- unlike DATE(), fits comfortably within SCALAR's own huge dynamic range so no "
+  "single/double INTEGER truncation question applies.",
+  'tested_dedicated', 'test/fixtures/datetimefn.hal -> datetimefn.fcm; test/test_scheduler.sh '
+  '"datetimefn" case (also confirms real virtual-time progression across a WAIT and a midnight rollover, '
+  'checked by hand during development); byte-diffed against yaHALMAT2 -- matches exactly.')
 F('Built-in: Time/Random Function', 'RANDOM()', 'Returns a random number, rectangular distribution over [0,1).',
   'USA003087 Appendix B', 'not_implemented',
   "problems.md §2.6: no PRNG/seed mechanism exists in yaGPC2; non-comparable by nature even if "

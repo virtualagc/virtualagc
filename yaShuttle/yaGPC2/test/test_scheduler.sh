@@ -30,12 +30,14 @@ fail=0
 # similarly sped up via its own --time-scale).
 run_case() {
     label="$1"; pacing="$2"; fcm="$3"; sym="$4"; golden="$5"
+    shift 5 || true
+    extra_args=("$@")
 
     act_out=$(mktemp)
     act_err=$(mktemp)
 
     "$YAGPC2" --interactive --no-trace --no-verbose --symbols "$sym" --line-width 240 --max-steps 200000 \
-        --time-scale 1000000 --pacing "$pacing" "$fcm" >"$act_out" 2>"$act_err"
+        --time-scale 1000000 --pacing "$pacing" "${extra_args[@]}" "$fcm" >"$act_out" 2>"$act_err"
     act_code=$?
 
     ok=1
@@ -193,5 +195,19 @@ run_case "waitforeventvarblock/burst"  "burst"  "fixtures/waitforeventvarblock.f
 run_case "waitforeventvarblock/signal" "signal" "fixtures/waitforeventvarblock.fcm" "fixtures/waitforeventvarblock-lnk101.json" "fixtures/waitforeventvarblock_golden.txt"
 run_case "waitforeventvarand/burst"  "burst"  "fixtures/waitforeventvarand.fcm" "fixtures/waitforeventvarand-lnk101.json" "fixtures/waitforeventvarand_golden.txt"
 run_case "waitforeventvarand/signal" "signal" "fixtures/waitforeventvarand.fcm" "fixtures/waitforeventvarand-lnk101.json" "fixtures/waitforeventvarand_golden.txt"
+
+# DATE()/CLOCKTIME() (SVC #22, TYPE=1/2) -- WAIT 3600 then read both, so
+# each reflects real virtual-time progression past the anchor, not just
+# the anchor itself. --date-time-epoch 951912000 = 2000-03-01 12:00:00
+# UTC (a fixed literal, not computed via `date` at test time, so this
+# stays reproducible regardless of the host's own timezone database);
+# TZ=UTC pins localtime()'s own decomposition the same way, since
+# DATE()/CLOCKTIME() are deliberately host-timezone-dependent by design
+# (see problems.md 7.15) -- without pinning TZ, this test would produce
+# a different (but still internally correct) golden value on every
+# machine. Byte-diffed against yaHALMAT2 (its own --start-time, same
+# epoch, same TZ=UTC) -- matches exactly.
+TZ=UTC run_case "datetimefn/burst"  "burst"  "fixtures/datetimefn.fcm" "fixtures/datetimefn-lnk101.json" "fixtures/datetimefn_golden.txt" "--date-time-epoch" "951912000"
+TZ=UTC run_case "datetimefn/signal" "signal" "fixtures/datetimefn.fcm" "fixtures/datetimefn-lnk101.json" "fixtures/datetimefn_golden.txt" "--date-time-epoch" "951912000"
 
 exit $fail

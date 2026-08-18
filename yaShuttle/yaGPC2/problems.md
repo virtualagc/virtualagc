@@ -3569,6 +3569,105 @@ Three new fixtures — `waitforeventvar.hal`, `waitforeventvarblock.hal`,
 `--pacing` modes, byte-diffed directly against `yaHALMAT2` (a genuine
 working oracle this time, unlike most of this pass's later items).
 
+### 7.15 `DATE()`/`CLOCKTIME()` — done, format/anchor convention settled with the user and `yaHALMAT2`, one real register-convention bug found via a real fixture
+
+The §7.14 sweep flagged `DATE()`/`CLOCKTIME()` (rows 96/97) as
+never specifically checked despite sharing `RUNTIME()`'s own `SVC #22`
+family — picked up as the next task per the user's go-ahead.
+
+**Design, decided with the user (not guessed):** yaGPC2 has no real
+mission epoch the way real FCOS would (an actual launch GMT). The user's
+explicit direction: by default use the real host date/time in the
+process's own local timezone as a start-of-run anchor, then progress
+using emulated (virtual) time thereafter; provide a CLI override for
+reproducible runs; and consult `yaHALMAT2` for alignment. `yaHALMAT2`
+independently reached the identical design with its own user and had
+already implemented it (`--start-time`, accepting a local wall-clock
+string or bare epoch seconds) by the time this session asked — both
+emulators now share the same anchor-plus-virtual-progression model,
+communicated and confirmed over the direct cross-session channel.
+
+**Format**, verified against documentation rather than accepted from
+either peer's guess: `USA003090` §8.2 item 17 states `DATE()` returns
+`YYDDD` (`(year%100)*1000 + day-of-year`, `DDD` 1-indexed) as an
+`INTEGER` — confirmed as *this* implementation's authoritative source
+since `USA003087`'s own generic Appendix B table leaves the format
+"implementation dependent." `CLOCKTIME()`'s unit is undocumented
+anywhere searched (`USA003087`, `USA003090`, `IBM-76-SS-1110` — no hit
+for "centisecond"/"hundredth"/"0.01 second"); the user's own initial
+recollection of centiseconds was retracted once shown the negative
+search result (likely conflated with the unrelated XPL/I compiler's own
+runtime library). Implemented as seconds since local midnight — the
+only reading consistent with `USA003090`'s "double precision scalar"
+description and the name itself, delivered in FP0-FP1 exactly like
+`RUNTIME()`'s own convention.
+
+**Mechanics**, traced from a real compiled `T=CLOCKTIME; D=DATE;`:
+both share `RUNTIME`/`NEXTIME`'s own `SVC #22` (low byte `0x16`),
+distinguished by a `TYPE` field in the high byte (`mem[ea]=0x0116` for
+`CLOCKTIME`, `0x0216` for `DATE` — 0=RUNTIME, 1=CLOCKTIME, 2=DATE,
+3=NEXTIME, matching `IBM-76-SS-1110` 4.2.4.1's documented layout
+exactly). `TYPE=3` (NEXTIME) is deliberately left unrecognized, per
+§7.13's own confirmed dead end. Both derive their result from
+`cpu->dateTimeAnchorEpochSec + cpu->elapsedTimeUs/1e6`, decomposed via
+`localtime_r()` at query time — `dateTimeAnchorEpochSec` defaults to a
+fixed, deterministic `0` in `cpu_init()` (so direct/embedded/test
+construction of a CPU never depends on real wall-clock time, matching
+`fcosMode`'s own precedent), with the CLI's own default (the real host
+clock at program start) applied one layer up in
+`ageharness_configure_from_opts()`; a new `--date-time-epoch <seconds>`
+flag overrides it for reproducible runs (mirrors `yaHALMAT2`'s own
+`--start-time`, though not identically named or shaped — `yaHALMAT2`
+also accepts flexible date/time strings, this side accepts only raw
+epoch seconds; flagged to `yaHALMAT2` as a possible follow-up
+unification, not resolved this session).
+
+**A real bug, caught by tracing the actual compiled instruction stream,
+not just the `SVC` summary:** the first implementation copied
+`PRIO()`/`ERRGRP()`/`ERRNUM()`'s own convention of pre-shifting an
+`INTEGER` result into R5's upper 16 bits (their own real fixtures show
+a bare `STH 5,<dest>` immediately after the `SVC`, confirming *their*
+raw hardware result is already upper-half). `DATE()`'s own real
+compiled sequence for `D = DATE;` is different: `SVC`, then
+`SLL 5,X'0010'`, then `STH 5,<dest>` — an extra shift with no
+counterpart in the `PRIO`/`ERRGRP`/`ERRNUM` fixtures. Storing
+pre-shifted-upper produced `0` (the `SLL` shifted the already-upper
+value entirely out of the 32-bit register) — caught immediately by a
+real fixture assigning `DATE()` into a plain (single-precision)
+`INTEGER`, not a synthetic unit test. The `SLL` is `USA003090` 8.2 item
+8's own documented double-to-single `INTEGER` conversion ("eliminating
+the left-most 16 bits of the double precision value"), which only makes
+sense if R5 holds the *raw, right-justified* 32-bit value beforehand —
+i.e. `DATE()`'s true hardware result is an `INTEGER DOUBLE` (32-bit),
+unlike `PRIO`/`ERRGRP`/`ERRNUM`'s small values that already fit
+`INTEGER SINGLE` directly. This tracks: `YYDDD` reaches up to 99366,
+overflowing `INTEGER SINGLE`'s 16-bit signed range (`USA003090` 8.2 item
+1, `-32768..32767`) — a plain `DECLARE D INTEGER;` silently truncates
+`DATE()`'s value per item 8's own documented (not erroneous) conversion
+rule, confirmed directly: `--date-time-epoch` anchored at 1978-02-01
+06:00 gave the correct double-precision value 78032 when `D` was
+declared `INTEGER DOUBLE`, but silently truncated to 12496 (78032's low
+16 bits) when `D` was left as plain `INTEGER` — both are *correct*
+per spec, not a bug, once the register convention itself was fixed.
+Fixed by delivering the raw, unshifted 32-bit value in R5 for `DATE()`
+specifically, leaving `PRIO`/`ERRGRP`/`ERRNUM`'s own pre-shifted
+convention untouched (real, fixture-confirmed, and no longer assumed to
+generalize to every `INTEGER`-returning built-in `SVC`).
+
+New fixture `datetimefn.hal` (`D` declared `INTEGER DOUBLE`, a `WAIT
+3600` before reading `CLOCKTIME`/`DATE` so both reflect real
+virtual-time progression past the anchor, not just the anchor itself),
+exercised by `test_scheduler.sh` under both `--pacing` modes with
+`TZ=UTC` and a fixed literal `--date-time-epoch` (not computed via
+`date` at test time, so the golden file stays reproducible regardless
+of the host's own timezone database) — byte-diffed against `yaHALMAT2`
+(`--start-time`, same epoch, same `TZ=UTC`), matching exactly. Also spot
+-checked by hand (not committed as a fixture): a midnight-rollover case
+(anchor 30 minutes before local midnight, `WAIT 3600`) correctly
+produced the next day's `DATE()` and a small positive `CLOCKTIME()`.
+`hal-runtime-features.db` rows 96/97 updated from `not_implemented` to
+`implemented`/`tested_dedicated`.
+
 ---
 
 ## Methodology and caveats

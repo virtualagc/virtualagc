@@ -197,6 +197,18 @@
 #                          PDE+0 or a plain EVENT variable's storage
 #                          cell), so this was a coverage/regression pass,
 #                          not a fix -- see problems.md 7.14.
+#   datetimefn.fcm         <- datetimefn.hal (checked in alongside this
+#                          script) -- DATE()/CLOCKTIME(), each after a
+#                          WAIT so both reflect real virtual-time
+#                          progression past their --date-time-epoch
+#                          anchor, not just the anchor itself. D is
+#                          declared INTEGER DOUBLE (not plain INTEGER)
+#                          because YYDDD (up to 99366) overflows a 16-bit
+#                          INTEGER SINGLE (USA003090 8.2 item 1) -- see
+#                          problems.md 7.15 for the empirical trace that
+#                          found this (a plain INTEGER D silently
+#                          truncates per item 8's own documented
+#                          double-to-single conversion, not a bug).
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -233,6 +245,7 @@ EXCLUSIVECONTEND_HAL="$(dirname "$0")/exclusivecontend.hal"
 WAITFOREVENTVAR_HAL="$(dirname "$0")/waitforeventvar.hal"
 WAITFOREVENTVARBLOCK_HAL="$(dirname "$0")/waitforeventvarblock.hal"
 WAITFOREVENTVARAND_HAL="$(dirname "$0")/waitforeventvarand.hal"
+DATETIMEFN_HAL="$(dirname "$0")/datetimefn.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -282,5 +295,6 @@ build "$EXCLUSIVECONTEND_HAL" EXCLCONT exclusivecontend
 build "$WAITFOREVENTVAR_HAL" EVTEST waitforeventvar
 build "$WAITFOREVENTVARBLOCK_HAL" EVBLOCK waitforeventvarblock
 build "$WAITFOREVENTVARAND_HAL" EVAND waitforeventvarand
+build "$DATETIMEFN_HAL" DTFN datetimefn
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm (+ -lnk101.json)"

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "compat.h"
 
@@ -102,6 +103,16 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
      * see halucp.c's effective_line_width(). */
     if (opts->lineWidthSet) age->halUCP.lineWidth = atoi(opts->lineWidth);
     age->gpc.cpu.fcosMode = opts->fcos;
+    /* DATE()/CLOCKTIME() wall-clock anchor -- see cpu.h's own
+     * dateTimeAnchorEpochSec comment and opts.h's --date-time-epoch.
+     * Unset (NULL): the real host machine's own current wall-clock time
+     * at this exact moment (program start, for all practical purposes --
+     * this runs once, immediately after argv parsing), which is why this
+     * lives here (the CLI's own default) rather than in cpu_init() (a
+     * fixed, deterministic 0 there, so direct/embedded/test construction
+     * of an AGEHarness/CPU -- e.g. every test_schedule.c scenario -- is
+     * never affected by what real day/time it happens to run on). */
+    age->gpc.cpu.dateTimeAnchorEpochSec = opts->dateTimeEpoch ? atof(opts->dateTimeEpoch) : (double)time(NULL);
 
     char *autoSymbols = NULL;
     const char *symbolsPath = opts->symbols;

@@ -90,6 +90,12 @@ static const char *HELP_TEXT =
 "                                  with POSIX real-time timer support; fails\n"
 "                                  loudly at startup if not available\n"
 "                                  (default: \"burst\")\n"
+"  --date-time-epoch <seconds>     Unix epoch seconds (e.g. `date +%s`)\n"
+"                                  overriding DATE()/CLOCKTIME()'s own\n"
+"                                  wall-clock anchor for reproducible\n"
+"                                  runs. Default: the real host machine's\n"
+"                                  current wall-clock time (its own\n"
+"                                  configured timezone) at program start.\n"
 "  -h, --help                      display help for command\n";
 
 static void set_defaults(Options *o) {
@@ -225,6 +231,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->timeScale = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--pacing", &n)) {
             opts->pacing = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--date-time-epoch", &n)) {
+            opts->dateTimeEpoch = take_value(argc, argv, &i, tok, n);
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {

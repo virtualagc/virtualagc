@@ -33,6 +33,7 @@ void cpu_init(CPU *cpu) {
     cpu->counter2Enabled = false;
     cpu->fcosMode = false;
     cpu->elapsedTimeUs = 0.0;
+    cpu->dateTimeAnchorEpochSec = 0.0; /* Unix epoch -- see cpu.h's own comment */
 }
 
 void cpu_free(CPU *cpu) {

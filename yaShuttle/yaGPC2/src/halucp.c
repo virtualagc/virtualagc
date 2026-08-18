@@ -1,9 +1,15 @@
+/* localtime_r (POSIX, not C11) -- DATE()/CLOCKTIME() need the reentrant
+ * form since this codebase has no other feature-test macro already
+ * pulling it in (unlike ageharness.c's plain time(), which is C89). */
+#define _POSIX_C_SOURCE 200809L
+
 #include "halucp.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "ebcdic.h"
 #include "floatIBM.h"
@@ -262,7 +268,18 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         return true;
     }
 
-    /* RUNTIME -- USA003087 13.5/Appendix B, USA003090 8.2 item 18:
+    /* RUNTIME/CLOCKTIME/DATE/NEXTIME all share SVC #22 (low byte 0x16),
+     * distinguished by a TYPE field in the high byte -- confirmed
+     * empirically (a real compiled `T = CLOCKTIME; D = DATE;` produces
+     * mem[ea]=0x0116 and 0x0216 respectively) and matching
+     * IBM-76-SS-1110 4.2.4.1's own documented parameter-list layout
+     * exactly (TYPE 0=RUNTIME, 1=CLOCKTIME, 2=DATE, 3=NEXTIME -- the
+     * same table that states "FCOS will not support the NEXTIME
+     * function," confirmed as a real dead end in problems.md 7.13, so
+     * TYPE=3 is deliberately NOT recognized here and falls through to
+     * the unhandled-SVC-trap path like any other unrecognized SVC).
+     *
+     * RUNTIME -- USA003087 13.5/Appendix B, USA003090 8.2 item 18:
      * "returns the current value of real time as a scalar, in
      * seconds." Confirmed empirically (a real compiled `T = RUNTIME;`)
      * that the compiled code's own STE/STD choice right after this SVC
@@ -280,11 +297,71 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
      * converted from microseconds to seconds, matching the Guide's own
      * "seconds since the real-time origin" definition where the origin
      * is "normally coincident with the initiation of the primal
-     * process" -- exactly cpu->elapsedTimeUs's own t=0. */
-    if (svcCode == 0x0016) {
+     * process" -- exactly cpu->elapsedTimeUs's own t=0.
+     *
+     * CLOCKTIME/DATE -- USA003090 8.2 items 17/18. Real FCOS's own
+     * definitions (the ICD's "Greenwich Mean Time of the last expired
+     * FCOS timer queue element... identical for all participating GPC's
+     * in a redundant set" for CLOCKTIME, and a real mission-elapsed-time
+     * epoch for DATE) are specifically about synchronization *across* a
+     * redundant GPC set and a real launch epoch, neither of which exist
+     * here -- yaGPC2 only ever emulates one GPC at a time, with no real
+     * mission epoch. Per the user's explicit design direction: both are
+     * instead derived from cpu->dateTimeAnchorEpochSec (a wall-clock
+     * anchor -- see cpu.h's own comment, and opts.h's --date-time-epoch
+     * override) plus cpu->elapsedTimeUs progressing virtual time forward
+     * from that anchor, decomposed via localtime() at query time.
+     *
+     * DATE -- USA003090 8.2 item 17: "returns today's date as YYDDD"
+     * (year*1000+day-of-year, DDD 1-indexed) as an INTEGER. USA003087's
+     * own generic Appendix B table leaves DATE's format "implementation
+     * dependent," confirming USA003090 (this implementation) is the
+     * authoritative source. YYDDD (up to 99366) doesn't fit an
+     * INTEGER SINGLE (USA003090 8.2 item 1: 16-bit signed, -32768..
+     * 32767) -- delivered right-justified across the FULL 32 bits of R5,
+     * i.e. as an INTEGER DOUBLE (item 2: 32-bit signed), unlike
+     * PRIO/ERRGRP/ERRNUM above (small values that fit INTEGER SINGLE
+     * directly, pre-shifted into R5's upper half by their own SVCs).
+     * Confirmed via a real compiled `D = DATE;`'s own instruction stream
+     * assigning into a plain (single-precision) INTEGER D: SVC, then
+     * SLL 5,X'0010', then STH 5,<dest> -- exactly USA003090 8.2 item 8's
+     * documented double-to-single conversion ("eliminating the left-most
+     * 16 bits of the double precision value"), which only makes sense if
+     * R5 holds the raw, right-justified 32-bit value beforehand. Storing
+     * pre-shifted into the upper half (matching PRIO/ERRGRP/ERRNUM) was
+     * tried first and confirmed wrong empirically -- the SLL discards
+     * it, storing 0 into a single-precision destination.
+     *
+     * CLOCKTIME -- USA003090 8.2 item 18 only says "a double precision
+     * scalar," no unit given. Searched USA003087/USA003090/the ICD
+     * exhaustively for a documented sub-second unit (centiseconds,
+     * hundredths, etc.) and found none -- the only implementation choice
+     * consistent with "double precision scalar" and CLOCKTIME's own name
+     * is seconds since local midnight, matching RUNTIME's own "scalar,
+     * in seconds" convention and delivered the same way, in FP0-FP1. */
+    uint32_t svcLow22 = svcCode & 0xff;
+    uint32_t dateTimeType = (svcCode >> 8) & 0xff;
+    if (svcLow22 == 0x16 && dateTimeType == 0) {
         FloatIBM rt = fibm_from_float(h->cpu->elapsedTimeUs / 1e6);
         register_set32(cpu_f(h->cpu, 0), fibm_to64x(&rt));
         register_set32(cpu_f(h->cpu, 1), fibm_to64y(&rt));
+        return true;
+    }
+    if (svcLow22 == 0x16 && (dateTimeType == 1 || dateTimeType == 2)) {
+        double nowEpoch = h->cpu->dateTimeAnchorEpochSec + h->cpu->elapsedTimeUs / 1e6;
+        time_t nowWhole = (time_t)nowEpoch;
+        double frac = nowEpoch - (double)nowWhole;
+        struct tm tmVal;
+        localtime_r(&nowWhole, &tmVal);
+        if (dateTimeType == 1) {
+            double secsSinceMidnight = tmVal.tm_hour * 3600.0 + tmVal.tm_min * 60.0 + tmVal.tm_sec + frac;
+            FloatIBM ct = fibm_from_float(secsSinceMidnight);
+            register_set32(cpu_f(h->cpu, 0), fibm_to64x(&ct));
+            register_set32(cpu_f(h->cpu, 1), fibm_to64y(&ct));
+        } else {
+            int yyddd = (tmVal.tm_year % 100) * 1000 + (tmVal.tm_yday + 1);
+            register_set32(cpu_r(h->cpu, 5), (uint32_t)yyddd);
+        }
         return true;
     }
 
