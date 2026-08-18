@@ -301,3 +301,48 @@ document's planning stages, and it is already in the code as
   checks re-verified passing against the corrected construction. Full
   existing suite stays green. The live MEDS test is worth trying again
   now that the actual framing bug is fixed.
+
+### [2026-08-19] Target: problems.md
+- **Live MEDS confirmation, for real this time.** Still no visible
+  change after the framing fix (same 2x "BCE: unknown instruction 0" as
+  before -- confirmed harmless/expected, unrelated). Debugged live using
+  Chrome DevTools Protocol (Electron's `--remote-debugging-port`,
+  temporarily added to `nsts-sim-gpc`'s `main.civet` -- a real user
+  needed for a real diagnosis here, not guessing): the message *was*
+  reaching `idp1`'s real `recvDK` handler correctly (`"IDPIDP1: DK1 DATA
+  FILL (1082 bytes)"`, matching the fixture's real payload size exactly)
+  and the bridge's own wire-protocol fix (2026-08-19, earlier entry) is
+  now fully confirmed correct, live. The remaining blocker was entirely
+  on `nsts-sim-gpc`'s own side, two real bugs in its DFB/FCW renderer,
+  found and fixed there (with the user's explicit go-ahead) via CDP-
+  captured stack traces:
+  1. `meds/mduScreen_DPS.coffee`'s `setBGDFB()` used CoffeeScript/Civet's
+     *inclusive* range (`[1..msg.data16.length]`) instead of exclusive
+     (`[1...msg.data16.length]`, matching the correctly-written `setTime()`
+     right below it) -- read one word out of bounds, writing `undefined`
+     into the FCW buffer.
+  2. `meds/deuFCW.coffee`'s `decodeFCW()` didn't guard against
+     `@decode()` returning `undefined` for an unrecognized halfword,
+     crashing the whole render on the first one; `drawFCWS()` didn't
+     guard its own caller-side use either. Fixed both (return early /
+     `continue unless desc?`) -- turns "one bad word crashes everything"
+     into "skip that word, keep going."
+  Root cause of *why* words go unrecognized: `nsts-sim-gpc`'s own
+  `@FCWS` table only implements single-halfword opcodes; its own
+  comments document several real historical multi-halfword FCW types
+  (POSITION variants, LINE, VPARM, RTC, TEST, DASH ON, etc.) as not yet
+  built -- confirmed a whole missing opcode category (every unmatched
+  word in the real DFB fixture starts with binary `1001`/`0x9x`, which
+  no current `@FCWS` entry's prefix matches). Real, substantial,
+  genuinely `nsts-sim-gpc`'s own unfinished territory -- not something
+  fixed or fixable from yaGPC2's side, and not attempted further here.
+  **User confirmation, verbatim: "Stuff appeared. It's goofy looking,
+  but it appeared."** -- exactly consistent with ~32% (172/541) of the
+  real DFB's FCWs being silently skipped rather than rendered. This is
+  the real, live, end-to-end confirmation the whole `--bce-network`
+  bridge was built for. The temporary CDP debugging switch in
+  `main.civet` and the diagnostic `console.log` in `deuFCW.coffee` are
+  still present in `nsts-sim-gpc`'s own working tree (not committed
+  anywhere) -- the two real fixes (off-by-one, undefined-guard) are
+  worth keeping/upstreaming to Don; the CDP switch was purely a
+  debugging aid and should probably be reverted once no longer needed.
