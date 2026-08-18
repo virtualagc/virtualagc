@@ -1217,6 +1217,15 @@ run ./run_local_fixture.sh sched_while_reset "N=               3" --time-scale 1
 # shared (that's how the primal sees the write-backs). Cross-checked with yaGPC2.
 run ./run_local_fixture.sh reentrant_automatic "$(printf 'RA=      1.0000000E+01\nRB=      2.0000000E+01')" --time-scale 1000000
 
+# Single-precision INTEGER is a 16-bit halfword (USA003090 Sec. 8.2 / App. B):
+# a store past int16 range wraps, and the wrapped value -- not a 32-bit one --
+# is what a later SIGNED comparison observes (so it's genuine storage
+# truncation, not just WRITE display masking). 30000+30000=60000 wraps to
+# -5536 in a single INTEGER (N) and equally in an INTEGER ARRAY element (ARR$1);
+# an INTEGER DOUBLE (D) is a full 32-bit word and stays 60000; SGN=1 proves N is
+# really negative in storage. Feature-survey gap vs yaGPC2's hal-runtime DB.
+run ./run_local_fixture.sh integer_wrap "$(printf '      -5536\n      60000\n      -5536\n          1')"
+
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale
 # usage above, to confirm interp_run_signal()'s tick-budget accounting

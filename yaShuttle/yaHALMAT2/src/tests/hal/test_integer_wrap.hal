@@ -1,0 +1,19 @@
+C/ Single-precision INTEGER is a 16-bit halfword (USA003090 Sec. 8.2 /
+C/ App. B): a store past int16 range wraps, and the WRAPPED value -- not a
+C/ 32-bit one -- is what a later signed comparison observes. INTEGER DOUBLE
+C/ is a full 32-bit word and does not wrap. See run_all.sh.
+ TIW: PROGRAM;
+    DECLARE INTEGER, N, M, SGN;
+    DECLARE D INTEGER DOUBLE;
+    DECLARE ARR ARRAY(2) INTEGER;
+    M = 30000;
+    N = M + M;
+    D = M + M;
+    ARR$1 = M + M;
+    IF N < 0 THEN SGN = 1;
+    ELSE SGN = 0;
+    WRITE(6) N;
+    WRITE(6) D;
+    WRITE(6) ARR$1;
+    WRITE(6) SGN;
+ CLOSE TIW;

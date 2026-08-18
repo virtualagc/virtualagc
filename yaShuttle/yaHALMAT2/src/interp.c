@@ -1125,6 +1125,25 @@ static bool resolve_operand(halmat_state_t *state, const halmat_operand_t *op, r
  * OP_TASN's own field write and TINT's whole-structure INITIAL()
  * population, neither of which this normalization has been extended to
  * yet; not known to be exercised by any real corpus file). */
+/* Coerce an integer value to its declared-precision storage width. A HAL/S
+ * single-precision INTEGER is a 16-bit halfword (USA003090 Sec. 8.2 / App. B):
+ * a value stored into such a variable wraps to int16 range, and that wrapped
+ * value -- not a 32-bit one -- is what every later read/comparison/arithmetic
+ * observes. INTEGER DOUBLE is a full 32-bit word. Default (no DOUBLE flag) is
+ * single. Intermediate/register values with no destination symbol
+ * (dest_syt == HALMAT_SYT_MAX) keep full width -- only a store into a declared
+ * single INTEGER truncates, matching the AP-101S "compute wide, store narrow"
+ * behavior. Non-INTEGER destinations are returned unchanged. */
+static int32_t coerce_integer_to_declared_precision(halmat_state_t *state, uint16_t dest_syt, int32_t value) {
+    if (dest_syt < HALMAT_SYT_MAX && state->symtab) {
+        const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, dest_syt);
+        if (dsym && dsym->hal_class == 6 && !(dsym->flags & HALMAT_SYM_FLAG_DOUBLE)) {
+            return (int16_t)value; /* single INTEGER: wrap to 16-bit */
+        }
+    }
+    return value;
+}
+
 static bool write_syt_entry(halmat_state_t *state, uint16_t dest_syt, halmat_syt_entry_t *e, const resolved_value_t *val) {
     if (e->type == SYT_TYPE_UNKNOWN) {
         e->type = (val->kind == RV_STRING) ? SYT_TYPE_CHARACTER
@@ -1170,7 +1189,7 @@ static bool write_syt_entry(halmat_state_t *state, uint16_t dest_syt, halmat_syt
         }
         e->scalar = sv;
     } else {
-        e->value = rv_to_integer(val);
+        e->value = coerce_integer_to_declared_precision(state, dest_syt, rv_to_integer(val));
     }
     return true;
 }
@@ -1236,7 +1255,20 @@ static bool write_container_element(halmat_state_t *state, uint16_t dest_syt, ha
     halmat_scalar_t sv = rv_to_scalar(val);
     if (state->symtab) {
         const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, dest_syt);
-        if (dsym && (dsym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE))) {
+        if (dsym && dsym->hal_class == 6) {
+            /* INTEGER ARRAY element: a single-precision INTEGER is a 16-bit
+             * halfword (same USA003090 Sec. 8.2 rule as a plain single INTEGER
+             * -- write_syt_entry's coerce_integer_to_declared_precision), so
+             * wrap the stored value to int16 range and re-box it, rather than
+             * applying the scalar-float scale_precision() below, which would
+             * misinterpret the INTEGER's SINGLE/DOUBLE flag as a floating
+             * mantissa width. INTEGER DOUBLE (32-bit) is returned unchanged by
+             * the coerce helper. The value round-trips exactly: an integer
+             * element is read back via rv_to_integer(), and
+             * halmat_scalar_from_integer() stores the wrapped value losslessly. */
+            int32_t iv = coerce_integer_to_declared_precision(state, dest_syt, rv_to_integer(val));
+            sv = halmat_scalar_from_integer(iv, false);
+        } else if (dsym && (dsym->flags & (HALMAT_SYM_FLAG_SINGLE | HALMAT_SYM_FLAG_DOUBLE))) {
             bool want_double = (dsym->flags & HALMAT_SYM_FLAG_DOUBLE) != 0;
             if (sv.double_precision != want_double) sv = scale_precision(sv, want_double);
         }
@@ -2494,7 +2526,8 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
     }
     if (psym && psym->hal_class == 6 /* INTEGER */ && state->io_pending.items[item_index].is_scalar) {
         dest_state->syt[param_syt].type = SYT_TYPE_INTEGER;
-        dest_state->syt[param_syt].value = halmat_scalar_to_integer(state->io_pending.items[item_index].scalar);
+        dest_state->syt[param_syt].value = coerce_integer_to_declared_precision(
+            dest_state, param_syt, halmat_scalar_to_integer(state->io_pending.items[item_index].scalar));
         return true;
     }
     if (state->io_pending.items[item_index].is_scalar) {
@@ -2509,7 +2542,8 @@ static bool bind_call_argument(halmat_state_t *state, halmat_state_t *dest_state
         dest_state->syt[param_syt].bit_value = state->io_pending.items[item_index].bits;
     } else {
         dest_state->syt[param_syt].type = SYT_TYPE_INTEGER;
-        dest_state->syt[param_syt].value = state->io_pending.items[item_index].integer;
+        dest_state->syt[param_syt].value = coerce_integer_to_declared_precision(
+            dest_state, param_syt, state->io_pending.items[item_index].integer);
     }
     return true;
 }
