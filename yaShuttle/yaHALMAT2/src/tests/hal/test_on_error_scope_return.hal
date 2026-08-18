@@ -1,0 +1,19 @@
+C/ Dynamic scoping of the error environment (USA003087 Sec. 25.1): a FUNCTION's
+C/ ON ERROR is unwound on return -- see run_all.sh for the full account.
+ TERR: PROGRAM;
+    DECLARE SCALAR, X, R;
+    DECLARE NEG SCALAR INITIAL(-4.0);
+    P: FUNCTION SCALAR;
+       DECLARE RES SCALAR;
+       ON ERROR GO TO PCAUGHT;
+       RES = SQRT(NEG);
+       RETURN 1.0;
+ PCAUGHT:
+       WRITE(6) 'P CAUGHT';
+       RETURN 99.0;
+    CLOSE P;
+    R = P;
+    WRITE(6) 'P RETURNED';
+    X = SQRT(NEG);
+    WRITE(6) 'AFTER PRIMAL SQRT';
+ CLOSE TERR;

@@ -1,0 +1,20 @@
+C/ Per-process error environment (USA003087 Sec. 25.1): a TASK's ON ERROR is its
+C/ own process's and must not catch the primal's error -- see run_all.sh.
+ TERR: PROGRAM;
+    DECLARE NEG SCALAR INITIAL(-4.0);
+    DECLARE X SCALAR;
+    TASKA: TASK;
+       DECLARE RES SCALAR;
+       ON ERROR GO TO TCAUGHT;
+       RES = SQRT(NEG);
+       WRITE(6) 'TASK NORMAL';
+       RETURN;
+ TCAUGHT:
+       WRITE(6) 'TASK CAUGHT';
+    CLOSE TASKA;
+    SCHEDULE TASKA PRIORITY(80);
+    WAIT(1.0);
+    WRITE(6) 'AFTER TASK';
+    X = SQRT(NEG);
+    WRITE(6) 'PRIMAL AFTER SQRT';
+ CLOSE TERR;

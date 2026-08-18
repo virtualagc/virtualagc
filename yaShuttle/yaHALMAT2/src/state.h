@@ -608,6 +608,18 @@ typedef struct {
     bool has_event_action;  /* AND SET/RESET/SIGNAL clause was present */
     uint16_t event_syt;     /* valid iff has_event_action */
     halmat_error_event_action_t event_action; /* valid iff has_event_action */
+    /* Per-process, dynamically-scoped error environment (USA003087 Sec. 25.1):
+     * "Every active real time process possesses its own error environment ...
+     * a process may only modify its own, never that of another." owning_task is
+     * the task[] index that registered this modification -- find_error_handler
+     * only considers the running task's own. scope_depth is that task's own
+     * call nesting (halmat_task_t.call_depth) at registration: "modifications
+     * made during execution of a procedure or function remain in force only
+     * until return from it", so on return this task's handlers registered at a
+     * deeper scope_depth are unwound. A deeper (more recently entered) handler
+     * shadows a shallower one for the same specification. */
+    int owning_task;
+    int scope_depth;
 } halmat_error_handler_t;
 
 #define HALMAT_MAX_TASKS 32
@@ -759,6 +771,12 @@ typedef struct {
     uint16_t exclusive_wait_sym;
     struct { uint16_t sym; uint16_t depth; } excl_held[HALMAT_MAX_EXCL_HELD];
     uint8_t excl_held_sp;
+
+    int call_depth; /* THIS task's own procedure/function call nesting (0 in the task/program
+                      * body, +1 per PCAL/FCAL it executes, -1 per return). Tracked per task --
+                      * independent of the shared global call_return_sp -- so the dynamically-
+                      * scoped error environment (halmat_error_handler_t.scope_depth, USA003087
+                      * Sec. 25.1) unwinds correctly even when tasks interleave calls. */
 
     bool awaiting_next_cycle; /* true only while a cyclic (REPEAT EVERY/AFTER) task is DORMANT in the
                                 * gap between cycles -- i.e. it has completed a cycle and is TASK_WAITING

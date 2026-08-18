@@ -2114,6 +2114,20 @@ run ./run_read_fixture.sh read_eof_onerror "$(printf '1 1\n2 3\n4 4\n')" "$(prin
 # and naturally falling through to CLOS. Fixture: test_return_on_error.hal.
 run ./run_read_fixture.sh return_on_error "$(printf '1 1\n2 3\n4 4\n')" "$(printf 'TEST RESULTS FOLLOW\n          0               3')"
 
+# Error environment is per-process and dynamically scoped (USA003087 Sec. 25.1),
+# not a single global "last handler installed wins" table. on_error_scope_return:
+# a FUNCTION P installs ON ERROR GO TO, catches its own SQRT(negative) domain
+# error (returns 99), and RETURNS; the primal (no handler) then does the same
+# SQRT -- P's handler is already unwound, so the primal's error takes the standard
+# system fixup. Expected P CAUGHT / P RETURNED / AFTER PRIMAL SQRT (a global table
+# wrongly re-fires P's handler -> a second P CAUGHT). on_error_scope_task: a TASK's
+# ON ERROR is its own process's environment and must NOT catch the primal's later
+# error. Handlers are tagged with owning task + call-depth scope; find only
+# considers the running task's, deepest scope wins, and a task's return unwinds
+# the handlers it registered in the block just exited. Cross-checked with yaGPC2.
+run ./run_local_fixture.sh on_error_scope_return "$(printf 'P CAUGHT\nP RETURNED\nAFTER PRIMAL SQRT')"
+run ./run_local_fixture.sh on_error_scope_task "$(printf 'TASK CAUGHT\nAFTER TASK\nPRIMAL AFTER SQRT')" --time-scale 1000000
+
 # Task #38: 172-OUTER.hal, `READ(5) ARG;` (ARG a UTIL_PARM-STRUCTURE with
 # fields `V VECTOR, S1 SCALAR, C INTEGER, S2 SCALAR, E BOOLEAN`) -- a
 # whole (bare/unqualified) STRUCTURE READ destination (HALMAT class 10),

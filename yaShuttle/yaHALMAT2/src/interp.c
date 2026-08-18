@@ -689,13 +689,50 @@ static halmat_error_handler_t *find_error_handler(halmat_state_t *state, int gro
     halmat_error_handler_t *exact = NULL, *by_group = NULL, *all = NULL;
     for (size_t i = 0; i < state->error_handler_count; i++) {
         halmat_error_handler_t *h = &state->error_handlers[i];
-        if (h->group == group && h->member == member) exact = h;
-        else if (h->group == group && h->member == -1) by_group = h;
-        else if (h->group == -1) all = h;
+        if (h->owning_task != state->current_task) continue; /* Sec. 25.1: only this process's own environment */
+        /* Within each specificity category the deepest (most recently entered)
+         * scope wins -- a handler set in an inner block shadows an outer one for
+         * the same specification until the inner block returns (Sec. 25.1's
+         * dynamic scoping). */
+        if (h->group == group && h->member == member) {
+            if (!exact || h->scope_depth > exact->scope_depth) exact = h;
+        } else if (h->group == group && h->member == -1) {
+            if (!by_group || h->scope_depth > by_group->scope_depth) by_group = h;
+        } else if (h->group == -1) {
+            if (!all || h->scope_depth > all->scope_depth) all = h;
+        }
     }
     if (exact) return exact;
     if (by_group) return by_group;
     return all;
+}
+
+/* Unwind this task's dynamically-scoped error modifications on return from a
+ * procedure/function (USA003087 Sec. 25.1): drop every handler this task
+ * registered at a scope deeper than keep_max_depth. Call with keep_max_depth =
+ * the task's own call_depth AFTER a return (so the just-exited block's handlers
+ * go), or -1 at task termination (so all of the task's handlers go -- its error
+ * environment ceases to exist along with the process). */
+static void error_handlers_unwind(halmat_state_t *state, int task, int keep_max_depth) {
+    size_t w = 0;
+    for (size_t r = 0; r < state->error_handler_count; r++) {
+        halmat_error_handler_t *h = &state->error_handlers[r];
+        if (h->owning_task == task && h->scope_depth > keep_max_depth) continue; /* out of scope now */
+        state->error_handlers[w++] = *h;
+    }
+    state->error_handler_count = w;
+}
+
+/* Called when the current task RETURNS from a procedure/function (any of
+ * OP_RTRN's / OP_CLOS's call-frame pop paths): drop this task's own call depth
+ * by one and unwind every error modification it made in the block just exited
+ * (USA003087 Sec. 25.1 dynamic scoping). call_depth is tracked per task rather
+ * than read off the shared global call_return_sp so it stays correct across
+ * task interleaving. */
+static void task_return_unwind(halmat_state_t *state) {
+    halmat_task_t *t = &state->tasks[state->current_task];
+    if (t->call_depth > 0) t->call_depth--;
+    error_handlers_unwind(state, state->current_task, t->call_depth);
 }
 
 /* Registers an ON ERROR modification for (group, member) -- USA003087
@@ -704,9 +741,15 @@ static halmat_error_handler_t *find_error_handler(halmat_state_t *state, int gro
  * rather than adding a second one. */
 static void register_error_handler(halmat_state_t *state, int group, int member, halmat_error_action_t action, size_t goto_pc,
                                     bool has_event_action, uint16_t event_syt, halmat_error_event_action_t event_action) {
+    int task = state->current_task;
+    int depth = state->tasks[task].call_depth;
+    /* Re-registering the SAME specification within the SAME block (same task and
+     * scope) replaces it (Sec. 25.2, "erasing memory of the previous recovery
+     * action"). A same-spec handler at a shallower scope is NOT replaced -- this
+     * one shadows it until this block returns (Sec. 25.1 dynamic scoping). */
     for (size_t i = 0; i < state->error_handler_count; i++) {
         halmat_error_handler_t *h = &state->error_handlers[i];
-        if (h->group == group && h->member == member) {
+        if (h->group == group && h->member == member && h->owning_task == task && h->scope_depth == depth) {
             h->action = action;
             h->goto_pc = goto_pc;
             h->has_event_action = has_event_action;
@@ -728,20 +771,8 @@ static void register_error_handler(halmat_state_t *state, int group, int member,
     h->has_event_action = has_event_action;
     h->event_syt = event_syt;
     h->event_action = event_action;
-}
-
-/* OFF ERROR (USA003087 Sec. 25.2): removes a previously-registered
- * modification with the same group:member specification, a no-op if
- * none exists. */
-static void unregister_error_handler(halmat_state_t *state, int group, int member) {
-    for (size_t i = 0; i < state->error_handler_count; i++) {
-        if (state->error_handlers[i].group == group && state->error_handlers[i].member == member) {
-            memmove(&state->error_handlers[i], &state->error_handlers[i + 1],
-                    (state->error_handler_count - i - 1) * sizeof(halmat_error_handler_t));
-            state->error_handler_count--;
-            return;
-        }
-    }
+    h->owning_task = task;
+    h->scope_depth = depth;
 }
 
 /* Resolves a QUAL_XPT operand (class-0/EXTN.md's "extended pointer",
@@ -5832,7 +5863,16 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                                             ins->tag == 1 ? HALMAT_ERRACT_SYSTEM : HALMAT_ERRACT_IGNORE, 0,
                                             has_event_action, event_syt, event_action);
                 } else if (ins->tag == 3) {
-                    unregister_error_handler(state, group, member);
+                    /* OFF ERROR (USA003087 Sec. 25.2): reverts the recovery
+                     * action for this specification to the standard system
+                     * action. Modeled as registering a SYSTEM-action handler at
+                     * the CURRENT scope: it replaces a same-scope handler for
+                     * this spec, or shadows one inherited from an enclosing
+                     * block -- and, like any modification, is unwound on return
+                     * from this block (Sec. 25.1), restoring the outer handler.
+                     * (SYSTEM is what find_error_handler/arithmetic_error_
+                     * should_apply_fixup treat as "apply the standard fixup".) */
+                    register_error_handler(state, group, member, HALMAT_ERRACT_SYSTEM, 0, false, 0, HALMAT_EVENT_SIGNAL);
                 } else {
                     fail(state, "ERON: unrecognized opcode-line tag %u", ins->tag);
                 }
@@ -12682,6 +12722,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * (recursive re-entry). Released by exclusive_release_returned()
                  * when this process returns back out. */
                 if (symbol_is_exclusive(state, proc)) exclusive_acquire(state, proc);
+                state->tasks[state->current_task].call_depth++; /* per-task call nesting, for ON ERROR scoping */
                 break;
             }
 
@@ -12753,6 +12794,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * EXCLUSIVE applies to functions as well as procedures; the
                  * contending-caller block happened at this call's XXST. */
                 if (symbol_is_exclusive(state, callee)) exclusive_acquire(state, callee);
+                state->tasks[state->current_task].call_depth++; /* per-task call nesting, for ON ERROR scoping */
                 break;
             }
 
@@ -13024,6 +13066,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         halmat_scalar_t *elems; size_t count; int rows, cols;
                         if (!resolve_container(state, &ins->operands[0], &elems, &count, &rows, &cols)) break;
                         size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
+                        task_return_unwind(state); /* Sec. 25.1: unwind this function's error modifications */
                         size_t vac_index = state->prog->instrs[fcal_pos].index;
                         if (!store_container_result(state, vac_index, elems, count, rows, cols)) break;
                         state->pc = fcal_pos + 1;
@@ -13032,6 +13075,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     }
                     if (!resolve_operand(state, &ins->operands[0], &a)) break;
                     size_t fcal_pos = state->call_return_stack[--state->call_return_sp];
+                    task_return_unwind(state); /* Sec. 25.1: unwind this function's error modifications */
                     size_t vac_index = state->prog->instrs[fcal_pos].index;
                     if (vac_index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
                     /* User-reported (128-MASS.hal's `WRITE(6)
@@ -13098,6 +13142,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     state->pc = fcal_pos + 1;
                 } else {
                     size_t call_pos = state->call_return_stack[--state->call_return_sp];
+                    task_return_unwind(state); /* Sec. 25.1: unwind this procedure's error modifications */
                     state->pc = call_pos + 1;
                 }
                 branched = true;
@@ -13195,6 +13240,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         apply_fixup = arithmetic_error_should_apply_fixup(state, HAL_S_ERROR_NO_RETURN_STATEMENT, &state->pc, &branched);
                     }
                     state->call_return_sp--;
+                    task_return_unwind(state); /* Sec. 25.1: unwind this subprogram's error modifications on fallthrough CLOSE */
                     if (is_fcal && apply_fixup) {
                         size_t vac_index = state->prog->instrs[fcal_pos].index;
                         if (vac_index < HALMAT_VAC_MAX) {
