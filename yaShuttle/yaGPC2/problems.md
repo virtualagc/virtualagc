@@ -4117,6 +4117,90 @@ Four new fixtures — `charactercompare.hal`, `remotevectorcopy.hal`,
 rows 131/133 updated from `unresolved` to `implemented_via_cpu`/
 `tested_dedicated` — **zero `unresolved` rows remain in the survey.**
 
+### 7.22 Program Processes (`SCHEDULE` targeting a separately-compiled `PROGRAM`) — implemented, correcting a scope assessment that was simply wrong; the survey's last real gap closed
+
+Requested by the user directly ("continue until all bugs and in-scope
+features are addressed"), reopening row 14 — previously marked
+`not_implemented` under an explicit "needs multi-image loading support
+at the `AGEHarness`/`main.c` level... infrastructure this whole
+scheduler-substitution pass never touches" assessment (§7.13). That
+assessment was wrong, in the same family as the `RANDOM()`/`RANDOMG()`
+and Appendix D research errors earlier in this section: it assumed
+"separately compiled" meant "separately loaded at runtime," when
+`USA003087` §23.1's own footnote 33 says plainly the object modules
+"have to be link-edited to produce a single executable load module" —
+an ordinary link-time concern, not a runtime one.
+
+**Confirmed directly, not just re-read:** built a real two-unit
+example — `PRIMARY2: PROGRAM;` containing `SECOND: EXTERNAL PROGRAM;`
+(a program template) and a genuine `SECOND: PROGRAM;` compiled
+separately — and found `lnk101` already merges both `.obj` files into
+one `.fcm` on request (`lnk101 primary.obj second.obj -o combined.fcm`)
+exactly the way it already merges every RTL library object this whole
+codebase depends on; no new linker capability was needed at all.
+
+**The SVC protocol traced from the merged image turned out
+byte-identical to the already-implemented `TASK` case**, with exactly
+one difference: `FLAGS` bit `0x0001` (the "TASK" marker, previously
+assumed mandatory on every recognized `SCHEDULE` signature) is *clear*
+for a Program Process target instead of set. The target's own PDE lives
+in *its own* compiled unit's own `#E<name>` data area — confirmed via a
+direct `.fcm` hex-dump (`#ESECOND`, sized identically to every `TASK`
+PDE slot already established this session) — rather than the caller's,
+since a Program Process, unlike a `TASK`, is a real independently-
+linkable unit any caller could `SCHEDULE`, so it can't reuse the
+caller's own private data area the way a nested `TASK` block does. Its
+own entry-point far-pointer decodes via the *exact same*
+`decode_pde_far_pointer()` already used for every `TASK` PDE, with no
+changes. **The entire fix was a single FLAGS-bit gate relaxation in
+`halucp.c`** — dropping the `hasTask &&` requirement from the main
+`SCHEDULE` branch's own condition — **zero changes to `schedule.c` at
+all**, since `sched_handle_schedule_svc()` never cared whether a PDE
+belonged to a `TASK` or a `PROGRAM` in the first place; it only ever
+decoded and dispatched an address.
+
+**Verified against the full `USA003087` §23.3 checklist**, not just the
+bare case, using two real compiled fixtures: `SCHEDULE` (bare and
+`DEPENDENT`), `WAIT FOR DEPENDENT`, `TERMINATE`, `UPDATE PRIORITY`,
+`REPEAT EVERY`, and the target's own name used as a `Boolean` both
+before and after scheduling it — all correct, all needing zero
+additional code beyond the one gate relaxation, since `TERMINATE`/
+`UPDATE PRIORITY`/process-name-as-`Boolean` already operated purely on
+PDE addresses with no `TASK`-specific assumptions anywhere in their own
+code paths.
+
+**No working `yaHALMAT2` oracle exists for this feature either** —
+attempted a cross-check via their own `@list`/`--entry` multi-unit
+mechanism and got `"only COMPOOL/FUNCTION/PROCEDURE auxiliary units are
+supported (not the PROGRAM entry point)"`: a real, symmetric gap on
+their side, not merely a historical one on this side. Verified instead
+via direct SVC/PDE tracing against the identical, already-extensively-
+validated mechanism `TASK`-based `SCHEDULE` already uses.
+
+Two new fixtures — `programprocess.hal`/`programprocess_second.hal` and
+`programprocessrepeat.hal`/`programprocessrepeat_second.hal` — built via
+a new `build_multi()` helper in `build_hal_fixtures.sh` (two independent
+`HALSFC` compiles, one `lnk101` link taking both `.obj` files at once),
+exercised by `test_scheduler.sh` under both `--pacing` modes.
+`hal-runtime-features.db` row 14 updated from `not_implemented` to
+`implemented`/`tested_dedicated`.
+
+**With this, the entire 143-row survey is closed.** Every row is either
+implemented and tested, or has a genuine, documented, unfixable-from-
+`yaGPC2`'s-side blocker — re-confirmed once more here, independently,
+rather than taken on faith from earlier passes: `SCHEDULE`'s cycle-
+overrun runtime error (row 11) stays `not_applicable` (re-searched the
+confidential FCOS source tree directly for any cycle/overrun/late-
+scheduling error handling; found none, and `USA003090` §8.3's own
+"This section was deleted by CR13613" remains the strongest possible
+confirmation real FCOS never implemented this promised-but-withdrawn
+language feature); `UPDATE PRIORITY`'s bare/self form (row 27) stays
+`partial` (re-tried with the simplest possible minimal trigger — a
+`TASK` whose only statement is `UPDATE PRIORITY TO 99;` — and
+reproduced the identical real `HALSFC` PASS2 compiler defect,
+`BS122 INDIRECT STACK USAGE CONFLICT`, confirming it's not an artifact
+of any particular surrounding code shape).
+
 ---
 
 ## Methodology and caveats

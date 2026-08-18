@@ -323,6 +323,31 @@
 #                          their side, reported but not an oracle here)
 #                          against the literal's own known bit pattern.
 #                          See problems.md 7.21.
+#   programprocess.fcm     <- programprocess.hal (primal) +
+#                          programprocess_second.hal (the EXTERNAL
+#                          PROGRAM target, built via build_multi below,
+#                          not build) -- Program Processes (USA003087
+#                          23.1-23.3: SCHEDULE targeting a separately-
+#                          compiled PROGRAM, not a TASK nested in the
+#                          same compilation unit). Exercises SCHEDULE
+#                          (bare + DEPENDENT), WAIT FOR DEPENDENT, and
+#                          the target's own name as a Boolean, both
+#                          before and after scheduling it.
+#                          programprocessrepeat.fcm <-
+#                          programprocessrepeat.hal +
+#                          programprocessrepeat_second.hal (same
+#                          build_multi pattern) -- REPEAT EVERY and
+#                          TERMINATE on a Program Process target. See
+#                          problems.md 7.22 for the full derivation:
+#                          previously marked out of scope under the
+#                          (wrong) assumption this needed real multi-
+#                          image *runtime* loading -- it's ordinary
+#                          link-time merging (lnk101 already merges
+#                          separately-compiled PROGRAM .obj files, same
+#                          as RTL library objects), and the SCHEDULE SVC
+#                          protocol is byte-identical to the TASK case
+#                          except FLAGS bit 0x0001 (the TASK marker) is
+#                          clear.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -378,6 +403,10 @@ CHARACTERCOMPARE_HAL="$(dirname "$0")/charactercompare.hal"
 REMOTEVECTORCOPY_HAL="$(dirname "$0")/remotevectorcopy.hal"
 STRUCTURECOMPARE_HAL="$(dirname "$0")/structurecompare.hal"
 CHARACTERSUBBIT_HAL="$(dirname "$0")/charactersubbit.hal"
+PROGRAMPROCESS_HAL="$(dirname "$0")/programprocess.hal"
+PROGRAMPROCESS_SECOND_HAL="$(dirname "$0")/programprocess_second.hal"
+PROGRAMPROCESSREPEAT_HAL="$(dirname "$0")/programprocessrepeat.hal"
+PROGRAMPROCESSREPEAT_SECOND_HAL="$(dirname "$0")/programprocessrepeat_second.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -391,6 +420,28 @@ build() {
     (cd "$WORK" && lnk101 "$base.obj" -o "$base.fcm" --json-symbols "$base-lnk101.json")
     cp "$WORK/$base.fcm" "$outprefix.fcm"
     cp "$WORK/$base-lnk101.json" "$outprefix-lnk101.json"
+}
+
+# Like build(), but for a Program Process pair (USA003087 23.1-23.3):
+# a primal .hal referencing a second, separately-compiled PROGRAM via
+# an EXTERNAL PROGRAM template, and that second .hal's own real
+# definition. Each is compiled independently, then lnk101 is given
+# BOTH .obj files at once -- it merges separately-compiled PROGRAM
+# units into one load module exactly the same way it already merges
+# RTL library objects, no special multi-image runtime loading involved
+# at all (see problems.md 7.22). Only the primal's own base name
+# becomes outprefix.fcm/-lnk101.json (the second unit's own code/data
+# lives in the same merged image, reached only via the primal's own
+# SCHEDULE, not run standalone).
+build_multi() {
+    local primalHal="$1" primalBase="$2" secondHal="$3" secondBase="$4" outprefix="$5"
+    cp "$primalHal" "$WORK/$primalBase.hal"
+    cp "$secondHal" "$WORK/$secondBase.hal"
+    (cd "$WORK" && HALSFC "$primalBase.hal" --parms="$PARMS" -o "$primalBase.obj")
+    (cd "$WORK" && HALSFC "$secondBase.hal" --parms="$PARMS" -o "$secondBase.obj")
+    (cd "$WORK" && lnk101 "$primalBase.obj" "$secondBase.obj" -o "$primalBase.fcm" --json-symbols "$primalBase-lnk101.json")
+    cp "$WORK/$primalBase.fcm" "$outprefix.fcm"
+    cp "$WORK/$primalBase-lnk101.json" "$outprefix-lnk101.json"
 }
 
 cd "$(dirname "$0")"
@@ -446,5 +497,7 @@ build "$CHARACTERCOMPARE_HAL" CHARCMP charactercompare
 build "$REMOTEVECTORCOPY_HAL" REMOTECP remotevectorcopy
 build "$STRUCTURECOMPARE_HAL" STRUCCMP structurecompare
 build "$CHARACTERSUBBIT_HAL" CHSUBBI2 charactersubbit
+build_multi "$PROGRAMPROCESS_HAL" PRIMARY2 "$PROGRAMPROCESS_SECOND_HAL" SECOND programprocess
+build_multi "$PROGRAMPROCESSREPEAT_HAL" PRIMARY3 "$PROGRAMPROCESSREPEAT_SECOND_HAL" SECONDR programprocessrepeat
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm, randomsequence.fcm, dartboard.fcm, roll.fcm, charactercompare.fcm, remotevectorcopy.fcm, structurecompare.fcm, charactersubbit.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm, randomsequence.fcm, dartboard.fcm, roll.fcm, charactercompare.fcm, remotevectorcopy.fcm, structurecompare.fcm, charactersubbit.fcm, programprocess.fcm, programprocessrepeat.fcm (+ -lnk101.json)"

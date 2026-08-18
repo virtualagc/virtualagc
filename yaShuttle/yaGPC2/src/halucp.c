@@ -416,9 +416,35 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         if (svcLow == 0x01) {
             /* SCHEDULE. FLAGS-word bits confirmed empirically against
              * real compiled programs, one variant at a time: 0x0001 =
-             * "TASK" marker (set on every signature this cut supports;
-             * a PROGRAM-process target, if that ever sets a different
-             * bit, is out of scope), 0x0004 = AT, 0x0008 = IN, 0x0020 =
+             * "TASK" marker -- set when the SCHEDULE target is a TASK
+             * block nested in the same compilation unit, CLEAR when the
+             * target is a Program Process (USA003087 23.1-23.3: SCHEDULE
+             * targeting a separately-compiled PROGRAM, linked into the
+             * same load module via an EXTERNAL PROGRAM template --
+             * confirmed empirically via a real two-unit HALSFC compile
+             * and lnk101 link: FLAGS=0x0000 for a bare `SCHEDULE SECOND
+             * PRIORITY(80);` where SECOND is an EXTERNAL PROGRAM, vs.
+             * FLAGS=0x0081 for the equivalent TASK case). The PDE
+             * reference (ea+2) and everything else about the parameter
+             * block, and the target's own entry-point far-pointer
+             * encoding (PDE+2, decode_pde_far_pointer) are byte-for-byte
+             * identical either way -- a Program Process's own PDE simply
+             * lives in ITS OWN compiled unit's own #E<name> data area
+             * (confirmed: #ESECOND, sized identically to #ECOUNTU's own
+             * per-task PDE slots) rather than the calling program's,
+             * since (unlike a TASK, which has no independent existence
+             * outside the block that declares it) a Program Process is
+             * a real, separate, independently-linkable compilation unit
+             * that could in principle be SCHEDULEd by more than one
+             * caller. This means sched_handle_schedule_svc needed zero
+             * changes at all -- only this FLAGS-bit gate needed
+             * relaxing to stop requiring the TASK bit specifically (see
+             * problems.md 7.22; only the bare/AT/IN/DEPENDENT/REPEAT-
+             * EVERY combination has been directly confirmed this way --
+             * the ON-event-expr branch below still requires the TASK bit
+             * until a Program-Process-plus-ON case is confirmed too, out
+             * of the same "don't extend past what's actually verified"
+             * discipline used throughout this whole file). 0x0004 = AT, 0x0008 = IN, 0x0020 =
              * DEPENDENT, bits 6-7 (mask 0x00C0) = REPEAT cycling mode
              * (0x00=none, 0x40=BARE/immediate, 0x80=EVERY, 0xC0=AFTER --
              * see RepeatMode's own comment in schedule.h; 0x0081 was this
@@ -473,8 +499,12 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                 uint32_t eventDescAddr = mcm_get16(&h->cpu->mainStorage, ea + 3);
                 return sched_handle_schedule_on_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr, eventDescAddr);
             }
-            if (hasTask && !hasOn && (flags & ~recognizedMask) == 0) {
-                /* The PDE reference is a single halfword (not a 32-bit
+            if (!hasOn && (flags & ~recognizedMask) == 0) {
+                /* Reaches here for both TASK targets (hasTask) and
+                 * Program Process targets (!hasTask) -- see this
+                 * function's own FLAGS-bit comment above; everything
+                 * from here down is identical either way. The PDE
+                 * reference is a single halfword (not a 32-bit
                  * hal_get32 read -- confirmed empirically: the halfword
                  * immediately after it is unrelated padding, not a real
                  * continuation), and its own VALUE is already in the

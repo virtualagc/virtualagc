@@ -322,4 +322,24 @@ run_case_with_stderr "errordynscope/signal" "signal" "fixtures/errordynscope.fcm
 run_case "reentrantautomatic/burst"  "burst"  "fixtures/reentrantautomatic.fcm" "fixtures/reentrantautomatic-lnk101.json" "fixtures/reentrantautomatic_golden.txt"
 run_case "reentrantautomatic/signal" "signal" "fixtures/reentrantautomatic.fcm" "fixtures/reentrantautomatic-lnk101.json" "fixtures/reentrantautomatic_golden.txt"
 
+# Program Processes (USA003087 23.1-23.3): SCHEDULE targeting a
+# separately-compiled PROGRAM (an EXTERNAL PROGRAM template, link-time
+# merged via lnk101 -- see build_hal_fixtures.sh's own build_multi
+# helper), not a TASK nested in the same compilation unit. FLAGS bit
+# 0x0001 (the TASK marker) is clear instead of set; everything else
+# about the SCHEDULE SVC protocol, and the target's own PDE/entry-point
+# decode, is byte-identical to the TASK case -- confirmed previously
+# out of scope under the wrong assumption this needed real multi-image
+# runtime loading. programprocess.fcm exercises SCHEDULE (bare +
+# DEPENDENT), WAIT FOR DEPENDENT, and the target's own name as a
+# Boolean before/after; programprocessrepeat.fcm exercises REPEAT EVERY
+# and TERMINATE on a Program Process target. No working yaHALMAT2
+# oracle exists for either -- confirmed their own multi-unit loading
+# explicitly rejects a second PROGRAM unit as an auxiliary. See
+# problems.md 7.22.
+run_case "programprocess/burst"  "burst"  "fixtures/programprocess.fcm" "fixtures/programprocess-lnk101.json" "fixtures/programprocess_golden.txt"
+run_case "programprocess/signal" "signal" "fixtures/programprocess.fcm" "fixtures/programprocess-lnk101.json" "fixtures/programprocess_golden.txt"
+run_case "programprocessrepeat/burst"  "burst"  "fixtures/programprocessrepeat.fcm" "fixtures/programprocessrepeat-lnk101.json" "fixtures/programprocessrepeat_golden.txt"
+run_case "programprocessrepeat/signal" "signal" "fixtures/programprocessrepeat.fcm" "fixtures/programprocessrepeat-lnk101.json" "fixtures/programprocessrepeat_golden.txt"
+
 exit $fail

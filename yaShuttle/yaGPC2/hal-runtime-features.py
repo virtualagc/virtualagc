@@ -340,15 +340,32 @@ F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT ... WHILE / UNTIL event-expr',
 F('Real-Time: SCHEDULE', 'Program Processes (SCHEDULE targeting a separate compiled PROGRAM)',
   'SCHEDULE can target another independently-compiled PROGRAM (via an EXTERNAL PROGRAM template '
   'and link-time assembly), not just a local TASK.',
-  'USA003087 §23.1-23.3', 'not_implemented',
-  'schedule.c only decodes a PDE reached from the current linked image; no multi-program-unit '
-  'process-creation path exists. RECONFIRMED at the end of the implementation-order pass (item #12): '
-  'still correctly out of scope for schedule.c/halucp.c specifically -- this is a genuinely different '
-  'kind of gap than everything else in this pass (SVC protocol substitution within one already-loaded '
-  'image), needing multi-image loading support at the AGEHarness/main.c level instead (loading and '
-  'linking more than one .fcm into one address space at once). Not a dead end like FILE/NEXTIME above '
-  '-- real FCOS did support this -- just infrastructure this scheduler-substitution pass never touches.',
-  'untested')
+  'USA003087 §23.1-23.3', 'implemented',
+  "IMPLEMENTED (2026-08-18), correcting the earlier 'needs multi-image loading at the AGEHarness/"
+  "main.c level' assessment -- that assumed real multi-image *runtime* loading was needed, but "
+  "footnote 33 of USA003087 23.1 says plainly: object modules from separate compilations 'have to "
+  "be link-edited to produce a single executable load module.' Confirmed directly: lnk101 already "
+  "merges multiple separately-compiled top-level PROGRAM .obj files into one .fcm on request "
+  "(`lnk101 primary.obj second.obj -o combined.fcm`), exactly like it already merges RTL library "
+  "objects -- no new linker capability needed. Traced the resulting SCHEDULE SVC and found its "
+  "own protocol byte-identical to the TASK case in every respect except FLAGS bit 0x0001 (the TASK "
+  "marker), which is clear instead of set; the target's own PDE lives in ITS OWN compiled unit's own "
+  "#E<name> data area (not the caller's, since -- unlike a TASK -- a Program Process is a real, "
+  "independently-linkable unit any caller could SCHEDULE) but decodes via the exact same "
+  "decode_pde_far_pointer() already used for TASK PDEs. The fix was a single FLAGS-bit gate "
+  "relaxation in halucp.c (stop requiring the TASK bit on the main SCHEDULE branch) -- zero changes "
+  "to schedule.c at all. Confirmed working for the full USA003087 23.3 checklist against a real "
+  "two-unit compile+link: SCHEDULE (bare and DEPENDENT), WAIT FOR DEPENDENT, TERMINATE, UPDATE "
+  "PRIORITY, REPEAT EVERY, and the target's own name as a Boolean, both before and after "
+  "scheduling it. No working yaHALMAT2 oracle exists -- confirmed their own multi-unit loading "
+  "explicitly rejects a second PROGRAM unit as an auxiliary ('only COMPOOL/FUNCTION/PROCEDURE "
+  "auxiliary units are supported'), a real gap on their side too, not just historically on this "
+  "one's. The ON-event-expr SCHEDULE branch still requires the TASK bit, since no Program-Process-"
+  "plus-ON combination has been directly confirmed.",
+  'tested_dedicated', "test/fixtures/programprocess.hal (bare/DEPENDENT SCHEDULE, WAIT FOR "
+  "DEPENDENT, process-name-as-Boolean) and programprocessrepeat.hal (REPEAT EVERY, TERMINATE), both "
+  "built via build_hal_fixtures.sh's new build_multi helper (two independent HALSFC compiles, one "
+  "lnk101 link), exercised by test_scheduler.sh under both --pacing modes. See problems.md 7.22.")
 
 # --- Real-Time: WAIT variants -------------------------------------------------------
 F('Real-Time: WAIT', 'WAIT (delta-time)', 'WAIT interval; suspends the executing process for interval seconds.',
