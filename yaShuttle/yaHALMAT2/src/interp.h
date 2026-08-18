@@ -40,6 +40,11 @@ void interp_set_raf_device(halmat_state_t *state, int channel, FILE *f, int reco
  * interpreter (main.c manages the halmat_symtab_t's lifetime). */
 void interp_set_symtab(halmat_state_t *state, const halmat_symtab_t *symtab);
 
+/* Override the DATE()/CLOCKTIME() mission-clock anchor (Unix epoch seconds) for
+ * every subsequently interp_init'd state -- --start-time, for reproducible runs.
+ * Call before interp_init(); unset -> the real host clock is captured instead. */
+void interp_set_wallclock_override(int64_t epoch_seconds);
+
 /* One entry of interp_set_external_units()'s map: `local_syt` (this
  * unit's own SYT index for an EXTERNAL FUNCTION/PROCEDURE symbol, the
  * exact index for which symbol_def_pos[] is NO_TARGET) resolves to

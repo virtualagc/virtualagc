@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -29,6 +30,41 @@
 
 #define MAX_UNITS 64
 #define MAX_DEVICE_MAPS 16
+
+/* Parse a --start-time value into Unix epoch seconds for DATE()/CLOCKTIME()'s
+ * mission-clock anchor. Accepts a local wall-clock datetime -- "YYYY-MM-DD",
+ * "YYYY-MM-DD HH:MM:SS", or "YYYY-MM-DDTHH:MM:SS" (interpreted in the host's
+ * local timezone via mktime, matching how DATE/CLOCKTIME report local time) --
+ * or a bare integer already in epoch seconds. Returns true on success. */
+static bool parse_start_time(const char *s, int64_t *out) {
+    int y, mo, d, h = 0, mi = 0, se = 0;
+    int n = sscanf(s, "%d-%d-%d %d:%d:%d", &y, &mo, &d, &h, &mi, &se);
+    if (n < 3) {
+        h = mi = se = 0;
+        n = sscanf(s, "%d-%d-%dT%d:%d:%d", &y, &mo, &d, &h, &mi, &se);
+    }
+    if (n >= 3) {
+        struct tm tmv;
+        memset(&tmv, 0, sizeof(tmv));
+        tmv.tm_year = y - 1900;
+        tmv.tm_mon = mo - 1;
+        tmv.tm_mday = d;
+        tmv.tm_hour = h;
+        tmv.tm_min = mi;
+        tmv.tm_sec = se;
+        tmv.tm_isdst = -1; /* let mktime determine DST for the given local time */
+        time_t t = mktime(&tmv);
+        if (t == (time_t)-1) return false;
+        *out = (int64_t)t;
+        return true;
+    }
+    /* Fall back to a bare epoch-seconds integer. */
+    char *endptr = NULL;
+    long long v = strtoll(s, &endptr, 10);
+    if (endptr == s || *endptr != '\0') return false;
+    *out = (int64_t)v;
+    return true;
+}
 
 typedef struct {
     int device;
@@ -84,6 +120,10 @@ static void usage(const char *prog) {
             "                   an hour of program time into about 36ms of sleeping) without\n"
             "                   changing any SCHEDULE/WAIT tick arithmetic or program output\n"
             "                   at all -- see state.h's scheduler comment.\n"
+            "  --start-time T   mission-clock anchor for DATE()/CLOCKTIME(): the calendar/time\n"
+            "                   of day at program start, then advanced by virtual time. T is a\n"
+            "                   local wall-clock 'YYYY-MM-DD[ HH:MM:SS]' or epoch seconds\n"
+            "                   (default: the real host clock at start). Fix it for reproducible runs.\n"
             "  --pacing=MODE    wall-clock pacing implementation: burst (default) is the\n"
             "                   original burst-execute-then-sleep polling design; signal is\n"
             "                   an alternative POSIX/Win32 timer-notification-driven design,\n"
@@ -1211,6 +1251,13 @@ int main(int argc, char **argv) {
                 fprintf(stderr, "%s: --time-scale expects a positive number\n", argv[0]);
                 return 1;
             }
+        } else if (strcmp(argv[i], "--start-time") == 0 && i + 1 < argc) {
+            int64_t epoch;
+            if (!parse_start_time(argv[++i], &epoch)) {
+                fprintf(stderr, "%s: --start-time expects YYYY-MM-DD[ HH:MM:SS] (local) or epoch seconds\n", argv[0]);
+                return 1;
+            }
+            interp_set_wallclock_override(epoch);
         } else if (strncmp(argv[i], "--pacing=", 9) == 0) {
             const char *val = argv[i] + 9;
             if (strcmp(val, "burst") == 0) {

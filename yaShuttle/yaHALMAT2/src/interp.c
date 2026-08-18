@@ -3270,10 +3270,23 @@ static void precompute_subprograms(halmat_state_t *state) {
     }
 }
 
+/* Optional process-wide override for DATE()/CLOCKTIME()'s mission-clock anchor
+ * (--start-time), so a run can be made reproducible. Set once from main.c
+ * before interp_init(); every state (including each unit of a linked program)
+ * then shares the same anchor, keeping their simulated calendars consistent.
+ * Unset -> interp_init() captures the real host clock instead. */
+static int64_t g_wallclock_override = 0;
+static bool g_wallclock_override_set = false;
+void interp_set_wallclock_override(int64_t epoch_seconds) {
+    g_wallclock_override = epoch_seconds;
+    g_wallclock_override_set = true;
+}
+
 void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks) {
     memset(state, 0, sizeof(*state));
     state->prog = prog;
+    state->wallclock_anchor = g_wallclock_override_set ? g_wallclock_override : (int64_t)time(NULL);
     state->literals = literals;
     state->num_blanks = num_blanks;
     state->line_length = -1; /* not explicitly set; flush_write picks the per-device
@@ -10119,18 +10132,25 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                     break;
                 }
                 if (ins->tag == 18 || ins->tag == 54) {
-                    /* DATE/CLOCKTIME: no argument, real OS wall-clock
-                     * time in the system's own configured local
-                     * timezone (user-clarified) -- plain standard-C
-                     * time()/localtime() (identically portable across
-                     * this project's POSIX/MSVC targets, unlike
-                     * interp_run_signal()'s platform-split
-                     * monotonic_seconds() a few thousand lines down,
-                     * which needs CLOCK_MONOTONIC precision this doesn't).
-                     * localtime() already honors TZ/the OS's configured
-                     * zone with no extra code. */
+                    /* DATE/CLOCKTIME: no argument. The mission clock is
+                     * anchored at program start (state->wallclock_anchor:
+                     * the real host time captured in interp_init, or a
+                     * --start-time override) and advanced by the *virtual*
+                     * elapsed time, so the calendar/time-of-day move on the
+                     * same simulated base as RUNTIME() rather than jumping
+                     * with the real host clock on every call -- and a run
+                     * with a fixed --start-time is reproducible. (This
+                     * replaced an earlier convention that read the real host
+                     * clock fresh on every call; aligned with yaGPC2's
+                     * start-anchor + virtual-progression + override
+                     * convention so the two emulators don't diverge.)
+                     * localtime() converts the resulting absolute instant to
+                     * the system's configured local timezone (rule 17/18's
+                     * calendar/day-of-year and time-of-day are local); it is
+                     * portable across this project's POSIX/MSVC targets. */
                     if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
-                    time_t now = time(NULL);
+                    time_t now = (time_t)(state->wallclock_anchor +
+                                          state->virtual_time / HALMAT_TICKS_PER_SECOND);
                     struct tm local_tm = *localtime(&now);
                     if (ins->tag == 18) {
                         /* DATE: [USA00309] Sec. 8.2 rule 17, confirmed

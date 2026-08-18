@@ -1662,6 +1662,14 @@ struct halmat_state {
                                * positional convention already used for FCAL's
                                * arguments, class-0/FCAL.md). */
     int64_t virtual_time;
+    int64_t wallclock_anchor; /* Unix epoch seconds of the mission clock at program start: the real host
+                                * time captured in interp_init(), or a --start-time override. DATE()/
+                                * CLOCKTIME() (USA00309 Sec. 8.2) read this anchor advanced by the
+                                * *virtual* elapsed time (virtual_time / HALMAT_TICKS_PER_SECOND), so the
+                                * calendar/clock progress on the same simulated time base as RUNTIME()
+                                * rather than jumping with the real host clock on every call -- and a run
+                                * with a fixed --start-time is fully reproducible. Kept as int64_t (not
+                                * time_t) so state.h needn't pull in <time.h> everywhere it's included. */
     int64_t instr_count; /* count of real HALMAT instructions actually executed so far
                            * (--debug's own "N=" field) -- incremented once per exec_one()
                            * call, NOT once per interp_step() call: a single interp_step()

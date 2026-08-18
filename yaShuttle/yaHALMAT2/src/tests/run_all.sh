@@ -1162,6 +1162,14 @@ run ./run_local_fixture.sh cancel_named_list "$(printf 'BEFORE\nDONE')" --time-s
 # yaGPC2's traced real HAL/S-FC (SVC #15/17 reserve/release before the body).
 run ./run_local_fixture.sh exclusive_serialized "$(printf 'BEFORE\nENTER P\nB TRY P\nLEAVE P\nPRIMAL DONE\nENTER P\nLEAVE P\nB GOT P')" --time-scale 1000000
 run ./run_local_fixture.sh exclusive_cutoff "$(printf 'BEFORE\nIN P\nB CALLS\nOUT P\nDONE')" --time-scale 1000000
+# DATE()/CLOCKTIME() (USA00309 Sec. 8.2 rules 17/18): mission clock anchored
+# at program start and advanced by *virtual* time (same base as RUNTIME), not
+# re-read from the real host clock per call. --start-time pins the anchor for a
+# reproducible run. DATE=YYDDD (INTEGER DOUBLE), CLOCKTIME=seconds since local
+# midnight; here 1978-02-01 00:00:00 -> DATE 78032, CLOCKTIME 0 then 3600 after
+# WAIT 3600. Convention shared with yaGPC2 (start anchor + virtual progression
+# + override) so the two emulators don't diverge.
+run ./run_local_fixture.sh datetime "$(printf '      78032\n 0.0          \n 3.6000000E+03')" --start-time "1978-02-01 00:00:00" --time-scale 1000000
 
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale

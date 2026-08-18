@@ -1,0 +1,18 @@
+C/ DATE()/CLOCKTIME() (USA00309 Sec. 8.2 rules 17/18). The mission clock is
+C/ anchored at program start (here pinned with --start-time for a reproducible
+C/ run) and then advances by *virtual* elapsed time, on the same time base as
+C/ RUNTIME() -- not by re-reading the real host clock on each call.  DATE is
+C/ YYDDD (needs INTEGER DOUBLE to hold a value > 32767); CLOCKTIME is seconds
+C/ since local midnight.  With --start-time 1978-02-01 00:00:00: DATE=78032
+C/ (Feb 1 1978 = day 32), CLOCKTIME=0 at start, then 3600 after WAIT 3600.
+ TDATETIME: PROGRAM;
+    DECLARE D INTEGER DOUBLE;
+    DECLARE C SCALAR;
+    D = DATE;
+    C = CLOCKTIME;
+    WRITE(6) D;
+    WRITE(6) C;
+    WAIT 3600.0;
+    C = CLOCKTIME;
+    WRITE(6) C;
+ CLOSE TDATETIME;
