@@ -12185,6 +12185,67 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                      * SKIP(0) case, not a direct observation. */
                     fseek(in, state->device_line_start[device] + (state->io_pending.column_n - 1), SEEK_SET);
                 }
+                if (ins->opcode == OP_RDAL) {
+                    /* READALL (USA003087 Sec. 22.1): raw fixed-width card-
+                     * image input. Unlike READ, the stream is a continuous
+                     * character sequence -- no division into fields, no type
+                     * conversion, no separator/null-field/semicolon rules
+                     * ("this behavior is unaffected by the contents of the
+                     * input stream"). Each listed item is CHARACTER; it is
+                     * filled from the current position, stopping when it
+                     * reaches its declared maximum length OR the end of the
+                     * line, whichever comes first. The next item resumes from
+                     * the next column of the same line, or from column 1 of
+                     * the next line if the previous item reached end of line.
+                     * With no list, the statement is just the (already done
+                     * above) initial positioning. The declared maximum length
+                     * comes from the symbol table (CHARACTER's SYM_LENGTH,
+                     * stored in bit_width -- symtab.c); with no symtab entry
+                     * we fall back to a plain read-to-end-of-line (capped at
+                     * the HAL/S CHARACTER ceiling of 255). */
+                    for (uint8_t i = 0; i < state->io_pending.item_count; i++) {
+                        const halmat_operand_t *dop = &state->io_pending.items[i].dest_operand;
+                        if (state->io_pending.items[i].dest_class != 2) {
+                            fail(state, "READALL(%d): item %u is not CHARACTER (only CHARACTER targets are supported)", device, i);
+                            break;
+                        }
+                        int maxlen = 255; /* HAL/S CHARACTER ceiling; also the read-buffer cap */
+                        if (dop->qual == QUAL_SYT && state->symtab) {
+                            const halmat_symtab_entry_t *dsym = halmat_symtab_find_by_index(state->symtab, dop->data);
+                            if (dsym && dsym->hal_class == 2 && dsym->bit_width > 0 && dsym->bit_width < maxlen)
+                                maxlen = dsym->bit_width;
+                        }
+                        char buf[256];
+                        int n = 0;
+                        int c = EOF;
+                        while (n < maxlen) {
+                            c = fgetc_refill(state, device, in);
+                            if (c == EOF || c == '\n') break;
+                            buf[n++] = (char)c;
+                        }
+                        if (c == EOF && n == 0) {
+                            /* Genuine end of input with nothing left to read
+                             * for this item -- same EOF handling as READ. */
+                            if (!io_error_redirect_on_eof(state, &state->pc, &branched)) {
+                                fail_cat(state, HALMAT_HALT_REASON_UNHANDLED_EOF, "READALL(%d): end of input for CHARACTER", device);
+                            }
+                            break;
+                        }
+                        if (c == '\n') {
+                            /* End of line consumed -- the next item resumes at
+                             * column 1 of the next line; keep device_line_start
+                             * (COLUMN(n) anchor) pointing at that new line so a
+                             * following SKIP(0),COLUMN(...) READ stays consistent. */
+                            state->device_line_start[device] = ftell(in);
+                        }
+                        buf[n] = '\0';
+                        resolved_value_t rv = { .kind = RV_STRING, .string = buf };
+                        if (!write_destination(state, dop, &rv)) break;
+                    }
+                    state->io_pending.active = false;
+                    state->io_pending.item_count = 0;
+                    break;
+                }
                 /* Tracks "has any data field of this whole READ statement
                  * already been consumed yet" -- read_skip_separator's
                  * `require_separator` needs this, not simply "am I past

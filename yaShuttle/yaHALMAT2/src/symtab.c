@@ -173,6 +173,20 @@ static void symtab_finalize(symtab_parse_state_t *st, halmat_symtab_t *out) {
         if (st->raw[i].sym_type == 1) {
             st->entries[i].bit_width = (int)st->raw[i].sym_length;
         }
+        /* CHARACTER (hal_class==2): SYM_LENGTH is the declared *maximum*
+         * character length, CHARACTER(n) -- confirmed empirically (a
+         * `CHARACTER(8)` symbol dumps SYM_TYPE=02, SYM_LENGTH=0008).
+         * Stored in the same bit_width slot ("declared per-element width",
+         * symtab.h) -- reused here rather than adding a parallel field,
+         * since a symbol is never simultaneously BIT and CHARACTER, and
+         * bit_width is already baked by the --compile symtab emitter. Only
+         * READALL (interp.c OP_RDAL) currently consults it: the raw fixed-
+         * width card-image read stops each item at this maximum or at end
+         * of line, USA003087 Sec. 22.1. Ordinary CHARACTER assignment/READ
+         * still models no fixed-length truncation (state.h char_value). */
+        if (st->raw[i].sym_type == 2) {
+            st->entries[i].bit_width = (int)st->raw[i].sym_length;
+        }
         /* Structure-field linked list (symtab.h's struct_first_field/
          * struct_next_field comment): SYM_LINK1 (template only) and
          * SYM_LINK2 (every field) are raw 16-bit values where a real

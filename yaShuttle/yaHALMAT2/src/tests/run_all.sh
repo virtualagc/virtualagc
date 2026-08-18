@@ -250,7 +250,16 @@ run ./run_debug_link_fixture.sh
 
 run ./run_local_fixture.sh write_lit "          5      3.5000000E+00"
 run ./run_read_fixture.sh read_write "42 3.5" "I1=              42     S1=      3.5000000E+00"
-run ./run_read_fixture.sh rdal "HELLO WORLD" "$(printf 'HELLO\nWORLD')"
+# READALL (USA003087 Sec. 22.1) is raw fixed-width card-image input, not a
+# whitespace-delimited READ: each CHARACTER item fills to its declared max
+# length OR to end of line, and a reached end-of-line sends the next item to
+# column 1 of the next line. C1/C2 are CHARACTER(20); on input line 1 "HELLO
+# WORLD" C1 fills to end of line (the whole 11-char line, NOT the first
+# whitespace token), then C2 takes all of line 2 "GOODBYE". (This fixture's
+# expectation previously encoded the old READ-alias's whitespace split --
+# corrected here along with implementing the real READALL, feature-survey
+# gap vs yaGPC2.)
+run ./run_read_fixture.sh rdal "$(printf 'HELLO WORLD\nGOODBYE\n')" "$(printf 'HELLO WORLD\nGOODBYE')"
 # USA003087 Sec. 12.3: READ data fields are separated by "a comma and/or
 # at least one blank" -- fscanf's own %lf/%ld/%s skip leading whitespace
 # but not a leading comma, so any comma-separated READ input (user-
@@ -321,6 +330,15 @@ run ./run_read_fixture.sh read_semicolon_loop "$(printf '1,2;\n4,5,6\n')" "$(pri
 # an already-buffered-data-only fseek/ftell without a real lseek()
 # syscall), confirmed directly against this exact fixture.
 run ./run_read_fixture.sh read_skip_column "$(printf 'PHI     1.5\nALPHA   2.5\nMODE    3\nEND\n')" "$(printf ' 1.5000000E+00      2.5000000E+00               3')"
+# READALL (USA003087 Sec. 22.1) is raw fixed-width card-image input, NOT a
+# whitespace-delimited READ alias: each CHARACTER item is filled to its
+# declared max length OR to end of line, and the next item resumes from the
+# next column of the SAME line -- so adjacent fixed-width fields with no
+# separator between them are sliced correctly. Feature-survey gap vs yaGPC2.
+# Input line 1 "ABCDEFGHIJ": C1(3)="ABC", C2(4)="DEFG" (resumes col 4). A
+# second READALL advances one line; line 2 "XYZ12345": C3(5)="XYZ12". (The
+# old READ-alias would have slurped the whole first token into C1.)
+run ./run_read_fixture.sh readall_fixed_width "$(printf 'ABCDEFGHIJ\nXYZ12345\n')" "$(printf 'ABC\nDEFG\nXYZ12')"
 # User-reported (044-ORTHONORMAL.hal's `READ(5) X;`, X a VECTOR(3)):
 # READ against a whole VECTOR/MATRIX destination failed outright
 # ("only CHARACTER/SCALAR/INTEGER arguments are implemented (got HALMAT

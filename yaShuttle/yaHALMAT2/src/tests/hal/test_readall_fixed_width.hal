@@ -1,0 +1,17 @@
+C/ READALL (USA003087 Sec. 22.1) is raw fixed-width card-image input: no
+C/ field division, no separators, no conversion. Each CHARACTER item is
+C/ filled to its declared maximum length OR to end of line, whichever comes
+C/ first; the next item resumes from the next column of the same line. A
+C/ second READALL statement advances one line first. Unlike READ (which
+C/ splits on whitespace), READALL slices adjacent fixed-width fields that
+C/ carry no separator between them. See run_all.sh.
+ TRA: PROGRAM;
+    DECLARE C1 CHARACTER(3);
+    DECLARE C2 CHARACTER(4);
+    DECLARE C3 CHARACTER(5);
+    READALL(5) C1, C2;
+    READALL(5) C3;
+    WRITE(6) C1;
+    WRITE(6) C2;
+    WRITE(6) C3;
+ CLOSE TRA;
