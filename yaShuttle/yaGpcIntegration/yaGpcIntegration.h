@@ -2,12 +2,22 @@
  * one of several GPC emulator instances inside a larger simulator (e.g.
  * a Space Shuttle simulator running GPC1-GPC5 as any mix of the two).
  *
- * Must be kept byte-for-byte identical between the two repos -- there is
- * no shared/common location for it yet, so each repo carries its own
- * copy. Do not add emulator-specific fields here; put those behind the
+ * This file itself IS the single shared copy (yaShuttle/yaGpcIntegration/,
+ * sibling to both yaGPC2/ and yaHALMAT2/ -- since 2026-08-01, no longer
+ * duplicated per-repo at all): both repos' Makefiles add an include path
+ * pointing here (yaGPC2: -I../yaGpcIntegration; yaHALMAT2:
+ * -I../../yaGpcIntegration) rather than each carrying its own copy, so
+ * editing it here is the only step needed to change the contract for
+ * either. Do not add emulator-specific fields here; put those behind the
  * opaque `impl` pointer instead, so this header never needs to #include
  * either emulator's internal headers (keeps the two repos' builds fully
  * decoupled).
+ *
+ * yaHALMAT3 (~/workspace/PFS/yaHALMAT3/ -- a private cross-compiler
+ * variant, outside this repo and not itself shared this way, see
+ * yaGPC2's own project_yahalmat3_compile_feature_is_private memory) keeps
+ * a genuinely separate, manually-mirrored copy -- that one DOES still
+ * need byte-for-byte reconciliation after any change here.
  *
  * See yaGPC2's integration-planning.md and its plan-mode discussion
  * history for the full design rationale. */
