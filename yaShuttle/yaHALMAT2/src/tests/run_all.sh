@@ -2465,6 +2465,14 @@ run ./run_local_fixture.sh test3_255 "$(printf '19\n025\n031\n00011001\n0001 100
 # BIT@DEC('1024')=0x0400, BIT@OCT('177777')=0xFFFF, BIT@BIN('00011001')=0x0019.
 # Feature-survey gap vs yaGPC2.
 run ./run_local_fixture.sh bit_radix "$(printf '0000 1111 1010 0000\n0000 0100 0000 0000\n1111 1111 1111 1111\n0000 0000 0001 1001')"
+# Simple-form BIT(CHARACTER), per the authoritative RTL RUNASM/CTOB.asm: '0'/'1'
+# shift a bit in, a blank is SKIPPED (no bit, doesn't widen the result), and an
+# empty string or any other character is SEND ERROR$(4:29) ILLEGAL BIT STRING
+# (standard fixup returns 0). Previously every non-'1' char -- blanks and
+# illegal letters alike -- became a 0 bit and never erred. So BIT('1 1')=0b11=3
+# (not 0b101=5), and BIT('X') raises 4:29, caught here by ON ERROR. Cross-checked
+# vs Don Schmidt's nsts-sim-gpc, which had the same silent-strip bug.
+run ./run_local_fixture.sh bit_illegal_char "$(printf '          3\nILLEGAL BIT')"
 
 # Task #67 (yahalmat2_assign_array_struct_element): 180-EXAMPLE_N.hal/
 # 184-EXAMPLE_N.hal, `CALL READ_IMU(I) ASSIGN(VEL(I));` (VEL a

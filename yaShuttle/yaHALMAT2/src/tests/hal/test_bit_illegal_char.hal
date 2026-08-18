@@ -1,0 +1,22 @@
+C/ Simple-form BIT(CHARACTER) conversion per the authoritative RTL
+C/ RUNASM/CTOB.asm: '0'/'1' shift a bit in, a blank is SKIPPED (contributes no
+C/ bit, so it does not widen the result), and an empty string or any other
+C/ character is SEND ERROR$(4:29) "ILLEGAL BIT STRING". So BIT('1 1') is 0b11=3
+C/ (blank skipped, NOT 0b101=5), and BIT('X') raises 4:29 -- caught here by an
+C/ ON ERROR handler. Cross-checked with Don Schmidt's nsts-sim-gpc, which had
+C/ the same silent-strip-instead-of-error bug. See run_all.sh.
+ T: PROGRAM;
+    DECLARE C CHARACTER(8);
+    DECLARE B BIT(8);
+    C = '1 1';
+    B = BIT(C);
+    WRITE(6) INTEGER(B);
+    ON ERROR$(4:29) GO TO BAD;
+    C = 'X';
+    B = BIT(C);
+    WRITE(6) 'UNCAUGHT';
+    GO TO DONE;
+ BAD:
+    WRITE(6) 'ILLEGAL BIT';
+ DONE:
+ CLOSE T;

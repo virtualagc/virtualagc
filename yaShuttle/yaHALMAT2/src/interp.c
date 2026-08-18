@@ -9594,14 +9594,35 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 uint32_t bits = 0;
                 int bit_width;
                 if (ins->tag == 0) {
-                    /* Simple form (comment above): each character is one bit,
-                     * most-significant first ('1' -> 1, anything else -> 0). */
-                    size_t len = strlen(a.string);
-                    if (len > 32) len = 32; /* project-wide 32-bit BIT ceiling, state.h's bit_width comment */
-                    for (size_t i = 0; i < len; i++) {
-                        bits = (bits << 1) | (a.string[i] == '1' ? 1u : 0u);
+                    /* Simple form, per the authoritative RTL RUNASM/CTOB.asm
+                     * (its own commented HAL/S algorithm): '0' shifts in a 0
+                     * bit, '1' shifts in a 1 bit, a blank (' ') is SKIPPED
+                     * entirely (contributes no bit, so it does NOT widen the
+                     * result), and an *empty* string or ANY other character is
+                     * SEND ERROR$(4:29) "ILLEGAL BIT STRING" whose standard
+                     * fixup returns a zero bit string. (An earlier version
+                     * mapped every non-'1' character -- blanks and illegal
+                     * letters alike -- to a 0 bit and never erred; corrected
+                     * against CTOB.asm after a cross-check with Don Schmidt's
+                     * nsts-sim-gpc turned up the same silent-strip bug there.
+                     * The radix form below validates its own digit string.) */
+                    int count = 0;
+                    bool illegal = (a.string[0] == '\0'); /* empty string is itself an error */
+                    for (const char *p = a.string; *p && !illegal; p++) {
+                        if (*p == '0') { bits <<= 1; count++; }
+                        else if (*p == '1') { bits = (bits << 1) | 1u; count++; }
+                        else if (*p == ' ') { /* blank: skipped, no bit */ }
+                        else { illegal = true; }
+                        if (count >= 32) count = 32; /* 32-bit BIT ceiling; value keeps its low 32 bits */
                     }
-                    bit_width = (int)len;
+                    if (illegal) {
+                        /* SEND ERROR$(4:29). If a GOTO handler is registered
+                         * the assignment never completes (write no result). */
+                        if (!arithmetic_error_should_apply_fixup(state, 29, &state->pc, &branched)) break;
+                        bits = 0; /* standard fixup: RETURN 0 */
+                        count = 0;
+                    }
+                    bit_width = count;
                 } else {
                     /* Radix form, USA003087 Sec. 21.3 (`BIT@BIN/@OCT/@DEC/
                      * @HEX(exp)`): interpret the CHARACTER value as a digit
