@@ -1,0 +1,20 @@
+ TCB_RADIX: PROGRAM;
+    DECLARE C CHARACTER(8);
+    DECLARE B BIT(16);
+    C = 'FA0';
+M    B = BIT    (C);
+S           @HEX
+    WRITE(6) B;
+    C = '1024';
+M    B = BIT    (C);
+S           @DEC
+    WRITE(6) B;
+    C = '177777';
+M    B = BIT    (C);
+S           @OCT
+    WRITE(6) B;
+    C = '00011001';
+M    B = BIT    (C);
+S           @BIN
+    WRITE(6) B;
+ CLOSE TCB_RADIX;

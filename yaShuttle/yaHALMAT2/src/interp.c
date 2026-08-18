@@ -9591,16 +9591,51 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (!resolve_operand(state, &ins->operands[0], &a)) break;
                 if (a.kind != RV_STRING) { fail(state, "CTOB: operand is not CHARACTER"); break; }
                 if (ins->index >= HALMAT_VAC_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "VAC index out of range"); break; }
-                size_t len = strlen(a.string);
-                if (len > 32) len = 32; /* project-wide 32-bit BIT ceiling, state.h's bit_width comment */
                 uint32_t bits = 0;
-                for (size_t i = 0; i < len; i++) {
-                    bits = (bits << 1) | (a.string[i] == '1' ? 1u : 0u);
+                int bit_width;
+                if (ins->tag == 0) {
+                    /* Simple form (comment above): each character is one bit,
+                     * most-significant first ('1' -> 1, anything else -> 0). */
+                    size_t len = strlen(a.string);
+                    if (len > 32) len = 32; /* project-wide 32-bit BIT ceiling, state.h's bit_width comment */
+                    for (size_t i = 0; i < len; i++) {
+                        bits = (bits << 1) | (a.string[i] == '1' ? 1u : 0u);
+                    }
+                    bit_width = (int)len;
+                } else {
+                    /* Radix form, USA003087 Sec. 21.3 (`BIT@BIN/@OCT/@DEC/
+                     * @HEX(exp)`): interpret the CHARACTER value as a digit
+                     * string in the given radix and generate its binary
+                     * representation, "truncated or padded with binary zeroes
+                     * on the left to create a 32-bit string" (so an
+                     * over-32-bit value keeps its low 32 bits: the spec's own
+                     * BIT@HEX('F0F1F2F3F4') == F1F2F3F4). The operator-word TAG
+                     * carries the radix, the same table BTOC's own radix form
+                     * uses: 1=@BIN, 2=@DEC, 3=@OCT, 4=@HEX. exp "must consist
+                     * entirely of a string of digits legal for the specified
+                     * radix"; anything else is a program error (fail loud --
+                     * an illegal digit string has no defined value). Confirmed
+                     * against the spec's worked examples (BIT@HEX('FA0') ==
+                     * 0x00000FA0, BIT@DEC('1024') == 0x00000400, BIT@OCT
+                     * ('177777') == 0x0000FFFF). */
+                    int base = (ins->tag == 1) ? 2 : (ins->tag == 3) ? 8 : (ins->tag == 2) ? 10 : 16;
+                    const char *s = a.string;
+                    while (*s == ' ') s++; /* leading card-image blanks */
+                    char *end = NULL;
+                    unsigned long v = strtoul(s, &end, base);
+                    const char *t = end;
+                    while (t && *t == ' ') t++; /* trailing card-image blanks */
+                    if (end == s || (t && *t != '\0')) {
+                        fail(state, "BIT@radix: '%s' is not a valid digit string for the radix", a.string);
+                        break;
+                    }
+                    bits = (uint32_t)(v & 0xFFFFFFFFu);
+                    bit_width = 32; /* 32-bit string per spec */
                 }
                 state->vac[ins->index].is_ref = false;
                 state->vac[ins->index].is_bits = true;
                 state->vac[ins->index].bits = bits;
-                state->vac[ins->index].bit_width = (int)len;
+                state->vac[ins->index].bit_width = bit_width;
                 break;
             }
 

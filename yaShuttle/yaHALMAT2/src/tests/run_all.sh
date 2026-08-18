@@ -2454,6 +2454,17 @@ run ./run_local_fixture.sh filter138 "$(printf 'IN=      1.0000000E+01     AVG= 
 # DEC digit-count-of-255=3 digits "025"). Confirmed against real gpc:
 # exact match, "19"/"025"/"031"/"00011001".
 run ./run_local_fixture.sh test3_255 "$(printf '19\n025\n031\n00011001\n0001 1001')"
+# The other direction: BIT radix conversion (USA003087 Sec. 21.3,
+# `BIT@BIN/@OCT/@DEC/@HEX(exp)`) of a runtime CHARACTER operand. OP_CTOB
+# previously did only the simple form (each char -> one bit) and ignored its
+# operator-word radix TAG (1=@BIN, 2=@DEC, 3=@OCT, 4=@HEX -- same table as
+# BTOC above), so BIT@HEX('FA0') decoded 'F'/'A'/'0' as three 0 bits instead
+# of the value 0x0FA0. Now the digit string is parsed in the radix and
+# generates its binary representation, truncated/padded on the left to 32
+# bits. Spec's own worked examples, into a BIT(16): BIT@HEX('FA0')=0x0FA0,
+# BIT@DEC('1024')=0x0400, BIT@OCT('177777')=0xFFFF, BIT@BIN('00011001')=0x0019.
+# Feature-survey gap vs yaGPC2.
+run ./run_local_fixture.sh bit_radix "$(printf '0000 1111 1010 0000\n0000 0100 0000 0000\n1111 1111 1111 1111\n0000 0000 0001 1001')"
 
 # Task #67 (yahalmat2_assign_array_struct_element): 180-EXAMPLE_N.hal/
 # 184-EXAMPLE_N.hal, `CALL READ_IMU(I) ASSIGN(VEL(I));` (VEL a
