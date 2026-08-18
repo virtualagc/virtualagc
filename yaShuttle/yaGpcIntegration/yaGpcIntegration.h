@@ -23,6 +23,15 @@ typedef struct {
     int gpcID;                 /* 1..5 (or more), caller-assigned */
     GpcEmulatorType emulator;
     double elapsedTime;        /* microseconds, monotonically increasing */
+    double startEpochSeconds;  /* Unix epoch seconds corresponding to elapsedTime==0 for
+                                 * this instance -- the anchor whatever HAL/S time-of-day
+                                 * construct the emulator implements (DATE()/CLOCKTIME())
+                                 * computes from: wall time = startEpochSeconds +
+                                 * elapsedTime/1e6. Set once by GpcInitializerFn from its
+                                 * own startEpochSeconds argument and not touched again --
+                                 * see that parameter's own comment for who decides its
+                                 * value and why it isn't read from an implementation-
+                                 * dependent global instead. */
     void *impl;                /* AGEHarness* (yaGPC2) or halmat_state_t* (yaHALMAT2) */
 } GpcState;
 
@@ -270,6 +279,21 @@ typedef bool (*GpcInputFn)(void *ioCtx, int channel, char *buf, size_t bufSize);
  * entry point comes from the HALMAT program itself, not a companion
  * file.
  *
+ * startEpochSeconds: Unix epoch seconds this instance's virtual clock
+ * starts at -- e.g. real host time by default, or a caller-supplied
+ * override (yaGPC2's own standalone CLI already implements exactly this
+ * policy for its own --date-time-epoch option). Stored into
+ * state->startEpochSeconds and used directly by whatever HAL/S
+ * time-of-day construct the emulator implements (yaGPC2: DATE()/
+ * CLOCKTIME(), read from CPU.dateTimeAnchorEpochSec, initialized from
+ * this argument). Deliberately an explicit constructor argument rather
+ * than something read from the real-time clock, or any other
+ * implementation-dependent global, at read time: the embedding
+ * simulator -- not the emulator -- is the one that knows whether this
+ * run should start at real time or at a specific caller-chosen moment,
+ * and a global would also make it impossible for two instances in one
+ * process to run under different wall-clock offsets.
+ *
  * servicer/servicerCtx: optional (NULL allowed) -- installs this
  * instance's peripheral-I/O callback, if any. This belongs on the
  * initializer rather than as a separate per-emulator function (the way
@@ -291,8 +315,8 @@ typedef bool (*GpcInputFn)(void *ioCtx, int channel, char *buf, size_t bufSize);
  * reasoning as servicer/servicerCtx: one shared GpcOps vtable per
  * emulator type can't carry per-instance I/O routing itself. */
 typedef bool (*GpcInitializerFn)(GpcState *state, const char *programPath, const char *symbolsPath,
-                                  GpcServicerFn servicer, void *servicerCtx, GpcOutputFn output, GpcInputFn input,
-                                  void *ioCtx);
+                                  double startEpochSeconds, GpcServicerFn servicer, void *servicerCtx,
+                                  GpcOutputFn output, GpcInputFn input, void *ioCtx);
 
 /* Releases whatever initializer allocated for state->impl (and, on
  * yaGPC2's side, flushes any output still buffered but not yet

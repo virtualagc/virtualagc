@@ -32,6 +32,12 @@
  *     confirms gpc_engine_status_message() returns real, non-empty text
  *     for every named code, so the "always available list of messages"
  *     requirement this whole scheme exists for is actually met.
+ *  7. GpcInitializerFn's startEpochSeconds argument is what DATE()/
+ *     CLOCKTIME() actually read (via GpcState.startEpochSeconds ->
+ *     CPU.dateTimeAnchorEpochSec), not the real-time clock or any other
+ *     implementation-dependent global -- confirmed by reproducing the
+ *     CLI's own --date-time-epoch golden output through this path
+ *     instead.
  *
  * Run from the repo root (as `make test` does) -- fixture path below is
  * relative to that. */
@@ -39,6 +45,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "../src/ageharness.h"
@@ -60,9 +67,9 @@ static int failures = 0;
 
 static void test_two_instance_independence(void) {
     GpcState a = {.gpcID = 1}, b = {.gpcID = 2};
-    CHECK(yaGPC2_ops.initializer(&a, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&a, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", 0.0, NULL, NULL, NULL, NULL, NULL),
           "instance A initializer succeeded");
-    CHECK(yaGPC2_ops.initializer(&b, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&b, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", 0.0, NULL, NULL, NULL, NULL, NULL),
           "instance B initializer succeeded");
     CHECK(a.impl != NULL && b.impl != NULL, "both instances got a non-NULL impl");
     CHECK(a.impl != b.impl, "instances have distinct impl allocations");
@@ -200,7 +207,7 @@ static void test_servicer_via_initializer(void) {
     memset(&fs, 0, sizeof fs);
 
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", fake_servicer,
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", 0.0, fake_servicer,
                                   &fs, NULL, NULL, NULL),
           "servicer-via-initializer instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
@@ -242,7 +249,7 @@ static long capture_engine_output(GpcState *state, char *out, size_t outSize) {
 
 static void test_htrace_output(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", 0.0, NULL, NULL, NULL, NULL, NULL),
           "htrace-output instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
     char buf[2400];
@@ -294,7 +301,7 @@ static void capture_output_cb(void *ctx, const char *text, int channel) {
  * itself is built to handle. */
 static void test_release_flushes_pending_output(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", 0.0, NULL, NULL, NULL, NULL, NULL),
           "release-flush instance initializer succeeded");
     AGEHarness *age = (AGEHarness *)state.impl;
 
@@ -335,7 +342,7 @@ static void test_debugger_state_lifecycle(void) {
  * and the plan-mode discussion that found it). */
 static void test_engine_status(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL, NULL, NULL, NULL),
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", 0.0, NULL, NULL, NULL, NULL, NULL),
           "engine-status instance initializer succeeded");
 
     GpcEngineStatus status = yaGPC2_ops.engine(&state);
@@ -440,7 +447,7 @@ static void test_output_routing_via_initializer(void) {
     memset(&co, 0, sizeof co);
 
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL,
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", 0.0, NULL, NULL,
                                   capture_output, NULL, &co),
           "output-routing instance initializer succeeded");
 
@@ -462,7 +469,7 @@ static void test_output_routing_via_initializer(void) {
  * silent-discard gap this parameter exists to close. */
 static void test_output_defaults_to_stdout(void) {
     GpcState state = {.gpcID = 1};
-    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", NULL, NULL,
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/hello.fcm", "test/fixtures/hello-lnk101.json", 0.0, NULL, NULL,
                                   NULL, NULL, NULL),
           "default-output instance initializer succeeded");
 
@@ -488,6 +495,48 @@ static void test_output_defaults_to_stdout(void) {
     yaGPC2_ops.release(&state);
 }
 
+/* ---------------------------------------------------------------------
+ * 8. Starting date/time via GpcInitializerFn's startEpochSeconds
+ * ------------------------------------------------------------------- */
+
+/* Direct regression test for the architectural fix that added this
+ * parameter: the initializer's startEpochSeconds argument -- not the
+ * real-time clock, not any other implementation-dependent global -- is
+ * what DATE()/CLOCKTIME() end up reading. Cross-checked against the
+ * exact same epoch/TZ/golden the CLI path already uses
+ * (test_scheduler.sh's "datetimefn/burst"/"datetimefn/signal" cases, via
+ * --date-time-epoch) so this proves the embedding path reproduces the
+ * CLI path's real, known-correct result, not just "some" date/time. */
+static void test_start_epoch_via_initializer(void) {
+    setenv("TZ", "UTC", 1);
+    tzset();
+
+    CapturedOutput co;
+    memset(&co, 0, sizeof co);
+
+    GpcState state = {.gpcID = 1};
+    CHECK(yaGPC2_ops.initializer(&state, "test/fixtures/datetimefn.fcm", "test/fixtures/datetimefn-lnk101.json",
+                                  951912000.0, NULL, NULL, capture_output, NULL, &co),
+          "start-epoch instance initializer succeeded");
+    CHECK(state.startEpochSeconds == 951912000.0, "GpcState.startEpochSeconds reflects the initializer's argument");
+
+    GpcEngineStatus status = GPC_ENGINE_RUNNING;
+    long steps = 0;
+    const long maxSteps = 20000;
+    while (status == GPC_ENGINE_RUNNING && steps < maxSteps) {
+        status = yaGPC2_ops.engine(&state);
+        steps++;
+    }
+    CHECK(status == GPC_ENGINE_HALTED_NORMAL, "datetimefn.fcm halted normally");
+
+    CHECK(strstr(co.buf, "CLOCKTIME") != NULL && strstr(co.buf, "4.6800000E+04") != NULL,
+          "CLOCKTIME reflects startEpochSeconds plus the 3600s WAIT, matching the CLI's own --date-time-epoch golden");
+    CHECK(strstr(co.buf, "DATE") != NULL && strstr(co.buf, "61") != NULL,
+          "DATE reflects startEpochSeconds, matching the CLI's own --date-time-epoch golden");
+
+    yaGPC2_ops.release(&state);
+}
+
 /* No dedicated GpcInputFn test, and no test of default_output()'s
  * discard-on-non-6/EOF-on-non-5 behavior specifically: hello.fcm only
  * ever WRITEs to channel 6 and never READs at all, and none of this
@@ -508,6 +557,7 @@ int main(void) {
     test_engine_status_messages();
     test_output_routing_via_initializer();
     test_output_defaults_to_stdout();
+    test_start_epoch_via_initializer();
     if (failures == 0) {
         printf("all gpcops/servicer tests passed\n");
     } else {

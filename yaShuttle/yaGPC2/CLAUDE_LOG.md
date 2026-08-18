@@ -58,3 +58,32 @@ document's planning stages, and it is already in the code as
   possible future unification, not resolved. See problems.md 7.15 for
   the full implementation writeup/verification this should link to or
   summarize.
+
+### [2026-08-18] Target: problems.md
+- 7.15 (`DATE()`/`CLOCKTIME()`) needs a follow-up paragraph: the
+  embedding contract (`../yaGpcIntegration/yaGpcIntegration.h`) had a
+  real architectural gap the CLI-only fix above didn't close —
+  `ageharness_init_minimal()`/`yagpc2_initializer()` (the path any
+  Shuttle-sim-style embedder uses via `GpcOps`) never touched
+  `cpu.dateTimeAnchorEpochSec` at all, so an embedded instance always
+  silently ran with `DATE()`/`CLOCKTIME()` anchored at epoch 0, with no
+  way for the embedding "main program" to supply its own starting
+  time/date. Per the user's explicit design ("the initializer should
+  take this time/date as an argument, and store it in the state
+  structure... rather than relying on... some implementation-dependent
+  global location"), fixed by adding a `startEpochSeconds` parameter to
+  `GpcInitializerFn` and a matching `GpcState.startEpochSeconds` field
+  (both in the shared header, alongside `elapsedTime`'s own precedent),
+  threaded through `ageharness_init_minimal()`'s new parameter into
+  `cpu.dateTimeAnchorEpochSec`, and set on `GpcState` by
+  `yagpc2_initializer()` (`src/gpcops.c`). `ageharness_configure_from_opts()`
+  (the CLI path) needed no change — it already implements the correct
+  policy independently. New regression test
+  `test_start_epoch_via_initializer` (`test/test_gpcops.c`) reproduces
+  the CLI's own `--date-time-epoch` golden (`datetimefn.fcm`, epoch
+  951912000, TZ=UTC) through the embedding path instead, confirming the
+  two paths agree. `../yaGpcIntegration/yaGpcIntegration.h` changed —
+  since it must stay byte-for-byte identical between yaGPC2 and
+  yaHALMAT2, the yaHALMAT2 peer session needs to make the matching
+  change on its side (message sent 2026-08-18; check its reply before
+  treating the two repos' copies as back in sync).

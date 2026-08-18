@@ -31,6 +31,7 @@
 #include <time.h>
 #endif
 #include <stdio.h>
+#include <time.h>
 
 #include "yaGpcIntegration.h" /* ../yaGpcIntegration/ -- see -I in the Makefile/NMakefile */
 
@@ -86,8 +87,13 @@ int main(void) {
      * yaGpcIntegration.h). That's the whole reason hello.fcm's own
      * WRITE(6) output shows up on this example's stdout with no further
      * setup below. */
+    /* This driver decides the starting date/time (real host clock here,
+     * same default the standalone `gpc run` CLI uses absent
+     * --date-time-epoch) and hands it to the initializer, which stores it
+     * on *state -- DATE()/CLOCKTIME() then read it straight from there,
+     * never from an implementation-dependent global. */
     GpcState state = {0};
-    if (!Ops->initializer(&state, FCM_PATH, SYMBOLS_PATH, NULL, NULL, NULL, NULL, NULL)) {
+    if (!Ops->initializer(&state, FCM_PATH, SYMBOLS_PATH, (double)time(NULL), NULL, NULL, NULL, NULL, NULL)) {
         fprintf(stderr, "Failed to initialize from %s / %s\n", FCM_PATH, SYMBOLS_PATH);
         return 1;
     }

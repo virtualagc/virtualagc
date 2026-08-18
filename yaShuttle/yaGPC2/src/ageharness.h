@@ -84,15 +84,20 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
  * if symbolsPath is non-NULL -- loads it and sets the entry point from
  * its numeric entryPoint field (silently leaves the default wait state
  * in place if the file has none, same as ageharness_configure_from_opts()
- * does for an --start-less, entryPoint-less symbols file). No other
- * Options concerns (--fcos, --line-width, etc). Not called anywhere in
- * the standalone `gpc run` CLI path (which uses
+ * does for an --start-less, entryPoint-less symbols file). Also stores
+ * startEpochSeconds into age->gpc.cpu.dateTimeAnchorEpochSec, the same
+ * field ageharness_configure_from_opts() sets from real host time or
+ * --date-time-epoch -- the caller decides that policy here instead,
+ * since this path has no Options struct of its own. No other Options
+ * concerns (--fcos, --line-width, etc). Not called anywhere in the
+ * standalone `gpc run` CLI path (which uses
  * ageharness_configure_from_opts() instead); existing behavior there is
  * unchanged. Like load_fcm(), a missing/unreadable fcmPath prints an
  * error and exits(1) rather than returning false -- matching this file's
  * existing failure convention throughout (see load_fcm()'s own comment).
  * The bool return is for future graceful-failure support. */
-bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath, const char *symbolsPath);
+bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath, const char *symbolsPath,
+                              double startEpochSeconds);
 
 void ageharness_set_entry_point(AGEHarness *age, uint32_t addr);
 

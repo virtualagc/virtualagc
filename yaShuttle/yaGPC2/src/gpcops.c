@@ -199,10 +199,10 @@ static void gpcops_input_shim(void *ctx, int channel, int iocode) {
 }
 
 static bool yagpc2_initializer(GpcState *state, const char *programPath, const char *symbolsPath,
-                                GpcServicerFn servicer, void *servicerCtx, GpcOutputFn output, GpcInputFn input,
-                                void *ioCtx) {
+                                double startEpochSeconds, GpcServicerFn servicer, void *servicerCtx,
+                                GpcOutputFn output, GpcInputFn input, void *ioCtx) {
     AGEHarness *age = malloc(sizeof(AGEHarness));
-    if (!ageharness_init_minimal(age, programPath, symbolsPath)) {
+    if (!ageharness_init_minimal(age, programPath, symbolsPath, startEpochSeconds)) {
         free(age);
         return false;
     }
@@ -218,6 +218,7 @@ static bool yagpc2_initializer(GpcState *state, const char *programPath, const c
     state->impl = age;
     state->emulator = GPC_EMULATOR_YAGPC2;
     state->elapsedTime = age->gpc.cpu.elapsedTimeUs;
+    state->startEpochSeconds = age->gpc.cpu.dateTimeAnchorEpochSec;
     return true;
 }
 

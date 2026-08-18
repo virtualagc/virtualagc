@@ -154,7 +154,8 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
     }
 }
 
-bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath, const char *symbolsPath) {
+bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath, const char *symbolsPath,
+                              double startEpochSeconds) {
     ageharness_init(age);
     load_fcm(age, fcmPath); /* exits(1) on hard failure -- see header comment */
     if (symbolsPath) {
@@ -163,6 +164,7 @@ bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath, const char *s
             ageharness_set_entry_point(age, entryPoint);
         }
     }
+    age->gpc.cpu.dateTimeAnchorEpochSec = startEpochSeconds;
     return true;
 }
 
