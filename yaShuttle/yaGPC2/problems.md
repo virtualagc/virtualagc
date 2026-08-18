@@ -3354,6 +3354,91 @@ target, the 3-level transitive graceful-wait chain above, and a `RUNNING`
 dependent being flagged rather than force-freed mid-cycle when its
 parent is `CANCEL`ed.
 
+### 7.12 `EXCLUSIVE` procedures/functions and `UPDATE` blocks — done, one real scheduler bug found by its own test, one more `yaHALMAT2` divergence
+
+Eleventh item in the runtime-feature-survey implementation order. Unlike
+almost everything else in this pass, the SVC protocol here didn't need
+reverse-engineering at all — `IBM-76-SS-1110` Rev 5 §4.2.2/§4.2.2.3
+documents the reserve/release SVC family in full: `SVC #15`
+(RESERVE, code block) on entering an `EXCLUSIVE` procedure/function,
+`SVC #17` (RELEASE) on its `CLOSE`; `SVC #16`/`#18` for the same on
+`UPDATE`-block entry/`CLOSE`. All four read a shared 3-halfword
+parameter block, addressed one halfword apart (confirmed empirically: a
+real compiled `RESERVE`'s own `ea` and the matching `RELEASE`'s own `ea`
+differ by exactly 1). Traced a real `EXCLUSIVE` procedure and found the
+ICD's documentation matched byte-for-byte, including that a `PROCEDURE`'s
+own `CLOSE` — unlike a `TASK`/`PROGRAM`'s — does **not** compile to
+`SVC 0x0015` at all; it returns via an ordinary subroutine `RETURN`,
+entirely outside this file's existing task-`CLOSE` handling.
+
+**Design**: `EXCLUSIVE` (code-block) locks are exact-match, tracked in a
+small scheduler-level table (`Scheduler.codeLocks`) since at most one
+process holds a given procedure at a time. `UPDATE`-block (data-area)
+locks are bitmask-overlap, per `USA003087` §26.4's own group-based
+protection — disjoint `LOCK` groups can be held by different processes
+simultaneously — so holds live per-task (`ScheduledTask.heldDataLockMask`)
+rather than in one global table. Both reuse the exact same blocking
+mechanism `WAIT FOR`'s event expressions and `WAIT FOR DEPENDENT`
+established: a contended `RESERVE` suspends the calling task
+(`TASK_STATE_WAITING`), polled by `sched_dispatch()`'s own eligibility
+scan; a released lock doesn't force a dispatch itself — the waiter is
+only actually granted once *something* forces a fresh dispatch decision,
+at which point the winner (by priority, same as every other candidate)
+gets the lock recorded as part of being dispatched, transparent to the
+resumed code.
+
+**A real scheduler bug, caught by its own deterministic test before it
+ever reached a real fixture**: the first draft of `sched_handle_reserve_data_svc`
+copied `EXCLUSIVE`'s own "don't bother allocating a scheduler slot for
+an immediately-granted, non-contended `RESERVE`" optimization. That's
+safe for code locks (the holder is recorded in the scheduler-level
+table, self-consistent even under the `-1` "primal, never engaged"
+sentinel) but not for data locks (the holder lives on a *per-task*
+field that doesn't exist yet for an unengaged primal) — an immediately-
+granted, unrecorded hold would be silently lost the instant the primal
+was later engaged for an unrelated reason while still holding it
+(exactly what `exclusivecontend.hal`'s own pattern does for real:
+`RESERVE`, then `WAIT` while still "inside"). `test_update_block_lock_groups_overlap_and_release`
+caught this immediately (four assertions failed) before any of this
+reached a real fixture or, worse, shipped silently broken for a case no
+fixture happens to exercise. Fixed by always engaging a real scheduler
+slot on data-lock `RESERVE`, even when granted immediately — the one
+place this feature's design deliberately diverges from `EXCLUSIVE`'s own.
+
+**Real `yaHALMAT2` divergence found**: `exclusivecontend.hal` (the
+primal enters `P`, `WAIT`s mid-procedure, and a separately `SCHEDULE`d
+task's own attempt to enter the same `P` should block until the primal
+releases it) produces `A ENTER P` **twice** on `yaHALMAT2` — it doesn't
+enforce mutual exclusion at all, letting the second task barge straight
+into `P` while the first is still inside. Relayed upstream separately
+from the `CANCEL` finding, not fixed here.
+
+**Not independently verified against a real compiled `UPDATE`-block
+fixture**: doing so needs a genuine multi-module `COMPOOL`+`PROGRAM`
+link this pass didn't set up (confirmed a real one is required —
+`LOCK` is explicitly compool-only per §26.4), and confirmed separately
+that a real `UPDATE` block can't even contain `WRITE`/I/O statements at
+all (a real PASS1 compiler error: *"I/O STATEMENTS ARE ILLEGAL INSIDE
+UPDATE BLOCKS"*), so even a successful compile wouldn't produce the
+kind of easy stdout-based confirmation every other fixture in this
+codebase relies on. Confidence instead rests on the ICD's own
+documentation (the same table already confirmed byte-for-byte accurate
+for the `EXCLUSIVE`/code-lock case) plus the fact that the overlap-
+detection logic never needs to interpret *which* bit means *which* lock
+group — only compiler-guaranteed self-consistency between a program's
+own `RESERVE` and `RELEASE` for the same `LOCK(n)` attribute, which
+holds regardless of bit-ordering convention. `test_update_block_lock_groups_overlap_and_release`
+is this feature's *only* coverage as a result — genuinely deterministic
+(disjoint groups granted immediately, partial overlap blocks, release-
+then-redispatch grants correctly), but not real-fixture-cross-checked
+the way `EXCLUSIVE` is.
+
+Three new fixtures — `exclusive.hal` (non-contended), `exclusivetwo.hal`
+(two distinct procedures, confirming independent, stable `LOCK ID`s),
+`exclusivecontend.hal` (genuine cross-task contention) — all exercised
+by `test_scheduler.sh` under both `--pacing` modes, goldens generated
+from `yaGPC2`'s own output.
+
 ---
 
 ## Methodology and caveats

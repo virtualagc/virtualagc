@@ -6,7 +6,8 @@
 # waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm,
 # dependent.fcm, dependentin.fcm, dependentrepeat.fcm,
 # dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm,
-# and cancelnamed.fcm (plus their -lnk101.json symbol tables) via the
+# cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, and
+# exclusivecontend.fcm (plus their -lnk101.json symbol tables) via the
 # real HAL/S toolchain
 # documented in ../../tools.md (HALSFC + lnk101, both expected on PATH).
 # Not run automatically (no CI machine has the toolchain) — kept for
@@ -161,6 +162,22 @@
 #                          script) -- CANCEL of two DORMANT REPEAT EVERY
 #                          targets in one statement (the named form's
 #                          count+PDE-list encoding); neither ever runs.
+#   exclusive.fcm         <- exclusive.hal (checked in alongside this
+#                          script) -- a single CALL into an EXCLUSIVE
+#                          procedure, no contention.
+#   exclusivetwo.fcm      <- exclusivetwo.hal (checked in alongside this
+#                          script) -- two distinct EXCLUSIVE procedures,
+#                          confirming each gets its own independent LOCK
+#                          ID (the compiler-generated CSECT-word
+#                          address), stable across repeated calls to the
+#                          same one.
+#   exclusivecontend.fcm  <- exclusivecontend.hal (checked in alongside
+#                          this script) -- genuine cross-task contention:
+#                          the primal enters an EXCLUSIVE procedure, WAITs
+#                          while still inside it, and a separately
+#                          SCHEDULEd task's own attempt to enter the same
+#                          procedure correctly blocks until the primal
+#                          releases it.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -191,6 +208,9 @@ WAITFORDEPENDENT_HAL="$(dirname "$0")/waitfordependent.hal"
 CANCEL_HAL="$(dirname "$0")/cancel.hal"
 SELFCANCEL_HAL="$(dirname "$0")/selfcancel.hal"
 CANCELNAMED_HAL="$(dirname "$0")/cancelnamed.hal"
+EXCLUSIVE_HAL="$(dirname "$0")/exclusive.hal"
+EXCLUSIVETWO_HAL="$(dirname "$0")/exclusivetwo.hal"
+EXCLUSIVECONTEND_HAL="$(dirname "$0")/exclusivecontend.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -234,5 +254,8 @@ build "$WAITFORDEPENDENT_HAL" WFDEP waitfordependent
 build "$CANCEL_HAL" CANCELT cancel
 build "$SELFCANCEL_HAL" SELFCAN selfcancel
 build "$CANCELNAMED_HAL" CANCEL2 cancelnamed
+build "$EXCLUSIVE_HAL" EXCLT exclusive
+build "$EXCLUSIVETWO_HAL" EXCL2 exclusivetwo
+build "$EXCLUSIVECONTEND_HAL" EXCLCONT exclusivecontend
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm (+ -lnk101.json)"

@@ -167,4 +167,19 @@ run_case "selfcancel/signal" "signal" "fixtures/selfcancel.fcm" "fixtures/selfca
 run_case "cancelnamed/burst"  "burst"  "fixtures/cancelnamed.fcm" "fixtures/cancelnamed-lnk101.json" "fixtures/cancelnamed_golden.txt"
 run_case "cancelnamed/signal" "signal" "fixtures/cancelnamed.fcm" "fixtures/cancelnamed-lnk101.json" "fixtures/cancelnamed_golden.txt"
 
+# EXCLUSIVE procedures/functions (SVC #15 reserve / #17 release, code
+# block -- USA003087 27.2, confirmed against IBM-76-SS-1110 4.2.2/
+# 4.2.2.3's own fully-documented reserve/release SVC family).
+# exclusivecontend.hal is the interesting one: genuine cross-task
+# contention (a SCHEDULEd task's own attempt to enter the same EXCLUSIVE
+# procedure the primal is still inside correctly blocks). yaHALMAT2
+# diverges on that one specifically -- it doesn't enforce mutual
+# exclusion at all (relayed upstream separately) -- see problems.md 7.12.
+run_case "exclusive/burst"  "burst"  "fixtures/exclusive.fcm" "fixtures/exclusive-lnk101.json" "fixtures/exclusive_golden.txt"
+run_case "exclusive/signal" "signal" "fixtures/exclusive.fcm" "fixtures/exclusive-lnk101.json" "fixtures/exclusive_golden.txt"
+run_case "exclusivetwo/burst"  "burst"  "fixtures/exclusivetwo.fcm" "fixtures/exclusivetwo-lnk101.json" "fixtures/exclusivetwo_golden.txt"
+run_case "exclusivetwo/signal" "signal" "fixtures/exclusivetwo.fcm" "fixtures/exclusivetwo-lnk101.json" "fixtures/exclusivetwo_golden.txt"
+run_case "exclusivecontend/burst"  "burst"  "fixtures/exclusivecontend.fcm" "fixtures/exclusivecontend-lnk101.json" "fixtures/exclusivecontend_golden.txt"
+run_case "exclusivecontend/signal" "signal" "fixtures/exclusivecontend.fcm" "fixtures/exclusivecontend-lnk101.json" "fixtures/exclusivecontend_golden.txt"
+
 exit $fail

@@ -497,6 +497,33 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
             int newPriority = (int)((svcCode >> 8) & 0xff);
             uint32_t pdeAddr = mcm_get16(&h->cpu->mainStorage, ea + 1);
             return sched_handle_update_priority_svc(&h->scheduler, h->cpu, newPriority, pdeAddr);
+        } else if (svcLow == 0x0f) {
+            /* RESERVE, code block -- entering an EXCLUSIVE procedure/
+             * function (confirmed against IBM-76-SS-1110 4.2.2.3, then
+             * empirically: LOCK ID at ea+2, the target's own compiler-
+             * generated CSECT-word address). */
+            uint32_t lockId = mcm_get16(&h->cpu->mainStorage, ea + 2);
+            return sched_handle_reserve_code_svc(&h->scheduler, h->cpu, lockId);
+        } else if (svcLow == 0x10) {
+            /* RESERVE, data area -- entering an UPDATE block. The TYP bit
+             * (0x8000, read-only vs written) is deliberately ignored:
+             * sched_handle_reserve_data_svc's own lock-group overlap
+             * check already captures the real mutual-exclusion contract
+             * regardless of which side of the read/write distinction a
+             * given RESERVE is on. */
+            uint32_t lockGroupMask = mcm_get16(&h->cpu->mainStorage, ea + 2);
+            return sched_handle_reserve_data_svc(&h->scheduler, h->cpu, lockGroupMask);
+        } else if (svcLow == 0x11) {
+            /* RELEASE, code block -- CLOSE of an EXCLUSIVE procedure/
+             * function. LOCK ID at ea+1 (this SVC's own ea is always the
+             * matching RESERVE's own ea+1 -- both read from one shared
+             * 3-halfword parameter block, confirmed empirically). */
+            uint32_t lockId = mcm_get16(&h->cpu->mainStorage, ea + 1);
+            return sched_handle_release_code_svc(&h->scheduler, h->cpu, lockId);
+        } else if (svcLow == 0x12) {
+            /* RELEASE, data area -- CLOSE of an UPDATE block. */
+            uint32_t lockGroupMask = mcm_get16(&h->cpu->mainStorage, ea + 1);
+            return sched_handle_release_data_svc(&h->scheduler, h->cpu, lockGroupMask);
         }
     }
 

@@ -114,6 +114,53 @@
  * confirmed and is left unrecognized, falling through
  * safely like any other unconfirmed combination).
  *
+ * EXCLUSIVE procedures/functions (USA003087 27.2) and UPDATE blocks
+ * (26.4) share one "reserve/release" SVC family, confirmed against
+ * IBM-76-SS-1110 4.2.2/4.2.2.3 (the HAL/FCOS ICD documents this in full,
+ * unlike most of this file's other protocol pieces, which had to be
+ * reverse-engineered from traces alone) and then verified empirically:
+ *   Entering an EXCLUSIVE procedure/function executes a RESERVE svc
+ *   (code block, SVC #15); its own CLOSE executes RELEASE (SVC #17).
+ *   Entering an UPDATE block executes RESERVE (data area, SVC #16); its
+ *   own CLOSE executes RELEASE (SVC #18). Confirmed empirically that a
+ *   PROCEDURE/FUNCTION's own CLOSE, unlike a TASK/PROGRAM's, does NOT
+ *   compile to SVC 0x0015 at all -- it returns via an ordinary
+ *   subroutine RETURN, entirely outside this file's existing CLOSE
+ *   handling, so the release SVC is the only hook available or needed.
+ *   All four share one 3-halfword parameter block, addressed differently
+ *   by each of the two SVCs that read from it (confirmed empirically: a
+ *   real compiled RESERVE's own ea and the matching RELEASE's own ea
+ *   differ by exactly 1, i.e. RELEASE reads from halfword 1 of the same
+ *   block RESERVE read from halfword 0):
+ *     ea+0 (RESERVE's own ea): high bit (0x8000) = TYP (data-area
+ *           RESERVE only: 1 = read-only, 0 = written; always 0 for a
+ *           code-block RESERVE), low byte = RESERVE SVC# (15 or 16)
+ *     ea+1 (RELEASE's own ea, i.e. RESERVE's ea+1): low byte = RELEASE
+ *           SVC# (17 or 18)
+ *     ea+2 (== RELEASE's own ea+1): LOCK ID -- for a code block, the
+ *           address of the compiler-generated CSECT word reserved for
+ *           that specific EXCLUSIVE procedure/function (confirmed
+ *           empirically stable and distinct per procedure across
+ *           repeated calls -- an exact-match key). For a data area, a
+ *           bitmask of LOCK GROUPs (bit N-1 <-> group N, 1<=N<=15;
+ *           LOCK(*) sets every bit) -- an overlap-match key, since
+ *           USA003087 26.4's own group-based protection lets disjoint
+ *           groups be held by different processes simultaneously.
+ * A task blocked trying to RESERVE something already held is placed in
+ * TASK_STATE_WAITING (ScheduledTask.waitingOnCodeLockId /
+ * waitingOnDataLockMask -- see their own comments), polled by
+ * sched_dispatch() the same way event expressions are, and its own
+ * reserve SVC handler simply returns true once granted -- from the
+ * blocked code's own perspective, RESERVE always eventually "just
+ * succeeds," identical to how an event-expression WAIT FOR looks from
+ * the inside. RELEASE never changes which context is live or forces a
+ * dispatch (matching SCHEDULE/TERMINATE-of-another-task's own "never
+ * changes which context is live" contract) -- any newly-eligible waiter
+ * is picked up whenever the releasing context itself next blocks, not
+ * immediately. A task that vanishes (TERMINATE/CANCEL) while still
+ * holding a reservation is out of scope -- no real fixture exercises it,
+ * and USA003087 doesn't define the behavior either.
+ *
  * Event expressions (WAIT FOR SVC #8, and SCHEDULE ... ON, which reuses
  * the same descriptor format via the FLAGS-word AT+IN-bits-combined
  * signature below) -- confirmed empirically against 7 real compiled
@@ -352,8 +399,53 @@ typedef struct {
      * sched_cancel_idx_and_dependents instead, with no flag involved. */
     bool cancelled;
 
+    /* EXCLUSIVE procedures/functions (USA003087 27.2) and UPDATE blocks
+     * (26.4) -- see this file's own header comment for the SVC protocol
+     * (confirmed against IBM-76-SS-1110 4.2.2/4.2.2.3, then verified
+     * empirically). Nonzero iff this task is currently WAITING to
+     * acquire a code-block lock (an EXCLUSIVE procedure/function someone
+     * else is already inside) -- schedule.c's Scheduler.codeLocks is the
+     * source of truth for who currently holds what; this is purely the
+     * dispatch-eligibility gate sched_dispatch() polls, mirroring
+     * eventDescAddr's own pattern. */
+    uint32_t waitingOnCodeLockId;
+
+    /* Nonzero iff this task is currently WAITING to acquire a data-area
+     * lock (UPDATE block) whose LOCK GROUP bitmask overlaps one or more
+     * groups some other task currently holds. */
+    uint32_t waitingOnDataLockMask;
+
+    /* Bitmask (bit N-1 <-> lock group N, 1<=N<=15; LOCK(*) sets every
+     * bit) of the LOCK GROUPs this task currently holds via one or more
+     * still-open UPDATE blocks. Unlike code-block locks (exclusive,
+     * exact-match, tracked in Scheduler.codeLocks below), multiple tasks
+     * can simultaneously hold *disjoint* lock groups at once -- USA003087
+     * 26.4's own "protection... on a group basis" -- so this lives per-
+     * task rather than in a single global holder table; sched_dispatch()
+     * treats the OR of every active task's own heldDataLockMask as "what's
+     * currently locked" when checking a waiter's own requested mask for
+     * overlap. */
+    uint32_t heldDataLockMask;
+
     TaskContext ctx;      /* saved whenever this task is not RUNNING */
 } ScheduledTask;
+
+/* One EXCLUSIVE procedure/function's own reservation state. lockId is the
+ * compiler-generated CSECT word's own address (USA003087/ICD: "one word
+ * ... compiled as zero and reserved for FCOS use" per EXCLUSIVE block,
+ * confirmed empirically stable and distinct per procedure/function across
+ * repeated calls) -- an exact-match key, unlike UPDATE blocks' own
+ * bitmask-overlap semantics (see ScheduledTask.heldDataLockMask above).
+ * lockId == 0 means this slot is free (never used, or last release
+ * cleared it) -- a real CSECT word's own address is never actually 0 in
+ * any linked program this codebase has ever seen, so this is a safe
+ * sentinel. */
+typedef struct {
+    uint32_t lockId;
+    int holderIdx; /* meaningful only when lockId != 0 */
+} CodeLock;
+
+#define SCHED_MAX_CODE_LOCKS 16
 
 typedef struct {
     ScheduledTask tasks[SCHED_MAX_TASKS];
@@ -361,6 +453,7 @@ typedef struct {
     int runningIdx; /* index of the TASK_STATE_RUNNING slot, or -1 if the
                       * scheduler has never been engaged (the common case
                       * for every fixture with no TASK/SCHEDULE at all) */
+    CodeLock codeLocks[SCHED_MAX_CODE_LOCKS];
 } Scheduler;
 
 void sched_init(Scheduler *s);
@@ -563,5 +656,45 @@ bool sched_handle_cancel_self_svc(Scheduler *s, CPU *cpu);
  * "never changes which context is live" contract). Always returns
  * true. */
 bool sched_handle_cancel_named_svc(Scheduler *s, CPU *cpu, const uint32_t *pdeAddrs, int count);
+
+/* Called from halucp.c's SVC dispatch for SVC #15 (RESERVE, code block
+ * -- entering an EXCLUSIVE procedure/function). lockId is the target
+ * procedure/function's own CSECT-word address (already decoded by the
+ * caller). If unheld, grants it to the calling context immediately (no
+ * blocking, no dispatch -- matches every other already-handled SVC's
+ * "never changes which context is live" contract when nothing contends).
+ * If already held by a different task, suspends the calling context
+ * (lazily creating the primal pseudo-task on first use, same pattern as
+ * sched_handle_wait_svc, only reached on this specific path since the
+ * immediately-granted case never needs a real scheduler slot at all --
+ * even the primal, un-engaged, can legitimately "hold" a lock via the
+ * sentinel runningIdx value -1) and dispatches whatever's next; the
+ * blocked task's own RESERVE simply returns true once
+ * sched_dispatch() later grants it the lock (see this file's own header
+ * comment). Always returns true. */
+bool sched_handle_reserve_code_svc(Scheduler *s, CPU *cpu, uint32_t lockId);
+
+/* Called from halucp.c's SVC dispatch for SVC #17 (RELEASE, code block
+ * -- CLOSE of an EXCLUSIVE procedure/function). Clears the calling
+ * context's own hold on lockId. Never changes which context is live or
+ * triggers a dispatch -- see this file's own header comment for why.
+ * Always returns true. */
+bool sched_handle_release_code_svc(Scheduler *s, CPU *cpu, uint32_t lockId);
+
+/* Called from halucp.c's SVC dispatch for SVC #16 (RESERVE, data area --
+ * entering an UPDATE block). lockGroupMask is the requested LOCK GROUP
+ * bitmask (already decoded by the caller). If it doesn't overlap any
+ * lock group currently held by any other active task, grants it
+ * immediately (added to the calling context's own
+ * ScheduledTask.heldDataLockMask, no blocking). Otherwise suspends the
+ * calling context exactly like sched_handle_reserve_code_svc, polled by
+ * sched_dispatch() for the overlap to clear. Always returns true. */
+bool sched_handle_reserve_data_svc(Scheduler *s, CPU *cpu, uint32_t lockGroupMask);
+
+/* Called from halucp.c's SVC dispatch for SVC #18 (RELEASE, data area --
+ * CLOSE of an UPDATE block). Clears lockGroupMask's own bits from the
+ * calling context's own heldDataLockMask. Never changes which context
+ * is live or triggers a dispatch. Always returns true. */
+bool sched_handle_release_data_svc(Scheduler *s, CPU *cpu, uint32_t lockGroupMask);
 
 #endif

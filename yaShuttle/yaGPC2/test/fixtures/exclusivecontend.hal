@@ -1,0 +1,17 @@
+ EXCLCONT: PROGRAM;
+    P: PROCEDURE EXCLUSIVE;
+       WRITE(6) 'A ENTER P';
+       WAIT 1.0;
+       WRITE(6) 'A LEAVE P';
+    CLOSE P;
+    B: TASK;
+       WRITE(6) 'B TRY P';
+       CALL P;
+       WRITE(6) 'B IN P';
+    CLOSE B;
+
+    WRITE(6) 'BEFORE';
+    SCHEDULE B PRIORITY(80);
+    CALL P;
+    WRITE(6) 'DONE';
+ CLOSE EXCLCONT;

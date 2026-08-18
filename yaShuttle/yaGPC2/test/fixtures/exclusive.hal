@@ -1,0 +1,9 @@
+ EXCLT: PROGRAM;
+    P: PROCEDURE EXCLUSIVE;
+       WRITE(6) 'IN P';
+    CLOSE P;
+
+    WRITE(6) 'BEFORE';
+    CALL P;
+    WRITE(6) 'DONE';
+ CLOSE EXCLT;

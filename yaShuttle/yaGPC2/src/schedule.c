@@ -220,6 +220,43 @@ static void sched_cancel_idx_and_dependents(Scheduler *s, CPU *cpu, int idx) {
     }
 }
 
+/* Finds the CodeLock entry for lockId, or -1 if none exists (never
+ * reserved, or its last release freed the slot). */
+static int sched_find_code_lock(Scheduler *s, uint32_t lockId) {
+    for (int i = 0; i < SCHED_MAX_CODE_LOCKS; i++) {
+        if (s->codeLocks[i].lockId == lockId) return i;
+    }
+    return -1;
+}
+
+/* OR of every active task's own currently-held UPDATE-block lock-group
+ * bits (ScheduledTask.heldDataLockMask), excluding excludeIdx -- so a
+ * task's own already-held groups never count as a conflict against
+ * itself. */
+static uint32_t sched_held_data_lock_mask(Scheduler *s, int excludeIdx) {
+    uint32_t mask = 0;
+    for (int i = 0; i < s->count; i++) {
+        if (i == excludeIdx || s->tasks[i].state == TASK_SLOT_FREE) continue;
+        mask |= s->tasks[i].heldDataLockMask;
+    }
+    return mask;
+}
+
+/* Records that holderIdx now holds lockId, in the first free CodeLock
+ * slot. Silently drops the grant if the table is full -- matches
+ * sched_alloc_slot's own "nowhere better to report from here" precedent;
+ * no real fixture exercises more than a handful of simultaneously-held
+ * EXCLUSIVE locks. */
+static void sched_grant_code_lock(Scheduler *s, uint32_t lockId, int holderIdx) {
+    for (int i = 0; i < SCHED_MAX_CODE_LOCKS; i++) {
+        if (s->codeLocks[i].lockId == 0) {
+            s->codeLocks[i].lockId = lockId;
+            s->codeLocks[i].holderIdx = holderIdx;
+            return;
+        }
+    }
+}
+
 static void sched_save_context(CPU *cpu, TaskContext *ctx) {
     uint32_t grSet = psw_get_reg_set(&cpu->psw);
     for (int i = 0; i <= 7; i++) ctx->r[i] = register_get32(registerfile_r(&cpu->regFiles[grSet], i));
@@ -291,9 +328,17 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
                  * SCHEDULE ... ON target still pending) is eligible
                  * exactly when its event expression is currently true --
                  * wakeDeadlineUs is meaningless for it (see schedule.h's
-                 * own ScheduledTask.eventDescAddr comment). */
+                 * own ScheduledTask.eventDescAddr comment). A task
+                 * blocked trying to RESERVE an EXCLUSIVE procedure/
+                 * function or an UPDATE block's own lock group(s) is
+                 * eligible once that contention clears (see schedule.h's
+                 * own header comment on the reserve/release SVC family). */
                 if (t->eventDescAddr != 0) {
                     if (!sched_event_expr_true(cpu, t->eventDescAddr)) continue;
+                } else if (t->waitingOnCodeLockId != 0) {
+                    if (sched_find_code_lock(s, t->waitingOnCodeLockId) >= 0) continue; /* still held */
+                } else if (t->waitingOnDataLockMask != 0) {
+                    if ((sched_held_data_lock_mask(s, i) & t->waitingOnDataLockMask) != 0) continue; /* still overlapping */
                 } else if (t->wakeDeadlineUs > cpu->elapsedTimeUs) {
                     continue;
                 }
@@ -303,6 +348,13 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
         if (best != -1) {
             ScheduledTask *t = &s->tasks[best];
             t->eventDescAddr = 0; /* about to run -- don't leave a stale pointer for this slot's next use */
+            if (t->waitingOnCodeLockId != 0) {
+                sched_grant_code_lock(s, t->waitingOnCodeLockId, best);
+                t->waitingOnCodeLockId = 0;
+            } else if (t->waitingOnDataLockMask != 0) {
+                t->heldDataLockMask |= t->waitingOnDataLockMask;
+                t->waitingOnDataLockMask = 0;
+            }
             if (!t->hasRun) {
                 /* Never dispatched before -- a freshly-SCHEDULEd
                  * REPEAT-EVERY task goes straight to DORMANT without
@@ -328,7 +380,10 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
         for (int i = 0; i < s->count; i++) {
             ScheduledTask *t = &s->tasks[i];
             if (t->state != TASK_STATE_WAITING && t->state != TASK_STATE_DORMANT) continue;
-            if (t->eventDescAddr != 0) continue; /* event-gated: no amount of elapsed time alone can satisfy it */
+            /* Event-gated, or blocked on an EXCLUSIVE/UPDATE-block lock:
+             * none of these can be satisfied by elapsed time alone, only
+             * by some other task's own state change. */
+            if (t->eventDescAddr != 0 || t->waitingOnCodeLockId != 0 || t->waitingOnDataLockMask != 0) continue;
             if (earliest < 0 || t->wakeDeadlineUs < earliest) earliest = t->wakeDeadlineUs;
         }
         if (earliest < 0) {
@@ -600,4 +655,88 @@ bool sched_handle_cancel_self_svc(Scheduler *s, CPU *cpu) {
     if (s->runningIdx < 0 || s->tasks[s->runningIdx].isPrimal) return false;
     uint32_t ownPde = s->tasks[s->runningIdx].pdeAddr;
     return sched_handle_cancel_named_svc(s, cpu, &ownPde, 1);
+}
+
+bool sched_handle_reserve_code_svc(Scheduler *s, CPU *cpu, uint32_t lockId) {
+    int lockIdx = sched_find_code_lock(s, lockId);
+    if (lockIdx < 0 || s->codeLocks[lockIdx].holderIdx == s->runningIdx) {
+        /* Unheld, or (degenerate but harmless) already held by the
+         * calling context itself -- grant immediately, no blocking. */
+        if (lockIdx < 0) sched_grant_code_lock(s, lockId, s->runningIdx);
+        return true;
+    }
+
+    /* Held by a different task -- block. Lazily engage the primal only
+     * here (never on the immediately-granted path above), same reasoning
+     * as sched_handle_wait_svc's own lazy allocation: a program that
+     * never actually contends (like every EXCLUSIVE-procedure fixture
+     * checked in alongside this item) never pays for a scheduler slot it
+     * doesn't need. */
+    if (s->runningIdx < 0) {
+        int idx = sched_alloc_slot(s);
+        s->tasks[idx].isPrimal = true;
+        s->tasks[idx].parentIdx = -1;
+        s->tasks[idx].state = TASK_STATE_RUNNING;
+        s->tasks[idx].hasRun = true;
+        s->runningIdx = idx;
+    }
+
+    ScheduledTask *waiter = &s->tasks[s->runningIdx];
+    sched_save_context(cpu, &waiter->ctx);
+    waiter->state = TASK_STATE_WAITING;
+    waiter->waitingOnCodeLockId = lockId;
+
+    s->runningIdx = -1;
+    sched_dispatch(s, cpu);
+    return true;
+}
+
+bool sched_handle_release_code_svc(Scheduler *s, CPU *cpu, uint32_t lockId) {
+    (void)cpu; /* no dispatch/context change -- see this file's own header comment */
+    int lockIdx = sched_find_code_lock(s, lockId);
+    if (lockIdx >= 0) s->codeLocks[lockIdx].lockId = 0; /* free the slot */
+    return true;
+}
+
+/* Unlike sched_handle_reserve_code_svc (where an un-engaged primal's
+ * immediately-granted lock is safely recorded in the scheduler-level
+ * codeLocks table under the sentinel holder index -1, and stays
+ * self-consistent even if the primal is later lazily engaged for an
+ * unrelated reason), UPDATE-block holds live on each task's own
+ * ScheduledTask.heldDataLockMask -- a per-task field that doesn't exist
+ * yet for an un-engaged primal. If granted without a real slot, that
+ * hold would be silently lost the moment the primal is later engaged by
+ * something else (e.g. its own subsequent, unrelated WAIT) -- exactly
+ * the scenario EXCLCONT.hal-style code exercises for real (RESERVE, then
+ * WAIT while still "inside"). So, unlike the code-lock case, the primal
+ * is *always* engaged here, even on the immediately-granted path. */
+bool sched_handle_reserve_data_svc(Scheduler *s, CPU *cpu, uint32_t lockGroupMask) {
+    if (s->runningIdx < 0) {
+        int idx = sched_alloc_slot(s);
+        s->tasks[idx].isPrimal = true;
+        s->tasks[idx].parentIdx = -1;
+        s->tasks[idx].state = TASK_STATE_RUNNING;
+        s->tasks[idx].hasRun = true;
+        s->runningIdx = idx;
+    }
+
+    if ((sched_held_data_lock_mask(s, s->runningIdx) & lockGroupMask) == 0) {
+        s->tasks[s->runningIdx].heldDataLockMask |= lockGroupMask;
+        return true;
+    }
+
+    ScheduledTask *waiter = &s->tasks[s->runningIdx];
+    sched_save_context(cpu, &waiter->ctx);
+    waiter->state = TASK_STATE_WAITING;
+    waiter->waitingOnDataLockMask = lockGroupMask;
+
+    s->runningIdx = -1;
+    sched_dispatch(s, cpu);
+    return true;
+}
+
+bool sched_handle_release_data_svc(Scheduler *s, CPU *cpu, uint32_t lockGroupMask) {
+    (void)cpu; /* no dispatch/context change -- see this file's own header comment */
+    if (s->runningIdx >= 0) s->tasks[s->runningIdx].heldDataLockMask &= ~lockGroupMask;
+    return true;
 }

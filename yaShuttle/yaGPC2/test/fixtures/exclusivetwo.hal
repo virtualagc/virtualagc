@@ -1,0 +1,14 @@
+ EXCL2: PROGRAM;
+    P: PROCEDURE EXCLUSIVE;
+       WRITE(6) 'IN P';
+    CLOSE P;
+    Q: PROCEDURE EXCLUSIVE;
+       WRITE(6) 'IN Q';
+    CLOSE Q;
+
+    WRITE(6) 'BEFORE';
+    CALL P;
+    CALL Q;
+    CALL P;
+    WRITE(6) 'DONE';
+ CLOSE EXCL2;

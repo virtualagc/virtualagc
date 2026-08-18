@@ -709,12 +709,25 @@ F('Runtime Library Routine', 'Unlabeled CSECT families (VR*, MSTR, OUTER1, CSTRU
 
 # --- Reentrancy / Exclusion -----------------------------------------------------------------
 F('Reentrancy/Exclusion', 'EXCLUSIVE procedures/functions', 'At most one process may be inside an EXCLUSIVE block at a time; others WAIT.',
-  'USA003087 §27.2', 'not_implemented',
-  "NEW FINDING (this survey): grep confirms zero mentions of EXCLUSIVE/mutual-exclusion enforcement "
-  "anywhere in yaGPC2's source. This is a genuine RTE-level mutex mechanism, the same category of "
-  "OS substitution as TASK/SCHEDULE/WAIT -- if the real compiled EXCLUSIVE-entry sequence traps via "
-  "an SVC (not confirmed either way), it currently falls through to the generic unhandled-SVC path.",
-  'untested')
+  'USA003087 §27.2', 'implemented',
+  "SVC #15 (RESERVE, code block, on entry) / SVC #17 (RELEASE, on CLOSE) -- confirmed directly against "
+  "IBM-76-SS-1110 4.2.2/4.2.2.3, which documents this reserve/release SVC family in full (unusually "
+  "complete compared to most of this codebase's other protocol pieces, which needed pure reverse-"
+  "engineering), then verified empirically against 3 real compiled programs. LOCK ID is the target "
+  "procedure/function's own compiler-generated CSECT-word address -- confirmed stable and distinct per "
+  "procedure across repeated calls. sched_handle_reserve_code_svc/sched_handle_release_code_svc "
+  "(src/schedule.c) track holders in a scheduler-level CodeLock table; a contended RESERVE blocks the "
+  "calling task (TASK_STATE_WAITING, ScheduledTask.waitingOnCodeLockId), polled by sched_dispatch() the "
+  "same way event expressions are. Confirmed a real cross-task contention case: a SCHEDULEd task's own "
+  "attempt to enter an EXCLUSIVE procedure the primal is still inside (having WAITed mid-procedure) "
+  "correctly blocks until the primal releases it. yaHALMAT2 diverges on that specific case -- it "
+  "doesn't enforce mutual exclusion at all, letting both contexts inside concurrently -- relayed "
+  "upstream, not yet fixed there.",
+  'tested_dedicated',
+  "test_schedule.c's test_exclusive_lock_blocks_and_releases_correctly (deterministic: block, "
+  "RELEASE-doesn't-force-a-dispatch, grant-on-next-dispatch) plus test/fixtures/exclusive.hal "
+  "(non-contended), exclusivetwo.hal (two distinct procedures, confirming independent LOCK IDs), and "
+  "exclusivecontend.hal (genuine cross-task contention), all byte-diffed via test_scheduler.sh.")
 F('Reentrancy/Exclusion', 'REENTRANT procedures/functions', 'May be invoked by multiple processes concurrently, no RTE restriction.',
   'USA003087 §27.3', 'implemented_via_cpu',
   'The "allow it" case needs no RTE enforcement; likely already correct by construction since the '
@@ -729,11 +742,32 @@ F('Reentrancy/Exclusion', 'AUTOMATIC local data in REENTRANT blocks', 'One priva
 F('Shared/Remote Data Access', 'LOCK(n) / LOCK(*) compool data protection + UPDATE block',
   'Declares protected compool data; an UPDATE block is the only place it may be referenced, with the '
   'RTE enforcing mutual exclusion across processes contending for overlapping lock groups.',
-  'USA003087 §26.4', 'not_implemented',
-  'NEW FINDING (this survey): grep confirms zero mentions of LOCK/UPDATE-block enforcement anywhere '
-  'in yaGPC2\'s source -- a second genuine RTE mutex mechanism (alongside EXCLUSIVE above) with no '
-  'runtime substitution at all. If real compiled code traps via an SVC on UPDATE-block entry/exit '
-  '(not confirmed), it currently falls through unhandled.', 'untested')
+  'USA003087 §26.4', 'implemented',
+  "SVC #16 (RESERVE, data area, on UPDATE-block entry) / SVC #18 (RELEASE, on UPDATE-block CLOSE) -- "
+  "same reserve/release SVC family as EXCLUSIVE above (IBM-76-SS-1110 4.2.2/4.2.2.3), sharing one "
+  "3-halfword parameter block format, differing only in the SVC numbers and in LOCK ID's own meaning: "
+  "a bitmask of LOCK GROUPs (1-15) rather than a single procedure address, so contention is bitwise "
+  "overlap (sched_held_data_lock_mask), not exact match -- USA003087 26.4's own group-based protection "
+  "explicitly lets disjoint groups be held by different processes simultaneously. "
+  "sched_handle_reserve_data_svc/sched_handle_release_data_svc (src/schedule.c) track each task's own "
+  "held groups in ScheduledTask.heldDataLockMask (per-task, unlike EXCLUSIVE's scheduler-level table, "
+  "since multiple disjoint holders can coexist) -- always lazily engaging the calling context's own "
+  "scheduler slot even on an immediately-granted RESERVE, unlike the code-lock case, because a hold "
+  "recorded only in a per-task field would otherwise be silently lost if the primal is later engaged "
+  "for an unrelated reason while still holding it (found as a real bug via this item's own deterministic "
+  "test, not just reasoned about). NOT independently verified against a real compiled UPDATE-block "
+  "fixture: doing so needs a genuine multi-module COMPOOL+PROGRAM link this pass didn't set up (and a "
+  "real UPDATE block can't contain I/O statements either, confirmed via a real PASS1 compiler error, so "
+  "even a successful compile wouldn't easily show its own SVC trace the way every other WRITE-laden "
+  "fixture in this codebase does). Confidence rests on the ICD's own documentation (the same table "
+  "that was already confirmed byte-for-byte accurate for the EXCLUSIVE/code-lock case) plus the fact "
+  "that the overlap-detection logic never needs to interpret which specific bit means which lock group "
+  "-- only compiler-guaranteed internal consistency between a program's own RESERVE and RELEASE calls "
+  "for the same LOCK(n) attribute, which holds regardless of bit-ordering convention.",
+  'tested_dedicated',
+  "test_schedule.c's test_update_block_lock_groups_overlap_and_release (deterministic: disjoint groups "
+  "granted immediately, partial overlap blocks, RELEASE-then-redispatch grants correctly) -- the only "
+  "coverage this feature has, given the real-fixture gap noted above.")
 F('Shared/Remote Data Access', 'TEMPORARY data declaration', 'Compiler storage-reuse hint inside a DO...END group.',
   'USA003087 §26.3', 'not_applicable', 'Pure compile-time storage-allocation optimization; no runtime behavior at all.', 'not_applicable')
 F('Shared/Remote Data Access', 'REMOTE data placement', 'Relegates infrequently-accessed compool data to a separate storage region.',

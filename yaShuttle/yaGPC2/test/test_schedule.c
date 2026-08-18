@@ -1088,6 +1088,125 @@ static void test_cancel_cascades_to_running_dependent_by_flagging_not_freeing(vo
     ageharness_free(&age);
 }
 
+/* ---------------------------------------------------------------------
+ * 14. EXCLUSIVE procedures/functions (SVC #15 reserve / #17 release,
+ *     code block) and UPDATE blocks (SVC #16 reserve / #18 release,
+ *     data area) -- USA003087 27.2/26.4, confirmed against
+ *     IBM-76-SS-1110 4.2.2/4.2.2.3's own fully-documented reserve/
+ *     release SVC family (see schedule.h's own header comment). The
+ *     EXCLUSIVE case is cross-checked against a real compiled fixture
+ *     with genuine cross-task contention (exclusivecontend.hal); the
+ *     UPDATE-block case is deterministic-only -- compiling a real
+ *     LOCK-group-using COMPOOL+PROGRAM pair needs a multi-module link
+ *     this session didn't set up, but the underlying scheduler mechanics
+ *     (blocking, grant-on-dispatch, fast-forward exclusion) are the
+ *     exact same code paths the EXCLUSIVE case already exercises for
+ *     real -- only the SVC numbers and the exact-match-vs-overlap
+ *     comparison differ, both taken directly from the ICD's own table.
+ * ------------------------------------------------------------------- */
+
+static void test_exclusive_lock_blocks_and_releases_correctly(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    const uint32_t LOCK_ID = 0x9999; /* arbitrary -- real compiled code uses a CSECT-word address, but this file's own handlers never interpret the value, only compare it */
+
+    uint32_t bEntry = build_close_only_task(mem, 0x1000);
+    uint32_t bPde = build_pde(mem, 0x1010, bEntry);
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, bPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE B handled");
+
+    CHECK(sched_handle_reserve_code_svc(sched, cpu, LOCK_ID), "primal RESERVE (free) handled");
+    CHECK(sched->runningIdx == -1, "immediately-granted RESERVE doesn't engage a scheduler slot");
+    int lockSlot = -1;
+    for (int i = 0; i < SCHED_MAX_CODE_LOCKS; i++) if (sched->codeLocks[i].lockId == LOCK_ID) lockSlot = i;
+    CHECK(lockSlot >= 0 && sched->codeLocks[lockSlot].holderIdx == -1, "lock recorded as held by the (still-unengaged) primal");
+
+    /* Primal WAITs (simulating work inside the reserved procedure) --
+     * lazily engages the primal and dispatches B, the only other ready
+     * candidate. */
+    CHECK(sched_handle_wait_svc(sched, cpu, 1.0), "primal WAIT handled");
+    int primalIdx = -1;
+    for (int i = 0; i < sched->count; i++) if (sched->tasks[i].isPrimal) primalIdx = i;
+    int bIdx = sched->runningIdx;
+    CHECK(primalIdx >= 0 && bIdx >= 0 && bIdx != primalIdx, "B dispatched, primal now has a real slot");
+
+    /* B tries to enter the same EXCLUSIVE region -- must block. */
+    CHECK(sched_handle_reserve_code_svc(sched, cpu, LOCK_ID), "B's own RESERVE (contended) handled");
+    CHECK(sched->tasks[bIdx].state == TASK_STATE_WAITING, "B blocks -- LOCK_ID is still held by the primal");
+    CHECK(sched->tasks[bIdx].waitingOnCodeLockId == LOCK_ID, "B's own waitingOnCodeLockId records the contended lock");
+    CHECK(sched->runningIdx == primalIdx, "primal resumed -- nothing else eligible (fast-forwarded to its own WAIT deadline)");
+
+    /* Primal releases -- B is still blocked (release never forces a
+     * dispatch, matching every other already-handled SVC's own "never
+     * changes which context is live" contract). */
+    CHECK(sched_handle_release_code_svc(sched, cpu, LOCK_ID), "primal RELEASE handled");
+    lockSlot = -1;
+    for (int i = 0; i < SCHED_MAX_CODE_LOCKS; i++) if (sched->codeLocks[i].lockId == LOCK_ID) lockSlot = i;
+    CHECK(lockSlot < 0, "lock freed after RELEASE");
+    CHECK(sched->tasks[bIdx].state == TASK_STATE_WAITING, "B still blocked -- RELEASE alone doesn't force a dispatch");
+
+    /* Only once something actually forces a fresh dispatch decision does
+     * B get picked up and granted the lock. */
+    CHECK(sched_handle_wait_svc(sched, cpu, 0.001), "primal WAIT (forces a dispatch decision) handled");
+    CHECK(sched->runningIdx == bIdx, "B dispatched -- its own contended RESERVE is now satisfied");
+    CHECK(sched->tasks[bIdx].waitingOnCodeLockId == 0, "B's own waitingOnCodeLockId cleared once granted");
+    lockSlot = -1;
+    for (int i = 0; i < SCHED_MAX_CODE_LOCKS; i++) if (sched->codeLocks[i].lockId == LOCK_ID) lockSlot = i;
+    CHECK(lockSlot >= 0 && sched->codeLocks[lockSlot].holderIdx == bIdx, "B now holds LOCK_ID, granted at dispatch time");
+
+    ageharness_free(&age);
+}
+
+static void test_update_block_lock_groups_overlap_and_release(void) {
+    AGEHarness age;
+    ageharness_init(&age);
+    CPU *cpu = &age.gpc.cpu;
+    MCM *mem = &cpu->mainStorage;
+    Scheduler *sched = &age.halUCP.scheduler;
+
+    uint32_t bEntry = build_close_only_task(mem, 0x1000);
+    uint32_t bPde = build_pde(mem, 0x1010, bEntry);
+    CHECK(sched_handle_schedule_svc(sched, cpu, 80, bPde, cpu->elapsedTimeUs, 0.0, false), "SCHEDULE B handled");
+
+    /* Primal reserves LOCK GROUPs {1,2} (mask 0x0003) -- unlike a
+     * code-lock RESERVE, this always engages a real scheduler slot even
+     * when granted immediately (see sched_handle_reserve_data_svc's own
+     * header comment: per-task heldDataLockMask tracking needs it,
+     * unlike the code-lock case's own global table). */
+    CHECK(sched_handle_reserve_data_svc(sched, cpu, 0x0003), "primal RESERVE groups {1,2} handled");
+    int primalIdx = -1;
+    for (int i = 0; i < sched->count; i++) if (sched->tasks[i].isPrimal) primalIdx = i;
+    CHECK(primalIdx >= 0 && sched->tasks[primalIdx].heldDataLockMask == 0x0003, "primal holds groups {1,2} immediately, already recorded");
+
+    CHECK(sched_handle_wait_svc(sched, cpu, 1.0), "primal WAIT (simulating work inside the UPDATE block) handled");
+    CHECK(primalIdx >= 0 && sched->tasks[primalIdx].heldDataLockMask == 0x0003,
+          "primal's own held mask persists while it's blocked on something unrelated");
+    int bIdx = sched->runningIdx;
+    CHECK(bIdx >= 0 && bIdx != primalIdx, "B dispatched");
+
+    /* B reserves groups {2,3} (mask 0x0006) -- overlaps only on group 2,
+     * but a PARTIAL overlap is still a conflict; must block despite
+     * group 3 alone being free. */
+    CHECK(sched_handle_reserve_data_svc(sched, cpu, 0x0006), "B's own RESERVE groups {2,3} (partially overlapping) handled");
+    CHECK(sched->tasks[bIdx].state == TASK_STATE_WAITING, "B blocks -- group 2 overlaps the primal's own held mask");
+    CHECK(sched->tasks[bIdx].waitingOnDataLockMask == 0x0006, "B's own waitingOnDataLockMask records the full requested mask");
+    CHECK(sched->runningIdx == primalIdx, "primal resumed -- nothing else eligible");
+
+    /* Primal releases {1,2} -- frees group 2, resolving B's own overlap. */
+    CHECK(sched_handle_release_data_svc(sched, cpu, 0x0003), "primal RELEASE groups {1,2} handled");
+    CHECK(sched->tasks[primalIdx].heldDataLockMask == 0, "primal holds nothing now");
+
+    CHECK(sched_handle_wait_svc(sched, cpu, 0.001), "primal WAIT (forces a dispatch decision) handled");
+    CHECK(sched->runningIdx == bIdx, "B dispatched -- its own contended RESERVE is now satisfied");
+    CHECK(sched->tasks[bIdx].waitingOnDataLockMask == 0, "B's own waitingOnDataLockMask cleared once granted");
+    CHECK(sched->tasks[bIdx].heldDataLockMask == 0x0006, "B now holds groups {2,3}, granted at dispatch time");
+
+    ageharness_free(&age);
+}
+
 int main(void) {
     test_priority_ordering_and_context_roundtrip();
     test_repeat_every_counter_and_virtual_time();
@@ -1105,6 +1224,8 @@ int main(void) {
     test_cancel_named_dormant_target_removed_immediately();
     test_cancel_dormant_target_with_dependents_waits_gracefully();
     test_cancel_cascades_to_running_dependent_by_flagging_not_freeing();
+    test_exclusive_lock_blocks_and_releases_correctly();
+    test_update_block_lock_groups_overlap_and_release();
     if (failures == 0) {
         printf("all scheduler-mechanics tests passed\n");
     } else {
