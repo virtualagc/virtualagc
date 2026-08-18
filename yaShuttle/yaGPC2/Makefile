@@ -176,6 +176,13 @@ $(TEST_BIN_DIR)/test_gpcops: test/test_gpcops.c $(LIB) $(INTEGRATION_DIR)/yaGpcI
 $(TEST_BIN_DIR)/test_schedule: test/test_schedule.c $(LIB) $(INTEGRATION_DIR)/yaGpcIntegration.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_schedule.c $(LIB) $(LDLIBS)
 
+# Helper for test/bcenet_smoke.sh (manual, network-dependent -- not part
+# of the `test` target's own UNIT_TESTS list or recipe). Links directly
+# against src/bcenet_transport.c, not $(LIB), since that's the one file
+# it actually exercises.
+$(TEST_BIN_DIR)/bcenet_recv_check: test/bcenet_recv_check.c src/bcenet_transport.c src/bcenet_transport.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/bcenet_recv_check.c src/bcenet_transport.c $(LDLIBS)
+
 # Not a unit test -- a runnable example of GpcOps-only usage (see its own
 # header comment), and per its own header comment now the demonstration
 # of exactly how an integrator would build against $(LIB): compiled --

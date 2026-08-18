@@ -96,6 +96,13 @@ static const char *HELP_TEXT =
 "                                  runs. Default: the real host machine's\n"
 "                                  current wall-clock time (its own\n"
 "                                  configured timezone) at program start.\n"
+"  --bce-network                    Install the real-peripheral servicer\n"
+"                                  bridge (multicast UDP, matching\n"
+"                                  nsts-sim-gpc's own wire protocol) so\n"
+"                                  BCE bus traffic can reach a real\n"
+"                                  peripheral emulator (e.g. Don Schmidt's\n"
+"                                  MEDS) instead of the inert MIA stub.\n"
+"                                  (default: false)\n"
 "  -h, --help                      display help for command\n";
 
 static void set_defaults(Options *o) {
@@ -233,6 +240,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->pacing = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--date-time-epoch", &n)) {
             opts->dateTimeEpoch = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--bce-network", &n)) {
+            (void)n; opts->bceNetwork = true;
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {

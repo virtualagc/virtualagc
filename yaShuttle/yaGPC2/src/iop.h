@@ -5,13 +5,17 @@
  * bank. See iop_bce_instr.h/iop_msc_instr.h for the two instruction sets.
  *
  * Networking (com/bus.civet's real UDP multicast, used by MIA to talk to
- * other GPCs/BCEs over the simulated hardware bus) is out of scope for
- * standalone `gpc run`: a batch process has no network peers, and network
- * I/O doesn't affect captured stdout/stderr/output-file bytes. MIA is
- * ported here as an inert stub by default — dataAvailable() always
- * false, getData() always 0, xmitWord/xmitCmd no-ops — observably
- * identical to a real MIA that never receives anything (the only case
- * that occurs in a single-process batch run).
+ * other GPCs/BCEs over the simulated hardware bus) was originally out of
+ * scope for standalone `gpc run` -- a batch process had no network peers,
+ * and network I/O didn't affect captured stdout/stderr/output-file bytes.
+ * That's still the *default*: MIA is an inert stub -- dataAvailable()
+ * always false, getData() always 0, xmitWord/xmitCmd no-ops -- observably
+ * identical to a real MIA that never receives anything. But `gpc run
+ * --bce-network` now opts into exactly this (src/bcenet_framer.c/
+ * bcenet_transport.c, installed via ap101_set_servicer() in run.c), for
+ * driving a real peripheral emulator (e.g. Don Schmidt's MEDS in
+ * nsts-sim-gpc) from the standalone CLI, not just through the GpcOps
+ * embedding API below.
  *
  * When embedded in a larger simulator (see yaGpcIntegration.h), an
  * externally-supplied GpcServicerFn can be installed via

@@ -64,6 +64,12 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     r->age.halUCP.errorCallback = halucp_error_cb;
 
     iohost_init_from_opts(&r->iohost, &r->age.halUCP, opts);
+
+    if (opts->bceNetwork) {
+        r->bceTransport = bcenet_transport_create();
+        r->bceFramer = bcenet_framer_create(r->bceTransport);
+        ap101_set_servicer(&r->age.gpc, bcenet_framer_service, r->bceFramer);
+    }
 }
 
 void batchrunner_free(BatchRunner *r) {
@@ -72,6 +78,8 @@ void batchrunner_free(BatchRunner *r) {
     iohost_free(&r->iohost);
     ageharness_free(&r->age);
     if (r->dbg) debugger_free(r->dbg);
+    if (r->bceFramer) bcenet_framer_free(r->bceFramer);
+    if (r->bceTransport) bcenet_transport_free(r->bceTransport);
     memset(r, 0, sizeof(*r));
 }
 
@@ -362,6 +370,14 @@ static bool batchrunner_step(BatchRunner *r) {
     /* Elapsed instruction time (cpu->elapsedTimeUs) is now accumulated
      * unconditionally inside cpu_exec1() itself, not just under --debug
      * -- see cpu.h's elapsedTimeUs comment. */
+
+    /* --bce-network: flush whatever real-BCE-bus word traffic this one
+     * instruction just generated as real UDP packets. Called here, once
+     * per instruction unconditionally (not gated on --debug like
+     * batchrunner_pace() below, which is a different concern) -- see
+     * bcenet_framer.h's own comment on why per-tick flushing is the
+     * right message-boundary signal. */
+    if (r->bceFramer) bcenet_framer_flush_tick(r->bceFramer);
 
     ageharness_snapshot_regs(&r->age, &after);
     RegChange changes[REG_SNAPSHOT_MAX_CHANGES];

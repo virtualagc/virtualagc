@@ -18,6 +18,8 @@
 #include <stdint.h>
 
 #include "ageharness.h"
+#include "bcenet_framer.h"
+#include "bcenet_transport.h"
 #include "debugger.h"
 #include "iohost.h"
 #include "opts.h"
@@ -94,6 +96,14 @@ typedef struct {
     PacingMode pacingMode;
     double pacingRefWallSeconds;
     double pacingRefVirtualUs;
+
+    /* --bce-network: NULL/NULL unless the flag was passed (see
+     * batchrunner_init()/batchrunner_free() and bcenet_framer_flush_tick()'s
+     * own call site in batchrunner_step()). bceTransport is owned by
+     * bceFramer's caller (here), not by the framer itself -- same
+     * lifetime discipline as bcenet_framer.h documents. */
+    BceNetTransport *bceTransport;
+    BceNetFramer *bceFramer;
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts);

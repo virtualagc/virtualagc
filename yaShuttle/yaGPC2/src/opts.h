@@ -105,6 +105,16 @@ typedef struct {
      * -- exactly the concern every golden-file fixture in test/fixtures/
      * already has to avoid for any other reason. */
     char *dateTimeEpoch;              /* NULL by default; parsed via atof */
+
+    /* Not part of gpc run's own option set -- yaGPC2-specific. Installs
+     * the real-peripheral servicer bridge (src/bcenet_framer.c/
+     * bcenet_transport.c) as the AP101's servicer, driving BCE bus
+     * traffic over real multicast UDP matching nsts-sim-gpc's own wire
+     * protocol (com/bus.civet) -- lets a real .fcm talk to Don Schmidt's
+     * MEDS emulator (or anything else speaking the same protocol) from
+     * the standalone CLI, not just through the GpcOps embedding API.
+     * Default false: unchanged behavior, MIA stays an inert stub. */
+    bool bceNetwork;                  /* default false */
 } Options;
 
 /* Parses argv (starting at argv[1]) exactly as `gpc run` would, except that

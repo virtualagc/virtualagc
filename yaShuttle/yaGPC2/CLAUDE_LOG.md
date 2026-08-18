@@ -158,3 +158,57 @@ document's planning stages, and it is already in the code as
   future servicer-extension discussion, not implemented or acted on here
   per the user's explicit instruction not to touch networking without
   discussion first.
+
+### [2026-08-19] Target: problems.md
+- Implemented the real UDP-multicast peripheral-bus bridge planned in the
+  session's plan-mode discussion (see `~/.claude/plans/fluttering-
+  dazzling-pine.md` for the full design rationale, superseding the
+  earlier TASK/SCHEDULE/WAIT plan that file used to hold). New `--bce-
+  network` CLI flag installs a `GpcServicerFn` implementation
+  (`src/bcenet_framer.c`/`.h`, layer 2: buffers word-at-a-time
+  `GPC_SVC_XMIT_WORD`/`XMIT_CMD` calls into whole messages, flushed once
+  per CPU instruction tick rather than by decoding the BCE command
+  word's own bit-level word-count field, which turned out inconsistent
+  across instructions; `src/bcenet_transport.c`/`.h`, layer 3: real
+  per-bus UDP multicast sockets matching `nsts-sim-gpc`'s own
+  `com/bus.civet` wire format exactly) via the *existing*
+  `servicer`/`servicerCtx` extension point -- zero changes to
+  `yaGpcIntegration.h` or to either emulator's own engine code, per the
+  plan's own key finding.
+  Verified end-to-end, not just built: hand-assembled
+  `test/fixtures/gen_bcenet_smoke_fcm.cjs` drives a real CPU->MSC->BCE6
+  activation sequence (`PC`/`LBP`/`LI`/`SIO`, encodings derived by hand
+  from the real `PackedBits` descriptors and confirmed via `--trace`
+  register readback -- MSC's round-robin scheduler
+  (`iopls_next_slice()`) gives each BCE exactly one turn per 33-slice
+  major cycle, which the fixture's own filler-instruction count accounts
+  for) issuing a real `#CMDI`+`#TDS`. The resulting UDP packet was
+  received correctly both by a raw socket and by `nsts-sim-gpc`'s own
+  real `com/bus.civet` `Bus` class directly (via
+  `@danielx/civet/register`, not a JS stub of our own) -- confirmed
+  byte-for-byte wire-format interop. The receive direction
+  (`bcenet_transport_recv()`) was verified separately against a real
+  `Bus#sendMsg()` call (a batch yaGPC2 run completes too fast to
+  reliably race an external sender within one process's lifetime for a
+  live `#RDS` test). New `test/bcenet_smoke.sh` +
+  `test/bcenet_recv_check.c` capture both checks as a repeatable,
+  opt-in script (skips cleanly if `nsts-sim-gpc` isn't checked out) --
+  deliberately NOT part of `make test`'s own automated suite, since a
+  real UDP multicast socket doesn't belong in the deterministic
+  standing suite (port conflicts, environment multicast support). Full
+  existing suite stays green throughout.
+  Scope, per the plan: BCE/MIA peripheral-bus traffic only, not the
+  broader "any SVC delegatable to a servicer" idea raised earlier in
+  discussion -- the user clarified `SEND ERROR`/`RUNTIME`/`SCHEDULE`/
+  `WAIT` etc. should stay native (they already work), and the callback
+  is for what the emulator genuinely can't do itself. Also investigated
+  and confirmed (via the yaHALMAT2 peer session): yaHALMAT2's `PMHD`/
+  `PMAR`/`PMIN` opcodes are the real HALMAT encoding of `%SVC`/`%SVCI`
+  (confirmed via `USA003090` 8.7: `%SVC(a)` generates `SVC a` where `a`
+  is the operand's *address*, not an immediate SVC number -- matching
+  `halucp.c`'s own `svcCode = mem[ea]` shape exactly), currently a
+  deliberate hard-fail rather than an absence -- real, separate future
+  work on their side, not blocking this one. TCP/shared-memory
+  transport variants and discrete I/O (PCI/PCO) remain explicitly out
+  of scope, structurally straightforward additions later (new layer-3
+  implementations / a new servicer extension) given this layering.
