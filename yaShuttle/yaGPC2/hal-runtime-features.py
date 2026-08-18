@@ -314,7 +314,29 @@ F('Real-Time: SCHEDULE', 'SCHEDULE ... ON event-expr (event-triggered initiation
   "eligible one, and is dispatched only once its own event becomes true).")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT ... WHILE / UNTIL event-expr',
   'Cyclic process cancelled when an event expression goes FALSE (WHILE) or TRUE (UNTIL).',
-  'USA003087 §24.5', 'not_implemented', 'Same FLAGS-word gate.', 'untested')
+  'USA003087 §24.5', 'implemented',
+  "FLAGS bit 0x0200 (an event-expr cancellation clause is present), composing with bit 0x0100 to "
+  "distinguish WHILE (0x0200 alone) from UNTIL (0x0200|0x0100) -- confirmed empirically, mutually "
+  "exclusive with the numeric UNTIL-time clause (row above) in the real grammar. The descriptor "
+  "pointer occupies ea+4, the exact same parameter-block slot the numeric UNTIL's own FPR4-5 value "
+  "would otherwise use, resolving to the identical [opcodeWord, reserved, PDE...] format WAIT FOR/"
+  "SCHEDULE ... ON already use -- confirmed via a real compiled program. Checked at CLOSE "
+  "(sched_handle_task_close) and, per 24.5's own text, immediately during the intercycle DORMANT "
+  "gap (sched_dispatch's own pre-pass, reusing the numeric UNTIL-time clause's own machinery). WHILE "
+  "is checked even before this task's very first dispatch (24.5: exp already FALSE means the process "
+  "'is merely removed... without ever executing'); UNTIL explicitly guarantees at least one cycle "
+  "regardless of exp's initial value. A real bug was caught building the UNTIL fixture: an earlier "
+  "draft gated the between-cycles check on ScheduledTask.hasRun, which is reset to false by every "
+  "re-arm (not just the first), so it couldn't distinguish 'never run' from 'between cycle 2 and 3' "
+  "-- the event going TRUE in that gap was wrongly treated as still-before-the-guaranteed-first-"
+  "cycle, letting an extra cycle run. Fixed with a dedicated completedFirstCycle field, never reset. "
+  "No working yaHALMAT2 oracle exists for this variant -- cross-checked and confirmed it isn't wired "
+  "up on that side yet (falls back to ignoring the clause, cycling as plain REPEAT EVERY).",
+  'tested_dedicated', "test/fixtures/repeatwhile.hal, repeatuntilevent.hal, repeatwhilefalse.hal "
+  "(byte-diffed via test_scheduler.sh -- the second is the direct regression fixture for the "
+  "hasRun-vs-completedFirstCycle bug) and test_schedule.c's "
+  "test_repeat_while_until_event_cancellation (deterministic, both forms plus the pre-first-cycle "
+  "removal case). See problems.md 7.17.")
 F('Real-Time: SCHEDULE', 'Program Processes (SCHEDULE targeting a separate compiled PROGRAM)',
   'SCHEDULE can target another independently-compiled PROGRAM (via an EXTERNAL PROGRAM template '
   'and link-time assembly), not just a local TASK.',

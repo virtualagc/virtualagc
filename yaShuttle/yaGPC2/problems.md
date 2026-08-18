@@ -3770,6 +3770,96 @@ by `test_scheduler.sh` under both `--pacing` modes; two new deterministic
 `REPEAT ... UNTIL time` updated from `not_implemented` to
 `implemented`/`tested_dedicated`.
 
+### 7.17 `SCHEDULE ... REPEAT ... WHILE / UNTIL event-expr` — done, closes out the SCHEDULE...REPEAT family, one real bug found (reusing a field with the wrong reset semantics), no working `yaHALMAT2` oracle
+
+Self-selected from the survey, closing out row 13 — the last remaining
+`Real-Time: SCHEDULE` gap after §7.16's bare/AFTER/numeric-UNTIL work
+(`REPEAT ... WHILE/UNTIL exp`, `exp` an *event* expression, `USA003087`
+§24.5 — distinct from the numeric UNTIL-time clause just implemented).
+The two genuinely out-of-scope rows left (`RANDOM()`/`RANDOMG()`, needing
+a C-level PRNG; Program Processes, needing multi-image loading) stay
+`not_implemented` for the same confirmed reasons as before.
+
+**FLAGS bits traced empirically** against three real compiled programs
+(`REPEAT EVERY 1.0 WHILE EV1`, `REPEAT EVERY 1.0 UNTIL EV1`, and a plain
+`SET`/`RESET` control to confirm the base case): bit 9 (`0x0200`) marks
+an event-expression cancellation clause present, composing with bit 8
+(`0x0100`, the same bit the numeric-UNTIL clause uses on its own) to
+distinguish `WHILE` (`0x0200` alone) from `UNTIL` (`0x0200|0x0100`) —
+the numeric and event forms are mutually exclusive in the real grammar
+(the compiler never sets both). The descriptor pointer occupies `ea+4`,
+the identical parameter-block slot the numeric `UNTIL` clause's own
+FPR4-5 value would otherwise use — confirmed by hex-dumping a linked
+`.fcm` directly (not just tracing SVC summaries) that it resolves to the
+exact same `[opcodeWord, reserved, PDE...]` descriptor format `WAIT
+FOR`/`SCHEDULE ... ON` already use, letting this reuse
+`sched_event_expr_true` verbatim with zero new descriptor-parsing code.
+
+**Semantics, matching `§24.5`'s own two-part text precisely:** `WHILE`
+cycles while `exp` stays `TRUE`, cancelling once it goes `FALSE` —
+checked *even before this task's very first dispatch* ("if the value of
+`exp` becomes FALSE before the process is initiated, it is merely
+removed... without ever executing"), confirmed via a real fixture
+(`repeatwhilefalse.hal`, `EV1` forced `FALSE` before the `SCHEDULE`
+itself) that produces zero `TICK` output at all. `UNTIL` cycles until
+`exp` becomes `TRUE`, but explicitly guarantees "at least one cycle
+shall be executed" regardless of `exp`'s initial value — the one place
+`WHILE` and event-`UNTIL` genuinely differ in mechanism, not just
+polarity. Both are otherwise checked exactly like the numeric-`UNTIL`
+clause from §7.16: at CLOSE (`sched_handle_task_close`) and immediately
+during the intercycle `DORMANT` gap (`sched_dispatch`'s own pre-pass),
+reusing the identical `sched_cancel_idx_and_dependents` machinery.
+
+**A real bug, caught building the `UNTIL` fixture, not by inspection:**
+the first draft gated event-`UNTIL`'s own "at least one cycle" guarantee
+on `ScheduledTask.hasRun` — but `hasRun` is reset back to `false` by
+*every* re-arm, not just the first (it exists to tell `sched_dispatch`
+whether the *next* firing needs a fresh dispatch to the entry point or a
+context restore, a per-firing question, not a "has this task ever run at
+all" one). This meant the between-cycles check couldn't distinguish
+"never run" from "between cycle 2 and 3": an event going `TRUE` in the
+gap between the 2nd and 3rd cycles was wrongly treated as still-before-
+the-guaranteed-first-cycle, and a 3rd cycle ran that should have been
+cancelled. Caught directly: `repeatuntilevent.hal`'s own primal resets
+`EV1` `FALSE`, `SCHEDULE`s `REPEAT EVERY 1.0 UNTIL EV1`, waits 1.5s
+(letting 2 cycles complete), sets `EV1` `TRUE`, waits 5 more seconds —
+expected 2 `TICK`s (cycle 1 guaranteed, cycle 2 still before the flip,
+cycle 3 cancelled), got 3 with the `hasRun`-gated draft. Fixed with a
+dedicated `completedFirstCycle` field, set once at this task's first
+`CLOSE` and never reset afterward — confirmed both directions: reverting
+locally and re-running the same fixture reproduced the extra cycle, and
+the same regression is now pinned as a deterministic
+`test_schedule.c` scenario (`test_repeat_while_until_event_cancellation`),
+verified to actually fail against the reverted code before being fixed
+again (a stale incremental `make` build masked the failure on the first
+attempt — a clean rebuild was needed to see it, worth remembering for
+next time this kind of quick revert-and-check comes up).
+
+**No working `yaHALMAT2` oracle for this specific variant**, unlike
+§7.16's numeric-`UNTIL` work: cross-checked all three fixtures against
+their binary and got results inconsistent with `§24.5`'s own text (the
+already-`FALSE`-before-scheduling `WHILE` case ran 6 cycles instead of
+zero; the mid-run `WHILE`-goes-`FALSE` case ran 8 instead of 3) —
+confirmed (informationally, not urgently) over the cross-session channel
+that this variant isn't wired up on their side yet, falling back to
+treating the clause as absent (plain `REPEAT EVERY`). Verified instead
+by the primary source directly plus internal consistency across the
+three fixtures' own predicted-vs-actual cycle counts, the same fallback
+methodology already established for `WAIT FOR`/`SCHEDULE ... ON` in
+§7.8 when no working oracle existed there either.
+
+Three new fixtures — `repeatwhile.hal`, `repeatuntilevent.hal` (the
+direct regression fixture for the `hasRun`/`completedFirstCycle` bug),
+`repeatwhilefalse.hal` — exercised by `test_scheduler.sh` under both
+`--pacing` modes; one new deterministic `test_schedule.c` scenario
+(`test_repeat_while_until_event_cancellation`, covering both `WHILE`'s
+pre-first-cycle removal and `UNTIL`'s guaranteed-first-cycle/between-
+cycles-cancellation). `hal-runtime-features.db` row 13 updated from
+`not_implemented` to `implemented`/`tested_dedicated`, closing out the
+entire `SCHEDULE ... REPEAT` family (§7.7 `AT`/`IN`, item #6 `EVERY`,
+§7.16 bare/`AFTER`/numeric-`UNTIL`, this section's `WHILE`/event-`UNTIL`)
+except the two confirmed-out-of-scope rows noted above.
+
 ---
 
 ## Methodology and caveats

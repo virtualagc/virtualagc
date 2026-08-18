@@ -400,6 +400,59 @@ typedef struct {
     bool hasUntilTime;
     double untilTimeUs;
 
+    /* USA003087 24.5's event-expression cancellation clauses -- "REPEAT
+     * cycle WHILE exp" and "REPEAT cycle UNTIL exp" (exp an event
+     * expression, not to be confused with the numeric UNTIL-time clause
+     * above; FLAGS bit 0x0200 confirmed empirically, composing with bit
+     * 0x0100 to distinguish WHILE (0x0200 alone) from UNTIL (0x0200 |
+     * 0x0100) -- see halucp.c's own FLAGS-bit decode). descAddr points
+     * to the identical event-expression descriptor format WAIT FOR/
+     * SCHEDULE ... ON already use (this file's own header comment) --
+     * confirmed via a real compiled program that FLAGS 0x0200's own
+     * pointer field (ea+4, the same slot the numeric-UNTIL value would
+     * otherwise occupy in FPR4-5 -- these two clauses are mutually
+     * exclusive in the real grammar, never combined) resolves to that
+     * exact [opcodeWord, reserved, PDE...] shape.
+     *
+     * WHILE (isUntilForm == false): cycling continues while exp is TRUE;
+     * cancels once exp is FALSE -- checked BOTH at CLOSE and, per 24.5's
+     * own "if the value of exp becomes FALSE before the process is
+     * initiated, it is merely removed... without ever executing," even
+     * before this task's very first dispatch (sched_dispatch's own
+     * pre-pass applies this check unconditionally, hasRun or not).
+     *
+     * UNTIL (isUntilForm == true): cycling continues until exp becomes
+     * TRUE; cancels once exp is TRUE -- but 24.5 explicitly guarantees
+     * "at least one cycle shall be executed" regardless of exp's initial
+     * value, unlike WHILE -- so sched_dispatch's own pre-pass only
+     * applies this check once completedFirstCycle is already true (i.e.
+     * never before this task's own first CLOSE, only from its second
+     * DORMANT period onward -- NOT gated on hasRun, which is reset back
+     * to false by every re-arm, including the first one, so it can't
+     * distinguish "never run" from "between cycle 2 and 3"; a real,
+     * caught-by-testing bug in an earlier draft of this feature).
+     * Both forms are otherwise checked exactly like hasUntilTime above:
+     * at CLOSE (sched_handle_task_close) and immediately during the
+     * intercycle DORMANT gap (sched_dispatch's own pre-pass), reusing
+     * the same sched_cancel_idx_and_dependents machinery CANCEL and the
+     * numeric UNTIL-time clause both already use. Unlike hasUntilTime,
+     * this is never a fast-forward candidate -- no amount of virtual-
+     * time advancement alone can resolve an event condition (same
+     * reasoning as eventDescAddr below), so sched_dispatch's pre-pass
+     * re-checks it on every call it makes regardless of what (if
+     * anything) time advanced to satisfy. */
+    bool hasUntilEvent;
+    bool untilEventIsUntilForm;
+    uint32_t untilEventDescAddr;
+    bool completedFirstCycle; /* set true the first time this task's own
+                                * CLOSE is ever processed (sched_handle_
+                                * task_close), regardless of whether that
+                                * CLOSE goes on to re-arm or cancel --
+                                * unlike hasRun (above), never reset back
+                                * to false; exists purely for
+                                * untilEventIsUntilForm's own "at least
+                                * one cycle" gate. */
+
     double wakeDeadlineUs;    /* meaningful when WAITING or DORMANT, and
                                 * only when eventDescAddr is 0 -- see below */
 
@@ -515,13 +568,17 @@ void sched_init(Scheduler *s);
 /* Called from halucp.c's SVC dispatch for SVC #1 (SCHEDULE) once its
  * FLAGS word is recognized as one of the signatures this cut supports
  * (TASK, with any combination of a plain/AT/IN initiation, a plain/
- * BARE/EVERY/AFTER cycling, and an UNTIL-time cancellation clause --
- * see halucp.c's own FLAGS-bit decode). priority/pdeAddr/repeatMode/
- * repeatIntervalUs/untilTimeUs are already decoded by the caller
- * (priority from the SVC param byte, pdeAddr via mcm_get16, repeatMode
- * from FLAGS bits 6-7, repeatIntervalUs from FPR2-3 when repeatMode is
- * EVERY or AFTER, untilTimeUs from FPR4-5 when hasUntilTime, all via
- * floatIBM.h). initialWakeDeadlineUs is the absolute cpu->elapsedTimeUs
+ * BARE/EVERY/AFTER cycling, and a numeric-UNTIL-time or event-expr
+ * WHILE/UNTIL cancellation clause -- see halucp.c's own FLAGS-bit
+ * decode; the numeric and event-expr cancellation clauses are mutually
+ * exclusive in the real grammar, never combined, so hasUntilTime and
+ * hasUntilEvent are never both true). priority/pdeAddr/repeatMode/
+ * repeatIntervalUs/untilTimeUs/untilEventDescAddr are already decoded
+ * by the caller (priority from the SVC param byte, pdeAddr via
+ * mcm_get16, repeatMode from FLAGS bits 6-7, repeatIntervalUs from
+ * FPR2-3 when repeatMode is EVERY or AFTER, untilTimeUs from FPR4-5
+ * when hasUntilTime, untilEventDescAddr from ea+4 when hasUntilEvent,
+ * all via floatIBM.h/mcm_get16). initialWakeDeadlineUs is the absolute cpu->elapsedTimeUs
  * value at which the task should first become ready -- plain SCHEDULE
  * passes cpu->elapsedTimeUs itself (due now, unchanged from this
  * function's original due-immediately-only behavior); AT/IN pass an
@@ -545,6 +602,7 @@ void sched_init(Scheduler *s);
 bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr,
                                 double initialWakeDeadlineUs, RepeatMode repeatMode,
                                 double repeatIntervalUs, bool hasUntilTime, double untilTimeUs,
+                                bool hasUntilEvent, bool untilEventIsUntilForm, uint32_t untilEventDescAddr,
                                 bool dependent);
 
 /* Called from halucp.c's SVC dispatch for SVC #6 (delta-time WAIT).

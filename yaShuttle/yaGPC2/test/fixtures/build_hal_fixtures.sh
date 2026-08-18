@@ -227,6 +227,25 @@
 #                          happens at, not overshooting to the would-be
 #                          next cycle -- see problems.md 7.16 for the
 #                          real internal bug this last one caught).
+#   repeatwhile.fcm        <- repeatwhile.hal, repeatuntilevent.fcm <-
+#                          repeatuntilevent.hal, repeatwhilefalse.fcm <-
+#                          repeatwhilefalse.hal (all checked in
+#                          alongside this script) -- SCHEDULE ...
+#                          REPEAT's event-expression cancellation
+#                          clauses (USA003087 24.5): REPEAT ... WHILE
+#                          exp (cycles while an EVENT stays TRUE, an
+#                          explicit RESET mid-run stopping it between
+#                          cycles), REPEAT ... UNTIL exp (cycles until
+#                          an EVENT becomes TRUE, guaranteeing at least
+#                          one cycle regardless of the event's initial
+#                          value -- unlike WHILE), and REPEAT ... WHILE
+#                          exp where exp is already FALSE before the
+#                          very first cycle (the process is removed
+#                          without ever executing at all) -- see
+#                          problems.md 7.17 for the real internal bug
+#                          the UNTIL case caught (a stale hasRun re-use
+#                          that couldn't distinguish "never run" from
+#                          "between cycle 2 and 3").
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -268,6 +287,9 @@ REPEATBARE_HAL="$(dirname "$0")/repeatbare.hal"
 REPEATAFTER_HAL="$(dirname "$0")/repeatafter.hal"
 REPEATEVERYUNTIL_HAL="$(dirname "$0")/repeateveryuntil.hal"
 REPEATAFTERCANCEL_HAL="$(dirname "$0")/repeataftercancel.hal"
+REPEATWHILE_HAL="$(dirname "$0")/repeatwhile.hal"
+REPEATUNTILEVENT_HAL="$(dirname "$0")/repeatuntilevent.hal"
+REPEATWHILEFALSE_HAL="$(dirname "$0")/repeatwhilefalse.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -322,5 +344,8 @@ build "$REPEATBARE_HAL" REPBARE repeatbare
 build "$REPEATAFTER_HAL" REPAFTR repeatafter
 build "$REPEATEVERYUNTIL_HAL" REPEVUNT repeateveryuntil
 build "$REPEATAFTERCANCEL_HAL" REPACNCL repeataftercancel
+build "$REPEATWHILE_HAL" RPWHIL2 repeatwhile
+build "$REPEATUNTILEVENT_HAL" RPUNTL2 repeatuntilevent
+build "$REPEATWHILEFALSE_HAL" RPWHFAL repeatwhilefalse
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm (+ -lnk101.json)"

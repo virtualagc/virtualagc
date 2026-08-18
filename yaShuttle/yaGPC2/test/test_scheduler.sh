@@ -232,4 +232,25 @@ run_case "repeateveryuntil/signal" "signal" "fixtures/repeateveryuntil.fcm" "fix
 run_case "repeataftercancel/burst"  "burst"  "fixtures/repeataftercancel.fcm" "fixtures/repeataftercancel-lnk101.json" "fixtures/repeataftercancel_golden.txt"
 run_case "repeataftercancel/signal" "signal" "fixtures/repeataftercancel.fcm" "fixtures/repeataftercancel-lnk101.json" "fixtures/repeataftercancel_golden.txt"
 
+# SCHEDULE ... REPEAT's event-expression cancellation clauses
+# (USA003087 24.5): REPEAT ... WHILE exp (cycles while an EVENT stays
+# TRUE, an explicit RESET mid-run stopping it between cycles -- 3 ticks,
+# not the full ~7-8 a plain REPEAT EVERY over the same WAIT span would
+# give), REPEAT ... UNTIL exp (cycles until an EVENT becomes TRUE,
+# guaranteeing at least one cycle regardless of the event's initial
+# value, unlike WHILE -- 2 ticks: cycle 1 always runs even though EV1
+# starts FALSE, cycle 3 never does once EV1 goes TRUE between cycles 2
+# and 3), and REPEAT ... WHILE exp already FALSE before the very first
+# cycle (removed without ever executing at all -- no TICK output). No
+# yaHALMAT2 cross-check exists for any of these three -- confirmed this
+# variant isn't wired up on that side yet (falls back to ignoring the
+# clause entirely, cycling as a plain REPEAT EVERY) -- see problems.md
+# 7.17.
+run_case "repeatwhile/burst"  "burst"  "fixtures/repeatwhile.fcm" "fixtures/repeatwhile-lnk101.json" "fixtures/repeatwhile_golden.txt"
+run_case "repeatwhile/signal" "signal" "fixtures/repeatwhile.fcm" "fixtures/repeatwhile-lnk101.json" "fixtures/repeatwhile_golden.txt"
+run_case "repeatuntilevent/burst"  "burst"  "fixtures/repeatuntilevent.fcm" "fixtures/repeatuntilevent-lnk101.json" "fixtures/repeatuntilevent_golden.txt"
+run_case "repeatuntilevent/signal" "signal" "fixtures/repeatuntilevent.fcm" "fixtures/repeatuntilevent-lnk101.json" "fixtures/repeatuntilevent_golden.txt"
+run_case "repeatwhilefalse/burst"  "burst"  "fixtures/repeatwhilefalse.fcm" "fixtures/repeatwhilefalse-lnk101.json" "fixtures/repeatwhilefalse_golden.txt"
+run_case "repeatwhilefalse/signal" "signal" "fixtures/repeatwhilefalse.fcm" "fixtures/repeatwhilefalse-lnk101.json" "fixtures/repeatwhilefalse_golden.txt"
+
 exit $fail

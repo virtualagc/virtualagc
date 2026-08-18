@@ -337,6 +337,31 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
             ScheduledTask *t = &s->tasks[i];
             if (t->state == TASK_STATE_DORMANT && t->hasUntilTime && cpu->elapsedTimeUs >= t->untilTimeUs) {
                 sched_cancel_idx_and_dependents(s, cpu, i);
+                continue;
+            }
+            /* USA003087 24.5's WHILE/UNTIL event-expression clauses --
+             * same between-cycles immediate-cancellation rule as
+             * hasUntilTime above, checked against an event expression's
+             * current truth value instead of a time comparison (never a
+             * fast-forward candidate -- no amount of elapsed-time
+             * advancement can resolve an event condition, same reasoning
+             * as eventDescAddr's own dispatch-eligibility gate below).
+             * WHILE (!untilEventIsUntilForm) applies even before this
+             * task's very first dispatch (24.5: "if the value of exp
+             * becomes FALSE before the process is initiated, it is
+             * merely removed... without ever executing"); UNTIL
+             * (untilEventIsUntilForm) explicitly guarantees at least one
+             * cycle regardless of exp's initial value, so it's gated on
+             * completedFirstCycle -- never checked before this task's own
+             * first CLOSE, only from its second DORMANT period onward
+             * (NOT gated on hasRun, which is reset back to false by
+             * every re-arm and so can't distinguish "never run" from
+             * "between cycle 2 and 3" -- see completedFirstCycle's own
+             * comment in schedule.h). */
+            if (t->state == TASK_STATE_DORMANT && t->hasUntilEvent && (t->untilEventIsUntilForm ? t->completedFirstCycle : true)) {
+                bool trueVal = sched_event_expr_true(cpu, t->untilEventDescAddr);
+                bool cancel = t->untilEventIsUntilForm ? trueVal : !trueVal;
+                if (cancel) sched_cancel_idx_and_dependents(s, cpu, i);
             }
         }
 
@@ -438,6 +463,7 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
 bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr,
                                 double initialWakeDeadlineUs, RepeatMode repeatMode,
                                 double repeatIntervalUs, bool hasUntilTime, double untilTimeUs,
+                                bool hasUntilEvent, bool untilEventIsUntilForm, uint32_t untilEventDescAddr,
                                 bool dependent) {
     /* DEPENDENT's own parent is whichever task is executing this
      * SCHEDULE statement (USA003087 13.4) -- lazily engage the primal
@@ -474,6 +500,9 @@ bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pd
     t->repeatIntervalUs = repeatIntervalUs;
     t->hasUntilTime = hasUntilTime;
     t->untilTimeUs = untilTimeUs;
+    t->hasUntilEvent = hasUntilEvent;
+    t->untilEventIsUntilForm = untilEventIsUntilForm;
+    t->untilEventDescAddr = untilEventDescAddr;
     /* Plain SCHEDULE's first firing is due immediately at SCHEDULE time
      * (caller passes cpu->elapsedTimeUs itself as initialWakeDeadlineUs
      * in that case) -- confirmed against yaHALMAT2's own output for the
@@ -537,6 +566,8 @@ bool sched_handle_task_close(Scheduler *s, CPU *cpu) {
     ScheduledTask *t = &s->tasks[s->runningIdx];
     if (t->isPrimal) return false; /* the main program's own CLOSE: real halt */
 
+    t->completedFirstCycle = true; /* see its own comment -- unlike hasRun, never reset */
+
     /* USA003087 23.5: "cancellation actually takes place at the end of
      * the first cycle which finishes later than the specified time" --
      * checked here, at this task's own CLOSE, treating "reached UNTIL
@@ -549,7 +580,16 @@ bool sched_handle_task_close(Scheduler *s, CPU *cpu) {
      * cycles cancellation, in sched_dispatch's pre-pass below, cascades
      * cancellation to dependents immediately). */
     bool untilTimeReached = t->hasUntilTime && cpu->elapsedTimeUs >= t->untilTimeUs;
-    if (t->hasRepeat && !t->cancelled && !untilTimeReached) {
+    /* USA003087 24.5's event-expression cancellation clauses -- same
+     * at-CLOSE check as untilTimeReached above, just against an event
+     * expression's current truth value instead of a time comparison.
+     * UNTIL-form's own "at least one cycle shall be executed" guarantee
+     * needs no special handling here: reaching CLOSE at all already
+     * means a cycle has completed, satisfying it unconditionally. */
+    bool untilEventReached = t->hasUntilEvent &&
+        (t->untilEventIsUntilForm ? sched_event_expr_true(cpu, t->untilEventDescAddr)
+                                   : !sched_event_expr_true(cpu, t->untilEventDescAddr));
+    if (t->hasRepeat && !t->cancelled && !untilTimeReached && !untilEventReached) {
         /* Re-arm cadence depends on RepeatMode (see its own comment):
          * EVERY re-arms from the fixed phase reference, not "now" --
          * avoids drift from however late this particular firing ran

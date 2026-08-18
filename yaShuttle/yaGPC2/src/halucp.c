@@ -423,24 +423,30 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
              * (0x00=none, 0x40=BARE/immediate, 0x80=EVERY, 0xC0=AFTER --
              * see RepeatMode's own comment in schedule.h; 0x0081 was this
              * cut's very first, and still most-tested, signature: TASK +
-             * REPEAT EVERY together), 0x0100 = an UNTIL-time cancellation
-             * clause is present (confirmed empirically alongside each
-             * REPEAT variant: REPEAT bare/AFTER/EVERY all compose freely
-             * with it). AT-and-IN-together (0x000d combined with TASK) is
-             * not a third initiation mode of its own -- confirmed
-             * empirically that the real compiler reuses those same two
-             * bits combined as the ON (event-expression) marker instead;
-             * see the dedicated branch below and schedule.h's own header
-             * comment. DEPENDENT combined with ON is not empirically
-             * confirmed and stays unrecognized. Neither CANCEL (its own
-             * separate SVC, not a FLAGS bit at all) nor REPEAT ...
-             * WHILE/UNTIL event-expr nor ON-combined-with-REPEAT are
-             * recognized -- any FLAGS word with a bit outside this set
-             * falls through to the unhandled-trap path below, exactly
-             * like today, rather than mishandling a variant this cut
-             * doesn't understand. */
+             * REPEAT EVERY together), 0x0100 alone = a numeric UNTIL-time
+             * cancellation clause is present (confirmed empirically
+             * alongside each REPEAT variant: REPEAT bare/AFTER/EVERY all
+             * compose freely with it), 0x0200 = an event-expression
+             * WHILE/UNTIL cancellation clause is present instead --
+             * mutually exclusive with the numeric form in the real
+             * grammar (never both), distinguished from each other by
+             * 0x0100 (confirmed empirically: 0x0200 alone == WHILE,
+             * 0x0200|0x0100 == UNTIL -- the same bit that means "numeric
+             * UNTIL" on its own doubles as the WHILE/UNTIL selector once
+             * 0x0200 is also set). AT-and-IN-together (0x000d combined
+             * with TASK) is not a third initiation mode of its own --
+             * confirmed empirically that the real compiler reuses those
+             * same two bits combined as the ON (event-expression) marker
+             * instead; see the dedicated branch below and schedule.h's
+             * own header comment. DEPENDENT combined with ON is not
+             * empirically confirmed and stays unrecognized. Neither
+             * CANCEL (its own separate SVC, not a FLAGS bit at all) nor
+             * ON-combined-with-REPEAT are recognized -- any FLAGS word
+             * with a bit outside this set falls through to the
+             * unhandled-trap path below, exactly like today, rather than
+             * mishandling a variant this cut doesn't understand. */
             uint32_t flags = mcm_get16(&h->cpu->mainStorage, ea + 1);
-            const uint32_t recognizedMask = 0x0001 | 0x0004 | 0x0008 | 0x0020 | 0x00C0 | 0x0100;
+            const uint32_t recognizedMask = 0x0001 | 0x0004 | 0x0008 | 0x0020 | 0x00C0 | 0x0100 | 0x0200;
             bool hasTask = (flags & 0x0001) != 0;
             bool hasAt = (flags & 0x0004) != 0;
             bool hasIn = (flags & 0x0008) != 0;
@@ -451,9 +457,11 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                                    : repeatBits == 0x00C0 ? SCHED_REPEAT_AFTER
                                                            : SCHED_REPEAT_NONE;
             bool hasRepeatEvery = repeatMode != SCHED_REPEAT_NONE; /* for the ON-branch's own exclusion check below, unchanged */
-            bool hasUntilTime = (flags & 0x0100) != 0;
+            bool hasUntilEvent = (flags & 0x0200) != 0;
+            bool hasUntilTime = (flags & 0x0100) != 0 && !hasUntilEvent;
+            bool untilEventIsUntilForm = hasUntilEvent && (flags & 0x0100) != 0;
             bool hasOn = hasAt && hasIn;
-            if (hasTask && hasOn && !hasDependent && !hasRepeatEvery && !hasUntilTime && (flags & ~recognizedMask) == 0) {
+            if (hasTask && hasOn && !hasDependent && !hasRepeatEvery && !hasUntilTime && !hasUntilEvent && (flags & ~recognizedMask) == 0) {
                 /* SCHEDULE label ON <event-expr> PRIORITY(p) -- ea+2 is
                  * the target's own PDE (same PROCESS field as every
                  * other SCHEDULE variant), ea+3 is a pointer to the
@@ -531,9 +539,23 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                     untilTimeUs = fibm_to_float(&until) * 1e6;
                 }
 
+                /* WHILE/UNTIL event-expr's own descriptor pointer is at
+                 * ea+4 -- the same parameter-block slot the numeric
+                 * UNTIL's own FPR4-5 value would otherwise occupy
+                 * (mutually exclusive in the real grammar, confirmed
+                 * empirically) -- pointing at the identical [opcodeWord,
+                 * reserved, PDE...] descriptor format WAIT FOR/
+                 * SCHEDULE ... ON already use. */
+                uint32_t untilEventDescAddr = 0;
+                if (hasUntilEvent) {
+                    untilEventDescAddr = mcm_get16(&h->cpu->mainStorage, ea + 4);
+                }
+
                 return sched_handle_schedule_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr,
                                                   initialWakeDeadlineUs, repeatMode, repeatIntervalUs,
-                                                  hasUntilTime, untilTimeUs, hasDependent);
+                                                  hasUntilTime, untilTimeUs,
+                                                  hasUntilEvent, untilEventIsUntilForm, untilEventDescAddr,
+                                                  hasDependent);
             }
         } else if (svcLow == 0x06) {
             /* WAIT, delta-time variant. */
