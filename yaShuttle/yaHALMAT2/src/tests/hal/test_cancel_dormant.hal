@@ -1,0 +1,16 @@
+C/ CANCEL of a cyclic task that is still DORMANT (scheduled REPEAT EVERY,
+C/ but CANCELed before it ever initiates) -- USA003087 Sec. 23.6 / class-0/
+C/ CANC.md's "no effect unless not-yet-initiated": the not-yet-initiated
+C/ task is removed and never runs.  Non-preemptive scheduling means A does
+C/ not run between the SCHEDULE and the immediately-following CANCEL, so A
+C/ never executes at all.  Expected: BEFORE / DONE (no "IN A").
+ TCANCEL: PROGRAM;
+    A: TASK;
+       WRITE(6) 'IN A';
+    CLOSE A;
+    WRITE(6) 'BEFORE';
+    SCHEDULE A PRIORITY(80), REPEAT EVERY 1.0;
+    CANCEL A;
+    WAIT 1.0;
+    WRITE(6) 'DONE';
+ CLOSE TCANCEL;

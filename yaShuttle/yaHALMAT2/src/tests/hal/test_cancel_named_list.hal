@@ -1,0 +1,18 @@
+C/ Named-list CANCEL (`CANCEL A, B;`) of two still-DORMANT cyclic tasks --
+C/ both are removed before initiating, neither runs.  Exercises the multi-
+C/ name operand-list form (CANC.md's previously-untested list form).
+C/ Expected: BEFORE / DONE (neither "IN A" nor "IN B").
+ TCANNAM: PROGRAM;
+    A: TASK;
+       WRITE(6) 'IN A';
+    CLOSE A;
+    B: TASK;
+       WRITE(6) 'IN B';
+    CLOSE B;
+    WRITE(6) 'BEFORE';
+    SCHEDULE A PRIORITY(80), REPEAT EVERY 1.0;
+    SCHEDULE B PRIORITY(80), REPEAT EVERY 1.0;
+    CANCEL A, B;
+    WAIT 1.0;
+    WRITE(6) 'DONE';
+ CLOSE TCANNAM;

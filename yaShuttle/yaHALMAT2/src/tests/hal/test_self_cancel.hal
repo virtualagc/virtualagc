@@ -1,0 +1,18 @@
+C/ Self-CANCEL (bare `CANCEL;` inside the task's own body) -- the key
+C/ distinction from TERMINATE (USA003087 Sec. 23.6): CANCEL is *graceful*.
+C/ The current cycle runs to completion (so the WRITE after CANCEL DOES
+C/ execute); only the next re-arm of this cyclic (REPEAT EVERY) task is
+C/ suppressed.  Expected: BEFORE / AFTER CANCEL / DONE -- printed once, not
+C/ repeating.  (A TERMINATE in the same spot would abort the cycle and the
+C/ "AFTER CANCEL" line would never print.)
+ TSELFCAN: PROGRAM;
+    A: TASK;
+       WRITE(6) 'IN A';
+       CANCEL;
+       WRITE(6) 'AFTER CANCEL';
+    CLOSE A;
+    WRITE(6) 'BEFORE';
+    SCHEDULE A PRIORITY(80), REPEAT EVERY 1.0;
+    WAIT 3.0;
+    WRITE(6) 'DONE';
+ CLOSE TSELFCAN;

@@ -4811,13 +4811,15 @@ static void close_current_process(halmat_state_t *state, bool *branched) {
          * completion (class-0/RTRN.md's "every subprogram body
          * is terminated regardless" note, TASK analog) or, for
          * a cyclic (REPEAT) task, just the end of one cycle.
-         * Explicit TERMINATE/CANCEL (OP_TERM/OP_CANC below)
-         * always end the task outright and bypass this rearm
-         * check entirely -- only a *fallthrough* CLOS is
-         * eligible to rearm, matching REPEAT/WHILE/UNTIL's
-         * role as governing the task's own natural completion,
-         * not something an explicit mid-body CANCEL could be
-         * talked out of. */
+         * Explicit TERMINATE (OP_TERM below) ends the task
+         * outright and bypasses this rearm check entirely. A
+         * self-CANCEL (OP_CANC) does NOT bypass it: per
+         * USA003087 Sec. 23.6 it lets the current cycle run to
+         * this CLOS, having first cleared repeat_kind to
+         * SCHD_REPEAT_NONE so the check below simply declines
+         * to rearm and the task terminates the ordinary way --
+         * that suppressed-rearm state is exactly what makes the
+         * cancel "graceful" rather than abortive. */
         halmat_task_t *cur = &state->tasks[state->current_task];
         bool stop = true;
         if (cur->repeat_kind != SCHD_REPEAT_NONE) {
@@ -13503,25 +13505,81 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_CANC: {
-                /* CANCEL statement (class-0/CANC.md): gracefully cancels
-                 * a cyclic process, removing it from the run queue --
-                 * same observable effect as TERM for this interpreter's
-                 * purposes (no distinct "cyclic re-arm" state is
-                 * modeled, since SCHD's cyclic REPEAT EVERY/AFTER forms
-                 * aren't implemented either -- see OP_SCHD above), so
-                 * this reuses TERM's exact self/named-form logic. */
+                /* CANCEL statement (class-0/CANC.md, USA003087 Sec. 23.6):
+                 * *gracefully* cancels a cyclic process. This is the key
+                 * distinction from TERMINATE (OP_TERM below), which ends a
+                 * process outright, mid-cycle: CANCEL removes only the
+                 * task's future re-arm (its next cycle), while the cycle
+                 * currently in progress runs to its own natural CLOSE. For
+                 * a non-cyclic / not-yet-initiated process it "has no
+                 * effect unless not-yet-initiated" (CANC.md) -- i.e. a
+                 * running non-cyclic task simply finishes normally (no
+                 * re-arm exists to suppress), and a dormant one that has
+                 * not begun is removed before it ever runs.
+                 *
+                 * SCHD's cyclic REPEAT EVERY/AFTER/ON forms and CLOS's
+                 * fallthrough rearm ARE implemented (close_current_process
+                 * above rearms iff repeat_kind != SCHD_REPEAT_NONE), so
+                 * "suppress the re-arm" is expressed exactly by clearing
+                 * repeat_kind/stop_kind and letting the body fall through
+                 * to its CLOSE, which then terminates the task the ordinary
+                 * way. This replaces an earlier stopgap that treated CANCEL
+                 * as an alias for TERMINATE (immediate task_state =
+                 * TASK_TERMINATED) back when the rearm machinery didn't
+                 * exist -- confirmed against yaGPC2's traced real HAL/S-FC:
+                 * a self-CANCEL runs the rest of its cycle and only
+                 * suppresses the next re-arm; a CANCEL of a still-dormant
+                 * (not-yet-initiated) cyclic task removes it, never run. */
                 if (ins->operand_count == 0) {
+                    /* Self form: graceful. Suppress this task's own re-arm
+                     * and let the rest of the current cycle run to CLOSE.
+                     * Do NOT set TASK_TERMINATED or clear
+                     * symbol_active_task here -- the task is still the sole
+                     * active process for its symbol until its body reaches
+                     * its own CLOSE, where close_current_process (seeing
+                     * repeat_kind == NONE) terminates it normally. */
                     halmat_task_t *cur = &state->tasks[state->current_task];
-                    cur->task_state = TASK_TERMINATED;
-                    if (cur->symbol < HALMAT_SYT_MAX) state->symbol_active_task[cur->symbol] = -1;
+                    cur->repeat_kind = SCHD_REPEAT_NONE;
+                    cur->stop_kind = SCHD_STOP_NONE;
+                    cur->has_on_event = false;
                 } else {
                     for (uint8_t i = 0; i < ins->operand_count; i++) {
                         if (ins->operands[i].qual != QUAL_SYT) { fail(state, "CANC: expected SYT operand"); break; }
                         uint16_t sym = ins->operands[i].data;
                         if (sym < HALMAT_SYT_MAX && state->symbol_active_task[sym] != -1) {
                             int idx = state->symbol_active_task[sym];
-                            state->tasks[idx].task_state = TASK_TERMINATED;
-                            state->symbol_active_task[sym] = -1;
+                            if (idx == state->current_task) {
+                                /* A task naming *itself* (CANCEL SELF;) --
+                                 * identical graceful semantics to the bare
+                                 * self form above. */
+                                halmat_task_t *cur = &state->tasks[idx];
+                                cur->repeat_kind = SCHD_REPEAT_NONE;
+                                cur->stop_kind = SCHD_STOP_NONE;
+                                cur->has_on_event = false;
+                            } else {
+                                /* Named cancel of another process. In this
+                                 * non-preemptive model the canceller is the
+                                 * only running task, so the target is never
+                                 * mid-instruction here; the confirmed case
+                                 * (yaGPC2 traces) is a still-dormant /
+                                 * not-yet-initiated cyclic task, which is
+                                 * removed before it runs. That is exactly a
+                                 * suppressed re-arm plus removal from the
+                                 * queue, so terminate it and free its
+                                 * symbol. (A target already suspended
+                                 * mid-cycle in a WAIT would, per Sec. 23.6's
+                                 * "graceful", finish its current cycle
+                                 * first; that case is unverified against a
+                                 * real trace and not exercised by any
+                                 * fixture, so it is left as removal for now
+                                 * rather than guessed at.) */
+                                halmat_task_t *t = &state->tasks[idx];
+                                t->repeat_kind = SCHD_REPEAT_NONE;
+                                t->stop_kind = SCHD_STOP_NONE;
+                                t->has_on_event = false;
+                                t->task_state = TASK_TERMINATED;
+                                state->symbol_active_task[sym] = -1;
+                            }
                         }
                     }
                 }

@@ -1136,6 +1136,18 @@ run ./run_local_fixture.sh nested_task_schedule "$(printf '          1\n        
 # previously did (which let NEXT run at most once). See class-0/SCHD.md's
 # "Waiting For Dependents At CLOSE" section for the full account.
 run ./run_local_fixture.sh countup2 "$(printf '          1\n          2\n          3\n          4\n          5\n          6\n          7\n          8\n          9\n         10')" --time-scale 1000000
+# CANCEL (class-0/CANC.md, USA003087 Sec. 23.6) -- graceful cancellation,
+# the key distinction from TERMINATE. cancel_dormant: a not-yet-initiated
+# cyclic task CANCELed before it runs is removed, never executes (non-
+# preemptive scheduling means it doesn't sneak a run in before the CANCEL).
+# self_cancel: a bare `CANCEL;` runs the *rest of the current cycle* (the
+# WRITE after it prints) and only suppresses the next re-arm -- unlike
+# TERMINATE, which would abort the cycle. cancel_named_list: the multi-name
+# `CANCEL A, B;` list form removes both dormant tasks. Cross-checked against
+# yaGPC2's traced real HAL/S-FC (SVC #4 self / #5 named).
+run ./run_local_fixture.sh cancel_dormant "$(printf 'BEFORE\nDONE')" --time-scale 1000000
+run ./run_local_fixture.sh self_cancel "$(printf 'BEFORE\nIN A\nAFTER CANCEL\nDONE')" --time-scale 1000000
+run ./run_local_fixture.sh cancel_named_list "$(printf 'BEFORE\nDONE')" --time-scale 1000000
 
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale
