@@ -3946,6 +3946,50 @@ way `hal_log()`'s own diagnostic messages are — diffed against its own
 golden rather than required empty). `hal-runtime-features.db` rows 55,
 57, 58 updated from `unresolved` to `implemented`/`tested_dedicated`.
 
+### 7.19 `AUTOMATIC` local data in `REENTRANT` blocks — already correctly implemented via the CPU alone, a real, live `yaHALMAT2` bug confirmed (not just theoretical)
+
+Self-selected from the survey's last easily-tractable `unresolved` row
+(136): `USA003087` §27.3's `AUTOMATIC` keyword, which gives each
+concurrent invocation of a `REENTRANT` procedure/function its own
+private copy of a local data item (as opposed to the default `STATIC`
+behavior, one shared copy for all invocations). The old notes had
+explicitly flagged the open question: is this ordinary compiled stack-
+frame code, or a real RTE-provided allocation service `yaGPC2` would
+need to implement?
+
+**Resolved empirically as the former** — `AUTOMATIC`'s own stack-
+relative addressing is entirely `HALSFC`'s own compile-time concern;
+`yaGPC2` needs nothing beyond what it already unconditionally provides
+every `TASK`/`PROGRAM` block: a genuinely independent linker-generated
+stack region (visible in every real fixture's own section map all
+session, confirmed safe for `REENTRANT` specifically back in the
+`DATE()`/`CLOCKTIME()` work's own reentrancy digression). Confirmed
+directly with a real compiled program: a `REENTRANT PROCEDURE P(X)
+ASSIGN(Y)` with `DECLARE SCALAR AUTOMATIC, LOCAL;` sets `LOCAL = X`,
+`WAIT`s 1.0s (so a second, later invocation genuinely overlaps the
+first, not just textually "reentrant" but actually concurrently live),
+then returns `LOCAL`. Two tasks call it with different arguments
+(`10.0`/`20.0`, 0.5s apart) — `yaGPC2` returns the correct value to
+each (`10.0`/`20.0`), zero cross-contamination, zero new code.
+
+**A real, live `yaHALMAT2` bug confirmed via this same fixture** — not
+just their own earlier-flagged theoretical concern
+(`RELAY-FROM-YAHALMAT2-Reentrancy.txt`, raised mid-session when they
+asked about `yaGPC2`'s own stack architecture): their side returns
+`20.0` for *both* tasks, meaning the first task's own `AUTOMATIC` local
+got clobbered by the second task's concurrent invocation, exactly the
+shared-interpreter-call-stack risk they'd already reasoned through but
+not yet demonstrated failing. They've since confirmed (cross-session)
+this is the same underlying root cause as the `ON ERROR`-scoping bug
+from §7.18 — a single global call/handler context rather than one
+scoped per task/call-frame — and are treating a foundational per-task-
+context fix as the one change that would resolve both.
+
+One new fixture, `reentrantautomatic.hal`, exercised by `test_scheduler.sh`
+under both `--pacing` modes (plain `run_case`, no `SEND ERROR` involved
+here unlike §7.18's fixtures). `hal-runtime-features.db` row 136 updated
+from `unresolved` to `implemented_via_cpu`/`tested_dedicated`.
+
 ---
 
 ## Methodology and caveats

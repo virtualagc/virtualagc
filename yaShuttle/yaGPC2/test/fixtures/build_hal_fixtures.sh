@@ -261,6 +261,19 @@
 #                          task). A real yaHALMAT2 bug found along the
 #                          way on both the per-task and dynamic-scoping
 #                          fronts -- see problems.md 7.18.
+#   reentrantautomatic.fcm <- reentrantautomatic.hal (checked in
+#                          alongside this script) -- AUTOMATIC local
+#                          data in REENTRANT procedures (USA003087
+#                          27.3): two tasks concurrently inside the same
+#                          REENTRANT procedure at once (one WAITs mid-
+#                          body so the other's own call genuinely
+#                          overlaps it), each with its own AUTOMATIC
+#                          local -- confirmed implemented_via_cpu (needs
+#                          zero yaGPC2-specific code at all, purely
+#                          AUTOMATIC's own compiler-generated stack-
+#                          relative addressing against yaGPC2's real
+#                          per-task stacks). A real yaHALMAT2 bug found
+#                          along the way -- see problems.md 7.19.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -308,6 +321,7 @@ REPEATWHILEFALSE_HAL="$(dirname "$0")/repeatwhilefalse.hal"
 OFFERROR_HAL="$(dirname "$0")/offerror.hal"
 ERRORPERTASK_HAL="$(dirname "$0")/errorpertask.hal"
 ERRORDYNSCOPE_HAL="$(dirname "$0")/errordynscope.hal"
+REENTRANTAUTOMATIC_HAL="$(dirname "$0")/reentrantautomatic.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -368,5 +382,6 @@ build "$REPEATWHILEFALSE_HAL" RPWHFAL repeatwhilefalse
 build "$OFFERROR_HAL" OFFERR2 offerror
 build "$ERRORPERTASK_HAL" ERRPTASK errorpertask
 build "$ERRORDYNSCOPE_HAL" ERRDYNS errordynscope
+build "$REENTRANTAUTOMATIC_HAL" REENT1 reentrantautomatic
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm (+ -lnk101.json)"

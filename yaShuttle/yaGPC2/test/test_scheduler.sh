@@ -312,4 +312,14 @@ run_case_with_stderr "errorpertask/signal" "signal" "fixtures/errorpertask.fcm" 
 run_case_with_stderr "errordynscope/burst"  "burst"  "fixtures/errordynscope.fcm" "fixtures/errordynscope-lnk101.json" "fixtures/errordynscope_golden.txt" "fixtures/errordynscope_stderr_golden.txt"
 run_case_with_stderr "errordynscope/signal" "signal" "fixtures/errordynscope.fcm" "fixtures/errordynscope-lnk101.json" "fixtures/errordynscope_golden.txt" "fixtures/errordynscope_stderr_golden.txt"
 
+# AUTOMATIC local data in REENTRANT procedures (USA003087 27.3): two
+# tasks concurrently inside the same REENTRANT procedure at once (one
+# WAITs mid-body so the other's own call genuinely overlaps it), each
+# with its own AUTOMATIC local -- confirmed implemented_via_cpu, zero
+# yaGPC2-specific code needed, purely AUTOMATIC's own compiler-generated
+# stack-relative addressing against yaGPC2's real per-task stacks. See
+# problems.md 7.19.
+run_case "reentrantautomatic/burst"  "burst"  "fixtures/reentrantautomatic.fcm" "fixtures/reentrantautomatic-lnk101.json" "fixtures/reentrantautomatic_golden.txt"
+run_case "reentrantautomatic/signal" "signal" "fixtures/reentrantautomatic.fcm" "fixtures/reentrantautomatic-lnk101.json" "fixtures/reentrantautomatic_golden.txt"
+
 exit $fail

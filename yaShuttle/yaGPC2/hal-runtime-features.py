@@ -871,9 +871,21 @@ F('Reentrancy/Exclusion', 'REENTRANT procedures/functions', 'May be invoked by m
   'cooperative scheduler only ever runs one task\'s instructions at a time (no true concurrency to break).',
   'untested')
 F('Reentrancy/Exclusion', 'AUTOMATIC local data in REENTRANT blocks', 'One private storage copy allocated per concurrent entry, vs. one shared static copy.',
-  'USA003087 §27.3', 'unresolved',
-  "Not confirmed from the manual text alone whether this is ordinary compiled stack-frame code "
-  "(needing nothing from yaGPC2) or a real RTE-provided allocation service.", 'untested')
+  'USA003087 §27.3', 'implemented_via_cpu',
+  "Resolved empirically: ordinary compiled stack-frame code, not an RTE service -- zero yaGPC2-"
+  "specific code exists or is needed. AUTOMATIC's own stack-relative addressing is entirely "
+  "HALSFC's own compile-time concern; yaGPC2 only needs each concurrently-executing process to "
+  "have a genuinely independent stack, which every TASK/PROGRAM block already does (its own "
+  "linker-generated stack region, confirmed throughout this session's own real fixture section "
+  "maps). Confirmed directly: a REENTRANT PROCEDURE with a DECLARE ... AUTOMATIC local, called by "
+  "two TASKs genuinely concurrently (one WAITs mid-body so the other's own call overlaps it), each "
+  "gets back its own value with zero cross-contamination. A real yaHALMAT2 bug found via this same "
+  "fixture, confirming their own previously-flagged (RELAY-FROM-YAHALMAT2-Reentrancy.txt) shared-"
+  "interpreter-call-stack risk is live, not just theoretical: one task's own AUTOMATIC local gets "
+  "clobbered by the other's concurrent invocation.",
+  'tested_dedicated', "test/fixtures/reentrantautomatic.hal, byte-diffed via test_scheduler.sh "
+  "against yaGPC2's own predicted-correct output (yaHALMAT2 again not a valid oracle -- its own bug "
+  "is what this fixture caught). See problems.md 7.19.")
 
 # --- Shared/Remote Data Access ---------------------------------------------------------------
 F('Shared/Remote Data Access', 'LOCK(n) / LOCK(*) compool data protection + UPDATE block',
