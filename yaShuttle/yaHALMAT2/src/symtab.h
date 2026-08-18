@@ -14,6 +14,10 @@
  * symbolFlags table) by name across independently-compiled units. */
 
 #define HALMAT_SYM_FLAG_EXTERNAL 0x00100000u
+/* EXCLUSIVE procedure/function (USA003087 Sec. 27.2): the RTE allows only one
+ * process to execute the block at a time. Bit value from unHALMAT.py's own
+ * symbolFlags table (0x00080000="EXCLUSIVE"). */
+#define HALMAT_SYM_FLAG_EXCLUSIVE 0x00080000u
 /* SINGLE/DOUBLE precision bits, confirmed against unHALMAT.py's own
  * symbolFlags table (0x00800000="SINGLE", 0x00400000="DOUBLE") -- used
  * by interp.c's bind_call_argument() to determine a MATRIX/VECTOR call

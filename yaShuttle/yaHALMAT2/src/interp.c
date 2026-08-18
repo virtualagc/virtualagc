@@ -3248,9 +3248,11 @@ static void precompute_subprograms(halmat_state_t *state) {
     state->symbol_def_pos = malloc(HALMAT_SYT_MAX * sizeof(size_t));
     state->def_clos_target = malloc(n * sizeof(size_t));
     state->symbol_active_task = malloc(HALMAT_SYT_MAX * sizeof(int));
+    state->exclusive_holder = malloc(HALMAT_SYT_MAX * sizeof(int));
     for (size_t i = 0; i < HALMAT_SYT_MAX; i++) {
         state->symbol_def_pos[i] = NO_TARGET;
         state->symbol_active_task[i] = -1;
+        state->exclusive_holder[i] = -1;
     }
     for (size_t i = 0; i < n; i++) state->def_clos_target[i] = NO_TARGET;
 
@@ -3512,6 +3514,7 @@ void interp_cleanup(halmat_state_t *state) {
     free(state->symbol_def_pos);
     free(state->def_clos_target);
     free(state->symbol_active_task);
+    free(state->exclusive_holder);
     free(state->arrayed_paragraph_end);
     free(state->arrayed_paragraph_count);
     free(state->arrayed_paragraph_unit_size);
@@ -5320,6 +5323,59 @@ static int64_t op_cost_ticks(halmat_state_t *state, const halmat_instr_t *ins) {
 
         default:
             return 60;
+    }
+}
+
+/* EXCLUSIVE procedure/function support (USA003087 Sec. 27.2). A procedure or
+ * function whose block-definition symbol carries the EXCLUSIVE flag may be in
+ * use by only one process at a time; the RTE serializes access. This is
+ * implemented as a per-callee reservation (state->exclusive_holder[]) taken
+ * when a process enters the block (OP_PCAL/OP_FCAL) and released when it
+ * returns back out (exclusive_release_returned, called after every instruction
+ * for the running task). A process that finds the reservation already held by
+ * *another* process is blocked at the CALL's own XXST -- BEFORE any call-return
+ * or I/O state is pushed -- so the single shared interpreter call stack only
+ * ever holds the one process actually inside the block. (A plain, non-EXCLUSIVE
+ * procedure used by two processes at once is an invalid category-1 program per
+ * Sec. 27.1 and is not guarded; REENTRANT genuine concurrency would need
+ * per-process call/data context this interpreter's shared stack doesn't model,
+ * and is a separate matter.) */
+static bool symbol_is_exclusive(halmat_state_t *state, uint16_t sym) {
+    if (!state->symtab || sym >= HALMAT_SYT_MAX) return false;
+    const halmat_symtab_entry_t *e = halmat_symtab_find_by_index(state->symtab, sym);
+    return e && (e->flags & HALMAT_SYM_FLAG_EXCLUSIVE) != 0;
+}
+
+/* Take (or re-take, for recursive re-entry) the reservation on exclusive callee
+ * `sym` for the current process, recording the call-return depth so the release
+ * pass knows when this process has returned back out past it. Call AFTER the
+ * PCAL/FCAL has pushed its return frame (so call_return_sp is the callee's own
+ * depth). */
+static void exclusive_acquire(halmat_state_t *state, uint16_t sym) {
+    state->exclusive_holder[sym] = state->current_task;
+    halmat_task_t *cur = &state->tasks[state->current_task];
+    if (cur->excl_held_sp < HALMAT_MAX_EXCL_HELD) {
+        cur->excl_held[cur->excl_held_sp].sym = sym;
+        cur->excl_held[cur->excl_held_sp].depth = (uint16_t)state->call_return_sp;
+        cur->excl_held_sp++;
+    }
+}
+
+/* Release any exclusive reservations the current process has now returned out
+ * of: an entry is released once the process's call-return stack has unwound
+ * below the depth at which that reservation was taken. A reservation is only
+ * actually freed (holder = -1) when no shallower entry for the same callee
+ * remains held (correct handling of recursive re-entry into the same block). */
+static void exclusive_release_returned(halmat_state_t *state) {
+    halmat_task_t *cur = &state->tasks[state->current_task];
+    while (cur->excl_held_sp > 0 &&
+           cur->excl_held[cur->excl_held_sp - 1].depth > state->call_return_sp) {
+        uint16_t sym = cur->excl_held[--cur->excl_held_sp].sym;
+        bool still_held = false;
+        for (uint8_t i = 0; i < cur->excl_held_sp; i++) {
+            if (cur->excl_held[i].sym == sym) { still_held = true; break; }
+        }
+        if (!still_held && sym < HALMAT_SYT_MAX) state->exclusive_holder[sym] = -1;
     }
 }
 
@@ -10990,6 +11046,29 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                  * one, so the nested call's own XXAR/FCAL/XXND see their
                  * own frame instead of corrupting the outer one. */
                 if (ins->operand_count != 1) { fail(state, "XXST: expected 1 operand"); break; }
+                /* EXCLUSIVE reservation gate (USA003087 Sec. 27.2). If this
+                 * XXST begins a CALL (QUAL_SYT callee) to an EXCLUSIVE
+                 * procedure/function that ANOTHER process currently holds,
+                 * block this process here -- before any io_pending/call-return
+                 * state is set up -- and re-run this same XXST once the
+                 * reservation frees (branched keeps pc here; the task becomes
+                 * READY again via sched_wake_exclusive). Only the current
+                 * holder (recursive re-entry) or a free reservation falls
+                 * through; the actual acquire happens at the matching PCAL/FCAL
+                 * once the call frame is pushed. */
+                if (ins->operands[0].qual == QUAL_SYT) {
+                    uint16_t callee = resolve_call_target(state, ins->operands[0].data);
+                    if (symbol_is_exclusive(state, callee)) {
+                        int holder = state->exclusive_holder[callee];
+                        if (holder != -1 && holder != state->current_task) {
+                            halmat_task_t *cur = &state->tasks[state->current_task];
+                            cur->task_state = TASK_WAITING_EXCLUSIVE;
+                            cur->exclusive_wait_sym = callee;
+                            branched = true; /* leave pc on this XXST; re-run when the reservation frees */
+                            break;
+                        }
+                    }
+                }
                 bool replay = state->io_pending.active && state->io_pending.start_pc == state->pc;
                 if (!replay) {
                     if (state->io_pending.active) {
@@ -12572,6 +12651,12 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->call_return_stack[state->call_return_sp++] = state->pc;
                 state->pc = state->symbol_def_pos[proc] + 1;
                 branched = true;
+                /* Take the EXCLUSIVE reservation on entry (USA003087 Sec. 27.2)
+                 * -- the contending-caller block already happened at this
+                 * call's XXST, so here the reservation is free or already ours
+                 * (recursive re-entry). Released by exclusive_release_returned()
+                 * when this process returns back out. */
+                if (symbol_is_exclusive(state, proc)) exclusive_acquire(state, proc);
                 break;
             }
 
@@ -12639,6 +12724,10 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 state->call_return_stack[state->call_return_sp++] = state->pc;
                 state->pc = state->symbol_def_pos[callee] + 1;
                 branched = true;
+                /* EXCLUSIVE reservation on entry (USA003087 Sec. 27.2) --
+                 * EXCLUSIVE applies to functions as well as procedures; the
+                 * contending-caller block happened at this call's XXST. */
+                if (symbol_is_exclusive(state, callee)) exclusive_acquire(state, callee);
                 break;
             }
 
@@ -13941,6 +14030,25 @@ static void sched_wake_dependents(halmat_state_t *state) {
     }
 }
 
+/* Re-checked every tick (no fixed deadline, same reasoning as
+ * TASK_WAITING_ON/sched_wake_on_events: the holder releases its EXCLUSIVE
+ * reservation at an unpredictable point -- its own CLOSE/RETURN -- not a fixed
+ * time). Any task blocked at a CALL to an EXCLUSIVE procedure/function
+ * (TASK_WAITING_EXCLUSIVE) whose callee's reservation is now free becomes
+ * READY; when next dispatched it re-runs that CALL's own XXST, which acquires
+ * the reservation and proceeds (USA003087 Sec. 27.2; state.h's
+ * TASK_WAITING_EXCLUSIVE comment). */
+static void sched_wake_exclusive(halmat_state_t *state) {
+    for (int i = 0; i < state->task_count; i++) {
+        halmat_task_t *t = &state->tasks[i];
+        if (t->in_use && t->task_state == TASK_WAITING_EXCLUSIVE &&
+            t->exclusive_wait_sym < HALMAT_SYT_MAX &&
+            state->exclusive_holder[t->exclusive_wait_sym] == -1) {
+            t->task_state = TASK_READY;
+        }
+    }
+}
+
 /* If every in-use task is either TERMINATED, TASK_WAITING_ON, or
  * TASK_WAITING (nothing READY right now, but something will eventually
  * wake), fast-forwards state->virtual_time to the earliest pending
@@ -13986,6 +14094,7 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     sched_wake_waiting(state);
     sched_wake_on_events(state);
     sched_wake_dependents(state);
+    sched_wake_exclusive(state);
     if (state->halted) return true; /* sched_wake_dependents just finalized the primal's own deferred CLOSE */
 
     /* Non-preemptive dispatch. USA003087 Sec. 13.1 defines a READY process
@@ -14047,6 +14156,14 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     } else {
         exec_one(state, out);
     }
+
+    /* Release any EXCLUSIVE reservations this process has just returned out of
+     * (its call-return stack unwound below where each was taken) -- see
+     * exclusive_release_returned(). Runs once per executed instruction for the
+     * running task, so a RETURN/CLOSE that exits an exclusive block frees it
+     * immediately, and sched_wake_exclusive() (next tick) hands it to any
+     * waiter. */
+    exclusive_release_returned(state);
 
     state->tasks[next].saved_pc = state->pc;
     /* virtual_time itself is now incremented inside exec_one() (see its
@@ -14436,6 +14553,7 @@ const halmat_instr_t *interp_peek_next(halmat_state_t *state) {
     sched_wake_waiting(state);
     sched_wake_on_events(state);
     sched_wake_dependents(state);
+    sched_wake_exclusive(state);
     if (state->halted) return NULL;
     sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);
@@ -14449,6 +14567,7 @@ int interp_peek_next_task(halmat_state_t *state) {
     sched_wake_waiting(state);
     sched_wake_on_events(state);
     sched_wake_dependents(state);
+    sched_wake_exclusive(state);
     if (state->halted) return -1;
     sched_advance_to_next_wake(state);
     return sched_pick_next(state);
@@ -14464,6 +14583,7 @@ long interp_current_stmt_for_next(halmat_state_t *state) {
     sched_wake_waiting(state);
     sched_wake_on_events(state);
     sched_wake_dependents(state);
+    sched_wake_exclusive(state);
     if (state->halted) return -1;
     sched_advance_to_next_wake(state);
     int next = sched_pick_next(state);

@@ -611,6 +611,10 @@ typedef struct {
 } halmat_error_handler_t;
 
 #define HALMAT_MAX_TASKS 32
+/* Max depth of nested EXCLUSIVE-procedure reservations a single process can hold
+ * at once (recursive/nested exclusive CALLs). Well above any realistic nesting;
+ * a small fixed per-task stack, see halmat_task_t's excl_held. */
+#define HALMAT_MAX_EXCL_HELD 16
 
 typedef enum {
     TASK_READY,
@@ -647,6 +651,19 @@ typedef enum {
                                           * an explicit second value keeps that branch a plain
                                           * exhaustive switch rather than a state+flag combination that
                                           * would need its own separate invariant-checking. */
+    TASK_WAITING_EXCLUSIVE, /* blocked at a CALL to an EXCLUSIVE procedure/function
+                              * (USA003087 Sec. 27.2) that another process currently
+                              * holds. exclusive_wait_sym below names the callee. Like
+                              * TASK_WAITING_ON, re-checked every tick with no fixed
+                              * deadline (the holder releases at an unpredictable point,
+                              * its own CLOSE/RETURN), by interp.c's
+                              * sched_wake_exclusive(): once the callee's lock is free
+                              * this task becomes READY and re-runs the call's own XXST,
+                              * which then acquires the lock and proceeds. The block
+                              * happens BEFORE any call/I-O state is pushed, so the
+                              * shared call-return stack only ever holds the one process
+                              * actually inside the exclusive block -- which is the whole
+                              * point of the RTE serializing access to it. */
     TASK_TERMINATED,
 } halmat_task_state_t;
 
@@ -731,6 +748,17 @@ typedef struct {
                               * (`ON (ORBIT & (ORBIT2 & ORBIT3))`, USA003087 Sec. 24.6 -- 239-STARTUP.hal)
                               * -- re-evaluated live via interp.c's reevaluate_live_bit_operand() every
                               * time this is consulted (sched_wake_on_events()), never read directly. */
+
+    /* EXCLUSIVE procedure/function reservation (USA003087 Sec. 27.2, interp.c's
+     * OP_XXST/OP_PCAL/OP_FCAL and sched_wake_exclusive). exclusive_wait_sym is
+     * the callee this task is blocked on while TASK_WAITING_EXCLUSIVE. excl_held
+     * is the small stack of exclusive locks this task currently holds, each with
+     * the call-return depth at which it was acquired, so the lock is released
+     * exactly when the task returns back out past that depth (interp.c's
+     * exclusive_release_returned()); it nests correctly for recursive re-entry. */
+    uint16_t exclusive_wait_sym;
+    struct { uint16_t sym; uint16_t depth; } excl_held[HALMAT_MAX_EXCL_HELD];
+    uint8_t excl_held_sp;
 
     halmat_schd_repeat_t repeat_kind;
     int32_t repeat_interval; /* ticks; valid iff repeat_kind is EVERY or AFTER. Resolved once, at the
@@ -1659,6 +1687,10 @@ struct halmat_state {
                          * interp_run_burst() and interp_run_signal() (interp.c); orthogonal to
                          * time_scale, which either implementation still honors identically. */
     int *symbol_active_task; /* indexed by SYT symbol: index into tasks[], or -1; for named TERM/CANCEL */
+    int *exclusive_holder;   /* indexed by SYT symbol: index into tasks[] of the process currently holding
+                              * that EXCLUSIVE procedure/function's reservation, or -1 if free (USA003087
+                              * Sec. 27.2). Allocated/initialized to -1 alongside symbol_active_task in
+                              * precompute_subprograms(). */
 
     /* BFNC selector 42/51 (RANDOM/RANDOMG, class-0/BFNC.md): a bit-exact
      * replication of the real AP-101S runtime library's own RUNASM/

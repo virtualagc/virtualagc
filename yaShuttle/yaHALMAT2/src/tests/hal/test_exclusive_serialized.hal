@@ -1,0 +1,27 @@
+C/ EXCLUSIVE procedure mutual exclusion (USA003087 Sec. 27.2): the RTE
+C/ allows only one process to use P at a time.  The primal CALLs P and
+C/ WAITs mid-body (still holding it); the DEPENDENT task B, running during
+C/ that WAIT, tries to CALL P and is BLOCKED until the primal leaves P and
+C/ releases the reservation.  Because B is DEPENDENT, the primal's CLOSE
+C/ waits for it (Sec. 13.3), so B is then granted P and runs it to
+C/ completion.  The two ENTER P/LEAVE P pairs are fully serialized (never
+C/ overlapping) -- and both CALLs return to the right place ("B GOT P"),
+C/ which a non-serialized barge-in would corrupt (shared interpreter call
+C/ stack).  Expected: BEFORE / ENTER P / B TRY P / LEAVE P / PRIMAL DONE /
+C/ ENTER P / LEAVE P / B GOT P.
+ TEXCL2: PROGRAM;
+    P: PROCEDURE EXCLUSIVE;
+       WRITE(6) 'ENTER P';
+       WAIT 1.0;
+       WRITE(6) 'LEAVE P';
+    CLOSE P;
+    B: TASK;
+       WRITE(6) 'B TRY P';
+       CALL P;
+       WRITE(6) 'B GOT P';
+    CLOSE B;
+    WRITE(6) 'BEFORE';
+    SCHEDULE B PRIORITY(80) DEPENDENT;
+    CALL P;
+    WRITE(6) 'PRIMAL DONE';
+ CLOSE TEXCL2;

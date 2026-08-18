@@ -1,0 +1,25 @@
+C/ EXCLUSIVE mutual exclusion, cut-off variant (USA003087 Sec. 27.2 +
+C/ Sec. 13.1/13.3).  Same contention as test_exclusive_serialized, but the
+C/ contending task B is scheduled WITHOUT DEPENDENT.  B tries to CALL the
+C/ EXCLUSIVE P while the primal holds it and is blocked; the primal leaves
+C/ P and then reaches its own CLOSE.  Since B is not DEPENDENT, the primal
+C/ halts the whole program (Sec. 13.1's overriding dependency-on-primal
+C/ rule), cutting B off before it is ever granted P -- so P's body runs
+C/ exactly once (the primal's use), never concurrently.  Expected:
+C/ BEFORE / IN P / B CALLS / OUT P / DONE (B's own second "IN P" never
+C/ prints).
+ TEXCL: PROGRAM;
+    P: PROCEDURE EXCLUSIVE;
+       WRITE(6) 'IN P';
+       WAIT 1.0;
+       WRITE(6) 'OUT P';
+    CLOSE P;
+    B: TASK;
+       WRITE(6) 'B CALLS';
+       CALL P;
+    CLOSE B;
+    WRITE(6) 'BEFORE';
+    SCHEDULE B PRIORITY(80);
+    CALL P;
+    WRITE(6) 'DONE';
+ CLOSE TEXCL;

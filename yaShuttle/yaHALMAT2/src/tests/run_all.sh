@@ -1148,6 +1148,20 @@ run ./run_local_fixture.sh countup2 "$(printf '          1\n          2\n       
 run ./run_local_fixture.sh cancel_dormant "$(printf 'BEFORE\nDONE')" --time-scale 1000000
 run ./run_local_fixture.sh self_cancel "$(printf 'BEFORE\nIN A\nAFTER CANCEL\nDONE')" --time-scale 1000000
 run ./run_local_fixture.sh cancel_named_list "$(printf 'BEFORE\nDONE')" --time-scale 1000000
+# EXCLUSIVE procedures (class-0 flag 0x00080000, USA003087 Sec. 27.2): the
+# RTE serializes access -- only one process inside the block at a time. A
+# contending caller is blocked at the CALL's XXST, before any call/I-O state
+# is pushed, so the shared interpreter call stack only ever holds the one
+# process actually inside (a plain non-EXCLUSIVE proc used concurrently is an
+# invalid category-1 program per Sec. 27.1 and isn't guarded). serialized: a
+# DEPENDENT contender is blocked, then granted the proc after the holder
+# releases -- both ENTER/LEAVE pairs non-overlapping, both CALLs return
+# correctly (a barge-in would corrupt the shared stack). cutoff: a non-
+# DEPENDENT contender is blocked and then cut off at the primal's halt
+# (Sec. 13.1), so the proc body runs exactly once. Cross-checked against
+# yaGPC2's traced real HAL/S-FC (SVC #15/17 reserve/release before the body).
+run ./run_local_fixture.sh exclusive_serialized "$(printf 'BEFORE\nENTER P\nB TRY P\nLEAVE P\nPRIMAL DONE\nENTER P\nLEAVE P\nB GOT P')" --time-scale 1000000
+run ./run_local_fixture.sh exclusive_cutoff "$(printf 'BEFORE\nIN P\nB CALLS\nOUT P\nDONE')" --time-scale 1000000
 
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale
