@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     gpc.gpcID = 1;
     gpc.emulator = GPC_EMULATOR_HALMAT;
 
-    if (!yaHALMAT2_ops.initializer(&gpc, argv[1], NULL, NULL, NULL, capture_output, provide_input, &ctx)) {
+    if (!yaHALMAT2_ops.initializer(&gpc, argv[1], NULL, 0.0, NULL, NULL, capture_output, provide_input, &ctx)) { /* startEpochSeconds=0.0: deterministic epoch anchor for this test */
         fprintf(stderr, "FAIL: initializer failed\n");
         return 1;
     }

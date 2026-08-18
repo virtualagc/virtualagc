@@ -193,8 +193,8 @@ typedef struct {
  * as a known, deliberate scope gap rather than silently left
  * unmentioned. */
 static bool yaHALMAT2_initializer(GpcState *gpcState, const char *programPath, const char *symbolsPath,
-                                   GpcServicerFn servicer, void *servicerCtx, GpcOutputFn output, GpcInputFn input,
-                                   void *ioCtx) {
+                                   double startEpochSeconds, GpcServicerFn servicer, void *servicerCtx,
+                                   GpcOutputFn output, GpcInputFn input, void *ioCtx) {
     (void)symbolsPath;
     char errbuf[512];
     yaHALMAT2_instance_t *inst = malloc(sizeof(*inst));
@@ -270,6 +270,20 @@ static bool yaHALMAT2_initializer(GpcState *gpcState, const char *programPath, c
     }
 
     interp_init(&inst->state, &inst->prog, inst->have_literals ? &inst->literals : NULL, 5); /* num_blanks=5, matching main.c's own CLI default */
+    /* DATE()/CLOCKTIME() mission-clock anchor (yaGpcIntegration.h's
+     * GpcInitializerFn startEpochSeconds / GpcState.startEpochSeconds):
+     * the embedding simulator -- not the engine -- decides whether this
+     * instance's virtual clock starts at real host time or a caller-chosen
+     * moment, and supplies it here as an explicit per-instance constructor
+     * argument rather than through interp_set_wallclock_override's process
+     * global (which the CLI main.c still uses for its own --start-time
+     * policy). Set it directly on this instance's state, overriding whatever
+     * that global happened to leave interp_init with, so two GPC instances in
+     * one process can run under different wall-clock offsets. state->
+     * wallclock_anchor is integer seconds (yaHALMAT2's DATE/CLOCKTIME are
+     * second-granular); the sub-second part of startEpochSeconds is dropped. */
+    inst->state.wallclock_anchor = (int64_t)startEpochSeconds;
+    gpcState->startEpochSeconds = startEpochSeconds;
     if (inst->have_symtab) interp_set_symtab(&inst->state, &inst->symtab);
     inst->state.output_fn = output;
     inst->state.output_ctx = ioCtx;

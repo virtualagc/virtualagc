@@ -70,7 +70,7 @@ int main(void) {
      * WRITE(6) output shows up on this example's stdout with no further
      * setup below. */
     GpcState state = {0};
-    if (!Ops->initializer(&state, FCM_PATH, SYMBOLS_PATH, NULL, NULL, NULL, NULL, NULL)) {
+    if (!Ops->initializer(&state, FCM_PATH, SYMBOLS_PATH, 0.0, NULL, NULL, NULL, NULL, NULL)) { /* startEpochSeconds=0.0: deterministic epoch anchor for this demo */
         fprintf(stderr, "Failed to initialize from %s\n", FCM_PATH);
         return 1;
     }
