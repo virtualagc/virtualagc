@@ -89,7 +89,7 @@ run ./run_local_fixture.sh multi_assign_mixed " 1.2720000E+02             127"
 run ./run_fixture.sh proc "$(derive_expected proc)"
 run ./run_fixture.sh array ""
 run ./run_fixture.sh matrix ""
-run ./run_local_fixture.sh sched_high "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')"
+run ./run_local_fixture.sh sched_high "$(printf 'BEFORE SCHEDULE\nAFTER SCHEDULE\nWORKER RUNNING')"
 # WORKER is DEPENDENT, so per USA003087 Sec. 13.3 (see class-0/SCHD.md's
 # "Waiting For Dependents At CLOSE" section, added in a later session) the
 # primal doesn't halt at its own CLOSE while WORKER is still active -- it
@@ -1088,7 +1088,7 @@ run ./run_raf_fixture.sh file 8 "$(printf '         42\n 3.5000000E+00\n        
 # output with and without --time-scale).
 run ./run_local_fixture.sh sched_at "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')" --time-scale 1000000
 run ./run_local_fixture.sh sched_in "$(printf 'BEFORE SCHEDULE\nWORKER RUNNING\nAFTER SCHEDULE')" --time-scale 1000000
-run ./run_local_fixture.sh sched_on "$(printf 'BEFORE SCHEDULE\nBEFORE SIGNAL\nWORKER RUNNING\nAFTER SIGNAL')"
+run ./run_local_fixture.sh sched_on "$(printf 'BEFORE SCHEDULE\nBEFORE SIGNAL\nAFTER SIGNAL')"
 run ./run_local_fixture.sh sched_every "N=               5" --time-scale 1000000
 run ./run_local_fixture.sh sched_after "N=               4" --time-scale 1000000
 run ./run_local_fixture.sh sched_while "N=               1" --time-scale 1000000
@@ -1443,7 +1443,7 @@ run ./run_local_fixture.sh bit_array_dsub "$(printf ' 9.9500000E+03     1     1 
 # test_sched_low.hal), then UPDATE PRIORITY WORKER TO 90 raises it above
 # the primal's -- the very next scheduler tick switches to WORKER,
 # confirming the write actually reaches the field sched_pick_next() reads.
-run ./run_local_fixture.sh prio "$(printf 'BEFORE SCHEDULE\nBEFORE UPDATE\nWORKER RUNNING\nAFTER UPDATE')"
+run ./run_local_fixture.sh prio "$(printf 'BEFORE SCHEDULE\nBEFORE UPDATE\nAFTER UPDATE\nWORKER RUNNING')"
 # Same sweep: WAIT (class-0/WAIT.md) only had its interval form (tag=1)
 # implemented; WAIT UNTIL (tag=2) and WAIT FOR DEPENDENT (tag=0, no
 # operands) both failed loudly despite WAIT.md's own operand-word format
@@ -2011,8 +2011,8 @@ run ./run_local_fixture.sh tsub_variable_index "$(printf '         11\n         
 # test_sched_until_compound.hal (BAND as a STOPPING clause -- a REPEAT
 # EVERY cyclic task keeps rearming while false, stops once true: exactly
 # 2 cycles, not more), test_wait_for_compound.hal (WAIT FOR with BAND).
-run ./run_local_fixture.sh sched_on_compound "$(printf 'BEFORE ANY SIGNAL\nAFTER E1\nAFTER E2\nWORKER STARTED\nAFTER E3')"
-run ./run_local_fixture.sh sched_on_compound_or "$(printf 'BEFORE ANY SIGNAL\nWORKER STARTED\nAFTER E2')"
+run ./run_local_fixture.sh sched_on_compound "$(printf 'BEFORE ANY SIGNAL\nAFTER E1\nAFTER E2\nWORKER STARTED\nAFTER E3')" --time-scale 1000000
+run ./run_local_fixture.sh sched_on_compound_or "$(printf 'BEFORE ANY SIGNAL\nWORKER STARTED\nAFTER E2')" --time-scale 1000000
 run ./run_local_fixture.sh sched_until_compound "$(printf 'CYCLE               1\nCYCLE               2\nDONE, N=               2')"
 run ./run_local_fixture.sh wait_for_compound "$(printf 'SETTER: E1 SIGNALED\nSETTER: E2 SIGNALED\nPRIMAL RESUMED')"
 

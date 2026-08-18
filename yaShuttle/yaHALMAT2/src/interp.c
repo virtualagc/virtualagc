@@ -13929,9 +13929,39 @@ bool interp_step(halmat_state_t *state, FILE *out) {
     sched_wake_on_events(state);
     sched_wake_dependents(state);
     if (state->halted) return true; /* sched_wake_dependents just finalized the primal's own deferred CLOSE */
-    sched_advance_to_next_wake(state);
-    int next = sched_pick_next(state);
-    if (next == -1) return true; /* nothing left ready (and nothing left to ever wake) */
+
+    /* Non-preemptive dispatch. USA003087 Sec. 13.1 defines a READY process
+     * as one "available for execution, but higher priority processes in
+     * execution are currently barring it" -- "barring" implies READY
+     * persists while something else runs, i.e. dispatch happens at discrete
+     * swap points rather than by continuous preemption; SCHEDULE's
+     * "available for execution immediately" (Sec. 13.4) then means the task
+     * ENTERS READY immediately (vs. the AT/IN/ON forms, which enter
+     * WAITING), not that it seizes the CPU. Consistent with yaGPC2's traced
+     * build (its schedule SVC only marks the task ready and never
+     * dispatches). Note: the spec doesn't state exactly when the RTE re-
+     * evaluates READY->EXECUTING, so this isn't an airtight proof against
+     * asynchronous preemption -- it's the best-supported reading and the
+     * one both emulators now share (WaitForBug cross-check with yaGPC2).
+     *
+     * So a bare SCHEDULE never switches away from the running process,
+     * whatever the new task's priority. The current process keeps running
+     * until IT reaches a swap point of its own (WAIT / WAIT FOR / WAIT FOR
+     * DEPENDENT / CLOSE / TERMINATE -- it stops being READY); only then is
+     * the highest-priority ready task dispatched. Priority governs *which
+     * ready task runs next at a dispatch*, never a preemption of an
+     * already-running one. (Replaced an earlier pick-highest-every-step
+     * model that pre-empted on a higher-priority SCHEDULE, which the old
+     * sched_high fixture had locked in -- now corrected.) */
+    int next;
+    if (state->tasks[state->current_task].in_use &&
+        state->tasks[state->current_task].task_state == TASK_READY) {
+        next = state->current_task;
+    } else {
+        sched_advance_to_next_wake(state);
+        next = sched_pick_next(state);
+        if (next == -1) return true; /* nothing left ready (and nothing left to ever wake) */
+    }
 
     state->current_task = next;
     state->pc = state->tasks[next].saved_pc;

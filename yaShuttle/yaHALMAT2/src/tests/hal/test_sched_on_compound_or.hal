@@ -2,6 +2,12 @@ C/ Isolates 239-STARTUP.hal's `SCHEDULE ... ON (ORBIT | (ORBIT2 | ORBIT3))`
 C/ construct (a compound BOR event-expression) -- proves WORKER starts as
 C/ soon as ANY ONE of the three events becomes true, not needing all of
 C/ them (the OR-vs-AND counterpart of test_sched_on_compound.hal).
+C/
+C/ Scheduling is non-pre-emptive (USA003087 Sec. 13.1), so the WAIT after
+C/ the SIGNAL is what yields to the scheduler and lets the now-armed WORKER
+C/ dispatch -- as the real 239-STARTUP context provides a yield.  A single
+C/ SIGNAL satisfies the OR, so WORKER runs during that WAIT, before the
+C/ following WRITE.
 
   TSCHDOR: PROGRAM;
      DECLARE E1 EVENT LATCHED, E2 EVENT LATCHED, E3 EVENT LATCHED;
@@ -14,6 +20,6 @@ C/ them (the OR-vs-AND counterpart of test_sched_on_compound.hal).
      SCHEDULE WORKER ON (E1 | (E2 | E3)) PRIORITY(70);
      WRITE(6) 'BEFORE ANY SIGNAL';
      SIGNAL E2;
+     WAIT(5);
      WRITE(6) 'AFTER E2';
-Y %SVCI(0);
   CLOSE TSCHDOR;

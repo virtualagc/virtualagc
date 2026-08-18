@@ -3,6 +3,13 @@ C/ construct (a compound BAND event-expression) -- proves WORKER only
 C/ starts once ALL THREE events are true, not as soon as the first one
 C/ is (verified by SIGNALing them one at a time, with a WRITE after each,
 C/ and WORKER itself WRITEing once it actually starts).
+C/
+C/ Scheduling is non-pre-emptive (USA003087 Sec. 13.1: a READY process is
+C/ "barred" while another runs), so a WAIT after each SIGNAL is what yields
+C/ to the scheduler and lets a now-armed WORKER actually dispatch -- exactly
+C/ as the real 239-STARTUP context provides a yield.  If the compound event
+C/ is not yet satisfied the WAIT dispatches nothing; when E3 completes the
+C/ AND, WORKER runs during that WAIT, before the following WRITE.
 
   TSCHDAND: PROGRAM;
      DECLARE E1 EVENT LATCHED, E2 EVENT LATCHED, E3 EVENT LATCHED;
@@ -15,10 +22,12 @@ C/ and WORKER itself WRITEing once it actually starts).
      SCHEDULE WORKER ON (E1 & (E2 & E3)) PRIORITY(70);
      WRITE(6) 'BEFORE ANY SIGNAL';
      SIGNAL E1;
+     WAIT(5);
      WRITE(6) 'AFTER E1';
      SIGNAL E2;
+     WAIT(5);
      WRITE(6) 'AFTER E2';
      SIGNAL E3;
+     WAIT(5);
      WRITE(6) 'AFTER E3';
-Y %SVCI(0);
   CLOSE TSCHDAND;
