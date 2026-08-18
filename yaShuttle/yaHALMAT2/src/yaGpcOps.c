@@ -162,16 +162,29 @@ typedef struct {
  * do for the CLI, rather than failing.
  *
  * servicer/servicerCtx: stored on the instance but not wired to anything
- * yet. yaHALMAT2 has no HAL/S-level construct for vehicle discrete/analog
- * I/O at all (confirmed by exhaustive search across interp.c, state.h, and
- * every reengineered-documentation/ doc including STATUS.md -- a plain
- * absence, not a documented gap) -- READ/WRITE/RDAL are ordinary channel
- * I/O, out of scope for the servicer. So there is currently no call site
- * to route these through, the same open question flagged since the
- * original relay. Accepting and storing them now (rather than ignoring
- * outright, the way symbolsPath is) costs nothing and means a future
- * HAL/S I/O construct just needs a call site added here, not a signature
- * change.
+ * yet. There is no *dedicated* HAL/S-level vehicle discrete/analog I/O
+ * construct (READ/WRITE/RDAL are ordinary channel I/O -- RDAL specifically
+ * is fixed-width card-image CHARACTER input, USA003087 Sec. 22.1, wired to
+ * input_fn like READ, NOT peripheral data). But the general supervisor-call
+ * escape IS present in HALMAT and would be the natural servicer dispatch
+ * point: a HAL/S `%SVC(n)` / `%SVCI(n)` (USA003087 Sec. 31.1) compiles to
+ * the PMHD/PMAR/PMIN `%macro`-invocation bracket, whose HALMAT preserves
+ * both the macro identity (PMHD/PMIN's own tag field -- 2=%SVC, 5=%SVCI)
+ * and the argument words (one PMAR each). interp.c currently fail_cat()s
+ * on PMHD ("out of scope") rather than dispatching -- so this is a
+ * recognized call site that HARD-FAILS, not a plain absence (an earlier
+ * version of this comment overstated it as the latter). Routing
+ * PMHD/PMAR/PMIN(%SVC) to servicer(state, svcNumber, args) is feasible in
+ * principle -- the routable information is in the stream -- but is
+ * unimplemented by CHOICE (the project boundary "interpret HALMAT, never
+ * AP-101S object code"): what a given SVC number MEANS is FCOS/environment-
+ * defined, so a servicer would supply that, and whether vehicle bus I/O
+ * specifically travels through %SVC (vs another mechanism) is unconfirmed
+ * here. A %SVC with a non-literal buffer argument would carry a SYT/VAC
+ * reference in its PMAR (untested -- PMAR.md's own open question), so even
+ * word-array buffer passing may be routable, but that is unverified.
+ * Accepting and storing servicer now costs nothing and means wiring it up
+ * later is a call site in the PMHD handler, not a signature change.
  *
  * output/input/ioCtx: wired directly into state->output_fn/input_fn/
  * output_ctx/input_ctx (state.h) -- see interp.c's device_emit_line()
