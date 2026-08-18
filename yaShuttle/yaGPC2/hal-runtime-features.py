@@ -742,18 +742,28 @@ F('Built-in: Time/Random Function', 'CLOCKTIME()', 'Returns a double-precision S
   '"datetimefn" case (also confirms real virtual-time progression across a WAIT and a midnight rollover, '
   'checked by hand during development); byte-diffed against yaHALMAT2 -- matches exactly.')
 F('Built-in: Time/Random Function', 'RANDOM()', 'Returns a random number, rectangular distribution over [0,1).',
-  'USA003087 Appendix B', 'not_implemented',
-  "problems.md §2.6: no PRNG/seed mechanism exists in yaGPC2; non-comparable by nature even if "
-  "implemented. RECHECKED at the end of the implementation-order pass (item #12): confirmed via "
-  "IBM-76-SS-1110's own 4.2.4 'HAL/S Functions' section that RANDOM/RANDOMG involve no SVC/RTE call at "
-  "all (unlike RUNTIME/CLOCKTIME/DATE/NEXTIME/PRIO/ERRGRP/ERRNUM, all documented there with real SVC "
-  "#22/#23 parameter lists) -- these compile to a plain math-library call, the same category as "
-  "SIN/COS/SQRT (Appendix C's own 'group 4' HAL/S-FC library). A real gap, but genuinely out of scope "
-  "for this pass specifically: it needs a C-level PRNG implementation, not a scheduler/SVC substitution "
-  "-- a different subsystem's work, not schedule.c/halucp.c's.",
-  'untested')
+  'USA003087 Appendix B', 'implemented_via_cpu',
+  "CORRECTED (2026-08-18) -- the item #12 recheck's own 'needs a C-level PRNG implementation' "
+  "conclusion was wrong, reached without testing actual execution. RANDOM/RANDOMG do involve no "
+  "SVC, exactly as that recheck found (confirmed via IBM-76-SS-1110 4.2.4) -- but that's precisely "
+  "why zero yaGPC2-specific code is needed: like SIN/COS/SQRT, this compiles to a call into a real "
+  "linked RUNASM/RANDOM.obj library routine (confirmed present in a real lnk101 link: #LRANDOM, "
+  "RANDOM, RANDG all resolve), which just needs a correct CPU emulator to execute, nothing more. "
+  "problems.md 2.6 (gpc/yaGPC, established 2026-07-28, apparently not cross-referenced by the "
+  "item #12 recheck despite being in the same file) already found and documented the exact "
+  "algorithm: a RANDU-family LCG (X(n+1)=65539*X(n) mod 2^32) seeded from a fixed compiled-in "
+  "constant (SEED=1435) -- fully deterministic, no wall-clock/hardware entropy anywhere. "
+  "Re-confirmed directly for yaGPC2 (2026-08-18): a real compiled RANDOM() call executes cleanly "
+  "with no unhandled-SVC trap, byte-identical across repeated runs and byte-identical to "
+  "yaHALMAT2's own output (which independently adopted the same reference algorithm per 2.6). Both "
+  "real 'Programming in HAL/S' sample programs using RANDOM() run correctly end-to-end: "
+  "071-DARTBOARD_APPROXIMATION.hal's 10,000-sample Monte Carlo pi estimate gives 3.1507998 "
+  "(byte-identical both tools), 134-ROLL.hal's dice-roll simulation gives identical roll sequences.",
+  'tested_dedicated', "test/fixtures/randomsequence.hal, dartboard.hal (071-DARTBOARD_APPROXIMATION.hal), "
+  "roll.hal (134-ROLL.hal) -- all byte-diffed against yaHALMAT2 via test_random.sh. See problems.md 7.20.")
 F('Built-in: Time/Random Function', 'RANDOMG()', 'Returns a random number, Gaussian distribution mean 0 variance 1.',
-  'USA003087 Appendix B', 'not_implemented', 'Same as RANDOM() above -- see its own impl_notes.', 'untested')
+  'USA003087 Appendix B', 'implemented_via_cpu', 'Same as RANDOM() above -- see its own impl_notes; the same RUNASM/RANDOM.obj routine (RANDG entry point) implements both.',
+  'tested_dedicated', "test/fixtures/randomsequence.hal -- byte-diffed against yaHALMAT2 via test_random.sh. See problems.md 7.20.")
 
 # --- Built-in: Character functions -----------------------------------------------------
 CHAR_FNS = [('INDEX', 'first-index of a substring, or 0'), ('LENGTH', 'current dynamic length'),

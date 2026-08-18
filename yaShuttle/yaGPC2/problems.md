@@ -3990,6 +3990,61 @@ under both `--pacing` modes (plain `run_case`, no `SEND ERROR` involved
 here unlike §7.18's fixtures). `hal-runtime-features.db` row 136 updated
 from `unresolved` to `implemented_via_cpu`/`tested_dedicated`.
 
+### 7.20 `RANDOM()`/`RANDOMG()` — already fully implemented and correct, a genuine error in this session's own earlier research corrected
+
+Requested explicitly by the user (used in two real "Programming in
+HAL/S" sample programs, `071-DARTBOARD_APPROXIMATION.hal` and
+`134-ROLL.hal`), overriding this session's own earlier "out of scope"
+categorization (§7.13/item #12: "needs a C-level PRNG implementation...
+a different subsystem's work"). That categorization turns out to have
+been a genuine research error, not a real scope boundary — caught only
+because the user asked for the concrete feature rather than accepting
+the earlier assessment.
+
+**The error, precisely:** item #12's own research correctly established
+that `RANDOM`/`RANDOMG` involve no `SVC` at all (confirmed via
+`IBM-76-SS-1110` 4.2.4), unlike every other built-in this whole session
+substituted for. It then concluded this meant "needs a C-level PRNG
+implementation" — but a missing `SVC` is exactly the signature of a
+*plain math-library call* (the same category as `SIN`/`COS`/`SQRT`),
+not a runtime-service gap: no `SVC` means no OS/RTE involvement is
+expected at all, the call is pure CPU-executed library code. The
+correct conclusion was the opposite of what got written down. Worse,
+`problems.md` §2.6 (this same file, written 2026-07-28, well before
+item #12's own 2026-08-17 recheck) had *already* established the exact
+algorithm and confirmed it deterministic for `gpc`/`yaGPC` — apparently
+never cross-referenced.
+
+**Directly tested rather than re-reasoned about:** compiled a minimal
+`X = RANDOM;` program via real `HALSFC`/`lnk101` and confirmed `RANDOM`
+`RANDG` (the real `RUNASM/RANDOM.obj` library routine) link successfully
+and execute cleanly under `yaGPC2` — no unhandled-`SVC` trap, a
+plausible `[0,1)` value, byte-identical across repeated runs (confirming
+§2.6's own "fixed compiled-in `SEED=1435`, no wall-clock entropy"
+finding holds), and byte-identical to `yaHALMAT2`'s own output (which
+independently adopted the same reference algorithm per §2.6's own
+handoff). Extended to a 5-call mixed `RANDOM`/`RANDOMG` sequence — still
+byte-identical both tools. Then ran both real "Programming in HAL/S"
+sample programs end-to-end: `071-DARTBOARD_APPROXIMATION.hal` (a
+10,000-iteration Monte Carlo `pi` estimate, ~400K CPU steps, computing
+with drawn values — `X**2+Y**2` — before drawing again, exactly the
+case §2.6's own "F1-chaining disrupted by other float ops" caveat
+flagged as a *`yaHALMAT2`-only* limitation, not `yaGPC2`'s, since
+`yaGPC2` "gets this right for free" via real register-level execution)
+gives `3.1507998` (a plausible `pi` estimate), byte-identical between
+both tools; `134-ROLL.hal` (a dice-roll simulator, `5 RANDOM + 1`
+truncated to `INTEGER`) gives an identical roll sequence on both.
+
+Three new fixtures — `randomsequence.hal` (a minimal, fast, isolated
+5-call sequence), plus `071-DARTBOARD_APPROXIMATION.hal`/`134-ROLL.hal`
+themselves, referenced directly from the `Source Code/Programming in
+HAL-S/` tree rather than copied (matching `hello.fcm`'s own precedent)
+— exercised by a new `test/test_random.sh` (no `TASK`/`SCHEDULE`
+involved in any of these, so no `--pacing`/`--time-scale` matrix needed,
+unlike `test_scheduler.sh`), wired into `make test`.
+`hal-runtime-features.db` rows 98/99 updated from `not_implemented` to
+`implemented_via_cpu`/`tested_dedicated`.
+
 ---
 
 ## Methodology and caveats

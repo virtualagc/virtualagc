@@ -274,6 +274,23 @@
 #                          relative addressing against yaGPC2's real
 #                          per-task stacks). A real yaHALMAT2 bug found
 #                          along the way -- see problems.md 7.19.
+#   randomsequence.fcm     <- randomsequence.hal (checked in alongside
+#                          this script) -- RANDOM()/RANDOMG(), confirmed
+#                          implemented_via_cpu with zero new code (a
+#                          real linked RUNASM/RANDOM.obj library
+#                          routine, a deterministic RANDU-family LCG
+#                          seeded from a fixed compiled-in constant --
+#                          already established in problems.md 2.6 for
+#                          gpc/yaGPC, re-confirmed here to hold for
+#                          yaGPC2 too). dartboard.fcm <-
+#                          "Programming in HAL/S"'s own
+#                          071-DARTBOARD_APPROXIMATION.hal, roll.fcm <-
+#                          its own 134-ROLL.hal (both referenced
+#                          directly from the Source Code tree, not
+#                          copied, matching hello.fcm's own precedent)
+#                          -- the two real textbook sample programs
+#                          this feature exists to support. See
+#                          problems.md 7.20.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -322,6 +339,9 @@ OFFERROR_HAL="$(dirname "$0")/offerror.hal"
 ERRORPERTASK_HAL="$(dirname "$0")/errorpertask.hal"
 ERRORDYNSCOPE_HAL="$(dirname "$0")/errordynscope.hal"
 REENTRANTAUTOMATIC_HAL="$(dirname "$0")/reentrantautomatic.hal"
+RANDOMSEQUENCE_HAL="$(dirname "$0")/randomsequence.hal"
+DARTBOARD_HAL="$HAL_SRC_DIR/Source Code/Programming in HAL-S/071-DARTBOARD_APPROXIMATION.hal"
+ROLL_HAL="$HAL_SRC_DIR/Source Code/Programming in HAL-S/134-ROLL.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -383,5 +403,8 @@ build "$OFFERROR_HAL" OFFERR2 offerror
 build "$ERRORPERTASK_HAL" ERRPTASK errorpertask
 build "$ERRORDYNSCOPE_HAL" ERRDYNS errordynscope
 build "$REENTRANTAUTOMATIC_HAL" REENT1 reentrantautomatic
+build "$RANDOMSEQUENCE_HAL" RANDSEQ randomsequence
+build "$DARTBOARD_HAL" DARTBRD dartboard
+build "$ROLL_HAL" TROLL roll
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm, randomsequence.fcm, dartboard.fcm, roll.fcm (+ -lnk101.json)"
