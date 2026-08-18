@@ -251,3 +251,19 @@ document's planning stages, and it is already in the code as
   show visible content, not just accept the packet. Still the user's own
   check to make (GUI, not visually inspectable from here). Full existing
   suite stays green throughout.
+
+### [2026-08-19] Target: problems.md
+- `MEDS.sh` itself turned out blocked on missing `npm` deps (`jquery`,
+  `three` -- declared in `nsts-sim-gpc`'s `package.json` but never
+  actually installed; `SETUP.sh`'s own `npm install` step apparently
+  never ran to completion there). Fixed with the user's explicit go-
+  ahead (`cd ~/donschmidt/nsts-sim-gpc && npm install`, external repo,
+  git status clean before and after -- only `node_modules` changed).
+  `MEDS.sh crt1 idp1` then built and launched cleanly. **The user ran
+  the `--bce-network`/`bcenet_dfb_relay.fcm` live test against it and
+  confirmed real, correct-looking display output** -- the actual,
+  final end-to-end validation of the whole bridge (CPU->MSC->BCE6
+  activation, `#CMDI`/`#TDLI`, `bcenet_framer`/`bcenet_transport`, real
+  UDP multicast, all the way to `nsts-sim-gpc`'s real MEDS/IDP renderer)
+  that nothing on this side could confirm alone. Closes out the
+  `--bce-network` work.
