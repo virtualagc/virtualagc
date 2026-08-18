@@ -13768,16 +13768,21 @@ static void exec_one(halmat_state_t *state, FILE *out) {
             }
 
             case OP_SGNL: {
-                /* SIGNAL statement (class-0/SGNL.md): makes an EVENT
-                 * data item transiently TRUE. Modeled as a direct BIT
-                 * write to the target's SYT entry (bit_value=1) -- the
-                 * "transient" (auto-reset) aspect and WAIT-ON-EVENT
-                 * consumption aren't modeled, since this interpreter has
-                 * no EVENT-aware WAIT form yet (only WAIT's interval
-                 * form is implemented -- see OP_WAIT above); no fixture
-                 * currently observes the target afterward, so this is a
-                 * safe, honest partial implementation rather than a
-                 * silent no-op. */
+                /* SIGNAL/SET/RESET statement (class-0/SGNL.md): all three
+                 * event-control statements compile to this one opcode,
+                 * distinguished by the opcode-line trailing tag -- 0=SIGNAL,
+                 * 1=SET, 2=RESET (the same event-action encoding ERON's `AND
+                 * SET/RESET/SIGNAL` clause uses, halmat_error_event_action_t).
+                 * Modeled as a direct BIT write to the target EVENT's SYT
+                 * entry: SIGNAL and SET make it TRUE (bit_value=1), RESET makes
+                 * it FALSE (bit_value=0). This RESET handling is what lets a
+                 * `REPEAT ... WHILE <event>` cyclic task actually see its event
+                 * go false and cancel (USA003087 Sec. 24.5) -- previously the
+                 * tag was ignored and every form set the event TRUE, so RESET
+                 * silently did nothing. The SIGNAL-vs-SET distinction (transient
+                 * auto-reset vs. latched-persistent) still isn't modeled -- both
+                 * just set TRUE -- but no fixture depends on that nuance, whereas
+                 * RESET's clear IS observable. */
                 if (ins->operand_count != 1 || ins->operands[0].qual != QUAL_SYT) {
                     fail(state, "SGNL: expected one SYT operand");
                     break;
@@ -13786,7 +13791,7 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 if (sym >= HALMAT_SYT_MAX) { fail_cat(state, HALMAT_HALT_REASON_BOUNDS, "SGNL: SYT index out of range"); break; }
                 halmat_syt_entry_t *e = &state->syt[sym];
                 e->type = SYT_TYPE_BIT;
-                e->bit_value = 1;
+                e->bit_value = (ins->tag == 2) ? 0 : 1; /* 2=RESET -> FALSE; 0=SIGNAL/1=SET -> TRUE */
                 break;
             }
 

@@ -1198,6 +1198,14 @@ run ./run_local_fixture.sh repeat_after_until "$(printf 'TICK\nDONE')" --time-sc
 # CLOSE would run that cycle -> N=4). Event stops have no deadline, so this is
 # re-checked every tick (sched_cancel_dormant_on_events), not fast-forwarded to.
 run ./run_local_fixture.sh sched_until_event_between "N=               3" --time-scale 1000000
+# REPEAT WHILE <event> cancelled by RESETting the event FALSE mid-run: WORKER
+# cycles EVERY 1.0 while EV1 is TRUE (SET at start); a RESETTER task RESETs EV1
+# at t=2.5, in WORKER's dormant gap [2,3], so WORKER cancels immediately and
+# runs 3 cycles (t=0,1,2) -> N=3. Exercises the SET/RESET event statements: all
+# of SIGNAL/SET/RESET compile to SGNL distinguished by tag (0/1/2); RESET (tag 2)
+# clears the event to FALSE, which is what lets a WHILE cyclic task see it go
+# false and cancel (previously the tag was ignored and RESET wrongly set TRUE).
+run ./run_local_fixture.sh sched_while_reset "N=               3" --time-scale 1000000
 
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale

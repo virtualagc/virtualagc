@@ -1,0 +1,18 @@
+C/ REPEAT WHILE <event> cancelled when the event is RESET FALSE mid-run -- see
+C/ run_all.sh. Exercises SET/RESET event statements (SGNL tags 1/2).
+ TPW: PROGRAM;
+    DECLARE EV1 EVENT LATCHED;
+    DECLARE INTEGER, N INITIAL(0);
+    WORKER: TASK;
+       N = N + 1;
+    CLOSE WORKER;
+    RESETTER: TASK;
+       WAIT(2.5);
+       RESET EV1;
+    CLOSE RESETTER;
+    SET EV1;
+    SCHEDULE WORKER PRIORITY(60), REPEAT EVERY 1.0 WHILE EV1;
+    SCHEDULE RESETTER PRIORITY(70);
+    WAIT(10);
+    WRITE(6) 'N=', N;
+ CLOSE TPW;
