@@ -6,7 +6,13 @@
 #include <string.h>
 
 #define FRAMER_MAX_BUS_ID 24
-#define FRAMER_MAX_WORDS 64 /* generous headroom over any real BCE long-form transfer */
+/* Was 64 ("generous headroom over any real BCE long-form transfer") --
+ * wrong, confirmed empirically: a real DK-bus DATA FILL message (op=1,
+ * see nsts-sim-gpc's meds/idp.coffee recvDK) relays a whole display
+ * frame buffer, hundreds of words (a real TEST-9011-GPC_MEMORY.dfb
+ * fixture there is 541 words). 1024 comfortably covers that with room
+ * to spare. */
+#define FRAMER_MAX_WORDS 1024
 
 /* All real BCE-numbered buses (1-23 in the port table -- see
  * bcenet_transport.c) correspond to a real Space Shuttle 1553B-like bus

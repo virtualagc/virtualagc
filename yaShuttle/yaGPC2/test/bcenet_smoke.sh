@@ -25,6 +25,16 @@
 #      sender within one process's lifetime; the transport layer is
 #      what actually needed proving, and the framer's own receive-side
 #      code is a thin, already-reviewed wrapper around it).
+#   3. A real, full-sized message: fixtures/bcenet_dfb_relay.fcm relays
+#      nsts-sim-gpc's own data/TEST-9011-GPC_MEMORY.dfb test fixture as
+#      a real DK-bus op=1 ("DATA FILL") message (542 words, not one
+#      arbitrary word) -- confirms the framer's buffering/flush logic
+#      and #TDLI long-transmit handling survive a real-sized transfer
+#      intact, matching meds/idp.coffee's recvDK exactly. This is the
+#      shape a live MEDS/IDP instance needs to actually show something
+#      on screen -- see this repo's own CLAUDE_LOG.md for how to try
+#      that (requires a live MEDS.sh Electron session, GUI-only, not
+#      checkable from here).
 set -u
 cd "$(dirname "$0")"
 
@@ -93,5 +103,50 @@ setTimeout(() => process.exit(0), 500);
     fi
 fi
 rm -f "$recv_out"
+
+echo "=== 3. Real DFB relay: yaGPC2 -> real Bus class (542-word DATA FILL) ==="
+DFB_FCM="fixtures/bcenet_dfb_relay.fcm"
+DFB_SOURCE="$NSTS_SIM_GPC/data/TEST-9011-GPC_MEMORY.dfb"
+if [ ! -f "$DFB_SOURCE" ]; then
+    echo "SKIP [bcenet_smoke/dfb_relay]: $DFB_SOURCE not found"
+else
+    recv_out=$(mktemp)
+    (cd "$NSTS_SIM_GPC" && node -e "
+require('@danielx/civet/register');
+const {Bus} = require('./com/bus.civet');
+const fs = require('fs');
+const dfb = fs.readFileSync('data/TEST-9011-GPC_MEMORY.dfb');
+const bus = new Bus('DK1', {gpcBceNum:6, port:6906, nom:'Display/Keyboard 1'}, true, 0x01);
+bus.onReceive((ctx, busID, msg) => {
+  const words = Array.from(msg.data16);
+  const expectedLen = 1 + dfb.length / 2;
+  if (words.length !== expectedLen || words[0] !== 1) {
+    console.log('SHAPE MISMATCH: got', words.length, 'words, op=' + words[0], '(expected', expectedLen, 'words, op=1)');
+    process.exit(0);
+  }
+  for (let i = 0; i < dfb.length / 2; i++) {
+    if (words[1 + i] !== dfb.readUInt16BE(i * 2)) {
+      console.log('CONTENT MISMATCH at word', i);
+      process.exit(0);
+    }
+  }
+  console.log('CONTENT MATCHES EXACTLY');
+  process.exit(0);
+}, null);
+setTimeout(() => { console.log('TIMEOUT'); process.exit(1); }, 8000);
+" >"$recv_out" 2>&1) &
+    listener_pid=$!
+    sleep 1.5
+    "$YAGPC2" --start 0x10 --bce-network --max-steps 300 "$DFB_FCM" >/dev/null 2>&1
+    wait "$listener_pid"
+    if grep -q "CONTENT MATCHES EXACTLY" "$recv_out"; then
+        echo "PASS [bcenet_smoke/dfb_relay]"
+    else
+        echo "FAIL [bcenet_smoke/dfb_relay]: expected 'CONTENT MATCHES EXACTLY', got:"
+        cat "$recv_out"
+        fail=1
+    fi
+    rm -f "$recv_out"
+fi
 
 exit $fail

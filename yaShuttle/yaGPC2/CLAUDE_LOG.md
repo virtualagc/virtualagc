@@ -212,3 +212,42 @@ document's planning stages, and it is already in the code as
   transport variants and discrete I/O (PCI/PCO) remain explicitly out
   of scope, structurally straightforward additions later (new layer-3
   implementations / a new servicer extension) given this layering.
+
+### [2026-08-19] Target: problems.md
+- Follow-up to the `--bce-network` bridge work above: the user asked
+  whether a linked, runnable copy of `PFS/OI340600/SSSRC/BILDNEW5.asm`
+  (real GPCIPL boot/IPL assembly, hand-written, not HAL/S-compiled)
+  existed to actually drive MEDS. It doesn't -- the only trace is an
+  empty (0-byte) leftover `tempAsmLogs/BILDNEW5.asm.log`, and the module
+  declares 14 `EXTRN` symbols (`MENU`, `MSGTABLE`, `SSLCKSUM`, etc.) it
+  doesn't itself define, meaning it's one CSECT of a larger real
+  load-module build whose full composition isn't resolved anywhere I
+  found (`CON80/MMBUILD` is just a bare `BUILD;` control card). Real
+  future work if pursued, not attempted.
+  Instead, found a much more tractable path by reading
+  `nsts-sim-gpc/meds/idp.coffee`'s own `recvDK` handler directly: DK-bus
+  messages are tagged by their own first word (`op = msg.data16[0]`),
+  and `op=1` ("DATA FILL") relays the rest of the message to the MDU as
+  a real display frame buffer -- exactly matching a real test fixture
+  already checked into `nsts-sim-gpc` itself,
+  `data/TEST-9011-GPC_MEMORY.dfb` (541 words). Built
+  `test/fixtures/gen_bcenet_dfb_relay_fcm.cjs` (extends the earlier
+  smoke-test's CPU->MSC->BCE6 activation sequence with an `LBB`
+  (Load BCE Base) MSC instruction and `#TDLI`, the long-transmit-with-
+  immediate-count BCE instruction, since a real DFB is hundreds of
+  words -- `#TDS`'s 5-bit count field only reaches 32). This uncovered
+  a real bug found via this new fixture, not the earlier one: both
+  `bcenet_framer.c`'s `FRAMER_MAX_WORDS` and
+  `bcenet_transport.c`'s own receive buffer were hardcoded to 64 words
+  ("generous headroom over any real BCE long-form transfer" -- wrong,
+  confirmed empirically), silently truncating anything longer; bumped
+  both to 1024. Verified end-to-end against `nsts-sim-gpc`'s own real
+  `Bus` class: the full 542-word message (op word + all 541 DFB words)
+  arrives byte-for-byte identical to the source file, shaped exactly as
+  `recvDK` expects. Added as a third check in `test/bcenet_smoke.sh`.
+  This is now the more meaningful artifact to try against a live
+  `MEDS.sh` Electron session -- unlike the earlier single-arbitrary-word
+  smoke test, a real MEDS/IDP instance receiving this should actually
+  show visible content, not just accept the packet. Still the user's own
+  check to make (GUI, not visually inspectable from here). Full existing
+  suite stays green throughout.

@@ -207,10 +207,13 @@ bool bcenet_transport_recv(BceNetTransport *t, int busID, int iua, bool isShuttl
     (void)outCount;
     return false;
 #else
-    unsigned char buf[2 + 64 * 2]; /* 2-byte header + up to 64 words -- generous
-                                     * for any real BCE long-form transfer (32
-                                     * words max per the 5-bit count field
-                                     * convention), room to spare. */
+    /* 2-byte header + up to 1024 words -- was 64 ("32 words max per the
+     * 5-bit count field convention, room to spare"), wrong: a real
+     * DK-bus DATA FILL message relays a whole display frame buffer,
+     * hundreds of words (#TDLI's own count field is 18 bits, not 5 --
+     * see bcenet_framer.h's own updated comment). Matches
+     * FRAMER_MAX_WORDS in bcenet_framer.c. */
+    unsigned char buf[2 + 1024 * 2];
     ssize_t n = recv(b->fd, buf, sizeof buf, 0);
     if (n < 0) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
