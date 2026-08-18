@@ -4045,6 +4045,78 @@ unlike `test_scheduler.sh`), wired into `make test`.
 `hal-runtime-features.db` rows 98/99 updated from `not_implemented` to
 `implemented_via_cpu`/`tested_dedicated`.
 
+### 7.21 The survey's last two `unresolved` rows — resolved by reading the real historical RUNASM source directly; all `implemented_via_cpu`, zero new code, one real `yaHALMAT2` gap found
+
+Closes out `hal-runtime-features.db`'s last two `unresolved` rows (131,
+133): "Compool/remote-access subroutines (CAS/CASP/CASR/CPAS/CPR
+families)" and "Unlabeled CSECT families (VR*, MSTR, OUTER1, CSTRUC,
+CSLD/CSST/CSHAPQ/QSHAPQ)," both from `USA003090` Appendix D's own
+runtime-library name table. Both rows' own old notes said the same
+thing: "purpose inferred from naming convention only" / "Appendix D
+itself gives no prose description... would need Language Spec
+cross-reference." That premise was avoidable — the real historical
+`RUNASM/*.asm` source for every one of these routines is available
+locally (`/home/rburkey/donschmidt/nsts-sdl-dps/.../RUNASM/`) and each
+file self-documents its own purpose in a `TITLE` line, no
+cross-referencing needed at all.
+
+**Row 131's own premise was wrong**: `CAS`/`CASP`/`CASR`/`CPAS`/`CPR`
+are not a Compool/REMOTE-access family. `CPR.asm`'s own `TITLE` reads
+"CHARACTER COMPARE"; `CPAS.asm` reads "CHARACTER ASSIGN, PARTITIONED
+OUTPUT" — an ordinary `CHARACTER`-type comparison/assignment family.
+`CAS` itself is simply Appendix D's own alias name for `CASV`
+("CHARACTER ASSIGN," already confirmed and in daily use throughout this
+entire session's own `WRITE`-with-string-literal support, long before
+this row was ever written — its own real purpose was hiding in plain
+sight, already identified once, just never connected back to this row).
+
+**Row 133's genuine REMOTE-data-movement family** turns out to be `VR*`
+(VECTOR) + `MSTR` (STRUCTURE), each self-titled ("VR1SN--SCALAR TO
+REMOTE VECTOR MOVE, SP," "MSTR- STRUCTURE MOVE,REMOTE"), and confirmed
+against `USA003090` §8.2's own `%COPY` documentation as the real
+implementation `%COPY(dest,source,count)` compiles to when `dest` is
+`REMOTE`. `OUTER1` is simply Appendix D's own alias of `IOINIT`
+(already confirmed, used by every fixture this whole session). `CSTRUC`
+is "STRUCTURE COMPARE"; `CSLD` is "CHARACTER SUBBIT LOAD AND STORE
+ROUTINES" (with `CSST` as one of its own internal linked labels,
+resolving that mystery member too); `CSHAPQ` is "ARRAYED CHARACTER TO
+INTEGER, SCALAR SHAPING FUNCTION" (an array-conversion routine, not a
+Compool/REMOTE mechanism despite the superficial naming worry).
+
+**All confirmed `implemented_via_cpu`** — ordinary CPU-executed RTL
+calls, no `SVC` involved, the exact same category as every math builtin
+and `RANDOM()`/`RANDOMG()` above, needing nothing from `yaGPC2` beyond a
+correct CPU emulator. Verified directly, not just by reading titles:
+- `charactercompare.hal` (`IF C1 = C2 THEN`) links and correctly
+  executes `CPR`, byte-identical to `yaHALMAT2`.
+- `remotevectorcopy.hal` (`RV = V;`, `RV` declared `REMOTE`) links and
+  correctly executes `VR1SN`, byte-identical to `yaHALMAT2`.
+- `structurecompare.hal` (`IF A = B THEN` on two `STRUCTURE`s) links
+  and correctly executes `CSTRUC`, byte-identical to `yaHALMAT2`.
+- `charactersubbit.hal` (`SUBBIT(C1) = BIN'...'; B1 = SUBBIT(C1);`)
+  links and correctly executes `CSLD`, round-tripping the exact bit
+  pattern of the literal — hand-verified, not diffed against
+  `yaHALMAT2`, since **a real gap was found on their side**: their own
+  binary explicitly errors ("`SUBBIT assignment: target type has no
+  confirmed raw-bit-pattern mapping (only INTEGER/BIT/SINGLE-precision
+  SCALAR are implemented)`") rather than executing it at all — reported
+  over the cross-session channel, not blocking here.
+- `CSHAPQ` alone stays undemonstrated by a dedicated fixture — its own
+  `WIDTH`-in-halfwords stride parameter suggests it's only reached for
+  non-densely-packed arrayed `CHARACTER`-to-numeric conversions, and a
+  quick real attempt (a plain `ARRAY(3) CHARACTER(4)` to `ARRAY(3)
+  INTEGER` conversion) didn't happen to trigger it (no library call
+  linked at all — the compiler resolved it some simpler way for that
+  specific case). Left as "confirmed same category by source reading,
+  not independently fixture-verified" rather than claiming false
+  certainty.
+
+Four new fixtures — `charactercompare.hal`, `remotevectorcopy.hal`,
+`structurecompare.hal`, `charactersubbit.hal` — exercised by a new
+`test/test_rtl.sh`, wired into `make test`. `hal-runtime-features.db`
+rows 131/133 updated from `unresolved` to `implemented_via_cpu`/
+`tested_dedicated` — **zero `unresolved` rows remain in the survey.**
+
 ---
 
 ## Methodology and caveats

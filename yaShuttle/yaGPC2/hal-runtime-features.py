@@ -842,9 +842,20 @@ F('Runtime Error', 'Vector/matrix errors (25, 27, 28)',
 
 # --- Runtime library routine families (Appendix D, collapsed) --------------------------------
 F('Runtime Library Routine', 'Compool/remote-access subroutines (CAS/CASP/CASR/CPAS/CPR families)',
-  'Compool access / REMOTE data-item resolution routines.', 'USA003090 Appendix D', 'unresolved',
-  'Purpose inferred from naming convention only, not confirmed against §26.3-26.4/§8.11 (not read '
-  'by any of the six research passes). Needs a follow-up read before its status can be assessed.', 'untested')
+  'Compool access / REMOTE data-item resolution routines.', 'USA003090 Appendix D', 'implemented_via_cpu',
+  "RESOLVED (2026-08-18) -- the original name-based guess was wrong. Read the real historical "
+  "RUNASM source directly (RUNASM/CPR.asm etc., available locally): CPR is titled 'CHARACTER "
+  "COMPARE', CPAS 'CHARACTER ASSIGN, PARTITIONED OUTPUT' -- an ordinary CHARACTER-type comparison/"
+  "assignment family, nothing to do with Compool or REMOTE access at all. CAS itself is simply "
+  "Appendix D's own alias name for CASV ('CAS ALIAS OF CASV' in the table), already confirmed and "
+  "in daily use throughout this whole codebase's WRITE-with-string-literal support since long "
+  "before this row was ever written. The genuine REMOTE-data-movement family this row's own "
+  "description was actually describing is VR* (VECTOR) + MSTR (STRUCTURE) -- see the CSTRUC/VR* "
+  "entry below. Confirmed implemented_via_cpu like every other RTL routine in this codebase: a real "
+  "compiled CHARACTER-comparison program (`IF C1 = C2 THEN`) links CPR and executes correctly, "
+  "byte-identical to yaHALMAT2.",
+  'tested_dedicated', "test/fixtures/charactercompare.hal, byte-diffed against yaHALMAT2 via "
+  "test_rtl.sh. See problems.md 7.21.")
 F('Runtime Library Routine', 'I/O channel primitive routines (IOINIT, xIN/xOUT family, INTRAP/IOCODE/IOBUF)',
   'The real runtime-library naming for the I/O trap mechanism yaGPC2\'s halucp.c substitutes for.',
   'USA003090 Appendix D', 'implemented', 'INTRAP/IOCODE directly match halucp.c\'s own known trap-address/iocodeAddr field names -- '
@@ -852,7 +863,28 @@ F('Runtime Library Routine', 'I/O channel primitive routines (IOINIT, xIN/xOUT f
   'tested_dedicated', CORPUS)
 F('Runtime Library Routine', 'Unlabeled CSECT families (VR*, MSTR, OUTER1, CSTRUC, CSLD/CSST/CSHAPQ/QSHAPQ)',
   'Several Appendix D entries with no description column and no confident cross-reference found.',
-  'USA003090 Appendix D', 'unresolved', 'Genuinely unresolved by this survey -- Appendix D itself gives no prose description for these; would need Language Spec (USA003088) cross-reference.', 'untested')
+  'USA003090 Appendix D', 'implemented_via_cpu',
+  "RESOLVED (2026-08-18) via direct reading of the real historical RUNASM source (available "
+  "locally, not requiring a USA003088 cross-reference at all): every member is self-titled in its "
+  "own file. OUTER1 is simply Appendix D's own alias of IOINIT (already confirmed and used by "
+  "every fixture this whole session). MSTR is 'STRUCTURE MOVE, REMOTE' and the VR* family is a "
+  "systematic REMOTE-VECTOR-move set (VR0SN 'SCALAR TO REMOTE VECTOR MOVE, SP', VR1DN 'REMOTE TO "
+  "REMOTE VECTOR MOVE, DP', etc., covering scalar/vector source x single/double precision x "
+  "local/remote-to-remote combinations) -- confirmed via USA003090 8.2's own %COPY documentation "
+  "as the real implementation of '%COPY(dest,source,count)' when dest is REMOTE. CSTRUC is "
+  "'STRUCTURE COMPARE'; CSLD is 'CHARACTER SUBBIT LOAD AND STORE ROUTINES'; CSHAPQ is 'ARRAYED "
+  "CHARACTER TO INTEGER, SCALAR SHAPING FUNCTION' (a type-conversion routine, not a Compool/REMOTE "
+  "mechanism despite the name). All ordinary CPU-executed RTL routines, same category as every "
+  "math builtin -- confirmed directly: a real compiled REMOTE VECTOR assignment (`RV = V;`, RV "
+  "declared REMOTE) links and correctly executes VR1SN, and a real compiled STRUCTURE comparison "
+  "(`IF A = B THEN`) links and correctly executes CSTRUC -- both byte-identical to yaHALMAT2.",
+  'tested_dedicated', "test/fixtures/remotevectorcopy.hal, structurecompare.hal (byte-diffed "
+  "against yaHALMAT2) and charactersubbit.hal (hand-verified against its own BIN literal -- "
+  "yaHALMAT2's own binary explicitly errors on CHARACTER SUBBIT assignment as unimplemented, a "
+  "real gap on their side, not usable as an oracle here) via test_rtl.sh. CSHAPQ not independently "
+  "fixture-tested (its own WIDTH-stride parameter suggests it's only reached for non-densely-packed "
+  "arrayed CHARACTER-to-numeric conversions, a genuinely narrow case a quick real-fixture attempt "
+  "didn't trigger), but confirmed the same category by direct source reading -- see problems.md 7.21.")
 
 # --- Reentrancy / Exclusion -----------------------------------------------------------------
 F('Reentrancy/Exclusion', 'EXCLUSIVE procedures/functions', 'At most one process may be inside an EXCLUSIVE block at a time; others WAIT.',

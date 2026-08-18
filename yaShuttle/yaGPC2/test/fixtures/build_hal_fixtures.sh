@@ -291,6 +291,38 @@
 #                          -- the two real textbook sample programs
 #                          this feature exists to support. See
 #                          problems.md 7.20.
+#   charactercompare.fcm   <- charactercompare.hal, remotevectorcopy.fcm
+#                          <- remotevectorcopy.hal, structurecompare.fcm
+#                          <- structurecompare.hal (all checked in
+#                          alongside this script) -- resolves
+#                          hal-runtime-features.db rows 131/133 (the
+#                          survey's last two "unresolved" Appendix D
+#                          library-routine entries): CAS/CASP/CASR/
+#                          CPAS/CPR turn out to be an ordinary CHARACTER
+#                          comparison/assignment family (CPR = "CHARACTER
+#                          COMPARE" per its own real RUNASM/CPR.asm
+#                          TITLE line), nothing to do with Compool/
+#                          REMOTE access despite the original guess;
+#                          the genuine REMOTE-data-movement family is
+#                          VR* (VECTOR) + MSTR (STRUCTURE), confirmed
+#                          from their own real RUNASM/*.asm TITLE lines
+#                          ("VR1SN--SCALAR TO REMOTE VECTOR MOVE, SP"
+#                          etc., "MSTR-STRUCTURE MOVE,REMOTE"); CSTRUC
+#                          is "STRUCTURE COMPARE". All confirmed
+#                          implemented_via_cpu, zero new code -- real
+#                          linked RTL routines needing nothing beyond a
+#                          correct CPU emulator, same category as every
+#                          math builtin. charactersubbit.fcm <-
+#                          charactersubbit.hal (checked in alongside
+#                          this script) -- CSLD ("CHARACTER SUBBIT LOAD
+#                          AND STORE ROUTINES"), one of row 133's own
+#                          named members; hand-verified (not diffed
+#                          against yaHALMAT2 -- their own binary
+#                          explicitly errors on CHARACTER SUBBIT
+#                          assignment as unimplemented, a real gap on
+#                          their side, reported but not an oracle here)
+#                          against the literal's own known bit pattern.
+#                          See problems.md 7.21.
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -342,6 +374,10 @@ REENTRANTAUTOMATIC_HAL="$(dirname "$0")/reentrantautomatic.hal"
 RANDOMSEQUENCE_HAL="$(dirname "$0")/randomsequence.hal"
 DARTBOARD_HAL="$HAL_SRC_DIR/Source Code/Programming in HAL-S/071-DARTBOARD_APPROXIMATION.hal"
 ROLL_HAL="$HAL_SRC_DIR/Source Code/Programming in HAL-S/134-ROLL.hal"
+CHARACTERCOMPARE_HAL="$(dirname "$0")/charactercompare.hal"
+REMOTEVECTORCOPY_HAL="$(dirname "$0")/remotevectorcopy.hal"
+STRUCTURECOMPARE_HAL="$(dirname "$0")/structurecompare.hal"
+CHARACTERSUBBIT_HAL="$(dirname "$0")/charactersubbit.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -406,5 +442,9 @@ build "$REENTRANTAUTOMATIC_HAL" REENT1 reentrantautomatic
 build "$RANDOMSEQUENCE_HAL" RANDSEQ randomsequence
 build "$DARTBOARD_HAL" DARTBRD dartboard
 build "$ROLL_HAL" TROLL roll
+build "$CHARACTERCOMPARE_HAL" CHARCMP charactercompare
+build "$REMOTEVECTORCOPY_HAL" REMOTECP remotevectorcopy
+build "$STRUCTURECOMPARE_HAL" STRUCCMP structurecompare
+build "$CHARACTERSUBBIT_HAL" CHSUBBI2 charactersubbit
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm, randomsequence.fcm, dartboard.fcm, roll.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm, repeatwhile.fcm, repeatuntilevent.fcm, repeatwhilefalse.fcm, offerror.fcm, errorpertask.fcm, errordynscope.fcm, reentrantautomatic.fcm, randomsequence.fcm, dartboard.fcm, roll.fcm, charactercompare.fcm, remotevectorcopy.fcm, structurecompare.fcm, charactersubbit.fcm (+ -lnk101.json)"
