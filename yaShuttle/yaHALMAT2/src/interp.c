@@ -13516,6 +13516,27 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                         nt->task_state = TASK_READY;
                         break;
                 }
+                /* WHILE <event exp> initial evaluation (USA003087 Sec. 24.5,
+                 * rule 5): "If the value of exp becomes FALSE before the
+                 * process is initiated, it is merely removed again from the
+                 * process queue, and becomes inactive" -- i.e. it must NOT run
+                 * even one cycle. Checked here for an immediately-initiated
+                 * process (the event is evaluated at initiation, which for the
+                 * immediate form is now). UNTIL <event> has NO such check --
+                 * Sec. 24.5 guarantees it "always allows at least one cycle of
+                 * execution to be completed", so it is deliberately excluded.
+                 * (The delayed AT/IN/ON initiation forms would evaluate this at
+                 * their own later initiation instant; not modeled here, since no
+                 * corpus/fixture exercises a delayed-init WHILE-event yet and
+                 * inventing it unverified would be guesswork.) */
+                if (nt->task_state == TASK_READY && nt->repeat_kind != SCHD_REPEAT_NONE &&
+                    nt->stop_kind == SCHD_STOP_WHILE_BIT) {
+                    uint32_t ev;
+                    if (!reevaluate_live_bit_operand(state, &nt->stop_event_op, &ev) || ev == 0) {
+                        nt->task_state = TASK_TERMINATED; /* removed without ever executing */
+                        break;
+                    }
+                }
                 state->symbol_active_task[task_sym] = idx;
                 /* No branch here -- SCHD only adds the task to the pool;
                  * the scheduler loop in interp_run naturally picks it up
@@ -14093,6 +14114,34 @@ static void sched_wake_exclusive(halmat_state_t *state) {
     }
 }
 
+/* Between-cycles EVENT-expression cancellation (USA003087 Sec. 24.5): a cyclic
+ * task dormant in the gap between cycles (awaiting_next_cycle) whose WHILE event
+ * has gone FALSE, or whose UNTIL event has gone TRUE, is cancelled immediately
+ * -- "if the event expression becomes FALSE/TRUE in the interval between
+ * cycles, cancellation takes place immediately." Unlike the numeric UNTIL-time
+ * case, an event expression has no deadline to fast-forward to: it changes only
+ * when a running task SIGNALs it, so this is re-evaluated every tick (like
+ * sched_wake_on_events) rather than via sched_advance_to_next_wake. The at-
+ * cycle-end case ("end of the first cycle in which the event changed") is
+ * handled separately by close_current_process's own WHILE/UNTIL check. */
+static void sched_cancel_dormant_on_events(halmat_state_t *state) {
+    for (int i = 0; i < state->task_count; i++) {
+        halmat_task_t *t = &state->tasks[i];
+        if (!t->in_use || t->task_state != TASK_WAITING || !t->awaiting_next_cycle) continue;
+        uint32_t v;
+        bool cancel = false;
+        if (t->stop_kind == SCHD_STOP_WHILE_BIT) {
+            cancel = !reevaluate_live_bit_operand(state, &t->stop_event_op, &v) || v == 0;
+        } else if (t->stop_kind == SCHD_STOP_UNTIL_BIT) {
+            cancel = reevaluate_live_bit_operand(state, &t->stop_event_op, &v) && v != 0;
+        }
+        if (cancel) {
+            t->task_state = TASK_TERMINATED;
+            if (t->symbol < HALMAT_SYT_MAX) state->symbol_active_task[t->symbol] = -1;
+        }
+    }
+}
+
 /* If every in-use task is either TERMINATED, TASK_WAITING_ON, or
  * TASK_WAITING (nothing READY right now, but something will eventually
  * wake), fast-forwards state->virtual_time to the earliest pending
@@ -14157,6 +14206,7 @@ bool interp_step(halmat_state_t *state, FILE *out) {
 
     sched_wake_waiting(state);
     sched_wake_on_events(state);
+    sched_cancel_dormant_on_events(state); /* Sec. 24.5: WHILE/UNTIL event met between cycles -> cancel now */
     sched_wake_dependents(state);
     sched_wake_exclusive(state);
     if (state->halted) return true; /* sched_wake_dependents just finalized the primal's own deferred CLOSE */

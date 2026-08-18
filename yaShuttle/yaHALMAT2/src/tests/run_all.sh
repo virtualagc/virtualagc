@@ -1099,7 +1099,13 @@ run ./run_local_fixture.sh sched_on "$(printf 'BEFORE SCHEDULE\nBEFORE SIGNAL\nA
 # cycle, Sec. 23.6). See sched_every_wait (same EVERY case, worker WAITs).
 run ./run_local_fixture.sh sched_every "N=               4" --time-scale 1000000
 run ./run_local_fixture.sh sched_after "N=               4" --time-scale 1000000
-run ./run_local_fixture.sh sched_while "N=               1" --time-scale 1000000
+# REPEAT WHILE <event>: EV1 is FALSE at the (immediate) initiation, so per
+# USA003087 Sec. 24.5 rule 5 the process "is merely removed again from the
+# process queue ... without ever executing" -- N=0, not 1. (Corrected from an
+# earlier check that only evaluated WHILE at each cycle's CLOSE, so it ran one
+# cycle first. UNTIL <event> keeps its guaranteed >=1 cycle -- see
+# sched_until_compound.)
+run ./run_local_fixture.sh sched_while "N=               0" --time-scale 1000000
 # User-reported sweep item: SCHEDULE's STOPPING-only form (WHILE/UNTIL
 # with no REPEAT/TIMING at all, `<SCHEDULE CONTROL> ::= <STOPPING>`) --
 # grammatically legal and HALSFC compiles it, but its runtime semantics
@@ -1186,6 +1192,12 @@ run ./run_local_fixture.sh datetime "$(printf '      78032\n 0.0          \n 3.6
 # UNTIL instant instead of overshooting to the next wake. Expected TICK/DONE (a
 # regression here prints TICK/TICK/DONE). Cross-checked with yaGPC2.
 run ./run_local_fixture.sh repeat_after_until "$(printf 'TICK\nDONE')" --time-scale 1000000
+# REPEAT ... UNTIL <event>, cancellation BETWEEN cycles (USA003087 Sec. 24.5):
+# a separate task SIGNALs EV1 at t=2.5, in WORKER's dormant gap [2,3], so WORKER
+# is cancelled immediately before its t=3 cycle -> N=3 (checking UNTIL only at
+# CLOSE would run that cycle -> N=4). Event stops have no deadline, so this is
+# re-checked every tick (sched_cancel_dormant_on_events), not fast-forwarded to.
+run ./run_local_fixture.sh sched_until_event_between "N=               3" --time-scale 1000000
 
 # --pacing=signal smoke test: reuses sched_every (a fast, already-passing
 # fixture) with a large --time-scale, same reasoning as the --time-scale

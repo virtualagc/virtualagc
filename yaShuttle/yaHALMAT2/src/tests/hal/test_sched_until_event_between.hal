@@ -1,0 +1,25 @@
+C/ REPEAT ... UNTIL <event>, cancellation in the interval BETWEEN cycles
+C/ (USA003087 Sec. 24.5, CYCLING until TRUE): "If it becomes TRUE in the
+C/ interval between cycles, cancellation takes place immediately."  WORKER
+C/ cycles EVERY 1.0 (starts t=0,1,2,...); a separate SETTER task SIGNALs EV1 at
+C/ t=2.5, which lands in the dormant gap [2,3] between WORKER's cycles.  WORKER
+C/ is therefore cancelled immediately at t=2.5, before its t=3 cycle -- so it
+C/ runs exactly 3 cycles (t=0,1,2).  Expected: N=3.  (Checking UNTIL only at
+C/ each CLOSE would instead run the t=3 cycle first, giving N=4.)  UNTIL <event>
+C/ also guarantees at least one cycle even if the event is already TRUE (Sec.
+C/ 24.5), unlike WHILE <event> which is evaluated before the first cycle.
+ TBTW: PROGRAM;
+    DECLARE EV1 EVENT;
+    DECLARE INTEGER, N INITIAL(0);
+    WORKER: TASK;
+       N = N + 1;
+    CLOSE WORKER;
+    SETTER: TASK;
+       WAIT(2.5);
+       SIGNAL EV1;
+    CLOSE SETTER;
+    SCHEDULE WORKER PRIORITY(60), REPEAT EVERY 1.0 UNTIL EV1;
+    SCHEDULE SETTER PRIORITY(70);
+    WAIT(10);
+    WRITE(6) 'N=', N;
+ CLOSE TBTW;
