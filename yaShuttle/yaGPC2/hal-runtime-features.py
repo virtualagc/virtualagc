@@ -286,8 +286,13 @@ F('Real-Time: SCHEDULE', 'Program Processes (SCHEDULE targeting a separate compi
   'and link-time assembly), not just a local TASK.',
   'USA003087 §23.1-23.3', 'not_implemented',
   'schedule.c only decodes a PDE reached from the current linked image; no multi-program-unit '
-  'process-creation path exists. Likely low priority: this needs a genuinely different runtime '
-  'topology (multiple linked "primal" units), not just a scheduler extension.', 'untested')
+  'process-creation path exists. RECONFIRMED at the end of the implementation-order pass (item #12): '
+  'still correctly out of scope for schedule.c/halucp.c specifically -- this is a genuinely different '
+  'kind of gap than everything else in this pass (SVC protocol substitution within one already-loaded '
+  'image), needing multi-image loading support at the AGEHarness/main.c level instead (loading and '
+  'linking more than one .fcm into one address space at once). Not a dead end like FILE/NEXTIME above '
+  '-- real FCOS did support this -- just infrastructure this scheduler-substitution pass never touches.',
+  'untested')
 
 # --- Real-Time: WAIT variants -------------------------------------------------------
 F('Real-Time: WAIT', 'WAIT (delta-time)', 'WAIT interval; suspends the executing process for interval seconds.',
@@ -471,7 +476,16 @@ F('Real-Time: Priority & Control', 'Process name as Boolean (ACTIVE/INACTIVE que
   'a real yaHALMAT2 gap, not a yaGPC2 one.')
 F('Real-Time: Priority & Control', 'NEXTIME(<label>) built-in function',
   'For a process scheduled with IN/AT and not yet started, returns its future start time; otherwise RUNTIME()-equivalent.',
-  'USA003087 Appendix B', 'not_implemented', 'Depends on both RUNTIME() and SCHEDULE...IN/AT, neither implemented.', 'untested')
+  'USA003087 Appendix B', 'not_applicable',
+  "PERMANENT DEAD END, directly confirmed (item #12 of the implementation-order pass): IBM-76-SS-1110 "
+  "4.2.4.1's own RUNTIME/CLOCKTIME/DATE/NEXTIME parameter-list table lists all four request types (0-3) "
+  "together, then states plainly: 'FCOS will not support the NEXTIME function.' Same category as the "
+  "SCHEDULE cycle-overrun runtime error (7.10) and DEPENDENT/UPDATE PRIORITY's bare self-forms -- a "
+  "documented language-spec feature real FCOS itself never implemented, not a yaGPC2 port gap. "
+  "(Superseded note: RUNTIME() and SCHEDULE...IN/AT, which the old impl_notes cited as blockers, are "
+  "both now implemented -- items #4/#6 of this same pass -- but it wouldn't matter either way, since "
+  "the real RTE itself rejects the request type.)",
+  'not_applicable', 'Nothing to test -- the real RTE itself never supported this request type.')
 
 # --- I/O: Statements ------------------------------------------------------------------
 F('I/O: Statement', 'WRITE statement', 'Outputs a comma-separated expression list to a paged/unpaged channel.',
@@ -492,10 +506,22 @@ F('I/O: Statement', 'READALL statement (raw CHARACTER stream input)',
   'tested_corpus', "yaHALMAT2's rdal.hal fixture exists; not confirmed run through yaGPC2 specifically.")
 F('I/O: Statement', 'FILE statement, write-mode (random-access output)',
   'Saves a value as a binary-image record at a given record address on a random-access channel.',
-  'USA003087 §22.2', 'not_implemented', 'No random-access/FILE-statement support found anywhere in src/.', 'untested')
+  'USA003087 §22.2', 'not_applicable',
+  "PERMANENT DEAD END, confirmed in an earlier session (not new research): USA003090 6.2 states "
+  "plainly, 'File I/O is not supported by the HAL/S-FC runtime library. If a FILE I/O statement is "
+  "compiled, unresolved external references will occur at link edit time.' Unlike WRITE/READ "
+  "(self-contained inline code trapping into OUTRAP/INTRAP/CNTRAP), FILE compiles to a call to an RTL "
+  "routine that never existed for the AP-101S-targeted compiler -- a real program using it could never "
+  "even be linked into a working binary. The user's own historical context: FILE reportedly worked in "
+  "an earlier, System/360-hosted HAL/S compiler that predates the AP-101S-targeted one and has not "
+  "survived; 'Programming in HAL/S' still documents it because that textbook dates to that earlier era. "
+  "Not a someday-TODO for either yaGPC2 or yaHALMAT2 -- implementing it would mean inventing behavior "
+  "the real historical system never had.",
+  'not_applicable', 'Nothing to test -- the real toolchain itself cannot produce a working program that exercises this.')
 F('I/O: Statement', 'FILE statement, read-mode (random-access input)',
   'Retrieves a binary-image record from a random-access channel.',
-  'USA003087 §22.2', 'not_implemented', 'Same as write-mode above.', 'untested')
+  'USA003087 §22.2', 'not_applicable', 'Same permanent dead end as write-mode above -- see its own impl_notes.',
+  'not_applicable', 'Nothing to test -- see write-mode above.')
 
 # --- I/O: Formatting -------------------------------------------------------------------
 F('I/O: Formatting', 'TAB(a) / COLUMN(b) horizontal positioning',
@@ -539,7 +565,8 @@ F('I/O: Data-Type Behavior', 'NAME (pointer) terminals excluded from sequential 
   'A structure\'s NAME-typed terminals are silently skipped by WRITE/READ/READALL.',
   'USA003087 §28.10', 'implemented_via_cpu', 'A compile-time code-generation concern (compiler simply never emits I/O code for NAME terminals).', 'untested', 'No fixture specifically confirms this asymmetry.')
 F('I/O: Data-Type Behavior', 'NAME (pointer) terminals included in random-access FILE I/O',
-  'FILE statements DO transfer a NAME-terminal\'s pointer value.', 'USA003087 §28.10', 'not_implemented', 'FILE statements are not implemented at all (see above).', 'not_applicable')
+  'FILE statements DO transfer a NAME-terminal\'s pointer value.', 'USA003087 §28.10', 'not_applicable',
+  'Moot -- FILE itself is a permanent dead end on this toolchain (USA003090 6.2), not just unimplemented. See the FILE statement entries above.', 'not_applicable')
 
 # --- I/O: Error handling -------------------------------------------------------------------
 F('I/O: Error Handling', 'WRITE numeric field-overflow handling', 'Too-narrow numeric field -> error message plus asterisks in place of the value.',
@@ -614,9 +641,18 @@ F('Built-in: Time/Random Function', 'CLOCKTIME()', 'Returns a double-precision S
   "problems.md §2.6: ties to the real FCOS task scheduler's own TQE tick machinery -- WORTH REVISITING now that a real virtual-time scheduler (schedule.c, cpu->elapsedTimeUs) exists; not attempted in this survey.",
   'untested')
 F('Built-in: Time/Random Function', 'RANDOM()', 'Returns a random number, rectangular distribution over [0,1).',
-  'USA003087 Appendix B', 'not_implemented', 'problems.md §2.6: no PRNG/seed mechanism exists in yaGPC2; non-comparable by nature even if implemented.', 'untested')
+  'USA003087 Appendix B', 'not_implemented',
+  "problems.md §2.6: no PRNG/seed mechanism exists in yaGPC2; non-comparable by nature even if "
+  "implemented. RECHECKED at the end of the implementation-order pass (item #12): confirmed via "
+  "IBM-76-SS-1110's own 4.2.4 'HAL/S Functions' section that RANDOM/RANDOMG involve no SVC/RTE call at "
+  "all (unlike RUNTIME/CLOCKTIME/DATE/NEXTIME/PRIO/ERRGRP/ERRNUM, all documented there with real SVC "
+  "#22/#23 parameter lists) -- these compile to a plain math-library call, the same category as "
+  "SIN/COS/SQRT (Appendix C's own 'group 4' HAL/S-FC library). A real gap, but genuinely out of scope "
+  "for this pass specifically: it needs a C-level PRNG implementation, not a scheduler/SVC substitution "
+  "-- a different subsystem's work, not schedule.c/halucp.c's.",
+  'untested')
 F('Built-in: Time/Random Function', 'RANDOMG()', 'Returns a random number, Gaussian distribution mean 0 variance 1.',
-  'USA003087 Appendix B', 'not_implemented', 'Same as RANDOM() above.', 'untested')
+  'USA003087 Appendix B', 'not_implemented', 'Same as RANDOM() above -- see its own impl_notes.', 'untested')
 
 # --- Built-in: Character functions -----------------------------------------------------
 CHAR_FNS = [('INDEX', 'first-index of a substring, or 0'), ('LENGTH', 'current dynamic length'),

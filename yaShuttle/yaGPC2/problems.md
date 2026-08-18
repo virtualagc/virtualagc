@@ -3439,6 +3439,77 @@ Three new fixtures — `exclusive.hal` (non-contended), `exclusivetwo.hal`
 by `test_scheduler.sh` under both `--pacing` modes, goldens generated
 from `yaGPC2`'s own output.
 
+### 7.13 Closing out the implementation-order pass: `FILE`, `NEXTIME()`, Program Processes, `RANDOM()`/`RANDOMG()`
+
+Twelfth and final item. Unlike every other item in this pass, none of
+these needed new code — each resolves to either a confirmed permanent
+dead end (real FCOS never supported it, matching the precedent already
+established for `SCHEDULE`'s own cycle-overrun runtime error in §7.10)
+or a genuinely different kind of gap this scheduler-substitution pass
+was never going to close.
+
+**`FILE` (random-access I/O) — reconfirmed, not new research.** An
+earlier session (2026-08-01, preserved in this agent's own memory)
+already settled this: `USA003090` §6.2 states plainly, *"File I/O is
+not supported by the HAL/S-FC runtime library. If a FILE I/O statement
+is compiled, unresolved external references will occur at link edit
+time."* Unlike `WRITE`/`READ` (self-contained inline code trapping into
+`OUTRAP`/`INTRAP`/`CNTRAP`), `FILE` compiles to a call to an RTL routine
+that never existed for the AP-101S-targeted compiler — a real program
+using it could never even be linked into a working binary. `Programming
+in HAL/S` still documents it because that textbook predates the
+AP-101S/RTL toolchain both emulators target. Re-verified the citation
+directly this session (it hadn't drifted) and updated
+`hal-runtime-features.db` rows 35/36/49 from `not_implemented` to
+`not_applicable` to reflect that this was already settled, not still
+open.
+
+**`NEXTIME(<label>)` — newly confirmed as the same category of dead
+end.** `IBM-76-SS-1110` §4.2.4.1's own `RUNTIME`/`CLOCKTIME`/`DATE`/
+`NEXTIME` parameter-list table lists all four request types together
+(0-3), then states outright: *"FCOS will not support the NEXTIME
+function."* The old `hal-runtime-features.db` note cited `RUNTIME()`
+and `SCHEDULE...IN`/`AT` as blockers — both are now implemented (items
+#4/#6 of this same pass) — but it wouldn't have mattered either way,
+since the real RTE itself rejects request type 3 regardless. Updated to
+`not_applicable`.
+
+**Program Processes (`SCHEDULE` targeting a separate compiled
+`PROGRAM`) — reconfirmed out of scope, but *not* a dead end.** Unlike
+`FILE`/`NEXTIME`, real FCOS genuinely did support this. The gap is
+architectural, not historical: `schedule.c` only ever decodes a PDE
+reached from the one already-loaded linked image, and supporting a
+second, independently-compiled `PROGRAM` as a `SCHEDULE` target needs
+multi-image loading at the `AGEHarness`/`main.c` level (linking more
+than one `.fcm` into one address space at once) — infrastructure this
+whole scheduler-substitution pass never touches. Left `not_implemented`,
+with the distinction from `FILE`/`NEXTIME` now made explicit in its own
+notes.
+
+**`RANDOM()`/`RANDOMG()` — confirmed out of this pass's scope
+specifically, not a dead end either.** Checked `IBM-76-SS-1110`'s own
+§4.2.4 "HAL/S Functions" section directly: `RUNTIME`/`CLOCKTIME`/`DATE`/
+`NEXTIME` (SVC #22) and `PRIO`/`ERRGRP`/`ERRNUM` (SVC #23) both have
+real, documented SVC parameter lists — `RANDOM`/`RANDOMG` appear nowhere
+in that section at all. This confirms they compile to a plain
+math-library call with no RTE/SVC involvement whatsoever, the same
+category as `SIN`/`COS`/`SQRT` (Appendix C's own "group 4" HAL/S-FC
+library) rather than anything this session's real-time-executive
+substitution work (`schedule.h`/`.c`, `halucp.c`'s SVC dispatch) is
+positioned to implement. A real gap (no PRNG/seed mechanism exists
+anywhere in `yaGPC2`, per the original §2.6 finding), but for a
+different subsystem to pick up, not this one.
+
+With this, all twelve items of the implementation-order plan (§7.3) are
+now resolved — nine implemented and tested (#1-8, #11 as separate
+commits; `WAIT UNTIL`, `TERMINATE`, `UPDATE PRIORITY`, `RUNTIME()`/
+`PRIO()`, process-name-as-Boolean, `SCHEDULE...IN`/`AT`, `WAIT FOR`/
+`SCHEDULE...ON`, `DEPENDENT`/`WAIT FOR DEPENDENT`/cascading `TERMINATE`,
+`CANCEL`, `EXCLUSIVE`/`UPDATE` blocks), three resolved as confirmed
+out-of-scope with primary-source citations rather than code (#9's cycle
+overrun, and this section's `FILE`/`NEXTIME`/Program Processes/
+`RANDOM`/`RANDOMG`).
+
 ---
 
 ## Methodology and caveats
