@@ -121,6 +121,22 @@ bool halmat_load_from_buffer(const uint8_t *buf, size_t size, halmat_program_t *
         }
     }
 
+    if (instr_count == 0) {
+        /* A valid HALMAT program always contains at least its block definition
+         * (MDEF/PDEF/...) and a closing CLOS, so zero instructions means the
+         * input carried no HALMAT at all -- almost always an empty or truncated
+         * file left behind when the HAL/S compile itself failed or was
+         * abandoned (e.g. HALSFC aborting on a source error emits a 0-byte
+         * halmat.bin). Reject it here with a clear message rather than letting
+         * the interpreter start with no program and run a never-initialized
+         * entry point off into a garbage instruction address. */
+        snprintf(errbuf, errbuf_size,
+                 "'<buffer>' contains no HALMAT instructions -- the file is empty or the HAL/S "
+                 "compile that produced it failed/was abandoned");
+        free(instrs);
+        return false;
+    }
+
     out->instrs = instrs;
     out->count = instr_count;
     return true;
