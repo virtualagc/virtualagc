@@ -3270,23 +3270,26 @@ static void precompute_subprograms(halmat_state_t *state) {
     }
 }
 
-/* Optional process-wide override for DATE()/CLOCKTIME()'s mission-clock anchor
- * (--start-time), so a run can be made reproducible. Set once from main.c
- * before interp_init(); every state (including each unit of a linked program)
- * then shares the same anchor, keeping their simulated calendars consistent.
- * Unset -> interp_init() captures the real host clock instead. */
-static int64_t g_wallclock_override = 0;
-static bool g_wallclock_override_set = false;
+/* DATE()/CLOCKTIME()'s real-world mission-clock anchor, supplied by whatever
+ * INTEGRATES this engine (the yaHALMAT2 CLI, a --compile'd F, or an embedding
+ * application) -- the engine itself deals only in emulated time from program
+ * start, so any real-world reference point comes from outside it via this
+ * setter. Set once before interp_init(); every state (including each unit of a
+ * linked program) then shares the anchor. If the integrator never sets it, the
+ * anchor stays 0 (Unix epoch) -- a deterministic default for direct/embedded
+ * construction, not a real-clock read the engine would have no business doing. */
+static int64_t g_wallclock_anchor = 0;
+static bool g_wallclock_anchor_set = false;
 void interp_set_wallclock_override(int64_t epoch_seconds) {
-    g_wallclock_override = epoch_seconds;
-    g_wallclock_override_set = true;
+    g_wallclock_anchor = epoch_seconds;
+    g_wallclock_anchor_set = true;
 }
 
 void interp_init(halmat_state_t *state, const halmat_program_t *prog,
                   const halmat_literal_table_t *literals, int num_blanks) {
     memset(state, 0, sizeof(*state));
     state->prog = prog;
-    state->wallclock_anchor = g_wallclock_override_set ? g_wallclock_override : (int64_t)time(NULL);
+    if (g_wallclock_anchor_set) state->wallclock_anchor = g_wallclock_anchor; /* else 0 (memset); the integrator owns real time */
     state->literals = literals;
     state->num_blanks = num_blanks;
     state->line_length = -1; /* not explicitly set; flush_write picks the per-device
@@ -10133,17 +10136,17 @@ static void exec_one(halmat_state_t *state, FILE *out) {
                 }
                 if (ins->tag == 18 || ins->tag == 54) {
                     /* DATE/CLOCKTIME: no argument. The mission clock is
-                     * anchored at program start (state->wallclock_anchor:
-                     * the real host time captured in interp_init, or a
-                     * --start-time override) and advanced by the *virtual*
+                     * anchored at program start (state->wallclock_anchor,
+                     * supplied by the integrator -- the CLI's --start-time or
+                     * its real-host-at-start default, F's own main, or an
+                     * embedding app) and advanced here by the *virtual*
                      * elapsed time, so the calendar/time-of-day move on the
                      * same simulated base as RUNTIME() rather than jumping
                      * with the real host clock on every call -- and a run
-                     * with a fixed --start-time is reproducible. (This
-                     * replaced an earlier convention that read the real host
-                     * clock fresh on every call; aligned with yaGPC2's
-                     * start-anchor + virtual-progression + override
-                     * convention so the two emulators don't diverge.)
+                     * with a fixed anchor is reproducible. The engine never
+                     * reads the real clock itself; that's the integrator's
+                     * job (aligned with yaGPC2's start-anchor + virtual-
+                     * progression + override convention).
                      * localtime() converts the resulting absolute instant to
                      * the system's configured local timezone (rule 17/18's
                      * calendar/day-of-year and time-of-day are local); it is

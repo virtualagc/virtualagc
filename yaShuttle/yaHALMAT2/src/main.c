@@ -1214,6 +1214,8 @@ int main(int argc, char **argv) {
                                     * a bare form-feed by default, this runtime's own historical
                                     * target hardware's own page-eject convention */
     double time_scale = 1.0;
+    int64_t start_time_epoch = 0;   /* DATE()/CLOCKTIME() anchor this integrator hands the engine */
+    bool has_start_time = false;    /* true once --start-time set it; else real host clock at start */
     halmat_pacing_mode_t pacing_mode = HALMAT_PACING_BURST;
     device_map_t maps[MAX_DEVICE_MAPS];
     int num_maps = 0;
@@ -1252,12 +1254,11 @@ int main(int argc, char **argv) {
                 return 1;
             }
         } else if (strcmp(argv[i], "--start-time") == 0 && i + 1 < argc) {
-            int64_t epoch;
-            if (!parse_start_time(argv[++i], &epoch)) {
+            if (!parse_start_time(argv[++i], &start_time_epoch)) {
                 fprintf(stderr, "%s: --start-time expects YYYY-MM-DD[ HH:MM:SS] (local) or epoch seconds\n", argv[0]);
                 return 1;
             }
-            interp_set_wallclock_override(epoch);
+            has_start_time = true;
         } else if (strncmp(argv[i], "--pacing=", 9) == 0) {
             const char *val = argv[i] + 9;
             if (strcmp(val, "burst") == 0) {
@@ -1347,6 +1348,12 @@ int main(int argc, char **argv) {
         usage(argv[0]);
         return 1;
     }
+
+    /* The engine deals only in emulated time (from program start); the real-
+     * world DATE()/CLOCKTIME() anchor is this integrator's job to supply. Hand
+     * it to the engine now: the --start-time value if given, otherwise the real
+     * host clock at start (matching "real time when no option is given"). */
+    interp_set_wallclock_override(has_start_time ? start_time_epoch : (int64_t)time(NULL));
 
     debug_colors_t colors = {0};
     if (strcmp(color_when, "always") == 0) {
