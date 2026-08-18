@@ -18,12 +18,18 @@
  *   convention throughout this codebase):
  *     ea+0: high byte = PRIORITY (1-255), low byte = SVC# (1)
  *     ea+1: FLAGS word (2-bit fields -- PROGRAM/TASK, AT/IN/ON/none,
- *           DEPENDENT, REPEAT none/REPEAT/EVERY/AFTER, CANCEL variant).
- *           This file only recognizes the one signature needed so far
- *           (TASK, REPEAT EVERY, nothing else set) -- anything else
- *           falls through to the existing unhandled-SVC-trap path,
- *           which is always safe (matches today's behavior for any
- *           SCHEDULE variant this file doesn't yet understand).
+ *           DEPENDENT, REPEAT none(0x00)/BARE(0x40)/EVERY(0x80)/
+ *           AFTER(0xC0) [bits 6-7], UNTIL-time-clause-present (0x0100)
+ *           [bit 8, empirically confirmed alongside the REPEAT bits --
+ *           see RepeatMode's own comment], CANCEL variant [not decoded
+ *           by this file at all -- CANCEL is its own separate SVC, #4/
+ *           #5, not a SCHEDULE FLAGS bit]. Any bit combination outside
+ *           what this file explicitly recognizes falls through to the
+ *           existing unhandled-SVC-trap path, which is always safe
+ *           (matches today's behavior for any SCHEDULE variant this
+ *           file doesn't yet understand) -- REPEAT ... WHILE/UNTIL
+ *           event-expr (USA003087 24.5) remains one such unrecognized
+ *           variant, out of scope for now.
  *     ea+2/+3: PROCESS -- the target task's 6-halfword PDE address
  *           (32-bit, hal_get32 convention)
  *     ea+4/+5: up to two Event Expression addresses (not read by this
@@ -31,7 +37,8 @@
  *           scope for now)
  *   Time values arrive in floating-point register pairs, IBM
  *   double-precision seconds: AT/IN in FPR0-1 (unused here), REPEAT
- *   EVERY/AFTER in FPR2-3, UNTIL in FPR4-5 (unused here).
+ *   EVERY/AFTER in FPR2-3 (AFTER's own delay and EVERY's own interval
+ *   share this same pair -- confirmed empirically), UNTIL in FPR4-5.
  *
  *   WAIT is SVC #6 (delta-time), #7 (UNTIL), #8 (event-expression), or
  *   #9 (DEPENDENT -- USA003087 13.5: "WAITING until all its dependent
@@ -324,6 +331,25 @@ typedef struct {
     uint32_t psw1, psw2;
 } TaskContext;
 
+/* SCHEDULE's cyclic-recycling mode -- the FLAGS word's own 2-bit field
+ * (bits 6-7, values 0x00/0x40/0x80/0xC0 -- see halucp.c's own FLAGS-bit
+ * decode and this file's SVC-protocol header comment), confirmed
+ * empirically against three real compiled programs (REPEAT bare,
+ * REPEAT AFTER, and the already-known REPEAT EVERY): USA003087 23.5's
+ * "IMMEDIATE RECYCLING" (bare REPEAT, no numeric parameter -- next cycle
+ * starts the instant the previous one's CLOSE runs), "RECYCLING AT
+ * SPECIFIED INTERVALS" (REPEAT EVERY, already implemented -- fixed
+ * interval measured from the START of the previous cycle, phase-
+ * anchored to avoid drift), and "CONSTANT INTERCYCLE DELAY" (REPEAT
+ * AFTER, a fixed delay measured from the END of the previous cycle --
+ * no phase anchor needed, by definition it can never drift). */
+typedef enum {
+    SCHED_REPEAT_NONE = 0,
+    SCHED_REPEAT_BARE,   /* FLAGS 0x0040 */
+    SCHED_REPEAT_EVERY,  /* FLAGS 0x0080 */
+    SCHED_REPEAT_AFTER,  /* FLAGS 0x00C0 */
+} RepeatMode;
+
 typedef struct {
     TaskState state;
     uint32_t pdeAddr;    /* halfword address of this task's 6-halfword PDE */
@@ -339,12 +365,40 @@ typedef struct {
     bool hasRun;
 
     bool hasRepeat;
+    RepeatMode repeatMode;    /* SCHED_REPEAT_NONE whenever !hasRepeat; the
+                                * cadence used to re-arm at CLOSE (see
+                                * sched_handle_task_close) -- BARE/AFTER
+                                * ignore repeatPhaseRefUs entirely (no phase
+                                * anchor, see RepeatMode's own comment) */
     double repeatIntervalUs;  /* 0 if one-shot (TASK_STATE_READY, not yet used) */
     double repeatPhaseRefUs;  /* anchor for drift-free EVERY re-arming: next
                                 * deadline is always phaseRef + N*interval for
                                 * the smallest N putting it in the future,
                                 * never "now + interval" (which would drift by
-                                * however late the previous firing ran) */
+                                * however late the previous firing ran) --
+                                * meaningless for BARE/AFTER, see above */
+
+    /* USA003087 23.5's UNTIL-time cancellation clause (any of the three
+     * cyclic SCHEDULE forms may carry one, FLAGS bit 0x0100, value in
+     * FPR4-5 -- confirmed empirically alongside the REPEAT-mode bits
+     * above): an absolute cpu->elapsedTimeUs value (same units/origin as
+     * wakeDeadlineUs) past which this task cancels instead of re-arming.
+     * "Cancellation actually takes place at the end of the first cycle
+     * which finishes later than the specified time" (checked at CLOSE,
+     * sched_handle_task_close) "...with the provision that if the
+     * cancellation condition is met in the interval between cycles,
+     * cancellation takes place immediately" (checked every DORMANT task
+     * on every sched_dispatch() call, see its own pre-pass) -- both
+     * checks reuse the exact same cancelled-at-CLOSE /
+     * sched_cancel_idx_and_dependents machinery CANCEL itself uses,
+     * since USA003087 23.6 describes this as the same underlying
+     * cancellation mechanism, not a separate one ("cancellation
+     * conditions in SCHEDULE statements cannot be dynamically modified;
+     * to cancel a cyclic process arbitrarily, the CANCEL statement must
+     * therefore be used" -- implying REPEAT...UNTIL and CANCEL differ
+     * only in how cancellation is *triggered*, not in what it *does*). */
+    bool hasUntilTime;
+    double untilTimeUs;
 
     double wakeDeadlineUs;    /* meaningful when WAITING or DORMANT, and
                                 * only when eventDescAddr is 0 -- see below */
@@ -460,33 +514,38 @@ void sched_init(Scheduler *s);
 
 /* Called from halucp.c's SVC dispatch for SVC #1 (SCHEDULE) once its
  * FLAGS word is recognized as one of the signatures this cut supports
- * (TASK, with any combination of a plain/AT/IN initiation and a plain/
- * REPEAT EVERY cycling -- see halucp.c's own FLAGS-bit decode).
- * priority/pdeAddr/repeatIntervalUs are already decoded by the caller
- * (priority from the SVC param byte, pdeAddr via mcm_get16,
- * repeatIntervalUs from FPR2-3 via floatIBM.h). initialWakeDeadlineUs is
- * the absolute cpu->elapsedTimeUs value at which the task should first
- * become ready -- plain SCHEDULE passes cpu->elapsedTimeUs itself (due
- * now, unchanged from this function's original due-immediately-only
- * behavior); AT/IN pass an already-computed absolute deadline (already
- * clamped to not be in the past, matching sched_handle_wait_until_svc's
- * "does not leave READY" precedent for an AT time already passed). This
- * same value anchors REPEAT EVERY's own phase reference too, so
- * "SCHEDULE X IN 1.5, REPEAT EVERY 1.0" fires at 1.5, 2.5, 3.5, ...
- * (anchored to the actual first-due time), not 0, 1, 2, ... Never
- * changes which context is live -- the calling program's own NIA just
- * continues normally afterward, matching how every other already-
- * handled SVC (SEND ERROR, SIGNAL/SET/RESET) behaves. dependent is
- * whether FLAGS' 0x0020 bit was set (USA003087 13.4's DEPENDENT
- * keyword): if true, the new task's own parentIdx becomes whichever
- * task is currently running (lazily engaging the primal pseudo-task
- * first, same as sched_handle_wait_svc's own lazy-allocation, if
- * scheduling has never been engaged before -- a program's very first
- * statement can legally be a DEPENDENT SCHEDULE). Always returns true
- * (this file only gets called once the FLAGS word is already confirmed
- * recognized). */
+ * (TASK, with any combination of a plain/AT/IN initiation, a plain/
+ * BARE/EVERY/AFTER cycling, and an UNTIL-time cancellation clause --
+ * see halucp.c's own FLAGS-bit decode). priority/pdeAddr/repeatMode/
+ * repeatIntervalUs/untilTimeUs are already decoded by the caller
+ * (priority from the SVC param byte, pdeAddr via mcm_get16, repeatMode
+ * from FLAGS bits 6-7, repeatIntervalUs from FPR2-3 when repeatMode is
+ * EVERY or AFTER, untilTimeUs from FPR4-5 when hasUntilTime, all via
+ * floatIBM.h). initialWakeDeadlineUs is the absolute cpu->elapsedTimeUs
+ * value at which the task should first become ready -- plain SCHEDULE
+ * passes cpu->elapsedTimeUs itself (due now, unchanged from this
+ * function's original due-immediately-only behavior); AT/IN pass an
+ * already-computed absolute deadline (already clamped to not be in the
+ * past, matching sched_handle_wait_until_svc's "does not leave READY"
+ * precedent for an AT time already passed). This same value anchors
+ * REPEAT EVERY's own phase reference too, so "SCHEDULE X IN 1.5, REPEAT
+ * EVERY 1.0" fires at 1.5, 2.5, 3.5, ... (anchored to the actual
+ * first-due time), not 0, 1, 2, ... -- meaningless for BARE/AFTER (see
+ * RepeatMode's own comment). Never changes which context is live -- the
+ * calling program's own NIA just continues normally afterward, matching
+ * how every other already-handled SVC (SEND ERROR, SIGNAL/SET/RESET)
+ * behaves. dependent is whether FLAGS' 0x0020 bit was set (USA003087
+ * 13.4's DEPENDENT keyword): if true, the new task's own parentIdx
+ * becomes whichever task is currently running (lazily engaging the
+ * primal pseudo-task first, same as sched_handle_wait_svc's own lazy-
+ * allocation, if scheduling has never been engaged before -- a
+ * program's very first statement can legally be a DEPENDENT SCHEDULE).
+ * Always returns true (this file only gets called once the FLAGS word
+ * is already confirmed recognized). */
 bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr,
-                                double initialWakeDeadlineUs, double repeatIntervalUs, bool dependent);
+                                double initialWakeDeadlineUs, RepeatMode repeatMode,
+                                double repeatIntervalUs, bool hasUntilTime, double untilTimeUs,
+                                bool dependent);
 
 /* Called from halucp.c's SVC dispatch for SVC #6 (delta-time WAIT).
  * Suspends the currently-running context (lazily creating the "primal"

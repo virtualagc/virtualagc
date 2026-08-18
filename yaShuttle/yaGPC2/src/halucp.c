@@ -419,29 +419,41 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
              * "TASK" marker (set on every signature this cut supports;
              * a PROGRAM-process target, if that ever sets a different
              * bit, is out of scope), 0x0004 = AT, 0x0008 = IN, 0x0020 =
-             * DEPENDENT, 0x0080 = REPEAT EVERY (0x0081 was this cut's
-             * very first, and still most-tested, signature: TASK +
-             * REPEAT EVERY together). AT-and-IN-together (0x000d
-             * combined with TASK) is not a third initiation mode of its
-             * own -- confirmed empirically that the real compiler reuses
-             * those same two bits combined as the ON (event-expression)
-             * marker instead; see the dedicated branch below and
-             * schedule.h's own header comment. DEPENDENT combined with
-             * ON is not empirically confirmed and stays unrecognized.
-             * Neither CANCEL/REPEAT-AFTER/REPEAT-UNTIL nor ON-combined-
-             * with-REPEAT-EVERY are recognized -- any FLAGS word with a
-             * bit outside this set falls through to the unhandled-trap
-             * path below, exactly like today, rather than mishandling a
-             * variant this cut doesn't understand. */
+             * DEPENDENT, bits 6-7 (mask 0x00C0) = REPEAT cycling mode
+             * (0x00=none, 0x40=BARE/immediate, 0x80=EVERY, 0xC0=AFTER --
+             * see RepeatMode's own comment in schedule.h; 0x0081 was this
+             * cut's very first, and still most-tested, signature: TASK +
+             * REPEAT EVERY together), 0x0100 = an UNTIL-time cancellation
+             * clause is present (confirmed empirically alongside each
+             * REPEAT variant: REPEAT bare/AFTER/EVERY all compose freely
+             * with it). AT-and-IN-together (0x000d combined with TASK) is
+             * not a third initiation mode of its own -- confirmed
+             * empirically that the real compiler reuses those same two
+             * bits combined as the ON (event-expression) marker instead;
+             * see the dedicated branch below and schedule.h's own header
+             * comment. DEPENDENT combined with ON is not empirically
+             * confirmed and stays unrecognized. Neither CANCEL (its own
+             * separate SVC, not a FLAGS bit at all) nor REPEAT ...
+             * WHILE/UNTIL event-expr nor ON-combined-with-REPEAT are
+             * recognized -- any FLAGS word with a bit outside this set
+             * falls through to the unhandled-trap path below, exactly
+             * like today, rather than mishandling a variant this cut
+             * doesn't understand. */
             uint32_t flags = mcm_get16(&h->cpu->mainStorage, ea + 1);
-            const uint32_t recognizedMask = 0x0001 | 0x0004 | 0x0008 | 0x0020 | 0x0080;
+            const uint32_t recognizedMask = 0x0001 | 0x0004 | 0x0008 | 0x0020 | 0x00C0 | 0x0100;
             bool hasTask = (flags & 0x0001) != 0;
             bool hasAt = (flags & 0x0004) != 0;
             bool hasIn = (flags & 0x0008) != 0;
             bool hasDependent = (flags & 0x0020) != 0;
-            bool hasRepeatEvery = (flags & 0x0080) != 0;
+            uint32_t repeatBits = flags & 0x00C0;
+            RepeatMode repeatMode = repeatBits == 0x0040 ? SCHED_REPEAT_BARE
+                                   : repeatBits == 0x0080 ? SCHED_REPEAT_EVERY
+                                   : repeatBits == 0x00C0 ? SCHED_REPEAT_AFTER
+                                                           : SCHED_REPEAT_NONE;
+            bool hasRepeatEvery = repeatMode != SCHED_REPEAT_NONE; /* for the ON-branch's own exclusion check below, unchanged */
+            bool hasUntilTime = (flags & 0x0100) != 0;
             bool hasOn = hasAt && hasIn;
-            if (hasTask && hasOn && !hasDependent && !hasRepeatEvery && (flags & ~recognizedMask) == 0) {
+            if (hasTask && hasOn && !hasDependent && !hasRepeatEvery && !hasUntilTime && (flags & ~recognizedMask) == 0) {
                 /* SCHEDULE label ON <event-expr> PRIORITY(p) -- ea+2 is
                  * the target's own PDE (same PROCESS field as every
                  * other SCHEDULE variant), ea+3 is a pointer to the
@@ -471,10 +483,10 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                 /* AT/IN's own time value is in FPR0-1 -- confirmed
                  * empirically (a real compiled SCHEDULE...IN/AT loads
                  * its argument there), the same register pair delta-time
-                 * WAIT/WAIT UNTIL already use. REPEAT EVERY's own
-                 * interval stays in FPR2-3, unrelated and independent --
-                 * a SCHEDULE can carry both an AT/IN initiation and a
-                 * REPEAT EVERY cycling clause at once. */
+                 * WAIT/WAIT UNTIL already use. REPEAT EVERY/AFTER's own
+                 * interval/delay stays in FPR2-3, unrelated and
+                 * independent -- a SCHEDULE can carry both an AT/IN
+                 * initiation and a REPEAT cycling clause at once. */
                 double initialWakeDeadlineUs;
                 if (hasIn) {
                     FloatIBM in = fibm_from64(register_get32(cpu_f(h->cpu, 0)), register_get32(cpu_f(h->cpu, 1)));
@@ -491,14 +503,37 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
                     initialWakeDeadlineUs = h->cpu->elapsedTimeUs;
                 }
 
+                /* REPEAT EVERY's own interval and REPEAT AFTER's own
+                 * delay share this same FPR2-3 pair -- confirmed
+                 * empirically (a real compiled `REPEAT AFTER 2.0` loads
+                 * FP2-3 exactly like `REPEAT EVERY 1.0` does). Bare
+                 * REPEAT has no numeric parameter of its own -- FPR2-3
+                 * stays whatever it already was, but repeatIntervalUs is
+                 * simply never read for SCHED_REPEAT_BARE (see
+                 * sched_handle_task_close's own re-arm dispatch). */
                 double repeatIntervalUs = 0.0;
-                if (hasRepeatEvery) {
+                if (repeatMode == SCHED_REPEAT_EVERY || repeatMode == SCHED_REPEAT_AFTER) {
                     FloatIBM every = fibm_from64(register_get32(cpu_f(h->cpu, 2)), register_get32(cpu_f(h->cpu, 3)));
                     repeatIntervalUs = fibm_to_float(&every) * 1e6;
                 }
 
+                /* UNTIL's own time value is in FPR4-5 -- confirmed
+                 * empirically -- and, like AT, is an absolute time
+                 * "after the real time origin" (USA003087 23.5), not a
+                 * delta; no past-clamp is applied here the way AT's own
+                 * is, since an already-past UNTIL is exactly the case
+                 * sched_dispatch's own between-cycles cancellation
+                 * pre-pass and sched_handle_task_close's own CLOSE-time
+                 * check are built to catch gracefully. */
+                double untilTimeUs = 0.0;
+                if (hasUntilTime) {
+                    FloatIBM until = fibm_from64(register_get32(cpu_f(h->cpu, 4)), register_get32(cpu_f(h->cpu, 5)));
+                    untilTimeUs = fibm_to_float(&until) * 1e6;
+                }
+
                 return sched_handle_schedule_svc(&h->scheduler, h->cpu, (int)priority, pdeAddr,
-                                                  initialWakeDeadlineUs, repeatIntervalUs, hasDependent);
+                                                  initialWakeDeadlineUs, repeatMode, repeatIntervalUs,
+                                                  hasUntilTime, untilTimeUs, hasDependent);
             }
         } else if (svcLow == 0x06) {
             /* WAIT, delta-time variant. */

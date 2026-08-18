@@ -214,12 +214,25 @@ F('Real-Time: SCHEDULE', 'SCHEDULE ... AT time (delayed initiation, absolute)',
   "test/fixtures/scheduleat.hal, byte-diffed against yaHALMAT2 via test_scheduler.sh.")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT (cyclic, immediate recycling)',
   'Next cycle starts immediately when one pass ends, until an UNTIL condition cancels it.',
-  'USA003087 §23.5', 'not_implemented', 'Same FLAGS-word gate.', 'untested')
+  'USA003087 §23.5', 'implemented',
+  "FLAGS bits 6-7 (mask 0x00C0) == 0x40 (confirmed empirically against a real compiled program, "
+  "alongside EVERY==0x80 and AFTER==0xC0 -- see RepeatMode in schedule.h). No numeric parameter of "
+  "its own; sched_handle_task_close re-arms wakeDeadlineUs to cpu->elapsedTimeUs itself (the CLOSE "
+  "instant), not phase-anchored the way EVERY is.",
+  'tested_dedicated', "test/fixtures/repeatbare.hal (byte-diffed via test_scheduler.sh) and "
+  "test_schedule.c's test_repeat_bare_and_after_cadence (deterministic: confirms re-arm lands on "
+  "the CLOSE instant, not a future deadline). See problems.md 7.16.")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT AFTER delay (cyclic, fixed intercycle delay)',
   'Fixed WAITING delay between the end of one cycle and the start of the next.',
-  'USA003087 §23.5', 'not_implemented',
-  "Explicitly out of scope per schedule.h's own header comment (REPEAT EVERY implemented, "
-  "REPEAT AFTER flagged as 'mechanically similar follow-on once EVERY works').", 'untested')
+  'USA003087 §23.5', 'implemented',
+  "FLAGS bits 6-7 == 0xC0 (see BARE's own entry above); delay value shares REPEAT EVERY's own "
+  "FPR2-3 pair (confirmed empirically: `REPEAT AFTER 2.0` loads FP2-3 exactly like `REPEAT EVERY "
+  "1.0` does). Re-arms to cpu->elapsedTimeUs + delay at CLOSE time -- no phase anchor needed (by "
+  "definition it's always measured from THIS cycle's own end, so it can't drift the way a naive "
+  "\"now + interval\" EVERY implementation would).",
+  'tested_dedicated', "test/fixtures/repeatafter.hal (byte-diffed via test_scheduler.sh) and "
+  "test_schedule.c's test_repeat_bare_and_after_cadence (deterministic: confirms re-arm lands on "
+  "CLOSE-instant-plus-delay). See problems.md 7.16.")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT EVERY interval (cyclic, fixed-interval recycling)',
   'Each new cycle starts a fixed interval after the START of the previous one (phase-anchored).',
   'USA003087 §23.5', 'implemented',
@@ -228,9 +241,30 @@ F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT EVERY interval (cyclic, fixed-inte
   'tested_dedicated', "test_schedule.c scenario 2 (4 firings in a 3.5s WAIT) and countup.hal (200 firings, byte-identical to yaHALMAT2's own real-time-paced output).")
 F('Real-Time: SCHEDULE', 'SCHEDULE ... REPEAT ... UNTIL time',
   'Cyclic process cancelled at the end of the first cycle finishing after an absolute time.',
-  'USA003087 §23.5', 'not_implemented',
-  'No UNTIL/cancellation-time field is decoded anywhere in halucp.c/schedule.c; a REPEAT EVERY '
-  'task runs forever (until the primal process itself ends).', 'untested')
+  'USA003087 §23.5', 'implemented',
+  "FLAGS bit 8 (0x0100), confirmed empirically alongside each REPEAT variant (bare/EVERY/AFTER all "
+  "compose freely with it); an absolute cpu->elapsedTimeUs value (\"seconds after the real time "
+  "origin\", same as AT) in FPR4-5. Checked in two places, matching the manual's own two-part rule "
+  "verbatim: (1) at CLOSE (sched_handle_task_close) -- \"cancellation actually takes place at the "
+  "end of the first cycle which finishes later than the specified time\"; (2) on every "
+  "sched_dispatch() call, for any DORMANT task (sched_dispatch's own pre-pass) -- \"if the "
+  "cancellation condition is met in the interval between cycles, cancellation takes place "
+  "immediately.\" Both reuse sched_cancel_idx_and_dependents, the same mechanism the explicit "
+  "CANCEL statement uses (USA003087 23.6 describes REPEAT...UNTIL and CANCEL as the same underlying "
+  "cancellation mechanism, differing only in trigger). A real internal bug was caught while "
+  "verifying case (2): sched_dispatch's own virtual-time fast-forward wasn't considering a DORMANT "
+  "task's own UNTIL time as a candidate deadline, so with nothing else pending in between it could "
+  "overshoot straight past the cancellation instant to the task's own next (later) wake time -- "
+  "invisible in the cancel/no-cancel outcome itself but wrong in cpu->elapsedTimeUs, directly "
+  "observable via RUNTIME()/DATE()/CLOCKTIME(); fixed by adding UNTIL time as a fast-forward "
+  "candidate too. Independently confirmed via yaHALMAT2's own binary: it had the identical bug "
+  "(same root cause -- a DORMANT cyclic task's own UNTIL time wasn't a fast-forward candidate on "
+  "their side either), cross-checked live over the direct cross-session channel.",
+  'tested_dedicated', "test/fixtures/repeateveryuntil.hal and repeataftercancel.hal (byte-diffed "
+  "via test_scheduler.sh -- the latter is the direct regression test for the fast-forward-overshoot "
+  "bug, using DEPENDENT + WAIT FOR DEPENDENT + RUNTIME() to make the exact cancellation instant "
+  "observable) and test_schedule.c's test_repeat_until_time_cancels_at_close_and_between_cycles "
+  "(deterministic, both check-sites). See problems.md 7.16.")
 F('Real-Time: SCHEDULE', 'SCHEDULE cycle-overrun runtime error',
   "If a REPEAT EVERY cycle's own execution time exceeds its interval, the language defines this "
   "as a documented runtime error, not a silently-absorbed skip.",

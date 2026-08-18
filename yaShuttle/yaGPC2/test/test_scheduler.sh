@@ -210,4 +210,26 @@ run_case "waitforeventvarand/signal" "signal" "fixtures/waitforeventvarand.fcm" 
 TZ=UTC run_case "datetimefn/burst"  "burst"  "fixtures/datetimefn.fcm" "fixtures/datetimefn-lnk101.json" "fixtures/datetimefn_golden.txt" "--date-time-epoch" "951912000"
 TZ=UTC run_case "datetimefn/signal" "signal" "fixtures/datetimefn.fcm" "fixtures/datetimefn-lnk101.json" "fixtures/datetimefn_golden.txt" "--date-time-epoch" "951912000"
 
+# SCHEDULE ... REPEAT's remaining variants (USA003087 23.5): bare REPEAT
+# (immediate recycling, cancelled by a small UNTIL time checked at
+# CLOSE), REPEAT AFTER (constant intercycle delay, no UNTIL), REPEAT
+# EVERY ... UNTIL (UNTIL-time cancellation layered on the already-known
+# EVERY cadence), and REPEAT AFTER ... UNTIL cancelling *between* cycles
+# -- the last one is the direct regression test for a real internal bug
+# (sched_dispatch's own virtual-time fast-forward wasn't considering a
+# DORMANT task's own UNTIL time as a candidate deadline, so it could
+# overshoot straight past the cancellation instant to the task's own
+# next wake time -- only observable via RUNTIME()'s own value once
+# nothing else in the program is scheduled in that gap, exactly what
+# this fixture's own DEPENDENT + WAIT FOR DEPENDENT + RUNTIME() shape is
+# built to expose) -- see problems.md 7.16.
+run_case "repeatbare/burst"  "burst"  "fixtures/repeatbare.fcm" "fixtures/repeatbare-lnk101.json" "fixtures/repeatbare_golden.txt"
+run_case "repeatbare/signal" "signal" "fixtures/repeatbare.fcm" "fixtures/repeatbare-lnk101.json" "fixtures/repeatbare_golden.txt"
+run_case "repeatafter/burst"  "burst"  "fixtures/repeatafter.fcm" "fixtures/repeatafter-lnk101.json" "fixtures/repeatafter_golden.txt"
+run_case "repeatafter/signal" "signal" "fixtures/repeatafter.fcm" "fixtures/repeatafter-lnk101.json" "fixtures/repeatafter_golden.txt"
+run_case "repeateveryuntil/burst"  "burst"  "fixtures/repeateveryuntil.fcm" "fixtures/repeateveryuntil-lnk101.json" "fixtures/repeateveryuntil_golden.txt"
+run_case "repeateveryuntil/signal" "signal" "fixtures/repeateveryuntil.fcm" "fixtures/repeateveryuntil-lnk101.json" "fixtures/repeateveryuntil_golden.txt"
+run_case "repeataftercancel/burst"  "burst"  "fixtures/repeataftercancel.fcm" "fixtures/repeataftercancel-lnk101.json" "fixtures/repeataftercancel_golden.txt"
+run_case "repeataftercancel/signal" "signal" "fixtures/repeataftercancel.fcm" "fixtures/repeataftercancel-lnk101.json" "fixtures/repeataftercancel_golden.txt"
+
 exit $fail

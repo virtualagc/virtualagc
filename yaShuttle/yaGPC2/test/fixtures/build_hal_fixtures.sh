@@ -209,6 +209,24 @@
 #                          found this (a plain INTEGER D silently
 #                          truncates per item 8's own documented
 #                          double-to-single conversion, not a bug).
+#   repeatbare.fcm         <- repeatbare.hal, repeatafter.fcm <-
+#                          repeatafter.hal, repeateveryuntil.fcm <-
+#                          repeateveryuntil.hal, repeataftercancel.fcm <-
+#                          repeataftercancel.hal (all checked in
+#                          alongside this script) -- SCHEDULE ...
+#                          REPEAT's remaining variants (USA003087 23.5):
+#                          bare REPEAT (immediate recycling, cancelled by
+#                          a small UNTIL time reached at CLOSE), REPEAT
+#                          AFTER (constant intercycle delay, no UNTIL),
+#                          REPEAT EVERY ... UNTIL (already-implemented
+#                          EVERY cadence plus a real UNTIL-time
+#                          cancellation), and REPEAT AFTER ... UNTIL
+#                          cancelling *between* cycles (DEPENDENT +
+#                          WAIT FOR DEPENDENT + RUNTIME() to observe the
+#                          exact virtual-time instant cancellation
+#                          happens at, not overshooting to the would-be
+#                          next cycle -- see problems.md 7.16 for the
+#                          real internal bug this last one caught).
 set -eu
 
 HAL_SRC_DIR="/home/rburkey/git/virtualagc/yaShuttle"
@@ -246,6 +264,10 @@ WAITFOREVENTVAR_HAL="$(dirname "$0")/waitforeventvar.hal"
 WAITFOREVENTVARBLOCK_HAL="$(dirname "$0")/waitforeventvarblock.hal"
 WAITFOREVENTVARAND_HAL="$(dirname "$0")/waitforeventvarand.hal"
 DATETIMEFN_HAL="$(dirname "$0")/datetimefn.hal"
+REPEATBARE_HAL="$(dirname "$0")/repeatbare.hal"
+REPEATAFTER_HAL="$(dirname "$0")/repeatafter.hal"
+REPEATEVERYUNTIL_HAL="$(dirname "$0")/repeateveryuntil.hal"
+REPEATAFTERCANCEL_HAL="$(dirname "$0")/repeataftercancel.hal"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -296,5 +318,9 @@ build "$WAITFOREVENTVAR_HAL" EVTEST waitforeventvar
 build "$WAITFOREVENTVARBLOCK_HAL" EVBLOCK waitforeventvarblock
 build "$WAITFOREVENTVARAND_HAL" EVAND waitforeventvarand
 build "$DATETIMEFN_HAL" DTFN datetimefn
+build "$REPEATBARE_HAL" REPBARE repeatbare
+build "$REPEATAFTER_HAL" REPAFTR repeatafter
+build "$REPEATEVERYUNTIL_HAL" REPEVUNT repeateveryuntil
+build "$REPEATAFTERCANCEL_HAL" REPACNCL repeataftercancel
 
-echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm (+ -lnk101.json)"
+echo "Rebuilt hello.fcm, read_write.fcm, read_eof_onerror.fcm, countup.fcm, waituntil.fcm, terminate.fcm, selfterminate.fcm, updatepriority.fcm, prio.fcm, runtimeprio.fcm, processboolean.fcm, schedulein.fcm, scheduleat.fcm, schedulerepeat.fcm, waitfor.fcm, waitfornot.fcm, waitforand.fcm, waitforor.fcm, scheduleon.fcm, dependent.fcm, dependentin.fcm, dependentrepeat.fcm, dependentclose.fcm, waitfordependent.fcm, cancel.fcm, selfcancel.fcm, cancelnamed.fcm, exclusive.fcm, exclusivetwo.fcm, exclusivecontend.fcm, waitforeventvar.fcm, waitforeventvarblock.fcm, waitforeventvarand.fcm, datetimefn.fcm, repeatbare.fcm, repeatafter.fcm, repeateveryuntil.fcm, repeataftercancel.fcm (+ -lnk101.json)"

@@ -3668,6 +3668,108 @@ produced the next day's `DATE()` and a small positive `CLOCKTIME()`.
 `hal-runtime-features.db` rows 96/97 updated from `not_implemented` to
 `implemented`/`tested_dedicated`.
 
+### 7.16 `SCHEDULE ... REPEAT`'s remaining cadences (bare, AFTER) and UNTIL-time cancellation — done, one real fast-forward bug found and independently confirmed on `yaHALMAT2`'s own side too
+
+Self-selected from the survey (rows 7/8/10 of `hal-runtime-features.db`):
+only `REPEAT EVERY` had ever been implemented (item #6, long before this
+session's later items); bare `REPEAT` (immediate recycling), `REPEAT
+AFTER` (constant intercycle delay), and any `UNTIL`-time cancellation
+clause were all still `not_implemented`, despite `schedule.h`'s own
+header comment flagging `REPEAT AFTER` specifically as a "mechanically
+similar follow-on once EVERY works." `REPEAT ... WHILE/UNTIL event-expr`
+(row 13, a materially different mechanism needing the event-expression
+evaluator) was deliberately left out of this pass's scope.
+
+**FLAGS-word bits traced empirically** against four real compiled
+programs (bare `REPEAT UNTIL`, `REPEAT AFTER` alone, `REPEAT EVERY ...
+UNTIL`, and `REPEAT AFTER ... UNTIL`): bits 6-7 (mask `0x00C0`) encode
+the cycling mode as a 2-bit field — `0x00`=none, `0x40`=bare, `0x80`=
+EVERY (already known), `0xC0`=AFTER — confirming the top-of-file header
+comment's own long-standing "REPEAT none/REPEAT/EVERY/AFTER" prediction
+was a real 2-bit field, not four independent bits. Bit 8 (`0x0100`)
+marks an `UNTIL`-time clause present, composing freely with every
+`REPEAT` variant. `REPEAT AFTER`'s own delay value shares `REPEAT
+EVERY`'s FPR2-3 pair exactly (confirmed via instruction trace: `REPEAT
+AFTER 2.0` loads FP2-3 identically to `REPEAT EVERY 1.0`). `UNTIL`'s own
+value is in FPR4-5, and — like `AT` — is an absolute "seconds after the
+real time origin," not a delta from "now."
+
+**Re-arm semantics**, each cadence distinct (`RepeatMode` enum,
+`schedule.h`): `EVERY` keeps its existing phase-anchored re-arm
+(`phaseRef + N*interval`, never drifting from however late a firing
+ran); `AFTER` re-arms to `elapsedTimeUs + delay` at CLOSE time — no
+phase anchor needed, since by definition it's always measured from
+*this* cycle's own end, so it can't drift; `BARE` re-arms to
+`elapsedTimeUs` itself (the CLOSE instant) — no numeric parameter at
+all, the next cycle is due immediately.
+
+**`UNTIL`-time cancellation checked at two sites**, matching
+`USA003087` §23.5's own two-part rule verbatim: (1) at CLOSE
+(`sched_handle_task_close`) — "cancellation actually takes place at the
+end of the first cycle which finishes later than the specified time";
+(2) on every `sched_dispatch()` call, for any `DORMANT` task
+(`sched_dispatch`'s own new pre-pass) — "if the cancellation condition
+is met in the interval between cycles, cancellation takes place
+immediately." Both reuse `sched_cancel_idx_and_dependents` verbatim, the
+same mechanism the explicit `CANCEL` statement already uses — `§23.6`
+describes `REPEAT...UNTIL` and `CANCEL` as the same underlying
+cancellation mechanism, differing only in what triggers it ("cancellation
+conditions in SCHEDULE statements cannot be dynamically modified; to
+cancel a cyclic process arbitrarily, the CANCEL statement must therefore
+be used"), so this correctly inherits the same RUNNING-vs-DORMANT
+asymmetry already established for `CANCEL` (a `RUNNING` target's own
+dependents are naturally waited for, not force-cancelled; only a
+`DORMANT` target's between-cycles cancellation cascades immediately —
+see `ScheduledTask.cancelled`'s own comment).
+
+**A real internal bug, caught while verifying the between-cycles case
+specifically, not by inspection:** `sched_dispatch`'s own virtual-time
+fast-forward step (advances `cpu->elapsedTimeUs` to "whatever's next"
+when nothing is immediately ready) only ever considered each pending
+task's own `wakeDeadlineUs` as a candidate, never a `DORMANT` task's own
+`UNTIL` time. Whenever `UNTIL` fell strictly between a cycle's own CLOSE
+and that same task's next `wakeDeadlineUs` — e.g. `REPEAT AFTER 10.0
+UNTIL 3.0`, with nothing else in the whole program scheduled in that
+8-second gap — the fast-forward jumped straight past the cancellation
+instant to the task's own next (much later) wake time before the
+pre-pass's own check ever got a chance to run at the *correct* instant.
+The cancel/no-cancel *outcome* was unaffected (still correctly
+cancelled, just later than it should have registered), which is exactly
+why this needed a fixture built specifically to expose it rather than
+just checking cycle counts: `DECLARE ... DEPENDENT`, `WAIT FOR
+DEPENDENT`, then `RUNTIME()` immediately after — since a
+dependent-satisfied wakeup goes through `TASK_STATE_READY`, bypassing
+any further fast-forward, whatever `cpu->elapsedTimeUs` the cancellation
+left behind is exactly what `RUNTIME()` reports. Reverting the fix
+locally and re-running that exact fixture confirmed the bug directly:
+`RUNTIME()` read `10.0` (the overshot wake time) without the fix, `3.0`
+(the correct `UNTIL` instant) with it. Fixed by adding a `DORMANT`
+task's own `untilTimeUs` as an additional fast-forward candidate,
+alongside `wakeDeadlineUs`.
+
+**Independently confirmed on `yaHALMAT2`'s own side too**, over the
+direct cross-session channel: cross-checking the same fixture against
+their binary first showed a *different* result (2 firings, `RUNTIME()`≈
+10.0, i.e. the same overshoot) — rather than assume either side was
+right, both of us re-verified against `USA003087` §23.5's own text
+directly. They confirmed my reading was correct and reproduced the
+identical root cause on their own side (their own fast-forward/advance-
+to-next-wake also never treated a `DORMANT` cyclic task's `UNTIL` time
+as a candidate), and are fixing theirs to match. A genuine case of two
+independent implementations converging on the same real bug from the
+same underlying design gap, caught by cross-checking rather than either
+side's own test suite alone.
+
+Four new fixtures — `repeatbare.hal`, `repeatafter.hal`,
+`repeateveryuntil.hal`, `repeataftercancel.hal` (the last one is the
+direct regression test for the fast-forward-overshoot bug) — exercised
+by `test_scheduler.sh` under both `--pacing` modes; two new deterministic
+`test_schedule.c` scenarios (`test_repeat_bare_and_after_cadence`,
+`test_repeat_until_time_cancels_at_close_and_between_cycles`).
+`hal-runtime-features.db` rows for bare `REPEAT`, `REPEAT AFTER`, and
+`REPEAT ... UNTIL time` updated from `not_implemented` to
+`implemented`/`tested_dedicated`.
+
 ---
 
 ## Methodology and caveats

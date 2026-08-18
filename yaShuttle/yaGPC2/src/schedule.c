@@ -318,6 +318,28 @@ static uint32_t decode_pde_far_pointer(CPU *cpu, uint32_t raw) {
  * eventually due, but is handled safely rather than looping forever. */
 static void sched_dispatch(Scheduler *s, CPU *cpu) {
     for (;;) {
+        /* USA003087 23.5: "...with the provision that if the cancellation
+         * condition is met in the interval between cycles, cancellation
+         * takes place immediately" -- a DORMANT task (between firings, or
+         * never yet initiated) whose own UNTIL time has already passed is
+         * cancelled right here, before ever being considered for
+         * dispatch, rather than waiting for its own wakeDeadlineUs. Re-
+         * checked on every sched_dispatch() call, including after each
+         * fast-forward retry below, so a task whose UNTIL time falls
+         * strictly between "now" and its own next wakeDeadlineUs is still
+         * caught promptly rather than only at its (never-reached) next
+         * CLOSE. Reuses sched_cancel_idx_and_dependents verbatim -- a
+         * DORMANT target there already cascades cancellation to
+         * dependents immediately, exactly USA003087 23.6's "waiting
+         * between cycles... canceled immediately" semantics, the same
+         * mechanism an explicit CANCEL of a DORMANT target uses. */
+        for (int i = 0; i < s->count; i++) {
+            ScheduledTask *t = &s->tasks[i];
+            if (t->state == TASK_STATE_DORMANT && t->hasUntilTime && cpu->elapsedTimeUs >= t->untilTimeUs) {
+                sched_cancel_idx_and_dependents(s, cpu, i);
+            }
+        }
+
         int best = -1;
         for (int i = 0; i < s->count; i++) {
             ScheduledTask *t = &s->tasks[i];
@@ -385,6 +407,19 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
              * by some other task's own state change. */
             if (t->eventDescAddr != 0 || t->waitingOnCodeLockId != 0 || t->waitingOnDataLockMask != 0) continue;
             if (earliest < 0 || t->wakeDeadlineUs < earliest) earliest = t->wakeDeadlineUs;
+            /* A DORMANT task's own UNTIL time is a candidate deadline too
+             * -- otherwise, whenever it falls strictly before this task's
+             * own next wakeDeadlineUs (e.g. REPEAT AFTER 10.0 UNTIL 8.0,
+             * with nothing else pending in between), the fast-forward
+             * below would jump straight past it to wakeDeadlineUs,
+             * overshooting the cancellation instant. The outcome (this
+             * task never dispatches again) is the same either way, but
+             * cpu->elapsedTimeUs itself -- directly observable via
+             * RUNTIME()/DATE()/CLOCKTIME() -- would end up wrong if
+             * nothing else in the program happens to need the earlier
+             * stop. */
+            if (t->state == TASK_STATE_DORMANT && t->hasUntilTime && (earliest < 0 || t->untilTimeUs < earliest))
+                earliest = t->untilTimeUs;
         }
         if (earliest < 0) {
             /* Nothing scheduled or waiting anywhere that time alone can
@@ -401,7 +436,9 @@ static void sched_dispatch(Scheduler *s, CPU *cpu) {
 }
 
 bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pdeAddr,
-                                double initialWakeDeadlineUs, double repeatIntervalUs, bool dependent) {
+                                double initialWakeDeadlineUs, RepeatMode repeatMode,
+                                double repeatIntervalUs, bool hasUntilTime, double untilTimeUs,
+                                bool dependent) {
     /* DEPENDENT's own parent is whichever task is executing this
      * SCHEDULE statement (USA003087 13.4) -- lazily engage the primal
      * first if scheduling has never been engaged before (same pattern as
@@ -432,8 +469,11 @@ bool sched_handle_schedule_svc(Scheduler *s, CPU *cpu, int priority, uint32_t pd
     t->priority = priority;
     t->isPrimal = false;
     t->parentIdx = dependent ? s->runningIdx : -1;
-    t->hasRepeat = repeatIntervalUs > 0;
+    t->hasRepeat = repeatMode != SCHED_REPEAT_NONE;
+    t->repeatMode = repeatMode;
     t->repeatIntervalUs = repeatIntervalUs;
+    t->hasUntilTime = hasUntilTime;
+    t->untilTimeUs = untilTimeUs;
     /* Plain SCHEDULE's first firing is due immediately at SCHEDULE time
      * (caller passes cpu->elapsedTimeUs itself as initialWakeDeadlineUs
      * in that case) -- confirmed against yaHALMAT2's own output for the
@@ -497,14 +537,38 @@ bool sched_handle_task_close(Scheduler *s, CPU *cpu) {
     ScheduledTask *t = &s->tasks[s->runningIdx];
     if (t->isPrimal) return false; /* the main program's own CLOSE: real halt */
 
-    if (t->hasRepeat && !t->cancelled) {
-        /* Re-arm from the fixed phase reference, not "now" -- avoids
-         * drift from however late this particular firing ran (matches
-         * yaHALMAT2's own REPEAT EVERY policy). Advance by whole
-         * intervals until back in the future relative to elapsedTimeUs,
-         * in case a firing ran long enough to miss more than one. */
-        double next = t->wakeDeadlineUs;
-        while (next <= cpu->elapsedTimeUs) next += t->repeatIntervalUs;
+    /* USA003087 23.5: "cancellation actually takes place at the end of
+     * the first cycle which finishes later than the specified time" --
+     * checked here, at this task's own CLOSE, treating "reached UNTIL
+     * time" exactly like an explicit CANCEL already in effect (the
+     * !t->cancelled condition below): falls through to the same
+     * has-active-dependents-or-free path, not a forced cascade to
+     * dependents (see ScheduledTask.cancelled's own comment on this
+     * asymmetry -- a RUNNING target's dependents are naturally waited
+     * for, not force-cancelled; only a DORMANT target's own between-
+     * cycles cancellation, in sched_dispatch's pre-pass below, cascades
+     * cancellation to dependents immediately). */
+    bool untilTimeReached = t->hasUntilTime && cpu->elapsedTimeUs >= t->untilTimeUs;
+    if (t->hasRepeat && !t->cancelled && !untilTimeReached) {
+        /* Re-arm cadence depends on RepeatMode (see its own comment):
+         * EVERY re-arms from the fixed phase reference, not "now" --
+         * avoids drift from however late this particular firing ran
+         * (matches yaHALMAT2's own REPEAT EVERY policy), advancing by
+         * whole intervals until back in the future relative to
+         * elapsedTimeUs in case a firing ran long enough to miss more
+         * than one. AFTER has no phase reference at all -- its own fixed
+         * delay is always measured from THIS cycle's own end (now), so
+         * it can never drift by construction. BARE has no numeric
+         * parameter -- the next cycle is due immediately (now). */
+        double next;
+        if (t->repeatMode == SCHED_REPEAT_AFTER) {
+            next = cpu->elapsedTimeUs + t->repeatIntervalUs;
+        } else if (t->repeatMode == SCHED_REPEAT_BARE) {
+            next = cpu->elapsedTimeUs;
+        } else { /* SCHED_REPEAT_EVERY */
+            next = t->wakeDeadlineUs;
+            while (next <= cpu->elapsedTimeUs) next += t->repeatIntervalUs;
+        }
         t->wakeDeadlineUs = next;
         t->state = TASK_STATE_DORMANT;
         /* A task's own CLOSE means this firing ran to completion -- there
