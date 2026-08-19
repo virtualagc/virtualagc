@@ -18,6 +18,21 @@ void ap101_exec1(AP101 *gpc) {
     iop_exec(&gpc->iop);
 }
 
+void ap101_tick(AP101 *gpc) {
+    /* CPU-side clock/interrupt advance only -- deliberately does NOT also
+     * call iop_exec() the way ap101_exec1() does. ap101_exec1() steps the
+     * IOP once per CPU *instruction*, an emulator-level 1:1 pairing this
+     * codebase has always relied on; batchrunner_step()'s WAIT-tick loop
+     * (see run.c) can call this many times with no CPU instruction ever
+     * executing in between, so pairing it with iop_exec() here would let
+     * the IOP's own independent MSC/BCE instruction stream run far ahead
+     * of anything that pairing was ever validated for -- confirmed to
+     * actually happen and corrupt unrelated CPU memory (BILDNEW5/GPCIPL's
+     * PCHINTH/PCHERLST program-check dispatch table, INTHNDLR.asm) the
+     * first time this was tried with iop_exec() included. */
+    cpu_tick(&gpc->cpu);
+}
+
 void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, void *servicerCtx) {
     iop_set_servicer(&gpc->iop, fn, servicerCtx);
 }

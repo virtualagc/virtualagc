@@ -582,6 +582,21 @@ void cpu_exec1(CPU *cpu) {
         cpu->elapsedTimeUs += instr_time_us(desc, &v, timePreN, branchTaken);
     }
 
+    cpu_tick(cpu);
+}
+
+/* Counter decrement + interrupt dispatch, split out of cpu_exec1's tail so
+ * a caller can advance it *without* fetching/decoding/executing a real
+ * instruction -- needed for WAIT state (see run.c's batchrunner_step):
+ * real hardware suspends instruction fetch while PSW bit 'w' is set, but
+ * the clock/interrupt facility keeps running, and a still-armed Clock 1/2
+ * (counter1Enabled/counter2Enabled) can independently underflow, go
+ * pending, and (via cpu_check_interrupts, right here) swap in a new PSW
+ * that clears the wait bit and resumes execution at the handler. Without
+ * this split, a WAIT entered while a clock is armed can never wake up on
+ * its own, because nothing ever calls this code again once the run loop
+ * stops fetching instructions. */
+void cpu_tick(CPU *cpu) {
     if (cpu->counter1Enabled) {
         cpu->counter1--;
         if ((int32_t)cpu->counter1 <= 0) {

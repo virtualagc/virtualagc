@@ -29,6 +29,12 @@ void ap101_init(AP101 *gpc);
 void ap101_free(AP101 *gpc);
 
 void ap101_exec1(AP101 *gpc);
+/* CPU-side counter decrement + interrupt dispatch only (no IOP step, no
+ * instruction fetch/execute) -- see cpu.c's cpu_tick() and this function's
+ * own comment (ap101.c) for why IOP stepping is deliberately excluded.
+ * Used by run.c's batchrunner_step to let an armed clock wake the CPU out
+ * of a WAIT state it would otherwise never leave. */
+void ap101_tick(AP101 *gpc);
 void ap101_reset(AP101 *gpc);
 
 /* Installs (or clears, with fn=NULL) an externally-supplied servicer for

@@ -152,6 +152,7 @@ uint32_t cpu_g_shift_cnt(CPU *cpu, uint32_t hw1);
 void cpu_reset(CPU *cpu);
 void cpu_run(CPU *cpu);
 void cpu_exec1(CPU *cpu);
+void cpu_tick(CPU *cpu); /* counter decrement + interrupt dispatch only; see cpu.c */
 
 /* Defined in cpu_instr.c (Phase 5). Mirrors Instruction.decode(hw1,hw2):
  * on a match, fills *v (including v->niaIncr, matching `d.len` after

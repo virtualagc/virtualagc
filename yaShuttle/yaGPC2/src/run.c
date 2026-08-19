@@ -18,6 +18,15 @@ static void halucp_error_cb(void *ctx, const char *msg) {
     fprintf(stderr, "\n*** %s\n\n", msg);
 }
 
+/* Safety bound on batchrunner_step()'s "keep the clock ticking while
+ * WAITing for an armed timer" loop (see its own comment) -- guards
+ * against a clock that's armed but masked off, which for real hardware is
+ * also a genuine deadlock, not something this emulator should spin on
+ * forever. Matches the existing --debug maxSteps cap (see
+ * batchrunner_init(), below) as the codebase's established "give a slow
+ * but real case room, but still bound it" scale. */
+#define WAIT_TICK_LIMIT 10000000L
+
 void batchrunner_init(BatchRunner *r, const Options *opts) {
     memset(r, 0, sizeof(*r));
     r->opts = opts;
@@ -421,9 +430,35 @@ static bool batchrunner_step(BatchRunner *r) {
     }
 
     if (psw_get_wait_state(&r->age.gpc.cpu.psw)) {
-        snprintf(r->stopReason, sizeof r->stopReason, "wait state");
-        r->hasStopReason = true;
-        return false;
+        /* Real hardware: entering WAIT suspends instruction fetch, but the
+         * clock/interrupt facility keeps running underneath it -- an
+         * already-armed Clock 1/2 (see cpu.h's counter1Enabled/
+         * counter2Enabled) can independently underflow and fire, swapping
+         * in a new PSW that clears the wait bit and resumes execution at
+         * the handler (confirmed against BILDNEW5/GPCIPL's own real-time
+         * setup sequence: LHI/ICR arms Clock 1 for 30us, SHW REALTIME,
+         * then SSM WAITMASK enables the Clock 1 mask bit and enters WAIT
+         * -- STM4010, the label right after, is real-time's own Clock-1
+         * handler entry point per INTHNDLR.asm's own comments, so this is
+         * a genuine "sleep until timer" idiom, not a stall). Advance the
+         * clock via ap101_tick() (counter decrement + interrupt dispatch
+         * + IOP step, no instruction fetch) until either the wait clears
+         * or nothing armed could ever clear it -- the latter matches
+         * every fixture in today's corpus, where wait state is really
+         * just a HAL/S program's normal termination and neither counter
+         * is ever enabled, so this loop does not even run for them. */
+        long ticks = 0;
+        while (psw_get_wait_state(&r->age.gpc.cpu.psw) &&
+               (r->age.gpc.cpu.counter1Enabled || r->age.gpc.cpu.counter2Enabled) &&
+               ticks < WAIT_TICK_LIMIT) {
+            ap101_tick(&r->age.gpc);
+            ticks++;
+        }
+        if (psw_get_wait_state(&r->age.gpc.cpu.psw)) {
+            snprintf(r->stopReason, sizeof r->stopReason, "wait state");
+            r->hasStopReason = true;
+            return false;
+        }
     }
 
     return true;
