@@ -229,8 +229,23 @@ void cpu_signal_privileged_op(CPU *cpu) {
 }
 
 void cpu_signal_protection_violation(CPU *cpu) {
+    /* Confirmed against both the manual (AP-101S-instruction-set.txt's
+     * own program-check code table: "AL 0007 CPU STORE PROTECT
+     * VIOLATION") and BILDNEW5.lst's own source (STM1.asm's store-
+     * protect self-test literally does `CHI R7,7  INTPCK INTRP CODE=7
+     * (STORE PROTECT)`) -- 0x0004 is a DIFFERENT program check entirely
+     * ("CPU FIXED POINT OVERFLOW"). Inherited verbatim from gpc/
+     * cpu.coffee's own signalProtectionViolation (`@intCode = 0x0004`),
+     * never caught because nothing in either emulator's corpus ever
+     * triggered a real store-protect violation before BILDNEW5/GPCIPL's
+     * own --ipl-driven boot did this session: PCHINTH's dispatch table
+     * misrouted every violation to SVC026 ("FIXED POINT OVERFLOW")'s
+     * handler instead of the real store-protect handler, whose actual
+     * job (per STM1.asm) is to recognize and resolve the condition
+     * rather than just log it -- so the violation recurred forever
+     * instead of ever being handled. */
     cpu->intPending.programCheck = true;
-    cpu->intCode = 0x0004;
+    cpu->intCode = 0x0007;
 }
 
 void cpu_signal_addressing_exception(CPU *cpu) {
