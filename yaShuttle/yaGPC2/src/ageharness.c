@@ -200,14 +200,50 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
     if (opts->start) {
         entryPoint = parse_hex(opts->start);
         hasEntryPoint = true;
-    } else if (hasSymEntry) {
+    } else if (hasSymEntry && !opts->ipl) {
+        /* Excluded under --ipl: the linker's own "entry point" is just
+         * the load address of the first CSECT (0x0 for BILDNEW5/GPCIPL)
+         * -- a link-time bookkeeping value, not a real boot vector. A
+         * real cold IPL never starts execution there: IPL "first causes
+         * a system reset function" (AP-101S-instruction-set.txt Sec.
+         * 2.5.3.3), and system reset loads the CPU's *entire* PSW pair
+         * (address, mask, BSR/DSR, everything) from a fixed vector --
+         * see cpu_reset() below and BILDNEW5.lst's own SRESINTN constant
+         * ("SYSTEM RESET = START UP ENTRY POINT", address 0x14). Leaving
+         * hasEntryPoint false here under --ipl (falling through to
+         * cpu_reset() after load_fcm(), below) is what makes that
+         * happen; --start still explicitly overrides it either way,
+         * same as without --ipl. */
         entryPoint = symEntry;
         hasEntryPoint = true;
     }
 
     if (opts->ipl) ipl_fill(age);
     long byteCount = load_fcm(age, fcmPath);
-    if (hasEntryPoint) ageharness_set_entry_point(age, entryPoint);
+    if (hasEntryPoint) {
+        ageharness_set_entry_point(age, entryPoint);
+    } else if (opts->ipl) {
+        /* Confirmed necessary, not just theoretically correct: without
+         * this, BILDNEW5/GPCIPL under --ipl starts executing at address
+         * 0 -- itself PSA data (BILDNEW5.lst: "RESERVED", "SKFBDPAR",
+         * "SPWRONN", "RESERVE1"), not code -- and immediately wanders
+         * into the interrupt-vector table (0x40-0x9F) as if it were
+         * instructions, tripping a store-protect violation on essentially
+         * the first real write, then looping forever in the resulting
+         * program-check handler because nothing has been unprotected yet
+         * either. cpu_reset() loads the real System Reset PSW instead,
+         * landing on GPCIPL's actual first instruction (IOPHISAM,
+         * BILDNEW5.lst address 0x013F). */
+        cpu_reset(&age->gpc.cpu);
+        /* Report the real, now-established entry point (rather than
+         * leaving hasEntryPoint/entryPoint as their "nothing set yet"
+         * defaults) so batchrunner_load()'s own "No entry point" check
+         * (run.c) doesn't misread a real cpu_reset()-driven boot as an
+         * unconfigured one, and so --verbose's "Start:" line reports
+         * where execution actually begins. */
+        entryPoint = psw_get_nia(&age->gpc.cpu.psw);
+        hasEntryPoint = true;
+    }
 
     if (age->initialFcmPath != fcmPath) {
         free(age->initialFcmPath);
