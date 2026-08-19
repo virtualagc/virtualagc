@@ -89,21 +89,26 @@ typedef struct {
      * above): "the second mode at power-on enters the run state after
      * the system reset is complete" -- a system reset (the same PSW-pair
      * load from the fixed hw 0x14 vector cpu_reset() performs, see
-     * --ipl's comment) with NO memory fill/protect step at all. IPL's own
-     * blanket protect-everything-then-C9FB/C6C6-fill behavior is IPL-
-     * specific per the manual's own section split, not a Power-On
-     * property -- confirmed to matter, not just textually distinct: a
-     * genuine BILDNEW5/GPCIPL self-test run under --power-on (memory
-     * left at its default unprotected/zeroed state, only the loaded FCM
-     * image's own content present) never trips the store-protect
-     * program-check loop that the same image run under --ipl does
-     * (GPCIPL's own error-logging path, SVCALT.asm's RECORDER/SAVENV,
-     * unconditionally writes into sector 1/ENVIRONS -- real Phase-2-
-     * owned memory this standalone self-test run never has backing for
-     * either way, but only --ipl's blanket protection turns that into a
-     * fault). --ipl and --power-on both drive entry via cpu_reset();
-     * --ipl takes precedence if both are given (its memory-init step is
-     * a superset that also performs a system reset). */
+     * --ipl's comment). IPL's blanket store-*protection* is IPL-specific
+     * per the manual's own section split, not a Power-On property --
+     * confirmed to matter, not just textually distinct: a genuine
+     * BILDNEW5/GPCIPL self-test run under --power-on (memory left
+     * unprotected, only the loaded FCM image's own content plus the fill
+     * below present) never trips the store-protect program-check loop
+     * that the same image run under --ipl does (GPCIPL's own error-
+     * logging path, SVCALT.asm's RECORDER/SAVENV, unconditionally writes
+     * into sector 1/ENVIRONS -- real Phase-2-owned memory this standalone
+     * self-test run never has backing for either way, but only --ipl's
+     * blanket protection turns that into a fault). The C9FB/C6C6 fill
+     * *content* itself, though, is still applied under --power-on (see
+     * ageharness.c's mem_pattern_fill()) -- GPCIPL's self-test explicitly
+     * checks for that pattern in at least one place, and skipping the
+     * fill entirely (memory left zeroed) leaves the counter-arming code
+     * downstream of that check unreached, stalling forever in a
+     * Clock-armed SVCPWAIT spin. --ipl and --power-on both drive entry
+     * via cpu_reset(); --ipl takes precedence if both are given (its
+     * memory-init step is a superset that also performs a system
+     * reset). */
     bool powerOn;                    /* default false */
 
     /* Not part of gpc run's own option set -- yaGPC2-specific, mirroring

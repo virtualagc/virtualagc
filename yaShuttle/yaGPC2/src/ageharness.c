@@ -54,6 +54,41 @@ void ageharness_free(AGEHarness *age) {
     memset(age, 0, sizeof(*age));
 }
 
+/* Just the C9FB/C6C6 content -- no protection. Split out from ipl_fill()
+ * below because BILDNEW5/GPCIPL's own self-test explicitly checks for
+ * this fill pattern (confirmed by tracing: a sequence around GPCIPL+1820
+ * reads a memory location and does `CHI 3,X'c9fb'` / `CHI 3,X'c6c6'`,
+ * branching differently depending on which it finds), so a real Power-On
+ * boot -- distinct from IPL's blanket *protection*, see opts.h's powerOn
+ * comment -- still needs this content present or that check takes a path
+ * self-test was never validated against. This does NOT by itself resolve
+ * the SVCPWAIT spin at GPCIPL+1831 both --power-on and --ipl eventually
+ * reach: that check reads the OLD SVC PSW save slot (hw 0x58, part of
+ * the interrupt-vector table) to see whether an SVC/program-check has
+ * ever fired yet, and SVCPWAIT (SSM X'1e85' then a self-branch) is a
+ * genuine wait-for-first-interrupt construct, unmasking Clock 1 and the
+ * IOP Program interrupt (EX2) specifically (X'1e85' & the low byte used
+ * as intMask, per cpu_check_interrupts' 0x80/0x04 tests). Neither ever
+ * fires in a standalone run with no real or emulated peripheral attached
+ * and no counter ever armed (ICR "Write Counter" is never reached
+ * either) -- --ipl only appears to get past this because its own
+ * artificial barrage of store-protect program checks happens to write a
+ * real value into that same hw 0x58 slot as a side effect, satisfying
+ * the check by accident. This looks like it's waiting on real I/O
+ * hardware (MEDS et al.) to be present, matching that Don Schmidt's own
+ * working demo starts MEDS before gpc -- see --bce-network. */
+static void mem_pattern_fill(AGEHarness *age) {
+    uint32_t total = age->gpc.ram.totalHWCount;
+    uint32_t split = 0x20000;
+    if (split > total) split = total;
+    for (uint32_t hw = 0; hw < split; hw++) {
+        membus_set16(&age->gpc.ram, hw, 0xc9fb, false);
+    }
+    for (uint32_t hw = split; hw < total; hw++) {
+        membus_set16(&age->gpc.ram, hw, 0xc6c6, false);
+    }
+}
+
 /* Real AP-101S cold IPL's own memory-initialization step -- see opts.h's
  * ipl comment for the full primary-source citation
  * (AP-101S-instruction-set.txt Sec. 2.5.3.3 "IPL"). Runs before load_fcm()
@@ -65,14 +100,8 @@ void ageharness_free(AGEHarness *age) {
  * selectively unprotect whatever it needs to write. */
 static void ipl_fill(AGEHarness *age) {
     uint32_t total = age->gpc.ram.totalHWCount;
-    uint32_t split = 0x20000;
-    if (split > total) split = total;
-    for (uint32_t hw = 0; hw < split; hw++) {
-        membus_set16(&age->gpc.ram, hw, 0xc9fb, false);
-        membus_set_store_protect(&age->gpc.ram, hw, true);
-    }
-    for (uint32_t hw = split; hw < total; hw++) {
-        membus_set16(&age->gpc.ram, hw, 0xc6c6, false);
+    mem_pattern_fill(age);
+    for (uint32_t hw = 0; hw < total; hw++) {
         membus_set_store_protect(&age->gpc.ram, hw, true);
     }
 
@@ -218,11 +247,12 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
         hasEntryPoint = true;
     }
 
-    /* --ipl's blanket fill+protect is IPL-specific (Sec. 2.5.3.3), not a
+    /* --ipl's blanket *protection* is IPL-specific (Sec. 2.5.3.3), not a
      * Power-On property (Sec. 2.5.3.1) -- see opts.h's powerOn comment.
-     * --power-on alone performs no memory init at all, only the reset
-     * below. */
+     * The C9FB/C6C6 fill *content* itself, though, is confirmed needed
+     * either way -- see mem_pattern_fill()'s own comment. */
     if (opts->ipl) ipl_fill(age);
+    else if (opts->powerOn) mem_pattern_fill(age);
     long byteCount = load_fcm(age, fcmPath);
     if (hasEntryPoint) {
         ageharness_set_entry_point(age, entryPoint);
