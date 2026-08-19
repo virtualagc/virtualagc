@@ -1296,6 +1296,23 @@ static void exec_SSM(CPU *t, DInstr *v) {
     uint32_t psw2 = register_get32(&t->psw.psw2);
     psw2 = (hwVal << 16) | (psw2 & 0xffff);
     register_set32(&t->psw.psw2, psw2);
+    /* External 0 (vector 0078/007C, mask 0x10) is "IOP Voter / C/M Idle /
+     * IOP ROS Parity / IOP Fault / Watchdog Timer" (AP-101S-instruction-
+     * set.txt row 50) -- intPending.iopGrp1 here. This emulator never has
+     * IOP/MIA activity genuinely in flight between one instruction and the
+     * next, so the condition is always already true whenever this bit is
+     * enabled -- checked on every SSM rather than only on a mask-bit
+     * transition, because a caller can legitimately arm-and-wait for it
+     * more than once (BILDNEW5/GPCIPL's own MIAENBL subroutine does
+     * exactly this from two different call sites) without any other SSM
+     * having cleared the bit in between. Confirmed against BILDNEW5/
+     * GPCIPL's own power-on self test: it arms exactly this mask bit right
+     * after its MIA transmitter enable/disable dance, and the very next
+     * instruction is an SVC error-handler call reached only if the
+     * expected interrupt fails to occur. */
+    if (psw_get_int_mask(&t->psw) & 0x10) {
+        t->intPending.iopGrp1 = true;
+    }
 }
 
 static void exec_SCAL(CPU *t, DInstr *v) {
