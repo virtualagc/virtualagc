@@ -91,7 +91,22 @@ void registerfile_set_dse(RegisterFile *rf, int baseReg, uint32_t value) {
 /* IBM-75-A97-001/p.21, IBM-6246156/p.29 — see regmem.coffee for the full
  * bit-layout comment. */
 #define PSW_DESC1 "ppppppppppppppppccrvf_usbbbbdddd"
-#define PSW_DESC2 "mmmmmmmmeeeercwpiiiiiiiiiiiiiiiiii"
+/* IBM-6246156B p.2-18, Figure 2-19: PSW2 is bits 32-63 (32 bits) --
+ * 8-bit System Mask (32-39), 4 reserved (40-43), Register Set (44),
+ * Machine Check Mask (45), Wait State (46), Problem/Supervisor (47),
+ * 16-bit Interrupt Code (48-63). The historical descriptor here (and in
+ * gpc/regmem.coffee's own @DESC2, ported faithfully) was 34 characters --
+ * 18 i's instead of 16 -- which, via getFieldShft's `length - lastIndexOf
+ * - 1`, shifts every field from 'r' onward two bits toward the MSB:
+ * 'p' (problem/supervisor) read what is really bit 45 (machine check
+ * mask), not bit 47, so any load of a supervisor-state PSW with the
+ * machine check mask bit set was misread as problem (user) state.
+ * Confirmed against the manual directly, not just against gpc, which
+ * carries the identical defect (its own getFieldMask/getField coerce
+ * through the same 32-bit bitwise ops once actually applied to real
+ * 32-bit data, even though intermediate values are computed via
+ * non-truncating parseInt). */
+#define PSW_DESC2 "mmmmmmmmeeeercwpiiiiiiiiiiiiiiii"
 
 static const PBField *f1(const ProgramStatusWord *p, char c) {
     return &p->pack1.field[(unsigned char)c];
@@ -111,9 +126,6 @@ static uint32_t get_field2(const ProgramStatusWord *p, char c) {
     return pb_get_field(register_get32(&p->psw2), f2(p, c));
 }
 static void set_field2(ProgramStatusWord *p, char c, uint32_t v) {
-    /* PSW2's descriptor is 34 characters; JS's bitwise-op coercion to
-     * Int32 makes that behave identically to bitLen=32 here (see
-     * util.c's pb_set_fld clamp) — passing 32 explicitly matches. */
     uint32_t t = pb_set_fld(register_get32(&p->psw2), 32, f2(p, c), v);
     register_set32(&p->psw2, t);
 }

@@ -21,28 +21,33 @@
  * yaGPC2's exec_CVFX (src/cpu_instr.c) was deliberately fixed to always
  * store the result and always compute CC instead. The 300 raw
  * EXEC_FIXTURES_CVFX entries below still come from an unmodified gpc
- * run; only the 151 entries whose gpc-recorded regDiffCount is 0 (i.e.
- * CONVERT_OVERFLOW cases gpc silently no-op'd) have had their
- * psw1After hand-corrected from gpc's stale baseline-CC value to what
- * yaGPC2's own already-verified-correct exec_CVFX actually produces.
- * Regenerating CVFX from gpc without reapplying this correction will
- * silently reintroduce these 151 failures. */
+ * run; of the entries whose gpc-recorded regDiffCount is 0 (i.e.
+ * CONVERT_OVERFLOW cases gpc silently no-op'd), whichever ones actually
+ * differ from what yaGPC2's own already-verified-correct exec_CVFX
+ * produces (69 of 136 as of the 2026-08-19 PSW2-fix regeneration; the
+ * other 67 already happened to match) have had their psw1After
+ * hand-corrected from gpc's stale baseline-CC value. Regenerating CVFX
+ * from gpc without reapplying this correction (`make test`'s failure
+ * list names the exact (hw1,hw2) pairs) will silently reintroduce these
+ * failures. */
 #include <stdio.h>
 #include <string.h>
 
 #include "../src/cpu_instr.h"
+#include "../src/iop.h"
 #include "cpu_instr_exec_fixtures.h"
 
 static CPU cpu;
+static IOP iop;
 static MCM iopMcm;
 static MemoryBus bus;
 
-/* Only iop_recv_from_cpu/iop_get_cc_data are needed to link (PC is the
- * only instruction that calls into the IOP so far); IOP itself isn't
- * ported yet (Phase 6), so this test doesn't cover PC's actual IOP
- * interaction — matches src/stubs_todo.c's stand-in behavior exactly, so
- * PC's own fixtures (which never reach isOutput==false) still validate
- * cleanly. */
+/* PC is the only instruction that calls into the IOP so far. A real IOP
+ * is wired up (cpu.iop) because EXEC_BASELINE's problem-state bit reads
+ * as supervisor (see regmem.c's PSW2 field-layout fix), so PC's own
+ * fixtures now genuinely reach cpu_send_to_iop instead of bailing out on
+ * the privilege check beforehand -- without this, iop_recv_from_cpu
+ * dereferences a NULL cpu->iop. */
 
 static void load_baseline(void) {
     for (int bank = 0; bank < 3; bank++) {
@@ -75,6 +80,8 @@ int main(void) {
     iopMcm = mcm_create(24 * 1024);
     bus = membus_create(&cpu.mainStorage, &iopMcm);
     cpu.ram = &bus;
+    iop_init(&iop, &cpu);
+    cpu.iop = &iop;
 
     int nSets = (int)(sizeof(EXEC_FIXTURE_SETS) / sizeof(EXEC_FIXTURE_SETS[0]));
     for (int s = 0; s < nSets; s++) {
