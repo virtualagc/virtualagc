@@ -691,11 +691,29 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         }
     }
 
+    /* No HAL/S RTL convention matched. Real hardware's own SVC
+     * interrupt (IBM-6246156B p.2-19 sec.9: "The 16-bit effective
+     * address is placed in the interruption code of the old PSW") has
+     * nothing to do with this dispatch at all -- it treats `ea` itself
+     * as the interrupt code, where every case above instead treats `ea`
+     * as a HAL/S-RTL parameter-block address and reads mem[ea] as
+     * "which SVC". A raw (non-HAL/S) program's own numbered SVCs, like
+     * BILDNEW5/GPCIPL's own error-handler calls, read mem[ea] as
+     * whatever unrelated data happens to sit there and essentially never
+     * coincidentally match one of the specific codes above -- so falling
+     * through here used to silently swallow the SVC (returning true,
+     * skipping the real interrupt) instead of letting exec_SVC perform
+     * the real hardware PSW swap to whatever handler is actually
+     * installed at 0x058/0x05C. Confirmed against BILDNEW5's own
+     * INTHNDLR: its "SVC nn *** CALL ERROR HANDLER ***" calls are real
+     * SVC interrupts to its own real handler, not RTL calls, and
+     * swallowing them left its own error-recovery register/counter
+     * updates never applied, spinning the same program-check dispatch
+     * forever. */
     char msg[160];
-    snprintf(msg, sizeof msg, "HAL/S SVC trapped (ea=0x%x, R1=0x%x, code=0x%x)", ea, r1, svcCode);
-    hal_report_error(h, msg);
-    h->svcTrapped = true;
-    return true;
+    snprintf(msg, sizeof msg, "HAL/S SVC unrecognized, passing to real interrupt (ea=0x%x, R1=0x%x, code=0x%x)", ea, r1, svcCode);
+    hal_log(h, msg);
+    return false;
 }
 
 /* ---------------------------------------------------------------------
