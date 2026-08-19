@@ -11,7 +11,10 @@
  * ------------------------------------------------------------------- */
 
 void cpu_init(CPU *cpu) {
-    cpu->mainStorage = mcm_create(40 * 1024);
+    /* 0x40000 words = 0x80000 halfwords -- the AP-101S's real, full 19-bit
+     * address space (see cpu.h's mainStorage comment), not gpc/cpu.coffee's
+     * inherited 40*1024-word (80K-halfword) partial size. */
+    cpu->mainStorage = mcm_create(0x40000);
     cpu->ram = NULL; /* see cpu.h header comment */
     /* `new RegisterFile("r0",8,32)` etc — num=8 allocates 9 slots
      * (CoffeeScript's inclusive [0..8]); only 0-7 are ever addressed by

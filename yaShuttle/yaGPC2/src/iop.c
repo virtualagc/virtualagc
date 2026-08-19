@@ -187,7 +187,6 @@ static bool dmaq_shift(DMAQueue *q, DMARequest *out) {
 
 void iop_init(IOP *iop, struct CPU *cpu) {
     iop->cpu = cpu;
-    iop->mainStorage = mcm_create(24 * 1024);
 
     msc_init(&iop->msc);
     for (int i = 0; i < 24; i++) bce_init(&iop->bce[i], i + 1);
@@ -222,7 +221,6 @@ void iop_init(IOP *iop, struct CPU *cpu) {
 }
 
 void iop_free(IOP *iop) {
-    mcm_free(&iop->mainStorage);
     registerfile_free(&iop->regInterrupts);
     iopls_free(&iop->ls);
     dmaq_free(&iop->dmaQueue);

@@ -37,7 +37,18 @@ typedef struct {
 } IntPending;
 
 typedef struct CPU {
-    MCM mainStorage;      /* CPU's own 40K-word (80K-halfword) core memory */
+    MCM mainStorage;      /* The AP-101S's real, single, shared main
+                            * storage -- 0x40000 words (0x80000 halfwords),
+                            * the full 19-bit address space (AP-101S-
+                            * instruction-set.txt Sec. III "1.1.2 Addressing
+                            * and Instruction Formats"). Lives on CPU
+                            * (mirroring gpc/cpu.coffee's own
+                            * @mainStorage) because the IOP has no separate
+                            * storage of its own -- see membus.h's header
+                            * comment -- but it's the one memory both the
+                            * CPU (through cpu->ram/MemoryBus) and the IOP
+                            * (directly, iop.c's iop_g_eaf/iop_g_eah/
+                            * iop_s_eaf/iop_s_eah) read and write. */
     MemoryBus *ram;        /* set externally; see header comment */
     RegisterFile regFiles[3]; /* [0]=R0-R7, [1]=R8-R15, [2]=FP0-FP7 */
     ProgramStatusWord psw;

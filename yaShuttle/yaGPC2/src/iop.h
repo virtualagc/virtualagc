@@ -168,7 +168,13 @@ typedef struct {
 
 typedef struct IOP {
     struct CPU *cpu;
-    MCM mainStorage; /* IOP's own 24K-word core memory (CPU-side bus target) */
+    /* No separate IOP storage: real AP-101S main storage is a single
+     * memory shared by the CPU and IOP (AP-101S-instruction-set.txt Sec.
+     * III "1.1.2 Addressing and Instruction Formats" -- the IOP is simply
+     * restricted to the lower half of the CPU's own 19-bit address space).
+     * All IOP memory access already went straight to cpu->mainStorage
+     * (iop_g_eaf/iop_g_eah/iop_s_eaf/iop_s_eah below); see membus.h's
+     * header comment for the CPU-side half of this fix. */
 
     MSC msc;
     BCE bce[24]; /* bce[0] = BCE #1 ... bce[23] = BCE #24 */

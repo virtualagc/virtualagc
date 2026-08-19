@@ -39,7 +39,6 @@
 
 static CPU cpu;
 static IOP iop;
-static MCM iopMcm;
 static MemoryBus bus;
 
 /* PC is the only instruction that calls into the IOP so far. A real IOP
@@ -61,13 +60,11 @@ static void load_baseline(void) {
     for (uint32_t a = 0; a < 4096; a++) {
         mcm_set16(&cpu.mainStorage, a, EXEC_BASELINE.mem[a], false);
     }
-    /* Zero everything outside the tracked window (both MCMs) — mirrors
-     * the JS generator's restore(); see its comment for why this must
-     * match exactly (otherwise a discarded-from-fixtures JS trial's
-     * leaked write silently diverges from this replay-only-kept-fixtures
-     * C test). */
+    /* Zero everything outside the tracked window — mirrors the JS
+     * generator's restore(); see its comment for why this must match
+     * exactly (otherwise a discarded-from-fixtures JS trial's leaked write
+     * silently diverges from this replay-only-kept-fixtures C test). */
     memset(cpu.mainStorage.data + (size_t)4096 * 2, 0, (size_t)cpu.mainStorage.wordCount * 4 - (size_t)4096 * 2);
-    memset(iopMcm.data, 0, (size_t)iopMcm.wordCount * 4);
     register_set32(&cpu.psw.psw1, EXEC_BASELINE.psw1);
     register_set32(&cpu.psw.psw2, EXEC_BASELINE.psw2);
 }
@@ -77,8 +74,7 @@ int main(void) {
     long total = 0;
 
     cpu_init(&cpu);
-    iopMcm = mcm_create(24 * 1024);
-    bus = membus_create(&cpu.mainStorage, &iopMcm);
+    bus = membus_create(&cpu.mainStorage);
     cpu.ram = &bus;
     iop_init(&iop, &cpu);
     cpu.iop = &iop;

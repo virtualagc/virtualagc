@@ -4,7 +4,7 @@ void ap101_init(AP101 *gpc) {
     cpu_init(&gpc->cpu);
     iop_init(&gpc->iop, &gpc->cpu);
     gpc->cpu.iop = &gpc->iop;
-    gpc->ram = membus_create(&gpc->cpu.mainStorage, &gpc->iop.mainStorage);
+    gpc->ram = membus_create(&gpc->cpu.mainStorage);
     gpc->cpu.ram = &gpc->ram;
 }
 

@@ -1,11 +1,18 @@
-/* Cross-checks mcm.c/membus.c against the real gpc/mcm.coffee and
- * gpc/membus.coffee, including store-protect and a load16 that spans the
- * CPU/IOP boundary.
+/* MCM_FIXTURES/PROTECT_FIXTURES/LOAD_* cross-check mcm.c against the real
+ * gpc/mcm.coffee (unaffected by the CPU/IOP-memory fix below — a single
+ * MCM's own get/set/protect logic was never part of that bug).
  *
- * Fixtures regenerated via:
  *   node test/gen_mcm_membus_fixtures.cjs > fixtures.json
  *   python3 test/gen_mcm_membus_fixtures_header.py fixtures.json > test/mcm_membus_fixtures.h
- */
+ *
+ * BUS_FIXTURES/BUS_PROT_FIXTURES/BUS_LOAD_* are hand-generated (see
+ * tools.md/CLAUDE_LOG.md) against the corrected, real membus.c model: one
+ * shared MCM (sized to the AP-101S's actual 0x40000-word/0x80000-halfword
+ * address space — AP-101S-instruction-set.txt Sec. III "1.1.2 Addressing
+ * and Instruction Formats"), not gpc/membus.coffee's own two-separate-MCMs
+ * "CPU region then IOP region" split — see membus.h's header comment for
+ * why that split isn't real hardware and cross-checking against it would
+ * just re-encode the bug this fixed. */
 #include <stdio.h>
 
 #include "../src/mcm.h"
@@ -78,9 +85,8 @@ int main(void) {
     mcm_free(&mcm);
 
     /* --- MemoryBus --- */
-    MCM cpuMcm = mcm_create(40 * 1024);
-    MCM iopMcm = mcm_create(24 * 1024);
-    MemoryBus bus = membus_create(&cpuMcm, &iopMcm);
+    MCM busMcm = mcm_create(0x40000); /* matches cpu_init's real mainStorage size */
+    MemoryBus bus = membus_create(&busMcm);
 
     int nb = (int)(sizeof(BUS_FIXTURES) / sizeof(BUS_FIXTURES[0]));
     for (int i = 0; i < nb; i++) {
@@ -120,8 +126,7 @@ int main(void) {
         }
     }
 
-    mcm_free(&cpuMcm);
-    mcm_free(&iopMcm);
+    mcm_free(&busMcm);
 
     int grand = nm + np + nl + nb + nbp + nbl;
     printf("%d/%d mcm/membus fixtures passed\n", grand - failures, grand);

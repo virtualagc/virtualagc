@@ -24,7 +24,6 @@ const InstrDesc *instr_decode(uint32_t hw1, uint32_t hw2, DInstr *v) {
 }
 
 static CPU cpu;
-static MCM iopMcm;
 static MemoryBus bus;
 
 static void load_baseline(void) {
@@ -89,8 +88,7 @@ int main(void) {
     long total = 0;
 
     cpu_init(&cpu);
-    iopMcm = mcm_create(24 * 1024);
-    bus = membus_create(&cpu.mainStorage, &iopMcm);
+    bus = membus_create(&cpu.mainStorage);
     cpu.ram = &bus;
 
     int ne = (int)(sizeof(EA_FIXTURES) / sizeof(EA_FIXTURES[0]));

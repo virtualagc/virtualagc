@@ -34,7 +34,6 @@ static void load_baseline(void) {
         mcm_set16(&cpu.mainStorage, a, IOP_EXEC_BASELINE.mem[a], false);
     }
     memset(cpu.mainStorage.data + (size_t)4096 * 2, 0, (size_t)cpu.mainStorage.wordCount * 4 - (size_t)4096 * 2);
-    memset(iop.mainStorage.data, 0, (size_t)iop.mainStorage.wordCount * 4);
 
     register_set32(&iop.regXmitEna, IOP_EXEC_BASELINE.regXmitEna);
     register_set32(&iop.regRecvEna, IOP_EXEC_BASELINE.regRecvEna);
