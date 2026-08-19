@@ -70,6 +70,12 @@ static const char *HELP_TEXT =
 "                                  (fill+protect, Sec 2.5.3.3) before loading\n"
 "                                  (default: false)\n"
 "  --no-ipl                        disable cold-IPL memory init (default)\n"
+"  --power-on                      real AP-101S Power-On (Sec 2.5.3.1): system\n"
+"                                  reset into the run state, with NO memory\n"
+"                                  fill/protect step (unlike --ipl, whose\n"
+"                                  blanket protect+fill is IPL-specific)\n"
+"                                  (default: false)\n"
+"  --no-power-on                   disable Power-On boot (default)\n"
 "  --debug                         gdb-style interactive debugger (implies\n"
 "                                  --interactive) (default: false)\n"
 "  --no-debug                      disable the interactive debugger (default)\n"
@@ -232,6 +238,10 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->ipl = true;
         } else if (tok_is(tok, "--no-ipl", &n)) {
             (void)n; opts->ipl = false;
+        } else if (tok_is(tok, "--power-on", &n)) {
+            (void)n; opts->powerOn = true;
+        } else if (tok_is(tok, "--no-power-on", &n)) {
+            (void)n; opts->powerOn = false;
         } else if (tok_is(tok, "--interactive", &n)) {
             (void)n; opts->interactive = true;
         } else if (tok_is(tok, "--watch-log", &n)) {

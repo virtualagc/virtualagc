@@ -200,38 +200,45 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
     if (opts->start) {
         entryPoint = parse_hex(opts->start);
         hasEntryPoint = true;
-    } else if (hasSymEntry && !opts->ipl) {
-        /* Excluded under --ipl: the linker's own "entry point" is just
-         * the load address of the first CSECT (0x0 for BILDNEW5/GPCIPL)
-         * -- a link-time bookkeeping value, not a real boot vector. A
-         * real cold IPL never starts execution there: IPL "first causes
-         * a system reset function" (AP-101S-instruction-set.txt Sec.
-         * 2.5.3.3), and system reset loads the CPU's *entire* PSW pair
+    } else if (hasSymEntry && !opts->ipl && !opts->powerOn) {
+        /* Excluded under --ipl/--power-on: the linker's own "entry point"
+         * is just the load address of the first CSECT (0x0 for BILDNEW5/
+         * GPCIPL) -- a link-time bookkeeping value, not a real boot
+         * vector. A real system reset (performed by both IPL and Power-
+         * On -- AP-101S-instruction-set.txt Sec. 2.5.3.3/2.5.3.1) never
+         * starts execution there: it loads the CPU's *entire* PSW pair
          * (address, mask, BSR/DSR, everything) from a fixed vector --
          * see cpu_reset() below and BILDNEW5.lst's own SRESINTN constant
          * ("SYSTEM RESET = START UP ENTRY POINT", address 0x14). Leaving
-         * hasEntryPoint false here under --ipl (falling through to
-         * cpu_reset() after load_fcm(), below) is what makes that
-         * happen; --start still explicitly overrides it either way,
-         * same as without --ipl. */
+         * hasEntryPoint false here under --ipl/--power-on (falling
+         * through to cpu_reset() after load_fcm(), below) is what makes
+         * that happen; --start still explicitly overrides it either way,
+         * same as without either flag. */
         entryPoint = symEntry;
         hasEntryPoint = true;
     }
 
+    /* --ipl's blanket fill+protect is IPL-specific (Sec. 2.5.3.3), not a
+     * Power-On property (Sec. 2.5.3.1) -- see opts.h's powerOn comment.
+     * --power-on alone performs no memory init at all, only the reset
+     * below. */
     if (opts->ipl) ipl_fill(age);
     long byteCount = load_fcm(age, fcmPath);
     if (hasEntryPoint) {
         ageharness_set_entry_point(age, entryPoint);
-    } else if (opts->ipl) {
+    } else if (opts->ipl || opts->powerOn) {
         /* Confirmed necessary, not just theoretically correct: without
-         * this, BILDNEW5/GPCIPL under --ipl starts executing at address
-         * 0 -- itself PSA data (BILDNEW5.lst: "RESERVED", "SKFBDPAR",
-         * "SPWRONN", "RESERVE1"), not code -- and immediately wanders
-         * into the interrupt-vector table (0x40-0x9F) as if it were
-         * instructions, tripping a store-protect violation on essentially
-         * the first real write, then looping forever in the resulting
-         * program-check handler because nothing has been unprotected yet
-         * either. cpu_reset() loads the real System Reset PSW instead,
+         * this, BILDNEW5/GPCIPL starts executing at address 0 -- itself
+         * PSA data (BILDNEW5.lst: "RESERVED", "SKFBDPAR", "SPWRONN",
+         * "RESERVE1"), not code -- and immediately wanders into the
+         * interrupt-vector table (0x40-0x9F) as if it were instructions.
+         * Under --ipl that also trips a store-protect violation on
+         * essentially the first real write, looping forever in the
+         * resulting program-check handler since nothing has been
+         * unprotected yet either; --power-on's own memory starts
+         * unprotected so it wouldn't fault the same way, but it would
+         * still be executing PSA data as instructions, which is just as
+         * wrong. cpu_reset() loads the real System Reset PSW instead,
          * landing on GPCIPL's actual first instruction (IOPHISAM,
          * BILDNEW5.lst address 0x013F). */
         cpu_reset(&age->gpc.cpu);
