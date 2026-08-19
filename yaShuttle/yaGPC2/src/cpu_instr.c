@@ -1329,31 +1329,17 @@ static void exec_SPM(CPU *t, DInstr *v) {
 static void exec_SSM(CPU *t, DInstr *v) {
     if (!cpu_i_super(t)) return;
     uint32_t hwVal = cpu_g_eah(t, v);
-    uint32_t oldMask = psw_get_int_mask(&t->psw);
     uint32_t psw2 = register_get32(&t->psw.psw2);
     psw2 = (hwVal << 16) | (psw2 & 0xffff);
     register_set32(&t->psw.psw2, psw2);
-    /* External 0 (vector 0078/007C, mask 0x10) is "IOP Voter / C/M Idle /
-     * IOP ROS Parity / IOP Fault / Watchdog Timer" (AP-101S-instruction-
-     * set.txt row 50) -- intPending.iopGrp1 here. This emulator never has
-     * IOP/MIA activity genuinely in flight between one instruction and the
-     * next, so the condition is always already true the instant this bit
-     * is newly unmasked -- checked on a 0->1 mask-bit transition (not
-     * every SSM that leaves it set) so that CPUTEST8's own interrupt-
-     * priority self test, which re-issues SSM to unmask everything after
-     * every single staged interrupt without ever re-masking EX0 in
-     * between, doesn't get EX0 re-fired on each of those calls. A rising
-     * edge still covers BILDNEW5/GPCIPL's own MIAENBL subroutine, which
-     * arms this exact bit from two different call sites -- confirmed it
-     * is genuinely masked (by an intervening `SSM X'0006'`, RESET SYSTEM
-     * MASK) between the two, so each arm is its own real 0->1 edge. */
-    uint32_t newMask = psw_get_int_mask(&t->psw);
-    if ((newMask & 0x10) && !(oldMask & 0x10)) {
-        t->intPending.iopGrp1 = true;
-    }
-    if (psw_get_int_mask(&t->psw) & 0x10) {
-        t->intPending.iopGrp1 = true;
-    }
+    /* External 0's "C/M Idle" cause used to be raised here, immediately
+     * whenever its mask bit (0x10) was set -- but that fires whenever
+     * ANY code broadly re-enables interrupts, not just when something
+     * is genuinely arming and waiting for it. Now raised where the real
+     * physical condition actually originates: exec_ICR's "Write
+     * Discretes" case (0x0c), the last step of BILDNEW5/GPCIPL's own
+     * MIAENBL subroutine's MIA transmitter enable/disable dance -- see
+     * its own comment for why. */
 }
 
 static void exec_SCAL(CPU *t, DInstr *v) {
@@ -1512,8 +1498,27 @@ static void exec_ICR(CPU *t, DInstr *v) {
             break;
         case 0x0c:
             /* Write Discretes: source sets `t.discretes = ...`, a
-             * property never read anywhere else (grep-verified) — a
-             * genuine no-op, not ported. */
+             * property never read anywhere else (grep-verified) — the
+             * value itself is still a genuine no-op, not ported.
+             *
+             * External 0's "C/M Idle" cause (AP-101S-instruction-set.txt
+             * row 50) is raised here instead of on every SSM that leaves
+             * its mask bit set (the earlier approach, which mis-fired
+             * whenever unrelated code broadly re-enabled interrupts for
+             * its own reasons -- confirmed against BILDNEW5/GPCIPL's own
+             * boot sequence, where that repeated firing corrupted a
+             * self-test region it re-entered). A discrete write via ICR
+             * is what BILDNEW5's own MIAENBL subroutine issues as the
+             * *last* step of its transmitter enable/disable dance ("ICR
+             * R7,R3 ENABLE ICR LINE"), i.e. the point at which the real
+             * MIA chip has just finished reconfiguring and genuinely can
+             * go idle -- a physically-motivated trigger instead of a
+             * mask-transition heuristic. This emulator has no ongoing
+             * IOP activity between instructions to keep the chip "busy"
+             * afterward, so the condition is simply pending from here
+             * until EX0 is unmasked, exactly like Clock1/Clock2/EX1-4
+             * already work. */
+            t->intPending.iopGrp1 = true;
             break;
         case 0x0d: /* Write AGE — not simulated, no-op */
             return;
