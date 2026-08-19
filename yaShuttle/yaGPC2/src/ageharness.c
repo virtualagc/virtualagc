@@ -54,6 +54,74 @@ void ageharness_free(AGEHarness *age) {
     memset(age, 0, sizeof(*age));
 }
 
+/* Real AP-101S cold IPL's own memory-initialization step -- see opts.h's
+ * ipl comment for the full primary-source citation
+ * (AP-101S-instruction-set.txt Sec. 2.5.3.3 "IPL"). Runs before load_fcm()
+ * so the loaded image's own content (written via membus_load16's
+ * unchecked writes) overlays this fill -- matching real hardware, where
+ * IPL's fill+protect happens first and the program image is loaded on
+ * top, still protected, left for the program's own bootstrap (ISPB calls
+ * driven by a table like BILDNEW5's $POFF/$PON-generated UNPRT) to
+ * selectively unprotect whatever it needs to write. */
+static void ipl_fill(AGEHarness *age) {
+    uint32_t total = age->gpc.ram.totalHWCount;
+    uint32_t split = 0x20000;
+    if (split > total) split = total;
+    for (uint32_t hw = 0; hw < split; hw++) {
+        membus_set16(&age->gpc.ram, hw, 0xc9fb, false);
+        membus_set_store_protect(&age->gpc.ram, hw, true);
+    }
+    for (uint32_t hw = split; hw < total; hw++) {
+        membus_set16(&age->gpc.ram, hw, 0xc6c6, false);
+        membus_set_store_protect(&age->gpc.ram, hw, true);
+    }
+
+    /* PSA locations the manual (AP-101S-instruction-set.txt Sec. 2.5.2,
+     * "Preferred Storage Area (PSA) Assignments") names as "must not be
+     * store protected" -- a permanent hardware carve-out, not something
+     * a program has to unprotect for itself: hardware itself writes
+     * these constantly (every interrupt dispatch saves the old PSW;
+     * every Clock 1/2 underflow reloads from the counter halfwords).
+     * Confirmed necessary, not just documented: without this carve-out,
+     * BILDNEW5/GPCIPL's own very first interrupt-vector-table
+     * initialization pass (walking through the old-PSW slots at
+     * addresses 0x60-0xA6) trips a store-protect violation on its very
+     * first write, before it has ever had a chance to run its own
+     * $POFF/$PON-driven unprotect sweep -- turning what should be
+     * ordinary early-boot bookkeeping into an unrecoverable interrupt
+     * loop. */
+    static const uint32_t oldPswVectors[] = {
+        0x00, /* Power off interrupt PSW */
+        0x40, /* Machine Check */
+        0x48, /* Program Check */
+        0x58, /* SVC */
+        0x60, /* Clock 1 */
+        0x68, /* Clock 2 */
+        0x70, /* Instruction Monitor */
+        0x78, /* EX0 */
+        0x80, /* EX1 */
+        0x88, /* EX2 */
+        0x90, /* EX3 */
+        0x98, /* EX4 */
+    };
+    for (size_t i = 0; i < sizeof(oldPswVectors) / sizeof(oldPswVectors[0]); i++) {
+        for (uint32_t hw = oldPswVectors[i]; hw < oldPswVectors[i] + 4 && hw < total; hw++) {
+            membus_set_store_protect(&age->gpc.ram, hw, false);
+        }
+    }
+    struct { uint32_t start, end; } psaRanges[] = {
+        {0x00a4, 0x00a5}, /* BCE 25 processor storage */
+        {0x00b0, 0x00b1}, /* Counter 1 & 2 high halfword */
+        {0x00c0, 0x0102}, /* Putaway locations */
+        {0x0104, 0x013f}, /* Diagnostics */
+    };
+    for (size_t i = 0; i < sizeof(psaRanges) / sizeof(psaRanges[0]); i++) {
+        for (uint32_t hw = psaRanges[i].start; hw <= psaRanges[i].end && hw < total; hw++) {
+            membus_set_store_protect(&age->gpc.ram, hw, false);
+        }
+    }
+}
+
 static long load_fcm(AGEHarness *age, const char *fcmPath) {
     free(age->fcmName);
     age->fcmName = yagpc_strdup(simple_basename(fcmPath));
@@ -137,6 +205,7 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
         hasEntryPoint = true;
     }
 
+    if (opts->ipl) ipl_fill(age);
     long byteCount = load_fcm(age, fcmPath);
     if (hasEntryPoint) ageharness_set_entry_point(age, entryPoint);
 

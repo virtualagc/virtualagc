@@ -66,6 +66,10 @@ static const char *HELP_TEXT =
 "                                  standalone/no-OS program doesn't get\n"
 "                                  (default: false)\n"
 "  --no-fcos                       disable FCOS behavior simulation (default)\n"
+"  --ipl                           simulate real AP-101S cold-IPL memory init\n"
+"                                  (fill+protect, Sec 2.5.3.3) before loading\n"
+"                                  (default: false)\n"
+"  --no-ipl                        disable cold-IPL memory init (default)\n"
 "  --debug                         gdb-style interactive debugger (implies\n"
 "                                  --interactive) (default: false)\n"
 "  --no-debug                      disable the interactive debugger (default)\n"
@@ -224,6 +228,10 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->fcos = true;
         } else if (tok_is(tok, "--no-fcos", &n)) {
             (void)n; opts->fcos = false;
+        } else if (tok_is(tok, "--ipl", &n)) {
+            (void)n; opts->ipl = true;
+        } else if (tok_is(tok, "--no-ipl", &n)) {
+            (void)n; opts->ipl = false;
         } else if (tok_is(tok, "--interactive", &n)) {
             (void)n; opts->interactive = true;
         } else if (tok_is(tok, "--watch-log", &n)) {

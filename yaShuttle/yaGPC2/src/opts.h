@@ -64,6 +64,25 @@ typedef struct {
      * program run without a real flight OS underneath it. */
     bool fcos;                       /* default false */
 
+    /* Not part of gpc run's own option set -- yaGPC2-specific. Simulates
+     * real AP-101S cold IPL's own memory-initialization step (USA-
+     * documented AP-101S-instruction-set.txt Sec. 2.5.3.3 "IPL", quoted
+     * verbatim): before any code is loaded, IOP microcode fills 0x0-
+     * 0x1FFFF with 0xC9FB and CPU microcode fills 0x20000-and-up with
+     * 0xC6C6, both regions marked store-protected -- so a program has to
+     * explicitly unprotect (via ISPB) whatever it needs to write, exactly
+     * like BILDNEW5/GPCIPL's own $POFF/$PON-generated UNPRT table does.
+     * Default false: an ordinary standalone-compiled HAL/S test fixture
+     * loaded directly by this harness never went through a real IPL and
+     * has no ISPB-based bootstrap of its own -- turning this on
+     * unconditionally breaks such fixtures (confirmed: they write to
+     * their own data area with no unprotect step, since real FCOS would
+     * have already unprotected it for them before ever handing them
+     * control -- a step this minimal harness doesn't reproduce). Only a
+     * genuine cold-boot run of hand-assembled, IPL-aware code like
+     * BILDNEW5 should pass this. */
+    bool ipl;                        /* default false */
+
     /* Not part of gpc run's own option set -- yaGPC2-specific, mirroring
      * yaHALMAT2's own --time-scale exactly (same name, same semantics,
      * same default). Wall-clock pacing divisor for SCHEDULE/WAIT
