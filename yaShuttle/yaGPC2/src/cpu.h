@@ -26,7 +26,13 @@ struct IOP; /* forward decl; wired in ap101.c (Phase 7) */
 
 typedef struct {
     bool powerTransient, systemReset, ipl, machineCheck, programCheck, svc;
-    bool clk1, clk2, ext1, ext2, ext3, ext4;
+    bool clk1, clk2, ext1, ext2;
+    /* iopGrp1/iopGrp2/iopProg are EX0/EX1/EX2 (vectors 0078/0080/0088,
+     * mask bits 0x10/0x08/0x04) -- named after the IOP-flavored sources
+     * AP-101S-instruction-set.txt row 50/51/53 documents for them.
+     * ext3/ext4 are EX3/EX4 (vectors 0090/0098, mask bits 0x02/0x01),
+     * both spare per the same table -- see cpu_check_interrupts. */
+    bool ext3, ext4;
     bool iopGrp1, iopGrp2, iopProg;
 } IntPending;
 

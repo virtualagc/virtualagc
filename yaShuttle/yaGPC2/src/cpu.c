@@ -166,6 +166,20 @@ void cpu_check_interrupts(CPU *cpu) {
         cpu_swap_psw(cpu, 0x0088, 0x008c);
         return;
     }
+    /* EX3/EX4 (vectors 0090/0098, mask 0x02/0x01) -- see cpu.h's
+     * IntPending comment. Previously entirely missing; confirmed against
+     * BILDNEW5/GPCIPL's own CPUTEST8 interrupt-priority self test, which
+     * expects both as two of the eight ordered sources. */
+    if (cpu->intPending.ext3 && (intMask & 0x02)) {
+        cpu->intPending.ext3 = false;
+        cpu_swap_psw(cpu, 0x0090, 0x0094);
+        return;
+    }
+    if (cpu->intPending.ext4 && (intMask & 0x01)) {
+        cpu->intPending.ext4 = false;
+        cpu_swap_psw(cpu, 0x0098, 0x009c);
+        return;
+    }
 }
 
 void cpu_signal_fixed_overflow(CPU *cpu) {

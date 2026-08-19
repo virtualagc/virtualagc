@@ -1215,9 +1215,45 @@ static void exec_STE(CPU *t, DInstr *v) {
  * ------------------------------------------------------------------- */
 
 static void exec_DIAG(CPU *t, DInstr *v) {
-    /* Source body is `# XXX UNIMPL` — genuinely empty. */
-    (void)t;
-    (void)v;
+    /* Source body is `# XXX UNIMPL` -- genuinely empty. DIAG is a whole
+     * family of manufacturer self-test microcode commands (H-bus wrap,
+     * command-PLA test, arithmetic-interrupt test, ROS parity, machine-
+     * check force, store-protect readback, ...) that real flight/HAL-S
+     * code never issues, so none of it was ever needed before BILDNEW5/
+     * GPCIPL's own hardware self test (STM1.asm's CPUTEST8 and friends)
+     * started exercising it directly. Only the one command that self
+     * test's own interrupt-priority section depends on is implemented
+     * here; every other DIAG command remains a no-op, a known, separate
+     * gap (STM1.asm names CPUTEST1/R/2/6/7/8/9/10, most still untested
+     * here). */
+    if (!cpu_i_super(t)) return;
+    uint32_t regNum = (v->hw1 >> 8) & 0x7; /* "xxx" field, same position as ISPB's m1 */
+    uint32_t data = register_get32(cpu_r(t, (int)regNum));
+    uint32_t cmd = cpu_g_eah(t, v);
+    if (cmd == 0x7001 && data == 0x90140000u) {
+        /* "START INT PRIO MICRO TEST" (STM1.asm CPUIP150, DIAG R4,X'7001'
+         * with R4=X'9014' preloaded). Per its own comment ("PERFORM DIAG
+         * INSTR TO SET CLOCK1 & 2, EXTERNAL 0,1,2,3,4 AND AGE INTERRUPTS
+         * PENDING") this stages all eight sources; the real CPU's own
+         * existing priority-ordered dispatch (cpu_check_interrupts,
+         * already strictly Clock1 > Clock2 > EX0 > EX1 > EX2 > EX3 > EX4)
+         * then releases the highest-priority still-pending one each time
+         * the test driver re-issues SSM to unmask everything, exactly
+         * matching INTHNDLR.asm's own per-handler "IPRIOWD order" table
+         * (0..6) -- no separate staged-queue tracking needed here, the
+         * existing mask-gated dispatch already does it correctly once
+         * all seven are simultaneously marked pending. AGE (order 7,
+         * INTHNDLR.asm's EX1 handler distinguishing it from real EX1 by
+         * interrupt code) is a known, separate gap -- cpu_instr.c's own
+         * ICR "Read AGE" case already documents AGE as unsimulated. */
+        t->intPending.clk1 = true;
+        t->intPending.clk2 = true;
+        t->intPending.iopGrp1 = true; /* EX0 */
+        t->intPending.iopGrp2 = true; /* EX1 */
+        t->intPending.iopProg = true; /* EX2 */
+        t->intPending.ext3 = true;    /* EX3 */
+        t->intPending.ext4 = true;    /* EX4 */
+    }
 }
 
 static void exec_ISPB(CPU *t, DInstr *v) {
@@ -1293,6 +1329,7 @@ static void exec_SPM(CPU *t, DInstr *v) {
 static void exec_SSM(CPU *t, DInstr *v) {
     if (!cpu_i_super(t)) return;
     uint32_t hwVal = cpu_g_eah(t, v);
+    uint32_t oldMask = psw_get_int_mask(&t->psw);
     uint32_t psw2 = register_get32(&t->psw.psw2);
     psw2 = (hwVal << 16) | (psw2 & 0xffff);
     register_set32(&t->psw.psw2, psw2);
@@ -1300,16 +1337,20 @@ static void exec_SSM(CPU *t, DInstr *v) {
      * IOP ROS Parity / IOP Fault / Watchdog Timer" (AP-101S-instruction-
      * set.txt row 50) -- intPending.iopGrp1 here. This emulator never has
      * IOP/MIA activity genuinely in flight between one instruction and the
-     * next, so the condition is always already true whenever this bit is
-     * enabled -- checked on every SSM rather than only on a mask-bit
-     * transition, because a caller can legitimately arm-and-wait for it
-     * more than once (BILDNEW5/GPCIPL's own MIAENBL subroutine does
-     * exactly this from two different call sites) without any other SSM
-     * having cleared the bit in between. Confirmed against BILDNEW5/
-     * GPCIPL's own power-on self test: it arms exactly this mask bit right
-     * after its MIA transmitter enable/disable dance, and the very next
-     * instruction is an SVC error-handler call reached only if the
-     * expected interrupt fails to occur. */
+     * next, so the condition is always already true the instant this bit
+     * is newly unmasked -- checked on a 0->1 mask-bit transition (not
+     * every SSM that leaves it set) so that CPUTEST8's own interrupt-
+     * priority self test, which re-issues SSM to unmask everything after
+     * every single staged interrupt without ever re-masking EX0 in
+     * between, doesn't get EX0 re-fired on each of those calls. A rising
+     * edge still covers BILDNEW5/GPCIPL's own MIAENBL subroutine, which
+     * arms this exact bit from two different call sites -- confirmed it
+     * is genuinely masked (by an intervening `SSM X'0006'`, RESET SYSTEM
+     * MASK) between the two, so each arm is its own real 0->1 edge. */
+    uint32_t newMask = psw_get_int_mask(&t->psw);
+    if ((newMask & 0x10) && !(oldMask & 0x10)) {
+        t->intPending.iopGrp1 = true;
+    }
     if (psw_get_int_mask(&t->psw) & 0x10) {
         t->intPending.iopGrp1 = true;
     }
@@ -1449,12 +1490,21 @@ static void exec_ICR(CPU *t, DInstr *v) {
             uint32_t r1 = register_get32(R(t, v, 'x'));
             membus_set16(t->ram, 0x00b0, (r1 >> 16) & 0xffff, true);
             t->counter1 = r1 & 0xffff;
+            /* Writing a countdown value to a real hardware timer starts
+             * it counting -- cpu_exec1's per-instruction decrement (and
+             * the Clock 1 interrupt it fires on underflow) was declared
+             * and fully wired but nothing anywhere ever set this flag,
+             * so no ICR-armed delay (e.g. BILDNEW5/GPCIPL's own
+             * CLK2DELY) could ever complete; confirmed no other call
+             * site sets it either. */
+            t->counter1Enabled = true;
             break;
         }
         case 0x09: { /* Write Counter 2 */
             uint32_t r1 = register_get32(R(t, v, 'x'));
             membus_set16(t->ram, 0x00b1, (r1 >> 16) & 0xffff, true);
             t->counter2 = r1 & 0xffff;
+            t->counter2Enabled = true; /* see Write Counter 1's comment */
             break;
         }
         case 0x05: /* Read AGE — not simulated, returns 0 */
