@@ -302,13 +302,32 @@ uint32_t cpu_g_expand(CPU *cpu, uint32_t ea, int bsrdsr) {
 }
 
 uint32_t cpu_g_expand_dse(CPU *cpu, uint32_t ea, int bsrdsr, uint32_t dseVal) {
+    /* AP-101S-instruction-set.txt Sec. 2.9 "Expanded Addressing", Figure
+     * 2-18's own "Data Operand Addressing Expansion" flowchart (verified
+     * against the real scanned page, not just OCR text): when the raw
+     * 16-bit address's own high bit (X) is 1, the replacement sector is
+     * ALWAYS PSW's real DSR (bits 28-31) -- never a base register's DSE,
+     * regardless of whether one was used to form the address. It's the
+     * OPPOSITE case -- X=0 (already "unexpanded") AND a genuine base
+     * register was used -- where that base register's own DSE replaces
+     * the (zero) high bit instead of the implied-0000 default. Inherited
+     * backwards from gpc/cpu.coffee's own g_EXPAND_DSE (which applied
+     * dseVal only when X was already 1); confirmed NOT independently
+     * re-verified by yaGPC/yaGPC2's own porting history (yaGPC preserved
+     * gpc's bugs exactly, yaGPC2 was derived from yaGPC without a full
+     * re-audit), not real corroboration. Branch-type expansion (BSR) never
+     * uses DSE at all -- see Figure 2-18's separate, simpler "Branch
+     * Addressing Expansion" chart -- so bsrdsr!=DATA/SHFT here mirrors
+     * cpu_g_expand()'s own BSR-only behavior exactly. */
     ea = ea & 0xffff;
-    if (ea & 0x8000) {
-        if (bsrdsr == OPTYPE_DATA || bsrdsr == OPTYPE_SHFT) {
-            ea = (dseVal << 15) + (ea & 0x7fff);
+    if (bsrdsr == OPTYPE_DATA || bsrdsr == OPTYPE_SHFT) {
+        if (ea & 0x8000) {
+            ea = (psw_get_dsr(&cpu->psw) << 15) + (ea & 0x7fff);
         } else {
-            ea = (psw_get_bsr(&cpu->psw) << 15) + (ea & 0x7fff);
+            ea = (dseVal << 15) + ea;
         }
+    } else if (ea & 0x8000) {
+        ea = (psw_get_bsr(&cpu->psw) << 15) + (ea & 0x7fff);
     }
     return ea;
 }
