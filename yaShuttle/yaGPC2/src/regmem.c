@@ -190,8 +190,21 @@ void psw_set_reg_set(ProgramStatusWord *p, uint32_t v) { set_field2(p, 'r', v); 
 uint32_t psw_get_mach_check_mask(const ProgramStatusWord *p) { return get_field2(p, 'c'); }
 void psw_set_mach_check_mask(ProgramStatusWord *p, uint32_t v) { set_field2(p, 'c', v); }
 
-int psw_get_wait_state(const ProgramStatusWord *p) { return !get_field2(p, 'w'); }
-void psw_set_wait_state(ProgramStatusWord *p, int v) { set_field2(p, 'w', v ? 0u : 1u); }
+/* IBM-6246156B p.2-19 sec.9: "When this bit is a zero, the CPU is in
+ * the processing state. When this bit is a one, the CPU is in the Wait
+ * State." The historical getter/setter here (and gpc/regmem.coffee's
+ * matching getWaitState/setWaitState, ported faithfully) inverted the
+ * raw bit -- self-consistent for any PSW built up purely through this
+ * same get/set pair (which is everything HAL/S-compiled code exercises,
+ * hence the otherwise-clean test suite), but wrong the moment a real,
+ * externally-authored PSW is loaded wholesale via psw_load(), e.g. an
+ * LPS or an interrupt's own fixed new-PSW block, whose raw bit already
+ * follows the real hardware convention with no inversion applied by
+ * anything. Confirmed against BILDNEW5/GPCIPL: a legitimately RUNNING
+ * PSW (raw bit 0, per real hardware) was read back as WAIT, halting the
+ * CPU seven instructions into a routine power-fail-recovery path. */
+int psw_get_wait_state(const ProgramStatusWord *p) { return (int)get_field2(p, 'w'); }
+void psw_set_wait_state(ProgramStatusWord *p, int v) { set_field2(p, 'w', v ? 1u : 0u); }
 
 int psw_get_problem_state(const ProgramStatusWord *p) { return (int)get_field2(p, 'p'); }
 void psw_set_problem_state(ProgramStatusWord *p, int v) { set_field2(p, 'p', (uint32_t)v); }
