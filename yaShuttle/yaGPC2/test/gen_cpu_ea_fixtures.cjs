@@ -10,7 +10,16 @@ const path = require('path');
 const esbuild = require('esbuild');
 const coffeeScriptPlugin = require('esbuild-coffeescript');
 
-const root = path.resolve(__dirname, '..', '..');
+// Reference-simulator root.  YAGPC_REF_ROOT selects WHICH gpc these
+// fixtures are generated from; without it the historical default is
+// yaShuttle/, whose gpc/ and com/ are symlinks to a frozen checkout.
+// That frozen gpc carries bugs since fixed upstream (it computed the
+// RS-form auto-index write-back from the EA rather than the index
+// register's own address field), so fixtures cut from it assert the
+// bug and fail against a corrected yaGPC2.  Name the oracle explicitly.
+const root = process.env.YAGPC_REF_ROOT
+  ? path.resolve(process.env.YAGPC_REF_ROOT)
+  : path.resolve(__dirname, '..', '..');
 
 // gpc/ap101.coffee (via com/lru) and gpc/iop_bce.coffee (via com/bus) pull
 // in .civet sources; mirror esbuild/esbuild.gpc.config.js's civet plugin.
@@ -223,7 +232,12 @@ async function main() {
     const ea = randU16();
     const bsrdsr = pick(opTypes);
     const dseVal = Math.floor(rng() * 16);
-    const result = gpc.cpu.g_EXPAND_DSE(ea, bsrdsr, dseVal) >>> 0;
+    // Older references expose DSE expansion as its own g_EXPAND_DSE;
+    // current ones fold it into g_EXPAND's third argument.  Same
+    // operation either way, so accept whichever the oracle provides.
+    const result = (gpc.cpu.g_EXPAND_DSE
+      ? gpc.cpu.g_EXPAND_DSE(ea, bsrdsr, dseVal)
+      : gpc.cpu.g_EXPAND(ea, bsrdsr, dseVal)) >>> 0;
     expandDseCases.push({ ea, bsrdsr, dseVal, result });
   }
 

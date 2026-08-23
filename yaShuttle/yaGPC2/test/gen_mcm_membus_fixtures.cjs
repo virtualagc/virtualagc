@@ -5,7 +5,16 @@ const path = require('path');
 const esbuild = require('esbuild');
 const coffeeScriptPlugin = require('esbuild-coffeescript');
 
-const root = path.resolve(__dirname, '..', '..');
+// Reference-simulator root.  YAGPC_REF_ROOT selects WHICH gpc these
+// fixtures are generated from; without it the historical default is
+// yaShuttle/, whose gpc/ and com/ are symlinks to a frozen checkout.
+// That frozen gpc carries bugs since fixed upstream (it computed the
+// RS-form auto-index write-back from the EA rather than the index
+// register's own address field), so fixtures cut from it assert the
+// bug and fail against a corrected yaGPC2.  Name the oracle explicitly.
+const root = process.env.YAGPC_REF_ROOT
+  ? path.resolve(process.env.YAGPC_REF_ROOT)
+  : path.resolve(__dirname, '..', '..');
 
 function mulberry32(seed) {
   let a = seed;
