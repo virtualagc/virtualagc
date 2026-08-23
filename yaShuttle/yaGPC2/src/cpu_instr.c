@@ -1774,6 +1774,9 @@ static void exec_ICR(CPU *t, DInstr *v) {
              * CLK2DELY) could ever complete; confirmed no other call
              * site sets it either. */
             t->counter1Enabled = true;
+            if (getenv("YAGPC_CLKTRACE"))
+                fprintf(stderr, "CLK ARM1 t=%.6f val=%08x (%.6f s)\n",
+                        t->elapsedTimeUs / 1e6, (unsigned)r1, (double)r1 / 1e6);
             break;
         }
         case 0x09: { /* Write Counter 2 */
@@ -1782,6 +1785,9 @@ static void exec_ICR(CPU *t, DInstr *v) {
             t->counter2 = r1 & 0xffff;
             t->intPending.clk2 = false;  /* see Write Counter 1 */
             t->counter2Enabled = true; /* see Write Counter 1's comment */
+            if (getenv("YAGPC_CLKTRACE"))
+                fprintf(stderr, "CLK ARM2 t=%.6f val=%08x (%.6f s)\n",
+                        t->elapsedTimeUs / 1e6, (unsigned)r1, (double)r1 / 1e6);
             break;
         }
         case 0x05: /* Read AGE — not simulated, returns 0 */

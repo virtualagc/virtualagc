@@ -1083,6 +1083,9 @@ static uint32_t tick_counter(CPU *cpu, uint32_t low, uint32_t hiAddr,
         if (hi == 0) {
             membus_set16(cpu->ram, hiAddr, 0xffff, false);
             *pending = true;
+            if (getenv("YAGPC_CLKTRACE"))
+                fprintf(stderr, "CLK FIRE%d t=%.6f\n",
+                        hiAddr == 0x00B0 ? 1 : 2, cpu->elapsedTimeUs / 1e6);
         } else {
             membus_set16(cpu->ram, hiAddr, hi - 1, false);
         }

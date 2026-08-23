@@ -822,3 +822,20 @@ document's planning stages, and it is already in the code as
   comparison was invalidated when gpc turned out to have still been running
   during the first post-fix measurements (`ps -C node` misses it: its process
   name is `node-MainThread`).
+
+### [2026-08-23] Target: [problems.md]
+- Display clock runs at half speed.  Measured rather than inferred, and the
+  first two suspects are both exonerated:
+  * REAL-TIME PACING is fine.  `YAGPC_PACETRACE` (new) reports sim/wall = 0.914
+    with zero capped idle advances; nsts-sim-gpc measures 0.923 on the same
+    host.  The host is 8% CPU-loaded, not compute-bound.
+  * THE INTERVAL TIMER is fine.  `YAGPC_CLKTRACE` (new) shows counter 1 armed
+    with 0x9c34 (39.988 ms) firing at 39.989 and 40.003 ms -- an accurate 25 Hz
+    tick.
+  The defect is the BCE6 display cycle's CADENCE: both emulators send TIME_FILL
+  carrying a 0.500 s increment, but gpc sends one every 0.500 s of SIMULATED
+  time and we send one every 1.026 s -- 2.05x too slow, which is exactly the
+  half-speed clock on the MDU.  Next: find what gates the cycle, MSC dispatch
+  of BCE6 being the obvious candidate (our MSC also spins at 032a4, a PC gpc
+  never reaches, and falls through at 032a2 `@BC X'4',X'4D'` where gpc
+  branches to 032f0).

@@ -49,6 +49,17 @@ typedef struct {
 
     double idleStartWallSeconds;
     double idleStartSimUs;
+
+    /* YAGPC_PACETRACE accounting: how the wall clock was actually spent.
+     * The simulation running slower than the rate it was asked for is
+     * invisible from inside -- everything time-derived just scales -- so
+     * it needs to be measured rather than inferred. */
+    double statLastReportSeconds;
+    double statIdleWallSeconds;   /* wall spent inside advance_idle */
+    double statSleepSeconds;      /* wall spent sleeping off a lead */
+    long   statIdleCalls;
+    long   statCappedCalls;       /* advances that hit IDLE_CATCHUP_MAX_NS */
+    double statCappedLostMs;      /* simulated time dropped by those caps */
 } RTPacer;
 
 /* Why a paced wait ended. */

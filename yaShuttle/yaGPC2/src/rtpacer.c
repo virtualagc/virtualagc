@@ -4,6 +4,9 @@
 #include "compat.h"
 #include "cpu.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 /* The most simulated time one rtpacer_advance_idle step will carry the
  * wait state forward by.
  *
@@ -46,6 +49,29 @@ void rtpacer_init(RTPacer *p, struct CPU *cpu, double factor, double idleTimeout
     p->wallBirthSeconds = p->wallStartSeconds;
     p->idleStartWallSeconds = p->wallStartSeconds;
     p->idleStartSimUs = p->simStartUs;
+    p->statLastReportSeconds = p->wallStartSeconds;
+    p->statIdleWallSeconds = 0.0;
+    p->statSleepSeconds = 0.0;
+    p->statIdleCalls = 0;
+    p->statCappedCalls = 0;
+    p->statCappedLostMs = 0.0;
+}
+
+/* Every couple of seconds, say how the wall clock was spent and what
+ * fraction of real time the simulation actually achieved. */
+static void rtpacer_report(RTPacer *p) {
+    if (!getenv("YAGPC_PACETRACE")) return;
+    double now = yagpc_monotonic_seconds();
+    if (now - p->statLastReportSeconds < 2.0) return;
+    double wall = now - p->wallBirthSeconds;
+    double sim = (p->cpu->elapsedTimeUs - 0.0) / 1e6;
+    fprintf(stderr,
+            "PACE wall=%8.2fs sim=%8.2fs rate=%.3f | idle: %ld calls %.2fs wall, "
+            "capped %ld (%.0f ms sim dropped) | slept %.2fs\n",
+            wall, sim, wall > 0 ? sim / wall : 0.0, p->statIdleCalls,
+            p->statIdleWallSeconds, p->statCappedCalls, p->statCappedLostMs,
+            p->statSleepSeconds);
+    p->statLastReportSeconds = now;
 }
 
 double rtpacer_ahead_ms(const RTPacer *p) {
@@ -55,9 +81,12 @@ double rtpacer_ahead_ms(const RTPacer *p) {
 }
 
 void rtpacer_pace(RTPacer *p) {
+    rtpacer_report(p);
     double ahead = rtpacer_ahead_ms(p);
     if (ahead > 2.0) {
+        double t0 = yagpc_monotonic_seconds();
         yagpc_sleep_seconds(ahead / 1000.0);
+        p->statSleepSeconds += yagpc_monotonic_seconds() - t0;
     } else if (ahead < -STALL_REBASE_MS) {
         /* The host stalled -- see STALL_REBASE_MS.  Drop the gap. */
         rtpacer_rebase(p);
@@ -91,6 +120,9 @@ void rtpacer_enter_idle(RTPacer *p) {
  * to cover the wall time elapsed since rtpacer_enter_idle(), servicing
  * interrupts as each step lands. */
 RTPaceResult rtpacer_advance_idle(RTPacer *p) {
+    rtpacer_report(p);
+    double statT0 = yagpc_monotonic_seconds();
+    p->statIdleCalls++;
     if (psw_get_wait_state(&p->cpu->psw)) {
         if (!cpu_can_wake(p->cpu)) return RTPACE_MASKED;
 
@@ -101,6 +133,8 @@ RTPaceResult rtpacer_advance_idle(RTPacer *p) {
         if (capped) owedNs = IDLE_CATCHUP_MAX_NS;
         if (owedNs > 0.0) cpu_advance_idle_ns(p->cpu, owedNs);
         if (capped) {
+            p->statCappedCalls++;
+            p->statCappedLostMs += (targetNs - (p->cpu->elapsedTimeUs - p->idleStartSimUs) * 1000.0) / 1e6;
             p->idleStartWallSeconds = yagpc_monotonic_seconds();
             p->idleStartSimUs = p->cpu->elapsedTimeUs;
         }
@@ -109,6 +143,7 @@ RTPaceResult rtpacer_advance_idle(RTPacer *p) {
         rtpacer_rebase(p);   /* post-wake execution paces at the normal rate */
         return RTPACE_RESUMED;
     }
+    p->statIdleWallSeconds += yagpc_monotonic_seconds() - statT0;
     double idleMs = (yagpc_monotonic_seconds() - p->idleStartWallSeconds) * 1000.0;
     return idleMs > p->idleTimeoutMs ? RTPACE_TIMEOUT : RTPACE_WAITING;
 }
