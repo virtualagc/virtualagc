@@ -313,6 +313,11 @@ static void format_watchpoint_msg(BatchRunner *r, uint32_t addr, uint16_t before
  * be inserted (immediately before ap101_exec1(), before the HalUCP trap
  * check) with one integration point instead of two. Returns false if the
  * loop should stop (r->hasStopReason will be set), true to continue. */
+/* Both defined further down; needed by the --real-time paced wait in
+ * batchrunner_step(), which has to poll for Ctrl-C itself. */
+static volatile sig_atomic_t g_sigint_received;
+static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, long step, int exitCode);
+
 static bool batchrunner_step(BatchRunner *r) {
     RegSnapshot before, after;
     ageharness_snapshot_regs(&r->age, &before);
@@ -475,7 +480,20 @@ static bool batchrunner_step(BatchRunner *r) {
              * fast as the host allows, which leaves any real peripheral
              * on the other end of a socket hopelessly behind.  See
              * rtpacer.h. */
-            RTPaceResult why = rtpacer_idle_wait(&r->rtPacer);
+            rtpacer_enter_idle(&r->rtPacer);
+            RTPaceResult why;
+            for (;;) {
+                why = rtpacer_advance_idle(&r->rtPacer);
+                if (why != RTPACE_WAITING) break;
+                /* Ctrl-C has to be honoured here too: a paced wait can
+                 * legitimately last seconds of wall time, and a loop that
+                 * only checked between instructions would swallow it. */
+                if (g_sigint_received) {
+                    interactive_report_and_exit(r, "\n--- INTERRUPTED after %ld steps ---",
+                                                r->step, 0);
+                }
+                yagpc_sleep_seconds(RTPACE_IDLE_POLL_SECONDS);
+            }
             if (why != RTPACE_RESUMED) {
                 snprintf(r->stopReason, sizeof r->stopReason,
                          "wait state (%s)", rtpacer_result_name(why));

@@ -601,3 +601,37 @@ document's planning stages, and it is already in the code as
   the transport's table, so the question is whether BCE 18 is ever
   driven -- i.e. whether the divergence is further out than the
   1.5M instructions compared so far.
+
+### [2026-08-23] Target: [problems.md]
+- yaGPC2 NOW DRIVES DON'S MMU.  Against a live `MMU.sh run`:
+  BITE_STATUS, POSITION_REQ and POSITION (track/subfile decoded), and the
+  MMU acts on them ("position -> 4/4/2") -- so the receive path works
+  too, not just transmit.
+- The bug was in bcenet_framer.c: GPC_SVC_XMIT_CMD recorded the IUA,
+  flushed any pending transmit burst and reported ok -- and never sent
+  the command word.  Every command the machine generated was dropped on
+  the floor.  It goes out as its own two-word message with the 24-bit
+  command left-justified across them, as the reference's MIA does.  A
+  command also now discards any stale queued RECEIVE words, since a
+  command begins a new transaction (the reference's own reasoning: a
+  subsystem cannot know how many words the bus program will read, so a
+  leftover word is normal and real hardware never captures it).
+- Diagnosis path worth recording: an env-gated print in mia_xmit_cmd
+  showed 28 commands, all on BCE 18 (the MM bus), with the servicer
+  installed -- and cmd=588000 is exactly the raw BITE_STATUS value the
+  MMU logs from gpc (5799936).  So the CPU/IOP side was already right
+  and only the bridge was at fault.  Confirming the commands were
+  correct BEFORE looking at the transport is what made this quick.
+- Also fixed: the --real-time paced wait swallowed Ctrl-C.  The pacer's
+  two halves (rtpacer_enter_idle/rtpacer_advance_idle) are now exposed
+  so run.c owns the poll loop and can check for it.  NOTE the plain
+  batchrunner_run path never installs a SIGINT handler at all -- only
+  the interactive path does -- so Ctrl-C there still kills the process
+  outright without a report.  Separate, pre-existing.
+- Under --real-time the instruction stream is NOT reproducible: the
+  paced wait spends wall-clock-derived time, so how many simulated
+  microseconds a wait consumes varies run to run.  Exact trace
+  comparison against gpc is therefore only meaningful WITHOUT
+  --real-time, which is also the mode gpc can be compared in at all (it
+  refuses to advance through a wait without a pacer and stops at
+  3,987,845).

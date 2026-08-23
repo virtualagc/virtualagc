@@ -110,7 +110,7 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
     if (!b) return; /* out-of-range busID: all-false/zero output, same as no servicer installed */
 
     switch (serviceNumber) {
-        case GPC_SVC_XMIT_CMD:
+        case GPC_SVC_XMIT_CMD: {
             /* A new command starts a new transaction. Flush any prior
              * transmit burst first -- normally already empty (the
              * per-tick flush should have cleared it), but defensive
@@ -118,8 +118,36 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
             flush_bus(f, input->busID, b);
             b->lastIua = input->address;
             b->haveLastIua = true;
+
+            /* Anything still queued from the LAST transaction is stale and
+             * must not lead this one.  A subsystem cannot always know how
+             * many words the bus program will read -- a display unit
+             * answers a status request with its whole status block, and
+             * software reads either one halfword of it or sixteen from the
+             * same command word -- so a leftover word is normal, and the
+             * hardware, whose receiver is inhibited outside a commanded
+             * transfer, never captures it.  Discarded here rather than at
+             * receive completion, which would also throw away words that
+             * legitimately arrive later in a transfer. */
+            b->recvHead = 0;
+            b->recvCount = 0;
+
+            /* And then SEND the command.  This is the whole point of the
+             * call and it was missing: the IUA was recorded, any pending
+             * data flushed, ok reported -- and the command word itself
+             * silently dropped, so a real peripheral never heard from us
+             * at all.  It goes out as its own two-word message, the
+             * 24-bit command left-justified across them, exactly as the
+             * reference's MIA does. */
+            uint32_t cmd24 = input->in.word & 0x00ffffffu;
+            uint16_t words[2];
+            words[0] = (uint16_t)((cmd24 >> 8) & 0xffffu);
+            words[1] = (uint16_t)((cmd24 & 0xffu) << 8);
+            bcenet_transport_send(f->transport, input->busID, input->address,
+                                  FRAMER_IS_SHUTTLE_BUS, words, 2);
             output->out.xmit.ok = true;
             break;
+        }
 
         case GPC_SVC_XMIT_WORD:
             if (b->xmitCount < FRAMER_MAX_WORDS) {

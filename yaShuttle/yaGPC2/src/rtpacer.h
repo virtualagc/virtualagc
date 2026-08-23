@@ -79,8 +79,16 @@ void rtpacer_rebase(RTPacer *p);
 void rtpacer_resync(RTPacer *p);
 
 /* Sit in the wait state at the real-time rate until an interrupt clears
- * it, or until nothing can. */
-RTPaceResult rtpacer_idle_wait(RTPacer *p);
+ * it, or until nothing can.
+ *
+ * The two halves are exposed separately because the caller has to keep
+ * control: a blocking loop in here swallows Ctrl-C, and the runner needs
+ * to poll for it between turns.  Call rtpacer_enter_idle() once, then
+ * rtpacer_advance_idle() repeatedly, sleeping RTPACE_IDLE_POLL_SECONDS
+ * between turns, until it returns something other than RTPACE_WAITING. */
+#define RTPACE_IDLE_POLL_SECONDS 0.001
+void rtpacer_enter_idle(RTPacer *p);
+RTPaceResult rtpacer_advance_idle(RTPacer *p);
 
 /* Wall milliseconds since the pacer was created, for reporting. */
 double rtpacer_wall_ms(const RTPacer *p);

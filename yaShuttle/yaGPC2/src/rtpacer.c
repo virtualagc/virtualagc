@@ -82,7 +82,7 @@ const char *rtpacer_result_name(RTPaceResult why) {
     }
 }
 
-static void rtpacer_enter_idle(RTPacer *p) {
+void rtpacer_enter_idle(RTPacer *p) {
     p->idleStartWallSeconds = yagpc_monotonic_seconds();
     p->idleStartSimUs = p->cpu->elapsedTimeUs;
 }
@@ -90,7 +90,7 @@ static void rtpacer_enter_idle(RTPacer *p) {
 /* Carry the wait state forward to the wall clock: advance simulated time
  * to cover the wall time elapsed since rtpacer_enter_idle(), servicing
  * interrupts as each step lands. */
-static RTPaceResult rtpacer_advance_idle(RTPacer *p) {
+RTPaceResult rtpacer_advance_idle(RTPacer *p) {
     if (psw_get_wait_state(&p->cpu->psw)) {
         if (!cpu_can_wake(p->cpu)) return RTPACE_MASKED;
 
@@ -122,15 +122,3 @@ void rtpacer_resync(RTPacer *p) {
     p->idleStartSimUs = p->cpu->elapsedTimeUs;
 }
 
-RTPaceResult rtpacer_idle_wait(RTPacer *p) {
-    rtpacer_enter_idle(p);
-    for (;;) {
-        RTPaceResult why = rtpacer_advance_idle(p);
-        if (why != RTPACE_WAITING) return why;
-        /* A millisecond of real time per turn: short enough that the
-         * simulated clock never drifts far from the wall clock, long
-         * enough that a peripheral's reply has actually arrived at the
-         * socket by the next call. */
-        yagpc_sleep_seconds(0.001);
-    }
-}
