@@ -87,31 +87,47 @@ static void exec_ST(IOP *t, DInstr *v) {
 }
 
 static void exec_LF(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t v1 = iop_g_eaf(t, ea);
     iopls_setACC(&t->ls, v1);
-    iop_incr_nia(t, 1);
+    iop_incr_nia(t, 2);
 }
 
 static void exec_LH(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t v1 = iop_g_eah(t, ea);
     iopls_setACC(&t->ls, v1);
-    iop_incr_nia(t, 1);
+    iop_incr_nia(t, 2);
 }
 
 static void exec_STF(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t v2 = iopls_getACC(&t->ls);
     iop_s_eaf(t, ea, v2);
-    iop_incr_nia(t, 1);
+    iop_incr_nia(t, 2);
 }
 
 static void exec_STH(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t v2 = register_get16(iopls_AL(&t->ls));
     iop_s_eah(t, ea, v2);
-    iop_incr_nia(t, 1);
+    iop_incr_nia(t, 2);
 }
 
 /* ---------------------------------------------------------------------
@@ -234,37 +250,53 @@ static void exec_TSZ(IOP *t, DInstr *v) {
 }
 
 static void exec_CI(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     int32_t val = (int32_t)ea; /* immediate mode: EA is the value itself */
     int32_t acc = (int32_t)iopls_getACC(&t->ls);
-    if (acc < val) iop_incr_nia(t, 2);
-    else if (acc == val) iop_incr_nia(t, 3);
-    else iop_incr_nia(t, 1);
+    if (acc < val) iop_incr_nia(t, 3);
+    else if (acc == val) iop_incr_nia(t, 4);
+    else iop_incr_nia(t, 2);
 }
 
 static void exec_C(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     int32_t val = (int32_t)iop_g_eaf(t, ea);
     int32_t acc = (int32_t)iopls_getACC(&t->ls);
-    if (acc < val) iop_incr_nia(t, 2);
-    else if (acc == val) iop_incr_nia(t, 3);
-    else iop_incr_nia(t, 1);
+    if (acc < val) iop_incr_nia(t, 3);
+    else if (acc == val) iop_incr_nia(t, 4);
+    else iop_incr_nia(t, 2);
 }
 
 static void exec_TMI(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t mask = ea; /* immediate value is the mask */
     uint32_t acc = iopls_getACC(&t->ls);
-    if ((acc & mask) != 0) iop_incr_nia(t, 2);
-    else iop_incr_nia(t, 1);
+    if ((acc & mask) != 0) iop_incr_nia(t, 3);
+    else iop_incr_nia(t, 2);
 }
 
 static void exec_TM(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t mask = iop_g_eaf(t, ea);
     uint32_t acc = iopls_getACC(&t->ls);
-    if ((acc & mask) != 0) iop_incr_nia(t, 2);
-    else iop_incr_nia(t, 1);
+    if ((acc & mask) != 0) iop_incr_nia(t, 3);
+    else iop_incr_nia(t, 2);
 }
 
 /* ---------------------------------------------------------------------
@@ -272,6 +304,10 @@ static void exec_TM(IOP *t, DInstr *v) {
  * ------------------------------------------------------------------- */
 
 static void exec_LBB(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
@@ -293,7 +329,7 @@ static void exec_LBB(IOP *t, DInstr *v) {
         register_set32(iopls_MST(&t->ls), st);
         iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
-    iop_incr_nia(t, 1);
+    iop_incr_nia(t, 2);
 }
 
 static void exec_LBB_at(IOP *t, DInstr *v) {
@@ -324,6 +360,10 @@ static void exec_LBB_at(IOP *t, DInstr *v) {
 }
 
 static void exec_LBP(IOP *t, DInstr *v) {
+    /* A long-format MSC instruction is TWO halfwords: the PC must
+     * advance past its operand word, which this did not do -- so
+     * every one of them was followed by executing its own operand
+     * as if it were an instruction. */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
@@ -345,7 +385,7 @@ static void exec_LBP(IOP *t, DInstr *v) {
         register_set32(iopls_MST(&t->ls), st);
         iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
-    iop_incr_nia(t, 1);
+    iop_incr_nia(t, 2);
 }
 
 static void exec_LBP_at(IOP *t, DInstr *v) {

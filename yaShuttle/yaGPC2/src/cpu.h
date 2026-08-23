@@ -147,6 +147,12 @@ typedef struct CPU {
      * ("BA Fault", Figure 2-20 row C0) unless an assist forces another. */
     uint32_t mcCode;
 
+    /* External 1 carries an interrupt code of its own: 0000 for an IOP
+     * data flow error, 0004 for a DMA store protect violation, 0006 for
+     * the Shuttle AGE (which has its own latch).  Reset to 0000 once the
+     * interrupt is taken. */
+    uint32_t ext1Code;
+
     /* Cumulative estimated AP-101S execution time (HAL/S-FC's own
      * unlabeled time units -- see timing.h), summed unconditionally by
      * every cpu_exec1() call, not just under --debug -- a GPC embedded
@@ -253,6 +259,11 @@ void cpu_signal_illegal_op(CPU *cpu);
 void cpu_signal_privileged_op(CPU *cpu);
 void cpu_signal_protection_violation(CPU *cpu);
 void cpu_signal_addressing_exception(CPU *cpu);
+
+/* The IOP's store protect violation: Figure 2-20 priority 51, External
+ * 1, PSA 0080/0084, mask bit 36, code 0004, and "CPU generated" even
+ * though it is the IOP's access that trips it. */
+void cpu_signal_dma_protect_violation(CPU *cpu);
 
 /* Returns true iff the caller should proceed to write back the FP result
  * and set CC normally (see floatIBM.h's FP_EXC_* for the exc codes). */

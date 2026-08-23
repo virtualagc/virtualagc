@@ -532,3 +532,32 @@ document's planning stages, and it is already in the code as
   ~12k on what looks like local-store width; MVH does not apply R1's DSE
   to its destination (our own timing code already does); DIAG OPX=3 and
   MIA/local-store parity tagging beyond the H-BUS path.
+
+### [2026-08-23] Target: [problems.md]
+- 43,311 -> 299,984 of 300,000 matched instructions, ONE phase slip.
+  Four defects, found by diffing IOP instruction streams:
+  - Ten of the twelve LONG-FORMAT MSC instructions (@LF @LH @STF @STH
+    @CI @C @TMI @TM @LBB @LBP) advanced the PC by one halfword too few,
+    so every one of them was followed by executing its own operand word
+    as an instruction.
+  - LOAD MSC BUSY (PCO 92040000) set the STAT4 bit but not the copy the
+    MSC reads back with @LMS (bit 17 of its status register, addressed
+    BY REGION so a CPU-side PCO does not hit whichever page is being
+    sliced).  The MSC read zero and stored a zero status where the
+    flight software expects 1.
+  - ISPB masked its EA with 0xfffe to drop the low bit -- but that EA is
+    already EXPANDED to 19 bits, so the mask threw the SECTOR away and
+    protected/unprotected the same offset in sector 0.  GPCIPL
+    unprotects a fullword in sector 6 and then writes it, and took a
+    store-protect check every time.  (cpu.c's own 0xfffe masks are
+    applied to the 16-bit EA before expansion and are correct.)
+  - IOP writes to main storage went past store protect entirely, so the
+    DMA store protect violation -- External 1 code 0004, Figure 2-20
+    priority 51 with the note '##' anomaly -- could never occur.  The
+    self test provokes it deliberately.
+- Added YAGPC_IOPTRACE: one line per IOP instruction to stderr.  The
+  CPU-side --trace says nothing about the MSC/BCEs and every remaining
+  divergence has been on that side; diffing this against gpc's own
+  --iop-trace is what found all four.
+- The single remaining slip is at ya[299970], 15 instructions from the
+  end of the compared window, in a memory-scan loop.

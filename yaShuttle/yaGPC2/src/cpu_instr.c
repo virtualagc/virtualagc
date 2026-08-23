@@ -1490,7 +1490,12 @@ static void exec_ISPB(CPU *t, DInstr *v) {
         case 1: { /* reset both halfwords of the fullword */
             /* "When M1 is 001 or 011, the low-order bit of the EA should
              * be 0 and will be ignored." */
-            uint32_t fwAddr = ea & 0xfffe;
+            /* The EA here is already EXPANDED to 19 bits, so masking
+             * the low bit off must not touch the sector bits: 0xfffe
+             * threw them away and protected/unprotected the same offset
+             * in sector 0 instead.  GPCIPL unprotects a fullword in
+             * sector 6 and then writes it. */
+            uint32_t fwAddr = ea & ~1u;
             t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, fwAddr, false);
             membus_set_store_protect(t->ram, fwAddr + 1, false);
@@ -1501,7 +1506,12 @@ static void exec_ISPB(CPU *t, DInstr *v) {
             membus_set_store_protect(t->ram, ea, true);
             break;
         case 3: { /* set both halfwords of the fullword */
-            uint32_t fwAddr = ea & 0xfffe;
+            /* The EA here is already EXPANDED to 19 bits, so masking
+             * the low bit off must not touch the sector bits: 0xfffe
+             * threw them away and protected/unprotected the same offset
+             * in sector 0 instead.  GPCIPL unprotects a fullword in
+             * sector 6 and then writes it. */
+            uint32_t fwAddr = ea & ~1u;
             t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, fwAddr, true);
             membus_set_store_protect(t->ram, fwAddr + 1, true);

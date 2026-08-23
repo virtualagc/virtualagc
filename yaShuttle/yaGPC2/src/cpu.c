@@ -52,6 +52,7 @@ void cpu_init(CPU *cpu) {
     cpu->diagScanReg = 0;
     cpu->diagInterruptPageDiagnoseMode = false;
     cpu->mcCode = 0x0008;
+    cpu->ext1Code = 0x0000;
 }
 
 void cpu_free(CPU *cpu) {
@@ -260,7 +261,12 @@ void cpu_check_interrupts(CPU *cpu) {
     }
     if (cpu->intPending.iopGrp2 && (intMask & 0x08)) {
         cpu->intPending.iopGrp2 = false;
-        psw_set_int_code(&cpu->psw, 0x0000);  /* see External 0 above */
+        psw_set_int_code(&cpu->psw, cpu->ext1Code);
+        /* Figure 2-20 marks the DMA store protect violation's PSA entry
+         * "0080#", so it carries the same old-PSW anomaly a store
+         * protect program check does. */
+        if (cpu->ext1Code == 0x0004) cc_anomaly(cpu);
+        cpu->ext1Code = 0x0000;
         cpu_swap_psw(cpu, 0x0080, 0x0084);
         return;
     }
@@ -381,6 +387,34 @@ void cpu_signal_protection_violation(CPU *cpu) {
      * instead of ever being handled. */
     cpu->intPending.programCheck = true;
     cpu->intCode = 0x0007;
+}
+
+/* The IOP's store protect violation: Figure 2-20 priority 51, External
+ * 1, PSA 0080/0084, mask bit 36, code 0004, and "CPU generated" even
+ * though it is the IOP's access that trips it.
+ *
+ * Figure 2-20 note '##': "A masked DMA store protect interrupt will set
+ * the condition code (CC) to a binary 10 and clear the carry and
+ * overflow bits...  Additionally, a masked DMA store protect interrupt
+ * clears any fixed point overflow, floating point underflow, and
+ * floating point overflow interrupts.  This can result in a lost
+ * arithmetic interrupt if a masked DMA store protect interrupt occurs
+ * during an instruction that causes one of these arithmetic
+ * interrupts." */
+void cpu_signal_dma_protect_violation(CPU *cpu) {
+    cpu->ext1Code = 0x0004;
+    cpu->intPending.iopGrp2 = true;
+    if (!(psw_get_int_mask(&cpu->psw) & 0x08)) {   /* masked */
+        psw_set_cc(&cpu->psw, 2);
+        psw_set_carry(&cpu->psw, 0);
+        psw_set_overflow(&cpu->psw, 0);
+        if (cpu->intPending.programCheck &&
+            (cpu->intCode == 0x0004 ||    /* fixed point overflow */
+             cpu->intCode == 0x0009 ||    /* floating point underflow */
+             cpu->intCode == 0x000B)) {   /* floating point overflow */
+            cpu->intPending.programCheck = false;
+        }
+    }
 }
 
 void cpu_signal_addressing_exception(CPU *cpu) {

@@ -1,4 +1,6 @@
 #include "iop.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -636,6 +638,21 @@ void iop_exec_processors(IOP *iop) {
     register_set16(iopls_IH(&iop->ls), hw1);
     register_set16(iopls_IL(&iop->ls), hw2);
 
+    /* One line per IOP instruction actually executed, to stderr, when
+     * YAGPC_IOPTRACE is set.  The CPU-side --trace says nothing about
+     * what the MSC and the BCEs are doing, and every remaining
+     * divergence against the reference has been on that side; diffing
+     * this against `gpc --iop-trace` is how they were found.  Off unless
+     * the variable is set, so it costs a getenv per slice and nothing
+     * else. */
+    if (getenv("YAGPC_IOPTRACE")) {
+        char who[8];
+        if (page == 0) snprintf(who, sizeof who, "MSC");
+        else snprintf(who, sizeof who, "BCE%d", page);
+        fprintf(stderr, "IOPT %-6s %05x  %04x %04x  A=%08x BST=%08x\n",
+                who, (unsigned)pc, (unsigned)hw1, (unsigned)hw2,
+                (unsigned)iopls_getACC(&iop->ls), (unsigned)iopls_getBST(&iop->ls));
+    }
     if (page == 0) {
         msc_instr_exec(iop, hw1, hw2);
     } else {
@@ -768,13 +785,24 @@ uint32_t iop_g_eah(IOP *iop, uint32_t addr) {
     if (iop_check_dma_parity(iop)) return 0;
     return mcm_get16(&iop->cpu->mainStorage, addr);
 }
+/* An IOP write to CPU main storage is store-protected like any other:
+ * a protected location raises the DMA store protect violation, External
+ * 1 with code 0004.  These wrote past protection entirely, so that
+ * interrupt could never occur -- and GPCIPL's self test deliberately
+ * provokes it. */
+static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value) {
+    if (mcm_set16(&iop->cpu->mainStorage, addr, value, true)) return true;
+    cpu_signal_dma_protect_violation(iop->cpu);
+    return false;
+}
 void iop_s_eaf(IOP *iop, uint32_t addr, uint32_t value) {
     if (iop_check_dma_parity(iop)) return;
-    mcm_set32(&iop->cpu->mainStorage, addr, value, false);
+    if (!iop_write_main16(iop, addr, (value >> 16) & 0xffff)) return;
+    iop_write_main16(iop, addr + 1, value & 0xffff);
 }
 void iop_s_eah(IOP *iop, uint32_t addr, uint32_t value) {
     if (iop_check_dma_parity(iop)) return;
-    mcm_set16(&iop->cpu->mainStorage, addr, value, false);
+    iop_write_main16(iop, addr, value);
 }
 
 void iop_set_nia(IOP *iop, uint32_t x) { register_set32(iopls_PC(&iop->ls), x); }
@@ -1037,6 +1065,17 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             /* The MSC's own bit in STAT4 -- the TOP bit of the word,
              * not the bottom one this used to set. */
             iop_proc_set(&iop->regBusyWait, PROC_MSC, 1);
+            /* And the copy of it the MSC reads back with @LMS: bit 17 of
+             * the 18-bit MSC status register, "the Busy/Wait bit for the
+             * MSC".  Software checks the copy against X'00000001'
+             * exactly, so nothing else in the register may be disturbed.
+             * Reached BY REGION, not through iopls_MST(): that accessor
+             * reads whichever page the IOP happens to be slicing, which
+             * for a CPU-side PCO is any of the 26.  Without this the
+             * MSC's own @LMS read back zero and it stored a zero status
+             * where the flight software expects 1. */
+            Register *mst = iopls_at(&iop->ls, PROC_MSC, 2, 7);
+            if (mst) register_set32(mst, register_get32(mst) | 1u);
             break;
         }
         case 0xc1008000: /* INHIBIT COMPLETION OF A DMA CYCLE */
