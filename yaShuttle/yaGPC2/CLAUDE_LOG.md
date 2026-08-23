@@ -702,3 +702,36 @@ document's planning stages, and it is already in the code as
   the PC (it printed only the opcode, to stdout).  An unknown opcode is
   almost always a runaway PC rather than a missing instruction, and the
   address is what tells those apart -- it is what localised this.
+
+### [2026-08-23] Target: [problems.md]
+- CORRECTION to the previous entry: the block loop DOES end in ours.  The
+  earlier diagnosis ("the loop never terminates after the first block")
+  was wrong -- it came from a truncated listing that showed only the
+  first 8 of 17 blocks.  Measured properly: 17 datagrams of 1024 bytes
+  arrive on bus 18, all 17 512-halfword receives complete, and BCE18's
+  instruction stream is IDENTICAL to gpc's, PC for PC, through the whole
+  per-block loop (035e6 -> 035f4).  The runaway #LBR operand is a
+  downstream symptom, not the fault.
+- What actually differs is AFTER the transfer.  gpc issues 3 READs and
+  moves the MSC on to 0x3268-0x330a; we issue 1 READ and re-enter the
+  block loop without commanding another, so the BCE waits out its
+  message time out (which is at the POO maximum, 262143 x 16.5 us =
+  4.325 s) once per attempt while the MSC keeps advancing the buffer
+  pointer until it overflows into the #LBR opcode field.
+- On the "interrupt at the end of the block" idea: there IS a completion
+  signal, two of them.  Per block, the BCE sets its INDICATOR bit and
+  the MSC polls it with @RAI ("repeat until all indicators", (indicator
+  & accMask) == accMask).  For the transfer, the MSC signals the CPU
+  with @INT (External 2).  Neither is the differentiator here: @INT at
+  0x3483 has I=1 and X=0 in BOTH emulators, so its level is 0 and
+  neither raises anything.
+- The measurable difference is RATE.  gpc executes 0x3483 33 times, ~6 ms
+  apart; ours executes it 76,266 times, continuously.  So our MSC is not
+  being held where gpc's is.  Checked and RULED OUT as the cause: the
+  MSC's @DLY is a no-op in both; iop_msc_repeat matches gpc's mscRepeat
+  line for line; the ACC accessors, @SIO, @N/@X and #LBR all match.
+- NEXT: find what paces gpc's MSC loop to ~6 ms per iteration.  It is not
+  @DLY and not mscRepeat's own timing, so it is something the loop waits
+  ON -- most likely a BCE busy/indicator transition arriving later in
+  gpc than in ours, i.e. our BCE finishing its program sooner than it
+  should.

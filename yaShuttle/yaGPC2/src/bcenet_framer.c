@@ -170,9 +170,6 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
         case GPC_SVC_RECV_POLL:
             refill_recv_queue(f, input->busID, b);
             output->out.poll.available = (b->recvHead < b->recvCount);
-            if (getenv("YAGPC_NETTRACE"))
-                fprintf(stderr, "POLL bus=%d avail=%d head=%d count=%d\n", input->busID,
-                        (int)output->out.poll.available, b->recvHead, (int)b->recvCount);
             break;
 
         case GPC_SVC_RECV_WORD:
@@ -180,9 +177,6 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
             if (b->recvHead < b->recvCount) {
                 output->out.recv.available = true;
                 output->out.recv.word = b->recvQueue[b->recvHead++];
-                if (getenv("YAGPC_NETTRACE"))
-                    fprintf(stderr, "RECVW bus=%d word=%04x\n", input->busID,
-                            (unsigned)output->out.recv.word);
             } else {
                 output->out.recv.available = false;
             }
