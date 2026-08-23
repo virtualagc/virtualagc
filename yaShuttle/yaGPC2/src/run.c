@@ -447,9 +447,18 @@ static bool batchrunner_step(BatchRunner *r) {
          * every fixture in today's corpus, where wait state is really
          * just a HAL/S program's normal termination and neither counter
          * is ever enabled, so this loop does not even run for them. */
+        /* A clock is not the only thing that can end a wait.  The IOP
+         * keeps running (see ap101_tick), so an enabled processor still
+         * working a bus -- or a real peripheral answering one through an
+         * installed servicer -- can raise the interrupt that wakes the
+         * CPU.  Ticking only while a counter happened to be armed gave up
+         * immediately on exactly the case that matters: GPCIPL waiting on
+         * the mass memory. */
         long ticks = 0;
         while (psw_get_wait_state(&r->age.gpc.cpu.psw) &&
-               (r->age.gpc.cpu.counter1Enabled || r->age.gpc.cpu.counter2Enabled) &&
+               (r->age.gpc.cpu.counter1Enabled || r->age.gpc.cpu.counter2Enabled ||
+                iop_any_processor_running(&r->age.gpc.iop) ||
+                iop_has_servicer(&r->age.gpc.iop)) &&
                ticks < WAIT_TICK_LIMIT) {
             ap101_tick(&r->age.gpc);
             ticks++;

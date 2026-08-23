@@ -81,6 +81,14 @@ void iop_proc_set(Register *r, int p, uint32_t v) {
     register_set32(r, v ? (cur | m) : (cur & ~m));
 }
 
+bool iop_any_processor_running(const IOP *iop) {
+    uint32_t enabled = register_get32(&iop->regHalt);
+    uint32_t busy = register_get32(&iop->regBusyWait);
+    return (enabled & busy & PROC_ALL) != 0;
+}
+
+bool iop_has_servicer(const IOP *iop) { return iop->servicer != NULL; }
+
 void iop_reset_discrete_inputs(IOP *iop) {
     register_set32(&iop->regDiscreteInA, DISCRETE_IN_A_DEFAULT);
     register_set32(&iop->regDiscreteInB, DISCRETE_IN_B_DEFAULT);

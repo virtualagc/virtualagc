@@ -19,18 +19,25 @@ void ap101_exec1(AP101 *gpc) {
 }
 
 void ap101_tick(AP101 *gpc) {
-    /* CPU-side clock/interrupt advance only -- deliberately does NOT also
-     * call iop_exec() the way ap101_exec1() does. ap101_exec1() steps the
-     * IOP once per CPU *instruction*, an emulator-level 1:1 pairing this
-     * codebase has always relied on; batchrunner_step()'s WAIT-tick loop
-     * (see run.c) can call this many times with no CPU instruction ever
-     * executing in between, so pairing it with iop_exec() here would let
-     * the IOP's own independent MSC/BCE instruction stream run far ahead
-     * of anything that pairing was ever validated for -- confirmed to
-     * actually happen and corrupt unrelated CPU memory (BILDNEW5/GPCIPL's
-     * PCHINTH/PCHERLST program-check dispatch table, INTHNDLR.asm) the
-     * first time this was tried with iop_exec() included. */
+    /* The IOP RUNS DURING WAIT, and it has to.  Instruction fetch is what
+     * the wait state suspends; the I/O processor is a separate machine
+     * that keeps executing its own MSC/BCE streams underneath, and a
+     * peripheral answering on a bus is one of the things that ENDS the
+     * wait -- GPCIPL parks here and expects the mass memory to wake it.
+     *
+     * This used to advance only the CPU-side clock, on the grounds that
+     * letting the IOP run untethered from CPU instructions had been seen
+     * to corrupt CPU memory (GPCIPL's own program-check dispatch table).
+     * That corruption was real but it was not the pairing: #SSC and #SST
+     * were computing an absolute address from a raw displacement and
+     * storing BCE status straight through the PSA -- see iop_bce_instr.c.
+     * With that fixed the IOP is safe to step here, and not stepping it
+     * is what leaves a WAIT unwakeable: with the IOP frozen no bus
+     * traffic can happen, so nothing can ever raise the interrupt the
+     * software is waiting for, and the run stops declaring "wait state"
+     * when the machine was simply waiting for I/O it was never given. */
     cpu_tick(&gpc->cpu);
+    iop_exec(&gpc->iop);
 }
 
 void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, void *servicerCtx) {

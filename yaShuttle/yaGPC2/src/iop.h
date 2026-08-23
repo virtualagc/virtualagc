@@ -261,6 +261,15 @@ void iop_init(IOP *iop, struct CPU *cpu);
 /* Restore the discrete inputs to the crew-panel/vehicle configuration
  * this emulator stands in for; see DISCRETE_IN_A_DEFAULT in iop.c. */
 void iop_reset_discrete_inputs(IOP *iop);
+
+/* Is any processor both enabled and busy -- i.e. is the IOP still doing
+ * something that could raise an interrupt?  Used to decide whether a CPU
+ * wait state still has a possible wakeup (see run.c). */
+bool iop_any_processor_running(const IOP *iop);
+/* Is a real-peripheral servicer installed (--bce-network or an embedding
+ * host)?  Traffic can arrive from outside at any time, so a wait is never
+ * hopeless while one is attached. */
+bool iop_has_servicer(const IOP *iop);
 void iop_free(IOP *iop);
 
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx);
