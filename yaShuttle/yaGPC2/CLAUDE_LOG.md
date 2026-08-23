@@ -990,3 +990,33 @@ document's planning stages, and it is already in the code as
   spinning at 032a4.  032a4 is `@RAW`, which per exec_RAW repeats until every
   BCE in its ACC mask is OUT of Busy/Wait.  BCE6 at a #WAT is not busy, so the
   next question is which BCE in that mask is stuck busy.
+
+### [2026-08-23] Target: [problems.md]
+- REVERTED the batching commit (11c0e4dda).  It was wrong at the protocol
+  level, and the code comment I overrode had been right all along.
+  meds/deuUnit.coffee's `recv` reads:
+      # ...a command as the 24 command bits left justified in two halfwords,
+      # and every data word on its own -- so the DATAGRAM LENGTH tells them apart
+      recv: (words) ->
+        if words.length >= 2 then @onCommand ... else (@onData(w) for w in words)
+  So a datagram of 2 or more halfwords IS a command.  Our batched 7-word time
+  fill was parsed as a garbage command and the payload never became data at
+  all.  The `(@onData(w) for w in words)` loop I cited as proof that multi-word
+  datagrams are accepted is only ever reached with ONE word.
+- Caught by running `gpcmd unit --idp 1 --stats-interval 10`, a HEADLESS DEU
+  that speaks the same state machine as MEDS and logs what it sees.  It said
+  so immediately and unambiguously: 314 commands, 157 polls, `wordsIn: 0`, and
+  "transfer abandoned, 7 halfwords short" on every single fill.  Use this
+  rather than the Electron GUI for any bus work -- it is the instrument that
+  was missing all session.
+- So one datagram per halfword is REQUIRED, and the overflow has to be solved
+  by pacing after all.  Why the earlier simulated-time pacing only got drops
+  from 7,823 to 4,882: it paced in SIMULATED time, but the peer is a real
+  process living in WALL time, and `cpu_advance_idle_ns` advances up to
+  IDLE_CATCHUP_MAX_NS (5 ms) of simulated time inside a single call with no
+  wall time passing at all.  A burst therefore still left the socket in one
+  instantaneous rush.  Pacing has to be against the WALL clock.
+- The DEU is separable from the display: `DEUUnit` (meds/deuUnit.coffee, plus
+  deuProto/deuSPL/deuFCW) is constructed both by meds/idp.coffee inside the GUI
+  and standalone by meds/gpcmd.coffee.  The rendering (mdu.coffee,
+  mduScreen_*.coffee) is a separate layer.

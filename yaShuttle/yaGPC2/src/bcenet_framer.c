@@ -182,35 +182,19 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
         }
 
         case GPC_SVC_XMIT_WORD: {
-            /* Accumulate; the burst goes out as ONE datagram, flushed by
-             * the next command or at the end of the tick.
-             *
-             * The reference's MIA does send a word per datagram, and this
-             * did too for a while, on the theory that a subsystem reads
-             * one datagram as one bus word.  That theory is wrong: both
-             * of the subsystems here loop over every word a datagram
-             * carries -- meds/deuUnit.coffee's `(@onData(w) for w in
-             * words)` and mmu/mmu.coffee's `self._onData(w) for w in
-             * words` -- and both answer with whole multi-word messages of
-             * their own (a display unit's poll reply arrives as a single
-             * 16-word datagram).
-             *
-             * Sending a word at a time is what broke the display bus.  A
-             * 511-halfword fill became 511 datagrams issued microseconds
-             * apart, because iop_exec_dma_queue() drains the whole queue
-             * in one call; a default UDP receive buffer holds roughly 276
-             * that small, so the kernel dropped the overflow -- measured,
-             * 7,823 datagrams lost in 45 s where the reference lost none.
-             * The casualties were the COMMANDS queued behind the bulk
-             * data, so the display unit never saw the poll at 035a2 and
-             * that receive timed out every cycle.  One datagram per
-             * transfer cannot overrun anything. */
-            if (b->xmitCount < FRAMER_MAX_WORDS) {
-                b->xmitBuf[b->xmitCount++] = (uint16_t)input->in.word;
-            } else {
-                flush_bus(f, input->busID, b);
-                b->xmitBuf[b->xmitCount++] = (uint16_t)input->in.word;
-            }
+            /* Each data word goes out as its OWN one-word message, which
+             * is what the reference's MIA does and what a peripheral
+             * parses.  Batching a transmit burst into a single datagram
+             * -- what this used to do, flushed once a tick -- produced a
+             * multi-word message the subsystem on the other end had no
+             * reason to expect: it reads a datagram as one bus word, so a
+             * burst arrived as one garbled word and the rest vanished.
+             * That is why a bare command (POSITION) got through while
+             * anything carrying data behind it did not. */
+            uint16_t word = (uint16_t)input->in.word;
+            int iua = b->haveLastIua ? b->lastIua : 0;
+            bcenet_transport_send(f->transport, input->busID, iua,
+                                  FRAMER_IS_SHUTTLE_BUS, &word, 1);
             output->out.xmit.ok = true;
             break;
         }
