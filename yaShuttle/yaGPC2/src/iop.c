@@ -24,6 +24,10 @@
 #define WD_TICK_US     768.0
 #define WD_COUNT_MASK  0xfffu
 
+/* Which bits of a MIA enable/disable data word are writable: BCE 1-24
+ * in processor numbering.  Only they have MIAs. */
+#define MIA_WRITE_MASK 0x7fffff80u
+
 #define INTA_GO_NOGO   0x80000000u
 #define INTA_IOP_FAIL  0x40000000u
 #define INTA_CM_IDLE   0x20000000u
@@ -868,32 +872,26 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         case 0xc0200000: /* BAD PARITY DATA INPUT DISABLE */
             iop->dataForceBadParity = false;
             break;
-        case 0x84040000: { /* MIA TRANSMITTER DISABLE */
-            uint32_t r1 = register_get32(&iop->regXmitEna);
-            uint32_t r2 = r1 & data;
-            r1 = r1 ^ r2;
-            register_set32(&iop->regXmitEna, r1);
+        /* Only BCE 1-24 have MIAs, so the data word is masked to their
+         * bits: the MSC's bit 0 and the seven unused low bits are not
+         * writable here.  Applying the word unmasked, as these did, let
+         * a blanket enable/disable reach processors that have no MIA. */
+        case 0x84040000: /* MIA TRANSMITTER DISABLE */
+            register_set32(&iop->regXmitEna,
+                           register_get32(&iop->regXmitEna) & ~(data & MIA_WRITE_MASK));
             break;
-        }
-        case 0x85040000: { /* MIA TRANSMITTER ENABLE */
-            uint32_t r1 = register_get32(&iop->regXmitEna);
-            r1 = r1 | data;
-            register_set32(&iop->regXmitEna, r1);
+        case 0x85040000: /* MIA TRANSMITTER ENABLE */
+            register_set32(&iop->regXmitEna,
+                           register_get32(&iop->regXmitEna) | (data & MIA_WRITE_MASK));
             break;
-        }
-        case 0x84080000: { /* MIA RECEIVER DISABLE */
-            uint32_t r1 = register_get32(&iop->regRecvEna);
-            uint32_t r2 = r1 & data;
-            r1 = r1 ^ r2;
-            register_set32(&iop->regRecvEna, r1);
+        case 0x84080000: /* MIA RECEIVER DISABLE */
+            register_set32(&iop->regRecvEna,
+                           register_get32(&iop->regRecvEna) & ~(data & MIA_WRITE_MASK));
             break;
-        }
-        case 0x85080000: { /* MIA RECEIVER ENABLE */
-            uint32_t r1 = register_get32(&iop->regRecvEna);
-            r1 = r1 | data;
-            register_set32(&iop->regRecvEna, r1);
+        case 0x85080000: /* MIA RECEIVER ENABLE */
+            register_set32(&iop->regRecvEna,
+                           register_get32(&iop->regRecvEna) | (data & MIA_WRITE_MASK));
             break;
-        }
         case 0x84100000: { /* DISCRETE OUTPUT RESET */
             uint32_t r1 = register_get32(&iop->regDiscreteOut);
             uint32_t r2 = r1 & data;
