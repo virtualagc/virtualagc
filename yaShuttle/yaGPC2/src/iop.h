@@ -218,6 +218,13 @@ typedef struct IOP {
     DMAQueue dmaQueue;
     long clockCycleCount;
 
+    /* MSC "repeat until" state -- @RAI/@RAW/@RNI/@RNW hold the MSC on one
+     * instruction until their condition is met or a count expires.  See
+     * iop_msc_repeat(). */
+    bool mscRepeatActive;
+    uint32_t mscRepeatPC;
+    double mscRepeatUntilUs;
+
     /* See header comment: NULL (default) preserves the exact inert-stub
      * MIA behavior; set via iop_set_servicer()/ap101_set_servicer().
      * servicerCtx is opaque -- never a GpcState, see yaGpcIntegration.h's
@@ -273,6 +280,12 @@ uint32_t iop_msc_ea(IOP *iop, uint32_t disp, bool indexed);
  * Element program counter -- the address of the next sequential
  * instruction.  The displacement is 11-bit two's complement. */
 uint32_t iop_bce_ea(IOP *iop, uint32_t disp, bool m);
+
+/* The MSC's repeat-until instructions.  `met` is the instruction's own
+ * condition; this advances 2 halfwords when it is met, 1 when the repeat
+ * count runs out, and otherwise leaves the PC alone so the instruction
+ * runs again on the MSC's next slice. */
+void iop_msc_repeat(IOP *iop, DInstr *v, bool met);
 uint32_t iop_msc_long_ea(IOP *iop, uint32_t addr, bool indexed);
 
 uint32_t iop_g_eaf(IOP *iop, uint32_t addr);

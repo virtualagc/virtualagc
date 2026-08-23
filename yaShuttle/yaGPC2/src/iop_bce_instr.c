@@ -71,16 +71,23 @@ static void exec_SIB(IOP *t, DInstr *v) {
 }
 
 static void exec_SSC(IOP *t, DInstr *v) {
-    uint32_t disp = df_get(v, 'd') + 2u * df_get(v, 'm') * (uint32_t)t->curPE;
-    iop_s_eaf(t, disp, iopls_getBST(&t->ls));
+    /* A BCE short-format address -- updated PC plus the signed
+     * displacement, plus 2 x BCENO when M is set -- with "the least
+     * significant bit of EA (the halfword address) ignored".  This used
+     * the raw displacement as an absolute address, so every BCE stored
+     * its status into the PSA at 2c + 2*BCENO, walking straight through
+     * the interrupt vectors; the SVC new PSW at 005c went to zero and the
+     * next SVC took the CPU to address 0. */
+    uint32_t ea = iop_bce_ea(t, df_get(v, 'd'), df_get(v, 'm') != 0) & ~1u;
+    iop_s_eaf(t, ea, iopls_getBST(&t->ls));
     iopls_setBST(&t->ls, 0);
     iop_proc_set(&t->regProgExcept, t->curPE, 1);
     iop_incr_nia(t, 1);
 }
 
 static void exec_SST(IOP *t, DInstr *v) {
-    uint32_t disp = df_get(v, 'd') + 2u * df_get(v, 'm') * (uint32_t)t->curPE;
-    iop_s_eaf(t, disp, iopls_getBST(&t->ls));
+    uint32_t ea = iop_bce_ea(t, df_get(v, 'd'), df_get(v, 'm') != 0) & ~1u;
+    iop_s_eaf(t, ea, iopls_getBST(&t->ls));
     iop_incr_nia(t, 1);
 }
 

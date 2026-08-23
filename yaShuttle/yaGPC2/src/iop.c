@@ -302,6 +302,9 @@ void iop_init(IOP *iop, struct CPU *cpu) {
 
     dmaq_init(&iop->dmaQueue);
     iop->clockCycleCount = 0;
+    iop->mscRepeatActive = false;
+    iop->mscRepeatPC = 0;
+    iop->mscRepeatUntilUs = 0.0;
 
     iop->servicer = NULL;
     iop->servicerCtx = NULL;
@@ -444,6 +447,36 @@ uint32_t iop_msc_ea(IOP *iop, uint32_t disp, bool indexed) {
         ea = (ea + x) & 0x3ffff;
     }
     return ea;
+}
+
+/* One "repeat" tick, in microseconds.  The count field is expressed in
+ * these, and the reference uses two 16.5us IOP cycles per tick. */
+#define MSC_REPEAT_TICK_US 33.0
+
+void iop_msc_repeat(IOP *iop, DInstr *v, bool met) {
+    uint32_t pc = register_get32(iopls_PC(&iop->ls)) & 0x3ffff;
+    double now = (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
+
+    if (!iop->mscRepeatActive || iop->mscRepeatPC != pc) {
+        /* First arrival at this instruction: arm the count.  "The lower
+         * 8 bits, bits 8 through 15, and the I-bit are used to compute a
+         * count" -- the I bit adds the index register on top of the
+         * instruction's own eight, the way it extends a displacement. */
+        uint32_t count = df_get(v, 'd');
+        if (df_get(v, 'i')) count += register_get32(iopls_X(&iop->ls)) & 0x3ffff;
+        iop->mscRepeatActive = true;
+        iop->mscRepeatPC = pc;
+        iop->mscRepeatUntilUs = now + (double)count * MSC_REPEAT_TICK_US;
+    }
+
+    if (met) {
+        iop->mscRepeatActive = false;
+        iop_incr_nia(iop, 2);
+    } else if (now >= iop->mscRepeatUntilUs) {
+        iop->mscRepeatActive = false;
+        iop_incr_nia(iop, 1);
+    }
+    /* else: leave the PC where it is and run again next slice. */
 }
 
 uint32_t iop_bce_ea(IOP *iop, uint32_t disp, bool m) {

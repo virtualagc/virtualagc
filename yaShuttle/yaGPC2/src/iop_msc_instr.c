@@ -200,9 +200,7 @@ static void exec_REC(IOP *t, DInstr *v) {
     uint32_t stval = iop_g_eaf(t, ea + 8);
     register_set32(iopls_MST(&t->ls), stval & 0x3ffffu);
     if (stval & 0x00010000u) {
-        uint32_t pe = register_get32(&t->regProgExcept);
-        pe = pe | 1;
-        register_set32(&t->regProgExcept, pe);
+        iop_proc_set(&t->regProgExcept, PROC_MSC, 1); /* MSC to GO */
     } else {
         /* MSC to NO-GO: its bit is the top of the word, not the
          * bottom -- see iop.h's processor-numbering note. */
@@ -454,9 +452,7 @@ static void exec_SEC(IOP *t, DInstr *v) {
         st = st | (peBit << 16);
         iop_s_eaf(t, ecr + 8, st);
         register_set32(iopls_MST(&t->ls), 0);
-        uint32_t pe = register_get32(&t->regProgExcept);
-        pe = pe | 1;
-        register_set32(&t->regProgExcept, pe);
+        iop_proc_set(&t->regProgExcept, PROC_MSC, 1); /* MSC to GO */
         register_set32(iopls_ECR(&t->ls), 0);
         iop_set_nia(t, ecr + 8);
     }
@@ -549,46 +545,23 @@ static void exec_LI(IOP *t, DInstr *v) {
  * ------------------------------------------------------------------- */
 
 static void exec_RAI(IOP *t, DInstr *v) {
-    uint32_t acc = iopls_getACC(&t->ls);
-    uint32_t bceMask = acc & PROC_ALL_BCE;
-    uint32_t ind = register_get32(&t->regIndicator);
-    if ((ind & bceMask) == bceMask) {
-        iop_incr_nia(t, 2);
-    } else {
-        if (df_get(v, 'd') == 0) {
-            iop_incr_nia(t, 1);
-        } else {
-            if ((ind & bceMask) == bceMask) iop_incr_nia(t, 2);
-            else iop_incr_nia(t, 1);
-        }
-    }
+    uint32_t m = iopls_getACC(&t->ls) & PROC_ALL_BCE;
+    iop_msc_repeat(t, v, (register_get32(&t->regIndicator) & m) == m);
 }
 
 static void exec_RAW(IOP *t, DInstr *v) {
-    (void)v;
-    uint32_t acc = iopls_getACC(&t->ls);
-    uint32_t bceMask = acc & PROC_ALL_BCE;
-    uint32_t bw = register_get32(&t->regBusyWait);
-    if ((bw & bceMask) == 0) iop_incr_nia(t, 2);
-    else iop_incr_nia(t, 1);
+    uint32_t m = iopls_getACC(&t->ls) & PROC_ALL_BCE;
+    iop_msc_repeat(t, v, (register_get32(&t->regBusyWait) & m) == 0);
 }
 
 static void exec_RNI(IOP *t, DInstr *v) {
-    (void)v;
-    uint32_t acc = iopls_getACC(&t->ls);
-    uint32_t bceMask = acc & PROC_ALL_BCE;
-    uint32_t ind = register_get32(&t->regIndicator);
-    if ((ind & bceMask) != 0) iop_incr_nia(t, 2);
-    else iop_incr_nia(t, 1);
+    uint32_t m = iopls_getACC(&t->ls) & PROC_ALL_BCE;
+    iop_msc_repeat(t, v, (register_get32(&t->regIndicator) & m) != 0);
 }
 
 static void exec_RNW(IOP *t, DInstr *v) {
-    (void)v;
-    uint32_t acc = iopls_getACC(&t->ls);
-    uint32_t bceMask = acc & PROC_ALL_BCE;
-    uint32_t bw = register_get32(&t->regBusyWait);
-    if ((~bw & bceMask) != 0) iop_incr_nia(t, 2);
-    else iop_incr_nia(t, 1);
+    uint32_t m = iopls_getACC(&t->ls) & PROC_ALL_BCE;
+    iop_msc_repeat(t, v, ((~register_get32(&t->regBusyWait)) & m) != 0);
 }
 
 /* ---------------------------------------------------------------------
@@ -624,9 +597,10 @@ static void exec_INT(IOP *t, DInstr *v) {
 
 static void exec_STP(IOP *t, DInstr *v) {
     (void)v;
-    uint32_t pe = register_get32(&t->regProgExcept);
-    pe = pe | 1; /* bit 0 = MSC, 1 = GO */
-    register_set32(&t->regProgExcept, pe);
+    /* MSC to GO.  Its bit is the top of the word (iop.h); this set the
+     * bottom one, which is one of the unused bits above the self-test
+     * processor. */
+    iop_proc_set(&t->regProgExcept, PROC_MSC, 1);
     iop_incr_nia(t, 1);
 }
 
