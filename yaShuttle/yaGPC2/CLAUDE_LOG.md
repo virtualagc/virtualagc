@@ -763,3 +763,23 @@ document's planning stages, and it is already in the code as
   sequence -- where before it only ran its 6-instruction self test.
 - GPCIPL trace still matches all 3,987,845 instructions, 0 phase slips;
   no suite moved.
+
+### [2026-08-23] Target: [problems.md]
+- MEDS MILESTONE, CONFIRMED VISUALLY BY THE USER WITH gpc STOPPED:
+  yaGPC2 alone drives the MEDS display.  Flashing "GPCIPL
+  09.05.00.00.00 LOADED", the header clock counting, and Mode/BSR1
+  fields updating.  (An earlier "stuff has appeared" arrived while a gpc
+  run happened to be live, so it was NOT evidence for us; the run above
+  was made with gpc killed first, specifically to settle that.)
+- DK1 bus traffic from us, measured over ~105 s: 707 poll commands, 14
+  DISPLAY_FILL, 3 TIME_FILL (func codes per meds/deuProto.coffee:
+  0x380 TIME_FILL, 0x38c DISPLAY_FILL, 0x394 FORMAT_FILL, extracted from
+  the command word as (w0 >> 1) & 0x3ff).
+- BCE6's program loop runs 211 iterations in ~110 s against the
+  reference's 189 over the same span -- same order, ours slightly
+  faster.
+- The header clock is a TIME_FILL message carrying mission time as a
+  48-bit IBM extended float in SECONDS (deuProto's ibmFloat48).  The
+  "000/00:00:01" first seen was simply the value early in the run; it
+  counts up once the load finishes.  Standalone MEDS drives that field
+  from wall time instead, which is why it looked different.
