@@ -372,7 +372,19 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                     uint32_t modifier = register_get32(ri) & 0xffff;
                     uint32_t ea16 = (pea + regx) & 0xffff;
                     ea = cpu_g_expand(cpu, ea16, v->opType);
-                    uint32_t modifiedAddr = (ea16 + modifier) & 0xffff;
+                    /* The modifier goes onto the index register's OWN
+                     * address field, not onto the EA: "each modifier is
+                     * added to the most significant 16 bits of the
+                     * registers. The result replaces the most
+                     * significant 16 bits" (instruction set, Step 8 and
+                     * the RS-form auto-modify description). Adding it to
+                     * ea16 instead folded the displacement and base into
+                     * the write-back, so an auto-indexed walk drifted by
+                     * the displacement on every step. Use the raw MS-16
+                     * bits rather than regx -- regx is pre-aligned by
+                     * addrWidth-1 for fullword operands. */
+                    uint32_t modifiedAddr =
+                        ((register_get32(ri) >> 16) + modifier) & 0xffff;
                     register_set32(ri, (modifiedAddr << 16) + modifier);
                 } else if (v->ia == 1 && v->ii == 0) {
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
@@ -469,7 +481,10 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
                     uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
                     uint32_t modifier = register_get32(ri) & 0xffff;
                     ea = (pea + regx) & 0xffff;
-                    uint32_t modifiedAddr = (ea + modifier) & 0xffff;
+                    /* Index register's own address field, not the EA --
+                     * see the 19-bit path above for the citation. */
+                    uint32_t modifiedAddr =
+                        ((register_get32(ri) >> 16) + modifier) & 0xffff;
                     register_set32(ri, (modifiedAddr << 16) + modifier);
                 } else if (v->ia == 1 && v->ii == 0) {
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
