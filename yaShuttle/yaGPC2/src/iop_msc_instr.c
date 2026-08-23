@@ -617,12 +617,76 @@ static void exec_INT(IOP *t, DInstr *v) {
     iop_incr_nia(t, 1);
 }
 
+/* Each processor's self test leaves a signature in the diagnostic
+ * processor's (25's) local store, which is why the POO warns that
+ * "Diagnostic Processor 25 should not be enabled while self-test is
+ * running.  MSC self-test modifies Proc 25's locations in local store". */
+#define STP_MSC_READ  0x0106
+#define STP_MSC_WRITE 0x0108
+#define STP_P25_A0 0x00010000u
+#define STP_P25_B1 0x00000000u
+#define STP_P25_C1 0x00037fffu
+
+/* SELF TEST - MSC.  OP=0001, I=0, OPX in bits 5-7, COUNT in bits 8-15.
+ * "Use of the OPX field selects one of three tests as follows: OPX = 000
+ * Normal STP sequence, OPX = 001 Queue-overflow test, OPX = 010 ROS
+ * parity error test, OPX = 011 Diagnostic Data Flow error test.  The
+ * COUNT field is at a don't care state unless the OPX field equals 001." */
 static void exec_STP(IOP *t, DInstr *v) {
-    (void)v;
-    /* MSC to GO.  Its bit is the top of the word (iop.h); this set the
-     * bottom one, which is one of the unused bits above the self-test
-     * processor. */
+    uint32_t opx = df_get(v, 'c');
+    if (opx == 1) {
+        /* "Performs a queue-overflow test by placing the number of memory
+         * requests specified by the COUNT field in the queue.  If the
+         * queue overflows, the channel interrupts the CPU and the request
+         * is lost.  The program loops on this instruction." */
+        Register *b = registerfile_r(&t->regInterrupts, 1);
+        register_set32(b, register_get32(b) | INTB_QUEUE_OVF);
+        if (t->cpu) t->cpu->intPending.iopGrp2 = true;   /* External 1 */
+        return;   /* the program loops on this instruction */
+    }
+    if (opx == 2) {
+        /* "The instruction attempts to execute a bad parity microword.
+         * This sets the HALT bit of all processors and sets BUSY/WAIT to
+         * WAIT." */
+        register_set32(&t->regHalt, 0x00000000u);
+        register_set32(&t->regBusyWait, 0x00000000u);
+        iop_signal_group1(t, INTA_ROS_PAR);
+        iop_incr_nia(t, 1);
+        return;
+    }
+    if (opx == 3) {
+        /* "The Diagnostic 25 Error Latch is set, causing an External 1
+         * Interrupt to the CPU, with the appropriate interrupt code in
+         * the Group 2 Interrupt Register."  That path runs through the
+         * data-flow parity machinery (enable/force generators, the Group
+         * 2 code field, the halt-everything response), none of which this
+         * emulator models yet -- so this one test is left inert rather
+         * than half-signalled. */
+        iop_incr_nia(t, 1);
+        return;
+    }
+
+    /* OPX = 000.  "If any faults are detected, the MSC Program Exception
+     * bit is set to 0 and the MSC status register bit 8 is set to 1 (Self
+     * Test failure)."  The modelled hardware has no faults, so the MSC
+     * goes to GO and status bit 8 stays clear. */
     iop_proc_set(&t->regProgExcept, PROC_MSC, 1);
+    /* "MSC Local Store Registers" is the first thing the micro program
+     * checks, and the status register is one of them: the test writes it,
+     * and on a machine with no faults what it leaves behind is zero. */
+    register_set32(iopls_MST(&t->ls), 0);
+    /* One of the five things the self-test micro program checks is
+     * "ability of MSC to read and write from memory", and it does that
+     * against a FIXED pair of PSA fullwords: it reads STP_MSC_READ and
+     * writes what it read to STP_MSC_WRITE.  Doing none of this -- as
+     * this used to -- left 0108 holding whatever it had, and GPCIPL's own
+     * check of the pair at +1167 read back a zero. */
+    iop_s_eaf(t, STP_MSC_WRITE, iop_g_eaf(t, STP_MSC_READ));
+    /* "MSC self-test modifies Proc 25's locations in local store which
+     * results in IOP diagnostic errors". */
+    register_set32(iopls_at(&t->ls, PROC_SELFTEST, 0, 0), STP_P25_A0);
+    register_set32(iopls_at(&t->ls, PROC_SELFTEST, 1, 1), STP_P25_B1);
+    register_set32(iopls_at(&t->ls, PROC_SELFTEST, 2, 1), STP_P25_C1);
     iop_incr_nia(t, 1);
 }
 
@@ -679,7 +743,7 @@ static const MscOpEntry OPS[] = {
     {"@WAT", "0000100000000000", exec_WAT},
     {"@DLY", "1100iddddddddddd", exec_DLY},
     {"@INT", "0011Illlllllllll", exec_INT},
-    {"@STP", "0001000000000000", exec_STP},
+    {"@STP", "00010cccdddddddd", exec_STP},   /* OPX in bits 5-7, COUNT in 8-15 */
 };
 
 #define OPS_COUNT (int)(sizeof(OPS) / sizeof(OPS[0]))

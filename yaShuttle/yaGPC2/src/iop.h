@@ -81,7 +81,11 @@ typedef void (*IopInstrExecFn)(struct IOP *iop, DInstr *v);
  * check in run_matrix.sh (diffing against the reference here would never
  * pass, by design, same as the read_eof_onerror case). */
 typedef struct {
-    RegisterFile storePage[25];
+    /* 26 pages, 0-25: the MSC, BCE 1-24, and the DIAGNOSTIC processor
+     * 25 -- the one each processor's self test leaves its signature in
+     * ("MSC self-test modifies Proc 25's locations in local store").
+     * Only 25 were allocated, so page 25 did not exist at all. */
+    RegisterFile storePage[26];
     int slice;
     int curBCE;
     int curPage;
@@ -234,6 +238,26 @@ typedef struct IOP {
     bool rmVoterFail;
     RegisterFile regInterrupts; /* 5 regs (num=5 -> 6 slots; slot 5 used by RM status read) */
     bool intForceTest;
+
+    /* Data flow parity (POO Appendix I, DATA FLOW PARITY CHECK).  Four
+     * generators can be armed to poison a path, and four checkers watch
+     * for it; a catch raises External 1 with a priority-encoded code in
+     * interrupt register B, halts every processor, disables the
+     * transmitters and receivers, and resets the discrete outputs.
+     * Checking starts disabled -- "events that disable parity checking
+     * include Power On, System Reset" -- and an error leaves it disabled
+     * with the generators reset, which is why software walking the four
+     * checkers re-issues ENABLE FLOW PARITY CHECK before every one. */
+    bool parityEnabled;
+    bool forceHBusParity;    /* C102: everything arriving over the H-Bus */
+    bool forceQueueParity;   /* C108: local store address / queue control */
+    bool forceDMAParity;     /* C140: DMA address and data */
+    bool forceMIAParity;     /* C180: octal MIA pages */
+    /* Which local store words hold a value that arrived over a poisoned
+     * H-Bus, one bit per (bank*4 + word), per page.  The bad parity is
+     * in the STORED word, so a tag survives being read and is cleared
+     * only by a clean rewrite. */
+    uint32_t lsBadParity[26];   /* pages 0-25; see PROC_SELFTEST below */
     Register regCCData;
 
     IOPLocalStore ls;
@@ -302,6 +326,35 @@ void iop_exec_channel_control(IOP *iop);
 void iop_exec_dma_queue(IOP *iop);
 void iop_exec_processors(IOP *iop);
 void iop_exec_rm(IOP *iop);
+void iop_channel_reset(IOP *iop);
+
+/* Interrupt register A bit 3 (ROS parity error) and register B bit 4
+ * (queue overflow, >64 requests queued) -- raised by the MSC's own self
+ * test, so they live here rather than privately in iop.c. */
+/* Interrupt register B's priority-encoded error code (bits 1-3): "if
+ * multiple errors occur, only the highest priority event will be
+ * annunciated", ordered numerically with 001 lowest and 110 highest. */
+#define INTB_CODE_MASK  0x70000000u
+#define INTB_CODE_SHIFT 28
+#define INTB_DEV_OUT 1   /* device out data parity error */
+#define INTB_R123    2   /* R1, R2, R3 parity error */
+#define INTB_DMA     3   /* flow bottom DMA address or data parity */
+#define INTB_QUEUE   4   /* MC queue control parity error */
+#define INTB_MIA     5   /* MIA parity error */
+#define INTB_DIAG25  6   /* diagnostic processor 25 error */
+
+#define INTA_ROS_PAR   0x10000000u
+#define INTB_QUEUE_OVF 0x08000000u
+
+/* Set one of the Group 1 bits and interrupt the CPU on External 0. */
+void iop_signal_group1(IOP *iop, uint32_t bit);
+
+/* A checker caught bad parity.  Returns true if it fired. */
+bool iop_signal_data_flow_parity(IOP *iop, uint32_t code);
+bool iop_check_dma_parity(IOP *iop);
+bool iop_check_mia_parity(IOP *iop);
+bool iop_check_queue_parity(IOP *iop);
+bool iop_check_local_store_parity(IOP *iop, int page);
 /* The RM status register as the CPU reads it back through PCI X'0814'. */
 uint32_t iop_rm_status(const IOP *iop);
 /* Advance the GO/NO-GO watchdog against the CPU clock. */

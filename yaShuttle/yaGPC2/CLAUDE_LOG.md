@@ -485,3 +485,50 @@ document's planning stages, and it is already in the code as
   (POO 15/16.8 -- DIAG 7100/7101, `iuShadow`) is absent, which is
   exactly where the trace now diverges at 35,036; MSC fixture suite
   fails ~12k on what looks like local-store width.
+
+### [2026-08-23] Target: [problems.md]
+- IU store-conflict model ported (POO 15/16.8): DIAG 7100/7101 toggle
+  detection, and with it OFF a store into the IC-1..IC+23 window keeps
+  the pre-store halfword in an `iuShadow` the fetch prefers, flushed at
+  every discontinuity.  GPCIPL's self test stores an instruction over
+  itself and requires the STALE one to run.  35,036 -> 43,311 matched
+  instructions, 0 phase slips.
+- DIAG took its command from the HALFWORD AT the effective address; the
+  command IS the effective address.  Every DIAG had been decoding
+  whatever happened to be in storage.  Whole family ported (1000, 7000/
+  7001 + the H-BUS IIO commands, 7100/7101, 9100, C000, D100, E300/E301,
+  F300, and the sect.15 self-test EA list); 9014 now clears the pending
+  register first and gates the two timers on 00B0/00B1 being zero.
+- AGE implemented: the twelfth interrupt, External 1's vector and mask
+  bit with its own latch and interrupt code 0006, LOWEST priority.  The
+  interrupt-priority self test requires it eighth.
+- Masked machine check / instruction monitor no longer stay pending
+  (POO 2.5.2.3) -- only the system class waits for an unmask.
+- ICR: counter reads come back TWO counts high; the PSA half of a
+  counter write goes past store protect and resets the clock latch;
+  per-command execution times (POO p.10-3); channel reset zeroes the
+  IOP interrupt registers; undefined commands are illegal ops.
+- Store path: every instruction store now goes through cpu_store_hw/
+  cpu_store_fw, which test BOTH halfwords' protect bits before writing
+  either, honour storeProtectOverride (left ON by an ISPB with an
+  illegal M1 -- dismissed before as a no-op because nothing read it),
+  and feed the IU shadow.
+- IOP: MSC @STP and BCE #STP self tests were stubs; both copy fixed PSA
+  fullwords (0106->0108, and 010a+2(n-1) -> +1) and the MSC leaves its
+  signature in processor 25's local store -- which did not exist, the
+  page array being one short.  MSC @STP's pattern was a bare literal so
+  OPX never decoded.  Data-flow parity ported whole: four generators,
+  four checkers, the priority-encoded register-B code, and the
+  halt-everything response.
+- **Pattern parser**: getMask/getMaskedDescVal replaced only LOWERCASE
+  field letters, leaving an uppercase one in the string for parseInt to
+  truncate on.  Faithful to an old reference; the current one replaces
+  [a-zA-Z_].  It wrecked the mask of every pattern with an uppercase
+  field in its first halfword -- the MSC's "0011Illlllllllll" and the
+  BCE's "#STP", whose I bit selects the MIA-transmit form.
+- Suites: packedbits 216/216, decode 4620/4620, floatIBM 75500/75500,
+  instr_tostr 20000/20000, cpu_instr_exec +300.
+- STILL OPEN: g_EXPAND sector bits (~900 EA fixtures); MSC fixture suite
+  ~12k on what looks like local-store width; MVH does not apply R1's DSE
+  to its destination (our own timing code already does); DIAG OPX=3 and
+  MIA/local-store parity tagging beyond the H-BUS path.

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "util.h"
 
 #include <string.h>
@@ -29,12 +30,15 @@ static void collapse_and_strip01(const char *s, char *out) {
  * PackedBits#getFieldMask/getFieldShft/getFieldBitlen. */
 /* JS `parseInt(str, 2)`: parses the leading run of '0'/'1' characters and
  * silently ignores everything from the first non-binary character onward
- * (it does not error/throw). getMask/getMaskedDescVal build a string by
- * replacing literal bits and lowercase/underscore field letters, but
- * leave any *uppercase* character untouched — so an instruction that
- * uses an uppercase field letter in its first halfword (e.g.
- * iop_msc_instr.coffee's "0011Illlllllllll", field 'I') hits this
- * truncating-parseInt quirk for real. Matched here exactly. */
+ * (it does not error/throw).  getMask/getMaskedDescVal replace EVERY
+ * field letter, either case, with '0' -- `.replace(/[a-zA-Z_]/g,'0')` --
+ * so nothing non-binary survives to truncate on.  An earlier reference
+ * replaced only lowercase, which left an uppercase field letter in the
+ * string and truncated the mask there; that was faithfully reproduced
+ * here, and it silently wrecked the mask of every pattern with an
+ * uppercase field in its first halfword (the MSC's "0011Illlllllllll"
+ * and the BCE's "0001I__________f").  The parse is kept prefix-tolerant
+ * anyway, since it costs nothing. */
 static uint32_t js_parse_binary_prefix(const char *s) {
     uint32_t v = 0;
     for (const char *p = s; *p == '0' || *p == '1'; p++) {
@@ -85,8 +89,9 @@ PBDesc pb_make_desc(const char *s) {
     char maskStr[64], maskedStr[64];
     for (size_t i = 0; i < w1len; i++) {
         char c = w1[i];
-        maskStr[i] = (c == '0' || c == '1') ? '1' : (((c >= 'a' && c <= 'z') || c == '_') ? '0' : c);
-        maskedStr[i] = ((c >= 'a' && c <= 'z') || c == '_') ? '0' : c;
+        bool isField = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+        maskStr[i] = (c == '0' || c == '1') ? '1' : (isField ? '0' : c);
+        maskedStr[i] = isField ? '0' : c;
     }
     maskStr[w1len] = '\0';
     maskedStr[w1len] = '\0';

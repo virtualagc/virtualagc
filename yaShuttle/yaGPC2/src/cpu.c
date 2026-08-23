@@ -1,6 +1,7 @@
 #include "cpu.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "floatIBM.h"
@@ -41,9 +42,22 @@ void cpu_init(CPU *cpu) {
     cpu->elapsedTimeUs = 0.0;
     cpu->timerAccumUs = 0.0;
     cpu->dateTimeAnchorEpochSec = 0.0; /* Unix epoch -- see cpu.h's own comment */
+    cpu->diagIuStoreDetect = true;   /* B STAT bit 6 is set at power-up */
+    cpu->iuShadow = NULL;
+    cpu->iuShadowCount = 0;
+    cpu->iuShadowCap = 0;
+    cpu->curIC = 0;
+    cpu->prevDiscont = false;
+    cpu->storeProtectOverride = false;
+    cpu->diagScanReg = 0;
+    cpu->diagInterruptPageDiagnoseMode = false;
+    cpu->mcCode = 0x0008;
 }
 
 void cpu_free(CPU *cpu) {
+    free(cpu->iuShadow);
+    cpu->iuShadow = NULL;
+    cpu->iuShadowCount = cpu->iuShadowCap = 0;
     mcm_free(&cpu->mainStorage);
     for (int i = 0; i < 3; i++) registerfile_free(&cpu->regFiles[i]);
 }
@@ -158,10 +172,25 @@ static void cc_anomaly(CPU *cpu) {
 void cpu_check_interrupts(CPU *cpu) {
     uint32_t intMask = psw_get_int_mask(&cpu->psw);
 
+    /* "Masked machine check and program interrupts do not stay pending"
+     * (POO 2.5.2.3): only the SYSTEM class (the interval timers and the
+     * externals) waits for an unmask.  The two maskable non-persistent
+     * sources are dropped here rather than lingering -- leaving them
+     * pending re-delivered a machine check the moment GPCIPL's self test
+     * re-enabled the mask at +104f, long after the event. */
+    if (cpu->intPending.machineCheck && !psw_get_mach_check_mask(&cpu->psw)) {
+        cpu->intPending.machineCheck = false;
+        cpu->mcCode = 0x0008;
+    }
+    if (cpu->intPending.instrMonitor && !(intMask & 0x20)) {
+        cpu->intPending.instrMonitor = false;
+    }
+
     if (cpu->intPending.machineCheck) {
         if (psw_get_mach_check_mask(&cpu->psw)) {
             cpu->intPending.machineCheck = false;
-            psw_set_int_code(&cpu->psw, 0x0008);
+            psw_set_int_code(&cpu->psw, cpu->mcCode);
+            cpu->mcCode = 0x0008;   /* back to "BA Fault" for the next one */
             cc_anomaly(cpu);
             cpu_swap_psw(cpu, 0x0040, 0x0044);
             return;
@@ -252,6 +281,14 @@ void cpu_check_interrupts(CPU *cpu) {
     if (cpu->intPending.ext4 && (intMask & 0x01)) {
         cpu->intPending.ext4 = false;
         cpu_swap_psw(cpu, 0x0098, 0x009c);
+        return;
+    }
+    /* AGE, last of the twelve: External 1's vector and mask bit, its own
+     * latch, and interrupt code 0006 to tell it apart. */
+    if (cpu->intPending.age && (intMask & 0x08)) {
+        cpu->intPending.age = false;
+        psw_set_int_code(&cpu->psw, 0x0006);
+        cpu_swap_psw(cpu, 0x0080, 0x0084);
         return;
     }
 }
@@ -668,23 +705,11 @@ uint32_t cpu_g_eah(CPU *cpu, DInstr *v) {
 }
 
 void cpu_s_eaf(CPU *cpu, DInstr *v, uint32_t value, int extraOffset) {
-    uint32_t ea = cpu_g_ea(cpu, v) + (uint32_t)extraOffset;
-    if (!membus_set16(cpu->ram, ea, value >> 16, true)) {
-        cpu_signal_protection_violation(cpu);
-        return;
-    }
-    if (!membus_set16(cpu->ram, ea + 1, value & 0xffff, true)) {
-        cpu_signal_protection_violation(cpu);
-        return;
-    }
+    cpu_store_fw(cpu, cpu_g_ea(cpu, v) + (uint32_t)extraOffset, value);
 }
 
 void cpu_s_eah(CPU *cpu, DInstr *v, uint32_t value) {
-    uint32_t ea = cpu_g_ea(cpu, v);
-    if (!membus_set16(cpu->ram, ea, value, true)) {
-        cpu_signal_protection_violation(cpu);
-        return;
-    }
+    cpu_store_hw(cpu, cpu_g_ea(cpu, v), value);
 }
 
 uint32_t cpu_g_shift_cnt(CPU *cpu, uint32_t hw1) {
@@ -700,7 +725,82 @@ uint32_t cpu_g_shift_cnt(CPU *cpu, uint32_t hw1) {
  * Reset / fetch-decode-execute
  * ------------------------------------------------------------------- */
 
+/* ---------------------------------------------------------------------
+ * IU store-conflict model (POO sect.15 DIAGNOSE, sect.16.8)
+ *
+ * "The actual detection circuitry uses the range of IC-1 to IC+23",
+ * compared on "the 15 least significant bits of the logical address"
+ * with 7FFF/0000 and FFFF/8000 contiguous.  Only the detection-OFF case
+ * needs modelling, and it needs no IU file: keep the pre-store halfword
+ * for the window the IU could have reached and hand it to the
+ * instruction fetch instead of storage, until the next discontinuity
+ * flushes it.  With detection ON -- the power-up state -- a conflict
+ * purges the file, and a model that always refetches is
+ * indistinguishable from one that purges, so none of this runs.
+ * ------------------------------------------------------------------- */
+
+#define IU_WINDOW_AHEAD 23
+
+void cpu_iu_shadow_flush(CPU *cpu) { cpu->iuShadowCount = 0; }
+
+static bool iu_shadow_lookup(const CPU *cpu, uint32_t addr, uint16_t *out) {
+    for (int i = 0; i < cpu->iuShadowCount; i++) {
+        if (cpu->iuShadow[i].addr == addr) { *out = cpu->iuShadow[i].val; return true; }
+    }
+    return false;
+}
+
+void cpu_shadow_iu_store(CPU *cpu, uint32_t addr) {
+    if (cpu->diagIuStoreDetect) return;
+    uint32_t d = (addr - cpu->curIC) & 0x7fffu;
+    if (!(d <= IU_WINDOW_AHEAD || d == 0x7fffu)) return;   /* 0x7fff == IC-1 */
+    uint16_t ignored;
+    if (iu_shadow_lookup(cpu, addr, &ignored)) return;     /* first value wins */
+    if (cpu->iuShadowCount == cpu->iuShadowCap) {
+        int cap = cpu->iuShadowCap ? cpu->iuShadowCap * 2 : 32;
+        IuShadowEntry *grown = realloc(cpu->iuShadow, (size_t)cap * sizeof *grown);
+        if (!grown) return;   /* out of memory: behave as a machine that purged */
+        cpu->iuShadow = grown;
+        cpu->iuShadowCap = cap;
+    }
+    cpu->iuShadow[cpu->iuShadowCount].addr = addr;
+    cpu->iuShadow[cpu->iuShadowCount].val = (uint16_t)membus_get16(cpu->ram, addr);
+    cpu->iuShadowCount++;
+}
+
+bool cpu_store_hw(CPU *cpu, uint32_t addr, uint32_t value) {
+    if (!cpu->diagIuStoreDetect) cpu_shadow_iu_store(cpu, addr);
+    if (membus_set16(cpu->ram, addr, value, !cpu->storeProtectOverride)) return true;
+    cpu_signal_protection_violation(cpu);
+    return false;
+}
+
+bool cpu_store_fw(CPU *cpu, uint32_t addr, uint32_t value) {
+    if (!cpu->diagIuStoreDetect) {
+        cpu_shadow_iu_store(cpu, addr);
+        cpu_shadow_iu_store(cpu, addr + 1);
+    }
+    /* Both protect bits are tested before either half is written, so a
+     * fullword store that straddles a protection boundary leaves neither
+     * half changed -- this used to write the high half and only then
+     * discover the low half was protected.  The two halves go one at a
+     * time, which is also how they are addressed: main storage is two
+     * MCMs and only the halfword path routes between them. */
+    if (!cpu->storeProtectOverride &&
+        (membus_get_store_protect(cpu->ram, addr) ||
+         membus_get_store_protect(cpu->ram, addr + 1))) {
+        cpu_signal_protection_violation(cpu);
+        return false;
+    }
+    membus_set16(cpu->ram, addr, (value >> 16) & 0xffff, false);
+    membus_set16(cpu->ram, addr + 1, value & 0xffff, false);
+    return true;
+}
+
 void cpu_reset(CPU *cpu) {
+    cpu->storeProtectOverride = false;
+    cpu->prevDiscont = false;
+    cpu_iu_shadow_flush(cpu);
     cpu_load_psw(cpu, membus_get32(cpu->ram, 0x14), membus_get32(cpu->ram, 0x16));
 }
 
@@ -728,6 +828,9 @@ void cpu_reset(CPU *cpu) {
  * unfilled memory at a fixed instruction count no matter what content the
  * composed image actually carried. */
 void cpu_power_on(CPU *cpu) {
+    cpu->storeProtectOverride = false;
+    cpu->prevDiscont = false;
+    cpu_iu_shadow_flush(cpu);
     cpu_load_psw(cpu, membus_get32(cpu->ram, 0x04), membus_get32(cpu->ram, 0x06));
 }
 
@@ -739,8 +842,17 @@ void cpu_run(CPU *cpu) {
 
 void cpu_exec1(CPU *cpu) {
     uint32_t nia = psw_get_nia(&cpu->psw);
+    cpu->curIC = nia;
     uint32_t hw1 = membus_get16(cpu->ram, nia);
     uint32_t hw2 = membus_get16(cpu->ram, nia + 1);
+    /* A halfword the IU already held when a store rewrote it, with
+     * conflict detection off: the fetch sees what the IU has, not what
+     * storage has.  See cpu_shadow_iu_store(). */
+    if (cpu->iuShadowCount) {
+        uint16_t held;
+        if (iu_shadow_lookup(cpu, nia, &held)) hw1 = held;
+        if (iu_shadow_lookup(cpu, nia + 1, &held)) hw2 = held;
+    }
 
     DInstr v;
     memset(&v, 0, sizeof(v));
@@ -774,6 +886,7 @@ void cpu_exec1(CPU *cpu) {
     }
 
     cpu_incr_nia(cpu, v.niaIncr);
+    uint32_t seqNIA = psw_get_nia(&cpu->psw);  /* fall-through NIA */
 
     /* Instruction monitor: PSW bit 34 set and instruction unprotected.
      * gpc/cpu.coffee reads `@ram.protData[nia]` here directly — but
@@ -813,6 +926,11 @@ void cpu_exec1(CPU *cpu) {
     }
 
     cpu_check_interrupts(cpu);
+
+    /* Sequential-fetch discontinuity (branch taken or interrupt swap):
+     * the next instruction starts with an empty lookahead. */
+    cpu->prevDiscont = psw_get_nia(&cpu->psw) != seqNIA;
+    if (cpu->prevDiscont) cpu_iu_shadow_flush(cpu);
 }
 
 /* Counter decrement + interrupt dispatch, split out of cpu_exec1's tail so

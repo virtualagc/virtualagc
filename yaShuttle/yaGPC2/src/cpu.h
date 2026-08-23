@@ -41,7 +41,18 @@ typedef struct {
      * both spare per the same table -- see cpu_check_interrupts. */
     bool ext3, ext4;
     bool iopGrp1, iopGrp2, iopProg;
+    /* The Shuttle AGE interrupt shares External 1's PSW pair (0080/0084)
+     * and mask bit (36), and is told from it only by the interrupt code
+     * in the old PSW -- 0006 against External 1's own 0000/0004.  It has
+     * a latch of its own because it is a separate source that can be
+     * pending alongside External 1, and it is the LOWEST priority of the
+     * twelve: GPCIPL's interrupt-priority self test sets every latch at
+     * once and requires AGE to arrive eighth, after External 4. */
+    bool age;
 } IntPending;
+
+/* One halfword the IU already held when a store rewrote it. */
+typedef struct { uint32_t addr; uint16_t val; } IuShadowEntry;
 
 typedef struct CPU {
     MCM mainStorage;      /* The AP-101S's real, single, shared main
@@ -101,6 +112,40 @@ typedef struct CPU {
      * get it, and instead sees whatever raw truncation the bare CVFX
      * instruction itself produces. */
     bool fcosMode;
+
+    /* DIAGNOSE state (POO sect.15/16.8), the instruction unit's own
+     * store-conflict detection.  A store into the halfwords the IU is
+     * already holding normally purges the lookahead, and a machine that
+     * simply refetches is indistinguishable from one that purges -- so
+     * with detection ON (the power-up state) nothing here does anything.
+     * DIAG X'7101' turns it OFF, which IS distinguishable: the pipeline
+     * is not purged and the STALE halfword executes.  GPCIPL's own self
+     * test relies on exactly that, storing an instruction over itself
+     * and requiring the old one to run.
+     *
+     * `iuShadow` holds the pre-store halfwords for the window the IU
+     * could have reached, and is discarded at the next discontinuity. */
+    bool diagIuStoreDetect;          /* B STAT bit 6; true at power-up */
+    IuShadowEntry *iuShadow;
+    int iuShadowCount, iuShadowCap;
+    uint32_t curIC;                  /* address of the instruction being run */
+    bool prevDiscont;                /* last instruction broke sequential fetch */
+
+    /* Left ON by an ISPB with an illegal M1 (100-111): protected
+     * locations can then be written without a violation until the next
+     * valid ISPB clears it.  Every store an instruction makes honours
+     * it. */
+    bool storeProtectOverride;
+
+    /* DIAGNOSE (POO sect.15).  The interrupt page's scan register doubles
+     * as its Diagnose Error register: the EA Scan 5 assist reads it and
+     * clears it, and nothing in a fault-free machine ever sets a bit in
+     * it. */
+    uint32_t diagScanReg;
+    bool diagInterruptPageDiagnoseMode;
+    /* Which machine-check code the next machine check carries; 0x0008
+     * ("BA Fault", Figure 2-20 row C0) unless an assist forces another. */
+    uint32_t mcCode;
 
     /* Cumulative estimated AP-101S execution time (HAL/S-FC's own
      * unlabeled time units -- see timing.h), summed unconditionally by
@@ -188,6 +233,17 @@ void cpu_advance_time_us(CPU *cpu, double us);
 void cpu_signal_fixed_overflow(CPU *cpu);
 void cpu_test_fixed_overflow(CPU *cpu);
 void cpu_load_psw(CPU *cpu, uint32_t p1, uint32_t p2);
+
+/* Every store an instruction makes goes through these: they record the
+ * IU shadow when detection is off, honour storeProtectOverride, and
+ * signal the protection violation.  Return false if the store was
+ * suppressed.  The fullword form tests BOTH halfwords' protect bits
+ * before writing either, so a fullword store straddling a protection
+ * boundary leaves neither half changed. */
+bool cpu_store_hw(CPU *cpu, uint32_t addr, uint32_t value);
+bool cpu_store_fw(CPU *cpu, uint32_t addr, uint32_t value);
+void cpu_shadow_iu_store(CPU *cpu, uint32_t addr);
+void cpu_iu_shadow_flush(CPU *cpu);
 void cpu_signal_exponent_overflow(CPU *cpu);
 void cpu_signal_exponent_underflow(CPU *cpu);
 void cpu_signal_significance(CPU *cpu);
@@ -231,5 +287,6 @@ const InstrDesc *instr_decode(uint32_t hw1, uint32_t hw2, DInstr *v);
 /* Defined in iop.c (Phase 6). */
 void iop_recv_from_cpu(struct IOP *iop, uint32_t cmd, uint32_t data);
 uint32_t iop_get_cc_data(struct IOP *iop);
+void iop_channel_reset(struct IOP *iop);
 
 #endif

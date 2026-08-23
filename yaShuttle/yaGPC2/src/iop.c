@@ -27,7 +27,6 @@
 #define INTA_GO_NOGO   0x80000000u
 #define INTA_IOP_FAIL  0x40000000u
 #define INTA_CM_IDLE   0x20000000u
-#define INTA_ROS_PAR   0x10000000u
 #define INTA_IOP_FAULT 0x08000000u
 
 /* Discrete inputs.
@@ -104,14 +103,14 @@ void iop_reset_discrete_inputs(IOP *iop) {
  * ------------------------------------------------------------------- */
 
 void iopls_init(IOPLocalStore *ls) {
-    for (int i = 0; i <= 24; i++) ls->storePage[i] = registerfile_create(16);
+    for (int i = 0; i <= PROC_SELFTEST; i++) ls->storePage[i] = registerfile_create(16);
     ls->slice = 0;
     ls->curBCE = 0;
     ls->curPage = 0;
 }
 
 void iopls_free(IOPLocalStore *ls) {
-    for (int i = 0; i <= 24; i++) registerfile_free(&ls->storePage[i]);
+    for (int i = 0; i <= PROC_SELFTEST; i++) registerfile_free(&ls->storePage[i]);
 }
 
 void iopls_next_slice(IOPLocalStore *ls) {
@@ -136,7 +135,7 @@ Register *iopls_ls(IOPLocalStore *ls, int bank, int word) {
 }
 
 Register *iopls_at(IOPLocalStore *ls, int region, int bank, int word) {
-    if (region < 0 || region > 24) return NULL;
+    if (region < 0 || region > PROC_SELFTEST) return NULL;
     return registerfile_r(&ls->storePage[region], bank * 4 + word);
 }
 
@@ -318,6 +317,14 @@ void iop_init(IOP *iop, struct CPU *cpu) {
     iop->rmVoterInhibit = false;
     iop->rmTestInputs = 0;
     iop->rmVoterFail = false;
+    /* "Events that disable parity checking include Power On, System
+     * Reset", so the machine starts with the checkers off. */
+    iop->parityEnabled = false;
+    iop->forceHBusParity = false;
+    iop->forceQueueParity = false;
+    iop->forceDMAParity = false;
+    iop->forceMIAParity = false;
+    for (int i = 0; i <= PROC_SELFTEST; i++) iop->lsBadParity[i] = 0;
     iop->regInterrupts = registerfile_create(5);
     iop->intForceTest = false;
     register_init(&iop->regCCData);
@@ -350,7 +357,7 @@ void iop_exec_channel_control(IOP *iop) { (void)iop; }
  * five conditions are grouped onto the one level, so this is a pulse to
  * the CPU's pending latch and not a level: the register is cleared by
  * the handler's own read. */
-static void iop_signal_group1(IOP *iop, uint32_t bit) {
+void iop_signal_group1(IOP *iop, uint32_t bit) {
     Register *a = registerfile_r(&iop->regInterrupts, 0);
     register_set32(a, register_get32(a) | bit);
     if (iop->cpu != NULL) iop->cpu->intPending.iopGrp1 = true;
@@ -450,6 +457,100 @@ uint32_t iop_rm_status(const IOP *iop) {
  * it advances.  Called once per CPU instruction, and also from the wait
  * loop -- the watchdog runs on wall time, not CPU instructions, so it
  * keeps counting through the wait state. */
+/* Reset the four bad-parity generators.  "The Disable Flow Parity Check
+ * PCO command disables the parity checkers.  It also resets any parity
+ * generator which is forcing bad parity in response to one of the 'force
+ * bad parity' PCOs."  Power on does the same. */
+static void iop_reset_parity_generators(IOP *iop) {
+    iop->forceHBusParity = false;
+    iop->forceQueueParity = false;
+    iop->forceDMAParity = false;
+    iop->forceMIAParity = false;
+}
+
+/* A checker caught bad parity (POO Appendix I, DATA FLOW PARITY CHECK):
+ * "an external 1 interrupt is issued to the CPU and all BCE's and the MSC
+ * are halted, all transmitter and receiver enables are disabled and the
+ * discrete outputs are reset.  The cause of this interrupt can be
+ * determined by reading the IOP interrupt register B."
+ *
+ * The error leaves checking DISABLED and the generators reset, which is
+ * why software that walks the four checkers re-issues ENABLE FLOW PARITY
+ * CHECK before every one of them.  Nothing happens at all while checking
+ * is disabled: "if parity is disabled no error indication is made". */
+bool iop_signal_data_flow_parity(IOP *iop, uint32_t code) {
+    if (!iop->parityEnabled) return false;
+    Register *b = registerfile_r(&iop->regInterrupts, 1);
+    uint32_t cur = (register_get32(b) & INTB_CODE_MASK) >> INTB_CODE_SHIFT;
+    if (cur > code) code = cur;   /* only the highest priority is annunciated */
+    register_set32(b, (register_get32(b) & ~INTB_CODE_MASK)
+                      | (code << INTB_CODE_SHIFT));
+
+    register_set32(&iop->regHalt, 0x00000000u);   /* MSC and every BCE halted */
+    register_set32(&iop->regXmitEna, 0x00000000u);
+    register_set32(&iop->regRecvEna, 0x00000000u);
+    register_set32(&iop->regDiscreteOut, 0x00000000u);
+
+    iop->parityEnabled = false;
+    iop_reset_parity_generators(iop);
+
+    /* External 1 with interrupt code 0000 -- IOP data flow error. */
+    if (iop->cpu) {
+        psw_set_int_code(&iop->cpu->psw, 0x0000);
+        iop->cpu->intPending.iopGrp2 = true;
+    }
+    return true;
+}
+
+/* Every IOP access to CPU main storage goes over the DMA path. */
+bool iop_check_dma_parity(IOP *iop) {
+    if (!(iop->parityEnabled && iop->forceDMAParity)) return false;
+    return iop_signal_data_flow_parity(iop, INTB_DMA);
+}
+
+/* The local store address lines and the queue control bits.  Used by both
+ * the CPU's local store PCI/PCO and by a processor's own instruction
+ * fetch (the queue is what an instruction is fetched into). */
+bool iop_check_queue_parity(IOP *iop) {
+    if (!(iop->parityEnabled && iop->forceQueueParity)) return false;
+    return iop_signal_data_flow_parity(iop, INTB_QUEUE);
+}
+
+/* The bus out to the octal MIA pages: "on the IB page parity is generated
+ * for all data and command words being sent to the octal MIA.  Parity for
+ * this bus is then checked on the MIA's, which sends an error message back
+ * to the IOP if any errors are detected."  Called by anything that puts a
+ * word on that bus. */
+bool iop_check_mia_parity(IOP *iop) {
+    if (!(iop->parityEnabled && iop->forceMIAParity)) return false;
+    return iop_signal_data_flow_parity(iop, INTB_MIA);
+}
+
+/* The IB page's second look at H-Bus data: it "indirectly checks the H-BUS
+ * parity when it checks parity for registers R1, R2, R3".  A processor
+ * slice touches those registers, so a page holding a word that arrived
+ * over a poisoned H-Bus reports here rather than at the transfer.  With
+ * checking disabled the bad word is read anyway and nothing is said, so
+ * the tag has to SURVIVE those reads: the bad parity is in the stored
+ * word, not in the act of looking at it, and only a rewrite clears it. */
+bool iop_check_local_store_parity(IOP *iop, int page) {
+    if (!iop->parityEnabled) return false;
+    if (page < 0 || page > PROC_SELFTEST) return false;
+    if (iop->lsBadParity[page] == 0) return false;
+    iop->lsBadParity[page] = 0;
+    return iop_signal_data_flow_parity(iop, INTB_R123);
+}
+
+/* ICR channel reset (POO sect.10): "The channel reset operation issues a
+ * reset to the IO.  The IO and CPU uses the signal to reset the IO/CPU
+ * interface logic", which zeroes the IOP's interrupt registers -- hence
+ * the programming note that this must not be issued until interrupt
+ * register A has been read when an External 0 has occurred. */
+void iop_channel_reset(IOP *iop) {
+    for (int i = 0; i <= 4; i++)
+        register_set32(registerfile_r(&iop->regInterrupts, i), 0);
+}
+
 void iop_exec_rm(IOP *iop) {
     iop_tick_watchdog(iop);
 }
@@ -502,6 +603,13 @@ void iop_exec_processors(IOP *iop) {
         if (!iop_proc_get(&iop->regHalt, bceIdx)) return;
         if (!iop_proc_get(&iop->regBusyWait, bceIdx)) return;
     }
+
+    /* A slice is where the three data flow parity checkers that watch a
+     * running processor get their chance, in the register's priority
+     * order.  Any of them halts every processor, so the slice ends. */
+    if (iop_check_queue_parity(iop)) return;
+    if (iop_check_dma_parity(iop)) return;
+    if (iop_check_local_store_parity(iop, page)) return;
 
     /* PC must be read/written via the 32-bit accessor here, matching every
      * instruction's own NIA logic (iop_set_nia/iop_incr_nia, and #BU/#BU@'s
@@ -645,10 +753,25 @@ uint32_t iop_msc_long_ea(IOP *iop, uint32_t addr, bool indexed) {
     return ea;
 }
 
-uint32_t iop_g_eaf(IOP *iop, uint32_t addr) { return mcm_get32(&iop->cpu->mainStorage, addr); }
-uint32_t iop_g_eah(IOP *iop, uint32_t addr) { return mcm_get16(&iop->cpu->mainStorage, addr); }
-void iop_s_eaf(IOP *iop, uint32_t addr, uint32_t value) { mcm_set32(&iop->cpu->mainStorage, addr, value, false); }
-void iop_s_eah(IOP *iop, uint32_t addr, uint32_t value) { mcm_set16(&iop->cpu->mainStorage, addr, value, false); }
+/* A processor's operand accesses to CPU main storage.  Each is a DMA
+ * transfer and so passes the address and data through the generator that
+ * C140 poisons; a caught error kills the access. */
+uint32_t iop_g_eaf(IOP *iop, uint32_t addr) {
+    if (iop_check_dma_parity(iop)) return 0;
+    return mcm_get32(&iop->cpu->mainStorage, addr);
+}
+uint32_t iop_g_eah(IOP *iop, uint32_t addr) {
+    if (iop_check_dma_parity(iop)) return 0;
+    return mcm_get16(&iop->cpu->mainStorage, addr);
+}
+void iop_s_eaf(IOP *iop, uint32_t addr, uint32_t value) {
+    if (iop_check_dma_parity(iop)) return;
+    mcm_set32(&iop->cpu->mainStorage, addr, value, false);
+}
+void iop_s_eah(IOP *iop, uint32_t addr, uint32_t value) {
+    if (iop_check_dma_parity(iop)) return;
+    mcm_set16(&iop->cpu->mainStorage, addr, value, false);
+}
 
 void iop_set_nia(IOP *iop, uint32_t x) { register_set32(iopls_PC(&iop->ls), x); }
 void iop_incr_nia(IOP *iop, int incr) {
@@ -686,6 +809,14 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
 
     register_set32(&iop->regCCData, data);
 
+    /* Was a bad-parity generator already armed when this transfer
+     * arrived?  Sampled BEFORE the command runs so that the "force bad
+     * parity" PCO which arms a generator is not itself caught by it: the
+     * generator poisons what comes after it, not the command word that
+     * set it. */
+    bool hbusPoisoned = iop->parityEnabled && iop->forceHBusParity;
+    bool queuePoisoned = iop->parityEnabled && iop->forceQueueParity;
+
     switch (cmd) {
         case 0xc0030000: /* DMA BURST INHIBIT */
             iop->dmaBurst = false;
@@ -701,6 +832,38 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             break;
         case 0xc1200000: /* BAD PARITY DATA INPUT ENABLE */
             iop->dataForceBadParity = true;
+            break;
+        case 0xc1010000: /* ENABLE FLOW PARITY CHECK */
+            /* "necessary to start the parity checking in the data flow
+             * following any event that disables parity checking." */
+            iop->parityEnabled = true;
+            break;
+        case 0xc0010000: /* DISABLE FLOW PARITY CHECK */
+            iop->parityEnabled = false;
+            iop_reset_parity_generators(iop);
+            break;
+        case 0xc1020000: /* FORCE IOP H-BUS BAD PARITY */
+            /* "forces bad parity on all data coming to the IOP via the
+             * H-Bus (PCO's or DMA's)." */
+            iop->forceHBusParity = true;
+            break;
+        case 0xc1080000: /* FORCE QUEUE CONTROL BAD PARITY */
+            /* "forces bad parity on the local store address and queue
+             * control bits." */
+            iop->forceQueueParity = true;
+            break;
+        case 0xc1400000: /* FORCE DMA ADDRESS/DATA BAD PARITY */
+            /* One generator covers both: which of the two checkers sees
+             * it depends on the bit parity of the address against the
+             * data word.  Register B reports the pair under one code, so
+             * the distinction is invisible to software. */
+            iop->forceDMAParity = true;
+            break;
+        case 0xc1800000: /* FORCE OCTAL MIA BAD PARITY */
+            /* "forces bad parity on all data transmitted from the IOP to
+             * the OCTAL MIA pages.  The MIA page checks parity on all
+             * incoming command and data words." */
+            iop->forceMIAParity = true;
             break;
         case 0xc0200000: /* BAD PARITY DATA INPUT DISABLE */
             iop->dataForceBadParity = false;
@@ -959,10 +1122,29 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         if (r != NULL) {
             if (isOutput) {
                 register_set32(r, data & 0x3ffffu);
+                /* The word is in local store now, but with the parity the
+                 * poisoned H-Bus generated for it.  Tag it so the IB page
+                 * can catch it when the owning processor next uses the
+                 * register -- a clean write to the same register clears
+                 * the tag, because the good parity overwrites the bad. */
+                uint32_t bit = 1u << (bank * 4 + word);
+                if (region <= PROC_SELFTEST) {
+                    if (hbusPoisoned) iop->lsBadParity[region] |= bit;
+                    else              iop->lsBadParity[region] &= ~bit;
+                }
             } else {
                 register_set32(&iop->regCCData,
                                0xfffc0000u | (register_get32(r) & 0x3ffffu));
             }
         }
+        /* The local store address lines and queue control bits carried
+         * this transfer, so the C108 generator poisons it. */
+        if (queuePoisoned && iop_check_queue_parity(iop)) return;
     }
+
+    /* The device-out data bus checker sees every H-Bus transfer as it
+     * arrives -- "the SI page checks the data for correct parity directly
+     * off the 'DEV OUT DATA BUS'" -- so a poisoned PCI or PCO reports here
+     * and now, whatever it was addressed to. */
+    if (hbusPoisoned) iop_signal_data_flow_parity(iop, INTB_DEV_OUT);
 }

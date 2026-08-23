@@ -15,9 +15,11 @@
  * combined list with a runtime filter, since it's equivalent and avoids
  * re-filtering on every call.
  *
- * `t.curPE` (used throughout for a "2 * BCE#" addressing offset) is
- * always 0 in the source — see iop.h's IOP.curPE comment — replicated
- * verbatim rather than "fixed".
+ * `t.curPE` (used throughout for a "2 * BCE#" addressing offset) is the
+ * processor whose slice is running -- iop.c sets it from the local-store
+ * page at each slice, as the reference now does.  This comment used to
+ * say it was "always 0 in the source", which was true of the reference
+ * at the time and is not any more.
  *
  * Sort order: JS's default `Array#sort()` (used for orderedMasks) is
  * *lexicographic* string comparison, not numeric — cmp_mask_lex_desc
@@ -322,7 +324,43 @@ static void exec_WAT(IOP *t, DInstr *v) {
     iop_incr_nia(t, 1);
 }
 
-static void exec_STP(IOP *t, DInstr *v) { (void)v; iop_incr_nia(t, 1); }
+/* SELF TEST - BCE.  The BCEs' own signature fullwords start here, one
+ * per BCE: STP_BCE_BASE + 2*(n-1). */
+#define STP_BCE_BASE 0x010a
+
+static void exec_STP(IOP *t, DInstr *v) {
+    if (df_get(v, 'I')) {
+        if (iop_proc_get(&t->regXmitEna, t->curPE)) {
+            /* Transmitter enabled: refuse.  "the BCE's Program Exception
+             * bit is set to 0, bit 22 of the BCE Status Register is set
+             * to 1 (Self Test failure)." */
+            iop_proc_set(&t->regProgExcept, t->curPE, 0);
+            iop_proc_set(&t->regBusyWait, t->curPE, 0);
+            iopls_setBST(&t->ls, iopls_getBST(&t->ls) | (1u << (31 - 22)));
+            iop_incr_nia(t, 1);
+            return;
+        }
+        /* Otherwise the transmit that never reaches the bus -- but it
+         * still puts a word on the bus out to the octal MIA pages, so
+         * the C180 generator gets its chance at it. */
+        iop_check_mia_parity(t);
+        iop_incr_nia(t, 1);
+        return;
+    }
+    /* "If an error is detected, the BCE's Program Exception bit is set to
+     * 0, bit 22 of the BCE Status Register is set to 1 (Self Test
+     * failure)."  The modelled hardware has no faults, so neither
+     * happens.
+     *
+     * "Ability of BCE to read and write from memory" is one of the tests,
+     * and like the MSC's it runs against a fixed PSA fullword -- this
+     * BCE's.  The high halfword is the pattern to read, the low halfword
+     * where it must land.  This whole instruction used to do nothing but
+     * advance the PC. */
+    uint32_t fw = STP_BCE_BASE + 2u * (uint32_t)(t->curPE - 1);
+    iop_s_eah(t, fw + 1, iop_g_eah(t, fw));
+    iop_incr_nia(t, 1);
+}
 
 /* ---------------------------------------------------------------------
  * Op table / decode / dispatch
@@ -355,7 +393,7 @@ static const BceOpEntry OPS[] = {
     {"#DLYI", "11000iiiiiiiiiii", exec_DLYI},
     {"#DLY", "11001ddddddddddd", exec_DLY},
     {"#WAT", "00001___________", exec_WAT},
-    {"#STP", "0001___________f", exec_STP},
+    {"#STP", "0001I__________f", exec_STP},   /* the I bit selects the MIA-transmit form */
 };
 
 #define OPS_COUNT (int)(sizeof(OPS) / sizeof(OPS[0]))

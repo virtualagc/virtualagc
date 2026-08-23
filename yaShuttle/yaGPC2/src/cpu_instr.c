@@ -351,7 +351,10 @@ static void exec_STH(CPU *t, DInstr *v) {
 static void exec_STM(CPU *t, DInstr *v) {
     uint32_t v2ea = cpu_g_ea(t, v);
     for (int i = 0; i <= 7; i++) {
-        membus_set32(t->ram, v2ea + (uint32_t)(i * 2), register_get32(cpu_r(t, i)), true);
+        /* cpu_store_fw, not a raw set32: a protected location takes the
+         * store protect violation and stops the instruction there
+         * (POO 2.4). */
+        if (!cpu_store_fw(t, v2ea + (uint32_t)(i * 2), register_get32(cpu_r(t, i)))) break;
     }
 }
 
@@ -1264,45 +1267,214 @@ static void exec_STE(CPU *t, DInstr *v) {
  * Exec bodies — privileged / IO batch
  * ------------------------------------------------------------------- */
 
+/* Effective addresses the POO's sect.15 lists as self tests: microcode
+ * runs them and reports through the interrupt page's scan register,
+ * which a fault-free machine leaves zero.  All of them pass here. */
+static const uint16_t DIAG_SELFTEST[] = {
+    0x0000, 0x0100, 0x0200, 0x0300, 0x0400, 0x0401,   /* CPU hardcore 0-4, 8 */
+    0x0500, 0x0600, 0x0700,                           /* constant PROM, memory, RTCC */
+    0x2000, 0x2001,                                   /* local store CPU / constant sector */
+    0x3000, 0x4000, 0x4100,                           /* (reserved-adjacent self-tests) */
+    0x8000, 0x8100, 0x8200, 0x8400, 0x8500,           /* interrupt page command PLA 0-4 */
+    0x9000,                                           /* interrupt page arithmetic capture */
+    0xA000,                                           /* EU ROS parity check circuit */
+    0xC200, 0xC201, 0xC202,                           /* monolithic memory read/write */
+    0xD000, 0xD001, 0xD010, 0xD011,                   /* EDAC soft / hard error */
+    0xF100,                                           /* ENDOP timer */
+};
+#define DIAG_PASS 0
+#define DIAG_FAIL 3
+
+/* The interrupt page's Internal I/O commands.  DIAG 7000/7001 put an IIO
+ * command and its data on the H-BUS; sect.15 lists "the hexadecimal value
+ * for the H-BUS IIO command required to select each of the micro
+ * sequences".  Only the ones with an externally visible effect are
+ * modelled: the page's own self tests report through the scan register,
+ * which stays zero on a machine with no faults. */
+static void diag_iio(CPU *t, uint32_t cmd, uint32_t data) {
+    switch (cmd) {
+        case 0x9014:
+            /* START INTERRUPT PRIORITY MICROCODE TEST.  "Sets all of the
+             * valid interrupts in the External Pending Interrupt
+             * Register.  Also, the two interval timers are set pending.
+             * Interrupt processing will then proceed in the normal
+             * manner.  Any pending interrupts will be lost when this
+             * command is executed."  The six externals are External 0-4
+             * and AGE; the timers go into the I/O interrupt register, and
+             * "Timer A and B interrupts only become macro interrupts if
+             * location B0 and B1, respectively, equal zero".
+             *
+             * The pending register is cleared first, and the two timers
+             * are conditional; doing neither (and raising all seven
+             * unconditionally) is what this used to do. */
+            memset(&t->intPending, 0, sizeof(t->intPending));
+            t->intPending.iopGrp1 = true;  /* External 0 */
+            t->intPending.iopGrp2 = true;  /* External 1 */
+            t->intPending.iopProg = true;  /* External 2 */
+            t->intPending.ext3 = true;
+            t->intPending.ext4 = true;
+            t->intPending.age = true;      /* the sixth external */
+            if (membus_get16(t->ram, 0x00b0) == 0) t->intPending.clk1 = true;
+            if (membus_get16(t->ram, 0x00b1) == 0) t->intPending.clk2 = true;
+            break;
+        case 0x900c:
+            /* RESET PENDING INTERRUPTS.  Software uses this after an
+             * operation whose side effects it does not want delivered: an
+             * IOP master reset sets C/M idle, which is an External 0 the
+             * code that ordered the reset is not waiting for. */
+            memset(&t->intPending, 0, sizeof(t->intPending));
+            break;
+        case 0x9013:
+            /* SET/RESET INTERRUPT PAGE DIAGNOSE MODE.  "When in diagnose
+             * mode, the interrupt page will not reset the computer when
+             * it detects a crash interrupt condition.  Also, the ROS
+             * parity error, and the Endop Timeout machine check
+             * interrupts will not be generated."  Nonzero data sets the
+             * mode.  This machine never resets itself, so the flag is
+             * readback state only. */
+            t->diagInterruptPageDiagnoseMode = (data != 0);
+            break;
+        default:
+            break;   /* 0x9011 and the page's own micro tests: no effect */
+    }
+}
+
 static void exec_DIAG(CPU *t, DInstr *v) {
-    /* Source body is `# XXX UNIMPL` -- genuinely empty. DIAG is a whole
-     * family of manufacturer self-test microcode commands (H-bus wrap,
-     * command-PLA test, arithmetic-interrupt test, ROS parity, machine-
-     * check force, store-protect readback, ...) that real flight/HAL-S
-     * code never issues, so none of it was ever needed before BILDNEW5/
-     * GPCIPL's own hardware self test (STM1.asm's CPUTEST8 and friends)
-     * started exercising it directly. Only the one command that self
-     * test's own interrupt-priority section depends on is implemented
-     * here; every other DIAG command remains a no-op, a known, separate
-     * gap (STM1.asm names CPUTEST1/R/2/6/7/8/9/10, most still untested
-     * here). */
+    /* DIAG is a whole family of manufacturer self-test microcode commands
+     * (H-bus wrap, command-PLA test, arithmetic-interrupt test, ROS
+     * parity, machine-check force, store-protect readback, ...) that real
+     * flight/HAL-S code never issues, so none of it was needed before
+     * BILDNEW5/GPCIPL's own hardware self test started exercising it.
+     *
+     * The command is the EFFECTIVE ADDRESS ITSELF, not the halfword at
+     * it: "all effective addresses not described here are reserved".
+     * Reading storage at the EA, as this used to, decoded whatever
+     * happened to be there. */
     if (!cpu_i_super(t)) return;
-    uint32_t regNum = (v->hw1 >> 8) & 0x7; /* "xxx" field, same position as ISPB's m1 */
-    uint32_t data = register_get32(cpu_r(t, (int)regNum));
-    uint32_t cmd = cpu_g_eah(t, v);
-    if (cmd == 0x7001 && data == 0x90140000u) {
-        /* "START INT PRIO MICRO TEST" (STM1.asm CPUIP150, DIAG R4,X'7001'
-         * with R4=X'9014' preloaded). Per its own comment ("PERFORM DIAG
-         * INSTR TO SET CLOCK1 & 2, EXTERNAL 0,1,2,3,4 AND AGE INTERRUPTS
-         * PENDING") this stages all eight sources; the real CPU's own
-         * existing priority-ordered dispatch (cpu_check_interrupts,
-         * already strictly Clock1 > Clock2 > EX0 > EX1 > EX2 > EX3 > EX4)
-         * then releases the highest-priority still-pending one each time
-         * the test driver re-issues SSM to unmask everything, exactly
-         * matching INTHNDLR.asm's own per-handler "IPRIOWD order" table
-         * (0..6) -- no separate staged-queue tracking needed here, the
-         * existing mask-gated dispatch already does it correctly once
-         * all seven are simultaneously marked pending. AGE (order 7,
-         * INTHNDLR.asm's EX1 handler distinguishing it from real EX1 by
-         * interrupt code) is a known, separate gap -- cpu_instr.c's own
-         * ICR "Read AGE" case already documents AGE as unsimulated. */
-        t->intPending.clk1 = true;
-        t->intPending.clk2 = true;
-        t->intPending.iopGrp1 = true; /* EX0 */
-        t->intPending.iopGrp2 = true; /* EX1 */
-        t->intPending.iopProg = true; /* EX2 */
-        t->intPending.ext3 = true;    /* EX3 */
-        t->intPending.ext4 = true;    /* EX4 */
+    uint32_t cmd = cpu_g_ea_16(t, v) & 0xffffu;
+    uint32_t x = df_get(v, 'x');
+    Register *r1 = cpu_r(t, (int)x);
+    Register *r1n = cpu_r(t, (int)((x + 1) & 7));
+
+    for (size_t i = 0; i < sizeof DIAG_SELFTEST / sizeof DIAG_SELFTEST[0]; i++) {
+        if (cmd == DIAG_SELFTEST[i]) { psw_set_cc(&t->psw, DIAG_PASS); return; }
+    }
+
+    switch (cmd) {
+        case 0x1000: {
+            /* READ PROGRAM AND SYSTEM MASK: PSW bits 16-47 into R1 bits
+             * 0-31.  Bits 16-31 are PSW1's low halfword, 32-47 PSW2's
+             * high halfword.  CC is explicitly not altered. */
+            uint32_t lo = register_get32(&t->psw.psw1) & 0xffffu;
+            uint32_t hi = (register_get32(&t->psw.psw2) >> 16) & 0xffffu;
+            register_set32(r1, (lo << 16) | hi);
+            break;
+        }
+        case 0x7000:
+        case 0x7001:
+            /* H-BUS READ / WRITE: "allows any Internal I/O (IIO) command
+             * to be written [read].  Bits 0-15 of register R1 shall
+             * contain the Internal Bus command.  Bits 16-31 of register
+             * R1 shall contain the data to be written." */
+            diag_iio(t, (register_get32(r1) >> 16) & 0xffffu,
+                        register_get32(r1) & 0xffffu);
+            psw_set_cc(&t->psw, DIAG_PASS);
+            break;
+
+        case 0x7100:
+        case 0x7101:
+            /* DETECT / DISREGARD STORES INTO IU FILE: sets or resets B
+             * STAT bit 6.  Set is what the machine does anyway -- a
+             * conflict purges the file, and a model that always refetches
+             * is indistinguishable from one that purges.  Reset is not:
+             * the pipeline is not purged and the stale halfword executes.
+             * See cpu.c's cpu_shadow_iu_store(). */
+            t->diagIuStoreDetect = (cmd == 0x7100);
+            /* Turning detection back on purges: "when conflicts are
+             * detected, the file is purged", and every conflict is
+             * detected from here on. */
+            if (t->diagIuStoreDetect) cpu_iu_shadow_flush(t);
+            psw_set_cc(&t->psw, DIAG_PASS);
+            break;
+
+        case 0x9100: {
+            /* INTERRUPT PAGE H-BUS WRAP ASSIST: the pattern in R1 bits
+             * 0-15 goes out on the H-BUS; what comes back on the H-BUS
+             * lands in R1 bits 16-31 and what comes back on the INBUS in
+             * R1+1 bits 0-15.  A good page wraps both. */
+            uint32_t pattern = (register_get32(r1) >> 16) & 0xffffu;
+            register_set32(r1, (pattern << 16) | pattern);
+            register_set32(r1n, (pattern << 16) | (register_get32(r1n) & 0xffffu));
+            break;
+        }
+
+        case 0xC000: {
+            /* MONOLITHIC CHECKSUM ASSIST: sum halfwords from the 19-bit
+             * address in R1 through the one in R1+1 inclusive,
+             * accumulating into R1+2 bits 0-15.  R1 is left equal to the
+             * end address; R1+1 is not altered. */
+            Register *r1n2 = cpu_r(t, (int)((x + 2) & 7));
+            uint32_t start = register_get32(r1) & 0x7ffffu;
+            uint32_t end = register_get32(r1n) & 0x7ffffu;
+            uint32_t sum = (register_get32(r1n2) >> 16) & 0xffffu;
+            for (uint32_t a = start; a <= end; a++)
+                sum = (sum + membus_get16(t->ram, a)) & 0xffffu;
+            register_set32(r1, end);
+            register_set32(r1n2, (sum << 16) | (register_get32(r1n2) & 0xffffu));
+            break;
+        }
+
+        case 0xD100: {
+            /* READ MONOLITHIC STORE PROTECT BITS.  R1 holds the 19-bit
+             * physical address, right-justified, on an even fullword
+             * boundary.  R1+1 receives the two halfwords' bits: 13-15 the
+             * redundant triple for the even halfword, 22-24 the same for
+             * the odd one, everything else undefined.  The triple is
+             * redundant because the hardware stores three copies and
+             * votes; a healthy machine reads all three alike.  The bits
+             * read back ACTIVE LOW: a protected halfword reads 000, an
+             * unprotected one 111. */
+            uint32_t addr = register_get32(r1) & 0x7fffeu;
+            uint32_t ev = membus_get_store_protect(t->ram, addr) ? 0u : 7u;
+            uint32_t od = membus_get_store_protect(t->ram, addr + 1) ? 0u : 7u;
+            register_set32(r1n, (ev << 16) | (od << 7));
+            break;
+        }
+
+        case 0xE300:
+        case 0xE301:
+            /* EA SCAN 5 ASSIST: read the interrupt page's 32-bit scan
+             * register into R1, then clear it.  It doubles as the page's
+             * Diagnose Error register, which is why the self-test reads
+             * it once to clear before a page test and again after to see
+             * what was caught.  No modelled fault ever sets a bit. */
+            register_set32(r1, t->diagScanReg);
+            t->diagScanReg = 0;
+            break;
+
+        case 0xF300:
+            /* FORCE ROS PARITY ERROR ASSIST: "The ROS parity error will
+             * only be forced if bits 0-15 of register R1 contain
+             * X'0001'."  It reports as a microstore parity machine check
+             * (Figure 2-20 row 04, code 0005).  PSW bit 45 masks it, and
+             * a masked one "will not remain pending" -- already how a
+             * masked machine check is treated.  On real hardware an
+             * unmasked, non-diagnose-mode ROS parity error also RESETS
+             * the computer; that part is deliberately not modelled, since
+             * the point of the assist is to exercise the interrupt path. */
+            if (((register_get32(r1) >> 16) & 0xffffu) == 0x0001u) {
+                t->mcCode = 0x0005;   /* CPU Microstore Parity */
+                t->intPending.machineCheck = true;
+            }
+            psw_set_cc(&t->psw, DIAG_PASS);
+            break;
+
+        default:
+            /* "All effective addresses not described here are reserved
+             * and shall not be used.  The result of using a reserved
+             * effective address is indeterminate." */
+            psw_set_cc(&t->psw, DIAG_FAIL);
+            break;
     }
 }
 
@@ -1311,28 +1483,39 @@ static void exec_ISPB(CPU *t, DInstr *v) {
     uint32_t ea = cpu_g_ea(t, v);
     uint32_t m1 = (v->hw1 >> 8) & 0x7; /* bits 5-7 */
     switch (m1) {
-        case 0:
+        case 0:   /* reset protect bit for the halfword at EA */
+            t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, ea, false);
             break;
-        case 1: {
+        case 1: { /* reset both halfwords of the fullword */
+            /* "When M1 is 001 or 011, the low-order bit of the EA should
+             * be 0 and will be ignored." */
             uint32_t fwAddr = ea & 0xfffe;
+            t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, fwAddr, false);
             membus_set_store_protect(t->ram, fwAddr + 1, false);
             break;
         }
-        case 2:
+        case 2:   /* set protect bit for the halfword at EA */
+            t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, ea, true);
             break;
-        case 3: {
+        case 3: { /* set both halfwords of the fullword */
             uint32_t fwAddr = ea & 0xfffe;
+            t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, fwAddr, true);
             membus_set_store_protect(t->ram, fwAddr + 1, true);
             break;
         }
         default:
-            /* Illegal M1 (100-111): source sets `t.storeProtectOverride
-             * = true`, a property never read anywhere else in the
-             * codebase (grep-verified) — a genuine no-op, not ported. */
+            /* Illegal M1 (100-111) leaves the store protect override ON:
+             * protected locations can then be written without a violation
+             * until the next valid ISPB clears it.  No illegal operation
+             * interrupt.  This was dismissed as a no-op on the grounds
+             * that nothing read the flag -- true of the reference at the
+             * time, but the store path reads it now (cpu_store_hw /
+             * cpu_store_fw). */
+            t->storeProtectOverride = true;
             break;
     }
 }
@@ -1361,7 +1544,9 @@ static void exec_MVH(CPU *t, DInstr *v) {
     while (count > 0) {
         count--;
         uint32_t hw = membus_get16(t->ram, srcAddr + count);
-        membus_set16(t->ram, destAddr + count, hw, true);
+        /* A violation terminates the instruction (Forced ENDOP), so R1
+         * is not updated either. */
+        if (!cpu_store_hw(t, destAddr + count, hw)) return;
     }
     register_set32(R(t, v, 'x'), destAddr << 16);
 }
@@ -1402,12 +1587,9 @@ static void exec_SCAL(CPU *t, DInstr *v) {
     uint32_t inc = r1val & 0xffff;
     uint32_t sa = (ptr + inc) & 0xffff;
     uint32_t psw1 = register_get32(&t->psw.psw1);
-    membus_set16(t->ram, sa, psw1 >> 16, true);
-    membus_set16(t->ram, sa + 1, psw1 & 0xffff, true);
+    if (!cpu_store_fw(t, sa, psw1)) return;
     for (int i = 0; i <= 7; i++) {
-        uint32_t regVal = register_get32(cpu_r(t, i));
-        membus_set16(t->ram, sa + 2 + (uint32_t)i * 2, regVal >> 16, true);
-        membus_set16(t->ram, sa + 2 + (uint32_t)i * 2 + 1, regVal & 0xffff, true);
+        if (!cpu_store_fw(t, sa + 2 + (uint32_t)i * 2, register_get32(cpu_r(t, i)))) return;
     }
     register_set32(R(t, v, 'x'), (sa << 16) | 18);
     psw_set_nia(&t->psw, branchAddr);
@@ -1447,7 +1629,7 @@ static void exec_TS(CPU *t, DInstr *v) {
     if (value == 0) psw_set_cc(&t->psw, 0);
     else if (value == 0xffff) psw_set_cc(&t->psw, 1);
     else psw_set_cc(&t->psw, 3);
-    membus_set16(t->ram, ea, 0xffff, true);
+    cpu_store_hw(t, ea, 0xffff);
 }
 
 static void exec_TSB(CPU *t, DInstr *v) {
@@ -1458,7 +1640,7 @@ static void exec_TSB(CPU *t, DInstr *v) {
     if (mask == 0 || selected == 0) psw_set_cc(&t->psw, 0);
     else if (selected == mask) psw_set_cc(&t->psw, 1);
     else psw_set_cc(&t->psw, 3);
-    membus_set16(t->ram, ea, value | mask, true);
+    cpu_store_hw(t, ea, value | mask);
 }
 
 static void exec_LDM(CPU *t, DInstr *v) {
@@ -1522,10 +1704,7 @@ static void exec_STXA(CPU *t, DInstr *v) {
     uint32_t dse = registerfile_get_dse(&t->regFiles[psw_get_reg_set(&t->psw)],
                                         (int)df_get(v, 'x'));
     uint32_t val = stxa_word(register_get32(R(t, v, 'x')), cur, dse);
-    if (!membus_set16(t->ram, ea, val >> 16, true) ||
-        !membus_set16(t->ram, ea + 1, val & 0xffff, true)) {
-        cpu_signal_protection_violation(t);
-    }
+    cpu_store_fw(t, ea, val);
 }
 
 static void exec_STDM(CPU *t, DInstr *v) {
@@ -1541,23 +1720,42 @@ static void exec_ICR(CPU *t, DInstr *v) {
     if (!cpu_i_super(t)) return;
     uint32_t cw = register_get32(R(t, v, 'y'));
     uint32_t cmd = (cw >> 27) & 0x1f;
+    /* POO p.10-3 gives each command its own execution time; the table's
+     * single ICR row is only a fallback.  Without these the counter a
+     * program reads back straight after loading it was two ticks low. */
+    switch (cmd) {
+        case 0x00: t->timePooOverrideUs = 5.5;  break;  /* read counter 1 */
+        case 0x01: t->timePooOverrideUs = 5.75; break;  /* read counter 2 */
+        case 0x08: t->timePooOverrideUs = 3.5;  break;  /* load counter 1 */
+        case 0x09: t->timePooOverrideUs = 3.75; break;  /* load counter 2 */
+        case 0x05: t->timePooOverrideUs = 20.25; break; /* read AGE */
+        case 0x0d: t->timePooOverrideUs = 20.0;  break; /* load AGE */
+        default: break;
+    }
     switch (cmd) {
         case 0x00: { /* Read Counter 1 */
+            /* The read comes back TWO counts high -- the value the
+             * counter will have had by the time the read completes. */
             uint32_t hi = membus_get16(t->ram, 0x00b0);
             uint32_t lo = t->counter1;
-            register_set32(R(t, v, 'x'), (hi << 16) | (lo & 0xffff));
+            register_set32(R(t, v, 'x'), ((hi << 16) | (lo & 0xffff)) + 2);
             break;
         }
         case 0x01: { /* Read Counter 2 */
             uint32_t hi = membus_get16(t->ram, 0x00b1);
             uint32_t lo = t->counter2;
-            register_set32(R(t, v, 'x'), (hi << 16) | (lo & 0xffff));
+            register_set32(R(t, v, 'x'), ((hi << 16) | (lo & 0xffff)) + 2);
             break;
         }
         case 0x08: { /* Write Counter 1 */
             uint32_t r1 = register_get32(R(t, v, 'x'));
-            membus_set16(t->ram, 0x00b0, (r1 >> 16) & 0xffff, true);
+            /* The PSA half is written PAST store protect: 00B0/00B1 are
+             * on the POO's own list of locations that must not be
+             * protected (2.5.2.4), and the write is the timer hardware's,
+             * not the program's. */
+            membus_set16(t->ram, 0x00b0, (r1 >> 16) & 0xffff, false);
             t->counter1 = r1 & 0xffff;
+            t->intPending.clk1 = false;  /* the load resets the latch */
             /* Writing a countdown value to a real hardware timer starts
              * it counting -- cpu_exec1's per-instruction decrement (and
              * the Clock 1 interrupt it fires on underflow) was declared
@@ -1570,8 +1768,9 @@ static void exec_ICR(CPU *t, DInstr *v) {
         }
         case 0x09: { /* Write Counter 2 */
             uint32_t r1 = register_get32(R(t, v, 'x'));
-            membus_set16(t->ram, 0x00b1, (r1 >> 16) & 0xffff, true);
+            membus_set16(t->ram, 0x00b1, (r1 >> 16) & 0xffff, false);
             t->counter2 = r1 & 0xffff;
+            t->intPending.clk2 = false;  /* see Write Counter 1 */
             t->counter2Enabled = true; /* see Write Counter 1's comment */
             break;
         }
@@ -1605,20 +1804,19 @@ static void exec_ICR(CPU *t, DInstr *v) {
         case 0x0d: /* Write AGE — not simulated, no-op */
             return;
         case 0x10:
-            /* Channel Reset: source calls `t.iop?.reset?()` — iop.coffee
-             * has no `reset` method (grep-verified), so this is a no-op
-             * even once IOP is ported. */
+            /* Channel Reset zeroes the IOP's interrupt registers.  This
+             * was a no-op on the grounds that the reference had no such
+             * method; it has one now. */
+            if (t->iop) iop_channel_reset(t->iop);
             break;
         default:
-            if ((cmd & 0x10) == 0) {
-                /* Source calls `t.i_ILLEGAL()`, a method that doesn't
-                 * exist anywhere on CPU (grep-verified) — would throw in
-                 * the real JS if ever reached. Implemented here as the
-                 * evident intent (cpu.coffee's signalIllegalOp) rather
-                 * than reproducing the crash. */
-                cpu_signal_illegal_op(t);
-            }
-            /* else: 1xxxx other than 10000 -> channel reset, no-op here too. */
+            /* "Command codes which are not defined in this document are
+             * illegal and should not be used.  Unlike previous versions
+             * of this architecture, ONLY the command 10000 causes a
+             * channel reset, not the general case 1XXXX." (sect.10
+             * programming notes) -- so 1xxxx other than 10000 is illegal
+             * too, where this used to let it pass silently. */
+            cpu_signal_illegal_op(t);
             break;
     }
 }
