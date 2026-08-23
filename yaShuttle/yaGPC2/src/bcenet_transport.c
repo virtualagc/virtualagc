@@ -193,9 +193,28 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID) {
         return false;
     }
 
+    /* The interface MUST be pinned, both for the join and for sends.
+     * Joining the group without naming one can have the host deliver
+     * every datagram TWICE -- and then the self-echo filter below
+     * consumes one copy and passes the other, so this emulator reads its
+     * own transmission back as if it were the peripheral's reply, which
+     * desynchronises the bus program by one word and every transaction
+     * after it.  That was observed here on the DK bus: 1- and 2-word
+     * "receives" carrying our own TIME_FILL and DISPLAY_FILL command
+     * words.  Every LRU is a process on this machine, so the default is
+     * loopback; NSTS_BUS_IFACE takes a local address to run a bus across
+     * a real network instead, exactly as the reference's own Bus.IFACE
+     * does. */
+    const char *ifaceStr = getenv("NSTS_BUS_IFACE");
+    if (ifaceStr == NULL) ifaceStr = "127.0.0.1";
+    struct in_addr iface;
+    iface.s_addr = inet_addr(ifaceStr);
+    if (iface.s_addr == INADDR_NONE) iface.s_addr = htonl(INADDR_ANY);
+    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &iface, sizeof iface);
+
     struct ip_mreq mreq = {0};
     mreq.imr_multiaddr.s_addr = inet_addr(BCENET_MULTICAST_GROUP);
-    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+    mreq.imr_interface.s_addr = iface.s_addr;
     if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof mreq) < 0) {
         fprintf(stderr, "bcenet: bus %d: IP_ADD_MEMBERSHIP failed: %s\n", busID, strerror(errno));
         close(fd);
