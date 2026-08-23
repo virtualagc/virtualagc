@@ -115,6 +115,128 @@ static const TimingEntry TIMING_TABLE[] = {
 };
 #define TIMING_TABLE_COUNT (sizeof(TIMING_TABLE) / sizeof(TIMING_TABLE[0]))
 
+/* ---------------------------------------------------------------------
+ * Section 17 fallback table
+ *
+ * TIMING_TABLE above is a verbatim port of the HAL/S-FC PASS2 compiler's
+ * own EXECUTION_TIMES, so it only covers instructions that compiler ever
+ * emitted.  Hand-written assembler -- GPCIPL above all -- uses plenty it
+ * never did, and those used to return 0.0 here, which is not "unknown"
+ * but "took no time": with the interval timers now advancing off
+ * execution time (see cpu_advance_time_us), a spin loop built out of
+ * untimed instructions never let the clock run at all.
+ *
+ * These values come from the manual's own table instead --
+ * AP-101S-instruction-set.txt section 17, "AP-101S INSTRUCTION EXECUTION
+ * TIMES", headed "INSTRUCTION EXECUTION TIME IN US" (which also settles
+ * timing.h's note that the units were never independently confirmed as
+ * microseconds: the table says so).  PASS2 WINS wherever both have an
+ * entry -- this table is consulted only when find_entry() comes back
+ * empty -- so nothing here can perturb a HAL/S-compiled workload.
+ *
+ * The seven columns are the manual's own: NORMAL ADDRESSING MODES, then
+ * DOUBLE INDIRECTION in its four XC/C combinations, then AUTO STORAGE
+ * MODIFICATION and AUTO INDEXING.  A negative entry is the manual's "--",
+ * i.e. the form has no such addressing mode, and falls back to normal.
+ *
+ * Every value below was read from the manual and then cross-checked
+ * against gpc/cpu_instr.coffee's `xts:` arrays, an independent
+ * transcription of the same table; they agree except where noted in the
+ * per-entry comments.
+ *
+ * TWO GREPPABLE MARKERS APPEAR BELOW, both meaning "a human still needs
+ * to look at the printed document"; an unmarked row was read cleanly and
+ * needs nothing.
+ *
+ *   PROVISIONAL:   the figure itself could not be read.  The OCR text is
+ *                  destroyed or the row is missing outright, and the
+ *                  value here is a stand-in.
+ *   RECONSTRUCTED: the figure was read cleanly, but the OCR dropped the
+ *                  INSTRUCTION column from the last pages of the table,
+ *                  so which mnemonic the row belongs to was recovered
+ *                  from the table's alphabetical order rather than read.
+ *                  Corroborated -- every row on those pages that also
+ *                  appears in the PASS2 table above carries the matching
+ *                  time (OST .750, SVC 20.25, SRET 17.50, TS 3.75, ...),
+ *                  and gpc independently assigns the same mnemonics --
+ *                  but not directly attested.
+ * ------------------------------------------------------------------- */
+
+#define NA (-1.0)
+
+typedef struct {
+    const char *nm;
+    double t[7];
+} PooTimingEntry;
+
+static const PooTimingEntry POO_TIMING_TABLE[] = {
+    /* Branch instructions: t[0] is the branch-TAKEN time; the not-taken
+     * time is in POO_BRANCH_NOT_TAKEN below. */
+    {"BVC",   {1.25, 4.0,   7.0,   3.75,  7.0,   5.0,   6.5}},
+    {"BVCF",  {1.25, NA,    NA,    NA,    NA,    NA,    NA}},
+    {"BVCR",  {1.25, NA,    NA,    NA,    NA,    NA,    NA}},
+
+    {"BCB",   {0.25, NA,    NA,    NA,    NA,    NA,    NA}},
+    {"CBL",   {5.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* "AVG. = 5.0" */
+    {"LFLR",  {0.75, NA,    NA,    NA,    NA,    NA,    NA}},
+    {"LFXR",  {0.75, NA,    NA,    NA,    NA,    NA,    NA}},
+    {"LPS",   {10.25,13.25, 14.25, 13.0,  14.25, 15.5,  17.25}},
+    {"LXA",   {3.5,  6.5,   6.25,  6.25,  6.25,  6.5,   5.25}}, /* -1.25 early out not modelled */
+    {"LXAR",  {3.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* -1.25 early out not modelled */
+    {"STDM",  {2.25, 5.25,  6.75,  5.0,   5.25,  7.0,   7.5}},   /* RECONSTRUCTED: mnemonic from alphabetical position, line 13711 */
+    {"STXA",  {2.5,  6.5,   8.0,   6.25,  8.0,   8.25,  8.75}},   /* RECONSTRUCTED: mnemonic from alphabetical position, line 13719 */
+    {"STXAR", {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},  /* RECONSTRUCTED: mnemonic from alphabetical position, line 13717 */
+    {"XUL",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},    /* RECONSTRUCTED: mnemonic from alphabetical position, line 13744 */
+
+    /* PROVISIONAL: SSM normal-addressing figure, line 13709 -- and
+     * RECONSTRUCTED: mnemonic from alphabetical position on the same
+     * line.  Pending a human read of the printed manual.  SSM's
+     * normal-mode figure is the one number on these pages the OCR lost
+     * outright -- line 13709 renders it "704".  7.75 is gpc's reading and
+     * the only multiple of .125 that fits, every other figure in the row
+     * being one (the manual prints those rounded to two decimals,
+     * 10.63/11.63/10.38, for 10.625/11.625/10.375, which is what is used
+     * here).  The columns are certain; only the first figure is not. */
+    {"SSM",   {7.75, 10.625, 11.625, 10.375, 11.625, 12.875, 14.625}},
+
+    /* Parametric and non-numeric rows.  t[0] is the base; see
+     * instr_time_us() for the per-instruction arithmetic. */
+    /* PROVISIONAL: ISPB M1 = 4 only -- that row is absent from the text
+     * (page break between 17-2 and 17-3); M1 = 0-3 (5.625, lines
+     * 13580-13583) and M1 = 5-7 (.125, lines 13590-13592) are read
+     * directly.  See the M1 cutoff in instr_time_us(). */
+    {"ISPB",  {5.625, 8.0,  9.0,   7.75,  9.0,   10.25, 12.0}}, /* M1 >= 4: 0.125 */
+    {"NCT",   {1.05, NA,    NA,    NA,    NA,    NA,    NA}},   /* + .075 * N */
+    {"SRDR",  {2.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* + .5 * N (N mod 32); RECONSTRUCTED: mnemonic, lines 13699-13701 */
+    {"SUM",   {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* * elements tested; RECONSTRUCTED: mnemonic, line 13721 */
+
+    /* The manual gives no single number for these three.  Each value is a
+     * representative stand-in, chosen so the instruction costs SOMETHING
+     * rather than nothing, and each matches gpc's own choice:
+     *   DIAG "SEE POO"            -- per-function times live in POO s.15
+     *   ICR  "COMMAND DEPENDENT"  -- varies by the command in R2
+     *   PC   ">4.25 BUT <22.5 (NO CUR DMA)" -- a range, not a value;
+     *        4.5 is the low end of it, the no-DMA typical case */
+    {"DIAG",  {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},
+    {"ICR",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},
+    {"PC",    {4.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* RECONSTRUCTED: mnemonic from alphabetical position, line 13664 */
+};
+#define POO_TIMING_COUNT (sizeof(POO_TIMING_TABLE) / sizeof(POO_TIMING_TABLE[0]))
+
+/* Branch-not-taken times for the section-17 branches, "BT=x; BNT=y". */
+typedef struct { const char *nm; double notTaken; } PooBranchEntry;
+static const PooBranchEntry POO_BRANCH_NOT_TAKEN[] = {
+    {"BVC", 0.50}, {"BVCF", 0.50}, {"BVCR", 0.50},
+};
+#define POO_BRANCH_COUNT (sizeof(POO_BRANCH_NOT_TAKEN) / sizeof(POO_BRANCH_NOT_TAKEN[0]))
+
+static const PooTimingEntry *find_poo_entry(const char *nm) {
+    for (size_t i = 0; i < POO_TIMING_COUNT; i++) {
+        if (strcmp(POO_TIMING_TABLE[i].nm, nm) == 0) return &POO_TIMING_TABLE[i];
+    }
+    return NULL;
+}
+
 static const TimingEntry *find_entry(const char *nm) {
     for (size_t i = 0; i < TIMING_TABLE_COUNT; i++) {
         if (strcmp(TIMING_TABLE[i].nm, nm) == 0) return &TIMING_TABLE[i];
@@ -133,6 +255,21 @@ static bool is_extended_indirect(const DInstr *v) {
 uint32_t instr_time_pre_n(CPU *cpu, const InstrDesc *desc, const DInstr *v, uint32_t hw1) {
     if (desc->opType == OPTYPE_SHFT) return cpu_g_shift_cnt(cpu, hw1);
     if (strcmp(desc->nm, "MVH") == 0) return register_get32(cpu_r(cpu, (int)df_get(v, 'x'))) & 0xffff;
+    /* Section-17 parametric instructions whose N is not a shift count.
+     * Both are read BEFORE execution because both overwrite the register
+     * the count comes from. */
+    if (strcmp(desc->nm, "NCT") == 0) {
+        /* NCT's N is what it is about to count: the run of leading bits
+         * that match their neighbour, exactly as exec_NCT walks it. */
+        uint32_t v2 = register_get32(cpu_r(cpu, (int)df_get(v, 'y')));
+        if (v2 == 0) return 0;
+        uint32_t n = 0;
+        while (n < 32 && (((v2 >> 31) & 1) == ((v2 >> 30) & 1))) { v2 <<= 1; n++; }
+        return n;
+    }
+    if (strcmp(desc->nm, "SUM") == 0) {
+        return (register_get32(cpu_r(cpu, (int)df_get(v, 'y'))) >> 16) & 0xffff;
+    }
     return 0;
 }
 
@@ -181,7 +318,61 @@ double instr_time_us(const InstrDesc *desc, const DInstr *v, uint32_t preN, bool
     if (oddR && strcmp(nm, "ME") == 0) return indexed ? (seePoo ? PLAIN_TIMES[50] : PLAIN_TIMES[62]) : PLAIN_TIMES[29];
 
     const TimingEntry *e = find_entry(nm);
-    if (!e) return 0.0; /* HAL/S-FC never named/timed this mnemonic */
+    if (!e) {
+        /* HAL/S-FC never named/timed this mnemonic -- fall back to the
+         * manual's own section-17 table (see POO_TIMING_TABLE). */
+        const PooTimingEntry *p = find_poo_entry(nm);
+        if (!p) return 0.0;
+
+        /* Column choice mirrors the PASS2 path directly above: an
+         * indexed operand with extended indirection takes the double-
+         * indirection figure, an indexed operand without it takes the
+         * auto-indexing figure, everything else takes normal addressing.
+         * yaGPC2 does not surface the indirect word's own XC/C bits to
+         * this layer (cpu_g_ea consumes them internally), so the four
+         * double-indirection sub-columns are not distinguished and the
+         * XC=0,C=0 one stands for them. */
+        int col = 0;
+        if (indexed) col = seePoo ? 1 : 6;
+        double t = p->t[col];
+        if (t < 0.0) t = p->t[0];
+
+        /* ISPB: the manual tabulates it per M1, 5.625 for M1 = 0-3 and
+         * .125 for M1 = 5-7.  The M1 = 4 row fell in the page break
+         * between 17-2 and 17-3 and is not in the text at all, so the
+         * cutoff below is PROVISIONAL: it follows gpc, which takes the
+         * .125 branch for the whole illegal-M1 group (100-111, i.e.
+         * M1 >= 4).  Only M1 = 4 is in doubt; 0-3 and 5-7 are read
+         * directly from the table. */
+        if (strcmp(nm, "ISPB") == 0 && df_get(v, 'x') >= 4) return 0.125;
+
+        /* Parametric rows. */
+        if (strcmp(nm, "NCT") == 0) return t + 0.075 * (double)preN;
+        if (strcmp(nm, "SRDR") == 0) {
+            uint32_t n = preN;
+            return t + 0.5 * (double)(n < 32 ? n : n - 32);
+        }
+        if (strcmp(nm, "SUM") == 0) {
+            /* "2.5 * (# ELEMENTS TESTED)".  How many get tested depends
+             * on where the scan stops, which is not knowable before the
+             * instruction runs, so this is the all-elements case -- an
+             * over-estimate whenever SUM exits early. */
+            uint32_t n = preN ? preN : 1;
+            return t * (double)n;
+        }
+
+        /* Branches tabulated as "BT=x; BNT=y" -- the pair applies to
+         * normal addressing only; the indirection/indexing columns are
+         * single figures. */
+        if (col == 0) {
+            for (size_t i = 0; i < POO_BRANCH_COUNT; i++) {
+                if (strcmp(POO_BRANCH_NOT_TAKEN[i].nm, nm) == 0) {
+                    return branchTaken ? t : POO_BRANCH_NOT_TAKEN[i].notTaken;
+                }
+            }
+        }
+        return t;
+    }
 
     int idx;
     if ((e->indirect || e->index) && indexed) {

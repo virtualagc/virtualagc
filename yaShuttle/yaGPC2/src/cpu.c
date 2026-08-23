@@ -36,6 +36,7 @@ void cpu_init(CPU *cpu) {
     cpu->counter2Enabled = false;
     cpu->fcosMode = false;
     cpu->elapsedTimeUs = 0.0;
+    cpu->timerAccumUs = 0.0;
     cpu->dateTimeAnchorEpochSec = 0.0; /* Unix epoch -- see cpu.h's own comment */
 }
 
@@ -695,10 +696,13 @@ void cpu_exec1(CPU *cpu) {
 
     {
         bool branchTaken = psw_get_nia(&cpu->psw) != nia + (uint32_t)desc->pb.origLen;
-        cpu->elapsedTimeUs += instr_time_us(desc, &v, timePreN, branchTaken);
+        /* Through cpu_advance_time_us(), so this instruction's own
+         * duration is what the interval timers advance by -- not one
+         * flat tick per instruction, which is what this used to do. */
+        cpu_advance_time_us(cpu, instr_time_us(desc, &v, timePreN, branchTaken));
     }
 
-    cpu_tick(cpu);
+    cpu_check_interrupts(cpu);
 }
 
 /* Counter decrement + interrupt dispatch, split out of cpu_exec1's tail so
@@ -712,21 +716,64 @@ void cpu_exec1(CPU *cpu) {
  * this split, a WAIT entered while a clock is armed can never wake up on
  * its own, because nothing ever calls this code again once the run loop
  * stops fetching instructions. */
-void cpu_tick(CPU *cpu) {
-    if (cpu->counter1Enabled) {
-        cpu->counter1--;
-        if ((int32_t)cpu->counter1 <= 0) {
-            cpu->counter1 = membus_get16(cpu->ram, 0x00B0) << 16;
-            cpu->intPending.clk1 = true;
+/* Decrement one interval timer by `ticks` microseconds.
+ *
+ * The counter is 32 bits split across two places: the low halfword is the
+ * hardware counter (cpu->counterN), the high halfword lives in main store
+ * at hiAddr, which is what Read/Write Counter assemble their fullword
+ * from.  On borrow the microcode decrements the high halfword -- writing
+ * it directly, bypassing store protection, since no program asked for the
+ * write.  When the high halfword is already zero at borrow time the count
+ * has run out: the interrupt goes pending and the high halfword wraps to
+ * FFFF, so the timer keeps running rather than stopping. */
+static uint32_t tick_counter(CPU *cpu, uint32_t low, uint32_t hiAddr,
+                             bool *pending, uint32_t ticks) {
+    int32_t v = (int32_t)(low & 0xffff) - (int32_t)ticks;
+    while (v < 0) {
+        v += 0x10000;
+        uint32_t hi = membus_get16(cpu->ram, hiAddr);
+        if (hi == 0) {
+            membus_set16(cpu->ram, hiAddr, 0xffff, false);
+            *pending = true;
+        } else {
+            membus_set16(cpu->ram, hiAddr, hi - 1, false);
         }
+    }
+    return (uint32_t)v & 0xffffu;
+}
+
+/* The interval timers are 1 MHz hardware, so they advance with SIMULATED
+ * TIME, not with instructions: a 2.8us instruction moves them nearly
+ * three times as far as a 1us one.  This port decremented them once per
+ * instruction instead, which made every instruction look equally long and
+ * ran the timers at whatever rate the code being executed happened to
+ * imply.  The per-instruction durations come from timing.c's HAL/S PASS2
+ * model, so feeding them in here is what the accuracy of that model was
+ * always for. */
+void cpu_advance_time_us(CPU *cpu, double us) {
+    cpu->elapsedTimeUs += us;
+    cpu->timerAccumUs += us;
+    if (cpu->timerAccumUs < 1.0) return;
+
+    double whole = (double)(long)cpu->timerAccumUs;
+    uint32_t ticks = (uint32_t)whole;
+    cpu->timerAccumUs -= whole;
+    if (ticks == 0) return;
+
+    if (cpu->counter1Enabled) {
+        cpu->counter1 = tick_counter(cpu, cpu->counter1, 0x00B0,
+                                     &cpu->intPending.clk1, ticks);
     }
     if (cpu->counter2Enabled) {
-        cpu->counter2--;
-        if ((int32_t)cpu->counter2 <= 0) {
-            cpu->counter2 = membus_get16(cpu->ram, 0x00B1) << 16;
-            cpu->intPending.clk2 = true;
-        }
+        cpu->counter2 = tick_counter(cpu, cpu->counter2, 0x00B1,
+                                     &cpu->intPending.clk2, ticks);
     }
+}
 
+/* One microsecond of wait-state time: the clock/interrupt facility keeps
+ * running while instruction fetch is suspended, and one tick is the
+ * timers' own resolution. */
+void cpu_tick(CPU *cpu) {
+    cpu_advance_time_us(cpu, 1.0);
     cpu_check_interrupts(cpu);
 }

@@ -76,8 +76,16 @@ typedef struct CPU {
     void (*halUCPLog)(void *halUCP, const char *msg);
     bool (*halUCPHandleSVC)(void *halUCP, uint32_t ea, uint32_t r1);
 
+    /* The two interval timers' 16-bit HARDWARE counters.  Their high
+     * halfwords are not here -- they live in main store at 0x00B0 and
+     * 0x00B1, which is where the microcode borrows from and where Read/
+     * Write Counter assemble the full 32-bit value from. */
     uint32_t counter1, counter2;
     bool counter1Enabled, counter2Enabled;
+    /* Sub-microsecond remainder carried between ticks.  The timers run at
+     * 1 MHz off simulated execution time, so an instruction that takes
+     * 2.8us advances them by two ticks and leaves 0.8us here. */
+    double timerAccumUs;
 
     /* --fcos (see opts.h): simulate specific known behaviors of FCOS
      * (the Shuttle flight-software OS), which real bare-hardware/no-OS
@@ -143,6 +151,11 @@ void cpu_send_to_iop(CPU *cpu, uint32_t cmd, uint32_t data);
 uint32_t cpu_recv_from_iop(CPU *cpu);
 
 void cpu_check_interrupts(CPU *cpu);
+
+/* Advance simulated execution time by `us` and tick the 1 MHz interval
+ * timers with it.  Every path that consumes time must go through this so
+ * the timers see it -- see cpu.c. */
+void cpu_advance_time_us(CPU *cpu, double us);
 
 void cpu_signal_fixed_overflow(CPU *cpu);
 void cpu_signal_exponent_overflow(CPU *cpu);
