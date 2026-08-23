@@ -961,3 +961,32 @@ document's planning stages, and it is already in the code as
   happens with all traces off.  The reference keeps driving DK1 indefinitely at
   this stage.  The display therefore goes blank after ~90 s, which is
   user-visibly worse than before even though the bus behavior is now correct.
+
+### [2026-08-23] Target: [problems.md]
+- Pacing, corrected understanding (user's point, and it is the right one): the
+  unit a receiver loses when overrun is not a datagram but a whole BUFFER --
+  everything after its socket fills -- which is exactly why the COMMANDS queued
+  behind bulk data were what vanished.  So the interval to honour is between
+  complete MESSAGES, each holding the bus for its own length (20 us/halfword,
+  so a 511-halfword fill occupies ~10 ms).  Spacing individual datagrams is the
+  wrong granularity and measured as such: 7,823 -> 4,882 drops per 45 s, versus
+  0 for one-datagram-per-transfer.
+- ATTEMPTED and REVERTED: message-granularity pacing in the framer (per-bus
+  outbound message FIFO + busFreeAtUs, spaced by wordCount * 20 us).  It made
+  things worse, twice over:
+  * With the queue drained only from the per-CPU-instruction flush_tick, the
+    data messages stopped going out entirely (POLL 166 and BITE 83 appeared,
+    matching the reference for the first time, but DISPLAY_FILL and the
+    TIME_FILL payload went to zero) -- because during a WAIT, which is where
+    the machine spends most of its time, that flush is never reached.
+  * Adding a flush to the idle loop silenced every bus.
+  Reverted to the committed batching.  The idea is sound; the implementation
+  needs the outbound queue drained from wherever simulated time advances,
+  without splitting a transfer mid-burst, and that needs designing rather than
+  patching.
+- THE BLOCKER remains the post-IPL stall, and it is independent of pacing: with
+  the committed batching alone, DK1 goes silent after some tens of seconds
+  (timing varies run to run), BCE6 parked on the `#WAT` at 0359e and the MSC
+  spinning at 032a4.  032a4 is `@RAW`, which per exec_RAW repeats until every
+  BCE in its ACC mask is OUT of Busy/Wait.  BCE6 at a #WAT is not busy, so the
+  next question is which BCE in that mask is stuck busy.
