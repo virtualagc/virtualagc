@@ -157,7 +157,9 @@ static const TimingEntry TIMING_TABLE[] = {
  *
  *   - SSM's four middle columns, printed to two decimals, read as the
  *     .125 multiples they round to.
- *   - ISPB's M1 = 4, which the original document simply does not list.
+ *   - ISPB's M1 = 4, which the original document does not list --
+ *     though the instruction's own M1 decode puts it with the illegal
+ *     encodings whose times ARE listed, so the value is not in doubt.
  *   - DIAG, ICR and PC, where the manual gives a phrase or a range
  *     instead of a number.
  *   - SUM and LXA/LXAR's early-out cases, which are runtime-dependent
@@ -217,8 +219,17 @@ static const PooTimingEntry POO_TIMING_TABLE[] = {
      * L13578-81) and M1 = 5-7 at .125 (p.17-3 L13592-94).  THERE IS NO
      * M1 = 4 ROW -- confirmed by reading the printed pages, so this is an
      * omission in the original document rather than something the OCR or
-     * the page break lost.  M1 = 4 is grouped with 5-7 here, following
-     * the shape of the two attested groups; the manual does not say.
+     * the page break lost.
+     *
+     * .125 is nonetheless the right value for it, and the instruction's
+     * own definition says why.  M1 selects what ISPB does, and the four
+     * encodings divide exactly the way the two timing groups do (p.9-4):
+     * 000/001 reset the protection bits for the halfword or fullword
+     * second operand, 010/011 set them -- the four real operations, at
+     * 5.625 -- while "100 Illegal, 101 Illegal, 110 Illegal, 111
+     * Illegal".  M1 = 4 is 100, one of the four illegal encodings, whose
+     * other three are the attested .125 rows.  An illegal M1 does no
+     * storage work at all; it raises the illegal-operation interrupt.
      * See the M1 cutoff in instr_time_us(). */
     {"ISPB",  {5.625, 8.0,  9.0,   7.75,  9.0,   10.25, 12.0}}, /* M1 >= 4: 0.125 */
     {"NCT",   {1.05, NA,    NA,    NA,    NA,    NA,    NA}},   /* + .075 * N; p.17-3 L13644 */
@@ -353,12 +364,13 @@ double instr_time_us(const InstrDesc *desc, const DInstr *v, uint32_t preN, bool
         if (t < 0.0) t = p->t[0];
 
         /* ISPB: the manual tabulates it per M1, 5.625 for M1 = 0-3 and
-         * .125 for M1 = 5-7.  It has NO M1 = 4 row -- an omission in the
-         * original document, confirmed by reading the printed pages, not
-         * something lost in the page break between 17-2 and 17-3 or by
-         * the OCR.  M1 = 4 therefore has no attested time; the cutoff
-         * below groups it with 5-7, as gpc does for the whole illegal-M1
-         * group (100-111).  Everything else here is read directly. */
+         * .125 for M1 = 5-7, with no M1 = 4 row -- an omission in the
+         * original document, not something the OCR or the 17-2/17-3 page
+         * break lost.  The cutoff is still exactly right: M1 = 4 is the
+         * encoding 100, the first of the four the instruction's own
+         * definition calls Illegal (p.9-4), and the other three illegal
+         * encodings are the .125 rows.  See POO_TIMING_TABLE's ISPB
+         * entry. */
         if (strcmp(nm, "ISPB") == 0 && df_get(v, 'x') >= 4) return 0.125;
 
         /* Parametric rows. */
