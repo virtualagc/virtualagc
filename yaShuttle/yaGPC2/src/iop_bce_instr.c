@@ -50,21 +50,23 @@ static void exec_LTOI(IOP *t, DInstr *v) {
 }
 
 static void exec_LTO(IOP *t, DInstr *v) {
-    uint32_t addr = register_get32(iopls_PC(&t->ls)) + df_get(v, 'd') + 2u * (uint32_t)t->curPE;
-    uint32_t v1 = iop_g_eaf(t, addr);
-    register_set32(iopls_MTO(&t->ls), v1);
+    /* Through iop_bce_ea(): the displacement is signed and relative to
+     * the UPDATED PC, and the result is forced even.  This computed it
+     * from the raw PC with an unsigned displacement and no alignment. */
+    uint32_t ea = iop_bce_ea(t, df_get(v, 'd'), true) & ~1u;
+    register_set32(iopls_MTO(&t->ls), iop_g_eaf(t, ea) & 0x3ffffu);
     iop_incr_nia(t, 1);
 }
 
 static void exec_RIB(IOP *t, DInstr *v) {
     (void)v;
-    register_setbit32(&t->regIndicator, t->curPE, 0);
+    iop_proc_set(&t->regIndicator, t->curPE, 0);
     iop_incr_nia(t, 1);
 }
 
 static void exec_SIB(IOP *t, DInstr *v) {
     (void)v;
-    register_setbit32(&t->regIndicator, t->curPE, 1);
+    iop_proc_set(&t->regIndicator, t->curPE, 1);
     iop_incr_nia(t, 1);
 }
 
@@ -72,7 +74,7 @@ static void exec_SSC(IOP *t, DInstr *v) {
     uint32_t disp = df_get(v, 'd') + 2u * df_get(v, 'm') * (uint32_t)t->curPE;
     iop_s_eaf(t, disp, iopls_getBST(&t->ls));
     iopls_setBST(&t->ls, 0);
-    register_setbit32(&t->regProgExcept, t->curPE, 1);
+    iop_proc_set(&t->regProgExcept, t->curPE, 1);
     iop_incr_nia(t, 1);
 }
 
@@ -111,10 +113,10 @@ static void exec_WIX(IOP *t, DInstr *v) {
         if (table & 1) table += 1;
         register_set32(a00, table);
     }
-    if (register_getbit32(&t->regXmitEna, t->curPE)) {
+    if (iop_proc_get(&t->regXmitEna, t->curPE)) {
         register_set32(a00, 0);
         iop_incr_nia(t, 1);
-        register_setbit32(&t->regBusyWait, t->curPE, 0);
+        iop_proc_set(&t->regBusyWait, t->curPE, 0);
     } else {
         BCE *bce = iop_cur_bce(t);
         if (bce && mia_data_available(t, &bce->mia)) {
@@ -138,7 +140,7 @@ static void exec_WIX(IOP *t, DInstr *v) {
  * ------------------------------------------------------------------- */
 
 static void exec_CMDI(IOP *t, DInstr *v) {
-    if (register_getbit32(&t->regXmitEna, t->curPE)) {
+    if (iop_proc_get(&t->regXmitEna, t->curPE)) {
         uint32_t cmd = (df_get(v, 'u') << 19) | df_get(v, 'i');
         register_set32(iopls_IUAR(&t->ls), df_get(v, 'u'));
         BCE *bce = iop_cur_bce(t);
@@ -150,7 +152,7 @@ static void exec_CMDI(IOP *t, DInstr *v) {
 static void exec_CMD(IOP *t, DInstr *v) {
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
     uint32_t cmd = iop_g_eaf(t, addr) & 0x00ffffffu;
-    if (register_getbit32(&t->regXmitEna, t->curPE)) {
+    if (iop_proc_get(&t->regXmitEna, t->curPE)) {
         register_set32(iopls_IUAR(&t->ls), (cmd >> 19) & 0x1f);
         BCE *bce = iop_cur_bce(t);
         if (bce) mia_xmit_cmd(t, &bce->mia, cmd);
@@ -195,7 +197,7 @@ static void exec_TDL(IOP *t, DInstr *v) {
  * mnemonics are indistinguishable at the bit level and only ever meant
  * to be decoded in the context of their parent instruction. */
 static void bce_process_mio_command(IOP *t, uint32_t pc) {
-    if (!register_getbit32(&t->regXmitEna, t->curPE)) return;
+    if (!iop_proc_get(&t->regXmitEna, t->curPE)) return;
     uint32_t cmdWord = iop_g_eaf(t, pc + 2) & 0x00ffffffu;
     register_set32(iopls_IUAR(&t->ls), (cmdWord >> 19) & 0x1fu);
     BCE *bce = iop_cur_bce(t);
@@ -298,7 +300,7 @@ static void exec_DLY(IOP *t, DInstr *v) { (void)v; iop_incr_nia(t, 1); }
 
 static void exec_WAT(IOP *t, DInstr *v) {
     (void)v;
-    register_setbit32(&t->regBusyWait, t->curPE, 0);
+    iop_proc_set(&t->regBusyWait, t->curPE, 0);
     iop_incr_nia(t, 1);
 }
 

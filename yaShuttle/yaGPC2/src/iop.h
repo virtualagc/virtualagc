@@ -92,6 +92,10 @@ void iopls_free(IOPLocalStore *ls);
 void iopls_next_slice(IOPLocalStore *ls);
 RegisterFile *iopls_cp(IOPLocalStore *ls);
 Register *iopls_ls(IOPLocalStore *ls, int bank, int word);
+/* Address a named region's page explicitly, rather than whichever page the
+ * round-robin scheduler currently has selected -- what a local-store PCI
+ * from the CPU needs.  Returns NULL if the region does not exist. */
+Register *iopls_at(IOPLocalStore *ls, int region, int bank, int word);
 
 /* COMMON */
 Register *iopls_PC(IOPLocalStore *ls);
@@ -222,6 +226,29 @@ typedef struct IOP {
     void *servicerCtx;
 } IOP;
 
+/* PER-PROCESSOR STATUS REGISTERS ARE NUMBERED FROM THE MS END.
+ *
+ * STAT1 (GO/NO-GO), STAT4 (BUSY/WAIT), STAT5 (the Halt Register), the
+ * indicator register and the MIA enables all carry one bit per processor,
+ * and READ PROCESSOR HALT STATUS spells the layout out: "BIT 0 MSC, BIT 1
+ * BCE No. 1 ... BIT 24 BCE No. 24, BIT 25 SELF TEST PROCESSOR, BIT 26-31
+ * NOT PRESENTLY USED".  IBM bit numbering, so processor p is 0x80000000
+ * >> p and the MSC is the TOP bit of the word.
+ *
+ * This port originally indexed them with register_getbit32/setbit32,
+ * which are 1u << b -- the bottom of the word -- so every access landed
+ * on the wrong processor, and the values handed to and from the CPU by
+ * the READ STATUS / CONFIGURE PROCESSORS commands were bit-reversed with
+ * respect to what the flight software reads and writes.  Use these. */
+#define PROC_MSC      0
+#define PROC_SELFTEST 25
+#define PROC_ALL      0xffffff80u  /* MSC + BCE 1-24 */
+#define PROC_ALL_BCE  0x7fffff80u  /* BCE 1-24, without the MSC */
+
+uint32_t iop_proc_bit(int p);
+uint32_t iop_proc_get(const Register *r, int p);
+void iop_proc_set(Register *r, int p, uint32_t v);
+
 void iop_init(IOP *iop, struct CPU *cpu);
 
 /* Restore the discrete inputs to the crew-panel/vehicle configuration
@@ -241,6 +268,11 @@ BCE *iop_cur_bce(IOP *iop); /* NULL if ls.curPage == 0 (MSC) */
 void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce);
 
 uint32_t iop_msc_ea(IOP *iop, uint32_t disp, bool indexed);
+/* BCE short-format effective address: "PC + DISP", or with M=1
+ * "PC + DISP + 2 x BCENO", where the PC is the UPDATED Bus Control
+ * Element program counter -- the address of the next sequential
+ * instruction.  The displacement is 11-bit two's complement. */
+uint32_t iop_bce_ea(IOP *iop, uint32_t disp, bool m);
 uint32_t iop_msc_long_ea(IOP *iop, uint32_t addr, bool indexed);
 
 uint32_t iop_g_eaf(IOP *iop, uint32_t addr);

@@ -69,6 +69,18 @@ static uint32_t mia_read_back(const Register *reg) {
     return (register_get32(reg) << 1) & MIA_READ_MASK;
 }
 
+uint32_t iop_proc_bit(int p) { return 0x80000000u >> p; }
+
+uint32_t iop_proc_get(const Register *r, int p) {
+    return (register_get32(r) & iop_proc_bit(p)) ? 1u : 0u;
+}
+
+void iop_proc_set(Register *r, int p, uint32_t v) {
+    uint32_t m = iop_proc_bit(p);
+    uint32_t cur = register_get32(r);
+    register_set32(r, v ? (cur | m) : (cur & ~m));
+}
+
 void iop_reset_discrete_inputs(IOP *iop) {
     register_set32(&iop->regDiscreteInA, DISCRETE_IN_A_DEFAULT);
     register_set32(&iop->regDiscreteInB, DISCRETE_IN_B_DEFAULT);
@@ -108,6 +120,11 @@ RegisterFile *iopls_cp(IOPLocalStore *ls) { return &ls->storePage[ls->curPage]; 
 
 Register *iopls_ls(IOPLocalStore *ls, int bank, int word) {
     return registerfile_r(iopls_cp(ls), bank * 4 + word);
+}
+
+Register *iopls_at(IOPLocalStore *ls, int region, int bank, int word) {
+    if (region < 0 || region > 24) return NULL;
+    return registerfile_r(&ls->storePage[region], bank * 4 + word);
 }
 
 Register *iopls_PC(IOPLocalStore *ls) { return iopls_ls(ls, 0, 2); }
@@ -345,12 +362,12 @@ void iop_exec_processors(IOP *iop) {
     if (page == 0) {
         /* regHalt is 1 = Processor Enabled (iop.h), so a CLEAR bit is the
          * halted processor that must not be stepped. */
-        if (!register_getbit32(&iop->regHalt, 0)) return;
-        if (!register_getbit32(&iop->regBusyWait, 0)) return;
+        if (!iop_proc_get(&iop->regHalt, PROC_MSC)) return;
+        if (!iop_proc_get(&iop->regBusyWait, PROC_MSC)) return;
     } else {
         int bceIdx = page;
-        if (!register_getbit32(&iop->regHalt, bceIdx)) return;
-        if (!register_getbit32(&iop->regBusyWait, bceIdx)) return;
+        if (!iop_proc_get(&iop->regHalt, bceIdx)) return;
+        if (!iop_proc_get(&iop->regBusyWait, bceIdx)) return;
     }
 
     /* PC must be read/written via the 32-bit accessor here, matching every
@@ -414,12 +431,25 @@ void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce) {
 
 uint32_t iop_msc_ea(IOP *iop, uint32_t disp, bool indexed) {
     if (disp & 0x400) disp |= 0xfffff800u;
-    uint32_t pc = register_get32(iopls_PC(&iop->ls));
+    /* The displacement is relative to the UPDATED PC -- "the address of
+     * the next sequential instruction", i.e. the halfword after this one,
+     * which is also how model101tables.py describes what the assembler
+     * emits.  Leaving out the +1 put every MSC short-format reference one
+     * halfword early: GPCIPL's own MSC program loads its processor mask
+     * with @L and got the word before it, so @SIO started nothing. */
+    uint32_t pc = (register_get32(iopls_PC(&iop->ls)) + 1u) & 0x3ffff;
     uint32_t ea = (pc + disp) & 0x3ffff;
     if (indexed) {
         uint32_t x = register_get32(iopls_X(&iop->ls));
         ea = (ea + x) & 0x3ffff;
     }
+    return ea;
+}
+
+uint32_t iop_bce_ea(IOP *iop, uint32_t disp, bool m) {
+    if (disp & 0x400) disp |= 0xfffff800u;
+    uint32_t ea = (register_get32(iopls_PC(&iop->ls)) + 1u + disp) & 0x3ffff;
+    if (m) ea = (ea + 2u * (uint32_t)iop->curPE) & 0x3ffff;
     return ea;
 }
 
@@ -449,9 +479,27 @@ void iop_incr_nia(IOP *iop, int incr) {
 uint32_t iop_get_cc_data(IOP *iop) { return register_get32(&iop->regCCData); }
 
 void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
+    /* Control word layout (Sec. 3.3 and Appendix I, "Program Controlled
+     * Inputs and Outputs"), in IBM bit numbers:
+     *
+     *      bit 0      ID -- 0 for an input operation, 1 for an output
+     *      bits 1-5   subsystem select
+     *      bit 6      handshake
+     *      bits 7-16  data select
+     *      bits 17-31 ignored
+     *
+     * A field of width w starting at IBM bit b sits at C shift 32-b-w, so
+     * the subsystem select is >> 26 and the data select >> 15.  Both were
+     * one place low here, which silently mis-decoded every command that is
+     * dispatched on the FIELDS rather than matched whole -- above all the
+     * local store, subsystem 8.  GPCIPL loads each BCE's program counter
+     * through it, one PC per command in a loop; with the wrong shift those
+     * commands decoded to a subsystem that does not exist and fell out the
+     * bottom of the switch, so no BCE ever received a PC and the MSC's own
+     * @SIO then found nothing to start. */
     uint32_t isOutput = cmd >> 31;
-    uint32_t devSelect = (cmd >> 25) & 0x1f;
-    uint32_t dataSelect = (cmd >> 14) & 0x3ff;
+    uint32_t devSelect = (cmd >> 26) & 0x1f;
+    uint32_t dataSelect = (cmd >> 15) & 0x3ff;
 
     register_set32(&iop->regCCData, data);
 
@@ -536,7 +584,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
              * processor bit is set.  STAT5 (the Halt Register) resets to
              * HALT and enabled is 1, so "all halted" is every bit CLEAR
              * -- zero, not a mask. */
-            register_set32(&iop->regProgExcept, 0xffffff80u);
+            register_set32(&iop->regProgExcept, PROC_ALL);
             register_set32(&iop->regBusyWait, 0x00000000u);
             register_set32(&iop->regHalt, 0x00000000u);
             register_set32(&iop->regXmitEna, 0x00000000u);
@@ -617,9 +665,9 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         case 0x92000000: /* RESET STATUS1(GO/NO-GO) */
             return;      /* no-op */
         case 0x92040000: { /* LOAD MSC BUSY */
-            uint32_t r1 = register_get32(&iop->regBusyWait);
-            r1 |= (1u << 0);
-            register_set32(&iop->regBusyWait, r1);
+            /* The MSC's own bit in STAT4 -- the TOP bit of the word,
+             * not the bottom one this used to set. */
+            iop_proc_set(&iop->regBusyWait, PROC_MSC, 1);
             break;
         }
         case 0xc1008000: /* INHIBIT COMPLETION OF A DMA CYCLE */
@@ -682,13 +730,31 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         uint32_t region = dataSelect >> 5;
         uint32_t bank = (dataSelect >> 3) & 0x3;
         uint32_t word = dataSelect & 0x7;
-        (void)region;
 
-        Register *r = iopls_ls(&iop->ls, (int)bank, (int)word);
-        if (isOutput) {
-            register_set32(&iop->regCCData, register_get32(r));
-        } else {
-            register_set32(r, data);
+        /* The REGION names which processor's page this addresses -- the
+         * MSC, BCE 1-24 or the self-test processor.  It used to be
+         * discarded, with the access going to iopls_ls() and so to
+         * whichever page the round-robin scheduler happened to have
+         * selected at that instant; GPCIPL's own setup writes each
+         * processor's program counter through here, so those landed in
+         * arbitrary pages and no processor ever got its PC.
+         *
+         * The direction was inverted too.  Bit 0 of the control word is
+         * "coded as 0" for an input and 1 for an output, and an OUTPUT is
+         * the CPU sending a word to the IOP -- so isOutput WRITES local
+         * store and the input case is the one that reads it back.
+         *
+         * A local store word is 18 bits, held in the low end of the
+         * 32-bit data word; a read returns it with the unused high bits
+         * set, as the hardware presents them. */
+        Register *r = iopls_at(&iop->ls, (int)region, (int)bank, (int)word);
+        if (r != NULL) {
+            if (isOutput) {
+                register_set32(r, data & 0x3ffffu);
+            } else {
+                register_set32(&iop->regCCData,
+                               0xfffc0000u | (register_get32(r) & 0x3ffffu));
+            }
         }
     }
 }

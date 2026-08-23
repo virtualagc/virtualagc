@@ -204,9 +204,9 @@ static void exec_REC(IOP *t, DInstr *v) {
         pe = pe | 1;
         register_set32(&t->regProgExcept, pe);
     } else {
-        uint32_t pe = register_get32(&t->regProgExcept);
-        pe = pe & ~1u;
-        register_set32(&t->regProgExcept, pe);
+        /* MSC to NO-GO: its bit is the top of the word, not the
+         * bottom -- see iop.h's processor-numbering note. */
+        iop_proc_set(&t->regProgExcept, PROC_MSC, 0);
     }
 }
 
@@ -266,13 +266,11 @@ static void exec_LBB(IOP *t, DInstr *v) {
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
     if (bceNum > 0 && bceNum <= 24) {
-        if (register_getbit32(&t->regBusyWait, (int)bceNum) || !register_getbit32(&t->regHalt, (int)bceNum)) {
+        if (iop_proc_get(&t->regBusyWait, (int)bceNum) || !iop_proc_get(&t->regHalt, (int)bceNum)) {
             uint32_t st = register_get32(iopls_MST(&t->ls));
             st = st | (1u << (17 - 13));
             register_set32(iopls_MST(&t->ls), st);
-            uint32_t pe = register_get32(&t->regProgExcept);
-            pe = pe & ~1u;
-            register_set32(&t->regProgExcept, pe);
+            iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
         } else {
             int savedPage = t->ls.curPage;
             t->ls.curPage = (int)bceNum;
@@ -283,9 +281,7 @@ static void exec_LBB(IOP *t, DInstr *v) {
         uint32_t st = register_get32(iopls_MST(&t->ls));
         st = st | (1u << (17 - 13));
         register_set32(iopls_MST(&t->ls), st);
-        uint32_t pe = register_get32(&t->regProgExcept);
-        pe = pe & ~1u;
-        register_set32(&t->regProgExcept, pe);
+        iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
     iop_incr_nia(t, 1);
 }
@@ -297,13 +293,11 @@ static void exec_LBB_at(IOP *t, DInstr *v) {
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
     if (bceNum > 0 && bceNum <= 24) {
-        if (register_getbit32(&t->regBusyWait, (int)bceNum) || !register_getbit32(&t->regHalt, (int)bceNum)) {
+        if (iop_proc_get(&t->regBusyWait, (int)bceNum) || !iop_proc_get(&t->regHalt, (int)bceNum)) {
             uint32_t st = register_get32(iopls_MST(&t->ls));
             st = st | (1u << (17 - 13));
             register_set32(iopls_MST(&t->ls), st);
-            uint32_t pe = register_get32(&t->regProgExcept);
-            pe = pe & ~1u;
-            register_set32(&t->regProgExcept, pe);
+            iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
         } else {
             int savedPage = t->ls.curPage;
             t->ls.curPage = (int)bceNum;
@@ -314,9 +308,7 @@ static void exec_LBB_at(IOP *t, DInstr *v) {
         uint32_t st = register_get32(iopls_MST(&t->ls));
         st = st | (1u << (17 - 13));
         register_set32(iopls_MST(&t->ls), st);
-        uint32_t pe = register_get32(&t->regProgExcept);
-        pe = pe & ~1u;
-        register_set32(&t->regProgExcept, pe);
+        iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
     iop_incr_nia(t, 1);
 }
@@ -326,13 +318,11 @@ static void exec_LBP(IOP *t, DInstr *v) {
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
     if (bceNum > 0 && bceNum <= 24) {
-        if (register_getbit32(&t->regBusyWait, (int)bceNum) || !register_getbit32(&t->regHalt, (int)bceNum)) {
+        if (iop_proc_get(&t->regBusyWait, (int)bceNum) || !iop_proc_get(&t->regHalt, (int)bceNum)) {
             uint32_t st = register_get32(iopls_MST(&t->ls));
             st = st | (1u << (17 - 12));
             register_set32(iopls_MST(&t->ls), st);
-            uint32_t pe = register_get32(&t->regProgExcept);
-            pe = pe & ~1u;
-            register_set32(&t->regProgExcept, pe);
+            iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
         } else {
             int savedPage = t->ls.curPage;
             t->ls.curPage = (int)bceNum;
@@ -343,9 +333,7 @@ static void exec_LBP(IOP *t, DInstr *v) {
         uint32_t st = register_get32(iopls_MST(&t->ls));
         st = st | (1u << (17 - 12));
         register_set32(iopls_MST(&t->ls), st);
-        uint32_t pe = register_get32(&t->regProgExcept);
-        pe = pe & ~1u;
-        register_set32(&t->regProgExcept, pe);
+        iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
     iop_incr_nia(t, 1);
 }
@@ -357,13 +345,11 @@ static void exec_LBP_at(IOP *t, DInstr *v) {
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
     if (bceNum > 0 && bceNum <= 24) {
-        if (register_getbit32(&t->regBusyWait, (int)bceNum) || !register_getbit32(&t->regHalt, (int)bceNum)) {
+        if (iop_proc_get(&t->regBusyWait, (int)bceNum) || !iop_proc_get(&t->regHalt, (int)bceNum)) {
             uint32_t st = register_get32(iopls_MST(&t->ls));
             st = st | (1u << (17 - 12));
             register_set32(iopls_MST(&t->ls), st);
-            uint32_t pe = register_get32(&t->regProgExcept);
-            pe = pe & ~1u;
-            register_set32(&t->regProgExcept, pe);
+            iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
         } else {
             int savedPage = t->ls.curPage;
             t->ls.curPage = (int)bceNum;
@@ -374,9 +360,7 @@ static void exec_LBP_at(IOP *t, DInstr *v) {
         uint32_t st = register_get32(iopls_MST(&t->ls));
         st = st | (1u << (17 - 12));
         register_set32(iopls_MST(&t->ls), st);
-        uint32_t pe = register_get32(&t->regProgExcept);
-        pe = pe & ~1u;
-        register_set32(&t->regProgExcept, pe);
+        iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
     iop_incr_nia(t, 1);
 }
@@ -433,14 +417,12 @@ static void exec_SIO(IOP *t, DInstr *v) {
     (void)v;
     uint32_t acc = iopls_getACC(&t->ls);
     uint32_t bw = register_get32(&t->regBusyWait);
-    uint32_t conflict = acc & bw & 0x01fffffeu;
+    uint32_t conflict = acc & bw & PROC_ALL_BCE;
     if (conflict) {
         uint32_t st = register_get32(iopls_MST(&t->ls));
         st = st | (1u << (17 - 11)) | (1u << (17 - 16));
         register_set32(iopls_MST(&t->ls), st);
-        uint32_t pe = register_get32(&t->regProgExcept);
-        pe = pe & ~1u;
-        register_set32(&t->regProgExcept, pe);
+        iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
     bw = bw | acc;
     register_set32(&t->regBusyWait, bw);
@@ -468,7 +450,7 @@ static void exec_SEC(IOP *t, DInstr *v) {
         uint32_t pc = register_get32(iopls_PC(&t->ls));
         iop_s_eaf(t, ecr + 6, pc + 1);
         uint32_t st = register_get32(iopls_MST(&t->ls));
-        uint32_t peBit = register_getbit32(&t->regProgExcept, 0);
+        uint32_t peBit = iop_proc_get(&t->regProgExcept, PROC_MSC);
         st = st | (peBit << 16);
         iop_s_eaf(t, ecr + 8, st);
         register_set32(iopls_MST(&t->ls), 0);
@@ -481,7 +463,7 @@ static void exec_SEC(IOP *t, DInstr *v) {
 }
 
 static void exec_RBI(IOP *t, DInstr *v) {
-    register_setbit32(&t->regIndicator, (int)df_get(v, 'b'), 0);
+    iop_proc_set(&t->regIndicator, (int)df_get(v, 'b'), 0);
     iop_incr_nia(t, 1);
 }
 
@@ -568,7 +550,7 @@ static void exec_LI(IOP *t, DInstr *v) {
 
 static void exec_RAI(IOP *t, DInstr *v) {
     uint32_t acc = iopls_getACC(&t->ls);
-    uint32_t bceMask = acc & 0x01fffffeu;
+    uint32_t bceMask = acc & PROC_ALL_BCE;
     uint32_t ind = register_get32(&t->regIndicator);
     if ((ind & bceMask) == bceMask) {
         iop_incr_nia(t, 2);
@@ -585,7 +567,7 @@ static void exec_RAI(IOP *t, DInstr *v) {
 static void exec_RAW(IOP *t, DInstr *v) {
     (void)v;
     uint32_t acc = iopls_getACC(&t->ls);
-    uint32_t bceMask = acc & 0x01fffffeu;
+    uint32_t bceMask = acc & PROC_ALL_BCE;
     uint32_t bw = register_get32(&t->regBusyWait);
     if ((bw & bceMask) == 0) iop_incr_nia(t, 2);
     else iop_incr_nia(t, 1);
@@ -594,7 +576,7 @@ static void exec_RAW(IOP *t, DInstr *v) {
 static void exec_RNI(IOP *t, DInstr *v) {
     (void)v;
     uint32_t acc = iopls_getACC(&t->ls);
-    uint32_t bceMask = acc & 0x01fffffeu;
+    uint32_t bceMask = acc & PROC_ALL_BCE;
     uint32_t ind = register_get32(&t->regIndicator);
     if ((ind & bceMask) != 0) iop_incr_nia(t, 2);
     else iop_incr_nia(t, 1);
@@ -603,7 +585,7 @@ static void exec_RNI(IOP *t, DInstr *v) {
 static void exec_RNW(IOP *t, DInstr *v) {
     (void)v;
     uint32_t acc = iopls_getACC(&t->ls);
-    uint32_t bceMask = acc & 0x01fffffeu;
+    uint32_t bceMask = acc & PROC_ALL_BCE;
     uint32_t bw = register_get32(&t->regBusyWait);
     if ((~bw & bceMask) != 0) iop_incr_nia(t, 2);
     else iop_incr_nia(t, 1);
@@ -615,9 +597,7 @@ static void exec_RNW(IOP *t, DInstr *v) {
 
 static void exec_WAT(IOP *t, DInstr *v) {
     (void)v;
-    uint32_t bw = register_get32(&t->regBusyWait);
-    bw = bw & ~1u;
-    register_set32(&t->regBusyWait, bw);
+    iop_proc_set(&t->regBusyWait, PROC_MSC, 0);
     uint32_t st = register_get32(iopls_MST(&t->ls));
     st = st & ~1u;
     register_set32(iopls_MST(&t->ls), st);
