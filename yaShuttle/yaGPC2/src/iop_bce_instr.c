@@ -214,16 +214,11 @@ static void bce_process_mio_command(IOP *t, uint32_t pc) {
 }
 
 static void exec_MOUT(IOP *t, DInstr *v) {
-    /* Only when the receive is STARTING: this instruction re-fetches
-     * itself every slice while it waits, and issuing the companion
-     * command again each time floods the bus.  Measured against the
-     * reference on the display bus: 105,059 poll commands in 100 s
-     * against its 176 in 60 -- about 440 times too many, which starved
-     * the display fills and the clock. */
-    if (iop_bce_receive_starting(t)) {
-        uint32_t pc = register_get32(iopls_PC(&t->ls));
-        bce_process_mio_command(t, pc);
-    }
+    /* Unconditionally, unlike #MIN below: a transmit advances its NIA on
+     * the spot, so it never re-fetches itself and has no receive state to
+     * consult.  The reference guards only #MIN for the same reason. */
+    uint32_t pc = register_get32(iopls_PC(&t->ls));
+    bce_process_mio_command(t, pc);
     uint32_t count = df_get(v, 'c') + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);

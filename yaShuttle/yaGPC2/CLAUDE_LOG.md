@@ -794,3 +794,31 @@ document's planning stages, and it is already in the code as
   the receive's own PC): polls 76,735 -> 110, TIME_FILL 8 -> 22 (gpc 16),
   DISPLAY_FILL 211 (gpc 360).  GPCIPL trace still matches gpc for all 3,987,845
   instructions with no divergence; all suites unchanged.
+
+### [2026-08-23] Target: [problems.md]
+- The bus transport told our own multicast loopback from a peer's traffic by
+  matching bytes, as the reference's `Bus` does.  That cannot work on the
+  display bus: a DEU answers a poll with ONE halfword (0x0009), while a display
+  fill puts 511 halfwords on the bus as 511 separate datagrams, most of them
+  0x0000 and one of them 0x0001.  A short reply is byte-identical to words we
+  ourselves just sent, and the filter consumed it -- measured, 13 of 78 poll
+  replies survived.  `#MIN` at 035a2 then never completed, BCE6
+  error-terminated twice per cycle, and the display got one buffer of seven.
+- Fixed by attributing on identity, not content: a separate transmit socket
+  bound to an ephemeral port, so our own datagrams arrive with a source port
+  nothing else on the host uses.  Measured after: 176 of 176 peer datagrams
+  kept, 144 of 144 of ours dropped, error-terminations 26 -> 0, and the 16-word
+  `#MIN` completes.  The byte-exact list is kept only as a fallback for when
+  the transmit socket cannot be created.
+- `exec_MOUT` had been given `#MIN`'s new receive-starting guard by mistake;
+  the reference guards only `#MIN` (a transmit advances its NIA on the spot and
+  has no receive state).  Reverted.
+- `YAGPC_BUSTRACE` added: one line per received datagram -- bus, ours/peer's,
+  source address:port, leading words.
+- STILL OPEN: against a freshly restarted MEDS the DEU answers with its 16-word
+  poll response (header 0x0000) and our BCE6 sits in a TIME_FILL+POLL loop,
+  never starting the DEU's own IPL fills, so nothing is drawn.  Not yet
+  established whether gpc starts those fills from an equally fresh DEU -- that
+  comparison was invalidated when gpc turned out to have still been running
+  during the first post-fix measurements (`ps -C node` misses it: its process
+  name is `node-MainThread`).

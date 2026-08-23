@@ -52,14 +52,30 @@ static const int BCENET_BUS_PORT[BCENET_MAX_BUS_ID + 1] = {
 /* Multicast loopback is ON (the reference's Bus turns it on too), so
  * every datagram this process sends comes straight back to its own
  * socket -- and for a shuttle bus it carries the very IUA byte the
- * receive filter accepts.  Without this filter a transmission is read
- * back as if it were the peripheral's reply, which desynchronises the
- * bus program by one word and every transaction after it.  The
- * reference keeps the same list and the same bound.
+ * receive filter accepts.  Read back as a peripheral's reply, it
+ * desynchronises the bus program by one word and every transaction
+ * after it, so our own copies have to be told apart from a peer's.
  *
- * Matching is byte-exact and CONSUMING: the first identical copy is
- * removed, so a peer that genuinely echoes the same bytes back is still
- * heard on the second occurrence. */
+ * They are told apart by WHO SENT THEM, not by what they contain:
+ * sending from a separate socket on an ephemeral port makes every
+ * datagram of ours arrive with that port as its source, which nothing
+ * else on the host can be using.  Attribution is then exact.
+ *
+ * The reference instead matches the bytes, and this did too until the
+ * DK bus showed why that cannot work here.  A display unit answers a
+ * poll with ONE halfword -- 0x0009 -- while a display fill puts 511
+ * halfwords on the bus as 511 separate datagrams, most of them 0x0000
+ * and one of them, in the time fill, 0x0001.  A one-word reply is
+ * therefore byte-identical to words we ourselves just sent, and the
+ * filter ate it: measured over one run, 13 of 78 poll replies survived.
+ * The receive at 035a2 then never completed, the BCE error-terminated
+ * every cycle, and the display got one buffer of seven.  The bytes
+ * simply do not carry enough information to attribute a short reply;
+ * the source port does.
+ *
+ * The byte-exact list below is KEPT as a fallback for the case where
+ * the transmit socket could not be created, where sends fall back to
+ * the receive socket and our copies do come back on the bus port. */
 #define SELF_ECHO_MAX 1024
 
 typedef struct {
@@ -69,7 +85,9 @@ typedef struct {
 
 typedef struct {
     int busID;
-    int fd; /* -1 = closed */
+    int fd;     /* receive socket, bound to the bus port; -1 = closed */
+    int txFd;   /* transmit socket, bound to an EPHEMERAL port; -1 = none */
+    uint16_t txPort;   /* the port the kernel gave txFd, in host order */
     SelfEchoEntry selfEcho[SELF_ECHO_MAX];
     int selfEchoCount;
 } BceNetBusSocket;
@@ -118,6 +136,8 @@ BceNetTransport *bcenet_transport_create(void) {
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
         t->buses[i].busID = i;
         t->buses[i].fd = -1;
+        t->buses[i].txFd = -1;
+        t->buses[i].txPort = 0;
         t->buses[i].selfEchoCount = 0;
     }
     return t;
@@ -128,6 +148,7 @@ void bcenet_transport_free(BceNetTransport *t) {
 #ifdef BCENET_HAVE_POSIX_SOCKETS
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
         if (t->buses[i].fd >= 0) close(t->buses[i].fd);
+        if (t->buses[i].txFd >= 0) close(t->buses[i].txFd);
         self_echo_clear(&t->buses[i]);
     }
 #endif
@@ -234,6 +255,42 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID) {
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
     b->fd = fd;
+
+    /* A SEPARATE socket for transmitting, bound to an ephemeral port.
+     * Its only purpose is to give our own datagrams a return address no
+     * other process on this host shares, so the loopback copies can be
+     * dropped on identity rather than on content -- see the self-echo
+     * comment above.  The destination is unchanged, so peers receive
+     * exactly what they did before; only the source port differs, and
+     * nothing in the protocol looks at it.
+     *
+     * Not fatal if it fails: sends fall back to the receive socket and
+     * the byte-exact filter, which is what this did before. */
+    b->txFd = -1;
+    b->txPort = 0;
+    int txFd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (txFd >= 0) {
+        struct sockaddr_in txAddr = {0};
+        txAddr.sin_family = AF_INET;
+        txAddr.sin_addr.s_addr = iface.s_addr;
+        txAddr.sin_port = htons(0);   /* let the kernel choose */
+        if (bind(txFd, (struct sockaddr *)&txAddr, sizeof txAddr) == 0) {
+            struct sockaddr_in bound = {0};
+            socklen_t boundLen = sizeof bound;
+            if (getsockname(txFd, (struct sockaddr *)&bound, &boundLen) == 0) {
+                setsockopt(txFd, IPPROTO_IP, IP_MULTICAST_IF, &iface, sizeof iface);
+                setsockopt(txFd, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof loop);
+                setsockopt(txFd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof ttl);
+                b->txFd = txFd;
+                b->txPort = ntohs(bound.sin_port);
+            }
+        }
+        if (b->txFd < 0) close(txFd);
+    }
+    if (b->txFd < 0) {
+        fprintf(stderr, "bcenet: bus %d: no separate transmit socket; "
+                        "falling back to byte-exact self-echo filtering\n", busID);
+    }
     return true;
 #endif
 }
@@ -273,8 +330,11 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
         buf[headerLen + i * 2 + 1] = (unsigned char)(w & 0xff);
     }
     struct sockaddr_in dest = bcenet_group_addr(BCENET_BUS_PORT[busID]);
-    self_echo_note_sent(b, buf, len);
-    ssize_t sent = sendto(b->fd, buf, len, 0, (struct sockaddr *)&dest, sizeof dest);
+    /* Only the fallback path needs the byte-exact record: when we have a
+     * transmit socket, the loopback copy is identified by its port. */
+    int sendFd = (b->txFd >= 0) ? b->txFd : b->fd;
+    if (b->txFd < 0) self_echo_note_sent(b, buf, len);
+    ssize_t sent = sendto(sendFd, buf, len, 0, (struct sockaddr *)&dest, sizeof dest);
     free(buf);
     if (sent < 0 || (size_t)sent != len) {
         fprintf(stderr, "bcenet: bus %d: sendto failed: %s\n", busID, strerror(errno));
@@ -303,14 +363,32 @@ bool bcenet_transport_recv(BceNetTransport *t, int busID, int iua, bool isShuttl
      * see bcenet_framer.h's own updated comment). Matches
      * FRAMER_MAX_WORDS in bcenet_framer.c. */
     unsigned char buf[2 + 1024 * 2];
-    ssize_t n = recv(b->fd, buf, sizeof buf, 0);
+    struct sockaddr_in from;
+    socklen_t fromLen = sizeof from;
+    ssize_t n = recvfrom(b->fd, buf, sizeof buf, 0, (struct sockaddr *)&from, &fromLen);
     if (n < 0) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             fprintf(stderr, "bcenet: bus %d: recv failed: %s\n", busID, strerror(errno));
         }
         return false;
     }
-    if (self_echo_is_ours(b, buf, (size_t)n)) return false;
+    /* Ours if it came from our own transmit socket -- exact, and it
+     * cannot mistake a peripheral's one-word reply for our own data. */
+    bool mine = (b->txFd >= 0 && ntohs(from.sin_port) == b->txPort);
+    if (!mine && b->txFd < 0) mine = self_echo_is_ours(b, buf, (size_t)n);
+    /* One line per datagram, env-gated: which bus, whose it was, and the
+     * leading words.  This is how the self-echo filter was caught eating
+     * the display unit's poll replies, and the same view is what any
+     * future "the peripheral never answered" question needs. */
+    if (getenv("YAGPC_BUSTRACE")) {
+        fprintf(stderr, "BUSRX bus%-3d %s from %s:%-5u  %2zd bytes ",
+                busID, mine ? "ECHO" : "KEEP", inet_ntoa(from.sin_addr),
+                (unsigned)ntohs(from.sin_port), n);
+        for (ssize_t i = 0; i + 1 < n && i < 12; i += 2)
+            fprintf(stderr, "%02x%02x ", buf[i], buf[i + 1]);
+        fprintf(stderr, "\n");
+    }
+    if (mine) return false;
     size_t headerLen = isShuttleBus ? 2 : 0;
     if ((size_t)n < headerLen) return false;
     if (isShuttleBus && buf[0] != (unsigned char)iua) {
