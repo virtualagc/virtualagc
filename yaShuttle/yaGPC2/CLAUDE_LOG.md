@@ -413,3 +413,26 @@ document's planning stages, and it is already in the code as
   counting down at step ~37,985), but a later pass shows R3 negative and
   decrementing, which cannot terminate.  Running long to see whether the
   walk completes or wedges.
+
+### [2026-08-23] Target: [ASM101S/ASM101Sa-notes.md]
+- DON FIXED THE SAME ASSEMBLER BUG INDEPENDENTLY.  nsts-sdl-dps
+  2228e1e "asm101: SRS/USING addressing, IOP encodings, and
+  section-correct relocation" -- which we had NOT cherry-picked -- makes
+  `B 1(2)` assemble to `C7F2 0001`, byte-identical to ASM101S.py's own
+  output, where the older asm101 emitted the one-halfword `DF04`.  The
+  fix appears to fall out of his SRS form-selection work rather than
+  being aimed at this idiom.
+- REBUILT PROPERLY.  Cherry-picked 2228e1e onto con80build-pch-extension-v2
+  and re-ran `con80build --phase 10 --assemble --link`; both BUMPWRDN
+  dispatch targets now hold C7F2 in the composed image.  The hand-placed
+  ASM101S object is no longer needed -- con80build produces a correct
+  BILDNEW5 on its own, so the fragile swap is retired.
+- AND OUR IMAGE NOW MATCHES DON'S BIT FOR BIT IN BEHAVIOUR.  yaGPC2 runs
+  our rebuilt PHASE10 and his IPL.fcm to the same 21,883 instructions
+  with ZERO divergences and zero phase slips, ending in the same wait at
+  01df8 with identical registers.  Our build pipeline is validated
+  against a build he confirms boots.
+- STILL EXCLUDED: 002c521 (con80build parallel builds).  Master's
+  halsc.in still has no --templib-out while con80build.py still passes
+  it, so that mismatch is unfixed upstream and the commit remains
+  unusable.
