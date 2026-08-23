@@ -148,22 +148,29 @@ static const TimingEntry TIMING_TABLE[] = {
  * transcription of the same table; they agree except where noted in the
  * per-entry comments.
  *
- * TWO GREPPABLE MARKERS APPEAR BELOW, both meaning "a human still needs
- * to look at the printed document"; an unmarked row was read cleanly and
- * needs nothing.
+ * EVERY FIGURE BELOW HAS BEEN READ FROM THE PRINTED DOCUMENT.  Three
+ * pages of this table reached us as OCR bad enough to lose figures and,
+ * on p.17-4, the whole INSTRUCTION column; those were resolved by a human
+ * reading the printed pages, so nothing here rests on OCR guesswork or on
+ * gpc's transcription.  Four things are still inference rather than
+ * reading, each marked at its own entry:
  *
- *   PROVISIONAL:   the figure itself could not be read.  The OCR text is
- *                  destroyed or the row is missing outright, and the
- *                  value here is a stand-in.
- *   RECONSTRUCTED: the figure was read cleanly, but the OCR dropped the
- *                  INSTRUCTION column from the last pages of the table,
- *                  so which mnemonic the row belongs to was recovered
- *                  from the table's alphabetical order rather than read.
- *                  Corroborated -- every row on those pages that also
- *                  appears in the PASS2 table above carries the matching
- *                  time (OST .750, SVC 20.25, SRET 17.50, TS 3.75, ...),
- *                  and gpc independently assigns the same mnemonics --
- *                  but not directly attested.
+ *   - SSM's four middle columns, printed to two decimals, read as the
+ *     .125 multiples they round to.
+ *   - ISPB's M1 = 4, which the original document simply does not list.
+ *   - DIAG, ICR and PC, where the manual gives a phrase or a range
+ *     instead of a number.
+ *   - SUM and LXA/LXAR's early-out cases, which are runtime-dependent
+ *     and modelled at their worst case.
+ *
+ * A NOTE ON THE RR FORMS.  This table prints the BASE mnemonic and lets
+ * the form column separate the variants, so p.17-3 carries two rows both
+ * labelled LXA -- one RR, one RS -- and p.17-4 two both labelled STXA.
+ * The assembler spells the RR forms differently: section 10 lists one
+ * entry "Load Extended Address LXA RR,RS" whose RR form is written
+ * LXAR R1,R2 and whose RS form is LXA R1,D2(B2), and model101tables.py
+ * gives them distinct opcodes.  So the LXA/STXA RR rows are this port's
+ * LXAR/STXAR, and are keyed that way below; they were not misread.
  * ------------------------------------------------------------------- */
 
 #define NA (-1.0)
@@ -187,32 +194,36 @@ static const PooTimingEntry POO_TIMING_TABLE[] = {
     {"LPS",   {10.25,13.25, 14.25, 13.0,  14.25, 15.5,  17.25}}, /* p.17-3 L13613 */
     {"LXA",   {3.5,  6.5,   6.25,  6.25,  6.25,  6.5,   5.25}}, /* p.17-3 L13616 (RS); -1.25 early out not modelled */
     {"LXAR",  {3.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-3 L13615 (RR); -1.25 early out not modelled */
-    {"STDM",  {2.25, 5.25,  6.75,  5.0,   5.25,  7.0,   7.5}},  /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13715 */
-    {"STXA",  {2.5,  6.5,   8.0,   6.25,  8.0,   8.25,  8.75}}, /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13726 */
-    {"STXAR", {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13724-25 */
-    {"XUL",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13759-60 */
+    {"STDM",  {2.25, 5.25,  6.75,  5.0,   5.25,  7.0,   7.5}},  /* p.17-4 L13715 */
+    {"STXA",  {2.5,  6.5,   8.0,   6.25,  8.0,   8.25,  8.75}}, /* STXA RS; p.17-4 L13726 */
+    {"STXAR", {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* the STXA RR row; p.17-4 L13724-25 */
+    {"XUL",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-4 L13759-60 */
 
-    /* PROVISIONAL: SSM normal-addressing figure, line 13709 -- and
-     * RECONSTRUCTED: mnemonic from alphabetical position on the same
-     * line.  Pending a human read of the printed manual.  SSM's
-     * normal-mode figure is the one number on these pages the OCR lost
-     * outright -- printed page 17-4 (L13709) renders it "704".  7.75 is gpc's reading and
-     * the only multiple of .125 that fits, every other figure in the row
-     * being one (the manual prints those rounded to two decimals,
-     * 10.63/11.63/10.38, for 10.625/11.625/10.375, which is what is used
-     * here).  The columns are certain; only the first figure is not. */
+    /* CONFIRMED against the printed page: "SSM RS 7.75 10.63 11.63 10.38
+     * 11.63 12.875 14.625" (p.17-4 L13709).  The OCR had destroyed the
+     * normal-addressing figure, rendering it "704"; 7.75 is what the page
+     * actually says.
+     *
+     * The four middle columns are printed to two decimals where the last
+     * two are printed to three, so 10.63/11.63/10.38 are read here as
+     * 10.625/11.625/10.375 -- the table's figures are multiples of .125
+     * throughout, and no two-decimal value in it is exact.  That reading
+     * is inference, not what is printed; the difference is 5 ns. */
     {"SSM",   {7.75, 10.625, 11.625, 10.375, 11.625, 12.875, 14.625}},
 
     /* Parametric and non-numeric rows.  t[0] is the base; see
      * instr_time_us() for the per-instruction arithmetic. */
-    /* PROVISIONAL: ISPB M1 = 4 only -- that row is absent from the text
-     * (page break between printed pages 17-2 and 17-3); M1 = 0-3
-     * (5.625, p.17-2 L13578-81) and M1 = 5-7 (.125, p.17-3 L13592-94)
-     * are read directly.  See the M1 cutoff in instr_time_us(). */
+    /* ISPB is listed one row per M1 value: M1 = 0-3 at 5.625 (p.17-2
+     * L13578-81) and M1 = 5-7 at .125 (p.17-3 L13592-94).  THERE IS NO
+     * M1 = 4 ROW -- confirmed by reading the printed pages, so this is an
+     * omission in the original document rather than something the OCR or
+     * the page break lost.  M1 = 4 is grouped with 5-7 here, following
+     * the shape of the two attested groups; the manual does not say.
+     * See the M1 cutoff in instr_time_us(). */
     {"ISPB",  {5.625, 8.0,  9.0,   7.75,  9.0,   10.25, 12.0}}, /* M1 >= 4: 0.125 */
     {"NCT",   {1.05, NA,    NA,    NA,    NA,    NA,    NA}},   /* + .075 * N; p.17-3 L13644 */
-    {"SRDR",  {2.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* + .5 * N (N mod 32); RECONSTRUCTED: mnemonic; p.17-4 L13700,13702 */
-    {"SUM",   {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* * elements tested; RECONSTRUCTED: mnemonic; p.17-4 L13727-28 */
+    {"SRDR",  {2.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* + .5 * N (N mod 32); p.17-4 L13700,13702 */
+    {"SUM",   {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* * elements tested; p.17-4 L13727-28 */
 
     /* The manual gives no single number for these three.  Each value is a
      * representative stand-in, chosen so the instruction costs SOMETHING
@@ -223,7 +234,7 @@ static const PooTimingEntry POO_TIMING_TABLE[] = {
      *        4.5 is the low end of it, the no-DMA typical case */
     {"DIAG",  {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13571 */
     {"ICR",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13576 */
-    {"PC",    {4.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13668 */
+    {"PC",    {4.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-4 L13668 */
 };
 #define POO_TIMING_COUNT (sizeof(POO_TIMING_TABLE) / sizeof(POO_TIMING_TABLE[0]))
 
@@ -342,13 +353,12 @@ double instr_time_us(const InstrDesc *desc, const DInstr *v, uint32_t preN, bool
         if (t < 0.0) t = p->t[0];
 
         /* ISPB: the manual tabulates it per M1, 5.625 for M1 = 0-3 and
-         * .125 for M1 = 5-7.  The M1 = 4 row fell in the page break
-         * between printed pages 17-2 and 17-3 and is not in the text at
-         * all, so the cutoff below is PROVISIONAL: it follows gpc,
-         * which takes the
-         * .125 branch for the whole illegal-M1 group (100-111, i.e.
-         * M1 >= 4).  Only M1 = 4 is in doubt; 0-3 and 5-7 are read
-         * directly from the table. */
+         * .125 for M1 = 5-7.  It has NO M1 = 4 row -- an omission in the
+         * original document, confirmed by reading the printed pages, not
+         * something lost in the page break between 17-2 and 17-3 or by
+         * the OCR.  M1 = 4 therefore has no attested time; the cutoff
+         * below groups it with 5-7, as gpc does for the whole illegal-M1
+         * group (100-111).  Everything else here is read directly. */
         if (strcmp(nm, "ISPB") == 0 && df_get(v, 'x') >= 4) return 0.125;
 
         /* Parametric rows. */
