@@ -1064,3 +1064,28 @@ document's planning stages, and it is already in the code as
 - No regressions: all suites unchanged, GPCIPL matches for all 3,987,845 traced
   instructions, and the mass memory load still completes end to end (POSITION
   4/4/2, EXTENDED_BLOCK, READ 17 blocks from 4/4/3/8, read done 4/4/4).
+
+### [2026-08-23] Target: [problems.md]
+- Added a simulated timestamp to YAGPC_IOPTRACE lines, so our IOP trace is
+  directly comparable with the reference's (which has always been timestamped).
+  That immediately localized the slow display.
+- WHERE THE CYCLE TIME GOES.  One BCE6 cycle against MEDS:
+      03572 #MOUT       16 us
+      03576 #DLYI    10.75 ms   (x650 -- a real programmed delay)
+      03577 #WAT        82 us
+      035a0/035a1       35 us
+      035a2 #MIN      6.2 ms    (the poll receive)
+      035a6 #WAT    462-503 ms  <-- the whole cycle
+  The reference re-dispatches that same `+35a6 #WAT` in ~116 us.  Ours parks
+  for ~480 ms, so our display cycle is ~40x the reference's, which is the
+  slow clock the user sees.
+- AND THE IOP IS ENTIRELY DORMANT for it: during one 480 ms park the MSC
+  executed 171 instructions and the BCEs 2, with all 171 falling inside the
+  LAST 347 us.  So nothing is spinning or waiting on a bus -- the IOP simply is
+  not being run, then bursts into life for ~350 us and dispatches BCE6.  The
+  question is what wakes it, and why that happens roughly twice a second for us
+  and continuously for the reference.  This is CPU-side, not transport.
+- Note for whoever picks this up: ACC at the 032a2 branch was 0x00009c20 in
+  this run (branch NOT taken), where an earlier run had 0x00000000 in all 147
+  samples (branch taken).  That branch reads halfword 0x34E6 and its value is
+  phase-dependent, so do not treat either reading as the settled answer.

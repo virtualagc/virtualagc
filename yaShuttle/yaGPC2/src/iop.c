@@ -668,7 +668,8 @@ void iop_exec_processors(IOP *iop) {
         char who[8];
         if (page == 0) snprintf(who, sizeof who, "MSC");
         else snprintf(who, sizeof who, "BCE%d", page);
-        fprintf(stderr, "IOPT %-6s %05x  %04x %04x  A=%08x BST=%08x\n",
+        fprintf(stderr, "%12.1f us IOPT %-6s %05x  %04x %04x  A=%08x BST=%08x\n",
+                (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0,
                 who, (unsigned)pc, (unsigned)hw1, (unsigned)hw2,
                 (unsigned)iopls_getACC(&iop->ls), (unsigned)iopls_getBST(&iop->ls));
     }
