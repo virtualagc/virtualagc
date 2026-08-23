@@ -399,9 +399,21 @@ static void exec_TD(CPU *t, DInstr *v) {
  * ------------------------------------------------------------------- */
 
 static void exec_BALR(CPU *t, DInstr *v) {
+    /* "First, the branch address is computed.  Then, the first word of
+     * the current PSW (bits 0 - 31) is loaded into general register R1."
+     * That order is the whole instruction when R1 and R2 are the SAME
+     * register: storing the link first overwrites the target with it, so
+     * the branch goes to the return address and the call falls through.
+     * GPCIPL does exactly that -- `LH 7,X'1c36'` then `BALR 7,7` -- so
+     * its call never happened and MOVENV ran with a junk R7, looping on
+     * its own return path forever. */
+    bool taken = df_get(v, 'y') != 0;
+    uint32_t branch = 0;
+    if (taken) {
+        branch = cpu_g_expand(t, register_get32(R(t, v, 'y')) >> 16, OPTYPE_BRCH);
+    }
     register_set32(R(t, v, 'x'), register_get32(&t->psw.psw1));
-    if (df_get(v, 'y') != 0) {
-        uint32_t branch = cpu_g_expand(t, register_get32(R(t, v, 'y')) >> 16, OPTYPE_BRCH);
+    if (taken) {
         psw_set_nia(&t->psw, branch);
     }
 }
