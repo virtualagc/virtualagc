@@ -322,6 +322,10 @@ static void exec_LBB(IOP *t, DInstr *v) {
             t->ls.curPage = (int)bceNum;
             register_set32(iopls_BASE(&t->ls), ea & 0x3ffffu);
             t->ls.curPage = savedPage;
+            if (getenv("YAGPC_DISPTRACE"))
+                fprintf(stderr, "DISP @LBB  bce%-3u base<-%05x X=%04x\n", (unsigned)bceNum,
+                        (unsigned)(ea & 0x3ffffu),
+                        (unsigned)register_get32(iopls_X(&t->ls)));
         }
     } else {
         uint32_t st = register_get32(iopls_MST(&t->ls));
@@ -349,6 +353,9 @@ static void exec_LBB_at(IOP *t, DInstr *v) {
             t->ls.curPage = (int)bceNum;
             register_set32(iopls_BASE(&t->ls), ea);
             t->ls.curPage = savedPage;
+            if (getenv("YAGPC_DISPTRACE"))
+                fprintf(stderr, "DISP @LBB@ bce%-3u base<-%05x X=%04x\n", (unsigned)bceNum,
+                        (unsigned)ea, (unsigned)register_get32(iopls_X(&t->ls)));
         }
     } else {
         uint32_t st = register_get32(iopls_MST(&t->ls));
@@ -378,6 +385,10 @@ static void exec_LBP(IOP *t, DInstr *v) {
             t->ls.curPage = (int)bceNum;
             register_set32(iopls_PC(&t->ls), ea & 0x3ffffu);
             t->ls.curPage = savedPage;
+            if (getenv("YAGPC_DISPTRACE"))
+                fprintf(stderr, "DISP @LBP  bce%-3u pc<-%05x  X=%04x\n", (unsigned)bceNum,
+                        (unsigned)(ea & 0x3ffffu),
+                        (unsigned)register_get32(iopls_X(&t->ls)));
         }
     } else {
         uint32_t st = register_get32(iopls_MST(&t->ls));
@@ -405,6 +416,9 @@ static void exec_LBP_at(IOP *t, DInstr *v) {
             t->ls.curPage = (int)bceNum;
             register_set32(iopls_PC(&t->ls), ea);
             t->ls.curPage = savedPage;
+            if (getenv("YAGPC_DISPTRACE"))
+                fprintf(stderr, "DISP @LBP@ bce%-3u pc<-%05x  X=%04x\n", (unsigned)bceNum,
+                        (unsigned)ea, (unsigned)register_get32(iopls_X(&t->ls)));
         }
     } else {
         uint32_t st = register_get32(iopls_MST(&t->ls));

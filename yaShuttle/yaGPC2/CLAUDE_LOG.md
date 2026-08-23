@@ -857,3 +857,27 @@ document's planning stages, and it is already in the code as
   is `node-MainThread`.  Two measurements this session were silently taken with
   a second emulator on the buses because of it.  Enumerate /proc/*/cmdline
   instead, and skip $$ or a pattern matches the checking shell itself.
+
+### [2026-08-23] Target: [problems.md]
+- Traced the missing display fills to a single CPU-side value.  BCE6's program
+  is chosen by the MSC at 0327c, `@LBP@ X'0',X'354C',X`, which is INDIRECT:
+  PC <- memory[0x354C + X].  The table in the IPL image is a list of BCE6 entry
+  points -- X=0 -> 03572, 2 -> 03578, 4 -> 03584, 6 -> 035a0, 8 -> 0358a,
+  10 -> 03592 -- and 03572/03578/03584 are the display fills.
+- X comes from `@XAX` at 03279 fed by `@LH X'3622'` at 03276, so halfword
+  0x3622 is the program selector.  In our run it only ever holds 0x0000 or
+  0x000a, written by `STH 4,X'3622'` at NIA=0x020cf and cleared by an IOP DMA
+  write.  Zero means "nothing to do" (the `@BC X'4',X'7'` at 03278 branches
+  past the dispatch), so index 10 (03592, the TIME_FILL+POLL program) is the
+  only one we EVER run -- 171 of 171 dispatches.  That is precisely why no
+  DISPLAY_FILL is sent and why the cycle is half the reference's length.
+  Next: why GPCIPL computes 10 rather than 0/2/4, at NIA=0x020cf (the stored
+  value is R4, which the watch line does not print).
+- Two dead leads, both recorded so they are not re-walked:
+  * `@XAX`/X is NOT wrong.  Our exec_XAX is identical to the reference's, and
+    the reference's own trace prints X as `r16(0,3)`, which returns the HIGH 16
+    bits -- its `X=0000` is consistent with X actually being 0x0a, same as ours.
+  * The dispatch table is static.  Nothing writes 0x354C..0x3556 in either
+    emulator; the varying entry points come from the selector, not the table.
+- `--watch` verified working before trusting an empty result: 1,727 hits on a
+  control location (0x00B0) in the same run that reported none on 0x3556.
