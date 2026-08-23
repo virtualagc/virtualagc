@@ -1158,3 +1158,23 @@ document's planning stages, and it is already in the code as
   0/2/4 through the load?  That single value explains the wrong screen
   contents, the 8-halfword fills the reference never sends, and the unit never
   reporting itself initialized.
+
+### [2026-08-23] Target: [problems.md]
+- Disassembled the selector's writers, which corrects the model above.  The CPU
+  touches halfword 0x3622 in exactly TWO places in the whole image:
+      0020cd: LHI  4,X'000a'      <- a LITERAL 10, not a computed value
+      0020cf: STH  4,X'3622'
+      00210e: SHW  X'3622'        <- sets it to all-ones (the 0xffff observed)
+  So "why does the CPU compute 10" was the wrong question: on that path it is
+  hard-coded, and no CPU code anywhere writes 0, 2, 4 or 6.
+- The walk is MSC-driven.  The MSC writes 0x3622 itself at 032f2, 03358 and
+  0336e (all `@STH X'3622'`), and 032f2 sits inside the 032f0..0330a block --
+  which is exactly where the MSC lands when the branch at 032a2 IS taken
+  (selector == 0, "nothing pending").  We do execute that block.
+- So the live question is now: of the values our MSC writes there, we see
+  0x0000, 0x0006, 0x000a and 0xffff, but never 0x0002 or 0x0004 -- the indices
+  that select the IPL-block programs at 03578 and 03584.  Whatever the MSC
+  reduces to those two indices in the reference is what to chase next.
+- Useful addresses gathered along the way: 0x3621/0x3623/0x3624/0x3626 are all
+  written or read by the same MSC region; 0x361F feeds the `@LH X'361F'` just
+  before the dispatch and is loaded from 0x3BA1 by the CPU at 0020d1.
