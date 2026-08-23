@@ -1132,3 +1132,29 @@ document's planning stages, and it is already in the code as
 - NEXT: why BCE6 almost never reaches 03584, which is where `5718fc` (count
   252 = the 250-halfword LAST_FILL + 2 header words) is issued.  It was seen
   exactly once during the batching experiment, so the path is reachable.
+
+### [2026-08-23] Target: [problems.md]
+- THE DISPLAY DEFECT, now traced end to end.  The display unit asks to be
+  IPLed (poll header bit HDR.IPL_REQUIRED = 0x0001, set while `not @ipled`),
+  and we DO react -- 0x0f49 is DEU.CONTROL_PROGRAM, "where the DEU's own IPL
+  load starts", and the unit logs "load started" for us.  But we then re-send
+  that FIRST BLOCK forever.  The reference walks the whole image --
+  0xf49, 0x1146, 0x1343, 0x1540, 0x173d, 0x193a -- and finishes with the
+  250-halfword fill at 0x2, at which point the unit reports itself initialized.
+- The block's source address is the BCE's BASE, loaded by the MSC's
+  `@LBB@ X'0',X'3526',X` (indirect: BASE <- memory[0x3526 + X]).  The reference
+  uses seven different BASEs 0x200 apart (0b302, 0b502, 0b702, 0b902, 0bb02,
+  0bd02, 0bf02); ours is 020ee on all 171 dispatches.  Halfword 0x3530 -- the
+  slot X=0x0a selects -- is NEVER WRITTEN, so the address is not being advanced
+  in place; the walk must come from varying X.
+- X comes from `@XAX` at 03279 fed by `@LH X'3622'`, so 0x3622 is the program
+  selector, written by the CPU at NIA=0x020cf (`STH 4,X'3622'`, the value in
+  R4).  Correction to an earlier entry: it takes MORE than 0x0000/0x000a -- a
+  longer sample shows 0x0000, 0x000a, 0x0006 and 0xffff.  But every dispatch
+  observed used 0x0a, the steady-state display program, where the IPL blocks
+  need 0/2/4.
+- SO THE QUESTION IS CPU-SIDE AND SPECIFIC: why does GPCIPL compute selector 10
+  at 0x020cf while the unit is still requesting an IPL, instead of stepping
+  0/2/4 through the load?  That single value explains the wrong screen
+  contents, the 8-halfword fills the reference never sends, and the unit never
+  reporting itself initialized.
