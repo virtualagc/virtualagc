@@ -206,8 +206,16 @@ static void exec_TDL(IOP *t, DInstr *v) {
  * mnemonics are indistinguishable at the bit level and only ever meant
  * to be decoded in the context of their parent instruction. */
 static void bce_process_mio_command(IOP *t, uint32_t pc) {
-    if (!iop_proc_get(&t->regXmitEna, t->curPE)) return;
+    if (!iop_proc_get(&t->regXmitEna, t->curPE)) {
+        if (getenv("YAGPC_DISPTRACE"))
+            fprintf(stderr, "MIOCMD proc%-3d pc=%05x GATED (xmit disabled)\n",
+                    t->curPE, (unsigned)pc);
+        return;
+    }
     uint32_t cmdWord = iop_g_eaf(t, pc + 2) & 0x00ffffffu;
+    if (getenv("YAGPC_DISPTRACE"))
+        fprintf(stderr, "MIOCMD proc%-3d pc=%05x cmd=%06x\n",
+                t->curPE, (unsigned)pc, (unsigned)cmdWord);
     register_set32(iopls_IUAR(&t->ls), (cmdWord >> 19) & 0x1fu);
     BCE *bce = iop_cur_bce(t);
     if (bce) mia_xmit_cmd(t, &bce->mia, cmdWord);

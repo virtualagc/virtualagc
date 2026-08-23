@@ -904,3 +904,32 @@ document's planning stages, and it is already in the code as
   fill a different buffer (509 halfwords at 0xf49 vs 196 at 0x19ee), and we
   never send BITE.  Neither emulator sends the 250-halfword LAST_FILL that would
   complete the DEU's own IPL.
+
+### [2026-08-23] Target: [problems.md]
+- ROOT CAUSE of the display-bus failures: we OVERFLOW the peer's UDP receive
+  buffer.  Measured over the same 45 s window against a freshly restarted MEDS:
+      gpc  : 0 datagrams dropped on the DK1 port
+      ours : 7,823 dropped
+  /proc/net/udp shows the drops on BOTH sockets bound to 6906 (ours ~11k,
+  MEDS's ~15k) and ZERO on every other bus port (6918, 6920-6923).
+- The mechanism, traced end to end.  Per BCE6 cycle we ISSUE five companion
+  commands but only three reach the wire:
+      03572 5719ff issued 81, sent 81   03592 570007 issued 79, sent 79
+      03578 571808 issued 78, sent  0   0359a 502000 issued 79, sent 79
+      035a2 502000 issued 81, sent  0
+  `bce_process_mio_command` is called and NOT gated for all five (the
+  transmit-enable gate was checked and is innocent), and `sendto` never reports
+  an error -- the datagrams are dropped in transit.  MEDS therefore never sees
+  the 035a2 poll, so that receive always times out (0 of 83 reach 035a6 where
+  the reference reaches it 673 times), and never sees the 571808 fill.
+- Why ours overflows and the reference does not: a transmit burst is emitted as
+  ONE DATAGRAM PER WORD with nothing between them.  `iop_exec_dma_queue`
+  recurses through the whole queue in a single call (dmaBurst, on by default),
+  so a 511-word #MOUT fires 511 synchronous sendto()s microseconds apart.  The
+  reference's execDMAQueue is structurally identical and also bursts, but its
+  fill is 196 words where ours is 511 -- and a default receive buffer holds
+  roughly 276 of these tiny datagrams, so its burst fits and ours does not.
+  The real MIA bus is ~1 Mbps, ~16 us per halfword, so a 511-word fill should
+  occupy ~8 ms rather than microseconds.  Pacing the DMA drain to the bus word
+  rate is the faithful fix; it needs care because it also paces the mass-memory
+  path (which currently drops nothing).
