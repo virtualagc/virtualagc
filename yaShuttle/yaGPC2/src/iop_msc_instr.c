@@ -363,7 +363,19 @@ static void exec_LBB_at(IOP *t, DInstr *v) {
         register_set32(iopls_MST(&t->ls), st);
         iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
-    iop_incr_nia(t, 1);
+    /* TWO halfwords, like every other long-format MSC instruction:
+     * the descriptor is a 32-bit pattern
+     * (1111i01Xbbbbb1aaaaaaaaaaaaaaaaaa), and the reference
+     * advances by 2 here as well.  Advancing by 1 left the PC on
+     * the instruction's own ADDRESS WORD, which was then executed
+     * as an instruction: 0x354c and 0x3526 both decode as @INT with
+     * a non-zero level, so every dispatch raised two spurious IOP
+     * Program interrupts (External 2) at the CPU.  That is what
+     * diverted GPCIPL out of its display-fill path.
+     *
+     * The non-@ forms were fixed for exactly this reason and these
+     * two were missed. */
+    iop_incr_nia(t, 2);
 }
 
 static void exec_LBP(IOP *t, DInstr *v) {
@@ -426,7 +438,19 @@ static void exec_LBP_at(IOP *t, DInstr *v) {
         register_set32(iopls_MST(&t->ls), st);
         iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
-    iop_incr_nia(t, 1);
+    /* TWO halfwords, like every other long-format MSC instruction:
+     * the descriptor is a 32-bit pattern
+     * (1111i01Xbbbbb1aaaaaaaaaaaaaaaaaa), and the reference
+     * advances by 2 here as well.  Advancing by 1 left the PC on
+     * the instruction's own ADDRESS WORD, which was then executed
+     * as an instruction: 0x354c and 0x3526 both decode as @INT with
+     * a non-zero level, so every dispatch raised two spurious IOP
+     * Program interrupts (External 2) at the CPU.  That is what
+     * diverted GPCIPL out of its display-fill path.
+     *
+     * The non-@ forms were fixed for exactly this reason and these
+     * two were missed. */
+    iop_incr_nia(t, 2);
 }
 
 /* ---------------------------------------------------------------------

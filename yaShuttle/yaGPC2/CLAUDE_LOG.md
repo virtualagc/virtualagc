@@ -1230,3 +1230,32 @@ document's planning stages, and it is already in the code as
   building it), and tracing slows it enough that it no longer reaches the
   breakpoint within a couple of minutes.  Use step-indexed breakpoints and
   --watch-log rather than a full trace.
+
+### [2026-08-23] Target: [problems.md]
+- FOUND AND FIXED, by step-indexed trace comparison: `@LBP@` and `@LBB@`
+  advanced NIA by ONE halfword instead of two.  Both are long-format
+  (1111i01Xbbbbb1aaaaaaaaaaaaaaaaaa, 32 bits), and the reference advances by 2
+  for all four LBB/LBP forms.  The non-@ forms had already been fixed for
+  exactly this reason; these two were missed.
+- The consequence was not a lost instruction but an EXECUTED one: the PC landed
+  on the instruction's own address word, and 0x354c / 0x3526 both decode as
+  `@INT` with a non-zero level, so every BCE dispatch raised TWO spurious IOP
+  Program interrupts (External 2) at the CPU.  That is what diverted GPCIPL out
+  of its display path.
+- HOW IT WAS FOUND, and this is the method to reuse: trace both emulators to a
+  fixed step count with peripherals attached (4.4M steps, 458 MB each), extract
+  the PC per step, and `cmp` the two sequences.  First difference at step
+  4,133,468, on `001dee: LH 1,X'36c8'` -- where the reference sets CC and
+  continues, and we swapped PSW (all eight registers reloaded, PSW1
+  1dee0011->1ed60011).  A new YAGPC_INTTRACE then named the vector pair
+  (0088/008c = iopProg), and the MSC trace showed us executing PC 0327d and
+  0327f, which are operand words.
+- Verified: operand words no longer executed (0 occurrences of 0327d/0327f),
+  all suites unchanged, GPCIPL still matches for all 3,987,845 traced
+  instructions.  Against the headless DEU the fix measurably helps --
+  fills 120 -> 155, halfwords accepted 62,288 -> 79,392, abandoned 0 -- but the
+  unit STILL does not complete its IPL.
+- STILL OPEN: a second divergence.  We execute MSC PCs 032d0..032ef (166 times
+  each) that the reference NEVER enters, reached via 032dc -> 032e8, and one of
+  them (032ee, `@INT` with the I bit set) still raises External 2 202 times.
+  Same technique should localize it: the traces are already captured.

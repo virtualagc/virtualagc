@@ -124,6 +124,15 @@ void cpu_compute_cc_logical(CPU *cpu, uint32_t result) {
 }
 
 void cpu_swap_psw(CPU *cpu, uint32_t oldAddr, uint32_t newAddr) {
+    /* One line per interrupt actually taken, naming the PSA vector pair
+     * it came through -- which is what identifies the class.  Added to
+     * find an interrupt we take that the reference does not. */
+    if (getenv("YAGPC_INTTRACE")) {
+        fprintf(stderr, "INT  old=%04x new=%04x  atNIA=%05x  newPSW=%08x\n",
+                (unsigned)oldAddr, (unsigned)newAddr,
+                (unsigned)psw_get_nia(&cpu->psw),
+                (unsigned)membus_get32(cpu->ram, newAddr));
+    }
     membus_set32(cpu->ram, oldAddr, register_get32(&cpu->psw.psw1), true);
     membus_set32(cpu->ram, oldAddr + 2, register_get32(&cpu->psw.psw2), true);
     uint32_t p1 = membus_get32(cpu->ram, newAddr);
