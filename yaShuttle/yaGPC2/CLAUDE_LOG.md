@@ -881,3 +881,26 @@ document's planning stages, and it is already in the code as
     emulator; the varying entry points come from the selector, not the table.
 - `--watch` verified working before trusting an empty result: 1,727 hits on a
   control location (0x00B0) in the same run that reported none on 0x3556.
+
+### [2026-08-23] Target: [problems.md]
+- CORRECTION, twice over, both from unrepresentative samples:
+  * "We never send DISPLAY_FILL" was wrong.  Against a fresh MEDS we send 157
+    DISPLAY_FILL events in 45 s, 34 of them 509-halfword blocks at 0xf49.  The
+    earlier null was sampled before the display program had started.
+  * The 0x3622 selector chain is NOT our bug.  gpc's selector takes exactly the
+    same two values (0x0000 / 0x000a) from exactly the same instruction
+    (`STH 4,X'3622'` at NIA=0x020cf) at nearly the same step, and against a
+    shared DEU state gpc's BCE6 loop is instruction-identical to ours
+    (03592 -> 03596 -> 03598 -> 03599 -> 0359a -> 0359e -> 03592, poll
+    succeeding 176 times).  Index 10 is all gpc dispatches for BCE6 too.
+- The DEU's own state dominates these comparisons and must be controlled: a DEU
+  that another emulator already IPLed answers a poll with 16 words, one that is
+  mid-IPL answers with 1, and the BCE takes a different path in each case.
+  Restart MEDS between runs or the comparison is meaningless.
+- CLEAN A/B, each against a freshly restarted MEDS, 45 s:
+      gpc : TIME_FILL 166  POLL 166  DISPLAY_FILL 166  BITE 83   196 hw @ 0x19ee
+      ours: TIME_FILL  82  POLL  82  DISPLAY_FILL 157  BITE  0   509 hw @ 0xf49
+  Three real differences remain: our cycle runs at half the reference's rate, we
+  fill a different buffer (509 halfwords at 0xf49 vs 196 at 0x19ee), and we
+  never send BITE.  Neither emulator sends the 250-halfword LAST_FILL that would
+  complete the DEU's own IPL.
