@@ -322,6 +322,7 @@ void iop_free(IOP *iop);
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx);
 
 void iop_exec(IOP *iop);
+void iop_exec_idle(IOP *iop);
 void iop_exec_channel_control(IOP *iop);
 void iop_exec_dma_queue(IOP *iop);
 void iop_exec_processors(IOP *iop);

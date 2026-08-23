@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -31,6 +32,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     memset(r, 0, sizeof(*r));
     r->opts = opts;
     r->maxSteps = atol(opts->maxSteps);
+    /* 0 means "no limit", as `gpc run --max-steps 0` does -- which is how
+     * a --real-time run against live peripherals is started, since there
+     * is no sensible instruction count for "until I stop it". */
+    if (r->maxSteps == 0) r->maxSteps = LONG_MAX;
     if (opts->breakAddr) {
         const char *s = opts->breakAddr;
         if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
@@ -55,6 +60,14 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     } else {
         fprintf(stderr, "error: --pacing expects 'burst' or 'signal' (got '%s')\n", opts->pacing);
         exit(1);
+    }
+
+    r->realTime = opts->realTime;
+    if (r->realTime) {
+        /* Initialised here so the baseline starts with the run, not with
+         * whatever setup precedes it. */
+        rtpacer_init(&r->rtPacer, &r->age.gpc.cpu,
+                     atof(opts->rtFactor), atof(opts->rtIdleTimeout));
     }
 
     r->debugMode = opts->debug;
@@ -454,6 +467,24 @@ static bool batchrunner_step(BatchRunner *r) {
          * CPU.  Ticking only while a counter happened to be armed gave up
          * immediately on exactly the case that matters: GPCIPL waiting on
          * the mass memory. */
+        if (r->realTime) {
+            /* Real time keeps flowing in the wait state: advance
+             * SIMULATED time at the real-time rate until an interrupt
+             * wakes the CPU.  This is the half that free-running the tick
+             * loop below cannot do -- it advances the machine's clock as
+             * fast as the host allows, which leaves any real peripheral
+             * on the other end of a socket hopelessly behind.  See
+             * rtpacer.h. */
+            RTPaceResult why = rtpacer_idle_wait(&r->rtPacer);
+            if (why != RTPACE_RESUMED) {
+                snprintf(r->stopReason, sizeof r->stopReason,
+                         "wait state (%s)", rtpacer_result_name(why));
+                r->hasStopReason = true;
+                return false;
+            }
+            return true;
+        }
+
         long ticks = 0;
         while (psw_get_wait_state(&r->age.gpc.cpu.psw) &&
                (r->age.gpc.cpu.counter1Enabled || r->age.gpc.cpu.counter2Enabled ||
@@ -740,7 +771,19 @@ static void batchrunner_pace_signal(BatchRunner *r) { (void)r; }
 /* Shared dispatcher, called after every batchrunner_step() from both
  * batchrunner_run() and batchrunner_run_interactive(). */
 static void batchrunner_pace(BatchRunner *r) {
-    if (r->debugMode) return;
+    if (r->debugMode) {
+        /* The debugger stops the machine for arbitrary wall time while
+         * the world outside keeps running.  Re-tie the clocks on the way
+         * back rather than repaying the gap -- see rtpacer.h. */
+        if (r->realTime) rtpacer_resync(&r->rtPacer);
+        return;
+    }
+    if (r->realTime) {
+        /* Only every 256th step: the check is a clock read, and paying
+         * for one per instruction would itself distort the pacing. */
+        if ((r->step & 255) == 0) rtpacer_pace(&r->rtPacer);
+        return;
+    }
     if (r->pacingMode == PACING_SIGNAL) {
         batchrunner_pace_signal(r);
     } else {

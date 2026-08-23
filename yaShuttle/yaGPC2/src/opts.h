@@ -176,6 +176,18 @@ typedef struct {
      * specification; "pass2" is the HAL/S-FC PASS2 compiler's own
      * static estimate of the same hardware, kept only because
      * comparing the two is informative. See timing.h. */
+    /* Mirrors `gpc run`'s own --real-time/--rt-factor.  Paces the
+     * simulation against the WALL CLOCK, including -- crucially -- while
+     * the CPU sits in the wait state, where simulated time is advanced
+     * FROM elapsed wall time rather than free-running.  That is what
+     * keeps this machine's clock tied to an external peripheral's rather
+     * than merely scaled by the same factor, and it is what a real MMU or
+     * MEDS on the other end of --bce-network needs.  See rtpacer.h for
+     * why this is a different thing from --time-scale. */
+    bool realTime;                    /* default false */
+    char *rtFactor;                   /* default "1"; parsed via atof */
+    char *rtIdleTimeout;              /* default "10000" (ms) */
+
     char *timing;                     /* "poo" (default) or "pass2" */
 } Options;
 

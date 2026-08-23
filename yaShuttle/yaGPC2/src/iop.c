@@ -674,6 +674,15 @@ void iop_exec_processors(IOP *iop) {
      * handling is authoritative now, matching how MSC already worked. */
 }
 
+/* One step of the IOP while the CPU is in the wait state: the DMA queue
+ * and a processor slice.  Channel control and the RM watchdog are driven
+ * separately from there (the watchdog on wall time, via
+ * iop_tick_watchdog). */
+void iop_exec_idle(IOP *iop) {
+    iop_exec_dma_queue(iop);
+    iop_exec_processors(iop);
+}
+
 void iop_exec(IOP *iop) {
     iop_exec_channel_control(iop);
     iop_exec_dma_queue(iop);

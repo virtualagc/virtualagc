@@ -108,6 +108,18 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID) {
     }
 
     int reuse = 1;
+    /* Ask for a generous receive buffer.  A datagram that arrives with
+     * the buffer full is DROPPED -- UDP has no retransmission, so a
+     * peripheral's reply sent while this process was not reading is gone
+     * for good.  A big buffer absorbs ordinary jitter (a scheduling
+     * hiccup, a slow trace write); it cannot absorb a debugger halt, and
+     * nothing at this layer can.  That case is handled the only way it
+     * can be, by not pretending the lost milliseconds still owe us
+     * anything -- see rtpacer.h's STALL_REBASE_MS.  Advisory: the kernel
+     * may cap this, and the call is deliberately not fatal. */
+    int rcvbuf = 1 << 20;   /* 1 MiB */
+    setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof rcvbuf);
+
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse) < 0) {
         fprintf(stderr, "bcenet: bus %d: SO_REUSEADDR failed: %s\n", busID, strerror(errno));
         close(fd);

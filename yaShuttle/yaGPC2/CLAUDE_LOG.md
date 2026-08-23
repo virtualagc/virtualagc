@@ -561,3 +561,43 @@ document's planning stages, and it is already in the code as
   --iop-trace is what found all four.
 - The single remaining slip is at ya[299970], 15 instructions from the
   end of the compared window, in a memory-scan loop.
+
+### [2026-08-23] Target: [problems.md]
+- Added --real-time / --rt-factor / --rt-idle-timeout (src/rtpacer.c),
+  mirroring `gpc run`'s own.  This is NOT the same thing as --time-scale
+  and the header says why: --time-scale sleeps off a lead a program
+  builds by fast-forwarding, and never makes simulated time advance on
+  its own.  A machine in the AP-101S wait state needs the opposite --
+  there are no instructions to pace, and the thing that ends the wait is
+  an interrupt from a timer, the IOP or a peripheral, so the simulated
+  clock has to keep moving.  Free-running it (what the wait loop did)
+  advances simulated time as fast as the host manages, and a bus receive
+  time out is measured in SIMULATED time -- so a reply a millisecond
+  away in wall-clock terms arrives to a transaction that timed out
+  "hours" ago.  Sharing a speed-up FACTOR is not enough; the clocks have
+  to be re-tied often enough to stay inside the protocol's tolerance.
+  Under --real-time the wait state converts elapsed WALL time into
+  simulated time (capped at 5 ms a lump) and spends it on the timers and
+  the IOP's 500 ns slices, via the new cpu_advance_idle_ns().
+- Host stalls are re-based, not repaid (STALL_REBASE_MS, and
+  rtpacer_resync() on leaving the debugger).  A debugger halt loses the
+  peripheral's datagrams outright -- UDP has no retransmission and a full
+  socket buffer just drops what arrives next -- so replaying the missing
+  wall time as simulated time would only run every outstanding
+  transaction past its receive time out: a host pause turned into a storm
+  of bus errors.  The transport now also asks for a 1 MiB SO_RCVBUF,
+  which absorbs ordinary jitter but cannot absorb a halt, and nothing at
+  that layer can.
+- --max-steps 0 now means "no limit", as gpc's does; that is how a
+  real-time run against live peripherals is started.
+- VERIFIED: pacing holds (200,000 instructions = 257.479 ms simulated in
+  265 ms wall at factor 1), the 1,490,000-instruction trace comparison
+  still matches with no divergence, and no suite moved.
+- NOT YET WORKING: yaGPC2 still drives no MMU traffic.  Control run on
+  the same live MMU instance: gpc --real-time = 37 commands in 45 s,
+  yaGPC2 --real-time --bce-network = 0.  The transmit path itself
+  matches gpc's (#CMD/#CMDI -> mia_xmit_cmd -> servicer, gated on
+  regXmitEna for the current BCE), and MM1 = BCE 18 -> port 6918 is in
+  the transport's table, so the question is whether BCE 18 is ever
+  driven -- i.e. whether the divergence is further out than the
+  1.5M instructions compared so far.

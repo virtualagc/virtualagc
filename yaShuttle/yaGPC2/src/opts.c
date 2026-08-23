@@ -86,6 +86,14 @@ static const char *HELP_TEXT =
 "                                  hardware spec) or \"pass2\" (the HAL/S-FC\n"
 "                                  compiler's own static estimate, kept for\n"
 "                                  comparison) (default: \"poo\")\n"
+"  --real-time                     pace execution at (approximately) real\n"
+"                                  AP-101S speed, including through the wait\n"
+"                                  state -- needed to drive a real peripheral\n"
+"                                  over --bce-network (default: false)\n"
+"  --rt-factor <x>                 real-time speed multiplier for --real-time\n"
+"                                  (2 = 2x real speed) (default: 1)\n"
+"  --rt-idle-timeout <ms>          give up on a --real-time wait state after\n"
+"                                  this much wall time (default: 10000)\n"
 "  --time-scale <factor>           wall-clock pacing divisor for SCHEDULE/WAIT\n"
 "                                  real-time throttling (default: 1.0, genuine\n"
 "                                  real time; factor > 0). A larger factor\n"
@@ -130,6 +138,9 @@ static void set_defaults(Options *o) {
     o->timeScale = "1.0";
     o->pacing = "burst";
     o->timing = "poo";
+    o->realTime = false;
+    o->rtFactor = "1";
+    o->rtIdleTimeout = "10000";
 }
 
 /* JS parseInt(s, 16) applied after stripping a leading "0x"/"0X" — matches
@@ -262,6 +273,16 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->timeScale = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--pacing", &n)) {
             opts->pacing = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--real-time", &n)) {
+            opts->realTime = true;
+        } else if (tok_is(tok, "--rt-factor", &n)) {
+            opts->rtFactor = take_value(argc, argv, &i, tok, n);
+            if (atof(opts->rtFactor) <= 0.0) {
+                fprintf(stderr, "error: --rt-factor must be > 0 (got '%s')\n", opts->rtFactor);
+                exit(1);
+            }
+        } else if (tok_is(tok, "--rt-idle-timeout", &n)) {
+            opts->rtIdleTimeout = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--timing", &n)) {
             opts->timing = take_value(argc, argv, &i, tok, n);
             if (strcmp(opts->timing, "poo") != 0 && strcmp(opts->timing, "pass2") != 0) {

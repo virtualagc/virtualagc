@@ -53,6 +53,7 @@ void cpu_init(CPU *cpu) {
     cpu->diagInterruptPageDiagnoseMode = false;
     cpu->mcCode = 0x0008;
     cpu->ext1Code = 0x0000;
+    cpu->idleIopNs = 0.0;
 }
 
 void cpu_free(CPU *cpu) {
@@ -866,6 +867,91 @@ void cpu_power_on(CPU *cpu) {
     cpu->prevDiscont = false;
     cpu_iu_shadow_flush(cpu);
     cpu_load_psw(cpu, membus_get32(cpu->ram, 0x04), membus_get32(cpu->ram, 0x06));
+}
+
+/* ---------------------------------------------------------------------
+ * The wait state, paced against real time
+ *
+ * Instruction fetch is what the wait state suspends; everything else --
+ * the interval timers, the IOP and its watchdog, a peripheral answering
+ * on a bus -- keeps running, and one of them is what ends the wait.  A
+ * runner that wants the machine to keep the SAME clock as an external
+ * peripheral drives these from the wall clock rather than free-running
+ * them; see rtpacer.h.
+ * ------------------------------------------------------------------- */
+
+/* The IOP is stepped at its slice rate, and time must advance WITH the
+ * slices rather than in one jump before them: the IOP's two waiting
+ * mechanisms are otherwise incommensurate.  A bus control element's
+ * delay and time out are measured in simulated time, while a master
+ * sequence controller's repeat instruction counts its own re-fetches.
+ * A 1 ms step is about 2000 slices, so an @RAW waiting 848 repeats would
+ * expire well inside a BCE's legitimate 10.7 ms #DLYI. */
+#define IOP_SLICE_NS 500.0
+
+bool cpu_can_wake(const CPU *cpu) {
+    if (psw_get_int_mask(&cpu->psw) != 0) return true;
+    /* The non-maskable classes, plus a machine check that is already
+     * pending: nothing else can arrive with every system mask bit off. */
+    return cpu->intPending.programCheck || cpu->intPending.svc ||
+           cpu->intPending.machineCheck;
+}
+
+/* Ticks until counter n borrows past zero, which is (low + 1 + high *
+ * 65536) away. */
+static double timer_remaining_us(const CPU *cpu, int n) {
+    uint32_t lo = (n == 2 ? cpu->counter2 : cpu->counter1) & 0xffffu;
+    uint32_t hi = membus_get16(cpu->ram, n == 2 ? 0x00b1 : 0x00b0);
+    return (double)lo + 1.0 + (double)hi * 65536.0;
+}
+
+double cpu_next_timer_ns(const CPU *cpu) {
+    double best = 0.0;
+    if (cpu->counter1Enabled) best = timer_remaining_us(cpu, 1);
+    if (cpu->counter2Enabled) {
+        double t = timer_remaining_us(cpu, 2);
+        if (best == 0.0 || t < best) best = t;
+    }
+    if (best == 0.0) return 0.0;
+    return best * 1000.0 - cpu->timerAccumUs * 1000.0;
+}
+
+double cpu_advance_idle_ns(CPU *cpu, double ns) {
+    double done = 0.0;
+    while (done < ns && psw_get_wait_state(&cpu->psw)) {
+        /* Steps are at most 1 ms and are shortened to land exactly on the
+         * next interval-timer expiry, so a wakeup is taken at its true
+         * simulated time rather than a step late. */
+        double step = ns - done;
+        if (step > 1e6) step = 1e6;
+        double tNs = cpu_next_timer_ns(cpu);
+        if (tNs > 0.0 && tNs < step) step = tNs;
+        if (step < 1.0) step = 1.0;   /* never stall on a zero step */
+        done += step;
+
+        /* The IOP's watchdog runs on wall time, not CPU instructions, so
+         * it keeps counting through the wait state. */
+        if (cpu->iop) iop_tick_watchdog(cpu->iop);
+
+        if (cpu->iop && iop_any_processor_running(cpu->iop)) {
+            double left = step;
+            while (left > 0.0) {
+                double slice = left < IOP_SLICE_NS ? left : IOP_SLICE_NS;
+                cpu_advance_time_us(cpu, slice / 1000.0);
+                left -= slice;
+                cpu->idleIopNs += slice;
+                while (cpu->idleIopNs >= IOP_SLICE_NS) {
+                    cpu->idleIopNs -= IOP_SLICE_NS;
+                    iop_exec_idle(cpu->iop);
+                }
+            }
+        } else {
+            cpu_advance_time_us(cpu, step / 1000.0);
+            cpu->idleIopNs = 0.0;
+        }
+        cpu_check_interrupts(cpu);
+    }
+    return done;
 }
 
 void cpu_run(CPU *cpu) {

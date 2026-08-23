@@ -153,6 +153,10 @@ typedef struct CPU {
      * interrupt is taken. */
     uint32_t ext1Code;
 
+    /* Leftover simulated nanoseconds owed to the IOP's slice clock while
+     * the CPU sits in the wait state -- see cpu_advance_idle_ns(). */
+    double idleIopNs;
+
     /* Cumulative estimated AP-101S execution time (HAL/S-FC's own
      * unlabeled time units -- see timing.h), summed unconditionally by
      * every cpu_exec1() call, not just under --debug -- a GPC embedded
@@ -265,6 +269,21 @@ void cpu_signal_addressing_exception(CPU *cpu);
  * though it is the IOP's access that trips it. */
 void cpu_signal_dma_protect_violation(CPU *cpu);
 
+/* Could anything still wake a CPU sitting in the wait state?  Only an
+ * unmasked system interrupt or an already-pending non-maskable one; with
+ * neither, the wait is permanent and callers should stop. */
+bool cpu_can_wake(const CPU *cpu);
+
+/* Simulated nanoseconds until the next interval-timer expiry, or 0 if
+ * neither counter is armed. */
+double cpu_next_timer_ns(const CPU *cpu);
+
+/* Advance simulated time through the wait state by up to `ns`, stopping
+ * early if an interrupt takes the CPU out of it.  Returns the
+ * nanoseconds actually advanced.  This is what couples the machine's own
+ * clock to the wall clock while it is waiting -- see rtpacer.h. */
+double cpu_advance_idle_ns(CPU *cpu, double ns);
+
 /* Returns true iff the caller should proceed to write back the FP result
  * and set CC normally (see floatIBM.h's FP_EXC_* for the exc codes). */
 bool cpu_fp_dispatch_exc(CPU *cpu, int exc);
@@ -299,5 +318,8 @@ const InstrDesc *instr_decode(uint32_t hw1, uint32_t hw2, DInstr *v);
 void iop_recv_from_cpu(struct IOP *iop, uint32_t cmd, uint32_t data);
 uint32_t iop_get_cc_data(struct IOP *iop);
 void iop_channel_reset(struct IOP *iop);
+void iop_tick_watchdog(struct IOP *iop);
+bool iop_any_processor_running(const struct IOP *iop);
+void iop_exec_idle(struct IOP *iop);
 
 #endif

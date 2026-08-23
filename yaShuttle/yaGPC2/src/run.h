@@ -18,6 +18,7 @@
 #include <stdint.h>
 
 #include "ageharness.h"
+#include "rtpacer.h"
 #include "bcenet_framer.h"
 #include "bcenet_transport.h"
 #include "debugger.h"
@@ -94,6 +95,12 @@ typedef struct {
      * run.c instead, matching g_sigint_received's own existing pattern
      * there (only one BatchRunner is ever paced per process). */
     PacingMode pacingMode;
+    /* --real-time: paces against the wall clock, and (unlike
+     * --time-scale) drives simulated time FROM it while the CPU waits.
+     * NULL unless --real-time was given.  See rtpacer.h. */
+    bool realTime;
+    RTPacer rtPacer;
+
     double pacingRefWallSeconds;
     double pacingRefVirtualUs;
 
