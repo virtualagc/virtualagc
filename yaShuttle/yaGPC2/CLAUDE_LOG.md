@@ -1203,3 +1203,30 @@ document's planning stages, and it is already in the code as
   there.  That is a CPU-side path question, and the tool for it is a traced
   comparison WITH peripherals attached, since both emulators agree for all
   3,987,845 instructions without them.
+
+### [2026-08-23] Target: [problems.md]
+- Walked back from the selector write.  The routine is a table walk whose two
+  exits both land on the write:
+      002a0e: LH   2,@X'0000'(0)+     walk a list, auto-increment
+      002a10: BCF  2,X'001f'          exit -> 002a30
+      002a2f: BCB  7,X'0022'          loop back to 002a0e
+      002a30: LHI  4,X'0018'          queue the display-fill program
+      002a32: STH  4,X'0bec'(0)       -> halfword 0x3622
+  and it is entered from `0029cc: BC 4,X'2a06'`, a conditional branch taken
+  after `0029ca: LH 5,X'0cb8'(0)`.
+- Breakpoint tests, ours with --bce-network and MEDS live, 90-100 s each:
+      --break 2a0e : never taken (the reference DOES break there)
+      --break 29cc : never taken
+  So we do not merely take the branch the other way -- we never reach the
+  branch at all, and the divergence is further upstream again.
+- Landmarks for the next attempt, since walking the call graph backwards by
+  hand is slow: the reference writes the selector at 0x02a32 on STEP 4326399,
+  and we write it at 0x020cf on step 4302055.  Both emulators print a step
+  count in --watch-log output, and both agree exactly for the first 3,987,845
+  instructions with no peripherals.  So the divergence is bounded to roughly
+  steps 3.99M..4.33M, and a step-indexed comparison over that window will
+  localize it far faster than another backwards walk.
+- Practical note: the reference cannot --trace to a file that far (it aborts
+  building it), and tracing slows it enough that it no longer reaches the
+  breakpoint within a couple of minutes.  Use step-indexed breakpoints and
+  --watch-log rather than a full trace.
