@@ -1089,3 +1089,21 @@ document's planning stages, and it is already in the code as
   this run (branch NOT taken), where an earlier run had 0x00000000 in all 147
   samples (branch taken).  That branch reads halfword 0x34E6 and its value is
   phase-dependent, so do not treat either reading as the settled answer.
+
+### [2026-08-23] Target: [problems.md]
+- CLEAN like-for-like cycle measurement, both emulators against a freshly
+  restarted MEDS, gpc's run-length "... N times" lines EXCLUDED from the
+  arithmetic (including them is what produced a spurious "gpc also parks for
+  480 ms" reading earlier):
+      gpc  BCE6 cycle period: median 11,996 us  (n=5, range 11-15 ms)
+      ours BCE6 cycle period:        520,000 us
+  So our display cycle is ~43x the reference's, and that is the slow clock.
+- Where ours goes: the `#WAT` at 035a6 parks 462-503 ms of the 520 ms, and the
+  IOP is DORMANT throughout -- 171 MSC instructions and 2 BCE instructions in
+  one whole park, with all 171 inside the final 347 us.  Nothing is spinning or
+  timing out; the IOP simply is not being run.
+- The MSC is restarted by a CPU-side PCO (iop.c, regBusyWait PROC_MSC <- 1),
+  and both `@WAT` and the execProcessors busy/halt gating are identical to the
+  reference's.  So the question is narrow and CPU-side: what issues that PCO,
+  and why ours issues it about twice a second where the reference's issues it
+  ~83 times a second.
