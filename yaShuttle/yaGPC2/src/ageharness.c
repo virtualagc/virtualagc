@@ -268,10 +268,18 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
          * unprotected yet either; --power-on's own memory starts
          * unprotected so it wouldn't fault the same way, but it would
          * still be executing PSA data as instructions, which is just as
-         * wrong. cpu_reset() loads the real System Reset PSW instead,
-         * landing on GPCIPL's actual first instruction (IOPHISAM,
-         * BILDNEW5.lst address 0x013F). */
-        cpu_reset(&age->gpc.cpu);
+         * wrong. Loading the real start-up PSW instead lands on GPCIPL's
+         * actual first instruction.
+         *
+         * WHICH start-up PSW depends on which reset this is, and they are
+         * NOT the same vector -- see cpu_power_on()'s comment for the
+         * Figure 2-20 / PSA.asm evidence. --ipl performs a system reset
+         * function (Sec. 2.5.3.3) and takes the System Reset vector at
+         * 0x14 (SRESINTN -> IOPHISAM, BILDNEW5.lst address 0x013F);
+         * --power-on takes the Power On vector at 0x04 (SPWRONN ->
+         * FAILEXEC). --ipl still wins if both are given. */
+        if (opts->ipl) cpu_reset(&age->gpc.cpu);
+        else cpu_power_on(&age->gpc.cpu);
         /* Report the real, now-established entry point (rather than
          * leaving hasEntryPoint/entryPoint as their "nothing set yet"
          * defaults) so batchrunner_load()'s own "No entry point" check

@@ -161,6 +161,7 @@ void cpu_s_eah(CPU *cpu, DInstr *v, uint32_t value);
 uint32_t cpu_g_shift_cnt(CPU *cpu, uint32_t hw1);
 
 void cpu_reset(CPU *cpu);
+void cpu_power_on(CPU *cpu);
 void cpu_run(CPU *cpu);
 void cpu_exec1(CPU *cpu);
 void cpu_tick(CPU *cpu); /* counter decrement + interrupt dispatch only; see cpu.c */

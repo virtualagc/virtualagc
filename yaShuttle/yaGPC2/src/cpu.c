@@ -545,6 +545,33 @@ void cpu_reset(CPU *cpu) {
     psw_load(&cpu->psw, membus_get32(cpu->ram, 0x14), membus_get32(cpu->ram, 0x16));
 }
 
+/* Power-On is its OWN interrupt class with its OWN PSA vector, distinct
+ * from System Reset -- AP-101S-instruction-set.txt Figure 2-20 lists all
+ * three power-class entries separately:
+ *
+ *      00  Power  old PSW 0010   CPU Power Off (Microcode Put Away)
+ *      01  Power  new PSW 0004   CPU Power On
+ *      02  Power  new PSW 0014   CPU System Reset
+ *
+ * and MLIB80/PSA.asm, the flight software's own PSA, defines the two
+ * start-up vectors as different symbols landing on different code:
+ *
+ *      SPWRONN  DC  Y(FAILEXEC)   POWER ON RESET-START UP PSW      (0x04)
+ *      SRESINTN DC  Y(IOPHISAM)   SYSTEM RESET = START UP ENTRY POINT2 (0x14)
+ *
+ * Sec. 2.5.3.1's prose ("the second mode at power-on enters the run state
+ * after the system reset is complete") is what previously led this file to
+ * use 0x14 for both: it names the system reset *function* of Sec. 2.5.3.2
+ * (clear pending interrupts, reset timers/status, zero the DSE registers),
+ * which a power-on does perform -- NOT the System Reset *vector*. Entering
+ * a real power-on at IOPHISAM skips whatever FAILEXEC does first, which is
+ * exactly the failure that made GPCIPL's self-test wild-branch into
+ * unfilled memory at a fixed instruction count no matter what content the
+ * composed image actually carried. */
+void cpu_power_on(CPU *cpu) {
+    psw_load(&cpu->psw, membus_get32(cpu->ram, 0x04), membus_get32(cpu->ram, 0x06));
+}
+
 void cpu_run(CPU *cpu) {
     while (!psw_get_wait_state(&cpu->psw)) {
         cpu_exec1(cpu);

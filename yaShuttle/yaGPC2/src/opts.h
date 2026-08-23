@@ -87,9 +87,15 @@ typedef struct {
      * AP-101S Power-On (AP-101S-instruction-set.txt Sec. 2.5.3.1,
      * distinct from IPL, Sec. 2.5.3.3, quoted in --ipl's own comment
      * above): "the second mode at power-on enters the run state after
-     * the system reset is complete" -- a system reset (the same PSW-pair
-     * load from the fixed hw 0x14 vector cpu_reset() performs, see
-     * --ipl's comment). IPL's blanket store-*protection* is IPL-specific
+     * the system reset is complete" -- i.e. it performs the system reset
+     * *function* of Sec. 2.5.3.2, then runs. It does NOT enter through
+     * the System Reset *vector*: Power On and System Reset are separate
+     * interrupt classes with separate PSA vectors (0x04 vs 0x14, Figure
+     * 2-20), landing on separate flight-software entry points (PSA.asm's
+     * SPWRONN -> FAILEXEC vs SRESINTN -> IOPHISAM). This comment used to
+     * say they were the same vector and cpu_reset() was used for both;
+     * that was wrong, and it was the reason GPCIPL's self-test always
+     * wild-branched. See cpu_power_on(). IPL's blanket store-*protection* is IPL-specific
      * per the manual's own section split, not a Power-On property --
      * confirmed to matter, not just textually distinct: a genuine
      * BILDNEW5/GPCIPL self-test run under --power-on (memory left
