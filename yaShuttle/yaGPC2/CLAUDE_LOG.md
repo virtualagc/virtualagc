@@ -346,3 +346,70 @@ document's planning stages, and it is already in the code as
   anywhere) -- the two real fixes (off-by-one, undefined-guard) are
   worth keeping/upstreaming to Don; the CDP switch was purely a
   debugging aid and should probably be reverted once no longer needed.
+
+### [2026-08-22] Target: [ASM101S/ASM101Sa-notes.md]
+- `asm101` (nsts-sdl-dps) MIS-ASSEMBLES `B disp(reg)`; our ASM101S.py does
+  not.  `B 1(2)` -> `DF04`, the one-halfword SRS short form, silently
+  DISCARDING the register; ASM101S.py -> `C7F2 0001`, the RS form.
+  Decoded against Figure 2-11 (RS: Op|R1|..|AM(13)|B2(14-15)|AddrSpec):
+  `C7F2` has B2=10=register 2 and AM=0, displacement `0001`, so the
+  target is R2+1 -- what `D(B)` means in S/360 operand syntax, and what
+  a subroutine return needs.  `DF04` is BCF mask 7 disp 1, and the
+  manual is explicit that BCF adds "the Disp to the updated IC", so the
+  register never participates.  `B 1(0,2)` and `B 1(2,0)` DO assemble
+  correctly in both, so it is specifically the one-register form.
+- WHY IT WAS NEVER CAUGHT: the idiom appears in exactly four places in
+  the whole corpus -- `BUMP64C`/`DEC64C` in MLIB80/SVCALT.asm and
+  `BUMP56C`/`BUMPMLTD` in MLIB80/SVCHNDLR.asm, all four the
+  "OTHERWISE, GET OUT OF TOWN" returns of the BUMP subroutines.  Neither
+  file has a standalone object in any byte-verified corpus (both are
+  COPY fragments), so RUNASM 205/205 and OI301700 272/272 never
+  exercised it.
+- CONSEQUENCE, and it is the whole reason GPCIPL never boots: SVCALT's
+  `BUMPWRDN DC Y(BUMP64C),Y(DEC64C)` are the power-fail executive's
+  dispatch switches.  `BALR 7,7` calls one, the callee cannot return
+  because its return branch lost the base register, and control loops
+  forever in the eight halfwords around `BUMPWRDN`.  Both yaGPC2 and
+  Don's gpc sit in that loop with identical iteration counts, because
+  both are running the same mis-assembled image -- which is why the
+  simulator-vs-simulator comparison could never find it.
+
+### [2026-08-23] Target: [ASM101S/ASM101Sa-notes.md]
+- CONFIRMED END TO END.  Reassembled BILDNEW5 with ASM101S.py (via
+  modules/sdfpkg/assemble-one.sh, which builds the combined
+  MLIB80+INCL80+INCLIB library the assembler needs -- pointing --library
+  at MLIB80 alone is not enough).  22 minutes, exit 0.  The new listing
+  has `01C20 C7F2 0001  BUMP64C  B  1(B2)` where asm101 emitted `DF04`.
+- Swapped that one object into PHASE10/obj, relinked PHASE10 (0
+  unresolved) and recomposed.  GPCIPL LEAVES THE LOOP: where every
+  previous run sat on the same eight halfwords around BUMPWRDN forever,
+  it now runs 172 distinct addresses and lands in BSL1UNPT/MEMPATRN
+  executing `ISPB 0,X'0000'(2,)` -- Insert Storage Protect Bits, walking
+  memory a halfword at a time with the address register incrementing.
+  That is the "unprotects its writable data" step of Don's own account
+  of a good boot.  At 40M instructions it is still in that walk but has
+  moved to another bank (BSR 1 -> 0), so it is progressing, not stuck.
+- OPEN: whether the unprotect walk terminates, and what follows it.
+  Comparing the corrected image against gpc to see whether the two still
+  agree now that the image is right.
+
+### [2026-08-23] Target: [modules/sdfpkg/HANDOFF-OI340600.md]
+- WE NOW RUN PAST THE REFERENCE.  On the corrected image gpc STOPS at
+  37,985 steps, "wait state" -- GPCIPL enters WAIT at 01df8 after an SSM
+  unmasks interrupts and nothing ever wakes it; with Don's own real-time
+  flags (--real-time --rt-factor 0.35 --max-steps 0) it still gives up,
+  "wait state (timeout)", after 6.8 SECONDS of simulated time.  yaGPC2
+  never reaches that WAIT: the two take different paths from the
+  divergence at ~20,773, where the software polls STAT4 (BUSY/WAIT) in a
+  bounded BCTB retry loop and the answer depends on how far the BCEs have
+  got.  yaGPC2's path continues into BSL1UNPT's unprotect walk, which is
+  the step Don's account of a good boot describes; gpc's dead-ends.
+- So the 20,773 divergence is NOT merely a timing artifact after all --
+  it selects between two different control-flow paths.  Which of the two
+  is right is unresolved: yaGPC2's is the one that matches the narrative,
+  gpc's is the one that stops.  Note gpc is not authoritative on timing,
+  and this difference is downstream of interval-timer pacing.
+- The unprotect loop itself is bounded where we can see it (R3 = 0x2141
+  counting down at step ~37,985), but a later pass shows R3 negative and
+  decrementing, which cannot terminate.  Running long to see whether the
+  walk completes or wedges.
