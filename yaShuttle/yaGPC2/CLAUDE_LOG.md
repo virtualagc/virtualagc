@@ -1178,3 +1178,28 @@ document's planning stages, and it is already in the code as
 - Useful addresses gathered along the way: 0x3621/0x3623/0x3624/0x3626 are all
   written or read by the same MSC region; 0x361F feeds the `@LH X'361F'` just
   before the dispatch and is loaded from 0x3BA1 by the CPU at 0020d1.
+
+### [2026-08-23] Target: [problems.md]
+- DIFFED the MSC's 032f0..0330a block, ours vs the reference, both against an
+  identically fresh headless DEU.  THE MSC IS NOT THE DIVERGENCE: identical
+  PCs, identical relative frequencies (03303/03304 exactly 3x in each), and the
+  same value -- 0 -- written to the selector at 032f2 in both.  Ours runs the
+  block 223 times to the reference's 429, which is just our slower cycle.
+  Neither emulator executes 03358 or 0336e at all.
+- THE DIVERGENCE IS A CPU ROUTINE WE NEVER REACH.  The reference writes the
+  selector from NIA=0x02a32 (`STH 4,X'0bec'(0)`) 215 times, and that is what
+  queues index 0x18 -- the display-fill program.  Our CPU reaches 0x02a32 ZERO
+  times.  Its selector therefore alternates 0x0a <-> 0x18 in equal measure
+  (169 each, plus 0x14/0x16/0x22 occasionally); ours only ever sees 0x0a.
+- Second difference from the same comparison: we execute `SHW X'3622'` at
+  0x0210e 208 times where the reference executes it ONCE.  We keep re-asserting
+  "no request" where it asserts once and moves on.  Same region of logic.
+- METHOD NOTE, and it cost real time: grepping the disassembly for X'3622'
+  found only literal-address references and MISSED the writer that matters,
+  because 0x02a32 reaches it base-relative as X'0bec'(0).  Use the reference's
+  own `--watch <addr> --watch-log`, which names the writing instruction and its
+  NIA, instead of trusting a static search for an address.
+- NEXT: what leads to 0x02a32 in the reference and why our CPU never gets
+  there.  That is a CPU-side path question, and the tool for it is a traced
+  comparison WITH peripherals attached, since both emulators agree for all
+  3,987,845 instructions without them.
