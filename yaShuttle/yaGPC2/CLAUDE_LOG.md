@@ -1107,3 +1107,28 @@ document's planning stages, and it is already in the code as
   reference's.  So the question is narrow and CPU-side: what issues that PCO,
   and why ours issues it about twice a second where the reference's issues it
   ~83 times a second.
+
+### [2026-08-23] Target: [problems.md]
+- A/B against the SAME headless DEU (gpcmd unit --ipl-request), 105 s each,
+  and this is the sharpest statement of the remaining defect yet:
+                              gpc      ours
+      DEU IPL completes       YES       no      "load complete (250 halfwords
+                              (13.4 s)             at 0x2), reporting
+                                                   initialized as unit 1"
+      unheadered fills          0        37
+      DISPLAY_FILL count 8      0        41
+      modeStatus replies        5       162
+      fills / timeFills    184/169   120/43
+- So: the reference finishes initializing the display unit in 13 s by sending a
+  final 250-halfword fill at address 0x2.  WE NEVER SEND IT, so the unit stays
+  in "IPL in progress" forever (162 one-word mode-status replies against the
+  reference's 5) and renders only whatever partial fills landed.  That is the
+  "displaying stuff, but not the right stuff" the user sees.
+- The error counts the user sees are OURS ALONE: the reference emits zero
+  8-halfword DISPLAY_FILLs; we emit 41, and every one lands as "unheadered fill
+  of 8 halfwords" (audited 1:1 -- 41 commands, 41 events, all of size 8).  No
+  511-halfword fill arrives unusable, so the pacing fix is holding; this is a
+  program-path symptom, not a transport one.
+- NEXT: why BCE6 almost never reaches 03584, which is where `5718fc` (count
+  252 = the 250-halfword LAST_FILL + 2 header words) is issued.  It was seen
+  exactly once during the batching experiment, so the path is reachable.
