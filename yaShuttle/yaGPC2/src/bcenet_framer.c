@@ -13,6 +13,7 @@
  * fixture there is 541 words). 1024 comfortably covers that with room
  * to spare. */
 #define FRAMER_MAX_WORDS 1024
+#define FRAMER_RECV_QUEUE_WORDS 16384
 
 /* Was `true` ("every real BCE-numbered bus is IUA-addressed, matching
  * com/bus.civet's own Bus class usage") -- WRONG, confirmed empirically
@@ -51,7 +52,16 @@ typedef struct {
     uint16_t xmitBuf[FRAMER_MAX_WORDS];
     size_t xmitCount;
 
-    uint16_t recvQueue[FRAMER_MAX_WORDS];
+    /* A FIFO, not a one-datagram buffer.  Every pending datagram is
+     * drained into it once per tick, the way the reference's socket
+     * callback delivers them, so the transport's self-echo filter is
+     * consulted while its record of what we sent is still current.
+     * Reading the socket only when a receive instruction happened to be
+     * running let that record -- a bounded ring -- turn over long before
+     * the matching echoes were read, and the leftovers then arrived as
+     * if they were the peripheral's replies.  Sized for a burst of
+     * mass-memory blocks (512 halfwords each) landing between ticks. */
+    uint16_t recvQueue[FRAMER_RECV_QUEUE_WORDS];
     size_t recvHead, recvCount;
 } BceNetBusState;
 
@@ -91,15 +101,37 @@ static void flush_bus(BceNetFramer *f, int busID, BceNetBusState *b) {
     b->xmitCount = 0;
 }
 
-static void refill_recv_queue(BceNetFramer *f, int busID, BceNetBusState *b) {
-    if (b->recvHead < b->recvCount) return; /* still have queued words */
+/* Take every datagram the socket currently holds and append its words to
+ * this bus's FIFO. */
+static void drain_bus(BceNetFramer *f, int busID, BceNetBusState *b) {
     int iua = b->haveLastIua ? b->lastIua : 0;
-    size_t count = 0;
-    if (bcenet_transport_recv(f->transport, busID, iua, FRAMER_IS_SHUTTLE_BUS, b->recvQueue, FRAMER_MAX_WORDS,
-                               &count)) {
-        b->recvHead = 0;
-        b->recvCount = count;
+    for (;;) {
+        uint16_t words[FRAMER_MAX_WORDS];
+        size_t count = 0;
+        if (!bcenet_transport_recv(f->transport, busID, iua, FRAMER_IS_SHUTTLE_BUS, words,
+                                   FRAMER_MAX_WORDS, &count)) {
+            return;   /* nothing left, or a datagram the filters dropped */
+        }
+        /* Compact first: the queue is consumed from the head, so once the
+         * head has advanced the space in front of it is free. */
+        if (b->recvHead > 0 && b->recvCount + count > FRAMER_RECV_QUEUE_WORDS) {
+            memmove(b->recvQueue, b->recvQueue + b->recvHead,
+                    (b->recvCount - b->recvHead) * sizeof b->recvQueue[0]);
+            b->recvCount -= b->recvHead;
+            b->recvHead = 0;
+        }
+        if (b->recvCount + count > FRAMER_RECV_QUEUE_WORDS) {
+            fprintf(stderr, "bcenet: bus %d: receive queue full, dropping %zu words\n",
+                    busID, count);
+            return;
+        }
+        memcpy(b->recvQueue + b->recvCount, words, count * sizeof words[0]);
+        b->recvCount += count;
     }
+}
+
+static void refill_recv_queue(BceNetFramer *f, int busID, BceNetBusState *b) {
+    drain_bus(f, busID, b);
 }
 
 void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcServiceInput *input,
@@ -186,6 +218,12 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
 
 void bcenet_framer_flush_tick(BceNetFramer *f) {
     for (int i = 0; i <= FRAMER_MAX_BUS_ID; i++) {
-        if (f->buses[i].used) flush_bus(f, i, &f->buses[i]);
+        if (!f->buses[i].used) continue;
+        flush_bus(f, i, &f->buses[i]);
+        /* Drain every tick, not only when a receive instruction asks:
+         * the transport's self-echo record is bounded, and leaving
+         * datagrams in the socket long enough for it to turn over is
+         * exactly what let our own transmissions come back as replies. */
+        drain_bus(f, i, &f->buses[i]);
     }
 }
