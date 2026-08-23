@@ -800,6 +800,18 @@ void iop_bce_error_terminate(IOP *iop, int p) {
     dmaq_drop_for_bce(&iop->dmaQueue, bce);
 }
 
+/* Is a receive at this PC only now beginning, rather than already in
+ * progress?  A waiting receive re-fetches its own instruction every
+ * slice, and anything the instruction does BESIDES receiving -- above
+ * all putting its companion command on the bus -- must happen once, on
+ * the first execution, not on every re-fetch. */
+bool iop_bce_receive_starting(IOP *iop) {
+    BCE *bce = iop_cur_bce(iop);
+    if (bce == NULL) return true;
+    uint32_t pc = register_get32(iopls_PC(&iop->ls)) & 0x3ffffu;
+    return !(bce->recvActive && bce->recvPC == pc);
+}
+
 bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
     BCE *bce = iop_cur_bce(iop);
     if (bce == NULL) return true;

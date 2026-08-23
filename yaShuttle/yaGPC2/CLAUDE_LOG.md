@@ -783,3 +783,14 @@ document's planning stages, and it is already in the code as
   "000/00:00:01" first seen was simply the value early in the run; it
   counts up once the load finishes.  Standalone MEDS drives that field
   from wall time instead, which is why it looked different.
+
+### [2026-08-22] Target: [problems.md]
+- `#MIN`/`#MIN@` issued their companion bus command on every execution, but a
+  waiting receive re-fetches its own instruction each slice, so one transaction
+  put its command on the bus thousands of times.  Measured on the display bus
+  (DK1) against nsts-sim-gpc: 76,735 polls in 60 s against its 176, which
+  starved the DISPLAY_FILL and TIME_FILL traffic behind them.  Guarded with a
+  new `iop_bce_receive_starting()` (mirrors gpc's `bceReceiveStarting`, keyed on
+  the receive's own PC): polls 76,735 -> 110, TIME_FILL 8 -> 22 (gpc 16),
+  DISPLAY_FILL 211 (gpc 360).  GPCIPL trace still matches gpc for all 3,987,845
+  instructions with no divergence; all suites unchanged.
