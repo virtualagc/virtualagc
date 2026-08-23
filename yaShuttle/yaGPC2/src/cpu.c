@@ -70,6 +70,35 @@ void cpu_compute_cc_arith(CPU *cpu, uint32_t v1, uint32_t v2) {
     else psw_set_cc(&cpu->psw, 1);
 }
 
+/* Fixed-point add, with the two side effects the bare `+` this port used
+ * everywhere never produced: the PSW carry bit and the fixed-point
+ * overflow interrupt.
+ *
+ * Carry is the 33rd bit of the unsigned sum, so the addition is done wide
+ * and then truncated.  Signed overflow is the standard test -- the two
+ * addends agreed in sign and the sum disagreed with them -- and raises
+ * the program interrupt through cpu_signal_fixed_overflow(), which honors
+ * the PSW's own fixed-point-overflow mask and was, until this was wired
+ * up, dead code that nothing in the emulator ever called.
+ *
+ * Subtraction goes through the same path as a + ~b + 1 rather than
+ * a + (~b + 1).  The two agree on the result and disagree on the carry
+ * when b is zero: the inner increment wraps to zero and loses the carry
+ * out that the wide form reports. */
+uint32_t cpu_add_fixed(CPU *cpu, uint32_t a, uint32_t b, uint32_t carryIn) {
+    uint64_t sum = (uint64_t)a + (uint64_t)b + (uint64_t)carryIn;
+    psw_set_carry(&cpu->psw, sum > 0xffffffffu ? 1u : 0u);
+    uint32_t result = (uint32_t)sum;
+    if (((a ^ result) & (b ^ result) & 0x80000000u) != 0) {
+        cpu_signal_fixed_overflow(cpu);
+    }
+    return result;
+}
+
+uint32_t cpu_sub_fixed(CPU *cpu, uint32_t a, uint32_t b) {
+    return cpu_add_fixed(cpu, a, ~b, 1);
+}
+
 void cpu_compute_cc_logical(CPU *cpu, uint32_t result) {
     psw_set_cc(&cpu->psw, result == 0 ? 0 : 3);
 }
@@ -102,6 +131,8 @@ uint32_t cpu_recv_from_iop(CPU *cpu) {
  * ------------------------------------------------------------------- */
 
 void cpu_check_interrupts(CPU *cpu) {
+    uint32_t intMask = psw_get_int_mask(&cpu->psw);
+
     if (cpu->intPending.machineCheck) {
         if (psw_get_mach_check_mask(&cpu->psw)) {
             cpu->intPending.machineCheck = false;
@@ -109,6 +140,16 @@ void cpu_check_interrupts(CPU *cpu) {
             cpu_swap_psw(cpu, 0x0040, 0x0044);
             return;
         }
+    }
+
+    /* CPU Breakpoint (Instruction Monitor) -- Figure 2-20 row 17, a
+     * PE-class interrupt of its own with mask bit 34 and vectors
+     * 0070/0074, carrying no interrupt code.  It outranks the program
+     * check (row 20 and below), which is why it is tested first. */
+    if (cpu->intPending.instrMonitor && (intMask & 0x20)) {
+        cpu->intPending.instrMonitor = false;
+        cpu_swap_psw(cpu, 0x0070, 0x0074);
+        return;
     }
 
     if (cpu->intPending.programCheck) {
@@ -137,8 +178,6 @@ void cpu_check_interrupts(CPU *cpu) {
         return;
     }
 
-    uint32_t intMask = psw_get_int_mask(&cpu->psw);
-
     if (cpu->intPending.clk1 && (intMask & 0x80)) {
         cpu->intPending.clk1 = false;
         cpu_swap_psw(cpu, 0x0060, 0x0064);
@@ -147,11 +186,6 @@ void cpu_check_interrupts(CPU *cpu) {
     if (cpu->intPending.clk2 && (intMask & 0x40)) {
         cpu->intPending.clk2 = false;
         cpu_swap_psw(cpu, 0x0068, 0x006c);
-        return;
-    }
-    if (cpu->intPending.ext1 && (intMask & 0x02)) {
-        cpu->intPending.ext1 = false;
-        cpu_swap_psw(cpu, 0x0070, 0x0074);
         return;
     }
     if (cpu->intPending.iopGrp1 && (intMask & 0x10)) {
@@ -643,8 +677,11 @@ void cpu_exec1(CPU *cpu) {
      * (membus_get_store_protect) rather than reproducing the crash. */
     uint32_t intMask = psw_get_int_mask(&cpu->psw);
     if ((intMask & 0x20) && !membus_get_store_protect(cpu->ram, nia)) {
-        cpu->intPending.programCheck = true;
-        cpu->intCode = 0x0009;
+        /* This is the Instruction Monitor, not a program check: it has
+         * its own class, vector and mask bit (see cpu_check_interrupts),
+         * and Figure 2-20 gives its interrupt code as N/A -- the 0x0009
+         * this used to store is the exponent-underflow code. */
+        cpu->intPending.instrMonitor = true;
     }
 
     /* Captured before execution -- some operands instr_time_us() needs

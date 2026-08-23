@@ -194,6 +194,15 @@ typedef struct IOP {
     bool dmaBurst, dmaForceBadParity, dataForceBadParity;
 
     Register regXmitEna, regRecvEna;
+    /* regHalt is Status Register 5, "the Halt Register", as READ
+     * PROCESSOR HALT STATUS (040C0000) reports it.  Despite the name the
+     * polarity is the ENABLE direction, straight from the PCI format:
+     * "0 = Processor (MSC or BCE) Disabled, 1 = Processor Enabled", bit 0
+     * the MSC, bits 1-24 BCE 1-24, bit 25 the self-test processor.  So a
+     * processor runs when its bit is SET, CONFIGURE PROCESSORS HALT
+     * clears bits, and MASTER RESET ("STAT5 RST=HALT") zeroes it.  This
+     * port originally held the register inverted, which reversed the
+     * status the flight software reads back. */
     Register regProgExcept, regBusyWait, regHalt, regIndicator;
     Register regDiscreteOut, regDiscreteInA, regDiscreteInB, regRMStatus;
     RegisterFile regInterrupts; /* 5 regs (num=5 -> 6 slots; slot 5 used by RM status read) */
@@ -214,6 +223,10 @@ typedef struct IOP {
 } IOP;
 
 void iop_init(IOP *iop, struct CPU *cpu);
+
+/* Restore the discrete inputs to the crew-panel/vehicle configuration
+ * this emulator stands in for; see DISCRETE_IN_A_DEFAULT in iop.c. */
+void iop_reset_discrete_inputs(IOP *iop);
 void iop_free(IOP *iop);
 
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx);

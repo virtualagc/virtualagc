@@ -26,7 +26,14 @@ struct IOP; /* forward decl; wired in ap101.c (Phase 7) */
 
 typedef struct {
     bool powerTransient, systemReset, ipl, machineCheck, programCheck, svc;
-    bool clk1, clk2, ext1, ext2;
+    bool clk1, clk2, ext2;
+    /* CPU Breakpoint (Instruction Monitor): its own PE-class interrupt,
+     * AP-101S-instruction-set.txt Figure 2-20 row 17 -- old PSW 0070, new
+     * PSW 0074, mask bit 34 (0x20), no interrupt code.  This slot used to
+     * be called ext1 and was dispatched on mask 0x02, which is EX3's bit,
+     * while the condition that raises it was reported as a program check
+     * on 0048/004c instead. */
+    bool instrMonitor;
     /* iopGrp1/iopGrp2/iopProg are EX0/EX1/EX2 (vectors 0078/0080/0088,
      * mask bits 0x10/0x08/0x04) -- named after the IOP-flavored sources
      * AP-101S-instruction-set.txt row 50/51/53 documents for them.
@@ -123,6 +130,12 @@ void cpu_set_nia(CPU *cpu, uint32_t x);
 void cpu_incr_nia(CPU *cpu, int incr);
 void cpu_compute_cc_arith(CPU *cpu, uint32_t v1, uint32_t v2);
 void cpu_compute_cc_logical(CPU *cpu, uint32_t result);
+
+/* Fixed-point add/subtract that maintain the PSW carry bit and raise the
+ * fixed-point overflow interrupt; see cpu.c.  Every A/S-family
+ * instruction must go through these rather than a bare + or -. */
+uint32_t cpu_add_fixed(CPU *cpu, uint32_t a, uint32_t b, uint32_t carryIn);
+uint32_t cpu_sub_fixed(CPU *cpu, uint32_t a, uint32_t b);
 
 void cpu_swap_psw(CPU *cpu, uint32_t oldAddr, uint32_t newAddr);
 

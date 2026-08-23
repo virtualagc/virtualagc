@@ -54,12 +54,23 @@ static inline Register *R(CPU *t, DInstr *v, char c) {
 
 static void exec_PC(CPU *t, DInstr *v) {
     if (!cpu_i_super(t)) return;
-    uint32_t cmd = register_get32(R(t, v, 'x'));
-    uint32_t data = register_get32(R(t, v, 'y'));
+    /* R1 ('x') is the DATA register, R2 ('y') holds the control word --
+     * instruction set Sec. 3.3: "transfers a fullword to or from the
+     * general register specified by R1.  Direct I/O operations are
+     * defined by a control word (CW) contained in the general register
+     * specified by R2", and for input the channel "loads 32 bits of
+     * information ... into general register R1".  The two were swapped
+     * here, so the CW was read from R1: at GPCIPL's Group 1 interrupt
+     * handler, PC 3,7 took R3 (0xffffffff, the just-loaded data) as the
+     * CW, whose bit 0 made it look like an OUTPUT, so the input branch
+     * never ran and R3 was left unwritten -- and the IOP was handed
+     * 0xffffffff as a command. */
+    uint32_t cmd = register_get32(R(t, v, 'y'));
+    uint32_t data = register_get32(R(t, v, 'x'));
     cpu_send_to_iop(t, cmd, data);
     bool isOutput = (cmd >> 31) != 0;
     if (!isOutput) {
-        register_set32(R(t, v, 'y'), cpu_recv_from_iop(t));
+        register_set32(R(t, v, 'x'), cpu_recv_from_iop(t));
     }
     psw_set_cc(&t->psw, 0);
 }
@@ -67,7 +78,7 @@ static void exec_PC(CPU *t, DInstr *v) {
 static void exec_AR(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = register_get32(R(t, v, 'y'));
-    uint32_t result = v1 + v2;
+    uint32_t result = cpu_add_fixed(t, v1, v2, 0);
     register_set32(R(t, v, 'x'), result);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -75,7 +86,7 @@ static void exec_AR(CPU *t, DInstr *v) {
 static void exec_A(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = cpu_g_eaf(t, v, 0);
-    uint32_t result = v1 + v2;
+    uint32_t result = cpu_add_fixed(t, v1, v2, 0);
     register_set32(R(t, v, 'x'), result);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -83,7 +94,7 @@ static void exec_A(CPU *t, DInstr *v) {
 static void exec_AH(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = cpu_g_eah(t, v) << 16;
-    uint32_t result = v1 + v2;
+    uint32_t result = cpu_add_fixed(t, v1, v2, 0);
     register_set32(R(t, v, 'x'), result);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -91,7 +102,7 @@ static void exec_AH(CPU *t, DInstr *v) {
 static void exec_AHI(CPU *t, DInstr *v) {
     uint32_t v1 = df_get(v, 'I') << 16;
     uint32_t v2 = register_get32(R(t, v, 'y'));
-    uint32_t result = v1 + v2;
+    uint32_t result = cpu_add_fixed(t, v1, v2, 0);
     register_set32(R(t, v, 'y'), result);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -99,7 +110,7 @@ static void exec_AHI(CPU *t, DInstr *v) {
 static void exec_AST(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = cpu_g_eaf(t, v, 0);
-    uint32_t result = v1 + v2;
+    uint32_t result = cpu_add_fixed(t, v1, v2, 0);
     cpu_s_eaf(t, v, result, 0);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -171,15 +182,28 @@ static void exec_D(CPU *t, DInstr *v) {
     if (r.overflow) psw_set_overflow(&t->psw, 1);
 }
 
+/* Exchange Upper and Lower Halfwords -- an EXCHANGE, with no XOR
+ * anywhere in it, which is what this used to compute:
+ *
+ *     "The upper halfword of general register R1 is exchanged with the
+ *     lower halfword of general register R2.  Bits 0 through 15 of
+ *     general register R1 replace bits 16 through 31 of general register
+ *     R2, while simultaneously bits 16 through 31 of general register R2
+ *     replace bits 0 through 15 of general register R1."
+ *
+ * "Simultaneously" is what decides the R1 == R2 case: the register's own
+ * two halves trade places.  The condition code, overflow and carry are
+ * all left alone. */
 static void exec_XUL(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = register_get32(R(t, v, 'y'));
-    uint32_t xorVal = ((v1 >> 16) ^ v2) & 0xffff;
+    uint32_t hi1 = (v1 >> 16) & 0xffff;
+    uint32_t lo2 = v2 & 0xffff;
     if (df_get(v, 'x') == df_get(v, 'y')) {
-        register_set32(R(t, v, 'x'), (xorVal << 16) | xorVal);
+        register_set32(R(t, v, 'x'), (lo2 << 16) | hi1);
     } else {
-        register_set32(R(t, v, 'x'), (xorVal << 16) | (v1 & 0xffff));
-        register_set32(R(t, v, 'y'), (v2 & 0xffff0000) | xorVal);
+        register_set32(R(t, v, 'x'), (lo2 << 16) | (v1 & 0xffff));
+        register_set32(R(t, v, 'y'), (v2 & 0xffff0000u) | hi1);
     }
 }
 
@@ -218,7 +242,7 @@ static void exec_LHI(CPU *t, DInstr *v) {
 
 static void exec_LCR(CPU *t, DInstr *v) {
     uint32_t v2 = register_get32(R(t, v, 'y'));
-    uint32_t result = ~v2 + 1;
+    uint32_t result = cpu_sub_fixed(t, 0, v2);
     register_set32(R(t, v, 'x'), result);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -334,7 +358,7 @@ static void exec_STM(CPU *t, DInstr *v) {
 static void exec_SR(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = register_get32(R(t, v, 'y'));
-    uint32_t result = v1 + (~v2 + 1);
+    uint32_t result = cpu_sub_fixed(t, v1, v2);
     register_set32(R(t, v, 'x'), result);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -342,7 +366,7 @@ static void exec_SR(CPU *t, DInstr *v) {
 static void exec_S(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = cpu_g_eaf(t, v, 0);
-    uint32_t result = v1 + (~v2 + 1);
+    uint32_t result = cpu_sub_fixed(t, v1, v2);
     register_set32(R(t, v, 'x'), result);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -350,7 +374,7 @@ static void exec_S(CPU *t, DInstr *v) {
 static void exec_SST(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = cpu_g_eaf(t, v, 0);
-    uint32_t result = (~v1 + 1) + v2;
+    uint32_t result = cpu_sub_fixed(t, v2, v1);
     cpu_s_eaf(t, v, result, 0);
     cpu_compute_cc_arith(t, result, 0);
 }
@@ -358,7 +382,7 @@ static void exec_SST(CPU *t, DInstr *v) {
 static void exec_SH(CPU *t, DInstr *v) {
     uint32_t v1 = register_get32(R(t, v, 'x'));
     uint32_t v2 = cpu_g_eah(t, v) << 16;
-    uint32_t result = v1 + (~v2 + 1);
+    uint32_t result = cpu_sub_fixed(t, v1, v2);
     register_set32(R(t, v, 'x'), result);
     cpu_compute_cc_arith(t, result, 0);
 }

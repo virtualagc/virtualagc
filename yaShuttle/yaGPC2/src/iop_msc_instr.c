@@ -266,7 +266,7 @@ static void exec_LBB(IOP *t, DInstr *v) {
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
     if (bceNum > 0 && bceNum <= 24) {
-        if (register_getbit32(&t->regBusyWait, (int)bceNum) || register_getbit32(&t->regHalt, (int)bceNum)) {
+        if (register_getbit32(&t->regBusyWait, (int)bceNum) || !register_getbit32(&t->regHalt, (int)bceNum)) {
             uint32_t st = register_get32(iopls_MST(&t->ls));
             st = st | (1u << (17 - 13));
             register_set32(iopls_MST(&t->ls), st);
@@ -297,7 +297,7 @@ static void exec_LBB_at(IOP *t, DInstr *v) {
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
     if (bceNum > 0 && bceNum <= 24) {
-        if (register_getbit32(&t->regBusyWait, (int)bceNum) || register_getbit32(&t->regHalt, (int)bceNum)) {
+        if (register_getbit32(&t->regBusyWait, (int)bceNum) || !register_getbit32(&t->regHalt, (int)bceNum)) {
             uint32_t st = register_get32(iopls_MST(&t->ls));
             st = st | (1u << (17 - 13));
             register_set32(iopls_MST(&t->ls), st);
@@ -326,7 +326,7 @@ static void exec_LBP(IOP *t, DInstr *v) {
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
     if (bceNum > 0 && bceNum <= 24) {
-        if (register_getbit32(&t->regBusyWait, (int)bceNum) || register_getbit32(&t->regHalt, (int)bceNum)) {
+        if (register_getbit32(&t->regBusyWait, (int)bceNum) || !register_getbit32(&t->regHalt, (int)bceNum)) {
             uint32_t st = register_get32(iopls_MST(&t->ls));
             st = st | (1u << (17 - 12));
             register_set32(iopls_MST(&t->ls), st);
@@ -357,7 +357,7 @@ static void exec_LBP_at(IOP *t, DInstr *v) {
     uint32_t bceNum = df_get(v, 'b');
     if (bceNum == 0) bceNum = iopls_getACC(&t->ls) & 0x1fu;
     if (bceNum > 0 && bceNum <= 24) {
-        if (register_getbit32(&t->regBusyWait, (int)bceNum) || register_getbit32(&t->regHalt, (int)bceNum)) {
+        if (register_getbit32(&t->regBusyWait, (int)bceNum) || !register_getbit32(&t->regHalt, (int)bceNum)) {
             uint32_t st = register_get32(iopls_MST(&t->ls));
             st = st | (1u << (17 - 12));
             register_set32(iopls_MST(&t->ls), st);

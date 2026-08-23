@@ -5,6 +5,75 @@
 
 #include "cpu.h"
 
+/* Interrupt register A (Group 1 / EX0) sources, in the order the
+ * instruction set lists them.  Reading register A is how the EX0 handler
+ * learns which of these raised it; the read is destructive (read and
+ * clear), which is why the values live here rather than being recomputed.
+ *
+ *   GO_NOGO    the go/no-go (watchdog) timer timed out
+ *   IOP_FAIL   IOP fail latch, from the RM voter logic -- a Computer Fail
+ *              affecting the capability of the machine, originating in
+ *              the voter rather than in transmission termination
+ *   CM_IDLE    "The IOP Control/Monitor logic is in the Idle mode and
+ *              available for further operations."
+ *   ROS_PAR    parity error during a transfer from IOP Read Only Storage
+ *   IOP_FAULT  IOP timing fault
+ */
+#define INTA_GO_NOGO   0x80000000u
+#define INTA_IOP_FAIL  0x40000000u
+#define INTA_CM_IDLE   0x20000000u
+#define INTA_ROS_PAR   0x10000000u
+#define INTA_IOP_FAULT 0x08000000u
+
+/* Discrete inputs.
+ *
+ * The two discrete-input registers carry the switch positions and vehicle
+ * signals the software configures itself from.  The IOP Principles of
+ * Operation, carried as an appendix of AP-101S-instruction-set.txt, gives
+ * the bits under "PCI FORMAT / READ DISCRETE INPUT A" (08180000, device
+ * DF) and "READ DISCRETE INPUTS B" (081c0000, device RM), where "0 = D.I.
+ * RESET, 1 = D.I. SET" and IBM bit numbering runs from the MS end:
+ *
+ *   A   0-2   HALT / STANDBY / RUN crew panel switches ("The setting of
+ *             this bit indicates that the crew panel switch has been set
+ *             to 'HALT'", which holds the CPU in system reset)
+ *       4,5   MM1 / MM2 selected as the IPL source
+ *       6,7   MM1 / MM2 READY -- the MMU's own signal, not a switch
+ *   B   0-2   GPC SELF ID (1-5; 0 is NOT a legal ID)
+ *       3-5   BFS ENGAGE 1/2/3, "set by orbiter BFS controller when BFS
+ *             engage push-button is depressed"
+ *       6,7   BFS CRT SELECT A and B, the current setting of the orbiter
+ *             BFC CRT select switch
+ *      8-31   not used
+ *
+ * Nothing in this emulator drives them yet, so they hold a fixed default
+ * standing in for the crew panel and the vehicle: GPC 1, IPL source MM1,
+ * MM1 ready, display CRT 1.  Leaving them zero -- which is what this port
+ * did -- is not a neutral choice: it reports GPC ID 0, which is not a
+ * legal ID, so GPCIPL cannot identify itself. */
+#define DISCRETE_IN_A_DEFAULT 0x0a000000u  /* bit 4 MM1 IPL source, bit 6 MM1 ready */
+#define DISCRETE_IN_B_DEFAULT 0x21000000u  /* bits 0-2 GPC 1, bits 6-7 CRT 1 */
+
+/* An MIA enable register as its READ PCI reports it.
+ *
+ * The registers are kept in PROCESSOR numbering, bit n being BCE n with
+ * the MSC at bit 0.  The READ PCIs answer in CHANNEL numbering instead --
+ * "BIT 0 CHANNEL NO. 1 MIA TRANSMITTER ... BIT 23 CHANNEL NO. 24 MIA
+ * TRANSMITTER, BIT 24-31 NOT USED. BITS, IF SET, ARE INVALID." -- so what
+ * comes back is the stored word moved one place left and cut off above
+ * channel 24.  Returning the register raw, as this port did, reports
+ * every channel one place off. */
+#define MIA_READ_MASK 0xffffff00u
+
+static uint32_t mia_read_back(const Register *reg) {
+    return (register_get32(reg) << 1) & MIA_READ_MASK;
+}
+
+void iop_reset_discrete_inputs(IOP *iop) {
+    register_set32(&iop->regDiscreteInA, DISCRETE_IN_A_DEFAULT);
+    register_set32(&iop->regDiscreteInB, DISCRETE_IN_B_DEFAULT);
+}
+
 /* ---------------------------------------------------------------------
  * IOPLocalStore
  * ------------------------------------------------------------------- */
@@ -206,6 +275,7 @@ void iop_init(IOP *iop, struct CPU *cpu) {
     register_init(&iop->regDiscreteOut);
     register_init(&iop->regDiscreteInA);
     register_init(&iop->regDiscreteInB);
+    iop_reset_discrete_inputs(iop);
     register_init(&iop->regRMStatus);
     iop->regInterrupts = registerfile_create(5);
     iop->intForceTest = false;
@@ -273,11 +343,13 @@ void iop_exec_processors(IOP *iop) {
     iop->curPE = page;
 
     if (page == 0) {
-        if (register_getbit32(&iop->regHalt, 0)) return;
+        /* regHalt is 1 = Processor Enabled (iop.h), so a CLEAR bit is the
+         * halted processor that must not be stepped. */
+        if (!register_getbit32(&iop->regHalt, 0)) return;
         if (!register_getbit32(&iop->regBusyWait, 0)) return;
     } else {
         int bceIdx = page;
-        if (register_getbit32(&iop->regHalt, bceIdx)) return;
+        if (!register_getbit32(&iop->regHalt, bceIdx)) return;
         if (!register_getbit32(&iop->regBusyWait, bceIdx)) return;
     }
 
@@ -442,26 +514,72 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             break;
         }
         case 0x86200000: { /* CONFIGURE PROCESSORS HALT */
+            /* regHalt holds Status Register 5 the way the architecture
+             * defines it -- 1 = Processor Enabled -- so halting CLEARS
+             * the named processors' bits.  See regHalt in iop.h. */
             uint32_t r1 = register_get32(&iop->regHalt);
-            r1 = r1 | data;
-            register_set32(&iop->regHalt, r1);
+            register_set32(&iop->regHalt, r1 & ~data);
             break;
         }
         case 0x87200000: { /* CONFIGURE PROCESSORS ENABLE */
             uint32_t r1 = register_get32(&iop->regHalt);
-            uint32_t r2 = r1 & data;
-            r1 = r1 ^ r2;
-            register_set32(&iop->regHalt, r1);
+            register_set32(&iop->regHalt, r1 | data);
             break;
         }
-        case 0x84400000: /* MASTER RESET */
-            register_set32(&iop->regProgExcept, 0xfffff800u);
+        case 0x84400000: { /* MASTER RESET */
+            /* PROC_ALL, the MSC plus BCE 1-24, is 0xffffff80 -- IBM bit
+             * numbering, so processor n is bit n counted from the MS end.
+             * The 0xfffff800 that used to be here is bits 0-20, four
+             * processors short.
+             *
+             * STAT1 (GO/NO-GO) resets to GO and GO is 1, so every
+             * processor bit is set.  STAT5 (the Halt Register) resets to
+             * HALT and enabled is 1, so "all halted" is every bit CLEAR
+             * -- zero, not a mask. */
+            register_set32(&iop->regProgExcept, 0xffffff80u);
             register_set32(&iop->regBusyWait, 0x00000000u);
-            register_set32(&iop->regHalt, 0xfffff800u);
+            register_set32(&iop->regHalt, 0x00000000u);
             register_set32(&iop->regXmitEna, 0x00000000u);
             register_set32(&iop->regRecvEna, 0x00000000u);
             register_set32(&iop->regDiscreteOut, 0x00000000u);
+            /* MASTER RESET's INTERRUPT effects, which were missing
+             * entirely.  The instruction set's own reset table gives them
+             * bit by bit:
+             *
+             *      -C/M IDLE                 SET
+             *      -IOP FAIL LTCH            NO CHANGE
+             *      -TIME OUT LTCH            NO CHANGE
+             *      -ROS PAR                  RESET
+             *      -IOP FAULT                RESET
+             *      -ALL OTHER INTERRUPTS     RESET
+             *
+             * C/M IDLE is the Control/Monitor logic reporting itself
+             * "in the Idle mode and available for further operations",
+             * and it is a Group 1 source, so setting it raises EX0 --
+             * PSA 0078/007C, "External 0 (C/M Idle, IOP Reg. A)".  This
+             * is what GPCIPL's self-test waits for after issuing its own
+             * MASTER RESET: the handler reads interrupt register A and
+             * expects to find C/M IDLE identifying the source.
+             *
+             * Registers B-E are "all other interrupts".  In register A
+             * only the two latches survive; ROS PAR and IOP FAULT are
+             * reset by falling outside the kept mask. */
+            register_set32(registerfile_r(&iop->regInterrupts, 1), 0x0u);
+            register_set32(registerfile_r(&iop->regInterrupts, 2), 0x0u);
+            register_set32(registerfile_r(&iop->regInterrupts, 3), 0x0u);
+            register_set32(registerfile_r(&iop->regInterrupts, 4), 0x0u);
+            uint32_t kept = register_get32(registerfile_r(&iop->regInterrupts, 0))
+                            & (INTA_GO_NOGO | INTA_IOP_FAIL);
+            register_set32(registerfile_r(&iop->regInterrupts, 0),
+                           kept | INTA_CM_IDLE);
+            if (iop->cpu != NULL) {
+                iop->cpu->intPending.iopGrp1 = true;  /* EX0 */
+            }
+            /* The table's remaining line, "WATCHDOG TIMER RST=ZERO
+             * COUNTER AND INHIBIT COUNTING", has nothing to act on --
+             * this emulator carries no go/no-go watchdog counter. */
             break;
+        }
         case 0x88040000: { /* LOAD GO/NO-GO TIMER */
             uint32_t r1 = register_get32(&iop->regRMStatus);
             uint32_t timerVal = data & 0x00000fffu;
@@ -507,10 +625,10 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         case 0xc1008000: /* INHIBIT COMPLETION OF A DMA CYCLE */
             return;      /* no-op */
         case 0x04000000: /* READ MIA TRANSMITTER STATUS */
-            register_set32(&iop->regCCData, register_get32(&iop->regXmitEna));
+            register_set32(&iop->regCCData, mia_read_back(&iop->regXmitEna));
             break;
-        case 0x40400000: /* READ MIA RECEIVER STATUS */
-            register_set32(&iop->regCCData, register_get32(&iop->regRecvEna));
+        case 0x04040000: /* READ MIA RECEIVER STATUS (04040000, not 40400000) */
+            register_set32(&iop->regCCData, mia_read_back(&iop->regRecvEna));
             break;
         case 0x04080000: /* READ DISCRETE OUTPUT STATUS */
             register_set32(&iop->regCCData, register_get32(&iop->regDiscreteOut));
@@ -545,8 +663,10 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         case 0x08180000: /* READ DISCRETE INPUT A (1-32) */
             register_set32(&iop->regCCData, register_get32(&iop->regDiscreteInA));
             break;
-        case 0x081c0000: /* READ DISCRETE INPUTS (33-40) */
-            register_set32(&iop->regCCData, register_get32(&iop->regDiscreteInA));
+        case 0x081c0000: /* READ DISCRETE INPUTS B (33-40) */
+            /* Register B, not A -- this read the A register, so discrete
+             * inputs 33-40 came back as inputs 1-32. */
+            register_set32(&iop->regCCData, register_get32(&iop->regDiscreteInB));
             break;
         case 0x10000000: /* READ STATUS1(GO/NO-GO) */
             register_set32(&iop->regCCData, register_get32(&iop->regProgExcept));

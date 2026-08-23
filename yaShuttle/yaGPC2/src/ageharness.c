@@ -98,6 +98,35 @@ static void mem_pattern_fill(AGEHarness *age) {
  * top, still protected, left for the program's own bootstrap (ISPB calls
  * driven by a table like BILDNEW5's $POFF/$PON-generated UNPRT) to
  * selectively unprotect whatever it needs to write. */
+/* Storage protection as a loader leaves it.
+ *
+ * Store powers up unprotected (Sec. 2.5.3.1 gives Power-On no protection
+ * step of its own -- the blanket protect belongs to IPL, Sec. 2.5.3.3).
+ * Protection is then what the loader asserts over what it has LOADED, so
+ * the loaded extents end up protected and everything else -- scratch,
+ * buffers, the PSA -- does not.
+ *
+ * Booting a composed image at Power-On skips the loader that would have
+ * done that, so assert it here from the section map the symbol file
+ * carries.  Both of the alternatives are wrong in a way GPCIPL notices:
+ * protect nothing and the Instruction Monitor fires the moment the
+ * software sets PSW mask bit 34, because every instruction then appears
+ * to be executing out of unprotected storage; protect everything (what
+ * --ipl does) and GPCIPL's own error logging faults writing into
+ * sector-1/ENVIRONS scratch that no loader would ever have protected. */
+static long apply_load_protection(AGEHarness *age) {
+    long n = 0;
+    for (int i = 0; i < age->sym.sectionCount; i++) {
+        const Section *s = &age->sym.sections[i];
+        if (s->size == 0) continue;
+        for (uint32_t a = s->address; a < s->address + s->size; a++) {
+            membus_set_store_protect(&age->gpc.ram, a, true);
+            n++;
+        }
+    }
+    return n;
+}
+
 static void ipl_fill(AGEHarness *age) {
     uint32_t total = age->gpc.ram.totalHWCount;
     mem_pattern_fill(age);
@@ -254,6 +283,16 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
     if (opts->ipl) ipl_fill(age);
     else if (opts->powerOn) mem_pattern_fill(age);
     long byteCount = load_fcm(age, fcmPath);
+    /* After the image is in store, not before: this stands in for the
+     * loader that would have protected what it wrote.  --ipl already
+     * protected everything up front, so it does not want this. */
+    if (opts->powerOn && !opts->ipl) {
+        long protectedHW = apply_load_protection(age);
+        if (opts->verbose) {
+            printf("Load protection: %ld halfword(s) over %d section(s)\n",
+                   protectedHW, age->sym.sectionCount);
+        }
+    }
     if (hasEntryPoint) {
         ageharness_set_entry_point(age, entryPoint);
     } else if (opts->ipl || opts->powerOn) {
