@@ -141,6 +141,12 @@ void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24);
 typedef struct {
     int bceNum;
     MIA mia;
+    /* #DLY/#DLYI hold this BCE at one instruction for a wall of
+     * simulated time; see iop_bce_delay().  Keyed by PC so re-entering a
+     * different delay instruction starts a fresh wait. */
+    bool delayActive;
+    uint32_t delayPC;
+    double delayUntilUs;
 } BCE;
 
 void bce_init(BCE *b, int bceNum);
@@ -289,6 +295,11 @@ uint32_t iop_msc_ea(IOP *iop, uint32_t disp, bool indexed);
  * Element program counter -- the address of the next sequential
  * instruction.  The displacement is 11-bit two's complement. */
 uint32_t iop_bce_ea(IOP *iop, uint32_t disp, bool m);
+
+/* Hold the running BCE at its current instruction for `count` timeout
+ * counts.  Returns true once the wait is over and the caller may advance
+ * the PC, false while it must stay put. */
+bool iop_bce_delay(IOP *iop, uint32_t count);
 
 /* The MSC's repeat-until instructions.  `met` is the instruction's own
  * condition; this advances 2 halfwords when it is met, 1 when the repeat

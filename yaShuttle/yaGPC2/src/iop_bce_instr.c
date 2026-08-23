@@ -302,8 +302,19 @@ static void exec_MIN_at(IOP *t, DInstr *v) {
  * 3.5 SPECIAL INSTRUCTIONS
  * ------------------------------------------------------------------- */
 
-static void exec_DLYI(IOP *t, DInstr *v) { (void)v; iop_incr_nia(t, 1); }
-static void exec_DLY(IOP *t, DInstr *v) { (void)v; iop_incr_nia(t, 1); }
+/* #DLYI holds the BCE for its own immediate timeout count; #DLY reads the
+ * count from the fullword its displacement addresses, the way #LTO reads
+ * its own.  Both used to advance immediately, so every BCE skipped every
+ * delay it was told to take and ran far ahead of the machine -- which the
+ * software notices, since it polls STAT4 to see how far the BCEs have
+ * got. */
+static void exec_DLYI(IOP *t, DInstr *v) {
+    if (iop_bce_delay(t, df_get(v, 'i'))) iop_incr_nia(t, 1);
+}
+static void exec_DLY(IOP *t, DInstr *v) {
+    uint32_t count = iop_g_eaf(t, iop_bce_ea(t, df_get(v, 'd'), true) & ~1u) & 0x3ffffu;
+    if (iop_bce_delay(t, count)) iop_incr_nia(t, 1);
+}
 
 static void exec_WAT(IOP *t, DInstr *v) {
     (void)v;

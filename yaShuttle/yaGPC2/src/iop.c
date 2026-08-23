@@ -226,6 +226,9 @@ void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
 }
 
 void bce_init(BCE *b, int bceNum) {
+    b->delayActive = false;
+    b->delayPC = 0;
+    b->delayUntilUs = 0.0;
     b->bceNum = bceNum;
     mia_init(&b->mia, bceNum);
 }
@@ -487,6 +490,26 @@ void iop_msc_repeat(IOP *iop, DInstr *v, bool met) {
     /* else: leave the PC where it is and run again next slice. */
 }
 
+/* "The resolution of this timeout count is 16.5 microseconds" -- the two
+ * ranges the POO quotes agree with it, 2047 counts to 33.78 ms and 262143
+ * to 4.325 s. */
+#define MTO_TICK_US 16.5
+
+bool iop_bce_delay(IOP *iop, uint32_t count) {
+    BCE *bce = iop_cur_bce(iop);
+    if (bce == NULL) return true;
+    uint32_t pc = register_get32(iopls_PC(&iop->ls)) & 0x3ffff;
+    double now = (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
+    if (!bce->delayActive || bce->delayPC != pc) {
+        bce->delayActive = true;
+        bce->delayPC = pc;
+        bce->delayUntilUs = now + (double)count * MTO_TICK_US;
+    }
+    if (now < bce->delayUntilUs) return false;
+    bce->delayActive = false;
+    return true;
+}
+
 uint32_t iop_bce_ea(IOP *iop, uint32_t disp, bool m) {
     if (disp & 0x400) disp |= 0xfffff800u;
     uint32_t ea = (register_get32(iopls_PC(&iop->ls)) + 1u + disp) & 0x3ffff;
@@ -694,17 +717,32 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         case 0x88100000: /* LOAD TEST REGISTER */
             return;      /* no-op */
         case 0x88180000: /* TEST INTERRUPTS */
+            /* "The TEST command word forces interrupt Registers A, B, D
+             * and E to set all interrupts as follows:
+             *      REG A  BITS 0-5  (FC00 0000)
+             *      REG B  BITS 4&5  (0C00 0000)
+             *      REG D  BIT 0     (8000 0000)
+             *      REG E  BIT 0     (8000 0000)"
+             * Not all-ones, which is what this used to write. */
             iop->intForceTest = true;
-            register_set32(registerfile_r(&iop->regInterrupts, 0), 0xffffffffu);
-            register_set32(registerfile_r(&iop->regInterrupts, 1), 0xffffffffu);
-            register_set32(registerfile_r(&iop->regInterrupts, 3), 0xffffffffu);
-            register_set32(registerfile_r(&iop->regInterrupts, 4), 0xffffffffu);
+            register_set32(registerfile_r(&iop->regInterrupts, 0), 0xfc000000u);
+            register_set32(registerfile_r(&iop->regInterrupts, 1), 0x0c000000u);
+            register_set32(registerfile_r(&iop->regInterrupts, 3), 0x80000000u);
+            register_set32(registerfile_r(&iop->regInterrupts, 4), 0x80000000u);
             break;
         case 0x88140000: /* ENABLE INTERRUPTS */
             iop->intForceTest = false;
             break;
         case 0x92000000: /* RESET STATUS1(GO/NO-GO) */
-            return;      /* no-op */
+            /* "These PCO's provide the capability (data Word is used as
+             * Mask) to reset Status Register 1 to the normal or GO
+             * indicator ... 0 No Change, 1 Reset Status".  STAT1 carries
+             * 1 = GO, so resetting a processor to GO SETS its bit.  This
+             * was a no-op, which left the software's own GO/NO-GO resets
+             * with no effect at all. */
+            register_set32(&iop->regProgExcept,
+                           register_get32(&iop->regProgExcept) | data);
+            break;
         case 0x92040000: { /* LOAD MSC BUSY */
             /* The MSC's own bit in STAT4 -- the TOP bit of the word,
              * not the bottom one this used to set. */
@@ -727,27 +765,27 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             break;
         case 0x08000000: /* READ INTERRUPT REGISTER A */
             register_set32(&iop->regCCData, register_get32(registerfile_r(&iop->regInterrupts, 0)));
-            register_set32(registerfile_r(&iop->regInterrupts, 0), 0x0);
+            if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 0), 0x0);
             break;
         case 0x08040000: /* READ INTERRUPT REGISTER B */
             register_set32(&iop->regCCData, register_get32(registerfile_r(&iop->regInterrupts, 1)));
-            register_set32(registerfile_r(&iop->regInterrupts, 1), 0x0);
+            if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 1), 0x0);
             break;
         case 0x08080000: /* READ INTERRUPT REGISTER C */
             register_set32(&iop->regCCData, register_get32(registerfile_r(&iop->regInterrupts, 2)));
-            register_set32(registerfile_r(&iop->regInterrupts, 2), 0x0);
+            if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 2), 0x0);
             break;
         case 0x080c0000: /* READ INTERRUPT REGISTER D */
             register_set32(&iop->regCCData, register_get32(registerfile_r(&iop->regInterrupts, 3)));
-            register_set32(registerfile_r(&iop->regInterrupts, 3), 0x0);
+            if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 3), 0x0);
             break;
         case 0x08100000: /* READ INTERRUPT REGISTER E */
             register_set32(&iop->regCCData, register_get32(registerfile_r(&iop->regInterrupts, 4)));
-            register_set32(registerfile_r(&iop->regInterrupts, 4), 0x0);
+            if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 4), 0x0);
             break;
         case 0x08140000: /* READ RM STATUS REGISTERS */
             register_set32(&iop->regCCData, register_get32(&iop->regRMStatus));
-            register_set32(registerfile_r(&iop->regInterrupts, 5), 0x0);
+            if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 5), 0x0);
             break;
         case 0x08180000: /* READ DISCRETE INPUT A (1-32) */
             register_set32(&iop->regCCData, register_get32(&iop->regDiscreteInA));
