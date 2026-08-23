@@ -1041,3 +1041,26 @@ document's planning stages, and it is already in the code as
   time fill always survives; a 511-halfword display fill usually does not.
 - The fix must therefore pace per-word datagrams against the WALL clock -- not
   simulated time, and not by batching, which the protocol forbids.
+
+### [2026-08-23] Target: [problems.md]
+- WALL-CLOCK PACING implemented in the transport, and it works.  One FIFO per
+  bus plus a token bucket: credit accrues at one halfword per 20 us of WALL
+  time (the 1 Mbps bus rate), capped at 64 words so a gap between pumps cannot
+  bank enough credit to release a whole transfer at once.  Datagrams stay one
+  halfword each, as the protocol requires.  Pumped from
+  bcenet_framer_flush_tick(), which is now called from the idle loop as well --
+  the per-instruction call is never reached during a wait.
+- Verified with the headless DEU harness, 100 s each:
+                        unpaced   paced
+      fills completed        68     122
+      headerless             75      33   (the rest are the legitimate 8-word
+      abandoned               8       0    trailer fills; gpc sends those too)
+      wordsIn            39,454  62,844
+  And the number that matters: DROPS ON THE PEER'S SOCKET are now ZERO.  Every
+  remaining drop is on OUR receive socket (8,978), discarding our own loopback
+  echoes -- harmless, though it is a small standing risk that a DEU reply could
+  be lost among them.  Per-socket attribution via /proc/net/udp inode -> owning
+  process; do that rather than reading the port total, which conflates the two.
+- No regressions: all suites unchanged, GPCIPL matches for all 3,987,845 traced
+  instructions, and the mass memory load still completes end to end (POSITION
+  4/4/2, EXTENDED_BLOCK, READ 17 blocks from 4/4/3/8, read done 4/4/4).

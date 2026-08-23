@@ -13,6 +13,8 @@
 
 #include "bcenet_transport.h"
 
+#include "compat.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,6 +85,46 @@ typedef struct {
     size_t len;
 } SelfEchoEntry;
 
+/* One halfword's time on the bus, in WALL seconds.
+ *
+ * The bus runs at 1 Mbps and spends 20 bit times on a word (sync, 16 data
+ * bits, parity), so a word is 20 us and a 511-halfword display fill takes
+ * about 10 ms.  Every word is its own datagram because the subsystems use
+ * DATAGRAM LENGTH to tell a command from data (meds/deuUnit.coffee's recv:
+ * two or more halfwords IS a command), so the burst cannot be collapsed --
+ * it has to be spread out instead.
+ *
+ * WALL seconds, deliberately, not simulated.  The subsystem on the other
+ * end is a real process draining a real socket; it does not care what the
+ * simulated clock thinks.  Pacing against simulated time was tried and
+ * barely helped -- cpu_advance_idle_ns() advances up to 5 ms of simulated
+ * time inside a single call with no wall time passing at all, so a burst
+ * still left in one rush.
+ *
+ * Unpaced, a 511-word fill overran the peer's socket: measured against a
+ * display unit, 2,948 datagrams dropped in 40 s, and more than half its
+ * fills arrived unusable -- 75 logged "unheadered" (the leading count and
+ * address words lost) against 68 that completed. */
+#define BUS_WORD_SECONDS 20e-6
+
+/* How many words may go back to back after an idle gap.  The peer's
+ * receive buffer holds roughly 276 of these tiny datagrams; staying well
+ * under that leaves room for whatever else is on the bus.  Without a cap,
+ * a long gap between pumps would bank enough credit to release the whole
+ * burst at once, which is the behavior being fixed. */
+#define BUS_BURST_MAX 64.0
+
+/* Datagrams that may be waiting for the bus.  A mass-memory block and a
+ * display fill are both ~512 words, so this holds several transfers. */
+#define BCENET_OUT_QUEUE 4096
+
+typedef struct {
+    uint16_t words[2];   /* a command is 2 halfwords, data is 1 */
+    uint8_t count;
+    uint8_t iua;
+    uint8_t shuttle;
+} OutDatagram;
+
 typedef struct {
     int busID;
     int fd;     /* receive socket, bound to the bus port; -1 = closed */
@@ -90,6 +132,13 @@ typedef struct {
     uint16_t txPort;   /* the port the kernel gave txFd, in host order */
     SelfEchoEntry selfEcho[SELF_ECHO_MAX];
     int selfEchoCount;
+
+    /* Outbound pacing: a FIFO plus a token bucket in wall time. */
+    OutDatagram outQ[BCENET_OUT_QUEUE];
+    size_t outHead, outCount;
+    double tokens;
+    double lastPumpSeconds;
+    bool pumpStarted;
 } BceNetBusSocket;
 
 /* Remember a datagram we just sent, so the loopback copy can be dropped. */
@@ -305,9 +354,11 @@ static struct sockaddr_in bcenet_group_addr(int port) {
 }
 #endif
 
-bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttleBus, const uint16_t *words,
-                            size_t wordCount) {
-    BceNetBusSocket *b = find_bus(t, busID);
+/* Put one datagram on the wire immediately.  Only the pump calls this;
+ * everything else goes through bcenet_transport_send(), which queues. */
+static bool transport_send_now(BceNetTransport *t, BceNetBusSocket *b, int busID, int iua,
+                               bool isShuttleBus, const uint16_t *words, size_t wordCount) {
+    (void)t;
     if (!b || b->fd < 0) return false;
 #ifndef BCENET_HAVE_POSIX_SOCKETS
     (void)iua;
@@ -341,6 +392,75 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
         return false;
     }
     return true;
+#endif
+}
+
+bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttleBus,
+                            const uint16_t *words, size_t wordCount) {
+    BceNetBusSocket *b = find_bus(t, busID);
+    if (!b || b->fd < 0) return false;
+    if (wordCount == 0) return true;
+    /* Queued, not sent: the bus carries one halfword every 20 us and the
+     * peer is a real process that cannot absorb a whole transfer at once.
+     * bcenet_transport_pump() releases these in order. */
+    if (wordCount > 2) {
+        /* Callers only ever offer a 1-word data value or a 2-word
+         * command; anything else would silently lose its tail here. */
+        fprintf(stderr, "bcenet: bus %d: %zu-word datagram offered, expected 1 or 2\n", busID,
+                wordCount);
+        return false;
+    }
+    if (b->outHead > 0 && b->outHead + b->outCount >= BCENET_OUT_QUEUE) {
+        memmove(&b->outQ[0], &b->outQ[b->outHead], b->outCount * sizeof b->outQ[0]);
+        b->outHead = 0;
+    }
+    if (b->outHead + b->outCount >= BCENET_OUT_QUEUE) {
+        fprintf(stderr, "bcenet: bus %d: outbound queue full, dropping a datagram\n", busID);
+        return false;
+    }
+    OutDatagram *d = &b->outQ[b->outHead + b->outCount];
+    d->words[0] = words[0];
+    d->words[1] = wordCount > 1 ? words[1] : 0;
+    d->count = (uint8_t)wordCount;
+    d->iua = (uint8_t)iua;
+    d->shuttle = isShuttleBus ? 1 : 0;
+    b->outCount++;
+    return true;
+}
+
+/* Release whatever the bus has had time for since the last call.  One
+ * FIFO per bus, so a command can never overtake the data burst ahead of
+ * it, and a token bucket so the average rate is the real bus rate while
+ * a gap between calls cannot bank enough credit to release a whole
+ * transfer at once (see BUS_WORD_SECONDS and BUS_BURST_MAX). */
+void bcenet_transport_pump(BceNetTransport *t) {
+    if (!t) return;
+#ifdef BCENET_HAVE_POSIX_SOCKETS
+    double now = yagpc_monotonic_seconds();
+    for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
+        BceNetBusSocket *b = &t->buses[i];
+        if (b->fd < 0) continue;
+        if (!b->pumpStarted) {
+            b->pumpStarted = true;
+            b->lastPumpSeconds = now;
+            b->tokens = BUS_BURST_MAX;   /* an idle bus starts ready */
+        }
+        double elapsed = now - b->lastPumpSeconds;
+        if (elapsed > 0.0) {
+            b->tokens += elapsed / BUS_WORD_SECONDS;
+            if (b->tokens > BUS_BURST_MAX) b->tokens = BUS_BURST_MAX;
+        }
+        b->lastPumpSeconds = now;
+
+        while (b->outCount > 0 && b->tokens >= 1.0) {
+            OutDatagram *d = &b->outQ[b->outHead];
+            transport_send_now(t, b, i, d->iua, d->shuttle != 0, d->words, d->count);
+            b->tokens -= (double)d->count;
+            b->outHead++;
+            b->outCount--;
+            if (b->outCount == 0) b->outHead = 0;
+        }
+    }
 #endif
 }
 

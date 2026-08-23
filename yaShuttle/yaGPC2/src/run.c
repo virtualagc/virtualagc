@@ -484,6 +484,12 @@ static bool batchrunner_step(BatchRunner *r) {
             RTPaceResult why;
             for (;;) {
                 why = rtpacer_advance_idle(&r->rtPacer);
+                /* The bus keeps running while the CPU waits, and its
+                 * transmissions are paced against the wall clock, so they
+                 * have to be released from here too -- the per-instruction
+                 * flush below is never reached during a wait, which is
+                 * where this machine spends most of its time. */
+                if (r->bceFramer) bcenet_framer_flush_tick(r->bceFramer);
                 if (why != RTPACE_WAITING) break;
                 /* Ctrl-C has to be honoured here too: a paced wait can
                  * legitimately last seconds of wall time, and a loop that

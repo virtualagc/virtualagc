@@ -41,6 +41,13 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID);
  * meaningfully "0" on the real wire) precedes the word data, matching
  * Bus#sendMsg's own layout exactly. Returns false if the bus isn't open
  * (call bcenet_transport_open_bus first) or the send itself failed. */
+/* Release queued datagrams that the bus has had time for.  Call often --
+ * from wherever the emulator makes progress, including the wait state.
+ * See BUS_WORD_SECONDS in bcenet_transport.c. */
+void bcenet_transport_pump(BceNetTransport *t);
+
+/* QUEUES one datagram (1 data halfword, or a 2-halfword command); the
+ * pump puts it on the wire at the bus's own rate. */
 bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttleBus, const uint16_t *words,
                             size_t wordCount);
 

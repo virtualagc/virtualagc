@@ -217,6 +217,8 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
 }
 
 void bcenet_framer_flush_tick(BceNetFramer *f) {
+    /* Let the transport put out whatever the bus has had time for. */
+    bcenet_transport_pump(f->transport);
     for (int i = 0; i <= FRAMER_MAX_BUS_ID; i++) {
         if (!f->buses[i].used) continue;
         flush_bus(f, i, &f->buses[i]);
