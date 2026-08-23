@@ -933,3 +933,31 @@ document's planning stages, and it is already in the code as
   occupy ~8 ms rather than microseconds.  Pacing the DMA drain to the bus word
   rate is the faithful fix; it needs care because it also paces the mass-memory
   path (which currently drops nothing).
+
+### [2026-08-23] Target: [problems.md]
+- ANSWER to "does gpc transmit only complete buffers?": no.  Its `xmitWord`
+  sends `new BusMsg(1)` -- one halfword per datagram, exactly as we did.  It
+  escapes the overflow only because its display fill is 196 words and ours is
+  511, and a default UDP receive buffer holds roughly 276 of them.
+- But the RECEIVERS all take multi-word datagrams: meds/deuUnit.coffee's
+  `(@onData(w) for w in words)` and mmu/mmu.coffee's `self._onData(w) for w in
+  words` both loop over every word, and both answer with whole multi-word
+  messages (a poll reply arrives as one 16-word datagram).  So batching a
+  transfer into one datagram is safe, and it is what fixes this.
+- Deliberate deviation from the reference, and measured:
+      per-word (was) : 7,823 datagrams dropped in 45 s
+      paced 20 us/wd : 4,882   (tried first, insufficient, reverted)
+      per-transfer   : 0       -- same as the reference
+  With it, `#MIN` at 035a2 COMPLETES for the first time (035a2 -> 035a6, 12
+  times; it had been 0 of 83), we finally issue `03584 cmd=5718fc` -- the
+  250-halfword LAST_FILL that completes the display unit's own IPL, previously
+  never sent at all -- and BCE6's transition graph now has the reference's
+  exact shape: 035a6 -> 03572 and 035a6 -> 03584, 03584 -> 03588 -> 03589 ->
+  03592.
+- NEWLY EXPOSED, not a regression of the above but the next problem: about 90 s
+  in, after the display unit's IPL completes, BCE6 stops at the `#WAT` at 0359e
+  and is never dispatched again; the MSC spins at 032a4 (`@RAW`, waiting on
+  busy bits) and DK1 goes silent.  Confirmed NOT a tracing artifact -- it
+  happens with all traces off.  The reference keeps driving DK1 indefinitely at
+  this stage.  The display therefore goes blank after ~90 s, which is
+  user-visibly worse than before even though the bus behavior is now correct.
