@@ -839,3 +839,21 @@ document's planning stages, and it is already in the code as
   of BCE6 being the obvious candidate (our MSC also spins at 032a4, a PC gpc
   never reaches, and falls through at 032a2 `@BC X'4',X'4D'` where gpc
   branches to 032f0).
+
+### [2026-08-23] Target: [problems.md]
+- CORRECTION to the MSC lead logged earlier today: it was wrong, and came from a
+  trace taken while a stale `gpc` was still on the buses.  In a clean run our
+  MSC branches correctly at 032a2 (ACC = 0 in all 147 samples), executes
+  032f0..0330a 150 times, and never spins at 032a4 (677,377 spins in the
+  contaminated trace, 0 in the clean one).  Its hot PCs match the reference
+  almost exactly: 03444/03445 14,865 vs 14,960, 03446/03490/03492 14,832 vs
+  14,927.  The MSC is not implicated.
+- The live divergence, both emulators against a FRESHLY restarted MEDS:
+  gpc's BCE6 cycle is TIME_FILL + POLL + DISPLAY_FILL (196 hw at 0x19ee) + BITE
+  every 0.500 s of simulated time; ours is TIME_FILL + POLL only, every 1.026 s.
+  Both now succeed at the 16-word poll and reach the `#WAT` at 0359e; the BCE
+  is then restarted at 03592 for us and at the display-fill path for gpc.
+- Process hygiene: `ps -C node` does NOT find a running gpc -- its process name
+  is `node-MainThread`.  Two measurements this session were silently taken with
+  a second emulator on the buses because of it.  Enumerate /proc/*/cmdline
+  instead, and skip $$ or a pattern matches the checking shell itself.
