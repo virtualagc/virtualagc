@@ -130,7 +130,11 @@ static const TimingEntry TIMING_TABLE[] = {
  * AP-101S-instruction-set.txt section 17, "AP-101S INSTRUCTION EXECUTION
  * TIMES", headed "INSTRUCTION EXECUTION TIME IN US" (which also settles
  * timing.h's note that the units were never independently confirmed as
- * microseconds: the table says so).  PASS2 WINS wherever both have an
+ * microseconds: the table says so).  Citations below give the PRINTED
+ * page first and the line in the OCR'd text second; the page markers in
+ * that text are FOOTERS (page 17-1 is the section's assumptions, and the
+ * table itself occupies printed pages 17-2, 17-3 and 17-4), so a row
+ * belongs to the first marker at or below it.  PASS2 WINS wherever both have an
  * entry -- this table is consulted only when find_entry() comes back
  * empty -- so nothing here can perturb a HAL/S-compiled workload.
  *
@@ -172,27 +176,27 @@ typedef struct {
 static const PooTimingEntry POO_TIMING_TABLE[] = {
     /* Branch instructions: t[0] is the branch-TAKEN time; the not-taken
      * time is in POO_BRANCH_NOT_TAKEN below. */
-    {"BVC",   {1.25, 4.0,   7.0,   3.75,  7.0,   5.0,   6.5}},
-    {"BVCF",  {1.25, NA,    NA,    NA,    NA,    NA,    NA}},
-    {"BVCR",  {1.25, NA,    NA,    NA,    NA,    NA,    NA}},
+    {"BVC",   {1.25, 4.0,   7.0,   3.75,  7.0,   5.0,   6.5}},  /* p.17-2 L13545 */
+    {"BVCF",  {1.25, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13546 */
+    {"BVCR",  {1.25, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13547 */
 
-    {"BCB",   {0.25, NA,    NA,    NA,    NA,    NA,    NA}},
-    {"CBL",   {5.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* "AVG. = 5.0" */
-    {"LFLR",  {0.75, NA,    NA,    NA,    NA,    NA,    NA}},
-    {"LFXR",  {0.75, NA,    NA,    NA,    NA,    NA,    NA}},
-    {"LPS",   {10.25,13.25, 14.25, 13.0,  14.25, 15.5,  17.25}},
-    {"LXA",   {3.5,  6.5,   6.25,  6.25,  6.25,  6.5,   5.25}}, /* -1.25 early out not modelled */
-    {"LXAR",  {3.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* -1.25 early out not modelled */
-    {"STDM",  {2.25, 5.25,  6.75,  5.0,   5.25,  7.0,   7.5}},   /* RECONSTRUCTED: mnemonic from alphabetical position, line 13711 */
-    {"STXA",  {2.5,  6.5,   8.0,   6.25,  8.0,   8.25,  8.75}},   /* RECONSTRUCTED: mnemonic from alphabetical position, line 13719 */
-    {"STXAR", {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},  /* RECONSTRUCTED: mnemonic from alphabetical position, line 13717 */
-    {"XUL",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},    /* RECONSTRUCTED: mnemonic from alphabetical position, line 13744 */
+    {"BCB",   {0.25, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13537 */
+    {"CBL",   {5.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* "AVG. = 5.0"; p.17-2 L13550 */
+    {"LFLR",  {0.75, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-3 L13607 */
+    {"LFXR",  {0.75, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-3 L13609 */
+    {"LPS",   {10.25,13.25, 14.25, 13.0,  14.25, 15.5,  17.25}}, /* p.17-3 L13613 */
+    {"LXA",   {3.5,  6.5,   6.25,  6.25,  6.25,  6.5,   5.25}}, /* p.17-3 L13616 (RS); -1.25 early out not modelled */
+    {"LXAR",  {3.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-3 L13615 (RR); -1.25 early out not modelled */
+    {"STDM",  {2.25, 5.25,  6.75,  5.0,   5.25,  7.0,   7.5}},  /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13715 */
+    {"STXA",  {2.5,  6.5,   8.0,   6.25,  8.0,   8.25,  8.75}}, /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13726 */
+    {"STXAR", {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13724-25 */
+    {"XUL",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13759-60 */
 
     /* PROVISIONAL: SSM normal-addressing figure, line 13709 -- and
      * RECONSTRUCTED: mnemonic from alphabetical position on the same
      * line.  Pending a human read of the printed manual.  SSM's
      * normal-mode figure is the one number on these pages the OCR lost
-     * outright -- line 13709 renders it "704".  7.75 is gpc's reading and
+     * outright -- printed page 17-4 (L13709) renders it "704".  7.75 is gpc's reading and
      * the only multiple of .125 that fits, every other figure in the row
      * being one (the manual prints those rounded to two decimals,
      * 10.63/11.63/10.38, for 10.625/11.625/10.375, which is what is used
@@ -202,13 +206,13 @@ static const PooTimingEntry POO_TIMING_TABLE[] = {
     /* Parametric and non-numeric rows.  t[0] is the base; see
      * instr_time_us() for the per-instruction arithmetic. */
     /* PROVISIONAL: ISPB M1 = 4 only -- that row is absent from the text
-     * (page break between 17-2 and 17-3); M1 = 0-3 (5.625, lines
-     * 13580-13583) and M1 = 5-7 (.125, lines 13590-13592) are read
-     * directly.  See the M1 cutoff in instr_time_us(). */
+     * (page break between printed pages 17-2 and 17-3); M1 = 0-3
+     * (5.625, p.17-2 L13578-81) and M1 = 5-7 (.125, p.17-3 L13592-94)
+     * are read directly.  See the M1 cutoff in instr_time_us(). */
     {"ISPB",  {5.625, 8.0,  9.0,   7.75,  9.0,   10.25, 12.0}}, /* M1 >= 4: 0.125 */
-    {"NCT",   {1.05, NA,    NA,    NA,    NA,    NA,    NA}},   /* + .075 * N */
-    {"SRDR",  {2.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* + .5 * N (N mod 32); RECONSTRUCTED: mnemonic, lines 13699-13701 */
-    {"SUM",   {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* * elements tested; RECONSTRUCTED: mnemonic, line 13721 */
+    {"NCT",   {1.05, NA,    NA,    NA,    NA,    NA,    NA}},   /* + .075 * N; p.17-3 L13644 */
+    {"SRDR",  {2.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* + .5 * N (N mod 32); RECONSTRUCTED: mnemonic; p.17-4 L13700,13702 */
+    {"SUM",   {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* * elements tested; RECONSTRUCTED: mnemonic; p.17-4 L13727-28 */
 
     /* The manual gives no single number for these three.  Each value is a
      * representative stand-in, chosen so the instruction costs SOMETHING
@@ -217,9 +221,9 @@ static const PooTimingEntry POO_TIMING_TABLE[] = {
      *   ICR  "COMMAND DEPENDENT"  -- varies by the command in R2
      *   PC   ">4.25 BUT <22.5 (NO CUR DMA)" -- a range, not a value;
      *        4.5 is the low end of it, the no-DMA typical case */
-    {"DIAG",  {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},
-    {"ICR",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},
-    {"PC",    {4.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* RECONSTRUCTED: mnemonic from alphabetical position, line 13664 */
+    {"DIAG",  {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13571 */
+    {"ICR",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13576 */
+    {"PC",    {4.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* RECONSTRUCTED: mnemonic from alphabetical position; p.17-4 L13668 */
 };
 #define POO_TIMING_COUNT (sizeof(POO_TIMING_TABLE) / sizeof(POO_TIMING_TABLE[0]))
 
@@ -339,8 +343,9 @@ double instr_time_us(const InstrDesc *desc, const DInstr *v, uint32_t preN, bool
 
         /* ISPB: the manual tabulates it per M1, 5.625 for M1 = 0-3 and
          * .125 for M1 = 5-7.  The M1 = 4 row fell in the page break
-         * between 17-2 and 17-3 and is not in the text at all, so the
-         * cutoff below is PROVISIONAL: it follows gpc, which takes the
+         * between printed pages 17-2 and 17-3 and is not in the text at
+         * all, so the cutoff below is PROVISIONAL: it follows gpc,
+         * which takes the
          * .125 branch for the whole illegal-M1 group (100-111, i.e.
          * M1 >= 4).  Only M1 = 4 is in doubt; 0-3 and 5-7 are read
          * directly from the table. */
