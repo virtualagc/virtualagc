@@ -735,3 +735,31 @@ document's planning stages, and it is already in the code as
   ON -- most likely a BCE busy/indicator transition arriving later in
   gpc than in ours, i.e. our BCE finishing its program sooner than it
   should.
+
+### [2026-08-23] Target: [problems.md]
+- FOUND IT: @RBI (RESET BCE INDICATOR, MSC) names its processor as the
+  instruction's own BCE field PLUS the low five bits of the accumulator
+  -- `p = (v.b + (ACC & 0x1f)) & 0x1f` -- the same accumulator-relative
+  convention @LBB/@LBP already used correctly here.  We took the field
+  alone, so every reset went to BCE 0 (the MSC) and the BCE's own
+  indicator, once set by #SIB, was NEVER cleared.
+- Consequence: @RAI ("repeat until all indicators", (indicator & accMask)
+  == accMask) was satisfied immediately every time, so the MSC never
+  waited for a block.  Measured at the branch that proves it -- @RAI at
+  0x3445 skips to 0x3447 when met: gpc exits there 33 times and loops
+  14,927 times waiting; ours exited 76,266 times and looped 66.  The MSC
+  therefore built block programs flat out until the buffer pointer
+  overflowed out of the #LBR operand field into its opcode, which is the
+  f204/f205/... BCE18 was choking on.
+- The per-block pacing that made the rates comparable in the first place
+  is #DLYI X'15E' at 035f2 -- 350 x 16.5 us = 5.775 ms, matching gpc's
+  ~6 ms per iteration.  Ours honoured it correctly all along (5,506
+  executions), which is what made the 76,266-vs-33 gap so conspicuous.
+- RESULT: mass memory load now completes and matches gpc command for
+  command -- 3 READs, ending exactly as Don's own expected output does:
+  "read 8 block(s) from 4/4/4/8", "read done, position 4/4/5".  Zero
+  unknown-instruction reports.  BCE6 (DK1, MEDS) now runs its display
+  program -- 8,573 instructions, gpc's own 3592/3596/3598/3599/359a/359e
+  sequence -- where before it only ran its 6-instruction self test.
+- GPCIPL trace still matches all 3,987,845 instructions, 0 phase slips;
+  no suite moved.

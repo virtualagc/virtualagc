@@ -511,7 +511,20 @@ static void exec_SEC(IOP *t, DInstr *v) {
 }
 
 static void exec_RBI(IOP *t, DInstr *v) {
-    iop_proc_set(&t->regIndicator, (int)df_get(v, 'b'), 0);
+    /* RESET BCE INDICATOR names its processor as the instruction's own
+     * BCE field PLUS the low five bits of the accumulator -- the same
+     * accumulator-relative convention @LBB/@LBP already use, which is
+     * how one piece of micro code resets whichever BCE it is currently
+     * working.  Taking the field alone, as this did, sent every reset
+     * to BCE 0 (the MSC), so the BCE's own indicator was set by #SIB
+     * and then NEVER cleared.  @RAI ("repeat until all indicators")
+     * was therefore satisfied immediately every time, and the MSC ran
+     * its mass-memory block loop flat out instead of once per block:
+     * 76,266 iterations against the reference's 33, building block
+     * programs until the buffer pointer overflowed out of the #LBR
+     * operand field and into its opcode. */
+    uint32_t p = (df_get(v, 'b') + (iopls_getACC(&t->ls) & 0x1fu)) & 0x1fu;
+    iop_proc_set(&t->regIndicator, (int)p, 0);
     iop_incr_nia(t, 1);
 }
 
