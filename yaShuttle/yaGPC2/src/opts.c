@@ -81,6 +81,11 @@ static const char *HELP_TEXT =
 "  --no-debug                      disable the interactive debugger (default)\n"
 "  --source-map <file>             HAL/S source-line map for --debug (see\n"
 "                                  tools/gen_source_map.py)\n"
+"  --timing <model>                instruction-timing model: \"poo\" (AP-101S\n"
+"                                  Principles of Operation section 17, the\n"
+"                                  hardware spec) or \"pass2\" (the HAL/S-FC\n"
+"                                  compiler's own static estimate, kept for\n"
+"                                  comparison) (default: \"poo\")\n"
 "  --time-scale <factor>           wall-clock pacing divisor for SCHEDULE/WAIT\n"
 "                                  real-time throttling (default: 1.0, genuine\n"
 "                                  real time; factor > 0). A larger factor\n"
@@ -124,6 +129,7 @@ static void set_defaults(Options *o) {
     o->dumpInterval = "100";
     o->timeScale = "1.0";
     o->pacing = "burst";
+    o->timing = "poo";
 }
 
 /* JS parseInt(s, 16) applied after stripping a leading "0x"/"0X" — matches
@@ -256,6 +262,12 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->timeScale = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--pacing", &n)) {
             opts->pacing = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--timing", &n)) {
+            opts->timing = take_value(argc, argv, &i, tok, n);
+            if (strcmp(opts->timing, "poo") != 0 && strcmp(opts->timing, "pass2") != 0) {
+                fprintf(stderr, "error: --timing must be \"poo\" or \"pass2\"\n");
+                exit(1);
+            }
         } else if (tok_is(tok, "--date-time-epoch", &n)) {
             opts->dateTimeEpoch = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--bce-network", &n)) {

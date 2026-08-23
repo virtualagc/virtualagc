@@ -792,6 +792,14 @@ static int batchrunner_report_stop(BatchRunner *r) {
     char msg[700];
     snprintf(msg, sizeof msg, "--- STOPPED after %ld steps (reason: %s) ---", r->step, r->stopReason);
     batchrunner_info(r, msg);
+    /* Simulated AP-101S time, so a run can be compared against another
+     * simulator's (or against the real hardware's own duty-cycle
+     * figures) without attaching a debugger to read elapsedTimeUs.
+     * Which model produced it matters -- see timing.h and --timing. */
+    snprintf(msg, sizeof msg, "--- SIMULATED TIME: %.3f ms (%.1f us, %s model) ---",
+             r->age.gpc.cpu.elapsedTimeUs / 1000.0, r->age.gpc.cpu.elapsedTimeUs,
+             r->age.gpc.cpu.timingPass2 ? "pass2" : "poo");
+    batchrunner_info(r, msg);
     batchrunner_info(r, "--- FINAL REGISTERS ---");
     info_reg_dump(r, r->step);
 

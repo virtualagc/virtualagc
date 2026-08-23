@@ -143,17 +143,25 @@ static const TimingEntry TIMING_TABLE[] = {
  * MODIFICATION and AUTO INDEXING.  A negative entry is the manual's "--",
  * i.e. the form has no such addressing mode, and falls back to normal.
  *
- * Every value below was read from the manual and then cross-checked
- * against gpc/cpu_instr.coffee's `xts:` arrays, an independent
- * transcription of the same table; they agree except where noted in the
- * per-entry comments.
+ * PROVENANCE, WHICH IS NOT UNIFORM ACROSS THIS TABLE.  It began as the
+ * twenty-two rows section 17 gives for instructions HAL/S-FC's own
+ * compiler never emitted, and every figure in those twenty-two WAS READ
+ * FROM THE PRINTED DOCUMENT -- three of these pages reached us as OCR
+ * bad enough to lose figures and, on p.17-4, the whole INSTRUCTION
+ * column, and a human read the printed pages to resolve them.  Those
+ * rows still carry their page/line citations below.
  *
- * EVERY FIGURE BELOW HAS BEEN READ FROM THE PRINTED DOCUMENT.  Three
- * pages of this table reached us as OCR bad enough to lose figures and,
- * on p.17-4, the whole INSTRUCTION column; those were resolved by a human
- * reading the printed pages, so nothing here rests on OCR guesswork or on
- * gpc's transcription.  Four things are still inference rather than
- * reading, each marked at its own entry:
+ * The remaining rows come from gpc/cpu_instr.coffee's `xts:`/`xtbs:`
+ * arrays -- Don Schmidt's own transcription of the same section-17
+ * table, taken wholesale so this port would stop guessing timings for
+ * the ~110 instructions it had no manual reading of.  They are NOT
+ * independently verified here.  Where the two sources overlap they were
+ * compared row by row and agree exactly, with one 5 ns exception (SSM,
+ * noted at its entry), which is the main reason for trusting the rest.
+ * Spot checks against the printed pages (L, LA, AH, LM) also agreed.
+ *
+ * Four things are inference rather than reading, each marked at its own
+ * entry:
  *
  *   - SSM's four middle columns, printed to two decimals, read as the
  *     .125 multiples they round to.
@@ -177,84 +185,185 @@ static const TimingEntry TIMING_TABLE[] = {
 
 #define NA (-1.0)
 
+/* SSM (p.17-4 L13709).  The OCR had destroyed the normal-addressing
+ * figure, rendering it "704"; the printed page says 7.75.  Its four
+ * middle columns are printed to two decimals where the last two are
+ * printed to three, so 10.63/11.63/10.38 are read here as
+ * 10.625/11.625/10.375 -- the table's figures are multiples of .125
+ * throughout and no two-decimal value in it is exact.  That reading is
+ * inference; gpc keeps the printed 10.63/11.63/10.38, and this is the
+ * one row where the two sources differ.  The difference is 5 ns.
+ *
+ * ISPB is listed one row per M1 value: M1 = 0-3 at 5.625 (p.17-2
+ * L13578-81) and M1 = 5-7 at .125 (p.17-3 L13592-94).  THERE IS NO
+ * M1 = 4 ROW -- confirmed by reading the printed pages, so this is an
+ * omission in the original document rather than something the OCR or
+ * the page break lost.
+ *
+ * .125 is nonetheless the right value for it, and the instruction's own
+ * definition says why.  M1 selects what ISPB does, and the four
+ * encodings divide exactly the way the two timing groups do (p.9-4):
+ * 000/001 reset the protection bits for the halfword or fullword
+ * second operand, 010/011 set them -- the four real operations, at
+ * 5.625 -- while "100 Illegal, 101 Illegal, 110 Illegal, 111
+ * Illegal".  M1 = 4 is 100, one of the four illegal encodings, whose
+ * other three are the attested .125 rows.  An illegal M1 does no
+ * storage work at all; it raises the illegal-operation interrupt.
+ * gpc puts the cutoff at M1 >= 5, i.e. it charges an illegal M1 = 4
+ * the full 5.625; this port charges .125.  See poo_override().
+ *
+ * DIAG, ICR and PC are the three rows the manual gives no single number
+ * for -- "SEE POO" (per-function times in POO s.15), "COMMAND
+ * DEPENDENT" (ICR's real per-command times are applied in
+ * poo_override(), from 85-C67-001 p.10-3), and ">4.25 BUT <22.5 (NO CUR
+ * DMA)", a range whose low end is taken as the no-DMA typical case. */
+
 typedef struct {
     const char *nm;
-    double t[7];
+    double t[7];   /* the seven addressing-mode columns; NA = "--" */
+    double bt[2];  /* branch [taken, not-taken]; NA if not a branch */
 } PooTimingEntry;
 
+/* Rows carrying a page/line citation were read from the printed manual;
+ * the rest are gpc's transcription of the same table (see the header
+ * comment above).  Sorted by mnemonic so a row is findable by eye. */
 static const PooTimingEntry POO_TIMING_TABLE[] = {
-    /* Branch instructions: t[0] is the branch-TAKEN time; the not-taken
-     * time is in POO_BRANCH_NOT_TAKEN below. */
-    {"BVC",   {1.25, 4.0,   7.0,   3.75,  7.0,   5.0,   6.5}},  /* p.17-2 L13545 */
-    {"BVCF",  {1.25, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13546 */
-    {"BVCR",  {1.25, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13547 */
-
-    {"BCB",   {0.25, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13537 */
-    {"CBL",   {5.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* "AVG. = 5.0"; p.17-2 L13550 */
-    {"LFLR",  {0.75, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-3 L13607 */
-    {"LFXR",  {0.75, NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-3 L13609 */
-    {"LPS",   {10.25,13.25, 14.25, 13.0,  14.25, 15.5,  17.25}}, /* p.17-3 L13613 */
-    {"LXA",   {3.5,  6.5,   6.25,  6.25,  6.25,  6.5,   5.25}}, /* p.17-3 L13616 (RS); -1.25 early out not modelled */
-    {"LXAR",  {3.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-3 L13615 (RR); -1.25 early out not modelled */
-    {"STDM",  {2.25, 5.25,  6.75,  5.0,   5.25,  7.0,   7.5}},  /* p.17-4 L13715 */
-    {"STXA",  {2.5,  6.5,   8.0,   6.25,  8.0,   8.25,  8.75}}, /* STXA RS; p.17-4 L13726 */
-    {"STXAR", {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* the STXA RR row; p.17-4 L13724-25 */
-    {"XUL",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-4 L13759-60 */
-
-    /* CONFIRMED against the printed page: "SSM RS 7.75 10.63 11.63 10.38
-     * 11.63 12.875 14.625" (p.17-4 L13709).  The OCR had destroyed the
-     * normal-addressing figure, rendering it "704"; 7.75 is what the page
-     * actually says.
-     *
-     * The four middle columns are printed to two decimals where the last
-     * two are printed to three, so 10.63/11.63/10.38 are read here as
-     * 10.625/11.625/10.375 -- the table's figures are multiples of .125
-     * throughout, and no two-decimal value in it is exact.  That reading
-     * is inference, not what is printed; the difference is 5 ns. */
-    {"SSM",   {7.75, 10.625, 11.625, 10.375, 11.625, 12.875, 14.625}},
-
-    /* Parametric and non-numeric rows.  t[0] is the base; see
-     * instr_time_us() for the per-instruction arithmetic. */
-    /* ISPB is listed one row per M1 value: M1 = 0-3 at 5.625 (p.17-2
-     * L13578-81) and M1 = 5-7 at .125 (p.17-3 L13592-94).  THERE IS NO
-     * M1 = 4 ROW -- confirmed by reading the printed pages, so this is an
-     * omission in the original document rather than something the OCR or
-     * the page break lost.
-     *
-     * .125 is nonetheless the right value for it, and the instruction's
-     * own definition says why.  M1 selects what ISPB does, and the four
-     * encodings divide exactly the way the two timing groups do (p.9-4):
-     * 000/001 reset the protection bits for the halfword or fullword
-     * second operand, 010/011 set them -- the four real operations, at
-     * 5.625 -- while "100 Illegal, 101 Illegal, 110 Illegal, 111
-     * Illegal".  M1 = 4 is 100, one of the four illegal encodings, whose
-     * other three are the attested .125 rows.  An illegal M1 does no
-     * storage work at all; it raises the illegal-operation interrupt.
-     * See the M1 cutoff in instr_time_us(). */
-    {"ISPB",  {5.625, 8.0,  9.0,   7.75,  9.0,   10.25, 12.0}}, /* M1 >= 4: 0.125 */
-    {"NCT",   {1.05, NA,    NA,    NA,    NA,    NA,    NA}},   /* + .075 * N; p.17-3 L13644 */
-    {"SRDR",  {2.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* + .5 * N (N mod 32); p.17-4 L13700,13702 */
-    {"SUM",   {2.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* * elements tested; p.17-4 L13727-28 */
-
-    /* The manual gives no single number for these three.  Each value is a
-     * representative stand-in, chosen so the instruction costs SOMETHING
-     * rather than nothing, and each matches gpc's own choice:
-     *   DIAG "SEE POO"            -- per-function times live in POO s.15
-     *   ICR  "COMMAND DEPENDENT"  -- varies by the command in R2
-     *   PC   ">4.25 BUT <22.5 (NO CUR DMA)" -- a range, not a value;
-     *        4.5 is the low end of it, the no-DMA typical case */
-    {"DIAG",  {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13571 */
-    {"ICR",   {1.0,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-2 L13576 */
-    {"PC",    {4.5,  NA,    NA,    NA,    NA,    NA,    NA}},   /* p.17-4 L13668 */
+    {"A",       {  0.25,    4.5,   4.25,   4.25,   4.25,    5.5,   7.25}, {NA, NA}},
+    {"AE",      {   2.5,   6.75,    6.5,    6.5,    6.5,    7.5,      9}, {NA, NA}},
+    {"AED",     {   6.5,   10.5,  10.25,  10.25,  10.25,   11.5,  13.25}, {NA, NA}},
+    {"AEDR",    {  6.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"AER",     {  2.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"AH",      {  0.25,    4.5,   4.25,   4.25,   4.25,    5.5,      7}, {NA, NA}},
+    {"AHI",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"AR",      {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"AST",     {  0.75,      6,      7,   5.75,      7,   8.25,  10.25}, {NA, NA}},
+    {"BAL",     {  3.75,      7,     10,   6.75,     10,      8,    9.5}, {NA, NA}},
+    {"BALR",    {    NA,     NA,     NA,     NA,     NA,     NA,     NA}, {3.5, 4.5}},
+    {"BC",      {  1.25,   4.25,   7.25,      4,   7.25,   5.25,   6.25}, {1.25, 0.25}},
+    {"BCB",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* p.17-2 L13537 */
+    {"BCF",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"BCR",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"BCRE",    {    NA,     NA,     NA,     NA,     NA,     NA,     NA}, {5.75, 0.5}},
+    {"BCT",     {  1.75,    4.5,    7.5,   4.25,    7.5,    5.5,      7}, {1.75, 0.75}},
+    {"BCTB",    {    NA,     NA,     NA,     NA,     NA,     NA,     NA}, {1.75, 0.75}},
+    {"BCTR",    {    NA,     NA,     NA,     NA,     NA,     NA,     NA}, {1.75, 0.75}},
+    {"BIX",     {   2.5,   5.75,   8.75,    5.5,   8.75,   6.75,   8.25}, {2.5, 1.5}},
+    {"BVC",     {  1.25,      4,      7,   3.75,      7,      5,    6.5}, {1.25, 0.5}},  /* p.17-2 L13545; BT/BNT */
+    {"BVCF",    {  1.25,     NA,     NA,     NA,     NA,     NA,     NA}, {1.25, 0.5}},  /* p.17-2 L13546; BT/BNT */
+    {"BVCR",    {  1.25,     NA,     NA,     NA,     NA,     NA,     NA}, {1.25, 0.5}},  /* p.17-2 L13547; BT/BNT */
+    {"C",       {  0.25,    4.5,   4.25,   4.25,   4.25,    5.5,   7.25}, {NA, NA}},
+    {"CBL",     {     5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* "AVG. = 5.0"; p.17-2 L13550 */
+    {"CE",      {  1.75,      6,   5.75,   5.75,   5.75,   6.75,    8.5}, {NA, NA}},
+    {"CED",     {  5.75,   9.75,    9.5,    9.5,    9.5,  10.75,   12.5}, {NA, NA}},
+    {"CEDR",    {   5.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"CER",     {   1.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"CH",      {  0.25,    4.5,   4.25,   4.25,   4.25,    5.5,      7}, {NA, NA}},
+    {"CHI",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"CIST",    {   1.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"CR",      {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"CVFL",    {  1.75,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"CVFX",    {  2.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"D",       { 4.925,   9.05,    8.8,    8.8,    8.8,  10.05,   11.8}, {NA, NA}},
+    {"DE",      {   7.5,     12,   11.5,   11.5,   11.5,  12.75,  15.25}, {NA, NA}},
+    {"DED",     {    23,  27.75,  27.75,  27.75,  27.75,  28.75,  29.75}, {NA, NA}},
+    {"DEDR",    { 22.75,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"DER",     {  7.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"DIAG",    {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* "SEE POO" -- stand-in; p.17-2 L13571 */
+    {"DR",      { 4.925,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"IAL",     {   0.5,      4,      5,   3.75,      5,   6.25,      8}, {NA, NA}},
+    {"ICR",     {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* "COMMAND DEPENDENT" -- per-command below; p.17-2 L13576 */
+    {"IHL",     {   0.5,   4.75,    4.5,    4.5,    4.5,   5.75,   7.25}, {NA, NA}},
+    {"ISPB",    { 5.625,      8,      9,   7.75,      9,  10.25,     12}, {NA, NA}},  /* p.17-2 L13578-81 / 17-3 L13592-94; M1>=4 -> 0.125 */
+    {"L",       {  0.25,    4.5,   4.25,   4.25,   4.25,    5.5,   7.25}, {NA, NA}},
+    {"LA",      {  0.25,      4,      5,   3.75,      5,   6.25,      8}, {NA, NA}},
+    {"LCR",     {   0.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"LDM",     {  6.75,     10,     10,     10,     10,  10.25,  10.25}, {NA, NA}},
+    {"LE",      {   1.2,      5,   4.75,   4.75,   4.75,   5.75,    8.5}, {NA, NA}},
+    {"LECR",    {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"LED",     {   1.5,    5.5,      5,      5,      5,   6.25,   8.75}, {NA, NA}},
+    {"LER",     {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"LFLI",    {  0.75,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"LFLR",    {  0.75,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* p.17-3 L13607 */
+    {"LFXI",    {  0.75,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"LFXR",    {  0.75,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* p.17-3 L13609 */
+    {"LH",      {  0.25,    4.5,   4.25,   4.25,   4.25,    5.5,      7}, {NA, NA}},
+    {"LHI",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"LM",      {   8.5,  12.25,  13.25,     12,  13.25,   14.5,  16.25}, {NA, NA}},
+    {"LPS",     { 10.25,  13.25,  14.25,     13,  14.25,   15.5,  17.25}, {NA, NA}},  /* p.17-3 L13613 */
+    {"LR",      {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"LXA",     {   3.5,    6.5,   6.25,   6.25,   6.25,    6.5,   5.25}, {NA, NA}},  /* p.17-3 L13616 (RS); -1.25 early out below */
+    {"LXAR",    {   3.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* p.17-3 L13615 (RR); -1.25 early out below */
+    {"M",       {   2.4,   6.53,   7.53,   6.28,   7.53,   8.78,  10.53}, {NA, NA}},
+    {"ME",      {  6.25,   10.5,  10.25,  10.25,  10.25,   11.5,  13.25}, {NA, NA}},
+    {"MED",     {    19,   22.5,  22.25,  22.25,  22.25,  24.25,  25.75}, {NA, NA}},
+    {"MEDR",    {  18.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"MER",     {     6,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"MH",      {  1.35,   5.48,   5.23,   5.23,   5.23,   6.48,   7.98}, {NA, NA}},
+    {"MHI",     {  1.35,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"MIH",     {   1.7,   5.83,   5.58,   5.58,   5.58,  6.825,  8.025}, {NA, NA}},
+    {"MR",      {   2.4,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"MSTH",    {     3,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"MVH",     {  7.75,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"N",       {  0.25,   4.75,    4.5,    4.5,    4.5,   5.75,    6.5}, {NA, NA}},
+    {"NCT",     {  1.05,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* base; + .075*N; p.17-3 L13644 */
+    {"NHI",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"NIST",    {     3,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"NR",      {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"NST",     {  0.75,      6,      7,   5.75,      7,   8.25,  10.25}, {NA, NA}},
+    {"O",       {  0.25,   4.75,    4.5,    4.5,    4.5,   5.75,    6.5}, {NA, NA}},
+    {"OHI",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"OR",      {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"OST",     {  0.75,      6,      7,   5.75,      7,   8.25,  10.25}, {NA, NA}},
+    {"PC",      {   4.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* ">4.25 BUT <22.5 (NO CUR DMA)" -- low end; p.17-4 L13668 */
+    {"S",       {  0.25,    4.5,   4.25,   4.25,   4.25,    5.5,   7.25}, {NA, NA}},
+    {"SB",      {     3,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SCAL",    {18.125,   21.5,   24.5,  21.25,   24.5,   22.5,     24}, {NA, NA}},
+    {"SE",      {   2.5,   4.75,    4.5,    4.5,    4.5,    4.5,    9.5}, {NA, NA}},
+    {"SED",     {   6.5,  10.75,   10.5,   10.5,   10.5,   11.5,   13.5}, {NA, NA}},
+    {"SEDR",    {  6.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SER",     {  2.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SH",      {  0.25,    4.5,   4.25,   4.25,   4.25,   5.75,   7.25}, {NA, NA}},
+    {"SHW",     {   1.5,    4.5,    5.5,   4.25,    5.5,   6.75,    8.5}, {NA, NA}},
+    {"SLDL",    {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SLL",     { 0.675,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SPM",     {  5.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SR",      {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SRA",     {  0.65,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SRDA",    {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SRDL",    {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SRDR",    {     2,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* base; + .5*(N mod 32); p.17-4 L13700,13702 */
+    {"SRET",    {  17.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SRL",     {  0.65,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SRR",     {  0.65,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"SSM",     {  7.75, 10.625, 11.625, 10.375, 11.625, 12.875, 14.625}, {NA, NA}},  /* p.17-4 L13709; see note */
+    {"SST",     {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"ST",      {   0.5,   4.75,   5.75,    4.5,   5.75,      7,      9}, {NA, NA}},
+    {"STDM",    {  2.25,   5.25,   6.75,      5,   5.25,      7,    7.5}, {NA, NA}},  /* p.17-4 L13715 */
+    {"STE",     {   0.5,   4.75,    4.5,    4.5,    4.5,    4.5,    7.5}, {NA, NA}},
+    {"STED",    {     1,   5.25,      5,      5,      5,      5,    7.5}, {NA, NA}},
+    {"STH",     {   0.5,    4.5,    5.5,   4.25,    5.5,   6.75,    8.5}, {NA, NA}},
+    {"STM",     {  7.25,  10.25,  11.25,     10,  11.25,   12.5,  14.25}, {NA, NA}},
+    {"STXA",    {   2.5,    6.5,      8,   6.25,      8,   8.25,   8.75}, {NA, NA}},  /* p.17-4 L13726 (RS) */
+    {"STXAR",   {   2.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* p.17-4 L13724-25 (RR) */
+    {"SUM",     {   2.5,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* base; * elements tested; p.17-4 L13727-28 */
+    {"SVC",     { 20.25,  22.75,  23.75,   22.5,  23.75,     25,  26.75}, {NA, NA}},
+    {"TB",      {     2,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"TD",      {     3,   5.75,    5.5,    5.5,    5.5,   6.75,   8.25}, {NA, NA}},
+    {"TH",      {  1.75,   5.25,      5,      5,      5,   6.25,   7.75}, {NA, NA}},
+    {"TRB",     {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"TS",      {  3.75,    6.5,   6.25,   6.25,   6.25,    7.5,      9}, {NA, NA}},
+    {"TSB",     {     3,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"X",       {  0.25,   4.75,    4.5,    4.5,    4.5,   5.75,    7.5}, {NA, NA}},
+    {"XHI",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"XIST",    {     3,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"XR",      {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"XST",     {  0.75,      6,      7,   5.75,      7,   8.25,  10.25}, {NA, NA}},
+    {"XUL",     {     1,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},  /* p.17-4 L13759-60 */
+    {"ZB",      {  3.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
+    {"ZH",      {   1.5,    4.5,    5.5,   4.25,    5.5,   6.75,    8.5}, {NA, NA}},
+    {"ZRB",     {  0.25,     NA,     NA,     NA,     NA,     NA,     NA}, {NA, NA}},
 };
 #define POO_TIMING_COUNT (sizeof(POO_TIMING_TABLE) / sizeof(POO_TIMING_TABLE[0]))
-
-/* Branch-not-taken times for the section-17 branches, "BT=x; BNT=y". */
-typedef struct { const char *nm; double notTaken; } PooBranchEntry;
-static const PooBranchEntry POO_BRANCH_NOT_TAKEN[] = {
-    {"BVC", 0.50}, {"BVCF", 0.50}, {"BVCR", 0.50},
-};
-#define POO_BRANCH_COUNT (sizeof(POO_BRANCH_NOT_TAKEN) / sizeof(POO_BRANCH_NOT_TAKEN[0]))
 
 static const PooTimingEntry *find_poo_entry(const char *nm) {
     for (size_t i = 0; i < POO_TIMING_COUNT; i++) {
@@ -279,8 +388,50 @@ static bool is_extended_indirect(const DInstr *v) {
 }
 
 uint32_t instr_time_pre_n(CPU *cpu, const InstrDesc *desc, const DInstr *v, uint32_t hw1) {
+    cpu->timePooOverrideUs = -1.0;
+
     if (desc->opType == OPTYPE_SHFT) return cpu_g_shift_cnt(cpu, hw1);
-    if (strcmp(desc->nm, "MVH") == 0) return register_get32(cpu_r(cpu, (int)df_get(v, 'x'))) & 0xffff;
+
+    if (strcmp(desc->nm, "MVH") == 0) {
+        /* MVH is the one instruction whose section-17 figure cannot be
+         * reconstructed after execution at all: it overwrites its own
+         * count register, and the "source immediately follows
+         * destination" case needs both operands' expanded addresses.
+         * So the whole POO figure is computed here, ahead of the move,
+         * exactly as gpc's own MVH body computes it.  The PASS2 model
+         * needs only the count, which is what this still returns. */
+        uint32_t r1val = register_get32(cpu_r(cpu, (int)df_get(v, 'x')));
+        uint32_t r2val = register_get32(cpu_r(cpu, (int)df_get(v, 'y')));
+        uint32_t destAddr = (r1val >> 16) & 0xffff;
+        uint32_t count = r1val & 0xffff;
+        if (count & 0x8000) {
+            /* A negative count is a no-op; the PSW-DSR destination path
+             * still runs 2.25 us faster. */
+            cpu->timePooOverrideUs = (destAddr & 0x8000) ? (7.5 - 2.25) : 7.5;
+            return count;
+        }
+        uint32_t srcAddr = (r2val >> 16) & 0x7fff;
+        if (r2val & 0x80000000u) srcAddr = ((r2val & 0xf) << 15) | srcAddr;
+        /* Destination sector: R1 bit 0 = 1 selects the PSW's DSR, bit
+         * 0 = 0 selects R1's own DSE register (POO section 9). */
+        bool destUsesDSR = (destAddr & 0x8000) != 0;
+        if (destUsesDSR) {
+            destAddr = (psw_get_dsr(&cpu->psw) << 15) | (destAddr & 0x7fff);
+        } else {
+            uint32_t dse = registerfile_get_dse(
+                &cpu->regFiles[psw_get_reg_set(&cpu->psw)], (int)df_get(v, 'x'));
+            destAddr = (dse << 15) | (destAddr & 0x7fff);
+        }
+        double t;
+        if (count == 0)                        t = 7.75;
+        else if (srcAddr - destAddr == 1)      t = 9.5 + 1.75 * (double)count;
+        else if (count % 2 == 0)               t = 10.25 + 0.875 * (double)count;
+        else                                   t = 12.0 + 0.875 * (double)(count - 1);
+        if (destUsesDSR) t -= 2.25;
+        cpu->timePooOverrideUs = t;
+        return count;
+    }
+
     /* Section-17 parametric instructions whose N is not a shift count.
      * Both are read BEFORE execution because both overwrite the register
      * the count comes from. */
@@ -295,6 +446,21 @@ uint32_t instr_time_pre_n(CPU *cpu, const InstrDesc *desc, const DInstr *v, uint
     }
     if (strcmp(desc->nm, "SUM") == 0) {
         return (register_get32(cpu_r(cpu, (int)df_get(v, 'y'))) >> 16) & 0xffff;
+    }
+    if (strcmp(desc->nm, "LXA") == 0 || strcmp(desc->nm, "LXAR") == 0) {
+        /* LXA/LXAR run 1.25 us faster when the DSE they are loading is
+         * the one R1 already holds -- a microcode early out.  Both
+         * halves of that comparison are gone by the time the
+         * instruction finishes, since the new DSE has been stored; but
+         * the new value always equals what was loaded, so comparing the
+         * DSE captured here against the DSE afterwards answers the same
+         * question.  See poo_override(). */
+        return registerfile_get_dse(
+            &cpu->regFiles[psw_get_reg_set(&cpu->psw)], (int)df_get(v, 'x'));
+    }
+    if (strcmp(desc->nm, "ICR") == 0) {
+        /* ICR's time depends on the command in R2 (bits 0-4). */
+        return (register_get32(cpu_r(cpu, (int)df_get(v, 'y'))) >> 27) & 0x1f;
     }
     return 0;
 }
@@ -321,7 +487,136 @@ static double resolve_times_index(int idx, uint32_t preN, bool branchTaken) {
     return 0.0;
 }
 
-double instr_time_us(const InstrDesc *desc, const DInstr *v, uint32_t preN, bool branchTaken) {
+/* Picks the addressing-mode column, falling back to normal addressing
+ * for a form the manual marks "--".  Mirrors gpc's xtPick(). */
+static double xt_pick(const double t[7], int xtCase) {
+    double x = (xtCase >= 0 && xtCase < 7) ? t[xtCase] : t[0];
+    return (x < 0.0) ? t[0] : x;
+}
+
+/* The section-17 rows the manual states as a formula or a condition
+ * rather than a number.  Returns a time in us, or a negative value for
+ * "no override; use the table row".  Every case here is gpc's, and the
+ * few places this port deliberately differs are called out.
+ *
+ * `preN` carries whatever instr_time_pre_n() captured for this
+ * mnemonic; `cpu` is read for LXA/LXAR's post-execution DSE only. */
+static double poo_override(CPU *cpu, const char *nm, const DInstr *v,
+                           uint32_t preN, int xtCase) {
+    bool oddR = (df_get(v, 'x') & 1) != 0;
+
+    /* MVH: computed in full before execution (see instr_time_pre_n). */
+    if (cpu->timePooOverrideUs >= 0.0) return cpu->timePooOverrideUs;
+
+    /* Multiply/divide with an ODD R1 keep only the high half of the
+     * product (or take the short divide path) and are correspondingly
+     * cheaper; the manual gives them their own rows. */
+    if (oddR) {
+        static const double D_ODD[7]  = {4.675, 8.8, 7.55, 7.55, 7.55, 9.8, 10.05};
+        static const double M_ODD[7]  = {2.15, 6.28, 7.28, 6.03, 7.28, 8.53, 10.28};
+        static const double ME_ODD[7] = {5.75, 10.0, 9.75, 9.75, 9.75, 11.0, 12.75};
+        if (strcmp(nm, "DR") == 0)  return 4.675;
+        if (strcmp(nm, "MR") == 0)  return 2.15;
+        if (strcmp(nm, "MER") == 0) return 5.5;
+        if (strcmp(nm, "D") == 0)   return xt_pick(D_ODD, xtCase);
+        if (strcmp(nm, "M") == 0)   return xt_pick(M_ODD, xtCase);
+        if (strcmp(nm, "ME") == 0)  return xt_pick(ME_ODD, xtCase);
+    } else if (strcmp(nm, "ME") == 0 && v->niaIncr == 1) {
+        return 5.75;   /* the short (SRS) form is 5.75 either parity */
+    }
+
+    /* Shifts: "base + perUnit * (shift count)". */
+    if (strcmp(nm, "SLL") == 0)  return 0.675 + 0.1  * (double)preN;
+    if (strcmp(nm, "SRA") == 0)  return 0.65  + 0.1  * (double)preN;
+    if (strcmp(nm, "SRL") == 0)  return 0.65  + 0.1  * (double)preN;
+    if (strcmp(nm, "SRR") == 0)  return 0.65  + 0.1  * (double)(preN % 32);
+    if (strcmp(nm, "SLDL") == 0) return 1.0   + 0.25 * (double)preN;
+    if (strcmp(nm, "SRDA") == 0) return 1.0   + 0.25 * (double)preN;
+    if (strcmp(nm, "SRDL") == 0) return 1.0   + 0.1  * (double)preN;
+    if (strcmp(nm, "SRDR") == 0) return 2.0   + 0.5  * (double)(preN < 32 ? preN : preN - 32);
+
+    if (strcmp(nm, "NCT") == 0) return 1.05 + 0.075 * (double)preN;
+
+    if (strcmp(nm, "SUM") == 0) {
+        /* "2.5 * (# ELEMENTS TESTED)".  gpc knows the real figure
+         * because it sets the time from inside the scan loop; this port
+         * charges the whole array, which over-estimates whenever SUM
+         * stops early.  It is the one section-17 formula here that is
+         * not exact. */
+        uint32_t n = preN ? preN : 1;
+        return 2.5 * (double)n;
+    }
+
+    if (strcmp(nm, "LXA") == 0 || strcmp(nm, "LXAR") == 0) {
+        /* -1.25 microcode early out when the DSE being loaded is
+         * already there.  preN is the DSE captured before execution;
+         * the DSE now holds what was loaded, so equality still answers
+         * the question (see instr_time_pre_n). */
+        uint32_t dseNow = registerfile_get_dse(
+            &cpu->regFiles[psw_get_reg_set(&cpu->psw)], (int)df_get(v, 'x'));
+        if (dseNow != preN) return -1.0;
+        const PooTimingEntry *p = find_poo_entry(nm);
+        return p ? xt_pick(p->t, xtCase) - 1.25 : -1.0;
+    }
+
+    if (strcmp(nm, "ISPB") == 0) {
+        /* Illegal M1 does no storage work at all.  gpc's cutoff is
+         * M1 >= 5; this port's is M1 >= 4, because M1 = 4 is the first
+         * of the four encodings p.9-4 calls Illegal and the manual
+         * simply has no row for it.  See the note above the table. */
+        if (df_get(v, 'x') >= 4) return 0.125;
+        return -1.0;
+    }
+
+    if (strcmp(nm, "ICR") == 0) {
+        /* Per-command typical times, 85-C67-001 p.10-3 (via gpc, whose
+         * comment records that the read-counter figures are tuned so the
+         * GPC self-test does not report CLOCK OUT OF TOLERANCE).  preN
+         * is the command field of R2. */
+        switch (preN) {
+            case 0x00: return 5.5;    /* read counter 1  */
+            case 0x01: return 5.75;   /* read counter 2  */
+            case 0x08: return 3.5;    /* load counter 1  */
+            case 0x09: return 3.75;   /* load counter 2  */
+            case 0x05: return 20.25;  /* read AGE        */
+            case 0x0d: return 20.0;   /* load AGE        */
+            default:   return -1.0;   /* undocumented: table row */
+        }
+    }
+
+    return -1.0;
+}
+
+/* The AP-101S Principles of Operation section-17 model -- the default.
+ * Dispatch order is gpc's: a formula row wins; then, for normal
+ * addressing only, a branch's taken/not-taken pair; then the
+ * addressing-mode column; then the untabulated-instruction floor. */
+static double instr_time_poo(CPU *cpu, const InstrDesc *desc, const DInstr *v,
+                             uint32_t preN, bool branchTaken) {
+    const char *nm = desc->nm;
+    int xtCase = cpu->xtCase;
+
+    double ovr = poo_override(cpu, nm, v, preN, xtCase);
+    if (ovr >= 0.0) return ovr;
+
+    const PooTimingEntry *p = find_poo_entry(nm);
+    if (!p) return INSTR_TIME_UNKNOWN_US;
+
+    /* "BT=x; BNT=y" applies to normal addressing; the indirection and
+     * indexing columns are single figures. */
+    if (xtCase == 0 && p->bt[0] >= 0.0) return branchTaken ? p->bt[0] : p->bt[1];
+
+    double t = xt_pick(p->t, xtCase);
+    return (t < 0.0) ? INSTR_TIME_UNKNOWN_US : t;
+}
+
+/* The HAL/S-FC PASS2 compiler's own estimate -- --timing=pass2 only.
+ * Kept for comparison against the hardware model above; see timing.h.
+ * Unchanged from when it was the default, except that a mnemonic the
+ * compiler never named now falls through to the section-17 model
+ * rather than costing nothing. */
+static double instr_time_pass2(CPU *cpu, const InstrDesc *desc, const DInstr *v,
+                               uint32_t preN, bool branchTaken) {
     const char *nm = desc->nm;
     bool oddR = (df_get(v, 'x') & 1) != 0;
     bool indexed = is_indexed(v);
@@ -344,62 +639,7 @@ double instr_time_us(const InstrDesc *desc, const DInstr *v, uint32_t preN, bool
     if (oddR && strcmp(nm, "ME") == 0) return indexed ? (seePoo ? PLAIN_TIMES[50] : PLAIN_TIMES[62]) : PLAIN_TIMES[29];
 
     const TimingEntry *e = find_entry(nm);
-    if (!e) {
-        /* HAL/S-FC never named/timed this mnemonic -- fall back to the
-         * manual's own section-17 table (see POO_TIMING_TABLE). */
-        const PooTimingEntry *p = find_poo_entry(nm);
-        if (!p) return 0.0;
-
-        /* Column choice mirrors the PASS2 path directly above: an
-         * indexed operand with extended indirection takes the double-
-         * indirection figure, an indexed operand without it takes the
-         * auto-indexing figure, everything else takes normal addressing.
-         * yaGPC2 does not surface the indirect word's own XC/C bits to
-         * this layer (cpu_g_ea consumes them internally), so the four
-         * double-indirection sub-columns are not distinguished and the
-         * XC=0,C=0 one stands for them. */
-        int col = 0;
-        if (indexed) col = seePoo ? 1 : 6;
-        double t = p->t[col];
-        if (t < 0.0) t = p->t[0];
-
-        /* ISPB: the manual tabulates it per M1, 5.625 for M1 = 0-3 and
-         * .125 for M1 = 5-7, with no M1 = 4 row -- an omission in the
-         * original document, not something the OCR or the 17-2/17-3 page
-         * break lost.  The cutoff is still exactly right: M1 = 4 is the
-         * encoding 100, the first of the four the instruction's own
-         * definition calls Illegal (p.9-4), and the other three illegal
-         * encodings are the .125 rows.  See POO_TIMING_TABLE's ISPB
-         * entry. */
-        if (strcmp(nm, "ISPB") == 0 && df_get(v, 'x') >= 4) return 0.125;
-
-        /* Parametric rows. */
-        if (strcmp(nm, "NCT") == 0) return t + 0.075 * (double)preN;
-        if (strcmp(nm, "SRDR") == 0) {
-            uint32_t n = preN;
-            return t + 0.5 * (double)(n < 32 ? n : n - 32);
-        }
-        if (strcmp(nm, "SUM") == 0) {
-            /* "2.5 * (# ELEMENTS TESTED)".  How many get tested depends
-             * on where the scan stops, which is not knowable before the
-             * instruction runs, so this is the all-elements case -- an
-             * over-estimate whenever SUM exits early. */
-            uint32_t n = preN ? preN : 1;
-            return t * (double)n;
-        }
-
-        /* Branches tabulated as "BT=x; BNT=y" -- the pair applies to
-         * normal addressing only; the indirection/indexing columns are
-         * single figures. */
-        if (col == 0) {
-            for (size_t i = 0; i < POO_BRANCH_COUNT; i++) {
-                if (strcmp(POO_BRANCH_NOT_TAKEN[i].nm, nm) == 0) {
-                    return branchTaken ? t : POO_BRANCH_NOT_TAKEN[i].notTaken;
-                }
-            }
-        }
-        return t;
-    }
+    if (!e) return instr_time_poo(cpu, desc, v, preN, branchTaken);
 
     int idx;
     if ((e->indirect || e->index) && indexed) {
@@ -407,5 +647,12 @@ double instr_time_us(const InstrDesc *desc, const DInstr *v, uint32_t preN, bool
     } else {
         idx = e->normal;
     }
-    return resolve_times_index(idx, preN, branchTaken);
+    double t = resolve_times_index(idx, preN, branchTaken);
+    return (t > 0.0) ? t : INSTR_TIME_UNKNOWN_US;
+}
+
+double instr_time_us(CPU *cpu, const InstrDesc *desc, const DInstr *v,
+                     uint32_t preN, bool branchTaken) {
+    if (cpu->timingPass2) return instr_time_pass2(cpu, desc, v, preN, branchTaken);
+    return instr_time_poo(cpu, desc, v, preN, branchTaken);
 }

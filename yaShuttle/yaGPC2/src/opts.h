@@ -168,6 +168,15 @@ typedef struct {
      * the standalone CLI, not just through the GpcOps embedding API.
      * Default false: unchanged behavior, MIA stays an inert stub. */
     bool bceNetwork;                  /* default false */
+
+    /* Not part of gpc run's own option set -- yaGPC2-specific. Which
+     * instruction-timing model charges cpu->elapsedTimeUs, and through
+     * it the interval timers: "poo" (the default) is the AP-101S
+     * Principles of Operation section-17 table, i.e. the hardware
+     * specification; "pass2" is the HAL/S-FC PASS2 compiler's own
+     * static estimate of the same hardware, kept only because
+     * comparing the two is informative. See timing.h. */
+    char *timing;                     /* "poo" (default) or "pass2" */
 } Options;
 
 /* Parses argv (starting at argv[1]) exactly as `gpc run` would, except that

@@ -126,6 +126,34 @@ typedef struct CPU {
      * deterministic regardless of what wall-clock time they happen to
      * run at. */
     double dateTimeAnchorEpochSec;
+
+    /* --- Per-instruction timing state (see timing.h) ------------------ */
+
+    /* Which of the AP-101S manual's seven section-17 timing columns the
+     * operand address of the instruction currently executing was formed
+     * by.  0 = normal addressing; 1..4 = double indirection, indexed by
+     * 1 + XC*2 + C; 5 = auto storage modification; 6 = auto indexing.
+     * Reset to 0 at the top of every cpu_exec1() and set by cpu_g_ea()/
+     * cpu_g_ea_16() as they take each addressing path -- those are the
+     * only places that see the indirect word's XC/C bits at all, which
+     * is why the case has to be recorded there rather than re-derived
+     * afterwards.  Mirrors gpc's CPU.xtCase (gpc/cpu.coffee). */
+    int xtCase;
+
+    /* Section-17 time (us) for instructions whose figure can only be
+     * computed from register state that the instruction itself destroys
+     * -- currently MVH alone.  Set by instr_time_pre_n() BEFORE
+     * execution; negative means "no override, use the table".  Mirrors
+     * gpc's CPU.opExecT, except that gpc can set it from inside the
+     * instruction body and this port cannot. */
+    double timePooOverrideUs;
+
+    /* Selects which of the two instruction-timing models cpu_exec1()
+     * charges each instruction against: false (the default) = the
+     * AP-101S Principles of Operation section-17 tables, i.e. the
+     * hardware specification; true = the HAL/S-FC PASS2 compiler's own
+     * EXECUTION_TIMES estimates.  See timing.h and --timing. */
+    bool timingPass2;
 } CPU;
 
 void cpu_init(CPU *cpu);

@@ -229,6 +229,9 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
      * see halucp.c's effective_line_width(). */
     if (opts->lineWidthSet) age->halUCP.lineWidth = atoi(opts->lineWidth);
     age->gpc.cpu.fcosMode = opts->fcos;
+    /* --timing; see timing.h.  Validated in opts_parse(), so anything
+     * other than "pass2" here is the section-17 default. */
+    age->gpc.cpu.timingPass2 = (strcmp(opts->timing, "pass2") == 0);
     /* DATE()/CLOCKTIME() wall-clock anchor -- see cpu.h's own
      * dateTimeAnchorEpochSec comment and opts.h's --date-time-epoch.
      * Unset (NULL): the real host machine's own current wall-clock time

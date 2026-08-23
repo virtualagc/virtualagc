@@ -35,6 +35,9 @@ void cpu_init(CPU *cpu) {
     cpu->counter1Enabled = false;
     cpu->counter2Enabled = false;
     cpu->fcosMode = false;
+    cpu->xtCase = 0;
+    cpu->timePooOverrideUs = -1.0;
+    cpu->timingPass2 = false;   /* section-17 hardware model -- see timing.h */
     cpu->elapsedTimeUs = 0.0;
     cpu->timerAccumUs = 0.0;
     cpu->dateTimeAnchorEpochSec = 0.0; /* Unix epoch -- see cpu.h's own comment */
@@ -386,10 +389,16 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                 } else if (v->ia == 0 && v->ii == 1) {
                     ea = psw_get_nia(&cpu->psw) - pea;
                 } else if (v->ia == 1 && v->ii == 0) {
+                    /* Timing: single-level indirection has no column of
+                     * its own in section 17; the closest case is double
+                     * indirection with XC=1 (nothing is post-indexed
+                     * here) and C=0, i.e. column 3. */
+                    cpu->xtCase = 3;
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectHW = membus_get16(cpu->ram, indirectAddr);
                     ea = cpu_g_expand(cpu, indirectHW, v->opType);
                 } else {
+                    cpu->xtCase = 5;   /* auto storage modification */
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectFW = membus_get32(cpu->ram, indirectAddr);
                     uint32_t modifier = indirectFW & 0xffff;
@@ -403,6 +412,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                     uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
                     ea = cpu_g_expand(cpu, pea + regx, v->opType);
                 } else if (v->ia == 0 && v->ii == 1) {
+                    cpu->xtCase = 6;   /* auto indexing */
                     uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
                     uint32_t modifier = register_get32(ri) & 0xffff;
                     uint32_t ea16 = (pea + regx) & 0xffff;
@@ -422,6 +432,9 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                         ((register_get32(ri) >> 16) + modifier) & 0xffff;
                     register_set32(ri, (modifiedAddr << 16) + modifier);
                 } else if (v->ia == 1 && v->ii == 0) {
+                    /* Timing: indirection WITH post-indexing; closest
+                     * section-17 case is double indirection XC=0, C=0. */
+                    cpu->xtCase = 1;
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectHW = membus_get16(cpu->ram, indirectAddr);
                     uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
@@ -433,6 +446,9 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                     uint32_t address15 = address16 & 0x7fff;
                     uint32_t xc = (indirectFW >> 11) & 1;
                     uint32_t c = (indirectFW >> 10) & 1;
+                    /* Timing: true double indirection, column selected
+                     * by the pointer's own XC/C bits. */
+                    cpu->xtCase = (int)(1 + xc * 2 + c);
                     uint32_t cb = (indirectFW >> 9) & 1;
                     uint32_t cd = (indirectFW >> 8) & 1;
                     uint32_t ptrBSR = (indirectFW >> 4) & 0xF;
@@ -496,10 +512,12 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
                 } else if (v->ia == 0 && v->ii == 1) {
                     ea = (ic16 - pea) & 0xffff;
                 } else if (v->ia == 1 && v->ii == 0) {
+                    cpu->xtCase = 3;   /* see cpu_g_ea's step 5 */
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectHW = membus_get16(cpu->ram, indirectAddr);
                     ea = indirectHW & 0xffff;
                 } else {
+                    cpu->xtCase = 5;   /* auto storage modification */
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectFW = membus_get32(cpu->ram, indirectAddr);
                     uint32_t modifier = indirectFW & 0xffff;
@@ -513,6 +531,7 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
                     uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
                     ea = (pea + regx) & 0xffff;
                 } else if (v->ia == 0 && v->ii == 1) {
+                    cpu->xtCase = 6;   /* auto indexing */
                     uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
                     uint32_t modifier = register_get32(ri) & 0xffff;
                     ea = (pea + regx) & 0xffff;
@@ -522,6 +541,7 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
                         ((register_get32(ri) >> 16) + modifier) & 0xffff;
                     register_set32(ri, (modifiedAddr << 16) + modifier);
                 } else if (v->ia == 1 && v->ii == 0) {
+                    cpu->xtCase = 1;   /* see cpu_g_ea's step 9 */
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectHW = membus_get16(cpu->ram, indirectAddr);
                     uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
@@ -531,6 +551,9 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
                     uint32_t indirectFW = membus_get32(cpu->ram, indirectAddr);
                     uint32_t address16 = (indirectFW >> 16) & 0xffff;
                     uint32_t xc = (indirectFW >> 11) & 1;
+                    /* Timing only: the C bit of the ZCON pointer.  The
+                     * 16-bit path has no use for it otherwise. */
+                    cpu->xtCase = (int)(1 + xc * 2 + ((indirectFW >> 10) & 1));
                     uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
                     ea = (xc == 0) ? ((address16 + regx) & 0xffff) : (address16 & 0xffff);
                 }
@@ -690,6 +713,7 @@ void cpu_exec1(CPU *cpu) {
      * unconditionally now (previously only under --debug, in run.c's
      * batchrunner_step) so elapsedTimeUs stays meaningful whether or not
      * a debugger is attached -- see cpu.h's elapsedTimeUs comment. */
+    cpu->xtCase = 0;
     uint32_t timePreN = instr_time_pre_n(cpu, desc, &v, hw1);
 
     if (desc->e) desc->e(cpu, &v);
@@ -699,7 +723,7 @@ void cpu_exec1(CPU *cpu) {
         /* Through cpu_advance_time_us(), so this instruction's own
          * duration is what the interval timers advance by -- not one
          * flat tick per instruction, which is what this used to do. */
-        cpu_advance_time_us(cpu, instr_time_us(desc, &v, timePreN, branchTaken));
+        cpu_advance_time_us(cpu, instr_time_us(cpu, desc, &v, timePreN, branchTaken));
     }
 
     cpu_check_interrupts(cpu);
