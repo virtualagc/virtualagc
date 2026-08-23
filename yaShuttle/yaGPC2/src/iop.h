@@ -151,6 +151,19 @@ typedef struct {
     bool delayActive;
     uint32_t delayPC;
     double delayUntilUs;
+
+    /* An in-progress commanded RECEIVE.  A bus receive instruction does
+     * not complete in one slice: it holds the BCE at that instruction,
+     * taking whatever words the MIA has each time round, until the count
+     * is satisfied or the transfer times out.  Keyed by PC, like the
+     * delay above, so re-entering a different receive starts fresh.  See
+     * iop_bce_receive(). */
+    bool recvActive;
+    uint32_t recvPC;
+    uint32_t recvAddr;
+    uint32_t recvLeft;
+    double recvSinceUs;
+    bool recvGotAny;
 } BCE;
 
 void bce_init(BCE *b, int bceNum);
@@ -363,6 +376,18 @@ void iop_tick_watchdog(IOP *iop);
 
 BCE *iop_cur_bce(IOP *iop); /* NULL if ls.curPage == 0 (MSC) */
 void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce);
+
+/* One turn of a commanded receive of `count` words to main storage from
+ * `addr`.  Returns true when the transfer is complete and the caller may
+ * advance the PC; false means "still receiving" -- the instruction must
+ * be left where it is so the BCE re-fetches it next slice.  A transfer
+ * that goes too long without a word is error-terminated. */
+bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count);
+
+/* An error termination: the BCE stops where it is, its program exception
+ * bit goes to 0 (NO-GO in STAT1), it leaves the busy state, and its
+ * indicator bit is set. */
+void iop_bce_error_terminate(IOP *iop, int p);
 
 uint32_t iop_msc_ea(IOP *iop, uint32_t disp, bool indexed);
 /* BCE short-format effective address: "PC + DISP", or with M=1

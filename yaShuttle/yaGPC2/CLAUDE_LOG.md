@@ -635,3 +635,36 @@ document's planning stages, and it is already in the code as
   --real-time, which is also the mode gpc can be compared in at all (it
   refuses to advance through a wait without a pacer and stops at
   3,987,845).
+
+### [2026-08-23] Target: [problems.md]
+- WHY WE WENT QUIET AFTER POSITION: a bus RECEIVE instruction does not
+  complete in one slice.  The reference holds the BCE at the instruction,
+  taking whatever words the MIA has each time round, until the count is
+  satisfied or the transfer times out -- #RDS/#RDL/#RDLI/#MIN/#MIN@ only
+  advance the PC when bceReceive() returns true.  Ours queued the words
+  as DMA and advanced unconditionally, so the bus program ran past a
+  reply that had not arrived and every transaction after it was one step
+  out of step with the subsystem.  Ported iop_bce_receive() (per-BCE
+  state keyed on PC; message time out from local store bank 1 word 3 in
+  16.5 us ticks with a 20 ms floor) and iop_bce_error_terminate().
+  Surplus words are deliberately NOT flushed on completion -- flushing
+  breaks the mass memory path, where a block arrives as one datagram of
+  512 halfwords.
+- Two transport bugs found on the way:
+  - NO SELF-ECHO FILTER.  Multicast loopback is on, so every datagram we
+    send comes straight back to our own socket, and for a shuttle bus it
+    carries the very IUA byte the receive filter accepts.  We read our
+    own transmissions back as replies.  The reference keeps a list of
+    sent datagrams and drops the first byte-identical copy; ported, with
+    the same 1024 bound and the same consuming match.
+  - Data words were BATCHED into one datagram and flushed once a tick.
+    The reference sends each as its own one-word message, which is what a
+    peripheral parses.  (Inert at the point we were stuck, but wrong.)
+- RESULT: yaGPC2 now follows gpc's MMU sequence exactly -- POSITION
+  4/4/2, EXTENDED_BLOCK count 16, READ track 4 subfile 3 block 8 count
+  15, "read 17 block(s) from 4/4/3/8", "read done, position 4/4/4".
+- Regenerated iop_bce_exec_fixtures.h against current gpc; the receive
+  rewiring is neutral on it (68734/74699 both before and after), and the
+  GPCIPL trace still matches all 3,987,845 instructions with 0 slips.
+- Note for future sessions: `pkill -f "mmu.js"` MATCHES ITS OWN SHELL and
+  kills the running command.  Use a bracket pattern: pkill -f "[m]mu\.js"

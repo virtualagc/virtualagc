@@ -49,10 +49,65 @@ static const int BCENET_BUS_PORT[BCENET_MAX_BUS_ID + 1] = {
     [20] = 6920, [21] = 6921, [22] = 6922, [23] = 6923,               /* FC1-4 */
 };
 
+/* Multicast loopback is ON (the reference's Bus turns it on too), so
+ * every datagram this process sends comes straight back to its own
+ * socket -- and for a shuttle bus it carries the very IUA byte the
+ * receive filter accepts.  Without this filter a transmission is read
+ * back as if it were the peripheral's reply, which desynchronises the
+ * bus program by one word and every transaction after it.  The
+ * reference keeps the same list and the same bound.
+ *
+ * Matching is byte-exact and CONSUMING: the first identical copy is
+ * removed, so a peer that genuinely echoes the same bytes back is still
+ * heard on the second occurrence. */
+#define SELF_ECHO_MAX 1024
+
+typedef struct {
+    unsigned char *bytes;
+    size_t len;
+} SelfEchoEntry;
+
 typedef struct {
     int busID;
     int fd; /* -1 = closed */
+    SelfEchoEntry selfEcho[SELF_ECHO_MAX];
+    int selfEchoCount;
 } BceNetBusSocket;
+
+/* Remember a datagram we just sent, so the loopback copy can be dropped. */
+static void self_echo_note_sent(BceNetBusSocket *b, const unsigned char *buf, size_t len) {
+    unsigned char *copy = malloc(len ? len : 1);
+    if (!copy) return;   /* out of memory: worst case we hear our own echo */
+    memcpy(copy, buf, len);
+    if (b->selfEchoCount == SELF_ECHO_MAX) {
+        free(b->selfEcho[0].bytes);
+        memmove(&b->selfEcho[0], &b->selfEcho[1],
+                sizeof b->selfEcho[0] * (SELF_ECHO_MAX - 1));
+        b->selfEchoCount--;
+    }
+    b->selfEcho[b->selfEchoCount].bytes = copy;
+    b->selfEcho[b->selfEchoCount].len = len;
+    b->selfEchoCount++;
+}
+
+/* Is this datagram one of ours coming back?  Consumes the match. */
+static bool self_echo_is_ours(BceNetBusSocket *b, const unsigned char *buf, size_t len) {
+    for (int i = 0; i < b->selfEchoCount; i++) {
+        if (b->selfEcho[i].len == len && memcmp(b->selfEcho[i].bytes, buf, len) == 0) {
+            free(b->selfEcho[i].bytes);
+            memmove(&b->selfEcho[i], &b->selfEcho[i + 1],
+                    sizeof b->selfEcho[0] * (size_t)(b->selfEchoCount - i - 1));
+            b->selfEchoCount--;
+            return true;
+        }
+    }
+    return false;
+}
+
+static void self_echo_clear(BceNetBusSocket *b) {
+    for (int i = 0; i < b->selfEchoCount; i++) free(b->selfEcho[i].bytes);
+    b->selfEchoCount = 0;
+}
 
 struct BceNetTransport {
     BceNetBusSocket buses[BCENET_MAX_BUS_ID + 1];
@@ -63,6 +118,7 @@ BceNetTransport *bcenet_transport_create(void) {
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
         t->buses[i].busID = i;
         t->buses[i].fd = -1;
+        t->buses[i].selfEchoCount = 0;
     }
     return t;
 }
@@ -72,6 +128,7 @@ void bcenet_transport_free(BceNetTransport *t) {
 #ifdef BCENET_HAVE_POSIX_SOCKETS
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
         if (t->buses[i].fd >= 0) close(t->buses[i].fd);
+        self_echo_clear(&t->buses[i]);
     }
 #endif
     free(t);
@@ -197,6 +254,7 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
         buf[headerLen + i * 2 + 1] = (unsigned char)(w & 0xff);
     }
     struct sockaddr_in dest = bcenet_group_addr(BCENET_BUS_PORT[busID]);
+    self_echo_note_sent(b, buf, len);
     ssize_t sent = sendto(b->fd, buf, len, 0, (struct sockaddr *)&dest, sizeof dest);
     free(buf);
     if (sent < 0 || (size_t)sent != len) {
@@ -233,6 +291,7 @@ bool bcenet_transport_recv(BceNetTransport *t, int busID, int iua, bool isShuttl
         }
         return false;
     }
+    if (self_echo_is_ours(b, buf, (size_t)n)) return false;
     size_t headerLen = isShuttleBus ? 2 : 0;
     if ((size_t)n < headerLen) return false;
     if (isShuttleBus && buf[0] != (unsigned char)iua) {

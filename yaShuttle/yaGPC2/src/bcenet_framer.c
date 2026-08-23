@@ -149,19 +149,30 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
             break;
         }
 
-        case GPC_SVC_XMIT_WORD:
-            if (b->xmitCount < FRAMER_MAX_WORDS) {
-                b->xmitBuf[b->xmitCount++] = (uint16_t)input->in.word;
-            } else {
-                fprintf(stderr, "bcenet: bus %d: transmit burst exceeds %d words, dropping extra\n", input->busID,
-                        FRAMER_MAX_WORDS);
-            }
+        case GPC_SVC_XMIT_WORD: {
+            /* Each data word goes out as its OWN one-word message, which
+             * is what the reference's MIA does and what a peripheral
+             * parses.  Batching a transmit burst into a single datagram
+             * -- what this used to do, flushed once a tick -- produced a
+             * multi-word message the subsystem on the other end had no
+             * reason to expect: it reads a datagram as one bus word, so a
+             * burst arrived as one garbled word and the rest vanished.
+             * That is why a bare command (POSITION) got through while
+             * anything carrying data behind it did not. */
+            uint16_t word = (uint16_t)input->in.word;
+            int iua = b->haveLastIua ? b->lastIua : 0;
+            bcenet_transport_send(f->transport, input->busID, iua,
+                                  FRAMER_IS_SHUTTLE_BUS, &word, 1);
             output->out.xmit.ok = true;
             break;
+        }
 
         case GPC_SVC_RECV_POLL:
             refill_recv_queue(f, input->busID, b);
             output->out.poll.available = (b->recvHead < b->recvCount);
+            if (getenv("YAGPC_NETTRACE"))
+                fprintf(stderr, "POLL bus=%d avail=%d head=%d count=%d\n", input->busID,
+                        (int)output->out.poll.available, b->recvHead, (int)b->recvCount);
             break;
 
         case GPC_SVC_RECV_WORD:
@@ -169,6 +180,9 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
             if (b->recvHead < b->recvCount) {
                 output->out.recv.available = true;
                 output->out.recv.word = b->recvQueue[b->recvHead++];
+                if (getenv("YAGPC_NETTRACE"))
+                    fprintf(stderr, "RECVW bus=%d word=%04x\n", input->busID,
+                            (unsigned)output->out.recv.word);
             } else {
                 output->out.recv.available = false;
             }

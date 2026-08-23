@@ -239,6 +239,12 @@ void bce_init(BCE *b, int bceNum) {
     b->delayActive = false;
     b->delayPC = 0;
     b->delayUntilUs = 0.0;
+    b->recvActive = false;
+    b->recvPC = 0;
+    b->recvAddr = 0;
+    b->recvLeft = 0;
+    b->recvSinceUs = 0.0;
+    b->recvGotAny = false;
     b->bceNum = bceNum;
     mia_init(&b->mia, bceNum);
 }
@@ -251,6 +257,19 @@ void msc_init(MSC *m) {
 /* ---------------------------------------------------------------------
  * DMA queue — growable FIFO (mirrors Array#push/#shift)
  * ------------------------------------------------------------------- */
+
+/* Drop every queued request belonging to one BCE -- an error
+ * termination takes its in-flight DMA with it. */
+static void dmaq_drop_for_bce(DMAQueue *q, BCE *bce) {
+    int kept = 0;
+    for (int i = 0; i < q->count; i++) {
+        DMARequest *r = &q->items[(q->head + i) % q->cap];
+        if (r->bce == bce) continue;
+        q->items[(q->head + kept) % q->cap] = *r;
+        kept++;
+    }
+    q->count = kept;
+}
 
 static void dmaq_init(DMAQueue *q) {
     q->cap = 64;
@@ -751,6 +770,78 @@ void iop_msc_repeat(IOP *iop, DInstr *v, bool met) {
  * ranges the POO quotes agree with it, 2047 counts to 33.78 ms and 262143
  * to 4.325 s. */
 #define MTO_TICK_US 16.5
+
+static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value);
+
+/* A commanded receive that goes this long without a word is abandoned.
+ * The floor matters because the timeout count a bus program loads can be
+ * zero, and a real subsystem still needs time to answer. */
+#define RECV_TIMEOUT_FLOOR_US 20000.0   /* 20 ms */
+
+/* The BCE's own message time out, from its local store (bank 1, word 3),
+ * in the same 16.5 us ticks the delay instructions use. */
+static double iop_recv_timeout_us(IOP *iop, int p) {
+    Register *r = iopls_at(&iop->ls, p, 1, 3);
+    uint32_t mto = r ? (register_get32(r) & 0x3ffffu) : 0u;
+    double t = (double)mto * MTO_TICK_US;
+    return t > RECV_TIMEOUT_FLOOR_US ? t : RECV_TIMEOUT_FLOOR_US;
+}
+
+void iop_bce_error_terminate(IOP *iop, int p) {
+    iop_proc_set(&iop->regProgExcept, p, 0);
+    iop_proc_set(&iop->regBusyWait, p, 0);
+    iop_proc_set(&iop->regIndicator, p, 1);
+    if (p < 1 || p > 24) return;
+    BCE *bce = &iop->bce[p - 1];
+    bce->recvActive = false;
+    /* Anything the MIA had received is dropped with it, and so is any DMA
+     * this BCE still had queued. */
+    while (mia_data_available(iop, &bce->mia)) (void)mia_get_data(iop, &bce->mia);
+    dmaq_drop_for_bce(&iop->dmaQueue, bce);
+}
+
+bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
+    BCE *bce = iop_cur_bce(iop);
+    if (bce == NULL) return true;
+    int p = iop->curPE;
+    uint32_t pc = register_get32(iopls_PC(&iop->ls)) & 0x3ffffu;
+    double now = (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
+
+    if (!bce->recvActive || bce->recvPC != pc) {
+        bce->recvActive = true;
+        bce->recvPC = pc;
+        bce->recvAddr = addr & 0x3ffffu;
+        bce->recvLeft = count;
+        bce->recvSinceUs = now;
+        bce->recvGotAny = false;
+    }
+
+    while (bce->recvLeft > 0 && mia_data_available(iop, &bce->mia)) {
+        uint32_t data = mia_get_data(iop, &bce->mia);
+        iopls_setD(&iop->ls, data);
+        iop_write_main16(iop, bce->recvAddr, data);
+        bce->recvAddr = (bce->recvAddr + 1) & 0x3ffffu;
+        bce->recvLeft--;
+        bce->recvGotAny = true;
+        bce->recvSinceUs = now;
+    }
+
+    if (bce->recvLeft == 0) {
+        bce->recvActive = false;
+        /* Surplus words a subsystem put on the bus are deliberately NOT
+         * flushed here.  A real receiver is inhibited except while a
+         * commanded transfer is running, so it would not have captured
+         * them, and dropping them is arguably right -- but it breaks the
+         * mass memory path, where a block arrives as one datagram of 512
+         * halfwords and a bus program that takes a block in more than one
+         * receive would lose the rest of it. */
+        return true;
+    }
+    if (now - bce->recvSinceUs >= iop_recv_timeout_us(iop, p)) {
+        iop_bce_error_terminate(iop, p);
+    }
+    return false;
+}
 
 bool iop_bce_delay(IOP *iop, uint32_t count) {
     BCE *bce = iop_cur_bce(iop);

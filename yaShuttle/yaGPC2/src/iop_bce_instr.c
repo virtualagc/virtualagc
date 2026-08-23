@@ -247,22 +247,22 @@ static void exec_MOUT_at(IOP *t, DInstr *v) {
  * ------------------------------------------------------------------- */
 
 static void exec_RDS(IOP *t, DInstr *v) {
+    /* A receive HOLDS the BCE at this instruction until the count is
+     * satisfied (or the transfer times out): iop_bce_receive() returns
+     * false to mean "still receiving", and the PC must be left alone so
+     * the BCE re-fetches it next slice.  Queueing the words as DMA and
+     * advancing regardless -- what this did -- ran the bus program past
+     * a reply that had not arrived, and every transaction after it was
+     * one step out of step with the subsystem. */
     uint32_t count = df_get(v, 'c') + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
-    BCE *bce = iop_cur_bce(t);
-    for (uint32_t i = 0; i < count; i++) {
-        uint32_t addr = base + df_get(v, 'd') + i;
-        iop_queue_dma(t, addr, DMA_WRITE, bce);
-    }
-    iop_incr_nia(t, 1);
+    if (iop_bce_receive(t, base + df_get(v, 'd'), count)) iop_incr_nia(t, 1);
 }
 
 static void exec_RDLI(IOP *t, DInstr *v) {
     uint32_t count = df_get(v, 'c') + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
-    BCE *bce = iop_cur_bce(t);
-    for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_WRITE, bce);
-    iop_incr_nia(t, 2);
+    if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
 }
 
 static void exec_RDL(IOP *t, DInstr *v) {
@@ -272,9 +272,7 @@ static void exec_RDL(IOP *t, DInstr *v) {
     uint32_t addr = df_get(v, 'c') + 2u * (uint32_t)t->curPE;
     uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
-    BCE *bce = iop_cur_bce(t);
-    for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_WRITE, bce);
-    iop_incr_nia(t, 2);
+    if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
 }
 
 static void exec_MIN(IOP *t, DInstr *v) {
@@ -282,12 +280,7 @@ static void exec_MIN(IOP *t, DInstr *v) {
     bce_process_mio_command(t, pc);
     uint32_t count = df_get(v, 'c') + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
-    BCE *bce = iop_cur_bce(t);
-    for (uint32_t i = 0; i < count; i++) {
-        uint32_t addr = base + df_get(v, 'd') + i;
-        iop_queue_dma(t, addr, DMA_WRITE, bce);
-    }
-    iop_incr_nia(t, 4);
+    if (iop_bce_receive(t, base + df_get(v, 'd'), count)) iop_incr_nia(t, 4);
 }
 
 static void exec_MIN_at(IOP *t, DInstr *v) {
@@ -295,9 +288,7 @@ static void exec_MIN_at(IOP *t, DInstr *v) {
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
     uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
-    BCE *bce = iop_cur_bce(t);
-    for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_WRITE, bce);
-    iop_incr_nia(t, 2);
+    if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
 }
 
 /* ---------------------------------------------------------------------
