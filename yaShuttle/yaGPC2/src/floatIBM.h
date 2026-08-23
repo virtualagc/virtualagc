@@ -81,6 +81,10 @@ FloatIBM fibm_compE(const FloatIBM *x, const FloatIBM *y); /* subE(...).result *
 
 FloatIBMResult fibm_mulE(const FloatIBM *x, const FloatIBM *y);
 FloatIBMResult fibm_mulQeE(const FloatIBM *x, const FloatIBM *y);
+/* The AP-101S's own extended multiply, as distinct from fibm_mulQeE's
+ * AP-101 C/M one.  gpc selects between them by machine model (fp:'S'
+ * vs fp:'B'); yaGPC2 is an AP-101S, so this is the one MEDR/MED use. */
+FloatIBMResult fibm_mulQeS(const FloatIBM *x, const FloatIBM *y);
 FloatIBMResult fibm_divE(const FloatIBM *x, const FloatIBM *y);
 
 FloatIBMCvfxResult fibm_cvfx(const FloatIBM *x);

@@ -112,7 +112,7 @@ void cpu_swap_psw(CPU *cpu, uint32_t oldAddr, uint32_t newAddr) {
     membus_set32(cpu->ram, oldAddr + 2, register_get32(&cpu->psw.psw2), true);
     uint32_t p1 = membus_get32(cpu->ram, newAddr);
     uint32_t p2 = membus_get32(cpu->ram, newAddr + 2);
-    psw_load(&cpu->psw, p1, p2);
+    cpu_load_psw(cpu, p1, p2);
 }
 
 /* IOP link — implemented in iop.c (Phase 6). */
@@ -134,6 +134,27 @@ uint32_t cpu_recv_from_iop(CPU *cpu) {
  * logic for every interrupt class instead. Dead code, not ported.
  * ------------------------------------------------------------------- */
 
+/* Figure 2-20 note '#': "When one of these interrupts is taken, the
+ * condition code (CC) in the OLD PSW will be set to a binary 10 and
+ * clear the carry and overflow bits.  This can result in erroneous GPC
+ * operation of an instruction which tries to utilize the CC, carry bit
+ * or overflow bit before they are set by another instruction."  The
+ * note is marked on every machine check, on the store protect
+ * violation, and on the External 1 DMA store protect violation -- a
+ * property of the event, not of the latch.  It must be applied BEFORE
+ * the swap, since the swap is what stores the old PSW the handler then
+ * reads.  (The third case, the DMA store protect, cannot arise here
+ * yet: nothing in this emulator's IOP DMA path checks store protection,
+ * so no External 1 ever carries code 0x0004.  When it does, it belongs
+ * in this same helper.)  Omitting this left GPCIPL's store-protect
+ * handler reading CC 00 out of the old PSW at 0x0048 where the real
+ * machine leaves 10. */
+static void cc_anomaly(CPU *cpu) {
+    psw_set_cc(&cpu->psw, 2);
+    psw_set_carry(&cpu->psw, 0);
+    psw_set_overflow(&cpu->psw, 0);
+}
+
 void cpu_check_interrupts(CPU *cpu) {
     uint32_t intMask = psw_get_int_mask(&cpu->psw);
 
@@ -141,6 +162,7 @@ void cpu_check_interrupts(CPU *cpu) {
         if (psw_get_mach_check_mask(&cpu->psw)) {
             cpu->intPending.machineCheck = false;
             psw_set_int_code(&cpu->psw, 0x0008);
+            cc_anomaly(cpu);
             cpu_swap_psw(cpu, 0x0040, 0x0044);
             return;
         }
@@ -172,6 +194,7 @@ void cpu_check_interrupts(CPU *cpu) {
             return;
         }
         psw_set_int_code(&cpu->psw, cpu->intCode);
+        if (cpu->intCode == 0x0007) cc_anomaly(cpu); /* store protect */
         cpu_swap_psw(cpu, 0x0048, 0x004c);
         return;
     }
@@ -194,11 +217,21 @@ void cpu_check_interrupts(CPU *cpu) {
     }
     if (cpu->intPending.iopGrp1 && (intMask & 0x10)) {
         cpu->intPending.iopGrp1 = false;
+        /* External 0 and External 1 are the only system interrupts that
+         * carry an interrupt code of their own (Figure 2-20's IOP side:
+         * 0000 for both, plus External 1's two overrides, the DMA store
+         * protect 0004 and the Shuttle AGE 0006, neither of which this
+         * emulator raises yet).  The rest carry none, and leave whatever
+         * the interrupted program's PSW held.  Not writing the 0000 left
+         * a stale code -- the fixed-point overflow's 0004 -- in the old
+         * PSW that GPCIPL's External 0 handler reads back at +096a. */
+        psw_set_int_code(&cpu->psw, 0x0000);
         cpu_swap_psw(cpu, 0x0078, 0x007c);
         return;
     }
     if (cpu->intPending.iopGrp2 && (intMask & 0x08)) {
         cpu->intPending.iopGrp2 = false;
+        psw_set_int_code(&cpu->psw, 0x0000);  /* see External 0 above */
         cpu_swap_psw(cpu, 0x0080, 0x0084);
         return;
     }
@@ -223,11 +256,35 @@ void cpu_check_interrupts(CPU *cpu) {
     }
 }
 
-void cpu_signal_fixed_overflow(CPU *cpu) {
-    if (psw_get_fixed_pt_overflow(&cpu->psw)) {
+/* Re-test POO 2.5.2.3's Note 1 condition -- the fixed-point overflow
+ * INDICATOR and its MASK both set.  Called after anything that can set
+ * either bit: an overflowing operation, SPM, or a PSW load. */
+void cpu_test_fixed_overflow(CPU *cpu) {
+    if (psw_get_overflow(&cpu->psw) && psw_get_fixed_pt_overflow(&cpu->psw)) {
         cpu->intPending.programCheck = true;
-        cpu->intCode = 0x0002;
+        /* Figure 2-20 row 20: "0004 | ENDOP | CPU | Fixed Point
+         * Overflow".  0002 -- what this used -- is row 31, "CPU Addr
+         * Spec 128K, GB Only", an entirely different check. */
+        cpu->intCode = 0x0004;
     }
+}
+
+void cpu_signal_fixed_overflow(CPU *cpu) {
+    /* The overflow INDICATOR is sticky and is set whether or not the
+     * mask lets the program check through -- software reads it back out
+     * of the PSW with SPM/LPS long after the fact.  Setting only the
+     * interrupt, as this did, left the bit permanently clear: GPCIPL's
+     * overflow self-test at +0c4b saw PSW 0c4dc000 where the real
+     * machine leaves 0c4dd000. */
+    psw_set_overflow(&cpu->psw, 1);
+    cpu_test_fixed_overflow(cpu);
+}
+
+/* psw_load() plus that re-test -- gpc's own loadPSW().  Every place a
+ * whole PSW is installed from memory goes through here. */
+void cpu_load_psw(CPU *cpu, uint32_t p1, uint32_t p2) {
+    psw_load(&cpu->psw, p1, p2);
+    cpu_test_fixed_overflow(cpu);
 }
 
 void cpu_signal_exponent_overflow(CPU *cpu) {
@@ -291,7 +348,11 @@ void cpu_signal_protection_violation(CPU *cpu) {
 
 void cpu_signal_addressing_exception(CPU *cpu) {
     cpu->intPending.programCheck = true;
-    cpu->intCode = 0x0003;
+    /* Figure 2-20 row 31: "0002 | ForcedENDOP | CPU | CPU Addr Spec
+     * 128K, GB Only".  0003 -- what this used -- is not a program
+     * check at all; it is machine check row 06, "CPU Memory Multi-bit
+     * Error", on the 0040/0044 pair. */
+    cpu->intCode = 0x0002;
 }
 
 bool cpu_fp_dispatch_exc(CPU *cpu, int exc) {
@@ -401,19 +462,32 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                     cpu->xtCase = 5;   /* auto storage modification */
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectFW = membus_get32(cpu->ram, indirectAddr);
+                    /* "Then, AFTER the EA has been formed, storage
+                     * modification is automatically performed... The
+                     * modifier is added to the address and the resulting
+                     * modified address replaces bits 0 through 15 of the
+                     * indirect address word" (Step 6, Figure 2-15).  The
+                     * access uses the address as it stands; the modified
+                     * one is what the NEXT use of the pointer sees.  This
+                     * used to add the modifier before forming the EA, so
+                     * every auto-modified reference ran one step ahead of
+                     * itself -- GPCIPL's DSE self-test at +0d88 read the
+                     * wrong fullword back. */
+                    uint32_t addr16 = (indirectFW >> 16) & 0xffff;
                     uint32_t modifier = indirectFW & 0xffff;
-                    ea = cpu_g_expand(cpu, indirectFW >> 16, v->opType);
-                    ea = ea + modifier;
-                    membus_set32(cpu->ram, indirectAddr, (ea << 16) + modifier, true);
+                    ea = cpu_g_expand(cpu, addr16, v->opType);
+                    uint32_t modifiedAddr = (addr16 + modifier) & 0xffff;
+                    membus_set32(cpu->ram, indirectAddr,
+                                 (modifiedAddr << 16) + modifier, true);
                 }
             } else {
                 Register *ri = cpu_r(cpu, (int)idx);
                 if (v->ia == 0 && v->ii == 0) {
-                    uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
+                    uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
                     ea = cpu_g_expand(cpu, pea + regx, v->opType);
                 } else if (v->ia == 0 && v->ii == 1) {
                     cpu->xtCase = 6;   /* auto indexing */
-                    uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
+                    uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
                     uint32_t modifier = register_get32(ri) & 0xffff;
                     uint32_t ea16 = (pea + regx) & 0xffff;
                     ea = cpu_g_expand(cpu, ea16, v->opType);
@@ -437,7 +511,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                     cpu->xtCase = 1;
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectHW = membus_get16(cpu->ram, indirectAddr);
-                    uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
+                    uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
                     ea = cpu_g_expand(cpu, indirectHW + regx, v->opType);
                 } else {
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
@@ -453,7 +527,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                     uint32_t cd = (indirectFW >> 8) & 1;
                     uint32_t ptrBSR = (indirectFW >> 4) & 0xF;
                     uint32_t ptrDSR = indirectFW & 0xF;
-                    uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
+                    uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
 
                     if (c == 1) {
                         if (cd == 1) psw_set_dsr(&cpu->psw, ptrDSR);
@@ -520,19 +594,31 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
                     cpu->xtCase = 5;   /* auto storage modification */
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectFW = membus_get32(cpu->ram, indirectAddr);
+                    /* "Then, AFTER the EA has been formed, storage
+                     * modification is automatically performed... The
+                     * modifier is added to the address and the resulting
+                     * modified address replaces bits 0 through 15 of the
+                     * indirect address word" (Step 6, Figure 2-15).  The
+                     * access uses the address as it stands; the modified
+                     * one is what the NEXT use of the pointer sees.  This
+                     * used to add the modifier before forming the EA, so
+                     * every auto-modified reference ran one step ahead of
+                     * itself -- GPCIPL's DSE self-test at +0d88 read the
+                     * wrong fullword back. */
                     uint32_t modifier = indirectFW & 0xffff;
                     ea = (indirectFW >> 16) & 0xffff;
-                    ea = (ea + modifier) & 0xffff;
-                    membus_set32(cpu->ram, indirectAddr, (ea << 16) + modifier, true);
+                    uint32_t modifiedAddr = (ea + modifier) & 0xffff;
+                    membus_set32(cpu->ram, indirectAddr,
+                                 (modifiedAddr << 16) + modifier, true);
                 }
             } else {
                 Register *ri = cpu_r(cpu, (int)idx);
                 if (v->ia == 0 && v->ii == 0) {
-                    uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
+                    uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
                     ea = (pea + regx) & 0xffff;
                 } else if (v->ia == 0 && v->ii == 1) {
                     cpu->xtCase = 6;   /* auto indexing */
-                    uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
+                    uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
                     uint32_t modifier = register_get32(ri) & 0xffff;
                     ea = (pea + regx) & 0xffff;
                     /* Index register's own address field, not the EA --
@@ -544,7 +630,7 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
                     cpu->xtCase = 1;   /* see cpu_g_ea's step 9 */
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
                     uint32_t indirectHW = membus_get16(cpu->ram, indirectAddr);
-                    uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
+                    uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
                     ea = (indirectHW + regx) & 0xffff;
                 } else {
                     uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
@@ -554,7 +640,7 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
                     /* Timing only: the C bit of the ZCON pointer.  The
                      * 16-bit path has no use for it otherwise. */
                     cpu->xtCase = (int)(1 + xc * 2 + ((indirectFW >> 10) & 1));
-                    uint32_t regx = (register_get32(ri) >> 16) << (v->addrWidth - 1);
+                    uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
                     ea = (xc == 0) ? ((address16 + regx) & 0xffff) : (address16 & 0xffff);
                 }
             }
@@ -615,7 +701,7 @@ uint32_t cpu_g_shift_cnt(CPU *cpu, uint32_t hw1) {
  * ------------------------------------------------------------------- */
 
 void cpu_reset(CPU *cpu) {
-    psw_load(&cpu->psw, membus_get32(cpu->ram, 0x14), membus_get32(cpu->ram, 0x16));
+    cpu_load_psw(cpu, membus_get32(cpu->ram, 0x14), membus_get32(cpu->ram, 0x16));
 }
 
 /* Power-On is its OWN interrupt class with its OWN PSA vector, distinct
@@ -642,7 +728,7 @@ void cpu_reset(CPU *cpu) {
  * unfilled memory at a fixed instruction count no matter what content the
  * composed image actually carried. */
 void cpu_power_on(CPU *cpu) {
-    psw_load(&cpu->psw, membus_get32(cpu->ram, 0x04), membus_get32(cpu->ram, 0x06));
+    cpu_load_psw(cpu, membus_get32(cpu->ram, 0x04), membus_get32(cpu->ram, 0x06));
 }
 
 void cpu_run(CPU *cpu) {

@@ -186,6 +186,8 @@ void cpu_check_interrupts(CPU *cpu);
 void cpu_advance_time_us(CPU *cpu, double us);
 
 void cpu_signal_fixed_overflow(CPU *cpu);
+void cpu_test_fixed_overflow(CPU *cpu);
+void cpu_load_psw(CPU *cpu, uint32_t p1, uint32_t p2);
 void cpu_signal_exponent_overflow(CPU *cpu);
 void cpu_signal_exponent_underflow(CPU *cpu);
 void cpu_signal_significance(CPU *cpu);

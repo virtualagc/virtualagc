@@ -147,8 +147,15 @@ async function main() {
 
   // Build a `v` decode object covering the various addressing submodes.
   function buildV(opts) {
+    // gpc's g_EA aligns the INDEX by v.indexWidth, not v.addrWidth (POO
+    // 14.1 exempts LM/STM/LPS/ISPB from automatic index alignment, so the
+    // two differ).  Leaving it undefined here made gpc evaluate
+    // `x << (undefined - 1)` -- a shift by NaN, which JS performs as a
+    // shift by 0 -- so every indexed fixture silently asserted halfword
+    // alignment regardless of the operand width it was generated for.
     const v = {
       niaIncr: opts.niaIncr, opType: opts.opType, addrWidth: opts.addrWidth,
+      indexWidth: opts.indexWidth !== undefined ? opts.indexWidth : opts.addrWidth,
     };
     if (opts.I !== undefined) v.I = opts.I;
     if (opts.d !== undefined) v.d = opts.d;
@@ -186,7 +193,7 @@ async function main() {
     const i = pick([0, 0, 1, 2, 3, 7]); // weight i==0 (IC-relative/indirect) heavily
     const ia = pick([0, 1]);
     const ii = pick([0, 1]);
-    return { niaIncr: 2, d, b, i, ia, ii, opType, addrWidth };
+    return { niaIncr: 2, d, b, i, ia, ii, opType, addrWidth, indexWidth: pick(addrWidths) };
   }
 
   for (let n = 0; n < 4000; n++) {

@@ -1166,7 +1166,7 @@ static void exec_MEDR(CPU *t, DInstr *v) {
     uint32_t x = df_get(v, 'x'), y = df_get(v, 'y');
     FloatIBM v1 = fibm_from64(register_get32(cpu_f(t, (int)x)), register_get32(cpu_f(t, (int)(x + 1))));
     FloatIBM v2 = fibm_from64(register_get32(cpu_f(t, (int)y)), register_get32(cpu_f(t, (int)(y + 1))));
-    FloatIBMResult r = fibm_mulQeE(&v1, &v2);
+    FloatIBMResult r = fibm_mulQeS(&v1, &v2);
     if (!cpu_fp_dispatch_exc(t, r.exc)) return;
     register_set32(cpu_f(t, (int)x), fibm_to64x(&r.result));
     register_set32(cpu_f(t, (int)(x + 1)), fibm_to64y(&r.result));
@@ -1178,26 +1178,40 @@ static void exec_MED(CPU *t, DInstr *v) {
     uint32_t v2hw1 = cpu_g_eaf(t, v, 0);
     uint32_t v2hw2 = cpu_g_eaf(t, v, 2);
     FloatIBM v2 = fibm_from64(v2hw1, v2hw2);
-    FloatIBMResult r = fibm_mulQeE(&v1, &v2);
+    FloatIBMResult r = fibm_mulQeS(&v1, &v2);
     if (!cpu_fp_dispatch_exc(t, r.exc)) return;
     register_set32(cpu_f(t, (int)x), fibm_to64x(&r.result));
     register_set32(cpu_f(t, (int)(x + 1)), fibm_to64y(&r.result));
 }
 
 static void exec_MER(CPU *t, DInstr *v) {
+    uint32_t x = df_get(v, 'x');
     FloatIBM v1 = fibm_from32(register_get32(F(t, v, 'x')));
     FloatIBM v2 = fibm_from32(register_get32(F(t, v, 'y')));
     FloatIBMResult r = fibm_mulE(&v1, &v2);
     if (!cpu_fp_dispatch_exc(t, r.exc)) return;
-    register_set32(F(t, v, 'x'), fibm_to32(&r.result));
+    /* Multiply Short develops a double-length product: the high half
+     * goes to R1 and the LOW half to R1+1, "unless R1 is odd" -- an odd
+     * R1 has no pair to hold it and the extension is discarded.  We
+     * wrote only the high half, so GPCIPL's own floating-point self-test
+     * at +0bcc saw a stale FP7. */
+    register_set32(cpu_f(t, (int)x), fibm_to64x(&r.result));
+    if (!(x % 2)) register_set32(cpu_f(t, (int)(x + 1)), fibm_to64y(&r.result));
 }
 
 static void exec_ME(CPU *t, DInstr *v) {
+    uint32_t x = df_get(v, 'x');
     FloatIBM v1 = fibm_from32(register_get32(F(t, v, 'x')));
     FloatIBM v2 = fibm_from32(cpu_g_eaf(t, v, 0));
     FloatIBMResult r = fibm_mulE(&v1, &v2);
     if (!cpu_fp_dispatch_exc(t, r.exc)) return;
-    register_set32(F(t, v, 'x'), fibm_to32(&r.result));
+    /* Multiply Short develops a double-length product: the high half
+     * goes to R1 and the LOW half to R1+1, "unless R1 is odd" -- an odd
+     * R1 has no pair to hold it and the extension is discarded.  We
+     * wrote only the high half, so GPCIPL's own floating-point self-test
+     * at +0bcc saw a stale FP7. */
+    register_set32(cpu_f(t, (int)x), fibm_to64x(&r.result));
+    if (!(x % 2)) register_set32(cpu_f(t, (int)(x + 1)), fibm_to64y(&r.result));
 }
 
 static void exec_SEDR(CPU *t, DInstr *v) {
@@ -1327,7 +1341,7 @@ static void exec_LPS(CPU *t, DInstr *v) {
     if (!cpu_i_super(t)) return;
     uint32_t eaw1 = cpu_g_ea(t, v);
     uint32_t eaw2 = eaw1 + 2;
-    psw_load(&t->psw, membus_get32(t->ram, eaw1), membus_get32(t->ram, eaw2));
+    cpu_load_psw(t, membus_get32(t->ram, eaw1), membus_get32(t->ram, eaw2));
 }
 
 static void exec_MVH(CPU *t, DInstr *v) {
@@ -1360,6 +1374,9 @@ static void exec_SPM(CPU *t, DInstr *v) {
     psw_set_fixed_pt_overflow(&t->psw, (bits >> 3) & 1);
     psw_set_exponent_underflow(&t->psw, (bits >> 1) & 1);
     psw_set_significance_mask(&t->psw, bits & 1);
+    /* Setting the indicator and its mask together is the Note 1 case:
+     * the interrupt occurs (POO 2.5.2.3). */
+    cpu_test_fixed_overflow(t);
 }
 
 static void exec_SSM(CPU *t, DInstr *v) {
@@ -1421,7 +1438,7 @@ static void exec_SVC(CPU *t, DInstr *v) {
     psw_set_int_code(&t->psw, ea);
     membus_set32(t->ram, 0x58, register_get32(&t->psw.psw1), true);
     membus_set32(t->ram, 0x5a, register_get32(&t->psw.psw2), true);
-    psw_load(&t->psw, membus_get32(t->ram, 0x5c), membus_get32(t->ram, 0x5e));
+    cpu_load_psw(t, membus_get32(t->ram, 0x5c), membus_get32(t->ram, 0x5e));
 }
 
 static void exec_TS(CPU *t, DInstr *v) {
@@ -1447,10 +1464,15 @@ static void exec_TSB(CPU *t, DInstr *v) {
 static void exec_LDM(CPU *t, DInstr *v) {
     uint32_t fw = cpu_g_eaf(t, v, 0);
     uint32_t regSet = psw_get_reg_set(&t->psw);
-    registerfile_set_dse(&t->regFiles[regSet], 0, (fw >> 28) & 0xf);
-    registerfile_set_dse(&t->regFiles[regSet], 1, (fw >> 24) & 0xf);
-    registerfile_set_dse(&t->regFiles[regSet], 2, (fw >> 20) & 0xf);
-    registerfile_set_dse(&t->regFiles[regSet], 3, (fw >> 16) & 0xf);
+    /* Sec. 9.13's own operand layout: each DSE is the LOW nibble of one
+     * byte -- bits 4-7, 12-15, 20-23, 28-31, with the high nibble of
+     * each byte reserved zero.  Reading four adjacent nibbles out of the
+     * high halfword instead, as this did, put R2's and R3's DSE in R0's
+     * and R1's bytes and dropped the low halfword entirely. */
+    registerfile_set_dse(&t->regFiles[regSet], 0, (fw >> 24) & 0xf);
+    registerfile_set_dse(&t->regFiles[regSet], 1, (fw >> 16) & 0xf);
+    registerfile_set_dse(&t->regFiles[regSet], 2, (fw >>  8) & 0xf);
+    registerfile_set_dse(&t->regFiles[regSet], 3, (fw      ) & 0xf);
 }
 
 static void exec_LXAR(CPU *t, DInstr *v) {
@@ -1469,25 +1491,49 @@ static void exec_LXA(CPU *t, DInstr *v) {
     registerfile_set_dse(&t->regFiles[psw_get_reg_set(&t->psw)], (int)df_get(v, 'x'), dseVal);
 }
 
+/* Sec. 9.14, STORE EXTENDED ADDRESS: "Bit 0 of the second operand is
+ * set to one, bits 1 through 15 are replaced by bits 1 through 15 of R1,
+ * bits 28 through 31 are replaced by the contents of R1 DSE, bits 16
+ * through 19 are set to zero, and bits 20 through 27 are unchanged and
+ * ignored." */
+static uint32_t stxa_word(uint32_t src, uint32_t dst, uint32_t dse) {
+    return 0x80000000u          /* bit 0, always set */
+         | (src & 0x7fff0000u)  /* bits 1-15, the address */
+                                /* bits 16-19 zeroed by omission */
+         | (dst & 0x00000ff0u)  /* bits 20-27, the destination's own */
+         | (dse & 0xfu);        /* bits 28-31, R1's DSE */
+}
+
 static void exec_STXAR(CPU *t, DInstr *v) {
-    /* Source body is a bare `return`. */
-    (void)t;
-    (void)v;
+    uint32_t dse = registerfile_get_dse(&t->regFiles[psw_get_reg_set(&t->psw)],
+                                        (int)df_get(v, 'x'));
+    register_set32(R(t, v, 'y'),
+                   stxa_word(register_get32(R(t, v, 'x')),
+                             register_get32(R(t, v, 'y')), dse));
 }
 
 static void exec_STXA(CPU *t, DInstr *v) {
-    /* Source computes addrConst/addr but never uses them — dead result.
-     * The g_EAF call itself may still have addressing side effects
-     * (indexed-with-modification), so it's still made and discarded. */
-    (void)cpu_g_eaf(t, v, 0);
+    /* The EA is taken ONCE: an auto-modifying address form must not be
+     * evaluated twice, so the read and the write share it rather than
+     * going through cpu_g_eaf()/cpu_s_eaf(). */
+    uint32_t ea = cpu_g_ea(t, v);
+    uint32_t cur = ((uint32_t)membus_get16(t->ram, ea) << 16)
+                 | membus_get16(t->ram, ea + 1);
+    uint32_t dse = registerfile_get_dse(&t->regFiles[psw_get_reg_set(&t->psw)],
+                                        (int)df_get(v, 'x'));
+    uint32_t val = stxa_word(register_get32(R(t, v, 'x')), cur, dse);
+    if (!membus_set16(t->ram, ea, val >> 16, true) ||
+        !membus_set16(t->ram, ea + 1, val & 0xffff, true)) {
+        cpu_signal_protection_violation(t);
+    }
 }
 
 static void exec_STDM(CPU *t, DInstr *v) {
     uint32_t regSet = psw_get_reg_set(&t->psw);
-    uint32_t fw = (registerfile_get_dse(&t->regFiles[regSet], 0) << 28) |
-                  (registerfile_get_dse(&t->regFiles[regSet], 1) << 24) |
-                  (registerfile_get_dse(&t->regFiles[regSet], 2) << 20) |
-                  (registerfile_get_dse(&t->regFiles[regSet], 3) << 16);
+    uint32_t fw = (registerfile_get_dse(&t->regFiles[regSet], 0) << 24) |
+                  (registerfile_get_dse(&t->regFiles[regSet], 1) << 16) |
+                  (registerfile_get_dse(&t->regFiles[regSet], 2) <<  8) |
+                  (registerfile_get_dse(&t->regFiles[regSet], 3)      );
     cpu_s_eaf(t, v, fw, 0);
 }
 
@@ -1700,11 +1746,11 @@ static OpEntry OPS[] = {
     { "LPS", "1100110111111abb/X", exec_LPS, 2, 1 },
     { "MVH", "01101xxx11101yyy", exec_MVH, 2, 1 },
     { "SPM", "1100100011101yyy", exec_SPM, 2, 1 },
-    { "SSM", "1000100011111abb/X", exec_SSM, 2, 1 },
+    { "SSM", "1000100011111abb/X", exec_SSM, 1, 1 },  /* halfword operand */
     { "SCAL", "11010xxx11111abb/X", exec_SCAL, 1, 2 },
     { "SRET", "10010xxx11101yyy", exec_SRET, 2, 1 },
     { "SVC", "1100100111111abb/X", exec_SVC, 1, 1 },
-    { "TS", "1011100011111abb/X", exec_TS, 2, 1 },
+    { "TS", "1011100011111abb/X", exec_TS, 1, 1 },  /* halfword operand */
     { "TSB", "10110111ddddddbb/I", exec_TSB, 1, 1 },
     { "LDM", "0110100011111abb/X", exec_LDM, 2, 1 },
     { "LXAR", "01000xxx11101yyy", exec_LXAR, 2, 1 },
@@ -1721,9 +1767,23 @@ static InstrDesc DESCS[OPS_COUNT];
 static const InstrDesc *SORTED[OPS_COUNT];
 static bool g_tableInit = false;
 
+static int popcount32(uint32_t v) {
+    int n = 0;
+    while (v) { n += (int)(v & 1u); v >>= 1; }
+    return n;
+}
+
+/* Most specific pattern first, and specificity is HOW MANY bits the
+ * pattern fixes -- not the numeric value of the mask.  Sorting by value
+ * alone put SHW (mask ff00, 8 fixed bits) ahead of STXA (mask f8f8, 10),
+ * so every STXA whose R1 field happened to read 010 decoded as a
+ * one-halfword SHW and the halfword after it as a separate instruction.
+ * Ties break on the mask value, as gpc's own ordering does. */
 static int cmp_mask_desc(const void *a, const void *b) {
     const InstrDesc *da = *(const InstrDesc **)a;
     const InstrDesc *db = *(const InstrDesc **)b;
+    int na = popcount32(da->pb.mask), nb = popcount32(db->pb.mask);
+    if (na != nb) return nb - na;
     if (da->pb.mask > db->pb.mask) return -1;
     if (da->pb.mask < db->pb.mask) return 1;
     return 0;
@@ -1736,6 +1796,18 @@ void cpu_instr_table_init(void) {
         DESCS[i].pb = pb_make_desc(OPS[i].pattern);
         DESCS[i].e = OPS[i].e;
         DESCS[i].addrWidth = OPS[i].addrWidth;
+        /* POO 14.1: "no automatic index alignment" -- LM, STM and LPS
+         * address fullword operands but take the index register as a
+         * plain halfword count.  Scaling their index like the operand,
+         * as this used to, doubled it: GPCIPL's SSM at +0cea landed 8
+         * halfwords past its mask table and read the C9FB fill instead
+         * of a system mask, so it unmasked the wrong interrupts.
+         * (ISPB is the fourth instruction the POO exempts, but its
+         * operand is already halfword-addressed, so it needs no entry.) */
+        DESCS[i].indexWidth = OPS[i].addrWidth;
+        if (!strcmp(OPS[i].nm, "LM") || !strcmp(OPS[i].nm, "STM") ||
+            !strcmp(OPS[i].nm, "LPS"))
+            DESCS[i].indexWidth = 1;
         DESCS[i].opType = OPS[i].opType;
         SORTED[i] = &DESCS[i];
     }
@@ -1760,6 +1832,7 @@ static void decodef(const InstrDesc *desc, uint32_t hw1, uint32_t hw2, DInstr *v
 
     v->niaIncr = desc->pb.len; /* == origLen */
     v->addrWidth = desc->addrWidth;
+    v->indexWidth = desc->indexWidth;
     v->opType = desc->opType;
 
     if (desc->pb.type == PB_TYPE_RI || desc->pb.type == PB_TYPE_SI) {
@@ -1812,6 +1885,7 @@ static void decodef(const InstrDesc *desc, uint32_t hw1, uint32_t hw2, DInstr *v
     }
 
     v->addrWidth = desc->addrWidth;
+    v->indexWidth = desc->indexWidth;
     v->opType = desc->opType;
 }
 
@@ -1841,6 +1915,31 @@ const InstrDesc *instr_decode(uint32_t hw1, uint32_t hw2, DInstr *v) {
  * `y -= 2`), and the JS source's plain `"#{v.x}"`/`.asHex()` would show
  * that as a genuine negative number, not a huge unsigned one.
  * ------------------------------------------------------------------- */
+
+/* Mode marker that precedes the displacement of an extended-form operand:
+ *   *+d / *-d   IC-relative forward / backward  (X2=0, A=0)
+ *   @d          indirect through d              (A=1)
+ *   @@d(x)      ZCON fullword pointer, double   (A=1, I=1, X2/=0)
+ *   ...+        auto-modification writes back   (I=1)
+ * None of this was rendered before, so an indirect or auto-modifying
+ * operand disassembled identically to a plain one. */
+static const char *ext_addr_prefix(const DInstr *v) {
+    if (!v->hasIa) return "";
+    uint32_t i = df_get(v, 'i');
+    if (i == 0 && v->ia == 0) return (v->ii == 1) ? "*-" : "*+";
+    if (v->ia == 1) return (v->ii == 1 && i != 0) ? "@@" : "@";
+    return "";
+}
+
+/* Trailing marker for the extended forms that write a modified address
+ * back to the pointer (step 6) or to the index register (step 8). */
+static const char *ext_addr_suffix(const DInstr *v) {
+    if (!v->hasIa || v->ii != 1) return "";
+    uint32_t i = df_get(v, 'i');
+    if (i == 0 && v->ia == 1) return "+";
+    if (i != 0 && v->ia == 0) return "+";
+    return "";
+}
 
 void instr_to_str(uint32_t hw1, uint32_t hw2, char *out, size_t outSize) {
     DInstr v;
@@ -1873,19 +1972,27 @@ void instr_to_str(uint32_t hw1, uint32_t hw2, char *out, size_t outSize) {
     if (df_has(&v, 'd')) {
         char hex[16];
         as_hex(hex, sizeof hex, (long long)(int32_t)df_get(&v, 'd'), 4);
-        pos += (size_t)snprintf(s + pos, sizeof s - pos, "X'%s'", hex);
+        pos += (size_t)snprintf(s + pos, sizeof s - pos, "%sX'%s'",
+                                ext_addr_prefix(&v), hex);
     }
     if (df_has(&v, 'b')) {
+        /* Index and base are joined with a comma only when BOTH are
+         * shown -- an omitted base used to leave a dangling "(7," . */
         int32_t bval = (int32_t)df_get(&v, 'b');
+        char parts[32];
+        size_t pp = 0;
         if (df_has(&v, 'i') && df_get(&v, 'i') != 0) {
-            pos += (size_t)snprintf(s + pos, sizeof s - pos, "(%d,", (int32_t)df_get(&v, 'i'));
-            if (!(v.extended && bval == 3)) {
-                pos += (size_t)snprintf(s + pos, sizeof s - pos, "%d", bval);
-            }
-            pos += (size_t)snprintf(s + pos, sizeof s - pos, ")");
-        } else if (!(v.extended && bval == 3)) {
-            pos += (size_t)snprintf(s + pos, sizeof s - pos, "(%d)", bval);
+            pp += (size_t)snprintf(parts + pp, sizeof parts - pp, "%d",
+                                   (int32_t)df_get(&v, 'i'));
         }
+        if (!(v.extended && bval == 3)) {
+            pp += (size_t)snprintf(parts + pp, sizeof parts - pp, "%s%d",
+                                   pp ? "," : "", bval);
+        }
+        if (pp) pos += (size_t)snprintf(s + pos, sizeof s - pos, "(%s)", parts);
+    }
+    if (df_has(&v, 'd')) {
+        pos += (size_t)snprintf(s + pos, sizeof s - pos, "%s", ext_addr_suffix(&v));
     }
     if (df_has(&v, 'I') && d->pb.type == PB_TYPE_SI) {
         char hex[16];

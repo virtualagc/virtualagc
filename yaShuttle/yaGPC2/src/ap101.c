@@ -51,7 +51,7 @@ void ap101_reset(AP101 *gpc) {
         }
     }
     for (int bank = 0; bank <= 1; bank++) {
-        for (int i = 0; i <= 3; i++) {
+        for (int i = 0; i <= 7; i++) {
             registerfile_set_dse(&gpc->cpu.regFiles[bank], i, 0);
         }
     }

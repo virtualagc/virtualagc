@@ -34,6 +34,11 @@ typedef struct {
 
     int niaIncr;    /* v.niaIncr (set by cpu.c from d->len before dispatch) */
     int addrWidth;  /* ADDR_HALFWORD/FULLWORD/DBLEWORD */
+    /* How the INDEX register is aligned, which is not always how the
+     * OPERAND is addressed.  POO 14.1 exempts a few instructions from
+     * automatic index alignment, so they address a fullword operand
+     * with a halfword-aligned index.  Defaults to addrWidth. */
+    int indexWidth;
     int opType;     /* OPTYPE_DATA/BRCH/SHFT */
     uint32_t hw1, hw2;
 } DInstr;
@@ -54,6 +59,7 @@ typedef struct {
     PBDesc pb;         /* mask/maskedVal/len/type/fields, from pb_make_desc(d-pattern) */
     InstrExecFn e;      /* NULL if the real instruction has no exec (shouldn't happen) */
     int addrWidth;
+    int indexWidth;
     int opType;
 } InstrDesc;
 

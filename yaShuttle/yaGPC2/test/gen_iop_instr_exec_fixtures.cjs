@@ -128,7 +128,7 @@ async function main() {
     gpc.iop.regRecvEna.set32(randU32());
     gpc.iop.regProgExcept.set32(randU32());
     gpc.iop.regBusyWait.set32(randU32());
-    gpc.iop.regHalt.set32(randU32());
+    gpc.iop.regProcEnable.set32(randU32());   // reference renamed regHalt -> regProcEnable
     gpc.iop.regIndicator.set32(randU32());
     gpc.iop.msc.regFailDisc.set32(Math.floor(rng() * 32));
     gpc.iop.msc.regIntProg.set32(Math.floor(rng() * 4096));
@@ -151,7 +151,7 @@ async function main() {
       regRecvEna: gpc.iop.regRecvEna.get32() >>> 0,
       regProgExcept: gpc.iop.regProgExcept.get32() >>> 0,
       regBusyWait: gpc.iop.regBusyWait.get32() >>> 0,
-      regHalt: gpc.iop.regHalt.get32() >>> 0,
+      regHalt: gpc.iop.regProcEnable.get32() >>> 0,
       regIndicator: gpc.iop.regIndicator.get32() >>> 0,
       regFailDisc: gpc.iop.msc.regFailDisc.get32() >>> 0,
       regIntProg: gpc.iop.msc.regIntProg.get32() >>> 0,
@@ -175,7 +175,7 @@ async function main() {
     gpc.iop.regRecvEna.set32(snap.regRecvEna);
     gpc.iop.regProgExcept.set32(snap.regProgExcept);
     gpc.iop.regBusyWait.set32(snap.regBusyWait);
-    gpc.iop.regHalt.set32(snap.regHalt);
+    gpc.iop.regProcEnable.set32(snap.regHalt);
     gpc.iop.regIndicator.set32(snap.regIndicator);
     gpc.iop.msc.regFailDisc.set32(snap.regFailDisc);
     gpc.iop.msc.regIntProg.set32(snap.regIntProg);

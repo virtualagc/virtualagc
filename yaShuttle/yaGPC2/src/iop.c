@@ -19,6 +19,11 @@
  *   ROS_PAR    parity error during a transfer from IOP Read Only Storage
  *   IOP_FAULT  IOP timing fault
  */
+/* One GO/NO-GO timer count is 0.768 ms -- "bit 31 = 0.768 ms" in the
+ * POO's own RM status layout -- and the count is 12 bits wide. */
+#define WD_TICK_US     768.0
+#define WD_COUNT_MASK  0xfffu
+
 #define INTA_GO_NOGO   0x80000000u
 #define INTA_IOP_FAIL  0x40000000u
 #define INTA_CM_IDLE   0x20000000u
@@ -305,6 +310,14 @@ void iop_init(IOP *iop, struct CPU *cpu) {
     register_init(&iop->regDiscreteInB);
     iop_reset_discrete_inputs(iop);
     register_init(&iop->regRMStatus);
+    iop->wdCount = 0;
+    iop->wdRunning = false;
+    iop->wdTimeout = false;
+    iop->wdAccumUs = 0.0;
+    iop->wdLastUs = 0.0;
+    iop->rmVoterInhibit = false;
+    iop->rmTestInputs = 0;
+    iop->rmVoterFail = false;
     iop->regInterrupts = registerfile_create(5);
     iop->intForceTest = false;
     register_init(&iop->regCCData);
@@ -333,7 +346,113 @@ void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx) {
 }
 
 void iop_exec_channel_control(IOP *iop) { (void)iop; }
-void iop_exec_rm(IOP *iop) { (void)iop; }
+/* Set one of the Group 1 bits and interrupt the CPU on External 0.  The
+ * five conditions are grouped onto the one level, so this is a pulse to
+ * the CPU's pending latch and not a level: the register is cleared by
+ * the handler's own read. */
+static void iop_signal_group1(IOP *iop, uint32_t bit) {
+    Register *a = registerfile_r(&iop->regInterrupts, 0);
+    register_set32(a, register_get32(a) | bit);
+    if (iop->cpu != NULL) iop->cpu->intPending.iopGrp1 = true;
+}
+
+/* LOAD GO/NO-GO TIMER (PCO 88040000).  The data word's low 12 bits are
+ * the count; the PCO is what starts the counter and resets the timeout
+ * latch. */
+static void iop_load_watchdog(IOP *iop, uint32_t value) {
+    iop->wdCount = value & WD_COUNT_MASK;
+    iop->wdRunning = true;
+    iop->wdTimeout = false;
+    iop->wdAccumUs = 0.0;
+    iop->wdLastUs = (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
+}
+
+/* The test form (PCO 88048000): "This PCO is used to load the Go/No-Go
+ * Timer with any chosen value which is incremented by one low order bit
+ * and read with a PCI (READ STATUS REGISTER) to determine the operating
+ * status of the timer."  The same load plus the single increment the
+ * hardware injects; a wrap past a full count latches the timeout the way
+ * any other full count does, which is why STM1 resets the latch with
+ * another load once it has read the count back. */
+static void iop_load_watchdog_test(IOP *iop, uint32_t value) {
+    iop_load_watchdog(iop, value);
+    iop->wdRunning = false;
+    iop->wdCount = (iop->wdCount + 1) & WD_COUNT_MASK;
+    if (iop->wdCount == 0) {
+        iop->wdTimeout = true;
+        iop_signal_group1(iop, INTA_GO_NOGO);
+    }
+}
+
+/* LOAD TEST REGISTER (PCO 88100000): redundancy management's voter, in
+ * the only mode a single simulated GPC can exercise -- self test. */
+static void iop_load_voter_test(IOP *iop, uint32_t data) {
+    iop->rmVoterInhibit = (data & 0x10u) != 0;
+    iop->rmTestInputs = data & 0xfu;
+    int votes = 0;
+    for (uint32_t b = 0x8u; b != 0; b >>= 1)
+        if (iop->rmTestInputs & b) votes++;
+    iop->rmVoterFail = votes >= 2;
+}
+
+/* Carry the watchdog forward to the CPU's clock.  A full count (the
+ * counter wrapping back to zero) is the timeout: it sets the timeout
+ * latch, which on a real vehicle drives the Computer Fail output, and
+ * raises External 0 through Group 1 bit 0. */
+void iop_tick_watchdog(IOP *iop) {
+    if (!iop->wdRunning || iop->cpu == NULL) return;
+    double now = iop->cpu->elapsedTimeUs;
+    iop->wdAccumUs += now - iop->wdLastUs;
+    iop->wdLastUs = now;
+    while (iop->wdAccumUs >= WD_TICK_US) {
+        iop->wdAccumUs -= WD_TICK_US;
+        iop->wdCount = (iop->wdCount + 1) & WD_COUNT_MASK;
+        if (iop->wdCount == 0) {
+            iop->wdTimeout = true;
+            iop->wdRunning = false;
+            iop->wdAccumUs = 0.0;
+            iop_signal_group1(iop, INTA_GO_NOGO);
+            return;
+        }
+    }
+}
+
+/* The RM status register as the CPU reads it (POO Appendix I, READ RM
+ * STATUS REGISTER), IBM bit numbering:
+ *    0     fail or timeout latch (the voter's failure, or a timeout)
+ *    1     PCO inhibiting the fail vote inputs for test
+ *    3-6   failure votes in from the other IOPs
+ *    7-10  failure votes out to them (set by the MSC; not modeled)
+ *    11-14 the voter's four test inputs
+ *    15    voter fail latch
+ *    16    timeout latch
+ *    17    voter termination control latch
+ *    18    timer termination control latch
+ *    20-31 GO/NO-GO timer count, bit 31 = 0.768 ms
+ * Only bits 17-18 are actually stored; the rest is composed here.  This
+ * read used to hand back the raw register, which held the loaded timer
+ * value parked in the wrong field and none of the voter state at all. */
+uint32_t iop_rm_status(const IOP *iop) {
+    uint32_t v = register_get32(&iop->regRMStatus) & 0x00006000u; /* bits 17-18 */
+    if (iop->rmVoterInhibit) v |= 0x40000000u;
+    v |= (iop->rmTestInputs & 0xfu) << 17;
+    if (iop->rmVoterFail) v |= 0x00010000u;
+    if (iop->wdTimeout) v |= 0x00008000u;
+    /* Bit 0 is the two of them together: "RM has detected a failure and
+     * set the failure latch or ... the watchdog timer has timed out
+     * forcing the fail latch." */
+    if (iop->rmVoterFail || iop->wdTimeout) v |= 0x80000000u;
+    v |= iop->wdCount & WD_COUNT_MASK;
+    return v;
+}
+
+/* Redundancy management: the GO/NO-GO timer is RM's, and this is where
+ * it advances.  Called once per CPU instruction, and also from the wait
+ * loop -- the watchdog runs on wall time, not CPU instructions, so it
+ * keeps counting through the wait state. */
+void iop_exec_rm(IOP *iop) {
+    iop_tick_watchdog(iop);
+}
 
 void iop_exec_dma_queue(IOP *iop) {
     if (iop->dmaQueue.count == 0) return;
@@ -687,35 +806,33 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             if (iop->cpu != NULL) {
                 iop->cpu->intPending.iopGrp1 = true;  /* EX0 */
             }
-            /* The table's remaining line, "WATCHDOG TIMER RST=ZERO
-             * COUNTER AND INHIBIT COUNTING", has nothing to act on --
-             * this emulator carries no go/no-go watchdog counter. */
+            /* And the table's remaining line, "WATCHDOG TIMER RST=ZERO
+             * COUNTER AND INHIBIT COUNTING". */
+            iop->wdCount = 0;
+            iop->wdRunning = false;
+            iop->wdAccumUs = 0.0;
             break;
         }
-        case 0x88040000: { /* LOAD GO/NO-GO TIMER */
-            uint32_t r1 = register_get32(&iop->regRMStatus);
-            uint32_t timerVal = data & 0x00000fffu;
-            r1 = (r1 & 0xf000ffffu) | (timerVal << 16);
-            register_set32(&iop->regRMStatus, r1);
+        case 0x88040000: /* LOAD GO/NO-GO TIMER */
+            iop_load_watchdog(iop, data);
             break;
-        }
-        case 0x88048000: { /* LOAD GO/NO-GO TIMER TEST */
-            uint32_t r1 = register_get32(&iop->regRMStatus);
-            uint32_t timerVal = data & 0x00000fffu;
-            r1 = (r1 & 0xf000ffffu) | (timerVal << 16);
-            register_set32(&iop->regRMStatus, r1);
+        case 0x88048000: /* LOAD GO/NO-GO TIMER TEST */
+            iop_load_watchdog_test(iop, data);
             break;
-        }
         case 0x88080000: { /* CONFIGURE TERMINATION CONTROL LATCHES */
             uint32_t timerLatch = (data >> 1) & 0x1u;
             uint32_t voterLatch = data & 0x1u;
             uint32_t r1 = register_get32(&iop->regRMStatus);
-            r1 = (r1 & 0xffffafffu) | (timerLatch << 12) | (voterLatch << 14);
+            /* They land in RM status IBM bits 18 and 17 -- 0x2000 and
+             * 0x4000.  The timer latch used to go to bit 19 (0x1000)
+             * behind a mask that cleared 19 and 17 but left 18 alone. */
+            r1 = (r1 & ~0x6000u) | (timerLatch << 13) | (voterLatch << 14);
             register_set32(&iop->regRMStatus, r1);
             break;
         }
         case 0x88100000: /* LOAD TEST REGISTER */
-            return;      /* no-op */
+            iop_load_voter_test(iop, data);
+            break;
         case 0x88180000: /* TEST INTERRUPTS */
             /* "The TEST command word forces interrupt Registers A, B, D
              * and E to set all interrupts as follows:
@@ -729,6 +846,18 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             register_set32(registerfile_r(&iop->regInterrupts, 1), 0x0c000000u);
             register_set32(registerfile_r(&iop->regInterrupts, 3), 0x80000000u);
             register_set32(registerfile_r(&iop->regInterrupts, 4), 0x80000000u);
+            /* Forcing the registers is only half of it: the point of the
+             * command is "self-testing of the interrupt detection
+             * circuitry", so the four levels those registers feed have to
+             * actually be raised to the CPU.  Setting the registers alone
+             * left GPCIPL's interrupt self-test with nothing to take once
+             * it unmasked. */
+            if (iop->cpu != NULL) {
+                iop->cpu->intPending.iopGrp1 = true;  /* External 0, REG A */
+                iop->cpu->intPending.iopGrp2 = true;  /* External 1, REG B */
+                iop->cpu->intPending.ext3 = true;     /* External 3, REG D */
+                iop->cpu->intPending.ext4 = true;     /* External 4, REG E */
+            }
             break;
         case 0x88140000: /* ENABLE INTERRUPTS */
             iop->intForceTest = false;
@@ -784,7 +913,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 4), 0x0);
             break;
         case 0x08140000: /* READ RM STATUS REGISTERS */
-            register_set32(&iop->regCCData, register_get32(&iop->regRMStatus));
+            register_set32(&iop->regCCData, iop_rm_status(iop));
             if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 5), 0x0);
             break;
         case 0x08180000: /* READ DISCRETE INPUT A (1-32) */

@@ -436,3 +436,52 @@ document's planning stages, and it is already in the code as
   halsc.in still has no --templib-out while con80build.py still passes
   it, so that mismatch is unfixed upstream and the commit remains
   unusable.
+
+### [2026-08-23] Target: [problems.md]
+- GPCIPL/IPL.fcm trace agreement vs. current `gpc` went 20,917 -> 35,036
+  matched instructions, 0 phase slips; the run now executes the full
+  300,000 steps instead of parking at 21,899.  Fifteen defects, each
+  confirmed against the POO (`ASM101S/AP-101S-instruction-set.txt`)
+  and/or nsts-sim-gpc before changing anything:
+  MSC `@BC`/`@BXC` branch displacement is relative to the UPDATED PC
+  (was one halfword early, so the MSC missed `@INT` and went idle);
+  MSC `@INT` never loaded IOP Interrupt Register C; `ME`/`MER` dropped
+  the low half of the double-length product; `MED`/`MEDR` used the
+  AP-101 C/M multiply (`mulQeE`) instead of the AP-101S's own
+  (`mulQeS`, newly ported) and `mulQeE` itself was 1 ulp high on
+  postnormalising products; Figure 2-20 note '#' (machine check /
+  store protect force old-PSW CC to 10, clear carry+overflow) was
+  missing; the fixed-point overflow INDICATOR was never set and never
+  re-tested after SPM/LPS; program-check codes for fixed-point overflow
+  (0004, was 0002) and address specification (0002, was 0003 -- not a
+  program check at all); External 0/1 did not write their own 0000
+  interrupt code; TEST INTERRUPTS set the registers but raised none of
+  the four levels; RM status was handed back raw -- no voter state and
+  the GO/NO-GO watchdog was not modelled at all (ported: counter,
+  0.768 ms tick, timeout latch, LOAD TEST REGISTER voter);
+  CONFIGURE TERMINATION CONTROL LATCHES wrote the timer latch to bit 19
+  instead of 18; POO 14.1 index alignment (LM/STM/LPS take a halfword
+  index despite fullword operands) was not modelled and SSM/TS were
+  marked fullword; auto storage modification used the POST-incremented
+  address for its own access; LDM/STDM read the four DSEs as nibbles of
+  the high halfword instead of the low nibble of each byte; only 4 DSEs
+  were kept where the machine has 8 (LXA on R4-R7 aliased onto R0-R3);
+  STXA/STXAR were empty stubs; and instruction decode ranked candidate
+  patterns by mask VALUE rather than by how many bits they fix, so
+  `STXA` with R1=010 decoded as `SHW`.
+- Disassembly now renders the extended-addressing markers (`@`, `@@`,
+  `*+`, `*-`, trailing `+`) and omits the dangling comma of an elided
+  base.
+- Fixture tooling: `gen_cpu_ea_fixtures.cjs` never set `indexWidth`, so
+  the oracle evaluated `x << (undefined - 1)` -- a shift by NaN, i.e. by
+  0 -- and every indexed EA fixture silently asserted halfword
+  alignment.  `gen_iop_instr_exec_fixtures.cjs` still used the
+  reference's old `regHalt` name (now `regProcEnable`) and could not run
+  at all.  Suites now: decode 4620/4620, floatIBM 75500/75500,
+  instr_tostr 20000/20000.
+- STILL OPEN, all pre-existing and measured: `g_EXPAND` drops sector
+  bits (+0x8000/0x10000/0x18000) in ~900 EA cases; the DIAG command
+  family is a stub beyond one command; the IU store-conflict model
+  (POO 15/16.8 -- DIAG 7100/7101, `iuShadow`) is absent, which is
+  exactly where the trace now diverges at 35,036; MSC fixture suite
+  fails ~12k on what looks like local-store width.

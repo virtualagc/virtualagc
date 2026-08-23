@@ -62,7 +62,7 @@ RegisterFile registerfile_create(int num) {
     rf.count = num + 1; /* CoffeeScript `[0..@num]` is inclusive */
     rf.regs = calloc((size_t)rf.count, sizeof(Register));
     for (int i = 0; i < rf.count; i++) register_init(&rf.regs[i]);
-    rf.dse[0] = rf.dse[1] = rf.dse[2] = rf.dse[3] = 0;
+    for (int i = 0; i < 8; i++) rf.dse[i] = 0;
     return rf;
 }
 
@@ -77,11 +77,11 @@ Register *registerfile_r(RegisterFile *rf, int x) {
 }
 
 uint32_t registerfile_get_dse(const RegisterFile *rf, int baseReg) {
-    return rf->dse[baseReg & 3];
+    return rf->dse[baseReg & 7];
 }
 
 void registerfile_set_dse(RegisterFile *rf, int baseReg, uint32_t value) {
-    rf->dse[baseReg & 3] = (uint8_t)(value & 0xf);
+    rf->dse[baseReg & 7] = (uint8_t)(value & 0xf);
 }
 
 /* ---------------------------------------------------------------------

@@ -48,6 +48,7 @@ static DInstr make_v(const VOpts *o) {
     v.niaIncr = o->niaIncr;
     v.opType = o->opType;
     v.addrWidth = o->addrWidth;
+    v.indexWidth = o->indexWidth;
     if (o->hasI) df_set(&v, 'I', o->I);
     if (o->hasD) df_set(&v, 'd', o->d);
     if (o->hasB) df_set(&v, 'b', o->b);

@@ -132,8 +132,14 @@ static void exec_BC(IOP *t, DInstr *v) {
         if (v1 > 0) doBranch = true;
     }
     if (doBranch) {
+        /* The displacement is relative to the UPDATED PC -- the address
+         * of the next sequential instruction -- so the branch is
+         * 1 + disp, not disp.  Taking it as disp landed one halfword
+         * early: GPCIPL's MSC program branches to @LXI/@INT/@WAT at
+         * 14c8 and we arrived at 14c7, skipping the @INT that raises the
+         * IOP interrupt to the CPU. */
         int32_t d8 = sign_extend(df_get(v, 'd'), 8);
-        iop_incr_nia(t, d8);
+        iop_incr_nia(t, 1 + d8);
     } else {
         iop_incr_nia(t, 1);
     }
@@ -153,8 +159,14 @@ static void exec_BXC(IOP *t, DInstr *v) {
         if (v1 > 0) doBranch = true;
     }
     if (doBranch) {
+        /* The displacement is relative to the UPDATED PC -- the address
+         * of the next sequential instruction -- so the branch is
+         * 1 + disp, not disp.  Taking it as disp landed one halfword
+         * early: GPCIPL's MSC program branches to @LXI/@INT/@WAT at
+         * 14c8 and we arrived at 14c7, skipping the @INT that raises the
+         * IOP interrupt to the CPU. */
         int32_t d8 = sign_extend(df_get(v, 'd'), 8);
-        iop_incr_nia(t, d8);
+        iop_incr_nia(t, 1 + d8);
     } else {
         iop_incr_nia(t, 1);
     }
@@ -588,6 +600,16 @@ static void exec_INT(IOP *t, DInstr *v) {
         uint32_t xval = register_get32(iopls_X(&t->ls));
         il = il | (xval & 0xfffu);
     }
+    /* "This instruction loads the 12 bit IOP Interrupt Register C and
+     * causes an interrupt to the GPC to be set if at least one of the
+     * bits is a 1."  Register C is what the CPU's own PCI X'0808'
+     * (READ INTERRUPT REGISTER C) hands back, left-justified in the
+     * 32-bit word.  Loading only regIntProg -- as this did -- raised
+     * the interrupt but left the CPU reading 0 from register C, so
+     * GPCIPL's handler at +09dd saw no source for the External 2 it
+     * had just taken. */
+    Register *intC = registerfile_r(&t->regInterrupts, 2);
+    register_set32(intC, register_get32(intC) | (il << 20));
     register_set32(&t->msc.regIntProg, il);
     if (il != 0 && t->cpu) {
         t->cpu->intPending.iopProg = true;

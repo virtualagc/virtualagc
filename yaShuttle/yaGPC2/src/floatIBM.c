@@ -416,6 +416,82 @@ static void round_once(uint64_t *mant, int *biasedExp) {
     *mant = rounded & ~(((uint64_t)1 << 25) - 1);
 }
 
+/* AP-101S extended multiply (MEDR/MED), IBM-85-C67-001 8.x:
+ *
+ *   "Fraction multiplication is accomplished by multiplying the three most
+ *    significant fullword partial sum pairs and adding the results (to 68
+ *    bits), followed by normalization and truncation to 56 bits."
+ *
+ * The two 56-bit fractions split into 28-bit halves (A:B and C:D); the
+ * three most significant partial products are AC, AD and BC, and BD --
+ * the least significant -- does not participate.  That is the whole
+ * difference from the AP-101 C/M, which instead throws away everything
+ * below 31 bits of each OPERAND before multiplying (fibm_mulQeE above).
+ * The S keeps far more: it lands within an ulp of the exact product
+ * where the C/M is millions of ulps out, which is why the two machines
+ * visibly disagree -- and why running MED through mulQeE here produced
+ * a correct high half with a wildly wrong low half. */
+FloatIBMResult fibm_mulQeS(const FloatIBM *x, const FloatIBM *y) {
+    uint64_t xFrac = fibm_gfracbits(x);
+    uint64_t yFrac = fibm_gfracbits(y);
+    if (xFrac == 0 || yFrac == 0) {
+        FloatIBMResult r = { fibm_zero(), FP_EXC_OK };
+        return r;
+    }
+
+    int resultSign = fibm_gsign(x) * fibm_gsign(y);
+    int xBiasedExp = fibm_gexp(x) + 64;
+    int yBiasedExp = fibm_gexp(y) + 64;
+    while (!(xFrac & FRAC56_TOP_HEX_MASK)) { xFrac <<= 4; xBiasedExp -= 1; }
+    while (!(yFrac & FRAC56_TOP_HEX_MASK)) { yFrac <<= 4; yBiasedExp -= 1; }
+
+    /* The 112-bit product is AC<<56 + (AD+BC)<<28 + BD, and BD -- the
+     * least significant partial product -- is the one that does not
+     * participate.  The hardware accumulates 68 bits of that; 64 are
+     * carried here (the top of the product, = product >> 48), which is
+     * all the postnormalization can reach: two normalized fractions
+     * multiply to at least 1/256, so at most one hex digit of left
+     * shift is ever needed, and eight guard bits cover it. */
+    const uint64_t MASK28 = ((uint64_t)1 << 28) - 1;
+    uint64_t a = xFrac >> 28, b = xFrac & MASK28;
+    uint64_t c = yFrac >> 28, d = yFrac & MASK28;
+    uint64_t ac = a * c;
+    uint64_t mid = a * d + b * c;
+    uint64_t inter = (ac << 8) + (mid >> 20);
+
+    if (inter == 0) {
+        FloatIBMResult r = { fibm_zero(), FP_EXC_OK };
+        return r;
+    }
+
+    uint64_t frac = (inter >> 8) & FRAC56_MASK;
+    int rBiasedExp = xBiasedExp + yBiasedExp - 64;
+    if (!(frac & FRAC56_TOP_HEX_MASK)) {
+        /* Postnormalize one hex digit within the intermediate, then
+         * truncate. */
+        frac = (inter >> 4) & FRAC56_MASK;
+        rBiasedExp -= 1;
+    }
+
+    FloatIBM result = fibm_zero();
+    if (rBiasedExp > 127) {
+        if (resultSign < 0) fibm_ssign(&result, -1);
+        fibm_sexp(&result, (rBiasedExp & 0x7F) - 64);
+        fibm_sfrac(&result, frac);
+        FloatIBMResult r = { result, FP_EXC_EXP_OVERFLOW };
+        return r;
+    }
+    if (rBiasedExp < 0) {
+        FloatIBMResult r = { result, FP_EXC_EXP_UNDERFLOW };
+        return r;
+    }
+    if (resultSign < 0) fibm_ssign(&result, -1);
+    fibm_sexp(&result, rBiasedExp - 64);
+    fibm_sfrac(&result, frac);
+    FloatIBMResult r = { result, FP_EXC_OK };
+    return r;
+}
+
 FloatIBMResult fibm_mulQeE(const FloatIBM *x, const FloatIBM *y) {
     uint64_t xFrac = fibm_gfracbits(x);
     uint64_t yFrac = fibm_gfracbits(y);
@@ -457,7 +533,12 @@ FloatIBMResult fibm_mulQeE(const FloatIBM *x, const FloatIBM *y) {
         rMant = target & FRAC56_MASK;
         rBiasedExp = xBiasedExp + yBiasedExp - 64;
     } else {
-        rMant = (prod >> 2) & FRAC56_MASK;
+        /* Postnormalize one hex digit.  The C/M shifts the 62-bit
+         * intermediate and fills the vacated low-order positions with
+         * ZEROS -- it does not reach back into the product for four
+         * more bits.  Taking prod>>2 here did, and came out 1 ulp high
+         * on every postnormalizing product. */
+        rMant = (target << 4) & FRAC56_MASK;
         rBiasedExp = xBiasedExp + yBiasedExp - 65;
     }
 

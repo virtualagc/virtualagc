@@ -26,7 +26,7 @@ def main():
     print()
 
     print("typedef struct {")
-    print("    int niaIncr, opType, addrWidth;")
+    print("    int niaIncr, opType, addrWidth, indexWidth;")
     print("    bool hasI; uint32_t I;")
     print("    bool hasD; uint32_t d;")
     print("    bool hasB; uint32_t b;")
@@ -39,8 +39,9 @@ def main():
         hasD = 'd' in o
         hasB = 'b' in o
         hasIdx = 'i' in o
-        return "{ %d, %d, %d, %s, %uu, %s, %uu, %s, %uu, %s, %uu, %uu, %uu }" % (
+        return "{ %d, %d, %d, %d, %s, %uu, %s, %uu, %s, %uu, %s, %uu, %uu, %uu }" % (
             o['niaIncr'], o['opType'], o['addrWidth'],
+            o.get('indexWidth', o['addrWidth']),
             b(hasI), o.get('I', 0),
             b(hasD), o.get('d', 0),
             b(hasB), o.get('b', 0),

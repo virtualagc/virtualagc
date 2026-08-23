@@ -43,7 +43,11 @@ void register_setbit16(Register *r, int b, uint32_t v);
 typedef struct {
     Register *regs;
     int count;       /* == num + 1 */
-    uint8_t dse[4];  /* 4-bit each; base registers 0-3 */
+    /* "The DSE registers are loaded by the LXA and LDM instructions"
+     * -- one 4-bit Data Sector Extension per GENERAL REGISTER, so eight
+     * of them, R0-R7.  Only four were kept here, with the index masked
+     * to 2 bits, so LXA on R4-R7 silently overwrote R0-R3's. */
+    uint8_t dse[8];  /* 4-bit each; general registers 0-7 */
 } RegisterFile;
 
 RegisterFile registerfile_create(int num);

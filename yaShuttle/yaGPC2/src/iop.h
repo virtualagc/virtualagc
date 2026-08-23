@@ -215,6 +215,23 @@ typedef struct IOP {
      * status the flight software reads back. */
     Register regProgExcept, regBusyWait, regHalt, regIndicator;
     Register regDiscreteOut, regDiscreteInA, regDiscreteInB, regRMStatus;
+
+    /* Redundancy management (POO Appendix I, READ RM STATUS REGISTER).
+     * The GO/NO-GO watchdog is a real counter that runs on wall time --
+     * it keeps counting through the CPU's wait state, since it is the
+     * thing meant to notice a CPU that has stopped making progress --
+     * and the voter's test inputs and inhibit come from LOAD TEST
+     * REGISTER.  Only regRMStatus's own bits 17-18 (the termination
+     * control latches) live in that register; everything else the CPU
+     * reads back is composed at read time by iop_rm_status(). */
+    uint32_t wdCount;       /* 12 bits, one count = WD_TICK_US */
+    bool wdRunning;
+    bool wdTimeout;         /* the timeout latch, RM status bit 16 */
+    double wdAccumUs;
+    double wdLastUs;
+    bool rmVoterInhibit;
+    uint32_t rmTestInputs;  /* 4 bits */
+    bool rmVoterFail;
     RegisterFile regInterrupts; /* 5 regs (num=5 -> 6 slots; slot 5 used by RM status read) */
     bool intForceTest;
     Register regCCData;
@@ -285,6 +302,10 @@ void iop_exec_channel_control(IOP *iop);
 void iop_exec_dma_queue(IOP *iop);
 void iop_exec_processors(IOP *iop);
 void iop_exec_rm(IOP *iop);
+/* The RM status register as the CPU reads it back through PCI X'0814'. */
+uint32_t iop_rm_status(const IOP *iop);
+/* Advance the GO/NO-GO watchdog against the CPU clock. */
+void iop_tick_watchdog(IOP *iop);
 
 BCE *iop_cur_bce(IOP *iop); /* NULL if ls.curPage == 0 (MSC) */
 void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce);
