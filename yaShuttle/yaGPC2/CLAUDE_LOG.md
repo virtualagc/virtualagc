@@ -668,3 +668,37 @@ document's planning stages, and it is already in the code as
   GPCIPL trace still matches all 3,987,845 instructions with 0 slips.
 - Note for future sessions: `pkill -f "mmu.js"` MATCHES ITS OWN SHELL and
   kills the running command.  Use a bracket pattern: pkill -f "[m]mu\.js"
+
+### [2026-08-23] Target: [problems.md]
+- MEDS run (MMU + MEDS crt1 idp1 + yaGPC2 --real-time --bce-network):
+  THE MENU DOES NOT APPEAR.  The mass memory load starts correctly and
+  identically to gpc -- POSITION 4/4/2, EXTENDED_BLOCK count 16, READ
+  track 4 subfile 3 block 8 count 15, "read 17 block(s) from 4/4/3/8" --
+  and then the block-transfer loop never terminates.
+- Evidence, in order:
+  - BCE18 floods "unknown instruction" (113k of them), always at PC
+    035e8, reading f204/f205/.../f29a where a valid #LBR is f200.
+  - Those words are written by the MSC (pe=0) from its @ST X'1A4',X at
+    034 3d: it BUILDS BCE18's bus program in memory, an #LBR whose
+    operand is the next block's buffer address, advancing 0x200 (512
+    halfwords, one block) per iteration.
+  - gpc's MSC executes that store 33 times, accumulator f200a000 ->
+    f200ee00: the high halfword stays f200 throughout.  Ours executes it
+    51,124 times, so the low halfword wraps and carries into the opcode
+    field -- f201, f202, ... f29a -- which is no longer a decodable
+    instruction, which is what BCE18 then chokes on.
+  - So the runaway pointer is a SYMPTOM: our loop does not terminate
+    after the first block, and the MSC keeps advancing the buffer.
+  - Consequence: BCE6 (DK1, MEDS) never runs a display program at all --
+    only its 6-instruction self test.  gpc's BCE6 runs 1210 instructions
+    (#MOUT / #LBR / #DLYI / #LTOI / #MIN / #WAT, the display poll loop).
+    So MEDS has nothing to show, and no amount of waiting will change
+    that until the mass memory load completes.
+- NEXT: find what ends gpc's block loop after the first block and does
+  not end ours.  The MMU sees exactly one READ from us and the right
+  one, so the failure is in what happens AFTER the 512-halfword block
+  arrives, not in requesting it.
+- Improved the BCE unknown-instruction message to name the processor and
+  the PC (it printed only the opcode, to stdout).  An unknown opcode is
+  almost always a runaway PC rather than a missing instruction, and the
+  address is what tells those apart -- it is what localised this.

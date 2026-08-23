@@ -492,5 +492,9 @@ void bce_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2) {
     /* Unrecognized instruction: matches the source exactly — logs to
      * stdout (observable in `run`'s captured output) and does NOT
      * advance NIA (unlike MSC's unrecognized-instruction path). */
-    printf("BCE: unknown instruction %x\n", hw1);
+    /* Say WHICH processor and WHERE: an unknown opcode is almost always
+     * a runaway PC rather than a genuinely missing instruction, and the
+     * address is what tells the two apart. */
+    fprintf(stderr, "BCE%d: unknown instruction %04x at %05x\n", iop->curPE,
+            (unsigned)hw1, (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu));
 }
