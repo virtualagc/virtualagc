@@ -1020,3 +1020,24 @@ document's planning stages, and it is already in the code as
   deuProto/deuSPL/deuFCW) is constructed both by meds/idp.coffee inside the GUI
   and standalone by meds/gpcmd.coffee.  The rendering (mdu.coffee,
   mduScreen_*.coffee) is a separate layer.
+
+### [2026-08-23] Target: [problems.md]
+- REPRODUCIBLE HARNESS for all bus work, and it should have been used from the
+  start:
+      node dist/gpcmd.js unit --idp 1 --ipl-request --stats-interval 10
+  A headless DEU running the same state machine as MEDS, logging every command
+  and a running count of fills / headerless / abandoned / wordsIn.  Note
+  `--ipl-request`: without it the unit reports itself ALREADY initialized and
+  the GPC never sends display fills at all, so the 511-halfword path -- the
+  only one that overflows -- is never exercised.  Drop counts come from
+  /proc/net/udp (column 13) for port 6906.
+- The overflow, measured DEU-side over 40 s with fills flowing:
+      2,948 datagrams dropped
+      fills 68 completed, HEADERLESS 75, abandoned 8
+  More than half the display fills are ruined, and the failure mode is exactly
+  the "whole buffer-load" one: a fill whose leading words are lost fails
+  parseFill and is logged "unheadered fill of N halfwords, ignored", while one
+  cut off later is "transfer abandoned, 27/77 halfwords short".  A 7-halfword
+  time fill always survives; a 511-halfword display fill usually does not.
+- The fix must therefore pace per-word datagrams against the WALL clock -- not
+  simulated time, and not by batching, which the protocol forbids.
