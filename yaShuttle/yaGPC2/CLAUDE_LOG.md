@@ -1318,3 +1318,29 @@ document's planning stages, and it is already in the code as
   BCE 74,083/74,699 (600 #MOUT@/#MIN@ documented deviation + 16 above);
   CPU exec 108,766/111,358 and EA 19,550/20,447 still untouched and NOT yet
   triaged -- the same mistake could be hiding there.
+
+### [2026-08-23] Target: [problems.md]
+- TRIAGED the two suites that had never been examined, and neither is "known":
+- CPU EA (897 failures, all in g_EA; the separate g_EXPAND and g_EXPAND_DSE
+  fixture sets all PASS, so expansion itself is correct):
+  * The differences are exact SECTOR multiples -- expected-minus-actual is
+    0x18000 (x200), 0x8000 (x155), 0x10000 (x132), 0x38000 (x46), -0x10000
+    (x37), plus 32-bit-wrap forms of the same.
+  * EVERY failing case has niaIncr=2 and hasI=false, and NO failing case has
+    hasI=true.  That is precisely the reference's first branch,
+    `if v.niaIncr == 2 and not v.I?` -- RS extended/indexed addressing.  So the
+    defect is confined to that path and is data-dependent within it (failures
+    and passes share the same opType/ia/ii/hasIdx combinations), which points
+    at which sector register gets applied rather than at which branch is taken.
+- CPU exec (3,576 FAIL lines): concentrated on RS-format memory instructions --
+  LM 207, MR 143, M 141, LH 138, ICR 136, CVFX 136, L 134, LE 130, STM 99 -- and
+  the failures are psw1 (1,692) and register-bank values.  One LM case expects
+  every register zeroed and we load garbage, i.e. we read from a DIFFERENT
+  ADDRESS.  These look downstream of the g_EA defect above rather than
+  independent; fix EA first and re-measure before triaging further.
+- The CPU exec generator is NOT exposed to the hand-built-decode hazard: it
+  calls the reference's real `inst.decode(hw1, hw2)`.  It does carry only
+  single-character v fields (FIELD_CHARS), so the reference's multi-character
+  ones (dx dy xa ia ii eaFlg xtbs xtc xtcs xts) are dropped -- checked, and all
+  of those are read only by disassembly/timing helpers, never by an `e:`
+  handler, so the oracle is sound on that point.
