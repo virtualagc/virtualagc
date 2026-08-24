@@ -2178,3 +2178,33 @@ document's planning stages, and it is already in the code as
   without running ls -- the file was there.  Then "the MMU has never been
   run" without grepping this log -- it had.  Check the record before
   claiming something has never happened.
+
+### [2026-08-24] Target: problems.md
+- MEDS NOW WORKS.  With the 2 ms receive floor, MMU1 and MEDS all up,
+  yaGPC2 drives the real display through a completed IPL and renders the
+  GPCIPL MENU correctly -- BOTH pages, per the user "even down to the
+  exact register values, ERROR codes and counts" against Don's video.
+  ITEM 18 (start self test), ITEM 19 (stop), ITEM 27+n, ITEM 28 all
+  behave as the video does.  Our text is arguably BETTER: we render
+  "ILLEGAL KYBD ENTRY WHILE SELF TEST IN PROGRESS" where the video shows
+  a corrupted "ILLEGAL KYBD ENTRY WHSELF TEST     IN PROGRESS".
+- gpcmd has a `key` subcommand that injects keystrokes on the keyboard
+  bus ("gpcmd key --idp 1 SYS_SUMM"), so the display can be driven
+  headlessly.  Host key map lives in meds/kybd.coffee: I=ITEM,
+  Enter=EXEC, O=OPS, P=PRO, S=SPEC, R=RESUME, K=ACK, Esc=MSG RESET,
+  Backspace=CLEAR, T=I/O RESET, Y=SYS SUMM, U=FAULT SUMM, G=GPC/CRT.
+- OPEN, AND THE SHARPEST REMAINING DIVERGENCE: the MMU1 erase sweeps far
+  too much.  The video's MMU messages run position 0/0/0 through 4/0/0 --
+  FIVE positions -- and then the display auto-advances to ITEM 29 (erase
+  stop).  Ours walks 64: first field 0-7, then the second field
+  increments, through 7/7, and then starts a second pass instead of
+  stopping.  About thirteen times too many writes.
+- So the erase's slowness was a red herring of mine.  The arithmetic is
+  right -- 512 halfwords a block, 256 blocks a write, 131,072 halfwords,
+  measured 28,961 words/s on MM1, hence 4.53 s per write and ~4.8 min a
+  pass -- but the fault is the 64 positions, not the 4.53 s.  Our pacing
+  of 20 us a word IS the real 1 Mbps bus rate; the reference paces not at
+  all and is therefore faster than a real bus could be.
+- NEXT: drive the reference headlessly through the same key sequence with
+  gpcmd key and compare its MMU position list against ours.  That is a
+  direct comparison needing no GUI and no user in the loop.
