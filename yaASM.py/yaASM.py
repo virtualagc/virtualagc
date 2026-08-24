@@ -131,6 +131,12 @@
 #                               links to constants in expressions.
 #               2023-07-23 RSB  Clip printout lines.  Added flowchart links
 #                               to HTML listings.
+#               2026-09-19 MAS  Preliminary support for simplex code. ORGSS, ORGSD,
+#                               ORGDS, DOGS, DEQS, HPCSS, HPCSD, and HPCDS pseudo-
+#                               operations are now supported. Duplex state for
+#                               instruction and data modules is now tracked and
+#                               used to generate DUPIN and DUPDN bits for HOP
+#                               constants and CDS.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -233,6 +239,8 @@ Pass 4:		Assembly and output.
 # and other memory characteristics.
 memUsed = [[[[False for offset in range(256)] for syllable in range(2)] \
 			for sector in range(16)] for module in range(8)]
+memDuplex = [[[False for offset in range(256)] \
+			for sector in range(16)] for module in range(8)]
 
 # BA8421 character set in its native encoding.  All of the unprintable
 # characters are replaced by '?', which isn't a legal character anyway.
@@ -332,10 +340,12 @@ inFalseIf = False
 
 inputFile = []
 IM = 0
+DUPIN = 0
 IS = 0
 S = 1
 LOC = 0
 DM = 0
+DUPDN = 0
 DS = 0
 dS = 0
 DLOC = 0
@@ -641,6 +651,7 @@ def incDLOC(increment = 1, mark = True):
 		if DLOC < 0o400 and mark:
 			memUsed[DM][DS][0][DLOC] = True
 			memUsed[DM][DS][1][DLOC] = True
+			memDuplex[DM][DS][DLOC] = DUPDN
 			if increment == 0 and \
 					(DLOC == 0o377 or sectorTopData[DM][DS] == DLOC1):
 				top = DLOC
@@ -689,12 +700,14 @@ def incLOC():
 		if useDat:
 			if DLOC < 256:
 				memUsed[DM][DS][dS][DLOC] = True
+				memDuplex[DM][DS][DLOC] = DUPDN
 			dS = 1 - dS
 			if dS == 1:
 				DLOC += 1
 		else:
 			if LOC < 256:
 				memUsed[IM][IS][S][LOC] = True
+				memDuplex[IM][IS][LOC] = DUPIN
 			LOC += 1
 	except:
 		return
@@ -896,6 +909,7 @@ def allocateNameless(lineNumber, constantString, \
 					addError(lineNumber, "Info: Allocation of nameless " + value)
 				memUsed[DM][DS][0][loc] = True
 				memUsed[DM][DS][1][loc] = True
+				memDuplex[DM][DS][loc] = DUPDN
 				octals[DM][DS][2][loc] = 0
 				nameless[value] = loc
 				allocationRecords.append({ "symbol": value, "lineNumber":lineNumber, 
@@ -918,6 +932,7 @@ def allocateNameless(lineNumber, constantString, \
 						addError(lineNumber, "Info: Allocation of nameless " + valueR)
 					memUsed[DM][0o17][0][loc] = True
 					memUsed[DM][0o17][1][loc] = True
+					memDuplex[DM][0o17][loc] = DUPDN
 					octals[DM][0o17][2][loc] = 0
 					nameless[valueR] = loc
 					allocationRecords.append({ "symbol": valueR, "lineNumber":lineNumber, 
@@ -1004,6 +1019,7 @@ def checkLOC(extra = 0):
 						% (IM, IS, S, LOC + 1))
 			else:
 				memUsed[IM][IS][S][LOC] = True
+				memDuplex[IM][IS][LOC] = DUPIN
 				autoSwitch = True
 			tLoc = LOC
 			tSyl = S
@@ -1256,12 +1272,10 @@ def formConstantHOP(hop):
 		return 0
 	hopConstant = 0
 	hopConstant |= (hop["IM"] & 1) << 25
-	if not ptc:
-		hopConstant |= 1 << 24
+	hopConstant |= hop["DUPIN"] << 24
 	hopConstant |= hop["DS"] << 20
 	hopConstant |= hop["DM"] << 17
-	if not ptc:
-		hopConstant |= 1 << 16
+	hopConstant |= hop["DUPDN"] << 16
 	hopConstant |= hop["LOC"] << 7
 	hopConstant |= hop["S"] << 6
 	hopConstant |= hop["IS"] << 2
@@ -1354,6 +1368,8 @@ DM = 0
 DS = 0
 dS = 0
 DLOC = 0
+DUPIN = 0
+DUPDN = 0
 useDat = False
 udDM = 0
 udDS = 0
@@ -1488,8 +1504,8 @@ for lineNumber in range(len(expandedLines)):
 				if fields[0] != "":
 					lhs = fields[0]
 					inputLine["lhs"] = lhs
-					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, 
-										"DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["hop"] = {"IM":DM, "DUPIN": DUPIN, "IS":DS, "S":0, "LOC":DLOC, 
+										"DM":DM, "DUPDN": DUPDN, "DS":DS, "DLOC":DLOC}
 					inputLine["isTABLE"] = True
 					# Ordinarily, addition to the symbol table would be handled
 					# later on, outside of this loop.  However, I find that 
@@ -1528,16 +1544,17 @@ for lineNumber in range(len(expandedLines)):
 				else:
 					inputLine["switchSectorAt"] = [IM, IS, S, LOC] + index
 					memUsed[IM][IS][S][LOC] = True
+					memDuplex[IM][IS][LOC] = DUPIN
 					IM, IS, S, LOC = tuple(index)
-					inputLine["hop"] = {"IM":index[0], "IS":index[1], 
+					inputLine["hop"] = {"IM":index[0], "DUPIN":DUPIN, "IS":index[1], 
 										"S":index[2], "LOC":index[3], 
-										"DM":DM, "DS":DS, "DLOC":DLOC}
+										"DM":DM,"DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 				if fields[0] != "":
 					lhs = fields[0]
 					inputLine["lhs"] = lhs
-					inputLine["hop"] = {"IM":index[0], "IS":index[1], 
+					inputLine["hop"] = {"IM":index[0], "DUPIN":DUPIN, "IS":index[1], 
 										"S":index[2], "LOC":index[3], 
-										"DM":DM, "DS":DS, "DLOC":DLOC}
+										"DM":DM, "DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 					inputLine["isBLOCK"] = True
 					# Ordinarily, addition to the symbol table would be handled
 					# later on, outside of this loop.  However, I find that 
@@ -1555,7 +1572,8 @@ for lineNumber in range(len(expandedLines)):
 					inputLine["syn"] = "ins"
 					inDataMemory = False
 					inputLine["lhs"] = fields[0]
-					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["hop"] = {"IM":IM, "DUPIN":DUPIN, "IS":IS, "S":S, "LOC":LOC,
+						                "DM":DM, "DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 					if False and synFix:
 						# This case may (or may not) be the more-correct 
 						# behavior, but I've disallowed it because of 
@@ -1566,7 +1584,8 @@ for lineNumber in range(len(expandedLines)):
 				elif fields[2] == "*DAT":
 					inputLine["syn"] = "dat"
 					inputLine["lhs"] = fields[0]
-					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["hop"] = {"IM":DM, "DUPIN":DUPIN, "IS":DS, "S":0, "LOC":DLOC,
+										"DM":DM, "DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 					if synFix:
 						pendingSyn = 0
 					else:
@@ -1592,8 +1611,10 @@ for lineNumber in range(len(expandedLines)):
 					else:
 						pass
 				forms[fields[0]] = ofields
-			elif (not ptc) and fields[1] == "ORGDD":
+			elif (not ptc) and fields[1] in ("ORGSS", "ORGSD", "ORGDS", "ORGDD"):
 				lastORG = True
+				DUPIN = 1 if fields[1][-2] == "D" else 0
+				DUPDN = 1 if fields[1][-1] == "D" else 0
 				if len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORGDD arguments")
 				else:
@@ -1620,6 +1641,7 @@ for lineNumber in range(len(expandedLines)):
 					else:
 						hop = symbols[symbol]
 						IM = hop["IM"]
+						DUPIN = hop["DUPIN"]
 						IS = hop["IS"]
 						S = hop["S"]
 						LOC = hop["LOC"]
@@ -1641,10 +1663,15 @@ for lineNumber in range(len(expandedLines)):
 						hop = symbols[symbol]
 						hop2 = symbols[symbol2]
 						IM = hop["IM"]
+						# Pulling DUPIN from the first operand's DUPDN if it's in data
+						# memory seems dubious, but otherwise I'm not sure how some
+						# early symbols in AS-512 or AS-513 manage to have DUPIN set.
+						DUPIN = hop["DUPDN"] if hop["inDataMemory"] else hop["DUPIN"]
 						IS = hop["IS"]
 						S = hop["S"]
 						LOC = hop["LOC"]
 						DM = hop2["DM"]
+						DUPDN = hop2["DUPDN"]
 						DS = hop2["DS"]
 						DLOC = hop2["DLOC"]
 				elif len(ofields) != 7:
@@ -1712,7 +1739,7 @@ for lineNumber in range(len(expandedLines)):
 						DLOC = 0
 					else:
 						DLOC = ptcDLOC[DM][DS]
-			elif fields[1] in ["DOGD", "DOG"]:
+			elif fields[1] in ["DOGS", "DOGD", "DOG"]:
 				if len(ofields) == 1:
 					# In this case we expect the operand to be the name of an
 					# existing symbol representing a variable.
@@ -1720,8 +1747,9 @@ for lineNumber in range(len(expandedLines)):
 					if symbol in constants and len(constants[symbol]) > 0 and \
 							symbol not in symbols:
 						try:
-							if "DEQD" == constants[symbol][0]:
+							if constants[symbol][0] in ("DEQS", "DEQD"):
 								DM = int(constants[symbol][1], 8)
+								DUPDN = 1 if constants[symbol][0][-1] == "D" else 0
 								DS = int(constants[symbol][2], 8)
 								DLOC = int(constants[symbol][3], 8)
 						except:
@@ -1733,10 +1761,12 @@ for lineNumber in range(len(expandedLines)):
 							or not symbols[symbol]["inDataMemory"]:
 						#addError(lineNumber, "Error: Symbol " + symbol + " not data")
 						DM = symbols[symbol]["IM"]
+						DUPDN = symbols[symbol]["DUPIN"]
 						DS = symbols[symbol]["IS"]
 						DLOC = symbols[symbol]["LOC"]
 					else:
 						DM = symbols[symbol]["DM"]
+						DUPDN = symbols[symbol]["DUPDN"]
 						DS = symbols[symbol]["DS"]
 						DLOC = symbols[symbol]["DLOC"]
 				elif len(ofields) != 3:
@@ -1745,6 +1775,8 @@ for lineNumber in range(len(expandedLines)):
 					fDM = ofields[0].strip()
 					fDS = ofields[1].strip()
 					fDLOC = ofields[2].strip()
+					if fields[1] in ("DOGS", "DOGD"):
+						DUPDN = 1 if fields[1][-1] == "D" else 0
 					if fDM[:1] == "*":
 						DM = adjustDogField(lineNumber, DM, fDM)
 					elif fDM != "":
@@ -1767,14 +1799,14 @@ for lineNumber in range(len(expandedLines)):
 						DLOC = 0
 				inputLine["udDM"] = DM
 				inputLine["udDS"] = DS
-			elif fields[1] in ["DEQS", "DEQD"] and fields[0] in constants:
+			elif fields[1] in ("DEQS", "DEQD") and fields[0] in constants:
 				newDM = int(constants[fields[0]][1], 8)
 				newDS = int(constants[fields[0]][2], 8)
 				newDLOC = int(constants[fields[0]][3], 8)
-				symbols[fields[0]] = {	"IM": newDM, "IS": newDS, "S": 0, 
-								"LOC": newDLOC, "DM": newDM, 
-								"DS": newDS, 
-								"DLOC": newDLOC, "inDataMemory":True }
+				newDUPDN = 1 if fields[1][-1] == "D" else 0
+				symbols[fields[0]] = {	"IM": newDM, "DUPIN": newDUPDN, "IS": newDS, "S": 0, 
+						"LOC": newDLOC, "DM": newDM, "DUPDN": newDUPDN, "DS": newDS, 
+						"DLOC": newDLOC, "inDataMemory":True }
 				inputLine["udDM"] = int(constants[fields[0]][1], 8)
 				inputLine["udDS"] = int(constants[fields[0]][2], 8)
 			elif fields[1] == "BSS":
@@ -1784,7 +1816,8 @@ for lineNumber in range(len(expandedLines)):
 						inputLine["lhs"] = fields[0]
 					inputLine["operator"] = fields[1]
 					inputLine["operand"] = fields[2]
-					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["hop"] = {"IM":DM, "DUPIN":DUPIN, "IS":DS, "S":0, "LOC":DLOC,
+										"DM":DM, "DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 					incDLOC(int(fields[2]))
 				except:
 					addError(lineNumber, "Error: Improper BSS")
@@ -1796,15 +1829,17 @@ for lineNumber in range(len(expandedLines)):
 					inputLine["lhs"] = fields[0]
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
-				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				inputLine["hop"] = {"IM":DM, "DUPIN":DUPIN, "IS":DS, "S":0, "LOC":DLOC,
+									"DM":DM, "DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 				incDLOC(textLength)
-			elif fields[1] in ["DEC", "OCT", "HPC", "HPCDD", "DFW"] or fields[1] in forms:
+			elif fields[1] in ["DEC", "OCT", "HPC", "HPCSS", "HPCSD", "HPCDS", "HPCDD", "DFW"] or fields[1] in forms:
 				checkDLOC()
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
-				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				inputLine["hop"] = {"IM":DM, "DUPIN":DUPIN, "IS":DS, "S":0, "LOC":DLOC,
+									"DM":DM, "DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 				incDLOC()	
 			elif fields[1] in operators:
 				inDataMemory = False
@@ -1841,19 +1876,21 @@ for lineNumber in range(len(expandedLines)):
 					addError(lineNumber, "Error: Tracking TMI/TNZ failed")
 				
 				if useDat:
-					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["hop"] = {"IM":DM, "DUPIN":DUPDN, "IS":DS, "S":dS, "LOC":DLOC,
+										"DM":DM, "DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 					inputLine["useDat"] = True
 					inputLine["inDataMemory"] = True
 					memUsed[DM][DS][dS][DLOC] = True
+					memDuplex[DM][DS][DLOC] = DUPDN
 				else:
-					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["hop"] = {"IM":IM, "DUPIN":DUPIN, "IS":IS, "S":S, "LOC":LOC,
+										"DM":DM, "DUPDN":DUPDN, "DS":DS, "DLOC":DLOC}
 					memUsed[IM][IS][S][LOC] = True
+					memDuplex[IM][IS][LOC] = DUPIN
 				incLOC()
 				if ptc and "incDLOC" in inputLine:
 					incDLOC(mark = False)
 				if fields[1] in ["CDS", "CDSD", "CDSS"]:
-					# I should be doing something here with the simplex vs duplex info, but I don't
-					# know what, so I'll just ignore it for now.
 					isCDS = True
 					if len(ofields) == 1:
 						if not useDat:
@@ -1862,29 +1899,34 @@ for lineNumber in range(len(expandedLines)):
 							if fields[2] in constants:
 								constant = constants[fields[2]]
 								if type(constant) == type([]) and len(constant) >= 3:
-									if not useDat:
-										DM = int(constant[1], 8)
-										DS = int(constant[2], 8)
+									DM = int(constant[1], 8)
+									DS = int(constant[2], 8)
 									inputLine["udDM"] = int(constant[1], 8)
 									inputLine["udDS"] = int(constant[2], 8)
+									if fields[1] == "CDSS":
+										DUPDN = 0
+									elif fields[1] == "CDSD":
+										DUPDN = 1
 									found = True
 							# We assume this is the name of a variable, and we have to
-							# find it to determine its DM/DS.  I presume it could be
+							# find it to determine its DM/DS/DUPDN.  I presume it could be
 							# defined later, and so we don't find it ... let's hope not!
 							if not found:
 								for testEntry in inputFile:
 									testLine = testEntry["expandedLine"]
 									if "lhs" in testLine and testLine["lhs"] == fields[2] and "hop" in testLine:
-										if fields[1] == "CDSD":
+										if fields[1] in ("CDSS", "CDSD"):
 											if not useDat:
 												DM = testLine["hop"]["DM"]
 												DS = testLine["hop"]["DS"]
+												DUPDN = 1 if fields[1][-1] == "D" else 0
 											inputLine["udDM"] = testLine["hop"]["DM"]
 											inputLine["udDS"] = testLine["hop"]["DS"]
 										elif fields[1] == "CDS":
 											if not useDat:
 												DM = testLine["hop"]["IM"]
 												DS = testLine["hop"]["IS"]
+												DUPDN = testLine["hop"]["DUPDN"]
 											inputLine["udDM"] = testLine["hop"]["IM"]
 											inputLine["udDS"] = testLine["hop"]["IS"]
 										found = True
@@ -1894,11 +1936,14 @@ for lineNumber in range(len(expandedLines)):
 					elif len(ofields) != 2:
 						addError(lineNumber, "Error: Wrong number of CDS/CDSD arguments")
 					elif not useDat:
-						if not useDat:
-							DM = int(ofields[0], 8)
-							DS = int(ofields[1], 8)
+						DM = int(ofields[0], 8)
+						DS = int(ofields[1], 8)
 						inputLine["udDM"] = int(ofields[0], 8)
 						inputLine["udDS"] = int(ofields[1], 8)
+						if fields[1] == "CDSS":
+							DUPDN = 0
+						elif fields[1] == "CDSD":
+							DUPDN = 1
 					if ptc:
 						DLOC = ptcDLOC[DM][DS]
 			elif fields[1] in preprocessed:
@@ -1940,7 +1985,6 @@ for lineNumber in range(len(expandedLines)):
 			pendingSyn = -1
 		if pendingSyn >= 0:
 			pendingSyn += 2
-
 
 # Create a table to quickly look up addresses of symbols. I think that all or
 # most of these will already have been done by the preprocessor or the loop 
@@ -2350,10 +2394,12 @@ def hopStar(hop2):
 	#addError(lineNumber, "Info: Allocating variable for HOP at %o,%02o,%03o" % (DM, ds, loc))
 	storeAssembled(lineNumber, hopConstant, {
 		"IM": IM,
+		"DUPIN": DUPIN,
 		"IS": IS,
 		"S": S,
 		"LOC": loc,
 		"DM": DM,
+		"DUPDN": DUPDN,
 		"DS": ds,
 		"DLOC": loc
 	})
@@ -2390,10 +2436,12 @@ def equalsH(operand):
 		symbol2 = symbols[symbold]
 	return {
 		"IM": symbol1["IM"],
+		"DUPIN": symbol1["DUPIN"],
 		"IS": symbol1["IS"],
 		"S": symbol1["S"],
 		"LOC": symbol1["LOC"],
 		"DM": symbol2["DM"],
+		"DUPDN": symbol2["DUPDN"],
 		"DS": symbol2["DS"],
 		"DLOC": symbol2["DLOC"]
 	}
@@ -2486,15 +2534,17 @@ for entry in inputFile:
 				ds = 0o17
 			storeAssembled(lineNumber, hopConstant, {
 				"IM": IM,
+				"DUPIN": DUPIN,
 				"IS": IS,
 				"S": residual,
 				"LOC": loc,
 				"DM": DM,
+				"DUPDN": DUPDN,
 				"DS": ds,
 				"DLOC": loc
 			}, True)
 		storeAssembled(lineNumber, assembled, \
-					{"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
+					{"IM":im0, "DUPIN":DUPIN, "IS":is0, "S":s0, "LOC":loc0}, False)
 		lineFields[imField] = "%2o" % im0
 		lineFields[isField] = "%02o" % is0
 		lineFields[sylField] = "%1o" % s0
@@ -2556,7 +2606,7 @@ for entry in inputFile:
 			lineFields[dmField] = "%2o" % DM
 			lineFields[dsField] = "%02o" % DS
 			#lineFields[adrField] = "%03o" % DLOC
-		elif operator in ["DEC", "OCT", "DFW", "BSS", "HPC", "HPCDD"] or operator in forms:
+		elif operator in ["DEC", "OCT", "DFW", "BSS", "HPC", "HPCSS", "HPCSD", "HPCDS", "HPCDD"] or operator in forms:
 			if ptc:
 				lineFields[adrField] = "%03o" % DLOC
 			else:
@@ -2646,7 +2696,7 @@ for entry in inputFile:
 		inLiteralMemory = True
 	elif operator == "ENDLIT":
 		inLiteralMemory = False
-	elif operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
+	elif operator in [ "DEC", "OCT", "HPC", "HPCSS", "HPCSD", "HPCDS", "HPCDD", "DFW" ] or operator in forms:
 		assembled = 0
 		if operator in forms:
 			formDef = forms[operator]
@@ -2749,24 +2799,30 @@ for entry in inputFile:
 				symbol1 = symbols[ofields[0]]
 				symbol2 = symbols[ofields[1]]
 				hopConstant = formConstantHOP({
-					"IM":  symbol1["IM"],
-					"IS":  symbol1["IS"],
-					"S":   symbol1["S"],
-					"LOC": symbol1["LOC"],
-					"DM":  symbol2["DM"],
-					"DS":  symbol2["DS"]
+					"IM":    symbol1["IM"],
+					"DUPIN": symbol1["DUPIN"],
+					"IS":    symbol1["IS"],
+					"S":     symbol1["S"],
+					"LOC":   symbol1["LOC"],
+					"DM":    symbol2["DM"],
+					"DUPDN": symbol2["DUPDN"],
+					"DS":    symbol2["DS"]
 				})
 				constantString = "%09o" % hopConstant
-		elif operator == "HPCDD":
+		elif operator in ("HPCSS", "HPCSD", "HPCDS", "HPCDD"):
+			dupin = 1 if operator[-2] == "D" else 0
+			dupdn = 1 if operator[-1] == "D" else 0
 			ofields = operand.split(",")
 			if len(ofields) == 2 and ofields[0] in symbols and ofields[1] in symbols:
 				symbol1 = symbols[ofields[0]]
 				symbol2 = symbols[ofields[1]]
 				im = symbol1["IM"]
+				dupin = symbol1["DUPIN"]
 				isc = symbol1["IS"]
 				s = symbol1["S"]
 				loc = symbol1["LOC"]
 				dm = symbol2["DM"]
+				dupdn = symbol2["DUPDN"]
 				ds = symbol2["DS"]
 			elif len(ofields) != 6 or not ofields[0].isdigit() or not ofields[1].isdigit() \
 				or not ofields[2].isdigit() or not ofields[3].isdigit() \
@@ -2776,10 +2832,12 @@ for entry in inputFile:
 				or int(ofields[4], 8) > 7 or int(ofields[5], 8) > 15:
 				addError(lineNumber, "Error: Illegal operand for HPC")
 				im = 0
+				dupin = 0
 				isc = 0
 				s = 0
 				loc = 0
 				dm = 0
+				dupdn = 0
 				ds = 0
 			else:
 				im = int(ofields[0], 8)
@@ -2788,7 +2846,8 @@ for entry in inputFile:
 				loc = int(ofields[3], 8)
 				dm = int(ofields[4], 8)
 				ds = int(ofields[5], 8)
-			hopConstant = formConstantHOP({"IM":im, "IS":isc, "S":s, "LOC":loc, "DM":dm, "DS":ds})
+			hopConstant = formConstantHOP({"IM":im, "DUPIN":dupin, "IS":isc, "S":s, "LOC":loc,
+										   "DM":dm, "DUPDN":dupdn, "DS":ds})
 			constantString = "%09o" % hopConstant
 		elif operator == "DFW":
 			constantString = ""
@@ -2935,10 +2994,12 @@ for entry in inputFile:
 					ds = 0o17
 				storeAssembled(lineNumber, hopConstant, {
 					"IM": IM,
+					"DUPIN": DUPIN,
 					"IS": IS,
 					"S": residual,
 					"LOC": loc,
 					"DM": DM,
+					"DUPDN": DUPDN,
 					"DS": ds,
 					"DLOC": loc
 				})
@@ -2997,10 +3058,12 @@ for entry in inputFile:
 							ds = 0o17
 						storeAssembled(lineNumber, hopConstant2, {
 							"IM": IM,
+							"DUPIN": DUPIN,
 							"IS": IS,
 							"S": residual2,
 							"LOC": loc2,
 							"DM": DM,
+							"DUPDN": DUPDN,
 							"DS": ds,
 							"DLOC": loc2
 						})
@@ -3008,13 +3071,16 @@ for entry in inputFile:
 						assembled2 = (assembled2 | (loc2 << 5) | (residual2 << 4))
 						storeAssembled(lineNumber, assembled2, {
 							"IM": IM,
+							"DUPIN": DUPIN,
 							"IS": IS,
 							"S": 1,
 							"LOC": loc,
 							"DM": DM,
+							"DUPDN": DUPDN,
 							"DS": DS
 						}, False)
 						memUsed[IM][IS][1][loc] = True
+						memDuplex[IM][IS][loc] = DUPIN
 		elif operator == "HOP":
 			# Note that the only arithmetical evaluation is for 
 			#	symbol+n
@@ -3083,9 +3149,9 @@ for entry in inputFile:
 				loc = 0
 			elif "inDataMemory" in symbols[operand] and \
 					symbols[operand]["inDataMemory"]:
-				loc = 1 | (symbols[operand]["DM"] << 1) | (symbols[operand]["DS"] << 4)
+				loc = symbols[operand]["DUPDN"] | (symbols[operand]["DM"] << 1) | (symbols[operand]["DS"] << 4)
 			else:
-				loc = 1 | (symbols[operand]["IM"] << 1) | (symbols[operand]["IS"] << 4)
+				loc = symbols[operand]["DUPDN"] | (symbols[operand]["IM"] << 1) | (symbols[operand]["IS"] << 4)
 			residual = 0
 		elif operator in ["CDSD", "CDSS"]:
 			ofields = operand.split(",")
@@ -3127,10 +3193,12 @@ for entry in inputFile:
 					#addError(lineNumber, "Info: Allocating nameless variable for =constant at %o,%02o,%03o" % (DM, ds, loc))
 					storeAssembled(lineNumber, int(constantString, 8), {
 						"IM": IM,
+						"DUPIN": DUPIN,
 						"IS": IS,
 						"S": residual,
 						"LOC": loc,
 						"DM": DM,
+						"DUPDN": DUPDN,
 						"DS": ds,
 						"DLOC": loc
 					})
@@ -3324,7 +3392,7 @@ for w in roofWorkarounds:
 		counts["warnings"] += 1
 	else:
 		storeAssembled(lineNumber, 0o00000, \
-					{ "IM": w[0], "IS": w[1], "S": w[2], "LOC": w[3]+1}, False)
+				{ "IM": w[0], "DUPIN": DUPIN, "IS": w[1], "S": w[2], "LOC": w[3]+1}, False)
 
 if checkTheOctals:
 	# While we have now checked all of the assembed values against the 
@@ -3504,7 +3572,7 @@ for constant in sorted(constants):
 		number = str(c["number"])
 		if "scale" in c:
 			number = number + "B%d" % c["scale"]
-	elif isinstance(c, list) and c[0] == "DEQD":
+	elif isinstance(c, list) and c[0] in ("DEQS", "DEQD"):
 		number = "%o-%02o-%03o" % (int(c[1],8), int(c[2],8), int(c[3],8))
 	else:
 		number = str(c)
@@ -3572,7 +3640,7 @@ for module in range(8):
 					rowList.append(" ")
 				elif octals[module][sector][2][loc] != None:
 					rowList.append(" %09o " % octals[module][sector][2][loc])
-					rowList.append("D")
+					rowList.append("D" if memDuplex[module][sector][loc] else " ")
 				else:
 					col = ""
 					usedEntry = False
@@ -3588,7 +3656,7 @@ for module in range(8):
 							col += "%05o" % octals[module][sector][syl][loc]
 							usedEntry = True
 					rowList.append(col)
-					if usedEntry:
+					if usedEntry and memDuplex[module][sector][loc]:
 						rowList.append("D")
 					else:
 						rowList.append(" ")
