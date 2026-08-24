@@ -514,22 +514,34 @@ static void exec_BCF(CPU *t, DInstr *v) {
 }
 
 static void exec_BCTR(CPU *t, DInstr *v) {
+    /* The branch address is taken FIRST, before R1 is decremented -- POO:
+     * "First, the branch address is computed. ... Then, the contents of
+     * bits 0 through 15 of general register R1 are reduced by one."  The
+     * order is only observable when R1 and R2 are the SAME register, and
+     * that is exactly what every failing fixture was: d4e4, d3e3, d5e5,
+     * d1e1 all have x == y.  Reading R2 after the decrement branched to
+     * an address one short. */
+    uint32_t branch = cpu_g_expand(t, register_get32(R(t, v, 'y')) >> 16, OPTYPE_BRCH);
     uint32_t r1val = register_get32(R(t, v, 'x'));
     uint32_t count = ((r1val >> 16) - 1) & 0xffff;
     register_set32(R(t, v, 'x'), (count << 16) | (r1val & 0xffff));
-    if (count != 0) {
-        uint32_t branch = cpu_g_expand(t, register_get32(R(t, v, 'y')) >> 16, OPTYPE_BRCH);
-        psw_set_nia(&t->psw, branch);
-    }
+    if (count != 0) psw_set_nia(&t->psw, branch);
 }
 
 static void exec_BCT(CPU *t, DInstr *v) {
+    /* Address FIRST, then the decrement -- POO: "First, the branch
+     * address is computed. ... Then, the contents of bits 0 through 15 of
+     * general register R1 are reduced by one."  Observable whenever R1 is
+     * also the base register, which 38 of the 300 BCT fixtures are.
+     *
+     * DELIBERATELY NOT MATCHING THE REFERENCE, which decrements first and
+     * whose fixtures therefore assert the wrong order -- the same call as
+     * @LAR, where the POO's word wins over the oracle's. */
+    uint32_t branch = cpu_g_ea(t, v);
     uint32_t r1val = register_get32(R(t, v, 'x'));
     uint32_t count = ((r1val >> 16) - 1) & 0xffff;
     register_set32(R(t, v, 'x'), (count << 16) | (r1val & 0xffff));
-    if (count != 0) {
-        psw_set_nia(&t->psw, cpu_g_ea(t, v));
-    }
+    if (count != 0) psw_set_nia(&t->psw, branch);
 }
 
 static void exec_BCTB(CPU *t, DInstr *v) {

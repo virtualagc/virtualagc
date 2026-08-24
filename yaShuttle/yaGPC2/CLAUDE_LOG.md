@@ -1411,3 +1411,22 @@ document's planning stages, and it is already in the code as
   checking for the same mod-8 pair issue first.
 - No regressions: EA 20,447/20,447, every other suite unchanged, GPCIPL still
   matches for all 3,987,845 traced instructions.
+
+### [2026-08-23] Target: [problems.md]
+- BCTR was NOT the mod-8 pair issue -- it was EVALUATION ORDER, and the failing
+  opcodes said so: d4e4, d3e3, d5e5, d1e1 all have x == y, i.e. R1 and R2 are
+  the SAME register.  POO: "First, the branch address is computed. ... Then,
+  the contents of bits 0 through 15 of general register R1 are reduced by one."
+  We read R2 after the decrement and so branched one short.  35 -> 0, and the
+  reference already had this right.
+- BCT has the SAME defect and the reference SHARES it, so the fixtures assert
+  the wrong order.  Fixed ours to the POO anyway -- the @LAR call again -- at a
+  cost of 30 of its 300 fixtures now failing against a wrong oracle.  38 of the
+  300 have R1 == B2, which is when the order is observable.
+  VERIFIED SAFE: GPCIPL still matches for all 3,987,845 traced instructions, so
+  no flight code in the corpus depends on the reference's order.
+- BCTB checked and is correct as it stands: its address comes from the
+  instruction counter and displacement, never from R1, so the order cannot be
+  observed there.
+- CPU exec now 111,056/111,358.  Remaining: ICR 136, CVFX 136, and the 30
+  deliberate BCT.  Neither ICR nor CVFX has been looked at yet.
