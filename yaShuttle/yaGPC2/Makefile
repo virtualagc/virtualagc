@@ -115,15 +115,37 @@ TEST_BIN_DIR := $(BUILD_DIR)/test
 
 UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_gpcops test_schedule
 
+TEST_SCRIPTS := test/run_all.sh test/test_debugger.sh test/test_scheduler.sh \
+                test/test_io_read.sh test/test_random.sh test/test_rtl.sh
+
+# Every stage RUNS, then the target fails if any of them did.
+#
+# This used to be one recipe line per stage, so make stopped at the first
+# failure.  A single failing script therefore hid every stage after it: with
+# test_debugger.sh failing on four disassembly-format fixtures, the whole
+# 17-test unit suite below it never executed at all, and `make test` had been
+# silently reporting on a fraction of itself.  Unit regressions could not have
+# been caught.  Collect the failures instead and report them together at the
+# end, so the exit status still means "everything passed" but a broken stage
+# no longer conceals the ones behind it.
 test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS)) $(TEST_BIN_DIR)/example_gpcops_paced_run
-	./test/run_all.sh
-	./test/test_debugger.sh
-	./test/test_scheduler.sh
-	./test/test_io_read.sh
-	./test/test_random.sh
-	./test/test_rtl.sh
-	@for t in $(UNIT_TESTS); do $(TEST_BIN_DIR)/$$t || exit 1; done
-	$(TEST_BIN_DIR)/example_gpcops_paced_run
+	@failed=""; \
+	for s in $(TEST_SCRIPTS); do \
+	    echo "=== $$s"; \
+	    ./$$s || failed="$$failed $$s"; \
+	done; \
+	echo "=== unit tests"; \
+	for t in $(UNIT_TESTS); do \
+	    $(TEST_BIN_DIR)/$$t || failed="$$failed $$t"; \
+	done; \
+	$(TEST_BIN_DIR)/example_gpcops_paced_run || failed="$$failed example_gpcops_paced_run"; \
+	echo; \
+	if [ -n "$$failed" ]; then \
+	    echo "FAILED STAGES:"; \
+	    for f in $$failed; do echo "    $$f"; done; \
+	    exit 1; \
+	fi; \
+	echo "make test: every stage passed"
 
 $(TEST_BIN_DIR):
 	mkdir -p $(TEST_BIN_DIR)

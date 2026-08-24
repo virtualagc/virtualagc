@@ -2541,3 +2541,20 @@ document's planning stages, and it is already in the code as
      difference" as "semantic difference" without looking at what it is.
   Also confirmed incidentally: hw 0x037E/0x047E/0x057E read FFFF in the linked
   image, independently corroborating that FCMPTAD1/2/3 are unstamped DC H'-1'.
+- `make test` FIXED: it was one recipe line per stage, so make stopped at the
+  first failure.  test_debugger.sh fails on four disassembly-format fixtures,
+  which meant the ENTIRE 17-test unit suite behind it never executed -- the
+  target had been silently reporting on a fraction of itself, and no unit
+  regression could have been caught.  Stages are now collected and reported
+  together at the end; exit status still means "everything passed".  Verified:
+  all six scripts plus all 17 unit tests plus example_gpcops_paced_run now run,
+  and the summary names the four genuinely failing stages (test_debugger.sh,
+  test_cpu_instr_exec, test_iop_bce_exec, test_iop_msc_exec), all pre-existing.
+- CAVEAT ON THE READY DISCRETE, stated plainly: it is a PROXY, not the real
+  signal.  On real hardware READY is a line driven BY the mass memory; here it
+  tracks whether our own bus controller is running.  The two coincide only
+  while the BCE stays busy for the duration of the MMU's work -- if the MMU
+  were still positioning after our BCE went idle, READY would rise early.
+  Sufficient for FCMBOOT, which only needs to see busy-then-ready.  True
+  fidelity would require the MMU to report its own state, i.e. MMU-side work
+  and a protocol change.
