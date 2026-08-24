@@ -2289,3 +2289,37 @@ document's planning stages, and it is already in the code as
   are lower than the earlier one (509) ONLY because the run was 70 s
   against 90 s.  Do not read a difference into that -- the same
   duration-mismatch error invalidated three claims earlier today.
+
+### [2026-08-24] Target: problems.md
+- WE CAN BUILD OUR OWN FLIGHT IMAGE, and it works on both emulators.
+  tools/build_ipl_fcm.sh: eleven modules assembled from OI340600/SSSRC
+  with asm101, linked by lnk101 under the CON80 deck's own layout
+  (--concard CON80 --concard-root PHASE10 --allow-undefined).
+- Verified against Don's: all twelve sections at IDENTICAL addresses and
+  sizes, entry point identical at 18195, and of the 65,024 shared bytes
+  the only in-section differences are SIX in FCMINSSL -- halfwords 29534
+  and 29536, the two unrelocated FIOMUWB2 references (0x3032a).  Eleven
+  of twelve sections byte-identical.  This settles the BILDNEW5 link that
+  HANDOFF-OI340600 records as unvalidated for want of a dump.
+- Runs on both, with real MMU1 and a real display unit:
+      yaGPC2    load complete, 268 commands, 93 fills, 81 timeFills,
+                0 unheadered, 37 MMU commands
+      reference load complete, 267 commands, 96 fills, 82 timeFills,
+                0 unheadered, 37 MMU commands
+- CORRECTION to my own alarm earlier today: I called DEUIPLCP "the worst
+  possible blocker" because the name reads as DEU IPL Control Program and
+  the display load transmits exactly that.  It is not a blocker.  The DEU
+  model never EXECUTES the control program -- deuUnit.coffee stores it in
+  @mem, has no opcodes or program counter, and gates completion solely on
+  a final block whose count is 250.  The picture comes from the format
+  control words in the fills that follow, and MENU12 draws those; MENU12
+  is one of the eleven we build.
+- Also corrected earlier today: my claim that no CON80 deck directory
+  existed under ~.  It is at ~/workspace/PFS/OI340600/CON80 with 194
+  decks, four levels down, and a timed-out find had reported its absence.
+- lnk101 here does NOT emit storeProtect (nor does mmu2fcm's unionSym),
+  so an image built this way needs tools/add_store_protect.py before the
+  reference emulator will boot it.  Its section-derived map came to 7
+  ranges, 26,779 halfwords.
+- STILL OPEN if byte-exactness is ever wanted: FIOMUWB2 needs DEUIPLCP,
+  which needs OPS0/phase 2; and PCH10TXT has no source anywhere.
