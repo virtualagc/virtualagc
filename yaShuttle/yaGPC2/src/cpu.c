@@ -31,8 +31,16 @@ void cpu_init(CPU *cpu) {
     cpu->halUCP = NULL;
     cpu->halUCPLog = NULL;
     cpu->halUCPHandleSVC = NULL;
-    cpu->counter1 = 0;
-    cpu->counter2 = 0;
+    /* Both interval counters come up ALL ONES, as a hardware down-counter
+     * does -- the reference sets 0xffff at construction and at each of its
+     * two resets.  Zero meant the very next tick borrowed from the high
+     * halfword in PSA 00B0/00B1 immediately, so a Read Counter issued
+     * before the first Write Counter came back a full count out.  The POO
+     * does not state the reset value; this follows the reference, and it
+     * is also the only way the ICR fixtures can agree, since the fixture
+     * baseline carries regs/dse/mem/psw but NOT the counters. */
+    cpu->counter1 = 0xffff;
+    cpu->counter2 = 0xffff;
     cpu->counter1Enabled = false;
     cpu->counter2Enabled = false;
     cpu->fcosMode = false;

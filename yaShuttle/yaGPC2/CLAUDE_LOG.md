@@ -1430,3 +1430,26 @@ document's planning stages, and it is already in the code as
   observed there.
 - CPU exec now 111,056/111,358.  Remaining: ICR 136, CVFX 136, and the 30
   deliberate BCT.  Neither ICR nor CVFX has been looked at yet.
+
+### [2026-08-23] Target: [problems.md]
+- ICR (136) FIXED: the interval counters came up ZERO where the reference brings
+  them up ALL ONES (it sets 0xffff at construction and at both resets).  Decoded
+  straight out of the failure: ours gave hi=0xc733 lo=0x0000 (+2 = 0xc7330002),
+  the reference hi=0xc733 lo=0xffff (+2 = 0xc7340001) -- the constant 0xFFFF
+  difference every failing case showed.  With zero, the very next tick borrowed
+  from PSA 00B0/00B1 immediately, so a Read Counter before the first Write
+  Counter came back a full count out.  The POO does not state the reset value;
+  this follows the reference, and it is also the only way these fixtures CAN
+  agree, because the fixture baseline carries regs/dse/mem/psw but NOT the
+  counters.  136 -> 0, CPU exec 111,056 -> 111,192/111,358.
+- CVFX (136) IS NOT A BUG and needs no change -- already investigated and
+  resolved, issue `cvfx_convert_overflow_fixture_cc_stale` (2026-08-01,
+  next_action_owner=none): the fixtures assert the PRE-fix reference behavior
+  (CC left stale on CONVERT_OVERFLOW, because its fp_dispatch_exc returns false
+  and exec_CVFX bails before writing CC), while ours was corrected by issue #9
+  to always compute and set CC.  Regenerating would re-encode the reference's
+  bug, so they stay failing deliberately -- the same call as @LAR and BCT.
+- SO THE CPU SUITE IS NOW FULLY ACCOUNTED FOR.  Of 111,358 fixtures, 111,192
+  pass and every one of the remaining 166 is a KNOWN-WRONG ORACLE, not a defect:
+  136 CVFX (stale) + 30 BCT (reference's evaluation order).  Nothing left there
+  is unexplained.
