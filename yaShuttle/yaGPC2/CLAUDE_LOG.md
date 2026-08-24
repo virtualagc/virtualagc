@@ -2031,3 +2031,34 @@ document's planning stages, and it is already in the code as
   now one line: why does 0x3622 never take the value 0x18 here?  Its
   writers are 032f2 (ours 196, ref 366), 03358 and 0336e (ours 82 each,
   ref 7 each -- the IPL block loop we cannot leave).
+
+### [2026-08-24] Target: problems.md
+- ROOT CAUSE CHAIN, found with cmp4.py on a sound baseline (MMU +
+  display both up), which is the tool I should have used at the start.
+  4,154,388 CPU instructions match EXACTLY, zero phase slips.  Then at
+  instruction 4,154,388, both on the same instruction
+  0030b6 C 6,X'0034'(1), the reference swaps PSW to 1ed6 -- an External 2
+  through PSA 008c -- and we do not.
+- It is LATE, not missing.  Both take ext2 exactly 12 times.  Ours trail
+  consistently: 4,154,918 against 4,154,388 (530 instructions), then
+  4,158,655 against 4,157,923 (732), then 4,162,372 against 4,161,623
+  (749).  About 1.3 ms each time.  cmp4.py calls it a real divergence
+  because an interrupt reroutes execution and it cannot resync through
+  one.
+- EVERYTHING ELSE IS DOWNSTREAM OF THAT LAG, and now ordered:
+  after it the CPU paths separate -- the reference executes 02a32
+  (STH 4,X'0bec'(0), which writes 0x18 into 3622) 54 times and we
+  execute it ZERO times; we instead execute SHW at 0210e 49 times
+  against its 1.  So 3622 never reaches 0x18 here, the MSC's branch at
+  03278 takes the no-dispatch path, @SIO restarts BCE6 on its stale PC
+  03578, and that emits the malformed 8-halfword fill.  Our spurious
+  @INTs at 032ae (77) and 032ee (82), which the reference never
+  executes, are downstream too -- they all occur AFTER the divergence,
+  which is why 4.15M instructions could match before it.
+- RULED OUT as the cause of the lag: MSC per-instruction timing.  The
+  step distributions match -- 2.0, 0.5, 1.0, 9.2, 9.3 us dominant in
+  both.  We simply execute more MSC instructions, and that is itself
+  downstream (the @RAW spin).
+- STILL UNFIXED: why our External 2 arrives ~530 instructions late.  That
+  is the whole remaining question; everything else in the display
+  investigation reduces to it.
