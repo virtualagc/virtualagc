@@ -137,6 +137,14 @@ void psw_init(ProgramStatusWord *p) {
     p->pack2 = pb_make_desc(PSW_DESC2);
 }
 
+/* The RAW 16-bit instruction counter field, before expanded addressing
+ * replaces its high bit.  IC-relative operand addressing forms its sum
+ * from this and expands the RESULT (see cpu_g_ea), so it must not be
+ * handed the already-expanded value psw_get_nia() returns. */
+uint32_t psw_get_ic16(const ProgramStatusWord *p) {
+    return get_field1(p, 'p');
+}
+
 uint32_t psw_get_nia(const ProgramStatusWord *p) {
     uint32_t nia16 = get_field1(p, 'p');
     if (nia16 & 0x8000) {

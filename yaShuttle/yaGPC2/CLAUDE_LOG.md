@@ -1344,3 +1344,28 @@ document's planning stages, and it is already in the code as
   ones (dx dy xa ia ii eaFlg xtbs xtc xtcs xts) are dropped -- checked, and all
   of those are read only by disassembly/timing helpers, never by an `e:`
   handler, so the oracle is sound on that point.
+
+### [2026-08-23] Target: [problems.md]
+- EA BUG FIXED -- 20,447/20,447, all 897 gone.  TWO causes, both in the RS
+  extended/indexed branch of cpu_g_ea:
+  1. THE BASE REGISTER'S DSE WAS NEVER APPLIED.  The reference computes
+     `dseVal = g_BASE_DSE(v, true)` once at the top of that branch and passes
+     it to EVERY g_EXPAND inside it; ours called the non-DSE cpu_g_expand
+     throughout, using the DSE only in the SRS branch.  A DSE selects a 32K
+     sector, which is exactly why every difference was a multiple of 0x8000.
+  2. IC-RELATIVE ADDRESSES WERE NEVER EXPANDED.  The reference forms
+     `g_EXPAND(getIC16() +/- pea, OPTYPE_BRCH)` -- the RAW 16-bit IC, with the
+     RESULT expanded.  Ours added psw_get_nia(), which is ALREADY expanded
+     (BSR applied), and then expanded nothing, so the answer was a sector out
+     whenever the IC's own high bit was set.  Added psw_get_ic16() for the raw
+     field.
+- CPU EXEC re-measured: 108,766 -> 109,553 of 111,358; FAIL lines 3,576 ->
+  2,202.  So roughly a third of them WERE downstream of the EA defect, as
+  predicted, and the rest are not.
+- What is left there, by mnemonic: MR 143, M 139, ICR 136, CVFX 136, LH 134,
+  LE 130, L 128, N 96, TB 84, ZB 82, SLDL 80, TSB 76, TH 67, MH 64.  The
+  multiply group (MR/M/MH), the bit-test group (TB/ZB/TSB/TH) and the shift
+  (SLDL) look like distinct families rather than one cause; triage each on its
+  own rather than assuming a shared root.
+- No regressions: every other suite unchanged and GPCIPL still matches for all
+  3,987,845 traced instructions.

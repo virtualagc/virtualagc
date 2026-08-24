@@ -68,6 +68,7 @@ typedef struct {
 
 void psw_init(ProgramStatusWord *p);
 
+uint32_t psw_get_ic16(const ProgramStatusWord *p);
 uint32_t psw_get_nia(const ProgramStatusWord *p);
 void psw_set_nia(ProgramStatusWord *p, uint32_t v);
 uint32_t psw_get_cc(const ProgramStatusWord *p);

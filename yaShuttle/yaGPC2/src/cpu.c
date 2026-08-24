@@ -515,6 +515,17 @@ uint32_t cpu_g_expand_dse(CPU *cpu, uint32_t ea, int bsrdsr, uint32_t dseVal) {
     return ea;
 }
 
+/* Expanded addressing for the RS branch, which forms its addresses from a
+ * BASE REGISTER and therefore expands them with that register's own Data
+ * Sector Extension rather than the implied-zero sector.  The reference
+ * passes g_BASE_DSE(v, true) into every g_EXPAND in this branch; ours
+ * passed none, so any address whose high bit was 0 landed a sector low --
+ * 897 of the 20,447 EA fixtures, every one off by an exact multiple of
+ * 0x8000, taking the RS-format memory instructions with it. */
+static uint32_t ea_expand(CPU *cpu, uint32_t ea, int opType, bool hasDse, uint32_t dseVal) {
+    return hasDse ? cpu_g_expand_dse(cpu, ea, opType, dseVal) : cpu_g_expand(cpu, ea, opType);
+}
+
 uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
     uint32_t ea;
 
@@ -522,26 +533,37 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
         uint32_t disp = df_get(v, 'd');
         uint32_t base = (df_get(v, 'b') == 3) ? 0 : (register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16);
         uint32_t pea = base + disp;
+        /* g_BASE_DSE(v, true): no DSE when there is no base field, or
+         * when B2 == 11 selects no base addressing at all. */
+        bool hasDse = df_has(v, 'b') && df_get(v, 'b') != 3;
+        uint32_t dseVal = hasDse
+            ? registerfile_get_dse(&cpu->regFiles[psw_get_reg_set(&cpu->psw)], (int)df_get(v, 'b'))
+            : 0u;
 
         if (df_has(v, 'i')) {
             uint32_t idx = df_get(v, 'i');
             if (idx == 0) {
                 if (v->ii == 0 && v->ia == 0) {
-                    ea = psw_get_nia(&cpu->psw) + pea;
+                    /* Formed from the RAW 16-bit IC, and the RESULT is
+                     * expanded as a branch address.  Adding the
+                     * already-expanded NIA and never expanding -- what
+                     * this did -- put the answer a sector out whenever
+                     * the IC's own high bit was set. */
+                    ea = cpu_g_expand(cpu, psw_get_ic16(&cpu->psw) + pea, OPTYPE_BRCH);
                 } else if (v->ia == 0 && v->ii == 1) {
-                    ea = psw_get_nia(&cpu->psw) - pea;
+                    ea = cpu_g_expand(cpu, psw_get_ic16(&cpu->psw) - pea, OPTYPE_BRCH);
                 } else if (v->ia == 1 && v->ii == 0) {
                     /* Timing: single-level indirection has no column of
                      * its own in section 17; the closest case is double
                      * indirection with XC=1 (nothing is post-indexed
                      * here) and C=0, i.e. column 3. */
                     cpu->xtCase = 3;
-                    uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
+                    uint32_t indirectAddr = ea_expand(cpu, pea, OPTYPE_DATA, hasDse, dseVal);
                     uint32_t indirectHW = membus_get16(cpu->ram, indirectAddr);
-                    ea = cpu_g_expand(cpu, indirectHW, v->opType);
+                    ea = ea_expand(cpu, indirectHW, v->opType, hasDse, dseVal);
                 } else {
                     cpu->xtCase = 5;   /* auto storage modification */
-                    uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
+                    uint32_t indirectAddr = ea_expand(cpu, pea, OPTYPE_DATA, hasDse, dseVal);
                     uint32_t indirectFW = membus_get32(cpu->ram, indirectAddr);
                     /* "Then, AFTER the EA has been formed, storage
                      * modification is automatically performed... The
@@ -556,7 +578,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                      * wrong fullword back. */
                     uint32_t addr16 = (indirectFW >> 16) & 0xffff;
                     uint32_t modifier = indirectFW & 0xffff;
-                    ea = cpu_g_expand(cpu, addr16, v->opType);
+                    ea = ea_expand(cpu, addr16, v->opType, hasDse, dseVal);
                     uint32_t modifiedAddr = (addr16 + modifier) & 0xffff;
                     membus_set32(cpu->ram, indirectAddr,
                                  (modifiedAddr << 16) + modifier, true);
@@ -565,13 +587,13 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                 Register *ri = cpu_r(cpu, (int)idx);
                 if (v->ia == 0 && v->ii == 0) {
                     uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
-                    ea = cpu_g_expand(cpu, pea + regx, v->opType);
+                    ea = ea_expand(cpu, pea + regx, v->opType, hasDse, dseVal);
                 } else if (v->ia == 0 && v->ii == 1) {
                     cpu->xtCase = 6;   /* auto indexing */
                     uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
                     uint32_t modifier = register_get32(ri) & 0xffff;
                     uint32_t ea16 = (pea + regx) & 0xffff;
-                    ea = cpu_g_expand(cpu, ea16, v->opType);
+                    ea = ea_expand(cpu, ea16, v->opType, hasDse, dseVal);
                     /* The modifier goes onto the index register's OWN
                      * address field, not onto the EA: "each modifier is
                      * added to the most significant 16 bits of the
@@ -590,12 +612,12 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                     /* Timing: indirection WITH post-indexing; closest
                      * section-17 case is double indirection XC=0, C=0. */
                     cpu->xtCase = 1;
-                    uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
+                    uint32_t indirectAddr = ea_expand(cpu, pea, OPTYPE_DATA, hasDse, dseVal);
                     uint32_t indirectHW = membus_get16(cpu->ram, indirectAddr);
                     uint32_t regx = (register_get32(ri) >> 16) << (v->indexWidth - 1);
-                    ea = cpu_g_expand(cpu, indirectHW + regx, v->opType);
+                    ea = ea_expand(cpu, indirectHW + regx, v->opType, hasDse, dseVal);
                 } else {
-                    uint32_t indirectAddr = cpu_g_expand(cpu, pea, OPTYPE_DATA);
+                    uint32_t indirectAddr = ea_expand(cpu, pea, OPTYPE_DATA, hasDse, dseVal);
                     uint32_t indirectFW = membus_get32(cpu->ram, indirectAddr);
                     uint32_t address16 = (indirectFW >> 16) & 0xffff;
                     uint32_t address15 = address16 & 0x7fff;
@@ -633,7 +655,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                 }
             }
         } else {
-            ea = cpu_g_expand(cpu, pea, v->opType);
+            ea = ea_expand(cpu, pea, v->opType, hasDse, dseVal);
         }
     } else {
         uint32_t base = register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16;
