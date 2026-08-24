@@ -403,6 +403,17 @@ void cpu_signal_protection_violation(CPU *cpu) {
      * job (per STM1.asm) is to recognize and resolve the condition
      * rather than just log it -- so the violation recurred forever
      * instead of ever being handled. */
+    /* Counted under YAGPC_PROTTRACE.  Protection here comes from the
+     * SECTION map, which protects whole loaded sections; the reference
+     * moved off that because it locks the runtime's own IOCODE/IOBUF
+     * cells and the stack.  If that over-protects, GPCIPL's own stores
+     * fault here, so this counter says whether it does. */
+    if (getenv("YAGPC_PROTTRACE")) {
+        static long n = 0;
+        if (++n <= 20 || n % 1000 == 0)
+            fprintf(stderr, "PROTVIOL #%ld at NIA=%05x\n", n,
+                    (unsigned)psw_get_nia(&cpu->psw));
+    }
     cpu->intPending.programCheck = true;
     cpu->intCode = 0x0007;
 }
