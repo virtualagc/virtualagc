@@ -1531,3 +1531,21 @@ document's planning stages, and it is already in the code as
   (halmat, multiunit, srcmap, wrap) on SCAL operand formatting --
   X'014a'(1,) in the golden vs @@X'014a'(1) produced.  Same four with
   my changes stashed.
+
+### [2026-08-23] Target: problems.md
+- ROOT CAUSE of the display IPL, one level below the 034DE counter: the
+  MSC's search loop at 03392-0339c walks an IPL block-pointer table and
+  stops on the first live entry.  The fullword it tests at 0339a holds,
+  in the reference, all seven blocks -- 0b302 0b502 0b702 0b902 0bb02
+  0bd02 0bf02 -- and here it holds ONLY 0b302, with every other slot
+  zero (ours: 2590 zeros and 259 x 0b302; reference: 10 zeros and one
+  each of the seven).  So the search returns block 0 every time, 034DE
+  never reaches 4, the reset block at 0331c-0332e re-runs and rezeroes
+  it, and the display is re-sent block 0 forever.  A data-construction
+  problem, not control flow: both sides run the marking store at 033a9
+  the same way.
+- NOT yet located: who builds that table.  @L X'168',X is short format,
+  so the displacement is relative to the MSC's own base, NOT absolute
+  0x168 -- a watchpoint on 0x168 therefore proves nothing and the one I
+  ran is void.  The long-format @LBB@ literals (03526) ARE absolute;
+  do not mix the two up when placing the next watchpoint.
