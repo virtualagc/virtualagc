@@ -1918,3 +1918,27 @@ document's planning stages, and it is already in the code as
   obvious candidate, since the model has no equivalent, but that should
   be transport-side only.  Answer that before drawing any conclusion
   about UDP versus TCP; the experiment cannot speak until it does.
+
+### [2026-08-24] Target: problems.md
+- WHY --deu-model does no bus I/O, traced to the instruction: the IOP
+  halts at 4,409,948 us of simulated time -- the SAME instant in a 45 s
+  and a 120 s run, so stuck, not slow -- with BCE18 spinning forever at
+  03600 on f300 0001, which is #RDLI, a receive.  BCE18 is MM1, the MASS
+  MEMORY.  Its receive never completes and never times out, so the MSC's
+  @RAI X'64' at 014b9 -- which waits for ALL 24 BCE indicators, ACC
+  7fffff80 -- never gets BCE18's, stays parked in early init, and never
+  reaches the display code.  The CPU is not deadlocked: it spins at
+  01df8 reading 36C2/36C4 and takes 1,651 clk1 interrupts waiting for
+  the IOP.
+- THE ASYMMETRY TO EXPLAIN: under --bce-network BCE18 has no peer either
+  -- no MMU process has ever been running in any of these runs -- yet
+  the machine gets past it (BCE18 8,713 lines, BCE6 109,683).  So the
+  same starved receive blocks under one GpcServicerFn and not the other.
+  Suspect iop_bce_receive's timeout path: it error-terminates 20 ms
+  after the receive starts, which sets the BCE's indicator and is
+  presumably what releases the @RAI.  Find why that fires with the
+  framer installed and not with the model.
+- Method note: the earlier reading "the machine is just slow under
+  --deu-model" was wrong.  Two runs of different length reaching the
+  identical simulated timestamp is the signature of a stall, and it was
+  visible in the first measurement had I compared the two endpoints.
