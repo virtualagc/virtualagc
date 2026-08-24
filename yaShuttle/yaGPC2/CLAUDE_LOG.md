@@ -1549,3 +1549,34 @@ document's planning stages, and it is already in the code as
   0x168 -- a watchpoint on 0x168 therefore proves nothing and the one I
   ran is void.  The long-format @LBB@ literals (03526) ARE absolute;
   do not mix the two up when placing the next watchpoint.
+
+### [2026-08-23] Target: problems.md
+- CORRECTION to the previous entry: the IPL block table is NOT short of
+  entries.  It is built correctly here -- a watchpoint at the properly
+  resolved address catches all seven going in from one CPU store loop at
+  NIA 01f74: 03519<-b302 0351b<-b502 0351d<-b702 0351f<-b902 03521<-bb02
+  03523<-bd02 03525<-bf02.  What differs is the SCAN CURSOR at 034E3,
+  which the search at 03392-0339c advances and the reset block at 0332a
+  zeroes.  The @L X'168',X that reads the table is PC-relative, not
+  base-relative: ea = (PC+1) + disp + X = 0339a + 168 + X = 03502 + X.
+- ROOT CAUSE: a block takes 500 ms here against the reference's 12 ms.
+  The reference's whole seven-block IPL (84 ms) fits between two reads
+  of the DEU status word, so its reset runs once and its cursor
+  survives; ours does not, so the reset runs between every block,
+  rezeroes 034E3, and the search returns block 0 forever.  Everything
+  downstream -- 034DE never reaching 4, 34E6, @RAW's timeout, 032d0 --
+  is correct behaviour responding to that.
+- The DEU is behaving correctly and identically for both: deuUnit.coffee
+  sets @ipled only on a fill whose count == LAST_FILL_WORDS (250), so
+  IPL_REQUIRED stays asserted until the final short block, which we
+  never send.  Its 0001 replies are honest.
+- NOT the cause, each measured: the CPU wakes the MSC at the SAME rate
+  on both sides (the LOAD MSC BUSY site 03259 runs 77 times here and 66
+  there over 35 s), the receive timeout floors are both 20 ms, and the
+  PCO site sets are identical but for one entry below.
+- NEW LEAD: 01eff issues RESET STATUS1 (0x92000000) with data 02000000,
+  the BCE6 bit, four times here and NEVER in the reference -- BCE6's
+  NO-GO recovery path, entered off a status compare against 0x5000 at
+  01ee9 that never matches there.  Something drives our BCE6 to a
+  program exception; iop_bce_error_terminate is the obvious suspect
+  since it is what sets ProgExcept to 0.
