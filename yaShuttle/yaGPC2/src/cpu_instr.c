@@ -621,15 +621,20 @@ static void exec_SLL(CPU *t, DInstr *v) {
 }
 
 static void exec_SLDL(CPU *t, DInstr *v) {
+    /* The partner is (R1 + 1) MOD 8 -- POO 6.6: "the pair of general
+     * registers (R1 and (R1+1)mod8)".  Plain R1+1 addressed a ninth
+     * register the machine does not have whenever R1 was 7, so the
+     * partner's half of every such shift went into limbo and register 0,
+     * its real partner, was left untouched. */
     uint32_t shiftCnt = cpu_g_shift_cnt(t, v->hw1);
     uint32_t x = df_get(v, 'x');
     uint32_t hi = register_get32(R(t, v, 'x'));
-    uint32_t lo = register_get32(cpu_r(t, (int)(x + 1)));
+    uint32_t lo = register_get32(cpu_r(t, (int)((x + 1) % 8)));
     if (shiftCnt == 0) return;
     if (shiftCnt >= 64) {
         psw_set_carry(&t->psw, 0);
         register_set32(R(t, v, 'x'), 0);
-        register_set32(cpu_r(t, (int)(x + 1)), 0);
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), 0);
     } else if (shiftCnt >= 32) {
         uint32_t s = shiftCnt - 32;
         if (s == 0) {
@@ -639,13 +644,13 @@ static void exec_SLDL(CPU *t, DInstr *v) {
             psw_set_carry(&t->psw, (lo & (1u << (32 - s))) ? 1 : 0);
             register_set32(R(t, v, 'x'), lo << s);
         }
-        register_set32(cpu_r(t, (int)(x + 1)), 0);
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), 0);
     } else {
         psw_set_carry(&t->psw, (hi & (1u << (32 - shiftCnt))) ? 1 : 0);
         uint32_t newHi = (hi << shiftCnt) | (lo >> (32 - shiftCnt));
         uint32_t newLo = lo << shiftCnt;
         register_set32(R(t, v, 'x'), newHi);
-        register_set32(cpu_r(t, (int)(x + 1)), newLo);
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), newLo);
     }
 }
 
@@ -658,46 +663,56 @@ static void exec_SRA(CPU *t, DInstr *v) {
 }
 
 static void exec_SRDA(CPU *t, DInstr *v) {
+    /* The partner is (R1 + 1) MOD 8 -- POO 6.6: "the pair of general
+     * registers (R1 and (R1+1)mod8)".  Plain R1+1 addressed a ninth
+     * register the machine does not have whenever R1 was 7, so the
+     * partner's half of every such shift went into limbo and register 0,
+     * its real partner, was left untouched. */
     uint32_t shiftCnt = cpu_g_shift_cnt(t, v->hw1);
     if (shiftCnt == 0) return;
     uint32_t x = df_get(v, 'x');
     int32_t hi = (int32_t)register_get32(R(t, v, 'x'));
-    uint32_t lo = register_get32(cpu_r(t, (int)(x + 1)));
+    uint32_t lo = register_get32(cpu_r(t, (int)((x + 1) % 8)));
     bool sign = (hi < 0);
     if (shiftCnt >= 64) {
         uint32_t fill = sign ? 0xffffffffu : 0u;
         register_set32(R(t, v, 'x'), fill);
-        register_set32(cpu_r(t, (int)(x + 1)), fill);
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), fill);
     } else if (shiftCnt >= 32) {
         uint32_t s = shiftCnt - 32;
-        register_set32(cpu_r(t, (int)(x + 1)), (s == 0) ? (uint32_t)hi : (uint32_t)(hi >> s));
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), (s == 0) ? (uint32_t)hi : (uint32_t)(hi >> s));
         register_set32(R(t, v, 'x'), sign ? 0xffffffffu : 0u);
     } else {
         uint32_t newLo = (lo >> shiftCnt) | ((uint32_t)hi << (32 - shiftCnt));
         uint32_t newHi = (uint32_t)(hi >> shiftCnt);
         register_set32(R(t, v, 'x'), newHi);
-        register_set32(cpu_r(t, (int)(x + 1)), newLo);
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), newLo);
     }
 }
 
 static void exec_SRDL(CPU *t, DInstr *v) {
+    /* The partner is (R1 + 1) MOD 8 -- POO 6.6: "the pair of general
+     * registers (R1 and (R1+1)mod8)".  Plain R1+1 addressed a ninth
+     * register the machine does not have whenever R1 was 7, so the
+     * partner's half of every such shift went into limbo and register 0,
+     * its real partner, was left untouched. */
     uint32_t shiftCnt = cpu_g_shift_cnt(t, v->hw1);
     if (shiftCnt == 0) return;
     uint32_t x = df_get(v, 'x');
     uint32_t hi = register_get32(R(t, v, 'x'));
-    uint32_t lo = register_get32(cpu_r(t, (int)(x + 1)));
+    uint32_t lo = register_get32(cpu_r(t, (int)((x + 1) % 8)));
     if (shiftCnt >= 64) {
         register_set32(R(t, v, 'x'), 0);
-        register_set32(cpu_r(t, (int)(x + 1)), 0);
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), 0);
     } else if (shiftCnt >= 32) {
         uint32_t s = shiftCnt - 32;
-        register_set32(cpu_r(t, (int)(x + 1)), (s == 0) ? hi : (hi >> s));
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), (s == 0) ? hi : (hi >> s));
         register_set32(R(t, v, 'x'), 0);
     } else {
         uint32_t newLo = (lo >> shiftCnt) | (hi << (32 - shiftCnt));
         uint32_t newHi = hi >> shiftCnt;
         register_set32(R(t, v, 'x'), newHi);
-        register_set32(cpu_r(t, (int)(x + 1)), newLo);
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), newLo);
     }
 }
 
@@ -716,27 +731,32 @@ static void exec_SRR(CPU *t, DInstr *v) {
 }
 
 static void exec_SRDR(CPU *t, DInstr *v) {
+    /* The partner is (R1 + 1) MOD 8 -- POO 6.6: "the pair of general
+     * registers (R1 and (R1+1)mod8)".  Plain R1+1 addressed a ninth
+     * register the machine does not have whenever R1 was 7, so the
+     * partner's half of every such shift went into limbo and register 0,
+     * its real partner, was left untouched. */
     uint32_t shiftCnt = cpu_g_shift_cnt(t, v->hw1) % 64;
     if (shiftCnt == 0) return;
     uint32_t x = df_get(v, 'x');
     uint32_t hi = register_get32(R(t, v, 'x'));
-    uint32_t lo = register_get32(cpu_r(t, (int)(x + 1)));
+    uint32_t lo = register_get32(cpu_r(t, (int)((x + 1) % 8)));
     if (shiftCnt >= 32) {
         uint32_t s = shiftCnt - 32;
         if (s == 0) {
             register_set32(R(t, v, 'x'), lo);
-            register_set32(cpu_r(t, (int)(x + 1)), hi);
+            register_set32(cpu_r(t, (int)((x + 1) % 8)), hi);
         } else {
             uint32_t newHi = (lo >> s) | (hi << (32 - s));
             uint32_t newLo = (hi >> s) | (lo << (32 - s));
             register_set32(R(t, v, 'x'), newHi);
-            register_set32(cpu_r(t, (int)(x + 1)), newLo);
+            register_set32(cpu_r(t, (int)((x + 1) % 8)), newLo);
         }
     } else {
         uint32_t newHi = (hi >> shiftCnt) | (lo << (32 - shiftCnt));
         uint32_t newLo = (lo >> shiftCnt) | (hi << (32 - shiftCnt));
         register_set32(R(t, v, 'x'), newHi);
-        register_set32(cpu_r(t, (int)(x + 1)), newLo);
+        register_set32(cpu_r(t, (int)((x + 1) % 8)), newLo);
     }
 }
 

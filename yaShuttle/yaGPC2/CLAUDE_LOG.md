@@ -1394,3 +1394,20 @@ document's planning stages, and it is already in the code as
   triaged together; ICR and CVFX are their own.
 - No regressions: EA still 20,447/20,447, every other suite unchanged, GPCIPL
   still matches for all 3,987,845 traced instructions.
+
+### [2026-08-23] Target: [problems.md]
+- SHIFT FAMILY TRIAGED AND FIXED, all 189 in one defect.  The four double
+  shifts took their partner register as plain R1+1; the POO says
+  (R1+1) MOD 8 -- 6.6 verbatim: "the pair of general registers (R1 and
+  (R1+1)mod8) are shifted right as a 64-bit register ... entered into bit
+  position 0 of general register (R1 + 1)mod8".  With R1 = 7 we addressed a
+  ninth register the machine does not have, so the partner's half of the shift
+  went nowhere and register 0 -- its real partner -- was left untouched.  Every
+  failing case showed reg[1][0] still holding its baseline 106917440.
+  SLDL 80, SRDR 52, SRDL 33, SRDA 24 -> all zero.  CPU exec 110,934 ->
+  111,051/111,358.
+- REMAINING: 307 FAIL lines over three mnemonics -- ICR 136, CVFX 136,
+  BCTR 35.  None of them addressing, and BCTR is small enough to be worth
+  checking for the same mod-8 pair issue first.
+- No regressions: EA 20,447/20,447, every other suite unchanged, GPCIPL still
+  matches for all 3,987,845 traced instructions.
