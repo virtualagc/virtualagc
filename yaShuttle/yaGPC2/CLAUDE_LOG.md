@@ -1638,3 +1638,27 @@ document's planning stages, and it is already in the code as
   times and the reference once.  Both then go to 014bb.  That is a phase
   difference, not a defect -- our BCEs set their indicator bits a few
   slices later.  Use cmp4.py, which resynchronises, rather than cmp.
+
+### [2026-08-23] Target: problems.md
+- The display IPL fails on a 1.28 ms miss.  In the gap between fill 1 and
+  fill 2 the MSC's @RAW at 032a4 spins 8705 times and gives up at
+  7246388.3 us; BCE6 does not reach WAIT (035a6) until 7247667.4.  So the
+  @RAW takes its TIMEOUT exit at 032a5 into the mode-status block instead
+  of its condition-met exit at 032a6, and everything follows.  The two
+  emulators issue their FIRST fill 8 us apart (7230356.0 vs 7230348.0)
+  and diverge immediately after it.
+- Where the 1.28 ms comes from: our one-word #MIN at 035a2 takes 6.44 ms
+  (7241229.5 -> 7247667.4) where the reference's takes 0.38 ms.  Our
+  #DLYI is right (10.76 ms against its 650 x 16.5 us = 10.73), so the
+  receive is the whole difference.
+- NEGATIVE RESULT, so nobody repeats it: outbound pacing is NOT the
+  cause.  YAGPC_BUS_WORD_US now makes the rate sweepable; at 20/8/4/2 us
+  per word the load never completes, and the faster settings make
+  unheadered fills worse.  The reference's com/bus.civet sendMsg does no
+  pacing at all, which is what suggested the theory.  The remaining
+  suspect is when we DRAIN the socket, not when we fill it.
+- METHOD NOTE, second time this has bitten: the reference's IOP trace
+  COLLAPSES repeats into "... N times" summary lines, so a grep that
+  counts full trace lines undercounts it wildly and makes it look like it
+  executes a delay once where we execute it 652 times.  Compare
+  TIMESTAMPS, not line counts.
