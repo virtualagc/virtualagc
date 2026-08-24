@@ -1892,3 +1892,29 @@ document's planning stages, and it is already in the code as
   no longer the reason -- fills clear in 9.5-10.6 ms now -- so what keeps
   BCE6 busy past the window is the spurious second fill itself, which is
   the loop closing on itself again.
+
+### [2026-08-24] Target: problems.md
+- BUILT: --deu-model, a display unit modelled in process (src/deumodel.c),
+  ported from meds/deuUnit.coffee and meds/deuProto.coffee.  Synchronous,
+  lossless, no socket, no pacing.  Installed INSTEAD of --bce-network.
+  YAGPC_DEUTRACE reports servicer calls by bus.
+- THE EXPERIMENT DID NOT ANSWER ITS QUESTION.  Under --deu-model the
+  machine does essentially no bus I/O: under 5000 servicer calls in 100 s
+  wall, and ZERO commands addressed to the unit over 234 s of SIMULATED
+  time at pacing rate 0.984.  The same image under --bce-network is
+  filling the display by 7.2 s of simulated time.
+- It is NOT the model failing to install: it prints on creation, a
+  --max-steps 1 run shows it wired in and reporting, and its counters are
+  all zero rather than absent.  The emulator never asks it anything.
+- Ruled out while chasing that: the run is not merely slow (234 s of sim
+  reached, rate 0.984), and the real unit does NOT initiate -- gpcmd's
+  --ipl-request only sets ipled:false, so the unit is purely reactive,
+  exactly as the model is.
+- SO THE NEXT QUESTION IS SHARPER THAN THE OLD ONE: why does the machine
+  drive the bus with one GpcServicerFn installed and not with another,
+  when the interface is the same four calls?  Something other than the
+  servicer's replies differs between the two configurations -- the
+  framer's per-instruction bcenet_framer_flush_tick from run.c is the
+  obvious candidate, since the model has no equivalent, but that should
+  be transport-side only.  Answer that before drawing any conclusion
+  about UDP versus TCP; the experiment cannot speak until it does.
