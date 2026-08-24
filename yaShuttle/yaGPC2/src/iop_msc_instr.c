@@ -337,7 +337,8 @@ static void exec_LBB(IOP *t, DInstr *v) {
 }
 
 static void exec_LBB_at(IOP *t, DInstr *v) {
-    uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
+    uint32_t tblEa = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
+    uint32_t ea = tblEa;
     uint32_t val = iop_g_eaf(t, ea);
     ea = val & 0x3ffffu;
     uint32_t bceNum = df_get(v, 'b');
@@ -354,8 +355,9 @@ static void exec_LBB_at(IOP *t, DInstr *v) {
             register_set32(iopls_BASE(&t->ls), ea);
             t->ls.curPage = savedPage;
             if (getenv("YAGPC_DISPTRACE"))
-                fprintf(stderr, "DISP @LBB@ bce%-3u base<-%05x X=%04x\n", (unsigned)bceNum,
-                        (unsigned)ea, (unsigned)register_get32(iopls_X(&t->ls)));
+                fprintf(stderr, "DISP @LBB@ bce%-3u base<-%05x X=%04x tbl=%05x\n",
+                        (unsigned)bceNum, (unsigned)ea,
+                        (unsigned)register_get32(iopls_X(&t->ls)), (unsigned)tblEa);
         }
     } else {
         uint32_t st = register_get32(iopls_MST(&t->ls));
