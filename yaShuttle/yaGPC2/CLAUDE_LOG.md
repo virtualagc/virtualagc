@@ -1866,3 +1866,29 @@ document's planning stages, and it is already in the code as
 - Store-protect over-protection is ruled out as a display cause: four
   violations in a whole run (YAGPC_PROTTRACE), at NIA 00bfa, 01058 and
   01107 twice.
+
+### [2026-08-24] Target: problems.md
+- CORRECTION to commit 332e571fb's message: the count-8 DISPLAY_FILL is
+  NOT "a different and older fault".  It predates the transmit thread,
+  but it is a SYMPTOM of the same stuck state, not independent of it.
+- What it actually is: the bus program really does have two fills back to
+  back -- 03572 #MOUT X'0',X'1FE' (511 words) then, after its #WAT at
+  03577, 03578 #MOUT X'0',X'7' (8 words) -- and BOTH send from BASE+0.
+  #WAT leaves the PC on 03578 (the reference's #WAT is identical, clear
+  busy and incrNIA(1)), so an @SIO that starts BCE6 without a fresh
+  @LBP@ resumes it there and re-sends the first 8 halfwords of the fill
+  buffer: 01fd 0f49 0000..., which is that buffer's own header, and the
+  display rejects it as unheadered.
+- Start-without-dispatch is NOT itself abnormal -- the reference starts
+  BCE6 436 times at 0329d, we start it 143.  The difference is only
+  WHERE the BCE is parked: it has moved on to its steady-state display
+  program, we are still in the IPL one, so our restarts land on 03578.
+- The clearest single statement of where we still are, from the display's
+  own command counts.  Reference: 259 DISPLAY_FILL count 198 (the real
+  display data), 7 count 511 (the IPL blocks), 0 count 8.  Ours: 37 count
+  511, 34 count 8, and NO count 198 at all -- we never reach steady state.
+- The @RAW at 032a4 still times out, though far less: 032a5 (timeout) 37
+  and 032a6 (met) 71, against the reference's 0 and 14.  The transport is
+  no longer the reason -- fills clear in 9.5-10.6 ms now -- so what keeps
+  BCE6 busy past the window is the spurious second fill itself, which is
+  the loop closing on itself again.
