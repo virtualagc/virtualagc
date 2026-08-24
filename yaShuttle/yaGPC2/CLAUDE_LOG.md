@@ -1607,3 +1607,34 @@ document's planning stages, and it is already in the code as
   same 35 s, so the CPU is NOT issuing the wake less often; the
   reference must get its MSC moving 40 ms at a time some other way.
   Unresolved, and the next thing to chase.
+
+### [2026-08-23] Target: problems.md
+- CORRECTION to the "40 ms there, 480 ms here" entry: the MSC park
+  cadence is IDENTICAL for the first 37 parks -- 39.9 39.9 40.0 39.8
+  39.9 39.9 119.9 239.9 20.4 ... matching to a tenth of a millisecond,
+  and park 37 lands on 7190151.0 us on both.  It COLLAPSES at park 38,
+  where the reference dwells 1.8 ms and we dwell 503.6, and from there
+  we alternate 463/503 for ever.  The steady-state medians (205 vs 463)
+  hid this; look at the ordered sequence, not the distribution.
+- WHAT HAPPENS AT PARK 38: BCE6 is at 0359a executing the SIXTEEN word
+  #MIN and only one word ever arrives, so it sits out its whole 20 ms
+  timeout, error terminates, and goes NO-GO, while the MSC spins in
+  @RAW at 032a4 waiting for a BCE6 that will never reach WAIT.  That is
+  the left=15 gotAny=1 timeout, and it is not a side issue -- it is what
+  breaks the cadence.
+- WHY ONE WORD: deuUnit.coffee's POLL handler replies with a single
+  header word, not the sixteen word poll response, while @iplRunning is
+  set.  The reference is only briefly in that state (its load completes
+  about 56 ms after it starts, modeStatus 5); we are in it permanently
+  (modeStatus 259), so every sixteen word #MIN we issue starves.
+- STILL OPEN, and the one thing left: our display fills are 540 ms apart
+  from the very FIRST one (19.761, 20.335, 20.872) where the reference's
+  are 11 ms (20.301, 20.312, 20.324) -- even while the park cadence
+  still matched.  The reference sends several fills per park; we send
+  one per thirteen.  Fill rate is NOT park rate, and that is what to
+  measure next.
+- METHOD NOTE: a plain cmp of the two MSC streams reports its first
+  difference at instruction 14, @RAI X'64' at 014b9, where we test 18
+  times and the reference once.  Both then go to 014bb.  That is a phase
+  difference, not a defect -- our BCEs set their indicator bits a few
+  slices later.  Use cmp4.py, which resynchronises, rather than cmp.
