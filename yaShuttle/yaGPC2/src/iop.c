@@ -778,7 +778,27 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value);
 /* A commanded receive that goes this long without a word is abandoned.
  * The floor matters because the timeout count a bus program loads can be
  * zero, and a real subsystem still needs time to answer. */
-#define RECV_TIMEOUT_FLOOR_US 20000.0   /* 20 ms */
+/* Was 20 ms, which was too long to be a floor: it silently overrode the
+ * flight software's OWN message timeout.  GPCIPL loads the display BCE an
+ * MTO of 303, i.e. 5.0 ms, and the MSC services the bus on a 6 ms loop --
+ * so a 20 ms floor turned every starved receive into more than three
+ * whole service periods.  That is not a small distortion: each timeout
+ * error-terminates the BCE, which SETS its indicator, and the MSC's
+ * @RAI ("repeat until all indicators") is then satisfied early, putting
+ * the whole service loop out of phase.  Measured against a real display
+ * unit and mass memory, sweeping only this number:
+ *
+ *     20 ms   load never completes, 97 BCE6 timeouts, 27 unheadered fills
+ *      5 ms   load COMPLETES,       14 timeouts,       0 unheadered
+ *      2 ms   load COMPLETES,        6 timeouts,       0 unheadered
+ *    0.5 ms   load COMPLETES,        6 timeouts,       0 unheadered
+ *
+ * 2 ms keeps a real floor for the case it exists for -- a bus program
+ * that loads a very short count, such as the mass memory's MTO of 15
+ * (0.25 ms), which no peer on a socket can answer inside -- while being
+ * comfortably under any timeout the software sets deliberately, and
+ * twenty times the ~100 us a peer here actually takes to reply. */
+#define RECV_TIMEOUT_FLOOR_US 2000.0    /* 2 ms */
 
 /* The floor is a concession to a peripheral in ANOTHER PROCESS, reached
  * over a socket: the count a bus program loads can be far shorter than
@@ -793,12 +813,23 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value);
  * machine then spends all its time retrying.  So an in-process
  * peripheral turns it off. */
 static double g_recvTimeoutFloorUs = RECV_TIMEOUT_FLOOR_US;
+static int g_recvFloorFromEnv = 0;
 
 void iop_set_recv_timeout_floor_us(double us) { g_recvTimeoutFloorUs = us; }
 
 /* The BCE's own message time out, from its local store (bank 1, word 3),
  * in the same 16.5 us ticks the delay instructions use. */
 static double iop_recv_timeout_us(IOP *iop, int p) {
+    /* YAGPC_RECV_FLOOR_US overrides the floor for measurement.  It is
+     * worth measuring because the floor is four times what the flight
+     * software asks for here -- GPCIPL loads the display BCE an MTO of
+     * 303, which is 5.0 ms, and a 20 ms floor turns one starved receive
+     * into more than three whole 6 ms MSC service periods. */
+    if (!g_recvFloorFromEnv) {
+        const char *e = getenv("YAGPC_RECV_FLOOR_US");
+        g_recvFloorFromEnv = 1;
+        if (e != NULL) g_recvTimeoutFloorUs = atof(e);
+    }
     Register *r = iopls_at(&iop->ls, p, 1, 3);
     uint32_t mto = r ? (register_get32(r) & 0x3ffffu) : 0u;
     double t = (double)mto * MTO_TICK_US;
