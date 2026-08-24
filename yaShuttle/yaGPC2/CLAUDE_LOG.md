@@ -1291,3 +1291,30 @@ document's planning stages, and it is already in the code as
   audit 200 instructions but to keep the suite AT ZERO, and to treat the POO as
   the tiebreaker whenever it and the reference disagree -- @LAR is proof the
   fixtures can encode the reference's own bugs.
+
+### [2026-08-23] Target: [problems.md]
+- WHO DEFERRED THE FIXTURES: the record says I did.  "MSC fixture suite ~12k on
+  what looks like local-store width" is my own log entry, a guess, repeated as
+  "unchanged" in every status since.  There is no ruling from the user to
+  ignore them; the standing instruction is the opposite.
+- @INT RESOLVED -- WRONG ORACLE, not a defect.  The generator read
+  `gpc.cpu.intPending.iopProg`, but the reference's PendingInterrupts defines
+  properties by spec.key and External 2's key is `ext2`; there is no `iopProg`
+  property anywhere in it.  So the read returned undefined and the write
+  created a stray own-property that never reached intPendingReg -- every @INT
+  fixture recorded "no interrupt" no matter what the reference did.  Generator
+  fixed to use `ext2`, fixtures regenerated: exactly 600 lines changed, all in
+  the contiguous @INT block, all the trailing iopProgAfter flipping false ->
+  true.  MSC 145,146 -> 145,446/145,746.  Our @INT was correct throughout.
+- @LAR (300) stands as the reference's bug, not ours -- POO II-101 lists it
+  Short format.  Do not "fix" ours to match the fixtures.
+- #MOUT/#MIN (16 of 74,699) LOCALIZED, NOT RESOLVED: every one is
+  ls[6][13] -- the IUA register (bank 2, word 5) -- reading 0 where the
+  reference has 13, after a companion command.  Both implementations gate
+  IUAR's write behind regXmitEna identically, and the fixture rows do not make
+  the baseline unambiguous, so the next step is to instrument the gate rather
+  than reason from the header.
+- Suite state now: MSC 145,446/145,746 (300 @LAR, reference's bug);
+  BCE 74,083/74,699 (600 #MOUT@/#MIN@ documented deviation + 16 above);
+  CPU exec 108,766/111,358 and EA 19,550/20,447 still untouched and NOT yet
+  triaged -- the same mistake could be hiding there.

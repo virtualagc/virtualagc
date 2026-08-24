@@ -132,7 +132,7 @@ async function main() {
     gpc.iop.regIndicator.set32(randU32());
     gpc.iop.msc.regFailDisc.set32(Math.floor(rng() * 32));
     gpc.iop.msc.regIntProg.set32(Math.floor(rng() * 4096));
-    gpc.cpu.intPending.iopProg = false;
+    gpc.cpu.intPending.ext2 = false;   // reference key is 'ext2'; 'iopProg' is not a property
     return gpc;
   }
 
@@ -155,7 +155,7 @@ async function main() {
       regIndicator: gpc.iop.regIndicator.get32() >>> 0,
       regFailDisc: gpc.iop.msc.regFailDisc.get32() >>> 0,
       regIntProg: gpc.iop.msc.regIntProg.get32() >>> 0,
-      iopProg: gpc.cpu.intPending.iopProg,
+      iopProg: gpc.cpu.intPending.ext2,   // External 2 == our iopProg
     };
   }
 
@@ -179,7 +179,7 @@ async function main() {
     gpc.iop.regIndicator.set32(snap.regIndicator);
     gpc.iop.msc.regFailDisc.set32(snap.regFailDisc);
     gpc.iop.msc.regIntProg.set32(snap.regIntProg);
-    gpc.cpu.intPending.iopProg = snap.iopProg;
+    gpc.cpu.intPending.ext2 = snap.iopProg;
     // TDLI/TDL/MOUT@/RDLI/RDL/MIN@ etc queue one DMA request per
     // transferred halfword, and their count field can be up to 18 bits
     // (262144) — never drained here (execDMAQueue is never called), so
