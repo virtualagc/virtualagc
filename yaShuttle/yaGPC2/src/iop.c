@@ -668,10 +668,11 @@ void iop_exec_processors(IOP *iop) {
         char who[8];
         if (page == 0) snprintf(who, sizeof who, "MSC");
         else snprintf(who, sizeof who, "BCE%d", page);
-        fprintf(stderr, "%12.1f us IOPT %-6s %05x  %04x %04x  A=%08x BST=%08x\n",
+        fprintf(stderr, "%12.1f us IOPT %-6s %05x  %04x %04x  A=%08x BST=%08x BASE=%05x\n",
                 (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0,
                 who, (unsigned)pc, (unsigned)hw1, (unsigned)hw2,
-                (unsigned)iopls_getACC(&iop->ls), (unsigned)iopls_getBST(&iop->ls));
+                (unsigned)iopls_getACC(&iop->ls), (unsigned)iopls_getBST(&iop->ls),
+                (unsigned)register_get32(iopls_BASE(&iop->ls)));
     }
     if (page == 0) {
         msc_instr_exec(iop, hw1, hw2);
@@ -1186,6 +1187,16 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         case 0x92040000: { /* LOAD MSC BUSY */
             /* The MSC's own bit in STAT4 -- the TOP bit of the word,
              * not the bottom one this used to set. */
+            /* When the CPU wakes the MSC.  The gap between these is the
+             * whole display story: the MSC parks itself at @WAT and can
+             * do nothing until this arrives, so if the fills are slow it
+             * is this cadence, not the IOP's own scheduling, that says
+             * so.  No PC is printed -- iopls_PC() reads whichever page
+             * the round-robin happens to have selected, which for a
+             * CPU-side PCO is any of the 26. */
+            if (getenv("YAGPC_DISPTRACE"))
+                fprintf(stderr, "DISP LOADMSCBUSY t=%.1f us\n",
+                        (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0);
             iop_proc_set(&iop->regBusyWait, PROC_MSC, 1);
             /* And the copy of it the MSC reads back with @LMS: bit 17 of
              * the 18-bit MSC status register, "the Busy/Wait bit for the

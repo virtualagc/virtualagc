@@ -1486,3 +1486,18 @@ document's planning stages, and it is already in the code as
 - WORTH FILING: #MOUT@/#MIN@ incrNIA is a fourth nsts-sim-gpc issue, and the
   strongest-evidenced of the lot -- it has the original build's listing behind
   it.  Not yet filed; needs the user's review of the text first.
+
+### [2026-08-23] Target: problems.md
+- gpc POO fixes verified not to disturb MEDS.  `~/donschmidt/nsts-sim-gpc`
+  branch `yagpc2-local-poo-fixes` = e12ac63 + cd1c945 (@LAR incrNIA 2->1,
+  BCT branch-before-decrement, CVFX store-on-overflow, #MOUT@/#MIN@
+  incrNIA 3->2).  Fresh-MEDS A/B: stock gave 137/1/3 then 132/1/2; patched
+  gave 132/1/2 -- stock varied more between its own runs than patched
+  varied from stock.  Clock normal, y/k/I keys live, DK1 identical at
+  2299 datagrams / 2497 words per 6 s.
+- UPSTREAM REGRESSION: nsts-sim-gpc main (0e275b1, "take store protection
+  from the linker's map") does not boot GPCIPL at all -- zero bus traffic,
+  ~46% CPU spin, no DEU IPL.  Bisected against unpatched builds: e12ac63
+  IPLs the DEU at 20.1 s (492 commands / 169 fills), 0e275b1 never does.
+  IPL.fcm has no .sym.json, which should take the `protectWarning`
+  "running unprotected" branch.  Not yet filed with Don.
