@@ -334,6 +334,12 @@ void iop_free(IOP *iop);
 
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx);
 
+/* Lower bound on a commanded receive's timeout, in microseconds.  Exists
+ * for a peripheral in another process; set it to 0 when the peripheral is
+ * in this one, so the bus program's own message timeout is honoured
+ * exactly.  See RECV_TIMEOUT_FLOOR_US in iop.c. */
+void iop_set_recv_timeout_floor_us(double us);
+
 void iop_exec(IOP *iop);
 void iop_exec_idle(IOP *iop);
 void iop_exec_channel_control(IOP *iop);

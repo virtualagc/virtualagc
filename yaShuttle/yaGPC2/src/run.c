@@ -91,6 +91,9 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
         /* Deliberately instead of, not alongside, the network servicer:
          * only one thing can sit on the far end of the bus, and the
          * point of this one is that no socket is involved. */
+        /* In this process, so the socket-latency floor does not apply:
+         * honour the bus program's own message timeout exactly. */
+        iop_set_recv_timeout_floor_us(0.0);
         r->deuModel = deumodel_create(6);   /* DK1 */
         ap101_set_servicer(&r->age.gpc, deumodel_service, r->deuModel);
     } else if (opts->bceNetwork) {

@@ -780,13 +780,29 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value);
  * zero, and a real subsystem still needs time to answer. */
 #define RECV_TIMEOUT_FLOOR_US 20000.0   /* 20 ms */
 
+/* The floor is a concession to a peripheral in ANOTHER PROCESS, reached
+ * over a socket: the count a bus program loads can be far shorter than
+ * the host can answer in, and the reference makes the same allowance for
+ * the same reason -- its comment adds "set it to 0 for exact hardware
+ * behaviour when the subsystem is in this process", which is exactly the
+ * case --deu-model creates.
+ *
+ * It is not free.  GPCIPL gives the mass memory an MTO of 15, which is
+ * 0.25 ms; flooring that at 20 ms makes every retry of an absent
+ * subsystem eighty times longer than the software intended, and the
+ * machine then spends all its time retrying.  So an in-process
+ * peripheral turns it off. */
+static double g_recvTimeoutFloorUs = RECV_TIMEOUT_FLOOR_US;
+
+void iop_set_recv_timeout_floor_us(double us) { g_recvTimeoutFloorUs = us; }
+
 /* The BCE's own message time out, from its local store (bank 1, word 3),
  * in the same 16.5 us ticks the delay instructions use. */
 static double iop_recv_timeout_us(IOP *iop, int p) {
     Register *r = iopls_at(&iop->ls, p, 1, 3);
     uint32_t mto = r ? (register_get32(r) & 0x3ffffu) : 0u;
     double t = (double)mto * MTO_TICK_US;
-    return t > RECV_TIMEOUT_FLOOR_US ? t : RECV_TIMEOUT_FLOOR_US;
+    return t > g_recvTimeoutFloorUs ? t : g_recvTimeoutFloorUs;
 }
 
 void iop_bce_error_terminate(IOP *iop, int p) {
@@ -828,6 +844,14 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         bce->recvLeft = count;
         bce->recvSinceUs = now;
         bce->recvGotAny = false;
+        if (getenv("YAGPC_TIMEOUT_TRACE")) {
+            Register *r = iopls_at(&iop->ls, p, 1, 3);
+            fprintf(stderr, "BCE%d RECV ARM t=%.1f us pc=%05x count=%u "
+                            "mto=%u timeout=%.2f ms\n",
+                    p, now, (unsigned)pc, (unsigned)count,
+                    (unsigned)(r ? register_get32(r) & 0x3ffffu : 0u),
+                    iop_recv_timeout_us(iop, p) / 1000.0);
+        }
     }
 
     while (bce->recvLeft > 0 && mia_data_available(iop, &bce->mia)) {
