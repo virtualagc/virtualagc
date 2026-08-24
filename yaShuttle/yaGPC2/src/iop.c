@@ -852,6 +852,17 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         return true;
     }
     if (now - bce->recvSinceUs >= iop_recv_timeout_us(iop, p)) {
+        /* The reference prints the same line under NSTS_BUS_TIMEOUT_TRACE.
+         * A receive that times out error-terminates the BCE, which is
+         * what puts it NO-GO and sends the flight software down its
+         * RESET STATUS1 recovery path -- so if that path runs here and
+         * not there, this is where to look first. */
+        if (getenv("YAGPC_TIMEOUT_TRACE"))
+            fprintf(stderr, "BCE%d RECV TIMEOUT t=%.1f us left=%u gotAny=%d "
+                            "waited=%.2f ms mto=%.2f ms\n",
+                    p, now, (unsigned)bce->recvLeft, (int)bce->recvGotAny,
+                    (now - bce->recvSinceUs) / 1000.0,
+                    iop_recv_timeout_us(iop, p) / 1000.0);
         iop_bce_error_terminate(iop, p);
     }
     return false;
@@ -1271,6 +1282,16 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         uint32_t region = dataSelect >> 5;
         uint32_t bank = (dataSelect >> 3) & 0x3;
         uint32_t word = dataSelect & 0x7;
+
+        /* The MSC's own program counter is region 0, bank 0, word 2, and
+         * the CPU setting it is how a parked MSC is aimed somewhere other
+         * than the instruction after its @WAT.  Traced because whether
+         * that write arrives decides where the MSC resumes, which decides
+         * how much of the display's IPL it gets through per wake. */
+        if (isOutput && region == 0 && bank == 0 && word == 2 &&
+            getenv("YAGPC_DISPTRACE"))
+            fprintf(stderr, "DISP MSCPC<-%05x t=%.1f us\n", (unsigned)(data & 0x3ffffu),
+                    (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0);
 
         /* The REGION names which processor's page this addresses -- the
          * MSC, BCE 1-24 or the self-test processor.  It used to be
