@@ -2089,3 +2089,35 @@ document's planning stages, and it is already in the code as
   why interrupt DELIVERY from IOP to CPU sits ~0.85 ms out of phase, at a
   scale well below anything the bus does.  Slice granularity and when the
   IOP is stepped relative to the CPU are the places to look.
+
+### [2026-08-24] Target: problems.md
+- IS THE ~6 ms MEANINGFUL?  Yes, and as a GOOD sign.  Both emulators show
+  the same two alternating MSC @INT periods, 5997.2/5997.3 us and
+  6007.2/6007.3 us -- identical to a tenth of a microsecond.  It is the
+  flight software's own MSC service-loop period, emergent from summed
+  instruction timings, not a constant either emulator injects.  That we
+  reproduce it that exactly is evidence our MSC instruction timing is
+  right.
+- AND IT SHARPENS THE PROBLEM: if the PERIOD matches to 0.1 us, the
+  0.85 ms offset cannot be accumulated drift.  It must be a phase STEP,
+  taken once.  Located it:
+      * MSC first-executions agree to +-0.1 us up to sim 148,710 us.
+      * Both then park for an IDENTICAL 4001.1 ms and both resume at
+        03266 at exactly 4,149,811.8 us -- so the wake is not the cause.
+      * From that common instant the MSC PC sequences run 1,214
+        instructions in lockstep, then part at 03445 @RAI X'64':
+            ours 03444 03445 03447 ...  condition MET, incrNIA(2)
+            ref  03444 03445 03446 ...  NOT met,      incrNIA(1)
+- WHY: @RAI waits for ALL BCE indicators (ACC 7fffff80).  An indicator is
+  set by #SIB or by iop_bce_error_terminate, and a receive TIMEOUT
+  error-terminates.  Measured with MMU and display both up:
+      BCE6 receive timeouts -- ours 95, reference 4.  BCE18 -- ours 1, ref 0.
+  So the display BCE's starved receives set its indicator over and over,
+  @RAI is satisfied ~3.6 ms early, and the MSC's whole service loop runs
+  out of phase from there.
+- @RBI is NOT the culprit; ours matches the reference exactly, including
+  the ACC-relative BCE selection fixed earlier.
+- So the bus-level symptom (starved 16-word polls) feeds BACK into MSC
+  control flow through the indicator bits.  That is the coupling that
+  makes this look circular, and BCE6's 95-vs-4 timeouts is the place to
+  break it.
