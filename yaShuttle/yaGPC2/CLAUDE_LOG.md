@@ -1369,3 +1369,28 @@ document's planning stages, and it is already in the code as
   own rather than assuming a shared root.
 - No regressions: every other suite unchanged and GPCIPL still matches for all
   3,987,845 traced instructions.
+
+### [2026-08-23] Target: [problems.md]
+- The user's instinct was right: there WAS a common thread, and it was
+  addressing again.  Two more defects, and CPU exec went 109,553 -> 110,934 of
+  111,358 (FAIL lines 2,202 -> 496):
+  1. MULTIPLY with an ODD R1 did the wrong operation.  POO 4.21 is explicit:
+     "Both multiplier and multiplicand are 32-bit signed twos complement
+     fractions.  The product is a 64-bit ... fraction ... When R1 is odd, only
+     the most significant 32 bits of the product is saved in general register
+     R1."  So it is a FULL 32x32 multiply either way; only the saving differs.
+     Ours did a 16x16 q15_mul of the two upper halves -- that is MULTIPLY
+     HALFWORD (4.22), a different instruction.  Affected MR and M.  MR 143 -> 0.
+  2. SRS ADDRESSING EXCLUDED BASE REGISTER 3 FROM ITS DSE.  "When B2 equals 11,
+     base addressing is not performed" is an RS-format rule; in SRS, register 3
+     is an ordinary base register and its DSE applies like any other's.  The
+     reference passes g_BASE_DSE(v, FALSE) there -- no exclusion -- and ours
+     excluded b==3.  Every SRS reference through R3 landed a sector out.  This
+     alone was +1,209 fixtures and cleared M, MH, LH, LE, L, N, TB, ZB, TSB,
+     TH, ME, NIST, S, D, SH, AE, SE, TD, MSTH, AH, C, CIST, A, CH outright.
+- WHAT REMAINS, 496 FAIL lines over 7 mnemonics and no longer addressing:
+      ICR 136, CVFX 136, SLDL 80, SRDR 52, BCTR 35, SRDL 33, SRDA 24
+  The four shifts (SLDL/SRDR/SRDL/SRDA, 189) are one family and should be
+  triaged together; ICR and CVFX are their own.
+- No regressions: EA still 20,447/20,447, every other suite unchanged, GPCIPL
+  still matches for all 3,987,845 traced instructions.

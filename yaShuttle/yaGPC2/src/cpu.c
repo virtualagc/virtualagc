@@ -662,7 +662,12 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
         uint32_t disp = df_get(v, 'd') << (v->addrWidth - 1);
         ea = base + disp;
         if (v->addrWidth == 2) ea = ea & 0xfffe;
-        if (df_has(v, 'b') && df_get(v, 'b') != 3) {
+        /* g_BASE_DSE(v, FALSE) here, unlike the RS branch above: "when B2
+         * equals 11, base addressing is not performed" is an RS-format
+         * rule, so in SRS register 3 is an ordinary base register and its
+         * own DSE applies like any other's.  Excluding it -- what this
+         * did -- put every SRS reference through R3 a sector out. */
+        if (df_has(v, 'b')) {
             uint32_t dseVal = registerfile_get_dse(&cpu->regFiles[psw_get_reg_set(&cpu->psw)], (int)df_get(v, 'b'));
             ea = cpu_g_expand_dse(cpu, ea, v->opType, dseVal);
         } else {

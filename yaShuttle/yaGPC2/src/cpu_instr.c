@@ -292,8 +292,18 @@ static void exec_MR(CPU *t, DInstr *v) {
         register_set32(cpu_r(t, (int)(x + 1)), r.lo);
         if (r.overflow) psw_set_overflow(&t->psw, 1);
     } else {
-        Q15MulResult r = q15_mul((int32_t)register_get32(R(t, v, 'x')) >> 16, (int32_t)register_get32(R(t, v, 'y')) >> 16);
-        register_set32(R(t, v, 'x'), (uint32_t)r.result);
+        /* R1 odd: still a FULL 32x32 multiply -- only the saving
+         * differs.  POO 4.21: "Both multiplier and multiplicand are
+         * 32-bit signed twos complement fractions.  The product is a
+         * 64-bit ... fraction number and occupies an even/odd register
+         * pair when the R1 field references an even-numbered general
+         * register.  When R1 is odd, only the most significant 32 bits
+         * of the product is saved in general register R1."  This did a
+         * 16x16 halfword multiply of the two upper halves instead,
+         * which is a different operation entirely -- that is MULTIPLY
+         * HALFWORD (4.22), a different instruction. */
+        Q31MulResult r = q31_mul32((int32_t)register_get32(R(t, v, 'x')), (int32_t)register_get32(R(t, v, 'y')));
+        register_set32(R(t, v, 'x'), r.hi);
         if (r.overflow) psw_set_overflow(&t->psw, 1);
     }
 }
@@ -306,8 +316,18 @@ static void exec_M(CPU *t, DInstr *v) {
         register_set32(cpu_r(t, (int)(x + 1)), r.lo);
         if (r.overflow) psw_set_overflow(&t->psw, 1);
     } else {
-        Q15MulResult r = q15_mul((int32_t)register_get32(R(t, v, 'x')) >> 16, (int32_t)cpu_g_eaf(t, v, 0) >> 16);
-        register_set32(R(t, v, 'x'), (uint32_t)r.result);
+        /* R1 odd: still a FULL 32x32 multiply -- only the saving
+         * differs.  POO 4.21: "Both multiplier and multiplicand are
+         * 32-bit signed twos complement fractions.  The product is a
+         * 64-bit ... fraction number and occupies an even/odd register
+         * pair when the R1 field references an even-numbered general
+         * register.  When R1 is odd, only the most significant 32 bits
+         * of the product is saved in general register R1."  This did a
+         * 16x16 halfword multiply of the two upper halves instead,
+         * which is a different operation entirely -- that is MULTIPLY
+         * HALFWORD (4.22), a different instruction. */
+        Q31MulResult r = q31_mul32((int32_t)register_get32(R(t, v, 'x')), (int32_t)cpu_g_eaf(t, v, 0));
+        register_set32(R(t, v, 'x'), r.hi);
         if (r.overflow) psw_set_overflow(&t->psw, 1);
     }
 }
