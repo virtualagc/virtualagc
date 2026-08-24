@@ -423,7 +423,18 @@ static bool transport_send_now(BceNetTransport *t, BceNetBusSocket *b, int busID
 #else
     size_t headerLen = isShuttleBus ? 2 : 0;
     size_t len = headerLen + wordCount * 2;
-    unsigned char *buf = malloc(len);
+    /* On the stack, not the heap.  A datagram here is at most an IUA pair
+     * plus a two-word command -- six bytes -- and this runs once per
+     * halfword of every transfer, so a malloc/free pair per send is real
+     * cost on the one path that has none to spare: a 511-word display fill
+     * has 10.7 ms to clear and the sends were measured at 8.5-9.0 us each
+     * against a 20 us word time.  self_echo_note_sent() copies what it is
+     * given, so nothing outlives this frame. */
+    unsigned char buf[2 + 2 * 2];
+    if (len > sizeof buf) {
+        fprintf(stderr, "bcenet: bus %d: %zu-byte datagram exceeds the frame\n", busID, len);
+        return false;
+    }
     if (isShuttleBus) {
         buf[0] = (unsigned char)iua;
         buf[1] = 0; /* reserved; the real Bus class leaves this uninitialized and
@@ -440,7 +451,6 @@ static bool transport_send_now(BceNetTransport *t, BceNetBusSocket *b, int busID
     int sendFd = (b->txFd >= 0) ? b->txFd : b->fd;
     if (b->txFd < 0) self_echo_note_sent(b, buf, len);
     ssize_t sent = sendto(sendFd, buf, len, 0, (struct sockaddr *)&dest, sizeof dest);
-    free(buf);
     if (sent < 0 || (size_t)sent != len) {
         fprintf(stderr, "bcenet: bus %d: sendto failed: %s\n", busID, strerror(errno));
         return false;
