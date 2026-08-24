@@ -1778,3 +1778,36 @@ document's planning stages, and it is already in the code as
   con80build-pch-extension-v2 at 1350a86 with one dirty file, i.e. mid
   work by another instance; leave it alone.
 - The step-20462 instruction-monitor finding is unaffected and stands.
+
+### [2026-08-24] Target: problems.md
+- RESOLVED, and there is NO gpc bug: 0e275b1 boots GPCIPL perfectly well
+  once the .sym.json carries a store-protect map.  Proved without a
+  relink -- copied IPL.fcm and IPL.sym.json to scratch, synthesised
+  storeProtect {unit: halfword, ranges: every section} into the copy, and
+  ran 0e275b1 against it: no warning, "load complete (250 halfwords at
+  0x2), reporting initialized as unit 1", 256 commands / 93 fills /
+  78 timeFills / 0 headerless / modeStatus 5.  Do not file an issue.
+- The real fault was ours: IPL.sym.json is STALE, built 2026-08-19 before
+  lnk101 emitted the map.  Upstream (ColanderCombo/nsts-sdl-dps, the
+  parent of our rburkey2005 fork) src/lnk101/linker.py has
+  storeProtectRangesHw() at line 809 and writes
+  "storeProtect": {"unit": "halfword", "ranges": ...} at 2842, exactly
+  the shape gpc reads.  ACTION: regenerate IPL.sym.json with the current
+  lnk101 via mmu2fcm (config IPL, phase 10) and gpc main works.
+- Why the earlier searches missed it: our nsts-sdl-dps clone has NO
+  upstream remote at all -- only `fork` -> rburkey2005/nsts-sdl-dps -- so
+  there is no origin/main and a working-tree grep finds nothing.  Read
+  upstream files with `gh api repos/ColanderCombo/nsts-sdl-dps/contents/
+  <path> -H "Accept: application/vnd.github.raw"` rather than adding a
+  remote to that checkout, which belongs to another instance.
+- MUTUAL CONFIRMATION: yaGPC2's own apply_load_protection() comment in
+  ageharness.c already describes this exact failure -- "protect nothing
+  and the Instruction Monitor fires the moment the software sets PSW mask
+  bit 34".  yaGPC2 is NOT running unprotected; it protects the loaded
+  sections from the section map.
+- NEW LEAD from all this: yaGPC2 protects whole SECTIONS, which is what
+  gpc did before 0e275b1 and what Don removed because it "locks the
+  runtime's own IOCODE/IOBUF cells and the stack" so stores are dropped
+  silently.  If yaGPC2 is over-protecting the same way, stores that
+  should land are being dropped -- worth checking against the display
+  path once IPL.sym.json carries the real ranges.
