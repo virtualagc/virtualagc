@@ -1259,3 +1259,35 @@ document's planning stages, and it is already in the code as
   each) that the reference NEVER enters, reached via 032dc -> 032e8, and one of
   them (032ee, `@INT` with the I bit set) still raises External 2 202 times.
   Same technique should localize it: the traces are already captured.
+
+### [2026-08-23] Target: [problems.md]
+- THE FIXTURE SUITES WERE BLIND, and one 18-bit mask fixed them.  `iop_set_nia`
+  did not mask the PC to 0x3ffff (the reference's setNIA masks with
+  LS_WORD_MASK).  Read sites mostly masked for themselves, so the machine ran --
+  but every MSC fixture compared ls[0][2] (the PC) and saw a full 32-bit value
+  where an 18-bit one belonged.  ALL 11,959 MSC failures were that one thing.
+  After the fix:
+      MSC  133,787/145,746 -> 145,146/145,746   (+11,359)
+      BCE   68,734/74,699  ->  74,083/74,699    (+5,349)
+  16,708 fixtures unmasked by an eight-character change, and every genuine
+  per-instruction discrepancy they had been hiding is now visible.
+- What remains, and it is small and specific:
+      @LAR   300 -- OURS IS RIGHT, THE REFERENCE IS WRONG.  The POO lists @LAR
+                    as SHORT format (II-101, "Load IOP Status Register ...
+                    Short"), so NIA advances by 1.  The reference uses
+                    incrNIA(2) for @LAR alone and incrNIA(1) for every other
+                    short register op (@SFD @LMS @XAX @SEC @RBI @RFD).  The
+                    fixtures encode its bug; do NOT "fix" ours to match.
+      @INT   300 -- real, unresolved: fixture expects iopProg=0 where we raise
+                    it.  Directly related to the 202 spurious External 2s still
+                    outstanding.
+      #MOUT@/#MIN@ 600 -- the deliberate documented deviation (incrNIA 2 vs the
+                    reference's 3), previously verified against BFS.SRC.
+      #MOUT 15, #MIN 1 -- not yet examined.
+- METHOD CONCLUSION for "should we audit every instruction against the POO":
+  we already HAVE an automated differential audit covering every instruction --
+  the fixture suites.  It was blinded by one systemic bug, and the failures had
+  been triaged as "known" and carried all session.  The lesson is not to hand
+  audit 200 instructions but to keep the suite AT ZERO, and to treat the POO as
+  the tiebreaker whenever it and the reference disagree -- @LAR is proof the
+  fixtures can encode the reference's own bugs.

@@ -918,7 +918,16 @@ void iop_s_eah(IOP *iop, uint32_t addr, uint32_t value) {
     iop_write_main16(iop, addr, value);
 }
 
-void iop_set_nia(IOP *iop, uint32_t x) { register_set32(iopls_PC(&iop->ls), x); }
+/* The PC is an 18-BIT local-store register, so every write wraps at
+ * 0x3ffff -- the reference's setNIA masks with LS_WORD_MASK and this did
+ * not.  Read sites mostly masked for themselves, which is why the
+ * machine ran; what it cost was the MSC fixture suite, where 11,959 of
+ * the 11,959 failures were this one thing, the full 32-bit value showing
+ * up where an 18-bit one belonged.  That buried every genuine
+ * per-instruction discrepancy the suite would otherwise have reported. */
+void iop_set_nia(IOP *iop, uint32_t x) {
+    register_set32(iopls_PC(&iop->ls), x & 0x3ffffu);
+}
 void iop_incr_nia(IOP *iop, int incr) {
     iop_set_nia(iop, register_get32(iopls_PC(&iop->ls)) + (uint32_t)incr);
 }
