@@ -107,6 +107,24 @@ typedef struct {
  * address words lost) against 68 that completed. */
 #define BUS_WORD_SECONDS 20e-6
 
+/* The rate is a compromise with no first-principles value: too fast and
+ * the peer's socket overruns (see above), too slow and the transfer does
+ * not finish inside the window the flight software allows it.  A 511-word
+ * fill costs 511 x this, and the display's own bus program budgets about
+ * 10.7 ms for one -- so 20 us per word spends the entire budget on the
+ * wire and the reply lands too late for the MSC's @RAW to see the BCE
+ * reach WAIT.  Overridable so the trade can be measured rather than
+ * guessed; the compiled-in value is the default. */
+static double bus_word_seconds(void) {
+    static double cached = -1.0;
+    if (cached < 0.0) {
+        const char *s = getenv("YAGPC_BUS_WORD_US");
+        double us = (s != NULL) ? atof(s) : 0.0;
+        cached = (us > 0.0) ? us * 1e-6 : BUS_WORD_SECONDS;
+    }
+    return cached;
+}
+
 /* How many words may go back to back after an idle gap.  The peer's
  * receive buffer holds roughly 276 of these tiny datagrams; staying well
  * under that leaves room for whatever else is on the bus.  Without a cap,
@@ -447,7 +465,7 @@ void bcenet_transport_pump(BceNetTransport *t) {
         }
         double elapsed = now - b->lastPumpSeconds;
         if (elapsed > 0.0) {
-            b->tokens += elapsed / BUS_WORD_SECONDS;
+            b->tokens += elapsed / bus_word_seconds();
             if (b->tokens > BUS_BURST_MAX) b->tokens = BUS_BURST_MAX;
         }
         b->lastPumpSeconds = now;
