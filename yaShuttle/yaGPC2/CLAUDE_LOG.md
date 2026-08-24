@@ -1754,3 +1754,27 @@ document's planning stages, and it is already in the code as
 - Don's repo left on branch yagpc2-local-poo-fixes at cd1c945, clean,
   dist rebuilt.  origin/main is still 0e275b1; the two commits after our
   branch point are meds fixes (#15, and a meds #27 unrelated to ours).
+
+### [2026-08-24] Target: problems.md
+- CORRECTION, user-flagged: I wrote that IPL.fcm "has no .sym.json and
+  cannot be relinked".  Both files are in ~/Desktop/IPL/ -- IPL.fcm 1.0M
+  and IPL.sym.json 674K -- and gpc loads the sym.json fine, resolving
+  GPCIPL +offset symbols from it throughout.  I asserted an absence
+  without running ls.
+- The accurate reading: IPL.sym.json HAS no `storeProtect` KEY.  Its
+  top-level keys are version, imageSize, entryPoint, sections, symbols,
+  modules, relocations, unresolvedRelocations, repro, ownerPhaseRunsHW.
+  Its repro block says it was built 2026-08-19 by mmu2fcm (config IPL,
+  phase 10) with lnk101, both at 6e0a232(2026-08-19) (dirty).  So gpc's
+  warning is literally accurate and its advice is the fix.
+- BUT the relink is not available: no lnk101 anywhere here emits
+  storeProtect, and nsts-sdl-dps has NO commit mentioning store
+  protection in its whole history.  So this is cross-repo version skew,
+  not a gpc bug -- gpc main landed a dependency on a linker field that
+  the linker does not yet write.  The issue draft is rewritten as a
+  question to Don about which revision writes it, keeping the measured
+  bisect and trace.  Still NOT filed.
+- nsts-sdl-dps was inspected READ-ONLY and not touched.  It is on branch
+  con80build-pch-extension-v2 at 1350a86 with one dirty file, i.e. mid
+  work by another instance; leave it alone.
+- The step-20462 instruction-monitor finding is unaffected and stands.
