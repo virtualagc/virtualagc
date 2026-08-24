@@ -2121,3 +2121,34 @@ document's planning stages, and it is already in the code as
   control flow through the indicator bits.  That is the coupling that
   makes this look circular, and BCE6's 95-vs-4 timeouts is the place to
   break it.
+
+### [2026-08-24] Target: problems.md
+- FIXED, AND THE DISPLAY NOW COMPLETES ITS IPL.  The receive timeout
+  floor was 20 ms; the flight software loads the display BCE an MTO of
+  303, which is 5.0 ms.  So the floor was not a floor, it was an
+  override, and every starved receive cost four times what the software
+  allowed -- more than three whole 6 ms MSC service periods.
+- The coupling that made this look circular for so long: a timed-out
+  receive error-terminates its BCE, which SETS the BCE's indicator, so
+  the MSC's @RAI is satisfied early, the service loop slips out of
+  phase, the MSC skips its @LBP@/@LBB@ dispatch, restarts BCE6 on a
+  stale PC (03578), and the display gets a fill carrying another
+  transfer's header.  Every symptom chased this session -- the 8-halfword
+  fills, 3622 never reaching 0x18, the 530-instruction late External 2,
+  the stale-PC restarts -- hangs off that one number.
+- Swept with MMU1 and a display unit both up, changing only the floor:
+      20 ms  no load,  97 BCE6 timeouts, 27 unheadered
+       5 ms  LOADS,    14 timeouts,       0 unheadered
+       2 ms  LOADS,     6 timeouts,       0 unheadered
+     0.5 ms  LOADS,     6 timeouts,       0 unheadered
+  Settled on 2 ms: still a real floor for the mass memory's own 0.25 ms
+  MTO, which no socket peer answers inside, but under anything the
+  software sets deliberately and 20x the ~100 us a peer really takes.
+- Standing beside the reference at the default now: load complete both;
+  commands 462 vs 480, fills 160 vs 166, timeFills 145 vs 153,
+  unheadered 0 vs 0, polls 157 vs 159.
+- YAGPC_RECV_FLOOR_US overrides it, which is how the sweep was taken.
+- NOTE for the UDP question: this was NOT a transport fault.  It was our
+  own timeout policy distorting the software's timing.  The earlier
+  conclusion stands and is now doubly supported -- UDP carries the
+  display fine, in both emulators.
