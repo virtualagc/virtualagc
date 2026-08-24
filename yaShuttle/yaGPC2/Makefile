@@ -113,7 +113,7 @@ $(BUILD_DIR):
 
 TEST_BIN_DIR := $(BUILD_DIR)/test
 
-UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_gpcops test_schedule
+UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_gpcops test_schedule
 
 test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS)) $(TEST_BIN_DIR)/example_gpcops_paced_run
 	./test/run_all.sh
@@ -175,6 +175,9 @@ $(TEST_BIN_DIR)/test_instr_tostr: test/test_instr_tostr.c $(CPU_INSTR_DEPS) src/
 
 $(TEST_BIN_DIR)/test_iop_exec_processors: test/test_iop_exec_processors.c $(IOP_TEST_DEPS) src/iop.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_exec_processors.c $(IOP_TEST_DEPS) $(LDLIBS)
+
+$(TEST_BIN_DIR)/test_iop_discretes: test/test_iop_discretes.c $(IOP_TEST_DEPS) src/iop.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_iop_discretes.c $(IOP_TEST_DEPS) $(LDLIBS)
 
 # Both link against $(LIB) itself, not the raw source list -- deliberately,
 # since that's exactly what a real integrator would do, and it doubles as

@@ -322,6 +322,13 @@ void iop_init(IOP *iop, struct CPU *cpu);
  * this emulator stands in for; see DISCRETE_IN_A_DEFAULT in iop.c. */
 void iop_reset_discrete_inputs(IOP *iop);
 
+/* Discrete input A as READ DISCRETE INPUT A reports it.  Not simply the
+ * stored register: the two MASS MEMORY READY bits are derived from whether
+ * the corresponding bus controller is running, because FCMBOOT handshakes
+ * on them -- it waits for ready to clear and then to set again -- and a
+ * constant ready bit hangs it.  See iop.c for the full account. */
+uint32_t iop_discrete_in_a(const IOP *iop);
+
 /* Is any processor both enabled and busy -- i.e. is the IOP still doing
  * something that could raise an interrupt?  Used to decide whether a CPU
  * wait state still has a possible wakeup (see run.c). */

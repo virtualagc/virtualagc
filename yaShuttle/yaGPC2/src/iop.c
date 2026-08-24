@@ -56,13 +56,25 @@
  *             BFC CRT select switch
  *      8-31   not used
  *
- * Nothing in this emulator drives them yet, so they hold a fixed default
- * standing in for the crew panel and the vehicle: GPC 1, IPL source MM1,
- * MM1 ready, display CRT 1.  Leaving them zero -- which is what this port
- * did -- is not a neutral choice: it reports GPC ID 0, which is not a
- * legal ID, so GPCIPL cannot identify itself. */
+ * The switch and vehicle bits hold a fixed default standing in for the crew
+ * panel and the vehicle: GPC 1, IPL source MM1, MM1 attached, display CRT 1.
+ * Leaving them zero -- which is what this port did -- is not a neutral
+ * choice: it reports GPC ID 0, which is not a legal ID, so GPCIPL cannot
+ * identify itself.  The two MASS MEMORY READY bits are NOT fixed; they are
+ * computed per read by iop_discrete_in_a() below. */
 #define DISCRETE_IN_A_DEFAULT 0x0a000000u  /* bit 4 MM1 IPL source, bit 6 MM1 ready */
 #define DISCRETE_IN_B_DEFAULT 0x21000000u  /* bits 0-2 GPC 1, bits 6-7 CRT 1 */
+
+/* The two MM READY bits of discrete input A, in IBM numbering from the MS
+ * end of the 32-bit register, and the bus controllers they report on.
+ * FCMBOOT's own arithmetic confirms both: it holds the bus mask
+ * FCMBBS18 EQU X'2000' for MM1 and shifts it left 12 before testing, giving
+ * 0x02000000 -- bit 6 -- and FCMBBS19 EQU X'1000' likewise gives bit 7.  Its
+ * "DEFAULT TO BUS 18 (MMU1)" fixes the channel numbers. */
+#define DISCRETE_A_MM1_READY 0x02000000u   /* IBM bit 6 */
+#define DISCRETE_A_MM2_READY 0x01000000u   /* IBM bit 7 */
+#define MM1_BCE 18
+#define MM2_BCE 19
 
 /* An MIA enable register as its READ PCI reports it.
  *
@@ -102,6 +114,55 @@ bool iop_has_servicer(const IOP *iop) { return iop->servicer != NULL; }
 void iop_reset_discrete_inputs(IOP *iop) {
     register_set32(&iop->regDiscreteInA, DISCRETE_IN_A_DEFAULT);
     register_set32(&iop->regDiscreteInB, DISCRETE_IN_B_DEFAULT);
+}
+
+/* Is this bus controller actually executing?  Same test
+ * iop_any_processor_running() makes for the machine as a whole: a processor
+ * runs when its bit is set in BOTH the halt register (the enable) and the
+ * busy/wait register. */
+static bool iop_channel_running(const IOP *iop, int p) {
+    uint32_t m = iop_proc_bit(p);
+    return (register_get32(&iop->regHalt) & register_get32(&iop->regBusyWait) & m) != 0;
+}
+
+/* One MM READY bit.  The STORED bit says whether that mass memory is there
+ * at all -- the default attaches MM1 and not MM2 -- and a mass memory that
+ * is not attached is never ready.  An attached one is ready exactly while
+ * its channel is idle. */
+static uint32_t iop_mm_ready(const IOP *iop, uint32_t stored, uint32_t mask, int bce) {
+    if (!(stored & mask)) return 0u;
+    return iop_channel_running(iop, bce) ? 0u : mask;
+}
+
+/* Discrete input A as READ DISCRETE INPUT A reports it: the stored switch
+ * and vehicle bits, with the two MASS MEMORY READY bits computed rather
+ * than stored.
+ *
+ * Why computed.  FCMBOOT -- the IPL bootstrap loader the IOP microcode
+ * fetches from the MMU -- does not sample this bit once, it HANDSHAKES on
+ * it.  Having picked its mass memory from bits 4/5, it waits for ready,
+ * starts the transfer, and then runs two more loops over the same mask
+ * (FCMBOOT.asm, "LOOP UNTIL THE MASS MEMORY IS BUSY" followed by "LOOP
+ * UNTIL POSITION OR READ IS COMPLETE"):
+ *
+ *     DO UNTIL=(Z)     PC read; NR R4,R3     -- wait for READY to CLEAR
+ *     DO UNTIL=(NZ)    PC read; NR R4,R3     -- wait for it to SET again
+ *
+ * A constant ready bit, which is what this port had, satisfies the first
+ * wait and then hangs forever in the second: the mass memory never appears
+ * to go busy, so the transfer never appears to start.
+ *
+ * Deriving the bit here, from state this emulator owns, rather than from
+ * anything the mass memory itself reports, is deliberate.  The MMU is a
+ * separate process developed independently of this one, and no part of this
+ * handshake should depend on its internals, its wire protocol or its
+ * timing; all that is required of it is that it answer the bus. */
+uint32_t iop_discrete_in_a(const IOP *iop) {
+    uint32_t stored = register_get32(&iop->regDiscreteInA);
+    uint32_t v = stored & ~(DISCRETE_A_MM1_READY | DISCRETE_A_MM2_READY);
+    v |= iop_mm_ready(iop, stored, DISCRETE_A_MM1_READY, MM1_BCE);
+    v |= iop_mm_ready(iop, stored, DISCRETE_A_MM2_READY, MM2_BCE);
+    return v;
 }
 
 /* ---------------------------------------------------------------------
@@ -1316,7 +1377,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 5), 0x0);
             break;
         case 0x08180000: /* READ DISCRETE INPUT A (1-32) */
-            register_set32(&iop->regCCData, register_get32(&iop->regDiscreteInA));
+            register_set32(&iop->regCCData, iop_discrete_in_a(iop));
             break;
         case 0x081c0000: /* READ DISCRETE INPUTS B (33-40) */
             /* Register B, not A -- this read the A register, so discrete
