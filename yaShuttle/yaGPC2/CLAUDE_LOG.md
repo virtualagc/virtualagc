@@ -1501,3 +1501,33 @@ document's planning stages, and it is already in the code as
   IPLs the DEU at 20.1 s (492 commands / 169 fills), 0e275b1 never does.
   IPL.fcm has no .sym.json, which should take the `protectWarning`
   "running unprotected" branch.  Not yet filed with Don.
+
+### [2026-08-23] Target: problems.md
+- The 032d0-032ef MSC divergence is a SYMPTOM, not a cause.  Chain, each
+  step measured against gpc under an identical headless-DEU run:
+  032d0 is entered from @RAW's timeout exit at 032a5 (032a6 is its
+  condition-met exit; both are legitimate, it is not a length bug)
+  <- halfword 34E6, written at 0331a
+  <- halfword 3B7A = the DEU's reply word, 1 for us and 0 for gpc
+  <- 0x0001 is HDR.IPL_REQUIRED: the display never finishes its IPL.
+- The display is handed the same block forever: 259 x "fill 509 hw at
+  0xf49 (0 non-zero)", where gpc walks 0x1146, 0x1343, 0x1540, 0x173d,
+  0x193a and reports load complete.
+- BCE6's BASE is frozen at 0b302; gpc's walks 0b302, 0b502, 0b702,
+  0b902.  BASE is a fullword from a table @LBB@ indexes by X: X=0 is
+  03526 (fill buffer), X=6 is 0352c (receive), X=0xa is 03530 (normal
+  operation).  Slot contents are CONSTANT -- watchpoints prove neither
+  emulator ever writes 03526 -- so a block advances by advancing X.
+  Block index at 03279: gpc 0x0a 207, 0x18 206, 0x00 6, 0x06 6, plus
+  0x04/0x14/0x16/0x22; ours 0x00 259 and 0x06 259 and nothing else.
+- Ruled OUT by measurement, not assumed: the CPU is not diverging (the
+  2^18 memory sweep at 077c-0795 is identical, 4.94M vs 4.77M
+  instructions and 301,465 interrupt excursions each), and the receive
+  path is correct (the wire shows the DEU really does reply 0001).
+- Open: gpc pushes 6 IPL blocks per MSC wake, we push one and park.  The
+  CPU's LOAD MSC BUSY arrives at a median 480 ms, which matches the 45 s
+  of a 54 s run that BCE6's #WAT at 035a6 accounts for.
+- Pre-existing, NOT mine: make test fails four debugger golden cases
+  (halmat, multiunit, srcmap, wrap) on SCAL operand formatting --
+  X'014a'(1,) in the golden vs @@X'014a'(1) produced.  Same four with
+  my changes stashed.
