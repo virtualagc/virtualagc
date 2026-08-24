@@ -1976,3 +1976,29 @@ document's planning stages, and it is already in the code as
   measurement taken so far, because every --bce-network run in the record
   was made without a mass memory and partly on phantom echo data.  Rerun
   the comparison with MMU1 up before drawing any conclusion.
+
+### [2026-08-24] Target: problems.md
+- CORRECTION of my own sloppy wording: GPCIPL does NOT load GPCIPL.  It
+  is already resident -- it is the image being run.  What it does is READ
+  from the mass memory (observed: track 4, subfile 4, block 8, count 7)
+  and load the DISPLAY's control program into the DEU.  The MMU matters
+  only because GPCIPL talks to it while doing that, and with no MMU
+  running our BCE18 receives were being satisfied by our own echoed
+  packets rather than by a device.
+- THE UDP-VERSUS-TCP TEST, run at last on a sound baseline.  Same UDP
+  transport, same two peripherals (MMU1 + display unit), same image,
+  90 s each:
+      reference : load COMPLETE, 436 commands, 152 fills, 138 timeFills,
+                  0 headerless, modeStatus 4, 37 MMU commands
+      yaGPC2    : no load,       345 commands,  81 fills,  62 timeFills,
+                  59 headerless, modeStatus 142, 37 MMU commands
+- CONCLUSION: UDP is SUFFICIENT.  The reference completes the display
+  load over exactly the transport we call fragile, against the same
+  peripherals, on the same machine.  The transport is not what stops
+  yaGPC2; the remaining fault is ours.  Everything earlier in this
+  session that attributed the failure to UDP was reasoning from a
+  baseline with no mass memory and phantom echo data in it.
+- Note the MMU command counts are IDENTICAL, 37 and 37.  The mass-memory
+  path matches the reference exactly; the divergence is entirely on the
+  display side, where we produce 59 unheadered fills and 142 mode-status
+  polls against the reference's 0 and 4.
