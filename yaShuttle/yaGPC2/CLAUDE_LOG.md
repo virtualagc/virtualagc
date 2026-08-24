@@ -2002,3 +2002,32 @@ document's planning stages, and it is already in the code as
   path matches the reference exactly; the divergence is entirely on the
   display side, where we produce 59 unheadered fills and 142 mode-status
   polls against the reference's 0 and 4.
+
+### [2026-08-24] Target: problems.md
+- THE 8-HALFWORD FILLS, cause established with the MMU running so the
+  baseline is sound.  Mechanism, caught in one instance at 8241698 us:
+      03276 @LH X'3622'      loads 0
+      03278 @BC X'4',X'7'    TAKEN -> bypasses @XAX/@LBP@/@LBB@
+      03280 -> 03294 -> 0329c @L X'3B1' -> ACC 02000000 (BCE6)
+      0329d @SIO             starts BCE6 with no dispatch in this pass
+      BCE6 03578 f500 0007   resumes its STALE parked PC, BASE 0b302
+  #WAT at 03577 leaves the PC on 03578 (the reference's #WAT is
+  identical), so a start without a fresh @LBP@ re-sends the first eight
+  halfwords of the 511-word fill buffer -- 01fd 0f49 0000..., that
+  buffer's own header -- and the display rejects it.
+- 0x3622 is the MSC's "next device to service" index, the same values the
+  @XAX at 03279 takes.  Reference: 0x0a 160, 0x18 159, 0 36, plus 0x22,
+  0x14, 0x16.  Ours: 0x0a 78 and 0 113, NOTHING ELSE.  So the reference
+  alternates between two service slots and we only ever have one, and
+  when the index is 0 the MSC skips the dispatch.
+- The bypass itself is NORMAL -- the reference takes it 36 times of 379.
+  It is harmless there because its BCE6 is parked in its steady-state
+  program (#WAT at 0359e, 156 times), not at 03578.  We are parked at
+  03578 because we are still running the 03572 IPL program: BCE6 03572
+  82 times here against the reference's 6, and 03592 78 against its 162.
+- Confirmed the reference NEVER executes 03578 (0 against our 77), and
+  never 0357c/0357d (0 against 2002/77), with MMU + display both up.
+- So the fills are fully explained and the question upstream of them is
+  now one line: why does 0x3622 never take the value 0x18 here?  Its
+  writers are 032f2 (ours 196, ref 366), 03358 and 0336e (ours 82 each,
+  ref 7 each -- the IPL block loop we cannot leave).
