@@ -2264,3 +2264,28 @@ document's planning stages, and it is already in the code as
   measurements taken over different windows, or against a setup that
   differed in a way I had not checked.  Match the durations and the
   configuration before comparing counts.
+
+### [2026-08-24] Target: problems.md
+- TERMINOLOGY, since it caused confusion: "the reference" always means
+  DON'S EMULATOR, gpc.  "Ours" means yaGPC2.  It has never meant two
+  different flight images.
+- There ARE two image paths, and the pairing is forced, not chosen:
+      ~/Desktop/IPL/IPL.fcm  + original IPL.sym.json  -> yaGPC2
+      scratchpad/iplref/IPL.fcm + patched IPL.sym.json -> gpc
+  The .fcm files are BYTE-IDENTICAL, md5 ddd623fc2aafee71a7277b32511f330f.
+  The sym.json differ by exactly ONE key, storeProtect, present only in
+  gpc's; all ten shared keys are identical.  yaGPC2 reads storeProtect
+  zero times.
+- The four combinations, all now established rather than assumed:
+      gpc    + patched   works  (the reference in every comparison)
+      gpc    + original  DOES NOT BOOT (the 0e275b1 store-protect issue)
+      yaGPC2 + original  works  (ours in every comparison)
+      yaGPC2 + patched   works, VERIFIED identical -- load complete,
+                         0 unheadered, modeStatus 12, same as its usual
+                         image
+  So only three are runnable and the two yaGPC2 cells are equivalent;
+  the comparisons drawn this session are sound.
+- Care taken: the raw counters of that verification run (267 commands)
+  are lower than the earlier one (509) ONLY because the run was 70 s
+  against 90 s.  Do not read a difference into that -- the same
+  duration-mismatch error invalidated three claims earlier today.
