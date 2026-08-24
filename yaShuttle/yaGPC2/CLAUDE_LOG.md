@@ -1580,3 +1580,30 @@ document's planning stages, and it is already in the code as
   01ee9 that never matches there.  Something drives our BCE6 to a
   program exception; iop_bce_error_terminate is the obvious suspect
   since it is what sets ProgExcept to 0.
+
+### [2026-08-23] Target: problems.md
+- CORRECTION: the MSC does NOT resume at 0330c after its @WAT here.  It
+  resumes at 03266, 295 times out of 296, exactly as the reference does
+  458 of 459.  The earlier reading came from grep -A1 over a MIXED
+  MSC/BCE trace compared against an MSC-ONLY one, so "the next line"
+  meant different things on the two sides.  Filter to MSC lines before
+  taking any successor or predecessor count.  The CPU's aiming write
+  lands 96 times against 108 wakes; that mechanism is fine.
+- The block loop 03356 -> 033b4 -> 03356 has NO park in it on either
+  side; each @CALL X'2',X'3262' spans one, dispatch -> @WAT -> the CPU
+  re-aims the MSC to 03266 -> 03316 @BU@ X'3262' returns.  So the block
+  rate IS the MSC wake rate.
+- THE NUMBER: MSC park intervals.  The reference runs a clean 40.0 ms
+  cadence, which is the display's own poll rate (deuUnit's comment says
+  a queued message "waits for the next poll 40 ms later"); min 1.9,
+  median 205.7, max 446.4.  Ours alternates 480/520 ms with no 40 ms
+  tick at all; min 20.4, median 480.1, max 520.1.  480/40 = 12 exactly.
+- Our interrupt profile over one run: clk1 847 (about 28/s, so the
+  timer tick itself is roughly right), clk2 316, External 2 / iopProg
+  94, External 1 16, External 0 7.  The 94 matches our 108 MSC wakes,
+  so MSC service here is paced by External 2 at about 3/s rather than
+  by the 40 ms tick.  That is the gap to close.
+- The LOAD MSC BUSY site 03259 runs 77 times here and 66 there over the
+  same 35 s, so the CPU is NOT issuing the wake less often; the
+  reference must get its MSC moving 40 ms at a time some other way.
+  Unresolved, and the next thing to chase.
