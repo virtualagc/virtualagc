@@ -1714,3 +1714,23 @@ document's planning stages, and it is already in the code as
   is also why it needs no pacing at all.  A dedicated transmit thread
   draining the existing FIFO is the equivalent, and the FIFO and pacing
   built here are already the right shape for it.
+
+### [2026-08-23] Target: problems.md
+- Removed the malloc/free pair every bus datagram was paying in
+  transport_send_now; it now builds the six bytes on the frame.  Send
+  cost 8.5-9.0 us -> 8.2-8.3, and several fills now clear at 37-54k
+  words/s where all of them used to sit at 27-30k.  The display still
+  does not finish its load, so this is an improvement and not a fix: the
+  remaining ~8 us is the multicast sendto itself.
+- Considered and NOT done, with the reasoning, so it is not re-derived:
+  sendmmsg would batch the syscall entry but not the kernel's per-
+  datagram multicast loopback delivery, which is where most of the 8 us
+  goes, so it buys a fraction of one microsecond of the twenty available
+  and does not change the verdict.  Disabling IP_MULTICAST_LOOP is not
+  available at all -- the peer is on this host and loopback is how it
+  receives.
+- NEW OBSERVATION, unchased: the display now logs "unheadered fill of 8
+  halfwords, ignored" ten to eighteen times a run.  An eight-halfword
+  fragment of a transfer arriving on its own looks like datagram loss
+  splitting a fill, which is worth its own look -- the count rose as the
+  drain got faster, which fits.
