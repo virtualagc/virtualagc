@@ -168,6 +168,7 @@ typedef struct {
      * the standalone CLI, not just through the GpcOps embedding API.
      * Default false: unchanged behavior, MIA stays an inert stub. */
     bool bceNetwork;                  /* default false */
+    bool deuModel;                    /* default false */
 
     /* Not part of gpc run's own option set -- yaGPC2-specific. Which
      * instruction-timing model charges cpu->elapsedTimeUs, and through

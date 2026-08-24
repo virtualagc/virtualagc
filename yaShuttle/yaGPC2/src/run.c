@@ -87,7 +87,13 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
 
     iohost_init_from_opts(&r->iohost, &r->age.halUCP, opts);
 
-    if (opts->bceNetwork) {
+    if (opts->deuModel) {
+        /* Deliberately instead of, not alongside, the network servicer:
+         * only one thing can sit on the far end of the bus, and the
+         * point of this one is that no socket is involved. */
+        r->deuModel = deumodel_create(6);   /* DK1 */
+        ap101_set_servicer(&r->age.gpc, deumodel_service, r->deuModel);
+    } else if (opts->bceNetwork) {
         r->bceTransport = bcenet_transport_create();
         r->bceFramer = bcenet_framer_create(r->bceTransport);
         ap101_set_servicer(&r->age.gpc, bcenet_framer_service, r->bceFramer);
@@ -95,6 +101,11 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
 }
 
 void batchrunner_free(BatchRunner *r) {
+    if (r->deuModel) {
+        deumodel_report(r->deuModel);
+        deumodel_free(r->deuModel);
+        r->deuModel = NULL;
+    }
     for (size_t i = 0; i < r->lineCount; i++) free(r->lines[i]);
     free(r->lines);
     iohost_free(&r->iohost);

@@ -20,6 +20,7 @@
 #include "ageharness.h"
 #include "rtpacer.h"
 #include "bcenet_framer.h"
+#include "deumodel.h"
 #include "bcenet_transport.h"
 #include "debugger.h"
 #include "iohost.h"
@@ -111,6 +112,7 @@ typedef struct {
      * lifetime discipline as bcenet_framer.h documents. */
     BceNetTransport *bceTransport;
     BceNetFramer *bceFramer;
+    struct DeuModel *deuModel;   /* --deu-model: the in-process display unit */
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts);

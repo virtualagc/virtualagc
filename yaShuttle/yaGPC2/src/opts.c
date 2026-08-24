@@ -120,6 +120,11 @@ static const char *HELP_TEXT =
 "                                  current wall-clock time (its own\n"
 "                                  configured timezone) at program start.\n"
 "  --bce-network                    Install the real-peripheral servicer\n"
+"  --deu-model                      Install an IN-PROCESS display unit instead\n"
+"                                  of the network one: same protocol, no socket,\n"
+"                                  answers in the same call.  A diagnostic -- it\n"
+"                                  makes a run deterministic so traces can be\n"
+"                                  compared (default: false)\n"
 "                                  bridge (multicast UDP, matching\n"
 "                                  nsts-sim-gpc's own wire protocol) so\n"
 "                                  BCE bus traffic can reach a real\n"
@@ -293,6 +298,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->dateTimeEpoch = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--bce-network", &n)) {
             (void)n; opts->bceNetwork = true;
+        } else if (tok_is(tok, "--deu-model", &n)) {
+            (void)n; opts->deuModel = true;
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {
