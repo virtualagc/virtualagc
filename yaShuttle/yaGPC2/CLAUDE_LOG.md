@@ -2208,3 +2208,28 @@ document's planning stages, and it is already in the code as
 - NEXT: drive the reference headlessly through the same key sequence with
   gpcmd key and compare its MMU position list against ours.  That is a
   direct comparison needing no GUI and no user in the loop.
+
+### [2026-08-24] Target: problems.md
+- THE ERASE DIVERGENCE IS NOW A HEADLESS, REPRODUCIBLE TEST -- no GUI, no
+  user in the loop.  Drive either emulator with a real MMU1 and a
+  headless display unit, wait for "load complete", then inject with
+  gpcmd key --idp 1:
+      ITEM 1 8 EXEC        (start GPC self test)
+      ITEM 1 9 EXEC        (stop)
+      ITEM 2 7 PLUS 1 EXEC (DEU erase option 1)
+      ITEM 2 7 PLUS 3 EXEC (MMU1 erase option 3)
+      ITEM 2 8 EXEC        (START)
+  and watch the MMU's write positions.  Script kept at scratchpad/refseq.sh.
+- RESULT, identical stimulus, 150 s each:
+      reference : 4 writes, ONE position (0/0/0/0), static from t=30 on
+      yaGPC2    : 39 writes, 36 positions, growing ~8 writes per 30 s,
+                  sweeping 0/0 1/0 ... 7/0, 0/1 ... 7/1, ... 3/4
+  The reference writes four blocks at one position and stops; we sweep
+  the tape and keep going.
+- CAVEAT, stated so nobody over-reads it: this key sequence does NOT
+  reproduce the video exactly -- the video's MMU walks 0/0/0 through
+  4/0/0, five positions, and my reference run shows only one.  So the
+  sequence is not precisely Don's.  What the test DOES establish is a
+  divergence under identical stimulus, which is what makes it useful.
+- Display IPL completes in 12 s for both, headless.  That is the fix from
+  earlier today holding up under an independent harness.
