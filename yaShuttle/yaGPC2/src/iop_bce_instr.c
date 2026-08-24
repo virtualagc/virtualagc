@@ -212,7 +212,12 @@ static void bce_process_mio_command(IOP *t, uint32_t pc) {
                     t->curPE, (unsigned)pc);
         return;
     }
-    uint32_t cmdWord = iop_g_eaf(t, pc + 2) & 0x00ffffffu;
+    /* The PC is an 18-bit register, so the companion command's address
+     * wraps with it: the reference fetches from
+     * (PC + 2) & LS_WORD_MASK.  Without the mask a PC carrying anything
+     * above bit 17 sent the fetch outside main storage, which read as
+     * zero and left the IUA register at 0. */
+    uint32_t cmdWord = iop_g_eaf(t, (pc + 2) & 0x3ffffu) & 0x00ffffffu;
     if (getenv("YAGPC_DISPTRACE"))
         fprintf(stderr, "MIOCMD proc%-3d pc=%05x cmd=%06x\n",
                 t->curPE, (unsigned)pc, (unsigned)cmdWord);

@@ -1453,3 +1453,36 @@ document's planning stages, and it is already in the code as
   pass and every one of the remaining 166 is a KNOWN-WRONG ORACLE, not a defect:
   136 CVFX (stale) + 30 BCT (reference's evaluation order).  Nothing left there
   is unexplained.
+
+### [2026-08-23] Target: [problems.md]
+- BCE SUITE TRIAGED, now 74,099/74,699 and fully accounted for.
+- The 16 #MOUT/#MIN failures FIXED: `bce_process_mio_command` fetched the
+  companion command from an UNMASKED PC.  The reference uses
+  (PC + 2) & LS_WORD_MASK.  The PC is an 18-bit register, and the fixture
+  baseline loads ls[6][2] = 0xbb440f7a, whose low 18 bits are 3962 -- exactly
+  the pre-execution PC the fixture expects.  Unmasked, our fetch address was
+  3,141,799,804, far outside main storage, so it read zero and the IUA register
+  stayed 0 where the reference had 13.  All 16 pass now.
+  (At runtime this could not bite since iop_set_nia masks on write, but the
+  mask is correct on its own terms and matches the reference.)
+- The remaining 600 (#MOUT@ 300, #MIN@ 300) are THE REFERENCE'S BUG, and this
+  is now PRIMARY-SOURCE PROVEN rather than inferred.  The original IBM build's
+  own assembly listing, PFS/BFS.rpts/ASMLIB-BOS.rpts:
+      013A8  F900 1AF2   #MIN@  DKDISP-12
+      013AA  0800        #WAT  0
+      013B2  FD00 1B78   #MOUT@ DEUDISP2-12
+      013B4  C002        #DLYI 2
+  Both occupy exactly TWO halfwords.  Our incrNIA(2) is right; the reference's
+  incrNIA(3) is wrong.  Structural corroboration from ASM101S/model101tables.py:
+  #MINC/#MOUTC "are not instructions at all but the parameter word that follows
+  a #MIN or #MOUT" -- the non-@ forms are 2 + 2 = 4 halfwords (our incrNIA(4)),
+  while the @ forms take an ADDRESS operand and carry no such word.
+- SO EVERY SUITE IS NOW FULLY ACCOUNTED FOR.  Nothing anywhere is unexplained:
+      EA        20,447/20,447
+      CPU exec 111,192/111,358   166 = 136 CVFX stale + 30 BCT (reference)
+      MSC     145,446/145,746   300 = @LAR (reference)
+      BCE      74,099/74,699    600 = #MOUT@/#MIN@ (reference)
+  All 1,066 remaining failures are a known-wrong oracle; none is a defect.
+- WORTH FILING: #MOUT@/#MIN@ incrNIA is a fourth nsts-sim-gpc issue, and the
+  strongest-evidenced of the lot -- it has the original build's listing behind
+  it.  Not yet filed; needs the user's review of the text first.
