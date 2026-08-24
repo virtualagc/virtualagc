@@ -1662,3 +1662,27 @@ document's planning stages, and it is already in the code as
   counts full trace lines undercounts it wildly and makes it look like it
   executes a delay once where we execute it 652 times.  Compare
   TIMESTAMPS, not line counts.
+
+### [2026-08-23] Target: problems.md
+- CONFIRMED MECHANISM for the 6.4 ms receive: the transport keeps ONE
+  in-order FIFO per bus, so the poll command that asks the display to
+  answer cannot overtake the fill ahead of it.  37 of 56 commands queue
+  behind 257 datagrams; at 20 us a word that is 5.1 ms, which with the
+  display's own turnaround is the 6.4 ms, which is the 1.28 ms by which
+  the MSC's @RAW misses BCE6 reaching WAIT.
+- THREE HYPOTHESES DISPROVEN, all by measurement, so nobody retries them:
+  (1) the word rate -- swept 20/8/4/2 us, the load never completes at any
+      of them and the fast settings make unheadered fills worse;
+  (2) the burst cap -- 64/128/256 give 5/24/22 unheadered fills, so the
+      default 64 is the best of them and raising it hurts.  The peer
+      absorbs about 64 datagrams back to back but not 128;
+  (3) the pump call rate -- about 15,000 a second, mean gap 0.066 ms,
+      far above the 1.3 ms a 511-word fill needs.
+- OPEN, and the sharpest lead: those numbers do not reconcile.  At that
+  call rate the token bucket should sustain 50k words/s and clear 511
+  words in 10.2 ms, but 257 are still queued 10.7 ms in -- an actual
+  drain of about 24k words/s, half the configured rate.  The 15k/s is a
+  two-second average; the suspicion is that the pump is NOT reached
+  while the CPU is inside a long non-idle stretch, which is precisely
+  when a fill is in flight.  Measure the drain rate WITHIN a fill
+  window, not averaged over seconds.
