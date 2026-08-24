@@ -148,6 +148,26 @@ static double bus_burst_max(void) {
     return cached;
 }
 
+/* How much credit the bucket may BANK, as opposed to how much it may
+ * release at once.  These are different jobs and one constant used to do
+ * both, which threw bus time away: the bucket held 64 words, or 1.28 ms,
+ * while the pump is in fact delayed by up to 3.9 ms when the CPU is deep
+ * in non-idle work.  Everything past the cap was discarded -- measured at
+ * 313 to 1864 words every two seconds -- so a 511-word fill that should
+ * take 10.6 ms took 18.5 and the display's poll queued behind it.  The
+ * cap now covers the worst gap seen; the per-call release stays at
+ * BUS_BURST_MAX, which is what the peer can actually absorb back to
+ * back. */
+static double bus_token_cap(void) {
+    static double cached = -1.0;
+    if (cached < 0.0) {
+        const char *s = getenv("YAGPC_BUS_TOKEN_CAP");
+        double v = (s != NULL) ? atof(s) : 0.0;
+        cached = (v > 0.0) ? v : 256.0;
+    }
+    return cached;
+}
+
 /* Datagrams that may be waiting for the bus.  A mass-memory block and a
  * display fill are both ~512 words, so this holds several transfers. */
 #define BCENET_OUT_QUEUE 4096
@@ -486,15 +506,28 @@ void bcenet_transport_pump(BceNetTransport *t) {
         static double firstSeconds = -1.0, lastReport = 0.0;
         static long calls = 0, sent = 0;
         static long lastCalls = 0, lastSent = 0;
+        static double prevCall = -1.0, maxGap = 0.0, lostTokens = 0.0;
         if (firstSeconds < 0.0) { firstSeconds = now; lastReport = now; }
+        if (prevCall >= 0.0) {
+            double gap = now - prevCall;
+            if (gap > maxGap) maxGap = gap;
+            /* Credit the bucket cannot hold is time on the bus thrown
+             * away: anything past BURST_MAX x the word time is lost. */
+            double earned = gap / bus_word_seconds();
+            if (earned > bus_burst_max()) lostTokens += earned - bus_burst_max();
+        }
+        prevCall = now;
         calls++;
         for (int j = 0; j <= BCENET_MAX_BUS_ID; j++) sent += (long)t->buses[j].outCount;
         if (now - lastReport >= 2.0) {
             double dt = now - lastReport;
-            fprintf(stderr, "PUMP %.0f calls/s, mean gap %.3f ms, queued-at-entry %.0f\n",
-                    (calls - lastCalls) / dt, dt * 1000.0 / (double)(calls - lastCalls ? calls - lastCalls : 1),
+            fprintf(stderr, "PUMP %.0f calls/s, max gap %.3f ms, credit lost %.0f words, "
+                            "mean gap %.3f ms, queued-at-entry %.0f\n",
+                    (calls - lastCalls) / dt, maxGap * 1000.0, lostTokens,
+                    dt * 1000.0 / (double)(calls - lastCalls ? calls - lastCalls : 1),
                     (double)(sent - lastSent) / (double)(calls - lastCalls ? calls - lastCalls : 1));
             lastReport = now; lastCalls = calls; lastSent = sent;
+            maxGap = 0.0; lostTokens = 0.0;
         }
     }
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
@@ -504,21 +537,58 @@ void bcenet_transport_pump(BceNetTransport *t) {
             b->pumpStarted = true;
             b->lastPumpSeconds = now;
             b->tokens = bus_burst_max();   /* an idle bus starts ready */
+            (void)0;
         }
         double elapsed = now - b->lastPumpSeconds;
         if (elapsed > 0.0) {
             b->tokens += elapsed / bus_word_seconds();
-            if (b->tokens > bus_burst_max()) b->tokens = bus_burst_max();
+            if (b->tokens > bus_token_cap()) b->tokens = bus_token_cap();
         }
         b->lastPumpSeconds = now;
 
-        while (b->outCount > 0 && b->tokens >= 1.0) {
+        /* The drain rate WITHIN one transfer, which is what matters and
+         * what a per-second average hides: the span from the queue first
+         * going non-empty to it going empty again, and how many datagrams
+         * left in it.  A 511-word fill has 10.7 ms to clear. */
+        static double burstStart[BCENET_MAX_BUS_ID + 1];
+        static long burstSent[BCENET_MAX_BUS_ID + 1];
+        static int burstOpen[BCENET_MAX_BUS_ID + 1];
+        if (b->outCount > 0 && !burstOpen[i]) {
+            burstOpen[i] = 1; burstStart[i] = now; burstSent[i] = 0;
+        }
+
+        long releasedThisCall = 0;
+        while (b->outCount > 0 && b->tokens >= 1.0 &&
+               releasedThisCall < (long)bus_burst_max()) {
+            releasedThisCall++;
             OutDatagram *d = &b->outQ[b->outHead];
+            /* What one send actually COSTS.  The token bucket assumes it
+             * is free and only meters the interval between sends; if the
+             * call itself takes longer than the word time, the bucket's
+             * rate is unreachable no matter how much credit it holds. */
+            double sendT0 = 0.0;
+            int costing = getenv("YAGPC_PUMPTRACE") != NULL;
+            if (costing) sendT0 = yagpc_monotonic_seconds();
             transport_send_now(t, b, i, d->iua, d->shuttle != 0, d->words, d->count);
+            if (costing) {
+                static double sendTotal = 0.0; static long sendCount = 0;
+                sendTotal += yagpc_monotonic_seconds() - sendT0;
+                if (++sendCount % 5000 == 0)
+                    fprintf(stderr, "SENDCOST mean %.2f us over %ld sends\n",
+                            sendTotal * 1e6 / (double)sendCount, sendCount);
+            }
             b->tokens -= (double)d->count;
+            burstSent[i]++;
             b->outHead++;
             b->outCount--;
             if (b->outCount == 0) b->outHead = 0;
+        }
+        if (burstOpen[i] && b->outCount == 0) {
+            double ms = (now - burstStart[i]) * 1000.0;
+            burstOpen[i] = 0;
+            if (burstSent[i] >= 16 && getenv("YAGPC_PUMPTRACE"))
+                fprintf(stderr, "BURST bus%-3d %ld datagrams in %.2f ms = %.0f words/s\n",
+                        i, burstSent[i], ms, ms > 0.0 ? burstSent[i] * 1000.0 / ms : 0.0);
         }
     }
 #endif
