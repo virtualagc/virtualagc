@@ -1811,3 +1811,31 @@ document's planning stages, and it is already in the code as
   silently.  If yaGPC2 is over-protecting the same way, stores that
   should land are being dropped -- worth checking against the display
   path once IPL.sym.json carries the real ranges.
+
+### [2026-08-24] Target: problems.md
+- REGENERATING IPL.sym.json WOULD NOT HELP, and this is the real bug:
+  mmu2fcm's unionSym() (src/tools/mmu2fcm.py ~line 632) builds the
+  composed sym.json from an EXPLICIT key list -- version, imageSize,
+  entryPoint, sections, symbols, modules, relocations,
+  unresolvedRelocations, repro -- and never merges storeProtect from the
+  constituent phases.  lnk101 writes the map into each PHASEnn.sym.json
+  (linker.py:2842) and mmu2fcm then drops it.  So gpc 0e275b1's advice,
+  "relink to regenerate .sym.json", holds for a plain lnk101 output but
+  NOT for an mmu2fcm-composed image like IPL, which is what we have.
+  The fix belongs in unionSym: union the phases' storeProtect ranges,
+  offset by each phase's placement delta, same as it already does for
+  sections and symbols.
+- Nor can the regeneration be run here at all: nsts-sdl-dps build/mmu is
+  EMPTY (no PHASEnn.lib, no PHASEnn/PHASEnn.sym.json), and there is no
+  CON80 deck directory anywhere under ~ within 4 levels.  mmu2fcm needs
+  both (--mmu and --con80), so the whole con80build -> asm101 -> lnk101
+  -> mmu chain would have to run first.  No fcm diff is therefore
+  possible either -- nothing was regenerated to diff against.
+- Current upstream was cloned READ-ONLY into scratch/dps at d8e01ed to
+  establish the above; the user's own checkout was not switched or built.
+- Interim that DOES work, already proven: a synthesised whole-section
+  storeProtect map added to a COPY of the sym.json boots gpc 0e275b1
+  fully.  That is the same policy as gpc's pre-0e275b1
+  applyLoadProtection and as yaGPC2's own apply_load_protection, so it
+  is a defensible stopgap -- but it is not what the linker would emit,
+  which is the point of the real map.
