@@ -60,6 +60,19 @@ CFLAGS += -DHAVE_POSIX_TIMERS
 LDLIBS += $(POSIX_TIMER_LIBS)
 endif
 
+# POSIX threads, probed the same way and for the same reason: the bus
+# bridge puts its outbound sends on a thread of their own, because a
+# 511-halfword display fill is 511 separate multicast datagrams at about
+# 8 us each and doing them on the emulation thread does not fit inside
+# the 10.7 ms the display's own bus program allows.  Only bcenet_transport.c
+# uses it, only under --bce-network; without pthreads it falls back to
+# pumping the queue inline exactly as before.
+PTHREAD_CHECK := $(shell printf '#include <pthread.h>\nstatic void *f(void *p){return p;}\nint main(void){pthread_t th;pthread_mutex_t m;pthread_mutex_init(&m,(void*)0);pthread_create(&th,(void*)0,f,(void*)0);pthread_join(th,(void*)0);pthread_mutex_destroy(&m);return 0;}\n' | $(CC) -std=c99 -D_POSIX_C_SOURCE=200809L -xc - -pthread -o /dev/null 2>/dev/null && echo yes)
+ifeq ($(PTHREAD_CHECK),yes)
+CFLAGS  += -DHAVE_PTHREADS -pthread
+LDLIBS  += -pthread
+endif
+
 SRC_DIR   := src
 BUILD_DIR := build
 BIN       := yaGPC2

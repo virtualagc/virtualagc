@@ -29,6 +29,34 @@
 #define BCENET_HAVE_POSIX_SOCKETS 1
 #endif
 
+/* Outbound sends run on a thread of their own where pthreads exist.
+ *
+ * Not an optimisation -- it is the difference between the display
+ * working and not.  A 511-halfword fill is 511 separate multicast
+ * datagrams, because the subsystems use datagram LENGTH to tell a
+ * command from data, and each sendto costs about 8 us of wall time
+ * against the 20 us a halfword is allowed on the bus.  Done on the
+ * emulation thread those 4 ms of syscall land inside the same 10.7 ms
+ * the display's bus program allows the whole transfer, and the queue
+ * drains at 27-30k halfwords/s instead of the 48k the rate allows.  The
+ * poll that asks the display to answer is then still queued behind 257
+ * datagrams when the program looks for the reply, the receive takes 6.4
+ * ms instead of 0.4, and the MSC's @RAW gives up 1.28 ms before the BCE
+ * reaches WAIT.  The reference has no such trouble because node's dgram
+ * is asynchronous -- its event loop interleaves the sends with
+ * everything else, which is also why it needs no pacing at all.
+ *
+ * Without pthreads the queue is pumped inline exactly as before. */
+#if defined(BCENET_HAVE_POSIX_SOCKETS) && defined(HAVE_PTHREADS)
+#include <pthread.h>
+#define BCENET_HAVE_TX_THREAD 1
+#endif
+
+/* How often the transmit thread looks at the queue.  Short enough that
+ * the token bucket's own rate, not this, decides when a datagram goes
+ * out: at 20 us a halfword this is twelve halfwords' worth of credit. */
+#define TX_THREAD_TICK_SECONDS 250e-6
+
 #define BCENET_MULTICAST_GROUP "239.255.1.1"
 #define BCENET_MAX_BUS_ID 24
 
@@ -163,7 +191,15 @@ static double bus_token_cap(void) {
     if (cached < 0.0) {
         const char *s = getenv("YAGPC_BUS_TOKEN_CAP");
         double v = (s != NULL) ? atof(s) : 0.0;
-        cached = (v > 0.0) ? v : 256.0;
+        /* One burst's worth by default.  This was briefly larger, to stop
+         * a late pump throwing away earned time when the pump ran on the
+         * emulation thread and could be 3.9 ms late.  The transmit thread
+         * ticks every 250 us, so that no longer happens -- and banked
+         * credit is then actively harmful, because it is spent as a burst
+         * the peer cannot absorb: measured, 512 datagrams left in 5.3 ms,
+         * twice the bus rate, and the display logged 22 unheadered
+         * fills. */
+        cached = (v > 0.0) ? v : bus_burst_max();
     }
     return cached;
 }
@@ -232,7 +268,38 @@ static void self_echo_clear(BceNetBusSocket *b) {
 
 struct BceNetTransport {
     BceNetBusSocket buses[BCENET_MAX_BUS_ID + 1];
+#ifdef BCENET_HAVE_TX_THREAD
+    pthread_mutex_t lock;   /* guards every bus's outbound FIFO and bucket */
+    pthread_t txThread;
+    bool txThreadRunning;
+    volatile bool txStop;
+#endif
 };
+
+/* The FIFO and its token bucket are the only shared state: the emulation
+ * thread enqueues, the transmit thread dequeues.  The sockets themselves
+ * are not shared -- receives use fd on the emulation thread, sends use
+ * txFd on the transmit thread -- and both are stable once the bus is
+ * open, so neither needs the lock. */
+#ifdef BCENET_HAVE_TX_THREAD
+static void *tx_thread_main(void *arg);
+#endif
+
+static void transport_lock(BceNetTransport *t) {
+#ifdef BCENET_HAVE_TX_THREAD
+    pthread_mutex_lock(&t->lock);
+#else
+    (void)t;
+#endif
+}
+
+static void transport_unlock(BceNetTransport *t) {
+#ifdef BCENET_HAVE_TX_THREAD
+    pthread_mutex_unlock(&t->lock);
+#else
+    (void)t;
+#endif
+}
 
 BceNetTransport *bcenet_transport_create(void) {
     BceNetTransport *t = malloc(sizeof(BceNetTransport));
@@ -243,11 +310,26 @@ BceNetTransport *bcenet_transport_create(void) {
         t->buses[i].txPort = 0;
         t->buses[i].selfEchoCount = 0;
     }
+#ifdef BCENET_HAVE_TX_THREAD
+    pthread_mutex_init(&t->lock, NULL);
+    t->txThreadRunning = false;
+    t->txStop = false;
+#endif
     return t;
 }
 
 void bcenet_transport_free(BceNetTransport *t) {
     if (!t) return;
+#ifdef BCENET_HAVE_TX_THREAD
+    /* Stopped and joined BEFORE any socket closes: the thread sends on
+     * txFd and would otherwise be doing so as the descriptor went. */
+    if (t->txThreadRunning) {
+        t->txStop = true;
+        pthread_join(t->txThread, NULL);
+        t->txThreadRunning = false;
+    }
+    pthread_mutex_destroy(&t->lock);
+#endif
 #ifdef BCENET_HAVE_POSIX_SOCKETS
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
         if (t->buses[i].fd >= 0) close(t->buses[i].fd);
@@ -394,6 +476,19 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID) {
         fprintf(stderr, "bcenet: bus %d: no separate transmit socket; "
                         "falling back to byte-exact self-echo filtering\n", busID);
     }
+#ifdef BCENET_HAVE_TX_THREAD
+    /* Started on the first bus to open, not at create(): a transport
+     * nothing ever opens a bus on -- which is every build of this that
+     * runs without --bce-network -- never starts a thread at all. */
+    if (!t->txThreadRunning) {
+        if (pthread_create(&t->txThread, NULL, tx_thread_main, t) == 0) {
+            t->txThreadRunning = true;
+        } else {
+            fprintf(stderr, "bcenet: could not start the transmit thread; "
+                            "sending inline from the emulation thread\n");
+        }
+    }
+#endif
     return true;
 #endif
 }
@@ -474,11 +569,13 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
                 wordCount);
         return false;
     }
+    transport_lock(t);
     if (b->outHead > 0 && b->outHead + b->outCount >= BCENET_OUT_QUEUE) {
         memmove(&b->outQ[0], &b->outQ[b->outHead], b->outCount * sizeof b->outQ[0]);
         b->outHead = 0;
     }
     if (b->outHead + b->outCount >= BCENET_OUT_QUEUE) {
+        transport_unlock(t);
         fprintf(stderr, "bcenet: bus %d: outbound queue full, dropping a datagram\n", busID);
         return false;
     }
@@ -496,6 +593,7 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
     d->iua = (uint8_t)iua;
     d->shuttle = isShuttleBus ? 1 : 0;
     b->outCount++;
+    transport_unlock(t);
     return true;
 }
 
@@ -504,50 +602,54 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
  * it, and a token bucket so the average rate is the real bus rate while
  * a gap between calls cannot bank enough credit to release a whole
  * transfer at once (see BUS_WORD_SECONDS and BUS_BURST_MAX). */
-void bcenet_transport_pump(BceNetTransport *t) {
-    if (!t) return;
+/* One pass over every bus: give each its earned credit and release what
+ * that credit allows.  The FIFO and the bucket are touched under the
+ * lock; the sends themselves are not, because a send is about 8 us and
+ * holding the lock across a burst of them would simply move the stall
+ * onto whichever thread wants to enqueue next. */
+static void pump_once(BceNetTransport *t) {
 #ifdef BCENET_HAVE_POSIX_SOCKETS
     double now = yagpc_monotonic_seconds();
-    /* How OFTEN this is called is what actually bounds throughput: at
-     * most BUS_BURST_MAX datagrams leave per call, so a 511-word fill
-     * needs a call every 1.3 ms to finish inside the 10.7 ms its bus
-     * program allows.  Reported rather than assumed. */
     if (getenv("YAGPC_PUMPTRACE")) {
-        static double firstSeconds = -1.0, lastReport = 0.0;
-        static long calls = 0, sent = 0;
-        static long lastCalls = 0, lastSent = 0;
-        static double prevCall = -1.0, maxGap = 0.0, lostTokens = 0.0;
-        if (firstSeconds < 0.0) { firstSeconds = now; lastReport = now; }
+        static double lastReport = -1.0;
+        static long calls = 0, lastCalls = 0;
+        static double prevCall = -1.0, maxGap = 0.0;
+        if (lastReport < 0.0) lastReport = now;
         if (prevCall >= 0.0) {
             double gap = now - prevCall;
             if (gap > maxGap) maxGap = gap;
-            /* Credit the bucket cannot hold is time on the bus thrown
-             * away: anything past BURST_MAX x the word time is lost. */
-            double earned = gap / bus_word_seconds();
-            if (earned > bus_burst_max()) lostTokens += earned - bus_burst_max();
         }
         prevCall = now;
         calls++;
-        for (int j = 0; j <= BCENET_MAX_BUS_ID; j++) sent += (long)t->buses[j].outCount;
         if (now - lastReport >= 2.0) {
             double dt = now - lastReport;
-            fprintf(stderr, "PUMP %.0f calls/s, max gap %.3f ms, credit lost %.0f words, "
-                            "mean gap %.3f ms, queued-at-entry %.0f\n",
-                    (calls - lastCalls) / dt, maxGap * 1000.0, lostTokens,
-                    dt * 1000.0 / (double)(calls - lastCalls ? calls - lastCalls : 1),
-                    (double)(sent - lastSent) / (double)(calls - lastCalls ? calls - lastCalls : 1));
-            lastReport = now; lastCalls = calls; lastSent = sent;
-            maxGap = 0.0; lostTokens = 0.0;
+            fprintf(stderr, "PUMP %.0f calls/s, max gap %.3f ms, mean gap %.3f ms\n",
+                    (calls - lastCalls) / dt, maxGap * 1000.0,
+                    dt * 1000.0 / (double)(calls - lastCalls ? calls - lastCalls : 1));
+            lastReport = now; lastCalls = calls; maxGap = 0.0;
         }
     }
+
+    /* The drain rate WITHIN one transfer, which is what matters and what
+     * a per-second average hides: the span from the queue first going
+     * non-empty to it going empty again.  A 511-word fill has 10.7 ms. */
+    static double burstStart[BCENET_MAX_BUS_ID + 1];
+    static long burstSent[BCENET_MAX_BUS_ID + 1];
+    static int burstOpen[BCENET_MAX_BUS_ID + 1];
+
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
         BceNetBusSocket *b = &t->buses[i];
         if (b->fd < 0) continue;
+
+        OutDatagram batch[(size_t)BUS_BURST_MAX];
+        size_t batchCount = 0;
+        size_t remaining;
+
+        transport_lock(t);
         if (!b->pumpStarted) {
             b->pumpStarted = true;
             b->lastPumpSeconds = now;
             b->tokens = bus_burst_max();   /* an idle bus starts ready */
-            (void)0;
         }
         double elapsed = now - b->lastPumpSeconds;
         if (elapsed > 0.0) {
@@ -556,52 +658,69 @@ void bcenet_transport_pump(BceNetTransport *t) {
         }
         b->lastPumpSeconds = now;
 
-        /* The drain rate WITHIN one transfer, which is what matters and
-         * what a per-second average hides: the span from the queue first
-         * going non-empty to it going empty again, and how many datagrams
-         * left in it.  A 511-word fill has 10.7 ms to clear. */
-        static double burstStart[BCENET_MAX_BUS_ID + 1];
-        static long burstSent[BCENET_MAX_BUS_ID + 1];
-        static int burstOpen[BCENET_MAX_BUS_ID + 1];
         if (b->outCount > 0 && !burstOpen[i]) {
             burstOpen[i] = 1; burstStart[i] = now; burstSent[i] = 0;
         }
-
-        long releasedThisCall = 0;
         while (b->outCount > 0 && b->tokens >= 1.0 &&
-               releasedThisCall < (long)bus_burst_max()) {
-            releasedThisCall++;
+               batchCount < (size_t)BUS_BURST_MAX) {
             OutDatagram *d = &b->outQ[b->outHead];
-            /* What one send actually COSTS.  The token bucket assumes it
-             * is free and only meters the interval between sends; if the
-             * call itself takes longer than the word time, the bucket's
-             * rate is unreachable no matter how much credit it holds. */
-            double sendT0 = 0.0;
-            int costing = getenv("YAGPC_PUMPTRACE") != NULL;
-            if (costing) sendT0 = yagpc_monotonic_seconds();
-            transport_send_now(t, b, i, d->iua, d->shuttle != 0, d->words, d->count);
-            if (costing) {
-                static double sendTotal = 0.0; static long sendCount = 0;
-                sendTotal += yagpc_monotonic_seconds() - sendT0;
-                if (++sendCount % 5000 == 0)
-                    fprintf(stderr, "SENDCOST mean %.2f us over %ld sends\n",
-                            sendTotal * 1e6 / (double)sendCount, sendCount);
-            }
+            batch[batchCount++] = *d;
             b->tokens -= (double)d->count;
-            burstSent[i]++;
             b->outHead++;
             b->outCount--;
             if (b->outCount == 0) b->outHead = 0;
         }
-        if (burstOpen[i] && b->outCount == 0) {
-            double ms = (now - burstStart[i]) * 1000.0;
+        remaining = b->outCount;
+        burstSent[i] += (long)batchCount;
+        /* The byte-exact self-echo record is only consulted when there is
+         * no transmit socket, and it lives in the bus struct, so in that
+         * fallback the send has to stay inside the lock. */
+        bool sendUnderLock = (b->txFd < 0);
+        if (sendUnderLock) {
+            for (size_t k = 0; k < batchCount; k++)
+                transport_send_now(t, b, i, batch[k].iua, batch[k].shuttle != 0,
+                                   batch[k].words, batch[k].count);
+        }
+        transport_unlock(t);
+
+        if (!sendUnderLock) {
+            for (size_t k = 0; k < batchCount; k++)
+                transport_send_now(t, b, i, batch[k].iua, batch[k].shuttle != 0,
+                                   batch[k].words, batch[k].count);
+        }
+
+        if (burstOpen[i] && remaining == 0 && batchCount > 0) {
+            double ms = (yagpc_monotonic_seconds() - burstStart[i]) * 1000.0;
             burstOpen[i] = 0;
             if (burstSent[i] >= 16 && getenv("YAGPC_PUMPTRACE"))
                 fprintf(stderr, "BURST bus%-3d %ld datagrams in %.2f ms = %.0f words/s\n",
                         i, burstSent[i], ms, ms > 0.0 ? burstSent[i] * 1000.0 / ms : 0.0);
         }
     }
+#else
+    (void)t;
 #endif
+}
+
+#ifdef BCENET_HAVE_TX_THREAD
+static void *tx_thread_main(void *arg) {
+    BceNetTransport *t = (BceNetTransport *)arg;
+    while (!t->txStop) {
+        pump_once(t);
+        yagpc_sleep_seconds(TX_THREAD_TICK_SECONDS);
+    }
+    return NULL;
+}
+#endif
+
+void bcenet_transport_pump(BceNetTransport *t) {
+    if (!t) return;
+#ifdef BCENET_HAVE_TX_THREAD
+    /* The transmit thread owns the wire; calling in from the emulation
+     * thread as well would put the sends straight back on it. */
+    if (t->txThreadRunning) return;
+#endif
+    pump_once(t);
 }
 
 bool bcenet_transport_recv(BceNetTransport *t, int busID, int iua, bool isShuttleBus, uint16_t *outWords,
