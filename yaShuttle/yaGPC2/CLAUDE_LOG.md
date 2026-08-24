@@ -2558,3 +2558,39 @@ document's planning stages, and it is already in the code as
   Sufficient for FCMBOOT, which only needs to see busy-then-ready.  True
   fidelity would require the MMU to report its own state, i.e. MMU-side work
   and a protocol change.
+- DISCRETES FRAMEWORK BUILT (user confirmed Don has nothing in place).
+  Branch `yagpc2-discretes` in ~/donschmidt/nsts-sim-gpc, one commit off
+  origin/main, 6 files, +417/-11.  NOT PUSHED -- PR text awaiting review at
+  scratchpad/PR-discretes.md.
+  * com/discretes.coffee (new): wire format, 4x16-bit words -- op(SET=1/
+    RESET=2), register(A=1/B=2), 32-bit mask in two halves, IBM numbering.
+    Follows Don's #1343 plan verbatim: set/reset BIT messages, not whole
+    words, so devices owning different bits of one register coexist.
+  * com/bus.civet: _gpcDiscretes on port 6980.
+  * mmu/mmu.coffee: @busy was declared in reset() and NEVER ASSIGNED -- made
+    real, with an in-flight-operations count so the line stays down across a
+    write awaiting data.  MM1 owns IBM bit 6, MM2 bit 7.  Publishes on change
+    plus a 250 ms heartbeat (opts.discreteRepublishMs; 0 disables).
+  * gpc/ap101.coffee: subscribes, applies set/reset to regDiscreteInA/B.
+  * com/lru.civet: REQUIRED BUG FIX.  Bus.onReceive hands (cbObj,busID,msg,
+    remote) unbound, but _setupBuses passed @recvBus with no cbObj -- `this`
+    was the Bus and arity off by one, so the first datagram on a bus with no
+    handler threw on this.busRecvCB[undefined].  Unreachable until the MMU
+    gained a second bus.  Also dropped a per-message console.log.
+  * test/test_discretes.cjs (new): 25 checks, all pass.
+- yaShuttle/discretePanel/ (new, ours): discretes.py (same wire format in
+  Python) + discretePanel.py (Tk checkboxes/radios for the crew switches,
+  GPC ID, BFS engage, CRT select; observes device-driven bits; republishes
+  every 250 ms).  Python encode is BYTE-IDENTICAL to the MMU's output
+  (0001000102000000 for SET MM1 READY), verified against captured traffic.
+- VERIFIED: on the wire with --reply-delay 600, READY drops, stays down
+  across two heartbeats, returns 600 ms later.  End to end, a Python publish
+  moved a running GPC's regDiscreteInA 0x0a000000 -> 0x48000000 (STANDBY on,
+  MM1 READY off, untouched IPL-source bit preserved).
+  test_floatIBM/test_meds_deu/test_mmu fail on stock origin/main too.
+- MISHAP TO REMEMBER: `git stash push <paths>` then `git stash pop` in
+  nsts-sim-gpc left the changes in the INDEX with the WORKTREE reverted to
+  HEAD -- looked like total loss.  Recovered with `git checkout-index -f`.
+  Check `git diff --cached` before believing work is gone.  That repo also
+  holds a pre-existing stash `af9c4b9 WIP on main: gpc: HAL error-handler
+  dispatch and channel-input fixes` that is NOT ours -- left untouched.

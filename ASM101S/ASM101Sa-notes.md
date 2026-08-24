@@ -103,6 +103,13 @@ git log --oneline 105ad9afb..HEAD -- ASM101S/ASM101S.py ASM101S/expressions.py \
 Empty output means in sync. Anything listed is exactly what the next parity
 pass must carry over.
 
+It has already paid for itself. Between two sweeps of the same corpus the
+repository moved 50 commits, `dc5b97707` to `10bea05ab`; the check returned
+empty — all of it was yaGPC2/yaHALMAT2 work — so the Python comparison was known
+to be valid *before* it was run rather than hoped to be afterwards. The old
+"last commit touching `ASM101S/`" rule would have flagged all 50 and told you
+nothing.
+
 `version.h` is the single place any of that is written down —
 `PORTED_FROM_COMMIT`/`_DATE`/`_SUBJECT`, an optional `PORTED_EXTRAS` for
 changes carried over individually, and an optional `PARITY_INCOMPLETE` printed
@@ -262,7 +269,7 @@ and the extremes of the double range.
 
 | Release | Modules | Exit status | Listings | Objects, canonical | Objects, raw |
 | --- | --- | --- | --- | --- | --- |
-| OI340600 | 224 | identical, all 0 | **byte-identical** | identical | 178 differ |
+| OI340600 | 271 | identical, all 0 | **byte-identical** | identical | 178 differ |
 | OI301700 | 271 | identical, all 0 | **byte-identical** | identical | 181 differ |
 
 The raw counts are worth one significant figure and no more: they came out 180
@@ -270,9 +277,15 @@ and 174 on an earlier pair of runs of the same two programs over the same
 sources. That is Python's per-process `set` ordering, and it is why the
 canonical column is the one that means anything.
 
-With BILDNEW5, compared separately below, that is **497 modules** — OI340600 225
-and OI301700 272 — with byte-identical listings and no canonical object
-difference, on two corpora with no module names in common. The raw object
+With BILDNEW5, compared separately below, that is **544 modules** — 272 from
+each release — with byte-identical listings and no canonical object difference,
+on two corpora with no module names in common.
+
+OI340600 used to sweep 224. The missing 47 were its PCH patch decks, which
+shipped without a filename extension and so were refused by both assemblers
+before any assembly began; renaming them to `*.asm` (PFS commit `00d1051b`)
+brought the two releases to the same count, which is not a coincidence — the
+entire difference between them was those decks being unreachable. The raw object
 differences are ESD ordering, which is Python `set` iteration and varies from
 run to run of `ASM101S.py` itself — see *Deliberate divergences* below.
 
@@ -315,6 +328,31 @@ results. The symlink is created on demand. `~/workspace/PFS` is never written
 to, which was checked afterwards rather than assumed: no file under it newer
 than the run, no stray outputs in the source or library directories, and
 `MACROFILES.txt` intact at 278 lines.
+
+**The PCH patch decks.** OI340600/SSSRC holds 47 of them, each a short list of
+`001 IS <len>,<prefix>[,<fill>]` cards, and they are the corpus's real exercise
+of the macro machinery rather than of the code generator.
+
+They look wrong at first: every card carries what appears to be an illegal,
+repeating label — `001`. It is not a label. `IS` (MLIB80/IS.asm) has the
+prototype `&S IS &L,&P,&FILL` and its body does `&N&S CSECT`, so the name field
+is a macro parameter concatenated onto a global prefix, and `001` never becomes
+a symbol. `IS 1F4,#Y101,C6C6` yields CSECT `#Y101001`, `DC 500X'C6C6'`, ESD
+length `0001F4`.
+
+All 47 assemble exit 0 under both assemblers with byte-identical listings — but
+the stronger check is against the **contemporary IBM assembler's own listings**,
+which survive for OI301700 in `~/workspace/PFS/OI301700 as received/SSSRC/`.
+Those files are listings, not source, and they carry the original expansion of
+these same decks. Ours matches card for card: **45 of the 45 decks that are the
+same revision in both releases, 368 generated cards.** The other two differ in
+revision and are not comparable — PCH02SRC has 23 `IS` cards against 22,
+PCH03SRC 5 against 6.
+
+The subtle path is exercised. `&FV` is a `GBLC`, so an omitted fill operand
+inherits the previous invocation's; 136 of the 184 `IS` invocations omit it, and
+PCH03SRC's four later CSECTs correctly inherit `C6C6` from the first. The
+`'0000'` default is *not* exercised — every deck's first `IS` supplies a fill.
 
 **BILDNEW5.** The module the `cb10a480b` and `105ad9afb` repairs were aimed at,
 and the reason it was excluded from every sweep, now assembles. The two releases
