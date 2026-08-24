@@ -2594,3 +2594,25 @@ document's planning stages, and it is already in the code as
   Check `git diff --cached` before believing work is gone.  That repo also
   holds a pre-existing stash `af9c4b9 WIP on main: gpc: HAL error-handler
   dispatch and channel-input fixes` that is NOT ours -- left untouched.
+- yaGPC2 NOW SUBSCRIBES to the discrete bus (--discretes, default off).
+  src/discretes.c/.h: multicast receiver on 239.255.1.1:6980, same four-word
+  format as com/discretes.coffee and yaShuttle/discretePanel/discretes.py.
+  iop.c's iop_discrete_in_a()/in_b() overlay it: a bit somebody PUBLISHES
+  beats the locally derived value, a bit nobody publishes keeps it.  So a
+  real mass memory takes over READY once attached, and a run with nothing
+  attached still works off the BCE-derived proxy.
+  * Poll happens ON THE READ, from the READ DISCRETE INPUT PCIs -- exactly
+    when the value must be current, and the flight software polls those in
+    tight loops while waiting.  No thread, no loop changes.
+  * Per-BIT staleness (DISCRETES_STALE_SEC 1.5s, YAGPC_DISCRETES_STALE_SEC
+    overrides).  Per bit, not per register: a crew panel republishing the
+    switches must not make a departed mass memory's READY look fresh.
+    Without it a publisher killed mid-transfer strands READY low forever.
+  * Makefile: IOP_TEST_DEPS and IOP_DEPS both gained discretes.c + compat.c,
+    since iop.c now references them -- test_cpu_ea caught that immediately.
+- VERIFIED: yaGPC2 --discretes reported "2 message(s) applied" against a live
+  publisher; test_iop_discretes gained a networked overlay case (published
+  READY beats the derivation, published STANDBY reaches the register, an
+  unpublished bit keeps its local value, and closing gives the derivation
+  back).  Skips rather than fails if the socket cannot open.  Unit suite back
+  to exactly the 3 pre-existing failures.

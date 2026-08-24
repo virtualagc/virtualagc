@@ -171,7 +171,7 @@ $(TEST_BIN_DIR)/test_mcm_membus: test/test_mcm_membus.c src/mcm.c src/mcm.h src/
 $(TEST_BIN_DIR)/test_floatIBM: test/test_floatIBM.c src/floatIBM.c src/floatIBM.h test/floatIBM_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_floatIBM.c src/floatIBM.c $(LDLIBS)
 
-IOP_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c
+IOP_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/discretes.c src/compat.c
 
 $(TEST_BIN_DIR)/test_cpu_ea: test/test_cpu_ea.c src/cpu.c src/cpu.h src/regmem.c src/mcm.c src/membus.c src/util.c src/timing.c $(IOP_DEPS) test/cpu_ea_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_cpu_ea.c src/cpu.c src/regmem.c src/mcm.c src/membus.c src/util.c src/timing.c $(IOP_DEPS) $(LDLIBS)
@@ -184,7 +184,10 @@ $(TEST_BIN_DIR)/test_cpu_instr_decode: test/test_cpu_instr_decode.c $(CPU_INSTR_
 $(TEST_BIN_DIR)/test_cpu_instr_exec: test/test_cpu_instr_exec.c $(CPU_INSTR_DEPS) src/cpu_instr.h test/cpu_instr_exec_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_cpu_instr_exec.c $(CPU_INSTR_DEPS) $(LDLIBS)
 
-IOP_TEST_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/regmem.c src/mcm.c src/membus.c src/util.c src/cpu.c src/floatIBM.c src/q31.c src/timing.c
+# iop.c consults the discrete bus on every read of the discrete
+# registers, so anything linking it needs discretes.c, and discretes.c
+# needs compat.c for the monotonic clock its staleness rule uses.
+IOP_TEST_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/regmem.c src/mcm.c src/membus.c src/util.c src/cpu.c src/floatIBM.c src/q31.c src/timing.c src/discretes.c src/compat.c
 
 $(TEST_BIN_DIR)/test_iop_bce_exec: test/test_iop_bce_exec.c $(IOP_TEST_DEPS) src/iop.h test/iop_bce_exec_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_bce_exec.c $(IOP_TEST_DEPS) $(LDLIBS)

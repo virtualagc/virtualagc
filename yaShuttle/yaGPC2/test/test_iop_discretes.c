@@ -28,8 +28,14 @@
  * nonexistent) channel is polled.
  */
 #include <stdio.h>
+#include <time.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #include "../src/cpu.h"
+#include "../src/discretes.h"
 #include "../src/iop.h"
 
 /* cpu.c references instr_decode() (normally cpu_instr.c) but nothing here
@@ -140,6 +146,71 @@ static void test_discrete_b_unchanged(void) {
     check("B verbatim", register_get32(&iop.regDiscreteInB), 0x21000000u);
 }
 
+/* The bus overrides the derivation.
+ *
+ * A bit somebody publishes must win over whatever iop.c works out locally,
+ * and a bit nobody publishes must keep the local value -- that is what
+ * lets a real mass memory take over READY while a run with nothing
+ * attached still works.  This goes over the real socket, on loopback, so
+ * it exercises the wire format too; if the socket cannot be opened (no
+ * multicast here, or the port is taken) the check is skipped rather than
+ * failed, since that is an environment problem and not a defect.
+ */
+static void test_bus_overrides_derivation(void) {
+    if (!discretes_open()) {
+        printf("SKIP bus overlay: discretes_open() failed (environment)\n");
+        return;
+    }
+
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) { discretes_close(); printf("SKIP bus overlay: no socket\n"); return; }
+    struct in_addr iface;
+    iface.s_addr = inet_addr("127.0.0.1");
+    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &iface, sizeof iface);
+    int loop = 1;
+    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof loop);
+
+    struct sockaddr_in to = {0};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = inet_addr("239.255.1.1");
+    to.sin_port = htons(6980);
+
+    /* RESET MM1 READY (bit 6) and SET STANDBY (bit 1), the two a mass
+     * memory and a crew panel would respectively be driving. */
+    uint8_t reset6[8] = {0, 2, 0, 1, 0x02, 0x00, 0x00, 0x00};
+    uint8_t set1[8]   = {0, 1, 0, 1, 0x40, 0x00, 0x00, 0x00};
+    sendto(fd, reset6, sizeof reset6, 0, (struct sockaddr *)&to, sizeof to);
+    sendto(fd, set1, sizeof set1, 0, (struct sockaddr *)&to, sizeof to);
+
+    CPU cpu; IOP iop;
+    setup(&cpu, &iop);
+    /* Give the loopback datagrams a moment to arrive. */
+    for (int i = 0; i < 200; i++) {
+        discretes_poll();
+        if (discretes_driven_mask(DISCRETES_REG_A) != 0) break;
+        struct timespec ts = {0, 1000000};   /* 1 ms */
+        nanosleep(&ts, NULL);
+    }
+
+    uint32_t driven = discretes_driven_mask(DISCRETES_REG_A);
+    if (driven == 0) {
+        printf("SKIP bus overlay: nothing received on loopback\n");
+        close(fd);
+        discretes_close();
+        return;
+    }
+
+    uint32_t got = iop_discrete_in_a(&iop);
+    check("published MM1 READY (off) beats the derivation", got & MM1_READY, 0u);
+    check("published STANDBY reaches the register", got & 0x40000000u, 0x40000000u);
+    check("an unpublished bit keeps its local value",
+          got & MM1_IPL_SRC, MM1_IPL_SRC);
+
+    close(fd);
+    discretes_close();
+    check("closing gives the derivation back", iop_discrete_in_a(&iop), 0x0a000000u);
+}
+
 int main(void) {
     test_idle_reports_default();
     test_mm1_ready_falls_while_busy();
@@ -148,6 +219,7 @@ int main(void) {
     test_absent_mm2_never_ready();
     test_attached_mm2_tracks_bce19();
     test_discrete_b_unchanged();
+    test_bus_overrides_derivation();
     if (failures) {
         printf("test_iop_discretes: %d failure(s)\n", failures);
         return 1;

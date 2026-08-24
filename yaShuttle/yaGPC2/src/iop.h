@@ -329,6 +329,11 @@ void iop_reset_discrete_inputs(IOP *iop);
  * constant ready bit hangs it.  See iop.c for the full account. */
 uint32_t iop_discrete_in_a(const IOP *iop);
 
+/* Discrete inputs B (33-40) as READ DISCRETE INPUTS B reports it.  Carries
+ * no derived bits of its own, but anything being published on the discrete
+ * bus overrides the stored value the same way it does for A. */
+uint32_t iop_discrete_in_b(const IOP *iop);
+
 /* Is any processor both enabled and busy -- i.e. is the IOP still doing
  * something that could raise an interrupt?  Used to decide whether a CPU
  * wait state still has a possible wakeup (see run.c). */

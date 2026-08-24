@@ -119,6 +119,12 @@ static const char *HELP_TEXT =
 "                                  runs. Default: the real host machine's\n"
 "                                  current wall-clock time (its own\n"
 "                                  configured timezone) at program start.\n"
+"  --discretes                      Subscribe to the discrete-input bus, so a\n"
+"                                  mass memory asserting its own READY, or the\n"
+"                                  crew panel in yaShuttle/discretePanel/,\n"
+"                                  drives this machine's discrete registers.\n"
+"                                  Bits nobody publishes keep the value derived\n"
+"                                  for them (default: false)\n"
 "  --bce-network                    Install the real-peripheral servicer\n"
 "  --deu-model                      Install an IN-PROCESS display unit instead\n"
 "                                  of the network one: same protocol, no socket,\n"
@@ -300,6 +306,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->bceNetwork = true;
         } else if (tok_is(tok, "--deu-model", &n)) {
             (void)n; opts->deuModel = true;
+        } else if (tok_is(tok, "--discretes", &n)) {
+            (void)n; opts->discretes = true;
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {

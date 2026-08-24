@@ -170,6 +170,14 @@ typedef struct {
     bool bceNetwork;                  /* default false */
     bool deuModel;                    /* default false */
 
+    /* Subscribe to the discrete-input bus, so that devices publishing
+     * discretes -- a mass memory asserting its own READY, the crew panel
+     * in yaShuttle/discretePanel/ -- drive this machine's discrete
+     * registers.  Bits nobody publishes keep the value iop.c derives or
+     * holds for them, so this only ever adds sources of truth.  Default
+     * false: no socket is opened and the registers behave as before. */
+    bool discretes;                   /* default false */
+
     /* Not part of gpc run's own option set -- yaGPC2-specific. Which
      * instruction-timing model charges cpu->elapsedTimeUs, and through
      * it the interval timers: "poo" (the default) is the AP-101S

@@ -11,6 +11,7 @@
 
 #include "compat.h"
 #include "cpu_instr.h"
+#include "discretes.h"
 #include "strfmt.h"
 #include "trace.h"
 
@@ -101,9 +102,19 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
         r->bceFramer = bcenet_framer_create(r->bceTransport);
         ap101_set_servicer(&r->age.gpc, bcenet_framer_service, r->bceFramer);
     }
+
+    /* Independent of the peripheral bus: discretes are their own bus, and
+     * a run may want them with or without --bce-network.  Failing to open
+     * is not fatal -- iop.c keeps deriving what it can. */
+    if (opts->discretes) discretes_open();
 }
 
 void batchrunner_free(BatchRunner *r) {
+    if (discretes_enabled()) {
+        fprintf(stderr, "discretes: %lu message(s) applied\n",
+                discretes_message_count());
+        discretes_close();
+    }
     if (r->deuModel) {
         deumodel_report(r->deuModel);
         deumodel_free(r->deuModel);

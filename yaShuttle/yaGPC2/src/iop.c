@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "cpu.h"
+#include "discretes.h"
 
 /* Interrupt register A (Group 1 / EX0) sources, in the order the
  * instruction set lists them.  Reading register A is how the EX0 handler
@@ -157,12 +158,35 @@ static uint32_t iop_mm_ready(const IOP *iop, uint32_t stored, uint32_t mask, int
  * separate process developed independently of this one, and no part of this
  * handshake should depend on its internals, its wire protocol or its
  * timing; all that is required of it is that it answer the bus. */
+/* Let whatever is actually on the discrete bus have the last word.
+ *
+ * A bit somebody is publishing overrides what we hold or derive for it; a
+ * bit nobody is publishing keeps the local value.  So a real mass memory,
+ * once attached, becomes the thing that says whether it is ready, while a
+ * run with nothing attached still works off the derivation above.
+ *
+ * The poll happens here, on the read, rather than on a timer: this is
+ * called from the READ DISCRETE INPUT PCIs, which is exactly when the
+ * value has to be current, and the flight software polls those in tight
+ * loops while it waits.  Draining a non-blocking socket is cheap. */
+static uint32_t iop_discrete_overlay(int reg, uint32_t local) {
+    if (!discretes_enabled()) return local;
+    discretes_poll();
+    uint32_t driven = discretes_driven_mask(reg);
+    return (local & ~driven) | (discretes_value(reg) & driven);
+}
+
 uint32_t iop_discrete_in_a(const IOP *iop) {
     uint32_t stored = register_get32(&iop->regDiscreteInA);
     uint32_t v = stored & ~(DISCRETE_A_MM1_READY | DISCRETE_A_MM2_READY);
     v |= iop_mm_ready(iop, stored, DISCRETE_A_MM1_READY, MM1_BCE);
     v |= iop_mm_ready(iop, stored, DISCRETE_A_MM2_READY, MM2_BCE);
-    return v;
+    return iop_discrete_overlay(DISCRETES_REG_A, v);
+}
+
+uint32_t iop_discrete_in_b(const IOP *iop) {
+    return iop_discrete_overlay(DISCRETES_REG_B,
+                                register_get32(&iop->regDiscreteInB));
 }
 
 /* ---------------------------------------------------------------------
@@ -1382,7 +1406,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         case 0x081c0000: /* READ DISCRETE INPUTS B (33-40) */
             /* Register B, not A -- this read the A register, so discrete
              * inputs 33-40 came back as inputs 1-32. */
-            register_set32(&iop->regCCData, register_get32(&iop->regDiscreteInB));
+            register_set32(&iop->regCCData, iop_discrete_in_b(iop));
             break;
         case 0x10000000: /* READ STATUS1(GO/NO-GO) */
             register_set32(&iop->regCCData, register_get32(&iop->regProgExcept));
