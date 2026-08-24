@@ -1839,3 +1839,30 @@ document's planning stages, and it is already in the code as
   applyLoadProtection and as yaGPC2's own apply_load_protection, so it
   is a defensible stopgap -- but it is not what the linker would emit,
   which is the point of the real map.
+
+### [2026-08-24] Target: problems.md
+- TRANSMIT THREAD LANDED, and it fixed what it targeted.  Per display
+  fill, before 513 datagrams in 17-19 ms (27-30k halfwords/s), after 512
+  in 9.5-10.6 ms (48-54k) -- the bus rate, inside the 10.7 ms the
+  display's bus program allows.  Sends are off the emulation thread; the
+  lock covers the FIFO and bucket only, never a send.  pthreads probed
+  in the Makefile like HAVE_POSIX_TIMERS; the thread starts on the first
+  bus opened, so a run without --bce-network never makes one.
+- Banked credit went back to one burst.  With 256 banked the thread
+  emptied a fill in 5.3 ms, twice the bus rate, and the display logged
+  22 unheadered fills.  Raising it had only ever been a workaround for
+  pump gaps that the thread removes.
+- The display STILL does not complete its load, and the blocker is now a
+  different, older fault: a spurious "DISPLAY_FILL count 8" command
+  arrives immediately behind a good 511-word fill, and the eight words
+  behind it are that fill's OWN header -- 01fd 0f49 0000 ... , i.e. 509
+  and 0xf49.  So we emit a command whose count field says 8 and then
+  send header words as data.  It is not the thread's doing: the same
+  "unheadered fill of 8 halfwords" appeared 10-18 times a run before it,
+  and it is not a FIFO ordering problem either -- flush_bus/xmitBuf in
+  bcenet_framer.c is DEAD CODE (xmitCount is only read and zeroed, never
+  incremented), so commands and data both go straight into the one
+  ordered queue.
+- Store-protect over-protection is ruled out as a display cause: four
+  violations in a whole run (YAGPC_PROTTRACE), at NIA 00bfa, 01058 and
+  01107 twice.
