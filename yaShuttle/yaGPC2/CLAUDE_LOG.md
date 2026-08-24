@@ -2233,3 +2233,34 @@ document's planning stages, and it is already in the code as
   divergence under identical stimulus, which is what makes it useful.
 - Display IPL completes in 12 s for both, headless.  That is the fix from
   earlier today holding up under an independent harness.
+
+### [2026-08-24] Target: problems.md
+- RETRACTION of "the erase sweeps 13x too much".  That compared the
+  video's EIGHT SECOND window (0:35-0:43, five positions) against our
+  multi-minute run (64 positions).  Different durations; the comparison
+  was meaningless.  Per unit time: video 5 positions in 8 s = 0.63/s,
+  ours 13 positions in 57 s = 0.23/s.  We sweep SLOWER, not more.
+- Also retracted: "the reference auto-advances to ITEM 29".  The user's
+  reading of his own timings is that Don pressed it manually at 0:43,
+  having got bored -- 0:43 shows both the apparent ITEM 29 and the actual
+  stop.  So there may be no automatic termination to reproduce.
+- MATCHED PAIR, Don's exact key timings, identical blank tape:
+      t=43s   ref 2 writes/1 position   ours 2 writes/1 position
+      t=60s   ref 4 writes/1 position   ours 6 writes/5 positions
+      t=90s   ref 4 writes/1 position   ours 14 writes/13 positions
+  They START IDENTICALLY and then the reference stalls at 0/0/0/0 while
+  we advance 1/0, 2/0, 3/0 ...
+- BUT THE VIDEO ADVANCES TOO, 0/0/0 through 4/0/0.  So on this behaviour
+  OURS resembles Don's video and my headless reference is the odd one
+  out.  Most likely because I run the MMU with a blank tape ("0 block(s)")
+  where his run probably had a real --volume.  Do not treat the headless
+  reference as a stand-in for the video on this point until that is
+  settled.
+- What survives: our sweep RATE is about 2.7x slower than the video's,
+  which is consistent with our pacing at the real 1 Mbps bus rate
+  (20 us a halfword) while the reference paces not at all.  That is a
+  known and deliberate difference, not a defect.
+- METHOD NOTE: three claims this session died the same way -- comparing
+  measurements taken over different windows, or against a setup that
+  differed in a way I had not checked.  Match the durations and the
+  configuration before comparing counts.
