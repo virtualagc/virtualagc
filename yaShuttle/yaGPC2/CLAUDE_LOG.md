@@ -2062,3 +2062,30 @@ document's planning stages, and it is already in the code as
 - STILL UNFIXED: why our External 2 arrives ~530 instructions late.  That
   is the whole remaining question; everything else in the display
   investigation reduces to it.
+
+### [2026-08-24] Target: problems.md
+- SCALE OF THE LATE EXTERNAL 2, measured rather than estimated.  The
+  interrupt period is 3,717 instructions and 5,997 us of simulated time,
+  so 1.61 us per instruction (the whole-run average of 10.3 us/instr is
+  meaningless here -- it includes wait states).  Therefore 530
+  instructions is:
+      emulated time   ~0.85 ms
+      real time       ~0.95 ms  (pacing rate 0.895)
+      bus words       ~43 halfwords, i.e. 43 datagrams at 20 us each
+      as a fraction of one 511-word display fill (10.2 ms):  ~8%
+      as a fraction of the 40 ms MSC service tick:           ~2%
+  So it is FAR below bus scale, which makes the transport an unlikely
+  cause; a fill takes twelve times as long as the whole discrepancy.
+- IT IS NOT JITTER, controlled for by running ours twice: our own two
+  runs put the first ext2 at 4,154,918 and 4,154,956 -- 38 instructions
+  apart, and 1 apart for every one after that.  The gap to the reference
+  is 530, 732, 749, 806, 769, 786.  An order of magnitude larger and
+  systematic.
+- Nor is it a RATE error: instructions per interrupt period match well
+  (ours 3737/3717/3737/3700..., reference 3535/3700/3680/3737...), and
+  the offset does not grow.  It is a fixed phase error in WHEN External 2
+  reaches the CPU, worth about 0.85 ms.
+- So the remaining question is narrower than "why is the IOP late": it is
+  why interrupt DELIVERY from IOP to CPU sits ~0.85 ms out of phase, at a
+  scale well below anything the bus does.  Slice granularity and when the
+  IOP is stepped relative to the CPU are the places to look.
