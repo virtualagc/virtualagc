@@ -1686,3 +1686,31 @@ document's planning stages, and it is already in the code as
   while the CPU is inside a long non-idle stretch, which is precisely
   when a fill is in flight.  Measure the drain rate WITHIN a fill
   window, not averaged over seconds.
+
+### [2026-08-23] Target: problems.md
+- THE CEILING, measured at last.  Per-fill drain rate is bimodal: a few
+  clear 513 datagrams in 10.6 ms (48k words/s, inside the 10.7 ms the
+  display's bus program allows) but most take 17-19 ms (27-30k words/s).
+  The cause is the cost of the sends themselves -- 8.5 to 9.0 us each,
+  against a 20 us word time.  511 synchronous multicast sends cannot
+  clear in 10.7 ms while the same thread is also emulating in real time;
+  that would need about 45% of a core on sendto alone.
+- Ruled out as the cause of that cost: the self-echo bookkeeping is
+  already skipped whenever the transmit socket exists (txFd >= 0), and
+  multicast loopback CANNOT be turned off -- the peer is on this host and
+  loopback is how it receives anything at all.  The datagram count cannot
+  be reduced either: deuUnit's recv treats any datagram of two or more
+  halfwords as a COMMAND, so payload really is one word per datagram.
+- FIXED ANYWAY, because it was a real defect even though it was not the
+  binding one: the token bucket used one constant for both the per-call
+  release and the banked credit, so any pump gap past 64 words x 20 us =
+  1.28 ms threw the rest away, and gaps reach 3.9 ms.  313 to 1864 words
+  of credit were being dropped every two seconds.  Banked credit now has
+  its own cap.  Drain rate did NOT improve, which is the evidence that
+  the send cost is the real ceiling.
+- DIRECTION for whoever picks this up: the sends need to come off the
+  emulation thread.  The reference gets this free from node's async
+  dgram -- its event loop interleaves sends with everything else, which
+  is also why it needs no pacing at all.  A dedicated transmit thread
+  draining the existing FIFO is the equivalent, and the FIFO and pacing
+  built here are already the right shape for it.
