@@ -2152,3 +2152,29 @@ document's planning stages, and it is already in the code as
   own timeout policy distorting the software's timing.  The earlier
   conclusion stands and is now doubly supported -- UDP carries the
   display fine, in both emulators.
+
+### [2026-08-24] Target: problems.md
+- RETRACTION.  I wrote that the Mass Memory Unit "had NEVER been run in
+  any of these sessions".  That is false and the record says so plainly.
+  Earlier entries in this very log describe running it -- "Control run on
+  the same live MMU instance: gpc --real-time = 37 commands in 45 s",
+  "yaGPC2 NOW DRIVES DON'S MMU. Against a live MMU.sh run", "yaGPC2 now
+  follows gpc's MMU sequence exactly" -- and commit 6312e5a61 of
+  2026-08-23 is titled "@RBI takes its BCE from the accumulator too; MMU
+  load completes", a fix found by measuring 76,266 mass-memory block-loop
+  iterations against the reference's 33.  None of that is possible
+  without the MMU running.  The 37 commands I "discovered" today is the
+  same 37 recorded then.
+- What was actually true, and all I was entitled to say: I did not start
+  the MMU when I set up THIS session's harness, so every measurement I
+  took before noticing lacked a peripheral the project had long since
+  been exercising.  That is my process failure, not a project gap.
+- The part that does stand: with no MMU running, BCE18's receives are
+  satisfied in ~100 us by our OWN multicast echo rather than by a device,
+  which is what let a peripheral-less run look healthy and hid the
+  omission from me.
+- PATTERN TO WATCH, twice in one session: I asserted a strong negative
+  from local absence of evidence.  First "IPL.fcm has no .sym.json"
+  without running ls -- the file was there.  Then "the MMU has never been
+  run" without grepping this log -- it had.  Check the record before
+  claiming something has never happened.
