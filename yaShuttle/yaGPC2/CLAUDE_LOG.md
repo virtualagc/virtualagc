@@ -1734,3 +1734,23 @@ document's planning stages, and it is already in the code as
   fragment of a transfer arriving on its own looks like datagram loss
   splitting a fill, which is worth its own look -- the count rose as the
   drain got faster, which fits.
+
+### [2026-08-23] Target: problems.md
+- The 0e275b1 regression is pinned to an exact instruction.  Both builds
+  are deterministic without the network, so their --trace output diffs
+  directly: they agree for 20,461 instructions and part company at step
+  20462, on the instruction right after GPCIPL's SSM X'006c' at 061b
+  unmasks interrupts.  e12ac63 executes the LHI; 0e275b1 reloads the
+  whole register file and swaps PSW1 to 0a26, which is an interrupt
+  taken through vector 0074 -- cpu_intr.coffee's instrMonitor, "CPU
+  Breakpoint (Instruction Monitor)".  GPCIPL never returns from it.
+- Mechanism, as a hypothesis and labelled as one: IPL.fcm has no
+  .sym.json and cannot be relinked to get one, so the commit's mapless
+  fallback protects NOTHING where applyLoadProtection used to protect
+  every loaded section.  A store that used to be dropped now lands and
+  arms the monitor.
+- Issue text drafted at scratchpad/issue-storeprotect.md and shown to
+  the user; NOT filed, per the review-before-publishing rule.
+- Don's repo left on branch yagpc2-local-poo-fixes at cd1c945, clean,
+  dist rebuilt.  origin/main is still 0e275b1; the two commits after our
+  branch point are meds fixes (#15, and a meds #27 unrelated to ours).
