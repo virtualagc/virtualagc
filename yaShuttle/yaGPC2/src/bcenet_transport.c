@@ -132,6 +132,22 @@ static double bus_word_seconds(void) {
  * burst at once, which is the behavior being fixed. */
 #define BUS_BURST_MAX 64.0
 
+/* Overridable alongside the word rate: the cap and the rate together set
+ * the SUSTAINED throughput, because at most this many datagrams leave per
+ * pump call.  If the pump is called every 2 ms, a cap of 64 sustains only
+ * 32k words/s however generous the rate is -- below the 50k/s that 20 us
+ * a word implies, so a 511-word fill cannot finish inside the 10.7 ms its
+ * bus program allows it. */
+static double bus_burst_max(void) {
+    static double cached = -1.0;
+    if (cached < 0.0) {
+        const char *s = getenv("YAGPC_BUS_BURST");
+        double v = (s != NULL) ? atof(s) : 0.0;
+        cached = (v > 0.0) ? v : BUS_BURST_MAX;
+    }
+    return cached;
+}
+
 /* Datagrams that may be waiting for the bus.  A mass-memory block and a
  * display fill are both ~512 words, so this holds several transfers. */
 #define BCENET_OUT_QUEUE 4096
@@ -436,6 +452,13 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
         fprintf(stderr, "bcenet: bus %d: outbound queue full, dropping a datagram\n", busID);
         return false;
     }
+    /* A COMMAND queued behind a transfer is the thing to watch: the FIFO
+     * is strictly in order, so the poll that asks a subsystem to answer
+     * cannot overtake the fill in front of it, and the depth here is
+     * exactly how long the reply will be held up. */
+    if (wordCount == 2 && b->outCount > 0 && getenv("YAGPC_BUSTRACE"))
+        fprintf(stderr, "BUSCMDQ bus%-3d command queued behind %zu datagrams\n",
+                busID, b->outCount);
     OutDatagram *d = &b->outQ[b->outHead + b->outCount];
     d->words[0] = words[0];
     d->words[1] = wordCount > 1 ? words[1] : 0;
@@ -455,18 +478,37 @@ void bcenet_transport_pump(BceNetTransport *t) {
     if (!t) return;
 #ifdef BCENET_HAVE_POSIX_SOCKETS
     double now = yagpc_monotonic_seconds();
+    /* How OFTEN this is called is what actually bounds throughput: at
+     * most BUS_BURST_MAX datagrams leave per call, so a 511-word fill
+     * needs a call every 1.3 ms to finish inside the 10.7 ms its bus
+     * program allows.  Reported rather than assumed. */
+    if (getenv("YAGPC_PUMPTRACE")) {
+        static double firstSeconds = -1.0, lastReport = 0.0;
+        static long calls = 0, sent = 0;
+        static long lastCalls = 0, lastSent = 0;
+        if (firstSeconds < 0.0) { firstSeconds = now; lastReport = now; }
+        calls++;
+        for (int j = 0; j <= BCENET_MAX_BUS_ID; j++) sent += (long)t->buses[j].outCount;
+        if (now - lastReport >= 2.0) {
+            double dt = now - lastReport;
+            fprintf(stderr, "PUMP %.0f calls/s, mean gap %.3f ms, queued-at-entry %.0f\n",
+                    (calls - lastCalls) / dt, dt * 1000.0 / (double)(calls - lastCalls ? calls - lastCalls : 1),
+                    (double)(sent - lastSent) / (double)(calls - lastCalls ? calls - lastCalls : 1));
+            lastReport = now; lastCalls = calls; lastSent = sent;
+        }
+    }
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
         BceNetBusSocket *b = &t->buses[i];
         if (b->fd < 0) continue;
         if (!b->pumpStarted) {
             b->pumpStarted = true;
             b->lastPumpSeconds = now;
-            b->tokens = BUS_BURST_MAX;   /* an idle bus starts ready */
+            b->tokens = bus_burst_max();   /* an idle bus starts ready */
         }
         double elapsed = now - b->lastPumpSeconds;
         if (elapsed > 0.0) {
             b->tokens += elapsed / bus_word_seconds();
-            if (b->tokens > BUS_BURST_MAX) b->tokens = BUS_BURST_MAX;
+            if (b->tokens > bus_burst_max()) b->tokens = bus_burst_max();
         }
         b->lastPumpSeconds = now;
 
