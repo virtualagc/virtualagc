@@ -1942,3 +1942,37 @@ document's planning stages, and it is already in the code as
   --deu-model" was wrong.  Two runs of different length reaching the
   identical simulated timestamp is the signature of a stall, and it was
   visible in the first measurement had I compared the two endpoints.
+
+### [2026-08-24] Target: problems.md
+- THE BIG ONE, and it invalidates the baseline this whole display
+  investigation rested on: there is a MASS MEMORY UNIT peripheral in
+  nsts-sim-gpc (mmu/, `node dist/mmu.js run --unit 1`, bus MM1 = BCE18)
+  and it had NEVER been run in any of these sessions.  GPCIPL is the IPL
+  program; it loads from mass memory.  With MMU1 up it is plainly driven:
+  "cmd READ ... track 4 subfile 4 block 8 count 7", "read 8 block(s) from
+  4/4/4/8", BITE_STATUS, POSITION_REQ.
+- What that changes at the display, same 90 s run, --bce-network:
+  timeFills 71 where it had been 1 to 4; commands 358, fills 75, polls
+  146.  Still no "load complete" and 73 unheadered 8-halfword fills, but
+  the machine is in a visibly different and healthier state.
+- HOW WE GOT AWAY WITHOUT ONE, and it is not good: with --bce-network and
+  NO peer at all the machine still reaches 57.7 s of sim and runs BCE6
+  124,140 times, because BCE18's receive COMPLETES in 100 us on a bus
+  with nothing on it.  That is our own multicast echo being read back as
+  mass-memory data.  Under --deu-model, which cannot echo, the same
+  receive correctly times out and retries -- which is why the model
+  looked "stuck" when it was in fact the only configuration behaving
+  honestly.
+- CORRECTION to the previous entry: --deu-model does NOT stall on BCE18.
+  It arms, times out at 20 ms, error-terminates and retries cleanly --
+  visible once YAGPC_TIMEOUT_TRACE reported arms as well as expiries.
+  The "stuck at 4409948 us" reading came from a trace cut off mid-spin by
+  the wall-clock timeout; two runs ending at the same simulated instant
+  had a duller explanation than a stall.
+- FIXED: the 20 ms receive-timeout floor is a socket concession and is
+  now iop_set_recv_timeout_floor_us(), set to 0 for --deu-model.  GPCIPL
+  asks the mass memory for 0.25 ms (MTO 15) and we were giving it 20.
+- STILL OPEN: the UDP-versus-TCP question CANNOT be answered from any
+  measurement taken so far, because every --bce-network run in the record
+  was made without a mass memory and partly on phantom echo data.  Rerun
+  the comparison with MMU1 up before drawing any conclusion.
