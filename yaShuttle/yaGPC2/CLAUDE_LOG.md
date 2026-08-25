@@ -3247,3 +3247,32 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
   (timeFills has read 0 throughout), not the cause of the blank screen.
   What GPCIPL actually intends to display at this point is the open
   question. BSLRESET is still reached somewhere too.
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- WHY MEDS SHOWED ONLY THE CLOCK, and it was not a yaGPC2 bug at all: MEDS
+  RETAINS ITS IPLed STATE between GPC runs. Its poll reply, captured off the
+  wire (32-byte datagram from :6906), reads
+  `0000 ff00 ... c000 0000 2000 2100` -- w0 bit 0 (IPL REQUIRED) CLEAR and
+  w12 = 0xc000 (BITE1_ALWAYS_ONE | BITE1_IPL_DONE), i.e. "already loaded".
+  GPCIPL therefore skips the DEU load, and the display FORMATS are part of
+  that load, so the screen has nothing to draw but the clock. Our in-process
+  deumodel starts un-IPLed every time, which is exactly why it saw all 518
+  displayFills while the wire saw none. RESTART MEDS BEFORE EACH RUN.
+  After a fresh MEDS: POLL 84, TIME_FILL 79, DISPLAY_FILL 4 in 40 s --
+  matching the 2026-08-23 reference rate (14 DISPLAY_FILL in ~105 s).
+- ALSO REQUIRED, and the reason my first reproduction attempts looked dead:
+  GPCIPL needs the MASS MEMORY ATTACHED even when the whole composed
+  IPL.fcm is already in memory. `--power-on ... IPL.fcm` alone gives ZERO
+  display traffic; add `--mmu-model` and it comes alive. Checked against a
+  worktree build of the pre-today commit -- same zero -- so this was never a
+  regression from today's work, and the 08-23 session had Don's MMU running.
+- Wire format, for the next person: IUA byte + reserved byte + 16-bit words,
+  ONE WORD PER DATAGRAM (deliberate, see bcenet_framer.c -- batching was
+  tried and broke the peer). Command func is (w0 >> 1) & 0x3ff on the WIRE
+  word; deumodel uses (cmd24 >> 9) on the 24-bit internal form. Do not mix
+  the two, as I did.
+- SELF-CORRECTION worth keeping: I told the user the clock was real GPC data,
+  then retracted it on seeing one-word datagrams, then had to un-retract when
+  the user pointed out it read 000/00:05:02 -- mission-elapsed, counting from
+  IPL, not wall time. The first answer was right. Retracting on weaker
+  evidence than the original claim is its own failure mode.
