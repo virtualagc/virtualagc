@@ -3215,3 +3215,35 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
 - Method note: the reference mmu.coffee has a busy/@_busyOps state machine
   our model has no equivalent of, and drives READY from it. Suspected but
   NOT the cause here; still an unported difference worth closing.
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- GPCIPL NOW DRIVES THE DISPLAY. End to end: FCMBOOT -> GPCIPL -> BSL1
+  loads the DCP -> DCPLDFL set (0000 -> ffff by SHW at 0x02E8C) -> POLL30
+  passes -> POLL60 REACHED -> CM4POLL polls the DEU -> the DEU's own
+  program load completes ("load complete ... reporting initialized",
+  ipled true). Measured on the in-process DEU: commands 6648, fills 2224,
+  polls 2215, wordsIn 460207, wordsOut 35350. Against MEDS over
+  --bce-network the user sees the mission-time clock ticking on the MDU.
+- The second MMU bug (629694ebf): the queue never lost anything, so a bus
+  program that took what it wanted from a transfer and stopped left the
+  rest queued and every later reply was read that many words late. GPCIPL's
+  loader left 360 unread words of a 4096-word transfer, so BSL1 read a
+  leftover tape word as the transport position -> ERROR 116 INVALID
+  POSITION. Fixed with TWO rules: a new command ends the last transfer and
+  its unread stream is dropped (definite, no timing argument), plus a
+  block-gap-grace ageing rule for a stream nothing follows.
+- LOAD-BEARING DETAIL: only STREAMED words are ever dropped. A reply is not
+  paced and so never ages out -- the timing rule alone left two orphaned
+  status words at the head of the queue for the rest of the run, and the
+  sequence never recovered. `pending N` in the MMUTRACE command log is the
+  thing to watch; it must be 0 at every command.
+- Both MMU bugs were found by adding counters, not by reading code:
+  wordsOut vs wordsTaken exposed the one-word MIA latch leak, and
+  `pending` at each command exposed the 360-word tail. Worth reaching for
+  first next time.
+- STILL OPEN: the MDU shows the clock and little else. Our DEU model
+  rejects func-896 fills as "unheadered" (2209 of them) -- those are the
+  mission time and MEDS parses them fine, so that is a defect in OUR model
+  (timeFills has read 0 throughout), not the cause of the blank screen.
+  What GPCIPL actually intends to display at this point is the open
+  question. BSLRESET is still reached somewhere too.
