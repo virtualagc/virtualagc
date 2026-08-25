@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ebcdic.h"
+
 /* deuProto.coffee */
 #define DEU_IUA             10
 #define FUNC_SHIFT          9
@@ -324,8 +326,54 @@ void deumodel_service(void *ctx, GpcServiceNumber serviceNumber, const GpcServic
     }
 }
 
+/* What the unit's memory actually holds.  A load that is all fill or all
+ * zeros reports exactly the same command and fill counts as a real one, so
+ * the counts alone cannot answer "is there really display-unit software on
+ * that tape".  Reported from here, after every fill has been stored --
+ * measuring it at "load complete" reads the image BEFORE the last block is
+ * written, and gives all-zeros no matter what arrived. */
+static void deu_image_stats(const DeuModel *d, unsigned *zeros, unsigned *fill,
+                            unsigned *distinct) {
+    static unsigned char seen[65536];
+    memset(seen, 0, sizeof seen);
+    *zeros = *fill = *distinct = 0;
+    for (unsigned i = 0; i < DEU_MEMORY_WORDS; i++) {
+        uint16_t v = d->mem[i];
+        if (v == 0) (*zeros)++;
+        else if (v == 0xc9fb || v == 0xc6c6) (*fill)++;
+        if (!seen[v]) { seen[v] = 1; (*distinct)++; }
+    }
+}
+
 void deumodel_report(const DeuModel *d) {
     if (!d) return;
+    {
+        unsigned z, f, n;
+        deu_image_stats(d, &z, &f, &n);
+        fprintf(stderr, "deu: image %u zeros, %u fill, %u distinct of %d words\n",
+                z, f, n, DEU_MEMORY_WORDS);
+        if (getenv("YAGPC_DEUIMAGE")) {
+            /* The non-zero runs, with an EBCDIC reading beside them: text
+             * is display content the unit renders, not code it executes. */
+            for (unsigned i = 0; i < DEU_MEMORY_WORDS; ) {
+                if (!d->mem[i]) { i++; continue; }
+                unsigned j = i;
+                while (j < DEU_MEMORY_WORDS && d->mem[j]) j++;
+                fprintf(stderr, "  0x%04x..0x%04x (%u):", i, j - 1, j - i);
+                for (unsigned k = i; k < j && k < i + 8; k++)
+                    fprintf(stderr, " %04x", d->mem[k]);
+                fprintf(stderr, "  |");
+                for (unsigned k = i; k < j && k < i + 16; k++) {
+                    int c = EBCDIC_TO_ASCII[(d->mem[k] >> 8) & 0xff];
+                    fputc((c >= 32 && c < 127) ? c : '.', stderr);
+                    c = EBCDIC_TO_ASCII[d->mem[k] & 0xff];
+                    fputc((c >= 32 && c < 127) ? c : '.', stderr);
+                }
+                fprintf(stderr, "|\n");
+                i = j;
+            }
+        }
+    }
     fprintf(stderr,
             "deu: {\"commands\":%ld,\"fills\":%ld,\"timeFills\":%ld,\"displayFills\":%ld,\"formatFills\":%ld,\"headerless\":%ld,"
             "\"polls\":%ld,\"bite\":%ld,\"dumps\":%ld,\"resets\":%ld,\"unknown\":%ld,"
