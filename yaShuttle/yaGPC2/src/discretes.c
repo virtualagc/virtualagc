@@ -26,9 +26,33 @@
 /* One bus, so one instance.  Kept here rather than in IOP because it is a
  * property of the process's connection to the outside world, not of the
  * emulated machine -- the same reason the bus transport keeps its own. */
+/* Names for the bits, so YAGPC_DISCRETETRACE reads as something a person
+ * can follow rather than a hex mask.  From the IOP Principles of
+ * Operation, as laid out in iop.c's own discrete-input comment. */
+static const char *bit_name(int reg, int bit) {
+    if (reg == DISCRETES_REG_A) {
+        switch (bit) {
+            case 0: return "HALT";        case 1: return "STANDBY";
+            case 2: return "RUN";         case 3: return "IPL";
+            case 4: return "MM1 IPL src"; case 5: return "MM2 IPL src";
+            case 6: return "MM1 READY";   case 7: return "MM2 READY";
+            case 12: return "IOP term A"; case 13: return "IOP term B";
+            default: return NULL;
+        }
+    }
+    switch (bit) {
+        case 0: case 1: case 2: return "GPC ID";
+        case 3: return "BFS engage 1";    case 4: return "BFS engage 2";
+        case 5: return "BFS engage 3";    case 6: return "CRT select A";
+        case 7: return "CRT select B";
+        default: return NULL;
+    }
+}
+
 static struct {
     int fd;
     bool open;
+    bool trace;
     unsigned long messages;
     double staleSec;
     /* Index 0 is register A, 1 is register B. */
@@ -49,6 +73,11 @@ unsigned long discretes_message_count(void) { return g.messages; }
 bool discretes_open(void) {
     if (g.open) return true;
     memset(&g, 0, sizeof g);
+
+    /* Publishers repeat themselves several times a second, so tracing
+     * every message would be noise: only a message that actually CHANGES
+     * a register prints. */
+    g.trace = getenv("YAGPC_DISCRETETRACE") != NULL;
 
     g.staleSec = DISCRETES_STALE_SEC;
     const char *s = getenv("YAGPC_DISCRETES_STALE_SEC");
@@ -135,6 +164,7 @@ static void apply(const uint8_t *b, size_t n) {
     if (mask == 0) return;
 
     int r = reg_index((int)reg);
+    uint32_t before = g.value[r];
     if (op == OP_SET) g.value[r] |= mask;
     else              g.value[r] &= ~mask;
 
@@ -143,6 +173,21 @@ static void apply(const uint8_t *b, size_t n) {
         if (mask & (0x80000000u >> bit)) g.lastSeen[r][bit] = now;
     }
     g.messages++;
+
+    if (g.trace && g.value[r] != before) {
+        fprintf(stderr, "DISCRETE %-5s %c  %08x  ->  %08x   ",
+                (op == OP_SET) ? "SET" : "RESET",
+                (reg == DISCRETES_REG_B) ? 'B' : 'A', mask, g.value[r]);
+        const char *sep = "";
+        for (int bit = 0; bit < 32; bit++) {
+            if (!(mask & (0x80000000u >> bit))) continue;
+            const char *nm = bit_name((int)reg, bit);
+            if (nm) fprintf(stderr, "%s%s", sep, nm);
+            else    fprintf(stderr, "%sbit %d", sep, bit);
+            sep = ", ";
+        }
+        fprintf(stderr, "\n");
+    }
 }
 
 void discretes_poll(void) {

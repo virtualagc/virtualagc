@@ -2616,3 +2616,26 @@ document's planning stages, and it is already in the code as
   unpublished bit keeps its local value, and closing gives the derivation
   back).  Skips rather than fails if the socket cannot open.  Unit suite back
   to exactly the 3 pre-existing failures.
+- Made the discrete path WATCHABLE, which is what "see it in action" needed.
+  * YAGPC_DISCRETETRACE=1 prints each discrete that CHANGES a register, with
+    the bit named ("HALT", "MM1 READY", "BFS engage 1"...).  Only changes, so
+    the publishers' 250 ms heartbeat does not drown it.
+  * run.c now also drains the bus every 1024 steps.  Polling had been purely
+    read-driven (iop.c, on the READ DISCRETE INPUT PCIs) which is right for
+    freshness, but an image that seldom reads discretes let datagrams pile up
+    between reads and showed NOTHING under the trace while switches were being
+    thrown -- so the demo appeared dead when it was working.
+  * Long-running invocation for a live demo (from the MEDS-era flags):
+      YAGPC_DISCRETETRACE=1 ./yaGPC2 run --discretes --power-on \
+         --real-time --rt-factor 1 --max-steps 0 --rt-idle-timeout 900 IPL.fcm
+    Verified against a publisher: HALT set/cleared, STANDBY set/cleared, RUN
+    set, BFS engage 1 on register B -- all six transitions traced.
+- TWO SELF-INFLICTED WASTES worth remembering:
+  1. `timeout N cmd | grep` LOSES ALL OUTPUT when the timeout fires -- the
+     project rule says exactly this and I did it anyway; the first live demo
+     looked like a total failure and was actually working.  Redirect to a file.
+  2. Tool output is NOT reliably shown to the user.  Two drafts were "delivered"
+     via Write + a file path and the user never saw either.  Outward-facing text
+     must be pasted into the reply itself.
+- Trace prints only on CHANGE, so a RESET of a bit already 0 prints nothing --
+  looks like a miss but is correct; the shadow state starts at 0.

@@ -419,6 +419,18 @@ static bool batchrunner_step(BatchRunner *r) {
     }
 
     ap101_exec1(&r->age.gpc);
+
+    /* Drain the discrete bus periodically as well as on the reads
+     * themselves.  The reads are what freshness actually depends on --
+     * iop.c polls there, which is exactly when the value has to be
+     * current -- but an image that seldom reads discretes would let
+     * datagrams pile up in the socket buffer between reads, and would
+     * show nothing at all under YAGPC_DISCRETETRACE while somebody was
+     * flipping switches on a panel.  Every 1024 steps, so this is a
+     * non-blocking syscall roughly a thousand times less often than an
+     * instruction. */
+    if (discretes_enabled() && (r->step & 0x3ff) == 0) discretes_poll();
+
     /* Elapsed instruction time (cpu->elapsedTimeUs) is now accumulated
      * unconditionally inside cpu_exec1() itself, not just under --debug
      * -- see cpu.h's elapsedTimeUs comment. */
