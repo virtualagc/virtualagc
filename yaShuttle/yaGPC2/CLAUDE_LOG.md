@@ -3161,3 +3161,29 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
 - Also confirmed: `--watch <addr>:<n> --watch-log` works in the FAST path
   (no --debug), which is the practical way to answer "what wrote this?"
   without paying the debugger's ~4.5K steps/s.
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- The user asked whether a discrete we now DRIVE might have had a different
+  default before the panel existed. It did, and it mattered. Register B
+  bits 6-7 are not two switches, they are the DEU_ID field: GPCRTOPT.asm
+  extracts them with `NHI R3,X'0300'` / `SRL R3,8`, and POLL30 ("IS THE
+  DEU_ID 1, 2, 3, OR 4", `LR R3,R3` / `BZ POLL45`) reads zero as "no display
+  unit". discretePanel started every toggle broken, so it published
+  DEU_ID = 0 and GPCIPL stopped looking for a display bus before choosing
+  one. yaGPC2's own DISCRETE_IN_B_DEFAULT is 0x21000000 -- GPC 1 and CRT 1.
+  Measured with a headless publisher: CRT field 0 reaches POLL45, CRT field
+  1 does not. Fixed in 58bf14106 (DEFAULT_ON).
+- GENERAL LESSON worth keeping: a panel's resting position must be the
+  position the hardware is in, or running the panel is itself a change to
+  the machine. Check every panel-owned bit against the corresponding
+  DISCRETE_IN_*_DEFAULT before adding it.
+- The fix does NOT reach POLL60: the next gate is `TH DCPLDFL / BNZ POLL60`
+  and the Display Control Program is not in core, so DKBUS is still never
+  written and the DEU still sees 0 commands over 9M steps. Phase loading
+  remains the blocker.
+- discretePanel cosmetics (a9a6799c7), all user-requested and approved:
+  per-column frames with untitled filler panes so no bare window shows
+  between a short pane and a tall one; one fixed-width font via ttk.Style
+  with the pad width taken from the widest label in either group, so the
+  bit captions form one column; "Publishing on ..." in its own full-width
+  pane; ON/OFF rather than ON/off, with "--" still meaning undriven.
