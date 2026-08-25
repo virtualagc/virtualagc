@@ -2672,3 +2672,61 @@ document's planning stages, and it is already in the code as
      load, showing up a second way -- not a defect in our CPU.
 - FCMBOOT still stalls in that delay: verified at 300,000 steps it visits
   only 000155/000156/000157/000159 with R06 stuck at 62 and R05 unchanged.
+
+### [2026-08-25] Target: [HANDOFF-yaGPC2-MEDS.md]
+FCMBOOT now RUNS.  Where it gets to, and the one thing stopping it.
+
+- SEQUENCE ESTABLISHED, all verified by trace:
+  1. `--ipl` takes the PSW pair from FCMBSYRS (PSA 0x0014) -> FCMBMOVR at
+     0x014B.  (--power-on is WRONG for this: FCMBOOT's power-on vector at
+     PSA 0x0004 is address 0000 with the WAIT STATE BIT set -- at power-on
+     it deliberately parks.  That is why an earlier --power-on run was
+     silent; nothing was broken.)
+  2. Starts the watchdog (PC with X'8804').
+  3. Clears its 2-second mode-switch settling delay in ~1,285,000 steps,
+     now that --ipl leaves counter 1 running (commit b292bb8a6).
+  4. UNPROTECTS the sector-6 receiving area (ISPB M1=1, 740 fullwords,
+     R5 = FCMBMVLT = 0x05C8 stepping -2), MVHs its own 1864 halfwords up
+     there, re-protects (ISPB M1=3), and LPSs into sector 6.
+  5. Executes exactly ONE instruction there -- `LR 1,2` at 0x30180 -- and
+     stops.
+- THE BLOCKER, precisely:
+      INT  old=0070 new=0074  atNIA=30181  newPSW=00000000
+  0070/0074 is the INSTRUCTION MONITOR -- the "executing out of
+  unprotected storage" interrupt.  FCMBOOT's own vectors are deliberately
+  wait-state PSWs (FCMBC1N at 0x64: address 0000, and 0x66 = X'0002'
+  "... WAIT STATE"), so any unexpected interrupt halts the machine.  Hence
+  exit 0 and silence: run.c treats stopReason "wait state" as a normal
+  ending and prints no ERROR (batchrunner_report_stop).
+- WHAT IS RULED OUT: memory content is fine.  Watchpoints show the MVH
+  correctly wrote 0x30180=19e2, 0x30181=ecf3, 0x30185, 0x30199, 0x301ff,
+  0x302ff -- all over C6C6 fill, all correct.  Clock 1 is not the culprit
+  either: PSA 0x00B0 = 0xFFFF so counter 1's period is ~71 minutes.
+- WHERE TO LOOK NEXT: why sector 6 is still unprotected at 0x30181 after
+  FCMBOOT's own re-protect loop (0x179-0x17d).  One unexplained
+  observation to start from: at step 1285000 the dump shows R02=01800000,
+  i.e. WITHOUT the X'8000' sector-6 bit that FCMBRSPW (=0x8180) carries
+  and that the source comment calls "STARTING ADDRESS WITH HIGH BIT ON TO
+  USE SECT 6 BSR AND DSR".  If the re-protect loop's EA lost that bit it
+  would have protected sector 0, not sector 6 -- but the MVH plainly did
+  reach sector 6, so the two do not yet add up.  DO NOT trust this
+  paragraph as a diagnosis; it is a lead, not a conclusion.
+- TAPE IS BUILT AND VALID: scratchpad/tape/mmu.mmv, 1085 blocks /
+  1,115,412 bytes, written by mmu2mmv from our own CON80 + phase libs and
+  read back cleanly by Don's own `mmu ls`.  Phase 10 (GPCIPL) is on it at
+  2/4/3/0 .. 2/4/4/22, 55 blocks.  Still NOT on it (mmu2mmv does not
+  generate them): MMDIR at 44000, and FMAIPL2 at 44500 (the bootstrap
+  copy).  And FCMPTAD1/2/3 inside FCMBOOT remain the FFFF "never mass
+  memory built" sentinel.
+- USEFUL MECHANICS LEARNED:
+  * Breakpoints match the FULL address including sector (0x30180), but the
+    hit message formats only 4 hex digits, so it prints "0x0180".  That
+    cost me a wrong conclusion.
+  * A "wait state" stop exits 0 and prints NOTHING without --trace.
+    Silence is a result, not a failure to run.
+  * YAGPC_INTTRACE=1 prints interrupt dispatches; it is what identified
+    the Instruction Monitor in one line after a lot of guessing.
+  * `timeout N cmd | grep` loses ALL output when the timeout fires.  I did
+    this THREE more times tonight.  Redirect to a file.
+  * The Bash tool's own default timeout is 2 minutes regardless of the
+    `timeout` given to the shell; long runs need the tool timeout raised.
