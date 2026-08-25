@@ -2971,3 +2971,36 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
   yaGPC2's own --ipl counter-1 arming (commit b292bb8a6) was already
   labelled a MODEL OF ASSUMED FIRMWARE BEHAVIOUR; this is the first
   evidence bearing on it, and it cuts against.
+- **FCMBOOT LOADS GPCIPL.**  Breakpoint 0x4713 -- GPCIPL's entry point --
+  HITS.  The bootstrap reads the phase off our own tape, checksums it,
+  accepts it and passes control.  Reproducible: two runs, 16 commands and
+  220 blocks read, identical (down from 24/330, because it now succeeds on
+  the first area instead of retrying all three).
+- THE LAST BUG WAS OURS, IN THE INTERVAL TIMER, AND THE POO SETTLES IT.
+  tick_counter() carried the low halfword's borrow into the high halfword
+  UNCONDITIONALLY.  AP-101S POO 2.5.2 (Figure 2-21 / the interval-timer
+  text) says it must not:
+     "When the low halfword (in the hardware counter) passes from 0000
+      [to FFFF] an interrupt occurs which CAN CAUSE the high halfword in
+      main store [via] microcode to be decremented by one. ...  [If the]
+      interrupt is masked the high halfword will not be decremented by
+      [the microcode and the] low halfword continues to count down."
+  The high halfwords are PSA cells 00B0/00B1 in low store.  FCMBOOT reads
+  GPCIPL's first load block -- 0x0000..0x3C21, which CONTAINS 00B0 because
+  GPCIPL supplies its own PSA -- then checksums it with clock interrupts
+  masked (its Clock 1 vector is a deliberate wait-state PSW).  Carrying
+  the borrow anyway drifted 00B0 five counts from the value the tape had
+  recorded, so the sum came out five short and a perfect block was
+  rejected.  Fixed: the borrow is carried only when the corresponding
+  clock interrupt is unmasked (Clock 1 = PSW mask 0x80, Clock 2 = 0x40,
+  the same bits cpu_check_interrupts tests).
+- HYPOTHESIS 1 FROM YESTERDAY WAS WRONG, and checking it is what led here:
+  my reconstructed LB1 is NOT over-extended.  PHASE10.lib really does
+  carry a TEXT extent 0x00000..0x03C1F, so the load block legitimately
+  covers the PSA and derive_load_blocks is right.  That left the counter
+  model as the only candidate, and the POO had the answer.
+- No regressions: the same 3 pre-existing unit failures, and run_all,
+  scheduler, rtl and random all pass.
+- STILL OPEN: what GPCIPL does once it has control -- the run ends without
+  reaching a display load.  That is the next thing, and it is now a
+  reproducible experiment rather than a timing lottery.

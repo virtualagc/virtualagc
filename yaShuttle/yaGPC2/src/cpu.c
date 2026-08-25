@@ -1128,12 +1128,41 @@ void cpu_exec1(CPU *cpu) {
  * it directly, bypassing store protection, since no program asked for the
  * write.  When the high halfword is already zero at borrow time the count
  * has run out: the interrupt goes pending and the high halfword wraps to
- * FFFF, so the timer keeps running rather than stopping. */
+ * FFFF, so the timer keeps running rather than stopping.
+ *
+ * ONLY WHEN THE INTERRUPT IS UNMASKED.  The borrow is an interrupt that
+ * the microcode normally services invisibly, and the POO is explicit that
+ * a masked one is not serviced at all: "When the low halfword (in the
+ * hardware counter) passes from 0000 [to FFFF] an interrupt occurs which
+ * CAN CAUSE the high halfword in main store [via] microcode to be
+ * decremented by one....  [If the] interrupt is masked the high halfword
+ * will not be decremented by [the microcode and the] low halfword
+ * continues to count down."
+ *
+ * This used to decrement unconditionally, which is not a subtlety: the
+ * high halfwords are PSA cells (00B0, 00B1) sitting in low store, and a
+ * program that loads over them has every right to expect them to stay
+ * put while it has the clocks masked off.  FCMBOOT does exactly that.
+ * It reads GPCIPL's first load block -- 0x0000..0x3C21, which contains
+ * 00B0 because GPCIPL supplies its own PSA -- and then checksums it with
+ * clock interrupts masked, its own Clock 1 vector being a deliberate
+ * wait-state PSW.  With the borrow carried through regardless, 00B0 drifted
+ * five counts away from the value the tape had recorded between the load
+ * and the sum, the checksum came out five short, and the bootstrap
+ * rejected a block that was in fact perfect. */
 static uint32_t tick_counter(CPU *cpu, uint32_t low, uint32_t hiAddr,
                              bool *pending, uint32_t ticks) {
+    /* Clock 1 is PSW mask bit 0x80, Clock 2 is 0x40 -- the same bits
+     * cpu_check_interrupts tests before dispatching either. */
+    uint32_t maskBit = (hiAddr == 0x00B0) ? 0x80u : 0x40u;
+    bool unmasked = (psw_get_int_mask(&cpu->psw) & maskBit) != 0;
+
     int32_t v = (int32_t)(low & 0xffff) - (int32_t)ticks;
     while (v < 0) {
         v += 0x10000;
+        /* Masked: the low halfword goes on counting and the high one is
+         * left alone. */
+        if (!unmasked) continue;
         uint32_t hi = membus_get16(cpu->ram, hiAddr);
         if (hi == 0) {
             membus_set16(cpu->ram, hiAddr, 0xffff, false);
