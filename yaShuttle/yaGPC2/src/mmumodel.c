@@ -309,6 +309,18 @@ static void on_command(MmuModel *m, uint32_t cmd24) {
     int opcode = (int)((cmd >> 15) & 0x0f);
     m->stats.commands++;
 
+    /* Every command, not just the ones with something to say.  Chasing a
+     * status error the flight software reported and this unit had not
+     * raised meant knowing what it had been ASKED, and only POSITION and
+     * READ said anything at all -- twelve of sixteen commands passed
+     * without a trace of them. */
+    static const char *const opName[16] = {
+        "POSITION", "BITE STATUS", "POSITION REQ", "EXTENDED BLOCK",
+        "?4", "?5", "?6", "?7", "WRITE", "READ", "WRITE ENABLE",
+        "?B", "?C", "?D", "?E", "?F"
+    };
+    mm_log(m, "cmd %06x  %s", cmd, opName[opcode]);
+
     /* A command arriving mid-transfer is an error in its own right, and
      * the transfer it interrupted is abandoned. */
     if (m->writeActive) {
