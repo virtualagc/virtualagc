@@ -30,49 +30,50 @@ sequence. Key facts established from it:
 
 ## 2. WHERE IT STANDS RIGHT NOW
 
-FCMBOOT runs its entire logic and reaches the handover. It does **not**
-yet transfer control to GPCIPL.
+**FCMBOOT loads GPCIPL and hands control to it.** Fixed 2026-08-25 in
+`14a7b7581`. All five of phase 10's load blocks now match the tape
+halfword for halfword (27,292 halfwords, none wrong), all five checksum
+on the first attempt, and `LPS X'0014'` at 0x30239 loads `013F 0011` —
+the vector off the tape — putting the machine at 0x0013F with BSR=DSR=1,
+which is GPCIPL's `SRESINTN`. GPCIPL then runs.
 
-Reproducible failure, 2,707,470 steps:
+What was wrong (the long form is in `CLAUDE_LOG.md`, 2026-08-25):
+FCMBOOT skips the unread tail of a partial mass memory block by
+*delaying* over it (`#DLYI`, `2*(639 - partial)` counts, built at
+FCMBBLDR+0x25). The model queued whole transfers and never lost a word,
+so the delay skipped nothing and every load block after the first landed
+477–610 halfwords early. The same displacement had a second halfword in
+it: a delay leaves one stale word latched in the MIA, which FCMBOOT
+discards with a one-halfword `#RDLI` it labels "CLEAR THE MIA BUFFER"
+(FCMBBLDR+0x18) — with nothing latched, that ate a live word. Now
+`mmumodel.c` puts a word on the bus at its own word time with 256 word
+times of gap between blocks, and `iop_bce_delay` throws away what goes
+past while it runs, leaving the last one in the MIA.
 
-    ERROR: invalid instruction 0xc99c at 0x7c3c
+Two things from the previous version of this section were simply wrong
+and are recorded here so they are not re-derived:
 
-What happens: at `0x30239` FCMBOOT executes `LPS X'0014'` — its own
-"ISSUE THE SYSTEM RESET", which is *how* it gives control to GPCIPL, by
-loading the PSW pair from PSA 0x0014 where GPCIPL's reset vector should
-now be. **The PSW it loads is 0x00000000.** Execution therefore begins at
-address 0 and slides ~32,000 instructions through empty store until it
-reaches FCMSSLPT and hits an invalid opcode.
+- The "checksum pass and fail both hit" contradiction was not one.
+  `FCMBCKSM` exits the whole loop on the first mismatch (0x034E, then
+  `B #@LB74`), so one call hits 0x30352 once per *passing* block and
+  0x3034E at most once. Both firing is the ordinary shape of "blocks
+  1..n-1 passed, block n failed".
+- The PSA zeros seen at the LPS came from a later, worse retry, not from
+  the first load. LB1 was always byte-perfect, PSA included.
 
-### The open puzzle — START HERE
+### The open thread — START HERE
 
-The tape carries the right vector. LB1 has `0x0014 = 013F 0011 0008`
-(GPCIPL's `SRESINTN → IOPHISAM`), and the composed IPL image agrees. But
-at the moment of the LPS, memory reads:
+GPCIPL runs but takes **unrecognized SVCs** and loops. `halucp`'s HAL/S
+SVC intercept is firing on GPCIPL's own assembly SVCs and passing them
+through to the real interrupt:
 
-| addr   | memory | tape | |
-|--------|--------|------|-|
-| 0x0004 | 0000   | 0235 | |
-| 0x0014 | 0000   | 013F | ← the reset vector |
-| 0x0044 | 0000   | 08A6 | |
-| 0x1000 | 8000   | 8000 | matches |
-| 0x3C21 | D779   | D779 | matches |
+    SVC DEBUG: ea=0x0 R1=0xff0e0000 NIA=0x1b57 mem[ea]=0x0000
+    HAL/S SVC unrecognized, passing to real interrupt
 
-So the PSA end of LB1 did not take while the rest did.
-
-**Ruled out: store protection.** `iop_write_main16()` (src/iop.c ~1059)
-does enforce it and raises External 1 (DMA store protect violation, code
-0004) on refusal; `YAGPC_INTTRACE=1` reports **zero** interrupts
-dispatched for the whole run. Nothing was refused.
-
-**RECONCILE THIS FIRST.** Breakpoint `0x3034e` (checksum FAILURE) *still*
-hits in the same run as `0x30352` (checksum pass). If LB1's PSA really is
-zeros in memory while the tape has content there, LB1's checksum could not
-pass. The two observations contradict each other, so do not build on
-either until you know which load block passes and which fails. Suggested
-first move: instrument per-LB — at 0x30332 the checksum loop starts with
-R6 = number of LBs remaining and R0 = the LB descriptor pointer, so a
-watch/break there identifies *which* block is being summed.
+Sites seen: 0x1153 (ea=0x80ce), 0x1B57, 0x1CDA, 0x2DED (ea=0x76). An
+`ea` of 0 with a code of 0 says the effective address is not being formed
+the way GPCIPL means it — likely the same expanded/unexpanded confusion
+that MVH had. Start by reading GPCIPL's own source at those addresses.
 
 ---
 
@@ -123,7 +124,16 @@ the hit message prints only 4 hex digits ("breakpoint at 0x0239").
 | 0x30332 | checksum loop entry (R6 = LBs left) |
 | 0x3034E | `ZH FCMBGRD` — checksum FAILED |
 | 0x30352 | checksum PASSED |
-| 0x30239 | `LPS X'0014'` — the handover. **Currently loads zeros.** |
+| 0x30239 | `LPS X'0014'` — the handover. Loads 013F/0011 → GPCIPL. |
+| 0x0013F | GPCIPL `SRESINTN`, where control lands (BSR=DSR=1) |
+
+Useful when the load itself is in doubt: dump memory at the checksum
+entry (`b 0x30330; c; x 0x0000 32768`) and compare it against the tape
+blocks directly, rather than reading dumps by eye. The tape's stream for
+phase 10 is 55 blocks from 2/4/3/0, i.e. `.mmv` block index
+`((4*8+2)*8+3)*32 = 8800`, and the load blocks take it in order with each
+partial block's tail discarded. Getting this wrong by eye is what
+produced the retracted "holes" and "PSA did not load" claims.
 
 Phase 10's five load blocks (start, length, protected):
 
@@ -192,8 +202,17 @@ Emulator fixes made (all with POO citations, all committed):
 
 ## 6. OUTSTANDING, NOT CODE
 
-- **11 commits unpushed** on `master` (`e7417f9c8` … `2f19b1281`). The
+- **13 commits unpushed** on `master` (`e7417f9c8` … `14a7b7581`). The
   user pushes themselves; they asked not to push until things were tested.
+- **`make test` has four failures that are NOT ours** — `test_debugger.sh`,
+  `test_cpu_instr_exec`, `test_iop_bce_exec`, `test_iop_msc_exec` fail
+  identically with the working tree stashed. Checked 2026-08-25; worth
+  fixing on their own account, and worth re-checking against a stash
+  before blaming any new change for them.
+- **Unverified in the pacing fix:** `iop_bce_delay` discards on every bus,
+  not just the mass memory. That is right for hardware — a delay always
+  loses bus data — but nothing in the suite exercises `#DLYI` on the DK
+  bus, so a regression in the DEU/MEDS path would not have shown up.
 - **MVH bug report to Don — drafted-but-held.** The user asked to wait.
   gpc still has it (`cpu_instr.coffee:5461`,
   `t.r(v.x).set32((destAddr << 16) | 0)`); JS bitwise is 32-bit so the

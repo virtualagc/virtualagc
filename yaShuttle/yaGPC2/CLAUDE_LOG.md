@@ -3043,3 +3043,48 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
 - FCMSSLPT IS being written: memory at 0x7C00 reads 000c 0005, which is
   our own phase descriptor (index 12, 5 load blocks).  So FCMBOOT does
   copy its table there for the SSL, as its prolog says.
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- The "checksum pass and fail both hit" contradiction was not one. FCMBCKSM
+  (0x0334) sums each load block in turn and on a mismatch branches to 0x034E
+  and EXITS the loop (`B #@LB74`), so one call hits 0x30352 once per passing
+  block and 0x3034E at most once. Both firing = "blocks 1..n-1 passed, n
+  failed". §2's note read them as mutually exclusive; that was wrong about
+  the control flow, not evidence of anything.
+- Register state at 0x3034E named the failing block: R6 = blocks remaining,
+  R0 = descriptor pointer (0x838A = FCMPTAD1+12, past the four 3-hw phase
+  descriptors; 0x848A = same offset into FCMPTAD2). Four calls, three
+  failures, then a pass -- FCMBOOT re-read the tape each time (220 blocks =
+  4 passes over phase 10's 55).
+- Compared memory against the tape directly rather than eyeballing dumps.
+  LB1 was byte-perfect INCLUDING the PSA (0x0014 = 013F). The "holes" at
+  0x0200/0x3800/0x3C00 recorded in §2 were real tape content, not holes, and
+  the PSA zeros seen at the LPS were from a LATER, worse attempt. LB2..LB5
+  were displaced by 477/572/581/610 halfwords.
+- Cause: FCMBOOT skips a partial block's unread tail by DELAYING over it
+  (#DLYI, 2*(639-partial) counts; book says 2 counts = one 33 us word time,
+  source says 128 = half a block gap). The model queued whole transfers and
+  lost nothing, so the delay skipped nothing. Second halfword of the same
+  displacement: FCMBOOT emits a one-hw #RDLI to "CLEAR THE MIA BUFFER"
+  (FCMBBLDR+0x18, gated on FCMBMIAC which the partial-block path sets) to
+  discard the stale word a delay leaves latched -- with nothing latched it
+  ate a live word.
+- Fixed in 14a7b7581. All five LBs now match the tape (27,292 hw, 0 wrong),
+  the checksum passes first time, and LPS X'0014' hands control to GPCIPL at
+  013F/0011. GPCIPL runs.
+- Dead end worth recording: a first cut had mmumodel expire words on its own
+  ("a word not collected in its window is gone"). Wrong -- an armed receive
+  is a DMA that loses nothing, and a BCE gets a slice only every 33 CPU
+  instructions (~50 us) against a 33 us bus, so it discarded 41% of live
+  data (69,210 of 168,972 words) and the load never completed at all. The
+  loss belongs to the delay, which is the only thing that knows nobody is
+  listening.
+- NEW, open: GPCIPL is now running but taking unrecognized SVCs -- halucp's
+  HAL/S SVC intercept is firing on GPCIPL's assembly SVCs (ea=0x0, code=0x0)
+  at 0x1153/0x1B57/0x1CDA/0x2DED and it loops. That is the next thread.
+- Not verified: the delay-discard applies to every bus, not just the mass
+  memory. Correct in hardware (a delay always loses bus data), but the DEU
+  path has no test that exercises #DLYI, so a regression there would not
+  have shown up. `make test` has the same four pre-existing failures with
+  and without the change (test_debugger.sh, test_cpu_instr_exec,
+  test_iop_bce_exec, test_iop_msc_exec).
