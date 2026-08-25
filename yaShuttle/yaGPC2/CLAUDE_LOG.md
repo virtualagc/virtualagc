@@ -3088,3 +3088,40 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
   have shown up. `make test` has the same four pre-existing failures with
   and without the change (test_debugger.sh, test_cpu_instr_exec,
   test_iop_bce_exec, test_iop_msc_exec).
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- MEDS end-to-end attempted with the boot. Measured, not inferred: over
+  60,000,000 steps (4,229 s of emulated time) the in-process DEU on bus 6
+  logged `commands:0, polls:0, wordsIn:0, wordsOut:0`. GPCIPL never drives the
+  display bus, so MEDS necessarily shows nothing. (The MDU's own menus --
+  y = SYS SUMM etc. -- are the IDP's local behaviour and work with no GPC.)
+- Where GPCIPL actually gets to: NIA 0x1DE7, inside `STMM0010` (0x1DE1), with
+  `STMMAIN1` @0x1DEE and `STMWAIT` @0x1DF6 next and R01 = `JOBTABLE` (0x1E84).
+  That is the self-test monitor's job-dispatch loop idling, NOT a crash and
+  NOT a hang. MMU shows 16 commands but still only 55 blocksRead, so GPCIPL
+  issued 12 further mass-memory commands that returned no data blocks.
+- RETRACTED, twice over, both from bad method:
+  (a) "GPCIPL parks after three SVCs" -- it does not. The quiet period is
+      MEMTST22, a DIAGNOSE-based memory test looping 0x077A-0x0795 that walks
+      R2 up two halfwords at a time across the whole 512K-halfword space,
+      ~19 instructions per step, ~5-6M instructions in total. R2 = 0 at
+      2.59M steps, 0x0006F168 at 6M. A 6M-step cutoff lands ~87% through it.
+  (b) "the process died / it's gone" -- it was running the whole time. My
+      `ps ... | grep` probes were unreliable (one reported 3 instances while
+      another reported none, seconds apart), and several `pkill -f` patterns
+      matched the tool call's OWN command line, including the heredoc text,
+      and killed the launching shell. Use a pidfile; never pkill on a pattern
+      that appears in the command issuing it.
+- `--size 512` on MEDS works; I wrongly called it swallowed by Electron. The
+  display reports device pixels at 2x, so a 512 window measures 1044 across
+  and I read that as the 1024 default, which I had never actually measured.
+  A 300px test returning 620 settled it.
+- PRACTICAL: the CLI paces to REAL TIME by default (--pacing=burst,
+  --time-scale 1.0), sleeping so emulated time tracks the wall clock -- 3%
+  CPU. For investigation use `--time-scale 200`. It only affects wall-clock
+  sleeping, not the emulated clock the MMU pacing depends on.
+- NEXT LEAD: GPCIPL's symbols include `SWTCHDKB`, `DEUMODE`, `IPLSELFL` --
+  it does have DK-bus and IPL-select code that is not being reached. Worth
+  trying the crew panel's MODE switch in RUN (and the IPL SOURCE bits) with
+  --discretes, since the real sequence is HALT -> STBY -> IPL -> RUN, and
+  checking whether the STM job loop is polling a discrete we never assert.
