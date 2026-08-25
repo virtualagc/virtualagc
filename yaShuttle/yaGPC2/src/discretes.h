@@ -79,4 +79,24 @@ uint32_t discretes_value(int reg);
 /* Datagrams applied since open, for the run summary. */
 unsigned long discretes_message_count(void);
 
+/* Drive a level onto the bus, for a device modelled in this process that
+ * a real vehicle would have wired to a discrete line -- the mass memory's
+ * READY, to begin with.  Publishing it is what lets a crew panel or any
+ * other listener SEE the signal; without it the line exists only inside
+ * this process and the panel's "observed" pane stays blank whether the
+ * emulator is running or not.
+ *
+ * A discrete is a level, so this must be repeated: subscribers drop a bit
+ * they have not heard about for DISCRETES_STALE_SEC.  Call it whenever the
+ * level changes and periodically regardless.  Cheap and non-blocking; a
+ * no-op when the bus was never opened.
+ *
+ * What we publish, we do NOT then read back as though somebody else had
+ * driven it: see discretes_driven_mask.  The model that drove the line is
+ * in this process and already authoritative, and routing its own signal
+ * out through a socket and back would put UDP delivery -- the very thing
+ * --mmu-model exists to keep out of the tape path -- between a device and
+ * the machine reading it. */
+void discretes_publish(int reg, uint32_t mask, bool on);
+
 #endif

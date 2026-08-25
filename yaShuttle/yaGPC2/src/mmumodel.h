@@ -66,6 +66,21 @@ int mmumodel_bus(const MmuModel *m);
 void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
                       const GpcServiceInput *input, GpcServiceOutput *output);
 
+/* Drive this unit's READY discrete onto the bus, so a crew panel (or
+ * anything else listening) can see what the tape is doing -- MM1 READY is
+ * register A bit 6, MM2 bit 7.  The unit is ready when it is not moving
+ * data: nothing left to hand over from a read, no write in progress.
+ *
+ * Safe and cheap to call often, which it must be: a discrete is a level
+ * and subscribers drop one they stop hearing about, so this republishes on
+ * a timer as well as on a change.  A no-op unless --discretes opened the
+ * bus.
+ *
+ * This is for observers.  What the flight software reads is still the
+ * value iop.c derives from the channel, which is why nothing about the
+ * boot changes when this is on -- see iop_mm_ready(). */
+void mmumodel_publish_ready(MmuModel *m);
+
 /* Counters in the shape the real unit's own report prints, so the two can
  * be compared directly. */
 void mmumodel_report(const MmuModel *m);

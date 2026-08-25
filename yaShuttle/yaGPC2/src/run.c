@@ -481,6 +481,12 @@ static bool mode_switch_held(BatchRunner *r) {
 static bool batchrunner_step(BatchRunner *r) {
     /* Before anything else: in HALT the machine executes nothing at all. */
     if (mode_switch_held(r)) {
+        /* The peripherals are not in reset, though -- a mass memory sits
+         * there READY with the GPC switched off, and its line says so.
+         * Publishing it here as well as in the running path is what makes
+         * a crew panel show something before the switch is ever moved,
+         * which is the only sign a person has that this is running. */
+        if (r->mmuModel) mmumodel_publish_ready(r->mmuModel);
         /* Nothing to do but wait for the switch to move; don't spin a
          * core doing it. */
         yagpc_sleep_seconds(0.002);
@@ -572,7 +578,14 @@ static bool batchrunner_step(BatchRunner *r) {
      * flipping switches on a panel.  Every 1024 steps, so this is a
      * non-blocking syscall roughly a thousand times less often than an
      * instruction. */
-    if (discretes_enabled() && (r->step & 0x3ff) == 0) discretes_poll();
+    if (discretes_enabled() && (r->step & 0x3ff) == 0) {
+        discretes_poll();
+        /* And drive what this process's own devices put ON the bus.  The
+         * mass memory's READY is a real line in the vehicle; publishing it
+         * is what lets a crew panel show the tape working, and doubles as
+         * the only outward sign that this emulator is running at all. */
+        if (r->mmuModel) mmumodel_publish_ready(r->mmuModel);
+    }
 
     /* Elapsed instruction time (cpu->elapsedTimeUs) is now accumulated
      * unconditionally inside cpu_exec1() itself, not just under --debug

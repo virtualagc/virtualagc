@@ -61,6 +61,10 @@ static struct {
      * crew panel republishing the switches must not make a departed mass
      * memory's READY look fresh. */
     double lastSeen[2][32];
+    /* Bits this process drives itself, which it must not then treat as
+     * externally driven -- see discretes.h. */
+    uint32_t selfDriven[2];
+    struct sockaddr_in group;
 } g;
 
 static int reg_index(int reg) {
@@ -133,6 +137,15 @@ bool discretes_open(void) {
 
     int loop = 1;
     setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof loop);
+    int ttl = 128;
+    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof ttl);
+
+    /* Where discretes_publish sends.  Same socket: it is already pinned to
+     * the interface and in the group, and a device driving a line is a peer
+     * on this bus like any other. */
+    g.group.sin_family = AF_INET;
+    g.group.sin_addr.s_addr = inet_addr(DISCRETES_GROUP);
+    g.group.sin_port = htons((uint16_t)DISCRETES_PORT);
 
     int flags = fcntl(fd, F_GETFL, 0);
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
@@ -203,6 +216,21 @@ void discretes_poll(void) {
     }
 }
 
+void discretes_publish(int reg, uint32_t mask, bool on) {
+    if (!g.open || mask == 0u) return;
+    int r = reg_index(reg);
+    g.selfDriven[r] |= mask;
+
+    uint8_t b[WORDS * 2];
+    unsigned op = on ? OP_SET : OP_RESET;
+    b[0] = (uint8_t)(op >> 8);   b[1] = (uint8_t)op;
+    b[2] = (uint8_t)(reg >> 8);  b[3] = (uint8_t)reg;
+    b[4] = (uint8_t)(mask >> 24); b[5] = (uint8_t)(mask >> 16);
+    b[6] = (uint8_t)(mask >> 8);  b[7] = (uint8_t)mask;
+    (void)sendto(g.fd, b, sizeof b, 0,
+                 (struct sockaddr *)&g.group, sizeof g.group);
+}
+
 uint32_t discretes_driven_mask(int reg) {
     if (!g.open) return 0u;
     int r = reg_index(reg);
@@ -212,7 +240,11 @@ uint32_t discretes_driven_mask(int reg) {
         double t = g.lastSeen[r][bit];
         if (t > 0.0 && (now - t) <= g.staleSec) m |= (0x80000000u >> bit);
     }
-    return m;
+    /* Our own multicast comes back to us, being a member of the group.
+     * Honouring it would replace a device's in-process state with the
+     * same state a socket round trip later -- worse in every way, and
+     * nondeterministic besides. */
+    return m & ~g.selfDriven[r];
 }
 
 uint32_t discretes_value(int reg) {

@@ -6,6 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "compat.h"
+#include "discretes.h"
+
+/* MM1 is register A bit 6, MM2 bit 7 -- the same bits iop.c computes for
+ * the machine's own READ DISCRETE INPUT A. */
+#define DISCRETE_A_MM1_READY 0x02000000u
+#define DISCRETE_A_MM2_READY 0x01000000u
+
 /* Tape geometry (mmuConf.coffee).  8 files x 8 tracks x 8 subfiles x 32
  * blocks of 512 halfwords -- 8,388,608 halfwords in all. */
 #define TRACKS 8
@@ -112,6 +120,10 @@ struct MmuModel {
     uint32_t slot[QUEUE_HW];
     double burstStartUs;
     uint32_t nextSlot;
+
+    /* The READY discrete this unit drives; see mmumodel_publish_ready. */
+    bool readyPublished, lastReady;
+    double lastReadyPublishSec;
 
     struct {
         long commands, blocksRead, blocksWritten, wordsOut, wordsIn;
@@ -487,6 +499,30 @@ void mmumodel_free(MmuModel *m) {
 
 void mmumodel_set_clock(MmuModel *m, const double *clockUs) {
     if (m) m->clockUs = clockUs;
+}
+
+/* Republish at least this often.  Comfortably inside the subscribers'
+ * DISCRETES_STALE_SEC, and the same period the crew panel uses for its own
+ * switches.  Wall time, not the emulated clock: what is watching this is a
+ * person, and --time-scale must not change how often a level is refreshed. */
+#define READY_REPUBLISH_SEC 0.25
+
+void mmumodel_publish_ready(MmuModel *m) {
+    if (!m || !discretes_enabled()) return;
+    /* Ready when it is not moving data: nothing left over from a read and
+     * no write running. */
+    bool ready = (m->queueHead >= m->queueCount) && !m->writeActive;
+    double now = yagpc_monotonic_seconds();
+    if (m->readyPublished && ready == m->lastReady &&
+        now - m->lastReadyPublishSec < READY_REPUBLISH_SEC)
+        return;
+    uint32_t bit = (m->unit == 2) ? DISCRETE_A_MM2_READY : DISCRETE_A_MM1_READY;
+    discretes_publish(DISCRETES_REG_A, bit, ready);
+    if (m->verbose && (!m->readyPublished || ready != m->lastReady))
+        mm_log(m, "READY -> %d", (int)ready);
+    m->lastReady = ready;
+    m->readyPublished = true;
+    m->lastReadyPublishSec = now;
 }
 
 void mmumodel_report(const MmuModel *m) {
