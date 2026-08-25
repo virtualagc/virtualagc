@@ -58,6 +58,21 @@ CRT_SELECT = [("CRT select A", 6), ("CRT select B", 7)]
 
 GPC_ID_BITS = (0, 1, 2)          # register B, a 3-bit field
 
+# Bits that start made rather than broken.
+#
+# A panel is a panel whether or not anybody has touched it, so its resting
+# position has to be the one the hardware is in -- otherwise merely running
+# this program changes what the flight software sees.  That is not
+# hypothetical: register B bits 6-7 are not two independent switches, they
+# are the DEU_ID field.  GPCIPL reads them with `NHI R3,X'0300'` and treats
+# zero as "there is no display unit" (MLIB80/GPCRTOPT.asm, POLL30: "IS THE
+# DEU_ID 1, 2, 3, OR 4" / `LR R3,R3` / `BZ POLL45`), so publishing both bits
+# broken told it there was no CRT to talk to, and it stopped looking for a
+# display bus before it ever picked one.  Bit 7 alone is DEU_ID 1 -- CRT 1 --
+# which is what a GPC with nothing driving it reads: yaGPC2's
+# DISCRETE_IN_B_DEFAULT is 0x21000000, GPC 1 and CRT 1.
+DEFAULT_ON = {(D.REG_B, 7)}
+
 
 class Panel:
     def __init__(self, root):
@@ -163,7 +178,7 @@ class Panel:
 
     def _checks(self, parent, reg, items):
         for label, bit in items:
-            v = tk.BooleanVar(value=False)
+            v = tk.BooleanVar(value=(reg, bit) in DEFAULT_ON)
             self.toggles[(reg, bit)] = v
             ttk.Checkbutton(
                 parent,
