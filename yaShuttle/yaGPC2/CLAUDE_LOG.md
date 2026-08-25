@@ -3125,3 +3125,39 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
   trying the crew panel's MODE switch in RUN (and the IPL SOURCE bits) with
   --discretes, since the real sequence is HALT -> STBY -> IPL -> RUN, and
   checking whether the STM job loop is polling a discrete we never assert.
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- Traced WHY GPCIPL never drives the display. GPCIPL is healthy: it is
+  cycling REALEXEC's STMMAIN job dispatcher over minor/major cycles
+  (STMM0010 0x1DE1, STMWAIT 0x1DF6 "LET'S CATCH A SNOOZE", JOBTABLE 0x1E84).
+  Confirmed by R05 = 0xC8727FE0 at 60M steps == JOBTABLE[8] from
+  MLIB80/REALEXEC.asm exactly.
+- Jobs run only where SCHEDWRD ("requested jobs") AND JOBTABLE[minor cycle]
+  is set. JOBADDR: 0 DEUIPL (a Y(STMWAIT) stub in this build), 3 CM4POLL,
+  4 POLLRSP, 5 CM4UPDT, 6 CM4MENU, 7 CM4FMAT, 8 LOADCHK, 10 DBCNTL.
+- SCHEDWRD (0x036C2) history, via `--watch 36c2:2 --watch-log`:
+    1,905,806  0000 -> 1c20  DMA, i.e. straight off the tape
+    2,554,339  1c20 -> 1020  STH at 0x00548  = INIT08     (clears POLLRSP, CM4UPDT)
+    6,526,206  1020 -> 00a0  XST at 0x0201f  = POLL30     (clears CM4POLL, sets LOADCHK)
+    6,535,940  00a0 -> 0020  XST at 0x02d04  = LOADCHK5
+    6,666,468/6,690,729 via BSL1UPTA / BSLRSET6, settling at 0020
+  So it ends as 0x00200000 -- bit 10, DBCNTL -- and the display jobs were
+  unscheduled by GPCIPL's OWN code, not lost.
+- DKBUS (0x03BA1) is NEVER written in 9M steps, so POLL60 is never reached;
+  and FAZ2STRT+4 (0x05788), the "SAVE LOC FOR OLDDKB FROM PHASE 1" that
+  CM4POLL reads as "LEGAL DKBUS FOR POLLING", stays 0. Nothing ever selects
+  a display bus, which is why BCE 6 sees nothing.
+- CAUTION on attribution: POLL10/POLL30 are NOT in FAZ2DEU.asm (which has
+  only POLL03/05/06/60) -- they are in MLIB80/GPCRTOPT.asm. The early part
+  of CM4POLL I first read from FAZ2DEU.asm is a DIFFERENT routine from the
+  code actually at 0x201f. Re-read GPCRTOPT.asm before building on this.
+- LIKELY ROOT CAUSE, not yet confirmed: GPCRTOPT's POLL30 is headed "HAS THE
+  DCP BEEN LOADED INTO CORE" and does `TH DCPLDFL / BNZ POLL60` -- it only
+  goes on to select a bus if the Display Control Program is in core. Our
+  tape gives GPCIPL nothing beyond phase 10 (MMU: 16 commands, still only
+  the original 55 blocksRead), and tools/stamp_ipl_phase_table.py builds a
+  table for phases 10, 2, 13, 3 of which only 10 was ever verified. Next
+  step is the phase loading, not the display bus.
+- Also confirmed: `--watch <addr>:<n> --watch-log` works in the FAST path
+  (no --debug), which is the practical way to answer "what wrote this?"
+  without paying the debugger's ~4.5K steps/s.
