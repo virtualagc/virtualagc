@@ -3333,3 +3333,42 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
 - METHOD NOTE: my first DEU-image measurement ran BEFORE the store loop and
   read all-zeros regardless. Check where a probe sits relative to the write
   it is measuring.
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- DISPLAY FORMATS, and a claim of the user's that I had wrongly dismissed.
+  I said substituting OI301700 .hal for OI340600 .dfg was unsound because
+  the releases would have drifted. The user said the .hal files are
+  provably what DFG would have generated from the .dfg files. He is right,
+  and it is checkable: an OI301700 .hal IS DFG output and says so in its own
+  header --
+      DFG VERSION: 30.40 / DDT ENTRIES: 428 / PAD HALFWORDS: 0
+      STATIC FCWS(BUILT BY DFG): 2 / DYNAMIC FCWS(BUILT BY CYCLIC): 402
+      MAXIMUM FCW COUNT: 404 / GPC STORAGE(IN 32 BIT WORDS): 288
+  -- and it EMBEDS ITS OWN DFG INPUT as C-prefixed comment lines under a
+  "**** DFG INPUT ****" banner. So the .dfg we hold can be compared directly
+  against the input the .hal was generated from.
+- Normalisation needed for the comparison: strip the leading 'C' from the
+  .hal lines, take cols 1..72 only (sequence field lives in 73+ and differs
+  per file), drop the Virtual AGC "C/" banner from both, strip trailing
+  continuation commas, and drop DFG's own trailing "****"-prefixed
+  annotations (e.g. "**** REFERENCED COMPOOLS") which are output, not input.
+- RESULT over all 133: 85 IDENTICAL, 17 near (>=0.98), 24 genuinely
+  different, 7 with no OI301700 .hal at all (CG0540, CG0543, CG1031,
+  CG6011, XG0540, XG0543, XG1031). So 85 formats can be substituted WITH
+  PROOF, and all 85 double as a byte-exact regression corpus for DFG when it
+  lands: run DFG on the .dfg, diff against the .hal, any mismatch is a
+  converter bug rather than an ambiguity. The header accounting above is a
+  specification of what the converter must reproduce, taken from real
+  output, before the converter exists.
+- Script: dfgcmp.py, written to the session scratchpad only. 30 lines; the
+  rules above are enough to rewrite it. NOT preserved in a repo -- ask
+  before putting PASS-corpus tooling somewhere permanent.
+- ALSO ESTABLISHED, and it kills a suggestion of mine: OI301700 CANNOT be
+  phase-built. CON80/PDTIN/PSFIN are 0/0/0 there against 194/40/178 in
+  OI340600, and OI340600/CON80/PHASE10 is the phase-membership definition.
+  Its 1544 .hal files are compilable modules with nothing saying how they
+  group into phases or lay out on a tape.
+- PATTERN WORTH FIXING: twice in this session I reached a confident
+  conclusion from reasoning when the evidence was sitting in the files --
+  "our tape is deficient" (measured different pacing flags) and "the
+  substitution is unsound" (never compared a .dfg to a .hal). Measure first.
