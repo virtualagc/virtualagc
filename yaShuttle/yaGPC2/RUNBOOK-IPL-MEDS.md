@@ -29,11 +29,38 @@ Set these once per shell:
     export PATH="$SDL/build/bin:$PATH"
     export PY="$SDL/build/venv/bin/python"
     export SRC=~/workspace/PFS/OI340600
-    export WORK=~/ipl-build          # anywhere with a few hundred MB free
+    export WORK=~/ipl-demo           # the pre-built artifacts already live here
 
 `~/donschmidt/*` and `~/workspace/PFS` belong to other people or other
 processes.  Pull before changing anything, prefer read-only, and say what you
 touched.
+
+---
+
+## 0a. THE ARTIFACTS ALREADY EXIST — you can skip straight to part C
+
+Everything part C needs is pre-built in `~/ipl-demo` (19 MB):
+
+    ~/ipl-demo/tape/mmu2.mmv           the mass memory volume, 1085 blocks
+    ~/ipl-demo/boot/BOOT-stamped.fcm   FCMBOOT, phase table stamped  <- run this
+    ~/ipl-demo/boot/BOOT.fcm           before stamping, for reference
+    ~/ipl-demo/boot/BOOT.sym.json      its symbols
+    ~/ipl-demo/boot/FCMBOOT.log        the ASM101S listing -- the address reference
+    ~/ipl-demo/phases/PHASEnn.lib      the 25 linked phase load modules
+    ~/ipl-demo/phases/PHASEnn/*.sym.json
+
+So:
+
+* **To run the demo** — go to part C.  Nothing in part A or B is needed.
+* **To rewrite the tape** — part A.3 only; `~/ipl-demo/phases` is all it reads.
+  Verified: `--report` against it reproduces the same map, phase 10 at MM
+  address `42300`, position `2/4/3/0`, 55 blocks, 1085 blocks total.
+* **To rebuild the phases themselves** — part A.1, which needs the full
+  source build and produces about 12 GB of intermediates.
+
+These were built in an earlier session; the 12 GB of build intermediates
+behind them lived in a session temp directory and are gone.  Only the
+artifacts above were kept.
 
 ---
 
@@ -45,6 +72,8 @@ touched.
 phase, assembles/compiles them and links a load module.
 
     con80build --phase 10 --root "$SRC" --out "$WORK/phases"
+
+(Only needed if you are rebuilding from source — see section 0a.)
 
 Repeat for each phase you want on the tape.  For the FCMBOOT → GPCIPL demo
 you need at least:
@@ -85,7 +114,7 @@ image whose protection is wrong.  Phase 10 should report 9 ranges covering
         --con80 "$SRC/CON80" \
         --mmu   "$WORK/phases" \
         --area  1 \
-        --out   "$WORK/mmu.mmv"
+        --out   "$WORK/tape/mmu2.mmv"
 
 **`--area 1` matters.**  The areas are redundant copies of the same software
 at different tape addresses.  Area 1 is what the working tape uses: verified
@@ -184,7 +213,7 @@ before the GPC starts.
 
     cd ~/git/virtualagc/yaShuttle/yaGPC2
     ./yaGPC2 run --ipl --discretes --bce-network \
-        --mmu-model "$WORK/mmu.mmv" \
+        --mmu-model "$WORK/tape/mmu2.mmv" \
         --real-time --rt-factor 1 --max-steps 0 --rt-idle-timeout 900 \
         --verbose "$WORK/boot/BOOT-stamped.fcm"
 
@@ -236,7 +265,7 @@ without it there is zero display traffic and the machine looks dead.
 **Diagnosing headlessly.**  Swap `--bce-network` for `--deu-model` and drop
 `--discretes`, add `--time-scale 2000`, and read the counters printed at exit:
 
-    ./yaGPC2 run --ipl --mmu-model "$WORK/mmu.mmv" --deu-model \
+    ./yaGPC2 run --ipl --mmu-model "$WORK/tape/mmu2.mmv" --deu-model \
         --time-scale 2000 --max-steps 20000000 "$WORK/boot/BOOT-stamped.fcm"
 
 A healthy run reports roughly `mmu1: commands 41, blocksRead 88` and
