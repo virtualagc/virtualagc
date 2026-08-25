@@ -3004,3 +3004,42 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
 - STILL OPEN: what GPCIPL does once it has control -- the run ends without
   reaching a display load.  That is the next thing, and it is now a
   reproducible experiment rather than a timing lottery.
+- **CORRECTION: "FCMBOOT loads GPCIPL" WAS A FALSE POSITIVE.**  I claimed
+  it because breakpoint 0x4713 (GPCIPL's entry) hit.  It hit because the
+  machine was RUNNING AWAY THROUGH ZEROS from address 0 and slid through
+  0x4713 on the way -- the trace shows `004713: 0000  A 0,X'0000'(0)`,
+  i.e. it executed a zero halfword there, not GPCIPL's first instruction.
+  A breakpoint on an address a runaway traverses proves nothing.  Lesson:
+  when a breakpoint "proves" success, check the INSTRUCTION at it.
+- WHAT IS ACTUALLY TRUE, and it is still real progress.  With the timer
+  fix, FCMBOOT gets all the way through its load sequence and reaches the
+  handover: at 0x30239 it executes `LPS X'0014'` -- its own "ISSUE THE
+  SYSTEM RESET" -- which is how it gives control to GPCIPL, by loading the
+  PSW from PSA 0x0014 where GPCIPL's own reset vector should now be.
+  The PSW it loads is 0x00000000.  Execution therefore starts at address
+  0 and slides through empty store for ~32,000 instructions until it
+  reaches FCMSSLPT and hits an invalid opcode: "invalid instruction
+  0xc99c at 0x7c3c".  2,707,470 steps, reproducible.
+- THE PUZZLE, unresolved.  The tape has the right vector: LB1 carries
+  0x0014 = 013F 0011 0008, which is GPCIPL's SRESINTN -> IOPHISAM, and
+  the composed IPL image agrees.  But at the moment of the LPS, memory
+  holds:
+        addr    memory   tape
+        0x0004  0000     0235
+        0x0014  0000     013F
+        0x0044  0000     08A6
+        0x1000  8000     8000   <- matches
+        0x3C21  D779     D779   <- matches
+  So the PSA end of LB1 did not take while the rest of it did.  Ruled
+  out: store protection.  iop_write_main16() does enforce it and raises
+  External 1 (DMA store protect violation, code 0004) on refusal, and
+  YAGPC_INTTRACE reports ZERO interrupts dispatched for the whole run --
+  nothing was refused.
+  Also unexplained alongside it: breakpoint 0x3034e (checksum FAILURE)
+  still hits in this run as well as 0x30352 (pass), so some load block is
+  still being rejected.  If LB1's PSA really is zeros in memory while the
+  tape has content there, LB1's checksum could not pass -- so the two
+  observations need reconciling before either is trusted.  Do that first.
+- FCMSSLPT IS being written: memory at 0x7C00 reads 000c 0005, which is
+  our own phase descriptor (index 12, 5 load blocks).  So FCMBOOT does
+  copy its table there for the SSL, as its prolog says.
