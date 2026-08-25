@@ -126,7 +126,7 @@ struct MmuModel {
     double lastReadyPublishSec;
 
     struct {
-        long commands, blocksRead, blocksWritten, wordsOut, wordsIn;
+        long commands, blocksRead, blocksWritten, wordsOut, wordsIn, wordsTaken;
     } stats;
 };
 
@@ -541,10 +541,11 @@ void mmumodel_report(const MmuModel *m) {
     if (!m) return;
     fprintf(stderr,
             "mmu%d: {\"commands\":%ld,\"blocksRead\":%ld,\"blocksWritten\":%ld,"
-            "\"wordsOut\":%ld,\"wordsIn\":%ld,\"position\":\"%d/%d/%d\"}\n",
+            "\"wordsOut\":%ld,\"wordsTaken\":%ld,\"wordsIn\":%ld,"
+            "\"position\":\"%d/%d/%d\"}\n",
             m->unit, m->stats.commands, m->stats.blocksRead,
-            m->stats.blocksWritten, m->stats.wordsOut, m->stats.wordsIn,
-            m->track, m->file, m->subfile);
+            m->stats.blocksWritten, m->stats.wordsOut, m->stats.wordsTaken,
+            m->stats.wordsIn, m->track, m->file, m->subfile);
 }
 
 void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
@@ -584,6 +585,7 @@ void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
             output->out.recv.word = w;
             output->out.recv.available = true;
             m->queueHead++;
+            m->stats.wordsTaken++;
             if (m->queueHead == m->queueCount) m->queueHead = m->queueCount = 0;
         } else {
             output->out.recv.available = false;

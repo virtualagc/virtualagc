@@ -297,17 +297,35 @@ bool mia_data_available(struct IOP *iop, MIA *m) {
 }
 
 uint32_t mia_get_data(struct IOP *iop, MIA *m) {
-    /* Whatever is still in the adapter came off the bus before anything
-     * the far end has queued since, so it goes first. */
+    if (iop->servicer) {
+        GpcServiceInput input = {.busID = m->bceNum, .address = 0};
+        GpcServiceOutput output = {0};
+        iop->servicer(iop->servicerCtx, GPC_SVC_RECV_WORD, &input, &output);
+        if (output.out.recv.available) {
+            /* A word actually on the bus OVERWRITES the adapter's buffer.
+             * The latch is only what is left there when nothing newer has
+             * come along; it does not queue ahead of live traffic.
+             *
+             * Handing the latch over first -- what this did -- was right
+             * for the case it was written for and wrong everywhere after
+             * it.  FCMBOOT's last load block ends in a delay like all the
+             * others, but nothing follows it to spend the latched word on,
+             * so it sat there until GPCIPL's first BITE STATUS took it as
+             * one of the two status words and left a real one behind.
+             * From then on every reply that unit sent was read one place
+             * late: GPCIPL stored the POSITION reply (0x14A0) where status
+             * belonged, and X'F800FFFF' -- its own MMU error mask -- made
+             * that an error, so BSL1 reported ERROR 118 "MMU ERROR" and
+             * reset instead of loading anything. */
+            m->latchValid = false;
+            return output.out.recv.word;
+        }
+    }
     if (m->latchValid) {
         m->latchValid = false;
         return m->latch;
     }
-    if (!iop->servicer) return 0;
-    GpcServiceInput input = {.busID = m->bceNum, .address = 0};
-    GpcServiceOutput output = {0};
-    iop->servicer(iop->servicerCtx, GPC_SVC_RECV_WORD, &input, &output);
-    return output.out.recv.available ? output.out.recv.word : 0;
+    return 0;
 }
 
 void mia_xmit_word(struct IOP *iop, MIA *m, uint32_t halfword) {
