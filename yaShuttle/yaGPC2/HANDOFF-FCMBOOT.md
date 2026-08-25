@@ -61,19 +61,52 @@ and are recorded here so they are not re-derived:
 - The PSA zeros seen at the LPS came from a later, worse retry, not from
   the first load. LB1 was always byte-perfect, PSA included.
 
+**GPCIPL then goes on to drive the display.** It runs its `MEMTST22`
+memory sweep, cycles REALEXEC's `STMMAIN` job dispatcher, loads further
+phases off the tape, sets `DCPLDFL`, reaches `POLL60`, IPLs the display
+unit and drives the DK bus. Measured on the in-process DEU:
+`commands 6648, fills 2224, displayFills 518, formatFills 8,
+timeFills 512, headerless 0, ipled true`.
+
+Two more emulator bugs were fixed to get there, both in the bus model and
+both found by adding a counter rather than by reading code:
+
+- **The MIA latch queued ahead of live traffic** (`82fb09d3b`). The latch
+  added with the delay-discard was handed over before anything newer.
+  FCMBOOT's LAST load block ends in a delay like the others, but the
+  "CLEAR THE MIA BUFFER" `#RDLI` is only emitted *ahead of* a block that
+  followed one, so the word survived into GPCIPL's first BITE STATUS and
+  shifted every later reply by one. GPCIPL stored the POSITION reply
+  (0x14A0) where status belonged; its own mask is `X'F800FFFF'`, so BSL1
+  called ERROR 118 "MMU ERROR" and reset. Found by `wordsOut` vs
+  `wordsTaken`: 28182 against 28181.
+- **A transfer's unread tail was never dropped** (`629694ebf`). GPCIPL's
+  loader left 360 unread words of a 4096-word transfer, so every later
+  reply was 360 words late and BSL1 called ERROR 116 INVALID POSITION.
+  Now a new command ends the last transfer and its unread stream goes,
+  plus a block-gap-grace ageing rule for a stream nothing follows. **Only
+  STREAMED words are ever dropped** — a reply is not paced and never ages
+  out, and the timing rule alone left two orphaned status words at the
+  head of the queue forever. Found by printing `pending` at each command.
+
 ### The open thread — START HERE
 
-GPCIPL runs but takes **unrecognized SVCs** and loops. `halucp`'s HAL/S
-SVC intercept is firing on GPCIPL's own assembly SVCs and passing them
-through to the real interrupt:
+**Our built tape does not drive the display as well as Don's reference
+image does.** Same emulator, same MEDS, same mass memory, same
+preconditions — the only variable is the software:
 
-    SVC DEBUG: ea=0x0 R1=0xff0e0000 NIA=0x1b57 mem[ea]=0x0000
-    HAL/S SVC unrecognized, passing to real interrupt
+| image | DISPLAY_FILL | over |
+|---|---|---|
+| `~/Desktop/IPL/IPL.fcm` (Don's) | **87** | 45 s |
+| our FCMBOOT chain + `mmu2.mmv` | **4** | 40 s |
 
-Sites seen: 0x1153 (ea=0x80ce), 0x1B57, 0x1CDA, 0x2DED (ea=0x76). An
-`ea` of 0 with a code of 0 says the effective address is not being formed
-the way GPCIPL means it — likely the same expanded/unexpanded confusion
-that MVH had. Start by reading GPCIPL's own source at those addresses.
+The reference renders correctly and the user confirmed it visually on
+2026-08-25 — the flashing banner, header clock and Mode/BSR1 fields, as
+on 08-23. Ours shows the clock and little else. So the emulator is doing
+its job and the shortfall is in what our build puts on the tape, which
+fits the other loose end: `BSLRESET` is still reached somewhere after the
+first successful loads, so the later phases carrying the display formats
+are not all getting in. Start there, not in the emulator.
 
 ---
 
@@ -97,6 +130,29 @@ Paths (scratchpad, session-specific — recreate if gone, see §5):
 
     ./yaGPC2 run --ipl --mmu-model $SP/tape/mmu2.mmv --deu-model \
         --max-steps 40000000 $SP/boot/BOOT-stamped.fcm
+
+**Against the real MEDS display** -- RESTART MEDS FIRST, every time (§5.7):
+
+    $SP/launch_meds.sh --size 512 crt1 idp1        # 512 = half size
+    python3 yaShuttle/discretePanel/discretePanel.py
+    ./yaGPC2 run --ipl --discretes --bce-network \
+        --mmu-model $SP/tape/mmu2.mmv --max-steps 0 --verbose \
+        $SP/boot/BOOT-stamped.fcm
+
+**The KNOWN-GOOD reference**, which renders properly (user-confirmed
+2026-08-25).  Note `--mmu-model` is required even though IPL.fcm holds the
+whole composed image, and `--power-on` rather than `--ipl`:
+
+    ./yaGPC2 run --power-on --discretes --bce-network \
+        --mmu-model $SP/tape/mmu2.mmv --real-time --rt-factor 1 \
+        --max-steps 0 --rt-idle-timeout 900 ~/Desktop/IPL/IPL.fcm
+
+To see what is actually reaching the display, count the wire traffic by
+function code -- `$SP/dk5.py <seconds>` does it, and the numbers to beat
+are the reference's 87 DISPLAY_FILL in 45 s.  Time-scale note: the CLI
+paces to REAL TIME by default, so use `--time-scale 200` or more for
+investigation runs; it changes only wall-clock sleeping, never the
+emulated clock the MMU pacing depends on.
 
 Add `--break <hexaddr>`, `--watch <hexaddr>`, `--verbose` (register dump at
 stop), `--trace` (~100 bytes/step), or `--debug` with commands piped on
@@ -195,7 +251,27 @@ Emulator fixes made (all with POO citations, all committed):
    card form (`42300`) — the latter silently reads blank tape.
 6. **Probe instruction *starts***, taken from the listing. 0x1c0 is the
    second halfword of the instruction at 0x1bf and never hits.
-7. **A "wait state" stop exits 0 and prints nothing** without `--verbose`.
+7. **MEDS RETAINS ITS IPLed STATE between GPC runs.**  Its poll reply
+   then has the IPL-REQUIRED bit clear and `w12 = 0xc000`
+   (`BITE1_IPL_DONE`), GPCIPL skips the DEU load, and the display FORMATS
+   are part of that load -- so the screen shows the clock and nothing
+   else.  **Restart MEDS before every run.**  The in-process `--deu-model`
+   starts un-IPLed every time, which is why it saw all 518 display fills
+   while the wire saw none, and why the two disagreed for hours.
+8. **GPCIPL needs the mass memory ATTACHED even when the whole composed
+   image is already in core.**  `--power-on ... IPL.fcm` alone gives ZERO
+   display traffic; add `--mmu-model` and it comes alive.  Verified
+   against a worktree build of the pre-today commit, so this is not a
+   regression -- the 08-23 session simply had Don's MMU running.
+9. **The command function code is `(w0 >> 1) & 0x3ff` on the WIRE word**
+   and `(cmd24 >> 9) & 0x3ff` on the 24-bit internal form.  Mixing them
+   makes real traffic look like nothing recognisable.  Wire framing is
+   IUA byte + reserved byte + words, ONE WORD PER DATAGRAM -- deliberate,
+   see bcenet_framer.c; batching was tried and broke the peer.
+10. **Reach for a counter before reading code.**  Both bus bugs above were
+   invisible in the source and obvious the moment the right number was
+   printed: `wordsOut` vs `wordsTaken`, and `pending` per command.
+11. **A "wait state" stop exits 0 and prints nothing** without `--verbose`.
    Silence is a result, not a failure to run.
 
 ---
