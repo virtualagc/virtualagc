@@ -89,24 +89,43 @@ both found by adding a counter rather than by reading code:
   out, and the timing rule alone left two orphaned status words at the
   head of the queue forever. Found by printing `pending` at each command.
 
-### The open thread — START HERE
+### IT WORKS END TO END — user-confirmed on screen, 2026-08-25
 
-**Our built tape does not drive the display as well as Don's reference
-image does.** Same emulator, same MEDS, same mass memory, same
-preconditions — the only variable is the software:
+Booting our own `BOOT-stamped.fcm` from our own `mmu2.mmv`, GPCIPL drives
+MEDS and the display renders correctly.  Wire traffic in 45 s:
 
-| image | DISPLAY_FILL | over |
-|---|---|---|
-| `~/Desktop/IPL/IPL.fcm` (Don's) | **87** | 45 s |
-| our FCMBOOT chain + `mmu2.mmv` | **4** | 40 s |
+    POLL 87, TIME_FILL 88, DISPLAY_FILL 87, FORMAT_FILL 7
 
-The reference renders correctly and the user confirmed it visually on
-2026-08-25 — the flashing banner, header clock and Mode/BSR1 fields, as
-on 08-23. Ours shows the clock and little else. So the emulator is doing
-its job and the shortfall is in what our build puts on the tape, which
-fits the other loose end: `BSLRESET` is still reached somewhere after the
-first successful loads, so the later phases carrying the display formats
-are not all getting in. Start there, not in the emulator.
+which matches Don's reference `IPL.fcm` (87 DISPLAY_FILL in 45 s) exactly.
+
+**A retracted claim, recorded so it is not believed again.**  An earlier
+version of this section said our tape was deficient, on a measurement of
+4 DISPLAY_FILL against the reference's 87.  That was wrong: the two runs
+used DIFFERENT PACING FLAGS.  The CLI's default is `--pacing=burst
+--time-scale 1.0`; the reference used `--real-time --rt-factor 1`.  Those
+are different mechanisms and produce very different emulated-time rates,
+so the comparison measured the flags, not the software.  With identical
+flags the two images agree.  `--deu-model` had already said so --
+displayFills 518 against 690 -- and I did not believe the instrument.
+
+Likewise `BSLRESET` being reached is NOT a failure: `BSLRQP15` is the
+SUCCESS path ("SHW LOADFLAG  SET GOOD COMPLETION FLAG" / "BAL R5,BSLRESET
+GO RESET FLAGS").  Two dead ends in one day from the same habit -- change
+one variable at a time, and check whether the thing you are calling an
+error is on the error path at all.
+
+### What is actually still open
+
+- `make test` fails four suites: `test/test_debugger.sh`,
+  `test_cpu_instr_exec`, `test_iop_bce_exec`, `test_iop_msc_exec`.  They
+  fail identically with the whole tree stashed, so they predate all of
+  this, but they are real and nobody has looked at them.
+- GPCIPL emits a stream of "HAL/S SVC unrecognized, passing to real
+  interrupt" for its own assembly SVCs.  It gets on with its work, so
+  this may be only noise from halucp's intercept -- but that has not been
+  established either way.
+- This is the IPL.  Loading the full PASS flight software on top of it is
+  a further step that has not been attempted.
 
 ---
 
@@ -131,13 +150,19 @@ Paths (scratchpad, session-specific — recreate if gone, see §5):
     ./yaGPC2 run --ipl --mmu-model $SP/tape/mmu2.mmv --deu-model \
         --max-steps 40000000 $SP/boot/BOOT-stamped.fcm
 
-**Against the real MEDS display** -- RESTART MEDS FIRST, every time (§5.7):
+**Against the real MEDS display, the run that WORKS.**  Restart MEDS
+first, every time (§5.7), and use these pacing flags -- the CLI's default
+burst pacing gives a twentieth of the display traffic and a nearly blank
+screen:
 
     $SP/launch_meds.sh --size 512 crt1 idp1        # 512 = half size
     python3 yaShuttle/discretePanel/discretePanel.py
     ./yaGPC2 run --ipl --discretes --bce-network \
-        --mmu-model $SP/tape/mmu2.mmv --max-steps 0 --verbose \
+        --mmu-model $SP/tape/mmu2.mmv --real-time --rt-factor 1 \
+        --max-steps 0 --rt-idle-timeout 900 --verbose \
         $SP/boot/BOOT-stamped.fcm
+
+Then move the crew panel's GPC MODE SWITCH from HALT to STBY.
 
 **The KNOWN-GOOD reference**, which renders properly (user-confirmed
 2026-08-25).  Note `--mmu-model` is required even though IPL.fcm holds the

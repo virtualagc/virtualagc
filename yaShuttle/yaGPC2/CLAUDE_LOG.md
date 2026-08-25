@@ -3276,3 +3276,25 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
   the user pointed out it read 000/00:05:02 -- mission-elapsed, counting from
   IPL, not wall time. The first answer was right. Retracting on weaker
   evidence than the original claim is its own failure mode.
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- END TO END, user-confirmed on screen: our own BOOT-stamped.fcm booting
+  GPCIPL off our own mmu2.mmv drives MEDS and the display renders. Wire
+  traffic in 45 s: POLL 87, TIME_FILL 88, DISPLAY_FILL 87, FORMAT_FILL 7 --
+  matching Don's reference IPL.fcm exactly.
+- RETRACTED: "our tape is deficient, 4 DISPLAY_FILL against the reference's
+  87". The two runs used DIFFERENT PACING FLAGS -- default --pacing=burst
+  --time-scale 1.0 against --real-time --rt-factor 1. Different mechanisms,
+  very different emulated-time rates. The comparison measured the flags.
+  With identical flags the images agree. --deu-model had ALREADY said so
+  (displayFills 518 vs 690) and I did not believe the instrument.
+- RETRACTED: "BSLRESET is still reached, so something fails". BSLRQP15 is
+  the SUCCESS path -- "SHW LOADFLAG SET GOOD COMPLETION FLAG / BAL R5,
+  BSLRESET GO RESET FLAGS". Check whether the label you are calling an
+  error is on the error path before building on it.
+- BOTH dead ends came from changing more than one variable at a time. That
+  is the lesson of the day, above any of the individual bugs.
+- USER FEEDBACK, and it was right: my summaries led with what worked and
+  buried the failure in a closing clause, while a screen that looked
+  perfect sat in front of the user. Lead with the state of the goal --
+  working or not -- and put the achievements after it.
