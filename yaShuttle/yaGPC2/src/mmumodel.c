@@ -126,7 +126,7 @@ struct MmuModel {
     double lastReadyPublishSec;
 
     struct {
-        long commands, blocksRead, blocksWritten, wordsOut, wordsIn, wordsTaken;
+        long commands, blocksRead, blocksWritten, wordsOut, wordsIn, wordsTaken, wordsLost;
     } stats;
 };
 
@@ -198,11 +198,32 @@ static void queue_words(MmuModel *m, const uint16_t *w, size_t n) {
  * the software arranges to lose them, by delaying -- iop_bce_delay is
  * what throws those away. */
 static bool bus_word(MmuModel *m, uint16_t *out) {
+    double now = mm_now(m);
+    while (m->queueHead < m->queueCount) {
+        uint32_t s = m->slot[m->queueHead];
+        if (s == SLOT_UNPACED || !m->clockUs) break;
+        double due = m->burstStartUs + (double)s * BUS_WORD_US;
+        if (now < due) return false;            /* not on the bus yet */
+        /* Long overdue, so nobody was listening.  A streamed word is gone
+         * once it has gone past, and the bus program does not have to
+         * account for every word a transfer puts on the wire: it takes
+         * what it wants and stops, and GPCIPL's loader does exactly that,
+         * leaving 360 of a 4096-word transfer unread.  Keeping them made
+         * every later reply that many words late -- BSL1 read a leftover
+         * tape word as the transport position and called ERROR 116.
+         *
+         * A whole block gap of grace, against a bus controller that drains
+         * everything available each time it runs and gets a slice every 33
+         * instructions: 8.4 ms of margin against about 50 us of exposure,
+         * so this cannot reach a word an armed receive was going to take.
+         * That margin is the whole reason the rule is safe, and it is why
+         * the discard lives here and not in the receive, which cannot tell
+         * "finished" from "between two receives of one transfer". */
+        if (now <= due + (double)BLOCK_GAP_WORDS * BUS_WORD_US) break;
+        m->queueHead++;
+        m->stats.wordsLost++;
+    }
     if (m->queueHead >= m->queueCount) return false;
-    uint32_t s = m->slot[m->queueHead];
-    if (s != SLOT_UNPACED && m->clockUs &&
-        mm_now(m) < m->burstStartUs + (double)s * BUS_WORD_US)
-        return false;
     *out = m->queue[m->queueHead];
     return true;
 }
@@ -319,7 +340,31 @@ static void on_command(MmuModel *m, uint32_t cmd24) {
         "?4", "?5", "?6", "?7", "WRITE", "READ", "WRITE ENABLE",
         "?B", "?C", "?D", "?E", "?F"
     };
-    mm_log(m, "cmd %06x  %s", cmd, opName[opcode]);
+    /* A new command ends the last transfer, and whatever it was still
+     * streaming is gone -- the unit stops sending and starts answering.
+     * Ageing those words out on the clock alone was not enough: the grace
+     * a streamed word gets is a whole block gap, and the loader issues its
+     * next command sooner than that, so 360 unread words of an 8-block
+     * transfer were still queued when the following BITE STATUS arrived.
+     * Once the sequence slips it never recovers, because a REPLY is not
+     * paced and so never ages out at all: two orphaned status words sat at
+     * the head of the queue for the rest of the run and every later reply
+     * was read two words late.
+     *
+     * Only streamed words go.  A reply the bus program has not collected
+     * yet is not something this unit would have thrown away, and nothing
+     * in the software races one. */
+    while (m->queueHead < m->queueCount && m->slot[m->queueHead] != SLOT_UNPACED) {
+        m->queueHead++;
+        m->stats.wordsLost++;
+    }
+
+    /* The pending count is the thing to watch.  A reply is only read for
+     * the command that asked for it while the queue is empty when it is
+     * queued; anything left over puts every later reply that many places
+     * late, which is how a POSITION word ends up read as a status word. */
+    mm_log(m, "cmd %06x  %-14s  pending %zu", cmd, opName[opcode],
+           m->queueCount - m->queueHead);
 
     /* A command arriving mid-transfer is an error in its own right, and
      * the transfer it interrupted is abandoned. */
@@ -541,11 +586,11 @@ void mmumodel_report(const MmuModel *m) {
     if (!m) return;
     fprintf(stderr,
             "mmu%d: {\"commands\":%ld,\"blocksRead\":%ld,\"blocksWritten\":%ld,"
-            "\"wordsOut\":%ld,\"wordsTaken\":%ld,\"wordsIn\":%ld,"
-            "\"position\":\"%d/%d/%d\"}\n",
+            "\"wordsOut\":%ld,\"wordsTaken\":%ld,\"wordsLost\":%ld,"
+            "\"wordsIn\":%ld,\"position\":\"%d/%d/%d\"}\n",
             m->unit, m->stats.commands, m->stats.blocksRead,
             m->stats.blocksWritten, m->stats.wordsOut, m->stats.wordsTaken,
-            m->stats.wordsIn, m->track, m->file, m->subfile);
+            m->stats.wordsLost, m->stats.wordsIn, m->track, m->file, m->subfile);
 }
 
 void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
