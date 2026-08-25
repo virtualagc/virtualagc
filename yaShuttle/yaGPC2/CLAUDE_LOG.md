@@ -2639,3 +2639,36 @@ document's planning stages, and it is already in the code as
      must be pasted into the reply itself.
 - Trace prints only on CHANGE, so a RESET of a bit already 0 prints nothing --
   looks like a miss but is correct; the shadow state starts at 0.
+- GPC MODE SWITCH (HALT/STBY/RUN) now modelled, as the user asked: not as a
+  discrete the software reads -- FCMBOOT never tests those bits, the whole
+  module mentions them only in one comment -- but as the RESET LINE it is,
+  carried on the discrete bus so its state is KNOWABLE to yaGPC2 instead of
+  being implicit in a CLI flag.  PASS User's Guide 2.3 is explicit: 3.1 HALT
+  = "hardware RESET controlled state.  No software can be executed"; 3.2 STBY
+  "entered from HALT ... causes the hardware to be released from the RESET
+  state giving control to the software.  If IPL occurred, control will be
+  given to the Bootstrap Loader program."
+  * run.c: mode_switch_held() reads discrete A bits 0/1/2, holds the CPU out
+    of execution entirely while HALT is asserted, and on the HALT->STBY EDGE
+    calls cpu_reset() -- reloading the PSW pair from the System Reset vector,
+    which is what hands control to FCMBOOT.  The edge matters, not the level.
+  * Backward compatible: nothing publishes those bits by default, all three
+    read zero, no position asserted, machine runs exactly as before.
+  * VERIFIED end to end from a separate process:
+        MODE: HALT; CPU held in reset
+        MODE: HALT -> STBY; reset released, starting at 0x0014b
+    0x14b is FCMBMOVR, exactly where FCMBSYRS (PSA 0x0014) points.
+- CORRECTED MYSELF twice here, both worth keeping:
+  1. I ran FCMBOOT with --power-on and got silence, then called it a puzzle.
+     It was correct: FCMBOOT's power-on vector (PSA 0x0004) is address 0000
+     with the WAIT STATE BIT set -- at power-on it deliberately parks.  Only
+     System Reset (0x0014 -> FCMBMOVR) starts the bootstrap.  Use --ipl.
+  2. I called the stalled 2-second delay a yaGPC2 "bug".  It is not.  The
+     POO makes Load/Start/Stop Counter 1 explicit ICR functions, so counters
+     do not free-run; FCMBOOT reads the PC1 clock without ever starting it,
+     assuming something already did.  That something is the firmware IPL
+     (Table 2-2 step 10, "GPC IPL - P/R ... Bootstrap loader read in from
+     MMU"), which we do not emulate.  Same missing microcode as the tape
+     load, showing up a second way -- not a defect in our CPU.
+- FCMBOOT still stalls in that delay: verified at 300,000 steps it visits
+  only 000155/000156/000157/000159 with R06 stuck at 62 and R05 unchanged.

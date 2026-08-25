@@ -343,7 +343,78 @@ static void format_watchpoint_msg(BatchRunner *r, uint32_t addr, uint16_t before
 static volatile sig_atomic_t g_sigint_received;
 static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, long step, int exitCode);
 
+/* The GPC MODE switch -- HALT / STBY / RUN -- modelled as the reset line
+ * it actually is.
+ *
+ * It is NOT a discrete input the software reads: FCMBOOT never tests these
+ * bits, and grepping the whole module finds only a comment about them.  It
+ * is hardware.  PASS User's Guide 2.3:
+ *
+ *   3.1  HALT mode - "the GPC is in a hardware RESET controlled state.  No
+ *        software can be executed."
+ *   3.2  STBY mode - "When entered from HALT, this mode causes the hardware
+ *        to be released from the RESET state giving control to the
+ *        software.  If IPL occurred, control will be given to the
+ *        Bootstrap Loader program."
+ *
+ * Carrying it on the discrete bus regardless is deliberate.  It is the
+ * panel switch a person actually throws; this emulator has to know its
+ * position to honour it at all; and discrete register A already documents
+ * bits 0-2 as exactly this switch, so there is a natural place to put it.
+ * Modelling it "as something like a discrete input" is what makes the
+ * state knowable rather than implicit in a command-line flag.
+ *
+ * Nothing publishes these bits by default, in which case all three read
+ * zero, no position is asserted, and the machine runs exactly as before --
+ * so this only ever takes effect when somebody is actually driving it. */
+#define MODE_HALT 0x80000000u   /* IBM bit 0 */
+#define MODE_STBY 0x40000000u   /* IBM bit 1 */
+#define MODE_RUN  0x20000000u   /* IBM bit 2 */
+#define MODE_ANY  (MODE_HALT | MODE_STBY | MODE_RUN)
+
+/* Position last seen, so the HALT->STBY EDGE can be caught: it is the
+ * transition, not the level, that releases reset and starts the
+ * bootstrap. */
+static uint32_t g_prevMode = 0;
+static bool g_modeReported = false;
+
+/* True when the machine is held in reset and must not execute. */
+static bool mode_switch_held(BatchRunner *r) {
+    if (!discretes_enabled()) return false;
+    discretes_poll();
+    uint32_t driven = discretes_driven_mask(DISCRETES_REG_A);
+    uint32_t mode = discretes_value(DISCRETES_REG_A) & driven & MODE_ANY;
+
+    if (mode != g_prevMode) {
+        if ((g_prevMode & MODE_HALT) && (mode & MODE_STBY)) {
+            /* The release.  Reload the whole PSW pair from the System
+             * Reset vector, which is what hands control to FCMBOOT. */
+            cpu_reset(&r->age.gpc.cpu);
+            fprintf(stderr, "MODE: HALT -> STBY; reset released, "
+                            "starting at 0x%05x\n",
+                    psw_get_nia(&r->age.gpc.cpu.psw));
+        } else if (mode & MODE_HALT) {
+            fprintf(stderr, "MODE: HALT; CPU held in reset\n");
+        } else if (mode != 0) {
+            fprintf(stderr, "MODE: %s\n",
+                    (mode & MODE_RUN) ? "RUN" : "STBY");
+        }
+        g_prevMode = mode;
+        g_modeReported = true;
+    }
+    (void)g_modeReported;
+    return (mode & MODE_HALT) != 0;
+}
+
 static bool batchrunner_step(BatchRunner *r) {
+    /* Before anything else: in HALT the machine executes nothing at all. */
+    if (mode_switch_held(r)) {
+        /* Nothing to do but wait for the switch to move; don't spin a
+         * core doing it. */
+        yagpc_sleep_seconds(0.002);
+        return true;
+    }
+
     RegSnapshot before, after;
     ageharness_snapshot_regs(&r->age, &before);
     uint32_t nia = psw_get_nia(&r->age.gpc.cpu.psw);
