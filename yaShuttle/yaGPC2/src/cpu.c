@@ -1185,8 +1185,30 @@ static uint32_t tick_counter(CPU *cpu, uint32_t low, uint32_t hiAddr,
     while (v < 0) {
         v += 0x10000;
         /* Masked: the low halfword goes on counting, the high one is left
-         * alone, and the borrow is owed until the mask lifts. */
-        if (!unmasked) { *deferred = true; continue; }
+         * alone, and the borrow is owed until the mask lifts.
+         *
+         * Except when the count has actually run out.  A borrow with the
+         * high halfword already 0000 is not a decrement at all -- it is the
+         * timeout, and the wrap to FFFF is how the hardware says so.  That
+         * happens whether or not anyone is listening; masking only defers
+         * the *interrupt*, which stays pending here either way.
+         *
+         * GPCIPL's own clock self-test (STM1 CLCK1000) is what settles
+         * this.  It runs under SSM INHCLKS with both clock interrupts
+         * masked, writes the counter, then adds 1 to the high halfword and
+         * requires 0000 back.  Clock 1 is written FFFFFFFF and passes on
+         * FFFF+1.  Clock 2 -- the loop never reloads R4, so it gets
+         * whatever is left, 00000000 -- is written zero, times out on the
+         * very next microsecond, and only reads back FFFF if that wrap is
+         * allowed to happen while masked.  Defer it and the test reads
+         * 0000, scores 0001, and reports error 206, "CLOCK2 CANNOT BE SET
+         * TO ZEROS".  The reference emulator has no mask check at all and
+         * so passes; deferring ordinary borrows is still needed here, or
+         * FCMBOOT's 00B0 drifts out from under its own load. */
+        if (!unmasked && membus_get16(cpu->ram, hiAddr) != 0) {
+            *deferred = true;
+            continue;
+        }
         counter_borrow(cpu, hiAddr, pending);
     }
     return (uint32_t)v & 0xffffu;
