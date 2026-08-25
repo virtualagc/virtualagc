@@ -2926,3 +2926,48 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
   line reflects the transport, by which time the BCE physically has the
   words.  UNPROVEN; the watchpoint shows only that D779 arrives, not that
   it arrives before the sum is taken.
+- IN-PROCESS MASS MEMORY BUILT: src/mmumodel.c/.h, --mmu-model <volume>
+  (+ --mmu-unit).  Ports mmu.coffee / mmuConf.coffee / volume.coffee into
+  C -- same command decode, position model, block sequencing, status
+  latching and .mmv volume format -- answering synchronously in the same
+  call, no socket, no drops, no pacing.  Unlike --deu-model it takes ONE
+  bus and leaves the rest alone (run.c's new bus_router_service), so it
+  composes with --bce-network and --deu-model: a run can have a
+  reproducible tape AND a real display.
+  IT WORKS AND IT IS REPRODUCIBLE: three identical runs, byte-identical
+  reports -- 24 commands, 330 blocks read, 168,972 words out.  That was
+  the whole point; the networked runs disagreed with themselves.
+- WITH DETERMINISM, THE CHECKSUM FELL IN ONE SITTING.  And the transport
+  is exonerated: with NO socket involved the checksum still failed, so it
+  was never the bus.
+  ROOT CAUSE, and it is MINE: PSA 0x00B0 is COUNTER 1's HIGH HALFWORD, and
+  it lies inside the region FCMBOOT checksums.  Phase 10's LB1 is
+  start=0x00000 len=15394, i.e. 0x0000..0x3C21.  The tape writes FFFF
+  there; tick_counter (cpu.c) decrements that cell on every borrow,
+  bypassing store protection.  Five borrows separate the load from the
+  checksum, so the sum came out five short.
+  MEASURED, not inferred: at the compare (breakpoint 0x3034b, reachable
+  now that runs are deterministic) R04=D774 against a stored D779, R05=
+  0x3C21 = length-1, R06=5 blocks; and `x 0xb0 2` reads FFFA where the
+  tape has FFFF.  FFFF-FFFA = 5 = D779-D774.
+  PROVED by experiment: suppressing the writeback made 0x30352 -- the
+  checksum ACCEPT path -- hit for the first time.  Experiment reverted;
+  it falsifies hardware behaviour and is not a fix.
+- THE OPEN QUESTION, which needs evidence I do not have.  FCMBOOT reads
+  the PC1 clock in SIX places and never starts or stops it, so a clock
+  must be running throughout -- including at 0x2C4/0x2C7, after the load.
+  But any running counter rewrites 0x00B0 every ~65.5 ms, and a load
+  block covering the PSA can then never checksum reliably.  Both cannot
+  be true of the real machine.  Candidates, weakest link first:
+   1. MY RECONSTRUCTED LB1 IS WRONG.  A sane ground build would not put
+      volatile PSA cells inside a checksummed load block.  I derived the
+      blocks with mmbstamp.derive_load_blocks, which is written for the
+      SSL's #PFCMGPT table, and I flagged the contiguous-layout
+      assumption when I wrote the stamper.  This is the most likely
+      culprit and the cheapest to test.
+   2. Counter 1 is not actually running during the load -- but then
+      FCMBOOT's own 2-second delay never expires.
+   3. The high-half writeback does not work as cpu.c models it.
+  yaGPC2's own --ipl counter-1 arming (commit b292bb8a6) was already
+  labelled a MODEL OF ASSUMED FIRMWARE BEHAVIOUR; this is the first
+  evidence bearing on it, and it cuts against.

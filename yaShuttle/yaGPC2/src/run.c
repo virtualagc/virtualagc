@@ -12,6 +12,7 @@
 #include "compat.h"
 #include "cpu_instr.h"
 #include "discretes.h"
+#include "mmumodel.h"
 #include "strfmt.h"
 #include "trace.h"
 
@@ -28,6 +29,32 @@ static void halucp_error_cb(void *ctx, const char *msg) {
  * batchrunner_init(), below) as the codebase's established "give a slow
  * but real case room, but still bound it" scale. */
 #define WAIT_TICK_LIMIT 10000000L
+
+/* Bus routing.  The mass memory model owns exactly one bus; everything
+ * else goes wherever it would have gone with no model installed, so
+ * --mmu-model composes with --bce-network and --deu-model rather than
+ * displacing them. */
+void bus_router_service(void *ctx, GpcServiceNumber svc,
+                        const GpcServiceInput *in, GpcServiceOutput *out) {
+    BusRouter *br = (BusRouter *)ctx;
+    if (!br || !in || !out) return;
+    if (br->mmu && in->busID == br->mmuBus) {
+        mmumodel_service(br->mmu, svc, in, out);
+        return;
+    }
+    if (br->fallback) {
+        br->fallback(br->fallbackCtx, svc, in, out);
+        return;
+    }
+    /* No peripheral on that bus, which is the truth. */
+    switch (svc) {
+    case GPC_SVC_XMIT_CMD:
+    case GPC_SVC_XMIT_WORD: out->out.xmit.ok = true; break;
+    case GPC_SVC_RECV_POLL: out->out.poll.available = false; break;
+    case GPC_SVC_RECV_WORD: out->out.recv.available = false; break;
+    default: break;
+    }
+}
 
 void batchrunner_init(BatchRunner *r, const Options *opts) {
     memset(r, 0, sizeof(*r));
@@ -88,6 +115,9 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
 
     iohost_init_from_opts(&r->iohost, &r->age.halUCP, opts);
 
+    GpcServicerFn base = NULL;
+    void *baseCtx = NULL;
+
     if (opts->deuModel) {
         /* Deliberately instead of, not alongside, the network servicer:
          * only one thing can sit on the far end of the bus, and the
@@ -96,11 +126,34 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
          * honour the bus program's own message timeout exactly. */
         iop_set_recv_timeout_floor_us(0.0);
         r->deuModel = deumodel_create(6);   /* DK1 */
-        ap101_set_servicer(&r->age.gpc, deumodel_service, r->deuModel);
+        base = deumodel_service;
+        baseCtx = r->deuModel;
     } else if (opts->bceNetwork) {
         r->bceTransport = bcenet_transport_create();
         r->bceFramer = bcenet_framer_create(r->bceTransport);
-        ap101_set_servicer(&r->age.gpc, bcenet_framer_service, r->bceFramer);
+        base = bcenet_framer_service;
+        baseCtx = r->bceFramer;
+    }
+
+    /* The mass memory model takes ONE bus and leaves the rest alone, so a
+     * run can have a reproducible tape and still drive a real display
+     * over --bce-network.  That is the difference from --deu-model, which
+     * replaces the far end of everything. */
+    if (opts->mmuModelVolume) {
+        long unit = opts->mmuModelUnit ? strtol(opts->mmuModelUnit, NULL, 10) : 1;
+        r->mmuModel = mmumodel_create((int)unit, opts->mmuModelVolume);
+        if (r->mmuModel) {
+            if (base == NULL) iop_set_recv_timeout_floor_us(0.0);
+            r->busRouter.mmu = r->mmuModel;
+            r->busRouter.mmuBus = mmumodel_bus(r->mmuModel);
+            r->busRouter.fallback = base;
+            r->busRouter.fallbackCtx = baseCtx;
+            ap101_set_servicer(&r->age.gpc, bus_router_service, &r->busRouter);
+        } else if (base) {
+            ap101_set_servicer(&r->age.gpc, base, baseCtx);
+        }
+    } else if (base) {
+        ap101_set_servicer(&r->age.gpc, base, baseCtx);
     }
 
     /* Independent of the peripheral bus: discretes are their own bus, and
@@ -114,6 +167,11 @@ void batchrunner_free(BatchRunner *r) {
         fprintf(stderr, "discretes: %lu message(s) applied\n",
                 discretes_message_count());
         discretes_close();
+    }
+    if (r->mmuModel) {
+        mmumodel_report(r->mmuModel);
+        mmumodel_free(r->mmuModel);
+        r->mmuModel = NULL;
     }
     if (r->deuModel) {
         deumodel_report(r->deuModel);

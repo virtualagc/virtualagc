@@ -178,6 +178,16 @@ typedef struct {
      * false: no socket is opened and the registers behave as before. */
     bool discretes;                   /* default false */
 
+    /* Serve the mass memory bus from an in-process model reading this
+     * .mmv volume, instead of from whatever is on the wire.  Composes
+     * with --bce-network and --deu-model: the mass memory bus goes to
+     * the model, every other bus goes wherever it would have gone, so a
+     * run can have a deterministic tape AND a real display.  See
+     * mmumodel.h for why a second implementation of someone else's
+     * device is worth having. */
+    char *mmuModelVolume;             /* default NULL */
+    char *mmuModelUnit;               /* "1" (MM1/BCE 18) or "2"; default 1 */
+
     /* Not part of gpc run's own option set -- yaGPC2-specific. Which
      * instruction-timing model charges cpu->elapsedTimeUs, and through
      * it the interval timers: "poo" (the default) is the AP-101S

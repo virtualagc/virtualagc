@@ -119,6 +119,15 @@ static const char *HELP_TEXT =
 "                                  runs. Default: the real host machine's\n"
 "                                  current wall-clock time (its own\n"
 "                                  configured timezone) at program start.\n"
+"  --mmu-model <volume>             Serve the mass memory bus from an\n"
+"                                  IN-PROCESS model reading this .mmv tape,\n"
+"                                  answering in the same call with no socket,\n"
+"                                  no drops and no pacing -- so a run is\n"
+"                                  reproducible.  Composes with --bce-network\n"
+"                                  and --deu-model: only the mass memory bus\n"
+"                                  is taken over (default: none)\n"
+"  --mmu-unit <n>                   which mass memory the model is, 1 or 2\n"
+"                                  (bus MM1/BCE 18 or MM2/BCE 19; default 1)\n"
 "  --discretes                      Subscribe to the discrete-input bus, so a\n"
 "                                  mass memory asserting its own READY, or the\n"
 "                                  crew panel in yaShuttle/discretePanel/,\n"
@@ -308,6 +317,10 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->deuModel = true;
         } else if (tok_is(tok, "--discretes", &n)) {
             (void)n; opts->discretes = true;
+        } else if (tok_is(tok, "--mmu-model", &n)) {
+            opts->mmuModelVolume = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--mmu-unit", &n)) {
+            opts->mmuModelUnit = take_value(argc, argv, &i, tok, n);
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {

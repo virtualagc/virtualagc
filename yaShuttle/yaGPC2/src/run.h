@@ -31,6 +31,15 @@
  * batchrunner_pace_signal(). */
 typedef enum { PACING_BURST, PACING_SIGNAL } PacingMode;
 
+/* Routes one bus to the in-process mass memory and the rest to whatever
+ * servicer would otherwise have been installed; see run.c. */
+typedef struct {
+    struct MmuModel *mmu;
+    int mmuBus;
+    GpcServicerFn fallback;
+    void *fallbackCtx;
+} BusRouter;
+
 typedef struct {
     const Options *opts;
 
@@ -112,7 +121,11 @@ typedef struct {
      * lifetime discipline as bcenet_framer.h documents. */
     BceNetTransport *bceTransport;
     BceNetFramer *bceFramer;
-    struct DeuModel *deuModel;   /* --deu-model: the in-process display unit */
+    struct DeuModel *deuModel;
+    /* In-process mass memory, and the routing that lets it own one bus
+     * while everything else still reaches whatever else is installed. */
+    struct MmuModel *mmuModel;
+    BusRouter busRouter;   /* --deu-model: the in-process display unit */
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts);
