@@ -93,6 +93,15 @@ typedef struct CPU {
      * Write Counter assemble the full 32-bit value from. */
     uint32_t counter1, counter2;
     bool counter1Enabled, counter2Enabled;
+    /* A borrow out of the low halfword that arrived while the counter's
+     * interrupt was masked.  The POO: masked, "the high halfword will not
+     * be decremented by the microcode.  The low halfword continues to
+     * count down.  The interrupt although, remains pending and if unmasked
+     * within 65 ms, the upper halfword will be decremented without a loss
+     * of a count."  One flag, not a count: the low halfword wraps every
+     * 65.536 ms, so a second borrow inside the window is exactly what the
+     * hardware cannot distinguish either. */
+    bool counter1Deferred, counter2Deferred;
     /* Sub-microsecond remainder carried between ticks.  The timers run at
      * 1 MHz off simulated execution time, so an instruction that takes
      * 2.8us advances them by two ticks and leaves 0.8us here. */

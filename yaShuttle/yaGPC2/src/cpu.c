@@ -1150,29 +1150,44 @@ void cpu_exec1(CPU *cpu) {
  * five counts away from the value the tape had recorded between the load
  * and the sum, the checksum came out five short, and the bootstrap
  * rejected a block that was in fact perfect. */
+/* One borrow out of the low halfword, applied to the high halfword in main
+ * store -- and the PSW swap when that reaches zero. */
+static void counter_borrow(CPU *cpu, uint32_t hiAddr, bool *pending) {
+    uint32_t hi = membus_get16(cpu->ram, hiAddr);
+    if (hi == 0) {
+        membus_set16(cpu->ram, hiAddr, 0xffff, false);
+        *pending = true;
+        if (getenv("YAGPC_CLKTRACE"))
+            fprintf(stderr, "CLK FIRE%d t=%.6f\n",
+                    hiAddr == 0x00B0 ? 1 : 2, cpu->elapsedTimeUs / 1e6);
+    } else {
+        membus_set16(cpu->ram, hiAddr, hi - 1, false);
+    }
+}
+
 static uint32_t tick_counter(CPU *cpu, uint32_t low, uint32_t hiAddr,
-                             bool *pending, uint32_t ticks) {
+                             bool *pending, bool *deferred, uint32_t ticks) {
     /* Clock 1 is PSW mask bit 0x80, Clock 2 is 0x40 -- the same bits
      * cpu_check_interrupts tests before dispatching either. */
     uint32_t maskBit = (hiAddr == 0x00B0) ? 0x80u : 0x40u;
     bool unmasked = (psw_get_int_mask(&cpu->psw) & maskBit) != 0;
 
+    /* A borrow that arrived while masked is owed, not forgotten: the
+     * interrupt stayed pending, so unmasking pays it "without a loss of a
+     * count".  Discarding it -- what this did -- ran both interval timers
+     * slow by one wrap for every window a program masked them in. */
+    if (unmasked && *deferred) {
+        *deferred = false;
+        counter_borrow(cpu, hiAddr, pending);
+    }
+
     int32_t v = (int32_t)(low & 0xffff) - (int32_t)ticks;
     while (v < 0) {
         v += 0x10000;
-        /* Masked: the low halfword goes on counting and the high one is
-         * left alone. */
-        if (!unmasked) continue;
-        uint32_t hi = membus_get16(cpu->ram, hiAddr);
-        if (hi == 0) {
-            membus_set16(cpu->ram, hiAddr, 0xffff, false);
-            *pending = true;
-            if (getenv("YAGPC_CLKTRACE"))
-                fprintf(stderr, "CLK FIRE%d t=%.6f\n",
-                        hiAddr == 0x00B0 ? 1 : 2, cpu->elapsedTimeUs / 1e6);
-        } else {
-            membus_set16(cpu->ram, hiAddr, hi - 1, false);
-        }
+        /* Masked: the low halfword goes on counting, the high one is left
+         * alone, and the borrow is owed until the mask lifts. */
+        if (!unmasked) { *deferred = true; continue; }
+        counter_borrow(cpu, hiAddr, pending);
     }
     return (uint32_t)v & 0xffffu;
 }
@@ -1197,11 +1212,13 @@ void cpu_advance_time_us(CPU *cpu, double us) {
 
     if (cpu->counter1Enabled) {
         cpu->counter1 = tick_counter(cpu, cpu->counter1, 0x00B0,
-                                     &cpu->intPending.clk1, ticks);
+                                     &cpu->intPending.clk1,
+                                     &cpu->counter1Deferred, ticks);
     }
     if (cpu->counter2Enabled) {
         cpu->counter2 = tick_counter(cpu, cpu->counter2, 0x00B1,
-                                     &cpu->intPending.clk2, ticks);
+                                     &cpu->intPending.clk2,
+                                     &cpu->counter2Deferred, ticks);
     }
 }
 

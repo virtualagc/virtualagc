@@ -1839,6 +1839,7 @@ static void exec_ICR(CPU *t, DInstr *v) {
             membus_set16(t->ram, 0x00b0, (r1 >> 16) & 0xffff, false);
             t->counter1 = r1 & 0xffff;
             t->intPending.clk1 = false;  /* the load resets the latch */
+            t->counter1Deferred = false; /* ...and cancels any owed borrow */
             /* Writing a countdown value to a real hardware timer starts
              * it counting -- cpu_exec1's per-instruction decrement (and
              * the Clock 1 interrupt it fires on underflow) was declared
@@ -1857,6 +1858,7 @@ static void exec_ICR(CPU *t, DInstr *v) {
             membus_set16(t->ram, 0x00b1, (r1 >> 16) & 0xffff, false);
             t->counter2 = r1 & 0xffff;
             t->intPending.clk2 = false;  /* see Write Counter 1 */
+            t->counter2Deferred = false;
             t->counter2Enabled = true; /* see Write Counter 1's comment */
             if (getenv("YAGPC_CLKTRACE"))
                 fprintf(stderr, "CLK ARM2 t=%.6f val=%08x (%.6f s)\n",
