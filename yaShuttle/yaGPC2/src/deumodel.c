@@ -142,7 +142,13 @@ static void deu_complete_fill(DeuModel *d) {
 
     if (n < 2 || (size_t)w[0] + 2 != n) {
         d->headerless++;
-        fprintf(stderr, "deu: unheadered fill of %zu halfwords, ignored\n", n);
+        /* The words too, not just the count.  "Unheadered" only says the
+         * length word disagreed with what arrived; which is wrong -- the
+         * software, or the way this model counts a transfer -- needs the
+         * content to tell. */
+        fprintf(stderr, "deu: unheadered fill of %zu halfwords, ignored:", n);
+        for (size_t i = 0; i < n && i < 8; i++) fprintf(stderr, " %04x", w[i]);
+        fprintf(stderr, "   (func %u)\n", d->xferFunc);
         d->xferActive = false;
         d->xferCount = 0;
         return;
