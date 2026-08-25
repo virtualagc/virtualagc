@@ -423,9 +423,9 @@ static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, l
  * Modelling it "as something like a discrete input" is what makes the
  * state knowable rather than implicit in a command-line flag.
  *
- * Nothing publishes these bits by default, in which case all three read
- * zero, no position is asserted, and the machine runs exactly as before --
- * so this only ever takes effect when somebody is actually driving it. */
+ * Without --discretes nothing reads these bits at all and the machine runs
+ * exactly as before, so this only ever takes effect when the run asked for
+ * a crew panel.  WITH it, silence reads as HALT: see mode_switch_held. */
 #define MODE_HALT 0x80000000u   /* IBM bit 0 */
 #define MODE_STBY 0x40000000u   /* IBM bit 1 */
 #define MODE_RUN  0x20000000u   /* IBM bit 2 */
@@ -444,6 +444,18 @@ static bool mode_switch_held(BatchRunner *r) {
     uint32_t driven = discretes_driven_mask(DISCRETES_REG_A);
     uint32_t mode = discretes_value(DISCRETES_REG_A) & driven & MODE_ANY;
 
+    /* Silence is HALT, not RUN.  The mode switch is a three-position
+     * switch somebody has to physically throw, it sits in HALT until they
+     * do, and HALT holds the reset line -- so a GPC nobody has taken out
+     * of HALT is a GPC that does not execute.  Reading "no publisher" as
+     * "no position asserted, carry on" instead made the boot depend on
+     * which process started first: bring the emulator up before the crew
+     * panel and FCMBOOT had already run by the time the panel's first
+     * HALT arrived.  It also meant closing the panel mid-run released the
+     * machine 1.5 seconds later, when the bits went stale. */
+    bool published = (driven & MODE_ANY) != 0;
+    if (!published) mode = MODE_HALT;
+
     if (mode != g_prevMode) {
         if ((g_prevMode & MODE_HALT) && (mode & MODE_STBY)) {
             /* The release.  Reload the whole PSW pair from the System
@@ -453,7 +465,8 @@ static bool mode_switch_held(BatchRunner *r) {
                             "starting at 0x%05x\n",
                     psw_get_nia(&r->age.gpc.cpu.psw));
         } else if (mode & MODE_HALT) {
-            fprintf(stderr, "MODE: HALT; CPU held in reset\n");
+            fprintf(stderr, "MODE: HALT; CPU held in reset%s\n",
+                    published ? "" : " (no crew panel heard yet)");
         } else if (mode != 0) {
             fprintf(stderr, "MODE: %s\n",
                     (mode & MODE_RUN) ? "RUN" : "STBY");
