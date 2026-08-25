@@ -1610,7 +1610,28 @@ static void exec_MVH(CPU *t, DInstr *v) {
          * is not updated either. */
         if (!cpu_store_hw(t, destAddr + count, hw)) return;
     }
-    register_set32(R(t, v, 'x'), destAddr << 16);
+    /* Only the COUNT is consumed.  The POO's programming notes for MOVE
+     * HALFWORD say "the count in R1 is modified [to] the number of
+     * halfwords remaining to be moved", and that the instruction "will
+     * not modify the DSR" -- the ADDRESS half is left alone.  It has to
+     * be: MVH is designed to be interruptible, it copies from the end
+     * backwards (the loop above), and a restart works only because the
+     * address still points at the start while the count says how much is
+     * left.
+     *
+     * This used to write back `destAddr << 16`, the EXPANDED address,
+     * which is wrong twice over.  destAddr is 19 bits once expanded, so
+     * the shift overflows and throws the sector away: FCMBOOT's move
+     * into sector 6 left R2 = 0x01800000 instead of 0x81800000, losing
+     * the X'8000' bit that the source calls "STARTING ADDRESS WITH HIGH
+     * BIT ON TO USE SECT 6 BSR AND DSR".  FCMBOOT then re-protects its
+     * relocated copy with `ISPB 3,0(R5,R2)`, so the protection landed on
+     * sector 0 instead of sector 6 -- and the moment it jumped into
+     * sector 6 the Instruction Monitor fired on the very first
+     * instruction, executing out of storage that was never protected.
+     * Its own vectors being deliberate wait-state PSWs, the machine then
+     * simply stopped. */
+    register_set32(R(t, v, 'x'), r1val & 0xffff0000u);
 }
 
 static void exec_SPM(CPU *t, DInstr *v) {
