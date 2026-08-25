@@ -3187,3 +3187,31 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
   with the pad width taken from the widest label in either group, so the
   bit captions form one column; "Publishing on ..." in its own full-width
   pane; ON/OFF rather than ON/off, with "--" still meaning undriven.
+
+### [2026-08-25] Target: HANDOFF-FCMBOOT.md
+- ERROR 118 "MMU ERROR" run to ground, and it was OURS. GPCIPL's BSL1 was
+  reporting a mass memory status error the model had never raised. Watching
+  MMSTATUS (0x03660) showed it receiving 0x14A0 by DMA -- exactly the packed
+  POSITION word for 2/4/5, (2<<11)|(4<<8)|(5<<5). MMERCKMK is X'F800FFFF',
+  so 0x14A00000 & mask != 0 -> ERROR 118 -> BSLRESET, every time.
+- Cause: the MIA latch I added with the delay-discard earlier the same day
+  was delivered AHEAD of newer traffic. A word actually arriving overwrites
+  the adapter buffer; the latch is only what is left when nothing newer has
+  come. FCMBOOT's LAST load block ends in a delay like the others, but the
+  "CLEAR THE MIA BUFFER" #RDLI is emitted only ahead of a load block that
+  FOLLOWED a delay, and LB5 is the last -- so the latched word survived into
+  GPCIPL's first BITE STATUS and shifted every later reply by one.
+- The measurement that found it: added wordsTaken to the model's report
+  beside wordsOut. 28182 queued, 28181 taken -- exactly one of the 22 reply
+  words never collected. Without that counter this would have been guesswork.
+- Fixed in 82fb09d3b. GPCIPL now gets on with it: MMU commands 16 -> 50,
+  blocksRead 55 -> 80, transport 2/4/5 -> 4/4/0, and BSLRQP10 (the success
+  path that sets DCPLDFL and reschedules the display jobs) is REACHED where
+  it never was. Tape load unchanged, all five LBs byte for byte.
+- STILL OPEN: BSLRESET is reached again later and POLL60 still is not, so a
+  further failure follows. wordsOut 41026 vs wordsTaken 40666 now -- 360
+  uncollected, worth checking whether that is legitimate partial-block tail
+  or the same class of bug again. DCPLDFL still never written at 40M steps.
+- Method note: the reference mmu.coffee has a busy/@_busyOps state machine
+  our model has no equivalent of, and drives READY from it. Suspected but
+  NOT the cause here; still an unported difference worth closing.
