@@ -86,50 +86,89 @@ class Panel:
     def _build(self):
         pad = {"padx": 8, "pady": 3}
 
-        f = ttk.LabelFrame(self.root, text="GPC mode (panel O6)")
-        f.grid(row=0, column=0, sticky="new", **pad)
+        # One fixed-width font throughout.  The bit captions are meant to
+        # line up in a column down the right of each group, and padding a
+        # label to a fixed number of characters only does that when every
+        # character is the same width.
+        style = ttk.Style()
+        for widget in ("TLabel", "TCheckbutton", "TRadiobutton", "TSpinbox",
+                       "TEntry", "TLabelframe.Label"):
+            style.configure(widget, font="TkFixedFont")
+
+        # A column apiece, so each group's panes stack and a filler can take
+        # up whatever is left.  Gridding the panes directly against each
+        # other instead left bare window between the short pane in one
+        # column and the tall one beside it, which reads as a hole rather
+        # than as space.
+        self.root.columnconfigure(0, weight=1)
+        self.root.columnconfigure(1, weight=1)
+        self.root.rowconfigure(0, weight=1)
+
+        left = ttk.Frame(self.root)
+        left.grid(row=0, column=0, sticky="nsew")
+        right = ttk.Frame(self.root)
+        right.grid(row=0, column=1, sticky="nsew")
+
+        f = ttk.LabelFrame(left, text="GPC mode (panel O6)")
+        f.pack(fill="x", **pad)
         for label, bit in MODE_SWITCH:
             ttk.Radiobutton(f, text=label, value=bit, variable=self.mode,
                             command=self._modeChanged).pack(anchor="w")
 
-        f = ttk.LabelFrame(self.root, text="IPL source")
-        f.grid(row=1, column=0, sticky="new", **pad)
+        f = ttk.LabelFrame(left, text="IPL source")
+        f.pack(fill="x", **pad)
         for label, bit in IPL_SOURCE:
             ttk.Radiobutton(f, text=label, value=bit, variable=self.iplSource,
                             command=self._iplSourceChanged).pack(anchor="w")
 
-        f = ttk.LabelFrame(self.root, text="This GPC")
-        f.grid(row=2, column=0, sticky="new", **pad)
+        f = ttk.LabelFrame(left, text="This GPC")
+        f.pack(fill="x", **pad)
         ttk.Label(f, text="GPC ID").pack(side="left")
         ttk.Spinbox(f, from_=1, to=5, width=4, textvariable=self.gpcId,
                     command=self._gpcIdChanged).pack(side="left", padx=6)
 
-        f = ttk.LabelFrame(self.root, text="Discrete inputs A")
-        f.grid(row=0, column=1, rowspan=2, sticky="new", **pad)
+        # Untitled, and there to be looked past: it carries no control, it
+        # just keeps the column the same surface as the rest of the panel.
+        ttk.LabelFrame(left).pack(fill="both", expand=True, **pad)
+
+        f = ttk.LabelFrame(right, text="Discrete inputs A")
+        f.pack(fill="x", **pad)
         self._checks(f, D.REG_A, TOGGLES_A)
 
-        f = ttk.LabelFrame(self.root, text="Discrete inputs B")
-        f.grid(row=2, column=1, sticky="new", **pad)
+        ttk.LabelFrame(right).pack(fill="both", expand=True, **pad)
+
+        f = ttk.LabelFrame(right, text="Discrete inputs B")
+        f.pack(fill="x", **pad)
         self._checks(f, D.REG_B, TOGGLES_B + CRT_SELECT)
 
         f = ttk.LabelFrame(self.root, text="Observed (driven by other devices)")
-        f.grid(row=3, column=0, columnspan=2, sticky="new", **pad)
+        f.grid(row=1, column=0, columnspan=2, sticky="ew", **pad)
         for label, bit in OBSERVED_A:
-            v = tk.StringVar(value="%s   --" % label)
+            v = tk.StringVar(value=self._observedText(label, None))
             self.observedVars[bit] = (v, label)
-            ttk.Label(f, textvariable=v, font=("TkFixedFont",)).pack(anchor="w")
+            ttk.Label(f, textvariable=v).pack(anchor="w")
 
-        self.status = tk.StringVar(value="publishing on %s:%d every %d ms"
+        # In a pane of its own, spanning the width, so the panel ends on the
+        # same edge it is built from rather than trailing off mid-sentence.
+        f = ttk.LabelFrame(self.root)
+        f.grid(row=2, column=0, columnspan=2, sticky="ew", **pad)
+        self.status = tk.StringVar(value="Publishing on %s:%d every %d ms"
                                    % (D.GROUP, D.PORT, D.REPUBLISH_MS))
-        ttk.Label(self.root, textvariable=self.status).grid(
-            row=4, column=0, columnspan=2, sticky="w", padx=8, pady=(0, 6))
+        ttk.Label(f, textvariable=self.status).pack(anchor="w", padx=4)
+
+    # Widest label anywhere in either group, so the bit captions form one
+    # column across both panes rather than two that nearly agree.
+    _LABEL_WIDTH = max(len(name)
+                       for name, _ in TOGGLES_A + TOGGLES_B + CRT_SELECT)
 
     def _checks(self, parent, reg, items):
         for label, bit in items:
             v = tk.BooleanVar(value=False)
             self.toggles[(reg, bit)] = v
             ttk.Checkbutton(
-                parent, text="%-16s (bit %d)" % (label, bit), variable=v,
+                parent,
+                text="%-*s  (bit %2d)" % (self._LABEL_WIDTH, label, bit),
+                variable=v,
                 command=lambda r=reg, b=bit, var=v: self._toggle(r, b, var)
             ).pack(anchor="w")
 
@@ -213,10 +252,17 @@ class Panel:
             self.observedA = D.apply(self.observedA, msg)
             self.root.after(0, self._refreshObserved)
 
+    # None means nobody has driven the bit yet, which is not the same as
+    # driving it low -- see discretes.py on staleness.
+    @staticmethod
+    def _observedText(label, on):
+        state = "--" if on is None else ("ON" if on else "OFF")
+        return "%-*s  %s" % (Panel._LABEL_WIDTH, label, state)
+
     def _refreshObserved(self):
         for bit, (var, label) in self.observedVars.items():
-            on = bool(self.observedA & D.bit_mask(bit))
-            var.set("%-12s %s" % (label, "ON" if on else "off"))
+            var.set(self._observedText(
+                label, bool(self.observedA & D.bit_mask(bit))))
 
 
 def main():
