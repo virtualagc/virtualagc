@@ -60,7 +60,7 @@ struct DeuModel {
     size_t replyHead, replyCount;
 
     /* Counters, named as the real unit's harness names them. */
-    long commands, fills, timeFills, headerless, polls, bite, dumps;
+    long commands, fills, timeFills, displayFills, formatFills, headerless, polls, bite, dumps;
     long resets, unknown, abandoned, modeStatus;
     long wordsIn, wordsOut;
 };
@@ -140,6 +140,19 @@ static void deu_complete_fill(DeuModel *d) {
     size_t n = d->xferCount;
     const uint16_t *w = d->xferWords;
 
+    /* A TIME FILL is not a fill in the loading sense and has no length or
+     * address word: it carries the mission time as 48-bit IBM extended
+     * floats (deuProto's ibmFloat48).  Held to the fill rule it failed it
+     * every time -- 2209 of 2224 "unheadered" rejections in an IPL were
+     * just the clock, which the real display renders perfectly well, while
+     * timeFills sat at 0 and said nothing had arrived. */
+    if (d->xferFunc == FUNC_TIME_FILL) {
+        d->timeFills++;
+        d->xferActive = false;
+        d->xferCount = 0;
+        return;
+    }
+
     if (n < 2 || (size_t)w[0] + 2 != n) {
         d->headerless++;
         /* The words too, not just the count.  "Unheadered" only says the
@@ -154,7 +167,8 @@ static void deu_complete_fill(DeuModel *d) {
         return;
     }
     d->fills++;
-    if (d->xferFunc == FUNC_TIME_FILL) d->timeFills++;
+    if (d->xferFunc == FUNC_DISPLAY_FILL) d->displayFills++;
+    else if (d->xferFunc == FUNC_FORMAT_FILL) d->formatFills++;
 
     unsigned count = w[0];
     unsigned addr = w[1];
@@ -313,11 +327,11 @@ void deumodel_service(void *ctx, GpcServiceNumber serviceNumber, const GpcServic
 void deumodel_report(const DeuModel *d) {
     if (!d) return;
     fprintf(stderr,
-            "deu: {\"commands\":%ld,\"fills\":%ld,\"timeFills\":%ld,\"headerless\":%ld,"
+            "deu: {\"commands\":%ld,\"fills\":%ld,\"timeFills\":%ld,\"displayFills\":%ld,\"formatFills\":%ld,\"headerless\":%ld,"
             "\"polls\":%ld,\"bite\":%ld,\"dumps\":%ld,\"resets\":%ld,\"unknown\":%ld,"
             "\"wordsIn\":%ld,\"wordsOut\":%ld,\"abandoned\":%ld,\"modeStatus\":%ld,"
             "\"ipled\":%s}\n",
-            d->commands, d->fills, d->timeFills, d->headerless, d->polls, d->bite,
+            d->commands, d->fills, d->timeFills, d->displayFills, d->formatFills, d->headerless, d->polls, d->bite,
             d->dumps, d->resets, d->unknown, d->wordsIn, d->wordsOut, d->abandoned,
             d->modeStatus, d->ipled ? "true" : "false");
 }
