@@ -2880,3 +2880,49 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
       start=0x06DC0 len=  502 prot=0   words=(6DC0,0600,01F6)
       start=0x06FBC len=  994 prot=1   words=(6FBC,8600,03E2)
       start=0x07C00 len=  770 prot=1   words=(7C00,8600,0302)
+- REPO CHECK: nsts-sdl-dps advanced 0846b59 -> b14293b, but the two
+  substantive commits are Don MERGING OUR OWN PRs (#37
+  fcmcmp-rld-annotation-halfword, #39 objdump-normalize -- the latter adds
+  ibmobjdump --normalize, a canonical object form, i.e. upstream now has
+  its own objcanon equivalent).  No new analysis of his to read.
+  nsts-sim-gpc origin/main unchanged at 04b2cc4; our yagpc2-discretes
+  branch REBASED onto it cleanly, rebuilt, test_discretes still 25/25.
+- CHECKSUM HUNT -- narrowed hard, NOT solved.  What is now established:
+  * THE TAPE IS RIGHT.  Read phase 10's LB1 back off mmu2.mmv with Don's
+    own `mmu get 2/4/3/0 --blocks 31` and applied FCMBOOT's exact rule:
+    slot[-2]=0000, stored=D779, computed=D779.  OK.
+    (NOTE the address form: `mmu get`/`dump` take t/f/s/b SLASH form,
+    NOT the ALLOC card's 42300 -- 42300 silently reads 5/4/1/28, which is
+    blank tape.  That cost me a wrong reading.)
+  * THE DATA REACHES MEMORY, INCLUDING THE CHECKSUM SLOT.  Watchpoint in
+    a clean run: HW 0x03C21 changed 0x0000 -> 0xD779, the exact stored
+    value.  Earlier, HW 0x01000 -> 0x8000, matching the composed image.
+  * THE COMPOSED IMAGE IS THE WRONG REFERENCE for checksums: its slots
+    hold C9FB C9FB (background fill).  Tape LB1 vs composed image differ
+    in EXACTLY the 2 checksum halfwords and nowhere else across 15,394.
+    The slot is a tape artifact; mmu2fcm does not put it in memory.
+  * THE ALGORITHMS AGREE.  FCMBOOT sums indices 0..length-2 (BCT loop
+    from length-2 down to 1, then index 0 at 0x346) and compares against
+    index length-1; mmu2mmv sums 0..length-3 and stores at length-1,
+    writing 0x0000 at length-2, so FCMBOOT's extra term is zero.
+  * mmu2mmv PADS each LB to a whole tape block with C6C6 -- so the "whole
+    number of tape blocks" comment is about the tape RECORD, not the
+    block length.  LB1 is 15,394 hw in 31 tape blocks; the 478 hw of pad
+    land past the checksummed region.  That hypothesis is dead.
+  * AND YET the clean run takes the failure path: 0x30332 (checksum loop)
+    HIT, 0x3034E ("CLEAR GOOD READ TO SHOW ERROR") HIT, 0x30352 (pass)
+    never.
+  * INSTRUMENTATION CHANGES THE OUTCOME.  With --trace (358 MB) or
+    --debug, the breakpoints that hit in a clean run are NOT reached and
+    the machine ends in FCMBSSM3 by a different route.  The live-bus run
+    is timing-fragile, so the failing moment cannot be inspected directly
+    with either tool.  Any future attempt needs a way to observe without
+    perturbing -- a targeted trace gate, or a deterministic in-process
+    mass memory the way --deu-model stands in for the display.
+  BEST REMAINING HYPOTHESIS: a race -- the checksum runs before the last
+  words land.  Our MMU publishes READY-on when it hands the datagram to
+  the socket, but the words still have to cross UDP and be DMA'd, so
+  READY-on can precede the data being in memory.  On real hardware the
+  line reflects the transport, by which time the BCE physically has the
+  words.  UNPROVEN; the watchpoint shows only that D779 arrives, not that
+  it arrives before the sum is taken.
