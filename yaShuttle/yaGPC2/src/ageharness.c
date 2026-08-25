@@ -320,8 +320,43 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
          * 0x14 (SRESINTN -> IOPHISAM, BILDNEW5.lst address 0x013F);
          * --power-on takes the Power On vector at 0x04 (SPWRONN ->
          * FAILEXEC). --ipl still wins if both are given. */
-        if (opts->ipl) cpu_reset(&age->gpc.cpu);
-        else cpu_power_on(&age->gpc.cpu);
+        if (opts->ipl) {
+            cpu_reset(&age->gpc.cpu);
+            /* An IPL leaves interval timer 1 RUNNING, and the bootstrap
+             * depends on it.
+             *
+             * FCMBOOT's first act after the system reset is a two-second
+             * settling delay -- "DELAY 2 SECONDS TO ALLOW THE MODE SWITCH
+             * TO STABILIZE" -- timed by reading the PC1 clock:
+             *
+             *     LA  R6,62
+             *     XR  R4,R4 / ICR R5,R4      READ PC1 CLOCK
+             *     S   R5,FCMBEXPT            F'32259', and its own comment
+             *                                says "32259 * 62 = 2 SECONDS"
+             *     ICR R4,R4 / SR R4,R5 / N R4,FCMBIT16 / BC
+             *
+             * which is a 1 MHz down-counter tested for borrow on IBM bit
+             * 16 -- exactly counter 1 as cpu_advance_time_us() models it.
+             * It never STARTS the counter, only reads it, so something
+             * before it must have: the POO makes Load/Start/Stop Counter 1
+             * separate ICR functions, so these do not free-run.  That
+             * something is the firmware IPL itself -- PASS User's Guide
+             * Table 2-2 step 10, "GPC IPL - P/R ... Fixed pattern stored
+             * in memory ...; Bootstrap loader read in from MMU" -- the
+             * same microcode that reads the bootstrap off the tape.
+             *
+             * We do not emulate that microcode, so without this FCMBOOT
+             * spins in the delay forever: measured, 300,000 steps visiting
+             * only the four instructions of the inner loop, with its outer
+             * count of 62 never once decrementing.
+             *
+             * This is a MODEL OF ASSUMED FIRMWARE BEHAVIOUR, not something
+             * the POO states.  It is under --ipl alone because that is the
+             * flag standing in for the IPL pushbutton; the HALT->STBY
+             * release in run.c does not restart anything, matching 3.2's
+             * "released from the RESET state". */
+            age->gpc.cpu.counter1Enabled = true;
+        } else cpu_power_on(&age->gpc.cpu);
         /* Report the real, now-established entry point (rather than
          * leaving hasEntryPoint/entryPoint as their "nothing set yet"
          * defaults) so batchrunner_load()'s own "No entry point" check
