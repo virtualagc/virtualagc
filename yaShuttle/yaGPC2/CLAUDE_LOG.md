@@ -3372,3 +3372,19 @@ FCMBOOT NOW READS THE TAPE.  One thing left: the load-block checksum.
   conclusion from reasoning when the evidence was sitting in the files --
   "our tape is deficient" (measured different pacing flags) and "the
   substitution is unsound" (never compared a .dfg to a .hal). Measure first.
+
+### [2026-08-25] Target: [problems.md]
+- GPCIPL ITEM 18 error 206 "CLOCK2 CANNOT BE SET TO ZEROS" fixed (62f23ad21).
+  STM1 CLCK1000 loads R4 from MINUS1 once, above the loop, and never reloads
+  it: clock 1 is written FFFFFFFF, clock 2 gets R4=0.  A counter written zero
+  has timed out; its next-microsecond borrow must wrap the PSA high halfword
+  to FFFF even though SSM INHCLKS has both clock interrupts masked.  Masking
+  defers the *interrupt*, not the timeout.  Ordinary borrows (high halfword
+  nonzero) stay deferred while masked -- needed so FCMBOOT's 00B0 does not
+  drift under its own checksum.
+- Measured, not assumed: matching the reference exactly (no mask gate, no
+  enable gate, both counters free-running from reset) breaks the boot -- the
+  CPU ends in a masked wait state and the DEU is never IPLed.
+- Also measured: the "LB1 mismatched 1 at 000b0" that motivated the original
+  blanket mask gate was live clock data, not a load error.  The load had 55
+  blocks and no retries.  With the fix, all five load blocks are 0 mismatched.
