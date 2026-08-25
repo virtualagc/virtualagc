@@ -381,15 +381,21 @@ static void format_watchpoint_msg(BatchRunner *r, uint32_t addr, uint16_t before
     char sectionPart[80];
     if (section) snprintf(sectionPart, sizeof sectionPart, " (%s)", section);
     else sectionPart[0] = '\0';
-    char r0h[16], r1h[16], r3h[16], r5h[16], r7h[16];
-    as_hex(r0h, sizeof r0h, (long long)after->r[0], 8);
-    as_hex(r1h, sizeof r1h, (long long)after->r[1], 8);
-    as_hex(r3h, sizeof r3h, (long long)after->r[3], 8);
-    as_hex(r5h, sizeof r5h, (long long)after->r[5], 8);
-    as_hex(r7h, sizeof r7h, (long long)after->r[7], 8);
+    /* All eight, not a subset.  Chasing which value an instruction wrote
+     * to a watched halfword means reading the register it came FROM, and a
+     * trace that happens to omit that one is no use at all. */
+    char regs[8][16], regPart[160];
+    size_t used = 0;
+    regPart[0] = '\0';
+    for (int i = 0; i < 8; i++) {
+        as_hex(regs[i], sizeof regs[i], (long long)after->r[i], 8);
+        int n = snprintf(regPart + used, sizeof regPart - used, " R%d=%s", i, regs[i]);
+        if (n < 0 || (size_t)n >= sizeof regPart - used) break;
+        used += (size_t)n;
+    }
     snprintf(out, outSize,
-             "memory watchpoint: HW 0x%s changed 0x%s -> 0x%s by %s at NIA=0x%s step=%ld%s R0=%s R1=%s R3=%s R5=%s R7=%s",
-             addrHex, beforeHex, afterHex, disasm, niaHex, step, sectionPart, r0h, r1h, r3h, r5h, r7h);
+             "memory watchpoint: HW 0x%s changed 0x%s -> 0x%s by %s at NIA=0x%s step=%ld%s%s",
+             addrHex, beforeHex, afterHex, disasm, niaHex, step, sectionPart, regPart);
 }
 
 /* Shared fetch/decode/execute step used by both batchrunner_run() and
