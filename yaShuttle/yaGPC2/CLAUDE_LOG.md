@@ -2730,3 +2730,46 @@ FCMBOOT now RUNS.  Where it gets to, and the one thing stopping it.
     this THREE more times tonight.  Redirect to a file.
   * The Bash tool's own default timeout is 2 minutes regardless of the
     `timeout` given to the shell; long runs need the tool timeout raised.
+- INSTRUCTION MONITOR SOLVED, and it was OUR BUG, in MVH.  exec_MVH wrote
+  back `destAddr << 16` -- the EXPANDED destination.  destAddr is 19 bits
+  after expansion, so the shift overflowed and threw the sector away:
+  FCMBOOT's move into sector 6 left R2 = 0x01800000 where the source put
+  0x81800000, destroying the X'8000' "use sector 6 BSR/DSR" bit.  FCMBOOT
+  then re-protects its relocated copy with `ISPB 3,0(R5,R2)`, so the
+  protection landed on SECTOR 0.  Jumping into sector 6 therefore executed
+  out of unprotected storage -> Instruction Monitor -> its own wait-state
+  vector -> silent halt after one instruction.
+  The POO settles what MVH should do: "will not modify the DSR", and "the
+  count in R1 is modified [to] the number of halfwords remaining to be
+  moved" -- the COUNT, not the address.  Necessarily so: MVH is
+  interruptible, copies from the end backwards, and restart works only
+  because the address still points at the start.  Fixed to
+  `r1val & 0xffff0000u` (commit 10eec897a).  No fixture change:
+  test_cpu_instr_exec is 111192/111358 with AND without.
+- WITH THAT FIXED, FCMBOOT RUNS ITS WHOLE LOGIC.  Verified by breakpoint:
+  0x30181 and 0x30185 execute; it does NOT take the "NO MASS MEMORY" wait
+  at 0x30199; it reaches 0x3019d "SAVE THE BCE NUMBER" (so the MM1
+  IPL-source discrete is read correctly); enables BCE transmitter
+  (X'8504'), receiver (X'8508') and processor (X'8720'); loads the max
+  timeout; then walks the three mass-memory areas at 0x301c4.
+- IT STOPS FOR THE RIGHT REASON.  At 0x301ca it does `LH R4,0(R0)` on the
+  area's phase table and branches away at 0x301cb.  Every table is the
+  FFFF "THIS AREA HAS NOT BEEN MASS MEMORY BUILT (DOESN'T EXIST)"
+  sentinel, so after three areas it lands in FCMBSSM3, the documented
+  give-up wait state.  PROVEN by patching hw 0x037E from FFFF to 0001:
+  execution then goes PAST 0x301cb to 0x301cd and 0x301d3, reading the
+  load-block count and starting MM address.  (It stops before @SIO
+  because the rest of that probe descriptor was deliberate garbage.)
+- SO THE ONLY REMAINING BLOCKER IS THE PHASE TABLE.  Stamp FCMPTAD1 with a
+  real descriptor -- 3-hw phase descriptors (index to 1st load block,
+  number of load blocks, MM address of 1st LB) then 3-hw load-block
+  descriptors (MM address; protect/reserve/sector flags; length in hw),
+  per FCMBOOT's own prolog -- and it will start issuing MMU commands.
+  The tape to point it at already exists: scratchpad/tape/mmu.mmv, with
+  GPCIPL at 2/4/3/0.
+- PROBE TECHNIQUE THAT PAID OFF, worth reusing: breakpoints on SECTOR-6
+  addresses (0x30000+offset) to bisect where execution diverges.  Two
+  traps: the hit message prints only 4 hex digits so it LOOKS like a
+  sector-0 address, and probing an address that is the SECOND halfword of
+  a 2-halfword instruction never hits (0x1c0 is inside the instruction at
+  0x1bf).  Take instruction starts from the listing, not round numbers.
