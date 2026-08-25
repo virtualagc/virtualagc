@@ -143,6 +143,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
         long unit = opts->mmuModelUnit ? strtol(opts->mmuModelUnit, NULL, 10) : 1;
         r->mmuModel = mmumodel_create((int)unit, opts->mmuModelVolume);
         if (r->mmuModel) {
+            mmumodel_set_clock(r->mmuModel, &r->age.gpc.cpu.elapsedTimeUs);
             if (base == NULL) iop_set_recv_timeout_floor_us(0.0);
             r->busRouter.mmu = r->mmuModel;
             r->busRouter.mmuBus = mmumodel_bus(r->mmuModel);

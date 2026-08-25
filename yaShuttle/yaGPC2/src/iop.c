@@ -288,6 +288,7 @@ void iopls_setBST(IOPLocalStore *ls, uint32_t v) {
 void mia_init(MIA *m, int bceNum) { m->bceNum = bceNum; }
 
 bool mia_data_available(struct IOP *iop, MIA *m) {
+    if (m->latchValid) return true;
     if (!iop->servicer) return false;
     GpcServiceInput input = {.busID = m->bceNum, .address = 0};
     GpcServiceOutput output = {0};
@@ -296,6 +297,12 @@ bool mia_data_available(struct IOP *iop, MIA *m) {
 }
 
 uint32_t mia_get_data(struct IOP *iop, MIA *m) {
+    /* Whatever is still in the adapter came off the bus before anything
+     * the far end has queued since, so it goes first. */
+    if (m->latchValid) {
+        m->latchValid = false;
+        return m->latch;
+    }
     if (!iop->servicer) return 0;
     GpcServiceInput input = {.busID = m->bceNum, .address = 0};
     GpcServiceOutput output = {0};
@@ -1018,7 +1025,24 @@ bool iop_bce_delay(IOP *iop, uint32_t count) {
         bce->delayPC = pc;
         bce->delayUntilUs = now + (double)count * MTO_TICK_US;
     }
-    if (now < bce->delayUntilUs) return false;
+    if (now < bce->delayUntilUs) {
+        /* Nothing is armed to receive, so whatever comes down the bus
+         * while this runs is lost -- and that is the point of the
+         * instruction, not a side effect of it.  FCMBOOT reads the part
+         * of a mass memory block it wants and then delays for exactly the
+         * rest of it (see mmumodel.c's pacing comment); without this the
+         * unread tail stayed queued and every load block after the first
+         * landed hundreds of halfwords early.  The last word taken stays
+         * in the adapter, which is the one the software's own "CLEAR THE
+         * MIA BUFFER" #RDLI expects to find. */
+        bool held = false;
+        while (mia_data_available(iop, &bce->mia)) {
+            bce->mia.latch = mia_get_data(iop, &bce->mia);
+            held = true;             /* re-latches what it just took */
+        }
+        if (held) bce->mia.latchValid = true;
+        return false;
+    }
     bce->delayActive = false;
     return true;
 }

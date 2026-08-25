@@ -49,6 +49,16 @@ typedef struct MmuModel MmuModel;
 MmuModel *mmumodel_create(int unit, const char *volumePath);
 void mmumodel_free(MmuModel *m);
 
+/* Hands the model the emulated clock (&cpu.elapsedTimeUs), which is what
+ * lets a read behave like a transfer down a wire instead of a handover of
+ * a whole array: a word is on the bus for one word time and then it is
+ * gone, and the blocks have real gaps between them.  Without this the
+ * model still works, but nothing the bus program does can miss a word --
+ * and missing words on purpose is exactly how the flight software skips
+ * the unused tail of a partial block.  See the pacing comment in
+ * mmumodel.c.  Pass NULL to go back to the unpaced behaviour. */
+void mmumodel_set_clock(MmuModel *m, const double *clockUs);
+
 /* Which BCE this unit answers on: 18 for MM1, 19 for MM2. */
 int mmumodel_bus(const MmuModel *m);
 

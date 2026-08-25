@@ -134,6 +134,17 @@ void iopls_setBST(IOPLocalStore *ls, uint32_t v);
  * GpcServiceInput.busID when a servicer is installed. */
 typedef struct {
     int bceNum;
+    /* The word the interface adapter is still holding.  A serial adapter
+     * latches whatever last came down the bus whether or not a receive
+     * was armed to take it, so a bus program that DELAYS while data goes
+     * past finds one word left over afterwards.  The flight software
+     * counts on exactly that: FCMBOOT builds a one-halfword #RDLI to
+     * "CLEAR THE MIA BUFFER" ahead of every load block that followed a
+     * delay, and asks for one only in the partial-block path that built
+     * the delay.  Set by iop_bce_delay as it throws words away; taken by
+     * the next receive, ahead of anything newer. */
+    uint32_t latch;
+    bool latchValid;
 } MIA;
 
 void mia_init(MIA *m, int bceNum);

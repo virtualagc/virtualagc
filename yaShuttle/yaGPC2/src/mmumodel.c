@@ -36,10 +36,49 @@
 #define STAT_B_DATA_DROPOUT 0x4000
 
 /* The largest transfer EXTENDED_BLOCK can ask for is an 8-bit count of
- * blocks, so the reply queue is sized to hold one outright.  Nothing here
- * paces, so a whole transfer is queued in the call that commanded it and
- * drained as the bus controller reads it. */
+ * blocks, so the reply queue is sized to hold one outright: a whole
+ * transfer is queued in the call that commanded it and drained as the bus
+ * controller reads it. */
 #define QUEUE_HW (256 * HALFWORDS_PER_BLOCK)
+
+/* ---------------------------------------------------------------------
+ * Pacing
+ *
+ * A queue that never loses anything is the wrong model of a wire, and the
+ * flight software is built around the difference.  FCMBOOT reads a load
+ * block whose length is not a whole number of mass memory blocks, takes
+ * the halfwords it wants, and then simply DELAYS while the rest of the
+ * last block goes past unread -- #DLYI, whose count it computes at
+ * FCMBBLDR+0x25 as 2*(639 - partial), i.e. two counts per halfword for
+ * the tail of the block plus 128 halfwords of the block gap.  The BCE
+ * book's own programming note for #DLYI fixes both numbers: "Each count
+ * of 1 represents a delay of 16.5 microseconds... Each count of 2
+ * represents a delay of 33 microseconds, the minimum time for a word
+ * transmission over a serial bus", and FCMBOOT's source names 128 as
+ * "HWS IN ONE HALF OF A MASS MEMORY BLOCK GAP".
+ *
+ * So a word reaches the bus at its own word time and not before, and the
+ * blocks have 256 word times of gap between them.  That is all this does;
+ * losing a word is not its business.  A receive the bus controller has
+ * armed is a hardware transfer that loses nothing, and our BCE gets a
+ * slice only every 33 CPU instructions, so a model that expired words on
+ * its own threw away live data at about two words in five.  The words
+ * that go past unread are the ones nobody is listening for, and the
+ * listener is the one that knows: iop_bce_delay discards them.
+ *
+ * Queueing the whole transfer up front and handing it over word by word
+ * on this schedule is deliberate.  Once a receive is armed the BCE drains
+ * whatever has arrived each time it runs, so it stays caught up without
+ * having to be scheduled at bus rate.
+ *
+ * Only a read is paced.  A status or position reply is a word the unit
+ * puts up in answer to a command and the sequence collects when it gets
+ * to it; nothing in the software races it, and delaying it would only
+ * invent a failure.
+ * ------------------------------------------------------------------- */
+#define BUS_WORD_US 33.0             /* one word time on the serial bus */
+#define BLOCK_GAP_WORDS 256          /* FCMBOOT's 128 is HALF a block gap */
+#define SLOT_UNPACED 0xffffffffu
 
 struct MmuModel {
     int unit;
@@ -65,6 +104,14 @@ struct MmuModel {
 
     uint16_t queue[QUEUE_HW];
     size_t queueHead, queueCount;
+
+    /* Pacing (see above).  slot[i] is the word time queue[i] occupies,
+     * counted from burstStartUs, or SLOT_UNPACED for a reply that is not
+     * part of a read.  nextSlot is where the next queued word goes. */
+    const double *clockUs;
+    uint32_t slot[QUEUE_HW];
+    double burstStartUs;
+    uint32_t nextSlot;
 
     struct {
         long commands, blocksRead, blocksWritten, wordsOut, wordsIn;
@@ -95,11 +142,17 @@ static void fault(MmuModel *m, char reg, uint16_t bit, const char *why) {
     mm_log(m, "fault %c 0x%04x: %s", reg, bit, why);
 }
 
-static void queue_words(MmuModel *m, const uint16_t *w, size_t n) {
+static double mm_now(const MmuModel *m) {
+    return m->clockUs ? *m->clockUs : 0.0;
+}
+
+static void queue_words_paced(MmuModel *m, const uint16_t *w, size_t n, bool paced) {
     /* Compact first if the head has run on, exactly as the framer does. */
     if (m->queueHead > 0 && m->queueCount + n > QUEUE_HW) {
         memmove(m->queue, m->queue + m->queueHead,
                 (m->queueCount - m->queueHead) * sizeof m->queue[0]);
+        memmove(m->slot, m->slot + m->queueHead,
+                (m->queueCount - m->queueHead) * sizeof m->slot[0]);
         m->queueCount -= m->queueHead;
         m->queueHead = 0;
     }
@@ -108,9 +161,38 @@ static void queue_words(MmuModel *m, const uint16_t *w, size_t n) {
                 m->unit, n);
         return;
     }
+    /* An idle bus starts the clock again: word times are counted from the
+     * first word of a burst, not from some transfer long finished. */
+    if (m->queueHead >= m->queueCount) {
+        m->burstStartUs = mm_now(m);
+        m->nextSlot = 0;
+    }
+    for (size_t i = 0; i < n; i++) {
+        m->slot[m->queueCount + i] = paced ? m->nextSlot++ : SLOT_UNPACED;
+    }
     memcpy(m->queue + m->queueCount, w, n * sizeof w[0]);
     m->queueCount += n;
     m->stats.wordsOut += (long)n;
+}
+
+static void queue_words(MmuModel *m, const uint16_t *w, size_t n) {
+    queue_words_paced(m, w, n, false);
+}
+
+/* True with *out set if the word at the head of the queue has reached its
+ * word time, i.e. is on the bus now.  Nothing is dropped here: a receive
+ * the bus controller has armed is a hardware transfer and loses nothing,
+ * however few slices the BCE happens to get.  Words are lost only where
+ * the software arranges to lose them, by delaying -- iop_bce_delay is
+ * what throws those away. */
+static bool bus_word(MmuModel *m, uint16_t *out) {
+    if (m->queueHead >= m->queueCount) return false;
+    uint32_t s = m->slot[m->queueHead];
+    if (s != SLOT_UNPACED && m->clockUs &&
+        mm_now(m) < m->burstStartUs + (double)s * BUS_WORD_US)
+        return false;
+    *out = m->queue[m->queueHead];
+    return true;
 }
 
 static uint16_t pack_position(const MmuModel *m) {
@@ -166,7 +248,13 @@ static void do_read(MmuModel *m, int track, int subfile, int block, int count) {
         int idx = first + i;
         const uint16_t *b = (idx >= 0 && idx < BLOCKS_TOTAL && m->blocks[idx])
                                 ? m->blocks[idx] : zero;
-        queue_words(m, b, HALFWORDS_PER_BLOCK);
+        queue_words_paced(m, b, HALFWORDS_PER_BLOCK, true);
+        /* The gap to the next block: no words, just word times nothing
+         * arrives in.  A delay that ends inside one is why the MIA still
+         * holds the last word of the block when the next load block's
+         * receive sequence starts, which is the word FCMBOOT emits an
+         * extra one-halfword #RDLI to throw away. */
+        if (i + 1 < n) m->nextSlot += BLOCK_GAP_WORDS;
         m->stats.blocksRead++;
     }
     position_after(m, track, m->file, subfile, block, n);
@@ -397,6 +485,10 @@ void mmumodel_free(MmuModel *m) {
     free(m);
 }
 
+void mmumodel_set_clock(MmuModel *m, const double *clockUs) {
+    if (m) m->clockUs = clockUs;
+}
+
 void mmumodel_report(const MmuModel *m) {
     if (!m) return;
     fprintf(stderr,
@@ -433,18 +525,23 @@ void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
         on_data(m, (uint16_t)(input->in.word & 0xffff));
         output->out.xmit.ok = true;
         break;
-    case GPC_SVC_RECV_POLL:
-        output->out.poll.available = (m->queueHead < m->queueCount);
+    case GPC_SVC_RECV_POLL: {
+        uint16_t w;
+        output->out.poll.available = bus_word(m, &w);
         break;
-    case GPC_SVC_RECV_WORD:
-        if (m->queueHead < m->queueCount) {
-            output->out.recv.word = m->queue[m->queueHead++];
+    }
+    case GPC_SVC_RECV_WORD: {
+        uint16_t w;
+        if (bus_word(m, &w)) {
+            output->out.recv.word = w;
             output->out.recv.available = true;
+            m->queueHead++;
             if (m->queueHead == m->queueCount) m->queueHead = m->queueCount = 0;
         } else {
             output->out.recv.available = false;
         }
         break;
+    }
     default:
         break;
     }
