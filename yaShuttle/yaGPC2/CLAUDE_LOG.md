@@ -286,3 +286,37 @@ the documents themselves.)
 - LESSON: a results row's summary fields are not the row.  Read the detail
   column before calling a recorded result wrong -- especially when the tool
   that wrote it is one of ours and has been reliable.
+
+### [2026-08-26] Target: [problems.md]
+- THE EXCEPTIONS CHAIN, run down after the user recalled its shape correctly.
+  dass-literals.py writes the base exceptions-XXX.txt -- the locations MAFGEN
+  marks with '*', changed after the build.  dass-versions.py then APPENDS the
+  differences attributable to our source being an older release, taking
+  --exceptions=BASE.txt and emitting the -full variant: 1262 entries become
+  46385, the extra ones carrying value -1 and a REASON in the name field
+  ("DCDDG9-revised-CM-to-CN").  The plain file is a strict subset.
+- THE SYMS/FIELDS PAIR IS THE OTHER HALF OF THE USER'S RECOLLECTION, and it
+  augments the CSECT INDEX rather than the exceptions file: dass-syms.py
+  recovers a COMPOOL's CSECT address into augmented-XXX.json, and
+  dass-fields.py -- "dass-syms.py's problem one level finer" -- adds the
+  addresses of FIELDS INSIDE those compools.  dass-versions.py consumes the
+  latter via --fields, precisely because "a reference from an ASSEMBLY module
+  into a revised COMPOOL is invisible" without field-level symbols.
+- AND THE OVER-BROAD EXCLUSION IS PINNED.  In exceptions-S2-full.txt the
+  reason "CSAPCT-revised-BX-to-BY" covers 1210 addresses spanning
+  00C6BC..00CC1E.  #PCSAPCT is 00C6BC..00CB56 and #PCSDRTC is
+  00CB5A..00CC37, adjacent.  1013 of those addresses are inside CSAPCT and
+  legitimately excused; 197 are inside CSDRTC -- the whole of its stated
+  halfwords -- and are not.  The marking starts at CSAPCT's own base and runs
+  past its end into the next CSECT.
+- IT IS DEMONSTRABLY WRONG, not merely suspect: the recovered OI340700
+  CSDRTCCM.hal compiles to match all 197.  A difference attributable to a
+  revised OTHER compool is not something our own source can reproduce; these
+  are reproducible, so they are CSD_RTC's own source difference and the
+  exclusion is mis-attributing them.
+- LIKELY CAUSE, stated as a hypothesis and not chased: the marking is
+  per-reference, not a span (89 separate runs), so references computed from
+  OUR layout land past the dump's CSECT end where our compool is larger --
+  the same our-layout-versus-the-dump's error that ran through the whole
+  .dfg phase.  Testable by re-running dass-versions.py with the recovered
+  compools in the fields table.
