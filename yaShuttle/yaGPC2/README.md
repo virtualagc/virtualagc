@@ -2,6 +2,13 @@ This directory contains `yaGPC2`, a C-language emulator for the AP-101S CPU (the
 
 `yaGPC2` also aims for output parity with a separate, independently-developed HALMAT bytecode interpreter, `yaHALMAT2` (`../yaHALMAT2/`) — specifically, byte-identical `WRITE`/`FILE` output for the same compiled HAL/S program. (An earlier goal of also matching `yaHALMAT2`'s command-line-option surface was considered and dropped as impractical; `yaGPC2` uses its own command-line conventions, inherited from `yaGPC`/`gpc run`.)
 
+There is one deliberate, exact exception to that. `yaGPC2` supports real-time
+wall-clock pacing for `TASK`/`SCHEDULE`/`WAIT` programs through `--time-scale`
+and `--pacing`, which match `yaHALMAT2`'s own flags of the same names and
+semantics. This is a narrow, intentional overlap rather than a reversal of the
+decision above: the rest of the option surface remains `yaGPC2`'s own. See the
+`gpc run` / `yaGPC2` section of `tools.md` for the full flag documentation.
+
 This port was created using Claude Sonnet 5, under direction. The initial `yaGPC` port worked the first time it was tried, without modification. All code was written by Claude.
 
 To build:

@@ -4461,6 +4461,44 @@ identical -- and it reached the linked image.
     order; that is 286's separate issue, and `ibmobjdump --normalize` is how
     it is compared across.
 
+THE 20,773 DIVERGENCE WAS THE MIS-ASSEMBLED IMAGE, AND IT IS GONE.  Recording
+it because the intermediate reading was wrong in an instructive way.
+
+    WHAT IT LOOKED LIKE.  On the image built with the old asm101, yaGPC2 and
+    gpc took different control-flow paths from about step 20,773, where the
+    software polls STAT4 (BUSY/WAIT) in a bounded BCTB retry loop and the
+    answer depends on how far the BCEs have got.  gpc stopped at 37,985 steps
+    in "wait state" -- GPCIPL enters WAIT at 01df8 after an SSM unmasks
+    interrupts and nothing wakes it -- and with Don's own real-time flags
+    (--real-time --rt-factor 0.35 --max-steps 0) still gave up, "wait state
+    (timeout)", after 6.8 seconds of simulated time.  yaGPC2 did not reach
+    that WAIT at all; its path continued into BSL1UNPT's unprotect walk.
+
+    WHAT I CONCLUDED, AND WHY IT WAS WRONG.  I wrote that the divergence was
+    therefore not a timing artifact but a real fork selecting between two
+    control-flow paths, with yaGPC2's the one matching Don's narrative of a
+    good boot and gpc's the one that dead-ends.  That reasoning took the
+    image as a fixed given and asked which emulator was right.  The image was
+    the variable.  Both emulators were faithfully executing the same
+    mis-assembled `B disp(reg)` (see the ASM101S handoff), and the fork was
+    downstream of it.
+
+    WHAT IS TRUE NOW.  With Don's 2228e1e cherry-picked and PHASE10 rebuilt,
+    yaGPC2 runs our own image and his IPL.fcm to the same 21,883 instructions
+    with ZERO divergences and zero phase slips, ending in the same wait at
+    01df8 with identical registers.  There is no 20,773 fork, no "we run past
+    the reference", and no open question about which path was correct.  The
+    unprotect-walk worry that went with it -- R3 = 0x2141 counting down at
+    ~37,985, but a later pass showing R3 negative and decrementing, which
+    cannot terminate -- was an artifact of the same bad image and does not
+    arise.
+
+    THE LESSON IS THE ORDER OF SUSPICION.  When two independent emulators
+    disagree, the tempting question is which one is right.  When they AGREE
+    -- as these two did, on the same wrong loop with identical iteration
+    counts -- the input they share is what to suspect, and a simulator-
+    against-simulator comparison cannot see it by construction.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.

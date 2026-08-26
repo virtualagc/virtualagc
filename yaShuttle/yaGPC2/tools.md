@@ -157,6 +157,31 @@ Common invocation flags (as used by `compileLinkRun`, see below):
 `--interactive --no-trace --no-verbose --symbols SYMFILE
 --line-width 240 FCMFILE`.
 
+
+### yaGPC2-specific run flags
+
+These three are `yaGPC2`'s own; they are not part of `gpc run`'s option set.
+
+`--time-scale <factor>` and `--pacing <burst|signal>` (`src/opts.c`/`.h`,
+`src/run.c`'s `batchrunner_pace()`) give wall-clock pacing for
+`SCHEDULE`/`WAIT`, mirroring `yaHALMAT2`'s flags of the same names, semantics
+and defaults. `--time-scale` defaults to 1.0, i.e. genuine real time.
+`--pacing` defaults to `burst`; the alternative `signal` requires the build's
+`HAVE_POSIX_TIMERS` probe to have succeeded (see the `Makefile`). Both flags
+are inert for a program with no `TASK`/`SCHEDULE`/`WAIT`, because never enough
+virtual time accumulates between pacing checks to trigger a sleep. Full
+writeup and verification: `problems.md` 2.7.
+
+`--date-time-epoch <seconds>` (`src/opts.c`/`.h`, `src/ageharness.c`,
+`src/cpu.h`'s `dateTimeAnchorEpochSec`) overrides the wall-clock anchor for
+`DATE()`/`CLOCKTIME()`, for reproducible runs. The default anchor is the host
+machine's current wall-clock time, in its own configured timezone, at program
+start; both built-ins then progress from that anchor via emulated time. It is
+deliberately not shaped identically to `yaHALMAT2`'s `--start-time`, which
+also accepts local date/time strings where this accepts only bare epoch
+seconds; a possible future unification was raised with `yaHALMAT2` and left
+unresolved. Full writeup and verification: `problems.md` 7.15.
+
 ## `compileLinkRun` — one-shot compile/link/run
 
     /home/rburkey/git/virtualagc/yaShuttle/Source Code/PASS.REL32V0/compileLinkRun

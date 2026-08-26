@@ -11,6 +11,13 @@ Section 2 items are the latter (real discrepancies, cause not yet
 determined). See the closing "Methodology and caveats" section for how
 these were found and how to read them.
 
+**Section 8 is different in kind and was added later.** Sections 1–7 were
+found by running *test programs*; Section 8 is what running **real Shuttle
+flight software against real peripherals** turned up — GPCIPL, the UDP bus
+bridge to Don Schmidt's MMU and MEDS, the OI340600 rebuild, and the
+OI340700 source recoveries. It carries its own method notes, because that
+instrument fails in ways the earlier one does not.
+
 All `gpc`/CoffeeScript line references are against
 `/mnt/STORAGE/home/rburkey/git/yaGPC/gpc/*.coffee` (the yaGPC port's
 source checkout of `gpc`) as of yaGPC commit `8f06c0e`. All "confirmed
@@ -3668,6 +3675,30 @@ produced the next day's `DATE()` and a small positive `CLOCKTIME()`.
 `hal-runtime-features.db` rows 96/97 updated from `not_implemented` to
 `implemented`/`tested_dedicated`.
 
+**Follow-up (2026-08-18): the embedding contract had the same gap, and the
+CLI-only fix above did not close it.**  `ageharness_init_minimal()` /
+`yagpc2_initializer()` — the path any Shuttle-sim-style embedder takes through
+`GpcOps` — never touched `cpu.dateTimeAnchorEpochSec` at all, so an embedded
+instance always ran silently with `DATE()`/`CLOCKTIME()` anchored at epoch 0,
+with no way for the embedding main program to supply a starting time at all.
+Per the user's explicit design ("the initializer should take this time/date as
+an argument, and store it in the state structure ... rather than relying on ...
+some implementation-dependent global location"), fixed by adding a
+`startEpochSeconds` parameter to `GpcInitializerFn` and a matching
+`GpcState.startEpochSeconds` field — both in the shared header, alongside
+`elapsedTime`'s own precedent — threaded through a new
+`ageharness_init_minimal()` parameter into `cpu.dateTimeAnchorEpochSec`, and set
+on `GpcState` by `yagpc2_initializer()` (`src/gpcops.c`).
+`ageharness_configure_from_opts()`, the CLI path, needed no change: it already
+implements the correct policy independently.  New regression test
+`test_start_epoch_via_initializer` (`test/test_gpcops.c`) drives the CLI's own
+`--date-time-epoch` golden (`datetimefn.fcm`, epoch 951912000, `TZ=UTC`)
+through the embedding path instead, confirming the two agree.  Because
+`../yaGpcIntegration/yaGpcIntegration.h` must stay byte-for-byte identical
+between yaGPC2 and yaHALMAT2, the matching change was requested of the
+yaHALMAT2 peer session (message sent 2026-08-18); check its reply before
+treating the two repos' copies as back in sync.
+
 ### 7.16 `SCHEDULE ... REPEAT`'s remaining cadences (bare, AFTER) and UNTIL-time cancellation — done, one real fast-forward bug found and independently confirmed on `yaHALMAT2`'s own side too
 
 Self-selected from the survey (rows 7/8/10 of `hal-runtime-features.db`):
@@ -4200,6 +4231,415 @@ language feature); `UPDATE PRIORITY`'s bare/self form (row 27) stays
 reproduced the identical real `HALSFC` PASS2 compiler defect,
 `BS122 INDIRECT STACK USAGE CONFLICT`, confirming it's not an artifact
 of any particular surrounding code shape).
+
+---
+
+## 8. Real flight software: GPCIPL, the peripheral bus, and the OI340600/OI340700 corpora (2026-08-17 → 2026-08-26)
+
+Sections 1–7 were found by running *test programs* — `yaHALMAT2`'s suite, the
+worked examples, hand-cut fixtures. This section is what running **real Shuttle
+flight software against real peripherals** turned up, which is a different
+instrument and finds different things. The single most important methodological
+result is negative and is stated first:
+
+> **Comparing two emulators against each other cannot find a bug in their shared
+> input.** yaGPC2 and `gpc` sat in the same infinite loop, at the same address,
+> with *identical iteration counts*, for days — because both were faithfully
+> executing the same mis-assembled image. Agreement between independent
+> implementations is evidence about the implementations, not about the program
+> they are both running.
+
+### 8.1 Real peripheral I/O: the `--bce-network` bridge
+
+`--bce-network` installs a `GpcServicerFn` that puts BCE/MIA bus traffic on
+real UDP multicast, matching `nsts-sim-gpc`'s own `com/bus.civet` wire format,
+so yaGPC2 drives Don Schmidt's real MMU and MEDS processes. Two new files
+(`src/bcenet_framer.c`, layer 2, word-at-a-time buffering; `src/bcenet_transport.c`,
+layer 3, one socket per bus) and **no change to `yaGpcIntegration.h` or to either
+emulator's engine** — the extension point already existed.
+
+Wire-format bugs found, each by testing against the *real* peer rather than a
+stub of our own:
+
+- **`FRAMER_IS_SHUTTLE_BUS` was hardcoded true**, adding an IUA+reserved header
+  the peer never strips, shifting every word by one. `nsts-sim-gpc` builds every
+  bus with `new Bus(name, busConfig[name])` — two arguments, so `isShuttleBus`
+  defaults false. Every earlier "verified against the real `Bus` class" check
+  had been made against a listener *we* constructed with the same wrong
+  assumption. **A test peer you configure yourself is not an independent check.**
+- **Buffers hardcoded to 64 words**, silently truncating a real display frame
+  buffer (542 words). Both raised to 1024.
+- **`GPC_SVC_XMIT_CMD` never sent the command word at all** — it recorded the
+  IUA, flushed the burst, and reported success. Every command the machine
+  generated was dropped. It goes out as its own two-word message with the
+  24-bit command left-justified, as the reference's MIA does.
+- **No self-echo filter.** Multicast loopback returns our own datagrams, and on
+  a shuttle bus they carry the very IUA the receive filter accepts. Fixed first
+  by byte-matching (as the reference does) and then properly: **that cannot work
+  on the display bus**, where a DEU answers a poll with one halfword and a fill
+  puts 511 mostly-identical halfwords out, so a real reply is byte-identical to
+  something we just sent. 13 of 78 poll replies survived. Now attributed by
+  *identity* — a separate transmit socket on an ephemeral port — 176 of 176 peer
+  datagrams kept, 144 of 144 of ours dropped, error-terminations 26 → 0.
+- **Batching words into one datagram was wrong** at the protocol level and was
+  reverted; the reference sends each word as its own message, which is what a
+  peripheral parses.
+
+Two upstream `nsts-sim-gpc` renderer bugs were found live via Chrome DevTools
+Protocol and fixed there with the user's go-ahead: an inclusive-vs-exclusive
+range in `setBGDFB()` reading one word out of bounds, and `decodeFCW()` crashing
+the whole render on the first unrecognised halfword. Its `@FCWS` table
+implements only single-halfword opcodes, so a whole category (POSITION variants,
+LINE, VPARM, RTC, TEST, DASH ON) goes unrendered — genuinely `nsts-sim-gpc`'s
+own unfinished territory, not fixable from here.
+
+**Real-time pacing** (`--real-time`/`--rt-factor`/`--rt-idle-timeout`,
+`src/rtpacer.c`) is *not* the same thing as `--time-scale`, and the distinction
+matters: `--time-scale` sleeps off a lead a program builds by running fast, and
+never advances simulated time on its own. A machine in the AP-101S wait state
+needs the opposite — there are no instructions to pace, and what ends the wait
+is an interrupt. Free-running the wait advances simulated time as fast as the
+host manages, so a bus reply a millisecond away in wall-clock terms arrives to a
+transaction that timed out "hours" ago in simulated time. Host stalls are
+**re-based, not repaid**: a debugger halt loses the peripheral's datagrams
+outright (UDP does not retransmit), so replaying the lost wall time as simulated
+time would only run every outstanding transaction past its timeout. Note that
+under `--real-time` the instruction stream is **not reproducible**, so exact
+trace comparison against `gpc` is only meaningful without it.
+
+### 8.2 Emulator defects found by running GPCIPL
+
+Trace agreement against `gpc` on the real `IPL.fcm` went
+**20,917 → 35,036 → 43,311 → 299,984/300,000 → all 3,987,845 instructions with
+zero phase slips.** Every fix below was confirmed against the POO
+(`ASM101S/AP-101S-instruction-set.txt`) and/or `nsts-sim-gpc` before changing
+anything. Roughly grouped:
+
+*CPU.* `ME`/`MER` dropped the low half of the double-length product;
+`MED`/`MEDR` used the AP-101 C/M multiply instead of the AP-101S's own, and that
+routine was itself 1 ulp high on postnormalising products; Figure 2-20 note `#`
+(machine check / store protect force the old PSW's CC to 10 and clear
+carry+overflow) was missing; the fixed-point overflow *indicator* was never set
+and never re-tested after `SPM`/`LPS`; program-check codes were wrong for
+fixed-point overflow (0004, was 0002) and address specification (0002, was 0003
+— not a program check at all); External 0/1 never wrote their own interrupt
+code; TEST INTERRUPTS set the registers but raised none of the four levels; POO
+14.1 index alignment (`LM`/`STM`/`LPS` take a *halfword* index despite fullword
+operands) was unmodelled and `SSM`/`TS` were wrongly marked fullword; auto
+storage modification used the post-incremented address for its own access;
+`LDM`/`STDM` read the four DSEs as nibbles of the high halfword rather than the
+low nibble of each byte; only 4 DSEs were kept where the machine has 8, so `LXA`
+on R4–R7 aliased onto R0–R3; `STXA`/`STXAR` were empty stubs.
+
+*Store protection and the IU.* Every instruction store now goes through
+`cpu_store_hw`/`cpu_store_fw`, which test **both** halfwords' protect bits before
+writing either and honour `storeProtectOverride` (left on by an `ISPB` with an
+illegal M1 — previously dismissed as a no-op because nothing read it). `ISPB`
+masked its EA with `0xfffe` to drop the low bit, but that EA is already expanded
+to 19 bits, so the mask threw the **sector** away and protected the same offset
+in sector 0. IOP writes to main storage bypassed store protect entirely, so the
+DMA store-protect violation the self test deliberately provokes could never
+occur. The IU store-conflict model (POO 15/16.8) was absent: with DIAG 7100/7101
+off, a store into the IC−1..IC+23 window must keep the pre-store halfword in a
+shadow the fetch prefers — **GPCIPL's self test stores an instruction over itself
+and requires the stale one to run.**
+
+*DIAG.* The whole family took its command from the halfword *at* the effective
+address; **the command is the effective address**. Every DIAG had been decoding
+whatever happened to be in storage.
+
+*Interrupts and timers.* AGE — the twelfth interrupt, External 1's vector and
+mask bit with its own latch, code 0006, lowest priority — was missing, and the
+interrupt-priority self test requires it eighth. Masked machine check and
+instruction monitor no longer stay pending (POO 2.5.2.3); only the system class
+waits for an unmask. `ICR` counter reads come back two counts high; the PSA half
+of a counter write goes past store protect and resets the clock latch. An
+interval timer's **masked borrow is owed, not forgotten** — but a timeout must
+still wrap through, or the boot dies in a masked wait state (`62f23ad21`; this is
+GPCIPL ITEM 18's error 206, "CLOCK2 CANNOT BE SET TO ZEROS").
+
+*IOP.* Ten of the twelve long-format MSC instructions advanced the PC one
+halfword too few, so each was followed by executing its own operand word.
+MSC `@BC`/`@BXC` displacement is relative to the *updated* PC. `@INT` never
+loaded IOP Interrupt Register C. LOAD MSC BUSY set the STAT4 bit but not the
+copy the MSC reads back with `@LMS`. `@STP`/`#STP` self tests were stubs, and
+the MSC leaves its signature in processor 25's local store — which did not exist,
+the page array being one short. **`@RBI` names its processor as the instruction's
+BCE field plus the low five bits of the accumulator**; taking the field alone sent
+every reset to BCE 0, so a BCE's indicator once set by `#SIB` was never cleared,
+`@RAI` was satisfied immediately, and the MSC built block programs flat out until
+the buffer pointer overflowed out of the `#LBR` operand field into its opcode.
+A bus **receive does not complete in one slice**: the reference holds the BCE at
+the instruction until the count is satisfied or it times out, where ours queued
+the words as DMA and advanced unconditionally. `#MIN`/`#MIN@` reissued their
+companion bus command on every execution, and since a waiting receive re-fetches
+its own instruction each slice, one transaction put its command on the bus
+thousands of times — 76,735 polls in 60 s against the reference's 176.
+
+*Decode.* Instruction decode ranked candidate patterns by mask **value** rather
+than by how many bits they fix, so `STXA` with R1=010 decoded as `SHW`. The
+pattern parser's `getMask` replaced only lowercase field letters, leaving an
+uppercase one for `parseInt` to truncate on — faithful to an old reference, and
+it wrecked the mask of every pattern with an uppercase field in its first
+halfword.
+
+### 8.3 The fixture suites were blind
+
+Two generator defects meant whole suites had been asserting nothing:
+
+- `gen_cpu_ea_fixtures.cjs` never set `indexWidth`, so the oracle evaluated
+  `x << (undefined - 1)` — **a shift by NaN, i.e. by 0** — and every indexed-EA
+  fixture silently asserted halfword alignment.
+- `gen_iop_instr_exec_fixtures.cjs` still used the reference's old `regHalt`
+  name (now `regProcEnable`) and could not run at all.
+- `iop_set_nia` needed one 18-bit mask before the IOP suites tested anything.
+
+Once they could see, every remaining failure was triaged rather than deferred.
+The EA suite's 897 failures were **two causes in the RS extended/indexed branch
+of `cpu_g_ea`**, the first being that the base register's DSE was never applied
+(the reference computes it once at the top and passes it to every `g_EXPAND`
+inside). The shift family's 189 failures were **one defect**: the four double
+shifts took their partner as plain R1+1 where POO 6.6 says `(R1+1) mod 8`.
+`BCTR` was an evaluation-order bug, not the mod-8 pair issue. Final state, with
+nothing anywhere unexplained:
+
+| Suite | Result | Remainder |
+| --- | --- | --- |
+| EA | 20,447 / 20,447 | — |
+| CPU exec | 111,192 / 111,358 | 166 = 136 stale CVFX + 30 BCT (reference's) |
+| MSC | 145,446 / 145,746 | 300 = `@LAR` (reference's) |
+| BCE | 74,099 / 74,699 | 600 = `#MOUT@`/`#MIN@` (reference's) |
+
+**All 1,066 remaining failures are a known-wrong oracle, not a defect.**
+
+Note the standing rule this exposed: **a fixture suite is regenerated, so
+editing a fixture is not a fix.** When the oracle is wrong, the suite is *recut*
+against a corrected reference — the generators take `YAGPC_REF_ROOT` to name
+which `gpc` is the oracle, and `gen_cpu_instr_decode_fixtures.cjs` documents the
+precedent in its own header.
+
+### 8.4 The display IPL, and a receive floor
+
+The display unit's IPL failed on **a 1.28 ms miss**, and the chain took a long
+time because it was genuinely circular: a timed-out receive starves the poll,
+the starved poll feeds back into MSC pacing via `@RAI` waiting for *all* BCE
+indicators, and the delayed MSC makes the next receive later still. The
+transport kept only one datagram per drain, so a one-word `#MIN` took 6.44 ms.
+Fixed with a receive floor (2 ms; `YAGPC_RECV_FLOOR_US` overrides it, which is
+how the sweep was taken).
+
+**This was not a transport fault** — it was our own drain rate. Also removed:
+the `malloc`/`free` pair every bus datagram was paying.
+
+**MEDS then worked.** With the floor, MMU1 and MEDS up, yaGPC2 drives the real
+display through a completed IPL and renders the GPCIPL MENU correctly — both
+pages, per the user "even down to the exact register values, ERROR codes and
+counts" against Don's video. ITEM 18/19/27+n/28 all behave as the video does.
+Our text is arguably better: we render "ILLEGAL KYBD ENTRY WHILE SELF TEST IN
+PROGRESS" where the video shows a corrupted "ILLEGAL KYBD ENTRY WHSELF TEST
+IN PROGRESS".
+
+### 8.5 Building our own flight image
+
+`tools/build_ipl_fcm.sh` assembles eleven modules from `OI340600/SSSRC` and links
+them under the CON80 deck's own layout. Verified against Don's `IPL.fcm`: **all
+twelve sections at identical addresses and sizes, identical entry point (18195),
+and of the 65,024 shared bytes only six differ** — halfwords 29534 and 29536 in
+`FCMINSSL`, the two unrelocated `FIOMUWB2` references. Eleven of twelve sections
+are byte-identical. This settles the BILDNEW5 link that `HANDOFF-OI340600`
+recorded as unvalidated for want of a dump.
+
+The full boot chain — FCMBOOT reading the tape, GPCIPL, MEDS — is documented
+separately in **`HANDOFF-FCMBOOT.md`**, including the two mass-memory model bugs
+(a MIA latch delivered ahead of live traffic, and a transfer's unread tail never
+dropped), both of which were found by **adding a counter rather than reading
+code**: `wordsOut` vs `wordsTaken` exposed the one-word leak, and `pending` per
+command exposed a 360-word tail.
+
+### 8.6 Rebuilding OI340600, and the bug that found
+
+A full rebuild from source now succeeds — **25/25 phases, 821/821 HAL, 285/285
+ASM** — after three upstream fixes in `nsts-sdl-dps`. Phase 21 needing 42 blocks
+against an allocation of 41 turned out not to be a defect: `CGMIMU` finally *has*
+content.
+
+The important result came from the all-ours tape **not** booting ("invalid
+instruction 0xd054 at 0x4a03"). An RLD hypothesis was wrong, but chasing it to a
+specific field found a real yaGPC2 bug instead. At `GPCIPL+0x285`
+(`LA R4,STMWAIT`), `asm101` emits `ECF3 1DF6` and ours `ECF0 1988`; `USING
+FAILDATA,B0` is active and `0x1DF6 − 0x46E = 0x1988`, so **ours resolves the
+USING and `asm101` ignores it** — and the original contemporary listing reads
+`00285 ECF0 1988`, ours exactly. Scored over all 1,165 differing halfwords in
+PHASE10: 1,071 are covered by the original listing, **ours matches 1,062 and
+`asm101` matches 0.**
+
+So the non-booting tape was the *faithful* one and the fault was ours:
+**`LDM`/`STDM` decode patterns fixed the register bits at 000**, so a real
+`LDM R1` (`69F8`) never matched and `DE` took it as a two-byte instruction,
+desynchronising every later fetch. Fixed in `249669d91`. The POO says bits 5–7
+of that family are identically zero; the *original* assembler encoded a spurious
+register operand there anyway, **so the emulator must ignore them and a modern
+assembler must reproduce them.** Filed as `nsts-sim-gpc` PR #31 and
+`nsts-sdl-dps` issues #44 and #45.
+
+This is the bug that could only be found by assembling the source correctly — see
+this section's opening note.
+
+### 8.7 The DASS comparison, and DFG
+
+The `.dfg` phase of the DASS comparison is no longer blocked (`d30c2c959`).
+Three independent gates had to go, one per file: `compileLinkCompare`'s "Step
+−1" hook printed "DFG preprocessing not yet implemented" and died, `dass-db.py`
+marked every `ext='dfg'` row skipped, and `dass-run.py`'s work query filtered
+`AND s.ext = 'hal'`. **124 of 139 membership rows match.**
+
+A cost estimate of mine was wrong by an order of magnitude — I said "hours",
+anchored on the 4-hour figure for a *full* sweep of all 2,558 units three times
+over. The `.dfg` work is 139 rows over 69 distinct decks and took about four
+minutes at `--jobs=4`. **Divide the sweep figure by the work before quoting it.**
+
+Of the 15 differing sections, four are not revisions of the same display at all
+but **wholly different displays** — ours Spacelab/IUS/TDRS-era, the dump's
+ISS-era (`CS2000` → APCU STATUS, `CS2050` → ISS MCS MODING, `CS2110` → ISS C&W,
+`CS2120` → OIU). They cluster by phase, and the phase is 15. This bears out the
+user's reading that these are mission-dependent I/O programs.
+
+### 8.8 Decompiling the dump: `dfgmap.py`
+
+`modules/sdfpkg/dfgmap.py` maps dumped halfwords back to the deck statements
+that produced them. It works because **DFG already writes the mapping down**:
+its generated `.hal` is self-annotating (`C -- <statement>` names the deck
+statement, `C - <text>` explains a field), so no reverse-engineering of the
+generator was needed. It runs forwards (`--dump`/`--address`: which of our
+statements a memory image corresponds to) and backwards (`--find`, `--corpus`).
+
+Everything below was derived from the corpus and *validated against it*:
+
+- **DEU character encoding** — two 7-bit characters per halfword, the first
+  character's low bit displaced into the second byte's top bit
+  (`hi = (c1>>1)|0xC0`, `lo = ((c1&1)<<7)|c2`). **4,169 of 4,172 CHAR runs**
+  decode to the statement DFG annotated.
+- **Cursor FCWs** — 19 raster units per column, 27 per row, two bases per axis
+  0x600 apart, plus absolute raster coordinates falling between cells.
+  **4,051 of 4,051** coordinate statements convert correctly.
+- **The screen is 51 × 26**, independently derived and user-confirmed.
+- **Displays come in X/C pairs** — same name, leading `X` = background (fixed
+  labels and item numbers), `C` = foreground — and only the XD/XG families have
+  them, never XS/XV. Compositing the pair is what makes a rendering legible.
+- `--bounded` bounds the display list by `[background, DDT)` from the DFT header.
+  Measured rather than asserted: on the 126 sections that match the dump byte for
+  byte it loses 1,290 cells against the full view's 173, so **both views are
+  kept** and the header carries the measurement rather than an adjective.
+
+Two real findings came out of it. `CDAP15` renders as nonsense because **it is
+not a display**: `PMF=`/`AMTx=` decks are AMT moding tables, detectable by their
+compool name (`CDA_Pnn_AMT`), and all eight `CDAPnn` decks are the same. And a
+genuine defect **in our source**: `OI340600/APPLSRC/CV1000.dfg` carried `\br`, an
+anonymization error, which the user fixed; with it corrected CV1000 matches both
+dumps exactly.
+
+Renderings of all 133 decks are written to `~/ipl-demo/dfg2/all-displays.txt`.
+
+### 8.9 Recovering OI340700 source from the dump
+
+Where a CSECT differs between our OI340600 source and the OI340700 DASS dumps,
+the dump is enough to recover the source. Two files are written (uncommitted, in
+`~/workspace/PFS/OI340700/APPLSRC/`, which is managed elsewhere), each carrying a
+Virtual AGC header saying it is a reverse-engineering rather than an original:
+
+- **`CS2PDT.hal`** — 86 structures plus the pad. Most of OI340600's file is
+  reusable: the nine structure templates in `INCL80/STRPDT.hal` are unchanged
+  between releases and are `D INCLUDE`d rather than restated, and even the
+  trailing `CSAS_PDT2_PAD ARRAY(116)` is the same size. Only the instance list
+  and its values are new. Each structure was matched to a template by member
+  signature, and the match verified independently: **the spacing between
+  consecutive structures equals the template's computed size at all 85
+  boundaries.** Compiled, the CSECT is **376 halfwords, exactly the dump's size**,
+  and **260 of the 260 halfwords the dump states a value for match** (the other
+  116 are the pad, which the dump states nothing for).
+- **`CS2110.dfg`** — round-trips through `dfg` and HALSFC to **all 144 halfwords**
+  of the dumped `#PCS2110`.
+
+Three things are worth keeping from how those were done:
+
+1. **Scalars are IBM S/360 short hex float, and the DASS report gives the raw
+   bits** in the column immediately before the decimal — `C518 69FF
+   -9.9999937E+04`. The decimal is only for human readability: it is that value
+   (exactly −99999.9375) *truncated* to eight digits, so re-encoding it lands one
+   ULP low. Emit from the raw hex.
+2. **But the exact decimal is not always the right literal either.** HALSFC loses
+   precision on a long one: `-4.39999866485595703125` is exactly `C1466665` and
+   comes back as `C1466664`. Emit the **shortest decimal that lands on the
+   intended bits under either rounding mode** — truncation brackets the magnitude
+   at `[exact, next)`, round-to-nearest at `[exact±½ULP]`, so choose from the
+   intersection `[exact, exact+½ULP]`. This is a general rule for recovering any
+   HAL/S SCALAR initializer from a dump.
+3. **The BLT bit indices needed no fitting.** The encoding is stated outright in
+   `nsts-sdl-dps/src/dfg/resolve.py`: `w0 = 0x0400 | bitpos1<<5 | bitpos2`, with
+   `bitpos(field,bit) = (-n) % 16 + (bit-1)`. Both fields are `BIT(16)`, so
+   `bitpos = bit-1`. An earlier formula of mine, fitted to OI340600's annotated
+   BLT statements, accounted for 27 of 57 — wasted effort against a documented
+   encoding.
+
+The two recoveries confirm each other: `CS2PDT.hal` places `CSAS_PDT_6020017` at
++228 and its `_FDA` at +230, i.e. `D594`/`D596`, which are precisely the
+addresses the dumped `CS2110` BLT entries carry — and the compool was recovered
+from its own structure listing with no reference to that deck.
+
+**Compile these with `halsParms.getParms(stem)`, never a hand-written CARDTYPE.**
+CARDTYPE is per-stem (`CS2110` takes `FCRMUDXCVMWCYCZM`, `CS2PDT` takes
+`FCRCUDXCVMWCYCZM` — a `C` where most take `M`), a wrong one does not fail the
+compile, and using CS2110's for CS2PDT silently added ten halfwords of
+conditionally-compiled declarations at the front of the compool, displacing every
+offset in it and every external reference to it. See §8.10.
+
+### 8.10 Method failures worth keeping
+
+These cost real time and several produced confident, wrong, *written-down*
+conclusions. They are recorded because the failure modes recur.
+
+**Never write your explanation into the measurement.** Seeing a uniform
+10-halfword offset between our compool and the dump, I explained it as "an object
+prologue the linker drops" and then encoded that into the comparison as a map
+scoring *ours-plus-10* as a match. The comparison could then no longer detect the
+thing it existed to check. The control disproved it in one command:
+`~/ForClaude/OI340600-clc/S2work3` holds both the object and the linked image for
+OI340600's own CS2PDT, and `object[h] == linked[D4B0+h]` for all 2,573 halfwords
+with no shift at all. **A uniform offset means suspect the build options, not
+invent a mechanism.**
+
+**Two emulators agreeing is not evidence about the input they share** — the
+opening note of this section, and the reason the `asm101` `B disp(reg)` bug
+survived RUNASM 205/205 and OI301700 272/272.
+
+**A test peer you configure yourself is not an independent check** (§8.1's
+`isShuttleBus`).
+
+**Change one variable at a time.** "Our tape is deficient, 4 DISPLAY_FILL against
+the reference's 87" compared two runs using *different pacing flags*; the
+comparison measured the flags. `--deu-model` had already said the images agreed
+(518 vs 690) and I did not believe the instrument.
+
+**Check whether the label you are calling an error is on the error path.**
+"BSLRESET is still reached, so something fails" — `BSLRQP15` is the *success*
+path.
+
+**Measure before asserting a negative.** I wrote that the Mass Memory Unit "had
+never been run", when all I was entitled to say was that I had not started one.
+Twice in one session a strong negative was asserted from a failure to observe.
+
+**Retracting on weaker evidence than the original claim is its own failure
+mode.** I told the user the MEDS clock was real GPC data, retracted on seeing
+one-word datagrams, and had to un-retract when the user pointed out it read
+`000/00:05:02` — mission-elapsed, counting from IPL. The first answer was right.
+
+**Process hygiene.** `ps -C node` does not find a running `gpc`: its process name
+is `node-MainThread`. Two measurements were silently taken with a second emulator
+on the buses because of it. `pkill -f "mmu.js"` **matches its own shell** and
+kills the launching command — use a bracket pattern, or a pidfile.
+
+**Check where a probe sits relative to the write it measures.** My first
+DEU-image measurement ran before the store loop and read zeros regardless.
 
 ---
 

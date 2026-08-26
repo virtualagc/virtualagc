@@ -441,6 +441,63 @@ Peak resident memory is about 18 MB per process on RUNASM and 130 MB on FCOS,
 where the arenas hold the whole 210-member macro library; Python's is 28 MB and
 50 MB.
 
+## A bug this assembler does not have: `asm101` and `B disp(reg)`
+
+Worth recording because it took a long time to find, and because it shows what
+a simulator-against-simulator comparison cannot see.
+
+`asm101`, the assembler in `nsts-sdl-dps`, mis-assembled the one-register form
+`B disp(reg)`. `B 1(2)` became `DF04`, the one-halfword SRS short form, which
+silently **discards the register**. `ASM101S.py` assembles the same statement
+to `C7F2 0001`, the RS form. Decoded against Figure 2-11 (RS:
+`Op|R1|..|AM(13)|B2(14-15)|AddrSpec`), `C7F2` has `B2=10`, register 2, and
+`AM=0`, with displacement `0001`, so the target is `R2+1` — which is what
+`D(B)` means in S/360 operand syntax and what a subroutine return needs.
+`DF04` is BCF mask 7, displacement 1, and the manual is explicit that BCF adds
+"the Disp to the updated IC", so the register never participates at all.
+`B 1(0,2)` and `B 1(2,0)` assemble correctly in both; it was specifically the
+one-register form.
+
+**Why the byte-for-byte corpora never caught it.** The idiom occurs in exactly
+four places in the whole corpus — `BUMP64C` and `DEC64C` in `MLIB80/SVCALT.asm`,
+`BUMP56C` and `BUMPMLTD` in `MLIB80/SVCHNDLR.asm`, all four the return branches
+of the BUMP subroutines. Neither file has a standalone object in any
+byte-verified corpus; both are `COPY` fragments. So RUNASM 205 of 205 and the
+OI301700 corpus 272 of 272 both passed without ever assembling one of them.
+
+**Why it mattered.** `SVCALT`'s `BUMPWRDN DC Y(BUMP64C),Y(DEC64C)` are the
+power-fail executive's dispatch switches. `BALR 7,7` calls one; the callee
+cannot return, because its return branch has lost the base register; and
+control loops forever in the eight halfwords around `BUMPWRDN`. This is why
+GPCIPL never booted. Both `yaGPC2` and Don's `gpc` sat in that loop with
+*identical iteration counts*, because both were faithfully executing the same
+mis-assembled image — so no amount of comparing the two emulators against each
+other could have found it. It took assembling the source correctly.
+
+**Confirmed end to end.** Reassembling `BILDNEW5` with `ASM101S.py` (via
+`modules/sdfpkg/assemble-one.sh`, which builds the combined
+`MLIB80`+`INCL80`+`INCLIB` library the assembler needs — pointing `--library`
+at `MLIB80` alone is not enough) gave
+`01C20 C7F2 0001  BUMP64C  B  1(B2)` where `asm101` had emitted `DF04`.
+Relinking `PHASE10` with that object, GPCIPL left the loop: where every earlier
+run sat on the same eight halfwords forever, it then ran 172 distinct addresses
+and reached `BSL1UNPT`/`MEMPATRN` executing `ISPB 0,X'0000'(2,)` — Insert
+Storage Protect Bits, walking memory a halfword at a time — which is the
+"unprotects its writable data" step of Don's own account of a good boot.
+
+**Resolved upstream, and the workaround retired.** Don fixed the same bug
+independently in `nsts-sdl-dps` 2228e1e, "asm101: SRS/USING addressing, IOP
+encodings, and section-correct relocation", which had not been cherry-picked.
+It makes `B 1(2)` assemble to `C7F2 0001`, byte-identical to `ASM101S.py`; the
+fix appears to fall out of his SRS form-selection work rather than to have been
+aimed at this idiom. With it cherry-picked, `con80build --phase 10 --assemble
+--link` produces a correct `BILDNEW5` on its own and the hand-placed
+`ASM101S.py` object is no longer needed, so that fragile swap is gone. The
+rebuilt image then ran under `yaGPC2` against Don's own `IPL.fcm` to the same
+21,883 instructions with zero divergences and zero phase slips, ending in the
+same wait at `01df8` with identical registers — validating our build pipeline
+against a build he confirms boots.
+
 ## Deliberate divergences from the Python
 
 Two, both commented at the point they occur.
