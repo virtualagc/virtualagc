@@ -73,3 +73,70 @@ the documents themselves.)
   -- CS2PDT 376-halfword CSECT with 260/260 stated halfwords matching the
   dump, CS2110 144/144.  The only object difference is the SYM record's
   compile TIMEstamp.
+
+### [2026-08-26] Target: [problems.md]
+- THE "REMAINING 14 .dfg FILES" IS 12 DECKS, NOT 14, AND MOST OF THEM DID NOT
+  NEED RECOVERING AT ALL.  Measured from dass-compare.db: 13 differing .dfg
+  sections over 12 distinct decks, not the 15/13 of a few days ago, because
+  the user's CV1000.dfg fix removed one deck (two sections).
+- THE DIFF TABLE CAPS AT TEN ROWS PER SECTION -- compileLinkCompare hardcodes
+  `--max-hw-diffs 10` -- so classifying from it undercounts.  Re-ran each deck
+  and re-compared with the cap raised: of 3855 differing halfwords, 944 are
+  RELOCATION TARGETS, i.e. pointers into a compool whose internal layout
+  changed.  Those decks are not wrong; the compool is.
+- CSA_PDT RECOVERED EXACTLY, and it was the single highest-value item: 2059
+  structures, CSECT 5756 halfwords (the dump's own size), 5640 of 5640 stated
+  halfwords match, no offset applied.  Same method as CS2_PDT.  Two parser
+  bugs had to be fixed first:
+    * the raw-hex field must be taken by FIXED COLUMN ([65:88], decimal
+      [88:113]).  A greedy hex regex swallows a decimal that happens to be
+      four digits ("6400"), leaving nothing to parse, and the member silently
+      renders as zero -- 180 integers were wrong that way.
+    * an array of copies ("+++ COPY 1 OF 2 +++") must be matched on ONE copy
+      and re-emitted as -STRUCTURE(n).  66 structures failed to match without
+      it, all of them _LIM.
+  INDEPENDENT CHECK: structure spacing equals the matched template's computed
+  size at all 2058 boundaries, 0 mismatched, and the last structure ends at
+  +5640, exactly where the pad begins.
+- CSP_CLB RECOVERED: OI340600's file plus one change.  Three GCIL command
+  masks are wrapped in structures whose first member is a 2-halfword SCALAR
+  dummy -- presumably how the "MUST BE ON FULLWORD BOUNDARY" its own comment
+  demands was finally guaranteed rather than asserted.  Three structures, two
+  halfwords each, is the six-halfword displacement that made CS0620's
+  pointers into #PCSPCLB wrong by 6.  140 halfwords, 60/60.
+- SIX DECK/CONFIG PAIRS NEEDED NO SOURCE CHANGE AT ALL.  Linked against the
+  recovered compools, CS0620/S2, CS0620/G9, CS0940, CS2011 and CS2021 go from
+  51/51/44/27/52 differing halfwords to ZERO.  Their OI340600 decks already
+  ARE the OI340700 decks.
+- TWO DECKS RECOVERED AND ROUND-TRIP VERIFIED:
+    CS0790  three display fields moved from the CSS_DDT arrays to CSA_PDT
+            parameter entries.  The deck's OWN comments already named the
+            three parameters (726040/726042/726044), so it is a change of
+            data source for the same three measurements.
+    CDAP15  four checkpoint-capable SPECs (200, 205, 211, 212) where OI340600
+            has eleven; 200 and 205 do not appear in OI340600 at all.
+- CV1130 IS NOT AN OI340700 DIFFERENCE AT ALL: it is an ANONYMIZATION ERROR
+  in OUR source.  CV1130.dfg reads CHAR=(R/^x RFG/FRT 36) where OI301700's
+  CV1130.hal -- an original-build artifact embedding its own DFG input --
+  reads R/SB, and the line two above it already reads R/SB MAT 35.  With
+  R/SB the deck matches the G9 dump with 0 differing halfwords.  Fixed in
+  OI340600, same class as CV1000's \br.
+- A "0 diffs" I NEARLY BELIEVED WAS A COMPILE FAILURE.  My sweep grepped for
+  "N halfwords differ" and printed 0 when the line was absent -- which is
+  also what a failed compile looks like.  CS2000 and CS2110 both showed
+  "0 diffs" while actually failing to compile.  Grep for PASS/FAIL
+  explicitly, never for the absence of a failure line.
+- STILL OPEN, and each is a full deck reconstruction rather than an edit:
+    CS2050  the dump is ISS MCS MODING, 734 halfwords against our 394;
+            renders legibly end to end, so the material is all there
+    CS2000  APCU STATUS, 282 halfwords, all 29 of our PDT params absent
+    CS2120  OIU, 884 halfwords
+    CS0780  SM SYS SUMM 1, a revision: 4 of its params changed template
+            (ANA_ENTRY -> EU_ENTRY, applied, and it compiles now) but it also
+            points into #PCS2MDT where ours points into #PCSDMDT, and dfg
+            cannot resolve 6 PADR referents after a naive INCLUDE swap.
+            NOT COMMITTED -- it does not round-trip and unverified work does
+            not go in.
+- TOOLING: /tmp/claude-1000/pdtrecover.py generalises the compool recovery
+  (any CSECT, any of the nine templates, arrays of copies, scalars from raw
+  hex).  Worth a permanent home beside dfgmap.py if more compools come up.
