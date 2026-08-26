@@ -46,6 +46,115 @@ HEXV = re.compile(r"HEX'([0-9A-Fa-f]{1,4})'")
 # Anything else is shown as <XX> rather than guessed at.
 GLYPH = {0x0D: "\u23ce", 0x10: "<SPCHAR>", 0x14: "<ALTCHAR>", 0x16: "_"}
 
+# Cursor FCWs.  Both axes are raster positions with a fixed pitch -- 19
+# raster units per column, 27 per row -- and each axis has two bases exactly
+# 0x600 apart, the low one covering the top-left of the screen and the high
+# one the rest.  Solved from the corpus and checked against it: the rule below
+# reproduces all 4051 annotated XC=/YC= statements with no exceptions, and the
+# largest column it yields is 51, which is the screen width.
+X_BASES, X_PITCH = (0x8412, 0x7E12), 19
+Y_BASES, Y_PITCH = (0x916E, 0x976E), 27
+SCREEN_COLS, SCREEN_ROWS = 51, 26
+
+def xc_of(hw):
+    for b in X_BASES:
+        d = hw - b
+        if d > 0 and d % X_PITCH == 0 and 1 <= d // X_PITCH <= SCREEN_COLS:
+            return d // X_PITCH
+
+def yc_of(hw):
+    for b in Y_BASES:
+        d = b - hw
+        if d > 0 and d % Y_PITCH == 0 and 1 <= d // Y_PITCH <= SCREEN_ROWS:
+            return d // Y_PITCH
+
+def render_annotated(rows):
+    """Render from a generated .hal using DFG's own annotations.
+
+    For a compool we have the source of, this beats decoding cursor FCWs out
+    of the halfword stream: the statement text says XC = 18 outright, and only
+    halfwords belonging to a CHAR/XC/YC/CARRTN statement are drawn at all, so
+    the header, KVT, DDT and item tables cannot paint noise.  The FCW route
+    below is for memory images, where there are no annotations."""
+    grid = [[" "] * SCREEN_COLS for _ in range(SCREEN_ROWS)]
+    x = y = home = 1
+    for _off, val, stmt, _d in rows:
+        st = (stmt or "").strip()
+        m = re.match(r"XC = (\d+)", st)
+        if m: x = home = int(m.group(1)); continue
+        m = re.match(r"YC = (\d+)", st)
+        if m: y = int(m.group(1)); continue
+        if st.startswith("CARRTN"):
+            y += 1; x = home; continue
+        if not st.startswith("CHAR = ("):
+            continue
+        for ch in decode_text([val]):
+            if len(ch) != 1:
+                continue                              # a control, not a cell
+            if 1 <= y <= SCREEN_ROWS and 1 <= x <= SCREEN_COLS:
+                grid[y - 1][x - 1] = ch
+            x += 1
+    return grid
+
+def display_list(hws):
+    """The static display list, per the DFT header.
+
+    +3 is the displacement to the background and +4 the displacement to the
+    DDT, so the drawing instructions lie between them.  Rendering the whole
+    compool instead puts the header, KVT and DDT through the decoder, which
+    paints noise: those halfwords are addresses and table entries, and some
+    of them happen to look like cursor FCWs or text."""
+    if len(hws) < 5:
+        return hws
+    bg, ddt = hws[3], hws[4]
+    if 0 < bg < ddt <= len(hws):
+        return hws[bg:ddt]
+    return hws
+
+def render(hws):
+    """Lay a halfword stream onto the 51x26 character screen.
+
+    The stream is a display list: cursor FCWs move the cursor, text halfwords
+    paint at it, and CARRTN returns to the column the last XC set and steps
+    down a row -- which is what makes multi-line labels come out under each
+    other rather than running on."""
+    grid = [[" "] * SCREEN_COLS for _ in range(SCREEN_ROWS)]
+    x = y = 1
+    home = 1
+    for hw in hws:
+        if (hw & 0xF000) == 0x8000:
+            v = xc_of(hw)
+            if v: x = home = v
+            continue
+        if (hw & 0xF000) == 0x9000:
+            v = yc_of(hw)
+            if v: y = v
+            continue
+        if (hw & 0xC000) != 0xC000:
+            continue                                  # some other FCW
+        hi, lo = hw >> 8, hw & 0xFF
+        for c in (((hi & 0x3F) << 1) | (lo >> 7), lo & 0x7F):
+            if c == 0:
+                continue
+            if c == 0x0D:                             # CARRTN
+                y += 1; x = home; continue
+            if c in (0x10, 0x14):                     # SPCHAR / ALTCHAR
+                continue                              # a set switch, not a cell
+            ch = GLYPH.get(c, chr(c) if 32 <= c < 127 else "?")
+            if len(ch) != 1: ch = "?"
+            if 1 <= y <= SCREEN_ROWS and 1 <= x <= SCREEN_COLS:
+                grid[y - 1][x - 1] = ch
+            x += 1
+    return grid
+
+def show_screen(grid):
+    print("     " + "".join(str(((c + 1) // 10) % 10) or " " for c in range(SCREEN_COLS)))
+    print("     " + "".join(str((c + 1) % 10) for c in range(SCREEN_COLS)))
+    print("    +" + "-" * SCREEN_COLS + "+")
+    for i, row in enumerate(grid, 1):
+        print(f" {i:2d} |" + "".join(row) + "|")
+    print("    +" + "-" * SCREEN_COLS + "+")
+
 def decode_text(hws):
     """Characters from a CHAR run.
 
@@ -131,12 +240,27 @@ def main():
                                     "with --find, instead of one file")
     p.add_argument("--decode", help="decode a comma-separated halfword "
                                     "sequence as DEU text")
+    p.add_argument("--whole", action="store_true",
+                   help="with --screen: render every halfword, not just the "
+                        "display list the DFT header delimits")
+    p.add_argument("--screen", action="store_true",
+                   help="render the halfwords as the 51x26 character screen")
     p.add_argument("--text", action="store_true",
                    help="with --dump: decode the dump's halfwords as text")
     a = p.parse_args()
     if a.decode:
         hws = [int(x, 16) for x in re.split(r"[ ,]+", a.decode.strip()) if x]
         print(decode_text(hws))
+        return
+    if a.screen:
+        if a.dump:
+            dump = hw_image(a.dump)
+            base = int(a.address, 16)
+            hws = dump[base:base + a.count]
+        else:
+            show_screen(render_annotated(parse(a.hal)))
+            return
+        show_screen(render(hws))
         return
     if a.dump and a.text:
         dump = hw_image(a.dump)
