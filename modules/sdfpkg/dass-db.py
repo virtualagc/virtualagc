@@ -282,14 +282,9 @@ def doInit(db, configs, srcTree, mafgen):
         db.execute("DELETE FROM membership WHERE config = ?", (config,))
         db.execute(
             "INSERT INTO membership(config, source_id, n_csects, status) "
-            "  SELECT config, source_id, COUNT(*), "
-            "         CASE WHEN (SELECT ext FROM source WHERE id = source_id)"
-            "              = 'dfg' THEN 'skipped' ELSE 'todo' END "
+            "  SELECT config, source_id, COUNT(*), 'todo' "
             "    FROM csect WHERE config = ? AND source_id IS NOT NULL "
             "   GROUP BY config, source_id", (config,))
-        db.execute(
-            "UPDATE membership SET note = 'DFG preprocessing not implemented' "
-            " WHERE config = ? AND status = 'skipped'", (config,))
 
         n = db.execute("SELECT COUNT(*) FROM membership WHERE config = ?",
                        (config,)).fetchone()[0]

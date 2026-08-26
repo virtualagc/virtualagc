@@ -502,7 +502,11 @@ def main():
     db = dassDb.connect(dbPath)
     query = ("SELECT m.source_id, s.path, m.status FROM membership m "
              "  JOIN source s ON s.id = m.source_id "
-             " WHERE m.config = ? AND s.ext = 'hal'")
+             # .dfg decks are compiled too, since compileLinkCompare now
+             # preprocesses them into HAL/S first.  .asm is still excluded:
+             # its six-character key is not unique, so the CSECT join cannot
+             # identify the source (see dass-db.py's header).
+             " WHERE m.config = ? AND s.ext IN ('hal', 'dfg')")
     params = [config]
     if "all" not in statuses:
         query += " AND m.status IN (%s)" % ",".join("?" * len(statuses))

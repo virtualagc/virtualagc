@@ -205,10 +205,26 @@ fileType = Path(filename).suffix.replace(".", "")
 
 if fileType in ["hal", "dfg"]:
     if fileType == "dfg":
-        # Step -1, convert to .hal
-        print(f"DFG preprocessing not yet implemented.")
-        die()
-    
+        # Step -1, convert the display deck to HAL/S.  DFG resolves the
+        # COMPOOLs a deck references through the SDF library, so it needs the
+        # same one HALSFC is given below; without it a deck that references
+        # another compool fails with "cannot derive condition word".  The
+        # generated source is named from `prefix` like every other product,
+        # so --out-dir moves it too, and it is what gets compiled.
+        pfilename = f"{prefix}.hal"
+        command = ["dfg", filename, "--sdflib",
+                   sdfi if sdfi != None else "SDFLIB", "-o", pfilename]
+        print(" ".join(command))
+        try:
+            result = subprocess.run(command, capture_output = True,
+                                    text = True, check = True)
+            print(result.stdout)
+        except subprocess.CalledProcessError as e:
+            print(f"DFG preprocessing failed with exit code {e.returncode}.")
+            print("STDOUT:", e.stdout)
+            print("STDERR:", e.stderr)
+            die()
+
     # Step zero, preprocess with preprocessHALSFC.
     if False: # No! Obsolete!
         pfilename = f"_{basename}.hal"
@@ -220,7 +236,8 @@ if fileType in ["hal", "dfg"]:
             print(f"Preprocessor failed with exit code {e.returncode}.")
             print("STDERR:", e.stderr)
             die()
-    else:
+    elif fileType != "dfg":
+        # .dfg already set pfilename to the generated COMPOOL above.
         pfilename = filename
     # First step, compile.
     command = ["HALSFC", "--clean", "--archive", pfilename, "--test",
