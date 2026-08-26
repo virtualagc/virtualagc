@@ -45,3 +45,31 @@ is 133 as 116 `APPLSRC` + 17 `SSSRC`, and only three of the four BUMP returns
 carry the "OTHERWISE, GET OUT OF TOWN" comment.  `HANDOFF-FCMBOOT.md`'s
 pointers at this log were rewritten, since the material has moved here into
 the documents themselves.)
+
+### [2026-08-26] Target: [problems.md]
+- COMMENTS IN RECOVERED SOURCE MUST STAY OUT OF THE SRN AREA, columns 73-80.
+  User caught both recovered OI340700 files spilling into it: CS2PDT.hal had
+  16 lines over 72 and CS2110.dfg 5 over.  Reflowed; both now clean.
+- THE .dfg LIMIT IS 70, NOT 72.  A deck comment is re-commented into the
+  generated HAL/S under the "**** DFG INPUT ****" banner with a "C " prefix
+  -- TWO characters, measured, not one -- so a 71-character deck line becomes
+  a 73-character HAL/S comment.  Verified against OI340600's own CS2110.dfg
+  and its dfg output.
+- PRESERVE EXISTING INTER-WORD SPACING when reflowing.  textwrap's
+  fix_sentence_endings rewrote the standard Virtual AGC header's
+  "None. Believed" into "None.  Believed", which would have made that block
+  differ from every other file carrying it.  Replaced with a greedy wrapper
+  that splits on runs of spaces and keeps each run intact.
+- Reflow scope: prose paragraphs only.  Tables (the BLT halfword listing),
+  code samples (the w0 formula) and separators are indented deeper than the
+  text column and are left exactly as they were.
+- Bug worth noting because it was silent: my first paragraph-continuation
+  test treated ANY "word:" as a new label, so a colon in running prose
+  ("human readability:", "on a long one:") ended the paragraph early and left
+  the rest unwrapped.  The label test has to require the text start at the
+  label column, not merely match the pattern.
+- VERIFIED, not assumed: comment text is word-for-word identical (558 and 840
+  words), code and deck statements are byte-identical, and both still build
+  -- CS2PDT 376-halfword CSECT with 260/260 stated halfwords matching the
+  dump, CS2110 144/144.  The only object difference is the SYM record's
+  compile TIMEstamp.
