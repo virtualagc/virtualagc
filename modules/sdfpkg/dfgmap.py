@@ -31,20 +31,43 @@ decks we do have.
     $ dfgmap.py x --corpus hal/ --find E349,E945
     CS2020    @175   CHAR = (FIRE CMD)
 '''
-import re, sys, argparse, pathlib
+import re, sys, argparse, pathlib, pathlib
 
 HEXV = re.compile(r"HEX'([0-9A-Fa-f]{1,4})'")
 
-# The DEU's character set is ASCII over the printable range; the rest are
-# glyphs and controls.  These four are the only non-ASCII codes anywhere in
-# the OI340600 display corpus, and each is named by the deck statement that
-# emits it -- found by searching the corpus for the halfword, not assumed:
-#     0x0D  CARRTN   2971 occurrences
-#     0x10  SPCHAR      8
-#     0x14  ALTCHAR     2
-#     0x16  the data-entry underscore, 624
-# Anything else is shown as <XX> rather than guessed at.
-GLYPH = {0x0D: "\u23ce", 0x10: "<SPCHAR>", 0x14: "<ALTCHAR>", 0x16: "_"}
+# The DEU character set: all 128 codes, from USA-003090 p.104 via
+# deucharset.ts beside this script.  It is NOT ASCII, which is what an
+# earlier version of this file assumed after inferring the set from the
+# corpus alone: 0x22 is ~ not ", 0x24 a radical not $, 0x40 gamma not @,
+# 0x5C theta, 0x5E pi, 0x7B/0x7E/0x7F sigma/lambda/delta.  Codes the corpus
+# never exercises were invisible to that inference altogether, and two it did
+# exercise were misread from the deck keyword that emits them: 0x10 and 0x14
+# are alpha and epsilon, not the "SPCHAR"/"ALTCHAR" the statements are named.
+def _load_charset():
+    for cand in (pathlib.Path(__file__).with_name("deucharset.ts"),
+                 pathlib.Path.home() / "ipl-demo" / "deucharset.ts"):
+        if cand.exists():
+            t = {}
+            for line in cand.read_text(encoding="utf-8").splitlines():
+                m = re.match(r"""\s*0x([0-9a-fA-F]{2})\s*:\s*('([^']*)'|"([^"]*)")""", line)
+                if m:
+                    t[int(m.group(1), 16)] = m.group(3) if m.group(3) is not None else m.group(4)
+            if len(t) >= 128:
+                return t
+    return None
+
+DEUSET = _load_charset()
+
+def glyph(c):
+    """One screen cell's worth of character, or None if the code is not one."""
+    if DEUSET is None:
+        return chr(c) if 32 <= c < 127 else None
+    g = DEUSET.get(c)
+    if g is None or g in ("\\0", "\\b", "\\r"):
+        return None                       # absent, or a control written as an escape
+    if g == "":
+        return "_"                        # 0x7d, the full-cell underscore
+    return g if len(g) == 1 else None     # 'SELF TEST' is a legend, not a cell
 
 # Cursor FCWs.  Both axes are raster positions with a fixed pitch -- 19
 # raster units per column, 27 per row -- and each axis has two bases exactly
@@ -94,6 +117,8 @@ def render_annotated(rows, grid=None):
         grid = [[" "] * SCREEN_COLS for _ in range(SCREEN_ROWS)]
     x = y = home = 1
     for _off, val, stmt, _d in rows:
+        if val is None:
+            continue
         st = (stmt or "").strip()
         m = re.match(r"XC = (\d+)", st)
         if m: x = home = int(m.group(1)); continue
@@ -145,6 +170,8 @@ def render(hws):
     x = y = 1
     home = 1
     for hw in hws:
+        if hw is None:
+            continue
         if (hw & 0xF000) == 0x8000:
             v = xc_of(hw)
             if v: x = home = v
@@ -159,12 +186,11 @@ def render(hws):
         for c in (((hi & 0x3F) << 1) | (lo >> 7), lo & 0x7F):
             if c == 0:
                 continue
-            if c == 0x0D:                             # CARRTN
+            if c == 0x0D:                             # carriage return
                 y += 1; x = home; continue
-            if c in (0x10, 0x14):                     # SPCHAR / ALTCHAR
-                continue                              # a set switch, not a cell
-            ch = GLYPH.get(c, chr(c) if 32 <= c < 127 else "?")
-            if len(ch) != 1: ch = "?"
+            ch = glyph(c)
+            if ch is None:
+                continue                              # a control, not a cell
             if 1 <= y <= SCREEN_ROWS and 1 <= x <= SCREEN_COLS:
                 grid[y - 1][x - 1] = ch
             x += 1
@@ -193,13 +219,16 @@ def decode_text(hws):
     remaining run differs only by the 0x16 glyph above."""
     out = []
     for x in hws:
+        if x is None:
+            continue
         hi, lo = x >> 8, x & 0xFF
         if (hi & 0xC0) != 0xC0:
             continue
         for c in (((hi & 0x3F) << 1) | (lo >> 7), lo & 0x7F):
             if c == 0:
                 continue
-            out.append(GLYPH.get(c, chr(c) if 32 <= c < 127 else f"<{c:02X}>"))
+            g = glyph(c)
+            out.append(g if g is not None else f"<{c:02X}>")
     return "".join(out)
 
 def parse(path):
@@ -207,6 +236,12 @@ def parse(path):
 
     Declaration order is memory order within the COMPOOL, so the running
     count of emitted halfwords IS the offset into the CSECT."""
+    # A NAME declaration occupies a halfword but emits no HEX literal: it is
+    # a relocated address, filled in by the linker.  Missing them silently
+    # shifted every later offset -- CV1000 parsed as 716 halfwords against a
+    # section of 800, and it has exactly 84 of them.  Carried as a None value,
+    # which is also the honest answer for what they hold.
+    NAMEDECL = re.compile(r"^\s*DECLARE\s+\S+\s+NAME\b")
     stmt, detail, out, off = None, [], [], 0
     for raw in open(path, errors="replace"):
         line = raw.rstrip("\n")
@@ -220,6 +255,10 @@ def parse(path):
             # continuation of a wrapped statement comment, e.g. a long VPARM
             if stmt is not None and line[2:].strip() and not line[2:].strip().startswith("*"):
                 stmt += " " + line[2:].strip()
+            continue
+        if NAMEDECL.match(line):
+            out.append((off, None, stmt, tuple(detail)))
+            off += 1
             continue
         for m in HEXV.finditer(line):
             out.append((off, int(m.group(1), 16), stmt, tuple(detail)))

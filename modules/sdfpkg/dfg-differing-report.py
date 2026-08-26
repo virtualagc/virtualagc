@@ -46,13 +46,20 @@ out.append("The dump side is rendered by decoding cursor FCWs out of the memory 
 out.append("with no source of any kind.  Where our section and the dump differ in size,")
 out.append("both are drawn in full rather than only their overlap.")
 out.append("")
-out.append("STRAY CHARACTERS ON THE DUMP SIDE ARE EXPECTED.  Our side is drawn from DFG's")
+out.append("CHARACTERS ARE THE REAL DEU SET, all 128 codes from USA-003090 p.104 --")
+out.append("not ASCII.  0x22 is a tilde, 0x24 a radical, 0x40 gamma, 0x5C theta, 0x5E pi,")
+out.append("0x7B/0x7E/0x7F sigma/lambda/delta.  Deck statement text uses ASCII stand-ins")
+out.append("for several of these, so a rendering can legitimately differ from the text of")
+out.append("the statement that produced it.")
+out.append("")
+out.append("SOME STRAY CHARACTERS REMAIN ON THE DUMP SIDE.  Our side is drawn from DFG's")
 out.append("annotations, so only halfwords belonging to a text statement are painted.  The")
 out.append("dump has no annotations, so its whole section goes through the decoder and")
-out.append("table data -- the DDT, the item and limits tables -- occasionally decodes as")
-out.append("printable characters.  Bounding the render by the DFT header removes that")
-out.append("noise but also removes real text: in CS0620 the label ORB C&W ISS lies beyond")
-out.append("the DDT displacement and disappears with it, so the full section is drawn.")
+out.append("table data -- the DDT, the item and limits tables -- sometimes decodes as")
+out.append("characters.  Halfwords our own parse knows to be relocated addresses are")
+out.append("blanked, which removes most of it; bounding the render by the DFT header")
+out.append("would remove the rest but also removes real text, since CS0620's ORB C&W ISS")
+out.append("lies beyond the DDT displacement, so the full section is drawn.")
 out.append("")
 out.append("WHAT THE RENDERINGS SHOW, in one table.  Four of the fifteen are not")
 out.append("revisions of the same display at all -- the slot holds a DIFFERENT display,")
@@ -111,7 +118,14 @@ for r in rows:
     out.append("  AS THE DUMPED BUILD HOLDS IT")
     if os.path.exists(img):
         d=hwimg(img); n=r['expected'] or r['halfwords']
-        w=d[r['address']:r['address']+n]
+        w=list(d[r['address']:r['address']+n])
+        # Blank the halfwords our own parse knows to be relocated addresses:
+        # they are linker output, they legitimately differ between
+        # configurations, and decoded as text they paint junk over the screen.
+        if os.path.exists(hal):
+            ours=[x[1] for x in m.parse(hal)]
+            for i in range(min(len(ours), len(w))):
+                if ours[i] is None: w[i]=None
         g=m.render(w)
         out += ["  "+l for l in grid_lines(g)]
         out.append("")
