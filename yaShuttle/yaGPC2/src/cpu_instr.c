@@ -2041,12 +2041,21 @@ static OpEntry OPS[] = {
     { "SVC", "1100100111111abb/X", exec_SVC, 1, 1 },
     { "TS", "1011100011111abb/X", exec_TS, 1, 1 },  /* halfword operand */
     { "TSB", "10110111ddddddbb/I", exec_TSB, 1, 1 },
-    { "LDM", "0110100011111abb/X", exec_LDM, 2, 1 },
+    /* The three register bits are part of the encoding, exactly as in LXA
+     * just below, and the assembler emits whatever register the source
+     * named: the flight code's own `LDM R1,EXTDATA1` is 69F8 and
+     * `LDM R3,...` is 6BF8, neither of which matched while these bits were
+     * fixed at 000.  DE (01101xxxddddddbb) then took them, being the only
+     * remaining match, and decoded a 4-byte instruction as a 2-byte one --
+     * so every instruction after the first LDM was fetched at the wrong
+     * offset.  Both opcodes still ignore the register itself: LDM loads,
+     * and STDM stores, all four DSEs regardless (sec. 9.13). */
+    { "LDM", "01101xxx11111abb/X", exec_LDM, 2, 1 },
     { "LXAR", "01000xxx11101yyy", exec_LXAR, 2, 1 },
     { "LXA", "01000xxx11111abb/X", exec_LXA, 2, 1 },
     { "STXAR", "10100xxx11101yyy", exec_STXAR, 2, 1 },
     { "STXA", "10100xxx11111abb/X", exec_STXA, 2, 1 },
-    { "STDM", "1001000011111abb/X", exec_STDM, 2, 1 },
+    { "STDM", "10010xxx11111abb/X", exec_STDM, 2, 1 },
     { "ICR", "11011xxx11100yyy", exec_ICR, 2, 1 },
 };
 
