@@ -219,3 +219,41 @@ the documents themselves.)
   labels.  The remaining route is the SDF, which dfg already parses.
 - SO THE CHAIN IS: CS2050 and CS0780 need CS2_MDT, CS2_MDT needs 35 names
   from CRATE, and CRATE needs an offset-to-name table out of its SDF.
+
+### [2026-08-26] Target: [problems.md]
+- ALL TWELVE DIFFERING .dfg DECKS ARE NOW ACCOUNTED FOR.  Exact and
+  round-trip verified: CS0780 (1100/1100), CS2000 (282/282), CS2110
+  (144/144), CS0790, CDAP15.  Needing NO source change at all, once the
+  compools were recovered: CS0620 in both S2 and G9, CS0940, CS2011, CS2021.
+  CV1130 was never an OI340700 difference -- an anonymization error in our
+  own source.  CS2120 is at 882 of 884 and CS2050 at 733 of 734.
+- FIVE COMPOOLS RECOVERED EXACTLY: CSA_PDT 5640/5640, CS2_MDT 755/755,
+  CS2_PDT 260/260, CSD_RTC 197/197, CSP_CLB 60/60.
+- SPCHAR WAS THE LAST BIG DECODE, and it took two wrong rules.  Only
+  0x20..0x5B is writable inside CHAR=( ); everything else is addressed by
+  index, c<=0x1E as c+11 and c>=0x5C as c-45.  But the CODE does not decide:
+  0x16 is packed with its neighbours in CS2120 and stands alone as SPCHAR=33
+  elsewhere, so a code-only rule fixed CS0780 and broke CS2120 by 623
+  halfwords.  Nor does the PACKING decide alone: 0x08 has no printable glyph
+  and must be SPCHAR even as an odd-length tail, which a packing-only rule
+  got wrong in seven places.  The rule is both: no printable glyph -> always
+  SPCHAR; otherwise alone-in-a-halfword MID-run -> SPCHAR, same shape at the
+  end -> an ordinary tail.
+- THE THREE REMAINING HALFWORDS ARE dfg's, NOT OURS.  Word 1 of a RATE entry
+  is the group's worst-case FCW draw, which dfg computes rather than reads.
+  Tracing its own _content_draw over CS2050's group gives every directive's
+  budget and EVERY ONE is a function of the emitted words alone -- 83 from
+  the content directives plus 34 from thirteen IMMED groups, 117, where the
+  dump has 118.  CS2120's two groups come to 207 and 77 against 213 and 78.
+  The emitted words match the dump everywhere else, so the original DFG
+  budgeted more for byte-identical content: a gap in dfg's model of the
+  original's allowances.  ddt.py itself says the original's budgets sometimes
+  exceed the runtime draw and lists the allowances it models; none of these
+  groups uses one.  WORTH REPORTING TO DON -- not filed, per the rule that
+  outward-facing text is shown first.
+- RULED OUT BY EXPERIMENT, NOT ARGUMENT: all ten corpus spellings of the
+  ambiguous VPARM format 1412/4018; raising each of the three TEST and three
+  BR operands (all make it worse, by changing the emitted displacement); the
+  CONV=S-versus-CONV=I ambiguity, which cannot apply since all three VPARMs
+  carry sign code 7; and dfg's HEX model, since CS0710 uses 15 HEX directives
+  and matches the dump exactly.
