@@ -257,3 +257,32 @@ the documents themselves.)
   CONV=S-versus-CONV=I ambiguity, which cannot apply since all three VPARMs
   carry sign code 7; and dfg's HEX model, since CS0710 uses 15 HEX directives
   and matches the dump exactly.
+
+### [2026-08-26] Target: [problems.md]
+- CORRECTION, USER-PROMPTED.  I said the DASS comparison's database holds a
+  "match" that is not one, citing #PCSDRTC as verdict 'ok' with 0 differing
+  halfwords against a direct rebuild showing 75.  THE DATABASE IS RIGHT AND I
+  MISREAD IT.  The same row's `detail` column says
+  "[75 ignored] [43 no reference data]" -- it recorded exactly what happened.
+  I read n_diffs and verdict and did not read the field beside them, in a row
+  I had already printed.
+- THE REAL FINDING IS ONE LEVEL OUT, and it is about the exceptions lists
+  rather than the database.  Those 75 were excluded by an exceptions file,
+  whose stated purpose is "locations changed after the build (I-LOADs,
+  patches, checksums), which no compilation or link can reproduce".  The run
+  used exceptions-S2-full.txt, which holds 197 entries inside #PCSDRTC's
+  range -- and that CSECT has exactly 197 halfwords with stated values, so
+  essentially the whole compool is declared unreproducible.
+- IT IS REPRODUCIBLE.  The recovered OI340700 CSDRTCCM.hal compiles to match
+  all 197.  A post-build patch is by definition not reproducible from source;
+  these are.  So the -full list masks a genuine OI340700 SOURCE difference as
+  a build-time artifact, which is the kind of exclusion that hides work.
+- TWO LOOSE THREADS, not chased: exceptions-S2.txt (1265 lines) has ZERO
+  entries in that range where exceptions-S2-full.txt (46393 lines) has 197,
+  yet both carry the identical header claiming to be the locations MAFGEN
+  marks with '*' -- they cannot both be that.  And dass-literals.py has no
+  --full option, so how the -full variants were produced is not accounted for
+  by the tool that claims to produce them.
+- LESSON: a results row's summary fields are not the row.  Read the detail
+  column before calling a recorded result wrong -- especially when the tool
+  that wrote it is one of ours and has been reliable.
