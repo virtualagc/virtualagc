@@ -80,16 +80,36 @@ Y_BASES, Y_PITCH = (0x916E, 0x976E), 27
 SCREEN_COLS, SCREEN_ROWS = 51, 26
 
 def xc_of(hw):
+    """The character column a cursor FCW selects, or None.
+
+    An exact multiple of the pitch is a character cell.  DFG also emits
+    absolute raster coordinates -- the deck writes them as XC = 195A -- which
+    fall BETWEEN cells: 0x84C3 is 0x8400 + 195, and (195 - 18) / 19 is 9.3.
+    Rejecting those outright left the cursor stale wherever one occurred, so
+    they are rounded to the nearest column instead."""
     for b in X_BASES:
         d = hw - b
         if d > 0 and d % X_PITCH == 0 and 1 <= d // X_PITCH <= SCREEN_COLS:
             return d // X_PITCH
+    for b in (X_BASES[0] - 0x12, X_BASES[1] - 0x12):
+        r = hw - b
+        if 0 < r <= (SCREEN_COLS + 1) * X_PITCH:
+            col = round((r - 18) / X_PITCH)
+            if 1 <= col <= SCREEN_COLS:
+                return col
 
 def yc_of(hw):
+    """The character row a cursor FCW selects, or None.  See xc_of."""
     for b in Y_BASES:
         d = b - hw
         if d > 0 and d % Y_PITCH == 0 and 1 <= d // Y_PITCH <= SCREEN_ROWS:
             return d // Y_PITCH
+    for b in Y_BASES:
+        d = b - hw
+        if 0 < d <= (SCREEN_ROWS + 1) * Y_PITCH:
+            row = round(d / Y_PITCH)
+            if 1 <= row <= SCREEN_ROWS:
+                return row
 
 def twin(path):
     """The background deck for a foreground one.
@@ -123,7 +143,7 @@ def render_annotated(rows, grid=None):
         m = re.match(r"XC = (\d+)", st)
         if m: x = home = int(m.group(1)); continue
         m = re.match(r"YC = (\d+)", st)
-        if m: y = int(m.group(1)); continue
+        if m: y = int(m.group(1)); x = home; continue
         if st.startswith("CARRTN"):
             y += 1; x = home; continue
         if not st.startswith("CHAR = ("):
@@ -134,7 +154,7 @@ def render_annotated(rows, grid=None):
             v = xc_of(val) if (val & 0xF000) == 0x8000 else None
             if v: x = home = v; continue
             v = yc_of(val) if (val & 0xF000) == 0x9000 else None
-            if v: y = v
+            if v: y = v; x = home
             continue
         for ch in decode_text([val]):
             if len(ch) != 1:
@@ -183,7 +203,12 @@ def render(hws):
             continue
         if (hw & 0xF000) == 0x9000:
             v = yc_of(hw)
-            if v: y = v
+            # A row move returns to the home column, the one the last XC set,
+            # exactly as CARRTN does.  Leaving x where the previous row's text
+            # ended put CS2120's "AD PD BUS LOCK" 14 columns right of where a
+            # 2008 crew training workbook shows it, so a later group landed on
+            # top of it and it read "B B W FK".
+            if v: y = v; x = home
             continue
         if (hw & 0xC000) != 0xC000:
             continue                                  # some other FCW
