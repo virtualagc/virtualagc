@@ -68,7 +68,21 @@ def yc_of(hw):
         if d > 0 and d % Y_PITCH == 0 and 1 <= d // Y_PITCH <= SCREEN_ROWS:
             return d // Y_PITCH
 
-def render_annotated(rows):
+def twin(path):
+    """The background deck for a foreground one.
+
+    Display definitions come in pairs with the same name but a leading X or
+    C: X is the background -- the fixed labels and item numbers -- and C is
+    the foreground painted over it.  Rendering a C deck alone therefore looks
+    far emptier than the real screen, because everything permanent about the
+    display lives in its X twin."""
+    p = pathlib.Path(path)
+    if not p.name.startswith("C"):
+        return None
+    t = p.with_name("X" + p.name[1:])
+    return t if t.exists() else None
+
+def render_annotated(rows, grid=None):
     """Render from a generated .hal using DFG's own annotations.
 
     For a compool we have the source of, this beats decoding cursor FCWs out
@@ -76,7 +90,8 @@ def render_annotated(rows):
     halfwords belonging to a CHAR/XC/YC/CARRTN statement are drawn at all, so
     the header, KVT, DDT and item tables cannot paint noise.  The FCW route
     below is for memory images, where there are no annotations."""
-    grid = [[" "] * SCREEN_COLS for _ in range(SCREEN_ROWS)]
+    if grid is None:
+        grid = [[" "] * SCREEN_COLS for _ in range(SCREEN_ROWS)]
     x = y = home = 1
     for _off, val, stmt, _d in rows:
         st = (stmt or "").strip()
@@ -87,6 +102,14 @@ def render_annotated(rows):
         if st.startswith("CARRTN"):
             y += 1; x = home; continue
         if not st.startswith("CHAR = ("):
+            # A cursor move need not be annotated "XC = n": DFG also emits
+            # them inside its IMMEDIATE UPDATE blocks, where the statement
+            # comment names the instruction rather than the coordinate.  So
+            # decode any halfword that is a cursor FCW, wherever it sits.
+            v = xc_of(val) if (val & 0xF000) == 0x8000 else None
+            if v: x = home = v; continue
+            v = yc_of(val) if (val & 0xF000) == 0x9000 else None
+            if v: y = v
             continue
         for ch in decode_text([val]):
             if len(ch) != 1:
@@ -240,6 +263,9 @@ def main():
                                     "with --find, instead of one file")
     p.add_argument("--decode", help="decode a comma-separated halfword "
                                     "sequence as DEU text")
+    p.add_argument("--over", help="background deck to composite under this one")
+    p.add_argument("--no-pair", action="store_true",
+                   help="do not look for the X background twin")
     p.add_argument("--whole", action="store_true",
                    help="with --screen: render every halfword, not just the "
                         "display list the DFT header delimits")
@@ -258,7 +284,13 @@ def main():
             base = int(a.address, 16)
             hws = dump[base:base + a.count]
         else:
-            show_screen(render_annotated(parse(a.hal)))
+            grid = None
+            bg = None if a.no_pair else (pathlib.Path(a.over) if a.over else twin(a.hal))
+            if bg:
+                grid = render_annotated(parse(bg))
+                print(f"    background: {pathlib.Path(bg).name}   "
+                      f"foreground: {pathlib.Path(a.hal).name}")
+            show_screen(render_annotated(parse(a.hal), grid))
             return
         show_screen(render(hws))
         return
