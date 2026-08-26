@@ -147,11 +147,16 @@ def render_annotated(rows, grid=None):
 def display_list(hws):
     """The static display list, per the DFT header.
 
-    +3 is the displacement to the background and +4 the displacement to the
-    DDT, so the drawing instructions lie between them.  Rendering the whole
-    compool instead puts the header, KVT and DDT through the decoder, which
-    paints noise: those halfwords are addresses and table entries, and some
-    of them happen to look like cursor FCWs or text."""
+    +3 is the displacement to the background and +4 to the DDT.  Bounding the
+    render between them removes the noise the header, KVT and tables paint
+    when the whole section goes through the decoder.
+
+    IT IS LOSSY, and measurably so: over the 120 generated compools, only 18
+    have every one of their CHAR halfwords inside this range.  Text routinely
+    lies beyond the DDT -- CG0200's runs to 1566 with the DDT at 800 -- so a
+    bounded view can silently drop real labels.  CS0620's ORB C&W ISS is the
+    example that caught this.  Hence a view, offered alongside the full one,
+    rather than the default."""
     if len(hws) < 5:
         return hws
     bg, ddt = hws[3], hws[4]
@@ -305,6 +310,10 @@ def main():
     p.add_argument("--over", help="background deck to composite under this one")
     p.add_argument("--no-pair", action="store_true",
                    help="do not look for the X background twin")
+    p.add_argument("--bounded", action="store_true",
+                   help="render only [background, DDT) from the DFT header: "
+                        "far less noise, but provably drops text in most "
+                        "decks -- see display_list()")
     p.add_argument("--whole", action="store_true",
                    help="with --screen: render every halfword, not just the "
                         "display list the DFT header delimits")

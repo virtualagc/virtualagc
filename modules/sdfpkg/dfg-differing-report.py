@@ -52,6 +52,14 @@ out.append("0x7B/0x7E/0x7F sigma/lambda/delta.  Deck statement text uses ASCII s
 out.append("for several of these, so a rendering can legitimately differ from the text of")
 out.append("the statement that produced it.")
 out.append("")
+out.append("TWO VIEWS OF THE DUMP.  The full view decodes every halfword of the")
+out.append("section.  The bounded view renders only [background, DDT) from the DFT")
+out.append("header.  Bounding is LOSSY and measurably so: of the 120 generated compools")
+out.append("only 18 have every CHAR halfword inside that range, and text routinely lies")
+out.append("beyond the DDT -- CG0200's runs to 1566 with the DDT at 800 -- so the bounded")
+out.append("view can silently drop real labels.  Read it as a legibility aid, never as")
+out.append("evidence of absence.")
+out.append("")
 out.append("SOME STRAY CHARACTERS REMAIN ON THE DUMP SIDE.  Our side is drawn from DFG's")
 out.append("annotations, so only halfwords belonging to a text statement are painted.  The")
 out.append("dump has no annotations, so its whole section goes through the decoder and")
@@ -122,12 +130,29 @@ for r in rows:
         # Blank the halfwords our own parse knows to be relocated addresses:
         # they are linker output, they legitimately differ between
         # configurations, and decoded as text they paint junk over the screen.
+        # ONLY when the two sections are the same length.  The mask is by
+        # offset, so on a size-mismatched section it would blank whatever
+        # happens to sit at our address offsets -- arbitrary halfwords of a
+        # different display, which is worse than the noise it removes.
         if os.path.exists(hal):
             ours=[x[1] for x in m.parse(hal)]
-            for i in range(min(len(ours), len(w))):
-                if ours[i] is None: w[i]=None
-        g=m.render(w)
-        out += ["  "+l for l in grid_lines(g)]
+            if len(ours)==len(w):
+                for i in range(len(ours)):
+                    if ours[i] is None: w[i]=None
+            else:
+                out.append("  (address slots not blanked: the sections differ "
+                           "in size, so our offsets do not correspond)")
+        out += ["  "+l for l in grid_lines(m.render(w))]
+        b=m.display_list([x for x in w])
+        if len(b)!=len(w):
+            out.append("")
+            out.append(f"  AS THE DUMPED BUILD HOLDS IT -- bounded view, "
+                       f"[background, DDT) = {len(b)} of {len(w)} halfwords")
+            out += ["  "+l for l in grid_lines(m.render(b))]
+        else:
+            out.append("")
+            out.append("  (bounded view identical: the DFT header does not "
+                       "delimit a smaller region here)")
         out.append("")
         out.append("  characters in the dumped section, in order:")
         out.append("    "+m.decode_text(w))
