@@ -320,3 +320,39 @@ the documents themselves.)
   the same our-layout-versus-the-dump's error that ran through the whole
   .dfg phase.  Testable by re-running dass-versions.py with the recovered
   compools in the fields table.
+
+### [2026-08-26] Target: [problems.md]
+- RE-RAN dass-versions.py FOR S2 WITH THE FIELDS TABLE.  THE OVER-RUN DOES NOT
+  REPRODUCE.  With --config=S2 --link-dir=work --exceptions=exceptions-S2.txt
+  --fields=augmented-S2-fields.json the output has ZERO entries in #PCSDRTC's
+  range and ZERO "CSAPCT-revised-BX-to-BY" entries at all -- against 197 and
+  1210 in the shipped exceptions-S2-full.txt.
+- SO THE SHIPPED FILE WAS MADE WITH INPUTS I DO NOT HAVE.  It carries 46385
+  entries where this run produces 17336, and the option I did not supply is
+  --asm-link, a FULL-CONFIGURATION link whose .fcm must sit beside it; no such
+  file is on disk.  I CANNOT ATTRIBUTE THE OVER-RUN TO A CODE PATH: my reading
+  of the self-revised branch was consistent with the arithmetic (the marked
+  span CC1E-C6BC+1 = 1379 exactly matches an unclamped walk of a 1379-halfword
+  section) but consistency is not reproduction, and the run does not show it.
+- AND THE FIX I INFERRED FROM THAT READING WAS WRONG.  Requiring
+  owner(address) == section name in the self-revised branch discarded 13418
+  legitimate entries across 11 units -- CVNMMUTI 7150, DMPMMMSG 3691, DCDDS2
+  1904 -- because A COMPOOL WHOSE STORAGE IS OWNED BY AN ASSEMBLY MODULE HAS
+  NO CSECT OF ITS OWN, so owner() returns the enclosing assembly CSECT and the
+  clamp rejects every address the compool legitimately claims.  That is the
+  very case dass-syms.py exists to handle, and the docstring of owner() says
+  so.  REVERTED; dass-versions.py is unchanged from its committed state.
+- WHAT STANDS, and it is the part that matters: the shipped
+  exceptions-S2-full.txt DOES excuse all 197 of #PCSDRTC's stated halfwords as
+  CSAPCT's revision, and the recovered OI340700 CSDRTCCM.hal reproduces those
+  197 from source.  A difference caused by another unit's revision is not
+  something our own source can reproduce, so the exclusion is wrong whatever
+  produced it.  The file is either stale or was generated from inputs that no
+  longer exist.
+- NEXT STEP IF PURSUED: find or rebuild the --asm-link full-configuration link
+  and regenerate the -full files from it, then diff against the shipped ones.
+  Until then the -full exceptions lists should be treated as unverified: at
+  least one of their entries is demonstrably wrong and cannot be regenerated.
+- LESSON, twice in one investigation: an explanation that fits the arithmetic
+  is not a reproduction.  I had the span arithmetic land exactly and still had
+  the wrong code path, and the "fix" it implied broke eleven units.
