@@ -125,6 +125,16 @@ for r in rows:
                f"{r['n_diffs']} differing{same}")
     out.append("-"*78)
     hal=os.path.join(HAL, r['stem']+".hal")
+    amt=m.amt_of(hal) if os.path.exists(hal) else None
+    if amt:
+        out.append("")
+        out.append(f"  NOT A DISPLAY.  This deck is the moding table {amt} -- a")
+        out.append("  PMF=/AMTx= deck telling FCOS which memory configuration a SPEC is")
+        out.append("  valid in.  It carries no CHAR, XC or YC statement, so there is no")
+        out.append("  screen to draw on either side; rendering one decodes table entries")
+        out.append("  as text and produces nonsense.  The halfword differences above are")
+        out.append("  real, they are simply differences in a table rather than a picture.")
+        continue
     out.append("")
     out.append("  AS OUR OI340600 SOURCE DEFINES IT")
     if os.path.exists(hal):

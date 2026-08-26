@@ -111,6 +111,24 @@ def yc_of(hw):
             if 1 <= row <= SCREEN_ROWS:
                 return row
 
+AMTNAME = re.compile(r"COMPOOL NAME:\s*(\S*_AMT)\b")
+
+def amt_of(path):
+    """The moding-table compool name, if this deck is one.
+
+    PMF=/AMTx= decks are not displays at all: DFG turns them into a
+    CDA_Pnn_AMT table telling FCOS which memory configuration a SPEC is valid
+    in.  They carry no CHAR, XC or YC statement, so drawing one as a screen
+    decodes table entries as text and produces nonsense -- CDAP15 came out
+    with a spurious %A1G=M and an F down column 1 of fifteen rows.  All eight
+    CDAPnn decks in OI340600 are of this kind."""
+    try:
+        head = pathlib.Path(path).read_text(errors="replace")[:4000]
+    except OSError:
+        return None
+    m = AMTNAME.search(head)
+    return m.group(1) if m else None
+
 def twin(path):
     """The background deck for a foreground one.
 
@@ -352,6 +370,13 @@ def main():
         print(decode_text(hws))
         return
     if a.screen:
+        amt = amt_of(a.hal) if a.hal else None
+        if amt and not a.dump:
+            print(f"{pathlib.Path(a.hal).name} is not a display: it is the "
+                  f"moding table {amt}.")
+            print("It has no CHAR/XC/YC statements, so there is no screen to "
+                  "draw.  Use --at/--find to read it as data.")
+            return
         if a.dump:
             dump = hw_image(a.dump)
             base = int(a.address, 16)
