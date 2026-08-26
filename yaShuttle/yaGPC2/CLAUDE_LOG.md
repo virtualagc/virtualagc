@@ -187,3 +187,35 @@ the documents themselves.)
   each holding a NAME pointer into CSA_PDT and an index, with an FFFF
   terminator -- a mechanical recovery of the same kind as CSA_PDT, and the
   next concrete step.  CS0780 is blocked on the same compool.
+
+### [2026-08-26] Target: [problems.md]
+- CS2_MDT IS 192 OF 227 POINTERS RECOVERED, and stuck on the last 35.  The
+  compool is 755 halfwords holding TWO kinds of structure, which is what made
+  the first attempts wrong:
+    * 42 S99Xnnn / S99Znnn entries, a NAME pointer plus an index, each
+      followed by an FFFF terminator.  S99X puts the pointer first and S99Z
+      puts the INDEX first -- reversed members, same shape.
+    * 92 CSDK_n_FCW entries, CSM_MD_TEXT_TABLE, two FCW halfwords of text.
+      CSDK_1..4 decode to '    ', '*   ', 'OFF ', 'B   ', matching
+      OI340600's CSDMDT.hal exactly, so the table itself is unchanged; the
+      numbering is not -- the dump starts at CSDK_1 where OI340600's CS2MDT
+      starts at CSDK_37.
+  S99Z's pointers are SELF-REFERENCES into this same compool, of the form
+  CSDK_n_FCW.CSMK_FCWS$(1:).
+- PARSER BUGS FOUND, both silent: an ARRAY member's values sit on their own
+  line with no name, so the name column holds the first hex value and the
+  line reads as a phantom member; and the second value is past the raw-hex
+  column, in the remainder.
+- THE BLOCKER IS #PCRATE.  35 pointers target it and the DASS report has NO
+  member-level listing for that CSECT -- zero "#PCRATE+" lines -- so the
+  names cannot be read off the dump.  They are not in OI340600's CS2MDT
+  either: that file's only non-PDT, non-CSDK reference is CPSB_SL_COMM_FLAG1,
+  from CPS_SLD.  These are new references.
+- BUT THE INFORMATION EXISTS.  #PCRATE MATCHES THE DUMP EXACTLY -- 1396
+  halfwords, 0 diffs, membership 'match' -- so OI340600's CRATE.hal IS
+  OI340700's, and the member at any offset is determined.  What is missing is
+  a way to READ the offsets: the link .json carries only the section symbol,
+  and HALSFC's pass2 listing emits the compool as bare DC directives with no
+  labels.  The remaining route is the SDF, which dfg already parses.
+- SO THE CHAIN IS: CS2050 and CS0780 need CS2_MDT, CS2_MDT needs 35 names
+  from CRATE, and CRATE needs an offset-to-name table out of its SDF.
