@@ -35,6 +35,41 @@ import re, sys, argparse, pathlib
 
 HEXV = re.compile(r"HEX'([0-9A-Fa-f]{1,4})'")
 
+# The DEU's character set is ASCII over the printable range; the rest are
+# glyphs and controls.  These four are the only non-ASCII codes anywhere in
+# the OI340600 display corpus, and each is named by the deck statement that
+# emits it -- found by searching the corpus for the halfword, not assumed:
+#     0x0D  CARRTN   2971 occurrences
+#     0x10  SPCHAR      8
+#     0x14  ALTCHAR     2
+#     0x16  the data-entry underscore, 624
+# Anything else is shown as <XX> rather than guessed at.
+GLYPH = {0x0D: "\u23ce", 0x10: "<SPCHAR>", 0x14: "<ALTCHAR>", 0x16: "_"}
+
+def decode_text(hws):
+    """Characters from a CHAR run.
+
+    Two 7-bit characters per halfword, with the FIRST character's low bit
+    displaced into the top bit of the second byte:
+
+        hi = (c1 >> 1) | 0xC0        lo = ((c1 & 1) << 7) | c2
+
+    so hi & 0xC0 == 0xC0 identifies a text halfword and distinguishes it from
+    the FCWs and control words that share a CHAR run.  A trailing 0 pads an
+    odd-length string.  Derived from the corpus, not from a document: it
+    reproduces the deck's own text for 4016 of 4172 CHAR runs, and every
+    remaining run differs only by the 0x16 glyph above."""
+    out = []
+    for x in hws:
+        hi, lo = x >> 8, x & 0xFF
+        if (hi & 0xC0) != 0xC0:
+            continue
+        for c in (((hi & 0x3F) << 1) | (lo >> 7), lo & 0x7F):
+            if c == 0:
+                continue
+            out.append(GLYPH.get(c, chr(c) if 32 <= c < 127 else f"<{c:02X}>"))
+    return "".join(out)
+
 def parse(path):
     """[(offset, value, statement, detail)] in declaration order.
 
@@ -84,7 +119,8 @@ def show(rows, dump=None, base=None, only_diff=False):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("hal")
+    p.add_argument("hal", nargs="?",
+                   help="generated .hal; not needed with --decode/--corpus")
     p.add_argument("--at", type=int)
     p.add_argument("--count", type=int, default=16)
     p.add_argument("--find")
@@ -93,7 +129,24 @@ def main():
     p.add_argument("--only-diff", action="store_true")
     p.add_argument("--corpus", help="directory of generated .hal to search "
                                     "with --find, instead of one file")
+    p.add_argument("--decode", help="decode a comma-separated halfword "
+                                    "sequence as DEU text")
+    p.add_argument("--text", action="store_true",
+                   help="with --dump: decode the dump's halfwords as text")
     a = p.parse_args()
+    if a.decode:
+        hws = [int(x, 16) for x in re.split(r"[ ,]+", a.decode.strip()) if x]
+        print(decode_text(hws))
+        return
+    if a.dump and a.text:
+        dump = hw_image(a.dump)
+        base = int(a.address, 16)
+        w = dump[base:base + a.count]
+        print(f"{a.count} halfwords at {base:X}:")
+        if a.hal:
+            print(f"   ours: {decode_text([r[1] for r in parse(a.hal)][:a.count])}")
+        print(f"   dump: {decode_text(w)}")
+        return
     if a.corpus and a.find:
         want = [int(x, 16) for x in re.split(r"[ ,]+", a.find.strip()) if x]
         found = 0
