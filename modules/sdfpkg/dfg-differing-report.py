@@ -52,13 +52,24 @@ out.append("0x7B/0x7E/0x7F sigma/lambda/delta.  Deck statement text uses ASCII s
 out.append("for several of these, so a rendering can legitimately differ from the text of")
 out.append("the statement that produced it.")
 out.append("")
-out.append("TWO VIEWS OF THE DUMP.  The full view decodes every halfword of the")
-out.append("section.  The bounded view renders only [background, DDT) from the DFT")
-out.append("header.  Bounding is LOSSY and measurably so: of the 120 generated compools")
-out.append("only 18 have every CHAR halfword inside that range, and text routinely lies")
-out.append("beyond the DDT -- CG0200's runs to 1566 with the DDT at 800 -- so the bounded")
-out.append("view can silently drop real labels.  Read it as a legibility aid, never as")
-out.append("evidence of absence.")
+out.append("THE DUMP IS SHOWN BOUNDED, and that is LOSSY.  Only [background, DDT) from")
+out.append("the DFT header is drawn.  Decoding the whole section instead shows more text")
+out.append("but buries it in the DDT and the item and limits tables, which have no")
+out.append("annotations to mark them as anything else; the two were shown side by side")
+out.append("here and were too confusing to read.")
+out.append("")
+out.append("MEASURED on the 126 sections that match the dump byte for byte, where every")
+out.append("rendering difference is therefore pure artifact:")
+out.append("")
+out.append("    whole section   identical  25/126   cells lost   173   invented 6909")
+out.append("    bounded         identical  30/126   cells lost  1290   invented  353")
+out.append("")
+out.append("So a blank region below is not evidence of absence: CS2110 keeps only 35 of")
+out.append("its 144 halfwords here and its five data-entry fields vanish, and CG0500 --")
+out.append("not one of these, but the worst case in the corpus -- bounds to nothing at")
+out.append("all against 79 cells of real text.  The line of characters printed under")
+out.append("each display is decoded from the WHOLE section and drops nothing, so what")
+out.append("the bounded picture omits can always be read there.")
 out.append("")
 out.append("SOME STRAY CHARACTERS REMAIN ON THE DUMP SIDE.  Our side is drawn from DFG's")
 out.append("annotations, so only halfwords belonging to a text statement are painted.  The")
@@ -142,17 +153,14 @@ for r in rows:
             else:
                 out.append("  (address slots not blanked: the sections differ "
                            "in size, so our offsets do not correspond)")
-        out += ["  "+l for l in grid_lines(m.render(w))]
         b=m.display_list([x for x in w])
         if len(b)!=len(w):
-            out.append("")
-            out.append(f"  AS THE DUMPED BUILD HOLDS IT -- bounded view, "
-                       f"[background, DDT) = {len(b)} of {len(w)} halfwords")
-            out += ["  "+l for l in grid_lines(m.render(b))]
+            out.append(f"  bounded to [background, DDT), {len(b)} of "
+                       f"{len(w)} halfwords")
         else:
-            out.append("")
-            out.append("  (bounded view identical: the DFT header does not "
-                       "delimit a smaller region here)")
+            out.append("  the DFT header delimits no smaller region, so this "
+                       "is the whole section")
+        out += ["  "+l for l in grid_lines(m.render(b))]
         out.append("")
         out.append("  characters in the dumped section, in order:")
         out.append("    "+m.decode_text(w))
