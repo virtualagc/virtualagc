@@ -140,3 +140,50 @@ the documents themselves.)
 - TOOLING: /tmp/claude-1000/pdtrecover.py generalises the compool recovery
   (any CSECT, any of the nine templates, arrays of copies, scalars from raw
   hex).  Worth a permanent home beside dfgmap.py if more compools come up.
+
+### [2026-08-26] Target: [problems.md]
+- CS2000 (APCU STATUS) RECOVERED AND ROUND-TRIP EXACT -- all 282 halfwords of
+  the dumped #PCS2000, from a deck reconstructed out of nothing but the dump.
+  First of the wholly-different displays.
+- THE ENCODING WAS LEARNED, NOT GUESSED, and that is the whole method.  DFG
+  annotates its generated .hal with the deck statement that produced each run
+  of halfwords, so running dfg over OI340600's 133 decks yields 31,517
+  labelled statement instances -- every statement kind's opcode and length,
+  and for 65% of a display's statements an exact sequence lookup.
+- Hand-decoded from the corpus where lookup did not reach: HEADER=nnnnS is
+  0xC000|n (C7D0 -> 2000S, checked against 0620S/1000S/2011S/2021S), and
+  VCORDA's FIRST point is x = fcw-0x8400 or -0x7E00, y = 0x916E-fcw or
+  0x976E-fcw, in raster units -- validated on all 352 corpus instances.  Its
+  SECOND point is NOT a signed delta: sign-magnitude on bit 11 gets 162 of
+  352 and fails on horizontal vectors, so it is left uninverted rather than
+  shipped half-right.
+- TWO TRAPS THAT COST TIME: 3400 is the opcode of BOTH SBC and a display-list
+  preamble FCW (told apart by the preamble's null operand), and PAD=n's F000
+  terminator ends the statement stream -- without handling it the DDT decodes
+  as spurious statements and F000 itself reads as a character.
+- AND ONE THAT NEARLY LOOKED LIKE A GRAMMAR PROBLEM: a deck line is read only
+  to COLUMN 72.  My first CS2000 deck had 83-character VPARM lines, so dfg
+  saw truncated statements and failed to parse.  The corpus wraps them.
+- TOOL MOVED AND RENAMED at the user's request: ~/workspace/PFS/decompileDFG.py,
+  self-contained (its own DEU charset, cursor geometry and corpus reader) so
+  it does not reach into virtualagc.  RTC/TEST/BLT/MDT are inverted from the
+  encoding nsts-sdl-dps documents in src/dfg/resolve.py; bitpos is
+  (-n)%16 + (bit-1) and the tool assumes n=16, which the corpus says recovers
+  BLT 692/722, TEST 927/973, RTC 1965/2297 -- the rest are narrower fields and
+  surface as differing halfwords in the round trip.
+- TEN ANONYMIZATION TAGS CORRECTED IN OI301700 (CG0500, CS0870, CS2000), each
+  a display label rather than a name: ^G -> RN, ^U -> MG, ^vk -> SRM.  Proved
+  from the files themselves -- they are original build artifacts, so
+  anonymizing the source left the compiled FCWs beside it intact and each file
+  states its own original text a few lines below the tag.  Found only because
+  the user asked whether OI301700 had the same error: my earlier sweep looked
+  for BACKSLASH sequences only, and CV1130's was a caret.  Both corpora are
+  now clean of tags inside CHAR=( ).
+- CS2050 IS DECOMPILED BUT BLOCKED ON ANOTHER COMPOOL.  The deck comes out
+  with only 5 VCORDA and 5 other statements uninverted and 3 unresolved
+  names, but dfg refuses it: "12 PADR pointer(s) have no SDF-resolvable
+  referent type".  Its MDT statements reference CS2_MDT, whose OI340700
+  version we do not have.  CS2_MDT is 755 halfwords, 134 S99Xnnn structures
+  each holding a NAME pointer into CSA_PDT and an index, with an FFFF
+  terminator -- a mechanical recovery of the same kind as CSA_PDT, and the
+  next concrete step.  CS0780 is blocked on the same compool.
