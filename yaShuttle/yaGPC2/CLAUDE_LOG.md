@@ -1250,3 +1250,48 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   --src/--mlib/--deck-root the original used.  THAT is the next step, and
   until phase 2 is complete its load-block count -- and therefore the
   parity -- is not final.
+
+### [2026-08-27] Target: [problems.md]
+- FIXED, AND IT IS THE EXTENSIONLESS-MEMBER TRAP AGAIN.  con80build has
+      _PATCH_SRC_RE = re.compile(r"^PCH\d+SRC$")
+  anchored with NO EXTENSION, so our corpus's `PCH02SRC.asm` never matches,
+  patch decks are never indexed, the plan reports "0 patch", and 10 members
+  go unresolved.  Verified directly: patch_member("PCH02SRC") -> PCH02TXT
+  and patch_csects() finds all 29 names -- the machinery works, the index
+  never reaches it.  This is exactly the recorded hazard that SDL tooling
+  assumes extensionless members and PFS added extensions.
+- THE FIX, WITHOUT TOUCHING DON'S REPO: extensionless copies of all 47
+  PCHnnSRC decks into a scratch dir, passed as an extra `--src` ahead of
+  SSSRC/APPLSRC.  Plan then reads "1 patch; 0 unresolved".
+- AND TWO MORE INVOCATION FIXES.  `--phase 2` NOT target `SSW`: --phase
+  builds PROLOGUE + PHASE SEGMENT and writes PHASE02.lib, which is the old
+  build's shape; the bare SSW target builds only the segment and drops all
+  the FCM*/FIO*/FPM* prologue modules.  And the link needs PHASE01.lib
+  present in --out for the deck's MAP cards, else "link FAILED (missing MAP
+  phase libraries)".
+- RESULT -- THE MOST COMPLETE PHASE 2 YET:
+      300 objects linked (old build 286, my SSW attempt 239)
+      637 sections, 326 modules (old 437/286)
+      PHASE02.lib 326,078 bytes (old 252,291)
+      patch areas RESTORED ($Y023001 ... $Y131000, all 9)
+      unaccounted deck members: 13 (was 72, then 22)
+      LOAD BLOCKS 25 -- ODD -- with the six above-128K at ordinals 20-25
+- THE REMAINING 13 ARE A CLASSIFIER MISREAD, not a missing source.
+  FCMBMASK FCMBUSPC FIOERRLB FIOERRLC FIOMGCV FIOMGSTR FIOSVCP FPMCVTFX
+  FPMIHPGM FPMRESET FIOPDISP FPMIHPC2 FPMMTURM all exist as SSSRC/*.asm and
+  all say "Language: IBM AP-101 Assembly Language" in their own headers,
+  but con80build's content-based classify() routes them to the HAL path --
+  they end up as gen/haltree/SSSRC/FCMBMASK.asm.hal and never produce an
+  object.  Separate defect, 13 modules, not chased.
+- TAPE REBUILT AND RUN: 1135 blocks (was 1085), phase table re-stamped
+  ("2:25LB@2300"), both SSL stamps applied.  MORE OF PASS NOW LOADS --
+  blocksRead 209 -> 261, wordsTaken 98,820 -> 106,501, position 3/4/7.
+- BUT THE BOOT STILL FAILS THE SAME WAY: FCMMOVE entered ONCE, R0=733f,
+  NEXTS=0000 CURRS=0001 -- the odd struct -- and dies at 0xc6c6/0x0a3b.
+  That is what the parity model predicts: the first above-128K block is
+  #20, an EVEN ordinal, so it draws FCMCTXT2.  25 being odd fixes the
+  CUMULATIVE parity for phases 13 and 3, which is what the model actually
+  constrains; it does nothing for phase 2's own internal ordinals, and with
+  six consecutive HIMEM blocks three of them draw the odd struct no matter
+  what.  The model has now survived three different layouts (24, 14 and 25
+  blocks) predicting the observed struct correctly each time.
