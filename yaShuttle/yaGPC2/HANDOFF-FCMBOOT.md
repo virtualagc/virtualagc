@@ -24,8 +24,13 @@ sequence. Key facts established from it:
   those bits.
 - Table 2-2 step 10 (GPC IPL push/release) is the *firmware* IPL: it
   fills memory (C9FB 0-1FFFF, C6C6 20000-7FFFF) and reads the bootstrap
-  in from the MMU. We do not emulate that microcode; `--ipl` stands in
-  for the fill, and we load FCMBOOT from a file instead of from tape.
+  in from the MMU.  **Both halves are now emulated** — omit the `fcm-file`
+  and the IPL pushbutton reads FCMBOOT off the tape over the bus (§2, "The
+  firmware IPL").  Giving a `fcm-file` still loads FCMBOOT from a file, and
+  `--ipl` still does the fill either way.
+- **Step 14 is the IPL SOURCE selector** (MM1 / OFF / MM2), and step 11 is
+  the HALT→STBY release that actually starts FCMBOOT.  Keeping 10 and 11
+  apart matters — see "Why reload is load-bearing" in §2.
 
 ---
 
@@ -133,13 +138,92 @@ writes a `.mmv` volume in the geometry the MMU model uses (8 files × 8 tracks �
 8 subfiles × 32 blocks × 512 halfwords, header plus block-index directory, and
 a writeProtect flag matching `mmu create --write-protect`).
 
-**Nothing emulates the IOP microcode that loads FCMBOOT off the tape at IPL
-initiation**, and that is by design rather than a gap: `--ipl` does cold-IPL
-memory init only (fill and protect, §2.5.3.3) and still loads the `.fcm` from
-a file, as `gpc` does.  FCMBOOT's own header says it "RECEIVES CONTROL FROM THE
-MICRO CODE LOADER VIA THE SYSTEM RESET PSW", which is what `--power-on` already
-does — so loading `BOOT.fcm` as the boot image and letting FCMBOOT do its own
-MMU reads tests the real question with no microcode at all.
+**The IOP microcode that loads FCMBOOT off the tape at IPL initiation is now
+emulated.**  An earlier version of this section said nothing did, and called
+that "by design rather than a gap", adding that `--power-on` was what FCMBOOT's
+"RECEIVES CONTROL FROM THE MICRO CODE LOADER VIA THE SYSTEM RESET PSW" meant.
+**Both halves of that were wrong** and are corrected in "The firmware IPL"
+below: `--power-on` takes the **power-on** vector at 0x04, where FCMBOOT
+deliberately parks in a wait state, and the microcode loader uses the **system
+reset** vector at 0x14.  The address table in §3 always said so.  `--ipl` still
+does cold-IPL memory init (fill and protect, §2.5.3.3), and loading a `.fcm`
+from a file still works exactly as before — what is new is that omitting the
+file makes the firmware fetch the bootstrap off the mass memory instead.
+
+### The firmware IPL — booting with no `.fcm` at all
+
+`gpc run` no longer requires an `fcm-file`.  **Omit it and the GPC IPL
+pushbutton reads FCMBOOT off the mass memory**, exactly as Table 2-2 step 10
+has the firmware do, and the HALT→STBY release runs it.  With an `fcm-file`
+present nothing changes at all.  Requires `--discretes` and either
+`--mmu-model` or `--bce-network`.
+
+**Which vector: always the system reset PSW at 0x14**, on the first release
+and on every later one.  `FCMBOOT.asm:38` says so outright ("RECEIVES CONTROL
+FROM THE MICRO CODE LOADER VIA THE SYSTEM RESET PSW"), and the image agrees,
+measured on `BOOT-stamped.fcm` itself — `0x0004` holds `0000 0000 0002 0000`,
+address 0 with the WAIT bit, a deliberate park, while `0x0014` holds
+`014B 0066 0008 0000`, FCMBMOVR in sector 6 with register set 1.
+
+**IPL is not a mode-switch position.**  It is a separate momentary pushbutton
+(register A bit 3) live **only** while HALT stands, so its bit rides *on top
+of* HALT's rather than excluding it.  `discretePanel.py` had it as a fourth
+radio position, which cannot express the real sequence; it is now a real
+pushbutton, disabled out of HALT, and the IPL source selector is MM1 / OFF /
+MM2 per Table 2-2 step 14.
+
+**It goes over the bus, through the installed servicer** — not by reading the
+volume.  Two user corrections, both right: reading the volume directly models
+a wire that does not exist (the MMU is a separate box and the bus is the only
+path to it), and calling `mmumodel_service()` directly would have worked with
+exactly one MMU — ours — when Don's lives on the far end of `--bce-network`.
+It now issues POSITION / EXTENDED BLOCK / READ and drains the reply queue
+through `iop.servicer`, with the bus picked by the panel's IPL-source bits
+(MM1 = BCE 18, MM2 = BCE 19).
+
+**That is also what fixed the READY indicator**, which is the symptom that
+exposed the first version.  Bypassing the bus left MM READY undisturbed, so a
+load gave the crew panel no sign of itself.  Draining the real queue makes
+READY fall and rise on its own, because it is derived from that queue.  A
+synthetic busy-timer written for this is gone again — it was treating the
+symptom.  **And the transfer is paced to real time**, a block at a time:
+drained flat out it dropped READY for ~20 ms against a panel that republishes
+every 250 ms, i.e. invisibly.  It is now 1.80 s, measured on the wire (READY
+low 3.44 → 5.23 s), matching 72×512 + 71×256 = 55,040 word times at 33 µs.
+`--time-scale` still shortens it.
+
+**The tape did not carry the bootstrap**, which is why this could not simply
+be written.  CON80's `MMUDAT1` allocates it — `FMAIPL2 ALLOC,ADDR=44500,
+BLKS=72` — and **a CON80 card address is FTSBB**, file/track/subfile/block, so
+44500 is file 4 / track 4 / subfile 5 / block 0.  (I had TFSBB in the tool and
+in `run.c`; the phase manifest settles it — card 43000 is 3/4/0/0, and it is
+the only reading under which all 1,085 blocks of a built volume are accounted
+for, checked over all 24 permutations.  The bootstrap's own 44500 is unaffected,
+file and track both being 4, but the comments were wrong.)
+`tools/stamp_bootstrap_on_tape.py` writes one there, **padding the whole
+72-block allocation** with the `C6C6` the `FMAIPL2 ALLOC`'s own `INIT=` names:
+a bus reader asks for a fixed block count and cannot be told which blocks were
+ever recorded — an unrecorded one simply reads back as zeros — so the earlier
+"stop at the first unrecorded block" trick was only possible through the back
+door that has now been removed.
+
+**Why reload is load-bearing, not housekeeping.**  FCMBOOT's External Zero
+handler does `OST R5,FCMBSYRS+2`, setting the WAIT bit in its own system reset
+PSW.  An already-booted in-memory FCMBOOT therefore **parks** on the next
+release; re-execution works only because a fresh IPL puts a pristine copy
+back.  That is what makes keeping step 10 and step 11 apart matter.
+
+**Verified end to end.**  An isolated test issuing that exact command sequence
+against the model collects all 36,864 halfwords and matches `BOOT-stamped.fcm`
+**byte for byte** over its 32,512, with `C6C6` in the tail.  With no
+`fcm-file`, panel HALT → HALT+IPL → STBY: "IPL; read from MM1 (BCE 18) over the
+bus (72 blocks, 36864 halfwords)" then "HALT → STBY; reset released, starting
+at 0x0014b" — FCMBMOVR.  The distinct SVC NIAs reached (1b57, 1cda, 1f35, 2122,
+29a6) are **identical** to the canonical `--ipl BOOT-stamped.fcm` run, so the
+tape-loaded boot and the file-loaded one behave the same.  A second IPL reloads
+and re-runs; IPL pressed in STBY is refused.  `~/ipl-demo/mmu2-boot.mmv` is the
+tape, re-stamped to the full allocation (1,157 blocks); `mmu2.mmv` beside it is
+untouched and carries no bootstrap.
 
 ### What actually reaches the display unit — a retracted claim
 
@@ -209,6 +293,69 @@ identical formats were described as a corpus "for when DFG lands".  It has
 since landed and is in use — see `problems.md` for the DFG phase and the DASS
 comparison it now feeds.
 
+### The SSL — why `ITEM 1` loaded nothing, and where the boot stands now
+
+Step 12 of the IPL sequence is "select the system to be loaded" (`ITEM 1 EXEC`)
+and step 13 is GPC MODE SWITCH to RUN.  The user reported the item being
+**accepted** — an asterisk appears beside it — with nothing loading and GPCIPL
+simply carrying on.  Pressing it twice changed nothing.
+
+**The chain** is `CM4KYBD` (items 1–17) → `LOADCHCK` (minor cycle 1) →
+`SSLCHECK` (minor cycles 2–11, 24) → `FCMINSSL`.  `LOADCHCK`'s own description
+states a precondition that looked like the answer and was not:
+
+    IF THE DEU IS NOT SELECTED OR THE DEU FORMATS HAVE NOT BEEN SENT
+    THEN SCHEDULE 'CM4FMAT' TO SEND THE OFT CRITICAL FORMATS (MM AREA 1)
+    TO THE DEU AND EXIT.
+
+**Breakpoints settled it, not reasoning about that branch**: `LOADCHK 0x2c8b`
+HIT, `SSLCHECK 0x2d10` HIT, `CM4FMAT 0x271f` **not** hit, `FCMINSSL 0x6fbc`
+**not** hit — and the last mass-memory command of a whole run is at t=13.7 s
+against a keypress at t=97.2 s, ninety-nine seconds of silence after `ITEM 1`.
+So the `CM4FMAT` branch is not being taken at all and the failure is in
+`SSLCHECK`.
+
+**Root cause: `SSLENGTH` and `SSLCKSUM` are zero, and a zero length hangs the
+check rather than failing it.**  `SSLCHECK`'s `BCT R3,SSL30` decrements
+*before* testing, so a count of 0 underflows and the checksum loop never
+terminates — measured deterministically, `SSL30` HIT and `SSL60`, the
+instruction after the `BCT`, **NEVER**.  The comparison is not reached at all,
+so `SSL70` — the path that master-resets and hands control to the loader —
+cannot be taken.  It is not that the checksum mismatches.
+
+They are zero because **the checksum is a build product our reconstruction does
+not produce.**  `FCMCKSUM.asm`: "FCMCKSUM WILL CONTAIN THE LENGTH OF THE SSL
+AND ITS ASSOCIATED CHECKSUM.  THE CHECKSUM WILL BE GENERATED BY THE MASS MEMORY
+BUILD PROGRAM.  ALSO, THIS DATA CSECT MUST BE THE LAST CSECT IN PHASE ONE."
+Declared `DC H'0'` and filled in when the phase is written to tape.
+`tools/stamp_ssl_checksum.py` stamps them, and the chain then completes —
+`SSL30`, `SSL60`, `SSL70`, `FCMINSSL` all HIT — and the load actually happens:
+
+    BITE STATUS / POSITION 3/4/0 / EXTENDED BLOCK / READ
+    mmu1: read 154 block(s) from 3/4/0/0     <- PASS area 1 phase 2
+
+That read had never occurred on any earlier run, ever.
+
+**The span is `SSLSTART..SSLEND`, 806 halfwords**, from the link's own `SSLEND`
+equ at `0x72E2` — not `SSLSTART..FCMCKSUM` (988), which was tried first.
+`SSLEND` **is** `FCMDATA`, the same address, so the sum covers code and
+constants and excludes the dynamic work area; that is the principled reason,
+and it is the same fact that explains why `FCMIBLK1` is scratch (see
+`problems.md` §8.14).  **Caution for anyone revisiting: the checksum cannot
+validate its own span**, because the value is computed *from* the span, so any
+choice is self-consistent and will pass.  Only a real MMB-built tape would
+settle it.
+
+**Where it stands now.**  With the SSL checksum stamped, `#BU@` indirecting,
+and `FIOMUWB2` patched (all three written up in `problems.md` §8.13–8.15), the
+boot loads phase 2, collects it (`wordsTaken` 98,820 of 107,012), transfers
+control into it — and then `FCMMOVE` reads a context struct through a fullword
+load that the emulator's alignment mask forces one halfword down, moves 4,096
+halfwords from 0 to 0 over the freshly loaded PASS image, and takes a
+protection violation whose handler that move has just destroyed.  **That is the
+open front**, and `problems.md` §8.15 states the narrow POO question it now
+turns on.
+
 ### What is actually still open
 
 - `make test` fails four suites: `test/test_debugger.sh`,
@@ -219,8 +366,20 @@ comparison it now feeds.
   interrupt" for its own assembly SVCs.  It gets on with its work, so
   this may be only noise from halucp's intercept -- but that has not been
   established either way.
-- This is the IPL.  Loading the full PASS flight software on top of it is
-  a further step that has not been attempted.
+- **Loading PASS on top of the IPL is now under way and is where the work
+  is.**  Phase 2 loads and is collected; the boot dies in `FCMMOVE` on the
+  alignment conflict of `problems.md` §8.15, which needs the POO.
+- **`FIOMUWB2` is patched, not fixed.**  `tools/patch_ssl_zcon.py` writes the
+  value the IPL link should have produced.  The real repair is to add the
+  defining compool (`APPLSRC/CVNMMUTI.hal`) to the link's inputs.
+- **The GUI panel change is untested by me** — no display here.  Its logic
+  parses and `_build()` precedes `_republish()`, so the widget exists before
+  the first publish, but somebody should actually press the IPL button.
+- **`ITEM 1` still has not been shown to work**, only the non-menu path that
+  bypasses it (`--discrete-b 20000000`).  The `LOADCHCK`/`CM4FMAT`
+  formats-not-sent branch was ruled out as the cause of the original report,
+  but nothing here models a DEU LOAD pushbutton (Table 2-2 step 9), so that
+  branch has never been exercised either.
 
 ---
 
@@ -244,6 +403,32 @@ Paths (scratchpad, session-specific — recreate if gone, see §5):
 
     ./yaGPC2 run --ipl --mmu-model $SP/tape/mmu2.mmv --deu-model \
         --max-steps 40000000 $SP/boot/BOOT-stamped.fcm
+
+**THE DETERMINISTIC HARNESS FOR THE SSL**, and the single most useful thing
+built this week.  Two runs are byte-identical — no crew panel, no `gpcmd`, no
+`--real-time`:
+
+    ./yaGPC2 run --ipl --deu-model --mmu-model $SP/tape/mmu2.mmv \
+        --discrete-b 20000000 --max-steps N [--break=ADDR] \
+        $SP/boot/BOOT-stamped.fcm
+
+`--discrete-b 20000000` is GPC 1 with **no CRT selected**, and it is what makes
+the **non-menu** path reachable: per Table 2-2, without step 6 (BFC CRT display
+switch ON) there is no menu at all — the SSL loads PASS area 1 phase 2 by
+itself and goes straight to step 13.  So the whole load question can be studied
+with no keyboard entry and no MEDS.  `--discrete-a`/`--discrete-b` are new and
+set the discrete input words directly.
+
+**The firmware IPL, with no `.fcm` at all** (needs a crew panel, since the IPL
+pushbutton is what starts it):
+
+    python3 yaShuttle/discretePanel/discretePanel.py
+    ./yaGPC2 run --discretes --mmu-model ~/ipl-demo/mmu2-boot.mmv --deu-model \
+        --max-steps 0
+
+Then: MODE SWITCH to HALT, IPL SOURCE to MM1, press IPL, MODE SWITCH to STBY.
+Note the **tape must carry the bootstrap** — `mmu2-boot.mmv`, not `mmu2.mmv` —
+see "The firmware IPL" in §2.
 
 **Against the real MEDS display, the run that WORKS.**  Restart MEDS
 first, every time (§5.7), and use these pacing flags -- the CLI's default
@@ -279,7 +464,16 @@ stop), `--trace` (~100 bytes/step), or `--debug` with commands piped on
 stdin: `printf 'b 0x30239\nc\nr\nx 0x14 4\nq\n' | ./yaGPC2 run ...`
 
 Env traces: `YAGPC_INTTRACE=1` (interrupt dispatches — invaluable),
-`YAGPC_MMUTRACE=1`, `YAGPC_DISCRETETRACE=1`, `YAGPC_CLKTRACE=1`.
+`YAGPC_PROTTRACE=1` (protection violations, **with the faulting address as
+well as the NIA**), `YAGPC_MMUTRACE=1`, `YAGPC_DISCRETETRACE=1`,
+`YAGPC_CLKTRACE=1`.  Added while chasing the SSL: `YAGPC_MODETRACE=1`
+(driven/value/mode/prev on every mode change — this is what separated the two
+causes of the mode-flapping report), `YAGPC_ALIGNTRACE=1` (every address the
+fullword alignment mask actually changes — 185 lines for a whole boot, so it
+is cheap to leave on), `YAGPC_DSETRACE=1`, `YAGPC_PCTRACE=1`, and
+`YAGPC_DISPTRACE=1` (prints `DISP LOADMSCBUSY` every time the CPU starts the
+MSC).  **`INTTRACE` plus `PROTTRACE` turned a "wild branch" into a one-line
+diagnosis** and should be the first thing reached for.
 
 ### Addresses you will need
 
@@ -302,6 +496,28 @@ the hit message prints only 4 hex digits ("breakpoint at 0x0239").
 | 0x30352 | checksum PASSED |
 | 0x30239 | `LPS X'0014'` — the handover. Loads 013F/0011 → GPCIPL. |
 | 0x0013F | GPCIPL `SRESINTN`, where control lands (BSR=DSR=1) |
+
+GPCIPL and the SSL, all absolute, from `donroute/IPL/IPL.sym.json` (whose
+sections are at absolute addresses).  `--break` by ADDRESS needs no symbols and
+works on a tape boot, which `--symbols` does not:
+
+| addr | what |
+|---|---|
+| 0x21cc | `CM4KYBD` — keyboard handler, items 1–17 |
+| 0x2c8b | `LOADCHK` — schedules the load (minor cycle 1) |
+| 0x271f | `CM4FMAT` — the "formats not sent → send them and EXIT" branch |
+| 0x2d10 | `SSLCHECK` — checksums the SSL (minor cycles 2–11, 24) |
+| 0x2d18 / 0x2d23 / 0x2d26 | `SSL20` / `SSL30` / `SSL60` — **`SSL60` is the tell**: reached only if the `BCT` count did not underflow |
+| 0x2d2b / 0x2d38 / 0x2d46 | `SSL62` / `SSL70` / `SSL75` — `SSL70` is the handover to the loader |
+| 0x2d70 / 0x2d72 | `SSLXIT` / `SSLRTN` |
+| 0x6fbc | `FCMINSSL` / `SSLSTART` — the loader itself |
+| 0x72e2 | `SSLEND`, which is also `FCMDATA` — the checksum span ends here |
+| 0x7398 / 0x739b | `SSLENGTH` / `SSLCKSUM` — the two the MM build stamps |
+| 0x72a1 | `FCMMOVE`, and 0x72ad its `MVH` — the current open front |
+| 0x7338 / 0x733f | `FCMCTXT1` / `FCMCTXT2` — the odd one is 0x733f |
+| 0x0a3b | `PCH`, GPCIPL's program check handler (**overlaid by phase 2's LB2**) |
+| 0x180c | `STERROR` |
+| 0x14e4 | `RTNEX0` |
 
 Useful when the load itself is in doubt: dump memory at the checksum
 entry (`b 0x30330; c; x 0x0000 32768`) and compare it against the tape
@@ -337,6 +553,18 @@ Phase 10's five load blocks (start, length, protected):
   load-block descriptors, from `mmbstamp.LoadBlock.words()`.
   **Assumption, flagged: contiguous layout in that order.** Never verified
   against an original stamped table.
+- **`tools/stamp_bootstrap_on_tape.py`** — writes FCMBOOT into a `.mmv` at the
+  `FMAIPL2` allocation (card 44500 = file 4 / track 4 / subfile 5 / block 0),
+  **padding the whole 72-block reservation** with `C6C6`.  Without it no tape
+  we build carries a bootstrap, because our volumes come from the PASS phase
+  manifest and there is no bootstrap in it.
+- **`tools/stamp_ssl_checksum.py`** — stamps `SSLENGTH` (806, from the link's
+  own `SSLEND` equ at 0x72E2) and `SSLCKSUM` (0xCB2C) and recomputes the
+  containing load block's checksum tail.  **This is what makes the SSL run at
+  all** (§2, "The SSL").  Keeps a `.prestamp` backup.
+- **`tools/patch_ssl_zcon.py`** — a **stopgap, not a fix**: writes `FCMB1ZCN` =
+  `832A 0006` (`FIOMUWB2` = 0x3032A) and recomputes the load-block tail,
+  standing in for a link that has the defining compool among its inputs.
 - **`tools/build_ipl_fcm.sh`** — rewritten to Don's composition route
   (relink with current lnk101, then `mmu2fcm --config IPL --phases 10
   --stamp-checksums`). Needs PHASE02.lib present. Output is 6 bytes from
@@ -417,7 +645,27 @@ Emulator fixes made (all with POO citations, all committed):
    yaGPC2's own `DISCRETE_IN_B_DEFAULT` is `0x21000000` — GPC 1, CRT 1.
    Fixed in `58bf14106` (DEFAULT_ON).  **Check every panel-owned bit against
    the corresponding `DISCRETE_IN_*_DEFAULT` before adding it.**
-13. **The discrete trace prints only on CHANGE.**  A RESET of a bit that is
+13. **Networked, real-time, `gpcmd`-driven runs are NOT deterministic**, and
+   several conclusions were built on single breakpoint hits taken from them.
+   `SSLCHECK 0x2d10` hit on one run and missed on a later *identical* one.
+   Use the deterministic harness in §3 for anything you intend to write down,
+   and repeat every observation before building on it.
+14. **Your own test scripts publish onto the user's discretes bus.**  It is
+   machine-wide multicast, and a script that holds RUN for 300 s drives RUN
+   into every emulator on the machine.  A sending socket is not bound to 6980,
+   so `ss` cannot see a publisher — only `ps` can, and it must be checked
+   **before** concluding anything about discretes.  Half of a "mode flapping"
+   bug report was this; the other half was real (`problems.md` §8.14).  Every
+   test script must be short-lived or explicitly killed.
+15. **`--symbols` is silently ignored on a tape boot** (the no-`fcm` path
+   returns before symbols load).  Do not try to "fix" it in passing: I did,
+   it segfaulted, and I chased it into `halucp_init_from_symbols` and added
+   NULL-name guards on the written premise that `IPL.sym.json` "includes
+   entries whose name is null".  **It does not** — 0 of 13 sections and 0 of
+   2,982 symbols.  The real cause was my own patch loading the table a second
+   time on top of the existing load.  All reverted.  `--break` by **address**
+   needs no symbols and works fine.
+16. **The discrete trace prints only on CHANGE.**  A RESET of a bit that is
    already 0 prints nothing.  That looks like a dropped message and is
    correct — the shadow state starts at 0.
 
@@ -425,8 +673,9 @@ Emulator fixes made (all with POO citations, all committed):
 
 ## 6. OUTSTANDING, NOT CODE
 
-- **13 commits unpushed** on `master` (`e7417f9c8` … `14a7b7581`). The
-  user pushes themselves; they asked not to push until things were tested.
+- **49 commits unpushed** on `master` (`249669d91` … `b2c5c0399`, measured
+  2026-08-27). The user pushes themselves; they asked not to push until
+  things were tested.  Re-measure rather than quoting this number.
 - **`make test` has four failures that are NOT ours** — `test_debugger.sh`,
   `test_cpu_instr_exec`, `test_iop_bce_exec`, `test_iop_msc_exec` fail
   identically with the working tree stashed. Checked 2026-08-25; worth
