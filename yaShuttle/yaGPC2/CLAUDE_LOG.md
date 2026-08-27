@@ -528,3 +528,56 @@ the documents themselves.)
   both times.
 - YAGPC_MODETRACE=1 prints driven/value/mode/prev on every mode change;
   that is what separated the two causes and is worth keeping.
+
+### [2026-08-26] Target: [HANDOFF-FCMBOOT.md]
+- WHY ITEM 1 MAY LOAD NOTHING.  The chain for "select system to be loaded"
+  is CM4KYBD (items 1-17) -> LOADCHCK (minor cycle 1) -> SSLCHECK (minor
+  cycles 2-11, 24) -> the SSL.  LOADCHCK's own description states the
+  precondition:
+      IF THE DEU IS NOT SELECTED OR THE DEU FORMATS HAVE NOT BEEN SENT
+      THEN SCHEDULE 'CM4FMAT' TO SEND THE OFT CRITICAL FORMATS (MM AREA 1)
+      TO THE DEU AND EXIT.
+  So an ITEM 1 with formats not yet sent does NOT load PASS: it sends
+  formats and exits.  Table 2-2 step 9, "DEU LOAD - Push, then release
+  (Menu IPL only)", is what normally sends them -- and nothing here models
+  a DEU LOAD pushbutton.
+- WHICH MEETS A CLAIM THIS PROJECT ALREADY RETRACTED: "the Display Control
+  Program came off our tape and went into the display unit" was withdrawn
+  because DCPLDFL is only a flag BSL1 sets when its transaction finishes,
+  with real data or without.  If the formats never actually reached the
+  DEU, LOADCHCK takes the CM4FMAT branch EVERY time and ITEM 1 can never
+  reach the load, however often it is pressed.  That fits the report
+  exactly: item accepted, nothing loads, GPCIPL carries on.
+- CHEAP TEST FOR THE USER: press ITEM 1 EXEC TWICE.  If the first press
+  only sends formats, the second should reach SSLCHECK and the tape.  If
+  neither does anything, the formats are not arriving and the DEU side is
+  where to look, not the mass memory.
+- NOTE the CM4FMAT path reads MM AREA 1, so it is itself MMU activity.
+  "No MMU activity at all" therefore argues the CM4FMAT branch is not
+  completing either, rather than merely being taken.
+
+### [2026-08-26] Target: [HANDOFF-FCMBOOT.md]
+- ADDRESSES FOR BISECTING "ITEM 1 DOES NOTHING", from
+  donroute/IPL/IPL.sym.json, whose sections are at absolute addresses:
+      CM4KYBD  0x21cc   keyboard handler for items 1-17
+      LOADCHK  0x2c8b   schedules the load (minor cycle 1)
+      CM4FMAT  0x271f   the "formats not sent -> send them and EXIT" branch
+      SSLCHECK 0x2d10   checksums the SSL (minor cycles 2-11, 24)
+      FCMINSSL 0x6fbc   the loader itself
+  The chain is CM4KYBD -> LOADCHK -> (CM4FMAT | SSLCHECK) -> FCMINSSL, so
+  --break at each says where it stops.  CM4KYBD doubles as the control: if
+  it does not hit when ITEM 1 is pressed, the tape-booted GPCIPL is not at
+  these addresses and nothing further can be concluded from them.
+- USER REPORTS THE ITEM IS ACCEPTED -- an asterisk appears beside it on the
+  display when it takes, and it took.  So CM4KYBD ran and the failure is
+  downstream of the keyboard.  Pressing twice changed nothing.
+- A SIDE QUEST THAT WENT WRONG AND IS REVERTED.  I tried making --symbols
+  work on a tape boot (it is silently ignored, since the no-fcm path
+  returns before symbols load).  It segfaulted; I chased it through
+  halucp_init_from_symbols and print_section_map and added NULL-name
+  guards, writing in the comment that IPL.sym.json "includes entries whose
+  name is null".  IT DOES NOT -- 0 of 13 sections and 0 of 2982 symbols
+  have a null name.  The real cause was my own patch loading the table a
+  second time on top of the existing load.  Guards and patch both reverted;
+  nothing of it is committed.  --break by ADDRESS needs no symbols and
+  works on a tape boot, which is what the bisect above uses.
