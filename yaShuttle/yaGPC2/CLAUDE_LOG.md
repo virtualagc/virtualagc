@@ -480,3 +480,37 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   FCMIBLK1 -> the dynamically built sequence reads its load block, #SST's
   its status, and #BU's to FCMIBLK2 -> ... -> the last one #WAT's, parking
   the BCE with its PC one past the #WAT while the CPU polls FCMINSST.
+
+### [2026-08-27] Target: [problems.md]
+- "WHAT IF YOU FIXED gpc's #BU@ SO THE COMPARISON COULD RUN?"  ASSESSED,
+  not asserted.  IT WOULD BUY EXACTLY ONE INSTRUCTION.  The patch is one
+  line, but the next thing the receive sequence executes is #DLYI 592, and
+  gpc has:
+      '#DLYI' e:(t,v)-> # Delay immediate: count*16.5us (no-op in simulator)
+                        t.incrNIA(1)
+      '#DLY'  e:(t,v)-> # Delay from memory: ... (no-op in simulator)
+                        t.incrNIA(1)
+  Both explicit no-ops.  That is the exact defect that broke FCMBOOT's
+  phase-10 load until 14a7b7581: the SSL skips each partial block's UNREAD
+  TAIL BY DELAYING OVER IT, so with a no-op delay nothing is skipped and
+  every later load block lands hundreds of halfwords early.
+- AND THAT FIX WAS TWO-SIDED -- iop_bce_delay discarding bus data during
+  the delay, AND mmumodel.c pacing words onto the bus with real block gaps.
+  gpc has NEITHER, and also lacks the MIA-latch ordering fix (82fb09d3b)
+  and the unread-transfer-tail fix (629694ebf).
+- IT ALSO CANNOT RUN THE SCENARIO DETERMINISTICALLY.  `gpc run` has no
+  --mmu-model: its option list is max-steps/break/watch/output/
+  dump-interval/trace/verbose/interactive/watch-log and nothing else.  Mass
+  memory is gpc/dev/mmu.coffee, a SEPARATE DEVICE PROCESS on the multicast
+  bus -- the networked vehicle this session's harness exists to avoid.
+- SO THE COST IS PORTING THE WHOLE IOP/BUS BODY OF WORK INTO IT, after
+  which it is not an independent implementation but yaGPC2 transcribed into
+  CoffeeScript, and its agreement carries no information.
+- AND IT STILL COULD NOT ANSWER THE LIVE QUESTION, which is why phase 2's
+  above-128K load blocks sit at ordinals 20 and 21.  That is a property of
+  the TAPE; both emulators merely read it.
+- THE BETTER INDEPENDENT CHECK, offered: parse phase 2's load-block
+  descriptors straight out of the .mmv OFFLINE and confirm the 21 blocks
+  and their sectors with NO emulator in the loop.  That is independent in a
+  way gpc -- a codebase we were ported FROM -- can never be.  Not done yet;
+  awaiting the user.
