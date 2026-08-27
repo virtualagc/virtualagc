@@ -841,3 +841,34 @@ the documents themselves.)
 - STATE: dereference restored on the evidence above; boot spins 0, phase 2
   read, wordsTaken 98,820 of 107,012; `make test` at its four pre-existing
   failed stages.
+
+### [2026-08-27] Target: [problems.md]
+- HOW FCMIBLK1 GETS FILLED IN -- the open question, answered.  THE SSL
+  WRITES THE BCE PROGRAM AT RUN TIME, instruction by instruction, into the
+  work area.  FCMINSSL.asm:616-624:
+      OHI  R5,FCMMLBR      ADD IN SKELETON #LBR INSTRUCTION
+      LH   R2,FCMRSADD     GET 1ST/NXT RECEIVE SEQUENCE ADDRESS
+      ST   R5,0(R2)        STORE INSTRUCTION IN BCE PROGRAM
+      LA   R2,2(R2)        BUMP BCE PROGRAM ADDRESS TWO
+      LHI  R4,FCMMRDLI     YES, GET SKELETON #RDLI INSTRUCTION
+      ST   R4,0(R2)        STORE IT IN BCE PROGRAM
+  The "skeletons" are bare opcodes -- FCMMLBR EQU X'F200' (#LBR), FCMMRDLI
+  EQU X'F300' (#RDLI), FCMMWAT EQU X'0800' (#WAT) -- OR'd with computed
+  operands (a load block's base address, its 512-halfword block count) and
+  stored through FCMRSADD, which points at FCMIBLK1 then FCMIBLK2
+  alternately (lines 747-749 swap them, so the two areas double-buffer).
+  So the receive sequence is generated per load block, not static.
+- THAT MAKES THE WHOLE PICTURE CONSISTENT:
+    * FCMIBLK1 is `DS 10F` in the DYNAMIC WORK AREA -- scratch, all zero
+      until the SSL writes code into it.
+    * The branch table therefore has to hold its ADDRESS, which is why
+      #BU@ dereferences.
+    * And the checksum span stops at SSLEND, which IS FCMDATA -- the same
+      address, 0x72E2 -- so the sum covers code and constants and excludes
+      the work area.  SSLENGTH = SSLEND - SSLSTART = 806 was right for that
+      reason, not just because it was the available symbol.
+- TWO OF MY OWN COUNTS WERE WRONG, both from a regex that excluded '_':
+  the BCE has 24 instructions, not 21 -- #RIB, #SIB and #WAT were missed --
+  and I briefly claimed #WAT was undecoded when it is right there at
+  iop_bce_instr.c:440, "00001___________".  0x0000 really is undecoded,
+  which the runtime already showed.
