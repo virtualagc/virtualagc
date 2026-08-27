@@ -1431,3 +1431,31 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   program (measured earlier: PC<-07362 and PC<-0736c), so the question is
   whether a third start is expected and missing.  YAGPC_SSTTRACE plus
   YAGPC_PCTRACE together should show it.
+
+### [2026-08-27] Target: [problems.md]
+- RAN IT AGAINST LIVE MEDS.  IT IS NOT BLANK, AND MY EARLIER CLAIM THAT IT
+  WOULD BE WAS WRONG.  45 s of wire traffic, counted with dk5.py while the
+  GPC ran with --bce-network against a real MEDS instance:
+      func 0x380 TIME_FILL   75
+      func 0x010 POLL        74
+      DISPLAY_FILL            0        (reference: 87)
+      FORMAT_FILL             0        (reference:  7)
+  Reference for a good run is POLL 87 / TIME_FILL 88 / DISPLAY_FILL 87 /
+  FORMAT_FILL 7 in 45 s, so POLL and TIME_FILL are at very nearly the right
+  rate and the display CONTENT is entirely missing.  The screen should show
+  the clock and nothing else -- exactly the symptom trap 7 describes for a
+  DEU whose formats never loaded.
+- WHY I GOT IT WRONG: the headless runs all used --discrete-b 20000000,
+  which is GPC 1 with NO CRT SELECTED -- the non-menu path, chosen so the
+  SSL loads without keyboard entry.  With no CRT selected GPCIPL never
+  drives a display, so "deu: commands 0, ipled false" was a property of MY
+  TEST CONFIGURATION and said nothing about the machine.  I then quoted it
+  as evidence the display was dead.  A counter that reads zero because the
+  feature was switched off is not a measurement of the feature.
+- SO THE STATE IS BETTER THAN REPORTED: GPCIPL is alive on the DK bus,
+  polling and time-filling, while the SSL is stalled in FCMMOVE's
+  alternate-buffer wait.  Those are consistent -- GPCIPL's display loop and
+  the SSL's load run on different processors.
+- TRAP REPEATED, THIRD TIME TODAY: `pkill -f 'electron ... meds'` MATCHED
+  ITS OWN COMMAND LINE and killed the shell (exit 144).  Use a bracket
+  pattern -- pgrep -f '[m]ain.js meds' -- as the handoff already says.
