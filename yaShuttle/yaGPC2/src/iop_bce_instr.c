@@ -112,11 +112,37 @@ static void exec_BU(IOP *t, DInstr *v) {
 }
 
 static void exec_BU_at(IOP *t, DInstr *v) {
-    /* Direct, per the POO: the next instruction is found AT the operand
-     * plus twice the BCE number.  No indirection -- the `@` does not mean
-     * a fetch here.  (I changed this to dereference and was wrong; the
-     * table entry it lands on is meant to be EXECUTED, not read.) */
-    iop_set_nia(t, df_get(v, 'a') + 2u * (uint32_t)t->curPE);
+    /* operand + 2*BCE# addresses a per-bus table ENTRY, and the entry
+     * holds the branch ADDRESS -- so the target is the word there, not
+     * the entry itself.
+     *
+     * The flight software says so outright.  FIOMGDSP.asm calls FIOBBM a
+     * "MM BRANCH ADDRESS TABLE" and fills it in at run time:
+     *
+     *      L   R7,FIOMMMUE-*-2(R0,R0)  MM UTL WRT PGM ENDING ADDR
+     *      SR  R7,R5                   CALCULATE NEXT XMIT SEQ ADDR
+     *      LA  R2,FIOBBM+2             GET MM BRANCH TABLE ADDRESS
+     *      ST  R7,0(R3,R2)             STORE ADDRESS IN BCE ENTRY
+     *
+     * and FIOCBLKS.asm declares that table as `DC 2F'0'` -- two fullwords
+     * of zero, with the same EQU *-36 bias -- so an entry cannot be a
+     * static instruction; it is a slot for a computed address.
+     * FCMINSSL's FCMBCEBT is built the same way, except its addresses are
+     * known at assembly time and so appear as `DC A(FCMIBLK1)`.
+     *
+     * Without the fetch, BCE 18 branched onto the table itself, decoded
+     * A(FCMIBLK1)'s leading 0000 as an unknown opcode, never advanced its
+     * PC, and spun there while every halfword of the transfer it had just
+     * commanded streamed past uncollected.
+     *
+     * NOTE: 300 #BU@ fixtures in test_iop_bce_exec encode the
+     * non-dereferencing behaviour and fail with this.  They agree with
+     * gpc, whose BCE opcode set is identical to ours and which is
+     * documented here as non-authoritative; they cannot in any case
+     * exercise a fetch, since their memory image is 4096 halfwords and
+     * the addresses involved are far above it. */
+    uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
+    iop_set_nia(t, iop_g_eaf(t, addr) & 0x3ffffu);
 }
 
 static void exec_WIX(IOP *t, DInstr *v) {

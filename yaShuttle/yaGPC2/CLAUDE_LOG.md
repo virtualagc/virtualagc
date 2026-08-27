@@ -810,3 +810,34 @@ the documents themselves.)
 - BOTH CANDIDATE FIXES PRODUCED IDENTICAL CORRECT BEHAVIOUR -- dereference
   at #BU@, or opcode 0 as a branch -- which is why neither can be chosen on
   the evidence of the boot working.  Only the POO can separate them.
+
+### [2026-08-27] Target: [problems.md]
+- SETTLED, FROM THE FLIGHT SOFTWARE: a BCE branch-table entry holds an
+  ADDRESS, so #BU@ takes the word at operand+2*BCE# as its target.  The
+  user asked how to find the instruction; looking it up produced the proof.
+      FCMINBCE.asm:82   #BU@ FCMBCEBT    (last instr of FCMBCMMR, line 77)
+      FIOMUWP9.asm:92   #BU@ FIOBBM      "EXECUTE CORRECT NO. OF TDL SEQUENCES"
+  FIOBBM is the decisive one.  FIOCBLKS.asm:537 declares it
+      ENTRY FIOBBM / DS 0F / FIOBBM EQU *-36 / DC 2F'0'
+  -- two fullwords of ZERO, same -36 bias -- so an entry cannot be a static
+  instruction.  And FIOMGDSP.asm:750 fills it in:
+      LA R2,FIOBBM+2    GET MM BRANCH TABLE ADDRESS
+      ST R7,0(R3,R2)    STORE ADDRESS IN BCE ENTRY
+  with the module header calling FIOBBM a "MM BRANCH ADDRESS TABLE".
+  Entries are computed addresses, written at run time.  FCMBCEBT is the
+  same construct with addresses known at assembly time, hence DC A(...).
+- WHICH MEANS THE POO WORDING IS THE INDIRECTION, read as "the next
+  instruction is found at the address [held at] operand + 2*BCE#".  No new
+  opcode is needed and opcode 0 stays undefined, consistent with the user's
+  "0x0000 is ADD R0,0(R0)".
+- I REPORTED THE #BU@ FIXTURES THREE DIFFERENT WAYS, ALL WRONG.  First
+  "300 disagree with the change"; then "they pass with direct, my change
+  broke them"; the verified answer, from a forced-rebuild A/B, is that
+  BOTH behaviours give 74099/74699 with ZERO #BU@ failures -- the fixtures
+  do not discriminate, because their memory image is 4096 halfwords and the
+  addresses involved sit far above it.  Every wrong version came from
+  measuring a binary that had not been rebuilt.  `touch` the source, or
+  check the timestamp, before believing an A/B in this tree.
+- STATE: dereference restored on the evidence above; boot spins 0, phase 2
+  read, wordsTaken 98,820 of 107,012; `make test` at its four pre-existing
+  failed stages.
