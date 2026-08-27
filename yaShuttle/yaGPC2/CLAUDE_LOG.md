@@ -566,3 +566,64 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   tape, differential testing becomes the right instrument and is worth
   building -- but on a case where the two could genuinely disagree, not one
   where I would have supplied both answers.
+
+### [2026-08-27] Target: [problems.md]
+- ASKED TO FIND OUT WHETHER THE TAPE'S LOAD-BLOCK LIST IS DEFICIENT AND FIX
+  IT.  FOUND OUT.  NOTHING FIXED, BECAUSE THE THEORY IT RESTED ON IS WRONG,
+  AND I DISPROVED IT MYSELF.
+- READ THE ACTUAL TABLE rather than inferring it.  FCMBOOT's phase table
+  lives at FCMPTAD1 = halfword 894 of BOOT-stamped.fcm (a flat big-endian
+  halfword image, 32512 hw).  Four 3-hw phase descriptors:
+      phase 10  disp=12  nLBs=5   mm=2260
+      phase  2  disp=27  nLBs=24  mm=2300
+      phase 13  disp=99  nLBs=2   mm=1b00
+      phase  3  disp=105 nLBs=10  mm=1bc0
+  Phase 2's 24 descriptors (addr / P / sector / length):
+       1 0051e P1 s0    344     13 0ea76 P1 s3   1512
+       2 00676 P0 s0  10288     14 0f05e P1 s3   1538
+       3 02ea6 P1 s0   1164     15 08000 P1 s4     34
+       4 03332 P1 s0      4     16 08000 P0 s5    596
+       5 08000 P0 s1    154     17 08254 P1 s5    118
+       6 0809a P1 s1    128     18 08000 P0 s6    802
+       7 0811a P0 s1  11122     19 08000 P0 s7    464
+       8 08000 P1 s2    430     20 08000 P1 s8   8532
+       9 081ae P1 s2   5112     21 08000 P0 s9    664
+      10 08000 P1 s3   6704     22 08298 P1 s9   1524
+      11 09a30 P1 s3  12140     23 08000 P1 s10    16
+      12 0c99c P0 s3   8410     24 08010 P0 s10     4
+  Total 71804 hw.  The 21 sector tests the probe saw are blocks 1-21; the
+  boot dies during block 20's move, so 22-24 are never reached.  Sector
+  addresses carry the 0x8000 sector marker, so 08000 is offset 0.
+- THE ORDINAL-PARITY INVARIANT IS DEAD.  There are FIVE above-128K blocks
+  (#20-24, sectors 8,9,9,10,10), and HIMEM blocks are CONTIGUOUS AT THE END
+  by construction.  Consecutive blocks alternate structs, so THREE OF THE
+  FIVE necessarily land on FCMCTXT2.  No arrangement avoids it -- merging
+  every mergeable pair still leaves two.  So FCMINSSL cannot be relying on
+  ordinal parity, and my "every above-128K LB must sit at an odd ordinal"
+  claim is WRONG.  I proposed it, tested it, and it failed.
+- AND THE ORIGINAL BUILD MATCHES US EXACTLY WHERE IT CAN BE CHECKED.  From
+  OI301700's as-received listing, object code and all:
+      0037C  FCMCTXT1 DS 7H
+      00383  FCMCTXT2 DS 7H            <- ODD offset in the real build
+      003A0  037C  DC Y(FCMCTXT1)
+      003A1  0383  DC Y(FCMCTXT2)      <- the real build's own pointer
+      002E7  1B00  L R3,TFCMTGTA       <- SRS, base R0, disp 0
+  1B00 decodes as 00011|011|000000|00 under our own L pattern.  So the
+  instruction, the struct offsets and the pointer table are all
+  byte-identical to ours.  The tape's list is NOT deficient in the way I
+  predicted and I am not "fixing" it on a disproved theory.
+- ONE GENUINE CANDIDATE DEFICIENCY, FLAGGED NOT TOUCHED, and it cannot
+  cause this failure: three adjacent same-protection pairs did not merge
+  although mmbstamp's own documented rule says adjacent groups merge while
+  total <= 16384 hw and protection agrees --
+      #3/#4   0x2ea6+1164 = 0x3332, both P=1, 1168 total
+      #8/#9   0x8000+430  = 0x81ae, both P=1, 5542 total
+      #13/#14 0xea76+1512 = 0xf05e, both P=1, 3050 total
+  #10/#11 is legitimately blocked by the 16384 cap (6704+12140=18844).
+  Whether the other three are right turns on the deck_standalone and bank
+  rules, unverified.  mmbstamp is Don's tool in his repo -- read-only.
+- SO THE QUESTION IS SHARPER AND WORSE: FCMINSSL DEMONSTRABLY REQUIRES BOTH
+  STRUCTS TO WORK.  Either the AP-101S does NOT mask bit 15 for this case,
+  contradicting POO Figure 2-8 as I read it, or the real MMB emitted far
+  fewer HIMEM load blocks than our 24-block reconstruction.  Those are the
+  two live branches now; both are testable and neither is in cpu.c.
