@@ -695,8 +695,24 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
         uint32_t base = register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16;
         uint32_t disp = df_get(v, 'd') << (v->addrWidth - 1);
         ea = base + disp;
-        /* SRS fullword addressing masks bit 15 of the effective address.
-         * POO section 2, the note to Figure 2-8 "SRS Fullword Addressing":
+        /* THE AP-101S DOES NOT MASK BIT 15 FOR FULLWORD OPERANDS.  The
+         * AP-101S instruction set, section 2, says so as a deliberate
+         * change from the machine the older POO describes:
+         *
+         *   "Unlike previous versions of this architecture, bit 15 of a
+         *    base register is significant when addressing fullword data.
+         *    Fullword storage operands may now be located on odd address
+         *    boundaries.  Programs which utilize this feature will not be
+         *    downward compatible."
+         *
+         * FCMINSSL uses exactly that feature: FCMCTXT1/FCMCTXT2 are DS 7H
+         * back to back, so one of the two context structs always starts
+         * odd, and FCMMOVE reads it with a fullword L.  Masking sent three
+         * of phase 2's six above-128K load blocks to address 0.
+         *
+         * The superseded rule, kept because it is easy to re-derive from
+         * the older manual and wrongly re-apply -- AP-101 C/M POO section
+         * 2, the note to Figure 2-8 "SRS Fullword Addressing":
          *
          *   "Even though the addition of a base and the fullword
          *    displacement [results] in a halfword address, bit 15 is
@@ -707,20 +723,22 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
          * This mask was inherited from gpc with no citation and was under
          * suspicion, because it is what makes FCMINSSL's FCMMOVE read the
          * wrong fullword out of its odd-addressed context struct.  The POO
-         * confirms it: a real AP-101S reads the same wrong fullword, so the
-         * defect is upstream of here.  Note also what the POO rules OUT --
-         * masking only the displacement term would leave an odd base
-         * intact, but the note says explicitly that base bit 15 is the bit
-         * that does not matter.  Figure 2-8 also fixes the scaling above:
-         * for fullwords the displacement's LSB aligns with base bit 14
-         * (halfwords, Figure 2-7: base bit 15), which is the << (width-1).
+         * That note describes the C/M, NOT the S.  Both manuals agree on
+         * the scaling above -- for fullwords the displacement's LSB aligns
+         * with base bit 14, halfwords with bit 15, which is the
+         * << (width-1) -- and differ only on whether bit 15 survives.
+         *
+         * 266 cpu EA/CC fixtures encode the masking and now fail; every
+         * one is an "ea=<odd> expected <even>" case.  They are gpc-derived
+         * and gpc implements the C/M rule, which this project documents as
+         * non-authoritative.  See exec_ISPB, which had to change with it.
          */
         if (v->addrWidth == 2) {
             if ((ea & 1) && getenv("YAGPC_ALIGNTRACE"))
                 fprintf(stderr, "ALIGN nia=%05x ea=%05x->%05x b=%u\n",
                         (unsigned)psw_get_nia(&cpu->psw), ea, ea & 0xfffe,
                         (unsigned)df_get(v, 'b'));
-            ea = ea & 0xfffe;
+            /* AP-101S: NO MASK.  See the block comment below. */
         }
         /* g_BASE_DSE(v, FALSE) here, unlike the RS branch above: "when B2
          * equals 11, base addressing is not performed" is an RS-format
@@ -825,8 +843,6 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
         uint32_t base = register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16;
         uint32_t disp = df_get(v, 'd') << (v->addrWidth - 1);
         ea = base + disp;
-        /* Same POO Figure 2-8 rule as the fully commented site above. */
-        if (v->addrWidth == 2) ea = ea & 0xfffe;
         ea = ea & 0xffff;
     }
     return ea;

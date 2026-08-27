@@ -1540,14 +1540,22 @@ static void exec_ISPB(CPU *t, DInstr *v) {
             membus_set_store_protect(t->ram, ea, false);
             break;
         case 1: { /* reset both halfwords of the fullword */
-            /* "When M1 is 001 or 011, the low-order bit of the EA should
-             * be 0 and will be ignored." */
+            /* AP-101S 9.2 INSERT STORAGE PROTECT BITS, M1=001: "Reset
+             * the storage protection bits for BOTH HALFWORDS IN THE
+             * FULLWORD SECOND OPERAND."  On the S a fullword operand may
+             * start at an odd address (section 2), so the pair is EA and
+             * EA+1 -- not the containing even-aligned fullword.  The
+             * older C/M POO's "when M1 is 001 or 011, the low-order bit
+             * of the EA should be 0 and will be ignored" is the
+             * superseded rule; applying it here made GPCIPL's MEMTST14
+             * unprotect 0x00B0/0x00B1 and then store to 0x00B1/0x00B2,
+             * faulting on a halfword it had not unprotected. */
             /* The EA here is already EXPANDED to 19 bits, so masking
              * the low bit off must not touch the sector bits: 0xfffe
              * threw them away and protected/unprotected the same offset
              * in sector 0 instead.  GPCIPL unprotects a fullword in
              * sector 6 and then writes it. */
-            uint32_t fwAddr = ea & ~1u;
+            uint32_t fwAddr = ea;   /* AP-101S: EA is the fullword, odd or not */
             t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, fwAddr, false);
             membus_set_store_protect(t->ram, fwAddr + 1, false);
@@ -1563,7 +1571,7 @@ static void exec_ISPB(CPU *t, DInstr *v) {
              * threw them away and protected/unprotected the same offset
              * in sector 0 instead.  GPCIPL unprotects a fullword in
              * sector 6 and then writes it. */
-            uint32_t fwAddr = ea & ~1u;
+            uint32_t fwAddr = ea;   /* AP-101S: EA is the fullword, odd or not */
             t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, fwAddr, true);
             membus_set_store_protect(t->ram, fwAddr + 1, true);

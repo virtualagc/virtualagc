@@ -1340,3 +1340,48 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   above-128K blocks in the entire 16-phase dump), or the odd struct works
   on real hardware in a way we have not found.  Phase 2 is not in
   #PFCMGPT, so there is no primary source for its partition.
+
+### [2026-08-27] Target: [problems.md]
+- SOLVED.  THE AP-101S DOES NOT MASK BIT 15 FOR FULLWORD OPERANDS, AND THE
+  MANUAL SAYS SO AS AN EXPLICIT CHANGE.  AP-101S instruction set,
+  section 2:
+      "Unlike previous versions of this architecture, bit 15 of a base
+       register is significant when addressing fullword data.  FULLWORD
+       STORAGE OPERANDS MAY NOW BE LOCATED ON ODD ADDRESS BOUNDARIES.
+       Programs which utilize this feature will not be downward
+       compatible."
+  Everything I cited for the mask -- POO Figure 2-8 and its "the same
+  fullword address is obtained regardless of base bit 15" -- is the AP-101
+  C/M, THE PREVIOUS MACHINE.  I read the wrong manual and then defended it
+  for most of a session.
+- AND ISPB CHANGED WITH IT.  AP-101S 9.2, M1=001: "Reset the storage
+  protection bits for BOTH HALFWORDS IN THE FULLWORD SECOND OPERAND."  On
+  the S that fullword may start odd, so the pair is EA and EA+1.  Our
+  exec_ISPB used the C/M's "the low-order bit of the EA should be 0 and
+  will be ignored" and did `ea & ~1`, so GPCIPL's MEMTST14 unprotected
+  0x00B0/0x00B1 and then stored to 0x00B1/0x00B2 -- faulting on a halfword
+  it had never unprotected.  THAT is why removing the mask alone broke the
+  memory test, and why I concluded for hours that the mask was load-bearing.
+- BOTH FIXED TOGETHER, AND THE BOOT NO LONGER CRASHES:
+      before   ERROR: invalid instruction 0xc6c6 at 0x0a3b
+      after    ERROR: max steps reached (200000000)
+      FCMMOVE entered TWICE, R0=73380000 then R0=733f0000 -- BOTH STRUCTS,
+        including the odd one, now complete
+      PROTVIOLs 5 -> 4, and the 4 remaining are exactly the DELIBERATE
+        self-test ones (00bfa/01058 at 017b8, 01107 at 000b0/000b1);
+        FCMMOVE's PROTVIOL #5 at 072ad is GONE and MEMTST14 passes
+      blocksRead 280, wordsTaken 116,666
+- FIXTURE REGRESSION, STATED PLAINLY: test_cpu_ea goes 20447/20447 ->
+  20181/20447.  ALL 266 failures are of the form "ea=<odd> expected
+  <even>" -- they encode the C/M masking rule exactly.  They are
+  gpc-derived and gpc implements the C/M behaviour, which this project
+  documents as non-authoritative.  The other suites are unchanged
+  (111180/111358, 73799/74699, 145446/145746).
+- THE WHOLE CHAIN OF WRONG CONCLUSIONS THIS CAUSED, for the record: the
+  odd-struct read was blamed on lnk101 misplacing FCMCTXT2, then on the
+  tape's load-block ordinal parity, then on a latent defect in FCMINSSL,
+  then on the phase-2 content being short.  Every one of those was a
+  downstream symptom of reading the AP-101 C/M manual for an AP-101S.  The
+  user's reductio -- software that flew for decades cannot fail to boot,
+  and no machine would copy three load blocks to address 0 -- is what
+  forced the manual to be re-checked.
