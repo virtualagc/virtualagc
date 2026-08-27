@@ -1061,3 +1061,66 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - SO THE PARITY ROADBLOCK IS NOW THE ONLY THING LEFT between us and the
   phase-2 load completing, which is exactly the justification the user was
   after for building the remaining phases.
+
+### [2026-08-27] Target: [problems.md]
+- WHY OUR PHASE 2 IS SHORT: 51 OF ITS 274 MODULES ABANDONED AT COMPILE TIME
+  in the scratchpad build, and that is the whole of the upper-memory gap.
+  Traced from the SSW CON80 deck, which IS phase 2's definition ("PHASE 2
+  APPLICATION PDE'S", "PHASE 2 PROG'S", "PHASE 2 STACKS"):
+      285 INSERT members in the deck; 213 present in PHASE02; 72 MISSING
+      of the 72, 38 have sources (23 distinct modules) and 34 do not --
+      the latter are #E<module> externals and modules absent from the
+      corpus (AIBGPC, ARAGPC, ASNGME, DGRGSE, DM8SPE, DM9ITE, ...)
+  The 23 with sources are AIESIP ARBIDL ARCGPC ASMAUX DMCSUP DMIMCD DMTERR
+  DUPNSP DM1KEY DM2APP DM3DIS DM4DEU DM5NEW DM6OPS DM7REQ DMNNEW DMMMCD
+  DNXBMS DXXCSE ARGREC DISPLA DCDDOW ASISPE, and they are exactly the
+  sector-8 occupants the DASS dump has and we lack.
+- THE OLD FAILURES WERE REAL COMPILE ERRORS, not tooling noise -- e.g.
+  ARCGPC: "DI11 ERROR #1 OF SEVERITY 2 ... THE VARIABLE CANB_ANN_MSG_BITS
+  USED IN A COMPILE-TIME EXPRESSION OR AS AN EQUATE STATEMENT HAS NOT BEEN
+  PREVIOUSLY DEFINED", 13 severity-2 errors, COMPILATION ABANDONED.  A
+  missing compool template, not a language fault; CANNCOM.obj itself builds
+  fine and ##CANNCO.sdf exists in the corpus SDFLIB.
+- AND WITH DON'S CURRENT TOOLCHAIN ALL 23 COMPILE.  Re-running his
+  con80build for SSW (`python3 -m con80.con80build SSW --root
+  .../OI340600 --out ... --assemble --hal --display --link`, PYTHONPATH at
+  nsts-sdl-dps/src) gives "113/113 ASM", "89/89 HAL", 0 unresolved, and an
+  object for every one of the 23.  So the modules are not the problem and
+  the corpus is not the problem.
+- THE BUILD IS BLOCKED BY AN INCONSISTENCY INSIDE nsts-sdl-dps ITSELF.
+  con80build.py passes `--sdfi=<gen/SDFLIB>` to the halsc wrapper, halsc
+  forwards it, and HALSFC-PASS1 rejects it:
+      Unknown command-line switch --sdfi=/.../gen/SDFLIB.  Try --help.
+  HALSFC-PASS1 is build/halsfc/HALSFC-PASS1, built 2026-07-21, against
+  halsc 2026-08-25 and con80build.py 2026-08-26; `make HALSFC-PASS1`
+  reports "Built target" without rebuilding, and the string `sdfi` appears
+  NOWHERE in the HALSFC sources.  So the switch was never implemented in
+  this checkout.  The tree is a local merge ("local-both", 755a372), so
+  the SDF side has most likely not caught up.
+  RESULT: every HAL compile finishes all passes (pass1..pass3, opt, flo,
+  objcode.bin, cards.bin -- no abandonment) and then emits a ZERO-LENGTH
+  .obj, so lnk101 fails loading the first one.
+- A PATH SHIM THAT STRIPPED --sdfi MADE IT WORSE (119 members with no
+  object instead of 5) and was removed.  Do not repeat that; the switch is
+  evidently load-bearing for the template/SDF path even though PASS1
+  cannot take it.
+- TWO METHOD FAILURES OF MINE IN THIS SEGMENT, both the same shape:
+    * I concluded "PASS1 does NOT have --sdfi" from running
+      build/bin/HALSFC-PASS1, WHICH DOES NOT EXIST -- the binaries live in
+      build/halsfc/.  A nonexistent binary plus `grep -c` = 0 read as
+      evidence.
+    * Then `$P --help | grep -iE sdfi | head -3 && echo DOES ACCEPT` fired
+      the && branch because the exit status is HEAD'S, not grep's.
+  Both were "a command that did not run looks like a negative result".
+  Test with an explicit count in a variable, and try the switch directly.
+- WHAT WAS TOUCHED OUTSIDE OUR TREE: only nsts-sdl-dps/build/, which is
+  git-ignored -- `make -j8 HALSFC-PASS1 ... HALSFC-AUXP` refreshed
+  build/bin/halsc and left build/halsfc/* unchanged (still 2026-07-21).
+  `make runtime` was NOT run, so the &ASM101S-gated fixes are untouched.
+  Don's repo git status is exactly as found: ` M ext/sim`,
+  ` M ext/virtualagc`, HEAD still 755a372.
+- SO THE PHASE BUILD IS BLOCKED ON DON, not on us, and the block is
+  precisely stated: HALSFC-PASS1 needs to accept --sdfi (or halsc must
+  stop forwarding it).  Everything else is ready -- 0 unresolved sources,
+  all 23 modules compiling, and #PFCMGPT in the DASS dumps as a
+  primary-source oracle to check the result against.
