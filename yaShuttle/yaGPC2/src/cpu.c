@@ -689,6 +689,26 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
         uint32_t base = register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16;
         uint32_t disp = df_get(v, 'd') << (v->addrWidth - 1);
         ea = base + disp;
+        /* SRS fullword addressing masks bit 15 of the effective address.
+         * POO section 2, the note to Figure 2-8 "SRS Fullword Addressing":
+         *
+         *   "Even though the addition of a base and the fullword
+         *    displacement [results] in a halfword address, bit 15 is
+         *    ignored when addressing fullword second operands.  As a
+         *    result, the same fullword address is obtained regardless of
+         *    the contents of base bit position 15."
+         *
+         * This mask was inherited from gpc with no citation and was under
+         * suspicion, because it is what makes FCMINSSL's FCMMOVE read the
+         * wrong fullword out of its odd-addressed context struct.  The POO
+         * confirms it: a real AP-101S reads the same wrong fullword, so the
+         * defect is upstream of here.  Note also what the POO rules OUT --
+         * masking only the displacement term would leave an odd base
+         * intact, but the note says explicitly that base bit 15 is the bit
+         * that does not matter.  Figure 2-8 also fixes the scaling above:
+         * for fullwords the displacement's LSB aligns with base bit 14
+         * (halfwords, Figure 2-7: base bit 15), which is the << (width-1).
+         */
         if (v->addrWidth == 2) {
             if ((ea & 1) && getenv("YAGPC_ALIGNTRACE"))
                 fprintf(stderr, "ALIGN nia=%05x ea=%05x->%05x b=%u\n",
@@ -793,6 +813,7 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
         uint32_t base = register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16;
         uint32_t disp = df_get(v, 'd') << (v->addrWidth - 1);
         ea = base + disp;
+        /* Same POO Figure 2-8 rule as the fully commented site above. */
         if (v->addrWidth == 2) ea = ea & 0xfffe;
         ea = ea & 0xffff;
     }
