@@ -85,29 +85,4 @@ void mmumodel_publish_ready(MmuModel *m);
  * be compared directly. */
 void mmumodel_report(const MmuModel *m);
 
-/* Read `nBlocks` whole blocks straight off the tape, starting at the
- * CON80 card address `track`/`file`/`subfile`/`block`, into `dest`.
- *
- * This deliberately bypasses everything else in this file -- no command
- * decode, no queue, no pacing, no status -- because the reader it models
- * is not a bus program.  The firmware IPL (PASS User's Guide Table 2-2
- * step 10, "Bootstrap loader read in from MMU") runs before any software
- * does, in microcode that owns the interface outright; it is not the CPU
- * issuing BCE transactions, so routing it through the transport would be
- * modelling the wrong thing and would perturb the position state a real
- * IPL leaves alone.
- *
- * `maxBlocks` is the SIZE OF THE ALLOCATION, not of the content: the
- * copy stops at the first block the volume never recorded, and the return
- * is how many whole blocks were actually copied (0 if the very first is
- * absent, so a tape carrying no bootstrap is distinguishable from one
- * carrying a bootstrap of zeros).  That is what keeps a short image from
- * overwriting the memory fill behind it with the remainder of its own
- * reservation.
- *
- * `dest` must have room for maxBlocks * 512 halfwords. */
-int mmumodel_read_blocks(const MmuModel *m, int track, int file,
-                         int subfile, int block, int maxBlocks,
-                         uint16_t *dest);
-
 #endif

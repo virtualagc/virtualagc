@@ -358,10 +358,14 @@ void opts_parse(int argc, char **argv, Options *opts) {
          * IPL pushbutton is pressed, so an fcm-file is what a run
          * SUBSTITUTES for that, not something a run must have.  But there
          * has to be a tape to read, and a panel to press IPL on. */
-        if (!opts->mmuModelVolume) {
+        /* Either mass memory will do: the in-process model, or a real
+         * one on the far end of --bce-network.  The IPL reads it through
+         * the installed servicer and does not care which. */
+        if (!opts->mmuModelVolume && !opts->bceNetwork) {
             fprintf(stderr,
                 "error: no 'fcm-file', so the bootstrap must come from a "
-                "mass memory -- give --mmu-model VOLUME.mmv\n");
+                "mass memory -- give --mmu-model VOLUME.mmv, or "
+                "--bce-network to read a real one\n");
             exit(1);
         }
         if (!opts->discretes) {

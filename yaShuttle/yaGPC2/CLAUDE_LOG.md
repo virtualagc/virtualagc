@@ -402,3 +402,39 @@ the documents themselves.)
 - NOT DONE: the GUI panel change is untested -- no display here.  Its logic
   parses and _build() precedes _republish(), so the widget exists before
   the first publish, but somebody should actually press the button.
+
+### [2026-08-26] Target: [HANDOFF-FCMBOOT.md]
+- THE FIRMWARE IPL NOW GOES OVER THE BUS, and through the INSTALLED
+  SERVICER rather than any particular mass memory.  Two user corrections,
+  both right: reading the volume directly models a wire that does not
+  exist (the MMU is a separate box; the bus is the only path to it), and
+  calling mmumodel_service() directly would have worked with exactly one
+  MMU -- ours -- when Don's lives on the far end of --bce-network.  It now
+  issues POSITION / EXTENDED BLOCK / READ and drains the reply queue
+  through iop.servicer, with the bus picked by the panel's IPL-source bits
+  (MM1 = BCE 18, MM2 = BCE 19).  --mmu-model is no longer required when no
+  fcm-file is given: --bce-network will do instead.
+- WHICH ALSO FIXED THE READY INDICATOR, the symptom that exposed the first
+  problem.  Bypassing the bus left MM READY undisturbed, so a load gave the
+  crew panel no sign of itself.  Draining the real queue makes READY fall
+  and rise on its own, because it is derived from that queue.  A synthetic
+  busy-timer written for this is gone again -- it was treating the symptom.
+- AND THE TRANSFER IS PACED TO REAL TIME, a block at a time.  Drained flat
+  out it dropped READY for ~20 ms against a panel that republishes every
+  250 ms, i.e. invisibly.  Now 1.80 s, measured on the wire (READY low
+  3.44 -> 5.23 s), matching 72*512 + 71*256 = 55040 word times at 33 us.
+  --time-scale still shortens it.
+- THE STAMPER NOW WRITES THE WHOLE 72-BLOCK ALLOCATION, padding past the
+  image with the C6C6 the FMAIPL2 ALLOC's own INIT= names.  A bus reader
+  asks for a fixed block count and cannot be told which blocks were ever
+  recorded -- an unrecorded one simply reads back as zeros -- so the
+  earlier "stop at the first unrecorded block" trick was only possible
+  through the back door that has now been removed.
+- VERIFIED.  An isolated test issuing that exact command sequence against
+  the model collects all 36864 halfwords and matches BOOT-stamped.fcm
+  BYTE FOR BYTE over its 32512, with C6C6 in the tail.  End to end: "read
+  from MM1 (BCE 18) over the bus (72 blocks, 36864 halfwords)" then
+  release at 0x0014b; second IPL reloads and re-runs; IPL in STBY refused.
+  Same four pre-existing test failures, unchanged.
+- ~/ipl-demo/mmu2-boot.mmv is the tape, re-stamped to the full allocation
+  (1157 blocks).  mmu2.mmv there is untouched and carries no bootstrap.

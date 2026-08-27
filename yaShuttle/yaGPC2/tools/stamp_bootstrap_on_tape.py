@@ -87,17 +87,21 @@ def main():
         sys.exit("%s has an odd byte count" % args.image)
 
     stride = HALFWORDS_PER_BLOCK * 2
-    need = (len(img) + stride - 1) // stride
-    if need > BOOT_ALLOC_BLOCKS:
+    used = (len(img) + stride - 1) // stride
+    if used > BOOT_ALLOC_BLOCKS:
         sys.exit("%s needs %d blocks, but FMAIPL2 reserves only %d"
-                 % (args.image, need, BOOT_ALLOC_BLOCKS))
+                 % (args.image, used, BOOT_ALLOC_BLOCKS))
 
     first = block_index(BOOT_TRACK, BOOT_FILE, BOOT_SUBFILE, BOOT_BLOCK)
-    # A partial final block is padded with the C6C6 the allocation's own
-    # INIT= names, so an over-read past the end of the image sees what the
-    # tape build would have left there rather than zeros.
-    padded = img + b"\xc6\xc6" * ((need * stride - len(img)) // 2)
-    for i in range(need):
+    # THE WHOLE ALLOCATION IS WRITTEN, not just the blocks the image fills.
+    # A reader on the bus asks for a fixed block count and cannot be told
+    # which blocks were ever recorded -- an unwritten one simply reads back
+    # as zeros.  The allocation says what belongs in the rest: INIT=C6C6.
+    # Writing it makes the tape say the same thing a real one would, and
+    # keeps the emulator from depositing a block of zeros into store.
+    padded = img + b"\xc6\xc6" * (
+        (BOOT_ALLOC_BLOCKS * stride - len(img)) // 2)
+    for i in range(BOOT_ALLOC_BLOCKS):
         blocks[first + i] = padded[i * stride:(i + 1) * stride]
 
     out = args.out or args.volume
@@ -105,8 +109,10 @@ def main():
     print("stamped %s (%d halfwords) at file %d/track %d/subfile %d/block %d"
           % (args.image, len(img) // 2, BOOT_FILE, BOOT_TRACK, BOOT_SUBFILE,
              BOOT_BLOCK))
-    print("  blocks %d..%d of the %d FMAIPL2 reserves; volume now holds %d"
-          % (first, first + need - 1, BOOT_ALLOC_BLOCKS, len(blocks)))
+    print("  blocks %d..%d, the whole %d-block FMAIPL2 reservation "
+          "(%d carry the image, the rest C6C6); volume now holds %d"
+          % (first, first + BOOT_ALLOC_BLOCKS - 1, BOOT_ALLOC_BLOCKS,
+             used, len(blocks)))
     print("  -> %s" % out)
 
 

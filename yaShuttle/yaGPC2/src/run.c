@@ -486,26 +486,144 @@ static bool g_modeReported = false;
  * already booted parks on the next release rather than re-running the
  * mover.  Re-executing is possible only because a fresh IPL puts a
  * pristine copy back.  Collapsing the two would make that unreachable. */
+/* The mass memory's own interface address, and the command fields
+ * mmumodel.c's on_command() decodes.  A command is 24 bits: IUA, then a
+ * 4-bit opcode, then operands. */
+#define MM_IUA 11
+#define MM_OP_POSITION 0x0
+#define MM_OP_EXTENDED_BLOCK 0x3
+#define MM_OP_READ 0x9
+#define MM_BUS_WORD_US 33.0     /* one word time; mmumodel.c's own figure */
+
+static uint32_t mm_cmd(int opcode, uint32_t operands) {
+    return ((uint32_t)MM_IUA << 19) | ((uint32_t)(opcode & 0xf) << 15) |
+           (operands & 0x7fffu);
+}
+
+/* Everything below talks to the mass memory through THE INSTALLED
+ * SERVICER, not to any particular implementation of one.
+ *
+ * The in-process model is not the only mass memory this has to work with:
+ * Don's is a separate process on the far end of --bce-network, and a real
+ * one is a separate box.  They are all reached the same way, which is the
+ * point of the servicer -- run.c's own bus_router_service already sends
+ * the MM bus to the model when there is one and to the network when there
+ * is not.  Calling mmumodel_service() directly would have quietly made
+ * this work with exactly one of them. */
+static void mm_service(BatchRunner *r, GpcServiceNumber svc, int busID,
+                       uint32_t word, GpcServiceOutput *out) {
+    GpcServiceInput in;
+    memset(&in, 0, sizeof in);
+    memset(out, 0, sizeof *out);
+    in.busID = busID;
+    in.in.word = word;
+    IOP *iop = &r->age.gpc.iop;
+    if (iop->servicer) iop->servicer(iop->servicerCtx, svc, &in, out);
+}
+
+static void mm_send_cmd(BatchRunner *r, int busID, uint32_t cmd) {
+    GpcServiceOutput out;
+    mm_service(r, GPC_SVC_XMIT_CMD, busID, cmd, &out);
+}
+
+/* The firmware IPL, driven from the panel's IPL pushbutton.
+ *
+ * Only when no .fcm was named.  With one, the image came from a file and
+ * reloading it off the tape would silently replace what the run was asked
+ * to execute -- so that case behaves exactly as it always has.
+ *
+ * THIS GOES OVER THE BUS, like everything else that reaches the mass
+ * memory.  The MMU is a separate box from the GPC and there is no other
+ * path to it; the microcode is not running BCE programs out of GPC store,
+ * but it still drives the same interface, issues the same POSITION and
+ * READ, and collects the same words a bus program would.  Reading the
+ * volume directly would model a wire that does not exist -- and it also
+ * left the MM READY discrete undisturbed, so a load left no sign of
+ * itself on the crew panel.  Going through the bus makes READY fall and
+ * rise on its own, because it is derived from the very queue this drains.
+ *
+ * Table 2-2 splits what one might expect to be a single act across two
+ * controls: step 10 (GPC IPL - P/R) fills memory and reads the bootstrap
+ * in, and step 11 (GPC to STBY) releases reset and lets it run.  They are
+ * kept apart here for the same reason, which is not pedantry: FCMBOOT's
+ * External Zero handler sets the WAIT bit in its own System Reset PSW
+ * (FCMBOOT.asm, `OST R5,FCMBSYRS+2`), so a machine that has already
+ * booted parks on the next release rather than re-running the mover.
+ * Re-executing is possible only because a fresh IPL puts a pristine copy
+ * back.  Collapsing the two would make that unreachable. */
 static void firmware_ipl(BatchRunner *r, uint32_t mode) {
     if (r->opts->fcmPath) return;
-    if (!r->mmuModel) {
+    if (!r->age.gpc.iop.servicer) {
         fprintf(stderr, "MODE: IPL, but no mass memory is attached; "
                         "nothing to read a bootstrap from\n");
         return;
     }
-    int wantUnit = (mode & MODE_SRC_MM2) ? 2 : 1;
-    int haveUnit = mmumodel_bus(r->mmuModel) == 19 ? 2 : 1;
-    if ((mode & (MODE_SRC_MM1 | MODE_SRC_MM2)) && wantUnit != haveUnit) {
-        fprintf(stderr, "MODE: IPL source is MM%d but the attached unit is "
-                        "MM%d; reading it anyway\n", wantUnit, haveUnit);
-    }
-    size_t cap = (size_t)BOOT_ALLOC_BLOCKS * MM_HALFWORDS_PER_BLOCK;
-    uint16_t *image = calloc(cap, sizeof *image);
+    /* The panel says which unit to IPL from -- register A bits 4 and 5 --
+     * and that picks the BUS, MM1 being BCE 18 and MM2 BCE 19.  It is the
+     * bus number rather than any local object that identifies the unit,
+     * which is what lets the far end be Don's process or a real box. */
+    int unit = (mode & MODE_SRC_MM2) ? 2 : 1;
+    int busID = (unit == 2) ? 19 : 18;
+
+    size_t nhw = (size_t)BOOT_ALLOC_BLOCKS * MM_HALFWORDS_PER_BLOCK;
+    uint16_t *image = calloc(nhw, sizeof *image);
     if (!image) return;
-    int blocks = mmumodel_read_blocks(r->mmuModel, BOOT_TRACK, BOOT_FILE,
-                                      BOOT_SUBFILE, BOOT_BLOCK,
-                                      BOOT_ALLOC_BLOCKS, image);
-    if (blocks <= 0) {
+
+    /* POSITION names the track, subfile and file; READ then names the
+     * block and a 4-bit count, which EXTENDED BLOCK widens to 8 -- and
+     * transfer_blocks() reads that as count+1, so 71 asks for 72. */
+    mm_send_cmd(r, busID, mm_cmd(MM_OP_POSITION,
+                                 ((uint32_t)BOOT_TRACK << 12) |
+                                 ((uint32_t)BOOT_SUBFILE << 9) |
+                                 ((uint32_t)BOOT_FILE << 1)));
+    mm_send_cmd(r, busID, mm_cmd(MM_OP_EXTENDED_BLOCK, BOOT_ALLOC_BLOCKS - 1));
+    mm_send_cmd(r, busID, mm_cmd(MM_OP_READ,
+                                 ((uint32_t)BOOT_TRACK << 12) |
+                                 ((uint32_t)BOOT_SUBFILE << 9) |
+                                 ((uint32_t)BOOT_BLOCK << 4)));
+
+    /* Collect the transfer.  The words are paced against the EMULATED
+     * clock, which is not running: the CPU is held in reset, so nothing
+     * is advancing it.  Time passes on a real machine while the tape
+     * turns -- the firmware IPL is what leaves interval timer 1 running
+     * in the first place -- so this advances it a word time at a time,
+     * which is exactly what the transfer costs. */
+    size_t got = 0;
+    size_t guard = 0, guardMax = nhw * 4 + 4096;
+    double startEmuUs = r->age.gpc.cpu.elapsedTimeUs;
+    double startWall = yagpc_monotonic_seconds();
+    double scale = (r->timeScale > 0.0) ? r->timeScale : 1.0;
+    while (got < nhw && guard++ < guardMax) {
+        GpcServiceOutput out;
+        mm_service(r, GPC_SVC_RECV_WORD, busID, 0, &out);
+        if (out.out.recv.available) {
+            image[got++] = (uint16_t)(out.out.recv.word & 0xffff);
+            /* Keep wall time alongside emulated time, a block at a time.
+             *
+             * Not decoration.  READY is what tells anyone at the panel
+             * that the button did something, and a transfer drained flat
+             * out drops it for about twenty milliseconds -- against a
+             * panel that republishes every 250 ms, which is to say
+             * invisibly.  The transfer really does take on the order of
+             * two seconds of tape motion, so spending them is both what
+             * makes the indicator readable and what the hardware does.
+             * --time-scale still shortens it, as it does everywhere. */
+            if ((got % MM_HALFWORDS_PER_BLOCK) == 0) {
+                double owedSec = (r->age.gpc.cpu.elapsedTimeUs - startEmuUs)
+                                 / 1e6 / scale;
+                double spentSec = yagpc_monotonic_seconds() - startWall;
+                if (owedSec > spentSec) yagpc_sleep_seconds(owedSec - spentSec);
+                /* Only ours to drive.  A networked unit publishes its own
+                 * READY, and overriding it from here would be this process
+                 * asserting a discrete about somebody else's hardware. */
+                if (r->mmuModel) mmumodel_publish_ready(r->mmuModel);
+            }
+            continue;
+        }
+        r->age.gpc.cpu.elapsedTimeUs += MM_BUS_WORD_US;
+    }
+
+    if (got == 0) {
         fprintf(stderr,
                 "MODE: IPL, but this tape carries no bootstrap at the "
                 "FMAIPL2 allocation (file %d/track %d/subfile %d/block %d).\n"
@@ -514,12 +632,13 @@ static void firmware_ipl(BatchRunner *r, uint32_t mode) {
         free(image);
         return;
     }
-    uint32_t nhw = (uint32_t)blocks * MM_HALFWORDS_PER_BLOCK;
-    ageharness_firmware_ipl(&r->age, image, nhw);
+    ageharness_firmware_ipl(&r->age, image, (uint32_t)got);
     free(image);
+    if (r->mmuModel) mmumodel_publish_ready(r->mmuModel);
     fprintf(stderr, "MODE: IPL; memory filled, bootstrap read from MM%d "
-                    "(%d blocks, %u halfwords) to 0x00000\n",
-            haveUnit, blocks, nhw);
+                    "(BCE %d) over the bus (%zu blocks, %zu halfwords) "
+                    "to 0x00000\n",
+            unit, busID, got / MM_HALFWORDS_PER_BLOCK, got);
 }
 
 /* True when the machine is held in reset and must not execute. */
