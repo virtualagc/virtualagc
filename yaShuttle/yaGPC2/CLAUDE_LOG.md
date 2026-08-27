@@ -438,3 +438,36 @@ the documents themselves.)
   Same four pre-existing test failures, unchanged.
 - ~/ipl-demo/mmu2-boot.mmv is the tape, re-stamped to the full allocation
   (1157 blocks).  mmu2.mmv there is untouched and carries no bootstrap.
+
+### [2026-08-26] Target: [problems.md]
+- CON80 CARD ADDRESSES ARE FTSBB -- file, track, subfile, two-digit block.
+  I had written TFSBB in the bootstrap tool and in run.c.  The phase
+  manifest settles it: card 43000 is address 3/4/0/0, and the manifest's
+  address string is track/file/subfile/block -- the ONLY reading under
+  which all 1085 blocks of a built volume are accounted for, checked over
+  all 24 permutations.  So the first card digit is the FILE.  The
+  bootstrap's own 44500 is unaffected, file and track both being 4, but
+  the comments were wrong and are fixed.
+- RETRACTED, before it misleads: "the tape's phase 2 is truncated, 114 of
+  154 blocks".  It is not.  That was the wrong decoding above.  The
+  manifest claims 1085 blocks and the volume holds exactly 1085; every
+  block described is present.  The check that caught it was arithmetic
+  the wrong answer could not survive -- count what the manifest claims and
+  count what the file holds -- and it is the check to run FIRST next time,
+  before reading anything into which blocks appear missing.
+- STEP 12/13 (select system, then RUN -> OPS 0) IS NOT DIAGNOSED.  What is
+  established: the DIA bit map in FCMDSCRM.asm is the flight software's own
+  and confirms HALT/STBY/RUN/IPL as bits 0/1/2/3, matching yaGPC2, Don's
+  gpc and discretePanel; RUN is DI02 = bit 2, a discrete the SOFTWARE
+  reads, and iop_discrete_overlay lets a published bit win, so the
+  plumbing is right; run.c does nothing on STBY->RUN, which is correct
+  because RUN is not a reset action.  Keyboard entry is not the suspect
+  either -- ITEM 18/19/27+n/28 already match Don's video.
+- WHAT TO CHECK NEXT: whether GPCIPL/SSL actually completes the phase 2
+  load and transfers, versus never seeing the RUN discrete.  The two are
+  distinguishable without MEDS: per Table 2-2 step 11, WITHOUT step 6 (BFC
+  CRT display switch ON) there is no menu at all -- SSL loads PASS area 1
+  phase 2 by itself and goes straight to step 13.  So a run with no BFC
+  CRT discrete asserted should reach TB-RUN unaided, and moving to RUN
+  should enter OPS 0, with no keyboard entry anywhere in it.  That isolates
+  the discrete from the menu path.

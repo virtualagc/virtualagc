@@ -454,8 +454,11 @@ static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, l
  *     FMAIPL2  ALOCDESC,'GPC IPL BOOTSTRAP COPY';
  *     FMAIPL2  ALLOC,ADDR=44500,BLKS=72,INIT=C6C6,SYSID=SYS1;
  *
- * A CON80 card address is TFSBB -- track, file, subfile, two-digit block
- * -- so 44500 is file 4, track 4, subfile 5, block 0.  The 72 is the
+ * A CON80 card address is FTSBB -- FILE, TRACK, subfile, two-digit block;
+ * the phase manifest fixes that order (card 43000 is track 3/file 4).  So
+ * 44500 is file 4, track 4, subfile 5, block 0 -- which both digits being
+ * 4 makes insensitive to the order, though other allocations are not.
+ * The 72 is the
  * RESERVATION; how much of it the bootstrap actually occupies comes from
  * the tape, not from here (see mmumodel_read_blocks). */
 #define BOOT_TRACK 4

@@ -13,11 +13,16 @@ WHERE IT GOES is not a choice.  CON80's own MMUDAT1 allocates it:
     FMAIPL2  ALOCDESC,'GPC IPL BOOTSTRAP COPY';
     FMAIPL2  ALLOC,ADDR=44500,BLKS=72,INIT=C6C6,SYSID=SYS1;
 
-A CON80 card address is TFSBB -- track, file, subfile, then a two-digit
-block -- which the phase manifest confirms (card 43000 is address
-3/4/0/0, card 42300 is 2/4/3/0).  So 44500 is file 4, track 4, subfile 5,
-block 0, and 72 blocks are reserved there.  The image is shorter than the
-reservation and the remainder is left as it was.
+A CON80 card address is FTSBB -- FILE, TRACK, subfile, then a two-digit
+block.  The phase manifest fixes the order: card 43000 is address
+3/4/0/0 and card 42300 is 2/4/3/0, where the manifest's own address is
+track/file/subfile/block (the reading under which all 1085 blocks of a
+built volume are accounted for, and no other).  So 43000 is file 4,
+track 3 -- the first card digit is the file.
+
+44500 is therefore file 4, track 4, subfile 5, block 0, with 72 blocks
+reserved.  Both digits being 4 here, this happens not to depend on
+getting that order right; other allocations very much do.
 
 Usage:  stamp_bootstrap_on_tape.py VOLUME.mmv BOOT.fcm [--out FILE]
 """
