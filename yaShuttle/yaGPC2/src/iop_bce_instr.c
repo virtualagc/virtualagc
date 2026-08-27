@@ -150,6 +150,15 @@ static void exec_BU_at(IOP *t, DInstr *v) {
      * rather than confirmation -- the flight software above is the
      * evidence, not either implementation. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
+    if (getenv("YAGPC_BUATTRACE")) {
+        static int n = 0;
+        if (n++ < 12)
+            fprintf(stderr, "BU@ #%d bce=%u table=%05x entry->%05x "
+                    "(gpc would go to %05x)\n",
+                    n, (unsigned)t->curPE, addr,
+                    (unsigned)(iop_g_eaf(t, addr) & 0x3ffff),
+                    (unsigned)(addr & 0x3ffff));
+    }
     iop_set_nia(t, iop_g_eaf(t, addr) & 0x3ffffu);
 }
 

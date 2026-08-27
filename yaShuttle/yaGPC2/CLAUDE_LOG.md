@@ -285,3 +285,45 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   by a FUNCTIONAL difference the change must produce, not by rebuilding and
   trusting the build.  wordsTaken was available as that check the whole
   time.
+
+### [2026-08-27] Target: [problems.md]
+- WHERE gpc AND yaGPC2 DIVERGE, MEASURED RATHER THAN REASONED.  Question
+  was: with GPCIPL+SSL already in memory and the switch going STBY -> RUN,
+  at what point do the two differ?  ANSWER: AT EXACTLY ONE INSTRUCTION, and
+  it is the only `#BU@` the whole IPL executes.  New YAGPC_BUATTRACE:
+      BU@ #1 bce=18 table=072cc entry->072f2 (gpc would go to 072cc)
+  Total executions in a whole boot: 1.
+- BEFORE IT, NOTHING DIFFERS -- memory test, REALEXEC's dispatcher, the
+  display IPL, the DK-bus traffic all run identically.  The divergence is
+  the SSL's MMU read BCE program reaching its last instruction,
+  `#BU@ FCMBCEBT` on BCE 18.
+      yaGPC2  fetches [072cc] = 072f2 = FCMIBLK1, the receive sequence the
+              SSL wrote into its own work area, and collects the blocks
+      gpc     branches to 072cc itself, which holds the constant 0000 72F2,
+              decodes 0000 as an unknown BCE opcode, never advances its PC,
+              and spins while the commanded transfer streams past
+  wordsTaken 98,820 vs 28,164 of 107,012.  The CPU side keeps running in
+  both -- the BCE is a separate processor -- so gpc does not crash, the
+  load just never completes.  Which is exactly the old "same infinite loop,
+  same address, identical iteration counts" observation.
+- SCOPE: `#BU@` appears at 57 non-comment sites in OI340600, but ALL the
+  MLIB80 ones (FIOMFBCE, FIOHFBCE, BTBCEGEN) are PASS code.  In the IPL
+  only SSSRC/FCMINBCE.asm:82 is reachable, which is why one execution
+  covers the whole boot -- and why this never showed up before the SSL
+  started running.
+- A FOURTH INDEPENDENT WITNESS FOR THE DEREFERENCE, found while scoping
+  that: MLIB80/BTBCEGEN.asm:564 comments its own `#BU@ FIOBTFLX` as
+  "INDIRECT BRANCH".  That is the flight software naming the semantics
+  outright, and it does not depend on the FIOBBM chain at all.  The four
+  are now: FIOBBM declared DC 2F'0'; FIOMGDSP storing addresses into it
+  ("STORE ADDRESS IN BCE ENTRY"); BTBCEGEN's "INDIRECT BRANCH"; and
+  FCMBCEBT's DC A(FCMIBLK1) pointing at DS 10F scratch.
+- STATED PLAINLY BECAUSE IT WAS ASKED: THIS IS NOT A TOLERATED DIFFERENCE.
+  One of the two is wrong.  We claim gpc is, on the four witnesses above
+  plus the functional result; against us stands the POO's prose, which
+  reads as direct, and 300 fixtures that encode a THIRD behaviour neither
+  implementation produces.  Not airtight from the manual -- the flight
+  software is what carries it.
+- YAGPC_BUATTRACE KEPT, printing BOTH candidate targets per execution.
+  This decision has been misreported four times; a switch that shows the
+  divergence in one line is worth its keep.
