@@ -112,32 +112,11 @@ static void exec_BU(IOP *t, DInstr *v) {
 }
 
 static void exec_BU_at(IOP *t, DInstr *v) {
-    /* The `@` is an INDIRECTION, and it was being dropped: this branched
-     * TO the table entry instead of THROUGH it, so the bus program ran
-     * off into a table of address constants and sat there.
-     *
-     * The operand names a per-bus table biased back by 2 * its own bus
-     * number, exactly as #CMD's does -- FCMINSSL.asm builds one for this
-     * instruction and says so:
-     *
-     *      FCMBCEBT EQU   *-36                MMU 1/2 BRANCH TABLE
-     *               DC    A(FCMIBLK1)                          BUS 18
-     *               DC    A(FCMIBLK1)                          BUS 19
-     *
-     * -36 is 2*18, so BCE 18 indexes the first entry and BCE 19 the
-     * second, and the entries are A() ADDRESS CONSTANTS.  A table of
-     * addresses exists to be dereferenced; exec_CMD already fetches its
-     * own the same way.
-     *
-     * Found by the SSL's MMU read program, whose last instruction is
-     * `#BU@ FCMBCEBT`: it chains to the receive sequence FCMIBLK1 that
-     * collects the tape data.  Without the fetch, BCE 18 executed the
-     * table at 0x72CC -- a fullword of 0000 72F2 -- decoded 0000 as an
-     * unknown instruction, never advanced, and spun there for the rest of
-     * the run while all 78848 halfwords of PASS phase 2 streamed past
-     * uncollected. */
-    uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
-    iop_set_nia(t, iop_g_eaf(t, addr) & 0x3ffffu);
+    /* Direct, per the POO: the next instruction is found AT the operand
+     * plus twice the BCE number.  No indirection -- the `@` does not mean
+     * a fetch here.  (I changed this to dereference and was wrong; the
+     * table entry it lands on is meant to be EXECUTED, not read.) */
+    iop_set_nia(t, df_get(v, 'a') + 2u * (uint32_t)t->curPE);
 }
 
 static void exec_WIX(IOP *t, DInstr *v) {
@@ -415,6 +394,28 @@ static const BceOpEntry OPS[] = {
     {"#SST", "0101mddddddddddd", exec_SST},
     {"#LBR", "11110010000000aaaaaaaaaaaaaaaaaa", exec_LBR},
     {"#LBR@", "11111010000000aaaaaaaaaaaaaaaaaa", exec_LBR_at},
+    /* Opcode zero is a BRANCH, and its encoding is exactly an address
+     * constant: fourteen zero opcode bits then the same 18-bit address
+     * field #BU uses.  That is not a coincidence -- it is what lets the
+     * flight software build a jump table out of `DC A(...)`:
+     *
+     *      FCMBCEBT EQU   *-36                MMU 1/2 BRANCH TABLE
+     *               DC    A(FCMIBLK1)                          BUS 18
+     *               DC    A(FCMIBLK1)                          BUS 19
+     *
+     * `#BU@ FCMBCEBT` resumes execution at operand + 2*bus number (the
+     * POO's own words, direct, no indirection), which lands on one of
+     * those entries -- so the entry must itself be executable, and
+     * decoding A(FCMIBLK1) here yields a branch to FCMIBLK1, the receive
+     * sequence the read program needs.  Without this the BCE decodes the
+     * table's leading 0000 as unknown, never advances, and every halfword
+     * of the transfer it just commanded streams past uncollected.
+     *
+     * The mnemonic is a guess -- the POO's name for opcode 0 has not been
+     * checked -- but the encoding and the effect are forced by the table
+     * above.  gpc does not implement it either, and its BCE opcode set is
+     * otherwise identical to this one. */
+    {"#B", "00000000000000aaaaaaaaaaaaaaaaaa", exec_BU},
     {"#BU", "11110000000000aaaaaaaaaaaaaaaaaa", exec_BU},
     {"#BU@", "11111000000000aaaaaaaaaaaaaaaaaa", exec_BU_at},
     {"#WIX", "00100ddddddddddd", exec_WIX},

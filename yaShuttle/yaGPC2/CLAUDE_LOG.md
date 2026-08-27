@@ -745,3 +745,38 @@ the documents themselves.)
   it applies to some fetches and not others.  RESOLVE THAT BEFORE ACTING --
   it is exactly the kind of half-fitting explanation that has cost several
   wrong turns today.
+
+### [2026-08-27] Target: [problems.md]
+- CORRECTED: #BU@ IS DIRECT, AND I WAS WRONG TO MAKE IT DEREFERENCE.  The
+  user checked the POO: "the next instruction is found at the address
+  specified by the operand, plus twice the BCE number."  That is exactly
+  what the code already did.  Reverted.
+- THE REAL GAP IS OPCODE 0, and the user reached it independently: the `@`
+  IS the +2*BCE# table indexing, so ADDRESS names the start of a table and
+  what sits at ADDRESS+2*BCE# must itself be a branching instruction.  It
+  is: opcode zero is a BRANCH whose encoding is exactly an address
+  constant -- fourteen zero opcode bits then the same 18-bit address field
+  #BU uses.  That is why `DC A(FCMIBLK1)` works as a jump-table entry, and
+  why FCMINSSL can call the thing a BRANCH TABLE.  Decoding the entry at
+  0x72CC gives a branch to 0x72F2 = FCMIBLK1, the receive sequence the
+  read program has to chain to.
+- MEASURED, same as the wrong fix achieved but now consistent with the POO:
+  unknown-instruction spins 1,551,211 -> 0, wordsTaken 28,164 -> 98,820 of
+  107,012, wordsLost 0.  gpc does not implement opcode 0 either and its BCE
+  opcode set is otherwise identical to ours, which is what let the gap
+  survive.
+- ONE TEST NOW FAILS, and the reason is exact: test_iop_exec_processors'
+  bce_unknown writes 0x0000 as "a BCE opcode word that matches no entry in
+  the dispatch table" and asserts the PC parks.  0x0000 is now a branch to
+  0, so the PC goes to 0.  The test's PREMISE is what the change
+  invalidates, not its intent.
+  NOT RESOLVED: substituting 0x4000 (which matches no pattern) did not
+  restore it -- the BCE never reported an unknown instruction at all, so it
+  never fetched the marker, which points at the harness rather than the
+  marker.  I stopped rather than keep guessing, and left the test exactly
+  as it was.  Whoever picks this up should find why the marker is not
+  fetched BEFORE editing the test.
+- STILL UNCONFIRMED, and it is the one question worth putting to the POO:
+  is opcode 0 a defined BCE instruction, and is it a branch?  Everything
+  above is forced by the flight software's own table construction, not read
+  from the manual.
