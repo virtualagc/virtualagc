@@ -688,7 +688,13 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
         uint32_t base = register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16;
         uint32_t disp = df_get(v, 'd') << (v->addrWidth - 1);
         ea = base + disp;
-        if (v->addrWidth == 2) ea = ea & 0xfffe;
+        if (v->addrWidth == 2) {
+            if ((ea & 1) && getenv("YAGPC_ALIGNTRACE"))
+                fprintf(stderr, "ALIGN nia=%05x ea=%05x->%05x b=%u\n",
+                        (unsigned)psw_get_nia(&cpu->psw), ea, ea & 0xfffe,
+                        (unsigned)df_get(v, 'b'));
+            ea = ea & 0xfffe;
+        }
         /* g_BASE_DSE(v, FALSE) here, unlike the RS branch above: "when B2
          * equals 11, base addressing is not performed" is an RS-format
          * rule, so in SRS register 3 is an ordinary base register and its

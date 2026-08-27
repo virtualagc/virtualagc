@@ -1040,3 +1040,37 @@ the documents themselves.)
   it turns out to be an address computed one halfword short, fixing THAT
   may let the mask go and FCMMOVE work.  Do not remove the mask without
   resolving 0x074E first.
+
+### [2026-08-27] Target: [problems.md]
+- CC IS NOT BROKEN and needed no fix.  exec_L does
+  cpu_compute_cc_arith(t, val, 0) on whatever it loaded; it loaded zero, so
+  CC=0 was correct.  That is exactly what made the user's CC check useful --
+  it confirmed the VALUE was wrong independently of the register display.
+  The defect is one line earlier, in forming the address.
+- HOW THIS SURVIVED SO LONG, measured rather than asserted.  Instrumented,
+  the alignment mask changes an address only 185 TIMES IN A WHOLE BOOT of
+  ~22.7 million instructions, and they cluster:
+      40 each at 0x07b8, 0x07b9, 0x07c0
+      16 each at 0x0072e, 0x0074e, 0x0074f, 0x00756
+       1     at 0x072a4   <- FCMMOVE's load, the one that matters
+  It takes a deliberately odd-sized structure -- DS 7H twice -- to put a
+  fullword operand on an odd base.  Everything else in the flight software
+  is naturally aligned, so nothing ever noticed.
+- AND THE CLUSTER IS GPCIPL'S MEMORY TEST: every one of the 176 resolves
+  inside MEMTST12/14/15/33/34 (BILDNEW5).  A memory test walks odd
+  addresses on purpose and provokes protection violations on purpose --
+  this project already records GPCIPL's self test storing an instruction
+  over itself and its "artificial barrage of store-protect program checks".
+  So THE MASK IS PROBABLY CORRECT and the self test depends on it.  That
+  reverses the question.
+- THE QUESTION IS NOW: why does FCMMOVE run against the ODD struct at all?
+  FCMNEXTS/FCMCURRS toggle 0<->1 normally (XIST X'0000'(0),X'0001'), and
+  FCMBCTXT holds Y(FCMCTXT1)=0x7338 and Y(FCMCTXT2)=0x733F, so every other
+  above-128K sequence lands on the odd one.  If the machine really aligns,
+  the flight software would break there too -- which it plainly did not.
+  So either the real build places those structs differently, or in the real
+  flow FCMMOVE is only ever reached with the even struct current, and our
+  sequence count differs by one.  THAT is the thing to chase next, not the
+  mask.
+- YAGPC_ALIGNTRACE added: prints every address the fullword alignment mask
+  actually changes.  185 lines for a whole boot, so it is cheap to leave on.
