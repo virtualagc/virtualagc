@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "ap101.h"
 
 void ap101_init(AP101 *gpc) {
@@ -14,6 +16,33 @@ void ap101_free(AP101 *gpc) {
 }
 
 void ap101_exec1(AP101 *gpc) {
+    /* YAGPC_NIAPROBE=<hexaddr> dumps R0-R7 and the SSL's two context-struct
+     * indices every time that address is about to execute.  Unlike --break
+     * it does not stop, so it yields one line per VISIT, which is what
+     * distinguishes "reached once" from "reached per load block" -- the
+     * question that located the FCMMOVE odd-struct defect.  The env lookup
+     * is cached because this is the per-instruction hot path. */
+    static int probeInit = 0;
+    static long probeAddr = -1;
+    if (!probeInit) {
+        const char *probe = getenv("YAGPC_NIAPROBE");
+        probeAddr = probe ? (long)strtoul(probe, NULL, 16) : -1;
+        probeInit = 1;
+    }
+    if (probeAddr >= 0) {
+        {
+            unsigned nia = (unsigned)psw_get_nia(&gpc->cpu.psw);
+            if ((long)nia == probeAddr) {
+                fprintf(stderr, "NIAPROBE nia=%05x", nia);
+                for (int i = 0; i < 8; i++)
+                    fprintf(stderr, " R%d=%08x", i,
+                            (unsigned)register_get32(cpu_r(&gpc->cpu, i)));
+                fprintf(stderr, " NEXTS=%04x CURRS=%04x\n",
+                        mcm_get16(&gpc->cpu.mainStorage, 0x7347),
+                        mcm_get16(&gpc->cpu.mainStorage, 0x7348));
+            }
+        }
+    }
     cpu_exec1(&gpc->cpu);
     iop_exec(&gpc->iop);
 }

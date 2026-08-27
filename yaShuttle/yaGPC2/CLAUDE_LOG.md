@@ -181,3 +181,64 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   behaviours diverge.  YAGPC_RSALIGNTRACE is kept so the next person can
   find such a case cheaply -- it is the same env-gated, only-on-oddness
   shape as YAGPC_ALIGNTRACE and costs nothing when quiet.
+
+### [2026-08-27] Target: [problems.md]
+- THE FCMMOVE DEFECT IS LOCATED, AND IT IS NOT THE EMULATOR.  Two
+  measurements settle it.
+- FIRST, PRIMARY EVIDENCE THAT OUR LINK IS RIGHT.  OI301700's "as received"
+  SSSRC/FCMINSSL is an ORIGINAL-BUILD LISTING WITH OBJECT CODE (OI340600's
+  is plain source -- only OI301700 ships listings, which is the whole
+  premise of HANDOFF-OI340600).  Its resolved addresses give the work area
+  outright:
+      FCMLBRTB 0378   FCMNEXTB 038A   FCMNEXTS 038B   FCMCURRS 038C
+      FCMMOVRG 038E   FCMBF1CT 039E   FCMBCTXT 03A0
+  Walking the DS chain from 0x378 reproduces every one: +2F=4 puts
+  FCMCTXT1 at 037C, +7H puts FCMCTXT2 at 0383, +7H lands FCMNEXTB at 038A
+  exactly, and FCMMOVRG's DS 8F needed a ONE-HALFWORD PAD from 038D to
+  038E -- which the listing confirms, and which proves the original
+  assembler aligns DS F just as ours does.  With CSECT base 0x6FBC
+  (= 0x7334 - 0x378, our own FCMLBRTB) that is FCMCTXT1 = 0x7338 and
+  FCMCTXT2 = 0x733F, THE EXACT ADDRESSES OUR LINK PRODUCES.  So the odd
+  struct is in the real flight build too, and lnk101 is not at fault.
+- SECOND, WHY IT IS REACHED.  New YAGPC_NIAPROBE at the sector test
+  (CHI R4,FCMLOWSC, found at 0x710b by scanning our own image for the
+  B5E4 0007 the listing shows) gives all 21 of phase 2's load blocks and
+  their computed sectors:
+      0 0 0 0 1 1 1 2 2 3 3 3 3 3 4 5 5 6 7 8 9
+  FCMLOWSC is 7 and the test is GT, so EXACTLY TWO blocks are above 128K:
+  ordinals 20 and 21.
+- AND THE STRUCT IS CHOSEN BY ORDINAL PARITY.  NEXTS toggles once per load
+  block, measured 0,1,0,1,... across all 21, so block N builds into
+  struct[(N-1) & 1] and its move (one iteration later, double-buffered)
+  uses that same struct.  Block 20 is EVEN, so it gets FCMCTXT2 -- the odd
+  address -- and block 21 would have got the even one.  The single observed
+  FCMMOVE call reads exactly that: nia=072a4 base=0733f NEXTS=0000
+  CURRS=0001, i.e. block 20's context out of struct 1.  The boot dies
+  before block 21's move ever happens.
+- SO THE INVARIANT FCMINSSL SILENTLY DEPENDS ON IS: EVERY ABOVE-128K LOAD
+  BLOCK MUST SIT AT AN ODD ORDINAL in its phase's load table.  Nothing in
+  the source states it, nothing checks it, and one of ours violates it.
+  Since the struct layout is byte-identical to the original build, the
+  variable that differs is OUR PHASE 2's LOAD-BLOCK LIST -- how many blocks
+  our mmubuild reconstruction emits and in what order.  THAT is where to
+  look next, not in cpu.c.
+- NEXT STEP: compare our phase 2 load-block list against what the original
+  MMB would have produced -- count, order, and which are above 128K.  If
+  the original put its high blocks at odd ordinals the invariant holds and
+  our tape build is the defect; if it could not have, FCMINSSL has a
+  latent bug that flight loads happened never to trip, which is worth
+  writing up on its own.
+- TOOL KEPT: YAGPC_NIAPROBE=<hexaddr> dumps R0-R7 plus FCMNEXTS/FCMCURRS
+  every time that address is ABOUT TO EXECUTE.  Unlike --break it does not
+  stop, so it gives one line per VISIT -- which is what distinguishes
+  "reached once" from "reached per load block" and is what cracked this.
+  The getenv is cached; with the variable unset the run is unchanged and
+  silent, verified.
+- METHOD NOTE: the first version of this probe went into gpcops.c, beside
+  its ap101_exec1() call, and NEVER FIRED -- that is the GpcOps embedding
+  path, and the CLI runs run.c's batchrunner_step().  ap101_exec1() in
+  ap101.c is the one chokepoint BOTH go through.  I nearly read the empty
+  output as "the sector test is never executed", which would have been a
+  confident wrong conclusion; what saved it was scanning the image for the
+  instruction's own object code and finding it exactly where the address
+  arithmetic said, so the probe had to be wrong rather than the address.
