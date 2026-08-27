@@ -872,3 +872,41 @@ the documents themselves.)
   and I briefly claimed #WAT was undecoded when it is right there at
   iop_bce_instr.c:440, "00001___________".  0x0000 really is undecoded,
   which the runtime already showed.
+
+### [2026-08-27] Target: [problems.md]
+- THE 0x8a2d "WILD BRANCH" IS A SYMPTOM, NOT THE FAULT.  Full-width trace:
+      0072ac FCMINSSL+02f0: 6bed MVH 3,5
+             R00..R07 ALL change, PSW1: 72acc011->0a3b0011, PSW2 cleared
+  Every register changing at once with a new PSW is an INTERRUPT WITH A
+  REGISTER-SET SWITCH, not a move.  MVH faulted, the trap dispatched
+  through a PSA vector, and landed at 0x0a3b -- which PASS phase 2 has
+  OVERLAID -- so the "handler" is now PASS data, which promptly executes
+  `BC 7,X'8a2d'` into the error-env stack and dies on 0xc2d9.  Chasing
+  0x8a2d or 0xc2d9 as a missing opcode is chasing the wrong end; 0xc2d9 is
+  genuinely undecoded but it is data, and memory there was legitimately
+  written by the SSL's own move loop (watchpoint: c9fb -> c2d9 by NIA
+  0x071bd).
+- WHY MVH FAULTED: it was handed dest=0, count=4096, src=0 -- a 4096
+  halfword move from 0 to 0, straight into store-protected low memory.
+  R3 = 0x00001000 and R5 = 0x80000000 at the call.
+- AND WHY THOSE OPERANDS: FCMMOVE (0x72a1) reads them from a BCE context
+  struct via R0, and the trace shows `L 3,X'0000'(0)` leaving R3 UNCHANGED
+  AT ZERO -- so the struct is all zeros.  FCMINSSL only populates it
+  conditionally:
+      IF (CHI,R4,GT,FCMLOWSC)  IF SECTOR > 7 (ABOVE 128K ADDR) ?
+      STH R4,TFCMTGTS / SRL R5,1 / STH R5,TFCMTGTA
+  so FCMMOVE is for load blocks ABOVE 128K only, and the struct stays zero
+  for low ones.  Either FCMMOVE is being reached for a low block when it
+  should not be, or the struct pointer is wrong.
+- NEXT SUSPECT, and it is a known family here: the struct is selected by
+      LA R0,FCMBCTXT / LH R3,FCMNEXTS / LH R0,0(R3,R0)
+  an INDEXED load.  problems.md already records one POO 14.1 index-scaling
+  defect (LM/STM/LPS take a halfword index despite fullword operands).  A
+  wrong index here would fetch the wrong struct address and give exactly
+  the all-zero struct observed.  CHECK THE SCALING OF `LH` WITH AN INDEX
+  BEFORE ASSUMING THE FLIGHT SOFTWARE IS AT FAULT.
+- ALSO CORRECTED: sectors are 32K, not 64K.  psw_get_nia does
+  `(BSR << 15) | (nia16 & 0x7FFF)` when bit 15 of the address is set, so my
+  earlier decode of the load-block descriptors as `sector << 16` was wrong.
+  Under <<15, phase 2's LB7 (addr 0x811a, sector 1, len 11122) covers
+  0x811a..0xac8b, which is why 0x8a2d had real data in it.
