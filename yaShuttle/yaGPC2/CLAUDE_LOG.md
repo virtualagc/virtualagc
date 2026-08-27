@@ -514,3 +514,55 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   and their sectors with NO emulator in the loop.  That is independent in a
   way gpc -- a codebase we were ported FROM -- can never be.  Not done yet;
   awaiting the user.
+
+### [2026-08-27] Target: [problems.md]
+- DECISION, ASKED FOR AND RECORDED: DO NOT BUILD A gpc-vs-yaGPC2
+  HEAD-TO-HEAD FOR THE SSL FAILURE.  The user's principle is right --
+  forcing two supposedly-identical programs to contend is a powerful
+  localizer -- and they were right that the discretes are NOT a blocker
+  here (nothing in gpc writes regDiscreteInA/B at all, so `gpc run` never
+  touches that bus; forcing them is two set32 calls, and is REQUIRED, since
+  zero means DEU_ID 0 = no display unit).
+- THE DECISIVE REASON IS NOT COST, IT IS THAT I WOULD BE WRITING THE
+  ORACLE.  To reach the failure gpc needs #DLYI/#DLY implemented WITH
+  bus-data discard and a progressive bus -- the exact behaviours under
+  test.  Implement them as yaGPC2 does and agreement proves nothing;
+  implement them differently and disagreement only shows I wrote two
+  different things.  Differential testing earns its power from
+  INDEPENDENCE, and yaGPC2 is a PORT of gpc: their disagreements are
+  precisely our changelog.  That is also why the historical comparison sat
+  in the same loop with identical iteration counts for days.
+- AND THERE IS NO INDEPENDENT SECOND IMPLEMENTATION AVAILABLE FOR THIS
+  CLASS OF QUESTION.  yaHALMAT2, which genuinely is independent and is the
+  real bug-finder against yaGPC2 elsewhere, executes HALMAT and not AP-101S
+  machine code, so it cannot run GPCIPL at all.  gpc is the only sibling
+  that can, and it is the one we were ported from.  Hence the primary
+  documents have had to be the oracle -- and they have worked.
+- THE LEDGER SUPPORTS THAT.  Everything decisive this session came from
+  PRIMARY SOURCES or TARGETED INSTRUMENTATION: POO Figure 2-8 (the mask),
+  the OI301700 as-received listing (the struct layout, byte for byte),
+  FIOBBM and BTBCEGEN's "INDIRECT BRANCH" (#BU@), the 0x710b probe (the 21
+  sectors), the FCMIBLK dump (the chain), the BCE POO (#WAT).  Every wrong
+  turn -- three reverted changes, four bad #BU@ fixture reports -- came
+  from trusting DERIVED artifacts: fixtures, stale builds, my own notes.
+- AND THE FAILURE IS LOCALIZED, not stalled: from "wild branch to 0xc2d9"
+  to "FCMINSSL requires every above-128K load block at an ODD ordinal, and
+  ours is at 20".  What remains is checking one list.
+- PHASE 2'S COMPLETE LOAD-BLOCK LIST, already in hand from the 0x710b probe
+  (R5 holds addr<<1 there; the source does SRL R5,1 immediately after):
+      1 051e/0   2 0676/0   3 2ea6/0   4 3332/0   5 0000/1   6 009a/1
+      7 011a/1   8 0000/2   9 01ae/2  10 0000/3  11 1a30/3  12 499c/3
+     13 6a76/3  14 705e/3  15 0000/4  16 0000/5  17 0254/5  18 0000/6
+     19 0000/7  20 0000/8  21 0000/9
+  Blocks 1 and 2 are 0x051E and 0x0676 -- EXACTLY the #LBR operands in the
+  dumped receive sequences, an independent cross-check.  Ascending sector
+  order, each new sector starting at 0x0000.  NINETEEN blocks precede
+  sector 8, which is the entire ordinal-parity problem.
+- SO THE NEXT WORK IS A TAPE-BUILD QUESTION, not emulator archaeology:
+  does our mmubuild emit the load-block list MMB would have?  Answerable
+  against CON80 and the phase manifest with NO emulator on either side.
+- CONDITION FOR REVERSING THIS: if the tape-build line runs dry AND the
+  next question turns out to be about EMULATOR BEHAVIOUR rather than the
+  tape, differential testing becomes the right instrument and is worth
+  building -- but on a case where the two could genuinely disagree, not one
+  where I would have supplied both answers.
