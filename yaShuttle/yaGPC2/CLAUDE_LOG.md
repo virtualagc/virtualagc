@@ -718,3 +718,30 @@ the documents themselves.)
   transfers control, and dies at
       ERROR: invalid instruction 0xc2d9 at 0x8a2d
   which is further than this has ever run.
+
+### [2026-08-26] Target: [problems.md]
+- WHERE THE BOOT NOW DIES, which is new ground.  With both fixes in, phase 2
+  loads, its data is collected, control transfers into it, and then:
+      [22762631] 0072ac FCMINSSL+02f0: 6bed  MVH 3,5
+      [22762632] 000a3b        +0a3b: c7f3 8a2d  BC 7,X'8a2d'
+      [22762633] 008a2d              : c2d9  ??? (invalid)
+  0xc2d9 matches no pattern in the decode table, so this is a wild branch,
+  not a missing opcode.
+- 0x0a3b IS PASS CODE, not GPCIPL.  It falls inside phase 2's LB2
+  (0x00676..0x02ea5), so it was overlaid by the load that just completed;
+  the trace labels it "GPCIPL+0a3b" only because the symbols loaded are
+  GPCIPL's.  Do not be misled by that label -- after a phase-2 load the
+  low-memory symbol names are stale.
+- THE LEAD, and it is only a lead: phase 2's LB7 covers 0x1811a..0x1ac8b in
+  SECTOR 1, which contains 0x18a2d.  The branch went to 0x008a2d.  The PSW
+  low halfword reads 0011 across the transition, and FCMBOOT's own PSA uses
+  X'0066' for "BSR & DSR := SECTOR 6", so 0011 reads as BSR 1 / DSR 1 --
+  which would make the intended target 0x18a2d, squarely inside loaded PASS
+  code, and 0x008a2d an unsectored version of it.  That points at the base
+  sector register not being applied to a branch target.
+  AGAINST that reading: the instructions immediately before resolve at
+  sector-0 addresses (0071bb etc.) with the same 0011 in the PSW, and they
+  are correct there.  So either the field is not BSR/DSR in this display, or
+  it applies to some fetches and not others.  RESOLVE THAT BEFORE ACTING --
+  it is exactly the kind of half-fitting explanation that has cost several
+  wrong turns today.
