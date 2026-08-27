@@ -554,7 +554,7 @@ static void mm_send_cmd(BatchRunner *r, int busID, uint32_t cmd) {
  * booted parks on the next release rather than re-running the mover.
  * Re-executing is possible only because a fresh IPL puts a pristine copy
  * back.  Collapsing the two would make that unreachable. */
-static void firmware_ipl(BatchRunner *r, uint32_t mode) {
+static void firmware_ipl(BatchRunner *r) {
     if (r->opts->fcmPath) return;
     if (!r->age.gpc.iop.servicer) {
         fprintf(stderr, "MODE: IPL, but no mass memory is attached; "
@@ -685,7 +685,42 @@ static bool mode_switch_held(BatchRunner *r) {
      * HALT arrived.  It also meant closing the panel mid-run released the
      * machine 1.5 seconds later, when the bits went stale. */
     bool published = (driven & MODE_ANY) != 0;
-    if (!published) mode = MODE_HALT;
+
+    /* SILENCE HOLDS THE MACHINE, BUT IT IS NOT A SWITCH POSITION.
+     *
+     * This used to substitute MODE_HALT when nothing was being published
+     * and then run the edge tests against it.  That manufactures a
+     * HALT->STBY release out of nothing: lose one datagram, or let a Tk
+     * panel fall behind DISCRETES_STALE_SEC once, and the next poll reads
+     * "HALT" and the poll after that reads the panel's real STBY -- which
+     * is an edge, so the CPU is reset.  It repeats for as long as the
+     * gaps do, and a machine reset every second or two never gets
+     * anywhere: this is why GPCIPL appeared not to run at all, and why
+     * the terminal filled with mode changes nobody made at the panel.
+     *
+     * So edges are now taken ONLY between things the panel actually said.
+     * A gap leaves the last known position standing, and when the panel
+     * comes back saying what it always said, nothing has changed and
+     * nothing happens -- which is the truth. */
+    /* A switch is always SOMEWHERE.  The panel publishes one bit per
+     * datagram, so between "clear the old position" and "set the new
+     * one" there is an instant when no position is asserted at all -- and
+     * polling every 2 ms lands in that instant often.  It is not a
+     * position and must not be treated as a change; reporting it is what
+     * put pairs of MODE lines in the terminal for a switch nobody
+     * touched.  Hold, and wait for the panel to finish speaking. */
+    if (published && !(mode & (MODE_HALT | MODE_STBY | MODE_RUN)))
+        return true;
+
+    if (!published) {
+        if (!g_modeReported) {
+            fprintf(stderr, "MODE: HALT; CPU held in reset "
+                            "(no crew panel heard yet)\n");
+            g_modeReported = true;
+        }
+        /* g_prevMode is deliberately left alone. */
+        return true;
+    }
 
     /* IPL IS NOT A MODE-SWITCH POSITION.  The mode switch is HALT / STBY /
      * RUN; the GPC IPL pushbutton is a SEPARATE momentary control, and it
@@ -695,11 +730,14 @@ static bool mode_switch_held(BatchRunner *r) {
      * and the two are asserted together.  Pressing it in STBY or RUN is
      * not a thing the panel can do to a running machine. */
     if (mode != g_prevMode) {
+        if (getenv("YAGPC_MODETRACE"))
+            fprintf(stderr, "MODETRACE driven=%08x value=%08x mode=%08x prev=%08x\n",
+                    driven, discretes_value(DISCRETES_REG_A), mode, g_prevMode);
         bool iplEdge = (mode & MODE_IPL) && !(g_prevMode & MODE_IPL);
         if (iplEdge && (mode & MODE_HALT)) {
             /* The pushbutton, on its press: pressing it again re-IPLs,
              * and holding it down does not repeat. */
-            firmware_ipl(r, mode);
+            firmware_ipl(r);
         } else if (iplEdge) {
             fprintf(stderr, "MODE: IPL pressed but the mode switch is not "
                             "in HALT; ignored\n");
@@ -711,8 +749,7 @@ static bool mode_switch_held(BatchRunner *r) {
                             "starting at 0x%05x\n",
                     psw_get_nia(&r->age.gpc.cpu.psw));
         } else if (mode & MODE_HALT) {
-            fprintf(stderr, "MODE: HALT; CPU held in reset%s\n",
-                    published ? "" : " (no crew panel heard yet)");
+            fprintf(stderr, "MODE: HALT; CPU held in reset\n");
         } else if (mode & (MODE_RUN | MODE_STBY)) {
             fprintf(stderr, "MODE: %s\n",
                     (mode & MODE_RUN) ? "RUN" : "STBY");

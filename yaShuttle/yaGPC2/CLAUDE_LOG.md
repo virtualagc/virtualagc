@@ -471,3 +471,60 @@ the documents themselves.)
   CRT discrete asserted should reach TB-RUN unaided, and moving to RUN
   should enter OPS 0, with no keyboard entry anywhere in it.  That isolates
   the discrete from the menu path.
+
+### [2026-08-26] Target: [problems.md]
+- HOW THE SSL ACTUALLY LOADS A PHASE, which is the thing to instrument for
+  the "no MMU activity after ITEM 1" report.  FCMINSSL.asm (SYSTEM SOFTWARE
+  LOADER, "CALLED BY THE GPCIPL") does not command the mass memory from the
+  CPU at all.  It names FCMBCMMR "MMU 1/2 READ BCE PROGRAM" and FCMINMMP
+  "MMU 1/2 POSITION TAPE BCE PROGRAM" and FCMINMSC "SSL MSC PROGRAM", and
+  at "START MSC/BCE PROCESSING" it does exactly three processor commands:
+  load the MSC PC, load the BCE PC, then start the MSC.
+      FCMIOPPC EQU X'A201'   BCE/MSC PROGRAM PC LOAD
+      FCMSCBSY EQU X'9204'   MSC BUSY
+- BOTH ARE IMPLEMENTED.  I first concluded A201 was not -- there is no
+  `case 0xa201...` in iop.c's PCO switch -- and that was WRONG: it decodes
+  to devSelect 0x08, the Local Store path, dataSelect 0x002 = region 0,
+  bank 0, word 2, which iop.c's own comment identifies as the MSC's program
+  counter.  The BCE 18 form (X'A201' | 18<<4 = X'A321') decodes to region
+  18, word 2, that BCE's PC.  Checking the switch alone would have produced
+  a confident wrong answer; the decode is what settles it.
+- SO THE FAILURE SPLITS CLEANLY IN TWO, and there is an env var for each:
+  YAGPC_DISPTRACE=1 prints "DISP LOADMSCBUSY" every time the CPU starts the
+  MSC, and YAGPC_MMUTRACE=1 prints every MMU command.  After ITEM 1 EXEC:
+  no LOADMSCBUSY means the SSL never got as far as starting its loader;
+  LOADMSCBUSY but no MMU lines means the MSC/BCE program was started and
+  did not reach the tape, which is ours; both present means the read
+  happened and the fault is later.
+
+### [2026-08-26] Target: [problems.md]
+- TWO CAUSES OF "MODE FLIPPING", one mine in the worst sense and one a
+  real emulator bug.  User reported RUN and STBY alternating in the yaGPC2
+  terminal while the switch sat on STBY, and GPCIPL never running.
+- FIRST: MY OWN TEST PANELS WERE PUBLISHING INTO THE USER'S SESSION.  The
+  discretes bus is machine-wide multicast, and several of my scripts end
+  with long RUN phases -- nomenu.py holds RUN for 300 s, ops0test.py for
+  240 s.  A stray one drives RUN into every emulator on the machine,
+  including one the user is running.  With the strays killed and the stale
+  window waited out, the emulator alone reports ZERO mode changes.  A
+  sender socket is not bound to 6980, so `ss` cannot see a publisher --
+  only `ps` can, and it must be checked BEFORE concluding anything about
+  discretes.  Every test script must be short-lived or explicitly killed.
+- SECOND, AND REAL: SILENCE WAS BEING READ AS A SWITCH POSITION.  run.c
+  substituted MODE_HALT whenever nothing was published and then ran the
+  edge tests against it, so one lost datagram -- or a Tk panel falling
+  behind DISCRETES_STALE_SEC once -- read as HALT, and the panel's return
+  read as a HALT->STBY release, which calls cpu_reset().  Repeatedly.  A
+  machine reset every second or two never gets anywhere, which is exactly
+  "GPCIPL does not run".  Edges are now taken only between positions the
+  panel actually published; a gap leaves the last one standing.  Measured:
+  4 deliberate 2.5 s dropouts, 1 release (was 1 per dropout).
+- ALSO: the no-position instant between "clear the old bit" and "set the
+  new one" was being reported as a mode change, which is where pairs of
+  MODE lines for a switch nobody touched came from.  Now held, not
+  reported.  Same test: 5 MODE lines total, no flapping.
+- I DISMISSED THIS OSCILLATION TWICE as a test-harness artifact, in my own
+  logs, before the user reported it from the GUI.  It was in front of me
+  both times.
+- YAGPC_MODETRACE=1 prints driven/value/mode/prev on every mode change;
+  that is what separated the two causes and is worth keeping.
