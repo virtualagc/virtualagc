@@ -559,6 +559,14 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
             ? registerfile_get_dse(&cpu->regFiles[psw_get_reg_set(&cpu->psw)], (int)df_get(v, 'b'))
             : 0u;
 
+        /* Every address formed with a NONZERO base-register DSE.  The
+         * rule applying it is flagged above as inherited from gpc and
+         * never independently re-verified, so when an operand lands in
+         * the wrong sector this is the first thing to look at. */
+        if (getenv("YAGPC_DSETRACE") && hasDse && dseVal != 0)
+            fprintf(stderr, "DSE nia=%05x pea=%05x b=%u dse=%u\n",
+                    (unsigned)psw_get_nia(&cpu->psw), pea,
+                    (unsigned)df_get(v, 'b'), dseVal);
         if (df_has(v, 'i')) {
             uint32_t idx = df_get(v, 'i');
             if (idx == 0) {

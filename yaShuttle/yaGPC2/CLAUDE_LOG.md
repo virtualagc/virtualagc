@@ -945,3 +945,43 @@ the documents themselves.)
   slots and new PSW, YAGPC_PROTTRACE prints protection violations with the
   NIA.  Those two together turned a "wild branch" into a one-line diagnosis
   and should be the first thing reached for next time.
+
+### [2026-08-27] Target: [problems.md]
+- FIOMUWB2 IS A HAL/S EQUATE, and the user found where.
+  APPLSRC/CVNMMUTI.hal:44:
+      EQUATE EXTERNAL FIOMUWB2 TO CDHV_BLOCKS$(1,1);
+  and HALSTAT.ASC:384169 confirms it:
+      FIOMUWB2 EQUATE LABEL  C O M P O O L  CVN_MM_UTILITY
+      (EQUATED TO: CDHV_BLOCKS  UNIT/BLOCK: CVN_MM_UTILITY) RESERVED
+      (CSECT: #PCVNMMU OFFSET: 000008)  PHASE 2 ADDR: 03032A
+  So it is the address of element (1,1) of a compool array, exported for
+  the assembly side to EXTRN.
+- OUR TOOLCHAIN DOES EMIT IT -- this is NOT a compiler gap.
+  PHASE03.sym.json has `FIOMUWB2 = 0x3032a, code global`, which matches
+  HALSTAT's PHASE 2 ADDR exactly.  The defect is only that the IPL link
+  does not have the defining compool among its inputs, so IPL.map lists
+  FIOMUWB2 as its one undefined symbol and the Z-CON resolves to zero.
+  FIXING THE LINK INPUTS IS THE REAL REPAIR.
+- tools/patch_ssl_zcon.py writes the value the link should have produced,
+  as a stopgap so the rest of the boot can be exercised.  The Z-CON format
+  was derived from the code that consumes it and then CHECKED: halfword 0
+  = 0x8000|(addr&0x7FFF), halfword 1 = addr>>15, and running FCMINSSL's own
+  LH/SLL/LH/SRL/SRDL sequence over 832A/0006 reconstructs 0x0003032A.
+  Before the patch FCMB1ZCN read `8000 0000` -- address zero with the
+  marker bit -- which is exactly the 0x80000000 the failing MVH had in R5.
+- EFFECT: the SSL's move now gets the right SOURCE (MVH trace: src=3032a,
+  was 00000).  It is not yet enough: dest is still 00000 with the
+  destination register's DSE reading 0, so the move still stores into
+  protected low memory and the same five PROTVIOLs occur.  The crash moved
+  from `0xc2d9 at 0x8a2d` to `0xc6c6 at 0x0a3b` -- 0xc6c6 being the SSL's
+  own fill pattern -- so the handler address is unchanged and only what
+  sits there differs.
+- STILL OPEN: why DSE(R3) is 0 at that MVH.  FCMMOVE does
+  `L 3,X'0000'(0)` / `LXAR 3,3` / `IHL 3,X'0003'(0)`, and LXAR's whole
+  purpose is to split an address constant into a register plus a DSE --
+  with TFCMTGTS = 8 in the struct, DSE(R3) should be 8 and the destination
+  0x40000, not 0.  I measured dseX=0 and did NOT determine why; an earlier
+  attempt to make MVH honour that DSE was reverted because the premise was
+  unverified.  Note also YAGPC_DSETRACE shows NO DSE applied at the load
+  itself (nia 072a3), so the load's EA is plainly 0x733f and it should read
+  the 0x00000008 that is there.
