@@ -564,8 +564,32 @@ static void firmware_ipl(BatchRunner *r, uint32_t mode) {
     /* The panel says which unit to IPL from -- register A bits 4 and 5 --
      * and that picks the BUS, MM1 being BCE 18 and MM2 BCE 19.  It is the
      * bus number rather than any local object that identifies the unit,
-     * which is what lets the far end be Don's process or a real box. */
-    int unit = (mode & MODE_SRC_MM2) ? 2 : 1;
+     * which is what lets the far end be Don's process or a real box.
+     *
+     * IPL SOURCE SELECT HAS AN OFF POSITION, and it is not decorative:
+     * Table 2-2 step 14 turns it off after the IPL, to remove the mask and
+     * let the software reach the MMU.  A panel driving those bits with
+     * both clear is therefore saying "no source", and an IPL then has
+     * nowhere to read from -- quietly falling back to MM1 would invent a
+     * selection nobody made.  Bits nobody drives at all are a different
+     * thing and still mean MM1, so a run with no crew panel is unchanged. */
+    /* Read the source bits from the discrete register itself.  `mode` is
+     * masked down to MODE_ANY -- the switch and the pushbutton -- so it
+     * never carries bits 4 and 5, and testing them there always answers
+     * "no": it would refuse every IPL, and before that it had been
+     * silently choosing MM1 for an MM2 selection. */
+    uint32_t srcDriven = 0, srcVal = 0;
+    if (discretes_enabled()) {
+        srcDriven = discretes_driven_mask(DISCRETES_REG_A)
+                    & (MODE_SRC_MM1 | MODE_SRC_MM2);
+        srcVal = discretes_value(DISCRETES_REG_A) & srcDriven;
+    }
+    if (srcDriven && !srcVal) {
+        fprintf(stderr, "MODE: IPL, but IPL SOURCE SELECT is OFF; "
+                        "no mass memory to read from\n");
+        return;
+    }
+    int unit = (srcVal & MODE_SRC_MM2) ? 2 : 1;
     int busID = (unit == 2) ? 19 : 18;
 
     size_t nhw = (size_t)BOOT_ALLOC_BLOCKS * MM_HALFWORDS_PER_BLOCK;

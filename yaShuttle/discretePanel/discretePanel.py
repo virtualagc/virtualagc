@@ -60,7 +60,15 @@ import discretes as D
 MODE_SWITCH = [("HALT", 0), ("STANDBY", 1), ("RUN", 2)]
 HALT_BIT = 0
 IPL_BIT = 3
-IPL_SOURCE = [("MM1", 4), ("MM2", 5)]
+# The IPL SOURCE SELECT switch has THREE positions, not two.  Table 2-2
+# step 3 selects a mass memory before the IPL, and step 14 -- "Mass Memory
+# - IPL Source Select OFF" -- turns it back off afterwards, to remove the
+# mask and let the software reach the MMU.  A two-position selector cannot
+# be turned off, so it could not express step 14 at all.
+#
+# OFF drives neither bit, which is why it is a value no bit ever has.
+IPL_SOURCE = [("MM1", 4), ("OFF", -1), ("MM2", 5)]
+IPL_SOURCE_OFF = -1
 OBSERVED_A = [("MM1 READY", 6), ("MM2 READY", 7)]
 TOGGLES_A = [("IOP terminate A", 12), ("IOP terminate B", 13)]
 TOGGLES_B = [("BFS engage 1", 3), ("BFS engage 2", 4), ("BFS engage 3", 5)]
@@ -248,8 +256,11 @@ class Panel:
         self._send(D.RESET, D.REG_A, D.bit_mask(IPL_BIT))
 
     def _iplSourceChanged(self):
+        # OFF is not a bit, so it selects nothing and both are broken.
         chosen = self.iplSource.get()
         for _, bit in IPL_SOURCE:
+            if bit == IPL_SOURCE_OFF:
+                continue
             self._send(D.SET if bit == chosen else D.RESET,
                        D.REG_A, D.bit_mask(bit))
 
@@ -302,7 +313,8 @@ class Panel:
             # our own republished traffic comes back to us too.
             owned = D.bit_mask(IPL_BIT)
             for _, b in MODE_SWITCH + IPL_SOURCE:
-                owned |= D.bit_mask(b)
+                if b != IPL_SOURCE_OFF:
+                    owned |= D.bit_mask(b)
             for (reg, b) in self.toggles:
                 if reg == D.REG_A:
                     owned |= D.bit_mask(b)
