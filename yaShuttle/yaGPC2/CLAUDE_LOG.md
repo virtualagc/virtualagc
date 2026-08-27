@@ -1015,3 +1015,28 @@ the documents themselves.)
   does, how is FCMMOVE meant to read a context struct that begins at an odd
   halfword?  One of those two must give.  I did NOT resolve it and have
   left the mask in place.
+
+### [2026-08-27] Target: [problems.md]
+- CC CONFIRMS THE LOAD READ ZERO, independently of the register display:
+  `L 3,X'0000'(0)` sets CC 1->0, and a load of 0x00000008 would set CC=1.
+  So the fullword really is being fetched from the wrong place.
+- WHAT THE FULLWORD LOAD IS FOR, which makes the conflict sharp: FCMMOVE's
+  `L 3,X'0000'(0)` deliberately grabs struct offsets 0 AND 1 together --
+  TFCMTGTA (address) and TFCMTGTS (sector) -- because that pair IS the
+  address-constant format LXAR then splits into a register plus a DSE.  So
+  the load MUST read the struct's own first two halfwords, wherever the
+  struct sits, and FCMCTXT2 sits at an odd halfword by construction.
+- BUT THE MASK CANNOT SIMPLY GO.  Removing it in both places, and then in
+  the data path alone, both stop the boot EARLIER: only 55 blocks read,
+  phase 2 never loaded.  With the data mask removed, PROTVIOL #5 moves from
+  NIA=072ad (FCMMOVE's MVH) to NIA=0074E.  So something at 0x074E either
+  depends on the alignment or is computing a base one halfword off with the
+  mask hiding it -- two defects cancelling.  test_cpu_instr_exec cannot
+  arbitrate: 111180/111358 with and without, identical.
+- HANDOFF: the next person should start at NIA=0x074E with the data-path
+  mask removed and find why that access needs aligning.  If it turns out to
+  be a genuine odd-base access that the real machine aligns, then the POO
+  question stands and FCMMOVE's struct-2 path must work some other way.  If
+  it turns out to be an address computed one halfword short, fixing THAT
+  may let the mask go and FCMMOVE work.  Do not remove the mask without
+  resolving 0x074E first.
