@@ -910,3 +910,38 @@ the documents themselves.)
   earlier decode of the load-block descriptors as `sector << 16` was wrong.
   Under <<15, phase 2's LB7 (addr 0x811a, sector 1, len 11122) covers
   0x811a..0xac8b, which is why 0x8a2d had real data in it.
+
+### [2026-08-27] Target: [problems.md]
+- ROOT CAUSE OF THE POST-LOAD DEATH, and it is a LINK GAP, not an emulator
+  bug.  IPL.map ends with:
+      UNDEFINED SYMBOLS
+        FIOMUWB2          referenced by: FCMINSSL.obj(FCMINSSL)
+  FCMINSSL declares its temp-buffer address as a Z-CON over that symbol:
+      FCMBFZCN DS 0F                 SOURCE ADDRESSES Z-CON ARRAY
+      FCMB1ZCN DC Z(,FIOMUWB2,0)     BUFFER 1 ADDRESS Z-CON
+  Undefined resolves to zero, so the buffer address is 0.  The chain from
+  there is exact and fully traced:
+      FCMLBRTB elem#1 = 0, elem#2 = 0 + FCMBF1CT(8192) = 0x2000
+        (watchpoint: only ONE write into 0x7334..0x7337, 0x7337 <- 0x2000)
+      -> FCMMOVE gets src = 0, dest = 0, count = 4096
+        (MVH trace: "x=3 dest=00000 count=4096 src=00000"; the three
+         PRECEDING moves are all sane -- 08180/1480, 07c00/768, 00106/52)
+      -> MVH stores into protected low memory
+        (PROTVIOL #5 at NIA=072ad)
+      -> trap through PSA 0x0048/0x004c, newPSW=0a3b0011
+      -> 0x0a3b is inside phase 2's LB2 (0x676..0x2ea5), which the load
+         just OVERLAID, so the handler is now PASS data
+      -> it executes `BC 7,X'8a2d'` into the error-env stack and dies on
+         0xc2d9.
+  FIOMUWB2 is "16K MM I/O BUFFER", referenced by FCMINSSL and FIOMM128 and
+  DEFINED IN NEITHER -- nor anywhere else in SSSRC.  Finding where the real
+  build gets it is the next task.
+- TWO SPECULATIVE FIXES TRIED AND REVERTED on the way, neither kept:
+  making MVH's destination honour the destination register's DSE (LXAR sets
+  one, so it looked compelling) -- measured dse=0 at the failing move, so
+  the premise was false; and reading the fault as a missing 0xc2d9 opcode
+  -- it is data, legitimately written by the SSL's own move loop.
+- USEFUL SWITCHES FOUND: YAGPC_INTTRACE prints every interrupt with its PSA
+  slots and new PSW, YAGPC_PROTTRACE prints protection violations with the
+  NIA.  Those two together turned a "wild branch" into a one-line diagnosis
+  and should be the first thing reached for next time.
