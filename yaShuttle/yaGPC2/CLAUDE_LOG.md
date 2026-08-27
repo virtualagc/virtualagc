@@ -855,3 +855,50 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   phases place at most one block there.  PHASE02.lib and the CON80 cards
   are the inputs; #PFCMGPT gives a primary-source specification of what
   right looks like for phases 3..18 to calibrate against.
+
+### [2026-08-27] Target: [problems.md]
+- WENT LOOKING FOR THE PHASE-2 DEFICIENCY.  FOUND REAL FACTS, AND ALSO
+  UNDERCUT MY OWN PREVIOUS CONCLUSION.  Recording both.
+- mmbstamp IS VALIDATED IN DETAIL, not just by count.  Our generated phase 3
+  descriptors against the SSW dump's #PFCMGPT: SAME COUNT (10), SAME ORDER,
+  AND IDENTICAL FLAG HALFWORDS throughout -- 8600 8600 0600 0600 8630 8630
+  0650 0660 0670 8690, i.e. sectors 0,0,0,0,3,3,5,6,7,9 in both.  Only
+  addresses and three lengths differ, which is the known OI340600 link
+  layout difference.  So the partitioning rules reproduce the real MMB and
+  are NOT the defect.
+- OUR PHASE 2'S UPPER MEMORY IS REAL CONTENT, NOT AN ARTIFACT.  PHASE02.lib
+  genuinely holds 8 extents above 128K (sectors 8, 9, 10), so the link put
+  them there; mmbstamp only partitions what it is given.  PHASE02's
+  sections above 128K are HAL/S runtime (ACOS DACOS EXP LOG SQRT DMOD DSQRT
+  ITOC GTBYTE STBYTE ...), application CSECTs ($0DCICYC $0VKISAC ...), the
+  annunciator compools, and PCH02TXT patch areas.
+- AND SECTOR 9 IS EXACTLY RIGHT.  Against the SSW dump's own CSECT index:
+      #PCDTANN  real 048010 645 hw   ours 048010 645
+      #PCDZANN  real 048298  68      ours 048298  68
+      #PCDKANN  real 0482dc 892      ours 0482dc 892
+      #PCDSANN  real 048658 561      ours 048658 561
+  Identical addresses AND sizes.  Sector 8 differs (ours is compressed
+  lower because our build has fewer CSECTs there -- e.g. ACOS real 0470fc
+  vs ours 041aa4, $0DCICYC real 041d96 vs ours 0400bc).
+- WHICH UNDERCUTS THE "AT MOST ONE HIMEM LB, ALWAYS LAST" INVARIANT for
+  phase 2.  Phase 3's real HIMEM block starts at 04888c -- IMMEDIATELY
+  AFTER #PCDSANN ends at 048889 -- and NO phase in 3..18 covers
+  048010..048889.  So the annunciators must be loaded by PHASE 2, meaning
+  the REAL phase 2 also carried sector-9 upper-memory content and cannot
+  have had only one HIMEM load block.
+- SO MY PREVIOUS "FLIGHT SOFTWARE EXONERATED" ENTRY IS PREMATURE.  The
+  invariant I inferred holds for phases 3..18, which is all #PFCMGPT
+  contains; phase 2 is the big IPL load, is different in kind, and is NOT
+  in that table, so it was never actually checked.  I generalised from the
+  sample I could see to the one case that matters.
+- WHAT IS STILL SOLID: the emulator is correct (POO Figure 2-8, the ISPB
+  low-bit rule, MEMTST14's dependence on the two agreeing); FCMCTXT2 is at
+  an odd address in the real build; mmbstamp partitions faithfully; and our
+  phase 2's sector-9 placement matches the original exactly.
+- WHAT IS OPEN: how the real phase 2 loaded sector 8/9 upper memory without
+  FCMMOVE meeting the odd struct.  Possibilities not yet tested -- the real
+  phase 2 had a different HIMEM block COUNT despite identical content
+  (sector 8's layout differs, so its block partition would too); or the SSL
+  reaches upper memory by some path other than the in-loop FCMMOVE at IPL;
+  or FCMNEXTS is not zero-based at the start of a phase load, which I
+  verified for OUR run but never for a real one.
