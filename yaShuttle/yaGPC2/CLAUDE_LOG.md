@@ -1122,3 +1122,26 @@ the documents themselves.)
 - WHICH SETTLES THE EARLIER CLAIM PROPERLY.  "The boot continued past them"
   was weak evidence and the user was right to push on it; this is the
   strong version.
+
+### [2026-08-27] Target: [problems.md]
+- HYPOTHESIS TESTED: is the MMU load happening BEFORE a self test that
+  should precede it?  Table 2-2 step 11 does make STP a precondition --
+  "STP executes one cycle; if successful, GPCIPL gives control to SSL" --
+  so it was worth checking.  IT IS NOT WHAT IS HAPPENING.  Ordering,
+  measured:
+      step  6,521,569   STP cycle ends, STPCYCNT 0 -> 1 (STH 7,X'3ba0'
+                        at NIA=00835, just past STPEND)
+      step  6,522,288   REALTIME (0x36c9) set 0 -> ffff (SHW at NIA=01cf8)
+      step 22,762,631   FCMMOVE's failing MVH
+  So a full STP cycle completes, and the machine transitions to REALTIME,
+  about 16 million instructions before anything goes wrong.
+- STPCYCNT IS A COUNT, NOT A VERDICT.  The cycle-end code increments it
+  unconditionally (LH 7,X'3ba0' / AHI 7,1 / STH 7,X'3ba0').  What gates the
+  path is `TH X'36c9'` -- REALTIME -- tested at 0x824 and again at 0x83d.
+- AND THE 1m25s IS A DURATION, NOT A WAIT.  Table 2-2 gives it as the time
+  from STBY to RUN TALKBACK for a default load, i.e. how long the whole
+  load takes, not a delay before starting one.  Our run reaches the phase-2
+  read at 18.6 s of emulated time and dies there, so it never approaches
+  85 s; there is no evidence of racing ahead of a timed wait.
+- (Also of note from the same trace: STP issues PCO 0x8804 -- LOAD GO/NO-GO
+  TIMER -- at cycle end, which our IOP does implement.)
