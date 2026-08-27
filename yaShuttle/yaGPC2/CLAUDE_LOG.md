@@ -1459,3 +1459,32 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - TRAP REPEATED, THIRD TIME TODAY: `pkill -f 'electron ... meds'` MATCHED
   ITS OWN COMMAND LINE and killed the shell (exit 144).  Use a bracket
   pattern -- pgrep -f '[m]ain.js meds' -- as the handoff already says.
+
+### [2026-08-27] Target: [problems.md]
+- USER CONFIRMED THE MEDS RESULT WITH HIS OWN EYES: "I just saw a clock."
+  That matches the wire counts exactly (TIME_FILL + POLL arriving, no
+  DISPLAY_FILL or FORMAT_FILL), so the measurement stands despite the
+  stray yaGPC2 processes that were live on the bus during it.  Five of
+  those were leftovers of mine from earlier runs -- kill them before
+  measuring, and use BRACKET patterns (pgrep -f '[m]ain.js meds'), since
+  `pkill -f 'electron ... meds'` matched its own command line and killed
+  the shell (exit 144) for the third time today.
+- THE STALL IS A DEADLOCK, and the traces pin it exactly.  In the SSL era
+  (t > 18 s) there are exactly TWO MSC starts and TWO BCE starts:
+      MSC0  PC<-07374  (FCMINMSC)  at 18.76 s and 18.93 s
+      BCE18 PC<-07362  (FCMINBCE)  at 18.76 s
+      BCE18 PC<-0736c             at 18.93 s
+  and NO THIRD of either.  #SST stores a good status (bst=00000000) to
+  0x0731a ten times, so the BCE's reporting side works.
+- SO: FCMMOVE sits in its "WAIT FOR ALTERN. BUF LOAD TO FINISH" loop
+  (NIA=072b1, R05=FCMMONE) waiting for a buffer load that requires another
+  BCE cycle; the BCE has parked on the #WAT that ended its second chain;
+  and the only thing that can restart it is the CPU, which is inside that
+  wait loop.  Neither side can move.
+- WHICH NARROWS THE QUESTION TO THE CHAIN'S TERMINATION.  FCMINSSL writes
+  #WAT instead of `#BU <other buffer>` only when `CHI R7,1` says this is
+  the LAST load block of the batch.  The dumped FCMIBLK2 ended in #WAT.  If
+  our R7 reaches 1 earlier than it should, the chain stops while FCMMOVE
+  still expects an alternate-buffer load.  THAT is the next thing to
+  instrument -- R7 at the point the terminator is chosen -- not the mask,
+  not the tape, not the phase build.
