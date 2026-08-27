@@ -88,7 +88,15 @@ static void exec_SSC(IOP *t, DInstr *v) {
 }
 
 static void exec_SST(IOP *t, DInstr *v) {
-    uint32_t ea = iop_bce_ea(t, df_get(v, 'd'), df_get(v, 'm') != 0) & ~1u;
+    uint32_t raw = iop_bce_ea(t, df_get(v, 'd'), df_get(v, 'm') != 0);
+    uint32_t ea = raw & ~1u;
+    if (getenv("YAGPC_SSTTRACE")) {
+        static int n = 0;
+        if (n++ < 10)
+            fprintf(stderr, "SST #%d bce=%u raw=%05x ea=%05x bst=%08x\n",
+                    n, (unsigned)t->curPE, raw, ea,
+                    (unsigned)iopls_getBST(&t->ls));
+    }
     iop_s_eaf(t, ea, iopls_getBST(&t->ls));
     iop_incr_nia(t, 1);
 }

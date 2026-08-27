@@ -1403,3 +1403,31 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   "the patch did not apply" until checking that the binary was older than
   the header.  Use `make test`, and compare timestamps before believing an
   unchanged fixture count.
+
+### [2026-08-27] Target: [problems.md]
+- WITH THE AP-101S FIXES IN, THE BOOT REACHES A COMPLETELY NEW PLACE, and
+  MEDS would show nothing yet, so it was not worth setting up.  Headless,
+  at 900,000,000 steps:
+      mmu1: read  55 block(s) from 2/4/3/0    <- phase 10, GPCIPL
+      mmu1: read 225 block(s) from 3/4/0/0    <- PHASE 2, THE WHOLE OF SSW
+      no further reads: phases 13 and 3 never load
+      deu: commands 0, ipled false            <- no display traffic at all
+  So SSW IS READ OFF THE TAPE IN FULL, but control never leaves the SSL.
+- WHERE IT STALLS, from --verbose: NIA=072b1, inside FCMMOVE, at the
+  `DO UNTIL=(Z) / L R5,FCMINSST` loop the source labels "WAIT FOR ALTERN.
+  BUF LOAD TO FINISH".  R05=ffffffff, which is FCMMONE -- the value the
+  CPU itself writes to reset that status word before waiting for the BCE
+  to update it.
+- AND THE BCE IS DOING ITS PART.  New YAGPC_SSTTRACE shows #SST executing
+  ten times on BCE 18, storing to raw=0731a ea=0731a (FCMINSST, and even,
+  so the mask is not implicated here) with bst=00000000 -- a good status.
+  So the handshake's WRITE side works; what fails is that the CPU resets
+  FCMINSST to -1 and then waits for a BCE cycle that has already finished
+  and parked on its #WAT.  This is the TFCMSEQF two-buffer arm: FCMMOVE
+  moved from the primary buffer and is waiting for the ALTERNATE buffer's
+  load, which the SSL never starts.
+- NEXT: find why the alternate-buffer load is not commanded.  FCMINSSL
+  swaps FCMRSADD between FCMIBLK1 and FCMIBLK2 and reloads the BCE PC per
+  program (measured earlier: PC<-07362 and PC<-0736c), so the question is
+  whether a third start is expected and missing.  YAGPC_SSTTRACE plus
+  YAGPC_PCTRACE together should show it.
