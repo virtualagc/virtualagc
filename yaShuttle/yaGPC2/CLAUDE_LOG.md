@@ -398,3 +398,47 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   Y-cons -- 72F2 7306, one halfword each -- while FCMBCEBT holds them as
   fullwords.  Same addresses, two widths, chosen by which processor reads
   them: the CPU indexes the Y table, the BCE fetches the A table.
+
+### [2026-08-27] Target: [problems.md]
+- WHAT THE RECEIVE SEQUENCE AT FCMIBLK1 DOES WHEN IT ENDS: IT BRANCHES.  It
+  never falls through into the zeros after it.  Asked, and answered from
+  both the source and a live dump at the moment #BU@ fires:
+      FCMIBLK1 @072f2  f200 051e  f300 0157  c250 5022  f000 7306
+      FCMIBLK2 @07306  f200 0676  f300 0000  f300 27ff  f200 2e76
+                       f300 002f  c4a0 5008  0800 0000
+  decoding as
+      #LBR 051e / #RDLI 344 / #DLYI 592 / #SST +22 / #BU FCMIBLK2
+      #LBR 0676 / #RDLI 1 / #RDLI 10240 / #LBR 2e76 / #RDLI 48
+        / #DLYI 1184 / #SST +08 / #WAT
+- THE TWO TERMINATORS ARE BOTH IN THE SOURCE.  FCMINSSL.asm:752
+  `OHI R5,FCMMBU` (FCMMBU EQU X'F000', UNCONDITIONAL BRANCH) OR'd with the
+  NEXT sequence address ends a sequence that has a successor; :727 and :760
+  `LHI R4,FCMMWAT` (X'0800') end the LAST one.  So FCMIBLK1 and FCMIBLK2
+  chain to each other, alternately, until the final load block waits.  The
+  unused tail of each DS 10F is never executed.
+- AND THE PACKING EXPLAINS A SOURCE ODDITY.  `c250 5022` is TWO
+  single-halfword instructions in one fullword -- #DLYI (11000iiiiiiiiiii,
+  FCMMDLYI EQU X'C000') and #SST (0101mddddddddddd, FCMMSST EQU X'5000') --
+  which is why FCMINSSL writes the fullword with `ST R4,0(R2)` and then
+  patches only the second halfword with `STH R4,1(R2)`.  I had read that
+  STH as suspicious; it is deliberate.
+- CORROBORATION THAT THIS IS REAL AND NOT A DECODE ARTIFACT: the #LBR
+  operands are 0x051E and 0x0676, phase 2's LB1 and LB2 START ADDRESSES,
+  and FCMIBLK2 splits LB2 (0x0676..0x2ea5) as 1 + 10240 words, reloads base
+  to 0x2e76, then 48 more -- a block-boundary split.  0x051E is the same
+  address the corrupting FCMMOVE stopped one halfword below.
+- The #DLYI counts are the FCMBOOT mechanism again: delay over a block's
+  unread tail plus half the inter-block gap, per FCMSSLBS's own
+  `LHI R4,639  GET MM BLOCK SIZE MINUS ONE PLUS 128`.
+- SO #BU@ IS A ONE-TIME ENTRY POINT, NOT PART OF THE LOOP.  It fires once
+  to get from the static FCMBCMMR program into the dynamic chain; the chain
+  then perpetuates itself through PLAIN #BU between the two buffers.  That
+  is why exactly ONE #BU@ executes in a whole boot despite 21 load blocks
+  and 209 blocks read -- a fact that looked odd until the chain was dumped.
+- OPEN, AND FLAGGED RATHER THAN GUESSED: how the remaining load blocks are
+  driven after that first #WAT -- whether the CPU reloads the BCE PC per
+  group (FCMIOPPC EQU X'A201', BCE 18 form X'A321') or rewrites the buffers
+  under a still-running chain.  The #WAT we captured is the terminator AS
+  OF THAT INSTANT, since FCMINSSL writes #WAT only when R7 = 1, so a given
+  buffer's last word changes as buffers are rebuilt.  Countable with
+  YAGPC_DISPTRACE (LOADMSCBUSY) against the 8 mass-memory commands.
