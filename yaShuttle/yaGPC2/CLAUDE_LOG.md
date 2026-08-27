@@ -956,3 +956,51 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   (deck_standalone? bank boundary? a cap measured wrongly?), fix it, and
   confirm phase 2 comes out with an odd block count and the boot proceeds
   past FCMMOVE.
+
+### [2026-08-27] Target: [problems.md]
+- THE MERGE STEP IS NOT THE DEFECT EITHER -- third wrong theory in this
+  thread, recorded as such.  Instrumenting derive_load_blocks' five merge
+  conditions for phase 2 shows all three pairs rejected by the SAME one,
+  `not (fill and fill.starts_block(u[0]))`:
+      c=02ea6..03330 u=03332   adj=T prot=T bank=T notstart=F cap=T
+      c=10000..101ac u=101ae   adj=T prot=T bank=T notstart=F cap=T
+      c=1ea76..1f05c u=1f05e   adj=T prot=T bank=T notstart=F cap=T
+  The blocks that refuse to merge backwards are DECK-PINNED PATCH AREAS
+  from PCH02TXT -- #T020000 (2 hw), $T022001 (10 hw), #T023002 (1536 hw) --
+  which is exactly the deck_standalone case mmbstamp documents.  Legitimate.
+  (#10/#11 is the 16384 cap: 6704+12140 = 18844.  Also legitimate.)
+- AND THE REAL BUILD HAS THE SAME PATCH AREAS, several at IDENTICAL
+  addresses and sizes, from the SSW dump's own csect index:
+      #T023002  real 01f05e 1536   ours 01f05e 1536
+      #Y029001  real 048000   16   ours 048000   16
+      $Y131000  real 050000   14   ours 050000   14
+      #T020000  real 004c6c    2   ours 03332     2
+      $T022001  real 0108b2   10   ours 101ae    10
+  So mmbstamp is right, the merges are right, the patch areas are right.
+- WHAT ACTUALLY DIFFERS is what I noticed two rounds ago and skated past:
+  OUR PHASE 2'S UPPER-MEMORY CONTENT IS FAR SMALLER THAN THE REAL BUILD'S.
+  The dump holds ~150 CSECTs above 128K; our PHASE02 packs 62 sections into
+  four sector-8 extents starting at 040000, while the real build has
+  $0AIBGPC, $0AIESIP, $0ARAGPC, $0ARBIDL, $0ARCGPC, $0ASMAUX, $0ASNGME,
+  $0DMCSUP, $0DMIMCD, $0DMTERR, $0DUPNSP and more up there that we do not
+  place there at all (e.g. ACOS real 0470fc vs ours 041aa4, $0DCICYC real
+  041d96 vs ours 0400bc).  Different content -> different partition ->
+  different block count -> DIFFERENT PARITY.
+- SO THE PARITY DISCREPANCY TRACES TO THE INCOMPLETENESS OF OUR OI340600
+  PHASE COMPOSITION, which is the already-tracked work in
+  HANDOFF-OI340600 -- not to a bug in a tool that I can fix here.  Sector 9
+  is exactly right, which is why it looked so close; sector 8 is not.
+- STANDING SUMMARY OF THE WHOLE THREAD, everything now sourced:
+    * the emulator's fullword alignment mask is CORRECT -- POO Figure 2-8,
+      the POO's ISPB low-bit rule, and MEMTST14's dependence on the two
+      agreeing.
+    * FCMCTXT2 is at an ODD address in the real build (DC Y(FCMCTXT2) =
+      0383 in the original listing), and FCMMOVE reads it with a fullword
+      L (1B00), so the odd struct MUST NOT be used for an above-128K move.
+    * FCMINSSL is safe because FCMNEXTS is zeroed ONCE before a loop over
+      THREE phases, and there are exactly TWO above-128K load blocks in the
+      system; both land on the even struct iff phase 2's block count is
+      ODD.
+    * ours is 24, even, because our phase 2 is missing upper-memory content
+      the real one has.  THE FLIGHT SOFTWARE, mmbstamp, lnk101 AND THE
+      EMULATOR ARE ALL CORRECT.
