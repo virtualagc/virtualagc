@@ -1124,3 +1124,20 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   stop forwarding it).  Everything else is ready -- 0 unresolved sources,
   all 23 modules compiling, and #PFCMGPT in the DASS dumps as a
   primary-source oracle to check the result against.
+- BLOCK CONFIRMED ACROSS EVERY CHECKOUT ON THE MACHINE.  HALSFC-PASS1 in
+  ~/donschmidt/nsts-sdl-dps (2026-07-21), ~/donschmidt2/nsts-sdl-dps
+  (2026-04-16) and /mnt/STORAGE0/.../nsts-sdl-dps (2026-07-21) ALL reject
+  --sdfi; nsts-sdl-dps-keep has no HALSFC build at all.  So no built
+  HALSFC anywhere provides the switch halsc and con80build depend on.
+- AND THERE IS NO WAY AROUND IT IN THIS halsc, which is also why the shim
+  backfired.  halsc line 257: `[[ -z "$SDFI_DIR" ]] && SDFI_DIR="$SDF_DIR"`
+  -- if --sdfi is absent it FALLS BACK to the --sdf directory, which
+  con80build passes as the per-compile OUTPUT dir, and then line 259 adds
+  --sdfi from that.  Stripping the switch therefore did not remove it, it
+  REPOINTED TEMPLATE RESOLUTION AT AN EMPTY OUTPUT DIRECTORY -- hence 119
+  members losing objects instead of 5.  con80build has no option to
+  disable SDF either.
+- SO THE ASK FOR DON IS ONE LINE: HALSFC-PASS1 must accept --sdfi (or
+  halsc must stop deriving and forwarding it).  Everything on our side is
+  ready -- 0 unresolved sources, 113/113 ASM, 89/89 HAL including all 23
+  missing modules, and #PFCMGPT in the DASS dumps to check the result.
