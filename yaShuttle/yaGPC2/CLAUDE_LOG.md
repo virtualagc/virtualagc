@@ -1145,3 +1145,38 @@ the documents themselves.)
   85 s; there is no evidence of racing ahead of a timed wait.
 - (Also of note from the same trace: STP issues PCO 0x8804 -- LOAD GO/NO-GO
   TIMER -- at cycle end, which our IOP does implement.)
+
+### [2026-08-27] Target: [problems.md]
+- (a) RULED OUT: the real build CANNOT place the context structs any
+  differently.  Computing the work area from FCMINSSL's own declarations:
+      FCMSVR0..7 8F=16   FCMIBLK1 +10F=20   FCMIBLK2 +10F=20
+      INSST/IZCON/MBASE 2+2+2   FCMRSADD 2Y + 3F + 3 pairs of A
+      SYSID/CLRSW/ECNT/CKERR 4   FCMLBRTB 2F=4
+  puts FCMCTXT1 at offset 86 and FCMCTXT2 at offset 93 from FCMDATA.  With
+  FCMDATA fullword-aligned (DS 0F, so always even), FCMCTXT2 IS AT AN ODD
+  HALFWORD IN ANY BUILD.  Our link's 0x7338 / 0x733F match exactly.
+- SO THE FULLWORD ALIGNMENT MASK IS THE PROXIMATE CAUSE, confirmed by the
+  fault address now that PROTTRACE prints it:
+      WITH the mask:    PROTVIOL #5 NIA=072ad addr=0051d
+      WITHOUT:          PROTVIOL #5 NIA=0074e addr=000b1
+  0x051D is one halfword below 0x051E, where phase 2's LB1 begins -- so
+  FCMMOVE's bad move had been WRITING OVER THE FRESHLY LOADED PASS IMAGE
+  from 0x0FFF down to 0x051E before faulting just under it.  That is the
+  real damage, not just a stalled boot.
+- BUT REMOVING THE MASK STILL BREAKS THE MEMORY TEST, at 0xB1 -- "Counter
+  1 & 2 high halfword".  Those ARE in ipl_fill's carve-out, so they start
+  unprotected; GPCIPL re-protects them later, and violations #3/#4 at
+  CLCK2000+0xA are the CLOCK test deliberately probing that they are.  So
+  this is not over-protection, and the earlier over-protection worry in
+  cpu.c does not explain it.
+- WHICH LEAVES A GENUINE CONFLICT, and it needs the POO, not more
+  measurement: FCMMOVE requires `L rX,X'0000'(b)` NOT to align, and the
+  memory test appears to require that it does.  Both use the identical SRS
+  form, so no rule keyed on the instruction can separate them.  What could:
+  the mask applying to the DISPLACEMENT term only rather than to base+disp,
+  which would leave an odd BASE intact while still aligning a scaled
+  displacement.  UNTESTED -- I did not want to try a third variant on
+  plausibility.
+- PROTTRACE now prints the faulting ADDRESS (cpu->lastProtFaultAddr).  The
+  NIA alone could not distinguish an over-protected map from a genuine
+  fault, and it is what showed the move was destroying the loaded image.

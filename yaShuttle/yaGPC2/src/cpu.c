@@ -411,8 +411,9 @@ void cpu_signal_protection_violation(CPU *cpu) {
     if (getenv("YAGPC_PROTTRACE")) {
         static long n = 0;
         if (++n <= 20 || n % 1000 == 0)
-            fprintf(stderr, "PROTVIOL #%ld at NIA=%05x\n", n,
-                    (unsigned)psw_get_nia(&cpu->psw));
+            fprintf(stderr, "PROTVIOL #%ld at NIA=%05x addr=%05x\n", n,
+                    (unsigned)psw_get_nia(&cpu->psw),
+                    (unsigned)cpu->lastProtFaultAddr);
     }
     cpu->intPending.programCheck = true;
     cpu->intCode = 0x0007;
@@ -875,6 +876,7 @@ void cpu_shadow_iu_store(CPU *cpu, uint32_t addr) {
 bool cpu_store_hw(CPU *cpu, uint32_t addr, uint32_t value) {
     if (!cpu->diagIuStoreDetect) cpu_shadow_iu_store(cpu, addr);
     if (membus_set16(cpu->ram, addr, value, !cpu->storeProtectOverride)) return true;
+    cpu->lastProtFaultAddr = addr;
     cpu_signal_protection_violation(cpu);
     return false;
 }

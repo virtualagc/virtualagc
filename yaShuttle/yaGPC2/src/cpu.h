@@ -172,6 +172,10 @@ typedef struct CPU {
      * in a larger simulator (see yaGpcIntegration.h) needs this whether
      * or not a debugger is attached. */
     double elapsedTimeUs;
+    /* Address of the most recent store-protect violation, for
+     * YAGPC_PROTTRACE: the NIA alone cannot tell an over-protected
+     * map from a genuine fault. */
+    uint32_t lastProtFaultAddr;
 
     /* DATE()/CLOCKTIME() wall-clock anchor (USA003090 8.2 items 17/18;
      * see halucp.c's own SVC #22 TYPE=1/2 handling) -- a Unix epoch
