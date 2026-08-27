@@ -1074,3 +1074,27 @@ the documents themselves.)
   mask.
 - YAGPC_ALIGNTRACE added: prints every address the fullword alignment mask
   actually changes.  185 lines for a whole boot, so it is cheap to leave on.
+
+### [2026-08-27] Target: [problems.md]
+- DOES yaGPC2 HANDLE THE SELF-TEST'S DELIBERATE STORE-PROTECT CHECKS?  YES,
+  and it is worth writing down because it was asked and is now measured.
+  All five violations in a boot dispatch identically and correctly:
+      old PSW -> 0x0048   FCMBPCO, program check OLD
+      new PSW <- 0x004C   FCMBPCN, program check NEW
+      newPSW  =  0a3b0011
+  and 0x0a3b resolves to PCH in BILDNEW5 -- GPCIPL's own program check
+  handler.  The store is suppressed as well (exec_MVH aborts on
+  !cpu_store_hw, the POO's forced ENDOP), and the CC/carry side effects
+  were fixed earlier (problems.md 8.2).
+- THE FOUR DELIBERATE ONES ALL RECOVER.  They sit at SVC076, SVC194 and
+  CLCK2000+0xA -- self-test routines -- and the boot continues past every
+  one of them.  So the interrupt path is exercised, repeatedly, and works.
+- THE FIFTH IS FATAL FOR AN UNRELATED REASON: by the time it happens, phase
+  2's LB2 (0x676..0x2ea5) has OVERLAID PCH itself, so the handler is gone.
+  The trap is not mishandled; the trap should not be occurring, and its
+  handler no longer exists.  Both of those follow from the FCMMOVE
+  odd-struct problem, not from interrupt handling.
+- WORTH NOTING FOR LATER: MLIB80/MOVEPSA.asm exists, so the real flow
+  presumably installs a new PSA once PASS is in memory -- FCMPSA has
+  PC=FPMIHPGM rather than GPCIPL's PCH.  A run that got further would stop
+  depending on the overlaid vector.
