@@ -355,3 +355,46 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   which they differ.  A comparison that stops short of the divergence
   cannot see it, which is a sharper version of the section-8 lesson than
   "two emulators agreeing proves nothing about their shared input".
+
+### [2026-08-27] Target: [problems.md]
+- #BU@ SEMANTICS, STATED EXACTLY (asked, and the loose earlier phrasing
+  deserved it): compute a + 2*BCE#, fetch the FULLWORD there, mask to 18
+  bits, load it into the BCE's PROGRAM COUNTER.  A branch, no increment.
+  For BCE 18: 0x72A8 + 36 = 0x72CC, fullword 0x000072F2, PC = 0x72F2 =
+  FCMIBLK1, where the BCE then runs the receive sequence the SSL built.
+  `DC A(x)` assembles to a FULLWORD -- the original listing shows
+  `00310 00000336` against `00314 0336` for the Y-con -- so the entry is
+  0000 72F2 as two halfwords, and that leading 0000 is exactly what gpc
+  executes and cannot decode when it branches TO the entry.
+- AND CHECKING THAT TURNED UP AN INCONSISTENCY IN THE @ FAMILY, ours:
+      #BU@    fetches a FULLWORD  -> branch target
+      #MIN@   fetches a HALFWORD  -> count
+      #MOUT@  fetches a HALFWORD  -> count
+      #LBR@   fetches NOTHING     -> BASE = the table entry's own address
+- THE BIAS SAYS THEY ARE ALL FULLWORD TABLES.  `EQU *-36` is -2*18, i.e.
+  TWO HALFWORDS -- ONE FULLWORD -- PER BCE, and FCMBCEBT has exactly two
+  entries, buses 18 and 19.  Every one of these tables is an array of A()
+  fullwords indexed by 2*BCE#.
+- AND FCMBCEST IS THE SAME ADDRESS AS FCMBCEBT.  Original listing:
+      1169: 00002EC  FCMBCEST EQU *-36   READ STATUS BASE REGISTER TABLE
+      1172: 00002EC  FCMBCEBT EQU *-36   MMU 1/2 BRANCH TABLE
+  Both 0x2EC, SHARING the same two DC A(FCMIBLK1) entries, and FCMINBCE.asm
+  uses both -- `#LBR@ FCMBCEST` at line 67 and `#BU@ FCMBCEBT` at line 82.
+  A table labelled "BASE REGISTER TABLE" holding address constants means
+  #LBR@ should load BASE FROM the fullword (0x72F2), not from the entry's
+  address (0x72CC).  Ours is 38 halfwords off.
+- WHY IT HAS NOT BITTEN: the SSL's dynamically built receive sequence sets
+  its own base with a plain #LBR (the FCMMLBR EQU X'F200' skeleton OR'd
+  with a computed load-block address), so FCMINBCE's initial #LBR@ value is
+  overwritten before any data uses it.  Luck, not correctness.
+- NOT CHANGED, DELIBERATELY.  Three changes have been reverted this session
+  for being made on plausibility, and #LBR@'s fixtures currently PASS --
+  weak evidence in a suite already proven to encode a third behaviour for
+  #BU@, but not nothing.  What would settle it: find a #LBR@ site whose
+  table entries are known values and check which reading the program needs,
+  the way FIOBBM settled #BU@.  FIOMFBCE/FIOHFBCE/BTBCEGEN are full of @
+  forms and are the place to look.
+- ALSO WORTH NOTING: FCMRCSEQ at 0x314 holds the SAME two addresses as
+  Y-cons -- 72F2 7306, one halfword each -- while FCMBCEBT holds them as
+  fullwords.  Same addresses, two widths, chosen by which processor reads
+  them: the CPU indexes the Y table, the BCE fetches the A table.
