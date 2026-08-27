@@ -696,3 +696,30 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   or (c) FCMINSSL has a latent defect real load profiles never exercised.
   (a) -- that the struct is even in the real build -- is DISPROVED by the
   original listing's own DC Y(FCMCTXT2) = 0383.
+
+### [2026-08-27] Target: [problems.md]
+- IS THE MISALIGNED READ ACTUALLY HARMFUL?  User's challenge: it still
+  covers the struct, just with an extra halfword, so perhaps harmless.
+  MEASURED AT FCMMOVE ENTRY, both structs dumped:
+      FCMCTXT1 @07338: 0000 0009 0000 0298 ffff 0000 0000
+      FCMCTXT2 @0733f: 0000 0008 0000 1000 ffff ffff 1154
+                       TGTA TGTS SRC  CNT  UPMF SEQF SCNT
+      L at 733f (intended) -> 00000008 = [TGTA=0000][TGTS=0008]
+      L at 733e (masked)   -> 00000000 = [0000][0000]
+- HALF RIGHT, AND NOT THE IMPORTANT HALF.  The extra halfword pulled in at
+  the FRONT (FCMCTXT1's SCNT = 0000) IS harmless.  The damage is at the
+  BACK: the pair is SHIFTED BY ONE, so TFCMTGTS = 0008 falls off the end
+  and is never read.  L reads exactly TWO halfwords and needs THESE two --
+  TGTA and TGTS are the address-constant pair LXAR splits into an address
+  plus a SECTOR EXTENSION.  Shifted, LXAR gets 0x00000000 instead of
+  0x00000008: address 0 sector 0 instead of address 0 SECTOR 8, so the
+  destination is 0x00000 instead of 0x40000 and the move lands 256K
+  halfwords low, on the PASS image just loaded.
+- AND THE REST OF THE STRUCT CORROBORATES THE FIELD READING EXACTLY:
+  CNT = 0x1000 = 4096, which is the observed MVH count; SRC = 0 selects the
+  primary buffer (FIOMUWB2); SEQF = ffff so the two-buffer path runs with
+  SCNT = 0x1154 = 4436 -- and 4096 + 4436 = 8532, PRECISELY LOAD BLOCK
+  #20's LENGTH.  Every field checks out; only the sector is lost.
+- SO THE EFFECT IS UNAMBIGUOUSLY A DEFECT.  What remains open is whose:
+  the code is asking for a fullword at an odd address and something must
+  give.
