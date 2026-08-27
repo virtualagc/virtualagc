@@ -1098,3 +1098,27 @@ the documents themselves.)
   presumably installs a new PSA once PASS is in memory -- FCMPSA has
   PC=FPMIHPGM rather than GPCIPL's PCH.  A run that got further would stop
   depending on the overlaid vector.
+
+### [2026-08-27] Target: [problems.md]
+- ARE THE FOUR DELIBERATE VIOLATIONS RECOVERING THE RIGHT WAY, or just not
+  killing the boot?  THE RIGHT WAY, and the flight software proves it
+  rather than merely tolerating it.  The full cycle, traced:
+      000bf5  LA  3,X'00db'(0)   R3 = 0x0c01     plant a resume address
+      000bf7  STH 3,X'0005'(1)                   store it at [R1+5]
+      000bf8  STH 5,X'02de'(1)                   DELIBERATE VIOLATION
+      000a3b  PCH ... 18 instructions ...
+      000a3d  LH  6,X'0005'(1)   R6 = 0x0c01     handler reads the plant back
+      000a43  STH 6,X'0048'                      patch the OLD PSW's address
+      000a47  NST 4,X'0048'      &= 0xffffefff   clear a flag in it
+      000a58  LH  4,X'004b'      R4 = 7          the PROGRAM CHECK CODE
+      000a5a  STH 4,X'000f'(1)                   stash it for the test
+      000aaa  LPS X'0048'                        return via the patched PSW
+      000c01  LH  7,X'000f'(1)                   resumes EXACTLY at the plant
+      000c02  CHI 7,X'0007'      CC 1->0         code == 7, EQUAL
+  So the self test plants a resume address, faults on purpose, and then
+  CHECKS THAT THE PROGRAM CHECK CODE WAS 7.  Our old-PSW save, the code we
+  report, and the resume address all satisfy it.  That is the flight
+  software validating this emulator's interrupt behaviour, four times over.
+- WHICH SETTLES THE EARLIER CLAIM PROPERLY.  "The boot continued past them"
+  was weak evidence and the user was right to push on it; this is the
+  strong version.
