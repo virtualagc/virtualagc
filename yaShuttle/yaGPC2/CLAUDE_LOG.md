@@ -1295,3 +1295,48 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   six consecutive HIMEM blocks three of them draw the odd struct no matter
   what.  The model has now survived three different layouts (24, 14 and 25
   blocks) predicting the observed struct correctly each time.
+
+### [2026-08-27] Target: [problems.md]
+- THE 13 MISSING MODULES WERE NOT A CLASSIFIER MISREAD.  I said they were;
+  wrong.  classify() returns ASM for all of them when called directly, and
+  the gen/haltree/*.asm.hal files I took as evidence are produced for
+  SUCCESSFULLY BUILT assembly modules too (FCMPSA, FIOCGR, FCMSVC all have
+  one AND an object).  A file's presence there means nothing.
+- THE REAL CAUSE IS THE EXTENSION, IN A SECOND PLACE.  SourceIndex.by_name
+  is keyed on the FULL FILENAME, so `resolve("FCMBMASK")` never matches
+  "FCMBMASK.asm" and EVERY module falls through to by_stem6, a 6-CHARACTER
+  stem index built with setdefault over a sorted listing.  Where two files
+  share six characters the alphabetically-first wins:
+      resolve("FCMBMASK") -> FCMBMAN.asm     resolve("FIOMGCV") -> FIOMGCMP.asm
+  The wrong path is then dropped by the `if path in seen` dedup, so the real
+  module is never built.  ALL 13 ARE SUCH COLLISIONS, verified one by one:
+  FCMBMASK/FCMBMAN, FCMBUSPC/FCMBUSCM, FIOERRLB+FIOERRLC/FIOERRLA,
+  FIOMGCV/FIOMGCMP, FIOMGSTR/FIOMGSNC, FIOSVCP/FIOSVC, FPMCVTFX/FPMCVTFL,
+  FPMIHPGM+FPMIHPC2/FPMIHPC1, FPMRESET/FPMRES, FIOPDISP/FIOPDIPG,
+  FPMMTURM/FPMMTUFX.
+- FIXED THE SAME WAY AS THE PATCH DECKS: a scratch tree of EXTENSIONLESS
+  SYMLINKS to every SSSRC (423) and APPLSRC (1149) member, passed as --src.
+  resolve() then hits by_name exactly and never reaches the stem index.
+  Nothing in Don's repo is modified.
+- PHASE 2 IS NOW COMPLETE FOR THE FIRST TIME:
+      155 ASM (was 141), 120 HAL, 7 displays, 1 patch, 0 unresolved
+      314 objects linked; 660 sections; 340 modules
+      DECK MEMBERS UNACCOUNTED: 0   (was 72 -> 22 -> 13 -> 0)
+      load blocks 26, above-128K at ordinals 21-26
+- AND FCMMOVE NOW SUCCEEDS ONCE.  Tape 1155 blocks, phase table
+  "2:26LB@2300".  The run shows TWO FCMMOVE entries:
+      R0=73380000  NEXTS=0001 CURRS=0000   <- FCMCTXT1, EVEN struct, WORKS
+      R0=733f0000  NEXTS=0000 CURRS=0001   <- FCMCTXT2, odd struct, fails
+  blocksRead 261 -> 280, wordsTaken 106,501 -> 116,666.  This is the
+  furthest the PASS load has ever got.
+- THE PARITY MODEL HAS NOW PREDICTED THE STRUCT CORRECTLY ACROSS FOUR
+  INDEPENDENT LAYOUTS -- 24, 14, 25 and 26 load blocks -- including this
+  one, where it predicted the first above-128K block would land on the EVEN
+  struct and it did.  That is as well-tested as anything in this session.
+- WHAT REMAINS: with six CONSECUTIVE above-128K blocks the alternation
+  puts three of them on FCMCTXT2 no matter what, so the boot still cannot
+  finish.  Either the real MMB partitions upper memory into ONE load block
+  per phase (as it demonstrably does for phases 3 and 13, the only two
+  above-128K blocks in the entire 16-phase dump), or the odd struct works
+  on real hardware in a way we have not found.  Phase 2 is not in
+  #PFCMGPT, so there is no primary source for its partition.
