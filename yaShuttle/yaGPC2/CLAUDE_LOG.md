@@ -611,3 +611,37 @@ the documents themselves.)
   match the build those comments came from.  They may be from an older
   release -- the module's update record spans 1978-1988 -- so this is
   suggestive of a layout difference, not yet a measurement of one.
+
+### [2026-08-26] Target: [HANDOFF-FCMBOOT.md]
+- RETRACTED, AGAIN: "the checksum is present at 0x739D and SSLCKSUM is two
+  halfwords early, so lnk101 misplaces FCMCKSUM."  Wrong.  mmbstamp.py's own
+  docstring says every load block carries a 2-hw checksum tail that the
+  block INCLUDES -- "lb_len = roundup_fullword(extent_end) + pad - start + 2"
+  -- so LB4's 994 is 992 content plus that tail, and 0x2958 is the LOAD
+  BLOCK's checksum, not the SSL's.  Verified: LB4 content 992 hw sums to
+  0x2958 and its tail slot reads 0000 2958.  lnk101's placement of FCMCKSUM
+  at 0x7398..0x739B is correct.
+- SO THE ORIGINAL READING STANDS: SSLENGTH and SSLCKSUM are genuinely zero
+  because nothing stamps them.  FCMCKSUM.asm says the MASS MEMORY BUILD
+  PROGRAM should; our reconstruction writes per-load-block checksums but not
+  this one.
+- CH/AH PUT HALFWORDS IN THE HIGH HALF (exec_AH/exec_CH: `<< 16`), so the
+  sum accumulates in R4's top 16 bits with carries falling off and
+  `CH R4,SSLCKSUM` reduces to (sum mod 2^16) == SSLCKSUM.  A plain 16-bit
+  sum is what is wanted; an earlier worry that no 16-bit value could match
+  came from assuming sign extension into the low half.
+- tools/stamp_ssl_checksum.py WRITTEN, and it does not fix ITEM 1.  Tried
+  two spans: SSLSTART..FCMCKSUM (988 hw, cksum 0x2958) and SSLSTART..SSLEND
+  using the link's own SSLEND equ at 0x72E2 (806 hw, cksum 0xCB2C).  Neither
+  produces a phase-2 read.  The tape is restored to its unstamped state; the
+  tool and the backup .prestamp remain.
+- METHOD WARNING FOR WHOEVER PICKS THIS UP: these runs are NOT
+  deterministic.  --real-time plus an external gpcmd process means a single
+  breakpoint hit-or-miss is weak evidence, and I treated several as strong.
+  SSLCHECK 0x2d10 hit on one run and not on a later identical one.  Repeat
+  each observation before building on it.
+- USEFUL ADDRESSES, all absolute, from IPL.sym.json:
+      SSLCHECK 2d10  SSL20 2d18  SSL30 2d23  SSL60 2d26  SSL62 2d2b
+      SSL70    2d38  SSL75 2d46  SSLXIT 2d70  SSLRTN 2d72  STERROR 180c
+      LOADCHK  2c8b  CM4KYBD 21cc  CM4FMAT 271f  RTNEX0 14e4
+      SSLSTART 6fbc  SSLEND 72e2  SSLENGTH 7398  SSLCKSUM 739b
