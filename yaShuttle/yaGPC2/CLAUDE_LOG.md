@@ -723,3 +723,25 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - SO THE EFFECT IS UNAMBIGUOUSLY A DEFECT.  What remains open is whose:
   the code is asking for a fullword at an odd address and something must
   give.
+- WHICH ACCESSES ARE MASKED, since this keeps getting asked in
+  source-vs-destination terms and that is the WRONG AXIS.  The axis is
+  FULLWORD OPERAND vs HALFWORD OPERAND:
+      L R3,TFCMTGTA   fullword operand, base+displacement (SRS) -> MASKED
+      MVH R3,R5       RR form, both addresses taken straight from
+                      registers, moves HALFWORDS one at a time via
+                      membus_get16/cpu_store_hw, never calls cpu_g_ea
+                      -> NOT MASKED, either end may legally be odd
+      L R5,0(R4,R1)   fullword but INDEXED, so the extended/RS path, which
+                      carries no mask here; FCMBFZCN 0x735E with TFCMSRC
+                      scaled by operand width gives 0x735E and 0x7360 for
+                      the two buffers -- both even, both right, and a
+                      confirmation that the index scaling matches POO
+                      Figure 2-13
+  So NOTHING about FCMMOVE's actual MOVE is constrained; the ONLY masked
+  access in the routine is the struct read.
+- AND THAT IS THE DESIGN, not an accident: the flight software DEPENDS on
+  halfword moves being unconstrained -- FCMMOVE copies arbitrary lengths to
+  arbitrary addresses -- while fullword OPERANDS must be aligned (POO
+  section 2, "Fullword operands must be located in main storage on even
+  halfword boundaries").  FCMCTXT1/FCMCTXT2 DS 7H is the one place the
+  software puts a fullword operand where that rule forbids.
