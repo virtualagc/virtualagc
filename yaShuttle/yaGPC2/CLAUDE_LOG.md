@@ -681,3 +681,40 @@ the documents themselves.)
   the 55-block GPCIPL read (28160).  So phase 2's 78848 words stream past
   and the bus program takes almost none of them.  That is the next thing to
   chase, and it is ours, not the tape's.
+
+### [2026-08-26] Target: [problems.md]
+- SECOND DEFECT, AND THIS ONE IS OURS: `#BU@` was not indirecting.
+  exec_BU_at computed `a + 2*curPE` -- the right per-bus TABLE ENTRY
+  address -- and then branched TO it instead of THROUGH it.  The SSL's MMU
+  read program ends with `#BU@ FCMBCEBT`, which is how it chains to the
+  receive sequence that collects the tape data, so BCE 18 landed on the
+  table itself at 0x72CC, decoded its 0000 as an unknown instruction, never
+  advanced, and spun there for the rest of the run.
+- THE FLIGHT SOFTWARE SAYS WHAT THE TABLE IS.  FCMINSSL.asm:
+      FCMBCEBT EQU   *-36                MMU 1/2 BRANCH TABLE
+               DC    A(FCMIBLK1)                          BUS 18
+               DC    A(FCMIBLK1)                          BUS 19
+  -36 is 2*18, so the bias is exactly what makes `2*busnum` index it, and
+  the entries are A() ADDRESS CONSTANTS.  exec_CMD already reads its own
+  per-bus table the same way -- `addr = a + 2*curPE` then iop_g_eaf --
+  so the addressing family was already right there in the file.
+- EFFECT, measured on the deterministic harness:
+      unknown-instruction lines  3,369,393 -> 0
+      wordsTaken                 28,164    -> 98,820   (of 107,012)
+      log size                   3.37M lines -> 18
+  The PASS phase-2 data is now actually collected instead of streaming past.
+- 300 #BU@ FIXTURES DISAGREE WITH ME, and I am flagging that rather than
+  burying it.  test_iop_bce_exec expects NIA = a, with no bus offset and no
+  indirection -- a third behaviour that neither the old code nor the new one
+  produces.  They were ALREADY failing before this change: 300 failures and
+  73799/74699 both with and without it, verified by stashing.  So nothing
+  regressed, but something is unresolved.  Two reasons to doubt the
+  fixtures rather than the change: their memory image is only 4096
+  halfwords, so an indirect fetch to 0x15F17 cannot be represented at all
+  -- they cannot exercise a dereference even in principle -- and gpc, the
+  likely oracle, is documented here as non-authoritative.  Whoever settles
+  this should do it against the POO, not against either implementation.
+- NEXT FRONTIER, newly reachable: the boot now completes the phase-2 load,
+  transfers control, and dies at
+      ERROR: invalid instruction 0xc2d9 at 0x8a2d
+  which is further than this has ever run.

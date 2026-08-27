@@ -1480,6 +1480,16 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             fprintf(stderr, "DISP MSCPC<-%05x t=%.1f us\n", (unsigned)(data & 0x3ffffu),
                     (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0);
 
+        /* Every processor's program counter as it is set, not just the
+         * MSC's.  A bus program that runs somewhere unintended is almost
+         * always one that was AIMED somewhere unintended, and this is the
+         * only place that aiming happens. */
+        if (isOutput && word == 2 && getenv("YAGPC_PCTRACE"))
+            fprintf(stderr, "PCTRACE %s%u PC<-%05x t=%.1f us\n",
+                    region == 0 ? "MSC" : "BCE", (unsigned)region,
+                    (unsigned)(data & 0x3ffffu),
+                    (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0);
+
         /* The REGION names which processor's page this addresses -- the
          * MSC, BCE 1-24 or the self-test processor.  It used to be
          * discarded, with the access going to iopls_ls() and so to

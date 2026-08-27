@@ -112,7 +112,32 @@ static void exec_BU(IOP *t, DInstr *v) {
 }
 
 static void exec_BU_at(IOP *t, DInstr *v) {
-    iop_set_nia(t, df_get(v, 'a') + 2u * (uint32_t)t->curPE);
+    /* The `@` is an INDIRECTION, and it was being dropped: this branched
+     * TO the table entry instead of THROUGH it, so the bus program ran
+     * off into a table of address constants and sat there.
+     *
+     * The operand names a per-bus table biased back by 2 * its own bus
+     * number, exactly as #CMD's does -- FCMINSSL.asm builds one for this
+     * instruction and says so:
+     *
+     *      FCMBCEBT EQU   *-36                MMU 1/2 BRANCH TABLE
+     *               DC    A(FCMIBLK1)                          BUS 18
+     *               DC    A(FCMIBLK1)                          BUS 19
+     *
+     * -36 is 2*18, so BCE 18 indexes the first entry and BCE 19 the
+     * second, and the entries are A() ADDRESS CONSTANTS.  A table of
+     * addresses exists to be dereferenced; exec_CMD already fetches its
+     * own the same way.
+     *
+     * Found by the SSL's MMU read program, whose last instruction is
+     * `#BU@ FCMBCEBT`: it chains to the receive sequence FCMIBLK1 that
+     * collects the tape data.  Without the fetch, BCE 18 executed the
+     * table at 0x72CC -- a fullword of 0000 72F2 -- decoded 0000 as an
+     * unknown instruction, never advanced, and spun there for the rest of
+     * the run while all 78848 halfwords of PASS phase 2 streamed past
+     * uncollected. */
+    uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
+    iop_set_nia(t, iop_g_eaf(t, addr) & 0x3ffffu);
 }
 
 static void exec_WIX(IOP *t, DInstr *v) {
