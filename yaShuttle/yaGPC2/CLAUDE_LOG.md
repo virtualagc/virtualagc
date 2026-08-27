@@ -745,3 +745,57 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   section 2, "Fullword operands must be located in main storage on even
   halfword boundaries").  FCMCTXT1/FCMCTXT2 DS 7H is the one place the
   software puts a fullword operand where that rule forbids.
+
+### [2026-08-27] Target: [problems.md]
+- THE TRIANGLE IS CLOSED, AND THE DEFECT IS IN THE FLIGHT SOFTWARE.
+  Resolving 0x074E -- the thing the earlier handoff said must be resolved
+  before touching the mask -- settles it.
+- 0x074E IS MEMTST14+5, in MLIB80/STPMEM.asm, the MEMORY UNIQUE ADDRESSING
+  TEST.  (0x00B0/0x00B1 are KHCT1HI/KHCT2HI, the PSA clock high halfwords.)
+  Symbols from donroute/IPL/IPL.sym.json; the other masked sites resolve to
+  MEMTST12+a, MEMTST14+6, MEMTST15+3, MEMTST33+3, MEMTST34+3.
+- THAT TEST DELIBERATELY DRIVES ITS POINTER ODD.  It walks a single bit
+  through the address (LHI R4,X'8000' / SRL R4,S3 / XR R2,R4), so when the
+  bit reaches the LSB the address IS odd, and the code knows it:
+      TRB  R2,1        ODD ADDRESS ?
+      SHW  ODDFLAG     SET ODD ADDRESS FLAG
+      NHI  R2,X'FFFE'  RESET ODD BIT      <- in R2 only, NOT in R1
+  R1 keeps the odd address.  Protection is per HALFWORD, which the test
+  shows outright by protecting both ends separately afterwards:
+      ISPB 2,0(R1)  PROTECT DATA   /  ISPB 2,1(R1)  PROTECT DATA+1
+- AND THE DECISIVE PAIRING IS AT MEMTST14:
+      ISPB 1,0(R1)   UNPROTECT 1 FULLWORD AT TEST PNTR
+      ST   R5,0(R1)  <- 0x074E, the faulting store
+      L    R6,0(R1)
+      CR   R6,R5     RESULT EQUAL EXPECTED ?
+  Our own exec_ISPB already carries the POO rule for the unprotect: "When
+  M1 is 001 or 011, THE LOW-ORDER BIT OF THE EA SHOULD BE 0 AND WILL BE
+  IGNORED."  That is Figure 2-8's rule stated for a DIFFERENT INSTRUCTION.
+  The unprotect and the store can only cover the same halfwords if the
+  FULLWORD ST and L ignore the low bit too.  Remove the mask and they
+  diverge -- which is exactly why the unmasked run faults right there.
+- SO THE MASK IS CONFIRMED TWICE OVER, once by POO Figure 2-8 and once by
+  the POO's ISPB rule plus GPCIPL's own dependence on the two agreeing.
+  GPCIPL's memory test is NOT our bug and the mask is not removable.
+- WHICH LEAVES ONLY CORNER 3.  FCMINSSL's
+      FCMCTXT1 DS 7H
+      FCMCTXT2 DS 7H
+  puts a FULLWORD OPERAND (TFCMTGTA+TFCMTGTS, read by L R3,TFCMTGTA and
+  split by LXAR into address + sector) at an ODD halfword address, which
+  POO section 2 forbids outright: "Fullword operands must be located in
+  main storage on even halfword boundaries."  THIS IS A LATENT DEFECT IN
+  THE REAL SHUTTLE FLIGHT SOFTWARE, present identically in OI301700 and
+  OI340600, and confirmed in the original build's own listing
+  (DC Y(FCMCTXT2) = 0383).
+- ITS EFFECT: any above-128K load block whose context lands on FCMCTXT2
+  loses TFCMTGTS, so LXAR gets sector 0 and the move goes to 0x00000
+  instead of the intended sector.  It cannot trap -- address 0 sector 0 is
+  a legal destination -- so on real hardware it would silently write a load
+  block to the wrong place.  It survives only if a phase never has two or
+  more above-128K load blocks; ours has five.
+- NOT YET EXPLAINED, and flagged rather than glossed: the exact faulting
+  halfword.  ISPB unprotects 0x00B0 and 0x00B1, so an unmasked fullword
+  store at 0x00B1 should span into 0x00B2 and fault THERE, yet the
+  measurement reports addr=0x000b1 on PROTVIOL #5.  The mechanism above
+  does not depend on which of the pair faults, but the discrepancy is real
+  and unresolved.
