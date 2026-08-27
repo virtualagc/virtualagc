@@ -1141,3 +1141,43 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   halsc must stop deriving and forwarding it).  Everything on our side is
   ready -- 0 unresolved sources, 113/113 ASM, 89/89 HAL including all 23
   missing modules, and #PFCMGPT in the DASS dumps to check the result.
+
+### [2026-08-27] Target: [problems.md]
+- RETRACTED: "THE PHASE BUILD IS BLOCKED ON DON."  IT IS NOT, AND THE BLOCK
+  WAS MINE.  The user pointed out that HALSFC --help documents --sdfi=D
+  outright ("Name of a directory to read Simulation Data Files (SDF) from
+  ... Customarily --sdfi=SDFLIB.  PASSED ON TO PASS1").  The switch is real
+  and supported.
+- THE CAUSE: halsc line 57 is
+      HALSFC_BINDIR="${HALSFC_BINDIR:-/home/rburkey/donschmidt/nsts-sdl-dps/build/halsfc}"
+  so it runs DON'S OWN pass binaries (HALSFC-PASS1 dated 2026-07-21) rather
+  than the project's, which are FIRST ON PATH at
+  "Source Code/PASS.REL32V0/HALSFC-PASS1" (2026-08-07) and DO accept
+  --sdfi.  This is exactly what the standing rule
+  ("use ASM101S.py / HALSFC, never asm101 or halsc") exists to prevent, and
+  I went down the halsc route anyway.
+- SETTING HALSFC_BINDIR TO PASS.REL32V0 BUILDS THE WHOLE PHASE:
+      113/113 ASM,  89/89 HAL,  6/6 DISPLAYS (was 1/6),
+      linked 239 objects -> SSW.fcm (+ SSW.lib),  208 objs, ZERO empty
+  The full command, one line:
+      cd /home/rburkey/donschmidt/nsts-sdl-dps && HALSFC_BINDIR="/mnt/STORAGE/home/rburkey/git/virtualagc/yaShuttle/Source Code/PASS.REL32V0" PYTHONPATH=/home/rburkey/donschmidt/nsts-sdl-dps/src python3 -u -m con80.con80build SSW --root /home/rburkey/workspace/PFS/OI340600 --out /tmp/claude-1000/sync/p2build --assemble --hal --display --link
+- AND THE RESULT MATCHES THE ORIGINAL BUILD.  Upper memory goes from 8
+  extents to 68, at the DUMP'S OWN ADDRESSES:
+      040000/527 = $0AIBGPC   040210/247 = A1AIBGPC   040308/329 = A2AIBGPC
+      041a0a/157 = $0ASHRWC   041d96 = $0DCICYC       042980 = $0DMIMCD
+  All the sector-8 occupants that were missing are now present and placed
+  where the real build placed them.
+- LOAD BLOCKS: 24 -> 14, and the five above-128K ones are now blocks 10-14
+  (sectors 8,8,9,9,10; lengths 14822, 15654, 648, 1524, 280).  14 IS STILL
+  EVEN, so on the parity model block 10 still draws FCMCTXT2.  NOT YET
+  TESTED against a rebuilt tape -- that is the next step and the only way
+  to know whether the parity model survives contact with the real layout.
+- METHOD FAILURE, AND IT IS THE ONE THAT COST THE MOST TODAY: I declared an
+  upstream blocker on the strength of tests that never ran.  I ran
+  build/bin/HALSFC-PASS1 (which does not exist -- the binaries are in
+  build/halsfc/) and read grep -c = 0 as a negative; then wrote
+  `$P --help | grep sdfi | head -3 && echo ACCEPTS`, where the && sees
+  HEAD's exit status, not grep's.  Two invalid tests in a row, both
+  pointing the same way, produced a confident "blocked on Don" that was
+  wrong.  ALWAYS capture the count in a variable and try the switch
+  directly, and CHECK THE BINARY EXISTS BEFORE BELIEVING ITS SILENCE.
