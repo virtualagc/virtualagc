@@ -985,3 +985,33 @@ the documents themselves.)
   unverified.  Note also YAGPC_DSETRACE shows NO DSE applied at the load
   itself (nia 072a3), so the load's EA is plainly 0x733f and it should read
   the 0x00000008 that is there.
+
+### [2026-08-27] Target: [problems.md]
+- WHY DSE(R3) IS ZERO AT FCMMOVE'S MVH -- traced to the instruction before.
+  YAGPC_LXATRACE shows `LXAR nia=072a5 x=3 y=3 const=00000000`, so LXAR is
+  handed zero and correctly derives a zero DSE from it.  The fault is the
+  preceding `L 3,X'0000'(0)`: the trace shows CC 1->0 (a zero result) where
+  memory plainly holds 0x00000008.
+- THE MECHANISM IS AN ALIGNMENT MASK.  cpu.c's SRS path does
+      ea = base + disp;
+      if (v->addrWidth == 2) ea = ea & 0xfffe;
+  R0 holds 0x733f -- FCMCTXT2 -- so the fullword load is forced down to
+  0x733e and reads FCMCTXT1's last halfword joined to FCMCTXT2's first,
+  which is 0x00000000.  Exactly the observed value.
+- AND FCMCTXT2 IS AT AN ODD ADDRESS BY CONSTRUCTION:
+      FCMCTXT1 DS 7H / FCMCTXT2 DS 7H
+  with no alignment between them, so whichever build you do, one of the two
+  structs starts odd -- and FCMBCTXT holds Y() HALFWORD pointers to both,
+  which FCMMOVE dereferences with a FULLWORD load.
+- THE MASK IS SUSPECT BUT LOAD-BEARING.  `git log -S` puts it in "Initial
+  yaGPC2 commit, only at yaGPC level" -- inherited from gpc, no POO
+  citation, the same provenance the DSE rule carries.  BUT REMOVING IT IS
+  WORSE, measured: the boot then reads only 55 blocks and never loads
+  phase 2 at all.  And it changes NOTHING in the fixtures -- 111180/111358
+  with and without -- so test_cpu_instr_exec does not exercise it either
+  way and cannot arbitrate.
+- SO THE QUESTION FOR THE POO IS NARROW: in SRS format with a fullword
+  operand, does the AP-101S force the effective address even, and if it
+  does, how is FCMMOVE meant to read a context struct that begins at an odd
+  halfword?  One of those two must give.  I did NOT resolve it and have
+  left the mask in place.
