@@ -127,4 +127,26 @@ int ageharness_diff_regs(const RegSnapshot *before, const RegSnapshot *after, Re
 
 void ageharness_reset(AGEHarness *age);
 
+/* The firmware IPL: what the GPC IPL pushbutton does before any software
+ * runs -- PASS User's Guide Table 2-2 step 10, "Drives mode TB-IPL; Fixed
+ * pattern stored in memory (C9FB from 0-1FFFF, C6C6 from 20000-7FFFF);
+ * Bootstrap loader read in from MMU; Mode TB reset to Barberpole".
+ *
+ * `image` is that bootstrap, already read off the tape by the caller --
+ * this file deliberately knows nothing about mass memories.  It is stored
+ * from address 0, which is where it has to go: FCMBOOT's PSA is its own
+ * first halfwords, so the vectors the release then loads (0x04, 0x14) ARE
+ * the image's.
+ *
+ * Storing happens with store protect bypassed, because the fill this
+ * performs protects all of memory and the microcode is not subject to it.
+ *
+ * Interval timer 1 is left RUNNING, which is not incidental: FCMBOOT's
+ * first act after the release is a two-second settling delay it times by
+ * reading the PC1 clock without ever starting it, so something before it
+ * must have.  See the longer note in ageharness.c's --ipl path, which
+ * models the same firmware behaviour for a file-loaded boot. */
+void ageharness_firmware_ipl(AGEHarness *age, const uint16_t *image,
+                             uint32_t nHalfwords);
+
 #endif

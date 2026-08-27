@@ -7,12 +7,16 @@
 /* Captured verbatim from `node dist/gpc.js run --help` so `yaGPC2 --help`
  * matches byte-for-byte. */
 static const char *HELP_TEXT =
-"Usage: gpc run [options] <fcm-file>\n"
+"Usage: gpc run [options] [<fcm-file>]\n"
 "\n"
 "Run an AP-101 program in batch mode\n"
 "\n"
 "Arguments:\n"
-"  fcm-file                        FCM memory image to load\n"
+"  fcm-file                        FCM memory image to load.  Omit it to\n"
+"                                  boot the way the machine does: the IPL\n"
+"                                  pushbutton reads the bootstrap off the\n"
+"                                  mass memory (needs --mmu-model and\n"
+"                                  --discretes)\n"
 "\n"
 "Options:\n"
 "  --start <addr>                  start address in hex\n"
@@ -349,8 +353,25 @@ void opts_parse(int argc, char **argv, Options *opts) {
     }
 
     if (positionalCount == 0) {
-        fprintf(stderr, "error: missing required argument 'fcm-file'\n");
-        exit(1);
+        /* No image named.  That is the real machine's own arrangement:
+         * the microcode reads the bootstrap off the mass memory when the
+         * IPL pushbutton is pressed, so an fcm-file is what a run
+         * SUBSTITUTES for that, not something a run must have.  But there
+         * has to be a tape to read, and a panel to press IPL on. */
+        if (!opts->mmuModelVolume) {
+            fprintf(stderr,
+                "error: no 'fcm-file', so the bootstrap must come from a "
+                "mass memory -- give --mmu-model VOLUME.mmv\n");
+            exit(1);
+        }
+        if (!opts->discretes) {
+            fprintf(stderr,
+                "error: no 'fcm-file', so the run is driven from the crew "
+                "panel -- give --discretes and press IPL, then STBY\n");
+            exit(1);
+        }
+        opts->fcmPath = NULL;
+        return;
     }
     if (positionalCount > 1) {
         fprintf(stderr,

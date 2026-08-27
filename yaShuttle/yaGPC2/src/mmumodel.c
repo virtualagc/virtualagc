@@ -582,6 +582,21 @@ void mmumodel_publish_ready(MmuModel *m) {
     m->lastReadyPublishSec = now;
 }
 
+int mmumodel_read_blocks(const MmuModel *m, int track, int file,
+                         int subfile, int block, int maxBlocks,
+                         uint16_t *dest) {
+    if (!m || !dest || maxBlocks <= 0) return 0;
+    int first = block_index(track, file, subfile, block);
+    if (first < 0 || first + maxBlocks > BLOCKS_TOTAL) return 0;
+    int n = 0;
+    while (n < maxBlocks && m->blocks[first + n]) {
+        memcpy(dest + (size_t)n * HALFWORDS_PER_BLOCK, m->blocks[first + n],
+               HALFWORDS_PER_BLOCK * sizeof *dest);
+        n++;
+    }
+    return n;
+}
+
 void mmumodel_report(const MmuModel *m) {
     if (!m) return;
     fprintf(stderr,

@@ -356,3 +356,49 @@ the documents themselves.)
 - LESSON, twice in one investigation: an explanation that fits the arithmetic
   is not a reproduction.  I had the span arithmetic land exactly and still had
   the wrong code path, and the "fix" it implied broke eleven units.
+
+### [2026-08-26] Target: [HANDOFF-FCMBOOT.md]
+- NO-FCM BOOT IMPLEMENTED.  `gpc run` no longer requires an fcm-file: omit
+  it and the GPC IPL pushbutton reads FCMBOOT off the mass memory, exactly
+  as Table 2-2 step 10 has the firmware do, and the HALT->STBY release runs
+  it.  Needs --mmu-model and --discretes; with an fcm-file nothing changes.
+- WHICH VECTOR: always the SYSTEM RESET PSW at 0x14, first release and
+  every later one.  FCMBOOT.asm:38 says so outright ("RECEIVES CONTROL FROM
+  THE MICRO CODE LOADER VIA THE SYSTEM RESET PSW"), and the image agrees --
+  0x0004 is `0000 0000 0002 0000`, address 0 with the WAIT bit, a
+  deliberate park; 0x0014 is `014B 0066 0008 0000`, FCMBMOVR in sector 6
+  with register set 1.  Measured on BOOT-stamped.fcm itself.
+- THE HANDOFF'S LINE 140 IS STALE and contradicts its own address table at
+  line 293: it says --power-on takes the system-reset PSW, which stopped
+  being true when cpu_power_on() was split out to take 0x04.  Line 293 is
+  right ("--power-on is wrong for FCMBOOT, use --ipl").  Fix on next sync.
+- IPL IS NOT A MODE-SWITCH POSITION -- user corrected me mid-implementation.
+  It is a separate momentary pushbutton (register A bit 3) live ONLY while
+  HALT stands, so its bit rides ON TOP of HALT's rather than excluding it.
+  discretePanel.py had it as a fourth radio position and could not express
+  the real sequence; it now has a real pushbutton, disabled out of HALT.
+- THE TAPE DID NOT CARRY THE BOOTSTRAP, which is why this could not simply
+  be written.  CON80's MMUDAT1 allocates it -- `FMAIPL2 ALLOC,ADDR=44500,
+  BLKS=72` -- and a CON80 card address is TFSBB, so 44500 is file 4 / track
+  4 / subfile 5 / block 0.  Our volumes are built from the PASS phase
+  manifest, which has no bootstrap in it.  tools/stamp_bootstrap_on_tape.py
+  writes one there; the emulator reads only as many blocks as the volume
+  actually recorded, so a short image cannot overwrite the memory fill
+  behind it with the rest of its own 72-block reservation.
+- VERIFIED END TO END.  No fcm-file, panel HALT -> HALT+IPL -> STBY: "IPL;
+  memory filled, bootstrap read from MM1 (64 blocks, 32768 halfwords)" then
+  "HALT -> STBY; reset released, starting at 0x0014b" -- FCMBMOVR.  The
+  distinct SVC NIAs reached (1b57, 1cda, 1f35, 2122, 29a6) are IDENTICAL to
+  the canonical `--ipl BOOT-stamped.fcm` run, so the tape-loaded boot and
+  the file-loaded one behave the same.  A SECOND IPL reloads and re-runs;
+  IPL pressed in STBY is refused.  Pre-existing test failures unchanged
+  (test_debugger.sh, test_cpu_instr_exec, test_iop_bce_exec,
+  test_iop_msc_exec all fail identically on a clean tree).
+- WHY RELOAD IS LOAD-BEARING, not housekeeping: FCMBOOT's External Zero
+  handler does `OST R5,FCMBSYRS+2`, setting the WAIT bit in its own system
+  reset PSW.  An already-booted in-memory FCMBOOT therefore PARKS on the
+  next release; re-execution works only because a fresh IPL puts a pristine
+  copy back.  That is what makes keeping step 10 and step 11 apart matter.
+- NOT DONE: the GUI panel change is untested -- no display here.  Its logic
+  parses and _build() precedes _republish(), so the widget exists before
+  the first publish, but somebody should actually press the button.

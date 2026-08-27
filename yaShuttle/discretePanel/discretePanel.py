@@ -49,7 +49,17 @@ import discretes as D
 #    3-5   BFS engage 1/2/3
 #    6,7   CRT (display) select
 
-MODE_SWITCH = [("HALT", 0), ("STANDBY", 1), ("RUN", 2), ("IPL", 3)]
+# The MODE SWITCH proper is a three-position rotary: HALT / STANDBY / RUN.
+#
+# IPL (bit 3) is NOT a fourth position of it.  It is a separate momentary
+# PUSHBUTTON, and it is live only while the mode switch stands in HALT --
+# PASS User's Guide Table 2-2 puts "GPC to HALT mode" at step 4 and "GPC
+# IPL - P/R" at step 10, with HALT still made.  So its bit is asserted ON
+# TOP of HALT's rather than instead of it, and a panel that made IPL a
+# fourth exclusive position could not express the real sequence at all.
+MODE_SWITCH = [("HALT", 0), ("STANDBY", 1), ("RUN", 2)]
+HALT_BIT = 0
+IPL_BIT = 3
 IPL_SOURCE = [("MM1", 4), ("MM2", 5)]
 OBSERVED_A = [("MM1 READY", 6), ("MM2 READY", 7)]
 TOGGLES_A = [("IOP terminate A", 12), ("IOP terminate B", 13)]
@@ -84,6 +94,7 @@ class Panel:
         # change, because a discrete is a level and the bus has neither
         # delivery guarantees nor replay -- see discretes.py.
         self.mode = tk.IntVar(value=0)          # HALT at startup
+        self.iplHeld = False                    # the IPL pushbutton, up
         self.iplSource = tk.IntVar(value=4)     # MM1
         self.gpcId = tk.IntVar(value=1)
         self.toggles = {}                       # (reg, bit) -> BooleanVar
@@ -129,6 +140,16 @@ class Panel:
         for label, bit in MODE_SWITCH:
             ttk.Radiobutton(f, text=label, value=bit, variable=self.mode,
                             command=self._modeChanged).pack(anchor="w")
+
+        f = ttk.LabelFrame(left, text="GPC IPL (panel O6)")
+        f.pack(fill="x", **pad)
+        # Momentary, and reported as "P/R" because that is what it is: the
+        # bit is up while the button is down and drops when it is let go.
+        self.iplButton = ttk.Button(f, text="IPL  P/R")
+        self.iplButton.pack(anchor="w")
+        self.iplButton.bind("<ButtonPress-1>", self._iplPressed)
+        self.iplButton.bind("<ButtonRelease-1>", self._iplReleased)
+        self._syncIplButton()
 
         f = ttk.LabelFrame(left, text="IPL source")
         f.pack(fill="x", **pad)
@@ -202,6 +223,29 @@ class Panel:
         for _, bit in MODE_SWITCH:
             self._send(D.SET if bit == chosen else D.RESET,
                        D.REG_A, D.bit_mask(bit))
+        # Leaving HALT drops the button with it: it cannot be held in.
+        if chosen != HALT_BIT and self.iplHeld:
+            self.iplHeld = False
+        self._send(D.SET if self.iplHeld else D.RESET,
+                   D.REG_A, D.bit_mask(IPL_BIT))
+        self._syncIplButton()
+
+    def _syncIplButton(self):
+        """Pressable only in HALT, which is the only place it does anything."""
+        state = "normal" if self.mode.get() == HALT_BIT else "disabled"
+        self.iplButton.configure(state=state)
+
+    def _iplPressed(self, _event=None):
+        if self.mode.get() != HALT_BIT:
+            return
+        self.iplHeld = True
+        self._send(D.SET, D.REG_A, D.bit_mask(IPL_BIT))
+
+    def _iplReleased(self, _event=None):
+        if not self.iplHeld:
+            return
+        self.iplHeld = False
+        self._send(D.RESET, D.REG_A, D.bit_mask(IPL_BIT))
 
     def _iplSourceChanged(self):
         chosen = self.iplSource.get()
@@ -256,7 +300,7 @@ class Panel:
                 continue
             # Only bits we do not drive ourselves are worth displaying;
             # our own republished traffic comes back to us too.
-            owned = 0
+            owned = D.bit_mask(IPL_BIT)
             for _, b in MODE_SWITCH + IPL_SOURCE:
                 owned |= D.bit_mask(b)
             for (reg, b) in self.toggles:

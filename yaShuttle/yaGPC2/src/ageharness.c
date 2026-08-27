@@ -245,7 +245,7 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
 
     char *autoSymbols = NULL;
     const char *symbolsPath = opts->symbols;
-    if (!symbolsPath) {
+    if (!symbolsPath && fcmPath) {
         autoSymbols = auto_detect_symbols(fcmPath);
         symbolsPath = autoSymbols;
     }
@@ -283,6 +283,21 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
      * Power-On property (Sec. 2.5.3.1) -- see opts.h's powerOn comment.
      * The C9FB/C6C6 fill *content* itself, though, is confirmed needed
      * either way -- see mem_pattern_fill()'s own comment. */
+    /* No .fcm at all: nothing is loaded and nothing is filled here.  The
+     * machine comes up held in reset with empty store, exactly as a GPC
+     * whose power is on but which has not been IPLed -- and it is the
+     * panel's IPL that fills memory and reads the bootstrap in, because
+     * that is the step which does so on the vehicle (Table 2-2 step 10).
+     * Doing any of it here would be inventing an IPL nobody commanded. */
+    if (!fcmPath) {
+        if (out) {
+            out->byteCount = 0;
+            out->hasEntryPoint = false;
+            out->entryPoint = 0;
+        }
+        free(autoSymbols);
+        return;
+    }
     if (opts->ipl) ipl_fill(age);
     else if (opts->powerOn) mem_pattern_fill(age);
     long byteCount = load_fcm(age, fcmPath);
@@ -457,6 +472,17 @@ int ageharness_diff_regs(const RegSnapshot *before, const RegSnapshot *after, Re
         n++;
     }
     return n;
+}
+
+void ageharness_firmware_ipl(AGEHarness *age, const uint16_t *image,
+                             uint32_t nHalfwords) {
+    ipl_fill(age);
+    uint32_t total = age->gpc.ram.totalHWCount;
+    if (nHalfwords > total) nHalfwords = total;
+    for (uint32_t i = 0; i < nHalfwords; i++) {
+        membus_set16(&age->gpc.ram, i, image[i], false);
+    }
+    age->gpc.cpu.counter1Enabled = true;
 }
 
 void ageharness_reset(AGEHarness *age) {

@@ -265,6 +265,11 @@ static void batchrunner_format_trace_line(BatchRunner *r, long step, uint32_t ni
 static long batchrunner_load(BatchRunner *r) {
     ConfigureResult res;
     ageharness_configure_from_opts(&r->age, r->opts->fcmPath, r->opts, &res);
+    /* With no .fcm there is nothing in store yet and so no entry point to
+     * have: the bootstrap arrives when IPL is pressed, and the address it
+     * starts at comes from its own System Reset PSW when HALT is released.
+     * Demanding one here would be demanding it before it can exist. */
+    if (!r->opts->fcmPath) return 0;
     if (!res.hasEntryPoint) {
         batchrunner_fatal(r, "No entry point: use --start=ADDR or provide a symbols file with a START symbol");
     }
@@ -435,13 +440,87 @@ static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, l
 #define MODE_HALT 0x80000000u   /* IBM bit 0 */
 #define MODE_STBY 0x40000000u   /* IBM bit 1 */
 #define MODE_RUN  0x20000000u   /* IBM bit 2 */
-#define MODE_ANY  (MODE_HALT | MODE_STBY | MODE_RUN)
+#define MODE_IPL  0x10000000u   /* IBM bit 3 -- the GPC IPL pushbutton */
+#define MODE_ANY  (MODE_HALT | MODE_STBY | MODE_RUN | MODE_IPL)
+
+/* Which mass memory the IPL reads from: register A bits 4 and 5, "MM1 /
+ * MM2 selected as the IPL source".  Same bits the crew panel drives and
+ * Don's gpc documents in iop.coffee. */
+#define MODE_SRC_MM1 0x08000000u
+#define MODE_SRC_MM2 0x04000000u
+
+/* The GPC IPL BOOTSTRAP COPY, per CON80's own MMUDAT1:
+ *
+ *     FMAIPL2  ALOCDESC,'GPC IPL BOOTSTRAP COPY';
+ *     FMAIPL2  ALLOC,ADDR=44500,BLKS=72,INIT=C6C6,SYSID=SYS1;
+ *
+ * A CON80 card address is TFSBB -- track, file, subfile, two-digit block
+ * -- so 44500 is file 4, track 4, subfile 5, block 0.  The 72 is the
+ * RESERVATION; how much of it the bootstrap actually occupies comes from
+ * the tape, not from here (see mmumodel_read_blocks). */
+#define BOOT_TRACK 4
+#define BOOT_FILE 4
+#define BOOT_SUBFILE 5
+#define BOOT_BLOCK 0
+#define BOOT_ALLOC_BLOCKS 72
+#define MM_HALFWORDS_PER_BLOCK 512
 
 /* Position last seen, so the HALT->STBY EDGE can be caught: it is the
  * transition, not the level, that releases reset and starts the
  * bootstrap. */
 static uint32_t g_prevMode = 0;
 static bool g_modeReported = false;
+
+/* The firmware IPL, driven from the panel's IPL position.
+ *
+ * Only when no .fcm was named.  With one, the image came from a file and
+ * reloading it off the tape would silently replace what the run was asked
+ * to execute -- so that case behaves exactly as it always has.
+ *
+ * Table 2-2 splits what one might expect to be a single act across two
+ * controls: step 10 (GPC IPL - P/R) fills memory and reads the bootstrap
+ * in, and step 11 (GPC to STBY) is what releases reset and lets it run.
+ * They are kept apart here for the same reason, which is not pedantry:
+ * FCMBOOT's External Zero handler sets the WAIT bit in its own System
+ * Reset PSW (FCMBOOT.asm, `OST R5,FCMBSYRS+2`), so a machine that has
+ * already booted parks on the next release rather than re-running the
+ * mover.  Re-executing is possible only because a fresh IPL puts a
+ * pristine copy back.  Collapsing the two would make that unreachable. */
+static void firmware_ipl(BatchRunner *r, uint32_t mode) {
+    if (r->opts->fcmPath) return;
+    if (!r->mmuModel) {
+        fprintf(stderr, "MODE: IPL, but no mass memory is attached; "
+                        "nothing to read a bootstrap from\n");
+        return;
+    }
+    int wantUnit = (mode & MODE_SRC_MM2) ? 2 : 1;
+    int haveUnit = mmumodel_bus(r->mmuModel) == 19 ? 2 : 1;
+    if ((mode & (MODE_SRC_MM1 | MODE_SRC_MM2)) && wantUnit != haveUnit) {
+        fprintf(stderr, "MODE: IPL source is MM%d but the attached unit is "
+                        "MM%d; reading it anyway\n", wantUnit, haveUnit);
+    }
+    size_t cap = (size_t)BOOT_ALLOC_BLOCKS * MM_HALFWORDS_PER_BLOCK;
+    uint16_t *image = calloc(cap, sizeof *image);
+    if (!image) return;
+    int blocks = mmumodel_read_blocks(r->mmuModel, BOOT_TRACK, BOOT_FILE,
+                                      BOOT_SUBFILE, BOOT_BLOCK,
+                                      BOOT_ALLOC_BLOCKS, image);
+    if (blocks <= 0) {
+        fprintf(stderr,
+                "MODE: IPL, but this tape carries no bootstrap at the "
+                "FMAIPL2 allocation (file %d/track %d/subfile %d/block %d).\n"
+                "      tools/stamp_bootstrap_on_tape.py writes one there.\n",
+                BOOT_FILE, BOOT_TRACK, BOOT_SUBFILE, BOOT_BLOCK);
+        free(image);
+        return;
+    }
+    uint32_t nhw = (uint32_t)blocks * MM_HALFWORDS_PER_BLOCK;
+    ageharness_firmware_ipl(&r->age, image, nhw);
+    free(image);
+    fprintf(stderr, "MODE: IPL; memory filled, bootstrap read from MM%d "
+                    "(%d blocks, %u halfwords) to 0x00000\n",
+            haveUnit, blocks, nhw);
+}
 
 /* True when the machine is held in reset and must not execute. */
 static bool mode_switch_held(BatchRunner *r) {
@@ -462,8 +541,23 @@ static bool mode_switch_held(BatchRunner *r) {
     bool published = (driven & MODE_ANY) != 0;
     if (!published) mode = MODE_HALT;
 
+    /* IPL IS NOT A MODE-SWITCH POSITION.  The mode switch is HALT / STBY /
+     * RUN; the GPC IPL pushbutton is a SEPARATE momentary control, and it
+     * is live only while the switch is in HALT -- Table 2-2 puts "GPC to
+     * HALT mode" at step 4 and "GPC IPL - P/R" at step 10, with HALT still
+     * standing.  So its bit is not exclusive of HALT's, it DEPENDS on it,
+     * and the two are asserted together.  Pressing it in STBY or RUN is
+     * not a thing the panel can do to a running machine. */
     if (mode != g_prevMode) {
-        if ((g_prevMode & MODE_HALT) && (mode & MODE_STBY)) {
+        bool iplEdge = (mode & MODE_IPL) && !(g_prevMode & MODE_IPL);
+        if (iplEdge && (mode & MODE_HALT)) {
+            /* The pushbutton, on its press: pressing it again re-IPLs,
+             * and holding it down does not repeat. */
+            firmware_ipl(r, mode);
+        } else if (iplEdge) {
+            fprintf(stderr, "MODE: IPL pressed but the mode switch is not "
+                            "in HALT; ignored\n");
+        } else if ((g_prevMode & MODE_HALT) && (mode & MODE_STBY)) {
             /* The release.  Reload the whole PSW pair from the System
              * Reset vector, which is what hands control to FCMBOOT. */
             cpu_reset(&r->age.gpc.cpu);
@@ -473,7 +567,7 @@ static bool mode_switch_held(BatchRunner *r) {
         } else if (mode & MODE_HALT) {
             fprintf(stderr, "MODE: HALT; CPU held in reset%s\n",
                     published ? "" : " (no crew panel heard yet)");
-        } else if (mode != 0) {
+        } else if (mode & (MODE_RUN | MODE_STBY)) {
             fprintf(stderr, "MODE: %s\n",
                     (mode & MODE_RUN) ? "RUN" : "STBY");
         }
@@ -481,6 +575,8 @@ static bool mode_switch_held(BatchRunner *r) {
         g_modeReported = true;
     }
     (void)g_modeReported;
+    /* HALT alone decides this.  IPL cannot be pressed out of HALT, so a
+     * machine being IPLed is already held by the switch itself. */
     return (mode & MODE_HALT) != 0;
 }
 
