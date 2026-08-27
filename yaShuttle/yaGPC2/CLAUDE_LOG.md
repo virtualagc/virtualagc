@@ -902,3 +902,57 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   reaches upper memory by some path other than the in-loop FCMMOVE at IPL;
   or FCMNEXTS is not zero-based at the start of a phase load, which I
   verified for OUR run but never for a real one.
+
+### [2026-08-27] Target: [problems.md]
+- THE MECHANISM IS PARITY OF THE CUMULATIVE LOAD-BLOCK COUNT, AND OUR PHASE
+  2 HAS THE WRONG PARITY.  This is the answer, and it makes flight
+  software, emulator and mmbstamp all correct.
+- STRUCTURE I HAD NEVER READ: FCMINSSL's top level is a loop over PHASES.
+      LFXI R4,FCMNUMPH        NUMBER OF PHASES TO LOAD   (FCMNUMPH EQU 3)
+      DO FROM=(R4)
+        ... FCMUPROT over the LBs ...
+        EXECUTE FCMINMMR,R7   LOAD PHASE FROM THE MMU
+        ... FCMRPROT over the LBs ...
+        ... advance to next phase descriptor ...
+      ENDDO
+  FCMINMMR is PROC lines 457-893 -- so everything I had been reading at
+  582-800 is INSIDE it, called once per phase.  The three phases are 2, 13
+  and 3, in the phase table's own order after phase 10.
+- FCMNEXTS/FCMCURRS LIVE IN THE WORK AREA, WHICH IS ZEROED ONCE BEFORE THE
+  PHASE LOOP (ZH 0(R5,R1), "RESET/ZERO EACH WORK AREA HALFWORD"), NOT per
+  phase.  SO THE STRUCT ALTERNATION RUNS CONTINUOUSLY ACROSS ALL THREE
+  PHASES.  That is the fact everything turns on and I had assumed the
+  opposite.
+- AND THERE ARE EXACTLY TWO UPPER-MEMORY BLOCKS IN THE WHOLE SYSTEM, both
+  confirmed NOT reserved (FCMRESRV EQU X'2000'; real flags 8690 and 86a0
+  have that bit clear, so they really are loaded and really do call
+  FCMMOVE):
+      phase 13   block  2 of  2
+      phase  3   block 10 of 10
+  With P2 = phase 2's load-block count, and block N using struct
+  (N-1+preceding) mod 2:
+      phase 13 block 2  -> (P2+1) mod 2   needs 0  =>  P2 MUST BE ODD
+      phase  3 block 10 -> (P2+11) mod 2  = 0 when P2 odd   ✓
+  So BOTH upper-memory moves land on FCMCTXT1, the EVEN struct, IF AND ONLY
+  IF PHASE 2 HAS AN ODD NUMBER OF LOAD BLOCKS.  The odd-addressed FCMCTXT2
+  is then never used for an above-128K move, and the fullword read never
+  happens at an odd address.  The flight software is correct.
+- OURS HAS 24 -- EVEN.  And the three adjacent same-protection pairs I found
+  earlier and DISMISSED as "cannot cause this failure" are exactly the
+  discrepancy:
+      #3/#4    0x2ea6 +1164 = 0x3332, both flags 8600, 1168 total
+      #8/#9    0x8000 + 430 = 0x81ae, both flags 8620, 5542 total
+      #13/#14  0xea76 +1512 = 0xf05e, both flags 8630, 3050 total
+  All three are adjacent with identical protection and well under the
+  16384-halfword cap, which is precisely mmbstamp's own documented merge
+  condition.  24 - 3 = 21, ODD.
+  (#10/#11 is legitimately unmerged: 6704+12140 = 18844 exceeds the cap.)
+- SO THE DEFECT IS IN THE MERGE STEP, not in the partition rules, not in
+  the link, and not in the flight software.  I had the evidence for it
+  hours ago and set it aside because I could not see how a block COUNT
+  could matter -- the answer being that it is not the count but its PARITY,
+  through a struct alternation that never resets.
+- NEXT: find why derive_load_blocks does not merge those three pairs
+  (deck_standalone? bank boundary? a cap measured wrongly?), fix it, and
+  confirm phase 2 comes out with an odd block count and the boot proceeds
+  past FCMMOVE.
