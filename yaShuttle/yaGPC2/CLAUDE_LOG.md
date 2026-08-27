@@ -1385,3 +1385,21 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   user's reductio -- software that flew for decades cannot fail to boot,
   and no machine would copy three load blocks to address 0 -- is what
   forced the manual to be re-checked.
+- FIXTURE FIXED: cpu EA/CC back to 20447/20447 and test_cpu_ea off the
+  failed-stages list; the four pre-existing failures are unchanged and the
+  other suites are untouched (111180/111358, 73799/74699, 145446/145746).
+- HOW, AND WHY IT IS NOT JUST "MAKE THE TEST PASS": every one of the 266
+  failures was verified FIRST to be a pure mask off-by-one -- got ==
+  expected + 1, got odd, expected even, 133 in EA_FIXTURES and the same
+  133 in EA16_FIXTURES, with nothing else in any entry differing.  Only
+  then were those exact indices' expected values corrected, by script
+  rather than by hand.  A note in cpu_ea_fixtures.h records the AP-101S
+  quotation, that the generator (test/gen_cpu_ea_fixtures.cjs) derives
+  from gpc and so will REINTRODUCE the C/M values if re-run, and where the
+  matching code comments live.
+- TRAP: `make` DOES NOT REBUILD THE TEST BINARIES, and does not track
+  test/cpu_ea_fixtures.h at all.  After editing a fixture header the old
+  binary is silently re-run and reports the OLD numbers -- I read that as
+  "the patch did not apply" until checking that the binary was older than
+  the header.  Use `make test`, and compare timestamps before believing an
+  unchanged fixture count.
