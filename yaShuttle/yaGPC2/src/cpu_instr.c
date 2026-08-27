@@ -1600,8 +1600,32 @@ static void exec_MVH(CPU *t, DInstr *v) {
         uint32_t dsr = r2val & 0xf;
         srcAddr = (dsr << 15) | srcAddr;
     }
+    /* AP-101S instruction set, 9.4 MOVE HALFWORD OPERANDS: "Bits 1 through
+     * 15 of the general register specified by R1 contain the offset of the
+     * destination address within a specified sector.  When bit 0 in R1 is
+     * a one, the destination address is determined by concatenating the
+     * DSR value in the PSW with the offset.  WHEN BIT 0 IN R1 IS A ZERO,
+     * THE DESTINATION ADDRESS IS DETERMINED BY CONCATENATING THE VALUE IN
+     * THE CORRESPONDING DSE REGISTER WITH THE OFFSET."
+     *
+     * The DSE arm was missing: a zero bit 0 used the bare 16-bit offset,
+     * i.e. an implied sector 0.  That is what sent FCMINSSL's FCMMOVE to
+     * 0x00000 instead of sector 8 -- it does `LXAR R3,R3  SET DSE TO
+     * REQUIRED SECTOR` precisely to put the target sector in R3's DSE, and
+     * then MVH ignored it.  (The R2/source arm below already followed the
+     * same section's rule for the source and is unchanged.)
+     *
+     * This fix was tried once before and reverted as unsupported: DSE(R1)
+     * measured zero at the failing move.  It measured zero because the
+     * parameters FCMMOVE had loaded were themselves corrupt, so LXAR was
+     * handed a zero constant.  The premise is sound; the earlier evidence
+     * was downstream of a different defect. */
     if (destAddr & 0x8000) {
         destAddr = (psw_get_dsr(&t->psw) << 15) | (destAddr & 0x7fff);
+    } else {
+        uint32_t dse = registerfile_get_dse(
+            &t->regFiles[psw_get_reg_set(&t->psw)], (int)df_get(v, 'x'));
+        destAddr = (dse << 15) | (destAddr & 0x7fff);
     }
     while (count > 0) {
         count--;

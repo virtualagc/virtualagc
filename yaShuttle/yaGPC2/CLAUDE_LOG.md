@@ -1004,3 +1004,60 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
     * ours is 24, even, because our phase 2 is missing upper-memory content
       the real one has.  THE FLIGHT SOFTWARE, mmbstamp, lnk101 AND THE
       EMULATOR ARE ALL CORRECT.
+
+### [2026-08-27] Target: [problems.md]
+- THE QUICK PARITY TEST WORKED, AND IT UNMASKED A SECOND DEFECT IN SERIES.
+  The user proposed flipping the parity cheaply to see whether the
+  roadblock clears.  Dropping a phase is the wrong lever -- the failure is
+  inside phase 2's own load, at its block 20 of 24, and FCMNUMPH is an EQU
+  needing a rebuild -- but a TWO-HALFWORD EDIT does it: swap FCMBCTXT's
+  Y(FCMCTXT1)=7338 and Y(FCMCTXT2)=733F on the tape.  No change to block
+  counts, tape layout or code, and the load-block checksum is unchanged
+  because swapping two halfwords does not change their sum.
+- IT PROVED THE PARITY MECHANISM.  Probing at 072a4 (which fires AFTER the
+  L at 072a3, so R3 there IS the load's result):
+      unswapped  R3 = 00000000   the misaligned read
+      swapped    R3 = 00000008   correct, [TGTA=0000][TGTS=0008]
+- BUT THE BOOT STILL FAILED IDENTICALLY -- same error, same address, same
+  word counts, same PROTVIOL #5 at NIA=072ad addr=0051d.  So the alignment
+  was NOT the whole story, and that negative result is what found the rest.
+- AT THE MVH (072ac) R3 = 00001000 IN BOTH RUNS: destination offset 0000 in
+  the high half, count 1000 = 4096 in the low.  THE SECTOR IS NOT IN R3 AT
+  ALL.  FCMMOVE does `LXAR R3,R3  SET DSE TO REQUIRED SECTOR` -- which our
+  exec_LXAR correctly implements, putting 8 in R3's DSE and 0 in its high
+  half -- and then `IHL R3,TFCMCNT` fills the low half with the count.  The
+  target sector lives ONLY in DSE(R3).
+- AND exec_MVH NEVER LOOKED AT IT.  It expanded the destination only when
+  bit 0 of R1 was set, via the PSW's DSR, and otherwise used the bare
+  offset, i.e. an implied sector 0.  THE AP-101S MANUAL STATES THE RULE
+  OUTRIGHT, section 9.4 MOVE HALFWORD OPERANDS:
+      "Bits 1 through 15 of the general register specified by R1 contain
+       the offset of the destination address within a specified sector.
+       When bit 0 in R1 is a one, the destination address is determined by
+       concatenating the DSR value in the PSW with the offset.  WHEN BIT 0
+       IN R1 IS A ZERO, THE DESTINATION ADDRESS IS DETERMINED BY
+       CONCATENATING THE VALUE IN THE CORRESPONDING DSE REGISTER WITH THE
+       OFFSET."
+  (The R2/source arm -- bit 0 zero means an implied DSR of all zeros, bit 0
+  one means the DSR in bits 28-31 -- we already had right, which is why the
+  SOURCE resolved correctly to 0x3032a while the destination went to 0.)
+- FIXED, and this is the same change I reverted earlier as unsupported.
+  It was unsupported THEN because DSE(R1) measured zero at the failing
+  move -- and it measured zero because the parameters FCMMOVE had loaded
+  were themselves corrupt, so LXAR was handed a zero constant.  The
+  premise was sound; my evidence was downstream of a different defect.
+- VERIFIED, three ways:
+    * the wild-branch death (`invalid instruction 0xc6c6 at 0x0a3b`) is
+      GONE in both runs -- earlier MVHs now land in their correct sectors
+      instead of over low memory, so PCH at 0x0a3b is no longer overlaid
+      and the protection-violation handler survives;
+    * with the parity worked around, FCMMOVE is entered TWICE instead of
+      once -- the first call (even struct, R0=7338) SUCCEEDS and the boot
+      goes on to a second, which lands on the odd struct as predicted;
+    * every fixture count is unchanged -- 111180/111358, 73799/74699,
+      145446/145746, 20447/20447, and the same four pre-existing failures.
+      The suites do not exercise MVH with a nonzero DSE at all, which is
+      consistent with gpc carrying the same gap.
+- SO THE PARITY ROADBLOCK IS NOW THE ONLY THING LEFT between us and the
+  phase-2 load completing, which is exactly the justification the user was
+  after for building the remaining phases.
