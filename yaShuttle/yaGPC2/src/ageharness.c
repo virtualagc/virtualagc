@@ -1,4 +1,5 @@
 #include "ageharness.h"
+#include "discretes.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -229,6 +230,15 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
      * see halucp.c's effective_line_width(). */
     if (opts->lineWidthSet) age->halUCP.lineWidth = atoi(opts->lineWidth);
     age->gpc.cpu.fcosMode = opts->fcos;
+    /* Discrete-input overrides, before anything reads them.  These set the
+     * LOCAL value only; a bit an external publisher drives still wins, so
+     * --discretes and a crew panel behave exactly as before. */
+    if (opts->discreteA)
+        iop_set_discrete_in(&age->gpc.iop, DISCRETES_REG_A,
+                            (uint32_t)strtoul(opts->discreteA, NULL, 16));
+    if (opts->discreteB)
+        iop_set_discrete_in(&age->gpc.iop, DISCRETES_REG_B,
+                            (uint32_t)strtoul(opts->discreteB, NULL, 16));
     /* --timing; see timing.h.  Validated in opts_parse(), so anything
      * other than "pass2" here is the section-17 default. */
     age->gpc.cpu.timingPass2 = (strcmp(opts->timing, "pass2") == 0);

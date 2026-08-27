@@ -645,3 +645,39 @@ the documents themselves.)
       SSL70    2d38  SSL75 2d46  SSLXIT 2d70  SSLRTN 2d72  STERROR 180c
       LOADCHK  2c8b  CM4KYBD 21cc  CM4FMAT 271f  RTNEX0 14e4
       SSLSTART 6fbc  SSLEND 72e2  SSLENGTH 7398  SSLCKSUM 739b
+
+### [2026-08-26] Target: [HANDOFF-FCMBOOT.md]
+- ROOT CAUSE FOUND AND FIXED, and the earlier retraction was itself wrong to
+  give up on: SSLENGTH really is the defect.  With it zero, SSLCHECK's
+  `BCT R3,SSL30` decrements BEFORE testing, so a count of 0 underflows and
+  the checksum loop never ends.  Measured deterministically: SSL30 HIT,
+  SSL60 (the instruction after the BCT) NEVER.  It is not that the checksum
+  mismatches -- the comparison is never reached at all.
+- WITH SSLENGTH AND SSLCKSUM STAMPED the whole chain completes:
+      SSL30 HIT   SSL60 HIT   SSL70 HIT   SSL62 not hit   FCMINSSL HIT
+  and the load actually happens:
+      BITE STATUS / POSITION 3/4/0 / EXTENDED BLOCK / READ
+      mmu1: read 154 block(s) from 3/4/0/0     <- PASS area 1 phase 2
+  That is the read that never occurred, on any earlier run, ever.
+- THE SPAN IS SSLSTART..SSLEND, 806 halfwords, from the link's own SSLEND
+  equ at 0x72E2 -- NOT SSLSTART..FCMCKSUM (988), which I tried first.
+  CAUTION FOR ANYONE REVISITING: the checksum cannot validate the span,
+  because the value is computed FROM the span, so any choice is
+  self-consistent and will pass.  SSLEND is the principled basis, not the
+  passing test.  A real MMB-built tape would settle it.
+- WHY EARLIER STAMPING "DID NOT WORK": it was tested on the networked,
+  real-time, gpcmd-driven vehicle, which is NONDETERMINISTIC.  The same
+  breakpoint hit on one run and missed on the next.  Every conclusion
+  before the deterministic harness existed should be treated as unproven.
+- THE DETERMINISTIC HARNESS, which is the reusable part:
+      ./yaGPC2 run --ipl --deu-model --mmu-model TAPE --discrete-b 20000000 \
+          --max-steps N [--break=ADDR] BOOT-stamped.fcm
+  No crew panel, no gpcmd, no --real-time: two runs are byte-identical.
+  --discrete-b 20000000 is new (GPC 1, NO CRT selected) and is what makes
+  the NON-MENU path reachable -- SSL loads by itself, no keyboard needed,
+  so the whole question can be studied without MEDS.
+- NEXT DEFECT, ALREADY VISIBLE: the read is commanded but not collected.
+  wordsOut 107012 against wordsTaken 28164 -- and 28164 is essentially just
+  the 55-block GPCIPL read (28160).  So phase 2's 78848 words stream past
+  and the bus program takes almost none of them.  That is the next thing to
+  chase, and it is ours, not the tape's.

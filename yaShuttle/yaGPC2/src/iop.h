@@ -340,6 +340,16 @@ void iop_reset_discrete_inputs(IOP *iop);
  * constant ready bit hangs it.  See iop.c for the full account. */
 uint32_t iop_discrete_in_a(const IOP *iop);
 
+/* Override the LOCAL value of a discrete input register -- what this GPC
+ * reads when nobody is publishing that bit on the discretes bus.  The
+ * defaults describe one particular vehicle configuration (GPC 1, IPL
+ * source MM1, CRT 1 selected), and some of the flight software's paths
+ * are only reachable from a different one: with no CRT selected there is
+ * no IPL menu at all, and SSL takes the default-load path instead of
+ * waiting for a keyboard item.  Reaching that from a crew panel needs a
+ * panel, which makes a run wall-clock dependent; this does not. */
+void iop_set_discrete_in(IOP *iop, int reg, uint32_t value);
+
 /* Discrete inputs B (33-40) as READ DISCRETE INPUTS B reports it.  Carries
  * no derived bits of its own, but anything being published on the discrete
  * bus overrides the stored value the same way it does for A. */

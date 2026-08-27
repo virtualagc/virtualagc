@@ -177,6 +177,8 @@ typedef struct {
      * holds for them, so this only ever adds sources of truth.  Default
      * false: no socket is opened and the registers behave as before. */
     bool discretes;                   /* default false */
+    char *discreteA;                  /* hex override, default NULL */
+    char *discreteB;                  /* hex override, default NULL */
 
     /* Serve the mass memory bus from an in-process model reading this
      * .mmv volume, instead of from whatever is on the wire.  Composes

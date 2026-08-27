@@ -176,6 +176,11 @@ static uint32_t iop_discrete_overlay(int reg, uint32_t local) {
     return (local & ~driven) | (discretes_value(reg) & driven);
 }
 
+void iop_set_discrete_in(IOP *iop, int reg, uint32_t value) {
+    register_set32(reg == DISCRETES_REG_B ? &iop->regDiscreteInB
+                                          : &iop->regDiscreteInA, value);
+}
+
 uint32_t iop_discrete_in_a(const IOP *iop) {
     uint32_t stored = register_get32(&iop->regDiscreteInA);
     uint32_t v = stored & ~(DISCRETE_A_MM1_READY | DISCRETE_A_MM2_READY);

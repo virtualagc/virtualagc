@@ -132,6 +132,14 @@ static const char *HELP_TEXT =
 "                                  is taken over (default: none)\n"
 "  --mmu-unit <n>                   which mass memory the model is, 1 or 2\n"
 "                                  (bus MM1/BCE 18 or MM2/BCE 19; default 1)\n"
+"  --discrete-a <hex>              override discrete input A's local value\n"
+"                                  (default 0A000000: MM1 IPL source, MM1\n"
+"                                  ready).  Bits anyone publishes on the\n"
+"                                  discretes bus still win over this.\n"
+"  --discrete-b <hex>              override discrete input B's local value\n"
+"                                  (default 21000000: GPC 1, CRT 1).  Clear\n"
+"                                  bits 6-7 for NO CRT selected, which is\n"
+"                                  what makes it a non-menu IPL.\n"
 "  --discretes                      Subscribe to the discrete-input bus, so a\n"
 "                                  mass memory asserting its own READY, or the\n"
 "                                  crew panel in yaShuttle/discretePanel/,\n"
@@ -275,6 +283,10 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->fcos = true;
         } else if (tok_is(tok, "--no-fcos", &n)) {
             (void)n; opts->fcos = false;
+        } else if (tok_is(tok, "--discrete-a", &n)) {
+            opts->discreteA = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--discrete-b", &n)) {
+            opts->discreteB = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--ipl", &n)) {
             (void)n; opts->ipl = true;
         } else if (tok_is(tok, "--no-ipl", &n)) {
