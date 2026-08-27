@@ -394,28 +394,6 @@ static const BceOpEntry OPS[] = {
     {"#SST", "0101mddddddddddd", exec_SST},
     {"#LBR", "11110010000000aaaaaaaaaaaaaaaaaa", exec_LBR},
     {"#LBR@", "11111010000000aaaaaaaaaaaaaaaaaa", exec_LBR_at},
-    /* Opcode zero is a BRANCH, and its encoding is exactly an address
-     * constant: fourteen zero opcode bits then the same 18-bit address
-     * field #BU uses.  That is not a coincidence -- it is what lets the
-     * flight software build a jump table out of `DC A(...)`:
-     *
-     *      FCMBCEBT EQU   *-36                MMU 1/2 BRANCH TABLE
-     *               DC    A(FCMIBLK1)                          BUS 18
-     *               DC    A(FCMIBLK1)                          BUS 19
-     *
-     * `#BU@ FCMBCEBT` resumes execution at operand + 2*bus number (the
-     * POO's own words, direct, no indirection), which lands on one of
-     * those entries -- so the entry must itself be executable, and
-     * decoding A(FCMIBLK1) here yields a branch to FCMIBLK1, the receive
-     * sequence the read program needs.  Without this the BCE decodes the
-     * table's leading 0000 as unknown, never advances, and every halfword
-     * of the transfer it just commanded streams past uncollected.
-     *
-     * The mnemonic is a guess -- the POO's name for opcode 0 has not been
-     * checked -- but the encoding and the effect are forced by the table
-     * above.  gpc does not implement it either, and its BCE opcode set is
-     * otherwise identical to this one. */
-    {"#B", "00000000000000aaaaaaaaaaaaaaaaaa", exec_BU},
     {"#BU", "11110000000000aaaaaaaaaaaaaaaaaa", exec_BU},
     {"#BU@", "11111000000000aaaaaaaaaaaaaaaaaa", exec_BU_at},
     {"#WIX", "00100ddddddddddd", exec_WIX},

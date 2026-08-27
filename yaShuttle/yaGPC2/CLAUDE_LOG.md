@@ -780,3 +780,33 @@ the documents themselves.)
   is opcode 0 a defined BCE instruction, and is it a branch?  Everything
   above is forced by the flight software's own table construction, not read
   from the manual.
+
+### [2026-08-27] Target: [problems.md]
+- BACKED OUT the invented BCE opcode 0.  User: "0x0000 is `ADD R0,0(R0)`."
+  Verified in our own CPU table -- pattern 00000xxxddddddbb, so 0x0000 is
+  A R0,0(R0).  My basis for calling opcode 0 a branch was inference from
+  the branch table's contents, not the manual, and it is contradicted.
+- AND A MEASUREMENT I GOT WRONG, which matters more than the change.  I
+  told the user the 300 #BU@ fixtures "were already failing, 300 with and
+  without the change, verified by stashing."  THEY WERE NOT.  With #BU@
+  direct -- the POO's behaviour, and what the code has always done -- all
+  300 PASS: the suite is 74099/74699, and the only BCE failures are 300
+  #MOUT@ and 300 #MIN@.  My dereference broke them and I reported the
+  opposite.  The stash comparison produced identical numbers because the
+  rebuild between the two halves did not take, so I measured one binary
+  twice and called it a control.  A control that agrees to the digit with
+  the thing it is controlling for is a control that did not run.
+- SO THE PUZZLE IS OPEN AGAIN, and it is worth stating exactly:
+    * The POO says #BU@ resumes at operand + 2*BCE#.  Direct.
+    * FCMINSSL points it at FCMBCEBT, whose entries are `DC A(FCMIBLK1)`.
+    * For BCE 18 that lands on 0x72CC, holding 0000 72F2.
+    * The BCE decoder has 21 opcodes and none matches 0000, so it parks
+      there and the transfer it just commanded is never collected.
+  One of those four must be wrong.  The entry is an address constant, not
+  a BCE instruction; either the BCE does something with 0000 that is not
+  in our table (and not the CPU's ADD, a different decoder), or #BU@ does
+  reach through it after all, or our table address is not the one the real
+  build would produce.
+- BOTH CANDIDATE FIXES PRODUCED IDENTICAL CORRECT BEHAVIOUR -- dereference
+  at #BU@, or opcode 0 as a branch -- which is why neither can be chosen on
+  the evidence of the boot working.  Only the POO can separate them.
