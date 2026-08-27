@@ -135,12 +135,20 @@ static void exec_BU_at(IOP *t, DInstr *v) {
      * PC, and spun there while every halfword of the transfer it had just
      * commanded streamed past uncollected.
      *
-     * NOTE: 300 #BU@ fixtures in test_iop_bce_exec encode the
-     * non-dereferencing behaviour and fail with this.  They agree with
-     * gpc, whose BCE opcode set is identical to ours and which is
-     * documented here as non-authoritative; they cannot in any case
-     * exercise a fetch, since their memory image is 4096 halfwords and
-     * the addresses involved are far above it. */
+     * NOTE: 300 #BU@ fixtures in test_iop_bce_exec fail -- but they fail
+     * WITH THE DEREFERENCE AND WITHOUT IT ALIKE, measured 2026-08-27 with
+     * the control verified functionally (wordsTaken 98,820 with the fetch,
+     * 28,164 without, so the rebuild demonstrably took).  They encode a
+     * THIRD behaviour, NIA = a with no bus offset at all, which neither
+     * this code nor gpc produces, so they cannot arbitrate between them.
+     * Nor could they exercise a fetch in principle: their memory image is
+     * 4096 halfwords and the addresses involved sit far above it.
+     *
+     * An earlier revision of this comment said they "fail with this",
+     * implying they pass without it.  They do not.  gpc is direct here,
+     * but yaGPC2 was ported from gpc, so that agreement is inheritance
+     * rather than confirmation -- the flight software above is the
+     * evidence, not either implementation. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
     iop_set_nia(t, iop_g_eaf(t, addr) & 0x3ffffu);
 }

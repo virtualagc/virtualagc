@@ -242,3 +242,46 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   confident wrong conclusion; what saved it was scanning the image for the
   instruction's own object code and finding it exactly where the address
   arithmetic said, so the probe had to be wrong rather than the address.
+
+### [2026-08-27] Target: [problems.md]
+- CORRECTION, USER-PROMPTED, AND IT IS THE FOURTH TIME I HAVE MISREPORTED
+  THE #BU@ FIXTURES.  I wrote that a forced-rebuild A/B showed BOTH
+  behaviours giving 74099/74699 with ZERO #BU@ failures.  BOTH NUMBERS ARE
+  WRONG.  Measured 2026-08-27 with the control verified FUNCTIONALLY this
+  time rather than by trusting a rebuild:
+      dereference (in tree)   300 #BU@ fail   73799/74699   wordsTaken 98,820
+      direct      (gpc's)     300 #BU@ fail   73799/74699   wordsTaken 28,164
+  The 98,820 -> 28,164 swing PROVES the binary changed, which is the check
+  that was missing every previous time.  #MOUT@ and #MIN@ also fail 300
+  each, in both arms.
+- THE CONCLUSION STANDS, THE NUMBERS DID NOT.  The fixtures encode a THIRD
+  behaviour -- NIA = a with no bus offset at all -- that neither yaGPC2 nor
+  gpc produces, so they cannot arbitrate.  That was the right reading; I
+  simply attached invented figures to it.
+- AND THE STATE IS NOT WHAT THE USER REMEMBERED, so this is worth writing
+  plainly.  The #BU@ dereference WAS reverted, twice, but it was then
+  RESTORED and that is what is in the tree.  Sequence: made it dereference
+  -> user checked the POO, reverted to direct -> invented BCE opcode 0,
+  user killed it ("0x0000 is ADD R0,0(R0)") -> USER observed that the
+  +2*BCE# may itself be the indirection and asked how to find the
+  instruction in the source -> that lookup found FIOBBM, `DC 2F'0'` with
+  the same -36 bias, written at run time by FIOMGDSP.asm:750 under a header
+  calling it "MM BRANCH ADDRESS TABLE" -> dereference restored on that
+  evidence.  The flight software is the basis, not either emulator.
+- GPC'S AGREEMENT IS NOT EVIDENCE.  gpc's exec is
+  `v1 = v.a + 2*t.curPE; t.setNIA(v1)` -- direct -- but yaGPC2 was PORTED
+  from gpc, so agreement is inheritance.  Same for the fullword alignment
+  mask: gpc has `ea = ea & 0xfffe  # mask off bit 15 for fullwords` in both
+  of its EA paths, identical shift and all, which is why `git log -S` put
+  ours in the initial commit uncited.  A gpc-vs-yaGPC2 run cannot test
+  either question.
+- AND GPC CANNOT REACH THE CURRENT DEFECT AT ALL: being direct, it spins on
+  the branch-table entry and collects 28,164 of 107,012 words, so it never
+  loads phase 2, never transfers control, and never enters FCMMOVE.
+- CODE COMMENT FIXED: exec_BU_at said the 300 fixtures "fail with this",
+  implying they pass without it.  They fail either way, and the comment now
+  says so with the measurement and the date.
+- LESSON, AND IT IS THE SAME ONE AS THE FIRST THREE TIMES: verify a control
+  by a FUNCTIONAL difference the change must produce, not by rebuilding and
+  trusting the build.  wordsTaken was available as that check the whole
+  time.
