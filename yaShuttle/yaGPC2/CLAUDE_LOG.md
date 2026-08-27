@@ -327,3 +327,31 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - YAGPC_BUATTRACE KEPT, printing BOTH candidate targets per execution.
   This decision has been misreported four times; a switch that shows the
   divergence in one line is worth its keep.
+
+### [2026-08-27] Target: [problems.md]
+- CORRECTION TO THE DIVERGENCE ANSWER, user-prompted and right: the
+  #BU@ divergence is GATED BEHIND THE SSL CHECKSUM, so the previous
+  statement carried an unstated precondition.  Measured both ways:
+      UNSTAMPED tape (SSLENGTH = 0)   0 #BU@ executions, wordsTaken 28,162
+      STAMPED tape                    1 #BU@ execution,  wordsTaken 98,820
+- SO WITH THE SSL IMAGE AS WE ORIGINALLY BUILT IT, gpc AND yaGPC2 DO NOT
+  DIVERGE AT ALL.  Both hang identically inside SSLCHECK's checksum loop,
+  long before any BCE program is started.  The divergence only becomes
+  REACHABLE once SSLENGTH/SSLCKSUM are stamped -- which is what lets SSL70
+  run, FCMINSSL be entered, the receive sequence be written into FCMIBLK1,
+  the BCE PC be loaded and the MSC started.  Correct ordering:
+      SSLCHECK -> SSL70 -> FCMINSSL -> build FCMIBLK1 -> start BCE
+        -> BCE 18 runs FCMBCMMR -> #BU@ FCMBCEBT   <- divergence
+- ONE PRECISION THAT CUTS THE OTHER WAY: the branch-table ENTRY is STATIC.
+  FCMBCEBT assembles as DC A(FCMIBLK1), so the dereference yields 0x72F2
+  whether or not the work area has been built.  What the dynamic build
+  supplies is the CODE AT that address, not the address.  So #BU@ does not
+  need the work area to RESOLVE, only to have somewhere useful to land.
+- AND THIS IS WHY THE #BU@ GAP SURVIVED: it sat unreachable behind the
+  checksum defect, so NO #BU@ HAD EVER EXECUTED in this project until this
+  session.  It is also the honest reason the old "same infinite loop, same
+  address, identical iteration counts" gpc-vs-yaGPC2 comparison found
+  nothing -- the two were agreeing UPSTREAM of the only instruction at
+  which they differ.  A comparison that stops short of the divergence
+  cannot see it, which is a sharper version of the section-8 lesson than
+  "two emulators agreeing proves nothing about their shared input".
