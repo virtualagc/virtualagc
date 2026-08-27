@@ -380,6 +380,26 @@ static void exec_DLY(IOP *t, DInstr *v) {
     if (iop_bce_delay(t, count)) iop_incr_nia(t, 1);
 }
 
+/* #WAT stops the BCE and PARKS THE PC ONE PAST ITSELF.  BCE POO section
+ * 2.2 (IBM-6246556A part 3):
+ *
+ *   "a BCE's Program Counter need not always be set before the MSC sets
+ *    the BCE to busy, since the BCE Wait instruction (#WAT) when executed,
+ *    leaves the PC pointing to the next sequential instruction.  This next
+ *    instruction may be programmed as a simple branch to the beginning of
+ *    the next BCE program segment.  In this case, the MSC need only
+ *    execute an SIO instruction to restart the BCE at the next segment."
+ *
+ * So the increment is not bookkeeping, it is the defined behaviour, and it
+ * is what makes that restart idiom possible.  Clearing the Busy/Wait bit
+ * is what actually stops execution -- iop_exec_slice() refuses to step a
+ * processor whose bit is clear -- and only the MSC's SIO can set it again
+ * ("The CPU cannot, however, directly set a BCE's Busy/Wait bit").
+ *
+ * The SSL does NOT use the fall-through-to-a-branch idiom: the halfword
+ * after its #WAT is 0000, and it reloads BCE 18's PC for each program
+ * instead (measured: PC<-07362 = FCMINBCE and PC<-0736c, matching
+ * FCMBCEAD's DC A(FCMBCMMR) / DC A(FCMINMMP) pair). */
 static void exec_WAT(IOP *t, DInstr *v) {
     (void)v;
     iop_proc_set(&t->regBusyWait, t->curPE, 0);

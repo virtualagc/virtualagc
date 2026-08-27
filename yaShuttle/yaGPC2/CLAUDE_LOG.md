@@ -442,3 +442,41 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   OF THAT INSTANT, since FCMINSSL writes #WAT only when R7 = 1, so a given
   buffer's last word changes as buffers are rebuilt.  Countable with
   YAGPC_DISPTRACE (LOADMSCBUSY) against the 8 mass-memory commands.
+
+### [2026-08-27] Target: [problems.md]
+- WHERE EXECUTION GOES AFTER #WAT: NOWHERE.  The BCE enters the WAIT STATE
+  and stops.  BCE POO section 2.2 (IBM-6246556A part 3) states it and also
+  states the PC behaviour our code already had:
+      "a BCE's Program Counter need not always be set before the MSC sets
+       the BCE to busy, since the BCE Wait instruction (#WAT) when
+       executed, leaves the PC pointing to the next sequential
+       instruction.  This next instruction may be programmed as a simple
+       branch to the beginning of the next BCE program segment.  In this
+       case, the MSC need only execute an SIO instruction to restart the
+       BCE at the next segment."
+  Also: "While a BCE is in the Wait state, the CPU may perform PCI/O
+  activity without disturbing the BCE"; "The Busy state may be entered
+  only from the Wait state"; and "The CPU cannot, however, directly set a
+  BCE's Busy/Wait bit" -- only the MSC's SIO.
+- SO exec_WAT WAS ALREADY RIGHT AND IS NOW CITED.  Clearing regBusyWait is
+  what stops execution (iop.c refuses to step a processor whose bit is
+  clear, verified), and iop_incr_nia(t,1) is the DEFINED behaviour rather
+  than bookkeeping -- it is precisely what makes the restart idiom work.
+- AND THE SSL DOES NOT USE THAT IDIOM, which answers the question left open
+  in the previous entry.  The halfword after its #WAT is 0000, not a
+  branch, so the PC must be reloaded per program.  MEASURED with
+  YAGPC_PCTRACE -- BCE 18's PC is loaded five times in a whole boot:
+      30240  t= 2.11s   FCMBOOT's own BCE program (sector 6)
+      3024c  t= 2.31s   FCMBOOT again
+      014d4  t= 4.30s   GPCIPL's all-BCE sweep
+      07362  t=18.46s   FCMINBCE          <- the SSL
+      0736c  t=18.62s   FCMINBCE+10
+  0x7362 is FCMINBCE's start in our link map (18 halfwords long), and the
+  two SSL-era loads at +0 and +10 match FCMBCEAD's own pair,
+  DC A(FCMBCMMR) "MMU 1/2 READ BCE PROGRAM PC" and DC A(FCMINMMP)
+  "MMU 1/2 POSITION TAPE BCE PROGRAM PC".
+- THE WHOLE CHAIN IS NOW ACCOUNTED FOR END TO END: MSC SIO starts BCE 18 at
+  FCMINBCE -> #LBR@ FCMBCEST, #CMD, ... -> #BU@ FCMBCEBT dereferences into
+  FCMIBLK1 -> the dynamically built sequence reads its load block, #SST's
+  its status, and #BU's to FCMIBLK2 -> ... -> the last one #WAT's, parking
+  the BCE with its PC one past the #WAT while the CPU polls FCMINSST.
