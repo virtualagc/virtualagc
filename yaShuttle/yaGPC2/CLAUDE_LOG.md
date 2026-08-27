@@ -627,3 +627,24 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   contradicting POO Figure 2-8 as I read it, or the real MMB emitted far
   fewer HIMEM load blocks than our 24-block reconstruction.  Those are the
   two live branches now; both are testable and neither is in cpu.c.
+- TERMINOLOGY WARNING FOR THE WRITE-UP, because it confused the user and
+  the confusion was mine: "ODD" IS BEING USED FOR TWO UNRELATED THINGS.
+    (a) FCMCTXT2 sits at an ODD ADDRESS, 0x733F, because FCMCTXT1 is
+        DS 7H and 0x7338 + 7 is odd.  This is the only odd address in the
+        story and it is a property of the SOURCE.
+    (b) Load blocks have ODD or EVEN ORDINALS (position 1..24 in the
+        list), and block N uses struct (N-1) mod 2 -- so an EVEN-ordinal
+        block draws FCMCTXT2, the odd-ADDRESSED one.
+  EVERY LOAD BLOCK ADDRESS IS EVEN -- all 24 verified: 0051e 00676 02ea6
+  03332 08000 0809a 0811a 08000 081ae 08000 09a30 0c99c 0ea76 0f05e 08000
+  08000 08254 08000 08000 08000 08000 08298 08000 08010.  Where a block's
+  DATA lands has nothing to do with the bug.  Say "ordinal" and "address"
+  explicitly and never just "odd".
+- AND THE ONE-LINE STATEMENT OF THE BUG: FCMMOVE reads TFCMTGTA+TFCMTGTS as
+  a FULLWORD (they are the address+sector pair LXAR splits), a fullword
+  load ignores address bit 15, so from FCMCTXT2 it reads
+  [FCMCTXT1's last halfword, FCMCTXT2's first] instead -- zeros in our run
+  -- and the move gets dest=0 count=4096 src=0 and overwrites the PASS
+  image just loaded.  Only above-128K blocks call FCMMOVE (they cannot be
+  DMA'd directly and are staged through a low buffer), which is blocks
+  20-24, struct indices 1,0,1,0,1 -- THREE OF FIVE on the bad struct.
