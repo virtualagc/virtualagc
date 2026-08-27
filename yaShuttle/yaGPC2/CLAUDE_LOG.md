@@ -1181,3 +1181,22 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   pointing the same way, produced a confident "blocked on Don" that was
   wrong.  ALWAYS capture the count in a variable and try the switch
   directly, and CHECK THE BINARY EXISTS BEFORE BELIEVING ITS SILENCE.
+- CORRECTION TO THE CORRECTION: the "both report HAL/S REL32V0, so same
+  release" argument I made is WORTHLESS.  That banner comes from the
+  original 2008 XPL/I source, so EVERY port of the compiler prints it.  The
+  compiler is a PORT; only the BUILD DATE distinguishes copies, and by
+  provenance a build from Don's repo can never be ahead of the Virtual AGC
+  archive's.
+- WHICH MAKES THE ROOT CAUSE OF THE WHOLE PHASE-2 GAP A STALE COMPILER, not
+  anything about the corpus, the sources, the tape build or the flight
+  software.  Don's build/halsfc/HALSFC-PASS1 is 2026-07-21; the archive's
+  Source Code/PASS.REL32V0/HALSFC-PASS1 is 2026-08-07 and is upstream of
+  it.  halsc defaults HALSFC_BINDIR to Don's, so the phase build ran the
+  stale port, and 51 of 274 modules abandoned.
+- THE A/B IS CLEAN, one variable: identical con80build command, same
+  --root, same cleaned --out.  Without HALSFC_BINDIR: 70 zero-length
+  objects, link failed.  With it: 0 zero-length, 6/6 displays, 239 objects
+  linked.  That is the control the earlier "blocked on Don" claim never had.
+- MEMORY WRITTEN so this is not rediscovered:
+  feedback_halsfc_bindir_use_virtualagc_archive.md -- set HALSFC_BINDIR to
+  the archive's PASS.REL32V0; never cite the REL32V0 banner as a version.
