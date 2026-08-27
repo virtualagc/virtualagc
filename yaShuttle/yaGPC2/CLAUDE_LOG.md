@@ -648,3 +648,51 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   image just loaded.  Only above-128K blocks call FCMMOVE (they cannot be
   DMA'd directly and are staged through a low buffer), which is blocks
   20-24, struct indices 1,0,1,0,1 -- THREE OF FIVE on the bad struct.
+
+### [2026-08-27] Target: [problems.md]
+- WHAT FCMMOVE ACTUALLY SPANS -- asked, and read out of the source rather
+  than assumed.  IT TAKES ONE CONTEXT STRUCT.  Its documented input is
+  "R0 : ADDRESS OF CURRENT BCE_CONTEXT_STRUCT", and the body is
+      L    R3,TFCMTGTA / LXAR R3,R3 / IHL R3,TFCMCNT
+      LA   R1,FCMBFZCN / LH R4,TFCMSRC / L R5,0(R4,R1) / MVH R3,R5
+      IF (TH,TFCMSEQF,,NZ)      <- load block uses BOTH TEMP BUFFERS
+        wait / AH R3,TFCMCNT / IHL R3,TFCMSCNT
+        XHI R4,X'0001' / L R5,0(R4,R1) / MVH R3,R5
+  So one call may issue TWO MVHs -- but the pair it spans is the two 8K
+  TEMP BUFFERS (FCMB1ZCN/FCMB2ZCN, FIOMUWB2 and +8192), NOT the two context
+  structs.
+- THERE ARE THREE SEPARATE ALTERNATING PAIRS IN THIS CODE and conflating
+  them is the trap:
+      FCMCTXT1/FCMCTXT2   context structs, per load block (FCMNEXTS/CURRS)
+      FCMIBLK1/FCMIBLK2   BCE receive-sequence CODE areas (FCMRSADD)
+      the two 8K buffers  data staging, indexed by TFCMSRC/FCMNEXTB
+  FCMMOVE spans the third.  It is called once per above-128K load block,
+  with whichever context struct that block used.
+- MEASURED: FCMMOVE IS ENTERED EXACTLY ONCE in our run, R0=733f0000,
+  NEXTS=0000 CURRS=0001.  The ALTERNATION itself is still INFERENCE from
+  the source, not observation -- the boot dies inside that first call, so a
+  second call with FCMCTXT1 has never been seen.  Stated plainly because it
+  was challenged and the challenge was fair.
+- CORRECTION TO MYSELF, TWICE OVER.  I claimed the old "removing the mask
+  breaks the boot" evidence was worthless because it was taken on the
+  UNSTAMPED tape, where phase 2 never loaded anyway.  The REASONING was
+  right -- that measurement could not have shown what I claimed -- but the
+  RESULT REPRODUCES on the stamped tape, so the conclusion stands:
+      mask ON    FCMMOVE calls 1   209 blocks   phase 2 loads, dies on the
+                                                 odd struct
+      mask OFF   FCMMOVE calls 0    55 blocks   breaks in GPCIPL's memory
+                                                 test, before the SSL runs
+  FCMMOVE CALL COUNT is the right discriminator and is what makes this A/B
+  trustworthy where the earlier one was not.
+- SO THE CONFLICT IS NOW THREE-CORNERED AND FULLY MEASURED:
+    * POO Figure 2-8 says SRS fullword addressing ignores address bit 15.
+    * GPCIPL's memory test REQUIRES that -- removing the mask stops the
+      boot before the SSL ever runs.
+    * FCMINSSL requires the opposite for FCMCTXT2, and cannot avoid it:
+      five above-128K load blocks, contiguous at the end of the list,
+      alternating structs, so three necessarily land on the odd one.
+  Two of the three are confirmed against primary sources.  The remaining
+  possibilities are (b) the real MMB emitted far fewer HIMEM load blocks,
+  or (c) FCMINSSL has a latent defect real load profiles never exercised.
+  (a) -- that the struct is even in the real build -- is DISPROVED by the
+  original listing's own DC Y(FCMCTXT2) = 0383.
