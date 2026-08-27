@@ -100,3 +100,84 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   usably with `pdftotext -layout`; section 2 addressing runs from about
   line 1250 to 2200 of the extraction, and section 14 is Automatic Index
   Alignment.
+
+### [2026-08-27] Target: [problems.md]
+- WHY THE POO SAYS "BASE bit 15" AND NOT "EA bit 15" -- user's question,
+  and the answer makes the citation stronger rather than looser.  THE BASE
+  IS THE ONLY THING THAT CAN SUPPLY BIT 15.  From the figures' own bit
+  rulers, not the prose:
+      Figure 2-7 halfword displacement   bits 10-15   (LSB at bit 15)
+      Figure 2-8 fullword displacement   bits  9-14   (LSB at bit 14)
+  Bit 15 is the LEAST significant bit in IBM numbering, so nothing can
+  carry into it, and the fullword displacement field does not reach it.
+  EA bit 15 is therefore IDENTICALLY base bit 15 -- the same bit, not a
+  derived one.  Naming the base is the precise formulation, not a loose one.
+- AND IT GENERALISES, per Figure 2-13 "Automatic Index Alignment":
+      halfword     index taken DIRECT from index register bits 0-15
+      fullword     index register bits 0-15 SHIFTED LEFT 1
+      double word  index register bits 0-15 SHIFTED LEFT 2
+  So an index cannot supply bit 15 either (nor bits 14-15 for a double
+  word).  Across SRS and indexed RS alike, the base is the unique source.
+- WHERE THE POO DOES SAY "EA", it is where no base exists: the RS
+  B2 = 11 case, "the displacement is instead used directly as the address
+  ... Bit 15 of the operand effective address is always treated as zero
+  when addressing fullword operands."  The wording tracks where bit 15 can
+  come from in each mode.
+- TWO CONSEQUENCES FOR US.  (1) `(base+disp) & ~1` and `(base & ~1) + disp`
+  are provably the same here, since disp contributes 0 to bit 15 and no
+  carry reaches the LSB -- so our `ea = (base + disp) & 0xfffe` matches
+  either reading of the rule.  (2) The base formulation is an
+  UNCONDITIONAL GUARANTEE about hardware behaviour, not a "misaligned
+  operands are undefined" caveat, so there is no room left to suppose a
+  real AP-101S did something else with FCMMOVE's odd struct.  That door is
+  shut, not merely unlikely.
+- ALSO SETTLES an adjacent worry: `LH R0,0(R3,R0)` indexing FCMBCTXT is a
+  HALFWORD operand, so Figure 2-13 says the index is taken direct -- our
+  indexWidth for LH is right, and the FCMBCTXT lookup is not the defect.
+
+### [2026-08-27] Target: [problems.md]
+- IS THE DISPLACEMENT MASKED?  NO -- IT IS SHIFTED, and only in SRS.  User's
+  question, answered from the figures' own bit rulers:
+      SRS halfword   displacement field at bits 10-15   (LSB at bit 15)
+      SRS fullword   displacement field at bits  9-14   (LSB at bit 14)
+  Same 6-bit field, POSITIONED one bit higher for fullwords, so the value
+  is scaled x1 or x2 and never truncated.  That is our
+  `disp << (addrWidth - 1)` exactly.  In the EXTENDED/RS form it is not
+  even scaled: POO, "The alignment of the displacement is the same whether
+  addressing double word, fullword or halfword operands", and our extended
+  path does plain `disp = df_get(v,'d')`.  Correct in both.
+- THE MASK IS ON THE SUM, NOT THE DISPLACEMENT, and there is only one of
+  them -- `& 0xfffe`, for fullwords.  Halfwords get none (every halfword
+  address is legal).  NO DOUBLE-WORD MASK IS MISSING: all seven
+  double-word instructions (AED CED DED LED MED SED STED) use the
+  `11111abb/X` extended form, so addrWidth 3 NEVER reaches the SRS branch,
+  and `if (addrWidth == 2)` there is complete rather than an oversight.
+  Checked by listing the table, not by assuming.
+- THE INDEX IS SCALED TOO, and matches POO Figure 2-13 "Automatic Index
+  Alignment": halfword direct, fullword shifted left 1, double word shifted
+  left 2 -- our `regx = (reg >> 16) << (indexWidth - 1)`.
+- BUT AN OPEN QUESTION FELL OUT OF THE SAME READING.  The `& 0xfffe` is
+  applied ONLY in the SRS branch, in both cpu_g_ea and cpu_g_ea_16.  The
+  extended/RS branch forces nothing -- yet in RS the displacement is
+  UNSCALED and can itself supply bit 15, and the POO says "Bit 15 of the
+  operand effective address is always treated as zero when addressing
+  fullword operands."  That sentence sits inside the B2 = 11 no-base case,
+  so whether it governs all of RS or only that case is genuinely ambiguous.
+- MEASURED: IT FIRES, 53 TIMES in the reachable part of a boot, and all 53
+  are INDEXED accesses with a real base -- b=1 x=6 at 0x00e4d (41), 0x00e6f
+  (5), 0x00e90 (4), and b=0 x=4 at 0x00f75 (3); ia=0 ii=0 throughout.  So
+  the B2 = 11 case, the one place the POO states the rule outright, never
+  occurs, and the ambiguity cannot be dodged.
+- AND NOTHING CAN ARBITRATE IT.  A/B with the mask added to both extended
+  branches: cpu EA/CC fixtures 20447/20447 either way, cpu instr exec
+  111180/111358 either way, and the boot BYTE-IDENTICAL (55 blocks, 28162
+  words out and taken, same position, same DEU counters).  THE CONTROL DID
+  RUN this time -- the probe went 53 hits to 0 with the mask and back to 53
+  without, which is the check that was missing from the `#BU@` A/B.
+- SO IT IS LEFT ALONE, deliberately.  Three changes have been reverted this
+  session for being made on plausibility; this one has less support than
+  any of them, since no measurement distinguishes it at all.  It needs
+  either a POO passage that scopes that sentence, or a case where the two
+  behaviours diverge.  YAGPC_RSALIGNTRACE is kept so the next person can
+  find such a case cheaply -- it is the same env-gated, only-on-oddness
+  shape as YAGPC_ALIGNTRACE and costs nothing when quiet.

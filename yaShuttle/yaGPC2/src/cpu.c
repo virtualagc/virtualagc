@@ -685,6 +685,12 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
         } else {
             ea = ea_expand(cpu, pea, v->opType, hasDse, dseVal);
         }
+        if (v->addrWidth == 2 && (ea & 1) && getenv("YAGPC_RSALIGNTRACE"))
+            fprintf(stderr, "RSALIGN A nia=%05x ea=%05x b=%d ia=%d ii=%d x=%d\n",
+                    (unsigned)psw_get_nia(&cpu->psw), ea,
+                    df_has(v,'b') ? (int)df_get(v,'b') : -1,
+                    (int)v->ia, (int)v->ii,
+                    df_has(v,'x') ? (int)df_get(v,'x') : -1);
     } else {
         uint32_t base = register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16;
         uint32_t disp = df_get(v, 'd') << (v->addrWidth - 1);
@@ -809,6 +815,12 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
         } else {
             ea = pea & 0xffff;
         }
+        if (v->addrWidth == 2 && (ea & 1) && getenv("YAGPC_RSALIGNTRACE"))
+            fprintf(stderr, "RSALIGN B nia=%05x ea=%05x b=%d ia=%d ii=%d x=%d\n",
+                    (unsigned)psw_get_nia(&cpu->psw), ea,
+                    df_has(v,'b') ? (int)df_get(v,'b') : -1,
+                    (int)v->ia, (int)v->ii,
+                    df_has(v,'x') ? (int)df_get(v,'x') : -1);
     } else {
         uint32_t base = register_get32(cpu_r(cpu, (int)df_get(v, 'b'))) >> 16;
         uint32_t disp = df_get(v, 'd') << (v->addrWidth - 1);
