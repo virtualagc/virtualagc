@@ -1200,3 +1200,53 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - MEMORY WRITTEN so this is not rediscovered:
   feedback_halsfc_bindir_use_virtualagc_archive.md -- set HALSFC_BINDIR to
   the archive's PASS.REL32V0; never cite the REL32V0 banner as a version.
+
+### [2026-08-27] Target: [problems.md]
+- UNBUILT PHASES, ANSWERED PRECISELY.  35 of the 52 in the manifest are
+  "not built", but they are almost nothing: PHASE 22 (GMAIMUC1, card 42506)
+  at 2 BLOCKS, and phases 27-60 which are all SMARDPnn at 3 BLOCKS EACH,
+  every one carrying SUBSYS=RID on its ALLOC card -- the Reconfigurable
+  Item Data patch slots, data not code.  TOTAL UNBUILT: 104 BLOCKS against
+  1085 already on the tape.  Phase 22 is the only manifest phase with no
+  .lib at all.
+  Separately: phases 23/24/25 HAVE .lib files and PHASE cards but never
+  appear in the manifest -- they are MOVE=NO with explicit LBLN/LBNO, so
+  they are not packed onto the tape the same way.  Phase 26 has a .lib and
+  no PHASE card.  Phase 1 is not a program phase at all: VMARPLDU
+  DIRECTRY,SIZE=2,ENTRIES=510,DMMD=NO,PH=1 -- the MM directory.  11, 17, 19
+  have .lib files and no PHASE card in these decks.
+- TAPE REBUILT WITH THE NEW PHASE 2, END TO END:
+      con80build SSW (HALSFC_BINDIR at the archive) -> SSW.lib
+      mmu2mmv --area 1 -> mmu2-new.mmv, 1084 blocks (was 1085)
+      stamp_ssl_checksum + patch_ssl_zcon on the new volume
+      stamp_ipl_phase_table --mmu <new tree> -> BOOT-new.fcm
+  THE PHASE TABLE STEP IS EASY TO MISS AND I DID MISS IT FIRST TIME:
+  BOOT-stamped.fcm carries FCMBOOT's own map (FCMPTAD1/2/3), so a rebuilt
+  tape without a re-stamped table is navigated by the OLD layout and gives
+  a bit-identical wrong answer.  The regenerated table reads
+  "10:5LB@2260, 2:14LB@2300, 13:2LB@1B00, 3:10LB@1BC0" -- phase 2 down
+  from 24 load blocks to 14.
+- RESULT: THE BOOT STILL FAILS, BUT IT MOVED.  ERROR went from
+  "invalid instruction 0xc6c6 at 0x0a3b" to "... at 0xeded"; wordsTaken
+  98,820 -> 86,020; blocks 209 -> 208.  FCMMOVE still entered ONCE with
+  R0=733f, NEXTS=0000 CURRS=0001 -- the odd struct.  That is exactly what
+  the parity model predicts for 14 blocks: the first above-128K block is
+  #10, an EVEN ordinal, so it draws FCMCTXT2.  The model survived this
+  test, which is the first real evidence for it.
+- BUT PHASE 2 IS STILL NOT COMPLETE, and that is the live defect now.
+  Against the SSW deck's 285 INSERT members:
+      OLD build  437 sections, 286 modules, 72 members unaccounted
+      NEW build  504 sections, 262 modules, 22 members unaccounted
+  So the rebuild gained ~50 members and LOST 24 modules the old build had.
+  The 22 still absent are 13 assembly modules (FCMBMASK FCMBUSPC FIOERRLB
+  FIOERRLC FIOMGCV FIOMGSTR FIOSVCP FPMCVTFX FPMIHPGM FPMRESET FIOPDISP
+  FPMIHPC2 FPMMTURM) and 9 patch areas ($Y023001 #Y023001 $Y024001
+  #Y025000 #Y027000 #Y027001 $Y028001 #Y029001 $Y131000).
+- AND THE SOURCES ALL EXIST -- SSSRC/FCMBMASK.asm, SSSRC/FPMIHPGM.asm,
+  SSSRC/FIOMGCV.asm, SSSRC/PCH02SRC.asm (which is where the $Y/#Y patch
+  areas come from).  My con80build run reported "113 ASM ... 0 patch",
+  where the original build clearly had more of both, so the invocation is
+  missing source/library paths: `--root` alone does not reproduce whatever
+  --src/--mlib/--deck-root the original used.  THAT is the next step, and
+  until phase 2 is complete its load-block count -- and therefore the
+  parity -- is not final.
