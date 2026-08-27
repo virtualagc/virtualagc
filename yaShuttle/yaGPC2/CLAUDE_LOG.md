@@ -799,3 +799,59 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   measurement reports addr=0x000b1 on PROTVIOL #5.  The mechanism above
   does not depend on which of the pair faults, but the discrepancy is real
   and unresolved.
+
+### [2026-08-27] Target: [problems.md]
+- RESOLVED, AND THE FLIGHT SOFTWARE IS EXONERATED.  The user's objection --
+  software that flew for decades cannot fail to boot -- was a sound
+  reductio and it was right.  My "latent defect in FCMINSSL" conclusion was
+  wrong, and the primary source that settles it is a DASS MEMORY DUMP.
+- #PFCMGPT, THE SSL'S IN-CORE PHASE TABLE, IS IN THE DUMPS.
+  ~/workspace/PFS/mafgen/SSW.fcm (also P9.fcm), halfword 118002, 1093 hw,
+  16 four-halfword phase descriptors for phases 3..18: [disp to LBs, number
+  of LBs, MM address, NUM_CONT].  The DASS comparison marks it 'ok' but its
+  detail says "[955 patched after build]" -- 955 of 1093 halfwords are
+  EXCLUDED as post-build patches, i.e. exactly the load-block descriptors,
+  so the comparison never validated them.  Reading them directly does.
+- AND IT VALIDATES mmbstamp EXACTLY for the IPL phases that appear:
+      phase  3   real 10 LBs @ 1bc0    ours 10 LBs @ 1bc0
+      phase 10   real  5 LBs @ 2260    ours  5 LBs @ 2260
+      phase 13   real  2 LBs @ 1b00    ours  2 LBs @ 1b00
+  So the partitioning rules reproduce the real MMB.  (Phase 2 is not in
+  this table -- it covers 3..18 -- so it cannot be checked directly.)
+- THE DECISIVE COUNT: ACROSS ALL SIXTEEN REAL PHASES THERE ARE EXACTLY TWO
+  ABOVE-128K LOAD BLOCKS.
+      phase  3   block 10 of 10, LAST, addr 0888c sector  9 len 5654
+      phase 13   block  2 of  2, LAST, addr 08010 sector 10 len 2698
+  Every other phase -- including ones with 26, 29, 30, 37 and 38 load
+  blocks -- has NONE.  Each of the two is ALONE in its phase and is the
+  LAST BLOCK of it.
+- SO THE INVARIANT FCMINSSL RELIES ON IS: A PHASE HAS AT MOST ONE
+  ABOVE-128K LOAD BLOCK, AND IT IS THE LAST ONE.  That is what makes it
+  safe, because the LAST block's FCMMOVE is dispatched from a DIFFERENT
+  CALL SITE -- the post-loop one at FCMINSSL.asm:782, after
+  BCT R7,#@LB45, whose R5 comes from the "IF LAST LB, UNDO NEXT LB SETUP"
+  branch (CHI R7,1) that deliberately toggles FCMNEXTS BACK.  Non-last
+  blocks use the in-loop call site with CURRS, which is what lands on
+  FCMCTXT2, the odd-addressed struct.  The real system never drives the
+  in-loop path for upper memory.
+- OUR PHASE 2 VIOLATES IT FIVE TIMES: blocks 20-24 of 24 are above 128K,
+  sectors 8,9,9,10,10, lengths 8532,664,1524,16,4 = 10740 halfwords of
+  upper memory, and FOUR OF THE FIVE ARE NOT LAST.  The real blocks are
+  single and large (5654, 2698) at 0888c and 08010; ours are fragments,
+  two of them 16 and 4 halfwords, mostly at 08000.  Out of family in every
+  respect.
+- SO THE DEFICIENCY IS OURS AFTER ALL, in the phase-2 reconstruction -- not
+  in the load-block COUNT rule (validated above) but in how much content
+  our phase 2 puts in upper memory and how it is split.  THE EMULATOR IS
+  CORRECT, the mask is correct, and FCMINSSL is correct under its real
+  operating conditions.
+- WHAT I GOT WRONG AND WHY IT MATTERS: I concluded "latent defect in the
+  flight software" from a chain in which every link was checked against a
+  primary source EXCEPT one -- the five-HIMEM-block count, which came from
+  our own reconstruction and which I never checked against anything.  I
+  even noticed the 16- and 4-halfword blocks looked like artifacts and
+  walked past it.  The user's reductio is what forced the check.
+- NEXT: find why our phase 2 places 10740 halfwords above 128K when real
+  phases place at most one block there.  PHASE02.lib and the CON80 cards
+  are the inputs; #PFCMGPT gives a primary-source specification of what
+  right looks like for phases 3..18 to calibrate against.
