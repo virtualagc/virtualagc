@@ -1927,3 +1927,42 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   timing documentation, which is not in the tree (the AP-101S manual covers
   the CPU and the IOP/BCE, not the MMU's own latency).
 - New: YAGPC_CLEARTRACE, reporting what each one-word clear-read consumes.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- THE ONE-HALFWORD SHIFT IS A PER-INSTRUCTION IOP STEPPING DEFECT, and it
+  is the same one raised at the start of this session in answer to "does
+  the BCE reception need a separate thread?".  Measured:
+      BCE18 #SST                       t=23664142.0
+      MVH dest=41c00 src=3232a c=7654  t=23664144.8
+      BCE18 next instruction (#BU)     t=23670877.3   <- 6732 us later
+  ap101_exec1 runs ONE iop_exec per CPU instruction, so FCMMOVE's
+  7,654-halfword MVH -- a single emulator instruction that charges ~6.7 ms
+  of POO time -- freezes the IOP while the simulated clock runs.
+- Why that loses a halfword: the SSL positions the BCE MID-GAP on purpose.
+  FCMSSLBS computes the delay as 639 - partial = (511 - partial) + 128,
+  i.e. the rest of the MMU block plus HALF the 256-word inter-block gap
+  ("128 = ONE HALF THE MMU BLOCK GAP IN HALF WORDS").  The following
+  one-word "CLEAR THE MIA BUFFER" #RDLI is therefore meant to execute
+  inside the gap, with nothing on the bus, and take the stale latch.  Ours
+  resumes 6.7 ms late, after the gap, and takes block 796's first real word
+  (e9f3) instead -- so the block lands one halfword out of phase and fails
+  its checksum.
+- MY EARLIER FRAMING WAS WRONG, twice over, and the correction matters:
+  there is no per-load-block read command to be late.  YAGPC_MMUTRACE with
+  timestamps shows only TWO read commands in the whole boot --
+  55 blocks at t=2339402.3 and 225 blocks at t=18929049.8 -- and the entire
+  PASS load streams from that single 225-block transfer.  The failing
+  clear-read is 4.7 s into it.  So "missing MMU read latency" was not the
+  problem, and reverting the lead-in was right for a better reason than the
+  one I gave.
+- A CANDIDATE BASIS FOR THE FIX, from the AP-101S manual's Part III (the
+  BCE POO), section 3.4.1: "In either case the sampling process occurs at
+  most once every 16.5 usec."  That is the BCE's own MIA-sampling rate, and
+  16.5 us is already in the code as MTO_TICK_US.  With 26 round-robin pages
+  (MSC + 24 BCEs + selftest) that implies one IOP pass per 16.5/26 = 0.635
+  us of simulated time.  NOT IMPLEMENTED: stepping the IOP by simulated
+  time rather than per CPU instruction changes global timing, and it is an
+  architectural decision, not a bug fix -- flag it before doing it.
+- mm_log now timestamps every line.  Every question about this unit has
+  turned out to be a question about WHEN, and an untimed log cannot answer
+  one; the two-read-commands finding above was invisible without it.

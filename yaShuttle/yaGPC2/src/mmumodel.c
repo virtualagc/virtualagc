@@ -136,13 +136,17 @@ static int block_index(int track, int file, int subfile, int block) {
                * BLOCKS_PER_SUBFILE + (block & 0x1f);
 }
 
+static double mm_now(const MmuModel *m);
+
 static void mm_log(MmuModel *m, const char *fmt, ...) {
     if (!m->verbose) return;
     va_list ap;
     va_start(ap, fmt);
     fprintf(stderr, "mmu%d: ", m->unit);
     vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
+    /* Timestamped: every question about this unit has turned out to be a
+     * question about WHEN, and an untimed log cannot answer one. */
+    fprintf(stderr, "  t=%.1f\n", mm_now(m));
     va_end(ap);
 }
 
