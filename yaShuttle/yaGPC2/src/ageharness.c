@@ -131,8 +131,20 @@ static long apply_load_protection(AGEHarness *age) {
 static void ipl_fill(AGEHarness *age) {
     uint32_t total = age->gpc.ram.totalHWCount;
     mem_pattern_fill(age);
-    for (uint32_t hw = 0; hw < total; hw++) {
-        membus_set_store_protect(&age->gpc.ram, hw, true);
+    /* YAGPC_IPL_PROTECT=0 starts memory UNPROTECTED instead.  Blanket
+     * protection here leaves any region no load block covers protected
+     * forever: #PCVNMMU (FIOMUWB2's CDHV_BLOCKS staging buffer) is
+     * allocated by the link but carries no data extent, so it gets no
+     * load block, and FCMINSSL's DMA into it is then silently refused --
+     * words vanish between wordsOut and wordsTaken and the SSL hangs.
+     * On the --ipl path the real loader runs and applies each load
+     * block's own protect flag, so code still ends up protected. */
+    {
+        const char *e = getenv("YAGPC_IPL_PROTECT");
+        bool dflt = !(e != NULL && e[0] == '0');
+        for (uint32_t hw = 0; hw < total; hw++) {
+            membus_set_store_protect(&age->gpc.ram, hw, dflt);
+        }
     }
 
     /* PSA locations the manual (AP-101S-instruction-set.txt Sec. 2.5.2,

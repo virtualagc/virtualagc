@@ -2888,3 +2888,37 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   yesterday and the conclusion was void.  In it `C6C6` is REAL CONTENT, not absent
   coverage: where our own build emits `C6C6` the dump agrees 100% (`09ed8`, `10000`,
   `1f05e`).
+
+### [2026-08-28] Target: [problems.md]
+- THE LINK ITSELF SAYS THE BUFFER MUST NOT BE PROTECTED.  `PHASE02.sym.json` carries a
+  `storeProtect` map -- `{"unit":"halfword","ranges":[[lo,hi],...]}`, 161 ranges
+  spanning `001aa..48889`.  NONE of them overlaps `#PCVNMMU` `30322..3432a`.  That is
+  authoritative and it is a better oracle than anything I was inferring from load
+  blocks or from the dump.  USE `storeProtect` FOR PROTECTION QUESTIONS.
+- MECHANISM OF THE HANG, now understood: `ageharness.c` `ipl_fill()` (the `--ipl`
+  path) protects EVERY HALFWORD of memory and then carves out only the PSA.  Any
+  region no load block covers therefore stays protected forever, and `#PCVNMMU` is
+  exactly such a region, so `FCMINSSL`'s DMA into the staging buffer is SILENTLY
+  refused -- masked DMA store protect sets CC=10 with no interrupt (Fig 2-20 note
+  '##'), which is why `wordsTaken` < `wordsOut` with zero violations traced.
+- `YAGPC_IPL_PROTECT=0` added to `ipl_fill()` to start memory unprotected instead.
+  DEFAULT IS UNCHANGED (only the literal string "0" switches it), and the four
+  pre-existing test failures are unchanged.  IT DOES NOT WORK: boot dies immediately
+  at `nia=00000` with nothing loaded, exactly the failure the existing comment
+  predicts -- the Instruction Monitor fires once the software sets PSW mask bit 34,
+  because every instruction then looks like it is executing from unprotected storage.
+  So blanket-unprotect is confirmed wrong, not merely suspected.  Keep the flag as a
+  diagnostic; do not make it the default.
+- The middle option -- protect only the boot image's own sections, which
+  `apply_load_protection()` already implements from `age->sym.sections` -- CANNOT BE
+  TESTED AS THE RUN STANDS: `load_symbols()` runs before `ipl_fill()` (lines 275 vs
+  323), but the `--ipl` invocation passes no symbol file, so there are no sections.
+  Supplying `full700/PHASE01/PHASE01.sym.json` is the obvious next experiment.
+- AN UNRESOLVED CONFLICT, and it should be settled before any fix is attempted.
+  `YAGPC_UNPROTECT_AT=1000` unprotects the buffer long before any DMA, yet STILL
+  hangs at 281 blocks -- so "the buffer is protected" cannot be the whole story.
+  `YAGPC_PROTSET` shows only FIVE toggles across the whole run, 1,0,1,0,1, ending
+  PROTECTED, and `YAGPC_ISPBTRACE` shows no `ISPB` naming that address, so I have not
+  identified what writes the bit.  The callers are `ipl_fill`,
+  `apply_load_protection`, the `ISPB` paths in `cpu_instr.c`, and my own timed
+  unprotect in `ap101.c`.  FIND THE WRITER BEFORE THEORISING FURTHER.
