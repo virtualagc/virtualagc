@@ -2319,3 +2319,20 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   BSR&DSR` captures the SSL's own BSR/DSR, so PASS is entered at 0a07 in
   whatever sector the SSL was running in.  Worth checking that assumption
   before assuming the low-memory image is at fault.
+
+### [2026-08-28] Target: problems.md
+- THE $POF/$PON CONVENTION IS SETTLED, and it is the mechanical one: the
+  marker labels the location where the region BEGINS (the next item), not
+  the item preceding it.  Tested on SSLCHECK.asm's minimal bracket
+      $POF / SSLRTN DC H'0' / $PON
+  where SSLRTN = 02d72.  The assembled table has
+      @05187  start=02d72 count=1
+  i.e. it starts exactly AT SSLRTN, the item after $POF.  The whole table
+  is 40-odd entries ending in a count=0 terminator at @051b3.
+- Consequence: PSA.asm's `$POF` after `PSA EX4` genuinely starts its
+  bracket at 000a0 (= RESERVE3, confirmed by symbol), so 0009c is excluded
+  deliberately -- now established twice, from the source and from the
+  assembled data.  It also WEAKENS the "$POF is one line late in the
+  recovered source" idea: the convention is unambiguous and holds
+  everywhere else, so a misplacement would have to be a transcription
+  error on that one line rather than a systematic misreading.
