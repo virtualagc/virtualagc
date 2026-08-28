@@ -3192,3 +3192,42 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   been protected, or an unprotect step is not being reached in our emulation.  Chase
   WHICH of those before proposing a fix; both my previous explanations were withdrawn
   after being stated too confidently.
+
+### [2026-08-28] Target: [problems.md]
+- DON HAD ALREADY IMPLEMENTED THE CONSUMER SIDE.  `7fff229` "lnk101: carry
+  store-protect ranges into .sym.json", Donald Schmidt, 2026-08-23 -- five days before
+  this discussion.  He reached the `SPON`/`SPOFF` reading independently and pre-wired
+  `lnk101` for it.  Two parties converging is not documentation, but it is stronger
+  than one inference.
+- `lnk101` NEEDS NO CHANGES.  `linker.py:333-334` reads the cards into
+  `mod.protManaged`/`protRangesHw`; `storeProtectRangesHw()` (linker.py:810) applies
+  the precedence "explicit ' PROT' ranges when the assembler captured SPON/SPOFF,
+  else the csect's SET/CLEAR mark, else the name-class default", and FEEDS BOTH the
+  `.lib` PROT records and the `.sym.json` map.
+- `.lib` FILES ARE `lnk101`'s DOING: `--lib` / `saveLib()` (cli.py:69, linker.py:2509)
+  -- "an AP-101 loadable module: CESD, per-extent text, RLD, store-protection,
+  overlay/phase metadata".  The `.fcm` is the flat image of the same link and has no
+  room for metadata; the `.lib` is where the structure lives.  All 235 extents in our
+  `PHASE02.lib` already carry a per-halfword `protect` array and real `0xA1` records.
+- FORMAT MISMATCH FOUND, and it would have FAILED SILENTLY.  `objectWriter.py:140`
+  `writePRT()` emits a 0x02 OBJECT RECORD typed "PRT" with a binary bitmap keyed by
+  ESD id.  `lnk101` reads a FREE-FORMAT CONTROL STATEMENT -- `objModule.py:1001`
+  routes `card[0] == 0x02` to module records and everything else to `ControlRecord`,
+  and `linker.py:319` scans only `controlStatements`.  A binary PRT record never
+  reaches it: `protManaged` stays empty, the tape comes out byte-identical, no error.
+  RON'S RULING: use Don's format.
+- DON'S FORMAT, for the record: a control card, column 1 NOT 0x02 (blank), text
+  `" PROT <csect> <s>-<e>[,<s>-<e>]..."`.  Ranges are CSECT-RELATIVE halfword offsets,
+  HEX, END-EXCLUSIVE, and list the PROTECTED regions.  Same convention as HAL/S-FC
+  PASS2's `" STACK <csect>"` cards (OBJECTGE.xpl), so there is precedent in the format.
+  CRITICAL (linker.py:169-172): a csect named on a PROT card is FULLY SPECIFIED --
+  an EMPTY range list means NOTHING in it is protected -- so emitting a card takes
+  that csect out of the deck scheme entirely.  THAT SETTLES THE PRECEDENCE QUESTION
+  WE SPECULATED ABOUT: Don has it as OVERRIDE, not modify.
+- REMAINING GAP IS `mmbstamp`, not `lnk101`: `protection_lookup()` (mmbstamp.py:228)
+  builds intervals from `sym["sections"]` plus the deck map and
+  `patch_aware_default(name)`.  It never reads `sym["storeProtect"]["ranges"]`, the
+  per-halfword map `lnk101` now computes with the full precedence.  Switching it
+  should be a NO-OP TODAY (with no PROT cards both derive from the same tiers), which
+  makes it verifiable now by rebuilding the tape and diffing, and it would then carry
+  real data automatically once the assembler lands.
