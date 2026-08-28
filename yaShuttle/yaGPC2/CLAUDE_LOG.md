@@ -2444,3 +2444,42 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   That also means our EX4=00a07 is OUR link's address, and the earlier
   "TPSASINP holds Y(EX4)" reasoning rests on the flight-software comment
   and our own image, not on the dumps.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- THE PASS BOOTSTRAP IS LOADED CORRECTLY AND THEN OVERWRITTEN.  Its
+  signature is `cdf9 0014` = LPS TPSASRP, which the DASS SSW dump has at
+  047ee.  In our run:
+      WATCHHW addr=047ee val=e74f pe=18 t=3266417.0    GPCIPL-era load
+      WATCHHW addr=047ee val=cdf9 pe=18 t=19840675.0   the bootstrap LANDS
+      WATCHHW addr=047ee val=0001 pe=18 t=26708849.5   OVERWRITTEN
+  and searching the whole 512K address space at the end of the run finds
+  `cdf9 0014` NOWHERE, though it is present on the tape (byte 665160) and
+  in PHASE02.lib (byte 79007).
+- THE CAUSE IS OVERLAPPING LOAD BLOCKS.  Three receives cover 047ee:
+      t=3120342.5   addr=03c22 count=9216 -> 03c22..06021   (GPCIPL era)
+      t=19836055.0  addr=047e0 count=1024 -> 047e0..04bdf   THE BOOTSTRAP
+      t=26445179.5  addr=03336 count=6656 -> 03336..04d35   OVERLAPS IT
+  The bootstrap's own load block is based at 047e0 -- EXACTLY the address
+  the DASS Special Interrupt NEW PSW points to -- and a later block
+  spanning 03336..04d35 swallows it whole.
+- Note 03336 is NOT among the 26 load-block bases FCMUPROT unprotected for
+  the first phase (0051e, 005a2, 00602, 00676, 04448, 047e0, 04c6c, 08000,
+  ...), and t=26.4 s is late, so it is very likely the SECOND phase
+  (FCMNUMPH=2).  A later phase overlaying an earlier one is normal in a
+  phased load; what is not normal is that the PASS bootstrap does not
+  survive it, since the real post-IPL image plainly has it at 047e0.
+- SO THE CHAIN IS NOW COMPLETE AND ALL OF IT IS BUILD-SIDE:
+    1. the bootstrap loads at 047e0 and is clobbered by an overlapping
+       later block, so 047e0 ends up holding "CPLT" text;
+    2. TPSASINP is never stamped with 047e0, so the SSL reads GPCIPL's own
+       Y(EX4) instead;
+    3. it jumps to 0a07, which is a data table in BOTH our image and the
+       authentic dump, and dies.
+  Fixing (1) without (2) still leaves the SSL jumping to 0a07; fixing (2)
+  without (1) makes it jump to clobbered memory.  Both are needed, and
+  neither is an emulator defect.
+- NEXT: confirm the 03336 block belongs to the second phase and work out
+  whether its extent is wrong (mmbstamp padding over-extending, as the
+  c9fb comparison already suggested) or its ORDER is -- i.e. whether the
+  bootstrap should have been loaded by the later phase rather than the
+  earlier one.
