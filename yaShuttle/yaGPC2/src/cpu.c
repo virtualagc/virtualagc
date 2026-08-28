@@ -1005,6 +1005,13 @@ bool cpu_store_fw(CPU *cpu, uint32_t addr, uint32_t value) {
     if (!cpu->storeProtectOverride &&
         (membus_get_store_protect(cpu->ram, addr) ||
          membus_get_store_protect(cpu->ram, addr + 1))) {
+        /* Record which halfword actually refused.  Without this a fullword
+         * violation left lastProtFaultAddr holding whatever the last
+         * HALFWORD violation had set, so YAGPC_INTTRACE reported a stale
+         * address -- and a stale one from the self-test, which is exactly
+         * the sort of plausible-looking wrong answer that costs an hour. */
+        cpu->lastProtFaultAddr =
+            membus_get_store_protect(cpu->ram, addr) ? addr : addr + 1;
         cpu_signal_protection_violation(cpu);
         return false;
     }

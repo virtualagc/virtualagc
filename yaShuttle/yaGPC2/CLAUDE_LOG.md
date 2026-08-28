@@ -2560,3 +2560,44 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   stamped table; our PHASE03 content; or the value that should be stamped
   into TPSASINP for a 3-phase OI340600 load.  The emulator is not
   implicated in any of them.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- PHASE REORDER WORKS, AND PASS'S INITIALISATION NOW RUNS.  Swapping the
+  stamped phase descriptors so phase 2 loads LAST (patching FCMSSLPT's
+  [1] and [3] at t=5 s), stamping TPSASINP=47e0, and clearing the PSA
+  after GPCIPL's last protection activity:
+      YAGPC_PATCH="5000000:7c03=006f,7c04=0009,7c05=1bc0,
+                           7c09=001b,7c0a=001a,7c0b=2300,009c=47e0"
+      YAGPC_UNPROTECT=30322-3432a,00000-0013f  YAGPC_UNPROTECT_AT=18765000
+  gives:
+      WATCHHW 047ee <- 0001 t=18507277   phase 3 now first
+      WATCHHW 047ee <- cdf9 t=21520903   phase 2 LAST: FCMLINIT SURVIVES
+      INT code=0007 atNIA=047f2          the CPU is INSIDE FCMLINIT
+      finally R0=47f00000                further still, with the PSA open
+  and the load stays clean: blocksRead 321, wordsOut = wordsTaken = 164360,
+  reaching the handoff instead of halting at FCMSSLEX.  So the SSL's
+  handoff completes and PASS's own initialisation executes.
+- NEW GAP, and the same family as the others.  FCMLINIT's opening does
+      OST R4,TPSAPWR / TPSAMCNP / TPSAPINP / TPSASNP / TPSAC1NP /
+          TPSAC2NP / TPSAIMNP / TPSAENP / TPSAE1NP / TPSAE2NP /
+          TPSAE3NP / TPSASINP
+  -- an OR-store that merges BSR/DSR bits into new PSWs whose ADDRESSES
+  must already be present.  Nothing in our build ever puts PASS's handler
+  addresses into the PSA: no load block reaches below 0051e (phase 2),
+  00654 (phase 3) or 024e4 (phase 13).  The authentic dump has them all
+  (004c = ad5c = FPMIHPGM, etc.), so something in the real build writes
+  them and we do not.  That is why a program check still vectors to
+  GPCIPL's 0a3b.
+- TWO INSTRUMENTATION FIXES ALONG THE WAY, one of which nearly cost an
+  hour: cpu_store_fw never set lastProtFaultAddr, so a FULLWORD violation
+  reported whatever the last HALFWORD violation had left there.  It was
+  reporting 000b1 -- a location the self-test had legitimately
+  protected/unprotected at t=4.3 s -- when the real faulting address was
+  00004 (SPWRONN, the power-ON PSW).  Fixed.  Also added YAGPC_PATCH,
+  timed halfword writes bypassing store protection, for standing in for
+  what the ground Mass Memory Build would have stamped.
+- CAVEAT ON THE REORDER: it is an experiment, not a proposed fix.  It
+  contradicts IPL_PHASE_ORDER = (10,2,13,3), which stamp_ipl_phase_table.py
+  takes from FCMBOOT's prolog and MMLOAD's IPL,PH=(10,2,13,3) card.  What
+  it demonstrates is only that FCMLINIT surviving is NECESSARY, not that
+  reordering is how the real build achieves it.

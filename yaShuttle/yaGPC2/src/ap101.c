@@ -135,8 +135,61 @@ static void ap101_step_iop(AP101 *gpc, double startUs) {
     if (n >= IOP_MAX_PASSES_PER_INSTR) gpc->iopNextPassUs = now;
 }
 
+/* YAGPC_PATCH applies halfword writes at a given simulated time, e.g.
+ *   YAGPC_PATCH="5000000:7c03=006f,7c04=0009;18700000:009c=47e0"
+ * Groups are separated by ';', each is "<timeUs>:<addr>=<val>,...", all
+ * hex except the time.  Writes bypass store protection, because the point
+ * is to stand in for something the ground Mass Memory Build would have
+ * written into the image before the machine ever ran.  Diagnostic only. */
+#define PATCH_MAX_GROUPS 8
+#define PATCH_MAX_WRITES 64
+static void ap101_timed_patch(AP101 *gpc) {
+    static int inited = 0, nGroups = 0;
+    static double atUs[PATCH_MAX_GROUPS];
+    static int done[PATCH_MAX_GROUPS];
+    static int nW[PATCH_MAX_GROUPS];
+    static uint32_t addr[PATCH_MAX_GROUPS][PATCH_MAX_WRITES];
+    static uint32_t val[PATCH_MAX_GROUPS][PATCH_MAX_WRITES];
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_PATCH");
+        while (e != NULL && *e != '\0' && nGroups < PATCH_MAX_GROUPS) {
+            char *end = NULL;
+            atUs[nGroups] = strtod(e, &end);
+            if (end == NULL || *end != ':') break;
+            const char *p2 = end + 1;
+            nW[nGroups] = 0;
+            while (*p2 != '\0' && *p2 != ';' && nW[nGroups] < PATCH_MAX_WRITES) {
+                uint32_t a = (uint32_t)strtoul(p2, &end, 16);
+                if (end == NULL || *end != '=') break;
+                uint32_t v = (uint32_t)strtoul(end + 1, &end, 16);
+                addr[nGroups][nW[nGroups]] = a;
+                val[nGroups][nW[nGroups]] = v;
+                nW[nGroups]++;
+                if (end == NULL || *end != ',') { p2 = end; break; }
+                p2 = end + 1;
+            }
+            done[nGroups] = 0;
+            nGroups++;
+            if (p2 == NULL || *p2 != ';') break;
+            e = p2 + 1;
+        }
+    }
+    for (int g = 0; g < nGroups; g++) {
+        if (done[g] || gpc->cpu.elapsedTimeUs < atUs[g]) continue;
+        done[g] = 1;
+        for (int i = 0; i < nW[g]; i++) {
+            mcm_set16(&gpc->cpu.mainStorage, addr[g][i], val[g][i], false);
+            fprintf(stderr, "patch: %05x <- %04x at t=%.1f\n",
+                    (unsigned)addr[g][i], (unsigned)val[g][i],
+                    gpc->cpu.elapsedTimeUs);
+        }
+    }
+}
+
 void ap101_exec1(AP101 *gpc) {
     ap101_timed_unprotect(gpc);
+    ap101_timed_patch(gpc);
     /* YAGPC_NIAPROBE=<hexaddr> dumps R0-R7 and the SSL's two context-struct
      * indices every time that address is about to execute.  Unlike --break
      * it does not stop, so it yields one line per VISIT, which is what

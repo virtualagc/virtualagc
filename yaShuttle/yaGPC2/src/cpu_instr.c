@@ -1576,7 +1576,16 @@ static void exec_DIAG(CPU *t, DInstr *v) {
 }
 
 static void exec_ISPB(CPU *t, DInstr *v) {
-    if (!cpu_i_super(t)) return;
+    if (!cpu_i_super(t)) {
+        /* Silently discarded in problem state.  Worth seeing: an ISPB that
+         * vanishes leaves storage protected that the program believes it
+         * has just unprotected, and the fault then lands somewhere else
+         * entirely. */
+        if (getenv("YAGPC_ISPBTRACE"))
+            fprintf(stderr, "ISPB SKIPPED (problem state) nia=%05x t=%.1f\n",
+                    (unsigned)psw_get_nia(&t->psw), t->elapsedTimeUs);
+        return;
+    }
     uint32_t ea = cpu_g_ea(t, v);
     uint32_t m1 = (v->hw1 >> 8) & 0x7; /* bits 5-7 */
     /* YAGPC_ISPBTRACE=lo[-hi] reports every ISPB whose EA falls in that
