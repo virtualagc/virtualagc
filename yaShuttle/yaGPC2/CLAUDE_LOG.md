@@ -1570,3 +1570,37 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   the partial count and stores through FCMRSADD, and lines 747-749 swap
   FCMRSADD between FCMIBLK1 and FCMIBLK2.  Whether that second sequence is
   built and started at all is the question.
+
+### [2026-08-27] Target: [problems.md]
+- THE DEADLOCK IS A PRODUCER/CONSUMER RACE, and the SSL's own structure
+  shows it.  "START MSC/BCE PROCESSING" (FCMINSSL:551) runs ONCE PER
+  PROGRAM, before the per-block loop: load MSC PC, load BCE PC, start MSC.
+  FCMINMSC is only two instructions -- f400 7322 (@LF FCMIBUSM) and
+  e400 0800 (the SIO) -- so it does not loop.  After that single start the
+  BCE runs CONTINUOUSLY through the FCMIBLK1<->FCMIBLK2 chain while the CPU
+  rewrites whichever buffer is not executing.
+- THE #WAT IS PROVISIONAL.  FCMINSSL:727 ALWAYS terminates a freshly built
+  sequence with #WAT (LHI R4,FCMMWAT / ST R4,0(R2)), and only later, at
+  :752, overwrites it with `OHI R5,FCMMBU` + the other buffer's address.
+  So the CPU MUST patch that halfword BEFORE THE BCE REACHES IT.  If the
+  BCE gets there first it parks, and the only thing that could restart it
+  is the CPU -- which is by then inside FCMMOVE's wait.  Deadlock.
+- CONFIRMED BY THE DUMPS at both FCMMOVE entries: the sequences are
+  WELL-FORMED, reading into both temp buffers --
+      FCMIBLK1 f203 032a (#LBR 0x3032A = FIOMUWB2) / #RDLI 1 / #RDLI 7168
+               c000 5020 (#DLYI+#SST) / f203 232a (#LBR 0x3232A = +0x2000)
+               #RDLI 7168 / #LBR 0x33F2A / #RDLI 486 / #DLYI+#SST
+               f000 7306 (#BU FCMIBLK2)
+      FCMIBLK2 ... 0800 0000 (#WAT)    <- the unpatched provisional
+  and FCMINSST reads ffff ffff, the CPU's armed sentinel.  Nothing is
+  malformed; the CPU is simply late.
+- WHY BLOCK 21 AND NOT EARLIER: it is the first block needing TWO MVH
+  moves (14,822 halfwords across both buffers), so the CPU is busy far
+  longer than for blocks 1-20 while the BCE keeps consuming.  That is
+  exactly when a race like this first bites.
+- SO THE NEXT QUESTION IS RELATIVE CPU/BCE SPEED, not correctness of any
+  instruction.  This project has been here before -- the #DLYI pacing work
+  and mmumodel's word-time pacing exist for the same reason.  Whether our
+  MVH is too slow, our BCE too fast, or the MMU delivering without the
+  real inter-block gaps, is measurable: instrument the time between the
+  CPU patching the #WAT and the BCE fetching that halfword.

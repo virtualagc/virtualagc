@@ -37,6 +37,19 @@ void ap101_exec1(AP101 *gpc) {
                 for (int i = 0; i < 8; i++)
                     fprintf(stderr, " R%d=%08x", i,
                             (unsigned)register_get32(cpu_r(&gpc->cpu, i)));
+                if (getenv("YAGPC_SSLDUMP")) {
+                    static const struct { const char *n; unsigned a, len; } B[] = {
+                        {"FCMIBLK1", 0x72f2, 20}, {"FCMIBLK2", 0x7306, 20},
+                        {"FCMINSST", 0x731a, 2},  {"FCMRSADD", 0x7320, 6},
+                        {"FCMNEXTB", 0x7346, 3} };
+                    for (unsigned b = 0; b < 5; b++) {
+                        fprintf(stderr, "\n   %s @%05x:", B[b].n, B[b].a);
+                        for (unsigned i = 0; i < B[b].len; i++)
+                            fprintf(stderr, " %04x",
+                                mcm_get16(&gpc->cpu.mainStorage, B[b].a + i));
+                    }
+                    fprintf(stderr, "\n  ");
+                }
                 fprintf(stderr, " NEXTS=%04x CURRS=%04x\n",
                         mcm_get16(&gpc->cpu.mainStorage, 0x7347),
                         mcm_get16(&gpc->cpu.mainStorage, 0x7348));
