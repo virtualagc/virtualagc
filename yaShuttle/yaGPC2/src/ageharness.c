@@ -115,6 +115,29 @@ static void mem_pattern_fill(AGEHarness *age) {
  * to be executing out of unprotected storage; protect everything (what
  * --ipl does) and GPCIPL's own error logging faults writing into
  * sector-1/ENVIRONS scratch that no loader would ever have protected. */
+/* YAGPC_IPL_PROTECT selects what --ipl's initial fill protects:
+ *   (unset)    every halfword, then the PSA carve-out -- the default.
+ *   "0"        nothing.  REFUTED: the Instruction Monitor fires as soon as
+ *              the software sets PSW mask bit 34, and boot dies at nia=0.
+ *   "sections" nothing up front, then apply_load_protection() over the
+ *              symbol file's sections after the image is in store -- the
+ *              middle option, standing in for the loader that would have
+ *              protected only what it wrote.  Needs --symbols.
+ * Regions no load block covers stay protected forever under the default,
+ * and #PCVNMMU (FIOMUWB2's staging buffer) is exactly such a region --
+ * yet PHASE02.sym.json's own storeProtect map excludes it. */
+static const char *ipl_protect_mode(void) {
+    const char *e = getenv("YAGPC_IPL_PROTECT");
+    return e != NULL ? e : "all";
+}
+static bool ipl_protect_all(void) {
+    const char *m = ipl_protect_mode();
+    return !(m[0] == '0' || strcmp(m, "sections") == 0);
+}
+static bool ipl_protect_sections(void) {
+    return strcmp(ipl_protect_mode(), "sections") == 0;
+}
+
 static long apply_load_protection(AGEHarness *age) {
     long n = 0;
     for (int i = 0; i < age->sym.sectionCount; i++) {
@@ -140,10 +163,8 @@ static void ipl_fill(AGEHarness *age) {
      * On the --ipl path the real loader runs and applies each load
      * block's own protect flag, so code still ends up protected. */
     {
-        const char *e = getenv("YAGPC_IPL_PROTECT");
-        bool dflt = !(e != NULL && e[0] == '0');
         for (uint32_t hw = 0; hw < total; hw++) {
-            membus_set_store_protect(&age->gpc.ram, hw, dflt);
+            membus_set_store_protect(&age->gpc.ram, hw, ipl_protect_all());
         }
     }
 
@@ -326,7 +347,7 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
     /* After the image is in store, not before: this stands in for the
      * loader that would have protected what it wrote.  --ipl already
      * protected everything up front, so it does not want this. */
-    if (opts->powerOn && !opts->ipl) {
+    if ((opts->powerOn && !opts->ipl) || (opts->ipl && ipl_protect_sections())) {
         long protectedHW = apply_load_protection(age);
         if (opts->verbose) {
             printf("Load protection: %ld halfword(s) over %d section(s)\n",
