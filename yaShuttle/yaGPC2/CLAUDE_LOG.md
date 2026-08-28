@@ -3106,3 +3106,39 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   lone-`SPON` files are belt-and-braces.  Neither reading is clearly better, and they
   give OPPOSITE answers on precedence against deck `SET`/`CLEAR`, so it must not be
   decided by whichever gets written down first.
+
+### [2026-08-28] Target: [problems.md]
+- RON'S READING OF `SPON`/`SPOFF`, AND IT IS EMPIRICALLY CORROBORATED: the authors did
+  not know what the protection defaults would be and simply added a mark where they
+  had a specific block they cared about.  That retires the delta-vs-fixed-default
+  argument rather than deciding it -- the source never encoded a global scheme, so
+  both ASM101S-port's delta hypothesis and my default-protected reading were attempts
+  to recover something that was never there.
+- THE TEST, because his reading predicts CLUSTERING on hazard-prone code where a
+  global scheme predicts none.  Across all 549 `.asm` in OI340600 SSSRC+MLIB80:
+      overall marking rate                          40/549   7.3%
+      files containing BCE opcodes                  17/39    44%
+        (#CMD/#TDL/#RDL/#LBR/#DLYI/#SST/#WAT/#BU)
+      files with NO BCE opcodes                     23/510   4.5%
+  A TENFOLD ENRICHMENT on exactly the code that contains DMA targets.  By prefix:
+  FIO 26/114 (22.8%), FCM 8/66 (12.1%), FPM 1/53 (1.9%), PCH 0/47, FAZ 0/16.
+  A global scheme would not care whether a file contains BCE opcodes.  I WITHDRAW my
+  default-protected reading; his is better supported than either of ours.
+- CONSEQUENCE FOR PRECEDENCE: if the marks are local worries rather than a scheme,
+  then asking whether they override or modify deck `SET`/`CLEAR` asks the source a
+  question it was never written to answer.  That argues for the assembler RECORDING
+  what it sees and reconciling nothing, leaving reconciliation to `lnk101` where it
+  is visible.
+- DECISIONS RECORDED (Ron, via ASM101S-port): (1) NO DIAGNOSTICS on unbalanced
+  brackets -- my 36-of-40 figure is the recorded justification and they recounted it
+  independently to the same numbers.  (2) The CSECT-start protection state becomes a
+  SECOND command-line option, since a default cannot be inferred from source that
+  never encoded one; default `on` (protected) in its absence.  Proposed spellings
+  `--no-store-protect` and `--protect-default=on|off`, kept lexically far apart --
+  `--no-csect-protect` beside `--no-store-protect` would be a script-level footgun.
+- ACCEPTANCE CRITERION, not a nice-to-have: sweeping both releases with
+  `--no-store-protect --protect-default=off` must reproduce the stored objects
+  BIT-FOR-BIT.  That specific combination is the strong form of the test -- default
+  `off` with suppression `on` is the configuration whose output would differ most if
+  protect state leaked through a path ignoring the suppression; running it with
+  `--protect-default=on` would be weaker for the same cost.
