@@ -2520,3 +2520,43 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   for what TPSASINP should point at in OI340600 than the OI301700-era
   047e0.  Next step: find the entry point of the routine containing 1bfef
   and check it against TPSASINP.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- STRONG VALIDATION OF OUR PHASE-2 IMAGE.  Resolving the DASS dump's
+  interrupt vectors (16-bit, BSR=3 when the high bit is set) against OUR
+  PHASE02.lib symbol table hits a symbol at OFFSET +0 EVERY TIME:
+      ProgChk  ad5c -> 1ad5c  FPMIHPGM +0     EX0  9a30 -> 19a30  FIOERRLA +0
+      SVC      b13a -> 1b13a  FPMSVC   +0     EX1  9a58 -> 19a58  FIOERRLB +0
+      Clk1     ad24 -> 1ad24  FPMIHPC1 +0     EX2  b480 -> 1b480  FIOCMPLT +0
+      Clk2     bed6 -> 1bed6  FPMIHPC2 +0
+      SpecInt  47e0 -> 047e0  FCMLINIT +0
+  Nine vectors, nine exact symbol starts.  Our phase-2 addresses match the
+  authentic system.  (This also kills the previous lead: the LPS TPSASRP at
+  1bfef is inside FPMIHPC2, the Clock-2 handler, not a bootstrap.)
+- SO TPSASINP MUST POINT AT FCMLINIT (047e0).  SSSRC/FCMLINIT.asm confirms
+  what it is -- PASS's initialisation entry, calling FCMINIOP and FPMDISP,
+  initialising variables and the GPC ID, with a 1978 change note "MAKE
+  FCMLINIT INDEPENDENT OF FCMINSSL".  Our phase 2 loads it at 047e0
+  correctly (block 5: addr=47e0 len=1164), verified landing at t=19840675.
+- THE CONTRADICTION, now release-independent and not resting on the DASS
+  comparison at all:
+      1. the SSL hands off to TPSASINP AFTER loading all FCMNUMPH phases
+      2. TPSASINP must point at FCMLINIT
+      3. therefore FCMLINIT must SURVIVE every phase
+      4. our phase 3 overwrites 047e0..04c6b at t=26708849
+  And phase 3's content there is NOT padding: PHASE03.lib carries a
+  genuine TEXT extent 03336..04e78, 6979 halfwords, covering 047e0.  So
+  the over-extension theory is wrong too.
+- WHICH LEAVES THE PHASE ORDER, and our own tooling already flags it as
+  the weak point.  tools/stamp_ipl_phase_table.py has
+      IPL_PHASE_ORDER = (10, 2, 13, 3)
+  "from FCMBOOT's prolog", with the docstring conceding "Assumed: that the
+  ground Mass Memory Build laid the four phases' load blocks out in this
+  order ... nothing contradicts it, but no original stamped table has been
+  [seen]".  Something contradicts it now: in that order the SSL loads 2,
+  then 13, then 3, and phase 3 destroys the one routine the SSL must jump
+  to.
+- SO ONE OF THREE THINGS IS WRONG, all build-side: the phase ORDER in our
+  stamped table; our PHASE03 content; or the value that should be stamped
+  into TPSASINP for a 3-phase OI340600 load.  The emulator is not
+  implicated in any of them.
