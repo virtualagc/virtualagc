@@ -2681,3 +2681,53 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   has not driven a display.  Whether that needs more simulated time, real
   MEDS rather than --deu-model, or something else is untested.
 - Suites unchanged: the same four fail as before.
+
+### [2026-08-28] Target: [problems.md]
+- The `mmbstamp.py` fix is VALIDATED END TO END, with no injection.  `pool_low_hw()`
+  plus the `parent_pool_lo` bound stops `derive_load_blocks` dropping PASS's own PSA
+  csect `FCMPSA`.  Rebuilt tape `mmu2-fixed.mmv` (1163 blocks, was 1155); phase 2 now
+  carries 27 load blocks, was 26, the new one being `00000..001a7` len 424 flags 0600
+  (unprotected).  Booting it: `R1=47e00000` -- the SSL read `TPSASINP` and got
+  `047e0` = `FCMLINIT`, straight from the loaded `FCMPSA`, and handed off.  No
+  `YAGPC_LOADBIN`, no PSA unprotect, no `YAGPC_PATCH`.  The fix stays LOCAL in
+  `~/donschmidt/nsts-sdl-dps`; no commit there, no PR, by the user's instruction.
+- THE PHASE TABLE STEP: `stamp_ipl_phase_table.py` needs `--sym`, and the image to
+  stamp is `newphase/PHASE01/PHASE01.fcm` with `PHASE01.sym.json` beside it.
+  `BOOT-full.fcm` is that same 65024-byte phase-1 image; `Desktop/IPL/IPL.fcm`
+  (1048576 bytes) is a DIFFERENT build and its `.sym.json` resolves 047e0 to GPCIPL's
+  `MSG142`, which is meaningless for a PASS image.  Only the 07xxx `FCMINSSL`
+  symbols are common to both.
+- REMAINING BLOCKER, unchanged by the fix: phase 3's load block `03336..04e7b`
+  (6982 hw; a genuine 6979-hw extent in `PHASE03.lib`, not a stamping artifact)
+  overwrites phase 2's `047e0..04c6b`, which is `FCMLINIT`.  Order is 10, 2, 13, 3,
+  so phase 3 wins, and the boot dies on `0xc6c6 at 0x48bf` INSIDE `FCMLINIT`.
+- The DASS post-IPL dump says phase 2 should win: `047e0..04c6b` is fully intact
+  there, 0 fill, with fill resuming at exactly `04c6c`; and PHASE02's own `047e0`
+  extent matches it 719/719, 100%.
+- REORDERING TO PUT PHASE 2 LAST DOES NOT WORK.  Descriptors are `[disp][count][addr]`
+  and each carries its own displacement, so they permute cleanly, and all three
+  copies (`FCMPTAD1/2/3` at 0x37E/0x47E/0x57E) were swapped to 10, 13, 3, 2.  The
+  load then stops at `FCMSSLEX + 2` with only 70 blocks read -- the SSL exits early,
+  thinking it is done.  Re-run with the unprotect moved to t=1000 to rule out the
+  timing confound: identical, 70 blocks.  So this is not an artifact of the
+  diagnostic patch's timing.
+- The unprotect timing matters in its own right: `YAGPC_UNPROTECT_AT=1000` on the
+  CORRECT order is WORSE than `=18765000` -- 281 blocks and `wordsTaken` 117178 <
+  `wordsOut` 143876, i.e. words dropped, stalling in `#@LB117`.  Late is right.
+- CORRECTION, and the number I first reported was misleading.  Comparing PHASE02's
+  extents against the DASS dump I said sector 0 matched "60.1%".  That counted
+  fill-vs-fill as mismatch.  The dump has TWO fill patterns: `C6C6` (49.3% of it)
+  and `C9FB` (21.4%).  Excluding halfwords the dump left as `C9FB`, PHASE02 sector 0
+  matches 11245/11550 = 97.4%.  Only 305 halfwords genuinely differ.
+- Those 305 are worth chasing separately and are NOT random: `001aa..00247` is our
+  values and DASS's SAME VALUES IN A DIFFERENT ORDER (ours has `F02B` at 001ba,
+  DASS at 0022a) -- a table our link emits permuted; `0001c..00023` is 8 zero
+  halfwords where DASS has PSA vectors; `04b48..04bad` is 102 halfwords we leave
+  zero; the rest are scattered single-halfword address differences.
+- Phases 10, 13 and 3 match the post-IPL dump at only 3.3%, 3.3% and 9.4% of their
+  own extents, against phase 2's 97.4%.  The resident post-IPL image is essentially
+  phase 2 alone.  Do not read this as "our phase 10/13/3 builds are wrong" without
+  checking it the same way -- the overlays are not expected to be resident.
+- Test suite: the same FOUR pre-existing failures (`test/test_debugger.sh`,
+  `test_cpu_instr_exec`, `test_iop_bce_exec`, `test_iop_msc_exec`), identical before
+  and after; there were seven at the pre-session commit `249669d91`.
