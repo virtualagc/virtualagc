@@ -3368,3 +3368,36 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   256-block allocation, so either the allocation is computed differently, or the
   block is absorbed into an adjacent one, or it belongs to another phase.  Do NOT
   simply raise the budget -- that would paper over whichever of those is true.
+
+### [2026-08-28] Target: [problems.md]
+- **`FCMRESRV` FOUND, AND THE SECOND `mmbstamp` DEFECT IS FIXED.**  `FCMINSSL.asm:1111`
+  `FCMRESRV EQU X'2000'  RESERVE LOADBLOCK MASK`.  The SSL tests it THREE times and
+  skips the block each time: the MM block count (:496, `RESERVE FLAG OFF (LB DATA ON
+  MM)?`), the BCE transfer setup (:584) and the checksum pass (:842).  So a reserved
+  load block READS NO TAPE, TRANSFERS NOTHING AND IS NOT CHECKSUMMED -- it is purely
+  a DESCRIPTOR carrying address/length/protect, and it is still walked by
+  `FCMUPROT`/`FCMRPROT`, which is what clears the store-protect bit `GPCERAS` set.
+  The idea came from the user asking whether reserved sections might be treated
+  differently rather than occupying space.  They are.
+- `LoadBlock.words()` built flags as `0x0600 | sector<<4` plus `0x8000`/`0x4000` and
+  HAD NO WAY TO EXPRESS `0x2000` AT ALL.  Added `LoadBlock.reserved`, encoded as
+  `FCMRESRV`, and made `pack_mm` charge a reserved block ZERO MM blocks.
+- ACCEPTANCE TEST PASSED, no injection, no patches, tape unchanged at 2500 blocks:
+      blocksRead        281 -> 400          (target 400)
+      wordsTaken/Out    117178/143876 -> 204812/204812
+      wordsLost         26698 -> 0
+      DMA violations    7170 -> 1           (the unrelated early addr=00002)
+      halt              #@LB117 -> FCMSSLEX+2, matching the injection runs
+  Phase 2: 28 descriptors, ncont=226, crossed=False -- NO budget overflow, because
+  the reserved block costs no MM blocks.  Descriptor encodes as
+  `addr=8322 flags=2660 len=400C` (FCMRESRV | 0x0600 | sector 6, protect off).
+- EVERY EARLIER EXPLANATION OF THE 58-BLOCK FAILURE WAS WRONG, and all for the same
+  root reason: I emitted the descriptor WITHOUT the flag, so the SSL tried to read 33
+  tape blocks that do not exist and everything after was displaced.  Specifically
+  WITHDRAWN: "budget overflow -> layout corrupt" (the overflow was an artifact of
+  counting a block that costs no tape -- and the user's PHASE21 precedent, 42 vs 41,
+  is a benign warning; `crossed` is a TRACK-boundary flag from `pack_mm`, handled by
+  setting `sot`, not a budget signal); and "the tape carries no content" (correct
+  observation, wrong significance -- it should not carry any).
+- STILL OPEN: the run halts at `FCMSSLEX+2` with 400 blocks rather than booting.
+  That was true of the injection runs too, so it is the NEXT defect, not this one.
