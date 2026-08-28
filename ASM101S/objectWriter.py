@@ -137,6 +137,52 @@ def writeEND(f, entryEsdId=None, entryAddr=None, ident="ASM101S", seqNum=1):
     return seqNum + 1
 
 
+def writePROT(f, sectName, ranges, seqNum):
+    """Write ' PROT <csect> <s>-<e>,...' store-protect control cards.
+
+    NOT AN OBJECT RECORD, and that distinction is the whole point.  An object
+    module record has 0x02 in column 1; ap101Utils/objModule.py routes those to
+    Record.from_image() and everything else to ControlRecord, and lnk101 reads
+    PROT only from the ControlRecord list (lnk101/linker.py, "' PROT <csect>
+    [<s>-<e>,...]' control cards: asm101's SPON/SPOFF capture").  A 0x02 record
+    typed "PRT" was tried first and is INVISIBLE to the linker -- it would have
+    integrated cleanly, produced nothing, and passed every test.
+
+    There is precedent for the carrier inside the format: HAL/S-FC's PASS2
+    already interleaves " STACK <csect>" cards in the object stream.
+
+    The ranges are the PROTECTED regions, as CSECT-RELATIVE halfword offsets,
+    in HEX without a prefix, END-EXCLUSIVE.  Naming a csect on a PROT card takes
+    it out of the deck-level SET/CLEAR scheme entirely (linker.py adds it to
+    protManaged), so a csect whose marks leave nothing protected still gets a
+    card, with an empty range list, meaning exactly that.  Several cards for one
+    csect accumulate, so a long list simply continues onto the next card.
+    """
+    pieces = ["%X-%X" % (a, b) for a, b in ranges]
+    # 80-column card, and the linker splits on whitespace, so keep well inside
+    # it and continue rather than truncate.
+    batches, cur = [], []
+    for piece in pieces:
+        trial = ",".join(cur + [piece])
+        if len(" PROT %s %s" % (sectName, trial)) > 71:
+            batches.append(cur)
+            cur = [piece]
+        else:
+            cur.append(piece)
+    batches.append(cur)
+
+    for batch in batches:
+        text = " PROT %s" % sectName
+        if batch:
+            text += " " + ",".join(batch)
+        card = bytearray([0x40] * 80)
+        card[0:len(text)] = toEbcdic(text, len(text))
+        f.write(bytes(card))
+        seqNum += 1
+
+    return seqNum
+
+
 def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
     esdItems, esdIdMap, nextEsdId = [], {}, 1
     # SECTIONS NEED THEIR OWN MAP, because `esdIdMap` is keyed by NAME and holds
@@ -252,27 +298,61 @@ def writeObjectModule(filename, metadata, symtab, sects, entries, extrns):
         
         if rldEntries:
             seqNum = writeRLD(f, rldEntries, seqNum)
-        
-        # THE END RECORD CARRIES NO ENTRY POINT, because no source names one.
-        # This used to take `next(iter(entries))` -- an arbitrary element of a
-        # SET -- and write that symbol's address into the END record.  Two
-        # things were wrong with it.
-        #
-        # It was not even deterministic: hash order varies from process to
-        # process, so BILDNEW5 assembled twice gave `END entry=0303C` one time
-        # and `END entry=034FA` the next, with all 5022 other lines of the
-        # normalized dump identical, and the value reached the linked image.
-        #
-        # And there was nothing to choose from in the first place.  An entry
-        # point comes from the END statement's operand, `END SYMBOL`, and
-        # EVERY module here writes a bare END: 702 of 702 across OI340600,
-        # OI301700 and RUNASM, with 101 of them declaring ENTRY symbols that
-        # this code was picking among.  A bare END specifies no entry point,
-        # and the loader takes the start of the first control section.
-        #
-        # If a source ever does name one, model101.py must capture it first --
-        # `END` there simply breaks out of the loop and the operand is
-        # discarded -- and the value should be passed in rather than guessed.
-        writeEND(f, None, None, "ASM101S 0.00", seqNum)
+
+            # STORE-PROTECT RANGES, one PROT control card set per control section that
+        # carries any SPON/SPOFF.  Suppressed entirely by --no-store-protect, which
+        # is what makes the feature testable: with it, this file must be bit-for-bit
+        # what the assembler produced before any of this existed.
+        if metadata.get("storeProtect", True):
+            byState = {}
+            for t in metadata.get("protects", []):
+                byState.setdefault(t["section"], []).append(t)
+            for sectName in sects:
+                if sectName not in byState or sects[sectName].get("dsect"):
+                    continue
+                nHw = (sects[sectName].get("used", 0) + 1) // 2
+                if nHw <= 0:
+                    continue
+                # Walk the marks, carrying the state forward, and collect the runs
+                # that are PROTECTED.  The state before the first mark is
+                # --protect-default; the state after the last runs to the end of the
+                # section, which is why SPOFF with no matching SPON needs no
+                # diagnostic to be meaningful.
+                state = metadata.get("protectDefault", True)
+                marks = sorted(byState[sectName], key=lambda t: t["offset"])
+                ranges, runStart = [], (0 if state else None)
+                for t in marks:
+                    hw = min(t["offset"] // 2, nHw)
+                    if t["protect"] and runStart is None:
+                        runStart = hw
+                    elif not t["protect"] and runStart is not None:
+                        if hw > runStart:
+                            ranges.append((runStart, hw))
+                        runStart = None
+                if runStart is not None and nHw > runStart:
+                    ranges.append((runStart, nHw))
+                seqNum = writePROT(f, sectName, ranges, seqNum)
     
-    return filename
+            # THE END RECORD CARRIES NO ENTRY POINT, because no source names one.
+            # This used to take `next(iter(entries))` -- an arbitrary element of a
+            # SET -- and write that symbol's address into the END record.  Two
+            # things were wrong with it.
+            #
+            # It was not even deterministic: hash order varies from process to
+            # process, so BILDNEW5 assembled twice gave `END entry=0303C` one time
+            # and `END entry=034FA` the next, with all 5022 other lines of the
+            # normalized dump identical, and the value reached the linked image.
+            #
+            # And there was nothing to choose from in the first place.  An entry
+            # point comes from the END statement's operand, `END SYMBOL`, and
+            # EVERY module here writes a bare END: 702 of 702 across OI340600,
+            # OI301700 and RUNASM, with 101 of them declaring ENTRY symbols that
+            # this code was picking among.  A bare END specifies no entry point,
+            # and the loader takes the start of the first control section.
+            #
+            # If a source ever does name one, model101.py must capture it first --
+            # `END` there simply breaks out of the loop and the operand is
+            # discarded -- and the value should be passed in rather than guessed.
+            writeEND(f, None, None, "ASM101S 0.00", seqNum)
+    
+        return filename

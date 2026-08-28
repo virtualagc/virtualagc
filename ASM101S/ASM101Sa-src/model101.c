@@ -86,6 +86,12 @@ Val *symtab = NULL;
 Val *entries = NULL;
 Val *extrns = NULL;
 Val *relocations = NULL;
+/* STORE-PROTECT TRANSITIONS from SPON/SPOFF, as {section, offset, protect}.
+   The interpretation of these pseudo-ops is INFERRED FROM USAGE -- no manual,
+   POO section or linkage-editor document defines them -- so nothing here
+   diagnoses against them and nothing reconciles them with the deck-level
+   SET/CLEAR cards.  What the assembler records is what the source says. */
+Val *protects = NULL;
 Val *literalPools = NULL;
 Val *metadata = NULL;
 Val *ignoreOps = NULL;
@@ -332,6 +338,7 @@ model101_init (int forceD)
   entries = val_dict ();
   extrns = val_dict ();
   relocations = val_seq (V_LIST);
+  protects = val_seq (V_LIST);
   metadata = val_dict ();
   ignoreOps = val_dict ();
   rngState = 16134176201611561415ULL;
@@ -342,6 +349,7 @@ model101_init (int forceD)
   val_dset (metadata, "rextrns", val_dict ());
   val_dset (metadata, "symtab", symtab);
   val_dset (metadata, "relocations", relocations);
+  val_dset (metadata, "protects", protects);
   val_dset_int (metadata, "passCount", 0);
   {
     static const char *const ignored[]
@@ -2186,6 +2194,8 @@ generateObjectCode (Val *source, Val *macros)
          be recorded on pass 3 exactly and never cleared, which was safe only
          while pass 3 was always the last.  It no longer is. */
       relocations->u.seq.len = 0;
+      /* And so do the protect transitions, for the same reason. */
+      protects->u.seq.len = 0;
       val_dset_int (metadata, "passCount", passCount);
       val_dset_int (svGlobals, "_passCount", passCount);
       collect = (passCount == 1 || passCount == 2);
@@ -2286,6 +2296,32 @@ generateObjectCode (Val *source, Val *macros)
               || val_dget_bool (properties, "empty", 0))
             continue;
           operation = val_dget_str (properties, "operation", "");
+          /* SPON/SPOFF mark the store-protect state of what follows.  They stay
+             in `ignoreOps' -- they generate no object code and the collect pass
+             still discards them -- but on a compile pass the location counter is
+             meaningful, so the transition is recorded first.
+
+             NO DIAGNOSTIC IS EMITTED HERE, DELIBERATELY.  The obvious one,
+             "unbalanced SPOFF/SPON", would fire on 36 of the 40 files in
+             OI340600 that use these at all:  31 have SPOFF with no SPON and 5
+             have SPON with no SPOFF, against 4 balanced.  Unbalanced is not the
+             error case, it is the normal case. */
+          if (compiling
+              && (strcmp (operation, "SPON") == 0
+                  || strcmp (operation, "SPOFF") == 0))
+            {
+              Val *sd = (sect != NULL) ? val_dget (sects, sect) : NULL;
+              if (sd != NULL && !val_dget_bool (sd, "dsect", 0))
+                {
+                  Val *t = val_dict ();
+                  val_dset (t, "section", val_str (sect));
+                  val_dset_int (t, "offset", val_dget_int (sd, "pos1", 0));
+                  val_dset (t, "protect",
+                            (strcmp (operation, "SPON") == 0) ? V_True
+                                                              : V_False);
+                  val_append (protects, t);
+                }
+            }
           if (val_dhas (ignoreOps, operation))
             continue;
           if (val_dget_bool (properties, "astFailed", 0))

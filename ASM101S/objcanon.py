@@ -52,8 +52,19 @@ def canon(path):
     sd = []           # canonical SD/LD/ER descriptions
     txt = []
     rld = []
+    ctl = []          # free-format control cards (' PROT ...', ' STACK ...')
     for i in range(0, len(data), 80):
         card = data[i:i + 80]
+        if card[0] != 0x02:
+            # A FREE-FORMAT CONTROL CARD, not an object record -- column 1 is
+            # not 0x02.  ASM101S emits ' PROT <csect> <s>-<e>,...' here for
+            # SPON/SPOFF, and HAL/S-FC emits ' STACK <csect>'.  DECODED RATHER
+            # THAN SKIPPED: an unrecognised card is silently ignored, and a
+            # comparison that skips the records under test reports success while
+            # testing nothing.  That happened once already with the object-record
+            # form of this same data.
+            ctl.append(ebcdic(card).rstrip())
+            continue
         typ = ebcdic(card[1:4])
         body = card[4:72]
         if typ == "ESD":
@@ -119,6 +130,8 @@ def canon(path):
     for rel, pos, flags, addr in sorted(rld, key=repr):
         out.append("RLD rel=%s pos=%s flags=%02X addr=%d"
                    % (named(rel), named(pos), flags, addr))
+    for text in sorted(ctl):
+        out.append("CTL %s" % text)
     return "\n".join(sorted(out))
 
 

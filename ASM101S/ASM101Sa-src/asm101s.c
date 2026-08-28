@@ -59,6 +59,8 @@ static Val *noLibraryMember;
 static asmint sysndx = -1;
 static int listOn = 1;
 static int trace = 0;
+static int storeProtect = 1;
+static int protectDefault = 1;
 static asmint endLibraries = 0;
 /* Read every listed member ahead of the module, as this always used to.  Off:
    members are fetched by name when invoked.  See `loadLibraryMacro`. */
@@ -1944,6 +1946,33 @@ main (int argc, char *argv[])
         {
           /* Already accounted for above. */
         }
+      /* STORE PROTECTION.  SPON/SPOFF are recorded against the location counter
+         and emitted as PRT records.  Two switches, because BOTH the meaning of
+         the pseudo-ops and the state that holds where a section carries no mark
+         are inferred from usage rather than from any document.  Unlike
+         --no-rtl-fixes these need no early read of argv: they are consulted only
+         when the object module is written, long after every source file has been
+         read, so their position on the command line cannot matter. */
+      else if (strcmp (parm, "--no-store-protect") == 0)
+        {
+          storeProtect = 0;
+        }
+      else if (py_startswith (parm, "--protect-default="))
+        {
+          const char *value = parm + strlen ("--protect-default=");
+          if (strcmp (value, "on") == 0 || strcmp (value, "yes") == 0
+              || strcmp (value, "true") == 0 || strcmp (value, "1") == 0)
+            protectDefault = 1;
+          else if (strcmp (value, "off") == 0 || strcmp (value, "no") == 0
+                   || strcmp (value, "false") == 0 || strcmp (value, "0") == 0)
+            protectDefault = 0;
+          else
+            {
+              fprintf (stderr, "Unrecognized --protect-default value: %s\n",
+                       value);
+              exit (1);
+            }
+        }
       else if (strcmp (parm, "--help") == 0)
         {
           printProvenance (0);
@@ -1992,6 +2021,13 @@ main (int argc, char *argv[])
           printf ("--no-force-d        Opposite of --force-d.\n");
           printf ("--trace             Enable tracing mode for debugging assembler\n");
           printf ("                    operation.\n");
+          printf ("--no-store-protect  Emit no store-protection (PRT) records in the\n");
+          printf ("                    object module.  SPON/SPOFF are still accepted\n");
+          printf ("                    and still generate no code.\n");
+          printf ("--protect-default=X X is on or off:  the store-protect state at the\n");
+          printf ("                    start of a control section, before any SPON or\n");
+          printf ("                    SPOFF in it.  Default on.  Ignored entirely if\n");
+          printf ("                    --no-store-protect is given.\n");
           printf ("--no-rtl-fixes      Reproduce the RTL library's original, historical\n");
           printf ("                    behavior -- including its known bugs -- by making\n");
           printf ("                    &ASM101S false instead of true. Some RTL source\n");
@@ -2026,6 +2062,9 @@ main (int argc, char *argv[])
    */
   if (objectFileName != NULL)
     {
+      val_dset (metadata, "storeProtect", storeProtect ? V_True : V_False);
+      val_dset (metadata, "protectDefault",
+                protectDefault ? V_True : V_False);
       writeObjectModule (objectFileName, metadata, symtab, sects, entries,
                          extrns);
       fprintf (stderr, "Output obj: %s\n", objectFileName);

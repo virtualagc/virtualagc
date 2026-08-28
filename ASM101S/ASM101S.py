@@ -1232,6 +1232,22 @@ svGlobals["&SYSPARM"] = "PASS"
 # in-place as it encounters it, so setting this too late would silently
 # fail to affect files already read).
 svGlobals["&ASM101S"] = "--no-rtl-fixes" not in sys.argv[1:]
+# STORE PROTECTION.  SPON/SPOFF in the source are recorded against the location
+# counter and emitted as PRT records in the object module.  Two switches, because
+# BOTH the meaning of the pseudo-ops and the state that holds where a section
+# carries no mark are INFERRED FROM USAGE rather than from any document:
+#
+#   --no-store-protect       emit no PRT records at all.  The object file is then
+#                            bit-for-bit what it was before this existed, which is
+#                            how the feature is regression-tested.
+#   --protect-default=on|off the state at the start of a control section, before
+#                            any SPON/SPOFF in it.  Defaults to protected.
+#
+# Unlike --no-rtl-fixes these need no early read from sys.argv: they are consulted
+# only when the object module is written, long after every source file has been
+# read, so their position on the command line cannot matter.
+storeProtect = True
+protectDefault = True
 endLibraries = 0 # First line in `source` following macro-library definitions.
 comparisonSects = None
 comparisonAssigned = {}
@@ -1287,6 +1303,18 @@ for parm in sys.argv[1:]:
         pass
     elif parm == "--no-rtl-fixes":
         pass # Already accounted for, above, before this loop even starts.
+    elif parm == "--no-store-protect":
+        storeProtect = False
+    elif parm.startswith("--protect-default="):
+        value = parm[len("--protect-default="):].lower()
+        if value in ["on", "yes", "true", "1"]:
+            protectDefault = True
+        elif value in ["off", "no", "false", "0"]:
+            protectDefault = False
+        else:
+            print("Unrecognized --protect-default value: %s" % value,
+                  file=sys.stderr)
+            sys.exit(1)
     elif parm in ["--trace"]:
         pass
     elif parm == "--help":
@@ -1331,6 +1359,13 @@ for parm in sys.argv[1:]:
         print("--no-force-d        Opposite of --force-d.")
         print("--trace             Enable tracing mode for debugging assembler")
         print("                    operation.")
+        print("--no-store-protect  Emit no store-protection (PRT) records in the")
+        print("                    object module.  SPON/SPOFF are still accepted")
+        print("                    and still generate no code.")
+        print("--protect-default=X X is on or off:  the store-protect state at the")
+        print("                    start of a control section, before any SPON or")
+        print("                    SPOFF in it.  Default on.  Ignored entirely if")
+        print("                    --no-store-protect is given.")
         print("--no-rtl-fixes      Reproduce the RTL library's original, historical")
         print("                    behavior -- including its known bugs -- by making")
         print("                    &ASM101S false instead of true. Some RTL source")
@@ -1356,6 +1391,8 @@ metadata = generateObjectCode(source, macros)
 #=============================================================================
 # Write object file.
 if objectFileName != None:
+    metadata["storeProtect"] = storeProtect
+    metadata["protectDefault"] = protectDefault
     writeObjectModule(objectFileName, metadata, symtab, sects, entries, extrns)
     print("Output obj: %s" % objectFileName, file=sys.stderr)
 

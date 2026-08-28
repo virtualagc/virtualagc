@@ -197,6 +197,62 @@ writeRLD (FILE *f, RldEntry *entries, size_t n, asmint seqNum)
  *   32     IDR type (blank = no IDR)
  *   33-51  translator identification
  */
+/*
+ * ' PROT <csect> <s>-<e>,...' store-protect control cards.
+ *
+ * NOT AN OBJECT RECORD, and that distinction is the whole point.  An object
+ * module record has 0x02 in column 1; ap101Utils/objModule.py routes those to
+ * Record.from_image() and everything else to ControlRecord, and lnk101 reads
+ * PROT only from the ControlRecord list (lnk101/linker.py, "' PROT <csect>
+ * [<s>-<e>,...]' control cards: asm101's SPON/SPOFF capture").  A 0x02 record
+ * typed "PRT" was tried first and is INVISIBLE to the linker -- it would have
+ * integrated cleanly, produced nothing, and passed every test.
+ *
+ * There is precedent for the carrier inside the format:  HAL/S-FC's PASS2
+ * already interleaves " STACK <csect>" cards in the object stream.
+ *
+ * The ranges are the PROTECTED regions, as CSECT-RELATIVE halfword offsets, in
+ * HEX without a prefix, END-EXCLUSIVE.  Naming a csect on a PROT card takes it
+ * out of the deck-level SET/CLEAR scheme entirely, so a csect whose marks leave
+ * nothing protected still gets a card with an empty range list, meaning exactly
+ * that.  Several cards for one csect accumulate in the linker, so a long list
+ * continues onto the next card.
+ */
+static asmint
+writePROT (FILE *f, const char *sectName, const asmint (*ranges)[2],
+           size_t nRanges, asmint seqNum)
+{
+  size_t i = 0;
+  int wroteAny = 0;
+  while (i < nRanges || !wroteAny)
+    {
+      char text[96];
+      unsigned char card[80];
+      int n = snprintf (text, sizeof (text), " PROT %s", sectName);
+      int first = 1;
+      while (i < nRanges)
+        {
+          char piece[32];
+          int m = snprintf (piece, sizeof (piece), "%s%lX-%lX",
+                            first ? " " : ",",
+                            (unsigned long) ranges[i][0],
+                            (unsigned long) ranges[i][1]);
+          if (n + m > 71)
+            break;
+          memcpy (text + n, piece, (size_t) m + 1);
+          n += m;
+          first = 0;
+          i++;
+        }
+      blanks (card, 80);
+      toEbcdic (card, text, (size_t) n);
+      fwrite (card, 1, 80, f);
+      seqNum++;
+      wroteAny = 1;
+    }
+  return seqNum;
+}
+
 static asmint
 writeEND (FILE *f, int haveEntry, asmint entryEsdId, asmint entryAddr,
           const char *ident, asmint seqNum)
@@ -403,6 +459,83 @@ writeObjectModule (const char *filename, Val *metadataArg, Val *symtabArg,
 
   if (nRld > 0)
     seqNum = writeRLD (f, rldEntries, nRld, seqNum);
+
+  /* STORE-PROTECT RANGES, one PROT control card set per control section that
+     carries any SPON/SPOFF.  Suppressed entirely by --no-store-protect, which
+     is what makes the feature testable:  with it, this file must be bit-for-bit
+     what the assembler produced before any of this existed. */
+  if (val_dget_bool (metadataArg, "storeProtect", 1))
+    {
+      Val *marks = val_dget (metadataArg, "protects");
+      size_t si;
+      for (si = 0; si < val_dlen (sectsArg); si++)
+        {
+          const char *sectName = val_dkey (sectsArg, si);
+          Val *sd = val_dget (sectsArg, sectName);
+          asmint nHw, runStart;
+          int haveRun, state, any = 0;
+          size_t mi, nRanges = 0;
+          asmint (*ranges)[2];
+          if (val_dget_bool (sd, "dsect", 0))
+            continue;
+          nHw = (val_dget_int (sd, "used", 0) + 1) / 2;
+          if (nHw <= 0)
+            continue;
+          for (mi = 0; marks != NULL && mi < val_len (marks); mi++)
+            if (strcmp (val_dget_str (val_get (marks, mi), "section", ""),
+                        sectName)
+                == 0)
+              {
+                any = 1;
+                break;
+              }
+          if (!any)
+            continue;
+          ranges = arena_alloc (ARENA_MAIN,
+                                (val_len (marks) + 2) * sizeof (*ranges));
+          /* Walk the marks in source order -- which is ascending offset within
+             a section -- carrying the state forward, and collect the runs that
+             are PROTECTED. */
+          state = val_dget_bool (metadataArg, "protectDefault", 1);
+          haveRun = state;
+          runStart = 0;
+          for (mi = 0; marks != NULL && mi < val_len (marks); mi++)
+            {
+              Val *t = val_get (marks, mi);
+              asmint hw;
+              int prot;
+              if (strcmp (val_dget_str (t, "section", ""), sectName) != 0)
+                continue;
+              hw = val_dget_int (t, "offset", 0) / 2;
+              if (hw > nHw)
+                hw = nHw;
+              prot = val_dget_bool (t, "protect", 1);
+              if (prot && !haveRun)
+                {
+                  haveRun = 1;
+                  runStart = hw;
+                }
+              else if (!prot && haveRun)
+                {
+                  if (hw > runStart)
+                    {
+                      ranges[nRanges][0] = runStart;
+                      ranges[nRanges][1] = hw;
+                      nRanges++;
+                    }
+                  haveRun = 0;
+                }
+            }
+          if (haveRun && nHw > runStart)
+            {
+              ranges[nRanges][0] = runStart;
+              ranges[nRanges][1] = nHw;
+              nRanges++;
+            }
+          seqNum = writePROT (f, sectName, (const asmint (*)[2]) ranges,
+                              nRanges, seqNum);
+        }
+    }
 
   /* THE END RECORD CARRIES NO ENTRY POINT, because no source names one.  This
      used to take the first element of `entries' -- in the Python an arbitrary

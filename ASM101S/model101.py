@@ -350,6 +350,13 @@ if False:
                 'text': f"R{i}       EQU     {1}"}
             }
 relocations = [] # RLD entries
+# STORE-PROTECT TRANSITIONS from SPON/SPOFF, as {section, offset, protect}.
+# The interpretation of these pseudo-ops is INFERRED FROM USAGE -- no manual,
+# POO section or linkage-editor document defines them -- so nothing here
+# diagnoses against them and nothing reconciles them with the deck-level
+# SET/CLEAR cards.  What the assembler records is what the source says; making
+# the two agree is lnk101's business, where it is visible.
+protects = []
 metadata = {
     "sects": sects,
     "entries": entries,
@@ -357,6 +364,7 @@ metadata = {
     "rextrns": rextrns,
     "symtab": symtab,
     "relocations": relocations,
+    "protects": protects,
     "passCount": 0
     }
 '''
@@ -1710,6 +1718,8 @@ def generateObjectCode(source, macros):
         # have kept addresses from a layout that later shifted.  Clearing here and
         # recording on every compile pass leaves the final pass's set standing.
         relocations.clear()
+        # And so do the protect transitions, for the same reason.
+        protects.clear()
         metadata["passCount"] = passCount
         svGlobals["_passCount"] = passCount
         collect = (passCount in [1, 2])
@@ -1776,6 +1786,24 @@ def generateObjectCode(source, macros):
             # Various types of lines we can immediately discard by looking at 
             # their `operation` fields
             operation = properties["operation"]
+            # SPON/SPOFF mark the store-protect state of what follows.  They
+            # remain in `ignore` -- they generate no object code and the collect
+            # pass still discards them -- but on a compile pass the location
+            # counter is meaningful, so the transition is recorded first.
+            #
+            # NO DIAGNOSTIC IS EMITTED HERE, DELIBERATELY.  The obvious one,
+            # "unbalanced SPOFF/SPON", would fire on 36 of the 40 files in
+            # OI340600 that use these at all: 31 have SPOFF with no SPON and 5
+            # have SPON with no SPOFF, against 4 balanced.  Unbalanced is not
+            # the error case, it is the normal case, and that holds whatever the
+            # pseudo-ops turn out to mean.
+            if compile and operation in ["SPON", "SPOFF"]:
+                if sect != None and sect in sects and not sects[sect]["dsect"]:
+                    protects.append({
+                        "section": sect,
+                        "offset": sects[sect]["pos1"],
+                        "protect": (operation == "SPON")
+                        })
             if operation in ignore:
                 continue
             if properties.get("astFailed", False):
