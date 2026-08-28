@@ -2002,3 +2002,44 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   YAGPC_IOP_PASS_US=<f> overrides the interval.
 - Suites: the same four fail as before, and test_iop_exec_processors,
   test_gpcops, test_schedule and test_iop_discretes all still pass.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- The post-load fault is a STORE PROTECT VIOLATION (program check code
+  0007) at address 0009c, taken by the instruction
+  `b8f0 009c` at 07065, which is `STH R0,TPSASINP` in the SSL's handoff:
+      BALR R1,0
+      ST   R1,TPSASRP     STORE THEM IN THE SYSTEM RESET PSW
+      LH   R1,TPSASINP    GET THE PASS BOOTSTRAP ADDRESS
+      STH  R0,TPSASINP    THEN, ZERO THE ADDRESS IN THE PSW   <-- faults
+      STH  R1,TPSASRP
+      LPS  TPSASRP
+  So TPSASINP = 0009c.  The SSL unprotects TPSASRP on entry
+  (`ISPB 1,TPSASRP` / `+2`, unconditional) but never TPSASINP.
+- History of 0009c: IPL protects it; GPCIPL unprotects it at t=2001083
+  (nia=00162, ISPB m1=1); and nia=30363 RE-PROTECTS it at t=4162864 as
+  part of a sweep of 16,258 ISPBs over 00000..07f02.  Nothing clears it
+  again, so the handoff store faults.  The vector at 004c then sends the
+  CPU to 0a3b, which PASS's own load has overlaid with c6c6, hence
+  "invalid instruction 0xc6c6".  The stale vector is a consequence; the
+  store-protect is the cause.
+- TRIED AND REVERTED: making the PSA carve-out permanent, i.e. refusing to
+  SET the protect bit on the locations AP-101S 2.5.2.1 lists as ones that
+  "must not be store protected" (power-off PSW, all OLD PSW locations,
+  00A4-00A5, 00B0-00B1, 00C0-0102, 104-13F).  It removed the spurious
+  faults at 000b0/000b1 -- which really are item 4 of that list verbatim --
+  but it WRECKED the early boot: simulated time ran away to 4187 s in 60M
+  steps with blocksRead stuck at 55.  The reading was wrong.  "Must not be
+  store protected" is a rule for SOFTWARE, not a hardware interlock:
+  GPCIPL's memory test sets those bits and reads them back (the manual
+  lists a "Store Protect Bits Incorrect" test, VE62/HCMEMTST), so a
+  hardware refusal makes it spin.  ageharness.c's own comment calling it
+  "a permanent hardware carve-out" is an over-reading of the same
+  sentence; it happens to work only because it is applied once, at IPL.
+- STILL OPEN: who is meant to clear 0009c between nia=30363's sweep and
+  the SSL's handoff.  Candidates not yet checked: whether that sweep
+  should exclude the PSA, and whether PASS's own initialisation is
+  supposed to have run first.
+- YAGPC_INTTRACE now prints the interrupt CODE and a timestamp, and for
+  code 0007 the faulting address from cpu->lastProtFaultAddr.  A bare
+  "old=0048" names only the class, which is what made this take as long
+  as it did.

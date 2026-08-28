@@ -136,10 +136,19 @@ void cpu_swap_psw(CPU *cpu, uint32_t oldAddr, uint32_t newAddr) {
      * it came through -- which is what identifies the class.  Added to
      * find an interrupt we take that the reference does not. */
     if (getenv("YAGPC_INTTRACE")) {
-        fprintf(stderr, "INT  old=%04x new=%04x  atNIA=%05x  newPSW=%08x\n",
+        /* The interrupt code says WHICH program check / machine check this
+         * is, and without it a 0048 line names only the class.  It is set
+         * into the PSW before the swap, so it reads correctly here. */
+        fprintf(stderr, "INT  old=%04x new=%04x  code=%04x  atNIA=%05x  "
+                        "newPSW=%08x  t=%.1f\n",
                 (unsigned)oldAddr, (unsigned)newAddr,
+                (unsigned)psw_get_int_code(&cpu->psw),
                 (unsigned)psw_get_nia(&cpu->psw),
-                (unsigned)membus_get32(cpu->ram, newAddr));
+                (unsigned)membus_get32(cpu->ram, newAddr),
+                cpu->elapsedTimeUs);
+        if (psw_get_int_code(&cpu->psw) == 0x0007)
+            fprintf(stderr, "     store-protect at %05x\n",
+                    (unsigned)cpu->lastProtFaultAddr);
     }
     membus_set32(cpu->ram, oldAddr, register_get32(&cpu->psw.psw1), true);
     membus_set32(cpu->ram, oldAddr + 2, register_get32(&cpu->psw.psw2), true);
