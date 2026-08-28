@@ -2285,3 +2285,37 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - So every candidate is now exonerated -- protection state, system id,
   masking, IPL fill, MMU write semantics -- and FCMINSSL still stores to a
   location its own loader deliberately protected.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- THE 0009c STORE-PROTECT IS THE ONLY THING BLOCKING THE HANDOFF.  Tested
+  by unprotecting just those four halfwords at t=18765000 -- i.e. as if
+  PSA.asm's $POF had been placed BEFORE `PSA EX4` rather than after, which
+  would make the bracket 0009c..0013f instead of 000a0..0013f:
+      YAGPC_UNPROTECT=30322-3432a,0009c-0009f
+  With that, FCMINSSL's handoff RUNS TO COMPLETION for the first time:
+      R1=0a070000            PASS bootstrap address read from TPSASINP
+      TPSASINP zeroed, address stored into TPSASRP, LPS TPSASRP issued
+      control transferred to PASS at 0a07
+  The GPC is out of the SSL and into PASS.  Everything else is unchanged
+  (blocksRead 321, wordsOut=wordsTaken=164360).
+- CAVEAT, stated plainly: this does NOT prove the recovered PSA.asm is
+  wrong.  It proves only that 0009c's protection is the sole blocker.  The
+  $POF-one-line-earlier idea is a HYPOTHESIS suggested by the fact that
+  moving it makes everything work; the recovered source as we have it puts
+  $POF after `PSA EX4` in BOTH releases, and the assembled UNPRT table
+  agrees with that.  Confirming it needs an authentic IPL image to diff
+  against, which we do not have -- the DASS memory.fcm dumps in PFS are
+  PASS-era and do not contain GPCIPL's table.
+- NEW FRONTIER, and it is well past anything reached before: PASS is
+  entered at 0a07 and that memory is ZEROS.  Dumped 0a07..0a36: 44
+  halfwords of 0000 (which decode as never-taken branches, so the CPU
+  walks straight through them) followed by c6c6 at 0a33, which is the
+  uninitialised fourth field of the 4-halfword records at 0a34.  So the
+  entry ADDRESS is real -- BCE 18 wrote 0a07/0011 into TPSASINP from tape
+  at t=2344001 and nothing overwrote it -- but no CODE was ever loaded
+  there.  A phase-2 load block does cover the region (FCMUPROT unprotects
+  00602..04c6f), so the question is why its content is zero.
+- Note the entry is sector-relative: `BALR R1,0  GET THE CURRENT PSW'S
+  BSR&DSR` captures the SSL's own BSR/DSR, so PASS is entered at 0a07 in
+  whatever sector the SSL was running in.  Worth checking that assumption
+  before assuming the low-memory image is at fault.
