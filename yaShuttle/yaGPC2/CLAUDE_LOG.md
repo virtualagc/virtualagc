@@ -2820,3 +2820,41 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   read the 400-block run as progress until that is explained.
 - Pre-existing and NOT caused by the overlay: 14 `dfg FAIL`s in PHASE15/16/26; only
   3 of the failing decks are overlay files, the other 11 are not.  Not in the IPL set.
+
+### [2026-08-28] Target: [problems.md]
+- WITHDRAWN, and this was the user's catch: there is NO "second mmbstamp gap" at
+  `FIOMUWB2`.  The region `30322..3432a` is 100% `C6C6` fill in the DASS post-IPL
+  dump (16387 of 16393 halfwords; the other 6 are zero), so NOTHING loaded it on the
+  real machine and no load block belongs there.  I had inferred one from the fact
+  that both neighbouring blocks are protect=0.  That inference was worthless: the
+  phase-3 neighbour `3432e..348a5` is ALSO 100% fill, because phase 3 is not resident
+  post-IPL.  Only the phase-2 neighbour `30000..30321` is real content (65.3% fill,
+  169 distinct values).
+- WHAT `FIOMUWB2` ACTUALLY IS.  `APPLSRC/CVNMMUTI.hal:51`
+  `EQUATE EXTERNAL FIOMUWB2 TO CDHV_BLOCKS$(1,1)`, and `INCL80/CSMCOM.hal:58`
+  `1 CDHV_BLOCKS ARRAY(CSM_ROWS,CSM_COLUMNS) INTEGER` inside `STRUCTURE
+  CDHV_RW_BUFR RIGID`.  `CVNMMUTI.hal:29-31` sets `CSM_ROWS 32`, `CSM_COLUMNS 512`,
+  `CSM_ARRAY_SIZE 16384`, so the array is 32 x 512 = 16384 halfwords = THIRTY-TWO MMU
+  BLOCKS OF 512.  Other compools size it differently -- `CVQMMUTI` 8 rows/4096,
+  `CSAMMU` 26 rows/13312 -- so never assume the size; read the compool in question.
+- It is reached almost exclusively through the HAL/S `NAME` construct, i.e. as a
+  POINTER TO THE WHOLE ARRAY, not a reference to element (1,1).  The equate to
+  `$(1,1)` just yields the base address.  So `FCMB1ZCN` and `FCMB2ZCN` are pointers
+  to the two 16-block halves (offsets 0 and 8192), which is why there are two.
+- CSECT layout confirmed two independent ways.  Walking the declaration:
+  `CDHV_DUMMY`(1) + `CDHV_DGO_ADJ`(3) + `CDHV_RW_TSW` INTEGER DOUBLE(2) + `CDHV_RWCT`(1)
+  + `CDHV_ERRCD`(1) = 8 hw, then `CDHV_BLOCKS` 16384, then `CDHV_CHK_SUM` 1.  And
+  `PHASE02.sym.json` gives `#PCVNMMU` (module `CVNMMUTI`) as `30322..3432a`, 16393 hw,
+  with `FIOMUWB2` at `3032a` = base+8.  Exact agreement.  My unprotect range happened
+  to be right, but I took it from `patch_ssl_zcon.py`'s 16K assumption, not from the
+  declaration.
+- `#PCVNMMU` IS NOT AN EXTENT IN `PHASE02.lib` AT ALL -- the linker allocates the
+  CSECT but emits no data, because its `INITIAL(0,3#0,0,0,BIN(16)'0',
+  CSM_ARRAY_SIZE#(0),0)` is all zeros.  So there is nothing for `derive_load_blocks`
+  to derive from.  This is NOT the FCMPSA bug class; do not "fix" mmbstamp here.
+- OPEN, and more interesting than the thing I withdrew: if `FCMINSSL` really staged
+  MMU blocks through this buffer during IPL, the post-IPL dump would show residue
+  from the last block read.  It shows PRISTINE FILL.  So on the real machine that
+  buffer was never touched during IPL, which is evidence against our model of how the
+  SSL moves blocks -- and it means `YAGPC_UNPROTECT=30322-3432a` is compensating for
+  something else entirely.  That, not a load block, is what to chase next.
