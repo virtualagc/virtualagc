@@ -3331,3 +3331,40 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   Anything less and the block is not doing what the injection does.
 - NOTE the 400-block run still HALTS at `FCMSSLEX+2` rather than booting, so this is
   a necessary step, not the last one.
+
+### [2026-08-28] Target: [problems.md]
+- THE `RESERVE` LOAD BLOCK IS CONFIRMED BY THE FLOWN ARTICLE, to the halfword.
+  `DASS_SSW_(PostIPL).ASC:1277-1280` brackets `#PCVNMMU` with
+  `*** BEGIN RESERVED CSECT ***` / `*** END RESERVED CSECT ***` AND, decisively,
+  shows a LOAD-BLOCK CHECKSUM TAIL at `03432C-03432D` immediately after it.  A
+  synthesized block from the deck card and csect size alone gives start `030322`,
+  length 16396, checksum tail `03432C..03432D`, next block at `03432E` -- which is
+  exactly where phase 3's observed block starts.  Four independent lines converge:
+  the deck's `RESERVE` card, the era-original MAFGEN annotation, the image's checksum
+  boundary, and the arithmetic.
+- CORRECTION, MINE: I said that annotation came from our own `mafgen/` tooling.  IT
+  DOES NOT -- zero matches in any of our `.py`, and the string occurs ONLY in
+  `DASS_SSW_(PostIPL).ASC`, an ORIGINAL 2010 MAFGEN report from real GPC dumps, twice
+  (the BEGIN/END pair), and in NONE of the seven OPS-configuration DASS reports.  I
+  misread a `grep` that returned nothing as having matched, because an `ls` in the
+  same command printed filenames after it.  The modern `mafgen/` is an imitation of
+  the era program, not its source.
+- THE FIX WORKS FOR PROTECTION AND FAILS ON ALLOCATION.  Emitting a synthetic fill
+  extent for RESERVEd csects before `derive_load_blocks` gives phase 2 28 load blocks
+  with `30322 len=16396 protected=False`, and booting with NO injection at all:
+      DMA violations  7170 -> 1   (and that 1 is the unrelated early addr=00002 hit)
+      words dropped   26698 -> 0  (wordsTaken == wordsOut)
+  So the missing block WAS the cause of the violations, exactly as diagnosed.
+  BUT blocksRead falls 281 -> 58, because of two implementation faults:
+    1. BUDGET OVERFLOW.  Phase 2 then needs ~259 tape blocks against
+       `blks_of_phase[2] = 256`; `fit_budget` returns ncont=261, crossed=True, so the
+       phase spills past its MM area and the layout is corrupt.
+    2. NO CONTENT ON THE TAPE.  `tape_text()` RE-READS the `.lib` FROM DISK, so an
+       in-memory synthetic extent never reaches the volume -- 0/16393 halfwords
+       covered.  Injecting into `lib.extents` inside `phase_load_blocks` is the wrong
+       insertion point for anything that must also be written.
+  REVERTED; phase 2 back to 27 blocks, ncont=226, crossed=False.
+- WHAT THAT IMPLIES FOR A REAL FIX: the era build fitted this block inside phase 2's
+  256-block allocation, so either the allocation is computed differently, or the
+  block is absorbed into an adjacent one, or it belongs to another phase.  Do NOT
+  simply raise the budget -- that would paper over whichever of those is true.
