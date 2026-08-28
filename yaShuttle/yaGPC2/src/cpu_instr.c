@@ -1575,6 +1575,30 @@ static void exec_DIAG(CPU *t, DInstr *v) {
     }
 }
 
+/* YAGPC_ISPB_ALIGN=1 makes the ISPB fullword forms honour the POO rule
+ * "When M1 is 001 or 011, the low-order bit of the EA should be 0 and
+ * will be ignored", i.e. act on the containing even-aligned pair.  The
+ * D100 READSP diagnose corroborates the hardware organisation: its
+ * address "must be an even fullword boundary", returning bits for the
+ * even HW at R1 and the odd HW at R1+1.
+ *
+ * IT IS NOT THE DEFAULT, BECAUSE IT BREAKS THE BOOT: the load stops
+ * after phase 10 with 55 blocks instead of 281.  The conflict is not
+ * resolved, and the odd-EA cases are systematic rather than incidental.
+ * Measured over a full IPL there are exactly 60 of them, from just three
+ * instructions in GPCIPL: nia=007ac (M1=1) and nia=007c2 (M1=3) sweep
+ * ea=x7ffd once per 32K sector (07ffd, 17ffd, 27ffd, 37ffd, 47ffd), and
+ * nia=0074d does ea=40001/48001.  A sector's last fullword is x7ffe/x7fff,
+ * which NEITHER reading reaches from x7ffd -- ours takes 7ffd/7ffe, the
+ * aligned one 7ffc/7ffd.  That points at our EA being off by one in this
+ * path, with fwAddr = ea papering over it.  Settle the EA before
+ * settling this. */
+static bool ispb_align(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { on = getenv("YAGPC_ISPB_ALIGN") != NULL; inited = 1; }
+    return on != 0;
+}
+
 static void exec_ISPB(CPU *t, DInstr *v) {
     if (!cpu_i_super(t)) {
         /* Silently discarded in problem state.  Worth seeing: an ISPB that
@@ -1623,22 +1647,24 @@ static void exec_ISPB(CPU *t, DInstr *v) {
             membus_set_store_protect(t->ram, ea, false);
             break;
         case 1: { /* reset both halfwords of the fullword */
-            /* AP-101S 9.2 INSERT STORAGE PROTECT BITS, M1=001: "Reset
-             * the storage protection bits for BOTH HALFWORDS IN THE
-             * FULLWORD SECOND OPERAND."  On the S a fullword operand may
-             * start at an odd address (section 2), so the pair is EA and
-             * EA+1 -- not the containing even-aligned fullword.  The
-             * older C/M POO's "when M1 is 001 or 011, the low-order bit
-             * of the EA should be 0 and will be ignored" is the
-             * superseded rule; applying it here made GPCIPL's MEMTST14
-             * unprotect 0x00B0/0x00B1 and then store to 0x00B1/0x00B2,
-             * faulting on a halfword it had not unprotected. */
-            /* The EA here is already EXPANDED to 19 bits, so masking
-             * the low bit off must not touch the sector bits: 0xfffe
-             * threw them away and protected/unprotected the same offset
-             * in sector 0 instead.  GPCIPL unprotects a fullword in
-             * sector 6 and then writes it. */
-            uint32_t fwAddr = ea;   /* AP-101S: EA is the fullword, odd or not */
+            /* POO, ISPB: "When M1 is 001 or 011, the low-order bit of
+             * the EA should be 0 and WILL BE IGNORED."  So the fullword
+             * forms act on the containing EVEN-ALIGNED pair, never on
+             * (EA, EA+1) at an odd EA.  The D100 READSP diagnose
+             * corroborates the hardware organisation: its address "must
+             * be an even fullword boundary" and it returns the bits for
+             * "address in R1 (even HW)" and "R1 plus one (odd HW)".
+             *
+             * TWO BUGS WERE PREVIOUSLY CONFLATED HERE.  The old code
+             * masked with 0xfffe, a 16-BIT mask applied to an EA already
+             * expanded to 19 bits, which threw the sector bits away and
+             * hit the same offset in sector 0 (3032a -> 0032a) -- that
+             * diagnosis was correct.  But the fix chosen was to abandon
+             * alignment altogether, when the actual repair is to mask
+             * only the low bit and leave the sector alone.  Measured over
+             * a full IPL, the fullword forms are issued with an odd EA
+             * 60 times (35 M1=1, 25 M1=3), and all 60 were mis-targeted. */
+            uint32_t fwAddr = ispb_align() ? (ea & ~1u) : ea;
             t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, fwAddr, false);
             membus_set_store_protect(t->ram, fwAddr + 1, false);
@@ -1649,12 +1675,8 @@ static void exec_ISPB(CPU *t, DInstr *v) {
             membus_set_store_protect(t->ram, ea, true);
             break;
         case 3: { /* set both halfwords of the fullword */
-            /* The EA here is already EXPANDED to 19 bits, so masking
-             * the low bit off must not touch the sector bits: 0xfffe
-             * threw them away and protected/unprotected the same offset
-             * in sector 0 instead.  GPCIPL unprotects a fullword in
-             * sector 6 and then writes it. */
-            uint32_t fwAddr = ea;   /* AP-101S: EA is the fullword, odd or not */
+            /* Even-aligned pair, sector bits preserved -- see M1=001. */
+            uint32_t fwAddr = ispb_align() ? (ea & ~1u) : ea;
             t->storeProtectOverride = false;
             membus_set_store_protect(t->ram, fwAddr, true);
             membus_set_store_protect(t->ram, fwAddr + 1, true);

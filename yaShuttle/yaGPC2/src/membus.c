@@ -52,7 +52,10 @@ void membus_set_store_protect(MemoryBus *b, uint32_t addr, bool v) {
             inited = 1;
         }
         if (lo >= 0 && (long)addr >= lo && (long)addr <= hi)
-            fprintf(stderr, "PROTSET addr=%05x -> %d\n", (unsigned)addr, (int)v);
+            fprintf(stderr, "PROTSET addr=%05x -> %d  from=+%td\n",
+                    (unsigned)addr, (int)v,
+                    (char *)__builtin_return_address(0)
+                        - (char *)(void *)&membus_get_store_protect);
     }
     mcm_set_store_protect(b->mcm, addr & b->addrMask, v);
 }

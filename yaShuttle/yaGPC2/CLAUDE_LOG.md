@@ -2922,3 +2922,45 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   identified what writes the bit.  The callers are `ipl_fill`,
   `apply_load_protection`, the `ISPB` paths in `cpu_instr.c`, and my own timed
   unprotect in `ap101.c`.  FIND THE WRITER BEFORE THEORISING FURTHER.
+
+### [2026-08-28] Target: [problems.md]
+- `ISPB` HALFWORD FORMS (M1=000/010) ARE CORRECT AS WRITTEN.  Measured over a full
+  IPL: M1=0 splits 204567 even / 204564 odd and M1=2 splits 145557 / 145546, i.e.
+  ~50/50, so they genuinely address individual halfwords.  The idea that the halfword
+  form can only reach the SECOND halfword of a fullword does not survive that, and the
+  manual's wording (L9507) is "the halfword second operand" -- IBM-style for the
+  halfword-sized OPERAND 2, not "the second halfword".
+- `ISPB` INDEX HANDLING ALREADY MATCHES THE POO, and `cpu_instr.c:2248` already cites
+  it: "This instruction will always have halfword alignment and will be excluded from
+  automatic index alignment."  ISPB is declared `addrWidth=1`, so `indexWidth=1` and
+  the scaling `regx = (reg >> 16) << (indexWidth - 1)` becomes `<< 0`.  Both halves
+  hold.  Therefore the ODD EAs ARE GENUINE, not artifacts of a bad EA.
+- THE FULLWORD FORMS ARE AN UNRESOLVED CONFLICT.  DO NOT "FIX" THIS WITHOUT READING
+  THIS ENTRY.
+    The POO says: "When M1 is 001 or 011, the low-order bit of the EA should be 0 and
+      WILL BE IGNORED."  D100 READSP corroborates the hardware organisation -- its
+      address "must be an even fullword boundary", returning bits for the even HW at
+      R1 and the odd HW at R1+1.
+    But AP-101S section 2, quoted in `cpu.c`, says the opposite for fullword operands
+      generally: "bit 15 of a base register is significant when addressing fullword
+      data.  Fullword storage operands may now be located on odd address boundaries."
+    AND ALIGNING BREAKS THE BOOT: with `ea & ~1u` the load stops after phase 10 at 55
+      blocks instead of 281, `nia=01df8`.  Restoring `fwAddr = ea` reproduces 281
+      exactly.
+  Gated as `YAGPC_ISPB_ALIGN=1`, NOT the default.  Open question for the user: WHICH
+  MANUAL is the "low-order bit ignored" quote from?  If the AP-101 C/M POO, it is
+  superseded by the S's section 2 and the current default is right; if the AP-101S
+  POO, the two statements in the same manual conflict and something else is wrong.
+- The odd-EA cases are SYSTEMATIC, only 60 of 34271 fullword-form ISPBs, from three
+  GPCIPL instructions: `nia=007ac` (M1=1) and `nia=007c2` (M1=3) sweep `ea=x7ffd`
+  once per 32K sector (07ffd, 17ffd, 27ffd, 37ffd, 47ffd, five times each), and
+  `nia=0074d` (M1=1) does `ea=x0001` per sector with `R1=80010000`.  A sector's last
+  fullword is x7ffe/x7fff, which NEITHER reading reaches from x7ffd: ours takes
+  7ffd/7ffe, aligned takes 7ffc/7ffd.  Both look wrong, which is why this is logged
+  as unresolved rather than decided.
+- ALSO FIXED, and unrelated to the above: the old `ea & 0xfffe` was a 16-BIT mask on
+  an EA already expanded to 19 bits, so it destroyed the sector (3032a -> 0032a).
+  That was a real bug and correctly diagnosed; but the repair chosen was to drop
+  alignment entirely, when `ea & ~1u` would have been sector-safe.  Two bugs were
+  conflated as one.  Whatever is decided above, do not reintroduce `0xfffe`.
+- Four pre-existing test failures unchanged throughout.
