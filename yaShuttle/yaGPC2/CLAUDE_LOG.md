@@ -1641,3 +1641,57 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - PRE-EXISTING, not from this work: test/test_debugger.sh,
   test_cpu_instr_exec, test_iop_bce_exec and test_iop_msc_exec already fail
   at fbc7671d8; verified by stashing src/ and re-running.
+
+### [2026-08-27] Target: HANDOFF-FCMBOOT.md
+- ROOT CAUSE of the SSL deadlock, traced end to end.  Chain, each link
+  measured:
+  1. FCMUPROT unprotects a load block halfword by halfword with
+     `ISPB@# 0,0(R2,R1)`, R1 -> FCMIZCON, a Z-CON holding address + DSR.
+  2. nia=0729b issues 107,842 ISPBs, EAs 0051e..50013 -- and NOT ONE of
+     them lands on 3032a.  The only ISPBs that ever touch 3032a come from
+     nia 00171/0017b/02c7c/02c80, which is GPCIPL's memory test doing
+     unprotect/write/protect.  So the region is left protected.
+  3. BCE18 then arms `addr=3032a count=7168` (the direct-to-upper-memory
+     path, TFCMUPMF -- not a temp buffer).  Destination 3032a..31f29 is
+     exactly the 7168 protected halfwords.  Every write is refused: 7172
+     DMA store-protect violations, 7168 of 7171 distinct addresses in
+     sector 6.
+  4. Those violations are MASKED, so per AP-101S Fig 2-20 note '##'
+     cpu_signal_dma_protect_violation sets CC to binary 10 WITHOUT taking
+     an interrupt -- invisible to YAGPC_INTTRACE, which is why the first
+     several passes over this looked like there was no interrupt at all.
+  5. At t=22933402.0 one lands between the SSL wait loop's
+     `L R4,FCMINSST` (071bb) and its `BCB` (071bd, db0e, m1=3).  CC==2
+     satisfies NO mask bit in exec_BC/BCB/BCF/BCR, so the wait falls
+     through with FCMINSST still ffffffff.  Measured directly: 23
+     fall-throughs at 071be, 22 with cc=0 (legitimate) and exactly one
+     with cc=2.
+  6. The CPU is now an iteration ahead and rebuilds buffer 1 (72f2..72fe)
+     while BCE18 is still executing the old, longer program there -- the
+     old one had two #SST groups (072f9 and 07303) and chained on at
+     07304; the rebuild puts a #WAT at 072fe, in the BCE's path.
+  7. BCE18 parks at 072ff.  Only the MSC can restart a parked BCE ("The
+     CPU cannot directly set a BCE's Busy/Wait bit", BCE POO 2.2) and the
+     MSC has been parked at its own #WAT since t=18.93 s.  Deadlock.
+- STILL TO ISOLATE: whether link 2 is a defect in the `@#` (Z-CON +
+  DSR) effective-address computation itself, or upstream in what
+  FCMIZCON is loaded with.  The measurement proves the unprotect never
+  covers the destination; it does not yet say which of the two is at
+  fault.  Only one ISPB decode-table entry exists
+  (`11101xxx11111abb/X`), so both `@` and `#` forms go through
+  cpu_g_ea.
+- Ruled out along the way, each by measurement: BCE receive throughput
+  (already drains all available words per slice, and 120M vs 600M steps
+  gave byte-identical counters); stray IOP/DMA writes to FCMINSST (all
+  46 IOP writes there are the 23 #SSTs x 2 halfwords); store-protect
+  refusal of the CPU's own reset (prot=0 on every one); the
+  storeProtectOverride flag (ovr=0 on all 7172 violations); #DLYI
+  pacing (976 counts = 488 halfwords x 33 us, exactly the MMU word
+  rate).
+- New instrumentation: YAGPC_WATCHRD (fullword CPU reads of an address),
+  YAGPC_BCTRACE (conditional-branch fall-throughs in a window, with mask
+  and CC), YAGPC_DMAPROT (masked DMA store-protect violations, otherwise
+  untraceable), YAGPC_PROTSET (protect-bit changes), YAGPC_ISPBTRACE
+  (ISPB by EA window, with M1 and issuing NIA), YAGPC_MEMDUMP (main
+  storage at end of run), IOP-side coverage for YAGPC_WATCHHW, and the
+  receive destination address in the RECV ARM line.

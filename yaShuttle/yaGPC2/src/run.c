@@ -1332,6 +1332,22 @@ static int batchrunner_report_stop(BatchRunner *r) {
     if (!r->hasStopReason) {
         snprintf(r->stopReason, sizeof r->stopReason, "max steps reached (%ld)", r->maxSteps);
         if (getenv("YAGPC_PROCDUMP")) iop_dump_procs(&r->age.gpc.iop);
+        /* YAGPC_MEMDUMP=lo[-hi] prints main storage over that halfword
+         * range at the end of a run.  The flight software builds its BCE
+         * programs at run time, so the only way to see what a given
+         * address actually holds is to look after the fact. */
+        {
+            const char *w = getenv("YAGPC_MEMDUMP");
+            if (w != NULL) {
+                char *end = NULL;
+                long lo = strtol(w, &end, 16);
+                long hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16)
+                                                       : lo + 15;
+                for (long a = lo; a <= hi; a++)
+                    fprintf(stderr, "MEM %05x = %04x\n", (unsigned)a,
+                            (unsigned)membus_get16(r->age.gpc.cpu.ram, (uint32_t)a));
+            }
+        }
         r->hasStopReason = true;
     }
 

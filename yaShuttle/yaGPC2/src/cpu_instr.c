@@ -472,13 +472,54 @@ static void exec_BCR(CPU *t, DInstr *v) {
     }
 }
 
+/* Shared by the conditional-branch family for YAGPC_BCTRACE (see exec_BC). */
+static void cc_branch_fallthru_trace(CPU *t, uint32_t m1, uint32_t cc,
+                                     const char *who) {
+    static int inited = 0;
+    static long lo = -1, hi = -1;
+    if (!inited) {
+        const char *w = getenv("YAGPC_BCTRACE");
+        if (w != NULL) {
+            char *end = NULL;
+            lo = strtol(w, &end, 16);
+            hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16) : lo;
+        }
+        inited = 1;
+    }
+    long nia = (long)psw_get_nia(&t->psw);
+    if (lo >= 0 && nia >= lo && nia <= hi)
+        fprintf(stderr, "BC-FALLTHRU %s nia=%05x m1=%u cc=%u t=%.1f\n",
+                who, (unsigned)nia, (unsigned)m1, (unsigned)cc,
+                t->elapsedTimeUs);
+}
+
 static void exec_BC(CPU *t, DInstr *v) {
     uint32_t m1 = df_get(v, 'x');
     uint32_t v2 = cpu_g_ea(t, v);
     uint32_t cc = psw_get_cc(&t->psw);
-    if ((m1 & 4 && cc == 0) || (m1 & 2 && cc == 3) || (m1 & 1 && cc == 1)) {
-        psw_set_nia(&t->psw, v2);
+    bool take = (m1 & 4 && cc == 0) || (m1 & 2 && cc == 3) || (m1 & 1 && cc == 1);
+    /* YAGPC_BCTRACE=lo[-hi] reports every BC in that window that does NOT
+     * branch, with the mask and CC it decided on.  A poll loop exiting once
+     * in eight million iterations is otherwise impossible to catch. */
+    if (!take) {
+        static int inited = 0;
+        static long lo = -1, hi = -1;
+        if (!inited) {
+            const char *w = getenv("YAGPC_BCTRACE");
+            if (w != NULL) {
+                char *end = NULL;
+                lo = strtol(w, &end, 16);
+                hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16) : lo;
+            }
+            inited = 1;
+        }
+        long nia = (long)psw_get_nia(&t->psw);
+        if (lo >= 0 && nia >= lo && nia <= hi)
+            fprintf(stderr, "BC-FALLTHRU nia=%05x m1=%u cc=%u t=%.1f\n",
+                    (unsigned)nia, (unsigned)m1, (unsigned)cc,
+                    t->elapsedTimeUs);
     }
+    if (take) psw_set_nia(&t->psw, v2);
 }
 
 static void exec_BCB(CPU *t, DInstr *v) {
@@ -487,6 +528,8 @@ static void exec_BCB(CPU *t, DInstr *v) {
     uint32_t cc = psw_get_cc(&t->psw);
     if ((m1 & 4 && cc == 0) || (m1 & 2 && cc == 3) || (m1 & 1 && cc == 1)) {
         psw_set_nia(&t->psw, psw_get_nia(&t->psw) - disp);
+    } else {
+        cc_branch_fallthru_trace(t, m1, cc, "BCB");
     }
 }
 
@@ -510,6 +553,8 @@ static void exec_BCF(CPU *t, DInstr *v) {
     uint32_t cc = psw_get_cc(&t->psw);
     if ((m1 & 4 && cc == 0) || (m1 & 2 && cc == 3) || (m1 & 1 && cc == 1)) {
         psw_set_nia(&t->psw, psw_get_nia(&t->psw) + disp);
+    } else {
+        cc_branch_fallthru_trace(t, m1, cc, "BCF");
     }
 }
 
@@ -1534,6 +1579,27 @@ static void exec_ISPB(CPU *t, DInstr *v) {
     if (!cpu_i_super(t)) return;
     uint32_t ea = cpu_g_ea(t, v);
     uint32_t m1 = (v->hw1 >> 8) & 0x7; /* bits 5-7 */
+    /* YAGPC_ISPBTRACE=lo[-hi] reports every ISPB whose EA falls in that
+     * window, with its M1 and the NIA that issued it -- which is how a
+     * region that ends up protected when the flight software meant it
+     * loadable gets traced back to the instruction responsible. */
+    {
+        static int inited = 0;
+        static long lo = -1, hi = -1;
+        if (!inited) {
+            const char *w = getenv("YAGPC_ISPBTRACE");
+            if (w != NULL) {
+                char *end = NULL;
+                lo = strtol(w, &end, 16);
+                hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16) : lo;
+            }
+            inited = 1;
+        }
+        if (lo >= 0 && (long)ea >= lo && (long)ea <= hi)
+            fprintf(stderr, "ISPB ea=%05x m1=%u nia=%05x t=%.1f\n",
+                    (unsigned)ea, (unsigned)m1,
+                    (unsigned)psw_get_nia(&t->psw), t->elapsedTimeUs);
+    }
     switch (m1) {
         case 0:   /* reset protect bit for the halfword at EA */
             t->storeProtectOverride = false;

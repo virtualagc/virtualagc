@@ -850,7 +850,25 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
 
 uint32_t cpu_g_eaf(CPU *cpu, DInstr *v, int extraOffset) {
     uint32_t ea = cpu_g_ea(cpu, v) + (uint32_t)extraOffset;
-    return (membus_get16(cpu->ram, ea) << 16) + membus_get16(cpu->ram, ea + 1);
+    uint32_t val = (membus_get16(cpu->ram, ea) << 16) + membus_get16(cpu->ram, ea + 1);
+    /* YAGPC_WATCHRD=<hexaddr> traces every fullword CPU READ of that
+     * address, with the reading NIA.  A poll loop is invisible to
+     * YAGPC_WATCHHW, which only sees stores, so "what did the wait
+     * actually see" needs its own hook. */
+    {
+        static int inited = 0;
+        static long watch = -1;
+        if (!inited) {
+            const char *w = getenv("YAGPC_WATCHRD");
+            if (w != NULL) watch = strtol(w, NULL, 16);
+            inited = 1;
+        }
+        if (watch >= 0 && (long)ea == watch)
+            fprintf(stderr, "WATCHRD addr=%05x val=%08x nia=%05x t=%.1f\n",
+                    (unsigned)ea, (unsigned)val,
+                    (unsigned)psw_get_nia(&cpu->psw), cpu->elapsedTimeUs);
+    }
+    return val;
 }
 
 uint32_t cpu_g_eah(CPU *cpu, DInstr *v) {
@@ -942,8 +960,15 @@ static void cpu_watch_store(CPU *cpu, uint32_t addr, uint32_t value,
     }
     if (lo < 0) return;
     if ((long)addr < lo || (long)addr > hi) return;
-    fprintf(stderr, "WATCHHW %s addr=%05x val=%08x nia=%05x t=%.1f\n",
+    /* The protect bit and the pre-store contents both matter: cpu_store_fw
+     * tests protection BEFORE writing and returns without writing, so a
+     * refused store is otherwise indistinguishable from one that took. */
+    fprintf(stderr, "WATCHHW %s addr=%05x val=%08x was=%04x prot=%d%s "
+                    "nia=%05x t=%.1f\n",
             kind, (unsigned)addr, (unsigned)value,
+            (unsigned)membus_get16(cpu->ram, addr),
+            (int)membus_get_store_protect(cpu->ram, addr),
+            cpu->storeProtectOverride ? " ovr" : "",
             (unsigned)psw_get_nia(&cpu->psw), cpu->elapsedTimeUs);
 }
 

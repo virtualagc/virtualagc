@@ -8,6 +8,9 @@
 #include "cpu.h"
 #include "discretes.h"
 
+static void iop_watch_store(IOP *iop, uint32_t addr, uint32_t value,
+                            const char *kind);
+
 /* Interrupt register A (Group 1 / EX0) sources, in the order the
  * instruction set lists them.  Reading register A is how the EX0 handler
  * learns which of these raised it; the read is destructive (read and
@@ -713,6 +716,7 @@ void iop_exec_dma_queue(IOP *iop) {
         } else {
             data = iopls_getD(&iop->ls);
         }
+        iop_watch_store(iop, req.addr, data, "dma");
         mcm_set16(&iop->cpu->mainStorage, req.addr, data, false); /* bypass protection */
     }
 
@@ -1020,6 +1024,30 @@ void iop_dump_procs(IOP *iop) {
     }
 }
 
+/* The IOP side of YAGPC_WATCHHW.  cpu.c's copy only sees CPU stores, so an
+ * IOP write into the watched window -- a BCE receive whose destination runs
+ * past its buffer, or a DMA store -- was invisible.  FCMINSST sits at 0731a,
+ * immediately after the BCE program area that ends at 07319, so "who else
+ * wrote this halfword" is exactly the question that needs answering. */
+static void iop_watch_store(IOP *iop, uint32_t addr, uint32_t value,
+                            const char *kind) {
+    static int inited = 0;
+    static long lo = -1, hi = -1;
+    if (!inited) {
+        const char *w = getenv("YAGPC_WATCHHW");
+        if (w != NULL) {
+            char *end = NULL;
+            lo = strtol(w, &end, 16);
+            hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16) : lo + 1;
+        }
+        inited = 1;
+    }
+    if (lo < 0 || (long)addr < lo || (long)addr > hi) return;
+    fprintf(stderr, "WATCHHW IOP-%s addr=%05x val=%04x pe=%d t=%.1f\n",
+            kind, (unsigned)addr, (unsigned)(value & 0xffff),
+            iop->curPE, iop_now_us(iop));
+}
+
 double iop_now_us(IOP *iop) {
     return (iop != NULL && iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
 }
@@ -1040,9 +1068,10 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         bce->recvGotAny = false;
         if (getenv("YAGPC_TIMEOUT_TRACE")) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);
-            fprintf(stderr, "BCE%d RECV ARM t=%.1f us pc=%05x count=%u "
-                            "mto=%u timeout=%.2f ms\n",
-                    p, now, (unsigned)pc, (unsigned)count,
+            fprintf(stderr, "BCE%d RECV ARM t=%.1f us pc=%05x addr=%05x "
+                            "count=%u mto=%u timeout=%.2f ms\n",
+                    p, now, (unsigned)pc, (unsigned)bce->recvAddr,
+                    (unsigned)count,
                     (unsigned)(r ? register_get32(r) & 0x3ffffu : 0u),
                     iop_recv_timeout_us(iop, p) / 1000.0);
         }
@@ -1151,7 +1180,16 @@ uint32_t iop_g_eah(IOP *iop, uint32_t addr) {
  * interrupt could never occur -- and GPCIPL's self test deliberately
  * provokes it. */
 static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value) {
+    iop_watch_store(iop, addr, value, "write");
     if (mcm_set16(&iop->cpu->mainStorage, addr, value, true)) return true;
+    /* A masked DMA store protect sets the CPU's CC to binary 10 (Fig 2-20
+     * note '##') WITHOUT taking an interrupt, so it is invisible to
+     * YAGPC_INTTRACE while still able to break a CPU-side condition test
+     * mid-loop.  YAGPC_DMAPROT is the only way to see it happen. */
+    if (getenv("YAGPC_DMAPROT"))
+        fprintf(stderr, "DMAPROT addr=%05x val=%04x pe=%d ovr=%d t=%.1f\n",
+                (unsigned)addr, (unsigned)(value & 0xffff), iop->curPE,
+                (int)iop->cpu->storeProtectOverride, iop_now_us(iop));
     cpu_signal_dma_protect_violation(iop->cpu);
     return false;
 }

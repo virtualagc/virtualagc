@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "membus.h"
 
 MemoryBus membus_create(MCM *mcm) {
@@ -33,6 +35,25 @@ void membus_load16(MemoryBus *b, uint32_t base, const uint8_t *bytes, size_t byt
 }
 
 void membus_set_store_protect(MemoryBus *b, uint32_t addr, bool v) {
+    /* YAGPC_PROTSET=lo[-hi] reports every change to a protect bit in that
+     * window.  A region that is protected when the flight software expects
+     * it not to be is otherwise untraceable: the bit has no other reader
+     * than the store paths, which only say that a store was refused. */
+    {
+        static int inited = 0;
+        static long lo = -1, hi = -1;
+        if (!inited) {
+            const char *w = getenv("YAGPC_PROTSET");
+            if (w != NULL) {
+                char *end = NULL;
+                lo = strtol(w, &end, 16);
+                hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16) : lo;
+            }
+            inited = 1;
+        }
+        if (lo >= 0 && (long)addr >= lo && (long)addr <= hi)
+            fprintf(stderr, "PROTSET addr=%05x -> %d\n", (unsigned)addr, (int)v);
+    }
     mcm_set_store_protect(b->mcm, addr & b->addrMask, v);
 }
 
