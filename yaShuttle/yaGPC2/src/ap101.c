@@ -15,7 +15,40 @@ void ap101_free(AP101 *gpc) {
     iop_free(&gpc->iop);
 }
 
+/* YAGPC_UNPROTECT=lo-hi with YAGPC_UNPROTECT_AT=<us> clears store
+ * protection over a halfword range ONCE, when simulated time first reaches
+ * that point.  It has to be timed: clearing at startup is undone by
+ * GPCIPL's memory test, which walks all of store doing
+ * unprotect/write/PROTECT, and refusing the protect outright makes that
+ * test fail (it verifies protection actually works).  The moment that
+ * matters is after the test and before the load -- exactly when FCMUPROT
+ * would have cleared it, had the phase's RESERVED storage had a load block.
+ * Diagnostic: the real repair belongs in the tape build. */
+static void ap101_timed_unprotect(AP101 *gpc) {
+    static int inited = 0, done = 0;
+    static long lo = -1, hi = -1;
+    static double atUs = 0.0;
+    if (!inited) {
+        const char *w = getenv("YAGPC_UNPROTECT");
+        const char *t = getenv("YAGPC_UNPROTECT_AT");
+        if (w != NULL && t != NULL) {
+            char *end = NULL;
+            lo = strtol(w, &end, 16);
+            hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16) : lo;
+            atUs = atof(t);
+        }
+        inited = 1;
+    }
+    if (done || lo < 0 || gpc->cpu.elapsedTimeUs < atUs) return;
+    done = 1;
+    for (long a = lo; a <= hi; a++)
+        membus_set_store_protect(gpc->cpu.ram, (uint32_t)a, false);
+    fprintf(stderr, "unprotect: %ld halfword(s) %05lx..%05lx at t=%.1f\n",
+            hi - lo + 1, lo, hi, gpc->cpu.elapsedTimeUs);
+}
+
 void ap101_exec1(AP101 *gpc) {
+    ap101_timed_unprotect(gpc);
     /* YAGPC_NIAPROBE=<hexaddr> dumps R0-R7 and the SSL's two context-struct
      * indices every time that address is about to execute.  Unlike --break
      * it does not stop, so it yields one line per VISIT, which is what

@@ -1733,3 +1733,45 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   taking 33K" pathology disappears entirely.  A long bypassed run is slow
   in wall clock (real 4m39s vs user 33s at 10M steps -- the runner pacing
   through wait states, not CPU) so a full one has not finished yet.
+
+### [2026-08-27] Target: HANDOFF-FCMBOOT.md
+- ROOT CAUSE PROVEN BY EXPERIMENT.  PHASE02.lib's own symbol table has
+  `#PCVNMMU  addr=hw 30322  length=16393 hw` and `FIOMUWB2 addr=hw 3032a
+  length=0`, so the linker knows the CSECT's full extent.  But it carries
+  no TEXT -- lib.extents has only 30000..3011d (285) and 30120..30320
+  (512) in sector 6, together the 802-halfword load block -- and
+  mmbstamp's derive_load_blocks() builds load blocks only from
+  data-bearing extents ("Load blocks = contiguous checksum-group runs of
+  the phase's linkedit image").  So RESERVED storage gets no load block,
+  FCMUPROT never unprotects it, and IPL's blanket protect stands over the
+  SSL's own two 8K buffers at 3032a and 3232a, which sit entirely inside
+  #PCVNMMU (3032a + 16384 = 3432a).
+- Supplying the missing unprotect at the moment FCMUPROT would have run
+  (YAGPC_UNPROTECT=30322-3432a YAGPC_UNPROTECT_AT=18765000):
+      DMA violations   7172 -> 7
+      blocksRead        280 -> 730
+      wordsOut/Taken  143364/116666 -> 373768/373768  (now 1:1)
+      MMU commands        8 -> 16
+      simulated time   23.3 s -> 31.4 s
+  The BCE no longer parks and the MMU no longer races ahead of it.
+- THE TIMING OF THE UNPROTECT MATTERS, and getting it wrong is
+  instructive: clearing the bits at startup is undone by GPCIPL's memory
+  test, which walks all of store doing unprotect/write/PROTECT at t=11.3 s;
+  and refusing the protect outright makes the boot fail far EARLIER
+  (blocksRead 0), because that test verifies store protection actually
+  works.  Only a clear placed after the test and before the load behaves
+  like the missing load block would.
+- YAGPC_NO_DMA_PROTECT was a DEAD END and is not the fix: bypassing the
+  protection check entirely stalls even earlier (blocksRead 55, position
+  2/4/5, MSC pc=0119e) and is identical at 10M and 130M steps.  Enforcing
+  protection on IOP writes is correct (426bca4d3).
+- NEXT BLOCKER: the load now plateaus at 730 of 1155 blocks, with the only
+  remaining DMA violations at 072cc/072cd (pe=18, just below FCMDATA at
+  072e2) recurring every ~6.3 s of simulated time -- t=18764864, 25076651,
+  31388552.  Not yet investigated.
+- THE REAL REPAIR IS IN THE TAPE BUILD, not the emulator: a phase's
+  RESERVED storage needs a load block so FCMUPROT covers it.  The
+  descriptor format documented in tools/stamp_ipl_phase_table.py has
+  "bit 2 reserve" for exactly this, and mmbstamp's LoadBlock.words()
+  never emits it.  mmbstamp is Don's (nsts-sdl-dps) and was only read
+  here.
