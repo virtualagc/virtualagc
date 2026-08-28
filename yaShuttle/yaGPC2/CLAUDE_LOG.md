@@ -2100,3 +2100,40 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
       a partly-uninitialised data table.  A load block does cover it
       (FCMUPROT unprotects 00602..04c6f), so the question is why that
       block's content is fill.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- CORRECTION to the previous entry: "the SSL's entry block never executes"
+  was WRONG, and the cause was my own grep pattern (`nia=070|nia=071`,
+  which cannot match `nia=06f`).  It executes, and issues exactly the three
+  ISPBs the source calls for:
+      ea=000b2 m1=1 nia=06fbf   TPSAWORK
+      ea=00014 m1=1 nia=06fc7   TPSASRP
+      ea=00016 m1=1 nia=06fc9   TPSASRP+2
+  Decoding the loaded entry block gives the PSA addresses directly:
+  TPSAWORK=00b2, TPSASRP=0014, and FCMMUIPL=06fd3 right after
+  `cdf8 0014` = LPS TPSASRP.  Lead (a) is dead.
+- What that reveals is the software's ACTUAL CONVENTION, and it is exact:
+  UNPROTECT PRECISELY WHAT YOU ARE ABOUT TO WRITE.  GPCIPL's restore pass
+  deliberately leaves 0014..0017 protected -- its groups run 00008..00013
+  then 00018..00043, straddling it -- and the SSL unprotects exactly those
+  four halfwords itself, immediately before storing the System Reset PSW.
+  So the restore and the SSL fit together precisely, by design.
+- Which sharpens the anomaly rather than explaining it: the same SSL writes
+  TPSASINP (009c..009f, `DS 2F`) with NO unprotect, in BOTH releases --
+  OI301700 lines 396-404 and OI340600 lines 388-398 are the same code.  The
+  only other candidate, `ISPB 1,TPSASSMA`, sits on a path not taken (only
+  three SSL ISPBs execute, and they are the three above).
+- GPCIPL's restore is table-driven and unprotects [X, X+3] for X in
+  {0048, 0058, 0060, 0068, 0070, 0078, 0080, 0088, 0090, 0098} -- the OLD
+  PSW slots, four halfwords each, matching AP-101S 2.5.2.1 -- plus one
+  stray halfword at 0087 that belongs to a NEW PSW slot and is the single
+  irregularity in the whole pattern.  If the real pass covered eight
+  halfwords per vector (old AND new) then 009c would fall inside it and
+  everything would fit; our execution produces four.
+- NEXT STEP, concrete: find and read that restore loop.  It is at nia=00507
+  inside section GPCIPL (0..15392, module BILDNEW5), but BILDNEW5.asm is a
+  wrapper -- its COPY list is MACSMITH, PSA, HISAM, FAILEXEC, STM0, STPMEM,
+  INTHNDLR, STM1, STM2, STM3 -- and the ISPBs live in those: STM0 has 19,
+  STPMEM 13, STM1 12, FAILEXEC 7.  Reading the loop settles whether four
+  halfwords per vector is what the code says or what we mis-execute, and
+  the stray 0087 is the thread to pull.
