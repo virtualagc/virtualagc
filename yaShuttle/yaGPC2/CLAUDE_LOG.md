@@ -2483,3 +2483,40 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   c9fb comparison already suggested) or its ORDER is -- i.e. whether the
   bootstrap should have been loaded by the later phase rather than the
   earlier one.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- CORRECTION, and it weakens two conclusions from the previous entries.
+  FCMNUMPH DIFFERS BY RELEASE:
+      OI301700  FCMNUMPH EQU 2   NUMBER OF SSW PHASES TO LOAD
+      OI340600  FCMNUMPH EQU 3   NUMBER OF PHASES TO LOAD
+  Our tape is OI340600, so loading THREE phases is CORRECT.  Measured and
+  confirmed: FCMUPROT unprotects 126,210 halfwords, which is exactly
+  107842 + 2394 + 15974, the three phase descriptors' totals, in three
+  bursts separated by gaps at 18.76->25.71 s and 25.73->26.05 s.
+- CONSEQUENCE 1: phase C's block `addr=3336 len=6982 -> 03336..04e7b`
+  LEGITIMATELY overlays phase A's `addr=47e0 len=1164 -> 047e0..04c6b`.
+  So "the bootstrap is wrongly clobbered" is NOT established -- in
+  OI340600 that region is meant to be overlaid.  What is established is
+  only that after our load, no copy of the 047e0 routine survives.
+- CONSEQUENCE 2: the DASS dumps have IPL FILL where phase C loads (03400
+  and 03600 are 99% c9fb, 0% match), so those dumps are from a TWO-phase
+  load -- either an OI301700-era system or a different system-ID/LOADTBL
+  selection than our default item 15.  CROSS-COMPARING LOW MEMORY WITH
+  THEM IS THEREFORE UNSAFE, and the earlier "our load coverage is broader
+  than the real one" conclusion is withdrawn: the extra content is phase
+  C, which that dump's system never loaded.
+- WHAT SURVIVES the correction: phase A's content at 01a00..01dff is 1024
+  halfwords BYTE-IDENTICAL to the dump, so our phase-A image and its
+  placement are right; and 00a07 is a data table in both, so jumping there
+  was always wrong whatever the release.
+- NEW LEAD, and it fits OI340600 rather than the dump: searching the whole
+  512K for `cdfX 0014` (LPS TPSASRP) finds THREE sites --
+      06fd1 = cdf8 0014   the SSL's own entry LPS
+      07068 = cdf8 0014   the SSL's handoff LPS
+      1bfef = cdfa 0014   PASS-side, inside phase A's block 12
+                          (19a30..1c99b)
+  So there IS a PASS routine that loads the System Reset PSW, at 1bfef,
+  and it SURVIVES the three-phase load.  That is a far better candidate
+  for what TPSASINP should point at in OI340600 than the OI301700-era
+  047e0.  Next step: find the entry point of the routine containing 1bfef
+  and check it against TPSASINP.
