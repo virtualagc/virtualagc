@@ -3294,3 +3294,40 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - Note the earlier pair at `nia=00171`/`0017b` (M1=1 then M1=3, t=2.00M/2.01M) is a
   FULLWORD unprotect/protect over the same address from GPCIPL's own early sweep,
   distinct from the GPCERAS pass.
+
+### [2026-08-28] Target: [problems.md]
+- THE PROTECTION CHAIN IS NOW ESTABLISHED END TO END, and the "timing sensitivity"
+  that never made sense is explained as a WINDOW:
+    1. `GPCERAS` (`GPCERAS.asm:257-261`, via `GPCWR20`) unprotects, fills and
+       RE-PROTECTS every halfword of sectors 0-15 at t~11.35M.  `DSRLIMIT DC X'000F'`
+       (`STPDATA.asm:1027`) = 15, so sector 6 is legitimately inside its range -- our
+       emulation is NOT overrunning.
+    2. The SSL's BCE DMAs into `#PCVNMMU` at t~22.96M.
+    3. NOTHING BETWEEN THEM UNPROTECTS IT.  `FCMUPROT` only ever opens LOAD-BLOCK
+       DESTINATIONS (it takes a 3-halfword descriptor in R1), and the staging buffer
+       is not a destination.
+    4. A load block covering the buffer with protect=0 would unprotect it in exactly
+       that window, because `FCMRPROT` re-protects only per the block's own flag.
+    5. `mmbstamp` emits no such block: the csect has no data extent, its `INITIAL`
+       being all zeros.
+- CONFIRMED BY PREDICTION, not by fitting: unprotect at t=12,000,000 and at
+  t=18,765,000 -- 6.7 seconds apart, both inside the window -- give BIT-IDENTICAL
+  outcomes: 400 blocks, wordsTaken == wordsOut == 204812, zero lost, same halt at
+  `FCMSSLEX+2` at t=39,593,714.9.  Outside the window (t=1000, t=60,000,000) both
+  give 281 blocks with 26,698 words dropped.  A window, not a lucky constant.
+- WITHDRAWN AGAIN, and this time the reasoning was circular: I ruled out a load block
+  here because the DASS dump shows the region 100% `C6C6`.  But `C6C6` IS THE TAPE'S
+  OWN FILL (`STACK_FILL_BYTE = 0xC6`, `INIT=C6C6` on every MMUDATn ALLOC card,
+  lnk101 `linker.py:59-63`), so a load block carrying fill produces EXACTLY the dump
+  content I used as evidence against one.  The dump cannot distinguish the two cases.
+  The memory file `project_fiomuwb2_is_a_name_pointer_to_cdhv_blocks` carried "Do not
+  fix mmbstamp here" as a DIRECTIVE and has been corrected.
+- PROPOSED FIX, same class as the FCMPSA drop: have `derive_load_blocks` emit an
+  UNPROTECTED load block for csects the link ALLOCATES but supplies no text for --
+  `#PCVNMMU` is the only one in the IPL set (measured earlier: sections minus extents
+  minus covered, no size threshold, 3 rows all the same region).
+  ACCEPTANCE TEST, already calibrated: rebuild the tape and boot with NO
+  `YAGPC_UNPROTECT` at all.  It must reach 400 blocks with wordsTaken == wordsOut.
+  Anything less and the block is not doing what the injection does.
+- NOTE the 400-block run still HALTS at `FCMSSLEX+2` rather than booting, so this is
+  a necessary step, not the last one.
