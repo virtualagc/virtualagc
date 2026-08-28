@@ -24,27 +24,37 @@ void ap101_free(AP101 *gpc) {
  * matters is after the test and before the load -- exactly when FCMUPROT
  * would have cleared it, had the phase's RESERVED storage had a load block.
  * Diagnostic: the real repair belongs in the tape build. */
+#define UNPROT_MAX 8
 static void ap101_timed_unprotect(AP101 *gpc) {
-    static int inited = 0, done = 0;
-    static long lo = -1, hi = -1;
+    static int inited = 0, done = 0, nRanges = 0;
+    static long lo[UNPROT_MAX], hi[UNPROT_MAX];
     static double atUs = 0.0;
     if (!inited) {
         const char *w = getenv("YAGPC_UNPROTECT");
         const char *t = getenv("YAGPC_UNPROTECT_AT");
         if (w != NULL && t != NULL) {
-            char *end = NULL;
-            lo = strtol(w, &end, 16);
-            hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16) : lo;
+            const char *p = w;
+            while (*p != '\0' && nRanges < UNPROT_MAX) {
+                char *end = NULL;
+                long a = strtol(p, &end, 16);
+                long b = a;
+                if (end != NULL && *end == '-') b = strtol(end + 1, &end, 16);
+                lo[nRanges] = a; hi[nRanges] = b; nRanges++;
+                if (end == NULL || *end != ',') break;
+                p = end + 1;
+            }
             atUs = atof(t);
         }
         inited = 1;
     }
-    if (done || lo < 0 || gpc->cpu.elapsedTimeUs < atUs) return;
+    if (done || nRanges == 0 || gpc->cpu.elapsedTimeUs < atUs) return;
     done = 1;
-    for (long a = lo; a <= hi; a++)
-        membus_set_store_protect(gpc->cpu.ram, (uint32_t)a, false);
-    fprintf(stderr, "unprotect: %ld halfword(s) %05lx..%05lx at t=%.1f\n",
-            hi - lo + 1, lo, hi, gpc->cpu.elapsedTimeUs);
+    for (int i = 0; i < nRanges; i++) {
+        for (long a = lo[i]; a <= hi[i]; a++)
+            membus_set_store_protect(gpc->cpu.ram, (uint32_t)a, false);
+        fprintf(stderr, "unprotect: %ld halfword(s) %05lx..%05lx at t=%.1f\n",
+                hi[i] - lo[i] + 1, lo[i], hi[i], gpc->cpu.elapsedTimeUs);
+    }
 }
 
 void ap101_exec1(AP101 *gpc) {

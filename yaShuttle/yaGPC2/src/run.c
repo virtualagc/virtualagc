@@ -1329,9 +1329,12 @@ static void batchrunner_free_watchpoints(BatchRunner *r) {
 
 /* Shared end-of-run reporting/exit-code logic for both loops. */
 static int batchrunner_report_stop(BatchRunner *r) {
+    /* Every stop reason, not only max-steps: a run that ends on a halt or
+     * a wait state is precisely the one whose processor state matters, and
+     * hooking this to the max-steps branch alone hid it. */
+    if (getenv("YAGPC_PROCDUMP")) iop_dump_procs(&r->age.gpc.iop);
     if (!r->hasStopReason) {
         snprintf(r->stopReason, sizeof r->stopReason, "max steps reached (%ld)", r->maxSteps);
-        if (getenv("YAGPC_PROCDUMP")) iop_dump_procs(&r->age.gpc.iop);
         /* YAGPC_MEMDUMP=lo[-hi] prints main storage over that halfword
          * range at the end of a run.  The flight software builds its BCE
          * programs at run time, so the only way to see what a given

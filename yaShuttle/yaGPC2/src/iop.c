@@ -1202,9 +1202,12 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value) {
      * YAGPC_INTTRACE while still able to break a CPU-side condition test
      * mid-loop.  YAGPC_DMAPROT is the only way to see it happen. */
     if (getenv("YAGPC_DMAPROT"))
-        fprintf(stderr, "DMAPROT addr=%05x val=%04x pe=%d ovr=%d t=%.1f\n",
+        fprintf(stderr, "DMAPROT addr=%05x val=%04x pe=%d ovr=%d pc=%05x "
+                        "t=%.1f\n",
                 (unsigned)addr, (unsigned)(value & 0xffff), iop->curPE,
-                (int)iop->cpu->storeProtectOverride, iop_now_us(iop));
+                (int)iop->cpu->storeProtectOverride,
+                (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu),
+                iop_now_us(iop));
     cpu_signal_dma_protect_violation(iop->cpu);
     return false;
 }

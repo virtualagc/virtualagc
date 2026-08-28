@@ -1775,3 +1775,41 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   "bit 2 reserve" for exactly this, and mmbstamp's LoadBlock.words()
   never emits it.  mmbstamp is Don's (nsts-sdl-dps) and was only read
   here.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md
+- With the #PCVNMMU unprotect supplied, the CC corruption is GONE:
+  BCTRACE over the WHOLE machine (0-7ffff) finds NO cc=2 fall-through
+  anywhere, against 78 legitimate cc=0 exits at 071be, and #SSTs rise
+  23 -> 88.  The wait loop is healthy.  So the second stall has a
+  different cause.
+- Second stall is real, not step-limited: blocksRead 730, BCE18 parked at
+  0730f (one past a #WAT), MSC parked at 07378, IDENTICAL at 200M, 260M
+  and 320M steps.
+- The 7 surviving DMA violations are all at 072cc/072cd, BCE 18, from
+  BCE PC 07366.  Dumping that fixed BCE program decodes it:
+      07362  fa00 72a8   base <- FCMBCEST (072a8)
+      07366  f300 0001   #RDLI 1   -> stores at base + 2*BCE#
+      0736a  0800        #WAT
+  and FCMBCEST is `EQU *-36`, a fictitious base so 2*BCE# indexes real
+  storage starting at 072cc.  IPL.sym.json confirms the layout:
+  FCMBCEST/FCMBCEBT 072a8, FCMBCEAD 072c4, FCMMSCAD 072ca, FCMRCSEQ
+  072d0.  So 072cc IS BCE 18's own read-status slot and must be writable
+  -- the same protection gap as #PCVNMMU, but this time DS storage
+  inside a LOADED csect rather than a whole reserved one.
+- BUT UNPROTECTING IT MAKES THINGS WORSE, and that is the interesting
+  part: blocksRead falls 730 -> 505, the 1:1 word ratio breaks
+  (258566 out / 143366 taken) and BCE18 runs away to pc=00000 busy=1.
+  The status word the MMU model returns is 0000 (it is the val= in the
+  DMAPROT line), so while the write is refused the slot keeps its
+  image value and the SSL proceeds; once the write lands, the SSL can
+  see the zero and takes a different path.  Two entangled problems:
+  the protection gap on the status table, and what our mmumodel reports
+  as read status.
+- A WRONG TURN worth recording: unprotecting 072a8..072cf (the whole
+  fictitious-base span) is destructive -- it includes FCMBCEAD 072c4 and
+  FCMMSCAD 072ca, the BCE and MSC PROGRAM PC POINTERS, which must stay
+  protected.  Only 072cc..072cf is real table storage.
+- iop_dump_procs now runs for EVERY stop reason, not only max-steps.  It
+  was hooked to the max-steps branch alone, so a run ending on a halt or
+  wait state -- exactly the one whose processor state matters -- printed
+  nothing, which cost several runs.
