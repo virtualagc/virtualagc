@@ -3262,3 +3262,35 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - Only `src/ap101Utils/mmbstamp.py` was touched in Don's repo, and it is back to
   carrying just the FCMPSA fix.  `ext/sim`, `ext/virtualagc` and `COMMON.out*` were
   already modified/untracked before I started and are not mine.
+
+### [2026-08-28] Target: [problems.md]
+- FCMIZCON CHASED, AND IT ANSWERS THE OPEN QUESTION.  `FCMINSSL.asm:1140`
+  `FCMIZCON DS F  CHECKUM/UNPROTECT/PROTECT ZCON` is used three ways: checksum
+  (844-852), (re)protect (925-931) and unprotect (968-974).  `FCMUPROT` (PROC at 964)
+  takes R1 pointing at a LOAD-BLOCK DESCRIPTOR -- address at `0(R1)`, BSR/flags at
+  `1(R1)`, length at `2(R1)`, the 3-halfword format -- builds a Z-CON from it and
+  walks `ISPB@# 0,0(R2,R1)` down the length.  IT UNPROTECTS THE LOAD BLOCK'S
+  DESTINATION, NOT THE STAGING BUFFER.  The SSL never unprotects `#PCVNMMU` at all;
+  it assumes that region is writable.
+- SO WHO PROTECTS IT?  `GPCERAS.asm:257-261`, GPCIPL's memory ERASE pass:
+      GPCWR20  ISPB  0,0(R5,Z3)   UN-PROTECT HW
+               STH   R6,0(R5,Z3)  SET TO X'NNNN'
+               ISPB# 2,0(R5,Z3)   RE-PROTECT AND AUTO-INCREMENT R5
+               BCT   R3,GPCWR20   LOOP TILL DONE WITH THIS BLOCK
+  It unprotects, writes a fill pattern, and RE-PROTECTS every halfword it covers.
+  Traced at `3032a`: `nia=02c7c` = `GPCWR20+2` (M1=0, unprotect) and `nia=02c80` =
+  `GPCWR20+6` (M1=2, protect) at t=11,348,275/11,348,281 -- ELEVEN SECONDS BEFORE the
+  SSL's first DMA at t=22.96M.  That is the proximate cause of all 7169 violations.
+- AND IT EXPLAINS THE INSENSITIVITY: blanket and `sections` modes give identical
+  results because THE FLIGHT SOFTWARE PROTECTS EVERYTHING ITSELF.  `ipl_fill()`'s
+  blanket is duplicating what `GPCERAS` does halfword by halfword.  Whatever our
+  loader model does is overwritten by the erase pass.
+- THE REMAINING QUESTION IS NARROW AND WELL-FORMED: the erase loop is BOUNDED --
+  `DSRCNT` counts sectors up, `CH R0,DSRLIMIT` at 264 ends it, with `STARTADR` and
+  `STARTCNT` as the within-sector bounds.  So either (a) `DSRLIMIT` should stop
+  GPCERAS before sector 6 and ours runs too far, or (b) something unprotects the
+  buffer after the erase and we are not reaching it.  CHECK DSRLIMIT'S VALUE AND WHO
+  SETS IT FIRST -- it is a single halfword and decides the whole question.
+- Note the earlier pair at `nia=00171`/`0017b` (M1=1 then M1=3, t=2.00M/2.01M) is a
+  FULLWORD unprotect/protect over the same address from GPCIPL's own early sweep,
+  distinct from the GPCERAS pass.
