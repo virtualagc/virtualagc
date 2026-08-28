@@ -3168,3 +3168,27 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   reads as an omission unless the reason is next to it -- the source contains no
   answer to reconcile toward, so inventing one would have the assembler assert
   something nobody can source.
+
+### [2026-08-28] Target: [problems.md]
+- HARNESS BUG OF MY OWN, and it invalidated three reported results.  The `sections`
+  mode never ran: the binary was STALE for `ageharness.c` despite its timestamp being
+  newer.  `touch src/ageharness.c && make` fixed it and the mode then reports
+  `Load protection: 3624 halfword(s) over 7 section(s)`.  Everything I said about
+  "protection strategy makes no difference" was measured on the default path.
+- WITH THE MODE ACTUALLY APPLIED, the result is IDENTICAL to the blanket default:
+  7170 DMA violations, 281 blocks, wordsTaken 117178 of wordsOut 143876 -- every
+  figure the same.  So OUR LOADER'S PROTECTION MODEL IS IRRELEVANT TO THIS FAILURE.
+  Under `sections`, `ipl_fill` leaves memory unprotected and only PHASE01's 7 sections
+  are protected; `#PCVNMMU` is in phase 2 and nothing in our model touches it, yet the
+  violations persist unchanged.
+- WITHDRAWN: the `#SST` race framing.  It predicts violations immediately after a
+  re-protect, and the timeline refutes that.  Last `ISPB` touching the buffer is
+  t=11,673,913 -- an unprotect/protect PAIR 6us apart at `nia=02c7c`/`02c80`, and only
+  on `3432a` (`CDHV_CHK_SUM`), which is the "open it briefly to write one word" idiom.
+  First DMA violation in the buffer is t=22,956,997, from `pe=18` at `pc=07308`, the
+  SSL's BCE read program.  ELEVEN SECONDS OF SIMULATED TIME APART.  Not a race.
+- WHAT THE EVIDENCE SUPPORTS NOW: the SSL never opens the staging buffer before the
+  BCE DMAs into it.  Either the flight software relies on that region never having
+  been protected, or an unprotect step is not being reached in our emulation.  Chase
+  WHICH of those before proposing a fix; both my previous explanations were withdrawn
+  after being stated too confidently.
