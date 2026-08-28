@@ -3073,3 +3073,36 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   required >3 lines after the CSECT card).
 - They offered to prototype behind a never-enabled flag in the port so the shape can
   be seen before `ASM101S.py` commits to a format.  AWAITING RON'S DECISION.
+
+### [2026-08-28] Target: [problems.md]
+- Ron's design requirement for `SPON`/`SPOFF`, relayed via ASM101S-port: the
+  implementation must be DISABLEABLE BY A COMMAND-LINE PARAMETER, and the switch need
+  only disable THE EMBEDDING IN OBJECT FILES, not the tracking.  Verified their
+  supporting detail: `ASM101S.py:1234` reads `--no-rtl-fixes` from `sys.argv` BEFORE
+  the option loop, for the reason given at 1230-1233 (source files are read in-place
+  as the loop encounters them); `--no-force-d` is at 1286.  So the convention is
+  opt-out, default enabled -- `--no-store-protect`, not `--store-protect`.  A flag
+  consulted only at `writeObjectModule` time does NOT need the early read; copying
+  that pattern would be cargo-culting a fix for a problem it does not have.
+- WHY SCOPING THE SWITCH TO THE EMBEDDING IS THE GOOD PART: listings are unaffected
+  either way, so the 542-module byte-identical listing regression stays valid; and
+  with the switch on, objects must come out BIT-FOR-BIT IDENTICAL to today's.  That
+  is a free total regression -- sweep both releases with the switch and diff against
+  the stored sweeps; any difference is the feature leaking.  ASM101S-port has current
+  sweeps for both releases in `pfs-test/` and can run it against a candidate.
+- MEASURED, AND IT SETTLES THE DIAGNOSTICS QUESTION.  Across all 40 files:
+  balanced 4 (10%), `SPOFF` with no `SPON` 31 (78%), `SPON` with no `SPOFF` 5 (12%),
+  mismatched-both-present 0.  So the obvious "unbalanced SPOFF/SPON" diagnostic would
+  FIRE ON 36 OF 40 FILES, 90%.  Unbalanced is the NORMAL case, not the error case.
+  That is a stronger reason for emitting no diagnostics than "the semantics are
+  inferred": even granting the interpretation, the diagnostic would be wrong about
+  the source nine times in ten.  It also protects the bit-identical property in the
+  point above, since any diagnostic changes the listing.
+- Their 31 is right and my earlier 25 was the loose figure; recount agrees.
+- I put one caution back to them on the delta hypothesis: it holds only if
+  "redundant" implies "would not have been written", and defensive explicit marking
+  is ordinary in assembly.  A simpler reading also survives -- default protected, the
+  31 `SPOFF`-only files never bother restoring because the CSECT ends, and the 5
+  lone-`SPON` files are belt-and-braces.  Neither reading is clearly better, and they
+  give OPPOSITE answers on precedence against deck `SET`/`CLEAR`, so it must not be
+  decided by whichever gets written down first.
