@@ -1048,6 +1048,8 @@ static void iop_watch_store(IOP *iop, uint32_t addr, uint32_t value,
             iop->curPE, iop_now_us(iop));
 }
 
+static int g_clearWatch[32];
+
 double iop_now_us(IOP *iop) {
     return (iop != NULL && iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
 }
@@ -1060,6 +1062,11 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
     double now = (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
 
     if (!bce->recvActive || bce->recvPC != pc) {
+        /* YAGPC_CLEARTRACE: the SSL's "CLEAR THE MIA BUFFER" read is a
+         * one-word #RDLI meant to discard a STALE word.  Whether it gets
+         * the latch or a live word decides the phase of everything after
+         * it, so record which. */
+        if (count == 1) g_clearWatch[p] = 1;
         bce->recvActive = true;
         bce->recvPC = pc;
         bce->recvAddr = addr & 0x3ffffu;
@@ -1078,7 +1085,14 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
     }
 
     while (bce->recvLeft > 0 && mia_data_available(iop, &bce->mia)) {
+        bool wasLatch = bce->mia.latchValid;
         uint32_t data = mia_get_data(iop, &bce->mia);
+        if (g_clearWatch[p] && getenv("YAGPC_CLEARTRACE")) {
+            fprintf(stderr, "CLEARREAD bce=%d took=%04x from=%s t=%.1f\n",
+                    p, (unsigned)data, wasLatch ? "latch-or-live" : "LIVE",
+                    now);
+            g_clearWatch[p] = 0;
+        }
         iopls_setD(&iop->ls, data);
         iop_write_main16(iop, bce->recvAddr, data);
         bce->recvAddr = (bce->recvAddr + 1) & 0x3ffffu;

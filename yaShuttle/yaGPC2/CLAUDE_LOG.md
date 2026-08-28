@@ -1891,3 +1891,39 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   destination, count and whether it completed.  A move that stops early on
   a store-protect violation leaves R1's count intact by design, so from
   outside it is indistinguishable from one that never ran.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- THE ONE-HALFWORD SHIFT IS PINNED, and the MIA model is NOT at fault.
+  YAGPC_CLEARTRACE shows what each "CLEAR THE MIA BUFFER" one-word #RDLI
+  consumes.  Almost all take c6c6 -- fill, i.e. a genuinely stale word,
+  which is the point of the instruction.  One does not:
+      CLEARREAD bce=18 took=c6c6 t=22844721.0
+      CLEARREAD bce=18 took=e9f3 t=23687787.2   <- block 2's FIRST word
+      CLEARREAD bce=18 took=c6c6 t=24473906.2
+  and the RECV ARM for it is at t=23687787.2 as well: the read completed
+  THE INSTANT IT WAS ARMED, because a live word was already queued.  (An
+  earlier reading of a 16.8 ms wait was wrong -- it compared arm and
+  completion times taken from two DIFFERENT runs.)
+- The AP-101S manual carries the BCE POO as Part III, and section 3.4.1
+  MIA-MIA BUFFER-BCE OPERATION settles the semantics in our favour:
+  "once an entry is placed in the MIA buffer it stays there until either
+  the BCE removes it OR THE MIA OVERWRITES IT WITH A NEW VALUE."  So a
+  newly arrived word legitimately displaces the stale one, which is
+  exactly mia_get_data's live-over-latch rule.  latchValid was true in
+  every clear-read including the e9f3 one, so a stale word WAS present;
+  the live word simply won, correctly.
+- So the defect is solely WHEN mmumodel makes a transfer's first word
+  available.  queue_words_paced starts a fresh burst at
+  burstStartUs = mm_now() with slot 0 due immediately, i.e. zero latency
+  after the read command -- physically impossible for a moving medium.
+- TRIED AND REVERTED: giving a paced burst a one-block-gap lead-in
+  (nextSlot = BLOCK_GAP_WORDS on a fresh burst).  It is principled -- every
+  block on the medium is preceded by a gap, and the constant and the
+  argument are already in the file -- but it did NOT fix this case, because
+  the read command precedes the clear-read by about 20 ms and the gap is
+  only 8.45 ms.  Reverted rather than left in: an unverified global timing
+  change with no measured benefit is precisely the kind of thing that has
+  misled this project before.  The right repair needs mass-memory-unit
+  timing documentation, which is not in the tree (the AP-101S manual covers
+  the CPU and the IOP/BCE, not the MMU's own latency).
+- New: YAGPC_CLEARTRACE, reporting what each one-word clear-read consumes.
