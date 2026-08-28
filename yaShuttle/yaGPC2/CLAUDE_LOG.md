@@ -2409,3 +2409,38 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   load a string into it: our phase-2 content/placement differs from the
   real one in low memory, which is the same region the bootstrap question
   turns on.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- COMPARED OUR LOADED LOW MEMORY AGAINST latest.unlinkSSW_(PostIPL).
+  USE THAT DUMP, NOT G9: the G9/G2/... dumps are other OPS configurations
+  where low memory has been reused, and reading 047e0 out of G9 earlier
+  gave a misleading answer.
+- OUR PHASE-2 CONTENT IS SUBSTANTIALLY RIGHT.  In 512-halfword buckets:
+      01a00  100.0% match      01c00  100.0% match
+      01e00   84.0%            02c00   93.4%      02e00  89.6%
+  01a00..01dff is 1024 halfwords BYTE-IDENTICAL to the authentic dump, so
+  both the content and its placement are correct there -- there is no
+  global offset error.
+- BUT OUR LOAD COVERAGE IS BROADER THAN THE REAL ONE.  Where we differ, the
+  dump is overwhelmingly c9fb -- the IOP's IPL fill, i.e. NEVER WRITTEN --
+  while we have content: 03400 and 03600 are 0.0% match against 99% fill,
+  04e00 is 0.2% against 100% fill.  So our load blocks write regions the
+  real MMB leaves untouched.  Consistent with mmbstamp's own padding rules
+  (FillRule, bank-tail fill) over-extending blocks.
+- THE STAMPING HYPOTHESIS IS CONFIRMED, from the authentic image:
+    * The real Special Interrupt NEW PSW is 47e0, and 047e0 in the dump
+      holds CODE ending `cdf9 0014` = LPS TPSASRP -- a bootstrap that
+      loads the System Reset PSW, exactly what FCMINSSL expects to reach.
+    * 00a07 is 0000 in BOTH ours and the dump; from 00a06 onward the two
+      agree exactly (0013 0000 0014 0012 ...).  It is a DATA TABLE, never
+      code.  So jumping there was always wrong, and the defect is the
+      VALUE in TPSASINP, not the memory at the destination.
+    * Our image has "CPLT" text at 047e0 where the real one has that
+      bootstrap, so our phase-2 image also differs there.
+- WHAT IS NOT COMPARABLE: the SSL csect 06fbc..07361 is 100% c9fb in the
+  dump -- never written since IPL -- so the real system's SSL does not live
+  at our link's address.  Address-level comparisons of GPCIPL/SSL symbols
+  against these dumps are meaningless; only PASS-era content compares.
+  That also means our EX4=00a07 is OUR link's address, and the earlier
+  "TPSASINP holds Y(EX4)" reasoning rests on the flight-software comment
+  and our own image, not on the dumps.
