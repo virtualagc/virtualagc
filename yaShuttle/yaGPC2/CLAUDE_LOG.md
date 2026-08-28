@@ -2376,3 +2376,36 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   would not help by itself, because the SSL still executes
   `STH R0,TPSASINP` to zero the slot afterwards, and that store faults.
   Both fixes are needed.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- 0009c DOES NOT AGREE WITH THE DASS DUMPS, and the dumps ARE usable for
+  this after all -- 0009c is in the PSA, which no load block covers, so it
+  survives into PASS runtime.  (.fcm is a raw big-endian halfword image
+  from address 0, per load_fcm, so halfword N is at byte 2N.)
+      halfword         ours (end of run)      DASS (post-IPL)
+      0098..009b       10aa 4011 ff0c 0000    0000 0000 0000 0000
+      0009c..009f      0000 0011 0000 0000    47e0 0000 000a 0000
+  and our IPL.fcm AS BUILT has 0a07 0011 at 009c.  All EIGHT dumps agree
+  with each other on 47e0 0000, so it is stable and authentic.
+- WHAT THAT DOES AND DOES NOT PROVE.  The dumps are POST-IPL with PASS
+  running, so 47e0 is the Special Interrupt vector PASS has INSTALLED by
+  then, not necessarily what the MMB stamped for the SSL to read.  They
+  therefore do NOT directly confirm the "TPSASINP is never stamped"
+  hypothesis.  What they do prove is that a healthy post-IPL PSA differs
+  from ours, and that 047e0 is a meaningful PASS address -- it is also one
+  of the 26 phase-2 load-block bases in our own FCMUPROT list, which my
+  earlier guess of 01a80 (PHASE02.lib's entryAddress) is not.  Drop 01a80
+  as the candidate.
+- SECOND DIVERGENCE, unlooked for: 0098..009b is the Special Interrupt OLD
+  PSW, and it is ALL ZEROS in every DASS dump -- no special interrupt was
+  ever taken in a healthy run.  Ours holds a saved PSW (10aa 4011 ff0c
+  0000), and the INT trace bears it out: 2 interrupts through
+  old=0098/new=009c.  So we take special interrupts the real machine does
+  not.  Worth chasing on its own.
+- THIRD DIVERGENCE: our memory at 047e0 holds TEXT -- 3234 3133 3231 3320
+  3431 3332 ... 4350 4c54 ("CPLT") -- where the DASS dump has 0000 0000
+  d574 0720 47e6 8006 and then c9fb fill (the IOP's own IPL pattern for
+  0..1FFFF).  So the real system has that region largely UNLOADED while we
+  load a string into it: our phase-2 content/placement differs from the
+  real one in low memory, which is the same region the bootstrap question
+  turns on.
