@@ -2731,3 +2731,32 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - Test suite: the same FOUR pre-existing failures (`test/test_debugger.sh`,
   `test_cpu_instr_exec`, `test_iop_bce_exec`, `test_iop_msc_exec`), identical before
   and after; there were seven at the pre-session commit `249669d91`.
+
+### [2026-08-28] Target: [problems.md]
+- CROSS-RELEASE COMPARISON, and it qualifies yesterday's numbers.  Everything built
+  this session came from `OI340600/CON80`.  But `PFS/OI340700/README.md` states the
+  DASS reports are OI34.07, NOT OI34.06 -- so `latest.unlinkSSW_(PostIPL)`, which I
+  measured PHASE02 against, is a DIFFERENT RELEASE from the thing measured.  The
+  prescription there is to clone `OI340600/` and overlay `OI340700/` over it.
+- The overlay is 17 files, all present in OI340600 and all differing: `MLIB80/`
+  `FCMBMTMC.asm` `FIOMDPS2.asm` `FIOMDPVU.asm` `FIOPBYMC.asm`, `SSSRC/FIOCBLKS.asm`
+  `CDAP15.dfg`, and 11 `APPLSRC/` HAL/S files.  Note `CON80` is the LINKAGE decks
+  (PHASE01..PHASE22, SSL, SSW -- 194 extensionless members), not source; source is
+  `APPLSRC`/`MLIB80`/`SSSRC`.  No OI340700 build exists anywhere yet.
+- Attributing the 305 genuine mismatches via `PHASE02.sym.json` sections:
+    `04b48` 102 hw and `04bde` 11 hw fall inside `FIOCBLKS` (045e3..04c90) -- and
+      `FIOCBLKS.asm` IS one of the 17 changed files.  The largest cluster is
+      therefore a release difference, not a build defect.
+    `0001c` 8 hw is in `FCMPSA`; `03944`/`03a66` in `FCMINSSL` (SSL>, 037de..03b83);
+      `040d6` in `FCMCBLKS`; none of those modules is changed by OI340700.
+    `001aa` 158 hw and `032e1` 45 hw are in NO CSECT AT ALL -- gaps our link leaves
+      empty that the dump fills (`001aa` follows FCMPSA, which ends at 001a5).  That
+      matches the README's own proviso about constants pointing outside the code we
+      have, and the patch-area pattern.
+  So the release delta explains the biggest cluster but NOT all 305.  Do not claim it
+  explains them all without rebuilding.
+- CSECT spans in PHASE02 OVERLAP (`FCMSAVE` 04960..04d77, `FIOADCNS` 04b6c..04e89,
+  `FIOCBLKS` 045e3..04c90 all cover 04b48), so single-section attribution is
+  suggestive, not conclusive.
+- The `mmbstamp.py` FCMPSA fix is UNAFFECTED by any of this: a dropped load block is
+  a stamping bug, independent of which release is being stamped.
