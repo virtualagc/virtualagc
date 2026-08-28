@@ -2043,3 +2043,60 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   code 0007 the faulting address from cpu->lastProtFaultAddr.  A bare
   "old=0048" names only the class, which is what made this take as long
   as it did.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- ANSWER TO "what clears 0009c": NOTHING IS SUPPOSED TO, and the sweep is
+  NOT supposed to exclude the PSA.  Both halves of the question resolve
+  against the guesses, and our emulation of all of it is faithful.
+- The sweep code is GPCIPL RELOCATED.  At t=2006120 it does
+  `MVH dest=30180 src=00180 count=1480` and thereafter runs from sector 6;
+  at t=4063861 it runs `MVH dest=07c00 src=3037e count=768` from nia=3035e,
+  which is FCMSSLPT (31744 hw = 07c00, size 768).  So nia 301e5 / 30363
+  are original 001e5 / 00363 plus 0x30000, not a runaway into #PCVNMMU.
+- The real sequence, all four passes measured:
+      t=2.00s  nia=00162  m1=1 unprotect 00000..00104   (PSA)
+      t=2.01s  nia=301e5  m1=1 unprotect 00104..07f02   (the rest)
+      t=4.06s  nia=30363  m1=3 PROTECT   00000..07f02   (counts DOWN to 0)
+      t=4.16s  nia=00507  m1=0 unprotect, table-driven, selective
+  The last pass restores EXACTLY the manual's carve-out: 00000..00003
+  (power-off PSW), then four halfwords per OLD PSW -- 00048..0004b,
+  00058..0005b, 00060..00063, 00068..0006b, 00070..00073, 00078..0007b,
+  00080..00083, 00088..0008b, 00090..00093, 00098..0009b -- then
+  000a0..00139, which is TPSARES5 + BCE25 (00a4-a5) + counters (00b0-b1)
+  + putaway (00c0-0102) + diagnostics (0104-013f).  There is NO group for
+  any NEW PSW slot.  So protect-then-restore is the design, and it is
+  correct.
+- 0009c IS TPSASINP, confirmed structurally from MLIB80/TFPSA.asm:
+      TPSASIOP  SPECIAL INTERRUPT OLD PSW    <- 0098
+      TPSASINP  SPECIAL INTERRUPT NEW PSW    <- 009c
+      TPSARES5  4 RESERVED                   <- 00a0..00a3
+      TPSABC25  BCE 25 PARITY CHECK VALUES   <- 00a4
+  which matches the restore boundaries 00098..0009b and 000a0..00139
+  exactly.  AP-101S 2.5.2.1 lists only OLD PSW locations, so a NEW PSW may
+  legitimately be protected and GPCIPL is right to leave it so.
+- Where its contents come from: BCE 18 -- the MMU -- writes the PASS
+  bootstrap PSW into it from tape at t=2344001, while it is still
+  unprotected:
+      WATCHHW IOP-write addr=0009c val=0a07 pe=18 t=2344001.0
+      WATCHHW IOP-write addr=0009d val=0011 pe=18 t=2344034.0
+  and the SSL later reads it back to find PASS's entry point.
+- Ruled out: no ISPB anywhere uses an illegal M1 (counts are m1=0 21865,
+  m1=1 16283, m1=2 27, m1=3 16261), so storeProtectOverride is never
+  engaged.
+- TWO NEW LEADS, both better than the sweep:
+  (a) THE SSL'S OWN ENTRY BLOCK NEVER EXECUTES.  FCMINSSL lines 231-244
+      do `ISPB 1,TPSAWORK`, `ISPB 1,TPSASRP`, `ISPB 1,TPSASRP+2` and end
+      with `LPS TPSASRP` (*SYSTEM RESET) to re-enter at FCMMUIPL.  Tracing
+      every ISPB over 0-7f02 for the whole run, the ONLY one the SSL
+      issues is nia=07028, the #@LB13 work-area loop.  Those three entry
+      ISPBs never happen.  (TPSASRP itself is low enough to fall inside
+      the 00008..00043 restore, which is why the handoff's ST to it
+      succeeds while the STH to 0009c does not.)
+  (b) PASS'S LOW MEMORY IS NOT WHAT IT SHOULD BE.  TPSASINP points at
+      0a07; at the halt 00a00..00a13 is zeros, and 00a34..00a3b reads
+      `0015 0012 0000 c6c6 / 0016 0012 0000 c6c6` -- four-halfword table
+      records with IPL FILL in the fourth slot.  So 0a3b, which the 004c
+      vector still points at and which held working code at t=4.3s, is now
+      a partly-uninitialised data table.  A load block does cover it
+      (FCMUPROT unprotects 00602..04c6f), so the question is why that
+      block's content is fill.
