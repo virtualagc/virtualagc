@@ -2178,3 +2178,36 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   STP IN GPR 7" -- so the next question is whether 000e is the right value
   for this configuration and who put it in R7.  That is a much better
   thread than the protection state, which is now closed.
+
+### [2026-08-28] Target: problems.md
+- "THREE VOTED STORAGE PROTECTION BITS" vs "a single protection bit" is
+  NOT a contradiction in the POO, and there is no second level of
+  protection.  There is ONE LOGICAL BIT PER HALFWORD, held in three
+  REDUNDANT physical cells and majority-voted.  Evidence, all from the
+  manual itself:
+    * 2-1.1: "...three voted storage protection bits are also associated
+      with each halfword for the AP-101S...  The AP-101S/G has two storage
+      protect bits per halfword."  Three-to-two across variants is a
+      reliability trade (3-vote becomes 2-compare); it cannot be a change
+      in the number of protection LEVELS.
+    * The D100 READSP diagnose names them outright: "Bits 13-15 REDUNDANT
+      Store Protect Bits for address in R1 (even HW)", "Bits 22-24
+      REDUNDANT Store Protect Bits for address in R1 plus one (odd HW)".
+    * Status register bit 6 is "MMP Store Protect Bits MISCOMPARE = 1
+      (DRAM only)" -- a fault raised when the copies DISAGREE, which only
+      means anything if they are meant to be identical.
+    * "voted" is used the same way elsewhere for "IOP hardware voting
+      logic" (PCI RM status).
+  So the redundancy is invisible to programs except through D100 and the
+  miscompare fault; no instruction can set the copies independently, which
+  is why only single-bit instructions exist.
+- OUR MODEL IS ALREADY RIGHT: mcm.h's `bool *protData` is one entry per
+  halfword, and cpu_instr.c's D100 already synthesises the triples --
+  bits 13-15 and 22-24, ACTIVE LOW (000 protected, 111 unprotected) --
+  with a comment that already explains the voting.  STPMEM.asm:171 shows
+  the flight software really does use it ("READ BY WAY OF THE
+  DIAGNOSE-READ STORE PROTECT BITS CMDS").
+- The one thing the single-bit model cannot express is a MISCOMPARE, where
+  one copy of the three disagrees.  That is hardware-failure injection,
+  not function; nothing needs it unless we ever want to exercise the
+  self-test's miscompare path.
