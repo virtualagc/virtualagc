@@ -2211,3 +2211,38 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   one copy of the three disagrees.  That is hardware-failure injection,
   not function; nothing needs it unless we ever want to exercise the
   self-test's miscompare path.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- FCMSYSID THREAD CLOSED: 000e IS CORRECT, and it is not the explanation
+  for the TPSASINP fault.  Full chain, measured and sourced:
+    * SSLCHECK.asm:145-150, immediately before `B$ SSLSTART`:
+          LH  G7,BSLTPNTR+1   GET ITEM NUM
+          SHI G7,1            SEND DEU ITEM # -1 TO SSL
+      so the "system ID" the SSL receives is the DEU MENU ITEM NUMBER
+      MINUS ONE.  Measured R7 = 000e0000 at nia=06fbc, hence FCMSYSID=000e
+      via the SSL's `NHI R7,X'000F'`.
+    * COMDATA.asm:130-131 initialises BSLTPNTR+1 to X'0011' (17), and
+      BCE 18 duly writes 0011 there from tape at t=3026738.
+    * The CPU then overwrites it with 000f (15) at t=7355453, nia=02031.
+      That address is inside GPCRTOPT.asm's POLL45, under the banner
+      "IPL DEFAULT LOAD -- NO DEU SELECTED":
+          STH R3,DKBUS        DKBUS=0000 (NO DEU SELECTED)
+          LHI R4,15
+          STH R4,BSLTPNTR+1   BSLTPNTR+1=000F (LOADTABLE ID=15)
+      15 is the DOCUMENTED DEFAULT for a no-DEU IPL, and 15-1 = 14 = 000e.
+      Our --discrete-b 20000000 selects no CRT, which is exactly this path.
+- So the guard `LH R2,FCMSYSID / TRB R2,X'0001' / BC 07-4,#@LB26` sees an
+  EVEN id and correctly takes the PASS branch rather than the BFS `LPS 0`.
+  The SSL is legitimately where it is, doing what it should, when it writes
+  TPSASINP.  Both of the obvious escapes are now closed: the protection
+  state is right (previous entry) and the system id is right (this one).
+- STILL UNEXPLAINED, and now quite sharply: FCMINSSL stores to 0009c,
+  which nothing in GPCIPL ever unprotects, on a path it is correct to be
+  on, with a value (the PASS bootstrap PSW) that BCE 18 itself wrote there
+  from tape at t=2344001 while it was still unprotected.  Every actor is
+  behaving per its own source.  What is left to question is the ipl_fill
+  blanket protect in ageharness.c -- the ONE part of this chain that is
+  ours rather than the software's -- and specifically whether a real IPL
+  leaves the PSA protected at all, given AP-101S 2.5.3.3 says only that
+  memory is written "with memory store protected" and GPCIPL's own first
+  act (nia=00162, t=2000764) is to unprotect 00000..00104.
