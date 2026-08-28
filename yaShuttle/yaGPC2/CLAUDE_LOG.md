@@ -2601,3 +2601,48 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   takes from FCMBOOT's prolog and MMLOAD's IPL,PH=(10,2,13,3) card.  What
   it demonstrates is only that FCMLINIT surviving is NECESSARY, not that
   reordering is how the real build achieves it.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- SINGLE ROOT CAUSE FOUND, AND IT EXPLAINS EVERY OUTSTANDING SYMPTOM.
+  PASS HAS ITS OWN PSA CSECT.  SSSRC/FCMPSA.asm:
+      FCMPSA   CSECT
+               TFPSA CSECT,PON=0,POF=0,SR=FCMINSSL,MC=0,
+                     PC=FPMIHPGM,
+                     SVC=FPMSVC,PC1=FPMIHPC1,PC2=FPMIHPC2,IM=FPMIHIM,
+                     EI0=FIOERRLA,EI1=FIOERRLB,EI2=FIOCMPLT,EI3=0,
+                     SI=FCMLINIT,DSR=0,BSR=0,PD=NO,
+  It is at hw 00000, 422 halfwords, in PHASE02.lib.  It carries EVERY
+  vector the authentic dump has, with DSR=0/BSR=0 matching the dump's
+  0000 000a 0000 flags -- and SI=FCMLINIT is the 47e0 we went looking
+  for.
+- OUR TAPE BUILD DROPS IT.  mmbstamp's derive_load_blocks discards any
+  extent ending at or below the phase's Z1 pool cursor:
+      pool_next_hw(PHASE02) = 0024a
+      00000..001a5  e<=pool -> DROPPED "(re-supplies dropped)"   <- FCMPSA
+      001a8..00247  e<=pool -> DROPPED
+      0051e..       kept
+  The rule exists to drop Z1 ZCON pool re-supplies from a parent phase; a
+  CSECT that legitimately lives at address 0 is caught by the same
+  `e <= pool` test.  So phase 2's load blocks start at 0051e and PASS's
+  PSA is never loaded.
+- THAT ONE DEFECT ACCOUNTS FOR ALL FOUR SYMPTOMS:
+    1. 0009c protected -- FCMUPROT unprotects each load block BEFORE
+       loading it, so the missing PSA block is exactly WHAT WAS SUPPOSED
+       TO CLEAR 0009c.  The question that started this is answered.
+    2. TPSASINP holding GPCIPL's Y(EX4) -- it should have been overwritten
+       by FCMPSA's SI=FCMLINIT.  MY "MISSING MM-BUILD STAMP" HYPOTHESIS IS
+       WRONG: nothing stamps it, it is simply assembled into a CSECT that
+       we fail to load.
+    3. every PSA vector keeping GPCIPL's addresses -- 004c = 0a3b instead
+       of ad5c = FPMIHPGM -- for the same reason.
+    4. the "invalid instruction 0xc6c6 at 0x0a3b" crash, which is just
+       symptom 3 being dispatched through.
+- AND IT MAKES THE PHASE-REORDER EXPERIMENT UNNECESSARY: with FCMPSA
+  loaded, TPSASINP points at FCMLINIT wherever FCMLINIT ends up, so the
+  question of phase 2 loading last is separate and possibly moot.  Do not
+  pursue the reorder as a fix.
+- The defect is in ap101Utils/mmbstamp.py, which is Don's
+  (nsts-sdl-dps) and was only read here.  Same family as the FIOMUWB2
+  Z-CON gap and the unstamped IPL phase table: our toolchain reproduces
+  the assembly and the link, but not the ground Mass Memory Build's own
+  choices about what becomes a load block.
