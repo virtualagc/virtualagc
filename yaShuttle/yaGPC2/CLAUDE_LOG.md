@@ -1541,3 +1541,32 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - AND IT PROBABLY EXPLAINS THE USER'S EARLIER CLOCK-ONLY REPORTS TOO -- both
   times the observation was made inside that first window.  The panel and
   --discretes (trap 12) are no longer implicated by anything measured.
+
+### [2026-08-27] Target: [problems.md]
+- WARM-UP CORRECTED BY THE USER: the screen appears at MET 00:00:13 on the
+  display's own ticking clock, WITH discretePanel.py attached and
+  --discretes.  So the panel is not implicated (trap 12 is off the table),
+  and my "~30 s" was my own panel-less run's wall-clock timing, not a
+  property of the software.  I should not have generalised from it.
+- R7 AT THE CHAIN TERMINATOR, MEASURED.  CHI R7,1 lives at 0x71d0 (found
+  by scanning our own image for B5E7 0001; the second site, 0x71e3, never
+  executes).  R7 counts load blocks DOWN FROM 26 -- exactly phase 2's load
+  block count -- and the probe fires 22 times:
+      26 25 24 23 22 21 20 ... 5
+  and never reaches 1.  SO THE CHAIN DID NOT STOP BECAUSE IT RAN OUT OF
+  BLOCKS.  It stopped with FIVE LEFT, i.e. at BLOCK 21.
+- AND BLOCK 21 IS THE FIRST ABOVE-128K BLOCK, 14,822 halfwords, which
+  EXCEEDS THE 8192-HALFWORD TEMP BUFFER.  So it is the first load block in
+  the whole boot that needs the TWO-BUFFER SEQUENTIAL path: FCMMOVE moves
+  the primary buffer, then takes IF (TH,TFCMSEQF,,NZ) and waits on
+  FCMINSST for the ALTERNATE buffer's load, which never happens.
+- THAT IS THE UNEXERCISED PATH, and it explains why everything up to here
+  worked: blocks 1-20 are all under 8192 halfwords, so TFCMSEQF is never
+  set and FCMMOVE never waits.  The deadlock is not about parity, the
+  tape, or the phase build -- it is the sequential two-buffer receive that
+  has never once run in this project.
+- NEXT: trace how the SSL builds the SECOND receive sequence for a block
+  that spans both buffers -- FCMINSSL:700-760 ORs the #RDLI skeleton with
+  the partial count and stores through FCMRSADD, and lines 747-749 swap
+  FCMRSADD between FCMIBLK1 and FCMIBLK2.  Whether that second sequence is
+  built and started at all is the question.
