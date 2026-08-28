@@ -3002,3 +3002,36 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   protects every halfword regardless, and the region has no load block to clear it.
   That blanket is the defect.  `YAGPC_IPL_PROTECT=0` is refuted as the alternative;
   the `sections` mode is the candidate still under test.
+
+### [2026-08-28] Target: [problems.md]
+- WITHDRAWN: "SPON/SPOFF is redundant, do not implement".  THE ARGUMENT WAS A
+  NON-SEQUITUR, and the user named it.  I compared the two mechanisms AT CSECT
+  GRANULARITY ("42 of 45 bracketed csects are already unprotected"), which is exactly
+  the granularity the wholesale mechanism can express and the fine-grained one
+  exceeds.  A comparison made at the coarser granularity cannot detect information
+  that lives below it.  "The coarse mechanism helps more than nothing" does not
+  imply "the fine mechanism is unnecessary".
+- MEASURED: 8 OF THE 40 SPOFF/SPON FILES BRACKET SUB-CSECT REGIONS -- `TFPSA`,
+  `FCMBMTMC` (CSECT 226, SPOFF 346, END 4043), `FIOMUWP9`, plus `FCMPROTD`,
+  `FIOACTMC`, `FIOG9OPG`, `FIOMODMC`, `FIOPBYMC`.  The rest bracket a whole csect.
+- THE CASE THAT SETTLES IT: `MLIB80/TFPSA.asm`, the PSA macro, emits `SPOFF`
+  CONDITIONALLY at line 289 -- `AIF ('&X' EQ 'DS').NOSPOFF` -- immediately before
+  `TPSASTRT` and the PSA storage (`TPSARES1`, `TPSAPWR` power-on PSW, the OLD PSW
+  slots).  That is the AP-101S 2.5.2.1 "must not be store protected" carve-out which
+  `ageharness.c` `ipl_fill()` HAND-CODES FROM THE MANUAL, because the loader that
+  would have applied it is not modelled.  Being macro-conditional, a fixed hand-coded
+  range cannot reproduce it.
+- ALSO WITHDRAWN: the "three exceptions" framing.  `FCMPROTD` and `FIOG9OPG` carry
+  `SPON` alone right after their CSECT card -- an explicit PROTECT -- and the linker
+  independently marks them protected.  They AGREE; they were never exceptions.  Five
+  files use `SPON` alone this way, which also corroborates the polarity.
+- Message sent to the `ASM101S-port` session: track a protect flag against the
+  location counter and emit per-halfword protect data per TEXT extent in the `.obj`,
+  mirroring `libModule.py`'s `0xA1 PROT` record (u24 start byte addr, u24 halfword
+  count, ceil(count/8) bytes MSB-first, written at `libModule.py:187`).  ASM101S
+  emits NO protect information today, so `lnk101` has only deck-level `SET`/`CLEAR`
+  plus the prefix guess.  Caveats sent with it: the semantics are INFERRED, no
+  primary source found; 25 of 40 files have `SPOFF` with no matching `SPON`; the
+  CSECT-start default is unsettled; emission can be macro-conditional so it must
+  follow real expansion, not a source scan; precedence vs deck-level `SET`/`CLEAR`
+  is theirs to decide.
