@@ -2760,3 +2760,63 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   suggestive, not conclusive.
 - The `mmbstamp.py` FCMPSA fix is UNAFFECTED by any of this: a dropped load block is
   a stamping bug, independent of which release is being stamped.
+
+### [2026-08-28] Target: [problems.md]
+- THE PHASE-3-DESTROYS-FCMLINIT BLOCKER WAS NEVER REAL.  It was an artifact of a
+  badly built `newphase/PHASE03.lib`, which has 10 extents including a 6979-halfword
+  block at `03336` swallowing `FCMLINIT`.  Rebuilt correctly, PHASE03 has 26 extents
+  and NOTHING below `04c70` -- it begins exactly where `FCMLINIT` ends (`04c6b`),
+  leaving the same 4-halfword gap `04c6c..04c6f` the DASS dump shows as fill.  Two
+  independently derived layouts agreeing on that boundary.  Against the dump,
+  PHASE03 goes from 12.9% (newphase) to 77.53% (rebuilt).  So the `0xc6c6 at 0x48bf`
+  crash, the failed phase reorder, and "phase 3 genuinely overwrites FCMLINIT" all
+  trace to ONE BAD LIBRARY.  `newphase` was internally inconsistent: its PHASE02 was
+  built correctly, its PHASE03 was not.
+- THE BUILD RECIPE, recovered from the objects' own `.asmg.json` repro records rather
+  than guessed.  Two ingredients decide it:
+    `--src /tmp/claude-1000/sync/srcnoext/{SSSRC,APPLSRC}` -- the EXTENSIONLESS source
+      mirror.  With `.asm`/`.hal`/`.dfg` names CON80 resolves DIFFERENT MODULES
+      (`FCMBMT02`, `FIOACT02`, `FIOCYC02` instead of `FCMBMTPG`, `FIOACTMD`,
+      `FIOCYCTB`), and the build silently scores 28% against the dump instead of 97%.
+    `--src /tmp/claude-1000/sync/patchsrc` -- the PATCH DECKS.  `PCH02TXT` assembles
+      from `PCH02SRC` and supplies `OPSZFILL`, `MFBZFILL`, `#T020000`, `PCH2SAIL`,
+      `$X020001`; without it the link has 10 unresolved symbols.
+  Plus `--incl <scratch>/INCL80_fixed` (symlinks, extensionless), `--mlib`,
+  `--linklib <nsts-sdl-dps>/build/lib/runtime/{RUN,ZCON}`, `--pass-rel32` at the
+  Virtual AGC archive.  All of `--pass-rel32`, `--linklib` and `--runlib` default
+  CWD-RELATIVE, so they must be given explicitly from anywhere else.
+- CONTROL VALIDATED: with the right recipe the OI340600 build reproduces the earlier
+  measurement exactly, 11245/11550 = 97.359%, 305 mismatched.
+- OI340600 vs OI340700 FOR PHASE 2 IS ONE HALFWORD, at `08f39`, which OI340700 gets
+  right.  It fixes 1, breaks 0, changes NOTHING in sector 0.  So the release delta
+  does NOT explain the 305 mismatches.
+- WITHDRAWN: I attributed the 102-halfword `04b48` cluster to the release difference
+  because it falls inside `FIOCBLKS`, one of the 17 changed files.  `FIOCBLKS` IS
+  changed, but its change lands elsewhere entirely.  Section containment was
+  suggestive and I treated it as conclusive.  Also withdrawn: `PCH02TXT` being
+  unresolved does NOT explain the `032e1` cluster -- that was an artifact of MY
+  broken build; the good build links the patch deck and `032e1` still mismatches, so
+  it is a difference in patch CONTENT, not a missing patch.
+- Of the 17 OI340700 files, only `FIOCBLKS` is a LINKED module in phase 2.  The four
+  `MLIB80` ones are COPY/macro members; `CDAP15` is a display deck.
+- Full 25-phase rebuild -> tape `mmu700.mmv` (2500 blocks, was 1163) -> `BOOT-700.fcm`.
+  Phase 2 carries its 27 load blocks, phase 3 now 10.  `TPSASINP` holds `47e0` =
+  `FCMLINIT`, matching the DASS dump.  THE Z-CON WORKAROUND IS NOW OBSOLETE:
+  `patch_ssl_zcon.py` reports `832A 0006 -> 832A 0006`, i.e. the correctly built SSL
+  already resolves `FIOMUWB2`.
+- STILL NOT BOOTING.  Default run: 281 blocks, `wordsTaken` 117178 < `wordsOut`
+  143876, hangs in `FCMINSSL` around `072af`.  No DMA protect violations and no
+  interrupts at all -- a hang, not a fault.
+- A SECOND `mmbstamp` GAP, same class as the FCMPSA one and now located exactly.
+  Decode load-block addresses as `(sector<<15) | (addr & 0x7fff)` -- NOT
+  `(sector<<15)|addr`, which is what I had and it shifts every sector>=2 block by
+  0x8000.  With that fixed: phase 2's sector-6 block ends at `30321`, phase 3's
+  starts at `3432e`, and `FIOMUWB2`'s 16K buffer `30322..3432a` lies in the GAP
+  between them, in NO load block at all.  Both neighbours are protect=0, so the
+  buffer should be unprotected too, and nothing unprotects it.
+- CAUTION on the unprotect experiments: `YAGPC_UNPROTECT_AT=18765000` yields 400
+  blocks and a clean halt at `FCMSSLEX+2`, but t=1000 and t=8000000 both give the
+  281-block hang.  A pure protection bit should not be timing sensitive, so do NOT
+  read the 400-block run as progress until that is explained.
+- Pre-existing and NOT caused by the overlay: 14 `dfg FAIL`s in PHASE15/16/26; only
+  3 of the failing decks are overlay files, the other 11 are not.  Not in the IPL set.
