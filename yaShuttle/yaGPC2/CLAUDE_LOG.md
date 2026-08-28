@@ -3401,3 +3401,47 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   observation, wrong significance -- it should not carry any).
 - STILL OPEN: the run halts at `FCMSSLEX+2` with 400 blocks rather than booting.
   That was true of the injection runs too, so it is the NEXT defect, not this one.
+
+### [2026-08-28] Target: [problems.md]
+- **THE SSL NOW LOADS PASS CLEANLY WITH NO INJECTION AT ALL, AND `FCMSWMON` RUNS.**
+      blocksRead      324  (was 400 with two checksum retries, or 281 stalled)
+      wordsTaken/Out  165896/165896, zero lost
+      DMA violations  1 (the unrelated early addr=00002)
+      CPU             nia=19847 = `FCMSWMON` (the FCOS software monitor),
+                      still executing at t=1,411,055,444 us when max-steps hit
+  No `YAGPC_UNPROTECT`, no `YAGPC_LOADBIN`, no `YAGPC_PATCH`.  Previously this state
+  was only reachable by injecting FCMPSA and forcing the buffer unprotect.
+- `FCMSSLEX+2` DIAGNOSED: it is the SSL's THREE-STRIKES give-up, not a normal wait.
+  `FCMSSLCK` compares the computed checksum, `SHW FCMCKERR`, `FCMECNT` +1, and at
+  `>= 3` falls into `FCMSSLEX / SSM FCMWAIT` (`FCMWAIT DC X'000A'`).  Traced live:
+  `nia=0724b` sets FCMCKERR=ffff and `nia=07250` steps FCMECNT 1,2,3 at t=27.48M,
+  28.61M, 29.73M -- about 1.13s apart.  That also explains 400 blocks against ~324:
+  the extra reads are the two retries.  `FCMIZCON` (0731c) held `024a` at each
+  failure, naming the failing block: phase 3's `0024a len=98`.
+- **ROOT CAUSE WAS MINE**, from the FCMPSA fix: `parent_pool_lo` was added to
+  `mmbstamp.phase_load_blocks` (which builds the PHASE TABLE) but NOT to
+  `mmu2mmv.phaseRecord` (which WRITES THE TAPE).  Phase 3 then got 11 blocks on tape
+  against 10 in the table -- the extra being `001fe len=4` -- so the SSL read the tape
+  displaced from that block onward and every following block failed its checksum.
+  The next block in address order is `0024a`, exactly the one observed failing.
+- SWEPT FOR OTHER CALLERS rather than assuming, and found a THIRD:
+      `mmbstamp.phase_load_blocks:811`   had it (my fix)
+      `mmu2mmv.phaseRecord:185`          MISSING -> fixed
+      `fcmImage._lb_slots:397`           MISSING -> fixed
+      `mmu2fcm.py:751`                   n/a, a comment noting it uses
+                                         phase_load_blocks deliberately
+  `fcmImage`'s own docstring states the invariant the omission broke --
+  "mmbstamp.derive_load_blocks is the single definition of the partition" -- which
+  holds only if every caller passes the same arguments.  It feeds checksum-slot
+  detection, so it would have skewed the very tooling used to verify the tape.
+  All four phases now agree table-vs-tape: 27/27, 10/10, 5/5, 2/2.
+- DESIGN SMELL WORTH FIXING PROPERLY: `parent_pool_lo` is derivable from what every
+  caller already has (`pool_low_hw(parent_lib, parent_pool)`), so making it the
+  caller's responsibility guarantees this drift.  `derive_load_blocks` should take the
+  parent LIB and compute both itself.  Not done -- wider change to Don's code.
+- ALSO VERIFIED (not a bug): the checksum convention is consistent.  The writer sets
+  `block[slot]=0` and `block[slot+1]=total` over `0..slot-1`; the SSL does
+  `SHI R5,2`, sums offsets `0..96` and compares offset 97 -- equal only because that
+  zero is there, and it is.
+- STILL OPEN: the DEU sees nothing (0 commands, 0 fills), so PASS runs but has not
+  driven a display.  That is the next target.
