@@ -187,9 +187,50 @@ static void ap101_timed_patch(AP101 *gpc) {
     }
 }
 
+/* YAGPC_LOADBIN="<timeUs>:<hexAddr>:<path>" loads a raw big-endian
+ * halfword image into main storage at that simulated time, bypassing
+ * store protection.  It stands in for a LOAD BLOCK the tape build should
+ * have emitted but did not -- specifically PHASE02's FCMPSA, PASS's own
+ * PSA csect, which mmbstamp drops as Z1 pool area.  Diagnostic only. */
+static void ap101_timed_loadbin(AP101 *gpc) {
+    static int inited = 0, done = 0;
+    static double atUs = 0.0;
+    static uint32_t base = 0;
+    static uint8_t *buf = NULL;
+    static long len = 0;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_LOADBIN");
+        if (e != NULL) {
+            char path[512];
+            double t; unsigned a;
+            if (sscanf(e, "%lf:%x:%511s", &t, &a, path) == 3) {
+                FILE *f = fopen(path, "rb");
+                if (f != NULL) {
+                    fseek(f, 0, SEEK_END); len = ftell(f); fseek(f, 0, SEEK_SET);
+                    buf = malloc((size_t)len);
+                    if (fread(buf, 1, (size_t)len, f) != (size_t)len) len = 0;
+                    fclose(f);
+                    atUs = t; base = a;
+                } else {
+                    fprintf(stderr, "loadbin: cannot open %s\n", path);
+                }
+            }
+        }
+    }
+    if (done || buf == NULL || len == 0 || gpc->cpu.elapsedTimeUs < atUs) return;
+    done = 1;
+    for (long i = 0; i + 1 < len; i += 2)
+        mcm_set16(&gpc->cpu.mainStorage, base + (uint32_t)(i / 2),
+                  ((uint32_t)buf[i] << 8) | buf[i + 1], false);
+    fprintf(stderr, "loadbin: %ld halfwords at %05x, t=%.1f\n",
+            len / 2, (unsigned)base, gpc->cpu.elapsedTimeUs);
+}
+
 void ap101_exec1(AP101 *gpc) {
     ap101_timed_unprotect(gpc);
     ap101_timed_patch(gpc);
+    ap101_timed_loadbin(gpc);
     /* YAGPC_NIAPROBE=<hexaddr> dumps R0-R7 and the SSL's two context-struct
      * indices every time that address is about to execute.  Unlike --break
      * it does not stop, so it yields one line per VISIT, which is what

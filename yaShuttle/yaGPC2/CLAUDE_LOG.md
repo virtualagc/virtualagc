@@ -2646,3 +2646,38 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   Z-CON gap and the unstamped IPL phase table: our toolchain reproduces
   the assembly and the link, but not the ground Mass Memory Build's own
   choices about what becomes a load block.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- PASS BOOTS AND RUNS.  Injecting the load block our tape build drops --
+  PHASE02's FCMPSA, extracted straight from PHASE02.lib -- gets the GPC all
+  the way into PASS:
+      YAGPC_LOADBIN="27000000:0:fcmpsa.bin"          422 halfwords at 00000
+      YAGPC_UNPROTECT=30322-3432a,00000-001a5        as FCMUPROT would
+      YAGPC_PATCH="5000000:7c03=...,7c09=..."        phase 2 loads last
+  Result: NO FAULT AT ALL.  The run ends on max-steps after 609 SECONDS of
+  simulated time, with
+      cpu: nia=19838   = FCMSWMON +28   PASS's SOFTWARE MONITOR
+      iop: MSC pc=049e6 = #PCGBGPS +26  a PASS MSC bus program
+      blocksRead 321, wordsOut = wordsTaken = 164360
+  The CPU is in PASS's steady-state monitor loop and the MSC is running
+  PASS's own bus programs, not GPCIPL's.
+- THE EXTRACTED FCMPSA IS BYTE-IDENTICAL TO THE AUTHENTIC DUMP, which is
+  what makes this more than a hack that happens to work:
+      ProgChk @004c = ad5c 0000 000a 0000   SpecInt @009c = 47e0 0000 000a 0000
+      SVC     @005c = b13a 0000 000a 0000   Clk1    @0064 = ad24 0000 000a 0000
+      Clk2    @006c = bed6 0000 000a 0000
+  Every one matches latest.unlinkSSW_(PostIPL) exactly.  Our PHASE02.lib
+  has always held the correct PSA; only the tape build fails to emit a
+  load block for it.
+- WHAT IS STILL A HACK, and must not be mistaken for a fix:
+    * the injection itself -- the real repair is in mmbstamp's
+      derive_load_blocks, so the block is emitted and FCMUPROT unprotects
+      and loads it in the ordinary way;
+    * the PSA unprotect, which that load block would have done;
+    * the phase reorder, which is still needed here only because phase 3
+      overwrites FCMLINIT at 047e0.  With a real FCMPSA load block the
+      reorder question is SEPARATE and still open.
+- NOT YET REACHED: the DEU sees nothing (0 fills), so PASS is running but
+  has not driven a display.  Whether that needs more simulated time, real
+  MEDS rather than --deu-model, or something else is untested.
+- Suites unchanged: the same four fail as before.
