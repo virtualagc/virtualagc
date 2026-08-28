@@ -1695,3 +1695,41 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   (ISPB by EA window, with M1 and issuing NIA), YAGPC_MEMDUMP (main
   storage at end of run), IOP-side coverage for YAGPC_WATCHHW, and the
   receive destination address in the RECV ARM line.
+
+### [2026-08-27] Target: HANDOFF-FCMBOOT.md
+- The protected region the SSL DMAs into is its own 16K TEMP BUFFER, and
+  the address is CORRECT.  FCMINSSL declares
+  `FCMB1ZCN DC Z(,FIOMUWB2,0)` / `FCMB2ZCN DC Z(,FIOMUWB2+8192,0)`, and
+  HALSTAT gives FIOMUWB2 as compool CVN_MM_UTILITY, CSECT #PCVNMMU
+  offset 8, PHASE 2 ADDR 03032A, marked RESERVED.  So 3032a/3232a are
+  right, and tools/patch_ssl_zcon.py's stopgap value is right too.
+- Why it is protected: #PCVNMMU begins at 30322, which is EXACTLY where
+  the sector-6 load block ends (30000..30321, len 0322 = 802).  Being
+  RESERVED it holds no tape data, so no load block covers it, so
+  FCMUPROT never unprotects it, so IPL's blanket protect stands.  The
+  manual (AP-101S 2.5.3.3) confirms the blanket protect is right: IPL
+  writes C6C6 above 20000 and the IOP writes C9FB below 1FFFF, both
+  "with memory store protected".  The first sector-6 violation even
+  carries val=c6c6, the IPL fill pattern itself.
+- The 26 FCMUPROT invocations match our phase table exactly ("2:26LB@2300"
+  = 26 load blocks), and every block cross-checks: sector 7 unprotects 864
+  and the receives are 512+352=864; sector 5 unprotects 4956 and receives
+  4608+348=4956.  The machinery is correct; the table simply has no entry
+  covering the reserved buffer.
+- SUSPECTED BUILD DEFECT, NOT AN EMULATOR DEFECT.  The load-block
+  descriptor format that tools/stamp_ipl_phase_table.py documents has
+  "bit 0 storage protect, bit 2 reserve", but
+  ap101Utils/mmbstamp.py's LoadBlock.words() only ever emits 0x8000
+  (protected) and 0x4000 (sot) -- there is no reserve bit -- and
+  derive_load_blocks() drops pool-area extents outright
+  (`if e <= pool: continue  # (re-supplies dropped)`).  FIOMUWB2 lives in
+  a compool, i.e. a pool.  NOT YET PROVEN, and mmbstamp is Don's
+  (nsts-sdl-dps), so read-only here.
+- A/B with a diagnostic bypass (YAGPC_NO_DMA_PROTECT, off by default,
+  never for fidelity runs) at 10M steps:
+      enforced   wordsOut 143364 / wordsTaken  33796, MSC pc=07378
+      bypassed   wordsOut  28162 / wordsTaken  28162, MSC pc=0119e
+  Bypassed consumes every word 1:1 and the "MMU races 143K ahead of a BCE
+  taking 33K" pathology disappears entirely.  A long bypassed run is slow
+  in wall clock (real 4m39s vs user 33s at 10M steps -- the runner pacing
+  through wait states, not CPU) so a full one has not finished yet.

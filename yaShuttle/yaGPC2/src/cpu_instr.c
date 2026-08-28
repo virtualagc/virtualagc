@@ -1595,10 +1595,18 @@ static void exec_ISPB(CPU *t, DInstr *v) {
             }
             inited = 1;
         }
-        if (lo >= 0 && (long)ea >= lo && (long)ea <= hi)
-            fprintf(stderr, "ISPB ea=%05x m1=%u nia=%05x t=%.1f\n",
+        if (lo >= 0 && (long)ea >= lo && (long)ea <= hi) {
+            uint32_t r1 = register_get32(cpu_r(t, 1));
+            uint32_t zc = (r1 >> 16) & 0xffffu;   /* the Z-CON's address */
+            fprintf(stderr, "ISPB ea=%05x m1=%u hw=%04x/%04x "
+                            "R1=%08x R2=%08x zcon=%04x/%04x nia=%05x t=%.1f\n",
                     (unsigned)ea, (unsigned)m1,
+                    (unsigned)v->hw1, (unsigned)v->hw2, (unsigned)r1,
+                    (unsigned)register_get32(cpu_r(t, 2)),
+                    (unsigned)membus_get16(t->ram, zc),
+                    (unsigned)membus_get16(t->ram, zc + 1),
                     (unsigned)psw_get_nia(&t->psw), t->elapsedTimeUs);
+        }
     }
     switch (m1) {
         case 0:   /* reset protect bit for the halfword at EA */

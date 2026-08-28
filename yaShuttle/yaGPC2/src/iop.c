@@ -1181,6 +1181,21 @@ uint32_t iop_g_eah(IOP *iop, uint32_t addr) {
  * provokes it. */
 static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value) {
     iop_watch_store(iop, addr, value, "write");
+    /* DIAGNOSTIC ONLY.  YAGPC_NO_DMA_PROTECT makes this path bypass store
+     * protection, the way iop_exec_dma_queue's own write already does.  It
+     * exists to answer one question -- whether the protected SSL temp
+     * buffer is the ONLY thing blocking the load -- and must never be set
+     * for a fidelity run: enforcing protection here is correct and is what
+     * raised GPCIPL trace agreement to 299,984/300,000 (426bca4d3). */
+    {
+        static int inited = 0;
+        static int bypass = 0;
+        if (!inited) { bypass = getenv("YAGPC_NO_DMA_PROTECT") != NULL; inited = 1; }
+        if (bypass) {
+            mcm_set16(&iop->cpu->mainStorage, addr, value, false);
+            return true;
+        }
+    }
     if (mcm_set16(&iop->cpu->mainStorage, addr, value, true)) return true;
     /* A masked DMA store protect sets the CPU's CC to binary 10 (Fig 2-20
      * note '##') WITHOUT taking an interrupt, so it is invisible to
