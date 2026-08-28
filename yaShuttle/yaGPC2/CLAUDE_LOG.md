@@ -2964,3 +2964,41 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   alignment entirely, when `ea & ~1u` would have been sector-safe.  Two bugs were
   conflated as one.  Whatever is decided above, do not reintroduce `0xfffe`.
 - Four pre-existing test failures unchanged throughout.
+
+### [2026-08-28] Target: [problems.md]
+- CORRECTION, AND IT REVERSES A WITHDRAWAL.  I reported ZERO DMA protect violations
+  and on that basis withdrew the "DMA into a protected region" explanation.  THE
+  MEASUREMENT WAS TOO SHORT.  Run to completion, `YAGPC_DMAPROT` reports 7170
+  violations, and 7169 OF THEM ARE IN `#PCVNMMU` `30322..3432a`.  The original theory
+  was right: the SSL's DMA into the staging buffer IS being refused, silently, which
+  is the `wordsTaken` < `wordsOut` shortfall.  Do not trust a violation count from a
+  truncated run -- `max-steps 200000000` reaches nowhere near it.
+- `SPON`/`SPOFF` EVALUATED, AND THEY ARE NOT THE CAUSE HERE.  The semantic guess looks
+  RIGHT -- `FIOMUWPG.asm` brackets its ENTIRE CSECT (`SPOFF` line 77 through `SPON`
+  line 369, immediately before `END`), and that CSECT is a BCE program ending in
+  `FIOMMSCW DC H'0'  MM'S WILL SEND 'MM UTILITY WRITE' SCW'S HERE`, i.e. a DMA target
+  that must not be protected.  40 files use them.  BUT IMPLEMENTING THEM WOULD NOT FIX
+  OUR PROBLEM:
+    Of the 45 SPOFF/SPON-bracketed CSECT instances present in the IPL phases, 42 are
+      ALREADY unprotected in the linker's `storeProtect` map.  `lnk101` derives
+      protection per-CSECT from the CON80 deck classes
+      (`ap101Utils/conlayout.default_protected`), not from assembly pseudo-ops, so the
+      information is already there by another route.
+    The three exceptions -- `FCMPROTD` (ph2, 22 hw), `FIOG9OPG` (ph2, 164 hw) and
+      `FCMINMSC` (ph10, 1 of 4 hw) -- take ZERO DMA violations, so nothing is
+      currently blocked by them.  They are a small open fidelity question, not this bug.
+    And the failing region is not reachable by these pseudo-ops at all: `#PCVNMMU` is
+      a HAL/S COMPOOL (`CVNMMUTI.hal`), so it would be `$POF`/`$PON` territory, not
+      `SPON`/`SPOFF`.
+  So: no request was sent to the ASM101S-port agent.  If they are implemented later it
+  should be for fidelity, not to fix this.
+- `FCMINSST` at `0731a` IS protected in phase 10's map, which looked alarming since it
+  is the `#SST` completion flag the CPU spins on -- but it takes NO violations, so the
+  BCE's store is getting through.  `FCMINSSL.asm` does not use `SPOFF`/`SPON`; it
+  manages its own protection, and `FCMINSSL.asm:1140` names the mechanism:
+  `FCMIZCON DS F   CHECKUM/UNPROTECT/PROTECT ZCON`.
+- WHERE THIS LEAVES THE ROOT CAUSE.  `PHASE02.sym.json`'s `storeProtect` map does NOT
+  cover `#PCVNMMU`, i.e. the link says that region must be UNPROTECTED.  `ipl_fill()`
+  protects every halfword regardless, and the region has no load block to clear it.
+  That blanket is the defect.  `YAGPC_IPL_PROTECT=0` is refuted as the alternative;
+  the `sections` mode is the candidate still under test.
