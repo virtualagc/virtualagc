@@ -1966,3 +1966,39 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - mm_log now timestamps every line.  Every question about this unit has
   turned out to be a question about WHEN, and an untimed log cannot answer
   one; the two-read-commands finding above was invisible without it.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- THE IOP IS NOW PACED BY SIMULATED TIME, one slice per 0.5 us, instead of
+  one slice per CPU instruction.  The rate is derived, not fitted:
+  iopls_next_slice cycles 33 slices so each BCE gets one per cycle, and the
+  AP-101S manual's Part III (BCE POO) 3.4.1 says a BCE samples its MIA
+  buffer "at most once every 16.5 usec".  16.5 / 33 = 0.5 exactly, and
+  16.5 us is already MTO_TICK_US.
+- Each slice is taken with cpu.elapsedTimeUs SET TO THE TIME THAT SLICE
+  FALLS AT, and the CPU's value restored afterwards.  That matters:
+  catching up in slice COUNT alone fixes nothing, because what the bus
+  cares about is WHEN.  Verified -- the outcome is IDENTICAL for pass
+  intervals of 0.16, 0.25, 0.35 and 0.5 us, so it is the back-dating that
+  does the work, not the rate.
+- RESULT, on the same tape and command:
+      old   3 clear-reads stole a real word;  FCMECNT=3, FCMCKERR=ffff;
+            SSL retried three times and halted at FCMSSLEX (SSM FCMWAIT);
+            blocksRead 730 (inflated BY the retries)
+      new   0 clear-reads stole anything;     FCMECNT=0, FCMCKERR=0;
+            SSL exits its phase loop NORMALLY and begins handing off to
+            PASS; blocksRead 321 (no retries needed)
+  The apparent drop 730 -> 321 is not a regression: the old figure was
+  three attempts at a block that never checksummed.  The load now
+  SUCCEEDS.
+- NEXT FRONTIER, and it is new ground: the handoff takes a Program Check
+  at NIA 07067 -- past #@LB14, the end of the phase loop, in the
+  #@LB25/#@LB26 work-area-reprotect-and-PSA region -- and the vector at
+  004c carries a PSW whose NIA is 0a3b, which has not been loaded, so the
+  CPU executes c6c6 fill there.  Was previously unreachable.
+- EASY TO REVERT, two ways: `git revert` this commit (it touches only
+  ap101.c and ap101.h), or set YAGPC_IOP_PER_INSTR=1 at runtime, which
+  reproduces the old behaviour EXACTLY -- verified bit for bit
+  (t=47937627.5, nia=0725c, blocksRead 730, 3 stolen words).
+  YAGPC_IOP_PASS_US=<f> overrides the interval.
+- Suites: the same four fail as before, and test_iop_exec_processors,
+  test_gpcops, test_schedule and test_iop_discretes all still pass.

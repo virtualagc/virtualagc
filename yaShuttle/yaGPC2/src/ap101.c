@@ -57,6 +57,84 @@ static void ap101_timed_unprotect(AP101 *gpc) {
     }
 }
 
+/* ---------------------------------------------------------------------
+ * IOP pacing
+ *
+ * The IOP used to take exactly one slice per CPU instruction.  That is
+ * right on average -- a CPU instruction and an IOP slice happen to run at
+ * comparable rates -- but it is wrong for any instruction that takes much
+ * longer than one, and MVH is the one that matters: FCMINSSL's FCMMOVE
+ * moves 7,654 halfwords in a single instruction, charging about 6.7 ms of
+ * POO time, during which the IOP got ONE slice.
+ *
+ * That cost the SSL a halfword.  It positions BCE 18 mid-gap on purpose --
+ * FCMSSLBS computes its delay as 639 - partial, i.e. (511 - partial) plus
+ * 128, "ONE HALF THE MMU BLOCK GAP IN HALF WORDS" -- so that the one-word
+ * "CLEAR THE MIA BUFFER" #RDLI which follows executes inside the 256-word
+ * inter-block gap, with nothing on the bus, and takes the stale word left
+ * in the MIA buffer.  Frozen through the move, the BCE resumed 6.7 ms late,
+ * the gap had passed, and the clear-read took the next block's first real
+ * word instead.  The load block then landed one halfword out of phase and
+ * failed its checksum.
+ *
+ * So the IOP is paced by SIMULATED TIME.  The rate is not invented:
+ * iopls_next_slice() cycles 33 slices, giving each BCE one slice per
+ * cycle, and the AP-101S manual's Part III (BCE POO) section 3.4.1 says
+ * of a BCE sampling its MIA buffer that "the sampling process occurs at
+ * most once every 16.5 usec".  16.5 / 33 = 0.5 us exactly, and 16.5 us is
+ * already MTO_TICK_US.  A 2 MHz slice rate giving a 16.5 us per-BCE
+ * sampling period is self-consistent, so that is the number used.
+ *
+ * Catching up in slice COUNT alone would not have fixed anything: what the
+ * bus cares about is WHEN.  So each slice is taken with the clock set to
+ * the time that slice actually falls at, and the CPU's own value restored
+ * afterwards -- the IOP sees time advance THROUGH a long instruction
+ * rather than jump to its end.
+ *
+ * Escape hatches, both off by default:
+ *   YAGPC_IOP_PER_INSTR=1   restore the old one-slice-per-instruction model
+ *   YAGPC_IOP_PASS_US=<f>   override the 0.5 us slice interval
+ * ------------------------------------------------------------------- */
+#define IOP_PASS_US_DEFAULT 0.5
+/* A backstop, not a policy: 0.1 s of simulated time in one instruction. */
+#define IOP_MAX_PASSES_PER_INSTR 200000
+
+static double iop_pass_us(void) {
+    static int inited = 0;
+    static double us = IOP_PASS_US_DEFAULT;
+    if (!inited) {
+        const char *e = getenv("YAGPC_IOP_PASS_US");
+        if (e != NULL) {
+            double v = atof(e);
+            if (v > 0.0) us = v;
+        }
+        inited = 1;
+    }
+    return us;
+}
+
+static int iop_per_instruction(void) {
+    static int inited = 0, per = 0;
+    if (!inited) { per = getenv("YAGPC_IOP_PER_INSTR") != NULL; inited = 1; }
+    return per;
+}
+
+static void ap101_step_iop(AP101 *gpc, double startUs) {
+    if (iop_per_instruction()) { iop_exec(&gpc->iop); return; }
+    double now = gpc->cpu.elapsedTimeUs;
+    double passUs = iop_pass_us();
+    if (gpc->iopNextPassUs <= 0.0) gpc->iopNextPassUs = startUs;
+    int n = 0;
+    while (gpc->iopNextPassUs <= now && n < IOP_MAX_PASSES_PER_INSTR) {
+        gpc->cpu.elapsedTimeUs = gpc->iopNextPassUs;   /* the IOP's view */
+        iop_exec(&gpc->iop);
+        gpc->iopNextPassUs += passUs;
+        n++;
+    }
+    gpc->cpu.elapsedTimeUs = now;
+    if (n >= IOP_MAX_PASSES_PER_INSTR) gpc->iopNextPassUs = now;
+}
+
 void ap101_exec1(AP101 *gpc) {
     ap101_timed_unprotect(gpc);
     /* YAGPC_NIAPROBE=<hexaddr> dumps R0-R7 and the SSL's two context-struct
@@ -99,8 +177,9 @@ void ap101_exec1(AP101 *gpc) {
             }
         }
     }
+    double startUs = gpc->cpu.elapsedTimeUs;
     cpu_exec1(&gpc->cpu);
-    iop_exec(&gpc->iop);
+    ap101_step_iop(gpc, startUs);
 }
 
 void ap101_tick(AP101 *gpc) {

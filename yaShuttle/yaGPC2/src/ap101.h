@@ -23,6 +23,9 @@ typedef struct {
     CPU cpu;
     IOP iop;
     MemoryBus ram; /* backs cpu.ram; gpc.ram / gpc.mainStorage aliases below */
+    /* Simulated time at which the IOP takes its next slice.  See
+     * ap101_step_iop() in ap101.c.  Zero means "not started yet". */
+    double iopNextPassUs;
 } AP101;
 
 void ap101_init(AP101 *gpc);
