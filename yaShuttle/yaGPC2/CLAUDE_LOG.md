@@ -1604,3 +1604,40 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   MVH is too slow, our BCE too fast, or the MMU delivering without the
   real inter-block gaps, is measurable: instrument the time between the
   CPU patching the #WAT and the BCE fetching that halfword.
+
+### [2026-08-27] Target: HANDOFF-FCMBOOT.md
+- SSL deadlock localized exactly.  Steady state: CPU writes `#WAT`
+  (FCMMWAT, unconditional terminator) at nia 071bb, then overwrites it with
+  `#BU` at nia 071dd; BCE18 fetches that slot ~12 us later and ping-pongs
+  between the two buffers (72f2..72fe -> 7306, 7306..7312 -> 72f2).  The
+  `#BU` store is guarded by `CHI R7,1` and, critically, sits AFTER
+  `BAL R4,FCMMOVE` in FCMINSSL -- so if FCMMOVE blocks, the `#WAT` is never
+  overwritten.  On the final pass that is what happens: FCMMOVE blocks at
+  072b1 ("WAIT FOR ALTERN. BUF LOAD TO FINISH"), BCE18 reaches the stale
+  `#WAT` 6755 us later and parks at 072ff.  Confirmed by `iop procs`:
+  BCE18 halt=1 busy=0 pc=072ff.
+- The MSC is ALSO parked (halt=1 busy=0 pc=07378): it executed six
+  instructions, hit its own `#WAT` at 07377 at t=18.93 s, and the CPU's
+  last LOAD MSC BUSY (PCO 0x92040000) was t=18928919.7 us.  The MSC park is
+  a consequence, not a cause -- the SSL's steady-state path self-chains via
+  `#BU` and never wakes the MSC again, so once BCE18 hits a `#WAT` there is
+  no recovery path at all.
+- FCMINSST (0x731a) has TWO consumers that both wait on it and both reset
+  it to FCMMONE: the SSL loop at #@LB70/071c2 and FCMMOVE at 072b6.
+  Measured 23 `#SST`s against 28 resets.
+- CORRECTION: the earlier reading "the BCE stops signalling after SST #10"
+  was an artifact of `exec_SST`'s hardcoded `if (n++ < 10)` trace cap, not a
+  fact.  The handshake runs to the very end.  Cap is now settable via
+  YAGPC_SSTTRACE=N (non-numeric = uncapped).
+- NOT a throughput problem: `iop_bce_receive` already drains every available
+  word per slice and yields without blocking, which is the right design.
+  Raising --max-steps from 120M to 600M left blocksRead/wordsOut/wordsTaken
+  byte-identical (280 / 143364 / 116666).
+- New instrumentation: YAGPC_WATCHHW=lo[-hi] (CPU stores into an address
+  window, with NIA and timestamp), YAGPC_BCEPCTRACE=lo[-hi] (YAGPC_IOPTRACE
+  narrowed to one window; the full trace is one line per slice and far too
+  large), YAGPC_PROCDUMP (per-processor halt/busy/PC at end of run),
+  iop_now_us() accessor.
+- PRE-EXISTING, not from this work: test/test_debugger.sh,
+  test_cpu_instr_exec, test_iop_bce_exec and test_iop_msc_exec already fail
+  at fbc7671d8; verified by stashing src/ and re-running.

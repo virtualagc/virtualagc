@@ -1331,6 +1331,7 @@ static void batchrunner_free_watchpoints(BatchRunner *r) {
 static int batchrunner_report_stop(BatchRunner *r) {
     if (!r->hasStopReason) {
         snprintf(r->stopReason, sizeof r->stopReason, "max steps reached (%ld)", r->maxSteps);
+        if (getenv("YAGPC_PROCDUMP")) iop_dump_procs(&r->age.gpc.iop);
         r->hasStopReason = true;
     }
 

@@ -422,6 +422,8 @@ void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce);
  * be left where it is so the BCE re-fetches it next slice.  A transfer
  * that goes too long without a word is error-terminated. */
 bool iop_bce_receive_starting(IOP *iop);
+double iop_now_us(IOP *iop);
+void iop_dump_procs(IOP *iop);
 bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count);
 
 /* An error termination: the BCE stops where it is, its program exception

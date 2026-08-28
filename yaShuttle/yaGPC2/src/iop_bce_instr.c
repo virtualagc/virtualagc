@@ -91,11 +91,23 @@ static void exec_SST(IOP *t, DInstr *v) {
     uint32_t raw = iop_bce_ea(t, df_get(v, 'd'), df_get(v, 'm') != 0);
     uint32_t ea = raw & ~1u;
     if (getenv("YAGPC_SSTTRACE")) {
+        /* Capped at 10 for years, which silently truncated the trace and
+         * made a still-running BCE look like it had stopped signalling.
+         * YAGPC_SSTTRACE=N sets the cap; any non-numeric value means all. */
         static int n = 0;
-        if (n++ < 10)
-            fprintf(stderr, "SST #%d bce=%u raw=%05x ea=%05x bst=%08x\n",
+        static int cap = -2;
+        if (cap == -2) {
+            const char *w = getenv("YAGPC_SSTTRACE");
+            char *end = NULL;
+            long v = (w != NULL) ? strtol(w, &end, 10) : 0;
+            cap = (w != NULL && end != w && *end == '\0' && v > 0)
+                      ? (int)v : -1;
+        }
+        if (cap < 0 || n++ < cap)
+            fprintf(stderr, "SST #%d bce=%u raw=%05x ea=%05x bst=%08x t=%.1f\n",
                     n, (unsigned)t->curPE, raw, ea,
-                    (unsigned)iopls_getBST(&t->ls));
+                    (unsigned)iopls_getBST(&t->ls),
+                    iop_now_us(t));
     }
     iop_s_eaf(t, ea, iopls_getBST(&t->ls));
     iop_incr_nia(t, 1);

@@ -922,7 +922,33 @@ void cpu_shadow_iu_store(CPU *cpu, uint32_t addr) {
     cpu->iuShadowCount++;
 }
 
+/* YAGPC_WATCHHW=<hexaddr> traces every CPU store to that halfword address
+ * (and to the fullword beginning there), with the storing NIA and the
+ * simulated timestamp.  Used to order a CPU-side flag arm against the BCE's
+ * #SST that is supposed to clear it. */
+static void cpu_watch_store(CPU *cpu, uint32_t addr, uint32_t value,
+                            const char *kind) {
+    static int inited = 0;
+    static long lo = -1, hi = -1;
+    if (!inited) {
+        const char *w = getenv("YAGPC_WATCHHW");
+        if (w != NULL) {
+            char *end = NULL;
+            lo = strtol(w, &end, 16);
+            hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16)
+                                              : lo + 1;
+        }
+        inited = 1;
+    }
+    if (lo < 0) return;
+    if ((long)addr < lo || (long)addr > hi) return;
+    fprintf(stderr, "WATCHHW %s addr=%05x val=%08x nia=%05x t=%.1f\n",
+            kind, (unsigned)addr, (unsigned)value,
+            (unsigned)psw_get_nia(&cpu->psw), cpu->elapsedTimeUs);
+}
+
 bool cpu_store_hw(CPU *cpu, uint32_t addr, uint32_t value) {
+    cpu_watch_store(cpu, addr, value, "hw");
     if (!cpu->diagIuStoreDetect) cpu_shadow_iu_store(cpu, addr);
     if (membus_set16(cpu->ram, addr, value, !cpu->storeProtectOverride)) return true;
     cpu->lastProtFaultAddr = addr;
@@ -931,6 +957,7 @@ bool cpu_store_hw(CPU *cpu, uint32_t addr, uint32_t value) {
 }
 
 bool cpu_store_fw(CPU *cpu, uint32_t addr, uint32_t value) {
+    cpu_watch_store(cpu, addr, value, "fw");
     if (!cpu->diagIuStoreDetect) {
         cpu_shadow_iu_store(cpu, addr);
         cpu_shadow_iu_store(cpu, addr + 1);

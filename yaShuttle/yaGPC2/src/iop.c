@@ -779,6 +779,30 @@ void iop_exec_processors(IOP *iop) {
      * this against `gpc --iop-trace` is how they were found.  Off unless
      * the variable is set, so it costs a getenv per slice and nothing
      * else. */
+    /* YAGPC_BCEPCTRACE=lo[-hi] is YAGPC_IOPTRACE narrowed to one address
+     * window.  The full trace is one line per slice, which is far too much
+     * to keep for a multi-second boot; this prints only while a processor
+     * is fetching inside the window under study. */
+    {
+        static int tinited = 0;
+        static long tlo = -1, thi = -1;
+        if (!tinited) {
+            const char *w = getenv("YAGPC_BCEPCTRACE");
+            if (w != NULL) {
+                char *end = NULL;
+                tlo = strtol(w, &end, 16);
+                thi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16)
+                                                   : tlo;
+            }
+            tinited = 1;
+        }
+        if (tlo >= 0 && (long)pc >= tlo && (long)pc <= thi) {
+            fprintf(stderr, "BCEPC %s%d pc=%05x %04x %04x t=%.1f\n",
+                    (page == 0) ? "MSC" : "BCE", page, (unsigned)pc,
+                    (unsigned)hw1, (unsigned)hw2, iop_now_us(iop));
+        }
+    }
+
     if (getenv("YAGPC_IOPTRACE")) {
         char who[8];
         if (page == 0) snprintf(who, sizeof who, "MSC");
@@ -974,6 +998,30 @@ bool iop_bce_receive_starting(IOP *iop) {
     if (bce == NULL) return true;
     uint32_t pc = register_get32(iopls_PC(&iop->ls)) & 0x3ffffu;
     return !(bce->recvActive && bce->recvPC == pc);
+}
+
+/* YAGPC_PROCDUMP prints, at the end of a run, which IOP processors are
+ * enabled, which are in Busy/Wait, and where each PC is parked.  A BCE that
+ * has executed #WAT shows as enabled but NOT busy: that combination is what
+ * a permanent park looks like, and it is otherwise invisible from outside. */
+void iop_dump_procs(IOP *iop) {
+    if (iop == NULL) return;
+    fprintf(stderr, "iop procs: MSC halt=%d busy=%d pc=%05x\n",
+            iop_proc_get(&iop->regHalt, PROC_MSC),
+            iop_proc_get(&iop->regBusyWait, PROC_MSC),
+            (unsigned)(register_get32(iopls_at(&iop->ls, 0, 0, 2)) & 0x3ffffu));
+    for (int i = 1; i <= 24; i++) {
+        int halt = iop_proc_get(&iop->regHalt, i);
+        int busy = iop_proc_get(&iop->regBusyWait, i);
+        if (!halt && !busy) continue;
+        fprintf(stderr, "iop procs: BCE%-2d halt=%d busy=%d pc=%05x\n",
+                i, halt, busy,
+                (unsigned)(register_get32(iopls_at(&iop->ls, i, 0, 2)) & 0x3ffffu));
+    }
+}
+
+double iop_now_us(IOP *iop) {
+    return (iop != NULL && iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
 }
 
 bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
