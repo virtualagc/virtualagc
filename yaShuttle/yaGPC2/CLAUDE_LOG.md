@@ -1813,3 +1813,41 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   was hooked to the max-steps branch alone, so a run ending on a halt or
   wait state -- exactly the one whose processor state matters -- printed
   nothing, which cost several runs.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- #LBR@ FIXED -- the last un-merged member of the BCE @-family.  It took
+  operand + 2*BCE# as the base register instead of FETCHING through it.
+  FCMINSSL settles it because both forms are used on THE SAME TABLE at THE
+  SAME BIAS: FCMBCEBT is `EQU *-36` over `DC A(FCMIBLK1)` x2, and
+      FCMINMMP 07362  fa00 72a8  #LBR@ 72a8
+               07366  f300 0001  #RDLI 1
+      FCMBCMMR 07372  f800 72a8  #BU@  72a8
+  Without the fetch BCE 18's base became 072cc -- the branch-table entry
+  itself -- so the #RDLI wrote its received word over the A(FCMIBLK1) that
+  the #BU@ ten halfwords later was about to read.  Store protection had
+  been refusing that write all along (072cc is below FCMDATA, so the SSL's
+  own unprotect sweep never reaches it), which preserved the entry and hid
+  the bug; unprotecting those four halfwords WITHOUT this fix sends BCE 18
+  to pc=00000.  With the fix the 072cc violations disappear entirely.
+  test_iop_bce_exec is 73499/74699 with AND without it -- measured both
+  ways -- so the fixtures cannot arbitrate, exactly as already recorded for
+  #BU@.  The flight software is the evidence.
+- THE SECOND STALL IS A LOAD-BLOCK CHECKSUM FAILURE, and the flight
+  software is behaving correctly.  At the halt:
+      cpu: nia=0725c   (FCMSSLEX 0725a, i.e. `SSM FCMWAIT`)
+      R7=6   R5=39e5 = 14821 = the sector-8 block's 39e6 length minus one
+      FCMECNT  07332 = 0003   three checksum errors, the retry limit
+      FCMCKERR 07333 = ffff   checksum error indicator set
+  FCMSSLCK compares the computed checksum, counts failures in FCMECNT, and
+  on the third gives up: it saves FCMSSLEX's address in TPSASSMA and
+  executes `SSM FCMWAIT`, putting the GPC in the WAIT STATE.  That is why
+  both IOP processors are parked -- the CPU stopped first, deliberately.
+  So the 730-block plateau is not a hang: it is a detected bad load.
+- NEXT: the failing block is sector 8, base 40000, length 14822 (descriptor
+  8000/8680/39e6), the one big enough to need the two-buffer sequential
+  path.  Whether the fault is our tape data, FCMMOVE's two-part move, or
+  the checksum loop's own `AH@#`/`CH@#` addressing is not yet determined.
+- YAGPC_PROCDUMP now also prints the CPU's NIA and R0-R7.  A parked BCE is
+  only half a deadlock and the CPU half is what identified this one.
+  YAGPC_MEMDUMP moved out of the max-steps branch for the same reason
+  PROCDUMP was: this run ends on a stop reason, so it printed nothing.

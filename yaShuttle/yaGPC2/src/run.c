@@ -1332,24 +1332,35 @@ static int batchrunner_report_stop(BatchRunner *r) {
     /* Every stop reason, not only max-steps: a run that ends on a halt or
      * a wait state is precisely the one whose processor state matters, and
      * hooking this to the max-steps branch alone hid it. */
-    if (getenv("YAGPC_PROCDUMP")) iop_dump_procs(&r->age.gpc.iop);
+    if (getenv("YAGPC_PROCDUMP")) {
+        /* The CPU half matters as much as the IOP half: a parked BCE is
+         * only half a deadlock, and which of them is waiting on the other
+         * is decided by where the CPU stopped. */
+        CPU *c = &r->age.gpc.cpu;
+        fprintf(stderr, "cpu: nia=%05x t=%.1f", (unsigned)psw_get_nia(&c->psw),
+                c->elapsedTimeUs);
+        for (int i = 0; i < 8; i++)
+            fprintf(stderr, " R%d=%08x", i, (unsigned)register_get32(cpu_r(c, i)));
+        fprintf(stderr, "\n");
+        iop_dump_procs(&r->age.gpc.iop);
+    }
+        /* YAGPC_MEMDUMP=lo[-hi] prints main storage over that halfword
+     * range at the end of a run.  The flight software builds its BCE
+     * programs at run time, so the only way to see what a given
+     * address actually holds is to look after the fact. */
+    {
+        const char *w = getenv("YAGPC_MEMDUMP");
+        if (w != NULL) {
+            char *end = NULL;
+            long lo = strtol(w, &end, 16);
+            long hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16)
+                                                   : lo + 15;
+            for (long a = lo; a <= hi; a++)
+                fprintf(stderr, "MEM %05x = %04x\n", (unsigned)a,
+                        (unsigned)membus_get16(r->age.gpc.cpu.ram, (uint32_t)a));
+        }
     if (!r->hasStopReason) {
         snprintf(r->stopReason, sizeof r->stopReason, "max steps reached (%ld)", r->maxSteps);
-        /* YAGPC_MEMDUMP=lo[-hi] prints main storage over that halfword
-         * range at the end of a run.  The flight software builds its BCE
-         * programs at run time, so the only way to see what a given
-         * address actually holds is to look after the fact. */
-        {
-            const char *w = getenv("YAGPC_MEMDUMP");
-            if (w != NULL) {
-                char *end = NULL;
-                long lo = strtol(w, &end, 16);
-                long hi = (end != NULL && *end == '-') ? strtol(end + 1, NULL, 16)
-                                                       : lo + 15;
-                for (long a = lo; a <= hi; a++)
-                    fprintf(stderr, "MEM %05x = %04x\n", (unsigned)a,
-                            (unsigned)membus_get16(r->age.gpc.cpu.ram, (uint32_t)a));
-            }
         }
         r->hasStopReason = true;
     }

@@ -119,7 +119,36 @@ static void exec_LBR(IOP *t, DInstr *v) {
 }
 
 static void exec_LBR_at(IOP *t, DInstr *v) {
-    register_set32(iopls_BASE(&t->ls), df_get(v, 'a') + 2u * (uint32_t)t->curPE);
+    /* The @ family is uniform: operand + 2*BCE# addresses a per-bus table
+     * ENTRY, and the entry holds the value -- see exec_BU_at, which fetches
+     * through exactly the same bias.  #LBR@ was the one member that did not
+     * fetch, taking the entry's ADDRESS as the base register instead.
+     *
+     * FCMINSSL settles it, because both forms are applied to THE SAME TABLE
+     * at THE SAME BIAS.  FCMBCEBT is `EQU *-36` over
+     *
+     *      DC A(FCMIBLK1)      BUS 18
+     *      DC A(FCMIBLK1)      BUS 19
+     *
+     * and the two fixed BCE programs use it thus:
+     *
+     *      FCMINMMP  07362  fa00 72a8   #LBR@ 72a8
+     *                07366  f300 0001   #RDLI 1
+     *      FCMBCMMR  07372  f800 72a8   #BU@  72a8
+     *
+     * If #BU@ dereferences and #LBR@ does not, then BCE 18's base becomes
+     * 072cc -- the branch-table entry itself -- and the #RDLI two halfwords
+     * later writes its received word straight over the A(FCMIBLK1) that the
+     * #BU@ at 07372 is about to read.  A table cannot be both the operand
+     * and the target of the transfer it directs.
+     *
+     * Observed, and the reason this surfaced at all: that write is refused
+     * by store protection (072cc lies below FCMDATA, so the SSL's own
+     * unprotect sweep never reaches it), which quietly preserved the entry
+     * and hid the defect.  Unprotecting those four halfwords without this
+     * fix lets the write land, and BCE 18 then branches to 00000. */
+    uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
+    register_set32(iopls_BASE(&t->ls), iop_g_eaf(t, addr) & 0x3ffffu);
     iop_incr_nia(t, 2);
 }
 
