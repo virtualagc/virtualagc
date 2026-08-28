@@ -1488,3 +1488,34 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   still expects an alternate-buffer load.  THAT is the next thing to
   instrument -- R7 at the point the terminator is chosen -- not the mask,
   not the tape, not the phase build.
+
+### [2026-08-27] Target: [problems.md]
+- CLEAN BUS-LEVEL A/B, AND IT INVERTS MY EARLIER REPORT.  MEDS restarted
+  for each, one GPC only, counted with dk5.py over 45 s:
+      A  original tape + BOOT-stamped.fcm : POLL 86 TIME_FILL 81
+                                            FORMAT_FILL 8  DISPLAY_FILL  7
+      B  new tape + BOOT-full.fcm         : POLL 86 TIME_FILL 81
+                                            FORMAT_FILL 8  DISPLAY_FILL 83
+      reference (2026-08-25)              : POLL 87 TIME_FILL 88
+                                            FORMAT_FILL 7  DISPLAY_FILL 87
+  USER CONFIRMED VISUALLY: "B rendered screens, A did not."  So the
+  REBUILT PHASE 2 PLUS THE AP-101S FIXES RENDER AT ESSENTIALLY REFERENCE
+  RATE, and the original tape is now the one that does not.
+- MY EARLIER "B GIVES 0 DISPLAY_FILL" WAS CONTAMINATED.  Five stray
+  yaGPC2 processes of mine from previous runs were live on the multicast
+  bus during that measurement.  I noticed the risk, wrote it down, and
+  reported the number anyway.  Kill every leftover and verify by PID
+  before any bus measurement -- pkill -f cannot be used here because the
+  shell's own command line contains the target text, which killed the
+  shell (exit 144) twice; capture $! and kill by PID.
+- ALSO DISPROVEN, and it was mine: "the SSL deadlock starves the display".
+  Both tapes give IDENTICAL --deu-model counts at both step counts (1066
+  at 40M, 1133 at 150M), including the tape where the SSL never runs.  And
+  --deu-model cannot answer bus questions at all -- trap 7 records it
+  seeing 518 fills while the wire saw none.  Four long runs spent on an
+  instrument that could not discriminate.
+- ONE VARIABLE REMAINS between the user's clock-only run and my B run:
+  theirs used --discretes with discretePanel.py, mine used yaGPC2's
+  built-in discrete defaults.  Trap 12 is exactly this class -- a panel
+  publishing 0 for register B bits 6-7 zeroes the DEU_ID field and stops
+  GPCIPL choosing a display bus.  That is the thing to check next.
