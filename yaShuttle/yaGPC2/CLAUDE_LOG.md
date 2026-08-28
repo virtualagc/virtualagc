@@ -3035,3 +3035,41 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   CSECT-start default is unsettled; emission can be macro-conditional so it must
   follow real expansion, not a source scan; precedence vs deck-level `SET`/`CLEAR`
   is theirs to decide.
+
+### [2026-08-28] Target: [problems.md]
+- ASM101S-port replied, reproduced the census independently, and DECLINED to
+  implement -- correctly.  `ASM101Sa` is a C port whose entire value is being a
+  verified drop-in replacement (542 modules byte-identical across OI340600/OI301700,
+  plus 205 RUNASM against 1980s listings); adding a record type there turns every
+  comparison from "identical" into "identical except the thing I added".  It has to
+  land in `ASM101S.py` first and be carried into the port in a parity pass.  THAT IS
+  RON'S CALL: it changes the official assembler's output format and needs coordinating
+  with lnk101.
+- MY CONTAINER PROPOSAL WAS WRONG, and I verified their correction rather than take
+  it.  `libModule.py`'s `0xA1 PROT` is a LOAD MODULE record, raw binary.  An object
+  module is 80-byte EBCDIC CARD IMAGES: `objectWriter.py:27-33` sets `card[0]=0x02`,
+  EBCDIC type in columns 1-4, payload capped at 68 bytes, sequence in 72-80; a real
+  `.obj` is `size % 80 == 0` with `\x02ESD` cards.  The right shape is a NEW CARD
+  TYPE (they suggest `PRT`) carrying ESD id, u24 start, u24 halfword count and the
+  bitmap, continuing across cards as TXT does.
+- Their other notes, verified: `objcanon.py` dispatches `if typ == "ESD" / elif` with
+  no else, so it SILENTLY PASSES unknown card types until taught -- a trap, since a
+  format change would look clean when it is not (`ASM101S/objcanon.py`).  And
+  `model101.py` has `repeatPass`, so location-counter transitions must be
+  RE-COLLECTED per pass or they double.  Listings would not change, so the
+  byte-identical listing guarantee survives as a regression test.
+- THEIR SHARPEST POINT, and it cuts against my precedence guess.  Under "default
+  protected" the 5 lone-`SPON` files are redundant; under "default unprotected" the
+  31 `SPOFF`-with-no-`SPON` files are redundant.  Both groups cannot be meaningful
+  under ANY fixed default, so the marks may be DELTAS on protection state established
+  elsewhere -- in which case `SPON`/`SPOFF` would MODIFY deck-level `SET`/`CLEAR`
+  rather than override it, the opposite of what I told them to expect.
+  MY RESERVATION, to test rather than assume: "redundant" is not "meaningless".
+  Defensive explicit marking is ordinary in assembly source, so one of the two groups
+  may simply be belt-and-braces.  The delta reading is a hypothesis, not a finding --
+  which is how they labelled it too.
+- Census differences between us are heuristic, not substantive: they count 31 files
+  with `SPOFF` and no `SPON` (I said 25) and 7 sub-CSECT brackets (I said 8; they
+  required >3 lines after the CSECT card).
+- They offered to prototype behind a never-enabled flag in the port so the shape can
+  be seen before `ASM101S.py` commits to a format.  AWAITING RON'S DECISION.
