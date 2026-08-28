@@ -1851,3 +1851,43 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   only half a deadlock and the CPU half is what identified this one.
   YAGPC_MEMDUMP moved out of the max-steps branch for the same reason
   PROCDUMP was: this run ends on a stop reason, so it printed nothing.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- REAL BUG FIXED IN OUR TOOLING: patch_ssl_zcon.py patched only FCMB1ZCN.
+  There are TWO Z-CONs -- `FCMB1ZCN DC Z(,FIOMUWB2,0)` and
+  `FCMB2ZCN DC Z(,FIOMUWB2+8192,0)` -- because the 16K buffer is used as
+  two 8K halves and FCMMOVE moves each with its own MVH.  With FIOMUWB2
+  unresolved, FCMB2ZCN held A000/0000, which MVH's R2 arm resolves to
+  02000, so the SECOND move sourced 7,654 halfwords of sector-0 rubbish.
+  Measured before the fix: the destination matched the tape in exactly its
+  first 7,168 halfwords -- the primary half -- and was zero after.
+      MVH dest=40000 src=3032a count=7168 ok
+      MVH dest=41c00 src=02000 count=7654 ok     <- wrong source
+  After patching both (FCMB2ZCN A000/0000 -> A32A/0006 = 3232a) the moves
+  read src=3232a and the sector-8 block at 40000 passes its checksum.  The
+  SSL advances to the next block (R7 6 -> 5).
+- NEXT DEFECT, and it is ours: the following block (0x439e6, len 3dc6) is
+  copied to memory PERFECTLY -- 15814/15814 against the tape -- but SHIFTED
+  BY ONE HALFWORD.  The tape block genuinely begins at linear halfword
+  407552 (512-aligned) with stream[407552]=e9f3, and at that origin its
+  checksum closes exactly: sum(first 15812)=a8cd, pad=0000, slot=a8cd,
+  VALID.  Memory holds stream[407553...], i.e. the block minus its first
+  word.  All the counts are right (1 + 7680 + 7680 + 454 = 15814, and the
+  two MVHs 7680 + 8134 = 15814); only the phase is wrong.
+- CAUSE, not yet fixed: the SSL deliberately issues a 1-word #RDLI to
+  "CLEAR THE MIA BUFFER" (SHW FCMCLRSW) before each bulk read, expecting to
+  discard a STALE word left latched in the adapter.  mia_get_data prefers a
+  LIVE word over the latch ("a word actually on the bus OVERWRITES the
+  adapter's buffer" -- a deliberate earlier fix, with its own regression
+  story in the comment).  So whether that clear-read discards rubbish or
+  eats the first real word is a RACE, and mmumodel makes it worse by
+  starting the burst with ZERO latency: queue_words_paced sets
+  burstStartUs = mm_now() and slot 0 is due immediately, so the first word
+  of a read is on the bus the instant the command is processed.  Real
+  hardware has seek/rotational delay, which is what gives the clear-read
+  its window.  Block 1 wins the race (takes the latch), block 2 loses it.
+  DO NOT invent a latency value -- find the real one first.
+- New: YAGPC_MVHTRACE reports each MOVE HALFWORD with resolved source,
+  destination, count and whether it completed.  A move that stops early on
+  a store-protect violation leaves R1's count intact by design, so from
+  outside it is indistinguishable from one that never ran.

@@ -1,12 +1,24 @@
 #!/usr/bin/env python3
-"""Patch FCMB1ZCN, the SSL's temp-buffer Z-CON, into a mass-memory volume.
+"""Patch FCMB1ZCN and FCMB2ZCN, the SSL's temp-buffer Z-CONs, into a volume.
 
 EXPERIMENTAL, AND A WORKAROUND FOR A BUILD DEFECT -- not a fix.
 
 FCMINSSL.asm declares its 16K MM I/O buffer as
 
-    FCMBFZCN DS 0F                 SOURCE ADDRESSES Z-CON ARRAY
-    FCMB1ZCN DC Z(,FIOMUWB2,0)     BUFFER 1 ADDRESS Z-CON
+    FCMBFZCN DS 0F                      SOURCE ADDRESSES Z-CON ARRAY
+    FCMB1ZCN DC Z(,FIOMUWB2,0)          BUFFER 1 ADDRESS Z-CON
+    FCMB2ZCN DC Z(,FIOMUWB2+8192,0)     BUFFER 2 ADDRESS Z-CON
+
+There are TWO of them, and patching only the first is not enough.  The 16K
+buffer is used as two 8K halves: FCMMOVE moves the primary half with one MVH
+and, on the sequential path, the alternate half with a second.  With only
+FCMB1ZCN patched, the second MVH sourced from the UNRESOLVED FCMB2ZCN --
+FIOMUWB2 = 0, so FIOMUWB2+8192 encodes as A000/0000, which MVH's R2 arm
+resolves to 02000 -- and moved 7,654 halfwords of sector-0 rubbish into the
+destination.  The load block then failed its checksum, and FCMINSSL, having
+failed three times, executed `SSM FCMWAIT` and stopped the GPC.  Measured:
+the destination matched the tape in exactly its first 7,168 halfwords (the
+primary half) and was zero after.
 
 and our IPL link leaves FIOMUWB2 UNDEFINED (it is the only undefined symbol
 in IPL.map), so the Z-CON resolves to zero.  The SSL then builds its buffer
@@ -90,17 +102,25 @@ def main():
     if lb is None:
         sys.exit("could not find the SSL load block by its checksum tail")
 
-    off = lb + (a.zcon - a.lb_addr)
-    hw0 = 0x8000 | (a.addr & 0x7fff)
-    hw1 = a.addr >> 15
-    print("  FIOMUWB2 -> %#07x  (sector %d, offset %#06x)" % (a.addr, hw1, a.addr & 0x7fff))
-    print("  FCMB1ZCN %#07x : %04X %04X -> %04X %04X"
-          % (a.zcon, get(off), get(off + 1), hw0, hw1))
+    print("  FIOMUWB2 -> %#07x  (sector %d, offset %#06x)"
+          % (a.addr, a.addr >> 15, a.addr & 0x7fff))
+    # Both halves of the 16K buffer.  FCMB2ZCN is the fullword after
+    # FCMB1ZCN, and addresses FIOMUWB2 + 8192.
+    writes = []
+    for i, (name, addr) in enumerate((("FCMB1ZCN", a.addr),
+                                      ("FCMB2ZCN", a.addr + 8192))):
+        off = lb + (a.zcon + 2 * i - a.lb_addr)
+        hw0 = 0x8000 | (addr & 0x7fff)
+        hw1 = addr >> 15
+        print("  %s %#07x : %04X %04X -> %04X %04X"
+              % (name, a.zcon + 2 * i, get(off), get(off + 1), hw0, hw1))
+        writes.append((off, hw0, hw1))
     if a.dry_run:
         print("  (dry run, nothing written)")
         return
-    put(off, hw0)
-    put(off + 1, hw1)
+    for off, hw0, hw1 in writes:
+        put(off, hw0)
+        put(off + 1, hw1)
     tail = sum(get(lb + i) for i in range(content)) & 0xffff
     print("  load-block checksum tail: %04X -> %04X" % (get(lb + content + 1), tail))
     put(lb + content, 0)

@@ -1709,13 +1709,27 @@ static void exec_MVH(CPU *t, DInstr *v) {
             &t->regFiles[psw_get_reg_set(&t->psw)], (int)df_get(v, 'x'));
         destAddr = (dse << 15) | (destAddr & 0x7fff);
     }
+    /* YAGPC_MVHTRACE reports each MOVE HALFWORD with its resolved source,
+     * destination and count, and says whether it ran to completion.  A move
+     * that stops early on a store-protect violation leaves R1's count
+     * intact by design, so from outside it is indistinguishable from one
+     * that never started. */
+    uint32_t mvhCount = count, mvhDest = destAddr, mvhSrc = srcAddr;
+    bool mvhDone = true;
     while (count > 0) {
         count--;
         uint32_t hw = membus_get16(t->ram, srcAddr + count);
         /* A violation terminates the instruction (Forced ENDOP), so R1
          * is not updated either. */
-        if (!cpu_store_hw(t, destAddr + count, hw)) return;
+        if (!cpu_store_hw(t, destAddr + count, hw)) { mvhDone = false; break; }
     }
+    if (getenv("YAGPC_MVHTRACE"))
+        fprintf(stderr, "MVH dest=%05x src=%05x count=%u %s left=%u "
+                        "nia=%05x t=%.1f\n",
+                (unsigned)mvhDest, (unsigned)mvhSrc, (unsigned)mvhCount,
+                mvhDone ? "ok" : "PROTFAULT", (unsigned)count,
+                (unsigned)psw_get_nia(&t->psw), t->elapsedTimeUs);
+    if (!mvhDone) return;
     /* Only the COUNT is consumed.  The POO's programming notes for MOVE
      * HALFWORD say "the count in R1 is modified [to] the number of
      * halfwords remaining to be moved", and that the instruction "will
