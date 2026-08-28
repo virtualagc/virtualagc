@@ -3142,3 +3142,29 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   `off` with suppression `on` is the configuration whose output would differ most if
   protect state leaked through a path ignoring the suppression; running it with
   `--protect-default=on` would be weaker for the same cost.
+
+### [2026-08-28] Target: [problems.md]
+- CONFOUND IN MY OWN CLUSTERING ARGUMENT, caught by ASM101S-port and confirmed: the
+  BCE-opcode evidence and the name-prefix evidence ARE NOT INDEPENDENT.  72% of
+  BCE-opcode files are FIO, so the prefix table largely RESTATED the opcode table
+  instead of corroborating it, and I presented them as two sources.  The test that
+  separates them is to hold the prefix constant.
+- STRATIFIED WITHIN FIO, and the effect survives.  Our two counts bracket it:
+                                  mine            theirs
+      BCE files, marked           17/39  43.6%    20/42  48%
+      non-BCE files, marked       23/510  4.5%    20/507  3.9%
+      FIO WITH BCE, marked        17/28  60.7%    19/30  63%
+      FIO WITHOUT BCE, marked      9/86  10.5%     7/84   8.3%
+      stratified ratio            5.8x            7.6x
+  The divergence is entirely the opcode heuristic -- fixed token list after
+  stripping (mine) vs `startswith` on the opcode field (theirs), so `#BU@` and family
+  land differently.  QUOTE THE RANGE, not either number: that two heuristics both
+  land well above 1 with the family fixed is itself part of the evidence, and 5.8x is
+  the conservative end.
+- ASM101S-port has withdrawn the delta hypothesis as well.  Both of our global-scheme
+  readings are now withdrawn in favour of Ron's local-worries reading.
+- FOR THE DESIGN NOTE: state the non-reconciliation as a DECISION with its reason
+  attached, not as a gap.  "The assembler records these and reconciles nothing"
+  reads as an omission unless the reason is next to it -- the source contains no
+  answer to reconcile toward, so inventing one would have the assembler assert
+  something nobody can source.
