@@ -1519,3 +1519,25 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   built-in discrete defaults.  Trap 12 is exactly this class -- a panel
   publishing 0 for register B bits 6-7 zeroes the DEU_ID field and stops
   GPCIPL choosing a display bus.  That is the thing to check next.
+
+### [2026-08-27] Target: [problems.md]
+- THE DISPLAY HAS A ~30-SECOND WARM-UP, and that explains every confused
+  observation in this thread.  Three consecutive 30 s dk5.py windows on one
+  continuous run (new tape, --bce-network, --real-time --rt-factor 1):
+      window 1 (0-30s)   POLL 35  TIME_FILL 36  FORMAT_FILL 0  DISPLAY_FILL  0
+      window 2 (30-60s)  POLL 64  TIME_FILL 59  FORMAT_FILL 8  DISPLAY_FILL 61
+      window 3 (60-90s)  POLL 58  TIME_FILL 59  FORMAT_FILL 0  DISPLAY_FILL 59
+  So the first half-minute is CLOCK ONLY by design, then the formats go out
+  and the screens draw and keep drawing.  User confirmed: "I see screens."
+  Consistent with Table 2-2's 1m25s STBY-to-RUN-talkback -- the load takes
+  real time at rt-factor 1.
+- WHICH RETRACTS "B RENDERS, A DOES NOT".  Both of those samples started 8 s
+  after launch and ran 45 s, so they straddled the ramp at different points;
+  A's DISPLAY_FILL 7 is what the START of the ramp looks like, not a dead
+  display.  I compared two runs at different points on a rising curve and
+  reported it as a difference between the tapes.  A single-window count is
+  meaningless here: SAMPLE THE TIME COURSE, or wait out the warm-up before
+  counting anything.
+- AND IT PROBABLY EXPLAINS THE USER'S EARLIER CLOCK-ONLY REPORTS TOO -- both
+  times the observation was made inside that first window.  The panel and
+  --discretes (trap 12) are no longer implicated by anything measured.
