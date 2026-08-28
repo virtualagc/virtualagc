@@ -2858,3 +2858,33 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   buffer was never touched during IPL, which is evidence against our model of how the
   SSL moves blocks -- and it means `YAGPC_UNPROTECT=30322-3432a` is compensating for
   something else entirely.  That, not a load block, is what to chase next.
+
+### [2026-08-28] Target: [problems.md]
+- ARE THERE MORE REGIONS LIKE `FIOMUWB2`?  MEASURED, AND NO -- it is a population of
+  one.  Method, which is the reusable part: take every section the link ALLOCATES
+  (`PHASE0n.sym.json` `sections`), subtract those carrying a data extent in
+  `PHASE0n.lib`, then subtract those covered by any load block stamped into the IPL
+  boot image.  With NO size threshold at all, across phases 10, 2, 13 and 3, the
+  answer is three rows and they are the SAME region: `#PCVNMMU` `30322..3432a`,
+  once per referencing phase (10 and 3 via `DEUIPLCP>`, 2 via `CVNMMUTI`).
+- CORRECTION TO MY OWN FRAMING.  "DMAs into regions no load block covers" was a
+  HYPOTHESIS I never observed.  `YAGPC_DMAPROT` reports ZERO protection violations
+  and `YAGPC_INTTRACE` zero interrupts on these runs.  The only evidence was that
+  `YAGPC_UNPROTECT` changed behaviour, which is much weaker than it looked.
+- `YAGPC_PROTSET=3032a-3032b` shows the buffer's protect bit being TOGGLED during the
+  run -- 1,0,1,0 -- and the two halfwords go out of step with each other.  So
+  `FCMUPROT`/`FCMRPROT` ARE bracketing it dynamically; it does not sit statically
+  protected.  That reframes the hang: not "nothing unprotects this buffer" but
+  "the software brackets it and our blanket `YAGPC_UNPROTECT` cuts across the
+  bracketing".  It also explains the thing that never made sense, that a PROTECTION
+  BIT appeared to be timing sensitive.
+- The SSL genuinely does stage through the buffer: `FCMINSSL.asm:526-534` loads
+  `FCMBFZCN` into `FCMLBRTB` as the BCE's two DMA targets, and `FCMMOVE` (~1016-1042)
+  `MVH`s from the primary buffer, then from the alternate when `TFCMSEQF` says the
+  load block spans both.
+- `latest.unlinkSSW_(PostIPL)` IS AN UNLINK OF THE DASS REPORTS -- a reconstruction of
+  the LOADED IMAGE, not a live RAM snapshot.  Runtime residue never appears in it, so
+  it CANNOT testify about what execution wrote.  I used it that way for one step
+  yesterday and the conclusion was void.  In it `C6C6` is REAL CONTENT, not absent
+  coverage: where our own build emits `C6C6` the dump agrees 100% (`09ed8`, `10000`,
+  `1f05e`).
