@@ -2246,3 +2246,42 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   leaves the PSA protected at all, given AP-101S 2.5.3.3 says only that
   memory is written "with memory store protected" and GPCIPL's own first
   act (nia=00162, t=2000764) is to unprotect 00000..00104.
+
+### [2026-08-28] Target: problems.md, HANDOFF-FCMBOOT.md
+- EXPERIMENT: removing the blanket PSA protect from ipl_fill (leaving
+  00000..00139 unprotected at IPL) changes NOTHING -- byte-for-byte the
+  same halt, nia=00a3b, blocksRead 321.  The reason is structural, and I
+  should have said it before running: GPCIPL's own sweep at nia=30363
+  re-protects 00000..07f02 at t=4162864, so whatever IPL leaves behind is
+  irrelevant by the time the SSL runs.  The IPL protection state is not
+  the lever.  Experiment reverted.
+- The UNPRT TABLE READ OUT OF MEMORY confirms everything, and it is
+  hand-tuned rather than mechanical:
+      @05131 start=00098 count=4     -> 00098..0009b
+      @05133 start=000a0 count=154   -> 000a0..00139
+  It steps straight over 0009c..0009f.  And the stray 0x87 is a REAL entry,
+  @0512b start=00087 count=1, explained verbatim in PSA.asm:
+      *  ---------- EX1O+7 (USED BY HARDWARE) -----------
+      *  LOCATION 87 IS USED BY UCODE-MUST BE 0 & UNPRT
+  A table precise to a single halfword for a documented microcode
+  requirement is not one that omits 0009c by accident.  OI301700 and
+  OI340600 place the $POF identically, so it is not a release difference.
+- ALSO RULED OUT: masking.  SSLCHECK does `SSM 7  MASK ALL INTRPS,REGSET=0`
+  immediately before `B$ SSLSTART`, so the SSL runs fully masked -- but
+  Figure 2-20 gives the Store Protect Violation (code 0007, row 33) a mask
+  column of "--", i.e. NO MASK BIT.  Maskable program checks carry one:
+  Fixed Point Overflow 20, FP Underflow 22, Significance 23, Instruction
+  Monitor 34.  So store protect is unmaskable and our unconditional
+  handling is right.
+- REAL GAP FOUND ALONG THE WAY, unrelated to this bug: we never consult a
+  mask for program checks at all.  cpu_check_interrupts honours
+  psw_get_mach_check_mask for machine checks and intMask bit 0x20 for the
+  instruction monitor, but `if (cpu->intPending.programCheck)` is taken
+  unconditionally -- so Fixed Point Overflow, Floating Point Underflow and
+  Significance are delivered even when their mask bits (20, 22, 23) say
+  they should be ignored.  POO 2.5.2.3, already quoted in that function,
+  says masked machine check AND PROGRAM interrupts do not stay pending.
+  Nothing in this boot depends on it; worth fixing on its own merits.
+- So every candidate is now exonerated -- protection state, system id,
+  masking, IPL fill, MMU write semantics -- and FCMINSSL still stores to a
+  location its own loader deliberately protected.
