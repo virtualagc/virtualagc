@@ -2336,3 +2336,43 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   recovered source" idea: the convention is unambiguous and holds
   everywhere else, so a misplacement would have to be a transcription
   error on that one line rather than a systematic misreading.
+
+### [2026-08-28] Target: HANDOFF-FCMBOOT.md, problems.md
+- SECTOR QUESTION CLOSED, our reading is right.  psw_get_nia applies the
+  BSR only when bit 0 of the 16-bit IC is set, and the manual says exactly
+  that: "When the high-order bit of a 16-bit branch address is a 1, a
+  4-bit Branch Sector Register (BSR-PSW bits 24 through 27) is selected to
+  replace the high-order bit.  When the high-order bit is a 0, an implied
+  BSR containing 0000 is selected."  0a07 has bit 0 clear, so it is
+  sector 0 and the BSR never enters into it.
+- ROOT CAUSE OF THE HANDOFF FAILURE FOUND, and it is a MISSING MM-BUILD
+  STAMP, not an emulator defect.  The symbols settle it:
+      EX4N  0009c    Special Interrupt NEW PSW  == TPSASINP
+      EX4   00a07    GPCIPL's EX4 interrupt handler
+      PCH   00a3b    GPCIPL's Program Check handler
+  TPSASINP holds `Y(EX4)` -- GPCIPL's own EX4 handler address, exactly what
+  the `PSA EX4` macro emits -- NOT a PASS bootstrap address.  FCMINSSL
+  reads it expecting the latter ("GET THE PASS BOOTSTRAP ADDRESS FROM THE
+  SPECIAL INTERRUPT PSW") and then zeroes it, which is the behaviour of a
+  value someone else stamped in.  Our IPL build never stamps it, so the SSL
+  jumps to 0a07 -- and the phase-2 load has meanwhile written ZEROS there:
+      WATCHHW IOP-write addr=00a07 val=e9f3 pe=18 t=2465804.0   GPCIPL code
+      WATCHHW IOP-write addr=00a07 val=0000 pe=18 t=19042438.0  PASS load
+  The CPU then walks 44 halfwords of 0000 (never-taken branches) into the
+  c6c6 at 0a33.
+- AND IT EXPLAINS THE EARLIER CRASH: PCH = 0a3b is GPCIPL's Program Check
+  handler, which is why the 004c vector pointed there, and why PASS's load
+  overwriting it turned any program check in the handoff window fatal.
+  Two puzzles, one cause.
+- CANDIDATE VALUE: PHASE02.lib's own entryAddress is 0x3500 bytes = hw
+  01a80.  That is the obvious thing to stamp into TPSASINP, but NOT YET
+  VERIFIED -- the MMB may derive the bootstrap address differently, and I
+  have not found the code or card that does the stamping.
+- SAME CLASS AS THE OTHER TWO BUILD GAPS: FIOMUWB2's unresolved Z-CONs and
+  the unstamped IPL phase table.  Our toolchain reproduces the assembly and
+  link but not everything the ground Mass Memory Build wrote into the
+  image.
+- STILL SEPARATE AND STILL OPEN: 0009c's protection.  Stamping TPSASINP
+  would not help by itself, because the SSL still executes
+  `STH R0,TPSASINP` to zero the slot afterwards, and that store faults.
+  Both fixes are needed.
