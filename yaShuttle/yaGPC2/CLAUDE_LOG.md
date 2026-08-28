@@ -3231,3 +3231,34 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   should be a NO-OP TODAY (with no PROT cards both derive from the same tiers), which
   makes it verifiable now by rebuilding the tape and diffing, and it would then carry
   real data automatically once the assembler lands.
+
+### [2026-08-28] Target: [problems.md]
+- THE `mmbstamp` CHANGE IS NOT A NO-OP.  I predicted it would be and was wrong.
+  Switching `protection_lookup()` to read `sym["storeProtect"]["ranges"]` (keeping
+  section coverage for the None case, swapping only the flag source) changes the tape
+  from 2500 to 2514 blocks.  REVERTED; the tape rebuilds byte-identical to before.
+- WHY, and it is not the assembler: THERE ARE NO `PROT` CARDS YET.  The disagreement
+  is between TWO INDEPENDENT IMPLEMENTATIONS OF "WHAT THE DECK'S SET/CLEAR SAYS" --
+  `mmbstamp`'s `deck_protection()` (436 entries for phase 2) versus `lnk101`'s
+  `placement.protected` as carried into `storeProtect`.  110 sections and 11947
+  halfwords differ, IN BOTH DIRECTIONS:
+      FCMINSSL  06fbc 934 hw   old protected -> new UNPROTECTED
+      FCMSSLPT  07c00 768 hw   old protected -> new UNPROTECTED
+      FCMLINIT  047e0 576 hw   old protected -> new UNPROTECTED
+      #PCDTANN  48010 645 hw   old unprotected -> new PROTECTED
+      #PCV2LIN  033aa 526 hw   old unprotected -> new PROTECTED
+  The `#P*` flips are the class-default prefix (`#P` is in `_UNPROT_PREFIXES`) being
+  overridden by a deck mark on one side and not the other.
+- WHY IT WOULD PROBABLY HAVE BROKEN THE BOOT: `FCMINSSL`, `FCMSSLPT` and `FCMLINIT`
+  becoming UNPROTECTED is exactly the condition `ageharness.c` `ipl_fill()`'s comment
+  warns about -- the Instruction Monitor fires the moment the software sets PSW mask
+  bit 34, because every instruction then looks like it is executing out of
+  unprotected storage.  That is also the observed failure of `YAGPC_IPL_PROTECT=0`.
+- SO ONE OF THE TWO DECK READERS IS WRONG, and that is worth settling on its own
+  merits BEFORE anything is switched over.  It is independent of the `SPON`/`SPOFF`
+  work: it would still be wrong if the assembler never emitted a card.  Do NOT land
+  the `mmbstamp` switch until it is resolved, or the assembler's data will arrive on
+  top of an already-divergent base and the two faults will be indistinguishable.
+- Only `src/ap101Utils/mmbstamp.py` was touched in Don's repo, and it is back to
+  carrying just the FCMPSA fix.  `ext/sim`, `ext/virtualagc` and `COMMON.out*` were
+  already modified/untracked before I started and are not mine.
