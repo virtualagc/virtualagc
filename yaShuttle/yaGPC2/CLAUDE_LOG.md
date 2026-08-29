@@ -3602,3 +3602,36 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   measuring one halfword.
 - SO THE MENU-SELECTED LOAD NOW RUNS: 429 blocks read where the pre-key runs read
   none.  `wordsLost 720` is the expected 2 x 360 of GPCIPL's own loader.
+
+### [2026-08-28] Target: [problems.md]
+- CRASH TRACED TO ITS DISPATCH, and the vectors are INNOCENT.  With
+  `YAGPC_INTTRACE` on the reproduced run:
+      INT old=0078 new=007c  atNIA=40000  newPSW=9a300031   EX0 while in PASS code
+      INT old=0070 new=0074  atNIA=00041  newPSW=acf80031   Instruction Monitor
+      ERROR: invalid instruction 0xc9a4 at 0x0008
+  `0x40000` is `$0AIBGPC` in module `AIBGPCLO` -- REAL PASS APPLICATION CODE, so PASS
+  was genuinely running when the interrupt arrived.  `00041` and `00008` are inside
+  `FCMPSA`.
+- THE EX0 VECTOR IS CORRECT.  `MEMDUMP 78-7f` at the crash gives
+  `0078: 8000 0081 fc05 0000` (old PSW, and `8000/0081` resolves to `0x40000` with
+  BSR 8 -- the interrupted address, saved correctly) and
+  `007c: 9a30 0031 a00c 0000` (new PSW).  `9a30` with BSR 3 is `0x19a30`, which is
+  exactly `FIOERRLA`, the `EI0=FIOERRLA` handler `TFPSA` declares.  So the interrupt
+  DISPATCHED PROPERLY and our FCMPSA fix is holding up under a real interrupt.
+- THEREFORE THE FAULT IS INSIDE `FIOERRLA` (or in what it returns to), not in the
+  vectoring: the handler is entered, and execution is next seen at `00041` in PSA
+  storage with the Instruction Monitor firing -- which is what happens when
+  instructions are fetched from UNPROTECTED storage with PSW mask bit 34 set.
+- EX0 IS NOT ITSELF FATAL: the same interrupt fires earlier at `atNIA=02d3f` and
+  `atNIA=00886` and is handled normally, execution continuing.  Only the one taken
+  from `0x40000` ends badly.  So do NOT chase "why does EX0 fire" first -- it fires
+  legitimately.  `iop.c` lists the Group 1 sources: GO_NOGO (watchdog, ~3.1 s at
+  0.768 ms x 12 bits), IOP_FAIL, CM_IDLE (master reset), ROS_PAR, IOP_FAULT.  The
+  spacing of the observed EX0s (210.9 M, 220.7 M, 354.3 M us) is NOT the watchdog
+  period, so it is not a free-running timeout.
+- NEXT: trace inside `FIOERRLA` (`19a30`, phase 2).  It is a LOADED region -- phase 2
+  has a load block at `19a30 len=12140` -- so this is not a missing-content problem.
+  Watch its entry and follow where it leaves the rails; `0x0008` is where it ends up,
+  not where it goes wrong.
+- Four pre-existing test failures unchanged.  MEDS left running (7 procs); no yaGPC2
+  or panel processes left behind.
