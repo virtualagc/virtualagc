@@ -150,6 +150,22 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
     static int done = 0;
     const char *spec = getenv("YAGPC_DEUKEYS");
     if (spec == NULL || done || !d->ipled) return 0;
+    /* WAIT FOR THE MENU.  Delivering on the first poll after the unit is
+     * IPLed puts an ITEM entry in front of a display that is not showing
+     * the menu yet, and GPCIPL discards it: the keys demonstrably reach
+     * DEUMODE and the count is read back, but nothing is selected.
+     * YAGPC_DEUKEYS_AFTER=<n> holds them until the nth poll (default 400,
+     * about the point GPCIPL settles into its menu loop at 01df8). */
+    {
+        static long after = -1;
+        if (after < 0) {
+            const char *w = getenv("YAGPC_DEUKEYS_AFTER");
+            char *end = NULL;
+            long v = (w != NULL) ? strtol(w, &end, 10) : 0;
+            after = (w != NULL && end != w && *end == '\0' && v >= 0) ? v : 400;
+        }
+        if (d->polls < after) return 0;
+    }
     int codes[MAX_KEYS_IPL]; int n = 0;
     for (const char *p = spec; *p && n < MAX_KEYS_IPL; ) {
         const char *e = p; while (*e && *e != ',') e++;

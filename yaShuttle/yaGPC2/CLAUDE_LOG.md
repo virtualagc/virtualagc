@@ -3511,3 +3511,34 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   NEXT STEP: watch `ITEMNO` (`0251e` in phase 10) and `BSLTPNTR+1` (`0366d`) to see
   whether the software reads the buffer at all before theorising further.
 - Four pre-existing test failures unchanged.
+
+### [2026-08-28] Target: [problems.md]
+- `YAGPC_DEUKEYS` WORKS AT THE PROTOCOL LEVEL, verified end to end.  Watching
+  `DEUMODE` (`03b7a`, phase 10) shows the poll response reaching memory from `pe=6`
+  (BCE 6, the DK bus) -- 14616 writes -- and the keyed response landing exactly once:
+      03b7a val=0008     header with KYBD_MSG
+      03b7b val=ff03     KEY_COUNT_HIGH | 3
+      03b7b val=00000003 the CPU writing the count back, i.e. it READ the buffer
+  So keys reach the software and are read.  `YAGPC_DEUKEYS_AFTER=<n>` (default 400
+  polls) was added to hold them until GPCIPL's menu is up; delivering at the first
+  poll after `ipled` put them in front of a display that was not showing the menu.
+- `CM4KYBD` (`GPCRTOPT.asm:1001`) CHECKSUMS THE WHOLE 16-HALFWORD BUFFER and requires
+  the sum to be ZERO (`LHI R3,16` / `AH# R0,0(X2,Z3)` / `BZ CHKSUC` / `ERROR 150`).
+  That check runs ONLY for keyed messages -- `RSP60` calls it only when the header's
+  `X'08'` is set -- which is why ordinary polls have always passed.  OUR MODEL ALREADY
+  SATISFIES IT: `deu_checksum` returns the NEGATED sum and `w[15]` is computed after
+  the keys are inserted.  Not the obstacle.
+- WHAT IS THE OBSTACLE, and it is structural: THE CREW SEQUENCE IS A SEQUENCE, NOT A
+  STATE.  Register A bits 0-3 are HALT/STANDBY/RUN/IPL and, per `discretePanel.py`'s
+  own comment, IPL is a MOMENTARY PUSHBUTTON asserted ON TOP OF HALT, not a fourth
+  position -- "a panel that made IPL a fourth exclusive position could not express the
+  real sequence at all".  A static `--discrete-a` asserts a final state the software
+  never TRANSITIONED into, so `--discrete-a 28000000` (RUN + MM1 source) produces a
+  run with no DEU activity and no mode lines at all.
+- SO HEADLESS MENU-DRIVEN TESTING NEEDS TIMED DISCRETE CHANGES -- a scripted
+  HALT -> IPL pulse -> STBY -> RUN -- which is exactly what `discretePanel.py` does
+  interactively and which yaGPC2 has no way to express on the command line.  THAT is
+  the missing capability, not the keyboard.  `--discrete-a`/`-b` are static overrides
+  by design.
+- STATE OF THE CRASH HUNT: unchanged.  `invalid instruction 0xc9a4 at 0x0008` remains
+  reproducible only interactively, because only the panel can perform the sequence.
