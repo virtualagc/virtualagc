@@ -3761,3 +3761,26 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   `mmu2mmv` wants `PHASEnn/PHASEnn.sym.json` and produced a 227-block volume from a
   lib-only directory before failing on missing phase blocks.  The working recipe is
   to copy `full700` wholesale and overlay the relinked phase.
+
+### [2026-08-29] Target: [problems.md]
+- CHECKED, at the user's prompting, whether `csects-SSW.json` really agrees with the
+  ORIGINAL `DASS_SSW_(PostIPL).ASC` rather than trusting the derived artifact.  It
+  does NOT agree entirely, and the shape of the disagreement matters:
+      report csect-header lines   656
+      csects-SSW.json entries     660
+      only in the report            0
+      shared names, different start 0
+      only in the json              4   `#PCDN102` `#PCDN202` `#PCDN302` `FCMTBLPG`
+  All four DO appear in the report, but not as `address-range NAME ****` header
+  lines: the `#PCDN*` three appear in a SOURCE LISTING (a declaration list carrying
+  `009500AA`-style sequence numbers) and `FCMTBLPG` in the SYMBOL CROSS-REFERENCE
+  (`FCMTBLPG 009EBC`, and the json's 40636 IS 0x9EBC).  So the json is a SUPERSET
+  drawing on more of the report than the header lines alone, and is consistent with
+  it wherever both carry an address.
+- FOR THE PINS THIS IS EXACT: within the Z1 pool the report has 80 header lines, the
+  json 80 entries, the same set of names and ZERO address differences.  The generated
+  `linkorder.json` is sound.
+- METHOD NOTE, since it bit me: a first pass at extracting csects from the report
+  matched 239 "entries" in the pool alone, because the pattern also caught
+  symbol-detail lines like `#ZFIOCGR+0000`.  Require the `****` field and reject
+  names containing `+`.
