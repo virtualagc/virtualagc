@@ -3731,3 +3731,33 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - The 2-halfword phase-3 drop at `001fe` is NOT settled by the dump, since the flown
   value matches neither of our phases.  Leave it dropped until the ordering question
   above is resolved.
+
+### [2026-08-29] Target: [problems.md]
+- **THE Z1 POOL ORDER CAN BE PINNED TO THE FLOWN ONE, AND NOW IS.**  `lnk101` takes
+  `--link-order <linkorder.json>`, whose `zconPool` is an ORDERED LIST OF CSECT NAMES
+  (`ap101Utils/linkorder.py:70`, `zcon_sort_key` sorts known ZCONs by pool position).
+  No such file existed anywhere, so our ordering was unpinned.  THE FLOWN ORDER IS
+  RECOVERABLE: `mafgen/csects-SSW.json` gives each csect's address in the flown image,
+  so sorting the 80 pool csects by address yields the pins directly.  Generated and
+  kept at `/tmp/claude-1000/sync/linkorder.json` (1104 bytes, 80 names).
+      before: 2 of 80 pool csects at the flown address
+      after:  80 of 80
+      PHASE02 sector-0 match vs DASS: 97.359% -> 98.061% (305 -> 224 mismatches)
+- **BUT IT IS NOT A FUNCTIONAL FIX, and my hypothesis was WRONG.**  I reasoned that
+  `SCAL 0,@@X'01cc'(1)` encodes a LITERAL base address and selects the routine by
+  INDEX, so the pool order would be part of the calling ABI and a permuted pool would
+  send library calls to the wrong routine -- which would explain EXP receiving a wild
+  argument.  Booting the pinned tape produces the IDENTICAL outcome: same
+  `#6 EXP FUNCTION HAS ARGUMENT > 174.673`, same `invalid instruction 0xc6c6 at
+  0x6b8f`, same `blocksRead 430`.  The link is self-consistent, so reordering changes
+  FIDELITY AGAINST THE FLOWN IMAGE but not BEHAVIOUR.  Keep the pins for comparison
+  work; do not expect them to fix anything.
+- SO THE EXP ERROR IS STILL UNEXPLAINED, and it is now the live question.  What is
+  established: the pool is loaded, its cells hold our own correct values, and the
+  order now matches the original.  What is not: why a HAL/S computation feeds EXP an
+  argument over 174.673.  That is a DATA problem somewhere upstream, not a linkage or
+  loading one.
+- BUILD NOTE: `pinned/` needed the whole per-phase tree, not just `.lib` files --
+  `mmu2mmv` wants `PHASEnn/PHASEnn.sym.json` and produced a 227-block volume from a
+  lib-only directory before failing on missing phase blocks.  The working recipe is
+  to copy `full700` wholesale and overlay the relinked phase.
