@@ -112,11 +112,73 @@ static void deu_queue_reply(DeuModel *d, const uint16_t *words, size_t n) {
     d->wordsOut += (long)n;
 }
 
+/* YAGPC_DEUKEYS: one keystroke sequence to deliver on the first poll after
+ * the unit is IPLed, so a headless run can drive GPCIPL's menu.  Names are
+ * deuProto.coffee's own (`ITEM,1,EXEC`), comma separated; a bare digit is
+ * that digit's key.  There is no keyboard on this model otherwise, which is
+ * why the menu-selected load path -- the one ITEM 1 EXEC starts, and a
+ * different load table from POLL45's no-DEU default -- has never been
+ * reachable without a human at a real MEDS.
+ *
+ * Encoding, from deuProto.coffee: the header carries KYBD_MSG (0x0008), the
+ * count word is KEY_COUNT_HIGH | count, and the buffer packs THREE keys to a
+ * halfword, 5 bits each, most significant first.  MAX_KEYS_IPL is 6 -- the
+ * monitor takes no more than that. */
+#define HDR_KYBD_MSG        0x0008
+#define KEYS_PER_WORD       3
+#define KEY_BITS            5
+#define MAX_KEYS_IPL        6
+
+static int deu_keycode(const char *n, size_t len) {
+    static const struct { const char *n; int v; } T[] = {
+        {"0",0x00},{"1",0x01},{"2",0x02},{"3",0x03},{"4",0x04},{"5",0x05},
+        {"6",0x06},{"7",0x07},{"8",0x08},{"9",0x09},{"A",0x0a},{"B",0x0b},
+        {"C",0x0c},{"D",0x0d},{"E",0x0e},{"F",0x0f},{"SYS_SUMM",0x10},
+        {"OPS",0x11},{"SPEC",0x12},{"FAULT_SUMM",0x13},{"ITEM",0x14},
+        {"MINUS",0x15},{"PLUS",0x16},{"DECIMAL",0x17},{"IO_RESET",0x18},
+        {"GPC_CRT",0x19},{"CLEAR",0x1a},{"RESUME",0x1b},{"ACK",0x1c},
+        {"MSG_RESET",0x1d},{"EXEC",0x1e},{"PRO",0x1f},
+    };
+    for (size_t i = 0; i < sizeof T / sizeof T[0]; i++)
+        if (strlen(T[i].n) == len && strncmp(T[i].n, n, len) == 0) return T[i].v;
+    return -1;
+}
+
+/* Fills w[1..] with the pending keys and returns the header bit to set, or 0
+ * when there is nothing to send.  Sends the sequence ONCE. */
+static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
+    static int done = 0;
+    const char *spec = getenv("YAGPC_DEUKEYS");
+    if (spec == NULL || done || !d->ipled) return 0;
+    int codes[MAX_KEYS_IPL]; int n = 0;
+    for (const char *p = spec; *p && n < MAX_KEYS_IPL; ) {
+        const char *e = p; while (*e && *e != ',') e++;
+        int c = deu_keycode(p, (size_t)(e - p));
+        if (c < 0) {
+            fprintf(stderr, "deu: YAGPC_DEUKEYS: unknown key '%.*s'\n",
+                    (int)(e - p), p);
+        } else {
+            codes[n++] = c;
+        }
+        p = (*e == ',') ? e + 1 : e;
+    }
+    if (n == 0) return 0;
+    for (int i = 0; i < n; i++)
+        w[2 + i / KEYS_PER_WORD] |=
+            (uint16_t)(codes[i] << ((KEYS_PER_WORD - 1 - i % KEYS_PER_WORD)
+                                    * KEY_BITS));
+    w[1] = (uint16_t)(KEY_COUNT_HIGH | n);
+    done = 1;
+    fprintf(stderr, "deu: YAGPC_DEUKEYS delivered %d keystroke(s)\n", n);
+    return HDR_KYBD_MSG;
+}
+
 static void deu_poll_response(DeuModel *d) {
     uint16_t w[POLL_WORDS];
     memset(w, 0, sizeof w);
     w[0] = deu_header(d);
     w[1] = KEY_COUNT_HIGH;              /* no keys queued */
+    w[0] |= deu_pending_keys(d, w);
     w[12] = deu_bite1(d);
     w[13] = 0;
     w[14] = SWSTATUS_HEALTHY;

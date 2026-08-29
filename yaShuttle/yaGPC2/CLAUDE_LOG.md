@@ -3487,3 +3487,27 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   alone... the rule that starves a sixteen-word receive mid-IPL" -- and `FAZ2DEU`
   exits early on `DEUMODE & X'0001'`.  Plausible but NOT verified: the full 16
   halfwords of a KEEP were never dumped, only the first 6.
+
+### [2026-08-28] Target: [problems.md]
+- ADDED `YAGPC_DEUKEYS` to `deumodel.c`: a keystroke sequence delivered once on the
+  first poll after the unit is IPLed, so a headless run can drive GPCIPL's menu.
+  Until now `deumodel.c:91` said it plainly -- "No keyboard here" -- so the
+  MENU-SELECTED LOAD PATH (what ITEM 1 EXEC starts, a different load table from
+  POLL45's no-DEU default) was unreachable without a human at a real MEDS, and no
+  headless test all session has ever exercised it.
+- ENCODING, from `meds/deuProto.coffee`, and our poll response already matched the
+  layout exactly: header carries `KYBD_MSG` 0x0008; the count word is
+  `KEY_COUNT_HIGH | count`; the buffer packs THREE keys to a halfword, 5 bits each,
+  most significant first, in `w[2..11]`; `MAX_KEYS_IPL` is 6.  Keycodes: digits
+  0x00-0x09, `ITEM` 0x14, `EXEC` 0x1e, `OPS` 0x11, `SPEC` 0x12, `PRO` 0x1f, etc.
+  So `ITEM,1,EXEC` packs to `w[2]=0x503E`, `w[1]=0xff03`.
+- IT DELIVERS BUT DOES NOT YET DRIVE THE MENU: "deu: YAGPC_DEUKEYS delivered 3
+  keystroke(s)", then 40000 DEU commands and 13332 polls later there is STILL no tape
+  read and no crash.  So GPCIPL is not acting on the keystrokes.  Candidates, none
+  tested: the keys arrive before the menu is up (delivery is on the first poll after
+  `ipled`, which may be far too early); the major-function field (`HDR.MAJOR_FUNC`,
+  bits 9-10) has to be set for a keyboard message to be honoured; or the handler
+  wants them spread over successive polls rather than in one burst.
+  NEXT STEP: watch `ITEMNO` (`0251e` in phase 10) and `BSLTPNTR+1` (`0366d`) to see
+  whether the software reads the buffer at all before theorising further.
+- Four pre-existing test failures unchanged.
