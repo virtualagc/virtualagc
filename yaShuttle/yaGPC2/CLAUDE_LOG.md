@@ -3635,3 +3635,25 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   not where it goes wrong.
 - Four pre-existing test failures unchanged.  MEDS left running (7 procs); no yaGPC2
   or panel processes left behind.
+
+### [2026-08-29] Target: [problems.md]
+- `FIOERRLA` IS CORRECTLY LOADED AND CORRECTLY ENTERED.  Dumping `19a30` at the crash
+  gives code that matches `SSSRC/FIOERRLA.asm` instruction for instruction:
+  `c8fb 964a` = `STM FI$ERRAB` (save area is at `0964a`), `edf3 0800` =
+  `LHI R5,FIOIRACW` with `X'0800'`, and `a05e` at `19a3e` is the `CALL FIOLGERR`
+  (`1a05e`).  Its return is `LPS TPSAEOP`, and `TPSAEOP` IS `00078` -- the EX0 old
+  PSW slot -- which the hardware had just filled with the interrupted `0x40000`.
+  So save, dispatch, handler content and return path are ALL sound.
+- CORRECTION TO MY OWN FRAMING, before it hardens: I was treating the fault as being
+  "inside FIOERRLA".  It probably is NOT.  170 MILLISECONDS of simulated time pass
+  between the EX0 (t=353,537,610) and the Instruction Monitor (t=353,708,461) --
+  thousands of instructions -- so the handler almost certainly returned normally and
+  the program ran on for a long while before going wild.  The two events being
+  ADJACENT IN THE INTERRUPT TRACE is an artifact of nothing else interrupting in
+  between, not evidence that one caused the other.
+- `0x41` is inside the MACHINE CHECK old-PSW slot (PSA `0x40-0x43`), so the wild
+  branch lands in PSA data, and `0x0008` is where it ends up after that -- neither is
+  where it goes wrong.
+- BENIGN, ruled out: the IOP (`pe=18`) zeroes `0078-007b` at t=221.9M.  That is the
+  `FCMPSA` load block (`00000..001a7`) legitimately initialising the PSA during the
+  load, long before the interrupt, and the hardware refills the slot when EX0 fires.
