@@ -3696,3 +3696,38 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   previous.  With a single panel the crash returned to exactly `0xc9a4 at 0x0008`.
   A polluted harness looked like a property of the machine.
 - Four pre-existing test failures unchanged.
+
+### [2026-08-29] Target: [problems.md]
+- SYSTEMATIC CHECK, and it is nearly clean now.  Extents present in a phase's `.lib`
+  but covered by NO load block of that phase:
+      PHASE10  0        PHASE02  0        PHASE13  0
+      PHASE03  1 extent, `001fe..001ff`, 2 halfwords
+  So after the FCMPSA, FCMRESRV and root-pool fixes, nothing else is being silently
+  dropped.  Worth re-running this check after any change to `derive_load_blocks`; it
+  is three lines and would have caught all three defects on day one.
+- THE REMAINING FAILURE HAS MOVED INTO PASS ITSELF.  After the HAL/S runtime error
+  the FCOS dispatcher exits through
+      1a97d  CCF8 0008  LM   X'0008'(0)     restore registers from the PSA
+      1a97f  CDFF 10B2  LPS  @X'00b2'       load PSW INDIRECTLY through 00b2
+  `00b2` is `TPSAWORK`, the FCOS WORK AREA (`&WORK SETC 'H''0'''` in TFPSA), which the
+  dispatcher fills with the PSW of the task it is dispatching.  It held a pointer into
+  `#CDPLLIG` (a DATA csect), so the dispatch went wild and ran on into unloaded
+  memory at `16b8f`.  This is NOT a load gap -- `TPSAWORK` is inside FCMPSA's block
+  and is loaded -- it is the dispatcher computing a bad value, downstream of the
+  runtime error.
+- A LEAD WORTH CHECKING BEFORE CHASING THE DISPATCHER: OUR Z1 POOL IS ORDERED
+  DIFFERENTLY FROM THE FLOWN ONE.  At `001fe` phase 2 has `8000 0E00`, phase 3 has
+  `888C 0E90`, and the DASS dump has `81F8 0E20` -- three different values.  That
+  matches the much earlier observation that `001aa..00247` holds "our values and
+  DASS's, the SAME VALUES IN A DIFFERENT ORDER".  `lnk101` takes a `--link-order`
+  pins file that fixes "the Z1 ZCON pool ordering", and NO `linkorder.json` EXISTS
+  ANYWHERE on this machine, so our ordering is unpinned.
+  WHY IT MIGHT MATTER NOW THAT THE POOL IS ACTUALLY LOADED: the link itself is
+  self-consistent, so compiled code reaches its own cells correctly -- but anything
+  that addresses a pool cell by ABSOLUTE ADDRESS from outside the link does not.  The
+  PATCH decks (`PCH02SRC` etc.) are exactly that.  A permuted pool would put patches
+  on the wrong cells.  UNVERIFIED; check whether any patch writes into 001a8..00249
+  before believing it.
+- The 2-halfword phase-3 drop at `001fe` is NOT settled by the dump, since the flown
+  value matches neither of our phases.  Leave it dropped until the ordering question
+  above is resolved.
