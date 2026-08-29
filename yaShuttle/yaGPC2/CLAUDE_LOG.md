@@ -3815,3 +3815,30 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   produced BYTE-IDENTICAL symptoms.  The link is self-consistent, so csect placement
   is a FIDELITY measure against the flown article, not a behavioural one.  Worth
   doing for comparison work; not a candidate root cause.
+
+### [2026-08-29] Target: [problems.md]
+- CORRECTION, MINE: I said `lnk101` never reads `csects-*.json` and that the file is
+  purely a comparison artifact.  WRONG -- I grepped for the FILENAME rather than the
+  OPTION.  `lnk101 --external-syms` takes exactly that shape (`loadExternalSyms`,
+  `linker.py:2243`): "a JSON containing csect locations and symbol offsets, which we
+  can use to perform relocations WITHOUT LOADING THE ACTUAL OBJECT MODULES", keyed by
+  csect name with `start`/`end`/`type`/`contents`.  That is the testing facility for
+  the case where a complete set of object files is not available, and
+  `csects-SSW-augmented.json` serves the same role.
+- **AND THE RESULT IS THE POINT: `con80build` NEVER PASSES `--external-syms`, so our
+  builds link from real objects UNAIDED -- and lnk101 STILL DOES NOT PLACE EVERY
+  CSECT WHERE THE DASS REPORTS PUT IT.**  For PHASE02, 631 of 653 shared csects land
+  at the flown address, 96.6%.  The 22 that do not are FOUR WHOLE PROGRAMS displaced
+  as units in one autocall region:
+      DMPMMM  18 csects  +592      VMELOA  3 csects  +268
+      $0ASCTIM  -3730              $0ASGCYC  -4358
+      flown order: DMPMMM, ASCTIM, VMELOA, ASGCYC
+      ours:        ASCTIM, ASGCYC, DMPMMM, VMELOA
+  Every group EXCEPT `$0` code (27/31) and `Ann` (45/50) is now 100%, the ZCON pool
+  having been fixed by the generated pins.
+- SO THE REMAINING GAP IS NARROW AND NAMED: the autocall program-placement order in
+  that one region.  `linkorder.json`'s `orphanFlush` / per-mc `codeOrder` / `streams`
+  are the mechanism; unlike `zconPool` they cannot be derived from an address sort
+  alone.  This is a measure of how far the LINK-ORDER DERIVATION has got, not a
+  defect in the loaded image's behaviour -- the `zconPool` experiment showed placement
+  is fidelity, not function.
