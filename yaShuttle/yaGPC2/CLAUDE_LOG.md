@@ -3577,3 +3577,28 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   in the same command line matches the shell itself (exit 144).  Putting the kill and
   the relaunch in ONE command is what does it.  Use `discrete[P]anel` so the pattern
   cannot match its own occurrence, and keep kills in a SEPARATE invocation.
+
+### [2026-08-28] Target: [problems.md]
+- **THE CRASH IS REPRODUCED HEADLESSLY, AND THE FIGURES MATCH THE USER'S RUN EXACTLY:**
+  `commands 56, blocksRead 429, wordsOut 219707, wordsTaken 218987, wordsLost 720`,
+  ending `ERROR: invalid instruction 0xc9a4 at 0x0008`.  Deterministic, no human at
+  the panel.  Sequence: scripted `discretePanel.py` (HALT / CRT select / MM1 / IPL /
+  STBY / RUN) + `YAGPC_DEUKEYS=ITEM,1,EXEC`, bootstrap read FROM TAPE over the bus.
+- THE BUG THAT WAS BLOCKING IT WAS MINE, in the keystroke packing.  `deuProto.coffee`
+  line 157 says it exactly: "bits 15-11 are the first key, 10-6 the second, 5-1 the
+  third, BIT 0 SPARE".  I shifted 10/5/0 instead of 11/6/1, so `ITEM,1,EXEC` packed
+  to `A07C`... no, to `503E`, whose top five bits are `0x0a` -- and `0x0a` is EXACTLY
+  what `KEY1` was observed to receive.  The software decodes with `SLDL R4,5` from
+  the TOP of the halfword (`GPCRTOPT.asm` KYBD01), so a one-bit error silently
+  becomes a different key.  Fixed: `ITEM,1,EXEC` now packs to `A07C` and `KEY1..KEY3`
+  read `0x14 / 0x01 / 0x1e`.
+- HOW IT WAS FOUND, and the lesson is to watch the RIGHT address: `ITEMNO` (`0251e`)
+  is the SAME address as `KYBDCON`, a structure base, so watching it showed only the
+  tape loader writing.  `KYSTRKS` is `DEUMODE+1` (`03b7b`), where the count lands and
+  where `STH R5,KYSTRKS` writes it back masked; `KEY1` (`02621`) is where decoded
+  keystrokes go.  Watching `KEY1` showed `0x0a` where `0x14` was sent, which named
+  the defect immediately.  Three earlier attempts theorised about delivery timing,
+  major-function bits and the `CM4KYBD` checksum -- all wrong, and all avoidable by
+  measuring one halfword.
+- SO THE MENU-SELECTED LOAD NOW RUNS: 429 blocks read where the pre-key runs read
+  none.  `wordsLost 720` is the expected 2 x 360 of GPCIPL's own loader.

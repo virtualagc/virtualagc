@@ -180,9 +180,15 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
     }
     if (n == 0) return 0;
     for (int i = 0; i < n; i++)
+        /* deuProto.coffee: "bits 15-11 are the first key, 10-6 the second,
+         * 5-1 the third, BIT 0 SPARE" -- so the shifts are 11/6/1, not
+         * 10/5/0.  The software decodes with SLDL R4,5 from the TOP of the
+         * halfword (GPCRTOPT.asm KYBD01), so a one-bit error turns ITEM
+         * (0x14) into 0x0a, which is exactly what KEY1 was observed to
+         * receive. */
         w[2 + i / KEYS_PER_WORD] |=
             (uint16_t)(codes[i] << ((KEYS_PER_WORD - 1 - i % KEYS_PER_WORD)
-                                    * KEY_BITS));
+                                    * KEY_BITS + 1));
     w[1] = (uint16_t)(KEY_COUNT_HIGH | n);
     done = 1;
     fprintf(stderr, "deu: YAGPC_DEUKEYS delivered %d keystroke(s)\n", n);
