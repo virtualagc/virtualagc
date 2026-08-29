@@ -40,13 +40,41 @@ static void apply_ignore_event_action(HalUCP *h, uint32_t eventAddr, IgnoreEvent
  * for byte-for-byte fidelity, not "fixed".
  * ------------------------------------------------------------------- */
 
+/* THE TABLE BELOW IS GROUP 4, AND ONLY GROUP 4.  USA003090 Appendix C says
+ * so in as many words: these errors "are detected by the HAL/S-FC library
+ * and emitted code.  They are classified as group 4 errors within the HAL/S
+ * error grouping scheme."  Every other group is a USER-DEFINED error --
+ * USA003090 8.1.3 item 14, "the valid range of error groups for user defined
+ * errors is 1 to 127" -- whose numbers mean whatever the application says
+ * they mean, and for which we have no table and can have none.
+ *
+ * Applying the table regardless of group (what halUCP.coffee does, and what
+ * this file did until now: groups 1-6 all named "RUNTIME", message chosen by
+ * number alone) MISREPORTS every user-defined error as a library one.  The
+ * real case that exposed it: AIBGPCLO.hal:630 raises SEND ERROR$(6:6),
+ * commented "RUNTIME USED INSTEAD OF PCMMU TIME TO CALCULATE TSIP", and it
+ * printed as "RUNTIME: #6 EXP FUNCTION HAS ARGUMENT > 174.673" -- sending
+ * the investigation after an exponential overflow that does not exist.
+ * Group 6 is the ONLY group PASS uses for its own SEND ERROR (numbers
+ * 1,2,3,6,7 across AIBGPCLO/AIESIP/DMIMCD/GKTUNI/GG8PWC/PGEPCI/GKEKIP/
+ * GSDFIR/SAFACQ), so in this corpus the misreport is the common case, not
+ * the corner one. */
+#define HAL_S_LIBRARY_ERROR_GROUP 4
+
 static const char *svc_error_group_name(int errGroup, char *buf, size_t bufSize) {
-    if (errGroup >= 1 && errGroup <= 6) return "RUNTIME";
+    if (errGroup == HAL_S_LIBRARY_ERROR_GROUP) return "RUNTIME";
     snprintf(buf, bufSize, "GROUP %d", errGroup);
     return buf;
 }
 
-static const char *svc_error_message(int errNum, char *buf, size_t bufSize) {
+static const char *svc_error_message(int errGroup, int errNum, char *buf, size_t bufSize) {
+    if (errGroup != HAL_S_LIBRARY_ERROR_GROUP) {
+        /* Application-defined: say so rather than borrowing group 4's text.
+         * The caller already prints the group and the number, so this adds
+         * only the one thing they do not convey -- that no table applies. */
+        (void)buf; (void)bufSize;
+        return "USER-DEFINED ERROR";
+    }
     switch (errNum) {
         case 4: return "EXPONENTIATION OF ZERO TO POWER < = 0";
         case 5: return "SQRT HAS ARGUMENT < 0 ";
@@ -241,10 +269,14 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         h->sendErrorPending = true;
         char gbuf[32], mbuf[32];
         const char *groupName = svc_error_group_name(errGroup, gbuf, sizeof gbuf);
-        const char *errMsg = svc_error_message(errNum, mbuf, sizeof mbuf);
+        const char *errMsg = svc_error_message(errGroup, errNum, mbuf, sizeof mbuf);
         char msg[512];
         snprintf(msg, sizeof msg, "HAL/S SEND ERROR: %s: #%d %s", groupName, errNum, errMsg);
         hal_report_error(h, msg);
+        /* The instruction trail into a SEND ERROR names the routine that
+         * raised it and its caller, which is otherwise invisible: the
+         * message says WHAT went wrong, never WHO asked. */
+        cpu_dump_nia_ring(h->cpu, "the SEND ERROR", psw_get_nia(&h->cpu->psw));
         try_on_error_dispatch(h, errGroup, errNum);
         return true;
     }

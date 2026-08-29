@@ -3842,3 +3842,46 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   alone.  This is a measure of how far the LINK-ORDER DERIVATION has got, not a
   defect in the loaded image's behaviour -- the `zconPool` experiment showed placement
   is fidelity, not function.
+
+### [2026-08-29] Target: [problems.md]
+- **THE "EXP" ERROR IS NOT AN EXP ERROR, AND NOTHING FEEDS IT AN ARGUMENT.**  The
+  NIA ring resolved the raising instruction to `4028c` = `A1AIBGPC+124`, module
+  `AIBGPCLO`.  `SSSRC/AIBGPCLO.hal:630` is `SEND ERROR$(6:6);` with the source's own
+  comment `/* RUNTIME USED INSTEAD OF PCMMU */ /* TIME TO CALCULATE TSIP */`, raised
+  by the guard immediately above it:
+      IF (AIBV_GMTOI > AIBV_TC) OR ((AIBV_TC - AIBV_GMTOI) > 1.02) THEN
+  where `AIBV_TC = RUNTIME` and `AIBV_GMTOI` is PCMMU time from `DIO(AIBV_PMU_RD)`
+  via `MTU_FMT_CONV`.  It is a deliberate application-level annunciation that the
+  PCMMU time failed its limit check and RUNTIME was substituted -- NOT a math fault.
+- **WHY IT PRINTED AS EXP -- a group-blind message table.**  USA003090 Appendix C
+  (line 8504) states the runtime table's scope in as many words: these errors "are
+  detected by the HAL/S-FC library and emitted code.  They are classified as GROUP 4
+  errors within the HAL/S error grouping scheme."  And 8.1.3 item 14: "the valid
+  range of error groups for user defined errors is 1 to 127."  So `(group,number)`
+  is the identity, the table is group 4 ONLY, and group 6 number 6 is a user-defined
+  error with no relation to number 6 in group 4.
+- INHERITED VERBATIM FROM `gpc`.  `halUCP.coffee:7-14` maps SVC_ERROR_GROUPS 1..6 all
+  to "RUNTIME" and picks the message from `SVC_ERROR_MESSAGES[errNum]` alone; our
+  `halucp.c` copied both.  Another instance of the pedigree bug class, not a yaGPC2
+  original.
+- MEASURED, not recalled: group 6 is the ONLY group PASS uses for its own
+  `SEND ERROR`, numbers 1,2,3,6,7, across `AIBGPCLO`, `AIESIP` (x5), `DMIMCD`,
+  `GKTUNI`, `GG8PWC`, `PGEPCI`, `GKEKIP`, `GSDFIR`, `SAFACQ`.  So the misreport was
+  the common case in this corpus, not a corner case.
+- FIXED in `src/halucp.c`: `HAL_S_LIBRARY_ERROR_GROUP 4`; `svc_error_group_name`
+  names only group 4 "RUNTIME"; `svc_error_message` takes the group and returns
+  `USER-DEFINED ERROR g:n` for anything else instead of borrowing group 4's text.
+  Build clean; `make test` leaves exactly the four pre-existing failures
+  (`test_debugger.sh`, `test_cpu_instr_exec`, `test_iop_bce_exec`,
+  `test_iop_msc_exec`) and `test_gpcops` still passes.
+- STILL OPEN, and it is a SHARED-CONTRACT defect, not mine to change alone:
+  `yaGpcIntegration.h:131` encodes `GPC_ENGINE_WARNING_HAL_S_ERROR_BASE = 1000` plus
+  `lastErrNum` ONLY (`gpcops.c:115`), so the group is dropped on the way out and an
+  integrator asking `gpc_engine_status_message(1006)` still gets the EXP text for a
+  group-6 error.  `yaHALMAT2/src/yaGpcEngineStatus.c` carries the identical table.
+  Needs a relay to the yaHALMAT2 session before either side changes the enum.
+- ROOT CONDITION BEHIND THE ANNUNCIATION: yaGPC2 has NO PCMMU/MTU model at all --
+  `grep -riE 'pcmmu|\bpmu\b|\bmtu\b' src/` returns ZERO hits.  So `AIBV_GMTOI` comes
+  back as unmodelled-I/O data (~0) and `(AIBV_TC - 0) > 1.02` is true as soon as
+  RUNTIME passes 1.02 s.  The flight software is doing exactly the right thing with
+  a PCMMU that is not there; the error is EXPECTED under the current model set.
