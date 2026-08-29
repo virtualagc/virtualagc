@@ -1020,6 +1020,25 @@ bool cpu_store_fw(CPU *cpu, uint32_t addr, uint32_t value) {
     return true;
 }
 
+/* Print the recorded instruction addresses, oldest first.  Called from the
+ * Instruction Monitor and from run.c's invalid-instruction stop, which are
+ * the two ways a wild branch becomes visible. */
+void cpu_dump_nia_ring(CPU *cpu, const char *why, uint32_t nia) {
+    if (cpu == NULL || cpu->niaRing == NULL || cpu->niaRingFilled < 2) return;
+    fprintf(stderr, "NIARING (oldest first) before %s at %05x:\n",
+            why, (unsigned)nia);
+    unsigned n = cpu->niaRingFilled;
+    unsigned start = (cpu->niaRingPos + cpu->niaRingCap - n) % cpu->niaRingCap;
+    for (unsigned i = 0; i < n; i++) {
+        if (i % 8 == 0) fprintf(stderr, "   ");
+        fprintf(stderr, " %05x",
+                (unsigned)cpu->niaRing[(start + i) % cpu->niaRingCap]);
+        if (i % 8 == 7) fprintf(stderr, "\n");
+    }
+    if (n % 8) fprintf(stderr, "\n");
+    cpu->niaRingFilled = 0;
+}
+
 void cpu_reset(CPU *cpu) {
     cpu->storeProtectOverride = false;
     cpu->prevDiscont = false;
@@ -1206,8 +1225,37 @@ void cpu_exec1(CPU *cpu) {
      * program that doesn't set that mask bit, and no fixture in this
      * port's corpus does. Implemented here via the real accessor
      * (membus_get_store_protect) rather than reproducing the crash. */
+    /* YAGPC_NIARING=<n>: remember the last n instruction addresses and dump
+     * them when the Instruction Monitor fires.  A wild branch is invisible
+     * to every other trace here -- the interrupt log shows only where
+     * execution ARRIVED, and a full --trace over the ~200M instructions this
+     * boot takes is not usable -- so the question "what branched into the
+     * PSA" needs the few addresses immediately before it. */
+    {
+        static uint32_t *ring = NULL;
+        static unsigned cap = 0, pos = 0, filled = 0;
+        if (cap == 0) {
+            const char *w = getenv("YAGPC_NIARING");
+            char *end = NULL;
+            long v = (w != NULL) ? strtol(w, &end, 10) : 0;
+            cap = (w != NULL && end != w && *end == '\0' && v > 0 && v <= 4096)
+                      ? (unsigned)v : 1u;
+            ring = calloc(cap, sizeof *ring);
+            if (ring == NULL) cap = 1;
+        }
+        if (ring != NULL && cap > 1) {
+            ring[pos] = nia;
+            pos = (pos + 1) % cap;
+            if (filled < cap) filled++;
+            cpu->niaRing = ring;
+            cpu->niaRingCap = cap;
+            cpu->niaRingPos = pos;
+            cpu->niaRingFilled = filled;
+        }
+    }
     uint32_t intMask = psw_get_int_mask(&cpu->psw);
     if ((intMask & 0x20) && !membus_get_store_protect(cpu->ram, nia)) {
+        cpu_dump_nia_ring(cpu, "the Instruction Monitor", nia);
         /* This is the Instruction Monitor, not a program check: it has
          * its own class, vector and mask bit (see cpu_check_interrupts),
          * and Figure 2-20 gives its interrupt code as N/A -- the 0x0009

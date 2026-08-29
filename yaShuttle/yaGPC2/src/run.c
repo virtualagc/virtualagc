@@ -826,6 +826,7 @@ static bool batchrunner_step(BatchRunner *r) {
         as_hex(hexv, sizeof hexv, (long long)hw1, 4);
         char niaHex[16];
         as_hex(niaHex, sizeof niaHex, (long long)nia, 4);
+        cpu_dump_nia_ring(&r->age.gpc.cpu, "the invalid instruction", psw_get_nia(&r->age.gpc.cpu.psw));
         snprintf(r->stopReason, sizeof r->stopReason, "invalid instruction 0x%s at 0x%s", hexv, niaHex);
         r->hasStopReason = true;
         return false;

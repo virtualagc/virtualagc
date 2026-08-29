@@ -138,7 +138,12 @@ typedef struct CPU {
     IuShadowEntry *iuShadow;
     int iuShadowCount, iuShadowCap;
     uint32_t curIC;                  /* address of the instruction being run */
-    bool prevDiscont;                /* last instruction broke sequential fetch */
+    bool prevDiscont;
+
+    /* YAGPC_NIARING: the last n instruction addresses, dumped when the
+     * Instruction Monitor fires.  See cpu_exec1. */
+    uint32_t *niaRing;
+    unsigned niaRingCap, niaRingPos, niaRingFilled;                /* last instruction broke sequential fetch */
 
     /* Left ON by an ISPB with an illegal M1 (100-111): protected
      * locations can then be written without a violation until the next
@@ -315,6 +320,7 @@ void cpu_s_eah(CPU *cpu, DInstr *v, uint32_t value);
 
 uint32_t cpu_g_shift_cnt(CPU *cpu, uint32_t hw1);
 
+void cpu_dump_nia_ring(CPU *cpu, const char *why, uint32_t nia);
 void cpu_reset(CPU *cpu);
 void cpu_power_on(CPU *cpu);
 void cpu_run(CPU *cpu);

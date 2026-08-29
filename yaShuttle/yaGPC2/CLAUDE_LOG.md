@@ -3657,3 +3657,42 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - BENIGN, ruled out: the IOP (`pe=18`) zeroes `0078-007b` at t=221.9M.  That is the
   `FCMPSA` load block (`00000..001a7`) legitimately initialising the PSA during the
   load, long before the interrupt, and the hardware refills the slot when EX0 fires.
+
+### [2026-08-29] Target: [problems.md]
+- **ROOT CAUSE FOUND: PHASE 2'S Z1 ZCON POOL WAS NEVER EMITTED, so PASS ran with
+  GPCIPL's Z-CONs.**  `derive_load_blocks` emits the pool as `[pool_start, pool-2]`,
+  but only sets `pool_start` when `s >= parent_pool`.  `POOL_PARENT` HAS NO ENTRY FOR
+  2, so `.get(2, 2)` makes PHASE 2 ITS OWN POOL PARENT and `parent_pool` is phase 2's
+  OWN cursor (`0024a`).  Its own pool starts at `001a8`, BELOW that, so the test was
+  never true and the block was never emitted.  Child phases were fine: their pool
+  sits above the parent's cursor.
+- HOW IT WAS FOUND, by measurement rather than inference, and it needed a new tool:
+    * A NIA ring buffer (`YAGPC_NIARING=<n>`, dumped at the Instruction Monitor and at
+      the invalid-instruction stop) -- a wild branch is invisible to every other trace
+      because the interrupt log shows only where execution ARRIVED, and `--trace` over
+      ~200M instructions is unusable.
+    * The ring gave `... 40078 40079 4007a | 44723 ...`, so `0x4007a` branched into
+      `#CDCDDOW`, a DATA csect.  `0x4007a` holds `D0FF 39CC`, which the emulator's own
+      disassembler renders as `SCAL 0,@@X'01cc'(1)` -- a call fetching its target
+      THROUGH a Z-CON at `01cc`.
+    * `01cc` is inside the Z1 pool (`pool_low_hw 001a8`, `pool_next_hw 0024a`), and
+      the only load block covering it belonged to PHASE 10.  Phase 2's `.lib` HAS the
+      content -- extent `001a8..00247`, 160 halfwords -- and it was being dropped.
+  THE SAME REGION was flagged HOURS EARLIER as a 158-halfword mismatch against the
+  DASS dump, "our values and DASS's, same values in a different order".  Two symptoms
+  of one cause; I did not connect them until the ring named the instruction.
+- FIX: when a phase is its own pool parent, its own cells begin at `pool_lo`, not at
+  the self-referential `parent_pool`.  Phase 2 now emits `001a8 len=162` (29 blocks,
+  ncont 227 of a 256 budget, crossed=False); phases 3, 10 and 13 are UNCHANGED.
+- **RESULT: PASS now runs far enough to report its own runtime error.**
+      *** HAL/S SEND ERROR: RUNTIME: #6 EXP FUNCTION HAS ARGUMENT > 174.673
+      ERROR: invalid instruction 0xc6c6 at 0x6b8f
+  That is the HAL/S runtime library detecting a math domain error and announcing it
+  through PASS's own channel -- a completely different and far more advanced failure
+  than a wild call into a data csect.  blocksRead 430.
+- WITHDRAWN: "the crash is nondeterministic".  It is deterministic; I had FOUR
+  discretePanel instances running at once, each republishing conflicting mode levels
+  from its own script clock, because I launched one per iteration without killing the
+  previous.  With a single panel the crash returned to exactly `0xc9a4 at 0x0008`.
+  A polluted harness looked like a property of the machine.
+- Four pre-existing test failures unchanged.
