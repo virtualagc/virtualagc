@@ -29,6 +29,7 @@ See discretes.py for the wire protocol, and com/discretes.coffee in
 nsts-sim-gpc for the same protocol on the other side.
 """
 
+import argparse
 import threading
 import tkinter as tk
 from tkinter import ttk
@@ -336,9 +337,99 @@ class Panel:
                 label, bool(self.observedA & D.bit_mask(bit))))
 
 
+# ---- scripted playback ------------------------------------------------
+#
+# The crew sequence is a SEQUENCE, not a state: HALT, then the IPL
+# pushbutton pressed ON TOP OF HALT, then STANDBY, then RUN.  yaGPC2's
+# --discrete-a/-b are static overrides and cannot express any of that --
+# they assert a final state the software never transitioned into -- so a
+# headless run could never reach the menu-selected load path.  The
+# sequence belongs here, where the bit layout and the momentary-pushbutton
+# semantics already live.
+#
+# Each line is `<milliseconds> <command>`, times measured from startup:
+#
+#     0     mode HALT
+#     500   ipl                 (press and release, 250 ms apart)
+#     3000  mode STANDBY
+#     60000 mode RUN
+#
+# `source MM1|MM2|OFF` and `gpcid <n>` are also accepted.  Blank lines and
+# `#` comments are ignored.
+SCRIPT_HELP = "timed discrete sequence: '<ms> <command>' per line"
+IPL_HOLD_MS = 250
+
+
+def _parse_script(text):
+    out = []
+    for n, line in enumerate(text.splitlines(), 1):
+        line = line.split("#", 1)[0].strip()
+        if not line:
+            continue
+        parts = line.split(None, 1)
+        if len(parts) != 2 or not parts[0].isdigit():
+            raise SystemExit(f"discretePanel: script line {n}: "
+                             f"expected '<ms> <command>', got {line!r}")
+        out.append((int(parts[0]), parts[1].strip()))
+    return sorted(out, key=lambda e: e[0])
+
+
+def _run_script(panel, entries, quitAfterMs=None):
+    def do(cmd):
+        verb, _, arg = cmd.partition(" ")
+        arg = arg.strip()
+        if verb == "mode":
+            names = {n.upper(): b for n, b in MODE_SWITCH}
+            if arg.upper() not in names:
+                raise SystemExit(f"discretePanel: unknown mode {arg!r}")
+            panel.mode.set(names[arg.upper()])
+            panel._modeChanged()
+        elif verb == "ipl":
+            panel._iplPressed()
+            panel.root.after(IPL_HOLD_MS, panel._iplReleased)
+        elif verb == "source":
+            names = {n.upper(): b for n, b in IPL_SOURCE}
+            if arg.upper() not in names:
+                raise SystemExit(f"discretePanel: unknown source {arg!r}")
+            panel.iplSource.set(names[arg.upper()])
+            panel._iplSourceChanged()
+        elif verb == "bit":
+            # `bit B 7 on` -- any bit this panel owns as a toggle, which is
+            # how CRT select (register B bits 6-7, the DEU_ID field) is
+            # reached.  Setting the variable rather than sending directly
+            # matters: _republish re-asserts from the variables, so a direct
+            # send would be undone on the next timer tick.
+            reg, num, val = arg.split()
+            key = (D.REG_A if reg.upper() == "A" else D.REG_B, int(num))
+            on = val.lower() in ("on", "1", "set", "true")
+            if key in panel.toggles:
+                panel.toggles[key].set(on)
+            panel._send(D.SET if on else D.RESET, key[0], D.bit_mask(key[1]))
+        elif verb == "gpcid":
+            panel.gpcId.set(int(arg))
+            panel._gpcIdChanged()
+        else:
+            raise SystemExit(f"discretePanel: unknown command {verb!r}")
+        print(f"discretePanel: {cmd}", flush=True)
+
+    for ms, cmd in entries:
+        panel.root.after(ms, lambda c=cmd: do(c))
+    if quitAfterMs is not None:
+        panel.root.after(quitAfterMs, panel.root.quit)
+
+
 def main():
+    ap = argparse.ArgumentParser(description="GPC discrete panel")
+    ap.add_argument("--script", metavar="FILE", help=SCRIPT_HELP)
+    ap.add_argument("--quit-after", type=int, metavar="MS",
+                    help="exit this many ms after startup (for scripted runs)")
+    args = ap.parse_args()
+
     root = tk.Tk()
-    Panel(root)
+    panel = Panel(root)
+    if args.script:
+        with open(args.script) as f:
+            _run_script(panel, _parse_script(f.read()), args.quit_after)
     root.mainloop()
 
 

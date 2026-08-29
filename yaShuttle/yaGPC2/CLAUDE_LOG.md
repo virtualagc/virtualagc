@@ -3542,3 +3542,38 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   by design.
 - STATE OF THE CRASH HUNT: unchanged.  `invalid instruction 0xc9a4 at 0x0008` remains
   reproducible only interactively, because only the panel can perform the sequence.
+
+### [2026-08-28] Target: [problems.md]
+- **THE CREW SEQUENCE IS NOW SCRIPTABLE, AND THE BOOTSTRAP COMES FROM TAPE.**  Added
+  `--script FILE` and `--quit-after MS` to `discretePanel.py` -- the user's suggestion,
+  and the right home for it: the panel already owns the bit layout and the
+  momentary-pushbutton semantics, whereas yaGPC2's `--discrete-a/-b` are static
+  overrides that assert a final state the software never TRANSITIONED into.  Script
+  lines are `<ms> <command>`: `mode HALT|STANDBY|RUN`, `ipl` (press + release
+  IPL_HOLD_MS later), `source MM1|MM2|OFF`, `gpcid <n>`, `bit <A|B> <n> <on|off>`.
+  `bit` sets the toggle VARIABLE, not just the wire, because `_republish` re-asserts
+  from the variables and a direct send would be undone on the next tick.
+- IT WORKS END TO END, headless, no `.fcm` argument at all:
+      MODE: HALT; CPU held in reset (no crew panel heard yet)
+      MODE: IPL; memory filled, bootstrap read from MM1 (BCE 18) over the bus
+                 (72 blocks, 36864 halfwords) to 0x00000
+      MODE: HALT -> STBY; reset released, starting at 0x0014b
+      MODE: RUN
+      deu: YAGPC_DEUKEYS delivered 3 keystroke(s)
+  THE BOOTSTRAP IS READ FROM THE TAPE OVER THE BUS -- the fidelity gap I had been
+  short-circuiting by handing `--ipl` a pre-built `BOOT-700s.fcm`.  Requires
+  `stamp_bootstrap_on_tape.py` to have written the FMAIPL2 allocation first.
+- ORDER MATTERS: start yaGPC2 FIRST.  The panel republishes LEVELS on a timer, but
+  the IPL pushbutton is MOMENTARY -- start the panel first and the pulse is missed
+  and the machine never IPLs.
+- STILL NOT LOADING: with the full sequence and `YAGPC_DEUKEYS=ITEM,1,EXEC`, 8665
+  polls and 26000 DEU commands later there is no tape read and no crash.  So the
+  keystrokes reach the software (proved earlier via DEUMODE) and the mode sequence is
+  now genuine, yet ITEM 1 EXEC does not select.  NEXT: watch `ITEMNO` (`0251e`) and
+  `BSLTPNTR+1` (`0366d`) during a scripted run -- that separates "keys parsed but the
+  item rejected" from "handler never reached", and it is the measurement I keep
+  deferring.
+- TRAP, FOURTH AND FIFTH TIME TODAY: a `pgrep -f`/`kill` whose PATTERN TEXT appears
+  in the same command line matches the shell itself (exit 144).  Putting the kill and
+  the relaunch in ONE command is what does it.  Use `discrete[P]anel` so the pattern
+  cannot match its own occurrence, and keep kills in a SEPARATE invocation.
