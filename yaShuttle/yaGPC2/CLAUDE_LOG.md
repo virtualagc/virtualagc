@@ -3784,3 +3784,34 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   matched 239 "entries" in the pool alone, because the pattern also caught
   symbol-detail lines like `#ZFIOCGR+0000`.  Require the `****` field and reject
   names containing `+`.
+
+### [2026-08-29] Target: [problems.md]
+- THE USER'S ACTUAL POINT, and it is right: `zconPool` is only ONE of the orderings,
+  and pinning it leaves the OTHER csect groups unpinned.  Measured, PHASE02 against
+  the flown addresses, 653 csects present in both:
+      #Q/#Z zcon    80/80  100.0%   <- the pins
+      #D data       66/66  100.0%    #P compool 58/58 100.0%
+      #C data       39/39  100.0%    #E extref  31/31 100.0%   @ stack 30/30 100.0%
+      Ann           45/50   90.0%
+      $0 code       27/31   87.1%
+      other        255/268  95.1%
+      ALL          631/653  96.6%
+- ALL 22 MISPLACEMENTS BELONG TO FOUR PROGRAMS, AND EACH FAMILY MOVES AS A UNIT --
+  the internal layout is right, the PROGRAM is placed wrong:
+      DMPMMM  ($0 + A1..A9, B0..B6)  18 csects, ALL shifted +592
+      VMELOA  ($0, A1, A2)            3 csects, ALL shifted +268
+      $0ASCTIM  -3730        $0ASGCYC  -4358
+  Program order in that region:
+      flown: DMPMMM(10b30) -> ASCTIM(119c2) -> VMELOA(11b06) -> ASGCYC(11d7a)
+      ours : ASCTIM(10b30) -> ASGCYC(10c74) -> DMPMMM(10d80) -> VMELOA(11c12)
+- THE MECHANISM THAT WOULD PIN IT is documented in `ap101Utils/linkorder.py`'s header:
+  besides `zconPool` the file takes `orphanFlush` (cross-module orphan program-flush
+  order) and per-memory-configuration `mc.{name}.codeOrder` (code-run module order),
+  `streams` (per-bank autocall placement), `floors`, `wave1Order`, `compoolOrder`.
+  Those govern where whole PROGRAMS land, which is exactly what differs.  Deriving
+  them needs the `mc` anchor structure, not just an address sort.
+- DO NOT EXPECT THIS TO FIX THE EXP ERROR EITHER.  The `zconPool` experiment already
+  settled the principle: pinning took the pool from 2/80 to 80/80 and the boot
+  produced BYTE-IDENTICAL symptoms.  The link is self-consistent, so csect placement
+  is a FIDELITY measure against the flown article, not a behavioural one.  Worth
+  doing for comparison work; not a candidate root cause.
