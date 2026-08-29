@@ -3445,3 +3445,45 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   zero is there, and it is.
 - STILL OPEN: the DEU sees nothing (0 commands, 0 fills), so PASS runs but has not
   driven a display.  That is the next target.
+
+### [2026-08-28] Target: [problems.md]
+- **THE DISPLAY PATH WORKS.**  `--discrete-b 21000000` (GPC 1, DEU_ID 1) with
+  `--deu-model`, headless: `ipled:true, polls 265, timeFills 260, displayFills 266,
+  formatFills 8, headerless 0, abandoned 0`, ZERO errors, 10,000 SECONDS of simulated
+  time, servicing Clock 1 interrupts normally.  Against this log's own reference for
+  a good run -- POLL 87 / TIME_FILL 88 / DISPLAY_FILL 87 / FORMAT_FILL 7 in 45 s --
+  the proportions match and `formatFills` 8 vs 7.  Every one of those counters read
+  ZERO in every previous run this session.
+- THE BIT LAYOUT, from `discretePanel/discretePanel.py`: register B bits 6-7 are the
+  DEU_ID field, read by GPCIPL as `NHI R3,X'0300'` with zero meaning NO DISPLAY UNIT
+  (`GPCRTOPT.asm` POLL30, "IS THE DEU_ID 1, 2, 3, OR 4" / `LR R3,R3` / `BZ POLL45`).
+  GPC id is bits 0-2.  So `20000000` = GPC 1 + DEU_ID 0 = the no-CRT default-load
+  path, and `21000000` = GPC 1 + DEU_ID 1.  THAT ONE DIGIT is the difference between
+  "the display is dead" and the numbers above.
+- WHAT THE HEADLESS RUN CANNOT DO: with a static discrete there is no keyboard, so
+  GPCIPL sits in its menu loop at `01df8`/`01dbe` polling the DEU forever and NEVER
+  LOADS -- zero tape reads.  Proving the display path is not proving the load.
+- ISOLATION RESULT, and it exonerates the bridge: re-running identically but with
+  `--bce-network` against the live MEDS instead of `--deu-model` ALSO runs clean --
+  7 minutes, zero errors.  So the user's crash is NOT the UDP bridge and NOT
+  `--real-time` pacing.  Both DEU paths are stable while GPCIPL waits at the menu.
+- THEREFORE the crash (`invalid instruction 0xc9a4 at 0x0008`, PSA storage executed
+  as code) belongs to THE MENU-INITIATED LOAD -- what ITEM 1 EXEC starts -- which is
+  a DIFFERENT load path from the one every headless test exercises.  With no DEU,
+  POLL45 takes "IPL DEFAULT LOAD" and writes LOADTABLE ID 15 to `BSLTPNTR+1`; a menu
+  selection writes a different id and loads a different table.  Untested by anything
+  I have run headlessly all session.
+- CORRECTION, TWICE MADE: `wordsLost` is NOT a defect.  `mmumodel.c:211-214` states
+  GPCIPL's loader "takes what it wants and stops... leaving 360 of a 4096-word
+  transfer unread", and the observed losses are EXACT multiples: 720 = 2x360,
+  1440 = 4x360.  The headless runs lose zero because the SSL loads there and takes
+  everything; the panel-IPL path runs GPCIPL's loader instead.  Different loader, not
+  different pacing.  I twice called this the thread to pull.
+- ALSO CORRECTED: MEDS DOES respond.  `YAGPC_BUSTRACE` shows 246 `KEEP` datagrams
+  from 127.0.0.1:6906 (32 bytes, `0000 ff00 ...`, and `0001 ff00 ...`) against 6872
+  `ECHO` of our own loopback correctly discarded.  So the transport and the IUA
+  filter both work.  `0001` is `HDR_IPL_REQUIRED`; our own `deumodel.c` documents the
+  matching rule -- "while a load is running the unit answers a poll with the header
+  alone... the rule that starves a sixteen-word receive mid-IPL" -- and `FAZ2DEU`
+  exits early on `DEUMODE & X'0001'`.  Plausible but NOT verified: the full 16
+  halfwords of a KEEP were never dumped, only the first 6.
