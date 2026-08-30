@@ -149,13 +149,22 @@ static int deu_keycode(const char *n, size_t len) {
 static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
     static int done = 0;
     const char *spec = getenv("YAGPC_DEUKEYS");
-    if (spec == NULL || done || !d->ipled) return 0;
-    /* WAIT FOR THE MENU.  Delivering on the first poll after the unit is
-     * IPLed puts an ITEM entry in front of a display that is not showing
-     * the menu yet, and GPCIPL discards it: the keys demonstrably reach
-     * DEUMODE and the count is read back, but nothing is selected.
-     * YAGPC_DEUKEYS_AFTER=<n> holds them until the nth poll (default 400,
-     * about the point GPCIPL settles into its menu loop at 01df8). */
+    if (spec == NULL || done) return 0;
+    /* NOT gated on d->ipled.  It used to be, and that made crew input
+     * impossible on the IPL path that omits the BFC CRT switch: GPCIPL's
+     * POLL45 ("IPL DEFAULT LOAD -- NO DEU SELECTED") never loads the unit
+     * there, so `ipled` stays false forever and no keystroke could ever be
+     * delivered -- on precisely the route where PASS, rather than GPCIPL,
+     * owns the DK bus.  The poll-count gate below is what actually wants
+     * enforcing, and it subsumes the old test: a unit that is being polled
+     * is a unit whose GPC is listening.
+     *
+     * WAIT FOR THE MENU.  Delivering on the first poll puts an ITEM entry
+     * in front of a display that is not showing the menu yet, and GPCIPL
+     * discards it: the keys demonstrably reach DEUMODE and the count is
+     * read back, but nothing is selected.  YAGPC_DEUKEYS_AFTER=<n> holds
+     * them until the nth poll (default 400, about the point GPCIPL settles
+     * into its menu loop at 01df8). */
     {
         static long after = -1;
         if (after < 0) {
