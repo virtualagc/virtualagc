@@ -38,11 +38,35 @@ periodically as well as on change, or a GPC that started late will hold a
 stale level forever.  REPUBLISH_MS is that period.
 """
 
+import os
 import socket
 import struct
 
 GROUP = "239.255.1.1"
-PORT = 6980                 # busConfig._gpcDiscretes
+
+# Every bus port derives from one base: bus n is base+n (IC1-5 = 1-5,
+# DK1-4 = 6-9, ... FC1-4 = 20-23) and the discrete bus is base+80.  The
+# default 6900 reproduces busConfig exactly, so nothing changes unless a
+# base is chosen.  Give a second emulation its own base -- --port-base
+# here, the same option on yaGPC2 and MEDS -- and the two run side by
+# side without fighting over sockets.  NSTS_BUS_PORT_BASE sets it too.
+PORT_BASE_DEFAULT = 6900
+DISCRETES_OFFSET = 80
+
+PORT_BASE = int(os.environ.get("NSTS_BUS_PORT_BASE", PORT_BASE_DEFAULT))
+PORT = PORT_BASE + DISCRETES_OFFSET     # busConfig._gpcDiscretes
+
+
+def set_port_base(base):
+    """Point this process at a different bus port range.
+
+    Call BEFORE opening any socket; sender()/receiver() read PORT at the
+    moment they bind.
+    """
+    global PORT_BASE, PORT
+    PORT_BASE = int(base)
+    PORT = PORT_BASE + DISCRETES_OFFSET
+    return PORT
 IFACE = "127.0.0.1"         # matches Bus.IFACE / NSTS_BUS_IFACE
 
 SET = 1

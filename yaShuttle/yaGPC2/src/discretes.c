@@ -16,7 +16,25 @@
 #include "compat.h"
 
 #define DISCRETES_GROUP "239.255.1.1"
-#define DISCRETES_PORT  6980
+/* One base for every bus socket in the process; see discretes.h.  Read
+ * from NSTS_BUS_PORT_BASE if --port-base was not given, so a shell that
+ * exports it once configures the whole instance. */
+static int g_portBase = -1;
+
+void yagpc_set_port_base(int base) { g_portBase = base; }
+
+int yagpc_port_base(void) {
+    if (g_portBase < 0) {
+        const char *w = getenv("NSTS_BUS_PORT_BASE");
+        char *end = NULL;
+        long v = (w != NULL && *w != '\0') ? strtol(w, &end, 10) : -1;
+        g_portBase = (end != NULL && *end == '\0' && v > 0 && v < 65536 - 100)
+                         ? (int)v : YAGPC_PORT_BASE_DEFAULT;
+    }
+    return g_portBase;
+}
+
+#define DISCRETES_PORT  (yagpc_port_base() + YAGPC_DISCRETES_OFFSET)
 
 #define OP_SET   1
 #define OP_RESET 2

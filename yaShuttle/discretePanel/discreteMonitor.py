@@ -52,9 +52,20 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--seconds", type=float, default=None,
                     help="stop after this long (default: run until interrupted)")
+    ap.add_argument("--port-base", type=int, metavar="N", default=None,
+                    help="base of the UDP port range the buses use: bus n is "
+                         "base+n and the discrete bus base+80 (default 6900, "
+                         "matching busConfig).  Give a second emulation its "
+                         "own base -- the same option on yaGPC2 and MEDS -- "
+                         "to run it alongside the first without port "
+                         "conflicts.  NSTS_BUS_PORT_BASE sets it too.")
     ap.add_argument("--changes", action="store_true",
                     help="print only when a register value actually changes")
     args = ap.parse_args()
+
+    # Before any socket is opened.
+    if args.port_base is not None:
+        D.set_port_base(args.port_base)
 
     sock = D.receiver(timeout=0.5)
     print("listening on %s:%d" % (D.GROUP, D.PORT))

@@ -30,6 +30,8 @@ nsts-sim-gpc for the same protocol on the other side.
 """
 
 import argparse
+import re
+import subprocess
 import threading
 import tkinter as tk
 from tkinter import ttk
@@ -91,6 +93,90 @@ GPC_ID_BITS = (0, 1, 2)          # register B, a 3-bit field
 # which is what a GPC with nothing driving it reads: yaGPC2's
 # DISCRETE_IN_B_DEFAULT is 0x21000000, GPC 1 and CRT 1.
 DEFAULT_ON = {(D.REG_B, 7)}
+
+
+def _active_window():
+    """The window the user is actually working in, as an X id string."""
+    try:
+        out = subprocess.run(["xprop", "-root", "_NET_ACTIVE_WINDOW"],
+                             capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    m = re.search(r"(0x[0-9a-fA-F]+)", out)
+    return m.group(1) if m and int(m.group(1), 16) else None
+
+
+def _dont_steal_focus(root):
+    """Map the panel without taking the keyboard away from the user.
+
+    The panel is a crew panel: every control is a mouse control and it has no
+    business receiving a keystroke.  Mapped the ordinary way it is a new
+    top-level, so the window manager gives it the keyboard and whatever the
+    user was typing elsewhere lands here -- silently, with the standard Tk
+    class bindings ready to turn a space or an arrow key into a DISCRETE
+    CHANGE.  That injects panel operations nobody performed into a test.
+
+    Same two halves Don applied to MEDS (nsts-sim-gpc 852d01a, "meds: don't
+    steal focus or Mod+Key's"), which used Electron's `show: false` +
+    `showInactive()`.
+
+    ASKING NICELY IS NOT ENOUGH.  EWMH says _NET_WM_USER_TIME 0 means "do not
+    activate on map", and setting it while withdrawn was tried first -- the
+    user reported the window still took focus.  Tk stamps its own timestamp
+    when deiconify() maps the window, so the 0 does not survive.  So instead
+    we note who had focus, map, and hand it straight back with wmctrl.  Both
+    calls are best effort: no xprop/wmctrl, or a window manager that will not
+    cooperate, and the second half below still stands.  (This desktop is
+    Marco.)
+
+    REFUSE THE KEYBOARD REGARDLESS.  takefocus=0 on every widget so Tk never
+    gives one keyboard focus; keys then arrive at the toplevel and are
+    swallowed.  This cannot be done with bind_all: the bindtag order is
+    widget, class, toplevel, all, so the CLASS binding that makes space press
+    a button has already run before "all" is reached.
+    """
+    def refuse(w):
+        try:
+            w.configure(takefocus=0)
+        except tk.TclError:
+            pass                                # frames and labels have none
+        for child in w.winfo_children():
+            refuse(child)
+    refuse(root)
+    root.bind("<Key>", lambda _e: "break")
+
+    previous = _active_window()
+
+    # Ask not to be activated in the first place.  EWMH: _NET_WM_USER_TIME 0
+    # means "do not activate this window on map".  Set while withdrawn, so it
+    # is in place before the map request.  Tk may stamp its own timestamp at
+    # deiconify() and undo this -- which is why the restore below exists too;
+    # the two are independent and neither is trusted alone.
+    root.withdraw()
+    root.update_idletasks()
+    try:
+        subprocess.run(["xprop", "-id", str(root.winfo_id()),
+                        "-f", "_NET_WM_USER_TIME", "32c",
+                        "-set", "_NET_WM_USER_TIME", "0"],
+                       check=False, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    root.deiconify()
+
+    def give_it_back():
+        # No previous window means nothing was focused, so there is nothing
+        # to steal and nothing to give back -- leave the panel focused.
+        if not previous:
+            return
+        try:
+            subprocess.run(["wmctrl", "-i", "-a", previous], check=False,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=5)
+        except (OSError, subprocess.SubprocessError):
+            pass
+    # After the map has settled, or the WM re-focuses us right afterwards.
+    root.after(400, give_it_back)
 
 
 class Panel:
@@ -423,10 +509,22 @@ def main():
     ap.add_argument("--script", metavar="FILE", help=SCRIPT_HELP)
     ap.add_argument("--quit-after", type=int, metavar="MS",
                     help="exit this many ms after startup (for scripted runs)")
+    ap.add_argument("--port-base", type=int, metavar="N", default=None,
+                    help="base of the UDP port range the buses use: bus n is "
+                         "base+n and the discrete bus base+80 (default 6900, "
+                         "matching busConfig).  Give a second emulation its "
+                         "own base -- the same option on yaGPC2 and MEDS -- "
+                         "to run it alongside the first without port "
+                         "conflicts.  NSTS_BUS_PORT_BASE sets it too.")
     args = ap.parse_args()
+
+    # Before any socket is opened.
+    if args.port_base is not None:
+        D.set_port_base(args.port_base)
 
     root = tk.Tk()
     panel = Panel(root)
+    _dont_steal_focus(root)
     if args.script:
         with open(args.script) as f:
             _run_script(panel, _parse_script(f.read()), args.quit_after)

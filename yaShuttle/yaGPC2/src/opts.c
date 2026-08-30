@@ -25,6 +25,12 @@ static const char *HELP_TEXT =
 "  --trap-svc-error                intercept HAL/S SEND ERROR SVCs (default)\n"
 "                                  (default: true)\n"
 "  --no-trap-svc-error             pass SEND ERROR SVCs to SVC handler\n"
+"  --no-halucp-svc                 do not intercept ANY SVC in HalUCP: the\n"
+"                                  loaded image supplies its own handlers.\n"
+"                                  Required for real flight software, whose\n"
+"                                  SVC numbers COLLIDE with HalUCP's own\n"
+"                                  (13=SET EVENT, 14=RESET EVENT, 20=SEND\n"
+"                                  ERROR are FPMSET/FPMRESET/FPMSDERR)\n"
 "  --halucp-format-num-blanks <n>  blanks between WRITE output fields (default:\n"
 "                                  5) (default: \"5\")\n"
 "  --line-width <n>                WRITE line width for wrap, overriding the\n"
@@ -131,6 +137,14 @@ static const char *HELP_TEXT =
 "                                  and --deu-model: only the mass memory bus\n"
 "                                  is taken over (default: none)\n"
 "  --mmu-unit <n>                   which mass memory the model is, 1 or 2\n"
+"  --port-base <n>                  base of the UDP port range the buses use:\n"
+"                                  bus n is base+n, the discrete bus base+80\n"
+"                                  (default 6900, matching nsts-sim-gpc's\n"
+"                                  busConfig).  Give a second emulation its\n"
+"                                  own base to run it alongside the first\n"
+"                                  without port conflicts; MEDS and\n"
+"                                  discretePanel.py take the same option.\n"
+"                                  NSTS_BUS_PORT_BASE sets it too\n"
 "                                  (bus MM1/BCE 18 or MM2/BCE 19; default 1)\n"
 "  --discrete-a <hex>              override discrete input A's local value\n"
 "                                  (default 0A000000: MM1 IPL source, MM1\n"
@@ -163,6 +177,7 @@ static const char *HELP_TEXT =
 static void set_defaults(Options *o) {
     memset(o, 0, sizeof(*o));
     o->trapSvcError = true;
+    o->halucpSvc = true;
     o->halucpFormatNumBlanks = "5";
     o->lineWidth = "132";
     o->maxSteps = "100000";
@@ -256,6 +271,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->trapSvcError = true;
         } else if (tok_is(tok, "--no-trap-svc-error", &n)) {
             (void)n; opts->trapSvcError = false;
+        } else if (tok_is(tok, "--no-halucp-svc", &n)) {
+            (void)n; opts->halucpSvc = false;
         } else if (tok_is(tok, "--halucp-format-num-blanks", &n)) {
             opts->halucpFormatNumBlanks = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--line-width", &n)) {
@@ -337,6 +354,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->mmuModelVolume = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--mmu-unit", &n)) {
             opts->mmuModelUnit = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--port-base", &n)) {
+            opts->portBase = take_value(argc, argv, &i, tok, n);
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {

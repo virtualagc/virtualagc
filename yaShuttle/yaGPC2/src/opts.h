@@ -22,6 +22,8 @@ typedef struct {
     char *symbols;                  /* NULL if unset */
     bool ebcdic;                    /* default false */
     bool trapSvcError;              /* default true */
+    bool halucpSvc;                 /* default true; false = the loaded image
+                                     * has its own SVC handlers (real PASS) */
     char *halucpFormatNumBlanks;    /* default "5" */
     char *lineWidth;                /* default "132"; only applied as a
                                       * uniform override if lineWidthSet */
@@ -189,6 +191,13 @@ typedef struct {
      * device is worth having. */
     char *mmuModelVolume;             /* default NULL */
     char *mmuModelUnit;               /* "1" (MM1/BCE 18) or "2"; default 1 */
+
+    /* Base of the UDP port range every bus socket derives from: bus n uses
+     * base+n and the discrete bus base+80.  Default 6900, which reproduces
+     * nsts-sim-gpc's own busConfig exactly.  Giving a second instance its
+     * own base lets two emulations run side by side without fighting over
+     * sockets -- MEDS and discretePanel.py take the same option. */
+    char *portBase;                   /* decimal; default 6900 */
 
     /* Not part of gpc run's own option set -- yaGPC2-specific. Which
      * instruction-timing model charges cpu->elapsedTimeUs, and through

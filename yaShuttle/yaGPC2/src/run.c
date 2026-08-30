@@ -118,6 +118,20 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     GpcServicerFn base = NULL;
     void *baseCtx = NULL;
 
+    /* BEFORE any socket is opened: every bus port derives from this base,
+     * so a second emulation can be given its own range and run alongside
+     * the first.  Bus n is base+n, the discrete bus base+80. */
+    if (opts->portBase != NULL && *opts->portBase != '\0') {
+        char *end = NULL;
+        long v = strtol(opts->portBase, &end, 10);
+        if (end == NULL || *end != '\0' || v <= 0 || v >= 65536 - 100) {
+            fprintf(stderr, "--port-base: expected a port number, got \"%s\"\n",
+                    opts->portBase);
+            exit(1);
+        }
+        yagpc_set_port_base((int)v);
+    }
+
     if (opts->deuModel) {
         /* Deliberately instead of, not alongside, the network servicer:
          * only one thing can sit on the far end of the bus, and the

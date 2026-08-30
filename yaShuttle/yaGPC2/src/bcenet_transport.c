@@ -12,6 +12,7 @@
 #endif
 
 #include "bcenet_transport.h"
+#include "discretes.h"
 
 #include "compat.h"
 
@@ -70,14 +71,25 @@
  * until something actually needs BCE 24; bcenet_transport_open_bus()
  * fails (logged, not fatal) for it rather than guessing a port. */
 static const int BCENET_BUS_PORT[BCENET_MAX_BUS_ID + 1] = {
-    [1] = 6901,  [2] = 6902,  [3] = 6903,  [4] = 6904,  [5] = 6905,  /* IC1-5 */
-    [6] = 6906,  [7] = 6907,  [8] = 6908,  [9] = 6909,               /* DK1-4 */
-    [10] = 6910, [11] = 6911,                                        /* PL1-2 */
-    [12] = 6912, [13] = 6913,                                        /* LB1-2 */
-    [14] = 6914, [15] = 6915, [16] = 6916, [17] = 6917,               /* FC5-8 */
-    [18] = 6918, [19] = 6919,                                        /* MM1-2 */
-    [20] = 6920, [21] = 6921, [22] = 6922, [23] = 6923,               /* FC1-4 */
+    [1] = 1,  [2] = 2,  [3] = 3,  [4] = 4,  [5] = 5,   /* IC1-5 */
+    [6] = 6,  [7] = 7,  [8] = 8,  [9] = 9,             /* DK1-4 */
+    [10] = 10, [11] = 11,                              /* PL1-2 */
+    [12] = 12, [13] = 13,                              /* LB1-2 */
+    [14] = 14, [15] = 15, [16] = 16, [17] = 17,        /* FC5-8 */
+    [18] = 18, [19] = 19,                              /* MM1-2 */
+    [20] = 20, [21] = 21, [22] = 22, [23] = 23,        /* FC1-4 */
 };
+
+/* The table holds OFFSETS from the port base, not absolute ports, so a
+ * second emulation can be run on its own range (--port-base /
+ * NSTS_BUS_PORT_BASE) without fighting the first for sockets.  At the
+ * default base of 6900 these are the 6901..6923 of nsts-sim-gpc's own
+ * busConfig, unchanged. */
+static int bcenet_bus_port(int busID) {
+    int off = (busID >= 0 && busID <= BCENET_MAX_BUS_ID)
+                  ? BCENET_BUS_PORT[busID] : 0;
+    return off ? yagpc_port_base() + off : 0;
+}
 
 /* Multicast loopback is ON (the reference's Bus turns it on too), so
  * every datagram this process sends comes straight back to its own
@@ -353,7 +365,7 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID) {
     }
     if (b->fd >= 0) return true; /* already open */
 
-    int port = BCENET_BUS_PORT[busID];
+    int port = bcenet_bus_port(busID);
     if (port == 0) {
         fprintf(stderr, "bcenet: bus %d has no known port mapping (see BCENET_BUS_PORT)\n", busID);
         return false;
@@ -540,7 +552,7 @@ static bool transport_send_now(BceNetTransport *t, BceNetBusSocket *b, int busID
         buf[headerLen + i * 2] = (unsigned char)(w >> 8);
         buf[headerLen + i * 2 + 1] = (unsigned char)(w & 0xff);
     }
-    struct sockaddr_in dest = bcenet_group_addr(BCENET_BUS_PORT[busID]);
+    struct sockaddr_in dest = bcenet_group_addr(bcenet_bus_port(busID));
     /* Only the fallback path needs the byte-exact record: when we have a
      * transmit socket, the loopback copy is identified by its port. */
     int sendFd = (b->txFd >= 0) ? b->txFd : b->fd;

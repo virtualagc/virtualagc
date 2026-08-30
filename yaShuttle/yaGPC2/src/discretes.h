@@ -99,4 +99,16 @@ unsigned long discretes_message_count(void);
  * the machine reading it. */
 void discretes_publish(int reg, uint32_t mask, bool on);
 
+
+/* ALL bus ports derive from one base, so a second emulation can be run
+ * alongside the first without fighting over sockets.  Bus n listens on
+ * base+n (IC1-5 = 1-5, DK1-4 = 6-9, ... FC1-4 = 20-23) and the discrete
+ * bus on base+80, matching nsts-sim-gpc's busConfig at the default base
+ * of 6900.  Set once, before any socket is opened, from --port-base or
+ * NSTS_BUS_PORT_BASE. */
+#define YAGPC_PORT_BASE_DEFAULT 6900
+#define YAGPC_DISCRETES_OFFSET  80
+void yagpc_set_port_base(int base);
+int  yagpc_port_base(void);
+
 #endif
