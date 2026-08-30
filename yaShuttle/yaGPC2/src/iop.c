@@ -1020,9 +1020,11 @@ static void iop_log_procs(IOP *iop, const char *what, uint32_t data) {
     static uint32_t last = 0xffffffffu;
     uint32_t now = register_get32(&iop->regHalt);
     if (now == last) return;
-    fprintf(stderr, "PROCS %-8s t=%.0f data=%08x  %08x -> %08x  dk1(bce6)=%d\n",
+    fprintf(stderr, "PROCS %-8s t=%.0f data=%08x  %08x -> %08x  dk1(bce6)=%d"
+            "  cpu@%05x\n",
             what, iop_now_us(iop), data, last, now,
-            iop_proc_get(&iop->regHalt, 6) ? 1 : 0);
+            iop_proc_get(&iop->regHalt, 6) ? 1 : 0,
+            iop->cpu ? (unsigned)psw_get_nia(&iop->cpu->psw) : 0u);
     last = now;
 }
 
@@ -1032,6 +1034,16 @@ static void iop_log_procs(IOP *iop, const char *what, uint32_t data) {
  * a permanent park looks like, and it is otherwise invisible from outside. */
 void iop_dump_procs(IOP *iop) {
     if (iop == NULL) return;
+    /* The MIA enables matter as much as the processor enables: a BCE can be
+     * enabled and still do nothing if its bus transmitter/receiver is off,
+     * and the two are set by different commands (FCMINIOP's ENABLE
+     * TRANSMITTERS/RECEIVERS from TFCMXMSK/TFCMRMSK, vs CONFIGURE
+     * PROCESSORS).  Printing both says which of the two is missing. */
+    fprintf(stderr, "iop mia: xmit=%08x recv=%08x  dk1(bce6) xmit=%d recv=%d\n",
+            (unsigned)register_get32(&iop->regXmitEna),
+            (unsigned)register_get32(&iop->regRecvEna),
+            iop_proc_get(&iop->regXmitEna, 6) ? 1 : 0,
+            iop_proc_get(&iop->regRecvEna, 6) ? 1 : 0);
     fprintf(stderr, "iop procs: MSC halt=%d busy=%d pc=%05x\n",
             iop_proc_get(&iop->regHalt, PROC_MSC),
             iop_proc_get(&iop->regBusyWait, PROC_MSC),
