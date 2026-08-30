@@ -189,6 +189,14 @@ void psw_set_bsr(ProgramStatusWord *p, uint32_t v) { set_field1(p, 'b', v); }
 uint32_t psw_get_dsr(const ProgramStatusWord *p) { return get_field1(p, 'd'); }
 void psw_set_dsr(ProgramStatusWord *p, uint32_t v) { set_field1(p, 'd', v); }
 
+/* EA-High, PSW bits 40-43.  PoO Sec. 2.5.1.1 "PSW Fields": "For an SVC
+ * instruction, the 4-bit extension to make the 19-bit effective address is
+ * saved in the old PSW bits 40-43."  The SVC handler needs it: FPMSVC reads
+ * the halfword at TPSASOP+2 and does `SRL R1,4 / NHI R1,X'000F'` to isolate
+ * exactly this field, then ORs it into a ZCON to reach the parameter list. */
+uint32_t psw_get_ea_high(const ProgramStatusWord *p) { return get_field2(p, 'e'); }
+void psw_set_ea_high(ProgramStatusWord *p, uint32_t v) { set_field2(p, 'e', v); }
+
 uint32_t psw_get_int_mask(const ProgramStatusWord *p) { return get_field2(p, 'm'); }
 void psw_set_int_mask(ProgramStatusWord *p, uint32_t v) { set_field2(p, 'm', v); }
 

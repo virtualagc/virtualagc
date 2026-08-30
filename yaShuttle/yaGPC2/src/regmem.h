@@ -87,6 +87,8 @@ uint32_t psw_get_bsr(const ProgramStatusWord *p);
 void psw_set_bsr(ProgramStatusWord *p, uint32_t v);
 uint32_t psw_get_dsr(const ProgramStatusWord *p);
 void psw_set_dsr(ProgramStatusWord *p, uint32_t v);
+uint32_t psw_get_ea_high(const ProgramStatusWord *p);
+void psw_set_ea_high(ProgramStatusWord *p, uint32_t v);
 uint32_t psw_get_int_mask(const ProgramStatusWord *p);
 void psw_set_int_mask(ProgramStatusWord *p, uint32_t v);
 uint32_t psw_get_reg_set(const ProgramStatusWord *p);

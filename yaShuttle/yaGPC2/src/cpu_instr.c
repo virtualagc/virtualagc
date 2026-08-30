@@ -1888,7 +1888,15 @@ static void exec_SVC(CPU *t, DInstr *v) {
     if (t->halUCP && t->halUCPHandleSVC && t->halUCPHandleSVC(t->halUCP, ea, r1)) {
         return;
     }
-    psw_set_int_code(&t->psw, ea);
+    /* The SVC's effective address is 19 bits, but the interrupt code field
+     * is only 16.  PoO Sec. 2.5.1.1: "For an SVC instruction, the 4-bit
+     * extension to make the 19-bit effective address is saved in the old PSW
+     * bits 40-43" -- the EA-High field.  Writing only the low 16 bits left
+     * that extension stale, so FPMSVC, which rebuilds the parameter-list
+     * address from it (`SRL R1,4 / NHI R1,X'000F'` on TPSASOP+2, then OR
+     * into a ZCON), fetched the SVC number from the wrong sector. */
+    psw_set_ea_high(&t->psw, (ea >> 16) & 0xf);
+    psw_set_int_code(&t->psw, ea & 0xffff);
     membus_set32(t->ram, 0x58, register_get32(&t->psw.psw1), true);
     membus_set32(t->ram, 0x5a, register_get32(&t->psw.psw2), true);
     cpu_load_psw(t, membus_get32(t->ram, 0x5c), membus_get32(t->ram, 0x5e));
