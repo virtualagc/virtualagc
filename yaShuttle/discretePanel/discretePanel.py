@@ -75,7 +75,29 @@ IPL_SOURCE_OFF = -1
 OBSERVED_A = [("MM1 READY", 6), ("MM2 READY", 7)]
 TOGGLES_A = [("IOP terminate A", 12), ("IOP terminate B", 13)]
 TOGGLES_B = [("BFS engage 1", 3), ("BFS engage 2", 4), ("BFS engage 3", 5)]
-CRT_SELECT = [("CRT select A", 6), ("CRT select B", 7)]
+# The BFC CRT SELECT switch is one THREE-POSITION rotary, not two
+# independent switches.  The PASS User's Guide gives its positions as
+# "1+2", "2+3" and "3+1", meaning the BFS commands display 1, 2 or 3
+# respectively; the IOP Principles of Operation calls the two discretes it
+# drives "BFS CRT SELECT A and B" (register B bits 6-7), and GPCRTOPT reads
+# them as ONE two-bit field -- `NHI R3,X'0300' / SRL R3,8` -- which it then
+# uses as the DEU_ID.  ARAGPCSW confirms the encoding: it takes the same
+# two bits as an integer and indexes ARAB_MASK_ARRAY, whose entries
+# BIN'100'/BIN'010'/BIN'001' mask DK1/DK2/DK3 for values 1/2/3 (and whose
+# 1+2 / 2+3 / 3+1 pairs are the BFS-engaged cases at value+4).
+#
+# So the position IS the value, MS bit first: bit 6 is the 2s place and
+# bit 7 the 1s.  Presenting it as two tick boxes let a value of 0 or 3 be
+# set that no real switch position produces, and labelling them A/B matched
+# neither source.  OFF is kept because a GPC with no BFC CRT is a real and
+# useful configuration here -- it is what GPCRTOPT's POLL45 ("IPL DEFAULT
+# LOAD -- NO DEU SELECTED") is for -- but it is now a deliberate position
+# rather than the accident of leaving both boxes clear.
+CRT_SELECT_BITS = (6, 7)                 # bit 6 = 2s place, bit 7 = 1s
+CRT_SELECT = [("OFF (no BFC CRT)", 0),
+              ("1+2  (BFS cmds display 1)", 1),
+              ("2+3  (BFS cmds display 2)", 2),
+              ("3+1  (BFS cmds display 3)", 3)]
 
 GPC_ID_BITS = (0, 1, 2)          # register B, a 3-bit field
 
@@ -191,6 +213,10 @@ class Panel:
         self.mode = tk.IntVar(value=0)          # HALT at startup
         self.iplHeld = False                    # the IPL pushbutton, up
         self.iplSource = tk.IntVar(value=4)     # MM1
+        # DEFAULT_ON puts register B bit 7 up, which is BFC CRT select = 1
+        # ("1+2", BFS commands display 1) -- the resting value yaGPC2's own
+        # DISCRETE_IN_B_DEFAULT of 0x21000000 also reports.
+        self.crtSelect = tk.IntVar(value=1)
         self.gpcId = tk.IntVar(value=1)
         self.toggles = {}                       # (reg, bit) -> BooleanVar
 
@@ -252,6 +278,13 @@ class Panel:
             ttk.Radiobutton(f, text=label, value=bit, variable=self.iplSource,
                             command=self._iplSourceChanged).pack(anchor="w")
 
+        f = ttk.LabelFrame(left, text="BFC CRT select")
+        f.pack(fill="x", **pad)
+        for label, value in CRT_SELECT:
+            ttk.Radiobutton(f, text=label, value=value,
+                            variable=self.crtSelect,
+                            command=self._crtSelectChanged).pack(anchor="w")
+
         f = ttk.LabelFrame(left, text="This GPC")
         f.pack(fill="x", **pad)
         ttk.Label(f, text="GPC ID").pack(side="left")
@@ -270,7 +303,7 @@ class Panel:
 
         f = ttk.LabelFrame(right, text="Discrete inputs B")
         f.pack(fill="x", **pad)
-        self._checks(f, D.REG_B, TOGGLES_B + CRT_SELECT)
+        self._checks(f, D.REG_B, TOGGLES_B)
 
         f = ttk.LabelFrame(self.root, text="Observed (driven by other devices)")
         f.grid(row=1, column=0, columnspan=2, sticky="ew", **pad)
@@ -290,7 +323,7 @@ class Panel:
     # Widest label anywhere in either group, so the bit captions form one
     # column across both panes rather than two that nearly agree.
     _LABEL_WIDTH = max(len(name)
-                       for name, _ in TOGGLES_A + TOGGLES_B + CRT_SELECT)
+                       for name, _ in TOGGLES_A + TOGGLES_B)
 
     def _checks(self, parent, reg, items):
         for label, bit in items:
@@ -350,6 +383,13 @@ class Panel:
                 continue
             self._send(D.SET if bit == chosen else D.RESET,
                        D.REG_A, D.bit_mask(bit))
+
+    def _crtSelectChanged(self):
+        """Drive the two discretes as one two-bit value, MS bit first."""
+        v = self.crtSelect.get()
+        hi, lo = CRT_SELECT_BITS
+        self._send(D.SET if v & 2 else D.RESET, D.REG_B, D.bit_mask(hi))
+        self._send(D.SET if v & 1 else D.RESET, D.REG_B, D.bit_mask(lo))
 
     def _gpcIdChanged(self):
         try:
