@@ -1004,6 +1004,28 @@ bool iop_bce_receive_starting(IOP *iop) {
     return !(bce->recvActive && bce->recvPC == pc);
 }
 
+/* YAGPC_PROCTRACE: one line per CHANGE to the processor-enable register,
+ * with the command that caused it.  YAGPC_PROCDUMP shows the state at the
+ * END of a run, which is the quiesced state and says nothing about how it
+ * got there; the question "which buses did the software bring up, and when
+ * did this one go away" needs the history.
+ *
+ * It is what showed that GPCIPL master-resets the IOP just before handing
+ * off (data=c0767fe0, every processor cleared), that PASS then re-enables
+ * only the MSC and MM1 to load itself, and that the DK bus -- BCE6, the
+ * display -- is never enabled again afterwards, which is why the DEU goes
+ * quiet at the handoff and stays quiet. */
+static void iop_log_procs(IOP *iop, const char *what, uint32_t data) {
+    if (!getenv("YAGPC_PROCTRACE")) return;
+    static uint32_t last = 0xffffffffu;
+    uint32_t now = register_get32(&iop->regHalt);
+    if (now == last) return;
+    fprintf(stderr, "PROCS %-8s t=%.0f data=%08x  %08x -> %08x  dk1(bce6)=%d\n",
+            what, iop_now_us(iop), data, last, now,
+            iop_proc_get(&iop->regHalt, 6) ? 1 : 0);
+    last = now;
+}
+
 /* YAGPC_PROCDUMP prints, at the end of a run, which IOP processors are
  * enabled, which are in Busy/Wait, and where each PC is parked.  A BCE that
  * has executed #WAT shows as enabled but NOT busy: that combination is what
@@ -1378,11 +1400,13 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
              * the named processors' bits.  See regHalt in iop.h. */
             uint32_t r1 = register_get32(&iop->regHalt);
             register_set32(&iop->regHalt, r1 & ~data);
+            iop_log_procs(iop, "HALT", data);
             break;
         }
         case 0x87200000: { /* CONFIGURE PROCESSORS ENABLE */
             uint32_t r1 = register_get32(&iop->regHalt);
             register_set32(&iop->regHalt, r1 | data);
+            iop_log_procs(iop, "ENABLE", data);
             break;
         }
         case 0x84400000: { /* MASTER RESET */
@@ -1398,6 +1422,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             register_set32(&iop->regProgExcept, PROC_ALL);
             register_set32(&iop->regBusyWait, 0x00000000u);
             register_set32(&iop->regHalt, 0x00000000u);
+            iop_log_procs(iop, "MRESET", data);
             register_set32(&iop->regXmitEna, 0x00000000u);
             register_set32(&iop->regRecvEna, 0x00000000u);
             register_set32(&iop->regDiscreteOut, 0x00000000u);
