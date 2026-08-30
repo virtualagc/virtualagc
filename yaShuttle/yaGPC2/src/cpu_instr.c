@@ -1840,12 +1840,24 @@ static void exec_SSM(CPU *t, DInstr *v) {
 }
 
 static void exec_SCAL(CPU *t, DInstr *v) {
+    /* Same ordering rule as exec_BAL, and for the same reason: psw1 is the
+     * RETURN PSW that SRET pops back, so it must be the CALLER's -- address
+     * and BSR/DSR both.  cpu_g_ea() can replace DSR/BSR from a fullword
+     * indirect pointer with C=1 (PoO Fig. 2-17), so reading psw1 after it
+     * stacked the CALLEE's sectors; SRET then returned with the wrong BSR
+     * and expanded the 16-bit return address into the wrong sector.
+     *
+     * Measured: DPLLIGHT's SRET at 0x101f4 (97e8) returned to 0x16b8f,
+     * which is FILL in our image and in the DASS reference alike -- so the
+     * real machine would fault there too, i.e. the target was wrong, not
+     * missing.  The instruction words at 101f0..101f4 are byte-identical to
+     * the reference, so this was execution, not the link. */
+    uint32_t psw1 = register_get32(&t->psw.psw1);
     uint32_t branchAddr = cpu_g_ea(t, v);
     uint32_t r1val = register_get32(R(t, v, 'x'));
     uint32_t ptr = (r1val >> 16) & 0xffff;
     uint32_t inc = r1val & 0xffff;
     uint32_t sa = (ptr + inc) & 0xffff;
-    uint32_t psw1 = register_get32(&t->psw.psw1);
     if (!cpu_store_fw(t, sa, psw1)) return;
     for (int i = 0; i <= 7; i++) {
         if (!cpu_store_fw(t, sa + 2 + (uint32_t)i * 2, register_get32(cpu_r(t, i)))) return;
