@@ -97,14 +97,16 @@ static void mtu_fill_time(struct MtuModel *m) {
     /* MILLISECONDS in 0.125 ms units, thirteen bits. */
     unsigned msec = (ms * 8u) & 0x1fffu;
 
-    /* TFMTU is three halfwords but the transfer is six, and which end of it
-     * carries the time is not stated anywhere I can find -- so put the same
-     * triple in both halves.  Both placements then decode identically, and
-     * a wrong guess about the offset cannot silently yield a wrong clock. */
+    /* TFMTU's three time halfwords sit at OFFSET 2 of the six-word
+     * transfer, not at its start.  FPMMTURM says so itself:
+     *     LA  R3,TFCMMTU1+2      POINT TO FIRST TIME READ
+     *     LH  R4,TFCMMTU2+2      LOAD ACTUAL TIME FROM BUFF 2
+     * The first two words are the unit's header, which this model leaves
+     * zero. */
     memset(m->reply, 0, sizeof m->reply);
-    m->reply[0] = m->reply[3] = (uint16_t)dyhr;
-    m->reply[1] = m->reply[4] = (uint16_t)mnsc;
-    m->reply[2] = m->reply[5] = (uint16_t)msec;
+    m->reply[2] = (uint16_t)dyhr;
+    m->reply[3] = (uint16_t)mnsc;
+    m->reply[4] = (uint16_t)msec;
     m->replyHead = 0;
     m->replyCount = MTU_WORDS;
     m->reads++;
@@ -158,7 +160,7 @@ void mtumodel_service(void *ctx, GpcServiceNumber svc,
 void mtumodel_report(struct MtuModel *m) {
     if (!m) return;
     fprintf(stderr, "mtu: {\"commands\":%ld,\"timeReads\":%ld,\"wordsOut\":%ld,"
-            "\"last\":\"%04x %04x %04x\"}\n",
+            "\"lastTime\":\"%04x %04x %04x\"}\n",
             m->commands, m->reads, m->wordsOut,
-            m->reply[0], m->reply[1], m->reply[2]);
+            m->reply[2], m->reply[3], m->reply[4]);
 }
