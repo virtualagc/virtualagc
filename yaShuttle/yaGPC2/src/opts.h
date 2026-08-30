@@ -199,6 +199,10 @@ typedef struct {
      * sockets -- MEDS and discretePanel.py take the same option. */
     char *portBase;                   /* decimal; default 6900 */
 
+    /* --mtu-model: answer as the Master Timing Unit (device 22 on BCE
+     * 20-22) so PASS can initialise its clock.  See src/mtumodel.h. */
+    bool mtuModel;                    /* default false */
+
     /* Not part of gpc run's own option set -- yaGPC2-specific. Which
      * instruction-timing model charges cpu->elapsedTimeUs, and through
      * it the interval timers: "poo" (the default) is the AP-101S

@@ -12,6 +12,7 @@
 #include "compat.h"
 #include "cpu_instr.h"
 #include "discretes.h"
+#include "mtumodel.h"
 #include "mmumodel.h"
 #include "strfmt.h"
 #include "trace.h"
@@ -40,6 +41,10 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
     if (!br || !in || !out) return;
     if (br->mmu && in->busID == br->mmuBus) {
         mmumodel_service(br->mmu, svc, in, out);
+        return;
+    }
+    if (br->mtu && mtumodel_owns_bus(in->busID)) {
+        mtumodel_service(br->mtu, svc, in, out);
         return;
     }
     if (br->fallback) {
@@ -153,14 +158,27 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
      * run can have a reproducible tape and still drive a real display
      * over --bce-network.  That is the difference from --deu-model, which
      * replaces the far end of everything. */
-    if (opts->mmuModelVolume) {
+    /* The MTU answers on its own buses (20-22) and leaves the rest alone,
+     * like the mass memory model.  PASS reads it to initialise its clock;
+     * with nothing there the clock came out as 24 hours (see mtumodel.h). */
+    if (opts->mtuModel) {
+        r->mtuModel = mtumodel_create();
+        if (r->mtuModel)
+            mtumodel_set_clock(r->mtuModel, &r->age.gpc.cpu.elapsedTimeUs);
+    }
+
+    if (opts->mmuModelVolume || r->mtuModel) {
         long unit = opts->mmuModelUnit ? strtol(opts->mmuModelUnit, NULL, 10) : 1;
-        r->mmuModel = mmumodel_create((int)unit, opts->mmuModelVolume);
-        if (r->mmuModel) {
-            mmumodel_set_clock(r->mmuModel, &r->age.gpc.cpu.elapsedTimeUs);
+        r->mmuModel = opts->mmuModelVolume
+                          ? mmumodel_create((int)unit, opts->mmuModelVolume)
+                          : NULL;
+        if (r->mmuModel || r->mtuModel) {
+            if (r->mmuModel)
+                mmumodel_set_clock(r->mmuModel, &r->age.gpc.cpu.elapsedTimeUs);
             if (base == NULL) iop_set_recv_timeout_floor_us(0.0);
             r->busRouter.mmu = r->mmuModel;
-            r->busRouter.mmuBus = mmumodel_bus(r->mmuModel);
+            r->busRouter.mmuBus = r->mmuModel ? mmumodel_bus(r->mmuModel) : -1;
+            r->busRouter.mtu = r->mtuModel;
             r->busRouter.fallback = base;
             r->busRouter.fallbackCtx = baseCtx;
             ap101_set_servicer(&r->age.gpc, bus_router_service, &r->busRouter);
@@ -192,6 +210,11 @@ void batchrunner_free(BatchRunner *r) {
         deumodel_report(r->deuModel);
         deumodel_free(r->deuModel);
         r->deuModel = NULL;
+    }
+    if (r->mtuModel) {
+        mtumodel_report(r->mtuModel);
+        mtumodel_free(r->mtuModel);
+        r->mtuModel = NULL;
     }
     for (size_t i = 0; i < r->lineCount; i++) free(r->lines[i]);
     free(r->lines);

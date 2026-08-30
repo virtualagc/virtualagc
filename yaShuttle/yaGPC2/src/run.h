@@ -36,6 +36,7 @@ typedef enum { PACING_BURST, PACING_SIGNAL } PacingMode;
 typedef struct {
     struct MmuModel *mmu;
     int mmuBus;
+    struct MtuModel *mtu;   /* buses 20-22, device 22; see mtumodel.h */
     GpcServicerFn fallback;
     void *fallbackCtx;
 } BusRouter;
@@ -125,6 +126,7 @@ typedef struct {
     /* In-process mass memory, and the routing that lets it own one bus
      * while everything else still reaches whatever else is installed. */
     struct MmuModel *mmuModel;
+    struct MtuModel *mtuModel;  /* --mtu-model: the in-process timing unit */
     BusRouter busRouter;   /* --deu-model: the in-process display unit */
 } BatchRunner;
 

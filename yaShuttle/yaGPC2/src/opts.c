@@ -137,6 +137,10 @@ static const char *HELP_TEXT =
 "                                  and --deu-model: only the mass memory bus\n"
 "                                  is taken over (default: none)\n"
 "  --mmu-unit <n>                   which mass memory the model is, 1 or 2\n"
+"  --mtu-model                      answer as the Master Timing Unit (device 22\n"
+"                                  on BCE 20-22), so PASS can initialise its\n"
+"                                  clock.  Without it those reads return\n"
+"                                  nothing and PASS computes a 24-hour time\n"
 "  --port-base <n>                  base of the UDP port range the buses use:\n"
 "                                  bus n is base+n, the discrete bus base+80\n"
 "                                  (default 6900, matching nsts-sim-gpc's\n"
@@ -354,6 +358,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->mmuModelVolume = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--mmu-unit", &n)) {
             opts->mmuModelUnit = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--mtu-model", &n)) {
+            (void)n; opts->mtuModel = true;
         } else if (tok_is(tok, "--port-base", &n)) {
             opts->portBase = take_value(argc, argv, &i, tok, n);
         } else {
