@@ -411,6 +411,7 @@ static void format_watchpoint_msg(BatchRunner *r, uint32_t addr, uint16_t before
 /* Both defined further down; needed by the --real-time paced wait in
  * batchrunner_step(), which has to poll for Ctrl-C itself. */
 static volatile sig_atomic_t g_sigint_received;
+static void on_sigint(int sig);
 static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, long step, int exitCode);
 
 /* The GPC MODE switch -- HALT / STBY / RUN -- modelled as the reset line
@@ -1426,10 +1427,52 @@ int batchrunner_run(BatchRunner *r) {
 
     batchrunner_init_watchpoints(r);
 
+    /* YAGPC_NIASAMPLE=<ms>: print where the CPU is, every <ms> of WALL time.
+     * A run that neither faults nor halts otherwise reveals nothing about
+     * itself -- the NIA ring only dumps on a fault, and the end-of-run report
+     * only arrives at the end.  When the question is "it is clearly executing,
+     * but doing WHAT?", this is the cheapest answer, and it needs no ptrace
+     * (Yama blocks gdb from attaching here). */
+    double sampleEvery = 0.0, sampleNext = 0.0;
+    {
+        const char *sv = getenv("YAGPC_NIASAMPLE");
+        if (sv != NULL && *sv != '\0') {
+            sampleEvery = strtod(sv, NULL) / 1000.0;
+            sampleNext = yagpc_monotonic_seconds() + sampleEvery;
+        }
+    }
+
+    /* A batch run is normally ended from OUTSIDE, by `timeout -s INT`.  With
+     * the default disposition that kills the process outright, so the mmu/deu
+     * counters, the memory dump and the stop reason -- exactly the state one
+     * needs -- are never printed.  Setting a stop reason instead makes SIGINT
+     * land in the same reporting path as a fault. */
+    signal(SIGINT, on_sigint);
+
     r->pacingRefWallSeconds = yagpc_monotonic_seconds();
     r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
     batchrunner_pace_setup(r);
     while (r->step < r->maxSteps) {
+        if (sampleEvery > 0.0) {
+            double nowS = yagpc_monotonic_seconds();
+            if (nowS >= sampleNext) {
+                sampleNext = nowS + sampleEvery;
+                CPU *sc = &r->age.gpc.cpu;
+                fprintf(stderr, "NIASAMPLE step=%-12ld nia=%05x t=%.0fus wait=%d",
+                        r->step, (unsigned)psw_get_nia(&sc->psw),
+                        sc->elapsedTimeUs, psw_get_wait_state(&sc->psw) ? 1 : 0);
+                for (int i = 0; i < 8; i++)
+                    fprintf(stderr, " R%d=%08x", i,
+                            (unsigned)register_get32(cpu_r(sc, i)));
+                fprintf(stderr, "\n");
+            }
+        }
+        if (g_sigint_received) {
+            snprintf(r->stopReason, sizeof r->stopReason,
+                     "interrupted (SIGINT) after %ld steps", r->step);
+            r->hasStopReason = true;
+            break;
+        }
         if (!batchrunner_step(r)) break;
         batchrunner_pace(r);
     }
