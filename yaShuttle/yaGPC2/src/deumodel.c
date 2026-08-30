@@ -222,6 +222,33 @@ static void deu_bite_response(DeuModel *d) {
  * address it loads at, and the transfer count is therefore the payload
  * plus two.  A load completes on the block whose payload is exactly
  * LAST_FILL_WORDS -- that rule, not the address, is what ends it. */
+/* Text on a DEU is carried in its OWN character set, inside a Format
+ * Control Word: op C, "11aaaaaaabbbbbbb", two 7-bit glyphs drawn g1 then
+ * g2.  A halfword without those top two bits is geometry or control rather
+ * than text, and prints as blanks here so the words that ARE text stand
+ * out.  From 0x20 up the DEU set coincides with ASCII, so only the low
+ * codes need a table; the few that have no ASCII equivalent (TACAN wye,
+ * the shuttle plan/profile glyphs, the facing DELs) are approximated,
+ * since this is a legibility aid and not a renderer.
+ *
+ * Read this way the post-IPL image says "GPCIPL", "IPL MENU", "1 GPC _
+ * MEMORY", "PASS1 1. BFS", "OLD PSW", "SCHEDWRD=", "MCDS BITE" -- the real
+ * GPC IPL menu.  Reference: USA-003090 p.104, and the DEUCharset and FCW
+ * tables in nsts-sim-gpc's meds/deuFCW.coffee. */
+static void deu_render_word(uint16_t w) {
+    static const char *const low[0x20] = {
+        " ", "]", "[", "?", ".", ":", "V", ".", " ", "/", "Y", ">", "<", " ",
+        "P", "S", "a", "b", "r", "w", "e", "O", "_", "-", "'", "<", "#", "o",
+        "^", "v", ">", "<"
+    };
+    if ((w & 0xc000) != 0xc000) { fputs("  ", stderr); return; }
+    unsigned g[2] = { (unsigned)((w >> 7) & 0x7f), (unsigned)(w & 0x7f) };
+    for (int i = 0; i < 2; i++) {
+        if (g[i] >= 0x20 && g[i] < 0x7f) fputc((int)g[i], stderr);
+        else fputs(low[g[i] & 0x1f], stderr);
+    }
+}
+
 static void deu_complete_fill(DeuModel *d) {
     size_t n = d->xferCount;
     const uint16_t *w = d->xferWords;
@@ -437,8 +464,9 @@ void deumodel_report(const DeuModel *d) {
         fprintf(stderr, "deu: image %u zeros, %u fill, %u distinct of %d words\n",
                 z, f, n, DEU_MEMORY_WORDS);
         if (getenv("YAGPC_DEUIMAGE")) {
-            /* The non-zero runs, with an EBCDIC reading beside them: text
-             * is display content the unit renders, not code it executes. */
+            /* The non-zero runs, with the DISPLAY LIST read as text beside
+             * them.  This used to read each halfword as two EBCDIC bytes and
+             * produced pure noise: the display list is not EBCDIC. */
             for (unsigned i = 0; i < DEU_MEMORY_WORDS; ) {
                 if (!d->mem[i]) { i++; continue; }
                 unsigned j = i;
@@ -447,12 +475,8 @@ void deumodel_report(const DeuModel *d) {
                 for (unsigned k = i; k < j && k < i + 8; k++)
                     fprintf(stderr, " %04x", d->mem[k]);
                 fprintf(stderr, "  |");
-                for (unsigned k = i; k < j && k < i + 16; k++) {
-                    int c = EBCDIC_TO_ASCII[(d->mem[k] >> 8) & 0xff];
-                    fputc((c >= 32 && c < 127) ? c : '.', stderr);
-                    c = EBCDIC_TO_ASCII[d->mem[k] & 0xff];
-                    fputc((c >= 32 && c < 127) ? c : '.', stderr);
-                }
+                for (unsigned k = i; k < j && k < i + 16; k++)
+                    deu_render_word(d->mem[k]);
                 fprintf(stderr, "|\n");
                 i = j;
             }

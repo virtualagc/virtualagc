@@ -4332,3 +4332,22 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   four times, all in the INDEXED forms (IC-relative, X-indexed,
   indexed-with-modifier, indirect). Sec. 2.2.8's B2=11 case has no such
   clause and instead yields the EA outright.
+
+### [2026-08-29] Target: [problems.md]
+- **The DEU display list is not EBCDIC.** `YAGPC_DEUIMAGE` read each halfword
+  as two EBCDIC bytes and produced pure noise, which made a correctly
+  rendered screen look like garbage. Display text rides in the DEU's own
+  character set inside a Format Control Word: op C,
+  `11aaaaaaabbbbbbb`, two 7-bit glyphs. From 0x20 up the set is ASCII.
+  Reference: USA-003090 p.104 and nsts-sim-gpc `meds/deuFCW.coffee`
+  (DEUCharset, FCW table).
+- Decoded properly, the post-IPL image is the real GPC IPL MENU:
+  "GPCIPL 09.05.00.00.01 / 1 GPC _ MEMORY PURGE / PASS1 1 BFS1 2 PASS2 /
+  27 OPTION START 28 STOP 29 / OLD PSW MAJ= MIN= SCHEDWRD= CLOCK1= /
+  17 DEU FORMAT LOAD / IPL MENU / STP/PURGE CYC CNT ERROR/MSG /
+  MCDS BITE MODE BSR1 BSR2". This is the screen that never appeared before
+  the Sec. 2.2.8 addressing fix.
+- NOTE for judging future runs: a FROZEN DEU image is not by itself a fault.
+  `deu_complete_fill` counts a TIME FILL and then discards it, so the clock
+  never reaches `d->mem`; and a static format refreshed every cycle writes
+  identical words. I briefly called the frozen image a defect -- it is not.
