@@ -442,8 +442,33 @@ static void exec_BALR(CPU *t, DInstr *v) {
 }
 
 static void exec_BAL(CPU *t, DInstr *v) {
+    /* SNAPSHOT THE LINK BEFORE COMPUTING THE EA.  psw1 carries the caller's
+     * BSR (bits 24-27) and DSR (28-31) alongside the return address, and
+     * BCRE restores the pair from it -- FCMTRACE's own exit says so:
+     *
+     *     BCRE 7,R7   RETURN TO CALLING ROUTINE (BSR/DSR OF CALLING
+     *                 ROUTINE WILL BE RESTORED BY THIS INSTRUCTION)
+     *
+     * But cpu_g_ea() can MODIFY the PSW on the way: a fullword indirect
+     * address pointer with C=1 replaces DSR from its DSV and BSR from its
+     * BSV (PoO Fig. 2-17, "MODIFY PSW ACTION"), which is exactly how a
+     * `BAL@# R7,...ZCON` calls into another sector.  Reading psw1 after
+     * that therefore saved the CALLEE's sectors, and BCRE then "restored"
+     * the callee's DSR into the caller.
+     *
+     * Measured: FCMSSYNC calls FCMTRACE through the PSA trace ZCON at
+     * 0x0000c = 98a0 0f33 (DSV=3, CD=1, byte-identical to the DASS
+     * reference, so the ZCON is right).  DSR went 1 -> 3 across the call
+     * and stayed 3.  FPMCLOSE then read TPCTFLGS through `USING TFPCT,R0`
+     * with R0=827c: bit 15 set, so DSR expands it, and DSR=3 sent the read
+     * to 0x182ab instead of 0x82ab.  The flags came back non-zero, the
+     * `IF (TB,TPCTFLGS,X'00C0',Z),OR,...` took its ELSE, the PCT was never
+     * freed, and it was re-dispatched on FPMFCLOS's re-issue PSW -- which
+     * executes a constant, falls into FPMFRPCT, and spins forever in its
+     * unguarded run-queue walk. */
+    uint32_t link = register_get32(&t->psw.psw1);
     uint32_t branch = cpu_g_ea(t, v);
-    register_set32(R(t, v, 'x'), register_get32(&t->psw.psw1));
+    register_set32(R(t, v, 'x'), link);
     psw_set_nia(&t->psw, branch);
 }
 
