@@ -3885,3 +3885,450 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   back as unmodelled-I/O data (~0) and `(AIBV_TC - 0) > 1.02` is true as soon as
   RUNTIME passes 1.02 s.  The flight software is doing exactly the right thing with
   a PCMMU that is not there; the error is EXPECTED under the current model set.
+
+### [2026-08-29] Target: [problems.md]
+- **WHY PHASE02 DIES, TRACED TO THE INSTRUCTION.**  PASS is not failing to start: it
+  loads 430 blocks, IPLs the DEU, and drives the display for 233 SECONDS of simulated
+  time (`polls 401, displayFills 402, timeFills 395, ipled true`) before dying.  The
+  death is `ERROR: invalid instruction 0xc6c6 at 0x6b8f` -- and `C6C6` is the TAPE
+  FILL PATTERN, so the CPU had branched into memory nothing ever loaded.
+- THE TRAIL, from `YAGPC_NIARING`: `1a954 ... 1a97f` then `101f4`.  `1a97f` is
+  `FPMDISP+59` -- the FCOS PROCESS DISPATCHER -- and the memory there decodes
+  against `SSSRC/FPMDISP.asm` exactly:
+      1a979 98f3 0141   LH   R0,TCVTOLD     (CVT+1)
+      1a97b 68f8 002a   LDM  0,TPCTDSE      (PCT+42)
+      1a97d ccf8 0008   LM   TPCTGPR0       (PCT+8)
+      1a97f cdff 10b2   LPS@ TPSAWORK       (PSA+b2)
+  So the last thing that ran was the dispatcher's `LPS` -- "DISPATCH HIGHEST READY
+  PROCESS" -- loading a PSW out of a PCT.
+- PSW DECODE, derived and then checked against two logged interrupts
+  (`8000/0081 -> 40000`, `9a30/0031 -> 19a30`):
+      NIA = ((hw1 >> 4) & 0xf) * 0x8000 + (hw0 & 0x7fff)
+- THE DISPATCHED PCT IS `TPCTACT` (`TCVTOLD` = `TCVTNEW` = `827c` at the stop, the
+  same value the static image has).  PCT layout from `MLIB80/TFPCT.asm`, confirmed
+  against the symbol table: stride 50 hw, `TPCTNXT`+0, `TPCTPSW`+4, `TPCTGPR0`+8,
+  `TPCTDSE`+42, `TPCTWAIT`+48 (`TPCTP1`@82e0 -> wait@8310 -> `TPCTP2`@8312).
+- WHERE IT LANDED: `101f4` is inside compool `#CDPLLIG`, and the memory there is
+  `97e8` followed by `c6c6 c6c6 c6c6` up to the next csect at `101f8` -- the fill
+  TAIL of a compool.  From there it ran into `16b8f`, which NO PHASE covers at all:
+  a ~25,000-halfword hole between `A2VMELOA` (ends 11e86) and `PCH023P1` (18000).
+- IT WAS NEVER LEGITIMATELY THERE.  `YAGPC_NIAPROBE=101f4` fired EXACTLY ONCE, on the
+  `LPS` itself.  So no process was ever interrupted at `101f4` -- `TPCTACT`'s saved
+  PSW was wrong before the dispatch, not a faithful record of one.
+- STATIC BASELINE, for comparison: the run queue is only two deep --
+  `TPCTACT`@827c pri 200 PSW `0000 0000` (NIA 0), then `FPMIDPCT`@82ae pri 0 PSW
+  `80a8 0011` (NIA 080a8), then NXT=0 ends the chain.  The free pool (`TPCTP1`@82e0
+  onward, stride 32h) is filled with `d7c3` = EBCDIC "PC" and is NOT in the queue.
+- HYPOTHESIS UNDER TEST, `YAGPC_WATCHHW=8280-8283` (TPCTACT's PSW, which watches IOP
+  stores as well as CPU ones): something writes a bad PSW there.  A stray DMA is a
+  live candidate given this log's own earlier count of 7,169 DMA violations in
+  `#PCVNMMU`.
+- RULED OUT ALONG THE WAY: the `TCVT*` unresolved-relocation lead.  62 TCVT symbols
+  are unresolved in `p2build/SSW.sym.json`, but that is my standalone DASS_SSW
+  comparison link and is NOT what runs -- EVERY PASS phase resolves the CVT fully
+  (72-73 TCVT symbols defined, 0 unresolved).  Measured across all 25 phase symbol
+  tables rather than inferred from the one that was open.
+
+### [2026-08-29] Target: [problems.md]
+- **THE BUILD WAS WRONG, AND THAT INVALIDATES THE RUNTIME CHASE ABOVE.**  The user
+  stopped me: what makes it wrong is that it never used `csects-SSW-augmented.json`.
+  Measured against `mafgen/csects-SSW.json`, the PHASE02 I had been running scored
+  **553/660 = 83.79%**, not the 96.6% this log quoted -- that figure was recalled
+  from a differently-configured build and was stale.  MEASURE, DO NOT RECALL.
+- WORSE, THE VOLUME PREDATED ITS OWN PINS: `linkorder.json` is timestamped 08-29
+  06:36 but `mmu900.mmv` 06:31, and every phase tree under `sync/` is from 08-27.
+  So every run this session used an image built WITHOUT the ZCON pins as well.
+- THE 100 MISPLACED CSECTS FELL IN TWO CLASSES: 80 Z-CON pool entries (`#Q*`/`#Z*`
+  inside `001aa..00246`) permuted among themselves, and 22 program csects displaced
+  as whole units -- `DMPMMM` +592 (x17), `VMELOA` +268 (x3), `$0ASCTIM` -3730,
+  `$0ASGCYC` -4358.  Plus 7 absent.
+- THE MECHANISM, read in `lnk101/linker.py` `loadExternalSyms` rather than assumed:
+  after resolving externals it runs "Pre-assign addresses for locally-defined
+  sections found in the JSON" -- `section.baseAddress = Addr.from_hw(entry['start'])`
+  for every SD section named in the pin file.  So `--external-syms` PINS PLACEMENT,
+  not just resolution; the docstring's "without loading the actual object modules"
+  undersells it.
+- `con80build` HAS NO `--external-syms` PASSTHROUGH (it forwards `--link-order`,
+  `--map-lib`, `--autocall`, but not this).  Rather than edit Don's repo -- which is
+  carrying three held local fixes and must not be disturbed -- I shimmed it:
+  `sync/shimbin/` symlinks every wrapper from `<dps>/build/bin` and replaces
+  `lnk101` with a 4-line script that appends
+  `--external-syms $YAGPC_EXTERNAL_SYMS`.  `con80build` resolves its tools from
+  `_BINDIR = dirname(--halsc)`, so `--halsc sync/shimbin/halsc` redirects all of
+  them.  NOTHING IN `nsts-sdl-dps` WAS MODIFIED.
+- RESULT, PHASE02 against the flown table: **553/660 (83.79%) -> 658/660 (99.70%),
+  0 misplaced, 2 absent** (`#XDPDSPC`, `#XDSPSPC`).
+- ALSO REBUILT: `sync/INCL80_fixed` had been emptied; recreated as 281 extensionless
+  symlinks into `PFS/OI340600/INCL80`.  And the stale trees are NOT salvageable by
+  relinking -- `newphase/PHASE02/obj` contains no `AIBGPCLO.obj` at all yet its
+  `sym.json` carries `$0AIBGPC`, so that tree is internally inconsistent.  Full
+  rebuild (`--build-all`) is the only sound route.
+- FULL RECIPE THAT WORKS (one line, from `nsts-sdl-dps`):
+  `HALSFC_BINDIR=<archive>/PASS.REL32V0 YAGPC_EXTERNAL_SYMS=<PFS>/mafgen/csects-SSW-augmented.json PYTHONPATH=<dps>/src python3 -u -m con80.con80build --root <PFS>/OI340600 --out sync/pin --src sync/srcnoext/SSSRC --src sync/srcnoext/APPLSRC --src sync/patchsrc --incl sync/INCL80_fixed --halsc sync/shimbin/halsc --pass-rel32 <archive>/PASS.REL32V0 --link-order sync/linkorder.json --build-all`
+
+### [2026-08-29] Target: [problems.md]
+- **THE PIN FILE IS PER MEMORY CONFIGURATION, NOT GLOBAL.**  My first pinned build
+  applied `csects-SSW-augmented.json` to EVERY phase link.  That is wrong, and the
+  user supplied the mapping from the PASS User's Guide:
+      PHASE02          = SSW
+      PHASE04, PHASE09 = G16   (memory configuration 1)
+      PHASE05          = G2    (2)
+      PHASE06          = G3    (3)
+      PHASE14, PHASE15 = S2    (4)
+      PHASE12          = P9    (6)
+      PHASE07          = G8    (8)
+      PHASE18          = G9    (9)
+      PHASE03          = spans configurations 1,2,3,8,9 -- no single table
+  Available in `PFS/mafgen/`: G16, G2, G3, G8, G9, P9, S2, SSW; `-augmented`
+  variants exist ONLY for SSW and P9.
+- MEASURED DAMAGE FROM THE GLOBAL PIN: PHASE03 had **316 csects moved** to SSW
+  addresses (e.g. `#CAIDDEU 4196c -> 46fc4`) and PHASE13 2.  PHASE01 and PHASE10
+  were untouched (0 moved), so GPCIPL and the bootstrap were NOT the casualties --
+  I guessed they were and was wrong.
+- THE RESULTING VOLUME DID NOT BOOT: `mmu-pin-boot.mmv` IPLed (72 bootstrap blocks
+  read from tape, start at `0014b`) and then went to a WAIT STATE at `30220` after
+  13.8 s simulated, MSC and BCE18 both halted, ZERO further tape reads and zero DEU
+  polls.  `30220` is `#PCANNCO+256`, a COMPOOL, and at that point only the
+  bootstrap is resident -- so FCMBOOT branched into unloaded memory.
+- A SEPARATE TRAP FOUND ALONG THE WAY: `BOOT-*.fcm` IS NOT `PHASE01.fcm`.  I assumed
+  it was because the sizes match (65024 bytes both).  Measured: `BOOT-900.fcm` differs
+  from `pin/PHASE01/PHASE01.fcm` in 747 bytes and from `newphase/PHASE01/PHASE01.fcm`
+  in 744, while those two differ from each other in only 21.  So `BOOT-900.fcm` is a
+  DIFFERENT ARTIFACT built by some other recipe -- possibly carrying the
+  `patch_ssl_zcon.py` FIOMUWB2 patch.  ITS PROVENANCE IS NOT YET ESTABLISHED and the
+  volume recipe is not reproducible until it is.
+- A/B, new phases + old `BOOT-900.fcm` bootstrap: gets FURTHER -- reaches `MODE: RUN`
+  and an Instruction Monitor at `00c24`.  So the bootstrap is a real variable too,
+  independent of the per-phase pin question.
+- SHIM NOW SELECTS BY PHASE, parsing `PHASEnn` out of the lnk101 argv and passing
+  NOTHING for unmapped phases (01, 03, 10, 13, 16, 20, 21, 23-26).  Still zero
+  modifications to `nsts-sdl-dps`.
+- OPEN QUESTION FOR THE USER: the mapping as given lists PHASE12 twice -- under
+  "configuration 1 or 6 (PHASE04, 09, 12) = G16" and again as "6 (PHASE12) = P9".
+  I have taken the more specific statement and used P9 for PHASE12.  PHASE12 is not
+  in the boot set (10, 2, 13, 3), so this does not block.
+
+### [2026-08-29] Target: [problems.md]
+- **THE MISSING VOLUME STEP IS `tools/stamp_ipl_phase_table.py`, AND ITS OWN HEADER
+  PREDICTED THE FAILURE.**  A PHASE01 built from source leaves FCMBOOT's three
+  256-halfword areas (`FCMPTAD1/2/3`) holding the `X'FFFF'` "never mass-memory built"
+  sentinel.  The tool's docstring: "a FCMBOOT built from source walks all three areas,
+  finds FFFF in each, and lands in its documented give-up wait state having never
+  touched the bus."  That is EXACTLY what was measured -- wait state at `30220`,
+  13.8 s, zero tape reads past the 72 bootstrap blocks, MSC and BCE18 halted.
+- SO THE VOLUME RECIPE IS THREE STEPS, NOT TWO:
+    1. `mmu2mmv --con80 <PFS>/OI340600/CON80 --mmu <tree> --out V.mmv`
+    2. `stamp_ipl_phase_table.py <tree>/PHASE01/PHASE01.fcm --mmu <tree>
+       --con80 <PFS>/OI340600/CON80 --sdl <dps> -o BOOT.fcm`      <-- WAS MISSING
+    3. `stamp_bootstrap_on_tape.py V.mmv BOOT.fcm`
+  Stamped output: `FCMPTAD1 at 0x0037E, 168 of 256 halfwords, phases 10:5LB@2260,
+  2:34LB@2300, 13:2LB@1B00, 3:11LB@1BC0` -- the same 2260/2300/1B00/1BC0 the
+  `BOOT-900.fcm` diff showed, so `BOOT-900.fcm` was simply a STAMPED PHASE01.  Its
+  provenance is now established and the recipe is reproducible.
+- HOW IT WAS FOUND, and the method is worth keeping: diff the working artifact
+  against the broken one and MAP THE DIFFERING BYTES TO CSECTS.  444 of the 448
+  differing halfwords fell inside FCMBOOT and the rest in FCMINSSL; decoding them as
+  `[address][flags][length]` triples gave `6fbc/8600/03e2` -- FCMINSSL's address with
+  the protect bit and length 994, which are `patch_ssl_zcon.py`'s own `--lb-addr`
+  and `--lb-len` defaults.  That named them as load-block descriptors immediately.
+- **THE CON80 DECKS CARRY THE CONFIGURATION MAPPING IN MACHINE-READABLE FORM**, which
+  is what the user suspected.  Each `PHASEnn` deck names the configuration deck it
+  pulls in, and those names match the `csects-*.json` names one for one:
+      PHASE02 OPS0,SSW -> SSW      PHASE08 GNC9      -> G9
+      PHASE04 GNC1,GNC6 -> G16     PHASE09 MFB9,PL9  -> P9
+      PHASE05 GNC2     -> G2       PHASE12 PL9       -> P9
+      PHASE06 GNC3     -> G3       PHASE15 SM2       -> S2
+      PHASE07 GNC8     -> G8       PHASE16 SM4       -> (no csects-S4.json)
+      PHASE03 GNC2,MFB3 (deck declares configurations 1,2,3,8,9) -> NO single table
+      PHASE14 MFB14 -> none;  PHASE18 names no configuration deck -> none
+  `G16` is configurations 1 AND 6, which is why PHASE04 pulls both GNC1 and GNC6.
+  Corrections to the prose mapping: PHASE09 is P9 not G16, and configuration 9 is
+  PHASE08 not PHASE18.  PHASE12 = P9 was right.
+- PER-PHASE PINNING RESULT (real content at the flown address, unpinned -> pinned):
+      PHASE04 11.21% -> 91.92%   PHASE06 12.58% -> 91.16%
+      PHASE05 14.26% -> 88.99%   PHASE07 16.46% -> 86.15%
+      PHASE15 18.09% -> 91.44%   PHASE02 83.79% -> 96.06%
+  High "absent" counts on PHASE09/PHASE14 are EXPECTED: a configuration table
+  describes a whole memory image that several phases jointly supply.
+- NOTED, NOT YET EXPLAINED: pinning PHASE12 to P9 makes it OVERSIZE on tape
+  (224 blocks > 216 allocated).  Phase 21 at 42 > 41 is NOT a problem (user).
+
+### [2026-08-29] Target: [problems.md]
+- **PINNING WITH `--external-syms` PRODUCES A MORE ACCURATE IMAGE THAT DOES NOT RUN.**
+  Measured headless with `--deu-model`, identical binary/script/panel, DEU counters
+  after ~80 s:
+      mmu900 (reference)                    400 cmds, 132 polls, ipled true
+      ctrl  = my recipe + UNPINNED old tree 400 cmds, 132 polls, ipled true
+      v3    = my recipe + FRESH build, boot set unpinned   400 cmds, ipled true
+      v2    = fresh build, PHASE02 pinned                    0 cmds, never ipled
+      v4    = fresh build, ALL of 10/2/13/3 pinned           0 cmds, never ipled
+      v5    = v4 + the cross-phase resolution pass           0 cmds, never ipled
+  So the RECIPE and the FRESH REBUILD are both sound; PINNING THE BOOT SET is what
+  breaks it, and it breaks it in every variant tried.
+- THE SYMPTOM IS NOT A CRASH.  `YAGPC_MMUTRACE` shows the failing and working
+  volumes ISSUE IDENTICAL TAPE COMMANDS up to and including `read 55 block(s) from
+  2/4/3/0` -- GPCIPL IS loaded.  The working one then goes on to `BITE STATUS` at
+  t=10.1 s; the failing one never does.  `YAGPC_NIASAMPLE` shows BOTH sitting at
+  `01cfc` (GPCIPL's own loop, 31 of 35 samples) with the same registers, and both
+  passing through `302be` first.  So GPCIPL runs and then stops progressing.
+- ELIMINATED, each by measurement rather than argument:
+    * MY VOLUME RECIPE -- the control built by it from the unpinned tree works.  The
+      recipe is THREE steps: `mmu2mmv`, then `stamp_ipl_phase_table.py`, then
+      `stamp_bootstrap_on_tape.py`.
+    * THE STAMPER -- fed the unpinned tree it reproduces `BOOT-900.fcm` EXACTLY
+      (`2:29LB@2300`), which also settles that file's provenance: it is a stamped
+      PHASE01, not a separate artifact.
+    * Z-CON HOLES.  Real and worth knowing: `--external-syms` runs BEFORE lnk101's
+      Z-CON generator and satisfies undefined `#Z*` symbols with CONTENT-LESS
+      synthetic sections, SUPPRESSING the generator.  `#ZDCDDG2` went from
+      `<generated-zcons>` (real pointer) to `<external-syms>` (empty), which
+      fragmented PHASE02's load blocks and left holes at `472..485`, `504..505`,
+      `566..579` -- every one a run of synthetic Z-CONs.  FIXED by dropping the 58
+      `#Z*` entries from the pin file and letting `linkorder.json`'s `zconPool` place
+      them: `#ZDCDDG2` is `<generated-zcons>` again AND at its flown address, gaps
+      identical to the unpinned build's, and placement IMPROVED to 652/660 = 98.79%
+      real content at the flown address, 0 misplaced.  IT STILL DOES NOT BOOT.
+    * CSECT OVERLAPS -- 0 real overlaps in either build.
+    * THE MISSING CROSS-PHASE PASS -- a genuine gap in my procedure (per-phase
+      `--link` skips what `--build-all` does at the end; PHASE02 had 367 sites to
+      patch), but running `--resolve-phases` does not fix the boot either.
+- STILL UNEXPLAINED: why an image whose csects sit at the addresses the DASS report
+  records runs WORSE than one whose csects do not.  The pin is address-accurate and
+  functionally dead, and the mechanism is not yet identified.
+- TOOLING ADDED ALONG THE WAY, all in yaGPC2: `YAGPC_NIASAMPLE=<ms>` prints NIA +
+  registers periodically (a run that neither faults nor halts previously revealed
+  nothing, and gdb cannot attach -- Yama blocks ptrace); batch-mode SIGINT now sets
+  a stop reason instead of killing the process, so `timeout -s INT` yields a full
+  end-of-run report; `YAGPC_MEMDUMP` takes comma-separated ranges.
+
+### [2026-08-29] Target: [problems.md]
+- **A BUILD THAT IS BOTH ACCURATE AND RUNS.**  PHASE02 against DASS_SSW:
+      unpinned baseline  553/660 = 83.79%  misplaced 100  absent 7  unresolved 638
+      v6 (this recipe)   652/660 = 98.79%  misplaced   0  absent 2  unresolved   6
+  and it boots: 400 DEU commands, 132 polls, `ipled true`, identical to the reference.
+- THREE THINGS HAD TO BE TRUE TOGETHER; every earlier attempt had two:
+    1. **PIN PHASE02 ONLY.**  Pinning PHASE10 is CATASTROPHIC -- it strips 97% of
+       GPCIPL's relocations (1788 -> 56), so its address constants stay ZERO.
+       PHASE03 loses 18% the same way.  PHASE02 is the one phase where pinning
+       IMPROVES resolution (638 unresolved -> 6, relocations 10470 -> 11094).
+    2. **DROP `#Z*` FROM THE PIN FILE** (58 entries).  `--external-syms` runs BEFORE
+       lnk101's Z-CON generator and satisfies undefined `#Z*` with CONTENT-LESS
+       synthetic sections, SUPPRESSING the generator; `#ZDCDDG2` went from
+       `<generated-zcons>` (a real pointer) to `<external-syms>` (empty), punching
+       holes in the load blocks.  `linkorder.json`'s `zconPool` places them properly
+       on its own.
+    3. **RUN `--resolve-phases` AFTERWARDS.**  Per-phase `--link` skips what
+       `--build-all` does at the end; PHASE02 alone had 367 sites to patch.
+- HOW IT WAS FOUND, and the lesson: DIFF THE LOADED MEMORY IMAGE, not the link
+  metadata.  Both volumes were stopped at the SAME step count (6,600,000) with
+  `YAGPC_MEMDUMP=0-7fff`; 375 halfwords differed, and the distribution named the
+  fault -- `FCMSSLPT` 264 (merely SHIFTED +6 halfwords, two extra load-block
+  descriptors, benign), and in GPCIPL a scatter of ZEROS where the working image had
+  addresses (`01bc8 3610->0000`, `01be8 1d3a->0000`, `01bf0 1ce4->0000`).  Unrelocated
+  address constants.  Reasoning from `sym.json` had me chasing Z-CON holes and csect
+  overlaps for hours; the memory diff named it in one run.
+- FOR DON, IF IT IS WORTH REPORTING: `lnk101 --external-syms` pre-assigns
+  `section.baseAddress` for locally-defined sections, and on PHASE10 that drops
+  1732 of 1788 relocations.  A section that arrives with a baseAddress already set
+  appears to be treated as needing no relocation.  Also, `--external-syms` should
+  not pre-empt the Z-CON generator.
+- MEASUREMENT TOOLING that made this possible, all added to yaGPC2 this session:
+  `YAGPC_NIASAMPLE=<ms>` (periodic NIA + registers -- gdb cannot attach, Yama blocks
+  ptrace); batch-mode SIGINT setting a stop reason instead of dying, so
+  `timeout -s INT` yields a full report on an open-ended run; `YAGPC_MEMDUMP` taking
+  comma-separated ranges.  Without the first two the failing run was unmeasurable.
+
+### [2026-08-29] Target: [problems.md]
+- **CORRECTION: MY VOLUME RECIPE IS NOT SOUND, AND THE PINNING WAS NEVER THE REASON
+  PASS FAILS TO LOAD.**  I called the recipe sound because the control drove the DEU.
+  That was GPCIPL DISPLAYING, not PASS LOADING, and I conflated the two.  Measured to
+  full length with `YAGPC_MMUTRACE`:
+      mmu900 (reference)                430 blocks -- PASS loads
+      ctrl   (my recipe, OLD tree)      160 blocks -- PASS never loads
+      v6     (my recipe, pinned)        160 blocks -- PASS never loads
+  The pinning results stand on their own (98.79% placement, 0 misplaced, boots and
+  runs 24 min of simulated time without faulting), but they are a separate axis.
+- WHERE IT DIVERGES, EXACTLY.  All volumes perform the SAME first five reads,
+  160 blocks: 72@4/4/5 (bootstrap), 55@2/4/3 (GPCIPL), 17@4/4/3/8, 8@4/4/0/24,
+  8@4/4/4/8.  The reference then, at t=221.7 s SIMULATED, does
+      position 3/4/0 -> read 227 blocks   PHASE02
+      position 3/3/0 -> read   5 blocks   PHASE13
+      position 3/3/5 -> read  38 blocks   PHASE03
+  Mine never take that step, even after 591,647,048 steps / 1455 s simulated.
+- RULED OUT BY MEASUREMENT, not argument:
+    * MMDIR.  Both volumes LACK the directory blocks entirely (4/4/0/24 is absent
+      from mmu900 too), yet mmu900 loads.  `mmu2mmv`'s "not generated" warning is
+      real but is NOT this blocker.
+    * THE BOOTSTRAP.  `BOOT-900.fcm` differs from mine in 171 bytes INCLUDING CODE
+      near the entry point (`00149h: 900=cdff 08d3` vs `ctrl=cdfb 0078`), so it came
+      from a differently-linked PHASE01 -- but stamping BOOT-900 onto my phases still
+      gives 160 blocks.  Not the blocker.
+    * THE DISPLAY / THE KEYSTROKES.  All three volumes produce an IDENTICAL DEU image
+      (`7472 zeros, 306 distinct of 8192`) and all report
+      `YAGPC_DEUKEYS delivered 3 keystroke(s)`.  GPCIPL's menu is up and the ITEM 1
+      EXEC reaches it in every case.
+    * TAPE SIZE.  mmu900 has 1336 blocks mine lacks (all in files 3 and 5 -- the
+      other PASS areas), but v6 is 2977 blocks and still stops at 160.
+- NEXT: diff the loaded memory image of reference vs mine at the SAME step count
+  (85,000,000, chosen as ~t=210 s from the measured 406k steps per simulated second)
+  -- the same technique that found the zeroed GPCIPL address constants.
+
+### [2026-08-29] Target: [problems.md]
+- **CORRECTION: "THE PINNED BUILD NEVER BUILDS FCMSSLPT" WAS A SAMPLING ARTIFACT.**
+  I sampled at a fixed step count (89M) and found the SSL phase table all zeros, and
+  reported the pinned build as failing earlier than the unpinned one.  Dumped at the
+  END of a 700 s run it IS built, and it matches the reference structurally:
+      ours 000c 0005 2260 | 001b 001f 2300 | 0078 0002 1b00 | 007e 000a 1bc0
+      ref  000c 0005 2260 | 001b 001d 2300 | 0072 0002 1b00 | 0078 000a 1bc0
+  as (disp, count, mm) triples for phases 10, 2, 13, 3.  Identical but for phase 2's
+  count -- 31 vs 29, expected, pinning changes PHASE02's extents -- and the two
+  displacements that follow from it.  PHASE 3 IS 000a (10) IN BOTH.
+- AND THE FRESH BUILD'S PHASE03 LOAD BLOCKS MATCH THE REFERENCE EXACTLY, all ten,
+  address/flags/length, decoded from the reference's own runtime FCMSSLPT:
+      024a/8600/0062 -> 586,98    3a96/0600/054a -> 14998,1354
+      4c70/0600/1b36 -> 19568,6966  935c/0650/0006 -> 168796,6
+      8360/0670/00a0 -> 230240,160  888c/8690/1616 -> 297100,5654
+  The STALE `newphase` tree has NINE and every one differs.  So `ctrl` looked
+  "closer to the reference" only by accident and I had been using the wrong
+  baseline; the `000a` vs `0009` count discrepancy was newphase being wrong.
+- **SYS5 MUST BE WRITTEN AS PROPER LOAD BLOCKS, NOT RAW FILL** -- the user's call,
+  and it is right.  The cards say so: `LOADBLK=1/2/3`.  Layout, from mmbstamp's
+  writer and the SSL's reader: `[0..L-3]` content, `[L-2]` zero, `[L-1]` sum of the
+  content mod 2**16 -- exactly what `patch_ssl_zcon.py` recomputes after an edit.
+  Raw `INIT=C6C6` is NOT a valid load block.
+      raw C6C6      : FMADEU13 read 4x, stuck, DEU never contacted
+      proper blocks : FMADEU13 read ONCE and passed; FMADEU21 now read 4x
+  So the construction is necessary and it advanced the failure one allocation.  It
+  is not yet sufficient: FMADEU21 (8 blocks, LOADBLK=3) is still rejected where
+  FMADEU13 (17 blocks, LOADBLK=1) is now accepted.  Checksums verified by hand:
+  8702 halfwords of C6C6 sum to BE74, 4094 to D274.
+- ALSO WITHDRAWN: "GPCIPL validates the DCP in GPC memory" AND "our DEU model
+  rejects the fills".  Both wrong.  The DEU counters read `commands: 0` for the
+  whole raw-C6C6 run -- the DEU was never contacted at all, so it cannot have
+  signalled anything, and the rejection is on the tape/load-block side.
+- SYS8 (MMDIR1/2/3, `FFFF` not-mass-memory-built sentinel) is harmless and stays:
+  160 blocks read, 2441 DEU commands, 813 display fills, no retry loop, no crash.
+- STILL THE HEADLINE UNKNOWN: with a correct SSL phase table and correct PHASE03
+  load blocks, PASS STILL DOES NOT LOAD.  160 blocks, every time.
+
+### [2026-08-29] Target: [problems.md]
+- **SSW LOADS.  THE BLOCKER WAS AN UNSTAMPED `FCMCKSUM`, AND A TOOL FOR IT ALREADY
+  EXISTED THAT I HAD NEVER RUN.**  `tools/stamp_ssl_checksum.py`.  Its own header
+  predicts the symptom verbatim: "SSLCHECK then sums with a count of zero, cannot
+  match, and takes its ERROR 22 path -- which deschedules it and returns to the
+  scheduler, so SSL70 never runs, FCMINSSL is never entered, and AN ITEM 1 EXEC
+  LOADS NOTHING.  Nothing is ever asked of the mass memory."  That is exactly what
+  had been measured for hours: keys accepted, 160 blocks, nothing further requested.
+      before:  blocksRead 160
+      after :  blocksRead 431 -- 228@3/4/0/0 PHASE02, 5@3/3/0/0 PHASE13,
+                                38@3/3/6/0 PHASE03
+  DEU counters now match the reference exactly (1206 commands, 402 displayFills,
+  401 polls), and the run reaches the SAME failure the reference does,
+  `invalid instruction 0xc6c6 at 0x6b8f`.  Parity, from a build we can reproduce.
+- HOW IT WAS FOUND: the matched-simulated-time memory diff showed only 109 differing
+  halfwords, two of them in FCMCKSUM -- `07398 ref=0326 mine=0000`,
+  `0739b ref=cb2c mine=0000`.  Searching the reference's own image for a region
+  whose 16-bit sum equals `cb2c` found EXACTLY ONE: 806 halfwords at `06fbc`,
+  which is FCMINSSL.  Our own FCMINSSL sums to `cb2c` too -- the SSL was always
+  correct, only the stamp was missing.
+- **THE VOLUME RECIPE IS FIVE STEPS, NOT TWO.**  Two of them I had been omitting:
+      1. mmu2mmv --con80 <CON80> --mmu <tree> --out V.mmv
+      2. stamp_ipl_phase_table.py <tree>/PHASE01/PHASE01.fcm --mmu <tree>
+         --con80 <CON80> --sdl <dps> -o BOOT.fcm          <-- was missing
+      3. stamp_ssl_checksum.py V.mmv                       <-- was missing
+      4. stamp_bootstrap_on_tape.py V.mmv BOOT.fcm
+      5. add_sysid_allocs.py V.mmv --con80 <CON80> --sysid SYS8
+  Step 3 also recomputes the SSL load block's own tail, `2fb8 -> fe0a`, which is
+  the value the reference carries -- another difference the diff had flagged.
+- THE LESSON, AND IT IS THE SAME ONE TWICE: `tools/` ALREADY CONTAINED THE FIX,
+  WITH A DOCSTRING NAMING THE EXACT SYMPTOM.  Both `stamp_ipl_phase_table.py` and
+  `stamp_ssl_checksum.py` were written for precisely the failures I then spent
+  hours rediscovering from memory dumps.  READ THE TOOLS BEFORE CHASING THE BUG.
+- SYS5 STAYS OUT for now, and the reason is now understood rather than assumed.
+  `SSSRC/MMULDTBL.asm` shows the DEU load is ONE TRANSACTION OF THREE raw DMA
+  transfers, not SSL load blocks:
+      2468 'DCP'    17 blocks x 512 words -> GPC A000     (87FC)
+      2418 'DST'     8 blocks x  76 words -> GPC D000     (392C)
+      2488 'CRTFMT'  8 blocks x  76 words -> GPC E000     (392C)
+  decoding BLK CNT-1 / WD CNT-1 as bits 15-11 / 10-2.  The 8-block transfers read
+  only 76 words per block, so a whole-allocation checksum tail is never even read.
+  `FMADEU21`/`DMACDFT1` in that file are the transaction's "END n OF 3" markers,
+  NOT the tape allocations of the same name -- the user spotted that.
+
+### [2026-08-29] Target: [problems.md]
+- **THE `0xc6c6` CRASH, TRACED TO ONE REGISTER.**  With PASS loaded and running, the
+  chain is entirely legitimate flight software until one branch:
+      PASS issues SVC 14
+        -> FPMSVC dispatches to FPMRESET (FSVC0014) at 1aefe
+          -> CALL FCMSSYNC  =  BAL 7,FCMSSYNC          R7 := link
+            -> FCMSSYNC 19716: ST R7,FCMSNCSV          saves the link
+               ... uses R7 as scratch (XR R7,R7 / ICR R4,R7) ...
+               197ab: L  R7,FCMSNCSV                   restores it
+               197af: BCR 7,R7                         returns through it
+  At 197af R7 = 0x00016bec.  BCR takes the HIGH half (`>>16`), so it branches to
+  0x0001.  35 times, then the bad dispatch and the invalid instruction.
+- WHAT THE VALUE SHOULD BE: `BAL` sets R7 := psw1, and psw1 carries
+  `nia16 = (v & 0x7FFF) | 0x8000` in its HIGH half (`psw_set_nia`, regmem.c:156;
+  confirmed by the PSA dump, 0x58 = `81f4 4021` encoding 0x101f4).  For a return to
+  FPMRESET+2 = 0x1af00 that is `0xAF00____`.  0x00016bec is instead the PLAIN
+  32-bit address 0x16bec -- and 0x16bec is nowhere near FPMRESET.
+- THE ARCHITECTURE AGREES WITH BCR, so the branch is not the bug.  MLIB80/CALL.asm
+  documents the convention: an entry address lives in "BITS 0-15" (IBM numbering =
+  the HIGH half) and a return code in "BITS 16-31".
+- RULED OUT, EACH BY READING THE CODE:
+    * `BCR` -- character-for-character identical to the reference
+      (`t.g_EXPAND(t.r(v.y).get32() >>> 16, OPTYPE_BRCH)`, gpc cpu_instr.coffee:2045).
+    * THE `ST` NOT REACHING FCMSNCSV -- the short-RS extended form decodes
+      correctly: `37f3` has dval == 0x3c, which sets `d := hw2` (0x8252) and
+      niaIncr 2 (cpu_instr.c:2318), and b == 3 means base 0 (cpu.c:563).  0x8252 is
+      exactly FCMSNCSV's address in both PHASE02 and PHASE03 symbol tables.
+    * THE SAVE AREA BEING PRE-LOADED WITH RUBBISH -- the static image has
+      `08252=0000 08253=0000`, correct per `FCMCBLKS.asm`'s `DC F'0'`.
+    * THE SVC TABLE -- FSVC0000/0010/0011/0023/0028/0029 are unresolved, but no
+      module anywhere defines them (searched with CON80 continuations joined), so
+      they are retired slots.  `FPMSVCEP` assembles regardless because `EXTRN`
+      defers to the linker; `FSVCYCON 50` IS invoked (line 103, after the MEND).
+- **A MEASUREMENT I HAD TO WITHDRAW:** I reported "FCMSNCSV is never written" from a
+  WATCHHW run -- but I KILLED THAT RUN AT ~4 MINUTES, and FCMSSYNC does not execute
+  until PASS is up around 220 s of simulated time.  The watch had simply not reached
+  the code yet.  A null result from a run that never reached the code under test is
+  not a null result.
+- OPEN: whether R7 is already wrong at FCMSSYNC's entry (caller/BAL at fault) or is
+  corrupted across the ST/L round trip.  `YAGPC_NIAPROBE=19716` decides it.
+
+### [2026-08-29] Target: [problems.md]
+- **RS extended form, B2=11: the displacement IS the effective address.**
+  PoO Sec. 2.2.8 ("RS Format Instructions"), second numbered difference from
+  SRS addressing: "When B2 equals 11, base addressing is not performed. In
+  this case, the displacement is instead used directly as the effective
+  address." `cpu_g_ea` was instead routing it through `ea_expand`, so any
+  operand with bit 15 set had its sector replaced by DSR. Sec. 2.9 does not
+  apply: it turns a 16-bit ADDRESS into a 19-bit EA, and here the
+  displacement already IS the EA. gpc expands too -- inherited defect.
+- Symptom: `ST R7,X'8252'` at FCMSSYNC entry worked by luck (DSR=1 gave
+  (1<<15)+0x252 = 0x8252); the matching `L R7,X'8252'` at exit ran with
+  DSR=0, read 0x0252, and put 0x0001 in R7's high half, so `BCR 7,R7`
+  branched to address 1 -- the `invalid instruction 0xc6c6 at 0x6b8f` crash.
+- Evidence in the linked image: six FCMSSYNC operands equal their symbol
+  addresses exactly, three with bit 15 set (FCMSNCSV 8252, FCMPLDSE 8bba,
+  FCMSVCNM 8209, TCVTRSSM 0166, TPSASOP 0058, TCVTSVCS 016a).
+- BRANCHES ARE EXCLUDED, measured not assumed: applying 2.2.8 literally to
+  branch operands costs test_scheduler, test_random and test_rtl outright and
+  drops 111116 -> 111036 fixtures. A branch target must still reach sector 3
+  (0x197ab needs more than 16 bits), so it expands with BSR per Sec. 2.9.
+- Cost: 64 `cpu_instr_exec` fixtures (111180 -> 111116), across 23 mnemonics,
+  ALL data-operand (L, C, N, LM/STM, LXA/STXA, LPS, SVC, TS, the FP set) and
+  none branch. Those fixtures are gpc-generated and encode the expansion, so
+  they cannot adjudicate; they need regenerating once this is settled.
+- Corroboration from the source: `FCMSNCSV` is an **EXTRN** (FCMSSYNC.asm:150),
+  so the linker resolves it and plugs an absolute address into the
+  displacement field. That only works if the displacement IS the effective
+  address -- a linker cannot know what DSR holds at each call site, so any
+  EXTRN resolving above 0x8000 would be unaddressable under expansion.
+  Assembler, linker and Sec. 2.2.8 agree.
+- What triggers expansion, per the PoO: it is not a mode but a step that
+  CONSUMES a 16-bit address, and the manual names it explicitly each time it
+  applies -- "(This EA is then expanded to a 19-bit EA...)" occurs exactly
+  four times, all in the INDEXED forms (IC-relative, X-indexed,
+  indexed-with-modifier, indirect). Sec. 2.2.8's B2=11 case has no such
+  clause and instead yields the EA outright.

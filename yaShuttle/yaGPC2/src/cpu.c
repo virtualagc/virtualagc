@@ -691,6 +691,48 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                     }
                 }
             }
+        } else if (df_get(v, 'b') == 3 && v->opType != OPTYPE_BRCH) {
+            /* AP-101S PoO Sec. 2.2.8 "RS Format Instructions", on the
+             * EXTENDED form (AM = bit 13 = 0), second numbered difference
+             * from SRS addressing:
+             *
+             *     "When B2 equals 11, base addressing is not performed.
+             *      In this case, the displacement is instead used
+             *      DIRECTLY AS THE EFFECTIVE ADDRESS."
+             *
+             * Directly as the EA -- so there is no 16-bit address left for
+             * Sec. 2.9 to expand.  Sec. 2.9 governs turning a 16-bit
+             * ADDRESS into a 19-bit EA; here the displacement already IS
+             * the EA, and quoting 2.9's "high-order bit 1 selects DSR"
+             * against this case is a category error (I made it once).
+             *
+             * Confirmed against the linked image: every such operand in
+             * FCMSSYNC equals its symbol's address exactly, INCLUDING the
+             * three whose bit 15 is set --
+             *     FCMSNCSV 8252   FCMPLDSE 8bba   FCMSVCNM 8209
+             *     TCVTRSSM 0166   TPSASOP  0058   TCVTSVCS 016a
+             * Expanding them hides the defect whenever DSR happens to
+             * match the operand's own sector, which is why the STORE at
+             * FCMSSYNC's entry worked and only the matching LOAD failed:
+             * DSR=1 at the ST gave (1<<15)+0x252 = 0x8252 by luck, DSR=0
+             * at the L gave 0x0252, and the value read back there put
+             * 0x0001 in R7's high half, so `BCR 7,R7` branched to address
+             * 1.  That was the 0xc6c6 crash.
+             *
+             * gpc expands here too, so this is an INHERITED defect rather
+             * than a porting slip -- the PoO and the linked image are the
+             * authority, not the reference implementation.
+             *
+             * BRANCHES ARE EXCLUDED, and that exclusion is MEASURED, not
+             * assumed.  Applying 2.2.8 literally to branch operands too
+             * costs three further whole stages -- test_scheduler,
+             * test_random and TEST_RTL, the real RTL assembly -- and drops
+             * 111116 -> 111036 fixtures.  The reason is that a branch
+             * target still has to reach sector 3: 16 bits cannot express
+             * 0x197ab, so the branch address is expanded with BSR per Sec.
+             * 2.9 even though no base was added.  For data operands the
+             * linked image says the opposite, and it wins. */
+            ea = pea & 0xffff;
         } else {
             ea = ea_expand(cpu, pea, v->opType, hasDse, dseVal);
         }
