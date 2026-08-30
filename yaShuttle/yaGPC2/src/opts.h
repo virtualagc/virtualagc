@@ -203,6 +203,11 @@ typedef struct {
      * 20-22) so PASS can initialise its clock.  See src/mtumodel.h. */
     bool mtuModel;                    /* default false */
 
+    /* --deu-bus <n>: install a SECOND display unit on bus n, alongside the
+     * one --deu-model puts on DK1.  PASS masks whichever DK bus the BFC CRT
+     * switch names, so a display it can actually drive has to be elsewhere. */
+    char *deuBus;                     /* decimal bus number; default none */
+
     /* Not part of gpc run's own option set -- yaGPC2-specific. Which
      * instruction-timing model charges cpu->elapsedTimeUs, and through
      * it the interval timers: "poo" (the default) is the AP-101S

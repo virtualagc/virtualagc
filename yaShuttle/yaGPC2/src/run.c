@@ -47,6 +47,10 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         mtumodel_service(br->mtu, svc, in, out);
         return;
     }
+    if (br->deu2 && in->busID == br->deu2Bus) {
+        deumodel_service(br->deu2, svc, in, out);
+        return;
+    }
     if (br->fallback) {
         br->fallback(br->fallbackCtx, svc, in, out);
         return;
@@ -161,24 +165,39 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     /* The MTU answers on its own buses (20-22) and leaves the rest alone,
      * like the mass memory model.  PASS reads it to initialise its clock;
      * with nothing there the clock came out as 24 hours (see mtumodel.h). */
+    /* A SECOND display unit, on a bus of its own.  The orbiter has several
+     * DEUs; we modelled one, on DK1 -- which is the very bus PASS hands to
+     * the BFS when the BFC CRT switch names CRT 1, so the only display we
+     * had was the one PASS was obliged to give up.  GPCIPL still runs its
+     * menu on DK1; this is the one PASS itself can drive. */
+    if (opts->deuBus != NULL && *opts->deuBus != '\0') {
+        long b = strtol(opts->deuBus, NULL, 10);
+        if (b > 0 && b <= 24) {
+            r->deuModel2 = deumodel_create((int)b);
+            r->busRouter.deu2 = r->deuModel2;
+            r->busRouter.deu2Bus = (int)b;
+        }
+    }
+
     if (opts->mtuModel) {
         r->mtuModel = mtumodel_create();
         if (r->mtuModel)
             mtumodel_set_clock(r->mtuModel, &r->age.gpc.cpu.elapsedTimeUs);
     }
 
-    if (opts->mmuModelVolume || r->mtuModel) {
+    if (opts->mmuModelVolume || r->mtuModel || r->deuModel2) {
         long unit = opts->mmuModelUnit ? strtol(opts->mmuModelUnit, NULL, 10) : 1;
         r->mmuModel = opts->mmuModelVolume
                           ? mmumodel_create((int)unit, opts->mmuModelVolume)
                           : NULL;
-        if (r->mmuModel || r->mtuModel) {
+        if (r->mmuModel || r->mtuModel || r->deuModel2) {
             if (r->mmuModel)
                 mmumodel_set_clock(r->mmuModel, &r->age.gpc.cpu.elapsedTimeUs);
             if (base == NULL) iop_set_recv_timeout_floor_us(0.0);
             r->busRouter.mmu = r->mmuModel;
             r->busRouter.mmuBus = r->mmuModel ? mmumodel_bus(r->mmuModel) : -1;
             r->busRouter.mtu = r->mtuModel;
+            r->busRouter.deu2 = r->deuModel2;
             r->busRouter.fallback = base;
             r->busRouter.fallbackCtx = baseCtx;
             ap101_set_servicer(&r->age.gpc, bus_router_service, &r->busRouter);
@@ -210,6 +229,12 @@ void batchrunner_free(BatchRunner *r) {
         deumodel_report(r->deuModel);
         deumodel_free(r->deuModel);
         r->deuModel = NULL;
+    }
+    if (r->deuModel2) {
+        fprintf(stderr, "deu2 (bus %d): ", r->busRouter.deu2Bus);
+        deumodel_report(r->deuModel2);
+        deumodel_free(r->deuModel2);
+        r->deuModel2 = NULL;
     }
     if (r->mtuModel) {
         mtumodel_report(r->mtuModel);

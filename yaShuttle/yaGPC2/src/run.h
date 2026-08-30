@@ -37,6 +37,8 @@ typedef struct {
     struct MmuModel *mmu;
     int mmuBus;
     struct MtuModel *mtu;   /* buses 20-22, device 22; see mtumodel.h */
+    struct DeuModel *deu2;  /* --deu-bus: a SECOND display unit */
+    int deu2Bus;
     GpcServicerFn fallback;
     void *fallbackCtx;
 } BusRouter;
@@ -127,6 +129,7 @@ typedef struct {
      * while everything else still reaches whatever else is installed. */
     struct MmuModel *mmuModel;
     struct MtuModel *mtuModel;  /* --mtu-model: the in-process timing unit */
+    struct DeuModel *deuModel2; /* --deu-bus: a second display unit */
     BusRouter busRouter;   /* --deu-model: the in-process display unit */
 } BatchRunner;
 

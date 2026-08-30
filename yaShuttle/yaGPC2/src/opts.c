@@ -137,6 +137,11 @@ static const char *HELP_TEXT =
 "                                  and --deu-model: only the mass memory bus\n"
 "                                  is taken over (default: none)\n"
 "  --mmu-unit <n>                   which mass memory the model is, 1 or 2\n"
+"  --deu-bus <n>                    install a SECOND display unit on bus n,\n"
+"                                  beside the one --deu-model puts on DK1.\n"
+"                                  PASS surrenders whichever DK bus the BFC\n"
+"                                  CRT switch names, so a display PASS can\n"
+"                                  drive has to live on a different one\n"
 "  --mtu-model                      answer as the Master Timing Unit (device 22\n"
 "                                  on BCE 20-22), so PASS can initialise its\n"
 "                                  clock.  Without it those reads return\n"
@@ -358,6 +363,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->mmuModelVolume = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--mmu-unit", &n)) {
             opts->mmuModelUnit = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--deu-bus", &n)) {
+            opts->deuBus = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--mtu-model", &n)) {
             (void)n; opts->mtuModel = true;
         } else if (tok_is(tok, "--port-base", &n)) {
