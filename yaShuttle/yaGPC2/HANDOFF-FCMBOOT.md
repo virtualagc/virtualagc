@@ -40,8 +40,9 @@ sequence. Key facts established from it:
 **The whole chain works.**  From a full boot with no `fcm-file` argument, the
 firmware IPL reads FCMBOOT off the tape over the bus, FCMBOOT loads GPCIPL,
 GPCIPL drives the display and accepts `ITEM 1 EXEC`, the SSL loads all three
-PASS phases and verifies every checksum, and PASS starts its applications and
-runs cyclically without halting.  Everything below is how each stage got there,
+PASS phases and verifies every checksum, and PASS starts its applications,
+runs cyclically without halting, and paints complete display fills that MEDS
+renders.  Everything below is how each stage got there,
 in the order it was fixed; "The SSL", "PASS runs" and "What is actually still
 open" are the current-state parts.
 
@@ -428,6 +429,27 @@ IOQE pool at one entry per second until PASS went idle 26 s in. Fixed
 2026-08-31; PASS now runs past t=316 s with a full pool and Clock 2 alive
 (`problems.md` §8.26).
 
+**And PASS's displays render, which took one more instruction.** `#TDL` fetched
+its word count with `iop_g_eah` — a **halfword** — from a per-bus table at a
+`2*BCE#` bias, but those tables are arrays of `A()` fullwords, exactly like the
+branch tables §8.17 fixed. The halfword read at an even entry returns the
+fullword's high half, always zero for a count, so every display fill moved **one
+word instead of 360**: commanded 360, sent 3, every time. TIME_FILL is 7
+halfwords by `#MOUT`, which carries an immediate count and no table, and always
+worked — hence the symptom *"a counting clock and no menu"*. Fixed in
+`96ab01cc4`; with PASS loaded, 14 of 14 fills now complete at 360 halfwords,
+333 of 358 words non-zero, decoding through MEDS's own `DEUCharset` to the
+glyphs on the screen.
+
+**That commit was too wide and was half reverted — do not re-widen it.**
+It changed `#MIN@` and `#RDL` on the family argument with no measured table
+behind them, and the two receive-side forms broke `ITEM 1 EXEC`: the keys
+arrived on the wire correctly, checksum and all, and GPCIPL never wrote
+`KEY1..KEY3`. `5e663c3f5` reverts those two; `#TDL` alone is the fix (`#MOUT@`
+is left converted, being a transmit that does not execute here). Whether the
+two reverted forms want the fullword count is **open again** and needs the
+flight software's own use of them (`problems.md` §8.27).
+
 ### What is actually still open
 
 - `make test` fails four suites: `test/test_debugger.sh`,
@@ -479,6 +501,28 @@ IOQE pool at one entry per second until PASS went idle 26 s in. Fixed
   discards any GMT under 48 half-hours, and `--mtu-model` counts from zero at
   power-on.  Two corrections were tried and both reverted (§8.25).  It is real,
   it is the flight software's own rule, and it is *not* what stopped PASS.
+  What the crew sees is that floor **plus a 16-bit truncation in MEDS**: the
+  time fill decodes to 86,520 s, MEDS's own `ibmFloat48` agrees, and the header
+  renders 86,520 − 65,536 = `000/05:49:44`, which is why CRT2 always starts near
+  `000/05:47:40` whatever the wall time.  CRT1 is unaffected — GPCIPL's CLOCK1
+  never approaches 2^16.  The untried GMT setting, **day 1 plus the real time of
+  day**, would clear the half-hour floor by the smallest margin *and* bring the
+  value back under 2^16, fixing both at once.
+- **CRT1's menu flashes**, blank/drawn, with its top section — the
+  `PASS1 1 BFS1 2 PASS2` lines — missing, while the GPC's own output is provably
+  correct: 41 of 41 fills complete, an identical 196-word screen to `0x19ee`
+  every 0.57 s — the rate the known-good reference runs at (87 fills in 45 s).  Whatever it is, it is
+  downstream of the wire.  Not investigated.
+- **PASS declines `OPS 101`.**  With a valid checksummed request delivered on
+  `_KYBD2`, the display list is byte-identical either side of it (sha1
+  `f8536acb6c44`) and no tape read follows, where a real OPS 1 transition would
+  have to load the G1 major function from mass memory.  Phase 2 is `OPS0,SSW`,
+  so establish first whether that transition exists in this configuration
+  (§8.27).
+- **`func=005 count=254` to IUA 8 on DK2** is issued 118 times and transmits
+  nothing.  Nothing queues for it, MEDS never replies to IUA 8, and BCE 7 takes
+  zero receive timeouts, so it is consistent with a control- or receive-shaped
+  command rather than a second truncation — but it is unidentified (§8.27).
 - **A shared-contract defect with yaHALMAT2**: `yaGpcIntegration.h:131`
   encodes `GPC_ENGINE_WARNING_HAL_S_ERROR_BASE + lastErrNum` only, dropping the
   error *group*, so an integrator asking `gpc_engine_status_message(1006)` gets
@@ -571,6 +615,23 @@ screen:
         $SP/boot/BOOT-stamped.fcm
 
 Then move the crew panel's GPC MODE SWITCH from HALT to STBY.
+
+**Restart MEDS with the GPC, not just the GPC** (§5.7, and it cost a whole
+session again on 2026-08-31): a MEDS instance that has been IPLed once stops
+asserting IPL-REQUIRED, so the display sits on stale content behind a red X
+while the tape side works perfectly and every GPC-side measurement looks
+correct.  Two instances need **25 s between launches** — `MEDS.sh` runs
+`electron-esbuild build`, which cleans `dist/`, so a second launch wipes the
+first one's still-loading `main.js`.  Launching the second directly with
+`MEDS.sh`'s own last line minus the rebuild
+(`electron dist/main/main.js meds --size 512 crt2 idp2`) avoids the race and
+writes nothing in Don's repo.
+
+**Keystrokes do not come from the MDU window.**  `meds/idp.coffee:93` routes a
+bus named `/KYBD/` to `recvKYBD`, so the IDP takes keys from a separate
+`_KYBD<n>` bus; typing into the window produced **zero** keyed replies in 348
+polls.  Use `gpcmd key --idp 2 OPS 1 0 1 PRO`, which puts them on `_KYBD2` and
+arrives correctly (header `0008`, count `ff05`, sum zero).
 
 **The KNOWN-GOOD reference**, which renders properly (user-confirmed
 2026-08-25).  Note `--mmu-model` is required even though IPL.fcm holds the
@@ -829,6 +890,16 @@ Bus and IOP:
     YAGPC_BCTRACE           conditional-branch fall-throughs, with mask and CC
     YAGPC_MMUTRACE          mass-memory commands, timestamped
     YAGPC_TIMEOUT_TRACE     BCE receive timeouts
+    YAGPC_XMITTRACE=<bus>   per bus command: the count it DECLARES against the
+                            words actually QUEUED and actually SENT before the
+                            next one.  Queued-vs-sent is the discriminator —
+                            short at queue time means the bus program asked for
+                            too little, short at send time means we lost words —
+                            and no peer can tell you which.  This is what found
+                            the truncated display fills (§8.27)
+    YAGPC_DMATRACE          MOUT / QDMA / DMADROP.  The read counter sits in
+                            `iop_queue_dma`, the chokepoint, so none of the five
+                            transmit instructions can be missed
     YAGPC_ALIGNTRACE / YAGPC_RSALIGNTRACE   odd fullword EAs, per addressing form
     YAGPC_DEUKEYS=ITEM,1,EXEC / YAGPC_DEUKEYS_AFTER=<polls>
     YAGPC_IOP_PER_INSTR=1 / YAGPC_IOP_PASS_US=<f>   revert or retune IOP pacing
@@ -913,10 +984,24 @@ Batch-mode SIGINT sets a stop reason instead of killing the process, so
 
 
 **`pkill -f` kills your own shell here.** The pattern text appears in the
-shell's own command line, so it matches itself — exit 144, five times in one
-day.  Use a bracket pattern (`discrete[P]anel`, `[m]ain.js meds`) **and** keep
-kills in a separate invocation from the relaunch.  `pgrep -f` prints only PIDs,
-so `pgrep -f X | grep -c python3` always counts 0; use `pgrep -fc`.
+shell's own command line, so it matches itself — exit 144, **six times now**,
+and a `case` pattern inside a `for` loop does it just as well as `pgrep -f`.
+Use a bracket pattern (`discrete[P]anel`, `[m]ain.js meds`) **and** keep kills
+in a separate invocation from the relaunch.  The form that has never failed is
+iterating `/proc`, matching on `comm`, and skipping `$$` and `$PPID`.  `pgrep -f`
+prints only PIDs, so `pgrep -f X | grep -c python3` always counts 0; use
+`pgrep -fc`.
+
+**`MEDS.sh` cleans `dist/` on every launch.** It runs `electron-esbuild build`
+first, so starting a second instance deletes the first one's `main.js`
+mid-launch and the first window dies silently.  Space two launches 25 s apart,
+or start the second from `MEDS.sh`'s own last line without the rebuild.
+
+**Patch instrumentation at the chokepoint, not at each function.**
+`exec_MOUT_at` and `exec_TDLI` have identical code shape; a patch matched by
+text landed in the wrong one and printed under the other's name, so the first
+trace showed a display fill with no transmit instruction in it at all.
+`iop_queue_dma` is the one place all five transmit forms pass through.
 
 **Leftover processes are on the user's bus.** Five stray yaGPC2 processes once
 contaminated a reported measurement, and four overlapping `discretePanel`
@@ -928,7 +1013,10 @@ bus measurement.
 `ageharness.c` despite it being newer, which invalidated three reported results
 about protection modes.  `make` also does not rebuild the *test* binaries and
 does not track `test/cpu_ea_fixtures.h` at all, so an edited fixture header is
-silently re-run against the old binary.
+silently re-run against the old binary.  Hit again on 2026-08-31: `make` called
+`test_iop_bce_exec` "up to date" after `iop_bce_instr.c` changed, so an A/B ran
+the same binary twice and reported a byte-identical result that meant nothing.
+`touch` the source and rebuild before believing any fixture comparison.
 
 **`--deu-model` cannot answer bus questions.** Its help says it "answers in the
 same call", so every solicited reply is present before the poll asks — it once

@@ -4805,6 +4805,34 @@ constants — in one run.
 naming verbatim the symptom then spent hours rediscovering from memory dumps.
 Twice.
 
+**Fix exactly what the evidence covers.** One instruction, `#TDL`, had a
+measured count table; four were changed on the family argument (§8.27). Two of
+the four were wrong and broke a working path — `ITEM 1 EXEC` stopped loading —
+so a verified fix arrived carrying a regression. The bisect that recovered it
+took longer than the original diagnosis. A family argument is a reason to *look
+at* the other members, not a licence to change them in the same commit.
+
+**Question the peer's accumulated state, not just its replies.** Seven GPC
+restarts in a row produced stale displays behind a red X while the tape side
+worked perfectly, and each one was met by measuring the GPC's side of the wire
+again. The MEDS instances had simply been IPLed once and stop asking
+afterwards, which §8.25 already records. **A long-lived peer is a stateful
+peer**; restart it with the thing under test, and when a symptom appears only
+after repeated runs, suspect what accumulates across them.
+
+**A hand-placed instrumentation patch can land on a different function.**
+`exec_MOUT_at` and `exec_TDLI` have identical code shape, so a patch matched by
+text went into the wrong one and printed its output under the other's name; the
+first trace showed a display fill with no transmit instruction at all. Where a
+family of functions shares a shape, put the counter at the **chokepoint they
+all pass through** — `iop_queue_dma`, in that case — rather than on each one.
+
+**`make` reports test binaries "up to date" after their sources change.**
+Recorded above for `ageharness.c`; hit again in the `@`-family A/B, where the
+first before-and-after comparison ran the same binary twice and reported a
+byte-identical result that meant nothing. `touch` the source and rebuild before
+believing any fixture comparison.
+
 ### 8.11 Finishing the OI340700 `.dfg` recovery
 
 §8.9 recovered two files. All twelve differing decks are now accounted for, and
@@ -5484,6 +5512,12 @@ reaches it), which preserved the entry and hid the bug — unprotecting those
 four halfwords *without* the fix sends BCE 18 to `pc=00000`.
 `test_iop_bce_exec` is 73499/74699 with and without, measured both ways, so
 the fixtures cannot arbitrate here either.
+
+**The same defect is in the count fetch, and that is §8.27.** `#BU@` and
+`#LBR@` fetch a *branch target* through the table; `#TDL` and its relatives
+fetch a *word count* from a table of the same shape, and were reading it as a
+halfword. Fixing the branch forms did not fix the count forms, and the count
+form is what was blocking PASS's displays.
 
 **What the receive sequence does, dumped live at the moment `#BU@` fires:**
 
@@ -6750,6 +6784,23 @@ half-hours) is indistinguishable from baseline, since `TCVTSWCM` is `0x30`
 either way — **which also disproves the "clock jump invalidates the TQE
 deadlines" theory** that had been built on it.
 
+**What the crew actually sees is that 24 h floor plus a 16-bit truncation, and
+the truncation is MEDS's.** With PASS driving CRT2 the mission clock always
+starts near `000/05:47:40` whatever the wall time — noticed by the user, who
+also noticed CRT1 starts at `000/00:00:00`. The time fill is two IBM 48-bit
+floats and a conversion word — `deuProto.coffee`'s `timeFillWords` builds it
+and `parseTimeFill` reads it back; ours carries
+`4515 1f7e84c0 …`, which decodes to **86,519.9 s = exactly 24 h plus the run
+time** — the floor above, since `--mtu-model` counts from power-on and never
+reaches it. MEDS's own `ibmFloat48` is byte-identical to that decode and gets
+86,520 correctly, yet renders `000/05:49:44` = 20,984 s = **86,520 − 65,536**.
+So the seconds count is truncated to 16 bits *downstream of the decode*, in the
+DPS header rendering, and every observation matches. CRT1 is unaffected because
+GPCIPL's own CLOCK1 never approaches 2^16. Cosmetic, and it blocks nothing —
+but note that the untried GMT setting (day **1** plus the real time of day)
+would clear the half-hour floor by the smallest possible margin *and* bring the
+value back under 2^16, fixing the display as a side effect.
+
 **The PCMMU is identified but deliberately not modelled.** `PMUDEV = 10`
 (`INCL80/IOMACS.hal:89`); `AIBB_PMU_CW = HEX'006CFF62'` (`AIBGPCLO.hal:262`) →
 IUA 13; `FIOPMUBS DC X'00000080'` (`FIOCBLKS.asm:1145`) → BCE 24, the IP bus;
@@ -6887,6 +6938,109 @@ before and after. The SVC exec fixtures expect a constant `2108` for `mem[90]`
 **whatever the EA** — the signature of the reference `gpc` never writing the
 EA-High field at all — so they were already failing and are the same accepted
 divergence §8.23 records.
+
+### 8.27 The count tables are fullwords too — CRT2's missing menu, and a bisect that halved the fix
+
+§8.17 fixed the `@`-family's *branch* forms. Its *count* forms had the same
+defect and it was still there: `#TDL`, `#MIN@`, `#MOUT@` and `#RDL` fetched
+their word count with `iop_g_eah` — a **halfword** — from a per-bus table at
+the same `2*BCE#` bias. Those tables are arrays of `A()` **fullwords**, which is
+the shape `#BU@` and `#LBR@` were already fixed to fetch through and the one
+`EQU *-36` implies. A halfword read at an even entry returns the fullword's
+**high** half, which for any realistic count is zero, so every one of these
+instructions moved exactly **one word regardless of the count**. Fixed as
+`96ab01cc4`.
+
+**Measured in PASS's own display path.** A DEU display fill is a 2-word header
+from the `#TDS` at `0x199ae` plus data from the `#TDL` at `0x199b2`; the DK2
+count table at `0x08c94` holds `0000 0016` for BCE 7. Before: **commanded 360
+halfwords, 3 sent, every time** — 21 truncations in 40 s on the wire and 0
+complete fills. After, with PASS genuinely loaded: **14 of 14 fills complete at
+360 halfwords, 0 truncated, 333 of 358 words non-zero**, decoding through MEDS's
+own `DEUCharset` to exactly the glyphs on the screen. TIME_FILL is 7 halfwords
+sent by `#MOUT`, which takes an immediate count and no table, and always
+worked — which is precisely why the symptom was *"a counting clock and no
+menu"*.
+
+**Why it had never been isolated: our own stub made a total failure look like a
+rounding error.** A fill whose data is one word is commanded as 3 and
+*completes*, so the small fills `deumodel.c` and `deustub.py` elicit mostly
+work; the worst the stub ever showed was "abandoned 2 halfwords short" on a
+count of 5. Real MEDS asks for a whole screen and the shortfall becomes 357.
+That is §8.10's "a test peer you configure yourself is not an independent
+check", in its most expensive form yet — the crude peer did not merely fail to
+find the bug, it *rescaled* it below notice.
+
+**The instrument is the reusable part.** `YAGPC_XMITTRACE=<bus>` prints one
+line per bus command with the count it **declares**, against the words actually
+**queued** and actually **sent** before the next command. Queued-versus-sent is
+the discriminator: short at queue time means the bus program asked for too
+little, short at send time means the emulator lost words in flight. **The peer
+cannot tell you which** — it can only report that a transfer ended short, which
+is why the symptom survived so long against MEDS. The DMA-read counter is taken
+in `iop_queue_dma`, the chokepoint, so none of the five instructions that can
+start a transmit (`#TDS`, `#TDL`, `#TDLI`, `#MOUT`, `#MOUT@`) is missed.
+`YAGPC_DMATRACE` prints `MOUT`/`QDMA`/`DMADROP` beside it.
+
+**False leads, each killed by a measurement rather than by an argument:** the
+transport's outbound queue (4,096 deep, with an explicit "dropping a datagram"
+message that never appeared); the DMA queue (growable, verified); and
+`dmaq_drop_for_bce` on an error terminate, where `YAGPC_DMATRACE` counted
+**zero** drops. The words were never queued in the first place.
+
+**Then the fix proved too wide, and the bisect is the record.** `96ab01cc4`
+changed all four instructions; only `#TDL` had a measured table. The two
+**receive**-side members broke GPCIPL's own menu, and the failure was clean:
+`ITEM 1 EXEC` arrived on the wire correctly (header `0008`, count `ff03`, keys
+`a07c`, the 16-halfword sum **zero**, so `CM4KYBD`'s checksum was satisfied) and
+GPCIPL did nothing with it — `KEY1..KEY3` took no CPU write at all, and the load
+stalled at 160 blocks against the 431 a working run reads. Reverting `#MIN@` and `#RDL`
+(`5e663c3f5`) restored it: `KEY1=0014 KEY2=0001 KEY3=001e` written at
+`nia=021f6`, and 431 blocks read, with the display fills still fixed.
+
+So **`#TDL` alone is the fix**. `#MOUT@` is left converted — it is a transmit,
+it does not execute in this workload, and it shares `#TDL`'s direction.
+`#MIN@`'s BCE 24 table entry does read `0000 0002`, which is why it looked
+right, but the empirical result outranks the reading: **whether the two
+reverted forms want the fullword count is open again**, and settling it needs
+the flight software's own use of them, the way `FIOBBM` and `BTBCEGEN` settled
+`#BU@`.
+
+**The fixtures cannot arbitrate, measured properly this time.**
+`test_iop_bce_exec` is 73499/74699 both ways and the failing set is
+byte-identical, 1,200 lines either way. Getting that number took forcing a
+rebuild: `make` reported the test binary "up to date" after the source changed,
+so the first A/B compared the same binary with itself (§8.10).
+
+**Two things seen while measuring and not chased.** `func=005 count=254` to
+IUA 8 on DK2 is issued 118 times and transmits nothing — nothing queues for it,
+MEDS never replies to IUA 8, and BCE 7 takes **zero** receive timeouts, so it
+is consistent with a control- or receive-shaped command rather than a second
+truncation, but it has not been identified. And the rendered CRT2 screen is
+sparse: clocks, the GPC indicator, the MEDS menu bar and a scatter of F/M
+characters. The truncation is fixed and verified; whether that is the *correct*
+PASS display for this state is a separate question, and there is no reference
+image here to judge it against.
+
+**Two peer-side facts that cost a whole session between them.** MEDS keystrokes
+do **not** come from the MDU window: `meds/idp.coffee:93` routes a bus named
+`/KYBD/` to `recvKYBD`, so the IDP takes keys from a separate `_KYBD<n>` bus,
+and typing into the CRT2 window produced **zero** keyed replies in 348 polls.
+`gpcmd key --idp 2 OPS 1 0 1 PRO` puts them on `_KYBD2` and they arrive
+correctly (header `0008`, count `ff05`, keys `11/01/00/01/1f`, sum zero). And
+with a valid request so delivered, **PASS declines OPS 101 outright**: the
+display list is byte-identical either side of it (sha1 `f8536acb6c44`) and no
+tape read follows, where a real OPS 1 transition would have to load the G1
+major function from mass memory. Phase 2 is `OPS0,SSW`, so whether that
+transition exists in this configuration at all is the first thing to establish.
+Not chased.
+
+**Still open on the display side:** CRT1's menu **flashes** — a blank/drawn
+alternation — with its top section, the `PASS1 1 BFS1 2 PASS2` lines, missing,
+while the GPC's own output is provably correct: 41 of 41 fills complete, an
+identical 196-word screen written to `0x19ee` every 0.57 s, which is the rate
+Don's known-good reference `IPL.fcm` runs at (87 display fills in 45 s). Whatever this is, it is downstream of the wire.
+
 
 ---
 
