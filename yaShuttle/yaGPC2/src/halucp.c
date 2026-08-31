@@ -121,6 +121,7 @@ void halucp_init(HalUCP *h, CPU *cpu) {
     h->cpu = cpu;
     sched_init(&h->scheduler);
     h->trapSvcError = true;
+    h->svcEnabled = true;
     h->iobufAscii = false; /* ebcdic default */
     h->formatNumBlanks = 5;
     h->lineWidth = -1; /* sentinel: no explicit override, use per-channel
@@ -185,6 +186,32 @@ static void hal_report_error(HalUCP *h, const char *msg) {
  * ------------------------------------------------------------------- */
 
 bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
+    /* HalUCP STANDS IN for the HAL/S runtime; it must only do so when the
+     * loaded image is a standalone HAL/S program, which is what `active`
+     * means -- halucp_init_from_symbols sets it only after resolving
+     * OUTRAP/INTRAP/CNTRAP/IOCODE/IOBUF out of the symbol table.  The
+     * reference implementation gates on exactly this (halUCP.coffee:170,
+     * `return false unless @active`), and yaGPC2 SET the flag but never
+     * TESTED it, so it intercepted SVCs for every image including real
+     * flight software.
+     *
+     * yaGPC2 cannot simply gate on `active` the way the reference does: its
+     * HalUCP also serves test programs that load no symbol table at all, so
+     * `active` is false for them too and a hard gate silences the runtime
+     * they depend on (it regresses test_schedule).  Hence the explicit
+     * --no-halucp-svc switch instead.
+     *
+     * The collision it exists to avoid: PASS defines its
+     * own fifty SVC handlers in FPMSVCEP, and five of the codes claimed here
+     * are live ones --
+     *     0x000D = 13 = FSVC0013 = FPMSET    'SET EVENT'
+     *     0x000E = 14 = FSVC0014 = FPMRESET  'RESET EVENT'
+     *     0x0014 = 20 = FSVC0020 = FPMSDERR  'PROCESS ERROR RECOVERY'
+     * and claiming one does not merely skip the handler: returning true makes
+     * exec_SVC return BEFORE saving the old PSW at 0x58 (TPSASOP) and before
+     * dispatching, so FCMSSYNC's `L$ R4,TPSASOP` then reads a stale PSW and
+     * `BCR R4` branches through it. */
+    if (!((HalUCP *)halUCPvp)->svcEnabled) return false;
     HalUCP *h = halUCPvp;
 
     uint32_t hw0 = mcm_get16(&h->cpu->mainStorage, ea);

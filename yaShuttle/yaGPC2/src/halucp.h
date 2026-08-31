@@ -64,6 +64,19 @@ typedef struct {
     HalUCPErrorCB errorCallback;
 
     bool trapSvcError;
+    /* False when the loaded image has its OWN SVC handlers -- real PASS does,
+     * all fifty of them in FPMSVCEP.  HalUCP exists to STAND IN for the HAL/S
+     * runtime when a compiled HAL/S program runs with no flight software under
+     * it; with PASS loaded it must step aside, because its SVC codes collide
+     * with the flight software's own numbering:
+     *     0x000D = 13 = FSVC0013 = FPMSET    'SET EVENT'
+     *     0x000E = 14 = FSVC0014 = FPMRESET  'RESET EVENT'
+     *     0x0014 = 20 = FSVC0020 = FPMSDERR  'PROCESS ERROR RECOVERY'
+     * Intercepting those does not merely skip the handler: halucp_handle_svc
+     * returns true, so exec_SVC returns BEFORE saving the old PSW at 0x58
+     * (TPSASOP) and before dispatching.  FCMSSYNC later loads R4 from TPSASOP
+     * and branches through it. */
+    bool svcEnabled;
     bool svcTrapped;
     bool active;
     bool wasRunning;

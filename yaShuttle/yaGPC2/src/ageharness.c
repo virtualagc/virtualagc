@@ -257,6 +257,7 @@ static uint32_t parse_hex(const char *s) {
 
 void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const Options *opts, ConfigureResult *out) {
     age->halUCP.trapSvcError = opts->trapSvcError;
+    age->halUCP.svcEnabled = opts->halucpSvc;
     age->halUCP.formatNumBlanks = atoi(opts->halucpFormatNumBlanks);
     /* Leave at halucp_init's sentinel (-1, meaning "use the per-channel
      * PAGED/UNPAGED default") unless the user explicitly overrode it --
