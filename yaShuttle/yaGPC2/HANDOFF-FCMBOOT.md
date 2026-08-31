@@ -1,4 +1,4 @@
-# HANDOFF — FCMBOOT → GPCIPL → MEDS
+# HANDOFF — FCMBOOT → GPCIPL → MEDS → PASS
 
 Written to survive a `/compact`. Everything needed to resume is here. The
 long-form narrative that was in `CLAUDE_LOG.md` has been folded into this
@@ -13,6 +13,7 @@ Boot the real Shuttle IPL chain in yaGPC2, end to end:
 
     firmware IPL → FCMBOOT (bootstrap) → reads GPCIPL off the mass memory
                  → hands control to GPCIPL → GPCIPL drives the MEDS display
+                 → ITEM 1 EXEC → the SSL loads PASS → PASS runs
 
 PASS User's Guide (`~/Desktop/sandroid.org/public_html/apollo/Shuttle/PASS
 USER GUIDE - OI32.pdf`) §2.3 and Table 2-2 (pages 49, 52, 53) describe the
@@ -35,6 +36,14 @@ sequence. Key facts established from it:
 ---
 
 ## 2. WHERE IT STANDS RIGHT NOW
+
+**The whole chain works.**  From a full boot with no `fcm-file` argument, the
+firmware IPL reads FCMBOOT off the tape over the bus, FCMBOOT loads GPCIPL,
+GPCIPL drives the display and accepts `ITEM 1 EXEC`, the SSL loads all three
+PASS phases and verifies every checksum, and PASS starts its applications and
+runs cyclically without halting.  Everything below is how each stage got there,
+in the order it was fixed; "The SSL", "PASS runs" and "What is actually still
+open" are the current-state parts.
 
 **FCMBOOT loads GPCIPL and hands control to it.** Fixed 2026-08-25 in
 `14a7b7581`. All five of phase 10's load blocks now match the tape
@@ -293,7 +302,7 @@ identical formats were described as a corpus "for when DFG lands".  It has
 since landed and is in use — see `problems.md` for the DFG phase and the DASS
 comparison it now feeds.
 
-### The SSL — why `ITEM 1` loaded nothing, and where the boot stands now
+### The SSL — why `ITEM 1` loaded nothing, and how it was finished
 
 Step 12 of the IPL sequence is "select the system to be loaded" (`ITEM 1 EXEC`)
 and step 13 is GPC MODE SWITCH to RUN.  The user reported the item being
@@ -346,40 +355,159 @@ validate its own span**, because the value is computed *from* the span, so any
 choice is self-consistent and will pass.  Only a real MMB-built tape would
 settle it.
 
-**Where it stands now.**  With the SSL checksum stamped, `#BU@` indirecting,
-and `FIOMUWB2` patched (all three written up in `problems.md` §8.13–8.15), the
-boot loads phase 2, collects it (`wordsTaken` 98,820 of 107,012), transfers
-control into it — and then `FCMMOVE` reads a context struct through a fullword
-load that the emulator's alignment mask forces one halfword down, moves 4,096
-halfwords from 0 to 0 over the freshly loaded PASS image, and takes a
-protection violation whose handler that move has just destroyed.  **That is the
-open front**, and `problems.md` §8.15 states the narrow POO question it now
-turns on.
+**Where it stands now — the SSL work is FINISHED.**  With the SSL checksum
+stamped, `#BU@` and `#LBR@` indirecting, the AP-101S addressing rules corrected
+and four load blocks restored that the tape build had been dropping, the SSL
+loads all three phases, verifies every checksum and hands off to PASS. The
+narrative is in `problems.md` §8.16–§8.26; the short form is:
+
+- The `FCMMOVE` alignment conflict that used to be "the open front" was the
+  **wrong manual**. The AP-101 C/M masks bit 15 for fullword operands; the
+  AP-101S explicitly does not, and `ISPB`'s fullword forms changed with it
+  (`problems.md` §8.16).
+- Four things the ground Mass Memory Build writes and our toolchain did not:
+  PASS's own PSA CSECT `FCMPSA` (dropped by `derive_load_blocks`' pool-cursor
+  test, and the single cause of `0009c` staying protected, `TPSASINP` holding
+  GPCIPL's `Y(EX4)`, every PSA vector keeping GPCIPL's addresses, and the
+  `0xc6c6 at 0x0a3b` crash); reserved load blocks (`FCMRESRV`, `X'2000'` —
+  descriptor only, no tape data, still walked by `FCMUPROT`); phase 2's own Z1
+  ZCON pool; and `parent_pool_lo` reaching only one of three callers
+  (`problems.md` §8.19).
+- The IOP is now paced by **simulated time**, one slice per 0.5 µs with each
+  slice back-dated to the time it falls at, rather than one slice per CPU
+  instruction — which is what stopped a 7,654-halfword `MVH` freezing the bus
+  for 6.7 ms and stealing a word from the next block (`problems.md` §8.20).
+- Three context-switch defects that only running PASS could find: RS extended
+  form with B2=11 (the displacement **is** the effective address), `BAL`/`SCAL`
+  saving the callee's BSR/DSR instead of the caller's, and `SVC` not saving the
+  EA's 4-bit extension — the last of which was itself only half right until
+  2026-08-31 (`problems.md` §8.23 and §8.26).
+
+**The volume recipe is FIVE steps, not two**, and the two that were being
+omitted each produced a bit-identical *wrong* answer rather than an error:
+
+    1. mmu2mmv --con80 <CON80> --mmu <tree> --out V.mmv
+    2. stamp_ipl_phase_table.py <tree>/PHASE01/PHASE01.fcm --mmu <tree>
+       --con80 <CON80> --sdl <dps> -o BOOT.fcm      <-- easy to miss
+    3. stamp_ssl_checksum.py V.mmv                  <-- easy to miss
+    4. stamp_bootstrap_on_tape.py V.mmv BOOT.fcm
+    5. add_sysid_allocs.py V.mmv --con80 <CON80> --sysid SYS8
+
+`stamp_ipl_phase_table.py` needs `--sym`, and the image to stamp is
+`<tree>/PHASE01/PHASE01.fcm` with `PHASE01.sym.json` beside it. `BOOT-*.fcm` is
+**not** `PHASEnn.fcm` even though the sizes match — it is a *stamped* PHASE01.
+Both stamping tools' docstrings name the exact symptom of omitting them; read
+them before chasing a boot that reads no tape.
+
+### PASS runs — and what that took
+
+PASS IPLs from a full boot with no `fcm-file` argument, loads, starts its
+applications, paints a display, and runs cyclically without halting. Getting
+there needed, besides the SSL work above, four peripheral fixes:
+
+- `710ae8dd2` — warn when `--bce-network` is given without `--real-time`.
+  **`--bce-network` requires `--real-time`**; without it the wire is paced on
+  wall time while the BCE times out on emulated time, so a poll queued behind a
+  511-word fill always times out and the DEU load restarts forever. Its own
+  help said so; every run in a long thread omitted it.
+- `d7cda7736` — map the intercomputer bus (BCE 24) by GPC identity
+  (`--gpc-id`), which selecting PFS needs.
+- `38e2fcd6d` — an in-process mass memory must assert its own MM READY
+  discrete. This is what blocked `ITEM 1 EXEC`: `BSRDYDI` spun waiting for
+  `X'0200'` and was heading for `ERROR 115 MMU WILL NOT GO READY`.
+- `2331c5e3e` — the MTU reply is **seven** words, not six (the Count Field is
+  one less than the transfer).
+
+Then one line in `exec_SVC`: the EA's saved extension is bits **15-18**, not
+16-19, because a sector is `0x8000` halfwords and `FPMSVC` feeds the nibble
+back as a DSE that expands by `<< 15`. Taken from bit 16 it arrives halved, so
+every SVC from sector 2 or above — 6,387 of 33,961 in one run, all of PASS's
+applications — handed FCOS a parameter-list address several sectors low. One
+resulting phantom I/O request wedged four BCEs busy for good and leaked the
+IOQE pool at one entry per second until PASS went idle 26 s in. Fixed
+2026-08-31; PASS now runs past t=316 s with a full pool and Clock 2 alive
+(`problems.md` §8.26).
 
 ### What is actually still open
 
 - `make test` fails four suites: `test/test_debugger.sh`,
-  `test_cpu_instr_exec`, `test_iop_bce_exec`, `test_iop_msc_exec`.  They
-  fail identically with the whole tree stashed, so they predate all of
-  this, but they are real and nobody has looked at them.
-- GPCIPL emits a stream of "HAL/S SVC unrecognized, passing to real
-  interrupt" for its own assembly SVCs.  It gets on with its work, so
-  this may be only noise from halucp's intercept -- but that has not been
-  established either way.
-- **Loading PASS on top of the IPL is now under way and is where the work
-  is.**  Phase 2 loads and is collected; the boot dies in `FCMMOVE` on the
-  alignment conflict of `problems.md` §8.15, which needs the POO.
-- **`FIOMUWB2` is patched, not fixed.**  `tools/patch_ssl_zcon.py` writes the
-  value the IPL link should have produced.  The real repair is to add the
-  defining compool (`APPLSRC/CVNMMUTI.hal`) to the link's inputs.
-- **The GUI panel change is untested by me** — no display here.  Its logic
-  parses and `_build()` precedes `_republish()`, so the widget exists before
-  the first publish, but somebody should actually press the IPL button.
-- **`ITEM 1` still has not been shown to work**, only the non-menu path that
-  bypasses it (`--discrete-b 20000000`).  The `LOADCHCK`/`CM4FMAT`
-  formats-not-sent branch was ruled out as the cause of the original report,
-  but nothing here models a DEU LOAD pushbutton (Table 2-2 step 9), so that
-  branch has never been exercised either.
+  `test_cpu_instr_exec`, `test_iop_bce_exec`, `test_iop_msc_exec`.  They fail
+  identically with the whole tree stashed, so they predate all of this, but
+  they are real and nobody has looked at them.  Note the fixture counts have
+  since moved for principled reasons — the AP-101S addressing corrections, the
+  RS `B2=11` rule and the SVC EA-High field each cost `gpc`-derived fixtures
+  that encode the behaviour those changes deliberately reject (`problems.md`
+  §8.16, §8.23, §8.26).  They are an accepted divergence, not a regression, and
+  they are individually justified where they occur.
+- **Two `mmbstamp` questions, both build-side and both stated in
+  `problems.md`.**  (1) `mmbstamp`'s `deck_protection()` and `lnk101`'s
+  `placement.protected` disagree about what the deck's `SET`/`CLEAR` says — 110
+  sections and 11,947 halfwords, in both directions — and one of the two
+  readers is wrong.  That must be settled *before* `protection_lookup()` is
+  switched to read `sym["storeProtect"]["ranges"]`, or the assembler's future
+  `PROT` data will arrive on top of an already-divergent base (§8.21).  (2)
+  `parent_pool_lo` should be computed inside `derive_load_blocks` from the
+  parent LIB rather than passed by each caller; making it the caller's
+  responsibility is what let two of three callers drift (§8.19).
+- **`SPON`/`SPOFF` in `ASM101S.py`** is designed and agreed but not written.
+  The format is Don's control card (`" PROT <csect> <s>-<e>,..."`,
+  CSECT-relative halfword offsets, hex, end-exclusive, listing the protected
+  regions), the switches are `--no-store-protect` and
+  `--protect-default=on|off`, no diagnostics are emitted on unbalanced
+  brackets, and the acceptance criterion is that sweeping both releases with
+  `--no-store-protect --protect-default=off` reproduces the stored objects bit
+  for bit.  `lnk101` needs no changes — Don pre-wired the consumer side in
+  `7fff229`.  (§8.21)
+- **The three `nsts-sdl-dps` fixes are local and uncommitted**, by the user's
+  instruction: `parent_pool_lo` in `src/ap101Utils/mmbstamp.py`,
+  `src/ap101Utils/fcmImage.py` and `src/tools/mmu2mmv.py`, plus
+  `LoadBlock.reserved` in `mmbstamp.py`.  Verified present on HEAD `755a372`.
+  Anything that pulls or resets that repo loses them.
+- **The `MVH` DSE fix has no fixture coverage.**  `exec_MVH` ignored the
+  destination's DSE entirely (AP-101S §9.4: with bit 0 of R1 zero the address
+  concatenates the **DSE register**, not an implied sector 0), and every suite
+  passed unchanged before and after — they do not exercise `MVH` with a nonzero
+  DSE at all, consistent with `gpc` carrying the same gap.
+- **The PCMMU is identified but not modelled**, deliberately: BCE 24, IUA 13, a
+  3-word reply in MTU format.  Two details are unmeasured and would have to be
+  guessed (§8.25).  Note the `SEND ERROR$(6:6)` that motivated it was an
+  artifact of the `--no-halucp-svc` regression and is not a live symptom.
+- **The MTU wire format is not in any document we have.**  USA005350 §2.6
+  confirms three accumulators on FC1/FC2/FC3 preparing GMT *and MET*, which may
+  well mean the transfer is 3+3 rather than the shape `mtumodel.c` assumes.
+- **PASS's software clock defaults to 24 hours**, because `FPMMTURM.asm:457`
+  discards any GMT under 48 half-hours, and `--mtu-model` counts from zero at
+  power-on.  Two corrections were tried and both reverted (§8.25).  It is real,
+  it is the flight software's own rule, and it is *not* what stopped PASS.
+- **A shared-contract defect with yaHALMAT2**: `yaGpcIntegration.h:131`
+  encodes `GPC_ENGINE_WARNING_HAL_S_ERROR_BASE + lastErrNum` only, dropping the
+  error *group*, so an integrator asking `gpc_engine_status_message(1006)` gets
+  group 4's text for a group 6 error.  `yaHALMAT2/src/yaGpcEngineStatus.c`
+  carries the identical table.  Needs a relay before either side changes the
+  enum.
+- **We never consult a mask for program checks.**  `cpu_check_interrupts` takes
+  `intPending.programCheck` unconditionally, so Fixed Point Overflow, FP
+  Underflow and Significance are delivered even when their mask bits say
+  otherwise.  Nothing in this boot depends on it.
+- **`ISPB`'s fullword forms are an unresolved conflict**, gated as
+  `YAGPC_ISPB_ALIGN=1` and not the default; aligning breaks the boot.  A
+  sector's last fullword is reachable from the observed `x7ffd` under *neither*
+  reading, which is why it is logged rather than decided (§8.16).
+- **CSECT placement fidelity is not complete.**  PHASE02 reaches 98.79% against
+  the flown article with `--external-syms` (PHASE02 only, `#Z*` dropped,
+  `--resolve-phases` afterwards); the remaining gap is the autocall
+  program-placement order, which needs `linkorder.json`'s `orphanFlush` /
+  per-`mc` `codeOrder` / `streams` and cannot be derived from an address sort
+  (§8.22).  Pinning is **fidelity, not function** — it has never changed
+  behaviour.
+- **The 8K DEU program image at `DCPSTART` (`0xA000`) is all zeros** in every
+  load: the harness bootstrap covers only `0x0000-0x8FFF`.  Display fills carry
+  real text regardless, so it is not blocking, but it is wrong.
+- **`--watch` misattributes a store to the following instruction** (it reported
+  `LHI 1,X'3610'` as changing memory).
+- **The GUI panel's IPL button is still untested by me** — no display here.
+  `--script` exercises the same code path headlessly, but somebody should
+  actually press it.
 
 ---
 
@@ -534,6 +662,51 @@ Phase 10's five load blocks (start, length, protected):
 
 ---
 
+
+### Running the whole thing headlessly, no GUI and no MEDS
+
+Four processes; start yaGPC2 **first**, because the IPL pushbutton is momentary
+and a panel started first will fire the pulse before anything is listening.
+
+    ./yaGPC2 run --mmu-model <vol>.mmv --mtu-model --discretes --bce-network \
+        --real-time --gpc-id 1 --no-halucp-svc --port-base 7000 \
+        --max-steps 4000000000
+
+    python3 /tmp/claude-1000/deustub.py 7000 6            # DK1, sends ITEM 1 EXEC
+    python3 /tmp/claude-1000/deustub.py 7000 7 nokeys     # DK2
+    python3 /tmp/claude-1000/deustub.py 7000 8 nokeys     # DK3
+    python3 /tmp/claude-1000/drive.py   7000 85           # crew discretes, RUN at 85 s
+
+`deustub.py` is a DEU peer implementing `deumodel.c`'s rules over the wire, with
+the same constants and names so the two can be read side by side; bus 6/7/8 =
+DK1/2/3, and the optional third argument is `nokeys` or `latekeys`.
+`drive.py` publishes the same SET/RESET bits `discretePanel.py` does and
+republishes every 0.25 s, with **no Tk window** — use it rather than
+`discretePanel.py --script` for anything automated, which opens a window on the
+user's display. Always run automated rigs on `--port-base 7000` so they cannot
+collide with a live session on the default 6900.
+
+Interactively, the sequence is `mode HALT` → BFC CRT select → IPL source MM1 →
+press and release **IPL** → `mode STANDBY` → wait ~1 m 25 s → `mode RUN`, with
+`discretePanel.py --script FILE` able to do all of it (`<ms> <command>`, where
+the commands are `mode`, `ipl`, `source`, `gpcid`, `bit <A|B> <n> <on|off>`).
+
+**Why each flag matters.** `--real-time` is mandatory over `--bce-network`
+(the transport paces the wire against the wall clock while the GPC times out in
+simulated time). `--mtu-model` answers the Master Timing Unit on BCE 20-22;
+without it flight I/O collapses — 5,453 intercomputer datagrams against 81,795.
+`--gpc-id 1` selects the intercomputer bus port, BCE 24 being per-GPC.
+`--no-halucp-svc` stops HalUCP intercepting PASS's own SVCs, whose numbers
+collide with the flight software's.
+
+**What is not a fault.** MEDS on `crt1` going to POLL FAIL after `ITEM 1 EXEC`
+is correct with BFC CRT = CRT 1 — that tells PASS the BFS owns display 1, so
+PASS masks DK1 and drives DK2/DK3. There is no "download complete" message on
+the `--bce-network` path; `deu: load complete` belongs to `--deu-model`. And a
+frozen DEU image is not by itself a fault (`deu_complete_fill` counts a time
+fill and discards it, and a static format refreshed every cycle writes
+identical words).
+
 ## 4. TOOLS BUILT THIS WEEK (all committed, all ours)
 
 - **`src/mmumodel.c/.h` + `--mmu-model <vol>` / `--mmu-unit <n>`** —
@@ -596,6 +769,73 @@ Emulator fixes made (all with POO citations, all committed):
   (fixed in `58bf14106`).
 
 ---
+
+
+### Instrumentation added since (all env-gated, all no-ops when unset)
+
+Whole-state, which is what cracked the hardest bugs:
+
+    YAGPC_SNAPSHOT=<t1>[,<t2>...]:<prefix>   whole main storage to <prefix>-<t>.bin
+                                             the first time sim time passes each t
+    YAGPC_MEMDUMP=<lo>-<hi>[,...]            ranges at end of run
+    YAGPC_PROCDUMP                           per-processor halt/busy/PC, plus each
+                                             BCE's recv state; runs for EVERY stop
+                                             reason, not just max-steps
+
+Execution:
+
+    YAGPC_NIARING=<n>            ring of recent NIAs, dumped at the Instruction
+                                 Monitor and at an invalid-instruction stop
+    YAGPC_RINGTRIG=<addr>:<hw>   dump that ring when a halfword takes a value
+    YAGPC_NIASAMPLE=<ms>         periodic NIA + registers (gdb cannot attach —
+                                 Yama blocks ptrace)
+    YAGPC_NIAPROBE=<hexaddr>     R0-R7 every time that address is about to run
+    YAGPC_TRACEWIN=<a>-<b>:<f>   per-instruction trace over a simulated-time window
+    YAGPC_TRACETRIG=<addr>:<val>:<count>:<f>
+                                 the same, armed by a memory VALUE rather than a
+                                 time — use this when the event moves between runs
+    YAGPC_EATRACE=<nia>[,...]    effective address and contents for named
+                                 instructions; a register dump says WHAT a wild
+                                 branch went to, only this says where it came from
+
+Memory and protection:
+
+    YAGPC_WATCHHW=lo[-hi]        CPU *and IOP* stores into a window, with NIA and
+                                 timestamp;  YAGPC_WATCHRD  for fullword reads
+    YAGPC_PROTSET                protect-bit changes
+    YAGPC_ISPBTRACE              ISPB by EA window, with M1 and issuing NIA
+    YAGPC_DMAPROT                masked DMA store-protect violations, which are
+                                 otherwise untraceable (Fig 2-20 note '##')
+    YAGPC_UNPROTECT=lo-hi[,...]  }  timed diagnostic unprotect, for standing in
+    YAGPC_UNPROTECT_AT=<us>      }  for a load block the tape build omits
+    YAGPC_PATCH="<us>:a=v,..."   timed halfword writes bypassing protection
+    YAGPC_LOADBIN=<us>:<addr>:<file>   inject a load block
+    YAGPC_IPL_PROTECT=0          start memory unprotected — REFUTED as a fix, kept
+                                 as a diagnostic; do not make it the default
+
+Bus and IOP:
+
+    YAGPC_SVCTRACE=<file>   every SVC: site, P/L address, base register, DSE, list
+    YAGPC_SIOTRACE          every MSC START I/O — the only place a dispatched
+                            transaction becomes a running BCE
+    YAGPC_PROCTRACE         every change to the processor-enable register
+    YAGPC_BUATTRACE         each `#BU@`, printing BOTH candidate targets
+    YAGPC_PCTRACE           BCE program-counter loads
+    YAGPC_SSTTRACE[=N]      `#SST`s (N caps the count; non-numeric = uncapped —
+                            the old hardcoded cap of 10 once made a running BCE
+                            look as though it had stopped signalling)
+    YAGPC_CLEARTRACE        what each one-word "clear the MIA buffer" read takes
+    YAGPC_MVHTRACE          each MOVE HALFWORD with resolved src/dest/count
+    YAGPC_BCTRACE           conditional-branch fall-throughs, with mask and CC
+    YAGPC_MMUTRACE          mass-memory commands, timestamped
+    YAGPC_TIMEOUT_TRACE     BCE receive timeouts
+    YAGPC_ALIGNTRACE / YAGPC_RSALIGNTRACE   odd fullword EAs, per addressing form
+    YAGPC_DEUKEYS=ITEM,1,EXEC / YAGPC_DEUKEYS_AFTER=<polls>
+    YAGPC_IOP_PER_INSTR=1 / YAGPC_IOP_PASS_US=<f>   revert or retune IOP pacing
+    YAGPC_ISPB_ALIGN=1      the disputed fullword-ISPB alignment; not the default
+
+Batch-mode SIGINT sets a stop reason instead of killing the process, so
+`timeout -s INT` yields a full end-of-run report on an open-ended run.
 
 ## 5. TRAPS THAT COST REAL TIME — DO NOT REPEAT
 
@@ -670,6 +910,47 @@ Emulator fixes made (all with POO citations, all committed):
    correct — the shadow state starts at 0.
 
 ---
+
+
+**`pkill -f` kills your own shell here.** The pattern text appears in the
+shell's own command line, so it matches itself — exit 144, five times in one
+day.  Use a bracket pattern (`discrete[P]anel`, `[m]ain.js meds`) **and** keep
+kills in a separate invocation from the relaunch.  `pgrep -f` prints only PIDs,
+so `pgrep -f X | grep -c python3` always counts 0; use `pgrep -fc`.
+
+**Leftover processes are on the user's bus.** Five stray yaGPC2 processes once
+contaminated a reported measurement, and four overlapping `discretePanel`
+instances — one launched per iteration without killing the previous — made a
+deterministic crash look nondeterministic.  Kill by PID and verify before any
+bus measurement.
+
+**A stale binary can survive a newer timestamp.** `make` did not rebuild
+`ageharness.c` despite it being newer, which invalidated three reported results
+about protection modes.  `make` also does not rebuild the *test* binaries and
+does not track `test/cpu_ea_fixtures.h` at all, so an edited fixture header is
+silently re-run against the old binary.
+
+**`--deu-model` cannot answer bus questions.** Its help says it "answers in the
+same call", so every solicited reply is present before the poll asks — it once
+reported 518 fills while the wire saw none.  Use `--bce-network` with
+`deustub.py` for anything about timing or sequencing.
+
+**A single window on a ramp is meaningless.** Two 45 s datagram counts taken 8 s
+after launch straddled different points of a rising curve and were reported as a
+difference between two tapes.
+
+**Do not trust a counter from a truncated run.** "Zero DMA protect violations"
+came from a run that never reached the code; the real figure is 7,170.
+
+**Piped output is lost entirely when a command is killed** — all of it, not the
+tail.  Use `python3 -u`, `PYTHONUNBUFFERED=1` or `unbuffer` for anything slow
+whose output you intend to read.
+
+**Commit before reverting.** `git checkout -- src/ageharness.c` destroyed hours
+of uncommitted work.  It was recovered only because the session transcript at
+`~/.claude/projects/<project>/<session-id>.jsonl` records every Edit's
+`old_string`/`new_string` and every Bash heredoc — that is the recovery route,
+but it is luck of the tool used.
 
 ## 6. OUTSTANDING, NOT CODE
 

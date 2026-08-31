@@ -4499,6 +4499,100 @@ it because the intermediate reading was wrong in an instructive way.
     counts -- the input they share is what to suspect, and a simulator-
     against-simulator comparison cannot see it by construction.
 
+THE LOAD-BLOCK CHECKSUM IS CRACKED, SO A .mmv CAN BE PATCHED PROPERLY.  This
+is the technique, and the one thing that makes it work is refusing to trust
+the DMA count.
+
+    DO NOT ASSUME THE DMA COUNT IS THE BLOCK LENGTH.  Find the length by
+    SEARCHING for the L that satisfies the flight software's own invariant,
+    `sum(hw[0..L-2]) == hw[L-1]` (FCMINSSL.asm:844-861 -- it sums halfwords
+    [0..len-2] and compares against halfword [len-1]).  For the block holding
+    PASS's TQE table exactly one plausible L works, L=11122, and it is
+    confirmed independently by the descriptor in the image itself: file offset
+    0x148224, `zcon=811a flags=0610 length=11122`, with RESERVE clear so the
+    checksum IS verified.  The DMA count observed on the wire for that block
+    is 10752 -- a PARTIAL transfer, and not the length.
+
+    Anchors for that block, for anyone repeating the exercise: directory slots
+    1113..1133 (block indices 9004..9024, contiguous), GPC 0811a.., read by
+    `BCE18 RECV ARM pc=0730a addr=0811a count=10752`; the volume mapping is
+    linear across it, so file offset and GPC address track each other.
+
+    THE WRITER'S CONVENTION, verified consistent with the reader's: the writer
+    sets `block[slot]=0` and `block[slot+1]=total` over `0..slot-1`, and the
+    SSL does `SHI R5,2`, sums offsets `0..slot-1` and compares offset `slot` --
+    equal only because that zero is there, and it is.  `patch_ssl_zcon.py`
+    recomputes the tail the same way after an edit.
+
+    WHY IT MATTERS BEYOND ONE BLOCK.  A raw byte patch to a .mmv is REJECTED:
+    FCMINSSL verifies the checksum after the mass-memory read ("ERROR CHECKS -
+    CHECKSUM AFTER MMU 1/2 READ"), so an unstamped patch makes the phase fail
+    to load and PASS never starts -- CLK2 175, last t=14.9 s, which is the
+    signature of a failed load and is easily misread as a fault elsewhere.
+    The .mmv volume format itself (MMUVOL01, 512-halfword blocks) has no
+    checksum of its own; the one that matters is inside the load block.
+
+    RESERVE blocks are the exception: FCMINSSL.asm:884 "RESERVE FLAG ON, SKIP
+    CHECKSUM", and a reserved block carries no tape data at all -- see the
+    FCMRESRV note in the yaGPC2 problems.md, section 8.19.
+
+    A FAILED DESCRIPTOR HUNT, recorded so it is not repeated: searching the
+    volume for a `[zcon][flags][length]` triple matching a block by its DMA
+    count finds nothing consistent (21 halfwords equal 0x811a, none with
+    length 10752; 83 halfwords equal 10752, all inside data regions).  The
+    descriptor's ZCON carries a BSR/DSR, so the stored address need not be the
+    literal address the DMA used, and the phase table may itself be relocated.
+    The checksum search is what converges; the descriptor then confirms it.
+
+THE TQE TABLE ON THE TAPE DOES NOT MATCH ITS SOURCE, BUT IT IS NOT WHAT STOPS
+PASS.  Both halves matter: the image-build discrepancy is real and worth
+fixing, and the causal claim built on it was wrong and is withdrawn.
+
+    WHAT THE IMAGE CARRIES.  Read out of pass-ipl.mmv with the checksum
+    technique above: the TQE free chain has TWENTY-FIVE entries, #0..#24, each
+    record reading `link | 0000 | 0000 | self-address | c9d6 c9d6` at GPC
+    090b2 + 0x12*n.  Record #25 at GPC 09274 is ALL ZEROS -- blank storage,
+    not a TQE.  So #24 is the last real entry, and its link holds 0x080ce
+    inside an otherwise exact arithmetic progression, i.e. a corrupt end
+    marker where 0x0000 belongs.  It sits at block halfword 4424, file offset
+    0x11b540.
+
+    WHAT THE SOURCE DECLARES.  FCMCBLKS.asm:774 gives NTQE=30.  The table is
+    not built by code -- FCMNINIT only empties the active chain back into it
+    (FCMNINIT.asm:349-357) -- so the TQEs come pre-built in a compool loaded
+    off the tape and the count is a property of OUR BUILT IMAGE.  Twenty-five
+    against a declared thirty is a build discrepancy, in the same family as
+    the FCMPSA, FCMRESRV and Z1-pool drops written up in yaGPC2's problems.md
+    section 8.19.
+
+    WHAT IS WITHDRAWN.  Both byte repairs were tested with the checksum
+    correctly restamped and verified.  Relinking #24 to 9274 (extending into
+    the blank record) loads and runs but still stops at t=99 and RAISES the
+    store-protect count 15 -> 35; relinking it to 0000 (a proper terminator)
+    removes the five fatal store-protects but PASS's applications then never
+    start at all.  Enlarging the pool properly -- three extra initialised
+    records, then fifty-seven -- settles it: pool 25 stops at t=99.0, pool 28
+    at t=102.4, pool 82 at t=101.2.  Linear extrapolation would have predicted
+    ~161 s for 82.  PASS STOPS AT ~100 s REGARDLESS OF POOL SIZE; the pool
+    only decides whether the allocator walks off the end and takes a
+    store-protect on the way.  Both "the corrupt link is causal" and "it is a
+    steady leak" are withdrawn.
+
+    A "PROVED CAUSAL" CLAIM THAT WAS NOT.  Patching the link on a copy of the
+    volume took the fatal store-protects from 5 to 0 -- but that run also
+    showed CLK2 175 and last t=14.9 s, i.e. PASS never started.  The fatal
+    store-protects occur at t~98 s DURING PASS, so they were absent because
+    PASS never reached them, not because the patch worked.  A count that falls
+    to zero because the code was never executed is not a measurement of the
+    code.
+
+    THE ACTUAL CAUSE OF THE ~26-SECOND STOP was in the emulator, not the tape:
+    exec_SVC saved the effective address's extension as bits 16-19 rather than
+    15-18, so every SVC from sector 2 or above rebuilt its parameter-list
+    address several sectors low.  Fixed in yaGPC2 as bbe9e9dcc and written up
+    in problems.md section 8.26.  The TQE count discrepancy stands on its own
+    as an image-build question; it is not blocking anything.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.

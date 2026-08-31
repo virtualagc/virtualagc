@@ -4234,7 +4234,7 @@ of any particular surrounding code shape).
 
 ---
 
-## 8. Real flight software: GPCIPL, the peripheral bus, and the OI340600/OI340700 corpora (2026-08-17 → 2026-08-27)
+## 8. Real flight software: GPCIPL, the peripheral bus, and the OI340600/OI340700 corpora (2026-08-17 → 2026-08-31)
 
 Sections 1–7 were found by running *test programs* — `yaHALMAT2`'s suite, the
 worked examples, hand-cut fixtures. This section is what running **real Shuttle
@@ -4684,6 +4684,127 @@ uppercase `X` made me call `0xc7f3` undecoded when it is `BC`. I published a
 count of 21 BCE opcodes, corrected it to 24, and both were wrong: **the table
 has 27**, measured by listing the mnemonics rather than counting matches.
 
+
+**Read the manual for the processor you are emulating.** Most of a session was
+spent defending an addressing rule cited to POO Figure 2-8, which is the
+AP-101 **C/M** — the previous machine. The AP-101S says the opposite in as many
+words, flagged as an explicit change. The wrong-manual error then produced four
+successive confident conclusions, each disproved by measurement, each a
+downstream symptom of the same root (§8.16). What forced the recheck was a
+*reductio* from the user rather than any measurement: software that flew for
+decades cannot fail to boot.
+
+**A null result from a run that never reached the code under test is not a null
+result.** "`FCMSNCSV` is never written" was reported from a `WATCHHW` run killed
+at about four minutes — but `FCMSSYNC` does not execute until PASS is up at
+~220 s of simulated time. Likewise "zero DMA protect violations" was reported
+from a truncated run and a correct explanation withdrawn on the strength of it;
+run to completion, there were 7,170.
+
+**A counter that reads zero because the feature was switched off is not a
+measurement of the feature.** Headless runs all used `--discrete-b 20000000` —
+GPC 1 with *no CRT selected* — so "deu: commands 0" was a property of the test
+configuration, and it was then quoted as evidence the display was dead.
+
+**Verify a control by a functional difference the change must produce, not by
+rebuilding and trusting the build.** The `#BU@` fixture counts were misreported
+**four times** before `wordsTaken` (98,820 vs 28,164) was used as the check that
+the binary had actually changed. It had been available the whole time.
+
+**Check the binary exists before believing its silence, and capture the count in
+a variable.** An upstream blocker was declared on the strength of running
+`build/bin/HALSFC-PASS1`, which does not exist (the binaries are in
+`build/halsfc/`), plus `$P --help | grep sdfi | head -3 && echo ACCEPTS`, where
+the `&&` sees `head`'s exit status rather than `grep`'s. Two invalid tests in a
+row, both pointing the same way.
+
+**Measure, do not recall.** A 96.6% placement figure was quoted from memory
+into a later argument; re-measured against `mafgen/csects-SSW.json` the build
+actually in use scored 83.79%. The number had been recalled from a
+differently-configured build. Worse, the volume under test **predated its own
+pins** — `linkorder.json` timestamped 06:36, the tape 06:31 — so every run in
+that thread used an image built without them.
+
+**Check the whole distribution, not the head of it.** "135 allocations and zero
+returns" over a pool came from a histogram truncated to the top 8 NIAs; the full
+histogram has 25 distinct writers, and the conclusion built on it (a leak) was
+wrong.
+
+**Kill every leftover process and verify by PID before any bus measurement.**
+Five stray yaGPC2 processes were live on the multicast bus during one reported
+measurement, and four `discretePanel` instances — one launched per iteration
+without killing the previous — each republishing conflicting mode levels from
+its own script clock, made a deterministic crash look nondeterministic. Related
+harness bug: `pgrep -f 'discretePane[l]' | grep -c python3` always counts 0
+because `pgrep -f` prints only PIDs, so an overlap guard built on it never
+fired; use `pgrep -fc`. And `pkill -f` cannot be used here at all — the
+pattern text appears in the shell's own command line, so it matches and kills
+the shell (exit 144, five times in one day). Use a bracket pattern
+(`discrete[P]anel`) **and** keep kills in a separate invocation.
+
+**Sample the time course; a single window on a ramp is meaningless.** Two 45 s
+datagram counts taken 8 s after launch straddled different points of a rising
+curve and were reported as a difference between two tapes. Retracted.
+
+**A stale binary can survive a newer timestamp.** The `sections` protection mode
+"never made any difference" for three reported results because `make` had not
+rebuilt `ageharness.c`; `touch` + `make` fixed it and the mode then reported its
+work. Separately, `make` does not rebuild the *test* binaries at all and does
+not track `test/cpu_ea_fixtures.h`, so an edited fixture header is silently
+re-run against the old binary.
+
+**Section containment is suggestive, not conclusive.** A 102-halfword mismatch
+cluster was attributed to a release difference because it falls inside a
+changed CSECT; the change lands elsewhere entirely, and in that phase
+`FCMSAVE`, `FIOADCNS` and `FIOCBLKS` all cover the same address anyway.
+
+**Do not compare two mechanisms at the granularity only one of them can
+express.** "SPON/SPOFF is redundant" was argued from CSECT-level agreement,
+which is exactly the granularity the coarse mechanism can express and the
+fine-grained one exceeds. A comparison made at the coarser granularity cannot
+detect information that lives below it.
+
+**Two pieces of evidence drawn from the same source are one piece of
+evidence.** The BCE-opcode clustering and the name-prefix clustering were
+presented as independent corroboration; 72% of BCE-opcode files share the same
+prefix, so the second table largely restated the first. Hold the confounder
+constant and re-measure.
+
+**When a claim rests on one unchecked link, name it.** "Latent defect in the
+flight software" was concluded from a chain in which every link was checked
+against a primary source *except* the HIMEM-block count, which came from our
+own reconstruction and was never checked against anything — and the artefacts
+in it (16- and 4-halfword blocks) had already been noticed and walked past.
+
+**`grep` that returns nothing is not `grep` that matched.** An `ls` in the same
+command printed filenames afterwards, and the empty match was read as a hit —
+crediting a MAFGEN annotation from the original 2010 report to our own modern
+imitation of it.
+
+**A probe placed on the wrong path looks like a negative result.** The first
+version of `YAGPC_NIAPROBE` went into `gpcops.c` beside its `ap101_exec1()`
+call — the GpcOps embedding path — while the CLI runs `run.c`'s
+`batchrunner_step()`. It never fired, which was nearly read as "the code is
+never executed". `ap101_exec1()` in `ap101.c` is the one chokepoint both go
+through. What saved it was scanning the image for the instruction's own object
+code and finding it exactly where the address arithmetic said.
+
+**Watch the address the software actually writes.** Three attempts at the
+keystroke bug theorised about delivery timing, major-function bits and a
+checksum; the defect was visible in one halfword, at `KEY1` rather than at
+`ITEMNO` — which is the same address as a structure base and therefore showed
+only unrelated traffic.
+
+**Diff the loaded memory image, not the link metadata.** Reasoning from
+`sym.json` chased Z-con holes and CSECT overlaps for hours; stopping two runs
+at the same step count and diffing memory named the fault — unrelocated address
+constants — in one run.
+
+**Read the tools before chasing the bug.** `tools/` already contained
+`stamp_ipl_phase_table.py` and `stamp_ssl_checksum.py`, each with a docstring
+naming verbatim the symptom then spent hours rediscovering from memory dumps.
+Twice.
+
 ### 8.11 Finishing the OI340700 `.dfg` recovery
 
 §8.9 recovered two files. All twelve differing decks are now accounted for, and
@@ -5042,11 +5163,20 @@ plausible.
 together turned that into a one-line diagnosis and should be the first thing
 reached for next time.
 
-### 8.15 The fullword alignment mask — an unresolved conflict
+### 8.15 The fullword alignment mask — an unresolved conflict (RESOLVED, see §8.16)
 
-This is where the boot stands, and it is written up in full because four
-plausible explanations have been ruled out and the remaining question needs the
-POO rather than more measurement.
+> **Resolved 2026-08-27.** The conflict below is real and every measurement in
+> it stands, but the whole argument was conducted from the wrong manual: the
+> AP-101 C/M masks bit 15 for fullword operands and the **AP-101S does not**.
+> §8.16 has the quotation, the matching `ISPB` change, and the four successive
+> wrong conclusions this one error produced. The account below is kept because
+> the facts it establishes — the struct layout in the original build, the
+> phase-2 load-block list, the three alternating pairs — all survive the
+> conclusion they were gathered for.
+
+This is where the boot stood when it was written, and it is written up in full
+because four plausible explanations had been ruled out and the remaining
+question needed the POO rather than more measurement.
 
 **The symptom.** `FCMMOVE` (`0x72a1`) reads its move parameters from a BCE
 context struct with `L 3,X'0000'(0)`, and the load returns zero where memory
@@ -5179,6 +5309,1584 @@ mask removed, that is where PROTVIOL #5 moves to, and until it is known whether
 that access is a genuine odd-base access the real machine aligns, or an address
 computed one halfword short with the mask hiding it, removing the mask trades one
 defect for another.
+
+### 8.16 The wrong manual — the AP-101S does *not* mask bit 15
+
+§8.15's conflict was real, every measurement in it stands, and the resolution
+is that **the whole of it was argued from the wrong manual.** AP-101S
+instruction set, section 2:
+
+> "Unlike previous versions of this architecture, bit 15 of a base register is
+> significant when addressing fullword data. **Fullword storage operands may
+> now be located on odd address boundaries.** Programs which utilize this
+> feature will not be downward compatible."
+
+Everything cited for the mask — POO Figure 2-8 and its "the same fullword
+address is obtained regardless of base bit 15" — is the **AP-101 C/M**, the
+previous machine. The document is
+`~/Desktop/sandroid.org/public_html/apollo/Shuttle/IBM-6246156 - Space Shuttle
+Model AP-101 C, M Principles of Operation.pdf`; it OCRs usably with
+`pdftotext -layout`, section 2 addressing running from about line 1250 to 2200
+of the extraction and section 14 covering Automatic Index Alignment. It is an
+excellent source for the wrong processor.
+
+**`ISPB` changed with it, and that is why removing the mask alone broke the
+memory test.** AP-101S 9.2, M1=001: "Reset the storage protection bits for
+BOTH HALFWORDS IN THE FULLWORD SECOND OPERAND." On the S that fullword may
+start odd, so the pair is EA and EA+1. `exec_ISPB` was using the C/M's "the
+low-order bit of the EA should be 0 and will be ignored" and doing `ea & ~1`,
+so GPCIPL's `MEMTST14` unprotected `0x00B0`/`0x00B1` and then stored to
+`0x00B1`/`0x00B2` — faulting on a halfword it had never unprotected. The two
+rules are a matched pair and had to move together.
+
+Fixed together, the boot stops crashing:
+
+| | before | after |
+|---|---|---|
+| stop | `invalid instruction 0xc6c6 at 0x0a3b` | `max steps reached` |
+| `FCMMOVE` entries | 1, on the odd struct, corrupting | 2 — **both** structs complete |
+| PROTVIOLs | 5 | 4, all deliberate self-test ones |
+| blocksRead / wordsTaken | — | 280 / 116,666 |
+
+**The fixture cost, and why correcting it was not "making the test pass".**
+`test_cpu_ea` went 20447/20447 → 20181/20447. Every one of the 266 failures
+was verified *first* to be a pure mask off-by-one — got == expected + 1, got
+odd, expected even, 133 in `EA_FIXTURES` and the same 133 in `EA16_FIXTURES`,
+with nothing else in any entry differing. Only then were those exact indices'
+expected values corrected, by script rather than by hand. A note in
+`test/cpu_ea_fixtures.h` records the AP-101S quotation and warns that the
+generator (`test/gen_cpu_ea_fixtures.cjs`) derives from `gpc` and will
+**reintroduce** the C/M values if it is ever re-run.
+
+**Trap:** `make` does not rebuild the test binaries and does not track
+`test/cpu_ea_fixtures.h` at all. After editing a fixture header the old binary
+is silently re-run and reports the old numbers. Use `make test`, and compare
+timestamps before believing an unchanged fixture count.
+
+**The chain of wrong conclusions this one manual error produced**, recorded
+because each was written down confidently at the time: the odd-struct read was
+blamed on `lnk101` misplacing `FCMCTXT2`; then on the tape's load-block ordinal
+parity; then on a latent defect in `FCMINSSL`; then on phase 2's content being
+short. Each was disproved by measurement and each was a downstream symptom of
+reading the C/M for an S. What forced the manual to be rechecked was the user's
+reductio — software that flew for decades cannot fail to boot, and no machine
+would copy three load blocks to address 0.
+
+**Worth keeping from the wrong turns**, because the facts survive the
+conclusions they were marshalled for:
+
+- The struct layout is genuinely odd in the real build. OI301700's "as
+  received" `SSSRC/FCMINSSL` is an original-build listing *with object code*
+  (only OI301700 ships listings): `FCMLBRTB 0378`, `FCMNEXTB 038A`,
+  `FCMNEXTS 038B`, `FCMCURRS 038C`, `FCMMOVRG 038E`, `FCMBF1CT 039E`,
+  `FCMBCTXT 03A0`; `0037C FCMCTXT1 DS 7H`, `00383 FCMCTXT2 DS 7H`,
+  `003A0 DC Y(FCMCTXT1)`, `003A1 DC Y(FCMCTXT2) = 0383`, `002E7 1B00
+  L R3,TFCMTGTA`. Walking the DS chain reproduces every address, including a
+  one-halfword pad before `FCMMOVRG` — which proves the original assembler
+  aligns `DS F` exactly as ours does. With CSECT base `0x6FBC` that is
+  `FCMCTXT1 = 0x7338`, `FCMCTXT2 = 0x733F`, **the exact addresses our link
+  produces.**
+- Three separate alternating pairs live in this code and conflating them is
+  the trap: `FCMCTXT1`/`FCMCTXT2` (context structs, one per load block, chosen
+  by `FCMNEXTS`/`FCMCURRS`); `FCMIBLK1`/`FCMIBLK2` (BCE receive-sequence *code*
+  areas, via `FCMRSADD`); and the two 8K staging buffers (`FCMB1ZCN`/
+  `FCMB2ZCN`, indexed by `TFCMSRC`). `FCMMOVE` spans the **third**.
+- "Odd" was used for two unrelated things and the confusion was ours:
+  `FCMCTXT2` sits at an odd *address*; load blocks have odd or even
+  *ordinals*. Every load-block address is even — all 24 of the then-current
+  phase 2 verified. Say "ordinal" and "address" explicitly, never just "odd".
+- `FCMINSSL`'s top level is a loop over **phases** (`LFXI R4,FCMNUMPH`), and
+  `FCMNEXTS`/`FCMCURRS` live in a work area zeroed **once before that loop**,
+  not per phase — so the struct alternation runs continuously across all
+  phases. `FCMNUMPH` differs by release: OI301700 = 2, OI340600 = 3.
+- The `RS` extended branch is *not* masked, and an A/B settled that it cannot
+  be decided from here: cpu EA/CC fixtures 20447/20447 either way, instr exec
+  111180/111358 either way, boot byte-identical, with the control verified
+  functionally (the probe went 53 hits → 0 with the mask and back to 53
+  without). `YAGPC_RSALIGNTRACE` is kept so a discriminating case can be found
+  cheaply if one ever turns up.
+- A separate real bug was conflated with the mask and is worth keeping
+  distinct: `ea & 0xfffe` is a **16-bit** mask applied to an EA already
+  expanded to 19 bits, so it destroyed the sector (`3032a` → `0032a`).
+  Whatever else is decided, do not reintroduce `0xfffe`; `ea & ~1u` would have
+  been the sector-safe spelling.
+- `ISPB`'s **halfword** forms are correct as written — over a full IPL, M1=0
+  splits 204567 even / 204564 odd and M1=2 splits 145557 / 145546, so they
+  genuinely address individual halfwords. Its index handling already matches
+  the POO ("excluded from automatic index alignment"; `addrWidth=1` so the
+  scaling is `<< 0`). The **fullword** forms remain an open conflict, gated as
+  `YAGPC_ISPB_ALIGN=1` and **not** the default: aligning breaks the boot (55
+  blocks instead of 281). Only 60 of 34,271 fullword-form ISPBs have odd EAs,
+  all from three GPCIPL instructions, and a sector's last fullword
+  (`x7ffe`/`x7fff`) is reachable from `x7ffd` under *neither* reading — which
+  is why this is logged rather than decided.
+
+### 8.17 The BCE `@`-family, and the one instruction where `gpc` and yaGPC2 diverge
+
+**`#BU@` semantics, stated exactly:** compute `a + 2*BCE#`, fetch the
+**fullword** there, mask to 18 bits, load it into the BCE's program counter. A
+branch, no increment. For BCE 18: `0x72A8 + 36 = 0x72CC`, fullword
+`0x000072F2`, PC = `0x72F2` = `FCMIBLK1`. `DC A(x)` assembles to a fullword —
+the original listing shows `00310 00000336` against `00314 0336` for the
+matching Y-con — so the entry is `0000 72F2` as two halfwords, and that leading
+`0000` is exactly what `gpc` executes and cannot decode when it branches *to*
+the entry instead of *through* it.
+
+**Measured, this is the only instruction at which the two emulators differ in
+a whole boot.** `YAGPC_BUATTRACE` prints both candidate targets:
+
+    BU@ #1 bce=18 table=072cc entry->072f2 (gpc would go to 072cc)
+
+Total `#BU@` executions in a boot: **one**. Before it, nothing differs — memory
+test, `REALEXEC`'s dispatcher, the display IPL, the DK-bus traffic all run
+identically. After it, `wordsTaken` is 98,820 against 28,164 of 107,012:
+yaGPC2 collects the blocks, `gpc` spins on a constant it cannot decode while
+the transfer streams past. The CPU keeps running in both — the BCE is a
+separate processor — so `gpc` does not crash; the load simply never completes.
+That is precisely the old "same infinite loop, same address, identical
+iteration counts" observation, seen from the other side.
+
+**And the divergence is gated behind the SSL checksum**, which is why it
+survived so long: unstamped tape (`SSLENGTH = 0`) gives 0 `#BU@` executions and
+`wordsTaken` 28,162 — both emulators hang identically inside `SSLCHECK`'s
+checksum loop, upstream of the only instruction at which they differ. **No
+`#BU@` had ever executed in this project** until the checksum was stamped. A
+comparison that stops short of the divergence cannot see it; that is a sharper
+form of §8's opening lesson than "two emulators agreeing proves nothing".
+
+**Four independent witnesses from the flight software**, which is what carries
+the decision, since the POO's prose reads as direct and the 300 `#BU@` fixtures
+encode a *third* behaviour (NIA = `a`, no bus offset) that neither
+implementation produces:
+
+1. `FIOBBM` is declared `DC 2F'0'` with the same `-36` bias — an array of
+   fullwords, not code;
+2. `FIOMGDSP.asm:750` writes addresses into it at run time, under a header
+   calling it "MM BRANCH ADDRESS TABLE" ("STORE ADDRESS IN BCE ENTRY");
+3. `MLIB80/BTBCEGEN.asm:564` comments its own `#BU@ FIOBTFLX` as
+   **"INDIRECT BRANCH"** — the software naming the semantics outright;
+4. `FCMBCEBT`'s `DC A(FCMIBLK1)` points at `DS 10F` scratch.
+
+Scope: `#BU@` appears at 57 non-comment sites in OI340600, but all the MLIB80
+ones (`FIOMFBCE`, `FIOHFBCE`, `BTBCEGEN`) are PASS code; in the IPL only
+`SSSRC/FCMINBCE.asm:82` is reachable.
+
+**`#LBR@` is the same defect and was fixed the same way.** `FCMBCEST` and
+`FCMBCEBT` are the *same address* — the original listing has
+`1169: 00002EC FCMBCEST EQU *-36` and `1172: 00002EC FCMBCEBT EQU *-36` — and
+`FCMINBCE` uses both forms on it, `#LBR@ FCMBCEST` at line 67 and
+`#BU@ FCMBCEBT` at line 82. Both must fetch through the table. Without the
+fetch, BCE 18's base became `072cc`, the branch-table entry itself, and its
+`#RDLI` wrote the received word over the `A(FCMIBLK1)` that the `#BU@` ten
+halfwords later was about to read. Store protection had been refusing that
+write all along (`072cc` is below `FCMDATA`, so the SSL's unprotect sweep never
+reaches it), which preserved the entry and hid the bug — unprotecting those
+four halfwords *without* the fix sends BCE 18 to `pc=00000`.
+`test_iop_bce_exec` is 73499/74699 with and without, measured both ways, so
+the fixtures cannot arbitrate here either.
+
+**What the receive sequence does, dumped live at the moment `#BU@` fires:**
+
+    FCMIBLK1 @072f2  #LBR 051e / #RDLI 344 / #DLYI 592 / #SST +22 / #BU FCMIBLK2
+    FCMIBLK2 @07306  #LBR 0676 / #RDLI 1 / #RDLI 10240 / #LBR 2e76 / #RDLI 48
+                     / #DLYI 1184 / #SST +08 / #WAT
+
+Both terminators are in the source: `FCMINSSL.asm:752` `OHI R5,FCMMBU`
+(`X'F000'`, unconditional branch) ends a sequence with a successor, and `:727`
+/`:760` `LHI R4,FCMMWAT` (`X'0800'`) ends the last. So the two buffers chain to
+each other alternately and `#BU@` is a **one-time entry point, not part of the
+loop** — which is why exactly one executes despite 21 load blocks and 209
+blocks read. The `#LBR` operands `0x051E` and `0x0676` are phase 2's first two
+load-block start addresses, an independent cross-check that the decode is real.
+`c250 5022` is *two* single-halfword instructions packed in one fullword
+(`#DLYI` + `#SST`), which is why `FCMINSSL` writes the fullword with
+`ST R4,0(R2)` and then patches only the second halfword with `STH R4,1(R2)` —
+deliberate, not suspicious.
+
+**After `#WAT` the BCE stops.** BCE POO §2.2 (the AP-101S manual carries it as
+Part III) states both the halt and the PC behaviour our code already had:
+
+> "a BCE's Program Counter need not always be set before the MSC sets the BCE
+> to busy, since the BCE Wait instruction (#WAT) when executed, leaves the PC
+> pointing to the next sequential instruction. This next instruction may be
+> programmed as a simple branch to the beginning of the next BCE program
+> segment. In this case, the MSC need only execute an SIO instruction to
+> restart the BCE at the next segment."
+
+So `exec_WAT` was already right and is now cited: clearing `regBusyWait` is
+what stops execution, and `iop_incr_nia(t,1)` is the *defined* behaviour that
+makes the restart idiom work. Also from the same section: "While a BCE is in
+the Wait state, the CPU may perform PCI/O activity without disturbing the BCE";
+"The Busy state may be entered only from the Wait state"; and "The CPU cannot,
+however, directly set a BCE's Busy/Wait bit" — only the MSC's `SIO`. That last
+sentence is what makes a parked BCE with a parked MSC a genuine deadlock.
+
+The SSL does **not** use the restart idiom — the halfword after its `#WAT` is
+`0000` — so the PC is reloaded per program. `YAGPC_PCTRACE` shows BCE 18's PC
+loaded five times in a whole boot: `30240` and `3024c` (FCMBOOT, t=2.11 s and
+2.31 s), `014d4` (GPCIPL's all-BCE sweep, t=4.30 s), then `07362` and `0736c`
+at t=18.46/18.62 s, which are `FCMINBCE` and `FCMINBCE+10` — matching
+`FCMBCEAD`'s own pair of `DC A(FCMBCMMR)` and `DC A(FCMINMMP)`.
+
+**Why no `gpc`-vs-yaGPC2 differential harness was built** — asked for, assessed,
+and declined with reasons, because the user's principle (force two supposedly
+identical programs to contend) is right and the refusal needs to be more than
+cost. Fixing `gpc`'s `#BU@` buys exactly *one instruction*: the next thing the
+receive sequence executes is `#DLYI 592`, and `gpc`'s `#DLYI`/`#DLY` are
+explicit no-ops — the exact defect that broke FCMBOOT's phase-10 load until
+`14a7b7581`, where the SSL skips each partial block's unread tail *by delaying
+over it*. `gpc` also lacks the MIA-latch ordering fix (`82fb09d3b`), the
+unread-transfer-tail fix (`629694ebf`), and any `--mmu-model` at all (its mass
+memory is a separate device process on the multicast bus). The decisive reason
+is not the cost but that **we would be writing the oracle**: to reach the
+failure, `gpc` needs `#DLYI` with bus-data discard and a progressive bus —
+the exact behaviours under test. Implement them as yaGPC2 does and agreement
+proves nothing; implement them differently and disagreement only shows two
+different things were written. Differential testing earns its power from
+independence, and yaGPC2 is a *port* of `gpc`: their disagreements are
+precisely our changelog. `yaHALMAT2`, which genuinely is independent and is the
+real bug-finder elsewhere, executes HALMAT rather than AP-101S machine code and
+cannot run GPCIPL at all. So the primary documents have had to be the oracle,
+and the ledger supports it — POO Figure 2-8, the OI301700 listing, `FIOBBM` and
+`BTBCEGEN`, the `0x710b` probe, the `FCMIBLK` dump, the BCE POO. Every wrong
+turn came from trusting *derived* artifacts: fixtures, stale builds, our own
+notes. **Condition for reversing this:** if the build-side line runs dry *and*
+the next question turns out to be about emulator behaviour rather than the
+tape, on a case where the two could genuinely disagree.
+
+### 8.18 Completing phase 2 — a stale compiler and two extensionless-member traps
+
+Phase 2 was short of the real build's upper-memory content, and every
+explanation offered for it was wrong until the cause turned out to be the
+compiler binary.
+
+**51 of 274 modules were being abandoned at compile time.** The SSW CON80 deck
+*is* phase 2's definition ("PHASE 2 APPLICATION PDE'S", "PHASE 2 PROG'S",
+"PHASE 2 STACKS"): 285 INSERT members, 213 present, 72 missing, of which 38 had
+sources (23 distinct modules) and 34 did not. The 23 are exactly the sector-8
+occupants the DASS dump has and we lacked: `AIESIP ARBIDL ARCGPC ASMAUX DMCSUP
+DMIMCD DMTERR DUPNSP DM1KEY DM2APP DM3DIS DM4DEU DM5NEW DM6OPS DM7REQ DMNNEW
+DMMMCD DNXBMS DXXCSE ARGREC DISPLA DCDDOW ASISPE`. The failures were real
+compile errors, not tooling noise — `ARCGPC` gave 13 severity-2 errors ending
+"COMPILATION ABANDONED" over an undefined `CANB_ANN_MSG_BITS`.
+
+**Root cause: `halsc` runs a stale compiler by default.** Line 57 is
+
+    HALSFC_BINDIR="${HALSFC_BINDIR:-/home/rburkey/donschmidt/nsts-sdl-dps/build/halsfc}"
+
+so it uses Don's own pass binaries (dated 2026-07-21) rather than the Virtual
+AGC archive's `Source Code/PASS.REL32V0` (2026-08-07), which is upstream of
+them and *does* accept `--sdfi`. Setting `HALSFC_BINDIR` to the archive builds
+the whole phase. The A/B has one variable — identical `con80build` command,
+same `--root`, same cleaned `--out`: without it, 70 zero-length objects and a
+failed link; with it, 0 zero-length, 6/6 displays, 239 objects linked.
+
+Two corrections attach to this. First, **an upstream blocker was declared on
+the strength of tests that never ran** — `build/bin/HALSFC-PASS1` does not
+exist (the binaries are in `build/halsfc/`), and `grep -c` returning 0 on a
+nonexistent binary was read as evidence; then
+`$P --help | grep sdfi | head -3 && echo ACCEPTS` fired the `&&` branch because
+the exit status is `head`'s, not `grep`'s. Two invalid tests in a row, both
+pointing the same way, produced a confident "blocked on Don" that was wrong.
+Second, **the `REL32V0` banner is worthless as a version**: it comes from the
+original 2008 XPL/I source, so every port of the compiler prints it. Only the
+build date distinguishes copies, and by provenance a build from Don's repo can
+never be ahead of the archive's. (Recorded in memory as
+`feedback_halsfc_bindir_use_virtualagc_archive`.)
+
+**Two extensionless-member traps, in two different places in `con80build`.**
+This is the recorded SDL-tooling hazard — the tools assume extensionless
+members and PFS added `.asm`/`.hal`/`.dfg` — and it bites twice:
+
+- `_PATCH_SRC_RE = re.compile(r"^PCH\d+SRC$")` is anchored with no extension,
+  so `PCH02SRC.asm` never matches, patch decks are never indexed, the plan
+  reports "0 patch", and 10 members go unresolved. The machinery works —
+  `patch_member("PCH02SRC")` → `PCH02TXT` and `patch_csects()` finds all 29
+  names — the index simply never reaches it.
+- `SourceIndex.by_name` is keyed on the **full filename**, so
+  `resolve("FCMBMASK")` never matches `FCMBMASK.asm` and every module falls
+  through to a **6-character stem index** built with `setdefault` over a sorted
+  listing. Where two files share six characters the alphabetically first wins,
+  and the wrong path is then dropped by the `if path in seen` dedup, so the
+  real module is never built. All 13 then-missing modules were such
+  collisions, verified one by one: `FCMBMASK/FCMBMAN`, `FCMBUSPC/FCMBUSCM`,
+  `FIOERRLB`+`FIOERRLC/FIOERRLA`, `FIOMGCV/FIOMGCMP`, `FIOMGSTR/FIOMGSNC`,
+  `FIOSVCP/FIOSVC`, `FPMCVTFX/FPMCVTFL`, `FPMIHPGM`+`FPMIHPC2/FPMIHPC1`,
+  `FPMRESET/FPMRES`, `FIOPDISP/FIOPDIPG`, `FPMMTURM/FPMMTUFX`.
+
+Both are fixed without touching Don's repo, by scratch trees of extensionless
+**symlinks** — every `SSSRC` (423) and `APPLSRC` (1149) member, plus all 47
+`PCHnnSRC` decks — passed as extra `--src` directories ahead of the real ones.
+`resolve()` then hits `by_name` exactly and never reaches the stem index. A
+first attempt that *stripped* `--sdfi` with a path shim made things worse (119
+members lost objects instead of 5) and was removed: `halsc:257` falls back to
+the `--sdf` directory when `--sdfi` is absent, and `con80build` passes that as
+the per-compile *output* dir, so stripping the switch repointed template
+resolution at an empty directory rather than removing it.
+
+Two more invocation facts: use `--phase 2`, **not** the bare `SSW` target
+(`--phase` builds PROLOGUE + PHASE SEGMENT and writes `PHASE02.lib`; the bare
+target builds only the segment and drops all the `FCM*`/`FIO*`/`FPM*` prologue
+modules), and the link needs `PHASE01.lib` present in `--out` for the deck's
+MAP cards.
+
+**Result — phase 2 complete for the first time:** 155 ASM, 120 HAL, 7 displays,
+1 patch, 0 unresolved; 314 objects linked; 660 sections; 340 modules; deck
+members unaccounted **0**, having gone 72 → 22 → 13 → 0.
+
+Along the way, the **unbuilt phases** question was answered precisely: 35 of
+the 52 in the manifest are "not built", but they are almost nothing — PHASE 22
+(`GMAIMUC1`, card 42506) at 2 blocks, and phases 27–60, all `SMARDPnn` at 3
+blocks each, every one carrying `SUBSYS=RID` on its ALLOC card: Reconfigurable
+Item Data patch slots, data rather than code. Total unbuilt: 104 blocks against
+1085 then on the tape. Separately, phases 23/24/25 have `.lib` files and PHASE
+cards but never appear in the manifest (they are `MOVE=NO` with explicit
+`LBLN`/`LBNO`); phase 26 has a `.lib` and no PHASE card; phases 11, 17 and 19
+have `.lib` files and no PHASE card; and phase 1 is not a program phase at all
+but the MM directory (`VMARPLDU DIRECTRY,SIZE=2,ENTRIES=510,DMMD=NO,PH=1`).
+
+### 8.19 What the ground Mass Memory Build wrote, and our toolchain did not
+
+A family of four defects, all the same shape: our toolchain reproduces the
+assembly and the link faithfully, but not the ground Mass Memory Build's own
+choices about **what becomes a load block**. Each was found by a different
+route and each blocked the boot in a different place.
+
+**1. `FCMPSA` — PASS's own PSA CSECT — was dropped.** `SSSRC/FCMPSA.asm`
+declares the whole interrupt vector table:
+
+    FCMPSA   CSECT
+             TFPSA CSECT,PON=0,POF=0,SR=FCMINSSL,MC=0,PC=FPMIHPGM,
+                   SVC=FPMSVC,PC1=FPMIHPC1,PC2=FPMIHPC2,IM=FPMIHIM,
+                   EI0=FIOERRLA,EI1=FIOERRLB,EI2=FIOCMPLT,EI3=0,
+                   SI=FCMLINIT,DSR=0,BSR=0,PD=NO,
+
+It is at halfword 0, 422 halfwords, present in `PHASE02.lib` and byte-identical
+to the flown article. `mmbstamp`'s `derive_load_blocks` discarded any extent
+ending at or below the phase's Z1 pool cursor — a rule that exists to drop Z1
+ZCON pool re-supplies from a parent phase — and a CSECT that legitimately lives
+at address 0 is caught by the same `e <= pool` test.
+
+That one drop accounted for **four** symptoms that had been chased separately
+for days: `0009c` staying protected (the missing block is exactly what
+`FCMUPROT` would have unprotected before loading it); `TPSASINP` still holding
+GPCIPL's own `Y(EX4)` instead of `SI=FCMLINIT`; every PSA vector keeping
+GPCIPL's addresses (`004c = 0a3b` instead of `ad5c = FPMIHPGM`); and the
+`invalid instruction 0xc6c6 at 0x0a3b` crash, which is the third symptom being
+dispatched through. **The "missing MM-build stamp" hypothesis was wrong** —
+nothing stamps `TPSASINP`; it is simply assembled into a CSECT we failed to
+load.
+
+The vectors are the strongest single validation of our phase-2 addresses.
+Resolving the DASS dump's interrupt vectors (16-bit, BSR=3 when the high bit is
+set) against our own `PHASE02.lib` symbol table hits a symbol at **offset +0
+every time**: ProgChk `ad5c` → `FPMIHPGM`; SVC `b13a` → `FPMSVC`; Clk1 `ad24` →
+`FPMIHPC1`; Clk2 `bed6` → `FPMIHPC2`; EX0 `9a30` → `FIOERRLA`; EX1 `9a58` →
+`FIOERRLB`; EX2 `b480` → `FIOCMPLT`; SpecInt `47e0` → `FCMLINIT`. Nine vectors,
+nine exact symbol starts.
+
+**2. `FCMRESRV` — reserved load blocks carry no tape data.**
+`FCMINSSL.asm:1111` `FCMRESRV EQU X'2000'  RESERVE LOADBLOCK MASK`, and the SSL
+tests it three times, skipping the block each time: the MM block count (`:496`,
+"RESERVE FLAG OFF (LB DATA ON MM)?"), the BCE transfer setup (`:584`) and the
+checksum pass (`:842`). So a reserved load block **reads no tape, transfers
+nothing and is not checksummed** — it is purely a descriptor carrying address,
+length and protection, and it is still walked by `FCMUPROT`/`FCMRPROT`, which
+is what clears the store-protect bit `GPCERAS` set. `LoadBlock.words()` built
+its flags as `0x0600 | sector<<4` plus `0x8000`/`0x4000` and had **no way to
+express `0x2000` at all**.
+
+The flown article confirms the block to the halfword.
+`DASS_SSW_(PostIPL).ASC:1277-1280` brackets `#PCVNMMU` with
+`*** BEGIN RESERVED CSECT ***` / `*** END RESERVED CSECT ***` and shows a
+load-block checksum tail at `03432C-03432D` immediately after it; a block
+synthesised from the deck card and CSECT size alone gives start `030322`,
+length 16396, tail `03432C..03432D`, next block at `03432E` — exactly where
+phase 3's observed block starts. Four independent lines converge: the deck's
+`RESERVE` card, the era-original MAFGEN annotation, the image's checksum
+boundary, and the arithmetic. (That annotation is from the **original 2010
+MAFGEN report**, not our own `mafgen/` imitation of it — a `grep` that returned
+nothing was misread as having matched because an `ls` in the same command
+printed filenames after it.)
+
+With `LoadBlock.reserved` added and `pack_mm` charging a reserved block **zero**
+MM blocks, the acceptance test passes with no injection and no patches, tape
+unchanged at 2500 blocks: blocksRead 281 → **400**; `wordsTaken/wordsOut`
+117178/143876 → 204812/204812; words lost 26698 → **0**; DMA violations 7170 →
+1 (an unrelated early `addr=00002`). Phase 2 goes to 28 descriptors with
+`ncont=226, crossed=False` — no budget overflow, because the reserved block
+costs no MM blocks. Every earlier explanation of the 58-block failure was
+wrong for one root reason: the descriptor was emitted **without** the flag, so
+the SSL tried to read 33 tape blocks that do not exist. Specifically withdrawn:
+"budget overflow → layout corrupt" (`crossed` is a *track*-boundary flag from
+`pack_mm`, handled by setting `sot`, not a budget signal) and "the tape carries
+no content" (a correct observation with the wrong significance — it should not
+carry any).
+
+**3. Phase 2's Z1 ZCON pool was never emitted**, so PASS ran with GPCIPL's
+Z-cons. `derive_load_blocks` emits the pool as `[pool_start, pool-2]` but only
+sets `pool_start` when `s >= parent_pool`; `POOL_PARENT` has no entry for 2, so
+`.get(2, 2)` makes **phase 2 its own pool parent** and `parent_pool` becomes
+phase 2's own cursor (`0024a`). Its own pool starts at `001a8`, below that, so
+the test was never true. Child phases were unaffected, their pools sitting
+above the parent's cursor.
+
+This one needed a new instrument. A wild branch is invisible to every other
+trace — the interrupt log shows only where execution *arrived*, and `--trace`
+over ~200M instructions is unusable — so `YAGPC_NIARING=<n>` was added, a ring
+of recent instruction addresses dumped at the Instruction Monitor and at the
+invalid-instruction stop. It gave `... 40078 40079 4007a | 44723 ...`, so
+`0x4007a` had branched into `#CDCDDOW`, a data CSECT. `0x4007a` holds
+`D0FF 39CC`, which the emulator's own disassembler renders as
+`SCAL 0,@@X'01cc'(1)` — a call fetching its target *through* a Z-con at `01cc`,
+inside the Z1 pool, and the only load block covering it belonged to phase 10.
+The same region had been flagged hours earlier as a 158-halfword mismatch
+against the DASS dump, "our values and DASS's, the same values in a different
+order"; two symptoms of one cause, not connected until the ring named the
+instruction.
+
+**4. `parent_pool_lo` was passed by one caller and not the others — and that
+one was ours.** After the `FCMPSA` fix, phase 3 got 11 blocks on tape against
+10 in the phase table, so the SSL read the tape displaced from that block
+onward and every following block failed its checksum. Sweeping for callers
+rather than assuming found three sites, two of them missing it:
+
+    ap101Utils/mmbstamp.py  phase_load_blocks   had it (the FCMPSA fix)
+    tools/mmu2mmv.py        phaseRecord         MISSING -> fixed
+    ap101Utils/fcmImage.py  _lb_slots           MISSING -> fixed
+
+`fcmImage`'s own docstring states the invariant the omission broke —
+"`mmbstamp.derive_load_blocks` is the single definition of the partition" —
+which holds only if every caller passes the same arguments; and it feeds
+checksum-slot detection, so it would have skewed the very tooling used to
+verify the tape. All four phases now agree table-vs-tape: 27/27, 10/10, 5/5,
+2/2. **Design smell worth fixing properly:** `parent_pool_lo` is derivable from
+what every caller already has (`pool_low_hw(parent_lib, parent_pool)`), so
+making it the caller's responsibility guarantees this drift.
+`derive_load_blocks` should take the parent LIB and compute both itself. Not
+done — a wider change to Don's code.
+
+**The systematic check that would have caught all three drops on day one**, and
+which is three lines: list the extents present in a phase's `.lib` but covered
+by no load block of that phase. After the fixes it reads PHASE10 0, PHASE02 0,
+PHASE13 0, PHASE03 1 (`001fe..001ff`, 2 halfwords). Re-run it after any change
+to `derive_load_blocks`.
+
+**Where these fixes live.** All three are **local, uncommitted** changes in
+`~/donschmidt/nsts-sdl-dps` (HEAD `755a372`), by the user's instruction — no
+commit there and no PR. Verified still present: `parent_pool_lo` in
+`src/ap101Utils/mmbstamp.py` and `src/ap101Utils/fcmImage.py` and
+`src/tools/mmu2mmv.py`, and `reserved` in `mmbstamp.py`. Note the path:
+`mmu2mmv` is under `src/tools/`, not `src/ap101Utils/`.
+
+**The volume recipe is FIVE steps, not two.** Two were being omitted, and each
+omission produced a *bit-identical wrong answer* rather than an error:
+
+    1. mmu2mmv --con80 <CON80> --mmu <tree> --out V.mmv
+    2. stamp_ipl_phase_table.py <tree>/PHASE01/PHASE01.fcm --mmu <tree>
+       --con80 <CON80> --sdl <dps> -o BOOT.fcm
+    3. stamp_ssl_checksum.py V.mmv
+    4. stamp_bootstrap_on_tape.py V.mmv BOOT.fcm
+    5. add_sysid_allocs.py V.mmv --con80 <CON80> --sysid SYS8
+
+Step 2 matters because `BOOT-stamped.fcm` carries FCMBOOT's own map
+(`FCMPTAD1/2/3`), so a rebuilt tape without a re-stamped table is navigated by
+the **old** layout; a PHASE01 built from source leaves all three 256-halfword
+areas holding the `X'FFFF'` "never mass-memory built" sentinel, and the tool's
+own docstring predicts the result exactly — "walks all three areas, finds FFFF
+in each, and lands in its documented give-up wait state having never touched
+the bus", which is precisely the measured wait state at `30220` after 13.8 s
+with zero tape reads. Step 3 matters for the same reason at the SSL level.
+`stamp_ipl_phase_table.py` needs `--sym`, and the image to stamp is
+`<tree>/PHASE01/PHASE01.fcm` with `PHASE01.sym.json` beside it.
+
+**The lesson, and it is the same one twice: `tools/` already contained the fix,
+with a docstring naming the exact symptom.** Both `stamp_ipl_phase_table.py`
+and `stamp_ssl_checksum.py` were written for precisely the failures that were
+then rediscovered from memory dumps over hours. Read the tools before chasing
+the bug.
+
+The `FCMCKSUM` case is worth keeping for its method: a matched-simulated-time
+memory diff showed only 109 differing halfwords, two of them in `FCMCKSUM`
+(`07398 ref=0326 mine=0000`, `0739b ref=cb2c mine=0000`); searching the
+reference's own image for a region whose 16-bit sum equals `cb2c` found exactly
+one, 806 halfwords at `06fbc`, which is `FCMINSSL`. Our own `FCMINSSL` sums to
+`cb2c` too — the SSL was always correct, only the stamp was missing.
+
+**Two build facts that cost time and are easy to get wrong.** `BOOT-*.fcm` is
+**not** `PHASEnn.fcm` — the sizes match (65024 bytes) and they are not the same
+artifact; `BOOT-900.fcm` is a *stamped* PHASE01, which the stamper reproduces
+exactly when fed the same tree. And decode load-block addresses as
+`(sector<<15) | (addr & 0x7fff)`, **not** `(sector<<15) | addr`, which shifts
+every sector≥2 block by `0x8000`.
+
+**Withdrawn along the way, and worth recording because the reasoning was
+circular:** a load block was ruled out for `#PCVNMMU` on the grounds that the
+DASS dump shows the region 100% `C6C6`. But `C6C6` **is the tape's own fill**
+(`STACK_FILL_BYTE = 0xC6`, `INIT=C6C6` on every `MMUDATn` ALLOC card,
+`lnk101 linker.py:59-63`), so a load block carrying fill produces exactly the
+dump content used as evidence against one. The dump cannot distinguish the two
+cases. Relatedly, `latest.unlinkSSW_(PostIPL)` is an **unlink of the DASS
+reports** — a reconstruction of the *loaded image*, not a live RAM snapshot —
+so it can never testify about what execution wrote.
+
+### 8.20 The IOP must be paced by simulated time, not by CPU instruction
+
+`ap101_exec1` ran one `iop_exec` per CPU instruction. `FCMMOVE`'s
+7,654-halfword `MVH` is a *single* emulator instruction that charges about
+6.7 ms of POO time, so it froze the IOP while the simulated clock ran:
+
+    BCE18 #SST                       t=23664142.0
+    MVH dest=41c00 src=3232a c=7654  t=23664144.8
+    BCE18 next instruction (#BU)     t=23670877.3   <- 6732 us later
+
+That loses a halfword because **the SSL positions the BCE mid-gap on purpose.**
+`FCMSSLBS` computes its delay as `639 - partial = (511 - partial) + 128`, its
+own comment naming the constant: "128 = ONE HALF THE MMU BLOCK GAP IN HALF
+WORDS". The one-word "CLEAR THE MIA BUFFER" `#RDLI` that follows is therefore
+*meant* to execute inside the gap, with nothing on the bus, and take the stale
+latch. Resuming 6.7 ms late, it took block 796's first real word instead, so
+the block landed one halfword out of phase and failed its checksum.
+
+**The rate is derived, not fitted.** `iopls_next_slice` cycles 33 slices so
+each BCE gets one per cycle, and the AP-101S manual's Part III (the BCE POO)
+§3.4.1 says a BCE samples its MIA buffer "at most once every 16.5 usec".
+16.5 / 33 = 0.5 exactly, and 16.5 µs is already `MTO_TICK_US` in the code.
+
+**What actually does the work is the back-dating, not the rate.** Each slice is
+taken with `cpu.elapsedTimeUs` **set to the time that slice falls at**, and the
+CPU's value restored afterwards — catching up in slice *count* alone fixes
+nothing, because what the bus cares about is *when*. Verified: the outcome is
+identical for pass intervals of 0.16, 0.25, 0.35 and 0.5 µs.
+
+Result, same tape and command:
+
+| | before | after |
+|---|---|---|
+| clear-reads that stole a real word | 3 | **0** |
+| `FCMECNT` / `FCMCKERR` | 3 / `ffff` | 0 / 0 |
+| outcome | three checksum retries, halt at `FCMSSLEX` (`SSM FCMWAIT`) | **phase loop exits normally, handoff begins** |
+| blocksRead | 730 (inflated *by* the retries) | 321 |
+
+The apparent drop 730 → 321 is not a regression: the old figure was three
+attempts at a block that never checksummed. Reversible two ways —
+`git revert` (it touches only `ap101.c`/`ap101.h`), or `YAGPC_IOP_PER_INSTR=1`
+at runtime, which reproduces the old behaviour bit for bit;
+`YAGPC_IOP_PASS_US=<f>` overrides the interval.
+
+**Two things ruled out first, each by measurement.** The MIA model is *not* at
+fault: `YAGPC_CLEARTRACE` shows almost every clear-read taking `c6c6` — fill,
+i.e. a genuinely stale word, which is the point of the instruction — and the
+one that took a real word completed *the instant it was armed*. The AP-101S
+manual's Part III §3.4.1 settles the semantics in our favour: "once an entry is
+placed in the MIA buffer it stays there until either the BCE removes it **or
+the MIA overwrites it with a new value**", which is exactly `mia_get_data`'s
+live-over-latch rule. And "missing MMU read latency" was not the problem
+either: `YAGPC_MMUTRACE` with timestamps shows only **two** read commands in a
+whole boot — 55 blocks at t=2.34 s and 225 blocks at t=18.93 s — with the
+entire PASS load streaming from that single 225-block transfer, the failing
+clear-read 4.7 s into it. A one-block-gap lead-in for fresh bursts was tried
+and reverted: principled, but the read command precedes the clear-read by about
+20 ms and the gap is only 8.45 ms. (`mm_log` now timestamps every line. Every
+question about this unit has turned out to be a question about *when*, and an
+untimed log cannot answer one — the two-read-commands finding was invisible
+without it.)
+
+### 8.21 Store protection, traced end to end
+
+The SSL's DMA into its own staging buffer was being silently refused, and the
+chase for it produced more withdrawn conclusions than any other thread in this
+section. The answer is that **the flight software protects everything itself**,
+so our loader's protection model turned out to be irrelevant.
+
+**The chain, each link measured:**
+
+1. `GPCERAS` (`GPCERAS.asm:257-261`, the `GPCWR20` loop) unprotects, fills and
+   **re-protects** every halfword of sectors 0-15 at t≈11.35 s:
+   `ISPB 0,0(R5,Z3)` / `STH R6,0(R5,Z3)` / `ISPB# 2,0(R5,Z3)` / `BCT`.
+   `DSRLIMIT DC X'000F'` (`STPDATA.asm:1027`) = 15, so sector 6 is legitimately
+   inside its range — our emulation is **not** overrunning.
+2. The SSL's BCE DMAs into `#PCVNMMU` at t≈22.96 s.
+3. Nothing between them unprotects it. `FCMUPROT` only ever opens **load-block
+   destinations** — it takes a 3-halfword descriptor in R1, builds a Z-con from
+   it and walks `ISPB@# 0,0(R2,R1)` down the length (`FCMINSSL.asm:1140`
+   `FCMIZCON DS F   CHECKUM/UNPROTECT/PROTECT ZCON`) — and the staging buffer
+   is not a destination.
+4. A load block covering the buffer with protect=0 *would* unprotect it in
+   exactly that window, because `FCMRPROT` re-protects only per the block's own
+   flag.
+5. `mmbstamp` emitted no such block, because the CSECT has no data extent — see
+   §8.19's `FCMRESRV` fix, which is what finally supplied it.
+
+**Confirmed by prediction rather than by fitting**, which is what turned an
+apparently absurd "timing-sensitive protection bit" into a window: unprotecting
+at t=12,000,000 and at t=18,765,000 — 6.7 s apart, both inside the window —
+gives *bit-identical* outcomes (400 blocks, `wordsTaken == wordsOut == 204812`,
+same halt); outside it (t=1000, t=60,000,000) both give 281 blocks with 26,698
+words dropped.
+
+**What `FIOMUWB2` actually is**, since it was repeatedly mis-sized:
+`APPLSRC/CVNMMUTI.hal:51` `EQUATE EXTERNAL FIOMUWB2 TO CDHV_BLOCKS$(1,1)`, and
+`INCL80/CSMCOM.hal:58` `1 CDHV_BLOCKS ARRAY(CSM_ROWS,CSM_COLUMNS) INTEGER`
+inside `STRUCTURE CDHV_RW_BUFR RIGID`. `CVNMMUTI.hal:29-31` sets `CSM_ROWS 32`,
+`CSM_COLUMNS 512`, `CSM_ARRAY_SIZE 16384` — 32 × 512 = 16384 halfwords = thirty-
+two MMU blocks of 512. **Other compools size it differently** (`CVQMMUTI` 8
+rows/4096, `CSAMMU` 26 rows/13312), so never assume the size; read the compool
+in question. It is reached almost entirely through the HAL/S `NAME` construct,
+i.e. as a pointer to the whole array, and the equate to `$(1,1)` merely yields
+the base address — which is why `FCMB1ZCN` and `FCMB2ZCN` are two pointers, to
+offsets 0 and 8192. Walking the declaration gives 8 halfwords of header, then
+16384, then a checksum halfword, and `PHASE02.sym.json` gives `#PCVNMMU`
+(module `CVNMMUTI`) as `30322..3432a`, 16393 hw, with `FIOMUWB2` at `3032a` =
+base + 8. Exact agreement, two independent ways. (Recorded in memory as
+`project_fiomuwb2_is_a_name_pointer_to_cdhv_blocks`, which formerly carried
+"do not fix mmbstamp here" as a directive and has been corrected.)
+
+**A real bug in our own tooling, found here:** `patch_ssl_zcon.py` patched only
+`FCMB1ZCN`. With `FIOMUWB2` unresolved, `FCMB2ZCN` held `A000/0000`, which
+`MVH`'s R2 arm resolves to `02000`, so the *second* move sourced 7,654
+halfwords of sector-0 rubbish — the destination matched the tape in exactly its
+first 7,168 halfwords and was zero after. Patching both (`A000/0000` →
+`A32A/0006` = `3232a`) makes the sector-8 block checksum. `YAGPC_MVHTRACE` was
+added for this: a move that stops early on a store-protect leaves R1's count
+intact by design, so from outside it is indistinguishable from one that never
+ran. (The workaround is now obsolete — a correctly built SSL resolves
+`FIOMUWB2` on its own, and `patch_ssl_zcon.py` reports `832A 0006 -> 832A
+0006`.)
+
+**The authoritative oracle for protection questions is the link, not the load
+blocks and not the dump.** `PHASE0n.sym.json` carries a `storeProtect` map —
+`{"unit":"halfword","ranges":[[lo,hi],...]}`, 161 ranges for phase 2 spanning
+`001aa..48889` — and none of them overlaps `#PCVNMMU`. Use it.
+
+**Our loader's protection strategy is irrelevant to this failure**, established
+after a harness bug of our own invalidated three reported results (the
+`sections` mode never actually ran: the binary was stale for `ageharness.c`
+despite a newer timestamp; `touch src/ageharness.c && make` fixed it). With the
+mode genuinely applied the result is *identical* to the blanket default — 7170
+DMA violations, 281 blocks, the same word counts — because `GPCERAS` protects
+everything itself regardless. `YAGPC_IPL_PROTECT=0` is separately refuted, not
+merely suspected: the boot dies immediately at `nia=00000` with nothing loaded,
+exactly as `ipl_fill()`'s existing comment predicts, because the Instruction
+Monitor fires once the software sets PSW mask bit 34 and every instruction then
+looks like it is executing from unprotected storage. Keep the flag as a
+diagnostic; do not make it the default.
+
+**Masking is not involved.** `SSLCHECK` does `SSM 7  MASK ALL INTRPS` before
+`B$ SSLSTART`, so the SSL runs fully masked — but Figure 2-20 gives the Store
+Protect Violation (code 0007, row 33) a mask column of "--", i.e. no mask bit
+at all. Maskable program checks carry one: Fixed Point Overflow 20, FP
+Underflow 22, Significance 23, Instruction Monitor 34. So store protect is
+unmaskable and our unconditional handling is right. **A real gap surfaced
+alongside it, unrelated to this bug:** we never consult a mask for program
+checks at all — `cpu_check_interrupts` honours `psw_get_mach_check_mask` for
+machine checks and `intMask` bit `0x20` for the instruction monitor, but
+`if (cpu->intPending.programCheck)` is taken unconditionally, so Fixed Point
+Overflow, FP Underflow and Significance are delivered even when their mask bits
+say they should be ignored. POO 2.5.2.3, already quoted in that function, says
+masked program interrupts do not stay pending. Nothing in this boot depends on
+it; worth fixing on its own merits.
+
+**Masked DMA violations are invisible by design**, which is why several passes
+over this looked like there was no interrupt at all: per AP-101S Fig 2-20 note
+`##`, `cpu_signal_dma_protect_violation` sets CC to binary 10 **without** taking
+an interrupt. `YAGPC_DMAPROT` exists precisely to see them. And **do not trust
+a violation count from a truncated run** — one such count was reported as zero
+and a correct explanation withdrawn on the strength of it; run to completion,
+`YAGPC_DMAPROT` reports 7170, of which 7169 are in `#PCVNMMU`.
+
+**`0009c` (`TPSASINP`) is protected by design**, and that thread is closed. The
+unprotect table is built by the `$POF`/`$PON` macro pair (`MACSMITH.asm:508`
+and `:540`) and walked by `STM0.asm:118-146` (`UNPTRTN`/`UNPT`,
+`ISPB# 0,0(X3,B3)` + `BCT R7,UNPT`) — our `nia=00507`. `PSA.asm` contains
+exactly one bracket, `$POF` at line 107 immediately *after* `PSA EX4`, running
+to `$PON` at line 176; that bracket is `00a0..0013f`, which is precisely what
+we observe, and the table read out of memory steps straight over `0009c..0009f`
+(`@05131 start=00098 count=4`, `@05133 start=000a0 count=154`). The stray
+single-halfword entry at `00087` is real and explained verbatim in `PSA.asm`:
+"LOCATION 87 IS USED BY UCODE-MUST BE 0 & UNPRT". A table precise to one
+halfword for a documented microcode requirement does not omit `0009c` by
+accident. The `$POF`/`$PON` convention was settled independently on
+`SSLCHECK.asm`'s minimal bracket (`$POF / SSLRTN DC H'0' / $PON`, `SSLRTN =
+02d72`, assembled entry `start=02d72 count=1`): **the marker labels where the
+region begins**, i.e. the item after it. AP-101S 2.5.2.1 lists only OLD PSW
+locations, so a NEW PSW may legitimately be protected. The software's actual
+convention is exact — **unprotect precisely what you are about to write**:
+GPCIPL's restore deliberately leaves `0014..0017` protected (its groups run
+`00008..00013` then `00018..00043`, straddling it) and the SSL unprotects
+exactly those four halfwords itself, immediately before storing the System
+Reset PSW.
+
+Also closed here, each by measurement rather than argument: **`FCMSYSID = 000e`
+is correct** — `SSLCHECK.asm:145-150` does `LH G7,BSLTPNTR+1 / SHI G7,1`, so
+the "system ID" is the DEU menu item number minus one; `COMDATA.asm:130-131`
+initialises `BSLTPNTR+1` to 17, `BCE 18` writes it from tape, and GPCRTOPT's
+`POLL45` ("IPL DEFAULT LOAD -- NO DEU SELECTED") overwrites it with 15, the
+documented default, giving 14. **Removing the blanket PSA protect from
+`ipl_fill` changes nothing**, structurally: GPCIPL's own sweep re-protects
+`00000..07f02` at t=4.16 s, so whatever IPL leaves behind is irrelevant by the
+time the SSL runs. And **making the PSA carve-out permanent was tried and
+reverted**: it removed the spurious faults at `000b0`/`000b1` but wrecked the
+early boot (simulated time ran away to 4187 s in 60M steps with blocksRead
+stuck at 55), because "must not be store protected" is a rule for *software*,
+not a hardware interlock — GPCIPL's memory test sets those bits and reads them
+back. `ageharness.c`'s comment calling it "a permanent hardware carve-out" is
+an over-reading of the same sentence; it happens to work only because it is
+applied once, at IPL.
+
+**"Three voted storage protection bits" is not a second protection level.**
+There is one *logical* bit per halfword, held in three redundant physical cells
+and majority-voted: POO 2-1.1 ("The AP-101S/G has two storage protect bits per
+halfword" — a 3-vote/2-compare reliability trade, not a change in the number of
+levels); the D100 `READSP` diagnose naming "Bits 13-15 **REDUNDANT** Store
+Protect Bits" and "Bits 22-24 REDUNDANT..."; and status register bit 6, "MMP
+Store Protect Bits MISCOMPARE", a fault raised when the copies *disagree*. Our
+model is already right — `mcm.h`'s `bool *protData` is one entry per halfword
+and `cpu_instr.c`'s D100 already synthesises the triples, active low, with a
+comment explaining the voting. The only thing it cannot express is a
+miscompare, which is hardware-failure injection rather than function.
+
+**`SPON`/`SPOFF`: a design settled with the ASM101S-port session and the user.**
+Forty files use them. An early conclusion — "redundant, do not implement",
+argued from 42 of 45 bracketed CSECTs already being unprotected in the linker's
+map — was withdrawn as a **non-sequitur**: it compared the two mechanisms at
+*CSECT granularity*, which is exactly the granularity the wholesale mechanism
+can express and the fine-grained one exceeds. Eight of the 40 files bracket
+sub-CSECT regions, and the case that settles it is `MLIB80/TFPSA.asm`, which
+emits `SPOFF` **conditionally** (`AIF ('&X' EQ 'DS').NOSPOFF`) immediately
+before `TPSASTRT` — that is the AP-101S 2.5.2.1 carve-out which `ageharness.c`
+hand-codes from the manual, and being macro-conditional, a fixed hand-coded
+range cannot reproduce it.
+
+The interpretation was resolved by the user rather than by either agent: **the
+authors did not know what the protection defaults would be and simply added a
+mark where they had a specific block they cared about.** That retires the
+delta-vs-fixed-default argument instead of deciding it, since the source never
+encoded a global scheme — and it predicts *clustering* on hazard-prone code
+where a global scheme predicts none. Measured across all 549 `.asm` in
+OI340600 `SSSRC`+`MLIB80`: overall marking rate 40/549 = 7.3%; files containing
+BCE opcodes 17/39 = 44%; files with none 23/510 = 4.5% — a tenfold enrichment
+on exactly the code that contains DMA targets. A confound was then caught by
+ASM101S-port and confirmed: 72% of BCE-opcode files are `FIO`, so the
+name-prefix table largely *restated* the opcode table rather than corroborating
+it. Stratified within `FIO` the effect survives, and the two agents' counts
+bracket it: `FIO` with BCE 17/28 (60.7%) vs 19/30 (63%), `FIO` without 9/86
+(10.5%) vs 7/84 (8.3%) — a stratified ratio of **5.8× to 7.6×**. Quote the
+range; that two heuristics both land well above 1 with the family fixed is
+itself part of the evidence.
+
+Decisions recorded, and the reasons matter as much as the decisions:
+
+- **No diagnostics on unbalanced brackets.** Census across the 40 files:
+  balanced 4 (10%), `SPOFF` with no `SPON` 31 (78%), `SPON` with no `SPOFF` 5
+  (12%), mismatched-both-present 0. The obvious diagnostic would fire on **36
+  of 40 files** — unbalanced is the normal case, not the error case. That is a
+  stronger reason than "the semantics are inferred", and it also protects the
+  bit-identical-listing property.
+- **The assembler records and reconciles nothing**, stated as a decision with
+  its reason attached rather than as a gap: the source contains no answer to
+  reconcile toward, so inventing one would have the assembler assert something
+  nobody can source. Reconciliation belongs in `lnk101`, where it is visible.
+- **Two command-line options**, per Ron: a switch disabling only *the embedding
+  in object files* (not the tracking), and a second for the CSECT-start
+  protection state, kept lexically far apart — `--no-store-protect` and
+  `--protect-default=on|off`, since `--no-csect-protect` beside
+  `--no-store-protect` would be a script-level footgun. `ASM101S.py`'s
+  convention is opt-out/default-enabled (`--no-rtl-fixes` at line 1234,
+  `--no-force-d` at 1286), though note those are read *before* the option loop
+  for a specific reason — source files are read in place as the loop
+  encounters them — which a flag consulted only at `writeObjectModule` time
+  does not need. Copying that pattern would be cargo-culting.
+- **Acceptance criterion, not a nice-to-have:** sweeping both releases with
+  `--no-store-protect --protect-default=off` must reproduce the stored objects
+  **bit for bit**. That specific combination is the strong form — default off
+  with suppression on is the configuration whose output would differ most if
+  protect state leaked through a path ignoring the suppression.
+
+The port session declined to implement it in `ASM101Sa` and was right to:
+that C port's entire value is being a verified drop-in replacement (542 modules
+byte-identical across OI340600/OI301700, plus 205 RUNASM against 1980s
+listings), and adding a record type turns every comparison from "identical"
+into "identical except the thing I added". It has to land in `ASM101S.py` first
+and be carried into the port in a parity pass.
+
+**The container format was got wrong and then settled by Don's existing code.**
+`libModule.py`'s `0xA1 PROT` is a **load module** record, raw binary; an object
+module is 80-byte EBCDIC card images (`objectWriter.py:27-33`, `card[0]=0x02`,
+EBCDIC type in columns 1-4, payload capped at 68 bytes, sequence in 72-80).
+`objectWriter.py:140`'s existing `writePRT()` emits a `0x02` record that
+`lnk101` never sees — `objModule.py:1001` routes `card[0] == 0x02` to module
+records and `linker.py:319` scans only `controlStatements`, so `protManaged`
+stays empty, the tape comes out byte-identical and **no error is raised**. The
+ruling is to use Don's format: a control card, column 1 blank, text
+`" PROT <csect> <s>-<e>[,<s>-<e>]..."`, ranges CSECT-relative halfword offsets,
+hex, **end-exclusive**, listing the *protected* regions — the same convention
+as HAL/S-FC PASS2's `" STACK <csect>"` cards. Critically
+(`linker.py:169-172`), **a CSECT named on a PROT card is fully specified**: an
+empty range list means nothing in it is protected, so emitting a card takes
+that CSECT out of the deck scheme entirely. That settles the precedence
+question both agents speculated about — Don has it as **override**, not modify.
+Two related traps the port session verified: `objcanon.py` dispatches
+`if typ == "ESD" / elif` with no `else`, so it **silently passes** unknown card
+types until taught; and `model101.py` has `repeatPass`, so location-counter
+transitions must be re-collected per pass or they double.
+
+Don had in fact already implemented the consumer side five days earlier —
+`7fff229` "lnk101: carry store-protect ranges into .sym.json", 2026-08-23 —
+reaching the same reading independently. `lnk101` needs no changes:
+`linker.py:333-334` reads the cards into `mod.protManaged`/`protRangesHw`, and
+`storeProtectRangesHw()` (`linker.py:810`) applies the precedence "explicit
+PROT ranges when the assembler captured SPON/SPOFF, else the CSECT's SET/CLEAR
+mark, else the name-class default", feeding both the `.lib` PROT records and
+the `.sym.json` map. (`.lib` files are `lnk101`'s doing — `--lib`/`saveLib()` —
+"an AP-101 loadable module: CESD, per-extent text, RLD, store-protection,
+overlay/phase metadata"; the `.fcm` is the flat image of the same link and has
+no room for metadata. All 235 extents in our `PHASE02.lib` already carry a
+per-halfword `protect` array and real `0xA1` records.)
+
+**The remaining gap is `mmbstamp`, and it must not be switched yet.**
+`protection_lookup()` (`mmbstamp.py:228`) builds intervals from
+`sym["sections"]` plus the deck map and `patch_aware_default(name)`; it never
+reads `sym["storeProtect"]["ranges"]`. That switch was predicted to be a no-op
+and **is not**: it changes the tape from 2500 to 2514 blocks. With no PROT
+cards yet, the disagreement is between *two independent implementations of what
+the deck's SET/CLEAR says* — `mmbstamp`'s `deck_protection()` (436 entries for
+phase 2) versus `lnk101`'s `placement.protected` as carried into
+`storeProtect`. 110 sections and 11,947 halfwords differ, in both directions:
+`FCMINSSL`, `FCMSSLPT` and `FCMLINIT` go protected → **unprotected** (which is
+exactly the condition `ipl_fill()`'s comment warns about, and would very likely
+have broken the boot), while `#PCDTANN` and `#PCV2LIN` go unprotected →
+protected, the `#P*` flips being the class-default prefix overridden by a deck
+mark on one side and not the other. One of the two deck readers is wrong, and
+that is worth settling on its own merits **before** anything is switched over —
+otherwise the assembler's data will arrive on top of an already-divergent base
+and the two faults will be indistinguishable. The experiment was reverted; the
+tape rebuilds byte-identical.
+
+### 8.22 Placement fidelity — pinning CSECTs to the flown article
+
+Separate axis from correctness, and it is important to keep them separate: the
+link is self-consistent, so CSECT placement is a **fidelity** measure against
+the flown article, not a behavioural one. The `zconPool` experiment settled
+that principle early — pinning took the Z1 pool from 2/80 to 80/80 at the flown
+addresses and the boot produced *byte-identical* symptoms.
+
+**The Z1 pool order is recoverable and now pinned.** `lnk101` takes
+`--link-order <linkorder.json>`, whose `zconPool` is an ordered list of CSECT
+names (`ap101Utils/linkorder.py:70`, `zcon_sort_key`). No such file existed
+anywhere, so our ordering was unpinned. `mafgen/csects-SSW.json` gives each
+CSECT's address in the flown image, so sorting the 80 pool CSECTs by address
+yields the pins directly: PHASE02 sector-0 match against DASS went 97.359% →
+98.061% (305 → 224 mismatches). Checked at the user's prompting against the
+*original* `DASS_SSW_(PostIPL).ASC` rather than trusting the derived artifact:
+656 CSECT-header lines against 660 json entries, **zero** address differences
+on shared names, the four extra all present in the report but as source-listing
+or cross-reference lines rather than headers — so the json is a superset drawn
+from more of the report, consistent wherever both carry an address. Within the
+Z1 pool it is exact: 80 header lines, 80 entries, same names, zero differences.
+(Method note: a first extraction matched 239 "entries" in the pool alone
+because the pattern also caught symbol-detail lines like `#ZFIOCGR+0000`.
+Require the `****` field and reject names containing `+`.)
+
+**`--external-syms` pins placement, not just resolution** — read in
+`linker.py` `loadExternalSyms` rather than assumed: after resolving externals
+it runs "Pre-assign addresses for locally-defined sections found in the JSON",
+setting `section.baseAddress` for every SD section named in the pin file. The
+docstring's "without loading the actual object modules" undersells it.
+`con80build` has no passthrough for it, so it was shimmed rather than editing
+Don's repo: `shimbin/` symlinks every wrapper from `<dps>/build/bin` and
+replaces `lnk101` with a four-line script appending
+`--external-syms $YAGPC_EXTERNAL_SYMS`; `con80build` resolves its tools from
+`_BINDIR = dirname(--halsc)`, so `--halsc shimbin/halsc` redirects all of them.
+
+**The pin file is per memory configuration, not global**, and the CON80 decks
+carry the mapping in machine-readable form — each `PHASEnn` deck names the
+configuration deck it pulls in, and those names match the `csects-*.json` names
+one for one:
+
+    PHASE02 OPS0,SSW  -> SSW      PHASE08 GNC9      -> G9
+    PHASE04 GNC1,GNC6 -> G16      PHASE09 MFB9,PL9  -> P9
+    PHASE05 GNC2      -> G2       PHASE12 PL9       -> P9
+    PHASE06 GNC3      -> G3       PHASE15 SM2       -> S2
+    PHASE07 GNC8      -> G8       PHASE16 SM4       -> (no csects-S4.json)
+    PHASE03 GNC2,MFB3 (declares configurations 1,2,3,8,9) -> no single table
+    PHASE14 MFB14 -> none;  PHASE18 names no configuration deck -> none
+
+`G16` is configurations 1 *and* 6, which is why PHASE04 pulls both GNC1 and
+GNC6. This corrects the prose mapping in two places: PHASE09 is P9, not G16,
+and configuration 9 is PHASE08, not PHASE18. Available in `PFS/mafgen/`: G16,
+G2, G3, G8, G9, P9, S2, SSW; `-augmented` variants exist only for SSW and P9.
+Applying SSW globally moved 316 CSECTs in PHASE03 to SSW addresses and 2 in
+PHASE13; PHASE01 and PHASE10 were untouched.
+
+**A build that is both accurate and runs.** PHASE02 against DASS_SSW went from
+553/660 (83.79%, 100 misplaced, 7 absent, 638 unresolved) to **652/660 =
+98.79%, 0 misplaced, 2 absent, 6 unresolved** — and it boots. Three things had
+to be true *together*; every earlier attempt had two:
+
+1. **Pin PHASE02 only.** Pinning PHASE10 is catastrophic — it strips 97% of
+   GPCIPL's relocations (1788 → 56), so its address constants stay zero;
+   PHASE03 loses 18% the same way. PHASE02 is the one phase where pinning
+   *improves* resolution (638 unresolved → 6, relocations 10470 → 11094).
+2. **Drop the 58 `#Z*` entries from the pin file.** `--external-syms` runs
+   *before* `lnk101`'s Z-con generator and satisfies undefined `#Z*` with
+   content-less synthetic sections, **suppressing** the generator: `#ZDCDDG2`
+   went from `<generated-zcons>` (a real pointer) to `<external-syms>` (empty),
+   punching holes in the load blocks. `linkorder.json`'s `zconPool` places them
+   properly on its own.
+3. **Run `--resolve-phases` afterwards.** Per-phase `--link` skips what
+   `--build-all` does at the end; PHASE02 alone had 367 sites to patch.
+
+**The lesson: diff the loaded memory image, not the link metadata.** Both
+volumes were stopped at the same step count with `YAGPC_MEMDUMP=0-7fff`; 375
+halfwords differed, and the distribution named the fault — `FCMSSLPT` merely
+shifted by 6 halfwords (two extra descriptors, benign), and in GPCIPL a scatter
+of **zeros where the working image had addresses** (`01bc8 3610->0000`,
+`01be8 1d3a->0000`, `01bf0 1ce4->0000`): unrelocated address constants.
+Reasoning from `sym.json` had chased Z-con holes and CSECT overlaps for hours;
+the memory diff named it in one run.
+
+**For Don, if it is worth reporting:** `lnk101 --external-syms` pre-assigns
+`section.baseAddress` for locally-defined sections, and on PHASE10 that drops
+1732 of 1788 relocations — a section arriving with a `baseAddress` already set
+appears to be treated as needing no relocation. And `--external-syms` should
+not pre-empt the Z-con generator.
+
+**Per-phase pinning results** (real content at the flown address, unpinned →
+pinned): PHASE04 11.21% → 91.92%; PHASE05 14.26% → 88.99%; PHASE06 12.58% →
+91.16%; PHASE07 16.46% → 86.15%; PHASE15 18.09% → 91.44%; PHASE02 83.79% →
+96.06% (then 98.79% with the `#Z*` correction). High "absent" counts on
+PHASE09/PHASE14 are expected — a configuration table describes a whole memory
+image that several phases jointly supply. Noted and unexplained: pinning
+PHASE12 to P9 makes it oversize on tape (224 blocks against 216 allocated).
+
+**What is still unpinned, and named:** besides `zconPool`, `linkorder.py`'s
+header documents `orphanFlush` (cross-module orphan program-flush order) and
+per-memory-configuration `mc.{name}.codeOrder`, `streams`, `floors`,
+`wave1Order` and `compoolOrder`. Those govern where whole *programs* land,
+which is exactly what differed before pinning: the 22 unpinned misplacements
+were four whole programs each moving as a unit — `DMPMMM` +592 (18 CSECTs),
+`VMELOA` +268 (3), `$0ASCTIM` −3730, `$0ASGCYC` −4358, with flown order
+DMPMMM → ASCTIM → VMELOA → ASGCYC against ours ASCTIM → ASGCYC → DMPMMM →
+VMELOA. They cannot be derived from an address sort alone; they need the `mc`
+anchor structure.
+
+**Cross-release caveat on all of these numbers.** Everything is built from
+`OI340600/CON80`, but `PFS/OI340700/README.md` states the DASS reports are
+**OI34.07**, so `latest.unlinkSSW_(PostIPL)` is a different release from the
+thing being measured. The overlay is 17 files (four `MLIB80` COPY/macro
+members, `SSSRC/FIOCBLKS.asm`, `CDAP15.dfg`, and 11 `APPLSRC` HAL/S files), of
+which only `FIOCBLKS` is a *linked* module in phase 2 — and for phase 2 the
+whole release delta is **one halfword**, at `08f39`, which OI340700 gets right.
+So the release difference does **not** explain the residual mismatches. Two
+attributions were withdrawn on that basis: the 102-halfword `04b48` cluster was
+credited to `FIOCBLKS` because it falls inside that section, but `FIOCBLKS`'s
+change lands elsewhere entirely — section containment was suggestive and was
+treated as conclusive, and CSECT spans in PHASE02 overlap anyway (`FCMSAVE`,
+`FIOADCNS` and `FIOCBLKS` all cover `04b48`). Note also that `CON80` is the
+**linkage decks** (194 extensionless members), not source; source is
+`APPLSRC`/`MLIB80`/`SSSRC`.
+
+Two measurement corrections worth keeping. Counting fill-vs-fill as mismatch
+understated PHASE02 sector 0 as "60.1%": the dump has *two* fill patterns,
+`C6C6` (49.3%) and `C9FB` (21.4%), and excluding halfwords the dump left as
+`C9FB` gives 11245/11550 = **97.4%**. And phases 10, 13 and 3 match the
+post-IPL dump at only 3.3%, 3.3% and 9.4% of their own extents against phase
+2's 97.4% — the resident post-IPL image is essentially phase 2 alone, so that
+is not evidence those builds are wrong; overlays are not expected to be
+resident.
+
+**The build recipe that reproduces these numbers**, recovered from the objects'
+own `.asmg.json` repro records rather than guessed, and the two ingredients
+that decide it: `--src <scratch>/srcnoext/{SSSRC,APPLSRC}`, the extensionless
+mirror — with `.asm`/`.hal`/`.dfg` names CON80 resolves *different modules*
+(`FCMBMT02`, `FIOACT02`, `FIOCYC02` instead of `FCMBMTPG`, `FIOACTMD`,
+`FIOCYCTB`) and the build silently scores 28% against the dump instead of 97% —
+and `--src <scratch>/patchsrc`, the patch decks, since `PCH02TXT` supplies
+`OPSZFILL`, `MFBZFILL`, `#T020000`, `PCH2SAIL` and `$X020001` and without it
+the link has 10 unresolved symbols. Plus `--incl <scratch>/INCL80_fixed`
+(extensionless symlinks), `--mlib`, `--linklib <dps>/build/lib/runtime/{RUN,
+ZCON}` and `--pass-rel32` at the Virtual AGC archive. **All of `--pass-rel32`,
+`--linklib` and `--runlib` default CWD-relative**, so they must be given
+explicitly from anywhere else. One line, from `nsts-sdl-dps`:
+
+    HALSFC_BINDIR=<archive>/PASS.REL32V0 YAGPC_EXTERNAL_SYMS=<PFS>/mafgen/csects-SSW-augmented.json PYTHONPATH=<dps>/src python3 -u -m con80.con80build --root <PFS>/OI340600 --out <scratch>/pin --src <scratch>/srcnoext/SSSRC --src <scratch>/srcnoext/APPLSRC --src <scratch>/patchsrc --incl <scratch>/INCL80_fixed --halsc <scratch>/shimbin/halsc --pass-rel32 <archive>/PASS.REL32V0 --link-order <scratch>/linkorder.json --build-all
+
+Stale trees are **not** salvageable by relinking: `newphase/PHASE02/obj`
+contains no `AIBGPCLO.obj` at all yet its `sym.json` carries `$0AIBGPC`, so
+that tree is internally inconsistent. A full `--build-all` is the only sound
+route. And `mmu2mmv` wants the whole per-phase tree (`PHASEnn/PHASEnn.sym.json`,
+not just `.lib` files) — it produced a 227-block volume from a lib-only
+directory before failing.
+
+**A blocker that was never real**, recorded because it consumed a day: "phase 3
+destroys `FCMLINIT`". It was an artifact of a badly built `newphase/PHASE03.lib`
+carrying a 6979-halfword extent at `03336` that swallowed `047e0`. Rebuilt
+correctly, PHASE03 has 26 extents and **nothing below `04c70`** — it begins
+exactly where `FCMLINIT` ends (`04c6b`), leaving the same four-halfword gap
+`04c6c..04c6f` the DASS dump shows as fill. Two independently derived layouts
+agreeing on that boundary. Against the dump, PHASE03 goes from 12.9% to 77.53%.
+The `0xc6c6 at 0x48bf` crash, the failed phase reorder, and "phase 3 genuinely
+overwrites FCMLINIT" all trace to that one bad library — `newphase` was
+internally inconsistent, its PHASE02 built correctly and its PHASE03 not. The
+phase-reorder experiment it motivated (patching `FCMSSLPT` so phase 2 loads
+last) is therefore **not** a proposed fix and should not be pursued: it
+contradicts `IPL_PHASE_ORDER = (10, 2, 13, 3)`, which
+`stamp_ipl_phase_table.py` takes from FCMBOOT's prolog and MMLOAD's
+`IPL,PH=(10,2,13,3)` card, and with `FCMPSA` loaded the question is moot
+anyway.
+
+**`SYS5` must be written as proper load blocks, not raw fill** — the cards say
+so (`LOADBLK=1/2/3`). The layout, from `mmbstamp`'s writer and the SSL's
+reader, is `[0..L-3]` content, `[L-2]` zero, `[L-1]` the sum of the content mod
+2^16 — exactly what `patch_ssl_zcon.py` recomputes after an edit. Raw
+`INIT=C6C6` is not a valid load block: with it `FMADEU13` was read four times
+and stuck; as proper blocks it is read once and passes. `SYS8`
+(`MMDIR1/2/3`, the `FFFF` not-mass-memory-built sentinel) is harmless and
+stays. Separately, `SSSRC/MMULDTBL.asm` shows the DEU load is **one transaction
+of three raw DMA transfers**, not SSL load blocks — `2468 'DCP'` 17 blocks ×
+512 words to GPC `A000`, `2418 'DST'` 8 × 76 to `D000`, `2488 'CRTFMT'` 8 × 76
+to `E000`, decoding BLK CNT-1 / WD CNT-1 as bits 15-11 / 10-2 — so a
+whole-allocation checksum tail is never even read there. (`FMADEU21`/`DMACDFT1`
+in that file are the transaction's "END n OF 3" markers, **not** the tape
+allocations of the same name.)
+
+### 8.23 Three context-switch defects that only running PASS could find
+
+None of these is visible to a per-instruction fixture, and the test suite has
+**no multi-process coverage at all** — nothing but running PASS exercises them.
+Each was found by the NIA ring, and each was confirmed against the flight
+software's own stated contract rather than against `gpc`.
+
+**1. RS extended form, B2=11: the displacement *is* the effective address.**
+POO §2.2.8, second numbered difference from SRS addressing: "When B2 equals 11,
+base addressing is not performed. In this case, the displacement is instead
+used directly as the effective address." `cpu_g_ea` was routing it through
+`ea_expand`, so any operand with bit 15 set had its sector replaced by DSR.
+§2.9 does not apply: it turns a 16-bit *address* into a 19-bit EA, and here the
+displacement already **is** the EA.
+
+The symptom was a coin-flip. `ST R7,X'8252'` at `FCMSSYNC`'s entry worked *by
+luck* — DSR=1 gave `(1<<15)+0x252 = 0x8252` — while the matching
+`L R7,X'8252'` at its exit ran with DSR=0, read `0x0252`, and put `0x0001` in
+R7's high half, so the `BCR 7,R7` return branched to address 1. That is the
+recurring `invalid instruction 0xc6c6 at 0x6b8f`.
+
+Corroboration from three directions: six `FCMSSYNC` operands equal their symbol
+addresses exactly, three with bit 15 set (`FCMSNCSV 8252`, `FCMPLDSE 8bba`,
+`FCMSVCNM 8209`, `TCVTRSSM 0166`, `TPSASOP 0058`, `TCVTSVCS 016a`);
+`FCMSNCSV` is an **EXTRN** (`FCMSSYNC.asm:150`), so the linker plugs an
+absolute address into the displacement field, which only works if the
+displacement is the EA — a linker cannot know what DSR holds at each call site,
+so any EXTRN resolving above `0x8000` would be unaddressable under expansion;
+and the POO names expansion explicitly each time it applies — "(This EA is then
+expanded to a 19-bit EA...)" occurs exactly four times, all in the *indexed*
+forms, while §2.2.8's B2=11 case has no such clause and yields the EA outright.
+**Branches are excluded, measured not assumed:** applying §2.2.8 literally to
+branch operands costs `test_scheduler`, `test_random` and `test_rtl` outright
+and drops 111116 → 111036 fixtures; a branch target must still reach sector 3
+(`0x197ab` needs more than 16 bits), so it expands with BSR per §2.9. Widening
+the rule to *all* extended operands breaks the boot outright at `nia=00156`.
+Cost: 64 `cpu_instr_exec` fixtures (111180 → 111116) across 23 mnemonics, all
+data-operand, none branch — `gpc`-generated and encoding the expansion, so they
+cannot adjudicate.
+
+**2. `BAL` and `SCAL` saved the *callee's* BSR/DSR instead of the caller's.**
+Both computed their target with `cpu_g_ea()` **before** snapshotting `psw1`,
+and `cpu_g_ea()` modifies the PSW when the target is reached through a fullword
+indirect pointer with C=1 (POO Fig. 2-17, "MODIFY PSW ACTION": DSR=DSV,
+BSR=BSV) — which is precisely how `BAL@# R7,...ZCON` calls into another sector.
+The fix is ordering only: read `psw1` first. (`cpu_incr_nia()` already runs
+before the exec dispatch, so the link's address half is unaffected.) The flight
+software states the contract itself, in `FCMTRACE`'s exit: `BCRE 7,R7  RETURN
+TO CALLING ROUTINE (BSR/DSR OF CALLING ROUTINE WILL BE RESTORED BY THIS
+INSTRUCTION)`.
+
+The chain it broke is worth keeping because it looked like a scheduler bug for
+days. `FCMSSYNC` calls `FCMTRACE` via the PSA trace Z-con at `0x0000c` =
+`98a0 0f33` (DSV=3, CD=1; byte-identical to the DASS reference, so the Z-con is
+right). DSR went 1→3 and **stayed** 3. `FPMCLOSE` then read `TPCTFLGS` through
+`USING TFPCT,R0` with R0=`827c`: bit 15 set, so DSR expands it, and DSR=3 read
+`0x182ab` instead of `0x82ab`. The true flags are `0000`; the wrong address
+gave bits in the `0x00C0` mask, so `IF (TB,TPCTFLGS,X'00C0',Z),OR,...` took its
+ELSE, the PCT was never freed, and `FPMDISP` re-dispatched it on `FPMFCLOS`'s
+**re-issue PSW** — `FPMDPSW`, the fallback constant
+`DC Z(FPMSVCL+2,FPMSVC21,8)` stored by `ST R4,TPCTPSW  IN CASE CLOSE MUST RE
+ISSUE CLOSE SVC` immediately before a `CALL FPMCLOSE` marked **(NO RETURN)**,
+so normally never dispatched. Its NIA `0xac14` expands to `0x1ac14` =
+`FPMDPSW` *itself*, so the CPU executed the constant, ran off the end of
+`FPMFCLOS` and fell into `FPMFRPCT` with garbage in R0, whose `FPMRLPCT`
+("REMOVE PCT FROM RUN QUEUE") has **no end-of-list test** —
+`DO WHILE=(CR,R5,NE,R0) / LR R1,R0 / LH R0,TPCTNXT / ENDDO` — and spun forever.
+Our link is not at fault: `1ac12..1ac15` is byte-identical to the DASS
+reference (`c9fb 8146 ac14 0831`). Result: 900 s / 505,713,872 steps with
+**zero** invalid instructions, and the NIA sampler finding the CPU spread
+across `FPMIDLE` instead of `FPMRLPCT`'s runaway.
+
+**3. `SVC` never saved the EA's 4-bit extension.** POO §2.5.1.1: "EA-High — For
+an SVC instruction, the 4-bit extension to make the 19-bit effective address is
+saved in the old PSW bits 40-43." `exec_SVC` wrote only
+`psw_set_int_code(ea)`, truncating to 16 bits; the field existed in
+`PSW_DESC2` as `'e'` but had no accessor and was never written by anything.
+`FPMSVC` rebuilds the SVC parameter-list address from exactly those bits
+(`LH$ R1,TPSASOP+2 / SRL R1,4 / NHI R1,X'000F' / XUL / OR / OHI X'8000'`), so a
+stale extension fetched the SVC number from the wrong sector, and a wrong number
+indexes `FPMSVCEP`, whose seven empty slots dispatch to address 0. `FPMSVCEP`
+itself is byte-identical to the DASS reference, so the build is right. Measured:
+branches into the PSA at `00000`, caught by the Instruction Monitor, fell from
+**5302 to 36** in a 450 s run (99.3%), the DK display task `$0DDKHCT` stopped
+failing entirely, and real application code (`$0ARAGPC`, `#CARYMFB`,
+`A2ARDCSB`, `FIOPDISP`, `FPMMTURM`) appeared in the traces where only `FPMIDLE`
+had before. Costs 249 `gpc` fixtures (111114 → 110865); `gpc` does not write
+EA-High either, so they encode its absence. **This fix was only half right and
+was completed on 2026-08-31 — see §8.26.**
+
+**Concurrency began working here, and that is the headline.** Dispatch counts
+(entries into each program, not instructions) over a full run:
+`ARA_GPC_SWITCH` 25, `DDKHCT` 164, `FPMIDLE` 831 — PASS's FCOS interleaving
+HAL/S programs correctly, which was **not** true before these three fixes.
+
+Two related findings that fell out of the same work. The **HAL/S error message
+table was group-blind**: `AIBGPCLO.hal:630`'s `SEND ERROR$(6:6)` — its own
+comment `/* RUNTIME USED INSTEAD OF PCMMU */ /* TIME TO CALCULATE TSIP */`,
+raised by the guard `IF (AIBV_GMTOI > AIBV_TC) OR ((AIBV_TC - AIBV_GMTOI) >
+1.02)` — was printed as "EXP FUNCTION HAS ARGUMENT > 174.673". USA003090
+Appendix C states the runtime table's scope in as many words: these errors "are
+detected by the HAL/S-FC library and emitted code. They are classified as GROUP
+4 errors within the HAL/S error grouping scheme", and §8.1.3 item 14 gives
+1..127 as the range for user-defined errors. So `(group, number)` is the
+identity, the table is group 4 only, and group 6 number 6 has no relation to
+number 6 in group 4. Inherited verbatim from `gpc` (`halUCP.coffee:7-14` maps
+groups 1..6 all to "RUNTIME" and picks the message from `SVC_ERROR_MESSAGES
+[errNum]` alone). Measured, group 6 is the **only** group PASS uses for its own
+`SEND ERROR` — numbers 1,2,3,6,7 across `AIBGPCLO`, `AIESIP` (×5), `DMIMCD`,
+`GKTUNI`, `GG8PWC`, `PGEPCI`, `GKEKIP`, `GSDFIR`, `SAFACQ` — so the misreport
+was the common case in this corpus. Fixed in `src/halucp.c`:
+`HAL_S_LIBRARY_ERROR_GROUP 4`, `svc_error_group_name` names only group 4
+"RUNTIME", and `svc_error_message` takes the group and returns `USER-DEFINED
+ERROR g:n` for anything else. **Still open, and a shared-contract defect:**
+`yaGpcIntegration.h:131` encodes `GPC_ENGINE_WARNING_HAL_S_ERROR_BASE = 1000`
+plus `lastErrNum` **only** (`gpcops.c:115`), so the group is dropped on the way
+out and an integrator asking `gpc_engine_status_message(1006)` still gets the
+EXP text; `yaHALMAT2/src/yaGpcEngineStatus.c` carries the identical table, so
+this needs a relay to that session before either side changes the enum.
+
+And **the DEU display list is not EBCDIC**. `YAGPC_DEUIMAGE` read each halfword
+as two EBCDIC bytes and produced pure noise, which made a correctly rendered
+screen look like garbage. Display text rides in the DEU's own character set
+inside a Format Control Word — op C, `11aaaaaaabbbbbbb`, two 7-bit glyphs, and
+from `0x20` up the set is ASCII (USA-003090 p.104; `nsts-sim-gpc`
+`meds/deuFCW.coffee`, `DEUCharset` and the FCW table). Decoded properly, the
+post-IPL image is the real GPC IPL menu: "GPCIPL 09.05.00.00.01 / 1 GPC _
+MEMORY PURGE / PASS1 1 BFS1 2 PASS2 / 27 OPTION START 28 STOP 29 / OLD PSW MAJ=
+MIN= SCHEDWRD= CLOCK1= / 17 DEU FORMAT LOAD / IPL MENU / STP/PURGE CYC CNT
+ERROR/MSG / MCDS BITE MODE BSR1 BSR2". Note for judging future runs: **a frozen
+DEU image is not by itself a fault** — `deu_complete_fill` counts a time fill
+and then discards it, so the clock never reaches `d->mem`, and a static format
+refreshed every cycle writes identical words.
+
+### 8.24 Driving the crew station headlessly, and the BFC CRT discrete's double duty
+
+**The crew sequence is a sequence, not a state.** Register A bits 0-3 are
+HALT/STANDBY/RUN/IPL, and IPL is a **momentary pushbutton asserted on top of
+HALT**, not a fourth position — `discretePanel.py`'s own comment says a panel
+that made IPL a fourth exclusive position could not express the real sequence
+at all. A static `--discrete-a` asserts a final state the software never
+*transitioned into*, so `--discrete-a 28000000` (RUN + MM1 source) produces a
+run with no DEU activity and no mode lines whatsoever. That, not the keyboard,
+was the missing capability.
+
+**`--script FILE` and `--quit-after MS` were added to `discretePanel.py`**, at
+the user's suggestion and in the right home: the panel already owns the bit
+layout and the momentary-pushbutton semantics. Script lines are
+`<ms> <command>`: `mode HALT|STANDBY|RUN`, `ipl` (press, release
+`IPL_HOLD_MS` later), `source MM1|MM2|OFF`, `gpcid <n>`,
+`bit <A|B> <n> <on|off>`. `bit` sets the toggle **variable**, not just the
+wire, because `_republish` re-asserts from the variables and a direct send
+would be undone on the next tick. With it the whole IPL runs headless with **no
+`fcm-file` argument at all** — the bootstrap is read from the tape over the bus,
+which had previously been short-circuited by handing `--ipl` a pre-built
+`.fcm`. **Order matters: start yaGPC2 first.** The panel republishes *levels*
+on a timer, but the IPL pushbutton is momentary — start the panel first and the
+pulse is missed and the machine never IPLs.
+
+**`YAGPC_DEUKEYS` delivers a keystroke sequence**, plus
+`YAGPC_DEUKEYS_AFTER=<n>` (default 400 polls) to hold them until GPCIPL's menu
+is up. `deumodel.c` had said it plainly — "No keyboard here" — so the
+menu-selected load path was unreachable without a human at a real MEDS, and no
+headless test had ever exercised it. The encoding, from `meds/deuProto.coffee`:
+the header carries `KYBD_MSG` `0x0008`; the count word is
+`KEY_COUNT_HIGH | count`; the buffer packs **three keys to a halfword, 5 bits
+each**, in `w[2..11]`; `MAX_KEYS_IPL` is 6. Keycodes: digits `0x00-0x09`,
+`ITEM` `0x14`, `EXEC` `0x1e`, `OPS` `0x11`, `SPEC` `0x12`, `PRO` `0x1f`.
+
+**The packing bug, and the lesson about which address to watch.**
+`deuProto.coffee:157` says it exactly — "bits 15-11 are the first key, 10-6 the
+second, 5-1 the third, **bit 0 spare**" — and the shifts used were 10/5/0
+instead of 11/6/1, so `ITEM,1,EXEC` packed to `503E` whose top five bits are
+`0x0a`. The software decodes with `SLDL R4,5` from the *top* of the halfword
+(`GPCRTOPT.asm` `KYBD01`), so a one-bit error silently becomes a different key.
+Three earlier attempts theorised about delivery timing, major-function bits and
+the `CM4KYBD` checksum — all wrong, and all avoidable by measuring one
+halfword. The trap was watching the *wrong* address: `ITEMNO` (`0251e`) is the
+same address as `KYBDCON`, a structure base, so it showed only the tape loader
+writing. `KYSTRKS` is `DEUMODE+1` (`03b7b`), where the count lands, and `KEY1`
+is `02621`, where decoded keystrokes go — watching `KEY1` showed `0x0a` where
+`0x14` was sent and named the defect immediately. Fixed, `ITEM,1,EXEC` packs to
+`A07C` and `KEY1..KEY3` read `0x14 / 0x01 / 0x1e`.
+
+Ruled out along the way and worth not re-checking: `CM4KYBD`
+(`GPCRTOPT.asm:1001`) checksums the whole 16-halfword buffer and requires the
+sum to be **zero** (`LHI R3,16 / AH# R0,0(X2,Z3) / BZ CHKSUC / ERROR 150`), and
+that check runs *only* for keyed messages — `RSP60` calls it only when the
+header's `X'08'` is set, which is why ordinary polls always passed. Our model
+already satisfies it: `deu_checksum` returns the negated sum and `w[15]` is
+computed after the keys are inserted.
+
+With all of that, **the crash was reproduced headlessly and deterministically**,
+matching the user's own run exactly: `commands 56, blocksRead 429, wordsOut
+219707, wordsTaken 218987, wordsLost 720`, ending `invalid instruction 0xc9a4
+at 0x0008`. (`wordsLost 720` is **not** a defect — `mmumodel.c:211-214` records
+that GPCIPL's loader "takes what it wants and stops", and the observed losses
+are exact multiples of 360. The headless SSL runs lose zero because the SSL
+takes everything. Different loader, not different pacing. This was twice called
+"the thread to pull".)
+
+**The BFC CRT discrete does double duty, and that is the real bind.** Register
+B bits 6-7 are read by *both* programs for *different* purposes:
+`MLIB80/GPCRTOPT.asm:327` `NHI R3,X'0300'   R3 BITS 6-7=EXTRACTED BFC CRT
+DISCREETS`, then `SRL R3,8` right-justifies it as **DEU_ID** — which display
+GPCIPL runs its IPL menu on, with `POLL30`'s `LR R3,R3 / BZ POLL45` taking the
+no-CRT path when it is zero. PASS reads the same bits as the **BFC CRT switch**
+— which CRT the *BFS* owns. So `--discrete-b 20000000` is GPC 1 + DEU_ID 0 and
+`21000000` is GPC 1 + DEU_ID 1; that one digit was the difference between "the
+display is dead" and 265 polls / 266 display fills / 8 format fills over 10,000
+seconds of simulated time.
+
+The consequence is a genuine bind rather than a bug:
+
+- **bits set** → GPCIPL shows its menu, `ITEM 1 EXEC` works, the applications
+  start — but PASS gives that DK bus to the BFS;
+- **bits clear** → PASS keeps every DK bus, but GPCIPL takes `POLL45`'s "IPL
+  DEFAULT LOAD -- NO DEU SELECTED", and the applications never start.
+
+**The DK1 masking is correct behaviour, not a defect**, and hours were spent
+treating it as one. `ARAGPCSW.hal`:
+
+    ARAB_MASK_ARRAY ARRAY(8) BIT(3) INITIAL(
+      BIN'000',BIN'100',BIN'010',BIN'001', BIN'110',BIN'110',BIN'011',BIN'101');
+    I = INTEGER(ARAB_OLD_DISC$(1 TO 2));    /* BFC CRT switch */
+    ARAB_NEW_DEU_MASK = ARAB_MASK_ARRAY$(I+1:);
+
+Index 1 (I=0) is `BIN'000'`, nothing masked; index 2 (I=1) is `BIN'100'` — DK1
+masked. The panel's `DEFAULT_ON = {(REG_B,7)}` sets BFC CRT = 1, which tells
+PASS the BFS owns CRT 1, so PASS masks DK1 and leaves DK2/DK3 alone — precisely
+the measured masks, `xmit=43bfff80 recv=41bfff80`, differing by exactly bus 6.
+Traced to its source: `FCMBMASK` (+0x9e enables, +0x81 disables) with the
+requester from the SVC old PSW resolving to `0x402a5 = A1AIBGPC (AIBGPCLO)
++0x95`, doing `DO FOR I = 6 TO 8; RECONFIG(AIBV_ASGN_BUS); END` — "REASSIGN DK
+BUSES 6-8 TO THIS GPC". `TFCMXMSK` (`09c74`) and `TFCMRMSK` (`09c76`) are both
+loaded as `00003000` (mass memory only) and byte-identical to the DASS
+reference; the masks *grow* at runtime, so the loss happens when the mask is
+applied, not in the mask. The reconfiguration machinery runs only during
+initialisation and then stops for good (`FCMBMAN` 48, `FCMBMASK` 36,
+`FCMBUSCM` 50, all last at t≈230.911 s, with DK1 masked at t=230.911045 inside
+that same millisecond).
+
+**And the whole DK1 chain turned out to be an artifact of running the wrong IPL
+sequence.** The user re-read PASS User's Guide Table 2-2 (pp. 52-54): if step 6
+(BFC CRT switch ON) is **not** done, step 11 says go to step 13, *skipping*
+step 12 (`ITEM 1 EXEC`); step 11 (STBY) itself loads PHASE02 into PASS area 1
+and shows mode TB-RUN, taking about 1 m 25 s. Measured with bits 6 and 7 clear
+and no keystroke: blocksRead 398, `wordsLost` **0** (720 on every previous
+run), `recv=43bfff80` with DK1 **not** masked, and PASS itself driving the DEU
+(96 commands, 48 polls, 48 time fills).
+
+**Both IPL paths load identical PASS software**, which kills the "load table 15
+loads something else" assumption: default 72 + 55 + 228 + 5 + 38 = 398 blocks;
+menu the same *plus* 17 + 8 + 8 = 33 DEU-control-program blocks = 431. Every
+structural explanation for the applications not starting on the default path
+was eliminated by measurement — the LOADTBL entry (item 15 names the *same*
+load area as item 1, `7c00`, and `LOADCHCK` takes both to the PASS-load path),
+`FCMAOT` (`TAOTPDE=06f6`, `TAOTPRIO=0032`, same on both), the bootstrap PDE at
+`06f6` (same on both), and `FCMLINIT`'s own instruction trace (4000
+instructions, differing by a single extra loop iteration). The only differing
+input is the BFC CRT discrete and the keystroke it enables. **The
+Application Bootstrap Program thread was itself invalid:** PDE `06f6`'s
+`TPDEPCT` is `0000` on *both* paths although `FCMLINIT`'s AOT code does
+`STH R2,TPDEPCT`, so that is not how `AIB_GPC_LOCATOR` starts on either. (PDE
+layout, halfword offsets: +0 `TPDEVENT`, +1 `TPDEPCT`, +2/+3 `TPDEP`, +4
+`TPDESTAK`, +5 `TPDEFLGS`.)
+
+`AIB_GPC_LOCATOR` (= `AIBGPCLO`) **is** the program that schedules every cyclic
+process — `SCHEDULE DMC_SUPER`, `DMI_MCDS_IN`, `DCICYC`, `ARA_GPC_SWITCH`,
+`DDK_HCT_TRANSFER`, `DUP_NSP_MSG_PROC` — so "cyclic processes are not running"
+and "AIBGPCLO never runs" are the same fact, not two. On the default path
+execution goes `FCMINSSL → FCMLINIT → FCMINIOP → FIOPC1DL → FCMLINIT →
+FCMSWMON → FPMIDLE` and stops, with exactly three block transitions between
+t=29.7 s and t=45.0 s; `A1AIBGPC` is never entered. That follows from GPCIPL's
+own documented behaviour on that route and is **by design, not a defect**.
+
+**Cyclic processing itself measures correct on the path that matters.** On the
+menu path: CLK2 3170 fires from t=6.118 s to run end, 772 of them after
+t=200 s with a **median gap of 40.0 ms = 25 Hz**, armed once per cycle from a
+single address. Clock constants are byte-identical to the DASS reference
+(`FPMMTOXH` = `6b49d200` = 1800 s, `FPMMPC1V` = `001fffff` = 2.097 s) and
+measured CLK1 period is 2097.2 ms exactly. A 3,648,340-arms-for-668-fires ratio
+that looked like a spurious re-arm is GPCIPL's early phase alone.
+
+**Two display observations that were wrong and are worth not repeating.** The
+display has no intrinsic "~30 second warm-up" — that figure came from a
+panel-less run's wall-clock timing and was generalised from; with
+`discretePanel.py` attached the screen appears at MET 00:00:13 on the display's
+own ticking clock. And a single-window datagram count is meaningless while
+anything is ramping: two 45 s samples starting 8 s after launch straddled
+different points of a rising curve and were reported as a difference *between
+the tapes* ("B renders, A does not"), then retracted. Sample the time course,
+or wait out the ramp before counting anything. An earlier contaminated
+measurement in the same thread had **five stray yaGPC2 processes of mine live
+on the multicast bus**; the risk was noticed, written down, and the number
+reported anyway.
+
+### 8.25 Real peripherals — `--real-time`, the MTU, the intercomputer bus, MM READY
+
+**`--bce-network` requires `--real-time`, and its own help says so.** Every run
+in a long thread omitted it, and the resulting failure was silent, remote from
+its cause, and cost days: a 511-word display fill queues 511 datagrams, the
+POLL behind them lands ~16 ms of *wall* time later (queue depth measured to
+819), and `iop.c`'s receive timeout is in *emulated* time — a 5.02 ms MTO that
+expires almost instantly. The receive times out with `gotAny=0`,
+`iop_bce_error_terminate()` puts the BCE NO-GO, the flight software takes RESET
+STATUS1, and the DEU load restarts forever while the DEU correctly keeps
+asserting IPL-REQUIRED. With `--real-time` at the default bus word rate the
+load completes: all seven FILLTBL blocks, then 309 display refreshes of 196
+words at `0x19ee` decoding as "GPCIPL ... LOADED".
+
+This also explains the 2026-08-23 regression window. `a59c9e203` ("pace bus
+transmissions against the wall clock") introduced the token bucket to stop the
+peer's socket overrunning; before it, datagrams left as fast as `sendto()`
+allowed and nothing could ever be queued behind a transfer, so the load
+completed even without pacing the wait state. After it, wall-clock pacing only
+works if the emulator also *spends* wall time — which is precisely what
+`--real-time` does. That commit's own message already warned against the fix
+that was attempted here: pacing on simulated time "was tried first and barely
+helped, because `cpu_advance_idle_ns()` advances up to 5 ms of simulated time
+inside a single call with no wall time passing at all". **yaGPC2 now warns when
+`--bce-network` is given without `--real-time`** (`710ae8dd2`).
+
+**Tried and reverted:** holding the BCE receive clock while the soliciting
+command is still in the transport's send queue. It cut timeouts 455 → 48 but
+*broke* the case that previously worked, and the reason is instructive —
+mid-IPL the DEU answers a 16-word poll with **one** word, so that receive is
+*supposed* to time out; the timeout is how the bus program learns "still
+loading, send the next block", with `gotAny` as the discriminator (1 = advance,
+0 = the DEU never heard the poll, restart). Suppressing the timeout removes the
+event the sequencing depends on. Note also that **`--deu-model` masked all of
+this**: its help says it "answers in the same call", so every solicited reply is
+present before the poll asks — and it cannot answer bus questions at all (it
+once reported 518 fills while the wire saw none). MEDS was never at fault: a
+freshly started MEDS asserts IPL-REQUIRED, and its single-word reply during a
+load is the documented mid-IPL rule `deumodel.c` implements identically.
+
+**A DEU peer over the wire** now exists at `/tmp/claude-1000/deustub.py`,
+implementing `deumodel.c`'s rules with the same constants and names, so the
+whole IPL reproduces headlessly with no MEDS and no GUI. It takes a port base,
+a bus number (6/7/8 = DK1/2/3) and an optional `nokeys`/`latekeys`, and can
+deliver `ITEM 1 EXEC` itself.
+
+**Three peripheral fixes, all committed**, that took PASS from loading to
+running:
+
+- `38e2fcd6d` — **an in-process mass memory must assert its own READY
+  discrete.** This is what blocked `ITEM 1 EXEC`: BSL1's `BSRDYDI` spun on
+  `NR R6,R5 / BNZ BSRDY08` with `R5=48000000` — BCE 18 selected (`X'0800'`) but
+  MMU 1 READY (`X'0200'`) never set — heading for `ERROR 115 MMU WILL NOT GO
+  READY`. `iop_discrete_in_a()` computes the ready bits only for a unit whose
+  *stored* bit is set, and only `--discrete-a` ever wrote that word; the model's
+  own published READY cannot inform us, because `discretes_driven_mask()`
+  excludes a publisher's own bits by design — which is why the crew panel showed
+  MM1 READY steady while the GPC saw nothing. Unnoticed for so long because the
+  harness reads the IPL bootstrap itself instead of executing FCMBOOT, and
+  GPCIPL never asks.
+- `d7cda7736` — **map the intercomputer bus (BCE 24) by GPC identity**
+  (`--gpc-id`), which selecting PFS needs.
+- `2331c5e3e` — **the MTU reply is SEVEN words, not six.** `FIOPRMPG`'s
+  commander reads the MTU with `#MIN 0,6` and its listener with `#RDLI 6`, and
+  the Principles of Operation is explicit that the field is one less than the
+  transfer: "The number of bus words actually sent is 1 more than the number in
+  the Count Field." So the BCE arms a seven-word receive — observed directly as
+  `BCE20 RECV ARM count=7` — and a six-word reply leaves it one short,
+  whereupon it times out with `left=1` and error-terminates the BCE onto its
+  NO-GO path.
+
+**The MTU is a device on three buses, not a bus.** `FIOCBLKS` names it device
+22 (`FIO22020/1/2`) but that is FCOS's device number; the bus address comes from
+the BCE program that reads it, and the only six-word command seen on buses
+20-22 is IUA 10. Documentation (user): USA005350, *Data Processing System
+(Hardware and System Software) Workbook*, §2.6 pp. 54-56 — two oscillators
+(OSC1/OSC2) selected by a panel switch feed **three identical accumulators**,
+each preparing GMT **and MET** and dumping them onto FC1(FC5), FC2(FC6),
+FC3(FC7) for accumulators 1/2/3 respectively, and any GPC may take them from
+any of the three. That confirms `--mtu-model`'s targeting — FC1/FC2/FC3 are
+BCE 20/21/22, exactly the buses `FIO22020/1/2` name. **The wire format is not
+given in the document**, and the GMT-and-MET pairing may well explain the
+transfer as 3+3 rather than the header-plus-time shape the model assumes.
+
+**PASS's software clock reads 24 hours, and that is the flight software's own
+rule, not an emulator bug.** `FPMMTURM.asm:457`:
+
+    IF    (CHI,R5,LT,X'0030')   GMT IS LESS THAN 1 DAY
+    LHI   R5,X'0030'            DEFAULT GMT TO 1 DAY
+
+R5 is the half-hour count, so any GMT under 48 half-hours is discarded and
+replaced by exactly 24 h. `--mtu-model` reports GMT counted from zero at
+power-on, always under that floor. Two corrections attempt were tried and both
+reverted: anchoring GMT to a real day of year (243) *does* remove the defect it
+targets — `TCVTSWCM` never written `0x30`, fatal store-protects 5 → 0, CLK2 815
+→ 2596 lasting the whole run, DK1 7,919 → 92,655 datagrams with 413 display
+fills — but PASS then never starts at all, with 2594 of 2596 CLK2 fires at
+`nia=01dbe` on a 0.2 ms median gap and no bus traffic; and day 1 exactly (48
+half-hours) is indistinguishable from baseline, since `TCVTSWCM` is `0x30`
+either way — **which also disproves the "clock jump invalidates the TQE
+deadlines" theory** that had been built on it.
+
+**The PCMMU is identified but deliberately not modelled.** `PMUDEV = 10`
+(`INCL80/IOMACS.hal:89`); `AIBB_PMU_CW = HEX'006CFF62'` (`AIBGPCLO.hal:262`) →
+IUA 13; `FIOPMUBS DC X'00000080'` (`FIOCBLKS.asm:1145`) → BCE 24, the IP bus;
+`PMUOIPL1(...,3,AIBV_GMTOI_MTU$(1),...)` → a 3-word reply, and the name
+`AIBV_GMTOI_MTU` says it is in MTU format, i.e. the same BCD triple
+`mtumodel.c` already builds. Not built, because two details remain unmeasured:
+the BCE arms `count=1` at `pc=1ccd2 addr=007a8` (not 3), and the only
+read-shaped command on the IP wire is `iua=15 func=0x221 count=480`, while the
+IUA 13 traffic is four 31-word *writes* per cycle. Those do not add up to a
+coherent transaction, and a model guessed into that gap would answer for the
+wrong reason. Note also that the `SEND ERROR$(6:6)` chain which motivated this
+was an **artifact of the `--no-halucp-svc` regression** (below) and is not a
+live symptom.
+
+**A regression of our own, and how it was recovered.** `git checkout --
+src/ageharness.c` destroyed hours of uncommitted work; the lost change was a
+single line in `ageharness_configure_from_opts`, `age->halUCP.svcEnabled =
+opts->halucpSvc;`. `halucp.c`/`.h` carried the gate and `opts.c` the switch, but
+nothing connected them, so **`--no-halucp-svc` did nothing** and HalUCP
+intercepted every SVC — including PASS's own, whose numbers collide (13/14/20
+are `FPMSET`/`FPMRESET`/`FPMSDERR`). Restored as `fd8d76771` and measured back
+to baseline: CLK2 175 → 815, IP 133 → 81,795 datagrams, HAL/S SEND ERROR 1 → 0.
+It was recovered from the session transcript at
+`~/.claude/projects/<project>/<session-id>.jsonl`, which records every Edit's
+`old_string`/`new_string` and every Bash heredoc — that is the recovery route
+if it happens again, but the rule is **commit before reverting**.
+
+### 8.26 Why PASS went idle after 26 seconds — the SVC address extension, completed
+
+With everything above in place, PASS IPLed, loaded, started, painted a display
+and did real cyclic flight I/O — for about 26 seconds of simulated time
+(t≈73 → t≈101), after which Clock 2 stopped and the CPU sat in `FPMIDLE`
+permanently. No crash, no fault, no wait state, no hang: the scheduler simply
+had nothing left to run. **The cause is one line in `exec_SVC`, and it is the
+other half of the fix in §8.23.**
+
+`exec_SVC` saved the effective address's extension as `(ea >> 16) & 0xf`. It
+has to be `(ea >> 15) & 0xf`. A sector on this machine is `0x8000` halfwords —
+every expansion in `cpu.c` is `sector << 15` — and the 16-bit address field's
+own bit 15 is the "expand me" flag that the sector **replaces**, so the four
+bits that turn the 16-bit interrupt code back into a 19-bit address begin at
+bit **15**, not 16. The flight software settles it: `FPMSVC` ORs this nibble
+into a ZCON as a **DSE**, and `FIOSVC`'s `LXAR R3,R3` masks the address with
+`0x7fff` and expands it by `dse << 15`. Taken from bit 16 the nibble arrives
+**halved** — `0x3832b` was rebuilt as `0x1832b`.
+
+Scale, measured: **6,387 of 33,961 SVCs in one run come from sector 7**, which
+is where PASS's applications live (`0x38xxx`). Every one of them handed FCOS a
+parameter-list address four sectors low, inside FCOS's own code. Low-memory
+SVCs — sector 0, which is all of GPCIPL and the SSL — round-trip correctly
+under either formula, which is exactly why this survived every earlier stage.
+
+**The death chain, each link measured:**
+
+1. `FIOSVC`/`FIOINITQ` builds an IOQE out of the "parameter list" at `0x1832b`,
+   which is code: `FLGS=b5e2 OPCD=dc0c WDCD=8271 PRI=a2f3 EVNT=9af3`, device
+   id 9. `FIOINITQ` copies faithfully; the list itself is rubbish.
+2. `FIOBCD[9]` = `0x0f00`, so the phantom request wants buses 20-23 — FF1-4.
+3. `FIOPDISP` toggles those four busy in `TCVTBCEB` (`XST`, an **exclusive-or**
+   store) and enables the BCEs — then the device-dependent `CASENTRY` indexes a
+   table with the garbage op code, branches to `0x04081` (unloaded data
+   storage) and takes a program check.
+4. The transaction is abandoned **before** `ST R2,TCVTSIOM`, so no `@SIO` is
+   ever issued, the BCEs never run, `FIOCMPLT` never toggles the bits back, and
+   `TCVTBCEB` keeps `0x0f00` **forever**.
+5. `FPMIHPC2`'s wait-queue scan starts a queued IOQE only when all the buses it
+   needs are idle (`IF (N,R5,TCVTBCEB,Z)`), so every later MTU read — mask
+   `0x0e00`, buses 20-22 — queues behind it: exactly **one IOQE leaked per
+   second**, against a pool of 26.
+6. Pool dry → `TCVTIOFP` runs off the end to `0x080ce` → the store to that
+   "IOQE"'s `TIOQINDX` at `0x080d6` hits protected code → store protect →
+   Clock 2 never re-armed → `FPMIDLE` for good.
+
+Before and after, same headless rig:
+
+| | before | after |
+|---|---|---|
+| PASS stops | t≈101 s | still running at t=316 s |
+| `TCVTBCEB` | `0x00000f00` (buses 20-23 stuck busy) | `0x00000000` |
+| free IOQE pool | 0 | 26 of 26, at t=120 and t=300 |
+| I/O wait queue | 25 stranded | 0 |
+| Clock 2 | dead after t=98.88 | arming and firing every 39.5 ms at t=320 |
+| software clock | — | 61.9 s → 241.2 s over 180 s of sim: exactly 1:1 |
+| idle fraction, t=98.00-98.12 | 95.0% | 92.5% |
+| DK2/DK3 | time fills only | display fills too |
+
+**The eight theories this displaced**, each tested and excluded by measurement
+before the real cause was found, and all of them looking at t≈98-101 — which is
+the *pool draining*, forty seconds downstream of the single I/O dispatch at
+t≈60 that never happens: TQE free-pool size (25, 28 and 82 entries all stop at
+≈100 s, so enlarging it removes only the store-protect symptom); a corrupt
+chain link at `09262`; `AIBGPCLO`'s `SEND ERROR$(6:6)`; the 24-hour software
+clock; the `080d6` store-protect as sole cause; crew input delivered during the
+live window; PCT cancellation; and the TSIP half-hour time base. The reframing
+that finally worked was to stop chasing symptoms at the stop instant and ask
+what was scheduled *at the start* with a ~27 s horizon.
+
+**Two map corrections that had misdirected the search**, both recorded because
+the earlier identifications were confidently wrong:
+
+- The stride-`0x12` table at `090b2` is the **IOQE** table (`TFIOQ`, 18
+  halfwords), **not** the TQEs. The TQEs are the stride-6 chain (`TFTQE`, 6
+  halfwords) and the EQEs the stride-`0x0a` one (`TFEQE`, 10). So "TQE
+  enqueueing stops at t=98.09" was really I/O-queue activity stopping.
+- **The CVT base is `0x140`**, anchored by `TCVTCID` (+0x51) reading 1 for
+  `--gpc-id 1` and by the PCT/EQE/TQE/IOE free-pool group at +0x0a..+0x0d.
+  `TCVTSIPI` is a **fullword**, so every field past it sits two halfwords later
+  than a naive parse of `MLIB80/TFCVT.asm` puts it — which is what made
+  `TCVTSWCH` appear at +0x52 rather than +0x54. PCTs are at `0x0827c`, stride
+  `0x32` (50 halfwords, exactly `TPCTLNTH`).
+
+**Method, and it is the reusable part.** Everything above came from
+`YAGPC_SNAPSHOT=<t1>[,<t2>...]:<prefix>`, which writes the whole of main
+storage to a file the first time simulated time passes each of those seconds.
+A raw image is what lets the FCOS control blocks — PCTs, TQEs, EQEs, IOQEs, the
+CVT, the compools — be read **offline with a script** instead of guessed at
+from a trace, and it is what made the leak visible as a table. The
+supporting instruments added with it: `YAGPC_TRACEWIN=<from>-<to>:<path>` and
+`YAGPC_TRACETRIG=<addr>:<value>:<count>:<path>` (per-instruction traces with
+registers, the second armed by a *state* rather than a time, because the event
+moved by a third of a second between runs); `YAGPC_EATRACE=<nia>[,...]`
+(effective address and contents for named instructions — a register dump says
+*what* a wild branch went to, only the EA says *where the address came from*);
+`YAGPC_RINGTRIG=<addr>:<value>` (dump the NIA ring when a halfword takes a
+value); `YAGPC_SVCTRACE=<path>` (every SVC: site, parameter-list address, base
+register, DSE, list contents — which is what made the halved nibble visible);
+and `YAGPC_SIOTRACE` (every MSC START I/O, the only place a dispatched
+transaction becomes a running BCE). `iop_dump_procs` now also prints each BCE's
+receive state and is called at every snapshot: a BCE parked mid-transfer looks
+identical to a running one until `recvActive`/`recvLeft` are printed beside
+`halt`/`busy`.
+
+**Regression status.** `make test`'s non-SVC failure set is byte-identical
+before and after. The SVC exec fixtures expect a constant `2108` for `mem[90]`
+**whatever the EA** — the signature of the reference `gpc` never writing the
+EA-High field at all — so they were already failing and are the same accepted
+divergence §8.23 records.
 
 ---
 
