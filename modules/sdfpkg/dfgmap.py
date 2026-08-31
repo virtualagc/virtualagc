@@ -326,10 +326,14 @@ def show(rows, dump=None, base=None, only_diff=False):
                 print(f"      . {d}")
             last = stmt
         if dump is None:
-            print(f"      +{off:<5} {val:04X}")
+            print(f"      +{off:<5} " + ("addr" if val is None else f"{val:04X}"))
         else:
             i = base + off
             theirs = dump[i] if 0 <= i < len(dump) else None
+            if val is None:
+                t = "----" if theirs is None else f"{theirs:04X}"
+                print(f"      +{off:<5} ours=addr dump={t}   (relocated address)")
+                continue
             mark = "" if theirs == val else "   <-- DIFFERS"
             if only_diff and not mark:
                 continue
