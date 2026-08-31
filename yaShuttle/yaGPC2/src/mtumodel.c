@@ -29,7 +29,19 @@
  * each word in turn -- SLDL 2/4/4/2/4 across DYHR, SLDL 3/4/3/4 across
  * MNSC, and `NHI R4,X'1FFF'  ZERO SPARE BITS 0-2` on MSEC. */
 /* The transfer is six halfwords; TFMTU's three time words lead it. */
-#define MTU_WORDS 6
+/* SEVEN, not six.  FIOPRMPG's commander reads the MTU with `#MIN 0,6`
+ * and its listener with `#RDLI 6`, and the Principles of Operation is
+ * explicit that the field is one less than the transfer: "The number of
+ * bus words actually sent is 1 more than the number in the Count Field.
+ * Thus a Count of 0 causes one memory halfword to be transmitted; a
+ * count of 31 corresponds to 32 half words."  So the BCE arms a
+ * SEVEN-word receive -- observed directly, "BCE20 RECV ARM count=7" --
+ * and a six-word reply leaves it one short, whereupon it times out with
+ * left=1 and error terminates the BCE onto its NO-GO path.
+ *
+ * The extra word goes on the END so the three time halfwords stay at
+ * offset 2, where FPMMTURM reads them (LA R3,TFCMMTU1+2). */
+#define MTU_WORDS 7
 
 struct MtuModel {
     const double *clockUs;
