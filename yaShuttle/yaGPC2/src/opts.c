@@ -405,6 +405,27 @@ void opts_parse(int argc, char **argv, Options *opts) {
         /* Either mass memory will do: the in-process model, or a real
          * one on the far end of --bce-network.  The IPL reads it through
          * the installed servicer and does not care which. */
+        /* --bce-network without --real-time fails silently and a long way
+         * from its cause.  The transport paces the wire against the WALL
+         * clock (a real peripheral drains a real socket and does not care
+         * what the simulated clock thinks), while the BCE counts its MTO
+         * in SIMULATED time -- and cpu_advance_idle_ns() can advance 5 ms
+         * of simulated time inside one call with no wall time passing at
+         * all.  So every receive expires before its own command has left
+         * the send queue, the BCE error terminates, and the display's IPL
+         * restarts from its first block forever: a running clock and no
+         * menu, with nothing anywhere saying why.  --real-time is what
+         * makes the emulator actually spend the wall time the wire needs.
+         * Warn rather than refuse: a run that only transmits (no soliciting
+         * command, so nothing to be late for) is legitimate. */
+        if (opts->bceNetwork && !opts->realTime) {
+            fprintf(stderr,
+                "warning: --bce-network without --real-time: the wire is paced "
+                "against the wall clock but the GPC times out in simulated "
+                "time, so a peripheral's reply arrives after the receive that "
+                "asked for it has already expired.  A display unit will IPL "
+                "forever and never show a menu.  Add --real-time.\n");
+        }
         if (!opts->mmuModelVolume && !opts->bceNetwork) {
             fprintf(stderr,
                 "error: no 'fcm-file', so the bootstrap must come from a "
