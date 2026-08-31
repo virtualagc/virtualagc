@@ -4946,3 +4946,671 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
 - No symbol file matches pass-ipl.mmv (the linkAndTest-earlyApril3 symbols-*.json are
   other link jobs; attribution puts 0x19838 at +18100 into a 13-word section). Naming
   these addresses needs a symbol table for this image.
+
+### [2026-08-31] Target: problems.md
+- MISTAKE, needs your attention: I ran `git checkout -- src/ageharness.c` to revert an
+  experiment of my own, WITHOUT checking first that the file already carried your
+  uncommitted changes. It did -- an earlier `git status` tonight listed it alongside
+  ap101.c/halucp.c/halucp.h. Those changes are gone; git fsck finds no dangling blob
+  for them and there is no editor backup or usable object file. What I read of the
+  file tonight (lines 105-215, the protect-mode and ipl_fill region) is byte-identical
+  to HEAD, so whatever was lost lay outside that region. Everything else I reverted
+  this session I checked with `git status` beforehand; this one I did not.
+- WHERE PASS NOW STOPS, traced end to end. It is FPMIDLE, the idle process -- the loop
+  at 0x080a8-0x080cb maps instruction for instruction onto FPMIDLE.asm:89-120 (SSM
+  FPMDSBL / LH TCVTIOA / IHL TCVTIOW / XHI 11 / LH TCVTTTQE / SSM FPMENBL / LE-SER-STE
+  FPMIDTIM / ENDDO). Not a crash: nothing is being scheduled.
+- Clock 2 is the reason. YAGPC_CLKTRACE: 1,944,020 arms, 815 fires; the last real arm
+  is t=98.840391 val=00009a2c (39.5 ms), it fires at 98.879862, and NOTHING re-arms it
+  after that. The wrap leaves the high halfword 0xffff, so the next expiry is ~4300 s
+  away. FPMIHPC2 (the PC2 handler) is what calls FPMITUPD to re-arm.
+- What stops the re-arm is a store-protect program check, code 0007, at NIA=1be4b
+  writing 0x080d6, recurring at exactly 0.48 s: t=97.7956+97.7960, 98.2772+98.2777,
+  98.7527. The first two are retried pairs, the third is a single -- FCOS retries, then
+  gives up. Clock 2 dies immediately after.
+- The store is `ZH X'0007'(1)` through a pointer loaded from a table field. On healthy
+  passes R1=0x90b2; at the failure it is 0x080cf, and with that range unprotected it
+  becomes 0 (faults move to addr=00007). So the POINTER is bad, not merely the
+  protection -- unprotecting cures the symptom and exposes the next one. Suspect a
+  TQE free-pool exhaustion: FPMIHPC2 recycles TQEs through TCVTTQEP.
+- Protection modes, all measured: default blanket -> the above; YAGPC_IPL_PROTECT=0 ->
+  GPCIPL dies at once, "ERROR: wait state (masked)"; unprotecting just the loaded
+  region -> same, CLK2 never fires at all. The manual (Sec. 2.5.3.3) says blanket
+  protect at IPL IS right, and FCMINSSL then unprotects per load block
+  (FCMUPROT/FCMINMMR/FCMRPROT, the flag tested `IF (LH,R3,1(R1),M)`). Storage with no
+  load block therefore never gets unprotected -- exactly what ap101.c already records:
+  "had the phase's RESERVED storage had a load block ... the real repair belongs in
+  the tape build".
+- No .sym.json with a storeProtect map exists anywhere in the workspace, so
+  YAGPC_IPL_PROTECT=sections cannot be used on this image; tools/build_ipl_fcm.sh
+  would have to be run to produce one.
+- Peripherals now needed for PASS to get this far: --mtu-model plus DEU responders on
+  DK1/DK2/DK3. Remaining unanswered reads are BCE24 (IP, no other GPC) and a 26-word
+  read on FC1 that is an MDM we do not model.
+
+### [2026-08-31] Target: problems.md
+- THE ageharness.c LOSS IS A FUNCTIONAL REGRESSION, not just lost text. Measured,
+  same command, same peripherals, HEAD unchanged at 2331c5e3e:
+      before the revert   CLK2 815 fires, last t=98.75 s; IP 81,795 datagrams
+      after  the revert   CLK2 175 fires, last t=14.90 s; IP 133 datagrams
+  Confirmed with my own cpu.c instrumentation reverted, so the only difference is
+  those lost uncommitted changes. Reproduced three times.
+- Unrecoverable: no dangling blob in git fsck, no stash, no editor backup, the
+  object file was rebuilt from the reverted source, and /mnt/STORAGE is ext4 with
+  no snapshots.
+- The baseline this cost is recorded in the 2026-08-30 entry above: "CLK2: 3170
+  fires, t=6.118 s -> 257.491 s (run end) ... the 25 Hz cyclic clock runs to the
+  end of the run."
+- What is committed and still good: 710ae8dd2 (--real-time warning), d7cda7736
+  (BCE 24 / --gpc-id), 38e2fcd6d (MM READY), 2331c5e3e (MTU seven words). None of
+  those touch ageharness.c.
+- Also learned before the regression, still valid: the SEND ERROR that starts the
+  cascade is AIBGPCLO's SEND ERROR$(6:6), "RUNTIME USED INSTEAD OF PCMMU TIME TO
+  CALCULATE TSIP" -- AIBGPCLO.hal does DIO(AIBV_PMU_RD), the limit check
+  (AIBV_GMTOI > AIBV_TC) OR ((AIBV_TC - AIBV_GMTOI) > 1.02) fails because no PCMMU
+  is modelled, and PASS takes its legitimate degraded path and LOGS the error. The
+  logging write is what hits protected scratch. Modelling the PCMMU would remove
+  the error at source, the same way --mtu-model removed the MTU reads.
+- --no-trap-svc-error is NOT the answer: letting PASS handle its own SEND ERROR
+  made it worse (CLK2 175, last t=14.9 s) even before the regression.
+
+### [2026-08-31] Target: problems.md
+- PCMMU located, for whoever picks this up. AIBGPCLO's SEND ERROR$(6:6) fires because
+  the PMU read returns nothing. The device is pinned down:
+      PMUDEV = 10                       (INCL80/IOMACS.hal:89)
+      AIBB_PMU_CW = HEX'006CFF62'       (AIBGPCLO.hal:262) -> IUA 13
+      FIOPMUBS DC X'00000080'           (FIOCBLKS.asm:1145) -> BCE 24, the IP bus
+      PMUOIPL1(...,3,AIBV_GMTOI_MTU$(1),...) -> a 3-word reply
+      MTU_FMT_CONV converts it, and the name AIBV_GMTOI_MTU says it is in MTU
+      format -- i.e. the same BCD triple mtumodel.c already builds.
+  So a PCMMU model is BCE 24, IUA 13, answering with the MTU's own BCD words.
+- NOT yet built, deliberately. Two details are still unmeasured and I will not guess
+  them: the BCE arms count=1 at pc=1ccd2 addr=007a8 (not 3), and the only read-shaped
+  command on the IP wire is iua=15 func=0x221 count=480, x41 -- while the IUA 13
+  traffic is four 31-word WRITES per cycle (funcs 0x120/0x122/0x124/0x126). Those do
+  not yet add up to a single coherent transaction, and a model guessed into that gap
+  would answer for the wrong reason.
+- Divergence isolated precisely: the interrupt streams before and after the
+  ageharness.c loss are IDENTICAL for 411 interrupts (through t~72.1 s) and part
+  company exactly there. The good run takes an EXT0 at t=71.9852 nia=40000 that the
+  regressed run never receives, and from t=73.23 it has CLK2 every 40 ms. The
+  regressed run gets IOP program interrupts at 101bc/101f4/402c1 instead and then
+  nothing until t=120.
+- PASS still reaches AIBGPCLO even on the regressed tree (SEND ERROR$(6:6) is raised
+  once), so PCMMU work is testable without restoring the lost file. Everything after
+  that point is not.
+
+### [2026-08-31] Target: problems.md
+- REGRESSION FOUND AND REPAIRED, committed as fd8d76771. Recovered from the session
+  transcript (user's suggestion): the lost uncommitted change was ONE line in
+  ageharness_configure_from_opts --
+      age->halUCP.svcEnabled = opts->halucpSvc;
+  applied by a Bash python patch at 2026-08-29T21:50:33Z, i.e. after the last commit
+  touching the file. halucp.c/.h carried the gate and opts.c the switch, but nothing
+  connected them, so --no-halucp-svc did NOTHING and HalUCP intercepted every SVC.
+  Restored and measured: CLK2 175 -> 815, IP 133 -> 81,795 datagrams, HAL/S SEND
+  ERROR 1 -> 0. Exactly the pre-regression baseline.
+- CORRECTION to the 2026-08-31 entries above: the AIBGPCLO SEND ERROR$(6:6) chain was
+  an ARTIFACT of that regression, not the root cause. With the wiring restored PASS
+  raises no SEND ERROR at all. The PCMMU model built on that premise was reverted
+  unverified; the device identification (BCE 24, IUA 13, 3 words, MTU format) stands
+  on primary sources and is still worth having, but it is NOT the blocker.
+- THE REAL BLOCKER, now measured cleanly (YAGPC_EAAT on the faulting instruction).
+  The store at NIA 1be4b walks a table of 18-halfword (0x12) records:
+      090ba 090cc ... 090f0 09102 ... 091fe 09210 09222 09234 09246 09258 0926a
+  -- 24 entries, every one prot=0, advancing about one record per few cycles. After
+  the 24th it goes to 080d6, which is prot=1, and the store-protect program check
+  follows. So it RUNS OFF THE END of a 24-entry pool. Unprotecting 080d6 only moves
+  the fault on (the next pointer reads 0, faulting at addr=00007), confirming the
+  pointer is bad rather than the protection.
+- Shape strongly suggests a pool consumed and never recycled -- FPMIHPC2's
+  "RETURN OLD TQE TO FREE POOL" (STH R4,TTQENXT / STH R3,TCVTTQEP) not taking effect.
+  NEXT: watch TCVTTQEP and the pool head with YAGPC_WATCHHW and find whether the
+  return path ever executes.
+- PROCESS LESSON, the important one: commit before reverting. The whole loss came
+  from `git checkout --` on a file whose uncommitted work was hours old and
+  load-bearing. The transcript at ~/.claude/projects/<proj>/<session>.jsonl records
+  every Edit old_string/new_string and every Bash heredoc, so this class of loss is
+  recoverable -- but only by luck of the tool used.
+
+### [2026-08-31] Target: problems.md
+- ROOT CAUSE of the 24-hour clock, found in the flight software and NOT an emulator
+  bug in itself. FPMMTURM.asm:457 --
+      IF    (CHI,R5,LT,X'0030')   GMT IS LESS THAN 1 DAY
+      LHI   R5,X'0030'            DEFAULT GMT TO 1 DAY
+  R5 is the half-hour count, so any GMT under 48 half-hours (24 h) is DISCARDED and
+  replaced by exactly 24 h.  --mtu-model reports GMT counted from zero at power-on,
+  always under that floor, so PASS writes TCVTSWCM=0x30 once (measured:
+  `WATCHHW hw addr=00196 val=00000030 nia=1c40d t=72.34`) and its clock jumps a day
+  the moment PASS starts.
+- CHAIN from there, each link measured: the clock jump invalidates outstanding TQE
+  deadlines -> a TQE queued 200 ms ahead never comes due -> FPMIHPC2 never returns it
+  to the free pool (proved: YAGPC_WATCHHW over the pool shows 135 allocations from
+  nia 1be54..1be79 and ZERO writes from any return path) -> the 24-entry pool drains
+  -> the allocator walks off the end into protected storage at 080d6 -> store-protect
+  -> Clock 2 dies -> FPMIDLE for good.
+- ATTEMPTED AND REVERTED: anchoring the MTU's GMT to a real day of year (host wall
+  clock via cpu.dateTimeAnchorEpochSec) so it clears the 1-day floor. It DOES remove
+  the defect it targets -- TCVTSWCM is never written 0x30, the fatal store-protects
+  go from 5 to 0, CLK2 from 815 to 2596 lasting the whole run, DK1 from 7,919 to
+  92,655 datagrams with 413 display fills instead of ~10 -- but PASS then never
+  starts at all: 2594 of 2596 CLK2 fires are at nia=01dbe with a median gap of
+  0.2 ms, i.e. GPCIPL hammering the timer, and there is no IP/DK2/DK3 traffic.
+  Jumping GMT to day-of-year 243 is evidently too large a step for the other,
+  unmodelled time sources to stay consistent with. Reverted rather than shipped.
+- NEXT to try, in order: (a) day 1 exactly, GMT = 24 h + real time of day, so the
+  floor is cleared by the smallest possible margin and RUNTIME stays close; (b) find
+  what at nia=01dbe arms Clock 2 with a ~0.2 ms interval when GMT is large -- that is
+  the thing that breaks, and it may be a real emulator defect worth fixing on its own.
+
+### [2026-08-31] Target: problems.md
+- CORRECTION to my own entry above: "135 allocations and ZERO returns" was WRONG. It
+  came from a histogram I had truncated to the top 8 NIAs. The full histogram over the
+  TQE pool has 25 distinct writers -- 1b4af, 1b645, 1bd09, 1bd1c at 110 writes each,
+  1bd2d/1bd45 at 106, 1bec7/1bec8, 1bd79/1bd7a, 1a77f, 19acb -- so TQEs ARE enqueued
+  and dequeued by more than the allocator. Check the whole distribution, not head -8.
+- What the monotonic walk therefore means: the 24 TQEs are each HELD by a repeating
+  process (SCHEDULE ... REPEAT EVERY keeps its TQE), so the free chain is consumed
+  legitimately and never comes back. The allocator then runs off the end. That makes
+  this a POOL SIZE question, not a leak.
+- The pool is not built by code -- FCMNINIT only empties the active chain back into it
+  (FCMNINIT.asm:349-357). The TQEs come pre-built in a compool loaded off the tape, so
+  the count is a property of OUR BUILT IMAGE, which puts this back in mmbstamp /
+  derive_load_blocks territory -- the same area as the known merge defect recorded in
+  the 2026-08-27 entries.
+- Two candidate fixes for the GMT floor, both TRIED and BOTH REVERTED:
+      real day of year (243)  -> TCVTSWCM never written 0x30, fatal store-protects
+                                 5 -> 0, CLK2 815 -> 2596 lasting the run, DK1 7,919
+                                 -> 92,655 with 413 display fills; BUT PASS never
+                                 starts, 2594/2596 CLK2 fires at nia=01dbe with a
+                                 0.2 ms median gap and no IP/DK2/DK3 traffic.
+      day 1 (48 half-hours)   -> TCVTSWCM is 0x30 either way, so every measurement is
+                                 identical to baseline. No behavioural change at all,
+                                 which also disproves my "clock jump invalidates the
+                                 TQE deadlines" theory.
+- NEXT: count the TQEs the compool actually carries in pass-ipl.mmv and compare with
+  what PASS schedules. If the image is short, the repair is in the tape build, exactly
+  as ap101.c's own comment says of the RESERVED-storage case.
+
+### [2026-08-31] Target: problems.md, HANDOFF-OI340600.md
+- **THE BLOCKER IS BAD DATA IN pass-ipl.mmv, AT A KNOWN BYTE OFFSET.** The TQE free
+  chain PASS loads off the tape is broken at record #24:
+      GPC 090b2 -> 090c4 -> ... -> 09250 -> 09262   (records #0..#23, each +0x12, all correct)
+      GPC 09262 -> 080ce   <-- WRONG, must be 09274
+      GPC 09274 -> 00000   (end of chain)
+  0x080ce is exactly the bad pointer the failing store uses (EA = R1+8 = 080d6), and
+  080ce is protected storage, so the allocator's 25th take walks off the chain into a
+  store-protect. Read straight out of the volume file: offset 0x11b540 holds 80ce
+  where it must hold 9274. Anchor: file 0x11b1e0 == GPC 0x090b2 (record #0's link),
+  records at +0x12 halfwords, and links #0..#23 verify against that mapping exactly.
+- PROVED CAUSAL: patching that one halfword on a COPY of the volume takes the fatal
+  store-protects from 5 to 0 (total 15 -> 10, the 10 being only GPCIPL's early
+  memory-test ones).
+- BUT a raw patch is not a fix: each load block carries its own checksum tail which
+  FCMINSSL verifies after the mass-memory read ("ERROR CHECKS - CHECKSUM AFTER MMU
+  1/2 READ"), so the patched phase is rejected and PASS never starts -- CLK2 175,
+  last t=14.90 s, the same signature as a failed load. The .mmv volume format itself
+  (MMUVOL01, 512-halfword blocks, mmumodel.c:456) has no checksum of its own; the one
+  that matters is inside the load block.
+- SO THE REPAIR BELONGS IN THE IMAGE BUILD, with the checksum recomputed -- same
+  conclusion, and probably the same tooling, as the mmbstamp/derive_load_blocks merge
+  defect recorded on 2026-08-27. FCMCBLKS.asm:774 declares NTQE=30; the loaded chain
+  has 26 entries with #24 corrupt, so the table on the tape does not match the source.
+- NEXT: find which load block covers GPC 09262, how 080ce got written there instead of
+  09274, and rebuild with the checksum restamped.
+
+### [2026-08-31] Target: problems.md
+- RETRACTION of the "PROVED CAUSAL" line in the entry above. Patching the TQE link on
+  a copy of the volume took the fatal store-protects from 5 to 0 -- but that run ALSO
+  showed CLK2 175 / last t=14.90 s, i.e. PASS never started. The fatal store-protects
+  occur at t~98 s DURING PASS, so they were absent because PASS never reached them,
+  not because the patch worked. The patch is still untested.
+- The volume mapping IS linear for that load block, so that is not the obstacle: the
+  block is directory slots 1113..1133, block indices 9004..9024, contiguous, GPC
+  0811a..0ab19, count 10752 (from `BCE18 RECV ARM pc=0730a addr=0811a count=10752`),
+  and the bad link sits at block halfword 4424 (file 0x11b540).
+- What does NOT reproduce is the checksum. FCMINSSL.asm:844-861 sums halfwords
+  [0..len-2] and compares against halfword [len-1]; over that block that gives 6300
+  against a stored 0048. So either the descriptor length differs from the DMA count,
+  or the block carries the RESERVE flag and its checksum is skipped entirely
+  (FCMINSSL.asm:884 "RESERVE FLAG ON, SKIP CHECKSUM"), or the sum is not over what I
+  assumed. Until that is settled the checksum cannot be restamped and the chain patch
+  cannot be tested.
+- STILL SOUND, and the best lead: the link at GPC 09262 is 080ce inside an otherwise
+  perfect arithmetic progression (#0..#23 each +0x12, #25 a clean 0000 end marker),
+  and 080ce is precisely the pointer the failing store uses. A single anomalous value
+  in an exact progression is almost certainly wrong, but it is not yet proven to be
+  the cause.
+- NEXT, in order: (1) read the load-block DESCRIPTOR for this block out of the image
+  (FCMSSLPT phase table) to get its true length and flags -- that settles both the
+  checksum question and whether RESERVE is set; (2) only then patch link + checksum
+  and re-run.
+
+### [2026-08-31] Target: problems.md
+- Descriptor hunt did NOT converge. Searching the volume for a load-block descriptor
+  [zcon][flags][length] matching this block found nothing consistent: 21 halfwords
+  equal 0x811a, none with length 10752; 83 halfwords equal 10752, all inside data
+  regions rather than a descriptor triple. The descriptor's ZCON carries a BSR/DSR
+  (FCMINSSL "IHL R4,0(R1) GET BSR/DSR"), so the stored address need not be the literal
+  0x811a the DMA used, and the phase table may itself be relocated. Not resolved.
+- STOPPING POINT, stated plainly. Everything reachable from the emulator side is fixed
+  and committed: --real-time guard (710ae8dd2), BCE 24 / --gpc-id (d7cda7736), MM READY
+  (38e2fcd6d), MTU seven words (2331c5e3e), --no-halucp-svc wiring (fd8d76771). The
+  remaining fault is DATA IN pass-ipl.mmv, and repairing it means understanding the
+  load-block descriptor and checksum well enough to rebuild -- image-build work, not
+  emulator work.
+- For whoever resumes, the state is exact: bad TQE link at file offset 0x11b540
+  (80ce, must be 9274), inside the load block GPC 0811a..0ab19 read by
+  `BCE18 RECV ARM pc=0730a addr=0811a count=10752`, directory slots 1113..1133, block
+  indices 9004..9024 contiguous, bad link at block halfword 4424. Unproven but strongly
+  indicated as the blocker. The checksum over that block does not reproduce
+  (computed 6300, stored 0048), which is the first thing to settle.
+
+### [2026-08-31] Target: problems.md, HANDOFF-OI340600.md
+- **THE CHECKSUM IS CRACKED**, so load blocks in a .mmv can now be patched properly.
+  Do not assume the DMA count is the block length: find the length by SEARCHING for the
+  L that satisfies the flight software's own invariant, sum(hw[0..L-2]) == hw[L-1]
+  (FCMINSSL.asm:844-861). For the block holding the TQE table exactly one plausible L
+  works, L=11122, and it is confirmed independently by the descriptor in the image --
+  file 0x148224, zcon=811a flags=0610 (RESERVE clear, so the checksum IS verified),
+  length=11122. The DMA count of 10752 is a partial transfer and is NOT the length.
+  Block = directory slots 1113..1133 (indices 9004..9024, contiguous), GPC 0811a..,
+  link at block halfword 4424, checksum at block halfword 11121.
+- **THE TQE TABLE HAS 25 ENTRIES, #0..#24, AND IS EXHAUSTED.** Each record reads
+  `link | 0000 | 0000 | self-address | c9d6 c9d6`; #25 at GPC 09274 is ALL ZEROS, i.e.
+  blank storage and not a TQE. So #24 is the last real entry and its link, 0x80ce, is a
+  corrupt end marker. FCMCBLKS.asm:774 declares NTQE=30; the image carries 25.
+- BOTH byte repairs tested, each with the checksum correctly restamped and verified:
+      #24 link -> 9274 (extend to the blank record): image loads, PASS runs, but still
+          stops at t=99 -- CLK2 815 -- and store-protects RISE 15 -> 35. It just moves
+          the wall one entry.
+      #24 link -> 0000 (proper terminator): the five fatal store-protects DISAPPEAR
+          (15 -> 10, only GPCIPL's early memory-test ones) and Clock 2 survives to
+          t=217.7 s instead of dying at 99 -- but PASS's applications never start at
+          all: no IP/DK2/DK3 traffic, GPCIPL just keeps its clock (409 time fills).
+- CONCLUSION: the pool is simply TOO SMALL. With a bad terminator PASS runs 26 s then
+  faults; with a good one it cannot allocate and never starts. Neither is a fix. The
+  repair is to build the image with the TQE table the source declares (30), which is a
+  rebuild, not a patch -- image-build work, and the emulator is not at fault here.
+- Retract nothing from the emulator fixes: they stand and are committed. This is where
+  the emulator side ends and the tape build begins.
+
+### [2026-08-31] Target: problems.md
+- **IT IS A LEAK, NOT A SMALL POOL -- proved by extending the pool and measuring.**
+  Built three properly initialised free TQEs in the blank storage after #24 (template
+  from a live one: [0]=link, [1]=0, [2]=0, [3]=self address, [4..17]=c9d6), relinked
+  #24 -> 9274 -> 9286 -> 9298 -> 0000, restamped the checksum, verified. Pool 25 -> 28.
+  Result, against the 25-entry baseline:
+      CLK2 815 -> 887,  last fire t=99.0 s -> 102.4 s
+      IP   81,795 -> 91,371 datagrams,  DK2/DK3 528 -> 594
+  Three extra entries bought +3.4 s, about 1.1 s each -- exactly the consumption rate
+  measured from the allocator's own walk. Enlarging the pool only moves the wall.
+- So something takes a TQE roughly every 1.1 s and never gives it back. FIOMGTQE
+  allocates ONLY when FIOMTQEC is zero and sets FIOMTQEC immediately after
+  (FIOMGTQE.asm:75-88), so a steady leak means FIOMTQEC is being CLEARED repeatedly.
+  That is the thing to chase, and it is plausibly ours: FIOMTQEC belongs to the
+  mass-memory polling path, and --mmu-model is what answers there.
+- Earlier "the image is short of TQEs (NTQE=30 vs 25)" is therefore NOT the story.
+  The count in the image may still be wrong, but it is not what stops PASS.
+- NEXT: YAGPC_WATCHHW on FIOMTQEC to see who clears it and how often; if the clear
+  tracks mass-memory completions, the defect is in mmumodel/iop rather than the tape.
+
+### [2026-08-31] Target: problems.md
+- **THE TQE POOL IS NOT THE CAUSE. Retract the "steady leak" conclusion.** User asked
+  why stop at 28 rather than going much larger -- a fair challenge, since +3 entries
+  buying +3.4 s is a thin basis for a linear trend. Went to 82 (57 blank record slots
+  exist after #24; the free list is a linked list so the three occupied slots 9298/
+  92aa/92bc can simply be hopped). Measured:
+      pool 25  ->  last CLK2 t= 99.0 s,  15 store-protects (5 fatal)
+      pool 28  ->  last CLK2 t=102.4 s,  15 store-protects (5 fatal)
+      pool 82  ->  last CLK2 t=101.2 s,  10 store-protects (ZERO fatal)
+  Linear would have predicted ~161 s for 82. It is ~101. So PASS STOPS AT ~100 s
+  REGARDLESS OF POOL SIZE; enlarging it only removes the store-protect SYMPTOM (the
+  walk off the end), not the stop. The 28-entry +3.4 s was noise, not a trend.
+- So the store-protect at 080d6 was never the root cause either -- it is what the
+  ~100 s stop looks like when the pool happens to be small enough to run out first.
+  Both of my last two causal claims (the leak, and the corrupt link) are withdrawn.
+- USER'S POINT, and it is a good one: a free list threaded through storage sits badly
+  with contiguous store protection. The real TQE table IS contiguous (records every
+  0x12 from 090b2), which is why protection can cover it as a unit and why a link
+  pointing OUT of it lands in protected storage at all. My 82-entry chain hopping over
+  occupied slots is not something a real build would produce -- it was a probe, not a
+  proposal, and it did its job by refuting the pool theory.
+- WHAT IS ACTUALLY TRUE, and unchanged all evening: PASS runs cyclically from ~t=73 s
+  and stops at ~t=100 s, ~27 s of real flight I/O, then FPMIDLE. That 27 s is the
+  invariant to explain. Pool size, the corrupt link, the SEND ERROR and the 24-hour
+  clock have each been tested and each is downstream of it.
+- NEXT: stop chasing symptoms at the stop instant. Find what is scheduled at ~t=73 s
+  with a ~27 s horizon -- i.e. what PASS sets up when the applications start that
+  expires or completes around t=100 s.
+
+### [2026-08-31] Target: problems.md
+- **THE STOP IS AN SVC THAT NEVER RETURNS.** Measured on the clean 82-TQE run, where
+  there are no store-protects at all, so nothing masks the ending:
+      t=101.2484  CLK2 nia=080c6      <- last cyclic tick
+      t=101.2485  SVC  code=0000 nia=00001
+      [nothing but CLK1 every 2.097 s thereafter, CPU in FPMIDLE]
+  One microsecond after the final Clock 2, PASS takes an SVC and never comes back.
+  Everything else chased this evening -- the TQE pool, the 080d6 store-protect, the
+  AIBGPCLO SEND ERROR, the 24-hour clock -- is downstream of that and none of them is
+  the cause.
+- Note --no-halucp-svc is now correctly wired (fd8d76771), so this SVC reaches PASS's
+  OWN handler (FPMSVCEP's fifty). The handler either does not return or parks. That is
+  the single thing to identify next.
+- SVC at nia=00001 is not itself anomalous -- bursts of `SVC code=0000 nia=00001`
+  appear during normal running earlier (t=74.75-74.92). What matters is that this one
+  is the LAST event.
+- NEXT: identify the SVC number (exec_SVC takes it from mem[EA]; the trace's code= is
+  the EA low halfword, which reads 0000 here) and then which FPMSVCEP entry that is.
+  A breakpoint on the SVC path near t=101.2 with the registers dumped would name it
+  outright.
+
+### [2026-08-31] Target: problems.md
+- **PASS IS NOT HUNG. ITS LAST PROCESS CLOSES.** Traced the SVC number directly
+  (temporary trace in exec_SVC printing ea, mem[ea] and r1; reverted afterwards).
+  The final SVC of the run is number 0x15 = 21, ea=00890, from nia=40746, and
+      SVC 21 = FPMCLOSE, "CLOSE PROCESSOR"   (FPMCLOSE.asm:28, ENTRY=FSVC0021)
+  So the ~27 s of cyclic operation ends with a process CLOSING NORMALLY, after which
+  nothing is left scheduled and FCOS drops into FPMIDLE. There is no fault, no hang
+  and no wait -- the scheduler simply has no work.
+- That reframes the whole evening: the question is not "what breaks at t=100 s" but
+  "why does the last cyclic process end rather than repeat". AIBGPCLO schedules its
+  work as `SCHEDULE DDK_HCT_TRANSFER AT CZ1V_A_TSIP + PHASE_DDK PRIORITY(PRIO_DDK),
+  REPEAT EVERY TIME_DDK`, so a REPEAT that stops repeating -- or a process that runs
+  out of whatever bounds it -- would look exactly like this.
+- SVC histogram over the last 200 before the end, for whoever picks this up:
+  002d (58), 0015 (55), 002c (41), 002e (16), 0018 (8), 000d (6). So SVC 21 is not
+  rare -- processes close routinely; what matters is that the LAST one is not followed
+  by any new schedule.
+- NEXT: identify WHICH process issues that final FPMCLOSE (r1=0882... is the parameter
+  list; nia=40746 is the caller) and what its REPEAT condition was. That is now the
+  whole question.
+
+### [2026-08-31] Target: problems.md
+- The crew-input test is SET UP BUT NOT YET RUN. My first attempt sent the late
+  keystrokes on DK1, which PASS stops polling at 23.8 s once BFC CRT = CRT 1 hands
+  that bus to the BFS, so they could never arrive; the retry on DK2 was spoiled by the
+  stub sending the initial ITEM 1 EXEC as well (both displays keying at once), and the
+  corrected third attempt was killed before it ran. deustub.py now takes "latekeys" as
+  its third argument: no initial keystrokes, and OPS 1 0 1 PRO after 150 polls.
+      python3 /tmp/claude-1000/deustub.py 7000 6            # DK1, sends ITEM 1 EXEC
+      python3 /tmp/claude-1000/deustub.py 7000 7 latekeys   # DK2, sends OPS 1 0 1 PRO late
+      python3 /tmp/claude-1000/deustub.py 7000 8 nokeys     # DK3
+- WHY IT MATTERS: if the scheduler wakes on that keystroke, the FPMIDLE state is PASS
+  correctly waiting for the crew and is not a defect at all. If it does not, the
+  question stays open. This is the cheapest remaining discriminator.
+- PRACTICAL FINDING for running by hand: with BFC CRT = CRT 1, DK1 goes silent at
+  t=23.8 s and PASS drives DK2/DK3 (594 datagrams each to t=147). So MEDS on `crt1`
+  shows GPCIPL's menu but never PASS's own displays; a second MEDS on `crt2 idp2`
+  is what would show them.
+
+### [2026-08-31] Target: problems.md
+- **THE REPEAT DECISION IS ONE TEST, IN FPMCLOSE (SVC 21).** FPMCLOSE.asm:84-93:
+      IF (TB,TPCTFLGS,X'00C0',Z),OR,(TB,TPCTFLGS,X'8000',Z)
+      *   CLOSING A NON-CYCLIC OR PCT HAS BEEN CANCELLED  *
+          CALL FPMFRPCT          <- PCT FREED, process gone for good
+      ELSE
+      *   SET UP PSW AND REGS FOR RE-ENTRY TO PROCESS     *
+          L  R4,TPDEP / ST R4,TPCTPSW / SB TPCTWAIT,X'0001'   <- re-armed
+      ENDIF
+  A process repeats ONLY IF some of TPCTFLGS bits 00C0 are set (cyclic) AND bit 8000
+  is set (not cancelled). So the whole question is now: on the last process to close,
+  which of those bits is wrong, and what cleared it?
+- That is a single halfword to watch (TPCTFLGS of the closing PCT; TCVTOLD holds the
+  active PCT address, FPMCLOSE.asm:80). YAGPC_WATCHHW on it through the run would name
+  the writer outright, the same way the SVC trace named FPMCLOSE.
+- Reminder of what the close is NOT: closes are routine -- 55 of the last 200 SVCs are
+  number 21 -- because a REPEAT EVERY process closes on EVERY cycle and is re-armed by
+  this same ELSE branch. Nothing about the final close is unusual except that it took
+  the IF branch instead.
+- USER'S OBSERVED RUN matches every measurement here and is NOT a new failure: download
+  starts on ITEM 1 EXEC without RUN; MEDS on crt1 then reports POLL FAIL because with
+  BFC CRT = CRT 1 PASS masks DK1 (measured silent from t=23.8 s) and drives DK2/DK3
+  instead; no "download complete" line exists on the --bce-network path (that message
+  belongs to --deu-model only). To SEE PASS, a second MEDS on `crt2 idp2`.
+- MY FAULT, twice over: `git checkout -- src/ageharness.c` destroyed uncommitted work
+  (recovered from the transcript), and `pkill -f 'discretePane[l]'` killed the user's
+  own crew panel mid-session. Both were broad commands aimed at my own processes that
+  did not distinguish theirs. Match on the port-base argument next time.
+
+### [2026-08-31] Target: problems.md
+- **WHO CANCELS A PCT.** Only two routines clear TPCTFLGS bit 8000, the bit FPMCLOSE
+  tests to decide free-vs-rearm (ZB zeroes it, and FPMCLOSE branches on ,Z):
+      FPMCANCL.asm:91,111   ZB TPCTFLGS,X'8000'   SET CANCEL FLAG IN PCT
+      FPMEVAL.asm:218,224   ZB TPCTFLGS,FPMPCTCN  *FLAG PCT CANCELLED
+  FPMCANCL is the HAL/S CANCEL processor; FPMEVAL is the EVENT EVALUATOR, which
+  cancels a PCT when a process's event condition can no longer be satisfied.
+- That is the most likely shape of the whole failure: PASS runs its cyclic work, an
+  event it is scheduled ON/UNTIL never occurs, FPMEVAL cancels the PCT, and the next
+  FPMCLOSE takes the IF branch and FREES the process instead of re-arming it. It also
+  dovetails with the crew-input hypothesis -- an event tied to crew action, or to a
+  peripheral we do not model, would look exactly like this.
+- NEXT MEASUREMENT, and it is small: YAGPC_WATCHHW on the closing PCT's TPCTFLGS to
+  catch the clear of bit 8000 and its NIA. If the writer is inside FPMEVAL, follow the
+  event; if it is FPMCANCL, find who called CANCEL. TCVTOLD holds the active PCT
+  address (FPMCLOSE.asm:80), so one run with the SVC-21 trace plus a watch on that
+  halfword names the culprit outright.
+
+### [2026-08-31] Target: problems.md
+- USER'S RUN, the most useful result of the night: with a second MEDS on `crt2 idp2`,
+  **PASS PAINTS A DISPLAY** -- a clock screen appeared on CRT 2, then POLL FAIL about
+  ten seconds later. First time PASS has been seen to drive anything. Confirms the bus
+  picture exactly: BFC CRT = CRT 1 makes PASS mask DK1 and draw on DK2.
+- AND A CORRECTION TO THE TEST I ASKED FOR. Keying OPS 1 0 1 PRO after POLL FAIL
+  proves nothing: once PASS stops polling DK2 the keystrokes are undeliverable, because
+  the DEU only hands keys over inside a poll REPLY. The crew-input hypothesis can only
+  be tested by keying DURING the live window (the ~10 s before POLL FAIL), not after.
+  I should have seen that before proposing it.
+- TABLE MAP of the FCOS control blocks in the image, found offline by the
+  self-address-at-offset-3 pattern (no run needed):
+      0904c..09092  stride 0x0e   6 records   (EQE or BRQE)
+      090b2..09262  stride 0x12  25 records   TQEs
+      08c66         isolated
+  The PCTs (NPCT=35) are NOT among these -- they carry no self-address at offset 3 --
+  which is why the earlier watch on 08c00-090b1 saw no stores at all. Locating the PCT
+  table is the prerequisite for watching TPCTFLGS, and guessing its placement has now
+  failed twice; trace the EA of `LH R0,TCVTOLD` at FPMCLOSE's entry instead.
+- A GUI-FREE DISCRETES DRIVER now exists: /tmp/claude-1000/drive.py <port-base>
+  <run-at-seconds>. It publishes the same SET/RESET bits discretePanel.py does and
+  republishes every 0.25 s, so headless runs no longer open a Tk window on the user's
+  display. Use it instead of discretePanel.py --script for any automated run.
+  IMPORTANT: start yaGPC2 BEFORE the driver -- the GPC must be listening when the IPL
+  pulse fires, or it comes up, sees a steady STANDBY and never boots (observed twice).
+
+### [2026-08-31] Target: problems.md
+- **CREW-INPUT HYPOTHESIS DISCONFIRMED.** Delivered OPS 1 0 1 PRO on DK2 -- the bus
+  PASS actually owns -- DURING the live window (stub set to key after 20 polls, well
+  before PASS stops polling; "delivered OPS 1 0 1 PRO" confirmed in the stub log, DK2
+  polled 52 times). Outcome unchanged:
+      with in-window crew input:  last CLK2 t=100.077 s, nia=080c6 (FPMIDLE)
+      baseline, no input:         last CLK2 t~101 s,     nia=080c6
+  PASS stops at the same moment whether or not keystrokes reach it while it can still
+  receive them. So the FPMIDLE state is NOT PASS correctly waiting for the crew; it is
+  a real defect.
+- That closes the last benign explanation. The stop is: last cyclic process issues
+  FPMCLOSE (SVC 21), FPMCLOSE takes its IF branch and FREES the PCT instead of
+  re-arming it, so nothing is left scheduled. Per FPMCLOSE.asm:84 that happens only if
+  TPCTFLGS bits 00C0 are clear (not cyclic) or bit 8000 is clear (cancelled), and only
+  FPMCANCL and FPMEVAL clear 8000.
+- Everything else has now been tested and excluded: TQE pool size (25/28/82 all stop
+  at ~100 s), the corrupt chain link, the AIBGPCLO SEND ERROR, the 24-hour clock, the
+  store-protect at 080d6, and crew input. The single remaining question is which of the
+  two TPCTFLGS bits is wrong on the last process and who wrote it.
+
+### [2026-08-31] Target: problems.md
+- **PCT TABLE LOCATED** (offline, no run): search the image for linked chains of any
+  stride -- a record whose first halfword points at the next -- and four tables appear:
+      stride 0x06, 28 records, first 081e2
+      stride 0x0a, 24 records, first 08a6a
+      stride 0x12, 24 records, first 090b2   <- TQEs, already known
+      stride 0x32, 32 records, first 0827c   <- PCTs (50 halfwords = saved PSW +
+                                                8 GPRs + 8 FPRs + flags; NPCT=35)
+  This is the technique to reach for: chains, not self-addresses. My two earlier
+  guesses at the PCT location were both wrong because I assumed it sat near the TQEs.
+- **CANCELLATION DISCONFIRMED.** Watched the whole PCT table (0827c-0895a) through a
+  run that stopped at t=101.01:
+      stores clearing bit 8000 (cancelled)      : 96, ALL at t=74.52, none after t=95
+      stores clearing bits 00C0 (cyclic)        : 90, ALL at t=74.52, none after t=95
+  Every one is PCT initialisation (was=d7c3, the fill pattern). Neither flag changes
+  anywhere near the stop. So nothing cancels the process and nothing clears its cyclic
+  bits: the last PCT to close was simply never marked cyclic, and FPMCLOSE freed it
+  correctly.
+- WHICH MOVES THE QUESTION AGAIN. It is not "why did a repeating process stop
+  repeating" -- no repeating process is being stopped. It is "why is there no repeating
+  process left after ~27 s". The cyclic work that ran between t=73 and t=100 ended on
+  its own terms and nothing re-scheduled it.
+- Theories tested and excluded tonight, each by measurement: TQE pool size (25/28/82),
+  the corrupt chain link at 09262, the AIBGPCLO SEND ERROR, the 24-hour clock, the
+  store-protect at 080d6, crew input during the live window, and now PCT cancellation.
+
+### [2026-08-31] Target: problems.md
+- AIBGPCLO.hal:527-539 schedules FOUR repeating processes, none with an UNTIL clause,
+  so all four should repeat forever:
+      DMI_MCDS_IN       AT CZ1V_A_TSIP + PHASE_DMI, REPEAT EVERY TIME_DMI
+      DCICYC            AT CZ1V_A_TSIP + PHASE_DCI, REPEAT EVERY TIME_DCI
+      ARA_GPC_SWITCH    AT CZ1V_A_TSIP + PHASE_ARA, REPEAT EVERY TIME_ARA
+      DDK_HCT_TRANSFER  AT CZ1V_A_TSIP + PHASE_DDK, REPEAT EVERY TIME_DDK
+  The 2026-08-30 entry above measured their dispatch counts as ARA_GPC_SWITCH 25 and
+  DDKHCT 164 -- FINITE. Twenty-five dispatches of a ~1 s process is almost exactly the
+  27 s window we now see. So all four stop repeating together, and the question is why
+  the RE-QUEUE fails for every one of them at once.
+- Note they are all scheduled AT an ABSOLUTE time, CZ1V_A_TSIP + PHASE_x, and TSIP is
+  the value AIBGPCLO computes from the clock (AIBV_TC + 1.060 + AIBK_PT522, or the
+  PCMMU time when it passes the limit check). A common absolute time base failing
+  would stop all four at once, which fits the observation better than anything
+  process-specific. The 24-hour clock was ruled out as the CAUSE of the stop, but the
+  TSIP time base itself has not been checked directly.
+- NEXT for a fresh session: instrument the four SCHEDULE dispatches (or watch
+  CZ1V_A_TSIP) and find what the re-queue computes on the cycle where it stops.
+  That is the first thing that would explain all four failing together.
+
+### [2026-08-31] Target: problems.md
+- **TSIP TIME BASE DISCONFIRMED TOO.** Hypothesis was that TCVTSWCH (microseconds
+  within the current half hour) starts near the top of a half hour and wraps ~27 s
+  later with no carry into TCVTSWCM, killing every absolute schedule at once.
+  Measured: the fullword at 00194 IS TCVTSWCH, written every 2.097 s from nia=1ad51,
+  and it is healthy --
+      t=141.0 s  val=040fffed  = 68.16e6 us into the half hour
+      t=164.1 s  val=056fffe2
+  It advances about 1 us per us, reaches only ~68e6 of the 1.8e9 us in a half hour
+  (so the wrap is at t~1872 s, not t~100), and keeps ticking long AFTER PASS has gone
+  idle. The time base is alive and correct.
+- That is the eighth theory excluded by measurement tonight: TQE pool size, the corrupt
+  chain link, the SEND ERROR, the 24-hour clock, the 080d6 store-protect, crew input,
+  PCT cancellation, and now the TSIP/half-hour time base.
+- What remains true and unexplained: all four of AIBGPCLO's REPEAT EVERY processes stop
+  together at t~100 s, the PCT flags are untouched, the clock keeps running, and
+  FPMCLOSE frees a PCT that was never marked cyclic. Nothing is broken at the moment of
+  the stop -- whatever ends it happens earlier and leaves nothing scheduled.
+- NEXT for a fresh session: instrument the SCHEDULE path itself (FPMTMENQ, which chains
+  a TQE) and count re-queues per process. If the four stop together, one re-queue site
+  is failing; watching it is more direct than any of the eight downstream symptoms
+  chased tonight.
+
+### [2026-08-31] Target: problems.md
+- **THE EVENT IS AT t=98.09, NOT t=101.** Every writer into the TQE pool starts at
+  t=72.46 (PASS start) and stops at t=98.09 -- 25.6 s of enqueues at ~5.3/s, matching
+  a 200 ms cycle -- and then nothing. The final CLK2 is ~3 s LATER, at t~101: that is
+  just the already-queued TQEs draining. So the stop I spent the night examining is
+  the AFTERMATH; the thing to explain happens at t=98.09 when enqueueing ceases.
+      nia=1be4b/1be4c/1be4e/1be50/1be52/1be54/1be71/1be76/1be78/1be79  135 each,
+          first t=72.46, last t=98.09
+      nia=1bd1c  110, first t=72.46, last t=97.62
+- Worth noting against the 25-entry baseline: its fatal store-protects were at t=97.80,
+  98.28 and 98.75 -- i.e. the FIRST one PRECEDES the enqueue stoppage at 98.09. That
+  argues the store-protect may not be purely a symptom after all, though the 82-entry
+  run had none and still stopped, so the two do not simply line up. Unresolved.
+- NEXT for a fresh session, and this is the sharpest handoff available: put the
+  instruction trace or a breakpoint around t=98.0-98.1 and find what the last enqueue
+  is and what runs immediately after it. Everything else tonight looked at t=101,
+  which is three seconds downstream of the actual event.
+
+### [2026-08-31] Target: problems.md
+- Checked the interrupt stream across t=98.09, where TQE enqueueing ceases: NOTHING
+  unusual there. CLK2 continues every 40 ms with IOPPROG interleaved, right through
+  98.09 and on to 98.75. The enqueues stop mid-stream with no interrupt, no fault and
+  no visible event. The 080d6 store-protects bracket it (97.80, 98.28, 98.75) but do
+  not coincide with it.
+- SESSION CLOSED HERE. Committed and verified: 710ae8dd2 (--real-time guard),
+  d7cda7736 (BCE 24 / --gpc-id), 38e2fcd6d (MM READY), 2331c5e3e (MTU seven words),
+  fd8d76771 (--no-halucp-svc wiring, recovered from the session transcript). Those took
+  PASS from a bare counting clock to loading, starting, painting CRT 2 and running real
+  cyclic flight I/O for ~26 s.
+- Excluded by measurement, eight of them, all mine: TQE pool size (25/28/82), the
+  corrupt chain link at 09262, the AIBGPCLO SEND ERROR, the 24-hour clock, the 080d6
+  store-protect as sole cause, crew input during the live window, PCT cancellation,
+  and the TSIP/half-hour time base.
+- The single best next step, and it is where I would start fresh: an INSTRUCTION trace
+  across t=98.00-98.10 to see what the last enqueue is and what executes after it.
+  Every measurement tonight was at the interrupt or memory-write level, which has now
+  been exhausted -- the answer is below that resolution.
+
+### [2026-08-31] Target: problems.md
+- **PASS IS ALREADY 95% IDLE BEFORE IT STOPS.** Instruction trace across
+  t=98.00-98.12 (YAGPC_TRACEWIN, since reverted): 87,792 instructions, of which
+  83,407 -- ninety-five percent -- are in region 080xx, i.e. FPMIDLE. Only 4,385 are
+  anywhere else.
+- That changes the picture of the whole 26 s window. PASS is NOT running full cyclic
+  work and then stopping; it is idle-heavy throughout and simply runs out of the little
+  work it has. Consistent with the 2026-08-30 dispatch counts (FPMIDLE 831 against
+  DDKHCT 164), which I read at the time as healthy interleaving.
+- The non-idle 5% at the end of the window is a tight 3-instruction spin at
+  1a964/1a965/1a966 that breaks out and runs on through 1a967..1a97f. Not identified.
+- SESSION ENDS HERE. The right question for a fresh start is no longer "what stops PASS
+  at t=101" nor even "what happens at t=98.09", but "why is PASS 95% idle from the
+  moment its applications start". That is a different and much earlier question than
+  anything pursued tonight, and it is where the remaining work is.
+
+### [2026-08-31] Target: problems.md, HANDOFF-PASS-IDLE.md
+- **PASS NO LONGER GOES IDLE.  ONE-LINE FIX IN exec_SVC.**  yaGPC2 saved the SVC's
+  address extension as `(ea >> 16) & 0xf`.  It has to be `(ea >> 15) & 0xf`: a sector
+  on this machine is 0x8000 halfwords (every expansion in cpu.c is `sector << 15`),
+  the 16-bit address field's own bit 15 is the "expand me" flag the sector REPLACES,
+  and FPMSVC ORs this nibble into a ZCON as a DSE that FIOSVC's `LXAR R3,R3` expands
+  by `<< 15`.  Taken from bit 16 the nibble arrives HALVED.
+- MEASURED SCALE: 6,387 of 33,961 SVCs in one run come from sector 7 (PASS's
+  applications live at 0x38xxx).  Every one of them handed FCOS a parameter-list
+  address four sectors low -- 0x3832b was rebuilt as 0x1832b, inside FCOS's own code.
+- THE DEATH CHAIN, end to end, each link measured:
+      1. FIOSVC/FIOINITQ builds an IOQE out of the "parameter list" at 0x1832b, which
+         is code: FLGS=b5e2 OPCD=dc0c WDCD=8271 PRI=a2f3 EVNT=9af3, DVID=9.
+      2. FIOBCD[9] = 0x0f00, so the phantom request wants buses 20-23 (FF1-4).
+      3. FIOPDISP marks those four busy in TCVTBCEB (`XST`, a TOGGLE) and enables the
+         BCEs -- then the device-dependent CASE indexes a table with the garbage
+         OPCD, branches to 0x04081 (unloaded data), and program-checks.
+      4. The transaction is abandoned before `ST R2,TCVTSIOM`, so no @SIO is ever
+         issued, the BCEs never run, FIOCMPLT never toggles the bits back, and
+         TCVTBCEB keeps 0x0f00 FOREVER.
+      5. FPMIHPC2's wait-queue scan only starts an IOQE whose buses are all idle, so
+         every later MTU read (mask 0x0e00 = buses 20-22) queues behind it: exactly
+         1 IOQE leaked per second, 26 in the pool.
+      6. Pool dry -> TCVTIOFP runs off the end to 0x080ce (the bad chain link at
+         09262) -> the store to TIOQINDX at 0x080d6 hits protected code -> store
+         protect -> Clock 2 never re-armed -> FPMIDLE forever.
+- BEFORE / AFTER, same headless rig: PASS stopped at t~101 s with TCVTBCEB=0x00000f00,
+  free IOQE pool 0, wait queue 25.  Now it runs past t=316 s with TCVTBCEB=0, free
+  pool 26 of 26, wait queue 0, timer queue 8, BCEs 7/8 (DK2/DK3) cycling busy/idle
+  normally -- and DK2/DK3 get DISPLAY fills, which they never did before.
+- WHY EIGHT EARLIER THEORIES ALL MISSED IT: every one of them looked at t~98-101,
+  which is the pool running dry.  The event is at t~60, forty seconds earlier, and
+  is a single I/O dispatch that never happens.
+- ALSO CORRECTED: the table at 090b2 stride 0x12 is the IOQE table (TFIOQ, 18
+  halfwords), NOT the TQEs.  The TQEs are the stride-6 chain (TFTQE, 6 halfwords)
+  and the EQEs the stride-0x0a one (TFEQE, 10).  The CVT base is 0x140, anchored by
+  TCVTCID(+0x51)=1 and the PCT/EQE/TQE/IOE free-pool group at +0x0a..+0x0d; TCVTSIPI
+  is a fullword, so every field past it sits 2 halfwords later than a naive parse of
+  TFCVT.asm puts it.  PCTs are at 0x0827c stride 0x32.
+- NEW ENV-GATED INSTRUMENTATION, all no-ops unless set: YAGPC_SNAPSHOT (whole main
+  storage to a file at chosen simulated seconds -- this is what cracked it, since the
+  FCOS control blocks can then be read offline), YAGPC_TRACEWIN / YAGPC_TRACETRIG
+  (per-instruction trace over a time window, or armed by a memory value, with
+  registers), YAGPC_EATRACE (effective address + contents for named NIAs),
+  YAGPC_RINGTRIG (dump the NIA ring when a halfword takes a value), YAGPC_SVCTRACE
+  (every SVC: site, P/L address, base register, DSE, list contents), YAGPC_SIOTRACE
+  (every MSC START I/O).  iop_dump_procs now prints per-BCE recv/indicator state and
+  is called at each snapshot.
+- REGRESSION CHECK: `make test` non-SVC failure set is byte-identical before and
+  after.  The SVC exec fixtures expect a CONSTANT 2108 for mem[90] regardless of the
+  EA -- the signature of the reference gpc never writing the EA-High field at all --
+  so they were already failing before this change and are an accepted divergence,
+  the same one the existing comment in exec_SVC describes.

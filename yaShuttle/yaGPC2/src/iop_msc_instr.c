@@ -507,6 +507,17 @@ static void exec_SIO(IOP *t, DInstr *v) {
     (void)v;
     uint32_t acc = iopls_getACC(&t->ls);
     uint32_t bw = register_get32(&t->regBusyWait);
+    /* YAGPC_SIOTRACE: every START I/O the MSC issues, with the processor
+     * mask it names, the enables in force, and whether any named BCE was
+     * already busy (which puts the MSC NO-GO and drops the transaction).
+     * This is the only place a dispatched transaction becomes a running
+     * BCE, so "FCOS dispatched an I/O and the BCEs never moved" can only
+     * be answered here. */
+    if (getenv("YAGPC_SIOTRACE"))
+        fprintf(stderr, "SIO t=%.1f acc=%08x busy=%08x ena=%08x conflict=%08x\n",
+                t->cpu ? t->cpu->elapsedTimeUs : 0.0, (unsigned)acc,
+                (unsigned)bw, (unsigned)register_get32(&t->regHalt),
+                (unsigned)(acc & bw & PROC_ALL_BCE));
     uint32_t conflict = acc & bw & PROC_ALL_BCE;
     if (conflict) {
         uint32_t st = register_get32(iopls_MST(&t->ls));

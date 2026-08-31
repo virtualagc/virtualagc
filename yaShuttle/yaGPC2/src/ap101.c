@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include "ap101.h"
 
@@ -227,8 +228,126 @@ static void ap101_timed_loadbin(AP101 *gpc) {
             len / 2, (unsigned)base, gpc->cpu.elapsedTimeUs);
 }
 
+
+/* YAGPC_SNAPSHOT=<t1>[,<t2>...]:<prefix> writes the whole of main storage,
+ * big-endian halfwords, to <prefix>-<t>.bin the first time simulated time
+ * passes each t (in SECONDS).  A raw image is what lets the FCOS control
+ * blocks -- PCTs, TQEs, the CVT, the compools -- be read offline with a
+ * script instead of guessed at from a trace, which is how the PCT table
+ * was finally located.  Times must be given in increasing order. */
+static void ap101_timed_snapshot(AP101 *gpc) {
+    static int inited = 0;
+    static double times[16];
+    static int nTimes = 0, next = 0;
+    static char prefix[400];
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_SNAPSHOT");
+        if (e != NULL) {
+            const char *colon = strrchr(e, ':');
+            if (colon != NULL) {
+                snprintf(prefix, sizeof(prefix), "%s", colon + 1);
+                const char *p = e;
+                while (p < colon && nTimes < 16) {
+                    times[nTimes++] = atof(p);
+                    const char *comma = strchr(p, ',');
+                    if (comma == NULL || comma > colon) break;
+                    p = comma + 1;
+                }
+            }
+        }
+    }
+    if (next >= nTimes) return;
+    if (gpc->cpu.elapsedTimeUs < times[next] * 1e6) return;
+    char path[512];
+    snprintf(path, sizeof(path), "%s-%g.bin", prefix, times[next]);
+    FILE *f = fopen(path, "wb");
+    if (f != NULL) {
+        int hw = gpc->cpu.mainStorage.wordCount * 2;
+        for (int a = 0; a < hw; a++) {
+            uint32_t v = mcm_get16(&gpc->cpu.mainStorage, (uint32_t)a);
+            fputc((int)((v >> 8) & 0xff), f);
+            fputc((int)(v & 0xff), f);
+        }
+        fclose(f);
+        fprintf(stderr, "snapshot: %s at t=%.3f s (%d halfwords)\n",
+                path, gpc->cpu.elapsedTimeUs / 1e6, hw);
+        iop_dump_procs(&gpc->iop);
+    } else {
+        fprintf(stderr, "snapshot: cannot write %s\n", path);
+    }
+    next++;
+}
+
+/* YAGPC_TRACEWIN=<from>-<to>:<path> writes one line per instruction
+ * executed between those two simulated SECONDS.  A window is the only
+ * usable form for this machine: an unconditional trace is millions of
+ * lines a second, while the questions that need it -- "what did the CPU
+ * do in the 38 ms between enabling the BCEs and never starting them" --
+ * are always about a known, short interval. */
+static void ap101_timed_trace(AP101 *gpc) {
+    static int inited = 0;
+    static double from = -1, to = -1;
+    static FILE *f = NULL;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_TRACEWIN");
+        if (e != NULL) {
+            char path[400];
+            if (sscanf(e, "%lf-%lf:%399s", &from, &to, path) == 3)
+                f = fopen(path, "w");
+        }
+    }
+    if (f == NULL) return;
+    double t = gpc->cpu.elapsedTimeUs / 1e6;
+    if (t < from) return;
+    if (t > to) { fclose(f); f = NULL; return; }
+    fprintf(f, "%.6f %05x\n", t, (unsigned)psw_get_nia(&gpc->cpu.psw));
+}
+
+/* YAGPC_TRACETRIG=<hexaddr>:<hexfullword>:<count>:<path> starts the same
+ * per-instruction trace the moment that fullword first holds that value,
+ * and runs it for <count> instructions.  A time window cannot catch an
+ * event whose timing moves between runs -- TCVTBCEB going to 0x0f00
+ * lands anywhere across a third of a second -- so the trigger is the
+ * state itself. */
+static void ap101_trig_trace(AP101 *gpc) {
+    static int inited = 0, armed = 0;
+    static uint32_t addr = 0, want = 0;
+    static long count = 0;
+    static FILE *f = NULL;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_TRACETRIG");
+        if (e != NULL) {
+            char path[400];
+            unsigned a, v; long n;
+            if (sscanf(e, "%x:%x:%ld:%399s", &a, &v, &n, path) == 4) {
+                addr = a; want = v; count = n; f = fopen(path, "w");
+            }
+        }
+    }
+    if (f == NULL) return;
+    if (!armed) {
+        if (mcm_get32(&gpc->cpu.mainStorage, addr) != want) return;
+        armed = 1;
+        fprintf(f, "* trigger %05x=%08x at t=%.6f\n", (unsigned)addr,
+                (unsigned)want, gpc->cpu.elapsedTimeUs / 1e6);
+    }
+    if (count-- <= 0) { fclose(f); f = NULL; return; }
+    fprintf(f, "%.6f %05x %08x", gpc->cpu.elapsedTimeUs / 1e6,
+            (unsigned)psw_get_nia(&gpc->cpu.psw),
+            (unsigned)mcm_get32(&gpc->cpu.mainStorage, addr));
+    for (int i = 0; i < 8; i++)
+        fprintf(f, " %08x", (unsigned)register_get32(cpu_r(&gpc->cpu, i)));
+    fprintf(f, "\n");
+}
+
 void ap101_exec1(AP101 *gpc) {
     ap101_timed_unprotect(gpc);
+    ap101_timed_snapshot(gpc);
+    ap101_timed_trace(gpc);
+    ap101_trig_trace(gpc);
     ap101_timed_patch(gpc);
     ap101_timed_loadbin(gpc);
     /* YAGPC_NIAPROBE=<hexaddr> dumps R0-R7 and the SSL's two context-struct

@@ -1885,6 +1885,33 @@ static void exec_SRET(CPU *t, DInstr *v) {
 static void exec_SVC(CPU *t, DInstr *v) {
     uint32_t ea = cpu_g_ea(t, v);
     uint32_t r1 = register_get32(cpu_r(t, 1));
+    /* YAGPC_SVCTRACE=<path>: one line per SVC -- where it was issued, the
+     * parameter-list address it computed, the base register and DSE that
+     * address came from, and the first halfwords of the list.  FCOS builds
+     * an I/O request straight out of that list, so a list that is not a
+     * list at all shows up here and nowhere else. */
+    {
+        static int inited = 0;
+        static FILE *f = NULL;
+        if (!inited) {
+            inited = 1;
+            const char *e = getenv("YAGPC_SVCTRACE");
+            if (e != NULL) f = fopen(e, "w");
+        }
+        if (f != NULL) {
+            unsigned b = df_has(v, 'b') ? (unsigned)df_get(v, 'b') : 9u;
+            fprintf(f, "t=%.1f nia=%05x ea=%05x b=%u base=%08x dse=%u pl=",
+                    t->elapsedTimeUs, (unsigned)psw_get_nia(&t->psw),
+                    (unsigned)ea, b,
+                    b < 4 ? (unsigned)register_get32(cpu_r(t, (int)b)) : 0u,
+                    b < 4 ? (unsigned)registerfile_get_dse(
+                                &t->regFiles[psw_get_reg_set(&t->psw)], (int)b)
+                          : 0u);
+            for (int i = 0; i < 9; i++)
+                fprintf(f, " %04x", (unsigned)membus_get16(t->ram, ea + i));
+            fprintf(f, "\n");
+        }
+    }
     if (t->halUCP && t->halUCPHandleSVC && t->halUCPHandleSVC(t->halUCP, ea, r1)) {
         return;
     }
@@ -1894,8 +1921,24 @@ static void exec_SVC(CPU *t, DInstr *v) {
      * bits 40-43" -- the EA-High field.  Writing only the low 16 bits left
      * that extension stale, so FPMSVC, which rebuilds the parameter-list
      * address from it (`SRL R1,4 / NHI R1,X'000F'` on TPSASOP+2, then OR
-     * into a ZCON), fetched the SVC number from the wrong sector. */
-    psw_set_ea_high(&t->psw, (ea >> 16) & 0xf);
+     * into a ZCON), fetched the SVC number from the wrong sector.
+     *
+     * That extension is bits 15-18, NOT 16-19.  A sector on this machine is
+     * 0x8000 halfwords (see cpu_g_expand: every expansion is `sector << 15`),
+     * and the 16-bit address field's own bit 15 is the "expand me" flag that
+     * the sector REPLACES -- so the four bits that turn the 16-bit field back
+     * into a 19-bit address begin at bit 15.  FPMSVC settles it: it ORs this
+     * nibble into a ZCON as a DSE, FIOSVC's `LXAR R3,R3` masks the address
+     * with 0x7fff and expands it by `dse << 15`, so a nibble taken from bit
+     * 16 arrives HALVED.  Every SVC issued from sector 2 or above rebuilt a
+     * parameter-list address one to seven sectors low: PASS's applications
+     * live at 0x38xxx, and FIOSVC was building I/O requests out of whatever
+     * happened to sit at 0x18xxx -- FCOS's own code.  One such phantom
+     * request, dispatched to buses 20-23 with a garbage op code, wild-
+     * branched, program-checked, and left those four BCEs marked busy
+     * forever; every later real I/O then queued behind them until the IOQE
+     * pool ran dry and PASS went idle for good about 26 seconds in. */
+    psw_set_ea_high(&t->psw, (ea >> 15) & 0xf);
     psw_set_int_code(&t->psw, ea & 0xffff);
     membus_set32(t->ram, 0x58, register_get32(&t->psw.psw1), true);
     membus_set32(t->ram, 0x5a, register_get32(&t->psw.psw2), true);

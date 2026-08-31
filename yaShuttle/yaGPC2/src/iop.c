@@ -1058,9 +1058,19 @@ void iop_dump_procs(IOP *iop) {
         int halt = iop_proc_get(&iop->regHalt, i);
         int busy = iop_proc_get(&iop->regBusyWait, i);
         if (!halt && !busy) continue;
-        fprintf(stderr, "iop procs: BCE%-2d halt=%d busy=%d pc=%05x\n",
+        const BCE *b = &iop->bce[i - 1];
+        /* recvActive/recvLeft answer "is this BCE parked mid-transfer",
+         * which halt/busy alone cannot: a BCE waiting out a commanded
+         * receive that no subsystem will ever answer looks identical to a
+         * running one until the receive state is printed beside it. */
+        fprintf(stderr, "iop procs: BCE%-2d halt=%d busy=%d pc=%05x ind=%d pex=%d"
+                " recv=%d left=%u since=%.0f gotAny=%d dly=%d\n",
                 i, halt, busy,
-                (unsigned)(register_get32(iopls_at(&iop->ls, i, 0, 2)) & 0x3ffffu));
+                (unsigned)(register_get32(iopls_at(&iop->ls, i, 0, 2)) & 0x3ffffu),
+                iop_proc_get(&iop->regIndicator, i),
+                iop_proc_get(&iop->regProgExcept, i),
+                (int)b->recvActive, (unsigned)b->recvLeft, b->recvSinceUs,
+                (int)b->recvGotAny, (int)b->delayActive);
     }
 }
 

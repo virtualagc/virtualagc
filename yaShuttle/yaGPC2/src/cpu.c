@@ -555,6 +555,32 @@ static uint32_t ea_expand(CPU *cpu, uint32_t ea, int opType, bool hasDse, uint32
     return hasDse ? cpu_g_expand_dse(cpu, ea, opType, dseVal) : cpu_g_expand(cpu, ea, opType);
 }
 
+/* YAGPC_EATRACE=<hexnia>[,<hexnia>...] prints the effective address a
+ * named instruction computed, and what is there.  A register dump says
+ * WHAT a wild branch went to; only the EA says WHERE the address came
+ * from, which is the difference between "this table entry is wrong" and
+ * "the table is being indexed wrong". */
+static void cpu_ea_trace(CPU *cpu, uint32_t ea) {
+    static int inited = 0;
+    static long nia[8];
+    static int count = 0;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_EATRACE");
+        while (e != NULL && *e != '\0' && count < 8) {
+            char *end = NULL;
+            nia[count++] = strtol(e, &end, 16);
+            e = (end != NULL && *end == ',') ? end + 1 : NULL;
+        }
+    }
+    for (int i = 0; i < count; i++)
+        if ((long)psw_get_nia(&cpu->psw) == nia[i])
+            fprintf(stderr, "EATRACE nia=%05x ea=%05x mem16=%04x mem32=%08x "
+                    "t=%.1f\n", (unsigned)psw_get_nia(&cpu->psw), (unsigned)ea,
+                    (unsigned)membus_get16(cpu->ram, ea),
+                    (unsigned)membus_get32(cpu->ram, ea), cpu->elapsedTimeUs);
+}
+
 uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
     uint32_t ea;
 
@@ -906,6 +932,7 @@ uint32_t cpu_g_eaf(CPU *cpu, DInstr *v, int extraOffset) {
      * address, with the reading NIA.  A poll loop is invisible to
      * YAGPC_WATCHHW, which only sees stores, so "what did the wait
      * actually see" needs its own hook. */
+    cpu_ea_trace(cpu, ea);
     {
         static int inited = 0;
         static long watch = -1;
@@ -924,6 +951,7 @@ uint32_t cpu_g_eaf(CPU *cpu, DInstr *v, int extraOffset) {
 
 uint32_t cpu_g_eah(CPU *cpu, DInstr *v) {
     uint32_t ea = cpu_g_ea(cpu, v);
+    cpu_ea_trace(cpu, ea);
     return membus_get16(cpu->ram, ea);
 }
 
@@ -995,8 +1023,34 @@ void cpu_shadow_iu_store(CPU *cpu, uint32_t addr) {
  * (and to the fullword beginning there), with the storing NIA and the
  * simulated timestamp.  Used to order a CPU-side flag arm against the BCE's
  * #SST that is supposed to clear it. */
+/* YAGPC_RINGTRIG=<hexaddr>:<hexhalfword> dumps the NIA ring the first time
+ * that halfword is stored with that value.  A watchpoint says which
+ * instruction wrote a bad value; only the ring says how execution got
+ * there, which is the difference between "this store is wrong" and "the
+ * caller handed this routine a wrong pointer". */
+static void cpu_ring_trigger(CPU *cpu, uint32_t addr, uint32_t value) {
+    static int inited = 0, fired = 0;
+    static long trigAddr = -1, trigVal = -1;
+    if (!inited) {
+        inited = 1;
+        const char *w = getenv("YAGPC_RINGTRIG");
+        if (w != NULL) {
+            char *end = NULL;
+            trigAddr = strtol(w, &end, 16);
+            trigVal = (end != NULL && *end == ':') ? strtol(end + 1, NULL, 16) : -1;
+        }
+    }
+    if (fired || trigAddr < 0) return;
+    if ((long)addr != trigAddr || (long)(value & 0xffff) != trigVal) return;
+    fired = 1;
+    fprintf(stderr, "RINGTRIG %05x=%04x t=%.1f\n", (unsigned)addr,
+            (unsigned)(value & 0xffff), cpu->elapsedTimeUs);
+    cpu_dump_nia_ring(cpu, "RINGTRIG", psw_get_nia(&cpu->psw));
+}
+
 static void cpu_watch_store(CPU *cpu, uint32_t addr, uint32_t value,
                             const char *kind) {
+    cpu_ring_trigger(cpu, addr, value);
     static int inited = 0;
     static long lo = -1, hi = -1;
     if (!inited) {
