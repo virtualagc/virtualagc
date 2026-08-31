@@ -498,6 +498,66 @@ rebuilt image then ran under `yaGPC2` against Don's own `IPL.fcm` to the same
 same wait at `01df8` with identical registers — validating our build pipeline
 against a build he confirms boots.
 
+## Store protection
+
+`SPON` and `SPOFF` used to be accepted and discarded. They are now recorded
+against the location counter and emitted into the object module as
+
+```
+ PROT <csect> <s>-<e>,...
+```
+
+the ranges being the **protected** regions, as csect-relative halfword offsets,
+in hex, **end-exclusive**. This is Don Schmidt's format; the consumer was
+already committed in `nsts-sdl-dps` `7fff229`, whose code comment reads *"asm101's
+SPON/SPOFF capture"* — he reached the same reading of these pseudo-ops
+independently and pre-wired the reader before any of this was written.
+
+**The carrier is a control card, not an object record, and that distinction is
+the whole of it.** An object-module record has `0x02` in column 1;
+`ap101Utils/objModule.py` routes those to `Record.from_image()` and everything
+else to `ControlRecord`, and lnk101 reads `PROT` only from the `ControlRecord`
+list. A `0x02` record typed `PRT` was written first and is **invisible** to the
+linker: it would have integrated cleanly, emitted nothing, and passed every
+test. There is precedent for the carrier inside the format — HAL/S-FC's PASS2
+already interleaves `' STACK <csect>'` cards in the object stream — and every
+reader to hand already tolerates one, where the object record needed two of them
+patched.
+
+Two switches, because both the meaning of the pseudo-ops and the state that
+holds where a section carries no mark are **inferred from usage**. No manual,
+POO section or linkage-editor document defines `SPON`/`SPOFF`.
+
+```
+--no-store-protect        emit no PROT cards at all
+--protect-default=on|off  state at csect start, default on
+```
+
+**No diagnostic is emitted for unbalanced marks.** Of the 40 files in OI340600
+that use these at all, 31 have `SPOFF` with no `SPON` and 5 have `SPON` with no
+`SPOFF`, against 4 balanced — so the obvious diagnostic would fire on 36 of 40.
+Unbalanced is the normal case, not the error case, and that holds whatever these
+turn out to mean.
+
+**Nothing is reconciled with the deck-level `SET`/`CLEAR` marks, deliberately.**
+The evidence is that the marks were put where somebody had a specific worry
+rather than as part of a scheme: they are 5.8–7.6× enriched in files containing
+BCE opcodes, and that survives holding the name prefix constant — within FIO, 19
+of 30 files with BCE opcodes are marked against 7 of 84 without. Reconciling
+would mean asserting an answer the source does not contain. lnk101 does it,
+where it is visible.
+
+The flag is driven by macro **expansion**, not by scanning source text, which is
+not a nicety: 65 modules per release emit cards where only 32 name `SPON`/`SPOFF`
+in their own source. `MLIB80/TFPSA.asm` emits `SPOFF` from behind an `AIF`.
+
+Verified by the acceptance criterion agreed with the emulator side: with
+`--no-store-protect --protect-default=off`, the objects of both releases are
+**542 of 542 bit-for-bit** identical to those of a binary built without the
+feature at all. The baseline for that test has to be a **pre-feature binary** —
+comparing against a stored sweep that the enabled feature has since regenerated
+reports failures that are pure bookkeeping.
+
 ## Deliberate divergences from the Python
 
 Two, both commented at the point they occur.
@@ -519,8 +579,11 @@ canonicalised**; on OI301700, about 180 of 271 differ raw and all 271 are
 canonically identical. "About", because the raw count is itself a function of
 the run: four sweeps of the same two programs over the same sources gave 180,
 178, 174 and 181. The canonical count was 0 in all four.
-`pfs-test/objcanon.py` re-expresses an object module by symbol name rather than
-by ESD id, which is the only way to compare two of them.
+`objcanon.py`, beside this file, re-expresses an object module by symbol name
+rather than by ESD id AND sorts the result, which together are the only way to
+compare two of them. It moved here from the test harness so that it lives with
+the assembler whose output it decodes; it imports `asciiToEbcdic` from its own
+directory.
 
 The correlation is exact: **every** module whose object differs has two or more
 ENTRY symbols, and **none** of the 137 with one or none does. Note that a single
