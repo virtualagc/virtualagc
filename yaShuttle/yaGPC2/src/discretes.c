@@ -34,6 +34,23 @@ int yagpc_port_base(void) {
     return g_portBase;
 }
 
+/* Which of the five GPCs this process is.  Only the intercomputer bus
+ * (BCE 24) needs it: every other bus has one port shared by all GPCs,
+ * but IP is per-GPC, so the BCE number alone does not name a port. */
+static int g_gpcId = -1;
+
+void yagpc_set_gpc_id(int id) { g_gpcId = (id >= 1 && id <= 5) ? id : 1; }
+
+int yagpc_gpc_id(void) {
+    if (g_gpcId < 0) {
+        const char *w = getenv("NSTS_GPC_ID");
+        char *end = NULL;
+        long v = (w != NULL && *w != '\0') ? strtol(w, &end, 10) : -1;
+        g_gpcId = (end != NULL && *end == '\0' && v >= 1 && v <= 5) ? (int)v : 1;
+    }
+    return g_gpcId;
+}
+
 #define DISCRETES_PORT  (yagpc_port_base() + YAGPC_DISCRETES_OFFSET)
 
 #define OP_SET   1

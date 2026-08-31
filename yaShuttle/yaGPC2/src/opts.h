@@ -198,6 +198,7 @@ typedef struct {
      * own base lets two emulations run side by side without fighting over
      * sockets -- MEDS and discretePanel.py take the same option. */
     char *portBase;                   /* decimal; default 6900 */
+    char *gpcId;                      /* decimal 1-5; default 1 */
 
     /* --mtu-model: answer as the Master Timing Unit (device 22 on BCE
      * 20-22) so PASS can initialise its clock.  See src/mtumodel.h. */

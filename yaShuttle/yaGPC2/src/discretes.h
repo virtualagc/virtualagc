@@ -110,5 +110,7 @@ void discretes_publish(int reg, uint32_t mask, bool on);
 #define YAGPC_DISCRETES_OFFSET  80
 void yagpc_set_port_base(int base);
 int  yagpc_port_base(void);
+void yagpc_set_gpc_id(int id);
+int  yagpc_gpc_id(void);
 
 #endif

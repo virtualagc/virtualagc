@@ -141,6 +141,16 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
         yagpc_set_port_base((int)v);
     }
 
+    if (opts->gpcId != NULL && *opts->gpcId != '\0') {
+        char *end = NULL;
+        long v = strtol(opts->gpcId, &end, 10);
+        if (end == NULL || *end != '\0' || v < 1 || v > 5) {
+            fprintf(stderr, "--gpc-id: expected 1-5, got \"%s\"\n", opts->gpcId);
+            exit(1);
+        }
+        yagpc_set_gpc_id((int)v);
+    }
+
     if (opts->deuModel) {
         /* Deliberately instead of, not alongside, the network servicer:
          * only one thing can sit on the far end of the bus, and the

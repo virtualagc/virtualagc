@@ -65,11 +65,11 @@
  * gpcBceNum-mapped entries (the ones a real BCE number can address).
  * IC1-5=1-5, DK1-4=6-9 (MEDS/IDP -- this bridge's own initial target),
  * PL1-2=10-11, LB1-2=12-13, FC5-8=14-17, MM1-2=18-19, FC1-4=20-23.
- * BCE 24 ("IP") is deliberately NOT included here: bus.civet gives it a
- * DIFFERENT port per GPC instance (IP1..IP5, ports 6924-6927), which
- * needs a GPC-identity parameter this table doesn't have -- out of scope
- * until something actually needs BCE 24; bcenet_transport_open_bus()
- * fails (logged, not fatal) for it rather than guessing a port. */
+ * BCE 24 ("IP") is per-GPC and so cannot live in this table at all:
+ * bus.civet gives IP1..IP5 the same gpcBceNum 24 but a different port
+ * each, selected by GPC identity rather than by BCE number.  It is
+ * resolved separately in bcenet_bus_port() from yagpc_gpc_id().
+ * Selecting PFS from the GPCIPL menu is what finally needed it. */
 static const int BCENET_BUS_PORT[BCENET_MAX_BUS_ID + 1] = {
     [1] = 1,  [2] = 2,  [3] = 3,  [4] = 4,  [5] = 5,   /* IC1-5 */
     [6] = 6,  [7] = 7,  [8] = 8,  [9] = 9,             /* DK1-4 */
@@ -85,7 +85,20 @@ static const int BCENET_BUS_PORT[BCENET_MAX_BUS_ID + 1] = {
  * NSTS_BUS_PORT_BASE) without fighting the first for sockets.  At the
  * default base of 6900 these are the 6901..6923 of nsts-sim-gpc's own
  * busConfig, unchanged. */
+/* bus.civet's own IP1..IP5 offsets, indexed by GPC number.  Note that it
+ * gives IP2 and IP3 the SAME port (6925), so five GPCs share four ports.
+ * That looks like an upstream typo, but it is reproduced verbatim rather
+ * than silently corrected: a GPC 3 that "fixed" it would be talking on a
+ * port the reference implementation is not listening to, which is a worse
+ * failure than sharing one. */
+static const int BCENET_IP_PORT_BY_GPC[6] = { 0, 24, 25, 25, 26, 27 };
+
 static int bcenet_bus_port(int busID) {
+    if (busID == 24) {
+        int gpc = yagpc_gpc_id();
+        if (gpc < 1 || gpc > 5) gpc = 1;
+        return yagpc_port_base() + BCENET_IP_PORT_BY_GPC[gpc];
+    }
     int off = (busID >= 0 && busID <= BCENET_MAX_BUS_ID)
                   ? BCENET_BUS_PORT[busID] : 0;
     return off ? yagpc_port_base() + off : 0;

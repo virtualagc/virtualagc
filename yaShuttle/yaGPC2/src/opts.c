@@ -146,6 +146,12 @@ static const char *HELP_TEXT =
 "                                  on BCE 20-22), so PASS can initialise its\n"
 "                                  clock.  Without it those reads return\n"
 "                                  nothing and PASS computes a 24-hour time\n"
+"  --gpc-id <n>                     which of the five GPCs this is (1-5,\n"
+"                                  default 1).  Only the intercomputer bus\n"
+"                                  (BCE 24) needs it: every other bus has one\n"
+"                                  port shared by all GPCs, but IP1-IP5 have a\n"
+"                                  port each, so the BCE number alone does not\n"
+"                                  name one\n"
 "  --port-base <n>                  base of the UDP port range the buses use:\n"
 "                                  bus n is base+n, the discrete bus base+80\n"
 "                                  (default 6900, matching nsts-sim-gpc's\n"
@@ -369,6 +375,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->mtuModel = true;
         } else if (tok_is(tok, "--port-base", &n)) {
             opts->portBase = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--gpc-id", &n)) {
+            opts->gpcId = take_value(argc, argv, &i, tok, n);
         } else {
             bool matched = false;
             for (int ch = 0; ch < OPTS_NUM_CHANNELS && !matched; ch++) {
