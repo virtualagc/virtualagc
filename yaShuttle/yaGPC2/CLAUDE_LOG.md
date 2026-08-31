@@ -4351,3 +4351,598 @@ the `psaRanges` carve-out, the unpushed-commit count — was verified present.)
   `deu_complete_fill` counts a TIME FILL and then discards it, so the clock
   never reaches `d->mem`; and a static format refreshed every cycle writes
   identical words. I briefly called the frozen image a defect -- it is not.
+
+### [2026-08-29] Target: [problems.md]
+- **PASS boots and displays, then wedges in the scheduler.** After the Sec.
+  2.2.8 addressing fix the 0xc6c6 crash is gone, GPCIPL draws its real IPL
+  MENU, the DEU IPLs and is driven (1206 commands, 402 display fills, 395
+  time fills). It then stops servicing the display and spins forever.
+- The spin is `FPMRLPCT` +0x5..+0x8 -- "REMOVE PCT FROM RUN QUEUE". Its walk
+  has NO end-of-list test: `DO WHILE=(CR,R5,NE,R0) / LR R1,R0 / LH R0,TPCTNXT
+  / ENDDO`. Handed a PCT that is not on the queue it runs to the null
+  terminator, R0 stays 0, and it never matches.
+- FULL CHAIN, measured:
+  1. PCT 827c sits on the run queue, wait=0000 (READY), psw=**ac140831**.
+  2. That PSW is `FPMDPSW`, FPMFCLOS's own fallback constant
+     `DC Z(FPMSVCL+2,FPMSVC21,8)` -- stored by `ST R4,TPCTPSW  IN CASE CLOSE
+     MUST RE ISSUE CLOSE SVC`, immediately before `CALL FPMCLOSE` which is
+     marked **(NO RETURN)**. Normally it is never dispatched.
+  3. FPMDISP's closing `LPS@` dispatches it. NIA 0xac14 expands (BSR=3) to
+     0x1ac14 = FPMDPSW ITSELF, i.e. the word after the 2-halfword SVC at
+     FPMSVCL (0x1ac12, `c9fb 8146`). The CPU executes the constant.
+  4. Execution runs off the end of FPMFCLOS (0x1abe6..0x1ac15) and falls
+     into FPMFRPCT (0x1ac16) -- measured path
+     `1a966..1a97f 1ac14 1ac15`, i.e. straight out of FPMDISP.
+  5. FPMFRPCT is thus entered with garbage: R0=13bb0018 (0x13bb is
+     #EDDKHCT+5, NOT a PCT; they live in FCMCBLKS 0811a..08b89). Its
+     `LR R5,R0` passes that to FPMRLPCT, which spins.
+- **OUR LINK IS NOT AT FAULT.** The image at 1ac12..1ac15 is byte-identical
+  to the DASS reference (`latest.unlinkSSW_(PostIPL)/memory.fcm`):
+  `c9fb 8146 ac14 0831`. The fallback PSW really does point at FPMDPSW.
+- STILL OPEN: why PCT 827c is left runnable holding the re-issue PSW at all.
+  FPMFCLOS is the FORCED CLOSE processor, so something is being forcibly
+  closed earlier -- that earlier event is the next thing to find.
+- Ruled out along the way, each by measurement, not argument: the UDP bridge
+  (same wedge with the in-process DEU, no queue at all); the keystroke path
+  (ITEM 1 EXEC arrives intact as `0008 ff03 a07c`); "all PCTs waiting" (both
+  are wait=0000); FIOPURGE clobbering R0 (it never writes R0 and has no
+  calls); and widening the 2.2.8 rule to all extended operands (breaks the
+  boot outright at nia=00156, DEU never IPLs).
+
+### [2026-08-30] Target: [problems.md]
+- **ROOT CAUSE of the scheduler wedge: BAL and SCAL saved the CALLEE's
+  BSR/DSR instead of the caller's.** Both computed their target with
+  `cpu_g_ea()` BEFORE snapshotting `psw1`, and `cpu_g_ea()` modifies the PSW
+  when the target is reached through a fullword indirect pointer with C=1
+  (PoO Fig. 2-17, "MODIFY PSW ACTION": DSR=DSV, BSR=BSV). That is precisely
+  how `BAL@# R7,...ZCON` calls into another sector. Fix is ordering only:
+  read `psw1` first. `cpu_incr_nia()` already runs before the exec dispatch
+  (cpu.c:1257), so the link's address half is unaffected.
+- The flight software states the contract itself, in FCMTRACE's exit:
+  `BCRE 7,R7  RETURN TO CALLING ROUTINE (BSR/DSR OF CALLING ROUTINE WILL BE
+  RESTORED BY THIS INSTRUCTION)`.
+- Chain it broke: FCMSSYNC calls FCMTRACE via the PSA trace ZCON at 0x0000c
+  = `98a0 0f33` (DSV=3, CD=1; byte-identical to the DASS reference, so the
+  ZCON is right). DSR went 1->3 and STAYED 3. FPMCLOSE then read TPCTFLGS
+  through `USING TFPCT,R0`, R0=827c: bit 15 set, so DSR expands it, and
+  DSR=3 read 0x182ab instead of 0x82ab. True flags 0000; wrong address gave
+  bits in the 0x00C0 mask, so `IF (TB,TPCTFLGS,X'00C0',Z),OR,...` took its
+  ELSE, the PCT was never freed, and FPMDISP re-dispatched it on FPMFCLOS's
+  re-issue PSW -- which resumes on a constant and falls into FPMFRPCT.
+- SCAL's variant surfaced next: DPLLIGHT's `SRET` at 0x101f4 returned to
+  0x16b8f, FILL in ours AND in the reference, so the target was wrong rather
+  than missing. That was the recurring `invalid instruction 0xc6c6`.
+- **RESULT: 900s / 505,713,872 steps, ZERO invalid instructions**, and the
+  NIA sampler finds the CPU spread across **FPMIDLE (080aa..080c6)** -- PASS's
+  own idle process -- instead of FPMRLPCT's runaway. The FCOS scheduler is
+  dispatching.
+- STILL OPEN: the DEU stops being driven at 1206 commands / 401 polls and the
+  display does not advance past GPCIPL's IPL menu. PASS runs but no
+  application process is producing display output yet. That is the next thing.
+- HARNESS BUG FIXED (was silently corrupting runs): runpass.sh's overlap
+  guard read `pgrep -f 'discretePane[l]' | grep -c python3`, but `pgrep -f`
+  prints only PIDs, so the count was ALWAYS 0 and overlapping panels were
+  never detected. Now `pgrep -fc 'discretePane[l]'`. Note the panel's process
+  NAME is python3, so a bare `pgrep -c discretePanel` also reports 0.
+
+### [2026-08-30] Target: [problems.md]
+- **SVC never saved the EA's 4-bit extension.** PoO Sec. 2.5.1.1: "EA-High --
+  For an SVC instruction, the 4-bit extension to make the 19-bit effective
+  address is saved in the old PSW bits 40-43." `exec_SVC` wrote only
+  `psw_set_int_code(ea)`, truncating to 16 bits. The field existed in
+  PSW_DESC2 as 'e' but had NO accessor and was never written by anything.
+- FPMSVC rebuilds the SVC parameter-list address from exactly those bits
+  (`LH$ R1,TPSASOP+2 / SRL R1,4 / NHI R1,X'000F' / XUL / OR / OHI X'8000'`),
+  so a stale extension fetched the SVC number from the wrong sector; a wrong
+  number indexes FPMSVCEP, whose seven empty slots dispatch to address 0.
+  FPMSVCEP itself is byte-identical to the DASS reference -- build is right.
+- MEASURED: branches into the PSA at 00000, caught by the Instruction
+  Monitor, fell from **5302 to 36** in a 450s run (99.3%). The DK display
+  task $0DDKHCT no longer fails at all; the 36 survivors are a DIFFERENT
+  caller, #CARDCSB (ARDCSBUS) at 45f0b, and are a separate case.
+- Real application code now runs where only FPMIDLE did: $0ARAGPC, #CARYMFB,
+  A2ARDCSB, FIOPDISP, FPMMTURM all appear in the traces.
+- STILL OPEN: the DEU remains frozen at 1206 commands / 401 polls, so no
+  display output yet. Next lead, measured but NOT yet acted on: the SVC
+  operand address comes out of `cpu_g_ea` unexpanded (e.g. ea=007c8) because
+  bit 15 is clear and no base register is used, so Sec. 2.9's implied
+  DSR=0000 applies -- yet the trace shows DSR=1 and the real parameter list
+  in sector 1 (087c8). Whether the SVC operand should instead expand with
+  the live DSR needs checking against the PoO before changing anything.
+- Costs 249 gpc fixtures (111114 -> 110865); gpc does not write EA-High
+  either, so they encode its absence.
+- **NEXT BLOCKER, precisely located: BCE6 never starts after the handoff.**
+  IOP bus activity across the GPCIPL->PASS handoff, from YAGPC_IOPTRACE:
+      bus              before      after
+      BCE6 (DK/disp)   113279      0
+      BCE18 (mass mem) 554879      0
+      BCE7/BCE8/BCE24  ~8000 ea    ~8000 ea  (still running)
+      MSC              723596      183531
+  So the IOP is alive and PASS does run bus programs -- on 7, 8 and 24 --
+  but never starts one on bus 6, which is exactly why the DEU sees nothing.
+  This is a DIFFERENT problem from the three fixed today, and the keystroke
+  path cannot be used to probe it: with no BCE6 program the DEU is never
+  polled, so no keys can be delivered either.
+- Also still true: at 100 ms sampling, 1767 of 1767 post-handoff samples are
+  in FPMIDLE, so application work is under 0.1% of elapsed time. Application
+  sections ($0ARAGPC, #CARYMFB, A2ARDCSB, FIOPDISP, FPMMTURM) do appear in
+  NIARING dumps, so they run in brief bursts rather than not at all.
+- 36 surviving branch-to-zero cases are NOT bad SVC numbers: FPMSVCEP's empty
+  slots are 00, 0a, 0b, 17, 1c, 1d, 32, and no application-range SVC lands on
+  any of them (traced). FPMSVC dispatches with `LA R2,FPMSVCEP / LH R2,0(R4,R2)
+  / BAL$ R7,0(R2)`, so the remaining failures are a bad table READ, not a bad
+  index -- FPMSVCEP is at 0x80ce, bit 15 set, so that load expands with DSR.
+
+### [2026-08-30] Target: [problems.md]
+- **Why the DEU goes quiet: PASS never queues DK I/O, so BCE6 is never
+  enabled.** Established with the new YAGPC_PROCTRACE:
+      ENABLE t=210910913 data=02000000  80002000 -> 82002000  dk1=1
+      MRESET t=210986839 data=c0767fe0  82002000 -> 00000000  dk1=0
+      ENABLE t=220674753 data=80002000  00000000 -> 80002000  dk1=0
+  GPCIPL master-resets the IOP just before handing off; PASS re-enables only
+  MSC + MM1 to load itself, later FC1-4 (20-23) and IP (24), never DK1.
+- NOT an initialisation gap: FCMINIOP enables ONLY the MSC
+  (`LHI R4,FCMENMSC / PC R4,R5  ENABLE MSC`), so every BCE is meant to come
+  up per-bus when there is I/O for it. The DK bus stays down because no
+  display I/O is ever queued.
+- Dead ends, recorded so they are not re-walked: FCMBUSCM's FCMDEU1/2/3
+  masks (X'03000000' etc.) are the **BFS-ENGAGED** path and compute buses to
+  be MASKED, not enabled; and toggling the CRT-select discrete (REG_B bit 7)
+  after PASS is up raises no reconfiguration request -- measured, no
+  processor change and DEU still 1206.
+- `data=00000040` is NOT anomalous: it is FCMBCE25, `IAL R4,FCMBCE25 / PC
+  R4,R5 DISABLE BCE 25` -- the self-test processor (PoO p.293, per user),
+  disabled by FCMINIOP by design.
+- NEXT: find what queues DK display I/O in PASS. The display task $0DDKHCT
+  is dispatched and now survives its SVCs, so the question is what it is
+  waiting on -- likely an OPS/major-function selection, which cannot be
+  entered from the DEU because with no BCE6 program the DEU is never polled.
+- **FRONTIER: DK1's RECEIVER is masked out at runtime, uniquely.** With the
+  new MIA reporting in YAGPC_PROCDUMP:
+      iop mia: xmit=43bfff80 recv=41bfff80  dk1(bce6) xmit=1 recv=0
+  The masks differ by EXACTLY bus 6's bit. Every other bus has both enabled,
+  DK2 and DK3 included. So PASS can transmit to the display but cannot hear
+  it -- which would make DEU polling pointless and is the best current
+  explanation for no DEU IOQE ever being queued.
+- NOT a build defect: TFCMXMSK (09c74) and TFCMRMSK (09c76) are both loaded
+  as 00003000 -- mass memory only -- and byte-identical to the DASS
+  reference. The masks GROW at runtime, so the software's own logic is what
+  leaves DK1 out of the receiver set. Writers are FCMBMASK (bus mask
+  manager, ENTRY=FSVC0035, an SVC handler taking a set/reset request) and
+  FCMBUSCM (bus reconfiguration).
+- Mechanism now fully mapped: FCMINIOP enables ONLY the MSC and the MIAs
+  from TFCMXMSK/TFCMRMSK; thereafter FIOPDISP+0x17 (cpu@1b991) enables a
+  BCE when it dispatches an IOQE for that bus, and FIOCMPLT (cpu@1b5f4)
+  halts it on completion. Measured hit counts over a full run: FCMLINIT
+  804549, FIOPDISP 106789, FCMINIOP 204, FCMNINIT 0 -- so I/O dispatch runs
+  constantly and simply never names bus 6.
+- PASS DOES intend to use the DK bus: FCMLINIT's FCMBUSDV
+  "PC-INITIALIZATION-POINTER-TABLE" pairs Y(FIODEUTB) with FCMBUS6 (EQU 12 =
+  2x6), alongside ICC/PLL/LDB/FCS for buses 1/10/12/14.
+- NEXT: find who calls FCMBMASK (SVC 35) to clear DK1's receiver bit, or
+  what leaves it unset when the other buses are added. That is a single
+  measurable question: trace writes to TFCMRMSK (09c76).
+- **DK1's masking is TRACED TO ITS SOURCE.** Watching TFCMRMSK (09c76) and
+  every MIA receiver command:
+      RECV-ENA t=230899371 data=02000000 -> recv=4203ff80 dk1=1 cpu@18494
+      ...all buses enabled, recv=43bfff80...
+      RECV-DIS t=230911045 data=02000000 -> recv=41bfff80 dk1=0 cpu@18477
+  cpu@18494/18477 are both FCMBMASK (+0x9e enables, +0x81 disables). The
+  requester comes from the SVC old PSW: 82a54081 -> NIA 82a5 with BSR=8
+  (status 4081) = **0x402a5 = A1AIBGPC (AIBGPCLO) +0x95**.
+- TFCMRMSK ITSELF IS CORRECT -- it is built up at nia=18486 to 43bfff80,
+  DK1 bit included, identical to the transmitter mask. The loss happens when
+  the mask is applied, not in the mask.
+- AIBGPCLO does `DO FOR I = 6 TO 8; RECONFIG(AIBV_ASGN_BUS); END` --
+  "REASSIGN DK BUSES 6-8 TO THIS GPC. THIS WILL ENABLE THE GROUND/CREW
+  COMMUNICATION WITH THE GPC VIA USER INTERFACE." Buses 7 and 8 end ENABLED;
+  only 6 is left masked.
+- The mechanism is named in AIBGPCLO's own comment: "PASS USES LOGIC IN
+  ARA_GPC_SWITCH TO DISCERN BFS COMMAND OF DK1-3 VIA THE BFC CRT SWITCH
+  DISCRETES." In ARAGPCSW.hal:
+      I = INTEGER(ARAB_OLD_DISC$(1 TO 2));      /* BFS CRT switch */
+      ARAB_NEW_DEU_MASK = ARAB_MASK_ARRAY$(I+1:);   /* index 1 = BIN'000' */
+  With no BFC panel our discretes give I=0 -> BIN'000' -> BFS owns NO DK
+  bus. The comment then says: "IF THE NEW BUS MASK IS NOT SET AND THE OLD
+  BUS MASK IS SET THEN THE PASS WAITS THREE CYCLES BEFORE TAKING OVER THE
+  BUS."
+- **HYPOTHESIS TO TEST NEXT (not yet verified): DK1 starts masked, and the
+  three-cycle takeover in ARA_GPC_SWITCH never completes.** $0ARAGPC does
+  appear in execution traces, so the question is whether it runs CYCLICALLY
+  and whether its delay counter ever reaches three. Instrument the loop at
+  ARAGPCSW.hal:511-520 (ARAB_NEW_DEU_MASK vs ARAB_FCMBFSMK) and count.
+- **Concurrency IS working, and that matters for how to read the DK1 stall.**
+  Dispatch counts (entries into each program, not instructions) over a full
+  run: ARA_GPC_SWITCH=25, DDKHCT=164, FPMIDLE=831. PASS's FCOS is
+  interleaving HAL/S programs correctly. NOTE: this was NOT true before
+  today -- the BAL/SCAL/SVC fixes were all context-switch or
+  supervisor-interface defects, invisible to per-instruction fixtures and
+  only reachable when control crosses between programs. The test suite still
+  has NO multi-process coverage; nothing but running PASS exercises it.
+- Consequence: the earlier "ARA_GPC_SWITCH's three-cycle takeover never runs
+  because the program may not be cycling" hypothesis is WRONG -- it cycles 25
+  times, far more than three. The fault must instead be that the count never
+  STARTS, i.e. `IF ARAB_NEW_DEU_MASK NOT= ARAB_FCMBFSMK$(3 AT 7)` is false
+  because both are already BIN'000', so ARA_GPC_SWITCH never touches DK1 and
+  is not the module that should release it.
+- The reconfiguration machinery runs only during initialisation and then
+  stops for good:
+      FCMBMAN=48  last t=230911857
+      FCMBMASK=36 last t=230911790
+      FCMBUSCM=50 last t=230911848
+  DK1 was masked at t=230911045, inside that same millisecond, and the run
+  continues to t~445s with none of the three ever running again. So the mask
+  is applied as step one of AIBGPCLO's RECONFIG and the RESET BUS MASK that
+  would release it never occurs. Buses 7 and 8 are never masked at all --
+  only bus 6 -- although the loop `DO FOR I = 6 TO 8` is identical for them.
+- NEXT: find why RECONFIG(6) masks when RECONFIG(7)/(8) do not. RECONFIG
+  queues a BRQE serviced by FCMBUSCM; the asymmetry is the lead. Also worth
+  checking: AIBGPCLO sets AIBV_ASGN_STRNG.VAR_DATA2 = TFCMID before the
+  1..4 loop but the 6..8 loop uses AIBV_ASGN_BUS, whose VAR_DATA2 is only
+  set explicitly later (to 0, for bus 9) -- whether it carries the intended
+  GPC id during the DK loop is UNVERIFIED and would explain an isolate.
+
+### [2026-08-30] Target: [problems.md]
+- **THE DK1 MASKING WAS AN ARTIFACT OF THE WRONG IPL SEQUENCE.** User
+  re-read PASS User's Guide Table 2-2 (pp.52-54): if step 6 (BFC CRT switch
+  ON) is NOT done, step 11 says go to step 13, SKIPPING step 12
+  (ITEM 1 EXEC). Step 11 (STBY) itself loads PHASE02 into PASS area 1 and
+  shows mode TB-RUN (TB = talkback, sect. 4.1, p.50), taking about 1m25s.
+- **Register B bits 6-7 ARE the BFC CRT switch.** MLIB80/GPCRTOPT.asm:327
+  `NHI R3,X'0300'   R3 BITS 6-7=EXTRACTED BFC CRT DISCREETS`, then
+  `SRL R3,8` right-justifies it as DEU_ID; POLL30's `LR R3,R3 / BZ POLL45`
+  takes the no-CRT path when it is zero. The discretePanel "CRT select A/B"
+  IS that switch. So DEFAULT_ON = {(REG_B,7)} meant we were DOING step 6 on
+  every run, which is why GPCIPL showed its menu and waited.
+- MEASURED, clearing bits 6 AND 7 and issuing no keystroke:
+      blocksRead 398 (vs 160 with no keystroke, 431 via the menu)
+      wordsLost  0   (was 720 on EVERY previous run)
+      iop mia: xmit=43bfff80 recv=43bfff80  dk1 xmit=1 recv=1  -- NOT MASKED
+      deu: commands=96 timeFills=48 polls=48 -- PASS ITSELF drives the DEU
+  So PHASE02 loads automatically on STBY, exactly as the user read it, and
+  the entire AIBGPCLO-masks-DK1 chain simply does not happen.
+- REMAINING on this path: `ipled:false`, `displayFills:0`. Loading the DEU
+  control program is GPCIPL's job via the BFC CRT path we now skip
+  (GPCRTOPT.asm's own header: "MOVES THE DEU CONTROL PROGRAM AND DEU
+  RESIDENT FORMATS TO HIGH CORE GPC MEMORY"), so PASS is polling a display
+  that has no program in it. Who loads the DCP when step 6 is omitted is the
+  open question.
+- GPCRTOPT's POLL45 confirms the no-BFC-CRT route is DESIGNED, not a
+  misconfiguration: the block is headed "IPL DEFAULT LOAD -- NO DEU
+  SELECTED" and does `STH R3,DKBUS` (DKBUS=0000), `BSLTPNTR+1=000F` (load
+  table 15), `OHI R4,S#LDCHK` (schedule LOADCHECK), `NHI R4,D#RSPPOL`
+  (DE-SCHEDULE CM4RSP & CM4POLL). So GPCIPL deliberately drives no display
+  on this path and does the default load -- our measured 398 blocks.
+- OUR DEU MODEL NEVER RUNS A DCP (user): it interprets the bus protocol and
+  keeps an image, so a loaded control program is irrelevant to whether a
+  screen appears. `ipled` is only the model's own flag.
+- DISPROVED by measurement: that the model's IPL_REQUIRED poll reply is why
+  PASS stops. Forcing d->ipled = true from creation changed NOTHING --
+  96 commands / 48 polls / 48 timeFills, identical.
+- **NEW FRONTIER on the correct path: PASS polls the DEU 48 times and then
+  stops for good.** A 900M-step run (t=1232s simulated, 20 minutes) ends
+  with the DEU counters frozen at exactly the short run's values, DK1 still
+  enabled (xmit/recv 43bfff80), and the CPU in FPMIDLE. So the bus is
+  available and PASS simply stops queueing DEU IOQEs. Same shape as the old
+  menu-path stall, minus the masking.
+- MODEL LIMITATION worth fixing before the next crew-input experiment:
+  deumodel.c:152 gates YAGPC_DEUKEYS on `!d->ipled`, so on the no-BFC-CRT
+  path -- where the unit is never IPLed -- NO keystroke can ever be
+  delivered. Any test needing crew input on the correct IPL path is
+  currently impossible.
+- Also still true and probably the root of it: PASS is ~100% idle
+  (FPMIDLE), so its cyclic processes are not running at their rates. A
+  healthy PASS runs cyclic work continuously; that is the thing to chase.
+
+### [2026-08-30] Target: [problems.md]
+- **Cyclic-process investigation, correct IPL path (step 6 omitted).**
+  Timeline from YAGPC_INTTRACE + YAGPC_CLKTRACE:
+      t=  29.486  FCMLINIT (PASS initialising)
+      t=  29.709  FPMIDLE  -- PASS goes idle and never leaves
+      [71 s with NO timer interrupts at all]
+      t= 100.019  TCVTSWCM set to 0x30 (48 half-hours = 24 h) by FPMMTURM+0xe7
+      t= 101.185  timers resume, 40 ms, CPU still FPMIDLE
+      t= 126.654  last CLK2 arm; t=126.694 last CLK2 fire -- clock dead
+      t= 262      run ends; CLK1 still ticking every 2.097 s
+- CLOCK CONSTANTS AND ARMING ARE CORRECT, ruling out an emulator timer bug:
+  FPMMTOXH=6b49d200 (1800 s) and FPMMPC1V=001fffff (2.097 s) are both
+  byte-identical to the DASS reference, the software itself arms CLK1 with
+  001fffff, and measured CLK1 period is 2097.2 ms exactly. CLK2 measures
+  40.0 ms exactly = 25 Hz, the right cyclic rate.
+- REAL DEFECT FOUND (but see below): PASS's software clock is set to 24
+  hours after 100 s of run. TCVTSWCM (0x196) is written ONCE, not
+  incremented -- a single store of 0x30 from FPMMTURM+0xe7. FPMMTURM is "MTU
+  REDUNDANCY MANAGEMENT (SVC 32)", whose functions include "PRIMARY GPC
+  INITIALIZATION OF RUNTIME"; its clock paths derive time from the MTU or,
+  on the secondary path, from TICCSYTH/TICCSYTM (another GPC's time at
+  CSYNC over the ICC bus). **yaGPC2 models NO MTU** (grep: no match in
+  src/) and there is no second GPC, so its time source reads as garbage.
+  Don's bus table has no MTU either -- it is a device on a bus, not a bus.
+- **HYPOTHESIS CORRECTED BY MEASUREMENT: the bogus clock is NOT why PASS
+  idles.** PASS is already in FPMIDLE at t=29.709, seventy seconds before
+  the clock is touched at t=100.019. I nearly built an MTU model on that
+  coincidence. The clock defect is real and worth fixing, but it is
+  downstream of whatever silences PASS at 29.7 s.
+- NEXT: find what PASS does between FCMLINIT (t=29.486) and FPMIDLE
+  (t=29.709) -- 223 ms -- and why nothing cyclic is left scheduled. Note
+  AIBGPCLO schedules its cyclic work with `SCHEDULE DDK_HCT_TRANSFER AT
+  CZ1V_A_TSIP + PHASE_DDK PRIORITY(PRIO_DDK), REPEAT EVERY TIME_DDK`, so a
+  bad time base there WOULD strand cyclic tasks at an unreachable time --
+  the two threads may still meet, but that has to be shown, not assumed.
+- **ANSWER: on the default-load path PASS's APPLICATION software never runs
+  at all, so there are no cyclic processes to schedule.** Traced execution
+  block by block: FCMINSSL (SSL) -> FCMLINIT +0x0..+0x71 -> [200 ms] ->
+  FCMINIOP -> FIOPC1DL -> FCMLINIT +0xed..+0x136 -> FCMSWMON -> FPMIDLE.
+  Initialisation COMPLETES normally -- no fault, no hang -- and hands off to
+  the software monitor. Between t=29.7 s and t=45.0 s there are exactly
+  THREE block transitions (FCMLINIT, FCMSWMON, FPMIDLE) and the CPU then
+  sits inside FPMIDLE. A1AIBGPC/AIBGPCLO is never entered.
+- CONTRAST: on the menu path (step 6 done + ITEM 1 EXEC) AIBGPCLO DOES run
+  -- it is what issued the SVC 35 that masks DK1 -- along with $0ARAGPC,
+  #CARYMFB, A2ARDCSB, FIOPDISP. So the menu path starts the applications and
+  then masks the display bus; the default path never starts them.
+- REFRAMING, important before more work: the two paths are each correct for
+  their own step-6 state, and the default path CANNOT produce a display --
+  GPCIPL's POLL45 sets DKBUS=0000 and de-schedules its DEU tasks by design.
+  If the goal is a working display, the MENU path is the one to pursue and
+  the DK1 masking is the defect to fix; the step-6-omitted path is only
+  useful as a control showing PASS loads and runs FCOS cleanly (398 blocks,
+  wordsLost=0, DK1 never masked).
+- Load table differs between them: POLL45 selects LOADTABLE ID=15
+  (BSLTPNTR+1=000F); 398 blocks vs the menu path's 431.
+
+### [2026-08-30] Target: [problems.md]
+- **RESOLVED: PASS's cyclic processes DO run, on the path that matters.**
+  Measured on the menu path (step 6 done + ITEM 1 EXEC), which is the only
+  route that can produce a display:
+      CLK2: 3170 fires, t=6.118 s -> 257.491 s (run end)
+      after t=200 s: 772 fires, median gap 40.0 ms = 25 Hz, steady
+  The 25 Hz cyclic clock runs to the end of the run, armed once per cycle
+  from nia=1add6. Dispatch counts on the same path: ARA_GPC_SWITCH 25,
+  DDKHCT 164, FPMIDLE 831 -- the FCOS scheduler is interleaving programs.
+- The "cyclic processes are not running" symptom belongs ONLY to the
+  DEFAULT-LOAD path (step 6 omitted), and there the cause is not scheduling
+  at all: PASS's APPLICATIONS ARE NEVER STARTED. Execution goes FCMINSSL ->
+  FCMLINIT -> FCMINIOP -> FCMSWMON -> FPMIDLE and stops; A1AIBGPC/AIBGPCLO
+  is never entered, and between t=29.7 s and t=45.0 s there are exactly
+  three block transitions. That follows from GPCIPL's own documented
+  behaviour on that route -- POLL45, "IPL DEFAULT LOAD -- NO DEU SELECTED",
+  sets DKBUS=0000 and de-schedules its DEU tasks -- so it is by design, not
+  a defect.
+- SUSPICION CLEARED by measurement: the timer was armed 3,648,340 times for
+  668 fires, which looked like a spurious re-arm. It is not: after PASS is
+  running the arms come once per ~40 ms from a single address (nia=1add6).
+  The 3.6M count is GPCIPL's early phase alone.
+- ALSO CLEARED: the interval timers themselves. FPMMTOXH (1800 s) and
+  FPMMPC1V (2.097 s) are byte-identical to the DASS reference, the software
+  arms CLK1 with exactly 001fffff, and measured periods are 2097.2 ms and
+  40.0 ms.
+- STILL OPEN, and now the single live defect for a working display: DK1 is
+  masked on the menu path (AIBGPCLO's RECONFIG masks bus 6 while buses 7 and
+  8 come up), and PASS's software clock reads 24 hours because FPMMTURM
+  rejects or bypasses the MTU reply. --mtu-model now answers those reads
+  with correctly encoded BCD GMT (verified 20 reads/run) but does NOT yet
+  correct the clock; a validity/BITE field the model does not supply is the
+  obvious next suspect.
+- **THE DK1 MASKING IS CORRECT BEHAVIOUR, NOT A DEFECT.** ARAGPCSW.hal:
+      ARAB_MASK_ARRAY ARRAY(8) BIT(3) INITIAL(
+        BIN'000',BIN'100',BIN'010',BIN'001', BIN'110',BIN'110',BIN'011',BIN'101');
+      I = INTEGER(ARAB_OLD_DISC$(1 TO 2));    /* BFC CRT switch */
+      ARAB_NEW_DEU_MASK = ARAB_MASK_ARRAY$(I+1:);
+  Index 1 (I=0) is BIN'000', nothing masked; index 2 (I=1) is BIN'100' --
+  DK1 masked. The panel's DEFAULT_ON = {(REG_B,7)} sets BFC CRT = 1, which
+  tells PASS THE BFS OWNS CRT 1, so PASS masks DK1 and leaves DK2/DK3 alone.
+  That is precisely the measured mask (xmit=43bfff80 recv=41bfff80, the two
+  differing by exactly bus 6). Hours were spent treating this as a bug; it
+  is the software doing what the discretes tell it.
+- CONSEQUENCE -- the real bind. Register B bits 6-7 serve BOTH roles:
+  GPCIPL reads them as DEU_ID (which display to run its IPL menu on) and
+  PASS reads them as the BFC CRT switch (which CRT the BFS owns). So:
+      bits set   -> GPCIPL menu + ITEM 1 EXEC + applications start,
+                    but PASS gives that DK bus to the BFS
+      bits clear -> PASS keeps every DK bus, but GPCIPL takes POLL45's
+                    default load and the applications never start
+  Neither combination yields "applications running AND PASS owning DK1".
+- NEXT, and it is the whole remaining question: why the applications
+  (A1AIBGPC/AIBGPCLO onward) never start on the default-load path. That is
+  the one thing standing between the current state and a display, and it is
+  NOT a scheduling or timer problem -- cyclic dispatch, the 25 Hz clock and
+  the interval timers all measure correct.
+- MTU documentation (user): USA005350, "Data Processing System (Hardware and
+  System Software) Workbook", section 2.6, pp.54-56 --
+  https://www.ibiblio.org/apollo/Shuttle/DPS%20Workbook.pdf
+  Two oscillators (OSC1/OSC2) selected by a panel switch feed THREE
+  identical accumulators, each preparing GMT **and MET** and dumping them
+  onto FC1(FC5), FC2(FC6), FC3(FC7) for accumulators 1/2/3 respectively.
+  Any GPC may take them from any of the three buses. CONFIRMS --mtu-model's
+  targeting: FC1/FC2/FC3 are BCE 20/21/22, exactly the buses FIO22020/1/2
+  name. The wire format is NOT given in the document.
+- That GMT-and-MET pairing probably explains the six-word transfer as 3+3
+  rather than the two-word header this model currently assumes; worth
+  testing before the next attempt at the clock.
+- **BOTH IPL PATHS LOAD IDENTICAL PASS SOFTWARE.** From YAGPC_MMUTRACE:
+      default:  72 boot + 55(2/4/3/0) + 228(3/4/0/0) + 5(3/3/0/0)
+                + 38(3/3/6/0)                                   = 398
+      menu:     the same, PLUS 17(4/4/3/8) + 8(4/4/0/24)
+                + 8(4/4/4/8) -- the DEU control program          = 431
+  The only difference is those 33 DEU blocks. The PASS load itself is
+  identical. So the applications ARE loaded on the default path, and their
+  failure to start is NOT a load-table or missing-software difference --
+  which also kills the "load table 15 loads something else" assumption.
+  The remaining input difference between the two runs is the BFC CRT
+  discrete (register B bits 6-7) and the ITEM 1 EXEC keystroke.
+- Timing note for whoever picks this up: on the default path PASS's load
+  completes at t~28.4 s and it is idle by t=29.7 s; on the menu path the
+  same reads happen at t~221-229 s, after the menu wait, and the
+  applications run from there. Same software, different discrete.
+- **AIB_GPC_LOCATOR (=AIBGPCLO) IS the program that schedules every cyclic
+  process**, so "cyclic processes are not running" and "AIBGPCLO never runs"
+  are the SAME FACT, not two:
+      SCHEDULE DMC_SUPER PRIORITY(PRIO_DMC);
+      SCHEDULE DMI_MCDS_IN AT CZ1V_A_TSIP + PHASE_DMI ...
+      SCHEDULE DCICYC AT CZ1V_A_TSIP + PHASE_DCI ...
+      SCHEDULE ARA_GPC_SWITCH AT CZ1V_A_TSIP + PHASE_ARA ...
+      SCHEDULE DDK_HCT_TRANSFER AT CZ1V_A_TSIP + PHASE_DDK ...
+      SCHEDULE DUP_NSP_MSG_PROC PRIORITY(PRIO_DUP);
+- FCMLINIT starts it as the Application Bootstrap Program from FCMAOT, the
+  "APPLICATION OVERRIDE TABLE":
+      LA R0,FCMAOT / LH R4,TAOTPRIO / LH R0,TAOTPDE
+      STH R4,TPCTPRI / STH R0,TPCTPDE / STH R2,TPDEPCT
+      SB TPDEVENT,X'0001'   SET ABP'S PROCESS EVENT TRUE
+- HYPOTHESES RULED OUT BY MEASUREMENT, all three identical on BOTH paths:
+      FCMAOT (0809a): TAOTPDE=06f6, TAOTPRIO=0032 -- same
+      the ABP's PDE at 06f6: 0000 0000 8000 0081 -- same
+      the PASS load itself: 228+5+38 blocks from the same addresses -- same
+  So it is NOT a missing bootstrap table, NOT a different bootstrap program,
+  and NOT a different load. Whatever differs is downstream of all three.
+  (My reading of TPDEVENT as the flag SB sets was wrong -- it is an ADDRESS
+  field, so 0000 on both paths proves nothing either way.)
+- The only remaining input difference between the two runs is the BFC CRT
+  discrete (register B bits 6-7) and the ITEM 1 EXEC keystroke.
+- FCMLINIT EXECUTES IDENTICALLY ON BOTH PATHS. Full instruction traces of
+  047e0..04a1f differ by a single extra loop iteration at 049de out of 4000
+  instructions. So the divergence is NOT in PASS initialisation.
+- AND the AOT block appears NOT to run on EITHER path: PDE 06f6's TPDEPCT
+  (offset +1) is 0000 on both, though FCMLINIT's AOT code does
+  `STH R2,TPDEPCT`. So the Application Bootstrap Program mechanism is not
+  how AIB_GPC_LOCATOR starts on the menu path either, and that whole thread
+  is invalid. PDE layout for reference (halfword offsets): +0 TPDEVENT,
+  +1 TPDEPCT, +2/+3 TPDEP (32-bit address constant), +4 TPDESTAK,
+  +5 TPDEFLGS; the PDE at 06f6 reads 0000 0000 8000 0081 13bc 8001.
+- STATE OF THE QUESTION: same software, same load, same AOT, same PDE,
+  identical FCMLINIT execution -- yet AIB_GPC_LOCATOR runs on the menu path
+  and not on the default one. Every structural explanation tried has been
+  eliminated by measurement. What remains unexamined is what GPCIPL does
+  DIFFERENTLY after ITEM 1 EXEC versus after its default load, since the
+  only surviving input difference is the BFC CRT discrete and that
+  keystroke. That is where the next session should start -- on the GPCIPL
+  side, not the PASS side.
+- **ELIMINATION COMPLETE. The cause is the BFC CRT discrete, and nothing
+  structural.** GPCIPL's LOADTBL (0x7378, indexed item-1):
+      item1=7c00  item2=2100  item3=7d00  item4=2100  item5=7e00
+      items 6-14 = ffff (invalid)   item15=7c00
+  Item 15 -- the default load POLL45 selects -- names the SAME load area as
+  item 1 (PASS1). LOADCHCK treats them alike too: `TRB R4,X'0001'` is
+  non-zero for both (both odd) and `CHI R4,15 / BLE LOAD5` takes both to the
+  PASS-load path.
+- Everything structural is therefore measured IDENTICAL between the two IPL
+  paths: load blocks, LOADTBL entry, FCMAOT, the bootstrap PDE, and
+  FCMLINIT's own instruction trace (4000 instructions, one loop iteration
+  apart). PASS receives the same software and initialises the same way.
+  The ONLY differing input is register B bits 6-7, the BFC CRT / DEU_ID
+  discrete, plus the ITEM 1 EXEC keystroke it enables.
+- SO: PASS's application startup -- and therefore all cyclic processing,
+  since AIB_GPC_LOCATOR is what schedules it -- follows the BFC CRT
+  discrete. With a CRT configured (bits set, menu, ITEM 1 EXEC) the
+  applications run and the 25 Hz cyclic clock runs to the end of the run.
+  With no CRT (bits clear) GPCIPL takes POLL45's "IPL DEFAULT LOAD -- NO DEU
+  SELECTED", and the applications do not start. Both are the software
+  behaving as configured; there is no emulator defect in this chain.
+
+### [2026-08-30] Target: problems.md
+- DEU IPL over `--bce-network` never completes: root cause is two unrelated clocks.
+  `bcenet_transport.c`'s `pump_once()` paces the wire on `yagpc_monotonic_seconds()`
+  (wall clock, 20 us/word), while `iop.c`'s receive timeout is emulated time. A
+  511-word display fill queues 511 datagrams; the POLL that follows lands behind
+  them (measured depth to 819, ~16 ms wall) against a 5.02 ms EMULATED MTO that
+  expires almost instantly. Receive times out `gotAny=0`, `iop_bce_error_terminate()`
+  puts the BCE NO-GO, flight software takes RESET STATUS1, the load restarts at
+  0x0f49 forever. The DEU correctly keeps asserting IPL-REQUIRED.
+- The emulated BCE spends NO emulated bus time on a transmit, so it issues the poll
+  at t+0 while the wire still holds 10.2 ms of that transfer. That asymmetry is the
+  defect, not the peripheral.
+- Proof: `YAGPC_BUS_WORD_US=2` -> all seven FILLTBL blocks (0f49, 1146, 1343, 1540,
+  173d, 193a, 0002) arrive once each in order, LOAD COMPLETE, abandoned 0.
+  Default rate -> only 0f49/1146/1343, repeated forever, never the 250@0x0002
+  terminator.
+- MEDS was never at fault: a freshly started MEDS asserts IPL-REQUIRED (the days-old
+  instance replied 0x0000 because it had been loaded once long ago), and its
+  single-word reply during a load is the documented mid-IPL rule that `deumodel.c`
+  implements identically.
+- `--deu-model` masked all of this: its help says "answers in the same call", so every
+  solicited reply is present before the poll asks.
+- Test harness: /tmp/claude-1000/deustub.py, a DEU peer implementing deumodel.c's
+  rules over the wire; reproduces the failure with no MEDS and no GUI.
+- Separate, unexplained: every display fill on the wire is all zeros, while the
+  in-process run ends with 717 non-zero words in the DEU image. Bootstrap loads only
+  0x0000-0x8FFF and DCPSTART is 0xA000 (GPCRTOPT.asm/MACSMITH.asm).
+- Also noted: `--watch` misattributes a store to the following instruction (reported
+  `LHI 1,X'3610'` as changing memory).
+
+### [2026-08-30] Target: problems.md
+- Tried and REVERTED: holding the BCE receive clock while the soliciting command is
+  still in the transport's send queue (new GPC_SVC_XMIT_PENDING service, per-bus
+  queued/sent sequence counters). It cut timeouts 455 -> 48, but BROKE the case that
+  previously worked: at YAGPC_BUS_WORD_US=2 the DEU load completed before the change
+  and looped on block 0x0f49 after it. A/B in one build with the hold env-gated:
+  hold OFF -> LOAD COMPLETE, hold ON -> 280 repeats of block 1.
+- Why it is wrong: mid-IPL the DEU answers a 16-word poll with ONE word, so that
+  receive is SUPPOSED to time out; the timeout is how the bus program learns "still
+  loading, send the next block". `gotAny` is the discriminator -- 1 means advance,
+  0 means the DEU never heard the poll, restart. Suppressing the timeout removes the
+  event the sequencing depends on.
+- Indicated fix is the other one: charge the emulated BCE real bus time for its own
+  transmits. It currently finishes a 511-word fill in ~0 emulated us and polls at
+  once, while the wire still holds 10.2 ms of that transfer. Since the emulator runs
+  ~40x slower than wall clock, 10.2 ms of EMULATED wire time is ~400 ms of wall --
+  ample for the transport to drain -- so both clocks agree by construction.
+
+### [2026-08-30] Target: problems.md
+- RESOLVED, and no source change was needed: `--bce-network` requires `--real-time`.
+  Its own help says so ("including through the wait state -- needed to drive a real
+  peripheral over --bce-network"); every run this session omitted it.
+- With `--real-time` at the DEFAULT bus word rate against the DEU stub: LOAD COMPLETE,
+  all seven FILLTBL blocks, then 309 display refreshes of 196 words at 0x19ee with
+  179/196 words non-zero, decoding as "GPCIPL ... LOADED". Without it, the load loops
+  on block 0x0f49 forever.
+- This also explains the 2026-08-23 regression window. Commit a59c9e203 ("pace bus
+  transmissions against the wall clock") introduced the token bucket to stop the peer's
+  socket overrunning; before it, datagrams left as fast as sendto() allowed and nothing
+  could ever be queued behind a transfer, so the load completed even without pacing the
+  wait state. After it, wall-clock pacing only works if the emulator also spends wall
+  time -- which is precisely what --real-time does.
+- That commit's own message already warned against the fix I attempted: pacing on
+  simulated time "was tried first and barely helped, because cpu_advance_idle_ns()
+  advances up to 5 ms of simulated time inside a single call with no wall time passing
+  at all". Charging the BCE emulated bus time would have failed the same way.
+- Worth doing: warn (or refuse) when --bce-network is given without --real-time. The
+  failure is silent, remote from its cause, and cost days.
+
+### [2026-08-30] Target: problems.md
+- PASS now IPLs, loads and STARTS. Three fixes tonight, all committed:
+  710ae8dd2 warn on --bce-network without --real-time; d7cda7736 map BCE 24 (IP bus)
+  by GPC identity (--gpc-id); 38e2fcd6d --mmu-model asserts its unit's stored MM
+  READY bit.
+- The MM READY one was what blocked ITEM 1 EXEC. BSL1's BSRDYDI spun on
+  `NR R6,R5 / BNZ BSRDY08` with R5=48000000: BCE 18 selected (X'0800') but MMU 1
+  READY (X'0200') never set, heading for ERROR 115 MMU WILL NOT GO READY.
+  iop_discrete_in_a() computes the ready bits but only for a unit whose STORED bit
+  is set, and only --discrete-a ever wrote that word. The model's own published
+  READY cannot inform us -- discretes_driven_mask() excludes a publisher's own bits
+  by design -- which is why the crew panel showed MM1 READY steady while the GPC saw
+  nothing. Unnoticed because the harness reads the IPL bootstrap itself instead of
+  executing FCMBOOT, and GPCIPL never asks.
+- With that, ITEM 1 EXEC runs the menu-selected load to completion (0x0100..0x0cee
+  plus the 94-halfword terminator at 0x0eeb), and after RUN the flight software does
+  real I/O: IP 5453 datagrams, plus DK2, DK3, PL1, FC1-3.
+- WHERE IT NOW STOPS. PASS runs CYCLICALLY for 41 cycles in 2.8 s (~14.6 Hz) then
+  halts. On the IP bus each cycle is IUA 13 funcs 0x120/0x122/0x124/0x126 (31 words
+  each) and IUA 15 func 0x221 (480 words). First transfer carries real data
+  (eb90 0014 1100 0030 0020 8154 03ff cf00); the rest are 0xAAAA fill, i.e. an
+  uninitialised region being shipped. NIA then settles in a loop at 0x1b659-0x1b66b
+  (R4=000a0000 R5=00200000 R6=b5a64031 R7=b4e70031).
+- The BFC CRT switch is NOT involved in that stop: with crt 0 (no menu, POLL45
+  default path) the post-RUN behaviour is identical, IP 5453 datagrams at the same
+  moment. CRT selection only decides whether GPCIPL draws a menu.
+- Also established: PASS surrenders whichever DK bus the BFC CRT names, but it does
+  not paint DK2 either (a DEU stub there saw 0 commands), so the display silence is
+  not just bus selection.
+- Still open: the 8K DEU program image at DCPSTART (0xA000) is all zeros in every
+  load, first and second -- the harness bootstrap covers only 0x0000-0x8FFF. Display
+  fills carry real text regardless, so it is not blocking, but it is wrong.
+- Harness: /tmp/claude-1000/deustub.py now takes port-base, bus number, and an
+  optional "nokeys"; it can deliver ITEM 1 EXEC itself, so the whole IPL reproduces
+  headlessly with no MEDS and no GUI.
+- No symbol file matches pass-ipl.mmv (the linkAndTest-earlyApril3 symbols-*.json are
+  other link jobs; attribution puts 0x19838 at +18100 into a 13-word section). Naming
+  these addresses needs a symbol table for this image.
