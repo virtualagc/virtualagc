@@ -184,6 +184,12 @@ void iop_set_discrete_in(IOP *iop, int reg, uint32_t value) {
                                           : &iop->regDiscreteInA, value);
 }
 
+/* The stored value, before the computed READY bits and the crew panel's
+ * overlay -- so a caller can add to it without having to know either. */
+uint32_t iop_discrete_in_a_stored(const IOP *iop) {
+    return register_get32(&iop->regDiscreteInA);
+}
+
 uint32_t iop_discrete_in_a(const IOP *iop) {
     uint32_t stored = register_get32(&iop->regDiscreteInA);
     uint32_t v = stored & ~(DISCRETE_A_MM1_READY | DISCRETE_A_MM2_READY);

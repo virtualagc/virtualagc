@@ -338,6 +338,7 @@ void iop_reset_discrete_inputs(IOP *iop);
  * the corresponding bus controller is running, because FCMBOOT handshakes
  * on them -- it waits for ready to clear and then to set again -- and a
  * constant ready bit hangs it.  See iop.c for the full account. */
+uint32_t iop_discrete_in_a_stored(const struct IOP *iop);
 uint32_t iop_discrete_in_a(const IOP *iop);
 
 /* Override the LOCAL value of a discrete input register -- what this GPC

@@ -201,8 +201,34 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
                           ? mmumodel_create((int)unit, opts->mmuModelVolume)
                           : NULL;
         if (r->mmuModel || r->mtuModel || r->deuModel2) {
-            if (r->mmuModel)
+            if (r->mmuModel) {
                 mmumodel_set_clock(r->mmuModel, &r->age.gpc.cpu.elapsedTimeUs);
+                /* Tell the IOP this mass memory is PRESENT, by setting its
+                 * READY bit in the stored discrete.  iop_discrete_in_a()
+                 * computes the bit rather than storing it -- ready means
+                 * "present and not moving data" -- but it computes it only
+                 * for a unit whose stored bit is set, which otherwise
+                 * nothing ever sets: --discrete-a is the only writer and
+                 * defaults to zero.
+                 *
+                 * The model does publish READY on the discrete bus, but a
+                 * publisher's own bits are excluded from the driven mask on
+                 * purpose (discretes_driven_mask: honouring our own
+                 * multicast would replace in-process state with the same
+                 * state a socket round trip later), so publishing cannot
+                 * inform us -- it informs the crew panel, which is what it
+                 * is for.
+                 *
+                 * Nothing noticed because the IPL bootstrap is read by the
+                 * harness rather than by executing FCMBOOT, and GPCIPL
+                 * never asks.  BSL1's BSRDYDI is the first real flight code
+                 * to test it, reached only by selecting PFS from the GPCIPL
+                 * menu, and it spun there until ERROR 115 MMU WILL NOT GO
+                 * READY. */
+                uint32_t readyBit = (unit == 2) ? 0x01000000u : 0x02000000u;
+                iop_set_discrete_in(&r->age.gpc.iop, DISCRETES_REG_A,
+                                    iop_discrete_in_a_stored(&r->age.gpc.iop) | readyBit);
+            }
             if (base == NULL) iop_set_recv_timeout_floor_us(0.0);
             r->busRouter.mmu = r->mmuModel;
             r->busRouter.mmuBus = r->mmuModel ? mmumodel_bus(r->mmuModel) : -1;
