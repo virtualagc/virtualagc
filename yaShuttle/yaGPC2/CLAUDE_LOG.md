@@ -66,3 +66,63 @@ redundant" are all recorded as withdrawn, with what survives them kept.
 Two things were *not* re-verified and are carried forward as reported: that
 `--watch` misattributes a store to the following instruction, and that the 8K
 DEU program image at `DCPSTART` is all zeros in every load.)
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **CRT2's missing menu was the BCE `@`-family reading its count tables as
+  HALFWORDS.**  `#TDL`, `#MIN@`, `#MOUT@` and `#RDL` fetched the word count with
+  `iop_g_eah` from a per-bus table at a `2*BCE#` bias.  Those tables are arrays of
+  `A()` FULLWORDS -- the shape `#BU@`, `#LBR@` and `#CMD@` were already fixed to
+  fetch through, and the one `EQU *-36` implies.  A halfword read at an even entry
+  returns the fullword's HIGH half, always zero for a count, so every one of these
+  instructions moved exactly ONE word regardless of the count.  Fixed as 96ab01cc4.
+- MEASURED IN PASS'S DISPLAY PATH.  A DEU display fill is a 2-word header from the
+  `#TDS` at `0x199ae` plus data from the `#TDL` at `0x199b2`; the DK2 count table at
+  `0x08c94` holds `0000 0016` for BCE 7.  Before: **commanded 360 halfwords, 3 sent,
+  every time** -- 21 truncations in 40 s on the wire, 0 complete.  After: 29 of 29
+  complete in the GPC's own accounting, 17 complete / 0 truncated on the wire, and
+  CRT2 renders GMT/MET, the GPC indicator and the display list instead of a bare
+  clock.  TIME_FILL (7 hw, `#MOUT`, no table) always worked, which is exactly why the
+  symptom was "a counting clock and no menu".
+- WHY IT HAD NEVER BEEN ISOLATED: a fill whose data is one word is commanded as 3 and
+  COMPLETES, so the small fills our DEU stub elicits mostly work; the stub only ever
+  showed "abandoned 2 halfwords short" on a count of 5.  Real MEDS asks for a whole
+  screen and the shortfall becomes 357.  A crude peer made a total failure look like a
+  rounding error.
+- HOW IT WAS FOUND, and the instrument is the reusable part: `YAGPC_XMITTRACE=<bus>`
+  prints one line per bus command with the count it DECLARES against the words
+  actually QUEUED and actually SENT before the next command.  Queued-vs-sent is the
+  discriminator -- short at queue time means the bus program asked for too little,
+  short at send time means the emulator lost words -- and the peer cannot tell you
+  which, it can only say a transfer ended short.  The DMA-read counter is taken in
+  `iop_queue_dma` so none of the FIVE instructions that can start a transmit (`#TDS`,
+  `#TDL`, `#TDLI`, `#MOUT`, `#MOUT@`) is missed; an early attempt instrumented
+  `exec_MOUT`/`exec_MOUT_at` by hand and silently patched `exec_TDLI` instead, which
+  is why the first trace showed a display fill with no transmit instruction at all.
+- FALSE LEADS, each killed by measurement: the transport's outbound queue (4096 deep,
+  with an explicit "dropping a datagram" message that never appeared); the DMA queue
+  (growable, verified); `dmaq_drop_for_bce` on an error terminate (`YAGPC_DMATRACE`
+  counted ZERO drops).  The words were never queued in the first place.
+- `#MIN@` FIXED ON THE SAME EVIDENCE, not by analogy: its BCE 24 table entry reads
+  `0000 0002`, so the halfword read was receiving one word where three were wanted.
+  `#MOUT@` and `#RDL` do not execute in this workload and are fixed on the family
+  argument alone -- stated plainly rather than implied.
+- THE FIXTURES CANNOT ARBITRATE, measured properly this time: `test_iop_bce_exec` is
+  73499/74699 both ways and the failing SET is BYTE-IDENTICAL, 1200 lines either way.
+  Getting that took forcing a rebuild -- `make` reported the test binary "up to date"
+  after the source changed, so the first A/B compared the same binary with itself.
+  That is §8.10's stale-binary trap, hit again.
+- STILL OPEN, seen while measuring and not chased: `func=005 count=254` to IUA 8 on
+  DK2 is issued 118 times and transmits nothing.  Nothing queues for it, MEDS never
+  replies to IUA 8, and BCE 7 takes ZERO receive timeouts, so it is consistent with a
+  control or receive-shaped command rather than a second truncation -- but it has not
+  been identified.
+- ALSO: the rendered CRT2 screen is sparse -- clocks, the GPC indicator, the MEDS menu
+  bar and a scatter of F/M characters.  The truncation is fixed and verified; whether
+  that is the CORRECT PASS display for this state is a separate question and I have no
+  reference image to judge it against.
+- HARNESS NOTE: `MEDS.sh` runs `electron-esbuild build`, which CLEANS `dist/`, so
+  starting a second instance wipes the first one's `main.js` mid-launch.  Launch the
+  second directly -- `electron dist/main/main.js meds --size 512 crt1 idp1`, which is
+  MEDS.sh's own last line minus the rebuild -- and nothing is written in Don's repo.
+- TRAP HIT AGAIN, fifth time in this project: a `pgrep -f` whose pattern text appears
+  in the same command line matched the shell and killed it (exit 144).
