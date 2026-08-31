@@ -119,3 +119,25 @@ code itself was not read.)
   masks.  Fix: derive the number from the MDU's own primary IDP.  Patch written to
   `$SP/meds-kybd-bus.patch` and `git apply --check`ed clean; NOT applied, because
   writing into `~/donschmidt/nsts-sim-gpc` is refused here.
+- **ONE PASS IS ENOUGH, WITH A FLIP OF THE BFC CRT SWITCH.**  GPCIPL loads the DEU on
+  the SELECTED CRT and PASS masks exactly that bus, so the display PASS drives is never
+  the one that was loaded.  Selecting **CRT 2** through the IPL and flipping to **CRT 1**
+  after the SSL load and before RUN gets IDP2 loaded first and handed to PASS afterwards.
+  Measured: DK2 then takes 92 polls, 172 TIME_FILLs and **86 DISPLAY_FILLs**, with a
+  358-halfword variable-data fill at `0x1a06` carrying real GPC MEMORY content ("CODE",
+  hex fields) and a 35-halfword message line at `0x19be` reading `BCE STRG 1 NSP 1
+  21:29:42(11)`.  Against 6 tiny fills and 2 polls with an unloaded unit.
+- MEDS's config override is read from `NSTS_SIM_CONFIG` and **deep-merged**
+  (`simRunner/main/main.civet:230`, absolute paths accepted, logs "[meds] loaded config
+  override from ..."), so the override only needs the four `idp*` entries and does not
+  have to track the rest of `config/meds.json`.
+- THE RETEST RIG lives in `~/workspace/pass-run/`: `rebuild-tape.sh` (regenerates
+  `DEUCFLM.bin` and `pass-ipl-cflm.mmv`, byte-reproducible, never touches
+  `pass-ipl.mmv`), `meds-unipled.json`, and `retest-crt2.sh`.  **Not yet verified
+  against real MEDS** -- every measurement here is against `deustub2.py`, so the last
+  step, MEDS actually RENDERING the critical-format buffer, is still unconfirmed.
+- The MEDS keyboard fix is applied in `~/donschmidt/nsts-sim-gpc` as a LOCAL,
+  UNCOMMITTED edit to `meds/mdu.coffee`, after a `git pull` that reported "Already up to
+  date" (the branch is 1 ahead of `origin/main`, 0 behind).  It compiles under the
+  repo's own `coffee`, and resolves CRT1 -> _KYBD1, CRT2 -> _KYBD2, CRT3 -> _KYBD1,
+  CRT4 -> _KYBD3.
