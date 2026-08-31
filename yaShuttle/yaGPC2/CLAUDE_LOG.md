@@ -126,3 +126,54 @@ DEU program image at `DCPSTART` is all zeros in every load.)
   MEDS.sh's own last line minus the rebuild -- and nothing is written in Don's repo.
 - TRAP HIT AGAIN, fifth time in this project: a `pgrep -f` whose pattern text appears
   in the same command line matched the shell and killed it (exit 144).
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE @-FAMILY FIX WAS TOO WIDE, AND THE BISECT IS THE RECORD.**  96ab01cc4 changed
+  four instructions from a halfword to a fullword count fetch; only `#TDL` had direct
+  evidence.  The two RECEIVE-side members broke GPCIPL's menu: `ITEM 1 EXEC` arrived on
+  the wire correctly (hdr 0008, count ff03, keys a07c, 16-halfword sum ZERO, so
+  `CM4KYBD` was satisfied) and GPCIPL did nothing with it -- `KEY1..KEY3` took no CPU
+  write at all and the load stalled at the documented 160 blocks.  Reverting `#MIN@`
+  and `#RDL` (5e663c3f5) restored it: `KEY1=0014 KEY2=0001 KEY3=001e` written at
+  nia=021f6, and 431 blocks read.  `#TDL` alone is the fix; `#MOUT@` is left converted
+  (a transmit, never executes here).  Whether the two reverted ones want the fullword
+  is OPEN again and needs the flight software's own use of them, the way FIOBBM
+  settled `#BU@`.
+- **THE DISPLAY-FILL FIX IS VERIFIED WITH PASS GENUINELY LOADED**: 14 of 14 fills
+  complete at 360 halfwords, 0 truncated, 333 of 358 words non-zero, decoding through
+  MEDS's own `DEUCharset` to exactly the glyphs on the screen.  Was 3 of 360.
+- **A MEDS INSTANCE THAT HAS BEEN IPLed ONCE WILL NOT ASK AGAIN**, and after seven GPC
+  restarts against the same instances the displays sat on stale content behind a red X
+  while the tape side worked perfectly.  §8.25 already records this ("a freshly started
+  MEDS asserts IPL-REQUIRED; the days-old instance replied 0x0000").  RESTART MEDS
+  WITH THE GPC, not just the GPC.  I measured the GPC's side of the wire repeatedly
+  and never thought to question the peer's accumulated state; the user called it.
+- **MEDS KEYSTROKES DO NOT COME FROM THE MDU WINDOW.**  `meds/idp.coffee:93` routes a
+  bus named `/KYBD/` to `recvKYBD`, so the IDP takes keys from a separate `_KYBDn`
+  bus.  Typing into the CRT2 window produced ZERO keyed replies in 348 polls.
+  `gpcmd key --idp 2 OPS 1 0 1 PRO` puts them on `_KYBD2` and they arrive correctly
+  (hdr 0008, count ff05, keys 11/01/00/01/1f, sum zero).  USE gpcmd, not the window.
+- **PASS DECLINES OPS 101 OUTRIGHT.**  With a valid checksummed request delivered, the
+  display list is BYTE-IDENTICAL (sha1 f8536acb6c44 before and after) and NO tape read
+  follows -- a real OPS 1 transition would have to load the G1 major function from mass
+  memory.  Phase 2 is `OPS0,SSW`, so whether that transition exists in this
+  configuration is the first thing to establish.  Not chased.
+- **THE ODD CRT2 CLOCK IS THE 24-HOUR DEFAULT PLUS A 16-BIT TRUNCATION.**  User noticed
+  CRT2 always starts near 000/05:47:40 regardless of wall time.  The time fill is two
+  IBM 48-bit floats plus a conv word (`deuProto.timeFillWords`); ours decodes to
+  **86,519.9 s = exactly 24 h + run time** -- the known `FPMMTURM.asm:457` floor, since
+  `--mtu-model` counts GMT from power-on and is always under a day.  MEDS's own
+  `ibmFloat48` is byte-identical to my decode and gets 86,520 correctly, yet displays
+  86,520 - 65,536 = 20,984 s = 000/05:49:44, matching every observation.  So the
+  seconds count is truncated to 16 bits downstream of the decode, in the DPS header
+  rendering.  CRT1 is unaffected because GPCIPL's own CLOCK1 never approaches 2^16.
+  Cosmetic; blocks nothing.  The untried GMT option from §8.25 -- day 1 plus the real
+  time of day -- would clear the floor by the smallest margin AND drop the value back
+  under 2^16, fixing the display as a side effect.
+- STILL OPEN: CRT1's menu FLASHES (blank/drawn alternation) with its top section --
+  the `PASS1 1 BFS1 2 PASS2` lines -- missing, while the GPC's own output is provably
+  correct (41 of 41 fills complete, identical 196-word screen to 0x19ee every 0.57 s,
+  matching this log's reference rate).  Not investigated.
+- TRAP, SIXTH TIME: a `pgrep`/`case` pattern whose text appears in the shell's own
+  command line matches the shell and kills it (exit 144).  Iterating `/proc` and
+  matching on `comm` -- with `$$` and `$PPID` skipped -- is the form that works.
