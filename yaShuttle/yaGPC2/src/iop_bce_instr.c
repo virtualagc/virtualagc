@@ -408,10 +408,7 @@ static void exec_RDL(IOP *t, DInstr *v) {
      * (d:'11111011000000cccccccccccccccccc'), unlike #TDL/#MOUT@/#MIN@
      * which use 'a'. */
     uint32_t addr = df_get(v, 'c') + 2u * (uint32_t)t->curPE;
-    /* Same fullword table as #TDL above (and as #BU@/#LBR@/#CMD@ already
-     * fetch): a halfword read at an even entry returns the high half,
-     * which is zero for a count. */
-    uint32_t count = (iop_g_eaf(t, addr) & 0xffffu) + 1;
+    uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
 }
@@ -435,10 +432,7 @@ static void exec_MIN(IOP *t, DInstr *v) {
 static void exec_MIN_at(IOP *t, DInstr *v) {
     /* See exec_MOUT_at's comment: same NIA-increment fix, same evidence. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
-    /* Same fullword table as #TDL above (and as #BU@/#LBR@/#CMD@ already
-     * fetch): a halfword read at an even entry returns the high half,
-     * which is zero for a count. */
-    uint32_t count = (iop_g_eaf(t, addr) & 0xffffu) + 1;
+    uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
 }
