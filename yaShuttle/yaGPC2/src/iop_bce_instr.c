@@ -286,7 +286,23 @@ static void exec_TDLI(IOP *t, DInstr *v) {
 
 static void exec_TDL(IOP *t, DInstr *v) {
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
-    uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
+    /* The per-bus table is an array of A() FULLWORDS at a 2*BCE# bias --
+     * the same shape #BU@, #LBR@ and #CMD@ already fetch through, and the
+     * one the `EQU *-36` bias implies (two halfwords, i.e. one fullword,
+     * per BCE).  A HALFWORD read at an even entry address therefore
+     * returns the fullword's HIGH half, which is always zero for a count,
+     * so every #TDL transmitted exactly one word regardless of what was
+     * asked for.
+     *
+     * Measured in PASS's own display path: the DK2 table at 0x08c94 holds
+     * `0000 0016` for BCE 7, and the DEU's display fill is a 2-word header
+     * from the #TDS at 0x199ae followed by this #TDL's data.  With the
+     * halfword read the count was 1 every time -- so a fill commanded as
+     * 5 halfwords sent 3 ("transfer abandoned, 2 halfwords short"), and
+     * one commanded as 360 against real MEDS also sent 3, leaving the
+     * screen unpainted while the 7-halfword time fill, which uses #MOUT
+     * and needs no table, kept the clock running. */
+    uint32_t count = (iop_g_eaf(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);
     for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_READ, bce);
@@ -335,6 +351,13 @@ static void exec_MOUT(IOP *t, DInstr *v) {
         uint32_t addr = base + df_get(v, 'd') + i;
         iop_queue_dma(t, addr, DMA_READ, bce);
     }
+    /* YAGPC_DMATRACE: what a #MOUT ASKED for, against what the bus later
+     * carries.  The instruction advances its NIA immediately, so a
+     * transmit's real length is only observable here. */
+    if (getenv("YAGPC_DMATRACE"))
+        fprintf(stderr, "MOUT    bce=%d queued %u word(s) from %05x\n",
+                t->curPE, (unsigned)count,
+                (unsigned)(base + df_get(v, 'd')));
     iop_incr_nia(t, 4);
 }
 
@@ -347,7 +370,10 @@ static void exec_MOUT_at(IOP *t, DInstr *v) {
      * instructions in workspace/PFS/BFS.SRC as received/COMPILED/BCE),
      * not 3. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
-    uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
+    /* Same fullword table as #TDL above (and as #BU@/#LBR@/#CMD@ already
+     * fetch): a halfword read at an even entry returns the high half,
+     * which is zero for a count. */
+    uint32_t count = (iop_g_eaf(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);
     for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_READ, bce);
@@ -382,7 +408,10 @@ static void exec_RDL(IOP *t, DInstr *v) {
      * (d:'11111011000000cccccccccccccccccc'), unlike #TDL/#MOUT@/#MIN@
      * which use 'a'. */
     uint32_t addr = df_get(v, 'c') + 2u * (uint32_t)t->curPE;
-    uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
+    /* Same fullword table as #TDL above (and as #BU@/#LBR@/#CMD@ already
+     * fetch): a halfword read at an even entry returns the high half,
+     * which is zero for a count. */
+    uint32_t count = (iop_g_eaf(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
 }
@@ -406,7 +435,10 @@ static void exec_MIN(IOP *t, DInstr *v) {
 static void exec_MIN_at(IOP *t, DInstr *v) {
     /* See exec_MOUT_at's comment: same NIA-increment fix, same evidence. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
-    uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
+    /* Same fullword table as #TDL above (and as #BU@/#LBR@/#CMD@ already
+     * fetch): a halfword read at an even entry returns the high half,
+     * which is zero for a count. */
+    uint32_t count = (iop_g_eaf(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
 }

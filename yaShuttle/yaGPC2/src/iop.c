@@ -342,7 +342,27 @@ uint32_t mia_get_data(struct IOP *iop, MIA *m) {
     return 0;
 }
 
+/* YAGPC_XMITTRACE=<bus>: the ground truth for "the peer says the transfer
+ * was short".  A command declares a word count; everything the MIA then
+ * puts on that bus before the NEXT command is what the peer actually
+ * gets.  Counting here, rather than at the instruction that queued the
+ * DMA, is what distinguishes "the bus program asked for too few" from
+ * "the words were queued and lost". */
+static int xmit_trace_bus(void) {
+    static int inited = 0, bus = -1;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_XMITTRACE");
+        if (e != NULL) bus = (int)strtol(e, NULL, 10);
+    }
+    return bus;
+}
+static long xmitWords[32];
+static long dmaQueuedRead[32];
+
 void mia_xmit_word(struct IOP *iop, MIA *m, uint32_t halfword) {
+    if (m->bceNum == xmit_trace_bus() && m->bceNum >= 0 && m->bceNum < 32)
+        xmitWords[m->bceNum]++;
     if (!iop->servicer) return;
     GpcServiceInput input = {.busID = m->bceNum, .address = 0, .in.word = halfword};
     GpcServiceOutput output = {0};
@@ -350,6 +370,17 @@ void mia_xmit_word(struct IOP *iop, MIA *m, uint32_t halfword) {
 }
 
 void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
+    if (m->bceNum == xmit_trace_bus() && m->bceNum >= 0 && m->bceNum < 32) {
+        unsigned iua = (cmd24 >> 19) & 0x1fu;
+        unsigned func = (cmd24 >> 9) & 0x3ffu;
+        unsigned cnt = cmd24 & 0x1ffu;
+        fprintf(stderr, "XMIT bce=%d  [prev: queued %ld, sent %ld]  "
+                "cmd iua=%u func=%03x count=%u  t=%.1f\n",
+                m->bceNum, dmaQueuedRead[m->bceNum], xmitWords[m->bceNum],
+                iua, func, cnt, iop->cpu ? iop->cpu->elapsedTimeUs : 0.0);
+        xmitWords[m->bceNum] = 0;
+        dmaQueuedRead[m->bceNum] = 0;
+    }
     if (!iop->servicer) return;
     /* IUA occupies bits 19-23 of the 24-bit command word (see
      * exec_CMDI/exec_CMD in iop_bce_instr.c, which build it as
@@ -384,7 +415,19 @@ void msc_init(MSC *m) {
 
 /* Drop every queued request belonging to one BCE -- an error
  * termination takes its in-flight DMA with it. */
+/* YAGPC_DMATRACE: a transmit that is queued as DMA and then discarded is
+ * invisible everywhere else -- the bus program has already advanced past
+ * its #MOUT, the transport never sees the words, and the peer reports
+ * only "transfer abandoned N short".  This names the discard. */
 static void dmaq_drop_for_bce(DMAQueue *q, BCE *bce) {
+    if (getenv("YAGPC_DMATRACE")) {
+        int n = 0;
+        for (int i = 0; i < q->count; i++)
+            if (q->items[(q->head + i) % q->cap].bce == bce) n++;
+        if (n)
+            fprintf(stderr, "DMADROP bce=%d dropping %d of %d queued\n",
+                    bce ? bce->bceNum : -1, n, q->count);
+    }
     int kept = 0;
     for (int i = 0; i < q->count; i++) {
         DMARequest *r = &q->items[(q->head + i) % q->cap];
@@ -866,6 +909,18 @@ BCE *iop_cur_bce(IOP *iop) {
 }
 
 void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce) {
+    /* Counted here rather than in the five instructions that can queue a
+     * transmit (#TDS, #TDL, #TDLI, #MOUT, #MOUT@), so no path is missed.
+     * "Queued" against "sent" is the discriminator: a shortfall at queue
+     * time is the bus program asking for too little, a shortfall at send
+     * time is the emulator losing words. */
+    if (bce && direction == DMA_READ && bce->bceNum >= 0 && bce->bceNum < 32) {
+        dmaQueuedRead[bce->bceNum]++;
+        if (getenv("YAGPC_DMATRACE"))
+            fprintf(stderr, "  QDMA bce=%d addr=%05x  bcePC=%05x\n",
+                    bce->bceNum, (unsigned)addr,
+                    (unsigned)(register_get32(iopls_at(&iop->ls, bce->bceNum, 0, 2)) & 0x3ffffu));
+    }
     DMARequest req = {addr, direction, bce};
     dmaq_push(&iop->dmaQueue, req);
 }
