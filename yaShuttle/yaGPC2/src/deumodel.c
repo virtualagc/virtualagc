@@ -75,6 +75,24 @@ DeuModel *deumodel_create(int busID) {
     /* "asking for an IPL": the unit powers up unloaded, which is the
      * state the flight software is meant to notice and fix. */
     d->ipled = false;
+    /* YAGPC_DEUPRELOADED: come up ALREADY LOADED, so the poll reply carries
+     * header 0x0000 with IPL-required clear.
+     *
+     * That is what MEDS answers -- captured off the live DK1 bus, its
+     * sixteen-word poll reply begins 0000 ff00, the ff00 being this
+     * protocol's own KEY_COUNT_HIGH, so it is the same protocol and only
+     * that first word differs from ours.
+     *
+     * It reproduces, deterministically and without MEDS, the symptom of a
+     * GPC that shows a running clock and no menu: GPCIPL paints its IPL
+     * menu only as part of LOADING the display unit, and it only loads a
+     * unit whose poll says it needs loading.  Measured on the same image,
+     * same script:
+     *     normal    displayFills 402, timeFills 395, polls 401
+     *     preloaded displayFills   0, timeFills 403, polls 403
+     * The clock keeps running either way, which is exactly what makes the
+     * failure look like "nothing is happening" rather than a skipped step. */
+    if (getenv("YAGPC_DEUPRELOADED")) d->ipled = true;
     d->iplRunning = false;
     return d;
 }
