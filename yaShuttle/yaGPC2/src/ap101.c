@@ -367,7 +367,9 @@ void ap101_exec1(AP101 *gpc) {
         {
             unsigned nia = (unsigned)psw_get_nia(&gpc->cpu.psw);
             if ((long)nia == probeAddr) {
-                fprintf(stderr, "NIAPROBE nia=%05x", nia);
+                fprintf(stderr, "NIAPROBE nia=%05x bsr=%u dsr=%u", nia,
+                        (unsigned)psw_get_bsr(&gpc->cpu.psw),
+                        (unsigned)psw_get_dsr(&gpc->cpu.psw));
                 for (int i = 0; i < 8; i++)
                     fprintf(stderr, " R%d=%08x", i,
                             (unsigned)register_get32(cpu_r(&gpc->cpu, i)));
