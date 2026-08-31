@@ -74,8 +74,34 @@ IPL_SOURCE = [("MM1", 4), ("OFF", -1), ("MM2", 5)]
 IPL_SOURCE_OFF = -1
 OBSERVED_A = [("MM1 READY", 6), ("MM2 READY", 7)]
 TOGGLES_A = [("IOP terminate A", 12), ("IOP terminate B", 13)]
-TOGGLES_B = [("BFS engage 1", 3), ("BFS engage 2", 4), ("BFS engage 3", 5)]
-CRT_SELECT = [("CRT select A", 6), ("CRT select B", 7)]
+# Register B's two composite fields, taken from the flight software's own
+# masks rather than from either document -- the PASS User's Guide and the
+# IOP Principles of Operation disagree about these, and the code does not.
+# FCMDSCRM (GPC DISCRETE REDUNDANCY MANAGEMENT ROUTINE) declares:
+#
+#     FCMBEMKT EQU X'1C00'   BFS ENGAGE DISCRETE MASK(DIB)
+#     FCMCSMK  EQU X'0300'   BFS CRT SELECT DISCRETE MASK(DIB)
+#
+# BFS ENGAGE is therefore ONE field of three bits (3,4,5), masked and tested
+# as a unit -- which matches the PoO's own note that all three are "SET BY
+# ORBITER BFS CONTROLLER WHEN BFS ENGAGE PUSH-BUTTON IS DEPRESSED".  It is
+# one button, not three switches.
+BFS_ENGAGE_BITS = (3, 4, 5)              # X'1C00'
+#
+# BFS CRT SELECT is a two-bit NUMBER, not a pair of flags.  FCMDSCRM does
+#     NHI R3,FCMCSMK      ZERO ALL BITS EXCEPT BFS CRT SELECT
+#     SRL R3,8            ALIGN BFS CRT SELECT IN BITS 14 AND 15
+#     LH  R5,TDWASBT(R3)  GET GPC COUNT FOR SELECTED CRT
+# -- shifting it down and using it as a TABLE INDEX.  FCMBUSCM reaches the
+# same value from the other end (`ZRB R6,X'FFFC'` leaves the low two bits)
+# and ARAGPCSW indexes ARAB_MASK_ARRAY with it, whose entries mask DK1/DK2/
+# DK3 for 1/2/3.  So the field is the CRT number, and 0 means none selected
+# -- the case GPCRTOPT's POLL45 ("IPL DEFAULT LOAD -- NO DEU SELECTED")
+# exists to serve.  Bit 6 is the 2s place, bit 7 the 1s.
+CRT_SELECT_BITS = (6, 7)                 # X'0300', bit 6 = 2s, bit 7 = 1s
+CRT_SELECT = [("none", 0), ("CRT 1", 1), ("CRT 2", 2), ("CRT 3", 3)]
+
+TOGGLES_B = []                           # register B has no lone switches
 
 GPC_ID_BITS = (0, 1, 2)          # register B, a 3-bit field
 
@@ -191,6 +217,11 @@ class Panel:
         self.mode = tk.IntVar(value=0)          # HALT at startup
         self.iplHeld = False                    # the IPL pushbutton, up
         self.iplSource = tk.IntVar(value=4)     # MM1
+        # DEFAULT_ON put register B bit 7 up, which as a two-bit field is
+        # CRT 1 -- the same resting value yaGPC2's own DISCRETE_IN_B_DEFAULT
+        # (0x21000000, "GPC 1 and CRT 1") reports.
+        self.crtSelect = tk.IntVar(value=1)
+        self.bfsEngage = tk.BooleanVar(value=False)
         self.gpcId = tk.IntVar(value=1)
         self.toggles = {}                       # (reg, bit) -> BooleanVar
 
@@ -270,7 +301,15 @@ class Panel:
 
         f = ttk.LabelFrame(right, text="Discrete inputs B")
         f.pack(fill="x", **pad)
-        self._checks(f, D.REG_B, TOGGLES_B + CRT_SELECT)
+        ttk.Checkbutton(f, text="BFS engage        (bits 3-5)",
+                        variable=self.bfsEngage,
+                        command=self._bfsEngageChanged).pack(anchor="w")
+        g = ttk.LabelFrame(f, text="BFC CRT select (bits 6-7)")
+        g.pack(fill="x", pady=(6, 0))
+        for label, value in CRT_SELECT:
+            ttk.Radiobutton(g, text=label, value=value,
+                            variable=self.crtSelect,
+                            command=self._crtSelectChanged).pack(anchor="w")
 
         f = ttk.LabelFrame(self.root, text="Observed (driven by other devices)")
         f.grid(row=1, column=0, columnspan=2, sticky="ew", **pad)
@@ -290,7 +329,7 @@ class Panel:
     # Widest label anywhere in either group, so the bit captions form one
     # column across both panes rather than two that nearly agree.
     _LABEL_WIDTH = max(len(name)
-                       for name, _ in TOGGLES_A + TOGGLES_B + CRT_SELECT)
+                       for name, _ in TOGGLES_A)
 
     def _checks(self, parent, reg, items):
         for label, bit in items:
@@ -351,6 +390,36 @@ class Panel:
             self._send(D.SET if bit == chosen else D.RESET,
                        D.REG_A, D.bit_mask(bit))
 
+    def _sendField(self, reg, bits, value):
+        """Drive a multi-bit field as one SET and one RESET.
+
+        A field is not a row of switches: sending it a bit at a time walks
+        the GPC through values the field never held.  The datagrams are the
+        same ones as ever -- the mask has always been 32 bits wide -- they
+        just carry the whole field.  Break before make, since "no bit set"
+        is a value the hardware really does pass through.
+        """
+        on = off = 0
+        for i, b in enumerate(bits):
+            m = D.bit_mask(b)
+            if value & (1 << (len(bits) - 1 - i)):
+                on |= m
+            else:
+                off |= m
+        if off:
+            self._send(D.RESET, reg, off)
+        if on:
+            self._send(D.SET, reg, on)
+
+    def _crtSelectChanged(self):
+        self._sendField(D.REG_B, CRT_SELECT_BITS, self.crtSelect.get())
+
+    def _bfsEngageChanged(self):
+        # All three bits together: FCMDSCRM masks them as one field
+        # (FCMBEMKT X'1C00'), and one push-button drives them.
+        self._sendField(D.REG_B, BFS_ENGAGE_BITS,
+                        0b111 if self.bfsEngage.get() else 0)
+
     def _gpcIdChanged(self):
         try:
             v = int(self.gpcId.get())
@@ -376,6 +445,8 @@ class Panel:
         self._modeChanged()
         self._iplSourceChanged()
         self._gpcIdChanged()
+        self._crtSelectChanged()
+        self._bfsEngageChanged()
         for (reg, bit), var in self.toggles.items():
             self._send(D.SET if var.get() else D.RESET, reg, D.bit_mask(bit))
         self.root.after(D.REPUBLISH_MS, self._republish)
@@ -490,7 +561,30 @@ def _run_script(panel, entries, quitAfterMs=None):
             on = val.lower() in ("on", "1", "set", "true")
             if key in panel.toggles:
                 panel.toggles[key].set(on)
-            panel._send(D.SET if on else D.RESET, key[0], D.bit_mask(key[1]))
+                panel._send(D.SET if on else D.RESET,
+                            key[0], D.bit_mask(key[1]))
+            elif key[0] == D.REG_B and key[1] in CRT_SELECT_BITS:
+                # Part of the two-bit CRT SELECT field: fold the change into
+                # the field's value so _republish agrees with it.  Bit 6 is
+                # the 2s place, bit 7 the 1s.
+                place = 1 << (len(CRT_SELECT_BITS) - 1
+                              - CRT_SELECT_BITS.index(key[1]))
+                v = panel.crtSelect.get()
+                panel.crtSelect.set(v | place if on else v & ~place)
+                panel._crtSelectChanged()
+            elif key[0] == D.REG_B and key[1] in BFS_ENGAGE_BITS:
+                panel.bfsEngage.set(on)
+                panel._bfsEngageChanged()
+            else:
+                panel._send(D.SET if on else D.RESET,
+                            key[0], D.bit_mask(key[1]))
+        elif verb == "crt":
+            # `crt 2` -- the BFC CRT SELECT field by number, 0 = none.
+            panel.crtSelect.set(int(arg))
+            panel._crtSelectChanged()
+        elif verb == "bfsengage":
+            panel.bfsEngage.set(arg.lower() in ("on", "1", "set", "true"))
+            panel._bfsEngageChanged()
         elif verb == "gpcid":
             panel.gpcId.set(int(arg))
             panel._gpcIdChanged()
