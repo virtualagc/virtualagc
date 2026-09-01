@@ -356,3 +356,31 @@ code itself was not read.)
   discriminating observation to ask for is which row `MEM/BUS CONFIG` lands on and which
   row the last line lands on -- 4 and 25 means the layout is right and the impression is
   coming from somewhere else.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **F10 WAS A BAD KEY AND THAT IS THE WHOLE OF THAT SYMPTOM**: Chromium gives F10 to the
+  menu bar, so pressing it moved focus out of the document and the DEU keyboard stopped
+  taking keys -- "it no longer accepts my ITEM 1 EXEC".  The toggle is now **Shift+V**,
+  one of the few letters `DPSKeys` does not map to a DEU key.  It also only called
+  `redraw()`, which repaints geometry already built, so the frame change reached nothing
+  but the furniture rebuilt each cycle -- about a character's width, exactly as reported.
+  It now calls `refresh()` first.
+- **MEDS'S BUILT-IN SCREENSHOT CANNOT WORK HERE**: `mdu.screenshot()` builds a `data:`
+  URL and calls `a.click()`, which needs a download handler Electron does not have in
+  this app.  Shift+S saves nothing and never did.  Do not ask for one.
+- THE CAMERA IS NOT THE EXPLANATION FOR THE 0.701, checked rather than assumed:
+  `resetCamera` spans 53.24 cells across and 38.32 down, so in a 1024-px window a cell
+  is 19.23 x 26.72 px -- already the 19/27 aspect of `COL_PITCH`/`ROW_PITCH`.  Square
+  cells would have given 0.717, which is close enough to the measurement to have been
+  believed without checking.
+- SO THE REMAINING CANDIDATE IS THE WALK ITSELF, and specifically the one thing my
+  offline model does NOT implement: `mduScreen_DPS` folds the X/Y REFERENCE REGISTERS
+  into every position word when FCW2's `xyRef` gate is set (`beamY = (v.y + (if xyRef
+  then ty else 0))`).  My walk reproduces the deck's rows without them; MEDS may not.
+  `NSTS_CELL_TRACE` exists to settle that -- it records what the RENDERER computed, not
+  what I think it should have.
+- METHOD NOTE, and it is the one this whole day keeps teaching: three separate times now
+  a number I derived offline has looked decisive and been incomplete because the model
+  left something out -- the sector, the second coordinate frame, and now possibly the
+  reference registers.  An offline model of somebody else's interpreter is a hypothesis
+  generator, not an oracle.  Instrument the real thing.
