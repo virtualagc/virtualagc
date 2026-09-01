@@ -511,3 +511,44 @@ code itself was not read.)
   the same screen reads `0001/000/` -- find its DDT entry in `CD0001.dfg`, find the
   variable it names, and watch what PASS writes there.  One field traced end to end
   beats another round of pattern-matching on the characters.
+
+### [2026-09-01] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE DISPLAY-ID FIELD, TRACED END TO END.  The display path is faithful; the DATA it
+  renders is uninitialised.**  That reframes the whole "garbage overlay".
+- THE PATH: `SSSRC/DCICYC.asm`, `DCIBHDR` (linked at **0x42345**) builds the header line.
+  It emits the X/Y FCWs, sets up a pseudo DDT entry at `CLOCDDTP`, points it at
+  `CMATPAGE`, and calls `DCI#CON` (**0x42495**) to convert the OPS page number; then the
+  SPEC page (`CMATPAGE+1`) and the DISP page (`CMATPAGE+2`), each preceded by a slash
+  FCW `X'C02F'`.  `CDDMAT` (`MLIB80/CDDMAT.asm`) is a DSECT: `CMATPAGE` is +10 halfwords
+  from `CMATSTRT`, three halfwords, one per display level.
+- WHAT THAT PROVES ABOUT OUR HEADER: ours reads `-0602/   /`.  The second and third
+  fields being **slash-plus-blanks is the code's own ZERO branch** ("THE SPEC PAGE
+  NUMBER IS NOT VALID, SO STORE A SLASH ... AND MOVE SPACES OVER"), so `CMATPAGE+1` and
+  `+2` are 0 and correct.  Only the OPS page converts, and it converts to a NEGATIVE
+  five-character value where the reference shows `0001`.
+- **THE LOAD-BEARING OBSERVATION IS A FIELD WITH NO ARITHMETIC IN IT.**  The deck has
+  `XC=12, CHARR=(CZ2V_MF_MC,2)` -- a plain two-character copy, no conversion -- and on
+  the wire that field renders `e346` = **"FF"**.  PASS stores characters in EBCDIC and
+  translates to DEU codes when building FCWs; DEU 0x46 comes from EBCDIC 0xC6, and
+  **0xC6 is the fill byte** (`STACK_FILL_BYTE`, `INIT=C6C6` on every MMUDAT allocation).
+  So that variable holds the FILL PATTERN and the display is drawing it correctly.
+- SO THE `M`s AND `F`s ARE DOWNSTREAM OF UNINITIALISED COMPOOL STORAGE, not of a broken
+  renderer or a broken conversion: a character field shows the fill as "FF", and a
+  numeric conversion of fill produces out-of-range "digits" -- `AHI R4,X'3030'` on a
+  value of 29 is exactly 0x4d, `M`.  `CZ2V_MC_REQ` rendering as **-50** where a memory
+  configuration should be 0-8 is the same thing.
+- RULED OUT ALONG THE WAY, each checked rather than argued: the compool's address
+  constants (99 of 99 correct); `SRDL`/`SLDL` register pairing (already carries the
+  `(R1+1) mod 8` fix POO 6.6 requires); and the linked `#PCZ2COM` initial image, which
+  is mostly ZEROS rather than fill -- so whatever puts C6C6 into these variables does it
+  at RUN TIME, not at link time.
+- **A REAL INCONSISTENCY FOUND WHILE LOOKING, not yet a proven bug**: `exec_D`
+  (`cpu_instr.c:176`) forms its register pair with `cpu_r(t, x + 1)` and **no `% 8`**,
+  while `exec_SLDL`/`exec_SRDL` were explicitly corrected to `(x + 1) % 8` with the POO
+  citation.  `D R6` does not hit it, so it is not this symptom, but `D R7` would address
+  a ninth register.  Worth fixing on its own.
+- NEXT: find where `CZ2V_MF_MC` gets C6C6 at run time.  It is a two-character variable
+  with no arithmetic anywhere near it, which makes it the cheapest possible probe --
+  snapshot main storage after RUN, read it, and find who wrote it.  Its address needs
+  the SDF, not the link map (HAL/S compool variables are not individually in
+  `PHASE02.sym.json`; only `#PCZ2COM` at 0x23f4 and a few entries are).
