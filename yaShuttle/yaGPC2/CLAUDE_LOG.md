@@ -706,3 +706,117 @@ code itself was not read.)
   display was obscured anyway.  **When someone reports the same symptom a third time,
   the model is wrong, not the measurement.**  `hasFrame` could not switch it off either:
   cde-window.ts declares the property, defaults it, and never reads it.
+
+### [2026-09-01] Target: [HANDOFF-FCMBOOT.md]
+- MEDS2 window: `cde-window` chrome is a FRAME, not a title strip -- it takes
+  pixels down the left and right too.  `NSTS_MDU_CHROME=<px>` sets the top
+  margin, `NSTS_MDU_CHROME_X` (default 8) the sides, and `_fitWindowToCanvas`
+  now targets canvas size PLUS both insets rather than overflow alone; a
+  right-hand inset is not overflow, so the old test left the canvas flush
+  against the frame on that side.  Launcher back to `--size 512` + 30 px bar;
+  unset both for a measurement session (`--size` is CSS only, render stays
+  1024).
+- Fitted from the user's original 1024x1024 measurements: `textX` -0.71 (21 px
+  left at 19.601 px/column), `vecX` +0.41 so vectors keep only 13 px of it.
+  The two differ because a glyph is drawn at `penX-1` and a vector at `penX`:
+  the same beam position puts them a whole cell apart.
+
+### [2026-09-01] Target: [problems.md]
+- GPC MEMORY: "CODE" flashes and does not in Don's video.  The blink path is
+  NOT a MEDS2 divergence -- `FCW1` (`001110dbtoasik__`), `blinkTick`, the
+  blink group and `blink = v.blink == 1` are all identical to upstream MEDS.
+  So the difference is in what MEDS2 *walks*.  Prime suspect: the two-pass
+  refresh.  On the hardware the background is reached by a branch from the
+  display list and attribute state carries across; MEDS2 makes it two separate
+  walks, each starting `blink = false`.
+- DEUCFLM has no "CODE" anywhere in the GPC MEMORY background (0x0404..).  At
+  0x049f the READ/WRITE block reads CR, six spaces, then `2` `1` -- the label
+  field is deliberately blank and the text arrives from PASS in a
+  DISPLAY_FILL.  Glyph 0x00 is a no-draw, no-advance pad used for odd-length
+  labels (`c031` = 0x00,'1' ending "INIT 51"); 0x0d is the carriage return.
+- Cell trace now records blink per glyph and every FCW1 word (address, raw
+  halfword, all eight bits).  It is truncated and re-armed per refresh, so the
+  file holds the last frame drawn -- reach GPC MEMORY and stop.
+
+### [2026-09-01] Target: [problems.md]
+- Flashing "CODE" RESOLVED as to origin, and my two-pass hypothesis was WRONG.
+  PASS brackets it explicitly: `FG FCW1 @1a55 3900` (blink=1), the two CHAR2
+  words drawing `CO` `DE`, then `FG FCW1 @1a58 3800` (blink=0).  Three words
+  apart, deliberate.  MEDS2 renders it faithfully; the blink is in the
+  DISPLAY_FILL PASS sent.
+- Placement is exact, which rules out a shifted attribute word: BG row 3.48
+  has `21` at columns 24-25 with 19-22 blank, and PASS draws `CODE` at
+  precisely 19-22, matching `DATA` at 19-22 / `20` at 24-25 on row 2.48.
+- A SECOND blink bracket sits at `@1a09`..`@1a0b`, around a single word that
+  draws nothing.  Two flashing fields on a page whose data fields read
+  `FFFFFFFFFF` (row 3.48 cols 7-16) and `-50` -- consistent with PASS flagging
+  fields it could not fill.  So the flash is most likely a downstream symptom
+  of the DCI#CON defect rather than an independent bug; fixing DCI#CON is the
+  test.
+
+### [2026-09-01] Target: [HANDOFF-FCMBOOT.md]
+- `pass-run/headless-gpcmem.sh` boots PASS to GPC MEMORY with NO MEDS, NO panel
+  window and NO network: in-process mass memory (`--mmu-model`), in-process
+  DEUs (`--deu-model --deu-bus 7`), scripted discretes
+  (`discretePanel.py --script`), `YAGPC_DEUKEYS=ITEM,1,EXEC`.  Its own
+  `--port-base 6800` so it never fights an interactive run.  Reproduces the
+  garbage EXACTLY -- same words at the same DEU addresses as the interactive
+  run (`-0602` at 0x19f1, `-50` at 0x1a11, `FFFFFFFFFF` at 0x1a1d, `CODE` at
+  0x1a56).  ~6 minutes, unattended.
+- Three things that had to be got right, all of which failed silently first:
+  the IPL pushbutton is MOMENTARY, so the GPC must be up before the panel
+  script runs or the press is simply lost (200M steps from address 0, no bus
+  traffic at all); `YAGPC_DEUKEYS_AFTER` defaults to 400 polls == ~400 seconds
+  here, longer than the run, so the load never started; and the outdir must be
+  absolutised, because the script cds into the yaGPC2 tree before redirecting.
+- New in yaGPC2: `YAGPC_RANGETRACE=lo-hi[,max[,afterSec]]` (afterSec in
+  EMULATED seconds -- a 400 s wall run reaches only ~321 s simulated, so a gate
+  of 330 never fires) and `YAGPC_DEUDUMP=<prefix>` for the raw 8192-halfword
+  image.
+
+### [2026-09-01] Target: [problems.md]
+- DCI#CON: THREE candidate defects eliminated, none of them the cause.
+  (1) `exec_D`'s missing `% 8` is not a bug at all: for even R1, R1+1 <= 7, and
+  for odd R1 the POO says the dividend is R1 with 32 low-order zeros appended,
+  which is exactly what the code does.  (2) The variable-shift form
+  (`SRDL R4,63`, `SLL R6,0(R4)` -- count field > 55 names a register, count
+  from ITS bits 0-15) IS implemented, in `cpu_g_shift_cnt`, and matches PASS's
+  own usage exactly: `SLL R7,18` + `AHI R7,32` puts 4n+32 in bits 0-15 and
+  `CHI R7,X'0040'` guards it against 64, which only makes sense on those
+  semantics.  (3) CHARCONV's decimal conversion was executed offline against
+  yaGPC2's own `q31_div`/`q31_mul32`/SRDL/SLDL (`ITEN` = `F'0.625'` =
+  0x50000000, the 4-bit pre-shift is the scaling): 2006 values, 0 mismatches.
+- So the wrong value is arriving IN `CLOCARG`, upstream of the arithmetic.
+  The header field decodes as sign `-` plus digits `602`: `c02d`(pad,'-')
+  `d836`("06") `d832`("02"), and the sign halfword is X'2D30' ('-','0') vs
+  X'0030' (pad,'0') for positive -- so a POSITIVE 602 would render "0602".
+  The minus comes from `TB CLOCARG,X'8000'`, set either by a genuinely
+  negative value or by a stale `CLOCFLGS` X'8000' that CHARCONV should have
+  consumed at #@LB318.
+
+### [2026-09-01] Target: [problems.md]
+- ROOT CAUSE FOUND AND FIXED (commit 32f98c64a).  `cpu_g_ea`'s fullword-
+  indirect path shifted a sector onto EVERY pointer, including one whose own
+  high bit is clear and which therefore addresses sector 0.  Sec. 2.9 and
+  Figure 2-17 ("MSB ... determines type of address expansion", flowchart leaf
+  EXPAND USING 0000) say otherwise.  Also: the index sum is 16-bit and
+  includes the high bit, so masking to 15 bits first threw away a carry that
+  decides the expansion.
+- Measured, not guessed: `YAGPC_INDTRACE` at 0x42845 shows ptr=26f80801 --
+  address 0x26f8, DSV=1, Xc=1, C=0 -- from `DC Z(,FCMCBLKS,8)` in DCI#DATA
+  (flags byte 8 = Xc set, C clear).  0x26f8's high bit is clear so the datum
+  is at 0x026f8; applying DSV read 0x0a6f8, unwritten, returning the C6C6 IPL
+  fill, sign-extended by the following SRA to -14650.
+- Before/after on the headless boot: `-0602` -> ` 0001`, `-50` -> ` 0`,
+  `FFFFFFFFFF` -> blank, and a block of the page that never drew at all now
+  does (BFS7 14 / PASS8 15 / 27 OPTION / START 28 / STOP 29).  The flashing
+  CODE went with it: PASS emitted FCW1 3900 (blink) at 0x1a55 and now emits
+  3800.  So the flash WAS a downstream symptom, as suspected.
+- The Xc inversion was tried and REVERTED: it hangs every program in
+  test_rtl, and the measured pointers carry Xc=1 on both the working RTL path
+  and the failing PASS path, so Xc was never the discriminator.
+- test_cpu_ea: 62/20447 fixtures encode gpc's version of the same defect.
+  Recorded as a known divergence recognised BY SHAPE (fullword-indirect-with-
+  index, ours < 0x8000, theirs the same address with a nonzero sector), so
+  regenerating the table cannot silently re-arm it.  Full suite is otherwise
+  back to its baseline four pre-existing failures.
