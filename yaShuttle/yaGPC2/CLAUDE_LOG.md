@@ -183,3 +183,38 @@ code itself was not read.)
   created, `chmod`ed and executed in one invocation, was gone from disk two invocations
   later, never committed, no `git` operation in between.  Cause unknown.  The remedy is
   the one already in this log: **commit a new tool the moment it works.**
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE TAPE FIX IS CONFIRMED END TO END AGAINST REAL MEDS.**  Recorded off the wire by
+  `tools/dksniff.py` during the user's own run: at t=38.2-38.4 GPCIPL sends IDP2 seven
+  `FORMAT_FILL`s of 509 halfwords to `0x0100..0x0cee` plus a 94-halfword tail at
+  `0x0eeb`, carrying **455-489 non-zero halfwords each** and decoding to `GPC MEMORY`,
+  `MEM/BUS ...`, `GPS STATUS`, `TRK ID`, `OXID`.  The critical-format buffer is loaded.
+  The display is STILL blank, so the remaining fault is in the RENDERING.
+- **WHAT PASS ACTUALLY SENDS FOR GPC MEMORY**, and it is two pieces: a THREE-halfword
+  background at `0x1fe2` -- `2000 1107 1fe2` -- and a 382-halfword dynamic list at
+  `0x19ee` that ends in `3200`, end-of-refresh.  `0x2000` is op 2 SUBLIST with
+  **sector 0**, `0x1107` is op 1 BRANCH with a 12-bit address of `0x107`.
+- **`0x107` IS EXACTLY RIGHT, AND THE FLIGHT SOFTWARE SAYS SO.**  `CD0001.dfg:89` reads
+  `DEULOC=000263`; 263 decimal = `0x107` = `0x100 + 7`, and 7 is `#PXD0001`'s index in
+  CFSYSIN's `CRTFMTCU=` list.  Every DEULOC in the release is 256..271, i.e.
+  `0x100..0x10F`, the CFIT slots.  So the branch word carries **twelve** address bits
+  and the SUBLIST's `ssss` supplies the sector.
+- **TWO THINGS IN MEDS STOP IT DRAWING, both in Don's renderer.**  (1)
+  `deuFCW.coffee:139` resolves a BRANCH as `hw & 0x1fff`, so `1107` becomes `0x1107`
+  instead of `0x0107` -- empty memory -- and `mduScreen_DPS`'s walker ignores op 2's
+  sector when the count is zero, which is the very thing that selects sector 0.  Note
+  the 13-bit reading IS right inside the display half: the same list branches `1a0e`,
+  which must resolve to `0x1a0e`, the dynamic portion.  The discriminator is the
+  sector word.  (2) `refresh()` starts the walk at `DISPLAY_HEADER` (`0x19ee`) and
+  nothing else, and the 382-halfword list there contains NO branch to `0x1fe2` -- I
+  searched it -- so the background block is never executed at all.  Both have to be
+  right before a critical format can draw.
+- NOT ATTEMPTED, deliberately: patching the beam interpreter.  The sector semantics
+  (what the current sector is, what a critical format's `111e` exit branch means -- it
+  is also CFSYSIN's `PAD`) need the DEU POO, and guessing them is exactly the trap of
+  copying a condition without understanding why it is there.
+- A SECOND SILENT WRITE FAILURE: the heredoc that was to append this very entry ran,
+  reported success, and left the file unchanged at 185 lines -- the same way
+  `tools/dksniff.py` vanished earlier.  Both were heredocs inside a compound command.
+  **Write the file, VERIFY it, then commit in a separate invocation.**
