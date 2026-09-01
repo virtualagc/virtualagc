@@ -584,3 +584,37 @@ code itself was not read.)
 - WITHDRAWN: yesterday's "the variables hold the C6C6 fill" reading.  It was inferred
   from `FF` being EBCDIC `0xC6` and never checked against memory.  The `FF` is
   manufactured by the display path out of `0x2020`.
+
+### [2026-09-01] Target: problems.md, HANDOFF-FCMBOOT.md
+- **MEASURED REFERENCE COORDINATES REPLACE THREE DAYS OF ADJUSTING BY EYE.**  The user
+  measured stroke-centre positions off a reference frame, 1024x1024, origin top-left,
+  +/-1 px.  Ten glyphs spanning the page plus the furniture.  Every number below is a
+  fit, not an impression.
+- GLYPH INK OFFSETS make the fit possible at all: a glyph's ink does not start at its
+  cell anchor, and each character differs.  Computed from `deu_font.svg` through MEDS's
+  own normalisation (`0.95 + 0.9*x/(512/43)`, `0.10 + 0.9*y/(512/30)`, then `drawGlyph`'s
+  `x-1`): `M` +0.116/+0.142, `E` +0.048/+0.153, `I` +0.328/+0.142, `B` +0.018/+0.158,
+  `S` +0.063/+0.153, `G` +0.131/+0.147, `T` +0.116/**+0.084**.  Subtracting these is what
+  takes the residuals from several px to sub-px.
+- **THE ROW PITCH IS ALREADY EXACT.**  Fitted 26.707 px/row against MEDS's rendered
+  26.722 -- **0.06% apart over a 21-row baseline**.  So the "compressed to 0.701" was
+  never in the rendering; the user had already suspected their OI30 reference document.
+  `NSTS_DPS_ROWGAP` wants **1**, and the knob stays only as a knob.
+- **THE TEXT SITS 1.43 ROWS LOW RELATIVE TO THE FURNITURE**, and that is the real defect.
+  Converting the ten glyph measurements to cells through a fit anchored on the
+  furniture's own exact constants gives -1.48 -1.48 -1.49 -1.48 -1.49 -1.48 -1.33 -1.33
+  -1.41 -1.35.  **Constant to +/-0.08 across the whole page**, so an offset, not a scale.
+  Carried by `NSTS_DPS_TEXTY`.
+- COLUMNS ARE RIGHT within the measurement's own noise: mean +0.18 cell, and the two
+  worst (`B` +0.24, `S` +0.46) are glyphs whose leftmost stroke is hardest to call.  No
+  column change made.
+- THE ABSOLUTE OFFSET, which is the half that depends on an assumption: furniture 1.54
+  rows low, text 2.89, both satisfied by the -1.43 text offset plus a group shift of
+  -1.5.  `NSTS_DPS_YSHIFT` therefore goes **+1 -> -0.5**.  It rests on the crop being
+  the whole MDU face, which its own content supports (the MAIN MENU rule and legend are
+  in frame, the POLL FAIL cross spans 10..1018 of 1024).  **It also contradicts the
+  earlier eyeball report that the page sat a row too HIGH with the clock clipped** -- the
+  fit says every text row, the clock included, was ~2.9 rows too LOW.  One of the two is
+  wrong and the measurement is the one with error bars.
+- MENU AREA moved 3 px right on the user's own measurement: its leftmost character sits
+  at x=1 of 1024 and is clipped.
