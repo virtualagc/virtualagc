@@ -384,3 +384,26 @@ code itself was not read.)
   left something out -- the sector, the second coordinate frame, and now possibly the
   reference registers.  An offline model of somebody else's interpreter is a hypothesis
   generator, not an oracle.  Instrument the real thing.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE GLYPH TRACE CAPTURED THE WRONG THING, and the flaw was mine**: it capped the
+  whole RUN at 6000 glyphs, and GPCIPL's screen -- repainted every 0.57 s -- spent the
+  budget in about twenty seconds.  6008 lines, every one of them `FG`, none of PASS and
+  none of the background pass.  It now truncates at the start of each `refresh()`, so
+  the file always holds the frame that is on the display.
+- IT DID PROVE ONE THING: **GPCIPL's screen under the DFG frame is nonsense** -- glyph
+  rows come out at 1.11, 2.07, 3.07 and one run at row **56**, all crammed into columns
+  28-52.  Non-integer rows are the signature of the wrong frame, and they are exactly
+  the "upper right quadrant" the user reported.
+- **THE FRAME TOGGLE ONLY MOVED THE PAGE A CHARACTER'S WIDTH BECAUSE THE WALK READ
+  LOAD-TIME CONSTANTS.**  `mduScreen_DPS` takes its starting beam position from
+  `FCWD.COL_ORIGIN`/`FCWD.ROW_ORIGIN` and wraps position words with `FCWD.GRID` -- all
+  captured at module load, so `setGeom` reached `cellCol`/`cellRow` and nothing else.
+  The walk now reads a live `FCWD.geom()`.  Same bug in both F10 and Shift+V, so the key
+  change was necessary but not sufficient, and the second report of an unchanged symptom
+  is what showed it.
+- The default frame is now **gpcipl**, because GPCIPL is what comes first in every run
+  and its menu has to be readable to work the sequence; Shift+V once after RUN moves to
+  PASS's.  `NSTS_DEU_GEOM=dfg` starts the other way.
+- ALSO NUDGED: the rule above `MAIN MENU` and the legend itself sit a row high like the
+  rest of the page, so `mduMenuArea` takes the same `NSTS_DPS_YSHIFT`.
