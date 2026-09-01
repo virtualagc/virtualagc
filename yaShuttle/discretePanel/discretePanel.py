@@ -30,6 +30,7 @@ nsts-sim-gpc for the same protocol on the other side.
 """
 
 import argparse
+import os
 import re
 import subprocess
 import threading
@@ -603,6 +604,9 @@ def main():
     ap.add_argument("--script", metavar="FILE", help=SCRIPT_HELP)
     ap.add_argument("--quit-after", type=int, metavar="MS",
                     help="exit this many ms after startup (for scripted runs)")
+    ap.add_argument("--geometry", metavar="SPEC", default=None,
+                    help="Tk geometry for the panel window, e.g. +1080+0 "
+                         "(also NSTS_PANEL_GEOMETRY)")
     ap.add_argument("--port-base", type=int, metavar="N", default=None,
                     help="base of the UDP port range the buses use: bus n is "
                          "base+n and the discrete bus base+80 (default 6900, "
@@ -618,6 +622,17 @@ def main():
 
     root = tk.Tk()
     panel = Panel(root)
+    # --geometry places the window, so a rig that starts the panel beside two
+    # MDU windows does not have to be dragged into shape every run.  Tk's own
+    # spec, so "+1080+0" positions and "400x600+1080+0" sizes as well; the
+    # environment variable is the same thing for callers that cannot easily add
+    # an argument.
+    geom = args.geometry or os.environ.get("NSTS_PANEL_GEOMETRY")
+    if geom:
+        try:
+            root.geometry(geom)
+        except tk.TclError as e:
+            raise SystemExit("discretePanel: bad --geometry %r: %s" % (geom, e))
     _dont_steal_focus(root)
     if args.script:
         with open(args.script) as f:
