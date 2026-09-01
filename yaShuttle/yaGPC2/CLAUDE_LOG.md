@@ -296,3 +296,36 @@ code itself was not read.)
   two implementations, and worth telling him about separately from the rendering work,
   since it will bite any display with content below row 13 no matter who wrote the
   interpreter.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE PREVIOUS ENTRY'S "ONE CONSTANT" IS WITHDRAWN.  There are TWO COORDINATE SYSTEMS
+  on this bus, differing in FOUR constants, and which one a word is in depends on who
+  wrote it.**  Scoring every list's position words by whether they land on integer
+  character cells and on screen at all, over real captured traffic:
+
+        list                     MEDS's calibration      DFG's constants
+        GPCIPL's own screen      2/2 cols, 2/2 rows      0/2 cols, 0/2 rows
+        PASS display list        15/24, 0/19, OFF        24/24, 19/19, on
+        PASS 0x1a06 area         14/22, 0/18, OFF        22/22, 18/18, on
+        PASS message line        0/1, 0/1, OFF           1/1, on
+        XD0001 critical format   0/6 (cols 97.8, 80.8)   6/6, matching its deck
+
+  MEDS: `GRID 2048, COL_ORIGIN 1573, ROW_ORIGIN 364, ABS 1555/364`.  DFG:
+  `1536, 1042, 366, 1024/1902`.
+- WHY MEDS HAS THE ONE IT HAS, and it is not a mistake anyone should be blamed for:
+  its constants are "calibrated against captured display memory", and **the only
+  display memory anyone could capture before PASS ran was GPCIPL's**.  They are exactly
+  right for GPCIPL and wrong for everything PASS emits, which is all of it.
+- WHY DFG'S IS THE FLIGHT SOFTWARE'S: `src/dfg/fcw.py` generates every format with
+  those constants, and our generated XD0001 is byte-identical to the historical DFG
+  output OI301700 still carries -- so the HISTORICAL formats encode `YC=18` as 1416,
+  which is row 18 only under 1536/366.
+- MEDS2 now SELECTS the geometry, defaulting to DFG's because running PASS is the
+  point; `NSTS_DEU_GEOM=gpcipl` restores the other for reading GPCIPL's own menu.  The
+  two cannot both be right at once and reconciling them wants documentation nobody has.
+- **THE LESSON, and it is one this log already carries in another form:** the user
+  reported GPCIPL's screen getting WORSE at the same time as PASS's got better, and
+  that pair is what exposed the mistake.  A change that improves the case you are
+  watching and quietly breaks the case you are not is indistinguishable from a fix
+  until somebody looks at both.  I had "verified" 1536 against XD0001's deck alone --
+  a real oracle, but a single one, and every format in that corpus shares a producer.
