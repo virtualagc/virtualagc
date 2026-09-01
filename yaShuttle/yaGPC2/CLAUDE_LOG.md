@@ -618,3 +618,33 @@ code itself was not read.)
   wrong and the measurement is the one with error bars.
 - MENU AREA moved 3 px right on the user's own measurement: its leftmost character sits
   at x=1 of 1024 and is clipped.
+
+### [2026-09-01] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE FIT WAS ANCHORED ON A CONSTANT I HAD MYSELF CHANGED, and that is the whole of
+  why it came out wrong.**  I converted the glyph measurements to cells using the GPC
+  box and kybd bar as the reference frame -- after moving that assembly up one row a few
+  commits earlier.  The reference frame therefore disagreed with the measurement's frame
+  by exactly the row I had introduced, and the "text sits 1.43 rows low" fell out of it.
+  **A fit is only as good as the frame it is anchored in, and anchoring on your own
+  recent edit is circular.**  Reverted: YSHIFT +1, TEXT_DY 0, GPC assembly back at Don's
+  constants.
+- WHAT SURVIVES THE RETRACTION, because it never depended on that anchor: **the row
+  PITCH is right** -- 26.707 px measured against 26.722 rendered, 0.06% over 21 rows, and
+  the user confirms the spacing now "looks exactly like I'd expect from Don's video".
+  `ROWGAP` stays 1.  The per-glyph ink offsets stand too, and they are what makes any
+  future measurement usable.
+- STILL WRONG ON SCREEN, from the user's own report and NOT yet explained: everything
+  above the MAIN MENU rule is ~2 text lines too high with the clock off the top; and
+  **a box drawn around text sits about a text line high relative to the text it
+  encloses**, on GPCIPL and on GPC MEMORY alike.
+- THE SECOND ONE IS THE INTERESTING ONE.  Vectors and glyphs are placed from the SAME
+  pen -- `@d.line` at `penY()`, `@d.str` at `penY()` -- but a glyph's ink starts +0.14
+  row below the pen and runs to +0.88, so a vector should sit within a seventh of a row
+  of the glyph top, not a whole row above it.  Nothing in the code accounts for a row.
+  `NSTS_DPS_VECY` offsets the vector path alone so the size of it can be measured
+  instead of argued.
+- METHOD, and it is the lesson of the whole day: **change one thing per round.**  Four
+  rounds in a row I moved two or three constants at once and could not attribute the
+  result.  The knobs now are one per symptom -- `NSTS_DPS_YSHIFT` (whole page),
+  `NSTS_DPS_TEXTY` (glyphs only), `NSTS_DPS_VECY` (vectors only), `NSTS_MENU_DX` (menu
+  area) -- so a single relaunch settles one question.
