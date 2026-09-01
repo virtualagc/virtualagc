@@ -329,3 +329,30 @@ code itself was not read.)
   watching and quietly breaks the case you are not is indistinguishable from a fix
   until somebody looks at both.  I had "verified" 1536 against XD0001's deck alone --
   a real oracle, but a single one, and every format in that corpus shares a producer.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **DON'S OWN CAPTURE SETTLES WHICH FRAME IS THE HARDWARE'S**, and it is not the one I
+  guessed.  `data/0001-O-GPC_MEMORY.dfb` is a capture of THIS VERY SCREEN, and it
+  decodes under MEDS's calibrated constants with **201 of 201 integer columns AND
+  rows**; under DFG's, 72 of 201 columns and 0 of 201 rows.  So MEDS's frame is the
+  DEU's, and the DFG frame is a format-relative one that something relocates -- the two
+  differ by a fixed offset, +531 in X and +510 in Y mod 2048, no scaling.
+- AND ITS LAYOUT IS THE ORACLE FOR THE WHOLE SCREEN: `GPC MEMORY` at row 2 col 17,
+  `MEM/BUS CONFIG` and `READ/WRITE` both at row 4, `1 CONFIG` at row 5, last line at
+  row 25, 177 text runs.  Our render of XD0001 under the DFG constants plus the
+  renderer's own `+1` produces exactly that, row for row -- which means the row numbers
+  are RIGHT and any residual vertical compression is downstream of them.
+- MEDS2 now switches frames **live with F10** rather than only at startup, since GPCIPL
+  and PASS need different ones and both happen in a single run.
+- **A ONE-ROW UPWARD DISPLACEMENT, LONG KNOWN AND NOW FIXED**: the user has reported for
+  some time that the whole DPS page sits a row high -- the top of the header clock
+  clipped, a row of slack at the bottom -- and it was left alone because MEDS was not
+  ours to modify.  `mduScreen_DPS.build` already carried `@group.position.y = -0.75`
+  with the comment "was +1, shifted up 1.75"; it is now `-0.75 + 1`, tunable with
+  `NSTS_DPS_YSHIFT` (which is the CORRECTION, so 0 restores MEDS's value).  One cell is
+  one world unit, so this moves text, clock, scratch pad and the POLL FAIL cross alike.
+- STILL UNEXPLAINED: the user reports the vertical spacing "compressed to about 0.7".
+  The row numbers match Don's capture exactly, so it is not the coordinates.  The
+  discriminating observation to ask for is which row `MEM/BUS CONFIG` lands on and which
+  row the last line lands on -- 4 and 25 means the layout is right and the impression is
+  coming from somewhere else.
