@@ -672,3 +672,37 @@ code itself was not read.)
   better measurements.**
 - PENDING, at the user's direction: restore a small margin on ALL FOUR sides once the
   geometry is fitted.  Not before.
+
+### [2026-09-01] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE MEASUREMENTS WERE OF DON'S VIDEO, so our own window's chrome never touched
+  them** -- the user pointed this out after I had spent a long series of rounds fixing
+  our window.  The fits were wrong for a different reason: I used the frustum
+  `resetCamera` rebuilt from `CAM_PAD_*` (53.44 x 38.32) instead of the CONSTRUCTOR's
+  real one (**52.442456 x 38.32**).  A column is **19.601 px**, not 19.233 -- which is
+  why the user's measured 19.619 kept looking like it disagreed with me when it was
+  right.
+- REFITTED AGAINST THE REAL FRUSTUM, and each group is internally tight but they do NOT
+  share a transform:
+
+        text (10 glyphs)          dY -2.52, dX +0.36   spread 0.05 row
+        GPC box + bar (4 pts)     dY -1.93, dX -0.27   spread 0.03 row
+        MAIN MENU rule            dY -0.95
+        POLL FAIL cross (4 ends)  dY -0.93             spread 0.66, diagonal
+                                                       endpoints are imprecise
+
+  Three tight but unequal offsets, and column deltas that differ in SIGN, mean Don's
+  video is a build whose layout constants differ from ours.  Matching it is moving each
+  group to where his has it, not shifting our page.
+- ALL OF IT APPLIED, on the user's explicit instruction: MEDS2 is scaffolding until
+  Don's own version lands, the bar is "looks like the real thing well enough", and the
+  question of WHY the constants differ is not worth answering for a stopgap.  Recorded
+  because that is a deliberate decision, not an oversight -- and because it would be the
+  wrong call for a permanent replacement, which the user notes is "looking increasingly
+  attractive".
+- THE WINDOW SAGA, worth keeping only for its lesson: the user said three times that the
+  viewing area PLUS THE CHROME was 2048 square, and I kept testing whether the canvas
+  was cropped.  It never was -- `cde-window`'s chrome is drawn OVER the canvas, so every
+  measurement agreed (viewport 1024, canvas 1024 at (0,0), overflow 0,0) while the
+  display was obscured anyway.  **When someone reports the same symptom a third time,
+  the model is wrong, not the measurement.**  `hasFrame` could not switch it off either:
+  cde-window.ts declares the property, defaults it, and never reads it.
