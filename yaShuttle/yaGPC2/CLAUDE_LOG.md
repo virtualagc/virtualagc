@@ -141,3 +141,45 @@ code itself was not read.)
   date" (the branch is 1 ahead of `origin/main`, 0 behind).  It compiles under the
   repo's own `coffee`, and resolves CRT1 -> _KYBD1, CRT2 -> _KYBD2, CRT3 -> _KYBD1,
   CRT4 -> _KYBD3.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE KEYBOARD FIX IS CONFIRMED IN THE REAL SYSTEM.**  User: keystrokes at CRT2 are
+  recognized, and `SPEC 1 PRO` / `SPEC 2 PRO` take PASS to *different* screens.  So the
+  `_KYBD` routing was the whole of that problem, and PASS is responding to items.
+- THE MEDS CONFIG OVERRIDE PROVABLY TOOK: both instances logged `[meds] loaded config
+  override from .../meds-unipled.json`, and the GPC log shows the 3004-block
+  `pass-ipl-cflm.mmv`.  So the tape and the `ipled:false` change were both in play and
+  the display was STILL blank -- which is why the next run has to be recorded rather
+  than reasoned about.
+- **NOT EVERY BACKGROUND IS THE GPC'S TO SEND ANY MORE.**  `CD0010.dfg:25` --
+  `CR93220A 01/23/08 OI3404 MOVE DPS UTILITY BACKGROUND TO MEDS`.  Exactly three decks
+  in OI340600 say it: **CD0010 (DPS UTILITY), CG0500, XG0500**.  So SPEC 1 coming up
+  blank is MEDS's own missing background, NOT our tape, and our build's CD0010 having 9
+  static FCWs and no title text is CORRECT rather than a gap.  `CD0001`/`XD0001` (GPC
+  MEMORY) say nothing of the sort -- that background is still the GPC's, via the
+  critical-format buffer, so the DEUCFLM work is the right fix for it.
+- ALSO NOT WHAT THEY LOOK LIKE: `CD0002`/`CD0003` are not SPEC 1 and SPEC 2.  They are
+  small message compools -- "MM IO ACTIVE FOR / ROLL-IN PAGE" and "MM IO PAGE NOT
+  RETRIEVED".
+- MEDS'S RENDERER *CAN* DRAW A CRITICAL FORMAT, checked in the source rather than
+  assumed: `mduScreen_DPS.refresh` draws `@bgFCWS` from `DISPLAY_HEADER` and **follows
+  the branch words**; `applyFill` writes every fill into that array; `deuUnit._fill`
+  treats FORMAT_FILL and DISPLAY_FILL identically and calls `onFill`, which the IDP
+  forwards to the MDU; `mdu.recvFromPri` routes a FILL to `screens['DPS']` whatever
+  screen is showing; and `@bgFCWS` is allocated ONCE, in the constructor, so it is not
+  wiped by a redraw or by POLL FAIL.  If the formats arrive and nothing draws, the
+  fault is further in than this.
+- TRAP #14 AGAIN, FROM THE OTHER SIDE: a live test of mine against the user's running
+  MEDS was invalidated because **their** `discretePanel.py` was still up from their
+  attempt, publishing onto the same machine-wide discretes bus.  The signature is
+  unmistakable in the GPC log -- `MODE: RUN` / `MODE: HALT` alternating forever.
+  `retest-crt2.sh` now REFUSES to start when a yaGPC2 or discretePanel is already
+  running, rather than producing a measurement that is really about two publishers.
+- NEW TOOL, committed: `tools/dksniff.py`, a RECEIVE-ONLY DK bus sniffer.  A stub peer
+  answers the GPC and answering changes what the GPC does next, so a stub cannot be
+  used to observe a MEDS run at all.  SO_REUSEADDR only, never SO_REUSEPORT, so it
+  cannot end up in a load-balancing pair with the peer it is watching.
+- A FILE I HAD WRITTEN AND RUN VANISHED between two commands -- `tools/dksniff.py`,
+  created, `chmod`ed and executed in one invocation, was gone from disk two invocations
+  later, never committed, no `git` operation in between.  Cause unknown.  The remedy is
+  the one already in this log: **commit a new tool the moment it works.**
