@@ -268,3 +268,31 @@ code itself was not read.)
 - STILL A HYPOTHESIS IN ONE PLACE: that the sector PERSISTS after the branch that used
   it, rather than being one-shot.  It has to, or the CFIT indirection (`0x107` ->
   `0x04fc`) would land in sector 1.  No document; it is what the data requires.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE WRONG POSITIONS WERE ONE CONSTANT: MEDS's beam-coordinate wrap is 2048 and the
+  generator's is 1536.**  `deuFCW.coffee:49` `GRID = 2048`; Don's own
+  `nsts-sdl-dps/src/dfg/fcw.py` says `GRID = 1536  # screen-coordinate wrap (both
+  axes)`.  The two implementations disagree, and the modulus a coordinate is READ under
+  has to be the one it was WRITTEN under.
+- WHY IT SHOWS UP ONLY BELOW ROW 13: a character row runs DOWNWARD from `ROW_ORIGIN`
+  366 at `ROW_PITCH` 27, so row 14 is already coordinate -12 and is stored wrapped.
+  XD0001's `YC=18` is the word **1416 = -120 + 1536**.  Taken modulo 2048 that reads as
+  row 37, off the bottom.  The user's description was exact -- "each line starts in the
+  middle vertically, and every line wraps around, occupying the right half of a line
+  and the left half of the next, twice as many lines as expected".
+- MEASURED, against the deck's own directives rather than by eye: walk the real
+  `DEUCFLM.bin` loaded at `0x0100` with the `2000 1107 1fe2` PASS writes, and score the
+  text runs against `XD0001.dfg`'s `XC=`/`YC=`.  **At 1536 all 45 runs land exactly
+  where the deck puts them and NONE is off-screen; at 2048, nine are.**  Spot checks:
+  (18,1) `GPC MEMORY`, (1,3) `MEM/BUS CONFIG`, (9,8), (4,11), (2,18) `LAUNCH 1 16`,
+  (18,3) `READ/WRITE`, (18,8).
+- THE PREVIOUS ROUND WAS RIGHT AS FAR AS IT WENT, and the user's report is what showed
+  it: "bits and pieces of the GPC MEMORY screen, always at the wrong position" means
+  the CONTENT arrived -- the two-pass walk and the sector-qualified branch work -- and
+  only the geometry was wrong.  Two independent defects in series, and the first had to
+  be fixed before the second could even be seen.
+- NOTE FOR WHEN DON'S MEDS LANDS: this one is a one-line disagreement between his own
+  two implementations, and worth telling him about separately from the rendering work,
+  since it will bite any display with content below row 13 no matter who wrote the
+  interpreter.
