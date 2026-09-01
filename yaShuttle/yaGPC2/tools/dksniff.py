@@ -50,11 +50,12 @@ def main():
     socks = {}
     for b in buses:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # SO_REUSEADDR only, deliberately.  A multicast datagram goes to
+        # every socket bound to the port that joined the group, so this gets
+        # a copy of what MEDS gets.  SO_REUSEPORT would put this socket in a
+        # reuseport group with MEDS's, and the whole point of the tool is
+        # that it cannot take anything away from the run it is watching.
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-        except (AttributeError, OSError):
-            pass
         s.bind(("", a.port_base + b))
         s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                      struct.pack("4s4s", socket.inet_aton(GROUP),
