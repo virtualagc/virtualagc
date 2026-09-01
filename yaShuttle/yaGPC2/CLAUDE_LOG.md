@@ -226,3 +226,45 @@ code itself was not read.)
   `~/donschmidt/nsts-sim-gpc/CLAUDE_LOG.md`.  Nothing is wrong with heredocs.  What is
   worth keeping is the check that caught it -- after writing a file, verify the file
   you meant to write actually changed.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **MEDS2 EXISTS, at `~/workspace/MEDS2`, and it is a deliberate stopgap.**  A clone of
+  `nsts-sim-gpc` on a branch `meds2` off the keyboard fix, with its push remote set to
+  the literal string `DISABLED-never-push-MEDS2-upstream` so it cannot go anywhere.  It
+  is renamed only enough to tell apart -- `MEDS2.sh`, and the MDU windows titled
+  "MEDS2 MDU / CRTn".  **Don's own MEDS supersedes it the moment it lands**: point
+  `retest-crt2.sh`'s `SIM=` back at `~/donschmidt/nsts-sim-gpc` and drop the `2`.
+  The reasoning was the user's and is worth keeping: the wasted effort is real, and it
+  is cheaper than an indeterminate wait on a determinate blocker.
+- **THE FIX IS THREE CHANGES IN THE DPS BEAM INTERPRETER.**  (1) `deuProto` gains
+  `CF_PAD = 0x111e`, CFSYSIN's own `PAD=`, which is the word every DFG static body ends
+  with.  (2) `deuFCW` decodes a BRANCH as **twelve** address bits; the sector comes from
+  the op 2 SUBLIST word ahead of it.  (3) `mduScreen_DPS` keeps a sector register, set
+  by op 2 whatever its count, and `refresh()` makes **two** passes -- the first from
+  `BACKGROUND_TOP`.
+- WHY TWO PASSES, and it is the answer to "why is this a MEDS problem at all": a DFG
+  display is not one list.  Its background is RESIDENT, downloaded once during the
+  unit's IPL, and at call-up the GPC writes only a POINTER to it at the top of memory.
+  Measured side by side off the wire: GPCIPL's screen is one self-contained 196-halfword
+  block at `0x19ee` whose single branch (`1ab1`) stays inside itself, so walking from
+  DISPLAY_HEADER alone renders it perfectly -- which is why GPCIPL always looked right.
+  PASS's is four separate pieces: the resident background, a 3-halfword pointer at
+  `0x1fe2`, a message line at `0x19be`, and the per-cycle list at `0x19ee`/`0x1a06`
+  whose only branch (`1a0e`) goes to its own dynamic area.  Nothing in it mentions the
+  background.
+- **VERIFIED AGAINST THE REAL DATA, not reasoned about.**  Load the built `DEUCFLM.bin`
+  at `0x0100`, write the `2000 1107 1fe2` PASS actually put at `0x1fe2`, walk from
+  `0x1fe4` under the new rules: `0x1fe2` -> sector 0 -> `0x0107` (the CFIT slot) ->
+  `0x04fc` (the XD0001 body) -> draws `GPC MEMORY`, `MEM/BUS CONFIG`, `1 CONFIG ( )`,
+  `2 GPC`, `STRING 1 7`, `PL 1/2 11`, `CRT 1 12`, `LAUNCH 1 16`, `OPS 3 UPLK 50`,
+  `READ/WRITE`, `DATA 20`, `BIT SET 22`, `SEQ ID 24` ... and stops at the PAD after 465
+  steps.  That is the screen the user described from the real vehicle.
+- THE PAD HAS TO TERMINATE, and following it is a trap: `111e` under sector 0 is CFIT
+  slot `0x11E`, which is SPARE and therefore points at `XD0000` -- sixteen halfwords
+  that draw **"NO CFMT BKGD"**.  That body is what an EMPTY slot is for; painting it
+  over a background that just drew correctly is not a return path.  Taking it also
+  loops, and the walker's `visited` guard would have hidden the mistake by stopping
+  after the damage.
+- STILL A HYPOTHESIS IN ONE PLACE: that the sector PERSISTS after the branch that used
+  it, rather than being one-shot.  It has to, or the CFIT indirection (`0x107` ->
+  `0x04fc`) would land in sector 1.  No document; it is what the data requires.
