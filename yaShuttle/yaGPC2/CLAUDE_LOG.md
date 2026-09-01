@@ -648,3 +648,27 @@ code itself was not read.)
   result.  The knobs now are one per symptom -- `NSTS_DPS_YSHIFT` (whole page),
   `NSTS_DPS_TEXTY` (glyphs only), `NSTS_DPS_VECY` (vectors only), `NSTS_MENU_DX` (menu
   area) -- so a single relaunch settles one question.
+
+### [2026-09-01] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE MEASUREMENTS WERE TAKEN AGAINST THE WRONG RECTANGLE, and the user spotted it:**
+  `startLRU` builds the MDU window `width: winW+10, height: winH+30`, so the window is
+  10 px wider and 30 px taller than the canvas.  The "dead band" at the right and bottom
+  where things vanished was never clipping -- it is window that is not canvas, and
+  nothing can draw there.  Every reading therefore carried an unknown offset, and the
+  fit built on them was fitting the chrome.
+- SO THE WINDOW IS NOW AN EXACT MEASUREMENT TARGET: `useContentSize` with the canvas
+  dimensions, `hasFrame` false so no cde-window title bar pushes the canvas down, and
+  the launcher stops passing `--size` -- backing store, CSS size and screen pixels all
+  1024 and all 1:1, nothing resampled between the renderer and the ruler.  The window
+  stays draggable because `style.css` already makes the whole page a drag region.
+- AND ONE MORE INVISIBLE OFFSET FOUND WHILE THERE: `#screen` had no `display`, so the
+  canvas was **inline** -- sitting on a text baseline with a few pixels of descender
+  space beneath it.  Real, invisible, and in every vertical measurement.  Now `block`.
+- WHAT THIS RETROSPECTIVELY EXPLAINS: the fit said furniture 1.54 rows low and text
+  2.89, both of which contradicted what was on screen.  With an unknown ~30 px vertical
+  chrome offset in the input, that is roughly a row of error before anything else, on
+  top of anchoring on a constant I had myself changed.  **Two independent errors in the
+  same fit, and the answer was neither more experiments nor a better model -- it was
+  better measurements.**
+- PENDING, at the user's direction: restore a small margin on ALL FOUR sides once the
+  geometry is fitted.  Not before.
