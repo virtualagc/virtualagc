@@ -487,3 +487,27 @@ code itself was not read.)
   rule over MAIN MENU was bisecting the box.
 - ROWGAP: the user settled on **1.15**, not the 1.35 I derived.  Recorded because the
   derivation was again from geometry rather than from the screen.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE "MISSING DATA" READING OF THE `M`s IS WITHDRAWN.**  The user rejected it flatly
+  -- `]`, `F` and `M` scattered through every field is the opposite of plausible data --
+  and they are right.  I reached for a convention that would make the output acceptable
+  instead of asking what would produce it.  That is the same failure as the sector, the
+  second frame and the row pitch: a story that fits, offered before a measurement that
+  discriminates.
+- A LEAD RAISED AND KILLED IN THE SAME SITTING, recorded so it is not raised again:
+  **the display compool's address constants are correct.**  `#PCD0001` carries 99
+  relocations and **99 of 99 match their linker target** when read as HALFWORDS.  (Read
+  as fullwords 0 of 99 match, which briefly looked like a catastrophe -- the address is
+  one halfword and the next halfword is the following FCW.)  So the fields are being fed
+  from the right addresses; unrelocated PADRs are not the explanation.
+- WHAT THE ARITHMETIC RULES OUT: `F` = 0x46 IS a correct hex F from a nibble conversion
+  (`0x30 + n + 7` for n = 15).  `M` = 0x4d cannot come from one -- it would need a nibble
+  of 22 -- so the `M`s are a literal character the flight software chose to write, not a
+  digit conversion gone wrong.  Whatever they are, they are not garbage arithmetic in a
+  field.
+- NEXT STEP WHEN THIS IS PICKED UP, and it should be a measurement, not a theory: take
+  ONE field -- the display-ID field is best, it reads `-0602/   /` where Don's capture of
+  the same screen reads `0001/000/` -- find its DDT entry in `CD0001.dfg`, find the
+  variable it names, and watch what PASS writes there.  One field traced end to end
+  beats another round of pattern-matching on the characters.
