@@ -407,3 +407,34 @@ code itself was not read.)
   PASS's.  `NSTS_DEU_GEOM=dfg` starts the other way.
 - ALSO NUDGED: the rule above `MAIN MENU` and the legend itself sit a row high like the
   rest of the page, so `mduMenuArea` takes the same `NSTS_DPS_YSHIFT`.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE GLYPH TRACE SETTLES IT: THE CRITICAL FORMAT NOW RENDERS EXACTLY RIGHT.**  409
+  background glyphs and 163 foreground, reconstructed into a page:
+
+        row  2   GPC MEMORY
+        row  4   MEM/BUS CONFIG   READ/WRITE
+        row  5   1 CONFIG  ( )     DATA 20   BIT SET 22   SEQ ID 24
+        row  8    STRING 1  7      ADD ID   DESIRED   ACTUAL
+        row 16                    MEMORY DUMP        STORE   MC=
+        row 25   OPS 3 INIT 51    ERR LOG RESET 48       SM  54
+
+  Every row matches XD0001's deck AND Don's own capture: title row 2, MEM/BUS CONFIG
+  and READ/WRITE row 4, 1 CONFIG row 5, last line row 25.  The user's own example --
+  "line 24 should read OPS 3 INIT 51 / ERR LOG RESET 48 / SM 54" -- is there complete,
+  at columns 2, 18 and 40.
+- SO THE ~0.70 IS NOT IN THE WALK, and that is now established rather than argued.  The
+  remaining candidate is the mapping from rows to the window: 26 text rows drawn one
+  cell per row into a camera **38.32 cells tall** (`resetCamera`: 0.20..53.44 across,
+  -1.75..36.57 down) fill 26/38.32 = **0.68** of it.  Against a measurement of ~0.70
+  that the user has since said may be ~4% out because the reference document is an OI30
+  screen with one fewer text row.  `NSTS_DPS_YSCALE` dials it live; the default stays 1
+  until somebody MEASURES the number instead of deriving it, which is the mistake this
+  log already records three times today.
+- ONE COLUMN, NOT CHASED: our title starts one column right of Don's capture (deck
+  XC=18 against his 17).  The user says horizontal spacing is right, so it is left
+  alone and written down rather than tuned away.
+- **A REGRESSION TO CHASE: GPCIPL now shows nothing but its clock.**  It rendered
+  before, in its own frame, which is now the default.  Not diagnosed -- the trace holds
+  one frame and by the time it was read the run was at GPC MEMORY.  Next run, capture
+  `cells.log` WHILE GPCIPL is on screen and before pressing anything.
