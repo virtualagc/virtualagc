@@ -459,3 +459,31 @@ code itself was not read.)
   experiment it reappeared only above about 1.2 -- which makes no sense under any model I
   have and is the reason to stop guessing.  It needs `cells.log` captured WHILE GPCIPL is
   on screen.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE OVERLAID "GARBAGE" IS PASS'S OWN VARIABLE DATA, CORRECTLY PLACED.**  Overlaying
+  both passes from the glyph trace gives a coherent GPC MEMORY page -- `1 CONFIG`,
+  `2 GPC`, `DATA 20`, `BIT SET 22`, `BIT RST 23`, `SEQ ID 24`, `WRITE 25`,
+  `26 ENG UNITS`, `HEX 27`, `ADD ID / DESIRED / ACTUAL` with items 28-39,
+  `MEMORY DUMP`, `40 START ID`, `41 NO WORDS`, `42 WDS/FRAME`, `DUMP START/STOP 43`,
+  `44 DOWNLIST GPC`, `STORE MC=`, `45 CONFIG`, `46 GPC`, `STORE 47`, `MM AREA`,
+  `PL 52 / GNC 53 / SM 54`, `OPS 0 ENA 49`, `OPS 3 UPLK 50`, `OPS 3 INIT 51`,
+  `ERR LOG RESET 48` -- with the variable fields sitting inside it, not scattered over
+  it.
+- WHAT THE FIELDS CONTAIN, counted off the wire: **362 nulls, 307 spaces, 100 `M`
+  (0x4d), 44 `F`, 40 `0`, 17 `-`**, and six `]` (code 0x01).  One `M` trails every data
+  field on the page.  The likely reading is the DPS missing-data flag -- the release
+  does carry the concept, `FPMMTURM.asm:678` masks a "DATA MISSING" bit -- so a GPC
+  MEMORY page with nothing requested showing `M` on every field is plausibly CORRECT
+  rather than broken.  **Not verified** to the display character; that trace has not
+  been followed.
+- TWO THINGS THAT DO LOOK WRONG, and they are small and specific: the DPS header's
+  display-ID field reads **`-0602/   /`** where Don's capture of the same screen reads
+  `0001/000/`; and `2 GPC` shows **ten `F`s** for its five GPC slots.  Both are field
+  CONTENT, in the right place, so they are questions about what PASS computed, not about
+  the renderer.
+- THE BOXED GPC NUMBER moved up one text row -- box, digit and both kybd-active bars
+  together, since they are one assembly.  The page nudge had left them behind and the
+  rule over MAIN MENU was bisecting the box.
+- ROWGAP: the user settled on **1.15**, not the 1.35 I derived.  Recorded because the
+  derivation was again from geometry rather than from the screen.
