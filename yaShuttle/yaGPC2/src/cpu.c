@@ -700,20 +700,92 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                         if (cb == 1) psw_set_bsr(&cpu->psw, ptrBSR);
                     }
                     uint32_t effDSR = (c == 0) ? ptrDSR : psw_get_dsr(&cpu->psw);
-                    if (v->opType == OPTYPE_BRCH) {
-                        if (xc == 0) {
-                            ea = (address15 + regx) & 0x7fff;
-                            ea = (psw_get_bsr(&cpu->psw) << 15) + ea;
-                        } else {
-                            ea = (psw_get_bsr(&cpu->psw) << 15) + address15;
+                    /* YAGPC_INDTRACE=lo-hi[,max[,afterSec]]: the whole
+                     * fullword-indirect computation for instructions in the
+                     * range -- the pointer as it actually stands, both
+                     * candidate addresses, and what each one holds.
+                     *
+                     * A RANGE, not a single address, because the IC has
+                     * already advanced by the time the EA is formed: matching
+                     * one address exactly printed nothing at all.
+                     *
+                     * Which way round Xc goes cannot be read off the scanned
+                     * Figure 2-17 (the OCR loses which arrow of the expansion
+                     * flowchart carries the =1), and inverting it on a guess
+                     * hangs every program in test_rtl.  So measure it. */
+                    {
+                        static int inited = 0;
+                        static uint32_t lo = 0, hi = 0;
+                        static long left = 0;
+                        static double afterUs = 0.0;
+                        if (!inited) {
+                            inited = 1;
+                            const char *spec = getenv("YAGPC_INDTRACE");
+                            if (spec) {
+                                unsigned a = 0, b = 0; long m = 40; double t = 0.0;
+                                if (sscanf(spec, "%x-%x,%ld,%lf", &a, &b, &m, &t) >= 2) {
+                                    lo = a; hi = b; left = m; afterUs = t * 1.0e6;
+                                }
+                            }
                         }
+                        uint32_t here = psw_get_nia(&cpu->psw);
+                        if (left > 0 && here >= lo && here <= hi &&
+                            cpu->elapsedTimeUs >= afterUs) {
+                            left--;
+                            uint32_t noIdx = (effDSR << 15) + address15;
+                            uint32_t withIdx = (effDSR << 15) + ((address15 + regx) & 0x7fff);
+                            fprintf(stderr,
+                                "INDTRACE nia=%05x pea=%05x ptr=%08x addr=%04x "
+                                "xc=%u c=%u cb=%u cd=%u bsv=%u dsv=%u dsr=%u idx=%u "
+                                "regx=%04x | noIdx=%05x holds %04x | withIdx=%05x holds %04x\n",
+                                (unsigned)here, (unsigned)indirectAddr,
+                                (unsigned)indirectFW, (unsigned)address16,
+                                (unsigned)xc, (unsigned)c, (unsigned)cb, (unsigned)cd,
+                                (unsigned)ptrBSR, (unsigned)ptrDSR,
+                                (unsigned)psw_get_dsr(&cpu->psw), (unsigned)df_get(v, 'i'),
+                                (unsigned)regx,
+                                (unsigned)noIdx, (unsigned)membus_get16(cpu->ram, noIdx),
+                                (unsigned)withIdx, (unsigned)membus_get16(cpu->ram, withIdx));
+                        }
+                    }
+                    /* THE POINTER'S OWN HIGH BIT DECIDES WHETHER A SECTOR
+                     * IS APPLIED AT ALL, exactly as it does for every other
+                     * address (Sec. 2.9, and cpu_g_expand() right above).
+                     * Figure 2-17 names bit 0 MSB, "Determines type of
+                     * address expansion", and the expansion flowchart's own
+                     * leaves are EXPAND USING DSR / DSV / DSE / *0000* --
+                     * that last one is this case.  This used to shift the
+                     * sector in unconditionally, so a pointer to sector 0
+                     * read from sector DSV instead.
+                     *
+                     * PASS is where it showed: DCI#CON fetches display data
+                     * through a ZCON that DCI#DATA declares as
+                     *     DC  Z(,FCMCBLKS,8)
+                     * -- flags byte 8, so Xc=1, C=0 -- and whose address half
+                     * it fills in at run time.  Measured at 0x42845 the
+                     * pointer reads 26f80801: address 0x26f8, DSV=1.  The
+                     * high bit of 0x26f8 is CLEAR, so the datum is at 0x026f8,
+                     * where the tape put CZ2V_MC_REQ.  Applying DSV anyway
+                     * read 0x0a6f8, which nothing had written, and returned
+                     * the C6C6 IPL fill.  Sign-extended by the SRA that
+                     * follows, that is -14650 -- which is how GPC MEMORY came
+                     * to show -0602, -50 and rows of FFFFFFFFFF.
+                     *
+                     * The addition is 16-bit and includes the high bit: "All
+                     * EA/BA address calculations involve 16-bit operands and
+                     * bit 0 of the fullword indirect address pointer is
+                     * included in these address calculations" (the note under
+                     * Figure 2-15).  Masking the index sum to 15 bits first,
+                     * as this did, threw away a carry that is supposed to
+                     * decide the expansion. */
+                    uint32_t ea16 = (xc == 0) ? ((address16 + regx) & 0xffff)
+                                              : address16;
+                    if (ea16 & 0x8000) {
+                        uint32_t sector = (v->opType == OPTYPE_BRCH)
+                                        ? psw_get_bsr(&cpu->psw) : effDSR;
+                        ea = (sector << 15) + (ea16 & 0x7fff);
                     } else {
-                        if (xc == 0) {
-                            ea = (address15 + regx) & 0x7fff;
-                            ea = (effDSR << 15) + ea;
-                        } else {
-                            ea = (effDSR << 15) + address15;
-                        }
+                        ea = ea16;
                     }
                 }
             }

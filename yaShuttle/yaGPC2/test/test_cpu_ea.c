@@ -26,6 +26,32 @@ const InstrDesc *instr_decode(uint32_t hw1, uint32_t hw2, DInstr *v) {
 static CPU cpu;
 static MemoryBus bus;
 
+/* The one place this test's oracle is knowingly wrong.
+ *
+ * The fixtures come from gpc/cpu.coffee, and gpc shifts a sector into EVERY
+ * fullword-indirect address, including one whose own high bit is clear and
+ * which therefore lives in sector 0 (Sec. 2.9; Figure 2-17 names bit 0 MSB,
+ * "Determines type of address expansion", and the expansion flowchart's
+ * fourth leaf is EXPAND USING 0000).  yaGPC2 was derived from yaGPC, which
+ * preserved gpc's behaviour exactly, so the defect was inherited rather than
+ * introduced here -- see the corresponding comment in cpu_g_ea().
+ *
+ * It is not academic: it is what put PASS's GPC MEMORY page 0x8000 out on
+ * every display field it fetched, so the page drew the C6C6 IPL fill instead
+ * of its data.
+ *
+ * Recognised by its shape rather than by fixture number, so regenerating the
+ * table does not silently re-arm it: the fullword-indirect-with-index mode,
+ * our answer below 0x8000, and the fixture's answer the same address with a
+ * nonzero sector shifted onto it.  62 of 20447 fixtures at the time of
+ * writing; anything else in this mode still fails. */
+static bool gpc_expands_a_sector_0_pointer(const EaFixture *fx, uint32_t ea) {
+    if (!(fx->opts.hasIdx && fx->opts.idx != 0 &&
+          fx->opts.ia == 1 && fx->opts.ii == 1)) return false;
+    if (ea >= 0x8000 || fx->ea < 0x8000) return false;
+    return (fx->ea & 0x7fff) == ea && (fx->ea >> 15) != 0;
+}
+
 static void load_baseline(void) {
     for (int bank = 0; bank < 3; bank++) {
         for (int i = 0; i <= 8; i++) {
@@ -99,7 +125,7 @@ int main(void) {
         DInstr v = make_v(&fx->opts);
         uint32_t ea = cpu_g_ea(&cpu, &v);
         total++;
-        if (ea != fx->ea) {
+        if (ea != fx->ea && !gpc_expands_a_sector_0_pointer(fx, ea)) {
             printf("FAIL g_EA[%d]: ea=%u expected %u\n", i, ea, fx->ea);
             failures++;
         }
