@@ -490,6 +490,29 @@ void deumodel_report(const DeuModel *d) {
         deu_image_stats(d, &z, &f, &n);
         fprintf(stderr, "deu: image %u zeros, %u fill, %u distinct of %d words\n",
                 z, f, n, DEU_MEMORY_WORDS);
+        /* YAGPC_DEUDUMP=<prefix>: the WHOLE image, raw, to
+         * <prefix>-bus<n>.bin -- rewritten on every report, so the file
+         * always holds the display as it stands.  The rendering below is
+         * for reading over someone's shoulder; it truncates each run to
+         * eight words and sixteen characters, which is no use at all for
+         * decoding a display list that has gone wrong. */
+        {
+            const char *pfx = getenv("YAGPC_DEUDUMP");
+            if (pfx) {
+                char path[512];
+                snprintf(path, sizeof path, "%s-bus%d.bin", pfx, d->busID);
+                FILE *f = fopen(path, "wb");
+                if (f) {
+                    for (unsigned i = 0; i < DEU_MEMORY_WORDS; i++) {
+                        unsigned char be[2];
+                        be[0] = (unsigned char)(d->mem[i] >> 8);
+                        be[1] = (unsigned char)(d->mem[i] & 0xff);
+                        fwrite(be, 1, 2, f);
+                    }
+                    fclose(f);
+                }
+            }
+        }
         if (getenv("YAGPC_DEUIMAGE")) {
             /* The non-zero runs, with the DISPLAY LIST read as text beside
              * them.  This used to read each halfword as two EBCDIC bytes and

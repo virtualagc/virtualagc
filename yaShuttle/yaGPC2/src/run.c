@@ -862,6 +862,50 @@ static bool mode_switch_held(BatchRunner *r) {
     return (mode & MODE_HALT) != 0;
 }
 
+/* YAGPC_RANGETRACE=lo-hi[,max[,afterSec]] (halfword addresses in hex, max
+ * lines decimal, default 200000; afterSec in EMULATED seconds, default 0):
+ * every instruction executed with NIA inside the range, disassembled, with
+ * R0-R7 as they stand AFTER it.
+ *
+ * --trace traces everything, which for flight software means the routine of
+ * interest arrives a hundred million steps in and buried.  A range is what
+ * makes a single subroutine readable: run to the display cycle, and read
+ * back the twenty instructions that built the field that came out wrong.
+ *
+ * afterSec is what makes it usable on flight software that calls the routine
+ * every display cycle from initialisation onwards: the interesting call is
+ * the one happening NOW, on the page in front of you, and without a start
+ * time the budget is spent on the first few seconds of the boot instead. */
+static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
+                        uint32_t hw2, const char *disasm,
+                        const RegSnapshot *after) {
+    static int inited = 0;
+    static uint32_t lo = 0, hi = 0;
+    static long left = 0;
+    static double afterUs = 0.0;
+    if (!inited) {
+        inited = 1;
+        const char *spec = getenv("YAGPC_RANGETRACE");
+        if (spec) {
+            unsigned a = 0, b = 0; long m = 200000; double t = 0.0;
+            if (sscanf(spec, "%x-%x,%ld,%lf", &a, &b, &m, &t) >= 2) {
+                lo = a; hi = b; left = m; afterUs = t * 1.0e6;
+            }
+        }
+    }
+    if (left <= 0 || nia < lo || nia > hi) return;
+    if (r->age.gpc.cpu.elapsedTimeUs < afterUs) return;
+    left--;
+    fprintf(stderr, "RT %05x %04x %04x  %-28s "
+            "R0=%08x R1=%08x R2=%08x R3=%08x "
+            "R4=%08x R5=%08x R6=%08x R7=%08x\n",
+            (unsigned)nia, (unsigned)hw1, (unsigned)hw2, disasm,
+            (unsigned)after->r[0], (unsigned)after->r[1],
+            (unsigned)after->r[2], (unsigned)after->r[3],
+            (unsigned)after->r[4], (unsigned)after->r[5],
+            (unsigned)after->r[6], (unsigned)after->r[7]);
+}
+
 static bool batchrunner_step(BatchRunner *r) {
     /* Before anything else: in HALT the machine executes nothing at all. */
     if (mode_switch_held(r)) {
@@ -985,6 +1029,7 @@ static bool batchrunner_step(BatchRunner *r) {
     if (r->bceFramer) bcenet_framer_flush_tick(r->bceFramer);
 
     ageharness_snapshot_regs(&r->age, &after);
+    range_trace(r, nia, hw1, hw2, disasm, &after);
     RegChange changes[REG_SNAPSHOT_MAX_CHANGES];
     int changeCount = ageharness_diff_regs(&before, &after, changes);
     int filteredCount = 0;
