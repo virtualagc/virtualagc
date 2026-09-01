@@ -42,7 +42,10 @@ firmware IPL reads FCMBOOT off the tape over the bus, FCMBOOT loads GPCIPL,
 GPCIPL drives the display and accepts `ITEM 1 EXEC`, the SSL loads all three
 PASS phases and verifies every checksum, and PASS starts its applications,
 runs cyclically without halting, and paints complete display fills that MEDS
-renders.  Everything below is how each stage got there,
+renders.  **GPC MEMORY now draws on CRT2 with correct data in its fields** —
+that took an empty critical-format buffer filled, two renderer defects fixed, a
+coordinate-frame chooser, and one emulator defect in `cpu_g_ea`; the whole story
+is `problems.md` §8.28.  Everything below is how each stage got there,
 in the order it was fixed; "The SSL", "PASS runs" and "What is actually still
 open" are the current-state parts.
 
@@ -452,6 +455,26 @@ flight software's own use of them (`problems.md` §8.27).
 
 ### What is actually still open
 
+- **GPCIPL shows only its clock, about half the time**, and the run has to be
+  killed and restarted.  Its menu is written ONCE — 509 halfwords at `0x19ee`
+  then 254 at `0x1beb`, 0.05 s apart, never repeated; after that only the first
+  196 words at `0x19ee` are refreshed, twice a second.  Lose either one-shot
+  fill and the display updates its clock over a blank screen for the rest of
+  the run.  Instrumented but not yet caught: `NSTS_DEU_LOG=<path>` (the
+  launcher sets it) now records every accepted fill and every
+  `transfer abandoned, N halfwords short`, which set against `dk.log`
+  separates "lost on the way" from "arrived and mishandled".
+- A rarer variant where everything except the clock flashes.
+- **How the DEU distinguishes the two coordinate conventions.**  Both are
+  historical — see §8.28 — they differ by exactly 512 in X and 2 in Y, and the
+  translate registers are ruled out.  MEDS2 routes around it by choosing the
+  geometry from the list; nothing explains it.
+- The CRT hand-over.  GPCIPL follows the BFC switch, replaying its entire
+  display init on the newly selected unit and no longer polling the old one
+  (whose POLL FAIL is just that).  Measured on a live run, and the PASS load
+  survives it.  But the user reports it is conspicuous and yet rare, so the
+  *normal* case must be GPCIPL not following the switch — something
+  intermittent in when it re-reads the BFC discrete.
 - `make test` fails four suites: `test/test_debugger.sh`,
   `test_cpu_instr_exec`, `test_iop_bce_exec`, `test_iop_msc_exec`.  They fail
   identically with the whole tree stashed, so they predate all of this, but
@@ -627,6 +650,30 @@ first one's still-loading `main.js`.  Launching the second directly with
 (`electron dist/main/main.js meds --size 512 crt2 idp2`) avoids the race and
 writes nothing in Don's repo.
 
+**The CRT2 recipe, and it is a rig rather than a command line.**
+`~/workspace/pass-run/retest-crt2.sh` starts both MEDS2 instances, the sniffer,
+the panel and the GPC, refuses to run when a yaGPC2 or `discretePanel` is
+already up (two publishers on the discretes bus make the GPC flap HALT↔RUN,
+§5.14), reaps leaked sniffers, and prints the crew sequence.  That sequence is:
+BFC CRT → **CRT 2**, IPL SOURCE → MM1, MODE → HALT, press IPL, MODE → STBY,
+wait for GPCIPL's menu, `ITEM 1 EXEC`, wait for the SSL load, BFC CRT →
+**CRT 1**, MODE → RUN.  The CRT 2 → CRT 1 flip is what gets PASS a unit that
+GPCIPL has already loaded.
+
+The rig runs **MEDS2**, not Don's MEDS — a clone whose push remote is the
+literal string `DISABLED-never-push-MEDS2-upstream`, carrying the renderer
+fixes of §8.28.  It is a stopgap: when Don's own version lands, point `SIM=`
+back at `~/donschmidt/nsts-sim-gpc` and drop the `2`.  It sets `--size 512`
+(CSS only — the render stays 1024) and `NSTS_MDU_CHROME=30`; unset both for a
+measurement session.
+
+**Shift+V is no longer needed.**  GPCIPL and PASS write in different
+beam-coordinate conventions, and MEDS2 used to want a keystroke after RUN to
+switch between them.  It now decides from the list itself — see §8.28 — so
+there is nothing to remember at the point in the run where forgetting it looked
+like a rendering bug.  The key is still bound (`kybd.coffee`) as a manual
+override, but the next refresh will overrule it if the list disagrees.
+
 **Keystrokes do not come from the MDU window.**  `meds/idp.coffee:93` routes a
 bus named `/KYBD/` to `recvKYBD`, so the IDP takes keys from a separate
 `_KYBD<n>` bus; typing into the window produced **zero** keyed replies in 348
@@ -723,6 +770,34 @@ Phase 10's five load blocks (start, length, protected):
 
 ---
 
+
+### Booting to GPC MEMORY unattended — `pass-run/headless-gpcmem.sh`
+
+`~/workspace/pass-run/headless-gpcmem.sh [seconds] [ABSOLUTE outdir]` takes the
+whole run to the GPC MEMORY page with no MEDS, no panel window and no network:
+in-process mass memory (`--mmu-model`), in-process display units
+(`--deu-model --deu-bus 7`), scripted discretes
+(`discretePanel.py --script`), and `YAGPC_DEUKEYS=ITEM,1,EXEC`.  It runs on its
+own `--port-base 6800`, so it never fights an interactive session.  About six
+minutes, unattended, and it reproduced the display garbage byte-identically to
+the interactive run — the same words at the same DEU addresses.  **Use it
+instead of asking a human to sit through an IPL.**
+
+Three things had to be got right and all three failed silently first:
+
+- **The IPL pushbutton is momentary.**  Start the GPC before the panel script,
+  or the press lands before anything is listening — 200 million steps from
+  address 0, no bus traffic at all, and no error.
+- **`YAGPC_DEUKEYS_AFTER` defaults to 400 polls**, which is about 400 *seconds*
+  here — longer than the run — so the load never started and the display sat on
+  IPL MENU until it was killed.  The script sets 150.
+- **The outdir must be absolute**, because the script cds into the yaGPC2 tree
+  before it redirects.
+
+Read the result with `YAGPC_DEUDUMP=<prefix>` (the raw 8192-halfword image per
+bus) plus `YAGPC_RANGETRACE` / `YAGPC_INDTRACE`.  Both of those take an
+`afterSec` in **emulated** seconds: a 400 s wall-clock run reaches only ~321 s
+simulated, so a gate set from wall time never fires.
 
 ### Running the whole thing headlessly, no GUI and no MEDS
 
@@ -839,6 +914,12 @@ Whole-state, which is what cracked the hardest bugs:
     YAGPC_SNAPSHOT=<t1>[,<t2>...]:<prefix>   whole main storage to <prefix>-<t>.bin
                                              the first time sim time passes each t
     YAGPC_MEMDUMP=<lo>-<hi>[,...]            ranges at end of run
+    YAGPC_DEUDUMP=<prefix>                   the whole 8192-halfword display image
+                                             to <prefix>-bus<n>.bin, on every report.
+                                             YAGPC_DEUIMAGE renders it for reading
+                                             over a shoulder but truncates each run
+                                             to eight words, which is no use for
+                                             decoding a list that has gone wrong
     YAGPC_PROCDUMP                           per-processor halt/busy/PC, plus each
                                              BCE's recv state; runs for EVERY stop
                                              reason, not just max-steps
@@ -847,6 +928,21 @@ Execution:
 
     YAGPC_NIARING=<n>            ring of recent NIAs, dumped at the Instruction
                                  Monitor and at an invalid-instruction stop
+    YAGPC_RANGETRACE=lo-hi[,max[,afterSec]]
+                                 every instruction whose NIA is in the range,
+                                 disassembled, with R0-R7 after each.  `--trace`
+                                 traces everything, which for flight software means
+                                 the routine of interest arrives a hundred million
+                                 steps in and buried; afterSec (EMULATED seconds) is
+                                 what makes it usable on a routine the display cycle
+                                 calls continuously
+    YAGPC_INDTRACE=lo-hi[,max[,afterSec]]
+                                 the whole fullword-indirect EA computation — the
+                                 pointer as it actually stands, both candidate
+                                 addresses, and what each one holds.  A RANGE, not a
+                                 single address: the IC has already advanced by the
+                                 time the EA is formed.  This is what settled §8.28
+                                 after reading the scanned figures could not
     YAGPC_RINGTRIG=<addr>:<hw>   dump that ring when a halfword takes a value
     YAGPC_NIASAMPLE=<ms>         periodic NIA + registers (gdb cannot attach —
                                  Yama blocks ptrace)
@@ -1039,6 +1135,36 @@ of uncommitted work.  It was recovered only because the session transcript at
 `~/.claude/projects/<project>/<session-id>.jsonl` records every Edit's
 `old_string`/`new_string` and every Bash heredoc — that is the recovery route,
 but it is luck of the tool used.
+
+17. **A relative path in a Bash call can land in another repository.** The
+    shell's working directory persists between calls, so a `cd` into
+    `~/donschmidt/nsts-sim-gpc` was still in force in the next invocation and
+    `cat > tools/dksniff.py` created it *there*. Twice — the second time it
+    swallowed a `CLAUDE_LOG.md` append. Use an absolute path, or `cd` at the
+    start of every invocation, and after writing a file verify that the file
+    you meant to write actually changed.
+18. **`cde-window`'s chrome is drawn OVER the canvas, and it is a FRAME.** Not
+    a title strip — it takes pixels down the left and right too. Every
+    measurement of the canvas agreed (viewport 1024, canvas 1024 at (0,0),
+    overflow 0,0) while the display was obscured anyway, and `hasFrame` cannot
+    switch it off: `cde-window.ts` declares the property, defaults it, and
+    never reads it. `NSTS_MDU_CHROME=<px>` and `NSTS_MDU_CHROME_X` (default 8)
+    inset the canvas so the frame has somewhere to live.
+19. **`--size` is CSS only.** It scales the canvas element; the render target
+    stays 1024 and no cell/pixel relationship changes. Safe to use, and not a
+    reason for a measurement to disagree.
+20. **A gate written in wall-clock seconds will not fire on emulated time.** A
+    400 s run reaches ~321 s simulated, so `YAGPC_RANGETRACE`'s first
+    `afterSec` of 330 produced no output at all and cost a whole seven-minute
+    cycle.
+21. **`YAGPC_DEUKEYS_AFTER` counts POLLS, not seconds**, and its default of 400
+    is about 400 seconds — longer than a headless run, so the keystrokes never
+    arrive and the display sits on IPL MENU looking like a different failure.
+22. **The MDU's own DEU log went to the renderer devtools.** `DEUUnit` detects
+    an abandoned transfer and logs it; `idp.coffee` passed it `console.log`, so
+    on every run — including every failing one — the single most diagnostic
+    line was thrown away. `NSTS_DEU_LOG=<path>` writes it to disk.
+
 
 ## 6. OUTSTANDING, NOT CODE
 

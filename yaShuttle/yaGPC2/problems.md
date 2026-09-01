@@ -4833,6 +4833,70 @@ first before-and-after comparison ran the same binary twice and reported a
 byte-identical result that meant nothing. `touch` the source and rebuild before
 believing any fixture comparison.
 
+**A relative path can write into somebody else's repository.** The shell's
+working directory PERSISTS between Bash calls, so a `cd ~/donschmidt/...` in one
+invocation was still in force in the next and `cat > tools/dksniff.py` created
+it *there*. It had not vanished; it was never in yaGPC2. The same thing
+swallowed a `CLAUDE_LOG.md` append, which became a new file in Don's tree. Both
+were found as untracked files while preparing a PR. Use an absolute path, or
+`cd` at the start of every invocation — and note that this is a way to modify
+another project silently, which is exactly what the standing rule about other
+people's repositories exists to prevent.
+
+**A fit is only as good as the frame it is anchored in.** Glyph measurements
+were converted to cells using the GPC box as the reference frame — after moving
+that assembly up one row a few commits earlier. The reference frame therefore
+disagreed with the measurement's frame by exactly the row I had introduced, and
+a confident "the text sits 1.43 rows low" fell straight out of it. Anchoring a
+fit on your own recent edit is circular.
+
+**An offline model of somebody else's interpreter is a hypothesis generator,
+not an oracle.** Three separate times a number derived offline looked decisive
+and was incomplete because the model left something out — the sector, the
+second coordinate frame, and the X/Y reference registers. Instrument the real
+thing; `NSTS_CELL_TRACE` records what the renderer computed, not what the model
+says it should have.
+
+**A knob is not automatically a safe way to let somebody else find a number.**
+`@group.scale.y` stretched the glyphs rather than the gaps and carried the POLL
+FAIL cross and the boxed GPC number down into the menu area, because they are
+drawn in the same group and the same units. It could only be wrong in ways that
+looked like progress.
+
+**Change one thing per round.** Four rounds in a row, two or three constants
+moved at once and no result could be attributed. One knob per symptom —
+`NSTS_DPS_YSHIFT` (whole page), `NSTS_DPS_TEXTY` (glyphs), `NSTS_DPS_VECY`
+(vectors), `NSTS_MENU_DX` (menu area) — so a single relaunch settles a single
+question.
+
+**When someone reports the same symptom a third time, the model is wrong, not
+the measurement.** The user said three times that the viewing area *plus the
+chrome* was 2048 square, and each round tested whether the canvas was cropped.
+It never was: `cde-window`'s chrome is drawn OVER the canvas, so every
+measurement agreed — viewport 1024, canvas 1024 at (0,0), overflow 0,0 — while
+the display was obscured anyway.
+
+**A change that improves the case you are watching and quietly breaks the case
+you are not is indistinguishable from a fix until somebody looks at both.** A
+single-constant "fix" to the beam geometry was verified against one deck — a
+real oracle, but one, and every format in that corpus shares a producer. The
+user's report that GPCIPL got *worse* at the same moment PASS got better is what
+exposed it.
+
+**Check the primary source before acting on an inference.** A conclusion that
+`dfg`'s coordinate origin was wrong was assembled from a calibrated decoder and
+a capture file, stated across two turns, and acted on — before anyone looked at
+the historical DFG output that `build_deucflm.py` names in its own docstring.
+That artifact overturned it in one command. Worse, the user's independent
+evidence (an overlay of our render against Don's screen) pointed the other way
+and was under-weighted.
+
+**A consequence nobody would accept is a test you can run against your own
+claim.** The same wrong conclusion implied that whole fields of a flown display
+were off the screen. That should have been checked against the historical
+output immediately rather than left for the user to ask "so they really are not
+visible?".
+
 ### 8.11 Finishing the OI340700 `.dfg` recovery
 
 §8.9 recovered two files. All twelve differing decks are now accounted for, and
@@ -7043,6 +7107,204 @@ Don's known-good reference `IPL.fcm` runs at (87 display fills in 45 s). Whateve
 
 
 ---
+
+### 8.28 Making CRT2 draw GPC MEMORY — an empty format buffer, a renderer that could not reach it, two coordinate frames, and one emulator defect
+
+The "garbage menu" on CRT2 turned out to be four defects in series, in three
+different code bases. Each had to be fixed before the next was even visible,
+and three of the four were mine to fix.
+
+**The buffer was empty because nothing ever built it.** PASS's entire display
+command for the CRT it drives is THREE halfwords — `0003 1fe2 | 2000 1107
+1fe2`. `0x2000` is op 2 SUBLIST with sector 0; `0x1107` is op 1 BRANCH to
+`0x107`, CFIT slot 7, which `CON80/CFSYSIN`'s `CRTFMTCU=` list gives as
+`#PXD0001` = GPC MEMORY. A critical format is *resident* in the display unit,
+so no background is sent; ours was 3563 halfwords of zeros and only the
+per-cycle variable data drew. `CD0001.dfg:89` confirms the address
+independently: `DEULOC=000263`, and 263 decimal is `0x107`.
+
+Three omissions in a row had left it empty. The phase build generated the
+`CD****` COMPOOL half of a display deck and not the `XD****`/`XG****` static
+half; nothing ever called `dfg deucflm`; and the volume recipe ran
+`--sysid SYS8` only, so `DMACDFT1/2/3` were absent from the tape and read back
+as zeros. Fixed in `3c232e041`: `tools/build_deucflm.py` runs `dfg` over
+CFSYSIN's sixteen members and lays the image out with `dfg`'s own
+`deucflm.build`. A static format module is one `ARRAY(n) BIT(16)
+INITIAL(HEX'....')` with no address constant, so its constants *are* its csect
+image and no HAL/S compile is needed — checked against the historical DFG
+output OI301700 still carries, XD0001 463 halfwords and XD0990 40, identical
+halfword for halfword.
+
+**The load block's length is the SYSTEM card's `HWDS=`, not the allocation's**,
+and getting that wrong cost a bisect. DMACDFT1 is an 8-block (4096 halfword)
+allocation holding an `HWDS=E4C` (3660) module, and `MMULDTBL.asm:196` reads
+exactly 3660. A checksum written at the end of the 4096 is never seen: the
+reader checks the 3660 it read, rejects it and re-reads — four reads of
+`4/4/4/8` against the baseline's one, and GPCIPL then never reaches the display
+at all. Writing the whole of SYS5 (the FMADEU\* DEU control program included)
+hangs GPCIPL the same way, so `--member DMACDFT1/2/3` is the recipe.
+
+**The unit PASS drives is never IPLed.** GPCIPL loads the DEU on the
+BFC-selected CRT, and PASS then masks exactly that bus and drives the others,
+which nobody has loaded. Demonstrated both ways round. The workaround is a flip
+of the BFC switch: select CRT 2 through the IPL so GPCIPL loads that unit, then
+flip to CRT 1 after the SSL load and before RUN. Measured, DK2 then takes 92
+polls, 172 TIME_FILLs and 86 DISPLAY_FILLs against 6 tiny fills and 2 polls.
+
+**CRT2's keystrokes never left the window.** `meds/mdu.coffee` had
+`new KYBD(1,@)` hardcoded, so every MDU window published on `_KYBD1` while
+IDP2 listened on `_KYBD2` — keys typed at CRT2 went to the one bus PASS masks.
+Deriving the number from the MDU's own primary IDP fixed it; user-confirmed,
+and upstream as PR #33.
+
+#### The renderer could not reach the format
+
+Two things in the beam interpreter stopped it drawing, and both had to be right
+at once. `deuFCW` resolved a BRANCH as `hw & 0x1fff`, so `1107` became `0x1107`
+— empty memory — when the sector comes from the op 2 SUBLIST word ahead of it
+and the address is **twelve** bits. And `refresh()` walked only from
+`DISPLAY_HEADER`, where the 382-halfword list contains no branch to `0x1fe2` at
+all.
+
+Why two passes is the answer to "why is this a MEDS problem": a DFG display is
+not one list. Its background is resident, downloaded once during the unit's
+IPL, and at call-up the GPC writes only a pointer to it at the top of memory.
+GPCIPL's screen, by contrast, is one self-contained 196-halfword block at
+`0x19ee` whose single branch stays inside itself — which is exactly why GPCIPL
+always looked right and the DFG displays never did.
+
+`CF_PAD = 0x111e` (CFSYSIN's own `PAD=`) terminates the background pass, and
+following it is a trap: `111e` under sector 0 is CFIT slot `0x11E`, which is
+SPARE and points at `XD0000`, sixteen halfwords drawing "NO CFMT BKGD". That
+body is what an empty slot is for; painting it over a background that just drew
+correctly is not a return path, and the walker's `visited` guard would have
+hidden the mistake by stopping after the damage.
+
+This work is in **MEDS2** (`~/workspace/MEDS2`), a clone on a branch whose push
+remote is the literal string `DISABLED-never-push-MEDS2-upstream`. It is a
+deliberate stopgap, superseded the moment Don's own MEDS lands: point
+`retest-crt2.sh`'s `SIM=` back at `~/donschmidt/nsts-sim-gpc` and drop the `2`.
+
+#### Two coordinate frames, and what they are not
+
+There are two beam-coordinate conventions on this bus, differing by exactly
+**512 in X and 2 in Y**, and which one a word is in depends on who wrote it:
+
+| | GRID | COL_ORIGIN | ROW_ORIGIN | ABS X/Y |
+|---|---|---|---|---|
+| MEDS (GPCIPL's) | 2048 | 1573 | 364 | 1555 / 364 |
+| DFG's | 1536 | 1042 | 366 | 1024 / 1902 |
+
+**Both are historical and genuine, and `dfg` is faithful.** That took three
+retractions to establish. `OI301700/SSSRC/XD0001.hal` — original DFG output,
+463 halfwords — runs from signed X −987 to +456, sits on the DFG grid 26/31
+against 11/31 on the other, has first XPOS 1384 = DFG column 18.00 exactly, and
+appears **verbatim at 0x3fc** in the DEUCFLM `dfg` builds today.
+
+MEDS's constants are equally real. Its own comment says they are "calibrated
+against captured display memory", and `data/0001-O-GPC_MEMORY.dfb` decodes
+under them with **201 of 201** integer columns *and* rows. `MLIB80/MACROS`
+lines 7–57 is where they come from — the `PDEF` table GPCIPL's own screen uses,
+column 1 at −475 (= 1573 mod 2048), rows +337 stepping −27 — and
+`MLIB80/XPOS` emits `DC BL.5'10000',FL.11'&X'`, a signed eleven-bit
+coordinate, refusing anything outside ±512 with `MNOTE 8`. That bound
+constrains GPCIPL's *own* usage only; it is not a machine-wide legality rule,
+which is what two of the retracted conclusions assumed.
+
+**How the DEU distinguishes them is still unknown.** It is not the translate
+registers: every XTRN on the wire reads 0 (YTRN 0 or 216), `dfg`'s generated
+DEUCFLM contains zero XTRN/YTRN words and zero FCW2s enabling the gate, and it
+is loaded into the unit verbatim — 3584 of 3584 halfwords unchanged. GPCIPL's
+`MENU12` does use the gate (`FCW2 ANCTL5=1,ANCTL4=1` then `XTRN 0` / `YTRN 0`),
+but to zero.
+
+MEDS2 now chooses the geometry **from the list** rather than from a keystroke,
+by counting position words outside GPCIPL's ±512 window. A discriminator, not a
+legality test; what makes it work is that the populations do not overlap — 0
+of 201 and 0 of 250 on Don's captures against 155/272 X and 99/252 Y on DFG
+formats. The first cut *toggled* and so alternated every two or three seconds:
+the test reads the raw halfword, so the second walk scored identically and
+"not worse" kept the flip. Deciding which convention a list is in is a pure
+function of the words in it, so it is an absolute choice now.
+
+#### The garbage in the fields was an emulator defect
+
+With the page finally drawing, its data fields read `-0602` where the display
+number belongs, `-50`, and rows of `FFFFFFFFFF`, and PASS bracketed the label
+`CODE` with a blink FCW1 (`3900`). The path was traced end to end —
+`DCIBHDR` at 0x42345 builds the header, sets up a pseudo DDT at `CLOCDDTP`,
+and calls `DCI#CON` at 0x42495 — and every candidate along it was eliminated by
+measurement: the compool's address constants (99 of 99 correct as halfwords),
+the DDT (our generated `CD0001` byte-identical to the historical output, 477 of
+477), and the memory itself (`YAGPC_WATCHHW` over a whole run caught ten
+stores, all IOP writes from BCE 18 off the tape, and none after; when the
+display drew, `CZ2V_MC_REQ` held 0 and `CZ2V_MF_MC` held `0202 2020`).
+
+The defect was in `cpu_g_ea`'s fullword-indirect path: **it shifted a sector
+onto every pointer**, including one whose own high bit is clear and which
+therefore addresses sector 0. Figure 2-17 names bit 0 MSB, "determines type of
+address expansion", and the expansion flowchart's fourth leaf is EXPAND USING
+**0000**. Measured at 0x42845 the pointer reads `26f80801` — address `0x26f8`,
+DSV=1 — from the ZCON `DCI#DATA` declares as `DC Z(,FCMCBLKS,8)`. `0x26f8`'s
+high bit is clear, so the datum is at `0x026f8` where the tape put
+`CZ2V_MC_REQ`; applying DSV read `0x0a6f8`, which nothing had written, and
+returned the C6C6 IPL fill. Sign-extended by the following `SRA`, that is
+−14650. The index sum is also 16-bit and includes the high bit ("all EA/BA
+address calculations involve 16-bit operands and bit 0 of the fullword indirect
+address pointer is included in these calculations"), so masking to 15 bits
+first threw away a carry that decides the expansion.
+
+Verified on a headless boot: `-0602` → ` 0001`, `-50` → ` 0`, `FFFFFFFFFF` →
+blank, plus a block of the page that had never drawn at all (`BFS7 14`,
+`PASS8 15`, `27 OPTION`, `START 28`, `STOP 29`). The flashing `CODE` went with
+it — PASS was bracketing that label with blink because it could not fill the
+field, and now emits `3800`.
+
+Three candidates were eliminated first, all wrongly suspected: `exec_D`'s
+missing `% 8` (not a bug — for even R1, R1+1 ≤ 7, and for odd R1 the POO says
+append 32 zeros, which is what it does); the register-variable shift form
+(implemented in `cpu_g_shift_cnt`, and matching PASS's own `SLL`/`AHI`/`CHI`
+guard exactly); and `CHARCONV`'s decimal conversion, executed offline against
+this emulator's own `q31_div`/`q31_mul32`/SRDL/SLDL over 2006 values with no
+mismatch (`ITEN` is `F'0.625'` = 0x50000000, and the 4-bit pre-shift is the
+scaling).
+
+`test_cpu_ea`'s fixtures come from `gpc`, which has the same defect; 62 of
+20447 disagreed. They are recorded as a known divergence matched **by shape**
+— fullword-indirect-with-index, ours below 0x8000, theirs the same address
+with a nonzero sector — so regenerating the table cannot silently re-arm the
+exception, and anything else in that mode still fails.
+
+#### Still open
+
+- **GPCIPL shows only its clock, about half the time.** Its menu is written
+  ONCE — 509 halfwords at `0x19ee` then 254 at `0x1beb`, 0.05 s apart, never
+  repeated; thereafter only the first 196 words at `0x19ee`, twice a second.
+  Lose either one-shot fill and the display updates its clock over a blank
+  screen until restart. MEDS2 already detected the case
+  (`transfer abandoned, N halfwords short`) but IDP handed the logger
+  `console.log`, i.e. the renderer devtools, so no failing run ever left a
+  record. `NSTS_DEU_LOG=<path>` now writes it to disk and every accepted fill
+  is logged; set against `dk.log` that separates "lost on the way" from
+  "arrived and mishandled".
+- The rarer variant where everything but the clock flashes.
+- How the DEU tells the two coordinate conventions apart.
+- The CRT hand-over: GPCIPL follows the BFC switch, replaying its entire init
+  on the newly selected unit (zeroing sweep `0x0f49`/`1146`/`1343`/`1540`/
+  `173d`/`193a`/`0002`, then 509@`0x19ee` + 254@`0x1beb`) and no longer polling
+  the old one, whose POLL FAIL is just that. Measured on a live run. The PASS
+  load had completed 11 s earlier and no second load appears before RUN, so the
+  repeat `ITEM 1 EXEC` was unnecessary. The user reports the hand-over is
+  conspicuous and yet rare, so the *normal* case must be GPCIPL not following
+  the switch — something intermittent in when it re-reads the BFC discrete.
+- One column: our title starts one column right of Don's capture (deck XC=18
+  against his 17). Left alone deliberately.
+- The vertical proportion. The cell rows are right — the glyph trace matches
+  XD0001's deck and Don's capture row for row — but a real MCDS CRT gives its
+  26 lines the whole screen and an MDU gives them the area above its menu bar.
+  Closing that is an MDU *layout* change, not a rendering fix, and it is
+  cosmetic.
+
 
 ## Methodology and caveats
 
