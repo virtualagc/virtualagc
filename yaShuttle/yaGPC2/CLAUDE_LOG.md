@@ -438,3 +438,24 @@ code itself was not read.)
   before, in its own frame, which is now the default.  Not diagnosed -- the trace holds
   one frame and by the time it was read the run was at GPC MEMORY.  Next run, capture
   `cells.log` WHILE GPCIPL is on screen and before pressing anything.
+
+### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
+- **THE VERTICAL SCALE WAS THE WRONG INSTRUMENT AND IS REVERTED.**  `@group.scale.y`
+  stretched the GLYPHS rather than the gaps, and carried the POLL FAIL cross, the red X
+  and the boxed GPC number down into the MAIN MENU area, because they are drawn in the
+  same group and the same units.  A knob is not automatically a safe way to let somebody
+  else find a number: this one could only be wrong in ways that looked like progress.
+- AND THERE IS NOWHERE FOR THE HEIGHT TO GO.  The page already runs to row 25 with the
+  MAIN MENU rule just below it, so anything past about 1.05 pushes text through it.
+  Extra space between rows is only possible if the page AREA grows first.
+- **SO THE ~0.70 IS NOT A RENDERING ERROR AT ALL.**  The cell rows are right -- the
+  glyph trace matches XD0001's deck and Don's own capture row for row.  A real MCDS CRT
+  gives its 26 lines the whole screen; an MDU gives them the area above its menu bar.
+  The proportion differs because the two devices are laid out differently, and closing
+  it is an MDU LAYOUT change -- move the menu area down, give the page the height, and
+  scale row PLACEMENT (not the group) to fill it.  That is a change to Don's design, not
+  a fix to ours, and it is cosmetic.
+- STILL OPEN AND NOT DIAGNOSED: GPCIPL shows nothing but its clock, and during the scale
+  experiment it reappeared only above about 1.2 -- which makes no sense under any model I
+  have and is the reason to stop guessing.  It needs `cells.log` captured WHILE GPCIPL is
+  on screen.
