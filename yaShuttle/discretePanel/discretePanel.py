@@ -604,6 +604,10 @@ def main():
     ap.add_argument("--script", metavar="FILE", help=SCRIPT_HELP)
     ap.add_argument("--quit-after", type=int, metavar="MS",
                     help="exit this many ms after startup (for scripted runs)")
+    ap.add_argument("--gpc-id", type=int, metavar="N", default=None,
+                    help="initial GPC ID (1-5), discrete B bits 0-2 -- this is "
+                         "where the GPC learns its own identity, NOT yaGPC2's "
+                         "--gpc-id, which only names its intercomputer port")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry for the panel window, e.g. +1080+0 "
                          "(also NSTS_PANEL_GEOMETRY)")
@@ -622,6 +626,11 @@ def main():
 
     root = tk.Tk()
     panel = Panel(root)
+    if args.gpc_id is not None:
+        if not 1 <= args.gpc_id <= 5:
+            raise SystemExit("discretePanel: --gpc-id must be 1..5")
+        panel.gpcId.set(args.gpc_id)
+        panel._gpcIdChanged()
     # --geometry places the window, so a rig that starts the panel beside two
     # MDU windows does not have to be dragged into shape every run.  Tk's own
     # spec, so "+1080+0" positions and "400x600+1080+0" sizes as well; the
