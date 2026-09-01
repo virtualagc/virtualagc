@@ -179,10 +179,17 @@ code itself was not read.)
   answers the GPC and answering changes what the GPC does next, so a stub cannot be
   used to observe a MEDS run at all.  SO_REUSEADDR only, never SO_REUSEPORT, so it
   cannot end up in a load-balancing pair with the peer it is watching.
-- A FILE I HAD WRITTEN AND RUN VANISHED between two commands -- `tools/dksniff.py`,
-  created, `chmod`ed and executed in one invocation, was gone from disk two invocations
-  later, never committed, no `git` operation in between.  Cause unknown.  The remedy is
-  the one already in this log: **commit a new tool the moment it works.**
+- **A RELATIVE PATH WROTE INTO SOMEBODY ELSE'S REPOSITORY, and it took two "vanished
+  file" mysteries to notice.**  The shell's working directory PERSISTS BETWEEN Bash
+  calls, so a `cd ~/donschmidt/nsts-sim-gpc` in one invocation was still in force in
+  the next, and `cat > tools/dksniff.py` created it THERE.  It had not vanished; it was
+  never in yaGPC2.  The same thing swallowed a `CLAUDE_LOG.md` append, which became a
+  new 31-line `CLAUDE_LOG.md` in Don's tree.  Both were found as untracked files while
+  preparing a PR, and removed; his repo is clean again apart from the intended
+  `meds/mdu.coffee` edit.  **Use an absolute path, or `cd` at the START of every
+  invocation** -- and note that this is a way to modify another project silently, which
+  is exactly what the standing rule about other people's repositories exists to
+  prevent.
 
 ### [2026-08-31] Target: problems.md, HANDOFF-FCMBOOT.md
 - **THE TAPE FIX IS CONFIRMED END TO END AGAINST REAL MEDS.**  Recorded off the wire by
@@ -214,7 +221,8 @@ code itself was not read.)
   (what the current sector is, what a critical format's `111e` exit branch means -- it
   is also CFSYSIN's `PAD`) need the DEU POO, and guessing them is exactly the trap of
   copying a condition without understanding why it is there.
-- A SECOND SILENT WRITE FAILURE: the heredoc that was to append this very entry ran,
-  reported success, and left the file unchanged at 185 lines -- the same way
-  `tools/dksniff.py` vanished earlier.  Both were heredocs inside a compound command.
-  **Write the file, VERIFY it, then commit in a separate invocation.**
+- THE "SECOND SILENT WRITE FAILURE" recorded here was the same mistake and is
+  withdrawn: the append reported success because it SUCCEEDED, into
+  `~/donschmidt/nsts-sim-gpc/CLAUDE_LOG.md`.  Nothing is wrong with heredocs.  What is
+  worth keeping is the check that caught it -- after writing a file, verify the file
+  you meant to write actually changed.
