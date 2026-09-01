@@ -552,3 +552,35 @@ code itself was not read.)
   snapshot main storage after RUN, read it, and find who wrote it.  Its address needs
   the SDF, not the link map (HAL/S compool variables are not individually in
   `PHASE02.sym.json`; only `#PCZ2COM` at 0x23f4 and a few entries are).
+
+### [2026-09-01] Target: problems.md, HANDOFF-FCMBOOT.md
+- **NOTHING WRITES C6C6 THERE.  THE MEMORY IS CORRECT AND THE DISPLAY IS MISRENDERING
+  IT.**  That is the answer, and it inverts yesterday's conclusion.
+- HOW IT WAS PINNED.  `ap101Utils.sdf` gives the compool offsets the link map does not:
+  `CZ2V_MC_REQ` is INTEGER at `#PCZ2COM`+772 = **0x026f8**, `CZ2V_MF_MC` is CHARACTER(2)
+  at +774 = **0x026fa** (`#PCZ2COM` is at 0x23f4).  `YAGPC_WATCHHW=26f8-26fc` over a
+  whole run catches **ten stores, all of them IOP writes from BCE 18** -- the tape:
+  GPCIPL's own phase at t=4.6 s, then the SSL loading phase 2 at t=26.4 s writing
+  `0000 0000 0202 2020 f000`, which is EXACTLY the linked `PHASE02.fcm` content.  After
+  that, for the rest of the run, **no store of any kind**.
+- SO WHEN THE DISPLAY DRAWS, MEMORY HOLDS: `CZ2V_MC_REQ` = **0** and `CZ2V_MF_MC` =
+  `0202 2020`.  And the wire, in the same run, 60 display fills in: col 9 renders
+  **`-50`**, col 12 renders **`FF`**, col 13 renders `-0`.  A field holding zero is
+  being drawn as minus fifty.
+- **AND THE DDT IS NOT THE PROBLEM EITHER**, which was the obvious next suspect since our
+  own `dfg` generates it: our generated `CD0001` is **byte-identical to the historical
+  DFG output** OI301700 carries -- 477 of 477 halfwords.  (`XD0001`, the static half,
+  was already known identical at 463 of 463.)
+- THAT LEAVES ONE PLACE: **the EXECUTION of `DCI#CON`** (`MLIB80/DCI#CON.asm`, linked at
+  0x42495).  Correct DDT, correct data, wrong output means an emulator defect in what
+  that code runs.  Its `CHARCONV` digit loop is `SRDL R6,4` / `D R6,ITEN` / `M R6,ITEN`
+  / `SLDL R6,4` / `SR R2,R6` / `SLL R2,16` / `AHI R4,X'3030'`, and its addressing is the
+  SRS forms `LH R5,0(R7,3)`, `STH R3,0(R2,3)`, `LA R2,1(R2,3)`.
+- TWO CANDIDATES, in order: (1) the SRS addressing form with that third operand -- if it
+  is mis-decoded, every fetch and store in the loop is off, which fits BOTH the numeric
+  and the character fields being wrong; (2) the register-pair arithmetic `D`/`M`.
+  `SRDL`/`SLDL` already carry the POO `(R1+1) mod 8` fix, but **`exec_D` does not** --
+  `cpu_instr.c:176` still forms its pair with a plain `x + 1`.
+- WITHDRAWN: yesterday's "the variables hold the C6C6 fill" reading.  It was inferred
+  from `FF` being EBCDIC `0xC6` and never checked against memory.  The `FF` is
+  manufactured by the display path out of `0x2020`.
