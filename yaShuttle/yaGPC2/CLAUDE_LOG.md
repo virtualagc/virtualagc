@@ -338,3 +338,46 @@ on the wire at all.)
   delays), and `FPMDSABL`'s `ZB TPCTPSW+2,X'5F00'` can only clear 0x5F,
   preserving PC1 (0x80) and the Instruction Monitor (0x20), so it cannot
   produce the observed zero mask.  Our `exec_ZB` is correct.
+
+### [2026-09-02] Target: problems.md
+- **THE OVERLAY-LOAD FAILURE IS A LOAD-BLOCK LENGTH DEFECT, AND IT IS FIXED.**
+  `mmbstamp` gets seven of phase 3's ten lengths right and three wrong; the
+  tape disagrees with all three, and the flight software believes the tape:
+      block  4:  6982 -> 6966   (-16)
+      block  9:   122 ->  160   (+38)
+      block 10:  5604 -> 5654   (+50)
+  Verified independently of the tool that made the change: against
+  `pass-ipl-cflm.mmv`, the generated table has **7 of 10** load blocks
+  checksumming and the corrected table has **10 of 10**.
+- WHY A WRONG LENGTH IS NOT COSMETIC: the reader sums the block, compares it
+  with the tail, rejects it, re-reads the identical blocks and gives up --
+  leaving the overlay PARTIALLY applied.  Phase 3's first blocks land at
+  0x01f6 and 0x0654, in PSA/CVT space, so a half-applied overlay is a
+  corrupted FCOS, and the machine takes an unwakeable masked wait about 0.4 s
+  later.  The 26-block read stops at exactly 13312, where block 10 begins, so
+  the rejected transfer is the one containing block 9 -- which is why
+  correcting block 4 alone changed nothing.
+- `tools/fix_phase_table_lengths.py` does the correction and is the deliverable:
+  the tape is the authority and can be read directly, since a load block is
+  `[content L-2][0][checksum]` with `checksum == sum(content)`, so for a known
+  start essentially one length verifies.  It walks each phase's blocks from its
+  mass-memory address, block-aligned, and takes the length the tape agrees
+  with.  A block that verifies at NO length is reported, never invented:
+  that is a tape-content problem, and choosing a length silently would turn a
+  detectable fault into an undetectable one.
+- **THREE OF MY OWN BUGS IN THAT TOOL, all of which produced confident wrong
+  output before being caught:**
+  (1) it aligned in ABSOLUTE volume coordinates, but a phase's base need not be
+  a multiple of 512 (phase 3 starts at volume halfword 158088) -- alignment is
+  relative to the phase's own first block, and getting it wrong reported 9 of
+  10 blocks as unconfirmable;
+  (2) a `MIN_LB_HW` guard meant to reject noise also rejected phase 3's block 7,
+  which really is 6 halfwords -- the minimum now guards only the blind search,
+  never the generated length;
+  (3) a search span of 5632 reported "no length verifies" for block 10, whose
+  true length is 5654 -- I had recorded that block as an unfixable tape-content
+  problem on the strength of exactly that bug.
+- The `mmbstamp` side is diagnosed but NOT fixed: `_extend_mc_bank_tails` and
+  `_open_bank_tails` both reshape a block's length from inferred MMB rules, and
+  one of them is where the three errors come from.  That is Don's repository,
+  so it is left read-only and reported rather than edited.
