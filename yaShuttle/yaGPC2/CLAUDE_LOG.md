@@ -648,3 +648,34 @@ on the wire at all.)
   the 176 shared with G16/G2/G3/G8, which are phase 3's MF overlay) form 80
   contiguous runs, not 35 blocks, and only 5 verify.  The MMB's grouping is
   its own rule and the tape is the only witness to it.
+
+### [2026-09-02] Target: problems.md
+- **PHASE 18 IS ACCOUNTED FOR: GNC OPS 9 is the ONLY configuration with three
+  overlay phases.**  `CZ2V_GRT_MC_PHASES` (#PCZ2COM+0x544, five halfwords per
+  MC) read out of the running image:
+        idx 1: 3  4        idx 6: 9 12
+        idx 2: 3  5        idx 8: 3  7
+        idx 3: 3  6        idx 9: **3  8  18**
+        idx 4: 14 15       every other row has two and a zero
+  `ARC` loops `ARC_M = 2 TO 5` over those slots, so it loads phase 8, then
+  phase 18, then hits the zero and stops -- and on an overlay error it EXITS
+  the loop, which is exactly why phase 18 was never read.  It matches the DASS
+  line "CONFIGURATION GNC9 IS DEFINED IN THE MCF AS PHASES 2,3,8,13,18": 2 and
+  13 are IPL-resident, so 3, 8 and 18 are the overlays.
+- **`mmbstamp` fails phase 18 the same way it fails phase 8 -- it drops the
+  leading 4-halfword ZCON block.**  Tape vs mmbstamp:
+        tape       4   92  582   40  1970  768
+        mmbstamp       92  582   40  1602  768  354
+  The recovery walk gets all six with ZERO ambiguity, and mmbstamp's ADDRESSES
+  look right where the lengths agree: its `e4b2`/sector-3 block resolves to
+  0x1E4B2, which is where that block's content actually sits in `G9.fcm`.
+- **PHASE 8 IS STILL BLOCKED, and specifically on ADDRESSES not lengths.**  The
+  walk recovers 35 unambiguous lengths, but there is no way yet to assign
+  destinations: content lookup in `G9.fcm` matches only sporadically (short or
+  uniform windows are ambiguous, and some content differs between OI340600 and
+  OI340700), and mmbstamp's 27 blocks do not correspond one-to-one with the
+  tape's 35 because of the merging.  Lengths without addresses cannot be
+  stamped.
+- Method note for the augmented files: they are ONE long line, so ordinary
+  line-oriented tools are useless on them.  `tools/jsonpp.py` (--keys,
+  --schema, --get, --count-by) exists for that.
