@@ -292,3 +292,49 @@ on the wire at all.)
   did NOT stop the read -- 483 blocks came off it successfully.  What is on the
   tape and what the overlay needs is now a question that can be asked with
   measurements instead of assumed.
+
+### [2026-09-02] Target: problems.md
+- **THE IPL-SOURCE FIX IS REAL AND ISOLATED.**  Control run: source deselected
+  before RUN, NO injected tables -- runs clean to 617.9 s and stops only on the
+  script's own SIGINT.  So deselecting the IPL source is safe by itself, and
+  the masked-wait halt belongs to the injected phase tables, not to the fix.
+- **THE HALT IS SELF-INFLICTED BY THE INJECTION.**  With `YAGPC_LOADBIN`
+  stamping `#PFCMGPT`, the overlay writes blocks 1-3 into low memory (0x01f6,
+  0x0654 -- PSA/CVT space, confirmed by a 385-vs-390 s snapshot diff), then
+  fails, leaving FCOS partially overlaid.  About 0.4 s later the machine takes
+  a masked wait.  Without the injection, none of this happens.
+- **BOTH TABLES ARE LOCATABLE ON THE TAPE BY THEIR OWN SENTINELS**, which makes
+  a real tape-stamping tool buildable:
+      #PFCMGPT  tape halfword 616158  1093 x 0000   (found by the 4-halfword
+                prefix signature f628 4000 0800 0800 -- ONE occurrence)
+      #PCDCPHA  tape halfword 633964    57 x ffff   (ONE run of exactly 57
+                in 1,544,072 halfwords)
+  Enclosing load blocks, found by the checksum property: (612956, 5961) and
+  (633736, 802).  The second implies a load address of exactly 0x30000, which
+  corroborates it.  The load-block convention is `[content L-2][0][checksum]`
+  with **checksum == sum(content) & 0xffff** -- from `tools/stamp_ssl_checksum.py`,
+  which already finds a block this way.
+- **A REAL DISCREPANCY, MEASURED: `mmbstamp` overstates phase-3 load block 4 by
+  16 halfwords.**  At tape offset 2560, length 6982 (generated) fails the
+  checksum and length **6966** passes; at the generated length's tail there is
+  `c6c6` fill.  Blocks 1-3 match the tape EXACTLY (98 @0, 12 @512, 1354 @1024,
+  all checksum OK), so the generation does correspond to this volume.
+- **BUT THAT DISCREPANCY IS NOT THE CAUSE OF THE HALT.**  Patching the length
+  to 6966 and re-running changed nothing: the same two 26-block reads from
+  3/3/6/0 and the same masked wait at 391.7 s.  Hypothesis falsified by
+  experiment.  The read is a single contiguous 26-block transfer, so PASS is
+  not reading per-load-block, and a per-block length is probably not what
+  decides it.  The 16-halfword error is real and worth fixing on its own
+  account; it is not this failure.
+- **RETRACTED: the "wrong build" worry.**  I suspected `~/ipl-demo/phases` was
+  not the build behind `pass-ipl.mmv`, on the strength of `#PCZ2COM` sitting at
+  0x014ac in the map but holding `c6c6` there in memory while the live compool
+  is at 0x23f4.  Phase-3 load blocks 1-3 matching the tape exactly settles it
+  the other way: it IS the right build.  288 of 309 phase-2 sections have
+  content at their mapped addresses; `#PCZ2COM` is one of 21 exceptions and
+  remains unexplained, but it is not evidence of a mismatch.
+- Two suspects eliminated by reading source rather than guessing: `FCMSSYNC`
+  treats an all-zero Discrete Input A as IN sync (its ring loops are timer
+  delays), and `FPMDSABL`'s `ZB TPCTPSW+2,X'5F00'` can only clear 0x5F,
+  preserving PC1 (0x80) and the Instruction Monitor (0x20), so it cannot
+  produce the observed zero mask.  Our `exec_ZB` is correct.
