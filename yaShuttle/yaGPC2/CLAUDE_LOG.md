@@ -185,3 +185,30 @@ is instrumented, not diagnosed.)
   designates targets.  Find what populates it, and what makes a GPC "in RUN"
   for that purpose -- our GPC is in RUN by the mode discrete, so the two
   notions differ.
+
+### [2026-09-01] Target: [problems.md]
+- **THE CHAIN IS COMPLETE, AND IT IS A GPC-SET PROBLEM, NOT A TAPE PROBLEM.**
+  Read out of memory with the SDF's own offsets, not inferred:
+
+        CZ2B_GRT_GPC_SET  0x026fc (offset 776 in #PCZ2COM at 0x23f4), 10 x 16b
+          [1] f000 GPCs 1,2,3,4   [6] 4400 GPC 2
+          [2] c000 GPCs 1,2       [7] 8400 GPC 1
+          [3] f000 GPCs 1,2,3,4   [8] c000 GPCs 1,2
+        CZ2B_RS (redundant set) 0x02407 = 0000
+        CZ2B_CS (common set)    0x02406 = 0000
+
+  The GRT targets ARE populated -- which is why DM6OPS gives ERR_TYPE 1 and not
+  2 -- but `RUN_GPC = ((GPCs in OPS0) AND CS_MASK) OR RS_ALL` is zero because
+  BOTH GPC SETS ARE EMPTY, so `AND TARGET_GPC` leaves nothing and the answer is
+  "NO TARGETS IN RUN".  The GPC CONFIG fault message means exactly that.
+- SO THE MISSING STEP IS ESTABLISHING A GPC SET / MEMORY CONFIGURATION, not
+  anything to do with the missing GNC9 overlay.  `CZ2V_MC_REQ` (0x026f8, the
+  memory-configuration request, and the same variable the DCI#CON work watched)
+  is 0, and `ICC_CZ2V_MC_REQ` is what DM6OPS signals when a transition is
+  accepted.  CANDIDATE and UNTESTED: GPC MEMORY's own `STORE MC=` block --
+  `45 CONFIG`, `46 GPC`, `STORE 47` -- is the crew's way of assigning a memory
+  configuration to a GPC, which is what would populate the set.
+- HOW TO READ ANY OF THIS AGAIN: `ap101Utils.sdf.SdfLibrary` over
+  `PFS/OI340600/SDFLIB`, `unit('CZ2COM').symbols()`, `.address` is the compool
+  offset.  Names in the SDF are EBCDIC and TRUNCATED TO 8 CHARACTERS, so a
+  plain grep for `CZ2B_GRT_GPC_SET` finds nothing -- search `CZ2B_GRT`.
