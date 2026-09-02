@@ -258,3 +258,37 @@ on the wire at all.)
   decode alone, before checking any of the above, and the user was right to say
   it told me nothing.  Decoding what the software CONCLUDED is not evidence for
   WHY it concluded it.
+
+### [2026-09-02] Target: problems.md
+- **HYPOTHESIS CONFIRMED BY EXPERIMENT: the IPL SOURCE switch was blocking every
+  post-IPL mass-memory I/O.**  With `SOURCE_RUN=OFF` deselecting it at t=252 s,
+  eight seconds before RUN, the tape is finally used:
+      13 mass-memory commands after t=300 s, where every previous run had 0
+      -- BITE STATUS, POSITION, EXTENDED BLOCK, READ, repeatedly
+      **483 blocks read, 247,367 words out**
+  So PASS performed the OPS 9 overlay load.  That is the first time any run
+  here has read the tape for anything but the IPL.
+- The mechanism is the one `FIOMGSNC` states: it dispatches a mass-memory
+  transaction only if the MMU is NOT IPL-selected or the switch is masked in
+  software (`CZ2B_MMU_IPL_SW_MASK`, `INITIAL(HEX'0000')`).  Leave the switch on
+  MM1 and every transaction returns transaction-status-word bit 7, "MM SELECTED
+  FOR IPL".  **Two switches, the same trap**: the user's `CRT none` finding and
+  this one are the same shape -- a discrete left in its IPL position that the
+  flight software correctly refuses to work around.
+- **NEW FAILURE, further along than anything before it.**  About 0.4 s after
+  the last tape command the GPC enters a **masked wait state** and the run
+  stops: `NIA=0x4071d`, `t=391.328 s`, `R4=0x0009` (the OPS number).  The
+  address names itself through the phase link maps as **`$0DCICYC`**, which is
+  resident -- it appears at the same address in every `PHASEnn.sym.json`.  The
+  display never advances: still `0001 /` at 0x19ef, so the transition did not
+  complete.
+- Technique worth keeping: **name a traced address by looking it up in the
+  phase link maps.**  `~/ipl-demo/phases/PHASE*/PHASE*.sym.json` covers every
+  phase, so any address can be attributed to a CSECT without disassembly --
+  that is how `FIOERRLC`, `FIOMGSNC` and now `$0DCICYC` were identified.  A
+  CSECT appearing at one address in ALL the maps is resident rather than
+  overlaid, which is itself useful.
+- Note against an earlier statement: the tape gap (GMAGNC91, VMAPL91 absent)
+  did NOT stop the read -- 483 blocks came off it successfully.  What is on the
+  tape and what the overlay needs is now a question that can be asked with
+  measurements instead of assumed.
