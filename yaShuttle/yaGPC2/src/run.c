@@ -1127,6 +1127,14 @@ static bool batchrunner_step(BatchRunner *r) {
                 snprintf(r->stopReason, sizeof r->stopReason,
                          "wait state (%s)", rtpacer_result_name(why));
                 r->hasStopReason = true;
+                /* A wait-state stop reports WHERE the machine parked and
+                 * nothing about how it got there, which is the one thing
+                 * that matters: "masked" means a PSW was loaded with every
+                 * system interrupt off, so the question is always which
+                 * code did that.  The ring is already kept; dumping it
+                 * here costs nothing and turns a dead end into a trail. */
+                cpu_dump_nia_ring(&r->age.gpc.cpu, "the wait state",
+                                  psw_get_nia(&r->age.gpc.cpu.psw));
                 return false;
             }
             return true;
@@ -1144,6 +1152,8 @@ static bool batchrunner_step(BatchRunner *r) {
         if (psw_get_wait_state(&r->age.gpc.cpu.psw)) {
             snprintf(r->stopReason, sizeof r->stopReason, "wait state");
             r->hasStopReason = true;
+            cpu_dump_nia_ring(&r->age.gpc.cpu, "the wait state",
+                              psw_get_nia(&r->age.gpc.cpu.psw));
             return false;
         }
     }
