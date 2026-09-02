@@ -367,3 +367,53 @@ is instrumented, not diagnosed.)
   at startup as well as on change, and Shift+1..4 pick PL/GNC/SM/ILLEGAL
   directly.  Shift+M still cycles.  Cycling blind through four positions with
   no feedback was how the PL-vs-GNC defect above stayed hidden.
+
+### [2026-09-02] Target: problems.md
+- **Never edit a shell script while an instance of it is running.**  Bash reads
+  a script incrementally from a byte offset, so an edit under a running
+  instance makes it resume in the middle of a different line.  Patching
+  `headless-gpcmem.sh` during the EAWATCH run gave `line 85: 900: command not
+  found`, a second yaGPC2 launched on the same port base, exit 124 from the
+  outer `timeout`, and the run's own `deu.log` re-truncated -- destroying the
+  trace it had just produced.  Copy the script, or wait.
+- The EAWATCH capture survived only in rtk's tee cache, and it is
+  self-validating: reads step by 4 from `DM6V_TR_TAB` at 0x2c38 and the values
+  decode as the table's own entries.  `DM6OPS`'s search loop is at NIA
+  **0x455f6 / 0x455fc**, and **0x45613** reads the matched entry's
+  `DM6B_TRANS_DATA`.  The match was entry 1 (value 0000, mask 0x81403F00) --
+  OPS 0, which is the FROM state, so the transition test itself was reached
+  and passed.  That is consistent with the refusal happening later, in
+  `DM6_TARGET_RUN_GPC`.
+
+### [2026-09-02] Target: problems.md
+- **The major-function diagnosis is CONFIRMED by experiment**, three runs with
+  one variable moved and PASS's own `DMZ_LOG` read back:
+      GPC 1, MF PL  (control) -> d6f1 0001  ERR_TYPE 1, NO TARGETS IN RUN
+      GPC 2, MF PL            -> d6f1 0000  ERR_TYPE 0, ACCEPTED
+      GPC 1, MF GNC           -> d6f1 0000  ERR_TYPE 0, ACCEPTED
+  and `CZ2V_REC_OPS` (0x23f4+1176) tells the same story from the other end:
+  **0** in the control -- the reconfiguration was never even requested -- and
+  **9** in both accepted runs.  The OPS request now propagates into
+  `ARC_GPC_RECONFIG`, which is the machinery that loads an overlay.
+- **The next blocker, and it is a different one: `CZ2V_MC$(GPC) = 0`.**
+  `ARC_OPS_ZERO` (ARCGPC.hal:1112) reads
+      IF CZ2V_MC$(ARC_GPC_ID;)=0 THEN CZ2V_REC_XERR=1; ELSE CZ2V_REC_XERR=0;
+  and both accepted runs come back with `CZ2V_REC_XERR = 1`, logged by DM2APP
+  as `d2ff 0001` -- its error branch.  This GPC has no memory configuration
+  assigned.
+- **That is the same defect the user spotted twice in Don's video**, from the
+  other side: Don's `STORE MC=09` against our `MC=__`, and Don's
+  `MM AREA / PL 52 1 / GNC 53 1 / SM 54 1` against our three zeroes.  One
+  missing thing, three symptoms.
+- **Answering the standing question "does it even try to read the tape?"**:
+  no.  All three runs have byte-identical mass-memory activity -- 92 trace
+  lines, every one from the IPL at t=10.3 s, none after.  The accepted runs
+  reach GPC reconfiguration and fail on the memory configuration BEFORE any
+  tape access is attempted.  So the tape gap is real but still downstream; it
+  is not what is stopping us today.
+- Two harness mistakes worth keeping: `YAGPC_SNAPSHOT` needs
+  `<t1>[,<t2>...]:<prefix>` and silently does nothing given a bare prefix (it
+  looks for the colon and gives up), which cost a full pair of runs; and a
+  backgrounded `( ... ) &` subshell does not inherit a `cd` that was only
+  `&&`-chained to its sibling, which is why one run wrote its log into the
+  repo and died instantly.
