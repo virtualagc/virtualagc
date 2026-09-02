@@ -407,3 +407,43 @@ on the wire at all.)
   is a coherent thing to be next -- PASS overlaying phase 3 and then finding
   something absent, plausibly the program overlay (phase 8, mm 10880 = 5/2/4/0)
   which is never read at all.
+
+### [2026-09-02] Target: problems.md
+- **THE MASKED WAIT IS FULLY EXPLAINED, AND IT IS PASS BEHAVING CORRECTLY.**
+  The chain, every link measured:
+    1. `YAGPC_WAITTRACE` (new) catches the exact instruction: **`FPMDISP`+59**,
+       the FCOS process dispatcher's `LPS@`, loading a PCT whose PSW is a
+       deliberate halt -- `psw2=0x00020000`, wait set, mask 00, machine-check
+       mask off.  The contrast proves it is deliberate: the NORMAL idle waits
+       in the same run are `by=01df6` with mask **ff**, fully unmasked.
+    2. The GRT row for GNC OPS 9 needs MF overlay phase **3** and program
+       overlay phase **8**.
+    3. **Phase 8's tape area (5/2/4/0) is BLANK.**  So is every other phase in
+       file 5 -- 4, 5, 6, 7, 8, 18 -- and phase 12.  Written: 3, 9, 15, 16.
+    4. So ARC pre-positions for phase 3 (`OVERLAY_NOT_AVAILABLE(1)` ON, the
+       `;1` branch -- which is exactly what the register trace showed, R6=3),
+       reads 26 blocks of it, and PASS then has no program overlay to run.
+    5. FCOS dispatches the halt PSW.
+  It is not an emulator defect, not a table defect, and not corruption.  PASS
+  is refusing to enter an OPS it cannot load, which is what it should do.
+- The overlay's write target is legitimate too, contrary to what I assumed for
+  several rounds: 0x01f6 is phase 3's **ZCON pool** (`#QASIN`, `#QDATAN`,
+  `#QDCOS` ... -- PHASE03's map places them there), so rewriting it is exactly
+  what an overlay does, not PSA corruption.
+- **THE REMAINING FIX IS A TAPE BUILD, AND THE WRITER DOES NOT EXIST.**
+  `PHASE08.lib` is present and 147 KB, so the software is built; the volume
+  simply never had it written.  `mmubuild` is analysis-only -- `--tree`,
+  `--alloc`, `--systems`, `--loadmods`, `--directories`, `--image`, `--json` --
+  and emits no volume, which settles the standing question.  MEDS2's
+  `mmu put` can lay halfwords onto a tape, so what is missing is the piece
+  between a `PHASEnn.lib` and the tape: load-block derivation, 512-halfword
+  alignment, and the `[content][0][checksum]` tails.  That is the Mass Memory
+  Build's phase writer, and writing it is a project rather than a patch.
+- `YAGPC_WAITTRACE=1` is the new instrument and earned its place: a wait-state
+  stop said WHERE the machine parked, the NIA ring said HOW IT GOT THERE, and
+  neither said WHICH instruction parked it or with what mask -- which for an
+  unwakeable wait is the whole question.
+- Also fixed, a defect I introduced: `fix_phase_table_lengths.py` corrected the
+  ten lengths but left `NUM_CONT_MM_BLKS` at 37 when the corrected blocks span
+  38, so its "10 of 10" table was internally inconsistent.  It now corrects
+  `ncont` too, preserving the multi-track flag.

@@ -1372,6 +1372,31 @@ void cpu_run(CPU *cpu) {
     }
 }
 
+/* YAGPC_WAITTRACE=1 reports every entry INTO the wait state: the
+ * instruction that caused it, and the PSW it left behind.
+ *
+ * A wait-state stop says where the machine parked; the NIA ring says how it
+ * got there; neither says WHICH instruction parked it or what mask it parked
+ * with, and with an unwakeable wait ("masked") that is the whole question --
+ * a PSW carrying interrupt mask 0 cannot be woken, so the interesting event
+ * is the one that loaded it. */
+static void cpu_wait_trace(CPU *cpu, uint32_t byNia) {
+    static int inited = 0, on = 0, wasWaiting = 0;
+    if (!inited) { inited = 1; on = getenv("YAGPC_WAITTRACE") != NULL; }
+    if (!on) return;
+    int now = psw_get_wait_state(&cpu->psw);
+    if (now && !wasWaiting)
+        fprintf(stderr, "WAITENTER by=%05x resumeNia=%05x mask=%02x "
+                "mcMask=%d psw1=%08x psw2=%08x t=%.1f\n",
+                (unsigned)byNia, (unsigned)psw_get_nia(&cpu->psw),
+                (unsigned)psw_get_int_mask(&cpu->psw),
+                (int)psw_get_mach_check_mask(&cpu->psw),
+                (unsigned)register_get32(&cpu->psw.psw1),
+                (unsigned)register_get32(&cpu->psw.psw2),
+                cpu->elapsedTimeUs);
+    wasWaiting = now;
+}
+
 void cpu_exec1(CPU *cpu) {
     uint32_t nia = psw_get_nia(&cpu->psw);
     cpu->curIC = nia;
@@ -1492,6 +1517,7 @@ void cpu_exec1(CPU *cpu) {
      * the next instruction starts with an empty lookahead. */
     cpu->prevDiscont = psw_get_nia(&cpu->psw) != seqNIA;
     if (cpu->prevDiscont) cpu_iu_shadow_flush(cpu);
+    cpu_wait_trace(cpu, nia);
 }
 
 /* Counter decrement + interrupt dispatch, split out of cpu_exec1's tail so

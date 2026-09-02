@@ -124,7 +124,23 @@ def main():
             rel = ((rel + got + HW_PER_BLOCK - 1)
                    // HW_PER_BLOCK) * HW_PER_BLOCK
 
-    print("\n%d length(s) corrected, %d block(s) the tape cannot confirm"
+        # NUM_CONT_MM_BLKS has to agree with the lengths, or the table is
+        # internally inconsistent: correcting a length changes how many tape
+        # blocks the phase spans, and leaving the count behind is a defect
+        # this tool would otherwise INTRODUCE.
+        rel = 0
+        for i in range(nblks):
+            rel = ((rel + G[disp + 3 * i + 2] + HW_PER_BLOCK - 1)
+                   // HW_PER_BLOCK) * HW_PER_BLOCK
+        span = rel // HW_PER_BLOCK
+        flag = ncont & 0x8000                  # multi-track marker
+        if (ncont & 0x7fff) != span:
+            print("    ncont: %d -> %d  (blocks the phase actually spans)"
+                  % (ncont & 0x7fff, span))
+            G[d + 3] = span | flag
+            changed += 1
+
+    print("\n%d correction(s), %d block(s) the tape cannot confirm"
           % (changed, unfixable))
     if a.out:
         io.open(a.out, "wb").write(b"".join(struct.pack(">H", v) for v in G))
