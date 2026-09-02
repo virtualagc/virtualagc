@@ -165,9 +165,8 @@ static int deu_keycode(const char *n, size_t len) {
 /* Fills w[1..] with the pending keys and returns the header bit to set, or 0
  * when there is nothing to send.  Sends the sequence ONCE. */
 static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
-    static int done = 0;
     const char *spec = getenv("YAGPC_DEUKEYS");
-    if (spec == NULL || done) return 0;
+    if (spec == NULL) return 0;
     /* NOT gated on d->ipled.  It used to be, and that made crew input
      * impossible on the IPL path that omits the BFC CRT switch: GPCIPL's
      * POLL45 ("IPL DEFAULT LOAD -- NO DEU SELECTED") never loads the unit
@@ -183,16 +182,53 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
      * read back, but nothing is selected.  YAGPC_DEUKEYS_AFTER=<n> holds
      * them until the nth poll (default 400, about the point GPCIPL settles
      * into its menu loop at 01df8). */
-    {
-        static long after = -1;
-        if (after < 0) {
-            const char *w = getenv("YAGPC_DEUKEYS_AFTER");
-            char *end = NULL;
-            long v = (w != NULL) ? strtol(w, &end, 10) : 0;
-            after = (w != NULL && end != w && *end == '\0' && v >= 0) ? v : 400;
+    /* SEVERAL BATCHES, EACH AT ITS OWN POLL COUNT.  One sequence was enough
+     * to work GPCIPL's menu, and is not enough to test anything AFTER the
+     * load: an OPS request has to arrive minutes later, once PASS is up.
+     *
+     *   YAGPC_DEUKEYS="@150:ITEM,1,EXEC;@430:OPS,9,0,1,PRO"
+     *
+     * A batch with no `@N:` uses YAGPC_DEUKEYS_AFTER (default 400).  Batches
+     * are sent in order, one per poll at most, each exactly once. */
+    static unsigned char sent[16];
+    static long batchAfter[16];
+    static const char *batchKeys[16];
+    static int nBatch = -1;
+    static char specBuf[512];
+    if (nBatch < 0) {
+        long dflt = 400;
+        const char *w = getenv("YAGPC_DEUKEYS_AFTER");
+        if (w != NULL) {
+            char *end = NULL; long v = strtol(w, &end, 10);
+            if (end != w && *end == '\0' && v >= 0) dflt = v;
         }
-        if (d->polls < after) return 0;
+        snprintf(specBuf, sizeof specBuf, "%s", spec);
+        nBatch = 0;
+        for (char *p = specBuf; *p && nBatch < 16; ) {
+            char *semi = p; while (*semi && *semi != ';') semi++;
+            char save = *semi; *semi = '\0';
+            long after = dflt;
+            char *keys = p;
+            if (*p == '@') {
+                char *colon = strchr(p, ':');
+                if (colon != NULL) {
+                    *colon = '\0';
+                    after = strtol(p + 1, NULL, 10);
+                    keys = colon + 1;
+                }
+            }
+            batchAfter[nBatch] = after;
+            batchKeys[nBatch] = keys;
+            nBatch++;
+            p = (save == ';') ? semi + 1 : semi;
+        }
     }
+    int which = -1;
+    for (int i = 0; i < nBatch; i++)
+        if (!sent[i] && d->polls >= batchAfter[i]) { which = i; break; }
+    if (which < 0) return 0;
+    sent[which] = 1;
+    spec = batchKeys[which];
     int codes[MAX_KEYS_IPL]; int n = 0;
     for (const char *p = spec; *p && n < MAX_KEYS_IPL; ) {
         const char *e = p; while (*e && *e != ',') e++;
@@ -217,7 +253,6 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
             (uint16_t)(codes[i] << ((KEYS_PER_WORD - 1 - i % KEYS_PER_WORD)
                                     * KEY_BITS + 1));
     w[1] = (uint16_t)(KEY_COUNT_HIGH | n);
-    done = 1;
     fprintf(stderr, "deu: YAGPC_DEUKEYS delivered %d keystroke(s)\n", n);
     return HDR_KYBD_MSG;
 }
