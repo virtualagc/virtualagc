@@ -306,3 +306,17 @@ is instrumented, not diagnosed.)
   directly; or (b) anchor on `DM6V_TR_TAB` at 0x2c38 -- located by content
   search, no symbols needed -- to find DM6OPS's code and `YAGPC_RANGETRACE` the
   comparison itself, which is how the DCI#CON defect was finally cornered.
+
+### [2026-09-01] Target: [problems.md]
+- **CORRECTION, same session: "our ITEM entries to PASS do nothing" is WITHDRAWN.**
+  With the `ITEM 1 EXEC` retry removed, a clean run of
+  `@150:ITEM,1,EXEC;@430:ITEM,5,3,PLUS,1,EXEC` leaves the message line showing
+  only the standing `BCE STRG 1 NSP 1 00:00:03( 1)` and **no ILLEGAL ENTRY**.
+  So `ITEM 53 +1 EXEC` was ACCEPTED and PASS item entries work.  Every ILLEGAL
+  ENTRY seen today was the retry landing on PASS's own GPC MEMORY page, where
+  `ITEM 1` is not valid -- the experiment flaw I flagged, and it went on to
+  contaminate two conclusions before I removed it.  **Retries that are harmless
+  on one screen are input on another; do not leave them in a measurement.**
+- So the OPS refusal stands alone: ERR_TYPE 1, NO TARGETS IN RUN, with SELF's
+  bit mask demonstrably correct and the GRT target sets demonstrably
+  populated.  The gap between those two facts is the whole remaining question.
