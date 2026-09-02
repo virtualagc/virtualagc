@@ -247,3 +247,37 @@ is instrumented, not diagnosed.)
   and as GPC 2 (user's run), which rules out indexes 7 and 6 and every set
   containing 1 or 2 -- pointing at an index that names **GPC 4**.  Running as
   GPC 4 is the falsifiable test; `headless-gpcmem.sh` now takes `GPC_ID`.
+
+### [2026-09-01] Target: [problems.md]
+- **GPC 4 PREDICTION FALSIFIED.**  Run as GPC 4, `OPS 901 PRO` gives the same
+  `d609 0001` / `d6f1 0001` -- ERR_TYPE 1.  So GPC 1, 2 AND 4 all fail
+  identically, and the refusal does not depend on which GPC we are.  Since
+  `RUN_GPC` reduces to `SELF AND TARGET_GPC` and the GRT sets between them name
+  1, 2 and 4, SELF is not reaching the comparison at all: either
+  `CDMB_RSCS_MSK$(TFCMID:*)` is zero or **TFCMID itself is wrong**.
+- BLOCKED THERE, and the blocker is tooling: `TFCMID` has `addr=0` in every SDF
+  unit that names it, i.e. it is resolved at LINK time, and there is no
+  `PHASEnn.sym.json` for the PASS load anywhere on this machine.  Same for the
+  CDM compool's base, which is what reading `CDMB_RSCS_MSK` needs.  Getting a
+  link map for the tape's PASS build is the enabler for the next step.
+- FOUND ANYWAY, by content search: `DM6V_TR_TAB` is at **0x2c38**, 4 halfwords
+  per entry (entry 1 mask `81403F00` at 0x2c38, entry 8 `81C04000` at 0x2c54,
+  entry 19 `C0002000` at 0x2c80).  A watch or trace anchored on that address
+  would give DM6OPS's code address without a symbol map, which is the other way
+  in.
+- **MM AREA, and where it comes from.**  User: Don's GPC MEMORY reads
+  `PL 52 1 / GNC 53 1 / SM 54 1` from the moment the page appears, ours reads 0.
+  The items drive `CDJV_MM_AREA$(1..3:)` (`SSSRC/CD0001`, `VPARM=(NAME=...)`,
+  CDJRWD offset 110), and `SSSRC/AIBGPCLO:441` initialises it during PASS
+  start-up:
+
+        IF CDJV_MM_AREA$(1:) = 0 THEN
+           DO FOR TEMPORARY I = 1 TO 3;
+              IF FCMMGPT_STARTING_MM_ADD$(1;) = CDCV_PHASES$(1,I:) THEN
+                 CDJV_MM_AREA$(1 TO 3:) = I;
+
+  It matches where PASS was ACTUALLY loaded from against the per-area phase
+  table.  Ours stays 0, so that match fails -- either the tape puts PASS
+  somewhere `CDCV_PHASES` does not name, or `CDCV_PHASES` is not populated.
+  That is a concrete, checkable difference from Don's state and it is
+  tape-build shaped, like DEUCFLM and MMDIR before it.
