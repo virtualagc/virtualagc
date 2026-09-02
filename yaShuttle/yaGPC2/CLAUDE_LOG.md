@@ -507,3 +507,37 @@ on the wire at all.)
   image's compool does not sit where those maps say.  Until it is settled, a
   table generated from those maps cannot be applied to this image, and the
   check is what makes that safe rather than silent.
+
+### [2026-09-02] Target: problems.md
+- **SETTLED: the image's compool sits at 0x23f4 because THE TAPE PUTS IT THERE,
+  and the tape was built from a link whose map is not on this machine.**
+  Proven directly, not inferred:
+    * The stamped IPL phase table, read off the tape at FCMBOOT halfword 894
+      (`FCMPTAD1`), gives phase 2 as 31 load blocks; block 6 is 15826 halfwords
+      loading tape offset 2560 -> memory 0x00676.
+    * `CZ2B_GRT_GPC_SET`'s ten-halfword initialiser signature sits at tape
+      offset **10886** in phase 2, which through that block is memory
+      **0x026fc** -- compool base **0x023f4**, exactly the live address.
+    * The map's 0x14ac would put the signature at tape offset 6974.  It is not
+      there; 10886 is the only occurrence.
+  So there is no relocation, no SSL trickery and no emulator defect.  The map
+  simply does not describe the phase 2 on this tape.
+- **NO SURVIVING BUILD MATCHES.**  Every `PHASE02.sym.json` on the machine:
+      0x014ac  ipl-demo/phases            (the one mmbstamp was run against)
+      0x0231a  ipl-demo/dfg2/oursbuild
+      0x02320  ipl-demo/dfg2/build
+  none is 0x023f4.  `pass-ipl.mmv` is dated 2026-08-29; those libraries are
+  2026-08-22.  The tape's own build root is gone.
+- **THAT IS WHY THE OVERLAY CORRUPTED THE GRT.**  `mmbstamp` derived phase 3's
+  load-block destinations from the 0x14ac build, where 0x2662 is free; on this
+  tape 0x2662 is the middle of the live compool.  A table that is internally
+  consistent and correct for its own build still destroys PASS's state when
+  applied to a different one -- which is exactly what the new `--check-image`
+  guard now refuses to do.
+- **CONSTRUCTIVE, AND THE WAY FORWARD:** the tape carries AUTHORITATIVE
+  load-block descriptors for the IPL phases in its own stamped IPL phase table
+  -- phases 10, 2, 13 and 3, with main-memory address, prot/BSR/DSR flags and
+  length for each, read directly with no link map involved.  For phase 3 that
+  is precisely the data `#PFCMGPT` needs.  Deriving the table from the TAPE
+  rather than from a `.lib` sidesteps the missing build entirely, and is the
+  only route that cannot disagree with the volume it will be read from.
