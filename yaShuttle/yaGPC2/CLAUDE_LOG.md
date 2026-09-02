@@ -130,3 +130,43 @@ on the wire at all.)
   MMDIR, and the pattern is now worth stating: **a table the flight software
   only ever READS is a table the ground build was supposed to WRITE.**  Both of
   these declare a sentinel (`0` and `-1`) that means "never built".
+
+### [2026-09-02] Target: problems.md
+- **The link map DOES exist, and my "no `PHASEnn.sym.json` anywhere on this
+  machine" was wrong.**  It is at `~/ipl-demo/phases/PHASE02/PHASE02.sym.json`,
+  2.4 MB, 437 sections; `~/ipl-demo/phases/` is the con80build output root with
+  all the `PHASEnn.lib` files.  I searched the wrong roots and then treated the
+  result as a hard blocker for two sessions.  It also cross-checks the
+  measurement exactly: the map gives `#PFCMGPT` at 0x1ccf2 (1093 hw) and
+  `#PCDCPHA` at 0x300e4 (57 hw), which is what the running machine gave via a
+  fullword-indirect pointer and a content search, by wholly independent routes.
+- **Stamping the two tables WORKS at the level it was meant to.**  Generated
+  with `mmbstamp.generate('~/ipl-demo/phases', OI340600/CON80)` and injected
+  with `YAGPC_LOADBIN` at t=258 s, the ARC table lookup that used to fetch 0
+  now fetches the right address -- measured in the trace, `LH 4,@@X'0010'(5,1)`
+  leaves **R4 = 0x1bc0 = 7104**, phase 3's mass-memory address, and both
+  `ARC_MMU1POS.DBLOCK` and `ARC_MMU2POS.DBLOCK` get it.
+- **But the OPS transition still fails, and the failure has MOVED.**  The two
+  DIOs go out (`SVC X'014f'`, `SVC X'0066'`), the `WAIT` (`SVC X'0156'`)
+  returns, and `ARC_PP1_TSW$(1)` = **0x2100** with `ARC_PP2_TSW$(1)` = **0x2200**
+  -- both non-zero, so still BAD PRE-POSITION.  Where before the address was
+  zero, now the address is right and the I/O itself is refused.  **The
+  emulator logs no bus command at all at that instant**, so FCOS rejected the
+  request internally rather than issuing it.  That is the next thread, and it
+  is a different one: an I/O-path question, not a table question.
+- **Do NOT stamp `FCMG3DAT` at its `sym.json` address.**  Stamping all three
+  tables killed the machine 8.6 ms after injection -- `invalid instruction
+  0xc99c at 0x000a`, simulated 258.0086 s against an injection at 258.000 s.
+  The other two targets held their documented sentinels (1093 zeros, 57 FFFF),
+  but 0x0320e held `aaaa` fill, zeros, and **ten copies of `325e`** -- pointers
+  into its own region, i.e. a live structure.  `PHASE02.sym.json` reports
+  `residue: None` for it, but that map describes phase 2 alone and something
+  else owns that address in the fully composed image.  `mmbstamp.stamp()`
+  checks only `residue`, so **any stamping path needs to verify the target
+  actually holds its sentinel before overwriting**.  An unstamped table is
+  self-announcing (0, -1, FFFF all mean "never built"); a wrongly stamped one
+  is silent, which makes being wrong here quieter than being absent.
+- `YAGPC_LOADBIN` now takes several images
+  (`t:addr:path;t:addr:path;...`, up to 8).  One was not enough: the ground
+  build stamps the phase tables as a SET, and standing in for part of a set
+  only moves the failure.

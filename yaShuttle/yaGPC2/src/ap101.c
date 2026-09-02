@@ -188,44 +188,61 @@ static void ap101_timed_patch(AP101 *gpc) {
     }
 }
 
-/* YAGPC_LOADBIN="<timeUs>:<hexAddr>:<path>" loads a raw big-endian
- * halfword image into main storage at that simulated time, bypassing
- * store protection.  It stands in for a LOAD BLOCK the tape build should
- * have emitted but did not -- specifically PHASE02's FCMPSA, PASS's own
- * PSA csect, which mmbstamp drops as Z1 pool area.  Diagnostic only. */
+/* YAGPC_LOADBIN="<timeUs>:<hexAddr>:<path>[;<timeUs>:<hexAddr>:<path>...]"
+ * loads raw big-endian halfword images into main storage at those simulated
+ * times, bypassing store protection.  Each stands in for something the tape
+ * build should have written and did not.
+ *
+ * It began as one image -- PHASE02's FCMPSA, which mmbstamp drops as Z1 pool
+ * area -- and one was not enough: the ground Mass Memory Build stamps the
+ * phase tables as a SET (#PFCMGPT, #PCDCPHA, FCMG3DAT), and standing in for
+ * part of a set only moves the failure.  Diagnostic only. */
+#define LOADBIN_MAX 8
 static void ap101_timed_loadbin(AP101 *gpc) {
-    static int inited = 0, done = 0;
-    static double atUs = 0.0;
-    static uint32_t base = 0;
-    static uint8_t *buf = NULL;
-    static long len = 0;
+    static int inited = 0;
+    static int count = 0;
+    static double atUs[LOADBIN_MAX];
+    static uint32_t base[LOADBIN_MAX];
+    static uint8_t *buf[LOADBIN_MAX];
+    static long len[LOADBIN_MAX];
+    static int done[LOADBIN_MAX];
     if (!inited) {
         inited = 1;
         const char *e = getenv("YAGPC_LOADBIN");
-        if (e != NULL) {
+        while (e != NULL && *e != '\0' && count < LOADBIN_MAX) {
             char path[512];
             double t; unsigned a;
-            if (sscanf(e, "%lf:%x:%511s", &t, &a, path) == 3) {
+            /* %511[^;] so a path is not cut short at the separator. */
+            if (sscanf(e, "%lf:%x:%511[^;]", &t, &a, path) == 3) {
                 FILE *f = fopen(path, "rb");
                 if (f != NULL) {
-                    fseek(f, 0, SEEK_END); len = ftell(f); fseek(f, 0, SEEK_SET);
-                    buf = malloc((size_t)len);
-                    if (fread(buf, 1, (size_t)len, f) != (size_t)len) len = 0;
+                    fseek(f, 0, SEEK_END); len[count] = ftell(f);
+                    fseek(f, 0, SEEK_SET);
+                    buf[count] = malloc((size_t)len[count]);
+                    if (buf[count] == NULL ||
+                        fread(buf[count], 1, (size_t)len[count], f)
+                            != (size_t)len[count]) len[count] = 0;
                     fclose(f);
-                    atUs = t; base = a;
+                    atUs[count] = t; base[count] = a; done[count] = 0;
+                    count++;
                 } else {
                     fprintf(stderr, "loadbin: cannot open %s\n", path);
                 }
             }
+            const char *semi = strchr(e, ';');
+            e = (semi != NULL) ? semi + 1 : NULL;
         }
     }
-    if (done || buf == NULL || len == 0 || gpc->cpu.elapsedTimeUs < atUs) return;
-    done = 1;
-    for (long i = 0; i + 1 < len; i += 2)
-        mcm_set16(&gpc->cpu.mainStorage, base + (uint32_t)(i / 2),
-                  ((uint32_t)buf[i] << 8) | buf[i + 1], false);
-    fprintf(stderr, "loadbin: %ld halfwords at %05x, t=%.1f\n",
-            len / 2, (unsigned)base, gpc->cpu.elapsedTimeUs);
+    for (int i = 0; i < count; i++) {
+        if (done[i] || buf[i] == NULL || len[i] == 0) continue;
+        if (gpc->cpu.elapsedTimeUs < atUs[i]) continue;
+        done[i] = 1;
+        for (long k = 0; k + 1 < len[i]; k += 2)
+            mcm_set16(&gpc->cpu.mainStorage, base[i] + (uint32_t)(k / 2),
+                      ((uint32_t)buf[i][k] << 8) | buf[i][k + 1], false);
+        fprintf(stderr, "loadbin: %ld halfwords at %05x, t=%.1f\n",
+                len[i] / 2, (unsigned)base[i], gpc->cpu.elapsedTimeUs);
+    }
 }
 
 
