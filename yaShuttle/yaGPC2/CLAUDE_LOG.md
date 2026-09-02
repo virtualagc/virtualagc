@@ -281,3 +281,28 @@ is instrumented, not diagnosed.)
   somewhere `CDCV_PHASES` does not name, or `CDCV_PHASES` is not populated.
   That is a concrete, checkable difference from Don's state and it is
   tape-build shaped, like DEUCFLM and MMDIR before it.
+
+### [2026-09-01] Target: [problems.md]
+- **OUR ITEM ENTRIES TO PASS APPEAR TO DO NOTHING, and that is a separate,
+  more tractable defect than the OPS one.**  Two independent attempts, keyed
+  headless and each verified delivered: `ITEM 45 +9 / ITEM 46 +2 / ITEM 47`
+  left `CZ2V_MC_REQ` at 0000, and `ITEM 53 +1` produced no 0->1 transition
+  anywhere with the three-consecutive shape `CDJV_MM_AREA$(1..3)` would have.
+  `ITEM 1 EXEC` on GPCIPL's own menu DOES work -- it loads PASS -- so the
+  keystroke path is fine as far as GPCIPL.  Whether PASS receives item entries
+  at all is now the first thing to establish, and it is testable without any
+  link map: key an item with a visible field (MM AREA is ideal, it is on
+  screen) and read the DEU image.
+- A DIFFERENTIAL TECHNIQUE THAT WORKS WITHOUT SYMBOLS, worth keeping: run the
+  same scenario as two different GPCs and diff the snapshots.  GPC 1 vs GPC 4
+  at the same snapshot time gives 22 halfwords holding the GPC ID (1 vs 4) and
+  15 holding a per-GPC bit mask (0x0010 vs 0x0002, i.e. bits 12 and 15 -- the
+  `TARGET_GPC$(12 TO 16)` numbering).  So SELF's mask IS computed correctly,
+  which makes the ERR_TYPE 1 harder to explain, not easier: with RS_ALL
+  carrying that bit and the GRT sets containing it, `RUN_GPC` should be
+  non-zero.  Something between those two facts is still missing.
+- TWO WAYS IN FROM HERE, both real: (a) get a `PHASEnn.sym.json` link map for
+  the tape's PASS build, which resolves `TFCMID` and the CDM compool base
+  directly; or (b) anchor on `DM6V_TR_TAB` at 0x2c38 -- located by content
+  search, no symbols needed -- to find DM6OPS's code and `YAGPC_RANGETRACE` the
+  comparison itself, which is how the DCI#CON defect was finally cornered.
