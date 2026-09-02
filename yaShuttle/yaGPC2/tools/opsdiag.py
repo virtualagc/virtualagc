@@ -28,10 +28,17 @@ import argparse, io, struct, sys
 CZ2 = 0x23f4                     # #PCZ2COM's base in the loaded image
 GRT_TAB = 1209                   # CZ2V_GRT_TAB, 10 rows x 6 halfwords
 GRT_GPC_SET = 776                # CZ2B_GRT_GPC_SET, 10 halfwords
-CZ2B_CS, CZ2B_RS = 18, 19
-CZ2V_CURRENT_OPS = 8
 CZ2V_MC_REQ = 772
+CZ2V_REC_OPS, CZ2V_REC_XERR = 1176, 1178
 N_MC = 10                        # CZ2V_NBR_MEM_CONFIGS
+
+# CZ2V_GST is the PER-GPC structure and it sits at the compool's own base:
+# 5 copies (CZ2V_NBR_GPCS) of 20 halfwords.  Reading GPC 2's common set at the
+# offset of GPC 1's is a silent way to get a right-looking wrong answer, so the
+# members are named relative to a copy and the copy is selected by GPC number.
+GST_STRIDE = 20
+GST = {"CURRENT_OPS": 8, "BUS_MGMT_MC": 11, "PROG_OVLY": 14, "MF_OVLY": 15,
+       "MC": 16, "TB_ID": 17, "CS": 18, "RS": 19}
 
 MF_NAME = {1: "PL", 2: "GNC", 3: "SM"}
 MF_NUM = {v: k for k, v in MF_NAME.items()}
@@ -103,15 +110,47 @@ def show_grt(w, ops, mf, gpc):
     return tg
 
 
+def gst(w, gpc, member):
+    return w[CZ2 + GST_STRIDE * (gpc - 1) + GST[member]]
+
+
 def show_sets(w, gpc):
-    print("\nGPC SETS")
-    print("  CZ2B_CS (common set)     = %04x" % w[CZ2 + CZ2B_CS])
-    print("  CZ2B_RS (redundant set)  = %04x" % w[CZ2 + CZ2B_RS])
-    print("  CZ2V_MC_REQ              = %04x" % w[CZ2 + CZ2V_MC_REQ])
+    print("\nGPC SETS  (CZ2V_GST copy %d at 0x%04x)"
+          % (gpc, CZ2 + GST_STRIDE * (gpc - 1)))
+    print("  CZ2B_CS (common set)     = %04x" % gst(w, gpc, "CS"))
+    print("  CZ2B_RS (redundant set)  = %04x" % gst(w, gpc, "RS"))
     print("  CZ2V_CURRENT_OPS[1..3]   = %04x %04x %04x"
-          % tuple(w[CZ2 + CZ2V_CURRENT_OPS:CZ2 + CZ2V_CURRENT_OPS + 3]))
+          % tuple(w[CZ2 + GST_STRIDE * (gpc - 1) + GST["CURRENT_OPS"]:][:3]))
     print("  this GPC is %d, so CDMB_RSCS_MSK$(%d) = %04x"
           % (gpc, gpc, 0x10 >> (gpc - 1)))
+
+    print("\nMEMORY CONFIGURATION")
+    for g in range(1, 6):
+        mc = gst(w, g, "MC")
+        note = ""
+        if g == gpc:
+            note = ("   <- this GPC, and it has NO memory configuration"
+                    if mc == 0 else "   <- this GPC")
+        print("  CZ2V_MC$(%d) = %-3d  PROG_OVLY=%-3d MF_OVLY=%-3d TB_ID=%d%s"
+              % (g, mc, gst(w, g, "PROG_OVLY"), gst(w, g, "MF_OVLY"),
+                 gst(w, g, "TB_ID"), note))
+    print("  CZ2V_MC_REQ  = %04x" % w[CZ2 + CZ2V_MC_REQ])
+
+    print("\nRECONFIGURATION")
+    ops, xerr = w[CZ2 + CZ2V_REC_OPS], w[CZ2 + CZ2V_REC_XERR]
+    print("  CZ2V_REC_OPS  = %d   %s" % (ops,
+          "the reconfiguration was never requested" if ops == 0
+          else "an OPS %d reconfiguration was requested" % ops))
+    print("  CZ2V_REC_XERR = %d   %s" % (xerr,
+          "no error" if xerr == 0 else
+          "DM2APP logs this as d2ff %04x and takes its ERROR branch" % xerr))
+    if xerr == 1:
+        print("     ARCGPC sets 1 in two places -- ARC_OPS_ZERO when"
+              " CZ2V_MC$(self) is 0, and")
+        print("     ARC_OPS_TRANS when ARC_TRANS_COND = 2.  Which one fired"
+              " needs a store watch")
+        print("     (YAGPC_WATCHHW on this address), not inference: they mean"
+              " different things.")
 
 
 def show_log(w):

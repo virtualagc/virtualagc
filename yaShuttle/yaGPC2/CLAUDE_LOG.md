@@ -77,3 +77,56 @@ on the wire at all.)
   required, since MEDS already gets `idp1` right and only `idp1` is in play on
   this route.  A launcher that tells you to do something unnecessary is how a
   retired workaround gets treated as a live requirement.
+
+### [2026-09-02] Target: problems.md
+- **CORRECTION, and it must be applied: §8.29 attributes `CZ2V_REC_XERR = 1`
+  to `ARC_OPS_ZERO`'s `IF CZ2V_MC$(ARC_GPC_ID;)=0` test.  That is WRONG.**  A
+  store watch on the variable (`YAGPC_WATCHHW=288e`) gives the real sequence:
+      nia=454d5  XERR <- 5   DM6_PRE_POSIT_PARMS, "PRE POSITION REQUEST"
+      nia=416b2  XERR <- 1   ARC_OPS_TRANS, because ARC_TRANS_COND = 2
+      nia=416d4  XERR <- 1   + ARC_XERR_PAD (0)
+  `CZ2V_MC = 0` is still true and still blanks the `MC=` field, but it is not
+  what produced this error.  I also misread the ELSE-chain nesting: XERR=5 is a
+  fully handled entry reason ("PREPOSITION MM AND NOTIFY DM2_APP",
+  `ARCGPC.hal:350`), not "ARC entered without cause".
+- **ROOT CAUSE, and it is ONE cause for FOUR symptoms: the phase tables were
+  never stamped into the tape.**  Every link measured, none inferred:
+    1. `CDCV_PHASES` (`CDCPHA.hal`, `ARRAY(19,3) INITIAL(-1)`) is at **0x300e4**
+       and is **57 halfwords of FFFF** -- found by content search as the only
+       run of exactly 57 in the whole image.  Never stamped.
+    2. `FCMGPT`, the MM/GTG in-core phase table (`FCMGPT.hal`,
+       `INITIAL(16#(4#0))`), is reached through a fullword-indirect pointer at
+       0x0ace = `ccee0003`; with the sector expansion (DSV=3, high bit set)
+       that is **0x1ccee**, and the whole table is zeros.  `AIBGPCLO:895` fills
+       it from `CDCV_PHASES`, so it can only ever be zeros.
+    3. `AIBGPCLO:470` cannot match `FCMMGPT_STARTING_MM_ADD$(1;)` against
+       `CDCV_PHASES$(1,I:)`, so `CDJV_MM_AREA` stays 0 -- the `MM AREA` fields
+       that read 1/1/1 in Don's video and 0/0/0 in ours.
+    4. `ARC_GPC_RECONFIG`'s pre-position then loads phase 3's address and gets
+       **0**.  Straight off the trace, registers and all:
+           LH 6,X'0257'(7,2)   R6 = 3     phase 3, GRT row 9's MF overlay
+           SLL 6,2 / AHI 5,-6  R5 = 6     FCMMGPT element 1, STARTING_MM_ADD
+           LH 4,@@X'0010'(5,1) R4 = 0     <- the mass-memory address is ZERO
+           STH 4,X'0065'(1)               ARC_MMU1POS.DBLOCK = 0
+       Both `DIO`s go out to block 0 (`SVC X'014f'`, `SVC X'0066'`), the
+       `WAIT` (`SVC X'0156'`) returns, `ARC_PP1_TSW` and `ARC_PP2_TSW` are both
+       non-zero, and `ARC_TRANS_COND = 2` -- BAD PRE-POSITION, `ARCGPC:051900`,
+       matched instruction for instruction against the source.
+    5. `CZ2V_MC` never updates because `ARC_UPDATE_MC` runs only after a
+       successful overlay, so `STORE MC=` stays blank.
+- **So "PASS never tries to read the tape" needs qualifying.**  It DOES issue
+  two mass-memory POSITION commands here.  They carry block address 0, which is
+  why our MMU model logs nothing: the I/O fails before any tape access.  The
+  earlier statement was right about the observable and wrong about the cause.
+- **The fix has a name.**  `mmu2fcm --stamp-phase-tables` stamps exactly
+  `#PFCMGPT`, `#PCDCPHA` and `FCMG3DAT`, via `ap101Utils.mmbstamp.generate()`
+  and `.stamp()`.  Our tape was not built with it: `rebuild-tape.sh` only adds
+  the DEU critical formats to `pass-ipl.mmv`, and `pass-ipl.mmv` itself carries
+  unstamped tables.  `mmbstamp.stamp(image, sym, tables)` needs `sym`, the link
+  map -- the same `PHASEnn.sym.json` blocker as before, but now with a specific
+  purpose and two known runtime addresses (0x1ccee and 0x300e4) to check any
+  stamping against.
+- This is the third thing to come out "tape-build shaped", after DEUCFLM and
+  MMDIR, and the pattern is now worth stating: **a table the flight software
+  only ever READS is a table the ground build was supposed to WRITE.**  Both of
+  these declare a sentinel (`0` and `-1`) that means "never built".
