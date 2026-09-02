@@ -154,3 +154,34 @@ is instrumented, not diagnosed.)
   there -- so the ILLEGAL ENTRY on screen may be from a retry rather than from
   the OPS request.  Send the ITEM batch once, or space the OPS request far
   enough to tell them apart.
+
+### [2026-09-01] Target: [problems.md]
+- **ROOT CAUSE OF THE REFUSED OPS TRANSITION: `DM6V_ERR_TYPE = 1`, "NO TARGETS
+  IN RUN".**  Read out of PASS's own log, not inferred.
+- HOW.  `SSSRC/DMZLOG` is a 150-entry circular log of 2-halfword sets, filled
+  `FFFF`, with `DMZB_LOG_ALIGNMENT INITIAL(HEX'0C5C')` beside it as a findable
+  marker and `DMZV_SET_NBR` as the next slot.  In the snapshot the marker sits
+  at 0x38025 with `SET_NBR = 27`, and the array FOLLOWS it (declaration order
+  is not layout order) at base 0x38028, so entry 26 ends exactly where the
+  `FFFF` fill begins.  The two entries our request wrote:
+
+        entry 25  0x38058  d609 0001   LOG ON OPS/MODE  -> OPS 9, mode 1
+        entry 26  0x3805a  d6f1 0001   LOG TYPE/STATUS  -> D6F1 = "NON MODE
+                                       RECALL" (DM6OPS:352), ERR_TYPE = 1
+
+- WHAT IT MEANS: target GPCs exist for the transition but NONE IS IN RUN
+  (`RUN_GPC = RUN_GPC AND TARGET_GPC; IF RUN_GPC = HEX'0000' THEN
+  FMPT_UI_FAULT(CDLK_G1); DM6V_ERR_TYPE = 1`).  The request passes the
+  transition table -- ERR_TYPE 9 would say otherwise -- reaches the target
+  check and stops, which is why it never touches the tape.
+- SO EVERY EARLIER SUSPECT IS OFF THE PATH: the major function switch, the GPC
+  ID, the transition table, and the missing GNC9/PL9 tape overlays.  The tape
+  gap is real but downstream of this.
+- AND THE `ILLEGAL ENTRY` WAS SELF-INFLICTED: ERR_TYPE 1 raises a GPC CONFIG
+  FAULT message, not `FMPT_UI_OPERR`, so the ILLEGAL ENTRY on screen came from
+  the `ITEM 1 EXEC` retries landing on PASS's GPC MEMORY page.  The flaw I
+  flagged before reading the log, now confirmed.
+- NEXT: `CZ2B_GRT_GPC_SET` is indexed by memory configuration and is what
+  designates targets.  Find what populates it, and what makes a GPC "in RUN"
+  for that purpose -- our GPC is in RUN by the mode discrete, so the two
+  notions differ.
