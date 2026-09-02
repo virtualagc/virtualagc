@@ -170,3 +170,48 @@ on the wire at all.)
   (`t:addr:path;t:addr:path;...`, up to 8).  One was not enough: the ground
   build stamps the phase tables as a SET, and standing in for part of a set
   only moves the failure.
+
+### [2026-09-02] Target: problems.md
+- **TWO CORRECTIONS to numbers already written into §8.29, both from trusting
+  truncated tool output or an unchecked convention.**
+  1. "92 mass-memory trace lines, every one from the IPL at t=10.3 s" is wrong.
+     There are **91**, and they run through the SSL load to `READY -> 1` at
+     **t=105.35 s**.  I read a `tail` that the output filter had truncated and
+     took the visible last line as the last line.  The conclusion survives --
+     nothing after 300 s, so the pre-position I/O still never reached the
+     device -- but the supporting number did not.
+  2. **`nia=` in the WATCH/EAWATCH hooks is the NEXT instruction, not the one
+     that acted.**  Both call `psw_get_nia()` after the PC has advanced.
+     Proved on one pair: `RT 413b5 ZH X'0051'(1)` stores to 0x0b0f and
+     `WATCHHW addr=00b0f` reports `nia=413b7`.  So every address quoted from a
+     watch is one instruction late -- the `XERR <- 1` store is at **0x416b1**,
+     not 0x416b2, and `DM6OPS`'s search sits just before 0x455f6/0x455fc.  The
+     RANGETRACE `RT` lines are unaffected: those print the instruction being
+     executed.  `EAWATCH`'s own comment claims it says "which instruction
+     touched this address", which is a shade misleading and should say which
+     instruction FOLLOWS it.
+- **The I/O refusal is inside FCOS's generic I/O dispatcher, and FCOS resolves
+  the device correctly before refusing.**  Measured at the failing call:
+      R3 = 0x90b2      the DIO parameter list (ARC_MMU1POS)
+      LH 5,X'000c'(3)  R5 = 0x000b = 11 = MMUDEV  (INCL80/IOMACS.hal)
+      R1 = 0x0012 = 18 = BCE 18, which is MM1's bus in our own model
+      TB X'002f'(0),X'4000'  -> bit CLEAR, and the branch goes to the failure
+      L 5,X'8d88' ; STH 5,X'0000'(0)   status 0x2100 into ARC_PP1_TSW
+  So the device number and the bus are both right, and FCOS still declines
+  without issuing anything.  It fails a bit test on a table reached through the
+  parameter list's flags halfword.
+- The macro layout that makes this readable is `INCL80/MMUMACS.hal`'s `MMUPOS`
+  -- `DSVCNO, flags, DMFID, DDEV, DOPCODE, DPRIO, DWDCT, DLOC, DEVNT, DBLOCK`
+  -- with `INCL80/IOMACS.hal` giving `IOSVC=24`, `MMUDEV=11`, `MMUPRI=0` and
+  `MMUMACS` giving `MMPOSCD=8`.  Both `ARC_MMU1POS` and `ARC_MMU2POS` name the
+  SAME device; the unit is selected by the `HEX'3000'` bits of
+  `CZ2B_MM_MF$(ARC_MF)`, which ARC toggles between the two DIOs
+  (`ARC_B = 0x2000` for MMU1, `XOR 0x3000 = 0x1000` for MMU2).
+- **NOT ESTABLISHED, and worth flagging as such:** the same dispatcher writes
+  0x6000 for device 6 on other calls, so it is not yet proven that a non-zero
+  task status word means failure in general rather than "this is the completion
+  code".  ARC clears both TSWs to 0 before the DIOs and only tests after the
+  WAIT, so its own reading is self-consistent -- but what a SUCCESSFUL FCOS
+  mass-memory I/O leaves in the TSW has not been observed, because PASS has
+  never done one here.  That is the thing to measure next, and until it is
+  measured "0x2100 is an error code" is an assumption.
