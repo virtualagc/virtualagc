@@ -583,3 +583,36 @@ on the wire at all.)
   wrong answers today.  The tape's IPL table also covers phases 2, 10 and 13,
   giving about fifty known-correct (lib extent -> tape address) pairs; that is
   the input a real fix needs.
+
+### [2026-09-02] Target: problems.md
+- **WHY THE TRANSITION DOES NOT COMPLETE: the PROGRAM overlay (phase 8) fails,
+  and ARC records that failure as a zero.**  The chain is in `ARCGPC`:
+      ARC_MF_PG_PH$(ARC_K) = 0                  when ARC_OVL_ERR$(self) is ON
+      CZ2V_MF_OVLY   = ARC_MF_PG_PH$(1)         (ARCGPC:1005)
+      CZ2V_PROG_OVLY = ARC_MF_PG_PH$(2)         (ARCGPC:1006)
+  and `ARC_UPDATE_MC` sets `CZ2V_MC` only if BOTH match the GRT's phases.
+  Measured after the run: **MF_OVLY = 3** (phase 3 loaded fine) and
+  **PROG_OVLY = 0** (phase 8 errored), so `CZ2V_MC` stays 0, and
+  `CZ2V_CURRENT_OPS` stays [0,0,0] -- the display never leaves `0001`.
+- **WHY PHASE 8 FAILS: its load-block descriptors are wrong.**  Only **1 of
+  27** checksum against the tape.  Phase 3's came from the tape's own IPL
+  phase table; phase 8's are still `mmbstamp`'s, and the IPL table covers only
+  phases 10, 2, 13 and 3.
+- **AND THEY CANNOT BE RECOVERED THE WAY PHASE 3'S WERE.**  The checksum walk
+  assumes each block starts at the next 512-halfword boundary after the last,
+  which holds only while the lengths are mostly right: it self-corrects three
+  wrong ones out of ten (phase 3) and drifts hopelessly when twenty-six of
+  twenty-seven are wrong (phase 8), where it "recovered" a 110-block phase as
+  70.  `fix_phase_table_lengths.py` now REFUSES when the recovered `NUM_CONT`
+  moves too far, rather than writing a table that looks authoritative.
+- Two real fixes to that tool on the way here, both mine, both of which had
+  produced confident wrong output first: the blind length search now requires
+  a candidate to be **followed by C6C6 fill to the block boundary** (without it
+  some short prefix almost always sums to the next halfword, and phase 8's
+  lengths "corrected" to 8, 13 and 14); and that fill test computes the
+  boundary **relative to the phase base**, not absolutely -- phase 3 starts at
+  volume halfword 158088, which is 392 into a block.  That is the third
+  absolute-vs-relative alignment error of the session.
+- Validation that matters: with both fixed, phase 3 reproduces the tape's own
+  IPL table exactly -- 6966, 160, 5654 -- with zero blocks unconfirmed.  The
+  oracle and the recovery agree.

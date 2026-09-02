@@ -53,7 +53,30 @@ def checksums(w, s, L):
             and (sum(w[s:s + L - 2]) & 0xffff) == w[s + L - 1])
 
 
-def true_length(w, s, want, span=12000):
+def followed_by_fill(w, s, L, base):
+    """A real load block is followed by C6C6 fill to the next 512 boundary.
+
+    Without this the blind search is worthless whenever the generated length
+    is far wrong: some short prefix almost always sums to whatever halfword
+    follows it, so the first verifying length is spurious, the walk drifts,
+    and every later block is nonsense.  Measured on OI340600 phase 8, the
+    unguarded search "corrected" 19 of 27 lengths to values like 8, 13 and 14
+    and cut NUM_CONT from 110 to 57.  A block that is not followed by fill has
+    not been found; it has been guessed."""
+    # Boundaries are RELATIVE to the phase's own base.  A phase does not
+    # start on a 512-halfword boundary of the volume -- phase 3 begins at
+    # 158088, which is 392 into a block -- so computing them absolutely
+    # checks the wrong range.  Third time this session that an absolute/
+    # relative alignment mix-up produced confident wrong output.
+    end = s + L
+    rel = end - base
+    bnd = base + ((rel + HW_PER_BLOCK - 1) // HW_PER_BLOCK) * HW_PER_BLOCK
+    if end == bnd:                     # ends exactly on the boundary
+        return True
+    return all(w[i] == 0xc6c6 for i in range(end, min(bnd, len(w))))
+
+
+def true_length(w, s, want, base, span=12000):
     """The length the tape agrees with at s, preferring the generated one.
 
     MIN_LB_HW guards only the BLIND SEARCH.  The generated length is checked
@@ -65,10 +88,11 @@ def true_length(w, s, want, span=12000):
     than the window."""
     if checksums(w, s, want):
         return want
-    for L in range(MIN_LB_HW, min(span, len(w) - s)):
-        if checksums(w, s, L):
-            return L
-    return None
+    cands = [L for L in range(MIN_LB_HW, min(span, len(w) - s))
+             if checksums(w, s, L) and followed_by_fill(w, s, L, base)]
+    if len(cands) == 1:
+        return cands[0]
+    return None                        # none, or ambiguous: do not guess
 
 
 # CZ2COMMO's own initialiser for CZ2B_GRT_GPC_SET: ten halfwords, distinctive
@@ -165,7 +189,7 @@ def main():
             k = disp + 3 * i
             addr, flags, want = G[k], G[k + 1], G[k + 2]
             pos = a.tape_offset + rel
-            got = true_length(V, pos, want)
+            got = true_length(V, pos, want, a.tape_offset)
             if got is None:
                 print("    %2d: addr=0x%04x len=%5d  NO LENGTH VERIFIES at "
                       "tape %d -- tape content problem, left alone"
@@ -192,6 +216,19 @@ def main():
                    // HW_PER_BLOCK) * HW_PER_BLOCK
         span = rel // HW_PER_BLOCK
         flag = ncont & 0x8000                  # multi-track marker
+        # A recovery that moves NUM_CONT far is not a recovery.  The walk
+        # assumes each block starts at the next 512-halfword boundary after
+        # the previous one, which only holds while the lengths are mostly
+        # right: it self-corrects a few wrong ones (phase 3, three of ten)
+        # and drifts hopelessly when most are wrong (phase 8, twenty-six of
+        # twenty-seven, where it "recovered" a 110-block phase as 70).
+        # Refuse rather than emit a table that looks authoritative.
+        if abs((ncont & 0x7fff) - span) > max(2, (ncont & 0x7fff) // 8):
+            print("    ncont %d -> %d is too large a move: the walk has "
+                  "drifted, not recovered." % (ncont & 0x7fff, span))
+            print("    phase %d NOT corrected -- its lengths need a source "
+                  "this tool does not have." % p)
+            sys.exit(3)
         if (ncont & 0x7fff) != span:
             print("    ncont: %d -> %d  (blocks the phase actually spans)"
                   % (ncont & 0x7fff, span))
