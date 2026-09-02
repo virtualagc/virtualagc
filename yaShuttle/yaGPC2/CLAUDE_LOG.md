@@ -616,3 +616,35 @@ on the wire at all.)
 - Validation that matters: with both fixed, phase 3 reproduces the tape's own
   IPL table exactly -- 6966, 160, 5654 -- with zero blocks unconfirmed.  The
   oracle and the recovery agree.
+
+### [2026-09-02] Target: problems.md
+- **THE DASS DUMPS ARE THE RIGHT DATA SOURCE, and `mafgen/` supplies both
+  halves.**  Eight `.fcm` memory images (flat, loaded at address 0 --
+  `ageharness.c:load_fcm` does `membus_load16(ram, 0, ...)`) plus
+  `augmented-*.json` CSECT maps of `{start, end, type, contents}`.  They map
+  onto the GRT's memory configurations: SSW=OPS 0, G16=MC1, G2=MC2, G3=MC3,
+  S2=MC4, P9=MC6, G8=MC8, **G9=MC9**, so G9 is a real GPC image in the exact
+  configuration our OPS 901 targets.  Only MC5 (SM OPS 4, program overlay
+  phase 16) has no dump -- and per the user that configuration does not exist
+  for these flights.
+- OI340700 source = the OI340600 tree with `OI340700/`'s files copied over it
+  (its README says so), so the build cards come from OI340600 and approach #2
+  is not blocked for want of a CON80.  I had been about to report otherwise.
+- **PHASE 8'S REAL BLOCK STRUCTURE IS RECOVERABLE FROM THE TAPE, and mmbstamp's
+  is wrong in a specific way: it MERGES tiny blocks that are really separate.**
+  The tape begins phase 8 with 4-halfword load blocks carrying one ZCON each:
+      rel   0:  80f8 0e20 0000 8f18     0x80f8 + 0x0e20 = 0x8f18
+      rel 512:  81f8 0e20 0000 9018     0x81f8 + 0x0e20 = 0x9018
+  each on its own 512-halfword tape block.  I dismissed these as noise twice
+  before checking the arithmetic.  A walk using the checksum plus the
+  "followed by C6C6 fill to the boundary" rule recovers **35 blocks with ZERO
+  ambiguity** -- every one had exactly one verifying length -- against
+  `mmbstamp`'s 27.
+- **IT STALLS AT TAPE BLOCK 87 OF 110.**  From rel 44544 there are 11,776
+  halfwords, 11,763 of them non-fill, and NO length checksums there under any
+  phase extent, aligned or packed.  So the last ~23 blocks are not in the
+  `[content][0][checksum]` form the first 35 are.  Unresolved.
+- Naive grouping does not substitute: the 440 CSECTs unique to G9 (666 minus
+  the 176 shared with G16/G2/G3/G8, which are phase 3's MF overlay) form 80
+  contiguous runs, not 35 blocks, and only 5 verify.  The MMB's grouping is
+  its own rule and the tape is the only witness to it.
