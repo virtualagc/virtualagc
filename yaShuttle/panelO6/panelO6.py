@@ -73,8 +73,6 @@ C_TB_GRAY = "#a3a39c"
 C_TB_LEGEND = "#f2f0e6"
 C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
-C_SCREW = "#b7b4a8"
-C_SCREW_X = "#6e6b60"
 C_LOCK = "#c4c1b5"
 
 REF_W = 820
@@ -263,11 +261,12 @@ class PanelO6:
                             font=self._font(size, bold), anchor=anchor)
 
     def _vtext(self, x, y, text, size=SETTING_SIZE, fill=C_INK):
-        """Stacked caption.  Leading is from the font's linespace plus a
-        gutter: 1.2 em was tight enough that bold caps overlapped."""
+        """Stacked caption.  Ascent plus a 2 px gutter — about 20% of the
+        previous extra leading, so the letters stay separate without a
+        large hole between them."""
         font = self._font(size)
-        linespace = self._tkfont(size).metrics("linespace")
-        fh = linespace + max(2, linespace // 3)
+        ascent = int(self._tkfont(size).metrics("ascent"))
+        fh = ascent + 2
         chars = [ch for ch in text if not ch.isspace()]
         n = len(chars) or 1
         total = n * fh
@@ -315,15 +314,6 @@ class PanelO6:
                            start=180, extent=180, style="arc",
                            outline=outline, width=ow)
 
-    def _screw(self, x, y, r=7):
-        self._oval(x - r, y - r, x + r, y + r,
-                   fill=C_SCREW, outline=C_SCREW_X, width=max(1, int(self.s)))
-        ir = r * 0.42
-        w = max(1, int(1.6 * self.s))
-        # Phillips: two diagonals, not a star.
-        self._line(x - ir, y - ir, x + ir, y + ir, fill=C_SCREW_X, width=w)
-        self._line(x - ir, y + ir, x + ir, y - ir, fill=C_SCREW_X, width=w)
-
     def _barberpole(self, x1, y1, x2, y2):
         px1, py1 = self.xy(x1, y1)
         px2, py2 = self.xy(x2, y2)
@@ -351,18 +341,83 @@ class PanelO6:
 
     # ---- the panel ------------------------------------------------------
 
+    def _layout(self):
+        """Even vertical rhythm.  Title-to-numbers is larger than the
+        other gaps so a centered group name does not land on GPC 3."""
+        g = 16          # divider / group-title leading
+        tn = 24         # group title -> 1 2 3 4 5
+        ns = 24         # numbers -> ON/BACKUP/RUN
+        cap = 16        # setting caption -> control (and control -> caption)
+        L = {}
+        y = 46
+        L["title"] = y
+        y += 16
+        L["title_line"] = y
+        y += g
+
+        L["power_title"] = y
+        y += tn
+        L["power_nums"] = y
+        y += ns
+        L["power_on"] = y
+        y += cap
+        L["power_sw"] = y
+        y += 124 + cap
+        L["power_off"] = y
+        y += g + 6
+
+        L["out_line"] = y
+        y += g
+        L["out_title"] = y
+        y += g
+        L["out_tb"] = y
+        y += 34 + 12
+        L["out_nums"] = y
+        y += ns
+        L["out_backup"] = y
+        y += cap
+        L["out_sw"] = y
+        y += 136 + cap
+        L["out_term"] = y
+        y += g + 6
+
+        L["ipl_line"] = y
+        y += g
+        L["ipl_title"] = y
+        y += g
+        L["ipl_btn"] = y
+        y += 50 + g
+
+        L["mode_tb"] = y
+        y += 34 + 12
+        L["mode_line"] = y
+        y += g
+        L["mode_title"] = y
+        y += tn
+        L["mode_nums"] = y
+        y += ns
+        L["mode_run"] = y
+        y += cap
+        L["mode_sw"] = y
+        y += 116 + cap
+        L["mode_halt"] = y
+        return L
+
     def redraw(self):
         self._scale()
         self.cv.delete("all")
         self._hits = []
         self._bp_cache = {}
+        L = self._layout()
+        self.L = L
 
         # --- L-shaped outline, matching the SCOM figure ---
         # Main rectangle, plus a right-hand tab holding IPL SOURCE.
         mx0, my0 = 36, 28
         mx1, my1 = 668, 972
         ex1 = 790
-        ey0, ey1 = 392, 708
+        ey0 = L["out_backup"] - 10
+        ey1 = L["mode_line"] + 4
 
         outline = [
             (mx0, my0), (mx1, my0), (mx1, ey0), (ex1, ey0),
@@ -385,17 +440,14 @@ class PanelO6:
         self.col = [inner_l + (inner_r - inner_l) * (i + 0.5) / N_GPC
                     for i in range(N_GPC)]
         self.col_w = (inner_r - inner_l) / N_GPC
+        # Side captions sit the same distance from the control as on the
+        # right: 14 px past the guard/hex edge, not against the panel rail.
+        self.side_l_out = self.col[0] - 29 - 14
+        self.side_r_out = self.col[-1] + 29 + 14
+        self.side_l_mode = self.col[0] - 38 - 14
+        self.side_r_mode = self.col[-1] + 38 + 14
 
-        # Screws, placed as in the SCOM drawing.
-        for sx, sy in (
-            (56, 48), (648, 48),
-            (56, 952), (648, 952),
-            (318, 318), (318, 648),
-            (706, 414), (772, 690),
-        ):
-            self._screw(sx, sy, r=8)
-
-        self._draw_title(mx0, mx1)
+        self._draw_title()
         self._draw_power()
         self._draw_output_talkbacks()
         self._draw_output_switches()
@@ -404,105 +456,118 @@ class PanelO6:
         self._draw_mode_switches()
         self._draw_ipl_source(mx1, ex1, ey0, ey1)
 
-    def _gpc_numbers(self, y, center_label=None):
-        """GPC 1..5 above a row.  The SCOM puts the group name where '3' sits."""
+    def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
-            if center_label and i == 2:
-                self._text(cx, y, center_label, size=10)
-            else:
-                self._text(cx, y, str(i + 1), size=12)
+            self._text(cx, y, str(i + 1), size=12)
 
-    def _draw_title(self, mx0, mx1):
-        self._text(347, 48, "GENERAL PURPOSE COMPUTER", size=13)
-        self._line(70, 62, 624, 62, fill=C_INK, width=max(1, int(self.s)))
+    def _draw_title(self):
+        L = self.L
+        self._text(347, L["title"], "GENERAL PURPOSE COMPUTER", size=13)
+        self._line(70, L["title_line"], 624, L["title_line"],
+                   fill=C_INK, width=max(1, int(self.s)))
 
     def _draw_power(self):
-        self._gpc_numbers(78, center_label="POWER")
-        self._text(347, 96, "ON", size=SETTING_SIZE)
+        L = self.L
+        self._text(347, L["power_title"], "POWER", size=10)
+        self._gpc_numbers(L["power_nums"])
+        self._text(347, L["power_on"], "ON", size=SETTING_SIZE)
 
         guard_w, guard_h = 58, 124
+        y1 = L["power_sw"]
         for i, cx in enumerate(self.col):
-            x1, y1 = cx - guard_w / 2, 110
-            x2, y2 = cx + guard_w / 2, 110 + guard_h
+            x1, x2 = cx - guard_w / 2, cx + guard_w / 2
+            y2 = y1 + guard_h
             pos = 0 if self.power[i] == "ON" else 1
             self._guarded_toggle(x1, y1, x2, y2, pos, npos=2)
             self._hit("power", i, x1, y1, x2, y2)
 
-        self._text(347, 246, "OFF", size=SETTING_SIZE)
+        self._text(347, L["power_off"], "OFF", size=SETTING_SIZE)
 
     def _draw_output_talkbacks(self):
-        self._line(70, 270, 624, 270, fill=C_INK_DIM, width=1)
-        self._text(347, 286, "OUTPUT", size=10)
+        L = self.L
+        self._line(70, L["out_line"], 624, L["out_line"],
+                   fill=C_INK_DIM, width=1)
+        self._text(347, L["out_title"], "OUTPUT", size=10)
         win_w, win_h = 50, 34
+        y1 = L["out_tb"]
         for i, cx in enumerate(self.col):
-            x1, y1 = cx - win_w / 2, 300
-            x2, y2 = cx + win_w / 2, 300 + win_h
-            self._talkback(x1, y1, x2, y2, self.output_tb(i))
-            self._text(cx, 346, str(i + 1), size=11)
+            x1, x2 = cx - win_w / 2, cx + win_w / 2
+            self._talkback(x1, y1, x2, y1 + win_h, self.output_tb(i))
+            self._text(cx, L["out_nums"], str(i + 1), size=11)
 
     def _draw_output_switches(self):
-        self._text(347, 368, "BACKUP", size=SETTING_SIZE)
-        self._vtext(56, 444, "NORMAL")
-        self._vtext(618, 444, "NORMAL")
+        L = self.L
+        self._text(347, L["out_backup"], "BACKUP", size=SETTING_SIZE)
+        cy = L["out_sw"] + 68
+        self._vtext(self.side_l_out, cy, "NORMAL")
+        self._vtext(self.side_r_out, cy, "NORMAL")
 
         guard_w, guard_h = 58, 136
+        y1 = L["out_sw"]
         for i, cx in enumerate(self.col):
-            x1, y1 = cx - guard_w / 2, 378
-            x2, y2 = cx + guard_w / 2, 378 + guard_h
+            x1, x2 = cx - guard_w / 2, cx + guard_w / 2
+            y2 = y1 + guard_h
             pos = OUTPUT_POS.index(self.output[i])
             self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
             self._hit("output", i, x1, y1, x2, y2)
 
-        self._text(347, 526, "TERMINATE", size=SETTING_SIZE)
+        self._text(347, L["out_term"], "TERMINATE", size=SETTING_SIZE)
 
     def _draw_ipl(self):
-        self._line(70, 542, 624, 542, fill=C_INK_DIM, width=1)
-        self._text(347, 558, "INITIAL PROGRAM LOAD", size=10)
+        L = self.L
+        self._line(70, L["ipl_line"], 624, L["ipl_line"],
+                   fill=C_INK_DIM, width=1)
+        self._text(347, L["ipl_title"], "INITIAL PROGRAM LOAD", size=10)
         btn = 50
+        y1 = L["ipl_btn"]
         for i, cx in enumerate(self.col):
-            x1, y1 = cx - btn / 2, 572
-            x2, y2 = cx + btn / 2, 572 + btn
-            self._pushbutton(x1, y1, x2, y2, str(i + 1), down=self.ipl[i])
-            self._hit("ipl", i, x1, y1, x2, y2)
+            x1, x2 = cx - btn / 2, cx + btn / 2
+            self._pushbutton(x1, y1, x2, y1 + btn, str(i + 1), down=self.ipl[i])
+            self._hit("ipl", i, x1, y1, x2, y1 + btn)
 
     def _draw_mode_talkbacks(self):
+        L = self.L
         win_w, win_h = 50, 34
+        y1 = L["mode_tb"]
         for i, cx in enumerate(self.col):
-            x1, y1 = cx - win_w / 2, 636
-            x2, y2 = cx + win_w / 2, 636 + win_h
-            self._talkback(x1, y1, x2, y2, self.mode_tb(i),
+            x1, x2 = cx - win_w / 2, cx + win_w / 2
+            self._talkback(x1, y1, x2, y1 + win_h, self.mode_tb(i),
                            legend_always="RUN")
 
     def _draw_mode_switches(self):
-        self._line(70, 684, 624, 684, fill=C_INK_DIM, width=1)
-        self._gpc_numbers(702, center_label="MODE")
-        self._text(347, 720, "RUN", size=SETTING_SIZE)
-        self._vtext(56, 838, "STBY")
-        self._vtext(618, 838, "STBY")
+        L = self.L
+        self._line(70, L["mode_line"], 624, L["mode_line"],
+                   fill=C_INK_DIM, width=1)
+        self._text(347, L["mode_title"], "MODE", size=10)
+        self._gpc_numbers(L["mode_nums"])
+        self._text(347, L["mode_run"], "RUN", size=SETTING_SIZE)
 
         rx, ry = 38, 58
+        cy = L["mode_sw"] + ry
+        self._vtext(self.side_l_mode, cy, "STBY")
+        self._vtext(self.side_r_mode, cy, "STBY")
         for i, cx in enumerate(self.col):
-            cy = 838
             pos = MODE_POS.index(self.mode[i])
             self._hex_toggle(cx, cy, rx, ry, pos, npos=3)
             self._hit("mode", i, cx - rx, cy - ry, cx + rx, cy + ry)
 
-        self._text(347, 912, "HALT", size=SETTING_SIZE)
+        self._text(347, L["mode_halt"], "HALT", size=SETTING_SIZE)
 
     def _draw_ipl_source(self, mx1, ex1, ey0, ey1):
-        cx = (mx1 + ex1) / 2.0 + 6
-        self._text(cx, ey0 + 28, "IPL SOURCE", size=9)
-        self._text(cx, ey0 + 48, "MMU 1", size=SETTING_SIZE)
+        cx = (mx1 + ex1) / 2.0
+        self._text(cx, ey0 + 16, "IPL", size=9)
+        self._text(cx, ey0 + 32, "SOURCE", size=9)
+        self._text(cx, ey0 + 56, "MMU 1", size=SETTING_SIZE)
 
         gw, gh = 56, 140
-        x1, y1 = cx - gw / 2, ey0 + 60
-        x2, y2 = cx + gw / 2, ey0 + 60 + gh
+        x1, y1 = cx - gw / 2, ey0 + 74
+        x2, y2 = cx + gw / 2, ey0 + 74 + gh
         pos = IPL_SOURCE_POS.index(self.ipl_source)
         self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
         self._hit("ipl_source", None, x1, y1, x2, y2)
 
         self._text(cx, y2 + 16, "MMU 2", size=SETTING_SIZE)
-        self._vtext(ex1 - 12, (y1 + y2) / 2.0, "OFF")
+        self._vtext(x2 + 14, (y1 + y2) / 2.0, "OFF")
 
     # ---- control bodies -------------------------------------------------
 
