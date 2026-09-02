@@ -581,6 +581,41 @@ static void cpu_ea_trace(CPU *cpu, uint32_t ea) {
                     (unsigned)membus_get32(cpu->ram, ea), cpu->elapsedTimeUs);
 }
 
+/* YAGPC_EAWATCH=lo-hi[,max[,afterSec]] (halfword addresses in hex, max lines
+ * decimal, default 2000; afterSec in EMULATED seconds, default 0): every
+ * operand access whose effective address lands in the range, with the NIA of
+ * the instruction that made it.
+ *
+ * This is EATRACE run backwards.  EATRACE answers "where did THIS instruction
+ * read?", which needs the instruction's address to start from; EAWATCH
+ * answers "WHICH instruction read this table?", which is the question you
+ * have when a data structure was located by searching memory for its contents
+ * and no link map exists to say what code owns it.  Finding DM6OPS from
+ * DM6V_TR_TAB is exactly that: the table is identifiable by its initial
+ * values, the code around it is not identifiable by anything. */
+static void cpu_ea_watch(CPU *cpu, uint32_t ea) {
+    static int inited = 0;
+    static uint32_t lo = 1, hi = 0;
+    static long left = 0;
+    static double afterUs = 0.0;
+    if (!inited) {
+        inited = 1;
+        const char *spec = getenv("YAGPC_EAWATCH");
+        if (spec != NULL) {
+            unsigned a = 0, b = 0; long m = 2000; double t = 0.0;
+            if (sscanf(spec, "%x-%x,%ld,%lf", &a, &b, &m, &t) >= 2) {
+                lo = a; hi = b; left = m; afterUs = t * 1.0e6;
+            }
+        }
+    }
+    if (left <= 0 || ea < lo || ea > hi) return;
+    if (cpu->elapsedTimeUs < afterUs) return;
+    left--;
+    fprintf(stderr, "EAWATCH nia=%05x ea=%05x mem16=%04x t=%.1f\n",
+            (unsigned)psw_get_nia(&cpu->psw), (unsigned)ea,
+            (unsigned)membus_get16(cpu->ram, ea), cpu->elapsedTimeUs);
+}
+
 uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
     uint32_t ea;
 
@@ -1005,6 +1040,7 @@ uint32_t cpu_g_eaf(CPU *cpu, DInstr *v, int extraOffset) {
      * YAGPC_WATCHHW, which only sees stores, so "what did the wait
      * actually see" needs its own hook. */
     cpu_ea_trace(cpu, ea);
+    cpu_ea_watch(cpu, ea);
     {
         static int inited = 0;
         static long watch = -1;
@@ -1024,6 +1060,7 @@ uint32_t cpu_g_eaf(CPU *cpu, DInstr *v, int extraOffset) {
 uint32_t cpu_g_eah(CPU *cpu, DInstr *v) {
     uint32_t ea = cpu_g_ea(cpu, v);
     cpu_ea_trace(cpu, ea);
+    cpu_ea_watch(cpu, ea);
     return membus_get16(cpu->ram, ea);
 }
 

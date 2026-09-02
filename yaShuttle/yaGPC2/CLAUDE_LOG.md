@@ -320,3 +320,50 @@ is instrumented, not diagnosed.)
 - So the OPS refusal stands alone: ERR_TYPE 1, NO TARGETS IN RUN, with SELF's
   bit mask demonstrably correct and the GRT target sets demonstrably
   populated.  The gap between those two facts is the whole remaining question.
+
+### [2026-09-02] Target: problems.md
+- **The OPS refusal is SOLVED, and it was never about the tape.**  `DM6OPS`
+  resolves an OPS request through the GRT keyed on *the requesting major
+  function*, and the GPC set that comes back is what `TARGET_GPC` is built
+  from.  Read out of the loaded image (`CZ2V_GRT_TAB` at 0x28ad,
+  `CZ2B_GRT_GPC_SET` at 0x26fc, compool `#PCZ2COM` at 0x23f4):
+      MF 1 PL  OPS 9 -> GRT index 6, set 4400, TARGET_GPC=0008 = GPC 2 ALONE
+      MF 2 GNC OPS 9 -> GRT index 9, set f000, TARGET_GPC=001e = GPC 1..4
+  We ran as GPC 1 with the major function at PL, so `TARGET_GPC` was GPC 2,
+  SELF's bit 0x0010 was not in it, `RUN_GPC = ... AND TARGET_GPC` was zero and
+  `DM6_TARGET_RUN_GPC` set `DM6V_ERR_TYPE = 1`, "NO TARGETS IN RUN".  There is
+  no contradiction left: SELF's mask WAS right and the GRT sets WERE
+  populated, and both facts were beside the point because the request was
+  aimed at a different GPC.
+- **Why the major function was stuck at PL.**  `DeuModel`'s `majorFunc` was
+  declared, used to build every poll header, and *never assigned from
+  anywhere* -- so the in-process DEU reported PL forever and every headless
+  OPS request was a PL request.  `YAGPC_DEUMF=<0..3>` now sets it.
+- **This explains three earlier dead ends at once.**  The GPC-4 prediction
+  failed because 0x0002 is not in 0x0008 either.  GPC 1, 2 and 4 "all giving
+  ERR_TYPE 1" looked like a uniform result -- and by the standing rule that
+  should have pointed at the harness, which is exactly where the defect was.
+  And Don's screens showing GPC **2** throughout were the clue: at PL, GPC 2
+  is the only GPC an OPS 9 request targets.
+- `tools/opsdiag.py` now reads the whole chain out of a snapshot -- GRT rows
+  with their targets, the GPC sets, and `DMZ_LOG`'s own verdict -- so this is
+  re-derivable in one command instead of by hand.
+- Note for the record: the tape image's GRT row 5 has `MC=5` where OI340600's
+  `CZ2COMMO` source has `MC=0`.  Row 7 (SM OPS 9, set 8400, GPC 1) has MC=0 in
+  both and so can never match its own index.  Not chased; not in the way.
+- `YAGPC_EAWATCH=lo-hi[,max[,afterSec]]` added to `cpu.c`: EATRACE run
+  backwards -- which instruction touched THIS address, rather than what
+  address did THIS instruction touch.  It is the tool for a structure located
+  by searching memory for its contents when no link map exists to say what
+  code owns it.
+- `headless-gpcmem.sh` teardown killed *every* `discretePanel` on the machine,
+  which takes out a parallel run's panel and any interactive one a person has
+  open.  It now kills only the one it started, so runs can go in parallel on
+  different port bases.
+
+### [2026-09-02] Target: problems-yaHALMAT2 (issue DB)
+- MEDS2: the MAJOR FUNCTION switch is now readable and directly selectable --
+  the position shows in the window title (`MEDS2 MDU / <lru> - MF GNC`), set
+  at startup as well as on change, and Shift+1..4 pick PL/GNC/SM/ILLEGAL
+  directly.  Shift+M still cycles.  Cycling blind through four positions with
+  no feedback was how the PL-vs-GNC defect above stayed hidden.

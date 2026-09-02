@@ -94,6 +94,26 @@ DeuModel *deumodel_create(int busID) {
      * failure look like "nothing is happening" rather than a skipped step. */
     if (getenv("YAGPC_DEUPRELOADED")) d->ipled = true;
     d->iplRunning = false;
+    /* YAGPC_DEUMF=<0..3>: the MAJOR FUNCTION switch position this unit
+     * reports in every poll header -- 0 PL, 1 GNC, 2 SM, 3 ILLEGAL.
+     *
+     * It was never settable, so the model reported PL forever, and PL is not
+     * a neutral default: DM6OPS resolves an OPS request through the GRT with
+     * the REQUESTING major function as part of the key, and MF PL OPS 9 maps
+     * to GRT index 6, whose GPC set is HEX'4400' -- GPC 2 alone.  Running as
+     * GPC 1, every OPS 901 PRO therefore failed DM6_TARGET_RUN_GPC with
+     * ERR_TYPE 1, "NO TARGETS IN RUN", which reads like a missing overlay and
+     * is not.  MF GNC OPS 9 is GRT index 9, set HEX'F000' -- GPCs 1 to 4.
+     * See CZ2COMMO's CZ2V_GRT_TAB and CZ2B_GRT_GPC_SET. */
+    {
+        const char *mf = getenv("YAGPC_DEUMF");
+        if (mf != NULL) {
+            d->majorFunc = (int)strtol(mf, NULL, 0) & 3;
+            fprintf(stderr, "deu: bus %d major function %d (%s)\n", busID,
+                    d->majorFunc,
+                    (const char *[]){"PL","GNC","SM","ILLEGAL"}[d->majorFunc]);
+        }
+    }
     return d;
 }
 
