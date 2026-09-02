@@ -46,3 +46,111 @@ the DEU distinguishes the two coordinate conventions is unknown; the earlier
 before it, and the "±512 is a legality rule" after it were all withdrawn, the
 last of them by `OI301700/SSSRC/XD0001.hal`.  And the clock-only GPCIPL failure
 is instrumented, not diagnosed.)
+
+### [2026-09-01] Target: [problems.md]
+- CONFIRMED by the user: `ADJ.vecY` = **0.50** is right.  Drawn lines on
+  `GPC/BUS STATUS` look correct and no other screen regressed.  The number came
+  from their measurement -- 8 px between one row's bottom strokes and the next
+  row's top strokes at 1024x1024, so the ink fills 0.70 of a row and the gap
+  0.30, and centring a rule in that gap is 4 px = 0.15 row off the old 0.65.
+  My own attempt at 0 was wrong by more than twice the whole gap: the deck
+  (CD0060, `VCORDA=(28,95,815,95)`) gives a ROW offset, and converting it to a
+  SCREEN offset needs where glyph ink sits inside its cell, which the deck does
+  not say.
+
+### [2026-09-01] Target: [HANDOFF-FCMBOOT.md]
+- WINDOW PLACEMENT, and a real trap in it: **Electron and Tk do not mean the
+  same thing by a coordinate.**  Electron takes device-INDEPENDENT pixels and
+  this desktop scales by 2, so an MDU asked for at 528x542 occupies 1056x1084
+  on screen (measured off a screenshot's own dimensions); Tk's `geometry` is in
+  real screen pixels and does not scale.  Placing the panel "just below" the
+  MDUs with an Electron-sized number put it halfway up CRT1.  `retest-crt2.sh`
+  now derives both from `MEDS_SIZE`/`NSTS_MDU_CHROME` with `MDU_SCALE`
+  (default 2) applied only to the Tk one: CRT1 `0,0`, CRT2 `560,0`, panel
+  `+0+1124`.  `NSTS_MDU_POS=<x>,<y>` (MEDS2) and `--geometry` /
+  `NSTS_PANEL_GEOMETRY` (discretePanel) are the underlying knobs.
+- Poll-reply logging is armed but has NOT yet caught a failing run.
+
+### [2026-09-01] Target: [problems.md]
+- **THE FLASHING AND CLOCK-ONLY GPCIPL SCREENS ARE ONE FAULT, AND IT IS PACKET
+  LOSS AT MEDS'S SOCKET.**  Proven with two observers on the same multicast
+  group: dksniff saw GPCIPL's 509-halfword menu fill at 0x19ee arrive complete
+  (452/509 non-zero) while MEDS received 423 of 509 and discarded the partial
+  transfer -- `transfer abandoned, 86 halfwords short`, three abandons in that
+  run (54, 30, 86).  With the menu body gone the walk from DISPLAY_HEADER
+  starts on a stray `FCW1 3900`, blink on with nothing after to clear it, so
+  318 of 319 glyphs land in the blink group and the whole screen flashes.
+  Where the loss falls differently you get the clock-only variant instead.
+- FIXED, and confirmed by the user: **0 abandoned transfers across 137 fills**,
+  against 3 before.  Two parts.  `com/bus.civet` now asks for a 4 MB receive
+  buffer (`NSTS_BUS_RCVBUF`) and LOGS what it was granted; and
+  `net.core.rmem_max` had to be raised from 212992, which is a root action --
+  `sysctl -w` does NOT persist, so `retest-crt2.sh` now checks it at startup
+  and prints both the temporary and the permanent fix.
+- WHY SO SMALL A PAYLOAD OVERRAN SO LARGE A BUFFER: the cost is per DATAGRAM,
+  not per byte.  A 509-halfword fill is about a kilobyte of data spread over
+  hundreds of bus messages, each charged its own skb overhead, so a burst of
+  seven fills is nearer 400 KB than 7 KB.  dksniff survives it by doing nothing
+  but drain the socket; Electron is rendering when the burst lands.
+- The earlier clock-only capture that showed NO abandons and no menu on the
+  wire at all remains a SECOND, distinct failure -- there the GPC never sent
+  it.  Not explained by this.
+
+### [2026-09-01] Target: [HANDOFF-FCMBOOT.md]
+- MAJOR FUNCTION SWITCH: the encoding is in the flight software, `SSSRC/CZ1COM`
+  on `CZ1B_D_DIT_MSG_HEADR` bits 9-10 -- **MF VALUE(0=PL, 1=GNC, 2=SM,
+  3=ILLEGAL)**.  MEDS2 and Don's MEDS both hardcode `@majorFunc = o.majorFunc ?
+  0`, so every run either of us has made has told PASS the switch is in
+  **PAYLOAD**.  That is a candidate for OPS 1 / OPS 9 being declined, and for
+  Don's video landing on P9 (PL OPS 9).  `NSTS_MAJOR_FUNC=<0..3>` sets it at
+  launch; a LIVE switch needs an MDU -> IDP bus message, since the MDU holds
+  only `@priPortIDP` as a number and cannot reach the IDP's DEUUnit.
+- A major function CHANGE is what PASS acts on, and it forges the keystrokes
+  itself -- `SSSRC/DMMMCD` queues two, HEX'000F' and HEX'0002', and calls
+  `ARY_MF_BUS_CHG` for a new bus commander.  That is why a display can change
+  with no scratch-pad echo, which is what the user observed in Don's video.
+- DPS UTILITY's background is MEDS's, not the GPC's, as of
+  `CR93220A 01/23/08 OI3404 MOVE DPS UTILITY BACKGROUND TO MEDS` (SSSRC/CD0010,
+  the only deck in OI340600 that says it).  PASS sends 155 halfwords of pure
+  variable data for that page.  The background is recoverable from OI301700,
+  which predates the change: `SSSRC/CD0010.hal`, 738 halfwords, decodes to the
+  full page.  Wiring it up needs to know WHICH page is up, and the only channel
+  that could carry that is `MEDS_XFER` -- 100 halfwords, ~1300 per run, stored
+  in `@medsDK` and read by nothing.  Now logged on change.
+
+### [2026-09-01] Target: [problems.md]
+- **PASS IS NOT FAILING SILENTLY ON THE OPS REQUEST**, which is what the user
+  doubted and was right to.  `SSSRC/DM6OPS` enumerates nine refusal reasons in
+  `DM6V_ERR_TYPE` -- 0 none, 1 NO TARGETS IN RUN (fault message, not ILLEGAL
+  ENTRY), 2 no target GPCs from GRT, 3 not overlay initiator and not in main
+  memory, 4 mode recall from application, 5 mode-to-mode illegal, 6 from
+  keyboard and not requested to target GPC/RS, 7 from application and not in
+  main memory, 8 illegal transition, and an UNDOCUMENTED 9 set when
+  `DM6_T_VALIDITY` fails -- writes it to the log with `DMZ_LOG`, and calls
+  `FMPT_UI_OPERR` (ILLEGAL ENTRY) for anything above 1.  We had simply never
+  looked.
+- AND IT NEVER READS THE TAPE.  So "the OPS software is not on the tape" is NOT
+  the operative cause: the request is refused before anything looks.  The tape
+  gap is real -- GMAGNC91 (384 blocks) and VMAPL91 (216) are absent, SYS2 and
+  SYS3 entirely so -- but it is downstream of whatever refuses.
+- FOUND IN MEMORY: `0x38058: d609 0001` -- `D600|9` and mode 1, DM6OPS's own
+  "LOG ON OPS/MODE" entry for our `OPS 901 PRO`.  So the request reaches the
+  OPS processor.  The following entry is `d6f1 0001`, which is NOT the
+  `[d609, ERR_TYPE]` the second `DMZ_LOG` call should write, so the log
+  framing is not yet decoded and **the error type is still unknown**.
+- REPRODUCED UNATTENDED, which is the real gain: `YAGPC_DEUKEYS` now takes
+  several batches at their own poll counts
+  (`@150:ITEM,1,EXEC;@480:OPS,9,0,1,PRO`), so the whole sequence -- IPL, load,
+  OPS request -- runs headless with a memory snapshot at the end.
+- THREE OF MY OWN MEASUREMENTS WERE WRONG TODAY and each cost runs.  (1) A
+  leaked yaGPC2 from a previous run held the port base and blocked the next;
+  the rig now escalates SIGINT to SIGKILL.  (2) `YAGPC_MMUTRACE` was never set
+  in the headless rig, so my "reads" grep matched only the bootstrap line and I
+  concluded PASS had not loaded when the display proved it had; MMUTRACE is now
+  on.  (3) An SSW-vs-DASS comparison reported "69.5% matching" that was C6C6
+  fill matching C6C6 fill with PASS not loaded.
+- EXPERIMENT FLAW TO FIX NEXT TIME: the ITEM 1 EXEC retries land on PASS's own
+  GPC MEMORY page once the load has taken, and `ITEM 1 EXEC` is not valid
+  there -- so the ILLEGAL ENTRY on screen may be from a retry rather than from
+  the OPS request.  Send the ITEM batch once, or space the OPS request far
+  enough to tell them apart.
