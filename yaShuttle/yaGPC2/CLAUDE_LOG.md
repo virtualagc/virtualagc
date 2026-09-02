@@ -447,3 +447,34 @@ on the wire at all.)
   ten lengths but left `NUM_CONT_MM_BLKS` at 37 when the corrected blocks span
   38, so its "10 of 10" table was internally inconsistent.  It now corrects
   `ncont` too, preserving the multi-track flag.
+
+### [2026-09-02] Target: problems.md
+- **RETRACTION of commit `899e22eb6`: "phase 8 is blank on the tape" is WRONG,
+  and so is the conclusion built on it.**  The `mmu` tool and `mmu2mmv`'s
+  report address blocks as **track/file**/subfile/block; I read the CON80
+  `ADDR=FTSBB` packing as file/track and dumped `5/2/4/0` when phase 8 is at
+  `2/5/4/0`.  Re-censused with the right ordering, **every phase 3-18 is
+  written on the tape** except 11 and 17, which are unassigned placeholders at
+  0/0/0/0.  So the masked wait is NOT PASS refusing an absent overlay, and the
+  "remaining fix is a tape build" conclusion goes with it.
+- `mmu2mmv` DOES build a volume (17 of 52 phases; the rest are "not built"
+  because their libraries are absent from the con80build root, not because the
+  tool cannot write them).  That corrects the older note that no volume writer
+  exists -- `mmubuild` has none, `mmu2mmv` is the writer, and it lives in
+  `nsts-sdl-dps/src/tools/`.
+- **The load-block length corrections still stand and are still real**: 6982
+  and 122 verify at NO start anywhere near their blocks, while 6966 at rel 2560
+  and 160 at rel 12800 verify uniquely, and 5654 at rel 13312 verifies uniquely
+  where 5604 does not.  Those three are measured against the volume itself.
+- **BUT the `ncont` correction is now in doubt.**  `mmu2mmv`'s own report gives
+  phase 3 as **37 blocks**, which is what `mmbstamp` generated and what I
+  "corrected" to 38.  With the corrected lengths and 512-halfword alignment the
+  blocks span 18966 halfwords = 38 blocks, and rel 18944 -- the 37-block
+  boundary -- holds `c6c6` fill.  Either the alignment is not uniform for the
+  last block or the report and the tape disagree; unresolved, and the tool
+  should not be trusted on `ncont` until it is.
+- Standing lesson, the second time this session an ordering assumption has cost
+  hours: **an address is not self-describing.**  `3/3/6/0` for phase 3 is
+  symmetric in track and file and so confirmed nothing, and I carried the wrong
+  ordering through every subsequent check until a phase with unequal track and
+  file exposed it.
