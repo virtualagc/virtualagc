@@ -71,6 +71,61 @@ def true_length(w, s, want, span=12000):
     return None
 
 
+# CZ2COMMO's own initialiser for CZ2B_GRT_GPC_SET: ten halfwords, distinctive
+# enough to locate the LIVE compool in an image by content alone.  Its offset
+# inside #PCZ2COM is 776.
+GRT_SIG = (0xf000, 0xc000, 0xf000, 0x1400, 0x1400,
+           0x4400, 0x8400, 0xc000, 0xf000, 0x0000)
+GRT_OFF = 776
+CZ2_SIZE = 1514
+
+
+def live_compool(img):
+    """Where #PCZ2COM actually IS in a running image, by content.
+
+    The link maps are not authority here: every PHASEnn map places #PCZ2COM at
+    0x14ac, and in the image measured for this check that address holds C6C6 --
+    never loaded -- while the compool PASS actually reads is at 0x23f4.  A load
+    block whose destination was computed against the map therefore lands in the
+    middle of live compool data, and phase 3's block 3 does exactly that:
+    0x2662..0x2bab covers CZ2B_GRT_GPC_SET (0x26fc) and CZ2V_GRT_TAB (0x28ad),
+    so applying that overlay zeroes the GPC reconfiguration table the OPS
+    transition is in the middle of using.  The machine then halts, and nothing
+    in the trace says why -- which is why this check exists."""
+    for i in range(len(img) - len(GRT_SIG)):
+        if tuple(img[i:i + len(GRT_SIG)]) == GRT_SIG:
+            return i - GRT_OFF
+    return None
+
+
+def check_destinations(G, img):
+    """Report load blocks whose destination overlaps the live compool."""
+    base = live_compool(img)
+    if base is None:
+        print("\ncompool not located in the image; destination check skipped")
+        return 0
+    lo, hi = base, base + CZ2_SIZE
+    print("\nDESTINATION CHECK -- live #PCZ2COM at 0x%05x..0x%05x" % (lo, hi - 1))
+    bad = 0
+    for p in range(3, 19):
+        d = 4 * (p - 3)
+        disp, nblks = G[d], G[d + 1]
+        for i in range(nblks):
+            k = disp + 3 * i
+            addr, flags, L = G[k], G[k + 1], G[k + 2]
+            sector = (flags >> 4) & 0xf
+            start = sector * 0x8000 + (addr & 0x7fff)
+            if start < hi and start + L > lo:
+                print("  phase %d block %2d -> 0x%05x..0x%05x OVERLAPS the live "
+                      "compool" % (p, i + 1, start, start + L - 1))
+                print("     applying it destroys data PASS is using; the table's "
+                      "addresses do not match this image")
+                bad += 1
+    if not bad:
+        print("  no load block overlaps it")
+    return bad
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
             formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -83,6 +138,9 @@ def main():
                          "block -- see the module note; volumes carry a "
                          "header, so this is measured, not assumed")
     ap.add_argument("-o", "--out", help="write the corrected table here")
+    ap.add_argument("--check-image",
+                    help="a YAGPC_SNAPSHOT image; verify no load-block "
+                         "destination overlaps the live compool")
     a = ap.parse_args()
 
     G = hw_list(io.open(a.gpt, "rb").read())
@@ -142,6 +200,12 @@ def main():
 
     print("\n%d correction(s), %d block(s) the tape cannot confirm"
           % (changed, unfixable))
+    if a.check_image:
+        bad = check_destinations(G, hw_list(io.open(a.check_image, "rb").read()))
+        if bad:
+            print("\n%d block(s) would corrupt live data -- NOT writing a table "
+                  "that cannot be applied safely" % bad)
+            sys.exit(2)
     if a.out:
         io.open(a.out, "wb").write(b"".join(struct.pack(">H", v) for v in G))
         print("wrote %s" % a.out)

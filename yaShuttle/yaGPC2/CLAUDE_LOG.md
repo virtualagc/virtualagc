@@ -478,3 +478,32 @@ on the wire at all.)
   symmetric in track and file and so confirmed nothing, and I carried the wrong
   ordering through every subsequent check until a phase with unequal track and
   file exposed it.
+
+### [2026-09-02] Target: problems.md
+- **THE MASKED WAIT IS TRACKED DOWN AND THE FAILURE MODE IS FIXED.**  The
+  overlay's load block 3 (0x2662..0x2bab, sector 0) writes straight over the
+  LIVE CZ2 compool.  Measured across the 385 s / 390 s snapshots:
+      CZ2B_GRT_GPC_SET @0x026fc  f000 c000 f000 1400 ... -> 0000 0000 0000 0000
+      CZ2V_GRT_TAB     @0x028ad  0001 0004 0003 0002 ... -> 0000 0000 0000 0000
+  That is the GPC reconfiguration table the OPS transition is in the middle of
+  reading.  Zero it and FCOS halts -- which is exactly the deliberate halt PSW
+  `FPMDISP` was seen to dispatch.
+- **WHY: the generated table's ADDRESSES do not match the running image.**
+  Every `PHASEnn.sym.json` places `#PCZ2COM` at 0x14ac, and that address holds
+  `C6C6` -- never loaded -- while the compool PASS actually reads is at 0x23f4.
+  Load blocks computed against the map therefore land in the middle of live
+  compool data.  It is systemic, not a phase-3 quirk: **7 blocks across phases
+  3, 9, 10, 13, 14, 15 and 16** overlap it.
+- `fix_phase_table_lengths.py --check-image SNAPSHOT` now locates the live
+  compool BY CONTENT (CZ2COMMO's own `CZ2B_GRT_GPC_SET` initialiser is a
+  ten-halfword signature), checks every load-block destination against it, and
+  **refuses to emit a table that would corrupt live data**, exiting 2.  The
+  failure mode was: inject a table, silently destroy PASS's own state, and get
+  an unexplained masked wait several seconds later with nothing in the trace
+  connecting the two.  It is now a detected, explained refusal.
+- NOT resolved, and stated as such: WHY the image's compool placement differs
+  from every phase map.  That is a build-provenance question -- the tape's
+  phase-3 load-block lengths match `~/ipl-demo/phases` exactly, yet the loaded
+  image's compool does not sit where those maps say.  Until it is settled, a
+  table generated from those maps cannot be applied to this image, and the
+  check is what makes that safe rather than silent.
