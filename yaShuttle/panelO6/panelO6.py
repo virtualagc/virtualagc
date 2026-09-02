@@ -30,7 +30,7 @@ real hardware; this simulation does not require pulling a lock.
 
 Usage:
     python3 panelO6.py
-    python3 panelO6.py --geometry 780x980+100+40
+    python3 panelO6.py --geometry 800x1200+80+20
 """
 
 import argparse
@@ -76,7 +76,7 @@ C_BTN_DOWN = "#8f8c80"
 C_LOCK = "#c4c1b5"
 
 REF_W = 820
-REF_H = 1000
+REF_H = 1260
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
 # MMU 1/2).  Side captions and above/below captions share this size.
@@ -148,7 +148,7 @@ class PanelO6:
         self.root = root
         root.title("Panel O6  —  GENERAL PURPOSE COMPUTER")
         root.configure(bg=C_WINDOW)
-        root.minsize(480, 580)
+        root.minsize(480, 700)
 
         self.power = list(DEFAULT_POWER)
         self.output = list(DEFAULT_OUTPUT)
@@ -223,6 +223,15 @@ class PanelO6:
     def _font(self, size, bold=True):
         pts = max(6, int(round(size * self.s)))
         return ("Helvetica", pts, "bold" if bold else "normal")
+
+    def _th(self, size):
+        """Half-height of a centre-anchored caption, in reference coords.
+
+        Layout y values are the centres of the glyphs.  Neighbouring
+        objects have to clear this plus PAD, or the ink collides.
+        """
+        ls = float(self._tkfont(size).metrics("linespace"))
+        return 0.5 * ls / max(self.s, 0.01)
 
     def _on_configure(self, event):
         if event.widget is not self.cv:
@@ -342,64 +351,87 @@ class PanelO6:
     # ---- the panel ------------------------------------------------------
 
     def _layout(self):
-        """Even vertical rhythm.  Title-to-numbers is larger than the
-        other gaps so a centered group name does not land on GPC 3."""
-        g = 16          # divider / group-title leading
-        tn = 24         # group title -> 1 2 3 4 5
-        ns = 24         # numbers -> ON/BACKUP/RUN
-        cap = 16        # setting caption -> control (and control -> caption)
+        """Vertical rhythm from glyph bounds, not from centre-to-centre
+        steps.  PAD is empty air above and below every caption; without
+        it the linespace is the whole gap and the letters sit on the
+        controls (the OUTPUT 1..5 row was the worst case)."""
+        pad = 10
+        bezel = 4          # talkback/button outline outside the content box
+        th13 = self._th(13)
+        th12 = self._th(12)
+        th11 = self._th(11)
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
         L = {}
-        y = 46
+        y = 28 + pad
+
+        y += th13
         L["title"] = y
-        y += 16
+        y += th13 + pad
         L["title_line"] = y
-        y += g
+        y += pad
 
+        y += th10
         L["power_title"] = y
-        y += tn
+        y += th10 + pad
+        y += th12
         L["power_nums"] = y
-        y += ns
+        y += th12 + pad
+        y += ths
         L["power_on"] = y
-        y += cap
+        y += ths + pad
         L["power_sw"] = y
-        y += 124 + cap
+        y += 124 + pad
+        y += ths
         L["power_off"] = y
-        y += g + 6
+        y += ths + pad
 
+        y += pad
         L["out_line"] = y
-        y += g
+        y += pad
+        y += th10
         L["out_title"] = y
-        y += g
+        y += th10 + pad
         L["out_tb"] = y
-        y += 34 + 12
+        y += 34 + bezel + pad
+        y += th11
         L["out_nums"] = y
-        y += ns
+        y += th11 + pad
+        y += ths
         L["out_backup"] = y
-        y += cap
+        y += ths + pad
         L["out_sw"] = y
-        y += 136 + cap
+        y += 136 + pad
+        y += ths
         L["out_term"] = y
-        y += g + 6
+        y += ths + pad
 
+        y += pad
         L["ipl_line"] = y
-        y += g
+        y += pad
+        y += th10
         L["ipl_title"] = y
-        y += g
+        y += th10 + pad
         L["ipl_btn"] = y
-        y += 50 + g
+        y += 50 + bezel + pad
 
         L["mode_tb"] = y
-        y += 34 + 12
+        y += 34 + bezel + pad
+        y += pad
         L["mode_line"] = y
-        y += g
+        y += pad
+        y += th10
         L["mode_title"] = y
-        y += tn
+        y += th10 + pad
+        y += th12
         L["mode_nums"] = y
-        y += ns
+        y += th12 + pad
+        y += ths
         L["mode_run"] = y
-        y += cap
+        y += ths + pad
         L["mode_sw"] = y
-        y += 116 + cap
+        y += 116 + pad
+        y += ths
         L["mode_halt"] = y
         return L
 
@@ -414,7 +446,8 @@ class PanelO6:
         # --- L-shaped outline, matching the SCOM figure ---
         # Main rectangle, plus a right-hand tab holding IPL SOURCE.
         mx0, my0 = 36, 28
-        mx1, my1 = 668, 972
+        mx1 = 668
+        my1 = L["mode_halt"] + 24
         ex1 = 790
         ey0 = L["out_backup"] - 10
         ey1 = L["mode_line"] + 4
@@ -440,6 +473,7 @@ class PanelO6:
         self.col = [inner_l + (inner_r - inner_l) * (i + 0.5) / N_GPC
                     for i in range(N_GPC)]
         self.col_w = (inner_r - inner_l) / N_GPC
+        self.mid = self.col[2]          # GPC3, where setting captions sit
         # Side captions sit the same distance from the control as on the
         # right: 14 px past the guard/hex edge, not against the panel rail.
         self.side_l_out = self.col[0] - 29 - 14
@@ -470,7 +504,7 @@ class PanelO6:
         L = self.L
         self._text(347, L["power_title"], "POWER", size=10)
         self._gpc_numbers(L["power_nums"])
-        self._text(347, L["power_on"], "ON", size=SETTING_SIZE)
+        self._text(self.mid, L["power_on"], "ON", size=SETTING_SIZE)
 
         guard_w, guard_h = 58, 124
         y1 = L["power_sw"]
@@ -481,7 +515,7 @@ class PanelO6:
             self._guarded_toggle(x1, y1, x2, y2, pos, npos=2)
             self._hit("power", i, x1, y1, x2, y2)
 
-        self._text(347, L["power_off"], "OFF", size=SETTING_SIZE)
+        self._text(self.mid, L["power_off"], "OFF", size=SETTING_SIZE)
 
     def _draw_output_talkbacks(self):
         L = self.L
@@ -497,7 +531,7 @@ class PanelO6:
 
     def _draw_output_switches(self):
         L = self.L
-        self._text(347, L["out_backup"], "BACKUP", size=SETTING_SIZE)
+        self._text(self.mid, L["out_backup"], "BACKUP", size=SETTING_SIZE)
         cy = L["out_sw"] + 68
         self._vtext(self.side_l_out, cy, "NORMAL")
         self._vtext(self.side_r_out, cy, "NORMAL")
@@ -511,7 +545,7 @@ class PanelO6:
             self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
             self._hit("output", i, x1, y1, x2, y2)
 
-        self._text(347, L["out_term"], "TERMINATE", size=SETTING_SIZE)
+        self._text(self.mid, L["out_term"], "TERMINATE", size=SETTING_SIZE)
 
     def _draw_ipl(self):
         L = self.L
@@ -540,7 +574,7 @@ class PanelO6:
                    fill=C_INK_DIM, width=1)
         self._text(347, L["mode_title"], "MODE", size=10)
         self._gpc_numbers(L["mode_nums"])
-        self._text(347, L["mode_run"], "RUN", size=SETTING_SIZE)
+        self._text(self.mid, L["mode_run"], "RUN", size=SETTING_SIZE)
 
         rx, ry = 38, 58
         cy = L["mode_sw"] + ry
@@ -551,22 +585,31 @@ class PanelO6:
             self._hex_toggle(cx, cy, rx, ry, pos, npos=3)
             self._hit("mode", i, cx - rx, cy - ry, cx + rx, cy + ry)
 
-        self._text(347, L["mode_halt"], "HALT", size=SETTING_SIZE)
+        self._text(self.mid, L["mode_halt"], "HALT", size=SETTING_SIZE)
 
     def _draw_ipl_source(self, mx1, ex1, ey0, ey1):
         cx = (mx1 + ex1) / 2.0
-        self._text(cx, ey0 + 16, "IPL", size=9)
-        self._text(cx, ey0 + 32, "SOURCE", size=9)
-        self._text(cx, ey0 + 56, "MMU 1", size=SETTING_SIZE)
-
+        pad = 10
+        th9 = self._th(9)
+        ths = self._th(SETTING_SIZE)
         gw, gh = 56, 140
-        x1, y1 = cx - gw / 2, ey0 + 74
-        x2, y2 = cx + gw / 2, ey0 + 74 + gh
+        # Whole cluster centred in the tab: IPL / SOURCE, then MMU 1,
+        # the switch, MMU 2, with OFF on the right of the switch.
+        block = (th9 + pad + th9 + pad + ths + pad + gh + pad + ths)
+        top = ey0 + max(pad, (ey1 - ey0 - block) / 2.0)
+        y = top + th9
+        self._text(cx, y, "IPL", size=9)
+        y += th9 + pad + th9
+        self._text(cx, y, "SOURCE", size=9)
+        y += th9 + pad + ths
+        self._text(cx, y, "MMU 1", size=SETTING_SIZE)
+        y1 = y + ths + pad
+        x1, x2 = cx - gw / 2, cx + gw / 2
+        y2 = y1 + gh
         pos = IPL_SOURCE_POS.index(self.ipl_source)
         self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
         self._hit("ipl_source", None, x1, y1, x2, y2)
-
-        self._text(cx, y2 + 16, "MMU 2", size=SETTING_SIZE)
+        self._text(cx, y2 + pad + ths, "MMU 2", size=SETTING_SIZE)
         self._vtext(x2 + 14, (y1 + y2) / 2.0, "OFF")
 
     # ---- control bodies -------------------------------------------------
@@ -761,7 +804,7 @@ def main(argv=None):
         except tk.TclError as e:
             raise SystemExit("panelO6: bad --geometry %r: %s" % (geom, e))
     else:
-        root.geometry("780x980")
+        root.geometry("800x1200")
     _dont_steal_focus(root)
     # Keep a reference so the panel is not collected; it owns no extra
     # threads, so Tk's mainloop is the whole process.
