@@ -215,3 +215,46 @@ on the wire at all.)
   mass-memory I/O leaves in the TSW has not been observed, because PASS has
   never done one here.  That is the thing to measure next, and until it is
   measured "0x2100 is an error code" is an assumption.
+
+### [2026-09-02] Target: problems.md
+- **The failing code has a name and a source file, and I had not looked.**  I
+  called it "FCOS's generic I/O dispatcher", which was an inference from
+  behaviour.  `PHASE02.sym.json` names it outright: the status store at
+  0x19ab4+1450 is **`FIOERRLC`** and its caller at 0x1a54c+208 is
+  **`FIOMGSNC`** -- both present as `SSSRC/FIOERRLC.asm` (130 KB) and
+  `SSSRC/FIOMGSNC.asm` (27 KB).  Looking up a traced address in the link map is
+  the cheap move I should have made first, and it is general: any address in
+  phase 2 can be named this way.
+- They are not a dispatcher.  `FIOERRLC` is the **I/O ERROR HANDLER, LEVEL C**;
+  `FIOMGSNC` is the **MM/GTG ERROR AND/OR SYNC PROCESSOR**, whose stated output
+  is "an updated user supplied transaction status word if an error was
+  detected".  So reaching that code means an error was already decided, and the
+  earlier open question -- whether a non-zero TSW really means failure -- is
+  answered yes.
+- **The status word decodes exactly** (`FIOERRLC.asm`, "FORMAT OF THE
+  TRANSACTION STATUS WORD"):
+      bit 0 FIOENTRF 8000  ENTIRE TRANSACTION FAILED. NO GOOD DATA EXISTS
+      bit 1 FIOHARDF 4000  FAILURE SOMEWHERE IN TRANSACTION
+      bit 2 FIOSELFE 2000  SELF HAD ERROR
+      bit 3 FIOMSCTF 1000  MSC TIMEOUT HAS OCCURRED
+      bit 4 FIOPSTOF 0800  PSUEDO TIMEOUT HAS OCCURRED
+      bit 6 FIOMMFPW 0200  FAILED OR POWERED DOWN MM   (formerly EGC 506)
+      bit 7          0100  MM SELECTED FOR IPL         (formerly EGC 507)
+  so **0x2100 = SELF HAD ERROR + MM SELECTED FOR IPL** and **0x2200 = SELF HAD
+  ERROR + FAILED OR POWERED DOWN MM**.  `PROC FIOMMERR` builds it as
+  `error_code OR FIOSELFE`.  MMU2's reading independently validates the decode:
+  our rig has no MM2, so "failed or powered down" is simply true.
+- **HYPOTHESIS, NOT YET TESTED** -- the run that would settle it was stopped
+  before it finished.  `FIOMGSNC` dispatches a transaction only if the MMU is
+  NOT IPL-selected (`CZ2BDIA` AND the BCE monitor mask, shifted by `FIOMMIPB`)
+  OR the switch is masked in software (`CZ2BMIPL` = `CZ2B_MMU_IPL_SW_MASK`,
+  `INITIAL(HEX'0000')`, so unmasked; only `ARXRSBUS` and a crew item in
+  `ASMAUX` ever set it).  Our panel holds `source MM1` for the whole run and
+  nothing masks it.  That would explain the refusal AND why the real vehicle is
+  not broken by it, but it is reasoning from source, not a measurement.
+  `headless-gpcmem.sh` now takes `SOURCE_RUN` (default `MM1`, so existing runs
+  are unchanged); `SOURCE_RUN=OFF` runs the test.
+- Method note: I asserted this cause once already off the back of the status
+  decode alone, before checking any of the above, and the user was right to say
+  it told me nothing.  Decoding what the software CONCLUDED is not evidence for
+  WHY it concluded it.
