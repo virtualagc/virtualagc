@@ -55,3 +55,25 @@ answers they were, with what each one actually cost.
 Carried forward as still unresolved: how the DEU distinguishes the two
 coordinate conventions, and the one clock-only capture where no menu went out
 on the wire at all.)
+
+### [2026-09-02] Target: problems.md
+- **The CRT2 dance is unnecessary: leave CRT 1 selected for the IPL and select
+  `none` just before RUN.**  The user's suggestion, and it works.  The
+  mechanism was always "GPCIPL loads the unit on the BFC-SELECTED CRT, and PASS
+  then masks exactly that bus" -- so with **no** CRT selected at RUN there is
+  nothing for PASS to mask and it drives the unit that was actually loaded.
+  One display unit, no flip, no second window.
+- VERIFIED headless, not reasoned: with `crt 1` through the IPL and `crt 0`
+  before RUN, bus 6 (the IPLed unit) carries PASS's live GPC MEMORY page --
+  `0001 /` at 0x19ef, the message line at 0x19c2, the GPC number at 0x1a03 --
+  while bus 7 stays 8188 zeros, never IPLed and never needed.  `DMZ_LOG` reads
+  `d6f1 0000`, so the OPS request is still accepted; nothing downstream changed.
+- `headless-gpcmem.sh` now takes `CRT_IPL` (default 1) and `CRT_RUN` (default
+  0), the older CRT2 dance being `CRT_IPL=2 CRT_RUN=1`.  `retest-crt2.sh`'s
+  crew sequence is rewritten to match.
+- **Two stale instructions came out of `retest-crt2.sh` with it.**  Step 9 told
+  the user to press Shift+V, which the automatic geometry chooser retired; and
+  `NSTS_SIM_CONFIG=meds-unipled.json` is now belt-and-braces rather than
+  required, since MEDS already gets `idp1` right and only `idp1` is in play on
+  this route.  A launcher that tells you to do something unnecessary is how a
+  retired workaround gets treated as a live requirement.
