@@ -212,3 +212,38 @@ is instrumented, not diagnosed.)
   `PFS/OI340600/SDFLIB`, `unit('CZ2COM').symbols()`, `.address` is the compool
   offset.  Names in the SDF are EBCDIC and TRUNCATED TO 8 CHARACTERS, so a
   plain grep for `CZ2B_GRT_GPC_SET` finds nothing -- search `CZ2B_GRT`.
+
+### [2026-09-01] Target: [problems.md]
+- **DON HITS THE SAME WALL WE DO.**  User's observation of his video: a flashing
+  `GPC CONF 2 00:00:46( 3)` appears IMMEDIATELY after `OPS 901 PRO`, and
+  nothing else happens.  `GPC CONF` is `FMPT_UI_FAULT(CDLK_G1)`, which DM6OPS
+  raises for exactly the ERR_TYPE 1 we measured.  So we are NOT behind him on
+  the OPS transition; we are at the same place, and his `9011/` `MC=09` screen
+  later in the video arrives by some route that is not that keystroke.
+- WHY OUR SCREEN DID NOT SHOW IT: the ILLEGAL ENTRY from my own `ITEM 1 EXEC`
+  retries landed on PASS's GPC MEMORY page and replaced it.  The fault line
+  works -- `BCE STRG 1` and `I/O ERROR CRT2` reach it.
+- HYPOTHESIS TESTED AND DEAD: assigning a memory configuration first, via GPC
+  MEMORY's `45 CONFIG` / `46 GPC` / `STORE 47`.  Keyed headless
+  (`ITEM,4,5,PLUS,9,EXEC` etc.); `CZ2V_MC_REQ` stayed 0000, both GPC sets
+  stayed 0000, and the OPS request reproduced ERR_TYPE 1 exactly.  MC 9 is the
+  right number for GNC OPS 9 (`GMAG9R1 PHASE,PH=18,MC=9`), so it is the route
+  that is wrong, not the value.
+- **THE MECHANISM, and it narrows the fault to one comparison.**  `DMCSUP`
+  runs on every MCDS event, unconditionally, before dispatching to
+  DM1_KEYBOARD:
+
+        CDMB_RS,CDMB_RSALL = CZ2B_RS$(TFCMID;);               /* 0000 */
+        CDMB_RSALL = CDMB_RSALL OR CDMB_RSCS_MSK$(TFCMID:*);  /* OR SELF */
+
+  so `DM6B_RS_ALL` is NOT empty -- it holds self.  `RUN_GPC` therefore reduces
+  to `SELF AND TARGET_GPC`, and ERR_TYPE 1 means **self is not in the target
+  set the GRT selected**, not that the sets are unpopulated.  My earlier "both
+  GPC sets are empty, so nothing can be a target" reading was half right: CS is
+  empty, but RS_ALL carries self and that is the term that matters.
+- GRT SETS DECODED BY GPC BIT (bits 1-5 from the MSB; bit 6 is some other
+  flag): [1] 1,2,3,4  [2] 1,2  [3] 1,2,3,4  [4] 4  [5] 4  [6] 2  [7] 1
+  [8] 1,2  [9] 1,2,3,4  [10] none.  We have failed as GPC 1 (headless default)
+  and as GPC 2 (user's run), which rules out indexes 7 and 6 and every set
+  containing 1 or 2 -- pointing at an index that names **GPC 4**.  Running as
+  GPC 4 is the falsifiable test; `headless-gpcmem.sh` now takes `GPC_ID`.
