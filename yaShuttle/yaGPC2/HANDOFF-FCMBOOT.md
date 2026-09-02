@@ -45,7 +45,10 @@ runs cyclically without halting, and paints complete display fills that MEDS
 renders.  **GPC MEMORY now draws on CRT2 with correct data in its fields** —
 that took an empty critical-format buffer filled, two renderer defects fixed, a
 coordinate-frame chooser, and one emulator defect in `cpu_g_ea`; the whole story
-is `problems.md` §8.28.  Everything below is how each stage got there,
+is `problems.md` §8.28.  **OPS transitions are now accepted** — `OPS 901 PRO`
+reaches `ARC_GPC_RECONFIG` rather than being refused, once the major function
+is not PAYLOAD (§8.29) — and the front of the work has moved to the memory
+configuration.  Everything below is how each stage got there,
 in the order it was fixed; "The SSL", "PASS runs" and "What is actually still
 open" are the current-state parts.
 
@@ -306,6 +309,47 @@ identical formats were described as a corpus "for when DFG lands".  It has
 since landed and is in use — see `problems.md` for the DFG phase and the DASS
 comparison it now feeds.
 
+**DPS UTILITY's background is MEDS's, not the GPC's**, as of
+`CR93220A 01/23/08 OI3404 MOVE DPS UTILITY BACKGROUND TO MEDS` — `SSSRC/CD0010`
+is the only deck in OI340600 that says so.  PASS sends 155 halfwords of pure
+variable data for that page and nothing else, which is why it renders as
+garbage with a clock.  The background is recoverable from OI301700, which
+predates the change: `SSSRC/CD0010.hal`, 738 halfwords, decodes to the full
+page.  Wiring it up needs to know *which* page is up, and the only channel that
+could carry that is `MEDS_XFER` — 100 halfwords, roughly 1300 per run, stored
+in `@medsDK` and read by nothing.  Now logged on change.
+
+### The MAJOR FUNCTION switch — where it lives and why it matters
+
+The encoding is in the flight software: `SSSRC/CZ1COM`, `CZ1B_D_DIT_MSG_HEADR`
+bits 9–10, **MF VALUE (0 = PL, 1 = GNC, 2 = SM, 3 = ILLEGAL)**.  The DEU
+reports it in every poll header; PASS reads it out of the keyboard message.
+
+Both MEDS2 and Don's MEDS originally hardcoded `@majorFunc = o.majorFunc ? 0`,
+and yaGPC2's own in-process `DeuModel` never assigned the field at all — so
+every run either of us had ever made told PASS the switch was in **PAYLOAD**.
+That is not a harmless default.  `DM6OPS` keys its GRT lookup on the requesting
+major function, and PL OPS 9 targets GPC 2 alone; see `problems.md` §8.29 for
+the whole story, which is where several days went.
+
+How to set it now:
+
+- **yaGPC2's DEU model:** `YAGPC_DEUMF=<0..3>`, or `DEUMF=` through
+  `headless-gpcmem.sh`.
+- **MEDS2, at launch:** `NSTS_MAJOR_FUNC=<0..3>`.
+- **MEDS2, live:** Shift+1..4 select PL/GNC/SM/ILLEGAL directly; Shift+M
+  cycles.  The position is shown in the window title (`MEDS2 MDU / <lru> -
+  MF GNC`), set at startup as well as on every change — without that it is
+  four positions with no feedback, which is exactly how the defect above
+  survived a session of the user trying all of them.  A live switch needs an
+  MDU → IDP bus message (`MDUMsg.SET_MAJOR_FUNC`), because the MDU holds only
+  `@priPortIDP` as a number and cannot reach the IDP's `DEUUnit` directly.
+
+A major function **change** is what PASS acts on, and it forges the keystrokes
+itself — `SSSRC/DMMMCD` queues two, `HEX'000F'` and `HEX'0002'`, and calls
+`ARY_MF_BUS_CHG` for a new bus commander.  That is why a display can change
+with no scratch-pad echo, which is what the user observed in Don's video.
+
 ### The SSL — why `ITEM 1` loaded nothing, and how it was finished
 
 Step 12 of the IPL sequence is "select the system to be loaded" (`ITEM 1 EXEC`)
@@ -455,20 +499,33 @@ flight software's own use of them (`problems.md` §8.27).
 
 ### What is actually still open
 
-- **GPCIPL shows only its clock, about half the time**, and the run has to be
-  killed and restarted.  Its menu is written ONCE — 509 halfwords at `0x19ee`
-  then 254 at `0x1beb`, 0.05 s apart, never repeated; after that only the first
-  196 words at `0x19ee` are refreshed, twice a second.  Lose either one-shot
-  fill and the display updates its clock over a blank screen for the rest of
-  the run.  Instrumented but not yet caught: `NSTS_DEU_LOG=<path>` (the
-  launcher sets it) now records every accepted fill and every
-  `transfer abandoned, N halfwords short`, which set against `dk.log`
-  separates "lost on the way" from "arrived and mishandled".
-- A rarer variant where everything except the clock flashes.
+- **A second clock-only failure, where the menu never goes out at all.**  The
+  common case — GPCIPL coming up with only a clock about half the time, and the
+  rarer variant where everything but the clock flashed — was **packet loss at
+  MEDS2's socket**, and is FIXED: a 4 MB receive buffer (`NSTS_BUS_RCVBUF`) plus
+  `net.core.rmem_max`, user-confirmed at 0 abandoned transfers across 137 fills
+  against 3 before.  See §8.28.  But one earlier capture showed no abandons and
+  no menu on the wire at all, and that one is unexplained.
+  **`net.core.rmem_max=8388608` is not persistent.**  `sysctl -w` lasts until
+  reboot; `retest-crt2.sh` checks the value and prints both fixes, but making it
+  permanent (`/etc/sysctl.d/99-nsts-bus.conf`) is a root action nobody has taken.
 - **How the DEU distinguishes the two coordinate conventions.**  Both are
   historical — see §8.28 — they differ by exactly 512 in X and 2 in Y, and the
   translate registers are ruled out.  MEDS2 routes around it by choosing the
   geometry from the list; nothing explains it.
+- **PASS has no memory configuration: `CZ2V_MC$(GPC) = 0`.**  This is the
+  current front of the work.  The OPS transition itself is FIXED (§8.29 — the
+  GRT lookup is keyed on the major function, and the DEU model's switch was
+  never settable, so every request was a PAYLOAD request); an accepted request
+  now reaches `ARC_GPC_RECONFIG` and fails there with `CZ2V_REC_XERR = 1`
+  because this GPC has no memory configuration assigned.  Same missing thing as
+  Don's `STORE MC=09` against our `MC=__` and his `MM AREA` reading 1/1/1
+  against our three zeroes.  `SSSRC/AIBGPCLO:441` matches
+  `FCMMGPT_STARTING_MM_ADD` against `CDCV_PHASES` and ours does not match, which
+  is tape-build shaped — like DEUCFLM and MMDIR before it.
+- **PASS never tries to read the tape**, so the missing GNC9/PL9 overlays are
+  real but downstream.  Measured: identical mass-memory activity across accepted
+  and refused runs, 92 trace lines, all from the IPL.
 - The CRT hand-over.  GPCIPL follows the BFC switch, replaying its entire
   display init on the newly selected unit and no longer polling the old one
   (whose POLL FAIL is just that).  Measured on a live run, and the PASS load
@@ -795,9 +852,30 @@ Three things had to be got right and all three failed silently first:
   before it redirects.
 
 Read the result with `YAGPC_DEUDUMP=<prefix>` (the raw 8192-halfword image per
-bus) plus `YAGPC_RANGETRACE` / `YAGPC_INDTRACE`.  Both of those take an
-`afterSec` in **emulated** seconds: a 400 s wall-clock run reaches only ~321 s
-simulated, so a gate set from wall time never fires.
+bus) plus `YAGPC_RANGETRACE` / `YAGPC_INDTRACE` / `YAGPC_EAWATCH`.  All of
+those take an `afterSec` in **emulated** seconds: a 400 s wall-clock run reaches
+only ~321 s simulated, so a gate set from wall time never fires.
+
+Env knobs the script forwards, all of which matter for the OPS work:
+
+| variable | what it does |
+|---|---|
+| `GPC_ID` | this GPC's own identity (discrete B bits 0–2), **not** yaGPC2's `--gpc-id`, which only names the ICC port |
+| `DEUMF` | the MAJOR FUNCTION switch — 0 PL, 1 GNC, 2 SM, 3 ILLEGAL.  Not cosmetic: see below |
+| `DEUKEYS` | multi-batch keystrokes, `@150:ITEM,1,EXEC;@480:OPS,9,0,1,PRO` — each batch at its own poll count, each sent once |
+| `SNAPSHOT` | forwarded to `YAGPC_SNAPSHOT`, which needs **`<t1>[,<t2>...]:<prefix>`** and silently does nothing given a bare prefix |
+| `PORT_BASE` | its own bus, so runs can go in parallel |
+
+**`DEUMF` is not a cosmetic default.** `DM6OPS` resolves an OPS request through
+the GRT keyed on the *requesting* major function: MF PL OPS 9 is GRT index 6,
+whose GPC set is `4400` — GPC 2 alone — while MF GNC OPS 9 is index 9, set
+`f000`, GPCs 1–4.  Left at PL while running as GPC 1, every `OPS 901 PRO` is
+refused with "NO TARGETS IN RUN", which reads exactly like a missing overlay
+and is nothing of the kind.  §8.29.
+
+Runs can now go in parallel on different port bases: the teardown used to kill
+*every* `discretePanel` on the machine, taking out a sibling run's panel and any
+interactive one a person had open, and now kills only the one it started.
 
 ### Running the whole thing headlessly, no GUI and no MEDS
 
@@ -914,6 +992,15 @@ Whole-state, which is what cracked the hardest bugs:
     YAGPC_SNAPSHOT=<t1>[,<t2>...]:<prefix>   whole main storage to <prefix>-<t>.bin
                                              the first time sim time passes each t
     YAGPC_MEMDUMP=<lo>-<hi>[,...]            ranges at end of run
+    YAGPC_DEUMF=<0..3>                       the DEU's MAJOR FUNCTION switch —
+                                             0 PL, 1 GNC, 2 SM, 3 ILLEGAL.  It was
+                                             declared, used to build every poll
+                                             header, and assigned from NOWHERE, so
+                                             the model reported PAYLOAD forever and
+                                             every headless OPS request was a PL
+                                             request (§8.29)
+    YAGPC_DEUKEYS="@<poll>:K,K;@<poll>:K,K"  several keystroke batches, each at its
+                                             own poll count and each sent once
     YAGPC_DEUDUMP=<prefix>                   the whole 8192-halfword display image
                                              to <prefix>-bus<n>.bin, on every report.
                                              YAGPC_DEUIMAGE renders it for reading
@@ -954,6 +1041,14 @@ Execution:
     YAGPC_EATRACE=<nia>[,...]    effective address and contents for named
                                  instructions; a register dump says WHAT a wild
                                  branch went to, only this says where it came from
+    YAGPC_EAWATCH=lo-hi[,max[,afterSec]]
+                                 EATRACE run BACKWARDS: which instruction touched
+                                 this address, rather than which address did this
+                                 instruction touch.  That is the question you have
+                                 when a structure was located by searching memory
+                                 for its contents and no link map says what code
+                                 owns it — it found DM6OPS at NIA 0x455f6 starting
+                                 from nothing but DM6V_TR_TAB's initial values
 
 Memory and protection:
 
@@ -1164,6 +1259,41 @@ but it is luck of the tool used.
     an abandoned transfer and logs it; `idp.coffee` passed it `console.log`, so
     on every run — including every failing one — the single most diagnostic
     line was thrown away. `NSTS_DEU_LOG=<path>` writes it to disk.
+23. **Electron and Tk do not mean the same thing by a coordinate.** Electron
+    takes device-INDEPENDENT pixels and this desktop scales by 2, so an MDU
+    asked for at 528×542 occupies 1056×1084 on screen (measured off a
+    screenshot's own dimensions); Tk's `geometry` is in real screen pixels and
+    does not scale. Placing the panel "just below" the MDUs with an
+    Electron-sized number put it halfway up CRT1. `retest-crt2.sh` derives both
+    from `MEDS_SIZE`/`NSTS_MDU_CHROME` with `MDU_SCALE` (default 2) applied
+    only to the Tk one: CRT1 `0,0`, CRT2 `560,0`, panel `+0+1124`. The
+    underlying knobs are `NSTS_MDU_POS=<x>,<y>` (MEDS2) and `--geometry` /
+    `NSTS_PANEL_GEOMETRY` (discretePanel).
+24. **A control that cannot be read is a control nobody can use.** Shift+M
+    cycled the MAJOR FUNCTION switch through four positions with no indication
+    of where it landed, so using it was guesswork and a wrong guess looked
+    exactly like a correct one that did not help. That is how the PL-vs-GNC
+    defect in §8.29 stayed hidden through a whole session of the user trying
+    every position. MEDS2 now puts the position in the window title
+    (`MEDS2 MDU / <lru> - MF GNC`, set at startup as well as on change) and
+    binds Shift+1..4 to PL/GNC/SM/ILLEGAL directly.
+25. **Never edit a shell script while an instance of it is running.** Bash
+    reads a script incrementally from a byte offset, so an edit under a running
+    instance makes it resume in the middle of a different line — here:
+    `line 85: 900: command not found`, a second emulator on the same port base,
+    a timeout kill, and the run's own log re-truncated, destroying the trace it
+    had just produced. Copy the script, or wait for the run to end.
+26. **`YAGPC_SNAPSHOT` needs `<t1>[,<t2>...]:<prefix>`** and, given a bare
+    prefix, looks for the colon, finds none, and does nothing at all. Two full
+    runs completed and produced no snapshots before anyone asked why.
+27. **A backgrounded subshell does not inherit a `cd` that was `&&`-chained to
+    its sibling.** `cd X && ( A ) & ( B ) &` runs B in the *original*
+    directory. B died instantly and wrote its log into the repository.
+28. **A retry that is harmless on one screen is input on another.** A repeated
+    `ITEM 1 EXEC` is a no-op on GPCIPL's menu and invalid once PASS owns the
+    page, where it raises `ILLEGAL ENTRY` — which then gets attributed to
+    whatever else was keyed. It contaminated two conclusions and produced one
+    written-down finding that had to be withdrawn.
 
 
 ## 6. OUTSTANDING, NOT CODE

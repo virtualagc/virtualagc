@@ -4897,6 +4897,40 @@ were off the screen. That should have been checked against the historical
 output immediately rather than left for the user to ask "so they really are not
 visible?".
 
+**A uniform result across a whole set means suspect the harness — including
+when the set is three runs, not three hundred.** This document's own standing
+rule, not applied when it mattered. GPC 1, GPC 2 and GPC 4 all refused the OPS
+request identically, and that identity was read as evidence about the flight
+software rather than as the signature of a shared input. The shared input was
+the harness: the DEU model's major-function switch, which reported PAYLOAD
+regardless of anything, because it was never assigned from anywhere.
+
+**A retry that is harmless on one screen is input on another.** A repeated
+`ITEM 1 EXEC` was left in every headless measurement because it is a no-op on
+GPCIPL's menu. Once PASS owns the page it is not: `ITEM 1` is invalid there and
+raises `ILLEGAL ENTRY`, which then got attributed to the OPS request. It
+contaminated two conclusions and produced one written-down finding — "PASS
+ignores our item entries" — that had to be withdrawn.
+
+**Never edit a shell script while an instance of it is running.** Bash reads a
+script incrementally from a byte offset, so an edit under a running instance
+makes it resume in the middle of a different line. Patching
+`headless-gpcmem.sh` during a trace run gave `line 85: 900: command not found`,
+a second emulator launched on the same port base, a timeout kill, and the run's
+own log re-truncated — destroying the trace it had just produced, which
+survived only because a tool cache happened to hold a copy. Copy the script, or
+wait.
+
+**A diagnostic that fails silently on a malformed argument will be trusted.**
+`YAGPC_SNAPSHOT` wants `<t1>[,<t2>...]:<prefix>` and, given a bare prefix,
+looks for the colon, finds none, and does nothing at all. Two full runs
+completed and produced no snapshots before anyone checked why.
+
+**A backgrounded subshell does not inherit a `cd` that was `&&`-chained to its
+sibling.** `cd X && ( A ) & ( B ) &` runs B in the *original* directory. B died
+instantly, wrote its log into the repository, and the pair of runs it was half
+of had to be redone.
+
 ### 8.11 Finishing the OI340700 `.dfg` recovery
 
 §8.9 recovered two files. All twelve differing decks are now accounted for, and
@@ -7180,6 +7214,16 @@ body is what an empty slot is for; painting it over a background that just drew
 correctly is not a return path, and the walker's `visited` guard would have
 hidden the mistake by stopping after the damage.
 
+**The drawn lines needed a constant nobody could derive.** `GPC/BUS STATUS`
+draws rules between rows, and the deck gives their position as a ROW offset
+(CD0060, `VCORDA=(28,95,815,95)`); converting that to a SCREEN offset needs to
+know where glyph ink sits inside its cell, which the deck does not say. My own
+attempt at `ADJ.vecY = 0` was wrong by more than twice the whole gap. The user
+measured it instead — 8 px between one row's bottom strokes and the next row's
+top strokes at 1024×1024, so the ink fills 0.70 of a row and the gap 0.30, and
+centring a rule in that gap is 4 px = 0.15 row off the old 0.65. **0.50**,
+confirmed on screen with no other page regressed.
+
 This work is in **MEDS2** (`~/workspace/MEDS2`), a clone on a branch whose push
 remote is the literal string `DISABLED-never-push-MEDS2-upstream`. It is a
 deliberate stopgap, superseded the moment Don's own MEDS lands: point
@@ -7275,20 +7319,57 @@ scaling).
 with a nonzero sector — so regenerating the table cannot silently re-arm the
 exception, and anything else in that mode still fails.
 
+#### The clock-only and the flashing screen were one fault, and it was packet loss
+
+Two symptoms that looked unrelated — GPCIPL coming up with only its clock about
+half the time, and a rarer variant where everything but the clock flashed —
+were the same fault, and it was neither in the flight software nor in the beam
+interpreter.
+
+GPCIPL's menu is written **once**: 509 halfwords at `0x19ee` then 254 at
+`0x1beb`, 0.05 s apart, never repeated; thereafter only the first 196 words at
+`0x19ee`, twice a second. Lose either one-shot fill and there is nothing left
+to redraw from.
+
+Proven with two observers on the same multicast group. `dksniff` saw the
+509-halfword fill arrive **complete** while MEDS2 received 423 of 509 and
+discarded the partial transfer — `transfer abandoned, 86 halfwords short`,
+three abandons in that run (54, 30, 86). *Where* the loss falls decides which
+symptom appears. Lose the menu body and the walk from DISPLAY_HEADER starts on
+a stray `FCW1 3900` — blink on, with nothing after it to clear it — so 318 of
+319 glyphs land in the blink group and the whole screen flashes; lose it
+elsewhere and the clock updates over a blank screen.
+
+**Why so small a payload overran so large a buffer: the cost is per DATAGRAM,
+not per byte.** A 509-halfword fill is about a kilobyte of data spread over
+hundreds of bus messages, each charged its own skb overhead, so a burst of
+seven fills is nearer 400 KB than 7 KB. `dksniff` survives it because it does
+nothing but drain the socket; Electron is rendering when the burst lands.
+
+Fixed in two parts, and confirmed by the user at **0 abandoned transfers across
+137 fills** against 3 before. `com/bus.civet` now asks for a 4 MB receive
+buffer (`NSTS_BUS_RCVBUF`) and logs what it was actually *granted*, and
+`net.core.rmem_max` has to be raised from its 212992 default — a root action.
+`sysctl -w` does not persist, so `retest-crt2.sh` checks the value at startup
+and prints both the temporary and the permanent fix rather than leaving it to
+be remembered.
+
+Finding it needed the log to reach disk. MEDS2 had detected the case all along,
+but IDP handed the logger `console.log` — the renderer's devtools — so no
+failing run ever left a record. `NSTS_DEU_LOG=<path>` now writes it to a file,
+which set against `dk.log` separates "lost on the way" from "arrived and
+mishandled".
+
+One earlier clock-only capture showed **no** abandons and no menu on the wire
+at all. There the GPC never sent it, and that remains a second, distinct
+failure.
+
 #### Still open
 
-- **GPCIPL shows only its clock, about half the time.** Its menu is written
-  ONCE — 509 halfwords at `0x19ee` then 254 at `0x1beb`, 0.05 s apart, never
-  repeated; thereafter only the first 196 words at `0x19ee`, twice a second.
-  Lose either one-shot fill and the display updates its clock over a blank
-  screen until restart. MEDS2 already detected the case
-  (`transfer abandoned, N halfwords short`) but IDP handed the logger
-  `console.log`, i.e. the renderer devtools, so no failing run ever left a
-  record. `NSTS_DEU_LOG=<path>` now writes it to disk and every accepted fill
-  is logged; set against `dk.log` that separates "lost on the way" from
-  "arrived and mishandled".
-- The rarer variant where everything but the clock flashes.
-- How the DEU tells the two coordinate conventions apart.
+- The second clock-only failure above, where the menu never goes out at all.
+- How the DEU tells the two coordinate conventions apart. MEDS2 no longer needs
+  the answer in order to render — it scores the list and picks the frame — but
+  how the real hardware did it is still unanswered.
 - The CRT hand-over: GPCIPL follows the BFC switch, replaying its entire init
   on the newly selected unit (zeroing sweep `0x0f49`/`1146`/`1343`/`1540`/
   `173d`/`193a`/`0002`, then 509@`0x19ee` + 254@`0x1beb`) and no longer polling
@@ -7304,6 +7385,179 @@ exception, and anything else in that mode still fails.
   26 lines the whole screen and an MDU gives them the area above its menu bar.
   Closing that is an MDU *layout* change, not a rendering fix, and it is
   cosmetic.
+
+
+### 8.29 Why `OPS 901 PRO` did nothing — a major function nobody could see
+
+With GPC MEMORY drawing correctly, every OPS transition typed at it was
+ignored. `OPS 901 PRO`, `OPS 201 PRO`: no screen change, no scratch-pad
+complaint, nothing read from the tape. The standing explanation was that the
+GNC9 and PL9 overlays are not on our tape. That is true, and it was not the
+reason.
+
+#### PASS was not failing silently
+
+Which is what the user doubted, and was right to. `SSSRC/DM6OPS` enumerates
+nine refusal reasons in `DM6V_ERR_TYPE` — 0 none, 1 NO TARGETS IN RUN, 2 no
+target GPCs from the GRT, 3 not overlay initiator and not in main memory, 4
+mode recall from application, 5 mode-to-mode illegal, 6 from keyboard and not
+requested to target GPC/RS, 7 from application and not in main memory, 8
+illegal transition, and an undocumented 9 where `DM6_T_VALIDITY` fails. It
+writes each to `DMZ_LOG` and calls `FMPT_UI_OPERR` (ILLEGAL ENTRY) only for
+anything **above** 1; ERR_TYPE 1 raises a GPC CONFIG fault *message* instead,
+which is why nothing appeared on the scratch pad. We had simply never looked at
+the log.
+
+`SSSRC/DMZLOG` is 150 two-halfword sets, filled `FFFF`, with
+`DMZB_LOG_ALIGNMENT INITIAL(HEX'0C5C')` beside it as a findable marker and
+`DMZV_SET_NBR` as the next slot. The array **follows** the marker — declaration
+order is not layout order. Our request had written two entries:
+
+    d609 0001    LOG ON OPS/MODE   -> OPS 9, mode 1
+    d6f1 0001    D6F1 = NON MODE RECALL, ERR_TYPE = 1, "NO TARGETS IN RUN"
+
+So the request reached the OPS processor, passed the transition table, and
+stopped at the target check. That is why it never touched the tape.
+
+#### Four wrong answers first
+
+Each was measured, and each was wrong.
+
+*The GPC sets are empty.* `CZ2B_CS` and `CZ2B_RS` are both `0000`, so
+`RUN_GPC` looked unpopulated. Half right, and the wrong half mattered:
+`DMCSUP` runs on every MCDS event and does `CDMB_RSALL = CZ2B_RS$(TFCMID;) OR
+CDMB_RSCS_MSK$(TFCMID:*)`, so RS_ALL carries **self** even when both sets are
+empty. `RUN_GPC` reduces to `SELF AND TARGET_GPC`.
+
+*Assign a memory configuration first.* GPC MEMORY's `45 CONFIG` / `46 GPC` /
+`STORE 47` is the crew's route to one. Keyed headless, `CZ2V_MC_REQ` stayed
+`0000` and the refusal reproduced exactly.
+
+*We must be the wrong GPC.* The GRT sets between them name GPCs 1, 2 and 4, we
+had failed as 1 and 2, so GPC 4 was the falsifiable test. **It failed
+identically.** At that point GPC 1, 2 and 4 all gave ERR_TYPE 1 — a uniform
+result across the whole set, which by this document's own standing rule should
+have pointed straight at the harness. It did not, and that cost the most.
+
+*PASS ignores our item entries.* Withdrawn the same session. Two attempts had
+produced no change and an `ILLEGAL ENTRY` on screen — but the ILLEGAL ENTRY was
+mine. A repeated `ITEM 1 EXEC`, harmless on GPCIPL's own menu, is *input* once
+PASS owns the page, where `ITEM 1` is not valid. With the retry removed,
+`ITEM 53 +1 EXEC` is accepted with no complaint. **A retry that is harmless on
+one screen is input on another; do not leave one in a measurement.**
+
+#### The answer: the GRT lookup is keyed on the major function
+
+`DM6_AMT_GRT_SEARCH` finds the GRT row whose major function *and* OPS number
+match the request and whose memory-configuration number equals its own index;
+`DM6_TARGET_RUN_GPC` then turns that row's GPC set into `TARGET_GPC` via
+`TARGET_GPC$(12 TO 16) = TSET$(1 TO 5)`. Read out of the loaded image —
+`CZ2V_GRT_TAB` at `0x28ad`, `CZ2B_GRT_GPC_SET` at `0x26fc`, compool `#PCZ2COM`
+at `0x23f4`:
+
+| request | GRT index | GPC set | TARGET_GPC | targets |
+|---|---|---|---|---|
+| MF 1 **PL** OPS 9 | 6 | `4400` | `0008` | **GPC 2 alone** |
+| MF 2 **GNC** OPS 9 | 9 | `f000` | `001e` | GPCs 1–4 |
+
+We ran as GPC 1 with the switch at PL. `TARGET_GPC` was GPC 2, SELF's bit
+`0x0010` was not in it, `RUN_GPC = ... AND TARGET_GPC` was zero, and
+`DM6_TARGET_RUN_GPC` set ERR_TYPE 1. There is no contradiction left in the
+earlier measurements: SELF's mask *was* computed correctly and the GRT sets
+*were* populated, and both facts were beside the point, because the request was
+aimed at a different computer.
+
+**The switch was stuck at PL because it was never settable.** `DeuModel`'s
+`majorFunc` was declared, used to build every poll header, and assigned from
+nowhere at all, so the in-process DEU reported PAYLOAD forever and every
+headless OPS request was a PL request. `YAGPC_DEUMF=<0..3>` now sets it.
+
+It also explains the GPC-4 result, which had looked like a refutation of
+everything: `0x0002` is not in `0x0008` either. And the clue was in plain sight
+the whole time — the user pointed twice at Don's screens reading GPC **2**,
+first on the header line and then on `44 DOWNLIST GPC`. At PL, GPC 2 is the
+only computer an OPS 9 request targets.
+
+#### Confirmed by experiment, not by argument
+
+Three runs, one variable moved, PASS's own log read back:
+
+| run | `DMZ_LOG` | verdict |
+|---|---|---|
+| GPC 1, MF PL (control) | `d6f1 0001` | ERR_TYPE 1, NO TARGETS IN RUN |
+| GPC 2, MF PL | `d6f1 0000` | **accepted** |
+| GPC 1, MF GNC | `d6f1 0000` | **accepted** |
+
+`CZ2V_REC_OPS` says the same from the other end: **0** in the control, where
+the reconfiguration was never requested at all, and **9** in both accepted
+runs. The request now propagates into `ARC_GPC_RECONFIG`, which is the
+machinery that loads an overlay.
+
+#### Does PASS ever try to read the tape? No
+
+All three runs have identical mass-memory activity — 92 trace lines, every one
+from the IPL at t=10.3 s, none after. The accepted runs reach GPC
+reconfiguration and fail *before* any tape access is attempted. The tape gap is
+real, but it is downstream of everything above and is not what is stopping us.
+
+#### The next blocker: no memory configuration
+
+Both accepted runs return `CZ2V_REC_XERR = 1`, which `DM2APP` logs as
+`d2ff 0001` and treats as an error. `ARC_OPS_ZERO` (`ARCGPC.hal:1112`) says
+where it comes from:
+
+    IF  CZ2V_MC$(ARC_GPC_ID;)=0  THEN  CZ2V_REC_XERR=1;  ELSE  CZ2V_REC_XERR=0;
+
+This GPC has no memory configuration assigned. That is the same missing thing
+the user identified twice from Don's video, from the other side: his
+`STORE MC=09` against our `MC=__`, and his `MM AREA / PL 52 1 / GNC 53 1 /
+SM 54 1` against our three zeroes. One cause, three symptoms.
+
+`SSSRC/AIBGPCLO:441` is where the MM AREA fields come from — during start-up it
+matches where PASS was *actually* loaded from against the per-area phase table:
+
+    IF CDJV_MM_AREA$(1:) = 0 THEN
+       DO FOR TEMPORARY I = 1 TO 3;
+          IF FCMMGPT_STARTING_MM_ADD$(1;) = CDCV_PHASES$(1,I:) THEN
+             CDJV_MM_AREA$(1 TO 3:) = I;
+
+Ours stays 0, so the match fails: either the tape puts PASS somewhere
+`CDCV_PHASES` does not name, or `CDCV_PHASES` is not populated. Tape-build
+shaped, like DEUCFLM and MMDIR before it.
+
+#### What made any of this readable
+
+- **`YAGPC_EAWATCH=lo-hi[,max[,afterSec]]`** (`src/cpu.c`) is `EATRACE` run
+  backwards: *which instruction touched this address*, rather than *which
+  address did this instruction touch*. That is the question you have when a
+  structure was located by searching memory for its contents and no link map
+  says what code owns it. It found `DM6OPS`'s transition-table search at NIA
+  `0x455f6`/`0x455fc`, with `0x45613` reading the matched entry's
+  `DM6B_TRANS_DATA`, starting from nothing but `DM6V_TR_TAB`'s own initial
+  values at `0x2c38`.
+- **`tools/opsdiag.py`** reads the whole chain out of a snapshot: the GRT rows
+  with the GPCs each targets, the GPC sets, and `DMZ_LOG`'s decoded verdict.
+  One command instead of a day.
+- **Multi-batch `YAGPC_DEUKEYS`** — `@150:ITEM,1,EXEC;@480:OPS,9,0,1,PRO`,
+  each batch at its own poll count — makes the whole sequence reproducible
+  unattended.
+- **The differential-GPC technique**, which needs no symbols at all: run the
+  same scenario as two different GPCs and diff the snapshots. GPC 1 against
+  GPC 4 gives 22 halfwords holding the GPC ID and 15 holding a per-GPC bit mask
+  (`0x0010` vs `0x0002`).
+- **Symbols without a link map.** The SDF (`modules/sdfpkg` over
+  `PFS/OI340600/SDFLIB`) resolves compool offsets; `#PCZ2COM` sits at `0x23f4`
+  in the tape's build, confirmed by `CZ2B_GRT_GPC_SET` matching `CZ2COMMO`'s
+  own initialiser halfword for halfword. Names in the SDF are EBCDIC and
+  **truncated to 8 characters**, so a grep for `CZ2B_GRT_GPC_SET` finds
+  nothing — search `CZ2B_GRT`. What the SDF cannot give is anything resolved at
+  LINK time: `TFCMID` has `addr=0` in every unit that names it, and there is no
+  `PHASEnn.sym.json` for the tape's PASS build anywhere on this machine.
+
+Recorded and not chased: the tape image's GRT row 5 carries `MC=5` where
+OI340600's `CZ2COMMO` source has `MC=0`. Row 7 (SM OPS 9, set `8400`,
+targeting GPC 1) has `MC=0` in both and so can never equal its own index, which
+is what the search requires.
 
 
 ## Methodology and caveats
