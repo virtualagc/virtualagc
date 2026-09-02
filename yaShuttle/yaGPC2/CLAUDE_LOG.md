@@ -381,3 +381,29 @@ on the wire at all.)
   `_open_bank_tails` both reshape a block's length from inferred MMB rules, and
   one of them is where the three errors come from.  That is Don's repository,
   so it is left read-only and reported rather than edited.
+
+### [2026-09-02] Target: problems.md
+- **CORRECTION to the commit above (`d7781ac24`): the load-block length defect
+  is REAL but it is NOT the cause of the masked wait.**  With all ten lengths
+  corrected and verified 10/10 against the tape, the machine still does the
+  same two 26-block reads from 3/3/6/0 and still halts at ~391 s.  The commit
+  message presents the length fix as the explanation of the halt; it is not,
+  and only the offline 7/10 -> 10/10 result should be relied on.
+- **AND THE OVERLAY APPLIES CORRECTLY.**  Load block 1 lands at 0x01f6 and
+  **96 of 96 content halfwords match the tape exactly**, against different
+  contents before the load.  So "a failed load corrupts FCOS" -- which is what
+  I had reasoned the halt was -- is wrong twice over: the load is faithful, and
+  fixing the lengths does not change the outcome.
+- WHAT IS ACTUALLY WRONG IS THE EXTENT.  The reader asks for **26 blocks**
+  (`EXTENDED BLOCK 598019`, 0x19 = 25, so 26) where the phase descriptor says
+  the phase spans `ncont = 37`.  26 blocks is 13312 halfwords, which is exactly
+  where load block 10 begins -- so blocks 1 through 9 are transferred and block
+  10 never is.  The second read is the same 26 blocks at the same address.
+  Where the 26 comes from, and why it is not 37, is the open question.
+- Still unexplained, and worth stating separately: nothing yet accounts for the
+  masked wait itself.  `FPMDSABL` cannot produce a zero interrupt mask, our
+  `ZB` is correct, `FCMSSYNC` reads as in-sync, and the overlay content is
+  faithful.  The halt follows a correctly-applied but INCOMPLETE overlay, which
+  is a coherent thing to be next -- PASS overlaying phase 3 and then finding
+  something absent, plausibly the program overlay (phase 8, mm 10880 = 5/2/4/0)
+  which is never read at all.
