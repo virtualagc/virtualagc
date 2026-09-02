@@ -38,6 +38,7 @@ import math
 import os
 import subprocess
 import tkinter as tk
+import tkinter.font as tkfont
 
 GPCS = ("GPC1", "GPC2", "GPC3", "GPC4", "GPC5")
 N_GPC = 5
@@ -78,6 +79,10 @@ C_LOCK = "#c4c1b5"
 
 REF_W = 820
 REF_H = 1000
+
+# Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
+# MMU 1/2).  Side captions and above/below captions share this size.
+SETTING_SIZE = 8
 
 
 def log(msg):
@@ -160,6 +165,7 @@ class PanelO6:
 
         self._hits = []          # (kind, index, x1, y1, x2, y2)
         self._bp_cache = {}
+        self._font_cache = {}
         self._wh = (0, 0)
         self._cursor_hits = False
 
@@ -204,9 +210,21 @@ class PanelO6:
 
     # ---- geometry -------------------------------------------------------
 
+    def _tkfont(self, size, bold=True):
+        # Tk: positive size is points.  Used only for metrics; _font() is
+        # what create_text gets, and must stay in the same units.
+        pts = max(6, int(round(size * self.s)))
+        key = (pts, bold)
+        font = self._font_cache.get(key)
+        if font is None:
+            font = tkfont.Font(family="Helvetica", size=pts,
+                               weight="bold" if bold else "normal")
+            self._font_cache[key] = font
+        return font
+
     def _font(self, size, bold=True):
-        px = max(6, int(round(size * self.s)))
-        return ("Helvetica", px, "bold" if bold else "normal")
+        pts = max(6, int(round(size * self.s)))
+        return ("Helvetica", pts, "bold" if bold else "normal")
 
     def _on_configure(self, event):
         if event.widget is not self.cv:
@@ -244,14 +262,18 @@ class PanelO6:
         self.cv.create_text(self.X(x), self.Y(y), text=text, fill=fill,
                             font=self._font(size, bold), anchor=anchor)
 
-    def _vtext(self, x, y, text, size=9, fill=C_INK):
-        fh = max(7, int(round(size * 1.2 * self.s)))
-        n = len(text)
+    def _vtext(self, x, y, text, size=SETTING_SIZE, fill=C_INK):
+        """Stacked caption.  Leading is from the font's linespace plus a
+        gutter: 1.2 em was tight enough that bold caps overlapped."""
+        font = self._font(size)
+        linespace = self._tkfont(size).metrics("linespace")
+        fh = linespace + max(2, linespace // 3)
+        chars = [ch for ch in text if not ch.isspace()]
+        n = len(chars) or 1
         total = n * fh
         y0 = self.Y(y) - total / 2.0 + fh / 2.0
-        font = self._font(size)
         cx = self.X(x)
-        for i, ch in enumerate(text):
+        for i, ch in enumerate(chars):
             self.cv.create_text(cx, y0 + i * fh, text=ch, fill=fill,
                                 font=font, anchor="c")
 
@@ -396,7 +418,7 @@ class PanelO6:
 
     def _draw_power(self):
         self._gpc_numbers(78, center_label="POWER")
-        self._text(347, 96, "ON", size=9)
+        self._text(347, 96, "ON", size=SETTING_SIZE)
 
         guard_w, guard_h = 58, 124
         for i, cx in enumerate(self.col):
@@ -406,7 +428,7 @@ class PanelO6:
             self._guarded_toggle(x1, y1, x2, y2, pos, npos=2)
             self._hit("power", i, x1, y1, x2, y2)
 
-        self._text(347, 246, "OFF", size=9)
+        self._text(347, 246, "OFF", size=SETTING_SIZE)
 
     def _draw_output_talkbacks(self):
         self._line(70, 270, 624, 270, fill=C_INK_DIM, width=1)
@@ -419,9 +441,9 @@ class PanelO6:
             self._text(cx, 346, str(i + 1), size=11)
 
     def _draw_output_switches(self):
-        self._text(347, 368, "BACKUP", size=9)
-        self._vtext(56, 444, "NORMAL", size=8)
-        self._vtext(618, 444, "NORMAL", size=8)
+        self._text(347, 368, "BACKUP", size=SETTING_SIZE)
+        self._vtext(56, 444, "NORMAL")
+        self._vtext(618, 444, "NORMAL")
 
         guard_w, guard_h = 58, 136
         for i, cx in enumerate(self.col):
@@ -431,7 +453,7 @@ class PanelO6:
             self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
             self._hit("output", i, x1, y1, x2, y2)
 
-        self._text(347, 526, "TERMINATE", size=9)
+        self._text(347, 526, "TERMINATE", size=SETTING_SIZE)
 
     def _draw_ipl(self):
         self._line(70, 542, 624, 542, fill=C_INK_DIM, width=1)
@@ -454,9 +476,9 @@ class PanelO6:
     def _draw_mode_switches(self):
         self._line(70, 684, 624, 684, fill=C_INK_DIM, width=1)
         self._gpc_numbers(702, center_label="MODE")
-        self._text(347, 720, "RUN", size=9)
-        self._vtext(56, 838, "STBY", size=8)
-        self._vtext(618, 838, "STBY", size=8)
+        self._text(347, 720, "RUN", size=SETTING_SIZE)
+        self._vtext(56, 838, "STBY")
+        self._vtext(618, 838, "STBY")
 
         rx, ry = 38, 58
         for i, cx in enumerate(self.col):
@@ -465,12 +487,12 @@ class PanelO6:
             self._hex_toggle(cx, cy, rx, ry, pos, npos=3)
             self._hit("mode", i, cx - rx, cy - ry, cx + rx, cy + ry)
 
-        self._text(347, 912, "HALT", size=9)
+        self._text(347, 912, "HALT", size=SETTING_SIZE)
 
     def _draw_ipl_source(self, mx1, ex1, ey0, ey1):
         cx = (mx1 + ex1) / 2.0 + 6
         self._text(cx, ey0 + 28, "IPL SOURCE", size=9)
-        self._text(cx, ey0 + 48, "MMU 1", size=9)
+        self._text(cx, ey0 + 48, "MMU 1", size=SETTING_SIZE)
 
         gw, gh = 56, 140
         x1, y1 = cx - gw / 2, ey0 + 60
@@ -479,8 +501,8 @@ class PanelO6:
         self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
         self._hit("ipl_source", None, x1, y1, x2, y2)
 
-        self._text(cx, y2 + 16, "MMU 2", size=9)
-        self._vtext(ex1 - 12, (y1 + y2) / 2.0, "OFF", size=8)
+        self._text(cx, y2 + 16, "MMU 2", size=SETTING_SIZE)
+        self._vtext(ex1 - 12, (y1 + y2) / 2.0, "OFF")
 
     # ---- control bodies -------------------------------------------------
 
