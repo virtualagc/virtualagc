@@ -541,3 +541,45 @@ on the wire at all.)
   is precisely the data `#PFCMGPT` needs.  Deriving the table from the TAPE
   rather than from a `.lib` sidesteps the missing build entirely, and is the
   only route that cannot disagree with the volume it will be read from.
+
+### [2026-09-02] Target: problems.md
+- **THE OPS 9 OVERLAY LOAD WORKS, FROM THE TAPE, WITH NO RUNTIME INJECTION.**
+      STOPPED ... reason: interrupted (SIGINT)      -- normal end of run
+      mmu1: read  26 block(s) from 3/3/6/0          phase  3, MF overlay
+      mmu1: read 110 block(s) from 2/5/4/0          phase  8, program overlay
+      CZ2V_REC_OPS = 9, CZ2V_REC_XERR = 0           no error
+      CZ2V_MF_OVLY = 3                              was 0
+  Both overlays load and the reconfiguration reports success.  Every earlier
+  attempt either never reached the tape or corrupted the GRT and halted.
+- **HOW: `#PFCMGPT` and `#PCDCPHA` are STAMPED ONTO THE VOLUME**
+  (`pass-stamped.mmv`, a copy; the original is untouched), with the phase
+  descriptors taken from the tape's OWN IPL phase table rather than from a
+  `mmbstamp` reconstruction.  `tools/stamp_phase_table_on_tape.py` builds the
+  table; the rig takes `TAPE=` to select a volume.
+- **THE ENCLOSING LOAD BLOCK MUST COME FROM THE TABLE, NOT FROM A SEARCH.**
+  My first attempt located it by scanning for a start/length whose checksum
+  verified, found `(612956, 5961)`, and "fixed" that -- corrupting phase 2's
+  REAL block 18, `(615304, 8410)`.  PASS then failed to load at all and halted
+  earlier than before.  A checksum match is cheap to hit by accident; the IPL
+  phase table gives the true extents:
+      #PFCMGPT  volume 616158  inside phase 2 block 18  (615304, 8410)
+      #PCDCPHA  volume 633964  inside phase 2 block 23  (633736,  802)
+  Both verified BEFORE stamping -- which is what proves the right block was
+  found -- and again after, on an independent re-read.
+- **`mmbstamp` IS NOT FIXED, and the framing "two tools disagree" is wrong.**
+  There is ONE derivation: `tools/stamp_ipl_phase_table.py` (ours) calls
+  `mmbstamp.phase_load_blocks()` (Don's), so the tape's table and today's
+  output come from the same code and differ only by INPUT.  Neither surviving
+  build root reproduces the tape: `~/ipl-demo/phases` has all ten phase-3
+  extents but gives block 1 at 0x1f6 where the tape says 0x24a;
+  `dfg2/build` gives 0x24a but lacks the 0x654 extent entirely and yields nine
+  blocks, not ten.  `mmbstamp.py` and `mmu2mmv.py` also carry uncommitted local
+  changes dated 2026-08-28/29 against a tape dated 2026-08-29, so the code that
+  built it may not be the code on disk.
+- The real MMB relocates some blocks and `mmbstamp` does not model it: five of
+  phase 3's ten addresses match the lib extents exactly and five differ, by
+  0x54, 0x190, 0x1092, 0x1434 and 0x193a -- no common factor.  Five deltas is
+  not enough to infer a placement rule, and guessing one is what produced four
+  wrong answers today.  The tape's IPL table also covers phases 2, 10 and 13,
+  giving about fifty known-correct (lib extent -> tape address) pairs; that is
+  the input a real fix needs.
