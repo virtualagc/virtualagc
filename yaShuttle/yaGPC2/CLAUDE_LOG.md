@@ -194,3 +194,34 @@ the transition at all.)
   did.  Both instruments used here (snapshot subtraction, and reading ARC's own
   logic against its recorded state) were available the whole time.
 
+
+### [2026-09-03] Target: [problems.md]
+- **FIRST DESCRIPTOR SET THAT IMPROVES MEMORY, AND A MEASURED CEILING.**
+  Scoring = mean agreement with the OI340700 as-built image over the regions a
+  load writes, snapshotted before and after (YAGPC_SNAPSHOT=235,255,
+  SOURCE_RUN=OFF RUN_AT=130):
+      candidate, 35 descriptors, checksum lengths + monotone dests
+                                            53.3% -> 68.2%   IMPROVES
+      mmbstamp, 27 descriptors              68.7% -> 24.8%   DESTROYS
+      phase 3, KNOWN-GOOD descriptors       94.3% -> 94.2%   <- THE CEILING
+  **The ceiling is ~94%, not 100%**, because the tape is OI340600-derived and
+  the reference is OI340700.  Phase 3 scores flat because it is already
+  resident, so reloading writes identical values -- which is the correct
+  behaviour, not a null result.  Without this measurement the obvious mistake is
+  to tune phase 8 toward a 100% that does not exist.
+- 68.2% against a 94% ceiling means about a quarter of the achievable gap is
+  still error, but it is now a NUMBER THAT RESPONDS TO CHANGES, one run apiece.
+- **`y` IS NOT THE TRANSFER LENGTH.**  It stayed at 110 while the machine read
+  **86** blocks -- matching the 35 descriptors' own consumption (87), not the
+  header.  So the read length is derived from the descriptor list and `y` is at
+  most an upper bound.  This retires the remaining "y is constrained" reasoning.
+- **The candidate causes a RETRY; mmbstamp's does not.**  FCMMGPOV retries an
+  unsuccessful overlay exactly once and the trace shows two identical 86-block
+  reads.  So the flight software DETECTS a fault with the candidate, where
+  mmbstamp's set passes validation and silently writes wrong data.  Likely cause
+  of the fault: 35 descriptors consume 87 MM blocks but only 86 were read, which
+  truncates the final block and fails its checksum.  Data is still written on
+  the failed attempt -- memory improved anyway.
+- The machine did NOT halt on the candidate tape (SIGINT at t=268, normal end),
+  unlike several earlier attempts.
+- Tapes: pass-cand.mmv is the candidate; pass-stamped.mmv remains the reference.
