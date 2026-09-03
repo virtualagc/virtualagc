@@ -560,8 +560,18 @@ def dfg(path, fatal = True):
     path = str(path)
     stem = Path(path).stem
     tmp = "_dfg_" + stem + ".hal"
-    command = [displayGenerator, path, "-o", tmp,
-               "--sdflib", sdfi, "--deck-root", "."]
+    command = [displayGenerator, path, "-o", tmp, "--deck-root", "."]
+    # --no-sdfi sets sdfi to None; passing that through would put None into the
+    # argument list.  A deck needs the compool SDFs to resolve its types, so
+    # without a library dfg will fail on any deck that includes one -- but that
+    # is dfg's diagnostic to give, not a crash here.
+    #
+    # Naming, for whoever needs it next: the two libraries do NOT agree.  An
+    # SDF member is SDFLIB/##NAME.sdf, WITH the extension; a template member is
+    # TEMPLIB/@@NAME, without one.  NAME is descore()d -- underscores stripped,
+    # truncated to six characters -- in both.
+    if sdfi != None:
+        command += ["--sdflib", sdfi]
     try:
         result = subprocess.run(command, capture_output = True, text = True)
     except Exception as e:
