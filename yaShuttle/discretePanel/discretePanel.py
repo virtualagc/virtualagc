@@ -133,8 +133,10 @@ def _active_window():
     return m.group(1) if m and int(m.group(1), 16) else None
 
 
-def _dont_steal_focus(root):
+def _dont_steal_focus(root, mapWindow=True):
     """Map the panel without taking the keyboard away from the user.
+
+    With mapWindow=False the window is never mapped at all -- see below.
 
     The panel is a crew panel: every control is a mouse control and it has no
     business receiving a keystroke.  Mapped the ordinary way it is a new
@@ -171,6 +173,22 @@ def _dont_steal_focus(root):
             refuse(child)
     refuse(root)
     root.bind("<Key>", lambda _e: "break")
+
+    if not mapWindow:
+        # NEVER MAPPED, SO THERE IS NOTHING TO STEAL.  A scripted run drives
+        # the buses over UDP and nobody looks at it; the window is pure
+        # overhead.  Everything above still applies to the widgets, and Tk's
+        # event loop runs `after()` timers perfectly well while withdrawn,
+        # which is all _run_script needs.
+        #
+        # This is the only reliable answer.  The dance below hands the
+        # keyboard back about 400 ms after mapping, which is a real gap: any
+        # keystroke in it is swallowed by the <Key> binding above rather than
+        # delivered to whatever the user was typing into.  One rig run is a
+        # brief annoyance; a dozen in a day, which is what an experiment
+        # campaign looks like, is a keyboard that randomly eats input.
+        root.withdraw()
+        return
 
     previous = _active_window()
 
@@ -642,7 +660,11 @@ def main():
             root.geometry(geom)
         except tk.TclError as e:
             raise SystemExit("discretePanel: bad --geometry %r: %s" % (geom, e))
-    _dont_steal_focus(root)
+    # A scripted run has no viewer, so it gets no window: see
+    # _dont_steal_focus.  Mapping one is what puts the panel anywhere near the
+    # keyboard, and a rig that starts the panel a dozen times a day makes that
+    # a standing hazard rather than a one-off.
+    _dont_steal_focus(root, mapWindow=not args.script)
     if args.script:
         with open(args.script) as f:
             _run_script(panel, _parse_script(f.read()), args.quit_after)
