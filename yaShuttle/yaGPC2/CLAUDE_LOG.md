@@ -148,3 +148,49 @@ the transition at all.)
   cause is visible in the names -- $0VB2LEV, A4VB2LEV, A6VB2LEV, B0VB2LEV are
   numbered variants of one routine, so a fingerprint matches the wrong copy at
   high confidence.  Raw scoring cannot detect that; the ordering constraint can.
+
+### [2026-09-03] Target: [problems.md]
+- **MEASURING THE LOAD'S EFFECT, INSTEAD OF INFERRING IT.**  Snapshotted main
+  storage either side of the transition (YAGPC_SNAPSHOT=235,250 with
+  SOURCE_RUN=OFF RUN_AT=130) and asked what the overlay actually did.  Three
+  facts, all measured:
+    1. The loader WORKS.  26 of mmbstamp's 27 phase-8 blocks are written to
+       memory at their declared addresses, at 85-100% of their halfwords.
+    2. The CONTENT IS WRONG.  Mean agreement with the OI340700 as-built image
+       across those 27 regions goes 68.7% BEFORE the load to 24.8% AFTER.  The
+       overlay degrades memory that was already correct -- blocks 4, 5, 7, 8,
+       16, 17, 18, 22, 23, 24, 26 and 27 were at ~100% and were wrecked.
+    3. ARC exits its phase loop after ONE iteration.  MC 9 loaded phases 3 and
+       8 then stopped before 18; MC 6 loaded phase 9 then stopped before 12.
+  So the descriptors are wrong -- which was the original conclusion -- but the
+  evidence used for it ("only 1 of 27 blocks checksum") was never testing the
+  descriptors.  It was testing MY packing model of where each block sits on the
+  tape, and that model is what is wrong.
+- **THE MULTI-GPC HYPOTHESIS IS REFUTED.**  ARCGPC.hal:979-1001 ORs
+  ARC_OVL_TSW$(2:12 TO 16) -- five bits, one per GPC -- into ARC_OVL_ERR, clears
+  bits only for GPCs that are neither source nor destination ("IGNORE IDLER
+  ERRORS"), exits the phase loop on any survivor and zeroes ARC_MF_PG_PH.  MC 9
+  targets GPCs 1-4 and the rig has one, so the missing three looked like the
+  cause.  They are not: MF PL OPS 9 is GRT index 6, set 4400 = GPC 2 ALONE, and
+  run as GPC_ID=2 DEUMF=0 it fails the SAME way -- phase 9 loads (23 blocks from
+  3/3/4/0), phase 12 never does.  ARC_OVL_ERR is being set for SELF.
+- Also checked and CLEAN, so nobody re-checks them: the GRT is intact across the
+  transition (CZ2B_GRT_GPC_SET and CZ2V_GRT_TAB identical before and after);
+  phase 18 IS allocated (35 contiguous blocks from index 11776, y=11 fits);
+  CZ2V_GRT_MC_PHASES correctly reads MC 9 = 3, 8, 18; REC_XERR = 0 at the
+  DM2APP level; and wordsLost=720 is CONSTANT across every run including the
+  known-good baseline and a control that performs no overlay at all, so it is
+  the deliberate "clear the MIA buffer" reads and not an error.
+- **THE REAL GAIN IS A NON-INFERENTIAL ORACLE.**  Any candidate descriptor set
+  can now be SCORED by running it: mean agreement with the as-built image over
+  the written regions, before versus after.  mmbstamp scores 68.7 -> 24.8, i.e.
+  actively harmful.  A correct set must score upward.  Every previous method
+  tried to prove a descriptor set correct offline; none ever measured whether a
+  load helped or hurt, and that measurement takes one run.
+- METHOD NOTE: every earlier approach -- checksum walks, bgrep anchoring, sparse
+  fingerprints, as-built scoring, section-start filtering, monotone DP -- was
+  the same move, inferring blocks by matching tape bytes against a dump, each
+  round making the matching cleverer.  None asked the running machine what it
+  did.  Both instruments used here (snapshot subtraction, and reading ARC's own
+  logic against its recorded state) were available the whole time.
+
