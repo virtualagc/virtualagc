@@ -529,6 +529,16 @@ def macroLibraryFor(path):
 # comparison against dumps rather than for a tape, this is the knob to change.
 assemblyFill = "C6C6"
 
+# An abort throws away however many hours the run had already spent, so say how
+# to pick it up again rather than leaving --skip-to to be found in --help.
+def resumeHint(where):
+    print("")
+    print("To resume after fixing this, from this directory:")
+    print("    compilePASS --skip-to=%s" % where)
+    print("(Do NOT re-run prepareTEMPLIB/prepareINCLIB first -- that would "
+          "discard the templates and SDFs already built.)")
+    print("")
+
 assemblyCount = 0
 def assemble(path, fatal = True):
     """Assemble one AP-101S source file into objects/<stem>.obj.  True on
@@ -560,6 +570,7 @@ def assemble(path, fatal = True):
         for line in tail:
             print("     ", line)
         if fatal:
+            resumeHint(path)
             outtaHere(1)
         return False
     return True
@@ -568,11 +579,27 @@ def assemble(path, fatal = True):
 # own; it only rewrites the deck as HAL/S, and OUR compiler then compiles that.
 displayGenerator = "dfg"
 
-def dfg(path, fatal = True):
+displayFailures = []
+def dfg(path, fatal = False):
     """Translate one display deck to HAL/S with `dfg`, compile the result with
-    `compile`, and discard the intermediate.  True on success."""
+    `compile`, and discard the intermediate.  True on success.
+
+    A generation failure is RECOVERABLE by default, unlike a compilation or
+    assembly error.  `dfg` is a translator, and the decks it cannot derive are
+    its own limitation rather than an error in our source -- CS2210 fails with
+    "cannot derive rate count ... draw not derivable".  Stopping the whole run
+    for one deck would cost hours and surface exactly one failure per run, when
+    what is wanted is the whole list; they are collected and reported instead."""
+    global skipping
     path = str(path)
     stem = Path(path).stem
+    # Mirror compile()'s --skip-to handling.  Without this a resumed run
+    # re-translates every earlier deck before compile() discards the result.
+    if skipping:
+        if path == skipTo:
+            skipping = False
+        else:
+            return True
     tmp = "_dfg_" + stem + ".hal"
     command = [displayGenerator, path, "-o", tmp, "--deck-root", "."]
     # --no-sdfi sets sdfi to None; passing that through would put None into the
@@ -597,6 +624,7 @@ def dfg(path, fatal = True):
         tail = (result.stderr or result.stdout or "").strip().splitlines()[-8:]
         for line in tail:
             print("     ", line)
+        displayFailures.append(path)
         if fatal:
             outtaHere(1)
         return False
@@ -1280,6 +1308,12 @@ if assembleToo:
     for path in assemblyFiles:
         assemble(path)
     print("%s: %d file(s) assembled." % (datetime.now(), len(assemblyFiles)))
+
+if len(displayFailures) > 0:
+    print("%d display deck(s) could not be translated by dfg, and have no "
+          "object:" % len(displayFailures))
+    for path in displayFailures:
+        print("     ", path)
 
 if len(unrecognizedFailures) > 0:
     print("%d file(s) failed in a way compilePASS does not recognize, and the "
