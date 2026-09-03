@@ -502,10 +502,24 @@ except:
 # byte-comparable).  A build wants reproducibility, so the C port it is.
 assembler = "ASM101Sa"
 
-# The macro library depends on where the source lives: the RTL in RUNASM/ is
-# assembled against RUNMAC/, everything else against MLIB80/.
+# The macro library depends on where the source lives: the RTL is assembled
+# against RUNMAC/, the flight software against MLIB80/.
+#
+# BUILD.md named only RUNASM/ (RUNMAC) and SSSRC/ (MLIB80).  ZCONASM/ is RTL
+# too, so it is grouped with RUNASM/ here.  That choice is not load-bearing:
+# the ZCON sources define data and invoke no macros, and twelve of them
+# assembled byte-identically under either library.
 def macroLibraryFor(path):
-    return "RUNMAC" if Path(path).parent.name == "RUNASM" else "MLIB80"
+    return "RUNMAC" if Path(path).parent.name in ("RUNASM", "ZCONASM") \
+           else "MLIB80"
+
+# NOTE for anyone tempted to run these commands through a shell: every one of
+# the 286 sources in ZCONASM/ is named with a leading "#" (#QACOS.asm and so
+# on), as are three in SSSRC/ and seven in MLIB80/.  "#" starts a comment in
+# sh, so such a name must be quoted on a command line.  Nothing here uses a
+# shell -- subprocess is given an argument list -- so the names pass through
+# untouched; introducing shell=True would silently truncate the command for
+# those 296 files.
 
 # C6C6 is the TAPE's padding convention, and tapes are what these objects are
 # for.  The other two values in play are 0000 (ASM101S's own default) and C9FB
