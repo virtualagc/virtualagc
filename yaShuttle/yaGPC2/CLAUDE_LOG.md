@@ -679,3 +679,30 @@ on the wire at all.)
 - Method note for the augmented files: they are ONE long line, so ordinary
   line-oriented tools are useless on them.  `tools/jsonpp.py` (--keys,
   --schema, --get, --count-by) exists for that.
+
+### [2026-09-02] Target: problems.md
+- **`c9fb` IS THE DUMP'S FILL PATTERN, and counting it as content wrecked a
+  whole line of analysis.**  The tape fills with `c6c6`/zeros; the mafgen `.fcm`
+  images fill with `c9fb`.  Scoring those positions as mismatches produced the
+  claim that "code matches the dump and data does not", which is FALSE.  With
+  fill excluded, phase 3 is 16,124 halfwords with **1,367 genuine differences,
+  8.5%** -- and the block I reported as "41.3% matching" is **99.7%**:
+        blk 3   794 differences, 790 of them c9fb  -> 4 genuine
+        blk 5     1 difference,    1 of them c9fb  -> 0 genuine
+  **The DASS dumps are as-built, as-linked, as-initialized and unchanged
+  thereafter; differences against our build are AS-BUILT.**  Corrected by the
+  user three times -- see the memory note; do not reach for "it had been
+  running" again.
+- The residual 8.5% is real as-built difference between our tape and OI340700,
+  concentrated in blocks 4 (627) and 8 (636), with 53 in the ZCON block.
+- **PHASE 8 IS STILL BLOCKED ON BLOCK BOUNDARIES, which is upstream of
+  everything else.**  Proof the 512-alignment walk is wrong: four of its
+  "unambiguous" blocks have content beginning with `c6c6`, which a load block
+  cannot.  With wrong boundaries, length recovery drifts AND content placement
+  fails -- row 7 anchors uniquely on its first 8 halfwords at 0x03fe0 but
+  diverges immediately after, i.e. right address, wrong length.
+- Content placement, done properly, does work: treat `c9fb` as a wildcard,
+  anchor on an 8-halfword window, then require >=85% agreement on non-fill
+  positions.  Row 35 places uniquely at **0x101f8** (1015 genuine agreements)
+  and row 22 at **0x0e29a** (94% of 100).  It is the boundaries, not the
+  method, that are missing.
