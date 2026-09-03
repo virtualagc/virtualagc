@@ -1063,7 +1063,15 @@ print(f"{datetime.now()}: Compiling independent files ...")
 for filename in templatesByFilename:
     template = templatesByFilename[filename]
     if len(template["includedFilenames"]) == 0:
-        if not compile(template):
+        # A display deck goes through dfg() here too.  This is the pass that
+        # takes files with no unresolved includes, and a deck that includes
+        # nothing lands in it -- handing it to compile() feeds the .dfg
+        # straight to HALSFC, which aborts after PASS1 with exit code 240.
+        if template.get("kind") == "dfg":
+            built = dfg(template["filename"])
+        else:
+            built = compile(template)
+        if not built:
             skipped.add(filename)
 for stem in templatesByStem:
     template = templatesByStem[stem]
