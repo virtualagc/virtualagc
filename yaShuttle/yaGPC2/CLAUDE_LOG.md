@@ -531,3 +531,216 @@ the transition at all.)
   exact on phase 3, the likely reading is that the CONTENT-MATCHED SET IS WRONG
   beyond its first few blocks, consistent with blocks 8/9/10 spanning real
   boundaries and 11 and 32 measuring bad.  Not yet proven either way.
+
+### [2026-09-03] Target: HANDOFF-FCMBOOT.md
+- CORRECTION: MMLOAD IS THE TOP-LEVEL DECK, NOT OFTMP.  My earlier "top-level"
+  scan followed only INCLUDE CONCARDS(...) edges, so it never saw
+  "LOADMOD,MEMBER=OFTMP" and wrongly reported OFTMP as top-level.  Following
+  every reference form: MMLOAD references OFTMP, NOTHING references MMLOAD, and
+  OFTMP drops out of the top-level set.  Control hierarchy is
+  MMLOAD -> OFTMP -> PHASEnn -> configuration decks -> INSERT cards; MMBUILD
+  ("BUILD;") is a separate top-level one-liner, as are MMUSYSn/MMUDATn/MMXnn.
+- THE THREE LIBRARIES THE DECKS NAME.  CONCARDS = CON80 itself (216 INCLUDEs,
+  113 members).  SYSLIBL1 = the OBJECT library (125 INCLUDEs, 114 members),
+  members named by CSECT and resolving to <name>.obj after stripping the HAL
+  prefix: #CPCINIT -> PCINIT.obj, #CSACPMU -> SACPMU.obj, #PCSPCON -> CSPCON.obj.
+  ZCONLIB(ZCON) = a single autocall member, and it is NOT anywhere in the tree.
+- ZCONLIB IS THE HAL/S RUNTIME LIBRARY AND IT IS MISSING HERE.  The G9 map has
+  161 HAL_LIBRARY_* CSECTs (68 CODE, 68 ZCON, 25 DATA) and NONE of them is
+  defined in objects/, nor present in MLIB80 under those names (SNCS, DSNCS,
+  DATAN2, VV1D3, EATAN2, MM13S3 are all absent).  They ship with the compiler,
+  not with the PASS sources.  This matters: phase 3's block 1 is ENTIRELY ZCON +
+  HAL_LIBRARY_ZCON, and its block at 0x4888c ends with 24 HAL_LIBRARY_CODE
+  routines plus a PATCH -- so a link without the runtime library cannot
+  reproduce either block.
+- objects/ IS A PARTIAL BUILD: 896 non-underscore .obj against ~1573 sources
+  (SSSRC 424 + APPLSRC 1149).  Sources exist for the missing ones (ASCTIMEM.hal,
+  ASLTMC.hal, DCDDG9.hal, FIOCDATS.asm, FIOMVUDT.asm) but were not compiled.
+  That is why 46 of PHASE08's 98 INSERT names do not resolve -- a build-input
+  gap, not a tooling defect.
+- THE "_"-PREFIXED OBJECTS ARE A SECOND COMPILE RUN: 899 of them against 896
+  plain.  AIDDEU.obj vs _AIDDEU.obj differ in 11 bytes of 1440, all digits in
+  the card identification fields (date/version stamps), not in code.  Pick one
+  set and use it consistently.
+
+### [2026-09-03] Target: HANDOFF-FCMBOOT.md
+- CONCARDS / SYSLIBL1 / ZCONLIB ARE JCL DD NAMES, NOT DIRECTORIES.  On the
+  mainframe "INCLUDE CONCARDS(MAP2)" meant member MAP2 of the dataset allocated
+  to DDNAME CONCARDS.  The build JCL/PROCs (OBS.PROCLIB, named in $$SUBSET's own
+  comments) were NOT recovered with the source, so the original dataset names
+  are not in the tree.  con80build reconstructs each DD name:
+    CONCARDS -> the CON80 directory itself (CON80_DIR="CON80", overlaid across
+                --root and --con80)
+    SYSLIBL1 -> resolved as SOURCE members through SSSRC/APPLSRC via
+                SourceIndex.resolve, then scanned for CSECT/ENTRY definitions,
+                because the csect name often differs from the file name
+                (INSERT GPCIPL -> CSECT GPCIPL inside member BILDNEW5)
+    ZCONLIB  -> build/lib/runtime/{RUN,ZCON}, passed to lnk101 -L
+- THE RUNTIME LIBRARY IS A SEPARATE BUILD.  cmake/BuildRuntime.cmake globs
+  $HALSFC_SRC_DIR/RUNASM/*.asm and ZCONASM/*.asm (RUNMAC for macros), assembles
+  each with asm101 and installs the .obj into lib/RUN and lib/ZCON.  Currently
+  built here: 205 RUN objects and 284 ZCON objects.  The RUNASM/ZCONASM SOURCES
+  are not on this machine -- only the built output -- so they come from the
+  HAL/S-FC compiler distribution, not from the PASS sources.
+- COVERAGE: of the 161 HAL_LIBRARY_* csects the G9 map needs, 132 are supplied
+  by that built runtime.  The other 29 are all #0* and #L*, which lnk101 handles
+  by prefix (linker.py:88 has ('#L','DATA')) and via synthesizeMissingExternals,
+  so they need no library member.
+- PATCH TEXT: "INCLUDE SYSLIBL1(PCHnnTXT)" is fed by source PCHnnSRC in SSSRC;
+  con80build.patch_member() is literally src_name[:-3] + "TXT".
+
+### [2026-09-03] Target: HANDOFF-FCMBOOT.md
+- CORRECTION: THE RUNTIME SOURCES ARE ON THIS MACHINE.  I said RUNASM/ZCONASM
+  were absent and only the built output existed; they are in
+  yaShuttle/"Source Code"/PASS.REL32V0/ -- RUNASM 624 members, ZCONASM 286,
+  with the macros in "Source Code"/HAL.HALS.RUNMAC (32).  My find had searched
+  the wrong roots and I generalised from its failure.
+- THE DD NAMES ARE BOUND IN RECOVERED CLISTs.  PASS.REL32V0/TEST.CLIST/T32V0 is
+  a PROC whose parameters bind them to MVS datasets outright:
+      RUNLIB(&ID..PASS.&RUNLVER..RUNLIB)
+      ZCONLIB(&ID..PASS.&COMPVER..ZCONOBJ)
+      COMPILER(&ID..PASS.&COMPVER..COMPILER)
+      LNKIN(NCAMCM.TESTLIB.&GROUP..CON)      <- linkage-editor control deck ds,
+                                                the analogue of CON80/CONCARDS
+  CM.CLIST/ALIAS defines the NCAMCM.PASS.CURRENT.* aliases onto
+  NCAMCM.PASS.REL32V0.*, so builds referred to CURRENT and the alias chose the
+  release.  CM.JCL/TAPE32V0 is a DFDSS volume dump listing the whole inventory.
+- SO: ZCONLIB = dataset NCAMCM.PASS.<ver>.ZCONOBJ, built by assembling ZCONASM;
+  RUNLIB = NCAMCM.PASS.<ver>.RUNLIB, a link library over RUNOBJ, built by
+  assembling RUNASM against the RUNMAC macros.  CONCARDS/SYSLIBL1 are the same
+  idea on the FLIGHT SOFTWARE volume (OBS.*), which was not recovered -- only
+  the CON80 deck contents and the sources survive.
+- NOT RECOVERED: BUILD.CLIST (the procedure that actually built RUNOBJ, RUNLIB
+  and ZCONOBJ) and those three built datasets themselves.  That is exactly why
+  cmake/BuildRuntime.cmake has to reassemble them from RUNASM/ZCONASM with
+  asm101 rather than just using them.
+- COVERAGE GAP WORTH CHECKING: 624 RUNASM sources against 205 built RUN objects
+  (ZCONASM is nearly complete, 286 sources against 284 objects).  The 29
+  HAL_LIBRARY_* csects G9 needs that the built runtime does not supply are all
+  #0*/#L* and have NO source in RUNASM or ZCONASM either, consistent with
+  lnk101 synthesising them (linker.py:88 ('#L','DATA'),
+  synthesizeMissingExternals).
+
+### [2026-09-03] Target: problems.md
+- RETRACTION: THE MISSING OBJECT FILES ARE NOT IMPLICATED IN THE TAPE PROBLEMS.
+  I suggested the incomplete objects/ was "very likely why" the phase-8
+  derivation placed only 19 of 45 runs while phase 3 came out exact.  That was
+  speculation and both halves of it are wrong.
+- THEY CANNOT AFFECT THE TAPE.  pass-ipl-cflm.mmv is the recovered tape image
+  (unstamped base pass-ipl.mmv plus DEU critical formats), not anything built
+  from objects/.  Direct proof: #CASLTMC has NO object in objects/, yet its
+  as-built content appears VERBATIM in the phase-8 tape data at offset 43520.
+  The tape carries content our object build does not have, so the two are
+  independent and a missing .obj cannot corrupt the tape.
+- THEY DO NOT EXPLAIN THE DERIVATION FAILURE EITHER.  Unresolved-seed ratios are
+  comparable -- phase 3 has 38 of 105 (36%), phase 8 has 46 of 98 (47%) -- and
+  phase 8 actually gets MORE sibling expansion, not less (28 runs gained
+  expanded siblings against phase 3's 2).  Median run length is the same to
+  within 1% (184 vs 182 halfwords).
+- WHAT ACTUALLY DIFFERS IS FRAGMENTATION.  Phase 3's footprint is 11 runs;
+  phase 8's is 45, spread from 0x001f8 to beyond 0x38400, over y=110 windows
+  against phase 3's 37.  The walk is sequential -- each block's tape offset is
+  the previous one's end rounded up -- so a single wrong length desyncs every
+  block after it, and 45 chained opportunities to desync is a different problem
+  from 11.  That, not the object gap, is where the phase-8 derivation loses.
+- The missing objects ARE a real blocker for BUILDING a release from source (you
+  cannot link what was never compiled: 896 non-underscore .obj against ~1573
+  sources), which is a separate matter from deriving descriptors for an existing
+  tape.
+
+### [2026-09-03] Target: problems.md
+- RETRACTION: THE TAPE IS NOT A RECOVERED ARTIFACT.  I called pass-ipl.mmv a
+  recovered tape image on the strength of a handoff phrase ("never modified").
+  Every .mmv on this machine is one of our own builds; there is no original.
+  The chain is: OI340600 sources -> con80build compiles/assembles and LINKS ->
+  $SP/phase_build/OI340600/PHASEnn.lib -> mmu2mmv --con80 CON80 --mmu <tree> ->
+  the volume -> stamp_* adds the phase tables (which is why the raw GPT is
+  empty).  So the tape data does ultimately come from compiled source.
+- MY #CASLTMC TEST WAS CIRCULAR and proves nothing on its own: I took the
+  content from G9-asbuilt.fcm and searched for it in a tape that could have been
+  FCM-derived.  What DOES rule out FCM derivation is the version gap measured
+  independently -- the tape behaves as OI340600 and the FCM dumps are OI340700;
+  an FCM-derived tape would BE OI340700 and show no gap.
+- WHY objects/ IS STILL NOT IMPLICATED: con80build compiles SSSRC/APPLSRC
+  ITSELF into its own build tree.  PFS/OI340600/objects/ is a separate, older,
+  partial object build that was never an input to the tape.  That is how
+  #CASLTMC reaches the tape with no .obj in that directory.
+- THE DESCRIPTORS ARE NOT A REVERSE-ENGINEERING PROBLEM.  mmu2mmv's own module
+  docstring: "mmbstamp.derive_load_blocks partitions the phase's linkedit image
+  into load blocks ... staging fill in every halfword the phase does not supply,
+  and each block's closing checksum", and "that is the same content model
+  mmu2fcm --stamp-checksums reads back when it emulates the load, so a block
+  written here and loaded there round[-trips]".  derive_load_blocks(lib, ...)
+  takes the phase's .lib and RETURNS the partition.  Phase 8's descriptors are
+  therefore a FUNCTION of PHASE08.lib, computable exactly -- not something to be
+  inferred from content matching, padding rules or checksum walks.
+- THIS EXPLAINS THE CENTRAL PARADOX.  If the tape's phase-8 data was written by
+  derive_load_blocks, then descriptors derived the same way must match it.  Only
+  1 of the 27 stamped descriptors checksums against the tape, so THE STAMPED GPT
+  AND THE TAPE'S PHASE-8 DATA CAME FROM DIFFERENT BUILDS (or different
+  parameters).  That is a far simpler explanation than any of the mechanisms
+  chased today, and it predicts that rebuilding PHASE08.lib and re-deriving
+  fixes it outright.
+- OPEN RISK the user's question implies: if con80build ever failed to compile a
+  source, that content is simply absent from the tape.  We cannot check now --
+  the phase_build tree lived in a dead session's scratchpad and is gone.
+  Rebuilding it is how to find out, and is the next step.
+
+### [2026-09-03] Target: problems.md
+- HOW MUCH OF THE RELEASE THE TAPE ACTUALLY USES.  Eligible sources (*.hal,
+  *.asm, *.dfg in RUNASM + OI340600/{APPLSRC,SSSRC} + OI340700/{APPLSRC,SSSRC},
+  OI340700 overriding by name) = 1777 exactly, confirming the user's count:
+  RUNASM 205 + flight 1572, with all 13 OI340700 files overriding an OI340600
+  namesake.  con80build --plan resolves a phase's worklist without building;
+  OFTMP defines 25 phases (1-21, 23-26 -- there is NO phase 22 even though a
+  PHASE22 deck exists).
+- LAYERED EVIDENCE FOR "USED", each layer found by correcting the previous one:
+      955  in a phase worklist (union of the 25 --plan runs)
+     +472  not in a worklist but WITH CSECTs in some FCM (253,150 halfwords)
+      +51  named outright in a CON80 deck (INSERT / INCLUDE SYSLIBL1)
+    = 1478 of 1572 flight sources demonstrably used; 94 unaccounted
+      (33 .dfg, 14 .hal, 47 .asm).
+- MY FIRST ANSWER OF 617 UNUSED WAS WRONG, and the user caught the reason:
+  COMPOOLs declare variables, take space, and their CSECTs appear in the FCMs.
+  I had labelled con80build's "template closure" as compiled-but-contributing-
+  no-bytes.  185 of those 193 modules occupy space in some FCM (77,449
+  halfwords), so template closure is a BUILD-ORDER artifact, not a usage
+  distinction, and must be counted as used.
+- THE RESIDUAL 94 IS AN UPPER BOUND, NOT AN ANSWER.  The CSECT-name test cannot
+  judge .dfg at all: of ALL 116 .dfg in OI340600/APPLSRC only 55 have a
+  name-matching CSECT, so the 33 .dfg leftovers are inconclusive rather than
+  unused.  RUNASM's 205 are excluded throughout -- runtime is autocalled from
+  lib/RUN and lib/ZCON and never appears in a worklist, so the method says
+  nothing about them (per-phase "runtime/library" counts run 0 to 70).
+
+### [2026-09-03] Target: problems.md
+- THE FCMs CANNOT AUDIT THE TAPE, and the user's example proves it: GPCIPL is in
+  no FCM because it runs at IPL and is overlaid.  Measured directly -- index
+  every 8-halfword window of all 8 configuration images, then classify each of
+  the tape's 3015 blocks: 39.7% fully in FCMs, 35.6% PARTLY, 4.8% (145 blocks,
+  74,240 halfwords) in NO FCM, 19.9% fill.  The three largest uncovered runs sit
+  at MM block indices 8812, 8821 and 8830 -- all inside phase 10's allocation
+  (x=8800, y=55), i.e. GPCIPL exactly as predicted.
+- SO "ABSENT FROM THE FCMs" DOES NOT MEAN "HOLE IN THE TAPE".  Phase 10 is the
+  one phase verified byte-for-byte (27,292 halfwords, none wrong) and it was
+  verified against the ASM101S LISTING, not an FCM.  Its blocks nonetheless
+  score as FCM-uncovered.  Any audit built on the FCMs inherits this blind spot,
+  including every "which sources are on the tape" number produced today.
+- THE 35.6% "PARTLY" BUCKET IS ALSO AMBIGUOUS: a block can miss some windows
+  because of the OI340600/OI340700 version gap OR because part of it is a hole,
+  and the probe cannot separate those.  Relocation makes this worse -- code
+  whose address operands shifted between releases mismatches throughout.
+- WHAT THE FCM AUDIT DID ESTABLISH, within its limits: of 2344 CSECTs with real
+  content in some configuration image, 1534 match the tape on every probe window
+  and 683 on some, leaving 127 with none -- and 121 of those 127 are DATA or
+  HALSTAT (version-gap-prone).  Only 6 are code, and the two most suggestive
+  (A1VB9BTU, A2VB9BTU at 0x256ba..0x2579b) are NOT in PHASE08's deck closure, so
+  they say nothing about phase 8.
+- THE LINKER-HOLE HYPOTHESIS REMAINS OPEN AND IS NOT TESTABLE THIS WAY.  It is
+  mechanically plausible -- con80build --tolerable defaults to 4 and
+  lnk101.synthesizeMissingExternals papers over unresolved references -- and
+  phase 3 shows no holes (129 of 130 deck-assigned CSECTs covered by its blocks,
+  all populated), but phase 3 is the cleanest phase and phase 8 cannot be
+  checked at all without the block placement we are trying to derive.  Only a
+  con80build rebuild settles it, and the same run yields PHASE08.lib for
+  derive_load_blocks.
