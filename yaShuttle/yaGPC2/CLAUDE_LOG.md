@@ -225,3 +225,64 @@ the transition at all.)
 - The machine did NOT halt on the candidate tape (SIGINT at t=268, normal end),
   unlike several earlier attempts.
 - Tapes: pass-cand.mmv is the candidate; pass-stamped.mmv remains the reference.
+
+### [2026-09-03] Target: [problems.md]
+- **THE ORACLE IS PER-DESCRIPTOR, WHICH MAKES THE PROBLEM CONVERGENT.**  Scoring
+  each block's destination separately (agreement with the as-built image over
+  that block's own extent, before vs after the load) turns a single pass/fail
+  into 35 independent verdicts:
+      19 blocks improved by >5 points, 5 degraded by >5, 10 roughly neutral
+  Biggest gains +43 to +59 (blk 5 -> 0x005a2, blk 9 -> 0x04754, blk 12 ->
+  0x0a22e, and the whole #DV* family).  So MOST destinations are already right
+  and a handful are wrong -- identified by measurement, not argument.
+- **The worst offender proves the truncation independently.**  Block 35
+  (tape 43520, len 1018 -> 0x101f8, #CASLTMC) was the HIGHEST-confidence
+  placement in the set, 100% content match over 1015 halfwords, and writing it
+  scored 100.0% -> 1.0%.  The only way that happens is that the data written
+  there is not block 35's content -- which is what a truncated transfer
+  predicts, since it is the last block and the read came up one MM block short.
+- **WHY THE TRANSFER TRUNCATES**: the EXTENDED BLOCK command carries (count-1) --
+  mmbstamp 0x6d=109 -> reads 110, candidate 0x55=85 -> reads 86 -- and
+  FCMBKTRK is initialised to -1 (FCMMGBOV, "INIT # OF BLOCKS PER TRACK TO -1").
+  A final load block that STRADDLES an MM-block boundary comes up one short.
+  mmbstamp's last block sits inside a single MM block (tape 55808, len 22) and
+  its transfer is accepted -- with wrong data.  The candidate's last block spans
+  two (tape 43520, len 1020) and its transfer is refused and retried.
+  NOT YET CONFIRMED -- the 34-descriptor test (last block dropped, list ending
+  inside one MM block) is what settles it.
+- Other blocks measured WRONG and worth re-placing: 11 (0x0ebbc, -53.7),
+  32 (0x0e4e2, -27.5), 31 (0x0e48e, -18.8), 33 (0x0f158, -17.8).
+
+### [2026-09-03] Target: [problems.md]
+- **THE DESYNC IS FIXED, AND THE METHOD THAT FOUND IT IS THE POINT.**  Take what
+  the loader actually WROTE at each destination (from the after-snapshot) and
+  search for that content on the tape.  That gives the tape offset the loader
+  really used for each descriptor, measured:
+      blk 28  declared 35840 -> found at 35840   ok
+      blk 30  declared 36864 -> found at 36352   OFF BY -512
+      blk 31, 32, 35 ...                          OFF BY -512
+  Everything through block 28 correct; from block 30 the loader is one MM block
+  behind.  One block of consumption was lost at BLOCK 29 and every descriptor
+  after it received its neighbour's data.
+- **CAUSE: block 29's destination was in the wrong SECTOR.**  Its descriptor was
+  addr=0x8365 flags=0x0690 -- sector 9, destination 0x48365 -- from the weakest
+  fingerprint in the set (33.3%), while every neighbour is sector 1.  The
+  ascending law confines a block between blk 28 (0x0e410, 40 hw) and blk 30
+  (0x0e460) to 0x0e44e..0x0e45f, and that window holds exactly three 6-halfword
+  sections for a 6-halfword block.  #DVM1BFD at 0x0e454 scores 66.7% vs 33.3%.
+  Changing only that one field:
+      read 87 blocks (was 86) -- matches consumption exactly, desync gone
+      score 51.4% -> 76.7% (was 70.3%)
+      24 of 34 blocks improved; degraded blocks 5 -> 3
+  So a single mis-sectored 6-halfword descriptor was costing an entire MM block
+  of transfer alignment.  Presumably FCMMGBOV's BCE-segment/DSR handling.
+- Scoring history: mmbstamp 68.7->24.8 (destroys); 35 desc 53.3->68.2;
+  34 desc 51.9->70.3; block-29 fix 51.4->76.7.  Ceiling 94.2 (phase 3).
+- **REFUTED ALONG THE WAY**: (a) that the shortfall was a final block STRADDLING
+  an MM-block boundary -- the 34-descriptor set ended inside one block and still
+  ran short; (b) that a sacrificial tail descriptor would absorb it -- it
+  changed nothing, correctly, since the loss is in the middle not the end.
+- STILL OPEN: the transfer is still RETRIED (two identical 87-block reads), so
+  the I/O is still reported unsuccessful and ARC will not credit the overlay.
+  And blocks 11 (0x0ebbc, -42.9) and 32 (0x0e4e2, -13.8) remain measurably
+  mis-placed.
