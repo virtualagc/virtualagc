@@ -625,9 +625,14 @@ def compile(template, fatal = True):
     compilationCount += 1
     rawFilename = template["filename"]
     filename = rawFilename[:]
-    parms = getParms(template)
-    parms.remove("LIST")
-    parms.remove("LISTING2")
+    # Suppress the listings.  getParms() returns the finished --parms STRING,
+    # so the option list has to be trimmed before it is built, not after:
+    # `options` replaces DEFAULT_OPTIONS outright, which is the supported way
+    # to drop LIST and LISTING2.  (An earlier in-progress edit called
+    # parms.remove() on the result, which raises -- str has no .remove.)
+    parms = halsParms.getParms(template["stem"],
+                               options = [o for o in halsParms.DEFAULT_OPTIONS
+                                          if o not in ("LIST", "LISTING2")])
     fields = filename.split("/")
     if len(fields) == 2:
         subfolder = fields[0]
