@@ -103,3 +103,48 @@ the transition at all.)
   withdrawn.  Interactive use unchanged.  `headless-gpcmem.sh` has always
   printed "discretePanel (scripted, headless)" and it was not headless until
   now.
+
+### [2026-09-03] Target: [problems.md]
+- **THE LOAD-BLOCK RULE, and it removes the need for any grouping heuristic: a
+  load block is a MAXIMAL CONTIGUOUS RUN of memory the phase writes.**  Every
+  one of phase 3's nine block boundaries has a large gap behind it -- 938 to
+  99,026 halfwords, measured from the tape's own IPL table.  There is no
+  grouping rule to reverse-engineer; the blocks fall out of the footprint.
+  That locates mmbstamp's defect: `_open_bank_tails` and `_extend_mc_bank_tails`
+  reshape lengths from inferred MMB rules, i.e. they solve a problem that does
+  not exist, and they are where its three wrong phase-3 lengths come from.
+- **BLOCKS WITHIN A PHASE ARE STRICTLY ASCENDING AND NON-OVERLAPPING.**
+  Verified on ALL 48 ground-truth blocks across phases 10, 2, 13 and 3 (the
+  tape's own IPL table).  This was asserted early, then RETRACTED on the
+  strength of phase-8 window placements that were unreliable -- wrong
+  boundaries, no fill or relocation credit, and produced alongside the blocked
+  harness.  **The retraction was the error.**  Dropping the constraint is what
+  made phase-8 destinations look like 35 independent guesses; they are a
+  monotone assignment, which is enormously more constrained.
+- Consequence for AUTOMATION: those two together mean the load blocks are fully
+  determined by ONE input -- the set of addresses each phase writes.  No
+  heuristics, no relocation model.  Build order is footprint -> maximal runs ->
+  blocks -> checksums, padding, table.  For a from-source build that input is
+  PHASEnn.lib and the problem is solved.
+- **Phase membership is NOT in the DASS maps.**  Checked `type`, `initial` and
+  `invariant` on the section inside vs just before each of phase 3's ten blocks:
+  nothing separates them.  But it IS approximately recoverable by DIFFING
+  CONFIGURATIONS -- halfwords where all five GNC dumps agree and both S2 and P9
+  differ, merged across gaps of ~1024, recover 6-7 of phase 3's 10 blocks.  A
+  genuinely independent signal, never used before, worth sharpening.
+- The tape does NOT describe itself.  Decoded the on-tape IPL table's header at
+  halfword 684294: 4 x (idx, nblks, mmaddr) -- phase 10 (5, 0x2260), 2 (31,
+  0x2300), 13 (2, 0x1b00), 3 (10, 0x1bc0) -- three redundant copies 256
+  halfwords apart.  Only the four IPL phases; no complete table exists on the
+  volume.
+- Phase 8 under the monotone solve: **27 of 35 blocks placed**, every one at a
+  section start, ascending and non-overlapping by construction, scores 70-100%
+  against the as-built image.  The constraint ELIMINATES bad placements rather
+  than inventing them -- the greedy non-overlap version had forced block 10
+  (4538 halfwords) to a 3.6% address; the monotone solve drops it instead.
+- **A conflict the law exposes and scoring cannot**: in the stalled region,
+  windows 90-95 (0x232aa..0x23caa) and windows 99-104 (0x12af0, 0x21f30) both
+  score 93-97% and are mutually exclusive under ascending order.  The likely
+  cause is visible in the names -- $0VB2LEV, A4VB2LEV, A6VB2LEV, B0VB2LEV are
+  numbered variants of one routine, so a fingerprint matches the wrong copy at
+  high confidence.  Raw scoring cannot detect that; the ordering constraint can.
