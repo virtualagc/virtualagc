@@ -4931,6 +4931,44 @@ sibling.** `cd X && ( A ) & ( B ) &` runs B in the *original* directory. B died
 instantly, wrote its log into the repository, and the pair of runs it was half
 of had to be redone.
 
+**An address is not self-describing.** The `mmu` tool and `mmu2mmv`'s report
+address blocks as track/file/subfile/block; the CON80 `ADDR=FTSBB` packing was
+read as file/track. Phase 3 is `3/3/6/0`, symmetric in track and file, so it
+confirmed nothing, and the wrong ordering was carried through every subsequent
+check until a phase with unequal track and file exposed it — after a written
+conclusion ("phase 8 is blank on the tape") had been built on it and had to be
+retracted. Cost: hours, twice in one session.
+
+**Decoding what the software CONCLUDED is not evidence for WHY.** The
+transaction status word 0x2100 decodes cleanly as "SELF HAD ERROR + MM SELECTED
+FOR IPL", and that decode was offered as the cause before anything upstream had
+been read. The user was right to say it told us nothing. The actual chain
+needed `FIOMGSNC`'s dispatch condition, and then an experiment.
+
+**Compare against the right reference, and check the fill convention first.**
+Three separate wrong conclusions came from comparing our tape to the DASS dumps
+naively: `c9fb` is the dumps' fill and was scored as content; the dumps are
+OI340700 where the tape is OI340600; and 2396 halfwords had been changed after
+the build and are flagged as such in the report itself. Uncorrected, correct
+blocks score 8–55% and were rejected as coincidental placements. Corrected,
+they score 99–100%. **A similarity score with an unvalidated reference is not a
+measurement**, and there was a control available the whole time — phase 3's
+boot-table blocks, which are known-good by construction.
+
+**Isolate one variable, especially when the change looks obviously safe.** Four
+tapes were built and tested against a hypothesis about phase 8's descriptor
+content. All four had also moved the descriptor block to free space elsewhere
+in the table, which seemed too mechanical to matter. It was the cause: with the
+*original* descriptors and only that move applied, the transition still fails.
+Three runs' worth of conclusions about descriptor content were void, and the
+one-variable control that showed it took the same nine minutes as any of them.
+
+**A log line is not a symptom until it is compared with a passing run.**
+"The run never left the IPL menu" was reported as a finding on the strength of
+`IPL MENU` text in the tail of `deu.log`. The known-good run shows the identical
+text — it is format-buffer content, not the live display. The real signature was
+elsewhere entirely, and one `diff` against a baseline would have said so.
+
 ### 8.11 Finishing the OI340700 `.dfg` recovery
 
 §8.9 recovered two files. All twelve differing decks are now accounted for, and
@@ -7493,22 +7531,45 @@ the reconfiguration was never requested at all, and **9** in both accepted
 runs. The request now propagates into `ARC_GPC_RECONFIG`, which is the
 machinery that loads an overlay.
 
-#### Does PASS ever try to read the tape? No
+#### Does PASS ever try to read the tape? — CORRECTED TWICE, see §8.30–§8.33
 
-All three runs have identical mass-memory activity — 92 trace lines, every one
-from the IPL at t=10.3 s, none after. The accepted runs reach GPC
-reconfiguration and fail *before* any tape access is attempted. The tape gap is
-real, but it is downstream of everything above and is not what is stopping us.
+As first written this said "No", on the strength of "92 trace lines, every one
+from the IPL at t=10.3 s, none after". Both halves were wrong.
+
+**The count and the span were wrong.** There are **91** lines, and they run
+through the SSL load to `READY -> 1` at **t=105.35 s** — not from the IPL
+alone. The number came from a `tail` that the output filter had truncated, read
+as if it were the end of the file. The conclusion it supported happened to
+survive (nothing after 300 s), but the evidence for it did not.
+
+**The claim itself was wrong about the cause.** PASS *does* issue two
+mass-memory POSITION commands at this point. They carry block address **0**,
+which is why the MMU model logs nothing: the I/O fails before any tape access.
+The observable was right; the explanation was not. §8.30 gives the reason the
+address is zero, and §8.31 gives the reason the I/O was refused even once the
+address was right.
 
 #### The next blocker: no memory configuration
 
 Both accepted runs return `CZ2V_REC_XERR = 1`, which `DM2APP` logs as
-`d2ff 0001` and treats as an error. `ARC_OPS_ZERO` (`ARCGPC.hal:1112`) says
-where it comes from:
+`d2ff 0001` and treats as an error.
 
-    IF  CZ2V_MC$(ARC_GPC_ID;)=0  THEN  CZ2V_REC_XERR=1;  ELSE  CZ2V_REC_XERR=0;
+**CORRECTION.** This section originally attributed that 1 to `ARC_OPS_ZERO`
+(`ARCGPC.hal:1112`) and its `IF CZ2V_MC$(ARC_GPC_ID;)=0` test. **That is
+wrong.** A store watch on the variable (`YAGPC_WATCHHW=288e`) gives the real
+sequence:
 
-This GPC has no memory configuration assigned. That is the same missing thing
+    nia=454d5  XERR <- 5   DM6_PRE_POSIT_PARMS, "PRE POSITION REQUEST"
+    nia=416b2  XERR <- 1   ARC_OPS_TRANS, because ARC_TRANS_COND = 2
+    nia=416d4  XERR <- 1   + ARC_XERR_PAD (0)
+
+`CZ2V_MC = 0` is still true and still blanks the `MC=` field, but it is not
+what produced this error. The ELSE-chain nesting was misread too: XERR = 5 is a
+fully handled entry reason ("PREPOSITION MM AND NOTIFY DM2_APP",
+`ARCGPC.hal:350`), not "ARC entered without cause". `ARC_TRANS_COND = 2` is
+BAD PRE-POSITION (`ARCGPC:051900`) — see §8.30.
+
+This GPC also has no memory configuration assigned. That is the same missing thing
 the user identified twice from Don's video, from the other side: his
 `STORE MC=09` against our `MC=__`, and his `MM AREA / PL 52 1 / GNC 53 1 /
 SM 54 1` against our three zeroes. One cause, three symptoms.
@@ -7528,13 +7589,23 @@ shaped, like DEUCFLM and MMDIR before it.
 #### What made any of this readable
 
 - **`YAGPC_EAWATCH=lo-hi[,max[,afterSec]]`** (`src/cpu.c`) is `EATRACE` run
-  backwards: *which instruction touched this address*, rather than *which
-  address did this instruction touch*. That is the question you have when a
-  structure was located by searching memory for its contents and no link map
-  says what code owns it. It found `DM6OPS`'s transition-table search at NIA
-  `0x455f6`/`0x455fc`, with `0x45613` reading the matched entry's
-  `DM6B_TRANS_DATA`, starting from nothing but `DM6V_TR_TAB`'s own initial
-  values at `0x2c38`.
+  backwards: *which instruction FOLLOWS the one that touched this address*,
+  rather than *which address did this instruction touch*. That is the question
+  you have when a structure was located by searching memory for its contents
+  and no link map says what code owns it. It found `DM6OPS`'s transition-table
+  search just before NIA `0x455f6`/`0x455fc`, with `0x45613` reading the
+  matched entry's `DM6B_TRANS_DATA`, starting from nothing but `DM6V_TR_TAB`'s
+  own initial values at `0x2c38`.
+
+  **`nia=` in the WATCH/EAWATCH hooks is the NEXT instruction, not the one that
+  acted** — both call `psw_get_nia()` after the PC has advanced. Proved on one
+  pair: `RT 413b5 ZH X'0051'(1)` stores to `0x0b0f` and `WATCHHW addr=00b0f`
+  reports `nia=413b7`. So every address quoted from a watch anywhere in this
+  document is one instruction late; the `XERR <- 1` store above is really at
+  `0x416b1`. `RANGETRACE`'s `RT` lines are unaffected — those print the
+  instruction being executed. `EAWATCH`'s own comment claimed it says "which
+  instruction touched this address", which is a shade misleading and has been
+  corrected in the source.
 - **`tools/opsdiag.py`** reads the whole chain out of a snapshot: the GRT rows
   with the GPCs each targets, the GPC sets, and `DMZ_LOG`'s decoded verdict.
   One command instead of a day.
@@ -7559,6 +7630,385 @@ OI340600's `CZ2COMMO` source has `MC=0`. Row 7 (SM OPS 9, set `8400`,
 targeting GPC 1) has `MC=0` in both and so can never equal its own index, which
 is what the search requires.
 
+
+### 8.30 The phase tables were never stamped — one cause, five symptoms
+
+`ARC_TRANS_COND = 2` is BAD PRE-POSITION. The pre-position loads phase 3's
+mass-memory address out of `FCMMGPT` and gets **0**. Straight off the trace,
+registers and all:
+
+    LH 6,X'0257'(7,2)   R6 = 3     phase 3, GRT row 9's MF overlay
+    SLL 6,2 / AHI 5,-6  R5 = 6     FCMMGPT element 1, STARTING_MM_ADD
+    LH 4,@@X'0010'(5,1) R4 = 0     <- the mass-memory address is ZERO
+    STH 4,X'0065'(1)               ARC_MMU1POS.DBLOCK = 0
+
+Both `DIO`s go out to block 0 (`SVC X'014f'`, `SVC X'0066'`), the `WAIT`
+(`SVC X'0156'`) returns, and `ARC_PP1_TSW`/`ARC_PP2_TSW` are both non-zero.
+That is the whole of the "no memory configuration" symptom, and four others:
+
+1. `CDCV_PHASES` (`CDCPHA.hal`, `ARRAY(19,3) INITIAL(-1)`) is at **0x300e4**
+   and is **57 halfwords of FFFF** — found by content search as the only run of
+   exactly 57 in the image. Never stamped.
+2. `FCMGPT`, the MM/GTG in-core phase table (`INITIAL(16#(4#0))`), is reached
+   through a fullword-indirect pointer at 0x0ace = `ccee0003`; with the sector
+   expansion that is **0x1ccee**, and the whole table is zeros. `AIBGPCLO:895`
+   fills it from `CDCV_PHASES`, so it can only ever be zeros.
+3. `AIBGPCLO:470` therefore cannot match `FCMMGPT_STARTING_MM_ADD$(1;)` against
+   `CDCV_PHASES$(1,I:)`, so `CDJV_MM_AREA` stays 0 — the `MM AREA` fields
+   reading 1/1/1 in Don's video and 0/0/0 in ours.
+4. The pre-position fails as above.
+5. `CZ2V_MC` never updates, because `ARC_UPDATE_MC` runs only after a
+   successful overlay, so `STORE MC=` stays blank.
+
+**The pattern, now worth stating: a table the flight software only ever READS
+is a table the ground build was supposed to WRITE.** This is the third thing to
+come out tape-build shaped after DEUCFLM and MMDIR, and both of these declare a
+sentinel (`0`, `-1`) that means "never built".
+
+#### The link map existed, and stamping moved the failure
+
+"No `PHASEnn.sym.json` anywhere on this machine" was wrong — it is at
+`~/ipl-demo/phases/PHASE02/PHASE02.sym.json`, 2.4 MB, 437 sections. Two
+sessions treated a bad search as a hard blocker. It cross-checks the runtime
+measurements exactly: the map gives `#PFCMGPT` at 0x1ccf2 and `#PCDCPHA` at
+0x300e4, which is what a fullword-indirect pointer and a content search gave by
+wholly independent routes.
+
+Generated with `mmbstamp.generate()` and injected with `YAGPC_LOADBIN`, the
+lookup that fetched 0 now fetches **0x1bc0 = 7104**, phase 3's real address.
+But the transition still failed, with the failure *moved*: both DIOs go out,
+the WAIT returns, and `ARC_PP1_TSW` = **0x2100**, `ARC_PP2_TSW` = **0x2200**.
+The address was right and the I/O itself was refused, with no bus command
+logged at all — an I/O-path question, not a table question. That is §8.31.
+
+**Do not stamp `FCMG3DAT` at its `sym.json` address.** Stamping all three
+tables killed the machine 8.6 ms after injection (`invalid instruction 0xc99c
+at 0x000a`). The other two held their documented sentinels, but 0x0320e held
+`aaaa` fill and **ten copies of `325e`** — pointers into its own region, i.e. a
+live structure. `PHASE02.sym.json` reports `residue: None` for it, but that map
+describes phase 2 alone. `mmbstamp.stamp()` checks only `residue`, so **any
+stamping path must verify the target actually holds its sentinel before
+overwriting**. An unstamped table is self-announcing; a wrongly stamped one is
+silent, which makes being wrong here quieter than being absent.
+
+### 8.31 The IPL SOURCE switch refused every post-IPL mass-memory I/O
+
+The refusing code has a name, and the cheap move was not made first: look the
+traced address up in the link map. `PHASE02.sym.json` names the status store as
+**`FIOERRLC`** (I/O ERROR HANDLER, LEVEL C) and its caller as **`FIOMGSNC`**
+(MM/GTG ERROR AND/OR SYNC PROCESSOR), both present as `SSSRC/*.asm`. They are
+not a "generic dispatcher", which was an inference from behaviour; reaching
+them means an error had already been decided.
+
+**The transaction status word decodes exactly** (`FIOERRLC.asm`):
+
+    bit 0 FIOENTRF 8000  ENTIRE TRANSACTION FAILED. NO GOOD DATA EXISTS
+    bit 1 FIOHARDF 4000  FAILURE SOMEWHERE IN TRANSACTION
+    bit 2 FIOSELFE 2000  SELF HAD ERROR
+    bit 3 FIOMSCTF 1000  MSC TIMEOUT HAS OCCURRED
+    bit 4 FIOPSTOF 0800  PSUEDO TIMEOUT HAS OCCURRED
+    bit 6 FIOMMFPW 0200  FAILED OR POWERED DOWN MM
+    bit 7          0100  MM SELECTED FOR IPL
+
+so **0x2100 = SELF HAD ERROR + MM SELECTED FOR IPL** and **0x2200 = SELF HAD
+ERROR + FAILED OR POWERED DOWN MM**. MMU2's reading independently validates the
+decode: our rig has no MM2, so "failed or powered down" is simply true.
+
+**Confirmed by experiment.** `FIOMGSNC` dispatches only if the MMU is *not*
+IPL-selected or the switch is masked in software (`CZ2B_MMU_IPL_SW_MASK`,
+`INITIAL(HEX'0000')`). Our panel held `source MM1` for the whole run. With
+`SOURCE_RUN=OFF` deselecting it 8 s before RUN:
+
+    13 mass-memory commands after t=300 s, where every previous run had 0
+    483 blocks read, 247,367 words out
+
+the first time any run here read the tape for anything but the IPL.
+
+**Two switches, the same trap.** The user's `CRT none` finding and this one are
+the same shape — a discrete left in its IPL position that the flight software
+correctly refuses to work around. The CRT2 dance is likewise unnecessary: leave
+CRT 1 selected through the IPL and select `none` just before RUN, and PASS
+drives the unit that was actually loaded, because there is nothing left for it
+to mask. Verified headless: bus 6 carries the live GPC MEMORY page while bus 7
+stays 8188 zeros, never IPLed and never needed. `headless-gpcmem.sh` takes
+`CRT_IPL` (default 1) and `CRT_RUN` (default 0); the old dance is
+`CRT_IPL=2 CRT_RUN=1`.
+
+Method note: the cause was asserted once from the status decode alone, before
+any of the above, and the user was right to say it told me nothing. **Decoding
+what the software CONCLUDED is not evidence for WHY it concluded it.**
+
+### 8.32 Where the compool really is, and why a generated table destroyed the GRT
+
+With the switch fixed, the injected table produced a *new* failure: a masked
+wait about 0.4 s after the last tape command. The control run — source
+deselected, no injection — runs clean to 617.9 s, so the halt belonged to the
+injection.
+
+**Load block 3 was writing over the LIVE CZ2 compool.** Measured across a
+385 s/390 s snapshot diff:
+
+    CZ2B_GRT_GPC_SET @0x026fc  f000 c000 f000 1400 ... -> 0000 0000 0000 0000
+    CZ2V_GRT_TAB     @0x028ad  0001 0004 0003 0002 ... -> 0000 0000 0000 0000
+
+That is the reconfiguration table the transition is in the middle of reading.
+Zero it and FCOS dispatches a halt PSW — which is exactly the deliberate halt
+`YAGPC_WAITTRACE` caught at `FPMDISP`+59, `psw2=0x00020000`, mask 00, against
+normal idle waits in the same run at mask **ff**.
+
+**Why: the generated table's addresses do not match the running image, and the
+tape is the reason.** Every `PHASEnn.sym.json` places `#PCZ2COM` at 0x14ac,
+which holds `C6C6`; the compool PASS reads is at 0x23f4. Settled directly:
+
+* the tape's own stamped IPL phase table (FCMBOOT halfword 894, `FCMPTAD1`)
+  gives phase 2 block 6 as 15826 halfwords loading tape offset 2560 → 0x00676;
+* `CZ2B_GRT_GPC_SET`'s ten-halfword initialiser signature sits at tape offset
+  **10886**, which through that block is memory **0x026fc** — compool base
+  **0x023f4**, exactly the live address;
+* the map's 0x14ac would put the signature at tape offset 6974. It is not
+  there; 10886 is the only occurrence.
+
+No relocation, no SSL trickery, no emulator defect: **the map simply does not
+describe the phase 2 on this tape.** No surviving build root matches
+(`ipl-demo/phases` 0x014ac, `dfg2/oursbuild` 0x0231a, `dfg2/build` 0x02320),
+and `pass-ipl.mmv` post-dates all of them. A table that is internally
+consistent and correct for its own build still destroys PASS's state when
+applied to a different one.
+
+`fix_phase_table_lengths.py --check-image SNAPSHOT` now locates the live
+compool **by content** and refuses to emit a table whose load blocks would
+overlap it, exiting 2. It is systemic, not a phase-3 quirk: **7 blocks across
+phases 3, 9, 10, 13, 14, 15 and 16** overlap. The failure mode was: inject,
+silently destroy PASS's state, and get an unexplained masked wait seconds later
+with nothing in the trace connecting the two.
+
+**Retracted along the way:** "phase 8 is blank on the tape". The `mmu` tool and
+`mmu2mmv`'s report address blocks as **track/file**/subfile/block; the CON80
+`ADDR=FTSBB` packing was read as file/track, so `2/5/4/0` was dumped as
+`5/2/4/0`. Every phase 3–18 is written except 11 and 17, which are unassigned
+placeholders. The conclusion built on it — "PASS is refusing an absent overlay,
+the remaining fix is a tape build" — goes with it. **An address is not
+self-describing**: `3/3/6/0` for phase 3 is symmetric in track and file and so
+confirmed nothing, and the wrong ordering was carried through every subsequent
+check until a phase with unequal track and file exposed it.
+
+### 8.33 The OPS 9 overlay loads from the tape
+
+    mmu1: read  26 block(s) from 3/3/6/0          phase  3, MF overlay
+    mmu1: read 110 block(s) from 2/5/4/0          phase  8, program overlay
+    CZ2V_REC_OPS = 9, CZ2V_REC_XERR = 0           no error
+    CZ2V_MF_OVLY = 3                              was 0
+
+**How: `#PFCMGPT` and `#PCDCPHA` are stamped onto the volume**
+(`pass-stamped.mmv`; the original is untouched), with phase 3's descriptors
+taken from the tape's **own IPL phase table** rather than from an `mmbstamp`
+reconstruction. Deriving the table from the tape sidesteps the missing build
+entirely, and is the only route that cannot disagree with the volume it will be
+read from. `tools/stamp_phase_table_on_tape.py` builds it; the rig takes `TAPE=`.
+
+**The enclosing load block must come from the table, not from a search.** The
+first attempt scanned for a start/length whose checksum verified, found
+`(612956, 5961)`, and "fixed" that — corrupting phase 2's real block 18,
+`(615304, 8410)`. A checksum match is cheap to hit by accident. The IPL phase
+table gives the true extents:
+
+    #PFCMGPT  volume 616158  inside phase 2 block 18  (615304, 8410)
+    #PCDCPHA  volume 633964  inside phase 2 block 23  (633736,  802)
+
+Both verified before stamping — which is what proves the right block was found
+— and again after, on an independent re-read. **Editing anything inside a load
+block breaks that block's checksum; always recompute it.** Omitting the repair
+put the machine into a masked wait at 115 s, *before* the OPS request, which is
+the signature of a broken SSL load rather than a bad phase table.
+
+`mmbstamp` is diagnosed, not fixed, and "two tools disagree" is the wrong
+framing: `stamp_ipl_phase_table.py` (ours) calls `mmbstamp.phase_load_blocks()`
+(Don's), so both come from the same code and differ only by input. The real MMB
+relocates some blocks and `mmbstamp` does not model it — five of phase 3's ten
+addresses match the lib extents and five differ, by 0x54, 0x190, 0x1092, 0x1434
+and 0x193a, no common factor. Five deltas is not enough to infer a rule, and
+guessing one produced four wrong answers in a day. The tape's IPL table covers
+phases 2, 10, 13 and 3, giving about fifty known-correct (lib extent → tape
+address) pairs; that is the input a real fix needs. That repository is Don's and
+was left read-only.
+
+### 8.34 Phase 8 — what the DASS dumps can and cannot settle
+
+The transition still does not complete. `ARC_MF_PG_PH$(ARC_K) = 0` when
+`ARC_OVL_ERR$(self)` is ON, and `ARC_UPDATE_MC` sets `CZ2V_MC` only if both
+overlays match the GRT's phases. Measured: **MF_OVLY = 3** (phase 3 fine) and
+**PROG_OVLY = 0** (phase 8 errored), so `CZ2V_MC` stays 0 and the display never
+leaves `0001`. Phase 3's descriptors came from the tape's IPL table; phase 8's
+are still `mmbstamp`'s, and only **1 of 27** checksums against the tape.
+
+**Phase 18 is accounted for.** `CZ2V_GRT_MC_PHASES` (`#PCZ2COM`+0x544, five
+halfwords per MC) read out of the running image gives GNC OPS 9 as the only
+configuration with three overlay phases — idx 9: **3, 8, 18** — matching the
+DASS line "CONFIGURATION GNC9 IS DEFINED IN THE MCF AS PHASES 2,3,8,13,18",
+where 2 and 13 are IPL-resident. `ARC` loops slots 2–5 and **exits the loop on
+an overlay error**, which is why phase 18 is never read.
+
+#### The reference has to be the as-built image, not the dump
+
+`mafgen/` supplies both halves: eight `.fcm` images (flat, loaded at address 0)
+and `augmented-*.json` CSECT maps of `{start, end, type, contents}`. They map
+onto the GRT's configurations, so **G9 is a real GPC image in the exact
+configuration `OPS 901` targets**. Three corrections were needed before any
+comparison meant anything, and each one had already produced a wrong conclusion:
+
+1. **`c9fb` is the dump's fill pattern.** The tape fills with `c6c6`/zeros.
+   Scoring those positions as mismatches produced the claim "code matches the
+   dump and data does not", which is false. Credit fill-equivalence and
+   `#PCVTTCS` goes from 8.17% to 98.88%; phase 3's known-good boot-table blocks
+   go from 41–55% to 99–100%. **Every "this is only 41–72%, so it's
+   coincidental" judgement made before this was measuring the fill convention,
+   not correctness.**
+2. **The tape is OI340600-derived; the dumps are OI340700.**
+   `PFS/OI340700/README.md` says so. Found independently: phase 3 block 8
+   (`#PCGCMFR`) differs in IBM float I-loads (`0x40333333` → `0x4011eb85`,
+   0.2 → 0.07) and integers, and block 1 (a ZCON) holds different absolute
+   addresses with no constant offset.
+3. **The DASS reports carry a post-build change table, and using it is what
+   makes the comparison work.** Halfwords altered after the build are flagged
+   by a `*` prefix (`*C1A0 *0000`) and listed as `address symbol+offset OLD NEW`
+   — e.g. `004D20 #PCGCCOM+007A C1F1 C1A0`. DASS_G9.ASC has **2396** of them and
+   the dump holds the NEW value in all 2396. Reverting them reconstructs the
+   as-built image, and *that* is what the tape must be compared against:
+
+       blk 8   55.08% -> 99.14%        blk 3   99.70% -> 100.00%
+       blk 4   91.11% -> 99.84%        blk 9   99.37% -> 100.00%
+
+   Nine of the ten authoritative blocks are now 99.1–100%.
+
+**The DASS dumps are as-built, as-linked, as-initialized and unchanged
+thereafter; differences against our build are AS-BUILT** — corrected by the user
+three times. Do not reach for "it had been running" again.
+
+#### Two residues survive all of that
+
+* **345 halfwords where `dump − tape` equals the containing section's own
+  base** — the tape holds a section-relative offset where the dump holds a
+  resolved address. Confirmed from the disassembly: `DASS_G9.ASC:115985` shows
+  `$0VAASEQ+0044  C7F3 BD1F 02BD1F  BC 7,X'BD1F'`, a branch whose target
+  halfword the tape stores unrelocated. `$0VAASEQ` scores 99.73% against both
+  G9.fcm and the as-built image — identical — so post-build uploads are not the
+  cause, and Don's `~/Desktop/IPL/IPL.fcm` is not the source (0.23% against it,
+  97.28% against G9.fcm). `OI340700/README.md` predicts exactly this class:
+  constants "which point to addresses outside the code available to us…
+  objects in memory set aside for overlays". Listed in
+  `tape-relocation-mismatches.txt`, 615 rows, with the ruled-out reasoning in
+  its header.
+* **Phase 3 block 1**, the ZCON block at 0x0024a, stuck at 54.17% under every
+  credit above.
+
+#### Approach #1 has a ceiling
+
+Content-based inference works where the two builds agree (code, 97–100%) and
+fails exactly where they differ — ZCON blocks and I-load tables. Those are also
+the blocks whose lengths cannot be recovered: a density end-detector validated
+at 10/10 on phase 3 drops to 7/10 when asked for lengths, and the failures are
+precisely block 1 (ZCON) and block 8 (I-loads). **A 100%-correct tape cannot be
+produced this way.** It needs approach #2 — build OI340700 from source per
+`PFS/OI340700/README.md` (clone `OI340600/`, overlay `OI340700/`), link, and
+take the load-block structure from the linker's own output. That is also
+*simpler*: building the tape means choosing a load-block grouping rather than
+inferring the original's.
+
+One version-independent technique does survive: **ZCON blocks can be placed by
+section arithmetic.** The tape's 146-halfword block at tape 1536 matches the
+unique 73-entry run of consecutive 2-halfword sections at 0x002ac..0x0033d
+(`#ZVAGTIM`..`#ZGMMLAT`); the adjacent 48-entry run 0x0024a..0x002a9 is
+confirmed as phase 3 block 1 by the boot table, which validates the method.
+
+#### What the phase table's fields actually mean
+
+`FCMGPT.hal` is authoritative and settles several guesses:
+
+    PHASE DESCRIPTOR (4 hw)   INDEX TO 1ST LOAD BLOCK OF PHASE
+                              # OF LOAD BLOCKS IN PHASE
+                              MASS MEMORY ADDRESS OF 1ST LB
+                              # OF CONTIGUOUS MM LBS FOR PHASE
+    LOAD BLOCK (3 hw)         MAIN MEM. ADDRESS OF LOAD BLOCK
+                              PROT. BIT | SOT BIT | BSR | DSR
+                              LENGTH OF LOAD BLOCK IN HWS
+
+with `STRUCTURE(16)` descriptors (64 hw) plus `FCMMGPT_LOAD_BLKS ARRAY(1029)`
+= 1093 halfwords total. `disp` is an offset from the GPT base — phase 3's is
+64, the first halfword after the descriptors — so descriptors live at
+`GPT+disp+3j`. `FCMMGPOV.asm:405-416` loads field 3 into `TIOSSTAD` and field 4
+into `TIOSWDCD`: **the fourth field is the I/O block count, not metadata.**
+
+Load blocks always **start** on an MM-block boundary and may **end** mid-block,
+the tail padded to the next boundary — verified 10/10 against the boot table.
+The descriptor list is **positional**: a descriptor carries address, flags and
+length but no tape offset, so the offset is implied by walking and rounding up,
+and one missing descriptor desynchronises every block after it. That is exactly
+`mmbstamp`'s failure mode on phases 8 and 18 — it drops the leading 4-halfword
+ZCON block, and everything after shifts:
+
+    tape       4   92  582   40  1970  768
+    mmbstamp       92  582   40  1602  768  354
+
+### 8.35 Rebuilding phase 8's descriptors — four controlled experiments
+
+Every attempt to widen phase 8 failed, and isolating one variable at a time is
+what finally said why. All against an otherwise untouched `pass-stamped.mmv`:
+
+| change | result |
+|---|---|
+| `y`=110, original 27 descriptors | **works** (baseline) |
+| `y`=128, original 27 descriptors | fails |
+| `y`=250, original 27 descriptors | fails |
+| `y`=128, 52 derived descriptors | fails |
+| `disp` 313→775, **original** descriptors and `y` | **fails** |
+
+**`y` is not a free parameter.** The original 27 descriptors consume exactly
+110 MM blocks; a legal-looking value that does not match what the descriptors
+consume is still rejected.
+
+**The descriptor block cannot be relocated, and that invalidated a whole
+evening's work.** Every tape built that night moved phase 8's descriptors into
+the free GPT space after phase 18 (`disp`=775). The last row above isolates it:
+original descriptors, original `y`, only `disp` moved — and the transition
+fails, with no `2/5/4/0` read at all. So the three tapes carrying derived
+descriptors were failing on the relocation and **say nothing about their
+descriptor content**. Phase 8's descriptors must be rewritten *in place* at
+`disp`=313, shifting phases 9–18 up by `(newN − 27)*3` halfwords and updating
+each of their `disp` fields. `FCMMGPT_LOAD_BLKS` covers GPT offsets 64..1092
+and 64..774 are in use, so phase 8 could grow from 27 to about 133 descriptors
+if everything after it is shifted. **Mechanism not established** — `FCMGPT.hal`
+documents the area as laid out in phase order, and `FCMMGBOV` indexes it via
+`TDBGPTIX` off the `FIOMGPTZ` base, so a bare `disp` ought to work. Read
+`FCMMGBOV`'s segment loop before assuming.
+
+The rejection is on the GPC side, not the MMU: `fault()` logs through `mm_log`
+and no fault line appears, and no read is attempted at all — not even the
+phase-3 read that precedes the overlay in a good run. So ARC/FCOS validates the
+phase set before issuing any I/O. A candidate mechanism, unconfirmed: the
+dynamic BCE program area is 1024 halfwords (`FIOMMGTG.asm` `DC 1024H'0'`,
+exported as `FIOCSECT`), which `FCMMGBOV` loads into `FCMCSIZE` as "MAX BCE
+PROG LENGTH" and uses to compute room-to-end-of-buffer at each track start.
+
+**Open, and stated as open: is `mmumodel.c:do_read` too strict?** It caps a
+transfer at the 256-block `(file,track)` unit — `fileEnd = (first /
+BLOCKS_PER_TRACK + 1) * BLOCKS_PER_TRACK` — while its own comment says "not off
+the end of the **file** it started in" and `BLOCKS_PER_FILE` is 2048. The
+flight software plainly supports crossing: `FCMMGBOV` has a section headed
+"BUILDS THE APPROPRIATE COMMANDS INTO THE BCE CODE TO ALLOW A PHASE TO CROSS
+THE FILE-TRACK BOUNDARY", incrementing the track explicitly, and `FIOMMGTG`
+carries delays labelled "USED BY MM OVERLAYS ON MULTI-TRACK PHASES" (0.82 s
+subfile traverse + 1.7 s spin-down = 2.52 s). **Do not "fix" `do_read` without
+checking the AP-101S mass-memory documentation first.** That every read in the
+known-good run fits inside its unit is consistent with either story and is not
+evidence that crossing is forbidden. A 228-block read at `3/4/0/0` succeeds
+today, so the cap only bites on transfers that would cross.
+
+Diagnostic note worth keeping: **"IPL MENU" text in the tail of `deu.log` is not
+a failure signature** — the known-good run shows it too, because it is
+format-buffer content rather than the live display. The real signal is the pair
+of reads `26 block(s) from 3/3/6/0` then `110 block(s) from 2/5/4/0` after the
+OPS keystrokes. `gpc.log` at ~621 bytes is normal; the mass-memory trace goes to
+`deu.log`.
 
 ## Methodology and caveats
 

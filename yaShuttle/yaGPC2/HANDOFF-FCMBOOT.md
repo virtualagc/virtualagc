@@ -45,12 +45,26 @@ runs cyclically without halting, and paints complete display fills that MEDS
 renders.  **GPC MEMORY now draws on CRT2 with correct data in its fields** —
 that took an empty critical-format buffer filled, two renderer defects fixed, a
 coordinate-frame chooser, and one emulator defect in `cpu_g_ea`; the whole story
-is `problems.md` §8.28.  **OPS transitions are now accepted** — `OPS 901 PRO`
-reaches `ARC_GPC_RECONFIG` rather than being refused, once the major function
-is not PAYLOAD (§8.29) — and the front of the work has moved to the memory
-configuration.  Everything below is how each stage got there,
+is `problems.md` §8.28.  **OPS transitions are accepted and the OPS 9 overlay
+now loads off the tape** — `read 26 block(s) from 3/3/6/0` then
+`read 110 block(s) from 2/5/4/0`, with `CZ2V_REC_XERR = 0`.  Getting there took
+four separate fixes, each its own section: the GRT lookup is keyed on the major
+function and the DEU model's switch was never settable (§8.29); the phase tables
+were never stamped onto the volume (§8.30); the IPL SOURCE switch was refusing
+every post-IPL mass-memory I/O (§8.31); and a table generated from a link map
+that does not describe this tape was destroying the live compool (§8.32, §8.33).
+**The front of the work is now phase 8's load-block descriptors** — only 1 of
+27 checksums against the tape, so the transition still does not complete
+(§8.34, §8.35).  Everything below is how each stage got there,
 in the order it was fixed; "The SSL", "PASS runs" and "What is actually still
 open" are the current-state parts.
+
+Volumes in `~/workspace/pass-run`, since several were built and only one is
+good: **`pass-stamped.mmv` is the known-good tape** (phase tables stamped from
+the tape's own IPL phase table).  `pass-ipl-cflm.mmv` is the unstamped base plus
+DEU critical formats; `pass-ipl.mmv` is never modified.  `pass-stamped2/3/4/6`
+and `pass-relocated.mmv` are the failed phase-8 experiments and are kept only as
+evidence — all of them moved `disp`, which is why they fail.
 
 **FCMBOOT loads GPCIPL and hands control to it.** Fixed 2026-08-25 in
 `14a7b7581`. All five of phase 10's load blocks now match the tape
@@ -513,19 +527,40 @@ flight software's own use of them (`problems.md` §8.27).
   historical — see §8.28 — they differ by exactly 512 in X and 2 in Y, and the
   translate registers are ruled out.  MEDS2 routes around it by choosing the
   geometry from the list; nothing explains it.
-- **PASS has no memory configuration: `CZ2V_MC$(GPC) = 0`.**  This is the
-  current front of the work.  The OPS transition itself is FIXED (§8.29 — the
-  GRT lookup is keyed on the major function, and the DEU model's switch was
-  never settable, so every request was a PAYLOAD request); an accepted request
-  now reaches `ARC_GPC_RECONFIG` and fails there with `CZ2V_REC_XERR = 1`
-  because this GPC has no memory configuration assigned.  Same missing thing as
-  Don's `STORE MC=09` against our `MC=__` and his `MM AREA` reading 1/1/1
-  against our three zeroes.  `SSSRC/AIBGPCLO:441` matches
-  `FCMMGPT_STARTING_MM_ADD` against `CDCV_PHASES` and ours does not match, which
-  is tape-build shaped — like DEUCFLM and MMDIR before it.
-- **PASS never tries to read the tape**, so the missing GNC9/PL9 overlays are
-  real but downstream.  Measured: identical mass-memory activity across accepted
-  and refused runs, 92 trace lines, all from the IPL.
+- **PHASE 8'S LOAD-BLOCK DESCRIPTORS.  This is the current front of the work.**
+  Everything upstream is now fixed and measured (`problems.md` §8.29–§8.35): the
+  OPS request is accepted, the phase tables are stamped onto the volume from the
+  tape's own IPL phase table, the IPL SOURCE switch no longer blocks
+  mass-memory I/O, and **the OPS 9 overlay loads** — `read 26 block(s) from
+  3/3/6/0` then `read 110 block(s) from 2/5/4/0`, `CZ2V_REC_XERR = 0`.  What
+  still fails is phase 8: only **1 of 27** of `mmbstamp`'s descriptors checksums
+  against the tape, so `ARC_OVL_ERR` is set, `PROG_OVLY` stays 0, `CZ2V_MC`
+  never updates and the display never leaves `0001`.  Phase 3's descriptors came
+  from the tape's IPL table; that table covers only phases 10, 2, 13 and 3.
+- **Two hard constraints on any fix, both established by controlled
+  experiment** (§8.35).  (1) `y` — `NUM_CONT_MM_BLKS` — is not a free
+  parameter: it must equal the MM-block consumption implied by the descriptor
+  list, and `y`=128 or 250 with the original 27 descriptors both fail.  (2) **The
+  descriptor block cannot be relocated.**  Moving phase 8's descriptors to the
+  free GPT space after phase 18 (`disp`=775) breaks the transition on its own,
+  with the original descriptors and original `y` unchanged.  So descriptors must
+  be rewritten *in place* at `disp`=313, shifting phases 9–18 up and updating
+  their `disp` fields.  Mechanism unexplained — read `FCMMGBOV`'s segment loop
+  before assuming.
+- **Is `mmumodel.c:do_read` too strict?**  It caps a transfer at the 256-block
+  `(file,track)` unit while its own comment says "the *file* it started in", and
+  the flight software plainly supports crossing (`FCMMGBOV` builds per-track
+  commands; `FIOMMGTG` carries multi-track spin-down delays).  Unconfirmed, and
+  **do not "fix" it without checking the AP-101S mass-memory documentation** —
+  every read in the known-good run fits inside its unit, which is consistent
+  with either story.
+- **A 100%-correct tape needs approach #2.**  Reverse-engineering the tape
+  against `PFS/mafgen/*.fcm` has a ceiling: the tape is OI340600-derived and the
+  dumps are OI340700, and content-based inference fails exactly where the two
+  builds differ — ZCON blocks and I-load tables, which are also the blocks whose
+  lengths cannot be recovered.  Building OI340700 from source and taking the
+  load-block structure from the linker's own output is both correct and simpler,
+  because building a tape means *choosing* a grouping rather than inferring one.
 - The CRT hand-over.  GPCIPL follows the BFC switch, replaying its entire
   display init on the newly selected unit and no longer polling the old one
   (whose POLL FAIL is just that).  Measured on a live run, and the PASS load
@@ -825,6 +860,59 @@ Phase 10's five load blocks (start, length, protected):
     0x00000 15394 1   0x03C22 9632 1   0x06DC0 502 0
     0x06FBC   994 1   0x07C00  770 1
 
+#### The in-core phase table, `#PFCMGPT` — layout and rules
+
+`SSSRC/FCMGPT.hal` is authoritative; everything below was checked against it and
+against the running machine.
+
+    PHASE DESCRIPTOR (4 hw)   INDEX TO 1ST LOAD BLOCK OF PHASE   ("disp")
+                              # OF LOAD BLOCKS IN PHASE          ("nblks")
+                              MASS MEMORY ADDRESS OF 1ST LB      ("x")
+                              # OF CONTIGUOUS MM LBS FOR PHASE   ("y")
+    LOAD BLOCK (3 hw)         MAIN MEM. ADDRESS OF LOAD BLOCK
+                              PROT. BIT | SOT BIT | BSR | DSR
+                              LENGTH OF LOAD BLOCK IN HWS
+
+`STRUCTURE(16)` descriptors (64 hw) + `FCMMGPT_LOAD_BLKS ARRAY(1029)` = **1093
+halfwords**, covering phases 3–18.  `disp` is an offset from the GPT base —
+phase 3's is 64, the first halfword after the descriptors — so a phase's
+descriptors live at `GPT + disp + 3j`.  On this volume the GPT is at **tape
+halfword 616158**, inside phase 2's load block `(615304, 8410)`; `#PCDCPHA` is
+at 633964 inside `(633736, 802)`.
+
+`x` is a **block index**, not an `mm16`: `((file*8 + track)*8 + subfile)*32 +
+block`.  Phase 8's `x` = 10880 = `0x2a80` = volume directory entry 1941.
+`FCMMGPOV.asm:405-416` loads `x` into `TIOSSTAD` and `y` into `TIOSWDCD`, so
+**`y` is the I/O block count**, not metadata.
+
+Rules that took experiments to establish:
+
+- A load block always **starts** on an MM-block boundary and may **end**
+  mid-block, tail padded to the next boundary with `c6c6` (10/10 against the
+  boot table).
+- The descriptor list is **positional** — no tape offset is stored, it is
+  implied by walking and rounding up — so one missing or mis-sized descriptor
+  desynchronises every block after it.  That is `mmbstamp`'s failure on phases
+  8 and 18: it drops the leading 4-halfword ZCON block and everything shifts.
+- `y` must equal the MM-block consumption implied by the descriptor list.
+- **`disp` must not be moved.**  Relocating phase 8's descriptors to free space
+  after phase 18 breaks the transition with the original descriptors and `y`.
+- Editing anything inside a load block breaks that block's checksum
+  (`[content L-2][0][checksum]`, `checksum == sum(content) & 0xffff`).  Always
+  recompute; omitting it halts the machine at 115 s, before the OPS request.
+- A generated descriptor list must be checked for **destination overlap** — the
+  first full phase-8 list had 32 overlapping ranges because span-based lengths
+  over-run the real block.
+
+Segmentation that reproduces phase 3 exactly (10/10, lengths *and*
+destinations) needs three constraints together: destination on a section start,
+length ending at a section end (`augmented-*.json`'s `end`, gap-tolerant — the
+map has 375 gaps totalling 102,960 halfwords), and a valid checksum.  Checksum
+alone **over-merges**: a greedy longest-length walk swallows several real blocks
+whenever their sums happen to close, which is how two phantom "blocks" of 31,244
+and 13,396 halfwords appeared, their windows loading to destinations spanning
+three times their own length.
+
 ---
 
 
@@ -982,6 +1070,32 @@ Emulator fixes made (all with POO citations, all committed):
   panel that published 0 for it stopped GPCIPL looking for a display bus
   (fixed in `58bf14106`).
 
+Tools added for the OPS-transition and phase-table work:
+
+- **`tools/stamp_phase_table_on_tape.py`** — builds `#PFCMGPT` from the tape's
+  OWN stamped IPL phase table (FCMBOOT halfword 894, `FCMPTAD1`, covering
+  phases 10, 2, 13, 3) rather than from an `mmbstamp` reconstruction.  This is
+  the deliverable that made the OPS 9 overlay load: deriving the table from the
+  volume it will be read from is the only route that cannot disagree with it.
+- **`tools/fix_phase_table_lengths.py`** — corrects load-block lengths against
+  the tape's own checksums, which is decidable because a block is
+  `[content L-2][0][checksum]`.  It **refuses** rather than guessing: a block
+  that verifies at no length is reported, and `--check-image SNAPSHOT` locates
+  the live compool by content and exits 2 rather than emit a table whose blocks
+  would overwrite it.  Three of its own bugs are recorded in `problems.md`
+  §8.19 and were each caught only after producing confident wrong output.
+- **`tools/opsdiag.py`** — reads the whole OPS chain out of a snapshot: GRT
+  rows and the GPCs each targets, the GPC sets, per-GPC `CZ2V_GST`,
+  `CZ2V_REC_OPS`/`REC_XERR`, and `DMZ_LOG`'s decoded verdict.  One command
+  instead of a day.
+- **`tools/jsonpp.py`** (`--keys`, `--schema`, `--get`, `--count-by`) — the
+  `augmented-*.json` CSECT maps are ONE long line, so ordinary line-oriented
+  tools are useless on them.
+- **`tape-relocation-mismatches.txt`** — not a tool but a dataset: 615 rows of
+  tape-vs-as-built differences that survive fill-equivalence and the DASS patch
+  summary, with the ruled-out explanations in its header.  See `problems.md`
+  §8.34.
+
 ---
 
 
@@ -1064,6 +1178,21 @@ Memory and protection:
     YAGPC_LOADBIN=<us>:<addr>:<file>   inject a load block
     YAGPC_IPL_PROTECT=0          start memory unprotected — REFUTED as a fix, kept
                                  as a diagnostic; do not make it the default
+    YAGPC_WAITTRACE=1            WHICH instruction parked the machine, and with
+                                 what interrupt mask.  A wait-state stop says
+                                 where it parked and the NIA ring says how it got
+                                 there; neither says which instruction did it,
+                                 which for an unwakeable wait is the whole
+                                 question.  Found `FPMDISP`+59 loading a PCT whose
+                                 PSW is a deliberate halt (`psw2=0x00020000`,
+                                 mask 00) — the contrast with the normal idle
+                                 waits in the same run, `by=01df6` at mask `ff`,
+                                 is what proved it deliberate.
+    YAGPC_LOADBIN                now takes several images,
+                                 `t:addr:path;t:addr:path;…` (up to 8).  One was
+                                 not enough: the ground build stamps the phase
+                                 tables as a SET, and standing in for part of a
+                                 set only moves the failure.
 
 Bus and IOP:
 
@@ -1294,6 +1423,35 @@ but it is luck of the tool used.
     page, where it raises `ILLEGAL ENTRY` — which then gets attributed to
     whatever else was keyed. It contaminated two conclusions and produced one
     written-down finding that had to be withdrawn.
+29. **An address is not self-describing.** The `mmu` tool and `mmu2mmv`'s
+    report use track/file/subfile/block; the CON80 `ADDR=FTSBB` packing was read
+    as file/track. Phase 3 is `3/3/6/0`, symmetric in track and file, so it
+    confirmed nothing — and the wrong ordering survived every check until a
+    phase with unequal track and file exposed it, after "phase 8 is blank on the
+    tape" had been written down and had to be retracted.
+30. **Isolate one variable, especially when the change looks too mechanical to
+    matter.** Four tapes were built to test a hypothesis about phase 8's
+    descriptor content. All four *also* moved the descriptor block to free space
+    elsewhere in the table. That move was the cause: with the original
+    descriptors and only the move applied, the transition still fails. Three
+    runs' worth of conclusions were void, and the control that showed it took
+    the same nine minutes as any of them.
+31. **A log line is not a symptom until it is diffed against a passing run.**
+    "The run never left the IPL menu" was reported from `IPL MENU` text in the
+    tail of `deu.log`. The known-good run shows the identical text — it is
+    format-buffer content, not the live display. The real signal is the pair of
+    reads `26 block(s) from 3/3/6/0` then `110 block(s) from 2/5/4/0` after the
+    OPS keystrokes. Also: `gpc.log` at ~621 bytes is normal, and the
+    mass-memory trace goes to `deu.log`, not `gpc.log`.
+32. **Check the fill convention and the reference build before scoring a
+    comparison.** Comparing our tape to `PFS/mafgen/*.fcm` produced three
+    separate wrong conclusions: `c9fb` is the dumps' fill and was scored as
+    content; the dumps are OI340700 where the tape is OI340600; and 2396
+    halfwords had been changed after the build and are flagged `*` in the report
+    itself, with an `address / symbol+offset / OLD / NEW` table that lets them be
+    reverted. Uncorrected, correct blocks score 8–55% and get rejected as
+    coincidence; corrected, 99–100%. There was a control available throughout —
+    phase 3's boot-table blocks, known-good by construction.
 
 
 ## 6. OUTSTANDING, NOT CODE
