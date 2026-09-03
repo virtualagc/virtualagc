@@ -10,59 +10,32 @@ WHY IN PLACE, AND NOT IN THE FREE SPACE AT THE END
 followed by `FCMMGPT_LOAD_BLKS ARRAY(1029)`, and `FCMGPT.hal` draws the
 load-block area as laid out in phase order -- "PHASE 3 1ST LOAD BLOCK ...
 PHASE 18 NTH LOAD BLOCK".  On this volume it is exactly that: contiguous from
-offset 64, phases 3 through 18 in order, ending at 775.
+offset 64, phases 3 through 18 in order, ending at 775.  This tool rebuilds the
+area contiguously in phase order, preserving that by construction, because it
+is what the ground build produced and there is no reason to depart from it.
 
-Moving a phase's descriptors into the free space after 775 and pointing its
-`disp` there DOES NOT WORK, even though `disp` is a plain offset and nothing in
-the documented format forbids it.  Measured: with the ORIGINAL 27 phase-8
-descriptors and the ORIGINAL `y`, moving `disp` from 313 to 775 and changing
-nothing else makes the OPS 9 transition fail with no mass-memory read at all.
-Three earlier tapes were built that way and all three failed for this reason
-rather than for anything to do with their descriptor content.
+A NOTE ON WHAT IS *NOT* KNOWN, BECAUSE AN EARLIER VERSION OF THIS FILE SAID
+OTHERWISE
 
-WORSE: NO `disp` MAY CHANGE AT ALL.  Three tests, each on an otherwise
-byte-identical copy of the known-good `pass-stamped.mmv`, with the enclosing
-checksum repaired and verified every time:
+This docstring previously stated, as measured fact, that no `disp` may change
+at all -- and therefore that a phase's descriptor COUNT is frozen.  That was
+wrong.  Every run behind it had the IPL SOURCE switch left at MM1, which blocks
+all post-IPL mass-memory I/O (problems.md Sec 8.31), so no overlay could be read
+regardless of the tape.  The control proves it: the KNOWN-GOOD volume, entirely
+unmodified, fails the same way under that invocation.  See Sec 8.35.
 
-    phase 8's disp 313 -> 775, phases 9-18 untouched        -> FAILS
-    phases 8-18's disp all +3, descriptors identical        -> FAILS
-    phases 9-18's disp +3, phase 8 left at 313              -> FAILS
-    (baseline, nothing changed)                             -> works
-
-The third is the one that matters, because it is exactly what GROWING phase 8
-does to the layout: `disp` is the START of a phase's descriptors, so adding
-descriptors leaves phase 8's own `disp` at 313 and moves only the phases after
-it.  A raw diff confirms that tape carried nothing else: ten changed `disp`
-fields, a clean +3 shift of the load-block region, phase 8's descriptors
-untouched.  Phases 9, 10, 11, 12, 14, 15, 16 and 17 are not even in GNC OPS 9's
-memory configuration (3, 8 and 18 are), and moving them still breaks it.
-
-MECHANISM UNKNOWN.  `FCMMGBOV:186-196` reads `disp` as a plain index off the
-`FIOMGPTZ` base -- `R4 = (phase-3)*4`, `R5 = table[R4]`, `TDBGPTIX = R5` -- with
-nothing constraining its value, and start-up (`AIBGPCLO:895`) writes only
-`FCMMGPT_STARTING_MM_ADD`, never `disp`.  Six modules reference `FIOMGPTZ`
-(FCMMGBOV, FCMMGPOV, FCMUPLOD, FCMZCONS, FIOMGCV, FIOMGDSP) and only the first
-two have been read.  Ruled out: the tail of the load-block area is genuinely all
-zeros in the known-good tape, so zeroing it is a no-op; and the original
-stamping touched only the GPT, #PCDCPHA and the two enclosing checksums, so
-there is no fifth thing this tool is failing to update.
-
-CONSEQUENCE: a phase's descriptor COUNT is frozen.  Its descriptors can be
-rewritten in place -- addresses, flags and lengths -- but there must be exactly
-as many as before, or a later phase's `disp` moves.  For phase 8 that means
-exactly 27, and the tape's phase 8 does not appear to fit in 27: a checksum
-walk finds 35 unambiguous blocks in just the first 87 of its 110 MM blocks.
-The shifting logic below is therefore correct but currently unusable; it is
-kept because the constraint is unexplained and may yet turn out to be
-conditional.
+So it is currently UNKNOWN whether `disp` can move, whether a phase can grow,
+and whether `y` is constrained.  Anyone testing this must pass
+`SOURCE_RUN=OFF` to `headless-gpcmem.sh` -- its default of `MM1` cannot perform
+an OPS transition at all.
 
 TWO OTHER THINGS THAT MUST BE RIGHT, BOTH LEARNED THE HARD WAY
 
-`y` (`NUM_CONT_MM_BLKS`) is not free.  `FCMMGPOV.asm:405-416` loads it into
-`TIOSWDCD`, so it IS the I/O block count: the number of mass-memory blocks the
-transfer fetches.  For phase 8, `y`=110 is known good and `y`=128 and `y`=250
-are both rejected, so it is the phase's TAPE EXTENT and does not change when
-the descriptors are re-carved out of that same extent.
+`y` (`NUM_CONT_MM_BLKS`) is the I/O block count -- `FCMMGPOV.asm:405-416` loads
+it into `TIOSWDCD` -- so it is the number of mass-memory blocks the transfer
+fetches.  `y`=110 is the known-good value for phase 8.  Whether any other value
+is rejected is NOT established: the runs that appeared to show `y`=128 and
+`y`=250 failing were the blocked-source runs described above.
 
 **`y` is NOT sum(ceil(len/512)).**  That formula reproduces only 8 of the 16
 phases on this volume — phase 3 has `y`=37 where the formula gives 38, phase 4
@@ -168,9 +141,9 @@ def main():
     ap.add_argument("--descriptors",
                     help="JSON list of [addr, flags, length] triples")
     ap.add_argument("--y", type=int,
-                    help="set NUM_CONT_MM_BLKS; omitted, it is PRESERVED.  It "
-                         "is the phase's tape extent, not a function of the "
-                         "descriptors -- see the module docstring")
+                    help="set NUM_CONT_MM_BLKS; omitted, it is PRESERVED. "
+                         "What constrains it is not established -- see the "
+                         "module docstring")
     ap.add_argument("--verify-identity", action="store_true",
                     help="rebuild from what is already there; require the "
                          "output to be byte-identical to the input")

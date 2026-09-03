@@ -537,16 +537,21 @@ flight software's own use of them (`problems.md` §8.27).
   against the tape, so `ARC_OVL_ERR` is set, `PROG_OVLY` stays 0, `CZ2V_MC`
   never updates and the display never leaves `0001`.  Phase 3's descriptors came
   from the tape's IPL table; that table covers only phases 10, 2, 13 and 3.
-- **Two hard constraints on any fix, both established by controlled
-  experiment** (§8.35).  (1) `y` — `NUM_CONT_MM_BLKS` — is not a free
-  parameter: it must equal the MM-block consumption implied by the descriptor
-  list, and `y`=128 or 250 with the original 27 descriptors both fail.  (2) **The
-  descriptor block cannot be relocated.**  Moving phase 8's descriptors to the
-  free GPT space after phase 18 (`disp`=775) breaks the transition on its own,
-  with the original descriptors and original `y` unchanged.  So descriptors must
-  be rewritten *in place* at `disp`=313, shifting phases 9–18 up and updating
-  their `disp` fields.  Mechanism unexplained — read `FCMMGBOV`'s segment loop
-  before assuming.
+- **ALWAYS PASS `SOURCE_RUN=OFF`.**  `headless-gpcmem.sh` defaults it to `MM1`,
+  which is the value that *blocks* every post-IPL mass-memory I/O (§8.31): with
+  the IPL SOURCE switch made, `FIOMGSNC` refuses every transaction and no
+  overlay is ever read.  The default invocation therefore cannot perform an OPS
+  transition at all, and fails silently and identically no matter what is on the
+  tape.  Nine experimental runs were lost to this before anyone diffed a failing
+  panel script against the working one; see §8.35.  The known-good baseline also
+  used `RUN_AT=130`.
+- **Nothing is currently known about whether the descriptor layout can be
+  changed** (§8.35, retracted in full).  An earlier version of this handoff
+  claimed two hard constraints — that `y` must equal the descriptor list's own
+  consumption, and that `disp` cannot move, together freezing phase 8 at 27
+  descriptors.  Both came from runs that had the IPL source blocked, so neither
+  was measured.  Whether `y` is constrained, whether `disp` can move, and
+  whether phase 8 can grow beyond 27 descriptors are all **open**.
 - **Is `mmumodel.c:do_read` too strict?**  It caps a transfer at the 256-block
   `(file,track)` unit while its own comment says "the *file* it started in", and
   the flight software plainly supports crossing (`FCMMGBOV` builds per-track

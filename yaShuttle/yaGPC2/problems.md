@@ -7949,66 +7949,74 @@ ZCON block, and everything after shifts:
     tape       4   92  582   40  1970  768
     mmbstamp       92  582   40  1602  768  354
 
-### 8.35 Rebuilding phase 8's descriptors — four controlled experiments
+### 8.35 Phase 8's descriptors — nine experiments that measured a switch
 
-Every attempt to widen phase 8 failed, and isolating one variable at a time is
-what finally said why. All against an otherwise untouched `pass-stamped.mmv`:
+**RETRACTED IN FULL.** An earlier version of this section reported four
+controlled experiments and drew two conclusions from them: that
+`NUM_CONT_MM_BLKS` must equal the descriptor list's own consumption, and that a
+phase's `disp` cannot be changed at all, which together froze phase 8 at
+exactly 27 descriptors. **Both were artifacts. Neither experiment measured what
+it claimed to.**
 
-| change | result |
-|---|---|
-| `y`=110, original 27 descriptors | **works** (baseline) |
-| `y`=128, original 27 descriptors | fails |
-| `y`=250, original 27 descriptors | fails |
-| `y`=128, 52 derived descriptors | fails |
-| `disp` 313→775, **original** descriptors and `y` | **fails** |
+Every one of those runs left the IPL SOURCE switch at MM1. §8.31 is the section
+that established what that does: `FIOMGSNC` dispatches a mass-memory
+transaction only if the MMU is *not* IPL-selected, so with the switch made,
+every post-IPL transaction is refused and no overlay is ever read.
+`headless-gpcmem.sh` defaults `SOURCE_RUN=MM1`; the working baseline had been
+run with `SOURCE_RUN=OFF`, and none of the nine follow-up runs passed it.
 
-**`y` is not a free parameter.** The original 27 descriptors consume exactly
-110 MM blocks; a legal-looking value that does not match what the descriptors
-consume is still rejected.
+The control settles it. The **known-good** tape, unmodified, run with that same
+default invocation:
 
-**The descriptor block cannot be relocated, and that invalidated a whole
-evening's work.** Every tape built that night moved phase 8's descriptors into
-the free GPT space after phase 18 (`disp`=775). The last row above isolates it:
-original descriptors, original `y`, only `disp` moved — and the transition
-fails, with no `2/5/4/0` read at all. So the three tapes carrying derived
-descriptors were failing on the relocation and **say nothing about their
-descriptor content**. Phase 8's descriptors must be rewritten *in place* at
-`disp`=313, shifting phases 9–18 up by `(newN − 27)*3` halfwords and updating
-each of their `disp` fields. `FCMMGPT_LOAD_BLKS` covers GPT offsets 64..1092
-and 64..774 are in use, so phase 8 could grow from 27 to about 133 descriptors
-if everything after it is shifted. **Mechanism not established** — `FCMGPT.hal`
-documents the area as laid out in phase order, and `FCMMGBOV` indexes it via
-`TDBGPTIX` off the `FIOMGPTZ` base, so a bare `disp` ought to work. Read
-`FCMMGBOV`'s segment loop before assuming.
+| tape | IPL source at RUN | overlay read |
+|---|---|---|
+| `pass-stamped.mmv` (known good) | OFF | **yes** |
+| `pass-stamped.mmv` (known good) | MM1 | no |
+| every experimental tape | MM1 | no |
 
-The rejection is on the GPC side, not the MMU: `fault()` logs through `mm_log`
-and no fault line appears, and no read is attempted at all — not even the
-phase-3 read that precedes the overlay in a good run. So ARC/FCOS validates the
-phase set before issuing any I/O. A candidate mechanism, unconfirmed: the
-dynamic BCE program area is 1024 halfwords (`FIOMMGTG.asm` `DC 1024H'0'`,
-exported as `FIOCSECT`), which `FCMMGBOV` loads into `FCMCSIZE` as "MAX BCE
-PROG LENGTH" and uses to compute room-to-end-of-buffer at each track start.
+The tape was never the variable. Nine runs and about ninety minutes of wall
+clock were spent re-measuring a switch position.
 
-**Open, and stated as open: is `mmumodel.c:do_read` too strict?** It caps a
-transfer at the 256-block `(file,track)` unit — `fileEnd = (first /
-BLOCKS_PER_TRACK + 1) * BLOCKS_PER_TRACK` — while its own comment says "not off
-the end of the **file** it started in" and `BLOCKS_PER_FILE` is 2048. The
-flight software plainly supports crossing: `FCMMGBOV` has a section headed
-"BUILDS THE APPROPRIATE COMMANDS INTO THE BCE CODE TO ALLOW A PHASE TO CROSS
-THE FILE-TRACK BOUNDARY", incrementing the track explicitly, and `FIOMMGTG`
-carries delays labelled "USED BY MM OVERLAYS ON MULTI-TRACK PHASES" (0.82 s
-subfile traverse + 1.7 s spin-down = 2.52 s). **Do not "fix" `do_read` without
-checking the AP-101S mass-memory documentation first.** That every read in the
-known-good run fits inside its unit is consistent with either story and is not
-evidence that crossing is forbidden. A 228-block read at `3/4/0/0` succeeds
-today, so the cap only bites on transfers that would cross.
+**What is genuinely known about the phase table is therefore much less:**
 
-Diagnostic note worth keeping: **"IPL MENU" text in the tail of `deu.log` is not
-a failure signature** — the known-good run shows it too, because it is
-format-buffer content rather than the live display. The real signal is the pair
-of reads `26 block(s) from 3/3/6/0` then `110 block(s) from 2/5/4/0` after the
-OPS keystrokes. `gpc.log` at ~621 bytes is normal; the mass-memory trace goes to
-`deu.log`.
+- `y`=110 works with the original 27 descriptors, because that is the baseline.
+  Whether `y` is constrained at all is **unmeasured**.
+- Whether `disp` can move is **unmeasured**.
+- Whether phase 8 can grow beyond 27 descriptors is **unmeasured**.
+
+`tools/rewrite_phase_descriptors.py` still stands on its own: it rewrites a
+phase's descriptors in place, shifts later phases, repairs the enclosing
+checksum, and `--verify-identity` reproduces the volume byte for byte on phases
+3, 4, 7, 8, 12 and 15. That test also caught a real defect — see the `y` note
+below — and none of it depended on the broken runs.
+
+#### The one durable result: `y` is not sum(ceil(len/512))
+
+Independent of any run, and measured directly against the table on the volume:
+that formula reproduces only **8 of the 16** phases. Phase 3 has `y`=37 where
+it gives 38; phase 4 has 37 against 57; phase 15 has 90 against 115. It happens
+to be right for phase 8, which is exactly why an identity test on phase 8 alone
+did not catch it. Whatever rule the ground build uses is not known, so the tool
+preserves `y` rather than computing it.
+
+#### Why this happened, which is the part worth keeping
+
+This document's own standing rule is *a uniform result across a whole set means
+the harness is broken*, and §8.10 already carried it. Eleven runs failed
+identically. That identity was read as evidence about the flight software —
+first that `y` was validated, then that `disp` was frozen, then that an
+undocumented layout invariant existed and four unread modules must hold the
+explanation — when it was the signature of a shared input.
+
+The diff that found it took one command: compare the panel script of a failing
+run against the panel script of the run that worked. Two lines differ. **A
+baseline is not a baseline unless it is re-run with the same invocation**, and
+the working run here was from the previous day, under settings nobody had
+written down beside it. `headless-gpcmem.sh`'s default is the trap: `MM1` is the
+value that *blocks* mass-memory I/O, so the default invocation cannot perform an
+overlay at all, and every run that forgets `SOURCE_RUN=OFF` fails in exactly the
+same silent way.
+
 
 ## Methodology and caveats
 

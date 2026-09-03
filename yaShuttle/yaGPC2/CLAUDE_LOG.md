@@ -53,52 +53,35 @@ builds multi-track transfers — and why relocating the descriptor block breaks
 the transition at all.)
 
 ### [2026-09-03] Target: [HANDOFF-FCMBOOT.md]
-- **NO `disp` IN #PFCMGPT MAY CHANGE AT ALL.  This freezes every phase's
-  descriptor COUNT and blocks the phase-8 fix.**  Three tests, each on an
-  otherwise byte-identical copy of pass-stamped.mmv with the enclosing checksum
-  repaired and verified:
-      phase 8 disp 313 -> 775, phases 9-18 untouched     -> FAILS
-      phases 8-18 disp all +3, descriptors identical     -> FAILS
-      phases 9-18 disp +3, phase 8 left at 313           -> FAILS
-      (baseline)                                         -> works
-  The third is the operative one: `disp` is the START of a phase's descriptors,
-  so GROWING phase 8 leaves its own disp at 313 and moves only the phases after
-  it -- which is exactly what that tape did.  A raw diff confirms it carried
-  nothing else: ten changed disp fields, a clean +3 shift of the load-block
-  region 394..777, phase 8's descriptors untouched.  Phases 9-12 and 14-17 are
-  not even in GNC OPS 9's configuration (3, 8, 18 are) and moving them still
-  breaks it.
-- Ruled out, so nobody re-checks them: the load-block tail (GPT offsets
-  775..1092) is genuinely all zeros in the known-good tape, so zeroing it is a
-  no-op; and the original stamping changed only four regions -- #PFCMGPT
-  0..774, #PCDCPHA, and the two enclosing block checksums (623713, 634537) --
-  so there is no fifth thing the rewrite tool fails to update.
-- Mechanism UNKNOWN.  FCMMGBOV:186-196 reads disp as a plain index off the
-  FIOMGPTZ base (`R4=(phase-3)*4 / R5=table[R4] / STH R5,TDBGPTIX`), nothing
-  constrains its value, and AIBGPCLO:895 writes only FCMMGPT_STARTING_MM_ADD,
-  never disp.  Six modules reference FIOMGPTZ -- FCMMGBOV, FCMMGPOV, FCMUPLOD,
-  FCMZCONS, FIOMGCV, FIOMGDSP -- and only the first two have been read.  Start
-  there.
-- **Consequence for phase 8**: its descriptors can be rewritten in place, but
-  there must be exactly 27 of them.  The tape's phase 8 does not appear to fit
-  in 27 -- the checksum walk finds 35 unambiguous blocks in just the first 87
-  of its 110 MM blocks, and phase 3 establishes the rule (10 descriptors, 10
-  checksummed blocks, 10/10 verified) that one descriptor means one block.
-- New tool: `tools/rewrite_phase_descriptors.py`, rewrites a phase's
-  descriptors in place, shifts later phases, repairs the enclosing checksum.
-  `--verify-identity` rebuilds from what is already present and requires a
-  byte-identical result; it passes on phases 3, 4, 7, 8, 12 and 15.  **That
-  test caught a real bug**: `y` is NOT sum(ceil(len/512)) -- that reproduces
-  only 8 of 16 phases (phase 3 gives 38 against the real 37, phase 15 115
-  against 90).  It is right for phase 8, which is exactly why testing phase 8
-  alone hid it.  The tool now preserves y unless `--y` is given.
-- Descriptor content, best available: lengths are unambiguous for 87 of the 110
-  MM blocks (35 blocks, zero ambiguity, stalls at tape 44544); destinations are
-  credible for about 28 of 35 once each block is scored over its OWN length
-  against the as-built image rather than over a fixed 512-halfword window --
-  the three ZCON blocks then place at 100%.  Forcing the remainder through a
-  non-overlap constraint makes it worse, not better: block 10 (4540 halfwords)
-  goes from 48.6% to 3.6%.  Not stamped, deliberately.
+- **RETRACTED BEFORE IT WAS EVER SYNCED: the "no disp may change" entry that
+  stood here.**  All nine runs behind it left the IPL SOURCE switch at MM1,
+  which blocks every post-IPL mass-memory I/O (problems.md 8.31), so none of
+  them could read an overlay whatever the tape said.  Control: the KNOWN-GOOD
+  pass-stamped.mmv, unmodified, fails identically under that invocation.
+      pass-stamped.mmv, SOURCE OFF  -> overlay read
+      pass-stamped.mmv, SOURCE MM1  -> NO overlay read
+      all nine experimental tapes, SOURCE MM1 -> NO overlay read
+  So it is UNKNOWN whether disp can move, whether a phase can grow past its
+  current descriptor count, and whether y is constrained.  problems.md 8.35 and
+  the handoff's "two hard constraints" have been rewritten as retractions.
+- **ALWAYS PASS `SOURCE_RUN=OFF` (and the baseline also used `RUN_AT=130`).**
+  headless-gpcmem.sh defaults SOURCE_RUN=MM1, which is the value that BLOCKS
+  mass-memory I/O, so the default invocation cannot perform an OPS transition at
+  all and fails silently and identically no matter what is on the tape.  Worth
+  considering whether that default should change, or whether the rig should
+  refuse to run an OPS-transition scenario with the source made.
+- The durable result, independent of any run: **y is NOT sum(ceil(len/512))** --
+  that reproduces only 8 of 16 phases (phase 3 gives 38 against the real 37,
+  phase 15 115 against 90).  It is right for phase 8, which is exactly why an
+  identity test on phase 8 alone hid it.
+- New tool `tools/rewrite_phase_descriptors.py` stands on its own: rewrites a
+  phase's descriptors in place, shifts later phases, repairs the enclosing
+  checksum; `--verify-identity` reproduces the volume byte for byte on phases
+  3, 4, 7, 8, 12 and 15.  Nothing in it depended on the broken runs.
+- Descriptor content, best available and unaffected: lengths unambiguous for 87
+  of 110 MM blocks (35 blocks, zero ambiguity, stalls at tape 44544);
+  destinations credible for ~28 of 35 once each block is scored over its OWN
+  length against the as-built image -- the three ZCON blocks then place at 100%.
 
 ### [2026-09-03] Target: [problems.md]
 - **discretePanel's focus fix was never broken; the rig started calling it a
