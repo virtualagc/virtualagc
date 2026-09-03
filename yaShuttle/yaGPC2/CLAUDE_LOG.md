@@ -61,9 +61,16 @@ the transition at all.)
       pass-stamped.mmv, SOURCE OFF  -> overlay read
       pass-stamped.mmv, SOURCE MM1  -> NO overlay read
       all nine experimental tapes, SOURCE MM1 -> NO overlay read
-  So it is UNKNOWN whether disp can move, whether a phase can grow past its
-  current descriptor count, and whether y is constrained.  problems.md 8.35 and
-  the handoff's "two hard constraints" have been rewritten as retractions.
+  problems.md 8.35 and the handoff's "two hard constraints" have been rewritten
+  as retractions.
+- **AND THE RE-RUN REVERSES THE CONCLUSION: `disp` CAN MOVE.**  pass-after8.mmv
+  (phase 8 held at disp=313, phases 9-18 moved +3, all descriptors identical),
+  re-run with SOURCE_RUN=OFF RUN_AT=130:
+      read  26 block(s) from 3/3/6/0   t=242.7s    phase 3, MF overlay
+      read 110 block(s) from 2/5/4/0   t=244.1s    phase 8, program overlay
+  which is the known-good behaviour.  So shifting later phases is harmless and
+  GROWING PHASE 8 IS VIABLE.  Whether `y` is constrained is still unmeasured --
+  those runs were blocked too and have not been repeated.
 - **ALWAYS PASS `SOURCE_RUN=OFF` (and the baseline also used `RUN_AT=130`).**
   headless-gpcmem.sh defaults SOURCE_RUN=MM1, which is the value that BLOCKS
   mass-memory I/O, so the default invocation cannot perform an OPS transition at

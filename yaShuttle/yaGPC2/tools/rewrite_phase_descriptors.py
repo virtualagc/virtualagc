@@ -24,10 +24,21 @@ all post-IPL mass-memory I/O (problems.md Sec 8.31), so no overlay could be read
 regardless of the tape.  The control proves it: the KNOWN-GOOD volume, entirely
 unmodified, fails the same way under that invocation.  See Sec 8.35.
 
-So it is currently UNKNOWN whether `disp` can move, whether a phase can grow,
-and whether `y` is constrained.  Anyone testing this must pass
-`SOURCE_RUN=OFF` to `headless-gpcmem.sh` -- its default of `MM1` cannot perform
-an OPS transition at all.
+RE-MEASURED PROPERLY, `disp` CAN MOVE.  The very tape that "proved" otherwise --
+phase 8 held at disp=313, phases 9-18 shifted +3, every descriptor identical --
+reads both overlays once the IPL source is released:
+
+    read  26 block(s) from 3/3/6/0   phase 3, MF overlay
+    read 110 block(s) from 2/5/4/0   phase 8, program overlay
+
+So shifting later phases is harmless and a phase CAN grow.  What remains
+unmeasured is whether `y` is constrained; those runs were blocked too and have
+not been repeated.
+
+Anyone testing this must pass `SOURCE_RUN=OFF` to `headless-gpcmem.sh` -- its
+default of `MM1` is the value that BLOCKS post-IPL mass-memory I/O, so the
+default invocation cannot perform an OPS transition at all and fails silently
+and identically whatever the tape says.
 
 TWO OTHER THINGS THAT MUST BE RIGHT, BOTH LEARNED THE HARD WAY
 

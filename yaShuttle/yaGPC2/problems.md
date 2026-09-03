@@ -7980,9 +7980,19 @@ clock were spent re-measuring a switch position.
 **What is genuinely known about the phase table is therefore much less:**
 
 - `y`=110 works with the original 27 descriptors, because that is the baseline.
-  Whether `y` is constrained at all is **unmeasured**.
-- Whether `disp` can move is **unmeasured**.
-- Whether phase 8 can grow beyond 27 descriptors is **unmeasured**.
+  Whether `y` is constrained at all is **unmeasured** — those runs were blocked
+  too and have not been repeated.
+- Whether `disp` can move: **re-measured properly, and it can.** The same tape
+  that "proved" it could not — phase 8 held at `disp`=313, phases 9–18 moved
+  +3, every descriptor identical — reads both overlays when the IPL source is
+  released:
+
+      read  26 block(s) from 3/3/6/0   t=242.7s   phase 3, MF overlay
+      read 110 block(s) from 2/5/4/0   t=244.1s   phase 8, program overlay
+
+  which is the known-good behaviour. So shifting later phases is harmless and
+  **growing phase 8 is viable**. The blocker is the descriptor content, not the
+  table's layout.
 
 `tools/rewrite_phase_descriptors.py` still stands on its own: it rewrites a
 phase's descriptors in place, shifts later phases, repairs the enclosing

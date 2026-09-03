@@ -545,13 +545,14 @@ flight software's own use of them (`problems.md` §8.27).
   tape.  Nine experimental runs were lost to this before anyone diffed a failing
   panel script against the working one; see §8.35.  The known-good baseline also
   used `RUN_AT=130`.
-- **Nothing is currently known about whether the descriptor layout can be
-  changed** (§8.35, retracted in full).  An earlier version of this handoff
-  claimed two hard constraints — that `y` must equal the descriptor list's own
-  consumption, and that `disp` cannot move, together freezing phase 8 at 27
-  descriptors.  Both came from runs that had the IPL source blocked, so neither
-  was measured.  Whether `y` is constrained, whether `disp` can move, and
-  whether phase 8 can grow beyond 27 descriptors are all **open**.
+- **`disp` CAN move, and phase 8 can grow** (§8.35).  An earlier version of
+  this handoff claimed two hard constraints — that `y` must equal the descriptor
+  list's own consumption, and that `disp` cannot move, together freezing phase 8
+  at 27 descriptors.  Both came from runs with the IPL source blocked.  Re-run
+  correctly, the tape that "proved" `disp` was frozen — phase 8 at `disp`=313,
+  phases 9–18 shifted +3, descriptors identical — reads both overlays exactly
+  like the known-good tape.  So the table's layout is not the obstacle; the
+  descriptor CONTENT is.  Whether `y` is constrained remains unmeasured.
 - **Is `mmumodel.c:do_read` too strict?**  It caps a transfer at the 256-block
   `(file,track)` unit while its own comment says "the *file* it started in", and
   the flight software plainly supports crossing (`FCMMGBOV` builds per-track
