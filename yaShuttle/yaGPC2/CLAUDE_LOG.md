@@ -286,3 +286,248 @@ the transition at all.)
   the I/O is still reported unsuccessful and ARC will not credit the overlay.
   And blocks 11 (0x0ebbc, -42.9) and 32 (0x0e4e2, -13.8) remain measurably
   mis-placed.
+
+### [2026-09-03] Target: [problems.md]
+- **WHY THE OVERLAY I/O IS STILL REJECTED: eliminations, all measured.**  After
+  the block-29 fix the transfer is structurally sound -- 87 blocks read, ALL 35
+  descriptors' checksums verify at their implied tape offsets, data lands at
+  76.7% -- and FCMMGPOV still retries it.  Ruled out one run apiece:
+      y matched to consumption (y=110 -> 87)      still retried
+      26 descriptors instead of 35                still retried
+      final block not straddling an MM boundary   still retried
+      a sacrificial tail descriptor               changed nothing
+      every descriptor's checksum                 0 of 35 fail
+  So it is NOT y, NOT the descriptor count, NOT the checksums, and NOT the
+  block structure.
+- **REC_XERR = 101 now appears** where every earlier run reported 0.  ARCGPC
+  sets ARC_XERR_PAD=100, so that is error code 1 plus the pad: ARC now REACHES
+  its overlay-error path and records the failure, where with mmbstamp's
+  descriptors it failed silently.  Better observability, not yet a better
+  outcome -- and I cannot yet distinguish "my transfer is worse in a new way"
+  from "the machine now gets far enough to notice".
+- The MMU side is clean throughout: BITE STATUS, POSITION, EXTENDED BLOCK, READ,
+  87 blocks, READY toggling, no faults.  The rejection is recorded on the GPC
+  side.  SVCTRACE shows the SVC after the ACCEPTED phase-3 read and after the
+  REJECTED phase-8 read are identical except for the base register
+  (08820882 vs 08822f3c), so the status is not visible at that level.
+- **The one structural difference left is COVERAGE.**  mmbstamp's accepted set
+  consumes exactly 110 MM blocks -- the phase's full allocated extent -- and
+  every set of mine consumes less (69, 85, 87).  Under test with the right
+  control: mmbstamp's OWN descriptors with only the last one dropped, so no
+  content of mine is involved.  If that retries, coverage is the criterion, and
+  the 23 MM blocks past the checksum walk's stall are REQUIRED rather than
+  optional -- which would make recovering them the critical path.
+
+### [2026-09-03] Target: problems.md
+- BISECTION LOCATED THE PHASE-8 OVERLAY REJECTION.  Hybrid descriptor sets
+  (mmbstamp's below a shared tape offset, mine above) flip acceptance, so the
+  offending descriptor can be found without a theory of WHY.  Steps: switch at
+  tape 2560 -> REJECTED; at 11776 -> ACCEPTED; so the fault lies in my blocks
+  6-10 (tape 2560..11776).  Isolating block 6 alone -> ACCEPTED, so block 6 is
+  innocent and the fault is in blocks 7-10.
+- THE LOADER DOES NOT VERIFY LOAD-BLOCK CHECKSUMS.  mmbstamp's descriptors fail
+  the checksum at their implied tape offsets and are accepted anyway; a hybrid
+  padded with FABRICATED filler descriptors (arbitrary content, wrong checksum)
+  is also accepted.  This retires an assumption used earlier to argue that a
+  wrong block length would be rejected -- it would not be.
+- BLOCK COUNT IS NOT THE DISCRIMINATOR.  headless-hy (RETRIED) and headless-hy2
+  (ACCEPTED) both read 87 blocks.  Across all runs, accepted reads are 87, 109
+  and 110, so the read count tracks the descriptor walk length, not `y` (which
+  stayed 110 throughout).
+- MY DESTINATIONS ARE LESS INVASIVE THAN MMBSTAMP'S, so "rejected because of
+  what it overwrote" is not a general explanation: mine put 0 blocks in the CZ2
+  compool against mmbstamp's 3, and 2 in low core against 1.
+
+### [2026-09-03] Target: problems.md
+- BLOCK 10'S DESTINATION IS WRONG, AND IS THE PRIME SUSPECT.  Of blocks 7-10 it
+  is the only one overlapping an I/O control CSECT: it starts at 26420, which is
+  32 halfwords INSIDE FIOCDATG (26388..26530), the FIO data CSECT on the GTG /
+  mass-memory path, then runs 4540 halfwords over it.  Overwriting the control
+  data of the transfer in progress would abort and retry it, which fits the
+  observed inverse correlation between correctness and acceptance.  Blocks 7, 8
+  and 9 touch only display/data CSECTs.
+- The +32 is the tell: a load block starts on a CSECT boundary, so the true
+  destination is likely 26388 (0x06714), not 26420.  Same class of error as
+  block 29's sector desync.  Block 10 also has the worst measured agreement of
+  the set (48.6%) and was the one destination that is not a section start.
+- Block 6 sits exactly on the $X080001 patch area (1538..1617), confirming the
+  guessed destination that placement could not measure.
+
+### [2026-09-03] Target: problems.md
+- RETRACTION of the "+32 is the tell" note logged earlier today.  Block 10's
+  destination is NOT off by 32.  Scanning every destination in a +/-64 halfword
+  window against the as-built image, 26420 (0x06734) is the BEST at 47.4%, and
+  the FIOCDATG boundary 26388 does not place in the top eight.  Moving the block
+  to the CSECT boundary makes agreement WORSE.  The reasoning ("a load block
+  starts on a CSECT boundary, so the +32 must be an error") was sound in general
+  and simply wrong here; it was written before it was measured.
+- WHAT THE PROFILE ACTUALLY SHOWS.  Agreement along block 10 oscillates --
+  100% at +512, 7% at +2944, 100% again at +4096.  A wrong start address gives
+  uniformly bad agreement, so this is not a misplacement of one block; it is one
+  descriptor SPANNING SEVERAL TRUE LOAD BLOCKS, with the agreeing stretches
+  being where the tape data happens to land correctly.
+- WHY IT WAS BUILT WRONG.  Across the nine 512-halfword windows block 10 covers
+  (windows 14-22), every per-window placement is low confidence (11%-64%) and
+  the implied destinations are mutually inconsistent (deltas of -42710, +9698,
+  +532 between adjacent windows).  The DP solver had no real signal in this
+  region and merged the windows anyway.  Block 10 is likely wrong in BOTH length
+  and destination, and low per-window confidence should be treated as a signal
+  to SPLIT rather than to merge.
+
+### [2026-09-03] Target: problems.md
+- THREE TAPE WINDOWS OF PHASE 8 HAVE NO HOME IN MEMORY.  Windows 14-16 of the
+  phase-8 data stream are ~94% fill (28, 28 and 33 non-fill halfwords of 512).
+  Treating the non-fill halfwords as a fingerprint and searching the ENTIRE
+  as-built image (330394 halfwords, all 10 sectors), the best match anywhere is
+  3/28, 3/28 and 8/33 -- noise.  This is NOT the OI340600/OI340700 version gap:
+  a version difference would still leave a strong partial match somewhere.
+  Whatever those windows are, the as-built G9 memory does not contain them.
+- A CONCRETE MECHANISM FOR THE OVERLAY REJECTION.  My block 10 starts at
+  0x06734, so its first window -- one of the unplaceable, fill-dominated ones --
+  is written over 0x06734..0x06933.  FIOCDATG occupies 0x06714..0x067a2, inside
+  that range.  So the block writes junk over the FIO data on the GTG /
+  mass-memory path WHILE THAT PATH IS EXECUTING THE TRANSFER, which would abort
+  and retry it.  mmbstamp's descriptors do not write there, which is why the
+  wrong-but-harmless set is accepted and the mostly-right one is not.  This
+  finally explains the inverse correlation between correctness and acceptance.
+- CAUTION: the mechanism is inferred, not yet proven.  The isolation run putting
+  my block 10 alone into an otherwise-accepted set is what tests it.
+
+### [2026-09-03] Target: HANDOFF-FCMBOOT.md
+- METHOD THAT WORKED WHERE THEORY DID NOT.  After many failed theory-driven
+  hypotheses, the rejection was localised by BISECTION over descriptor sets:
+  build hybrids that take mmbstamp's descriptors below a tape offset shared by
+  both walks and mine above it, and see which half flips acceptance.  Because
+  the loader ignores load-block checksums, FABRICATED FILLER descriptors can pad
+  a walk to the next shared offset, which turns the coarse split into
+  single-block isolation.  Blocks 1-5 and block 6 were cleared this way.
+- Content matching cannot place fill-dominated windows: maximising percentage
+  agreement makes three different windows all "best-place" at one address
+  (0x013bc, 94%) because fill matches fill.  Require the non-fill halfwords to
+  match as a fingerprint instead, and the false placement disappears.
+
+### [2026-09-03] Target: problems.md
+- RETRACTION, SAME DAY, of the FIOCDATG mechanism logged immediately above.
+  Isolating my block 10 into an otherwise-accepted descriptor set gives ONE read
+  of 88 blocks -- ACCEPTED.  Block 10 does write unplaceable fill over
+  0x06734..0x06933, which contains FIOCDATG (0x06714..0x067a2), and the transfer
+  succeeds regardless.  So the flight software TOLERATES having the FIO data on
+  the GTG/mass-memory path overwritten during the transfer, and "the load
+  clobbers the I/O control structures" is not the explanation for the rejection.
+  The hypothesis was logged before it was tested, and the test refuted it.
+- Blocks 1-5, 6 and 10 are all now cleared individually.  The fault is in block
+  7 (tape 3072, len 242, dest 0x03fe0), block 8 (tape 3584, len 1660, dest
+  0x040d4) or block 9 (tape 5632, len 1300, dest 0x04754).  Their destinations
+  are display/data CSECTs (#PCDAP08, #DASCTIM, @0-tables), nothing on an I/O
+  path -- so whatever the mechanism is, it is not the one just retracted.
+- STILL TRUE AND STILL UNEXPLAINED: windows 14-16 match nothing in the as-built
+  image.  That finding is independent of the retracted mechanism.
+
+### [2026-09-03] Target: problems.md
+- NO SINGLE DESCRIPTOR CAUSES THE PHASE-8 REJECTION.  Isolated into an otherwise
+  accepted set, EVERY candidate is accepted: blocks 1-5, block 6, blocks 7+8,
+  block 9 and block 10 each give one read.  Yet blocks 6-35 together are
+  rejected while 11-35 together are accepted.  The fault is therefore a
+  COMBINATION within blocks 6-10, not a property of any one of them.
+- CORRECTION: "block 9 is the fault", inferred when blocks 7+8 came back
+  accepted, was unsound and is withdrawn.  Elimination across a set is only
+  valid if the property is additive over its members, and this one is not --
+  block 9 alone is accepted.  The direct group control (my 6-10 with mmbstamp
+  elsewhere) is the test that should have been run instead of inferring.
+- This revives the "destructive write" family of explanations, which the block-10
+  result had appeared to kill: a single block's damage may be survivable where
+  the accumulated damage of five is not.
+
+### [2026-09-03] Target: problems.md
+- A CHECKSUM-DRIVEN BLOCK WALK RECOVERS PHASE 3 BUT DOES NOT GENERALISE.  Walking
+  the tape and ending each block at the first L where hw[L-2]==0 and
+  hw[L-1]==sum(content)&0xffff recovers 9 of phase 3's 10 known blocks exactly,
+  offset AND length.  On phase 4 it gets 1 of 17.  ONE PHASE IS NOT A
+  VALIDATION; do not promote this to a general method on the strength of phase 3.
+- Phase 4's data region on this tape is 88% c6c6 (7239 of the first 8192
+  halfwords), so that phase may simply not be populated here and may not be a
+  fair test -- but phase 3 alone cannot establish the method either way.
+- THE "MAJORITY c6c6 => BLOCK END" RULE IS UNSAFE ON PHASE 8.  It holds on phase
+  3 (every padding-dominated window is a block's last window, 0 mid-block), but
+  phase 8 windows 12-16 are majority c6c6 as REAL CONTENT: their non-c6c6
+  halfwords come in runs of exactly 6, and every #E* CSECT in the map is exactly
+  6 halfwords, so these are 6-halfword entries with genuine c6c6 between them.
+  Boundaries the rule derives there (6144..8192) may be false.
+- Still standing: my blocks 8, 9, 10 and 32 each span a boundary the rule
+  derived, and block 32 was independently measured as a bad destination.
+
+### [2026-09-03] Target: problems.md
+- BLOCK 10 IS NECESSARY BUT NOT SUFFICIENT for the phase-8 rejection.  Group
+  control {6,7,8,9,10} REJECTED (two reads of 110); {6,7,8,9} with block 10
+  dropped ACCEPTED (one read of 110); block 10 alone ACCEPTED.  So the failure
+  needs block 10 PLUS at least one partner among 6,7,8,9.
+- WHAT BLOCK 10 DESTROYS.  It is the only block in the group writing to a
+  control-path CSECT: it overwrites 111 of FIOCDATG's 143 halfwords, from offset
+  32 on.  The first 32 halfwords (FIOHFDEL, FIOTMSRT, FIOHFDIV, FIOHFDZ1/2,
+  FIONMDZ1/2, FIOHFORM, FIOTMIOC, FIOHFCY2, FIOHFECY, FIOFCNDX) SURVIVE; the
+  clobbered part is FIOHFECF, FIOADBST, TIOQP001, TIOQP002, TIOQP014, TIOQP015,
+  FIOCF305, FIOCF102, FIOCFSAV.
+- TIOQP001 IS A PREINITIALISED IOQE, not inert data: FPMIHPC2.asm:710 does
+  "LA R0,TIOQP001  GET PREINIT IOQE ADDR FOR HFE INPT".  So the block destroys
+  preinitialised I/O queue elements that other paths hand out by address.  That
+  is survivable alone and evidently not once something else is also damaged.
+- mmbstamp's writes over the same tape range are ENTIRELY DISJOINT from mine
+  (7824 halfwords written by mine, 0 shared), and FIOCDATG is the only
+  control-path CSECT mine hits that mmbstamp's does not.
+
+### [2026-09-03] Target: HANDOFF-FCMBOOT.md
+- STRATEGIC: BISECTION IS NOW CHASING A SYMPTOM.  Every descriptor is accepted
+  alone and the group is not, and the damage in question is wrong DESTINATIONS
+  in aggregate.  Isolating the exact offending pair still leaves the fix as
+  "move that destination", which is the open problem for all 35 blocks.
+- The root limitation is the placement method: matching tape content against the
+  as-built image fights two handicaps bisection cannot remove -- the tape is
+  OI340600 while the reference image is OI340700, and much of phase 8 is
+  c6c6-dominated, where content matching is provably degenerate (three separate
+  windows "best-place" at one address at 94%).
+- The structural fix is to take destinations FROM THE BUILD (the phase's memory
+  footprint from the OI340600 link) instead of inferring them from a dump.  That
+  converts 35 uncertain placements into a derived list.
+
+### [2026-09-03] Target: HANDOFF-FCMBOOT.md
+- THE BUILD RECORDS PHASE MEMBERSHIP; EARLIER CLAIM RETRACTED.  I had concluded
+  that nothing in the build says which CSECTs belong to a phase, and that
+  deriving destinations from the build was closed off.  Wrong -- I was reading
+  only derived artifacts.  `OI340600/CON80` is the linkage-editor control deck
+  library: `OFTMP` is the master deck (ONE link over the whole overlay tree) and
+  states membership directly ("PHASE 8,18" / "INCLUDE CONCARDS(PHASE08)").
+  PHASE08 expands to MAP2, MAP3, OVERLAY Z3, PATCH08, GNC9, leaves are INSERT.
+- CON80 also holds the MMU build: MMLOAD says "IPL,PH=(10,2,13,3),SYSID=SYS1,
+  MMDIR=44000;", identical to the on-tape IPL phase table reconstructed by hand,
+  which corroborates that these decks are the real build inputs.
+- `con80build` ALREADY DOES THIS and is documented in RUNBOOK-IPL-MEDS.md A.1:
+  "reads the CON80 card deck, works out which modules belong to a phase,
+  assembles/compiles them and links a load module", `--master OFTMP` default.
+  tools/phase_from_condeck.py duplicates part of its front end; prefer
+  con80build for building, and keep the new tool only for deriving TAPE
+  DESCRIPTORS, which con80build does not produce.
+
+### [2026-09-03] Target: problems.md
+- DERIVING DESCRIPTORS FROM THE DECK REPRODUCES PHASE 3 EXACTLY: 10 of 10
+  destinations and 10 of 10 lengths against the tape's ground-truth IPL table,
+  0 spurious.  Three corrections were needed and each was forced by validation:
+  (a) INSERT cards are not the whole phase -- OFTMP's "LIBRARY ZCONLIB(ZCON)"
+  autocalls members that never appear on a card, so INSERT names must be
+  resolved to OBJECT FILES via the .obj ESD records and every CSECT that object
+  defines taken (one HAL/S compilation emits #C/#D/#Z/#X/#E under one object);
+  (b) the run-merge tolerance is 32 halfwords, not 2 (within-block CSECT gaps
+  reach 4, between-block gaps are 938+); (c) block lengths are even.
+- A GREEDY WALK CANNOT DO IT.  Accepting a spurious run consumes the next real
+  block's length and desyncs everything after; a tolerance tight enough to
+  reject it also rejects real blocks whose autocalled tail runs far past the
+  deck's hint (phase 8's 0x005a2 hints 36 where the block is ~148).  A search
+  that maximises the number of runs placed at checksum-valid lengths does both.
+- PHASE 8 DOES NOT COME OUT CLEANLY YET: 98 INSERT names expand to 162 CSECTs
+  and 45 runs (phase 3: 105 -> 130 -> 11), of which the search places only 19,
+  some at implausible lengths (0x30322 hint 136 -> 6538).  Only 9 of 45 deck
+  destinations coincide with the content-matched set -- and those 9 are exactly
+  the low-address blocks derived most reliably (0x001f8, 0x00242, 0x005a2,
+  0x03fe0, 0x040d4, 0x04754, 0x0a3ee, 0x0a70c, 0x101f8).  Since the method is
+  exact on phase 3, the likely reading is that the CONTENT-MATCHED SET IS WRONG
+  beyond its first few blocks, consistent with blocks 8/9/10 spanning real
+  boundaries and 11 and 32 measuring bad.  Not yet proven either way.
