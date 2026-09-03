@@ -75,8 +75,10 @@ The only OPTIONS available are:
                     include of something already included and PASS1 rejects it
                     with PL2 -- which is what happened to CS2PAT.
     --no-preprocess (Default.)  Opposite of --preprocess.
-    --clean         Use HALSFC's --clean switch.
-    --archive       Use HALSFC's --archive switch.
+    --clean         (Default) Use HALSFC's --clean switch.
+    --no-clean      Don't use HALSFC's --clean switch.
+    --archive       (Default) Use HALSFC's --archive switch.
+    --no-archive    Don't use HALSFC's --archive switch.
     --extra-parms=P P is a list of extra HAL/S-FC compiler options prefixed to
                     the defaults used by this program.  A trailing comma is
                     supplied if you leave it off.  TABLST is the reason it
@@ -110,6 +112,9 @@ The only OPTIONS available are:
     --no-csects     Compile every HAL/S file found, without regard to whether
                     it is part of PASS.  This was the behaviour before the
                     check existed.
+    --no-assemble   Compile the HAL/S and display decks but do not assemble
+                    the AP-101S sources in SSSRC/, APPLSRC/, RUNASM/ and
+                    ZCONASM/.  (A full build does both.)
     --halt-on-error Abandon the run on the first failure that is not one of the
                     recognized, delayable kinds, as compilePASS always used to.
                     The default is now to record it and carry on: a run takes an
@@ -189,13 +194,16 @@ dfg = True
 skipTo = None
 rsbTrace = ""
 ops = "G16"
-clean = False
-archive = False
+clean = True
+archive = True
 sdfi = "SDFLIB"
 csectsDir = ".." + os.sep + "mafgen"
 providerDeps = True
 seedCycles = True
 haltOnError = False
+# A full build assembles as well as compiling; --no-assemble is for the case
+# where only the HAL/S side is wanted (it is much the slower half to redo).
+assembleToo = True
 unrecognizedFailures = []
 extraParms = ""
 for parm in sys.argv[1:]:
@@ -210,6 +218,10 @@ for parm in sys.argv[1:]:
         clean = True
     elif parm == "--archive":
         archive = True
+    elif parm == "--no-clean":
+        clean = False
+    elif parm == "--no-archive":
+        archive = False
     elif parm.startswith("--extra-parms="):
         # Prefixed to every compilation's PARM field.  TABLST is the reason it
         # exists:  with it, PASS4 parses each SDF the run has just written
@@ -230,6 +242,8 @@ for parm in sys.argv[1:]:
         seedCycles = False
     elif parm == "--halt-on-error":
         haltOnError = True
+    elif parm == "--no-assemble":
+        assembleToo = False
     elif parm == "--dfg":
         dfg = True
     elif parm == "--no-dfg":
@@ -473,6 +487,109 @@ try:
     os.mkdir("objects")
 except:
     pass
+# ---------------------------------------------------------------------------
+# ASSEMBLY (.asm) and DISPLAY DECKS (.dfg)
+#
+# `compile` handles HAL/S.  These two handle the other kinds of source in a
+# release, so that a full build is compile + assemble + dfg over APPLSRC/,
+# SSSRC/, RUNASM/ and ZCONASM/.  Both drop their object into objects/ under the
+# source's own basename, exactly as `compile` does, so the three are
+# interchangeable from the caller's point of view.
+
+# The assembler is OURS.  ASM101Sa is the C port: it is deterministic, where
+# ASM101S.py emits csects in Python `set` order and so produces a different
+# object file on every run (identical in content -- see objcanon.py -- but not
+# byte-comparable).  A build wants reproducibility, so the C port it is.
+assembler = "ASM101Sa"
+
+# The macro library depends on where the source lives: the RTL in RUNASM/ is
+# assembled against RUNMAC/, everything else against MLIB80/.
+def macroLibraryFor(path):
+    return "RUNMAC" if Path(path).parent.name == "RUNASM" else "MLIB80"
+
+# C6C6 is the TAPE's padding convention, and tapes are what these objects are
+# for.  The other two values in play are 0000 (ASM101S's own default) and C9FB
+# (what a DASS dump shows for a halfword that was never written) -- so an
+# object built with C9FB will appear to agree with a dump for reasons that have
+# nothing to do with the code being right.  If these objects are ever built for
+# comparison against dumps rather than for a tape, this is the knob to change.
+assemblyFill = "C6C6"
+
+assemblyCount = 0
+def assemble(path, fatal = True):
+    """Assemble one AP-101S source file into objects/<stem>.obj.  True on
+    success.  Any assembly error is fatal unless the caller says otherwise."""
+    global assemblyCount
+    assemblyCount += 1
+    path = str(path)
+    stem = Path(path).stem
+    obj = "objects" + os.sep + stem + ".obj"
+    command = [assembler,
+               "--object=" + obj,
+               "--library=" + macroLibraryFor(path),
+               "--tolerable=4",
+               "--fill=" + assemblyFill,
+               # The RTL fixes are deliberate corrections to historical bugs.
+               # A release must reproduce what was actually built, bugs and
+               # all, so they are suppressed here.
+               "--no-rtl-fixes",
+               path]
+    print("%3d: Assembling %s" % (assemblyCount, path))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True)
+    except Exception as e:
+        print("Could not run %s: %s" % (assembler, str(e)))
+        outtaHere(1)
+    if result.returncode != 0 or not Path(obj).is_file():
+        print("Assembly of %s failed, exit code %d." % (path, result.returncode))
+        tail = (result.stderr or result.stdout or "").strip().splitlines()[-8:]
+        for line in tail:
+            print("     ", line)
+        if fatal:
+            outtaHere(1)
+        return False
+    return True
+
+# Don's `dfg` is used here because we have no display-deck translator of our
+# own; it only rewrites the deck as HAL/S, and OUR compiler then compiles that.
+displayGenerator = "dfg"
+
+def dfg(path, fatal = True):
+    """Translate one display deck to HAL/S with `dfg`, compile the result with
+    `compile`, and discard the intermediate.  True on success."""
+    path = str(path)
+    stem = Path(path).stem
+    tmp = "_dfg_" + stem + ".hal"
+    command = [displayGenerator, path, "-o", tmp,
+               "--sdflib", sdfi, "--deck-root", "."]
+    try:
+        result = subprocess.run(command, capture_output = True, text = True)
+    except Exception as e:
+        print("Could not run %s: %s" % (displayGenerator, str(e)))
+        outtaHere(1)
+    if result.returncode != 0 or not Path(tmp).is_file():
+        print("Display generation for %s failed, exit code %d."
+              % (path, result.returncode))
+        tail = (result.stderr or result.stdout or "").strip().splitlines()[-8:]
+        for line in tail:
+            print("     ", line)
+        if fatal:
+            outtaHere(1)
+        return False
+    # Compile the generated HAL/S under the DECK's name, so the object lands in
+    # objects/<stem>.obj like every other unit rather than under the temporary
+    # file's name.
+    template = { "filename": tmp, "stem": stem, "halname": descore(stem),
+                 "includedFilenames": [], "includedHalnames": [] }
+    try:
+        ok = compile(template, fatal)
+    finally:
+        try:
+            os.remove(tmp)
+        except:
+            pass
+    return ok
+
 # Return True on success, False on skipped compilation.
 def compile(template, fatal = True):
     """Compile one unit.  True on success, False on a failure that can be
@@ -485,6 +602,8 @@ def compile(template, fatal = True):
     rawFilename = template["filename"]
     filename = rawFilename[:]
     parms = getParms(template)
+    parms.remove("LIST")
+    parms.remove("LISTING2")
     fields = filename.split("/")
     if len(fields) == 2:
         subfolder = fields[0]
@@ -524,7 +643,7 @@ def compile(template, fatal = True):
         parmsFull = parms
         print("%4d: Compiling %s" % \
               (compilationCount, rawFilename))
-        command = ["HALSFC", f"{subfolder}/{filename}", "--test", "--force",
+        command = ["HALSFC", f"{subfolder}/{filename}", # "--test", "--force",
              f"--parms={parmsFull}", "-o", f"objects/{template['stem']}.obj"]
         if clean:
             command.append("--clean")
@@ -540,6 +659,7 @@ def compile(template, fatal = True):
         if len(result.stderr):
             print(result.stderr)
     except subprocess.CalledProcessError as e:
+        '''
         if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
             print(f"      ZO3 error in OPT, compilation of {rawFilename} skipped.")
             rsbTrace = ""
@@ -576,6 +696,7 @@ def compile(template, fatal = True):
             print(f"      PASS2 errors ({lastPass1Errors}), compilation of {rawFilename} skipped.")
             rsbTrace = ""
             return False
+        '''
         print(f"Failed with exit code {e.returncode}.")
         if len(e.stdout):
             print(e.stdout)
@@ -622,9 +743,15 @@ if preprocess:
 SSSRC = Path("SSSRC")
 APPLSRC = Path("APPLSRC")
 templateFiles = list(SSSRC.glob("*.hal")) + list(APPLSRC.glob("*.hal"))
+# Display decks are compilation units too, and they depend on COMPOOLs exactly
+# as HAL/S files do -- `dfg` needs the compool SDFs to resolve types -- so they
+# have to be ordered along with everything else rather than swept up at the end.
+displayFiles = sorted(str(x) for x in
+                      list(SSSRC.glob("*.dfg")) + list(APPLSRC.glob("*.dfg")))
+templateFiles = templateFiles + displayFiles
 for i in range(len(templateFiles)):
     rawFilename = str(templateFiles[i])
-    if preprocess:
+    if preprocess and not rawFilename.endswith(".dfg"):
         filename = f".{os.sep}_{Path(rawFilename).name}"
         command = ["preprocessHALSFC", f"--in={rawFilename}", f"--out={filename}"]
         try:
@@ -654,6 +781,26 @@ templatesByStem = {}
 for filename in templateFiles:
     debugging = False
     debug("A")
+    if str(filename).endswith(".dfg"):
+        # A deck names its compools as "INCLUDE=NAME," -- a different syntax
+        # from HAL/S's "D INCLUDE TEMPLATE name", and one that carries
+        # underscores (INCLUDE=CGK_KIP_FLT_FLOAT), so descore() as usual.  The
+        # deck itself becomes a COMPOOL named for the deck.
+        entry = { "filename": str(filename), "halname": descore(Path(filename).stem),
+                  "includedFilenames": [], "includedHalnames": [], "kind": "dfg" }
+        f = open(filename, "r", errors = "replace")
+        for line in f.readlines():
+            field = line[:72].strip()
+            if field.upper().startswith("INCLUDE="):
+                name = field[len("INCLUDE="):].strip().rstrip(",;:").strip()
+                if name:
+                    entry["includedHalnames"].append(descore(name))
+        f.close()
+        entry["stem"] = Path(filename).stem
+        templatesByFilename[str(filename)] = entry
+        templatesByHalname[entry["halname"]] = entry
+        templatesByStem[entry["stem"]] = entry
+        continue
     f = open(filename, "r")
     # Column 1 is rewritten through this file's CARDTYPE before the card is
     # classified, so that conditionally-compiled comments really disappear and
@@ -1040,7 +1187,11 @@ while True:
                 continue
             includedFilenames = set(template["includedFilenames"])
             if len(includedFilenames & filesLeft) == 0:
-                if not compile(template):
+                if template.get("kind") == "dfg":
+                    built = dfg(template["filename"])
+                else:
+                    built = compile(template)
+                if not built:
                     skipped.add(filename)
                     if template["stem"] not in errorsSkipped:
                         remove.append(filename)
@@ -1078,6 +1229,28 @@ if False:
         filename = template["filename"]
         compile(template)
         templatesByFilename.pop(filename)
+
+# ---------------------------------------------------------------------------
+# ASSEMBLY PASS
+#
+# Unlike HAL/S and the display decks, assembly has no COMPOOL dependency: an
+# AP-101S source is self-contained apart from its macro library, so the order
+# does not matter and one sweep does them all.  RUNASM/ and ZCONASM/ are the
+# RTL and are assembled against RUNMAC/; APPLSRC/ and SSSRC/ against MLIB80/.
+if assembleToo:
+    print(f"{datetime.now()}: Assembling AP-101S source files ...")
+    assemblyFiles = []
+    for d in ("SSSRC", "APPLSRC", "RUNASM", "ZCONASM"):
+        if Path(d).is_dir():
+            assemblyFiles += sorted(str(x) for x in Path(d).glob("*.asm"))
+        else:
+            print("     %s/ not present; skipping it." % d)
+    # BUILD.md: "Any compilation or assembly error is fatal."  assemble()
+    # therefore exits the run rather than returning, and there is no
+    # continue-past-it path to write here.
+    for path in assemblyFiles:
+        assemble(path)
+    print("%s: %d file(s) assembled." % (datetime.now(), len(assemblyFiles)))
 
 if len(unrecognizedFailures) > 0:
     print("%d file(s) failed in a way compilePASS does not recognize, and the "
