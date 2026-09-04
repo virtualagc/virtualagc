@@ -35,11 +35,10 @@ follow the highlighted insets on SCOM printed page 2.6-25.
 
 Usage:
     python3 panelO6.py
-    python3 panelO6.py --geometry 1060x1200+80+20
+    python3 panelO6.py --geometry 948x1250+80+20
 """
 
 import argparse
-import math
 import os
 import subprocess
 import tkinter as tk
@@ -84,10 +83,14 @@ C_TB_GRAY = "#a3a39c"
 C_TB_LEGEND = "#f2f0e6"
 C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
-C_LOCK = "#c4c1b5"
 
-REF_W = 1090
-REF_H = 1260
+# Window margin on every side equals the original top inset.
+MARGIN = 28
+PANE_GAP = 16          # air between O6 and the C3/F6 stack
+C3_W = 236
+O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
+REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + MARGIN   # 948
+REF_H = 1250
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
 # MMU 1/2).  Side captions and above/below captions share this size.
@@ -485,7 +488,7 @@ class PanelO6:
         L["mode_run"] = y
         y += ths + pad
         L["mode_sw"] = y
-        y += 116 + pad
+        y += 136 + pad
         y += ths
         L["mode_halt"] = y
         return L
@@ -500,8 +503,8 @@ class PanelO6:
 
         # --- L-shaped outline, matching the SCOM figure ---
         # Main rectangle, plus a right-hand tab holding IPL SOURCE.
-        mx0, my0 = 36, 28
-        mx1 = 668
+        mx0, my0 = MARGIN, MARGIN
+        mx1 = O6_MAIN_RIGHT
         my1 = L["mode_halt"] + 24
         ex1 = 790
         ey0 = L["out_backup"] - 10
@@ -530,11 +533,9 @@ class PanelO6:
         self.col_w = (inner_r - inner_l) / N_GPC
         self.mid = self.col[2]          # GPC3, where setting captions sit
         # Side captions sit the same distance from the control as on the
-        # right: 14 px past the guard/hex edge, not against the panel rail.
+        # right: 14 px past the guard edge, not against the panel rail.
         self.side_l_out = self.col[0] - 29 - 14
         self.side_r_out = self.col[-1] + 29 + 14
-        self.side_l_mode = self.col[0] - 38 - 14
-        self.side_r_mode = self.col[-1] + 38 + 14
 
         self._draw_title()
         self._draw_power()
@@ -545,20 +546,20 @@ class PanelO6:
         self._draw_mode_switches()
         self._draw_ipl_source(mx1, ex1, ey0, ey1)
 
-        # C3 / F6 sit to the right of the O6 L-shape (past the IPL SOURCE tab).
+        # C3 / F6 sit in the O6 concave cutout, above the IPL SOURCE tab.
         pad = 10
         th10 = self._th(10)
         ths = self._th(SETTING_SIZE)
         c3_sw_h = 136          # same 3-pos guard as O6 OUTPUT
         sw_h = 58              # F6 is POWER's 58x124 guard, rotated
-        c3_x0 = ex1 + 24
-        c3_x1 = c3_x0 + 236
+        c3_x0 = mx1 + PANE_GAP
+        c3_x1 = c3_x0 + C3_W
         c3_y0 = my0
         # Heights follow _draw_c3 / _draw_f6: centre-anchored titles
         # consume a full linespace on each side of the glyph.
         c3_y1 = c3_y0 + 5 * pad + 2 * th10 + 6 * ths + c3_sw_h
         f6_x0, f6_x1 = c3_x0, c3_x1
-        f6_y0 = c3_y1 + 16
+        f6_y0 = c3_y1 + PANE_GAP
         f6_y1 = f6_y0 + 4 * pad + 4 * th10 + sw_h
         self._draw_c3(c3_x0, c3_y0, c3_x1, c3_y1)
         self._draw_f6(f6_x0, f6_y0, f6_x1, f6_y1)
@@ -649,14 +650,17 @@ class PanelO6:
         self._gpc_numbers(L["mode_nums"])
         self._text(self.mid, L["mode_run"], "RUN", size=SETTING_SIZE)
 
-        rx, ry = 38, 58
-        cy = L["mode_sw"] + ry
-        self._vtext(self.side_l_mode, cy, "STBY")
-        self._vtext(self.side_r_mode, cy, "STBY")
+        guard_w, guard_h = 58, 136
+        y1 = L["mode_sw"]
+        cy = y1 + guard_h / 2.0
+        self._vtext(self.side_l_out, cy, "STBY")
+        self._vtext(self.side_r_out, cy, "STBY")
         for i, cx in enumerate(self.col):
+            x1, x2 = cx - guard_w / 2, cx + guard_w / 2
+            y2 = y1 + guard_h
             pos = MODE_POS.index(self.mode[i])
-            self._hex_toggle(cx, cy, rx, ry, pos, npos=3)
-            self._hit("mode", i, cx - rx, cy - ry, cx + rx, cy + ry)
+            self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
+            self._hit("mode", i, x1, y1, x2, y2)
 
         self._text(self.mid, L["mode_halt"], "HALT", size=SETTING_SIZE)
 
@@ -766,28 +770,6 @@ class PanelO6:
                    fill=C_SLOT, outline="#111", width=1)
         self._draw_paddle_h(x1 + m, y1 + m, x2 - m, y2 - m, pos, npos)
 
-    def _hex_toggle(self, cx, cy, rx, ry, pos, npos):
-        """Lever-lock MODE switch, drawn as a pointy-top hexagon."""
-        pts = []
-        for k in range(6):
-            a = math.radians(-90 + 60 * k)
-            pts.append((cx + rx * math.cos(a), cy + ry * math.sin(a)))
-        self._poly(pts, fill=C_GUARD, outline=C_GUARD_LO,
-                   width=max(2, int(1.5 * self.s)))
-        irx, iry = rx * 0.58, ry * 0.70
-        ipt = []
-        for k in range(6):
-            a = math.radians(-90 + 60 * k)
-            ipt.append((cx + irx * math.cos(a), cy + iry * math.sin(a)))
-        self._poly(ipt, fill=C_SLOT, outline="#111", width=1)
-        # Lever-lock tab, upper right — decorative, not a control.
-        self._rect(cx + rx * 0.52, cy - ry * 0.18,
-                   cx + rx * 0.90, cy + ry * 0.02,
-                   fill=C_LOCK, outline=C_GUARD_LO, width=1)
-        self._draw_paddle(cx - irx * 0.70, cy - iry * 0.78,
-                          cx + irx * 0.70, cy + iry * 0.78,
-                          pos, npos)
-
     def _draw_paddle(self, x1, y1, x2, y2, pos, npos):
         """White toggle paddle sitting at one of npos slots in a well."""
         well_h = y2 - y1
@@ -867,9 +849,14 @@ class PanelO6:
         self._rect(x1, y1, x2, y2, fill=C_GUARD, outline=C_GUARD_LO,
                    width=max(2, int(1.5 * self.s)))
         m = 6
-        self._rect(x1 + m + dx, y1 + m + dx, x2 - m + dx, y2 - m + dx,
+        iy1, iy2 = y1 + m + dx, y2 - m + dx
+        self._rect(x1 + m + dx, iy1, x2 - m + dx, iy2,
                    fill=fill, outline=C_PADDLE_LO, width=1)
-        self._text((x1 + x2) / 2.0 + dx, (y1 + y2) / 2.0 + dx,
+        # Anchor=c uses the full em box, so digits sit high.  Shift down by
+        # half the descent to centre the ink in the inner face.
+        f = self._tkfont(14)
+        y_fix = (f.metrics("descent") / 2.0) / max(self.s, 0.01)
+        self._text((x1 + x2) / 2.0 + dx, (iy1 + iy2) / 2.0 + y_fix,
                    label, size=14)
 
     # ---- mouse ----------------------------------------------------------
@@ -985,7 +972,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Space Shuttle panels O6, C3, F6 (GPC / BFC hardware controls)")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
-                    help="Tk geometry, e.g. 780x980+80+40")
+                    help="Tk geometry, e.g. 948x1250+80+20")
     args = ap.parse_args(argv)
 
     root = tk.Tk()
@@ -997,7 +984,7 @@ def main(argv=None):
         except tk.TclError as e:
             raise SystemExit("panelO6: bad --geometry %r: %s" % (geom, e))
     else:
-        root.geometry("1060x1200")
+        root.geometry("%dx%d" % (REF_W, REF_H))
     _dont_steal_focus(root)
     # Keep a reference so the panel is not collected; it owns no extra
     # threads, so Tk's mainloop is the whole process.
