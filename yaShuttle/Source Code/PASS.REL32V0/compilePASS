@@ -201,6 +201,10 @@ csectsDir = ".." + os.sep + "mafgen"
 providerDeps = True
 seedCycles = True
 haltOnError = False
+# How many times to sweep over the units that produced no object.  Most
+# failures are ordering accidents that clear on a second look; the sweep stops
+# early as soon as one pass gains nothing.
+retryPasses = 4
 # A full build assembles as well as compiling; --no-assemble is for the case
 # where only the HAL/S side is wanted (it is much the slower half to redo).
 assembleToo = True
@@ -244,6 +248,8 @@ for parm in sys.argv[1:]:
         haltOnError = True
     elif parm == "--no-assemble":
         assembleToo = False
+    elif parm.startswith("--retries="):
+        retryPasses = int(parm[10:])
     elif parm == "--dfg":
         dfg = True
     elif parm == "--no-dfg":
@@ -271,6 +277,38 @@ if not Path("APPLSRC").is_dir():
 
 def descore(s):
     return s.strip().replace("_", "")[:6]
+
+# ---------------------------------------------------------------------------
+# TOMBSTONES
+#
+# The OI340700 overlay is applied by copying OI340700/ over a clone of
+# OI340600/, so it can ADD a file and it can REPLACE one, but it has no way to
+# say that OI340600 carried a file the later release does not.  Nothing in the
+# prescription can express a deletion.
+#
+# A ZERO-LENGTH file is that missing verb.  Overlaying an empty
+# OI340700/APPLSRC/CS4PDT.hal over OI340600's leaves an empty file in the
+# merged tree, and an empty file is not a compilation unit -- there is nothing
+# to compile and nothing to say about it -- so it reads naturally as "this unit
+# is not in this release".  Such a file is skipped wherever sources are
+# gathered: it never enters the dependency graph, is never compiled or
+# assembled, and produces no object.
+#
+# This matters for correctness, not just tidiness.  OI340600's CS4PDT declares
+# CSAS_PDT_6020002 with INITIAL(HEX'4103',...) and an extra _FDA member;
+# OI340700's CS2PDT declares the same name with INITIAL(HEX'4003',...) and
+# without it.  Two different definitions of one payload cannot both be right,
+# and an SDF only tolerates a duplicate when the definitions agree, so building
+# the CS4 family into an OI340700 tree is not a harmless extra -- it is a
+# conflict.
+def isTombstone(path):
+    """True for a zero-length source: a file OI340700 has REMOVED."""
+    try:
+        return os.path.getsize(str(path)) == 0
+    except OSError:
+        return False
+
+tombstones = []
 
 # OI340600 holds more than PASS: auxiliary code for the same software version
 # sits alongside it in APPLSRC/ and SSSRC/, and compiling it is a waste at best
@@ -806,6 +844,9 @@ templateFiles = list(SSSRC.glob("*.hal")) + list(APPLSRC.glob("*.hal"))
 displayFiles = sorted(str(x) for x in
                       list(SSSRC.glob("*.dfg")) + list(APPLSRC.glob("*.dfg")))
 templateFiles = templateFiles + displayFiles
+removedByOverlay = [f for f in templateFiles if isTombstone(f)]
+tombstones += [str(f) for f in removedByOverlay]
+templateFiles = [f for f in templateFiles if not isTombstone(f)]
 for i in range(len(templateFiles)):
     rawFilename = str(templateFiles[i])
     if preprocess and not rawFilename.endswith(".dfg"):
@@ -1296,6 +1337,45 @@ if False:
         templatesByFilename.pop(filename)
 
 # ---------------------------------------------------------------------------
+# RETRY PASS
+#
+# The dependency analysis is not perfect, and BUILD.md says what to do about
+# that: "instead of treating an error as fatal, just come back to it later on.
+# Obviously, that takes longer."  Measured on a full build, 36 of 51 HAL
+# failures were XI3 ("@@X NOT IN TEMPLIB") or XI10 ("REL3 SDF ##X NOT FOUND")
+# -- a template or SDF that simply had not been written yet when the dependent
+# was compiled.  Every one of those is fixed by trying again once the rest of
+# the build has populated the libraries.
+#
+# Sweep repeatedly over everything that produced no object, stopping when a
+# whole pass adds nothing.  What survives is a real error rather than an
+# ordering accident: a genuine duplicate definition, say, which no amount of
+# reordering will fix.
+if retryPasses > 0:
+    print(f"{datetime.now()}: Retrying units that produced no object ...")
+    for attempt in range(1, retryPasses + 1):
+        again = []
+        for stem in sorted(templatesByStem):
+            template = templatesByStem[stem]
+            if Path("objects" + os.sep + stem + ".obj").is_file():
+                continue
+            again.append(template)
+        if not again:
+            break
+        print("   pass %d: %d unit(s) to retry" % (attempt, len(again)))
+        gained = 0
+        for template in again:
+            if template.get("kind") == "dfg":
+                ok = dfg(template["filename"])
+            else:
+                ok = compile(template, fatal = False)
+            if ok and Path("objects" + os.sep + template["stem"] + ".obj").is_file():
+                gained += 1
+        print("   pass %d: %d unit(s) now built" % (attempt, gained))
+        if gained == 0:
+            break
+
+# ---------------------------------------------------------------------------
 # ASSEMBLY PASS
 #
 # Unlike HAL/S and the display decks, assembly has no COMPOOL dependency: an
@@ -1307,7 +1387,9 @@ if assembleToo:
     assemblyFiles = []
     for d in ("SSSRC", "APPLSRC", "RUNASM", "ZCONASM"):
         if Path(d).is_dir():
-            assemblyFiles += sorted(str(x) for x in Path(d).glob("*.asm"))
+            found = sorted(str(x) for x in Path(d).glob("*.asm"))
+            tombstones.extend(f for f in found if isTombstone(f))
+            assemblyFiles += [f for f in found if not isTombstone(f)]
         else:
             print("     %s/ not present; skipping it." % d)
     # BUILD.md: "Any compilation or assembly error is fatal."  assemble()
@@ -1316,6 +1398,12 @@ if assembleToo:
     for path in assemblyFiles:
         assemble(path)
     print("%s: %d file(s) assembled." % (datetime.now(), len(assemblyFiles)))
+
+if len(tombstones) > 0:
+    print("%d source file(s) removed by the overlay (zero length), not built:"
+          % len(tombstones))
+    for f in sorted(tombstones):
+        print("     ", f)
 
 if len(displayFailures) > 0:
     print("%d display deck(s) could not be translated by dfg, and have no "
