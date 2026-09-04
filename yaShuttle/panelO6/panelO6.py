@@ -722,7 +722,8 @@ class PanelO6:
         self._hit("bfc_display", None, dx1, sw_top, dx2, sw_top + gh)
         self._hit("bfc_select", None, sx1, sw_top, sx2, sw_top + gh)
 
-        self._vtext(sx2 + 14, sw_top + gh / 2.0, "2+3")
+        self._vtext(sx2 + 14 + SETTING_SIZE * 2 / 3.0,
+                    sw_top + gh / 2.0, "2+3")
         y_bot = sw_top + gh + pad + ths
         self._text(disp_cx, y_bot, "OFF", size=SETTING_SIZE)
         self._text(sel_cx, y_bot, "3+1", size=SETTING_SIZE)
