@@ -12,7 +12,7 @@ with white lettering.
 
 Usage:
     python3 stsKeyboard.py
-    python3 stsKeyboard.py --geometry 410x810+80+40
+    python3 stsKeyboard.py --geometry 650x1280+80+20
 """
 
 import argparse
@@ -35,9 +35,15 @@ KEYS = (
 NROW = 8
 NCOL = 4
 
-# Gap is 1/8 of the key.  Default window matches 4k+5g by 8k+9g so the
-# outer margin equals the gap between keys.
-KEY_REF = 88
+# Hex keypad: 0-9, A-F, -, +.  The period is drawn as a disc, not a glyph.
+HEX_CAPTIONS = frozenset("0123456789ABCDEF-+")
+
+# Other-key legends use the size EXEC had on the original 88 px keys (10 pt
+# on this display).  Hex legends are 1.6x that.  KEY_REF is large enough
+# that RESUME / CLEAR / two-line labels stay inside the button at 10 pt.
+OTHER_PTS_REF = 10
+HEX_FONT_SCALE = 1.6
+KEY_REF = 140
 GAP_RATIO = 1.0 / 8.0
 GAP_REF = KEY_REF * GAP_RATIO
 REF_W = int(round(NCOL * KEY_REF + (NCOL + 1) * GAP_REF))
@@ -64,6 +70,14 @@ def key_id(lines):
     if lines[0].endswith("/"):
         return lines[0] + lines[1]
     return " ".join(lines)
+
+
+def key_kind(lines):
+    if lines == (".",):
+        return "dot"
+    if len(lines) == 1 and lines[0] in HEX_CAPTIONS:
+        return "hex"
+    return "other"
 
 
 def _active_window():
@@ -183,19 +197,11 @@ class STSKeyboard:
             self._font_cache[key] = font
         return font
 
-    def _legend_font(self, lines, key):
-        """Largest Helvetica bold that fits the legend in the key."""
-        inner = key * 0.86
-        size = max(8, int(key * (0.28 if len(lines) == 1 else 0.20)))
-        while size >= 6:
-            f = self._tkfont(size)
-            widest = max(f.measure(line) for line in lines)
-            ls = f.metrics("linespace")
-            tall = ls * len(lines)
-            if widest <= inner and tall <= inner:
-                return f, size
-            size -= 1
-        return self._tkfont(6), 6
+    def _pts_for(self, kind, k):
+        other = max(6, int(round(OTHER_PTS_REF * k / float(KEY_REF))))
+        if kind == "hex":
+            return max(6, int(round(other * HEX_FONT_SCALE)))
+        return other
 
     def redraw(self):
         self.cv.delete("all")
@@ -219,11 +225,19 @@ class STSKeyboard:
         self.cv.create_line(x1 + 1, y2 - 1, x2 - 1, y2 - 1, fill=lo)
         self.cv.create_line(x2 - 1, y1 + 1, x2 - 1, y2 - 1, fill=lo)
 
-        font, _pts = self._legend_font(lines, k)
-        ls = font.metrics("linespace")
-        n = len(lines)
+        kind = key_kind(lines)
         cx = (x1 + x2) / 2.0 + dx
         cy = (y1 + y2) / 2.0 + dx
+        if kind == "dot":
+            other = self._tkfont(self._pts_for("other", k))
+            d = float(other.measure("o"))
+            r = d / 2.0
+            self.cv.create_oval(cx - r, cy - r, cx + r, cy + r,
+                                fill=C_LEGEND, outline="")
+            return
+        font = self._tkfont(self._pts_for(kind, k))
+        ls = font.metrics("linespace")
+        n = len(lines)
         if n == 1:
             self.cv.create_text(cx, cy, text=lines[0], fill=C_LEGEND,
                                 font=font, anchor="c")
@@ -268,7 +282,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Space Shuttle DPS keyboard")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
-                    help="Tk geometry, e.g. 410x810+80+40")
+                    help="Tk geometry, e.g. 650x1280+80+20")
     args = ap.parse_args(argv)
 
     root = tk.Tk()
