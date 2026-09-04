@@ -12,7 +12,7 @@ with white lettering.
 
 Usage:
     python3 stsKeyboard.py
-    python3 stsKeyboard.py --geometry 650x1280+80+20
+    python3 stsKeyboard.py --geometry 520x1020+80+20
 """
 
 import argparse
@@ -39,11 +39,13 @@ NCOL = 4
 HEX_CAPTIONS = frozenset("0123456789ABCDEF-+")
 
 # Other-key legends use the size EXEC had on the original 88 px keys (10 pt
-# on this display).  Hex legends are 1.6x that.  KEY_REF is large enough
-# that RESUME / CLEAR / two-line labels stay inside the button at 10 pt.
+# on this display).  Hex legends are 1.6x that; RESUME is 0.75x other.
+# KEY_REF leaves about half a character of margin at 10 pt (CLEAR is the
+# widest remaining other-key once RESUME is reduced).
 OTHER_PTS_REF = 10
 HEX_FONT_SCALE = 1.6
-KEY_REF = 140
+RESUME_FONT_SCALE = 0.75
+KEY_REF = 110
 GAP_RATIO = 1.0 / 8.0
 GAP_REF = KEY_REF * GAP_RATIO
 REF_W = int(round(NCOL * KEY_REF + (NCOL + 1) * GAP_REF))
@@ -197,10 +199,12 @@ class STSKeyboard:
             self._font_cache[key] = font
         return font
 
-    def _pts_for(self, kind, k):
+    def _pts_for(self, kind, k, lines=()):
         other = max(6, int(round(OTHER_PTS_REF * k / float(KEY_REF))))
         if kind == "hex":
             return max(6, int(round(other * HEX_FONT_SCALE)))
+        if lines == ("RESUME",):
+            return max(6, int(round(other * RESUME_FONT_SCALE)))
         return other
 
     def redraw(self):
@@ -235,7 +239,7 @@ class STSKeyboard:
             self.cv.create_oval(cx - r, cy - r, cx + r, cy + r,
                                 fill=C_LEGEND, outline="")
             return
-        font = self._tkfont(self._pts_for(kind, k))
+        font = self._tkfont(self._pts_for(kind, k, lines))
         ls = font.metrics("linespace")
         n = len(lines)
         if n == 1:
@@ -282,7 +286,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Space Shuttle DPS keyboard")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
-                    help="Tk geometry, e.g. 650x1280+80+20")
+                    help="Tk geometry, e.g. 520x1020+80+20")
     args = ap.parse_args(argv)
 
     root = tk.Tk()
