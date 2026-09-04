@@ -527,16 +527,40 @@ flight software's own use of them (`problems.md` §8.27).
   historical — see §8.28 — they differ by exactly 512 in X and 2 in Y, and the
   translate registers are ruled out.  MEDS2 routes around it by choosing the
   geometry from the list; nothing explains it.
-- **PHASE 8'S LOAD-BLOCK DESCRIPTORS.  This is the current front of the work.**
-  Everything upstream is now fixed and measured (`problems.md` §8.29–§8.35): the
-  OPS request is accepted, the phase tables are stamped onto the volume from the
-  tape's own IPL phase table, the IPL SOURCE switch no longer blocks
-  mass-memory I/O, and **the OPS 9 overlay loads** — `read 26 block(s) from
-  3/3/6/0` then `read 110 block(s) from 2/5/4/0`, `CZ2V_REC_XERR = 0`.  What
-  still fails is phase 8: only **1 of 27** of `mmbstamp`'s descriptors checksums
-  against the tape, so `ARC_OVL_ERR` is set, `PROG_OVLY` stays 0, `CZ2V_MC`
-  never updates and the display never leaves `0001`.  Phase 3's descriptors came
-  from the tape's IPL table; that table covers only phases 10, 2, 13 and 3.
+- **PHASE 8'S LOAD-BLOCK DESCRIPTORS — AND STOP TRYING TO INFER THEM.**
+  Everything upstream is fixed and measured (`problems.md` §8.29–§8.35): the OPS
+  request is accepted, the phase tables are stamped from the tape's own IPL
+  table, the IPL SOURCE switch no longer blocks mass-memory I/O, and **the OPS 9
+  overlay loads**.  Phase 8 still fails — only 1 of 27 of `mmbstamp`'s
+  descriptors checksums against the tape, so `ARC_OVL_ERR` is set, `PROG_OVLY`
+  stays 0 and the display never leaves `0001`.
+  **The reframing (§8.37) is the important part.**  `mmu2mmv`'s own docstring
+  says `mmbstamp.derive_load_blocks(lib, …)` partitions a phase's linkedit image
+  into its load blocks — so phase 8's descriptors are a FUNCTION of
+  `PHASE08.lib`, computable exactly, and were never a reverse-engineering
+  problem.  That also explains the paradox: if the tape's phase-8 data was
+  written by `derive_load_blocks`, descriptors derived the same way must match
+  it, so **the stamped GPT and the tape's phase-8 data came from different
+  builds**.  Rebuilding `PHASE08.lib` and re-deriving is predicted to fix it
+  outright.  Everything in §8.34–§8.36 — checksum walks, fingerprints, monotone
+  DP, bisection — was an attempt to recover by inference something the build
+  already computes.  Do not resume that line.
+- **What the bisection did establish, since it cost a day** (§8.36): the loader
+  does NOT verify load-block checksums; block count is not the discriminator; no
+  single descriptor causes the rejection — every one is accepted alone and
+  {6,7,8,9,10} together is refused, with block 10 necessary and block 6 (which
+  is provably correct) its partner.  Four hypotheses were refuted by measurement
+  and are recorded there so they are not re-run.
+- **Don's note, 2026-09-03, may bear on this directly**: "the BCE programs
+  initiate block transfers and then use `#DLY` to skip certain data as it
+  arrives.  I have fixes incoming for that."  That is the same mechanism as the
+  FCMBOOT delay bug already recorded in §2 — and a timing-sensitive skip would
+  behave exactly like the observed rejection, where acceptance correlates
+  inversely with correctness and no single descriptor is at fault.  **Wait for
+  those fixes before resuming descriptor work.**  His other two suggestions are
+  cheap checks: `SPEC 1 PRO` / `ITEM 48 EXEC` bypasses the G3 archive load and
+  checksum, and `ITEM 38 EXEC` masks the IPL source switch back to MMU1 (we see
+  MMU1 activity already, so that one may not apply).
 - **ALWAYS PASS `SOURCE_RUN=OFF`.**  `headless-gpcmem.sh` defaults it to `MM1`,
   which is the value that *blocks* every post-IPL mass-memory I/O (§8.31): with
   the IPL SOURCE switch made, `FIOMGSNC` refuses every transaction and no
@@ -808,6 +832,57 @@ is cheap to leave on), `YAGPC_DSETRACE=1`, `YAGPC_PCTRACE=1`, and
 `YAGPC_DISPTRACE=1` (prints `DISP LOADMSCBUSY` every time the CPU starts the
 MSC).  **`INTTRACE` plus `PROTTRACE` turned a "wild branch" into a one-line
 diagnosis** and should be the first thing reached for.
+
+### The CON80 decks — where the build is actually defined
+
+`PFS/OI340600/CON80` is the linkage-editor control-deck library, 194 members,
+and it is the authority on what belongs to a phase.  The hierarchy, following
+every reference form (an earlier scan followed only `INCLUDE CONCARDS(...)` and
+wrongly made `OFTMP` the top):
+
+    MMLOAD                overall control -- referenced by nobody
+      OFTMP               master LINK deck, one link over the whole overlay tree
+        PHASEnn           PHASE directives assign segments to phases
+          GNC9 / PATCH08  configuration and patch decks
+            INSERT <csect>
+
+`MMLOAD` carries `IPL,PH=(10,2,13,3),SYSID=SYS1,MMDIR=44000;` — identical to the
+on-tape IPL phase table reconstructed by hand, which is good evidence these are
+the real build inputs.  `MMBUILD` is a separate one-liner (`BUILD;`), as are the
+`MMUSYSn`/`MMUDATn`/`MMXnn` MMU-build decks; `mmu2mmv` reads `MMLOAD` for
+`MMDIR` plus `MMUDAT<area>` and `MMUSYS<area>` for the tape layout.
+
+**The three libraries the decks name are JCL DD names, not directories.**  The
+flight-software build JCL (`OBS.PROCLIB`, named in `$$SUBSET`'s own comments) was
+never recovered, so the original dataset names are gone; `con80build`
+reconstructs each:
+
+| DD name | what it was | where it comes from now |
+|---|---|---|
+| `CONCARDS` | the deck library | the `CON80` directory itself |
+| `SYSLIBL1` | object library, 114 members | resolved as source members through `SSSRC`/`APPLSRC`, then scanned for CSECT/ENTRY definitions — the member name is often NOT the file name (`INSERT GPCIPL` → CSECT `GPCIPL` inside `BILDNEW5`) |
+| `ZCONLIB` | HAL/S runtime | `build/lib/runtime/{RUN,ZCON}`, passed to `lnk101 -L` |
+
+The compiler-side equivalents survive and confirm the pattern:
+`PASS.REL32V0/TEST.CLIST/T32V0` binds `RUNLIB(&ID..PASS.&RUNLVER..RUNLIB)`,
+`ZCONLIB(&ID..PASS.&COMPVER..ZCONOBJ)` and
+`LNKIN(NCAMCM.TESTLIB.&GROUP..CON)`; `CM.CLIST/ALIAS` points
+`NCAMCM.PASS.CURRENT.*` at `NCAMCM.PASS.REL32V0.*`; `CM.JCL/TAPE32V0` is a DFDSS
+dump listing the whole inventory.  `BUILD.CLIST` — the procedure that actually
+built `RUNOBJ`, `RUNLIB` and `ZCONOBJ` — was NOT recovered, which is why
+`cmake/BuildRuntime.cmake` has to reassemble the runtime from source.
+
+**The runtime sources are on this machine**, in
+`yaShuttle/"Source Code"/PASS.REL32V0/`: `RUNASM` 624 members, `ZCONASM` 286,
+macros in `"Source Code"/HAL.HALS.RUNMAC` (32).  Of the 161 `HAL_LIBRARY_*`
+CSECTs the G9 map needs, 132 come from the built runtime; the other 29 are all
+`#0*`/`#L*`, which `lnk101` handles by prefix and via
+`synthesizeMissingExternals`, so they need no library member.
+
+`PFS/OI340600/objects/` is a **partial, stale build** — 896 non-underscore `.obj`
+against ~1573 sources, and the `_`-prefixed duplicates are a second compile run
+differing only in date/version digits.  It was never an input to the tape:
+`con80build` compiles `SSSRC`/`APPLSRC` itself into its own tree.
 
 ### Addresses you will need
 
@@ -1458,6 +1533,32 @@ but it is luck of the tool used.
     reverted. Uncorrected, correct blocks score 8–55% and get rejected as
     coincidence; corrected, 99–100%. There was a control available throughout —
     phase 3's boot-table blocks, known-good by construction.
+
+33. **Do not run a build in `~/donschmidt/nsts-sdl-dps`.** The standing rule
+    covers running its *own* commands, not just editing it — a `make runtime`
+    there once silently reverted hand-placed `ASM101S` fixes, because `asm101`
+    ignores the `&ASM101S` conditional-assembly convention. Three `con80build`
+    runs were made here before that rule was recalled. Damage was limited to one
+    stale `.pyc` (the runtime libraries kept their 2026-08-24 dates), but that
+    was luck. Set `PYTHONDONTWRITEBYTECODE=1` if a run there is genuinely
+    necessary, and point every output at our own tree.
+
+34. **A foreground `sleep` in the same command as a background launch kills the
+    build.** `setsid nohup … & disown; sleep 240` looks safe; the wrapper's
+    2-minute timeout then takes the whole process group, and a build that had
+    reached 268 files reports as if it failed. Launch detached with `setsid`,
+    return immediately, and poll in a separate call. Related: `A && B & disown`
+    backgrounds the *entire* `A && B` chain, so cleanup and preparation race
+    with whatever polls them — run preparation synchronously and background only
+    the long step.
+
+35. **`halsc` is not a neutral wrapper around the real compiler.** It drives the
+    authentic HAL/S-FC passes, which is why it looks safe, but it supplies ONE
+    global `CARDTYPE=UDVMWCXCYCZM` to every file. `halsParms` holds a per-file
+    table whose baseline is `FCRMUDXCVMWCYCZM`; they differ on **every one** of
+    the 1167 HAL sources. A `halsc`-driven build compiles the whole corpus under
+    the wrong conditional-compilation letters and says nothing about it. Use
+    `compilePASS`, which imports `halsParms`.
 
 
 ## 6. OUTSTANDING, NOT CODE

@@ -4598,6 +4598,38 @@ offset in it and every external reference to it. See §8.10.
 These cost real time and several produced confident, wrong, *written-down*
 conclusions. They are recorded because the failure modes recur.
 
+**Do not log a hypothesis as a finding before you test it.** The FIOCDATG
+mechanism in §8.36 — "block 10 clobbers the I/O control structures while the
+transfer is executing, which aborts it" — was coherent, explained the inverse
+correlation between correctness and acceptance, and was written into the log
+before the isolation run existed. That run accepted block 10. The cost is not
+the wrong idea, which was reasonable; it is a retraction sitting next to the
+claim in a document someone else will read.
+
+**Elimination across a set is valid only if the property is additive over its
+members.** Blocks 7+8 came back accepted, so "block 9 is the fault" followed by
+elimination — and block 9 alone is also accepted. Every member of {6,7,8,9,10}
+is individually accepted and the group is refused. When the property might be
+cumulative, run the group control instead of subtracting.
+
+**One phase is not a validation.** The checksum-driven block walk recovers 9 of
+phase 3's 10 blocks exactly, offset and length, and 1 of phase 4's 17. It was
+described as a general method on the strength of the first number before the
+second was measured. Two independent cases is the minimum before promoting a
+technique, and the second one should be chosen to be unlike the first.
+
+**Check whether your evidence is circular before you rely on it.** "#CASLTMC has
+no object in `objects/`, yet its as-built content appears verbatim in the tape"
+was offered as proof that the tape is independent of our object build. The
+content was *taken from* the as-built image and searched for in a tape that
+could have been derived from it. The claim happened to be right for another
+reason entirely; the argument was worthless.
+
+**`git add <file>` without `git diff <file>` first.** A file in the working tree
+had uncommitted changes by the user that were swept into a commit of mine, under
+my message, and one of them (a `parms.remove()` on a value that is a string) then
+blocked the build. Review what you are committing, not just what you wrote.
+
 **Never write your explanation into the measurement.** Seeing a uniform
 10-halfword offset between our compool and the dump, I explained it as "an object
 prologue the linker drops" and then encoded that into the comparison as a map
@@ -8027,6 +8059,319 @@ value that *blocks* mass-memory I/O, so the default invocation cannot perform an
 overlay at all, and every run that forgets `SOURCE_RUN=OFF` fails in exactly the
 same silent way.
 
+
+### 8.36 Phase 8's descriptors — bisection, and four hypotheses the machine refuted
+
+§8.35 left the overlay transfer being read and then *refused*: `FCMMGPOV` retries
+an unsuccessful overlay exactly once, and the trace showed two identical reads.
+The descriptors were by then structurally sound — 87 blocks read, all 35
+checksums verifying at their implied tape offsets, memory improving from 51.4%
+to 76.7% against a 94.2% ceiling — and the software still would not credit it.
+
+**Acceptance correlated INVERSELY with correctness.**  `mmbstamp`'s set, which
+scores 68.7 → 24.8 (it destroys memory that was already right) and whose blocks
+fail their own checksums, is accepted.  Sets that improve memory are refused.
+Any explanation had to account for that inversion.
+
+**Eliminations, one run apiece.**  Not `y` (110 → 87, still retried); not the
+descriptor count (26 instead of 35, still retried); not a final block straddling
+an MM-block boundary; not a sacrificial tail descriptor; not the checksums (0 of
+35 fail).  `REC_XERR = 101` appears where earlier runs reported 0 — that is
+error code 1 plus `ARC_XERR_PAD=100`, so ARC now *reaches* its overlay-error
+path.  Better observability, not a better outcome.
+
+**The method that finally localised it was bisection, not theory.**  Build
+hybrid descriptor sets — `mmbstamp`'s below a tape offset shared by both walks,
+ours above — and see which half flips acceptance.  Two runs put the fault in
+blocks 6–10.  Then, because **the loader does not verify load-block checksums**
+(`mmbstamp`'s fail and are accepted; a walk padded with *fabricated* filler
+descriptors is also accepted), filler can pad a walk to the next shared offset,
+which turns a coarse split into single-block isolation.
+
+That retires an assumption used earlier to argue a wrong block length would be
+caught: it would not be.  It also disposes of two other candidates.  **Block
+count is not the discriminator** — `headless-hy` (retried) and `headless-hy2`
+(accepted) both read 87 blocks; accepted reads across all runs are 87, 109 and
+110, so the read count tracks the descriptor walk, not `y`.  And **our
+destinations are less invasive than `mmbstamp`'s**, not more: ours put 0 blocks
+in the CZ2 compool against its 3, and 2 in low core against 1.
+
+**The result, and it is not what bisection usually gives.**  Isolated into an
+otherwise-accepted set, *every* candidate is accepted — blocks 1–5, block 6,
+blocks 7+8, block 9, block 10, each one read.  Yet blocks 6–35 together are
+refused while 11–35 together are accepted.  **No single descriptor causes the
+rejection; it is a combination within 6–10.**  Group controls narrow it further:
+{6,7,8,9,10} rejected, {6,7,8,9} accepted, {9,10} accepted, {7,8,10} accepted —
+so block 10 is NECESSARY, and its partner is block 6.
+
+Block 6 is the one block in the set that can be *proved correct*: it writes 80
+halfwords of `c6c6` into `$X080001` (1538..1617), which is exactly what the
+as-built image holds there.  A provably-correct block participating in the
+failure means the cause is not the data any single block writes.
+
+**What block 10 destroys, for the record.**  It is the only block in the group
+touching a control-path CSECT: 111 of `FIOCDATG`'s 143 halfwords, from offset 32
+on.  `FIOHFDEL`, `FIOTMSRT`, `FIOHFDIV`, `FIOHFDZ1/2`, `FIONMDZ1/2`,
+`FIOHFORM`, `FIOTMIOC`, `FIOHFCY2`, `FIOHFECY`, `FIOFCNDX` survive; `FIOHFECF`,
+`FIOADBST`, `TIOQP001/2/014/015`, `FIOCF305`, `FIOCF102`, `FIOCFSAV` are
+clobbered.  `TIOQP001` is not inert data — `FPMIHPC2.asm:710` is
+`LA R0,TIOQP001  GET PREINIT IOQE ADDR FOR HFE INPT`, a preinitialised I/O queue
+element other paths hand out by address.
+
+#### Four hypotheses this section had to withdraw
+
+They are kept because each was plausible, each was written down, and each was
+killed by a measurement that took one run.
+
+1. **"Block 10's destination is off by +32."**  It starts 32 halfwords inside
+   `FIOCDATG`, and a load block should start on a CSECT boundary — so the
+   boundary at 26388 looked like the true address.  Scanning every destination
+   in a ±64 window against the as-built image, 26420 is the BEST at 47.4% and
+   26388 does not place in the top eight.  Moving it to the boundary makes
+   agreement *worse*.  The general reasoning was sound; it was written before it
+   was measured.
+2. **"Block 10 clobbers the I/O control structures mid-transfer, which aborts
+   it."**  Coherent, and it explained the inversion.  Isolating block 10 alone
+   gives ONE read of 88 blocks — accepted.  The flight software tolerates having
+   the FIO data on the GTG path overwritten during the transfer.
+3. **"Block 9 is the fault," inferred when 7+8 came back accepted.**  Unsound:
+   elimination across a set is valid only if the property is additive over its
+   members, and this one is not — block 9 alone is accepted.  The group control
+   is the test that should have been run instead of inferring.
+4. **A checksum-driven block walk generalises.**  Ending each block at the first
+   `L` where `hw[L-2]==0` and `hw[L-1]==sum(content)&0xffff` recovers 9 of phase
+   3's 10 blocks exactly, offset AND length — and 1 of phase 4's 17.  One phase
+   is not a validation.  (Phase 4's region on this tape is 88% `c6c6`, so it may
+   not be a fair test; that cuts both ways.)
+
+Related and still standing: **windows 14–16 of phase 8 match nothing in the
+as-built image at all** — 28, 28 and 33 non-fill halfwords of 512, best
+fingerprint match anywhere 3/28, 3/28 and 8/33, across all 330,394 halfwords.
+That is not the version gap, which would leave a strong partial match somewhere.
+And the **"majority `c6c6` ⇒ block end" rule is unsafe on phase 8**: it holds on
+phase 3 (every padding-dominated window is a block's last, zero mid-block), but
+phase 8's windows 12–16 are majority `c6c6` as *real content* — their non-fill
+halfwords come in runs of exactly 6, and every `#E*` CSECT in the map is exactly
+6 halfwords.
+
+### 8.37 The descriptors were never a reverse-engineering problem
+
+Everything in §8.34–§8.36 — checksum walks, `bgrep` anchoring, sparse
+fingerprints, as-built scoring, section-start filtering, monotone DP, bisection —
+was an attempt to *infer* phase 8's load blocks by matching tape bytes against a
+memory dump.  That whole line of work was unnecessary.
+
+**`mmu2mmv`'s own module docstring says where the blocks come from:**
+
+> `mmbstamp.derive_load_blocks` partitions the phase's linkedit image into load
+> blocks … staging fill in every halfword the phase does not supply, and each
+> block's closing checksum … that is the same content model `mmu2fcm
+> --stamp-checksums` reads back when it emulates the load, so a block written
+> here and loaded there round-trips.
+
+`derive_load_blocks(lib, …)` takes the phase's `.lib` and *returns* the
+partition.  **Phase 8's descriptors are a function of `PHASE08.lib`**,
+computable exactly — not something to be recovered from content matching.
+
+**And that explains the central paradox.**  If the tape's phase-8 data was
+written by `derive_load_blocks`, descriptors derived the same way must match it.
+Only 1 of the 27 stamped descriptors checksums against the tape.  So **the
+stamped GPT and the tape's phase-8 data came from different builds**, or from
+the same code with different parameters.  That is a far simpler explanation than
+any mechanism chased in §8.36, and it predicts that rebuilding `PHASE08.lib` and
+re-deriving fixes the problem outright.
+
+#### Two beliefs that had to go first
+
+**The tape is not a recovered artifact.**  `pass-ipl.mmv` was called one on the
+strength of a handoff phrase ("never modified").  Every `.mmv` on this machine is
+one of our own builds; there is no original.  The chain is OI340600 sources →
+`con80build` compiles, assembles and links → `PHASEnn.lib` → `mmu2mmv --con80
+CON80 --mmu <tree>` → the volume → `stamp_*` adds the phase tables, which is why
+the raw GPT is empty.  The tape data does ultimately come from compiled source.
+
+**The build does record phase membership.**  An earlier conclusion that nothing
+in the build says which CSECTs belong to a phase — and therefore that deriving
+destinations from the build was closed off — was drawn from derived artifacts
+alone.  `OI340600/CON80` is the linkage-editor control-deck library and states
+membership outright:
+
+    MMLOAD   IPL,PH=(10,2,13,3),SYSID=SYS1,MMDIR=44000;
+             LOADMOD,MEMBER=OFTMP,PHASE=18;
+    OFTMP    PHASE 8,18
+             INCLUDE CONCARDS(PHASE08)
+    PHASE08  MAP2, MAP3, OVERLAY Z3, PATCH08, GNC9   -> leaves are INSERT cards
+
+`MMLOAD`'s `PH=(10,2,13,3)` is identical to the on-tape IPL phase table
+reconstructed by hand in §8.33, which corroborates that these decks are the real
+build inputs.  `MMLOAD` is the top-level deck, not `OFTMP` — an earlier scan
+followed only `INCLUDE CONCARDS(...)` edges and never saw `LOADMOD,MEMBER=`.
+
+`con80build` (documented in `RUNBOOK-IPL-MEDS.md` §A.1) already reads these
+decks, works out which modules belong to a phase, and builds the load module.
+`tools/phase_from_condeck.py` duplicates part of its front end and exists only
+to derive tape *descriptors*, which `con80build` does not produce; validated
+against phase 3's ground truth it gives 10 of 10 destinations and 10 of 10
+lengths.  Three corrections were needed and each was forced by that validation:
+`INSERT` cards are not the whole phase (`OFTMP`'s `LIBRARY ZCONLIB(ZCON)`
+autocalls members that never appear on a card, so `INSERT` names must be
+resolved to object files via ESD records and every CSECT that object defines
+taken); the run-merge tolerance is 32 halfwords, not 2; and lengths are even.
+
+**Phase 8 does not come out cleanly from the deck yet**: 98 `INSERT` names
+expand to 162 CSECTs and 45 runs, of which the search places 19.  Only 9 of the
+45 deck destinations coincide with the content-matched set — and those 9 are
+exactly the low-address blocks that were derived most reliably (`0x001f8`,
+`0x00242`, `0x005a2`, `0x03fe0`, `0x040d4`, `0x04754`, `0x0a3ee`, `0x0a70c`,
+`0x101f8`).  Since the method is exact on phase 3, the likely reading is that
+the content-matched set is wrong beyond its first few blocks — consistent with
+blocks 8, 9 and 10 spanning real boundaries and with 11 and 32 measuring bad.
+Not proven either way.
+
+#### What the FCMs can and cannot audit
+
+Prompted by the question "if a file's object was missing at link time, the
+linker would succeed and leave a hole" — mechanically plausible, since
+`con80build --tolerable` defaults to 4 and `lnk101.synthesizeMissingExternals`
+papers over unresolved references.  It cannot be tested against the dumps.
+
+Indexing every 8-halfword window of all eight configuration images and
+classifying the tape's 3015 blocks: 39.7% fully in FCMs, 35.6% partly, **4.8%
+(145 blocks, 74,240 halfwords) in no FCM at all**, 19.9% fill.  The three
+largest uncovered runs sit at MM block indices 8812, 8821 and 8830 — all inside
+phase 10's allocation.  That is GPCIPL, which runs at IPL and is overlaid, so no
+configuration dump contains it.
+
+**So "absent from the FCMs" does not mean "hole in the tape."**  Phase 10 is the
+one phase verified byte-for-byte (27,292 halfwords, none wrong) and it was
+verified against the ASM101S *listing*, not an FCM — yet its blocks score as
+FCM-uncovered.  Every "which sources are on the tape" number derived from the
+FCMs inherits this blind spot.  The 35.6% "partly" bucket is ambiguous too: a
+block can miss windows because of the version gap or because part of it is a
+hole, and the probe cannot separate them.
+
+Within those limits: of 2344 CSECTs with real content in some image, 1534 match
+the tape on every probe window and 683 on some, leaving 127 with none — of which
+121 are DATA or HALSTAT, the version-gap-prone types.  Only 6 are code, and the
+two most suggestive (`A1VB9BTU`, `A2VB9BTU`) are not in `PHASE08`'s deck
+closure, so they say nothing about phase 8.  Phase 3 shows no holes at all: 129
+of 130 deck-assigned CSECTs are covered by its blocks and all are populated.
+
+### 8.38 Building OI340700 from source — the object stage
+
+`PFS/BUILD.md` specifies the build: prepare a scratch `OI340700/` from
+OI340600's `APPLSRC SSSRC MLIB80 INCL80` plus PASS.REL32V0's
+`RUNASM RUNMAC ZCONASM`, overlay OI340700's three directories, then run
+`compilePASS`.  Full detail of the recipe and its current state is in
+`HANDOFF-OI340700-BUILD.md`; this section records what the work *established*.
+
+**State: 1955 objects, 22 missing.**  Assembly 761 of 761, displays 68 of 69,
+HAL 1105 of 1126, with 105 files tombstoned.  The progression is worth keeping
+because it shows what each change was worth:
+
+    --csects                        145 missing
+    --no-csects                      78
+      + retry pass                   73
+      + CSPCLB qualification         59
+    --csects again                  126
+      + 105 tombstones               22
+
+#### Use our tools, and know which are ours
+
+`con80build` drives `asm101` and `halsc`.  `lnk101` we have no equivalent of, so
+it is legitimately his; the assembler and the compiler are not.  **`halsc`
+supplies ONE global `CARDTYPE=UDVMWCXCYCZM` to every file**, where `halsParms`
+has a per-file table whose baseline is `FCRMUDXCVMWCYCZM` — they differ on every
+one of the 1167 HAL sources, so a `halsc`-driven build compiles the whole corpus
+under the wrong conditional-compilation letters.
+
+Comparing the assemblers on phase 3's four assembly sources, canonicalised with
+`objcanon.py`, they agree on every ESD symbol, every size and all generated
+code, and differ in exactly two things: the END record (a bare `END` should emit
+no entry point — ASM101S is right, `asm101` fabricates one, a known upstream bug
+with a PR in flight), and the `--fill` default.  `ASM101S.py` is **not
+reproducible** — three runs on one input give three different object files
+because csect emission order comes from a Python `set`; the C port `ASM101Sa` is
+deterministic and canonically identical, so use it.  Validated against the
+earlier `compileLinkCompare` work in `~/ForClaude/OI340600-clc-G9`,
+`--fill=C6C6` reproduces that build exactly bar the END record, and is the
+closest of the three candidates (2 differing lines against 6 for `C9FB` and 6
+for `0000`).
+
+#### The overlay could add and replace but not remove
+
+OI340700 is applied by copying it over a clone of OI340600, so nothing in the
+prescription can express a *deletion* — and OI340700 does not carry everything
+OI340600 did.  A **zero-length file is that missing verb**: an empty file is not
+a compilation unit, so it reads naturally as "this unit is not in this release",
+and `compilePASS` now skips such files everywhere and reports them.
+
+This is correctness, not tidiness.  OI340600's `CS4PDT` declares
+`CSAS_PDT_6020002` as `INITIAL(HEX'4103',…)` with an extra `_FDA` member;
+OI340700's `CS2PDT` declares the same name as `INITIAL(HEX'4003',…)` without it.
+One payload cannot have two definitions, and an SDF tolerates a duplicate only
+when the definitions agree, so building the CS4 family into an OI340700 tree is
+a conflict — which is what `CPUSLS` and `CPTOSV` were reporting as `PM1
+DUPLICATE DEFINITION`.
+
+**Deriving the list needs two conditions, not one.**  "No CSECT in any of the
+eight DASS configurations" gives 124 candidates, but 19 must be kept: compools
+with no storage — hence no CSECT — that files still in OI340700 include as
+templates (`CSAPXT` by six including `SBISM`; `PTVOSV`, `PDLIUS`, `PDSSEQ`,
+`PMGGNC`, `PMRSLR`, `PMTSLG`, `PMWSLW` all by `SSPEXEC`; `CPCGXT` by four;
+`CSACAT`, `CSADAR`, `CSAFCM`, `CSAIFT`, `CSAINB`, `CSAIPT`, `CSAIXP`, `CSAPAR`,
+`CSAPAT`, `CSDINI`).  Removing those breaks their consumers.  105 remain.
+
+#### The residue is one root cause
+
+All 21 remaining HAL failures reduce to seven roots and fourteen cascade:
+
+    roots     CS2IXP CS2PX3 CS2PXT CSAPCT   DI11: reference OI340600-only payloads
+              CS2PX2                        IS1, same family
+              CPTOSV CPUSLS                 DI11 once their SM4 branch is off
+    cascade   CS2IX2..7 CS2PCT CS2IFT CS2PAT PTVOSV SCOSPE SGCKIP SM2OPS SSPEXEC
+              chain: PTVOSV <- CPTOSV, SSPEXEC <- PTVOSV, SM2OPS <- SSPEXEC
+
+Every root is a compool that indexes payload IDs OI340700 does not carry.
+**`CS2PDT`'s payload set is DISJOINT between the releases** — 262 entries
+against 50, not one in common; `CSAPDT` shares 756 of ~906 and swaps ~150 each
+way.  These are ordinary `DECLARE`s, not `REPLACE` macros, and no two COMPOOLs
+collide on their normalized six-character names (312 compools, 312 distinct), so
+neither of the obvious explanations applies.  They need OI340700 reconstructions
+from their DASS structure listings, exactly as `CS2PDT` and `CSAPDT` got; all
+four are `#P` CSECTs present in the S2 dump, so the data exists.
+
+#### Three blind spots in the verification method
+
+Demonstrated, and each one explains part of why these files were never
+reconstructed:
+
+1. **A name-only change compiles to identical object code**, so a binary
+   comparison cannot see it.  `CS2IXP`, `CS2PX3`, `CS2PXT` and `CSAPCT` each
+   bumped one revision (BY→BZ, BW→BX, BW→BX, BX→BY) and matched byte for byte —
+   and they are precisely the four that now cannot compile.
+2. **A section shorter than the dump's passes as `ok`.**  `#PCSPCLB` is recorded
+   `ours=134 expected=140 n_diffs=0 verdict=ok`.  The 6-halfword shortfall is
+   exactly the padding a later reconstruction added.  `expected` is stored and
+   takes no part in the verdict.
+3. **Revision codes were maintained by hand.**  A bump means something changed;
+   no bump means nothing either way.  `SPSPSP` is `BP` in both and demonstrably
+   changed.
+
+And the comparison databases do not validate the reconstructions: every run in
+`~/ForClaude/dass-compare-*.db` is dated 2026-08-06/07 while `PFS/OI340700/` was
+created 2026-08-26, so every "match" there means *OI340600 source reproduces the
+OI340700 dump*.
+
+**The DASS report is the reliable oracle**, because it names every member and
+offset.  It settled the `CSPCLB` question outright — the structure and its dummy
+are named in the dump, and the same report disassembles `SPSPSP` reaching the
+mask through the structure (`LA R4,X'0024'(R2)  CSPB_PI_UMB_RESET_BUF+2`).  So
+the reconstruction is right, and `SPSPSP.hal` and `SSOSPDAT.hal` need OI340700
+versions using the qualified name.  Tested in the scratch tree, `SPSPSP` then
+compiles; the qualified reference ends at column 75 and overruns the SRN field,
+so each needs a continuation card — a reconstruction decision, not a mechanical
+substitution.  **PFS is untouched.**
 
 ## Methodology and caveats
 
