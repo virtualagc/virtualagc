@@ -35,6 +35,7 @@ follow the highlighted insets on SCOM printed page 2.6-25.
 
 Usage:
     python3 panelO6.py
+    python3 panelO6.py --size 512
     python3 panelO6.py --geometry 948x1250+80+20
 """
 
@@ -91,6 +92,7 @@ C3_W = 236
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
 REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + MARGIN   # 948
 REF_H = 1250
+FULL_SIZE = 1024       # --size units: 1024 is the design (full) window
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
 # MMU 1/2).  Side captions and above/below captions share this size.
@@ -157,12 +159,19 @@ def _dont_steal_focus(root):
     root.after(400, give_it_back)
 
 
+def scaled_wh(w, h, size):
+    """Pixel size at --size N, where FULL_SIZE (1024) is the design window."""
+    f = size / float(FULL_SIZE)
+    return max(1, int(round(w * f))), max(1, int(round(h * f)))
+
+
 class PanelO6:
-    def __init__(self, root):
+    def __init__(self, root, size=FULL_SIZE):
         self.root = root
         root.title("Panels O6, C3, F6  —  GPC / BFC")
         root.configure(bg=C_WINDOW)
-        root.minsize(640, 700)
+        mw, mh = scaled_wh(640, 700, size)
+        root.minsize(mw, mh)
 
         self.power = list(DEFAULT_POWER)
         self.output = list(DEFAULT_OUTPUT)
@@ -174,8 +183,9 @@ class PanelO6:
         self.bfc_disengage = DEFAULT_BFC_DISENGAGE
         self._held_ipl = None
 
+        cw, ch = scaled_wh(REF_W, REF_H, size)
         self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
-                            width=REF_W, height=REF_H)
+                            width=cw, height=ch)
         self.cv.pack(fill="both", expand=True)
 
         self._hits = []          # (kind, index, x1, y1, x2, y2)
@@ -971,12 +981,16 @@ class PanelO6:
 def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Space Shuttle panels O6, C3, F6 (GPC / BFC hardware controls)")
+    ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
+                    help="Scale: 1024 is full size (default), 512 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
-                    help="Tk geometry, e.g. 948x1250+80+20")
+                    help="Tk geometry, e.g. 948x1250+80+20 (overrides --size)")
     args = ap.parse_args(argv)
+    if args.size <= 0:
+        raise SystemExit("panelO6: --size must be a positive integer")
 
     root = tk.Tk()
-    panel = PanelO6(root)
+    panel = PanelO6(root, size=args.size)
     geom = args.geometry or os.environ.get("NSTS_O6_GEOMETRY")
     if geom:
         try:
@@ -984,7 +998,8 @@ def main(argv=None):
         except tk.TclError as e:
             raise SystemExit("panelO6: bad --geometry %r: %s" % (geom, e))
     else:
-        root.geometry("%dx%d" % (REF_W, REF_H))
+        w, h = scaled_wh(REF_W, REF_H, args.size)
+        root.geometry("%dx%d" % (w, h))
     _dont_steal_focus(root)
     # Keep a reference so the panel is not collected; it owns no extra
     # threads, so Tk's mainloop is the whole process.

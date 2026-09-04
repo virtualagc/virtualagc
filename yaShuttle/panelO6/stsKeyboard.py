@@ -12,6 +12,7 @@ with white lettering.
 
 Usage:
     python3 stsKeyboard.py
+    python3 stsKeyboard.py --size 512
     python3 stsKeyboard.py --geometry 520x1020+80+20
 """
 
@@ -50,6 +51,7 @@ GAP_RATIO = 1.0 / 8.0
 GAP_REF = KEY_REF * GAP_RATIO
 REF_W = int(round(NCOL * KEY_REF + (NCOL + 1) * GAP_REF))
 REF_H = int(round(NROW * KEY_REF + (NROW + 1) * GAP_REF))
+FULL_SIZE = 1024       # --size units: 1024 is the design (full) window
 
 # Same gull grey as panelO6.py; keys are black on that surface.
 C_WINDOW = "#2a2a2a"
@@ -138,12 +140,19 @@ def _dont_steal_focus(root):
     root.after(400, give_it_back)
 
 
+def scaled_wh(w, h, size):
+    """Pixel size at --size N, where FULL_SIZE (1024) is the design window."""
+    f = size / float(FULL_SIZE)
+    return max(1, int(round(w * f))), max(1, int(round(h * f)))
+
+
 class STSKeyboard:
-    def __init__(self, root):
+    def __init__(self, root, size=FULL_SIZE):
         self.root = root
         root.title("STS Keyboard")
         root.configure(bg=C_PANEL)
-        root.minsize(200, 360)
+        mw, mh = scaled_wh(200, 360, size)
+        root.minsize(mw, mh)
 
         self._held = None          # (row, col) while the mouse is down
         self._hits = []
@@ -151,8 +160,9 @@ class STSKeyboard:
         self._cursor_hits = False
         self._font_cache = {}
 
+        cw, ch = scaled_wh(REF_W, REF_H, size)
         self.cv = tk.Canvas(root, bg=C_PANEL, highlightthickness=0,
-                            width=REF_W, height=REF_H)
+                            width=cw, height=ch)
         self.cv.pack(fill="both", expand=True)
         self.cv.bind("<ButtonPress-1>", self._on_press)
         self.cv.bind("<ButtonRelease-1>", self._on_release)
@@ -285,12 +295,16 @@ class STSKeyboard:
 def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Space Shuttle DPS keyboard")
+    ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
+                    help="Scale: 1024 is full size (default), 512 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
-                    help="Tk geometry, e.g. 520x1020+80+20")
+                    help="Tk geometry, e.g. 520x1020+80+20 (overrides --size)")
     args = ap.parse_args(argv)
+    if args.size <= 0:
+        raise SystemExit("stsKeyboard: --size must be a positive integer")
 
     root = tk.Tk()
-    kb = STSKeyboard(root)
+    kb = STSKeyboard(root, size=args.size)
     geom = args.geometry or os.environ.get("NSTS_KEYBOARD_GEOMETRY")
     if geom:
         try:
@@ -298,7 +312,8 @@ def main(argv=None):
         except tk.TclError as e:
             raise SystemExit("stsKeyboard: bad --geometry %r: %s" % (geom, e))
     else:
-        root.geometry("%dx%d" % (REF_W, REF_H))
+        w, h = scaled_wh(REF_W, REF_H, args.size)
+        root.geometry("%dx%d" % (w, h))
     _dont_steal_focus(root)
     root._kb = kb
     root.mainloop()
