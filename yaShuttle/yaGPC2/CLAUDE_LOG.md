@@ -1,37 +1,29 @@
 # CLAUDE_LOG.md
 
-(Cleared 2026-09-04 by Full Documentation Sync.  Thirty-two entries applied to
-`problems.md` (8087 → 8432) and `HANDOFF-FCMBOOT.md` (1506 → 1607).  They were
-one continuous story — the hunt for why the phase-8 overlay transfer is refused,
-the discovery that the descriptors were never a reverse-engineering problem, and
-the OI340700 object build that followed — so they were told as such rather than
-filed as thirty-two dated notes.  Several entries retracted earlier ones on the
-same day; the retractions are integrated where the claim lives, not appended.
+(Cleared 2026-09-04 by Full Documentation Sync.  Four entries applied, all to
+`problems.md` (8432 → 8612).  They were one continuous story — the OI340700
+source reconstructions — so they were told as such rather than filed as four
+dated notes, and the first entry's "NOT ATTEMPTED: writing those
+reconstructions" is superseded by the three that follow it rather than
+preserved alongside them.
 
-- **`problems.md`**: three new sections.  **§8.36** the bisection — what it
-  established (the loader does not verify checksums; block count is not the
-  discriminator; no single descriptor is at fault, block 10 is necessary and
-  provably-correct block 6 is its partner) and the four hypotheses measurement
-  refuted, kept so they are not re-run.  **§8.37** the reframing: `mmu2mmv`'s own
-  docstring says `derive_load_blocks(lib, …)` returns the partition, so phase 8's
-  descriptors are a function of `PHASE08.lib`; the stamped GPT and the tape's
-  data therefore came from different builds.  With it, the two beliefs that had
-  to go first — the tape is our own build, not a recovered artifact, and CON80
-  does record phase membership — and what the FCMs can and cannot audit (4.8% of
-  tape blocks are in no FCM at all, GPCIPL among them).  **§8.38** the OI340700
-  object build: use our tools and know which are ours, the zero-length tombstone
-  as the overlay's missing "remove" verb, and the residue tracing to one root
-  cause.  Plus five new method failures in **§8.10**, of which the sharpest are
-  "do not log a hypothesis as a finding before you test it" and "elimination
-  across a set is valid only if the property is additive".
+- **`problems.md` §8.38**, four new subsections.  **The conditional the source
+  already contained**: `CPUSLS` and `CPTOSV` are fixed by four characters each,
+  all in column 1, because the `F`-card conditionals are comments in those
+  modules and the source already ships both branches — with the dump's eight
+  null pointers agreeing rather than merely permitting.  **Reading the payload
+  indexes out of the dump**: the three-step method for `CS2IX2`–`CS2IX7` and
+  `CS2IXP`, and the three traps in it (the `_FDA`/`_LIM` exclusion, `0000`
+  being a real null rather than `CSAS_PDT_DUMMY`, and the grouping comments
+  being unrecoverable).  **Two further shapes**: `CS2PX2` and `CS2PCT`, why
+  eleven "unresolved" pointers were never broken, and the 191-of-196 identical
+  reproduction that validates the whole method.  **`dass-ixgen.py`**: where the
+  tool lives and the three self-checks built into it.  The existing "residue is
+  one root cause" subsection was updated to say which eleven files are now
+  done, which four remain, and — explicitly — not to quote its "22 missing"
+  figure as though it accounted for the new work.
 
-- **`HANDOFF-FCMBOOT.md`**: the phase-8 open item rewritten around §8.37 with an
-  explicit "do not resume that line", Don's `#DLY` timing note flagged as the
-  thing to wait for, a new CON80 reference subsection (the deck hierarchy, the
-  three DD names and what they resolve to now, where the runtime sources really
-  are), and traps 33–35 — running builds in Don's repo, foreground `sleep`
-  killing a detached launch, and `halsc` supplying one global CARDTYPE where
-  `halsParms` has a per-file table.
-
-The OI340700 build's own state and recipe live in `HANDOFF-OI340700-BUILD.md`,
-written yesterday and not duplicated here.)
+- **`problems.md` §8.10**, two method failures.  `pgrep -f` matching the
+  shell that runs it, and the worse compounding error of reading the process
+  table instead of the log the job had already written; and displaying "the
+  first match" as though it were the match the analysis actually found.)

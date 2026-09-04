@@ -5001,6 +5001,27 @@ one-variable control that showed it took the same nine minutes as any of them.
 text — it is format-buffer content, not the live display. The real signature was
 elsewhere entirely, and one `diff` against a baseline would have said so.
 
+**A tool's own command line is part of what it searches.** `pgrep -f
+compilePASS` matched the shell running it, because that string was in the
+command being run — so a finished build was reported as still active, twice.
+Bracketing the pattern (`[c]ompilePASS`) did not help either, because the same
+invocation also carried `echo "NO compilePASS running"`, putting the literal
+string back on the command line. The compounding error was worse than the
+trick: a *process check* was used to decide what a *run* had done, when the log
+already said `Done.` on its last line and gave the full summary. Read the
+artifact the job produces, not the process table. Two claims went to the user
+from this — "the run will retry them in its retry pass" and "the run is hung" —
+and both were false; the run had finished normally, before ten of the eleven
+fixed files existed, so it had never seen them.
+
+**Do not display "the first match" as though it were "the match the analysis
+found".** A sweep flagged one bad payload reference in `CS2IFT`; the line then
+shown was picked by a separate `awk` that simply printed the file's first
+`CSAS_PDT_` line. The two had no connection. It named `CSAS_PDT_726001` at line
+89, which is declared in OI340700 and perfectly fine, when the real reference
+was `CSAS_PDT_10000091` at line 257. The displayed evidence must come from the
+same computation as the claim, or it is decoration.
+
 ### 8.11 Finishing the OI340700 `.dfg` recovery
 
 §8.9 recovered two files. All twelve differing decks are now accounted for, and
@@ -8341,6 +8362,26 @@ neither of the obvious explanations applies.  They need OI340700 reconstructions
 from their DASS structure listings, exactly as `CS2PDT` and `CSAPDT` got; all
 four are `#P` CSECTs present in the S2 dump, so the data exists.
 
+**Eleven of them now have those reconstructions** — `CPUSLS`, `CPTOSV`,
+`CS2IX2`–`CS2IX7`, `CS2IXP`, `CS2PX2` and `CS2PCT` — written to
+`PFS/OI340700/APPLSRC/`.  The four subsections that follow record how, because
+the method generalises and the traps in it are not obvious.  `CPUSLS` is
+confirmed compiling; the other ten were written after the last completed
+`compilePASS` run and a fresh one is in flight, so **do not quote the "22
+missing" figure above as though it accounted for them.**  What each
+reconstruction does rest on, independently of any build, is that every pointer
+in it resolves, no payload it names is undeclared in OI340700, and the
+generator's self-checks pass on every entry.
+
+`CS2PX3`, `CS2PXT`, `CSAPCT` and `CS2IFT` remain.  The first three are
+`CS2PX2`'s shape and should fall out of the same builder; `CS2IFT` is the
+outlier — three-member structures aimed at several different compools rather
+than a flat payload index — and the dump shows its
+`DECLARE CSAS_IFT_920313 CSAS_IFT_DIS_3-STRUCTURE` is *removed* in OI340700
+rather than nulled: `#PCS2IFT` runs `…920109, 920315, 920318…`, skipping it.
+That shifts every later offset in the compool, so it is a structural edit of a
+different class from anything done so far.
+
 #### Three blind spots in the verification method
 
 Demonstrated, and each one explains part of why these files were never
@@ -8372,6 +8413,145 @@ versions using the qualified name.  Tested in the scratch tree, `SPSPSP` then
 compiles; the qualified reference ends at column 75 and overruns the SRN field,
 so each needs a continuation card — a reconstruction decision, not a mechanical
 substitution.  **PFS is untouched.**
+
+#### The conditional the source already contained — `CPUSLS` and `CPTOSV`
+
+Both roots are fixed by changing four characters each, and the fix was sitting
+in the original source all along.  Every payload-pointer initialiser in these
+two modules is written as a conditional pair:
+
+    124  DECLARE CPUV_MAIN_BUS_VOLT NAME SCALAR
+    125 F MSP4 = ANY
+    126          INITIAL(NAME(CSAS_PDT_9011201.CSAS_PDTR_VAL));
+    127 F MSP4 = NONE
+    128 A        INITIAL(NULL);
+    129 F END
+
+The `MSP4`/`MSP9` cards are type `F`, and `F` maps to *comment* in these
+modules, so **the compiler never evaluates the conditional at all — column 1
+alone selects the branch.**  Put a `C` in column 1 of the payload initialiser
+and take the `A` off column 1 of the `INITIAL(NULL)` alternate, and the module
+compiles.  `CPUSLS` differs from its OI340600 original in 14 characters,
+`CPTOSV` in 4, every one of them in column 1; no line was added, removed,
+reordered or retyped.
+
+This is why the earlier note that "`CPUSLS`'s payload references are NOT
+conditional — they appear on unconditional cards (column 1 blank)" was true but
+led nowhere.  The cards *are* unconditional as the compiler sees them; what
+matters is that the source ships both branches and the release chooses between
+them in column 1.
+
+**The dump confirms it independently, and that is what makes it a finding
+rather than a guess.**  `#PCPUSLS` is 151 halfwords of `DATA` at `00A3EE`, and
+all eight pointers its six blocks touch are `0000` — `+0000`…`+0003` and
+`+000F`…`+0012`.  `#PCPTOSV+000C` and `+000D` are likewise `0000`.  That is
+what `INITIAL(NULL)` and `INITIAL(2#(NULL))` produce and *not* what the
+OI340600 initialisers produce, so the dump agrees with the edit rather than
+merely permitting it.  A pointer to a payload the release does not carry has
+nowhere to point.
+
+`CPUSLS` references four payloads — `CSAS_PDT_9011201`, `9010204`, `9073707`,
+`9075710` — all four present in OI340600's `CSAPDT.hal` and all four absent
+from OI340700's, so all six of its blocks flip, not just the two that named the
+payload originally asked about.
+
+**These two are the only files the recipe fits.**  A sweep of every
+non-tombstone source for active references to payloads no OI340700 table
+declares finds thirteen more, and in *all* of them the count of references
+having an `INITIAL(NULL)` alternate is zero.
+
+#### Reading the payload indexes out of the dump — `CS2IX2`–`CS2IX7`, `CS2IXP`
+
+These seven are compools holding nothing but an array of `NAME` pointers into
+the payload data tables, and the dump prints a `NAME`'s value as *the address
+it points at*.  So the whole initializer list can be read straight out of
+memory:
+
+1.  Walk `#P<stem>` in offset order.  Each entry is a `NAME` whose printed
+    value is an address —
+    `0048F0  #PCS2IX3+0000  CSAS_IXP_PDT_PTR  C49C  NAME`.
+2.  Look that address up.  Two lines cover it: the `STRUCTURE` line names the
+    payload, the `TERMINAL` line at that exact halfword names the field —
+    `00C49C-00C49E  CSAS_PDT_451145  STRUCTURE` and
+    `00C49C  CSAS_PDTA_STAT`.
+3.  Those two names *are* the initializer:
+    `NAME(CSAS_PDT_451145.CSAS_PDTA_STAT)`.
+
+Six of the seven fall from 196 entries to 136, `CS2IX7` from 207 to 140.  Every
+payload named across all seven is declared in OI340700; none is left over from
+OI340600.
+
+**Three traps, each hit before it was understood.**
+
+1.  **Payload structures are not all `CSAS_PDT_<digits>`.**  Fourteen carry a
+    trailing letter (`CSAS_PDT_450120C`) and one a suffix
+    (`CSAS_PDT_742622_A`).  What must be excluded is the *sub*-structures, and
+    those are exactly the `_FDA` and `_LIM` forms — 755 and 553 of them — so
+    match by excluding that pair of words, never by guessing a shape.  A
+    `^CSAS_PDT_\d+$` pattern silently drops real entries and reports them as
+    unresolved pointers.
+2.  **A pointer value of `0000` is a genuine null**, not a pointer to
+    `CSAS_PDT_DUMMY`, which has a real address and appears as an ordinary
+    target in the same lists.  `CS2IX7`'s five trailing nulls are written
+    `5#(NULL)`, the form OI340600 uses for its own five.
+3.  **The grouping comments are not recoverable.**  OI340600 interleaves the
+    list with `*** HALF HERTZ - CYCLE 3 ***` and rows of dashes.  The dump
+    records values, not comments, so where those divisions fall in OI340700 is
+    unknown; they are omitted and each generated header says so rather than
+    inventing them.
+
+#### Two further shapes — `CS2PX2` and `CS2PCT`
+
+Neither is the flat-index shape, and assuming otherwise is the reason a
+pointer-resolver reported them as partly unreadable.
+
+`CS2PX2` is 257 individually `DECLARE`d four-halfword `CSAS_PXT_<parmid>`
+entries, down from 440 — six bit-packed flags, a 24-bit `PARMID`, two `NAME`
+pointers — under one of two templates that the members themselves identify:
+`PARM_PTR`/`CONC_PTR` means `CSAS_PXT_ANA_EU`, `PARENT_PTR`/`DISC_PTR` means
+`CSAS_PXT_DISC`.
+
+`CS2PCT` is 19 declares down from 166, across *three* templates interleaved
+with padding arrays: 4 `CSAS_PCT_INFO_BLOCK`, 8 `CSAS_PCT_SOL_BLOCK`, 4
+`CSAS_PGT`, 3 pads.  The pads are OI340600's own declares reused verbatim after
+checking their sizes against the dump's `COPY` markers (5, 25, 10 — unchanged).
+
+**The "unresolved" pointers were never broken.**  All eleven of them — 7 in
+`CS2PX2`, 4 in `CS2PCT` — aim at an `_FDA` **sub-structure as a whole**, and
+the original source writes exactly that, with no field:
+`NAME(CSAS_PDT_612557_FDA)`.  A resolver that insists on `payload.field`
+reports as unreadable what is correct by design.  `CS2PX2`'s `DISC_PTR` and
+`CS2PCT`'s `DMST_POS` are the two members that do this.
+
+**191 of the 196 entries shared between the releases came out byte-identical to
+OI340600's hand-written text**, whitespace aside.  That is the strongest
+evidence the method is sound: the generator reproduced 191 declares it had
+never seen, from the dump alone.  The five that differ are real release changes
+and each is corroborated independently — four move `CSAS_PDTA_STAT` to
+`CSAS_PDTE_STAT` because those payloads change template in OI340700
+(`CSAS_PDT_ANA_ENTRY` → `CSAS_PDT_EU_ENTRY`, per the separately reconstructed
+`CSAPDT.hal`), and `CSAS_PXT_612515`'s `CONCURRENT` is `TRUE` in the dump.
+
+#### `PFS/dass-ixgen.py`, and the self-checks in it
+
+The generator is a tool, not a one-off, and lives beside the other `dass-*.py`
+at the PFS root.  It dispatches on the shape the dump shows rather than being
+told which file is which, re-derives every reconstruction from scratch in one
+run, and `--report` resolves without writing.  Each generated file's header
+names it and says not to hand edit — the headers claim the content was
+recovered from the dump, and without the generator that claim is not checkable.
+
+Three self-checks are built in, so a misparse cannot pass silently, and all
+three pass on every entry:
+
+1.  `PARMID` must decode to the entry's own number: `CSAS_PXT_460305` holds
+    `BIN'000001110000011000010001'`, which is 460305.
+2.  Each packed halfword is **reassembled from the dump's decoded fields and
+    compared with the raw hex the dump also prints**.  For
+    `CSAS_PCT_SOL_1_1_2001_11` that is five pad bits, `TYPE` 1, `POSITION`
+    `01000` and five flags, giving `0502` — the word shown.
+3.  A `CSAS_PGT` declare's name embeds the payload its `DMST_POS` points at,
+    and the two must agree.
 
 ## Methodology and caveats
 
