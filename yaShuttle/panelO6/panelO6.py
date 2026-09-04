@@ -35,7 +35,7 @@ follow the highlighted insets on SCOM printed page 2.6-25.
 
 Usage:
     python3 panelO6.py
-    python3 panelO6.py --geometry 1100x1200+80+20
+    python3 panelO6.py --geometry 1060x1200+80+20
 """
 
 import argparse
@@ -86,7 +86,7 @@ C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
 C_LOCK = "#c4c1b5"
 
-REF_W = 1150
+REF_W = 1090
 REF_H = 1260
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
@@ -552,7 +552,7 @@ class PanelO6:
         c3_sw_h = 136          # same 3-pos guard as O6 OUTPUT
         sw_h = 58              # F6 is POWER's 58x124 guard, rotated
         c3_x0 = ex1 + 24
-        c3_x1 = c3_x0 + 300
+        c3_x1 = c3_x0 + 236
         c3_y0 = my0
         # Heights follow _draw_c3 / _draw_f6: centre-anchored titles
         # consume a full linespace on each side of the glyph.
@@ -722,7 +722,7 @@ class PanelO6:
         self._hit("bfc_display", None, dx1, sw_top, dx2, sw_top + gh)
         self._hit("bfc_select", None, sx1, sw_top, sx2, sw_top + gh)
 
-        self._text(sx2 + 16, sw_top + gh / 2.0, "2+3", size=SETTING_SIZE)
+        self._vtext(sx2 + 14, sw_top + gh / 2.0, "2+3")
         y_bot = sw_top + gh + pad + ths
         self._text(disp_cx, y_bot, "OFF", size=SETTING_SIZE)
         self._text(sel_cx, y_bot, "3+1", size=SETTING_SIZE)
@@ -996,7 +996,7 @@ def main(argv=None):
         except tk.TclError as e:
             raise SystemExit("panelO6: bad --geometry %r: %s" % (geom, e))
     else:
-        root.geometry("1100x1200")
+        root.geometry("1060x1200")
     _dont_steal_focus(root)
     # Keep a reference so the panel is not collected; it owns no extra
     # threads, so Tk's mainloop is the whole process.
