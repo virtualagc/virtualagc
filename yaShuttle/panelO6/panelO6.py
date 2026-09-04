@@ -241,7 +241,7 @@ class PanelO6:
     def _tkfont(self, size, bold=True):
         # Tk: positive size is points.  Used only for metrics; _font() is
         # what create_text gets, and must stay in the same units.
-        pts = max(6, int(round(size * self.s)))
+        pts = max(1, int(round(size * self.s)))
         key = (pts, bold)
         font = self._font_cache.get(key)
         if font is None:
@@ -251,7 +251,7 @@ class PanelO6:
         return font
 
     def _font(self, size, bold=True):
-        pts = max(6, int(round(size * self.s)))
+        pts = max(1, int(round(size * self.s)))
         return ("Helvetica", pts, "bold" if bold else "normal")
 
     def _th(self, size):

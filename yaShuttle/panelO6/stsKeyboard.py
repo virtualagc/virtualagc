@@ -200,7 +200,7 @@ class STSKeyboard:
         return k, g, cells
 
     def _tkfont(self, pts, bold=True):
-        pts = max(6, int(pts))
+        pts = max(1, int(round(pts)))
         key = (pts, bold)
         font = self._font_cache.get(key)
         if font is None:
@@ -210,11 +210,11 @@ class STSKeyboard:
         return font
 
     def _pts_for(self, kind, k, lines=()):
-        other = max(6, int(round(OTHER_PTS_REF * k / float(KEY_REF))))
+        other = max(1, int(round(OTHER_PTS_REF * k / float(KEY_REF))))
         if kind == "hex":
-            return max(6, int(round(other * HEX_FONT_SCALE)))
+            return max(1, int(round(other * HEX_FONT_SCALE)))
         if lines == ("RESUME",):
-            return max(6, int(round(other * RESUME_FONT_SCALE)))
+            return max(1, int(round(other * RESUME_FONT_SCALE)))
         return other
 
     def redraw(self):
