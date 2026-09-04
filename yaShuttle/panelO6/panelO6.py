@@ -28,9 +28,14 @@ The OUTPUT switch itself is the third-row three-position toggle
 three-position toggle (RUN / STBY / HALT), lever-locked in RUN on the
 real hardware; this simulation does not require pulling a lock.
 
+To the right of O6 are the BFC CRT block from panel C3 (DISPLAY ON/OFF
+and SELECT 1+2 / 2+3 / 3+1) and the BFC DISENGAGE block from panel F6
+(a horizontal two-position toggle; RIGHT disengages the BFS).  Those
+follow the highlighted insets on SCOM printed page 2.6-25.
+
 Usage:
     python3 panelO6.py
-    python3 panelO6.py --geometry 800x1200+80+20
+    python3 panelO6.py --geometry 1100x1200+80+20
 """
 
 import argparse
@@ -47,12 +52,18 @@ POWER_POS = ("ON", "OFF")          # up, down
 OUTPUT_POS = ("BACKUP", "NORMAL", "TERMINATE")   # up, mid, down
 MODE_POS = ("RUN", "STBY", "HALT")               # up, mid, down
 IPL_SOURCE_POS = ("MMU 1", "OFF", "MMU 2")       # up, mid, down
+BFC_DISPLAY_POS = ("ON", "OFF")                 # up, down
+BFC_SELECT_POS = ("1+2", "2+3", "3+1")          # up, mid, down
+BFC_DISENGAGE_POS = ("LEFT", "RIGHT")           # left, right; unlabeled
 
 # Typical pre-flight: GPC 5 is the BFS computer, OUTPUT in BACKUP.
 DEFAULT_POWER = ["ON"] * N_GPC
 DEFAULT_OUTPUT = ["NORMAL", "NORMAL", "NORMAL", "NORMAL", "BACKUP"]
 DEFAULT_MODE = ["HALT"] * N_GPC
 DEFAULT_IPL_SOURCE = "OFF"
+DEFAULT_BFC_DISPLAY = "OFF"
+DEFAULT_BFC_SELECT = "1+2"
+DEFAULT_BFC_DISENGAGE = "LEFT"     # RIGHT disengages the BFS
 
 # Aircraft-panel greys.  Overhead panels are light gull gray with black
 # engraved legends, not the dark of a CRT bezel.
@@ -75,7 +86,7 @@ C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
 C_LOCK = "#c4c1b5"
 
-REF_W = 820
+REF_W = 1150
 REF_H = 1260
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
@@ -146,15 +157,18 @@ def _dont_steal_focus(root):
 class PanelO6:
     def __init__(self, root):
         self.root = root
-        root.title("Panel O6  —  GENERAL PURPOSE COMPUTER")
+        root.title("Panels O6, C3, F6  —  GPC / BFC")
         root.configure(bg=C_WINDOW)
-        root.minsize(480, 700)
+        root.minsize(640, 700)
 
         self.power = list(DEFAULT_POWER)
         self.output = list(DEFAULT_OUTPUT)
         self.ipl = [False] * N_GPC
         self.mode = list(DEFAULT_MODE)
         self.ipl_source = DEFAULT_IPL_SOURCE
+        self.bfc_display = DEFAULT_BFC_DISPLAY
+        self.bfc_select = DEFAULT_BFC_SELECT
+        self.bfc_disengage = DEFAULT_BFC_DISENGAGE
         self._held_ipl = None
 
         self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
@@ -200,6 +214,9 @@ class PanelO6:
                    "ON" if self.ipl[i] else "OFF",
                    self.output_tb(i), self.mode_tb(i)))
         log("  IPL SOURCE=%s" % self.ipl_source)
+        log("  BFC CRT DISPLAY=%s  SELECT=%s" %
+            (self.bfc_display, self.bfc_select))
+        log("  BFC DISENGAGE=%s" % self.bfc_disengage)
 
     def _announce(self, what, old, new):
         if old == new:
@@ -289,6 +306,18 @@ class PanelO6:
         return self.cv.create_rectangle(
             self.X(x1), self.Y(y1), self.X(x2), self.Y(y2), **kw)
 
+    def _rect_panel(self, x0, y0, x1, y1):
+        """A rectangular crew-panel body, same surface as O6."""
+        ow = max(2, int(2 * self.s))
+        self._poly([(x0 + 5, y0 + 6), (x1 + 5, y0 + 6),
+                    (x1 + 5, y1 + 6), (x0 + 5, y1 + 6)],
+                   fill="#1a1a1a", outline="", width=0)
+        self._rect(x0, y0, x1, y1, fill=C_PANEL, outline=C_INK, width=ow)
+        self._line(x0, y0, x1, y0, fill=C_PANEL_HI, width=ow)
+        self._line(x0, y0, x0, y1, fill=C_PANEL_HI, width=ow)
+        self._line(x0, y1, x1, y1, fill=C_PANEL_LO, width=ow)
+        self._line(x1, y0, x1, y1, fill=C_PANEL_LO, width=ow)
+
     def _poly(self, pts, **kw):
         flat = []
         for x, y in pts:
@@ -321,6 +350,32 @@ class PanelO6:
                            outline=outline, width=ow)
         self.cv.create_arc(self.X(x1), self.Y(bot - w), self.X(x2), self.Y(bot),
                            start=180, extent=180, style="arc",
+                           outline=outline, width=ow)
+
+    def _hbar(self, left, right, cy, height, fill, outline, width_px=1):
+        """Horizontal rounded-end bar."""
+        y1, y2 = cy - height / 2.0, cy + height / 2.0
+        if right < left:
+            left, right = right, left
+        w = right - left
+        h = height
+        ow = max(1, int(width_px * self.s))
+        if w <= h * 1.05:
+            self._oval(left, y1, right, y2, fill=fill, outline=outline, width=ow)
+            return
+        r = h / 2.0
+        self._rect(left + r, y1, right - r, y2, fill=fill, outline="", width=0)
+        self._oval(left, y1, left + h, y2, fill=fill, outline="", width=0)
+        self._oval(right - h, y1, right, y2, fill=fill, outline="", width=0)
+        self._line(left + r, y1, right - r, y1, fill=outline, width=ow)
+        self._line(left + r, y2, right - r, y2, fill=outline, width=ow)
+        self.cv.create_arc(self.X(left), self.Y(y1),
+                           self.X(left + h), self.Y(y2),
+                           start=90, extent=180, style="arc",
+                           outline=outline, width=ow)
+        self.cv.create_arc(self.X(right - h), self.Y(y1),
+                           self.X(right), self.Y(y2),
+                           start=270, extent=180, style="arc",
                            outline=outline, width=ow)
 
     def _barberpole(self, x1, y1, x2, y2):
@@ -490,6 +545,24 @@ class PanelO6:
         self._draw_mode_switches()
         self._draw_ipl_source(mx1, ex1, ey0, ey1)
 
+        # C3 / F6 sit to the right of the O6 L-shape (past the IPL SOURCE tab).
+        pad = 10
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        c3_sw_h = 136          # same 3-pos guard as O6 OUTPUT
+        sw_h = 58              # F6 is POWER's 58x124 guard, rotated
+        c3_x0 = ex1 + 24
+        c3_x1 = c3_x0 + 300
+        c3_y0 = my0
+        # Heights follow _draw_c3 / _draw_f6: centre-anchored titles
+        # consume a full linespace on each side of the glyph.
+        c3_y1 = c3_y0 + 5 * pad + 2 * th10 + 6 * ths + c3_sw_h
+        f6_x0, f6_x1 = c3_x0, c3_x1
+        f6_y0 = c3_y1 + 16
+        f6_y1 = f6_y0 + 4 * pad + 4 * th10 + sw_h
+        self._draw_c3(c3_x0, c3_y0, c3_x1, c3_y1)
+        self._draw_f6(f6_x0, f6_y0, f6_x1, f6_y1)
+
     def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
             self._text(cx, y, str(i + 1), size=12)
@@ -612,6 +685,66 @@ class PanelO6:
         self._text(cx, y2 + pad + ths, "MMU 2", size=SETTING_SIZE)
         self._vtext(x2 + 14, (y1 + y2) / 2.0, "OFF")
 
+    def _draw_c3(self, x0, y0, x1, y1):
+        """BFC CRT DISPLAY and SELECT, the highlighted inset on panel C3."""
+        self._rect_panel(x0, y0, x1, y1)
+        pad = 10
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        gw, gh = 58, 136
+        cx = (x0 + x1) / 2.0
+        y = y0 + pad + th10
+        self._text(cx, y, "BFC CRT", size=10)
+
+        disp_cx = x0 + 28 + gw / 2
+        sel_cx = disp_cx + gw + 50
+        y = y + th10 + pad + ths
+        self._text(disp_cx, y, "DISPLAY", size=SETTING_SIZE)
+        self._text(sel_cx, y, "SELECT", size=SETTING_SIZE)
+        y = y + ths + pad + ths
+        self._text(disp_cx, y, "ON", size=SETTING_SIZE)
+        self._text(sel_cx, y, "1+2", size=SETTING_SIZE)
+        sw_top = y + ths + pad
+        box_x0 = disp_cx - gw / 2 - 8
+        box_x1 = sel_cx + gw / 2 + 8
+        self._rect(box_x0, sw_top - 6, box_x1, sw_top + gh + 6,
+                   fill="", outline=C_GUARD_LO, width=max(1, int(self.s)))
+        mid_x = (disp_cx + sel_cx) / 2.0
+        self._line(mid_x, sw_top - 6, mid_x, sw_top + gh + 6,
+                   fill=C_GUARD_LO, width=max(1, int(self.s)))
+
+        dpos = BFC_DISPLAY_POS.index(self.bfc_display)
+        spos = BFC_SELECT_POS.index(self.bfc_select)
+        dx1, dx2 = disp_cx - gw / 2, disp_cx + gw / 2
+        sx1, sx2 = sel_cx - gw / 2, sel_cx + gw / 2
+        self._guarded_toggle(dx1, sw_top, dx2, sw_top + gh, dpos, npos=2)
+        self._guarded_toggle(sx1, sw_top, sx2, sw_top + gh, spos, npos=3)
+        self._hit("bfc_display", None, dx1, sw_top, dx2, sw_top + gh)
+        self._hit("bfc_select", None, sx1, sw_top, sx2, sw_top + gh)
+
+        self._text(sx2 + 16, sw_top + gh / 2.0, "2+3", size=SETTING_SIZE)
+        y_bot = sw_top + gh + pad + ths
+        self._text(disp_cx, y_bot, "OFF", size=SETTING_SIZE)
+        self._text(sel_cx, y_bot, "3+1", size=SETTING_SIZE)
+
+    def _draw_f6(self, x0, y0, x1, y1):
+        """BFC DISENGAGE, the highlighted inset on panel F6."""
+        self._rect_panel(x0, y0, x1, y1)
+        pad = 10
+        th10 = self._th(10)
+        cx = (x0 + x1) / 2.0
+        y = y0 + pad + th10
+        self._text(cx, y, "BFC", size=10)
+        y += th10 + pad + th10
+        self._text(cx, y, "DISENGAGE", size=10)
+        y += th10 + pad
+        gw, gh = 124, 58
+        sx1, sy1 = cx - gw / 2, y
+        sx2, sy2 = cx + gw / 2, y + gh
+        pos = BFC_DISENGAGE_POS.index(self.bfc_disengage)
+        self._guarded_toggle_h(sx1, sy1, sx2, sy2, pos, npos=2)
+        self._hit("bfc_disengage", None, sx1, sy1, sx2, sy2)
+
     # ---- control bodies -------------------------------------------------
 
     def _guarded_toggle(self, x1, y1, x2, y2, pos, npos):
@@ -622,6 +755,15 @@ class PanelO6:
         self._rect(x1 + m, y1 + m, x2 - m, y2 - m,
                    fill=C_SLOT, outline="#111", width=1)
         self._draw_paddle(x1 + m, y1 + m, x2 - m, y2 - m, pos, npos)
+
+    def _guarded_toggle_h(self, x1, y1, x2, y2, pos, npos):
+        """Horizontal switch guard with a paddle that travels left/right."""
+        self._rect(x1, y1, x2, y2, fill=C_GUARD, outline=C_GUARD_LO,
+                   width=max(2, int(1.5 * self.s)))
+        m = 7
+        self._rect(x1 + m, y1 + m, x2 - m, y2 - m,
+                   fill=C_SLOT, outline="#111", width=1)
+        self._draw_paddle_h(x1 + m, y1 + m, x2 - m, y2 - m, pos, npos)
 
     def _hex_toggle(self, cx, cy, rx, ry, pos, npos):
         """Lever-lock MODE switch, drawn as a pointy-top hexagon."""
@@ -668,6 +810,29 @@ class PanelO6:
         gy2 = bot - pw * 0.40
         if gy2 > gy1 + 4:
             self._line(gx, gy1, gx, gy2, fill=C_PADDLE_GROOVE,
+                       width=max(2, int(2 * self.s)))
+
+    def _draw_paddle_h(self, x1, y1, x2, y2, pos, npos):
+        """White toggle paddle sitting at one of npos slots in a horizontal well."""
+        well_w = x2 - x1
+        well_h = y2 - y1
+        ph = well_h * 0.46
+        pw = well_w * (0.50 if npos == 2 else 0.32)
+        if pw < ph * 1.35:
+            pw = ph * 1.35
+            if pw > well_w * 0.62:
+                pw = well_w * 0.62
+        gap = max(3.0, well_w * 0.04)
+        travel = max(0.0, well_w - pw - 2 * gap)
+        t = pos / float(npos - 1) if npos > 1 else 0.0
+        left = x1 + gap + t * travel
+        right = left + pw
+        cy = (y1 + y2) / 2.0
+        self._hbar(left, right, cy, ph, C_PADDLE, C_PADDLE_LO, width_px=1)
+        gx1 = left + ph * 0.40
+        gx2 = right - ph * 0.40
+        if gx2 > gx1 + 4:
+            self._line(gx1, cy, gx2, cy, fill=C_PADDLE_GROOVE,
                        width=max(2, int(2 * self.s)))
 
     def _talkback(self, x1, y1, x2, y2, state, legend_always=None):
@@ -750,6 +915,15 @@ class PanelO6:
         elif kind == "ipl":
             self._set_ipl(index, True)
             self._held_ipl = index
+        elif kind == "bfc_display":
+            z = self._zone(event.y, y1, y2, 2)
+            self._set_bfc_display(BFC_DISPLAY_POS[z])
+        elif kind == "bfc_select":
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_bfc_select(BFC_SELECT_POS[z])
+        elif kind == "bfc_disengage":
+            z = self._zone(event.x, x1, x2, 2)
+            self._set_bfc_disengage(BFC_DISENGAGE_POS[z])
 
     def _on_release(self, event):
         if self._held_ipl is not None:
@@ -787,10 +961,28 @@ class PanelO6:
         self._announce("IPL SOURCE", old, value)
         self.redraw()
 
+    def _set_bfc_display(self, value):
+        old = self.bfc_display
+        self.bfc_display = value
+        self._announce("BFC CRT DISPLAY", old, value)
+        self.redraw()
+
+    def _set_bfc_select(self, value):
+        old = self.bfc_select
+        self.bfc_select = value
+        self._announce("BFC CRT SELECT", old, value)
+        self.redraw()
+
+    def _set_bfc_disengage(self, value):
+        old = self.bfc_disengage
+        self.bfc_disengage = value
+        self._announce("BFC DISENGAGE", old, value)
+        self.redraw()
+
 
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        description="Space Shuttle panel O6 (GPC hardware controls)")
+        description="Space Shuttle panels O6, C3, F6 (GPC / BFC hardware controls)")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 780x980+80+40")
     args = ap.parse_args(argv)
@@ -804,7 +996,7 @@ def main(argv=None):
         except tk.TclError as e:
             raise SystemExit("panelO6: bad --geometry %r: %s" % (geom, e))
     else:
-        root.geometry("800x1200")
+        root.geometry("1100x1200")
     _dont_steal_focus(root)
     # Keep a reference so the panel is not collected; it owns no extra
     # threads, so Tk's mainloop is the whole process.
