@@ -182,7 +182,44 @@ DEFAULT_SDL = False
 # of the richer SDFs on dependent compiles has not been measured.  Adopt it
 # when the SDFs themselves are the subject, not as a freebie.
 
-def getCardtype(stem, original=False):
+# ---------------------------------------------------------------------------
+# PER-RELEASE OVERRIDES
+#
+# A file's conditional-compilation letters can differ between releases even when
+# its text does not, because what the letters SELECT differs.  CPUSLS and CPTOSV
+# carry a type-B card "INCLUDE TEMPLATE CS4_PDT"; the BD pair makes it a real
+# directive, which is right for OI340600, where CS4PDT exists and has to reach
+# the dependency graph (see getCardtypeMap's note).  OI340700 does not carry the
+# CS4 family at all, so under BD the file cannot compile in an OI340700 tree by
+# construction -- it asks for a template that is not in the release.
+#
+# Keyed by release, then by stem, and holding the SAME per-file prefix that
+# cardtypesBySourceFile holds; the conditional pairs are appended as usual.  An
+# absent release, or an absent stem within one, falls through to the base table,
+# so adding a release costs nothing until it needs an exception.
+#
+# NOTE that B->C is necessary for these two but NOT sufficient: CPUSLS also
+# references CSAS_PDT_9011201, which OI340600's CSAPDT declares and OI340700's
+# does not, so it still needs an OI340700 source of its own.  The override is
+# recorded because it is right, not because it finishes the job.
+cardtypesByRelease = {
+    "OI340700": {
+        "CPUSLS": "ACBCFCRM",
+        "CPTOSV": "ACBCFCRM",
+    },
+}
+
+
+def releaseCardtypes(release):
+    '''The per-file CARDTYPE table for one release, base table if unknown.'''
+    if release is None:
+        return cardtypesBySourceFile
+    merged = dict(cardtypesBySourceFile)
+    merged.update(cardtypesByRelease.get(release, {}))
+    return merged
+
+
+def getCardtype(stem, original=False, release=None):
     '''The CARDTYPE value for one source file, named by its stem.
 
     A leading underscore is stripped, so that a preprocessed _NAME.hal or a
@@ -193,10 +230,10 @@ def getCardtype(stem, original=False):
     if stem.startswith("stub"):         # _stubNAME.hal, from cycle seeding
         stem = stem[4:]
     pairs = CONDITIONAL_PAIRS_ORIGINAL if original else CONDITIONAL_PAIRS
-    return cardtypesBySourceFile.get(stem, cardtypesBySourceFile["default"]) \
-           + pairs
+    table = releaseCardtypes(release)
+    return table.get(stem, table["default"]) + pairs
 
-def getCardtypeMap(stem):
+def getCardtypeMap(stem, release=None):
     '''The same pairs as a column-1 substitution, so a caller can classify a
     card the way the compiler will rather than the way it looks.
 
@@ -216,7 +253,7 @@ def getCardtypeMap(stem):
     files after CV5SLCOM, which failed XI3 for want of its template.  The same
     guard also makes the first pair for a given type win, rather than the last.
     '''
-    cardtype = getCardtype(stem)
+    cardtype = getCardtype(stem, release=release)
     map = {}
     for i in range(0, len(cardtype) - 1, 2):
         if cardtype[i] in "EMSCD " or cardtype[i] in map:
@@ -224,7 +261,8 @@ def getCardtypeMap(stem):
         map[cardtype[i]] = cardtype[i + 1]
     return map
 
-def getParms(stem, extraParms="", options=None, original=False, sdl=None):
+def getParms(stem, extraParms="", options=None, original=False, sdl=None,
+             release=None):
     '''The full --parms string for one source file.
 
     stem        the source file's stem, e.g. "GKFHOR" for GKFHOR.hal.
@@ -248,7 +286,7 @@ def getParms(stem, extraParms="", options=None, original=False, sdl=None):
     if extraParms and not extraParms.endswith(","):
         extraParms += ","
     return extraParms + ",".join(opts) + ",CARDTYPE=" + \
-           getCardtype(stem, original=original)
+           getCardtype(stem, original=original, release=release)
 
 def stemOf(filename):
     '''The stem of a source filename, for callers that hold a path rather than

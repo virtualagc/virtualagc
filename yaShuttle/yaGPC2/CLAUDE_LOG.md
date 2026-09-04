@@ -298,3 +298,256 @@ preserved alongside them.
   assembly sources in SSSRC/, APPLSRC/, RUNASM/ and ZCONASM/ have NOT been
   assembled in this series.  A full build does both, and that is the next step
   before anything can be linked.
+
+### [2026-09-04] Target: problems.md
+- **THE FULL OI340700 BUILD SUCCEEDS, COMPILE AND ASSEMBLY.**  Run 9, the first
+  in this series without --no-assemble: 1218 compiled and 761 assembled, 0
+  aborted, 0 exit-code failures, 0 skipped, 0 uncompiled due to dependence.
+  All 761 assembly sources -- 272 SSSRC, 205 RUNASM, 284 ZCONASM -- assembled
+  on the first attempt against the new tombstone set.
+- THE COUNTS RECONCILE EXACTLY, which is the check worth doing rather than
+  trusting the totals: 1958 live sources, 1979 objects, and NO live source
+  without an object.  The 21-object excess is entirely _stub*.obj from the
+  cycle-breaking seeds, and every stub has its real object alongside it, so
+  none is a stale artefact of a now-tombstoned file -- which is what would
+  quietly corrupt a link.
+- Four "ERROR" hits in the log are the filenames VXEERROR.hal and VBFERROR.hal.
+  Both compiled successfully.  Grep for a word, get a word.
+- COMMITTED: PFS 70e65182 (122 files -- 17 reconstructions, 103 tombstones,
+  dass-ixgen.py, BUILD.md), virtualagc 5b5e52bc2 (the pending log queue).
+  Deliberately NOT committed to PFS: __pycache__/ and
+  OI340600/g9-all.fcmcmp.repro.json, since no repro.json is tracked there.
+- NEXT: linking.  The object stage is complete, so CON80 and lnk101 are what
+  stands between this and a memory image.
+
+### [2026-09-04] Target: problems.md
+- **WE CAN FORM RUN AND ZCON OURSELVES, and now have.**  They are not a special
+  artefact of Don's: each is simply a DIRECTORY OF .obj FILES (his also carry
+  .asmg.json and .stamp build metadata, which the linker does not need).  RUN
+  holds 205 objects and ZCON 284 -- exactly our RUNASM and ZCONASM source
+  counts, and the NAME SETS ARE IDENTICAL, 0 differences either way.  Built to
+  build/lib/runtime/{RUN,ZCON} in the scratch tree, mirroring his layout.
+- HOW OURS COMPARE, canonicalised with ASM101S/objcanon.py to remove the known
+  set-ordering noise:
+      ZCON   284 of 284 IDENTICAL
+      RUN     89 of 205 identical, 116 differ
+  Every one of the 116 reduces to two causes we already knew about and chose:
+  72 fill byte only, 22 END record only, 21 both, and 1 (IOINIT) whose
+  "unexplained" residue turned out to be fill as well -- Don ZERO-fills the
+  #LIOINIT block where we write c6c6, which the classifier missed because it
+  only knew to look for c9fb.  The fill difference is deliberate: c6c6 was
+  chosen for tape building, c9fb is what the dump shows.  NOTHING here suggests
+  our objects are wrong.
+- SO THE LINK STAGE IS NOT BLOCKED ON DON.  lnk101 remains his, legitimately --
+  we have no equivalent -- but its two runtime libraries are ours now, built
+  from our own assembler out of sources in the Virtual AGC tree.
+
+### [2026-09-04] Target: problems.md
+- **YES, OI340700 NEEDS ITS OWN CON80/, BUT ONLY 10 DECKS OF 194.**  The decks
+  name CSECTs, 1134 distinct ones across 1340 INSERT statements.  Taking each
+  tombstoned file's CSECT from OI340600's OWN OBJECT LIBRARY (an SD record,
+  not a guess from the filename -- that guess is what removed the MM_UTILITY
+  compools wrongly), the 106 tombstones remove 106 CSECTs, 28 of which are
+  INSERTed somewhere:
+      CS4PX    3   OFTMP     5   PHASE22  1   SM2DISP  3   SM4      5
+      SM4DISP  3   SM4DISPS  5   SM4IXPLB 7   SSW      1   TEXTGPH  1
+  The pattern is almost entirely SM4/CS4 -- #PCS4PX2, #PCS4IX2..7, #PCS4PDT,
+  #PCS4IPT, #PCP4GXT -- so OI340700 appears to drop that payload
+  configuration outright.  #PCVMS8C is the other recurring one, in OFTMP, SSW
+  and TEXTGPH.
+- NO NEW INSERTS ARE NEEDED FOR THE RECONSTRUCTIONS.  Every one keeps its
+  OI340600 CSECT name and 13 of 17 are already INSERTed; the four that are not
+  (CS2PCT, CS2IFT, CS2PAT, SSPEXEC) were not INSERTed in OI340600 either, so
+  nothing changed for them.
+- AN OPEN QUESTION THE CHECK TURNED UP, and it is a link-stage one.  Our build
+  gives CSAMMU, CVIMMUTI and CVQMMUTI the CSECTs #PCSAMMU, #PCVIMMU and
+  #PCVQMMU -- named after their own compools -- and NONE of those three is
+  INSERTed anywhere.  The dumps show why: #PCVNMMU is a single CSECT SLOT
+  occupied by CSA_MM_UTILITY, CVN_MM_UTILITY or CVQ_MM_UTILITY depending on
+  configuration, and #PCDIMMU likewise by CDI_MM_UTILITY or CVI_MM_UTILITY,
+  with "INCLUDE REMOTE" marking the owner.  So the release puts several
+  compools into one CSECT, and our objects do not name that CSECT.  How that
+  slot assignment happens -- a compiler option, a CON80 mechanism, or
+  something else -- is NOT established, and it has to be before those three
+  can link.  It does not affect the compile, which is why run 8 and run 9 were
+  clean.
+
+### [2026-09-04] Target: problems.md
+- **THE LINK WORKS, END TO END, WITH ONLY lnk101.**  con80build is not needed:
+  lnk101 takes --concard <deck dir> and --concard-root itself.  Recipe, from
+  the build tree:
+      lnk101 objects/*.obj (minus _stub*) -L lib/runtime/RUN -L lib/runtime/ZCON
+             --concard CON80 --concard-root SM2 --allow-undefined
+             -o link/SM2.fcm --lib link/SM2.lib --json-symbols link/SM2-symbols.json
+  Result: 2113 modules, 966288 halfwords, 92 undefined.  TWO THINGS THAT MUST
+  BE RIGHT: the _stub*.obj cycle seeds MUST be excluded (they duplicate every
+  symbol of the real unit), and --allow-undefined is required because THE REAL
+  IMAGE HAS UNRESOLVED REFERENCES TOO -- FIOCWWRP, FIODD3PC and #CPUSSLS are
+  referenced by objects and absent from the S2 image itself.
+- ONLY ONE CON80 DECK NEEDED CHANGING FOR SM2.  SM2 reaches 15 decks and just
+  SM2DISP is among the 10 with dead INSERTs.  Its three, #PCS2100 #PCS2130
+  #PCS2140, are absent from the real S2 image -- so the image itself confirms
+  the tombstones behind them.  PFS/OI340700/CON80/SM2DISP holds the edit.
+- **I COMPARED AGAINST THE WRONG GROUND TRUTH FIRST, and it inverted the
+  result.**  latest.unlinkS2.results/signature.json looked authoritative -- 1164
+  CSECTs, per-CSECT halfwords -- and I used it without checking it against the
+  DASS dump.  IT DISAGREES WITH DASS_S2 ON 358 OF 1160 CSECT SIZES, and where
+  they disagree the dump matches OUR build: #CAIDDEU signature 40, dump 61,
+  ours 61; #CARDCSB signature 391, dump 556, ours 556.  On that reference I had
+  concluded "712 real content differences" and was investigating our compiler
+  for emitting oversized code.  Against the RIGHT reference -- the DASS_S2 dump
+  and mafgen/S2.fcm -- 1141 of 1223 CSECT sizes MATCH and only 82 differ.
+  Check a new oracle against a known one before trusting it.
+- WHERE THE CONTENT COMPARISON STANDS, same-size CSECTs against mafgen/S2.fcm:
+      byte-identical                    157
+      differ only at relocation sites    353
+      differ only in fill                65
+      relocation + fill                  69
+      other                             497
+  644 of 1141 are fully accounted for by placement and fill.  Our single-shot
+  SM2 link lays memory out differently from the real phased build (966288
+  halfwords against 330394), so every address constant differs by construction;
+  that is why relocation dominates.  The 497 are not yet characterised and must
+  not be called defects until the layout matches.
+- SO THE PTV_OSVS vs SMN_CLN QUESTION IS STILL OPEN.  It needs a layout-matched
+  link -- phases in OFTMP order with --map-lib -- before $0SSPEXE's 189
+  halfwords can be compared meaningfully.
+
+### [2026-09-04] Target: problems.md
+- **compilePASS WAS COMPILING NOSDL, AND THAT IS WRONG FOR THIS COMPARISON.**
+  monitor13.parms records the options actually used.  The reference build that
+  matches the dumps says
+      SDL,SREF,LIST,LISTING2,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE=...
+  ours said
+      SREF,SRN,TEMPLATE,NOLFXI,REGOPT,LITSTRINGS=3000,CARDTYPE=...
+  LIST and LISTING2 are report-only, so SDL was the one substantive difference.
+  Without it the compiler emits, for EVERY PROGRAM, a START CSECT, an
+  "LHI R0,<stack>" prologue and linkage-editor STACK cards that the flight
+  images do not have -- mechanism 1 in the comparison database, "makes 27 of 29
+  PROGRAM CSECTs byte-identical".  It explains the 6696 "Symbol 'START' defined
+  in both" warnings my link emitted and $0SSPEXE coming out 191 halfwords
+  against the real 189.  halsParms has always had DEFAULT_SDL=False and an
+  sdl= parameter that NOTHING passed; compileLinkCompare compiles with SDL by
+  default, compilePASS never did.  Added --sdl to compilePASS.
+- **A BUG THAT MADE --extra-parms SILENTLY INEFFECTIVE.**  compilePASS calls
+  getParms TWICE: once for dependency ordering, which passed extraParms, and
+  once to build the PARM field actually used for the compilation, which did
+  NOT.  So --extra-parms=SDL appeared to work and changed nothing.  The
+  symptom is invisible unless you read monitor13.parms in the results
+  directory, which is the file that settles what the compiler was really told.
+  Both call sites now pass extraParms and sdl.
+- --concard IS NOT THE WAY TO GET THE LAYOUT.  The established method is
+  per-module: link ONE object with --external-syms=mafgen/augmented-XXX.json,
+  which places it at the address the real image has, then fcmcmp against
+  mafgen/XXX.fcm.  That is what compileLinkCompare and dass-run.py do, and it
+  makes the whole-image layout problem disappear.  My whole-image --concard
+  link is why relocation dominated the comparison.
+- WHAT THE COMPARISON DATABASE SAYS ABOUT MY 497 "content differences":
+  ALL 497 are in it, and 446 have verdict ok -- our own tools already
+  reproduced them byte-for-byte against this same DASS S2 dump from OI340600
+  sources.  So they were never tool defects.  The other 51 were never compared
+  (47 'other' origin, 2 library, 2 hal).  ZERO of the 497 carry an attribution
+  to any known mechanism, because a matching section has nothing to attribute.
+- THE DATABASE ALSO HOLDS THE CATALOGUE OF KNOWN CAUSES, eleven of them, with
+  status: program-prologue-sdl, pde-stack-address-fill, zcon-negative-
+  displacement and post-build-patched-locations are 'fixed';
+  source-version-oi3406-vs-oi3407 and reconfiguration-data-differs are
+  'understood'.  Read mechanism before investigating a difference.
+
+### [2026-09-04] Target: problems.md
+- **THE --fill QUESTION IS ANSWERED, AND IT IS PER-TOOLCHAIN, NOT PER-CSECT.**
+  Measured from the dumps themselves, with no build involved.  Every DASS
+  configuration contains BOTH values -- S2 has 234 C6C6 and 37 C9FB at
+  alignment gaps, and the same split appears in all eight -- so neither is "the"
+  fill.  But of S2's 124 CSECTs that have alignment gaps, EVERY ONE USES A
+  SINGLE VALUE THROUGHOUT; not one mixes.  Joining them to the comparison
+  database's csect.origin:
+      hal    origin -> C6C6   94 CSECTs, all of them
+      other  origin -> C9FB   29 CSECTs   (plus one 0000)
+  So C6C6 is the COMPILER's fill and C9FB is the ASSEMBLER's.
+- WE HAD IT WRONG FOR ASSEMBLY.  compilePASS passed --fill=C6C6 to ASM101S.
+  HALSFC takes no --fill option at all -- it emits C6C6 inherently -- so the
+  compiler's value had been copied to the assembler, where the original build
+  used C9FB.  Corroborated independently: 93 of Don's RUN objects, which are
+  assembly and pre-link, hold C9FB in exactly the halfwords ours held C6C6.
+  Changed assemblyFill to C9FB, with the measurement recorded beside it.
+- CONSEQUENCE FOR run 12: it loaded the old value at start, so its 761
+  assembly objects are still C6C6 and will need re-assembling before any DASS
+  comparison of an assembly CSECT means anything.  Its HAL objects, which is
+  what run 12 was for, are unaffected.
+- SDL IS NOT A BUG FIX, IT IS A TARGET SELECTION.  A flight build does NOT use
+  SDL; NOSDL is correct for compilePASS's normal purpose and remains the
+  default.  --sdl is opt-in and exists only because the DASS images we compare
+  against are SDL builds.  The same split applies to fill: a DASS-matching run
+  wants --sdl and C9FB assemblies together.  The only genuine BUG in this area
+  was --extra-parms being dropped at the compile call site.
+
+### [2026-09-04] Target: problems.md
+- **PTV_OSVS vs SMN_CLN IS SETTLED BY THE BINARY: KEEP PTV_OSVS.**  With SDL
+  compilation, C9FB assemblies and --external-syms placement, $0SSPEXE comes
+  out 189 halfwords -- the dump's own figure -- and differs from the real S2
+  image in EXACTLY SEVEN.  The relocations at those seven sites are #ZPDSSEQ,
+  #ZPDLIUS, #ZPMGGNC, #ZPMRSLR, #ZPMWSLW, #ZPMTSLG and #ZPTVOSV: precisely the
+  seven-module CHANGE list in SM2MSPS.  The real image holds the SAME address
+  (3A98) at all seven; ours holds seven distinct ones, because the link was
+  given --external-syms without --concard and so never applied CHANGE.  The
+  source is therefore correct as it stands -- SSPEXEC keeps CALL PTV_OSVS and
+  PTVOSV.hal stays untombstoned.  Editing the source to call SMN_CLN would have
+  produced a $0SSPEXE differing from DASS in a DIFFERENT seven places.
+- WHAT MADE THE COMPARISON POSSIBLE, all three needed together:
+      --sdl                          $0SSPEXE 191 -> 189 halfwords
+      assemblyFill C9FB              assembly CSECTs stop differing on fill
+      --external-syms augmented-S2   1243 of 1243 sections at the REAL address
+  Whole-image result: 862 of 1207 same-size sections BYTE-IDENTICAL, up from
+  157 before these three.  The remaining differences are dominated by CHANGE
+  sites, which --concard would supply and --external-syms does not.
+- A QUALIFICATION ON THE FILL RULE.  "One fill per CSECT, C6C6 for HAL and
+  C9FB for assembly" was measured over ALIGNMENT GAPS and holds there (2012 of
+  2012 HAL gaps are C6C6).  It does NOT hold inside a section: the real
+  #DSSPEXE, a HAL data section, has C6C6 at +5 and C9FB at +A and +B.  Literal
+  pools and gaps are filled differently.
+- The theoretical 0x20000 address cutoff does not work in practice, as the user
+  said: measured over 2345 gaps in all eight configurations, origin predicts
+  the fill 98.6% and an address split at 0x20000 only 85.8%, with plain
+  counterexamples on both sides (DAIESIP C6C6 at 0008BD, $0DCICYC C9FB at
+  04233D).
+
+### [2026-09-04] Target: problems.md
+- **THE LINK IS DONE PROPERLY NOW: 976 of 1260 sections MATCH the DASS S2
+  image**, against 157 when the comparison started.  The recipe is
+  PFS/dass-link.sh, which carries its own reasoning; `dass-link.sh <tree> S2`
+  reproduces 976 OK / 284 FAIL / 40 SKIP.
+- FIVE THINGS HAD TO BE RIGHT, and each was found by measurement rather than
+  from documentation:
+  1. **SDL** on the HAL/S compile.  Worth every PROGRAM CSECT.  $0SSPEXE 191 ->
+     189 halfwords, matching the dump exactly.
+  2. **--fill=C9FB** on the assembly.  C6C6 is the COMPILER's fill; passing it
+     to the assembler conflated the two.
+  3. **--external-syms AND --concard together.**  external-syms places 1243 of
+     1243 sections at the real address, which NO deck layout reproduces --
+     con80build's own scores 0 of 327.  concard is still needed for the deck's
+     CHANGE cards.  Neither alone is enough: 862 identical with external-syms
+     only, 834 with concard only over it, 976 with both plus the rest.
+  4. **The object list must be the configuration's own.**  Feeding all 1960
+     objects left 1545 sections beyond the end of the real image; scoping to
+     modules with a CSECT in augmented-S2.json took failures 1752 -> 290.
+  5. **STACK cards removed from this release's decks.**  Under SDL a CON80
+     STACK card is the ONLY trigger for generating an @-stack, and a generated
+     stack is placed by deck layout rather than at its real address -- ALL 28
+     misplaced sections were stacks and nothing else.  Removing the cards lets
+     external-syms resolve the PDE's stack-address halfword instead, and 20 PDE
+     sections come right.  The @-stacks are then absent from our image; they
+     are pure fill in the dumps, so only coverage is lost.
+- AND USE fcmcmp, NOT A HAND-ROLLED COMPARATOR.  It annotates each differing
+  halfword with the RLD that owns it, honours an exceptions file for post-build
+  patches and I-LOADs (exceptions-S2.txt, 1265 lines, worth 6 sections), and
+  knows about no-reference-data cases.  My own comparator had none of that and
+  its "content difference" counts were misleading throughout.
+- THE CEILING IS A SOURCE-VERSION LIMIT, NOT A LINK ONE.  Mechanism 10 in the
+  comparison database measured it over SSW: files at the SAME revision as the
+  OI-34.07 build never differ, and 5.2% of revision bumps are visible.  Our 284
+  residue is dominated by size mismatches -- #CPGGPCF is 6504 halfwords in the
+  image and 10057 in ours -- which are OI340700 source differences we have not
+  reconstructed, not link defects.
+- KEY SECTIONS ALL PASS: $0SSPEXE, #DSSPEXE, #CSMNCLN, #ZSMNCLN, #EASCTIM,
+  #EPGDATA.  53 of 70 PDE sections match.

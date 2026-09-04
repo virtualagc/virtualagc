@@ -112,6 +112,9 @@ The only OPTIONS available are:
     --no-csects     Compile every HAL/S file found, without regard to whether
                     it is part of PASS.  This was the behaviour before the
                     check existed.
+    --release=R     Build release R (e.g. OI340700), which selects any
+                    per-file CARDTYPE exceptions that release needs.  Omitted,
+                    the base table is used -- that is OI340600.
     --no-assemble   Compile the HAL/S and display decks but do not assemble
                     the AP-101S sources in SSSRC/, APPLSRC/, RUNASM/ and
                     ZCONASM/.  (A full build does both.)
@@ -201,6 +204,13 @@ csectsDir = ".." + os.sep + "mafgen"
 providerDeps = True
 seedCycles = True
 haltOnError = False
+# Which release is being built.  A file's conditional-compilation letters can
+# differ between releases even when its text does not, because what the letters
+# SELECT differs -- CPUSLS and CPTOSV carry a type-B "INCLUDE TEMPLATE CS4_PDT"
+# that must be a directive for OI340600 and must not be for OI340700, which has
+# no CS4 family.  halsParms.cardtypesByRelease holds those exceptions; None
+# means the base table, which is OI340600's.
+release = None
 # How many times to sweep over the units that produced no object.  Most
 # failures are ordering accidents that clear on a second look; the sweep stops
 # early as soon as one pass gains nothing.
@@ -210,6 +220,7 @@ retryPasses = 4
 assembleToo = True
 unrecognizedFailures = []
 extraParms = ""
+sdl = None
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg)
@@ -232,6 +243,14 @@ for parm in sys.argv[1:]:
         # rather than merely opening it, so a corpus becomes a test of PASS4
         # and SDFPKG as well as of the compiler.
         extraParms = parm[14:]
+    elif parm == "--sdl":
+        # Compile as the Software Development Lab did.  The DASS memory dumps
+        # we compare against are SDL builds, and NOSDL -- the default -- emits
+        # a START CSECT and an "LHI R0,<stack>" prologue for every PROGRAM that
+        # those images do not have.  See the note beside DEFAULT_SDL.
+        sdl = True
+    elif parm == "--no-sdl":
+        sdl = False
     elif parm.startswith("--sdfi="):
         sdfi = parm[7:]
     elif parm == "--no-sdfi":
@@ -248,6 +267,8 @@ for parm in sys.argv[1:]:
         haltOnError = True
     elif parm == "--no-assemble":
         assembleToo = False
+    elif parm.startswith("--release="):
+        release = parm[10:]
     elif parm.startswith("--retries="):
         retryPasses = int(parm[10:])
     elif parm == "--dfg":
@@ -401,7 +422,8 @@ from halsParms import getCardtype, getCardtypeMap, cardtypesBySourceFile
 import halsParms
 
 def getParms(template):
-    return halsParms.getParms(template["stem"], extraParms)
+    return halsParms.getParms(template["stem"], extraParms, sdl=sdl,
+                              release=release)
 
 # SPACELIB, the space-management system, is linked into every pass and can
 # abend with any of BI002, BI003, BI004 or BI010 -- respectively a bug in the
@@ -565,7 +587,14 @@ def macroLibraryFor(path):
 # object built with C9FB will appear to agree with a dump for reasons that have
 # nothing to do with the code being right.  If these objects are ever built for
 # comparison against dumps rather than for a tape, this is the knob to change.
-assemblyFill = "C6C6"
+# MEASURED, not chosen.  In the DASS dumps every CSECT with an alignment gap
+# uses ONE fill value throughout, and which value it is tracks the toolchain
+# rather than the module: across S2's 124 such CSECTs, all 94 of HAL origin are
+# C6C6 and all 29 assembly ones are C9FB.  C6C6 is the COMPILER's fill -- HALSFC
+# takes no --fill option and emits it inherently -- so passing it to the
+# assembler as well was conflating the two.  Don's own RUN objects, built with
+# his assembler, are C9FB in exactly the halfwords ours had C6C6.
+assemblyFill = "C9FB"
 
 # An abort throws away however many hours the run had already spent, so say how
 # to pick it up again rather than leaving --skip-to to be found in --help.
@@ -696,9 +725,11 @@ def compile(template, fatal = True):
     # `options` replaces DEFAULT_OPTIONS outright, which is the supported way
     # to drop LIST and LISTING2.  (An earlier in-progress edit called
     # parms.remove() on the result, which raises -- str has no .remove.)
-    parms = halsParms.getParms(template["stem"],
+    parms = halsParms.getParms(template["stem"], extraParms,
                                options = [o for o in halsParms.DEFAULT_OPTIONS
-                                          if o not in ("LIST", "LISTING2")])
+                                          if o not in ("LIST", "LISTING2")],
+                               sdl = sdl,
+                               release = release)
     fields = filename.split("/")
     if len(fields) == 2:
         subfolder = fields[0]
@@ -906,7 +937,7 @@ for filename in templateFiles:
     # that the substitution is applied once and not iterated: a pair maps a
     # card type to a *behaviour*, so the result is not itself a type to
     # translate again.
-    cardtypeMap = getCardtypeMap(Path(filename).stem)
+    cardtypeMap = getCardtypeMap(Path(filename).stem, release=release)
     lines = []
     for line in f.readlines():
         line = cardtypeMap.get(line[:1], line[:1]) + line[1:]
