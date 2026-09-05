@@ -268,6 +268,23 @@ class sdf:
             # EQUATEd structures, whose ASIP is a Variable Reference Cell, and
             # reading one of those as a cell chain produces long lists of
             # nonsense copies.
+            flags = getattr(sym.symbolDataCell, "flagBits", 0)
+            # A SIMPLE NAME variable -- flag bit 5, neither subscripted nor a
+            # structure terminal -- has its ASIP pointing straight at one
+            # Variable Reference Cell, with no cell chain and no operators
+            # (ICD Sec 2.2.2.2.4.2, field 0c).  Without this only structure
+            # terminals were reported, which is why an audit against the dumps
+            # found far fewer NAME initializations than the listing shows.
+            if flags & (1 << (31 - 5)):
+                if self._plausiblePointer(head):
+                    target = self._variableReference(head)
+                    if target:
+                        self.nameTerminalInitialization[symbno] = [
+                            (1, target, 0, ())]
+                        self.vprint(f"\tSymbol {symbno}: "
+                                    f"{sdf.fullSymbolASCII(sym)}")
+                        self.vprint(f"\t\t{target}")
+                continue
             if getattr(sym.symbolDataCell, "symbolType", None) != 0x10:
                 continue
             tmpl = getattr(sym.symbolDataCell, "symbolNumberOfTemplate", 0)
