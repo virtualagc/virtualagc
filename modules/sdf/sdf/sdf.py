@@ -318,7 +318,12 @@ class sdf:
             # or two words, the first halfword giving the type (ICD Figures
             # 2-52 to 2-55).  X'03', End of Initialization, is the last
             # operator in every cell and may carry an extension pointer.
+            # Field 5 is FULLWORD ALIGNED (ICD Figure 2-51), so an odd number
+            # of 2-byte symbol indexes in field 4 is followed by two bytes of
+            # padding.  Both structures that first exercised this decoder had
+            # an even count, which hid the rounding.
             op = 8 + 2 * nIndexes
+            op = (op + 3) & ~3
             loops = []
             while op + 4 <= nbytes:
                 self.offsetForGet = head
@@ -371,7 +376,9 @@ class sdf:
         save = self.offsetForGet
         try:
             self.offsetForGet = vrc
-            count = self.getHalfword(2)
+            # Figure 2-76 field 2 is a FLAG pane plus the count of symbol
+            # indexes, so the count is not the whole halfword.
+            count = self.getHalfword(2) & 0x0FFF
             if count < 1 or count > 16:
                 return None
             names = []
