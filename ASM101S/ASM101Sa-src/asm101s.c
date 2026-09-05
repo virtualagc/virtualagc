@@ -1246,7 +1246,20 @@ readSourceFile (const char *fromWhere, Val *svLocals, Val *sequence, int copy,
             val_dset_str (properties, "rawOperation", operation);
             val_dset_str (properties, "rawOperand",
                           operand == NULL ? "" : operand);
-            name = svReplace (properties, name, svLocals);
+            /* A SUBSTITUTED NAME FIELD MUST BE STRIPPED.  On the card the
+               name field is delimited by whitespace and so can never carry
+               blanks; a name built from a symbolic variable can, and
+               MLIB80/PCGEN.asm does it deliberately --
+               `&SYM SETC '&SYSLIST(3,1)'.'  '' pads the name to a fixed width
+               before using it as the label of an EQU.
+
+               WITHOUT THIS THE SYMBOL IS DEFINED UNDER A KEY NOTHING CAN
+               MATCH.  FIOADCNS put 'FIOCWWRP  ' into symtab while its own
+               `ENTRY FIOCWWRT,FIOCWWRP' asked for 'FIOCWWRP', so the lookup in
+               objectwriter.c missed and the LD record was dropped -- silently,
+               because an entry that is not in symtab is skipped without
+               comment. */
+            name = py_strip (svReplace (properties, name, svLocals));
             operation = svReplace (properties, operation, svLocals);
             operand = svReplace (properties, operand == NULL ? "" : operand,
                                  svLocals);
