@@ -260,7 +260,22 @@ class sdf:
             # Initialization list, so read no further unless this symbol is one
             # (symbol type X'10'), and never let a misread pointer abort the
             # whole report.
+            # An ASIP is overloaded, so read one as a Name Terminal
+            # Initialization list ONLY for a structure whose template is
+            # flagged as having NAME terminals -- flag bit 27, "Misc. Name
+            # Flag ... the symbol is the template of a structure with NAME
+            # terminals".  symbolType X'10' alone is far too loose: it admits
+            # EQUATEd structures, whose ASIP is a Variable Reference Cell, and
+            # reading one of those as a cell chain produces long lists of
+            # nonsense copies.
             if getattr(sym.symbolDataCell, "symbolType", None) != 0x10:
+                continue
+            tmpl = getattr(sym.symbolDataCell, "symbolNumberOfTemplate", 0)
+            if not (1 <= tmpl <= len(self.symbolIndexTable)):
+                continue
+            tflags = getattr(self.symbolIndexTable[tmpl - 1].symbolDataCell,
+                             "flagBits", 0)
+            if not (tflags & (1 << (31 - 27))):
                 continue
             if not self._plausiblePointer(head):
                 continue
@@ -269,12 +284,23 @@ class sdf:
                 continue
             self.nameTerminalInitialization[symbno] = entries
             self.vprint(f"\tSymbol {symbno}: {sdf.fullSymbolASCII(sym)}")
-            for copy, target, raw in entries:
-                if target is not None:
-                    self.vprint(f"\t\tcopy {copy}: {target}")
+            for copy, target, raw, loops in entries:
+                if target is None:
+                    if copy is None:
+                        self.vprint(f"\t\t(unrecognised operator "
+                                    f"0x{raw:04X})")
+                    else:
+                        self.vprint(f"\t\tcopy {copy}: (target not resolved)")
+                    continue
+                if loops:
+                    # An Initial Pointer Value inside Loop Start operators
+                    # applies to copies n, n+y, n+2y, ... n+(x-1)y for each
+                    # enclosing loop's repetition x and increment y.
+                    spec = ", ".join("x%d step %d" % (r, i)
+                                     for _, r, i in loops)
+                    self.vprint(f"\t\tcopy {copy} ({spec}): {target}")
                 else:
-                    self.vprint(f"\t\tcopy {copy}: (undecoded operator "
-                                f"0x{raw:04X})")
+                    self.vprint(f"\t\tcopy {copy}: {target}")
 
     # Walk one cell chain and return [(copyNumber, "A.B.C" or None, rawType)].
     def _nameTerminalCells(self, head):
@@ -288,19 +314,51 @@ class sdf:
             nxt = self.getPointer(4)
             if nbytes < 8 or nbytes > 4 * self.pageSize:
                 break
+            # Field 5, the Initial List Words: fixed-length operators of one
+            # or two words, the first halfword giving the type (ICD Figures
+            # 2-52 to 2-55).  X'03', End of Initialization, is the last
+            # operator in every cell and may carry an extension pointer.
             op = 8 + 2 * nIndexes
-            while op + 8 <= nbytes:
+            loops = []
+            while op + 4 <= nbytes:
                 self.offsetForGet = head
                 opType = self.getHalfword(op)
-                if opType != 0:          # not an Initial Pointer Value Operator
-                    out.append((None, None, opType))
+                if opType == 0:                     # Initial Pointer Value
+                    copy = self.getHalfword(op + 2)
+                    f5c = self.getPointer(op + 4)
+                    # 5C is four bytes: a flag, then either a Symbol Index or a
+                    # pointer to a Variable Reference Cell.  With the flag on
+                    # the low 16 bits ARE the index, and the symbol is simple --
+                    # neither subscripted nor part of a structure.
+                    if f5c & 0x80000000:
+                        idx = f5c & 0xFFFF
+                        target = (sdf.fullSymbolASCII(
+                                      self.symbolIndexTable[idx - 1])
+                                  if 1 <= idx <= len(self.symbolIndexTable)
+                                  else "?%d" % idx)
+                    else:
+                        target = (self._variableReference(f5c)
+                                  if self._plausiblePointer(f5c) else None)
+                    out.append((copy, target, opType, tuple(loops)))
+                    op += 8
+                elif opType == 1:                   # Initialization Loop Start
+                    loops.append((self.getHalfword(op + 2),      # nest level
+                                  self.getHalfword(op + 4),      # repetition
+                                  self.getHalfword(op + 6)))     # increment
+                    op += 8
+                elif opType == 2:                   # Initialization Loop End
+                    if loops:
+                        loops.pop()
+                    op += 4
+                elif opType == 3:                   # End of Initialization
+                    if self.getHalfword(op + 2):    # 5K extension flag
+                        nxt = self.getPointer(op + 4)
+                    else:
+                        nxt = 0
                     break
-                copy = self.getHalfword(op + 2)
-                vrc = self.getPointer(op + 4)
-                target = (self._variableReference(vrc)
-                          if self._plausiblePointer(vrc) else None)
-                out.append((copy, target, opType))
-                op += 8
+                else:
+                    out.append((None, None, opType, ()))
+                    break
             head = nxt
         return out
 
