@@ -1097,7 +1097,7 @@ class sdf:
         drc.hour, drc.minute, drc.second = \
             self.centisecondsToHMS(drc.timeOfFileCreation)
         self.vprint(f"\t\t{'%02d' % drc.hour}:{'%02d' % drc.minute}:" + \
-                    "{'%02d' % drc.second}")
+                    f"{'%02d' % drc.second}")
         drc.numberOfLastDirectoryPhysicalRecord = self.getHalfword(
             12, "5\tNumber of last directory physical record")
         drc.numberOfExternalBlocks = self.getHalfword(
