@@ -229,6 +229,118 @@ class sdf:
             vmp = sdf.vmpPlusOffset(self.offsetForGet, sdfPtr)
         return self.c.mode5(vmp)
 
+    # 2.2.2.2.4.6. Name Terminal Initialization Cells (ICD PDF p.78).
+    #
+    # A NAME variable's initializer is NOT in the Initialization Table -- that
+    # table is "for non-NAME variables" (ICD Sec 2.2.2.2.1.3).  It lives in a
+    # linked list of Name Terminal Initialization Cells whose head is field 0c,
+    # the Auxiliary Symbol Information Pointer, on the MAJOR STRUCTURE's Symbol
+    # Data Cell; flag bit 29 says the pointer is there.
+    #
+    # The ICD gives the fields but their widths are in Figures 2-51/2-52, which
+    # are images and did not survive the text conversion, so the layout below
+    # was read off real SDFs and checked against source.  For ##CS2IX3 it
+    # reproduces all of CSAS_IX3's NAME initializers exactly, e.g. copy 1 ->
+    # CSAS_PDT_451145.CSAS_PDTA_STAT, matching the DECLARE.  Anything not
+    # understood is dumped raw rather than guessed at.
+    def parseNameTerminalInitialization(self):
+        heads = []
+        for i, sym in enumerate(self.symbolIndexTable):
+            p = getattr(sym.symbolDataCell, "pAuxiliarySymbolInformation", 0)
+            if p:
+                heads.append((i + 1, sym, p))
+        if not heads:
+            return
+        self.vprint("Name Terminal Initialization (ICD PDF p.78)")
+        self.nameTerminalInitialization = {}
+        for symbno, sym, head in heads:
+            # An ASIP is overloaded: for an EQUATE label or a simple NAME it is
+            # a Variable Reference Cell, for a PROCEDURE/FUNCTION a formal
+            # parameter cell.  Only a structure's leads a Name Terminal
+            # Initialization list, so read no further unless this symbol is one
+            # (symbol type X'10'), and never let a misread pointer abort the
+            # whole report.
+            if getattr(sym.symbolDataCell, "symbolType", None) != 0x10:
+                continue
+            if not self._plausiblePointer(head):
+                continue
+            entries = self._nameTerminalCells(head)
+            if not entries:
+                continue
+            self.nameTerminalInitialization[symbno] = entries
+            self.vprint(f"\tSymbol {symbno}: {sdf.fullSymbolASCII(sym)}")
+            for copy, target, raw in entries:
+                if target is not None:
+                    self.vprint(f"\t\tcopy {copy}: {target}")
+                else:
+                    self.vprint(f"\t\tcopy {copy}: (undecoded operator "
+                                f"0x{raw:04X})")
+
+    # Walk one cell chain and return [(copyNumber, "A.B.C" or None, rawType)].
+    def _nameTerminalCells(self, head):
+        out = []
+        seen = set()
+        while head and head not in seen and self._plausiblePointer(head):
+            seen.add(head)
+            self.offsetForGet = head
+            nbytes = self.getHalfword(0)
+            nIndexes = self.getHalfword(2)
+            nxt = self.getPointer(4)
+            if nbytes < 8 or nbytes > 4 * self.pageSize:
+                break
+            op = 8 + 2 * nIndexes
+            while op + 8 <= nbytes:
+                self.offsetForGet = head
+                opType = self.getHalfword(op)
+                if opType != 0:          # not an Initial Pointer Value Operator
+                    out.append((None, None, opType))
+                    break
+                copy = self.getHalfword(op + 2)
+                vrc = self.getPointer(op + 4)
+                target = (self._variableReference(vrc)
+                          if self._plausiblePointer(vrc) else None)
+                out.append((copy, target, opType))
+                op += 8
+            head = nxt
+        return out
+
+    # 2.2.2.2.7. Variable Reference Cell (ICD PDF p.105): a length, a count of
+    # Symbol Index Table indexes, and then that many indexes -- the qualifier
+    # chain, so CSAS_PDT_451145.CSAS_PDTA_STAT arrives as two indexes.
+    def _variableReference(self, vrc):
+        if not vrc:
+            return None
+        save = self.offsetForGet
+        try:
+            self.offsetForGet = vrc
+            count = self.getHalfword(2)
+            if count < 1 or count > 16:
+                return None
+            names = []
+            for k in range(count):
+                idx = self.getHalfword(8 + 2 * k)
+                if 1 <= idx <= len(self.symbolIndexTable):
+                    names.append(
+                        sdf.fullSymbolASCII(self.symbolIndexTable[idx - 1]))
+                else:
+                    names.append("?%d" % idx)
+            return ".".join(names)
+        finally:
+            self.offsetForGet = save
+
+
+    # cmem.abend() calls os._exit(), so a bad pointer cannot be caught after
+    # the fact -- it has to be rejected before it is dereferenced.
+    def _plausiblePointer(self, vmp):
+        if not vmp:
+            return False
+        page, offset = vmp >> 16, vmp & 0xFFFF
+        last = getattr(self.directoryRootCell,
+                       "numberOfLastPhysicalRecord", None)
+        if last is None or page > last:
+            return False
+        return 0 <= offset < self.pageSize
+
     def getByte(self, sdfPtr, caption=None, hex=False, indent=1):
         address = self._addr(sdfPtr)
         value = self.c.mem[address]
@@ -1244,6 +1356,7 @@ class sdf:
                     pDataCell=pDataCell,
                     symbolDataCell=symbolDataCell
                 ))
+            self.parseNameTerminalInitialization()
         
         # 2.2.2.2.5. Statement Index Table
         if drc.pFirstStatementIndexTableEntry != 0:
