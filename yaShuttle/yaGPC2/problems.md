@@ -8362,25 +8362,28 @@ neither of the obvious explanations applies.  They need OI340700 reconstructions
 from their DASS structure listings, exactly as `CS2PDT` and `CSAPDT` got; all
 four are `#P` CSECTs present in the S2 dump, so the data exists.
 
-**Eleven of them now have those reconstructions** — `CPUSLS`, `CPTOSV`,
-`CS2IX2`–`CS2IX7`, `CS2IXP`, `CS2PX2` and `CS2PCT` — written to
-`PFS/OI340700/APPLSRC/`.  The four subsections that follow record how, because
-the method generalises and the traps in it are not obvious.  `CPUSLS` is
-confirmed compiling; the other ten were written after the last completed
-`compilePASS` run and a fresh one is in flight, so **do not quote the "22
-missing" figure above as though it accounted for them.**  What each
-reconstruction does rest on, independently of any build, is that every pointer
-in it resolves, no payload it names is undeclared in OI340700, and the
-generator's self-checks pass on every entry.
+**All of them now have those reconstructions** — seventeen files in
+`PFS/OI340700/APPLSRC/`, every one compiling, and the whole release building
+clean (§8.39).  The four subsections that follow record how, because the method
+generalises and the traps in it are not obvious.  **Do not quote the "22
+missing" figure above as though it still stood.**  What each reconstruction
+rests on, independently of any build, is that every pointer in it resolves, no
+payload it names is undeclared in OI340700, and the generator's self-checks pass
+on every entry.
 
-`CS2PX3`, `CS2PXT`, `CSAPCT` and `CS2IFT` remain.  The first three are
-`CS2PX2`'s shape and should fall out of the same builder; `CS2IFT` is the
-outlier — three-member structures aimed at several different compools rather
-than a flat payload index — and the dump shows its
-`DECLARE CSAS_IFT_920313 CSAS_IFT_DIS_3-STRUCTURE` is *removed* in OI340700
-rather than nulled: `#PCS2IFT` runs `…920109, 920315, 920318…`, skipping it.
-That shifts every later offset in the compool, so it is a structural edit of a
-different class from anything done so far.
+The last two were the awkward ones.  `CS2IFT` *gains* entries — 43 declares
+against 45, adding 726040, 726042 and 726044 — while dropping
+`CSAS_IFT_920313`, which the dump shows is **removed** in OI340700 rather than
+nulled: `#PCS2IFT` runs `…920109, 920315, 920318…`, skipping it, so every later
+offset in the compool shifts.  All 42 entries it shares with OI340600 came out
+byte-identical.  Its template is not in the dump but is derivable: `CSAS_IFT`,
+`CSAS_IFT_INT`, `CSAS_IFT_DIS` and `CSAS_IFT_DIS_3` have identical member names
+and differ only in the type of `CSAS_IFT_PARM_VAL`, so the type of what a
+pointer points *at* names the template — and the census (27 SCALAR, 17 BIT(16),
+no BIT(3)) corroborates the missing entry, since `CSAS_IFT_920313` was
+OI340600's sole `DIS_3`.  `CS2PAT` is a cross-check as much as a
+reconstruction: its two declares point at the first entry of each precondition
+table, and all six targets exist in the separately-built `CSAPCT` and `CS2PCT`.
 
 #### Three blind spots in the verification method
 
@@ -8552,6 +8555,545 @@ three pass on every entry:
     `01000` and five flags, giving `0502` — the word shown.
 3.  A `CSAS_PGT` declare's name embeds the payload its `DMST_POS` points at,
     and the two must agree.
+
+
+#### Nine generator defects, none of them in the dump
+
+Every one was caught by comparing the generated file against OI340600, not by
+the build — several compiled perfectly and were wrong.  They are listed because
+the failure modes generalise to any table reconstruction.
+
+From the `CS2PXT`/`CSAPCT` work:
+
+1.  **A count declared outside the generated body was silently carried over.**
+    `CS2PXT` holds `DECLARE  CSAS_PXT_NUM_ENTRIES INTEGER INITIAL(1316)` — two
+    spaces after `DECLARE`, so it never matched the declare pattern and was
+    copied from OI340600 untouched.  The dump says 766.  **Any constant outside
+    the replaced region is suspect this way**; the tool now reads the value from
+    the dump.
+2.  A `COPY` marker carries no CSECT name, so the last structure of a CSECT
+    collected a marker from elsewhere in the file.  Bound it by the structure's
+    own address range.
+3.  **MAFGEN paginates inside structures.**  A page break between an ARRAY
+    member and its continuation lines put the banner where the values should be:
+    `INITIAL(1M,A,F,G,E,N,REL,26.020,…)`.  Furniture is now stripped once at
+    load, for every parser.
+4.  A pointer need not aim at a payload at all — `CSAPCT`'s SOL_BLOCKs point
+    into the `CS2_IPT` compool.  The resolver falls back to the innermost
+    structure covering the address, whatever compool it belongs to.
+
+From the `CS2IFT` builder:
+
+5.  **Array element size.**  The index is `(ptr-lo)/width+1`, not `ptr-lo+1`; a
+    SCALAR array is 2 halfwords per element, so `$(2:)` came out as `$(3:)`.
+    SCALAR arrays print no value line, so the width must come from the type.
+6.  **Three subscript styles, not one** — `$n`, `$(n)` and `$(n:)`.  The
+    declarations are identical, so the difference is the source's own style; it
+    is preserved per array from OI340600.
+7.  A `)?` in the style regex swallowed `NAME`'s own closing paren.
+8.  `CSAS_IFT_NUM_ENTRIES` was inside the replaced region and got dropped — the
+    same defect as `CSAPCT`'s `DUMMY_INTEGER`, and also a count that *changed*,
+    42 against the dump's 44.
+9.  **The fix for (8) landed in the wrong function.**  `build_pct` and
+    `build_ift` end with an identical return line and `replace(…, 1)` took the
+    first.  It then failed *silently*, because the missing value made the target
+    `None` and the whole block was skipped without error.
+
+`CSAPCT` lost two whole cards this way — its `F END` and
+`DECLARE DUMMY_INTEGER INTEGER INITIAL(0);` — and HALSFC still reported
+"Compilation successful".  **The sound check is to ask the dump what should be
+there, not to ask the file what is**: enumerate the scalars lying outside every
+structure of the CSECT and confirm each is present with the dump's value.  Doing
+that gives 0 standalone scalars for `CS2IX2`–`CS2IX7`, `CS2IXP`, `CS2PX2`,
+`CS2PX3` and `CS2PCT`; `CSAS_PXT_NUM_ENTRIES` for `CS2PXT`; `DUMMY_INTEGER` for
+`CSAPCT`, which was missing; and 12 and 4 for `CPUSLS` and `CPTOSV`, all
+agreeing — the first check that covers those two beyond their eight pointers.
+
+A first attempt at that sweep scanned the generated files for carried-over
+numeric initialisers and missed the known `CSAS_PXT_NUM_ENTRIES` case, because
+that declare spans an intervening `F GEN` card.  **A sweep that misses the
+example you already have is not evidence of anything.**
+
+Two other checks were wrong rather than the files.  A hypothesis that
+`CSAPCT`'s `GROUP_INDEX` equals the number in the declare's own name held in six
+sampled entries and, measured across the whole file, in 36 of 63 — a
+coincidence.  And a script reporting only 8 of 74 `CSAS_PGT` declares agreeing
+with their `DMST_POS` target was counting 66 NULL targets as disagreements;
+measured properly it is 66 NULL, 8 pointing somewhere, all 8 agreeing.
+
+After all nine fixes the eleven previously generated files regenerate
+**byte-identical**, which is what makes the fixes safe to have applied
+retroactively.
+
+### 8.39 The OI340700 build completes — compile and assembly
+
+Run 9 is the first full build of the release: **1218 HAL/S and display sources
+compiled and 761 assembly sources assembled**, with no aborts, no exit-code
+failures, nothing skipped for IR1/DI11/PM2/ZO3 and nothing left uncompiled for
+want of a dependency.  The progression across the runs whose inputs were stable
+end to end — runs 3, 6 and 7 are excluded, the first two because sources were
+restaged mid-run and the third because it collided with run 6 and wedged:
+
+    run    successful   IR1/DI11/PM2/ZO3 skips   unrecognized   aborted
+    run2      1204               12                   11           24
+    run4      1208                8                    7           16
+    run5      1213                3                    2            9
+    run8      1218                0                    0            0
+
+What closed the last two was `CS2IFT` and `CS2PAT`.  Seventeen reconstructions
+in all now exist in `PFS/OI340700/APPLSRC/`, and 103 tombstones — 94 in
+APPLSRC, 9 in SSSRC — mark the files the release drops.
+
+**The counts reconcile, which is the check worth doing rather than trusting a
+total**: 1958 live sources, 1979 objects, and no live source without an object.
+The 21-object excess is entirely `_stub*.obj` from the cycle-breaking seeds, and
+every stub has its real object beside it, so none is a stale artefact of a
+now-tombstoned file — which is what would quietly corrupt a link.
+
+Three tombstones were wrong and the derivation explains why.  `CSAMMU.hal`,
+`CVIMMUTI.hal` and `CVQMMUTI.hal` were removed because the derivation identified
+each file's CSECT **by filename** — `#PCSAMMU`, `#PCVIMMU` and `#PCVQMMU` have
+zero occurrences in any dump — when in fact `#PCVNMMU` is a single CSECT *slot*
+occupied by `CSA_MM_UTILITY`, `CVN_MM_UTILITY` or `CVQ_MM_UTILITY` depending on
+configuration, and `#PCDIMMU` likewise.  The sound test, and the one to reuse,
+is to collect every compilation-unit name the eight dumps mention (the `| NAME`
+field of a CSECT header, 1165 of them) and require a tombstone's unit to be
+absent from it.  A `.dfg`'s stem is its unit name, so the same test covers both
+kinds.  A zero-length file is not automatically a tombstone either:
+`RUNASM/test.log` is build litter.  The definition is "zero bytes **and** an
+OI340600 original exists".
+
+The runtime libraries are ours now.  `RUN` and `ZCON` are not special artefacts
+of Don's — each is simply a directory of `.obj` files — and building them from
+our own assembler gives 205 and 284 objects, exactly our `RUNASM` and `ZCONASM`
+source counts, with identical name sets.  Canonicalised with `objcanon.py` to
+remove set-ordering noise, **ZCON is 284 of 284 identical** and RUN differs only
+by fill byte and END record, both of which are deliberate choices.
+
+### 8.40 Linking, and what a score actually measures
+
+The link needs only `lnk101`; `con80build` is not required, because `lnk101`
+takes `--concard` and `--concard-root` itself.  Five things have to be right,
+and each was found by measurement rather than from documentation:
+
+1.  **`--sdl` on the HAL/S compile.**  `monitor13.parms` records the options
+    actually used, and the reference build has SDL where ours did not.  Without
+    it the compiler emits a `START` CSECT and an `LHI R0,<stack>` prologue for
+    every PROGRAM that the flight images do not have; `$0SSPEXE` comes out 191
+    halfwords against the dump's 189.  A flight build does **not** use SDL, so
+    NOSDL remains right for `compilePASS`'s normal purpose and `--sdl` is
+    opt-in, existing only because the DASS images are SDL builds.
+2.  **`--fill=C9FB` on the assembly.**  Measured over 2345 alignment gaps in all
+    eight dumps, HAL-origin CSECTs are C6C6 without exception and assembly ones
+    C9FB.  C6C6 is the *compiler's* fill — HALSFC has no `--fill` option and
+    emits it inherently — so passing it to the assembler conflated the two.  The
+    theoretical 0x20000 address cutoff does not hold: origin predicts the fill
+    98.6% of the time, an address split 85.8%, with plain counterexamples on
+    both sides.
+3.  **`--external-syms` and `--concard` together.**  external-syms places 1243
+    of 1243 sections at the real address, which no deck layout reproduces;
+    concard is still needed for the deck's CHANGE cards.  Neither alone
+    suffices.
+4.  **Link every object, not just the configuration's own.**  Scoping the list
+    makes the report far tidier and is measurably worse, because the dropped
+    modules still define symbols this configuration references.
+5.  **STACK cards removed from the decks.**  Under SDL a CON80 STACK card is the
+    only trigger for generating an `@`-stack, and a generated stack is placed by
+    deck layout rather than at its real address.  See §8.42.
+
+And use `fcmcmp`, not a hand-rolled comparator: it annotates each differing
+halfword with the RLD that owns it and honours an exceptions file.
+
+#### A tool's pass count is not a score
+
+This cost two wrong commits in a row and is the most transferable lesson in the
+section.  Rooting the link at OFTMP rather than at the configuration's own deck
+raised `fcmcmp`'s OK count from 1006 to 1038 and was committed on that basis.
+But `fcmcmp` compares every section in *our* symbol table — 4273 of them — and
+most are not in S2 at all.  Measured against what S2 actually contains, the
+OFTMP root scores 638 of 1177 where the SM2 root scores 837.  **A memory
+configuration is one phase's view of memory, not the union of all phases**, and
+rooting at the master deck links every phase into one flat image where later
+phases overwrite earlier ones.  The same bad evidence also caused three
+exclusion rules to be deleted as "dead code"; on the honest metric they still
+earn their place.  Both commits were reverted.
+
+Define the denominator before optimising.  The honest one is not obvious:
+
+*   `augmented-S2.json` lists 1296 CSECTs, but 119 are pure fill in the image —
+    present in the index, not loaded in this configuration.  The index is a
+    **superset** of what a configuration carries.
+*   157 more share an overlay range with another CSECT.  These are alternatives:
+    the index lists every candidate for a range, not the winner.
+*   Sections more than half fill are not "loaded" in any useful sense.
+
+That leaves the uncontested, genuinely-loaded set, which is the denominator used
+throughout: 980 for S2 and 8292 across all eight configurations.
+
+#### Overlay alternatives, and why both can be partly present
+
+Excluding overlay alternatives is worth 19 sections, but the rule needs **two**
+signals: exclude a module only when its CSECT sits in an index range overlapping
+another's *and* some other configuration's deck names it while this
+configuration's chain does not.  Either signal alone fails — excluding
+everything another deck names drops 691 modules S2 really uses.  `MFB14` and
+`OPS0` are not alternative configurations: PHASE14 includes MFB14 and PHASE15
+maps it, so they are the same image at a different phase.
+
+The claim that at most one alternative per group can be present is **wrong**.
+The image is built by loading phases in order into a staging buffer, and a later
+load does not touch the areas it leaves as fill, so earlier content survives
+underneath.  This is visible in the dumps with no build involved: `#PCVMSLP` is
+515 halfwords in S2 whose **last 311 are byte-identical to SSW's image at the
+same address** while the first 204 are not; `#DDCDDS8` matches at both ends with
+the middle overwritten.  Measured strictly — the value must appear in another
+configuration that assigns a *different* section to that address — the mechanism
+accounts for 15.9% of differing halfwords and explains 52 failing sections
+entirely.  A loose version of the same test gives 96.1% and is worthless,
+because any resident CSECT common to all eight configurations matches trivially.
+
+### 8.41 Two things the dumps do not say, and how much they were costing us
+
+Before any defect could be judged, two properties of the DASS reports had to be
+accounted for.  Together they were worth **462 sections** — differences no build
+could ever reproduce, being charged against ours.
+
+**The dump marks its own post-build changes, and we were ignoring them.**
+MAFGEN flags locations changed after the build with `*`, and those are scraped
+into `exceptions-<cfg>-full.txt` — 5206 addresses for G2.  `dass-link.sh` passes
+them to `fcmcmp`; the scoring script did not.  `#PCGCMFR` (636 differing
+halfwords) and `#PCGGCOM` (506) are **100% post-build changes** — I-LOADs and
+mission constants, IBM hex floats such as our `4033'3333` against the image's
+`4011'EB85` — and not our errors at all.
+
+**MAFGEN never prints an all-zero multi-halfword field, and the `.fcm` is
+extracted from the listing.**  Of 1325 multi-halfword field rows in DASS_S2 that
+*are* followed by a value line, **zero are all zeros**.  A row prints only when
+at least one word is non-zero: `AIBK_KYBD_MSG` prints `0011 0000 0000 0000`.
+It is not the width — `CZ2B_ACT_RECVR` BIT(32) is `INITIAL(HEX'00000000')` and
+prints nothing, while its neighbour `CZ2B_PASS_BUS_MASKS`, also BIT(32) but
+`03FF CF00`, prints.  **74,936 halfwords of DASS_S2 lie in fields the listing
+never prints**, and in S2, of the 5117 halfwords where we write `0000` and the
+image is fill, 5115 lie inside one.
+
+Any accuracy claim from here on must excuse both.  The raw number understates
+the build by about 5.6 points.
+
+#### The long detour this caused, recorded because the reasoning was seductive
+
+`#PCPGDPL` differs in 2960 halfwords, all of them ours-`0000` against
+image-fill, and its **fill boundaries land exactly on declaration boundaries** in
+`CPGDPL.hal`, with the declarations summing precisely to the 6871-halfword
+section.  Three zero-initialised arrays are fill; two structures containing
+EBCDIC blanks are written.  That is a very strong-looking pattern, and it
+supported a rule — "a declaration whose initializer is entirely zero got no
+object text" — that was asserted, retracted, re-asserted on a 121-of-121
+measurement, and finally **refuted by experiment**: adding `INITIAL(0)` to a
+scalar, vector or matrix deposits zeros, which is what INITIAL is for.  The
+121-of-121 was circular, because an unwritten array is precisely what makes its
+CSECT count as partly filled.
+
+A second, equally plausible conclusion followed and was also wrong.  Replacing
+`10#0` with `6#,4#0` in `CZ2COMMO.hal` and recompiling puts object holes at
+exactly the halfwords the image leaves as fill — run for run, five copies — and
+that was read as proof the recovered sources had lost their `n#`
+partial-initialisation markers.  It is not proof.  **The reporting artefact
+produces the identical observation with no source defect at all**, and the
+experiment could not distinguish them.  The `n#` construct works as documented
+(Guide §16.3), but nothing shows the ground source used it here, and no source
+should be "fixed" on that basis.
+
+What *is* established from the episode and remains useful:
+
+*   A variable declared **without** `INITIAL` gets no object text; its storage
+    holds whatever the loader left.  The decisive case is `#DPU1MUP`, a
+    three-halfword data CSECT whose entire source is one uninitialised INTEGER:
+    the compiler's own `LOCAL BLOCK DATA` header is written and `PU1_O` is
+    C6C6, and it reproduces across all eight parallel `#DPU1MUP`..`#DPU8MUP`.
+*   C6C6 inside a HAL CSECT is the **link editor's hole fill** (`linker.py:275`),
+    not the mass-memory staging buffer.  Fill inside a CSECT means the object
+    had a hole there.
+*   Padding between consecutive declared items is never zero: of 807 such
+    halfwords, 573 are C9FB and 234 C6C6.
+*   Fill-versus-written is decided by the **load**, provable from the dumps
+    alone: `#PCV1LSR` is 100% fill in SSW/G2/G8/P9/S2 and 0% in G16/G3/G9 at the
+    same address, and the object cannot be both emitted and not emitted.
+
+### 8.42 Three defects found and fixed
+
+#### Generated stacks overwriting real data — 255 sections
+
+`dass-link.sh` rule 5 already knew a CON80 STACK card must go under SDL, but it
+had only been acted on for `SM2` and `SSNON31D`.  Every other configuration was
+still generating `@`-stacks, and they do not merely sit in the wrong place —
+**they land on top of sections carrying real data**:
+
+    cfg   stacks   halfwords covered   indexed sections overlapped
+    G9      54          3848                    10
+    SSW     24          1414                    16
+    G16     16          3954                    64
+    G2      16          5120                    58
+    G3      16          3472                    54
+    G8      14          4116                    47
+    P9      10           506                     7
+    S2       0             0                     0
+
+The case that exposed it is worth keeping as a diagnostic pattern.  `#DDCICYC`
+in G2 reads C6C6 for all 676 halfwords, yet our object `DCI#DATA` holds all 676
+in 25 TXT records and `lnk101` both links the module and places the section
+correctly.  Linked alone, the same object produces the content.  The culprit was
+`@0GELORB`, 2256 halfwords of `<generated-stacks>` sitting on it.  **When a
+section is fill in our image but our object has the data, look for an
+overlapping section before suspecting the object.**
+
+165 cards deactivated across ten decks, now OI340700 CON80 overrides (PFS
+`1975a8c4`).  S2 unchanged, which is the control that confirms the mechanism.
+
+#### Cross-phase relocations — `FIOADCNS` and `FIOADCCL` to zero
+
+Both are resident tables of external addresses holding the addresses of display
+pages that live in *other* phases.  A configuration-at-a-time link cannot
+resolve them: `--external-syms` supplies only the sections this configuration's
+index names, so `lnk101` appends the rest past the end of the image and bakes a
+truncated address into every reference.  The split was total — 78 of 78 and 110
+of 110 wrong entries named a symbol placed past the image; every right entry
+named one inside it.
+
+Three fixes were tried and all fail, and are written into the script so they are
+not retried: a combined `--external-syms` alone fixes the tables but the
+borrowed sections emit their content over ours (S2 867 → 552); dropping the
+foreign modules loses their symbol *definitions* (unresolved relocations 283 →
+992, because external-syms places sections without defining the entry points
+inside them, and entry points are what these tables reference); and
+`lnk101 -D SYM=addr` is ignored outright, because the defining module is linked,
+merely misplaced, so its own definition wins.
+
+What works is `PFS/dass-xphase.py`: link twice and take each halfword from
+whichever link is right about it — content from the normal link, and from a
+combined-external-syms link **only** the relocation sites whose symbol the
+normal link placed past the end of the image.  The restriction does all the
+work: taking every relocation site imports the clobbered content and is worse
+than doing nothing (S2 867 → 624), where the restricted merge is 867 → 879.
+
+The tool had a bug of its own, worth recording because the shape recurs.  A
+relocation record carries both `targetName` — the symbol the site references —
+and `symbol`, a rendering of where *this link* resolved it as
+`<section>+<hex>`.  They agree when the resolution is right and disagree
+precisely over the population the tool exists to repair.  `FIOCBLKS+186`
+references `TFIVFAB1`, placed at 430759 and plainly in need of patching, while
+its `symbol` reads `#PCD0020+261`, whose section sits comfortably inside the
+image — so the site was passed over every time.  **When a reference looks
+correctly resolved against a plausible section, check the symbol, not the
+section: a bad address still lands somewhere, and whatever it lands in gets
+named.**
+
+The underlying situation is an overlay pair: `#PCVBBTU` appears in G9's index
+alone at 43258..44085, `#PCRILVC` occupies 43300..44675 in S2, and the ADCON
+points at `#PCVBBTU`'s map address regardless of which alternative is resident.
+`TFIVFAB1` is an `EQUATE EXTERNAL` alias into that compool, so its value is
+wherever `#PCVBBTU` sits.
+
+#### An assembler defect: a macro-substituted name field kept its padding
+
+`FIOCBLKS` differed by 67 halfwords in six configurations, **49 of them at
+unresolved relocation sites**, and every one of the 49 missing symbols resolves
+in the real image into `FIOADCNS` (31) or `FIOADCCL` (18) — modules we build.
+The evidence chain was exact and entirely silent: the listing showed
+`ENTRY FIOCWWRT,FIOCWWRP` fully substituted, `FIOCWWRP EQU *` at `0000024A`, and
+the symbol table resolving it, while the object emitted `LD` for the first name
+only, with `grep -c Severity` returning zero.
+
+The cause was neither ENTRY nor multi-operand.  ASM101S stored a
+**macro-substituted name field verbatim**, so PCGEN's deliberate padding
+(`&SYM SETC '&SYSLIST(3,1)'.'  '`) defined the symbol as `'FIOCWWRP  '` while
+every reference spelled `'FIOCWWRP'`; the symtab lookup missed and skipped the
+entry without comment.  A `.strip()` in `ASM101S.py:874` and `asm101s.c:1249`
+(virtualagc `92d7c2c1c`, fixed by the ASM101S-port session).
+
+Checked before reporting: **ASM101Sa and ASM101S.py produce identical output**,
+so it was never a port regression.  Re-assembling all 272 OI340700 assembly
+modules and diffing every object gives **exactly two changes**, `FIOADCNS`
+72 → 139 LD records and `FIOADCCL` 5 → 121, matching the other session's
+OI340600 result from a different corpus.  `FIOCBLKS` unresolved relocations went
+from 49 per configuration to **7 in total across all eight**.
+
+Three hypotheses were tested and *passed*, and therefore were not the trigger:
+hand-written `ENTRY A,B`, `ENTRY` of EQU-defined labels, and an over-wide label
+field.  The last is the instructive one — a hand-written padded label is
+stripped by field delimiting before it ever reaches the offending code, so the
+hypothesis was right and the experiment could not test it.
+
+### 8.43 Where the accuracy stands
+
+Scored on uncontested, genuinely-loaded CSECTs with both reporting artefacts of
+§8.41 excused, using `score3.py`:
+
+    cfg    loaded    exact    rate
+    SSW       520      465   89.4%
+    G16      1564     1408   90.0%
+    G2       1209     1087   89.9%
+    G3       1375     1227   89.2%
+    G8       1036      921   88.9%
+    G9       1041      927   89.0%
+    P9        567      517   91.2%
+    S2        980      885   90.3%
+    ALL      8292     7437   89.7%
+
+The progression, each step measured rather than estimated: 79.6% raw → 85.2%
+once the dump's own artefacts were excused → 88.3% after the stack fix → 89.3%
+after cross-phase resolution → 89.7% after the assembler fix.
+
+The residue is **5218 halfwords in 822 sections**:
+
+    we wrote where the image is fill              2198   42.1%
+    both have content and they differ             1713   32.8%
+    we wrote 0000 where the image has content     1112   21.3%
+    we left fill where the image has content       195    3.7%
+
+Worst remaining are `FCMBMT16` (271), `FCMBMT38` (245 in two configurations),
+`FIOCDATS` (~96 in two) and `FCMBMTG9` (87).  The `FCMBMT*` family is the
+obvious next thread and has no identified cause.
+
+### 8.44 The tape: plumbed end to end, blocked on one number
+
+Two link routes exist and they are in direct tension, which is the real obstacle:
+
+*   **`--external-syms` placement** matches the dump's content but gets the
+    phase composition wrong.  Our phase 15 carries 137,130 halfwords in 70 load
+    blocks where the reference has 49,152 in 31, and `#PFCMGPT` overflows — 447
+    descriptors against a capacity of 343.
+*   **CON80 deck layout** produces a composition that fits the GPT but matches
+    content badly (S2 164/980 against 885).
+
+They cannot simply be combined: external-syms spreads a phase's sections across
+the whole address space at their DASS addresses, while a phase's load blocks
+must describe one bounded set of regions.
+
+A per-phase pipeline exists either way — `PFS/dass-phases.sh`,
+`dass-phaselists.py`, `dass-combine.py` (PFS `28425dde`) — and the composition
+is not guesswork: `ap101Utils.mcconfigs` carries it, IPL = phases (10,2,13,3)
+then the configuration's GRT row, which independently confirms that G16 is
+rooted at GNC1.  Two traps in it both look like success: feeding every object to
+every phase leaves no residual cross-phase RLD sites, so `phaseresolve` prints
+"0 site(s) resolved" for all 18 phases and appears to have run (deck-restricted,
+the same command resolves 31,416); and a MAP-card section is *defined* but not
+re-emitted by the later phase, so overlaying it buries the real text.
+
+A functional tape was built from the deck-layout route —
+`OI340700-boot.mmv`, all five steps of the HANDOFF-FCMBOOT recipe — and it IPLs
+without faults but stops after loading the SSL, where the known-good OI340600
+tape paints a display.  Three things came out of the attempt and stand on their
+own:
+
+*   **Every phase must fit its ALLOC card, and `mmu2mmv --report` checks it
+    without reference to the dumps.**  Two were over, both from autocall
+    dragging in content that does not belong: phase 2 at 608 blocks against 256,
+    phase 10 at 87 against 64.  Relinking those two without `-L SYSLIBL1` gives
+    227/256 and 52/64.  The same disease put `#PCVNMMU` — 16,393 halfwords of
+    mass-memory buffer — into PHASE01 and took the bootstrap past FMAIPL2's
+    72-block reservation.
+*   **All 17 DEU critical-format decks in OI340700 are zero-length
+    placeholders** where OI340600 has all 17 with real content.  `CFSYSIN` is
+    byte-identical between the releases, so the OI340600 decks build a usable
+    `DEUCFLM.bin`.  Without them every critical-format display draws over a
+    blank background.
+*   **`stamp_ssl_checksum.py` defaults to the OI340600 SSL location** and exits
+    when the phase has moved, and because the recipe is a plain command
+    sequence, the remaining steps then run on an unchecksummed volume.  Take
+    `--phase-track/-file/-subfile/-blocks` from `mmu2mmv`'s own report row.
+
+None of the `.mmv` files in `~/workspace/pass-run` is a recovered flight tape —
+they are all our own builds, produced by `con80build` compiling, assembling and
+linking OI340600 — so there is no independent authority for what a phase's load
+blocks should be.
+
+### 8.45 The SDF as an independent oracle
+
+The SDF is written by the compiler itself, so it can arbitrate where a DASS
+report column is doubtful.  Four defects stood between it and that use, all now
+fixed (virtualagc `d55ec2e33`, `f420f852a`, `f79c1aeaf`, `80bb4fece`,
+`d18835356`).
+
+**The Initialization Table was printed stepping one byte at a time instead of
+one halfword.**  Consecutive entries overlapped by a byte — `0x0030`, `0x3039`,
+`0x3900` for the single fullword `0x00003039` — and the listing covered only
+half the table while claiming the full count from Directory Root Cell field 43.
+This hid the documented link between the two tables: ICD §2.2.2.2.1.3 says a
+symbol's initialisation data begins at **field 10, its relative memory
+address**, and with the step corrected `##CZ2COM`'s table agrees with the linked
+image of `#PCZ2COM` in **1509 of 1514 halfwords** at shift 0, against 37.6%
+before.  There is no separate "field 10A" to detect and no flag governing it:
+field 10 has three mutually exclusive readings chosen by what the symbol is.
+
+**NAME initialisation was not decoded at all.**  It is not in the Initialization
+Table — that is explicitly "for non-NAME variables" — but in Name Terminal
+Initialization Cells (§2.2.2.2.4.6) reached through field 0c, the Auxiliary
+Symbol Information Pointer, announced by flag bit 29.  `##CS2IX3` now reproduces
+all 136 of `CSAS_IX3`'s NAME initialisers with zero mismatches against the
+source, and 120 SDFs parse clean with no unresolved targets.
+
+The cell layouts are in ICD figures that did not survive the text conversion of
+USA001556, so they are recorded here:
+
+    Fig 2-51  Name Terminal Init Cell: f1 2 bytes (bytes in cell), f2 2 bytes
+              (# symbol indexes), f3 4 bytes (next cell), f4 2-byte indexes,
+              f5 operators — FULLWORD ALIGNED, so an odd f2 means 2 bytes padding
+    Fig 2-52  field 5C: 4 bytes, "Flag" then "Symbol Index or Pointer to
+              Variable Reference Cell" — flag ON means the low half IS the index
+    Fig 2-53  5D = X'01' Loop Start;  2-54  5H = X'02' Loop End
+    Fig 2-55  5J = X'03' End of Initialization, 5K = Extension Flag
+    Fig 2-76  Variable Reference Cell: +0 f1 2 bytes, +2 f2 2 bytes = FLAG pane
+              + # of symbol indexes, +4 f3 4 bytes (ptr to Expression Variables
+              Cell), +8 f4 2-byte Symbol # entries, then f5 Subscript Descriptors
+
+Figure 2-76 field 5, the Subscript Descriptors, is still not read: a subscripted
+NAME target prints its symbol chain without the subscript.
+
+Three decoder bugs were found only because those figures arrived, and each
+looked correct on the first structure tried: gating on symbol type X'10' alone
+admits EQUATEd structures and manufactured 394 nonsense copies; field 5 was read
+without fullword alignment, which both test structures happened not to exercise;
+and the Variable Reference Cell's count was read as a whole halfword when its
+top pane is a flag.
+
+No corruption of NAME initialisers in the dumps has been found.  All 29,068 NAME
+pointers across the eight dumps resolve to a real section, and `#PCS2IX3`'s 136
+agree with the SDF exactly.  A whole-configuration audit reported 1062
+"disagreements" that are an artefact of the comparator — it resolves an address
+to the enclosing structure copy header where the SDF gives the qualified field —
+and that number should not be quoted.  65 CSECTs still show a copy-count
+mismatch and were never compared.
+
+### 8.46 Method failures from this phase
+
+*   **`pkill -f` keeps finding new ways to be wrong.**  Bracketing the pattern
+    protects the invoking shell but not other watchers: `pkill -f 'compileP[A]SS'`
+    stopped the build as intended *and* killed the Monitor task watching it.
+    Capture the PID at launch and kill that.
+*   **Verify a tree is quiet before launching into it.**  `kill` returning
+    success proves nothing; two runs were destroyed by a launch into a build
+    that was still going.  Scan `/proc` for processes whose cwd is the build
+    directory.
+*   **A run whose inputs changed underneath it cannot be quoted.**  Runs 3 and 6
+    were abandoned for sources restaged mid-run.  Stage, then launch.
+*   **Timestamps on artefacts settle "is this a regression".**  Five apparent
+    new failures in run 6 had results directories inside a three-second window
+    centred on a kill; the failure list alone would have argued for
+    re-tombstoning three files that are correctly present.
+*   **Check a new oracle against a known one before trusting it.**
+    `latest.unlinkS2.results/signature.json` looked authoritative and disagrees
+    with DASS_S2 on 358 of 1160 CSECT sizes; where they disagree the dump agrees
+    with our build.  A conclusion of "712 real content differences" came from it.
+*   **Assert on every string replacement.**  One that silently matched nothing
+    left an option at its old default while every other edit took, and the
+    resulting behaviour was then misdiagnosed as a stale `__pycache__`.
+*   **A sweep that misses the example you already have is not evidence.**
+*   **`objcanon.py` prints TXT addresses in decimal.**  Reading them as hex
+    produced a confident, wrong verdict.
+*   **When a fix needs a growing set of exceptions to keep paying off, suspect
+    the thing they are all correcting for.**  Three exclusion rules were each a
+    genuine improvement when measured and all three were local optima around a
+    structural mistake.
 
 ## Methodology and caveats
 
