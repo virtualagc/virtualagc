@@ -9095,6 +9095,96 @@ mismatch and were never compared.
     genuine improvement when measured and all three were local optima around a
     structural mistake.
 
+### 8.47 Linking against the modules a configuration actually loads
+
+The `FCMBMT*` family was the entry point: eight modules, one per configuration,
+each of them a single `FCMBMTMC 16` macro call twenty-nine lines long, and every
+one of them differing from its dump — 1001 halfwords between them.  Nothing is
+wrong with the modules.  The defect is in what the link resolves their
+references to, and it was worth 170 CSECTs across the corpus.
+
+`dass-link.sh` links every object in the build, and its own header records the
+measurement that justified it (point 4): scoping the object list to modules with
+a CSECT in `augmented-<config>.json` makes the report far tidier but is *worse*,
+because the modules it drops still define symbols this configuration references
+— undefined symbols go from 91 to 337 and every relocation to one of them comes
+out wrong.  That measurement is correct and still is.  What it left standing is
+the opposite error.
+
+A module a configuration does not load has no entry in that configuration's
+index, so `--external-syms` has no address for it and `lnk101` appends it past
+the end of the image.  From then on it contributes no halfword to any compared
+range — but its entry points are still in the symbol table, and they still win
+resolution.  That would be harmless if the appended modules defined only their
+own names.  They do not: overlay alternatives are alternatives precisely because
+they export the *same* names.
+
+> `FCMBMT16` references `FIOBY23C`.  Both `FIOMFE02` and `FIOMFE16` define it.
+> G16 loads `FIOMFE16` — it is the only one of the five `FIO[HM]FE*` variants in
+> G16's index — and the link resolved to `FIOMFE02`'s definition, at 821892,
+> past the end of a 330394-halfword image.  Every such ADCON is a truncated
+> address.  G16's object list carries all eight `FCMBMT*` and all five
+> `FIO[HM]FE*` variants while its index names exactly `FCMBMT16`, `FIOHFE16` and
+> `FIOMFE16`.
+
+`dass-resolve.py` supplies the missing definitions instead of doing without
+them, which is the half of the problem the earlier measurement could not
+address.  It builds an **oracle** — the whole object list linked against this
+configuration's index plus the addresses the other seven agree on, the same
+combined map `dass-xphase.py` used — so that every symbol the system defines
+anywhere has an address.  Then it iterates: drop every module `lnk101` placed
+*entirely* past the image, re-link, and give each now-undefined symbol a `-D`
+from the oracle.  Three passes converge in every configuration but SSW, which
+takes four.
+
+The drop is safe by construction, and that argument is what makes the change
+defensible rather than merely lucky.  A module placed entirely past the image
+cannot contribute a halfword to the compared region, so dropping it removes no
+correct content of any kind.  It can only change symbol resolution, and only in
+one direction: toward the definition the configuration actually loads.
+
+**`-D` takes a byte address.**  `--json-symbols` reports halfwords, and
+`lnk101`'s `processDefinedSymbols` does `baseAddress=Addr(value)`.  Passing the
+halfword value puts every patched ADCON at half its size — DASS `3C50` against
+ours `1E28` — which reads as a resolution into the wrong section rather than as
+a wrong unit, and cost an hour before the factor of two was noticed.  It is a
+unit convention, not an `lnk101` bug.
+
+Measured on the standing denominator — uncontested, genuinely-loaded CSECTs,
+with the dump's own post-build changes and never-printed fields excused:
+
+| | exact | excused | rate |
+|---|---|---|---|
+| `dass-link.sh` alone | 6843 | 7334 | 88.4% |
+| `dass-xphase.py` | 6946 | 7437 | 89.7% |
+| `dass-resolve.py` | 7012 | **7507** | **90.5%** |
+
+Every configuration improved and all eight now stand at or above 90%: P9 91.7,
+SSW 91.3, G16 90.7, G2 90.5, G8 90.4, S2 90.4, G3 90.1, G9 90.1.  The family
+that exposed it goes from 1001 differing halfwords to 36, five of the eight
+byte-for-byte; `FIOHFE16` 42 → 0 and `FIOMFE16` 40 → 0 came with it.
+
+`dass-xphase.py` is superseded and its docstring says so.  It is kept because it
+documents the defect and because it is the measurement `dass-resolve.py` had to
+beat, but applying its merge on top of a `dass-resolve.py` link changes 318
+halfwords in G16 and not one scored section — dropping the never-loaded modules
+fixes the same relocations at their source instead of patching their values
+afterwards.
+
+`dass-score.py` (same commit, PFS `5f923499`) is the scorer that produces the
+figure above.  Until now it existed only as a throwaway script rewritten from
+memory each time it was wanted, which is exactly the way a headline number goes
+quietly wrong.  It documents what the 8292 denominator is and which of its three
+columns to quote.
+
+**What is left in the family** is 36 halfwords, and they are a different defect
+of the same shape one level down.  All of them are `TFIV*` `EQUATE EXTERNAL`
+aliases resolving to the wrong compool *instance*: S2's `TFIVAN14` belongs to
+`#PCS2INB` and G9's to `#PCVHPLD`, and the link picks a single definition for
+both.  The drop rule cannot reach it because the competing definitions are not
+in modules that went past the image — they are compools this configuration does
+load.
+
 ## Methodology and caveats
 
 **Section 1** items were found during `yaGPC`'s original CoffeeScript→C
