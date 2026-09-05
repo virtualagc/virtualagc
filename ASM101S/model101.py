@@ -332,8 +332,19 @@ sects = {} # CSECTS and DSECTS.
 # symbol, so it cannot collide with a section the source names, nor with "",
 # which is the unnamed CONTROL section.
 unnamedDsect = "*DSECT*"
-entries = set() # For `ENTRY`.
-extrns = set() # For `EXTRN`.
+# DICTS RATHER THAN SETS, FOR THE ORDER AND NOTHING ELSE.  Only membership and
+# iteration are ever asked of these, which a set does perfectly well -- but a
+# set iterates in hash order, which CPython randomises per process, so the ESD
+# records built from them came out in a different order on every run and two
+# assemblies of the same source produced different object files.  The listing
+# was never affected (its cross reference is sorted), only the object.
+#
+# A dict preserves insertion order, so the ESD now follows the order the source
+# declares its ENTRY and EXTRN symbols in -- which is also what the C port does,
+# so the two now agree byte for byte rather than merely after canonicalisation.
+# The values are unused; only the keys carry meaning.
+entries = {} # For `ENTRY`.
+extrns = {} # For `EXTRN`.
 rextrns = {} # For `EXTRN`
 symtab = {}
 setProgramSymtab(symtab)   # so T' can reach it; see expressions.py
@@ -1600,10 +1611,10 @@ def generateObjectCode(source, macros):
             ast = unroll(ast)
             if ast != None and isinstance(ast, str):
                 ast = [ast]
-                already = set()
+                already = {}
                 for symbol in ast:
                     if symbol in symtab:
-                        already.add(symbol)
+                        already[symbol] = True
                     else:
                         symtab[symbol] = { 
                             "type": "EXTERNAL",
@@ -1908,7 +1919,7 @@ def generateObjectCode(source, macros):
                             symbols.append(e[1])
                     for symbol in symbols:
                         if operation == "ENTRY":
-                            entries.add(symbol)
+                            entries[symbol] = True
                             if symbol in symtab:
                                 symtab[symbol]["entry"] = True
                                 if passCount == 3:
@@ -1916,7 +1927,7 @@ def generateObjectCode(source, macros):
                                         symtab[symbol]["references"] = []
                                     symtab[symbol]["references"].append(properties["n"])
                         else:
-                            extrns.add(symbol)
+                            extrns[symbol] = True
                             if symbol not in symtab:
                                 symtab[symbol] = {
                                     "type": "EXTERNAL",
@@ -2549,7 +2560,7 @@ def generateObjectCode(source, macros):
                             if symbolName:
                                 # Add to externs if not already declared
                                 if symbolName not in symtab:
-                                    extrns.add(symbolName)
+                                    extrns[symbolName] = True
                                     symtab[symbolName] = {
                                         "type": "EXTERNAL",
                                         "value": getHashcode(symbolName)
@@ -2558,7 +2569,7 @@ def generateObjectCode(source, macros):
                                 elif zLocalSect == None and \
                                         symtab[symbolName].get("type") != "EXTERNAL":
                                     if symbolName not in extrns:
-                                        extrns.add(symbolName)
+                                        extrns[symbolName] = True
 
                                 if compile:
                                     pos1 = sects[sect]["pos1"]
@@ -2634,7 +2645,7 @@ def generateObjectCode(source, macros):
                                                         sects[_bs].get("dsect"):
                                                     zBaseSect = _bs
                                             if zBaseName not in symtab:
-                                                extrns.add(zBaseName)
+                                                extrns[zBaseName] = True
                                                 symtab[zBaseName] = {
                                                     "type": "EXTERNAL",
                                                     "value": getHashcode( \
@@ -2644,7 +2655,7 @@ def generateObjectCode(source, macros):
                                                         ["value"]] = zBaseName
                                             elif zBaseSect == None and \
                                                     zBaseName not in extrns:
-                                                extrns.add(zBaseName)
+                                                extrns[zBaseName] = True
                                             relocations.append({
                                                 'symbol': zBaseSect \
                                                           if zBaseSect != None \
