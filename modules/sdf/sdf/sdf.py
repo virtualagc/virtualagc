@@ -1029,9 +1029,16 @@ class sdf:
         self.vprint("Initialization Table (ICD PDF p.44)")
         self.initializationTable = []
         self.offsetForGet = drc.pInitializationTable
+        # getHalfword()'s offset is in BYTES -- every other caller steps it by
+        # 2 (the symbol cell reads -10, -8, -4, -2, 0).  Stepping by 1 here
+        # emitted a halfword at every BYTE offset, so consecutive "values"
+        # overlapped by a byte (0x0030, 0x3039, 0x3900 for a single 0x00003039)
+        # and the listing covered only half the table.  With the correct step a
+        # symbol's initialization data begins at halfword index = its field 10,
+        # exactly as ICD Sec 2.2.2.2.1.3 says.
         for i in range(drc.halfwordsInInitializationTable):
             self.initializationTable.append(self.getHalfword(
-                i, f"1\tInitialization value {i+1}", hex=True))
+                2 * i, f"1\tInitialization value {i+1}", hex=True))
         
         # 2.2.2.2.2. Include Text Data
         self.vprint("Include Text Data (ICD PDF p.45)")
