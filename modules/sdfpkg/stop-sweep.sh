@@ -19,7 +19,13 @@
 
 set -u
 PATTERNS=(
-    '^bash .*run-configs\.sh'
+    # NOT '^bash ...': reached through the ~/bin symlink the command line is
+    # '/bin/bash /home/rburkey/bin/run-configs.sh', which that cannot match.
+    # The parent then survived a stop and launched the next configuration --
+    # two sweeps sharing jobs/1-4, where HALSFC's fixed-name workfiles
+    # corrupt each other.  Requiring a path after 'bash ' keeps this from
+    # matching an interactive 'bash -c ...' that merely mentions the script.
+    'bash /[^ ]*run-configs\.sh'
     'dass-run\.py'
     'compileLinkCompare'
     'HALSFC'
