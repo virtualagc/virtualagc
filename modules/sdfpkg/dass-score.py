@@ -136,6 +136,8 @@ def main():
           % ("cfg", "loaded", "exact", "rate", "+patches", "rate",
              "+unknown", "rate"))
     TT = RR = EE = FF = 0
+    XS = XF = NF = 0
+    excused = []
     for cfg in cfgs:
         aug = json.load(io.open("%s/augmented-%s.json" % (M, cfg)))
         r = halfwords("%s/%s.fcm" % (M, cfg))
@@ -151,13 +153,22 @@ def main():
                     break
                 cont.add(rng[i][2]); cont.add(rng[j][2])
         tot = raw = ex1 = ex2 = 0
+        exhS = exhF = nfill = 0
         for n, g in aug.items():
             s, e = g["start"], g["end"]
             if e + 1 > len(r) or n in cont:
                 continue
             sz = e - s + 1
+            # Halfwords the listing never stated a value for, which
+            # unlinkMAFGEN2 synthesised fill into.  We neither match nor differ
+            # there, so they are excused rather than tested.
+            never = sum(1 for i in range(s, e + 1)
+                        if i not in pr and r[i] in FILL)
             if sum(1 for i in range(s, e + 1) if r[i] in FILL) / sz >= 0.5:
+                nfill += 1
+                exhF += never
                 continue
+            exhS += never
             tot += 1
             if o.get(n) != (s, sz):
                 continue
@@ -170,11 +181,36 @@ def main():
             if all(a not in pr and r[a] in FILL for a in d1):
                 ex2 += 1
         TT += tot; RR += raw; EE += ex1; FF += ex2
+        XS += exhS; XF += exhF; NF += nfill
+        excused.append((cfg, exhS, exhF, nfill))
         print("%-5s %7d %7d %6.1f%% %9d %6.1f%% %10d %6.1f%%"
               % (cfg, tot, raw, 100 * raw / tot, ex1, 100 * ex1 / tot,
                  ex2, 100 * ex2 / tot))
     print("%-5s %7d %7d %6.1f%% %9d %6.1f%% %10d %6.1f%%"
           % ("ALL", TT, RR, 100 * RR / TT, EE, 100 * EE / TT, FF, 100 * FF / TT))
+
+    # EXCUSED HALFWORDS.  The columns above are CSECT pass/fail and are at 100%,
+    # so they cannot show progress on the one large thing still outstanding:
+    # addresses the MAFGEN listing never stated a value for.  unlinkMAFGEN2
+    # synthesises fill there, we neither match nor differ, and the CSECT is
+    # excused.  An initial value recovered from the compiler's SDF converts each
+    # such halfword from an excuse into a test, so THIS is the number that
+    # measures that work.
+    #
+    # Split, because the two halves behave differently.  A halfword in a scored
+    # CSECT becomes a comparison the moment a value is supplied.  One in a CSECT
+    # excluded as at least half fill does more: supplying values can carry the
+    # CSECT below the fill threshold and bring it into the denominator, which is
+    # where the mass-memory compools (#PCDIMMU, #PCVNMMU, #CDCDDG9) sit.
+    print("\nEXCUSED HALFWORDS -- the listing stated no value, so neither"
+          " matched nor differing")
+    print("%-5s %14s %16s %14s" % ("cfg", "in scored", "in mostly-fill",
+                                   "mostly-fill"))
+    print("%-5s %14s %16s %14s" % ("", "CSECTs", "CSECTs", "CSECTs"))
+    for cfg, a, b, c in excused:
+        print("%-5s %14d %16d %14d" % (cfg, a, b, c))
+    print("%-5s %14d %16d %14d" % ("ALL", XS, XF, NF))
+    print("total excused: %d halfwords" % (XS + XF))
 
     # REDUNDANT EXCEPTIONS.  An exception asserts no claim about an address, so
     # it goes on suppressing the comparison after the difference it covered is
