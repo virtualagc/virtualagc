@@ -1083,7 +1083,10 @@ def main():
     # evidence is read at references to a section's FIELDS, and `contents` --
     # the field names -- is what dass-fields.py adds AFTER this script has run;
     # marking here saw no contents and marked nothing.
-    json.dump(augmented, open(out, "w"))
+    # Pretty-printed, like unlinkMAFGEN2.py's csects-<cfg>.json: these are read
+    # by people and grepped from the command line at least as often as they are
+    # parsed, and a single 200KB line is usable by neither.
+    json.dump(augmented, open(out, "w"), indent=2)
 
     print(f"{config}: {len(index)} CSECTs in the index, "
           f"{len(seen)} symbols unresolved by lnk101, "
