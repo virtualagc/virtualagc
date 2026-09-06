@@ -144,7 +144,7 @@ PY
 # worth 19 sections (837 -> 856).  Neither signal alone will do: excluding
 # everything another deck names drops 691 modules this configuration really
 # uses and collapses the score to 507.
-python3 - "$AUG" "$PWD/CON80" "$ROOT" link/csect-to-object.json link/objlist-$CFG-trim.txt \
+python3 - "$AUG" "$PWD/CON80" "$ROOT" link/csect-to-object.json link/objlist-$CFG-trim.txt "$CFG" \
         > link/objlist-$CFG.txt <<'PY'
 import io, os, re, json, sys
 aug=json.load(io.open(sys.argv[1])); C=sys.argv[2]; root=sys.argv[3]
@@ -166,27 +166,87 @@ def chain(top):
             m = re.search(r'INCLUDE\s+\w+\(([^)]*)\)', b)
             if m: names.update(y.strip() for y in m.group(1).split(","))
     return names
-mine = chain(root)
-others = set()
-# Alternative CONFIGURATIONS only.  MFB14 and OPS0 are NOT alternatives --
-# they are decks of this same image (PHASE14 includes MFB14, and PHASE15 maps
-# it), so treating them as "another configuration" drops CSAPDT, CSAPCT and
-# CSDRTCCM, which S2 plainly contains, and costs 5 sections.
-for r0 in ("GNC1","GNC2","GNC3","GNC8","GNC9","SM2","SM4","PL9","SSW",
-           "TEXTGPH","MFB3","MFB9"):
-    if r0 != root: others |= chain(r0)
+# WHICH OVERLAY ALTERNATIVE IS RESIDENT: ASK THE PHASE ORDER, NOT THE DECK TEXT.
+#
+# The previous rule dropped a module when its CSECT overlapped another AND some
+# other configuration's deck named it while this one's chain did not.  That is
+# the wrong signal.  A module reached by lnk101's on-demand library search is
+# named by no deck at all -- the CS2INB and CGBIH2 case -- so the rule dropped
+# modules this image genuinely holds.  S2 is the clearest: it dropped CSASAT,
+# leaving #PCSASAT an address-only external-syms placeholder with no content,
+# and DCDDG9 then covered the region.  The dump holds CSASAT's EU table there.
+#
+# The decks answer it directly.  A phase deck declares its base ("MAJOR FUNCTION
+# BASE IS PHASE THREE") and its OVERLAY region, and the GRT rows are (base,
+# overlay) pairs: phases 3, 9 and 14 overlay Z2 and are the major-function
+# bases; 4-8 base on 3, 12 on 9, 15/16 on 14, all overlaying Z3.  A
+# configuration therefore loads its phases in a known order and a later phase
+# overwrites an earlier one.  For S2 (10,2,13,3,14,15) PHASE02 places #CDCDDG9
+# and PHASE14/15 place #PCSASAT over it -- which is what the dump holds.
+#
+# Two things follow, measured separately:
+#   * DROP the loser of each overlapping group, the CSECT whose latest placing
+#     phase is earliest.  Alone: 76807 -> 64892 real halfword differences.
+#   * ORDER what remains so that, among modules owning a contested CSECT, the
+#     later phase links last.  Ordering the WHOLE list instead reaches 52838 but
+#     costs a CSECT and regresses 47 others, because it reorders modules that
+#     never collide and changes which definition of a shared #E* section wins.
+#     Restricting the reorder to contested owners keeps 8292 of 8292.
+# Together: 76807 -> 54692 real differences, whole-image identity 97.09% ->
+# 97.93%, CSECT score unchanged.
+IPL = [10, 2, 13, 3]
+GRT = {"G16": (3, 4), "G2": (3, 5), "G3": (3, 6), "G8": (3, 7),
+       "G9": (3, 8, 18), "P9": (9, 12), "S2": (14, 15), "S4": (14, 16),
+       "SSW": ()}
+cfg = sys.argv[6]
+order = IPL + list(GRT.get(cfg, ()))
+pos = {}
+for k, ph in enumerate(order):
+    f = "phase/PHASE%02d.sym.json" % ph
+    if not os.path.exists(f):
+        continue
+    for e in json.load(io.open(f)).get("sections", []):
+        pos[e["name"]] = max(pos.get(e["name"], -1), k)
+
 rng = sorted((g["start"], g["end"], n) for n, g in aug.items())
-overlap = set()
-for i in range(len(rng) - 1):
-    for j in range(i + 1, len(rng)):
-        if rng[j][0] > rng[i][1]: break
-        overlap.add(rng[i][2]); overlap.add(rng[j][2])
-drop = {os.path.splitext(c2o[n])[0] for n in overlap
-        if n in others and n not in mine and n in c2o}
-drop -= {os.path.splitext(c2o[n])[0] for n in mine if n in c2o}
-for l in io.open(sys.argv[5]).read().split():
-    if os.path.splitext(os.path.basename(l))[0] not in drop:
-        print(l)
+groups, cur, end = [], [], -1
+for s0, e0, n in rng:
+    if cur and s0 <= end:
+        cur.append(n); end = max(end, e0)
+    else:
+        if len(cur) > 1: groups.append(cur)
+        cur, end = [n], e0
+if len(cur) > 1: groups.append(cur)
+
+contested, losers = set(), set()
+for names in groups:
+    contested.update(names)
+    best = max(pos.get(n, -1) for n in names)
+    losers.update(n for n in names if pos.get(n, -1) < best)
+
+o2c = {}
+for cs, ob in c2o.items():
+    o2c.setdefault(os.path.splitext(ob)[0], []).append(cs)
+# Drop a module only if EVERY CSECT it supplies here is a loser; one that also
+# owns an uncontested CSECT still has to be linked for that.
+drop = set()
+for m, cs in o2c.items():
+    here = [x for x in cs if x in aug]
+    if here and all(x in losers for x in here):
+        drop.add(m)
+
+keep = [l for l in io.open(sys.argv[5]).read().split()
+        if os.path.splitext(os.path.basename(l))[0] not in drop]
+
+def key(i):
+    m = os.path.splitext(os.path.basename(keep[i]))[0]
+    mine = [c for c in o2c.get(m, []) if c in contested]
+    if not mine:
+        return (0, 0, i)          # never collides: leave where it was
+    return (1, max(pos.get(c, -1) for c in mine), i)
+
+for i in sorted(range(len(keep)), key=key):
+    print(keep[i])
 PY
 echo "linking $(wc -l < link/objlist-$CFG.txt) objects"
 "$BIN/lnk101" "@link/objlist-$CFG.txt" \
