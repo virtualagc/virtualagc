@@ -7,7 +7,7 @@ Purpose:    Recover memory contents that unlinkMAFGEN2 did not scrape, from
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 
 Usage:      dass-literals.py --config=SSW [--out=F.fcm]
-                            [--exceptions=F.txt] [--report]
+                            [--report]
 
 THE PROBLEM.  MAFGEN's data listing does not print every halfword of a CSECT.
 For a #D it prints the "??? ADCONS,LITERALS,ETC. ???" region it recognises and
@@ -229,7 +229,6 @@ def main():
     config = "SSW"
     mafgen = DEFAULT_MAFGEN
     out = None
-    exceptionsOut = None
     report = False
     for p in sys.argv[1:]:
         if p.startswith("--config="):
@@ -238,8 +237,6 @@ def main():
             mafgen = Path(p.partition("=")[2]).expanduser()
         elif p.startswith("--out="):
             out = p.partition("=")[2]
-        elif p.startswith("--exceptions="):
-            exceptionsOut = p.partition("=")[2]
         elif p == "--report":
             report = True
         else:
@@ -248,25 +245,22 @@ def main():
     if out is None:
         out = f"{config}.literals.fcm"
 
-    if exceptionsOut is None:
-        exceptionsOut = f"exceptions-{config}.txt"
+    # NO EXCEPTIONS FILE IS WRITTEN.  This used to emit exceptions-<config>.txt
+    # from the starred locations the PATCH SUMMARY does not cover.  Classifying
+    # all 877 of those entries against the eight dumps: 397 asserted a
+    # difference our build does not have, 479 lay outside every scored CSECT,
+    # and the one that could matter -- SSW 38266 MISSION_ID -- is carried by
+    # exceptions-<config>-curated.txt already.  The file could not change a
+    # score, and 45% of it was untrue.
+    #
+    # The scrape itself is kept: it is what the self-check below tests, and a
+    # parse error here would mean the .fcm was built from a misread listing.
     starred = recoverStarred(dassPath(mafgen, config))
     patchLM = recoverPatchLM(dassPath(mafgen, config))
     needed = {a: v for a, v in starred.items() if a not in patchLM}
-    with open(exceptionsOut, "w") as f:
-        f.write(f"# exceptions-{config}.txt -- locations changed after the "
-                f"build, scraped from\n# {dassPath(mafgen, config).name}, "
-                f"where MAFGEN marks the value with '*'.\n"
-                f"# Locations the PATCH SUMMARY gives a load-module value for "
-                f"are OMITTED:\n# unlinkMAFGEN2 writes that value into the "
-                f".fcm, so the image is as-built\n# there and our build should "
-                f"match it without an exception.\n"
-                f"# address value name\n")
-        for address, (value, name) in sorted(needed.items()):
-            f.write(f"{address:05X} {value:04X} {name}\n".rstrip() + "\n")
     print(f"{config}: {len(starred)} location(s) marked as changed after the "
           f"build, {len(starred) - len(needed)} of them covered by the PATCH "
-          f"SUMMARY -> {len(needed)} exception(s) in {exceptionsOut}")
+          f"SUMMARY, {len(needed)} not (no exceptions file is written)")
     # Self-check: every entry must match the reference image, since
     # unlinkMAFGEN2 scraped the starred value into it.  A mismatch means the
     # line was parsed wrongly, not that the image is wrong.
