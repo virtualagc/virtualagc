@@ -52,6 +52,21 @@ LOG=~/ForClaude/run-configs.log
 exec >>"$LOG" 2>&1
 echo "=================== started $(date -Is)"
 
+# SOURCE MANIFEST.  A sweep is only interpretable against the tree it compiled,
+# and comparing two runs otherwise means diffing trees by hand afterwards -- and
+# getting it wrong: a first attempt compared only the top-level sources and
+# missed that the release delta lives largely in INCL80, where one changed
+# include (FLEXDATA, for CZ3COM) moves a module the file-level diff calls equal.
+#
+# The digest line answers "same tree?" at a glance; the manifest answers "which
+# files?".  Name it for the start time so it survives the log being renamed.
+MANIFEST=$HOME/ForClaude/run-configs-sources-$(date +%Y%m%dT%H%M%S).md5
+( cd "$CLC" && find APPLSRC SSSRC INCL80 CON80 -type f 2>/dev/null | sort \
+    | xargs -r md5sum ) > "$MANIFEST" 2>/dev/null
+echo "sources: $CLC"
+echo "sources: $(wc -l < "$MANIFEST") files, digest $(md5sum < "$MANIFEST" | cut -d" " -f1)"
+echo "sources: manifest $MANIFEST"
+
 # Snapshot the scripts, and run from the snapshot.  A sweep takes three and a
 # half hours, and editing a dass-*.py file while one is in flight silently
 # changes the tooling underneath it: an edit eleven minutes into a run forced a
