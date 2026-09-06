@@ -157,3 +157,19 @@ reproduce itself", and "`csects-*.json` is 1077 CSECTs stale".)
   This also explains why only 248 of 1804 matched after the count fix: the
   content was right but compared against the wrong offset, so my "the removed
   62 are not the tail" inference is ALSO unsafe and is withdrawn.
+- **CORRECTION to the entry above: `#PCSASAT` is NOT 48 halfwords out.**  At
+  `031168` both images hold `01BE C6C6` -- `01BE` is 446, the ANA entry count,
+  exactly where HALSTAT puts it -- so the table starts at `03116A` in BOTH and
+  the layout is right.  The twelve hits at `03119A` were later entries, not the
+  table head.  What our image actually holds there is a MIXTURE: `4051 2CD7` at
+  the start but the dump's own `4051 F241` at `03117E` and `031192`.  That is
+  two modules overwriting each other in a contested region, which is the
+  unresolved overlay problem and not a layout defect.  The withdrawal of "the
+  removed 62 are not the tail" stands withdrawn on different grounds: the
+  comparison was against a partially-overwritten region, so it says nothing
+  either way.
+- **Three consecutive wrong conclusions on this region** -- `#PCDWDOW`, "48
+  halfwords late", and the ULP mis-encoding that started it -- all from
+  reasoning about a region whose contents are a mixture of two modules.  Do not
+  analyse content inside a contested region until the overlay question is
+  settled for it; the bytes there are not attributable to any one module.
