@@ -138,6 +138,8 @@ def main():
     TT = RR = EE = FF = 0
     XS = XF = NF = 0
     excused = []
+    WN = WEQ = WNS = 0
+    whole = []
     for cfg in cfgs:
         aug = json.load(io.open("%s/augmented-%s.json" % (M, cfg)))
         r = halfwords("%s/%s.fcm" % (M, cfg))
@@ -152,6 +154,20 @@ def main():
                 if rng[j][0] > rng[i][1]:
                     break
                 cont.add(rng[i][2]); cont.add(rng[j][2])
+        # WHOLE IMAGE.  The CSECT columns are a proxy; the actual goal is that
+        # our image IS the recovered image.  Counted over every halfword the
+        # two have in common, with differences split into the one class the
+        # recovery is known to be wrong about -- addresses MAFGEN stated no
+        # value for, where unlinkMAFGEN2 synthesises fill from the address --
+        # and everything else, which is a real disagreement wherever it sits,
+        # inside a scored CSECT or not.
+        wn = min(len(r), len(m))
+        weq = sum(1 for i in range(wn) if r[i] == m[i])
+        wns = sum(1 for i in range(wn)
+                  if r[i] != m[i] and i not in pr and r[i] in FILL)
+        whole.append((cfg, wn, weq, wns, wn - weq - wns))
+        WN += wn; WEQ += weq; WNS += wns
+
         tot = raw = ex1 = ex2 = 0
         exhS = exhF = nfill = 0
         for n, g in aug.items():
@@ -188,6 +204,22 @@ def main():
                  ex2, 100 * ex2 / tot))
     print("%-5s %7d %7d %6.1f%% %9d %6.1f%% %10d %6.1f%%"
           % ("ALL", TT, RR, 100 * RR / TT, EE, 100 * EE / TT, FF, 100 * FF / TT))
+
+    # Printed after the CSECT table, not instead of it: the two measure
+    # different things and moving in opposite directions is diagnostic.  SSW and
+    # P9 score 100% of their CSECTs and reproduce under a third of their images,
+    # because they load few CSECTs and their listings state little.
+    print("\nWHOLE IMAGE -- halfwords identical to the recovered image")
+    print("%-5s %10s %10s %8s %13s %11s"
+          % ("cfg", "halfwords", "identical", "rate", "never-stated",
+             "real diff"))
+    for cfg, n, eq, ns, rd in whole:
+        print("%-5s %10d %10d %7.2f%% %13d %11d"
+              % (cfg, n, eq, 100.0 * eq / n, ns, rd))
+    print("%-5s %10d %10d %7.2f%% %13d %11d"
+          % ("IMAGE", WN, WEQ, 100.0 * WEQ / WN, WNS, WN - WEQ - WNS))
+    print("identity excusing only never-stated addresses: %.2f%%"
+          % (100.0 * (WEQ + WNS) / WN))
 
     # EXCUSED HALFWORDS.  The columns above are CSECT pass/fail and are at 100%,
     # so they cannot show progress on the one large thing still outstanding:
