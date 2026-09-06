@@ -32,7 +32,15 @@ set -u
 if [ -z "${PFSDIR:-}" ]; then
     if [ -d mafgen ]; then PFSDIR=$(pwd); else PFSDIR=$HOME/workspace/PFS; fi
 fi
-CLC=~/ForClaude/OI340600-clc
+# WHICH TREE IS SWEPT.  This was OI340600-clc, which compiled OI340600
+# sources against the OI340700 dumps and attributed the residue to version
+# drift.  That was the right question while the dumps were what we were
+# trying to understand.  It is the wrong one now: isolating those
+# version-related differences and reconstructing OI340700 source from them
+# IS the work, so a sweep that factors them out measures precisely the gap
+# we exist to close -- which is why its version no-claim class has decayed
+# to one entry in the whole corpus.  $CLC overrides.
+CLC=${CLC:-$HOME/ForClaude/OI340700-clc}
 JOBS=~/ForClaude/jobs
 # Resolve through the symlink: these scripts are reached via ~/bin, and
 # DB below hangs off SRC.  dirname "$0" would make it ~/bin/dass-compare.db,
