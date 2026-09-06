@@ -202,6 +202,29 @@ def recoverStarred(path):
     return starred
 
 
+def recoverPatchLM(path):
+    """address -> load-module value, from the listing's PATCH SUMMARY.
+
+    unlinkMAFGEN2 now writes these over the starred values when it builds the
+    .fcm, so the image is the AS-BUILT one.  A starred location that the patch
+    summary covers therefore needs no exception -- our build should match it --
+    and only a starred location the summary does not cover still does.
+    """
+    rows = {}
+    seen = False
+    row = re.compile(r'^([0-9A-F]{6})\s+\S+?\s*\+([0-9A-F]{4})\s+'
+                     r'([0-9A-F]{4})\s+([0-9A-F]{4})\s*$')
+    for line in open(path, errors="replace"):
+        line = line.rstrip("\r\n")[1:]
+        if not seen:
+            seen = "P A T C H   S U M M A R Y" in line
+            continue
+        m = row.match(line)
+        if m:
+            rows[int(m.group(1), 16)] = int(m.group(3), 16)
+    return rows
+
+
 def main():
     config = "SSW"
     mafgen = DEFAULT_MAFGEN
@@ -228,15 +251,22 @@ def main():
     if exceptionsOut is None:
         exceptionsOut = f"exceptions-{config}.txt"
     starred = recoverStarred(dassPath(mafgen, config))
+    patchLM = recoverPatchLM(dassPath(mafgen, config))
+    needed = {a: v for a, v in starred.items() if a not in patchLM}
     with open(exceptionsOut, "w") as f:
         f.write(f"# exceptions-{config}.txt -- locations changed after the "
                 f"build, scraped from\n# {dassPath(mafgen, config).name}, "
                 f"where MAFGEN marks the value with '*'.\n"
+                f"# Locations the PATCH SUMMARY gives a load-module value for "
+                f"are OMITTED:\n# unlinkMAFGEN2 writes that value into the "
+                f".fcm, so the image is as-built\n# there and our build should "
+                f"match it without an exception.\n"
                 f"# address value name\n")
-        for address, (value, name) in sorted(starred.items()):
+        for address, (value, name) in sorted(needed.items()):
             f.write(f"{address:05X} {value:04X} {name}\n".rstrip() + "\n")
     print(f"{config}: {len(starred)} location(s) marked as changed after the "
-          f"build -> {exceptionsOut}")
+          f"build, {len(starred) - len(needed)} of them covered by the PATCH "
+          f"SUMMARY -> {len(needed)} exception(s) in {exceptionsOut}")
     # Self-check: every entry must match the reference image, since
     # unlinkMAFGEN2 scraped the starred value into it.  A mismatch means the
     # line was parsed wrongly, not that the image is wrong.
@@ -246,7 +276,10 @@ def main():
         byte = address * 2
         if byte + 1 >= len(check):
             continue
-        if struct.unpack_from(">H", check, byte)[0] == value:
+        # The image holds the load-module value where the PATCH SUMMARY has
+        # one, and the starred value elsewhere.
+        expect = patchLM.get(address, value)
+        if struct.unpack_from(">H", check, byte)[0] == expect:
             good += 1
         else:
             bad += 1
