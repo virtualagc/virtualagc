@@ -142,3 +142,18 @@ reproduce itself", and "`csects-*.json` is 1077 CSECTs stale".)
   `max(current, rule)`, which consults the answer, and reported +13020.  The
   pure rule is -572965.  Any rule that selects by fit against the dump is not a
   rule; check the expression, not just the number.
+- **`#PCSASAT`: our CONTENT is right and our LAYOUT is 48 halfwords out.**  The
+  dump's first ANA entry is `4051 F241 C05E 4D10`; that exact pattern occurs 12
+  times in our own image, first at `03119A`, where HALSTAT puts the table at
+  `03116A` (`CSECT: #PCSASAT OFFSET: 0006A8`).  So the source values compile
+  correctly -- `3.2010281E-01` and `-3.6836344E-01` are the dump's values to
+  the ULP -- and the table is simply 48 halfwords late.  Both tables check out
+  against HALSTAT independently: EU is 165 entries plus `5#(...)` spares = the
+  declared 170 = 1700 halfwords (`OFFSET 000002 SIZE 0006A4`), and ANA is 451
+  (`OFFSET 0006A8 SIZE 00070C`).  1700 + 2 puts ANA at 1704; ours sits at 1752.
+  **What occupies the extra 48 halfwords between the EU table and the ANA table
+  is not identified**, and finding it is worth the 1804-halfword table and
+  probably the whole 3505-halfword region -- the largest single remaining item.
+  This also explains why only 248 of 1804 matched after the count fix: the
+  content was right but compared against the wrong offset, so my "the removed
+  62 are not the tail" inference is ALSO unsafe and is withdrawn.
