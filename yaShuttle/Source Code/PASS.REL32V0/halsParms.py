@@ -301,6 +301,24 @@ def getParms(stem, extraParms="", options=None, original=False, sdl=None,
     return extraParms + ",".join(opts) + ",CARDTYPE=" + \
            getCardtype(stem, original=original, release=release)
 
+def getParmsForCompare(stem, extraParms="", release=None):
+    '''getParms for a build that will be COMPARED against the DASS images.
+
+    Exists because forgetting sdl=True is silent and expensive.  DEFAULT_SDL is
+    False because compilePASS and compileLinkRun want it that way; the objects
+    in a compileLinkCompare tree are SDL builds, since the memory images in
+    PFS/mafgen are.  Compiled without it, every PROGRAM gains a START CSECT and
+    an "LHI R0,<stack>" prologue -- six extra object records -- and the module
+    no longer matches the dump.
+
+    A session that recompiled nineteen modules with a bare getParms() saw the
+    corpus fall from 8285 to 8234 of 8292 and spent a long time concluding the
+    build tree could not reproduce itself.  It could; the caller was wrong.
+    Any ad-hoc recompile against the corpus should come through here.
+    '''
+    return getParms(stem, extraParms=extraParms, sdl=True, release=release)
+
+
 def stemOf(filename):
     '''The stem of a source filename, for callers that hold a path rather than
     a stem.  compileLinkRun and compileLinkCompare used to test "if name in
