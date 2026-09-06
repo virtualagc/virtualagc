@@ -59,6 +59,7 @@ cardtypesBySourceFile = {
     "CS4PDT" : "FCRC",
     "PGSCRU" : "FCRC",
     "PGPPLD" : "FCRC",
+    "PGGPCF" : "FCRC",
     # GKFHOR's five T cards were the whole of its M1 "ILLEGAL CARD TYPE"
     # failure; S, its only other unusual column 1, is a standard type.  Both
     # readings parse and compile, since the T lines wrap an IF/ELSE around a
