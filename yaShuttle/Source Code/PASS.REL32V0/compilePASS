@@ -118,6 +118,16 @@ The only OPTIONS available are:
     --no-assemble   Compile the HAL/S and display decks but do not assemble
                     the AP-101S sources in SSSRC/, APPLSRC/, RUNASM/ and
                     ZCONASM/.  (A full build does both.)
+    --no-compiler-check
+                    Do not check whether HALSFC-PASS1 and its companions are
+                    older than the sources they are built from.  The check
+                    exists because those binaries are untracked build products
+                    that nothing in a PASS build rebuilds, so a fix committed
+                    to XCOM-I or to the compiler's XPL reaches the flight
+                    software only when somebody remembers `make all` by hand.
+                    Use this when the mtimes are misleading rather than the
+                    binaries stale -- a fresh git checkout stamps every source
+                    with the checkout time.
     --halt-on-error Abandon the run on the first failure that is not one of the
                     recognized, delayable kinds, as compilePASS always used to.
                     The default is now to record it and carry on: a run takes an
@@ -221,6 +231,7 @@ assembleToo = True
 unrecognizedFailures = []
 extraParms = ""
 sdl = None
+compilerCheck = True
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg)
@@ -263,6 +274,8 @@ for parm in sys.argv[1:]:
         providerDeps = False
     elif parm == "--no-seed-cycles":
         seedCycles = False
+    elif parm == "--no-compiler-check":
+        compilerCheck = False
     elif parm == "--halt-on-error":
         haltOnError = True
     elif parm == "--no-assemble":
@@ -287,6 +300,71 @@ for parm in sys.argv[1:]:
     else:
         print("Unrecognized parameter:", parm)
         print(helpMsg)
+        outtaHere(1)
+
+# ---------------------------------------------------------------------------
+# IS THE COMPILER ITSELF UP TO DATE?
+#
+# HALSFC-PASS1 and its ten companions are build products, untracked by git, and
+# nothing in a PASS build rebuilds them.  A fix committed to XCOM-I or to the
+# compiler's XPL therefore reaches the flight software only when somebody
+# remembers to run `make all` in PASS.REL32V0 by hand.
+#
+# On 2026-09-06 that was found not to have happened for 26 days.  XCOM-I
+# 8310a61db corrected MONITOR(9,5) to the original EXPON algorithm on 08-11;
+# the binaries dated from 08-07; and every corpus measurement in between was
+# made with a compiler that folded 10**(-6) one ULP wrong.  Nothing announced
+# it.  Worse, the four CSECTs it spoiled had been written off in
+# mafgen/defects.txt as defects in the ORIGINAL compiler -- our own stale
+# toolchain masquerading as IBM's bug, for a month.
+#
+# So refuse, the way dass-resolve.py refuses a stale phase link, and say what
+# to run.  A manual step handed to a person is a step that gets forgotten.
+def compilerIsStale():
+    """(oldest binary, newest source) if the compiler needs rebuilding."""
+    here = Path(__file__).resolve().parent
+    sources = []
+    xcomi = here.parent.parent.parent / "XCOM-I"
+    if xcomi.is_dir():
+        for pat in ("*.c", "*.h", "*.py"):
+            sources += list(xcomi.glob(pat))
+    sources += list(here.glob("*.PROCS/*.xpl"))
+    if not sources:
+        return None                      # cannot tell; say nothing
+    newestSource = max(sources, key=lambda f: f.stat().st_mtime)
+    oldestBinary = None
+    for name in ("HALSFC-PASS1", "HALSFC-PASS1B", "HALSFC-OPT", "HALSFC-OPTB",
+                 "HALSFC-AUXP", "HALSFC-PASS2", "HALSFC-PASS2B", "HALSFC-PASS3",
+                 "HALSFC-PASS3B", "HALSFC-PASS4", "HALSFC-FLO"):
+        found = shutil.which(name) or (here / name if (here / name).exists()
+                                       else None)
+        if found is None:
+            continue
+        f = Path(found)
+        if oldestBinary is None or f.stat().st_mtime < oldestBinary.stat().st_mtime:
+            oldestBinary = f
+    if oldestBinary is None:
+        return None                      # not on PATH; HALSFC will complain
+    if oldestBinary.stat().st_mtime < newestSource.stat().st_mtime:
+        return (oldestBinary, newestSource)
+    return None
+
+if compilerCheck:
+    stale = compilerIsStale()
+    if stale != None:
+        binary, source = stale
+        print("The HAL/S-FC binaries are older than the sources they are built")
+        print("from, so this build would not contain whatever changed:")
+        print("    %s" % binary)
+        print("        built %s" % datetime.fromtimestamp(binary.stat().st_mtime))
+        print("    %s" % source)
+        print("        changed %s" % datetime.fromtimestamp(source.stat().st_mtime))
+        print("Rebuild the compiler first:")
+        print("    ( cd \"%s\" && make all )" % binary.parent
+              if binary.parent.name == "PASS.REL32V0" else
+              "    ( cd <PASS.REL32V0> && make all )")
+        print("or pass --no-compiler-check if the mtimes are misleading rather")
+        print("than the binaries stale.")
         outtaHere(1)
 
 if not Path("SSSRC").is_dir():
