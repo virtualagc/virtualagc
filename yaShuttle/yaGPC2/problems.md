@@ -9729,6 +9729,516 @@ The tape remains blocked on `#PFCMGPT` overflow — 447 descriptors against a
 capacity of 343 — and 65 CSECTs still show an SDF-versus-listing copy-count
 mismatch and have never been compared.
 
+### 8.59 The phase idea, tested: which phase LINKS the table, not who belongs to it
+
+§8.58 named phase membership of the defining module as the thing to test next.
+Tested, and the membership form is **refuted**: `CGBOBF` and `CRBMCI` are in all
+eight configurations' phase sets, including the ones that zero their symbols.
+
+What decides it is **which phase links the referencing table**, read straight out
+of `phase/PHASE*.sym.json`.  Those links already ran with the real `--map-lib`
+chains, so nothing has to model MAP semantics.  `PHASE08` maps MAP2+MAP3 and
+`PHASE09` maps MAP2 alone, and `FIOHFE89` is linked in phase 8 for G9 and phase 9
+for P9 — which is why the dump holds two forms of it.
+
+Two restrictions make it safe.  Only symbols that are **not** CSECT names (a
+CSECT address is a system-wide constant, handled by the existing rule; zeroing
+one breaks the invariant tables reaching `FIOMDPPG`), and only where the
+referencing table is non-invariant, counting a single placement as no evidence.
+Unrestricted it fires on whatever our phase decks omit and costs 77 CSECTs —
+phase 8's table holds 1502 entries where the system has tens of thousands.
+
+Result 8288 → 8289, with G9 and P9 exact (1041/1041, 567/567) and six
+configurations at 100%.
+
+**A measurement hazard, now automated away.**  The phase tables were a day stale,
+predating every source fix of that session, and the first measurement of this
+rule was wrong in *both* directions — it reported 8288 → 8287 where refreshing
+them gives 8288 → 8289.  `dass-resolve.py` now exits with an error if any
+`phase/PHASE*.sym.json` is older than `objects/`.  That guard earned its keep
+later the same week, refusing eight resolves that would otherwise have re-read
+stale images and reported a stale score as a fresh one.
+
+### 8.60 `CS2INB`'s CHANGE card, and why deck order lies about provenance
+
+**The `CS2INB` coverage gap was a CHANGE card.**  `SM2TAB` has `CHANGE
+#PCSAINB(#PCS2INB)` immediately above `INCLUDE SYSLIBL1(#ESAFACQ)`, and a CHANGE
+applies to the INCLUDE that *follows* it.  Phase 15 loaded SAFACQ, renamed the
+reference, and then reported "Undefined COMPOOL: #PCS2INB" — `lnk101`'s library
+search is on demand and never goes looking for the name it has just renamed *to*.
+It is the same deadlock `change_includes()` breaks one level up.
+`dass-phaselists.py` now collects CHANGE targets; S2 gains `FIOCDATS`.
+
+**`CGBIH2` needed no repair at all.**  No deck names `#PCGBIH2` and no index
+places it; it reaches phase 2 only by library search.  The defect there was the
+attribution, not the coverage.
+
+**Deck order does not say which phase produced the copy a dump holds.**  SSW's
+`FIOHFEPG` is linked by phases 2 and 3, and the dump holds phase 2's — 70
+halfwords of 1144 differ against phase 3's 1099 — so "last phase in deck order"
+blamed a link that never produced it and zeroed `TFIVH251`.  Comparing the phase
+copies against the dump settles it directly and settles it hard: P9's `FIOCDATS`
+matches its phase-9 copy in all 580 halfwords.  All six known cases come out
+right, where deck order got two wrong in each direction.
+
+8290 → 8291 of 8292.  From here the only CSECT left in the whole corpus was
+`#PCS2120`, the `dfg` budget defect of §8.54.
+
+### 8.61 HALSTAT is a source-level oracle, and its trailing number is a source record
+
+The single most useful discovery of this stretch, and it had been sitting unused:
+`dass-versions.py` reads HALSTAT only for revision levels and extents, and its
+symbol dictionary had never been looked at.
+
+**It answered the `CVAS_INB` question outright.**  Symbol 29246: `ARRAY(26)
+INTEGER INITIAL() ('EQUATED')`, `(CSECT: #PCVHPLD OFFSET: 000011) SIZE:
+00001A(26) BIAS: 000001(1)`, at source record 016352 — exactly where OI34.06
+declares `ARRAY(44)`.  So the DASS listing's 26 is neither MAFGEN truncation nor
+an intentional overrun into the `FCMBMTG9` table that follows it in memory.
+
+**The trailing number on a HALSTAT symbol is its SOURCE RECORD**, which makes the
+file far more than a size oracle.  `CVAS_INB`'s five EQUATEs sit at 016354,
+016356, 016358, 016360 and 016362 (statements 14–18) and are `TFIVPF12`,
+`TFIVPF13`, `TFIVPF22`, `TFIVPF23`, `TFIVPF24` at elements 1, 9, 10, 18, 19.
+Those are the same records where OI34.06 has
+`TFIVSF11`/`SF12`/`SF13`/`SF21`/`SF22`, and **no `TFIVSF` name occurs anywhere in
+HALSTAT**.  The block was replaced in place, not appended to — which is why
+`$(30:)`, `$(32:)` and `$(33:)` looked impossible: they belong to the 44-element
+version.
+
+`TFIVPF12` is element 1, not 33, and the G9 dump says so independently:
+`FCMBMTG9+018E` is its relocation site and holds `F921`, which is `CVAS_INB`'s own
+base, where `$(33:)` gives `F941`.  `CVAS_INB` spans only `0xF921`–`0xF93A` with
+`FCMBMTG9` at `0xF93C`, so element 33 cannot exist there.  `#PCVHPLD` is now 43
+halfwords and abuts `FCMBMTG9` exactly, where `ARRAY(44)` overlapped the table by
+seventeen.
+
+`FCMBMTG9` and `FIOMVUPG` became byte-identical (0 of 1334 and 0 of 276).  Both
+had been passing only through the post-build exception list, so G9's 100% stopped
+resting on an excuse.
+
+**Retraction.**  "No scored CSECT references them, so there is nothing to derive
+the new subscripts from" was wrong.  There was — HALSTAT.
+
+**HALSTAT also distinguishes an absent INITIAL from an empty one**: beside
+`CZ3_FLEX_MDM_TABLE`'s `STRUCTURE(5) INITIAL()`, `CZ3V_FLEX_DEVICE_ID` renders as
+a bare `INTEGER RIGID`.  That is what makes `INITIAL()` readable as "clause
+present, value not rendered" rather than "no clause".  And its sub-counter
+constrains card LAYOUT, not just values: `CVAV_TDIR_NUM_FMT` at include record
+`001300+25` proves `VTLMMDIR` has twenty separate value cards and no
+`3#(0,HEX'0000')` filler, and `CSAS_INB-STRUCTURE(176)` proves the 21 aliases
+beyond copy 176 are absent, because compiling at 176 rejects them outright.
+
+### 8.62 `CZ3COM`, `F GEN`, and eleven units reconstructed
+
+`#PCZ3COM` differed from all eight dumps in the same nine halfwords, ours holding
+data where the dump holds `0000`, over `+002C..+0036`.  HALSTAT named the run
+exactly — `CZ3_FLEX_MDM_TABLE` at offset `00002C` size `00000A(10)`,
+`CZ3V_SM4_STAT` at `000036` — and showed both keeping their declarations, so only
+the values changed.  The sub-counter fixed the layout too: the values live in
+`INCL80/FLEXDATA.hal`, reached from `CZ3COM`'s `D INCLUDE FLEXDATA` at record
+001500, which is why HALSTAT writes `001500+1` and `001500+7`; the status declare
+being the *seventh* record means the table's declare must keep occupying records
+one to six and cannot be collapsed to `INITIAL(10#(0))`.  One include, eight
+CSECTs.
+
+**`F GEN`/`F END` marks per-flight generated data, and it is the most productive
+pattern so far.**  `CSPCON`, `CPASSI` and `FLEXDATA` all turned out to be blocks
+of flight-specific values that STS-134 leaves at defaults or zeros; in each case
+the entries *outside* the block already matched, which is what confirms the block
+boundary is the right edit.
+
+**`BIN(3)'1'` is a repetition, not a width.**  It means `'1'` three times = 111,
+which is what our compiler correctly emits and what the neighbouring `BIN(3)'0'`
+→ 000 confirms.  `CS2PX3`'s 27 PXT entries want `BIN'001'`.  Worth checking
+wherever a `BIN(n)'...'` literal is narrower than its field.
+
+**`GPXSRB`'s ET-camera block was wrong and is corrected**: it writes
+`CGBB_OUT12_HFA_DSCRT7/8$(3;2:8)`, not `$(4;...)`.  The dump's ACONs read
+3E89/3E85 = `#PCGBOBF`+283/+279, and at 114 halfwords a copy that is copy 3.  The
+original reconstruction derived the copy from the listing's annotation of *our*
+value instead of the dump's own ACON, and said so honestly ("zero differing
+halfwords outside relocations") — the four relocations it set aside were the
+wrong ones, and the `-1` block then hid them for weeks.
+
+**`CSASAT`: the EU scaling table is 165 entries, not 162.**  Three facts agree —
+the dump's `CSAS_SAT_EU_NUM_ENTRIES` is 165, the declared 167 needs 170 for 165
+real plus five spares, and the dump's entries 163–165 carry the same pattern our
+161–162 do.  `CSAS_SAT_ANA_NUM_ENTRIES` corrected 508 → 446; its table is left at
+513 copies (the dump implies 451), because which 62 entries were dropped cannot
+be recovered without matching 446 floats, and `#PCSASAT` is address-only in every
+link.
+
+**`CPGPCD` is a fourth R=C unit**, and its output-channel table is five generated
+entries, not thirty.  `#DPGVVAL`'s ACONs into `#PCPGPCD` were 9 and 59 halfwords
+late: nine is `STRPDT`'s R-gated NAME pointers again, and fifty is
+`CPGK_SCREEN_INDEX` = `CPGV_OUTPUT_CLASS1_INDEX`(16) + `CPGV_OUTPUT_CHAN_INDEX`,
+an `F GEN` value of 30 giving 46 two-halfword copies where HALSTAT leaves room
+for 21.  With the index at 5 our SDF reports 97, 98 and 142 — HALSTAT to the
+halfword.
+
+Eleven units in all, each verified byte-identical: `CZ3COM` (8 CSECTs), `CS2INB`
+(2), `CVAMMDIR` (2), `GDRENT` (2), `CPGPCD` (2), `CSPCON`, `CPASSI`, `CS2PX3`,
+`CSASAT`, `GPXSRB`.  Honest score 8267 → 8288 of 8292 across the pass; the
+headline stayed 8291 throughout, because these were CSECTs the version block was
+already excusing.  The raw `exact` column is the one that moved.
+
+### 8.63 RETRACTED: "the build tree does not reproduce itself"
+
+Recorded here in full because it was stated as the most important finding of a
+pass, and it was wrong.
+
+**The claim.**  Recompiling 27 modules from the tree's own sources, with no
+source edit, regressed the corpus 8285 → 8234 — 51 CSECTs.  `#DASMAUX` and
+`#DDUPNSP` broke in all eight configurations and nine code CSECTs changed size.
+The conclusion drawn was that `objects/` and `APPLSRC/`+`SSSRC/` were not in
+correspondence, that some objects had been built from source states no longer in
+the tree, and that this undermined every measurement taken from it.
+
+**The cause.**  Every ad-hoc `HALSFC` invocation of that session omitted the
+`SDL` compiler option.  `compilePASS` adds it via `--sdl` and documents exactly
+why: the DASS dumps are SDL builds, and NOSDL — the default — emits a `START`
+CSECT and an `LHI R0,<stack>` prologue for every PROGRAM that those images do not
+have.  `getParms()` does not include it, so calling `getParms` and invoking
+HALSFC directly silently builds a different program.
+
+**The proof.**  `ASMAUX` and `PGDATA` each grew by exactly 480 bytes = six
+80-byte object records, and a record-type census showed the extra content is one
+more ESD/TXT/RLD/END/SYM plus a STA record for a CSECT named `START`.  Recompiled
+with `SDL`, twelve of twelve modules come out the same size, including all nine
+that appeared to regress.
+
+**A second error made the first look worse.**  HALSFC objects are **not
+byte-stable**: two identical compiles of `CDQANNUN` differ in four bytes at
+offsets 115–118, EBCDIC digits of a timestamp.  `cmp` on objects is the wrong
+test — compare size first and treat same-size differences as noise until shown
+otherwise.  This is the same trap as the SDF non-stability recorded earlier, and
+it was walked into a second time.  (The object also carries two further date
+stamps on its identification card, found later; see §8.68.)
+
+**Fix.**  `halsParms.getParmsForCompare()` added, being `getParms(..., sdl=True)`
+and carrying the reason.  `DEFAULT_SDL` is correctly `False` for `compilePASS`
+and `compileLinkRun`; a compileLinkCompare tree is an SDL build because the
+PFS/mafgen images are.  Anything measured against the DASS images must come
+through it.
+
+### 8.64 Exceptions, part 1: 138,322 lines → 884
+
+**The criterion is the generator's own, made explicit.**  `dass-versions.py`
+emits a `-1` only where our image and the dump actually differ (`if a == b:
+continue`), so an entry whose address we now match is dead by the generator's own
+rule.  Extended to what the score can see: an entry is load-bearing only if its
+address lies in a scored CSECT — not contested, under 50% synthetic fill,
+placement matching — **and** still differs **and** is not already excused by the
+never-printed fill rule.
+
+First pass: 138,322 → 33,492 lines (75.8%), with both scores provably unchanged
+and the `+patches` column identical at 7331.  Of 16,749 distinct addresses
+remaining, exactly **three** carried the `-1` marker, against 82,725 before.  The
+version block was effectively gone; what remained was almost entirely the
+patch-summary class.
+
+**A structural mismatch worth naming.**  The exceptions files were derived from
+an OI34.06-versus-dump comparison and were being used to score an OI34.07 build.
+Every source reconstruction landed makes more of the `-1` block stale, and
+nothing detected it — six stale entries were noticed only because `FCMBMTG9`
+moved from failing to excused.  That observation is what eventually removed the
+class entirely (§8.69) and repointed the sweep (§8.70).
+
+### 8.65 `unlinkMAFGEN2.py` extracts the AS-BUILT image
+
+The design decision was Ron's: fix the extractor, not the artefact, so filenames
+and their meaning are unchanged and future users get the right thing.
+
+It reads the PATCH SUMMARY in the same pass — the loop runs to EOF and merely
+stops appending, so `asc` is unchanged and piped input still works — and writes
+the load-module values over the main-memory ones before emitting `memory.json`
+and `memory.fcm`.
+
+Verified on all eight: same size; differences confined to the patch addresses and
+no others; the new image holds LM at every one and the old held MM at every one;
+`csectTable.json` byte-identical to the committed `csects-*.json`.  Zero rows
+match the row pattern between the scan marker and the summary, so nothing
+extraneous is picked up.  `printed()`'s whole-corpus validation still holds, and
+only one address in all eight has an LM that is itself a fill pattern.
+
+`dass-literals.py` had to change with it: it generated `exceptions-<cfg>.txt`
+from the starred locations and self-checked them against the `.fcm`, which would
+now fail everywhere.  It omits any starred location the PATCH SUMMARY covers and
+checks against LM where one exists.  That class fell 27,789 → 877.
+
+**Exceptions 138,322 → 884 lines**, and only eight addresses corpus-wide still
+load-bearing.  The real measure moved with it: byte-for-byte agreement with **no
+exceptions at all** went 7252 → 7328 of 8292, and exceptions changed the outcome
+for three CSECTs instead of 209.
+
+**Method notes.**  The extractions can run concurrently — every write goes to the
+per-config `--results` directory, inputs are read-only and distinct, no chdir and
+no temp files.  They were serialised by reflex, carrying over HALSFC's
+fixed-name-workfile constraint, which does not apply here.  Also: `ps | grep`
+through the `rtk` proxy returns filtered output, and had a running extraction
+reported as dead; read `/proc/*/cmdline` for process checks.
+
+### 8.66 The `1.0E-6` constant: three wrong explanations, then the right one
+
+Four CSECTs — `#DGO1ASC`, `#DGO2ORB`, `#DGO3ENT`, `#DGO8ORB` — differed from the
+dumps in one halfword each, the last of the double `3C10C6F7A0B5ED8C` where ours
+held `...ED8D`.  It took three retractions to get to the cause.
+
+**Wrong once: "the dump is wrong."**  Entered in `mafgen/defects.txt` as the `-2`
+class, meaning our output is right and the dumped image is not.
+
+**Wrong twice: "compiler rounding, unfixable."**  Retracted when the dumps turned
+out to contain *both* forms — `ED8C` at 4 sites and `ED8D` at 19 — so the
+original compiler produced the round-to-nearest value nineteen times.
+
+**Wrong three times: "a source difference in the `GO*` family."**  Nearer, but it
+put the difference in the wrong place.
+
+**The cause.**  `INCL80/GOQCOD.hal:37` — included by `GO1ASC`, `GO2ORB`, `GO3ENT`
+and `GO8ORB` and nothing else — reads `(SCALAR$(@DOUBLE)(TFCMLTQH)  10**(-6))`,
+with `... 1800 )` on the line above supplying the `4370800000000000` that sits
+beside it in the literal pool.  The constant is **folded, not parsed**, which is
+why no decimal spelling (`1.0E-6`, `1.0E-06`, `1E-6`, `.000001`) ever reproduced
+the dump.
+
+**How HAL/S-FC folds.**  `ARITH_LITERAL` only loads the operands; the arithmetic
+is `MONITOR(9,op)`, whose `EXPON` routine (`MONITOR.ASM/MONITOR.bal`, cards
+00289400–00293000) does LSB-first binary square-and-multiply in S/360 hex
+floating point, patching `MDR` to `DDR` for a negative exponent.  So `10**(-6)` =
+`(1.0 DDR 100) DDR 10000` with the divide **truncating** at each step.
+Simulating that exactly reproduces `3C10C6F7A0B5ED8C`; every other model tried —
+truncating or rounding `1/1e6`, `(0.1)^6` either association, IEEE round-trips —
+does not.
+
+The literal pool keeps every term, factor and intermediate: a test compile of
+`10**(-6)` holds 10.0, 6.0, −6.0 *and* the folded result.  The emitted data CSECT
+keeps only what the generated code references, which is why neither our image nor
+the dump shows the operands beside the constant.
+
+**`#DSSMANT` is the same defect**, not the unattributable 9-ULP constant it had
+been recorded as.  S2 `05D63` is `#DSSMANT+0157`, dump `3CC2B65E44A8CF7C` against
+ours `...CF85` — 1.1605762E-5, i.e. `SSMANTMG.hal:1149`'s `(1.1605762 10**(-5))`.
+The 9-ULP gap is the 8-ULP error in `10**(-5)` scaled by 1.1605762.  The earlier
+note calling it "43215.484375" was a decoding slip and is withdrawn.
+
+**`mafgen/defects.txt` has been rewritten as a retraction.**  The `-2` class is
+empty and its only ever member is withdrawn.  The file's own standing rule —
+nothing may be entered that our own toolchain has not first been shown to get
+right — is precisely what was broken, and the entry stood for a month.
+
+### 8.67 The compiler was 26 days stale, and nothing said so
+
+The defect was in our port, and **the fix already existed**.  Don Schmidt
+committed it to XCOM-I on 2026-08-11 (`8310a61db`), naming
+`X'3C10C6F7A0B5ED8C'` outright and noting it also fixes `SSMANTMG` and `GTBUPL`.
+Our compiler binaries were built 2026-08-07 — four days early — so every build
+since had used a compiler known to fold `10**(-6)` one ULP wrong.
+
+The binaries are untracked build products and nothing in a PASS build rebuilds
+them, so pulling the fix updated the source and reached nothing.  Your own
+`ibmFloat` fix (`4a4324b32`) escaped the same fate by six minutes: committed
+18:57:26, binaries built 19:03:23.
+
+**Rebuilt all eleven passes.**  The literal pool now folds `10**(-6)` to `ED8C`
+while `1.0E-6` still parses to `ED8D` — exactly the split the eight dumps show.
+
+`xplBuiltins.py` needed the same fix and did not have it: its `MONITOR(9)` op 5
+was IEEE `pow()`.  `compilePASS` cross-checks the C PASS1 against this Python
+PASS1, so without it every folded `**` would have been reported as a
+disagreement.  `ibm_dp_expon()` added as a direct port of the same `EXPON`
+algorithm; verified `10**(-6)` → `3C10C6F7A0B5ED8C`, `10**(-5)` →
+`3CA7C5AC471B4780`, `2**10` → 1024, non-integer exponent falling back.
+
+**Measured result.**  Corpus rebuilt, phases rebuilt, all eight configurations
+re-resolved and re-scored.  Image-level blast radius, measured against a
+pre-change backup of the linked images: **16 halfwords across 12 CSECTs in the
+whole corpus — 5 moved onto the dump, 11 sit at addresses MAFGEN never printed,
+0 moved away.**  Surgical, and fully attributed: of the three XCOM-I commits
+since the old binaries, one was an additive CLI switch and one was already in
+them, so EXPON was the only behavioural change.
+
+**`compilePASS` now refuses to start** when the oldest of the eleven binaries
+predates the newest of `XCOM-I/{*.c,*.h,*.py}` and `PASS.REL32V0/*.PROCS/*.xpl`,
+naming both files, both timestamps and the command to run — the same idiom
+`dass-resolve.py` uses for a stale phase link.  `--no-compiler-check` overrides
+it for a fresh checkout, where mtimes are misleading rather than the binaries
+stale.
+
+### 8.68 8292 of 8292
+
+Three things closed the last gap.
+
+**The compiler rebuild** took the four `GO*` CSECTs and `#DSSMANT` (§8.67).
+
+**`--release=OI340700`**, whose omission from the first corpus rebuild had left
+`CPUSLS` and `CPTOSV` uncompiled.  `halsParms.cardtypesByRelease` holds exactly
+those two, whose type-B `INCLUDE TEMPLATE CS4_PDT` must be a directive for
+OI340600 and must not be one for OI340700 — `APPLSRC/CS4PDT.hal` is a zero-length
+tombstone.  With the flag, 0 files skipped and no stale objects: the whole
+1981-object corpus current, from current sources, under one compiler.  Their
+CSECTs had never been real failures in any case — `#PCPUSLS` and `#PCPTOSV`
+differ only in synthetic fill, 0 non-fill halfwords each.
+
+**A local `dfg` allowance for `#PCS2120`.**  Don's `7d90b05` supersedes our
+per-release table and takes `CS2050` to 734/734, but `CS2120` to 883/884: group 0
+derives 211 where the dump says 213.  Three VPARM signatures occur in that group
+and in **no other dump-validated group** — `HEX(9,8) B 3.0 H ZEROES=YES`,
+`HEX(9,3) B 2.0 H ZEROES=NO`, `HEX(1,8) B 3.0 H ZEROES=YES` — all `ATTR=B`, where
+every measured case behind `7d90b05` is `ATTR=H`.  The shortfall of 2 divides
+none of the multiplicities (4, 4, 3) and the rate count is a max-walk rather than
+a sum, so it is not attributable to an op from what we hold.  Across 116 display
+decks and all eight dumps there is exactly one non-fill disagreement, so the
+corpus yields a single data point and under-determines any general rule — a
+constraint Don has equally, since his evidence is our DASS dumps and the OI30
+listings.  A per-release allowance is applied locally in
+`~/donschmidt/nsts-sdl-dps` (`src/dfg/ddt.py`, `src/dfg/cli.py`, uncommitted); a
+bare entry would corrupt OI340600 builds, because the table is keyed by display
+name and OI340600's `CS2120` is an unrelated 1068-halfword page.
+
+**8292 of 8292.  `exact` 7330, `+patches` 7332.**  Every scored CSECT in all eight
+configurations matches its dump.
+
+### 8.69 Exceptions, part 2: the generated class eliminated
+
+All 877 remaining base entries were classified against the eight dumps:
+
+| | |
+|---|---|
+| 397 | our build already matches — the exception asserts a falsehood |
+| 479 | differ, but lie outside every scored CSECT |
+| 1 | differs inside a scored CSECT: SSW `38266` MISSION_ID |
+
+and that one is already carried by the curated file.  So the class could not
+change a score and 45% of it was untrue.  `dass-literals.py` no longer writes the
+file; the starred scrape and its self-check stay, because a parse error there
+would mean the `.fcm` was built from a misread listing.
+
+**`-full` renamed `-curated`.**  It had been a genuine superset —
+`dass-versions.py` built it from the base file plus the version no-claims — but
+pruning left it holding only the extras, so the name had stopped being true and
+the "full" file was two entries against the base's 877.
+
+**A regression caused and fixed in the same pass**: that pruning broke the
+superset relation, and `fcmcmp --exceptions` takes one file, so sweep 3 would
+have applied 0–1 exceptions where it previously applied 61–142.  It never touched
+the score, because `dass-score.py` reads both files independently.
+
+**`run-configs.sh` no longer regenerates a curated file that exists.**
+Generating one has value exactly once per configuration — deriving the version
+no-claims from each unit's revision level is how the file gets its first
+contents — and after that it is curated and should only be read.  Regenerating
+over it is also how its entries decay unnoticed: five of the seven alive on
+2026-09-06 had already stopped being true, four of them made redundant by the
+compiler rebuild that morning, and all five were found by hand.
+
+**`dass-score.py` now reports spent exceptions** — any curated entry whose
+address already matches — so the next person sees them without looking.  Base
+redundancies are counted rather than named, being derived and not actionable.
+
+**Two curated entries remain corpus-wide**: SSW `38266` MISSION_ID and S2 `43C45`
+`$0DGRGSE`.
+
+**MISSION_ID is a runtime value, and that was established by refutation.**
+`DCDDOW.hal` declares it `BIT(8) INITIAL(HEX'00')`; setting it to `HEX'1D'` fixed
+SSW and broke the other seven, which all hold `0000`.  SSW is the post-IPL
+listing, so the running system wrote the mission ID into memory.  The exception
+is correctly classified and permanent.  The lesson generalises: check a candidate
+against **all eight** dumps before believing it, because a value present in one
+and absent in seven is runtime, not build.
+
+### 8.70 One home for the tooling, and four stale-copy failures in one day
+
+The `dass-*` tooling existed in two places — `~/workspace/PFS` and
+`modules/sdfpkg` — diverging in both directions.  `run-configs.sh` snapshots from
+`modules/sdfpkg`, so that copy is what a sweep actually runs, and its
+`dass-literals.py` was a month behind: a sweep would have regenerated the
+exceptions files at 138,322 lines and silently undone §8.65.
+
+**The rule, and it is not the obvious one.**  virtualagc is what every user
+clones and its directories go on the PATH; PFS is restricted and most users will
+never hold it, yet all documentation for PFS lives on the virtualagc web pages.
+A program any instruction might name therefore belongs in virtualagc even when
+its data does not.  `modules/sdfpkg` is the official copy; PFS keeps `mafgen/`,
+the listings, the indexes, the exceptions and the source trees.
+
+`dasspfs.py` is the one thing the split needed, because six files found their
+data by looking beside themselves.  Resolution order: `$PFS`, else the working
+directory if it holds a `mafgen/`, else beside the script, else
+`~/workspace/PFS`.  The working directory is the ordinary answer, because the
+instructions have the reader cd to PFS first.
+
+**Four failures in one day, all the same shape** — a change reaching one copy or
+one invocation path and not another:
+
+1. the compiler binaries, 26 days stale (§8.67);
+2. `dass-literals.py` in `modules/sdfpkg`, a month stale;
+3. `csects-*.json` judged stale by comparing it against a **March** results
+   directory — an error of measurement, not of code, retracted below;
+4. `stop-sweep.sh`, which matched `'^bash .*run-configs\.sh'` where the symlinked
+   invocation is `/bin/bash /home/rburkey/bin/run-configs.sh`.
+
+The fourth was the worst in effect.  `pkill` took the children and left the
+parent, which launched the next configuration while a second sweep was starting;
+two sweeps then shared `jobs/1-4`, where HALSFC's fixed-name workfiles corrupt
+each other, and one `dass-compare.db` — while `stop-sweep.sh` reported "sweep
+stopped; nothing left running".  The `rm: cannot remove ... Directory not empty`
+warnings were the only symptom.  Fixed, and every moved script audited for the
+same class: the Python ones already used `Path(__file__).resolve()`, while
+`dasspfs.py` used `abspath` and `dass-phases.sh` used `dirname "$0"` to find its
+siblings.  Both now resolve.
+
+**Retraction of the `csects-*.json` claim.**  It was asserted that the committed
+index was 1,077 CSECTs short and that the scoring denominator silently omitted a
+ninth of the dumps.  Re-running the **current** extractor reproduces all eight
+CSECT tables entry-for-entry and all eight `.fcm` files by MD5.  The committed
+files were correct; the March artefact predates a change that drops CSECTs having
+no `start`.  A five-month-old results directory was quoted as if it were current
+— the exact failure the standing rule "measure, do not recall" names.  One good
+thing came of it: the eight `.fcm` files are now proven reproducible from the
+current extractor, which independently validates the as-built re-extraction of
+§8.65.
+
+`csects-{P9,SSW}-augmented.json` were deleted as vestigial: they are
+`dass-syms.py`'s former default output name, renamed to `augmented-<config>.json`
+precisely so the `csects-*.json` glob could not see them, and the only code
+mentioning the suffix is the exclusion that neutralises them.
+
+### 8.71 The CLC sweep was aimed at the wrong target
+
+`~/ForClaude/OI340600-clc` compiles **OI340600** sources against the **OI340700**
+dumps and attributes the residue to version drift — which is what the `-1` class
+was for, and why its header reads "Differences attributable to the source being
+OI-34.06 where the dump is OI-34.07".
+
+That was the right question while the dumps were what we were trying to
+understand.  It is the wrong one now: isolating those version-related differences
+and reconstructing OI340700 source from them **is** the work, so a sweep that
+factors them out measures precisely the gap we exist to close.  The `-1` class
+decaying to a single entry corpus-wide was the symptom.
+
+A partial run of it did still confirm the tooling after the move — 0 errors
+across SSW, P9 and G8, the conditional curated-file rule firing on every
+configuration, the exceptions removal exonerated (0 of 65 differing addresses had
+been covered by a deleted entry), and `GO8ORB` plus the whole `DCDD*` and
+`DKFCM*` families dropping out of the differing set, which is §8.67's compiler
+fix confirming itself in a corpus that was not being measured for it.  At file
+level that run was 40 differing against August's 54.
+
+`CLC` is now a variable defaulting to `~/ForClaude/OI340700-clc`, which mirrors
+`~/pass-build/OI340700` — the merged OI340600-clone-plus-overlay the build
+actually uses.  `PFS/OI340700` holds only the overlay, and all 1021 `APPLSRC`
+differences between them are files present only in the merged tree, with no
+content conflict.  `$CLC` still reaches the old comparison rather than destroying
+it.
+
+**Preserve baselines, do not delete them.**  `rm -f ~/ForClaude/run-configs.log`
+before a run discarded the previous one's record, and `dass-db.py reset` wipes
+prior rows per configuration, so the database could not supply it either.  Only
+`run-configs-g8s2.log` (2026-08-07) survived, because it happened to have a
+different name: G8 1737/1739, S2 1236/1252.  Rename, do not remove.
+
+
 ## Methodology and caveats
 
 **Section 1** items were found during `yaGPC`'s original CoffeeScript→C
