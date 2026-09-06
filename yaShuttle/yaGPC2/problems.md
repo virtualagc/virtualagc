@@ -9185,6 +9185,550 @@ both.  The drop rule cannot reach it because the competing definitions are not
 in modules that went past the image — they are compools this configuration does
 load.
 
+### 8.48 The scorer was the understatement, not the build
+
+90.5% was wrong, and the scorer was the reason.  `unlinkMAFGEN2.py` sets every
+address it never saw a value for to `0xC9FB` below `0x20000` and `0xC6C6` above
+(its lines 484-488).  That fill is **synthetic and chosen by address** — it says
+nothing whatever about the dump.  `dass-score.py` already meant to excuse those
+addresses, but it looked for a ranged field header whose next line carried no
+values, which finds MAFGEN's *omitted all-zero fields* — and those are precisely
+the addresses that ARE known, since the extractor writes a real 0 for them.  It
+missed every address falling between printed rows.
+
+> `#DARBIDL` is the type case: the listing prints `+0000-+0001`, jumps to
+> `+0004`, and never mentions `+0002-+0003`.  **474 of 752 failing CSECTs were
+> failing on nothing but that.**
+
+`printed()` now collects every address the listing prints a value for, and is
+validated on all eight configurations: every non-fill, non-zero halfword in
+every `.fcm` falls inside the set it builds.
+
+It had a second bug of its own, worth 11 more CSECTs.  It decided an address was
+known if its listing line carried a four-hex-digit group, testing "not adjacent
+to another alphanumeric" — and an underscore is not alphanumeric, so
+`CAAB_TM_AC_STAT` matched on `CAAB`.  Every value-less declaration line whose
+variable name happens to start with four hex letters was treated as printing
+data.  `#PCAASCC` was the type case, and that was its entire residue in six
+configurations.  Excluding `_` from both boundaries fixes it, and the set is
+still conservative by the same whole-corpus check.
+
+**The same trap recurred later** and is worth stating as a rule: a first count
+of the fields `DCDDG9`'s listing names came to 34, of which thirty were
+four-hex-digit *data values* matching an identifier regex.  The real count is
+four.  Any regex that harvests identifiers from a MAFGEN listing must exclude
+`^[0-9A-F]{4}$`.
+
+A correction to `dass-link.sh` point 2 belongs here too.  No inter-CSECT
+alignment gap that MAFGEN actually prints contains `C9FB` — 403 are `C6C6` and
+none are `C9FB` — so "assembly CSECTs are C9FB without exception, measured over
+2345 alignment gaps" was read off the extractor's `0x20000` split rather than off
+the dump.  `C9FB` is real elsewhere: it appears as printed content inside CSECTs
+in every configuration, so `--fill=C9FB` is not thereby refuted, only its
+evidence.
+
+### 8.49 Linking what the configuration holds: re-adds, KNOWN, and the phase split
+
+`dass-link.sh`'s deck-based overlay exclusion drops modules whose loaded CSECT
+this configuration's index *names* — `GSIABT`, `GVWQUA`, `GVXQUA` in G16 and G3,
+`PGPPLD` in S2, the `DCDD*`/`DKFCM*`/`D*LIGHT` family nearly everywhere.
+`dass-resolve.py` puts back 137 such modules, restricted to **uncontested**
+CSECTs so the re-add cannot clobber an overlay alternative.
+
+Three modules are known by address alone.  `FCMPSA+0014` is `TPSASRP`, `DC Y`,
+reading `6FBC` in all eight dumps: `FCMINSSL` is IPL-time code that the resident
+image later overwrites, which is why no index names it and why it must not be
+linked — supplying the address alone makes `FCMPSA` exact everywhere.
+`FIOG9ADB` and `FIOPDG9` join it (+14): each is a whole CSECT at one address in
+every configuration, 122512 and 122466, low halves `DE90`/`DE62`, which is what
+all eight dumps store at `FIOCMPLT+01BE` and `FIOPDISP+027D`, and G9 — whose
+phases include them — links both unaided.  `KNOWN` had to be exempted from the
+phase zeroing, which runs later and was overwriting the very entries it exists to
+supply, so the first attempt did nothing at all.  The combined map was tried as a
+replacement for the phase test and is not one: it fixes these two and loses six
+others (G16 1555 → 1551).
+
+**The phase lists are what separate the two "foreign section" cases.**  A symbol
+that is a CSECT this configuration does not load is either in another *phase* of
+this configuration, where the borrowed address is right — this is what fixes
+`FCMBMT16` — or in another *configuration*, where the original link editor had no
+definition either and stored the bare offset, base 0, which 250 of 306 such
+scored failures imply exactly.  Zeroing both costs sections (G16 1547 → 1545;
+the wider "lives in a foreign section" form 1547 → 1537).  Splitting them by
+`ap101Utils.mcconfigs` phase membership gains 26 and drops G16's unresolved
+relocations from 1471 to 41.
+
+**A module the index does not name is absent even if it fits.**  The drop rule
+tested only for sections placed *past* the image, which misses the commoner case:
+`--external-syms` places what the index names and `lnk101` auto-places the rest
+wherever it fits, usually *inside* the image, so the module keeps its sections at
+an invented address and its entry points still win.
+
+> `CGBGPS` is the type case.  `#PCGBGPS` is in five indexes at 25350 and in SSW's
+> not at all, so it landed at 211066, and `FIOGPSPG`, `FIOHFEPG` and `FIOACTMD`
+> all came out wrong in SSW although every dump stores `630A`, the low half of
+> 25354.  The oracle had the address all along; nothing could use it, because the
+> defining module was linked and `-D` is therefore ignored.
+
+Dropping on "no section of this module is named by this index" and letting `-D`
+supply the definitions is the same pairing that fixed `FCMBMT16`, and it took SSW
+to 100.0%.
+
+**Leave the symbol undefined; do not define it as 0.**  For a symbol whose CSECT
+this configuration does not load, the original stored the addend as it stood.
+Defining it as 0 differs at every *subtractive* relocation, where `lnk101` then
+stores `-(0 + addend)`: five CSECTs failed on one halfword each with the dump
+holding `+N` and us `-N` (`#CGL4SUP` in G16 and G3, `#DGX4DIS`, `#DGY4STS`,
+`#DGHCORB`).  `#CGL4SUP+0088` is `LA R1,4`, `TPSAPWR` at `FCMPSA+4`, and we
+stored `FFFC`.  Dropping the symbol from the oracle rather than zeroing it fixes
+all five; for an additive site the two are identical, which is why the base-0
+measurement that motivated the rule still holds.  G3 and G8 to 100.0%.
+
+**Prefer the definition this configuration actually loads.**  An `EQUATE
+EXTERNAL` alias is declared once per configuration against a different compool —
+`TFIVAN14` is `CS2INB`'s `#PCS2INB`, `CVHPLD`'s `#PCVHPLD`, `CS4INB`'s
+`#PCS4INB` — and the oracle link resolves each name once, so it picks one.  In G9
+it picked S2's.  `local_definitions()` reads the objects and, where a module's SD
+is named by this index, takes the address from its LD offsets: `TFIVAN14` at byte
+12 of `#PCVHPLD`, base 63760, gives `F916`, which is what G9 stores.  Fill is
+deliberately **not** consulted — `#PCVHPLD` is 98% fill because it is a buffer,
+so the re-add rightly declines to emit it, but its *address* is still the one
+every reference uses.
+
+Accuracy across this stretch: 7437/8292 (89.7%) → 8225 (99.2%) → 8266 (99.7%) →
+8274 (99.8%) → 8280 (99.9%).
+
+### 8.50 `CDQANNUN`: the crew fault-message compool, regenerated
+
+Worth 8 CSECTs, one per configuration: `#PCDQANN` is byte-identical in all eight
+dumps at `0x050010`, so one file fixed one CSECT everywhere.  The tables both
+grew and were revised — `CDQV_PL_MASK` 18 → 28 halfwords, `CDQK_PL_FMPS` 278 →
+443 copies, `CDQK_PL_MAJORS` 155 → 191, `CDQK_PL_MINORS` 64 → 83, each keeping
+its 5-entry PAD, and `CDQV_INDEX_ARRAY INITIAL(18,278,575,1815)` →
+`(28,443,915,2443)`.  The listing confirms those four are (mask size, FMPS count,
+MAJORS offset, MINORS offset) from `+0003`, and `4 + 28 + 886 + 1528 + 249 =
+2695`.
+
+**A message word is two 7-bit ASCII characters**, `0xC000 | (c1 << 7) | c2`.  It
+reproduces all 209 known texts with zero mismatches and decodes OI34.07's new
+entries into plain text, so the regeneration lost no annotation.  Two earlier
+claims recorded here were wrong and are retracted: that the `FSD_SM*_FCW*` words
+are format-control words and the text underivable — that test paired source
+comments against *dump* entries, which the revision has shifted apart, so its
+conflicts were the test's own bug; and that 36 MAJORS and 19 MINORS entries would
+lack text — that was `186-150` and `78-59`, assuming an append where the tables
+were in fact revised.
+
+Every format rule was verified to reproduce the existing file *before* being used
+to extend it — comment fields, and `REPLACE S73_PL_<n>_ALRT_<class>` as the FMPS
+index carrying that major text and class, all 62 verified and all 62 resolving
+uniquely against the new tables.  All 140 non-generated lines are byte-identical,
+and the recompiled object's TXT matches the dump in all 2695 halfwords with no
+link-editor fill in the section.  The file went to `PFS/OI340700/SSSRC/` as an
+OI34.07 override; `OI340600/SSSRC` is untouched.
+
+**An SDF is not byte-stable across identical recompiles**, so a checksum cannot
+tell a substantive SDF change from a metadata one.  Diff `sdfpkg.py` reports
+instead: for `##STMTAB` the two reports are 36828 identical lines apart from the
+file-creation timestamp.  That is how the seven modules recompiled for the moved
+compool layout (`AIBGPCLO`, `CPGSPL`, `DMTERR`, `PGDATA`, `PGGPCF`, `PGPPLD`,
+`STMTAB`) were shown not to cascade further.
+
+### 8.51 `GSIABT` and `FIOGPSPG`: two removals, found the same way
+
+Both by one method — find what the dump does *not* contain, and check the change
+suffix.
+
+`GSIABT` (4 CSECTs): `GSI_TERM_ISO_VLV_RESETS`, `MASK7` and `MASK8` appear in
+neither the G16 nor the G3 dump, while `MASK6` beside them appears in both, and
+`MASK7`+`MASK8` are `ARRAY(4) BIT(16)` — exactly the 8 halfwords `#DGSIABT` was
+over.  Removing the declarations and the RCS tank isolation-valve reset block
+they serve puts every CSECT on the index to the halfword.
+
+`FIOGPSPG` (4 CSECTs): six BCE bypass points, two written `#BU` with the original
+`AA` suffix and four written `#DLYI 68`/`#DLYI 0` with suffix `AD`; the dumps
+have `#BU` at all six.
+
+Neither change is conditional compilation — column 1 is blank throughout.  The
+method has a known limit, which §8.57 shows: MAFGEN omits zero-valued fields, so
+absence from the listing does not imply absence from the build.  It was decisive
+here and unreliable for `PGGPCF`.
+
+### 8.52 Symbol resolution: six rules tried, and the one discriminator that works
+
+Whether a cross-configuration reference was resolved or left at 0 turned out to
+be a property of the **referencing table**, not of the symbol — and `-D` sets a
+symbol's value once per link.  Every per-symbol form of the rule was tried and
+measured, and all but one cost more than it gained:
+
+> (a) extending the phase test from CSECT names to all symbols zeroes
+> `FIOADCNS`'s cross-phase display-page addresses (G16 1562 → 1554), because
+> `dass-phaselists.py` deliberately skips `MAP*` decks and so under-reports what a
+> configuration holds; (b) adding the `MAP` members back does not repair it —
+> `FIOADCNS`'s targets live in `FIOMDPPG`, which no `MAP` card names; (c) asking
+> the dump instead, zeroing a symbol whose section is mostly fill here, is worse
+> still (G9 1036 → 1024), because a cross-phase reference legitimately points at
+> memory that is not loaded at dump time; (d) index membership with `pop` costs
+> P9 565 → 555 and G16 1563 → 1554.
+
+**What finally worked is the referencing table's invariance.**  A CSECT that is
+byte-identical in every dump that places it was resolved once, with the whole
+system in view, and copied into each configuration: `FIOADCNS` and `FIOADCCL` are
+the same bytes at the same address in all eight, and they hold `FIOMDPPG`'s
+addresses even in SSW and P9, where `FIOMDPPG` is nothing but fill.  A CSECT that
+differs between dumps was linked per configuration: `FIOCDATS` takes three
+distinct forms across G9, P9 and S2, and holds 0 where its target is absent.
+
+So: leave a symbol undefined only when its section is unloaded here **and** every
+section referencing it is non-invariant; keep the oracle address when all the
+referrers are invariant.  The reference map has to come from the real
+per-configuration link, not the oracle — the oracle's sections overlap, and an
+address lookup there names `FCMBMT02` as the referrer of `FIO00SOU` when it is
+`FIOCDATS`.  Building it from the oracle was what sank the first attempt.  G9 and
+S2 then resolve `FIOCDATS` exactly, and nothing else moves.
+
+A **sixth** attempt, made after the source work of §8.57 was finished, regressed
+8288 → 8283 and was reverted.  It changed two things at once.  Requiring a
+section to be placed in at least two dumps before calling it invariant is sound
+and should be kept if this is ever revisited — a section only one dump places has
+no second copy to be identical to, and `FCMBMTG9`, placed by G9 alone, passes the
+test trivially.  Replacing the fill proxy with index membership is what broke it:
+it fires on 100+ symbols per configuration and zeroes words the dump genuinely
+resolves (SSW `FIOHFEPG`, `FIOACTMD`, `FIOPDHF`; G9 `FIOMVUPG`).
+
+`PR #38` against `lnk101`, still open, is the mechanism that would express this
+properly: "a CSECT-table entry may supply an address without supplying a
+definition" adds a per-entry mark so an entry contributes its *address* but not
+its *linkage*, leaving the reference unresolved and the site as the original left
+it.  That is the per-entry granularity `-D` cannot express — so "unreachable by
+any per-symbol rule" was true of the tool and not true in general, which is how it
+was stated.
+
+### 8.53 The three mass-memory compools, and the CHANGE cards that pick between them
+
+`CDHV_BLOCKS` is `ARRAY(CSM_ROWS,512)` in `CSMCOM.hal`, and `CSM_ROWS` is
+`REPLACE`d as 26 in `CSAMMU.hal`, 32 in `CVNMMUTI.hal` and 8 in `CVQMMUTI.hal` —
+13321, 16393 and 4105 halfwords, which are exactly the three extents the indexes
+report for `#PCVNMMU`.  The dumps name all three `#PCVNMMU` and separate them
+only in the HAL unit column: `CVN_MM_UTILITY` in SSW and P9, `CSA_MM_UTILITY` in
+S2, `CVQ_MM_UTILITY` in G9.  The decks say it outright — `MFB14` carries `CHANGE
+#PCSAMMU(#PCVNMMU)`, "rather than the 32 block buffers used in PL 9", and
+`GNC9STUB` carries `CHANGE #PCVQMMU(#PCVNMMU)`.
+
+**Why the CHANGE was being skipped**: `lnk101` reads the card and reports "no
+loaded module supplies INCLUDE member `#PCVQMMU`; renames skipped", because a
+library is searched on demand and nothing references the name being renamed
+*from* — every reference is to `#PCVNMMU`, the name it is renamed *to*.  Naming
+the object explicitly breaks the deadlock.  `change_includes()` collects those
+cards from the concard root **and** this configuration's phase decks (S2's are in
+`MFB14`, reached through `PHASE14`, not `SM2`) and loads them: G9 gains
+`#PCVQMMU`, S2 gains `#PCSAMMU` and `#PCVIMMU`.
+
+**Both names were in play, and the right one won by luck.**  Loading the copy a
+CHANGE names, without removing the module that supplies the renamed-to CSECT
+natively, leaves both defining it after the rename — in G9, `CVNMMUTI` at 16393
+halfwords beside the renamed 4105-halfword `#PCVQMMU`.  `lnk101` picked the right
+one; nothing made it do so.  The native supplier is now excluded explicitly, and
+it must be read from the **objects**: the oracle link applies the rename too, so
+its section map reports the *renamed* copy as the supplier of the target name.
+The first attempt used that map, excluded `CVQMMUTI` — the copy we want — and
+still gave the right answer, because the file it dropped (`objects/CVQMMUTI.obj`)
+is not the file it added (`SYSLIBL1/#PCVQMMU.obj`).  Right outcome, wrong reason,
+twice over.
+
+`CPR` now matches the G9 dump in all 46 halfwords, including the 45 the
+post-build exception list had been excusing — they were never patches, they were
+our missing content, overwritten by 12288 halfwords of zeros from the 32-block
+compool placed where the 8-block one belongs.
+
+**Known limitation, S2.**  Its CHANGE cards are in `MFB14`, reached through
+`PHASE14`; `lnk101` walks the concard chain from `--concard-root`, which for S2
+is `SM2`, so it never sees them.  `#PCSAMMU` keeps its own name, is not in S2's
+index, and `not_here()` drops it, leaving `#PCVNMMU` address-only.  Harmless —
+the region is 100% fill in every dump — but the card is not honoured, and the fix
+is a concard root that reaches `MFB14`.
+
+**The `overruns()` rule of `64b75cca` is removed.**  It was a mitigation built on
+a wrong story — one compool sized per configuration.  Its safety argument held,
+since an all-fill section is outside the score's denominator either way, but with
+the CHANGE cards honoured it is unnecessary, and removing it costs nothing and
+gains three CSECTs before excusals (7213 → 7216).  The lesson is worth keeping:
+**a rule that is score-neutral by construction cannot be validated by the score**,
+and this one was covering for a diagnosis that had not been finished.
+
+### 8.54 Don's PR and issue traffic, and what it meant for us
+
+Reviewed after noticing he had closed several of ours.  Most closures are
+"already fixed differently", and two matter directly.
+
+**PR #46 (closed): `7d90b05` supersedes our `--release` workaround.**  He fixed
+`dfg`'s budget calculation instead — HEX-prefixed VPARM budgets the plain digit
+formula at every width, the 8-bit byte budgets one FCW, `FMT=6.1 CONV=I SIGN=P`
+budgets the sign.  We were two commits behind and did not have it.  Pulled and
+rebuilt: `CS2050` goes from 1 differing halfword to **0**, and `CS2120` from 2 to
+1.
+
+**PR #36 (closed) is genuinely superseded and was already active.**  `df6d595`
+and `2228e1e` are in our checkout, and `build/bin/lnk101` is a *wrapper* that
+runs the Python from `src/`, so its July date means nothing — every measurement
+had already been using his more general `field_mask`.  His caveat that
+`ADDRESS_FIELD_MASK` is 18 bits and "could break elsewhere" is not observed here:
+of the printed, non-excused sites whose target exceeds 2^18, 7546 match the dump
+and 441 do not, so it is not systematically truncating.
+
+**A claim of mine that was simply wrong**: that issue #44 / `7384813` (asm101
+`LDM`/`STDM`) might have left our objects wrong.  `compilePASS` sets `assembler =
+"ASM101Sa"` — ours, in `~/git/virtualagc/ASM101S/` — and the issue was filed to
+bring *Don's* assembler into line with what ours already did.  Zero effect on our
+build.  Check which tool a build actually invokes before attributing anything to
+it.
+
+**The pull cost nothing and the mixed-`dfg` state was a non-issue.**  Full sweep
+after merging `origin/master`: 8282/8292, no configuration down.  Running the old
+`dfg` (extracted from `d3fbcd2` into a scratch tree with `PYTHONPATH` pointed at
+it) and the new one over all 133 display decks and diffing the generated HAL:
+exactly two differ, `CS2050` and `CS2120`.  The other 131 regenerate
+byte-identically, so their objects, built with the old `dfg`, are already right
+and need no rebuild.
+
+**PR #38 rebased onto master and pushed** (`bd60df6`), which is what Don had
+asked for.  It rebased with no conflicts despite `608a029` having reworked
+overlay and CHANGE handling in the same file.  `test/srcTest` is 56 passed, 11
+skipped; the placement-only test asserts on `linker.placementOnlySymbols` and the
+symbol table rather than comparing `sym.json` wholesale, so `7fff229`'s
+store-protect key cannot break it — which was his stated concern.  The only
+`sym.json` fixture in the tree, `test/fcmcmp/test_simple_do.sym.json`, is an
+*input* to fcmcmp, not an expected lnk101 output.  The binary-dependent tests
+under `test/` cannot run from a worktree without a build, so that part is
+unverified.  The rebase could not have regressed us: our own `local-both` already
+carried `59f674f` plus the merged master, so what the rebase produces is what
+every measurement had already run.
+
+**`CS2120` residue narrowed to one word**, and reported back.  `S2_2120_VPD` at
+`#PCS2120+0176`: the S2 dump has `00D5` (213), `dfg` emits `00D3` (211).  All 362
+other `_VPD` words in the deck match.  It is the word immediately following the
+deck's leading `5402` control word, and the same shape recurs at `S226`/`S227`
+(`5402`, `004E`).  Verified by running **both** branches over the deck rather
+than quoting the old PR body: `dfg-release-allowances` emits `00D5` there and
+`7d90b05` emits `00D3`, and the two agree exactly on `CS2050`.  Posted as a
+comment on PR #46.  This is the one remaining halfword in the corpus that is not
+ours.
+
+### 8.55 `GPXSRB`: reconstructing flight source from a disassembly
+
+Four source revisions remained at this point, three of them the hard direction —
+OI34.07 has code we lack — and one the removable kind: `GPXSRB` short by 37
+halfwords, `DCDDG9` by 80, `PGGPCF` by 13, `PGPPLD` **long** by 12.
+
+`GPXSRB` was fully specified by the dump and is a superset of ours.  Same
+procedure name, `GPX_SRB_MON_FNC`, but OI34.07 prefixes an ET-camera timing block
+to our SRB-pressure code, which is still there further down.  Everything about it
+was *stated* rather than inferred: the data CSECT names the five missing locals
+with their initial values — `GPX_I`=1, `GPX_I_LMT`=4, `GPX_MET`=0.0 (SCALAR),
+`GPX_ET_CAM_START_TIME`=(-1,20,60), `GPX_ET_CAM_END_TIME`=(10,30,70) — which is
+`1+1+2+3+3 = 10` halfwords, exactly what `#DGPXSRB` was short (22 against 32).
+The statement numbering corroborated the shape before a line was written: `ST#8`
+then `ST#15` means six declaration statements where we had one.  The block is in
+neither the OI340600 nor the OI301700 source — checked on Ron's suggestion, and
+nothing in either release mentions `GPX_ET_CAM` or `GPX_I_LMT`.
+
+**The bit assignments were located by arithmetic.**  `CGBV_HFE_OUTPUT1_2` is a
+RIGID `STRUCTURE(4)` of 114 halfwords a copy, so the listing's `+397` and `+393`
+are copy 4, offsets 55 and 51 — `CGBB_OUT12_HFA_DSCRT8` and
+`CGBB_OUT12_HFA_DSCRT7`, element 2 of each, bit 8 for `X'0100'`.
+
+**The dump corrected one guess**: the inner test written `>` assembled to `DE24`
+(branch low-or-equal) where the dump has `DA24` (branch low), so the original is
+`>=`.  With that, `#CGPXSRB` 144/144, `#DGPXSRB` 32/32 and `#ZGPXSRB` 2/2 all
+match with zero differing halfwords outside relocations.  G16 joined SSW, G2, G3
+and G8 at 100.0%.
+
+**Method note**: the reconstruction was verified *before* linking, by comparing
+the object's TXT against the dump outside its relocation sites.  That check is
+what caught the `>`, would equally have caught a wrong subscript or bit number,
+and costs one compile rather than a full link-and-score cycle.
+
+**A method failure to remember**, from the same phase: `PGPPLD.hal` was first
+edited with `sed`, which shortened the line and pushed the SRN out of columns
+73-80 into the content field; the compiler then read the next line's sequence
+number as source and reported a syntax error on `014`.  HAL/S is
+column-sensitive — rebuild the line to 72 columns and re-append the SRN, never
+substitute in place.
+
+### 8.56 The opcode-stream method, and the four traps in it
+
+`GPXSRB`'s method did not transfer.  It worked because the dump *named* every
+missing local with its value; `PGGPCF` and `DCDDG9` name almost nothing.  What
+replaced it is Ron's suggestion: compile with `LSTALL`, so `pass2.rpt` carries
+the AP-101S code generation interleaved with HAL/S statement numbers, and compare
+that against the DASS disassembly.  Four things have to be got right.
+
+**Compare hex opcodes, not mnemonics.**  `pass2.rpt` writes `BC` where the
+listing writes `BCF`, `LH@` for `LH@#`, `LHI` for a relocatable `LA`: comparing
+mnemonics gives 889 differing blocks, all noise.  The opcode is the **top five
+bits** of the first halfword; the low three carry the register or condition
+(`LA R1`=E9 against `LA R3`=EB, `BCF 5`=DD against `BCF 2`=DA).
+
+**`pass2.rpt`'s addresses are pre-optimisation** and cannot be used as
+instruction boundaries.  It puts `ST` at `+005E` where the object has it at
+`+005D`, because REGOPT shortened the preceding `L`.  Use the listing's
+boundaries with the object's bytes.  The listing's hex lines also include
+embedded `DC` literals, so the mnemonic has to be checked or a code CSECT gains
+phantom instructions.
+
+**Better still, skip `pass2.rpt` for the boundaries entirely.**  Instruction
+length is a function of `(top five bits, nibble 2)` of the first halfword —
+verified unambiguous over all 40722 instructions of `DASS_S2.ASC`, 291 distinct
+keys.  That table lets *both* the dump and our own linked image be walked without
+any listing and reduced to opcode-only streams, so operand and address noise
+drops out and a plain `diff` shows only genuine code differences.  `opstream.py`.
+The same treatment applies to `ASM101S`/`ASM101Sa` reports, which carry the same
+LOC and hex columns as `pass2.rpt` — that is how `FIOHFE89` was read.
+
+**Its blind spot**: an operand-only error is invisible to it.  Fourteen restored
+statements in `DCD16001` were written with every `CVAS_INB` index one element too
+high, which produces identical opcodes throughout; only one frame betrayed it,
+where an even source address let the compiler substitute one fullword move for
+two halfword moves.  Always follow an opcode diff with a raw halfword compare.
+
+Two further findings belong with the method.
+
+**A first divergence can net out, so chase runs, not first points.**  In
+`#CPGPPLD` the first opcode divergence at `+08AE` is ours emitting a long branch
+`C7F3 08EE` where the dump has a short `DFCC` — targets `+08EE` against `+08E2`,
+differing by exactly our 12-halfword excess, so the long branch is a
+*consequence* of downstream size, not a cause.  Two instructions later the dump
+has an extra `BD54  STH R5,X'0015'(R0)` that we do not emit, and from `+08C2` the
+two are back in step.  Chasing the first divergence would have been chasing an
+artefact.
+
+**The DASS listing carries an SRN column**, at about column 118, giving the
+source record number of the statement that generated each block of code.  That
+maps dumped code directly onto our source's columns 73-80 — far better than the
+`ST#` statement numbers, which drift as soon as our declaration count differs
+(the dump's `ST#707` is `PGPPLD`'s statement 716 in our listing).  For code
+coming from an `INCLUDE` it carries a **sub-counter** as well, which numbers the
+statements within the included file, and that is what makes a missing statement
+placeable.  This should be the primary way of relating dumped code to source from
+here on.
+
+`dass-sdfsyms.py` (PFS `4a6af0d4`) belongs to the same toolkit: it reads our own
+field offsets out of an `sdfpkg.py` report, so a layout difference can be
+localised without depending on MAFGEN naming anything.  Three traps, all of which
+the first attempt fell into — field 15, the name continuation, comes *after*
+field 10, the address, so emitting at the address line drops every continuation
+and gives `CSAS_PX` for `CSAS_PXT`; the "relative" address is *already* the
+offset within the CSECT, so adding the local block's base double-counts it; and
+class 4 is a Template whose address means nothing, while class 1 is a Variable and
+a real allocation.
+
+### 8.57 `PGPPLD`, `PGGPCF` and `DCDDG9`: two CARDTYPE units and one real gap
+
+All three are now byte-perfect, and two of them were never source problems at
+all.  Several conclusions recorded while they were open are superseded and are
+corrected here.
+
+**`PGPPLD` and `PGGPCF` are `R=C` units.**  Under the default `FCRM`,
+`#CPGPPLD` came out 2977 halfwords against the dump's 2965 and `#DPGPPLD` 140
+against 132.  Every one of the 750 differing halfwords was either a local-data
+offset or a branch target — no divergent code at all until `+08AE` — and the
+offsets say exactly where the eight extra halfwords of data sit: `SPXT_STRUCTURE`
+is +6, `PGP_PDT_LIM_DATA` +7, `PGP_LIM_VALUES` +8.  That is `STRPDT`'s nine
+`R`-gated `NAME` pointers, seven simple ones ahead of `PGP_PDT_LIM_DATA` and two
+`ARRAY(3)` ones ahead of `PGP_LIM_VALUES`, less one.
+
+The code differences were a **consequence**, not a second defect.  With nine
+fewer pointers to keep live, the allocator spills `PGP_LOAD_MIA` to a save slot
+before the flex-table loop and reloads it, the way the dump does, instead of
+recomputing it from `CPGB_LOAD_BUF` inside the loop.  `PGGPCF` is the same story
+one level over: the same seven pointers are allocated at `0x84..0x8A`,
+immediately ahead of `PGG_OUTPUT`, so `PGG_OUTPUT` sits at `0x138` for us and
+`0x131` in the dump — and the dump's `PGG_OUTPUT+4` at odd `0x135` cannot take a
+fullword move where ours at even `0x13C` can.  That is the whole of the `%COPY`
+difference at statement 437.  OI301700 carries those statements verbatim, so the
+source was never in question.
+
+`halsParms.py` now carries `"PGPPLD" : "FCRC"` and `"PGGPCF" : "FCRC"`.  The
+`DQ8` that used to block `R=C` for these two — our `CPGPCD` SDF carrying
+`STRPDT`'s structures where the template path did not — no longer occurs, and
+that standing comment was rewritten rather than repeated.  `STRPDT` is the only
+include of either module's carrying `R` cards, so the pair changes nothing else.
+Compiled `R=C`, `#CPGPPLD` is byte-identical across all 2965 halfwords and
+`#CPGGPCF` across all 10070.
+
+**This retracts three earlier conclusions.**  That `PGP_LIM_VALUES`'s
+`STRUCTURE(3)` copy count was "at best half the story" — it was none of it.  That
+`PGGPCF`'s seven surplus `CSAS_PDT_*` variables "arrive through an included
+template, so the divergence is not in that module's own source" — they arrive
+through `STRPDT`, and the divergence *is* in that module's own compilation
+parameters.  And that `PGGPCF` and `DCDDG9` "did not yield" — they yielded to a
+different question.
+
+**`DCDDG9` was a real source gap.**  `#CDCDDG9` came out 10098 against 10178.
+Reduced to opcode streams the two agree everywhere except seven runs of `LH`/`STH`
+pairs the dump has and we do not, and every `CVAS_INB` reference in the whole G9
+image falls inside them — our `DCD16001` had none.  The SRN sub-counter placed
+each missing statement exactly: our include holds 276 statements against the
+dump's 290, and the fourteen sit at the head of frames 0, 1, 10, 11, 13, 14 and
+15.  Destinations follow from `DL(n)` being `CDWV_DWNLST_AREA+127+n`, which the
+surviving statements fix independently.  MAFGEN's `CVAS_INB+n` is our
+`CVAS_INB$n`, not `$(n+1)`.  Corrected, `#CDCDDG9` is byte-identical across all
+10178 halfwords and `#DDCDDG9` matches its 1372.  The file is in PFS as
+`OI340700/INCL80/DCD16001.hal`, and `DCDDG9` is the only module that includes it.
+
+**This retracts the `DCDDG9` diagnosis too.**  "The code shift is a consequence
+of `#DDCDDG9` being 2 short at its tail" was backwards — the data CSECT came
+right of its own accord once the fourteen statements were restored.  And "only
+21% of non-relocated halfwords line up under an 80-halfword shift, so `DCDDG9` is
+not one change" was true but useless: it *is* seven changes, and a positional
+shift test could never have shown that where an opcode-stream diff shows it
+immediately.
+
+### 8.58 Where the accuracy stands, and what is left
+
+**8288 of 8292 (99.95%)** on uncontested, genuinely-loaded CSECTs.  Five
+configurations are exact — SSW, G16, G2, G3 and G8 — and the honest denominator
+is unchanged throughout: 8292 CSECTs with non-overlapping index ranges and less
+than 50% synthetic fill.
+
+Four remain, and three of them are one phenomenon rather than three: a symbol the
+original link left undefined, where the dump holds 0 and we resolve an address
+from the oracle.  `FCMBMTG9+017A` wants `TFIVMCI1` undefined; P9's `FIOCDATS`
+wants `FIOPF1RC` and `FIOPF2RC` undefined; `FIOHFE89`'s thirteen are all `#LBR`
+external-buffer operands (`TFOVHUD1`, `TFOVH112`, `TFOVH151`, …), read straight
+off the `ASM101Sa` listing.  The fourth, `#PCS2120+0176`, is the `dfg` budget
+defect of §8.54 and is Don's.
+
+**Why the invariance rule of §8.52 cannot reach them.**  `lnk101` records no
+owning section for a `-D`-supplied symbol, and the oracle's symbol records carry
+a `module` field that names the real supplier.  For `FIOHFE89` that is `CGBOBF`,
+whose compool `#PCGBOBF` is in **both** the G9 and P9 indexes at the same 33%
+fill, and whose name appears in neither the `GNC9` nor the `PL9` deck tree — only
+in `MFB3` and `OPS0`.  So section loading, fill and deck membership all fail to
+separate G9, which resolves these, from P9, which zeroes them.  What is left is
+phase membership of the *defining module*: GNC9 links three phases (3, 8, 18) and
+PL9 two (9, 12).  That is the thing to test next, and it should be tested on its
+own rather than bolted onto the invariance rule, which is the mistake the sixth
+attempt made.
+
+One loose end is not that phenomenon and may be independently interesting.
+`FCMBMTG9+018E` is not a zero: the dump has `TFIVPF12` = `F921` =
+`CVAS_INB$(1:)`, and we emit `F941` = `$(33:)` from `CVHPLD`'s `EQUATE`.  But
+`CVAS_INB` spans only `0xF921-0xF93A` in the dump — 26 elements, with `FCMBMTG9`
+beginning at `0xF93C` — so `$(33:)` cannot exist there, and our `ARRAY(44)`
+declaration is suspect.  This is the same knot recorded earlier when four more
+`CVAS_INB` aliases were added to `CVHPLD`: `TFIVPF13`, `TFIVPF22`, `TFIVPF23` and
+`TFIVPF24` are declared by no module G9 loads, yet the dump resolves all four
+inside `#PCVHPLD`, and the listing's layout puts them at halfwords 25, 26, 34 and
+35 — `CVAS_INB` elements 9, 10, 18 and 19.  Adding them made `FIOMVUPG` right and
+dropped `FCMBMTG9` to one halfword.  `TFIVSF22`, `TFIVSF23` and `TFIVPF12` must
+be re-subscripted for a 26-element array, and no scored CSECT references the
+first two, so there is nothing yet to derive their new subscripts from.
+
+The tape remains blocked on `#PFCMGPT` overflow — 447 descriptors against a
+capacity of 343 — and 65 CSECTs still show an SDF-versus-listing copy-count
+mismatch and have never been compared.
+
 ## Methodology and caveats
 
 **Section 1** items were found during `yaGPC`'s original CoffeeScript→C

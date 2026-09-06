@@ -1,9 +1,14 @@
 # CLAUDE_LOG.md
 
-(Cleared 2026-09-05 by Full Documentation Sync.  One entry applied, to
-`problems.md` (9154 → 9245): new §8.47, "Linking against the modules a
-configuration actually loads" — the `FCMBMT*` family, the past-the-image
-overlay-alternative definitions that were winning symbol resolution,
-`dass-resolve.py` and its safety argument, the `-D` byte-versus-halfword trap,
-the move to 7507/8292 (90.5%), `dass-xphase.py` superseded, `dass-score.py`
-packaged, and the compool-level residue that is left.)
+(Cleared 2026-09-05 by Full Documentation Sync.  Twelve entries applied to two
+targets.  Ten went to `problems.md` (9244 → 9788 lines) as new §8.48-§8.58: the
+scorer understatement and the two `printed()` bugs; re-adds, `KNOWN` and the
+phase split; `CDQANNUN` regenerated; the `GSIABT`/`FIOGPSPG` removals; the six
+symbol-resolution rules and the invariance discriminator; the three mass-memory
+compools and their CHANGE cards; Don's PR traffic, the PR #38 rebase and
+`CS2120`; `GPXSRB` reconstructed from the dump; the opcode-stream method and its
+four traps; `PGPPLD`/`PGGPCF` as R=C units and `DCDDG9`'s fourteen restored
+statements; and where the 8288/8292 residue stands.  Five earlier conclusions
+are explicitly retracted there.  Two went to `HANDOFF-OI340600.md` as database
+entry #291 via `dass-handoff.py`, since that file is generated; `check` passes
+on all three handoffs.)

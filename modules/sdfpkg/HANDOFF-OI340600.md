@@ -4593,6 +4593,94 @@ fixing, and the causal claim built on it was wrong and is withdrawn.
     in problems.md section 8.26.  The TQE count discrepancy stands on its own
     as an image-build question; it is not blocking anything.
 
+THE LAST THREE HAL/S RECONSTRUCTIONS ARE BYTE-PERFECT, AND TWO OF THEM WERE
+NEVER SOURCE PROBLEMS.  The corpus stands at 8288 of 8292 uncontested,
+genuinely-loaded CSECTs (99.95%), with SSW, G16, G2, G3 and G8 exact.
+PGPPLD, PGGPCF and DCDDG9 are done.
+
+    PGPPLD AND PGGPCF ARE CARDTYPE, NOT SOURCE.  Both are R=C units.  Under
+    the default FCRM, STRPDT's nine R-gated NAME pointers are allocated into
+    their local data blocks: #CPGPPLD came out 2977 halfwords against the
+    dump's 2965 and #DPGPPLD 140 against 132, and every one of the 750
+    differing halfwords was a local-data offset or a branch target, with no
+    divergent code at all until +08AE.  The offsets say where the eight extra
+    halfwords sit -- SPXT_STRUCTURE +6, PGP_PDT_LIM_DATA +7, PGP_LIM_VALUES
+    +8 -- which is the seven simple pointers plus the two ARRAY(3) ones, less
+    one.
+
+    Every code difference downstream followed from that misalignment.  In
+    PGPPLD the allocator recomputed PGP_LOAD_MIA inside the flex-table loop
+    instead of spilling it; in PGGPCF the dump's PGG_OUTPUT+4 sits at odd
+    0x135 and cannot take a fullword move where ours at even 0x13C can, which
+    is the whole of the %COPY difference at statement 437.  OI301700 carries
+    those statements verbatim, so the source was never in question.
+    halsParms.py now carries "PGPPLD" : "FCRC" and "PGGPCF" : "FCRC".  The DQ8
+    that used to block R=C for these two -- our CPGPCD SDF carrying STRPDT's
+    structures where the template path did not -- no longer occurs, and that
+    standing comment was rewritten rather than repeated.  STRPDT is the only
+    include of either module's carrying R cards.
+
+    DCDDG9 WAS A REAL SOURCE GAP.  DCD16001 was missing fourteen CVAS_INB
+    downlist statements; every CVAS_INB reference in the whole G9 image falls
+    inside the seven runs of LH/STH pairs the dump has and we did not.  The
+    file is now in PFS as OI340700/INCL80/DCD16001.hal, and DCDDG9 is the only
+    module that includes it.
+
+    THE METHOD, WHICH IS REUSABLE.  Instruction length is a function of (top
+    five bits, nibble 2) of the first halfword -- unambiguous over all 40722
+    instructions of DASS_S2.ASC.  That lets both the dump and our own linked
+    image be reduced to opcode-only streams and diffed, so operand and address
+    noise drops out and only genuine code differences show.  ASM101S/ASM101Sa
+    reports carry the same LOC and hex columns as pass2.rpt and take the same
+    treatment.  Its blind spot is an operand-only error: the fourteen restored
+    statements were first written with every CVAS_INB index one element too
+    high, which produces identical opcodes throughout, so always follow an
+    opcode diff with a raw halfword compare.  The DASS SRN column carries a
+    sub-counter for statements coming from an INCLUDE, which is what placed
+    each missing statement exactly -- our include holds 276 statements against
+    the dump's 290.
+
+    ALSO LANDED: dass-resolve's invariance discriminator.  A CSECT
+    byte-identical in every dump that places it was resolved once with the
+    whole system in view, so its addresses survive a phase that does not load
+    the target; one that differs was linked per configuration.  G9 and S2
+    resolve FIOCDATS exactly.
+
+    WHAT IS LEFT, AND WHY IT IS ONE THING.  Four CSECTs.  Three are a single
+    phenomenon: a symbol the original link left undefined, where the dump
+    holds 0 and we resolve an address from the oracle.  FCMBMTG9+017A wants
+    TFIVMCI1 undefined, P9's FIOCDATS wants FIOPF1RC and FIOPF2RC undefined,
+    and FIOHFE89's thirteen are all #LBR external-buffer operands read off the
+    ASM101Sa listing.  The fourth, #PCS2120+0176, is the dfg budget defect
+    reported on PR #46 and is not ours.
+
+    The invariance rule cannot reach them.  lnk101 records no owning section
+    for a -D-supplied symbol, and the oracle's symbol records carry a "module"
+    field naming the real supplier -- CGBOBF for FIOHFE89, whose compool
+    #PCGBOBF is in BOTH the G9 and P9 indexes at the same 33% fill, and whose
+    name appears in neither the GNC9 nor the PL9 deck tree, only in MFB3 and
+    OPS0.  Section loading, fill and deck membership all fail to separate G9,
+    which resolves these, from P9, which zeroes them.  What is left is phase
+    membership of the DEFINING MODULE: GNC9 links three phases (3, 8, 18) and
+    PL9 two (9, 12).  Test that on its own rather than bolting it onto the
+    invariance rule.
+
+    A SIXTH ATTEMPT AT THE LEAVE-UNDEFINED RULE REGRESSED (8288 -> 8283) and
+    was reverted.  Requiring a section to be placed in at least two dumps
+    before calling it invariant is sound and worth keeping -- a section only
+    one dump places has no second copy to be identical to, and FCMBMTG9,
+    placed by G9 alone, passes the test trivially.  Replacing the fill proxy
+    with index membership is what broke it: it fires on 100+ symbols per
+    configuration and zeroes words the dump genuinely resolves (SSW FIOHFEPG,
+    FIOACTMD, FIOPDHF; G9 FIOMVUPG).
+
+    ONE LOOSE END that is not that phenomenon.  FCMBMTG9+018E is not a zero:
+    the dump has TFIVPF12 = F921 = CVAS_INB$(1:) and we emit F941 = $(33:)
+    from CVHPLD's EQUATE.  CVAS_INB spans only 0xF921-0xF93A in the dump -- 26
+    elements, with FCMBMTG9 beginning at 0xF93C -- so $(33:) cannot exist
+    there and our ARRAY(44) declaration is suspect.  Full detail in yaGPC2's
+    problems.md sections 8.52, 8.57 and 8.58.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
