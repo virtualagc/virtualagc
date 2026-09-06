@@ -28,16 +28,26 @@ front of sys.path, and these four files sit together.
 # source file and belong to PASS itself; the conditional pairs further down are
 # constant and belong to Virtual AGC.
 #
-# R=C is necessary but not sufficient for PGSCRU and PGPPLD, which fail after
-# it with DQ8 rather than DQ7 -- "STRUCTURE ... CANNOT BE UNQUALIFIED".  Those
-# two are a different defect and not a CARDTYPE matter at all.  PGSCRU's own
-# report settles it: STRUCTURE CSAS_PDT_PAR_ENTRY appears exactly once in it,
-# from its own "D INCLUDE STRPDT" at statement 28, so the CPG_PCD template it
-# includes at statement 6 did not carry STRPDT's structures.  Our SDF for
-# CPGPCD does carry them, and the collision follows.  The SDF include path
-# (HALINCL/INCSDF.xpl) exports or imports more than the template path does --
-# compiling the same unit with --no-sdfi gives PM2 instead, so the two paths
-# genuinely disagree.  That is the thing to fix; R=C only moves the symptom.
+# R=C used to be necessary but not sufficient for PGSCRU and PGPPLD, which
+# failed after it with DQ8 rather than DQ7 -- "STRUCTURE ... CANNOT BE
+# UNQUALIFIED" -- because our SDF for CPGPCD carried STRPDT's structures while
+# the template path did not.  PGSCRU's own report settles that reading:
+# STRUCTURE CSAS_PDT_PAR_ENTRY appears exactly once in it, from its own
+# "D INCLUDE STRPDT" at statement 28, so the CPG_PCD template it includes at
+# statement 6 did not carry STRPDT's structures.  That disagreement between the
+# two include paths has since been fixed, and both units now compile under R=C.
+#
+# PGPPLD is settled independently by the DASS S2 dump, which is what moved it
+# into the table.  Under R=M its #CPGPPLD came out 2977 halfwords against the
+# dump's 2965 and its #DPGPPLD 140 against 132; the eight extra halfwords of
+# data are exactly STRPDT's nine R-gated NAME pointers less one, landing where
+# the dump's own operand offsets say they must (+7 ahead of PGP_PDT_LIM_DATA,
+# +2 ahead of PGP_LIM_VALUES).  The twelve extra halfwords of code were a
+# consequence, not a separate defect: with nine fewer pointers to keep live the
+# register allocator spills PGP_LOAD_MIA across the flex-table loop instead of
+# recomputing it, as the dump does.  Under R=C both CSECTs come out exact.
+# STRPDT is the only include of PGPPLD's carrying R cards, so the pair changes
+# nothing else.
 cardtypesBySourceFile = {
     "default": "FCRM",
     "CS2INI" : "ACFCRM",
@@ -48,6 +58,7 @@ cardtypesBySourceFile = {
     "CS2PDT" : "FCRC",
     "CS4PDT" : "FCRC",
     "PGSCRU" : "FCRC",
+    "PGPPLD" : "FCRC",
     # GKFHOR's five T cards were the whole of its M1 "ILLEGAL CARD TYPE"
     # failure; S, its only other unusual column 1, is a standard type.  Both
     # readings parse and compile, since the T lines wrap an IF/ELSE around a
