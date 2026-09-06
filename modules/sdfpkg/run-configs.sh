@@ -34,7 +34,10 @@ if [ -z "${PFSDIR:-}" ]; then
 fi
 CLC=~/ForClaude/OI340600-clc
 JOBS=~/ForClaude/jobs
-SRC=$(cd "$(dirname "$0")" && pwd)
+# Resolve through the symlink: these scripts are reached via ~/bin, and
+# DB below hangs off SRC.  dirname "$0" would make it ~/bin/dass-compare.db,
+# a fresh empty database -- the throwaway-DB failure warned about above.
+SRC=$(cd "$(dirname "$(readlink -f "$0")")" && pwd)
 DB=$SRC/dass-compare.db
 LOG=~/ForClaude/run-configs.log
 
