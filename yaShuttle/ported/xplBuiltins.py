@@ -39,7 +39,67 @@ from asciiToEbcdic import asciiToEbcdic, ebcdicToAscii
 #from virtualenv.create.via_global_ref.builtin import via_global_self_do
 from ibmFloat import ibm_dp_to_double, ibm_dp_from_double, ibm_dp_mul, \
                      ibm_dp_div, ibm_dp_addsub, ibm_dp_to_hal_string, \
-                     ibm_dp_from_string, hfpJoin
+                     ibm_dp_from_string, hfpJoin, \
+                     IBM_DP_EXP_BIAS, IBM_DP_MANT_HEXDIGITS, \
+                     IBM_DP_MANT_MASK, IBM_DP_SIGN_BIT
+
+
+def ibm_dp_expon(op0, op1):
+    '''
+    a**b -- port of the original MONITOR.bal EXPON routine (cards
+    00289400-00293000), matching runtimeC.c's MONITOR(9) op 5.  When the
+    exponent b is an exact integer n with |n| < 2**24, the original does
+    LSB-first binary square-and-multiply in S/360 truncating hex FP; for a
+    NEGATIVE exponent it patches the MDR into DDR, i.e. the accumulator
+    (init 1.0) is DIVIDED by the running power at each set bit -- never
+    positive-power-then-reciprocal.  The truncation points matter: e.g.
+    10**(-6) must come out as X'3C10C6F7A0B5ED8C' (= (1.0 DDR 100) DDR
+    10000), where an IEEE pow() round-trip lands an ULP away.
+
+    Returns the 64-bit IBM DP result, or -1 for EXPON's RC=1 error, or None
+    if the exponent is not an integer in range, in which case the caller
+    should fall back as before (the original went through its hex LOG/EXP
+    routines there).
+    '''
+    bMant = op1 & IBM_DP_MANT_MASK
+    bExp = (op1 >> 56) & 0x7F
+    bNeg = (op1 & IBM_DP_SIGN_BIT) != 0
+    isInt = False
+    n = 0
+    if bMant == 0:              # b == +/-0 -> n = 0
+        isInt = True
+        bNeg = False
+    else:
+        # Number of hex digits of the mantissa below the binary point.
+        k = IBM_DP_EXP_BIAS + IBM_DP_MANT_HEXDIGITS - bExp
+        if k <= 0:
+            pass                # |b| >= 16**14: beyond EXPON's 24-bit limit
+        elif k < IBM_DP_MANT_HEXDIGITS and (bMant & ((1 << (4 * k)) - 1)) == 0:
+            mag = bMant >> (4 * k)
+            if mag < (1 << 24):
+                isInt = True
+                n = mag
+        # k >= 14 with a nonzero mantissa: |b| < 1 and non-integer.
+    if not isInt:
+        return None
+    # EXPON returns RC=1 (error) for 0 ** nonpositive-integer.
+    if (op0 & IBM_DP_MANT_MASK) == 0 and (bNeg or n == 0):
+        return -1
+    acc = 0x4110000000000000     # D#ONE
+    base = op0
+    while n != 0:
+        bit = n & 1
+        n >>= 1
+        if bit:
+            if bNeg:
+                if (base & IBM_DP_MANT_MASK) == 0:
+                    return -1    # running power underflowed to 0: divide fault
+                acc = ibm_dp_div(acc, base)
+            else:
+                acc = ibm_dp_mul(acc, base)
+        if n != 0:
+            base = ibm_dp_mul(base, base)   # MDR 0,0
+    return acc
 
 # McKeeman p. 137 specifies that in mulit-assignments like
 #    X1, X2, ..., XN = Y;
@@ -480,6 +540,7 @@ def MONITOR(function, arg2=None, arg3=None):
             print("\nNo MONITOR(5) prior to MONITOR(9)", file=sys.stderr)
             exit(1)
         op = arg2
+        rawAvailable = False
         try:
             if op <= 4:
                 operand0 = (dwArea[0] << 32) | dwArea[1]
@@ -498,7 +559,15 @@ def MONITOR(function, arg2=None, arg3=None):
             elif op == 4:
                 operand0 = ibm_dp_div(operand0, operand1)
             elif op == 5:
-                value0 = pow(value0, value1)
+                rawResult = ibm_dp_expon((dwArea[0] << 32) | dwArea[1],
+                                         (dwArea[2] << 32) | dwArea[3])
+                if rawResult is None:
+                    value0 = pow(value0, value1)
+                elif rawResult < 0:
+                    return 1
+                else:
+                    operand0 = rawResult
+                    rawAvailable = True
             # Or perform the unary operations, which are all trig functions.
             # Unfortunately, the documentation doesn't specify the angular 
             # units.  I assume they're radians.
@@ -516,7 +585,7 @@ def MONITOR(function, arg2=None, arg3=None):
                 value0 = math.sqrt(value0)
             else:
                 return 1
-            if op <= 4:
+            if op <= 4 or rawAvailable:
                 msw = (operand0 >> 32) & 0xFFFFFFFF
                 lsw = operand0 & 0xFFFFFFFF
                 #value0 = ibm_dp_to_double(msw, lsw)
