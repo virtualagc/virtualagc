@@ -42,7 +42,11 @@
 #      address holding nothing but zeros, and the score was 1.7% instead of
 #      31.5%.  dass-combine.py skips a range a phase did not actually emit.
 set -e
-T=${1:?build tree}; PFS=$(cd "$(dirname "$0")" && pwd)  # sibling scripts
+T=${1:?build tree}
+# readlink -f: this names the SIBLING SCRIPTS, and reached through a ~/bin
+# symlink dirname "$0" is ~/bin, which only works while every sibling
+# happens to be symlinked there as well.
+PFS=$(cd "$(dirname "$(readlink -f "$0")")" && pwd)
 BIN=${LNK101_BIN:-$HOME/donschmidt/nsts-sdl-dps/build/bin}
 SRC=${LNK101_SRC:-$HOME/donschmidt/nsts-sdl-dps}
 cd "$T"; mkdir -p phase; rm -f phase/PHASE*.lib phase/PHASE*.fcm phase/PHASE*.sym.json

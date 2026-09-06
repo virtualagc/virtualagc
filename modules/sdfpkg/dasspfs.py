@@ -38,7 +38,9 @@ def pfsDir():
         return os.path.expanduser(p)
     if os.path.isdir("mafgen"):
         return os.path.abspath(".")
-    here = os.path.dirname(os.path.abspath(__file__))
+    # realpath, not abspath: reached through a ~/bin symlink, abspath would
+    # answer ~/bin and this fallback would look for ~/bin/mafgen.
+    here = os.path.dirname(os.path.realpath(__file__))
     if os.path.isdir(os.path.join(here, "mafgen")):
         return here
     return os.path.expanduser(_DEFAULT)
