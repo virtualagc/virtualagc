@@ -58,7 +58,7 @@ AUG=$PFS/mafgen/augmented-$CFG.json
 IMG=$PFS/mafgen/$CFG.fcm
 # The tracked copy in mafgen/ is canonical; the sweep's working copy in
 # ~/ForClaude is the fallback.  $EXCEPTIONS overrides both.
-EXC=${EXCEPTIONS:-$PFS/mafgen/exceptions-$CFG.txt}
+EXC=${EXCEPTIONS:-$PFS/mafgen/exceptions-$CFG-curated.txt}
 [ -f "$EXC" ] || EXC=$HOME/ForClaude/OI340600-clc/exceptions-$CFG.txt
 ROOT=${CONCARD_ROOT:-SM2}
 

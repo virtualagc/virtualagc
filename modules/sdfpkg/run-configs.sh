@@ -117,7 +117,7 @@ for CFG in $CONFIGS; do
         --base="$CLC/csects-$CFG-gen.json" --out="$CLC/csects-$CFG-gen2.json" )
     # GENERATE THE -full FILE ONLY IF IT DOES NOT EXIST.
     #
-    # This used to write exceptions-$CFG-full.txt unconditionally.  The file is
+    # This used to write exceptions-$CFG-curated.txt unconditionally.  The file is
     # now hand-curated and tracked in mafgen/ -- it carries the pruning and the
     # retraction of the -2 class, judgement no script can restate -- so writing
     # over it destroyed exactly what could not be rebuilt.
@@ -128,7 +128,13 @@ for CFG in $CONFIGS; do
     # the sweep only reads it.  Regenerating over a curated file is also how the
     # entries decay unnoticed: five of the seven alive on 2026-09-06 had already
     # stopped being true, and dass-score.py now reports such entries.
-    CURATED=$PFSDIR/mafgen/exceptions-$CFG-full.txt
+    # The generated exceptions-$CFG.txt above is a WORKING-DIRECTORY
+    # artefact, not a tracked one.  Of its 877 entries, 397 assert a
+    # difference our build does not have, 479 lie outside every scored
+    # CSECT, and the one that could matter is MISSION_ID, which the
+    # curated file already carries.  It suppresses genuine post-build
+    # patch noise in sweeps 1 and 2 and is used for nothing else.
+    CURATED=$PFSDIR/mafgen/exceptions-$CFG-curated.txt
     if [ -f "$CURATED" ]; then
         echo "---------- $CFG version no-claims: $CURATED exists, not regenerated"
     else

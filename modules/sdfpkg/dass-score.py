@@ -24,7 +24,7 @@ is placed at exactly the index's address and length AND every halfword agrees.
 
 TWO THINGS THE DUMPS DO NOT SAY, both excused in the later columns
 
-  * POST-BUILD CHANGES.  The dump marks them with '*'; exceptions-<cfg>-full.txt
+  * POST-BUILD CHANGES.  The dump marks them with '*'; exceptions-<cfg>-curated.txt
     is the scrape.  No build can reproduce a patch applied after the build.
   * ADDRESSES MAFGEN NEVER PRINTS A VALUE FOR.  unlinkMAFGEN2.py sets every
     address it never saw a value for to 0xC9FB below 0x20000 and 0xC6C6 above
@@ -108,7 +108,7 @@ def exc_dir(fn):
 
 def exc_set(cfg):
     s = set()
-    for fn in ("exceptions-%s.txt" % cfg, "exceptions-%s-full.txt" % cfg):
+    for fn in ("exceptions-%s-curated.txt" % cfg,):
         p = exc_dir(fn)
         if not os.path.exists(p):
             continue
@@ -183,7 +183,7 @@ def main():
     # of them match and a fifth had never been what it claimed -- and they were
     # found by hand.  Report them: an exception that no longer changes anything
     # should be deleted, not carried.
-    # Only the -full files are reported by address.  The base files are derived
+    # Only the curated files are reported by address.  The base files are derived
     # from the listing alone and know nothing of our build, so a redundant
     # entry there is expected and regenerates anyway; it is counted, not named.
     stale, base = [], 0
@@ -193,8 +193,7 @@ def main():
             m = halfwords("%s/link/%s%s.fcm" % (tree, cfg, sfx))
         except IOError:
             continue
-        for fn, curated in (("exceptions-%s.txt" % cfg, False),
-                            ("exceptions-%s-full.txt" % cfg, True)):
+        for fn, curated in (("exceptions-%s-curated.txt" % cfg, True),):
             p = exc_dir(fn)
             if not os.path.exists(p):
                 continue
