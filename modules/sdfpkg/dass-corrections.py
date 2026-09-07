@@ -31,6 +31,23 @@ hold, none of which consults our build:
     unlinkMAFGEN2's synthesised fill rather than anything read from the dump;
   * and the reference does hold fill there, confirming that is what happened.
 
+WHY A ZERO IS WRITTEN EVEN WHERE OUR BUILD HOLDS FILL.  The oracle for these
+images is the DASS files, and MAFGEN formed them from the SDFs; where the SDF
+says zero, zero is what the reference should say.  Our own build holding fill
+there proves nothing about the original: it is our LINK EDITOR's hole-fill
+convention, not evidence about the memory.  And the risks are not symmetric --
+a zero where fill would have done costs nothing at run time, while fill where a
+zero was needed is fatal the first time the location is read.  So a halfword the
+SDF initializes to zero is corrected to zero, and it is not withheld merely
+because the object left it a hole: CHARACTER buffer tails and the like are
+unused space where nothing else belongs.
+
+THE ONE EXCEPTION IS AN ADDRESS CONSTANT, and it is why the RLD guard exists.
+There the table's zero is the UNRELOCATED value and memory holds base+0 -- a
+real pointer -- so writing zero destroys it.  That is the test: withhold a
+correction only where a DIFFERENT, NON-ZERO value is known to belong, never
+because fill is the alternative.
+
 CONTESTED CSECTS.  Where two CSECTs' index ranges overlap, an address belongs to
 both and the dump may hold either one's content.  Such an address is corrected
 only when every claiming CSECT agrees the value is zero, and only with
@@ -245,24 +262,6 @@ def buildCache(tree, sizes, path):
                 span = [k for k in range(n) if k % bi in occ]
             else:
                 span = range(n)
-            # A CHARACTER's buffer is only emitted as far as it is used.  Its
-            # first halfword is (maximum length, current length), so
-            # ceil((2 + current) / 2) halfwords carry data and the rest of the
-            # declared extent is a hole the link editor fills.  The SDF pads
-            # that tail with zeros -- CVSP_MESSAGE_TEXT, ARRAY(15)
-            # CHARACTER(34), reads 2201 2000 then sixteen zeros a copy -- and
-            # correcting them wrote zeros over 240 halfwords of fill in
-            # #PCVTTCS alone.  The padding is the SDF's, not the memory's.
-            if getattr(c, "symbolType", None) == 2:
-                elems, esz = (r1, bi) if (r1 and bi) else (1, n)
-                tail = set()
-                for e in range(elems):
-                    b0 = ra + e * esz
-                    if b0 >= len(init):
-                        break
-                    used = (2 + (init[b0] & 0xFF) + 1) // 2
-                    tail.update(range(e * esz + used, e * esz + esz))
-                span = [k for k in span if k not in tail]
             nm = SDF.fullSymbolASCII(sym).strip()
             for k in span:
                 if ra + k < len(init) and init[ra + k] == 0:
