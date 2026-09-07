@@ -171,6 +171,40 @@ def templateOffsets(tbl, index, seen):
     return out
 
 
+def relocationTargets(tree):
+    """(CSECT, offset) -> target CSECT, for every halfword an object relocates.
+
+    Orientation matters and is easy to get backwards: the CONTAINER is the
+    SECOND name, so "#PCANNCO -> #DDMTERR addr=00014" is a pointer to #PCANNCO
+    living at halfword 0x14 of #DDMTERR.  Offsets are type-dependent too -- a
+    YCON flags the pointer halfword itself, a ZCON/data flags a fullword whose
+    address is the halfword after it.
+    """
+    import subprocess
+    objs = os.path.join(tree, "objects")
+    if not os.path.isdir(objs):
+        return {}
+    files = [os.path.join(objs, f) for f in sorted(os.listdir(objs))
+             if f.endswith(".obj")]
+    if not files:
+        return {}
+    out = subprocess.run([OBJDUMP, "--no-repro"] + files,
+                         capture_output=True, text=True, timeout=1800).stdout
+    pat = re.compile(r"^RLD\s+(\S+)\s+(\S+)\s+->\s+(\S+)\s+addr=([0-9A-F]+)")
+    out2 = collections.defaultdict(dict)
+    for line in out.splitlines():
+        m = pat.match(line)
+        if not m:
+            continue
+        kind, target, container, o = m.group(1), m.group(2), m.group(3), \
+            int(m.group(4), 16)
+        offs = (o,) if kind.startswith("YCON") else \
+               ((o + 1,) if kind.startswith("ZCON/data") else (o, o + 1))
+        for x in offs:
+            out2[container].setdefault(x, target)
+    return out2
+
+
 def relocatedHalfwords(tree):
     """(CSECT, offset) pairs an object asks the link editor to relocate.
 
@@ -216,6 +250,7 @@ def buildCache(tree, sizes, path):
     from sdf import sdf as SDF
     here = os.getcwd()
     os.chdir(tree)
+    reloc = relocationTargets(tree)
     out, stats = {}, collections.Counter()
     for f in sorted(os.listdir("SDFLIB")):
         if not f.endswith(".sdf"):
@@ -266,8 +301,16 @@ def buildCache(tree, sizes, path):
             for k in span:
                 if ra + k < len(init) and init[ra + k] == 0:
                     zeros.append([ra + k, nm])
-        if zeros:
-            out[unit] = {"csect": hit[0], "zeros": zeros}
+        # A NAME slot holds the target's CSECT-RELATIVE OFFSET, with the YCON
+        # supplying the base, so its value is meaningful even when zero -- zero
+        # means offset zero, a pointer to the CSECT base.  Recorded here so the
+        # pointer pass can compute base + offset.
+        pointers = []
+        for off, target in sorted(reloc.get(hit[0], {}).items()):
+            if off < len(init):
+                pointers.append([off, init[off], target])
+        if zeros or pointers:
+            out[unit] = {"csect": hit[0], "zeros": zeros, "pointers": pointers}
             stats["usable"] += 1
     os.chdir(here)
     json.dump(out, io.open(path, "w"))
@@ -349,6 +392,47 @@ def main():
                      "unit": who[0][2],
                      "alsoClaimedBy": sorted(cs - {who[0][0]}) or None})
         stats["CORRECTED to 0000"] += 1
+
+    # NAME POINTERS THE LISTING NEVER STATED.  A NAME slot holds the target's
+    # CSECT-relative offset with the YCON supplying the base, so base + offset
+    # is the value -- and the listing itself already holds exactly that at
+    # 37,357 halfwords over the seven configurations, which validates the model
+    # without reference to our build.  But a WRONG pointer is harmful at run
+    # time where a spurious zero is not, so the asymmetry that lets zeros be
+    # written freely runs the other way here: only a pointer our own build
+    # independently arrives at is written.  That makes this class
+    # build-confirmed BY CONSTRUCTION -- it is flagged as such, and must be
+    # kept out of the independent-agreement figure the zero corrections rest
+    # on.
+    ours = None
+    op = "%s/link/%s-r.fcm" % (tree, cfg)
+    if os.path.exists(op):
+        b = open(op, "rb").read()
+        ours = list(struct.unpack(">%dH" % (len(b) // 2), b))
+    if ours is not None:
+        for unit, rec in units.items():
+            g = aug.get(rec["csect"])
+            if not g:
+                continue
+            if rec["csect"] in contested and not withContested:
+                continue
+            for off, val, target in rec.get("pointers", ()):
+                a = g["start"] + off
+                tg = aug.get(target)
+                if tg is None or a >= len(img) or a >= len(ours):
+                    continue
+                if a in printed or img[a] not in FILL:
+                    continue              # the listing spoke: leave it alone
+                want = (tg["start"] + val) & 0xFFFF
+                if ours[a] != want:
+                    stats["pointer: our build does not confirm it"] += 1
+                    continue
+                corr.append({"address": a, "old": img[a], "new": want,
+                             "class": "name-pointer-never-printed",
+                             "csect": rec["csect"], "offset": off,
+                             "target": target, "unit": unit,
+                             "buildConfirmed": True})
+                stats["POINTER restored as base+offset"] += 1
 
     print("%s: %d correction(s)" % (cfg, len(corr)))
     for k, v in sorted(stats.items()):
