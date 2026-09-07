@@ -65,7 +65,9 @@ import collections
 import io
 import json
 import os
+import re
 import struct
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
@@ -74,6 +76,9 @@ for _p in ("modules/sdfpkg/sdfpkg", "modules/sdf/sdf", "modules/cmem/cmem"):
 
 from dasspfs import mafgenDir                                    # noqa: E402
 
+OBJDUMP = os.environ.get(
+    "IBMOBJDUMP",
+    os.path.expanduser("~/donschmidt/nsts-sdl-dps/build/bin/ibmobjdump"))
 FILL = {0xC6C6, 0xC9FB}
 INITIAL_FLAG = 1 << (31 - 17)
 NAME_FLAG = 1 << (31 - 5)
@@ -147,6 +152,43 @@ def templateOffsets(tbl, index, seen):
         if j == 0xFFFF:
             break
     return out
+
+
+def relocatedHalfwords(tree):
+    """(CSECT, offset) pairs an object asks the link editor to relocate.
+
+    An address constant's initialization-table entry is the UNRELOCATED value,
+    normally zero, so the SDF says "zero" while memory holds base+0 -- the
+    target CSECT's address.  Correcting such a halfword to zero overwrites a
+    real pointer, which is what 666 of these corrections did before this guard,
+    #DDMTERR's 152 among them.
+
+    In an RLD line the CONTAINER is the SECOND name and addr is an offset within
+    it: "#PCANNCO -> #DDMTERR addr=00014" is a pointer to #PCANNCO living at
+    halfword 0x14 of #DDMTERR.  Reading that backwards is easy and costly.  A
+    fullword ADCON is flagged at its even offset while the address occupies the
+    odd halfword after it, and a halfword YCON is flagged at the pointer itself,
+    so both o and o+1 are withheld.
+    """
+    import subprocess
+    objs = os.path.join(tree, "objects")
+    if not os.path.isdir(objs):
+        return {}
+    files = [os.path.join(objs, f) for f in sorted(os.listdir(objs))
+             if f.endswith(".obj")]
+    if not files:
+        return {}
+    out = subprocess.run([OBJDUMP, "--no-repro"] + files,
+                         capture_output=True, text=True, timeout=1800).stdout
+    pat = re.compile(r"^RLD\s+\S+(?:\([-+]\))?\s+(\S+)\s+->\s+(\S+)"
+                     r"\s+addr=([0-9A-F]+)")
+    out2 = collections.defaultdict(set)
+    for line in out.splitlines():
+        m = pat.match(line)
+        if m:
+            o = int(m.group(3), 16)
+            out2[m.group(2)].update((o, o + 1))
+    return out2
 
 
 def buildCache(tree, sizes, path):
@@ -244,6 +286,7 @@ def main():
     raw = open("%s/%s.fcm" % (M, cfg), "rb").read()
     img = list(struct.unpack(">%dH" % (len(raw) // 2), raw))
     printed = printedAddresses(cfg)
+    relocated = relocatedHalfwords(tree)
 
     rng = sorted((g["start"], g["end"], n) for n, g in aug.items())
     contested = set()
@@ -264,7 +307,10 @@ def main():
             continue
         if rec["csect"] in contested and not withContested:
             continue
+        rl = relocated.get(rec["csect"], ())
         for off, nm in rec["zeros"]:
+            if off in rl:
+                continue                      # an address constant, not a zero
             a = g["start"] + off
             if a < len(img):
                 claim[a].append((rec["csect"], nm, unit))
