@@ -280,7 +280,7 @@ class sdf:
                     target = self._variableReference(head)
                     if target:
                         self.nameTerminalInitialization[symbno] = [
-                            (1, target, 0, ())]
+                            (1, target, 0, (), ())]
                         self.vprint(f"\tSymbol {symbno}: "
                                     f"{sdf.fullSymbolASCII(sym)}")
                         self.vprint(f"\t\t{target}")
@@ -301,13 +301,18 @@ class sdf:
                 continue
             self.nameTerminalInitialization[symbno] = entries
             self.vprint(f"\tSymbol {symbno}: {sdf.fullSymbolASCII(sym)}")
-            for copy, target, raw, loops in entries:
+            for copy, target, raw, loops, path in entries:
+                # The path's last element is the terminal; the first is the
+                # structure itself, which the heading already names.
+                term = (".".join(path[1:]) if len(path) > 1 else "")
+                term = (" " + term) if term else ""
                 if target is None:
                     if copy is None:
                         self.vprint(f"\t\t(unrecognised operator "
                                     f"0x{raw:04X})")
                     else:
-                        self.vprint(f"\t\tcopy {copy}: (target not resolved)")
+                        self.vprint(f"\t\tcopy {copy}{term}: "
+                                    f"(target not resolved)")
                     continue
                 if loops:
                     # An Initial Pointer Value inside Loop Start operators
@@ -315,11 +320,13 @@ class sdf:
                     # enclosing loop's repetition x and increment y.
                     spec = ", ".join("x%d step %d" % (r, i)
                                      for _, r, i in loops)
-                    self.vprint(f"\t\tcopy {copy} ({spec}): {target}")
+                    self.vprint(f"\t\tcopy {copy}{term} ({spec}): {target}")
                 else:
-                    self.vprint(f"\t\tcopy {copy}: {target}")
+                    self.vprint(f"\t\tcopy {copy}{term}: {target}")
 
-    # Walk one cell chain and return [(copyNumber, "A.B.C" or None, rawType)].
+    # Walk one cell chain, returning
+    # [(copyNumber, target or None, rawType, loops, path)], where path is the
+    # field 4 qualified name of the terminal being initialized.
     def _nameTerminalCells(self, head):
         out = []
         seen = set()
@@ -331,6 +338,15 @@ class sdf:
             nxt = self.getPointer(4)
             if nbytes < 8 or nbytes > 4 * self.pageSize:
                 break
+            # Never read past the end of the page the cell starts on.  cmem
+            # normalises an offset beyond PAGE_SIZE by advancing to the next
+            # page and abends 4005 -- uncatchably -- if that page is absent, so
+            # a cell whose length runs off the end takes the whole run down.
+            # Following the successor chain reaches such cells, which the old
+            # code never visited because it stopped at the first.
+            nbytes = min(nbytes, self.pageSize - (head & 0xFFFF))
+            if nbytes < 8:
+                break
             # Field 5, the Initial List Words: fixed-length operators of one
             # or two words, the first halfword giving the type (ICD Figures
             # 2-52 to 2-55).  X'03', End of Initialization, is the last
@@ -339,6 +355,28 @@ class sdf:
             # of 2-byte symbol indexes in field 4 is followed by two bytes of
             # padding.  Both structures that first exercised this decoder had
             # an even count, which hid the rounding.
+            # Field 4 is that many Symbol Index Table indexes: the QUALIFIED
+            # PATH of the terminal being initialized, so a structure's cell
+            # names both the structure and the terminal -- [SSC, N] for
+            # SSC.N.  Skipping it, which this did, threw away the only
+            # statement of WHICH terminal an Initial Pointer Value belongs to
+            # and left callers inferring it from template offsets.
+            # BOUND THE COUNT BEFORE TRUSTING IT.  A malformed cell can
+            # report 32770 indexes -- ##ARFDPS has one -- and reading that many
+            # halfwords walks off the page, which cmem answers with an
+            # uncatchable abend 4005.  The old code only ever used nIndexes as
+            # arithmetic, so garbage was harmless; reading field 4 makes it
+            # lethal.  The indexes must fit inside the cell.
+            count = nIndexes if (nIndexes <= 16
+                                 and 8 + 2 * nIndexes <= nbytes) else 0
+            path = []
+            for k in range(count):
+                self.offsetForGet = head
+                idx = self.getHalfword(8 + 2 * k)
+                path.append(sdf.fullSymbolASCII(self.symbolIndexTable[idx - 1])
+                            if 1 <= idx <= len(self.symbolIndexTable)
+                            else "?%d" % idx)
+            path = tuple(path)
             op = 8 + 2 * nIndexes
             op = (op + 3) & ~3
             loops = []
@@ -361,7 +399,7 @@ class sdf:
                     else:
                         target = (self._variableReference(f5c)
                                   if self._plausiblePointer(f5c) else None)
-                    out.append((copy, target, opType, tuple(loops)))
+                    out.append((copy, target, opType, tuple(loops), path))
                     op += 8
                 elif opType == 1:                   # Initialization Loop Start
                     loops.append((self.getHalfword(op + 2),      # nest level
@@ -373,14 +411,31 @@ class sdf:
                         loops.pop()
                     op += 4
                 elif opType == 3:                   # End of Initialization
+                    # The 5K extension flag supplies a REPLACEMENT successor;
+                    # its absence does not mean there is none.  Field 2 of the
+                    # cell already gave one, and for a structure with several
+                    # NAME terminals that is the chain to the next terminal's
+                    # cell -- TSNK_RECS's NFLD1 cell points on to its NFLD2
+                    # cell.  Zeroing it here reported 2 of its 4 pointers.
                     if self.getHalfword(op + 2):    # 5K extension flag
                         nxt = self.getPointer(op + 4)
-                    else:
-                        nxt = 0
                     break
                 else:
-                    out.append((None, None, opType, ()))
+                    out.append((None, None, opType, (), path))
                     break
+            # Field 2 is a successor only in a well-formed cell; elsewhere
+            # the halfword is something else.  ##ARFDPS has an empty cell
+            # (nbytes 8, no indexes) whose field 2 leads to rubbish, so accept
+            # a successor only when its own header is sane.
+            if nxt and self._plausiblePointer(nxt):
+                self.offsetForGet = nxt
+                nb2 = self.getHalfword(0)
+                self.offsetForGet = nxt
+                ni2 = self.getHalfword(2)
+                if not (12 <= nb2 <= self.pageSize and 1 <= ni2 <= 16):
+                    nxt = 0
+            else:
+                nxt = 0
             head = nxt
         return out
 
@@ -421,6 +476,19 @@ class sdf:
                        "numberOfLastPhysicalRecord", None)
         if last is None or page > last:
             return False
+        # numberOfLastPhysicalRecord is not the whole test: a page can be
+        # within that range and still absent, and cmem abends 4005 --
+        # uncatchably, via os._exit -- the moment one is addressed.  So ask
+        # cmem, which is the authority on what it will accept.  Following a
+        # cell chain reaches pointers that were never dereferenced before,
+        # which is how a latent bad successor became a crash.
+        exists = getattr(self.c, "_pageExistsInSdf", None)
+        if exists is not None:
+            try:
+                if not exists(self.c.current, page):
+                    return False
+            except Exception:
+                return False
         return 0 <= offset < self.pageSize
 
     def getByte(self, sdfPtr, caption=None, hex=False, indent=1):

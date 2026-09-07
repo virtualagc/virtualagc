@@ -402,9 +402,25 @@ def main():
                     recs = v
             check("nameTerminalInitialization describes TSNK_RECS", recs is not None)
             if recs:
-                check("its first element is the TERMINAL ORDINAL, not a copy number",
-                      [(o, t) for o, t, _r, _l in recs]
-                      == [(1, "TSNI_TARGET1"), (2, "TSNI_TARGET2")], str(recs))
+                got = [(c, t.strip(), p[-1].strip() if p else "")
+                       for c, t, _r, _l, p in recs]
+                # Two copies of two NAME terminals is four pointers, and the
+                # table states every one: the first element is the COPY, and
+                # field 4's path names the TERMINAL.  Both were once missing --
+                # field 4 was skipped, and End of Initialization zeroed the
+                # cell's successor, so only the first terminal was ever seen.
+                check("all four pointers appear, copy and terminal named",
+                      got == [(1, "TSNI_TARGET1", "NFLD1"),
+                              (2, "TSNI_TARGET2", "NFLD1"),
+                              (1, "TSNI_TARGET2", "NFLD2"),
+                              (2, "TSNI_TARGET1", "NFLD2")], str(got))
+                # ...and they are exactly what the initialization table holds
+                # at each terminal of each copy.
+                hb = ra("TSNK_RECS")
+                tn = {"NFLD1": ra("NFLD1"), "NFLD2": ra("NFLD2")}
+                check("each entry matches the initialization table",
+                      all(t5[hb + (c - 1) * 2 + tn[term]] == ra(tgt)
+                          for c, tgt, term in got))
 
         print("\nTSTPART -- too few elements, using neither legal form")
         rc, rpt = compile(work, "TSTPART")
