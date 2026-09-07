@@ -645,6 +645,8 @@ static const HelpEntry HELP_ENTRIES[] = {
     {"mem, x, examine ADDR [COUNT]", "Examine memory, halfwords (default 16)"},
     {"xw, x32, fw ADDR", "Examine memory, one fullword"},
     {"deposit, dep, dw ADDR VALUE... [-w]", "Write halfwords (fullwords with -w)"},
+    {"fcm FILE [START] [COUNT]", "Snapshot storage to an FCM file (default 330394 halfwords from 0)"},
+    {"poison [VALUE] [START] [COUNT]", "Fill storage with VALUE (default DEAD) -- see 'help poison'"},
     {"sym, symbol NAME", "Look up symbol (substring match)"},
     {"sections, sect", "Show section map"},
     {"where, loc, here", "Show current location"},
@@ -747,6 +749,85 @@ static void cmd_enable_disable(Debugger *dbg, AGEHarness *age, const char *addrS
     char addrFmt[80];
     format_addr(age, addr, addrFmt, sizeof addrFmt);
     printf("Breakpoint %s at %s\n", enable ? "enabled" : "disabled", addrFmt);
+}
+
+/* The DASS-recovered images are 330,394 halfwords, so a snapshot defaults to
+ * that length and is directly comparable with mafgen/<cfg>.fcm and
+ * corrected-<cfg>.fcm.  Big-endian halfwords, no header: the same shape
+ * unlinkMAFGEN2 produces. */
+#define FCM_DEFAULT_HW 330394u
+
+static void cmd_fcm(AGEHarness *age, int argc, char **argv) {
+    if (argc < 2) {
+        printf("*** Usage: fcm FILE [START] [COUNT]\n");
+        return;
+    }
+    uint32_t start = 0;
+    if (argc > 2 && !resolve_addr(age, argv[2], &start)) {
+        printf("*** Cannot resolve: %s\n", argv[2]);
+        return;
+    }
+    uint32_t count = FCM_DEFAULT_HW;
+    if (argc > 3) count = (uint32_t)strtoul(argv[3], NULL, 0);
+    uint32_t total = age->gpc.ram.totalHWCount;
+    if (start >= total) {
+        printf("*** Start %u is past the end of storage (%u halfwords)\n",
+               start, total);
+        return;
+    }
+    if (count > total - start) count = total - start;
+
+    FILE *f = fopen(argv[1], "wb");
+    if (!f) {
+        printf("*** Cannot write %s\n", argv[1]);
+        return;
+    }
+    for (uint32_t i = 0; i < count; i++) {
+        uint32_t hw = membus_get16(&age->gpc.ram, start + i);
+        unsigned char be[2] = { (unsigned char)((hw >> 8) & 0xff),
+                                (unsigned char)(hw & 0xff) };
+        if (fwrite(be, 1, 2, f) != 2) {
+            printf("*** Write failed at halfword %u\n", start + i);
+            fclose(f);
+            return;
+        }
+    }
+    fclose(f);
+    printf("Wrote %u halfwords from %06X to %s\n", count, start, argv[1]);
+}
+
+/* Filling storage with a recognisable value marks what a later load does NOT
+ * write.  It is rarely what you want here: IPL itself fills storage with C6C6
+ * above 0x20000 and C9FB below before FCMBOOT is loaded, so that distinction
+ * already exists and is authentic -- anything still holding fill after a load
+ * was not written by it.  Poisoning after IPL also destroys exactly the
+ * earlier-phase data that shows through a later phase's gaps, which is usually
+ * the thing under study.  And poisoning live storage will overwrite FCMBOOT or
+ * GPCIPL and stop the run dead.  Provided for deliberate experiments, not for
+ * routine use. */
+static void cmd_poison(AGEHarness *age, int argc, char **argv) {
+    uint32_t value = 0xDEADu;
+    if (argc > 1) value = (uint32_t)strtoul(argv[1], NULL, 16) & 0xFFFFu;
+    uint32_t start = 0;
+    if (argc > 2 && !resolve_addr(age, argv[2], &start)) {
+        printf("*** Cannot resolve: %s\n", argv[2]);
+        return;
+    }
+    uint32_t total = age->gpc.ram.totalHWCount;
+    if (start >= total) {
+        printf("*** Start %u is past the end of storage (%u halfwords)\n",
+               start, total);
+        return;
+    }
+    uint32_t count = total - start;
+    if (argc > 3) {
+        uint32_t want = (uint32_t)strtoul(argv[3], NULL, 0);
+        if (want < count) count = want;
+    }
+    for (uint32_t i = 0; i < count; i++)
+        membus_set16(&age->gpc.ram, start + i, value, false);
+    printf("Filled %u halfwords from %06X with %04X"
+           " (this may have overwritten loaded code)\n", count, start, value);
 }
 
 static void cmd_deposit(AGEHarness *age, int argc, char **argv) {
@@ -1180,6 +1261,14 @@ static bool dispatch_command(Debugger *dbg, AGEHarness *age, uint32_t nia, uint3
     }
     if (cmd_is(cmd, "deposit", "dep", "dw", NULL)) {
         cmd_deposit(age, argc, argv);
+        return false;
+    }
+    if (cmd_is(cmd, "fcm", NULL)) {
+        cmd_fcm(age, argc, argv);
+        return false;
+    }
+    if (cmd_is(cmd, "poison", NULL)) {
+        cmd_poison(age, argc, argv);
         return false;
     }
     if (cmd_is(cmd, "sym", "symbol", NULL)) {
