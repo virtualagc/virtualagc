@@ -1,0 +1,17 @@
+  TST_PRT2: COMPOOL RIGID;
+C  Probe 3: LEGAL partial initialization, per Programmer's Guide 16.3.
+  DECLARE TSQB_GUARD1 BIT(16) INITIAL(HEX'8881');
+C  interior gap: 3 elements left uninitialized in the middle
+  DECLARE TSQB_GAP ARRAY(8) BIT(16) INITIAL(
+     HEX'E101',HEX'E102',3#,HEX'E106',HEX'E107',HEX'E108');
+  DECLARE TSQB_GUARD2 BIT(16) INITIAL(HEX'8882');
+C  trailing remainder uninitialized
+  DECLARE TSQB_REM ARRAY(8) BIT(16) INITIAL(
+     HEX'E201',HEX'E202',*);
+  DECLARE TSQB_GUARD3 BIT(16) INITIAL(HEX'8883');
+C  explicit zeros, for contrast with the gaps above
+  DECLARE TSQB_ZEROS ARRAY(8) BIT(16) INITIAL(
+     HEX'E301',HEX'0000',HEX'0000',HEX'0000',
+     HEX'0000',HEX'0000',HEX'0000',HEX'E308');
+  DECLARE TSQB_GUARD4 BIT(16) INITIAL(HEX'8884');
+  CLOSE_TSQ: CLOSE;
