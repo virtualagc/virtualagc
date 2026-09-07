@@ -542,6 +542,71 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
      * spins forever in FIOPC1DL: measured on corrected-G9.fcm, 55 million
      * steps visiting only 0x1a84d-0x1a851, the four instructions of the
      * delay loop.  "counter1": false in the JSON opts out. */
+    /* The IOP half.  Restoring the CPU alone leaves every processor
+     * enable at zero, so the machine executes correctly and drives no bus
+     * at all -- which is precisely how corrected-G9.fcm looked when it was
+     * running FPMDISP with the DEUs seeing nothing. */
+    JsonValue *io_ = json_obj_get(root, "iop");
+    if (io_ != NULL) {
+        IOP *iop = &age->gpc.iop;
+        struct { const char *k; Register *r; } regs[] = {
+            {"halt", &iop->regHalt}, {"xmitEna", &iop->regXmitEna},
+            {"recvEna", &iop->regRecvEna}, {"busyWait", &iop->regBusyWait},
+            {"progExcept", &iop->regProgExcept},
+            {"indicator", &iop->regIndicator},
+            {"discreteOut", &iop->regDiscreteOut},
+            {"rmStatus", &iop->regRMStatus},
+            {"mscFailDisc", &iop->msc.regFailDisc},
+            {"mscIntProg", &iop->msc.regIntProg},
+        };
+        for (size_t i = 0; i < sizeof regs / sizeof regs[0]; i++) {
+            JsonValue *v = json_obj_get(io_, regs[i].k);
+            if (v != NULL) register_set32(regs[i].r, state_word(v, 0));
+        }
+        JsonValue *v;
+        if ((v = json_obj_get(io_, "curPE")) != NULL)
+            iop->curPE = (int)json_as_number(v, iop->curPE);
+        if ((v = json_obj_get(io_, "slice")) != NULL)
+            iop->ls.slice = (int)json_as_number(v, iop->ls.slice);
+        if ((v = json_obj_get(io_, "curBCE")) != NULL)
+            iop->ls.curBCE = (int)json_as_number(v, iop->ls.curBCE);
+        if ((v = json_obj_get(io_, "curPage")) != NULL)
+            iop->ls.curPage = (int)json_as_number(v, iop->ls.curPage);
+        JsonValue *ls = json_obj_get(io_, "ls");
+        for (int pg = 0; pg < 26 && json_arr_count(ls) > pg; pg++) {
+            JsonValue *page = json_arr_get(ls, pg);
+            for (int w = 0; w < 16 && json_arr_count(page) > w; w++) {
+                Register *r = iopls_at(&iop->ls, pg, w / 4, w % 4);
+                if (r != NULL)
+                    register_set32(r, state_word(json_arr_get(page, w), 0));
+            }
+        }
+        JsonValue *bl = json_obj_get(io_, "bce");
+        for (int i = 0; i < 24 && json_arr_count(bl) > i; i++) {
+            JsonValue *e = json_arr_get(bl, i);
+            BCE *b = &iop->bce[i];
+            JsonValue *t;
+            if ((t = json_obj_get(e, "delayActive")) != NULL)
+                b->delayActive = t->type == JSON_BOOL ? t->boolVal : false;
+            b->delayPC = state_word(json_obj_get(e, "delayPC"), b->delayPC);
+            if ((t = json_obj_get(e, "recvActive")) != NULL)
+                b->recvActive = t->type == JSON_BOOL ? t->boolVal : false;
+            b->recvPC = state_word(json_obj_get(e, "recvPC"), b->recvPC);
+            b->recvAddr = state_word(json_obj_get(e, "recvAddr"), b->recvAddr);
+            b->recvLeft = state_word(json_obj_get(e, "recvLeft"), b->recvLeft);
+            if ((t = json_obj_get(e, "recvGotAny")) != NULL)
+                b->recvGotAny = t->type == JSON_BOOL ? t->boolVal : false;
+            b->mia.latch = state_word(json_obj_get(e, "latch"), b->mia.latch);
+            if ((t = json_obj_get(e, "latchValid")) != NULL)
+                b->mia.latchValid = t->type == JSON_BOOL ? t->boolVal : false;
+        }
+        if (verbose)
+            fprintf(stderr, "--state: IOP halt=%08x xmit=%08x recv=%08x\n",
+                    (unsigned)register_get32(&iop->regHalt),
+                    (unsigned)register_get32(&iop->regXmitEna),
+                    (unsigned)register_get32(&iop->regRecvEna));
+    }
+
     JsonValue *c1 = json_obj_get(root, "counter1");
     age->gpc.cpu.counter1Enabled =
         (c1 == NULL || c1->type != JSON_BOOL) ? true : c1->boolVal;
@@ -551,6 +616,96 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
                 json_arr_count(r) < 0 ? 0 : json_arr_count(r),
                 json_arr_count(fp) < 0 ? 0 : json_arr_count(fp), path);
     json_free(root);
+    return true;
+}
+
+
+/* --dump-state: the other half of --state.
+ *
+ * A .fcm is memory only.  Everything below is machine state that lives
+ * OUTSIDE main storage and is therefore absent from any memory image:
+ *
+ *   - the CPU's PSW pair and its general/floating registers;
+ *   - counter 1's enable, started by IPL firmware and never by software;
+ *   - the IOP's processor enables.  regHalt bit 0 is the MSC and bits
+ *     1-24 are BCE 1-24, and a processor RUNS when its bit is SET, so a
+ *     zero here means no bus traffic at all however good the image is.
+ *     The MIA transmit/receive enables are separate again (FCMINIOP sets
+ *     them from TFCMXMSK/TFCMRMSK, not by CONFIGURE PROCESSORS), so both
+ *     have to travel or a BCE comes up enabled but mute;
+ *   - the IOP local store, 26 pages of 16 registers -- page 0 the MSC,
+ *     1-24 the BCEs, 25 the diagnostic processor.  Each BCE's PROGRAM
+ *     COUNTER lives here, not in main storage, so without it a restored
+ *     BCE resumes from nowhere;
+ *   - each BCE's in-flight delay and commanded-receive state, which is
+ *     keyed by PC and holds the processor mid-instruction.
+ *
+ * Written when the run stops, so `--break <addr> --dump-state f.json`
+ * captures a transition exactly. */
+bool ageharness_dump_state(AGEHarness *age, const char *path) {
+    FILE *f = fopen(path, "w");
+    if (f == NULL) {
+        fprintf(stderr, "--dump-state: cannot write %s\n", path);
+        return false;
+    }
+    CPU *cpu = &age->gpc.cpu;
+    IOP *iop = &age->gpc.iop;
+    uint32_t grSet = psw_get_reg_set(&cpu->psw);
+    fprintf(f, "{\n");
+    fprintf(f, "  \"psw1\": \"%08x\",\n", register_get32(&cpu->psw.psw1));
+    fprintf(f, "  \"psw2\": \"%08x\",\n", register_get32(&cpu->psw.psw2));
+    fprintf(f, "  \"counter1\": %s,\n", cpu->counter1Enabled ? "true" : "false");
+    fprintf(f, "  \"r\": [");
+    for (int i = 0; i < 8; i++)
+        fprintf(f, "%s\"%08x\"", i ? ", " : "",
+                register_get32(registerfile_r(&cpu->regFiles[grSet], i)));
+    fprintf(f, "],\n  \"fp\": [");
+    for (int i = 0; i < 8; i++)
+        fprintf(f, "%s\"%08x\"", i ? ", " : "",
+                register_get32(registerfile_r(&cpu->regFiles[2], i)));
+    fprintf(f, "],\n  \"iop\": {\n");
+    fprintf(f, "    \"halt\": \"%08x\",\n", register_get32(&iop->regHalt));
+    fprintf(f, "    \"xmitEna\": \"%08x\",\n", register_get32(&iop->regXmitEna));
+    fprintf(f, "    \"recvEna\": \"%08x\",\n", register_get32(&iop->regRecvEna));
+    fprintf(f, "    \"busyWait\": \"%08x\",\n", register_get32(&iop->regBusyWait));
+    fprintf(f, "    \"progExcept\": \"%08x\",\n", register_get32(&iop->regProgExcept));
+    fprintf(f, "    \"indicator\": \"%08x\",\n", register_get32(&iop->regIndicator));
+    fprintf(f, "    \"discreteOut\": \"%08x\",\n", register_get32(&iop->regDiscreteOut));
+    fprintf(f, "    \"rmStatus\": \"%08x\",\n", register_get32(&iop->regRMStatus));
+    fprintf(f, "    \"mscFailDisc\": \"%08x\",\n", register_get32(&iop->msc.regFailDisc));
+    fprintf(f, "    \"mscIntProg\": \"%08x\",\n", register_get32(&iop->msc.regIntProg));
+    fprintf(f, "    \"curPE\": %d,\n", iop->curPE);
+    fprintf(f, "    \"slice\": %d,\n", iop->ls.slice);
+    fprintf(f, "    \"curBCE\": %d,\n", iop->ls.curBCE);
+    fprintf(f, "    \"curPage\": %d,\n", iop->ls.curPage);
+    fprintf(f, "    \"ls\": [");
+    for (int pg = 0; pg < 26; pg++) {
+        fprintf(f, "%s\n      [", pg ? "," : "");
+        for (int w = 0; w < 16; w++) {
+            Register *r = iopls_at(&iop->ls, pg, w / 4, w % 4);
+            fprintf(f, "%s\"%08x\"", w ? ", " : "",
+                    r == NULL ? 0u : register_get32(r));
+        }
+        fprintf(f, "]");
+    }
+    fprintf(f, "\n    ],\n    \"bce\": [");
+    for (int i = 0; i < 24; i++) {
+        const BCE *b = &iop->bce[i];
+        fprintf(f, "%s\n      {\"delayActive\": %s, \"delayPC\": \"%08x\", "
+                   "\"recvActive\": %s, \"recvPC\": \"%08x\", "
+                   "\"recvAddr\": \"%08x\", \"recvLeft\": \"%08x\", "
+                   "\"recvGotAny\": %s, \"latch\": \"%08x\", "
+                   "\"latchValid\": %s}",
+                i ? "," : "",
+                b->delayActive ? "true" : "false", b->delayPC,
+                b->recvActive ? "true" : "false", b->recvPC,
+                b->recvAddr, b->recvLeft,
+                b->recvGotAny ? "true" : "false",
+                b->mia.latch, b->mia.latchValid ? "true" : "false");
+    }
+    fprintf(f, "\n    ]\n  }\n}\n");
+    fclose(f);
+    fprintf(stderr, "--dump-state: wrote %s\n", path);
     return true;
 }
 

@@ -111,6 +111,10 @@ typedef struct {
 } RegSnapshot;
 
 void ageharness_snapshot_regs(AGEHarness *age, RegSnapshot *snap);
+/* --dump-state: write the machine state a .fcm does not carry (CPU PSW
+ * and registers, IOP processor enables, local store and per-BCE transfer
+ * state) as JSON that --state can read back.  Returns false on I/O error. */
+bool ageharness_dump_state(AGEHarness *age, const char *path);
 
 #define REG_SNAPSHOT_MAX_CHANGES 20
 typedef struct {

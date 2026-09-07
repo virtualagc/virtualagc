@@ -21,6 +21,9 @@ static const char *HELP_TEXT =
 "Options:\n"
 "  --start <addr>                  start address in hex\n"
 "  --symbols <file>                load symbol table JSON from linker\n"
+"  --dump-state <file>             on stopping, write the machine state a\n"
+"                                  .fcm does not carry (CPU, IOP, local\n"
+"                                  store) as JSON --state can read back\n"
 "  --state <file>                  load CPU state (PSW pair and registers)\n"
 "                                  from JSON, applied AFTER the image and\n"
 "                                  any reset.  A memory image alone cannot\n"
@@ -286,6 +289,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->start = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--symbols", &n)) {
             opts->symbols = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--dump-state", &n)) {
+            opts->dumpState = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--state", &n)) {
             opts->state = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--ebcdic", &n)) {

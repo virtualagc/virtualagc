@@ -1531,6 +1531,8 @@ static int batchrunner_report_stop(BatchRunner *r) {
              r->age.gpc.cpu.elapsedTimeUs / 1000.0, r->age.gpc.cpu.elapsedTimeUs,
              r->age.gpc.cpu.timingPass2 ? "pass2" : "poo");
     batchrunner_info(r, msg);
+    if (r->opts != NULL && r->opts->dumpState != NULL)
+        ageharness_dump_state(&r->age, r->opts->dumpState);
     batchrunner_info(r, "--- FINAL REGISTERS ---");
     info_reg_dump(r, r->step);
 
@@ -1673,6 +1675,8 @@ static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, l
     char msg[128];
     snprintf(msg, sizeof msg, headerFmt, step);
     batchrunner_info(r, msg);
+    if (r->opts != NULL && r->opts->dumpState != NULL)
+        ageharness_dump_state(&r->age, r->opts->dumpState);
     batchrunner_info(r, "--- FINAL REGISTERS ---");
     info_reg_dump(r, step);
     batchrunner_flush(r);
