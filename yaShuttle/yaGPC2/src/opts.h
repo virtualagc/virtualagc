@@ -20,6 +20,7 @@ typedef struct {
     /* AGEHarness options */
     char *start;                    /* NULL if unset; hex string */
     char *symbols;                  /* NULL if unset */
+    char *state;                    /* --state JSON, NULL if unset */
     bool ebcdic;                    /* default false */
     bool trapSvcError;              /* default true */
     bool halucpSvc;                 /* default true; false = the loaded image

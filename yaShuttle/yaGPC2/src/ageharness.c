@@ -7,6 +7,9 @@
 #include <time.h>
 
 #include "compat.h"
+#include "json.h"
+
+static bool load_state(AGEHarness *age, const char *path, bool verbose);
 
 static const char *simple_basename(const char *path) {
     const char *slash = strrchr(path, '/');
@@ -426,6 +429,14 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
         hasEntryPoint = true;
     }
 
+    /* LAST, deliberately: after the image, after --start, and after any
+     * --ipl/--power-on reset, so a captured state wins over the reset
+     * vector instead of being overwritten by it. */
+    if (opts->state != NULL && load_state(age, opts->state, opts->verbose)) {
+        entryPoint = psw_get_nia(&age->gpc.cpu.psw);
+        hasEntryPoint = true;
+    }
+
     if (age->initialFcmPath != fcmPath) {
         free(age->initialFcmPath);
         age->initialFcmPath = yagpc_strdup(fcmPath);
@@ -451,6 +462,95 @@ bool ageharness_init_minimal(AGEHarness *age, const char *fcmPath, const char *s
         }
     }
     age->gpc.cpu.dateTimeAnchorEpochSec = startEpochSeconds;
+    return true;
+}
+
+
+/* --state: the CPU state a memory image does NOT carry.
+ *
+ * A .fcm is memory and nothing else.  Flight software resumed from one
+ * stops dead, because the machine it was dumped from also had a PSW (mask
+ * bits, condition code, and the BSR/DSR bank and segment registers) and
+ * eight live general registers.  Measured on OI340700: entering
+ * corrected-SSW.fcm at FCMINIOP -- the address the reference tape's own
+ * handover actually uses -- stops after ONE instruction in "wait state
+ * (masked)", because --start sets the NIA and leaves everything else at
+ * its default.  The real handover is PSW1=8dca4031 PSW2=000c0000, i.e.
+ * CC=1, BSR=3, DSR=1, with R0=41000000 R2=40000000 R3=86200000 ...
+ *
+ * Capture a state with --break <addr> (its "FINAL REGISTERS" block is
+ * exactly these fields) and replay it here.  Numbers may be JSON numbers
+ * or hex strings; "r" and "fp" are 8-element arrays, both optional.
+ * Applied AFTER the image load and after any --ipl/--power-on reset, so
+ * it overrides the reset vector rather than racing it. */
+static uint32_t state_word(const JsonValue *v, uint32_t dflt) {
+    if (v == NULL) return dflt;
+    if (v->type == JSON_STRING) {
+        const char *t = json_as_string(v, NULL);
+        if (t == NULL) return dflt;
+        return (uint32_t)strtoul(t, NULL, 16);
+    }
+    if (v->type == JSON_NUMBER) return (uint32_t)json_as_number(v, dflt);
+    return dflt;
+}
+
+static bool load_state(AGEHarness *age, const char *path, bool verbose) {
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) {
+        fprintf(stderr, "--state: cannot open %s\n", path);
+        return false;
+    }
+    fseek(f, 0, SEEK_END);
+    long n = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *text = malloc((size_t)n + 1);
+    if (text == NULL || fread(text, 1, (size_t)n, f) != (size_t)n) {
+        fprintf(stderr, "--state: cannot read %s\n", path);
+        free(text); fclose(f); return false;
+    }
+    text[n] = 0;
+    fclose(f);
+    JsonValue *root = json_parse(text);
+    free(text);
+    if (root == NULL) {
+        fprintf(stderr, "--state: %s is not valid JSON\n", path);
+        return false;
+    }
+    JsonValue *p1 = json_obj_get(root, "psw1");
+    JsonValue *p2 = json_obj_get(root, "psw2");
+    if (p1 != NULL || p2 != NULL) {
+        uint32_t w1 = state_word(p1, 0), w2 = state_word(p2, 0);
+        cpu_load_psw(&age->gpc.cpu, w1, w2);
+        if (verbose)
+            fprintf(stderr, "--state: PSW1=%08x PSW2=%08x NIA=%05x\n",
+                    w1, w2, psw_get_nia(&age->gpc.cpu.psw));
+    }
+    uint32_t grSet = psw_get_reg_set(&age->gpc.cpu.psw);
+    JsonValue *r = json_obj_get(root, "r");
+    for (int i = 0; i < 8 && json_arr_count(r) > i; i++)
+        register_set32(registerfile_r(&age->gpc.cpu.regFiles[grSet], i),
+                       state_word(json_arr_get(r, i), 0));
+    JsonValue *fp = json_obj_get(root, "fp");
+    for (int i = 0; i < 8 && json_arr_count(fp) > i; i++)
+        register_set32(registerfile_r(&age->gpc.cpu.regFiles[2], i),
+                       state_word(json_arr_get(fp, i), 0));
+    /* A MACHINE YOU ARE RESUMING HAD ITS INTERVAL TIMER RUNNING.  Counter 1
+     * is a 1 MHz down-counter that the IPL firmware starts and nothing in
+     * the software ever does -- see the --ipl comment above, which enables
+     * it for exactly that reason.  A resume cannot take --ipl (its blanket
+     * store protect faults the first STM), so without this the software
+     * spins forever in FIOPC1DL: measured on corrected-G9.fcm, 55 million
+     * steps visiting only 0x1a84d-0x1a851, the four instructions of the
+     * delay loop.  "counter1": false in the JSON opts out. */
+    JsonValue *c1 = json_obj_get(root, "counter1");
+    age->gpc.cpu.counter1Enabled =
+        (c1 == NULL || c1->type != JSON_BOOL) ? true : c1->boolVal;
+
+    if (verbose)
+        fprintf(stderr, "--state: %d general, %d floating register(s) from %s\n",
+                json_arr_count(r) < 0 ? 0 : json_arr_count(r),
+                json_arr_count(fp) < 0 ? 0 : json_arr_count(fp), path);
+    json_free(root);
     return true;
 }
 

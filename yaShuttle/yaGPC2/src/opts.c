@@ -21,6 +21,12 @@ static const char *HELP_TEXT =
 "Options:\n"
 "  --start <addr>                  start address in hex\n"
 "  --symbols <file>                load symbol table JSON from linker\n"
+"  --state <file>                  load CPU state (PSW pair and registers)\n"
+"                                  from JSON, applied AFTER the image and\n"
+"                                  any reset.  A memory image alone cannot\n"
+"                                  be resumed: the PSW carries the mask,\n"
+"                                  CC and BSR/DSR, and the software expects\n"
+"                                  live registers.  Capture with --break.\n"
 "  --ebcdic                        use EBCDIC encoding for character I/O\n"
 "  --trap-svc-error                intercept HAL/S SEND ERROR SVCs (default)\n"
 "                                  (default: true)\n"
@@ -280,6 +286,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->start = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--symbols", &n)) {
             opts->symbols = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--state", &n)) {
+            opts->state = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--ebcdic", &n)) {
             (void)n; opts->ebcdic = true;
         } else if (tok_is(tok, "--trap-svc-error", &n)) {
