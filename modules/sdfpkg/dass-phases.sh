@@ -53,14 +53,20 @@ cd "$T"; mkdir -p phase; rm -f phase/PHASE*.lib phase/PHASE*.fcm phase/PHASE*.sy
 
 python3 "$PFS/dass-phaselists.py" "$T"
 
+# Pin each phase to the addresses the index gives; see dass-phaseextsyms.py
+# for why phases cannot share one configuration's index, and why the
+# section list comes from the objlists rather than the deleted sym.json.
+python3 "$PFS/dass-phaseextsyms.py" "$T"
+
 for spec in "01:" "10:" "02:" "13:" "03:2" "04:2,3" "05:2,3" "06:2,3" "07:2,3" \
             "08:2,3" "09:2" "14:2" "12:2,9" "15:2,14" "16:2,14" "18:2,3"; do
   p=${spec%%:*}; maps=${spec##*:}
   [ -s phase/objlist-$p.txt ] || continue
   ml=""; for n in ${maps//,/ }; do ml="$ml --map-lib $n=phase/PHASE$(printf %02d $n).lib"; done
+  es=""; [ -s phase/extsyms-$p.json ] && es="--external-syms phase/extsyms-$p.json"
   printf "PHASE%s " $p
   "$BIN/lnk101" "@phase/objlist-$p.txt" --concard CON80 --concard-root PHASE$p \
-     -L SYSLIBL1 -L lib/runtime/RUN -L lib/runtime/ZCON $ml --allow-undefined \
+     -L SYSLIBL1 -L lib/runtime/RUN -L lib/runtime/ZCON $ml --allow-undefined $es \
      -o phase/PHASE$p.fcm --lib phase/PHASE$p.lib --json-symbols phase/PHASE$p.sym.json \
      > phase/PHASE$p.log 2>&1 && echo "ok" || { echo FAILED; exit 1; }
 done
