@@ -921,6 +921,73 @@ static bool batchrunner_step(BatchRunner *r) {
         return true;
     }
 
+    /* YAGPC_DUMPSTATE_AT=<sec>[,<sec>...] writes --dump-state's JSON the
+     * first time simulated time passes each <sec>, without stopping the
+     * run.  --dump-state alone fires only when the machine stops, and the
+     * state worth having is often mid-flight: a BCE is only RUNNING
+     * between the MSC's START I/O and the end of its bus program, so a
+     * capture taken at an arbitrary stop finds every BCE idle and
+     * busyWait naming the MSC alone.  Pick a time just after a
+     * YAGPC_SIOTRACE line that names the processor you care about. */
+    if (r->opts != NULL && r->opts->dumpState != NULL) {
+        static int dsInit = 0;
+        static double dsAt[8];
+        static int dsN = 0, dsNext = 0;
+        if (!dsInit) {
+            dsInit = 1;
+            const char *e = getenv("YAGPC_DUMPSTATE_AT");
+            while (e != NULL && *e != '\0' && dsN < 8) {
+                dsAt[dsN++] = atof(e);
+                const char *c = strchr(e, ',');
+                if (c == NULL) break;
+                e = c + 1;
+            }
+        }
+        /* YAGPC_DUMPSTATE_BUSY=<proc> instead catches the machine WHILE
+         * that processor is running: 0 is the MSC, 1-24 are BCE 1-24.
+         * Time cannot do this.  A display transaction is a START I/O
+         * followed by a bus program lasting microseconds, after which the
+         * BCE clears its own busy bit and its enable -- measured, a dump
+         * taken 124 us after a BCE7 SIO already shows halt=MSC alone.
+         * Firing on the busy bit is the only way to capture a BCE that is
+         * actually mid-transfer. */
+        static int dsBusyInit = 0, dsBusyProc = -1, dsBusyDone = 0;
+        static double dsBusyAfterUs = 0.0;
+        if (!dsBusyInit) {
+            dsBusyInit = 1;
+            const char *b = getenv("YAGPC_DUMPSTATE_BUSY");
+            if (b != NULL && *b != '\0') {
+                dsBusyProc = atoi(b);
+                /* ",<afterSec>": the FIRST time a processor goes busy is
+                 * not usually the one wanted.  GPCIPL's own IOP init
+                 * starts every BCE at once (acc=7fffff80, t=6.1 s), long
+                 * before the flight software's display transactions
+                 * (acc=81000000, from t=109.7 s).  Without a floor the
+                 * capture is of the loader, not of PASS. */
+                const char *c = strchr(b, ',');
+                if (c != NULL) dsBusyAfterUs = atof(c + 1) * 1e6;
+            }
+        }
+        if (dsBusyProc >= 0 && !dsBusyDone &&
+            r->age.gpc.cpu.elapsedTimeUs >= dsBusyAfterUs &&
+            iop_proc_get(&r->age.gpc.iop.regBusyWait, dsBusyProc) &&
+            iop_proc_get(&r->age.gpc.iop.regHalt, dsBusyProc)) {
+            char path[512];
+            snprintf(path, sizeof path, "%s-busy%d.json",
+                     r->opts->dumpState, dsBusyProc);
+            ageharness_dump_state(&r->age, path);
+            dsBusyDone = 1;
+        }
+        if (dsNext < dsN &&
+            r->age.gpc.cpu.elapsedTimeUs >= dsAt[dsNext] * 1e6) {
+            char path[512];
+            snprintf(path, sizeof path, "%s-%g.json",
+                     r->opts->dumpState, dsAt[dsNext]);
+            ageharness_dump_state(&r->age, path);
+            dsNext++;
+        }
+    }
+
     RegSnapshot before, after;
     ageharness_snapshot_regs(&r->age, &before);
     uint32_t nia = psw_get_nia(&r->age.gpc.cpu.psw);
