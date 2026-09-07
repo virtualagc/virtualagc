@@ -245,6 +245,24 @@ def buildCache(tree, sizes, path):
                 span = [k for k in range(n) if k % bi in occ]
             else:
                 span = range(n)
+            # A CHARACTER's buffer is only emitted as far as it is used.  Its
+            # first halfword is (maximum length, current length), so
+            # ceil((2 + current) / 2) halfwords carry data and the rest of the
+            # declared extent is a hole the link editor fills.  The SDF pads
+            # that tail with zeros -- CVSP_MESSAGE_TEXT, ARRAY(15)
+            # CHARACTER(34), reads 2201 2000 then sixteen zeros a copy -- and
+            # correcting them wrote zeros over 240 halfwords of fill in
+            # #PCVTTCS alone.  The padding is the SDF's, not the memory's.
+            if getattr(c, "symbolType", None) == 2:
+                elems, esz = (r1, bi) if (r1 and bi) else (1, n)
+                tail = set()
+                for e in range(elems):
+                    b0 = ra + e * esz
+                    if b0 >= len(init):
+                        break
+                    used = (2 + (init[b0] & 0xFF) + 1) // 2
+                    tail.update(range(e * esz + used, e * esz + esz))
+                span = [k for k in span if k not in tail]
             nm = SDF.fullSymbolASCII(sym).strip()
             for k in span:
                 if ra + k < len(init) and init[ra + k] == 0:
