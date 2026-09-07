@@ -664,6 +664,33 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
                     (unsigned)register_get32(&iop->regRecvEna));
     }
 
+    const char *pp = json_as_string(json_obj_get(root, "protect"), NULL);
+    if (pp != NULL) {
+        FILE *pf = fopen(pp, "rb");
+        if (pf == NULL) {
+            fprintf(stderr, "--state: cannot open protect map %s\n", pp);
+        } else {
+            uint32_t hw = (uint32_t)json_as_number(
+                json_obj_get(root, "protectHalfwords"),
+                age->gpc.cpu.mainStorage.wordCount * 2.0);
+            uint32_t nprot = 0;
+            int byte = 0;
+            for (uint32_t a = 0; a < hw; a++) {
+                if ((a & 7) == 0) {
+                    byte = fgetc(pf);
+                    if (byte == EOF) break;
+                }
+                bool v = (byte & (0x80 >> (a & 7))) != 0;
+                membus_set_store_protect(age->gpc.cpu.ram, a, v);
+                if (v) nprot++;
+            }
+            fclose(pf);
+            if (verbose)
+                fprintf(stderr, "--state: %u halfword(s) store-protected\n",
+                        nprot);
+        }
+    }
+
     JsonValue *c1 = json_obj_get(root, "counter1");
     age->gpc.cpu.counter1Enabled =
         (c1 == NULL || c1->type != JSON_BOOL) ? true : c1->boolVal;
@@ -818,7 +845,41 @@ bool ageharness_dump_state(AGEHarness *age, const char *path) {
                 b->delayUntilUs - cpu->elapsedTimeUs,
                 cpu->elapsedTimeUs - b->recvSinceUs);
     }
-    fprintf(f, "\n    ]\n  }\n}\n");
+    fprintf(f, "\n    ]\n  },\n");
+    /* STORE PROTECTION, and it is not an optimisation.  The Instruction
+     * Monitor fires on any instruction fetched from an UNPROTECTED
+     * address (cpu.c: intMask & 0x20 && !membus_get_store_protect), so a
+     * machine resumed with no protection map trips it on EVERY
+     * instruction.  Measured: the replay logged FCOS error X'0503' --
+     * FPMIHIM.asm's FPMIMGC, "INST. MON. GRP-CODE" -- through FPMERLOG
+     * continuously and never got back to dispatching.  --ipl's blanket
+     * protect is not a substitute; that faults the first legitimate
+     * store instead.  One bit per halfword, packed, in a companion file
+     * because it is 512 K halfwords. */
+    {
+        uint32_t hw = (uint32_t)(cpu->mainStorage.wordCount * 2);
+        char pp[600];
+        snprintf(pp, sizeof pp, "%s.protect.bin", path);
+        FILE *pf = fopen(pp, "wb");
+        if (pf != NULL) {
+            uint8_t byte = 0;
+            uint32_t nprot = 0;
+            for (uint32_t a = 0; a < hw; a++) {
+                bool v = membus_get_store_protect(cpu->ram, a);
+                if (v) nprot++;
+                byte = (uint8_t)((byte << 1) | (v ? 1 : 0));
+                if ((a & 7) == 7) { fputc(byte, pf); byte = 0; }
+            }
+            if (hw & 7) fputc((uint8_t)(byte << (8 - (hw & 7))), pf);
+            fclose(pf);
+            fprintf(f, "  \"protect\": \"%s\",\n", pp);
+            fprintf(f, "  \"protectHalfwords\": %u,\n", hw);
+            fprintf(f, "  \"protectedHalfwords\": %u\n", nprot);
+        } else {
+            fprintf(f, "  \"protect\": null\n");
+        }
+    }
+    fprintf(f, "}\n");
     fclose(f);
     fprintf(stderr, "--dump-state: wrote %s\n", path);
     return true;
