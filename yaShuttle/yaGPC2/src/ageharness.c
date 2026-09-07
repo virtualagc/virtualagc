@@ -542,6 +542,54 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
      * spins forever in FIOPC1DL: measured on corrected-G9.fcm, 55 million
      * steps visiting only 0x1a84d-0x1a851, the four instructions of the
      * delay loop.  "counter1": false in the JSON opts out. */
+    /* The scheduling half -- see ageharness_dump_state's comment for why
+     * each field has to travel.  elapsedTimeUs is restored BEFORE the IOP
+     * section below, because the BCE deadlines there are absolute times
+     * measured against this clock. */
+    JsonValue *cs = json_obj_get(root, "cpu");
+    if (cs != NULL) {
+        CPU *c = &age->gpc.cpu;
+        JsonValue *v;
+        c->counter1 = state_word(json_obj_get(cs, "counter1"), c->counter1);
+        c->counter2 = state_word(json_obj_get(cs, "counter2"), c->counter2);
+        struct { const char *k; bool *p; } bs[] = {
+            {"counter1Enabled", &c->counter1Enabled},
+            {"counter2Enabled", &c->counter2Enabled},
+            {"counter1Deferred", &c->counter1Deferred},
+            {"counter2Deferred", &c->counter2Deferred},
+        };
+        for (size_t i = 0; i < sizeof bs / sizeof bs[0]; i++) {
+            v = json_obj_get(cs, bs[i].k);
+            if (v != NULL && v->type == JSON_BOOL) *bs[i].p = v->boolVal;
+        }
+        if ((v = json_obj_get(cs, "timerAccumUs")) != NULL)
+            c->timerAccumUs = json_as_number(v, c->timerAccumUs);
+        c->intCode = state_word(json_obj_get(cs, "intCode"), c->intCode);
+        JsonValue *ip = json_obj_get(cs, "int");
+        if (ip != NULL) {
+            IntPending *q = &c->intPending;
+            struct { const char *k; bool *p; } fl[] = {
+                {"powerTransient", &q->powerTransient},
+                {"systemReset", &q->systemReset}, {"ipl", &q->ipl},
+                {"machineCheck", &q->machineCheck},
+                {"programCheck", &q->programCheck}, {"svc", &q->svc},
+                {"clk1", &q->clk1}, {"clk2", &q->clk2}, {"ext2", &q->ext2},
+                {"instrMonitor", &q->instrMonitor}, {"ext3", &q->ext3},
+                {"ext4", &q->ext4}, {"iopGrp1", &q->iopGrp1},
+                {"iopGrp2", &q->iopGrp2}, {"iopProg", &q->iopProg},
+                {"age", &q->age},
+            };
+            for (size_t i = 0; i < sizeof fl / sizeof fl[0]; i++) {
+                v = json_obj_get(ip, fl[i].k);
+                if (v != NULL && v->type == JSON_BOOL) *fl[i].p = v->boolVal;
+            }
+        }
+        if (verbose)
+            fprintf(stderr, "--state: clk1=%d clk2=%d c1=%08x c2=%08x t=%.3fs\n",
+                    c->counter1Enabled, c->counter2Enabled,
+                    c->counter1, c->counter2, c->elapsedTimeUs / 1e6);
+    }
+
     /* The IOP half.  Restoring the CPU alone leaves every processor
      * enable at zero, so the machine executes correctly and drives no bus
      * at all -- which is precisely how corrected-G9.fcm looked when it was
@@ -599,6 +647,15 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
             b->mia.latch = state_word(json_obj_get(e, "latch"), b->mia.latch);
             if ((t = json_obj_get(e, "latchValid")) != NULL)
                 b->mia.latchValid = t->type == JSON_BOOL ? t->boolVal : false;
+            /* Rebased onto THIS run's clock: a deadline is only
+             * meaningful as "how much longer", never as the absolute
+             * value it had on the captured machine. */
+            if ((t = json_obj_get(e, "delayRemainUs")) != NULL)
+                b->delayUntilUs = age->gpc.cpu.elapsedTimeUs
+                                + json_as_number(t, 0.0);
+            if ((t = json_obj_get(e, "recvElapsedUs")) != NULL)
+                b->recvSinceUs = age->gpc.cpu.elapsedTimeUs
+                               - json_as_number(t, 0.0);
         }
         if (verbose)
             fprintf(stderr, "--state: IOP halt=%08x xmit=%08x recv=%08x\n",
@@ -663,7 +720,62 @@ bool ageharness_dump_state(AGEHarness *age, const char *path) {
     for (int i = 0; i < 8; i++)
         fprintf(f, "%s\"%08x\"", i ? ", " : "",
                 register_get32(registerfile_r(&cpu->regFiles[2], i)));
-    fprintf(f, "],\n  \"iop\": {\n");
+    fprintf(f, "],\n");
+    /* THE SCHEDULING STATE.  FCOS runs on the interval timers, so a
+     * machine restored without them completes whatever transfer was in
+     * flight and then issues no further START I/O -- measured: 2 DEU
+     * commands and then silence.  All of it lives outside main storage:
+     *
+     *   - counter 1 and counter 2, the two 16-bit 1 MHz hardware
+     *     down-counters, with their enables and their deferred-borrow
+     *     flags.  (Their HIGH halfwords are in main store at 0x00B0 and
+     *     0x00B1, so the image carries those.)
+     *   - timerAccumUs, the sub-microsecond remainder between ticks.
+     *   - elapsedTimeUs.  This one is not a nicety: the BCE delay and
+     *     commanded-receive fields below are ABSOLUTE simulated times, so
+     *     restoring them onto a clock that restarts at zero puts every
+     *     deadline impossibly far in the future and the BCE waits for
+     *     ever.  It is also what DATE()/CLOCKTIME() read off.
+     *   - the pending-interrupt latches, since a timer interrupt raised
+     *     but not yet taken is exactly what a capture can land on. */
+    fprintf(f, "  \"cpu\": {\n");
+    fprintf(f, "    \"counter1\": \"%08x\", \"counter2\": \"%08x\",\n",
+            cpu->counter1, cpu->counter2);
+    fprintf(f, "    \"counter1Enabled\": %s, \"counter2Enabled\": %s,\n",
+            cpu->counter1Enabled ? "true" : "false",
+            cpu->counter2Enabled ? "true" : "false");
+    fprintf(f, "    \"counter1Deferred\": %s, \"counter2Deferred\": %s,\n",
+            cpu->counter1Deferred ? "true" : "false",
+            cpu->counter2Deferred ? "true" : "false");
+    fprintf(f, "    \"timerAccumUs\": %.6f,\n", cpu->timerAccumUs);
+    /* INFORMATIONAL ONLY -- deliberately not restored.  rtpacer_init
+     * takes its simStartUs baseline from this at start-up, so moving the
+     * clock forward afterwards makes the pacer believe it owes that much
+     * wall time and sleep through the entire run: measured, restoring
+     * 109.2 s dropped a replay from 2 DEU commands to none.  What the
+     * BCE deadlines actually need is how much longer to wait, which is
+     * what delayRemainUs/recvElapsedUs carry instead. */
+    fprintf(f, "    \"capturedAtUs\": %.3f,\n", cpu->elapsedTimeUs);
+    fprintf(f, "    \"intCode\": \"%08x\",\n", cpu->intCode);
+    fprintf(f, "    \"int\": {");
+    {
+        const IntPending *ip = &cpu->intPending;
+        struct { const char *k; bool v; } fl[] = {
+            {"powerTransient", ip->powerTransient}, {"systemReset", ip->systemReset},
+            {"ipl", ip->ipl}, {"machineCheck", ip->machineCheck},
+            {"programCheck", ip->programCheck}, {"svc", ip->svc},
+            {"clk1", ip->clk1}, {"clk2", ip->clk2}, {"ext2", ip->ext2},
+            {"instrMonitor", ip->instrMonitor}, {"ext3", ip->ext3},
+            {"ext4", ip->ext4}, {"iopGrp1", ip->iopGrp1},
+            {"iopGrp2", ip->iopGrp2}, {"iopProg", ip->iopProg},
+            {"age", ip->age},
+        };
+        for (size_t i = 0; i < sizeof fl / sizeof fl[0]; i++)
+            fprintf(f, "%s\"%s\": %s", i ? ", " : "", fl[i].k,
+                    fl[i].v ? "true" : "false");
+    }
+    fprintf(f, "}\n  },\n");
+    fprintf(f, "  \"iop\": {\n");
     fprintf(f, "    \"halt\": \"%08x\",\n", register_get32(&iop->regHalt));
     fprintf(f, "    \"xmitEna\": \"%08x\",\n", register_get32(&iop->regXmitEna));
     fprintf(f, "    \"recvEna\": \"%08x\",\n", register_get32(&iop->regRecvEna));
@@ -695,13 +807,16 @@ bool ageharness_dump_state(AGEHarness *age, const char *path) {
                    "\"recvActive\": %s, \"recvPC\": \"%08x\", "
                    "\"recvAddr\": \"%08x\", \"recvLeft\": \"%08x\", "
                    "\"recvGotAny\": %s, \"latch\": \"%08x\", "
-                   "\"latchValid\": %s}",
+                   "\"latchValid\": %s, \"delayRemainUs\": %.3f, "
+                   "\"recvElapsedUs\": %.3f}",
                 i ? "," : "",
                 b->delayActive ? "true" : "false", b->delayPC,
                 b->recvActive ? "true" : "false", b->recvPC,
                 b->recvAddr, b->recvLeft,
                 b->recvGotAny ? "true" : "false",
-                b->mia.latch, b->mia.latchValid ? "true" : "false");
+                b->mia.latch, b->mia.latchValid ? "true" : "false",
+                b->delayUntilUs - cpu->elapsedTimeUs,
+                cpu->elapsedTimeUs - b->recvSinceUs);
     }
     fprintf(f, "\n    ]\n  }\n}\n");
     fclose(f);
