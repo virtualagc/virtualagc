@@ -725,6 +725,20 @@ def assemble(path, fatal = True):
 displayGenerator = "dfg"
 
 displayFailures = []
+_dfgRelease = None
+def dfgHasRelease():
+    """True if the dfg on PATH accepts --release.  Probed once."""
+    global _dfgRelease
+    if _dfgRelease == None:
+        try:
+            h = subprocess.run([displayGenerator, "--help"],
+                               capture_output = True, text = True)
+            _dfgRelease = "--release" in (h.stdout or "") + (h.stderr or "")
+        except Exception:
+            _dfgRelease = False
+    return _dfgRelease
+
+
 def dfg(path, fatal = False):
     """Translate one display deck to HAL/S with `dfg`, compile the result with
     `compile`, and discard the intermediate.  True on success.
@@ -758,6 +772,12 @@ def dfg(path, fatal = False):
     # truncated to six characters -- in both.
     if sdfi != None:
         command += ["--sdflib", sdfi]
+    # A release's generator allowances differ, so dfg has to be told which one
+    # is being built -- but only if this dfg has the option.  Upstream's does
+    # not yet (nsts-sdl-dps PR #46 is open), and a build must not fail because
+    # the local dfg is the stock one; probe once and stay silent if absent.
+    if release != None and dfgHasRelease():
+        command += ["--release", release]
     try:
         result = subprocess.run(command, capture_output = True, text = True)
     except Exception as e:
