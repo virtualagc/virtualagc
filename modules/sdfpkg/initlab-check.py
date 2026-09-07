@@ -129,6 +129,26 @@ def coverage(work, csect):
     return cov, image
 
 
+def rldAddresses(work, csect):
+    """Halfword addresses the object asks the linker to relocate.
+
+    A NAME pointer is stored as the target's CSECT-RELATIVE offset with a YCON
+    relocation over it, so what lands in memory is the target's ABSOLUTE
+    address.  Without checking the RLDs one would compute a relative value and
+    compare it against an absolute one, which is what made the first attempt at
+    class B wrong at every site.
+    """
+    obj = os.path.join(work, "current.results", "cards.bin")
+    out = subprocess.run([OBJDUMP, "--no-repro", obj],
+                         capture_output=True, text=True, timeout=600).stdout
+    a = set()
+    for line in out.splitlines():
+        m = re.match(r"^RLD\s+\S+\s+(\S+)\s+->\s+\S+\s+addr=([0-9A-F]+)", line)
+        if m and m.group(1) == csect:
+            a.add(int(m.group(2), 16))
+    return a
+
+
 def objectPasses(work):
     """(bulk, explicit, image) -- the halfwords each pass writes, and the result.
 
@@ -332,6 +352,59 @@ def main():
             check("in an uninitialized structure only BIT fields are bulk-zeroed",
                   img.get(22) == 0 and img.get(24) == 0
                   and not ({23, 25, 26, 27} & cov))
+
+        print("\nTSTNAME -- where a NAME pointer lands and what it holds")
+        rc, rpt = compile(work, "TSTNAME")
+        check("compiles", rc == 0, "rc=%d" % rc)
+        if rc == 0:
+            s5 = sdfOf(work, "##TSTNAM")
+            t5 = list(getattr(s5, "initializationTable", None) or [])
+            sy5 = symbols(s5)
+            rld = rldAddresses(work, "#PTSTNAM")
+            NAMEF = 1 << (31 - 5)
+
+            def ra(n):
+                c = sy5.get(n)
+                return getattr(c, "relativeMemoryAddressOfSymbol", None) if c else None
+
+            for ptr, tgt in (("TSNP_PTR1", "TSNI_TARGET1"),
+                             ("TSNP_PTR2", "TSNI_TARGET2")):
+                p_, t_ = ra(ptr), ra(tgt)
+                check("%s holds %s's CSECT-relative offset" % (ptr, tgt),
+                      p_ is not None and t_ is not None
+                      and p_ < len(t5) and t5[p_] == t_,
+                      "table[%s]=%s want %s" % (p_, t5[p_] if p_ is not None
+                                                and p_ < len(t5) else "?", t_))
+            check("a NAME pointer occupies one halfword",
+                  ra("TSNP_PTR2") - ra("TSNP_PTR1") == 2)   # a guard sits between
+            check("every pointer carries a YCON relocation, so memory is absolute",
+                  {ra("TSNP_PTR1"), ra("TSNP_PTR2")} <= rld,
+                  "rld=%s" % sorted(rld))
+            h = ra("TSNK_RECS")
+            check("both copies of the NAME structure are initialized",
+                  [t5[h + k] for k in range(4)]
+                  == [ra("TSNI_TARGET1"), ra("TSNI_TARGET2"),
+                      ra("TSNI_TARGET2"), ra("TSNI_TARGET1")],
+                  str([t5[h + k] for k in range(4)]))
+            check("and all four are relocated",
+                  set(range(h, h + 4)) <= rld)
+            for f in ("NFLD1", "NFLD2"):
+                check("template terminal %s carries the NAME flag, bit 5" % f,
+                      bool((getattr(sy5[f], "flagBits", 0) or 0) & NAMEF))
+            check("NAME terminals sit at template offsets 0 and 1",
+                  (ra("NFLD1"), ra("NFLD2")) == (0, 1))
+            nti = getattr(s5, "nameTerminalInitialization", None) or {}
+            tbl5 = getattr(s5, "symbolIndexTable", None) or []
+            recs = None
+            for k, v in nti.items():
+                from sdf import sdf as SDF
+                if SDF.fullSymbolASCII(tbl5[k - 1]).strip() == "TSNK_RECS":
+                    recs = v
+            check("nameTerminalInitialization describes TSNK_RECS", recs is not None)
+            if recs:
+                check("its first element is the TERMINAL ORDINAL, not a copy number",
+                      [(o, t) for o, t, _r, _l in recs]
+                      == [(1, "TSNI_TARGET1"), (2, "TSNI_TARGET2")], str(recs))
 
         print("\nTSTPART -- too few elements, using neither legal form")
         rc, rpt = compile(work, "TSTPART")
