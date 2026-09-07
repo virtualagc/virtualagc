@@ -91,6 +91,44 @@ def compile(work, name):
                           if os.path.exists(rpt) else "")
 
 
+def esdLengths(work):
+    obj = os.path.join(work, "current.results", "cards.bin")
+    out = subprocess.run([OBJDUMP, "--no-repro", obj],
+                         capture_output=True, text=True, timeout=600).stdout
+    d = {}
+    for line in out.splitlines():
+        m = re.match(r"^ESD\s+\[\s*\d+\]\s+SD\s+(\S+)\s+addr=\S+\s+len=(\d+) hw",
+                     line)
+        if m:
+            d[m.group(1)] = int(m.group(2))
+    return d
+
+
+def coverage(work, csect):
+    """(written, image) for one CSECT -- which halfwords any TXT record writes.
+
+    A halfword no record writes is a HOLE, and the linker fills it with C6C6.
+    That is the whole point of these probes: alignment padding inside a fully
+    initialized structure is such a hole.
+    """
+    obj = os.path.join(work, "current.results", "cards.bin")
+    out = subprocess.run([OBJDUMP, "-x", "--no-repro", obj],
+                         capture_output=True, text=True, timeout=600).stdout
+    cov, image, cur = set(), {}, None
+    for line in out.splitlines():
+        m = TXT.match(line)
+        if m:
+            cur = (m.group(1), int(m.group(2), 16))
+            continue
+        h = HEXL.match(line)
+        if h and cur and cur[0] == csect:
+            for i, v in enumerate(h.group(2).split()):
+                a = int(h.group(1), 16) + i
+                cov.add(a)
+                image[a] = int(v, 16)
+    return cov, image
+
+
 def objectPasses(work):
     """(bulk, explicit, image) -- the halfwords each pass writes, and the result.
 
@@ -243,6 +281,57 @@ def main():
             t2 = list(getattr(s2, "initializationTable", None) or [])
             check("the table cannot distinguish n#, * and explicit zero",
                   all(v == 0 for v in t2[3:6] + t2[12:18] + t2[20:26]))
+
+        print("\nTSTPROG -- a PROGRAM's table is segmented per block")
+        rc, rpt = compile(work, "TSTPROG")
+        check("compiles", rc == 0, "rc=%d" % rc)
+        if rc == 0:
+            s3 = sdfOf(work, "##TSTPRO")
+            t3 = list(getattr(s3, "initializationTable", None) or [])
+            sy3 = symbols(s3)
+            lens = esdLengths(work)
+            check("the data CSECT is exactly as long as the table",
+                  lens.get("#DTSTPRO") == len(t3), str(lens.get("#DTSTPRO")))
+            for nm, ra, v in (("TSRB_MAIN1", 6, 0x9991), ("TSRB_MAIN2", 7, 0x9992),
+                              ("TSRB_PROC1", 12, 0xAAA1), ("TSRB_PROC2", 13, 0xAAA2),
+                              ("TSRI_FUN1", 18, 0x7531), ("TSRB_FUN2", 19, 0xBBB2)):
+                c = sy3.get(nm)
+                check("%-11s of block %s sits at %2d holding %04X"
+                      % (nm, getattr(c, "blockIndexNumber", "?"), ra, v),
+                      c is not None
+                      and getattr(c, "relativeMemoryAddressOfSymbol", None) == ra
+                      and ra < len(t3) and t3[ra] == v)
+            check("the three blocks are numbered 1, 2, 3 in the table",
+                  [t3[4], t3[10], t3[16]] == [1, 2, 3],
+                  str([t3[4], t3[10], t3[16]]))
+            check("the PROGRAM's segment header carries 18, its stack size",
+                  t3[5] == 18, str(t3[5]))
+            check("a local carries no COMPOOL flag, unlike a compool variable",
+                  not ((getattr(sy3["TSRB_MAIN1"], "flagBits", 0) or 0) >> 31))
+
+        print("\nTSTMIX -- alignment padding is a hole, even when initialized")
+        rc, rpt = compile(work, "TSTMIX")
+        check("compiles", rc == 0, "rc=%d" % rc)
+        if rc == 0:
+            cov, img = coverage(work, "#PTSTMIX")
+            s4 = sdfOf(work, "##TSTMIX")
+            t4 = list(getattr(s4, "initializationTable", None) or [])
+            sy4 = symbols(s4)
+            c = sy4.get("TSMK_FULL")
+            check("TSMK_FULL is INITIAL and spans 3 copies of 6 halfwords",
+                  c is not None and (getattr(c, "rangeOfDim1", 0) or 0) == 3
+                  and (getattr(c, "valueOfBiasOfArray", 0) or 0) == 6)
+            check("though fully initialized, its SCALAR padding is never written",
+                  not ({5, 11, 17} & cov), str(sorted({5, 11, 17} & cov)))
+            check("and the SDF table reads 0000 at that padding",
+                  all(t4[i] == 0 for i in (5, 11, 17)))
+            check("SCALAR INITIAL(0) emits 0000 0000",
+                  img.get(36) == 0 and img.get(37) == 0)
+            check("an uninitialized SCALAR is never written",
+                  not ({38, 39} & cov))
+            check("in an uninitialized structure only BIT fields are bulk-zeroed",
+                  img.get(22) == 0 and img.get(24) == 0
+                  and not ({23, 25, 26, 27} & cov))
 
         print("\nTSTPART -- too few elements, using neither legal form")
         rc, rpt = compile(work, "TSTPART")
