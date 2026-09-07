@@ -14,6 +14,8 @@ History:    2026-07-05 RSB  Began.
             2026-07-16 RSB  Adapted from its original stand-alone implementation
                             (local git repo git/cmem on my computer) for use
                             as a module in the Virtual AGC source tree.
+            2026-09-07 RSB  Corrected name in comments from "sdfParser" to 
+                            "sdfpkg".
 
 This file can be used either as a module or as a stand-alone program.  It 
 contains a single class, plus a main program.  The provided Python classe is
@@ -81,7 +83,7 @@ The Python version of the HAL/S compiler (HAL_S_FC.py) doesn't even have any
 analog for SPACELIB.  But at any rate, it just seems unnecessary.  Instead,
 alter the XPL/I or Python code of the HAL/S compiler or HALMAT or whatever
 to just use an adequate worst-case size for the Paging and FCB areas to begin
-with.  Of course, this is a limitation of `cmem` more than `sdf` or `sdfParser`.
+with.  Of course, this is a limitation of `cmem` more than `sdf` or `sdfpkg`.
 
 "Rescinding" the Paging Area Augments:  Same thing!
 '''
@@ -950,9 +952,9 @@ added at strategic points in the report.  These correspond to the "HAL/S-FC
 SDL Interface Control Document", USA001556.
 
 Usage as a stand-alone program:
-    sdfParser.py --help
+    sdfpkg.py --help
 or
-    sdfParser.py --sdf=SDFNAME [OPTIONS]
+    sdfpkg.py --sdf=SDFNAME [OPTIONS]
 
 By SDFNAME, I mean things like "##NAVCOM".  The SDF's are assumed by the program
 to be stored in the directory SDFLIB/ and to have the filename extension ".sdf",
@@ -968,7 +970,7 @@ available OPTIONS are:
                 `sdf` class and then exits.  The elements of the class contain 
                 the parsed SDF contents, while at the same time showing the 
                 internal architecture of the class.  This is useful to have in 
-                hand when coding software that imports sdfParser.py as a module
+                hand when coding software that imports sdfpkg.py as a module
                 and wants to use the parsed data in some way.
 
 --interactive   Provides a command loop in which you can enter SDFPKG commands
