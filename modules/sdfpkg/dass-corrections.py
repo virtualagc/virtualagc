@@ -7,7 +7,7 @@
 writes, beside the recovered images in PFS/mafgen:
 
     corrections-<cfg>.json   every correction, with its evidence
-    corrected-<cfg>.fcm      <cfg>.fcm with those corrections applied
+    corrected-<cfg>.fcm      pure-<cfg>.fcm with those corrections applied
 
 THE BUG THIS CORRECTS.  A variable that HAL/S initializes to zero often appears
 in the DASS report with NO HEXADECIMAL VALUE AT ALL, so unlinkMAFGEN2 has
@@ -16,8 +16,24 @@ C6C6 above.  The memory held zeros; the report simply failed to state them.
 Proving that the unprinted values should have been printed is the whole purpose
 of reading the SDFs, and it is what this does.
 
-<cfg>.fcm is never modified.  It is the primary artefact of the listing, and the
-corrected image is derived from it.
+THE BASE IS pure-<cfg>.fcm, NOT <cfg>.fcm, AND THE DISTINCTION IS LOAD-BEARING.
+unlinkMAFGEN2 emits both: <cfg>.fcm is the AS-BUILT image, in which the PATCH
+SUMMARY's load-module values overwrite what memory held, and pure-<cfg>.fcm is
+what the machine actually held.  <cfg>.fcm is right for comparing against an
+OI340700 link and wrong to execute, because a location the ground build stamped
+after linking reads as its unstamped declaration there.  #PFCMGPT is the case
+that forced this: declared INITIAL(16#(4#0)) and INITIAL(1029#0), its LM value
+is zero at all 1093 halfwords while its MM value is the live phase table that
+FCMMGBOV indexes to find an overlay phase.  Corpus-wide, 13297 halfwords have
+LM=0000 with a non-zero MM.  corrected-<cfg>.fcm exists to be EXECUTED, so it
+is built on the pure image.
+
+Neither <cfg>.fcm nor pure-<cfg>.fcm is ever modified; both are primary
+artefacts of the listing, and the corrected image is derived from the second.
+
+This changes which VALUE survives, not which ADDRESSES are corrected: every
+patched location is one the listing printed, and both correction classes below
+skip anything in `printed` before they look at the image at all.
 
 WHAT IS CORRECTED, and nothing else.  An address is corrected when all of these
 hold, none of which consults our build:
@@ -343,7 +359,13 @@ def main():
         units = buildCache(tree, sizes, cache)
 
     aug = json.load(io.open("%s/augmented-%s.json" % (M, cfg)))
-    raw = open("%s/%s.fcm" % (M, cfg), "rb").read()
+    base = "%s/pure-%s.fcm" % (M, cfg)
+    if not os.path.exists(base):
+        sys.exit("%s is missing.  corrected-%s.fcm must be built on the "
+                 "as-dumped image, not the as-built one -- rerun "
+                 "unlinkMAFGEN2.py to emit pureMemory.fcm and install it as "
+                 "pure-%s.fcm.  See this file's header." % (base, cfg, cfg))
+    raw = open(base, "rb").read()
     img = list(struct.unpack(">%dH" % (len(raw) // 2), raw))
     printed = printedAddresses(cfg)
     relocated = relocatedHalfwords(tree)
