@@ -10375,6 +10375,57 @@ overwriting each other in a contested region, not a layout defect.
     not the tail" stays withdrawn, now on the ground that the comparison was
     against a partially-overwritten region and says nothing either way.
 
+### 8.75 The DMA store-protect check we already had, and the canary we actually needed
+
+`cc_anomaly()`'s comment in `cpu.c` read: "the DMA store protect cannot arise
+here yet: nothing in this emulator's IOP DMA path checks store protection, so
+no External 1 ever carries code 0x0004." **That was stale, and reading it cost
+a wrong conclusion.**
+
+`iop_write_main16()` calls `mcm_set16()` with the protection check ON —
+`YAGPC_NO_DMA_PROTECT` bypasses it, `YAGPC_DMAPROT` traces it — and hands a
+refusal to `cpu_signal_dma_protect_violation()`, which sets `ext1Code = 0x0004`
+and `intPending.iopGrp2`, and for the masked case applies the CC anomaly itself
+along with the Figure 2-20 lost-arithmetic-interrupt rule. The implementation
+is complete, correct, and on by default. The comment is corrected in place
+(`8bd535813`).
+
+**Why it did not fire on the G9 overlay bug, which is the part worth keeping.**
+Phase 8's DMA overwrote `FCMCBLKS` (`0x0811A-0x08B89`), destroying `FCMMGIOS`
+and `FCMMGEVT` while a process was blocked in `SVC FCMMGWAT` waiting on that
+event — and no violation was raised, correctly. `FCMCBLKS` is **unprotected**,
+as it must be: FCOS fills in the SVC parameter lists that live there, so a
+write to it is not a violation under any rule the hardware has. Every watched
+write to `0x8173` in the traces reports `prot=0`. **A store-protect check
+cannot catch a transfer whose destination is legitimately writable memory**,
+and no amount of fidelity in that check would have helped here.
+
+**What would have caught it needs no emulator at all.** 63.6% of memory varies
+between the eight DASS configurations and 36.4% never does, and every module in
+the mass-memory overlay chain lies in the invariant set with **zero** varying
+halfwords:
+
+    FCMCBLKS  FCMMGPOV  FCMMGBOV  FIOSVC
+    FIOMGCMP  FIOMGMTR  FPMIHPC2  FCMPSA
+
+That is the design — the loader and its control blocks live where no phase
+writes — which makes "destination inside the invariant set" a sound rejection
+rule rather than a heuristic. `tools/check_volume_destinations.py` derives the
+mask from the eight images and rejects any load block aimed into it; on
+`pass-910.mmv`'s phase 8 it reports the two offending blocks and exits 1.
+
+Its scope is narrow and stated in its own output: it recognises **one** header
+form, `(dest, length, 0, dest+length)`, which is the *degenerate* form those
+content-free filler blocks happen to have. Real load blocks use a paired form
+and are not recognised, so a clean report means "nothing of the recognised kind
+is aimed at resident memory", **not** "this volume is correct". Widening it
+needs the load-block format settled, which it is not.
+
+The general lesson is the one §8.26 also teaches from the other direction: this
+belongs in the **tape-building** path, not the emulator. An emulator check can
+only refuse what the hardware would refuse, and the hardware was right to allow
+this write. The defect was that we asked for it.
+
 ## Methodology and caveats
 
 **Section 1** items were found during `yaGPC`'s original CoffeeScript→C

@@ -5136,175 +5136,444 @@ method is stated with it.
 
 WHY.  Three passes concluded class B was empty and each was wrong for a different methodological reason, so the conclusion is worthless without the method attached. The sdf.py field-4 fix is what made the fourth answer trustworthy -- the SDF states the terminal identity that was being inferred -- and the coverage limit is the honest reason the answer is still not final.
 
-G9 DOES NOT RUN, AND ONLY ONE OF THE TWO BLOCKERS HAS A MEASURED CAUSE
-(2026-09-08, the phase 18 half CORRECTED the same day -- see #299).  G9 has
-never displayed a menu screen, on any tape or standalone.  On our own volumes
-the blocker is measured and is in our OI340700 phase 10 link; on the reference
-tapes the SYMPTOM is established and the CAUSE is not.
+G9 DOES NOT RUN, AND AS OF 2026-09-08 THE CAUSE IS KNOWN AND PARTLY FIXED
+(originally written 2026-09-08, rewritten the same day after the cause was
+found -- read #300 and #301 with it).  Memory configuration G9 has never
+displayed a menu screen.  This entry originally gave two blockers and named
+both wrongly; what it got right was that the emulator is not where the fault
+lies, and that our OI340700 build is.
 
-    ON THE REFERENCE TAPES, PHASE 18 IS NEVER REQUESTED -- OBSERVED.  Phases
-    3 and 8 are read from 3/3/6/0 and 2/5/4/0; nothing ever reads 6/5/0/0,
-    where GMAG9R1 PHASE,PH=18,MC=9 sits with 3,311 non-zero halfwords in its
-    first 8 blocks.  That much is a bus trace and is solid.
+    WHAT IS STILL TRUE, AND WAS MEASURED.  The OPS 9 transition loads phase
+    3 and phase 8 and never phase 18, which sits on the tape at 6/5/0/0.
+    Without it the configuration is half-built: a PCT entry still names
+    0x20241 -- $0AIGDEU (a PROGRAM) in SSW, #PCVNMMU (a compool) in G9 --
+    FPMDISP branches there and executes a compool, and 1,989 Instruction
+    Monitor traps share one NIA ring, `1a96b..1a97f -> 20241`.  The monitor
+    is faithful: USA 2.4.1 says an unprotected instruction fetch interrupts
+    when PSW bit 34 is one.  On OUR volumes PASS did not load at all:
+    FCMINSSL executed ZERO instructions after ITEM 1 EXEC, every table the
+    menu consults was byte-identical to the reference, and GPCIPL carried
+    1,101 build differences in 463 scattered runs once 1,094 halfwords of
+    runtime state were excluded -- the signature of address constants.
 
-    WHY IT IS NEVER REQUESTED IS NOT ESTABLISHED, AND THE EXPLANATION THIS
-    ENTRY ORIGINALLY GAVE IS WITHDRAWN.  It read: #PFCMGPT -- the in-core
-    phase table, 16 four-halfword descriptors for phases 3..18 -- is ALL
-    ZEROS (0 of 1,093 halfwords) in a running SSW, in that machine 250 s
-    later, and in corrected-G9.fcm; FCMMGBOV.asm indexes it directly
-    (`LA R1,FIOMGPTZ / SHI R4,3 / SLL R4,2 / LH@# R5,0(R4,R1) / AHI R4,1 /
-    LH@# R6,0(R4,R1)`) with descriptor halfword 1 the SEGMENT COUNT, so zero
-    means no segments and nothing is fetched.  EVERY MEASUREMENT IN THAT
-    SENTENCE STANDS; THE INFERENCE DOES NOT.  It is refuted by the same run
-    it was drawn from: phases 3 and 8 ARE fetched, from the correct tape
-    addresses, while that table reads zero.  Whatever supplied those two MM
-    addresses was not the zeros we dumped, so the zeros cannot be what
-    withholds the third.  The caveat was in the notes at the time ("phase 8
-    DOES load despite the empty table, so the OPS transition's first load
-    reaches mass memory by some other path -- worth identifying before
-    assuming a stamped GPT is sufficient") and was compressed out of this
-    entry when it was written.  The experiment offered as confirmation does
-    not confirm it either: injecting a populated table at 0x1CCF2 changed
-    which phase FCOS read, which proves FCOS READS THAT ADDRESS and nothing
-    more -- the injected table disagreed with the volume, which is sufficient
-    on its own to fail the phase 8 overlay and skip phase 18.  #299 lists
-    the candidate causes and what has to be measured to separate them.
+    THE PHASE 18 EXPLANATION THIS ENTRY GAVE IS WITHDRAWN.  It read that
+    #PFCMGPT, the in-core phase table, is all zeros, so FCMMGBOV reads a
+    segment count of zero and fetches nothing.  The measurement was of the
+    AS-BUILT DUMPS; in a RUNNING machine that table is fully populated,
+    phase 18 included, at t=150 s and t=240 s alike, with descriptor
+    02EF 0006 2E00 000B -- segment count 6, mass-memory address 2E00.  The
+    earlier "0 of 1,093 non-zero in a running SSW" was simply a bad
+    measurement.  Every precondition for fetching phase 18 is present and
+    correct: GRT row 9 reads 0003 0008 0012, CDCV_PHASES row 15 holds
+    2E00 3200 3E00, the phase is checksum-valid on tape, and ARC_OVL_ERR is
+    0000 after the phase 8 read.  #300 has the real cause.
 
-    WITHOUT PHASE 18 THE CONFIGURATION IS HALF-BUILT.  Phase 8 loads, the PCT
-    still names 0x20241 -- $0AIGDEU (a PROGRAM) in SSW, #PCVNMMU (a compool)
-    in G9 -- and FPMDISP branches there and executes a compool.  All 1,989
-    Instruction Monitor traps share one NIA ring, `1a96b..1a97f -> 20241`.
-    The monitor is faithful: USA 2.4.1 says an unprotected instruction fetch
-    interrupts when PSW bit 34 is one, regardless of the branch address.
+    "THE EMULATOR IS NOT THE PROBLEM" NEEDS ITS REASON REPLACED.  The
+    conclusion holds; the argument given for it does not.  It is not that
+    the tables were unstamped.  It is that our tape carried load blocks that
+    overwrote FCOS while it was running -- see #300 -- and that our phase 10
+    links csects where the original did not.
 
-    ON OUR OWN VOLUMES PASS NEVER LOADS.  FCMINSSL executes ZERO instructions
-    after ITEM 1 EXEC.  Every table the menu consults -- MENU12, MMLDRTBL,
-    MMUPUR, PHAS2/FAZ2, LOADTBL -- is byte-identical to the reference, but
-    GPCIPL carries 1,101 build differences in 463 scattered runs once the
-    1,094 halfwords of runtime state are excluded.  Two halfwords per run,
-    scattered: address constants.  Our phase 10 places csects where the
-    original did not.
+    WHAT IS FIXED, AND WHAT IS NOT.  The tape-building defect is fixed and a
+    volume cut from con80build load modules now IPLs to the GPCIPL menu
+    (#301).  Our phase 10 is NOT fixed and is now the only known gate
+    between us and testing G9 on a volume of our own.  Splicing the
+    reference's phase 10 over ours is NOT a shortcut: phase 10 contains
+    FCMSSLPT, whose descriptors describe the extents of the volume it came
+    from, so the splice must be followed by restamping that table for our
+    own phase sizes.
 
-    SPLICING THE REFERENCE'S PHASE 10 ONTO OUR VOLUME MAKES OUR PASS LOAD --
-    220 blocks of our phase 2, 7 of phase 13, 39 of phase 3, and GPC MEMORY
-    on the screen.  That isolates phase 10 as the gate and shows the other
-    phases are sound.  It then reaches FPMIDLE and schedules nothing (132 DEU
-    polls against the reference's 430+), so the poll-gated OPS 9 keystrokes
-    never go out and the transition never starts.
-
-    SEE #289 AND #290 FIRST.  #289's checksum rule explains why a raw
-    'mmu.js put' splice of our phases onto a reference tape is re-read
-    forever -- I recorded that as a phase 3 defect and withdrew it.  #290
-    already investigated the TQE table, found NTQE=30 declared against 25 in
-    the image, saw PASS stop at t=99, and withdrew a causal claim built on
+    SEE #289 AND #290 FIRST if patching a volume.  #289's checksum rule
+    explains why a raw 'mmu.js put' splice of our phases onto a reference
+    tape is re-read forever -- recorded once as a phase 3 defect and
+    withdrawn.  #290 already investigated the TQE table, found NTQE=30
+    declared against 25 in the image, and withdrew a causal claim built on
     it.  Both were rediscovered the hard way.
 
     TOOLING THAT CAME OUT OF IT, all committed: yaGPC2 --state/--dump-state
     carrying the CPU PSW and registers, the IOP processor enables and local
     store, per-BCE transfer state, the scheduling counters and the
     store-protect map, with condition- and time-triggered capture and paired
-    memory+state dumps; a store-protect map derivable from our own build with
-    no tape run (blanket, minus data-typed csects, minus the linker's
-    sub-csect ranges in NONHAL/PATCH), verified equivalent to a captured one,
-    537 DEU commands against 540; and PR ColanderCombo/nsts-sdl-dps#48, '#0'
-    being a sector-zero placement convention rather than an unprotected-data
-    class.  Detail in dass-notes 66 and 69-83.
+    memory+state dumps; a store-protect map derivable from our own build
+    with no tape run, verified equivalent to a captured one, 537 DEU
+    commands against 540; and PR ColanderCombo/nsts-sdl-dps#48, '#0' being a
+    sector-zero placement convention rather than an unprotected-data class.
 
     OPERATIONAL TRAPS THAT COST HOURS.  The IPL SOURCE switch must be OFF
     before RUN or FCOS refuses every post-IPL mass-memory transaction.
     YAGPC_NIARING gives a fault's own address; YAGPC_INTTRACE's atNIA is the
     HANDLER address.  With PASS actually running the emulator is about 5.7x
-    slower than wall against 2.4x during IPL, so poll-gated keystrokes need
-    far longer runs than the historical scripts assume.  A discretePanel left
-    from a previous run makes the GPC flap HALT<->RUN; kill panels BEFORE a
-    run, not only after.
+    slower than wall against 2.4x during IPL.  A discretePanel left from a
+    previous run makes the GPC flap HALT<->RUN; kill panels BEFORE a run.
+    AND `--rt-idle-timeout` IS IN MILLISECONDS: headless-gpcmem.sh passes
+    900, i.e. 0.9 s, which silently truncates every run about a second into
+    a wait state.  IDLE_TIMEOUT now overrides it there.
 
-WHY.  A whole session went into trying to bring memory configuration G9 up, on tape and standalone, and it never displayed. The value is in what that eliminated: the emulator is not the problem, our phase 10 is, and the reference-tape half is a narrower open question than it looked. Read #299 with it -- this entry asserted a cause for the missing phase 18 that its own bus trace refutes, and the correction matters more than the original claim did.
+WHY.  The original entry named two blockers and got both wrong, while reaching a conclusion that happens to be right. Rewritten rather than superseded because its measurements are still the record of what the transition does; only the explanations needed replacing.
 
-WHY PHASE 18 IS NEVER REQUESTED: THREE CANDIDATE CAUSES, NONE OF THEM
-MEASURED, AND THE ONE WE ASSERTED IS THE WEAKEST (2026-09-08).  This corrects
-#292 and comes out of an outside review of that entry, which caught the
-contradiction: on the reference tape phases 3 and 8 load from the correct MM
-addresses WHILE the phase table reads all zeros, so the zeros cannot be what
-withholds phase 18.  The candidates below are separated by source inspection;
-each is testable and none has been tested.
+WHY PHASE 18 IS NEVER REQUESTED: ALL THREE CANDIDATES ARE DISPOSED OF, AND
+THE ANSWER IS IN #300 (written 2026-09-08, rewritten the same day).  This
+entry listed three candidate causes and asked for a dispatch trace rather
+than a bus trace.  The trace was taken.  All three are dead, and recording
+how is worth more than the list was.
 
-    (1) THE OVERLAY LOOP EXITS ON THE FIRST ERROR, so a failed phase 8 skips
-    phase 18 without any table being consulted.  SSSRC/ARCGPC.hal:970-991:
+    (1) THE OVERLAY LOOP EXITING ON THE FIRST ERROR -- DEAD.  ARCGPC.hal's
+    ARC_PHASE_LOOP does exit on an overlay error, but ARC_OVL_ERR at
+    000AEF reads 0000 after the phase 8 read.  No error was set.
 
-        ARC_PHASE_LOOP :
-          ARC_J = CZ2V_GRT_MC_PHASES$(ARC_GRT_INDEX;ARC_M);
-          IF ARC_J = 0 THEN EXIT ARC_PHASE_LOOP;
-          ...
-          OVERLAY(ARC_OVL_PARMS);
-          ...
-          IF (ARC_OVL_ERR$(1 TO 5) ~= BIN'00000') AND
-             (ARC_I = 1) THEN DO;
-             ...
-             EXIT ARC_PHASE_LOOP;
+    (2) THE IN-MEMORY TABLE OVERWRITTEN FROM AN ALL-MINUS-ONE ARRAY -- DEAD.
+    AIBGPCLO.hal:888-895 really does copy CDCV_PHASES over
+    FCMMGPT_STARTING_MM_ADD for every phase in the GRT row, and CDCPHA.hal:40
+    really does declare CDCV_PHASES ARRAY(19,3) INITIAL(-1...).  But in a
+    running machine both are populated: #PFCMGPT holds all sixteen
+    descriptors including phase 18 at 02EF 0006 2E00 000B, and CDCV_PHASES
+    row 15 holds 2E00 3200 3E00, whose 2E00 is halfword 2 of that
+    descriptor -- so the copy path is intact end to end.
 
-    G9's GRT row is 3, 8, 18.  Slot 1 is the MF overlay (phase 3); slots 2-3
-    are the program overlay, 8 then 18.  We have never read ARC_OVL_ERR,
-    CZ2V_REC_XERR, CZ2V_MF_OVLY/PROG_OVLY or the GRT slots on the run that
-        actually produced the 110-block phase 8 read.  Note that problems.md
-    8.34 already
-    measured this mechanism once, in another context, and it was not
-    re-measured here.
+    (3) A REQUEST WITH A NULL DESCRIPTOR, INVISIBLE TO A BUS TRACE -- DEAD.
+    The dispatch trace shows the loop never reaches slot 3 at all, so no
+    request of any shape is made.
 
-    (2) THE IN-MEMORY TABLE IS OVERWRITTEN AFTER IPL FROM AN ALL-MINUS-ONE
-    ARRAY, and we measured the wrong structure.  SSSRC/CDCPHA.hal:40 declares
-    CDCV_PHASES ARRAY(19,3) INTEGER INITIAL(-1, -1, -1, ...), all 57 entries
-    minus one.  SSSRC/AIBGPCLO.hal:888-895 then walks the GRT row and does
+    WHAT THE DISPATCH TRACE ACTUALLY SHOWED.  A range trace over the whole
+    ARCGPC family, $0ARCGPC through A9ARCGPC (40f34-419ef), has the
+    GRT-index code at 4156c -- LH 7,X'001b'(1) then MHI 7,X'0005', the
+    stride-5 CZ2V_GRT_MC_PHASES indexing -- executing TWICE, and
+    SVC X'015d' at 4157b twice.  Slot 1 is phase 3, slot 2 is phase 8, and
+    slot 3 is never reached because the loop never returns from slot 2.
 
-        AIB_PHASE = CZ2V_GRT_MC_PHASES$(J;K:) - 2;
-        IF AIB_PHASE > 0 AND AIB_PHASE < 17 THEN DO;
-          FCMMGPT_STARTING_MM_ADD$(AIB_PHASE;) = CDCV_PHASES$
-          (AIB_PHASE,AIB_AREA:);
+    THE EXPERIMENT THIS ENTRY REVIVED IS ALSO REFUTED, and by a static check
+    that costs nothing.  Writing our phase 18 onto a copy of pass-910.mmv
+    cannot test what it was meant to, because A VALID PHASE 18 IS ALREADY
+    THERE: 6/5/0/0 holds 32 allocated MM blocks, block 0 carrying 511
+    non-zero halfwords, headed by a well-formed segment descriptor
+    83AA 0E60 0000 920A whose checksum is 0x83AA + 0x0E60.  Phase 8 at
+    2/5/4/0 has the same shape and phase 8 loads.  Two phases with
+    identically shaped, checksum-valid descriptors, one fetched and one not,
+    so replacing phase 18's CONTENT cannot change whether it is REQUESTED --
+    and the checksum restamp that #292 identified as the flaw in the
+    original attempt is beside the point.
 
-    Phase 18 maps to AIB_PHASE 16 and passes the guard, so the MM addresses
-    the overlay loader ends up using come from CDCV_PHASES, in #PCDCPHA, NOT
-    from whatever was stamped into #PFCMGPT on the volume.  We knew from
-    YAGPC_LOADBIN that #PFCMGPT, #PCDCPHA and FCMG3DAT are stamped as a SET
-    and we only ever dumped the first of the three.  THIS ALSO EXPLAINS THE
-    NEGATIVE RESULT WE HAVE: pass-stamped.mmv behaving like the unstamped
-    tape shows that stamping the VOLUME did not help, not that a populated
-    table would not -- no snapshot of the in-memory table was taken on that
-    run, and the structure that governs is a different one.
+    THE PIN NOTE STANDS AND IS STILL UNCHASED: problems.md 8.22 rules that
+    "pinning PHASE10 is catastrophic -- it strips 97% of GPCIPL's
+    relocations (1788 -> 56), so its address constants stay zero", which is
+    the exact signature #292 reports for our phase 10.  dass-phases.sh:66
+    gates the pin on `[ -s phase/extsyms-$p.json ]`, a SIZE test, and
+    phase/extsyms-10.json is `{}` at 2 bytes -- non-empty to the shell,
+    empty to the linker -- so phase 10 was linked with --external-syms
+    against an empty pin set.  That is not the configuration 8.22 measured
+    and what lnk101 does with it has still not been checked.  It is the
+    best remaining lead on the phase 10 gate.
 
-    (3) PHASE 18 IS REQUESTED WITH A NULL DESCRIPTOR and the request is
-    invisible to a bus trace, which is all we have.  "Never requested" was
-    scored as "nothing hit 6/5/0/0"; an OVERLAY call with MM address 0 and
-    count 0 looks identical from the bus.
+WHY.  Three named candidates and a revived experiment, all four dead, each for a reason worth keeping so nobody re-derives them. The one thing in the entry that survived -- the phase 10 pin note -- is now the best remaining lead and is called out as such.
 
-    WHAT SEPARATES THEM is a dispatch trace rather than a bus trace: read
-    ARC_OVL_ERR and the GRT slots immediately before and after the program
-    overlay, dump CDCV_PHASES in #PCDCPHA rather than #PFCMGPT at the map
-    address, and check whether OVERLAY is entered with phase 18 at all.
+THE COMPLETION CHAIN, TRACED TO THE BOTTOM, AND THE ROOT CAUSE OF G9
+(2026-09-08).  ARC_OVL_EVT is not signalled after phase 8, and following
+that one fact down every link ends at a defect in how we cut the tape.
 
-    THE EXPERIMENT THAT TESTS THE WHOLE THING WITHOUT WAITING ON PHASE 10 was
-    run once and withdrawn for the wrong reason.  Writing our phases 3, 8 and
-    18 onto a copy of pass-910.mmv -- a volume whose GPCIPL and PASS already
-    work -- is the only configuration that puts a phase 18 in front of a
-    machine that actually reaches the transition.  #292 records the
-    retraction: the raw 'mmu.js put' failed FCMINSSL's load-block checksum
-    (sum(hw[0..L-2]) == hw[L-1], FCMINSSL.asm:844-861, #289).  That
-    retraction was correct, but the experiment was never rerun with the
-    checksums restamped.  Do that before spending anything more on the phase
-    10 link, because it is independent of it.
+    THE CHAIN, EVERY STEP FROM SOURCE.  ARCGPC does WAIT FOR ARC_OVL_EVT
+    (0x00AF6).  That event is set by FCMMGPOV+137 through FPMEVDEQ, reached
+    only after FCMMGPOV+245's `SVC FCMMGWAT` returns.  FCMMGWAT (SVC 8,
+    parameter list 0x008174) waits on the event expression FCMMGEVE
+    (0x008176), whose YCON at 0x008178 names FCMMGEVT (0x008173).  FCMMGEVT
+    is the I/O COMPLETION EVENT named by the YCON at 0x008171, which is
+    FCMMGIOS[7] -- TIOSEVNT in MLIB80/TFIOS.asm -- in the parameter list
+    that FCMMGPOV+243's `SVC FCMMGIOS` (SVC 24, 0x00816A) issues.  All of
+    that is hard-coded at assembly time in FCMCBLKS.asm, which allocates the
+    event cell and writes its address into both lists: "DC Y(FCMMGEVT)
+    I/O COMPLETION EVENT ADDRESS".  FIOSVC.asm:263 reads TIOSEVNT, resets
+    the event and copies the address into the IOQE as TIOQEVNT, then chains
+    the IOQE at TCVTIOW by priority.  TIOQEVNT is posted by FIOMGCMP.asm:92
+    via COPY FIOSTEVT.  FIOMGCMP is called from FIOMGMTR.asm:209, whose
+    stated purpose is "WHENEVER A MM/GTG TIMER INTERRUPT OCCURS".  And
+    FIOMGMTR is called from FPMIHPC2.asm:750, "DO MM/GTG INTERRUPT
+    PROCESSING" -- the PROGRAMMED CLOCK 2 handler.
 
-    ALSO FROM THE SAME REVIEW, NOT YET CHASED: problems.md 8.22 already rules
-    "pinning PHASE10 is catastrophic -- it strips 97% of GPCIPL's relocations
-    (1788 -> 56), so its address constants stay zero", which is the exact
-    signature #292 reports for our phase 10 (1,101 differences in 463
-    scattered runs).  dass-phases.sh:66 gates the pin on `[ -s
-    phase/extsyms-$p.json ]`, a SIZE test, and phase/extsyms-10.json is `{}`
-    at 2 bytes -- non-empty to the shell, empty to the linker -- so phase 10
-    was linked with --external-syms against an empty pin set.  That is not
-    the configuration 8.22 measured, and what lnk101 does with it has not
-    been checked.  Check it before treating the phase 10 gap as general
-    build-verification work.
+    SO MASS-MEMORY COMPLETION IS POLLED FROM A TIMER, not signalled by the
+    device, and the MMU READY discrete appears NOWHERE in the path.  READY
+    is a level published for the crew panel.  Chasing it is a dead end, and
+    an entire line of investigation was spent proving that.
 
-WHY.  An outside review of #292 found that its stated cause is refuted by the bus trace in the same entry, and that a caveat present in the notes had been compressed away. The three candidates are separated here so the next run measures the right things, and so the withdrawn splice experiment -- the only one that does not wait on the phase 10 link -- is not left retracted when only its method was wrong.
+    WHAT THE MEASUREMENTS SHOW, watching 0x8168-0x8180 across both overlays
+    in one run.  Phase 3: FCMMGPOV+243 clears the event, FIOSVC+55 resets
+    it, FPMEVENQ+99 links the wait as 8a9c, then FIOMGCMP+14 writes 8a9d and
+    FPMEVDEQ+64 writes 0001 -- completion, and the process resumes.  Phase
+    8: the same three writes linking the wait as 8aa6, and then AT
+    t=181.9339 AND AGAIN AT t=181.9846 THE MASS-MEMORY DMA (IOP-write,
+    pe=18, which is MM1) WRITES C6C6 ACROSS 0x8168-0x8180 -- FCMMGIOS,
+    FCMMGEVT, FCMMGWAT, FCMMGEVE and both YCONs.  The event cell and the
+    pointers that reach it are destroyed WHILE THE PROCESS IS WAITING ON
+    THEM.
+
+    AND THE MACHINERY THEN COLLAPSES.  Counting distinct entries into each
+    module after each read: after phase 3's, FIOMGMTR 5, FIOMGCV 1,
+    FIOMGCMP 2, FIOMGSNC 2, FIOMGSTR 1 -- the full completion sequence.
+    After phase 8's, FIOMGMTR 1 AND NOTHING ELSE.  That single entry walks
+    the IOQE chain, tests the flag bits at IOQE+7 and IOQE+000C, branches
+    past the completion call and returns, which is the same "not complete
+    yet" verdict phase 3 got four times before its fifth poll completed it.
+    PC2 itself then dies: FPMIHPC2 is entered 16 times before the phase 3
+    read, 9 between the two reads (about 1.4 s), and only 2 after the phase
+    8 read across about ten seconds in which the machine is demonstrably
+    alive.  FPMIHPC2 re-arms the clock, and once its control blocks are gone
+    it stops doing so.
+
+    THE ROOT CAUSE IS THAT OUR PHASES ARE NOT LOAD MODULES.  Phase 8 on
+    pass-910.mmv is 110 blocks from linear block 10880 -- which is 2/5/4/0
+    and exactly the 0x2A80 its #PFCMGPT descriptor states, confirming that
+    the table's MM address is the linear block number.  THIRTEEN of those
+    110 blocks have bodies that are ENTIRELY FILL, 0 of 508 non-fill
+    halfwords past the header.  Three declare real destinations, and where
+    they aim decides everything: dest 080F8 len 0E20 and dest 081F8 len 0E20
+    each cover 3616 halfwords that are 100% RESIDENT -- never varying across
+    any of the eight DASS configurations -- while dest 0DF0C len 0E30 lands
+    entirely in non-resident space and is harmless.  FCMCBLKS
+    (0x0811A-0x08B89) lies inside the first span, and FCMMGEVT with it.
+
+    THOSE BLOCKS HAVE NO CORRECT DESTINATION BECAUSE THEY HAVE NO CONTENT.
+    They are lnk101's hole fill, and #296 predicted them in its own words:
+    "a PHASE*.fcm is a COMPLETE LINKED IMAGE, not a load module: what the
+    phase does not supply is filled by lnk101, so its filler is
+    indistinguishable from its content and each later phase obliterates the
+    ones before."  dass-phases.sh links each phase with --external-syms
+    --allow-undefined, mmu2mmv writes the filler to tape, and the flight
+    software faithfully loads what the tape tells it to.
+
+    SO G9 AND THE TAPE-BUILDING PROBLEM ARE ONE PROBLEM.  #296's next step,
+    con80build emitting true load modules, is the fix for G9 as well, and no
+    emulator work substitutes for it.  See #301.
+
+    THE ACCEPTANCE TEST THIS HANDS US, which needs no emulator run: 63.6% of
+    memory varies between the eight configurations and 36.4% never does, and
+    every module in the overlay chain -- FCMCBLKS, FCMMGPOV, FCMMGBOV,
+    FIOSVC, FIOMGCMP, FIOMGMTR, FPMIHPC2, FCMPSA -- has ZERO varying
+    halfwords.  That is the design: the loader and its control blocks live
+    where no phase writes.  So reject any load-block destination landing in
+    the never-varying mask.  yaGPC2/tools/check_volume_destinations.py does
+    it, reports exactly the two offending blocks on pass-910.mmv and exits 1.
+    Its scope is narrow and stated in its own output: it recognises ONE
+    header form, (dest, length, 0, dest+length), which is the DEGENERATE
+    form those filler blocks have -- real load blocks use a paired form and
+    are not recognised, so a clean report is not a clean bill of health.
+
+    NOTE FOR THE FUTURE: "Clock 2 stopped" is what this machine does
+    whenever FCOS's control state is damaged.  problems.md 8.26 had the same
+    symptom from the SVC address-extension bug.  Seeing it again should
+    prompt "what corrupted the state", not "the SVC bug is back".
+
+WHY.  Every previous attempt on G9 stopped one link short and reported the stop as a finding. This is the whole chain from the waiting process to the tape, with the measurement behind each step, so the next person can check a link rather than re-derive the path.
+
+con80build WAS NEVER BROKEN, AND A TAPE BUILT FROM ITS LOAD MODULES BOOTS
+(2026-09-08).  #296 recorded that con80build "exits 0 and writes NOTHING".
+It does that because EVERY STEP FLAG DEFAULTS TO FALSE -- --assemble, --hal,
+--display, --critfmt, --link -- so an invocation naming none of them resolves
+the worklist, prints the census and returns.  That is the second of #296's
+"the tool is broken" conclusions to turn out to be our own invocation, after
+the mmu2mmv block counts, and the pattern is worth naming: when one of Don's
+tools appears to do nothing, read its options before its code.
+
+    THE WORKING RECIPE, using only lnk101 -- no asm101, no halsc:
+
+        con80build --phase N --root <tree>
+                   --src <extensionless-patch-dir>
+                   --src <tree>/SSSRC --src <tree>/APPLSRC
+                   --out DIR --link --no-autocall
+
+    run for phases in ASCENDING NUMERIC ORDER, because --link wants earlier
+    phases' .lib for MAP cards and for origin-less OVERLAY re-opens, with
+    the objdir staged as symlinks to our own objects plus PCHnnSRC.obj
+    aliased as PCHnnTXT.obj.
+
+    TWO OBSTACLES, AND WHAT THEY WERE.  (1) _PATCH_SRC_RE is
+    `re.compile(r"^PCH\d+SRC$")` and matches the WHOLE FILENAME, so our
+    PCH04SRC.asm does not match and every phase reported "0 patch,
+    1 unresolved: PCHnnTXT".  That is the extensionless-member assumption
+    already on file for .hal and .dfg, and it is a legitimate PR to Don.
+    Worked around here with a --src directory of extensionless symlinks.
+    (2) The autocall closure REPLACES objects in the objdir with EMPTY FILES
+    when it cannot compile them -- 30 in one run, including good objects we
+    had supplied -- and the link then fails to load them.  --no-autocall
+    avoids it.  It replaced the symlinks rather than writing through, so
+    ~/pass-build/OI340700/objects was undamaged, verified after every phase;
+    with hard links or real files it would have destroyed part of our build.
+
+    RESULTS.  20 of 25 phases link; 11, 17, 19, 20 and 21 fail.  mmu2mmv
+    then writes 1278 TAPE BLOCKS against dass-phases.sh's 2983 and the
+    runbook's "about 1085", with EVERY PHASE INSIDE ITS ALLOCATION:
+
+        phase  2   202/256   (was 461/256, an overflow)
+        phase  3    38/64    matches the reference tape exactly
+        phase  8    89/384
+        phase 10    55/64    (was  87/64, an overflow) -- matches exactly
+        phase 13     7/16
+        phase 18    30/64    WRITTEN
+
+    FMAIPL2 fits at 64 of 72 where it used to overflow sector zero.  AND THE
+    FILLER IS GONE: phase 8's first block now reads hdr 9B06 0E90 with 55
+    non-fill body halfwords, against the old 80F8 0E20 0000 8F18 with 0 of
+    508 -- no content-free block, nothing aimed at 0x080F8 or 0x081F8.
+
+    IT BOOTS.  Bootstrap 72 blocks from 4/4/5/0, phase 10 55 from 2/4/3/0,
+    all three DEU load modules, IPL MENU ten times, ITEM 1 EXEC accepted --
+    and then NO read of 3/4/0/0, so PASS does not load.  That is exactly
+    #292's phase 10 gate, untouched by any of this, and it is what confirms
+    the two defects are independent rather than one.  Only the DEU load
+    modules are borrowed: 24 blocks from the reference for the three
+    allocations mmu2mmv does not supply, none of it PASS.  MMDIR is still
+    not generated.
+
+    A HYBRID IS NOT A SHORTCUT HERE.  Splicing the reference's phase 10 onto
+    this volume makes it WORSE -- it halts at t=15.3 s in a masked wait
+    after repeated 55-block reads at drifting addresses (2/4/3/0, then
+    2/4/6/0, then 3/0/5/30) -- because PHASE 10 CONTAINS FCMSSLPT and the
+    reference's copy describes the reference's layout, 228 blocks of phase 2
+    against our 202.  Note 80's hybrid worked because its host volume had
+    been stamped consistently first.  To repeat it, restamp FCMSSLPT for our
+    extents before booting.
+
+    STILL OPEN: our phase 10's address constants (#292, and the pin lead in
+    #299); the five phases that do not link; --no-autocall's fidelity cost,
+    which shows as phase 2 at 202 blocks against the reference's 228 and
+    phase 8 at 89 against 110, so our phase 2 is genuinely incomplete; and
+    MMDIR.
+
+WHY.  The tape-building problem blocked this phase for weeks on the belief that a tool was defective. It was an unread option. Recording the working invocation, the two obstacles around it, and the exact block counts means the next volume can be cut from the recipe rather than rediscovered.
+
+THE LM ROLLBACK DESTROYED THE PHASE TABLE, AND corrected-<cfg>.fcm IS NOW
+BUILT ON THE AS-DUMPED IMAGE (2026-09-08).  The user's observation, confirmed
+two independent ways and now fixed in the tooling.
+
+    #PFCMGPT is assembled all zeros -- FCMGPT.hal declares it
+    INITIAL(16#(4#0)) and INITIAL(1029#0), and 16x4 + 1029 is 1093, exactly
+    the CSECT size -- and the ground Mass Memory Build stamps it afterwards.
+    So in the DASS dumps every descriptor is a PATCHED location whose two
+    columns read LM=0000 and MM=<the real value>.  unlinkMAFGEN2 substituted
+    the LOAD-MODULE column, which is right for scoring against our as-built
+    link and WRONG for an image meant to execute: it wrote zeros over the
+    only copy of the phase table we have.
+
+    EVIDENCE 1, THE LISTING.  DASS_G9.ASC gives phase 18's descriptor as
+    FCMMGPT_DISP_TO_LOAD_BLK *03A6, FCMMGPT_NUM_LOAD_BLKS *0008,
+    FCMMGPT_STARTING_MM_ADD *2E00, FCMMGPT_NUM_CONT_MM_BLKS *0022, against
+    LM 0000 in all four.  The field names also confirm the descriptor layout
+    FCMMGBOV indexes: hw0 displacement, hw1 the load-block count its R6
+    reads as the segment count, hw2 the mass-memory address, hw3 the
+    contiguous-block count.
+
+    EVIDENCE 2, A LIVE MACHINE.  A snapshot of pass-910.mmv at t=240 s, PASS
+    up and before any OPS 9 request, holds 766 of 1093 halfwords non-zero
+    with all sixteen descriptors present: phase 3 reads 0040 000A 1BC0 0025
+    against the dump's *0040 *000A *1BC0 *0026, and phase 18 reads
+    02EF 0006 2E00 000B against *03A6 *0008 *2E00 *0022.  STARTING_MM_ADD
+    agrees exactly in both; the displacements and block counts differ
+    because pass-910.mmv is a different volume from the DASS machine.
+
+    SCOPE, over all eight PATCH SUMMARY tables: 13,297 halfwords have
+    LM=0000 with MM non-zero and were therefore being zeroed -- G16 3571,
+    G3 3448, G2 1174, G8 1057, SSW 1053, S2 1034, G9 1021, P9 939.
+    #PFCMGPT alone is 7,502 of them, then #PCGN13R 4408, #PCGCMFR 165,
+    #PCGG01R 139, #DGLJRCV 112, FCMG3DAT 111 -- FCMG3DAT being the second
+    member of the set YAGPC_LOADBIN says the ground build stamps together.
+
+    THE FIX, shipped as virtualagc ebd8695d2 and PFS 7ba839c9.
+    unlinkMAFGEN2 now emits pureMemory.fcm BEFORE applying the rollback,
+    alongside an unchanged memory.fcm, and dass-corrections.py builds
+    corrected-<cfg>.fcm on pure-<cfg>.fcm, exiting with a pointed message if
+    it is absent rather than silently falling back.  <cfg>.fcm stays
+    AS-BUILT for comparing against an OI340700 link; pure-<cfg>.fcm is
+    AS-DUMPED; corrected-<cfg>.fcm exists to be EXECUTED and is built on the
+    second.  All eight corrected images now carry the phase table at 955 of
+    1093 non-zero with phase 18 reading 03A6 0008 2E00 0022.
+
+    IT CHANGES WHICH VALUE SURVIVES, NOT WHICH ADDRESSES ARE CORRECTED, and
+    that was verified rather than assumed: both correction classes gate on
+    `a in printed` before consulting the image, and every patched location
+    is one the listing printed.  Against the previously shipped
+    corrections-G9.json the set is identical -- 15,295 addresses both ways,
+    none added, none dropped, no value different.  Against the previously
+    shipped corrected-G9.fcm, 2,440 halfwords differ, every one a PATCH
+    SUMMARY location now holding the MM column exactly, with new == pure and
+    old == built at every one.  (A first comparison showed 2,942
+    corrections vanishing; that was the comparison run without --contested,
+    which the shipped images use.  The giveaway was that the "dropped"
+    addresses held identical values in both images.)
+
+    AND THE HAND STEP IS GONE.  modules/sdfpkg/dass-unlink.py re-extracts
+    all eight configurations and installs both images under their final
+    names, so nothing between unlinkMAFGEN2's generic output and mafgen/
+    depends on being remembered.  It is also a regression check: the
+    as-built path must be untouched by the addition of the pure one, so a
+    freshly extracted <cfg>.fcm must be byte-identical to the committed one,
+    and it refuses to overwrite without --force if it is not.  Over all
+    eight: pure created 8/8, <cfg>.fcm unchanged 8/8, csects-<cfg>.json
+    matching 8/8.
+
+    QUALIFICATION TO NOTE #24's "MM->LM exposure is bounded at 16
+    halfwords": that is true of owning_phase's ARBITRATION and must not be
+    read as the MM/LM choice being immaterial.  For execution it matters at
+    13,297.
+
+WHY.  Two artefacts with different oracles were sharing one base, and the executable one was losing the ground build's stamped tables. The split is small in code and large in consequence, and the verification that the correction SET did not change is what makes it safe to adopt.
+
+FOUR WRONG TURNS ON THE WAY TO #300, AND WHAT EACH ONE COST (2026-09-08).
+Recorded because three of the four came from trusting a secondary description
+over the artefact it described, in one session, on one investigation.
+
+    THE MMU READY DEADLOCK THAT DOES NOT EXIST.  Reported as root cause:
+    mmumodel_publish_ready computes ready = (queueHead >= queueCount) &&
+    !writeActive, so READY is gated on the output queue draining; the queue
+    advances only in bus_word() when the BCE polls it; the BCE has stopped
+    because the software is blocked waiting for READY.  Every clause of that
+    is true and the conclusion was still wrong.  `--rt-idle-timeout` IS IN
+    MILLISECONDS -- headless-gpcmem.sh passes 900, i.e. 0.9 s -- and I read
+    it as 900 seconds.  Every run in the series was being killed about a
+    second into the wait.  With IDLE_TIMEOUT=30000, READY -> 0 at
+    t=181.721106 and READY -> 1 at t=191.697854, ON ITS OWN.  There is no
+    circular dependency.  I had also built YAGPC_MMU_TIMED_READY
+    (mmumodel.c, opt-in, default off) to fix it; baseline and flagged runs
+    agree to within 38 microseconds, because there was nothing to fix.  The
+    flag is kept only as documentation of the READY proxy's limits.
+
+    THE WILD BRANCH INTO FCMSAVE THAT IS NOT ONE.  A trace ending at
+    `SCAL 0,X'9464'` looked like a call into FCMSAVE, which its own source
+    declares "NON-EXECUTABLE... ALL THE FCOS SAVE AREAS".  The user
+    identified the target from DASS_G9 as A1ARCGPC at 0x41464:
+    0x9464 & 0x7FFF is 0x1464, and 0x41464 - 0x1464 is 0x40000, which is
+    SECTOR 8.  My sector enumeration ran 0 to 7 and stopped one short.  The
+    trace range 40f34-41462 also ended two halfwords BELOW A1ARCGPC, so the
+    trace stopped because execution left the window I gave it, not because
+    it left ARCGPC.  Check the sector arithmetic against a listing before
+    calling any SCAL target wrong, and make a range cover the CSECT FAMILY.
+
+    THE DMA STORE-PROTECT CHECK WE ALREADY HAVE.  Reported as a missing
+    canary, on the strength of a comment in cpu.c reading "nothing in this
+    emulator's IOP DMA path checks store protection, so no External 1 ever
+    carries code 0x0004".  The comment was stale.  iop_write_main16() calls
+    mcm_set16() with the check ON -- YAGPC_NO_DMA_PROTECT bypasses,
+    YAGPC_DMAPROT traces -- and hands a refusal to
+    cpu_signal_dma_protect_violation(), which sets ext1Code 0x0004 and
+    intPending.iopGrp2 and applies the CC anomaly for the masked case.  It
+    would not have caught this anyway: FCMCBLKS is UNPROTECTED because FCOS
+    fills in the SVC parameter lists that live there, so every watched write
+    to 0x8173 reports prot=0, correctly.  A store-protect check cannot catch
+    a transfer whose destination is legitimately writable.  Comment
+    corrected in 8bd535813.
+
+    THE SPLICE EXPERIMENT REFUTED BY A FREE STATIC CHECK.  See #299: a valid
+    phase 18 was already on the volume, so replacing its content could not
+    change whether it was requested.  Five minutes of reading the tape would
+    have saved proposing it.
+
+    THE COMMON THREAD, and the rule that follows.  A stale comment, an
+    option's units, and a sector range: in each case a description was
+    believed over the thing described, and in each case the artefact was
+    available and cheap to check.  READ THE PRIMARY ARTEFACT -- the option's
+    own help text, the code the comment describes, the listing that names
+    the address -- BEFORE BUILDING A CONCLUSION ON IT.  The corollary that
+    actually worked: when a measurement and an inference disagree, the
+    measurement wins, and every one of these was caught by a measurement
+    that contradicted the story.
+
+WHY.  Three of the four came from trusting a description over the artefact -- a stale comment, an option's units, a sector range -- and all three were cheap to check. Keeping them together makes the pattern visible in a way four scattered retractions would not.
 
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
