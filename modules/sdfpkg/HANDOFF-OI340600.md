@@ -4681,6 +4681,73 @@ PGPPLD, PGGPCF and DCDDG9 are done.
     there and our ARRAY(44) declaration is suspect.  Full detail in yaGPC2's
     problems.md sections 8.52, 8.57 and 8.58.
 
+G9 DOES NOT RUN, AND THE TWO REASONS ARE BOTH IN THE BUILD (2026-09-08).  It
+has never displayed a menu screen, on any tape or standalone, and the blockers
+are in our OI340700 links rather than in yaGPC2.
+
+    ON THE REFERENCE TAPES, PHASE 18 IS NEVER REQUESTED.  #PFCMGPT -- the
+    in-core phase table, 16 four-halfword descriptors for phases 3..18 -- is
+    ALL ZEROS (0 of 1,093 halfwords) in a running SSW, in that machine 250 s
+    later, and in corrected-G9.fcm.  FCMMGBOV.asm indexes it directly
+    (`LA R1,FIOMGPTZ / SHI R4,3 / SLL R4,2 / LH@# R5,0(R4,R1) / AHI R4,1 /
+    LH@# R6,0(R4,R1)`), and descriptor halfword 1 is the SEGMENT COUNT.  Zero
+    means no segments, so nothing is fetched.  Confirmed experimentally as
+    well: injecting a populated table at 0x1CCF2 changed which phase FCOS
+    read.  Our own builds DO stamp these tables -- it is the DASS extractions
+    that carry zeros, which is what a memory dump of ground-build output
+    would look like.
+
+    WITHOUT PHASE 18 THE CONFIGURATION IS HALF-BUILT.  Phase 8 loads, the PCT
+    still names 0x20241 -- $0AIGDEU (a PROGRAM) in SSW, #PCVNMMU (a compool)
+    in G9 -- and FPMDISP branches there and executes a compool.  All 1,989
+    Instruction Monitor traps share one NIA ring, `1a96b..1a97f -> 20241`.
+    The monitor is faithful: USA 2.4.1 says an unprotected instruction fetch
+    interrupts when PSW bit 34 is one, regardless of the branch address.
+
+    ON OUR OWN VOLUMES PASS NEVER LOADS.  FCMINSSL executes ZERO instructions
+    after ITEM 1 EXEC.  Every table the menu consults -- MENU12, MMLDRTBL,
+    MMUPUR, PHAS2/FAZ2, LOADTBL -- is byte-identical to the reference, but
+    GPCIPL carries 1,101 build differences in 463 scattered runs once the
+    1,094 halfwords of runtime state are excluded.  Two halfwords per run,
+    scattered: address constants.  Our phase 10 places csects where the
+    original did not.
+
+    SPLICING THE REFERENCE'S PHASE 10 ONTO OUR VOLUME MAKES OUR PASS LOAD --
+    220 blocks of our phase 2, 7 of phase 13, 39 of phase 3, and GPC MEMORY
+    on the screen.  That isolates phase 10 as the gate and shows the other
+    phases are sound.  It then reaches FPMIDLE and schedules nothing (132 DEU
+    polls against the reference's 430+), so the poll-gated OPS 9 keystrokes
+    never go out and the transition never starts.
+
+    SEE #289 AND #290 FIRST.  #289's checksum rule explains why a raw
+    'mmu.js put' splice of our phases onto a reference tape is re-read
+    forever -- I recorded that as a phase 3 defect and withdrew it.  #290
+    already investigated the TQE table, found NTQE=30 declared against 25 in
+    the image, saw PASS stop at t=99, and withdrew a causal claim built on
+    it.  Both were rediscovered the hard way.
+
+    TOOLING THAT CAME OUT OF IT, all committed: yaGPC2 --state/--dump-state
+    carrying the CPU PSW and registers, the IOP processor enables and local
+    store, per-BCE transfer state, the scheduling counters and the
+    store-protect map, with condition- and time-triggered capture and paired
+    memory+state dumps; a store-protect map derivable from our own build with
+    no tape run (blanket, minus data-typed csects, minus the linker's
+    sub-csect ranges in NONHAL/PATCH), verified equivalent to a captured one,
+    537 DEU commands against 540; and PR ColanderCombo/nsts-sdl-dps#48, '#0'
+    being a sector-zero placement convention rather than an unprotected-data
+    class.  Detail in dass-notes 66 and 69-83.
+
+    OPERATIONAL TRAPS THAT COST HOURS.  The IPL SOURCE switch must be OFF
+    before RUN or FCOS refuses every post-IPL mass-memory transaction.
+    YAGPC_NIARING gives a fault's own address; YAGPC_INTTRACE's atNIA is the
+    HANDLER address.  With PASS actually running the emulator is about 5.7x
+    slower than wall against 2.4x during IPL, so poll-gated keystrokes need
+    far longer runs than the historical scripts assume.  A discretePanel left
+    from a previous run makes the GPC flap HALT<->RUN; kill panels BEFORE a
+    run, not only after.
+
+WHY.  A whole session went into trying to bring memory configuration G9 up, on tape and standalone, and it never displayed. The value is in what that eliminated: the emulator is not the problem, and the two blockers are separately identified, so nobody need repeat the search.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
