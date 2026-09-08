@@ -976,6 +976,25 @@ static bool batchrunner_step(BatchRunner *r) {
             snprintf(path, sizeof path, "%s-busy%d.json",
                      r->opts->dumpState, dsBusyProc);
             ageharness_dump_state(&r->age, path);
+            /* AND THE MEMORY, AT THE SAME INSTANT.  A state and a snapshot
+             * taken at two different times do not describe one machine:
+             * the PSW, the registers and the BCE program counters all
+             * refer to memory as it was when they were read.  Pairing them
+             * here is what makes a resume reproduce the captured machine
+             * rather than an average of two. */
+            snprintf(path, sizeof path, "%s-busy%d.mem.bin",
+                     r->opts->dumpState, dsBusyProc);
+            FILE *mf = fopen(path, "wb");
+            if (mf != NULL) {
+                uint32_t nhw = (uint32_t)(r->age.gpc.cpu.mainStorage.wordCount * 2);
+                for (uint32_t a = 0; a < nhw; a++) {
+                    uint32_t v = membus_get16(r->age.gpc.cpu.ram, a);
+                    fputc((int)((v >> 8) & 0xff), mf);
+                    fputc((int)(v & 0xff), mf);
+                }
+                fclose(mf);
+                fprintf(stderr, "--dump-state: memory -> %s\n", path);
+            }
             dsBusyDone = 1;
         }
         if (dsNext < dsN &&
