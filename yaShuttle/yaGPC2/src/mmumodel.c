@@ -85,7 +85,43 @@
  * invent a failure.
  * ------------------------------------------------------------------- */
 #define BUS_WORD_US 33.0             /* one word time on the serial bus */
-#define BLOCK_GAP_WORDS 256          /* FCMBOOT's 128 is HALF a block gap */
+#define BLOCK_GAP_WORDS_DEFAULT 256  /* FCMBOOT's 128 is HALF a block gap */
+
+/* YAGPC_MMU_BLOCK_GAP overrides the inter-block gap, in word times.
+ *
+ * WHY IT IS TUNABLE.  The gap is ~30% of a long transfer's duration, and
+ * the System Software Loader checksums a load block after a wait it sizes
+ * itself: FCMINSSL reads the block back out of memory, sums it, compares
+ * against the block's own trailing checksum, and on three failures enters
+ * a wait state on purpose (FCMINSSL.asm, label FCMSSLEX).  So a transfer
+ * the model paces more slowly than the hardware did shows up NOT as a
+ * timeout but as a phase that will not load.  Measured on our OI340700
+ * volume: phase 13's second load block is 2698 halfwords, needing about
+ * 131 ms at 33 us/word plus five 256-word gaps, while the loader
+ * checksummed it at about 123 ms -- 594 halfwords still undelivered.  The
+ * reference tape's equivalent block is 2012 halfwords and comfortably
+ * inside the window.
+ *
+ * This exists to SEPARATE two causes, not to paper over one: if a smaller
+ * gap loads the phase, the model's pacing is implicated; if it does not,
+ * the fault is elsewhere and this changes nothing.  The default is
+ * unchanged, and FCMBOOT's block-gap timing is load-bearing (see note 71
+ * on YAGPC_MMU_WORD_US), so anything but the default needs FCMBOOT
+ * re-verified before it is believed. */
+static uint32_t block_gap_words(void) {
+    static int inited = 0;
+    static uint32_t v = BLOCK_GAP_WORDS_DEFAULT;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_MMU_BLOCK_GAP");
+        if (e != NULL && *e != '\0') {
+            long n = strtol(e, NULL, 0);
+            if (n >= 0 && n < 100000) v = (uint32_t)n;
+        }
+    }
+    return v;
+}
+#define BLOCK_GAP_WORDS (block_gap_words())
 #define SLOT_UNPACED 0xffffffffu
 
 struct MmuModel {
