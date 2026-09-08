@@ -4681,6 +4681,461 @@ PGPPLD, PGGPCF and DCDDG9 are done.
     there and our ARRAY(44) declaration is suspect.  Full detail in yaGPC2's
     problems.md sections 8.52, 8.57 and 8.58.
 
+THE CSECT SCORE HAS NO REAL DEFECTS LEFT, AND THE RESIDUE IS ALL IN THE
+WHOLE-IMAGE METRIC (2026-09-07).  Decomposing the 962 scored CSECTs that are
+not exact: 2 are cleared by a curated exception, 960 differ ONLY at
+never-stated fill, and 0 carry a real unexplained difference.  There are also
+zero structural failures -- no scored CSECT is absent from our link,
+misplaced, or mis-sized.  The +unknown column reading 8292/8292 is therefore
+not a generous excusal; nothing else is in there.
+
+    WHAT THE EXACT COLUMN'S 88.4% MEASURES IS FILL FLAVOUR.  49 of the 51
+    single-halfword failures are C6C6 -> C9FB, our link editor's hole fill
+    against the C9FB that unlinkMAFGEN2 synthesises below 0x20000.  The
+    listing never stated those locations, so neither value is evidenced and
+    matching them would mean building to an invention.
+
+    THE RESIDUE IS THE WHOLE-IMAGE METRIC, 53,503 halfwords, and it is
+    overwhelmingly contested: 38,628 of the 38,650 both-non-zero
+    differences, 6,502 of 6,533 NAME-pointer candidates, 6,556 of 6,937
+    reverse cases.  Outside contested regions the entire residue is about
+    800 halfwords, mostly inter-section fill.  The overlay question is the
+    only substantial lever left, and the two candidate ownership rules
+    (fit-based and MMU load order) differ by only 18 halfwords, so neither
+    is going to break it.  What is needed is something that decides
+    contested CONTENT the way --external-syms decided placement.
+
+    THE COMPARISON IS LIKE-FOR-LIKE, CHECKED RATHER THAN ASSUMED.
+    owning_phase compares our as-built phase images against
+    mafgen/<cfg>.fcm, and unlinkMAFGEN2 substitutes the PATCH SUMMARY's
+    load-module value there, so both sides are as-built.  The LM column
+    differs from the listing's dumped value at 100% of covered locations, so
+    the substitution is real rather than a no-op scrape of the same column,
+    and dass-literals' self-check agrees at 27,789 of 27,789.  877 starred
+    locations across the eight configurations are NOT covered by a PATCH
+    SUMMARY and remain as-dumped; only 16 of those fall inside a section
+    owning_phase arbitrates.  Ownership is decided by minimum
+    differing-halfword count over sections of hundreds of halfwords, so 1-4
+    stray halfwords cannot flip a vote that is not already tied that
+    closely.  MEMORY-VERSUS-LOAD-MODULE EXPOSURE IS BOUNDED AT 16
+    HALFWORDS.
+
+WHY.  Effort was going into hunting CSECT-level defects that do not exist. The decomposition says where the remaining work actually is -- the whole-image metric, and within it the contested regions -- and the 16-halfword bound says the phase-ownership vote is not being corrupted by the memory-versus-load-module question.
+
+BOTH MAFGEN REPORTING BUGS ARE CONFIRMED BY PATTERN, WITHOUT ANY SDF
+ANALYSIS (2026-09-07).  Classifying all 53,503 real halfword differences by
+value signature -- the count ties out exactly against dass-score.py's own
+definition -- separates two classes from the bulk.
+
+    (1) INITIAL(NAME(...)) REPORTED AS ZERO.  3,585 differences where we
+    store a value that IS a section start address in the index and DASS
+    reports 0000.  Section starts below 65536 occupy 1.04% of the 16-bit
+    value space, so chance would give about 68 of the 6,533 candidates:
+    this is 53x enrichment and cannot be coincidence.  Top pointer targets
+    #PCDWDOW 2015, #PCGBIH1 333, #PCGBIM1 269, #PCVUSRB 243, #DDXRDMM 224.
+    Only 13 lie outside contested regions, so the class is real but almost
+    entirely blocked behind the overlay question.
+
+    (2) ZERO SHOWN AS FILL.  589 differences, every one the pair
+    0000 -> C6C6, over 25 CSECTs that are almost uniformly the compool
+    family -- #PCGNFL1 34, #PCGYFL1 30, #PCGCFL1 27, #PCGZFLD 20,
+    #PCGNFL2 18.  366 of these are OUTSIDE contested regions and are
+    therefore actionable now.
+
+    Together 4,174 of 53,503, or 7.8%.  The remaining bulk, 38,650
+    differences with both sides non-zero and non-fill, is 38,628 contested:
+    that is the overlay problem, not a MAFGEN reporting bug.
+
+    THE ENTRY-SYMBOL RETEST IS MARGINAL AND WEAKENS THE STATISTIC.  Matching
+    the 2,948 leftover candidates against entry symbols rather than section
+    starts does raise 3,585 to 3,901, but on only 316 hits, every one of
+    them contested, so the actionable count outside contested regions stays
+    at 13.  The cost is that known addresses below 65536 go from 1.04% to
+    4.38% of the value space, the chance baseline from about 68 to about
+    286, and the enrichment from 53x to 14x.  KEEP THE SECTION-START TEST
+    AS THE HEADLINE NUMBER; it is the sharper instrument.  Of the 316 only
+    70 are type 'entry'.  246 are type 'section' -- a section address in
+    our link that is NOT a section start in the DASS index, which is a
+    section-placement disagreement and a different question from the
+    NAME-pointer one.  #PCGBIM1 supplies 140 of the 316 and already
+    appeared at 269 in the section-start list, so it is matching both ways,
+    which is what a placement disagreement looks like.  Treating those 246
+    as unexplained, the defensible NAME-pointer total is 3,655 rather than
+    3,901, and 2,632 candidates remain unexplained by any address we know.
+
+WHY.  Both classes had been suspected from single instances. Value-signature classification tests them against the whole corpus at once and gives each one a chance baseline, so they can be believed without reading a single SDF -- and it says up front that only 379 of the 4,174 can be acted on before the overlay question is settled.
+
+THE SHARED-PHASE ADDRESS CONSTANT: A REAL MECHANISM, A MISATTRIBUTED
+EXCEPTION, AND A FIX THAT MEASUREMENT REFUTES (2026-09-07).
+
+    THE S2 CURATED EXCEPTION IS MISATTRIBUTED -- it is not a version
+    difference.  exceptions-S2-curated.txt carries
+    '43C45 -1 DGRGSERO-revised-BN-to-BQ', justified by DGRGSERO being
+    revision BN in our source and BQ in HALSTAT.  Both revision facts are
+    true and irrelevant.  What the halfword actually is: lnk101 records a
+    relocation at 277573 targeting #PCDHMMU with target 21027, so it is an
+    ADDRESS CONSTANT, not code and not a literal.  #PCDHMMU sits at 00ABB8
+    in seven configurations and at 00511A in S2, and the field offset is
+    0x109 -- so 0xABB8+0x109 = ACC1 and 0x511A+0x109 = 5223.  ALL EIGHT
+    DUMPS HOLD ACC1.  Seven match us because their base really is 00ABB8;
+    only S2 mismatches, because our full-configuration link re-resolves the
+    constant against S2's own map.
+
+    THE MECHANISM IS PHYSICAL.  DGRGSERO.obj is supplied by objlist-02
+    alone -- phase 2, an IPL phase loaded by every configuration -- while
+    #PCDHMMU's module CDHMMUTI.obj comes from phases 12 and 14.  Phase 2's
+    single shared load module therefore carries ONE resolved address for a
+    symbol that lives at different addresses per configuration, and in S2
+    that constant points into #PCRILVC rather than #PCDHMMU.  That is a
+    property of the original build, not of our sources.  842 halfwords
+    corpus-wide have the signature -- our value differs from the dump and
+    the dump holds the same symbol at another configuration's base -- G3
+    245, G16 202, G8 191, G2 180, S2 18, with #PCDWDOW supplying 719 of
+    them.
+
+    THE OBVIOUS FIX IS REFUTED; DO NOT IMPLEMENT IT.  The rule "a module
+    supplied by an IPL phase must keep that phase's resolution rather than
+    being re-relocated per configuration" was measured in two
+    dump-independent forms, each taking the majority value among the
+    configurations that must agree.  STRICT (relocations in sections of
+    IPL-supplied modules that sit at one address in all eight
+    configurations): 8,629 addresses examined, 46 non-unanimous, 171
+    halfwords rewritten, 1 fixed, 4 broken, NET -3.  GENERALISED (for each
+    phase P, the configurations loading P must agree on relocations in
+    sections P supplies): 49,910 examined, 291 non-unanimous, 600 rewritten,
+    1 fixed, 280 BROKEN, NET -279.  THE 280 ARE THE FINDING: at those
+    halfwords our per-configuration resolution ALREADY matches the dump, so
+    the original build DID relocate per configuration.  The premise is false
+    as a general rule for this system.  Both variants fix exactly one
+    halfword, the DGRGSERO case that motivated them, which therefore stands
+    as an exception rather than as an instance of a mechanism.  The 842 were
+    identified USING the dump and are a posteriori: no dump-independent rule
+    recovers them, which is what these two measurements demonstrate.
+    Nothing was changed in any repository; exceptions-S2-curated.txt is
+    untouched.  STILL RECOMMENDED: the -1 treatment of 43C45 is correct, but
+    its stated reason should be replaced -- the cause is the phase-2 address
+    constant for #PCDHMMU at 00ABB8, not the BN-to-BQ revision.  Removing
+    the exception without a fix turns the CSECT into a genuine failure, so
+    the two go together.
+
+    #PCDWDOW HAS NOW APPEARED THREE TIMES AND ONLY TWO OF THEM STAND.
+    (a) RETRACTED: "every phase link places #PCDWDOW at 002AC0 while the
+    index and dump say 0030DE" -- an artefact of the phase links running
+    without --external-syms, and not a placement defect at all.  (b) 2015
+    locations where we store its index address 0x30DE as a NAME pointer and
+    the DASS listing reports 0000, the largest single instance of the
+    INITIAL(NAME(...)) reporting bug.  (c) 719 of the 842 shared-phase
+    relocation constants above.  (b) and (c) are compatible and both concern
+    address constants naming this symbol; (a) remains withdrawn.
+
+WHY.  A one-line curated exception was carrying a wrong reason, and the correct reason suggested a general fix that measurement destroyed. Recording both halves stops the fix being re-derived from the same true premise, and stops the retracted #PCDWDOW placement claim from being rediscovered a fourth time.
+
+THE TAPE, NOT THE FCM, CARRIES THE PHASE EXTENTS -- and that is what the
+load-order rule needs (2026-09-07).  The rule, as the user states it: forming
+an FCM loads phases in a definite order and A LATER-LOADED PHASE ALWAYS WINS
+over an earlier one, so except for data outside every loaded phase there
+should be no concept of "contested" at all.  Three measurements bear on it,
+and two of them failed the same way, by inferring phase extents from our own
+build.
+
+    MMU LOAD ORDER, MEASURED AND NOT ADOPTED.  ap101Utils/mcconfigs states
+    the model directly -- a memory configuration is "the ordered list of
+    phase load modules the loader places into GPC memory: the IPL set first,
+    then the MC's application phases at OPS transition.  Later phases
+    overlay earlier ones" -- sourced to CON80/MMLOAD's IPL,PH=(10,2,13,3)
+    and CON80/MMUSYS1's phase census.  Implemented as: among the phases
+    whose LOAD MODULE places a section (PHASE*.sym.json, not the objlist),
+    the last in load order owns it.  Result 8291/8292 CSECTs and 53,521 real
+    halfword differences, against the fit-based owning_phase's 8292 and
+    53,503 -- worse by 1 CSECT and 18 halfwords, so reverted.  An earlier
+    objlist-based attempt lost 181 CSECTs, and the whole of that gap was the
+    wrong section list rather than the wrong order, so the load-order model
+    is confirmed to within 18 halfwords.  NOTE that the order for G9 is
+    (10,2,13,3,3,8,18) with phase 3 duplicated: index() must take the LAST
+    occurrence.
+
+    TWO MEASUREMENTS THAT INFERRED EXTENTS FROM OUR BUILD, AND FAILED.
+    (1) The bare overlap test used all session treats any two overlapping
+    index ranges as contested; resolving overlaps toward the CSECT a
+    configuration builds turns 53,339 "contested" halfwords into 35,414
+    attributable, 17,696 in CSECTs it does not build, and only 422 genuinely
+    ambiguous.  (2) Composing the PHASE*.fcm images in load order scores
+    18.01% against the reference where the single full-configuration link
+    scores 59.89%, because a PHASE*.fcm is a COMPLETE LINKED IMAGE and not a
+    load module: what the phase does not supply is filled by lnk101, so its
+    filler is indistinguishable from its content and each later phase
+    obliterates the ones before.
+
+    WHERE THE EXTENTS ACTUALLY ARE.  The MMU tape carries PHASE LOAD BLOCKS,
+    each with a tape offset, a length and a destination, described by the
+    tape's own IPL phase table.  ~/workspace/pass-run/pass-ipl-cflm.mmv is
+    such an image -- 1,544,072 halfwords, table at halfword 684294 -- and
+    yaGPC2/tools/place_phase_blocks.py reads 48 ground-truth blocks for
+    phases 10, 2, 13 and 3 from it, establishing that a phase's blocks are
+    strictly ascending and non-overlapping.  A block's destination plus
+    length IS the written extent, stated rather than inferred.  THE FCM IS
+    THE RESULT OF LOADING, so recovering the loading from it is backwards.
+
+    THE TAPE BUILD FAILURE IS AN INPUT ERROR, NOT A BUILD DEFECT.
+    RUNBOOK-IPL-MEDS.md section A documents the procedure: con80build builds
+    each phase's LOAD MODULE from the CON80 deck, then mmu2mmv writes the
+    volume (--con80, --mmu, --area 1, --out; --report to look first).  Our
+    mmu/PHASEnn.lib DOES NOT COME FROM con80build -- dass-phases.sh builds
+    it by running lnk101 directly with --concard CON80 --concard-root
+    PHASEn, which is right for the CSECT analysis it was written for and
+    wrong for the tape, since lnk101 with --external-syms and
+    --allow-undefined spans a whole image per phase.  Feeding those to
+    mmu2mmv gives phase 2 needing 461 blocks against 256 allocated, phase 10
+    87 against 64, PHASE01.lib overflowing sector zero, and 2,983 blocks
+    total against the runbook's ~1,085.  I read that as evidence our phases
+    are structurally wrong; that reading was itself wrong.  A diagnostic
+    confirms it (scratch/cutvol.py, not a solution and not to be shipped):
+    cutting each phase's extent from the corrected FCMs at its deck-derived
+    section ranges -- objlist modules via csect-to-object to sections to
+    index addresses, IPL phases cut from SSW where they are unoverlaid,
+    application phases from a configuration that loads them -- gives 1,255
+    blocks, with phase 2 at 240 inside its 256.  The user also observed that
+    a run of blocks can serve several phases, which the numbers bear out:
+    per-phase sums come to 1,502 blocks where the UNION of sections is 967,
+    with 451 sections in more than one phase and #PCVNMMU (16,393 halfwords)
+    in four.  Sharing is a packing question for the tape, not a content one.
+
+    NEXT: get con80build running rather than cutting our own, then compose
+    by load order using tape block extents, and only then judge what is left
+    outside every loaded phase.  con80build currently exits 0 on
+    '--phase 13 --root <tree> --runlib <tree>/RUNASM --runlib <tree>/ZCONASM
+    --out DIR', reports "sources: 0 ASM, 3 HAL, 0 display, 0 AMT, 0 patch;
+    0 runtime/library, 0 unresolved" and writes NOTHING, so something else
+    is missing -- likely --lib-dir, an INCLIB/SDFLIB, or the phase prologue.
+    STILL OPEN from the same line: our full-configuration link stacks up to
+    three of a configuration's OWN index CSECTs at one address -- #DGADHFE,
+    #DDG9LIG and #DDPLLIG all at 0005A2 in G16, 200 such overlapping pairs
+    in G16 alone -- and resolves them by link order, which is arbitrary
+    where load order is not.  ALSO: OI340700.mmv and OI340700-boot.mmv in
+    ~/pass-build/OI340700 are from 2026-09-05, predate the 09-06 recompile
+    and the 09-06 link and phase rebuilds, and must not be used to judge our
+    chain.
+
+WHY.  The contested-content question is the only substantial lever left on the score, and this says where its answer lives: in the tape's own load-block table, not in anything recoverable from an FCM or from our per-phase links. It also records that the tape build failure was my input error rather than a structural defect in our phases, so the next attempt starts at con80build.
+
+SDF CORRECTIONS, CLASS A: THE RULE THAT SETTLED IT, AND THE FOUR PASSES THAT
+GOT IT WRONG FIRST (2026-09-07).  dass-corrections.py (modules/sdfpkg) emits
+corrections-<cfg>.json and corrected-<cfg>.fcm from the SDFs, leaving
+<cfg>.fcm untouched.  Class A restores the initialization values MAFGEN never
+printed: a variable HAL/S initializes to zero appears in the DASS report with
+no hexadecimal value at all, so unlinkMAFGEN2 synthesises fill there.
+
+    THE SDF SIDE WORKS.  sdfpkg parses a unit in 0.06 s; the initialization
+    table is a halfword image indexed by the symbol's relative address
+    (sdfpkg mode 18 reads pInitializationTable + 2*reladdr); symbols carry
+    INITIAL as flag bit 17 and NAME as bit 5; and
+    nameTerminalInitialization maps a symbol to its NAME target by name.
+
+    THE RULE, SETTLED AFTER FOUR PASSES GOT IT WRONG IN ONE DIRECTION OR THE
+    OTHER: WRITE THE SDF'S ZERO UNLESS A DIFFERENT, NON-ZERO VALUE IS KNOWN
+    TO BELONG.  Never withhold merely because fill is the alternative.  The
+    oracle is the DASS files and MAFGEN formed them from the SDFs, so where
+    the SDF says zero, zero is what the reference should say.  OUR BUILD
+    HOLDING FILL PROVES NOTHING about the original -- it is our link
+    editor's hole-fill convention, not evidence about the memory -- so
+    withholding on that basis treats our own build as the authority against
+    the oracle.  The risks are not symmetric either: a zero where fill would
+    have done costs nothing at run time, while fill where a zero was needed
+    is fatal the first time the location is read, and optimising for
+    byte-exact reproduction of a memory image we cannot observe at the
+    expense of the image being runnable is optimising for the wrong thing.
+    THE ONE GENUINE EXCEPTION is an address constant, whose table entry is
+    the UNRELOCATED value while memory holds base+0, a real pointer:
+    writing zero there DESTROYS something.  The rule is now in
+    dass-corrections.py's docstring.
+
+    WHAT THE FOUR WRONG PASSES WERE, all the same shape -- an
+    initialization-table zero that never reached memory, or a gate that
+    mistook an absent report for a wrong one.  (1) Correcting every location
+    where the SDF says zero and the dump shows fill fires 70,471 times
+    against the 589 proven, because most fill in <cfg>.fcm was SYNTHESISED
+    by unlinkMAFGEN2 for addresses MAFGEN never printed; those are absent
+    reports, not wrong ones, and restricting to dass-score.printed(cfg)
+    brings S2 from 34,609 to 247.  (2) An early symbol-to-address mapping
+    keyed on the bare symbol name and took the first declaration carrying a
+    CSECT/OFFSET, but names are not unique -- CZ2V_GST appears as a
+    cross-reference list, a STRUCTURE TEMPLATE, and a STRUCTURE(5) VARIABLE
+    ("EQUATED") whose entry says "(SEE TEMPLATE ...)" instead of giving an
+    extent -- and validation, independent because nothing in the tool reads
+    our build, showed 2,295 of 2,509 corrections moving the reference AWAY
+    from our independently built image against 199 toward it.  The fix is to
+    resolve each symbol to its declaring unit from the SDF's own block, to
+    carry structure copies and terminals rather than a flat
+    (offset, size), and to honour the BIAS that 5,611 declarations state.
+    (3) #PCVTTCS's 240 CHARACTER-tail zeros, which I recorded as MAFGEN
+    printing SDF padding as memory and which were our own class A pass
+    writing over fill -- in SSW the raw reference reads C9FB across the
+    whole region, MAFGEN printed nothing there.  A CHARACTER is emitted only
+    as far as it is used, its first halfword being (maximum length, current
+    length), so CVSP_MESSAGE_TEXT as ARRAY(15) CHARACTER(34) emits two
+    halfwords of eighteen and holes sixteen: 16 x 15 = 240.  Withholding
+    those was implemented (virtualagc 5668cd33b, PFS 69f30fa7) and then
+    REVERTED under the settled rule (virtualagc c13fcb2f1, PFS a0e97e08),
+    because 441 of the 681 withdrawn corrections were ones our build
+    CONFIRMS and the SDF alone cannot separate a genuine zero from a hole;
+    deciding per tail would mean reading the object's TXT coverage, which
+    costs the independence that makes the agreement figure mean anything.
+    (4) An RLD guard whose offset orientation was inverted; see the class B
+    entry.
+
+    WHERE IT LANDED.  130,973 corrections with --contested, our own build --
+    same sources, never read by the tool -- agreeing at 95.50%.  Contested
+    addresses are corrected only where EVERY claiming CSECT agrees the value
+    is zero, which is why agreement holds up at all in ambiguous space.
+    With SSW held out, raw identity against our build over the seven goes
+    59.89% to 64.17% and real differences 50,835 to 54,234; SSW separately
+    30.13% to 37.94%, and that weakness -- 30% raw identity against 60% --
+    is independent support for setting SSW aside.  Real differences RISE
+    because previously unknown addresses are now stated and disagreeing,
+    visible rather than hidden, and the 97.98% headline barely moves because
+    that metric already forgives never-stated addresses and cannot reward
+    turning an unknown into a match.  RAW IDENTITY IS THE HONEST MEASURE
+    HERE.  SHIPPED: PFS tracks mafgen/corrected-<cfg>.fcm for all eight
+    configurations, generated with --contested; <cfg>.fcm is untouched;
+    corrections-<cfg>.json is left untracked and ignored, regenerated
+    alongside.
+
+    THE ONE REAL COST OF WRITING ZERO IS BOUNDED AT 31 HALFWORDS.  The
+    user's objection is sound: a hole in a load module is not fill in the
+    loaded machine, it is a WINDOW through which the previously-loaded
+    phase's content remains visible, and writing 0000 paves it over.  A
+    first count of 32,854 corrections sitting where SOME loaded phase holds
+    content looked alarming, but it ignores overlay order -- a phase writing
+    content is itself overwritten by a later phase writing zero.  Respecting
+    load order (IPL 10,2,13,3 then the GRT row, later phases overlaying
+    earlier), at 102,646 of 102,677 corrections the LAST phase to write the
+    address wrote ZERO, so our zero is what would be loaded anyway.  Only 31
+    have a non-zero last writer, all in S2, mostly CPAB_*_PARENT symbols
+    where phase 15 shows 0001 beneath our 0000, and our full-configuration
+    link kept the value at 11 of them.  Small enough to fix exactly rather
+    than by policy, and the fix fits the settled rule -- the show-through
+    content being the different, non-zero value known to belong.  NOT
+    IMPLEMENTED: the guard needs the per-phase images to know who wrote
+    last, which puts a dependency on our build's CONTENT into the correction
+    path, the same trade declined for CHARACTER tails, though here it buys a
+    demonstrably correct outcome on 31 known addresses rather than a
+    speculative one.  The user's call.  KEEP IN MIND that
+    corrected-<cfg>.fcm is for EXECUTION and <cfg>.fcm stays the artefact
+    for overlay and show-through analysis, since the corrections
+    deliberately fill windows that analysis needs open.
+
+WHY.  Four separate passes got the withhold-or-write decision wrong, in both directions, and each time the reasoning looked sound at the time. The rule and its one exception are what stop a fifth. The 31-halfword show-through bound is the only measured cost of applying it, and it is small enough that the rule can be trusted.
+
+SDF CORRECTIONS, CLASS B: NAME POINTERS, AND THE sdf.py GAP THAT BLOCKED
+THREE ATTEMPTS (2026-09-07).  Class B asks whether MAFGEN misreports NAME
+pointers.  Three earlier passes returned "empty" and all three were artefacts
+of method -- a printed-address gate, a non-zero corroboration gate, and an
+inverted RLD orientation -- so a fourth "empty" means nothing unless the
+method is stated with it.
+
+    ONLY NAME(...) NEEDS RELOCATION, CONFIRMED FROM SOURCE.  Every survivor
+    examined is a NAME initialization: APPLSRC/CGAGAX.hal declares STRUCTURE
+    CGAA_SCAL_LIMIT with terminal '1 CGAA_S_ADDR_SCLR NAME SCALAR' and
+    DECLARE ... STRUCTURE(8) INITIAL(NAME(...)); APPLSRC/CDWDOWNL.hal has
+    DECLARE CDWV_CUR_VAR_DUMP ... INITIAL( 10#( NAME(CDWV_OP_FORMAT_ID) ) ),
+    a repetition factor wrapping a NAME; and ASIV_WORD_COUNT, which I had
+    flagged, is a plain INTEGER INITIAL(0) that an over-wide guard caught.
+    RETRACTED: that the relocated halfwords are compiler linkage data and
+    that the RLD guard masks an extent-attribution bug.  That rested on
+    classifying the claiming SYMBOL rather than the OFFSET, which as the
+    user pointed out cannot work for a STRUCTURE -- a structure variable's
+    own cell carries no NAME flag, its TERMINALS do.  THE GUARD STANDS: the
+    666 corrections it removed were genuine NAME initializations whose table
+    entry is the unrelocated zero, so zeroing them destroyed real pointers.
+
+    RLD OFFSET SEMANTICS ARE TYPE-DEPENDENT and have been got wrong once
+    already in each direction.  A YCON flags the pointer halfword ITSELF; a
+    ZCON/data flags a fullword whose address is the halfword AFTER it.
+    Blanket-excluding o and o+1 falsely implicated plain variables at
+    YCON+1, and going type-aware cut the affected set from 5,120 to 3,671.
+    Kinds seen: YCON(+) 81196, ACON(+) 3656, ZCON/data(+) 1711,
+    ZCON/addr(+) 836, YCON(-) 499, DSR-only(+) 401, ZCON/code(+) 298,
+    ZCON/data(-) 136, ACON(-) 2.  For whoever touches relocationTargets():
+    the container is the SECOND name in an RLD line.
+
+    THE BLOCKER WAS A DISCARDED FIELD IN sdf.py, and the user's suspicion of
+    it was right.  Probe ~/temp/TAILS.hal declares a standalone
+    'DECLARE NSC NAME SCALAR INITIAL(NAME(SC))' and a structure
+    'STRUCTURE POOKIE: 1 X SCALAR, 1 N NAME SCALAR, 1 J INTEGER' declared as
+    POOKIE-STRUCTURE INITIAL(5.0, NAME(SC), 12).  READING THE CELL RAW: for
+    the structure, field 1 nbytes=24, field 3 nIndexes=2, and FIELD 4 HOLDS
+    SYMBOL INDEXES [8, 4] = [SSC, N] -- the qualified path naming WHICH
+    TERMINAL is initialized -- followed by one Initial Pointer Value with
+    field5B=1 (the copy) and target SC.  So the SDF states "SSC.N, copy 1,
+    points at SC" in full.  sdf.py computed op = 8 + 2*nIndexes to SKIP
+    field 4 and never read it, so it reported only (copy, target) and
+    dropped the terminal identity, rendering as "copy 1: SC".  For the
+    simple case, NSC, field 4 is [7] = [SC], the target itself, with no
+    operators (nbytes=10), and sdf.py's separate simple-NAME path via
+    _variableReference handles it correctly.  ONLY THE STRUCTURE PATH LOST
+    INFORMATION.  That gap is what produced 3,288 terminals classified
+    non-NAME that the source shows ARE NAME: terminal identity was being
+    inferred by walking the template and computing offsets when the SDF
+    states it outright.  ALSO CONFIRMED: a NAME field occupies ONE halfword,
+    not the size of its base type -- POOKIE lays out X (SCALAR) at 0-1, N
+    (NAME SCALAR) at 2, J (INTEGER) at 3.
+
+    THE RE-RUN ON THE FIXED PARSER FINDS NO DEFENSIBLE CORRECTIONS, and this
+    time the method is sound.  With sdf.py b1bbe2731 -- field 4 giving
+    terminal identity outright and the cell chain complete -- 13,659 sites
+    built, 8,661 evaluated, 5,503 with the dump holding exactly the computed
+    pointer, 3,152 where it does not, 6 where the dump is silent.  THE 3,152
+    ARE SUBSCRIPTED TARGETS, not misreports: AIEV_ICC_NAMES ->
+    CZ2V_NOM_BUS wants 271A while the dump holds 2734, 274E, 2768, 2782 in
+    steps of 0x1A, so the SDF names the array and the pointer addresses
+    element k, with the subscript recorded nowhere in the entry (raw and
+    loops are both empty).  OUR BUILD AGREES WITH THE DUMP AT ALL 3,152, so
+    there is nothing misreported there.  The 6 silent sites are all one
+    address, 003AC9 in DXRV_MMRD_PLIST targeting CDME_IO_MM_EVENT in six
+    configurations, whose computed 0EAF disagrees with our build's 1E6C, so
+    they fail their own sanity check.  THE HONEST LIMIT IS COVERAGE: 17,316
+    targets do not resolve -- cross-unit and structure-qualified -- so about
+    two thirds of sites are unevaluated.  That is a gap in the symbol map,
+    not evidence of absence, and widening it is the next thing worth doing
+    if class B is revisited.  A narrower cut agrees: restricted to the 4,294
+    sites whose target is a scalar, so no subscript is possible and the
+    pointer value is computable from the SDF alone, the listing is ALREADY
+    RIGHT at 4,147, our build agrees at 4,146, and there are ZERO sites
+    where the listing is silent or prints 0000.  Where checkable, MAFGEN
+    reports NAME pointers correctly.
+
+    NAME POINTERS ARE NEVERTHELESS RESTORED WHERE THE LISTING SAYS NOTHING:
+    387 over the seven, 272 in SSW.  A NAME slot in the initialization table
+    holds the target's CSECT-RELATIVE OFFSET with the YCON supplying the
+    base, so its value is meaningful even at zero -- zero means offset zero,
+    a pointer to the CSECT base -- and base + offset is the value.  THE
+    MODEL IS VALIDATED WITHOUT REFERENCE TO OUR BUILD: of 54,891 relocated
+    halfwords evaluated over the seven, THE LISTING ITSELF ALREADY HOLDS
+    base+offset at 37,357, and 13,250 more hold a different value because
+    the target is subscripted.  Restoration is on confirmation only, because
+    a wrong pointer is harmful at run time where a spurious zero is not, so
+    the asymmetry that lets zeros be written freely runs the OTHER WAY here:
+    of 4,284 candidate sites our build independently arrives at the same
+    address in 387 over the seven (G16 1, G2 10, G3 2, G8 89, G9 41, P9 231,
+    S2 13) and 272 in SSW, and the other 3,897 are left alone.  Those 659
+    are BUILD-CONFIRMED BY CONSTRUCTION, carry a buildConfirmed flag, and
+    are excluded from the independent-agreement figure, which stays 130,973
+    zero corrections at 95.50%.  Over the seven with SSW held out, raw
+    identity against our build goes 59.89% to 64.19%.  Shipped as virtualagc
+    6d1a9cafa and PFS 10ff585a.  RETRACTED: excluding NAME slots from class
+    A would have discarded real values -- the ICD's "non-NAME variables"
+    phrasing refers to where the target IDENTITY is recorded, not to the
+    slot being empty.
+
+    SECOND HALF OF THE PARSER QUESTION, STILL OPEN.  TSNK_RECS in
+    initlab/TSTNAME.hal has 2 copies x 2 NAME terminals = 4 pointers (its
+    table reads 0001 0003 0003 0001) yet yielded only 2 entries, both
+    apparently from the first terminal's cell.  NFLD2 presumably lives in a
+    chained cell reached by the "next" pointer at offset 4; check whether
+    that chain is followed.
+
+WHY.  Three passes concluded class B was empty and each was wrong for a different methodological reason, so the conclusion is worthless without the method attached. The sdf.py field-4 fix is what made the fourth answer trustworthy -- the SDF states the terminal identity that was being inferred -- and the coverage limit is the honest reason the answer is still not final.
+
 G9 DOES NOT RUN, AND THE TWO REASONS ARE BOTH IN THE BUILD (2026-09-08).  It
 has never displayed a menu screen, on any tape or standalone, and the blockers
 are in our OI340700 links rather than in yaGPC2.
