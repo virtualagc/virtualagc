@@ -5136,21 +5136,39 @@ method is stated with it.
 
 WHY.  Three passes concluded class B was empty and each was wrong for a different methodological reason, so the conclusion is worthless without the method attached. The sdf.py field-4 fix is what made the fourth answer trustworthy -- the SDF states the terminal identity that was being inferred -- and the coverage limit is the honest reason the answer is still not final.
 
-G9 DOES NOT RUN, AND THE TWO REASONS ARE BOTH IN THE BUILD (2026-09-08).  It
-has never displayed a menu screen, on any tape or standalone, and the blockers
-are in our OI340700 links rather than in yaGPC2.
+G9 DOES NOT RUN, AND ONLY ONE OF THE TWO BLOCKERS HAS A MEASURED CAUSE
+(2026-09-08, the phase 18 half CORRECTED the same day -- see #299).  G9 has
+never displayed a menu screen, on any tape or standalone.  On our own volumes
+the blocker is measured and is in our OI340700 phase 10 link; on the reference
+tapes the SYMPTOM is established and the CAUSE is not.
 
-    ON THE REFERENCE TAPES, PHASE 18 IS NEVER REQUESTED.  #PFCMGPT -- the
-    in-core phase table, 16 four-halfword descriptors for phases 3..18 -- is
-    ALL ZEROS (0 of 1,093 halfwords) in a running SSW, in that machine 250 s
-    later, and in corrected-G9.fcm.  FCMMGBOV.asm indexes it directly
+    ON THE REFERENCE TAPES, PHASE 18 IS NEVER REQUESTED -- OBSERVED.  Phases
+    3 and 8 are read from 3/3/6/0 and 2/5/4/0; nothing ever reads 6/5/0/0,
+    where GMAG9R1 PHASE,PH=18,MC=9 sits with 3,311 non-zero halfwords in its
+    first 8 blocks.  That much is a bus trace and is solid.
+
+    WHY IT IS NEVER REQUESTED IS NOT ESTABLISHED, AND THE EXPLANATION THIS
+    ENTRY ORIGINALLY GAVE IS WITHDRAWN.  It read: #PFCMGPT -- the in-core
+    phase table, 16 four-halfword descriptors for phases 3..18 -- is ALL
+    ZEROS (0 of 1,093 halfwords) in a running SSW, in that machine 250 s
+    later, and in corrected-G9.fcm; FCMMGBOV.asm indexes it directly
     (`LA R1,FIOMGPTZ / SHI R4,3 / SLL R4,2 / LH@# R5,0(R4,R1) / AHI R4,1 /
-    LH@# R6,0(R4,R1)`), and descriptor halfword 1 is the SEGMENT COUNT.  Zero
-    means no segments, so nothing is fetched.  Confirmed experimentally as
-    well: injecting a populated table at 0x1CCF2 changed which phase FCOS
-    read.  Our own builds DO stamp these tables -- it is the DASS extractions
-    that carry zeros, which is what a memory dump of ground-build output
-    would look like.
+    LH@# R6,0(R4,R1)`) with descriptor halfword 1 the SEGMENT COUNT, so zero
+    means no segments and nothing is fetched.  EVERY MEASUREMENT IN THAT
+    SENTENCE STANDS; THE INFERENCE DOES NOT.  It is refuted by the same run
+    it was drawn from: phases 3 and 8 ARE fetched, from the correct tape
+    addresses, while that table reads zero.  Whatever supplied those two MM
+    addresses was not the zeros we dumped, so the zeros cannot be what
+    withholds the third.  The caveat was in the notes at the time ("phase 8
+    DOES load despite the empty table, so the OPS transition's first load
+    reaches mass memory by some other path -- worth identifying before
+    assuming a stamped GPT is sufficient") and was compressed out of this
+    entry when it was written.  The experiment offered as confirmation does
+    not confirm it either: injecting a populated table at 0x1CCF2 changed
+    which phase FCOS read, which proves FCOS READS THAT ADDRESS and nothing
+    more -- the injected table disagreed with the volume, which is sufficient
+    on its own to fail the phase 8 overlay and skip phase 18.  #299 lists
+    the candidate causes and what has to be measured to separate them.
 
     WITHOUT PHASE 18 THE CONFIGURATION IS HALF-BUILT.  Phase 8 loads, the PCT
     still names 0x20241 -- $0AIGDEU (a PROGRAM) in SSW, #PCVNMMU (a compool)
@@ -5201,7 +5219,91 @@ are in our OI340700 links rather than in yaGPC2.
     from a previous run makes the GPC flap HALT<->RUN; kill panels BEFORE a
     run, not only after.
 
-WHY.  A whole session went into trying to bring memory configuration G9 up, on tape and standalone, and it never displayed. The value is in what that eliminated: the emulator is not the problem, and the two blockers are separately identified, so nobody need repeat the search.
+WHY.  A whole session went into trying to bring memory configuration G9 up, on tape and standalone, and it never displayed. The value is in what that eliminated: the emulator is not the problem, our phase 10 is, and the reference-tape half is a narrower open question than it looked. Read #299 with it -- this entry asserted a cause for the missing phase 18 that its own bus trace refutes, and the correction matters more than the original claim did.
+
+WHY PHASE 18 IS NEVER REQUESTED: THREE CANDIDATE CAUSES, NONE OF THEM
+MEASURED, AND THE ONE WE ASSERTED IS THE WEAKEST (2026-09-08).  This corrects
+#292 and comes out of an outside review of that entry, which caught the
+contradiction: on the reference tape phases 3 and 8 load from the correct MM
+addresses WHILE the phase table reads all zeros, so the zeros cannot be what
+withholds phase 18.  The candidates below are separated by source inspection;
+each is testable and none has been tested.
+
+    (1) THE OVERLAY LOOP EXITS ON THE FIRST ERROR, so a failed phase 8 skips
+    phase 18 without any table being consulted.  SSSRC/ARCGPC.hal:970-991:
+
+        ARC_PHASE_LOOP :
+          ARC_J = CZ2V_GRT_MC_PHASES$(ARC_GRT_INDEX;ARC_M);
+          IF ARC_J = 0 THEN EXIT ARC_PHASE_LOOP;
+          ...
+          OVERLAY(ARC_OVL_PARMS);
+          ...
+          IF (ARC_OVL_ERR$(1 TO 5) ~= BIN'00000') AND
+             (ARC_I = 1) THEN DO;
+             ...
+             EXIT ARC_PHASE_LOOP;
+
+    G9's GRT row is 3, 8, 18.  Slot 1 is the MF overlay (phase 3); slots 2-3
+    are the program overlay, 8 then 18.  We have never read ARC_OVL_ERR,
+    CZ2V_REC_XERR, CZ2V_MF_OVLY/PROG_OVLY or the GRT slots on the run that
+    actually produced the 110-block phase 8 read.  Note that #8.34 already
+    measured this mechanism once, in another context, and it was not
+    re-measured here.
+
+    (2) THE IN-MEMORY TABLE IS OVERWRITTEN AFTER IPL FROM AN ALL-MINUS-ONE
+    ARRAY, and we measured the wrong structure.  SSSRC/CDCPHA.hal:40 declares
+    CDCV_PHASES ARRAY(19,3) INTEGER INITIAL(-1, -1, -1, ...), all 57 entries
+    minus one.  SSSRC/AIBGPCLO.hal:888-895 then walks the GRT row and does
+
+        AIB_PHASE = CZ2V_GRT_MC_PHASES$(J;K:) - 2;
+        IF AIB_PHASE > 0 AND AIB_PHASE < 17 THEN DO;
+          FCMMGPT_STARTING_MM_ADD$(AIB_PHASE;) = CDCV_PHASES$
+          (AIB_PHASE,AIB_AREA:);
+
+    Phase 18 maps to AIB_PHASE 16 and passes the guard, so the MM addresses
+    the overlay loader ends up using come from CDCV_PHASES, in #PCDCPHA, NOT
+    from whatever was stamped into #PFCMGPT on the volume.  We knew from
+    YAGPC_LOADBIN that #PFCMGPT, #PCDCPHA and FCMG3DAT are stamped as a SET
+    and we only ever dumped the first of the three.  THIS ALSO EXPLAINS THE
+    NEGATIVE RESULT WE HAVE: pass-stamped.mmv behaving like the unstamped
+    tape shows that stamping the VOLUME did not help, not that a populated
+    table would not -- no snapshot of the in-memory table was taken on that
+    run, and the structure that governs is a different one.
+
+    (3) PHASE 18 IS REQUESTED WITH A NULL DESCRIPTOR and the request is
+    invisible to a bus trace, which is all we have.  "Never requested" was
+    scored as "nothing hit 6/5/0/0"; an OVERLAY call with MM address 0 and
+    count 0 looks identical from the bus.
+
+    WHAT SEPARATES THEM is a dispatch trace rather than a bus trace: read
+    ARC_OVL_ERR and the GRT slots immediately before and after the program
+    overlay, dump CDCV_PHASES in #PCDCPHA rather than #PFCMGPT at the map
+    address, and check whether OVERLAY is entered with phase 18 at all.
+
+    THE EXPERIMENT THAT TESTS THE WHOLE THING WITHOUT WAITING ON PHASE 10 was
+    run once and withdrawn for the wrong reason.  Writing our phases 3, 8 and
+    18 onto a copy of pass-910.mmv -- a volume whose GPCIPL and PASS already
+    work -- is the only configuration that puts a phase 18 in front of a
+    machine that actually reaches the transition.  #283 retracted it because
+    the raw 'mmu.js put' failed FCMINSSL's load-block checksum
+    (sum(hw[0..L-2]) == hw[L-1], FCMINSSL.asm:844-861, #289), and the
+    retraction was correct, but the experiment was never rerun with the
+    checksums restamped.  Do that before spending anything more on the phase
+    10 link, because it is independent of it.
+
+    ALSO FROM THE SAME REVIEW, NOT YET CHASED: problems.md 8.22 already rules
+    "pinning PHASE10 is catastrophic -- it strips 97% of GPCIPL's relocations
+    (1788 -> 56), so its address constants stay zero", which is the exact
+    signature #292 reports for our phase 10 (1,101 differences in 463
+    scattered runs).  dass-phases.sh:66 gates the pin on `[ -s
+    phase/extsyms-$p.json ]`, a SIZE test, and phase/extsyms-10.json is `{}`
+    at 2 bytes -- non-empty to the shell, empty to the linker -- so phase 10
+    was linked with --external-syms against an empty pin set.  That is not
+    the configuration 8.22 measured, and what lnk101 does with it has not
+    been checked.  Check it before treating the phase 10 gap as general
+    build-verification work.
+
+WHY.  An outside review of #292 found that its stated cause is refuted by the bus trace in the same entry, and that a caveat present in the notes had been compressed away. The three candidates are separated here so the next run measures the right things, and so the withdrawn splice experiment -- the only one that does not wait on the phase 10 link -- is not left retracted when only its method was wrong.
 
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
