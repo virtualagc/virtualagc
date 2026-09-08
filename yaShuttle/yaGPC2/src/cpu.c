@@ -185,12 +185,22 @@ uint32_t cpu_recv_from_iop(CPU *cpu) {
  * violation, and on the External 1 DMA store protect violation -- a
  * property of the event, not of the latch.  It must be applied BEFORE
  * the swap, since the swap is what stores the old PSW the handler then
- * reads.  (The third case, the DMA store protect, cannot arise here
- * yet: nothing in this emulator's IOP DMA path checks store protection,
- * so no External 1 ever carries code 0x0004.  When it does, it belongs
- * in this same helper.)  Omitting this left GPCIPL's store-protect
- * handler reading CC 00 out of the old PSW at 0x0048 where the real
- * machine leaves 10. */
+ * reads.  Omitting this left GPCIPL's store-protect handler reading CC
+ * 00 out of the old PSW at 0x0048 where the real machine leaves 10.
+ *
+ * The third case, the DMA store protect, IS implemented and does arise:
+ * iop_write_main16() calls mcm_set16() with the protection check on
+ * (YAGPC_NO_DMA_PROTECT bypasses it, YAGPC_DMAPROT traces it) and hands
+ * a refusal to cpu_signal_dma_protect_violation(), which sets ext1Code
+ * 0x0004.  That helper applies the CC anomaly itself for the MASKED
+ * case, where no interrupt is taken and this function is never reached.
+ * An earlier version of this comment said the check did not exist; it
+ * has, and reading it cost a session's worth of a wrong conclusion --
+ * that a mass-memory overlay writing over FCMCBLKS went unnoticed for
+ * want of the check.  It went unnoticed because FCMCBLKS is UNPROTECTED,
+ * as it must be: FCOS fills in the SVC parameter lists that live there,
+ * so a write to it is not a violation under any rule the hardware has.
+ * A canary cannot sing about a door that is meant to be open. */
 static void cc_anomaly(CPU *cpu) {
     psw_set_cc(&cpu->psw, 2);
     psw_set_carry(&cpu->psw, 0);

@@ -569,11 +569,53 @@ void mmumodel_set_clock(MmuModel *m, const double *clockUs) {
  * person, and --time-scale must not change how often a level is refreshed. */
 #define READY_REPUBLISH_SEC 0.25
 
+/* YAGPC_MMU_TIMED_READY: raise READY when the transfer has gone past on the
+ * wire, rather than when the host has consumed it.
+ *
+ * WHY THIS EXISTS, AND WHY IT IS NOT THE DEFAULT.  READY here is a PROXY --
+ * HANDOFF-FCMBOOT.md says so plainly: on real hardware it is a line driven by
+ * the mass memory, while here it tracks whether our own bus controller is
+ * still running.  That caveat predicted the proxy failing by raising READY
+ * EARLY, if the MMU were still positioning after our BCE went idle.  The OPS 9
+ * transition to G9 hits the OPPOSITE failure of the same approximation, and it
+ * deadlocks: `ready` below is gated on the output queue draining, the queue
+ * advances only in bus_word() when the BCE polls it, and the BCE has stopped
+ * because the flight software is blocked waiting for READY.  Phase 3's 26
+ * blocks are consumed before the wait begins and escape it; phase 8's 110
+ * multi-track blocks are not, ~33000 words stay queued, READY never returns,
+ * FCMMGPOV never reaches its signal point, ARC_OVL_EVT is never set, and
+ * ARCGPC's overlay loop never advances to the slot that would request phase
+ * 18.
+ *
+ * A synthetic busy-timer written for READY once before was removed as
+ * "treating the symptom" when the transfer was made to go over the bus and be
+ * paced to real time.  This is not that timer: it uses the pacing already
+ * here, asking whether the LAST QUEUED WORD's slot time has passed, so it
+ * cannot rise before the wire would have carried the data.  It is still an
+ * approximation of the same signal, which is why it is opt-in.  Proper
+ * fidelity needs the MMU to report its own state -- MMU-side work and a
+ * protocol change, per the same caveat. */
+static bool timed_ready_enabled(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = getenv("YAGPC_MMU_TIMED_READY") != NULL; }
+    return on != 0;
+}
+
 void mmumodel_publish_ready(MmuModel *m) {
     if (!m || !discretes_enabled()) return;
     /* Ready when it is not moving data: nothing left over from a read and
      * no write running. */
     bool ready = (m->queueHead >= m->queueCount) && !m->writeActive;
+    if (!ready && !m->writeActive && timed_ready_enabled() && m->clockUs &&
+        m->nextSlot > 0) {
+        /* The last word this burst queued is due at its own slot time; give
+         * it the same block-gap grace bus_word() uses before it calls a word
+         * gone past. */
+        double lastDue = m->burstStartUs +
+                         (double)(m->nextSlot - 1) * BUS_WORD_US;
+        if (mm_now(m) > lastDue + (double)BLOCK_GAP_WORDS * BUS_WORD_US)
+            ready = true;
+    }
     double now = yagpc_monotonic_seconds();
     if (m->readyPublished && ready == m->lastReady &&
         now - m->lastReadyPublishSec < READY_REPUBLISH_SEC)
