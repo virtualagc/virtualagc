@@ -5246,7 +5246,8 @@ each is testable and none has been tested.
     G9's GRT row is 3, 8, 18.  Slot 1 is the MF overlay (phase 3); slots 2-3
     are the program overlay, 8 then 18.  We have never read ARC_OVL_ERR,
     CZ2V_REC_XERR, CZ2V_MF_OVLY/PROG_OVLY or the GRT slots on the run that
-    actually produced the 110-block phase 8 read.  Note that #8.34 already
+        actually produced the 110-block phase 8 read.  Note that problems.md
+    8.34 already
     measured this mechanism once, in another context, and it was not
     re-measured here.
 
@@ -5284,9 +5285,9 @@ each is testable and none has been tested.
     run once and withdrawn for the wrong reason.  Writing our phases 3, 8 and
     18 onto a copy of pass-910.mmv -- a volume whose GPCIPL and PASS already
     work -- is the only configuration that puts a phase 18 in front of a
-    machine that actually reaches the transition.  #283 retracted it because
-    the raw 'mmu.js put' failed FCMINSSL's load-block checksum
-    (sum(hw[0..L-2]) == hw[L-1], FCMINSSL.asm:844-861, #289), and the
+    machine that actually reaches the transition.  #292 records the
+    retraction: the raw 'mmu.js put' failed FCMINSSL's load-block checksum
+    (sum(hw[0..L-2]) == hw[L-1], FCMINSSL.asm:844-861, #289).  That
     retraction was correct, but the experiment was never rerun with the
     checksums restamped.  Do that before spending anything more on the phase
     10 link, because it is independent of it.
