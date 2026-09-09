@@ -47,9 +47,11 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         mtumodel_service(br->mtu, svc, in, out);
         return;
     }
-    if (br->deu2 && in->busID == br->deu2Bus) {
-        deumodel_service(br->deu2, svc, in, out);
-        return;
+    for (int d = 0; d < br->nDeuExtra; d++) {
+        if (br->deuExtra[d] && in->busID == br->deuExtraBus[d]) {
+            deumodel_service(br->deuExtra[d], svc, in, out);
+            return;
+        }
     }
     if (br->fallback) {
         br->fallback(br->fallbackCtx, svc, in, out);
@@ -180,12 +182,34 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
      * the BFS when the BFC CRT switch names CRT 1, so the only display we
      * had was the one PASS was obliged to give up.  GPCIPL still runs its
      * menu on DK1; this is the one PASS itself can drive. */
+    /* --deu-bus takes a LIST: "7", or "7,8,9".  PASS drives four DEUs
+     * (DCICYC.asm DCIS#DEU EQU 4, device IDs 5-8 per FIOERRLC.asm), and the
+     * DK handler keeps a request outstanding to each.  A unit with nothing on
+     * its bus never completes, and its IOQE is never returned to the pool of
+     * 25 (FIOCBLKS.asm GENERATE ... NIOQE=25).  Run the pool dry and FIOSVC
+     * pops the free list's deliberate sentinel -- a pointer to the PROTECTED
+     * SVC table (GENERATE.asm:335) -- so the next store takes a store-protect
+     * program check.  That is FCOS's queue-overflow detector working exactly
+     * as designed, and it is fatal here: taken inside the Clock 2 handler it
+     * stops FPMIHPC2 before its CALL FPMITUPD, the only code that re-arms
+     * Clock 2, after which no TQE ever expires again. */
     if (opts->deuBus != NULL && *opts->deuBus != '\0') {
-        long b = strtol(opts->deuBus, NULL, 10);
-        if (b > 0 && b <= 24) {
-            r->deuModel2 = deumodel_create((int)b);
-            r->busRouter.deu2 = r->deuModel2;
-            r->busRouter.deu2Bus = (int)b;
+        const char *p = opts->deuBus;
+        while (*p != '\0' && r->nDeuModelExtra < DEU_EXTRA_MAX) {
+            char *end = NULL;
+            long b = strtol(p, &end, 10);
+            if (end == p) break;
+            if (b > 0 && b <= 24) {
+                int k = r->nDeuModelExtra;
+                r->deuModelExtra[k] = deumodel_create((int)b);
+                if (r->deuModelExtra[k] != NULL) {
+                    r->busRouter.deuExtra[k] = r->deuModelExtra[k];
+                    r->busRouter.deuExtraBus[k] = (int)b;
+                    r->nDeuModelExtra = k + 1;
+                    r->busRouter.nDeuExtra = k + 1;
+                }
+            }
+            p = (*end == ',') ? end + 1 : end;
         }
     }
 
@@ -195,12 +219,12 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
             mtumodel_set_clock(r->mtuModel, &r->age.gpc.cpu.elapsedTimeUs);
     }
 
-    if (opts->mmuModelVolume || r->mtuModel || r->deuModel2) {
+    if (opts->mmuModelVolume || r->mtuModel || r->nDeuModelExtra > 0) {
         long unit = opts->mmuModelUnit ? strtol(opts->mmuModelUnit, NULL, 10) : 1;
         r->mmuModel = opts->mmuModelVolume
                           ? mmumodel_create((int)unit, opts->mmuModelVolume)
                           : NULL;
-        if (r->mmuModel || r->mtuModel || r->deuModel2) {
+        if (r->mmuModel || r->mtuModel || r->nDeuModelExtra > 0) {
             if (r->mmuModel) {
                 mmumodel_set_clock(r->mmuModel, &r->age.gpc.cpu.elapsedTimeUs);
                 /* Tell the IOP this mass memory is PRESENT, by setting its
@@ -233,7 +257,9 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
             r->busRouter.mmu = r->mmuModel;
             r->busRouter.mmuBus = r->mmuModel ? mmumodel_bus(r->mmuModel) : -1;
             r->busRouter.mtu = r->mtuModel;
-            r->busRouter.deu2 = r->deuModel2;
+            for (int d = 0; d < r->nDeuModelExtra; d++)
+                r->busRouter.deuExtra[d] = r->deuModelExtra[d];
+            r->busRouter.nDeuExtra = r->nDeuModelExtra;
             r->busRouter.fallback = base;
             r->busRouter.fallbackCtx = baseCtx;
             ap101_set_servicer(&r->age.gpc, bus_router_service, &r->busRouter);
@@ -266,11 +292,12 @@ void batchrunner_free(BatchRunner *r) {
         deumodel_free(r->deuModel);
         r->deuModel = NULL;
     }
-    if (r->deuModel2) {
-        fprintf(stderr, "deu2 (bus %d): ", r->busRouter.deu2Bus);
-        deumodel_report(r->deuModel2);
-        deumodel_free(r->deuModel2);
-        r->deuModel2 = NULL;
+    for (int d = 0; d < r->nDeuModelExtra; d++) {
+        if (r->deuModelExtra[d] == NULL) continue;
+        fprintf(stderr, "deu%d (bus %d): ", d + 2, r->busRouter.deuExtraBus[d]);
+        deumodel_report(r->deuModelExtra[d]);
+        deumodel_free(r->deuModelExtra[d]);
+        r->deuModelExtra[d] = NULL;
     }
     if (r->mtuModel) {
         mtumodel_report(r->mtuModel);

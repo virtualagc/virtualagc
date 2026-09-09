@@ -64,6 +64,7 @@ struct DeuModel {
 
     /* Counters, named as the real unit's harness names them. */
     long commands, fills, timeFills, displayFills, formatFills, headerless, polls, bite, dumps;
+    long medsXfers;
     long resets, unknown, abandoned, modeStatus;
     long wordsIn, wordsOut;
 };
@@ -385,6 +386,32 @@ static void deu_complete_fill(DeuModel *d) {
         return;
     }
 
+    /* A MEDS TRANSFER is not a headered fill either.  FUNC_MEDS_XFER
+     * (0x398) carries a fixed MEDS_XFER_WORDS-word payload with no leading
+     * length/address pair, so the fill rule below rejected every one of them
+     * -- thousands per run, logged as "unheadered ... ignored" -- exactly the
+     * way TIME FILLs were rejected before they were special-cased above.
+     *
+     * Discarding them is not cosmetic.  The DK handler (PCT 83a8, PDE
+     * #EDDKHCT) issues these as OPCD 000a, WDCD 0064 to each display unit and
+     * REISSUES when nothing comes of them, so the dropped data turns into a
+     * retry storm: an OPS transition was measured with 21 of them outstanding
+     * at once (18 waiting, 3 active) against an IOQE free pool of 25
+     * (FIOCBLKS.asm GENERATE ... NIOQE=25 -- 25 in the original G9 dump too).
+     * The 26th request then pops the free list's deliberate sentinel, a
+     * pointer to the PROTECTED SVC table (GENERATE.asm:335), and the
+     * resulting store-protect check -- FCOS's queue-overflow detector working
+     * as designed -- lands inside the Clock 2 handler and stops FPMIHPC2
+     * before CALL FPMITUPD, the only code that re-arms Clock 2.  After that
+     * no TQE ever expires, no mass-memory I/O completes, and the overlay
+     * never advances to the phase it was going to request next. */
+    if (d->xferFunc == FUNC_MEDS_XFER) {
+        d->medsXfers++;
+        d->xferActive = false;
+        d->xferCount = 0;
+        return;
+    }
+
     if (n < 2 || (size_t)w[0] + 2 != n) {
         d->headerless++;
         /* The words too, not just the count.  "Unheadered" only says the
@@ -625,11 +652,11 @@ void deumodel_report(const DeuModel *d) {
         }
     }
     fprintf(stderr,
-            "deu: {\"commands\":%ld,\"fills\":%ld,\"timeFills\":%ld,\"displayFills\":%ld,\"formatFills\":%ld,\"headerless\":%ld,"
+            "deu: {\"commands\":%ld,\"fills\":%ld,\"timeFills\":%ld,\"displayFills\":%ld,\"formatFills\":%ld,\"medsXfers\":%ld,\"headerless\":%ld,"
             "\"polls\":%ld,\"bite\":%ld,\"dumps\":%ld,\"resets\":%ld,\"unknown\":%ld,"
             "\"wordsIn\":%ld,\"wordsOut\":%ld,\"abandoned\":%ld,\"modeStatus\":%ld,"
             "\"ipled\":%s}\n",
-            d->commands, d->fills, d->timeFills, d->displayFills, d->formatFills, d->headerless, d->polls, d->bite,
+            d->commands, d->fills, d->timeFills, d->displayFills, d->formatFills, d->medsXfers, d->headerless, d->polls, d->bite,
             d->dumps, d->resets, d->unknown, d->wordsIn, d->wordsOut, d->abandoned,
             d->modeStatus, d->ipled ? "true" : "false");
 }

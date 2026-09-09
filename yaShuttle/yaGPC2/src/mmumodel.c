@@ -605,10 +605,11 @@ void mmumodel_set_clock(MmuModel *m, const double *clockUs) {
  * person, and --time-scale must not change how often a level is refreshed. */
 #define READY_REPUBLISH_SEC 0.25
 
-/* YAGPC_MMU_TIMED_READY: raise READY when the transfer has gone past on the
- * wire, rather than when the host has consumed it.
+/* Raise READY when the transfer has gone past on the wire, rather than when
+ * the host has consumed it.  YAGPC_MMU_QUEUE_READY restores the older
+ * consumed-the-queue rule, for comparing against it.
  *
- * WHY THIS EXISTS, AND WHY IT IS NOT THE DEFAULT.  READY here is a PROXY --
+ * WHY THIS EXISTS, AND WHY IT IS NOW THE DEFAULT.  READY here is a PROXY --
  * HANDOFF-FCMBOOT.md says so plainly: on real hardware it is a line driven by
  * the mass memory, while here it tracks whether our own bus controller is
  * still running.  That caveat predicted the proxy failing by raising READY
@@ -627,13 +628,18 @@ void mmumodel_set_clock(MmuModel *m, const double *clockUs) {
  * "treating the symptom" when the transfer was made to go over the bus and be
  * paced to real time.  This is not that timer: it uses the pacing already
  * here, asking whether the LAST QUEUED WORD's slot time has passed, so it
- * cannot rise before the wire would have carried the data.  It is still an
- * approximation of the same signal, which is why it is opt-in.  Proper
- * fidelity needs the MMU to report its own state -- MMU-side work and a
- * protocol change, per the same caveat. */
+ * cannot rise before the wire would have carried the data.
+ *
+ * It was opt-in while it was one candidate explanation among several.  It is
+ * the default now because the alternative is not neutral: the consumed-the-
+ * queue rule DEADLOCKS, as above, and a deadlock is not a more conservative
+ * approximation than a timing estimate that is bounded below by the wire.
+ * Both are approximations of a signal the MMU ought to report itself; proper
+ * fidelity still needs MMU-side work and a protocol change, per the same
+ * caveat.  YAGPC_MMU_TIMED_READY is still accepted, and is now a no-op. */
 static bool timed_ready_enabled(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = getenv("YAGPC_MMU_TIMED_READY") != NULL; }
+    if (!inited) { inited = 1; on = getenv("YAGPC_MMU_QUEUE_READY") == NULL; }
     return on != 0;
 }
 

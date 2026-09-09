@@ -360,9 +360,76 @@ static void ap101_trig_trace(AP101 *gpc) {
     fprintf(f, "\n");
 }
 
+/* YAGPC_PCCOUNT=<hexaddr>[,<hexaddr>...] counts how many times each of those
+ * halfword addresses is about to execute, with the simulated time of the first
+ * and last visit, and prints the table when the run ends.
+ *
+ * This exists because the questions that matter about a stalled overlay are
+ * counting questions -- was FCMMGPOV entered twice or three times, was
+ * FIOMGCMP entered at all -- and the only tools for them were a window trace
+ * (60 MB for five seconds, and it has to be aimed at a time that moves between
+ * runs) and YAGPC_SVCTRACE (which printed so much it dropped the emulator to a
+ * third of real time and the run was killed before it reached the event).  A
+ * sorted array of at most 32 addresses costs a binary search per instruction
+ * and answers those questions in an otherwise ordinary run. */
+#define PCCOUNT_MAX 32
+typedef struct { uint32_t addr; long hits; double first, last; } PcCount;
+static PcCount g_pcCount[PCCOUNT_MAX];
+static int g_nPcCount = -1;
+
+void ap101_pccount_report(void) {
+    if (g_nPcCount <= 0) return;
+    fprintf(stderr, "PCCOUNT:\n");
+    for (int i = 0; i < g_nPcCount; i++)
+        fprintf(stderr, "  %05x  hits=%-9ld first=%-10.3f last=%.3f\n",
+                (unsigned)g_pcCount[i].addr, g_pcCount[i].hits,
+                g_pcCount[i].first, g_pcCount[i].last);
+}
+
+static void ap101_pc_count(AP101 *gpc) {
+    if (g_nPcCount < 0) {
+        g_nPcCount = 0;
+        const char *e = getenv("YAGPC_PCCOUNT");
+        for (const char *p = e; p != NULL && *p && g_nPcCount < PCCOUNT_MAX; ) {
+            char *end = NULL;
+            unsigned long a = strtoul(p, &end, 16);
+            if (end == p) break;
+            g_pcCount[g_nPcCount].addr = (uint32_t)a;
+            g_pcCount[g_nPcCount].hits = 0;
+            g_nPcCount++;
+            p = (*end == ',') ? end + 1 : end;
+        }
+        /* Sorted so the per-instruction test is a binary search.  Insertion
+         * sort: the list is at most 32 entries and is built once. */
+        for (int i = 1; i < g_nPcCount; i++) {
+            for (int j = i; j > 0 && g_pcCount[j - 1].addr > g_pcCount[j].addr; j--) {
+                PcCount t = g_pcCount[j];
+                g_pcCount[j] = g_pcCount[j - 1];
+                g_pcCount[j - 1] = t;
+            }
+        }
+        if (g_nPcCount > 0) atexit(ap101_pccount_report);
+    }
+    if (g_nPcCount == 0) return;
+    uint32_t nia = (uint32_t)psw_get_nia(&gpc->cpu.psw);
+    int lo = 0, hi = g_nPcCount - 1;
+    while (lo <= hi) {
+        int mid = (lo + hi) / 2;
+        if (g_pcCount[mid].addr == nia) {
+            double t = gpc->cpu.elapsedTimeUs / 1e6;
+            if (g_pcCount[mid].hits == 0) g_pcCount[mid].first = t;
+            g_pcCount[mid].last = t;
+            g_pcCount[mid].hits++;
+            return;
+        }
+        if (g_pcCount[mid].addr < nia) lo = mid + 1; else hi = mid - 1;
+    }
+}
+
 void ap101_exec1(AP101 *gpc) {
     ap101_timed_unprotect(gpc);
     ap101_timed_snapshot(gpc);
+    ap101_pc_count(gpc);
     ap101_timed_trace(gpc);
     ap101_trig_trace(gpc);
     ap101_timed_patch(gpc);

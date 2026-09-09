@@ -195,7 +195,25 @@ uint32_t iop_discrete_in_a(const IOP *iop) {
     uint32_t v = stored & ~(DISCRETE_A_MM1_READY | DISCRETE_A_MM2_READY);
     v |= iop_mm_ready(iop, stored, DISCRETE_A_MM1_READY, MM1_BCE);
     v |= iop_mm_ready(iop, stored, DISCRETE_A_MM2_READY, MM2_BCE);
-    return iop_discrete_overlay(DISCRETES_REG_A, v);
+    uint32_t out = iop_discrete_overlay(DISCRETES_REG_A, v);
+    /* YAGPC_DISCTRACE: report every change of discrete input A as the flight
+     * software actually reads it -- stored, computed, and after the crew
+     * panel's overlay -- so "the MMU published READY but CZ2BDIA never got
+     * it" can be attributed to a stage instead of guessed at. */
+    if (getenv("YAGPC_DISCTRACE")) {
+        static uint32_t last = 0xffffffffu;
+        if (out != last) {
+            fprintf(stderr, "DISCA stored=%08x computed=%08x out=%08x "
+                            "(MM1RDY stored=%d computed=%d out=%d) t=%.2f\n",
+                    (unsigned)stored, (unsigned)v, (unsigned)out,
+                    !!(stored & DISCRETE_A_MM1_READY),
+                    !!(v & DISCRETE_A_MM1_READY),
+                    !!(out & DISCRETE_A_MM1_READY),
+                    (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs / 1e6 : 0.0);
+            last = out;
+        }
+    }
+    return out;
 }
 
 uint32_t iop_discrete_in_b(const IOP *iop) {
@@ -1686,6 +1704,22 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             break;
         case 0x10040000: /* READ STATUS4(BUSY/WAIT) */
             register_set32(&iop->regCCData, register_get32(&iop->regBusyWait));
+            /* FCMCSYNC ORs STAT4 & FIOMMASK (X'00003000', processors 18 and
+             * 19) into the DIA word it leaves in the ICC buffer, and
+             * FCMDSCRM then uses those two bits to MASK OFF the MM READY
+             * discretes: a BCE that reads busy takes its unit's READY away.
+             * So the busy bits are as much a part of "did READY reach
+             * CZ2BDIA" as READY itself, and are traced beside it. */
+            if (getenv("YAGPC_DISCTRACE")) {
+                static uint32_t lastbw = 0xffffffffu;
+                uint32_t bw = register_get32(&iop->regBusyWait);
+                if ((bw & 0x00003000u) != (lastbw & 0x00003000u)) {
+                    fprintf(stderr, "STAT4 busy=%08x mm=%04x t=%.2f\n",
+                            (unsigned)bw, (unsigned)(bw & 0x00003000u),
+                            (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs / 1e6 : 0.0);
+                    lastbw = bw;
+                }
+            }
             break;
         default:
             break;

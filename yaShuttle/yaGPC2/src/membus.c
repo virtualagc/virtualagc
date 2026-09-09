@@ -34,6 +34,47 @@ void membus_load16(MemoryBus *b, uint32_t base, const uint8_t *bytes, size_t byt
     }
 }
 
+/* PSA locations the POO (AP-101S-instruction-set.txt 2.5.2, "Preferred
+ * Storage Area (PSA) Assignments") says "must not be store protected":
+ *
+ *   1. Power off interrupt PSW          2. All old PSW locations
+ *   3. BCE 25 processor storage 00A4-00A5
+ *   4. Counter 1 and 2 high halfwords 00B0 and 00B1
+ *   5. Putaway locations 00C0-0102      6. Diagnostics 0104-013F
+ *
+ * That is a property of the MACHINE, not of whoever last loaded memory, so
+ * it belongs here rather than in one loader's setup: the hardware itself
+ * writes these constantly -- every interrupt saves the old PSW, every
+ * Clock 1/2 underflow reloads from the counter halfwords -- and no program
+ * has to unprotect them first.
+ *
+ * It used to be applied only by the AGE harness's ipl_fill(), i.e. only on
+ * the --ipl path.  A tape boot got none of it, because there the real
+ * loader runs and applies each load block's own protect flag over the top
+ * of the PSA.  The cost was not subtle: FIOSVC1's store to 00007 (the
+ * power-off PSW area) and stores to 00B0/00B1 were refused, and a store
+ * protect taken inside the Clock 2 handler stopped FPMIHPC2 before its
+ * CALL FPMITUPD -- the only code that re-arms Clock 2.  With no 40 ms
+ * tick no TQE can expire, so the mass-memory monitor never runs again, an
+ * overlay read is never completed, and an OPS transition hangs after the
+ * phase it was loading.  See HANDOFF-OPS9.md. */
+static bool psa_must_not_protect(uint32_t hw) {
+    if (hw <= 0x0007) return true;            /* power off interrupt PSW */
+    if (hw >= 0x00a4 && hw <= 0x00a5) return true;   /* BCE 25 storage */
+    if (hw >= 0x00b0 && hw <= 0x00b1) return true;   /* counter 1/2 high */
+    if (hw >= 0x00c0 && hw <= 0x0102) return true;   /* putaway */
+    if (hw >= 0x0104 && hw <= 0x013f) return true;   /* diagnostics */
+    /* Old PSW locations.  Each interrupt class has an old/new pair four
+     * halfwords apart -- the trace prints them as old=0048 new=004c -- and
+     * it is the OLD half the hardware stores into. */
+    static const uint32_t oldPsw[] = {0x0040, 0x0048, 0x0058, 0x0060, 0x0068,
+                                      0x0070, 0x0078, 0x0080, 0x0088, 0x0090,
+                                      0x0098};
+    for (size_t i = 0; i < sizeof oldPsw / sizeof oldPsw[0]; i++)
+        if (hw >= oldPsw[i] && hw < oldPsw[i] + 4) return true;
+    return false;
+}
+
 void membus_set_store_protect(MemoryBus *b, uint32_t addr, bool v) {
     /* YAGPC_PROTSET=lo[-hi] reports every change to a protect bit in that
      * window.  A region that is protected when the flight software expects
@@ -57,6 +98,7 @@ void membus_set_store_protect(MemoryBus *b, uint32_t addr, bool v) {
                     (char *)__builtin_return_address(0)
                         - (char *)(void *)&membus_get_store_protect);
     }
+    if (v && psa_must_not_protect(addr & b->addrMask)) v = false;
     mcm_set_store_protect(b->mcm, addr & b->addrMask, v);
 }
 

@@ -31,14 +31,21 @@
  * batchrunner_pace_signal(). */
 typedef enum { PACING_BURST, PACING_SIGNAL } PacingMode;
 
+#define DEU_EXTRA_MAX 3   /* built-in DK1 + 3 = the four DEUs PASS drives */
+
 /* Routes one bus to the in-process mass memory and the rest to whatever
  * servicer would otherwise have been installed; see run.c. */
 typedef struct {
     struct MmuModel *mmu;
     int mmuBus;
     struct MtuModel *mtu;   /* buses 20-22, device 22; see mtumodel.h */
-    struct DeuModel *deu2;  /* --deu-bus: a SECOND display unit */
-    int deu2Bus;
+    /* --deu-bus: display units BEYOND the built-in one on DK1.  PASS drives
+     * FOUR (DCICYC.asm: DCIS#DEU EQU 4; device IDs 5-8 per FIOERRLC.asm's
+     * FIODEULW/FIODEUHI), so modelling one or two leaves the DK handler with
+     * requests to units that never answer. */
+    struct DeuModel *deuExtra[DEU_EXTRA_MAX];
+    int deuExtraBus[DEU_EXTRA_MAX];
+    int nDeuExtra;
     GpcServicerFn fallback;
     void *fallbackCtx;
 } BusRouter;
@@ -129,7 +136,8 @@ typedef struct {
      * while everything else still reaches whatever else is installed. */
     struct MmuModel *mmuModel;
     struct MtuModel *mtuModel;  /* --mtu-model: the in-process timing unit */
-    struct DeuModel *deuModel2; /* --deu-bus: a second display unit */
+    struct DeuModel *deuModelExtra[DEU_EXTRA_MAX]; /* --deu-bus list */
+    int nDeuModelExtra;
     BusRouter busRouter;   /* --deu-model: the in-process display unit */
 } BatchRunner;
 
