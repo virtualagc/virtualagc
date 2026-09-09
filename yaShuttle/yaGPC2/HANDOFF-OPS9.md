@@ -451,6 +451,23 @@ like `GPC MEMORY` and `GNC SYS SUMM 1` appearing in the DEU image dump are
 **loaded formats from `DEUCFLM`**, not evidence of a live display — do not
 read them as one.
 
+### Set `SNAPSHOT` on any run meant to test the transition
+
+The logs say which phases were read and nothing about why one was not.  If
+`OPS 9 PRO` fires and no phase 8 or phase 18 read follows, the question is
+what `FCMMGBOV` found in `#PFCMGPT` at `0x1CCF2` and what the PCT held — and
+without a memory image there is nothing to look at, so the run has to be done
+again from the start at 45 minutes a time.
+
+```bash
+SNAPSHOT="t1,t2:prefix"     # harness variable, NOT YAGPC_SNAPSHOT --
+                            # the harness overrides the latter
+```
+
+Pick one capture shortly after the IPL set completes and one after the
+transition window, and check the in-core phase table in the second against
+what §5 stamped.
+
 ---
 
 ## What this tape has that its predecessors did not
