@@ -1,0 +1,1025 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Visual simulation of Space Shuttle overhead panel O6 (paddle switches).
+
+The GENERAL PURPOSE COMPUTER hardware controls live on panel O6, overhead
+of the commander's seat.  This program draws that GPC half of the panel
+(the MDM power switches on the left of the physical panel are not yet
+included) and lets the controls be operated with the mouse.
+
+Control changes are printed to stdout.  Discrete signalling to yaGPC2 is
+intentionally not wired yet.
+
+The figure this layout follows is "GENERAL PURPOSE COMPUTER Hardware
+Controls" in the Shuttle Crew Operations Manual (SCOM, USA007587 Rev A,
+printed page 2.6-4).  Two rows of that figure are easy to misread:
+
+  * The second row is not a set of slide switches.  Those hatched windows
+    are the OUTPUT talkbacks: gray if that GPC may transmit on the
+    flight-critical buses, barberpole if it may not.  They are driven by
+    GPC output discretes, not by a crew switch of their own.  Until a GPC
+    is attached they are approximated from POWER, OUTPUT and MODE.
+  * The fifth row is the MODE talkback (RUN, IPL, or barberpole), not a
+    control.  It shows RUN while the MODE switch is in RUN, and IPL while
+    the IPL pushbutton is held.
+
+The OUTPUT switch itself is the third-row three-position toggle
+(BACKUP / NORMAL / TERMINATE).  The MODE switch is the bottom-row
+three-position toggle (RUN / STBY / HALT), lever-locked in RUN on the
+real hardware; this simulation does not require pulling a lock.
+
+To the right of O6 are the BFC CRT block from panel C3 (DISPLAY ON/OFF
+and SELECT 1+2 / 2+3 / 3+1) and the BFC DISENGAGE block from panel F6
+(a horizontal two-position toggle; RIGHT disengages the BFS).  Those
+follow the highlighted insets on SCOM printed page 2.6-25.
+
+This is the paddle-switch variant of panelO6.py: same layout and
+behaviour, but the two- and three-position switches are drawn as
+bat-handle paddle toggles rather than sliding capsules.
+
+Usage:
+    python3 panelO6-paddle.py
+    python3 panelO6-paddle.py --size 512
+    python3 panelO6-paddle.py --geometry 948x1250+80+20
+"""
+
+import argparse
+import os
+import subprocess
+import tkinter as tk
+import tkinter.font as tkfont
+
+GPCS = ("GPC1", "GPC2", "GPC3", "GPC4", "GPC5")
+N_GPC = 5
+
+POWER_POS = ("ON", "OFF")          # up, down
+OUTPUT_POS = ("BACKUP", "NORMAL", "TERMINATE")   # up, mid, down
+MODE_POS = ("RUN", "STBY", "HALT")               # up, mid, down
+IPL_SOURCE_POS = ("MMU 1", "OFF", "MMU 2")       # up, mid, down
+BFC_DISPLAY_POS = ("ON", "OFF")                 # up, down
+BFC_SELECT_POS = ("1+2", "2+3", "3+1")          # up, mid, down
+BFC_DISENGAGE_POS = ("LEFT", "RIGHT")           # left, right; unlabeled
+
+# Typical pre-flight: GPC 5 is the BFS computer, OUTPUT in BACKUP.
+DEFAULT_POWER = ["ON"] * N_GPC
+DEFAULT_OUTPUT = ["NORMAL", "NORMAL", "NORMAL", "NORMAL", "BACKUP"]
+DEFAULT_MODE = ["HALT"] * N_GPC
+DEFAULT_IPL_SOURCE = "OFF"
+DEFAULT_BFC_DISPLAY = "OFF"
+DEFAULT_BFC_SELECT = "1+2"
+DEFAULT_BFC_DISENGAGE = "LEFT"     # RIGHT disengages the BFS
+
+# Aircraft-panel greys.  Overhead panels are light gull gray with black
+# engraved legends, not the dark of a CRT bezel.
+C_WINDOW = "#2a2a2a"
+C_PANEL = "#c6c3b6"
+C_PANEL_HI = "#dddaca"
+C_PANEL_LO = "#8e8b7e"
+C_INK = "#1b1b1b"
+C_INK_DIM = "#3a3a3a"
+C_GUARD = "#d9d6c9"
+C_GUARD_LO = "#6a675c"
+C_SLOT = "#242422"
+C_PADDLE = "#eceadf"
+C_PADDLE_LO = "#8a877c"
+C_PADDLE_GROOVE = "#4a4a46"
+C_BEZEL = "#4a4840"
+C_TB_GRAY = "#a3a39c"
+C_TB_LEGEND = "#f2f0e6"
+C_BTN = "#d5d2c6"
+C_BTN_DOWN = "#8f8c80"
+
+# Window margin on every side equals the original top inset.
+MARGIN = 28
+PANE_GAP = 16          # air between O6 and the C3/F6 stack
+C3_W = 236
+O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
+REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + MARGIN   # 948
+REF_H = 1250
+FULL_SIZE = 1024       # --size units: 1024 is the design (full) window
+
+# Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
+# MMU 1/2).  Side captions and above/below captions share this size.
+SETTING_SIZE = 8
+
+
+def log(msg):
+    print("panelO6: %s" % msg, flush=True)
+
+
+def _active_window():
+    try:
+        out = subprocess.run(
+            ["xprop", "-root", "_NET_ACTIVE_WINDOW"],
+            capture_output=True, text=True, timeout=5,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    import re
+    m = re.search(r"(0x[0-9a-fA-F]+)", out)
+    return m.group(1) if m and int(m.group(1), 16) else None
+
+
+def _dont_steal_focus(root):
+    """Map without taking the keyboard.  Best-effort; see discretePanel.py."""
+
+    def refuse(w):
+        try:
+            w.configure(takefocus=0)
+        except tk.TclError:
+            pass
+        for child in w.winfo_children():
+            refuse(child)
+
+    refuse(root)
+    root.bind("<Key>", lambda _e: "break")
+    previous = _active_window()
+    root.withdraw()
+    root.update_idletasks()
+    try:
+        subprocess.run(
+            ["xprop", "-id", str(root.winfo_id()),
+             "-f", "_NET_WM_USER_TIME", "32c",
+             "-set", "_NET_WM_USER_TIME", "0"],
+            check=False, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL, timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        pass
+    root.deiconify()
+
+    def give_it_back():
+        if not previous:
+            return
+        try:
+            subprocess.run(
+                ["wmctrl", "-i", "-a", previous],
+                check=False, stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL, timeout=5,
+            )
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+    root.after(400, give_it_back)
+
+
+def scaled_wh(w, h, size):
+    """Pixel size at --size N, where FULL_SIZE (1024) is the design window."""
+    f = size / float(FULL_SIZE)
+    return max(1, int(round(w * f))), max(1, int(round(h * f)))
+
+
+class PanelO6:
+    def __init__(self, root, size=FULL_SIZE):
+        self.root = root
+        root.title("Panels O6, C3, F6  —  GPC / BFC  (paddle)")
+        root.configure(bg=C_WINDOW)
+        mw, mh = scaled_wh(640, 700, size)
+        root.minsize(mw, mh)
+
+        self.power = list(DEFAULT_POWER)
+        self.output = list(DEFAULT_OUTPUT)
+        self.ipl = [False] * N_GPC
+        self.mode = list(DEFAULT_MODE)
+        self.ipl_source = DEFAULT_IPL_SOURCE
+        self.bfc_display = DEFAULT_BFC_DISPLAY
+        self.bfc_select = DEFAULT_BFC_SELECT
+        self.bfc_disengage = DEFAULT_BFC_DISENGAGE
+        self._held_ipl = None
+
+        cw, ch = scaled_wh(REF_W, REF_H, size)
+        self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
+                            width=cw, height=ch)
+        self.cv.pack(fill="both", expand=True)
+
+        self._hits = []          # (kind, index, x1, y1, x2, y2)
+        self._bp_cache = {}
+        self._font_cache = {}
+        self._wh = (0, 0)
+        self._cursor_hits = False
+
+        self.cv.bind("<ButtonPress-1>", self._on_press)
+        self.cv.bind("<ButtonRelease-1>", self._on_release)
+        self.cv.bind("<Motion>", self._on_motion)
+        self.cv.bind("<Configure>", self._on_configure)
+        self.cv.bind("<Leave>", lambda _e: self.cv.configure(cursor=""))
+
+        self._dump_state("startup")
+
+    # ---- derived talkbacks (local stand-in until yaGPC2 drives them) ----
+
+    def output_tb(self, i):
+        if (self.power[i] == "ON"
+                and self.output[i] == "NORMAL"
+                and self.mode[i] == "RUN"):
+            return "GRAY"
+        return "BP"
+
+    def mode_tb(self, i):
+        if self.ipl[i]:
+            return "IPL"
+        if self.mode[i] == "RUN":
+            return "RUN"
+        return "BP"
+
+    def _dump_state(self, why):
+        log(why)
+        for i, name in enumerate(GPCS):
+            log("  %s  POWER=%-3s  OUTPUT=%-9s  MODE=%-4s  IPL=%s  "
+                "OUT-tb=%s  MODE-tb=%s"
+                % (name, self.power[i], self.output[i], self.mode[i],
+                   "ON" if self.ipl[i] else "OFF",
+                   self.output_tb(i), self.mode_tb(i)))
+        log("  IPL SOURCE=%s" % self.ipl_source)
+        log("  BFC CRT DISPLAY=%s  SELECT=%s" %
+            (self.bfc_display, self.bfc_select))
+        log("  BFC DISENGAGE=%s" % self.bfc_disengage)
+
+    def _announce(self, what, old, new):
+        if old == new:
+            return
+        log("%s  %s -> %s" % (what, old, new))
+
+    # ---- geometry -------------------------------------------------------
+
+    def _tkfont(self, size, bold=True):
+        # Tk: positive size is points.  Used only for metrics; _font() is
+        # what create_text gets, and must stay in the same units.
+        pts = max(1, int(round(size * self.s)))
+        key = (pts, bold)
+        font = self._font_cache.get(key)
+        if font is None:
+            font = tkfont.Font(family="Helvetica", size=pts,
+                               weight="bold" if bold else "normal")
+            self._font_cache[key] = font
+        return font
+
+    def _font(self, size, bold=True):
+        pts = max(1, int(round(size * self.s)))
+        return ("Helvetica", pts, "bold" if bold else "normal")
+
+    def _th(self, size):
+        """Half-height of a centre-anchored caption, in reference coords.
+
+        Layout y values are the centres of the glyphs.  Neighbouring
+        objects have to clear this plus PAD, or the ink collides.
+        """
+        ls = float(self._tkfont(size).metrics("linespace"))
+        return 0.5 * ls / max(self.s, 0.01)
+
+    def _on_configure(self, event):
+        if event.widget is not self.cv:
+            return
+        if (event.width, event.height) == self._wh:
+            return
+        if event.width < 40 or event.height < 40:
+            return
+        self._wh = (event.width, event.height)
+        self.redraw()
+
+    def _scale(self):
+        cw = max(self.cv.winfo_width(), 40)
+        ch = max(self.cv.winfo_height(), 40)
+        self.s = min(cw / float(REF_W), ch / float(REF_H))
+        self.ox = (cw - REF_W * self.s) / 2.0
+        self.oy = (ch - REF_H * self.s) / 2.0
+
+    def X(self, x):
+        return self.ox + x * self.s
+
+    def Y(self, y):
+        return self.oy + y * self.s
+
+    def xy(self, x, y):
+        return (self.X(x), self.Y(y))
+
+    # ---- primitives -----------------------------------------------------
+
+    def _line(self, x1, y1, x2, y2, **kw):
+        self.cv.create_line(self.X(x1), self.Y(y1), self.X(x2), self.Y(y2),
+                            **kw)
+
+    def _text(self, x, y, text, size=11, fill=C_INK, bold=True, anchor="c"):
+        self.cv.create_text(self.X(x), self.Y(y), text=text, fill=fill,
+                            font=self._font(size, bold), anchor=anchor)
+
+    def _vtext(self, x, y, text, size=SETTING_SIZE, fill=C_INK):
+        """Stacked caption.  Ascent plus a 2 px gutter — about 20% of the
+        previous extra leading, so the letters stay separate without a
+        large hole between them."""
+        font = self._font(size)
+        ascent = int(self._tkfont(size).metrics("ascent"))
+        fh = ascent + 2
+        chars = [ch for ch in text if not ch.isspace()]
+        n = len(chars) or 1
+        total = n * fh
+        y0 = self.Y(y) - total / 2.0 + fh / 2.0
+        cx = self.X(x)
+        for i, ch in enumerate(chars):
+            self.cv.create_text(cx, y0 + i * fh, text=ch, fill=fill,
+                                font=font, anchor="c")
+
+    def _rect(self, x1, y1, x2, y2, **kw):
+        return self.cv.create_rectangle(
+            self.X(x1), self.Y(y1), self.X(x2), self.Y(y2), **kw)
+
+    def _rect_panel(self, x0, y0, x1, y1):
+        """A rectangular crew-panel body, same surface as O6."""
+        ow = max(2, int(2 * self.s))
+        self._poly([(x0 + 5, y0 + 6), (x1 + 5, y0 + 6),
+                    (x1 + 5, y1 + 6), (x0 + 5, y1 + 6)],
+                   fill="#1a1a1a", outline="", width=0)
+        self._rect(x0, y0, x1, y1, fill=C_PANEL, outline=C_INK, width=ow)
+        self._line(x0, y0, x1, y0, fill=C_PANEL_HI, width=ow)
+        self._line(x0, y0, x0, y1, fill=C_PANEL_HI, width=ow)
+        self._line(x0, y1, x1, y1, fill=C_PANEL_LO, width=ow)
+        self._line(x1, y0, x1, y1, fill=C_PANEL_LO, width=ow)
+
+    def _poly(self, pts, **kw):
+        flat = []
+        for x, y in pts:
+            flat.extend(self.xy(x, y))
+        return self.cv.create_polygon(flat, **kw)
+
+    def _oval(self, x1, y1, x2, y2, **kw):
+        return self.cv.create_oval(
+            self.X(x1), self.Y(y1), self.X(x2), self.Y(y2), **kw)
+
+    def _barberpole(self, x1, y1, x2, y2):
+        px1, py1 = self.xy(x1, y1)
+        px2, py2 = self.xy(x2, y2)
+        w = max(2, int(abs(px2 - px1)))
+        h = max(2, int(abs(py2 - py1)))
+        key = (w, h)
+        img = self._bp_cache.get(key)
+        if img is None:
+            img = tk.PhotoImage(width=w, height=h)
+            pitch = max(4, w // 5)
+            c1, c2 = "#f4f4f0", "#1a1a1a"
+            for y in range(h):
+                row = []
+                for x in range(w):
+                    row.append(c1 if ((x + y) // pitch) % 2 == 0 else c2)
+                img.put("{" + " ".join(row) + "}", to=(0, y))
+            self._bp_cache[key] = img
+        self.cv.create_image(min(px1, px2), min(py1, py2),
+                             image=img, anchor="nw")
+
+    def _hit(self, kind, index, x1, y1, x2, y2):
+        self._hits.append((kind, index,
+                           self.X(x1), self.Y(y1),
+                           self.X(x2), self.Y(y2)))
+
+    # ---- the panel ------------------------------------------------------
+
+    def _layout(self):
+        """Vertical rhythm from glyph bounds, not from centre-to-centre
+        steps.  PAD is empty air above and below every caption; without
+        it the linespace is the whole gap and the letters sit on the
+        controls (the OUTPUT 1..5 row was the worst case)."""
+        pad = 10
+        bezel = 4          # talkback/button outline outside the content box
+        th13 = self._th(13)
+        th12 = self._th(12)
+        th11 = self._th(11)
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        L = {}
+        y = 28 + pad
+
+        y += th13
+        L["title"] = y
+        y += th13 + pad
+        L["title_line"] = y
+        y += pad
+
+        y += th10
+        L["power_title"] = y
+        y += th10 + pad
+        y += th12
+        L["power_nums"] = y
+        y += th12 + pad
+        y += ths
+        L["power_on"] = y
+        y += ths + pad
+        L["power_sw"] = y
+        y += 124 + pad
+        y += ths
+        L["power_off"] = y
+        y += ths + pad
+
+        y += pad
+        L["out_line"] = y
+        y += pad
+        y += th10
+        L["out_title"] = y
+        y += th10 + pad
+        L["out_tb"] = y
+        y += 34 + bezel + pad
+        y += th11
+        L["out_nums"] = y
+        y += th11 + pad
+        y += ths
+        L["out_backup"] = y
+        y += ths + pad
+        L["out_sw"] = y
+        y += 136 + pad
+        y += ths
+        L["out_term"] = y
+        y += ths + pad
+
+        y += pad
+        L["ipl_line"] = y
+        y += pad
+        y += th10
+        L["ipl_title"] = y
+        y += th10 + pad
+        L["ipl_btn"] = y
+        y += 50 + bezel + pad
+
+        L["mode_tb"] = y
+        y += 34 + bezel + pad
+        y += pad
+        L["mode_line"] = y
+        y += pad
+        y += th10
+        L["mode_title"] = y
+        y += th10 + pad
+        y += th12
+        L["mode_nums"] = y
+        y += th12 + pad
+        y += ths
+        L["mode_run"] = y
+        y += ths + pad
+        L["mode_sw"] = y
+        y += 136 + pad
+        y += ths
+        L["mode_halt"] = y
+        return L
+
+    def redraw(self):
+        self._scale()
+        self.cv.delete("all")
+        self._hits = []
+        self._bp_cache = {}
+        L = self._layout()
+        self.L = L
+
+        # --- L-shaped outline, matching the SCOM figure ---
+        # Main rectangle, plus a right-hand tab holding IPL SOURCE.
+        mx0, my0 = MARGIN, MARGIN
+        mx1 = O6_MAIN_RIGHT
+        my1 = L["mode_halt"] + 24
+        ex1 = 790
+        ey0 = L["out_backup"] - 10
+        ey1 = L["mode_line"] + 4
+
+        outline = [
+            (mx0, my0), (mx1, my0), (mx1, ey0), (ex1, ey0),
+            (ex1, ey1), (mx1, ey1), (mx1, my1), (mx0, my1),
+        ]
+        # Drop shadow
+        shadow = [(x + 5, y + 6) for x, y in outline]
+        self._poly(shadow, fill="#1a1a1a", outline="", width=0)
+        self._poly(outline, fill=C_PANEL, outline=C_INK, width=max(2, int(2 * self.s)))
+        # Bevel: light on top/left, dark on bottom/right.
+        self._line(mx0, my0, mx1, my0, fill=C_PANEL_HI, width=max(2, int(2 * self.s)))
+        self._line(mx0, my0, mx0, my1, fill=C_PANEL_HI, width=max(2, int(2 * self.s)))
+        self._line(mx0, my1, mx1, my1, fill=C_PANEL_LO, width=max(2, int(2 * self.s)))
+        self._line(mx1, ey1, mx1, my1, fill=C_PANEL_LO, width=max(1, int(self.s)))
+        self._line(ex1, ey0, ex1, ey1, fill=C_PANEL_LO, width=max(2, int(2 * self.s)))
+        self._line(mx1, ey1, ex1, ey1, fill=C_PANEL_LO, width=max(2, int(2 * self.s)))
+
+        # Column centres for GPC 1..5 inside the main rectangle.
+        inner_l, inner_r = 86, 630
+        self.col = [inner_l + (inner_r - inner_l) * (i + 0.5) / N_GPC
+                    for i in range(N_GPC)]
+        self.col_w = (inner_r - inner_l) / N_GPC
+        self.mid = self.col[2]          # GPC3, where setting captions sit
+        # Side captions sit the same distance from the control as on the
+        # right: 14 px past the guard edge, not against the panel rail.
+        self.side_l_out = self.col[0] - 29 - 14
+        self.side_r_out = self.col[-1] + 29 + 14
+
+        self._draw_title()
+        self._draw_power()
+        self._draw_output_talkbacks()
+        self._draw_output_switches()
+        self._draw_ipl()
+        self._draw_mode_talkbacks()
+        self._draw_mode_switches()
+        self._draw_ipl_source(mx1, ex1, ey0, ey1)
+
+        # C3 / F6 sit in the O6 concave cutout, above the IPL SOURCE tab.
+        pad = 10
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        c3_sw_h = 136          # same 3-pos guard as O6 OUTPUT
+        sw_h = 58              # F6 is POWER's 58x124 guard, rotated
+        c3_x0 = mx1 + PANE_GAP
+        c3_x1 = c3_x0 + C3_W
+        c3_y0 = my0
+        # Heights follow _draw_c3 / _draw_f6: centre-anchored titles
+        # consume a full linespace on each side of the glyph.
+        c3_y1 = c3_y0 + 5 * pad + 2 * th10 + 6 * ths + c3_sw_h
+        f6_x0, f6_x1 = c3_x0, c3_x1
+        f6_y0 = c3_y1 + PANE_GAP
+        f6_y1 = f6_y0 + 4 * pad + 4 * th10 + sw_h
+        self._draw_c3(c3_x0, c3_y0, c3_x1, c3_y1)
+        self._draw_f6(f6_x0, f6_y0, f6_x1, f6_y1)
+
+    def _gpc_numbers(self, y):
+        for i, cx in enumerate(self.col):
+            self._text(cx, y, str(i + 1), size=12)
+
+    def _draw_title(self):
+        L = self.L
+        self._text(347, L["title"], "GENERAL PURPOSE COMPUTER", size=13)
+        self._line(70, L["title_line"], 624, L["title_line"],
+                   fill=C_INK, width=max(1, int(self.s)))
+
+    def _draw_power(self):
+        L = self.L
+        self._text(347, L["power_title"], "POWER", size=10)
+        self._gpc_numbers(L["power_nums"])
+        self._text(self.mid, L["power_on"], "ON", size=SETTING_SIZE)
+
+        guard_w, guard_h = 58, 124
+        y1 = L["power_sw"]
+        for i, cx in enumerate(self.col):
+            x1, x2 = cx - guard_w / 2, cx + guard_w / 2
+            y2 = y1 + guard_h
+            pos = 0 if self.power[i] == "ON" else 1
+            self._guarded_toggle(x1, y1, x2, y2, pos, npos=2)
+            self._hit("power", i, x1, y1, x2, y2)
+
+        self._text(self.mid, L["power_off"], "OFF", size=SETTING_SIZE)
+
+    def _draw_output_talkbacks(self):
+        L = self.L
+        self._line(70, L["out_line"], 624, L["out_line"],
+                   fill=C_INK_DIM, width=1)
+        self._text(347, L["out_title"], "OUTPUT", size=10)
+        win_w, win_h = 50, 34
+        y1 = L["out_tb"]
+        for i, cx in enumerate(self.col):
+            x1, x2 = cx - win_w / 2, cx + win_w / 2
+            self._talkback(x1, y1, x2, y1 + win_h, self.output_tb(i))
+            self._text(cx, L["out_nums"], str(i + 1), size=11)
+
+    def _draw_output_switches(self):
+        L = self.L
+        self._text(self.mid, L["out_backup"], "BACKUP", size=SETTING_SIZE)
+        cy = L["out_sw"] + 68
+        self._vtext(self.side_l_out, cy, "NORMAL")
+        self._vtext(self.side_r_out, cy, "NORMAL")
+
+        guard_w, guard_h = 58, 136
+        y1 = L["out_sw"]
+        for i, cx in enumerate(self.col):
+            x1, x2 = cx - guard_w / 2, cx + guard_w / 2
+            y2 = y1 + guard_h
+            pos = OUTPUT_POS.index(self.output[i])
+            self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
+            self._hit("output", i, x1, y1, x2, y2)
+
+        self._text(self.mid, L["out_term"], "TERMINATE", size=SETTING_SIZE)
+
+    def _draw_ipl(self):
+        L = self.L
+        self._line(70, L["ipl_line"], 624, L["ipl_line"],
+                   fill=C_INK_DIM, width=1)
+        self._text(347, L["ipl_title"], "INITIAL PROGRAM LOAD", size=10)
+        btn = 50
+        y1 = L["ipl_btn"]
+        for i, cx in enumerate(self.col):
+            x1, x2 = cx - btn / 2, cx + btn / 2
+            self._pushbutton(x1, y1, x2, y1 + btn, str(i + 1), down=self.ipl[i])
+            self._hit("ipl", i, x1, y1, x2, y1 + btn)
+
+    def _draw_mode_talkbacks(self):
+        L = self.L
+        win_w, win_h = 50, 34
+        y1 = L["mode_tb"]
+        for i, cx in enumerate(self.col):
+            x1, x2 = cx - win_w / 2, cx + win_w / 2
+            self._talkback(x1, y1, x2, y1 + win_h, self.mode_tb(i),
+                           legend_always="RUN")
+
+    def _draw_mode_switches(self):
+        L = self.L
+        self._line(70, L["mode_line"], 624, L["mode_line"],
+                   fill=C_INK_DIM, width=1)
+        self._text(347, L["mode_title"], "MODE", size=10)
+        self._gpc_numbers(L["mode_nums"])
+        self._text(self.mid, L["mode_run"], "RUN", size=SETTING_SIZE)
+
+        guard_w, guard_h = 58, 136
+        y1 = L["mode_sw"]
+        cy = y1 + guard_h / 2.0
+        self._vtext(self.side_l_out, cy, "STBY")
+        self._vtext(self.side_r_out, cy, "STBY")
+        for i, cx in enumerate(self.col):
+            x1, x2 = cx - guard_w / 2, cx + guard_w / 2
+            y2 = y1 + guard_h
+            pos = MODE_POS.index(self.mode[i])
+            self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
+            self._hit("mode", i, x1, y1, x2, y2)
+
+        self._text(self.mid, L["mode_halt"], "HALT", size=SETTING_SIZE)
+
+    def _draw_ipl_source(self, mx1, ex1, ey0, ey1):
+        cx = (mx1 + ex1) / 2.0
+        pad = 10
+        th9 = self._th(9)
+        ths = self._th(SETTING_SIZE)
+        gw, gh = 56, 140
+        # Whole cluster centred in the tab: IPL / SOURCE, then MMU 1,
+        # the switch, MMU 2, with OFF on the right of the switch.
+        block = (th9 + pad + th9 + pad + ths + pad + gh + pad + ths)
+        top = ey0 + max(pad, (ey1 - ey0 - block) / 2.0)
+        y = top + th9
+        self._text(cx, y, "IPL", size=9)
+        y += th9 + pad + th9
+        self._text(cx, y, "SOURCE", size=9)
+        y += th9 + pad + ths
+        self._text(cx, y, "MMU 1", size=SETTING_SIZE)
+        y1 = y + ths + pad
+        x1, x2 = cx - gw / 2, cx + gw / 2
+        y2 = y1 + gh
+        pos = IPL_SOURCE_POS.index(self.ipl_source)
+        self._guarded_toggle(x1, y1, x2, y2, pos, npos=3)
+        self._hit("ipl_source", None, x1, y1, x2, y2)
+        self._text(cx, y2 + pad + ths, "MMU 2", size=SETTING_SIZE)
+        self._vtext(x2 + 14, (y1 + y2) / 2.0, "OFF")
+
+    def _draw_c3(self, x0, y0, x1, y1):
+        """BFC CRT DISPLAY and SELECT, the highlighted inset on panel C3."""
+        self._rect_panel(x0, y0, x1, y1)
+        pad = 10
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        gw, gh = 58, 136
+        cx = (x0 + x1) / 2.0
+        y = y0 + pad + th10
+        self._text(cx, y, "BFC CRT", size=10)
+
+        disp_cx = x0 + 28 + gw / 2
+        sel_cx = disp_cx + gw + 50
+        y = y + th10 + pad + ths
+        self._text(disp_cx, y, "DISPLAY", size=SETTING_SIZE)
+        self._text(sel_cx, y, "SELECT", size=SETTING_SIZE)
+        y = y + ths + pad + ths
+        self._text(disp_cx, y, "ON", size=SETTING_SIZE)
+        self._text(sel_cx, y, "1+2", size=SETTING_SIZE)
+        sw_top = y + ths + pad
+        box_x0 = disp_cx - gw / 2 - 8
+        box_x1 = sel_cx + gw / 2 + 8
+        self._rect(box_x0, sw_top - 6, box_x1, sw_top + gh + 6,
+                   fill="", outline=C_GUARD_LO, width=max(1, int(self.s)))
+        mid_x = (disp_cx + sel_cx) / 2.0
+        self._line(mid_x, sw_top - 6, mid_x, sw_top + gh + 6,
+                   fill=C_GUARD_LO, width=max(1, int(self.s)))
+
+        dpos = BFC_DISPLAY_POS.index(self.bfc_display)
+        spos = BFC_SELECT_POS.index(self.bfc_select)
+        dx1, dx2 = disp_cx - gw / 2, disp_cx + gw / 2
+        sx1, sx2 = sel_cx - gw / 2, sel_cx + gw / 2
+        self._guarded_toggle(dx1, sw_top, dx2, sw_top + gh, dpos, npos=2)
+        self._guarded_toggle(sx1, sw_top, sx2, sw_top + gh, spos, npos=3)
+        self._hit("bfc_display", None, dx1, sw_top, dx2, sw_top + gh)
+        self._hit("bfc_select", None, sx1, sw_top, sx2, sw_top + gh)
+
+        self._vtext(sx2 + 14 + SETTING_SIZE * 2 / 3.0,
+                    sw_top + gh / 2.0, "2+3")
+        y_bot = sw_top + gh + pad + ths
+        self._text(disp_cx, y_bot, "OFF", size=SETTING_SIZE)
+        self._text(sel_cx, y_bot, "3+1", size=SETTING_SIZE)
+
+    def _draw_f6(self, x0, y0, x1, y1):
+        """BFC DISENGAGE, the highlighted inset on panel F6."""
+        self._rect_panel(x0, y0, x1, y1)
+        pad = 10
+        th10 = self._th(10)
+        cx = (x0 + x1) / 2.0
+        y = y0 + pad + th10
+        self._text(cx, y, "BFC", size=10)
+        y += th10 + pad + th10
+        self._text(cx, y, "DISENGAGE", size=10)
+        y += th10 + pad
+        gw, gh = 124, 58
+        sx1, sy1 = cx - gw / 2, y
+        sx2, sy2 = cx + gw / 2, y + gh
+        pos = BFC_DISENGAGE_POS.index(self.bfc_disengage)
+        self._guarded_toggle_h(sx1, sy1, sx2, sy2, pos, npos=2)
+        self._hit("bfc_disengage", None, sx1, sy1, sx2, sy2)
+
+    # ---- control bodies -------------------------------------------------
+
+    def _guarded_toggle(self, x1, y1, x2, y2, pos, npos):
+        """Rounded rectangular switch guard with a vertical paddle."""
+        self._rect(x1, y1, x2, y2, fill=C_GUARD, outline=C_GUARD_LO,
+                   width=max(2, int(1.5 * self.s)))
+        m = 7
+        self._rect(x1 + m, y1 + m, x2 - m, y2 - m,
+                   fill=C_SLOT, outline="#111", width=1)
+        self._draw_paddle(x1 + m, y1 + m, x2 - m, y2 - m, pos, npos)
+
+    def _guarded_toggle_h(self, x1, y1, x2, y2, pos, npos):
+        """Horizontal switch guard with a paddle that travels left/right."""
+        self._rect(x1, y1, x2, y2, fill=C_GUARD, outline=C_GUARD_LO,
+                   width=max(2, int(1.5 * self.s)))
+        m = 7
+        self._rect(x1 + m, y1 + m, x2 - m, y2 - m,
+                   fill=C_SLOT, outline="#111", width=1)
+        self._draw_paddle_h(x1 + m, y1 + m, x2 - m, y2 - m, pos, npos)
+
+    def _draw_paddle(self, x1, y1, x2, y2, pos, npos):
+        """Bat-handle paddle, throwing up/down in the well."""
+        self._bat_handle((x1 + x2) / 2.0, (y1 + y2) / 2.0,
+                         x2 - x1, y2 - y1, pos, npos, axis="y")
+
+    def _draw_paddle_h(self, x1, y1, x2, y2, pos, npos):
+        """Bat-handle paddle, throwing left/right in the well."""
+        self._bat_handle((x1 + x2) / 2.0, (y1 + y2) / 2.0,
+                         x2 - x1, y2 - y1, pos, npos, axis="x")
+
+    def _bushing(self, cx, cy, r):
+        """Circular mounting nut the handle pivots in."""
+        ow = max(1, int(self.s))
+        self._oval(cx - r * 1.25, cy - r * 1.25, cx + r * 1.25, cy + r * 1.25,
+                   fill="#6e6b60", outline="#3a3830", width=ow)
+        self._oval(cx - r, cy - r, cx + r, cy + r,
+                   fill="#b0ada0", outline="#5a584c", width=ow)
+        self._oval(cx - r * 0.55, cy - r * 0.55, cx + r * 0.55, cy + r * 0.55,
+                   fill="#3a3830", outline="#1a1a18", width=1)
+
+    def _bat_handle(self, cx, cy, well_w, well_h, pos, npos, axis="y"):
+        """Front-view bat-handle toggle.
+
+        Thrown positions show the handle in the plane of the panel.
+        The centre of a 3-position switch points at the camera, so the
+        paddle is seen end-on.
+        """
+        span = well_h if axis == "y" else well_w
+        thick = well_w if axis == "y" else well_h
+        br = thick * 0.20
+        self._bushing(cx, cy, br)
+        t = pos / float(npos - 1) if npos > 1 else 0.0
+        if npos == 3 and pos == 1:
+            self._bat_face(cx, cy, thick)
+            return
+        sign = -1.0 if t < 0.5 else 1.0
+        self._bat_thrown(cx, cy, thick, span, sign, axis, br)
+
+    def _bat_face(self, cx, cy, thick):
+        """End-on paddle: the handle is pointing at the viewer."""
+        rx, ry = thick * 0.40, thick * 0.36
+        ow = max(1, int(self.s))
+        # Drop shadow
+        self._oval(cx - rx + 1.5, cy - ry + 2, cx + rx + 1.5, cy + ry + 2,
+                   fill="#2a2a22", outline="")
+        self._oval(cx - rx, cy - ry, cx + rx, cy + ry,
+                   fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
+        # Specular blob, upper left
+        self._oval(cx - rx * 0.55, cy - ry * 0.65,
+                   cx + rx * 0.05, cy - ry * 0.05,
+                   fill="#ffffff", outline="")
+        # Rim groove
+        irx, iry = rx * 0.55, ry * 0.55
+        self._oval(cx - irx, cy - iry, cx + irx, cy + iry,
+                   fill="", outline=C_PADDLE_GROOVE, width=ow)
+
+    def _bat_thrown(self, cx, cy, thick, span, sign, axis, br):
+        """Paddle thrown along axis: sign -1 is up/left, +1 is down/right."""
+        length = span * 0.40
+        base_h = thick * 0.13
+        tip_h = thick * 0.30
+        ow = max(1, int(self.s))
+        # Neck starts just past the bushing so the handle reads as pivoting.
+        neck = br * 0.35
+        if axis == "y":
+            y0 = cy + sign * neck
+            y1 = cy + sign * length
+            y_join = y1 - sign * tip_h * 0.75
+            pts = [
+                (cx - base_h, y0),
+                (cx + base_h, y0),
+                (cx + tip_h, y_join),
+                (cx - tip_h, y_join),
+            ]
+            shadow = [(x + 1.2, y + 1.8 * sign) for x, y in pts]
+            self._poly(shadow, fill="#2a2a22", outline="", width=0)
+            self._poly(pts, fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
+            self._oval(cx - tip_h, y1 - tip_h, cx + tip_h, y1 + tip_h,
+                       fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
+            # Highlight along the left edge and on the cap
+            self._line(cx - base_h * 0.45, y0,
+                       cx - tip_h * 0.55, y_join,
+                       fill="#ffffff", width=max(1, int(1.5 * self.s)))
+            self._oval(cx - tip_h * 0.55, y1 - tip_h * 0.70,
+                       cx + tip_h * 0.05, y1 - tip_h * 0.05,
+                       fill="#ffffff", outline="")
+        else:
+            x0 = cx + sign * neck
+            x1 = cx + sign * length
+            x_join = x1 - sign * tip_h * 0.75
+            pts = [
+                (x0, cy - base_h),
+                (x0, cy + base_h),
+                (x_join, cy + tip_h),
+                (x_join, cy - tip_h),
+            ]
+            shadow = [(x + 1.8 * sign, y + 1.2) for x, y in pts]
+            self._poly(shadow, fill="#2a2a22", outline="", width=0)
+            self._poly(pts, fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
+            self._oval(x1 - tip_h, cy - tip_h, x1 + tip_h, cy + tip_h,
+                       fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
+            self._line(x0, cy - base_h * 0.45,
+                       x_join, cy - tip_h * 0.55,
+                       fill="#ffffff", width=max(1, int(1.5 * self.s)))
+            self._oval(x1 - tip_h * 0.70, cy - tip_h * 0.55,
+                       x1 - tip_h * 0.05, cy + tip_h * 0.05,
+                       fill="#ffffff", outline="")
+
+    def _talkback(self, x1, y1, x2, y2, state, legend_always=None):
+        """Electromechanical flag window: GRAY, BP, RUN, or IPL.
+
+        legend_always is the word silk-screened on a MODE talkback in the
+        SCOM figure ('RUN').  It is shown when the flag is in that state;
+        barberpole / IPL replace it.
+        """
+        # Recessed bezel
+        self._rect(x1 - 3, y1 - 3, x2 + 3, y2 + 3,
+                   fill=C_BEZEL, outline="#1a1a1a",
+                   width=max(1, int(self.s)))
+        self._rect(x1, y1, x2, y2, fill=C_TB_GRAY, outline="#111", width=1)
+        if state == "BP":
+            self._barberpole(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
+        elif state == "GRAY":
+            self._rect(x1 + 1, y1 + 1, x2 - 1, y2 - 1,
+                       fill=C_TB_GRAY, outline="")
+        else:
+            # RUN or IPL flag
+            self._rect(x1 + 1, y1 + 1, x2 - 1, y2 - 1,
+                       fill=C_TB_LEGEND, outline="")
+            word = state if state != "RUN" or legend_always is None else legend_always
+            self._text((x1 + x2) / 2.0, (y1 + y2) / 2.0, word, size=10)
+
+    def _pushbutton(self, x1, y1, x2, y2, label, down=False):
+        fill = C_BTN_DOWN if down else C_BTN
+        dx = 2 if down else 0
+        # Bezel
+        self._rect(x1, y1, x2, y2, fill=C_GUARD, outline=C_GUARD_LO,
+                   width=max(2, int(1.5 * self.s)))
+        m = 6
+        iy1, iy2 = y1 + m + dx, y2 - m + dx
+        self._rect(x1 + m + dx, iy1, x2 - m + dx, iy2,
+                   fill=fill, outline=C_PADDLE_LO, width=1)
+        # Anchor=c uses the full em box, so digits sit high.  Shift down by
+        # half the descent to centre the ink in the inner face.
+        f = self._tkfont(14)
+        y_fix = (f.metrics("descent") / 2.0) / max(self.s, 0.01)
+        self._text((x1 + x2) / 2.0 + dx, (iy1 + iy2) / 2.0 + y_fix,
+                   label, size=14)
+
+    # ---- mouse ----------------------------------------------------------
+
+    def _find(self, x, y):
+        for kind, index, x1, y1, x2, y2 in self._hits:
+            if x1 <= x <= x2 and y1 <= y <= y2:
+                return kind, index, x1, y1, x2, y2
+        return None
+
+    def _zone(self, y, y1, y2, npos):
+        """Which of npos vertical slots was clicked?  0 = up."""
+        if npos <= 1:
+            return 0
+        t = (y - y1) / float(y2 - y1) if y2 != y1 else 0.5
+        t = 0.0 if t < 0 else 1.0 if t > 1 else t
+        z = int(t * npos)
+        return npos - 1 if z >= npos else z
+
+    def _on_motion(self, event):
+        hit = self._find(event.x, event.y)
+        want = bool(hit)
+        if want != self._cursor_hits:
+            self._cursor_hits = want
+            self.cv.configure(cursor="hand2" if want else "")
+
+    def _on_press(self, event):
+        hit = self._find(event.x, event.y)
+        if hit is None:
+            return
+        kind, index, x1, y1, x2, y2 = hit
+        if kind == "power":
+            z = self._zone(event.y, y1, y2, 2)
+            self._set_power(index, POWER_POS[z])
+        elif kind == "output":
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_output(index, OUTPUT_POS[z])
+        elif kind == "mode":
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_mode(index, MODE_POS[z])
+        elif kind == "ipl_source":
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_ipl_source(IPL_SOURCE_POS[z])
+        elif kind == "ipl":
+            self._set_ipl(index, True)
+            self._held_ipl = index
+        elif kind == "bfc_display":
+            z = self._zone(event.y, y1, y2, 2)
+            self._set_bfc_display(BFC_DISPLAY_POS[z])
+        elif kind == "bfc_select":
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_bfc_select(BFC_SELECT_POS[z])
+        elif kind == "bfc_disengage":
+            z = self._zone(event.x, x1, x2, 2)
+            self._set_bfc_disengage(BFC_DISENGAGE_POS[z])
+
+    def _on_release(self, event):
+        if self._held_ipl is not None:
+            self._set_ipl(self._held_ipl, False)
+            self._held_ipl = None
+
+    def _set_power(self, i, value):
+        old = self.power[i]
+        self.power[i] = value
+        self._announce("%s POWER" % GPCS[i], old, value)
+        self.redraw()
+
+    def _set_output(self, i, value):
+        old = self.output[i]
+        self.output[i] = value
+        self._announce("%s OUTPUT" % GPCS[i], old, value)
+        self.redraw()
+
+    def _set_mode(self, i, value):
+        old = self.mode[i]
+        self.mode[i] = value
+        self._announce("%s MODE" % GPCS[i], old, value)
+        self.redraw()
+
+    def _set_ipl(self, i, down):
+        old = "ON" if self.ipl[i] else "OFF"
+        new = "ON" if down else "OFF"
+        self.ipl[i] = down
+        self._announce("%s IPL" % GPCS[i], old, new)
+        self.redraw()
+
+    def _set_ipl_source(self, value):
+        old = self.ipl_source
+        self.ipl_source = value
+        self._announce("IPL SOURCE", old, value)
+        self.redraw()
+
+    def _set_bfc_display(self, value):
+        old = self.bfc_display
+        self.bfc_display = value
+        self._announce("BFC CRT DISPLAY", old, value)
+        self.redraw()
+
+    def _set_bfc_select(self, value):
+        old = self.bfc_select
+        self.bfc_select = value
+        self._announce("BFC CRT SELECT", old, value)
+        self.redraw()
+
+    def _set_bfc_disengage(self, value):
+        old = self.bfc_disengage
+        self.bfc_disengage = value
+        self._announce("BFC DISENGAGE", old, value)
+        self.redraw()
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description="Space Shuttle panels O6, C3, F6 (paddle-switch variant)")
+    ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
+                    help="Scale: 1024 is full size (default), 512 is half, etc.")
+    ap.add_argument("--geometry", metavar="SPEC", default=None,
+                    help="Tk geometry, e.g. 948x1250+80+20 (overrides --size)")
+    args = ap.parse_args(argv)
+    if args.size <= 0:
+        raise SystemExit("panelO6-paddle: --size must be a positive integer")
+
+    root = tk.Tk()
+    panel = PanelO6(root, size=args.size)
+    geom = args.geometry or os.environ.get("NSTS_O6_GEOMETRY")
+    if geom:
+        try:
+            root.geometry(geom)
+        except tk.TclError as e:
+            raise SystemExit("panelO6-paddle: bad --geometry %r: %s" % (geom, e))
+    else:
+        w, h = scaled_wh(REF_W, REF_H, args.size)
+        root.geometry("%dx%d" % (w, h))
+    _dont_steal_focus(root)
+    # Keep a reference so the panel is not collected; it owns no extra
+    # threads, so Tk's mainloop is the whole process.
+    root._panel = panel
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
