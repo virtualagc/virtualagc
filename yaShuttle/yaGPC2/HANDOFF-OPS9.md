@@ -485,17 +485,32 @@ This is the parameter that decides whether the run is long enough to be worth
 starting.  `@150:ITEM,1,EXEC` fires on the 150th poll and `@430:OPS,9,0,1,PRO`
 on the 430th; a batch with no `@N:` uses `YAGPC_DEUKEYS_AFTER` (default 400).
 
-Polls accumulate at roughly **4.1 s of wall clock each** on this machine, so:
+**A POLL COUNT IS A BAD CLOCK, because the poll rate is a function of the
+thing under test.**  An earlier revision of this file said "roughly 4.1 s of
+wall clock each" and sized every run from it.  That figure was measured on a
+build where PASS never took the display and polling therefore stayed slow
+forever; on a tape that works it is about **1.6 s/poll** and it accelerates
+once PASS is up.  Carrying it forward made every headless run two to three
+times longer than it needed to be — 35 minutes for something the crew station
+does in under three.
 
-| run length | polls reached | gets you |
-|---|---|---|
-| 620 s | ~151 | the IPL set only — `ITEM 1 EXEC` fires at the very last poll |
-| ~1800 s | ~430 | `OPS 9 PRO` fires |
-| 2700 s | ~650 | `OPS 9 PRO` with margin |
+**Measure the landmarks, and re-measure after any large change.**  From
+`ops901-v29/deu.log`, by correlating the `"polls":N` stats lines against the
+events either side of them:
 
-A 620-second run looks like a failed transition and is not one: the second
-batch simply never fires.  Read the poll count out of the DEU's closing stats
-line (`"polls":151`) before concluding anything about a transition.
+| landmark | poll |
+|---|---|
+| GPCIPL menu on screen (`IPL MENU` in the DEU image) | **~64** |
+| PASS takes the display (`0x19ee` collapses to `3200`) | **~200** |
+| SSL mass-memory activity finished | t ≈ 105 s |
+
+So the gates are `@75` for `ITEM 1 EXEC`, about `@210` for anything that must
+arrive once PASS is up, and `RUN_AT=140` — which is what `headless-gpcmem.sh`
+now defaults to.  A 700-second run covers an OPS transition with margin.
+
+Read the poll count out of the DEU's closing stats line (`"polls":378`) before
+concluding anything about a transition: a batch that never fired looks
+identical to one that fired and did nothing.
 
 ### Reading the run
 
@@ -547,9 +562,15 @@ image carries `OLD PSW`, `MAJ=`, `MIN=`, `SCHEDWRD=`, `CLOCK1=`,
 `17 DEU FORMAT LOAD`, `STP/PURGE CYC CNT   ERROR/MS`, `MCDS BITE`,
 `MODE   BSR1   BSR2` and `27 OPTION START 28 STOP 29` — the GPC MEMORY page.
 
-A run must be **1500 s**, not 620.  At 620 s the banner still reads
-`GPCIPL 09.05.00.00.01` even on the known-good tape, which is what made the
-headless harness look incapable of showing the menu for a whole evening.
+A HEADLESS run must be **1500 s**, not 620 — and the reason is the keystroke
+gate, not PASS.  `@150` fires on the 150th DEU poll, and polls accumulate at
+about 4.1 s of wall clock each, so `ITEM 1 EXEC` is not delivered until
+t≈615 s: at 620 s the SSL load has barely started, which is why the banner
+still reads `GPCIPL 09.05.00.00.01` even on the known-good tape.  **On the
+crew station `GPC MEMORY` comes up almost instantly after `RUN`** (the user,
+2026-09-09), so do not read the headless run's length as a statement about how
+long PASS takes to seize the display.  Lower `@N` if a faster headless
+turnaround is wanted.
 
 ### Set `SNAPSHOT` on any run meant to test the transition
 

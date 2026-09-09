@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "ebcdic.h"
 
@@ -184,6 +185,19 @@ static int deu_keycode(const char *n, size_t len) {
 
 /* Fills w[1..] with the pending keys and returns the header bit to set, or 0
  * when there is nothing to send.  Sends the sequence ONCE. */
+/* Seconds since the first DEU poll of this run -- the wall clock the "@Ns:"
+ * keystroke gate is measured against.  The run is paced to real time, so this
+ * tracks simulated time too. */
+static double deu_wall_seconds(void) {
+    static struct timespec t0;
+    static int started = 0;
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    if (!started) { t0 = now; started = 1; }
+    return (double)(now.tv_sec - t0.tv_sec)
+         + (double)(now.tv_nsec - t0.tv_nsec) / 1e9;
+}
+
 static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
     const char *spec = getenv("YAGPC_DEUKEYS");
     if (spec == NULL) return 0;
@@ -212,6 +226,7 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
      * are sent in order, one per poll at most, each exactly once. */
     static unsigned char sent[16];
     static long batchAfter[16];
+    static long batchSecs[16];
     static const char *batchKeys[16];
     static int nBatch = -1;
     static char specBuf[512];
@@ -229,14 +244,31 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
             char save = *semi; *semi = '\0';
             long after = dflt;
             char *keys = p;
+            long secs = -1;
             if (*p == '@') {
                 char *colon = strchr(p, ':');
                 if (colon != NULL) {
                     *colon = '\0';
-                    after = strtol(p + 1, NULL, 10);
+                    char *end = NULL;
+                    long v = strtol(p + 1, &end, 10);
+                    /* "@120s:" is a WALL-CLOCK gate, "@150:" a poll count.
+                     * A POLL COUNT IS A BAD CLOCK: the poll rate is a
+                     * function of the build under test -- measured at about
+                     * 1.6 s/poll on a tape that reaches GPC MEMORY and 9.3
+                     * on one that does not -- so a gate chosen from one
+                     * build silently fails to fire on the next, and the run
+                     * then looks like a transition that did nothing rather
+                     * than a keystroke that was never sent.  The run is
+                     * paced to real time (--real-time --rt-factor 1), so
+                     * seconds are stable across builds; prefer them. */
+                    if (end != NULL && (*end == 's' || *end == 'S'))
+                        secs = v;
+                    else
+                        after = v;
                     keys = colon + 1;
                 }
             }
+            batchSecs[nBatch] = secs;
             batchAfter[nBatch] = after;
             batchKeys[nBatch] = keys;
             nBatch++;
@@ -244,8 +276,13 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
         }
     }
     int which = -1;
-    for (int i = 0; i < nBatch; i++)
-        if (!sent[i] && d->polls >= batchAfter[i]) { which = i; break; }
+    for (int i = 0; i < nBatch; i++) {
+        if (sent[i]) continue;
+        int due = (batchSecs[i] >= 0)
+                  ? (deu_wall_seconds() >= (double)batchSecs[i])
+                  : (d->polls >= batchAfter[i]);
+        if (due) { which = i; break; }
+    }
     if (which < 0) return 0;
     sent[which] = 1;
     spec = batchKeys[which];
