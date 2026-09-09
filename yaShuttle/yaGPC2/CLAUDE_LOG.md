@@ -109,3 +109,44 @@ Append new entries below this line.
   broken tape.  Post-IPL the rule inverts -- FIOMGSNC will not dispatch
   mass-memory I/O for a still-IPL-selected MMU, which is why SOURCE_RUN=OFF
   exists.
+
+### [2026-09-09] Target: HANDOFF-OI340600.md
+- THE ARCGPC RANGE TRACE, RUN ON v35, AND WHAT IT SETTLES.  YAGPC_TRACEWIN over
+  simulated 405-425 s, 13,327,289 instructions, filtered to ARCGPC's
+  40F34..419EF (which our per-phase csect tables place IDENTICALLY to the range
+  #299 used).  The GRT-index code at 4156C and the overlay request SVC X'015D'
+  at 4157B each execute EXACTLY TWICE -- t=410.3275/410.3277 for slot 1 and
+  411.5240/411.5243 for slot 2 -- and ARCGPC is NEVER ENTERED AGAIN: 0 visits
+  from 411.5243 through the end of the window at 425.0.  So the loop does not
+  return from slot 2; it is not exiting early.
+- AND PHASE 18 IS DEFINITELY EXPECTED.  CZ2V_GRT_PHASES is at relative
+  halfword 1348 of #PCZ2COM (0x023F4, the same address in our build and in
+  every dump), so 0x02938; read out of a live snapshot its rows are
+  0:(3,4) 1:(3,5) 2:(3,6) 3:(14,15) 4:(14,16) 5:(9,12) 7:(3,7) and
+  ROW 8 = (3, 8, 18) -- the G9 row, GRT index 9.  It is INTACT at t=400, 445,
+  480 and 560, and CZ2V_REC_GRT_INDEX reads 0009 after the request.  The
+  request is understood, the table is right, the loop issues two of three.
+- WHAT IS LEFT.  Phase 8's DATA arrives in full (reads at t=412.1 and 417.7,
+  122+115 = 237 blocks) but the COMPLETION is never posted, so ARC_OVL_EVT
+  never fires.  That is #300's chain, but NOT #300's cause: no load block
+  covers the completion chain at 0x8168-0x8180 and the chain is intact in live
+  memory.  The one anomaly inside the window is a single store-protect at
+  080D6 = FPMSVCEP+8 (the SVC BRANCH VECTOR TABLE, deliberately protected by
+  the deck's `OVERLAY FCOS1SET ------- PROTECTED BANK 1 THINGS`), from
+  FIOSVC+13 -- and FIOSVC is IN the completion chain (#300: FIOSVC.asm:263
+  reads TIOSEVNT and copies the address into the IOQE).  It is an SRS
+  (base-register-relative) instruction, `A11D`, so the address is not baked in
+  and the base register is what is wrong; FIOSVC's own FI$SVC references are
+  CORRECT (its first instruction, BFF3 92CE, stores to FI$SVC+14 = 0x092CE,
+  and FI$SVC resolves to FCMSAVE at 0x092C0 exactly as in the dump).  The
+  loaded image matches the linked image, so the tape is not corrupt.
+- TWO HYPOTHESES KILLED BY MEASUREMENT ON THE WAY, both recorded so they are
+  not re-run: (a) AIG_DEU_LOADER stuck at `WAIT FOR NOT CZ2E_SHRD_EVT` -- the
+  event is at #PCZ2COM+1272 = 0x028EC and reads 8A93 (a waiter queued) at
+  t=400 and 0000 at 445/480/560, so it clears normally; (b) a branch into
+  overlaid data at 0x20241 -- at t=411.9 phase 8 has not loaded yet, 0x20241
+  still holds SSW's $0AIGDEU code, and those interrupts are on PSA vector 0068
+  with a `code` field that is not a program-check code, unlike the store
+  protect's 0048/0007.  $0AIGDEU being absent from every GNC configuration
+  (present only in SSW, P9, S2) remains true and still explains why OPS 201,
+  301 and 901 behave alike, but it is not the mechanism.
