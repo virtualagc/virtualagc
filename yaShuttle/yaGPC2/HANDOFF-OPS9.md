@@ -1,16 +1,22 @@
 # Building the OPS 9 tape
 
-How the volume `OI340700-v8boot.mmv` was produced on 2026-09-08: the first
-tape cut from our own OI340700 links with **no oversize phase**, with
-`FPMRESET` present rather than a hole, and with a populated in-core phase
-table.
+How the volume `OI340700-v27boot.mmv` was produced, finished 2026-09-09.
+
+**This tape boots.**  It IPLs, loads G9 and reaches the **GPC MEMORY** menu
+screen, and every part of it comes from our own chain — every module compiled
+by `HALSFC` and assembled by `ASM101S`/`ASM101Sa`, our own `GPCIPL`, our own
+stamped `FCMSSLPT` and `#PFCMGPT`, nothing spliced from a reference volume.
+Its final DEU image is identical, 0 of 8192 words differing, to that of v26,
+which was the same tape still carrying the reference's `GPCIPL` — so nothing
+on that screen depended on the borrowed content.
 
 Written to be executable, not narrated.  Where a step exists because of a
 defect, the defect is named in one line and the detail is in
 `modules/sdfpkg/HANDOFF-OI340600.md`.
 
-Nothing here is claimed about whether G9 comes up.  This document covers
-producing the tape; the run is a separate question.
+The procedure below is the v27 one.  Earlier revisions of this file described
+the v8 tape, which cut cleanly but did not run; the differences are called out
+where they matter and summarised at the end.
 
 ---
 
@@ -22,7 +28,7 @@ producing the tape; the run is a separate question.
 | `$S` | `/tmp/claude-1000/c80src` | **a patched copy** of `nsts-sdl-dps/src` — see §1 |
 | `$P` | `/tmp/claude-1000/pchsrc` | the extensionless patch-source directory |
 | `$SD` | `/tmp/claude-1000/sdfpad` | `SDFLIB` with the 132 minimum-size SDFs padded past 3360 bytes |
-| — | `/tmp/claude-1000/extsyms-02-pruned.json` | external-symbol pins for phase 2 |
+| — | `/tmp/claude-1000/extsyms-02-plus.json` | the csect table for phase 2 and phase 3 (SSW-only, extended) |
 | — | `$T/phase/extsyms-13.json` | external-symbol pins for phase 13 |
 | — | `~/workspace/pass-run/pass-910.mmv` | donor for the DEU load modules (§7) |
 
@@ -179,13 +185,44 @@ for p in 1 2 3 4 5 6 7 8 9 10 12 13 14 15 18 23 24 25; do
     23|24|25) lib="--linklib $T/SYSLIBL1 $RT" ;;      # no deck root by name
     *)        lib="--linklib $ML/$n $RT" ;;           # this phase's INSERTs
   esac
-  [ $p -eq 2 ]  && extra="--external-syms /tmp/claude-1000/extsyms-02-pruned.json"
+  [ $p -eq 2 ]  && extra="--external-syms /tmp/claude-1000/extsyms-02-plus.json"
+  [ $p -eq 3 ]  && extra="--external-syms /tmp/claude-1000/extsyms-02-plus.json"
   [ $p -eq 13 ] && extra="--external-syms $T/phase/extsyms-13.json"
   PYTHONPATH=$S timeout 1800 python3 -m con80.con80build --phase $p --root $T \
       --src $P --src $T/SSSRC --src $T/APPLSRC --out $C --link $lib $extra 2>&1 \
     | grep -E 'linked|FAILED' | head -1
 done
 ```
+
+### The csect table must be **complete for this phase's configuration**
+
+`--external-syms` is not a symbol list; it **is the linker's csect table**, and
+`linker.py`'s `applyRelocations` skips any relocation whose target section the
+table does not name — leaving the assembler's own bytes in place.  Get its size
+wrong in either direction and the failure is silent:
+
+| table | what happens |
+|---|---|
+| absent | nothing is suppressed; relocation against fabricated addresses.  Phase 13's image collapses 330,391 → 16,127 halfwords and the tape re-reads it forever |
+| **pruned** | real csects keep **assembler-relative offsets**.  `FIOPDISP+116` reads `0033` where the flight machine has `B9AD`.  The display dispatcher then branches into low memory, the DEUs are never polled, and FCOS idles in `FPMIDLE` |
+| union of all 8 configs | every csect in the table is *placed*, so phase 2 gains 31 csects belonging to P9, S2, G9 and G16 — 59,521 halfwords.  Phase 2 overruns its 256-block allocation and `mmu2mmv` **trims the tail silently**, losing `$0AIBGPC`, `$0AIESIP`, `$0ARCGPC` and 132 more |
+| **SSW-only, extended** | correct.  Foreign csects 0, phase 2 = **228 blocks, exactly the original's**, phase 3 = 38/38 |
+
+Build it as the SSW table (660 csects) plus `contents` entries for the 27
+parent csects whose members are referenced across phases; that takes unresolved
+symbols from 658 to 290.  `extsyms-02-plus.json` is that file.
+
+Phase 3 needs it too.  Without it phase 3's `LB2` runs `04572..060A8` while
+`FCMLINIT` sits at `047E0..04A1F` — **entirely inside it** — so loading phase 3
+DMAs over resident FCOS and the machine executes the wreckage
+(`invalid instruction 0xc055 at 0x47e0`).  With it, phase 3 reproduces the
+original block for block: `0024A..002AC`, `00654..00660`, `03A96..03FE0`,
+`04C70..067A6`.
+
+**Do not give it to the other phases.**  Applied everywhere it fragments the
+phases whose full csect set we do not build — 756 load blocks against the
+original's 298, phase 4 going 28 → 169 — which overflows `#PFCMGPT`'s 1093
+halfwords and `mmustamp` refuses with `overflow at phase 6`.
 
 Three different library policies, and each one is load-bearing:
 
@@ -203,8 +240,8 @@ that policy the phases come out close to the original:
 
 | ph | ours | orig | | ph | ours | orig |
 |---|---|---|---|---|---|---|
-| 2 | **229** | 228 | | 9 | 24 | 25 |
-| 3 | 39 | 38 | | 10 | 55 | 55 |
+| 2 | **233** | 228 | | 9 | 24 | 25 |
+| 3 | 44 | 38 | | 10 | 55 | 55 |
 | 4 | 325 | 414 | | 12 | 206 | 216 |
 | 5 | 254 | 292 | | 13 | 7 | 7 |
 | 6 | 310 | 385 | | 14 | 114 | 107 |
@@ -212,8 +249,43 @@ that policy the phases come out close to the original:
 | 8 | 206 | 243 | | 18 | 30 | 34 |
 
 "orig" is the contiguous-block count from the in-core phase table in
-`pure-G9.fcm`, decoded by `/tmp/claude-1000/gpt.py`.  Phases 4, 5, 6 and 15
-are still short; that is open and is not what this procedure fixes.
+`pure-G9.fcm`, decoded by `/tmp/claude-1000/gpt.py`.  Phase 2 is 228 blocks
+from the link and 233 once the process stacks are created (next section);
+both fit its 256-block allocation.  Phases 4, 5, 6, 7, 8 and 15 are still
+short; that is open and is not what this procedure fixes.
+
+### Uncomment the `STACK` cards, or the tape has no process stacks at all
+
+`lnk101` creates stacks in `generateStackSections()` from `stackCsectNames()`,
+whose docstring is explicit: *"Primary source: the CON80 `STACK $0<prog>` cards
+— SDL-mode objects carry no stack ERs at all, the cards are the only trigger."*
+Our objects are SDL-mode, and in `~/pass-build/OI340700/CON80` **every one of
+the 181 `STACK` cards is commented out** — an asterisk in column 1 — across
+`SSW`, `OPS0`, `GNC1`, `GNC2`, `GNC3`, `GNC8`, `GNC9`, `MFB14`, `PL9` and
+`SM4`.  `con80build` never passes `--generate-stacks` either, so even an active
+card set would have had no fallback size.
+
+The DASS SSW dump has 30 csects of type `STACK`; without this step our phase 2
+has **zero**.  The first store into one is then a program check —
+`YAGPC_INTTRACE=1` shows `store-protect at 013be`, which is `$0AIBGPC`, from
+`FCMLINIT+407` — and everything downstream follows from it: the masked wait,
+the resume address of `$0AIBGPC+0`, the DEUs never polled, the display never
+leaving the GPCIPL banner.
+
+```bash
+# work on a COPY; the user's deck is reconstructed and is not modified
+cp -r ~/pass-build/OI340700/CON80 /tmp/claude-1000/CON80s
+sed -i -E 's/^\*(\s+STACK\s+\$0)/ \1/' /tmp/claude-1000/CON80s/{SSW,OPS0,GNC1,GNC2,GNC3,GNC8,GNC9,MFB14,PL9,SM4}
+# then link with --concards /tmp/claude-1000/CON80s and --generate-stacks 256
+```
+
+Result: 28 of the 30 stacks, **24 at exactly the flight machine's address**,
+`$0AIBGPC` among them at `0x013BC`.  Four come out one halfword larger and
+shift accordingly; `$0ASCTIM` and `$0ASGCYC` are still not generated.
+
+**Whether those asterisks belong in the deck is an open reconstruction
+question for the user.**  The flight machine has the stacks and our SDL objects
+cannot produce them any other way, so for our build the cards must be active.
 
 ### Phases 16 and 26 are omitted, deliberately
 
@@ -268,7 +340,7 @@ PYEOF
 PYTHONPATH=$S python3 -m tools.mmustamp --mmu $C --con80 $T/CON80 --skip-phase 16
 ```
 
-Expect `FCMSSLPT stamped, 633 non-zero` and
+Expect `FCMSSLPT stamped, 606 non-zero` and
 
 ```
     2  #PFCMGPT  0x01ccf2  1093       0     870
@@ -288,7 +360,7 @@ every csect.  `mmustamp --restore` undoes it from the sidecars.
 ## 6.  Cut the tape
 
 ```bash
-V=/tmp/claude-1000/OI340700-v8.mmv
+V=/tmp/claude-1000/OI340700-v27.mmv
 cd ~/donschmidt/nsts-sdl-dps
 PYTHONPATH=$S timeout 900 python3 -m tools.mmu2mmv \
     --con80 $T/CON80 --mmu $C --area 1 --out $V
@@ -317,7 +389,7 @@ def load(p):
                                for i, d in enumerate(dirs)}
 def bidx(t, f, s, b):
     return ((((f & 7) * 8 + (t & 7)) * 8 + (s & 7)) * 32 + (b & 0x1f))
-magic, hw, flag, ours = load("/tmp/claude-1000/OI340700-v8.mmv")
+magic, hw, flag, ours = load("/tmp/claude-1000/OI340700-v27.mmv")
 _, _, _, ref = load("/home/rburkey/workspace/pass-run/pass-910.mmv")
 n = 0
 for f, t, s, b0, cnt in ((4,4,0,7,17), (4,4,7,8,17), (4,4,3,8,17), (4,4,4,8,8),
@@ -331,12 +403,12 @@ out = bytearray(magic) + struct.pack(">III", hw, len(dirs), flag)
 out += b"\0" * (32 - len(out))
 for d in dirs: out += struct.pack(">I", d)
 for d in dirs: out += ours[d]
-open("/tmp/claude-1000/OI340700-v8boot.mmv", "wb").write(bytes(out))
+open("/tmp/claude-1000/OI340700-v27boot.mmv", "wb").write(bytes(out))
 print("DEU blocks forced: %d, volume %d blocks" % (n, len(dirs)))
 PYEOF
 
 python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/stamp_ssl_checksum.py \
-        /tmp/claude-1000/OI340700-v8boot.mmv
+        /tmp/claude-1000/OI340700-v27boot.mmv
 ```
 
 The splice must be unconditional.  An "only if absent" version silently
@@ -350,10 +422,10 @@ Expect `DEU blocks forced: 24, volume 2210 blocks`.
 
 ```bash
 python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/check_volume_destinations.py \
-        /tmp/claude-1000/OI340700-v8boot.mmv
+        /tmp/claude-1000/OI340700-v27boot.mmv
 ```
 
-On the v8 volume this reports two blocks with `len C6C6` — the staging fill
+On the v27 volume this reports two blocks with `len C6C6` — the staging fill
 pattern read as a length, inside a raw phase record.  The tool recognises one
 load-block header form and says so; a length of 50886 halfwords is not a real
 finding.  A block flagged with a *plausible* length and `BODY IS ENTIRELY
@@ -377,13 +449,13 @@ for x in lib.extents:
         text[b + i] = (x.data[2*i] << 8) | x.data[2*i + 1]
 gpt = [text.get(0x1CCF2 + i, 0) for i in range(1093)]
 sig = b"".join(v.to_bytes(2, "big") for v in gpt[:12])
-raw = open("/tmp/claude-1000/OI340700-v8boot.mmv", "rb").read()
+raw = open("/tmp/claude-1000/OI340700-v27boot.mmv", "rb").read()
 print("GPT %d non-zero; on tape: %s"
       % (sum(1 for v in gpt if v), "yes" if sig in raw else "NO"))
 PYEOF
 ```
 
-Expect `GPT 870 non-zero; on tape: yes`, first descriptor `0040 000C 1BC0
+Expect `GPT 813 non-zero; on tape: yes`, first descriptor `0040 000C 1BC0
 0027`.
 
 ---
@@ -395,9 +467,9 @@ left from a previous run makes the GPC flap `HALT`↔`RUN`.
 
 ```bash
 cd ~/workspace/pass-run
-TAPE=/tmp/claude-1000/OI340700-v8boot.mmv DEUMF=1 \
+TAPE=/tmp/claude-1000/OI340700-v27boot.mmv DEUMF=1 \
 DEUKEYS="@150:ITEM,1,EXEC;@430:OPS,9,0,1,PRO" RUN_AT=260 PORT_BASE=6900 \
-./headless-gpcmem.sh 620 ~/workspace/pass-run/headless-v8
+./headless-gpcmem.sh 1500 ~/workspace/pass-run/headless-v27
 ```
 
 The IPL SOURCE switch must be **off** before RUN or FCOS refuses every
@@ -441,15 +513,43 @@ read  17 block(s) from 4/4/3/8     DEU load modules
 read   8 block(s) from 4/4/0/24
 read   8 block(s) from 4/4/4/8
 YAGPC_DEUKEYS delivered 3 keystroke(s)      <- ITEM 1 EXEC
-read 229 block(s) from 3/4/0/0     phase 2    (orig 228)
+read 233 block(s) from 3/4/0/0     phase 2    (orig 228)
 read   7 block(s) from 3/3/0/0     phase 13   (orig 7)
-read  39 block(s) from 3/3/6/0     phase 3    (orig 38)
+read  44 block(s) from 3/3/6/0     phase 3    (orig 38)
 ```
 
 Both DEUs should report `"ipled":true` with a few hundred commands.  Strings
 like `GPC MEMORY` and `GNC SYS SUMM 1` appearing in the DEU image dump are
 **loaded formats from `DEUCFLM`**, not evidence of a live display — do not
 read them as one.
+
+### The one test that says PASS has the display
+
+The banner region **`0x19ee`** is occupied by `GPCIPL 09.05.00.00.01` for as
+long as GPCIPL owns the screen, and **collapses to a single halfword `3200`**
+once PASS takes it over.  That, not the presence of any string, is the check:
+
+```bash
+awk '/^  0x19ee/{l=$0} END{print substr(l,1,110)}' <outdir>/deu.log
+```
+
+The run that verified v27:
+
+```bash
+cd ~/workspace/pass-run
+TAPE=$HOME/workspace/pass-run/OI340700-v27boot.mmv DEUMF=1 SOURCE_RUN=OFF \
+DEUKEYS="@150:ITEM,1,EXEC" RUN_AT=260 PORT_BASE=6800 \
+./headless-gpcmem.sh 1500 ~/workspace/pass-run/headless-v27
+```
+
+SIGINT at 873,990,427 steps, **no halt**; `0x19ee..0x19ee (1): 3200`; and the
+image carries `OLD PSW`, `MAJ=`, `MIN=`, `SCHEDWRD=`, `CLOCK1=`,
+`17 DEU FORMAT LOAD`, `STP/PURGE CYC CNT   ERROR/MS`, `MCDS BITE`,
+`MODE   BSR1   BSR2` and `27 OPTION START 28 STOP 29` — the GPC MEMORY page.
+
+A run must be **1500 s**, not 620.  At 620 s the banner still reads
+`GPCIPL 09.05.00.00.01` even on the known-good tape, which is what made the
+headless harness look incapable of showing the menu for a whole evening.
 
 ### Set `SNAPSHOT` on any run meant to test the transition
 
@@ -472,15 +572,45 @@ what §5 stamped.
 
 ## What this tape has that its predecessors did not
 
-| | earlier tapes | v8 |
+| | earlier tapes | v27 |
 |---|---|---|
-| phase 2 | 617 blocks (oversize) or 211 with an `FPMRESET` hole | 241 blocks, `FPMRESET` present |
+| phase 2 | 617 blocks (oversize), or 211 with an `FPMRESET` hole | 233 blocks, `FPMRESET` present |
 | overlay content in phase 2 | 307 blocks | 0 |
-| in-core phase table | zeros | 870 of 1093 halfwords |
-| `FCMSSLPT` | zeros on some | 633 non-zero |
+| foreign-configuration csects | 31, and the tape's top of memory trimmed away | 0 |
+| relocation | assembler-relative offsets in the I/O and display branch tables | applied |
+| phase 3 | `LB2` straddling `FCMLINIT` | reproduces the original block for block |
+| process stacks | 0 of 30 | 28 of 30, 24 at flight addresses |
+| in-core phase table | zeros | 813 non-zero halfwords |
+| `FCMSSLPT` | zeros | 606 non-zero |
 | oversize phases | phase 2 | none |
+| **what it does** | idles, or halts in a masked wait | **reaches the GPC MEMORY menu** |
 
-Phase 2's 241 blocks against the original's 228, measured by classifying every
-section against the eight DASS csect tables: 237 blocks in the SSW dump, 0 in
-any other configuration's, 4 in none (the phase 10 IPL loader, correctly
-absent from a post-IPL dump).
+Code divergence from the flight machine — linked `PHASE02.fcm` against
+`pure-SSW.fcm` over code csects only, where a difference cannot be runtime
+state — went from **8.37 %** to **0.50 %** over this work.
+
+## What is still open
+
+* **Phases 4, 5, 6, 7, 8 and 15 come out short** of the phase table's
+  contiguous-block counts.  The undersized ones are display-heavy, which is
+  why the zero-byte exclusion markers were the first hypothesis — but phase 15
+  is 198 against 304 with its SPEC-2 sources all present, so something else
+  undersizes phases as well.
+* **Phase 16 does not link** (`CON80/SM4TAB`, above), and is skipped.
+* **The csect table does not generalise** to the phases whose full csect set we
+  do not build.  That has to be solved before an OPS transition can work.
+* **The `STACK` cards** need the user's decision; the fix was tested only in a
+  copy of the deck.
+* **The `GPC POWER REFAIL` message.**  It tracks our `GPCIPL` exactly — present
+  on v2–v17 and v27, absent on v18–v26 which carried the reference's — but it
+  does **not** block the load, and our `GPCIPL` is bit-exact to the original
+  IBM listing (`PFS/temp/temp/BILDNEW5.lst`, VER 9.05 09-23-96): 0 mismatches
+  in 13,285 halfwords, against 1,167 for the GPCIPL inside
+  `pass-ipl-cflm.mmv`.  It is not a build defect of ours.
+* **Queued for Don**, all patched on the copy at `/tmp/claude-1000/c80src`:
+  `mmu2mmv` should call `stamp_ipl` (or refuse an unstamped tree);
+  `mmustamp --skip-phase`; `con80build --generate-stacks` and
+  `--external-syms` passthroughs; `_PATCH_SRC_RE`'s extensionless member
+  assumption; and autocall's SDF-size proxy, which should test the object
+  rather than a byte threshold and read an empty source as absent rather than
+  compile it.

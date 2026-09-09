@@ -5575,6 +5575,157 @@ over the artefact it described, in one session, on one investigation.
 
 WHY.  Three of the four came from trusting a description over the artefact -- a stale comment, an option's units, a sector range -- and all three were cheap to check. Keeping them together makes the pattern visible in a way four scattered retractions would not.
 
+THE OI340700 TAPE BOOTS G9 TO THE GPC MEMORY MENU, AND EVERY PART OF IT IS
+OURS (2026-09-09).  The goal set on 2026-09-08 -- "fix the tape-build process
+until the tape loads and runs G9 to the point of at least seeing the GPC
+MEMORY menu screen" -- is met by OI340700-v27boot.mmv.
+
+    WHAT v27 IS.  Every module compiled by HALSFC and assembled by ASM101S or
+    ASM101Sa, our own GPCIPL, our own stamped FCMSSLPT and #PFCMGPT, no
+    spliced reference content anywhere.  Its immediate predecessor v26 was
+    identical except that it still carried the reference tape's GPCIPL, and
+    the two tapes differ ONLY inside phase 10's GPCIPL region -- a
+    29,912-byte span with 1,906 bytes actually different -- so the result is
+    attributable to our GPCIPL alone.
+
+    THE RUN.  TAPE=OI340700-v27boot.mmv DEUMF=1 SOURCE_RUN=OFF
+    DEUKEYS="@150:ITEM,1,EXEC" RUN_AT=260 PORT_BASE=6800 ./headless-gpcmem.sh
+    1500 headless-v27.  SIGINT at 873,990,427 steps with no halt.  The DEU
+    banner region 0x19ee has collapsed to the single halfword 3200 -- PASS
+    owns the display -- and the image carries OLD PSW, MAJ=, MIN=, SCHEDWRD=,
+    CLOCK1=, "17 DEU FORMAT LOAD", "STP/PURGE CYC CNT ERROR/MS", "MCDS BITE",
+    "MODE BSR1 BSR2" and "27 OPTION START 28 STOP 29".
+
+    THE STRONGEST FORM OF THE RESULT: v27's final DEU image is IDENTICAL to
+    v26's, 0 of 8192 words differing.  Nothing on that screen depended on the
+    borrowed GPCIPL.
+
+    Code divergence from the flight machine, measured as linked PHASE02.fcm
+    against pure-SSW.fcm over code csects only, went from 8.37 per cent at
+    the start of this work to 0.50 per cent.
+
+    THE PROCEDURE IS WRITTEN UP in yaShuttle/yaGPC2/HANDOFF-OPS9.md, which is
+    hand-maintained and is NOT one of the three generated handoffs.
+
+THE SEVEN BUILD DEFECTS, IN THE ORDER THEY WERE FOUND (2026-09-09).  An index
+to the entries that follow, because the investigation ran 2026-09-06 to
+2026-09-09 and each cleared blocker exposed the next.
+
+    1.  TWO UNSTAMPED TABLES.  FCMSSLPT and the SSL checksum are left blank
+        by anything mmu2mmv cuts, and the loader skips the whole load when
+        descriptor halfword 0 is zero.
+
+    2.  PLACEMENT.  Phase 13's load blocks land displaced because phase 2's
+        do; both must be pinned to the DASS index.
+
+    3.  THE LIBRARY POLICY.  A blanket -L SYSLIBL1 resolves other phases'
+        compools by reference and puts 307 blocks of overlay content into
+        phase 2; no library at all leaves FPMRESET a hole that control falls
+        into.  A phase may take only what its own deck root INSERTs.
+
+    4.  RELOCATION SILENTLY DISABLED.  A PRUNED --external-syms table makes
+        lnk101 leave assembler-relative offsets in the I/O and display
+        branch tables.  Phase 2's code divergence 8.37 per cent -> 0.77.
+
+    5.  PHASE 3 OVERWRITING FCOS.  Its LB2 ran 04572..060A8 with FCMLINIT at
+        047E0..04A1F entirely inside it.  The csect table fixes it and phase
+        3 then reproduces the original block for block.
+
+    6.  THE UNION TABLE TRIMMING THE TAPE.  Too LARGE a table injects other
+        configurations' csects, overflows phase 2's 256-block allocation and
+        loses the top of memory -- AIB_GPC_LOCATOR with it -- silently.
+
+    7.  NO PROCESS STACKS AT ALL.  The CON80 STACK cards are commented out
+        and SDL-mode objects carry no stack ERs, so nothing triggered
+        creation; the first store to @0AIBGPC is a program check.
+
+    An eighth, the spliced phase 10 of v18..v22, was self-inflicted by the
+    experiment rather than by the build: see the entry on splicing.
+
+THE TWO TABLES A VOLUME CUT BY mmu2mmv DOES NOT CARRY, AND HOW TO STAMP THEM
+(2026-09-08).  This supersedes the causal claim in #292 while leaving its
+measurement intact.
+
+    WHAT IS BLANK.  A volume cut by mmu2mmv from con80build load modules has
+    FCMSSLPT -- phase 10's own IPL phase table at 0x07C00 -- ENTIRELY ZERO,
+    0 of 768 halfwords, while FCMINSSL's code is intact at 919 of 934.
+    mmbstamp's own comment says descriptor halfword 0 doubles as the "this
+    system was mass-memory built" flag AND THE LOADER SKIPS THE WHOLE LOAD
+    WHEN IT IS ZERO.  SSLENGTH and SSLCKSUM at 0x07398 are zero as well, and
+    tools/stamp_ssl_checksum.py's docstring describes that failure exactly:
+    SSLCHECK sums with a count of zero, cannot match, takes its ERROR 22
+    path, deschedules itself, SSL70 never runs, FCMINSSL is never entered,
+    and an ITEM 1 EXEC loads nothing.  Either blank table is sufficient on
+    its own.
+
+    #292 attributed the gate to 1,101 build differences in GPCIPL across 463
+    scattered runs, the signature of address constants.  THAT MEASUREMENT
+    STANDS AND ITS INTERPRETATION DOES NOT: it was taken on a volume where
+    both tables were also blank.
+
+    WHY mmu2mmv LEAVES IT BLANK.  mmu2mmv.py:330-333 calls generate_sslpt()
+    and stamp_boot(), stamping the IPL table into the BOOTSTRAP copy
+    (FMAIPL2's FCMPTAD1/2/3), and NEVER calls stamp_ipl(), which is
+    mmbstamp.py:1002 and is what writes FCMSSLPT.  Only mmu2fcm calls it,
+    behind --stamp-ipl-tables.  A volume cut by a different path can have it
+    stamped, which is how an earlier measurement of OI340700-cflm.mmv led to
+    the wrong generalisation.
+
+    HOW TO STAMP IT WITHOUT TOUCHING DON'S TOOLING.
+    generate_sslpt(mmu_root, con80) returns the table for OUR extents, and
+    mmbstamp's own LibModule.read / _extent_for / _splice write it into
+    PHASE10.lib at 0x07C00 before mmu2mmv cuts the volume.  Then run
+    yaShuttle/yaGPC2/tools/stamp_ssl_checksum.py on the cut volume for
+    SSLENGTH and SSLCKSUM, which also fixes the containing load block's own
+    checksum tail.  A proper fix is a PR making mmu2mmv call stamp_ipl.
+
+    THE OTHER TABLE.  mmustamp is a SEPARATE step between con80build and
+    mmu2mmv that writes #PFCMGPT, and nothing joins them, so a build can
+    silently skip it.  Automate it into whatever cuts the tape; a manual
+    step handed to a human is a step that gets forgotten.
+
+AUTOCALL REUSES OUR OBJECTS IF THE SDF SIZE PROXY IS SATISFIED, SO NO halsc IS
+NEEDED (2026-09-08).  This supersedes the --no-autocall workaround in the
+earlier con80build recipe.
+
+    THE MECHANISM, con80build.py around line 2216.  Autocall is not obliged
+    to compile a module it pulls; it reuses an existing object instead,
+    gated on: if (objdir/f'{p.stem}.obj').exists() then sdf_ok =
+    (classify(p) == 'ASM') or (_sdfm.exists() and _sdfm.stat().st_size >
+    3360), where _sdfm is gendir/'SDFLIB'/f'##{p.stem[:6]:<6}.sdf'.
+    Assembly ALWAYS reuses.  HAL reuses only if a matching SDF exists and is
+    STRICTLY LARGER than 3360 bytes; otherwise it falls through to a
+    compile, and with halsc unavailable that leaves an EMPTY OBJECT which
+    the link then fails to load.  That is what produced the 30 clobbered
+    objects that forced --no-autocall, which in turn left the application
+    phases badly incomplete.
+
+    THE PROXY IS WRONG FOR OUR TREE, and I misread it first myself.  132 of
+    our 1199 SDFs are EXACTLY 3360 bytes and I took that for a stub marker.
+    It is not: 3360 is the minimum size for a trivial unit, and those
+    modules have REAL objects.  CGBMED.obj is 480 bytes and defines
+    #PCGBMED; CDCPHA.obj is 560 bytes and defines #PCDCPHA, the compool
+    CDCV_PHASES lives in.  They are small because they are small compools.
+
+    THE WORKAROUND, touching nothing of ours or Don's: stage the SDFs into
+    <out>/PHASEnn/gen/SDFLIB, symlinking those over 3360 bytes and COPYING
+    the 132 minimum-size ones with a single byte appended so the proxy
+    passes.  pass-build/OI340700/SDFLIB is never modified.  With that in
+    place autocall pulled 227 modules for phase 8 and reused our object for
+    every one: zero empty objects, zero clobbering.
+
+    RESULT, full ordered build: 18 phases link, and the application phases
+    become far more complete -- PHASE04 93 -> 352 objects, PHASE05 61 ->
+    236, PHASE06 84 -> 309, PHASE07 56 -> 174, PHASE08 85 -> 181, PHASE15
+    106 -> 186.  Phase 2 links 299 objects either way -- its deck carries
+    NOCALLER, so autocall never applies to it -- and phase 13 is 3 objects
+    either way.
+
+    QUEUED FOR DON: this check should test the OBJECT rather than an SDF
+    size threshold.  Also: autocall should read an EMPTY SOURCE as absent
+    rather than compile it, because on a phase that happens to link, the
+    same path loses the csect's content silently.
+
 WHAT IS DELIBERATELY NOT IN THIS FILE, and where it is instead.  This handoff
 was cut down on purpose; the material below is still true and still wanted,
 but reading it costs more than it is worth until it is needed.
@@ -5619,4 +5770,738 @@ but reading it costs more than it is worth until it is needed.
     trio in the restored sources -- a restored `$POF` expands afresh beside
     the vestigial pair the extraction kept.  It emits nothing and costs no
     space.
+
+PINNING PHASE 2 AND PHASE 13 PUTS THE LOAD BLOCKS AT THE ORIGINAL'S ADDRESSES
+(2026-09-08).
+
+    THE PROBLEM.  Phase 13 was read TWICE and the machine then halted in a
+    masked wait.  A phase read twice is a phase the loader REJECTED and
+    retried: FCMINSSL reads each load block back out of MEMORY, sums
+    halfwords 0..length-2 and compares against the halfword at length-1; on
+    a mismatch it does SHW FCMCKERR, increments FCMECNT, and IF
+    (CHI,R2,GE,3) falls through FCMSSLEX to SSM FCMWAIT.  Three checksum
+    failures and it puts the GPC in a wait state ON PURPOSE.
+
+    THE TAPE AND THE RULES ARE BOTH CORRECT.  mmu2mmv sums 0..length-3,
+    zeroes length-2 and stores the total at length-1; FCMINSSL sums
+    0..length-2, which includes that zero, and compares against length-1 --
+    identical.  Verified on the bytes.
+
+    THE CAUSE IS PLACEMENT.  Reference phase 13: LB0 zcon 3918 flags 0600
+    len 382, LB1 zcon 8010 flags 86A0 len 2012.  Ours: LB0 zcon 32FA len
+    382, LB1 zcon 3478 flags 8600 len 2698 -- same LB0 length at an address
+    0x61E lower, and an LB1 34 per cent longer sitting in SECTOR 0 where the
+    reference puts it in SECTOR A.  Phase 13 INHERITS THIS FROM PHASE 2:
+    con80build's own source records that PHASE13's origin-less OVERLAY
+    PHAS13D re-opens a region the phase-2 segment defined, and lnk101
+    imports region origins from the earlier phase libs.
+
+    THE FIX.  con80build had no --external-syms option, so one was added --
+    three lines of passthrough in link(), a CLI option, and the call site --
+    on a COPY at /tmp/claude-1000/c80src run with PYTHONPATH, because Don's
+    checkout has diverged and will not fast-forward.  His tree is untouched.
+    With phase 2 pinned, phase 13's LB0 moves to 0x03918, EXACTLY the
+    reference; with phase 13 pinned as well, LB1 moves to 0x50010, which IS
+    the reference's zcon 8010 with DSR A expanded.  Phase 13 is then read
+    once and accepted and PHASE 3 LOADS.
+
+    A TIMING EXPLANATION IS WITHDRAWN.  It was argued that the loader
+    checksums before the DMA catches up, on the strength of a snapshot
+    showing 594 of 2698 halfwords undelivered.  The observation was real but
+    incidental: LB1 is STILL 2698 halfwords and now loads without complaint.
+    The descriptor and the data disagreed because of PLACEMENT, so no retry
+    could ever have made that checksum match.  What DOES stand from that
+    experiment is that the model's pacing is not at fault, and that reducing
+    it breaks the boot: YAGPC_MMU_BLOCK_GAP at 64 word-times against the
+    default 256 breaks the IPL outright, phase 10 re-read three times and a
+    halt at t=38 s.  FCMBOOT's block-gap timing is load-bearing.
+
+    problems.md 8.22 concluded "pin PHASE02 only" having tested 2, 3 and 10.
+    This extends it: PHASE13 must be pinned too.
+
+THE LIBRARY POLICY: A PHASE MAY TAKE FROM SYSLIBL1 ONLY THE CSECTS ITS OWN
+DECK ROOT INSERTS (2026-09-08).  This ends a dilemma that consumed most of a
+day, and both horns of it turned out to be the same defect.
+
+    THE DILEMMA AS IT STOOD.  WITHOUT -L SYSLIBL1 phase 2 linked 211 blocks,
+    fitted card 43000's 256, loaded phases 13 and 3 -- and FPMRESET was
+    ABSENT, so control fell into the hole at 0x1AF00 and executed fill.
+    (FPMRESET is 19 halfwords of SVC-14 RESET EVENT handler reached from
+    FPMSVC; PHASE02.sym.json declared it at 0x1AEFE with module
+    <external-syms>, a section existing only because the pin file named it,
+    with no object supplying its text.  Pinning turns "absent" into "present
+    but empty", which is what lets control fall in.)  WITH -L SYSLIBL1 phase
+    2 had FPMRESET and zero holes -- and needed 617 BLOCKS AGAINST 256,
+    overran into the DEU and bootstrap areas, and GPCIPL retried 4/4/3/8
+    forever without reaching the menu.  The original build has both
+    properties in 228 blocks, so they ARE reconcilable.
+
+    THE MEASUREMENT THAT SPLIT IT.  Classify every section of a phase 2 link
+    against the eight DASS csect tables: in the SSW dump, or not in SSW but
+    in another configuration's dump, or in no dump at all.  With -L
+    SYSLIBL1: 908 sections, 245 blocks of SSW content, 307 BLOCKS OF OVERLAY
+    CONTENT.  Without: 608 sections, 222 blocks of SSW content, ZERO
+    overlay.  The library was contributing 307 blocks of OTHER PHASES'
+    csects, and that -- not the INSERTed content -- was the whole overrun.
+
+    WHERE THEY CAME FROM.  Not siblings in a shared member: SYSLIBL1 is one
+    object per csect, 4277 of them.  They arrive by REFERENCE RESOLUTION --
+    lnk101 satisfies phase 2's references to compools that live in overlay
+    phases by pulling them locally, which the NOCALLER card is supposed to
+    prevent.  Of the 317 csects the library adds, 21 are NAMED on an INSERT
+    card reachable from PHASE02 and carry 18 blocks with ZERO overlay
+    content; the other 296 are named nowhere in the deck and carry 315
+    blocks of which 307 are overlay.
+
+    THE RELEASE ITSELF SETTLES OWNERSHIP.  Intersect the in-core phase
+    table's absolute load-block destinations with the DASS csect tables and
+    "which phase loads this csect" has a definite answer taken from the
+    release.  Of twelve compools that appeared in a phase 9 link, NOT ONE is
+    loaded by phase 2: #PCDIMMU at 2065E by phases 4, 5, 6, 7, 8, 12 and 14;
+    #PCD1MMU at 04864 by 4, 5, 6, 7, 8, 10, 12, 15, 16; #PCVTTCS at 0BE1A by
+    4, 5, 6, 7, 8, 12, 14.
+
+    AND STRIPPING PHASE 2 BROKE PHASE 9, which is the finding that makes the
+    rule general.  Phase 9 went from 22 blocks to 180, overflowing a
+    64-block allocation.  The sixteen sections it gained are the same
+    compools that had been bloating phase 2 -- and only ONE of them was ever
+    in phase 2.  A fat phase 2 was not ABSORBING them, it was SUPPRESSING
+    them: con80build gates a pull on whether a MAPped phase's load module
+    defines the symbol, which it reports as "MAP phase 2 region-gated, N
+    unmapped remote-compool definitions will not suppress pulls".
+
+    THE RULE.  Every phase's INSERT list resolves in SYSLIBL1 almost
+    entirely -- 430 of 431 for phase 2, 105 of 105 for phase 3, 29 of 29 for
+    phase 9 -- so a per-phase library of exactly those objects is buildable
+    straight from the deck, and because a library is searched only for
+    UNDEFINED symbols, passing the whole INSERT list is equivalent to
+    passing the subset the phase actually lacks.  Result for phase 2: 592
+    sections, 237 blocks of SSW content, ZERO overlay, FPMRESET present,
+    241 blocks inside the 256 allocation against the original's 228.
+
+    TWO EXCEPTIONS, MEASURED.  Phases 1 and 10 must take NO library: a
+    blanket one takes phase 1 from 7 sections and 3624 halfwords to 8 and
+    20017, the boot record then has no entry point to find, and the tape
+    spins at NIA 00486 after the bootstrap without reading a single phase.
+    Phases 23, 24 and 25 have no deck root of that name and take SYSLIBL1
+    whole.  The HAL/S runtime RUN and ZCON stay on every phase; they are
+    pulled by reference and are small.
+
+    FOUR THINGS TRIED AND FOUND UNNECESSARY: --concard-root SSW (the DEFAULT
+    root already reaches all 431 INSERT cards), an --insert-root option
+    added for the purpose, --nocall/--no-nocall (autocall satisfies
+    REFERENCES, and with nothing referencing #LEXP there is nothing to
+    pull), and supplying the RUN/ZCON runtime libraries.  con80build's
+    autocall gate is "phase in AUTOCALL_VALIDATED" with AUTOCALL_VALIDATED =
+    {4, 5, 6, 7, 8, 12, 15, 16}: PHASE 2 IS NOT IN IT and never will
+    autocall whatever the flags say.
+
+    A COMPARISON WITHDRAWN.  ~/ipl-demo/phases was used as a completeness
+    reference and is not one.  It is dated 2026-08-22, a different source
+    release with a different worklist; its phase 2 carries 48 runtime-math
+    csects ours does not, and our phase 2 correctly does not carry them
+    because it does not contain the modules that call them.  What ipl-demo
+    IS is a TAPE GEOMETRY reference: 1087 blocks, no OVERSIZE, no overlap,
+    FMAIPL2 clean, and a volume cut from it reaches the IPL menu -- which
+    proves the whole cutting pipeline.  It loads phase 2 and then never
+    loads phase 13 or phase 3, idling to t=318 s.
+
+A ZERO-BYTE SOURCE IN OI340700 IS AN EXCLUSION MARKER, NOT DAMAGE (2026-09-08).
+The convention comes from the user, after I got it backwards and had to revert.
+
+    THE RULE.  Both PFS/OI340700 and pass-build/OI340700 carry 37 zero-byte
+    .hal files, the same 37 in both, 31 in APPLSRC and 6 in SSSRC.  A
+    ZERO-BYTE FILE MEANS THE OI340600 FILE IS NOT USED IN OI340700.  It must
+    NOT be filled in from PFS/OI340600.  I copied all 37 across from
+    OI340600 and reverted them the same hour.  PFS/OI340700 is a SPARSE
+    OVERLAY on OI340600 -- only the files that differ, plus these markers --
+    which is why a directory listing of it looks far too small to be a
+    release.  The tree is reconstructed throughout, so any of it can be
+    wrong, which is what makes the check below worth having.
+
+    WHICH FILES.  CS4CPT, CS4DART, CS4IFT, CS4INI, CS4IPT, CS4IX2..7,
+    CS4IXP, CS4MDT, CS4PAR, CS4PAT, CS4PCT, CS4PDT, CS4PX2, CS4PX3, CS4PXT,
+    S4ICLN, SM4OPS are the SPEC 4 display set; CDF163, CDG164, CDH165,
+    CDND16, CDR16D, XD0000 the CRT display set; with CGMIMU, CP4GXT, CS2CPT,
+    CSTCPT, CV2SIN, CV3SOT, CVMS8COM, CVWLDBPO and PUSSLS beside them.
+
+    THE CORPUS CORROBORATES THEM, WITH ONE BLIND SPOT.  Every DASS listing
+    reads AT RELEASE 034 VERSION 070, the same release the tree
+    reconstructs, so the dumps can adjudicate an exclusion.  Ask whether any
+    csect name in the eight tables carries a module's six-character stem --
+    the rule con80build's own autocall uses, guessing #PCS4DAR for CS4DART.
+    Base rate: 1106 of 1130 present modules are found, 98 per cent.  NONE of
+    the 37 excluded ones is found.  BUT 22 of the 37 are the SPEC-4 family
+    and the corpus has no SM4 dump -- phase 16 is SMASM4 at MC=5 and our
+    eight are SSW, G9, G8, G2, G3, G16, P9, S2 -- so those would be absent
+    whether excluded or not; the one PRESENT SPEC-4 module is also absent
+    from every dump, 0 of 1, which is the confound stated as a measurement.
+    The other 15 are testable and all absent, CS2CPT being the sharpest case
+    because its SPEC-2 family scores 22 of 22 present.  So the exclusions
+    are corroborated wherever the dumps can speak and contradicted nowhere.
+    /tmp/claude-1000/excl2.py runs it.
+
+    THE INCONSISTENCY, which is a reconstruction question and not a tooling
+    one.  CON80/SM4TAB, reached from CON80/SM4, carries linkage-editor
+    CHANGE cards that rebind a generic module to the SPEC-4 compools --
+    CHANGE #PCSADAR(#PCS4DAR) and ten more -- whose targets are almost
+    exactly the excluded set: CP4GXT, CS4DART, CS4IFT, CS4IPT, CS4IXP,
+    CS4PAR, CS4PAT, CS4PXT, CS4INI, CSTCPT.  So the deck REQUIRES symbols
+    the emptied sources REMOVE, and neither a source nor a prebuilt object
+    exists for any of the 37 (0 of 37 in objects/ or SYSLIBL1).  Two
+    reconstructed artefacts disagree and which is wrong is not decidable
+    from here.  Phase 16 is 308 contiguous blocks in the original's phase
+    table against 169 in our build and the missing SPEC-4 set is large
+    enough to cover that gap, which leans toward the sources -- but phase 15
+    is 157 against 304 with its SPEC-2 sources all PRESENT, so something
+    else undersizes phases as well and the SPEC-4 gap is not the whole
+    story.  This is why phase 16 does not link.
+
+PHASE 16 CAN BE LEFT OUT, AND IT DOES NOT AFFECT PHASE 18 (2026-09-08).  Asked
+because phase 16 is the one that will not link -- see the SM4TAB entry -- and
+it was blocking the whole tape.  Four independent couplings checked, all
+negative.
+
+    LINK TIME.  CON80/PHASE18 declares MAP 2,ZCONPCH2,B1PCH02U,B2PCH02,
+    B3PCH02 then MAP 3,MFBZFILL then MAP 8,*.  Phase 18 maps phases 2, 3
+    and 8; it does not map 16.
+
+    TAPE.  The allocations are disjoint.  SMASM41 ALLOC ADDR=35300 BLKS=352
+    is blocks 7520..7872; GMAG9R1 ALLOC ADDR=56000 BLKS=64 is 11776..11840.
+
+    RUN TIME.  SMASM41 is PHASE,PH=16,MC=5 against GMAG9R1 PHASE,PH=18,MC=9.
+    Phase 16 is memory configuration 5 and phase 18 is configuration 9, so a
+    G9 transition never requests 16.
+
+    THE IN-CORE PHASE TABLE, the only place the two meet.  Each descriptor's
+    first halfword is a running displacement, so removing phase 16's 33 load
+    blocks moves every later phase's displacement down by 99 halfwords --
+    838 to 742 for phase 18.  FCMMGBOV reads that displacement OUT OF THE
+    DESCRIPTOR, so the shift is self-describing.  Verified by re-laying the
+    same per-phase data both ways: phase 18's load block count, mass memory
+    address and contiguous count are unchanged and all eight of its load
+    block descriptors are byte-identical, while phase 15, which precedes 16,
+    does not move at all.
+
+    THE COST, stated plainly: memory configuration 5 can no longer be
+    loaded, because phase 16's descriptor reads a segment count of zero,
+    which is exactly the condition FCMMGBOV treats as "no segments".  We
+    have no MC=5 dump to test against in any case.
+
+    IMPLEMENTED so it is not a hand edit: mmustamp --skip-phase N,
+    repeatable, gives phase N the placeholder row phases 11 and 17 already
+    get instead of failing on a missing load module; mmbstamp.generate takes
+    a skip= set and filters the assigned list.  Patched in
+    /tmp/claude-1000/c80src and queued for Don.
+
+THE IN-CORE PHASE TABLE IS A BUILD ORACLE, AND IT DECODES (2026-09-08).  See
+#302 for the LM-rollback finding that made it readable; this is what it is
+good for.
+
+    THE LAYOUT, documented in FCMGPT.hal and carried by pure-<cfg>.fcm at
+    0x1CCF2: 16 phase descriptors for phases 3..18, four halfwords each --
+    the halfword OFFSET WITHIN THE TABLE of the phase's first load block
+    descriptor, the load block count, the mass memory address of the first
+    one, the contiguous MM block count -- then three-halfword load block
+    descriptors of main memory address, PROT|SOT|BSR|DSR flags, and length.
+    Destinations are sector-encoded as everywhere else: bit 15 set means
+    expand, (dest & 0x7FFF) | (sector << 15), sector in flags bits 7..4.
+    Every phase's block count agrees with its own contiguous field and the
+    tables are byte-identical between pure-SSW and pure-G9, so the
+    original's exact load-block layout for all sixteen overlay phases is
+    readable.  /tmp/claude-1000/gpt.py decodes it; gptdiff.py diffs a built
+    tree against it.
+
+    WHAT IT SAYS.  Ours against the original, first measured 2026-09-08:
+    phases 3 (38/38), 9 (25/25), 11, 17 and 18 (34/34) exact; 8 215/243, 12
+    210/216, 14 115/107; but 4 155/414, 5 137/292, 6 147/385, 15 157/304 and
+    16 169/308.  The corpus is the same release as the tree -- every DASS
+    listing says AT RELEASE 034 VERSION 070 -- so this is a real deficit and
+    not a release difference.  The build is not uniformly wrong: a specific
+    group of phases comes out at a third to a half while others are exact.
+
+    WHICH TAPES CARRY A STAMPED TABLE.  Search a volume for the FIRST
+    DESCRIPTOR'S STRUCTURE, not for bytes from a known tree -- a build
+    stamped from a different tree matches neither pattern, and an exact-byte
+    search found only two volumes and produced a confident wrong answer.  By
+    structure, 29 of the workspace/pass-run volumes DO carry one, pass-910
+    among them; pass-ipl.mmv and pass-ipl-cflm.mmv do NOT.
+
+    WHAT IT ALSO SETTLES.  Intersecting the table's absolute destinations
+    with the DASS csect tables gives "which phase loads this csect" from the
+    release rather than from our reading of the deck.  That is what
+    established the library policy in the preceding entry, and it is the
+    right instrument for any future question of the same shape.
+
+THE --external-syms OPTION IS THE LINKER'S CSECT TABLE, AND A PRUNED ONE
+SILENTLY DISABLES RELOCATION (2026-09-08).  This is the root cause of the unrelocated
+pointers, and it was OUR OPTION USE -- neither lnk101 nor ASM101S is at fault.
+
+    THE SYMPTOM, found by booting our tape and the reference headless with
+    SNAPSHOT and comparing memory at the same simulated instant, t=150 s,
+    with the IPL set loaded in each.  Nothing is modified, so the comparison
+    cannot invent a failure of its own.  30735 of 524288 halfwords differ.
+    THE SCHEDULING CORE IS BYTE-IDENTICAL -- FPMDISP, FPMSCHED, FPMIDLE,
+    FPMRESET, FCMSAVE, FPMIHPC1, FPMGMTIM, FCMMGBOV, FCMMGPOV and FIOSVC all
+    differ in ZERO halfwords -- which rules out a whole family of theories.
+    Restricted to non-DATA csects, 1071 halfwords are unambiguous bad
+    pointers in two forms: 438 hold the CSECT-RELATIVE OFFSET where the
+    reference holds the relocated absolute address (FIOPDISP+116 reads 0033
+    against B9AD, and 0x1B9AD minus FIOPDISP's start 0x1B97A is exactly
+    0x33), and the rest are 0000 where the reference has a pointer.  They
+    cluster in the I/O and display path: FIOMUWP9 263, FIOHFEPG 99,
+    FIOADCCL 69, FIOPDISP 53, FIOADCNS 43, FIOPDSMU 34, FIOCBLKS 33.
+    FIOPDISP is the display dispatcher, which must run for a DEU to be
+    polled at all -- hence POLL FAIL on the screen and FCOS falling into
+    FPMIDLE with nothing scheduled.
+
+    THE MECHANISM, in linker.py's applyRelocations: absent =
+    (bool(self.csectTable) and targetSection is not None and
+    targetSection.name.strip() not in self.csectTable), then "if not
+    resolved or absent: continue" -- the TXT is left exactly as the
+    assembler wrote it.  --external-syms loads its JSON straight into
+    self.csectTable.  The behaviour is DELIBERATE and its comment says so: a
+    section the table does not name was not part of the configuration that
+    table describes.  Correct for its purpose; catastrophic when fed a table
+    that is merely INCOMPLETE.  extsyms-02-pruned.json held 538 csects
+    against phase 2's 599, and the 89 missing included FIOPDISP, FIOMUWP9,
+    FIOHFEPG and FIOERRLC, the worst affected.
+
+    WHY IT LOOKED LIKE A SELF-REFERENCE BUG.  The gate tests targetSection,
+    non-None only when the relocation targets a SECTION; a relocation
+    against an EXTERNAL takes the other branch and is never gated.  So
+    externals relocated and section references did not -- and the commonest
+    section reference in a csect is to ITSELF.  In FIOPDISP 51 of the 53
+    wrong relocations named FIOPDISP and the 185 correct ones named other
+    modules.  Entirely explained by which branch the code takes.
+
+    TWO CLAIMS MADE ON THE WAY AND WITHDRAWN.  (a) "The DASS dump agrees
+    with the reference tape and not with us, which REFUTES the suggestion
+    that old-tape objects were assembled by asm101 with different relocation
+    data."  It refutes nothing -- it is equally consistent with our linker
+    dropping relocations and with our assembler never emitting them, and if
+    the latter, the old tape matching the hardware is exactly what would be
+    expected.  The user made this point and was right.  (b) "The fix is to
+    pass no external-syms file at all."  Measured, that is wrong in the
+    other direction; see the next entry.
+
+    WHAT DID DISCRIMINATE.  Read the RLD records out of our own objects and
+    ask whether the halfwords that came out unrelocated are flagged.  627 of
+    653 -- 96 per cent -- ARE: FIOMUWP9 263 of 263, FIOHFEPG 99 of 99,
+    FIOPDISP 53 of 53, FIOADCNS 43 of 43, all complete.  ASM101S emitted
+    every relocation.
+
+    USE ibmobjdump.  build/bin/ibmobjdump parses these objects and prints
+    RLD entries, and has --normalize, which drops positional ESD indices and
+    sorts the record groups precisely so two objects can be diffed.
+    Hand-parsing the card images produced two confidently wrong tables
+    first, on two traps worth writing down: the address is the LOW THREE
+    BYTES of the eight-byte entry (R 2, P 2, FLAG 1, ADDRESS 3), and the
+    flag's length field 0x0C marks a FOUR-byte address constant whose
+    relocated halfword is at offset+1, not the halfword the RLD names.
+
+    THE asm101 EXPERIMENT, run with the user's explicit go-ahead to a
+    scratch object never entering a build.  asm101 -L MLIB80 -L RUNMAC
+    -march ap101s on SSSRC/FIOADCCL.asm gives an object the same size as
+    ours, 17840 bytes; sorted RLD dumps are 543 entries each and IDENTICAL;
+    normalized whole-object dumps differ on ONE LINE in 1018, ASM101S
+    writing a bare END where asm101 writes END esdid=FIOADCCL.  So the two
+    assemblers do not differ in relocation.  A SMALL ASM101S FINDING FOR THE
+    VALIDATION LEDGER: the END record's ESD id, naming the module's entry
+    point, is present in asm101's output and absent from ours.
+
+    A HEURISTIC CORRECTED.  "Ours 0000 where the reference is non-zero" was
+    counted as an unrelocated pointer.  Checked against ibmobjdump's parse,
+    the 26 such halfwords in FIOADCCL are NOT RLD targets at all and read
+    ours 0000 against ref 8000 -- a status bit in a data area, i.e. RUNTIME
+    STATE between two running machines.  The 633-zero figure above is
+    inflated by an unknown amount for the same reason.  What survives is the
+    load-bearing part: 627 halfwords sit AT RLD-FLAGGED LOCATIONS holding
+    either the csect-relative offset or zero.  Runtime state does not
+    coincidentally equal "absolute minus csect start".
+
+A CSECT TABLE MUST BE COMPLETE FOR THE PHASE IT IS GIVEN TO -- NOT ABSENT, NOT
+PRUNED, NOT A UNION (2026-09-09).  Three sizes were tried and only one is
+right, and each wrong size fails in its own silent way.
+
+    ABSENT.  Removing the table everywhere improved the I/O csects but broke
+    phase 13 outright: its image collapsed from 330391 halfwords to 16127
+    and the tape re-read phase 13 forever, because extsyms-13.json lists 3
+    csects and phase 13 links exactly 3, so that table was COMPLETE and
+    suppressed nothing.  The absent gate is doing real work for csects that
+    genuinely are not in the configuration; switching it off relocates
+    against fabricated addresses.
+
+    PRUNED.  Real csects silently keep assembler-relative offsets.  This is
+    the preceding entry's defect.
+
+    UNION OF ALL EIGHT CONFIGURATIONS, 3859 csects.  Chosen on a
+    code-divergence comparison, 0.77 per cent against the SSW-only table's
+    1.03, WITHOUT CHECKING WHAT IT INJECTED.  Every csect in the table is
+    PLACED, so the union gave phase 2 thirty-one csects belonging to P9, S2,
+    G9 and G16, all reported by the linker with module=<external-syms>:
+    #PCDIMMU 17419 halfwords, #PCD1MMU through #PCD4MMU 8193 each, #PCVTTCS
+    6399.  59521 halfwords of content that does not belong to this
+    configuration.  Phase 2's total went to 186730 halfwords and mmu2mmv,
+    cutting into a 256-block allocation, TRIMMED THE TAIL SILENTLY -- and
+    the tail is the top of memory, where AIB_GPC_LOCATOR, AIESIP, ARCGPC,
+    ARAGPC, DMTERR and DUPNSP live.  135 csects and 34257 halfwords dropped,
+    with no oversize warning, because trimming to fit is what fit_budget
+    does.
+
+    COMPLETE, FOR THE PHASE'S OWN CONFIGURATION.  Take the pruned table and
+    for every csect the phase links that it omits, add it IF the DASS SSW
+    dump also contains it -- the dump being the authority on what the
+    configuration really holds.  83 of the 89 missing csects qualified; the
+    6 that did not are FCMCKSUM, FCMINBCE, FCMINMSC, FCMINSSL, FCMSSLPT and
+    LOADTBLE, phase 10's IPL loader and correctly absent from a post-IPL
+    image.  The SSW-only table at 660 csects, extended with `contents`
+    entries for 27 parent csects, took unresolved symbols from 658 to 290.
+
+    THE MEASUREMENTS.  As-built, linked PHASE02.fcm against pure-SSW.fcm
+    over the 76418 halfwords of CODE csects only -- NONHAL, PROCEDURE,
+    PROGRAM, BCE, MSC -- where a difference cannot be runtime state: pruned
+    6397 differ (8.37 per cent), no table 9430 (12.34), complete 621-csect
+    785 (1.03), union 592 (0.77).  But the union's 0.77 is bought with 117
+    blocks of foreign content and a trimmed tape, so THE COMPARISON THAT
+    CHOSE IT WAS THE WRONG ONE.  With the SSW-only table foreign csects fall
+    to ZERO, phase 2 drops to 127209 halfwords and the record to 228 BLOCKS,
+    EXACTLY THE ORIGINAL'S 228, and derive_load_blocks cuts seven blocks
+    above 0x38400 including 40000..439E6, so AIB_GPC_LOCATOR reaches memory.
+    Phase 3 reads 38 against 38.  Converging on the original's own geometry
+    is a stronger signal than any single csect comparison.
+
+    THE RULE.  A phase's csect table must describe THE CONFIGURATION THAT
+    PHASE BELONGS TO.  Too small silently disables relocation; too large
+    silently injects other configurations' content and pushes the phase over
+    its allocation, whereupon the tape loses its top of memory without a
+    word.
+
+    TWO MEASUREMENT ERRORS TO STOP REPEATING.  (a) Comparing RUNNING
+    SNAPSHOTS to judge a build is confounded: two builds diverge in
+    execution and their runtime state then differs for reasons having
+    nothing to do with the build.  The "removing the table made the whole
+    image worse, 30735 to 48884" figure was of that kind and is withdrawn,
+    even though the as-built numbers reach the same conclusion.  (b)
+    /tmp/claude-1000/plb.py passes himem=(ph==10) while mmu2mmv passes
+    himem=(phase in ipl), AND PHASE 2 IS IN THE IPL SET.  Every phase 2
+    load-block dump taken with plb.py understates what reaches the tape and
+    hides exactly the high blocks at issue here.
+
+    AND AN INFERENCE WITHDRAWN, worth keeping as a pattern: "v14 crashes
+    earlier, so my table must be feeding DASS addresses our build does not
+    use" was exactly backwards.  v14's image is EIGHT TIMES closer to the
+    flight machine than the tape that merely idled.  Getting closer to the
+    original made the machine fail SOONER, which means the crash is a fault
+    the earlier, worse builds never reached.
+
+PHASE 3 WAS OVERWRITING FCOS: A LOAD BLOCK STRADDLING FCMLINIT (2026-09-08).
+
+    THE FAULT.  With the relocation defect fixed, the tape stopped idling
+    and started CRASHING -- "invalid instruction 0xc055 at 0x47e0" after
+    about 40.4 million steps, NIA 047E0, which is FCMLINIT+0.
+
+    THE EVIDENCE CHAIN.  At 047E0 the linked PHASE02.fcm, the reference
+    tape's running memory and pure-SSW.fcm all hold 88FF 0211 71E1 3121, and
+    a snapshot of OUR OWN run at t=100 holds the same -- so the tape LOADED
+    that address correctly and C055 appears nowhere in the loaded image.
+    The crash is at t=105.5 s and PHASE 3 LOADS AT t=104.4 s, one second
+    earlier.  run.c fetches with mcm_get16(mainStorage, nia) at the literal
+    NIA, so C055 really was at 047E0 when it faulted: something wrote it
+    between the snapshot and the crash.
+
+    THE CAUSE.  Our phase 3's load block LB2 ran 04572..060A8.  FCMLINIT is
+    047E0..04A1F, ENTIRELY INSIDE IT.  Loading phase 3 DMA'd over resident
+    FCOS and the machine then executed the wreckage -- exactly the class of
+    defect tools/check_volume_destinations.py was written for, arriving by a
+    different route.  The original does not do this: its phase 3 blocks are
+    0024A..002AC, 00654..00660, 03A96..03FE0 and 04C70..067A6, and 04C70 is
+    safely past FCMLINIT's end.  Ours were shifted about 1600 halfwords low
+    because, with no csect table, the linker placed phase 3's csects
+    wherever they fell.
+
+    THE FIX is the csect table.  Phase 3 then reproduces the original BLOCK
+    FOR BLOCK -- 0024A..002AC, 00654..00660, 03A96..03FE0, 04C70..067A6 --
+    and nothing straddles FCMLINIT.
+
+    THE LIMIT WORTH RECORDING.  Applied to every phase, the table fragments
+    the ones whose full csect set we do not build: 756 load blocks against
+    the original's 298, phase 4 going from 28 to 169, which overflows
+    #PFCMGPT's 1093 halfwords and mmustamp refuses with "overflow at phase
+    6".  The table places every csect at its flight-machine address, so
+    where our build is nearly complete (phases 2 and 3) it reproduces the
+    original, and where it is not, the placed content is scattered.
+
+A PHASE RECORD CANNOT BE SPLICED WITHOUT THE DESCRIPTORS THAT DESCRIBE IT
+(2026-09-09).  Stated for the third time in two days because it kept being
+rediscovered, and it voids two separate rounds of bisect tapes.
+
+    THE FIRST ROUND, 2026-09-08.  Three tapes were built with the known-good
+    phase 2, 3 or 13 spliced over ours, one at a time.  All three looked
+    identical to the user -- POLL FAIL -- and all three are INVALID: bisect
+    02 read 229 blocks THREE TIMES, bisect 03 read 39 blocks three times,
+    bisect 13 read 7 blocks three times and never reached phase 3.  In each
+    case the load stalled ON THE SPLICED PHASE.  The good tape's records are
+    SHORTER than ours -- phase 2 228 against our 229, phase 3 38 against 39,
+    phase 13 5 against 7 -- so copying the good record over ours leaves the
+    tail as the good tape's staging fill while the descriptor still asks for
+    our block count.  #289 already records exactly this.  I had read #289
+    earlier in the same session and built the splices anyway.
+
+    THE SECOND ROUND, 2026-09-09, and it looked sound.  The method was
+    corrected to replace a phase's WHOLE ALLOCATION rather than its shorter
+    record, which leaves the reference's own staging fill in the tail and
+    loads cleanly.  Results: reference no halt, SIGINT at 1029241367 steps;
+    v18 (ours 2+13+3, reference phase 10) masked wait at 42503082; v19 (v18
+    + reference phase 2) 81481198; v20 (v19 + reference phase 3) 81481190;
+    v21 (v19 + reference phase 13) 81481198.  Read at face value that
+    exonerates phases 3 and 13 and implicates phase 2.
+
+    IT IS ALL ARTEFACT.  v22 -- reference bootstrap, reference phases 2, 3
+    and 10, OUR phase 13 -- logs "3 x read 5 block(s) from 3/3/0/0".  FIVE
+    blocks is the REFERENCE'S phase 13 size; ours is seven.  The loader
+    asked for five because the descriptor said five, and the descriptor came
+    from FCMSSLPT, WHICH IS STAMPED INTO PHASE 10 -- and phase 10 on every
+    tape from v18 onward is the reference's.  Those tapes pair the
+    reference's descriptors with our records: wrong length, failed load
+    block checksum, three retries, SSM FCMWAIT.  The halt is SELF-INFLICTED
+    and the step counts measure nothing about our build.
+
+    CONFIRMED AT THE INSTRUCTION.  v19's halt NIA is 0725C; FCMINSSL starts
+    at 28604 and FCMSSLEX is at 29274, so the halt is FCMSSLEX+2, the
+    instruction after SSM FCMWAIT on the three-checksum-errors path
+    (FCMINSSL.asm line 875).  FCMWAIT is DC X'000A' and the halted PSW2
+    reads 000A0000.  A SECOND SSM FCMWAIT exists at line 273, "NEITHER MMU
+    1/2 SELECTED FOR IPL", and is NOT the one taken -- worth knowing, since
+    SOURCE_RUN=OFF makes that a plausible-looking suspect.
+
+    THE RULE.  For the IPL set the descriptors are FCMSSLPT inside PHASE 10;
+    for overlay phases they are #PFCMGPT inside PHASE 2.  Splicing phase 10
+    silently replaces the description of every IPL phase; splicing phase 2
+    silently replaces the description of every overlay phase.  THE ONLY
+    SOUND SINGLE-VARIABLE EXPERIMENT IS TO REBUILD.
+
+    THE ONE SPLICE THAT IS SOUND is a substitution INSIDE a phase that keeps
+    our layout and our stamped tables: replacing GPCIPL's 15392 halfwords
+    within PHASE10.lib and re-stamping FCMSSLPT before cutting.  Descriptors
+    and records still agree, and exactly one csect has changed.
+
+    AND THE CONTROL THAT WAS NOT RUN.  Four tapes gave the same visible
+    result, which is the standing signal to suspect the harness before the
+    thing under test.  Nobody had booted the UNMODIFIED pass-ipl-cflm.mmv
+    through the same panel sequence in the same environment.  Until such a
+    control exists, every comparison against "the tape that works" rests on
+    an assumption.
+
+THE DEU IMAGE DUMP IS A SCREEN COMPARISON, AND HEADLESS CAN VERIFY GPC MEMORY
+AFTER ALL (2026-09-09).  Two limits asserted repeatedly through 2026-09-08
+were never measured, and both are false.
+
+    THE INSTRUMENT, which existed all along.  The headless DEU model dumps
+    its whole 8192-word image at end of run, as address ranges with an
+    EBCDIC gloss.  Diffing that against the same dump from the working tape
+    is a comparison of WHAT IS ON THE SCREEN, and it needs no MEDS and no
+    display.  Reference: 4106 zeros, 820 distinct of 8192.  v17: 4106 zeros,
+    821 distinct -- and ONE LINE of 400 differs, at 0x19ee..0x1a94, where
+    the reference reads "GPCIPL 09.05.00.00.01" and v17 reads ">>> GPC POWER
+    REFA[IL]".  Everything else matches.  So the display was being driven
+    correctly all along, and "456 bus commands against the reference's
+    15662" was misleading: the content is right, our run simply stops
+    refreshing sooner.  COMPARE THE ARTEFACT, NOT THE TRAFFIC.
+
+    THE SECOND LIMIT: "the headless harness drives yaGPC2's DEU model, not
+    MEDS, so it can never show the menu".  Run the WORKING tape headless for
+    1500 s instead of 620 and the region 0x19ee has COLLAPSED TO A SINGLE
+    HALFWORD, 3200 -- the banner is gone, PASS has taken the display -- and
+    the dump carries GPC MEMORY, "MEM/BUS CONFIG 1 CONFIG" and "READ/WRITE
+    DATA 20 BIT S".  The reference runs to SIGINT at 1029241367 steps.  The
+    620-second runs were simply too short.
+
+    CAUTION ON READING IT.  The strings GPC MEMORY and the rest also live in
+    the DEU's format memory loaded from DEUCFLM, so their PRESENCE proves
+    nothing.  THE LINE THAT DISCRIMINATES IS THE BANNER REGION 0x19ee:
+    occupied by the GPCIPL banner while GPCIPL owns the screen, collapsed to
+    one halfword once PASS does.  That single test is what verified v26 and
+    v27.
+
+THE CON80 STACK CARDS ARE COMMENTED OUT, SO OUR BUILDS CREATE NO PROCESS
+STACKS AT ALL (2026-09-09).  This is the last defect that stood between the
+tape and the GPC MEMORY menu.
+
+    THE FAULT, caught by YAGPC_INTTRACE=1, which should have been run hours
+    earlier: "INT old=0048 new=004c code=0007 atNIA=04977 newPSW=ad5c0031"
+    followed by "store-protect at 013be" and then the masked wait.  A
+    PROGRAM CHECK, interrupt code 7, store protect.  0x013BC is @0AIBGPC,
+    type STACK in the DASS table -- AIB_GPC_LOCATOR's own stack -- and
+    0x04977 is FCMLINIT+407, so FCOS was storing into the stack of the
+    process it was about to dispatch.
+
+    THE CAUSE.  @0AIBGPC does not exist in our link.  Nor does any other
+    stack: the DASS SSW dump has 30 csects of type STACK and our phase 2 had
+    ZERO csects beginning @0.  The address falls under the blanket store
+    protect and the first store to it is a program check.  Everything
+    downstream -- the masked wait, the resume address of AIB_GPC_LOCATOR+0,
+    the DEUs never being polled, the display never leaving the GPCIPL banner
+    -- follows from that one fault.
+
+    WHY THEY ARE MISSING.  lnk101 creates stacks in generateStackSections,
+    from stackCsectNames, whose docstring says: "Primary source: the CON80
+    STACK $0<prog> cards -- SDL-mode objects carry no stack ERs at all, THE
+    CARDS ARE THE ONLY TRIGGER."  Our objects are SDL-mode.  And in
+    pass-build/OI340700/CON80 EVERY STACK CARD IS COMMENTED OUT -- an
+    asterisk in column 1 -- 181 of them across SSW, OPS0, GNC1, GNC2, GNC3,
+    GNC8, GNC9, MFB14, PL9 and SM4.  con80build also never passes
+    --generate-stacks, so even an active card set would have had no fallback
+    size.
+
+    THE FIX, TESTED IN A COPY OF THE DECK AT /tmp/claude-1000/CON80s, THE
+    USER'S TREE UNTOUCHED: strip the leading asterisk from those cards,
+    preserving column alignment, and pass --generate-stacks (a passthrough
+    added to the patched con80build).  Phase 2 then creates 28 of the 30
+    stacks, 24 of them AT EXACTLY THE FLIGHT MACHINE'S ADDRESS, @0AIBGPC
+    among them at 0x013BC.  Four come out one halfword larger and shift
+    accordingly; @0ASCTIM and @0ASGCYC are still not generated.  Phase 2
+    grows from 229 to 233 blocks, still inside its 256.
+
+    THE OPEN QUESTION FOR THE USER, and it is a reconstruction question
+    rather than a tooling one: whether those asterisks belong in the deck.
+    The flight machine HAS the stacks and our SDL objects cannot produce
+    them any other way, so for our build the cards must be active -- but the
+    tree is reconstructed throughout and I have not modified it.
+
+GPCIPL: OUR BUILD IS BIT-EXACT TO THE ORIGINAL LISTING AND THE LEGACY TAPE IS
+NOT (2026-09-09).  This settles a question open since 2026-09-08 and reverses
+the implication that was drawn from it.
+
+    THE SYMPTOM.  The GPCIPL menu appears with a flashing ">>> GPC POWER
+    REFAIL -PROGRAM/MACHINE WERE R[ESET]".  That is MSG130 in
+    MLIB80/MACSMITH.asm, raised only by ERROR 130 in FAIL#0 of
+    MLIB80/FAILEXEC.asm, whose header reads: COMES HERE IF POWER FAILED
+    AGAIN BEFORE THE LAST POWER-DOWN PUTAWAY INFO COULD BE SAFELY RECORDED
+    IN FAILENV1 FOR RESTART.  Its sibling MSG131 is FULL RECOVERY
+    SUCCESSFUL, so this is the failure branch.  FAILEXEC's entry does TSB
+    FAILSWCH,X'8000' and branches to REFAILED if the bit is already set, so
+    FAILEXEC RAN TWICE.  FAILEXEC is COPYd into SSSRC/BILDNEW5.asm, i.e. it
+    is part of GPCIPL, i.e. PHASE 10.
+
+    THE EMULATOR IS NOT THE SOURCE.  yaGPC2 has no power-fail interrupt: the
+    only match in the source is a comment in regmem.c about an already-fixed
+    wait-state inversion, and cpu.h's powerTransient is read and written
+    solely by --state save/restore in ageharness.c.  A tape boot reaches
+    cpu_reset() (System Reset, vector 0x14) from run.c's HALT->STBY, never
+    cpu_power_on() (vector 0x04, SPWRONN -> FAILEXEC), and the log confirms
+    it with "starting at 0x0014b".  The bootstrap's start-up vectors are
+    IDENTICAL between our tape and the reference, POWER ON at 0004 zero in
+    both and SYSTEM RESET at 0014 reading 014B0066 in both, so FAILEXEC is
+    not entered through a mis-set vector.
+
+    THE MESSAGE TRACKS OUR GPCIPL EXACTLY: present on v2..v17 and on v27
+    (our GPCIPL), absent on v18..v26 (the reference's spliced in).  It was
+    isolated by substituting GPCIPL's bytes ALONE -- keeping our phase 10
+    layout and our stamped FCMSSLPT so descriptors and records still agree
+    -- and v23 then showed the normal banner where v17 showed the refail.
+
+    BUT THE DIVERGENCE IS NOT OURS.  Scored against the ORIGINAL IBM
+    ASSEMBLY LISTING, PFS/temp/temp/BILDNEW5.lst, GPCIPL PROGRAM VER 9.05
+    09-23-96, over the 13,285 halfwords whose object code the listing
+    prints: our objects/BILDNEW5.obj MISMATCHES ZERO (0.000 per cent); the
+    GPCIPL inside pass-run/pass-ipl-cflm.mmv mismatches 1,167 (8.78 per
+    cent).  All three of our BILDNEW5 objects -- objects/,
+    objects.prefix-backup/, cb/obj/ -- are byte-identical, so the difference
+    is not something we introduced.
+
+    THE LEGACY TAPE'S DEVIATIONS ARE SYSTEMATIC, NOT RANDOM.  459 of them
+    change only the LOW NIBBLE of an instruction's first halfword to 3 --
+    the base/index register field -- with the following address halfword
+    adjusted by a matching constant.  At 00285 the listing and ASM101S both
+    emit ECF0 1988 for "LA R4,STMWAIT"; the legacy tape has ECF3 1DF6.  That
+    is an assembler resolving base-register addressing differently, not a
+    source-version difference, and it is the shape the user's asm101
+    hypothesis predicted.  Only 17 of 1159 RLD sites in GPCIPL differ
+    between the two, so it is not a relocation difference either.
+
+    SO THE EARLIER IMPLICATION IS WITHDRAWN.  "GPCIPL is the csect that
+    raises the power refail" stands as an isolation result; "therefore our
+    GPCIPL is defective" does not.  Our GPCIPL reproduces the release's own
+    listing exactly, and v27 shows the refail message AND STILL REACHES GPC
+    MEMORY.  What raises MSG130 with a bit-exact GPCIPL is worth knowing but
+    is not a build defect of ours.
+
+    A METHOD WORTH REUSING.  Neither tape is an authority.  pure-<cfg>.fcm
+    and the original listings are, both at AT RELEASE 034 VERSION 070.  Of
+    1071 disputed pointers elsewhere in memory, the DASS dump agreed with
+    the reference tape in 772 cases and with our value in 26 -- but 273
+    matched NEITHER, typically by small offsets (FIODDUPG at 1E86D reads
+    ADF0 on the reference against ADF6 in the dump).  The old tape is not a
+    perfect oracle and must not be treated as one.
+
+0x20241 HOLDS A COMPOOL IN A REAL G9 MACHINE, SO THE DISPATCHER TRAP IS A
+STALE PCT AND NOT CORRUPTED MEMORY (2026-09-08).  Refines the reading in #292,
+which treated FPMDISP branching to 0x20241 and executing a compool as the
+symptom of a half-built configuration.
+
+    WHAT THE DUMPS SAY.  At 0x20241 the eight DASS images hold: SSW an
+    AIGDEU PROGRAM, G9 #PCVNMMU (a compool), G8 #CGR2ORB, G2 #CGKNRCS, G3
+    #CGPEELV, G16 #CGH9CON, P9 #CDCDDS8, S2 #PCVNMMU.  So a running G9
+    machine LEGITIMATELY has compool data at that address.  Intersecting the
+    address with the in-core phase table's load blocks, it is overlaid by
+    phases 4, 5, 6, 7, 8, 12 and 14 -- PHASE 8 AMONG THEM, and G9 does load
+    phase 8.
+
+    WHAT THAT MEANS.  The trap is not "the overlay did not happen"; the
+    overlay DID happen and put a compool there, exactly as the dump shows.
+    What is wrong is that a PCT entry still names 0x20241 as a process entry
+    point AFTER the overlay, so the dispatcher branches into data and the
+    Instruction Monitor traps on an unprotected fetch.  1989 traps sharing
+    one NIA ring 1a96b..1a97f -> 20241 is consistent with a single stale
+    table entry rather than with anything about the loaded image.
+
+    THE QUESTION TO ASK NEXT is therefore what updates the PCT during a
+    transition and why that update did not reach this entry -- not why the
+    memory at 0x20241 is "wrong".  NOT YET INVESTIGATED.  It is not phase
+    18's to write: our phase 18 supplies load blocks at 09ED8, 0A1DA, 0A528,
+    1E4B2, 1F05E, 303AA and 388C4 and none covers 0x20241, and neither does
+    the ORIGINAL's phase 18.
+
+WHAT IS STILL OPEN ON THE OI340700 TAPE (2026-09-09).  Stated after v27 reached
+GPC MEMORY, so that the remaining work is not confused with what is finished.
+None of these blocked the menu.
+
+    PHASES 4, 5, 6, 7, 8 AND 15 COME OUT SHORT of the in-core phase table's
+    contiguous-block counts.  As of the v10 build: phase 2 229 against 228,
+    3 39/38, 9 24/25, 10 55/55, 12 206/216, 13 7/7, 14 114/107, 18 30/34 --
+    but 4 325/414, 5 254/292, 6 310/385, 7 196/230, 8 206/243 and 15
+    198/304.  The undersized ones are display-heavy, which is why the
+    zero-byte exclusion markers were the first hypothesis; phase 15's
+    SPEC-2 sources are all PRESENT and it is still short, so something else
+    undersizes phases as well.
+
+    PHASE 16 DOES NOT LINK.  CON80/SM4TAB's CHANGE cards require SPEC-4
+    symbols that the OI340700 exclusion markers remove.  It can be skipped
+    with mmustamp --skip-phase 16 with no effect on phase 18.
+
+    THE csect TABLE DOES NOT GENERALISE to the phases whose full csect set
+    we do not build; applied to all of them it fragments them past
+    #PFCMGPT's 1093 halfwords.  That has to be solved before an OPS
+    transition can work.
+
+    THE PCT UPDATE during a transition is unexplained; see the 0x20241
+    entry.
+
+    THE STACK CARDS need the user's decision; see that entry.  The fix was
+    tested only in a copy of the deck.
+
+    QUEUED FOR DON, all patched on the copy at /tmp/claude-1000/c80src and
+    none of it in his tree: mmu2mmv should call stamp_ipl (or refuse an
+    unstamped tree -- checkStamped() plus --allow-unstamped as prototyped);
+    mmustamp --skip-phase; con80build --generate-stacks passthrough;
+    con80build --external-syms passthrough; _PATCH_SRC_RE's extensionless
+    member assumption; and autocall's SDF-size proxy, which should test the
+    object rather than a byte threshold and should read an empty source as
+    absent rather than compile it.
+
+    THE PROCEDURE for building and booting the tape is
+    yaShuttle/yaGPC2/HANDOFF-OPS9.md.  The tapes themselves are
+    ~/workspace/pass-run/OI340700-v*.mmv, v27 being the one that works, and
+    ~/workspace/pass-run/headless-gpcmem.sh boots one unattended.
 
