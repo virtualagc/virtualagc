@@ -83,6 +83,7 @@ C_SLOT = "#242422"
 C_PADDLE = "#eceadf"
 C_PADDLE_LO = "#8a877c"
 C_PADDLE_GROOVE = "#4a4a46"
+C_WELL = "#76756f"     # midway between black and the paddle cream
 C_BEZEL = "#4a4840"
 C_TB_GRAY = "#a3a39c"
 C_TB_LEGEND = "#f2f0e6"
@@ -738,7 +739,7 @@ class PanelO6:
         """Circular well behind the paddle, centred on the throw's mid position."""
         ow = max(1, int(self.s))
         self._oval(cx - r, cy - r, cx + r, cy + r,
-                   fill=C_SLOT, outline="#111", width=ow)
+                   fill=C_WELL, outline="#4a4840", width=ow)
 
     def _bushing(self, cx, cy, r):
         """Circular mounting nut the handle pivots in."""
@@ -759,9 +760,10 @@ class PanelO6:
         """
         span = well_h if axis == "y" else well_w
         thick = well_w if axis == "y" else well_h
-        # Thrown-paddle cap width is 2 * 0.30 * thick; disk diameter is twice that.
+        # Thrown-paddle cap width is 2 * 0.30 * thick; disk diameter is
+        # twice that, then 10% smaller.
         paddle_w = thick * 0.60
-        self._switch_disk(cx, cy, paddle_w)
+        self._switch_disk(cx, cy, paddle_w * 0.90)
         br = thick * 0.20
         self._bushing(cx, cy, br)
         t = pos / float(npos - 1) if npos > 1 else 0.0
@@ -794,13 +796,14 @@ class PanelO6:
         length = span * 0.40
         base_h = thick * 0.13
         tip_h = thick * 0.30
+        along = tip_h * 0.70          # oval flattened along the shaft
         ow = max(1, int(self.s))
         # Neck starts just past the bushing so the handle reads as pivoting.
         neck = br * 0.35
         if axis == "y":
             y0 = cy + sign * neck
             y1 = cy + sign * length
-            y_join = y1 - sign * tip_h * 0.75
+            y_join = y1 - sign * along * 0.95
             pts = [
                 (cx - base_h, y0),
                 (cx + base_h, y0),
@@ -810,19 +813,19 @@ class PanelO6:
             shadow = [(x + 1.2, y + 1.8 * sign) for x, y in pts]
             self._poly(shadow, fill="#2a2a22", outline="", width=0)
             self._poly(pts, fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
-            self._oval(cx - tip_h, y1 - tip_h, cx + tip_h, y1 + tip_h,
+            self._oval(cx - tip_h, y1 - along, cx + tip_h, y1 + along,
                        fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
             # Highlight along the left edge and on the cap
             self._line(cx - base_h * 0.45, y0,
                        cx - tip_h * 0.55, y_join,
                        fill="#ffffff", width=max(1, int(1.5 * self.s)))
-            self._oval(cx - tip_h * 0.55, y1 - tip_h * 0.70,
-                       cx + tip_h * 0.05, y1 - tip_h * 0.05,
+            self._oval(cx - tip_h * 0.55, y1 - along * 0.70,
+                       cx + tip_h * 0.05, y1 - along * 0.05,
                        fill="#ffffff", outline="")
         else:
             x0 = cx + sign * neck
             x1 = cx + sign * length
-            x_join = x1 - sign * tip_h * 0.75
+            x_join = x1 - sign * along * 0.95
             pts = [
                 (x0, cy - base_h),
                 (x0, cy + base_h),
@@ -832,13 +835,13 @@ class PanelO6:
             shadow = [(x + 1.8 * sign, y + 1.2) for x, y in pts]
             self._poly(shadow, fill="#2a2a22", outline="", width=0)
             self._poly(pts, fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
-            self._oval(x1 - tip_h, cy - tip_h, x1 + tip_h, cy + tip_h,
+            self._oval(x1 - along, cy - tip_h, x1 + along, cy + tip_h,
                        fill=C_PADDLE, outline=C_PADDLE_LO, width=ow)
             self._line(x0, cy - base_h * 0.45,
                        x_join, cy - tip_h * 0.55,
                        fill="#ffffff", width=max(1, int(1.5 * self.s)))
-            self._oval(x1 - tip_h * 0.70, cy - tip_h * 0.55,
-                       x1 - tip_h * 0.05, cy + tip_h * 0.05,
+            self._oval(x1 - along * 0.70, cy - tip_h * 0.55,
+                       x1 - along * 0.05, cy + tip_h * 0.05,
                        fill="#ffffff", outline="")
 
     def _talkback(self, x1, y1, x2, y2, state, legend_always=None):
