@@ -717,22 +717,12 @@ class PanelO6:
     # ---- control bodies -------------------------------------------------
 
     def _guarded_toggle(self, x1, y1, x2, y2, pos, npos):
-        """Rounded rectangular switch guard with a vertical paddle."""
-        self._rect(x1, y1, x2, y2, fill=C_GUARD, outline=C_GUARD_LO,
-                   width=max(2, int(1.5 * self.s)))
-        m = 7
-        self._rect(x1 + m, y1 + m, x2 - m, y2 - m,
-                   fill=C_SLOT, outline="#111", width=1)
-        self._draw_paddle(x1 + m, y1 + m, x2 - m, y2 - m, pos, npos)
+        """Vertical paddle switch on a circular well."""
+        self._draw_paddle(x1, y1, x2, y2, pos, npos)
 
     def _guarded_toggle_h(self, x1, y1, x2, y2, pos, npos):
-        """Horizontal switch guard with a paddle that travels left/right."""
-        self._rect(x1, y1, x2, y2, fill=C_GUARD, outline=C_GUARD_LO,
-                   width=max(2, int(1.5 * self.s)))
-        m = 7
-        self._rect(x1 + m, y1 + m, x2 - m, y2 - m,
-                   fill=C_SLOT, outline="#111", width=1)
-        self._draw_paddle_h(x1 + m, y1 + m, x2 - m, y2 - m, pos, npos)
+        """Horizontal paddle switch on a circular well."""
+        self._draw_paddle_h(x1, y1, x2, y2, pos, npos)
 
     def _draw_paddle(self, x1, y1, x2, y2, pos, npos):
         """Bat-handle paddle, throwing up/down in the well."""
@@ -743,6 +733,12 @@ class PanelO6:
         """Bat-handle paddle, throwing left/right in the well."""
         self._bat_handle((x1 + x2) / 2.0, (y1 + y2) / 2.0,
                          x2 - x1, y2 - y1, pos, npos, axis="x")
+
+    def _switch_disk(self, cx, cy, r):
+        """Circular well behind the paddle, centred on the throw's mid position."""
+        ow = max(1, int(self.s))
+        self._oval(cx - r, cy - r, cx + r, cy + r,
+                   fill=C_SLOT, outline="#111", width=ow)
 
     def _bushing(self, cx, cy, r):
         """Circular mounting nut the handle pivots in."""
@@ -763,6 +759,9 @@ class PanelO6:
         """
         span = well_h if axis == "y" else well_w
         thick = well_w if axis == "y" else well_h
+        # Thrown-paddle cap width is 2 * 0.30 * thick; disk diameter is twice that.
+        paddle_w = thick * 0.60
+        self._switch_disk(cx, cy, paddle_w)
         br = thick * 0.20
         self._bushing(cx, cy, br)
         t = pos / float(npos - 1) if npos > 1 else 0.0
