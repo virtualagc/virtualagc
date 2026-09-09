@@ -13,7 +13,8 @@ keyboard buses.  Same CLI shape as MEDS2.sh:
     python3 MEDS2.py --dev crt1 idp1
 
 LRU definitions: config/meds.json next to this file, or NSTS_SIM_CONFIG, or
-~/workspace/MEDS2/config/meds.json.
+~/workspace/MEDS2/config/meds.json.  Glyphs come from deu_font.svg (the DEU
+stroke font), not a desktop typeface.
 
 This is the DPS/IDP path used with yaGPC2 (GPCIPL → PASS).  Steam-gauge
 screens (AE_PFD, SPI, …) open a window but do not draw those instruments.
@@ -30,12 +31,14 @@ import argparse
 import json
 import math
 import os
+import re
 import socket
 import struct
 import sys
 import threading
 import time
 import tkinter as tk
+import xml.etree.ElementTree as ET
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -67,6 +70,165 @@ def default_config_path():
 
 def log(msg):
     print("MEDS2: %s" % msg, flush=True)
+
+
+# ---------------------------------------------------------------------------
+# DEU stroke font (data/deu_font.svg).  Same mapping as CharGen in
+# mduVectorDisplay.coffee: group id cN -> chr(N+33), path coords through
+# xy = (0.95+0.9*x/(512/43), 0.10+0.9*y/(512/30)).
+# ---------------------------------------------------------------------------
+
+_NUM = re.compile(r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?")
+
+
+def _svg_nums(s):
+    return [float(x) for x in _NUM.findall(s or "")]
+
+
+def _xy_font(xc, yc):
+    return (0.95 + 0.9 * xc / (512.0 / 43.0),
+            0.10 + 0.9 * yc / (512.0 / 30.0))
+
+
+def _cubic(p0, p1, p2, p3, n=8):
+    pts = []
+    for i in range(n + 1):
+        t = i / float(n)
+        u = 1.0 - t
+        x = (u ** 3 * p0[0] + 3 * u * u * t * p1[0]
+             + 3 * u * t * t * p2[0] + t ** 3 * p3[0])
+        y = (u ** 3 * p0[1] + 3 * u * u * t * p1[1]
+             + 3 * u * t * t * p2[1] + t ** 3 * p3[1])
+        pts.append((x, y))
+    return pts
+
+
+def _parse_path_d(d):
+    """Flatten an SVG path `d` into lists of (x,y) vertices."""
+    tokens = re.findall(r"[MmLlHhVvCcSsQqTtAaZz]|[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?",
+                        d or "")
+    strokes = []
+    i = 0
+    x = y = 0.0
+    sx = sy = 0.0
+    cmd = "M"
+    cur = []
+
+    def take(n):
+        nonlocal i
+        vals = [float(tokens[i + k]) for k in range(n)]
+        i += n
+        return vals
+
+    while i < len(tokens):
+        t = tokens[i]
+        if t.isalpha():
+            cmd = t
+            i += 1
+            if cmd in "Zz":
+                if cur:
+                    cur.append(cur[0])
+                    strokes.append(cur)
+                cur = []
+                x, y = sx, sy
+                continue
+        if i >= len(tokens):
+            break
+        if cmd in "Mm":
+            nx, ny = take(2)
+            if cmd == "m":
+                nx += x
+                ny += y
+            x, y = nx, ny
+            sx, sy = x, y
+            if cur:
+                strokes.append(cur)
+            cur = [(x, y)]
+            cmd = "l" if cmd == "m" else "L"
+        elif cmd in "Ll":
+            nx, ny = take(2)
+            if cmd == "l":
+                nx += x
+                ny += y
+            x, y = nx, ny
+            cur.append((x, y))
+        elif cmd in "Hh":
+            nx = take(1)[0]
+            if cmd == "h":
+                nx += x
+            x = nx
+            cur.append((x, y))
+        elif cmd in "Vv":
+            ny = take(1)[0]
+            if cmd == "v":
+                ny += y
+            y = ny
+            cur.append((x, y))
+        elif cmd in "Cc":
+            a = take(6)
+            if cmd == "c":
+                a[0] += x
+                a[1] += y
+                a[2] += x
+                a[3] += y
+                a[4] += x
+                a[5] += y
+            pts = _cubic((x, y), (a[0], a[1]), (a[2], a[3]), (a[4], a[5]))
+            cur.extend(pts[1:])
+            x, y = a[4], a[5]
+        else:
+            # Skip unknown commands' numbers
+            while i < len(tokens) and not tokens[i].isalpha():
+                i += 1
+    if cur:
+        strokes.append(cur)
+    return strokes
+
+
+def _load_deu_font():
+    paths = [
+        os.path.join(HERE, "deu_font.svg"),
+        os.path.join(nsts_top(), "data", "deu_font.svg"),
+    ]
+    path = next((p for p in paths if os.path.isfile(p)), None)
+    if not path:
+        log("deu_font.svg not found; DEU glyphs will be blank")
+        return {}
+    tree = ET.parse(path)
+    root = tree.getroot()
+    glyphs = {}
+    for g in root.iter():
+        tag = g.tag.split("}")[-1]
+        gid = g.get("id") or ""
+        if tag != "g" or not re.match(r"^c\d+$", gid):
+            continue
+        n = int(gid[1:])
+        ch = chr(n + 33)
+        strokes = []
+        for el in g.iter():
+            et = el.tag.split("}")[-1]
+            if et == "line":
+                x1, y1 = float(el.get("x1", 0)), float(el.get("y1", 0))
+                x2, y2 = float(el.get("x2", 0)), float(el.get("y2", 0))
+                strokes.append([_xy_font(x1, y1), _xy_font(x2, y2)])
+            elif et in ("polyline", "polygon"):
+                pts = _svg_nums(el.get("points", ""))
+                coords = [_xy_font(pts[i], pts[i + 1])
+                          for i in range(0, len(pts) - 1, 2)]
+                if et == "polygon" and coords:
+                    coords.append(coords[0])
+                if len(coords) >= 2:
+                    strokes.append(coords)
+            elif et == "path" and el.get("d"):
+                for raw in _parse_path_d(el.get("d")):
+                    strokes.append([_xy_font(px, py) for px, py in raw])
+        glyphs[ch] = strokes
+    log("DEU font %s: %d glyphs" % (path, len(glyphs)))
+    return glyphs
+
+
+DEU_FONT = _load_deu_font()
+GLYPH_DY = {"_": -0.15}
 
 
 # ---------------------------------------------------------------------------
@@ -654,16 +816,46 @@ def cell_row(y):
     return ((_geom["row0"] - y + g) % g) / float(ROW_PITCH)
 
 
-DEU_CHARSET = {}
-for i, ch in enumerate(" !\"#$%&'()*+,-./0123456789:;<=>?"):
-    DEU_CHARSET[0x20 + i] = ch
-for i, ch in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
-    DEU_CHARSET[0x41 + i] = ch
-for i, ch in enumerate("abcdefghijklmnopqrstuvwxyz"):
-    DEU_CHARSET[0x61 + i] = ch
-DEU_CHARSET[0x5D] = "_"
-DEU_CHARSET[0x7C] = "|"
-DEU_CHARSET[0x7D] = "_"
+# DEUCharset from deuFCW.coffee (USA-003090 p.104).  Keys are 7-bit glyph
+# codes; values are the Unicode characters CharGen uses as font keys
+# (SVG group cN -> chr(N+33)).  0x00 / 0x08 / 0x0D are beam controls, not ink.
+DEU_CHARSET = {
+    0x01: "]", 0x02: "[", 0x03: "SELF TEST",
+    0x04: "˙", 0x05: "¨", 0x06: "∇", 0x07: "·",
+    0x09: "÷", 0x0A: "ߠ", 0x0B: "▷", 0x0C: "◁",
+    0x0E: "ߡ", 0x0F: "ߟ",
+    0x10: "α", 0x11: "β", 0x12: "ρ", 0x13: "ω",
+    0x14: "ε", 0x15: "Ω", 0x16: "_", 0x17: "⎯",
+    0x18: "ˈ", 0x19: "◊", 0x1A: "¥", 0x1B: "°",
+    0x1C: "↑", 0x1D: "↓", 0x1E: "→", 0x1F: "←",
+    0x20: " ", 0x21: "!", 0x22: "~", 0x23: "#",
+    0x24: "√", 0x25: "%", 0x26: "&", 0x27: "'",
+    0x28: "(", 0x29: ")", 0x2A: "*", 0x2B: "+",
+    0x2C: ",", 0x2D: "-", 0x2E: ".", 0x2F: "/",
+    0x30: "0", 0x31: "1", 0x32: "2", 0x33: "3",
+    0x34: "4", 0x35: "5", 0x36: "6", 0x37: "7",
+    0x38: "8", 0x39: "9", 0x3A: ":", 0x3B: ";",
+    0x3C: "<", 0x3D: "=", 0x3E: ">", 0x3F: "?",
+    0x40: "γ",
+    0x41: "A", 0x42: "B", 0x43: "C", 0x44: "D",
+    0x45: "E", 0x46: "F", 0x47: "G", 0x48: "H",
+    0x49: "I", 0x4A: "J", 0x4B: "K", 0x4C: "L",
+    0x4D: "M", 0x4E: "N", 0x4F: "O", 0x50: "P",
+    0x51: "Q", 0x52: "R", 0x53: "S", 0x54: "T",
+    0x55: "U", 0x56: "V", 0x57: "W", 0x58: "X",
+    0x59: "Y", 0x5A: "Z",
+    0x5B: "Σ", 0x5C: "θ", 0x5D: "‾", 0x5E: "π",
+    0x5F: "Ф", 0x60: "Ψ",
+    0x61: "a", 0x62: "b", 0x63: "c", 0x64: "d",
+    0x65: "e", 0x66: "f", 0x67: "g", 0x68: "h",
+    0x69: "i", 0x6A: "j", 0x6B: "k", 0x6C: "l",
+    0x6D: "m", 0x6E: "n", 0x6F: "o", 0x70: "p",
+    0x71: "q", 0x72: "r", 0x73: "s", 0x74: "t",
+    0x75: "u", 0x76: "v", 0x77: "w", 0x78: "x",
+    0x79: "y", 0x7A: "z",
+    0x7B: "σ", 0x7C: "|", 0x7D: "_", 0x7E: "λ",
+    0x7F: "∆",
+}
 
 # opcode table: name -> (mask, val, fields{name: (lsb, width)}, extra)
 def _pat(d, names):
@@ -915,13 +1107,52 @@ class MDUWindow(object):
         for c, r in pts:
             x, y = self._px(c, r)
             flat.extend((x, y))
-        self.cv.create_line(*flat, fill=color, width=width)
+        self.cv.create_line(*flat, fill=color, width=width,
+                            capstyle=tk.ROUND, joinstyle=tk.ROUND)
 
-    def _text_cell(self, col, row, s, color, scale=1.0):
-        x, y = self._px(col, row)
-        px = max(6, int(round(self._sy * 0.72 * scale)))
-        self.cv.create_text(x, y, text=s, fill=color, anchor="nw",
-                            font=("Courier", px, "bold"))
+    def _glyph(self, col, row, ch, color, scale=1.0, angle=0.0):
+        strokes = DEU_FONT.get(ch)
+        if not strokes:
+            return
+        ox = col - 1.0
+        oy = row + GLYPH_DY.get(ch, 0.0)
+        gcx = gcy = cs = sn = ar = 0.0
+        if angle:
+            minx = miny = 1e9
+            maxx = maxy = -1e9
+            for stroke in strokes:
+                for gx, gy in stroke:
+                    if gx < minx:
+                        minx = gx
+                    if gx > maxx:
+                        maxx = gx
+                    if gy < miny:
+                        miny = gy
+                    if gy > maxy:
+                        maxy = gy
+            gcx = (minx + maxx) / 2.0
+            gcy = (miny + maxy) / 2.0
+            cs, sn = math.cos(angle), math.sin(angle)
+            ar = (self._sy / self._sx) if self._sx else 1.0
+        for stroke in strokes:
+            pts = []
+            for gx, gy in stroke:
+                if angle:
+                    rx = gcx + (gx - gcx) * cs - (gy - gcy) * ar * sn
+                    ry = gcy + (gx - gcx) * sn / ar + (gy - gcy) * cs
+                    gx, gy = rx, ry
+                pts.append((ox + gx * scale, oy + gy * scale))
+            self._line(pts, color)
+
+    def _text_cell(self, col, row, s, color, scale=1.0, angle=0.0):
+        xx, yy = col, row
+        for ch in s:
+            if ch == "\n":
+                yy += scale
+                xx = col
+                continue
+            self._glyph(xx, yy, ch, color, scale, angle)
+            xx += 1.0
 
     def _walk(self, start, stop_at):
         _g = geom()
@@ -1003,7 +1234,7 @@ class MDUWindow(object):
             if ch and ch != " ":
                 if not blink or self.blink_on:
                     sc = (COL_PITCH_L / float(COL_PITCH)) if large else 1.0
-                    self._text_cell(pen_x(), pen_y(), ch, pen_color(), sc)
+                    self._text_cell(pen_x(), pen_y(), ch, pen_color(), sc, angle)
             advance()
 
         def draw_vector(a, b):
