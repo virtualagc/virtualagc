@@ -150,3 +150,65 @@ Append new entries below this line.
   protect's 0048/0007.  $0AIGDEU being absent from every GNC configuration
   (present only in SSW, P9, S2) remains true and still explains why OPS 201,
   301 and 901 behave alike, but it is not the mechanism.
+
+### [2026-09-09] Target: HANDOFF-OI340600.md
+- THE OPS 901/201/301 BLOCKER, MEASURED FAR MORE PRECISELY THAN BEFORE -- AND
+  MY CANDIDATE CAUSE IS DISPROVEN.  What is established, all from an
+  instruction trace (YAGPC_TRACEWIN over simulated 405-425 s, 13.3M
+  instructions) and live snapshots, on v35:
+    * The request is understood.  CZ2V_REC_GRT_INDEX reads 9 and the G9 row of
+      CZ2V_GRT_PHASES (#PCZ2COM+1348 = 0x02938) reads 3, 8, 18 and stays
+      intact at t=400, 445, 480 and 560.  Phase 18 IS expected.
+    * ARCGPC executes the GRT-index code at 4156C and the overlay request
+      SVC X'015D' at 4157B EXACTLY TWICE (410.3275/410.3277 and
+      411.5240/411.5243) and is NEVER ENTERED AGAIN through 425.0.  It does
+      not exit the loop early; it does not return from slot 2.
+    * Phase 8's DATA arrives in full (122+115 = 237 blocks of its 243) but
+      FIOMGCMP -- which posts the completion -- is not entered once after
+      second 411, while FIOMGMTR keeps polling 15/s.  FIOMGMTR's first test is
+      the MM READY discrete: `LH R5,CZ2BDIA; L R3,TIOQMNTM; SLL R3,FIOMMRDB
+      (=12); NR R3,R5; BC 07-4,#@LB13`, and it takes the not-ready branch every
+      time, skipping both `SB TIOQFLG1,TIOQIOCM` sites, so #@LB4's test of
+      TIOQIOCM fails and the FIOMGCMP call is jumped over.  Measured: the
+      IOQE at 090B2 holds TIOQFLG1=0C00 (LTMM set, IOCM never) at 411, 412.5,
+      413.5, 414.5 and 415.2.
+    * ENTRY #300 IS WRONG THAT "the MMU READY discrete appears NOWHERE in the
+      path".  It is FIOMGMTR's first and controlling test.
+    * #300's own root cause is GONE: no load block covers the completion chain
+      at 0x8168-0x8180 and the chain is intact in live memory.  Our FIOCBLKS
+      is byte-identical to the flight machine's, including the odd last free
+      -pool link 09262 -> 080CE.
+    * The store-protect at 080D6 (FPMSVCEP+8) is a CONSEQUENCE: completions
+      stop at 412, the 25-entry IOQE pool then drains (TCVTIOFP 090E8 ->
+      0910C -> 091D2 -> 0922C -> 080CE) and FIOSVC allocates the terminator.
+- THE CANDIDATE CAUSE, AND ITS REFUTATION.  From second 412 the dispatcher
+  runs 4300-4900 times a second, every dispatch entering $0AIGDEU and
+  executing ONLY offset 0x21F -- 0x20241, which phase 8's LB23 (2009C..210A7)
+  has just overwritten.  AIG_DEU_LOADER is a LIVE cyclic process (13-14
+  dispatches/s, 130 distinct offsets) that never completes its DEU load:
+  AIGV_DEUIPL_ERR_CODE = 2, "INVALID DEU BITE STATUS RESPONSE", on DEU 2.
+  The REFERENCE TAPE behaves identically (13-14/s, same 130 offsets), so this
+  is not a build defect.  It looked like the whole story.  IT IS NOT: with
+  YAGPC_DEUPRELOADED=1, so AIG_DEU_LOADER has nothing to do and closes, the
+  transition STILL runs only slots 1 and 2, phase 18 is still not requested,
+  and the 080D6 store-protect goes from 1 to 4.  The thrash is real and is
+  NOT the blocker.
+- THREE FIX ATTEMPTS, ALL FAILED, RECORDED SO THEY ARE NOT REPEATED.  (a)
+  Always setting BITE1 bit 0x4000: no effect, because the word deu_bite1()
+  returns is not the word AIGDEU reads.  (b) Dropping the second DEU: no
+  effect -- PASS's DEU load table lists DEU 2 whether or not a model answers.
+  (c) Putting the message header first in deu_bite_response(), which IS
+  justified -- AIGDEU.hal:252 aims the transfer at CZ1B_D_DEU_MSG_HDR and
+  ##CZ1COM.sdf places CZ1B_D_BITE_STAT immediately after it at relative
+  halfword 5 against the header's 4 -- and which DID take AIGDEU past error 2
+  for the first time and removed the 080D6 fault; but AIGDEU then looped on
+  the DCP mass-memory read instead (454 reads of 17 blocks from 4/4/0/7) and
+  starved the transition of MM service entirely, so slots 1 and 2 did not run
+  at all.  A regression, so src/deumodel.c was REVERTED to HEAD; the attempt
+  is kept at /tmp/claude-1000/deumodel-bitefix.c.
+- WHERE TO GO NEXT.  The chain from "FIOMGMTR never sees READY" to "no slot 3"
+  is solid; what is NOT established is why the completion never posts once the
+  transfer ends and READY returns.  The transfer is ~3.6 s of model time for
+  122 blocks, which is the right order for the real hardware, so slowness is
+  not obviously the fault.  Instrument FIOMGMTR's not-ready branch and the
+  moment READY re-asserts, rather than the dispatcher.
