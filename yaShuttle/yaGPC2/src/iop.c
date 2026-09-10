@@ -1177,10 +1177,21 @@ void iop_msc_repeat(IOP *iop, DInstr *v, bool met) {
         static int rtInit = 0, rtOn = 0;
         if (!rtInit) { rtInit = 1; rtOn = getenv("YAGPC_REPEATTRACE") != NULL; }
         if (rtOn)
-            fprintf(stderr, "REPEAT pc=%05x d=%u x=%05x count=%u (%.1f us) t=%.1f\n",
+            /* THE ACCUMULATOR IS THE MONITOR MASK.  FIOMNTR0 loads it from
+             * the TOP ACTIVE IOQE ("GET I/O MONITOR MASK FROM THE TOP
+             * ACTIVE IOQE"), so it names which buses the MSC is watching
+             * on this pass -- and therefore which completions it CANNOT
+             * see.  Without it the trace says how long a repeat armed for
+             * but not what it was waiting on, which is the actual
+             * question when one bus's completion is 1052 ms late while
+             * the MSC cycles every 34 ms. */
+            fprintf(stderr, "REPEAT pc=%05x d=%u x=%05x count=%u (%.1f us) "
+                            "acc=%08x busy=%08x t=%.1f\n",
                     (unsigned)pc, (unsigned)df_get(v, 'd'),
                     (unsigned)(register_get32(iopls_X(&iop->ls)) & 0x3ffff),
-                    (unsigned)count, (double)count * MSC_REPEAT_TICK_US, now);
+                    (unsigned)count, (double)count * MSC_REPEAT_TICK_US,
+                    (unsigned)iopls_getACC(&iop->ls),
+                    (unsigned)register_get32(&iop->regBusyWait), now);
     }
 
     if (met) {
