@@ -43,6 +43,9 @@ typedef struct {
      * FOUR (DCICYC.asm: DCIS#DEU EQU 4; device IDs 5-8 per FIOERRLC.asm's
      * FIODEULW/FIODEUHI), so modelling one or two leaves the DK handler with
      * requests to units that never answer. */
+    /* Simulated microseconds, for YAGPC_DKTRACE.  The router is the one
+     * place that sees every bus command with a clock in reach. */
+    const double *clockUs;
     struct DeuModel *deuExtra[DEU_EXTRA_MAX];
     int deuExtraBus[DEU_EXTRA_MAX];
     int nDeuExtra;

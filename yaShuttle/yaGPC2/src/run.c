@@ -39,6 +39,17 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
                         const GpcServiceInput *in, GpcServiceOutput *out) {
     BusRouter *br = (BusRouter *)ctx;
     if (!br || !in || !out) return;
+    /* YAGPC_DKTRACE: every command issued on a display-keyboard bus, with the
+     * simulated time.  The IOQE a DK request holds is not released until the
+     * transfer completes, so how long one takes is what decides whether an
+     * OPS repaint -- about two dozen 100-word transfers issued at once --
+     * fits inside the 25-entry free pool or runs it dry.  Nothing else
+     * reports that interval: the DEU model has no clock of its own and
+     * YAGPC_DEUTRACE only counts calls. */
+    if (svc == GPC_SVC_XMIT_CMD && br->clockUs != NULL &&
+        in->busID >= 6 && in->busID <= 9 && getenv("YAGPC_DKTRACE"))
+        fprintf(stderr, "DK bus=%d cmd=%06x t=%.6f\n", in->busID,
+                (unsigned)(in->in.word & 0xffffffu), *br->clockUs / 1e6);
     if (br->mmu && in->busID == br->mmuBus) {
         mmumodel_service(br->mmu, svc, in, out);
         return;
@@ -260,6 +271,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtra[d] = r->deuModelExtra[d];
             r->busRouter.nDeuExtra = r->nDeuModelExtra;
+            r->busRouter.clockUs = &r->age.gpc.cpu.elapsedTimeUs;
             r->busRouter.fallback = base;
             r->busRouter.fallbackCtx = baseCtx;
             ap101_set_servicer(&r->age.gpc, bus_router_service, &r->busRouter);
