@@ -45,6 +45,10 @@ void deumodel_free(DeuModel *d);
 void deumodel_service(void *ctx, GpcServiceNumber serviceNumber, const GpcServiceInput *input,
                       GpcServiceOutput *output);
 
+/* The emulator's simulated-microsecond clock, so a keystroke batch can be
+ * gated on simulated rather than wall time (YAGPC_DEUKEYS_SIMTIME). */
+void deumodel_set_clock(DeuModel *d, const double *clockUs);
+
 /* One line of counters in the same shape the real unit's harness prints,
  * so the two can be compared directly. */
 void deumodel_report(const DeuModel *d);

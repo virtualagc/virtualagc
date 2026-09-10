@@ -336,6 +336,12 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
         if (r->mmuModel || r->mtuModel || r->nDeuModelExtra > 0) {
             if (r->mmuModel) {
                 mmumodel_set_clock(r->mmuModel, &r->age.gpc.cpu.elapsedTimeUs);
+    /* The DEU models get the same clock, so YAGPC_DEUKEYS_SIMTIME can gate
+     * a keystroke batch on simulated time. */
+    if (r->deuModel != NULL)
+        deumodel_set_clock(r->deuModel, &r->age.gpc.cpu.elapsedTimeUs);
+    for (int d = 0; d < r->nDeuModelExtra; d++)
+        deumodel_set_clock(r->deuModelExtra[d], &r->age.gpc.cpu.elapsedTimeUs);
                 /* Tell the IOP this mass memory is PRESENT, by setting its
                  * READY bit in the stored discrete.  iop_discrete_in_a()
                  * computes the bit rather than storing it -- ready means
@@ -1043,6 +1049,42 @@ static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
             (unsigned)after->r[6], (unsigned)after->r[7]);
 }
 
+/* The whole of main storage as raw big-endian halfwords, 524,288 of them.
+ * Paired with a state dump so the two describe ONE machine -- see the
+ * -busy path's comment, which makes the same point and is the reason this
+ * is a shared helper rather than a second copy.
+ *
+ * It exists because "did phase N actually load" cannot be answered from
+ * any log the emulator writes: the MMU model's "read N block(s)" line is
+ * emitted at QUEUE time inside do_read, before a single word has left for
+ * the bus, and the bus log records service calls rather than delivered
+ * words.  Only the memory contents settle it, compared against the blocks
+ * on the tape. */
+static void dump_main_storage(BatchRunner *r, const char *path) {
+    FILE *mf = fopen(path, "wb");
+    if (mf == NULL) {
+        fprintf(stderr, "dump: cannot write %s\n", path);
+        return;
+    }
+    uint32_t nhw = (uint32_t)(r->age.gpc.cpu.mainStorage.wordCount * 2);
+    /* Buffered and written in one go.  A byte-at-a-time fputc loop over a
+     * megabyte takes long enough to matter: the run is paced to real time,
+     * so a slow dump makes the emulator fall behind the wall clock, which
+     * moves the simulated instant a wall-gated DEU keystroke lands on. */
+    unsigned char *buf = (unsigned char *)malloc((size_t)nhw * 2);
+    if (buf == NULL) { fclose(mf); fprintf(stderr, "dump: out of memory\n"); return; }
+    for (uint32_t a = 0; a < nhw; a++) {
+        uint32_t v = membus_get16(r->age.gpc.cpu.ram, a);
+        buf[2 * a] = (unsigned char)((v >> 8) & 0xff);
+        buf[2 * a + 1] = (unsigned char)(v & 0xff);
+    }
+    fwrite(buf, 1, (size_t)nhw * 2, mf);
+    free(buf);
+    fclose(mf);
+    fprintf(stderr, "dump: memory (%u hw) -> %s  t=%.1f us\n",
+            (unsigned)nhw, path, r->age.gpc.cpu.elapsedTimeUs);
+}
+
 static bool batchrunner_step(BatchRunner *r) {
     /* Before anything else: in HALT the machine executes nothing at all. */
     if (mode_switch_held(r)) {
@@ -1121,17 +1163,7 @@ static bool batchrunner_step(BatchRunner *r) {
              * rather than an average of two. */
             snprintf(path, sizeof path, "%s-busy%d.mem.bin",
                      r->opts->dumpState, dsBusyProc);
-            FILE *mf = fopen(path, "wb");
-            if (mf != NULL) {
-                uint32_t nhw = (uint32_t)(r->age.gpc.cpu.mainStorage.wordCount * 2);
-                for (uint32_t a = 0; a < nhw; a++) {
-                    uint32_t v = membus_get16(r->age.gpc.cpu.ram, a);
-                    fputc((int)((v >> 8) & 0xff), mf);
-                    fputc((int)(v & 0xff), mf);
-                }
-                fclose(mf);
-                fprintf(stderr, "--dump-state: memory -> %s\n", path);
-            }
+            dump_main_storage(r, path);
             dsBusyDone = 1;
         }
         if (dsNext < dsN &&
@@ -1140,6 +1172,9 @@ static bool batchrunner_step(BatchRunner *r) {
             snprintf(path, sizeof path, "%s-%g.json",
                      r->opts->dumpState, dsAt[dsNext]);
             ageharness_dump_state(&r->age, path);
+            snprintf(path, sizeof path, "%s-%g.mem.bin",
+                     r->opts->dumpState, dsAt[dsNext]);
+            dump_main_storage(r, path);
             dsNext++;
         }
     }

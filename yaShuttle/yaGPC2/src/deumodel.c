@@ -43,6 +43,11 @@
 struct DeuModel {
     int busID;
 
+    /* The emulator's simulated microsecond clock, as the MMU and MTU
+     * models already take one.  Needed so a keystroke batch can be
+     * gated on SIMULATED time -- see deu_pending_keys. */
+    const double *clockUs;
+
     bool ipled;         /* the unit has been loaded */
     bool iplRunning;    /* a load is in progress */
     int majorFunc;
@@ -299,8 +304,31 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
     int which = -1;
     for (int i = 0; i < nBatch; i++) {
         if (sent[i]) continue;
+        /* WALL CLOCK IS NOT A STABLE GATE.  The comment above prefers
+         * seconds over poll counts because the run is paced to real time,
+         * but "paced to" is not "equal to": the emulator falls behind
+         * whenever the host is loaded, so the SIMULATED instant at which a
+         * batch lands drifts run to run.  Measured: an identical
+         * "@410s:OPS,9,0,1,PRO" landed at simulated 389.6 s in a run that
+         * had the machine to itself and much later in three runs sharing
+         * it, and only the first drove a mass-memory read -- the other
+         * runs looked like a transition that did nothing rather than a
+         * keystroke delivered at the wrong moment.
+         *
+         * YAGPC_DEUKEYS_SIMTIME=1 gates on SIMULATED seconds instead,
+         * which is reproducible regardless of host load.  Off by default
+         * so existing "@Ns" specs keep their old meaning. */
+        double gateSec = deu_wall_seconds();
+        {
+            static int stInit = 0, stOn = 0;
+            if (!stInit) {
+                stInit = 1;
+                stOn = getenv("YAGPC_DEUKEYS_SIMTIME") != NULL;
+            }
+            if (stOn && d->clockUs != NULL) gateSec = *d->clockUs / 1e6;
+        }
         int due = (batchSecs[i] >= 0)
-                  ? (deu_wall_seconds() >= (double)batchSecs[i])
+                  ? (gateSec >= (double)batchSecs[i])
                   : (d->polls >= batchAfter[i]);
         if (due) { which = i; break; }
     }
@@ -331,7 +359,14 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
             (uint16_t)(codes[i] << ((KEYS_PER_WORD - 1 - i % KEYS_PER_WORD)
                                     * KEY_BITS + 1));
     w[1] = (uint16_t)(KEY_COUNT_HIGH | n);
-    fprintf(stderr, "deu: YAGPC_DEUKEYS delivered %d keystroke(s)\n", n);
+    /* TIMESTAMPED.  Without it the only way to date a batch is to read the
+     * nearest trace line, which is unreliable -- and every question about a
+     * transition turns out to be a question about WHEN the key landed. */
+    fprintf(stderr, "deu: YAGPC_DEUKEYS delivered %d keystroke(s) "
+                    "poll=%ld simt=%.3f s wall=%.1f s\n",
+            n, (long)d->polls,
+            (d->clockUs != NULL) ? *d->clockUs / 1e6 : -1.0,
+            deu_wall_seconds());
     return HDR_KYBD_MSG;
 }
 
@@ -620,6 +655,10 @@ static void deu_image_stats(const DeuModel *d, unsigned *zeros, unsigned *fill,
         else if (v == 0xc9fb || v == 0xc6c6) (*fill)++;
         if (!seen[v]) { seen[v] = 1; (*distinct)++; }
     }
+}
+
+void deumodel_set_clock(DeuModel *d, const double *clockUs) {
+    if (d) d->clockUs = clockUs;
 }
 
 void deumodel_report(const DeuModel *d) {

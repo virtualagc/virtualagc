@@ -988,7 +988,10 @@ void iop_exec_processors(IOP *iop) {
                 bwOn = getenv("YAGPC_BWTRACE") != NULL;
                 for (int i = 0; i < 33; i++) bwLast[i] = -1;
             }
-            if (bwOn && bceIdx >= 1 && bceIdx <= 32) {
+            /* Buses 6/7/8 are the DK/DEU buses under study and 18 is mass
+             * memory; every other BCE would only bulk out the log. */
+            if (bwOn && (bceIdx == 6 || bceIdx == 7 || bceIdx == 8 ||
+                         bceIdx == 18)) {
                 int h = iop_proc_get(&iop->regHalt, bceIdx) ? 1 : 0;
                 int b = iop_proc_get(&iop->regBusyWait, bceIdx) ? 1 : 0;
                 int st = (h << 1) | b;
