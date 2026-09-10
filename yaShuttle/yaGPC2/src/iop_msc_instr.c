@@ -665,9 +665,44 @@ static void exec_RAI(IOP *t, DInstr *v) {
     iop_msc_repeat(t, v, (register_get32(&t->regIndicator) & m) == m);
 }
 
-/* THE MSC'S OWN BIT IS NOT IN THIS MASK, and putting it there breaks the
- * machine.  PROC_ALL_BCE is correct; this is written down because FIOMCNTL
- * looks at first sight like it says otherwise.
+/* THE MSC'S OWN BIT IS NOT IN THIS MASK, AND THAT IS WRONG.  The document
+ * is explicit and this code contradicts it; PROC_ALL_BCE is a COMPENSATING
+ * ERROR that the machine currently depends on.  Read the next paragraph
+ * before believing anything further down.
+ *
+ * IOP Principles of Operation (IBM-6246556A), @RAW "REPEAT UNTIL ALL
+ * WAITING", PROGRAMMING NOTES, verbatim:
+ *
+ *     "Since processor 0 corresponds to the MSC, (which is busy during
+ *      instruction execution), the MSC execution of an @RAW instruction
+ *      will correspond to a loop until the maximum repeat count is
+ *      reached."
+ *
+ * So bit 0 IS the MSC, the MSC IS busy while executing, and an @RAW with
+ * bit 0 set loops to the count -- exactly the delay FIOMDLY builds with
+ * "@LI -1  *TURN ON MSC BIT IN REPEAT MASK".  nsts-sim-gpc 818df88 makes
+ * the same correction, citing POO II-80.
+ *
+ * Both arguments below fail.  2.6.1.6's "all of a set of specified BCEs"
+ * is the general description, and the programming notes address bit 0
+ * directly.  FIOMNTR3's `@N FIOM7FFF ... OFF MSC BIT` does not show the
+ * hardware ignoring bit 0 -- it shows the software clearing it BECAUSE
+ * the hardware honours it.
+ *
+ * WHY IT IS STILL PROC_ALL_BCE.  Correcting it kills the machine at
+ * t~231 s: the IOQE sentinel fault (PGMCHK 0007 at=1be4b lastProt=080d6)
+ * instead of ~398, no transition, and the bus-6 hold median going from
+ * 0.85 ms to thousands.  Measured alone (run x2) and together with
+ * upstream's receive pacing and zero time-out floor (run u1) -- the same
+ * failure both times, so it is not an isolation artifact.  That means a
+ * SECOND defect exists which this error has been masking, and the t~231
+ * fault is its symptom.  Fix that first, then set the mask correctly.
+ * YAGPC_RAW_MSCBIT and YAGPC_IOP_UPSTREAM both select the correct
+ * behaviour for testing.
+ *
+ * The historical argument for PROC_ALL_BCE follows, kept because it is
+ * what the measurements were made against -- but it is REFUTED BY THE
+ * DOCUMENT above, not merely doubtful.
  *
  * FIOMDLY builds a delay out of @RAW and comments it
  *      @LI  -1   *TURN ON MSC BIT IN REPEAT MASK
@@ -691,7 +726,8 @@ static void exec_RAI(IOP *t, DInstr *v) {
  * FIOMDLY is for in the first place: its own header says the purpose is "to
  * delay until the I/O to be monitored is done".
  *
- * DO NOT "FIX" THIS TO PROC_ALL. */
+ * DO NOT "fix" this to PROC_ALL EXPECTING IT TO WORK -- it is the right
+ * value and the machine dies on it until the masked defect is found. */
 static void exec_RAW(IOP *t, DInstr *v) {
     /* YAGPC_RAW_MSCBIT=1 includes the MSC's own bit, i.e. the change the
      * comment above forbids.  It is a MEASUREMENT HOOK, not a fix, and it
