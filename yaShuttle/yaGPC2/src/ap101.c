@@ -142,6 +142,85 @@ static void ap101_step_iop(AP101 *gpc, double startUs) {
  * hex except the time.  Writes bypass store protection, because the point
  * is to stand in for something the ground Mass Memory Build would have
  * written into the image before the machine ever ran.  Diagnostic only. */
+/* YAGPC_POISON fills halfword RANGES with a known value at a given
+ * simulated time, e.g.
+ *   YAGPC_POISON="386:04020-0421f=dead,0a000-0a1ff=dead"
+ * Groups are separated by ';', each is "<timeSec>:<lo>-<hi>=<val>,...",
+ * addresses and value hex, time in seconds.  Writes bypass store
+ * protection, like YAGPC_PATCH, and for the same reason.
+ *
+ * WHY A RANGE FILL AND NOT YAGPC_PATCH.  The question it exists for is
+ * "did the loader WRITE here, or did memory merely already hold the right
+ * value" -- and for blocks that are zeros or a repeating fill pattern, no
+ * amount of comparing content can answer it, because the answer looks the
+ * same either way.  Poisoning the destination first turns that into a
+ * direct measurement: if the poison is gone the loader wrote, if it
+ * survives the loader did not, and if it is replaced by something that is
+ * neither the poison nor the tape's bytes then the loader wrote something
+ * TRANSFORMED.  That last case is invisible to a content search, which is
+ * why 24 phase-8 blocks came back "not found anywhere" with no way to tell
+ * absence from transformation.  A patch list of 64 halfwords cannot do it;
+ * one block alone is 512. */
+#define POISON_MAX_GROUPS 4
+#define POISON_MAX_RANGES 64
+static void ap101_timed_poison(AP101 *gpc) {
+    static int inited = 0, nGroups = 0;
+    static double atUs[POISON_MAX_GROUPS];
+    static int done[POISON_MAX_GROUPS];
+    static int nR[POISON_MAX_GROUPS];
+    static uint32_t lo[POISON_MAX_GROUPS][POISON_MAX_RANGES];
+    static uint32_t hi[POISON_MAX_GROUPS][POISON_MAX_RANGES];
+    static uint32_t val[POISON_MAX_GROUPS][POISON_MAX_RANGES];
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_POISON");
+        while (e != NULL && *e != '\0' && nGroups < POISON_MAX_GROUPS) {
+            char *end = NULL;
+            atUs[nGroups] = strtod(e, &end) * 1e6;
+            if (end == NULL || *end != ':') break;
+            const char *p2 = end + 1;
+            nR[nGroups] = 0;
+            while (*p2 != '\0' && *p2 != ';' && nR[nGroups] < POISON_MAX_RANGES) {
+                uint32_t a = (uint32_t)strtoul(p2, &end, 16);
+                if (end == p2 || *end != '-') break;
+                p2 = end + 1;
+                uint32_t b = (uint32_t)strtoul(p2, &end, 16);
+                if (end == p2 || *end != '=') break;
+                p2 = end + 1;
+                uint32_t v = (uint32_t)strtoul(p2, &end, 16);
+                if (end == p2) break;
+                lo[nGroups][nR[nGroups]] = a;
+                hi[nGroups][nR[nGroups]] = b;
+                val[nGroups][nR[nGroups]] = v;
+                nR[nGroups]++;
+                p2 = end;
+                if (*p2 == ',') p2++;
+            }
+            done[nGroups] = 0;
+            nGroups++;
+            const char *semi = strchr(e, ';');
+            if (semi == NULL) break;
+            e = semi + 1;
+        }
+        if (nGroups > 0)
+            fprintf(stderr, "poison: %d group(s) armed\n", nGroups);
+    }
+    for (int g = 0; g < nGroups; g++) {
+        if (done[g] || gpc->cpu.elapsedTimeUs < atUs[g]) continue;
+        done[g] = 1;
+        long n = 0;
+        for (int i = 0; i < nR[g]; i++) {
+            for (uint32_t a = lo[g][i]; a <= hi[g][i]; a++) {
+                mcm_set16(&gpc->cpu.mainStorage, a, val[g][i], false);
+                n++;
+            }
+        }
+        fprintf(stderr, "poison: group %d wrote %ld halfword(s) in %d range(s) "
+                        "at t=%.6f s\n", g, n, nR[g],
+                gpc->cpu.elapsedTimeUs / 1e6);
+    }
+}
+
 #define PATCH_MAX_GROUPS 8
 #define PATCH_MAX_WRITES 64
 static void ap101_timed_patch(AP101 *gpc) {
@@ -458,6 +537,7 @@ void ap101_exec1(AP101 *gpc) {
     ap101_timed_trace(gpc);
     ap101_trig_trace(gpc);
     ap101_timed_patch(gpc);
+    ap101_timed_poison(gpc);
     ap101_timed_loadbin(gpc);
     /* YAGPC_NIAPROBE=<hexaddr> dumps R0-R7 and the SSL's two context-struct
      * indices every time that address is about to execute.  Unlike --break
