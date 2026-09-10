@@ -145,6 +145,13 @@ typedef struct {
      * the next receive, ahead of anything newer. */
     uint32_t latch;
     bool latchValid;
+    /* YAGPC_IOP_UPSTREAM: simulated time at or after which the next
+     * received word may be taken.  A real receiver presents halfwords to
+     * its BCE at the bus rate however fast the host modelling the
+     * subsystem answered; without this a whole transfer is absorbed in
+     * one slice and the software's pacing against it means nothing.
+     * Ported from nsts-sim-gpc's MIA.rxNextNs (iop_bce.coffee). */
+    double rxNextUs;
 } MIA;
 
 void mia_init(MIA *m, int bceNum);

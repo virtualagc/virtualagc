@@ -721,7 +721,13 @@ static void exec_RAW(IOP *t, DInstr *v) {
      * and x1 stopped at ~190.  A 200-second run cannot clear this
      * change. */
     static int mbInit = 0, mbOn = 0;
-    if (!mbInit) { mbInit = 1; mbOn = getenv("YAGPC_RAW_MSCBIT") != NULL; }
+    if (!mbInit) {
+        mbInit = 1;
+        /* YAGPC_IOP_UPSTREAM turns this on as part of the coordinated set;
+         * YAGPC_RAW_MSCBIT still selects it alone, which is refuted. */
+        mbOn = (getenv("YAGPC_RAW_MSCBIT") != NULL ||
+                getenv("YAGPC_IOP_UPSTREAM") != NULL);
+    }
     uint32_t m = iopls_getACC(&t->ls) & (mbOn ? PROC_ALL : PROC_ALL_BCE);
     iop_msc_repeat(t, v, (register_get32(&t->regBusyWait) & m) == 0);
 }

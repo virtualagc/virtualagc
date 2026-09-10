@@ -33,6 +33,9 @@ static void iop_watch_store(IOP *iop, uint32_t addr, uint32_t value,
 /* Which bits of a MIA enable/disable data word are writable: BCE 1-24
  * in processor numbering.  Only they have MIAs. */
 #define MIA_WRITE_MASK 0x7fffff80u
+/* One word time on the 1 MHz serial bus: 28 bits plus a >=5 us
+ * interword gap.  nsts-sim-gpc BUS_WORD_NS = 33000. */
+#define MIA_BUS_WORD_US 33.0
 
 #define INTA_GO_NOGO   0x80000000u
 #define INTA_IOP_FAIL  0x40000000u
@@ -319,9 +322,52 @@ void iopls_setBST(IOPLocalStore *ls, uint32_t v) {
 
 void mia_init(MIA *m, int bceNum) { m->bceNum = bceNum; }
 
+/* YAGPC_IOP_UPSTREAM=1 enables the COORDINATED SET of IOP corrections from
+ * nsts-sim-gpc commit 818df88, "addressing, timer and bus-rate corrections
+ * in the CPU and the IOP":
+ *
+ *   - the receive time-out floor is zero, so the time out FCMINIOP loaded
+ *     governs (33 us on most buses, 49.5 us on bus 24, 5 ms on the DK
+ *     buses 6-9, 1.959936 s on mass memory 18-19);
+ *   - a MIA presents one received word per 33 us bus word time;
+ *   - @RAW keeps accumulator bit 0 (POO II-80).
+ *
+ * THEY GO TOGETHER.  Bit 0 alone was tried here and was catastrophic (run
+ * x2: no transition, the IOQE sentinel fault at t=230 instead of ~398, and
+ * the bus-6 hold median going from 0.85 ms to 4263 ms), which is what
+ * gpc-causes.py entry 2 records.  Upstream ships it beside the pacing and
+ * the zero floor, so testing one item of an interdependent set and
+ * concluding the item is wrong is the error to avoid here.
+ *
+ * OFF by default.  Any test of it must run past 250 s: x1 looked perfectly
+ * healthy for 190 s and the damage did not start until about 230. */
+static int iop_upstream(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = getenv("YAGPC_IOP_UPSTREAM") != NULL; }
+    return on;
+}
+
+/* The receive pacing on its own, so the set can be bisected: the whole set
+ * regressed exactly as the @RAW mask alone did (run u1: IPL healthy, then
+ * the IOQE sentinel fault at t=231.19 against x2's 230.9, and a bus-6 hold
+ * median of 2166 ms against a 0.85 ms baseline), which says the mask is
+ * still the item that breaks and the pacing did not rescue it.  The zero
+ * timeout floor needs no flag of its own -- YAGPC_RECV_FLOOR_US=0 does it. */
+static int iop_mia_pace(void) {
+    static int inited = 0, on = 0;
+    if (!inited) {
+        inited = 1;
+        on = (getenv("YAGPC_MIA_PACE") != NULL ||
+              getenv("YAGPC_IOP_UPSTREAM") != NULL);
+    }
+    return on;
+}
+
 bool mia_data_available(struct IOP *iop, MIA *m) {
     if (m->latchValid) return true;
     if (!iop->servicer) return false;
+    /* Paced: a word is not presentable before its bus word time is up. */
+    if (iop_mia_pace() && iop_now_us(iop) < m->rxNextUs) return false;
     GpcServiceInput input = {.busID = m->bceNum, .address = 0};
     GpcServiceOutput output = {0};
     iop->servicer(iop->servicerCtx, GPC_SVC_RECV_POLL, &input, &output);
@@ -329,6 +375,7 @@ bool mia_data_available(struct IOP *iop, MIA *m) {
 }
 
 uint32_t mia_get_data(struct IOP *iop, MIA *m) {
+    if (iop_mia_pace()) m->rxNextUs = iop_now_us(iop) + MIA_BUS_WORD_US;
     if (iop->servicer) {
         GpcServiceInput input = {.busID = m->bceNum, .address = 0};
         GpcServiceOutput output = {0};
@@ -1265,6 +1312,11 @@ static double iop_recv_timeout_us(IOP *iop, int p) {
         const char *e = getenv("YAGPC_RECV_FLOOR_US");
         g_recvFloorFromEnv = 1;
         if (e != NULL) g_recvTimeoutFloorUs = atof(e);
+        /* Upstream: "the receive time-out floor is zero: the loaded time
+         * out governs."  FCMINIOP programs every BCE's MTO explicitly, and
+         * a 2 ms floor overrides all of them except buses 6-9, 12-13 and
+         * 18-19 -- bus 24's 49.5 us becomes 2 ms, 40x. */
+        else if (iop_upstream()) g_recvTimeoutFloorUs = 0.0;
     }
     Register *r = iopls_at(&iop->ls, p, 1, 3);
     uint32_t mto = r ? (register_get32(r) & 0x3ffffu) : 0u;
