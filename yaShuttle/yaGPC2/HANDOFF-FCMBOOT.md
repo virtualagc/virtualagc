@@ -1206,6 +1206,54 @@ Whole-state, which is what cracked the hardest bugs:
                                              BCE's recv state; runs for EVERY stop
                                              reason, not just max-steps
 
+Counting, which answers a different shape of question from tracing.  Where a
+window trace costs tens of megabytes and has to be aimed at a simulated instant
+that MOVES between runs, and `YAGPC_SVCTRACE` prints so much it drops the
+emulator below real time and the run is killed before reaching the event, these
+are cheap enough to leave on:
+
+    YAGPC_PCCOUNT=<hexaddr>[,...]  executions of up to 32 halfword addresses,
+                                   with the first and last simulated time,
+                                   printed at exit.  A sorted array and a binary
+                                   search per instruction.  It is what localised
+                                   the OPS 901 blocker to the instant Clock 2
+                                   stops being re-armed (§8.31)
+    YAGPC_DKTRACE                  every command on a display-keyboard bus (6-9)
+                                   with its simulated time, from the bus router
+                                   — the only place that sees every bus command
+                                   with a clock in reach, the DEU model having
+                                   none of its own and YAGPC_DEUTRACE counting
+                                   service calls without timing them
+    YAGPC_IMONHIST                 a histogram, by 4K page, of where the
+                                   Instruction Monitor fires, printed at exit.
+                                   It fires on any instruction fetched from a
+                                   location the store-protect bitmap says is
+                                   NOT protected, and PASS runs with its mask
+                                   bit set, so on a machine whose protection
+                                   matches the real one it should be silent
+
+Behaviour, not instrumentation — these CHANGE the run:
+
+    YAGPC_MMU_QUEUE_READY          restore the pre-2026-09-09 rule that raised
+                                   the MMU's READY discrete when the host had
+                                   consumed the output queue.  Raising it when
+                                   the transfer has gone past ON THE WIRE is now
+                                   the DEFAULT: the old rule DEADLOCKS the G9
+                                   overlay, because READY is gated on the queue
+                                   draining, the queue advances only when the
+                                   BCE polls it, and the BCE has stopped because
+                                   the software is blocked waiting for READY.
+                                   YAGPC_MMU_TIMED_READY is now a no-op
+    YAGPC_DEU_EXTRA_PRELOADED      display units BEYOND the built-in DK1 one come
+                                   up already initialised.  This model recognises
+                                   the end of a load only by GPCIPL's
+                                   250-halfword final fill (LAST_FILL_WORDS);
+                                   PASS's own load of the other units ends
+                                   differently, so they never reach `ipled`,
+                                   answer every poll needing a load, and
+                                   AIG_DEU_LOADER retries them forever.  Opt-in
+                                   until the real end-of-load rule is known
+
 Execution:
 
     YAGPC_NIARING=<n>            ring of recent NIAs, dumped at the Instruction

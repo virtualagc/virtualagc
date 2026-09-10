@@ -504,9 +504,47 @@ events either side of them:
 | PASS takes the display (`0x19ee` collapses to `3200`) | **~200** |
 | SSL mass-memory activity finished | t ≈ 105 s |
 
-So the gates are `@75` for `ITEM 1 EXEC`, about `@210` for anything that must
-arrive once PASS is up, and `RUN_AT=140` — which is what `headless-gpcmem.sh`
-now defaults to.  A 700-second run covers an OPS transition with margin.
+So the gates are `@75` for `ITEM 1 EXEC` and about `@210` for anything that
+must arrive once PASS is up.
+
+**`@Ns` IS WALL SECONDS, NOT SIMULATED SECONDS.**  `deu_wall_seconds()`, not
+the emulated clock — while `YAGPC_SNAPSHOT` and `YAGPC_TRACEWIN` are both
+SIMULATED.  The two clocks do not track: the sim/wall ratio has been measured
+between **0.19x and 1.7x** on otherwise identical runs, depending on what
+instrumentation is attached.  A time window aimed at a simulated instant may
+therefore never be reached before the script's wall-clock kill, and a
+keystroke gate may fire much earlier or later in the machine's own life than
+intended.  `YAGPC_SVCTRACE` and `YAGPC_EAWATCH` each cost roughly half the
+emulator's speed.
+
+**`RUN_AT` IS BACK TO 260, AND THE IPL SOURCE NOW COMES OFF *AFTER* RUN.**
+The PASS User's Guide, Table 2-2 "GPC IPL SEQUENCE" (p. 54), steps 13 and 14,
+are unambiguous: RUN first, then IPL SOURCE OFF.  `headless-gpcmem.sh` used to
+deselect eight seconds BEFORE RUN, inverting it, and nothing established the
+two were equivalent.  The panel script is now crt-deselect at `RUN_AT-10`, RUN
+at `RUN_AT`, SOURCE OFF at `RUN_AT+2`.  The old `ITEM 1 EXEC must fire before
+RUN_AT-8` deadline was an artefact of the inverted order and no longer exists;
+the SSL load still has to finish before RUN.
+
+**`SOURCE_RUN` DEFAULTS TO `OFF`, AND LEAVING IT ON FAILS AS SILENCE.**  With
+the IPL source still selected, an OPS request is ACCEPTED — `ARCGPC` runs —
+and then `FIOMGSTR` completes the mass-memory transaction synchronously with
+"MM SELECTED FOR IPL", `FIOMGCMP` dequeues it in the same millisecond,
+`FIOMGMTR` is never entered because nothing is left to monitor, and the tape is
+never touched.  Measured with `YAGPC_PCCOUNT`: `$0ARCGPC` 1 hit, `FIOMGSTR` 2,
+`FIOMGSNC` 2, `FIOMGCMP` 2, all inside one millisecond; `FIOMGMTR` 0,
+`FIOMGTQE` 0.  From outside that is indistinguishable from a refused
+transition or a tape missing the phase.  It cost five runs before it was
+found.  **Confirm an MMU read at t > 200 s before believing any measurement of
+a transition.**
+
+**STALE `discretePanel` PROCESSES SURVIVE A KILLED RUN** and hold the port
+base; two publishers on the discretes bus make the GPC flap HALT <-> RUN, and
+the guard then refuses the next run.  `retest-crt2.sh` launched its panel
+backgrounded INSIDE a subshell (`& )`), so the subshell exited immediately and
+the panel was orphaned with no pid anyone could record — now fixed, along with
+a trap that tears down the displays, the sniffer, the panel and the GPC
+together, and an Enter-to-shut-down prompt in place of `wait`.
 
 Read the poll count out of the DEU's closing stats line (`"polls":378`) before
 concluding anything about a transition: a batch that never fired looks
@@ -591,6 +629,90 @@ what §5 stamped.
 
 ---
 
+## The OPS 901/201/301 blocker, as of 2026-09-09
+
+`OPS 901 PRO` **does not complete.**  Phase 3 and phase 8 load from the tape;
+phase 18 never does.  `OPS 201` and `OPS 301` fail identically, and neither
+needs phase 18.
+
+### What is invariant across every run
+
+* `FCMMGPOV` is entered **twice** for the transition — phase 3, phase 8 — and
+  never a third time.
+* `$0ARCGPC` is entered **exactly twice** and never again, parked in
+  `WAIT FOR ARC_OVL_EVT` after phase 8.
+* Phase 8's data **does** arrive: 123 + 115 blocks read off the tape.
+* `CZ2V_GRT_MC_PHASES` rows are FIVE halfwords, not three; the table starts at
+  `#PCZ2COM+1348` (`0x02938`) and row 9 (OPS 9 GNC) reads **3, 8, 18**.
+  `ARCGPC` uses slot 1 for the MF overlay and slots 2-5 for the program
+  overlay.  Phase 18 is present and well formed on the tape: 8 load blocks at
+  `6/5/0/0`, 15,284 halfwords of its 34 allocated blocks.
+
+So the failure is that **`ARC_OVL_EVT` is never set after a load that
+demonstrably completed on the tape side.**  `FCMMGPOV` sets it on its exit
+path via `COPY FIOSTEVT`, after `FCMIOSLP` exits.  That is the place to
+instrument — `FSVC0019` `192ce`, `FCMMGOVP` `19309`, `SVC FCMMGIOS` `193c1`,
+`SVC FCMMGWAT` `193c3`, `SVC FCMMGWTT` (200 ms error retry) `193d1`,
+`FTRMGPOV` (the exit that sets the event) `1935c`.
+
+### The chain that is NOT the cause, and is now fixable
+
+A long chain was traced end to end and then shown to be a **passenger**.  It
+is real, it is worth fixing, and switching it off does **not** make phase 18
+load:
+
+1. Our DEU model recognises the end of a load only by GPCIPL's 250-halfword
+   final fill (`LAST_FILL_WORDS`).  PASS's own load of the other units ends
+   differently, so they never reach `ipled`, answer every poll saying they
+   still need loading, and `AIG_DEU_LOADER` retries forever.  Measured with
+   four units attached: **three loads started, one completed.**
+2. A loader still retrying is still on the dispatcher's queue when the
+   transition overlays phase 8 across `$0AIGDEU` at `0x20022`.
+3. The dispatcher then runs into what is now `#PCVNMMU` — a compool, correctly
+   unprotected — and the Instruction Monitor traps **every instruction**:
+   27,939 traps in about six seconds, all in page `0x20000`.
+4. I/O completion starves; `FIOCMPLT` stops releasing IOQEs for ~5 s.
+5. The 25-entry pool drains 13 -> 0 in ~36 ms.  `FIOSVC` then pops the free
+   list's **deliberate sentinel** — `GENERATE.asm:335`,
+   `DC Y(FPMSVCEP)  POINTER TO PROTECTED SVC TABLE` — and the store-protect
+   check that follows is **FCOS's queue-overflow detector working as
+   designed**, not a defect.
+6. Taken inside the Clock 2 handler, it stops `FPMIHPC2` before
+   `CALL FPMITUPD`, the only code that re-arms Clock 2.  Last `ARM2`
+   395.239705, final `FIRE2` 395.279203, no successor.  Clock 1 keeps firing
+   to the end of the run, so the timer facility itself is sound.
+7. No tick, so no TQE expires, so the mass-memory I/O is never completed.
+
+`YAGPC_DEU_EXTRA_PRELOADED` brings the non-DK1 units up already initialised.
+Measured: loads 1/1, Instruction Monitor traps **27,939 -> 1**, sentinel
+violations gone — **and phase 18 still did not load.**
+
+### Things established by measurement that contradict earlier entries
+
+* **The pool is not undersized.**  `NIOQE=25` (`FIOCBLKS.asm:1554`) and the
+  original `G9.fcm` dump has the same 25 IOQEs at the same addresses with the
+  same `080ce` sentinel; `FIOCBLKS` is 1710 halfwords in our build and in the
+  DASS csect table.
+* **`TCVTIOFP` is not corrupt and the free list is not unterminated.**
+* **The store protection is not over-broad** at `FPMSVCEP`; that csect is the
+  SVC entry-point table and must be protected.
+* **The DK buses are not saturated.**  17.3 commands/s in a quiet stretch
+  against 8.8/s during the burst, and the 8.458 s gap on bus 6 runs from
+  `t=400.036` to `408.494` — starting at the instant the pool empties.  The
+  display goes quiet BECAUSE the machine breaks.
+* **`ICNT=c9d6` is not a count.**  `C9D6` is EBCDIC `'IO'`, the generator's
+  fill for untouched IOQE fields.
+* **PSW2 `b804`** in a final register dump is `FPMDSBL`, `FPMIDLE`'s own
+  disabled window — where a random sample lands, not evidence of masked
+  interrupts.
+
+### Run-to-run variability is real
+
+`v44a` and `v44b`, same configuration and differing only in which
+instrumentation was attached, gave 3 violations with the monitor storm gone
+and 6 violations with the timer dying as before.  **Single runs are not
+evidence here; confirm any effect twice before believing it.**
+
 ## What this tape has that its predecessors did not
 
 | | earlier tapes | v27 |
@@ -612,26 +734,53 @@ state — went from **8.37 %** to **0.50 %** over this work.
 
 ## What is still open
 
-* **Phases 4, 5, 6, 7, 8 and 15 come out short** of the phase table's
-  contiguous-block counts.  The undersized ones are display-heavy, which is
-  why the zero-byte exclusion markers were the first hypothesis — but phase 15
-  is 198 against 304 with its SPEC-2 sources all present, so something else
-  undersizes phases as well.
-* **Phase 16 does not link** (`CON80/SM4TAB`, above), and is skipped.
-* **The csect table does not generalise** to the phases whose full csect set we
-  do not build.  That has to be solved before an OPS transition can work.
-* **The `STACK` cards** need the user's decision; the fix was tested only in a
-  copy of the deck.
+* **`OPS 901/201/301 PRO` do not complete.**  Phase 3 and phase 8 load; phase
+  18 never does.  See "The OPS 901/201/301 blocker" above for the invariants
+  and for the chain that was traced and then shown to be a passenger.  The
+  single remaining question is why `ARC_OVL_EVT` is never set after phase 8's
+  load.
+* **The real end-of-load rule for a display unit is unknown.**  This model
+  uses GPCIPL's 250-halfword final fill, which only ever recognises the load of
+  the BFC-selected unit; `YAGPC_DEU_EXTRA_PRELOADED` is a stand-in, not an
+  answer.  The user's `MEDS2-port.py` shows the same symptom from the other
+  side — clock but no menu under GPCIPL, correct from GPC MEMORY onward — so
+  it may well settle what the terminator actually is.
+* **Phase 16 does not link** (`CON80/SM4TAB`, above), and is skipped with
+  `mmustamp --skip-phase 16`.  `HALSTAT.ASC`'s SM4 map is the one description
+  of it we have.
 * **The `GPC POWER REFAIL` message.**  It tracks our `GPCIPL` exactly — present
   on v2–v17 and v27, absent on v18–v26 which carried the reference's — but it
   does **not** block the load, and our `GPCIPL` is bit-exact to the original
   IBM listing (`PFS/temp/temp/BILDNEW5.lst`, VER 9.05 09-23-96): 0 mismatches
   in 13,285 halfwords, against 1,167 for the GPCIPL inside
   `pass-ipl-cflm.mmv`.  It is not a build defect of ours.
-* **Queued for Don**, all patched on the copy at `/tmp/claude-1000/c80src`:
-  `mmu2mmv` should call `stamp_ipl` (or refuse an unstamped tree);
-  `mmustamp --skip-phase`; `con80build --generate-stacks` and
-  `--external-syms` passthroughs; `_PATCH_SRC_RE`'s extensionless member
-  assumption; and autocall's SDF-size proxy, which should test the object
-  rather than a byte threshold and read an empty source as absent rather than
-  compile it.
+
+### Closed since the last sync
+
+* **Phases 4, 5, 6, 7, 8 and 15 came out short.**  Fixed by giving each phase
+  the csect table of the configuration it belongs to: 8 of 14 phases now match
+  the original's block count exactly, with no oversize phase and all 30 stacks
+  at the exact flight address and size.
+* **The csect table now generalises**, per phase, chosen by counting how many
+  of the phase's linked csects each dump contains.
+* **The `STACK` cards** are uncommented in the user's own deck.
+* **Queued for Don** — now **open as PRs against `ColanderCombo/nsts-sdl-dps`**:
+  **#49** the resident HAL/S library never reached any phase (`.asmg.json`
+  sidecars that do not exist, duplicate-by-path rather than by csect name, and
+  generated stacks pinned from the csect table for address *and* size);
+  **#50** `mmustamp --skip-phase`; **#51** `mmu2mmv` refusing a tape whose
+  Mass-Memory-Build tables were never stamped.  `buildtape.sh` now takes its
+  tooling root from `$C80SRC`, so once these land it can point at a real
+  checkout instead of the scratch copy.  Note that a bare clone links
+  *nothing* and reports it only as a blank line per phase: `con80build`
+  resolves its `--runlib`/`--linklib` DEFAULTS relative to the cwd, so the
+  checkout needs `ext/{virtualagc,sim,halmat}` populated and
+  `build/lib/runtime/{RUN,ZCON}` present.
+* **Tape v36** is the first built from Don's tooling at upstream `db9d34b`
+  with our fixes merged rather than from the scratch copy.  It is **not**
+  byte-identical to v35 — phase 7 224 -> 230 blocks, phase 9 23 -> 25, phase
+  12 215 -> 216, everything else unchanged and all within allocation — and the
+  difference is Don's own work since our base (PR #38, placement-only
+  CSECT-table entries), not our patches.  Phase 12 at 216 now matches the
+  original's exactly, where v35 was one block short.  Verified booting,
+  running PASS, and transitioning.

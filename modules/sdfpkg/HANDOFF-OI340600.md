@@ -6463,45 +6463,53 @@ symptom of a half-built configuration.
     1E4B2, 1F05E, 303AA and 388C4 and none covers 0x20241, and neither does
     the ORIGINAL's phase 18.
 
-WHAT IS STILL OPEN ON THE OI340700 TAPE (2026-09-09).  Stated after v27 reached
-GPC MEMORY, so that the remaining work is not confused with what is finished.
-None of these blocked the menu.
+The control #316 said had never been run was finally run: `pass-ipl-cflm.mmv` given the same `@120s:ITEM,1,EXEC;@430s:OPS,9,0,1,PRO`.  It reaches GPC MEMORY, takes both keystrokes, runs 360,758,813 steps without halting -- and requests NO overlay phase at all, while taking 485 store-protect faults at 1EA76 (FIOPDSRB).
 
-    PHASES 4, 5, 6, 7, 8 AND 15 COME OUT SHORT of the in-core phase table's
-    contiguous-block counts.  As of the v10 build: phase 2 229 against 228,
-    3 39/38, 9 24/25, 10 55/55, 12 206/216, 13 7/7, 14 114/107, 18 30/34 --
-    but 4 325/414, 5 254/292, 6 310/385, 7 196/230, 8 206/243 and 15
-    198/304.  The undersized ones are display-heavy, which is why the
-    zero-byte exclusion markers were the first hypothesis; phase 15's
-    SPEC-2 sources are all PRESENT and it is still short, so something else
-    undersizes phases as well.
+v35 on the same sequence runs GRT slot 1 (phase 3 re-read, 26 blocks) and slot 2 (phase 8, 122+115 = 237 of its 243) and takes ONE store-protect, at 080D6 = FPMSVCEP+8.
 
-    PHASE 16 DOES NOT LINK.  CON80/SM4TAB's CHANGE cards require SPEC-4
-    symbols that the OI340700 exclusion markers remove.  It can be skipped
-    with mmustamp --skip-phase 16 with no effect on phase 18.
+So "phase 18 is never requested" is NOT established as a defect of our build.  The user's own finding that OPS 201 PRO and OPS 301 PRO fail identically -- neither needs phase 18 -- says the same thing from the other side.
 
-    THE csect TABLE DOES NOT GENERALISE to the phases whose full csect set
-    we do not build; applied to all of them it fragments them past
-    #PFCMGPT's 1093 halfwords.  That has to be solved before an OPS
-    transition can work.
+YAGPC_ISPB_ALIGN=1 IS REFUTED AND MUST STAY OFF.  The hypothesis was that the fullword ISPB clear-protect forms, issued with an odd EA 60 times per IPL and all 60 mis-targeted, leave a location protected so the next legitimate store faults.  Measured: the REFERENCE tape with the flag set does not even IPL (bootstrap and phase 10 only, 0 keystrokes delivered, wait-state timeout at 2.6M steps), and v35 gains new faults at 10002, 7FF5E and 91 of them at 7FFFE.  cpu_instr.c's own comment was right that the EA in that path is off by one and `fwAddr = ea` papers over it; the papering is load-bearing.  Settle the EA before touching the flag again.
 
-    THE PCT UPDATE during a transition is unexplained; see the 0x20241
-    entry.
+Re-tested 2026-09-09 after the PSA carve-out and the MEDS-transfer fix: the tape now DOES IPL with the flag set, but store-protect violations go from 6 to 20.  Still off.
 
-    THE STACK CARDS need the user's decision; see that entry.  The fix was
-    tested only in a copy of the deck.
+WHY.  Every comparison against 'the tape that works' made before this control was run is worth re-reading, because the control had never been run.
 
-    QUEUED FOR DON, all patched on the copy at /tmp/claude-1000/c80src and
-    none of it in his tree: mmu2mmv should call stamp_ipl (or refuse an
-    unstamped tree -- checkStamped() plus --allow-unstamped as prototyped);
-    mmustamp --skip-phase; con80build --generate-stacks passthrough;
-    con80build --external-syms passthrough; _PATCH_SRC_RE's extensionless
-    member assumption; and autocall's SDF-size proxy, which should test the
-    object rather than a byte threshold and should read an empty source as
-    absent rather than compile it.
+All four are now open as PRs against ColanderCombo/nsts-sdl-dps: #49 carries (1), (2), (3) and (4); #50 is mmustamp --skip-phase; #51 is mmu2mmv refusing an unstamped tape.
 
-    THE PROCEDURE for building and booting the tape is
-    yaShuttle/yaGPC2/HANDOFF-OPS9.md.  The tapes themselves are
-    ~/workspace/pass-run/OI340700-v*.mmv, v27 being the one that works, and
-    ~/workspace/pass-run/headless-gpcmem.sh boots one unattended.
+(1) runtime_csect_index() built its map ONLY from *.asmg.json sidecars and this tree has NONE -- 0 beside SYSLIBL1's 4277 objects, RUN's 205 and ZCON's 284 -- so the index was always empty, inserted_runtime_objects() always returned zero, and EVERY CON80 INSERT of a resident-library csect was silently dropped from every build we have ever made.  Phase 2 carried none of the HAL/S runtime, so `MAP 2,LIBZERO,LIBRESD,LIBRESC` reserved nothing and the overlay phases placed content on the library's addresses; phase 8 put #PCPSSLT and #EVVCSLD on top of them and the G9 transition died after phase 8 with a store protect in FPMSVCEP.  Fixed by reading each object's own ESD.
+
+(2) The duplicate check compared PATHS, not csect names, and the same object reaches the link from the worklist AND from the minimal library.  The LE keeps the first definition and deletes the later one, which left #DDSPSPC, #DDPDSPC, #DDXCCCS and #DDXRDMM (the display data) as EMPTY pinned sections and the machine sat at POLL IDLE having fallen into #PCGNCOM.
+
+(3) generateStackSections() ignored the --external-syms pin, so generated stacks were placed by sequential allocation and landed INSIDE live data: @0DMPMMM at 0A638 inside #DDMPMMM's 0A52E..0A6A4, 100 halfwords of DMPMMMSG's own data overwritten by its own stack.
+
+(4) It also SIZED them from a longest-call-chain estimate, which moves when the graph moves: linking the resident library took @0ARBIDL from 214 halfwords to 76 and @0DMCSUP -- the display manager's -- from 206 to 192.  Both address and size now come from the csect table, which states what the flight machine actually allocated.
+
+A checkout used via buildtape.sh's $C80SRC needs ext/{virtualagc,sim,halmat} populated and build/lib/runtime/{RUN,ZCON} present: con80build resolves its --runlib and --linklib DEFAULTS relative to the cwd, so a bare clone links nothing and reports it only as an empty line per phase.
+
+WHY.  Every regression in this sequence was a DERIVED quantity moving when its inputs changed.  Where the flight machine's value is known, TAKE IT, do not compute it.
+
+TAPE v36 is the first built from Don's tooling at upstream db9d34b with our fixes merged, rather than from the scratch copy at /tmp/claude-1000/c80src.  buildtape.sh takes its tooling root from $C80SRC now.
+
+It is NOT byte-identical to v35: phase 7 goes 224 -> 230 blocks, phase 9 23 -> 25, phase 12 215 -> 216, everything else unchanged and all still within allocation.  The difference is Don's own work since our base (PR #38, placement-only CSECT-table entries), not our patches.  Phase 12 at 216 now matches the original's exactly, where v35 was one block short.  Verified booting, running PASS, and performing the OPS 901 overlay reads.
+
+THREE yaGPC2 DEFAULTS CHANGED, all committed (8037aeb4f, 8b34911cb):
+
+* The MMU's READY discrete is raised when the transfer has gone past ON THE WIRE, not when the host has consumed the output queue.  The old rule DEADLOCKS the G9 overlay: READY is gated on the queue draining, the queue advances only when the BCE polls it, and the BCE has stopped because the software is blocked waiting for READY.  A deadlock is not a more conservative approximation than a timing estimate bounded below by the wire.  YAGPC_MMU_QUEUE_READY restores the old rule; YAGPC_MMU_TIMED_READY is now a no-op.
+* The PSA locations the POO 2.5.2 lists as "must not be store protected" -- the power-off PSW, all old-PSW slots, 00A4-00A5, the Clock 1/2 high halfwords 00B0/00B1, putaway 00C0-0102 and diagnostics 0104-013F -- are enforced in membus_set_store_protect(), so they hold on EVERY path.  The carve-out existed only in the AGE harness's ipl_fill(), i.e. only under --ipl; a tape boot got none of it, because there the real loader runs and lays each load block's protect flag over the PSA.  Violations over one transition: 8 -> 6.  Store protection is per HALFWORD, which matches the hardware: READSP (D100) returns three redundant bits for the even HW and three for the odd, addressed at an even fullword boundary, and the bits are INVERTED -- zero means protected.
+* --deu-bus takes a LIST ("7,8,9"), so up to four display units can be modelled.  PASS drives four: DCICYC.asm DCIS#DEU EQU 4, device IDs 5-8 per FIOERRLC.asm's FIODEULW/FIODEUHI.
+
+WHY.  A tape built from a scratch copy in /tmp does not survive a reboot, and an emulator default that deadlocks the machine is not a conservative choice.
+
+OPS 901/201/301 PRO DO NOT COMPLETE.  Phase 3 and phase 8 load from the tape; phase 18 never does.  The full state of that investigation lives in yaShuttle/yaGPC2/HANDOFF-OPS9.md under 'The OPS 901/201/301 blocker'; what matters here is the tape's side of it, which is that the tape is not implicated: the GRT row reads 3, 8, 18, phase 18 is present and well formed at 6/5/0/0 (8 load blocks, 15,284 halfwords), and phase 8's data arrives in full.
+
+WHAT IS INVARIANT ACROSS EVERY RUN.  FCMMGPOV is entered twice for the transition and never a third time; $0ARCGPC is entered exactly twice and never again, parked in WAIT FOR ARC_OVL_EVT after phase 8.  So the open question is why ARC_OVL_EVT is never set after a load that demonstrably completed on the tape side.
+
+A LONG CHAIN WAS TRACED AND THEN SHOWN TO BE A PASSENGER.  Display units that can never finish loading (our model recognises only GPCIPL's 250-halfword final fill) keep AIG_DEU_LOADER retrying, so AIGDEU is still queued when phase 8 overlays 0x20022, so the dispatcher runs into #PCVNMMU -- a compool, correctly unprotected -- and the Instruction Monitor traps every instruction: 27,939 traps in six seconds.  I/O completion starves, the 25-entry IOQE pool drains, FIOSVC pops the free list's DELIBERATE sentinel (GENERATE.asm:335, DC Y(FPMSVCEP), 'POINTER TO PROTECTED SVC TABLE'), and the store-protect that follows is FCOS's queue-overflow detector working as designed.  Taken inside the Clock 2 handler it stops FPMIHPC2 before CALL FPMITUPD, the only code that re-arms Clock 2.  YAGPC_DEU_EXTRA_PRELOADED takes the traps from 27,939 to 1 and removes the sentinel violations -- AND PHASE 18 STILL DOES NOT LOAD.
+
+FOUR THINGS THAT ARE NOT DEFECTS, each having been recorded as one at some point: the IOQE pool is not undersized (NIOQE=25, and the original G9.fcm has the same 25 at the same addresses with the same 080ce sentinel); TCVTIOFP is not corrupt and the free list is not unterminated; the store protection at FPMSVCEP is correct, that csect being the SVC entry-point table; and the DK buses are not saturated -- they go quiet BECAUSE the machine breaks, the 8.458 s gap starting at the instant the pool empties.
+
+PHASE 16 STILL DOES NOT LINK and is skipped with mmustamp --skip-phase 16.  HALSTAT.ASC's SM4 map is the one description of it we have.
+
+RUN-TO-RUN VARIABILITY IS REAL: two runs of the same configuration, differing only in which instrumentation was attached, gave 3 violations with the monitor storm gone and 6 with the timer dying as before.  Confirm any effect twice.
 
