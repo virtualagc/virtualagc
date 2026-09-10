@@ -1,0 +1,118 @@
+# Causes investigated, and what happened
+
+GENERATED FROM `gpc-causes.db` BY `gpc-causes.py` -- a hand edit here is
+invisible to the database and the next command silently overwrites it.
+
+Before spending a run on anything below, ask:
+
+    gpc-causes.py addr 1010d      # is this address already accounted for?
+    gpc-causes.py search pacing   # has this idea already been tried?
+
+
+## Open
+
+- **#1** *(goal)* OPS 901/201/301 PRO: phase 8's overlay never completes, so ARC_OVL_EVT is never set, ARC_MEM_OVL never advances, and phase 18 (6/5/0/0) is never requested.
+  - evidence: ~90 runs, zero 6/5/0/0.
+  - addrs `65000-65000` &middot; csects `ARCGPC,FCMMGPOV,FTRMGPOV` &middot; phases `3,8,18` &middot; config `G9` &middot; symptom `no 6/5/0/0,phase 18 never requested` &middot; tsec `389-400` &middot; run `v55a-v88a`
+- **#22** *(iop)* Our build: during the stall each DK bus runs only 5-6 transactions, each holding the bus a UNIFORM ~1053 ms (median 0.86 ms before). Occupancy goes 7.6% -> 99.0%, so FIOSVC's per-request gate (TCVTBCEB AND TIOQMNTM)==0 almost never passes, every DEU request queues, 8 fills x 3 buses + 1 MM = the whole 25-entry pool, FIOSVC walks onto the 080ce sentinel and the store-protect kills Clock 2.
+  - evidence: ANSWERED IN PART, v91a: the holds use the ORDINARY dispatch/completion path, not any delay mechanism. Of 803 bus-6 busy-bit sets, 803 come from nia=1b982 = FIOPDISP+8; of 803 clears, 803 from nia=1b620 = FIOCMPLT+1a0 (csect bases FIOPDISP=1b97a, FIOCMPLT=1b480, PHASE0x.sym.json). FCMBUSCM's FCMDELAY (OST TCVTBCEB, TFCMDLAY=80260 us, TQE flag X'200D' = FPMIHPC2 case 13 I/O DELAY) sets it exactly ONCE in the entire run and not during any hold, so the deliberate commandership delay is ruled out. Each hold DOES begin with a dispatch and an SIO naming BCE6 0.16-0.24 ms later, and BCE6 then transmits its fill (1 XMIT_CMD + 100 XMIT_WORD) within a microsecond -- so the BCE is started and does run. Then the wire is silent and FIOCMPLT does not clear the bit for ~1053 ms. Whole-run distribution: 804 intervals, median 0.85 ms, p90 1.45 ms, only 5-6 over 300 ms and all in t=390.7-398.5. REMAINING: does BCE6 execute #WAT at the START of the hold (program finished, completion lost) or at the END (BCE genuinely occupied)? YAGPC_BWTRACE added to src/iop.c for exactly this.
+  - addrs `152-152,14d-14d,19b-19c,9068-9068,90b2-9273,80ce-8100` &middot; csects `FIOSVC,FIOPDISP,FIOCMPLT,FIOMNTR,FPMSVCEP,FIOCBLKS,FCMBUSCM,FPMIHPC2` &middot; procs `BCE6,BCE7,BCE8,MSC` &middot; phases `8` &middot; tape `v36` &middot; env `YAGPC_IOQEDEPTH,YAGPC_PGMTRACE,YAGPC_WATCHHW,YAGPC_BWTRACE` &middot; symptom `pool overflow,Clock 2 dead` &middot; tsec `391-399` &middot; run `v60a,v62a,v66a,v81a,v89a,v91a`
+- **#23** *(emulator)* Other build (pass-910): FCMPMOD (SVC 26) stores to 0x1010d and takes a store-protect. That region was unprotect-written-REPROTECTED by the SSL loader at t=119.6 and the phase-8 overlay's unprotect walk starts at 0x1010e, one halfword above it.
+  - evidence: FCMPMOD branches on the caller's TMODSSP flag, not the hardware, so it writes directly. Walk is FCMMGBOV+423, m1=1, 1914 ISPBs.
+  - addrs `1010d-1010d,100f8-10129,19442-19442,1010e-11000` &middot; csects `FCMPMOD,FCMMGBOV,FPMSVC,#CDG9LIG,$0AIESIP` &middot; instrs `ISPB` &middot; phases `8` &middot; config `G9` &middot; tape `pass-910` &middot; env `YAGPC_ISPBTRACE,YAGPC_NIARING` &middot; symptom `store protect violation,Clock 2 dead` &middot; tsec `389-392` &middot; run `v87ref`
+- **#27** *(iop)* ESTABLISHED CORRELATION (mechanism NOT established): the DK buses fall silent for exactly the duration of each mass-memory transfer. Bus 18 runs 100,000-121,000 events/s while buses 6/7/8 go to 0-101/s.
+  - evidence: gpc-buslog.py overlap 6 18 on a complete capture, with a built-in control: bus 6 silences BEFORE the MMU starts contain ZERO bus-18 events (ordinary ~360 ms gaps); every silence from t=391.5 is full of MMU traffic, and the uniform holds 1052.60/1054.22/2101.14 ms contain 108604/107300/236707 bus-18 events. CAUTION -- I first wrote this up as 'the MMU floods the servicer and starves the DK buses'. THAT MECHANISM IS DOUBTFUL: service calls cost WALL time, not SIMULATED time, so they cannot starve another bus in the emulated timeline; and the DK BCEs are eligible for only ~0.1% of wheel revolutions, i.e. not dispatched at all rather than denied service. The likelier reading is that both are consequences of FCOS not dispatching DK work while the MM transaction is outstanding. TO SETTLE IT: check whether a DK transaction is dispatched (TCVTBCEB set, SIO issued) at all inside a silence; if it is, service starvation is live, if not the cause is upstream in dispatch.
+  - addrs `152-152` &middot; csects `FIOCMPLT,FIOMNTR` &middot; procs `BCE6,BCE7,BCE8,BCE18,MSC` &middot; phases `8` &middot; tape `v36` &middot; env `YAGPC_BUSLOG` &middot; files `src/mmumodel.c,src/iop.c` &middot; symptom `1053 ms bus hold,pool overflow` &middot; tsec `391-400` &middot; run `v90a`
+
+## Confirmed
+
+- **#20** *(method)* pass-910.mmv is NOT an original tape -- every .mmv is one we built, so it cannot serve as a control for 'the real machine did X'.
+  - evidence: User correction. No provenance note exists; it merely supplies DEU load modules our build cannot generate.
+  - tape `pass-910,v36` &middot; doc `user correction`
+- **#21** *(method)* The authoritative hardware manuals are in the local ibiblio mirror and were unused for most of this work.
+  - evidence: IBM-74-A31-016 is a SUMMARY that defers BCE detail to the BCE Principles of Operation (IBM-6246556A part 3), which is on disk and OCR'd. Going to it found the #RDL defect in minutes.
+  - doc `BCE PoO IBM-6246556A pt3,IOP POO IBM-74-A31-016,AP-101 PoO IBM-6246156`
+- **#26** *(method)* WATCHHW emits both 'hw' and 'fw' lines; filtering to one kind silently hides half the stores.
+  - evidence: A regex matching only 'WATCHHW hw addr=0019c' showed TCVTMNTR written zero 547/547 times and nearly produced a false root cause ('nothing is ever monitored'). Including fw lines showed 988 non-zero writes -- monitoring was healthy all along. Match both kinds, or the analysis is of a subset.
+  - addrs `19c-19c` &middot; env `YAGPC_WATCHHW` &middot; run `v89a`
+- **#28** *(method)* A complete binary bus log (YAGPC_BUSLOG + gpc-buslog.py) answers retrospectively what the 43 YAGPC_*TRACE variables each need a dedicated run to ask.
+  - evidence: ~18 MB for a 1000 s run, less than one re-run. On its FIRST use it established the DK/MM correlation from a question (overlap 6 18) not anticipated when the run started, which no pre-chosen trace could have answered. It also made the overclaim visible quickly: the same data showed the flooding MECHANISM was unsupported.
+  - env `YAGPC_BUSLOG` &middot; files `src/run.c,gpc-buslog.py` &middot; run `v90a`
+- **#29** *(method)* Phase 8's DATA transfer DOES complete. It is read as TWO MMU operations because GMAGNC91 (ADDR=52400, BLKS=384) crosses the 256-block track boundary: 123 blocks from 2/5/4/0 at t=392.16 and 115 from 3/5/0/0 at t=397.79, finished t=400.70. The CPU is already dead in FPMIDLE by then, and the MMU gets no further command for the run's remaining 562 s.
+  - evidence: v91a MMU log. Read decode via mmbstamp.py:159 mm16 = 00|File(3)|Track(3)|Subfile(3)|Block(5) against CON80 MMUSYS1/MMUDAT1: 33600=GMAGNFB1 PH=3, 52400=GMAGNC91 PH=8 (+128 blocks = 53000, same csect, next track), 56000=GMAG9R1 PH=18 -- which is where the 6/5/0/0 criterion comes from, and it is correct for area 1. Run reached 963 s simulated; commands:70 total, last at 397.79.
+  - csects `GMAGNC91,GMAGNFB1,GMAG9R1,FPMIDLE` &middot; phases `3,8,18` &middot; tape `v36` &middot; files `src/mmumodel.c,OI340700/CON80/MMUSYS1,OI340700/CON80/MMUDAT1` &middot; symptom `no 6/5/0/0` &middot; tsec `389-400` &middot; doc `mmbstamp.py:159 mm16 encoding` &middot; run `v91a`
+- **#31** *(iop)* The DK holds are a SWEEP, not a per-transaction delay: over the whole 963 s run buses 6/7/8 have 804-806 busy intervals with median 0.85 ms and p90 1.45 ms, and only 5-6 exceed 300 ms -- all inside t=390.7-398.5, quantized to ~1053 ms with clean 2x and 4x multiples (414/415, 1053, 1053, 1055, 1058, 1068, 2101, 2167, 2169, 4264, 4310).
+  - evidence: Whole-run TCVTBCEB (0x152 fullword) transition census, v91a. Bus 24 keeps completing normally (median 0.51 ms, 4282 intervals, none over 300 ms) THROUGHOUT every DK hold, so FCOS is alive and FIOCMPLT is running and simply never clears 6/7/8. During a hold bus 6 emits ZERO wire events -- not even the per-revolution RECV_POLL that bus 18 emits while a receive is pending -- so BCE6 is not in a receive wait and is not executing. The busy bit clears and is immediately re-set 0.02-0.03 ms before the next SIO. 1x/2x/4x quantization of a fixed period is the signature of a periodic reclaim, not a timer armed per transaction.
+  - addrs `152-152` &middot; csects `FIOCMPLT,FIOSVC` &middot; procs `BCE6,BCE7,BCE8,BCE24` &middot; phases `8` &middot; tape `v36` &middot; env `YAGPC_WATCHHW,YAGPC_BUSLOG` &middot; symptom `pool overflow,Clock 2 dead` &middot; tsec `390-399` &middot; run `v91a`
+
+## Fixed
+
+- **#14** *(emulator)* MSC repeat state (mscRepeatActive/PC/UntilUs) survived a CPU-forced PC load, so a returning @RAW would not re-arm and used a stale deadline.
+  - evidence: Correct as modelling; cleared on the local-store PC write. Did NOT unblock phase 18.
+  - addrs `a201-a201` &middot; csects `FIOMDLY` &middot; instrs `@RAW` &middot; procs `MSC` &middot; files `src/iop.c` &middot; run `v55a`
+- **#15** *(emulator)* exec_RDL read its count with a HALFWORD access masked to 16 bits and did not ignore the address LSB.
+  - evidence: BCE POO: count is bits 14-31 of the main storage FULLWORD, LSB of the address ignored, range 0..262143. Same defect already fixed in its twin #TDL. LATENT: #RDL never executes here (BCE18 uses #RDLI).
+  - instrs `#RDL,#RDLI,#TDL` &middot; procs `BCE18` &middot; files `src/iop_bce_instr.c` &middot; doc `BCE PoO IBM-6246556A pt3 (count = bits 14-31 of the fullword)` &middot; run `v84a`
+- **#32** *(method)* gpc-buslog.py's KIND table had both enum pairs transposed. Correct order is XMIT_WORD=0, XMIT_CMD=1, RECV_WORD=2, RECV_POLL=3 (yaGpcIntegration.h:177) -- word before command, the opposite of the way one says it.
+  - evidence: The wrong table made an ordinary DEU fill (1 command + 100 data words, emitted at a silence boundary) decode as '100 commands issued in zero simulated time', which reads like a bus program spinning. Cross-check that settles it: bus 6 XMIT_WORD must equal the DEU model's own wordsIn -- 111164/111164 for bus 6, 60957 for bus 7, 61477 for bus 8, all exact. Analyses that selected kind==1 for MM commands were unaffected (that IS XMIT_CMD) and are independently corroborated by the MMU model's log.
+  - env `YAGPC_BUSLOG` &middot; files `gpc-buslog.py` &middot; doc `yaGpcIntegration.h:177 GpcServiceNumber` &middot; run `v91a`
+
+## Refuted -- DO NOT RETEST
+
+- **#2** *(iop)* @RAW's accumulator mask should include the MSC's own bit (PROC_ALL not PROC_ALL_BCE), per FIOMDLY's 'TURN ON MSC BIT IN REPEAT MASK'.
+  - evidence: REGRESSION. FIOMCKIO uses the same instruction as the I/O-COMPLETE test and arms 98478 times to FIOMDLY's 14; with bit 0 in the mask it can never report complete, so every I/O falls to FIOMTOUT. I/O engine stopped dead.
+  - csects `FIOMCNTL,FIOMDLY,FIOMCKIO` &middot; instrs `@RAW` &middot; procs `MSC` &middot; files `src/iop_msc_instr.c` &middot; symptom `I/O engine stops,keys=0` &middot; doc `IBM-74-A31-016 sec 2.6.1.6` &middot; run `v53b`
+- **#3** *(iop)* The MSC is being clobbered by LOAD MSC BUSY arriving while it is already busy.
+  - evidence: By design. TCVTMSC=-1 is 'BUSY BUT INTERRUPTABLE' and FIOSTMSC waits DO UNTIL=(...,NP), which -1 satisfies. The 186 'clobbers' are the intended interrupt path.
+  - addrs `1a2-1a2` &middot; csects `FIOSTMSC,FIOPDISP` &middot; instrs `LOAD MSC BUSY` &middot; procs `MSC` &middot; symptom `TCVTMSC latched ffffffff` &middot; run `v51a/v51b`
+- **#4** *(iop)* The MSC executes too slowly, so FCOS's next dispatch catches it mid-program.
+  - evidence: IOP_PASS_US=0.1 cut clobbers 18x and phase 18 still did not load. Also sio ~= busyset at every second, so when started the MSC does issue its SIO.
+  - csects `FIOSTMSC` &middot; procs `MSC` &middot; env `YAGPC_IOP_PASS_US` &middot; run `v51b/v71a`
+- **#5** *(iop)* Completions are lost: FIOCMPLT / the @INT path never runs for DK transactions.
+  - evidence: MSCINT fires 34-37/s throughout the stall, so completions ARE raised. The failure is dispatch-side, not completion-side.
+  - csects `FIOCMPLT,FIOPDISP` &middot; instrs `@INT` &middot; procs `MSC,BCE6,BCE7,BCE8` &middot; symptom `DK buses idle` &middot; run `v64a`
+- **#6** *(iop)* TCVTBCEB is stuck because XST double-frees the bus mask.
+  - evidence: The mask alternates healthily (FIOPDISP+8 sets, FIOCMPLT+416 clears) and drains to 0000. No double-free.
+  - addrs `152-152` &middot; csects `FIOCMPLT,FIOPDISP` &middot; env `YAGPC_WATCHHW` &middot; symptom `TCVTBCEB stuck busy` &middot; run `v66a`
+- **#7** *(iop)* DMA contention starves the DK buses while mass memory transfers.
+  - evidence: dmaBurst defaults true, so iop_exec_dma_queue drains the whole queue every step. The queue never backs up.
+  - procs `BCE6,BCE7,BCE8` &middot; env `dmaBurst` &middot; files `src/iop.c`
+- **#8** *(iop)* Mass memory head-blocks ordinary I/O in the active queue.
+  - evidence: Separate queues (TCVTIOA vs TCVTMMA), and the ordinary queue is only ever 3 deep. BCE20/BCE24 are serviced normally throughout.
+  - addrs `144-144,151-151` &middot; csects `FIOPDISP` &middot; procs `BCE18,BCE20,BCE24` &middot; run `v62a`
+- **#9** *(iop)* The IOQE pool leaks entries over time.
+  - evidence: Free list is a full 25 from t=150 to t=389, then drains in 5 s and RECOVERS to 24. A spike, not a leak.
+  - addrs `14d-14d,90b2-9273` &middot; csects `FIOSVC` &middot; env `YAGPC_IOQEDEPTH` &middot; symptom `pool drains` &middot; run `v62a`
+- **#10** *(iop)* DK transfers are ~10x too slow per word (1385 us/word).
+  - evidence: Measurement artifact: YAGPC_DKRATE times XMIT_CMD to the NEXT XMIT_CMD and divides by words, i.e. the inter-command GAP, not transfer duration. Figures void.
+  - procs `BCE6,BCE7,BCE8` &middot; env `YAGPC_DKRATE` &middot; files `src/run.c` &middot; run `v68a`
+- **#11** *(iop)* The DK bus holds are message timeouts.
+  - evidence: Zero RECV timeouts on buses 6/7/8 across the window; all 40 timeouts are BCE20, a bus with no model attached.
+  - instrs `#RDLI` &middot; procs `BCE6,BCE7,BCE8,BCE20` &middot; env `YAGPC_TIMEOUT_TRACE` &middot; run `v69a`
+- **#12** *(iop)* A DK BCE is dispatched but never started (SIO missing).
+  - evidence: TCVTBCEB busy-set and SIO match exactly per bus: 42/42, 42/42, 43/43, zero unmatched.
+  - addrs `152-152` &middot; csects `FIOPDISP` &middot; instrs `@SIO` &middot; procs `BCE6,BCE7,BCE8` &middot; env `YAGPC_SIOTRACE` &middot; run `v81a`
+- **#13** *(iop)* Bus pacing / serial-bus occupancy: modelling the wire as busy per word (YAGPC_BUS_WORD_US, 25 or 33 us/word) will fix the IOQE pool overflow.
+  - evidence: Failed three times: global wire, then per-bus, then per-bus without head-of-line blocking. Every attempt broke the boot (keys=0). Left OFF by default.
+  - tape `v36` &middot; env `YAGPC_BUS_WORD_US` &middot; files `src/iop.c` &middot; symptom `keys=0,boot broken` &middot; doc `IBM-74-A31-016 (28us word + 5us gap = 33us)` &middot; run `v76-v78`
+- **#16** *(emulator)* #DLY is mis-implemented (sole opcode debuting at the transition, t=399.3 on BCE18).
+  - evidence: Correct on every check: address (PC+DISP+2xBCE#), the x2 HALFWORD stride, 18-bit count vs the documented 0..4.325 s, LSB-ignored alignment. No transition debut at all on the other build.
+  - addrs `1d204-1d204` &middot; instrs `#DLY,#DLYI` &middot; procs `BCE18` &middot; tape `v36,pass-910` &middot; env `YAGPC_FIRSTOP` &middot; tsec `399.3` &middot; doc `BCE PoO IBM-6246556A pt3` &middot; run `v84a/v85ref`
+- **#17** *(emulator)* ISPB is being discarded in problem state, so an unprotect vanishes.
+  - evidence: exec_ISPB's own comment predicts this symptom, but the measured 'ISPB SKIPPED (problem state)' count is 0.
+  - csects `FCMPMOD` &middot; instrs `ISPB` &middot; env `YAGPC_ISPBTRACE` &middot; files `src/cpu_instr.c` &middot; symptom `store protect violation` &middot; run `v86ref`
+- **#18** *(tape)* Our tape's #PFCMGPT phase table or load blocks are wrong.
+  - evidence: Decoded from PHASE02.lib: phase 3 = 10 blocks/38 tape blocks, phase 8 = 30/243, phase 18 = 8/34, all matching the cut table, descriptors internally consistent.
+  - csects `#PFCMGPT` &middot; phases `3,8,18` &middot; tape `v36` &middot; files `PHASE02.lib`
+- **#19** *(flight-sw)* AIGDEU's WAIT 0.018 is too short for our I/O; lengthening it will stop the fills stacking.
+  - evidence: Built tape v79 with WAIT 0.100. Ran clean (keys=2, transition occurred) and changed nothing: overflow=1, minfree=0, same FIOSVC fault. At the measured rates a fill needs >100 ms. Source restored.
+  - csects `AIGDEU,AIG_DEU_LOADER` &middot; phases `8` &middot; tape `v79` &middot; files `SSSRC/AIGDEU.hal` &middot; symptom `pool overflow` &middot; run `v79t`
+- **#24** *(iop)* Suppressing AIG_DEU_LOADER by reporting all DEUs already loaded (YAGPC_DEUPRELOADED) will stop the 8-fills-per-DEU that exhaust the IOQE pool.
+  - evidence: Valid run (keys=2, latereads=3, simtime 964 s) and the pool still drained: minfree=0, overflow=1, same FIOSVC sentinel fault at t=398.0, no 6/5/0/0. Consistent with v60a (hack on) and v67a (hack off) both showing 22 IOQEs from the same PCT 83a8. The 8 fills are not a retry storm -- an OPS transition legitimately reloads display formats, so they happen whatever ipled says.
+  - addrs `80ce-8100,90b2-9273` &middot; csects `AIGDEU,AIG_DEU_LOADER,FIOSVC` &middot; procs `BCE6,BCE7,BCE8` &middot; phases `8` &middot; tape `v36` &middot; env `YAGPC_DEUPRELOADED,YAGPC_DEU_EXTRA_PRELOADED` &middot; files `SSSRC/AIGDEU.hal,src/deumodel.c` &middot; symptom `pool overflow,no 6/5/0/0` &middot; tsec `392-398` &middot; run `v88a`
+- **#25** *(iop)* The MSC monitor cycle is longer than AIGDEU's 18 ms fill window (FIOMDLY delaying TCVTMTTG ticks), so every DEU fill misses its window and all eight stack.
+  - evidence: Measured TCVTMTTG directly at 0x19b through the transition: dominated by 149 ticks = 4.92 ms (398 of 988 writes), only 39 writes above 18 ms. Well inside the window. The 848-tick/28 ms figure came from t=13.7 s -- the IPL-time mass-memory read, not a fill. Monitoring itself is healthy: TCVTMNTR set to a real IOQE 988 times, ~49/s.
+  - addrs `19b-19c,146-146,148-148` &middot; csects `FIOPDISP,FIOMDLY,FIOMNTR,AIGDEU` &middot; instrs `@RAW` &middot; procs `MSC,BCE6,BCE7,BCE8` &middot; phases `8` &middot; tape `v36` &middot; env `YAGPC_WATCHHW,YAGPC_REPEATTRACE` &middot; symptom `pool overflow,fills stack` &middot; tsec `380-400` &middot; run `v89a`
+- **#30** *(method)* Bus 18's multi-second continuous activity during the stall (921,749 events, 292,074 RECV_POLL over 8.54 s, vs 1,833 events / 9 polls for a normal transfer) is a runaway BCE read loop.
+  - evidence: NOT an anomaly. In the bus log RECV_POLL/RECV_WORD are emitted once per 16.5 us wheel revolution while a receive is pending, so the counts measure SERVICE TICKS, not words -- 1822 events over 30.13 ms is exactly one per revolution. Each bus-18 burst matches its own MMU READY->0..READY->1 interval exactly (26 blocks: 651 ms ready-gap vs 654 ms burst; 123 blocks: 3109 ms; 115 blocks: 2906 ms; ~25 ms/block throughout). The bus-18 activity is a large read taking the time a large read takes. Do not read the bus-log event counts as word counts.
+  - procs `BCE18` &middot; tape `v36` &middot; env `YAGPC_BUSLOG` &middot; files `src/run.c,gpc-buslog.py` &middot; tsec `390-401` &middot; run `v91a`

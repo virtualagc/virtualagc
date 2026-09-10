@@ -665,6 +665,33 @@ static void exec_RAI(IOP *t, DInstr *v) {
     iop_msc_repeat(t, v, (register_get32(&t->regIndicator) & m) == m);
 }
 
+/* THE MSC'S OWN BIT IS NOT IN THIS MASK, and putting it there breaks the
+ * machine.  PROC_ALL_BCE is correct; this is written down because FIOMCNTL
+ * looks at first sight like it says otherwise.
+ *
+ * FIOMDLY builds a delay out of @RAW and comments it
+ *      @LI  -1   *TURN ON MSC BIT IN REPEAT MASK
+ * which reads as though bit 0 takes part in the comparison and makes the
+ * condition unsatisfiable.  It does not.  The same instruction serves
+ * FIOMCKIO, the I/O-COMPLETE test, whose condition is exactly
+ * "(busy/wait AND the request's bus mask) == 0"; the MSC's own busy bit is
+ * set the whole time it is executing, so including bit 0 makes that test
+ * unable to EVER report complete, and every I/O falls through to FIOMTOUT
+ * and is declared an MSC timeout.  Measured with YAGPC_REPEATTRACE over one
+ * IPL: FIOMCKIO arms 98478 times against FIOMDLY's 14.  Changing this to
+ * PROC_ALL therefore stopped the I/O engine outright -- second DEUKEYS batch
+ * never delivered, zero tape reads after t=200 s, deu.log 1009 lines against
+ * ~96900 with fills=0 (v53b, against v51a/v51b on the same tape).
+ *
+ * The POO agrees: 2.6.1.6 is about "all of a set of specified BCEs", and
+ * FIOMNTR3's `@N FIOM7FFF ... OFF MSC BIT` shows the software clearing bit 0
+ * by hand when it has a word that might carry it.  FIOMDLY's comment is loose
+ * wording -- the literal -1 does set the bit, the hardware ignores it, and the
+ * delay still works because the BCEs being monitored are busy.  That is what
+ * FIOMDLY is for in the first place: its own header says the purpose is "to
+ * delay until the I/O to be monitored is done".
+ *
+ * DO NOT "FIX" THIS TO PROC_ALL. */
 static void exec_RAW(IOP *t, DInstr *v) {
     uint32_t m = iopls_getACC(&t->ls) & PROC_ALL_BCE;
     iop_msc_repeat(t, v, (register_get32(&t->regBusyWait) & m) == 0);
@@ -675,6 +702,9 @@ static void exec_RNI(IOP *t, DInstr *v) {
     iop_msc_repeat(t, v, (register_get32(&t->regIndicator) & m) != 0);
 }
 
+/* PROC_ALL for the same reason as exec_RAW: the mask names processors, and
+ * the MSC is one of them.  It must still be masked to processors that EXIST,
+ * because the complement of the register sets every unused bit. */
 static void exec_RNW(IOP *t, DInstr *v) {
     uint32_t m = iopls_getACC(&t->ls) & PROC_ALL_BCE;
     iop_msc_repeat(t, v, ((~register_get32(&t->regBusyWait)) & m) != 0);
@@ -686,6 +716,15 @@ static void exec_RNW(IOP *t, DInstr *v) {
 
 static void exec_WAT(IOP *t, DInstr *v) {
     (void)v;
+    /* Traced under YAGPC_DISPTRACE beside LOAD MSC BUSY, because the pair is
+     * what says whether the MSC is AVAILABLE.  The MSC runs one program at a
+     * time; if a long mass-memory overlay's program holds it, nothing else on
+     * any bus can be serviced and no completion interrupt is raised, which
+     * stalls FCOS's whole I/O engine -- FIOPDISP -> FIOSTMSC -> MSC -> EX2 ->
+     * FIOCMPLT -> FIOPDISP is a closed loop that stops if one link is missed. */
+    if (getenv("YAGPC_DISPTRACE"))
+        fprintf(stderr, "DISP MSCWAIT t=%.1f us\n",
+                (t->cpu != NULL) ? t->cpu->elapsedTimeUs : 0.0);
     iop_proc_set(&t->regBusyWait, PROC_MSC, 0);
     uint32_t st = register_get32(iopls_MST(&t->ls));
     st = st & ~1u;
@@ -715,6 +754,14 @@ static void exec_INT(IOP *t, DInstr *v) {
     Register *intC = registerfile_r(&t->regInterrupts, 2);
     register_set32(intC, register_get32(intC) | (il << 20));
     register_set32(&t->msc.regIntProg, il);
+    /* Traced under YAGPC_DISPTRACE with its LEVEL, because an @INT whose
+     * level computes to zero executes and signals NOTHING -- and EX2 is the
+     * only thing that drives FIOCMPLT, so a silent @INT is a completion the
+     * flight software never learns about.  TCVTMSC then stays latched at
+     * "MSC BUSY / NOT INTERRUPTABLE" and FIOPDISP dispatches nothing further. */
+    if (getenv("YAGPC_DISPTRACE"))
+        fprintf(stderr, "DISP MSCINT il=%03x t=%.1f us\n", (unsigned)il,
+                (t->cpu != NULL) ? t->cpu->elapsedTimeUs : 0.0);
     if (il != 0 && t->cpu) {
         t->cpu->intPending.iopProg = true;
     }
@@ -988,6 +1035,8 @@ void msc_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2) {
         for (int i = 0; i < n32; i++) {
             const MscInstrDesc *d = SORTED32[i];
             if ((fullword & d->pb.mask) == d->pb.maskedVal) {
+                iop_first_op(iop, "MSC", d->nm,
+                             register_get32(iopls_PC(&iop->ls)) & 0x3ffffu);
                 DInstr v;
                 msc_decode(fullword, d, &v);
                 if (d->e) d->e(iop, &v);
@@ -1000,6 +1049,8 @@ void msc_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2) {
     for (int i = 0; i < n16; i++) {
         const MscInstrDesc *d = SORTED16[i];
         if ((h1 & d->pb.mask) == d->pb.maskedVal) {
+            iop_first_op(iop, "MSC", d->nm,
+                         register_get32(iopls_PC(&iop->ls)) & 0x3ffffu);
             DInstr v;
             msc_decode(h1, d, &v);
             if (d->e) d->e(iop, &v);

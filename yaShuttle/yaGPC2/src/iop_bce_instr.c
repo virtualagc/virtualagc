@@ -305,6 +305,21 @@ static void exec_TDL(IOP *t, DInstr *v) {
     uint32_t count = (iop_g_eaf(t, addr) & 0xffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);
+    /* YAGPC_TDLTRACE: the count each #TDL actually queues.  A list transmit
+     * is supposed to hand the MIA the whole message in ONE instruction; if it
+     * queues one word per execution the transfer becomes BCE-scheduling-bound
+     * instead of wire-bound, which is the difference between a 510-word DEU
+     * fill costing 16.8 ms (hardware, wire-limited) and costing however many
+     * wheel revolutions the BCE happens to get.  Measured 1.3 instructions
+     * per word, so this is worth printing. */
+    {
+        static int tlInit = 0, tlOn = 0;
+        if (!tlInit) { tlInit = 1; tlOn = getenv("YAGPC_TDLTRACE") != NULL; }
+        if (tlOn && bce)
+            fprintf(stderr, "TDL bce=%d count=%u tableAddr=%05x raw=%08x\n",
+                    bce->bceNum, (unsigned)count, (unsigned)addr,
+                    (unsigned)iop_g_eaf(t, addr));
+    }
     for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_READ, bce);
     iop_incr_nia(t, 2);
 }
@@ -407,8 +422,30 @@ static void exec_RDL(IOP *t, DInstr *v) {
     /* Uses field 'c', not 'a' — matches the source's descriptor exactly
      * (d:'11111011000000cccccccccccccccccc'), unlike #TDL/#MOUT@/#MIN@
      * which use 'a'. */
-    uint32_t addr = df_get(v, 'c') + 2u * (uint32_t)t->curPE;
-    uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
+    /* THE COUNT IS A FULLWORD FIELD, NOT A HALFWORD -- the same defect that
+     * was found and fixed in #TDL, left unfixed in its receive twin.
+     *
+     * BCE POO (IBM-6246556A part 3): "The effective count of input words to be
+     * received can range from 0 to 262143, and may be specified by either bits
+     * 14 thru 31 of the instructions (#RDLI) or by BITS 14 THRU 31 OF THE MAIN
+     * STORAGE FULLWORD addressed by bits 14 thru 31 of the instruction (#RDL).
+     * In the second case, the LEAST SIGNIFICANT BIT OF THE ADDRESS (the
+     * halfword selection) IS IGNORED.  In either case the effective transfer
+     * count is one less than the number of words to be received."
+     *
+     * So: read a FULLWORD, take 18 bits (0..262143), ignore the address LSB.
+     * This read a HALFWORD and masked 16 bits, and at an even address a
+     * halfword read returns the fullword's HIGH half -- always zero for a
+     * count -- so every #RDL would have received exactly ONE word.  That is
+     * verbatim the failure #TDL's own comment describes.
+     *
+     * LATENT, NOT OBSERVED: #RDL does not execute in the OI340700 workload
+     * (BCE18 uses the immediate form #RDLI, whose 18-bit field was already
+     * handled correctly), so this fix is on the documentation's authority and
+     * cannot be confirmed by a run.  Found by auditing instructions whose
+     * FIRST execution YAGPC_FIRSTOP timestamps -- see #TDL/#TDS/#DLY. */
+    uint32_t addr = (df_get(v, 'c') + 2u * (uint32_t)t->curPE) & ~1u;
+    uint32_t count = (iop_g_eaf(t, addr) & 0x3ffffu) + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
 }
@@ -637,6 +674,9 @@ void bce_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2) {
     for (int i = 0; i < nLong; i++) {
         const BceInstrDesc *d = SORTED_LONG[i];
         if ((combined & d->pb.mask) == d->pb.maskedVal) {
+            { char k[8]; snprintf(k, sizeof k, "BCE%d", iop->curPE);
+              iop_first_op(iop, k, d->nm,
+                           register_get32(iopls_PC(&iop->ls)) & 0x3ffffu); }
             DInstr v;
             bce_decode(combined, d, &v);
             if (d->e) d->e(iop, &v);
@@ -648,6 +688,9 @@ void bce_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2) {
     for (int i = 0; i < nShort; i++) {
         const BceInstrDesc *d = SORTED_SHORT[i];
         if ((h1 & d->pb.mask) == d->pb.maskedVal) {
+            { char k[8]; snprintf(k, sizeof k, "BCE%d", iop->curPE);
+              iop_first_op(iop, k, d->nm,
+                           register_get32(iopls_PC(&iop->ls)) & 0x3ffffu); }
             DInstr v;
             bce_decode(h1, d, &v);
             if (d->e) d->e(iop, &v);

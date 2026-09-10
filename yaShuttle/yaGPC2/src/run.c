@@ -50,6 +50,104 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         in->busID >= 6 && in->busID <= 9 && getenv("YAGPC_DKTRACE"))
         fprintf(stderr, "DK bus=%d cmd=%06x t=%.6f\n", in->busID,
                 (unsigned)(in->in.word & 0xffffffu), *br->clockUs / 1e6);
+    /* YAGPC_DKSTALL: per-second census of what the DK buses are DOING, which
+     * is the only way to tell a long transfer from a long wait.  A DEU
+     * transaction that holds its bus for 1052.6 ms while moving ~100 words
+     * (33 us each, so ~3.3 ms of wire time) is idle for 99.7% of the hold --
+     * but "idle" could be the GPC never transmitting or the peripheral never
+     * answering, and those are opposite bugs.  Counting transmits against
+     * polls that found nothing separates them. */
+    if (br->clockUs != NULL && in->busID >= 6 && in->busID <= 9) {
+        static int dsInit = 0, dsOn = 0, lastSec = -1;
+        static long xmitC, xmitW, pollY, pollN, recvY, recvN;
+        if (!dsInit) { dsInit = 1; dsOn = getenv("YAGPC_DKSTALL") != NULL; }
+        if (dsOn) {
+            int sec = (int)(*br->clockUs / 1e6);
+            if (lastSec >= 0 && sec != lastSec) {
+                fprintf(stderr, "DKSTALL t=%d xmitCmd=%ld xmitWord=%ld "
+                        "pollHit=%ld pollMiss=%ld recvHit=%ld recvMiss=%ld\n",
+                        lastSec, xmitC, xmitW, pollY, pollN, recvY, recvN);
+                xmitC = xmitW = pollY = pollN = recvY = recvN = 0;
+            }
+            lastSec = sec;
+            switch (svc) {
+            case GPC_SVC_XMIT_CMD:  xmitC++; break;
+            case GPC_SVC_XMIT_WORD: xmitW++; break;
+            default: break;
+            }
+        }
+    }
+    /* YAGPC_DKRATE: per-TRANSACTION word count and duration on a DK bus, so
+     * the emulator's actual per-word rate can be compared with the hardware's.
+     * The hardware number is not in doubt -- IBM-74-A31-016: 28 bits at 1 MHz
+     * = 28 us per word plus a 5 us minimum interword gap, so 33 us/word, and
+     * a 510-word DEU fill is 16.83 ms.  But BUS_WORD_US lives only in
+     * mmumodel.c: the DK path has NO bus-rate pacing, so its speed is
+     * whatever the IOP round-robin yields (one BCE instruction per 16.5 us
+     * wheel revolution, times the instructions per word the bus program
+     * spends).  This prints what that actually is. */
+    if (br->clockUs != NULL && in->busID >= 6 && in->busID <= 9) {
+        static int drInit = 0, drOn = 0;
+        static double startUs[10];
+        static long words[10];
+        if (!drInit) { drInit = 1; drOn = getenv("YAGPC_DKRATE") != NULL; }
+        if (drOn) {
+            int b = in->busID;
+            if (svc == GPC_SVC_XMIT_CMD) {
+                if (words[b] > 0) {
+                    double d = *br->clockUs - startUs[b];
+                    fprintf(stderr, "DKRATE bus=%d words=%ld dur=%.1f us "
+                            "perword=%.1f us t=%.6f\n", b, words[b], d,
+                            d / (double)words[b], startUs[b] / 1e6);
+                }
+                startUs[b] = *br->clockUs; words[b] = 0;
+            } else if (svc == GPC_SVC_XMIT_WORD) {
+                words[b]++;
+            }
+        }
+    }
+    /* YAGPC_BUSLOG=<path>: a COMPLETE binary record of every bus event, for
+     * the whole run, decoded afterwards by gpc-buslog.py.
+     *
+     * WHY.  There are 43 separate YAGPC_*TRACE variables, each answering ONE
+     * question and each costing a fresh run of the same scenario -- so any
+     * question not thought of in advance is unanswerable without running
+     * again.  A whole ~1000 s run moves about 1.49 million bus words, which
+     * at 12 bytes an event is under 18 MB: complete capture is cheaper than
+     * one re-run, and it turns "guess which trace to enable, then re-run"
+     * into "run once, query afterwards".
+     *
+     * Record: uint32 t_us, uint8 bus, uint8 kind, uint16 aux, uint32 value.
+     * Little-endian, 12 bytes, no header -- the decoder knows the shape. */
+    if (br->clockUs != NULL) {
+        static int blInit = 0;
+        static FILE *bl = NULL;
+        if (!blInit) {
+            blInit = 1;
+            const char *path = getenv("YAGPC_BUSLOG");
+            if (path != NULL && *path != '\0') {
+                bl = fopen(path, "wb");
+                if (bl == NULL)
+                    fprintf(stderr, "buslog: cannot write %s\n", path);
+                else
+                    setvbuf(bl, NULL, _IOFBF, 1 << 20);
+            }
+        }
+        if (bl != NULL) {
+            unsigned char rec[12];
+            uint32_t t = (uint32_t)(*br->clockUs);
+            uint32_t v = (uint32_t)(in->in.word & 0xffffffffu);
+            uint16_t aux = (uint16_t)(in->address & 0xffffu);
+            rec[0] = t & 0xff; rec[1] = (t >> 8) & 0xff;
+            rec[2] = (t >> 16) & 0xff; rec[3] = (t >> 24) & 0xff;
+            rec[4] = (unsigned char)(in->busID & 0xff);
+            rec[5] = (unsigned char)(svc & 0xff);
+            rec[6] = aux & 0xff; rec[7] = (aux >> 8) & 0xff;
+            rec[8] = v & 0xff; rec[9] = (v >> 8) & 0xff;
+            rec[10] = (v >> 16) & 0xff; rec[11] = (v >> 24) & 0xff;
+            fwrite(rec, 1, sizeof rec, bl);
+        }
+    }
     if (br->mmu && in->busID == br->mmuBus) {
         mmumodel_service(br->mmu, svc, in, out);
         return;

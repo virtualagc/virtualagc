@@ -292,6 +292,9 @@ typedef struct IOP {
     /* MSC "repeat until" state -- @RAI/@RAW/@RNI/@RNW hold the MSC on one
      * instruction until their condition is met or a count expires.  See
      * iop_msc_repeat(). */
+    /* Simulated time at which the serial bus is free again; see
+     * YAGPC_BUS_WORD_US in iop.c. */
+    double busFreeUs[32];
     bool mscRepeatActive;
     uint32_t mscRepeatPC;
     double mscRepeatUntilUs;
@@ -424,6 +427,7 @@ void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce);
  * that goes too long without a word is error-terminated. */
 bool iop_bce_receive_starting(IOP *iop);
 double iop_now_us(IOP *iop);
+void iop_first_op(IOP *iop, const char *kind, const char *nm, uint32_t pc);
 void iop_dump_procs(IOP *iop);
 bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count);
 

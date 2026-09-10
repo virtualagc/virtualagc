@@ -296,6 +296,11 @@ bool cpu_can_wake(const CPU *cpu);
  * neither counter is armed. */
 double cpu_next_timer_ns(const CPU *cpu);
 
+/* YAGPC_IMONHIST -- see cpu.c. */
+extern long *cpu_imon_hist;
+extern long cpu_imon_total;
+void cpu_imon_report(void);
+
 /* Advance simulated time through the wait state by up to `ns`, stopping
  * early if an interrupt takes the CPU out of it.  Returns the
  * nanoseconds actually advanced.  This is what couples the machine's own

@@ -629,90 +629,147 @@ what §5 stamped.
 
 ---
 
-## The OPS 901/201/301 blocker, as of 2026-09-09
+## The OPS 901/201/301 blocker, as of 2026-09-10
 
 `OPS 901 PRO` **does not complete.**  Phase 3 and phase 8 load from the tape;
 phase 18 never does.  `OPS 201` and `OPS 301` fail identically, and neither
-needs phase 18.
+needs phase 18.  Roughly ninety runs have produced no `6/5/0/0`.
+
+> **BEFORE SPENDING A RUN, ASK THE LEDGER.**  Causes investigated and fixes
+> attempted live in `gpc-causes.db`, generated to `CAUSES.md`:
+>
+>     ./gpc-causes.py addr 1010d      is this address already accounted for?
+>     ./gpc-causes.py search pacing   has this idea already been tried?
+>     ./gpc-causes.py list --status=refuted
+>
+> Addresses are recorded as ranges and answer point queries.  An entry marked
+> `refuted` carries the evidence and the run that settled it; do not retest one
+> without new evidence.  This exists because the observed failure mode is not
+> forgetting a fact but **rediscovering and re-refuting the same cause**.
+
+### There are TWO independent blockers, not one
+
+They share an outcome and must not be conflated.  Fixing either alone will not
+produce `6/5/0/0`.
+
+| build | fault | when | pool overflow |
+|---|---|---|---|
+| ours (v36) | IOQE exhaustion -> `FIOSVC` walks onto the `080ce` sentinel | ~395-398 | yes |
+| `pass-910` | `FCMPMOD` store-protect at `0x1010d` | ~389-392 | **none** |
+
+Our tape shows **no** `FCMPMOD` fault at all; its program-check list is the
+three GPCIPL self-tests plus the `FIOSVC` one.  Both end the same way: a
+program check abandons a process, `FPMIHPC2` misses `CALL FPMITUPD`, Clock 2
+is never re-armed, phase 8's mass-memory transaction never completes, and
+phase 18 is never requested.
 
 ### What is invariant across every run
 
-* `FCMMGPOV` is entered **twice** for the transition — phase 3, phase 8 — and
-  never a third time.
-* `$0ARCGPC` is entered **exactly twice** and never again, parked in
-  `WAIT FOR ARC_OVL_EVT` after phase 8.
-* Phase 8's data **does** arrive: 123 + 115 blocks read off the tape.
-* `CZ2V_GRT_MC_PHASES` rows are FIVE halfwords, not three; the table starts at
-  `#PCZ2COM+1348` (`0x02938`) and row 9 (OPS 9 GNC) reads **3, 8, 18**.
-  `ARCGPC` uses slot 1 for the MF overlay and slots 2-5 for the program
-  overlay.  Phase 18 is present and well formed on the tape: 8 load blocks at
-  `6/5/0/0`, 15,284 halfwords of its 34 allocated blocks.
+* `FCMMGPOV` is entered **twice** for the transition and never a third time.
+* `$0ARCGPC` is entered **exactly twice**, parked in `WAIT FOR ARC_OVL_EVT`.
+* Phase 8's data **does** arrive off the tape.
+* `CZ2V_GRT_MC_PHASES` rows are FIVE halfwords; row 9 (OPS 9 GNC) reads
+  **3, 8, 18**.  `dass-combine.py` agrees independently: `"G9":(3,8,18)`.
+* **`TCVTMMA` never clears.**  The phase-8 mass-memory transaction is still
+  outstanding at the end of every run, on both builds.
+* Clock 2 dies during the transition on both builds.  In `FPMIHPC2` the only
+  re-arm is `CALL FPMITUPD` (line 288) and **both** exits are after it, so a
+  handler that runs to completion re-arms the clock.  Measured: 32 of 33 PC2
+  passes reach `FPMITUPD`; the 33rd diverges at `FPMIHPC2+561` into
+  `FIOSVC -> FPMIHPGM -> FPMERLOG -> FPMDISP`, the program-check path.
 
-So the failure is that **`ARC_OVL_EVT` is never set after a load that
-demonstrably completed on the tape side.**  `FCMMGPOV` sets it on its exit
-path via `COPY FIOSTEVT`, after `FCMIOSLP` exits.  That is the place to
-instrument — `FSVC0019` `192ce`, `FCMMGOVP` `19309`, `SVC FCMMGIOS` `193c1`,
-`SVC FCMMGWAT` `193c3`, `SVC FCMMGWTT` (200 ms error retry) `193d1`,
-`FTRMGPOV` (the exit that sets the event) `1935c`.
+### Our build: the IOQE chain, measured end to end
 
-### The chain that is NOT the cause, and is now fixable
+1. `AIG_DEU_LOADER` issues **eight** DCP fills per DEU
+   (`AIGDEU.hal`, `OUTER: DO FOR AIGV_NUM_OF_FILL = 1 TO 8`), each followed by
+   a **timed** `WAIT 0.018` — not a wait on completion.  The status words are
+   pre-zeroed and only a non-zero value is an error, so an unfinished I/O reads
+   as success and the loop issues the next fill regardless.
+2. In our emulator the fills do not complete inside 18 ms, so all eight stack.
+   **8 fills x 3 DK buses + 1 mass memory = 25 = exactly the pool**
+   (`NIOQE=25`).  FCOS sized it for this; we sit at capacity and overflow by
+   one.
+3. `FIOSVC` then walks onto the free list's deliberate sentinel
+   (`GENERATE.asm:335`, `DC Y(FPMSVCEP)`) and the store-protect that follows is
+   **FCOS's queue-overflow detector working as designed**.
+4. That program check costs the PC2 pass its `FPMITUPD`, and the clock stops.
 
-A long chain was traced end to end and then shown to be a **passenger**.  It
-is real, it is worth fixing, and switching it off does **not** make phase 18
-load:
+The free list is a full 25 from t=150 to t=389, drains 25 -> 0 across
+t=392-397, and **recovers to 24** by t=402: a spike, not a leak.  The open link
+is why a completed DK transaction does not clear its `TCVTBCEB` bit for ~1 s.
 
-1. Our DEU model recognises the end of a load only by GPCIPL's 250-halfword
-   final fill (`LAST_FILL_WORDS`).  PASS's own load of the other units ends
-   differently, so they never reach `ipled`, answer every poll saying they
-   still need loading, and `AIG_DEU_LOADER` retries forever.  Measured with
-   four units attached: **three loads started, one completed.**
-2. A loader still retrying is still on the dispatcher's queue when the
-   transition overlays phase 8 across `$0AIGDEU` at `0x20022`.
-3. The dispatcher then runs into what is now `#PCVNMMU` — a compool, correctly
-   unprotected — and the Instruction Monitor traps **every instruction**:
-   27,939 traps in about six seconds, all in page `0x20000`.
-4. I/O completion starves; `FIOCMPLT` stops releasing IOQEs for ~5 s.
-5. The 25-entry pool drains 13 -> 0 in ~36 ms.  `FIOSVC` then pops the free
-   list's **deliberate sentinel** — `GENERATE.asm:335`,
-   `DC Y(FPMSVCEP)  POINTER TO PROTECTED SVC TABLE` — and the store-protect
-   check that follows is **FCOS's queue-overflow detector working as
-   designed**, not a defect.
-6. Taken inside the Clock 2 handler, it stops `FPMIHPC2` before
-   `CALL FPMITUPD`, the only code that re-arms Clock 2.  Last `ARM2`
-   395.239705, final `FIRE2` 395.279203, no successor.  Clock 1 keeps firing
-   to the end of the run, so the timer facility itself is sound.
-7. No tick, so no TQE expires, so the mass-memory I/O is never completed.
+### The other build: the FCMPMOD protection gap
 
-`YAGPC_DEU_EXTRA_PRELOADED` brings the non-DK1 units up already initialised.
-Measured: loads 1/1, Instruction Monitor traps **27,939 -> 1**, sentinel
-violations gone — **and phase 18 still did not load.**
+Traced from the NIA ring dumped at the program check:
 
-### Things established by measurement that contradict earlier entries
+    FPMIHPC2 -> FPMITUPD -> FPMDISP      (a PC2 pass completing NORMALLY)
+      -> $0AIESIP -> SVC -> FPMSVC
+      -> FCMPMOD+98 stores to #CDG9LIG+21 (0x1010d) -> PGMCHK 0007
+      -> FPMIHPGM -> FPMERLOG -> FPMDISP
 
-* **The pool is not undersized.**  `NIOQE=25` (`FIOCBLKS.asm:1554`) and the
-  original `G9.fcm` dump has the same 25 IOQEs at the same addresses with the
-  same `080ce` sentinel; `FIOCBLKS` is 1710 halfwords in our build and in the
-  DASS csect table.
-* **`TCVTIOFP` is not corrupt and the free list is not unterminated.**
-* **The store protection is not over-broad** at `FPMSVCEP`; that csect is the
-  SVC entry-point table and must be protected.
-* **The DK buses are not saturated.**  17.3 commands/s in a quiet stretch
-  against 8.8/s during the burst, and the 8.458 s gap on bus 6 runs from
-  `t=400.036` to `408.494` — starting at the instant the pool empties.  The
-  display goes quiet BECAUSE the machine breaks.
-* **`ICNT=c9d6` is not a count.**  `C9D6` is EBCDIC `'IO'`, the generator's
-  fill for untouched IOQE fields.
-* **PSW2 `b804`** in a final register dump is `FPMDSBL`, `FPMIDLE`'s own
-  disabled window — where a random sample lands, not evidence of masked
-  interrupts.
+`FCMPMOD` is **SVC 26, "MAIN MEMORY PROGRAM MODIFICATION"**.  It does not test
+the hardware — it branches on a **caller-supplied** flag:
+
+    IF (TB,TMODFLGS,TMODSSP,O)  THEN DATA WORD IS PROTECTED
+        ISPB@# 0 / STH@# / ISPB@# 2        unprotect, write, reprotect
+    ELSE                         DATA WORD IS NOT PROTECTED
+        STH@# R3,0(R7,R0)                  write directly
+
+The caller said "not protected", so it wrote directly.  `0x100f8..0x1010d` was
+unprotect-written-**reprotected** by the SSL loader at t=119.6 and never
+unprotected again; the phase-8 overlay's unprotect walk (`FCMMGBOV+423`,
+`m1=1`, 1914 `ISPB`s) begins at `0x1010e`, one halfword above the faulting
+store.  The loop itself reads correctly — it covers every even offset from
+`len-2` down to 0 — so the defect is in its **inputs**: either `FCMOVZC` is
+wrong for that block, or the block never gets a walk.
+
+### Diagnostics added for this work
+
+All gated, all off by default.
+
+| hook | what it answers |
+|---|---|
+| `YAGPC_FIRSTOP` | first execution of each opcode, with processor, address, time — finds instructions that debut at the transition and so have never been exercised |
+| `YAGPC_IOQEDEPTH` | IOQE free-list depth per second, plus queue heads and `TCVTMMA` |
+| `YAGPC_PGMTRACE` | every program check taken, with code and faulting address; dumps the IOQE pool on a sentinel hit and the NIA ring on the first non-IPL check |
+| `YAGPC_NIAWINDOW` | every instruction in a window of simulated time |
+| `YAGPC_MSCSTATE` / `YAGPC_BCESTATE` | the halt/busy bits that gate a processor, and per-second slice counts |
+| `YAGPC_DKSTALL` / `YAGPC_DKRATE` | DK bus transmit census; **`DKRATE` measures command-to-command GAPS, not transfer time** |
+| `YAGPC_ODDFW` | fullword reads at an odd address |
+| `YAGPC_BUS_WORD_US` | models the wire as busy per word.  **Failed three times; left off.** |
+
+### Method rules learned the hard way
+
+* **No `.mmv` is an original.**  Every tape is one we built, `pass-910.mmv`
+  included.  It can show that two builds differ; it can **not** establish that
+  either is correct.  Any argument of the form "the original didn't do this,
+  so the defect is ours" is circular.
+* **The authoritative manuals are in the local ibiblio mirror** and went unused
+  for most of this work.  `IBM-74-A31-016` is a *summary* that defers BCE
+  instruction detail to the **BCE Principles of Operation**
+  (`IBM-6246556A` part 3, OCR'd, `pdftotext -layout`).  Going to it found the
+  `#RDL` defect in minutes.  The MSC and AP-101 manuals are beside it.
+* **The DASS dumps cannot validate runtime-built areas.**  They are as-built
+  images, so bus programs and scratch read as zero.  "Absent from the dumps" is
+  evidence only for statically linked code.
+* **The JS reference fixtures encode the bugs they should catch.**  Both the
+  `@RAW` and `#RDL` fixtures pass with the defect and with the fix.
+* **Judge a run's validity before its result.**  Require `keys=2`,
+  `latereads >= 2`, and `SIMULATED TIME` past 410 s.  Several readings this
+  session came from runs that never reached the transition.
+* **The MMU trace goes stale by design** — nothing touches the tape between
+  t=13 s and t=130 s — so it is not a progress indicator.  The emulated clock
+  is in `gpc.log`'s `SIMULATED TIME` at exit.
+* **`pgrep -f` matches the shell running it.**  Use
+  `ps -eo args | grep "[y]aGPC2 run"`, and exclude `$$`/`$PPID` when killing.
 
 ### Run-to-run variability is real
 
-`v44a` and `v44b`, same configuration and differing only in which
-instrumentation was attached, gave 3 violations with the monitor storm gone
-and 6 violations with the timer dying as before.  **Single runs are not
-evidence here; confirm any effect twice before believing it.**
-
+Same configuration, differing only in instrumentation, has given materially
+different violation counts, and the fault time drifts by seconds between runs
+(392.73, 391.85, 389.69 on the same build).  **Single runs are not evidence;
+confirm any effect twice**, and never key a trace window to a time observed in
+a previous run.
 ## What this tape has that its predecessors did not
 
 | | earlier tapes | v27 |
@@ -735,10 +792,19 @@ state — went from **8.37 %** to **0.50 %** over this work.
 ## What is still open
 
 * **`OPS 901/201/301 PRO` do not complete.**  Phase 3 and phase 8 load; phase
-  18 never does.  See "The OPS 901/201/301 blocker" above for the invariants
-  and for the chain that was traced and then shown to be a passenger.  The
-  single remaining question is why `ARC_OVL_EVT` is never set after phase 8's
-  load.
+  18 never does.  See "The OPS 901/201/301 blocker" above.  There are **two**
+  independent faults, one per build, and both end by killing Clock 2 so that
+  phase 8's mass-memory transaction never completes.  The two open links are:
+  (a) our build — why a completed DK transaction does not clear its
+  `TCVTBCEB` bit for ~1 s; (b) the other build — why the phase-8 overlay's
+  unprotect walk starts at `0x1010e` rather than covering its block.
+  `gpc-causes.py list --status=open` is the live list.
+* **`#RDL`'s count read was wrong and is fixed, but latent.**  It used a
+  halfword access masked to 16 bits and did not ignore the address LSB, where
+  the BCE PoO specifies bits 14-31 of the *fullword* with the LSB ignored —
+  the same defect already fixed in its twin `#TDL`.  It never executes in this
+  workload (BCE18 uses the immediate `#RDLI`), so the fix rests on the
+  documentation and cannot be confirmed by a run.
 * **The real end-of-load rule for a display unit is unknown.**  This model
   uses GPCIPL's 250-halfword final fill, which only ever recognises the load of
   the BFC-selected unit; `YAGPC_DEU_EXTRA_PRELOADED` is a stand-in, not an
@@ -756,6 +822,21 @@ state — went from **8.37 %** to **0.50 %** over this work.
   `pass-ipl-cflm.mmv`.  It is not a build defect of ours.
 
 ### Closed since the last sync
+
+* **A searchable ledger of causes now exists** — `gpc-causes.py` over
+  `gpc-causes.db`, generated to `CAUSES.md`, following the same pattern as the
+  `dass-handoff.py` handoffs (database is the source, Markdown is generated,
+  `check` proves no drift, a hand edit is silently overwritten).  Seeded with
+  23 entries from this work: 16 refuted, 3 open, 2 fixed, 2 confirmed.
+  Seventeen searchable fields, including addresses **as ranges answering point
+  queries** — `addr 10120` finds the entry recorded as `100f8-10129`.
+* **Instruction auditing by first execution.**  `YAGPC_FIRSTOP` reduced 58
+  opcodes to the single one debuting at the transition (`#DLY`, BCE18,
+  `0x1d204`), which was then exonerated against the BCE PoO on four counts.
+  The technique found a real defect (`#RDL`) on the way.
+* **`pass-910.mmv` is not an original tape.**  Retracted; every `.mmv` is one
+  we built.  Any conclusion that used it as a control for "the real machine
+  did X" is void.
 
 * **Phases 4, 5, 6, 7, 8 and 15 came out short.**  Fixed by giving each phase
   the csect table of the configuration it belongs to: 8 of 14 phases now match

@@ -95,6 +95,26 @@ DeuModel *deumodel_create(int busID) {
      * The clock keeps running either way, which is exactly what makes the
      * failure look like "nothing is happening" rather than a skipped step. */
     if (getenv("YAGPC_DEUPRELOADED")) d->ipled = true;
+    /* YAGPC_DEU_EXTRA_PRELOADED: the units BEYOND the built-in DK1 one come
+     * up already initialised.  GPCIPL loads exactly one unit -- the
+     * BFC-selected CRT -- and this model only recognises the end of THAT
+     * load, by its 250-halfword final fill (LAST_FILL_WORDS).  PASS's own
+     * load of the other units ends differently, so they never reach `ipled`,
+     * answer every poll saying they still need loading, and AIG_DEU_LOADER
+     * retries them forever.  Measured with four units attached: three loads
+     * started, one completed.
+     *
+     * That matters far beyond a blank screen.  A loader still retrying is
+     * still on the dispatcher's queue when an OPS transition overlays phase 8
+     * across $0AIGDEU at 0x20022, and the dispatcher then runs into what is
+     * now #PCVNMMU -- a compool, correctly unprotected -- which trips the
+     * instruction monitor on every instruction: 27,939 traps in about six
+     * seconds, starving I/O completion until the IOQE pool empties.
+     *
+     * A real orbiter has all four units up, so this is closer to the truth
+     * than three units permanently demanding a load we cannot finish.  It is
+     * opt-in until the real end-of-load rule is known. */
+    if (busID != 6 && getenv("YAGPC_DEU_EXTRA_PRELOADED")) d->ipled = true;
     d->iplRunning = false;
     /* YAGPC_DEUMF=<0..3>: the MAJOR FUNCTION switch position this unit
      * reports in every poll header -- 0 PL, 1 GNC, 2 SM, 3 ILLEGAL.

@@ -543,6 +543,7 @@ void iop_init(IOP *iop, struct CPU *cpu) {
 
     dmaq_init(&iop->dmaQueue);
     iop->clockCycleCount = 0;
+    for (int i = 0; i < 32; i++) iop->busFreeUs[i] = 0.0;
     iop->mscRepeatActive = false;
     iop->mscRepeatPC = 0;
     iop->mscRepeatUntilUs = 0.0;
@@ -765,10 +766,101 @@ void iop_exec_rm(IOP *iop) {
     iop_tick_watchdog(iop);
 }
 
+/* YAGPC_BUS_WORD_US: model the SERIAL BUS BEING BUSY for a transmitted word.
+ *
+ * Without this a transmit costs nothing: mia_xmit_word() hands the word to the
+ * servicer synchronously, so the wire is never occupied and the only pacing is
+ * how often the owning BCE gets a wheel slice (~16.5 us).  The hardware is
+ * slower than that -- IBM-74-A31-016: a bus word is 28 bits at 1 MHz = 28 us,
+ * plus a minimum 5 us interword gap, and the BCE book calls 33 us "the minimum
+ * time for a word transmission over a serial bus".  So a 510-word DEU fill
+ * occupies the wire 16.8 ms on the orbiter and about 10.9 ms here, and under
+ * load we have measured it take 800 ms, a 75x spread.  AIG_DEU_LOADER paces
+ * its eight DCP fills at 18 ms apiece, which only works if a fill reliably
+ * fits inside that; nondeterministic occupancy is what breaks it.
+ *
+ * OFF BY DEFAULT (0 = the old free-wire behaviour).  mmumodel.c's own warning
+ * applies with full force: FCMBOOT's block-gap timing is load-bearing, and
+ * this changes the timing of EVERY bus transmit, mass memory included.  Set it
+ * to 33 for the documented rate, or lower to buy margin against the emulator's
+ * own dispatch latency, which the orbiter did not have. */
+static double bus_word_us(void) {
+    static int inited = 0;
+    static double us = 0.0;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_BUS_WORD_US");
+        if (e != NULL) { double v = atof(e); if (v >= 0.0) us = v; }
+    }
+    return us;
+}
+
+/* YAGPC_FIRSTOP: the FIRST execution of each distinct opcode, with the
+ * processor, the address the instruction sits at, and the simulated time.
+ *
+ * An OPS transition runs code paths that have never executed before, so an
+ * opcode making its DEBUT at the moment of the transition is a prime suspect
+ * for being implemented wrongly -- it has had no chance to be exercised, and
+ * nothing else in a boot would have caught it.  A full instruction trace
+ * cannot answer this (one line per slice is far too much to keep across a
+ * boot) and an address-windowed trace answers a different question, needing
+ * you to already know where to look.  One line per opcode, ever, costs
+ * nothing after the first and is small enough to read end to end.
+ *
+ * Names are static string literals, so identity comparison is enough -- and
+ * the MSC and BCE tables hold separate literals, so the same mnemonic in both
+ * is reported separately, which is what is wanted: they are different
+ * implementations. */
+void iop_first_op(IOP *iop, const char *kind, const char *nm, uint32_t pc) {
+    static int inited = 0, on = 0, nSeen = 0;
+    static const char *seen[512];
+    if (!inited) { inited = 1; on = getenv("YAGPC_FIRSTOP") != NULL; }
+    if (!on || nm == NULL) return;
+    for (int i = 0; i < nSeen; i++) if (seen[i] == nm) return;
+    if (nSeen < 512) seen[nSeen++] = nm;
+    fprintf(stderr, "FIRSTOP %-6s %-8s pc=%05x t=%.6f\n", kind, nm,
+            (unsigned)pc, iop_now_us(iop) / 1e6);
+}
+
 void iop_exec_dma_queue(IOP *iop) {
     if (iop->dmaQueue.count == 0) return;
+    /* Hold the wire for one word time.  Only a TRANSMIT (DMA_READ: the IOP
+     * reading main store to put a word on the bus) occupies it; a receive is
+     * the peripheral's transmission and is paced at the far end. */
+    double wordUs = bus_word_us();
     DMARequest req;
-    dmaq_shift(&iop->dmaQueue, &req);
+    if (wordUs > 0.0 && iop->cpu != NULL) {
+        /* PER BUS, and WITHOUT HEAD-OF-LINE BLOCKING.  Each BCE drives its own
+         * serial line, so transmits on different buses are concurrent -- but
+         * the DMA queue is one shared FIFO, so simply refusing to drain while
+         * its head waits for that head's wire stalls every other bus and every
+         * receive behind it.  Both mistakes were measured the same way: PASS
+         * never reached the point of accepting a keystroke.  Scan instead for
+         * the first request whose wire is free, and lift it out of the queue.
+         *
+         * A receive is never gated: it is the peripheral's transmission and is
+         * paced at the far end (mmumodel.c does exactly that for mass memory). */
+        double now = iop->cpu->elapsedTimeUs;
+        int n = iop->dmaQueue.count, pick = -1;
+        for (int i = 0; i < n; i++) {
+            const DMARequest *r = &iop->dmaQueue.items[iop->dmaQueue.head + i];
+            if (r->direction != DMA_READ || r->bce == NULL) { pick = i; break; }
+            int b = r->bce->bceNum;
+            if (b < 0 || b >= 32 || now >= iop->busFreeUs[b]) { pick = i; break; }
+        }
+        if (pick < 0) return;                 /* every pending wire is busy */
+        req = iop->dmaQueue.items[iop->dmaQueue.head + pick];
+        for (int i = pick; i > 0; i--)
+            iop->dmaQueue.items[iop->dmaQueue.head + i] =
+                iop->dmaQueue.items[iop->dmaQueue.head + i - 1];
+        iop->dmaQueue.head++; iop->dmaQueue.count--;
+        if (req.direction == DMA_READ && req.bce != NULL) {
+            int b = req.bce->bceNum;
+            if (b >= 0 && b < 32) iop->busFreeUs[b] = now + wordUs;
+        }
+    } else {
+        dmaq_shift(&iop->dmaQueue, &req);
+    }
     if (req.direction == DMA_READ) {
         /* IOP reading from main memory (transmit to bus) */
         uint32_t data = mcm_get16(&iop->cpu->mainStorage, req.addr);
@@ -807,10 +899,106 @@ void iop_exec_processors(IOP *iop) {
     if (page == 0) {
         /* regHalt is 1 = Processor Enabled (iop.h), so a CLEAR bit is the
          * halted processor that must not be stepped. */
+        /* YAGPC_MSCSTATE: every change in the two bits that GATE the MSC,
+         * plus a per-second count of the slices it actually executes.
+         *
+         * These two bits are the whole question when TCVTMSC latches at -1.
+         * -1 is FIOMCNTL's "MSC BUSY BUT INTERRUPTABLE", stored on entry to
+         * FIOMNTR; every path out of FIOMNTR ends by storing 0 (FIOMWAIT) or
+         * +1, and the only instruction that can hold the MSC there is @RAW,
+         * whose count is a halfword of 33us ticks and so expires in at most
+         * ~2.2 s.  A PERMANENT latch therefore cannot be the repeat waiting:
+         * it has to be the MSC no longer being stepped at all, which is
+         * exactly what a cleared halt or busy bit does here -- the repeat
+         * then never resolves, the @INT is never reached, FIOCMPLT never
+         * runs, and FIOPDISP never dispatches again. */
+        {
+            static int msInit = 0, msOn = 0, lastH = -1, lastB = -1;
+            static long bin[4096]; static int lastBin = -1;
+            if (!msInit) { msInit = 1; msOn = getenv("YAGPC_MSCSTATE") != NULL; }
+            if (msOn) {
+                int h = (int)iop_proc_get(&iop->regHalt, PROC_MSC);
+                int b = (int)iop_proc_get(&iop->regBusyWait, PROC_MSC);
+                double now = (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
+                if (h != lastH || b != lastB) {
+                    fprintf(stderr, "MSCSTATE halt=%d busy=%d t=%.3f\n", h, b, now / 1e6);
+                    lastH = h; lastB = b;
+                }
+                int sec = (int)(now / 1e6);
+                if (sec >= 0 && sec < 4096) {
+                    if (h && b) bin[sec]++;
+                    if (sec != lastBin) {
+                        lastBin = sec;
+                        if (sec >= 1 && bin[sec - 1] == 0)
+                            fprintf(stderr, "MSCSTATE IDLE-SECOND t=%d\n", sec - 1);
+                    }
+                }
+            }
+        }
         if (!iop_proc_get(&iop->regHalt, PROC_MSC)) return;
         if (!iop_proc_get(&iop->regBusyWait, PROC_MSC)) return;
     } else {
         int bceIdx = page;
+        /* YAGPC_BCESTATE: for the DK buses, a per-second census of the wheel
+         * revolutions in which the BCE was ELIGIBLE to run (halt+busy both
+         * set) against the revolutions that went by.  A BCE gets one slice per
+         * 16.5 us revolution, so a word per revolution is the floor; we have
+         * measured 21 revolutions per word during a transition and 84 at
+         * worst, against 1.3 during GPCIPL.  Either the BCE is ineligible most
+         * of the time -- its busy bit clear, so nothing steps it -- or it is
+         * eligible and spending many instructions per word.  Those are
+         * opposite defects and this is what separates them. */
+        if (bceIdx >= 6 && bceIdx <= 8) {
+            static int bsInit = 0, bsOn = 0, lastSec = -1;
+            static long elig[9], seen[9];
+            if (!bsInit) { bsInit = 1; bsOn = getenv("YAGPC_BCESTATE") != NULL; }
+            if (bsOn && iop->cpu != NULL) {
+                int sec = (int)(iop->cpu->elapsedTimeUs / 1e6);
+                if (lastSec >= 0 && sec != lastSec) {
+                    fprintf(stderr, "BCESTATE t=%d", lastSec);
+                    for (int b = 6; b <= 8; b++) {
+                        fprintf(stderr, " bce%d=%ld/%ld", b, elig[b], seen[b]);
+                        elig[b] = seen[b] = 0;
+                    }
+                    fprintf(stderr, "\n");
+                }
+                lastSec = sec;
+                seen[bceIdx]++;
+                if (iop_proc_get(&iop->regHalt, bceIdx) &&
+                    iop_proc_get(&iop->regBusyWait, bceIdx)) elig[bceIdx]++;
+            }
+        }
+        /* YAGPC_BWTRACE: every transition of a BCE's Halt and Busy/Wait
+         * bits, timestamped.  Busy/Wait is what actually gates execution
+         * (iop_exec_slice refuses to step a processor whose bit is clear),
+         * only the MSC's SIO can set it, and #WAT is what clears it -- so
+         * its falling edge IS the moment the bus program ended.
+         *
+         * This exists to date the DK holds of gpc-causes.py entry 22 from
+         * the BCE's side.  TCVTBCEB stays set for a uniform ~1053 ms while
+         * the wire is silent; if #WAT lands at the START of that hold the
+         * program finished and the COMPLETION was lost, and if it lands at
+         * the END the BCE genuinely was occupied.  Those are opposite
+         * defects in opposite files. */
+        {
+            static int bwInit = 0, bwOn = 0;
+            static int bwLast[33];
+            if (!bwInit) {
+                bwInit = 1;
+                bwOn = getenv("YAGPC_BWTRACE") != NULL;
+                for (int i = 0; i < 33; i++) bwLast[i] = -1;
+            }
+            if (bwOn && bceIdx >= 1 && bceIdx <= 32) {
+                int h = iop_proc_get(&iop->regHalt, bceIdx) ? 1 : 0;
+                int b = iop_proc_get(&iop->regBusyWait, bceIdx) ? 1 : 0;
+                int st = (h << 1) | b;
+                if (bwLast[bceIdx] != st) {
+                    bwLast[bceIdx] = st;
+                    fprintf(stderr, "BW bce=%d halt=%d busy=%d t=%.1f\n",
+                            bceIdx, h, b, iop_now_us(iop));
+                }
+            }
+        }
         if (!iop_proc_get(&iop->regHalt, bceIdx)) return;
         if (!iop_proc_get(&iop->regBusyWait, bceIdx)) return;
     }
@@ -978,6 +1166,18 @@ void iop_msc_repeat(IOP *iop, DInstr *v, bool met) {
         iop->mscRepeatActive = true;
         iop->mscRepeatPC = pc;
         iop->mscRepeatUntilUs = now + (double)count * MSC_REPEAT_TICK_US;
+        /* YAGPC_REPEATTRACE: the count each repeat ARMS, with the PC that
+         * armed it.  The count is what decides whether a @RAW that cannot be
+         * satisfied is a short delay or a machine-stopping park, and it is
+         * not visible any other way -- the instruction's own displacement is
+         * only half of it, the index register supplies the rest. */
+        static int rtInit = 0, rtOn = 0;
+        if (!rtInit) { rtInit = 1; rtOn = getenv("YAGPC_REPEATTRACE") != NULL; }
+        if (rtOn)
+            fprintf(stderr, "REPEAT pc=%05x d=%u x=%05x count=%u (%.1f us) t=%.1f\n",
+                    (unsigned)pc, (unsigned)df_get(v, 'd'),
+                    (unsigned)(register_get32(iopls_X(&iop->ls)) & 0x3ffff),
+                    (unsigned)count, (double)count * MSC_REPEAT_TICK_US, now);
     }
 
     if (met) {
@@ -1305,6 +1505,32 @@ uint32_t iop_msc_long_ea(IOP *iop, uint32_t addr, bool indexed) {
  * C140 poisons; a caught error kills the access. */
 uint32_t iop_g_eaf(IOP *iop, uint32_t addr) {
     if (iop_check_dma_parity(iop)) return 0;
+    /* YAGPC_ODDFW: report a FULLWORD read whose address is ODD.
+     *
+     * BCE POO (IBM-6246556A part 3) section 1: "all main memory addresses
+     * computed by the BCE are represented as 18-bit absolute numbers... the
+     * lowest bit (bit 17) the halfword portion of the addressed fullword...
+     * WHEN USED AS A FULLWORD ADDRESS, BIT 17 IS IGNORED.  Thus, H'276' and
+     * H'277' refer to the same fullword."
+     *
+     * The four PC-relative instructions honour that with `& ~1u`
+     * (#LTO, #SBST, #SST, #DLY).  The long-format ones that carry an explicit
+     * address field -- #LBR@, #CMD, #TDL, #MOUT@ -- do NOT, so an odd address
+     * there would read a fullword STRADDLING two entries where the hardware
+     * would read the one containing it.  Whether that ever happens is a
+     * question about the flight software's tables, not about the rule, so
+     * count it rather than guess. */
+    if (addr & 1u) {
+        static int ofInit = 0, ofOn = 0; static long n = 0;
+        if (!ofInit) { ofInit = 1; ofOn = getenv("YAGPC_ODDFW") != NULL; }
+        if (ofOn && n < 40) {
+            n++;
+            fprintf(stderr, "ODDFW addr=%05x proc=%d pc=%05x t=%.6f\n",
+                    (unsigned)addr, iop->curPE,
+                    (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu),
+                    iop_now_us(iop) / 1e6);
+        }
+    }
     return mcm_get32(&iop->cpu->mainStorage, addr);
 }
 uint32_t iop_g_eah(IOP *iop, uint32_t addr) {
@@ -1636,9 +1862,21 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
              * so.  No PC is printed -- iopls_PC() reads whichever page
              * the round-robin happens to have selected, which for a
              * CPU-side PCO is any of the 26. */
-            if (getenv("YAGPC_DISPTRACE"))
-                fprintf(stderr, "DISP LOADMSCBUSY t=%.1f us\n",
+            if (getenv("YAGPC_DISPTRACE")) {
+                /* A busy-set arriving while the MSC is ALREADY busy is the
+                 * case the POO warns about twice: "while the MSC is busy do
+                 * not attempt to alter the STAT1 or STAT4 Registers by using
+                 * PCO commands", and PCOs writing MSC local store -- which is
+                 * where its program counter lives, and FIOSTMSC writes it with
+                 * X'A201' immediately before this -- leave "MSC program
+                 * execution ... unpredictable".  The running program is
+                 * derailed, never reaches its @INT, and its completion is
+                 * never signalled, so TCVTMSC stays latched busy. */
+                int already = iop_proc_get(&iop->regBusyWait, PROC_MSC);
+                fprintf(stderr, "DISP LOADMSCBUSY%s t=%.1f us\n",
+                        already ? " CLOBBER" : "",
                         (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0);
+            }
             iop_proc_set(&iop->regBusyWait, PROC_MSC, 1);
             /* And the copy of it the MSC reads back with @LMS: bit 17 of
              * the 18-bit MSC status register, "the Busy/Wait bit for the
@@ -1770,6 +2008,28 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         if (r != NULL) {
             if (isOutput) {
                 register_set32(r, data & 0x3ffffu);
+                /* FORCING THE MSC'S PC ENDS ANY REPEAT IN PROGRESS.
+                 * On the hardware a repeat is nothing but the MSC
+                 * re-executing one instruction until its condition or its
+                 * count; point the PC somewhere else and there is no repeat
+                 * left to be in.  We model it instead as a struct field keyed
+                 * on the PC, which SURVIVES the restart -- so the MSC would
+                 * run the new program, come back round to the very same @RAW
+                 * (FIOMNTR is re-entered on every I/O, and FIOMDLY's @RAW
+                 * sits at one fixed address), find mscRepeatActive still set
+                 * and mscRepeatPC still matching, and therefore NOT re-arm.
+                 * It would then compare against a deadline from the previous
+                 * entry, already in the past, and fall straight through with
+                 * a spurious timeout -- no delay at all, FIOMCKIO's single
+                 * look taken far too early, and FIOMTOUT declaring an MSC
+                 * timeout on an I/O that was merely still running.
+                 *
+                 * FCOS invites exactly this: TCVTMSC = -1 is "BUSY BUT
+                 * INTERRUPTABLE", and FIOSTMSC's wait is DO UNTIL=(...,NP),
+                 * which -1 satisfies, so the CPU restarts the MSC mid-repeat
+                 * by design. */
+                if ((int)region == PROC_MSC && bank == 0 && word == 2)
+                    iop->mscRepeatActive = false;
                 /* The word is in local store now, but with the parity the
                  * poisoned H-Bus generated for it.  Tag it so the IB page
                  * can catch it when the owning processor next uses the

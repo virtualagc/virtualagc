@@ -373,8 +373,10 @@ static void ap101_trig_trace(AP101 *gpc) {
  * sorted array of at most 32 addresses costs a binary search per instruction
  * and answers those questions in an otherwise ordinary run. */
 #define PCCOUNT_MAX 32
-typedef struct { uint32_t addr; long hits; double first, last; } PcCount;
+#define PCCOUNT_BINS 32          /* one-second bins, YAGPC_PCCOUNT_BINS=lo-hi */
+typedef struct { uint32_t addr; long hits; double first, last; long bin[PCCOUNT_BINS]; } PcCount;
 static PcCount g_pcCount[PCCOUNT_MAX];
+static int g_binLo = -1, g_binHi = -1;
 static int g_nPcCount = -1;
 
 void ap101_pccount_report(void) {
@@ -384,6 +386,21 @@ void ap101_pccount_report(void) {
         fprintf(stderr, "  %05x  hits=%-9ld first=%-10.3f last=%.3f\n",
                 (unsigned)g_pcCount[i].addr, g_pcCount[i].hits,
                 g_pcCount[i].first, g_pcCount[i].last);
+    /* first/last alone cannot tell "ran steadily to the end" from "ran hard
+     * early and twice more later", and that ambiguity cost a wrong reading of
+     * whether FIOSTMSC keeps waking the MSC through an overlay.  The bins say
+     * which. */
+    if (g_binLo < 0) return;
+    fprintf(stderr, "PCCOUNT per second, t=%d..%d:\n", g_binLo, g_binHi);
+    fprintf(stderr, "   addr ");
+    for (int t = g_binLo; t <= g_binHi; t++) fprintf(stderr, "%6d", t);
+    fprintf(stderr, "\n");
+    for (int i = 0; i < g_nPcCount; i++) {
+        fprintf(stderr, "  %05x", (unsigned)g_pcCount[i].addr);
+        for (int t = g_binLo; t <= g_binHi; t++)
+            fprintf(stderr, "%6ld", g_pcCount[i].bin[t - g_binLo]);
+        fprintf(stderr, "\n");
+    }
 }
 
 static void ap101_pc_count(AP101 *gpc) {
@@ -408,6 +425,12 @@ static void ap101_pc_count(AP101 *gpc) {
                 g_pcCount[j - 1] = t;
             }
         }
+        const char *bw = getenv("YAGPC_PCCOUNT_BINS");
+        if (bw != NULL) {
+            int a = 0, b = 0;
+            if (sscanf(bw, "%d-%d", &a, &b) == 2 && b >= a &&
+                b - a < PCCOUNT_BINS) { g_binLo = a; g_binHi = b; }
+        }
         if (g_nPcCount > 0) atexit(ap101_pccount_report);
     }
     if (g_nPcCount == 0) return;
@@ -420,6 +443,8 @@ static void ap101_pc_count(AP101 *gpc) {
             if (g_pcCount[mid].hits == 0) g_pcCount[mid].first = t;
             g_pcCount[mid].last = t;
             g_pcCount[mid].hits++;
+            if (g_binLo >= 0 && t >= g_binLo && t <= g_binHi)
+                g_pcCount[mid].bin[(int)t - g_binLo]++;
             return;
         }
         if (g_pcCount[mid].addr < nia) lo = mid + 1; else hi = mid - 1;

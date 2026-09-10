@@ -247,6 +247,83 @@ void cpu_check_interrupts(CPU *cpu) {
 
     if (cpu->intPending.programCheck) {
         cpu->intPending.programCheck = false;
+        /* YAGPC_PGMTRACE: every program check actually TAKEN, with its code
+         * and the address it interrupted.  A program check that the flight
+         * software handles is invisible otherwise -- FPMIHPGM logs it via
+         * FPMERLOG and goes to the dispatcher, so nothing on the emulator
+         * side ever says it happened -- and one of these is what breaks the
+         * OPS transition: the last FPMIHPC2 pass takes one inside FIOSVC and
+         * therefore never reaches the `CALL FPMITUPD` that re-arms Clock 2. */
+        {
+            static int pgInit = 0, pgOn = 0;
+            if (!pgInit) { pgInit = 1; pgOn = getenv("YAGPC_PGMTRACE") != NULL; }
+            if (pgOn) {
+                fprintf(stderr, "PGMCHK code=%04x at=%05x lastProt=%05x t=%.6f\n",
+                        (unsigned)cpu->intCode, (unsigned)psw_get_nia(&cpu->psw),
+                        (unsigned)cpu->lastProtFaultAddr,
+                        cpu->elapsedTimeUs / 1e6);
+                /* Dump the NIA ring for the FIRST check after startup, so the
+                 * path INTO the fault is captured without having to guess a
+                 * time window -- the fault drifts by a second between runs
+                 * (392.73 vs 391.85 on the same tape), which is exactly what
+                 * a windowed trace cannot catch.  Needs YAGPC_NIARING=<n>.
+                 * Skipped for the three GPCIPL self-tests at t~6 s. */
+                {
+                    static int dumped = 0;
+                    if (!dumped && cpu->elapsedTimeUs > 100e6) {
+                        dumped = 1;
+                        cpu_dump_nia_ring(cpu, "the program check",
+                                          psw_get_nia(&cpu->psw));
+                    }
+                }
+                /* A store-protect check landing inside FPMSVCEP (080ce..08100)
+                 * is FCOS's IOQE-QUEUE-OVERFLOW TRAP, not a random fault: the
+                 * last IOQE's TIOQNXT is DC Y(FPMSVCEP) (GENERATE.asm:335), so
+                 * walking off the end of the chain stores into the protected
+                 * SVC table on purpose.  When it fires, the interesting state
+                 * is WHO HELD THE 25 IOQEs -- dump the pool and the queue
+                 * heads so the owning device can be identified offline. */
+                if (cpu->intCode == 0x0007 &&
+                    cpu->lastProtFaultAddr >= 0x080ce &&
+                    cpu->lastProtFaultAddr <= 0x08100) {
+                    fprintf(stderr, "IOQEDUMP heads:");
+                    static const struct { const char *n; uint32_t a; } hd[] = {
+                        {"TCVTTTQE",0x143},{"TCVTIOA",0x144},{"TCVTIOW",0x145},
+                        {"TCVTPCTP",0x14a},{"TCVTTQEP",0x14c},{"TCVTIOFP",0x14d},
+                        {"TCVTMMA",0x151},{"TCVTBCEB",0x152},{"TCVTMSC",0x1a2}};
+                    for (size_t i = 0; i < sizeof hd / sizeof hd[0]; i++)
+                        fprintf(stderr, " %s=%04x", hd[i].n,
+                                (unsigned)membus_get16(cpu->ram, hd[i].a));
+                    fprintf(stderr, "\n");
+                    uint32_t owners[25]; int nOwn = 0;
+                    for (int q = 0; q < 25; q++) {
+                        uint32_t base = 0x090b2 + (uint32_t)q * 18;
+                        fprintf(stderr, "IOQEDUMP %2d %05x:", q, base);
+                        for (int w = 0; w < 18; w++)
+                            fprintf(stderr, " %04x",
+                                    (unsigned)membus_get16(cpu->ram, base + w));
+                        fprintf(stderr, "\n");
+                        /* Halfword 1 is the requestor's PCT (FIOSVC: "R2 bits
+                         * 0-15 contain requestor's PCT addr").  22 of the 25
+                         * IOQEs carry the SAME value in both the four-DEU and
+                         * one-DEU configurations, which is a single process in
+                         * a retry loop rather than organic traffic -- so dump
+                         * each distinct owner's PCT to find out WHO. */
+                        uint32_t own = membus_get16(cpu->ram, base + 1);
+                        int seen = 0;
+                        for (int k = 0; k < nOwn; k++) if (owners[k] == own) seen = 1;
+                        if (!seen && nOwn < 25) owners[nOwn++] = own;
+                    }
+                    for (int k = 0; k < nOwn; k++) {
+                        fprintf(stderr, "PCTDUMP owner=%04x:", (unsigned)owners[k]);
+                        for (int w = 0; w < 32; w++)
+                            fprintf(stderr, " %04x",
+                                    (unsigned)membus_get16(cpu->ram, owners[k] + w));
+                        fprintf(stderr, "\n");
+                    }
+                }
+            }
+        }
         uint32_t newPsw1 = membus_get32(cpu->ram, 0x004c);
         uint32_t newPsw2 = membus_get32(cpu->ram, 0x004e);
         if (newPsw1 == 0 && newPsw2 == 0) {
@@ -603,6 +680,16 @@ static void cpu_ea_trace(CPU *cpu, uint32_t ea) {
  * and no link map exists to say what code owns it.  Finding DM6OPS from
  * DM6V_TR_TAB is exactly that: the table is identifiable by its initial
  * values, the code around it is not identifiable by anything. */
+long *cpu_imon_hist = NULL;
+long cpu_imon_total = 0;
+void cpu_imon_report(void) {
+    if (cpu_imon_hist == NULL) return;
+    fprintf(stderr, "IMONHIST total=%ld  by 4K page:", cpu_imon_total);
+    for (int i = 0; i < 64; i++)
+        if (cpu_imon_hist[i]) fprintf(stderr, " %05x=%ld", (unsigned)(i << 12), cpu_imon_hist[i]);
+    fprintf(stderr, "\n");
+}
+
 static void cpu_ea_watch(CPU *cpu, uint32_t ea) {
     static int inited = 0;
     static uint32_t lo = 1, hi = 0;
@@ -1493,8 +1580,94 @@ void cpu_exec1(CPU *cpu) {
             cpu->niaRingFilled = filled;
         }
     }
+    /* YAGPC_IOQEDEPTH: once per simulated second, walk FCOS's IOQE free list
+     * from TCVTIOFP (0x14d) and print how many entries are left.  The pool is
+     * 25 (FIOCBLKS.asm GENERATE TYPE=CSECT,NIOQE=25) and its last TIOQNXT is
+     * DC Y(FPMSVCEP)=080ce, so a walk ends either at 0 or at that sentinel.
+     * This distinguishes the two ways the pool can reach empty: a SLOW LEAK
+     * that would drain it at some fixed time whatever else happened, versus a
+     * SPIKE consumed by the transition.  The overflow trap alone cannot tell
+     * them apart, and the answer decides whether to hunt a missing free or a
+     * burst of requests. */
+    {
+        static int dpInit = 0, dpOn = 0, lastSec = -1;
+        if (!dpInit) { dpInit = 1; dpOn = getenv("YAGPC_IOQEDEPTH") != NULL; }
+        if (dpOn) {
+            int sec = (int)(cpu->elapsedTimeUs / 1e6);
+            if (sec != lastSec) {
+                lastSec = sec;
+                uint32_t p = membus_get16(cpu->ram, 0x14d);
+                int n = 0;
+                while (p != 0 && p != 0x080ce && n < 40) {
+                    p = membus_get16(cpu->ram, p);
+                    n++;
+                }
+                /* Also the ACTIVE queue head and the monitor slot.  There
+                 * are TWO queues -- TCVTIOA for ordinary I/O and TCVTMMA for
+                 * mass memory -- so a long MM transfer does NOT head-block
+                 * ordinary I/O.  If the DK buses starve anyway, the suspect
+                 * is the head of TCVTIOA itself being stuck, with everything
+                 * behind it waiting; printing the head and its bus mask each
+                 * second says whether it advances or sits on one IOQE. */
+                uint32_t ioa = membus_get16(cpu->ram, 0x144);
+                int an = 0; uint32_t q = ioa;
+                while (q != 0 && q != 0x080ce && an < 40) {
+                    q = membus_get16(cpu->ram, q); an++;
+                }
+                fprintf(stderr,
+                        "IOQEDEPTH t=%d free=%d head=%04x end=%s "
+                        "IOA=%04x IOAlen=%d IOAbus=%04x MNTR=%04x MMA=%04x\n",
+                        sec, n, (unsigned)membus_get16(cpu->ram, 0x14d),
+                        p == 0 ? "zero" : (p == 0x080ce ? "SENTINEL" : "runaway"),
+                        (unsigned)ioa, an,
+                        (unsigned)(ioa ? membus_get16(cpu->ram, ioa + 4) : 0),
+                        (unsigned)membus_get16(cpu->ram, 0x146),
+                        (unsigned)membus_get16(cpu->ram, 0x151));
+            }
+        }
+    }
+    /* YAGPC_NIAWINDOW=loSec,hiSec[,loAddr-hiAddr]: every instruction address
+     * executed inside a window of SIMULATED time, optionally restricted to an
+     * address range.  The ring buffer cannot answer "how did we get here" when
+     * the destination is a tight loop -- FPMIDLE churns ~32000 times a second
+     * and flushes any ring long before it can be dumped -- and a whole-run
+     * trace is far too much.  A narrow window over one CSECT is both. */
+    {
+        static int nwInit = 0, nwOn = 0;
+        static double lo = 0, hi = 0;
+        static unsigned aLo = 0, aHi = 0xfffff;
+        if (!nwInit) {
+            nwInit = 1;
+            const char *w = getenv("YAGPC_NIAWINDOW");
+            if (w != NULL) {
+                unsigned x = 0, y = 0;
+                int n = sscanf(w, "%lf,%lf,%x-%x", &lo, &hi, &x, &y);
+                if (n >= 2) { nwOn = 1; if (n == 4) { aLo = x; aHi = y; } }
+            }
+        }
+        if (nwOn) {
+            double t = cpu->elapsedTimeUs / 1e6;
+            if (t >= lo && t <= hi && nia >= aLo && nia <= aHi)
+                fprintf(stderr, "NIAW %05x t=%.6f\n", (unsigned)nia, t);
+        }
+    }
     uint32_t intMask = psw_get_int_mask(&cpu->psw);
     if ((intMask & 0x20) && !membus_get_store_protect(cpu->ram, nia)) {
+        /* YAGPC_IMONHIST: a histogram, by 4K page, of where the Instruction
+         * Monitor fires, printed at exit.  It fires on every instruction
+         * fetched from a location the store-protect bitmap says is NOT
+         * protected, and PASS runs with its mask bit set, so on a machine
+         * whose protection matches the real one it should be silent.  Ours
+         * was measured at ~4700 per SECOND, each one a full PSW swap into
+         * the monitor handler -- so this says which code is sitting in
+         * memory we have failed to protect. */
+        if (getenv("YAGPC_IMONHIST")) {
+            static long hist[64]; static long tot = 0; static int reg = 0;
+            if (!reg) { reg = 1; atexit(cpu_imon_report); }
+            tot++; cpu_imon_total = tot;
+            unsigned pg = (unsigned)(nia >> 12);
+            if (pg < 64) { hist[pg]++; cpu_imon_hist = hist; }
+        }
         cpu_dump_nia_ring(cpu, "the Instruction Monitor", nia);
         /* This is the Instruction Monitor, not a program check: it has
          * its own class, vector and mask bit (see cpu_check_interrupts),
