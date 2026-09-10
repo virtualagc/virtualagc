@@ -693,7 +693,36 @@ static void exec_RAI(IOP *t, DInstr *v) {
  *
  * DO NOT "FIX" THIS TO PROC_ALL. */
 static void exec_RAW(IOP *t, DInstr *v) {
-    uint32_t m = iopls_getACC(&t->ls) & PROC_ALL_BCE;
+    /* YAGPC_RAW_MSCBIT=1 includes the MSC's own bit, i.e. the change the
+     * comment above forbids.  It is a MEASUREMENT HOOK, not a fix, and it
+     * is OFF by default so the refuted change cannot creep into the tree:
+     * the claim that it stops the I/O engine dead is backed by a run
+     * (v53b) and must be re-refuted or overturned with evidence, not with
+     * an argument.  What put the question back on the table is that some
+     * @RAW arms its follower with a count of 0x3ffff -- exactly
+     * -1 & 0x3ffff, which only @LI -1 can supply and only @XAX can move
+     * into the index register, so the '@LI 0 *JUST CHECK IT' between them
+     * was skipped by a met-exit.  Whether that @RAW is FIOMDLY's is not
+     * yet established: the site arming 0x3ffff (pc=1cb70, ~8k times) is
+     * NOT the one whose 98478 count=0 arms match this comment's own
+     * FIOMCKIO measurement (pc=03445).
+     *
+     * RETESTED AND THE WARNING STANDS.  Run x2, MSC bit IN, full length:
+     * the IOQE sentinel fault (PGMCHK 0007 at 1be4b, lastProt 080d6)
+     * fires at t=230.9 s instead of ~398, no transition happens at all,
+     * and the bus-6 hold distribution goes from a 0.85 ms median with
+     * 5-6 excursions to a 4263 ms MEDIAN, 6361 ms max, 12 of 13 over
+     * 300 ms.  So this is worse, not better, and the mask is not the
+     * explanation for the 0x3ffff arm.
+     *
+     * BEWARE THE SHORT SMOKE TEST.  Run x1 with the bit IN looked
+     * completely healthy -- every IPL read present, 99,914 log lines,
+     * fills=226 -- because the damage does not begin until about t=230 s
+     * and x1 stopped at ~190.  A 200-second run cannot clear this
+     * change. */
+    static int mbInit = 0, mbOn = 0;
+    if (!mbInit) { mbInit = 1; mbOn = getenv("YAGPC_RAW_MSCBIT") != NULL; }
+    uint32_t m = iopls_getACC(&t->ls) & (mbOn ? PROC_ALL : PROC_ALL_BCE);
     iop_msc_repeat(t, v, (register_get32(&t->regBusyWait) & m) == 0);
 }
 
