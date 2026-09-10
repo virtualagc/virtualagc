@@ -1194,6 +1194,152 @@ static bool batchrunner_step(BatchRunner *r) {
         }
     }
 
+    /* YAGPC_LANDMARKS: named addresses whose ARRIVAL is the result.
+     *
+     *     YAGPC_LANDMARKS="1c9f2:overlay-complete!,80ce:ioqe-sentinel!,\
+     *                      80a8:cpu-idle" YAGPC_LANDMARKS_AFTER=380
+     *
+     * Each entry is <hex>[:label][!]; a trailing '!' means STOP THE RUN on
+     * arrival.  YAGPC_LANDMARKS_AFTER=<sec> ignores every hit before that
+     * simulated second, which is what makes the mechanism usable at all --
+     * FPMIDLE, FIOCMPLT and the program-check handler are all reached
+     * thousands of times during IPL, long before the question being asked.
+     *
+     * WHY.  The investigation this serves has spent whole 12-minute runs
+     * producing a log from which a verdict then had to be INFERRED, and
+     * the inferences have been wrong in both directions: a "read N blocks"
+     * line that turned out to be emitted before any word left for the bus,
+     * and six runs read as "transitioned and failed" that had in fact
+     * never transitioned.  Arrival at a known address is not an inference.
+     * Reaching the code that requests phase 18 means phase 8 finished,
+     * whatever the logs look like.
+     *
+     * Every landmark's first arrival is reported with its simulated time
+     * whether or not it stops the run, so one run yields the whole
+     * sequence of landmarks passed, not just the first terminal one.  With
+     * --dump-state, a stopping landmark dumps state AND memory at that
+     * instant, which is the moment worth having. */
+    {
+        /* 64, the same ceiling --debug's own breakpoint table uses
+         * (DEBUGGER_MAX_BREAKPOINTS, debugger.c).  --break, the third
+         * mechanism, holds exactly one address and has no array at all. */
+        enum { LM_MAX = 64 };
+        static int lmInit = 0, lmN = 0;
+        static uint32_t lmAddr[LM_MAX];
+        static char lmLabel[LM_MAX][32];
+        static long lmStop[LM_MAX];   /* 0 = never stop, N = stop on Nth hit */
+        static long lmHits[LM_MAX];
+        static double lmAfterUs = 0.0;
+        /* Room for LM_MAX entries at a generous 48 chars each, so a full
+         * set cannot be truncated mid-entry -- silent truncation would
+         * leave a half-parsed hex address armed at the wrong place. */
+        static char lmBuf[LM_MAX * 48];
+        /* One test rejects almost every instruction: this check sits in the
+         * per-instruction path, and a linear scan of 64 addresses there is
+         * not free.  Indexed by the low 11 bits of the address; a set bit
+         * only means "some landmark could have these low bits", and the
+         * scan below then confirms. */
+        static unsigned char lmMaybe[2048 / 8];
+        if (!lmInit) {
+            lmInit = 1;
+            const char *e = getenv("YAGPC_LANDMARKS");
+            const char *a = getenv("YAGPC_LANDMARKS_AFTER");
+            if (a != NULL) lmAfterUs = atof(a) * 1e6;
+            if (e != NULL) {
+                if (strlen(e) >= sizeof lmBuf) {
+                    fprintf(stderr, "landmarks: *** YAGPC_LANDMARKS is %zu "
+                                    "bytes, over the %zu-byte limit -- "
+                                    "REFUSING, none armed\n",
+                            strlen(e), sizeof lmBuf - 1);
+                    e = NULL;
+                }
+            }
+            if (e != NULL) {
+                snprintf(lmBuf, sizeof lmBuf, "%s", e);
+                for (char *p = lmBuf; *p != '\0'; ) {
+                    if (lmN >= LM_MAX) {
+                        fprintf(stderr, "landmarks: *** more than %d given; "
+                                        "the rest are NOT armed, starting at "
+                                        "\"%s\"\n", LM_MAX, p);
+                        break;
+                    }
+                    char *comma = p;
+                    while (*comma != '\0' && *comma != ',') comma++;
+                    char save = *comma;
+                    *comma = '\0';
+                    char *colon = strchr(p, ':');
+                    const char *label = "";
+                    if (colon != NULL) { *colon = '\0'; label = colon + 1; }
+                    /* "<label>!"  stop on the first arrival
+                     * "<label>!2" stop on the SECOND, and so on.  The Nth
+                     * form is the one that matters here: FTRMGPOV is
+                     * reached once when phase 3's overlay completes and
+                     * again for phase 8, so "overlay-complete!2" is
+                     * precisely the success condition. */
+                    size_t ll = strlen(label);
+                    long stop = 0;
+                    const char *bang = strchr(label, '!');
+                    if (bang != NULL) {
+                        stop = (bang[1] != '\0') ? strtol(bang + 1, NULL, 10) : 1;
+                        if (stop < 1) stop = 1;
+                        ll = (size_t)(bang - label);
+                    }
+                    lmAddr[lmN] = (uint32_t)strtoul(p, NULL, 16);
+                    snprintf(lmLabel[lmN], sizeof lmLabel[lmN], "%.*s",
+                             (int)ll, label);
+                    if (lmLabel[lmN][0] == '\0')
+                        snprintf(lmLabel[lmN], sizeof lmLabel[lmN], "%05x",
+                                 (unsigned)lmAddr[lmN]);
+                    lmStop[lmN] = stop;
+                    lmHits[lmN] = 0;
+                    lmMaybe[(lmAddr[lmN] & 0x7ff) >> 3] |=
+                        (unsigned char)(1u << (lmAddr[lmN] & 7));
+                    lmN++;
+                    p = (save == ',') ? comma + 1 : comma;
+                }
+                fprintf(stderr, "landmarks: %d of %d armed, ignored before "
+                                "%.1f s\n", lmN, LM_MAX, lmAfterUs / 1e6);
+                for (int i = 0; i < lmN; i++)
+                    fprintf(stderr, "landmarks:   %05x %-24s %s\n",
+                            (unsigned)lmAddr[i], lmLabel[i],
+                            lmStop[i] ? "STOPS" : "logs only");
+            }
+        }
+        if (lmN > 0 &&
+            (lmMaybe[(nia & 0x7ff) >> 3] & (1u << (nia & 7))) != 0 &&
+            r->age.gpc.cpu.elapsedTimeUs >= lmAfterUs) {
+            for (int i = 0; i < lmN; i++) {
+                if (nia != lmAddr[i]) continue;
+                lmHits[i]++;
+                /* Every arrival, not just the first, up to a bound: the
+                 * COUNT is the result for a landmark like FTRMGPOV, and a
+                 * first-hit-only line cannot express "reached twice". */
+                if (lmHits[i] <= 20)
+                    fprintf(stderr, "LANDMARK %s #%ld at %05x t=%.6f s step=%ld\n",
+                            lmLabel[i], lmHits[i], (unsigned)nia,
+                            r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step);
+                if (lmStop[i] != 0 && lmHits[i] >= lmStop[i]) {
+                    if (r->opts != NULL && r->opts->dumpState != NULL) {
+                        char path[512];
+                        snprintf(path, sizeof path, "%s-landmark-%s.json",
+                                 r->opts->dumpState, lmLabel[i]);
+                        ageharness_dump_state(&r->age, path);
+                        snprintf(path, sizeof path, "%s-landmark-%s.mem.bin",
+                                 r->opts->dumpState, lmLabel[i]);
+                        dump_main_storage(r, path);
+                    }
+                    snprintf(r->stopReason, sizeof r->stopReason,
+                             "landmark %s hit %ld at 0x%05x (t=%.6f s)",
+                             lmLabel[i], lmHits[i], (unsigned)nia,
+                             r->age.gpc.cpu.elapsedTimeUs / 1e6);
+                    r->hasStopReason = true;
+                    return false;
+                }
+                break;
+            }
+        }
+    }
+
     /* Under --debug, the debugger's own breakpoint table (seeded from
      * --break, if given -- see debugger_create()) replaces this single-
      * breakpoint mechanism rather than running alongside it as a second,
