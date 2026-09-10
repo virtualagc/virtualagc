@@ -102,9 +102,31 @@ static void exec_LH(IOP *t, DInstr *v) {
      * advance past its operand word, which this did not do -- so
      * every one of them was followed by executing its own operand
      * as if it were an instruction. */
+    /* @LH SIGN-EXTENDS.  The accumulator is 32 bits and the operand is a
+     * halfword, and a halfword operand in this machine is signed -- so
+     * zero-extending turns every negative value into a large positive one.
+     *
+     * FIOMNTR2 is where it bites, and it is the whole of the DK hold:
+     *
+     *     @LH   TCVTMTTG   *GET TIME-TO-GO OF I/O OPERATION
+     *     @TI   FIOMSCDB-FIOMPT1
+     *     @BNN  FIOMDLY    *BEFORE MONITOR WINDOW. GO DELAY.
+     *     @B    FIOMCKIO
+     *
+     * A NEGATIVE time-to-go means the I/O is overdue and the MSC should go
+     * straight to FIOMCKIO and check it.  Zero-extended, -1 reads as 65535,
+     * the branch takes the delay instead, and the count handed to FIOMDLY is
+     * ~65535 -- a delay of up to 65535 x 33 us = 2162.7 ms during which the
+     * MSC monitors nothing at all and every other bus's completion waits.
+     *
+     * Measured (run r2, with @RAW corrected so the delays are honoured): the
+     * long FIOMDLY arms cluster at 2161, 2159, 2152 and 2135 ms, i.e. just
+     * under that 2162.7 ms ceiling, which is the signature of a 16-bit
+     * negative read as unsigned.  nsts-sim-gpc 818df88 lists the same
+     * correction: "@LH sign-extends." */
     uint32_t ea = iop_msc_long_ea(t, df_get(v, 'a'), df_get(v, 'i') != 0);
     uint32_t v1 = iop_g_eah(t, ea);
-    iopls_setACC(&t->ls, v1);
+    iopls_setACC(&t->ls, (uint32_t)sign_extend(v1, 16));
     iop_incr_nia(t, 2);
 }
 
