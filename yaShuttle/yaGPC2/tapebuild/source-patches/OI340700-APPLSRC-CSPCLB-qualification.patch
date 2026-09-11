@@ -1,0 +1,73 @@
+--- a/APPLSRC/SPSPSP.hal
++++ b/APPLSRC/SPSPSP.hal
+@@ -958,7 +958,8 @@
+     PORT_MODE.DDEV = TCSPF1_DEVID;                                      101800AX
+ C                                                                       101900AX
+ C ***   SET THE PI/UMB RESET MASK                                (868)  101940BE
+- NAME(PORT_MODE.DLOC) = NAME(CSPB_PI_UMB_RESET_MASK);                   101960BE
++ NAME(PORT_MODE.DLOC) = NAME(CSPB_PI_UMB_RESET_BUF.                     101960BE
++      CSPB_PI_UMB_RESET_MASK);                                          
+ C                                                                       101980BE
+ C ***   MDM RESET COMMAND WORD FOR PF1                           (870)  102000BE
+     NAME(PORT_MODE.DCWLOC) = NAME(CSPB_CMD_PF1_RESET);                  102100AX
+@@ -971,13 +972,15 @@
+  DO;                                                                    102320BE
+ C                                                                       102340BE
+ C ***   SET THE PI DISCRETE SET MASK                             (875)  102350BE
+-    NAME(PORT_MODE.DLOC) = NAME(CSPB_PI_SET_MASK);                      102360BE
++    NAME(PORT_MODE.DLOC) = NAME(CSPB_PI_SET_BUF.                        102360BE
++      CSPB_PI_SET_MASK);                                                
+  END;                                                                   102370BE
+  ELSE                                                                   102380BE
+  DO;                                                                    102400AX
+ C                                                                       102420BE
+ C ***   SET THE UMB DISCRETE SET MASK                            (876)  102440BE
+-    NAME(PORT_MODE.DLOC) = NAME(CSPB_UMB_SET_MASK);                     102450BE
++    NAME(PORT_MODE.DLOC) = NAME(CSPB_UMB_SET_BUF.                       102450BE
++      CSPB_UMB_SET_MASK);                                               
+  END;                                                                   102455BE
+ C                                                                       102460BE
+ C ***   MDM SET COMMAND WORD FOR PF1                             (878)  102480BE
+@@ -991,7 +994,8 @@
+     PORT_MODE.DDEV = TCSPF2_DEVID;                                      102700AX
+ C                                                                       102800AX
+ C ***   SET THE PI/UMB RESET MASK                                (885)  103400BE
+- NAME(PORT_MODE.DLOC) = NAME(CSPB_PI_UMB_RESET_MASK);                   103500AX
++ NAME(PORT_MODE.DLOC) = NAME(CSPB_PI_UMB_RESET_BUF.                     103500AX
++      CSPB_PI_UMB_RESET_MASK);                                          
+ C                                                                       103530BE
+ C ***   MDM RESET COMMAND WORD FOR PF2                           (890)  103550BE
+     NAME(PORT_MODE.DCWLOC) = NAME(CSPB_CMD_PF2_RESET);                  103600BE
+@@ -1004,13 +1008,15 @@
+  DO;                                                                    105600AX
+ C                                                                       105700AX
+ C ***   SET THE PI DISCRETE SET MASK                             (920)  105800AX
+-    NAME(PORT_MODE.DLOC) = NAME(CSPB_PI_SET_MASK);                      105900AX
++    NAME(PORT_MODE.DLOC) = NAME(CSPB_PI_SET_BUF.                        105900AX
++      CSPB_PI_SET_MASK);                                                
+  END;                                                                   106000AX
+  ELSE                                                                   106100AX
+  DO;                                                                    106200AX
+ C                                                                       106300AX
+ C ***   SET THE UMB DISCRETE SET MASK                            (925)  106400AX
+-    NAME(PORT_MODE.DLOC) = NAME(CSPB_UMB_SET_MASK);                     106500AX
++    NAME(PORT_MODE.DLOC) = NAME(CSPB_UMB_SET_BUF.                       106500AX
++      CSPB_UMB_SET_MASK);                                               
+  END;                                                                   106600AX
+ C                                                                       107100BE
+ C ***   MDM SET COMMAND WORD FOR PF2                             (930)  107200BE
+--- a/APPLSRC/SSOSPDAT.hal
++++ b/APPLSRC/SSOSPDAT.hal
+@@ -207,8 +207,10 @@
+      END;                                                               009800AZ
+     END;                          /* DO CASE CSSV_COMM_LINK_HANDOFF */  009900AZ
+ C POINT THE RESET COMMANDS TO THE RIGHT DATA             (350)          009920AZ
+-   NAME(GCIL_RESET_PF2.DLOC) = NAME(CSPB_PI_UMB_RESET_MASK);            009940AZ
+-   NAME(GCIL_RESET_PF1.DLOC) = NAME(CSPB_PI_UMB_RESET_MASK);            009960AZ
++   NAME(GCIL_RESET_PF2.DLOC) = NAME(CSPB_PI_UMB_RESET_BUF.              009940AZ
++      CSPB_PI_UMB_RESET_MASK);                                          
++   NAME(GCIL_RESET_PF1.DLOC) = NAME(CSPB_PI_UMB_RESET_BUF.              009960AZ
++      CSPB_PI_UMB_RESET_MASK);                                          
+    DO FOR TEMPORARY I = 1 TO SSO_COM_CNT;             /* (360) */       010000AZ
+ C    RESET DATA IS ALREADY PREPARED FOR PF1           /* (370) */       010100AZ
+      DIO(GCIL_RESET_PF1);                                               010200AZ

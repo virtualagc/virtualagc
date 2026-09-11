@@ -1,433 +1,271 @@
 # Building the OPS 9 tape
 
-How the volume `OI340700-v27boot.mmv` was produced, finished 2026-09-09.
+How to build **`OI340700-v41boot.mmv`** from source — the volume that runs
+`OPS 201/301/302/801/901/101 PRO` and keeps polling the displays (see "The
+OPS 901/201/301 blocker" below).  Rewritten 2026-09-10, when the document was
+first *followed* rather than recalled and found not to reproduce anything:
+it described the v27 procedure, v36 had been built by a script that existed
+only in `/tmp/claude-1000`, and half its inputs had no recipe at all.
 
-**This tape boots.**  It IPLs, loads G9 and reaches the **GPC MEMORY** menu
-screen, and every part of it comes from our own chain — every module compiled
-by `HALSFC` and assembled by `ASM101S`/`ASM101Sa`, our own `GPCIPL`, our own
-stamped `FCMSSLPT` and `#PFCMGPT`, nothing spliced from a reference volume.
-Its final DEU image is identical, 0 of 8192 words differing, to that of v26,
-which was the same tape still carrying the reference's `GPCIPL` — so nothing
-on that screen depended on the borrowed content.
+**The procedure is now a script in this repository, and it is verified by
+building from an empty directory and comparing byte for byte with the volume
+that was tested.**  This section says how to run it and, for each stage, why
+it is what it is.  Every input is a git repository at a named state or a file
+committed beside the script; nothing is read from `~/pass-build/OI340700` or
+from any scratch directory.
 
-Written to be executable, not narrated.  Where a step exists because of a
-defect, the defect is named in one line and the detail is in
-`modules/sdfpkg/HANDOFF-OI340600.md`.
-
-The procedure below is the v27 one.  Earlier revisions of this file described
-the v8 tape, which cut cleanly but did not run; the differences are called out
-where they matter and summarised at the end.
-
----
-
-## 0.  What you need before you start
-
-| symbol | is | note |
-|---|---|---|
-| `$T` | `~/pass-build/OI340700` | the staged OI340700 tree: `CON80/`, `SSSRC/`, `APPLSRC/`, `objects/`, `SYSLIBL1/`, `lib/runtime/{RUN,ZCON}` |
-| `$S` | `/tmp/claude-1000/c80src` | **a patched copy** of `nsts-sdl-dps/src` — see §1 |
-| `$P` | `/tmp/claude-1000/pchsrc` | the extensionless patch-source directory |
-| `$SD` | `/tmp/claude-1000/sdfpad` | `SDFLIB` with the 132 minimum-size SDFs padded past 3360 bytes |
-| — | `/tmp/claude-1000/extsyms-02-plus.json` | the csect table for phase 2 and phase 3 (SSW-only, extended) |
-| — | `$T/phase/extsyms-13.json` | external-symbol pins for phase 13 |
-| — | `~/workspace/pass-run/pass-910.mmv` | donor for the DEU load modules (§7) |
-
-`$T` is a **reconstruction**.  A zero-byte `.hal` in it is not damage: it
-means *the OI340600 file is not used in OI340700*.  There are 37 of them and
-they must not be filled in from `PFS/OI340600`.  The same 37 are zero-byte in
-`PFS/OI340700`, which is a sparse overlay on OI340600 rather than a whole
-release.
+What the volume is made of, honestly: our own compiles (`HALSFC`), assemblies
+(`ASM101Sa`), `GPCIPL`, links and stamped tables — except the three DEU load
+modules, which our chain cannot generate and which are **24 blocks taken from
+`pass-910.mmv`** (itself a volume we built), and the 88 halfwords that
+`tools/patch_unresolved.py` fills after the link (section 7b).
 
 ---
 
-## 1.  The patched toolchain, and why it is a copy
-
-Don's checkout diverged and will not fast-forward, so `con80build`,
-`mmu2mmv`, `mmustamp` and `mmbstamp` are run from a patched copy at `$S` with
-`PYTHONPATH=$S`, from inside `~/donschmidt/nsts-sdl-dps`.  Five changes, none
-of them upstream yet:
-
-1. **`con80build --external-syms FILE`** — passthrough to `lnk101`.
-2. **`con80build --nocall/--no-nocall`** — override the deck's `NOCALLER`.
-   *Not used by this procedure*; the default (`--nocall`, honour the card) is
-   what the tape was built with.
-3. **`con80build --insert-root CARD`** — scan INSERT cards from one deck root
-   while laying out at another.  *Not used*: it was measured to make no
-   difference to phase 2, and neither does `--concard-root SSW`.
-4. **`mmu2mmv`** refuses a tree whose `#PFCMGPT` is all zeros, with
-   `--allow-unstamped` to override.  Guards §5 — a tape built without it
-   carries a phase table of zeros, every descriptor reads a segment count of
-   zero, and no OPS transition can load anything.
-5. **`mmustamp --skip-phase N`** and `mmbstamp.generate(skip=…)` — treat a
-   phase as unassigned, giving it the placeholder descriptor phases 11 and 17
-   already get, instead of failing when its load module is missing.  Required
-   by §6, because phase 16 does not link.
-
----
-
-## 2.  Stage each phase's object and SDF directories
-
-`con80build` reuses an existing `<out>/PHASEnn/obj/NAME.obj` instead of
-recompiling, and accepts a prebuilt SDF only if it is larger than 3360 bytes.
+## 0.  One command
 
 ```bash
-T=~/pass-build/OI340700; S=/tmp/claude-1000/c80src
-C=/tmp/claude-1000/c80boot; P=/tmp/claude-1000/pchsrc; SD=/tmp/claude-1000/sdfpad
-rm -rf $C; mkdir -p $C
-for p in 1 2 3 4 5 6 7 8 9 10 12 13 14 15 18 23 24 25; do
-  n=$(printf "PHASE%02d" $p)
-  mkdir -p $C/$n/obj $C/$n/gen
-  ln -s $T/objects/*.obj $C/$n/obj/ 2>/dev/null
-  for s in $T/objects/PCH*SRC.obj; do
-    b=$(basename $s SRC.obj); ln -sf $s $C/$n/obj/${b}TXT.obj
-  done
-  cp -r $SD $C/$n/gen/SDFLIB
-done
+REF=~/workspace/pass-run/OI340700-v41boot.mmv \
+    ~/git/virtualagc/yaShuttle/yaGPC2/tapebuild/build.sh /tmp/claude-1000/tapebuild
 ```
 
-The `PCHnnSRC.obj` → `PCHnnTXT.obj` aliasing is required: `_PATCH_SRC_RE`
-assumes an extensionless member name and does not find the patch text
-otherwise.
-
-> **The `obj/` entries are symlinks into `$T/objects`.**  Anything that writes
-> into them writes through to the real object.  After every build, check
-> `find $T/objects -name '*.obj' -size 0 | wc -l` is still 0.
-
----
-
-## 3.  Build a minimal INSERT library **for every phase**
-
-**This is the step that makes the phases fit.**  `SYSLIBL1` holds one object
-per csect, 4,277 of them, and passing it whole lets `lnk101` satisfy a
-phase's references to compools that live in *other* phases by pulling them in
-locally — which the deck's `NOCALLER` card is supposed to prevent.  In phase
-2 that contributed **307 blocks of other phases' content**, taking it to 617
-blocks against a 256-block allocation.
-
-> **Do not treat this as a phase 2 problem.**  Fixing phase 2 alone moved it:
-> phase 9 went from 22 blocks to 180 and overlapped phase 3's area, gaining
-> the same compools — `#PCDIMMU`, `#PCD1MMU`–`#PCD4MMU`, `#PCVTTCS`.  They
-> were never *in* phase 2; a fat phase 2 was **suppressing** the pull for
-> every phase that maps it, because `con80build` gates a pull on whether a
-> mapped phase's load module defines the symbol.  The in-core phase table
-> settles where they really belong: `#PCDIMMU` is loaded by phases 4, 5, 6,
-> 7, 8, 12 and 14, and by neither 2 nor 9.
-
-The rule is therefore general: **a phase may take from `SYSLIBL1` only the
-csects its own deck root INSERTs.**  Every phase's INSERT list resolves in
-the library almost entirely — 430 of 431 for phase 2, 105 of 105 for phase 3,
-29 of 29 for phase 9 — and a library is searched only for *undefined*
-symbols, so passing a phase's whole INSERT list is equivalent to passing just
-the subset it actually lacks.
-
-```bash
-cd ~/donschmidt/nsts-sdl-dps
-PYTHONPATH=$S python3 - <<'PYEOF'
-import os, sys
-sys.path.insert(0, "/tmp/claude-1000/c80src")
-from con80.con80build import concard
-T = "/home/rburkey/pass-build/OI340700"
-deck = concard.ConcardDeck(T + "/CON80")
-base = "/tmp/claude-1000/minilibs"
-os.makedirs(base, exist_ok=True)
-for p in (1,2,3,4,5,6,7,8,9,10,12,13,14,15,18):
-    root = "PHASE%02d" % p
-    ins = {op.operand for op in concard.layout_program(deck, root)
-           if op.verb == "INSERT" and op.operand}
-    d = os.path.join(base, root)
-    os.makedirs(d, exist_ok=True)
-    for f in os.listdir(d):
-        os.unlink(os.path.join(d, f))
-    n = 0
-    for name in sorted(ins):
-        src = os.path.join(T, "SYSLIBL1", name + ".obj")
-        if os.path.exists(src):
-            os.symlink(src, os.path.join(d, name + ".obj")); n += 1
-    print("%s: %d of %d INSERTs in SYSLIBL1" % (root, n, len(ins)))
-PYEOF
-```
-
-Phases 23–25 have no deck root of that name and are one object each; give
-them `SYSLIBL1` whole.
-
-### The phase 2 subset, for reference
-
-Diffing a `SYSLIBL1` link against a no-library link shows phase 2 needs
-exactly 21 of its 431 INSERTs from the library, carrying 18 blocks with zero
-overlay content — all resident FCOS/FIO/FPM csects:
+About 25 minutes, most of it `compilePASS`.  It must end with
 
 ```
-FCMBMASK FCMBMTPG FCMBUSPC FCMTBLPG FIOACTMD FIOCYCTB FIOERRLB FIOERRLC
-FIOHFEPG FIOMGCV  FIOMGSTR FIOPBYTB FIOPDISP FIOPDSMU FIOPDSRB FIOSVCP
-FPMCVTFX FPMIHPC2 FPMIHPGM FPMMTURM FPMRESET
+  tree a68da6e6088adf5442cfd428a17daba698dd4e8f
+  1981 objects
+  SYSLIBL1: 4277 entries
+  lib/runtime: RUN 205 (0 failed), ZCON 284
+    PHASE01: linked 7 objects ...          (every phase must say "linked")
+      2  #PFCMGPT  0x01ccf2  1093       0     918
+    OVERSIZE rows (must be 0): 0
+    DEU blocks forced: 24 (must be 24), volume 2681 blocks
+  88 filled in 7 load blocks, 125 found already correct, 0 refused
+### MATCH: byte-identical to /home/rburkey/workspace/pass-run/OI340700-v41boot.mmv
 ```
 
-You do not need to reproduce that subset — the per-phase library above is a
-superset of it and the linker takes only the symbols it lacks.  It is
-recorded because it is a cheap check that phase 2 came out right.
+**Verified 2026-09-10 by running exactly this command in an empty directory.**
+The first attempt did not match -- a bare toolchain clone links nothing (see
+"`con80build`'s default runtime directories must exist" under stages 4–7) --
+and the script was fixed until it did; that is the only way this document gets
+to say it works.
 
----
+Omit `REF` to build without comparing.  `WORK` (the argument) may be any empty
+directory; the two git clones in it are reused on a rerun.  The pre-fill
+volume is `$WORK/OI340700-v36boot.mmv` — what "v36" has always meant.
 
-## 4.  Link the phases, in ascending numeric order
+**Prerequisites** — the only things taken from the machine rather than from a
+pinned source:
 
-Order matters: a phase's `MAP n,…` cards are resolved from earlier phases'
-`.lib` files, which is how the per-phase build models the linkage editor
-processing `OFTMP` as one job.
-
-```bash
-cd ~/donschmidt/nsts-sdl-dps
-for p in 1 2 3 4 5 6 7 8 9 10 12 13 14 15 18 23 24 25; do
-  ML=/tmp/claude-1000/minilibs
-  RT="--linklib $T/lib/runtime/RUN --linklib $T/lib/runtime/ZCON"
-  extra=""
-  case $p in
-    1|10)     lib="" ;;                               # no library at all
-    23|24|25) lib="--linklib $T/SYSLIBL1 $RT" ;;      # no deck root by name
-    *)        lib="--linklib $ML/$n $RT" ;;           # this phase's INSERTs
-  esac
-  [ $p -eq 2 ]  && extra="--external-syms /tmp/claude-1000/extsyms-02-plus.json"
-  [ $p -eq 3 ]  && extra="--external-syms /tmp/claude-1000/extsyms-02-plus.json"
-  [ $p -eq 13 ] && extra="--external-syms $T/phase/extsyms-13.json"
-  PYTHONPATH=$S timeout 1800 python3 -m con80.con80build --phase $p --root $T \
-      --src $P --src $T/SSSRC --src $T/APPLSRC --out $C --link $lib $extra 2>&1 \
-    | grep -E 'linked|FAILED' | head -1
-done
-```
-
-### The csect table must be **complete for this phase's configuration**
-
-`--external-syms` is not a symbol list; it **is the linker's csect table**, and
-`linker.py`'s `applyRelocations` skips any relocation whose target section the
-table does not name — leaving the assembler's own bytes in place.  Get its size
-wrong in either direction and the failure is silent:
-
-| table | what happens |
+| what | why |
 |---|---|
-| absent | nothing is suppressed; relocation against fabricated addresses.  Phase 13's image collapses 330,391 → 16,127 halfwords and the tape re-reads it forever |
-| **pruned** | real csects keep **assembler-relative offsets**.  `FIOPDISP+116` reads `0033` where the flight machine has `B9AD`.  The display dispatcher then branches into low memory, the DEUs are never polled, and FCOS idles in `FPMIDLE` |
-| union of all 8 configs | every csect in the table is *placed*, so phase 2 gains 31 csects belonging to P9, S2, G9 and G16 — 59,521 halfwords.  Phase 2 overruns its 256-block allocation and `mmu2mmv` **trims the tail silently**, losing `$0AIBGPC`, `$0AIESIP`, `$0ARCGPC` and 132 more |
-| **SSW-only, extended** | correct.  Foreign csects 0, phase 2 = **228 blocks, exactly the original's**, phase 3 = 38/38 |
-
-Build it as the SSW table (660 csects) plus `contents` entries for the 27
-parent csects whose members are referenced across phases; that takes unresolved
-symbols from 658 to 290.  `extsyms-02-plus.json` is that file.
-
-Phase 3 needs it too.  Without it phase 3's `LB2` runs `04572..060A8` while
-`FCMLINIT` sits at `047E0..04A1F` — **entirely inside it** — so loading phase 3
-DMAs over resident FCOS and the machine executes the wreckage
-(`invalid instruction 0xc055 at 0x47e0`).  With it, phase 3 reproduces the
-original block for block: `0024A..002AC`, `00654..00660`, `03A96..03FE0`,
-`04C70..067A6`.
-
-**Do not give it to the other phases.**  Applied everywhere it fragments the
-phases whose full csect set we do not build — 756 load blocks against the
-original's 298, phase 4 going 28 → 169 — which overflows `#PFCMGPT`'s 1093
-halfwords and `mmustamp` refuses with `overflow at phase 6`.
-
-Three different library policies, and each one is load-bearing:
-
-**Phases 1 and 10 take no library at all.**  A blanket `SYSLIBL1` breaks
-`FCMBOOT`: phase 1 goes from 7 sections and 3,624 halfwords to 8 and 20,017,
-and the resulting tape gets through the 72-block bootstrap read and then
-spins — 718 million steps at `NIA=0x00486` with every register zero, three
-mass-memory commands in total, no phase ever read, the DEUs never IPLed.
-Check phase 1 after linking: **7 sections, 3,624 halfwords**, matching
-`~/ipl-demo/phases/PHASE01`.  Anything else and the tape will not boot.
-
-**Every other phase takes its own minimal library** from §3, plus the HAL/S
-runtime (`RUN`, `ZCON`), which is pulled by reference and is small.  With
-that policy the phases come out close to the original:
-
-| ph | ours | orig | | ph | ours | orig |
-|---|---|---|---|---|---|---|
-| 2 | **233** | 228 | | 9 | 24 | 25 |
-| 3 | 44 | 38 | | 10 | 55 | 55 |
-| 4 | 325 | 414 | | 12 | 206 | 216 |
-| 5 | 254 | 292 | | 13 | 7 | 7 |
-| 6 | 310 | 385 | | 14 | 114 | 107 |
-| 7 | 196 | 230 | | 15 | 198 | 304 |
-| 8 | 206 | 243 | | 18 | 30 | 34 |
-
-"orig" is the contiguous-block count from the in-core phase table in
-`pure-G9.fcm`, decoded by `/tmp/claude-1000/gpt.py`.  Phase 2 is 228 blocks
-from the link and 233 once the process stacks are created (next section);
-both fit its 256-block allocation.  Phases 4, 5, 6, 7, 8 and 15 are still
-short; that is open and is not what this procedure fixes.
-
-### Uncomment the `STACK` cards, or the tape has no process stacks at all
-
-`lnk101` creates stacks in `generateStackSections()` from `stackCsectNames()`,
-whose docstring is explicit: *"Primary source: the CON80 `STACK $0<prog>` cards
-— SDL-mode objects carry no stack ERs at all, the cards are the only trigger."*
-Our objects are SDL-mode, and in `~/pass-build/OI340700/CON80` **every one of
-the 181 `STACK` cards is commented out** — an asterisk in column 1 — across
-`SSW`, `OPS0`, `GNC1`, `GNC2`, `GNC3`, `GNC8`, `GNC9`, `MFB14`, `PL9` and
-`SM4`.  `con80build` never passes `--generate-stacks` either, so even an active
-card set would have had no fallback size.
-
-The DASS SSW dump has 30 csects of type `STACK`; without this step our phase 2
-has **zero**.  The first store into one is then a program check —
-`YAGPC_INTTRACE=1` shows `store-protect at 013be`, which is `$0AIBGPC`, from
-`FCMLINIT+407` — and everything downstream follows from it: the masked wait,
-the resume address of `$0AIBGPC+0`, the DEUs never polled, the display never
-leaving the GPCIPL banner.
-
-```bash
-# work on a COPY; the user's deck is reconstructed and is not modified
-cp -r ~/pass-build/OI340700/CON80 /tmp/claude-1000/CON80s
-sed -i -E 's/^\*(\s+STACK\s+\$0)/ \1/' /tmp/claude-1000/CON80s/{SSW,OPS0,GNC1,GNC2,GNC3,GNC8,GNC9,MFB14,PL9,SM4}
-# then link with --concards /tmp/claude-1000/CON80s and --generate-stacks 256
-```
-
-Result: 28 of the 30 stacks, **24 at exactly the flight machine's address**,
-`$0AIBGPC` among them at `0x013BC`.  Four come out one halfword larger and
-shift accordingly; `$0ASCTIM` and `$0ASGCYC` are still not generated.
-
-**Whether those asterisks belong in the deck is an open reconstruction
-question for the user.**  The flight machine has the stacks and our SDL objects
-cannot produce them any other way, so for our build the cards must be active.
-
-### Phases 16 and 26 are omitted, deliberately
-
-**Phase 16 (`SMASM4`, memory configuration 5) does not link.**
-`CON80/SM4TAB` carries `CHANGE #PCSADAR(#PCS4DAR)` and ten more, rebinding a
-generic module to the SPEC-4 compools — whose modules are exactly the ones
-OI340700 marks excluded.  The rename leaves `#PCS4DAR` unresolved,
-`con80build`'s autocall guesses `CS4DART.hal` from the naming convention,
-compiles the zero-byte source into an 80-byte END-record object, and `lnk101`
-refuses it.  Two reconstructed artefacts disagree; which is wrong is open.
-
-**Leaving phase 16 out does not affect phase 18**, checked four ways:
-`CON80/PHASE18` maps phases 2, 3 and 8 and not 16; the allocations are
-disjoint (16 is tape blocks 7520–7872, 18 is 11776–11840); 16 is memory
-configuration 5 against 18's 9, so a G9 transition never requests it; and in
-the phase table only the running displacement of later phases moves, which
-`FCMMGBOV` reads out of the descriptor.  Phase 18's load-block count, mass
-memory address and all eight of its load-block descriptors are unchanged.
-The only deck that maps 16 is `CONCARDS/SMPLRID`, under phase 26.
-
-**Phase 26** fails for want of its MAP phase libraries and is outside the
-phase table's 3–18 range.
+| `~/workspace/PFS` containing commit `19464059` | sources are `git archive`d at that commit (`PFSREV` overrides) |
+| this repository's `PASS.REL32V0` with built `HALSFC-*` binaries | `compilePASS` refuses a compiler older than its sources |
+| `ASM101S/ASM101Sa` built | the assembler |
+| `~/donschmidt/nsts-sdl-dps` | **only** its `ext/` submodules and its Python venv (`typer`, `rich`, `lark`); none of its code is run |
+| network access to GitHub | two clones: the linker toolchain and `dfg` |
+| `unbuffer` (expect) | so `compilePASS`'s output is not lost if interrupted |
 
 ---
 
-## 5.  Stamp the Mass-Memory-Build tables into the load modules
+## 1.  The stages
 
-Two separate stamping steps, both between the link and the tape, and
-**neither is called by `con80build` or by `mmu2mmv`**.  Skipping them is why
-earlier tapes could not transition.
-
-```bash
-# 5a.  FCMSSLPT -- phase 10's own IPL phase table.  Descriptor halfword 0
-#      doubles as the "this system was mass-memory built" flag and the loader
-#      skips the whole load when it is zero.
-cd ~/donschmidt/nsts-sdl-dps
-PYTHONPATH=$S python3 - <<'PYEOF'
-import sys; sys.path.insert(0, "/tmp/claude-1000/c80src")
-from pathlib import Path
-from ap101Utils import mmbstamp as mb
-C = Path("/tmp/claude-1000/c80boot"); T = Path("/home/rburkey/pass-build/OI340700")
-sslpt, notes = mb.generate_sslpt(C, T / "CON80")
-p = C / "PHASE10.lib"
-at = {s["name"]: s for s in mb._lib_sym(p).get("sections", [])}
-lib = mb.LibModule.read(p)
-mb._splice(lib, at[mb.SSLPT_CSECT]["address"], list(sslpt), mb.SSLPT_CSECT)
-lib.write(p)
-print("FCMSSLPT stamped, %d non-zero" % sum(1 for w in sslpt if w))
-PYEOF
-
-# 5b.  #PFCMGPT, #PCDCPHA and FCMG3DAT into PHASE02.lib.
-PYTHONPATH=$S python3 -m tools.mmustamp --mmu $C --con80 $T/CON80 --skip-phase 16
-```
-
-Expect `FCMSSLPT stamped, 606 non-zero` and
-
-```
-    2  #PFCMGPT  0x01ccf2  1093       0     870
-    2  #PCDCPHA  0x0300e4    57      57      48
-    2  FCMG3DAT  0x004b48   161       0      98
-```
-
-`#PFCMGPT` **must** be at `0x01ccf2`.  A different address means phase 2 has
-linked its csects somewhere the original did not, and the tape will be wrong
-in ways that show up much later.
-
-Re-run 5b after any relink: the tables are a readout of where the linker put
-every csect.  `mmustamp --restore` undoes it from the sidecars.
+| # | stage | pinned by | output |
+|---|---|---|---|
+| 0 | linker toolchain | fork `rburkey2005/nsts-sdl-dps`: upstream `db9d34b` + branches `lib-inserts-and-stacks`, `mmustamp-skip-phase`, `mmu2mmv-unstamped-guard`, merged; **tree `a68da6e6` checked** | `$WORK/nsts-sdl-dps` |
+| 0b | `dfg` | upstream `ColanderCombo/nsts-sdl-dps` `7d90b05` + `toolchain-patches/dfg-7d90b05-to-OI340700.patch` | `$WORK/bin/dfg` |
+| 1 | source tree | PFS `19464059`: `OI340600` overlaid with `OI340700`; `RUNASM/RUNMAC/ZCONASM` from `PASS.REL32V0`; `source-patches/OI340700-APPLSRC-CSPCLB-qualification.patch` | `$WORK/OI340700` |
+| 2 | objects | `compilePASS --no-csects --sdl --release=OI340700` | 1,981 objects |
+| 3 | derived layers | `tapebuild/derive.py` | `SYSLIBL1`, `lib/runtime`, `sdfpad`, `pchsrc`, per-phase csect tables |
+| 4–7 | link, stamp, cut, DEU splice, SSL checksum | `tapebuild/link-and-cut.sh` (the v36 procedure) | `OI340700-v36boot.mmv` |
+| 8 | unresolved-relocation fill | `tools/patch_unresolved.py` (section 7b) | `OI340700-v41boot.mmv` |
 
 ---
 
-## 6.  Cut the tape
+## 2.  Why each stage is what it is
 
-```bash
-V=/tmp/claude-1000/OI340700-v27.mmv
-cd ~/donschmidt/nsts-sdl-dps
-PYTHONPATH=$S timeout 900 python3 -m tools.mmu2mmv \
-    --con80 $T/CON80 --mmu $C --area 1 --out $V
-```
+Each of these was found by building and comparing, and each one, done the
+obvious way, silently produces a different tape.
 
-**No row may say `OVERSIZE`.**  The DEU rows saying `not supplied`
-(`DEUDCPLM`, `DEUCFLM`, `DEUSTLM`) are expected and are handled by §7.
+### Stage 0 — the linker toolchain
+
+Upstream `db9d34b` plus three of our branches, which are PRs to Don.  The
+merge commits are local, so their hashes change on every rebuild; the script
+checks the **tree** hash instead (`a68da6e6`, which is what built v36).  If
+the branches move, it stops rather than build with something else.  The
+`ext/` submodules are symlinked to Don's checkout, as they were for v36.
+
+### Stage 0b — `dfg`, pinned, because the one that built v36 was never committed
+
+The display decks are translated to HAL/S by Don's `dfg`.  The `dfg` that
+built the verified volume was **his working tree**: upstream `7d90b05` (PR
+#46, since merged) plus a local merge and an **uncommitted** per-release
+rate-group allowance in `src/dfg/ddt.py`, which gives OI340700's `CS2120`
+two more dynamic field-control words — VPD `00D5`, exactly what the S2 DASS
+dump has, instead of `00D3`.  The patch is the whole difference, verified to
+reproduce his `src/dfg` file for file.
+
+It only takes effect if `dfg` is called with `--release OI340700`, and
+`compilePASS` decides that by probing `dfg --help` — which is drawn by `rich`
+with the two dashes styled separately, so the literal `--release` never
+appeared and the probe always said no.  **Fixed in `compilePASS` on
+2026-09-10**; before that, a clean build could not reproduce `CS2120`.
+
+### Stage 1 — the source tree
+
+`OI340600`, overlaid with `OI340700`, from PFS at `19464059` — which includes
+`OI340700/CON80` with the **`STACK` cards activated** (without them the tape
+has no process stacks; see below).  A **zero-byte `.hal` in the `OI340700`
+overlay is an exclusion marker** — the file is not part of this release — and
+is copied over OI340600's on purpose.  Never fill one in.
+
+One source change is not in PFS: the "CSPCLB qualification" of
+`CSPB_PI_UMB_RESET_MASK` in `APPLSRC/SPSPSP.hal` and `SSOSPDAT.hal`, needed
+for them to compile.  It was made in a scratch tree on 2026-09-03 and never
+committed anywhere; it is now `source-patches/`.
+
+### Stage 2 — objects: `--sdl` and `--release=OI340700`, both required
+
+`HANDOFF-OI340700-BUILD.md`'s recipe omits both, and without them the objects
+differ from the ones the tape was built from:
+
+- **`--sdl`** — the flight images are SDL builds.  Without it every PROGRAM
+  gets a `START` csect, an `LHI R0,<stack>` prologue and stack ERs: 160
+  objects differ.  With it the stacks come from the CON80 `STACK` cards, which
+  is what the link below expects.  (`halsParms.DEFAULT_SDL` is `False` because
+  a *library* build does not need it; a *tape* build does.)
+- **`--release=OI340700`** — selects `halsParms`' per-release card types:
+  `CPUSLS` and `CPTOSV` need `ACBC`, not the base table's `ACBD`, or they fail
+  `XI3` and eight phase-15 objects fail after them.
+
+With both, all 1,981 objects match the ones v36 was linked from in loaded
+content (ESD/TXT/RLD).  They never match byte for byte: the SYM and END cards
+carry the **compile date**, which does not reach the tape.
+
+### Stage 3 — the derived layers
+
+Each rule was established by regenerating the layer v36 used and comparing;
+the details are in `tapebuild/derive.py`'s header.
+
+- **`SYSLIBL1`** — one entry per section an object defines, a hard link to
+  that object; objects in name order, first definer wins; `START` excluded.
+- **`lib/runtime/RUN`** — `RUNASM` assembled with **`--fill=C6C6`**.
+  `compilePASS` now assembles with `C9FB`, deliberately, since the DASS dumps'
+  assembler csects are `C9FB`; but the runtime library the tested volume was
+  linked with predates that change, and 94 of its 205 modules differ in fill
+  halfwords.  Kept to reproduce v41; a padding deviation, recorded below.
+- **`lib/runtime/ZCON`** — `compilePASS`'s objects for `ZCONASM`.
+- **`sdfpad`** — `SDFLIB` with each 3,360-byte SDF padded by one zero byte:
+  `con80build` accepts a prebuilt SDF only if it is *larger* than 3,360.
+- **`pchsrc`** — `SSSRC/PCH*.asm` with the extension removed: `con80build`'s
+  `_PATCH_SRC_RE` assumes an extensionless member name.  The objects are also
+  aliased `PCHnnSRC.obj` → `PCHnnTXT.obj` in each phase's `obj/`.
+- **Per-phase csect tables** — each phase gets the csect table of the
+  configuration it belongs to, from `PFS/mafgen/csects-<CFG>.json` keeping
+  `start`/`end`/`type`: phases 3, 8, 18 → G9; 4 → G16; 5 → G2; 6 → G3;
+  7 → G8; 9, 12 → P9; 14, 15 → S2.  The configuration was chosen by counting
+  how many of the phase's linked csects each dump holds.  Regenerated
+  byte-identically to the 11 tables v36 used.
+- **`inputs/extsyms-02-plus.json`** — phase 2's table: the SSW table (660
+  csects) plus `contents` entries for 27 parent csects referenced across
+  phases, with 98 further hand edits.  **Its generator is lost**; the file is
+  committed as the input it is.  `inputs/extsyms-13.json` — phase 13's three
+  pins — likewise.
+
+### Stages 4–7 — link, stamp, cut, splice
+
+`tapebuild/link-and-cut.sh`, proven byte-identical to the script that built
+v36 given the same inputs.  What each step is for:
+
+**Per-phase minimal libraries.**  A phase may take from `SYSLIBL1` only the
+csects its own deck root INSERTs — passing the library whole let `lnk101` pull
+other phases' compools into phase 2 (617 blocks against 256) and, once phase 2
+was fixed, into phase 9.  The resident HAL/S library (`LIBZERO`, `LIBRESD`,
+`LIBRESC`) belongs to phase 2 and is **shared**: offered to another phase it
+is pulled in a second time at the flight addresses and fragments the phase
+(12 went 216 → 334 blocks).  Phases 1 and 10 take **no library at all** (a
+blanket library breaks `FCMBOOT`: phase 1 must be 7 sections, 3,624
+halfwords); 23–25 take `SYSLIBL1` whole.
+
+**The csect tables are the linker's section table, not a symbol list.**
+`applyRelocations` skips any relocation whose target section the table does
+not name, leaving the assembler's bytes.  Absent, pruned or over-complete, the
+failure is silent: phase 13 collapses to 16,127 halfwords; `FIOPDISP+116`
+keeps an assembler-relative `0033`; phase 2 overruns its allocation and
+`mmu2mmv` trims the tail.  Phases 1 and 10 take none (pinning phase 10 strips
+97% of `GPCIPL`).
+
+**Stacks.**  `lnk101` creates stacks only from CON80 `STACK $0<prog>` cards
+(SDL objects carry no stack ERs), and `--generate-stacks 256` supplies the
+size.  Result: 28 of the flight machine's 30, 24 at exactly the flight
+address; `$0ASCTIM` and `$0ASGCYC` are still not generated.  Whether the
+original deck had those cards commented out is an open reconstruction
+question; for our build they must be active.
+
+**Phases 16 and 26 are omitted.**  16 (`SMASM4`) does not link: `SM4TAB`
+rebinds a generic module to SPEC-4 compools OI340700 excludes.  It does not
+affect phase 18 (disjoint allocations, different configuration).  26 lacks its
+MAP libraries and is outside the phase table's 3–18.
+
+**`con80build`'s default runtime directories must exist.**  It will not link
+at all unless `build/lib/runtime/{RUN,ZCON}`, relative to the toolchain
+checkout, exist — phases 1 and 10, given no library, fall back to them — and a
+bare clone has no `build/`, so every phase links nothing and says so with a
+blank line.  They take no object from them (v36's phase 1 linked its 7 own
+objects, phase 10 its 12); v36's checkout had them as symlinks into Don's
+build.  `build.sh` points them at our own runtime library, and both scripts now
+stop at the first phase that does not say `linked`.  Found by following this
+document from an empty directory; the previous revision had noted the symptom
+and not connected it to phases 1 and 10.
+
+**Stamping** (5a, 5b) — neither `con80build` nor `mmu2mmv` does it, and a tape
+without it cannot transition.  `FCMSSLPT` into phase 10 (its descriptor
+halfword 0 doubles as the "mass-memory built" flag); `#PFCMGPT`, `#PCDCPHA`
+and `FCMG3DAT` into phase 2.  `#PFCMGPT` **must** land at `0x01ccf2`.
+
+**Cut** — `mmu2mmv`; no row may say `OVERSIZE`.
+
+**DEU load modules** — `mmu2mmv` cannot generate `DEUDCPLM`/`DEUCFLM`/
+`DEUSTLM`.  The 24 blocks v36 took from `pass-910.mmv` (md5 `f9d116d2…`) are
+extracted into `inputs/deu-loadmodules.mmv`, so the build does not depend on
+that volume.  Then `tools/stamp_ssl_checksum.py` writes `SSLENGTH`/`SSLCKSUM`,
+without which `SSLCHECK` takes its error path and ITEM 1 EXEC loads nothing.
 
 ---
 
-## 7.  Splice in the DEU load modules and close the checksums
+## 3.  Deviations and loose ends, recorded rather than hidden
 
-`mmu2mmv` does not generate the DEU load modules, so they are taken from a
-volume that has them.  The eight ranges below are exactly the allocations
-`mmu2mmv` reported as `not supplied`.
-
-```bash
-python3 - <<'PYEOF'
-import struct
-def load(p):
-    raw = open(p, "rb").read()
-    hw, ent, flag = struct.unpack(">III", raw[8:20])
-    dirs = list(struct.unpack(">%dI" % ent, raw[32:32 + 4 * ent]))
-    off = 32 + 4 * ent
-    return raw[:8], hw, flag, {d: raw[off + i*hw*2: off + (i+1)*hw*2]
-                               for i, d in enumerate(dirs)}
-def bidx(t, f, s, b):
-    return ((((f & 7) * 8 + (t & 7)) * 8 + (s & 7)) * 32 + (b & 0x1f))
-magic, hw, flag, ours = load("/tmp/claude-1000/OI340700-v27.mmv")
-_, _, _, ref = load("/home/rburkey/workspace/pass-run/pass-910.mmv")
-n = 0
-for f, t, s, b0, cnt in ((4,4,0,7,17), (4,4,7,8,17), (4,4,3,8,17), (4,4,4,8,8),
-                         (4,4,4,16,8), (4,4,4,24,8), (4,4,0,24,8), (4,4,4,0,8)):
-    for b in range(cnt):
-        i = bidx(t, f, s, b0 + b)
-        if i in ref:
-            ours[i] = ref[i]; n += 1
-dirs = sorted(ours)
-out = bytearray(magic) + struct.pack(">III", hw, len(dirs), flag)
-out += b"\0" * (32 - len(out))
-for d in dirs: out += struct.pack(">I", d)
-for d in dirs: out += ours[d]
-open("/tmp/claude-1000/OI340700-v27boot.mmv", "wb").write(bytes(out))
-print("DEU blocks forced: %d, volume %d blocks" % (n, len(dirs)))
-PYEOF
-
-python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/stamp_ssl_checksum.py \
-        /tmp/claude-1000/OI340700-v27boot.mmv
-```
-
-The splice must be unconditional.  An "only if absent" version silently
-copies 0 blocks when the target volume already has something there.
-
-Expect `DEU blocks forced: 24, volume 2210 blocks`.
+- **The runtime library's fill** (`C6C6` where the flight machine's assembler
+  csects have `C9FB`) — padding only, kept for byte-identity with the tested
+  volume.  Rebuilding with `C9FB` changes 94 runtime modules' pad halfwords.
+- **`extsyms-02-plus.json`'s generator is lost** — the 98 edits are not
+  derivable from anything recorded.
+- **`dfg`'s `CS2120` allowance is empirical** (Don's comment: the general rule
+  is unconstrained there) and lives only in our patch until it is upstream.
+- **The DEU load modules are borrowed**, not built.
+- **88 halfwords are filled after the link** (section 7b) — cross-phase
+  relocations our per-phase links leave unresolved.  The real fix is in the
+  links; until then the fill is part of the build.
+- **`~/pass-build/OI340700` is stale — do not build from it.**
+  `objects/AIGDEU.obj` there is the v79 `WAIT 0.100` experiment's object,
+  never recompiled after the source was restored; a link from that tree gives
+  118,176 differing halfwords.  Its source directories are otherwise exactly
+  PFS `19464059` + the CSPCLB patch.
+- **`HANDOFF-OI340700-BUILD.md` needs `--sdl --release=OI340700`** added to
+  its recipe (see stage 2).
 
 ---
 
 ## 7b.  Fill the unresolved cross-phase relocations
 
-**This step is a WORKAROUND for a build defect.**  Skip it and the tape boots
-and IPLs, but every major-mode transition then dies: `OPS 201`, `301` and `801`
-draw their new display and fall silent seconds later (POLL FAIL), and `OPS 901`
-either crashes or stops polling.
+**Stage 8 of `tapebuild/build.sh`, and a WORKAROUND for a build defect.**
+Skip it and the tape boots and IPLs, but every major-mode transition then
+dies: `OPS 201`, `301` and `801` draw their new display and fall silent seconds
+later (POLL FAIL), and `OPS 901` either crashes or stops polling.  Standalone:
 
 ```bash
 python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/patch_unresolved.py \
-        /tmp/claude-1000/OI340700-vNNboot.mmv
+        $WORK/OI340700-v36boot.mmv --out $WORK/OI340700-v41boot.mmv
 ```
 
 On a v36-shaped volume expect `88 filled in 7 load blocks, ... 0 refused`, and
@@ -532,28 +370,32 @@ defect and wants its own diagnosis, not a hand-applied constant.
 
 ## 8.  Check the volume before booting it
 
+`build.sh` already refuses a phase that does not link, an `OVERSIZE` cut, a
+failed stamp and a refused fill, and `REF` compares the whole volume.  Two
+further checks, with the values the verified build gives (2026-09-10):
+
 ```bash
+W=/tmp/claude-1000/tapebuild
 python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/check_volume_destinations.py \
-        /tmp/claude-1000/OI340700-v27boot.mmv
+        $W/OI340700-v41boot.mmv
 ```
 
-On the v27 volume this reports two blocks with `len C6C6` — the staging fill
-pattern read as a length, inside a raw phase record.  The tool recognises one
-load-block header form and says so; a length of 50886 halfwords is not a real
-finding.  A block flagged with a *plausible* length and `BODY IS ENTIRELY
-FILL` would be.
+Expect `No recognised load block is aimed at resident memory.`  (One header is
+recognised and is fill-only -- the staging fill pattern read as a length inside
+a raw phase record, not a finding.  A block with a *plausible* length and
+`BODY IS ENTIRELY FILL` would be.)
 
-Confirm the phase table actually reached the tape.  **Match on the tree's own
-bytes, not on a remembered signature** — the phase 3 descriptor's load-block
-count differs between builds, and searching for another tree's bytes produces
-a false negative.  This was got wrong twice.
+Confirm the phase table reached the tape.  **Match on the build's own bytes,
+not on a remembered signature** -- the phase 3 descriptor differs between
+builds, and searching for another build's bytes gives a false negative.  This
+was got wrong twice.
 
 ```bash
 python3 - <<'PYEOF'
-import sys; sys.path.insert(0, "/tmp/claude-1000/c80src")
+import sys; W = "/tmp/claude-1000/tapebuild"; sys.path.insert(0, W + "/nsts-sdl-dps/src")
 from pathlib import Path
 from ap101Utils.libModule import LibModule
-lib = LibModule.read(Path("/tmp/claude-1000/c80boot/PHASE02.lib"))
+lib = LibModule.read(Path(W + "/c80/PHASE02.lib"))
 text = {}
 for x in lib.extents:
     b = x.address // 2
@@ -561,14 +403,16 @@ for x in lib.extents:
         text[b + i] = (x.data[2*i] << 8) | x.data[2*i + 1]
 gpt = [text.get(0x1CCF2 + i, 0) for i in range(1093)]
 sig = b"".join(v.to_bytes(2, "big") for v in gpt[:12])
-raw = open("/tmp/claude-1000/OI340700-v27boot.mmv", "rb").read()
-print("GPT %d non-zero; on tape: %s"
-      % (sum(1 for v in gpt if v), "yes" if sig in raw else "NO"))
+raw = open(W + "/OI340700-v41boot.mmv", "rb").read()
+print("GPT %d non-zero; on tape: %s; first descriptor %s"
+      % (sum(1 for v in gpt if v), "yes" if sig in raw else "NO",
+         " ".join("%04X" % v for v in gpt[:4])))
 PYEOF
 ```
 
-Expect `GPT 813 non-zero; on tape: yes`, first descriptor `0040 000C 1BC0
-0027`.
+Expect `GPT 918 non-zero; on tape: yes; first descriptor 0040 000A 1BC0 0026`.
+(`mmustamp` reports the same 918 for `#PFCMGPT`; `FCMSSLPT` is stamped with 462
+non-zero halfwords.)
 
 ---
 
@@ -577,12 +421,17 @@ Expect `GPT 813 non-zero; on tape: yes`, first descriptor `0040 000C 1BC0
 Kill any leftover `discretePanel` **before** the run, not only after — one
 left from a previous run makes the GPC flap `HALT`↔`RUN`.
 
+The recipe that verified OPS 901/201/301 on the rebuilt volume (2026-09-10;
+use `OPS,2,0,1,PRO` or `OPS,3,0,1,PRO` for the others):
+
 ```bash
 cd ~/workspace/pass-run
-TAPE=/tmp/claude-1000/OI340700-v27boot.mmv DEUMF=1 \
-DEUKEYS="@150:ITEM,1,EXEC;@430:OPS,9,0,1,PRO" RUN_AT=260 PORT_BASE=6900 \
-./headless-gpcmem.sh 1500 ~/workspace/pass-run/headless-v27
+YAGPC_DEU_EXTRA_PRELOADED=1 TAPE=/tmp/claude-1000/tapebuild/OI340700-v41boot.mmv \
+DEU2="7,8,9" DEUMF=1 DEUKEYS="@120s:ITEM,1,EXEC;@280s:OPS,9,0,1,PRO" \
+PORT_BASE=6800 ./headless-gpcmem.sh 430 ~/workspace/pass-run/headless-v41
 ```
+
+Interactively: `./retest-crt2.sh --tape /tmp/claude-1000/tapebuild/OI340700-v41boot.mmv`.
 
 The IPL SOURCE switch must be **off** before RUN or FCOS refuses every
 post-IPL mass-memory transaction; the harness handles this.  `IDLE_TIMEOUT`
@@ -698,7 +547,7 @@ once PASS takes it over.  That, not the presence of any string, is the check:
 awk '/^  0x19ee/{l=$0} END{print substr(l,1,110)}' <outdir>/deu.log
 ```
 
-The run that verified v27:
+The run that verified v27 (historical):
 
 ```bash
 cd ~/workspace/pass-run
@@ -1011,16 +860,15 @@ state — went from **8.37 %** to **0.50 %** over this work.
 * **Four Z-CONs hold wrong values rather than fill** — `0x1E8`, `0x202`,
   `0x218`, `0x22C`, each with bit 0 clear where all eight DASS dumps have it
   set, so the target is taken as sector 0.  Deliberately not patched.
-* **Build provenance is not kept.**  The tape a run used cannot be traced back
-  to the tree that made it: staging is reused in place, so `c80boot/` and
-  `c80src/` hold only what the **last** build left there.  Thirty-six numbered
-  volumes were cut across 09-08/09-09 and only the `.mmv` of each survives;
-  **no tree on disk reproduces v36's root block** — its fingerprint (`c878` at
-  `0x1d0` *and* `117c` at `0x1e8`) matches none of 64 staged `.lib` files.
-  This is not a `/tmp` cleanup: last boot was 09-07, `tmpfiles.d` keeps `/tmp`
-  for 30 days, and `OI340700-v2` through `v30` are all still there.
-  Fingerprint a few halfwords before assuming a `phase*/` artifact belongs to a
-  given tape.
+* **Build provenance -- RESOLVED 2026-09-10.**  The volume is now built by
+  `tapebuild/build.sh` from pinned sources and committed inputs, and verified
+  byte-identical to the tested v41 (sections 0-3).  What had been wrong: the
+  v36 build script lived only in `/tmp/claude-1000/buildtape.sh`, several
+  inputs had no recipe, one object in `~/pass-build/OI340700` had drifted, and
+  `dfg` was an uncommitted working tree.  An earlier note here said "no tree on
+  disk reproduces v36's root block"; that was **wrong** -- v36's own staging
+  survives at `/tmp/claude-1000/c80v36`, with a `.lnk101.repro.json` per phase
+  recording every input and its md5, which is how the drift was found.
 * **The old DK question is closed by the `@LH` fix** and should not be
   reopened: a completed DK transaction was never slow to clear `TCVTBCEB`; the
   monitor was asleep for up to 2.16 s on a sign-extension bug.

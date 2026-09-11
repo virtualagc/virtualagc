@@ -1,0 +1,154 @@
+#!/bin/bash
+# Build the OI340700 mass-memory volume from SOURCE, end to end.
+#
+#     tapebuild/build.sh [WORK]          default WORK=/tmp/claude-1000/tapebuild
+#
+# Produces $WORK/OI340700-v41boot.mmv.  Given the same inputs it is
+# byte-identical to the OI340700-v41boot.mmv that ran OPS 201/301/801/901
+# on 2026-09-10 -- the last stage checks that when REF is set:
+#
+#     REF=~/workspace/pass-run/OI340700-v41boot.mmv tapebuild/build.sh
+#
+# Every input is either SOURCE (a git repository at a named state) or a file
+# committed beside this script.  Nothing is read from ~/pass-build or from a
+# scratch directory of an earlier session; that is the point of it.  See
+# HANDOFF-OPS9.md, "Building the tape", for why each stage is what it is.
+#
+# Inputs (override by environment):
+#   PFS      ~/workspace/PFS            OI340600 + OI340700 source overlays and
+#                                       mafgen/csects-*.json, read at PFSREV
+#   PFSREV   19464059                   (git archive, not the working tree)
+#   PASSREL  <this repo>/yaShuttle/Source Code/PASS.REL32V0
+#                                       HALSFC, compilePASS, RUNASM/RUNMAC/ZCONASM
+#   ASM      <this repo>/ASM101S        ASM101Sa
+#   DPS      ~/donschmidt/nsts-sdl-dps  Don's checkout: ext/ submodules and the
+#                                       Python venv (typer, rich, lark) only
+#   FORK     https://github.com/rburkey2005/nsts-sdl-dps   linker toolchain
+#   UPSTREAM https://github.com/ColanderCombo/nsts-sdl-dps dfg, at 7d90b05
+set -u
+HERE="$(cd "$(dirname "$0")" && pwd)"
+VA="$(cd "$HERE/../../.." && pwd)"
+WORK=${1:-/tmp/claude-1000/tapebuild}
+PFS=${PFS:-$HOME/workspace/PFS}
+PASSREL=${PASSREL:-$VA/yaShuttle/Source Code/PASS.REL32V0}
+ASM=${ASM:-$VA/ASM101S}
+DPS=${DPS:-$HOME/donschmidt/nsts-sdl-dps}
+FORK=${FORK:-https://github.com/rburkey2005/nsts-sdl-dps}
+UPSTREAM=${UPSTREAM:-https://github.com/ColanderCombo/nsts-sdl-dps}
+PFSREV=${PFSREV:-19464059}
+TOOLS="$VA/yaShuttle/yaGPC2/tools"
+IN="$HERE/inputs"
+die() { echo "FAILED: $*" >&2; exit 1; }
+mkdir -p "$WORK" || die "cannot create $WORK"
+
+# ---------------------------------------------------------------------------
+echo "### 0. toolchain: upstream db9d34b + our three branches"
+# Tree hash a68da6e6 is what built v36 (/tmp/claude-1000/sdl-pr, 95b034a).
+# The merge commits get new hashes on every rebuild; the TREE must not.
+SDL="$WORK/nsts-sdl-dps"
+if [ ! -d "$SDL/.git" ]; then
+  git clone -q "$FORK" "$SDL" || die "clone $FORK"
+  git -C "$SDL" -c advice.detachedHead=false checkout -q db9d34b || die "db9d34b"
+  git -C "$SDL" checkout -q -b tapebuild
+  for b in lib-inserts-and-stacks mmustamp-skip-phase mmu2mmv-unstamped-guard; do
+    git -C "$SDL" -c user.name=tapebuild -c user.email=tapebuild@localhost \
+        merge -q --no-edit "origin/$b" || die "merge $b"
+  done
+fi
+tree=$(git -C "$SDL" rev-parse HEAD^{tree})
+[ "$tree" = a68da6e6088adf5442cfd428a17daba698dd4e8f ] \
+  || die "toolchain tree $tree, expected a68da6e6 -- the branches have moved"
+# ext/ submodules: the same checkout v36 used, by symlink, as sdl-pr had.
+for e in halmat sim virtualagc; do
+  rm -rf "$SDL/ext/$e"; ln -s "$DPS/ext/$e" "$SDL/ext/$e"
+done
+S="$SDL/src"
+echo "  tree $tree"
+
+echo "### 0b. dfg: upstream 7d90b05 + toolchain-patches/dfg-7d90b05-to-OI340700.patch"
+# The display decks are translated by Don's dfg.  The dfg that built v36 was
+# his working tree -- upstream 7d90b05 (PR #46, merged) plus a local merge and
+# an UNCOMMITTED per-release rate-group allowance for OI340700's CS2120
+# (VPD 00D5, as the flight dump has it; 00D3 without it).  The patch is that
+# whole difference, verified to reproduce his src/dfg file for file.
+DFG="$WORK/dfg"
+if [ ! -d "$DFG/.git" ]; then
+  git clone -q "$UPSTREAM" "$DFG" || die "clone $UPSTREAM"
+  git -C "$DFG" -c advice.detachedHead=false checkout -q 7d90b05 || die "7d90b05"
+  git -C "$DFG" apply "$HERE/toolchain-patches/dfg-7d90b05-to-OI340700.patch" \
+    || die "dfg patch"
+fi
+mkdir -p "$WORK/bin"
+cat > "$WORK/bin/dfg" <<EOF
+#!/bin/bash
+PYTHONPATH="$DFG/src" exec "$DPS/build/venv/bin/python" -m dfg "\$@"
+EOF
+chmod +x "$WORK/bin/dfg"
+[ "$(cd /tmp && PYTHONPATH="$DFG/src" "$DPS/build/venv/bin/python" -c 'import dfg; print(dfg.__file__)')" \
+  = "$DFG/src/dfg/__init__.py" ] || die "the pinned dfg is not the one imported"
+
+# ---------------------------------------------------------------------------
+echo "### 1. source tree: PFS OI340600, overlaid with OI340700, + PASS.REL32V0"
+# A zero-byte .hal in the OI340700 overlay is an EXCLUSION MARKER -- the file
+# is not part of this release -- and the overlay copies it over OI340600's on
+# purpose.  Never fill one in.
+T="$WORK/OI340700"; PX="$WORK/pfs"
+rm -rf "$T" "$PX"; mkdir -p "$T" "$PX"
+git -C "$PFS" archive "$PFSREV" OI340600 OI340700 mafgen | tar -x -C "$PX" \
+  || die "git archive $PFSREV"
+for d in APPLSRC SSSRC MLIB80 INCL80 CON80; do
+  mkdir -p "$T/$d"
+  for layer in OI340600 OI340700; do
+    [ -d "$PX/$layer/$d" ] && find "$PX/$layer/$d" -maxdepth 1 -type f \
+        -exec cp -p {} "$T/$d/" \;
+  done
+done
+for d in RUNASM RUNMAC ZCONASM; do cp -a "$PASSREL/$d" "$T/"; done
+( cd "$T" && patch -s -p1 < "$HERE/source-patches/OI340700-APPLSRC-CSPCLB-qualification.patch" ) \
+  || die "source patch"
+echo "  PFS at $PFSREV"
+
+# ---------------------------------------------------------------------------
+echo "### 2. objects: compilePASS --sdl --release=OI340700"
+# --sdl: the tape links these objects, and the flight images are SDL builds
+#   (no START csect, no stack ER); stacks come from the CON80 STACK cards.
+# --release=OI340700: CPUSLS and CPTOSV need CARDTYPE ACBC, not the base
+#   table's ACBD, or they fail XI3 and eight phase-15 objects cascade away.
+export PATH="$WORK/bin:$PASSREL:$ASM:$PATH"
+( cd "$T" && prepareTEMPLIB --clear && prepareINCLIB --clear --include=INCL80 \
+  && mkdir -p objects SDFLIB \
+  && unbuffer compilePASS --no-csects --sdl --release=OI340700 ) \
+  > "$WORK/compile.log" 2>&1 || die "compilePASS (see $WORK/compile.log)"
+echo "  $(ls "$T/objects" | wc -l) objects"
+
+# ---------------------------------------------------------------------------
+echo "### 3. derived layers"
+PFS="$PX" python3 "$HERE/derive.py" "$T" "$WORK" "$ASM/ASM101Sa" || die "derive.py"
+
+# ---------------------------------------------------------------------------
+echo "### 4-7. link, stamp, cut, splice (the v36 procedure)"
+# con80build will not link at all unless its DEFAULT runtime directories,
+# build/lib/runtime/{RUN,ZCON} relative to the toolchain checkout, exist --
+# and phases 1 and 10, which are given no library, fall back to them.  They
+# take no object from them (v36's phase 1 linked its 7 own objects, phase 10
+# its 12), but a bare clone has no build/ and every phase then links nothing,
+# reported only as a blank line.  v36's checkout had them as symlinks into
+# Don's build; point them at OUR runtime library instead.
+mkdir -p "$SDL/build/lib/runtime"
+ln -sfn "$T/lib/runtime/RUN"  "$SDL/build/lib/runtime/RUN"
+ln -sfn "$T/lib/runtime/ZCON" "$SDL/build/lib/runtime/ZCON"
+T="$T" S="$S" WORK="$WORK" IN="$IN" TOOLS="$TOOLS" bash "$HERE/link-and-cut.sh" \
+  || die "link-and-cut.sh"
+
+# ---------------------------------------------------------------------------
+echo "### 8. fill the unresolved cross-phase relocations"
+OUT="$WORK/OI340700-v41boot.mmv"
+python3 "$TOOLS/patch_unresolved.py" "$WORK/OI340700-v36boot.mmv" --out "$OUT" \
+  > "$WORK/patch.log" 2>&1 || { tail -5 "$WORK/patch.log"; die "patch_unresolved refused cells"; }
+tail -2 "$WORK/patch.log" | sed 's/^/  /'
+
+if [ -n "${REF:-}" ]; then
+  if cmp -s "$OUT" "$REF"; then echo "### MATCH: byte-identical to $REF"
+  else echo "### MISMATCH against $REF"; cmp "$OUT" "$REF" | head -1; exit 1; fi
+fi
+echo "### done -> $OUT"

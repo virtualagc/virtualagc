@@ -1,0 +1,128 @@
+diff --git a/src/dfg/cli.py b/src/dfg/cli.py
+index 18aaa4b..5788351 100644
+--- a/src/dfg/cli.py
++++ b/src/dfg/cli.py
+@@ -75,12 +75,25 @@ def generate(
+                              help="Treat NAME as an AMT-mode deck (PMF=/AMTx= "
+                              "cards -> CDA_Pnn_AMT moding-table compool). "
+                              "Auto-detected from the deck when omitted."),
++    release: Optional[str] = typer.Option(None, "--release",
++                                          help="PASS release whose generator "
++                                          "rate-group allowances to reproduce "
++                                          "(OI340600, OI340700) "
++                                          "[default: OI340600]."),
+     dfb: Optional[Path] = typer.Option(None, "--dfb",
+                                        help="Write the deck's static section "
+                                        "as a raw big-endian halfword stream "
+                                        "(a .dfb) instead of HAL/S source."),
+ ) -> None:
+     """Translate display NAME into HAL/S COMPOOL source."""
++    if release:
++        from . import ddt
++        try:
++            ddt.set_release(release)
++        except KeyError:
++            raise typer.BadParameter("unknown release: %s (known: %s)"
++                                     % (release,
++                                        ", ".join(sorted(ddt._RC_RELEASES))))
+     if sdflib:
+         compool.set_sdflib(str(sdflib))
+     if deck_root:
+diff --git a/src/dfg/ddt.py b/src/dfg/ddt.py
+index a86bbfe..f526bf7 100644
+--- a/src/dfg/ddt.py
++++ b/src/dfg/ddt.py
+@@ -258,7 +258,31 @@ _BLT6 = frozenset((
+ # GROUP-level allowances added on top of the derived max-walk, keyed by
+ # (display, rate-group ordinal).  Generator allowances only — the runtime
+ # needs no more than the walk; the rule producing them is unknown.
+-_RC_GROUP_ALLOWANCE = {("CG0500", 1): 2, ("CG0500", 2): 3}
++#
++# LOCAL WORKAROUND, not upstream.  PR #46 is open: 7d90b05 takes CS2050 to
++# 734/734 against the OI340700 dump and CS2120 to 883/884, leaving rate group
++# 0 at 211 where the dump says 213.  Three VPARM signatures occur in that
++# group and in no other dump-validated group -- HEX(9,8) B 3.0 H ZEROES=YES,
++# HEX(9,3) B 2.0 H ZEROES=NO and HEX(1,8) B 3.0 H ZEROES=YES, all ATTR=B
++# where the measured cases behind 7d90b05 are ATTR=H -- so the general rule
++# is unconstrained there and the shortfall cannot be attributed to an op.
++# Until it is, the allowance is empirical, and therefore per-release: the
++# table is keyed by display name and OI340600's CS2120 is an unrelated
++# 1068-halfword S/L DPA PERIPHERAL page, so a bare entry would corrupt
++# OI340600 builds.
++_RC_GROUP_ALLOWANCE_OI340600 = {("CG0500", 1): 2, ("CG0500", 2): 3}
++_RC_GROUP_ALLOWANCE_OI340700 = {("CG0500", 1): 2, ("CG0500", 2): 3,
++                                ("CS2120", 0): 2}
++_RC_RELEASES = {"OI340600": _RC_GROUP_ALLOWANCE_OI340600,
++                "OI340700": _RC_GROUP_ALLOWANCE_OI340700}
++_RC_GROUP_ALLOWANCE = _RC_GROUP_ALLOWANCE_OI340600
++
++
++def set_release(release):
++    """Select the release whose generator allowances to reproduce.  Raises
++    KeyError on an unknown release."""
++    global _RC_GROUP_ALLOWANCE
++    _RC_GROUP_ALLOWANCE = _RC_RELEASES[release]
+ 
+ 
+ def _cascade_idioms(nodes):
+diff --git a/src/dfg/deck.py b/src/dfg/deck.py
+index 00eb55c..bc5d217 100644
+--- a/src/dfg/deck.py
++++ b/src/dfg/deck.py
+@@ -70,12 +70,25 @@ def deck_dirs(root=None):
+     return [os.path.join(root, d) for d in _DEFAULT_DECK_DIRS]
+ 
+ 
++#: The extension the display decks now carry.  They had none until it was
++#: established that they are DFG inputs, at which point the PASS tree renamed
++#: them; both spellings are still in circulation, so both resolve.
++DECK_SUFFIX = ".dfg"
++
++
+ def find_deck(name, root=None):
+-    """Absolute path of the deck named `name`, or None."""
++    """Absolute path of the deck named `name`, or None.
++
++    `name` may be given with or without the `.dfg` extension: a tree that
++    still uses the bare names and one that has been renamed both answer to
++    either spelling.  Directory order wins over spelling, so a deck found in
++    an earlier search directory is preferred whichever way it is spelt."""
++    stem = name[:-len(DECK_SUFFIX)] if name.lower().endswith(DECK_SUFFIX) else name
+     for d in deck_dirs(root):
+-        p = os.path.join(d, name)
+-        if os.path.exists(p):
+-            return p
++        for cand in (name, stem + DECK_SUFFIX, stem):
++            p = os.path.join(d, cand)
++            if os.path.exists(p):
++                return p
+     return None
+ 
+ 
+diff --git a/src/dfg/encode.py b/src/dfg/encode.py
+index a1c888a..34d7217 100644
+--- a/src/dfg/encode.py
++++ b/src/dfg/encode.py
+@@ -12,7 +12,7 @@ import re
+ from . import kvt as _kvt
+ from . import ddt as _ddt
+ from . import static as _static
+-from .deck import encodable_directives
++from .deck import DECK_SUFFIX, encodable_directives
+ from .fcw import Branch, FCW
+ from .model import Error, Segment, Padr, flatten
+ from .ops import immed
+@@ -104,6 +104,13 @@ def encode(hal):
+     raises `Error`."""
+     src = hal
+     hal = os.path.basename(hal.replace("\\", "/"))
++    # The COMPOOL is named for the DISPLAY, not for the file the deck came
++    # in.  These decks were extensionless until it was established that they
++    # are DFG inputs; carrying the `.dfg` through would emit
++    # `CD0001.dfg: COMPOOL RIGID;` and name every generated COMPOOL after a
++    # filename that other modules cannot reference.
++    if hal.lower().endswith(DECK_SUFFIX):
++        hal = hal[:-len(DECK_SUFFIX)]
+     ds = encodable_directives(src)
+ 
+     # A deck led by CRTFMT= is a critical format: a bare CFT FCW array (no

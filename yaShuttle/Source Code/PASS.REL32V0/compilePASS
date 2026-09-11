@@ -730,10 +730,22 @@ def dfgHasRelease():
     """True if the dfg on PATH accepts --release.  Probed once."""
     global _dfgRelease
     if _dfgRelease == None:
+        # dfg's help is drawn by `rich`, which styles the two dashes of an
+        # option separately -- "-" ESC[0m ESC[1;36m "-release" -- so the
+        # literal string "--release" was never in the output and this probe
+        # always said no.  compilePASS therefore never told dfg the release,
+        # dfg fell back to OI340600's rate-group allowances, and OI340700's
+        # CS2120 came out with VPD 00D3 where the flight dump has 00D5.  Ask
+        # for plain output AND strip whatever styling is left.
+        import re
         try:
+            env = dict(os.environ, NO_COLOR = "1", TERM = "dumb",
+                       COLUMNS = "200")
             h = subprocess.run([displayGenerator, "--help"],
-                               capture_output = True, text = True)
-            _dfgRelease = "--release" in (h.stdout or "") + (h.stderr or "")
+                               capture_output = True, text = True, env = env)
+            txt = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "",
+                         (h.stdout or "") + (h.stderr or ""))
+            _dfgRelease = "--release" in txt
         except Exception:
             _dfgRelease = False
     return _dfgRelease
