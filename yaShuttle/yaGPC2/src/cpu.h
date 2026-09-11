@@ -328,6 +328,8 @@ uint32_t cpu_g_shift_cnt(CPU *cpu, uint32_t hw1);
 void cpu_dump_nia_ring(CPU *cpu, const char *why, uint32_t nia);
 void cpu_reset(CPU *cpu);
 void cpu_power_on(CPU *cpu);
+/* POO 2.5.3.2's system reset function; see cpu.c. */
+void cpu_system_reset(CPU *cpu);
 void cpu_run(CPU *cpu);
 void cpu_exec1(CPU *cpu);
 void cpu_tick(CPU *cpu); /* counter decrement + interrupt dispatch only; see cpu.c */

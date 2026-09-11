@@ -45,5 +45,6 @@ void ap101_reset(AP101 *gpc);
  * yaGpcIntegration.h. Not called anywhere in the standalone `gpc run`
  * CLI path; a GPC with no servicer installed behaves exactly as before. */
 void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, void *servicerCtx);
+void ap101_system_reset(AP101 *gpc);
 
 #endif

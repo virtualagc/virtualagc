@@ -605,6 +605,73 @@ void iop_init(IOP *iop, struct CPU *cpu) {
     iop->servicerCtx = NULL;
 }
 
+/* THE I/O SIDE OF THE SYSTEM RESET.  POO 2.5.3: power-on, IPL and the
+ * system reset key "each produce a system reset sequence which applies to
+ * the computer, I/O channels, and peripherals" -- and an IPL of a machine
+ * that had been RUNNING left the IOP exactly as PASS had it: the MSC mid-
+ * program, BCEs mid-transfer with receives armed and MIA words latched, DMA
+ * queued, interrupt and status registers set.  The HALT switch only stops
+ * the clock, so all of it resumed the moment STBY released the machine,
+ * over memory the IPL had just overwritten and ahead of FCMBOOT, which does
+ * not master-reset the IOP until after its two-second settling delay.
+ *
+ * The manual does not itemise the I/O side, so this puts the IOP back in
+ * the state iop_init() gives it at power-up -- the state every first boot
+ * starts from and succeeds from.  What is NOT the IOP's to reset stays:
+ * the peripheral servicer and peer hook (the wiring to the outside), the
+ * discrete INPUTS (driven by the crew panel, not by the GPC), the bus
+ * timing and the CPU link. */
+void iop_system_reset(IOP *iop) {
+    msc_init(&iop->msc);
+    for (int i = 0; i < 24; i++) {
+        bce_init(&iop->bce[i], i + 1);
+        iop->bce[i].mia.latch = 0;
+        iop->bce[i].mia.latchValid = false;
+        iop->bce[i].mia.rxNextUs = 0.0;
+    }
+    iop->curPE = 0;
+    iop->dmaForceBadParity = false;
+    iop->dataForceBadParity = false;
+    register_init(&iop->regXmitEna);
+    register_init(&iop->regRecvEna);
+    register_init(&iop->regProgExcept);
+    register_init(&iop->regBusyWait);
+    register_init(&iop->regHalt);
+    register_init(&iop->regIndicator);
+    register_init(&iop->regDiscreteOut);
+    register_init(&iop->regRMStatus);
+    iop->wdCount = 0;
+    iop->wdRunning = false;
+    iop->wdTimeout = false;
+    iop->wdAccumUs = 0.0;
+    iop->rmVoterInhibit = false;
+    iop->rmTestInputs = 0;
+    iop->rmVoterFail = false;
+    iop->parityEnabled = false;      /* "Power On, System Reset" disable it */
+    iop->forceHBusParity = false;
+    iop->forceQueueParity = false;
+    iop->forceDMAParity = false;
+    iop->forceMIAParity = false;
+    for (int i = 0; i <= PROC_SELFTEST; i++) iop->lsBadParity[i] = 0;
+    for (int i = 0; i < iop->regInterrupts.count; i++)
+        register_init(&iop->regInterrupts.regs[i]);
+    iop->intForceTest = false;
+    register_init(&iop->regCCData);
+    for (int pg = 0; pg <= PROC_SELFTEST; pg++) {
+        RegisterFile *rf = &iop->ls.storePage[pg];
+        for (int i = 0; i < rf->count; i++) register_init(&rf->regs[i]);
+        for (int i = 0; i < 8; i++) rf->dse[i] = 0;
+    }
+    iop->ls.slice = 0;
+    iop->ls.curBCE = 0;
+    iop->ls.curPage = 0;
+    iop->dmaQueue.head = 0;
+    iop->dmaQueue.count = 0;
+    iop->mscRepeatActive = false;
+    iop->mscRepeatPC = 0;
+    iop->mscRepeatUntilUs = 0.0;
+}
+
 void iop_free(IOP *iop) {
     registerfile_free(&iop->regInterrupts);
     iopls_free(&iop->ls);

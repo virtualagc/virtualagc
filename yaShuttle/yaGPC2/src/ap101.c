@@ -612,6 +612,15 @@ void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, void *servicerCtx) {
     iop_set_servicer(&gpc->iop, fn, servicerCtx);
 }
 
+/* POO 2.5.3's system reset sequence, CPU and I/O channels together -- what
+ * an IPL does first, whatever the machine was doing.  Unlike ap101_reset,
+ * which zeroes registers and the PSW for a harness restart, this is the
+ * hardware function and touches only what the manual says it resets. */
+void ap101_system_reset(AP101 *gpc) {
+    cpu_system_reset(&gpc->cpu);
+    iop_system_reset(&gpc->iop);
+}
+
 void ap101_reset(AP101 *gpc) {
     for (int bank = 0; bank <= 2; bank++) {
         for (int i = 0; i <= 7; i++) {

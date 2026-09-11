@@ -385,6 +385,8 @@ void iop_free(IOP *iop);
 
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx);
 void iop_set_peer_wait(IOP *iop, bool (*fn)(void *ctx, int busID, bool gotAny), void *ctx);
+/* The I/O side of POO 2.5.3's system reset sequence; see iop.c. */
+void iop_system_reset(IOP *iop);
 
 /* Lower bound on a commanded receive's timeout, in microseconds.  Exists
  * for a peripheral in another process; set it to 0 when the peripheral is

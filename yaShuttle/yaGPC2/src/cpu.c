@@ -1353,6 +1353,49 @@ void cpu_dump_nia_ring(CPU *cpu, const char *why, uint32_t nia) {
     cpu->niaRingFilled = 0;
 }
 
+/* THE SYSTEM RESET FUNCTION, POO Sec. 2.5.3.2, which an IPL "first causes"
+ * (2.5.3.3: "The use of the IPL function is independent of the prior state
+ * of the system").  The manual's list, and nothing else:
+ *
+ *      CPU pending interrupts are reset
+ *      Internal timers are reset to all ones (1's)
+ *      Status registers are reset
+ *      DSE registers are set to zero
+ *
+ * each to the value cpu_init() gives it at power-up.  Main store, the
+ * general and floating registers and the PSW are NOT on the list: the PSW
+ * is loaded when the release comes (cpu_reset).
+ *
+ * This was missing, and an IPL of a machine that had been RUNNING carried
+ * all of it over: Clock 1/2, External and SVC conditions left pending by
+ * PASS, the counters mid-count, DSEs pointing at PASS's sectors.  FCMBOOT
+ * does not expect any of that -- its External Zero handler, taken early on
+ * a stale External 0, sets the WAIT bit in its own System Reset PSW, and
+ * the IPL parks.  A first boot never met it because power-up had already
+ * cleared everything. */
+void cpu_system_reset(CPU *cpu) {
+    memset(&cpu->intPending, 0, sizeof(cpu->intPending));
+    cpu->intCode = 0;
+    cpu->ext1Code = 0x0000;
+    cpu->mcCode = 0x0008;
+    cpu->counter1 = 0xffff;
+    cpu->counter2 = 0xffff;
+    cpu->counter1Enabled = false;
+    cpu->counter2Enabled = false;
+    cpu->counter1Deferred = false;
+    cpu->counter2Deferred = false;
+    cpu->timerAccumUs = 0.0;
+    for (int bank = 0; bank <= 1; bank++)
+        for (int i = 0; i < 8; i++) registerfile_set_dse(&cpu->regFiles[bank], i, 0);
+    cpu->diagIuStoreDetect = true;   /* B STAT bit 6 is set at power-up */
+    cpu->diagScanReg = 0;
+    cpu->diagInterruptPageDiagnoseMode = false;
+    cpu->storeProtectOverride = false;
+    cpu->prevDiscont = false;
+    cpu->idleIopNs = 0.0;
+    cpu_iu_shadow_flush(cpu);
+}
+
 void cpu_reset(CPU *cpu) {
     cpu->storeProtectOverride = false;
     cpu->prevDiscont = false;

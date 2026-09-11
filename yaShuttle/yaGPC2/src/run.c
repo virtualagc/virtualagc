@@ -835,6 +835,12 @@ static void mm_send_cmd(BatchRunner *r, int busID, uint32_t cmd) {
  * back.  Collapsing the two would make that unreachable. */
 static void firmware_ipl(BatchRunner *r) {
     if (r->opts->fcmPath) return;
+    /* "IPL first causes a system reset function" (POO 2.5.3.3), and "the
+     * use of the IPL function is independent of the prior state of the
+     * system".  Without it an IPL of a machine that had been running kept
+     * that machine's pending interrupts, timers and whole IOP -- see
+     * cpu_system_reset() and iop_system_reset(). */
+    ap101_system_reset(&r->age.gpc);
     if (!r->age.gpc.iop.servicer) {
         fprintf(stderr, "MODE: IPL, but no mass memory is attached; "
                         "nothing to read a bootstrap from\n");
@@ -870,6 +876,24 @@ static void firmware_ipl(BatchRunner *r) {
     }
     int unit = (srcVal & MODE_SRC_MM2) ? 2 : 1;
     int busID = (unit == 2) ? 19 : 18;
+
+    /* Whatever the unit still holds for the LAST transaction is not the
+     * bootstrap.  A reply the running software never collected -- a BITE
+     * STATUS answer, say -- stays queued (mmumodel.c keeps replies across a
+     * new command, as a unit would), and the collection loop below would
+     * take it as the bootstrap's first word and shift the whole image.  A
+     * real receiver is inhibited outside a commanded transfer; discard it. */
+    {
+        GpcServiceOutput stale;
+        size_t dropped = 0;
+        for (;;) {
+            mm_service(r, GPC_SVC_RECV_WORD, busID, 0, &stale);
+            if (!stale.out.recv.available || ++dropped > 65536) break;
+        }
+        if (dropped > 0)
+            fprintf(stderr, "MODE: IPL; discarded %zu word(s) MM%d still held "
+                            "from before\n", dropped, unit);
+    }
 
     size_t nhw = (size_t)BOOT_ALLOC_BLOCKS * MM_HALFWORDS_PER_BLOCK;
     uint16_t *image = calloc(nhw, sizeof *image);
