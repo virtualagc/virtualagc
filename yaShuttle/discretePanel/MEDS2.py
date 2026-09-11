@@ -10489,8 +10489,13 @@ class IDPPane(QtWidgets.QWidget):
         pad = 10
         th10, ths = self._th(10), self._th(PANE_SETTING)
         gw = 58
-        cx = PANE_REF_W / 2.0
-        x0, x1 = 10, PANE_REF_W - 10
+        # The panel body runs to the pane's right edge -- the window border --
+        # leaving only the dark strip on the left as a divider from the
+        # display.  A margin on the right too read as a stray black line
+        # between the panel and the frame.  The controls centre in the body.
+        x0 = 10
+        x1 = self.width() / max(self.s, 0.01) + 2
+        cx = (x0 + min(x1, PANE_REF_W)) / 2.0
         # The control block is centred in the pane's height, and the panel
         # body runs the full height of the pane, as the user asked: the
         # block's height is its layout from 0, so lay it out once for that
@@ -10732,7 +10737,10 @@ class MDUWindow(QtWidgets.QWidget):
         x, y, cw, ch = self.canvasBox()
         self.canvas.setGeometry(x, y, cw, ch)
         if self.sidePane is not None:
-            self.sidePane.setGeometry(*self.paneBox())
+            # To the window's right edge, whatever the rounding: a pixel of
+            # window background between pane and frame shows as a dark line.
+            px, py, _pw, ph = self.paneBox()
+            self.sidePane.setGeometry(px, py, max(1, self.width() - self.chromeInset - px), ph)
         if self.titleBar is not None:
             self.titleBar.setGeometry(0, 0, self.width(), self.chrome)
         disp = getattr(getattr(self, 'lru', None), 'disp', None)
