@@ -10210,19 +10210,31 @@ class ParamPanel(QtWidgets.QWidget):
 # They act on this display's PRIMARY IDP, over the same MDU -> IDP bus the
 # major function switch already used, so the IDP may be in another process.
 #
-# DRAWN IN panelO6.py's IDIOM -- its palette, its bat-handle paddles on a well
-# and nut, its bezelled pushbutton, its Helvetica legends -- in its reference
-# units, at the MDU's scale: PANE_REF_W reference units across for every
-# PANE_REF_H of canvas height, so it grows and shrinks with --size.  Text is
-# sized against the geometry as Tk sizes panelO6's points at 96 dpi, so
-# legend and switch keep panelO6's proportions.  --no-pane (or
-# NSTS_MDU_PANE=0) leaves the window as it was.
+# DRAWN AS panelO6.py IS DRAWN, AT THE SAME SIZE -- its palette, its
+# bat-handle paddles on a well and nut, its bezelled pushbutton, its Helvetica
+# legends, and its arithmetic.  panelO6 at --size N draws N/768 PHYSICAL
+# pixels per reference unit (Tk is not scaled by the desktop) and sizes text
+# in points, round(size * N/768), which Tk renders through Xft at the
+# desktop's Xft.dpi.  An MDU at --size N is N LOGICAL pixels high.  So the
+# pane takes N/768 physical pixels per unit -- its canvas height over
+# PANE_FULL, divided by the device pixel ratio -- and sets the same point
+# sizes as Qt points, which on a desktop where Xft.dpi is Qt's logical dpi
+# times the pixel ratio (192 = 96 x 2 here) come out as Tk's do.  The first
+# version scaled by the canvas at 96 dpi and came out with paddles half as
+# big again as panelO6's and text a quarter to a half too small.
+#
+# Line spacing follows Tk's metrics for Nimbus Sans rather than Qt's, which
+# are taller: a linespace of 1.05 em, stacked letters ascent (0.75 em) plus
+# 2 px apart.  The titles are two lines, "IDP/" over "POWER" and "IDP/" over
+# "MAJ FUNC", as the orbiter's panels mark them, which keeps the pane narrow.
+# --no-pane (or NSTS_MDU_PANE=0) leaves the window as it was.
 # ===========================================================================
 
-PANE_REF_W = 150
-PANE_REF_H = 1024
-PANE_PX_PER_PT = 96.0 / 72.0     # Tk's points at 96 dpi, as panelO6 is drawn
+PANE_REF_W = 180                 # reference units across
+PANE_FULL = 768                  # panelO6's --size unit: 768 is full size
 PANE_SETTING = 8                 # panelO6's SETTING_SIZE
+PANE_LINESPACE_EM = 1.05         # Tk's linespace for Nimbus Sans Bold
+PANE_ASCENT_EM = 0.75            # and its ascent
 # panelO6.py's palette, by the same names.
 P_WINDOW = "#2a2a2a"
 P_PANEL = "#c6c3b6"
@@ -10252,7 +10264,9 @@ class IDPPane(QtWidgets.QWidget):
         self.mdu = mdu
         self.deuDown = False
         self._hits = []
-        self.s = 1.0
+        self.s = 1.0      # LOGICAL pixels per reference unit
+        self.sp = 1.0     # PHYSICAL pixels per reference unit, panelO6's `s`
+        self.dpr = 1.0
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.setMouseTracking(True)
         self.setAutoFillBackground(False)
@@ -10266,17 +10280,26 @@ class IDPPane(QtWidgets.QWidget):
         return y * self.s
 
     def _ow(self, k=1.0):
-        return max(1, int(k * self.s))
+        """panelO6's line widths, max(1, int(k * s)) physical pixels."""
+        return max(1, int(k * self.sp)) / self.dpr
+
+    def _pts(self, size):
+        return max(1, int(round(size * self.sp)))
 
     def _font(self, size):
         f = QtGui.QFont("Helvetica")
         f.setBold(True)
-        f.setPixelSize(max(1, int(round(size * PANE_PX_PER_PT * self.s))))
+        f.setPointSize(self._pts(size))
         return f
 
+    def _em(self, size):
+        """The em of a caption, in logical pixels."""
+        return self._pts(size) * self.logicalDpiY() / 72.0
+
     def _th(self, size):
-        """Half-height of a centred caption, in reference units."""
-        return 0.5 * QtGui.QFontMetricsF(self._font(size)).height() / max(self.s, 0.01)
+        """Half-height of a centred caption, in reference units -- half of
+        Tk's linespace, as panelO6's _th is."""
+        return 0.5 * PANE_LINESPACE_EM * self._em(size) / max(self.s, 0.01)
 
     # -- primitives, as panelO6's --------------------------------------------
     def _pen(self, color, w):
@@ -10320,7 +10343,7 @@ class IDPPane(QtWidgets.QWidget):
     def _vtext(self, p, x, y, text, size=PANE_SETTING, color=P_INK):
         """Stacked caption: ascent plus a 2 px gutter per letter, as panelO6."""
         f = self._font(size)
-        fh = QtGui.QFontMetricsF(f).ascent() + 2
+        fh = PANE_ASCENT_EM * self._em(size) + 2.0 / self.dpr
         chars = [ch for ch in text if not ch.isspace()]
         total = len(chars) * fh
         y0 = self.Y(y) - total / 2.0 + fh / 2.0
@@ -10333,7 +10356,7 @@ class IDPPane(QtWidgets.QWidget):
 
     def _rect_panel(self, p, x0, y0, x1, y1):
         """A rectangular crew-panel body, same surface as O6."""
-        ow = max(2, int(2 * self.s))
+        ow = max(2, int(2 * self.sp)) / self.dpr
         self._poly(p, [(x0 + 5, y0 + 6), (x1 + 5, y0 + 6),
                        (x1 + 5, y1 + 6), (x0 + 5, y1 + 6)], fill="#1a1a1a")
         self._rect(p, x0, y0, x1, y1, fill=P_PANEL, outline=P_INK, width=ow)
@@ -10363,7 +10386,7 @@ class IDPPane(QtWidgets.QWidget):
                    fill=P_SHADOW)
         self._oval(p, cx - rx, cy - ry, cx + rx, cy + ry,
                    fill=P_PADDLE, outline=ring or P_PADDLE_LO,
-                   width=ow if ring is None else max(2, int(2.5 * self.s)))
+                   width=ow if ring is None else max(2, int(2.5 * self.sp)) / self.dpr)
         self._oval(p, cx - rx * 0.55, cy - ry * 0.65, cx + rx * 0.05, cy - ry * 0.05,
                    fill="#ffffff")
         irx, iry = rx * 0.55, ry * 0.55
@@ -10388,7 +10411,7 @@ class IDPPane(QtWidgets.QWidget):
         self._oval(p, cx - tip_h, y1 - along, cx + tip_h, y1 + along,
                    fill=P_PADDLE, outline=P_PADDLE_LO, width=ow)
         self._line(p, cx - base_h * 0.45, y0, cx - tip_h * 0.55, y_join,
-                   "#ffffff", max(1, int(1.5 * self.s)))
+                   "#ffffff", self._ow(1.5))
         self._oval(p, cx - tip_h * 0.55, y1 - along * 0.70,
                    cx + tip_h * 0.05, y1 - along * 0.05, fill="#ffffff")
 
@@ -10409,14 +10432,16 @@ class IDPPane(QtWidgets.QWidget):
         fill = P_BTN_DOWN if down else P_BTN
         dx = 2 if down else 0
         self._rect(p, x1, y1, x2, y2, fill=P_GUARD, outline=P_GUARD_LO,
-                   width=max(2, int(1.5 * self.s)))
+                   width=max(2, int(1.5 * self.sp)) / self.dpr)
         m = 6
         self._rect(p, x1 + m + dx, y1 + m + dx, x2 - m + dx, y2 - m + dx,
-                   fill=fill, outline=P_PADDLE_LO, width=1)
+                   fill=fill, outline=P_PADDLE_LO, width=1.0 / self.dpr)
 
     # -- the pane --------------------------------------------------------------
     def paintEvent(self, _ev):
-        self.s = self.height() / float(PANE_REF_H) if self.height() > 0 else 1.0
+        self.dpr = self.devicePixelRatioF() or 1.0
+        self.sp = self.height() / float(PANE_FULL) if self.height() > 0 else 1.0
+        self.s = self.sp / self.dpr
         p = QtGui.QPainter(self)
         p.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
         p.fillRect(self.rect(), QColor(P_WINDOW))
@@ -10430,6 +10455,8 @@ class IDPPane(QtWidgets.QWidget):
         # Lay out first, so the panel body can be drawn under the controls.
         y = top + pad + th10
         yPowerTitle = y
+        y += 2 * th10                       # the title's second line
+        yPowerTitle2 = y
         y += th10 + pad + ths
         yOn = y
         powerTop = y + ths + pad
@@ -10438,6 +10465,8 @@ class IDPPane(QtWidgets.QWidget):
         ySep1 = y + ths + pad
         y = ySep1 + pad + th10
         yMfTitle = y
+        y += 2 * th10
+        yMfTitle2 = y
         y += th10 + pad + ths
         yGnc = y
         mfTop = y + ths + pad
@@ -10451,7 +10480,8 @@ class IDPPane(QtWidgets.QWidget):
         self._rect_panel(p, x0, top, x1, bottom)
 
         # IDP POWER
-        self._text(p, cx, yPowerTitle, "IDP POWER", 10)
+        self._text(p, cx, yPowerTitle, "IDP/", 10)
+        self._text(p, cx, yPowerTitle2, "POWER", 10)
         self._text(p, cx, yOn, "ON", PANE_SETTING)
         on = getattr(self.mdu, 'idpPower', True)
         self._paddle(p, cx - gw / 2, powerTop, cx + gw / 2, powerTop + 124,
@@ -10462,7 +10492,8 @@ class IDPPane(QtWidgets.QWidget):
 
         # IDP MAJ FUNC.  ILLEGAL (Shift+4) is not a place the paddle can be;
         # it shows the handle end-on, ringed in red, rather than lying about it.
-        self._text(p, cx, yMfTitle, "IDP MAJ FUNC", 10)
+        self._text(p, cx, yMfTitle, "IDP/", 10)
+        self._text(p, cx, yMfTitle2, "MAJ FUNC", 10)
         self._text(p, cx, yGnc, "GNC", PANE_SETTING)
         mf = (getattr(self.mdu, 'majorFunc', 0) or 0) & 3
         if mf == 3:
@@ -10629,8 +10660,12 @@ class MDUWindow(QtWidgets.QWidget):
         self.layoutCanvas()
 
     def _paneK(self):
-        """The pane's width per unit of canvas height; 0 with no pane."""
-        return PANE_REF_W / float(PANE_REF_H) if self.sidePane is not None else 0.0
+        """The pane's width per unit of canvas height; 0 with no pane.  Its
+        scale is canvas/PANE_FULL PHYSICAL pixels per reference unit (see
+        IDPPane), so in logical pixels it depends on the pixel ratio."""
+        if self.sidePane is None:
+            return 0.0
+        return PANE_REF_W / (float(PANE_FULL) * (self.devicePixelRatioF() or 1.0))
 
     def setSidePane(self, pane):
         """Put the IDP control pane down the right-hand side, widening the
