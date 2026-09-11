@@ -1615,6 +1615,36 @@ class DEUUnit(object):
                       'unknown': 0, 'wordsIn': 0, 'wordsOut': 0, 'abandoned': 0,
                       'modeStatus': 0}
 
+    # -- IDP POWER and DEU LOAD ----------------------------------------------
+    def requestLoad(self):
+        """DEU LOAD: the unit asks to be loaded again.  Its next poll reply
+        carries IPL_REQUIRED, which is what makes GPCIPL load it -- and draw
+        its menu -- or PASS's DEU loader reload it.  Display memory is cleared
+        with it: the load writes only what it writes, and a background pointer
+        PASS left at BACKGROUND_TOP would otherwise draw PASS's background
+        under GPCIPL's menu."""
+        self.xfer = None
+        self.ipled = False
+        self.iplRunning = False
+        self.deuId = None
+        self.mem[:] = 0
+
+    def powerUp(self):
+        """IDP POWER ON: a cold unit -- memory, keyboard queue, scratch pad and
+        latches gone, and needing to be loaded.  The major function switch is
+        a switch, not state, and keeps its position."""
+        self.requestLoad()
+        del self.keyQueue[:]
+        self.spl.clear()
+        self.msgResetPending = False
+        self.ackPending = False
+        self.iplError = False
+        self.iplCircuitError = False
+        self.selfTest = False
+        self.timeWords = None
+        self.time = None
+        self.medsDK = None
+
     # -- DK bus handling ----------------------------------------------------
     def recv(self, words):
         """A BCE transmits a command as the 24 command bits left justified in
@@ -1859,6 +1889,8 @@ MDUMsg = NS(
     # MDU -> IDP.  Everything above is the other direction; `recvMDU` already
     # treats anything BELOW `FILL` as inbound from an MDU.
     SET_MAJOR_FUNC=0x0001,   # the major function switch moved: one word, 0..3
+    DEU_LOAD=0x0002,         # DEU LOAD pushed (Table 2-2 step 9): no words
+    IDP_POWER=0x0003,        # IDP POWER switch moved: one word, 1 ON, 0 OFF
 )
 MDUMsgName = {}
 for _k, _v in MDUMsg.items():
@@ -4825,6 +4857,13 @@ class Screen_DPS(MDUScreen):
                 self.bgFCWS, self.geo_dps_bg,
                 {'memory': self.bgFCWS, 'start': DEU.ADDR.BACKGROUND_TOP,
                  'stopAt': DEU.CF_PAD, 'rowScale': ADJ['rowGap']})
+        else:
+            # NO POINTER, NO BACKGROUND.  A display unit draws what its memory
+            # says on every refresh, so a background whose branch has gone is
+            # gone with it.  Skipping the pass instead left the last one drawn
+            # -- PASS's GPC MEMORY page stayed on screen under GPCIPL's menu
+            # after a re-IPL, the two lists superimposed.
+            self.geo_dps_bg = self.drawFCWS([], self.geo_dps_bg)
         self.geo_dps_fcws = self.drawFCWS(
             self.bgFCWS, self.geo_dps_fcws,
             {'memory': self.bgFCWS, 'start': DEU.ADDR.DISPLAY_HEADER,
@@ -9191,6 +9230,10 @@ class MDU(LRU):
         # Mirror DEUUnit's default so the title reports the real position
         # before the switch has ever been moved, not a guess.
         self.majorFunc = int(envnum('NSTS_MAJOR_FUNC', 0)) & 3
+        # The IDP POWER switch as the pane shows it.  The IDP starts powered,
+        # as it always has; only the switch turns it off.
+        self.idpPower = True
+        self.pane = None
         self.config = config
         self.priPortIDP = priPortIDP
         self.secPortIDP = secPortIDP
@@ -9272,7 +9315,30 @@ class MDU(LRU):
             self.curBus.sendMsg(msg)
         name = self.showMajorFunc()
         print("MEDS2: major function switch -> %d (%s)" % (self.majorFunc, name))
+        if self.pane is not None:
+            self.pane.update()      # Shift+M and Shift+1..4 move the paddle too
         return self.majorFunc
+
+    # IDP POWER and DEU LOAD, from the pane.  Like the major function switch
+    # they belong to the IDP, which may be in another process, so they go to
+    # it as MDU -> IDP messages.
+    def setIdpPower(self, on):
+        self.idpPower = bool(on)
+        msg = BusMsg(2)
+        msg.data16[0] = MDUMsg.IDP_POWER
+        msg.data16[1] = 1 if self.idpPower else 0
+        if self.curBus is not None:
+            self.curBus.sendMsg(msg)
+        print("MEDS2: IDP%s POWER -> %s" % (self.priPortIDP, "ON" if on else "OFF"))
+        if self.pane is not None:
+            self.pane.update()
+
+    def deuLoad(self):
+        msg = BusMsg(1)
+        msg.data16[0] = MDUMsg.DEU_LOAD
+        if self.curBus is not None:
+            self.curBus.sendMsg(msg)
+        print("MEDS2: DEU LOAD -> IDP%s" % self.priPortIDP)
 
     def showMajorFunc(self):
         """ON SCREEN, in the window title bar.  There is nowhere on the DPS
@@ -9636,6 +9702,7 @@ class IDP(LRU):
         self.running = False
         self._hbTimer = None
         self.bgDFB = None
+        self.powered = True      # the IDP POWER switch; see setPower
 
         deulog = env('NSTS_DEU_LOG')
 
@@ -9686,6 +9753,8 @@ class IDP(LRU):
 
     # Display/Keyboard (DK) busses
     def recvDK(self, t, busID, msg, remote):
+        if not t.powered:
+            return               # an unpowered unit hears nothing, answers nothing
         t.unit.recv(msg.data16)
 
     def _send(self, words):
@@ -9761,10 +9830,50 @@ class IDP(LRU):
                            % (t.id, was, mf,
                               " (the INVALID position)" if mf == 3 else ""))
             return
+        if int(msg.data16[0]) == MDUMsg.IDP_POWER:
+            t.setPower(len(msg.data16) > 1 and int(msg.data16[1]) != 0)
+            return
+        if int(msg.data16[0]) == MDUMsg.DEU_LOAD:
+            t.deuLoad()
+            return
         if int(msg.data16[0]) < MDUMsg.FILL:
             print("IDP%s: %s recv %s" % (t.id, busID, msg))
 
+    def _clearMDUs(self):
+        """The unit's memory was cleared; so is every MDU's copy of it."""
+        self._sendToMDUs(0, [0] * DEU.DEU_MEMORY_WORDS)
+
+    def setPower(self, on):
+        """IDP POWER.  OFF: the unit stops answering the DK bus and its
+        heartbeat stops, so its MDUs go AUTONOMOUS after IDP_LOST_MS exactly
+        as they do for a dead IDP.  ON: a cold unit that needs loading."""
+        if bool(on) == self.powered:
+            return
+        self.powered = bool(on)
+        if not self.powered:
+            if self._hbTimer is not None:
+                self._hbTimer.stop()
+                self._hbTimer = None
+            self.unit.xfer = None
+            self.unit.log("IDP%s: POWER OFF" % self.id)
+            return
+        self.unit.powerUp()
+        self.unit.log("IDP%s: POWER ON -- memory cleared, requesting IPL" % self.id)
+        self._heartbeat()
+        self._clearMDUs()
+
+    def deuLoad(self):
+        """DEU LOAD pushed.  Nothing happens to an unpowered unit."""
+        if not self.powered:
+            self.unit.log("IDP%s: DEU LOAD ignored -- IDP POWER is OFF" % self.id)
+            return
+        self.unit.requestLoad()
+        self.unit.log("IDP%s: DEU LOAD -- memory cleared, requesting IPL" % self.id)
+        self._clearMDUs()
+
     def recvKYBD(self, t, busID, msg, remote):
+        if not t.powered:
+            return
         for w in msg.data16:
             k = KYBD.byScan(int(w))
             if k is not None:
@@ -10082,6 +10191,351 @@ class ParamPanel(QtWidgets.QWidget):
 # display how much room to leave for it.
 # ===========================================================================
 
+# ===========================================================================
+# The IDP control pane
+#
+# A strip down the right side of an MDU window carrying three IDP controls
+# MEDS had no way to operate:
+#
+#   IDP POWER     2-position paddle, ON (up) / OFF (down)
+#   IDP MAJ FUNC  3-position paddle, GNC (up) / SM (middle) / PL (down) --
+#                 the same switch Shift+M and Shift+1..4 move
+#   DEU LOAD      momentary pushbutton: PASS User's Guide Table 2-2 step 9,
+#                 the push-and-release that makes a display unit ask to be
+#                 loaded.  A unit asks by itself only when it is powered on,
+#                 so without this a re-IPL can never bring GPCIPL's menu back
+#                 to a unit PASS has already loaded -- GPCIPL loads a unit,
+#                 and draws its menu, only when the unit's poll reply asks.
+#
+# They act on this display's PRIMARY IDP, over the same MDU -> IDP bus the
+# major function switch already used, so the IDP may be in another process.
+#
+# DRAWN IN panelO6.py's IDIOM -- its palette, its bat-handle paddles on a well
+# and nut, its bezelled pushbutton, its Helvetica legends -- in its reference
+# units, at the MDU's scale: PANE_REF_W reference units across for every
+# PANE_REF_H of canvas height, so it grows and shrinks with --size.  Text is
+# sized against the geometry as Tk sizes panelO6's points at 96 dpi, so
+# legend and switch keep panelO6's proportions.  --no-pane (or
+# NSTS_MDU_PANE=0) leaves the window as it was.
+# ===========================================================================
+
+PANE_REF_W = 150
+PANE_REF_H = 1024
+PANE_PX_PER_PT = 96.0 / 72.0     # Tk's points at 96 dpi, as panelO6 is drawn
+PANE_SETTING = 8                 # panelO6's SETTING_SIZE
+# panelO6.py's palette, by the same names.
+P_WINDOW = "#2a2a2a"
+P_PANEL = "#c6c3b6"
+P_PANEL_HI = "#dddaca"
+P_PANEL_LO = "#8e8b7e"
+P_INK = "#1b1b1b"
+P_INK_DIM = "#3a3a3a"
+P_GUARD = "#d9d6c9"
+P_GUARD_LO = "#6a675c"
+P_PADDLE = "#eceadf"
+P_PADDLE_LO = "#8a877c"
+P_PADDLE_GROOVE = "#4a4a46"
+P_WELL = "#d9d6cb"
+P_BTN = "#d5d2c6"
+P_BTN_DOWN = "#8f8c80"
+P_SHADOW = "#2a2a22"
+
+
+class IDPPane(QtWidgets.QWidget):
+    POWER_POS = ("ON", "OFF")                  # up, down
+    MF_POS = ("GNC", "SM", "PL")               # up, middle, down
+    MF_OF_POS = (1, 2, 0)                      # MF_NAMES indices
+    POS_OF_MF = {1: 0, 2: 1, 0: 2}
+
+    def __init__(self, mdu, parent):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.mdu = mdu
+        self.deuDown = False
+        self._hits = []
+        self.s = 1.0
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.setMouseTracking(True)
+        self.setAutoFillBackground(False)
+        self.setToolTip("IDP%s -- this display's primary IDP" % mdu.priPortIDP)
+
+    # -- geometry: reference units -> widget pixels ---------------------------
+    def X(self, x):
+        return x * self.s
+
+    def Y(self, y):
+        return y * self.s
+
+    def _ow(self, k=1.0):
+        return max(1, int(k * self.s))
+
+    def _font(self, size):
+        f = QtGui.QFont("Helvetica")
+        f.setBold(True)
+        f.setPixelSize(max(1, int(round(size * PANE_PX_PER_PT * self.s))))
+        return f
+
+    def _th(self, size):
+        """Half-height of a centred caption, in reference units."""
+        return 0.5 * QtGui.QFontMetricsF(self._font(size)).height() / max(self.s, 0.01)
+
+    # -- primitives, as panelO6's --------------------------------------------
+    def _pen(self, color, w):
+        if color is None:
+            return QtGui.QPen(Qt.PenStyle.NoPen)
+        pen = QtGui.QPen(QColor(color))
+        pen.setWidthF(w)
+        return pen
+
+    def _brush(self, color):
+        return QtGui.QBrush(QColor(color)) if color else QtGui.QBrush(Qt.BrushStyle.NoBrush)
+
+    def _rect(self, p, x1, y1, x2, y2, fill=None, outline=None, width=1):
+        p.setPen(self._pen(outline, width))
+        p.setBrush(self._brush(fill))
+        p.drawRect(QRectF(self.X(x1), self.Y(y1), self.X(x2) - self.X(x1),
+                          self.Y(y2) - self.Y(y1)))
+
+    def _oval(self, p, x1, y1, x2, y2, fill=None, outline=None, width=1):
+        p.setPen(self._pen(outline, width))
+        p.setBrush(self._brush(fill))
+        p.drawEllipse(QRectF(self.X(x1), self.Y(y1), self.X(x2) - self.X(x1),
+                             self.Y(y2) - self.Y(y1)))
+
+    def _poly(self, p, pts, fill=None, outline=None, width=1):
+        p.setPen(self._pen(outline, width))
+        p.setBrush(self._brush(fill))
+        p.drawPolygon(QtGui.QPolygonF([QPointF(self.X(x), self.Y(y)) for x, y in pts]))
+
+    def _line(self, p, x1, y1, x2, y2, color, width=1):
+        p.setPen(self._pen(color, width))
+        p.drawLine(QPointF(self.X(x1), self.Y(y1)), QPointF(self.X(x2), self.Y(y2)))
+
+    def _text(self, p, x, y, text, size, color=P_INK):
+        p.setFont(self._font(size))
+        p.setPen(QColor(color))
+        w = self.X(PANE_REF_W)
+        p.drawText(QRectF(self.X(x) - w, self.Y(y) - w, 2 * w, 2 * w),
+                   Qt.AlignmentFlag.AlignCenter, text)
+
+    def _vtext(self, p, x, y, text, size=PANE_SETTING, color=P_INK):
+        """Stacked caption: ascent plus a 2 px gutter per letter, as panelO6."""
+        f = self._font(size)
+        fh = QtGui.QFontMetricsF(f).ascent() + 2
+        chars = [ch for ch in text if not ch.isspace()]
+        total = len(chars) * fh
+        y0 = self.Y(y) - total / 2.0 + fh / 2.0
+        p.setFont(f)
+        p.setPen(QColor(color))
+        for i, ch in enumerate(chars):
+            cy = y0 + i * fh
+            p.drawText(QRectF(self.X(x) - fh, cy - fh, 2 * fh, 2 * fh),
+                       Qt.AlignmentFlag.AlignCenter, ch)
+
+    def _rect_panel(self, p, x0, y0, x1, y1):
+        """A rectangular crew-panel body, same surface as O6."""
+        ow = max(2, int(2 * self.s))
+        self._poly(p, [(x0 + 5, y0 + 6), (x1 + 5, y0 + 6),
+                       (x1 + 5, y1 + 6), (x0 + 5, y1 + 6)], fill="#1a1a1a")
+        self._rect(p, x0, y0, x1, y1, fill=P_PANEL, outline=P_INK, width=ow)
+        self._line(p, x0, y0, x1, y0, P_PANEL_HI, ow)
+        self._line(p, x0, y0, x0, y1, P_PANEL_HI, ow)
+        self._line(p, x0, y1, x1, y1, P_PANEL_LO, ow)
+        self._line(p, x1, y0, x1, y1, P_PANEL_LO, ow)
+
+    def _switch_disk(self, p, cx, cy, r):
+        self._oval(p, cx - r, cy - r, cx + r, cy + r, fill=P_WELL,
+                   outline="#4a4840", width=self._ow())
+
+    def _bushing(self, p, cx, cy, r):
+        ow = self._ow()
+        self._oval(p, cx - r * 1.25, cy - r * 1.25, cx + r * 1.25, cy + r * 1.25,
+                   fill="#6e6b60", outline="#3a3830", width=ow)
+        self._oval(p, cx - r, cy - r, cx + r, cy + r,
+                   fill="#b0ada0", outline="#5a584c", width=ow)
+        self._oval(p, cx - r * 0.55, cy - r * 0.55, cx + r * 0.55, cy + r * 0.55,
+                   fill="#3a3830", outline="#1a1a18", width=1)
+
+    def _bat_face(self, p, cx, cy, thick, ring=None):
+        """End-on paddle: the handle is pointing at the viewer."""
+        rx, ry = thick * 0.40, thick * 0.36
+        ow = self._ow()
+        self._oval(p, cx - rx + 1.5, cy - ry + 2, cx + rx + 1.5, cy + ry + 2,
+                   fill=P_SHADOW)
+        self._oval(p, cx - rx, cy - ry, cx + rx, cy + ry,
+                   fill=P_PADDLE, outline=ring or P_PADDLE_LO,
+                   width=ow if ring is None else max(2, int(2.5 * self.s)))
+        self._oval(p, cx - rx * 0.55, cy - ry * 0.65, cx + rx * 0.05, cy - ry * 0.05,
+                   fill="#ffffff")
+        irx, iry = rx * 0.55, ry * 0.55
+        self._oval(p, cx - irx, cy - iry, cx + irx, cy + iry,
+                   outline=P_PADDLE_GROOVE, width=ow)
+
+    def _bat_thrown(self, p, cx, cy, thick, span, sign, br):
+        """Paddle thrown along y: sign -1 is up, +1 is down."""
+        length = span * 0.40
+        base_h = thick * 0.13
+        tip_h = thick * 0.30
+        along = tip_h * 0.70
+        ow = self._ow()
+        neck = br * 0.35
+        y0 = cy + sign * neck
+        y1 = cy + sign * length
+        y_join = y1 - sign * along * 0.95
+        pts = [(cx - base_h, y0), (cx + base_h, y0),
+               (cx + tip_h, y_join), (cx - tip_h, y_join)]
+        self._poly(p, [(x + 1.2, y + 1.8 * sign) for x, y in pts], fill=P_SHADOW)
+        self._poly(p, pts, fill=P_PADDLE, outline=P_PADDLE_LO, width=ow)
+        self._oval(p, cx - tip_h, y1 - along, cx + tip_h, y1 + along,
+                   fill=P_PADDLE, outline=P_PADDLE_LO, width=ow)
+        self._line(p, cx - base_h * 0.45, y0, cx - tip_h * 0.55, y_join,
+                   "#ffffff", max(1, int(1.5 * self.s)))
+        self._oval(p, cx - tip_h * 0.55, y1 - along * 0.70,
+                   cx + tip_h * 0.05, y1 - along * 0.05, fill="#ffffff")
+
+    def _paddle(self, p, x1, y1, x2, y2, pos, npos, ring=None):
+        """Vertical bat-handle paddle switch on a circular well."""
+        cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+        thick, span = x2 - x1, y2 - y1
+        self._switch_disk(p, cx, cy, thick * 0.60 * 0.90)
+        br = thick * 0.20
+        self._bushing(p, cx, cy, br)
+        if pos is None or (npos == 3 and pos == 1):
+            self._bat_face(p, cx, cy, thick, ring)
+            return
+        t = pos / float(npos - 1) if npos > 1 else 0.0
+        self._bat_thrown(p, cx, cy, thick, span, -1.0 if t < 0.5 else 1.0, br)
+
+    def _pushbutton(self, p, x1, y1, x2, y2, down=False):
+        fill = P_BTN_DOWN if down else P_BTN
+        dx = 2 if down else 0
+        self._rect(p, x1, y1, x2, y2, fill=P_GUARD, outline=P_GUARD_LO,
+                   width=max(2, int(1.5 * self.s)))
+        m = 6
+        self._rect(p, x1 + m + dx, y1 + m + dx, x2 - m + dx, y2 - m + dx,
+                   fill=fill, outline=P_PADDLE_LO, width=1)
+
+    # -- the pane --------------------------------------------------------------
+    def paintEvent(self, _ev):
+        self.s = self.height() / float(PANE_REF_H) if self.height() > 0 else 1.0
+        p = QtGui.QPainter(self)
+        p.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
+        p.fillRect(self.rect(), QColor(P_WINDOW))
+        self._hits = []
+        pad = 10
+        th10, ths = self._th(10), self._th(PANE_SETTING)
+        gw = 58
+        cx = PANE_REF_W / 2.0
+        x0, x1 = 10, PANE_REF_W - 10
+        top = 16
+        # Lay out first, so the panel body can be drawn under the controls.
+        y = top + pad + th10
+        yPowerTitle = y
+        y += th10 + pad + ths
+        yOn = y
+        powerTop = y + ths + pad
+        y = powerTop + 124 + pad + ths
+        yOff = y
+        ySep1 = y + ths + pad
+        y = ySep1 + pad + th10
+        yMfTitle = y
+        y += th10 + pad + ths
+        yGnc = y
+        mfTop = y + ths + pad
+        y = mfTop + 136 + pad + ths
+        yPl = y
+        ySep2 = y + ths + pad
+        y = ySep2 + pad + th10
+        yDeuTitle = y
+        deuTop = y + th10 + pad
+        bottom = deuTop + 50 + pad + 6
+        self._rect_panel(p, x0, top, x1, bottom)
+
+        # IDP POWER
+        self._text(p, cx, yPowerTitle, "IDP POWER", 10)
+        self._text(p, cx, yOn, "ON", PANE_SETTING)
+        on = getattr(self.mdu, 'idpPower', True)
+        self._paddle(p, cx - gw / 2, powerTop, cx + gw / 2, powerTop + 124,
+                     0 if on else 1, 2)
+        self._hits.append(('power', cx - gw / 2, powerTop, cx + gw / 2, powerTop + 124))
+        self._text(p, cx, yOff, "OFF", PANE_SETTING)
+        self._line(p, x0 + 6, ySep1, x1 - 6, ySep1, P_INK_DIM, 1)
+
+        # IDP MAJ FUNC.  ILLEGAL (Shift+4) is not a place the paddle can be;
+        # it shows the handle end-on, ringed in red, rather than lying about it.
+        self._text(p, cx, yMfTitle, "IDP MAJ FUNC", 10)
+        self._text(p, cx, yGnc, "GNC", PANE_SETTING)
+        mf = (getattr(self.mdu, 'majorFunc', 0) or 0) & 3
+        if mf == 3:
+            self._paddle(p, cx - gw / 2, mfTop, cx + gw / 2, mfTop + 136, None, 3,
+                         ring="#c0201a")
+        else:
+            self._paddle(p, cx - gw / 2, mfTop, cx + gw / 2, mfTop + 136,
+                         self.POS_OF_MF[mf], 3)
+        self._hits.append(('mf', cx - gw / 2, mfTop, cx + gw / 2, mfTop + 136))
+        self._vtext(p, cx + gw / 2 + 14 + PANE_SETTING * 2 / 3.0,
+                    mfTop + 136 / 2.0, "SM")
+        self._text(p, cx, yPl, "PL", PANE_SETTING)
+        self._line(p, x0 + 6, ySep2, x1 - 6, ySep2, P_INK_DIM, 1)
+
+        # DEU LOAD
+        self._text(p, cx, yDeuTitle, "DEU LOAD", 10)
+        self._pushbutton(p, cx - 25, deuTop, cx + 25, deuTop + 50, self.deuDown)
+        self._hits.append(('deu', cx - 25, deuTop, cx + 25, deuTop + 50))
+        p.end()
+
+    # -- mouse -----------------------------------------------------------------
+    def _find(self, pos):
+        x, y = pos.x() / max(self.s, 0.01), pos.y() / max(self.s, 0.01)
+        for kind, x1, y1, x2, y2 in self._hits:
+            if x1 <= x <= x2 and y1 <= y <= y2:
+                return kind, y1, y2, y
+        return None
+
+    @staticmethod
+    def _zone(y, y1, y2, npos):
+        """Which of npos vertical slots was clicked?  0 = up."""
+        t = (y - y1) / float(y2 - y1) if y2 != y1 else 0.5
+        t = 0.0 if t < 0 else 1.0 if t > 1 else t
+        return min(npos - 1, int(t * npos))
+
+    def mousePressEvent(self, ev):
+        ev.accept()
+        if ev.button() != Qt.MouseButton.LeftButton:
+            return
+        hit = self._find(ev.position())
+        if hit is None:
+            return
+        kind, y1, y2, y = hit
+        if kind == 'power':
+            on = self.POWER_POS[self._zone(y, y1, y2, 2)] == "ON"
+            if on != getattr(self.mdu, 'idpPower', True):
+                self.mdu.setIdpPower(on)
+        elif kind == 'mf':
+            mf = self.MF_OF_POS[self._zone(y, y1, y2, 3)]
+            if mf != self.mdu.majorFunc:
+                self.mdu.setMajorFunc(mf)
+        elif kind == 'deu':
+            self.deuDown = True
+            self.mdu.deuLoad()
+        self.update()
+
+    def mouseDoubleClickEvent(self, ev):
+        # A double click here is two presses on a control, not the window's
+        # parameter-editor gesture.
+        self.mousePressEvent(ev)
+
+    def mouseReleaseEvent(self, ev):
+        ev.accept()
+        if self.deuDown:
+            self.deuDown = False
+            self.update()
+
+    def mouseMoveEvent(self, ev):
+        want = self._find(ev.position()) is not None
+        self.setCursor(Qt.CursorShape.PointingHandCursor if want
+                       else Qt.CursorShape.ArrowCursor)
+
+
 class MDUWindow(QtWidgets.QWidget):
     def __init__(self, name, lruConf, dev=False):
         QtWidgets.QWidget.__init__(self)
@@ -10095,6 +10549,7 @@ class MDUWindow(QtWidgets.QWidget):
         self.chrome = int(envnum('NSTS_MDU_CHROME', 0))
         self.chromeInset = int(envnum('NSTS_MDU_CHROME_X', 8)) if self.chrome > 0 else 0
         self.titleBar = None
+        self.sidePane = None     # the IDP control pane, when there is one
 
         win = lruConf.get('window') or {}
         # A REAL WINDOW FRAME BY DEFAULT.  The Electron build asked for
@@ -10173,14 +10628,41 @@ class MDUWindow(QtWidgets.QWidget):
         self.canvas = widget
         self.layoutCanvas()
 
-    def canvasBox(self):
+    def _paneK(self):
+        """The pane's width per unit of canvas height; 0 with no pane."""
+        return PANE_REF_W / float(PANE_REF_H) if self.sidePane is not None else 0.0
+
+    def setSidePane(self, pane):
+        """Put the IDP control pane down the right-hand side, widening the
+        window by exactly its width so the canvas keeps every pixel it had."""
+        self.sidePane = pane
+        _x, _y, _cw, ch = self.canvasBox()
+        self.resize(self.width() + int(round(self._paneK() * ch)), self.height())
+        pane.show()
+        self.layoutCanvas()
+
+    def _layoutBox(self):
+        """The canvas and the pane beside it, as one block centred in the
+        room the window has: the canvas keeps its aspect ratio, and the pane
+        is as tall as the canvas and _paneK() times that wide."""
         availW = max(1, self.width() - 2 * self.chromeInset)
         availH = max(1, self.height() - self.chrome)
-        cw = min(availW, availH * self._aspect)
-        ch = cw / self._aspect if self._aspect else availH
-        x = self.chromeInset + (availW - cw) / 2.0
+        k = self._paneK()
+        ch = min(availH, availW / (self._aspect + k)) if (self._aspect + k) else availH
+        cw = ch * self._aspect
+        pw = ch * k
+        x = self.chromeInset + (availW - (cw + pw)) / 2.0
         y = self.chrome + (availH - ch) / 2.0
+        return x, y, cw, ch, pw
+
+    def canvasBox(self):
+        x, y, cw, ch, _pw = self._layoutBox()
         return (int(round(x)), int(round(y)), max(1, int(round(cw))),
+                max(1, int(round(ch))))
+
+    def paneBox(self):
+        x, y, cw, ch, pw = self._layoutBox()
+        return (int(round(x + cw)), int(round(y)), max(1, int(round(pw))),
                 max(1, int(round(ch))))
 
     def layoutCanvas(self):
@@ -10188,6 +10670,8 @@ class MDUWindow(QtWidgets.QWidget):
             return
         x, y, cw, ch = self.canvasBox()
         self.canvas.setGeometry(x, y, cw, ch)
+        if self.sidePane is not None:
+            self.sidePane.setGeometry(*self.paneBox())
         if self.titleBar is not None:
             self.titleBar.setGeometry(0, 0, self.width(), self.chrome)
         disp = getattr(getattr(self, 'lru', None), 'disp', None)
@@ -10211,7 +10695,8 @@ class MDUWindow(QtWidgets.QWidget):
         if self.isFullScreen() or self.isMaximized():
             return
         _x, _y, cw, ch = self.canvasBox()
-        want = QtCore.QSize(cw + 2 * self.chromeInset, ch + self.chrome)
+        pw = self.paneBox()[2] if self.sidePane is not None else 0
+        want = QtCore.QSize(cw + pw + 2 * self.chromeInset, ch + self.chrome)
         if want != self.size():
             self.resize(want)
 
@@ -10458,6 +10943,11 @@ class MedsRunner(object):
                 lru.win = win
                 win.lru = lru
             lru.start()
+            if isinstance(lru, MDU) and not lruConf.get('shared') \
+                    and self.opts.get('pane', True) \
+                    and str(env('NSTS_MDU_PANE', '1')) != '0':
+                lru.pane = IDPPane(lru, win)
+                win.setSidePane(lru.pane)
             self.lrus[lruName] = lru
         # console access: window.lru is the last LRU started in this window
         _EXEC_NS['lru'] = self.lrus.get(CONFIG['thisStart'][-1]) if CONFIG['thisStart'] else None
@@ -10567,6 +11057,10 @@ def buildParser():
                    help='text stroke width factor, e.g. 0.8: thins or thickens the '
                         'lines glyphs are drawn with, and no other lines (default: '
                         '1, or the config "textStrokeScale")')
+    p.add_argument('--no-pane', dest='noPane', action='store_true',
+                   help='no IDP control pane (IDP POWER, IDP MAJ FUNC, DEU LOAD) '
+                        'down the right side of each MDU window; also '
+                        'NSTS_MDU_PANE=0')
     p.add_argument('--dev', action='store_true',
                    help='developer mode: MDUs run standalone (no IDP heartbeat '
                         'gating, preloaded DPS test formats)')
@@ -10596,6 +11090,7 @@ def main(argv=None):
         'strokeScale': args.strokeScale,
         'dev': args.dev,
         'list': args.list,
+        'pane': not args.noPane,
     }
 
     # --list needs no window system at all.
