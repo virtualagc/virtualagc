@@ -9425,8 +9425,11 @@ class MDU(LRU):
                 t.redraw()
         elif tag == MDUMsg.CLOCK:
             if scr is not None:
-                scr.setClock(int(msg.data16[1]), int(msg.data16[2]),
-                             int(msg.data16[3]))
+                mis, evt = int(msg.data16[1]), int(msg.data16[2])
+                if len(msg.data16) >= 6:      # the high halves (_sendClock)
+                    mis |= int(msg.data16[4]) << 16
+                    evt |= int(msg.data16[5]) << 16
+                scr.setClock(mis, evt, int(msg.data16[3]))
                 t.redraw()
         elif tag == MDUMsg.RESET_SPL:
             if scr is not None:
@@ -9811,8 +9814,16 @@ class IDP(LRU):
         so drawing there would overwrite the fields the GPC is updating."""
         if t is None:
             return
-        self._sendMDU(MDUMsg.CLOCK, [max(0, jsround(t['mission'])),
-                                     max(0, jsround(t['event'])), t['conv']])
+        # THE WORDS ARE HALFWORDS, and a time of day is more seconds than
+        # one holds: 16 bits wrapped at 65536 s, so a GMT of day 1 00:00:03
+        # (86403 s) reached the display as 000/05:47:47, and the clock seemed
+        # to start at a fixed five-and-three-quarter hours.  The high halves
+        # ride AFTER the original three words, so an MDU that reads only
+        # those -- the Electron one -- still sees what it always did.
+        mis = max(0, jsround(t['mission']))
+        evt = max(0, jsround(t['event']))
+        self._sendMDU(MDUMsg.CLOCK, [mis & 0xffff, evt & 0xffff, t['conv'],
+                                     (mis >> 16) & 0xffff, (evt >> 16) & 0xffff])
 
     def _resetScratchPad(self):
         self._sendMDU(MDUMsg.RESET_SPL)
