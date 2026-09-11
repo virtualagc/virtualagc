@@ -127,11 +127,13 @@ TERM_B_BIT = 13
 # Register B.
 GPC_ID_BITS = (0, 1, 2)                          # this GPC's ID, 1-5
 BFS_ENGAGE_BITS = (3, 4, 5)                      # one field, all or none
-# BFC CRT SELECT, a two-bit CRT number with bit 6 the 2s place.  Workbook
-# 8.2: with DISPLAY OFF "both discretes are off"; otherwise the BFS takes
-# "the CRT specified by the first number of each of the switch positions".
+# BFC CRT SELECT, a two-bit field with bit 6 the 2s place.  Workbook 8.2:
+# with DISPLAY OFF "both discretes are off", so 0.  Which value each SELECT
+# position sends is NOT the "first number" of its legend, which is how this
+# was first wired: per the project owner (2026-09-11), 2+3 sends 1, 3+1
+# sends 2 and 1+2 sends 3.
 CRT_SELECT_BITS = (6, 7)
-CRT_SELECT_VALUE = {"1+2": 1, "2+3": 2, "3+1": 3}
+CRT_SELECT_VALUE = {"2+3": 1, "3+1": 2, "1+2": 3}
 
 
 def _bits(bits):
@@ -1412,7 +1414,7 @@ class PanelO6:
 #     ipl                          its IPL pushbutton, held IPL_HOLD_MS
 #     source MM1|MM2|OFF           IPL SOURCE
 #     crt 0|1|2|3                  BFC CRT: 0 is DISPLAY OFF, else DISPLAY ON
-#                                  and SELECT 1+2 / 2+3 / 3+1
+#                                  and SELECT 2+3 / 3+1 / 1+2
 #     bfsengage on|off             on: CDR ENGAGE pressed and released; off:
 #                                  BFC DISENGAGE to RIGHT and back.  An engage
 #                                  latches only if some GPC is in BACKUP.
