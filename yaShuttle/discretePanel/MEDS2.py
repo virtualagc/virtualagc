@@ -9004,13 +9004,28 @@ class KYBD(object):
         self.bus.onReceive(self.recvKYBD)
 
     def recvKYBD(self, _obj, busID, msg, remote):
-        print("KYBD%s: %s recv %s" % (self.kybdBus, busID, msg))
+        # Another keyboard on this bus -- stsKeyboard.py, or a second MDU
+        # window.  The IDP hears the same datagram and queues the key for the
+        # GPC; this only echoes it on the scratch pad, as a press in this
+        # window does.  This window's own sends never get here: the bus drops
+        # them as self-echo.
+        for w in msg.data16:
+            k = KYBD.byScan(int(w))
+            if k is None:
+                print("KYBD%s: unknown keyboard scan code 0x%x"
+                      % (self.kybdBus, int(w) & 0xffff))
+                continue
+            print("KYBD%s: %s recv %s" % (self.kybdBus, busID, k['ascii']))
+            self._echo(k)
 
     def keyPress(self, k):
         print("KYBD keyPress", k)
         kybdMsg = BusMsg(1)
         kybdMsg.data16[0] = k['deuCode']
         self.bus.sendMsg(kybdMsg)
+        self._echo(k)
+
+    def _echo(self, k):
         if self.mdu:
             scr = self.mdu.screens.get('DPS')
             if scr is not None:

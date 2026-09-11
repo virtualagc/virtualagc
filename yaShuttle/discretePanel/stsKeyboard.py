@@ -3,8 +3,17 @@
 """Visual simulation of the Space Shuttle DPS keyboard.
 
 Eight rows of four square momentary pushbuttons, the same layout as the
-commander/pilot keyboards (SCOM / shuttleCrewInterface.py).  Presses and
-releases print to stdout.  Discrete signalling to yaGPC2 is not wired yet.
+commander/pilot keyboards (SCOM / shuttleCrewInterface.py).  Pressing a
+key sends it to MEDS2.py on a MEDS keyboard bus, exactly as a keystroke
+typed into an MDU window does; presses and releases also print to stdout.
+
+The keyboard bus is chosen with --kybd.  MEDS2.py's IDPs listen as
+follows (MEDSConf there): KYBD1 -> IDP1, IDP3; KYBD2 -> IDP2, IDP3;
+KYBD3 -> IDP2, IDP4.  An MDU echoes the scratch pad for the first
+keyboard its primary IDP listens to:
+    KYBD1  crt1 crt3 cdr1 cdr2 plt2 mfd2
+    KYBD2  crt2 plt1 mfd1
+    KYBD3  crt4 afd1
 
 Styling follows panelO6.py: gull-grey panel, Helvetica legends, the
 window does not steal keyboard focus.  The keys themselves are black
@@ -12,12 +21,15 @@ with white lettering.
 
 Usage:
     python3 stsKeyboard.py
+    python3 stsKeyboard.py --kybd 2
     python3 stsKeyboard.py --size 512
     python3 stsKeyboard.py --geometry 520x1020+80+20
 """
 
 import argparse
 import os
+import socket
+import struct
 import subprocess
 import tkinter as tk
 import tkinter.font as tkfont
@@ -63,8 +75,54 @@ C_KEY_LO = "#000000"
 C_LEGEND = "#f4f4f4"
 
 
+# The MEDS keyboard buses, as MEDS2.py's busConfig has them (_KYBD1.._KYBD3):
+# UDP multicast, one datagram per keystroke, holding the key's scan code as a
+# single big-endian halfword.
+MCAST_GROUP = "239.255.1.1"
+KYBD_PORT = {1: 6931, 2: 6932, 3: 6933}
+
+# Scan codes by legend, from KYBD.DEUKey in MEDS2.py, which is where the IDP
+# looks them up (KYBD.byScan).  They are the row/column strobe pattern the
+# keyboard puts on the bus, not the 5-bit code the GPC is eventually given.
+SCAN = {
+    "FAULT SUMM": 0xFFE1, "SYS SUMM": 0xFFE9, "MSG RESET": 0xFFF1, "ACK": 0xFFF9,
+    "GPC/CRT": 0xFFC1,    "A": 0xFFC9,        "B": 0xFFD1,         "C": 0xFFD9,
+    "I/O RESET": 0xFF3A,  "D": 0xFF7A,        "E": 0xFFBA,         "F": 0xFFFA,
+    "ITEM": 0xFE3A,       "1": 0xFE7A,        "2": 0xFEFB,         "3": 0xFEFA,
+    "EXEC": 0xF9FB,       "4": 0xFBFB,        "5": 0xFDFB,         "6": 0xFFFB,
+    "OPS": 0xF1FB,        "7": 0xF3FB,        "8": 0xF5FB,         "9": 0xF7FB,
+    "SPEC": 0xCFFC,       "-": 0xDFFC,        "0": 0xEFFC,         "+": 0xFFFC,
+    "RESUME": 0x8FFC,     "CLEAR": 0x9FFC,    ".": 0xAFFC,         "PRO": 0xBFFC,
+}
+
+
 def log(msg):
     print("stsKeyboard: %s" % msg, flush=True)
+
+
+class KeyboardBus:
+    """The sending end of one MEDS keyboard bus."""
+
+    def __init__(self, n):
+        self.n = n
+        self.port = KYBD_PORT[n]
+        # The same interface MEDS2.py's buses are pinned to, or the datagram
+        # leaves by the default route and its listeners never see it.
+        iface = os.environ.get("NSTS_BUS_IFACE", "127.0.0.1")
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 128)
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF,
+                     socket.inet_aton(iface))
+        self.sock = s
+
+    def send(self, scan):
+        try:
+            self.sock.sendto(struct.pack(">H", scan), (MCAST_GROUP, self.port))
+        except OSError as e:
+            log("KYBD%d: send failed: %s" % (self.n, e))
+            return False
+        return True
 
 
 def key_id(lines):
@@ -147,9 +205,10 @@ def scaled_wh(w, h, size):
 
 
 class STSKeyboard:
-    def __init__(self, root, size=FULL_SIZE):
+    def __init__(self, root, size=FULL_SIZE, bus=None):
         self.root = root
-        root.title("STS Keyboard")
+        self.bus = bus
+        root.title("STS Keyboard" + (" (KYBD%d)" % bus.n if bus else ""))
         root.configure(bg=C_PANEL)
         mw, mh = scaled_wh(200, 360, size)
         root.minsize(mw, mh)
@@ -280,7 +339,12 @@ class STSKeyboard:
         if hit is None:
             return
         self._held = hit
-        log("%s  down" % key_id(KEYS[hit[0]][hit[1]]))
+        name = key_id(KEYS[hit[0]][hit[1]])
+        # A key goes out when it is pressed, as the MDU window's keydown does.
+        if self.bus is not None and self.bus.send(SCAN[name]):
+            log("%s  down -> KYBD%d 0x%04X" % (name, self.bus.n, SCAN[name]))
+        else:
+            log("%s  down" % name)
         self.redraw()
 
     def _on_release(self, event):
@@ -299,12 +363,16 @@ def main(argv=None):
                     help="Scale: 1024 is full size (default), 512 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 520x1020+80+20 (overrides --size)")
+    ap.add_argument("--kybd", type=int, choices=sorted(KYBD_PORT), default=1,
+                    metavar="N",
+                    help="MEDS keyboard bus to send on, 1-3 (default 1: "
+                         "IDP1 and IDP3)")
     args = ap.parse_args(argv)
     if args.size <= 0:
         raise SystemExit("stsKeyboard: --size must be a positive integer")
 
     root = tk.Tk()
-    kb = STSKeyboard(root, size=args.size)
+    kb = STSKeyboard(root, size=args.size, bus=KeyboardBus(args.kybd))
     geom = args.geometry or os.environ.get("NSTS_KEYBOARD_GEOMETRY")
     if geom:
         try:
