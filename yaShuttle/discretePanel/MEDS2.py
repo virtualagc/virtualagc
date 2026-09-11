@@ -10381,7 +10381,6 @@ class MedsRunner(object):
 
         # An MDU is square, so one dimension does it.  DISPLAY size only: the
         # render resolution stays put, so pixel-denominated strokes scale too.
-        # --size is in SIZE_UNITs, as panelO6.py's is: the config size is 768.
         size = 0
         if self.opts.get('size') is not None:
             try:
@@ -10389,8 +10388,8 @@ class MedsRunner(object):
             except (TypeError, ValueError):
                 size = float('nan')
             if not (size == size) or size <= 0:
-                sys.stderr.write("meds: --size wants a positive number (%d is full "
-                                 "size), got '%s'\n" % (SIZE_UNIT, self.opts['size']))
+                sys.stderr.write("meds: --size wants a positive pixel count, got '%s'\n"
+                                 % self.opts['size'])
                 sys.exit(2)
 
         def factor(opt, flag):
@@ -10420,9 +10419,7 @@ class MedsRunner(object):
                 if self.opts.get('menu'):
                     lruConf['init']['menu'] = self.opts['menu']
                 if size > 0 and lruConf.get('window') is not None:
-                    full = lruConf['window'].get('width') or 1024
-                    lruConf['window']['displayPx'] = max(
-                        1, jsround(full * size / SIZE_UNIT))
+                    lruConf['window']['displayPx'] = size
                 if textScale > 0:
                     lruConf['textScale'] = textScale
                 if strokeScale > 0:
@@ -10537,11 +10534,6 @@ def _runNstsExec():
 # Entry point
 # ===========================================================================
 
-# --size units: SIZE_UNIT is the config's own window size, whatever that is in
-# pixels (1024 for the MDUs as shipped).  The same unit as panelO6.py's.
-SIZE_UNIT = 768
-
-
 def buildParser():
     p = argparse.ArgumentParser(
         prog='MEDS2.py',
@@ -10564,9 +10556,9 @@ def buildParser():
                         'OMS_MPS, SPI, ...)')
     p.add_argument('--menu', metavar='<name>',
                    help='initial MDU menu (MAIN, FLT_INST, ...)')
-    p.add_argument('--size', metavar='<n>',
-                   help='MDU window size: %d is full size, the config width/height '
-                        '(the default), 512 is 2/3, 384 is half, etc.' % SIZE_UNIT)
+    p.add_argument('--size', metavar='<px>',
+                   help='MDU window size in pixels, square (default: the config '
+                        'width/height)')
     p.add_argument('--scale', metavar='<x>',
                    help='text size factor, e.g. 0.9: every glyph shrinks or grows '
                         'about its own centre, and nothing moves (default: 1, or '
