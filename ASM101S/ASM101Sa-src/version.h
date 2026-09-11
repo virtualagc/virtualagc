@@ -69,12 +69,15 @@
 
 /*
  * Changes carried over individually since that commit.  Undefined when there
- * are none, which is the state to aim for and the state we are in:  a port
+ * are none, which is the state to aim for:  a port
  * that is exactly one commit is far easier to reason about than one that is a
  * commit plus a list.  Define it as a string if that ever stops being true.
  *
  *   #define PORTED_EXTRAS "abcdef123 (foo.py only) -- what it does"
  */
+#define PORTED_EXTRAS                                                         \
+  "93f73e0df and 92d7c2c1c, each ported in its own commit; and the RLD "      \
+  "R-pointer fix, containingSection() (model101.py and model101.c together)"
 
 /*
  * Whether everything up to that commit is present.  Undefined means complete;

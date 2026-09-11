@@ -1433,6 +1433,46 @@ def generateObjectCode(source, macros):
             return symtab[sect]["value"] + sects[sect]["pos1"] // 2
         except:
             return 0
+
+    # THE CONTROL SECTION A RELOCATABLE ADDRESS BELONGS TO, which is what an
+    # RLD's R pointer must name.  Every CSECT of a module shares ONE hashcode
+    # (a CSECT's symtab value is the first one's), so `unhash` answers with
+    # the first CSECT for every label in the module and the section has to be
+    # recovered from the address instead -- `value` is the whole-assembly
+    # halfword address, the frame the listing prints and the field holds.
+    #
+    # THE CURRENT SECTION IS A CANDIDATE LIKE ANY OTHER.  Each caller used to
+    # skip it (`sn != sect`), assuming that its default already named it --
+    # true only in the FIRST CSECT.  In any later one a reference to its own
+    # labels kept the first CSECT's id, and so did `LA$ R,SYM(Z3)`, which never
+    # looked at the address at all.  lnk101 relocates a field by its R
+    # section's move (link address less ESD address), so such a field comes
+    # out wrong by exactly the distance the linker opened between the two
+    # sections.  BILDNEW5 is the case: phase 10's deck starts LINES as a new
+    # overlay segment, the LE's inter-block checksum puts it two halfwords
+    # after GPCIPL rather than at its assembled 3C20, and ten fields naming
+    # LINES stayed two halfwords low -- among them CM4UPDT's
+    # `LA$ B1,ERRMSGS(Z3)`, which is why GPCIPL announced itself with
+    # message 132's number and message 130's text, ">>> GPC POWER REFAIL
+    # -PROGRAM/MACHINE WERE R", cut short by the same two halfwords.
+    #
+    # ONLY WHEN THE DEFAULT IS ITSELF ONE OF OUR CSECTS.  An EXTRN comes back
+    # from `unhash` as its own name at offset 0, and address 0 lies in the
+    # first CSECT -- so without this every `DC Y(EXTRN)` of a module was
+    # re-aimed at that module's own first section.  The old loops were spared
+    # only by skipping the current section, which in a one-CSECT module is
+    # the only one holding address 0.
+    def containingSection(value, default):
+        d = sects.get(default)
+        if d is None or d.get("dsect") or "offset" not in d:
+            return default
+        for sn, sd in sects.items():
+            if sd.get("dsect") or "offset" not in sd:
+                continue
+            so = sd["offset"]
+            if value >= so and value < so + sd["used"] // 2:
+                return sn
+        return default
     
     # Evaluate a single suboperand of the operand of an instruction like 
     # RR, RS, SRS, SI, RI.  Returns a pair (err,value).  The `err` is 
@@ -3143,17 +3183,7 @@ def generateObjectCode(source, macros):
                                     # anything that is not Y or Z the 4-byte
                                     # flags, 0x1C, which is what this wants.
                                     if compile:
-                                        rldSymbol = aSect
-                                        for sn, sd in sects.items():
-                                            if sd.get("dsect") or \
-                                                    "offset" not in sd:
-                                                continue
-                                            so = sd["offset"]
-                                            su = sd["used"] // 2
-                                            if v >= so and v < so + su \
-                                                    and sn != sect:
-                                                rldSymbol = sn
-                                                break
+                                        rldSymbol = containingSection(v, aSect)
                                         relocations.append({
                                             'symbol': rldSymbol,
                                             'section': sect,
@@ -3264,15 +3294,7 @@ def generateObjectCode(source, macros):
                                 if ySect is not None and compile:
                                     combinedOffset = yOffset + sects.get(ySect, {}).get("offset", 0)
                                     # Resolve actual CSECT from combined offset
-                                    rldSymbol = ySect
-                                    for sn, sd in sects.items():
-                                        if sd.get("dsect") or "offset" not in sd:
-                                            continue
-                                        so = sd["offset"]
-                                        su = sd["used"] // 2
-                                        if combinedOffset >= so and combinedOffset < so + su and sn != sect:
-                                            rldSymbol = sn
-                                            break
+                                    rldSymbol = containingSection(combinedOffset, ySect)
                                     yAddr = sects[sect]["pos1"] + dcBufferPtr
                                     relocations.append({
                                         'symbol': rldSymbol,
@@ -4265,11 +4287,27 @@ def generateObjectCode(source, macros):
                                                     if rd != None \
                                                             and not rd.get("dsect") \
                                                             and "offset" in rd:
-                                                        d0 = rOff \
-                                                             + rd.get("offset", 0) \
-                                                             - sects[sect].get("offset", 0)
+                                                        # THE FIELD IS THE WHOLE-
+                                                        # ASSEMBLY ADDRESS, the
+                                                        # frame the listing and a
+                                                        # Y constant use, and the
+                                                        # R pointer is the section
+                                                        # holding it (see
+                                                        # containingSection).  The
+                                                        # fallback's d2 was rebased
+                                                        # on a hashcode every CSECT
+                                                        # shares, so it already is
+                                                        # that address; `unhash`
+                                                        # answers relative to the
+                                                        # hashcode's owner.  This
+                                                        # used to subtract the
+                                                        # current section's offset,
+                                                        # which is zero only in the
+                                                        # first CSECT.
+                                                        d0 = rOff if sameSectionB2 \
+                                                             else rOff + rd.get("offset", 0)
                                                         relocations.append({
-                                                            'symbol': rSect,
+                                                            'symbol': containingSection(d0, rSect),
                                                             'section': sect,
                                                             'address': \
                                                                 sects[sect]["pos1"] + 2,
@@ -4313,18 +4351,14 @@ def generateObjectCode(source, macros):
                                                 section, offset = unhash(d2)
                                                 if section in sects and \
                                                         "offset" in sects[section]:
-                                                    d0 = offset + sects[section].get("offset", 0) - sects[sect].get("offset", 0)
+                                                    # The whole-assembly
+                                                    # address, not one relative
+                                                    # to the current section;
+                                                    # see the AM=0 arm above.
+                                                    d0 = offset + sects[section].get("offset", 0)
                                                     b2 = 3
                                                     if compile:
-                                                        rldSymbol = section
-                                                        for sn, sd in sects.items():
-                                                            if sd.get("dsect") or "offset" not in sd:
-                                                                continue
-                                                            so = sd["offset"]
-                                                            su = sd["used"] // 2
-                                                            if d0 >= so and d0 < so + su and sn != sect:
-                                                                rldSymbol = sn
-                                                                break
+                                                        rldSymbol = containingSection(d0, section)
                                                         rldAddr = sects[sect]["pos1"] + 2
                                                         relocations.append({
                                                             'symbol': rldSymbol,

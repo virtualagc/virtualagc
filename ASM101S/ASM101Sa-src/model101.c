@@ -1726,6 +1726,38 @@ currentHash (void)
 }
 
 /*
+ * The control section a relocatable whole-assembly halfword address belongs
+ * to, which is what an RLD's R pointer must name; `dflt` when none holds it.
+ * The current section is a candidate like any other, but only when `dflt` is
+ * itself one of our CSECTs rather than an EXTRN -- see
+ * containingSection() in model101.py for why each caller used to skip it and
+ * what that did to BILDNEW5.
+ */
+static const char *
+containingSection (asmint value, const char *dflt)
+{
+  size_t sn;
+  Val *d = dflt == NULL ? NULL : val_dget (sects, dflt);
+  /* Only when the default is itself one of our CSECTs: an EXTRN comes back
+     from unhash() as its own name at offset 0, and address 0 lies in the
+     first CSECT.  See model101.py. */
+  if (d == NULL || val_dget_bool (d, "dsect", 0) || !val_dhas (d, "offset"))
+    return dflt;
+  for (sn = 0; sn < val_dlen (sects); sn++)
+    {
+      Val *sd = val_dval (sects, sn);
+      asmint so, su;
+      if (val_dget_bool (sd, "dsect", 0) || !val_dhas (sd, "offset"))
+        continue;
+      so = val_dget_int (sd, "offset", 0);
+      su = val_dget_int (sd, "used", 0) / 2;
+      if (value >= so && value < so + su)
+        return val_dkey (sects, sn);
+    }
+  return dflt;
+}
+
+/*
  * Evaluate a single suboperand of an RR, RS, SRS, SI or RI instruction.
  * Returns whether an ERROR occurred; `*value` is set and `*present` cleared
  * when the desired subfield is not there at all.
@@ -4146,27 +4178,9 @@ generateObjectCode (Val *source, Val *macros)
                                    */
                                   if (compiling)
                                     {
-                                      const char *rldSymbol = aSect;
-                                      size_t sn;
+                                      const char *rldSymbol
+                                          = containingSection (value, aSect);
                                       Val *rel;
-                                      for (sn = 0; sn < val_dlen (sects); sn++)
-                                        {
-                                          Val *sd = val_dval (sects, sn);
-                                          asmint so, su;
-                                          if (val_dget_bool (sd, "dsect", 0)
-                                              || !val_dhas (sd, "offset"))
-                                            continue;
-                                          so = val_dget_int (sd, "offset", 0);
-                                          su = val_dget_int (sd, "used", 0) / 2;
-                                          if (value >= so && value < so + su
-                                              && strcmp (val_dkey (sects, sn),
-                                                         sect)
-                                                     != 0)
-                                            {
-                                              rldSymbol = val_dkey (sects, sn);
-                                              break;
-                                            }
-                                        }
                                       rel = val_dict ();
                                       val_dset_str (rel, "symbol", rldSymbol);
                                       val_dset_str (rel, "section", sect);
@@ -4275,27 +4289,9 @@ generateObjectCode (Val *source, Val *macros)
                                       yOffset,
                                       val_dget_int (val_dget (sects, ySect),
                                                     "offset", 0));
-                                  const char *rldSymbol = ySect;
-                                  size_t sn;
+                                  const char *rldSymbol
+                                      = containingSection (combinedOffset, ySect);
                                   Val *rel;
-                                  for (sn = 0; sn < val_dlen (sects); sn++)
-                                    {
-                                      Val *sd = val_dval (sects, sn);
-                                      asmint so, su;
-                                      if (val_dget_bool (sd, "dsect", 0)
-                                          || !val_dhas (sd, "offset"))
-                                        continue;
-                                      so = val_dget_int (sd, "offset", 0);
-                                      su = val_dget_int (sd, "used", 0) / 2;
-                                      if (combinedOffset >= so
-                                          && combinedOffset < so + su
-                                          && strcmp (val_dkey (sects, sn), sect)
-                                                 != 0)
-                                        {
-                                          rldSymbol = val_dkey (sects, sn);
-                                          break;
-                                        }
-                                    }
                                   rel = val_dict ();
                                   val_dset_str (rel, "symbol", rldSymbol);
                                   val_dset_str (rel, "section", sect);
@@ -5329,16 +5325,20 @@ generateObjectCode (Val *source, Val *macros)
                                                     && val_dhas (rd, "offset"))
                                                   {
                                                     Val *rel = val_dict ();
-                                                    d0 = ASM_SUB (
-                                                        ASM_ADD (
-                                                            rOff,
-                                                            val_dget_int (
-                                                                rd, "offset", 0)),
-                                                        val_dget_int (
-                                                            val_dget (sects, sect),
-                                                            "offset", 0));
-                                                    val_dset_str (rel, "symbol",
-                                                                  rSect);
+                                                    /* The whole-assembly
+                                                       address; see the same
+                                                       arm of model101.py. */
+                                                    d0 = sameSectionB2
+                                                             ? rOff
+                                                             : ASM_ADD (
+                                                                 rOff,
+                                                                 val_dget_int (
+                                                                     rd, "offset",
+                                                                     0));
+                                                    val_dset_str (
+                                                        rel, "symbol",
+                                                        containingSection (
+                                                            d0, rSect));
                                                     val_dset_str (rel, "section",
                                                                   sect);
                                                     val_dset_int (
@@ -5412,53 +5412,22 @@ generateObjectCode (Val *source, Val *macros)
                                                     "offset"))
                                               {
                                                 const char *rldSymbol = section;
-                                                size_t sn;
                                                 Val *rel;
-                                                d0 = ASM_SUB (
-                                                    ASM_ADD (
-                                                        offset,
-                                                        val_dget_int (
-                                                            val_dget (sects,
-                                                                      section),
-                                                            "offset", 0)),
+                                                /* The whole-assembly address,
+                                                   not one relative to the
+                                                   current section. */
+                                                d0 = ASM_ADD (
+                                                    offset,
                                                     val_dget_int (
-                                                        val_dget (sects, sect),
+                                                        val_dget (sects, section),
                                                         "offset", 0));
                                                 haveD0 = 1;
                                                 b2 = 3;
                                                 haveB2 = 1;
                                                 if (compiling)
                                                   {
-                                                    for (sn = 0;
-                                                         sn < val_dlen (sects);
-                                                         sn++)
-                                                      {
-                                                        Val *sd
-                                                            = val_dval (sects, sn);
-                                                        asmint so, su;
-                                                        if (val_dget_bool (
-                                                                sd, "dsect", 0)
-                                                            || !val_dhas (sd,
-                                                                          "offset"))
-                                                          continue;
-                                                        so = val_dget_int (
-                                                            sd, "offset", 0);
-                                                        su = val_dget_int (
-                                                                 sd, "used", 0)
-                                                             / 2;
-                                                        if (d0 >= so
-                                                            && d0 < so + su
-                                                            && strcmp (
-                                                                   val_dkey (sects,
-                                                                             sn),
-                                                                   sect)
-                                                                   != 0)
-                                                          {
-                                                            rldSymbol = val_dkey (
-                                                                sects, sn);
-                                                            break;
-                                                          }
-                                                      }
+                                                    rldSymbol = containingSection (
+                                                        d0, section);
                                                     rel = val_dict ();
                                                     val_dset_str (rel, "symbol",
                                                                   rldSymbol);
