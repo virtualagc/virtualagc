@@ -198,7 +198,7 @@ RHC_BTN = 40
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
 REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + MARGIN   # 948
 REF_H = 1250
-FULL_SIZE = 1024       # --size units: 1024 is the design (full) window
+FULL_SIZE = 768        # --size units: 768 is the design (full) window
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
 # MMU 1/2).  Side captions and above/below captions share this size.
@@ -274,7 +274,7 @@ def _dont_steal_focus(root, mapWindow=True):
 
 
 def scaled_wh(w, h, size):
-    """Pixel size at --size N, where FULL_SIZE (1024) is the design window."""
+    """Pixel size at --size N, where FULL_SIZE (768) is the design window."""
     f = size / float(FULL_SIZE)
     return max(1, int(round(w * f))), max(1, int(round(h * f)))
 
@@ -1517,7 +1517,7 @@ def main(argv=None):
         description="Space Shuttle panels O6, C3, F6: the GPC crew panel "
                     "on the discrete bus")
     ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
-                    help="Scale: 1024 is full size (default), 512 is half, etc.")
+                    help="Scale: 768 is full size (default), 512 is 2/3, 384 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 948x1250+80+20 (overrides --size; "
                          "also NSTS_O6_GEOMETRY)")
