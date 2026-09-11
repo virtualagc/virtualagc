@@ -13,13 +13,12 @@ existed only as the unexplained contents of ~/pass-build/OI340700 and of
                    wins (true of all 63 names defined more than once), and
                    START excluded -- it is the NOSDL stack csect.  Reproduces
                    all 4,275 linked entries of the staged library.
-  TREE/lib/runtime/RUN/   every RUNASM/*.asm assembled with --fill=C6C6.
-                   compilePASS now assembles with C9FB -- deliberately, since
-                   the DASS dumps' assembler csects are C9FB -- but the runtime
-                   library v36 linked was assembled before that change, and 94
-                   of its 205 modules differ in fill halfwords only.  C6C6 is
-                   kept to reproduce the verified volume; it is a padding
-                   deviation from the flight machine, recorded, not endorsed.
+  TREE/lib/runtime/RUN/   every RUNASM/*.asm assembled with --fill=C9FB, as
+                   compilePASS assembles everything else.  v36 and v41 linked a
+                   runtime library assembled with C6C6 (94 of its 205 modules
+                   differ in fill halfwords only); the flight's is C9FB -- all
+                   69 C6C6 halfwords of the RUN csects the DASS tables place
+                   are C9FB in the dumps, and none of them is C6C6 there.
   TREE/lib/runtime/ZCON/  compilePASS's object for every ZCONASM/*.asm
                    (fill does not reach them: 284 of 284 identical).
   WORK/sdfpad/     TREE/SDFLIB with each 3,360-byte SDF extended by one zero
@@ -32,7 +31,13 @@ existed only as the unexplained contents of ~/pass-build/OI340700 and of
                    start/end/type only; byte-identical to the 11 tables v36
                    used.  The configuration was chosen per phase by counting
                    how many of the phase's linked csects each DASS dump holds;
-                   the answer was unambiguous every time.
+                   the answer was unambiguous every time.  Phase 2 (OPS 0)
+                   takes SSW's.  Until 2026-09-11 it took a hand-curated
+                   extsyms-02-plus.json instead -- SSW's table less 98 LD lists,
+                   plus 27 csects of other configurations, generator lost --
+                   which cross-phase resolution (link-and-cut.sh 4b) makes
+                   unnecessary: dropping it moves no csect and changes no
+                   halfword of phase 2.
 """
 import json
 import os
@@ -42,7 +47,7 @@ import sys
 
 TREE, WORK, ASM = sys.argv[1], sys.argv[2], sys.argv[3]
 PFS = os.environ.get("PFS", os.path.expanduser("~/workspace/PFS"))
-PHASE_CONFIG = {"03": "G9", "04": "G16", "05": "G2", "06": "G3", "07": "G8",
+PHASE_CONFIG = {"02": "SSW", "03": "G9", "04": "G16", "05": "G2", "06": "G3", "07": "G8",
                 "08": "G9", "09": "P9", "12": "P9", "14": "S2", "15": "S2",
                 "18": "G9"}
 
@@ -97,7 +102,7 @@ for f in sorted(os.listdir(os.path.join(TREE, "RUNASM"))):
         continue
     stem = f[:-4]
     r = subprocess.run([ASM, "--object=" + os.path.join(run, stem + ".obj"),
-                        "--library=RUNMAC", "--tolerable=4", "--fill=C6C6",
+                        "--library=RUNMAC", "--tolerable=4", "--fill=C9FB",
                         "--no-rtl-fixes", os.path.join("RUNASM", f)],
                        cwd=TREE, stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL)

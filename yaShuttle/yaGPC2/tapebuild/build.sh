@@ -3,11 +3,15 @@
 #
 #     tapebuild/build.sh [WORK]          default WORK=/tmp/claude-1000/tapebuild
 #
-# Produces $WORK/OI340700-v41boot.mmv.  Given the same inputs it is
-# byte-identical to the OI340700-v41boot.mmv that ran OPS 201/301/801/901
-# on 2026-09-10 -- the last stage checks that when REF is set:
+# Produces $WORK/OI340700-v42boot.mmv.  Given the same inputs it is
+# byte-identical to ~/workspace/pass-run/OI340700-v42boot.mmv -- the last
+# stage checks that when REF is set:
 #
-#     REF=~/workspace/pass-run/OI340700-v41boot.mmv tapebuild/build.sh
+#     REF=~/workspace/pass-run/OI340700-v42boot.mmv tapebuild/build.sh
+#
+# (v41boot, 2026-09-10, was this build WITHOUT toolchain-patches/lnk101-*
+# and link-and-cut stages 4b/4c, plus 88 halfwords hand-filled on the volume
+# by tools/patch_unresolved.py.  git history of this directory reproduces it.)
 #
 # Every input is either SOURCE (a git repository at a named state) or a file
 # committed beside this script.  Nothing is read from ~/pass-build or from a
@@ -42,8 +46,18 @@ die() { echo "FAILED: $*" >&2; exit 1; }
 mkdir -p "$WORK" || die "cannot create $WORK"
 
 # ---------------------------------------------------------------------------
-echo "### 0. toolchain: upstream db9d34b + our three branches"
-# Tree hash a68da6e6 is what built v36 (/tmp/claude-1000/sdl-pr, 95b034a).
+echo "### 0. toolchain: upstream db9d34b + our three branches + lnk101 patch"
+# The three branches merge to tree a68da6e6, what built v36 and v41
+# (/tmp/claude-1000/sdl-pr, 95b034a).  toolchain-patches/lnk101-first-
+# definition-and-zcon-pool.patch is then committed on top, giving 0dce2b7f:
+#   * the LE keeps the FIRST definition of a csect name.  One object reaching
+#     the link under two names (DSPSPC.obj and the library's #CDSPSPC.obj)
+#     had every relocation in #CDSPSPC, #CDPDSPC, #CDXCCCS and #CDXRDMM
+#     applied TWICE -- 62 sites in phase 2, among them the root Z-CONs at
+#     001E8/00202/00218/0022C (ledger #58: 117C for 88BE);
+#   * a Z1-pool word the csect table names is built as a real pool stub, so
+#     the root carries it and stage 4b resolves it, instead of an address-
+#     only entry that left 0x1D6..0x243 as C6C6 padding.
 # The merge commits get new hashes on every rebuild; the TREE must not.
 SDL="$WORK/nsts-sdl-dps"
 if [ ! -d "$SDL/.git" ]; then
@@ -54,10 +68,18 @@ if [ ! -d "$SDL/.git" ]; then
     git -C "$SDL" -c user.name=tapebuild -c user.email=tapebuild@localhost \
         merge -q --no-edit "origin/$b" || die "merge $b"
   done
+  [ "$(git -C "$SDL" rev-parse HEAD^{tree})" = a68da6e6088adf5442cfd428a17daba698dd4e8f ] \
+    || die "merged tree is not a68da6e6 -- the branches have moved"
+  git -C "$SDL" apply "$HERE/toolchain-patches/lnk101-first-definition-and-zcon-pool.patch" \
+    || die "lnk101 patch"
+  git -C "$SDL" add src/lnk101/linker.py
+  git -C "$SDL" -c user.name=tapebuild -c user.email=tapebuild@localhost \
+      commit -q -m "tapebuild: lnk101 first-definition rule and Z1-pool words" \
+    || die "commit lnk101 patch"
 fi
 tree=$(git -C "$SDL" rev-parse HEAD^{tree})
-[ "$tree" = a68da6e6088adf5442cfd428a17daba698dd4e8f ] \
-  || die "toolchain tree $tree, expected a68da6e6 -- the branches have moved"
+[ "$tree" = 0dce2b7fb827adf6455718ef53a7ce0c2b6ffedc ] \
+  || die "toolchain tree $tree, expected 0dce2b7f -- the branches or the patch have moved"
 # ext/ submodules: the same checkout v36 used, by symlink, as sdl-pr had.
 for e in halmat sim virtualagc; do
   rm -rf "$SDL/ext/$e"; ln -s "$DPS/ext/$e" "$SDL/ext/$e"
@@ -104,8 +126,14 @@ for d in APPLSRC SSSRC MLIB80 INCL80 CON80; do
   done
 done
 for d in RUNASM RUNMAC ZCONASM; do cp -a "$PASSREL/$d" "$T/"; done
-( cd "$T" && patch -s -p1 < "$HERE/source-patches/OI340700-APPLSRC-CSPCLB-qualification.patch" ) \
-  || die "source patch"
+# Source patches not (yet) in PFS: the CSPCLB qualification (stage 1 of
+# HANDOFF-OPS9.md) and SM2's lost STACK cards -- the regenerated deck keeps
+# its `*STACK *` header (009300) and the next card is 011200, so S2's phase 15
+# ran its 26 programs with NO stacks; restored from SM4's intact block with
+# $0SM4OPS -> $0SM2OPS, all 26 of which the S2 dump places.
+for sp in OI340700-APPLSRC-CSPCLB-qualification.patch OI340700-CON80-SM2-STACK-cards.patch; do
+  ( cd "$T" && patch -s -p1 < "$HERE/source-patches/$sp" ) || die "source patch $sp"
+done
 echo "  PFS at $PFSREV"
 
 # ---------------------------------------------------------------------------
@@ -126,7 +154,7 @@ echo "### 3. derived layers"
 PFS="$PX" python3 "$HERE/derive.py" "$T" "$WORK" "$ASM/ASM101Sa" || die "derive.py"
 
 # ---------------------------------------------------------------------------
-echo "### 4-7. link, stamp, cut, splice (the v36 procedure)"
+echo "### 4-7. link, resolve, stamp, cut, splice"
 # con80build will not link at all unless its DEFAULT runtime directories,
 # build/lib/runtime/{RUN,ZCON} relative to the toolchain checkout, exist --
 # and phases 1 and 10, which are given no library, fall back to them.  They
@@ -140,13 +168,7 @@ ln -sfn "$T/lib/runtime/ZCON" "$SDL/build/lib/runtime/ZCON"
 T="$T" S="$S" WORK="$WORK" IN="$IN" TOOLS="$TOOLS" bash "$HERE/link-and-cut.sh" \
   || die "link-and-cut.sh"
 
-# ---------------------------------------------------------------------------
-echo "### 8. fill the unresolved cross-phase relocations"
-OUT="$WORK/OI340700-v41boot.mmv"
-python3 "$TOOLS/patch_unresolved.py" "$WORK/OI340700-v36boot.mmv" --out "$OUT" \
-  > "$WORK/patch.log" 2>&1 || { tail -5 "$WORK/patch.log"; die "patch_unresolved refused cells"; }
-tail -2 "$WORK/patch.log" | sed 's/^/  /'
-
+OUT="$WORK/OI340700-v42boot.mmv"
 if [ -n "${REF:-}" ]; then
   if cmp -s "$OUT" "$REF"; then echo "### MATCH: byte-identical to $REF"
   else echo "### MISMATCH against $REF"; cmp "$OUT" "$REF" | head -1; exit 1; fi

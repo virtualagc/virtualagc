@@ -1,20 +1,20 @@
 #!/bin/bash
-# Link, stamp, cut and splice: the procedure that built OI340700-v36boot.mmv
-# on 2026-09-09 (/tmp/claude-1000/buildtape.sh, 14:34), with its hard-coded
+# Link, resolve, stamp, cut and splice.  Began as the procedure that built
+# OI340700-v36boot.mmv on 2026-09-09 (/tmp/claude-1000/buildtape.sh, 14:34), with its hard-coded
 # paths made parameters.  Called by build.sh, which sets:
 #   T      the source tree with objects/, SYSLIBL1/, lib/runtime/, CON80/
 #   S      the toolchain's src/ directory (modules run from its parent)
 #   WORK   scratch: sdfpad/, pchsrc/, extsyms/, and the outputs
 #   IN     tapebuild/inputs    TOOLS  yaGPC2/tools
-# Output: $WORK/OI340700-v36boot.mmv -- the volume BEFORE the unresolved-
-# relocation fill, which is what the name v36 has always meant.
+# Output: $WORK/OI340700-v42boot.mmv.  (Until 2026-09-11 this produced v36boot,
+# which tools/patch_unresolved.py then hand-filled into v41boot; stages 4b
+# and 4c replace that fill, and the link fixes in toolchain-patches/ the rest.)
 set -u
 set -o pipefail
 : "${T:?}" "${S:?}" "${WORK:?}" "${IN:?}" "${TOOLS:?}"
 C="$WORK/c80"; P="$WORK/pchsrc"; SD="$WORK/sdfpad"; ML="$WORK/minilibs"
-XS="$IN/extsyms-02-plus.json"
 RT="--linklib $T/lib/runtime/RUN --linklib $T/lib/runtime/ZCON"
-OUT="$WORK/OI340700-v36.mmv"; BOOT="$WORK/OI340700-v36boot.mmv"
+OUT="$WORK/OI340700-v42.mmv"; BOOT="$WORK/OI340700-v42boot.mmv"
 export C80SRC_RESOLVED="$S"
 rm -rf "$C"; mkdir -p "$C"
 cd "$(dirname "$S")" || exit 1
@@ -65,13 +65,12 @@ for p in 1 2 3 4 5 6 7 8 9 10 12 13 14 15 18 23 24 25; do
     23|24|25) lib="--linklib $T/SYSLIBL1 $RT" ;;      # no deck root by name
     *)        lib="--linklib $ML/$n $RT" ;;           # this phase's INSERTs
   esac
-  # Each phase gets the csect table of its own configuration; phase 2 the
-  # SSW-only extended table; 13 its own pins; 1 and 10 NONE (pinning
-  # PHASE10 strips 97% of GPCIPL).
-  [ $p -eq 2 ]  && extra="--external-syms $XS"
+  # Each phase gets the csect table of its own configuration (phase 2:
+  # SSW's); 13 its own pins; 1 and 10 NONE (pinning PHASE10 strips 97% of
+  # GPCIPL).
   [ $p -eq 13 ] && extra="--external-syms $IN/extsyms-13.json"
   case $p in
-    3|4|5|6|7|8|9|12|14|15|18)
+    2|3|4|5|6|7|8|9|12|14|15|18)
       extra="--external-syms $WORK/extsyms/extsyms-ph$(printf %02d $p).json" ;;
   esac
   out=$(PYTHONPATH=$S timeout 1800 python3 -m con80.con80build --phase $p --root $T \
@@ -84,6 +83,45 @@ for p in 1 2 3 4 5 6 7 8 9 10 12 13 14 15 18 23 24 25; do
   # MAPs the earlier ones, so going on only multiplies the damage.
   case "$line" in linked*) ;; *) echo "$out" | tail -5 >&2; exit 1 ;; esac
 done
+
+echo "  4b. cross-phase resolution"
+# The flight linked each memory configuration as ONE job, so a reference from
+# one phase to a csect another phase of the same configuration places got a
+# real address.  Our links are per phase and leave such sites as assembled,
+# with their RLDs kept in the .lib; lnk101.phaseresolve replays them against
+# the phases that share a configuration with the site (con80's mcconfigs),
+# honouring the decks' LIBRARY *(...) no-call cards.  Without it v36 carried
+# 793 unresolved sites, the ones that mattered hand-filled on the volume by
+# tools/patch_unresolved.py.  Any residue other than the two pool words of
+# stage 4c is fatal.
+PYTHONPATH=$S python3 -m lnk101.phaseresolve --con80 $T/CON80 $C/PHASE*.lib \
+  > $WORK/xres.log 2>&1 || { tail -5 $WORK/xres.log >&2; exit 1; }
+grep -E '^PHASE' $WORK/xres.log \
+  | awk '{r += $2} / still unresolved/ {split($0, a, ", "); for (i in a) if (a[i] ~ /still unresolved/) {split(a[i], b, "/"); u += b[2] + 0}} END {printf "    %d site(s) resolved, %d left unresolved (must be 2)\n", r, u; exit (u != 2)}' \
+  || { grep -B2 -A6 'still unresolved' $WORK/xres.log | grep -v ' 0 symbol' >&2; exit 1; }
+
+echo "  4c. root pool words whose target no phase links"
+PYTHONPATH=$S python3 - "$C" "$IN/zcon-pool-unlinked.json" <<'PYEOF'
+import json, sys, os; sys.path.insert(0, os.environ["C80SRC_RESOLVED"])
+from pathlib import Path
+from ap101Utils import mmbstamp as mb
+C = Path(sys.argv[1]); words = json.load(open(sys.argv[2]))["words"]
+p = C / "PHASE02.lib"
+at = {s["name"]: s for s in mb._lib_sym(p).get("sections", [])}
+lib = mb.LibModule.read(p)
+have = {}
+for x in lib.extents:
+    for i in range(x.hwLength):
+        have[x.address // 2 + i] = (x.data[2*i] << 8) | x.data[2*i+1]
+for name, w in sorted(words.items()):
+    a = at[name]["address"]
+    if a != w["address"] or [have.get(a), have.get(a + 1)] != [0x8000, 0x0E00]:
+        sys.exit("    %s: not the unresolved stub at %05X -- refused" % (name, w["address"]))
+    mb._splice(lib, a, list(w["value"]), name)
+    print("    %s @%05X = %04X %04X" % (name, a, *w["value"]))
+lib.write(p)
+PYEOF
+[ $? -eq 0 ] || exit 1
 
 echo "  5a. FCMSSLPT into PHASE10.lib"
 PYTHONPATH=$S python3 - "$C" "$T" <<'PYEOF'

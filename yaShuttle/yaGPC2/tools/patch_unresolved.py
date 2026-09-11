@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 """Fill the UNRESOLVED RELOCATIONS our per-phase links leave on a volume.
 
+SUPERSEDED 2026-09-11 -- tapebuild no longer runs this.  Its 88 halfwords
+are now produced by the link itself: the 51 `resident`/`phase8` cells by
+cross-phase resolution (tapebuild/link-and-cut.sh stage 4b), the 18 root
+Z-CONs as real Z1-pool stubs (toolchain-patches/lnk101-first-definition-
+and-zcon-pool.patch) resolved by the same pass, and the two whose target no
+phase links (#ZDCDDS4, #ZDKFCM5) by stage 4c from inputs/zcon-pool-
+unlinked.json.  Kept because it is what made OI340700-v41boot.mmv, which
+tapebuild's git history still reproduces.
+
 EXPERIMENTAL, AND A WORKAROUND FOR A BUILD DEFECT -- not a fix.  The real
 repair is in the links (see HANDOFF-OPS9.md section 7b); this exists because
 it is what makes OPS 201/301/801 and 901 keep polling the displays, and a

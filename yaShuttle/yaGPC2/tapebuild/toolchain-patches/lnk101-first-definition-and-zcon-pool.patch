@@ -1,0 +1,125 @@
+diff --git a/src/lnk101/linker.py b/src/lnk101/linker.py
+index 9d61706..ee7ccd4 100644
+--- a/src/lnk101/linker.py
++++ b/src/lnk101/linker.py
+@@ -2004,6 +2004,11 @@ class Linker:
+             section = Section(symName, module.nextEsdId(), 'SD',
+                               AddrDisp(0), AddrDisp(4),
+                               module, data=bytearray(b'\x00\x00\x0e\x00'))
++            # Pin the stub from the csect table, as generated stacks are: the
++            # pin pass ran before this section existed.
++            _pin = self.csectTable.get(symName) if self.csectTable else None
++            if _pin is not None and 'start' in _pin:
++                section.baseAddress = Addr.from_hw(_pin['start'])
+             module.addSection(section)
+             target = '#C' + symName[2:]
+             ext = module.externalsByName.get(target)
+@@ -2308,6 +2313,82 @@ class Linker:
+                 log.info(f"module {Path(mod.filename).name} left empty by "
+                          f"duplicate-csect deletion; dropped from the link")
+ 
++    def dropDuplicateCsects(self):
++        """Delete a csect an EARLIER module of this link already defines.
++
++        The LE keeps the FIRST definition of a csect name and deletes every
++        later one, together with the RLDs positioned in it; a reference to
++        the deleted csect resolves to the survivor by name.  Without this
++        both copies are placed -- at the same pinned address -- and BOTH
++        copies' RLDs are applied to the one image, so every relocation in
++        the csect is added twice.  It happens when one object reaches the
++        link under two names: in OI340700 phase 2 the worklist's
++        DSPSPC.obj has #DDSPSPC deferred to a later phase, the reference
++        pulls the minimal library's #CDSPSPC.obj -- the SAME object -- and
++        its #CDSPSPC and #ZDSPSPC doubled the Z-CON at 001E8 (117C for
++        88BE) and all 62 relocations in #CDSPSPC, #CDPDSPC, #CDXCCCS and
++        #CDXRDMM.  MAP imports are handled by dropMapDuplicateCsects.
++        Returns True if anything was deleted."""
++        first = {}
++        changed = False
++        for mod in list(self.modules):
++            if mod.external:
++                continue
++            doomed = []
++            for s in list(mod.sections.values()):
++                if s.type != 'SD':
++                    continue
++                winner = first.get(s.name)
++                if winner is None:
++                    first[s.name] = mod
++                    continue
++                orphans = [l.name for l in mod.lds
++                           if l.ldId == s.esdId
++                           and l.name not in winner.sectionsByName]
++                if orphans:
++                    self.warnings.append(
++                        f"duplicate csect {s.name} from "
++                        f"{Path(mod.filename).name} KEPT: "
++                        f"{Path(winner.filename).name} does not carry "
++                        f"{', '.join(orphans)}")
++                    continue
++                doomed.append(s)
++            if not doomed:
++                continue
++            doomedIds = {s.esdId for s in doomed}
++            doomedLds = [ld for ld in mod.lds if ld.ldId in doomedIds]
++            nameById = {s.esdId: s.name for s in doomed}
++            nameById.update({ld.esdId: ld.name for ld in doomedLds})
++            for s in doomed:
++                del mod.sections[s.esdId]
++                if mod.sectionsByName.get(s.name) is s:
++                    del mod.sectionsByName[s.name]
++            for ld in doomedLds:
++                mod.lds.remove(ld)
++                mod.ldsByEsdId.pop(ld.esdId, None)
++                if mod.sectionsByName.get(ld.name) is ld:
++                    del mod.sectionsByName[ld.name]
++            dropIds = doomedIds | {ld.esdId for ld in doomedLds}
++            kept = []
++            for r in mod.relocations:
++                if r.posId in doomedIds:
++                    continue           # a site inside the deleted copy
++                kept.append(r)
++                if r.relId in dropIds and r.relId not in mod.externals:
++                    mod.addExternal(External(
++                        nameById[r.relId], r.relId, False, mod))
++            mod.relocations = kept
++            if mod.entryPoint and mod.entryPoint[0] in dropIds:
++                mod.entryPoint = None
++            changed = True
++            log.info(f"duplicate csect(s) "
++                     + ", ".join(sorted(s.name for s in doomed))
++                     + f" from {Path(mod.filename).name} deleted: already "
++                     f"defined earlier in the link")
++            if not mod.sections and not mod.lds:
++                self.modules.remove(mod)
++        return changed
++
+     @staticmethod
+     def _carriedZconNext(lib):
+         """The Z1 pool cursor a MAP-carded parent phase carries forward.
+@@ -2393,6 +2474,16 @@ class Linker:
+                     continue
+             if symName in loadedCsects:
+                 continue
++            # A Z1-POOL WORD IS CONTENT, NOT JUST AN ADDRESS.  An address-only
++            # section here satisfies the reference and leaves the pool word
++            # with no text at all -- on the OI340700 volume 0x1D6..0x243 were
++            # C6C6 padding, and a SCAL through #ZDCDDG9 went to 0x648DA.  Leave
++            # the name undefined so generateZconStubs builds the word (pinned
++            # from this table) and cross-phase resolution fills it against the
++            # phase that carries the procedure, as the flight root has them.
++            if (self.args.concard and symName.startswith('#Z')
++                    and entry.get('type') == 'ZCON'):
++                continue
+             loadedCsects.add(symName)
+ 
+             startHW = entry['start']
+@@ -2489,6 +2580,8 @@ class Linker:
+         
+         log.info("Resolving external references...")
+         allResolved = self.resolveExternals(searchLibraries=bool(self.args.library_path))
++        if self.dropDuplicateCsects():
++            allResolved = self.resolveExternals(searchLibraries=False)
+ 
+         # Load external symbol table — needed both for resolving remaining
+         # undefined symbols AND for placing loaded sections (including library
