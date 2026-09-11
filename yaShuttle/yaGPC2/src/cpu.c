@@ -1256,7 +1256,19 @@ static void cpu_ring_trigger(CPU *cpu, uint32_t addr, uint32_t value) {
 
 static void cpu_watch_store(CPU *cpu, uint32_t addr, uint32_t value,
                             const char *kind) {
-    cpu_ring_trigger(cpu, addr, value);
+    /* A FULLWORD store is two halfword stores for the trigger's purposes.
+     * Passing the 32-bit value straight through compared it against a
+     * 16-bit trigger value, so no fullword store could ever match -- which
+     * made YAGPC_RINGTRIG blind to STM, ST and every PSW save, and its
+     * silence read as "nothing ever wrote this".  It happened on
+     * 2026-09-10, watching FP$GMTIM's R7 slot for the value STM puts
+     * there. */
+    if (kind[0] == 'f') {
+        cpu_ring_trigger(cpu, addr, (value >> 16) & 0xffff);
+        cpu_ring_trigger(cpu, addr + 1, value & 0xffff);
+    } else {
+        cpu_ring_trigger(cpu, addr, value);
+    }
     static int inited = 0;
     static long lo = -1, hi = -1;
     if (!inited) {

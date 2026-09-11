@@ -418,21 +418,52 @@ Expect `DEU blocks forced: 24, volume 2210 blocks`.
 
 ---
 
-## 7b.  Fill the root's unresolved cross-phase Z-CONs
+## 7b.  Fill the unresolved cross-phase relocations
 
-**This step is a WORKAROUND for a build defect.**  Skip it and the tape boots,
-IPLs, and completes an `OPS 901/201/301 PRO` transition -- and then the machine
-stops with `invalid instruction 0xc6c6 at 0x48da`.
+**This step is a WORKAROUND for a build defect.**  Skip it and the tape boots
+and IPLs, but every major-mode transition then dies: `OPS 201`, `301` and `801`
+draw their new display and fall silent seconds later (POLL FAIL), and `OPS 901`
+either crashes or stops polling.
 
 ```bash
-python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/patch_root_zcons.py \
+python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/patch_unresolved.py \
         /tmp/claude-1000/OI340700-vNNboot.mmv
 ```
 
-Expect `18 Z-CONs filled` and a recomputed load-block checksum.  The tool finds
-its own load block by anchoring on the three filled Z-CONs that precede the
-hole, so it need not be told a slot or a destination address, and it refuses to
-write if a target cell is not fill.
+On a v36-shaped volume expect `88 filled in 7 load blocks, ... 0 refused`, and
+the output is **byte-identical to `OI340700-v41boot.mmv`**, the volume verified
+in the table below.  It is idempotent: a second run fills nothing and exits 0.
+The cells, their broken and correct values and the surrounding code as our build
+lays it out are in `tools/patch_unresolved.fills.json`, in three groups:
+
+| group | cells | where | unfilled, it causes |
+|---|---|---|---|
+| `zcon` | 36 halfwords (18 Z-CONs) | root, `0x1d6-0x243` | `invalid instruction 0xc6c6 at 0x48da` after OPS 901/201 |
+| `resident` | 6 | `FIOSVCP+29`, `FIOCMPLT+1be`, `FIOPDISP+27d` (each `BAL R7` to **address 0**), `$0DGRGSE+122/+12e`, `#DDGRGSE+2e` | POLL FAIL after OPS 201/301/801 |
+| `phase8` | 45 | phase 8's `FIOPDSMU` (42 -- exactly the link's 42 unresolved relocations for that section), `FIOG9ADB+1/+78` (its save area, so it `STM`s the caller's registers at **address 0**), `FIOPDG9+3` | OPS 901: the CPU **starts the MSC at address 0**; then wild branches or silence |
+
+**How it finds a cell with no phase table.**  Every load block on these volumes
+starts on a 512-halfword boundary and its two-halfword checksum tail is followed
+by `C6C6` padding to the next boundary, so the block holding a cell is the
+nearest aligned start whose tail verifies *and* is followed by clean padding.
+Neighbouring table cells inside a context are wildcards (so clustered cells
+still match after a partial run), but a context must keep six halfwords that are
+neither `0000` nor `C6C6` -- **without that guard a Z-CON context inside the
+`C6C6` hole matched fill in an unrelated block and wrote a Z-CON value into it.**
+A cell holding anything other than its expected broken value or its fill is
+refused, not overwritten: that means a different build, and the table does not
+apply.  It supersedes `patch_root_zcons.py`, whose 18 Z-CONs are the `zcon`
+group.
+
+**Where the values come from.**  The DASS dumps, cross-checked against our own
+build wherever possible: 17 of the 18 Z-CONs against our whole-memory link's
+relocation list; all 42 `FIOPDSMU` values against the **three correctly linked
+copies of `FIOPDSMU` that our own build placed in other phases of the same
+tape** (only phase 8's copy is broken); `FIOG9ADB`'s `a0c6` against our link's
+symbol `FI$G9ADB` (`FIOCDATS.asm:324`, "REGISTER SAVE AREA FOR G9 MDM A/D"), and
+`FIOPDG9`'s `a09a` against our symbol `FIOCF302`.  The whole-memory link can't
+check the G9 cells: a union link can't represent overlays that share an
+address, and it resolves those cells to other modules' references.
 
 ### What it is fixing
 
@@ -712,6 +743,52 @@ what §5 stamped.
 
 ## The OPS 901/201/301 blocker -- RESOLVED 2026-09-10
 
+### The POLL FAIL after 201, 301, 801 and 901 -- also RESOLVED, 2026-09-10
+
+With the transitions completing, each new major mode drew its display and then
+the displays went to POLL FAIL.  The cause is the same build defect as the
+Z-CONs below -- **unresolved cross-phase relocations** -- in I/O code, filled by
+section 7b's `resident` and `phase8` groups.  Measured with the bus log
+(`YAGPC_BUSLOG`, `gpc-buslog.py rate`), DEU buses 6/7/8:
+
+| run | tape | after the transition |
+|---|---|---|
+| D201, K301 | v37 | every bus falls silent within seconds, no program check |
+| B201, B201b, V201, Z201 | v38+fill / v39 / v41 | polling steady to the end of the run; buses 14/16/20/22 carry MM 201's flight-critical traffic |
+| V301, Z301 | v39 / v41 | steady, ~14,000 DEU events per 20 s |
+| X901b | v40 | silent after ~285 s |
+| Y901a, Y901b | v41 | steady; **G9 MDM buses 10/11 carry traffic for the first time** |
+
+**Confirmed interactively by the user on v41** with MEDS: `OPS 201 PRO` (`UNIV
+PTG`), `OPS 301 PRO` (`DEORB MNVR COAST`, title now present), `OPS 302 PRO`
+(`DEORB MNVR EXEC`), `OPS 801 PRO` (`FCS/DED DIS C/O`), `OPS 901 PRO` and many
+GNC 9 displays, and `OPS 101 PRO` (`LAUNCH TRAJ 1`).  Some transitions show the
+GPCIPL screens while loading before the PASS display arrives; that is expected.
+
+How OPS 901 died, as it was traced (ledger #66-#72), because every step of it
+was a plausible wrong turn:
+
+1. `FIOPDSMU` in phase 8 formed an **MSC start address of 0** (`PCTRACE MSC0
+   PC<-00000`).  The MSC executed the PSA as MSC instructions, ran into
+   `VAASEQUE`'s procedure code, and stored CPU instruction words into protected
+   FCOS code -- 776 DMA store-protect violations in 8 ms, all `pe=0`.  OPS 201
+   had none.
+2. Each masked DMA store-protect violation sets the **documented CC anomaly**:
+   CC = binary 10.  No ordinary instruction produces 10, which is why `BCR 7`
+   ("M1 = 111 always branches") never tests it -- **so a `BR 7` taken right
+   after the anomaly falls through, on the real machine as on ours.**  Our
+   `exec_BCR` is correct; do not "fix" it.
+3. `FPMGMTIM`'s closing `BR 7` fell through into the next halfword, which is
+   `FPMIHIM` (the Instruction Monitor handler -- missing from the DASS CSECT
+   tables, so the ring first read as `FPMGMTIM` running on into code it does
+   not contain).  `FPMIHIM` logs through `FPMERLOG`, which calls `FPMGMTIM`,
+   whose `BR 7` fell through again: a recursion ending in an unused SVC whose
+   table entry is 0 -- also 0 on the real machine -- and a masked wait at
+   address 0.
+4. With `FIOPDSMU` fixed, `FIOG9ADB`'s `STM`/`LM` at address 0 and
+   `FIOPDG9`'s operand remained: the last three code differences in everything
+   phases 8 and 18 load.
+
 `OPS 901/201/301 PRO` complete, and the machine survives them.  It took **two**
 fixes, and either alone leaves the machine dead.
 
@@ -921,8 +998,11 @@ state — went from **8.37 %** to **0.50 %** over this work.
 
 ## What is still open
 
-* **The root link's unresolved relocations.**  Section 7b patches eighteen
-  Z-CONs onto the finished volume; the build should not need patching.  678
+* **The per-phase links' unresolved relocations.**  Section 7b patches 88
+  halfwords onto the finished volume; the build should not need patching.  It
+  is not only the root: phase 8's link leaves its references into the root's
+  `FIOCDATS` unresolved too, while three other phases' links of the *same*
+  module (`FIOPDSMU`) resolve them -- so compare how those phases are linked.  678
   relocations over 304 distinct symbols are unresolved in `PHASE02`, and the
   eighteen are only the currently-fatal subset — `#PCDHMMU` alone has 179
   unresolved references.  `phase3/PHASE02.lib` (09-05) already gets the Z-CONs
@@ -968,6 +1048,16 @@ state — went from **8.37 %** to **0.50 %** over this work.
 
 ### Closed since the last sync
 
+* **POLL FAIL after OPS 201, 301, 801 and 901** -- fixed on v41 by section 7b's
+  `resident` and `phase8` groups; confirmed headless and interactively.  See
+  "The POLL FAIL after 201, 301, 801 and 901" above.
+* **`tools/patch_unresolved.py`** supersedes `patch_root_zcons.py`; its data
+  is `tools/patch_unresolved.fills.json`.
+* **Diagnostics fixed or added:** `YAGPC_BUSLOG` now flushes every simulated
+  second (it lost its whole tail on every SIGINT-ended run, which is how every
+  healthy run ends); `YAGPC_RINGTRIG` now sees fullword stores (it was blind to
+  `STM`, `ST` and PSW saves); `YAGPC_MSCRING=<n>` keeps the last *n* MSC
+  instructions and dumps them at the first DMA store-protect violation.
 * **`OPS 901/201/301 PRO` now complete and the machine survives them** — the
   `@LH` sign-extension fix plus section 7b's Z-CON fill.  Measured against a
   v36 control in the same session; see the section above.

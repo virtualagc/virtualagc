@@ -146,6 +146,16 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             rec[8] = v & 0xff; rec[9] = (v >> 8) & 0xff;
             rec[10] = (v >> 16) & 0xff; rec[11] = (v >> 24) & 0xff;
             fwrite(rec, 1, sizeof rec, bl);
+            /* FLUSH ONCE PER SIMULATED SECOND.  The 1 MB buffer holds ~87,000
+             * events, and a run ended by SIGINT -- which is how every healthy
+             * run ends, on the harness timeout -- never wrote its last
+             * buffer.  When bus traffic COLLAPSES, which is the very thing
+             * this log exists to catch, the whole collapse fits in that
+             * buffer and vanishes: two runs measured on 2026-09-10 ended
+             * their logs at 273 s and 292 s of a 404 s run, and the missing
+             * tail was the answer.  One fflush a second costs nothing. */
+            static uint32_t blSec = 0;
+            if (t / 1000000u != blSec) { blSec = t / 1000000u; fflush(bl); }
         }
     }
     if (br->mmu && in->busID == br->mmuBus) {

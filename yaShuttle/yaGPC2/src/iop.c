@@ -8,6 +8,10 @@
 #include "cpu.h"
 #include "discretes.h"
 
+/* YAGPC_MSCRING helpers, defined beside iop_write_main16(). */
+static void msc_ring_record(IOP *iop, uint32_t pc, uint32_t hw1, uint32_t hw2);
+static void msc_ring_dump_once(IOP *iop, const char *why);
+
 static void iop_watch_store(IOP *iop, uint32_t addr, uint32_t value,
                             const char *kind);
 
@@ -1112,6 +1116,14 @@ void iop_exec_processors(IOP *iop) {
         }
     }
 
+    /* YAGPC_MSCRING=<n>: the last n MSC instructions (address and both
+     * halfwords), dumped at the FIRST DMA store-protect violation.  The
+     * CPU has YAGPC_NIARING; the MSC had nothing, so an MSC found running
+     * somewhere absurd -- executing a HAL/S module's code as MSC
+     * instructions, as OPS 901 does on v39 -- could be SEEN but not
+     * TRACED back to the branch or start that put it there. */
+    if (page == 0) msc_ring_record(iop, pc, hw1, hw2);
+
     if (getenv("YAGPC_IOPTRACE")) {
         char who[8];
         if (page == 0) snprintf(who, sizeof who, "MSC");
@@ -1255,6 +1267,42 @@ void iop_msc_repeat(IOP *iop, DInstr *v, bool met) {
  * ranges the POO quotes agree with it, 2047 counts to 33.78 ms and 262143
  * to 4.325 s. */
 #define MTO_TICK_US 16.5
+
+
+/* ---- YAGPC_MSCRING: see the call site in the fetch loop. ---- */
+static struct { uint32_t pc; uint16_t h1, h2; double t; } *mscRing = NULL;
+static unsigned mscRingCap = 0, mscRingPos = 0, mscRingN = 0;
+static int mscRingInit = 0, mscRingDumped = 0;
+static void msc_ring_record(IOP *iop, uint32_t pc, uint32_t hw1, uint32_t hw2) {
+    if (!mscRingInit) {
+        mscRingInit = 1;
+        const char *e = getenv("YAGPC_MSCRING");
+        if (e != NULL && atoi(e) > 0) {
+            mscRingCap = (unsigned)atoi(e);
+            mscRing = calloc(mscRingCap, sizeof *mscRing);
+            if (mscRing == NULL) mscRingCap = 0;
+        }
+    }
+    if (mscRingCap == 0) return;
+    mscRing[mscRingPos].pc = pc;
+    mscRing[mscRingPos].h1 = (uint16_t)hw1;
+    mscRing[mscRingPos].h2 = (uint16_t)hw2;
+    mscRing[mscRingPos].t = (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
+    mscRingPos = (mscRingPos + 1) % mscRingCap;
+    if (mscRingN < mscRingCap) mscRingN++;
+}
+static void msc_ring_dump_once(IOP *iop, const char *why) {
+    (void)iop;
+    if (mscRingCap == 0 || mscRingDumped || mscRingN == 0) return;
+    mscRingDumped = 1;
+    fprintf(stderr, "MSCRING (oldest first, %u entries) before %s:\n", mscRingN, why);
+    unsigned start = (mscRingPos + mscRingCap - mscRingN) % mscRingCap;
+    for (unsigned i = 0; i < mscRingN; i++) {
+        unsigned k = (start + i) % mscRingCap;
+        fprintf(stderr, "  %05x  %04x %04x  t=%.1f\n", (unsigned)mscRing[k].pc,
+                (unsigned)mscRing[k].h1, (unsigned)mscRing[k].h2, mscRing[k].t);
+    }
+}
 
 static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value);
 
@@ -1630,6 +1678,7 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value) {
      * note '##') WITHOUT taking an interrupt, so it is invisible to
      * YAGPC_INTTRACE while still able to break a CPU-side condition test
      * mid-loop.  YAGPC_DMAPROT is the only way to see it happen. */
+    msc_ring_dump_once(iop, "the first DMA store-protect violation");
     if (getenv("YAGPC_DMAPROT"))
         fprintf(stderr, "DMAPROT addr=%05x val=%04x pe=%d ovr=%d pc=%05x "
                         "t=%.1f\n",

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Fill the root image's UNRESOLVED cross-phase Z-CONs on a mass-memory volume.
 
+SUPERSEDED by patch_unresolved.py, whose "zcon" group is these 18 Z-CONs and
+which also fills the resident and phase-8 I/O operands that cause POLL FAIL
+after OPS 201/301/801/901.  Kept because v37 was cut with it.
+
 EXPERIMENTAL, AND A WORKAROUND FOR A BUILD DEFECT -- not a fix.  The real
 repair belongs in the root link; this exists to prove what the defect costs
 and to get a bootable volume in the meantime.  Compare tools/patch_ssl_zcon.py,
