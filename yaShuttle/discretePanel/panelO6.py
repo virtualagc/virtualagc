@@ -7,8 +7,17 @@ of the commander's seat.  This program draws that GPC half of the panel
 (the MDM power switches on the left of the physical panel are not yet
 included) and lets the controls be operated with the mouse.
 
-Control changes are printed to stdout.  Discrete signalling to yaGPC2 is
-intentionally not wired yet.
+It is also the crew panel on the GPC discrete bus, replacing
+discretePanel.py: the same UDP multicast set/reset protocol (discretes.py),
+the same 250 ms republishing, the same --script language.  One GPC is
+wired -- GPC 1, or the one --gpc-id names -- and its column drives that
+GPC's discrete inputs together with the shared IPL SOURCE, BFC CRT, BFC
+DISENGAGE and RHC BFC ENGAGE controls.  The other columns are drawn and
+operable but publish nothing.  See "GPC discrete inputs" below for the
+bit-by-bit mapping and where each part of it comes from.
+
+Control changes, and the discrete words they produce, are printed to
+stdout.
 
 The figure this layout follows is "GENERAL PURPOSE COMPUTER Hardware
 Controls" in the Shuttle Crew Operations Manual (SCOM, USA007587 Rev A,
@@ -17,11 +26,12 @@ printed page 2.6-4).  Two rows of that figure are easy to misread:
   * The second row is not a set of slide switches.  Those hatched windows
     are the OUTPUT talkbacks: gray if that GPC may transmit on the
     flight-critical buses, barberpole if it may not.  They are driven by
-    GPC output discretes, not by a crew switch of their own.  Until a GPC
-    is attached they are approximated from POWER, OUTPUT and MODE.
+    GPC output discretes, not by a crew switch of their own.  Here they
+    are approximated as gray when the GPC is powered, in RUN, and not held
+    off the buses by I/O TERM B (below), so a BFS engage flips them.
   * The fifth row is the MODE talkback (RUN, IPL, or barberpole), not a
     control.  It shows RUN while the MODE switch is in RUN, and IPL while
-    the IPL pushbutton is held.
+    the IPL pushbutton is held in HALT.
 
 The OUTPUT switch itself is the third-row three-position toggle
 (BACKUP / NORMAL / TERMINATE).  The MODE switch is the bottom-row
@@ -33,26 +43,29 @@ and SELECT 1+2 / 2+3 / 3+1) and the BFC DISENGAGE block from panel F6
 (a horizontal two-position toggle; RIGHT disengages the BFS).  Those
 follow the highlighted insets on SCOM printed page 2.6-25.
 
-Below the IPL SOURCE tab, in the same column and at F6's size, is an
-ACTIVITY pane with MM1 and MM2 lamps: pane grey when unpowered, green
-for READY, red for BUSY.  They are indicators, not controls; set them
-with PanelO6.set_activity().  Nothing drives them yet.
-
-This is the paddle-switch variant of panelO6.py: same layout and
-behaviour, but the two- and three-position switches are drawn as
-bat-handle paddle toggles rather than sliding capsules.
+Below the IPL SOURCE tab, in the same column, are two panes that are not
+on any one crew panel.  RHC BFC ENGAGE holds the BFS ENGAGE pushbuttons
+from the tops of the commander's and pilot's rotational hand controllers.
+ACTIVITY has MM1 and MM2 lamps showing the mass memories' own READY
+lines as heard on the bus: pane grey (OFF) until a unit's READY is first
+heard, then green READY or red BUSY (READY dropped) for good.
 
 Usage:
-    python3 panelO6-paddle.py
-    python3 panelO6-paddle.py --size 512
-    python3 panelO6-paddle.py --geometry 948x1250+80+20
+    python3 panelO6.py
+    python3 panelO6.py --size 512
+    python3 panelO6.py --geometry 948x1250+80+20
+    python3 panelO6.py --gpc-id 2 --port-base 7900
+    python3 panelO6.py --script ipl.script --quit-after 60000
 """
 
 import argparse
 import os
 import subprocess
+import threading
 import tkinter as tk
 import tkinter.font as tkfont
+
+import discretes as D
 
 GPCS = ("GPC1", "GPC2", "GPC3", "GPC4", "GPC5")
 N_GPC = 5
@@ -66,6 +79,7 @@ BFC_SELECT_POS = ("1+2", "2+3", "3+1")          # up, mid, down
 BFC_DISENGAGE_POS = ("LEFT", "RIGHT")           # left, right; unlabeled
 MMUS = ("MM1", "MM2")                           # ACTIVITY lamps, left to right
 ACTIVITY_STATES = ("OFF", "READY", "BUSY")      # unpowered, green, red
+RHCS = ("CDR", "PLT")                           # BFS ENGAGE pushbuttons
 
 # Typical pre-flight: GPC 5 is the BFS computer, OUTPUT in BACKUP.
 DEFAULT_POWER = ["ON"] * N_GPC
@@ -76,6 +90,70 @@ DEFAULT_BFC_DISPLAY = "OFF"
 DEFAULT_BFC_SELECT = "1+2"
 DEFAULT_BFC_DISENGAGE = "LEFT"     # RIGHT disengages the BFS
 DEFAULT_ACTIVITY = ["OFF", "OFF"]
+DEFAULT_GPC_ID = 1
+
+# ---- GPC discrete inputs --------------------------------------------------
+#
+# The bus, wire format and bit map are discretePanel.py's and discretes.py's,
+# which carry the reasoning for each field; this is where the controls on
+# this panel land in them.  IBM bit numbering, from the most significant end
+# of each 32-bit register.  The authority for which crew control drives
+# which line is the BFS's own table of them, BFS.SRC/MLIB80/ENTRYS.asm
+# ("DIA BIT 0=HALT CMD (FROM PANEL)" ... "13=I/O TERM B (FROM PANEL OR
+# CNTLR)"), and for the BFC logic, DPS Familiarization Workbook (USA005351
+# Rev C) sections 1.1.2, 8.2 and 13.2.
+#
+# Only the wired GPC's column is published.  The bus carries no GPC address,
+# so every GPC listening on it reads the same lines; wiring a second one
+# needs a protocol change, not just a second column.
+
+# Register A.  The MODE switch is one field of three exclusive bits.  IPL is
+# not a fourth position of it but a pushbutton that counts only in HALT.
+MODE_BITS = {"HALT": 0, "STBY": 1, "RUN": 2}
+IPL_BIT = 3
+IPL_SOURCE_BITS = {"MMU 1": 4, "MMU 2": 5}       # OFF drives neither
+MM_READY_BITS = (6, 7)                           # from the MMUs; observed
+# I/O TERM A inhibits MIA channels 10-13 (PL1, PL2, LB1, LB2).  No crew
+# control drives it: ENTRYS.asm has "12=I/O TERM A (FROM HDWR=0)" and
+# "IO TERM A HARDWARE CONTROL (CLAMPED TO ZERO)", and PASS's self-test
+# (MLIB80/STM0.asm) reports ERROR 129, "IOP TERMINATE SWITCH "A" IS ON", if
+# it ever reads 1.  Held at 0; a --script can still set it.
+TERM_A_BIT = 12
+# I/O TERM B inhibits the flight-critical buses, channels 14-17 and 20-23.
+# It is the BFC module's output, from this GPC's OUTPUT switch and the
+# engage latches -- see PanelO6.term_b().
+TERM_B_BIT = 13
+
+# Register B.
+GPC_ID_BITS = (0, 1, 2)                          # this GPC's ID, 1-5
+BFS_ENGAGE_BITS = (3, 4, 5)                      # one field, all or none
+# BFC CRT SELECT, a two-bit CRT number with bit 6 the 2s place.  Workbook
+# 8.2: with DISPLAY OFF "both discretes are off"; otherwise the BFS takes
+# "the CRT specified by the first number of each of the switch positions".
+CRT_SELECT_BITS = (6, 7)
+CRT_SELECT_VALUE = {"1+2": 1, "2+3": 2, "3+1": 3}
+
+
+def _bits(bits):
+    m = 0
+    for b in bits:
+        m |= D.bit_mask(b)
+    return m
+
+
+def _field(bits, value):
+    """Mask for `value` in a field whose first bit is its most significant."""
+    m = 0
+    for i, b in enumerate(bits):
+        if value & (1 << (len(bits) - 1 - i)):
+            m |= D.bit_mask(b)
+    return m
+
+
+# Every bit this panel drives, re-asserted on each republish, 1 or 0.
+OWNED_A = _bits(list(MODE_BITS.values()) + [IPL_BIT] +
+                list(IPL_SOURCE_BITS.values()) + [TERM_A_BIT, TERM_B_BIT])
+OWNED_B = _bits(GPC_ID_BITS + BFS_ENGAGE_BITS + CRT_SELECT_BITS)
 
 # Aircraft-panel greys.  Overhead panels are light gull gray with black
 # engraved legends, not the dark of a CRT bezel.
@@ -98,8 +176,7 @@ C_TB_LEGEND = "#f2f0e6"
 C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
 # ACTIVITY lamps.  Unpowered is the pane grey, so a dark lamp is just its rim.
-C_LAMP = {"OFF": C_PANEL, "READY": "#1fbf2a", "BUSY": "#e02418"}
-# Tk reports no cap height, and its "ascent" is not one (on X11 with
+C_LAMP = {"OFF": C_PANEL, "READY": "#1fbf2a", "BUSY": "#e02418"}# Tk reports no cap height, and its "ascent" is not one (on X11 with
 # Nimbus Sans it nearly equals the caps; with Arial it is 1/4 taller).
 # Advance widths are reliable, and the Helvetica metric family (Helvetica,
 # Arial, Nimbus Sans, Liberation Sans) shares them: every digit is 0.556
@@ -111,6 +188,9 @@ HELV_CAP_EM = 0.72
 MARGIN = 28
 PANE_GAP = 16          # air between O6 and the C3/F6 stack
 C3_W = 236
+# ENGAGE pushbuttons.  Smaller than IPL's 50: at 50 the pane leaves only
+# ~5 px under the IPL SOURCE tab at some --size values; at 40, 15 or more.
+RHC_BTN = 40
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
 REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + MARGIN   # 948
 REF_H = 1250
@@ -138,8 +218,13 @@ def _active_window():
     return m.group(1) if m and int(m.group(1), 16) else None
 
 
-def _dont_steal_focus(root):
-    """Map without taking the keyboard.  Best-effort; see discretePanel.py."""
+def _dont_steal_focus(root, mapWindow=True):
+    """Map without taking the keyboard.  Best-effort; see discretePanel.py.
+
+    mapWindow=False never maps the window at all, which is what a scripted
+    run wants: nobody is looking, and a window that is never mapped cannot
+    take the keyboard even for the 400 ms the hand-back below needs.
+    """
 
     def refuse(w):
         try:
@@ -151,6 +236,9 @@ def _dont_steal_focus(root):
 
     refuse(root)
     root.bind("<Key>", lambda _e: "break")
+    if not mapWindow:
+        root.withdraw()
+        return
     previous = _active_window()
     root.withdraw()
     root.update_idletasks()
@@ -188,9 +276,9 @@ def scaled_wh(w, h, size):
 
 
 class PanelO6:
-    def __init__(self, root, size=FULL_SIZE):
+    def __init__(self, root, size=FULL_SIZE, gpc_id=DEFAULT_GPC_ID):
         self.root = root
-        root.title("Panels O6, C3, F6  —  GPC / BFC  (paddle)")
+        root.title("Panels O6, C3, F6  —  GPC / BFC")
         root.configure(bg=C_WINDOW)
         mw, mh = scaled_wh(640, 700, size)
         root.minsize(mw, mh)
@@ -204,7 +292,11 @@ class PanelO6:
         self.bfc_select = DEFAULT_BFC_SELECT
         self.bfc_disengage = DEFAULT_BFC_DISENGAGE
         self.activity = list(DEFAULT_ACTIVITY)
-        self._held_ipl = None
+        self.rhc = [False] * len(RHCS)       # ENGAGE pushbuttons, held down
+        self.latch = [False] * N_GPC         # each GPC's BFC engage latches
+        self.term_a = False                  # hardware 0; --script only
+        self.wired = gpc_id - 1              # the column that is published
+        self._held = None                    # (kind, index) of a held button
 
         cw, ch = scaled_wh(REF_W, REF_H, size)
         self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
@@ -225,17 +317,80 @@ class PanelO6:
 
         self._dump_state("startup")
 
-    # ---- derived talkbacks (local stand-in until yaGPC2 drives them) ----
+        # The discrete bus.  Published on every change and re-asserted every
+        # REPUBLISH_MS, because a discrete is a level and the bus is UDP with
+        # no replay for a late joiner -- see discretes.py.
+        self.sock = D.sender()
+        self._published = None
+        self._send_failed = False
+        log("publishing %s discretes on %s:%d every %d ms"
+            % (GPCS[self.wired], D.GROUP, D.PORT, D.REPUBLISH_MS))
+        # Mass memory READY, heard by a listener thread and picked up on the
+        # Tk side by _tick(): the last level per unit, or None if never.
+        self._rx_lock = threading.Lock()
+        self._mm_heard = [None] * len(MM_READY_BITS)
+        threading.Thread(target=self._listen, daemon=True).start()
+        self._tick()
+
+    # ---- the BFC modules --------------------------------------------------
+    #
+    # Workbook 13.2.1.  The OUTPUT switches set two inputs of each GPC's BFC
+    # module: BFC GPC SELECT and BFC SELECT OFF.  An ENGAGE pushbutton sets
+    # the module's latches unless SELECT OFF or the F6 DISENGAGE switch is
+    # clearing them; the latches are the GPC's three ENGAGE discretes, and
+    # I/O TERM B is the latches EXCLUSIVE-OR BFC GPC SELECT.  So before an
+    # engage a PASS GPC in NORMAL may transmit and the BFS in BACKUP may not,
+    # after one it is the other way round, and a GPC in TERMINATE never may.
+    # The workbook's three contacts per button and "3 of 3" voting guard
+    # against failed electronics, which are not simulated, so one latch per
+    # module stands for all six.
+
+    def _backup_gpc(self):
+        """Only the highest-numbered GPC in BACKUP is the BFS GPC."""
+        for i in reversed(range(N_GPC)):
+            if self.output[i] == "BACKUP":
+                return i
+        return None
+
+    def _bfc_gpc_select(self, i):
+        return self.output[i] == "TERMINATE" or i == self._backup_gpc()
+
+    def _bfc_select_off(self, i):
+        # "whenever all GPCs are in NORMAL or TERMINATE", and for a GPC in
+        # TERMINATE -- so there is no engage with no BFS to engage.
+        return self.output[i] == "TERMINATE" or self._backup_gpc() is None
+
+    def _update_latches(self):
+        before = list(self.latch)
+        disengage = self.bfc_disengage == "RIGHT"
+        pressed = any(self.rhc)
+        for i in range(N_GPC):
+            if disengage or self._bfc_select_off(i):
+                self.latch[i] = False
+            elif pressed:
+                self.latch[i] = True
+        if self.latch != before:
+            on = [GPCS[i] for i in range(N_GPC) if self.latch[i]]
+            log("BFC ENGAGE latches  %s" % (" ".join(on) if on else "clear"))
+
+    def term_b(self, i):
+        return self.latch[i] != self._bfc_gpc_select(i)
+
+    # ---- talkbacks (local stand-in until yaGPC2 drives them) -------------
 
     def output_tb(self, i):
         if (self.power[i] == "ON"
-                and self.output[i] == "NORMAL"
-                and self.mode[i] == "RUN"):
+                and self.mode[i] == "RUN"
+                and not self.term_b(i)):
             return "GRAY"
         return "BP"
 
+    def _ipl_live(self, i):
+        """The IPL pushbutton does something only in HALT."""
+        return self.ipl[i] and self.mode[i] == "HALT"
+
     def mode_tb(self, i):
-        if self.ipl[i]:
+        if self._ipl_live(i):
             return "IPL"
         if self.mode[i] == "RUN":
             return "RUN"
@@ -245,16 +400,117 @@ class PanelO6:
         log(why)
         for i, name in enumerate(GPCS):
             log("  %s  POWER=%-3s  OUTPUT=%-9s  MODE=%-4s  IPL=%s  "
-                "OUT-tb=%s  MODE-tb=%s"
+                "OUT-tb=%s  MODE-tb=%s%s"
                 % (name, self.power[i], self.output[i], self.mode[i],
                    "ON" if self.ipl[i] else "OFF",
-                   self.output_tb(i), self.mode_tb(i)))
+                   self.output_tb(i), self.mode_tb(i),
+                   "  (wired)" if i == self.wired else ""))
         log("  IPL SOURCE=%s" % self.ipl_source)
         log("  BFC CRT DISPLAY=%s  SELECT=%s" %
             (self.bfc_display, self.bfc_select))
         log("  BFC DISENGAGE=%s" % self.bfc_disengage)
+        log("  RHC BFC ENGAGE  %s" % "  ".join(
+            "%s=%s" % (r, "ON" if h else "OFF") for r, h in zip(RHCS, self.rhc)))
         log("  ACTIVITY  %s" % "  ".join(
             "%s=%s" % (m, a) for m, a in zip(MMUS, self.activity)))
+
+    # ---- the discrete bus -------------------------------------------------
+
+    def discretes(self):
+        """Registers A and B as the wired GPC should read them.
+
+        Only the OWNED_A / OWNED_B bits mean anything; the rest belong to
+        other devices.
+        """
+        w = self.wired
+        a = D.bit_mask(MODE_BITS[self.mode[w]])
+        if self._ipl_live(w):
+            a |= D.bit_mask(IPL_BIT)
+        if self.ipl_source in IPL_SOURCE_BITS:
+            a |= D.bit_mask(IPL_SOURCE_BITS[self.ipl_source])
+        if self.term_a:
+            a |= D.bit_mask(TERM_A_BIT)
+        if self.term_b(w):
+            a |= D.bit_mask(TERM_B_BIT)
+        b = _field(GPC_ID_BITS, w + 1)
+        if self.latch[w]:
+            b |= _field(BFS_ENGAGE_BITS, 0b111)
+        b |= _field(CRT_SELECT_BITS, self.crt_value())
+        return a, b
+
+    def crt_value(self):
+        if self.bfc_display != "ON":
+            return 0
+        return CRT_SELECT_VALUE[self.bfc_select]
+
+    def _publish(self):
+        """Assert every owned bit: one RESET, then one SET, per register.
+
+        Break before make, as discretePanel.py's _sendField: a field changing
+        value passes through "no bit set", which the hardware does too, and
+        never through a value it did not hold.
+        """
+        a, b = self.discretes()
+        try:
+            for reg, owned, value in ((D.REG_A, OWNED_A, a),
+                                      (D.REG_B, OWNED_B, b)):
+                if owned & ~value:
+                    D.publish(self.sock, D.RESET, reg, owned & ~value)
+                if owned & value:
+                    D.publish(self.sock, D.SET, reg, owned & value)
+            self._send_failed = False
+        except OSError as e:
+            if not self._send_failed:
+                log("cannot publish on the discrete bus: %s" % e)
+            self._send_failed = True
+        if (a, b) != self._published:
+            self._published = (a, b)
+            log("%s discretes  A=%08x  B=%08x"
+                % (GPCS[self.wired], a & OWNED_A, b & OWNED_B))
+
+    def _listen(self):
+        """Thread: note every MM READY level anybody publishes."""
+        try:
+            sock = D.receiver()
+        except OSError as e:
+            log("cannot listen on the discrete bus: %s" % e)
+            return
+        while True:
+            try:
+                data, _ = sock.recvfrom(2048)
+            except OSError:
+                return
+            msg = D.decode(data)
+            if msg is None or msg["reg"] != D.REG_A:
+                continue
+            with self._rx_lock:
+                for u, bit in enumerate(MM_READY_BITS):
+                    if msg["mask"] & D.bit_mask(bit):
+                        self._mm_heard[u] = msg["op"] == D.SET
+
+    def _tick(self):
+        """Every REPUBLISH_MS: re-assert our bits, refresh the lamps.
+
+        A lamp is OFF until its unit's READY is first heard, and READY or
+        BUSY from then on -- a unit that goes quiet keeps its last state.
+        """
+        with self._rx_lock:
+            heard = list(self._mm_heard)
+        for u, h in enumerate(heard):
+            if h is None:
+                state = "OFF"
+            else:
+                state = "READY" if h else "BUSY"
+            if state != self.activity[u]:
+                self.set_activity(u, state)
+        self._publish()
+        self.root.after(D.REPUBLISH_MS, self._tick)
+
+    def _changed(self):
+        """After any control moves: BFC logic, bus, picture."""
+        self._update_latches()
+        self._publish()
+        self.redraw()
 
     def _announce(self, what, old, new):
         if old == new:
@@ -548,10 +804,14 @@ class PanelO6:
         f6_y1 = f6_y0 + 4 * pad + 4 * th10 + sw_h
         self._draw_c3(c3_x0, c3_y0, c3_x1, c3_y1)
         self._draw_f6(f6_x0, f6_y0, f6_x1, f6_y1)
-        # ACTIVITY is F6's size, in the same column, with its bottom on
-        # O6's bottom edge -- below the IPL SOURCE tab.
+        # Below the IPL SOURCE tab, in the same column: ACTIVITY with its
+        # bottom on O6's bottom edge, and RHC BFC ENGAGE directly above it.
+        # Heights follow _draw_activity / _draw_rhc.
         act_y1 = my1
-        act_y0 = act_y1 - (f6_y1 - f6_y0)
+        act_y0 = act_y1 - (3 * pad + 4 * th10)
+        rhc_y1 = act_y0 - PANE_GAP
+        rhc_y0 = rhc_y1 - (5 * pad + 6 * th10 + RHC_BTN)
+        self._draw_rhc(f6_x0, rhc_y0, f6_x1, rhc_y1)
         self._draw_activity(f6_x0, act_y0, f6_x1, act_y1)
 
     def _gpc_numbers(self, y):
@@ -740,6 +1000,29 @@ class PanelO6:
         self._guarded_toggle_h(sx1, sy1, sx2, sy2, pos, npos=2)
         self._hit("bfc_disengage", None, sx1, sy1, sx2, sy2)
 
+    def _draw_rhc(self, x0, y0, x1, y1):
+        """BFS ENGAGE pushbuttons from the tops of the two RHCs."""
+        self._rect_panel(x0, y0, x1, y1)
+        pad = 10
+        th10 = self._th(10)
+        cx = (x0 + x1) / 2.0
+        # Two lines, like BFC / DISENGAGE: one is wider than the pane.
+        y = y0 + pad + th10
+        self._text(cx, y, "RHC", size=10)
+        y += th10 + pad + th10
+        self._text(cx, y, "BFC ENGAGE", size=10)
+        y += th10 + pad + th10
+        quarter = (x1 - x0) / 4.0
+        top = y + th10 + pad
+        for i, (name, down) in enumerate(zip(RHCS, self.rhc)):
+            bx = cx + (2 * i - 1) * quarter
+            self._text(bx, y, name, size=10)
+            bx1, bx2 = bx - RHC_BTN / 2.0, bx + RHC_BTN / 2.0
+            # IPL's grey, not the vehicle's red: the ACTIVITY lamps are the
+            # only colour on the panel, so they are what the eye goes to.
+            self._pushbutton(bx1, top, bx2, top + RHC_BTN, "", down=down)
+            self._hit("rhc", i, bx1, top, bx2, top + RHC_BTN)
+
     def _draw_activity(self, x0, y0, x1, y1):
         """MM1 / MM2 ACTIVITY lamps, each captioned on its left."""
         self._rect_panel(x0, y0, x1, y1)
@@ -748,8 +1031,8 @@ class PanelO6:
         cx = (x0 + x1) / 2.0
         y = y0 + pad + th10
         self._text(cx, y, "ACTIVITY", size=10)
-        # Lamps centred in the space below the title.
-        row_y = (y + th10 + pad + y1 - pad) / 2.0
+        # One caption line below the title, as close as the other titles.
+        row_y = y + th10 + pad + th10
         quarter = (x1 - x0) / 4.0
         for i, (name, state) in enumerate(zip(MMUS, self.activity)):
             self._lamp(cx + (2 * i - 1) * quarter, row_y, name, state)
@@ -941,6 +1224,8 @@ class PanelO6:
         iy1, iy2 = y1 + m + dx, y2 - m + dx
         self._rect(x1 + m + dx, iy1, x2 - m + dx, iy2,
                    fill=fill, outline=C_PADDLE_LO, width=1)
+        if not label:
+            return
         # Anchor=c uses the full em box, so digits sit high.  Shift down by
         # half the descent to centre the ink in the inner face.
         f = self._tkfont(14)
@@ -991,7 +1276,10 @@ class PanelO6:
             self._set_ipl_source(IPL_SOURCE_POS[z])
         elif kind == "ipl":
             self._set_ipl(index, True)
-            self._held_ipl = index
+            self._held = (kind, index)
+        elif kind == "rhc":
+            self._set_rhc(index, True)
+            self._held = (kind, index)
         elif kind == "bfc_display":
             z = self._zone(event.y, y1, y2, 2)
             self._set_bfc_display(BFC_DISPLAY_POS[z])
@@ -1002,64 +1290,106 @@ class PanelO6:
             z = self._zone(event.x, x1, x2, 2)
             self._set_bfc_disengage(BFC_DISENGAGE_POS[z])
 
+
     def _on_release(self, event):
-        if self._held_ipl is not None:
-            self._set_ipl(self._held_ipl, False)
-            self._held_ipl = None
+        if self._held is None:
+            return
+        kind, index = self._held
+        self._held = None
+        if kind == "ipl":
+            self._set_ipl(index, False)
+        elif kind == "rhc":
+            self._set_rhc(index, False)
 
     def _set_power(self, i, value):
         old = self.power[i]
         self.power[i] = value
         self._announce("%s POWER" % GPCS[i], old, value)
-        self.redraw()
+        self._changed()
 
     def _set_output(self, i, value):
         old = self.output[i]
         self.output[i] = value
         self._announce("%s OUTPUT" % GPCS[i], old, value)
-        self.redraw()
+        self._changed()
 
     def _set_mode(self, i, value):
         old = self.mode[i]
         self.mode[i] = value
         self._announce("%s MODE" % GPCS[i], old, value)
-        self.redraw()
+        self._changed()
 
     def _set_ipl(self, i, down):
         old = "ON" if self.ipl[i] else "OFF"
         new = "ON" if down else "OFF"
         self.ipl[i] = down
+        if down and self.mode[i] != "HALT":
+            new += " (ignored: not in HALT)"
         self._announce("%s IPL" % GPCS[i], old, new)
-        self.redraw()
+        self._changed()
 
     def _set_ipl_source(self, value):
         old = self.ipl_source
         self.ipl_source = value
         self._announce("IPL SOURCE", old, value)
-        self.redraw()
+        self._changed()
 
     def _set_bfc_display(self, value):
         old = self.bfc_display
         self.bfc_display = value
         self._announce("BFC CRT DISPLAY", old, value)
-        self.redraw()
+        self._changed()
 
     def _set_bfc_select(self, value):
         old = self.bfc_select
         self.bfc_select = value
         self._announce("BFC CRT SELECT", old, value)
-        self.redraw()
+        self._changed()
 
     def _set_bfc_disengage(self, value):
         old = self.bfc_disengage
         self.bfc_disengage = value
         self._announce("BFC DISENGAGE", old, value)
-        self.redraw()
+        self._changed()
+
+    def _set_rhc(self, i, down):
+        old = "ON" if self.rhc[i] else "OFF"
+        self.rhc[i] = down
+        self._announce("%s RHC BFC ENGAGE" % RHCS[i], old,
+                       "ON" if down else "OFF")
+        self._changed()
+
+    def set_crt(self, value):
+        """BFC CRT DISPLAY and SELECT from the field value: 0 is DISPLAY OFF."""
+        if value == 0:
+            self._set_bfc_display("OFF")
+            return
+        for pos, v in CRT_SELECT_VALUE.items():
+            if v == value:
+                self._set_bfc_select(pos)
+                self._set_bfc_display("ON")
+                return
+        raise ValueError("BFC CRT SELECT is 0-3, not %r" % value)
+
+    def set_gpc_id(self, gpc_id):
+        """Wire a different column: its switches, and its ID, are published."""
+        if not 1 <= gpc_id <= N_GPC:
+            raise ValueError("GPC ID is 1-%d, not %r" % (N_GPC, gpc_id))
+        self._announce("wired GPC", GPCS[self.wired], GPCS[gpc_id - 1])
+        self.wired = gpc_id - 1
+        self._changed()
+
+    def set_term_a(self, on):
+        self._announce("I/O TERM A", "ON" if self.term_a else "OFF",
+                       "ON" if on else "OFF")
+        self.term_a = on
+        self._changed()
 
     def set_activity(self, i, state):
         """Light ACTIVITY lamp i (0 = MM1): OFF, READY (green), BUSY (red).
 
-        An indicator, not a control; nothing on the panel calls this.
+        An indicator, not a control: _tick() calls this from what it hears
+        of the mass memories' READY lines.
         """
         if state not in ACTIVITY_STATES:
             raise ValueError("ACTIVITY state must be one of %s, not %r"
@@ -1070,31 +1400,164 @@ class PanelO6:
         self.redraw()
 
 
+# ---- scripted playback ----------------------------------------------------
+#
+# discretePanel.py's language, so a rig that drives that panel can drive this
+# one; see its "scripted playback" for why a crew sequence has to be a timed
+# script rather than a static override.  Each line is `<milliseconds>
+# <command>`, times from startup; blank lines and `#` comments are ignored.
+# The commands move the controls, so the window, the log and the bus agree:
+#
+#     mode HALT|STANDBY|STBY|RUN   the wired GPC's MODE switch
+#     ipl                          its IPL pushbutton, held IPL_HOLD_MS
+#     source MM1|MM2|OFF           IPL SOURCE
+#     crt 0|1|2|3                  BFC CRT: 0 is DISPLAY OFF, else DISPLAY ON
+#                                  and SELECT 1+2 / 2+3 / 3+1
+#     bfsengage on|off             on: CDR ENGAGE pressed and released; off:
+#                                  BFC DISENGAGE to RIGHT and back.  An engage
+#                                  latches only if some GPC is in BACKUP.
+#     gpcid N                      wire GPC N's column instead
+#     bit A|B N on|off             one bit.  A12 is I/O TERM A; A13 (I/O TERM
+#                                  B) puts OUTPUT in TERMINATE or NORMAL; B3-5
+#                                  is bfsengage; B6-7 fold into crt.  Any other
+#                                  bit is sent once, raw, and the next
+#                                  republish undoes it if this panel owns it.
+SCRIPT_HELP = "timed discrete sequence: '<ms> <command>' per line"
+IPL_HOLD_MS = 250
+
+
+def _on(word):
+    return word.lower() in ("on", "1", "set", "true")
+
+
+def _parse_script(text):
+    out = []
+    for n, line in enumerate(text.splitlines(), 1):
+        line = line.split("#", 1)[0].strip()
+        if not line:
+            continue
+        parts = line.split(None, 1)
+        if len(parts) != 2 or not parts[0].isdigit():
+            raise SystemExit("panelO6: script line %d: expected "
+                             "'<ms> <command>', got %r" % (n, line))
+        out.append((int(parts[0]), parts[1].strip()))
+    return sorted(out, key=lambda e: e[0])
+
+
+def _run_script(panel, entries, quit_after_ms=None):
+    root = panel.root
+
+    def do(cmd):
+        verb, _, arg = cmd.partition(" ")
+        arg = arg.strip()
+        log(cmd)
+        w = panel.wired
+        if verb == "mode":
+            name = {"STANDBY": "STBY"}.get(arg.upper(), arg.upper())
+            if name not in MODE_POS:
+                raise SystemExit("panelO6: unknown mode %r" % arg)
+            panel._set_mode(w, name)
+        elif verb == "ipl":
+            panel._set_ipl(w, True)
+            root.after(IPL_HOLD_MS, lambda: panel._set_ipl(w, False))
+        elif verb == "source":
+            name = {"MM1": "MMU 1", "MM2": "MMU 2",
+                    "OFF": "OFF"}.get(arg.upper())
+            if name is None:
+                raise SystemExit("panelO6: unknown source %r" % arg)
+            panel._set_ipl_source(name)
+        elif verb == "crt":
+            panel.set_crt(int(arg))
+        elif verb == "bfsengage":
+            bfsengage(_on(arg))
+        elif verb == "gpcid":
+            panel.set_gpc_id(int(arg))
+        elif verb == "bit":
+            reg, num, val = arg.split()
+            reg = D.REG_A if reg.upper() == "A" else D.REG_B
+            num, on = int(num), _on(val)
+            if reg == D.REG_A and num == TERM_A_BIT:
+                panel.set_term_a(on)
+            elif reg == D.REG_A and num == TERM_B_BIT:
+                panel._set_output(w, "TERMINATE" if on else "NORMAL")
+            elif reg == D.REG_B and num in BFS_ENGAGE_BITS:
+                bfsengage(on)
+            elif reg == D.REG_B and num in CRT_SELECT_BITS:
+                place = 1 << (len(CRT_SELECT_BITS) - 1
+                              - CRT_SELECT_BITS.index(num))
+                v = panel.crt_value()
+                panel.set_crt(v | place if on else v & ~place)
+            else:
+                D.publish(panel.sock, D.SET if on else D.RESET, reg,
+                          D.bit_mask(num))
+        else:
+            raise SystemExit("panelO6: unknown command %r" % verb)
+
+    def bfsengage(on):
+        if on:
+            panel._set_rhc(0, True)
+            root.after(IPL_HOLD_MS, lambda: panel._set_rhc(0, False))
+        else:
+            panel._set_bfc_disengage("RIGHT")
+            root.after(IPL_HOLD_MS,
+                       lambda: panel._set_bfc_disengage("LEFT"))
+
+    for ms, cmd in entries:
+        root.after(ms, lambda c=cmd: do(c))
+    if quit_after_ms is not None:
+        root.after(quit_after_ms, root.quit)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        description="Space Shuttle panels O6, C3, F6 (paddle-switch variant)")
+        description="Space Shuttle panels O6, C3, F6: the GPC crew panel "
+                    "on the discrete bus")
     ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
                     help="Scale: 1024 is full size (default), 512 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
-                    help="Tk geometry, e.g. 948x1250+80+20 (overrides --size)")
+                    help="Tk geometry, e.g. 948x1250+80+20 (overrides --size; "
+                         "also NSTS_O6_GEOMETRY)")
+    ap.add_argument("--gpc-id", type=int, metavar="N", default=DEFAULT_GPC_ID,
+                    help="the GPC whose column is wired to the discrete bus, "
+                         "and the ID it reads (discrete B bits 0-2); default "
+                         "1.  NOT yaGPC2's --gpc-id, which only names its "
+                         "intercomputer port")
+    ap.add_argument("--port-base", type=int, metavar="N", default=None,
+                    help="base of the UDP port range the buses use: the "
+                         "discrete bus is base+80 (default 6900, matching "
+                         "busConfig).  The same option as on yaGPC2 and MEDS. "
+                         "NSTS_BUS_PORT_BASE sets it too.")
+    ap.add_argument("--script", metavar="FILE", help=SCRIPT_HELP)
+    ap.add_argument("--quit-after", type=int, metavar="MS",
+                    help="exit this many ms after startup (for scripted runs)")
     args = ap.parse_args(argv)
     if args.size <= 0:
-        raise SystemExit("panelO6-paddle: --size must be a positive integer")
+        raise SystemExit("panelO6: --size must be a positive integer")
+    if not 1 <= args.gpc_id <= N_GPC:
+        raise SystemExit("panelO6: --gpc-id must be 1..%d" % N_GPC)
+    # Before any socket is opened.
+    if args.port_base is not None:
+        D.set_port_base(args.port_base)
 
     root = tk.Tk()
-    panel = PanelO6(root, size=args.size)
+    panel = PanelO6(root, size=args.size, gpc_id=args.gpc_id)
     geom = args.geometry or os.environ.get("NSTS_O6_GEOMETRY")
     if geom:
         try:
             root.geometry(geom)
         except tk.TclError as e:
-            raise SystemExit("panelO6-paddle: bad --geometry %r: %s" % (geom, e))
+            raise SystemExit("panelO6: bad --geometry %r: %s" % (geom, e))
     else:
         w, h = scaled_wh(REF_W, REF_H, args.size)
         root.geometry("%dx%d" % (w, h))
-    _dont_steal_focus(root)
-    # Keep a reference so the panel is not collected; it owns no extra
-    # threads, so Tk's mainloop is the whole process.
+    # A scripted run has nobody watching it, so it gets no window.
+    _dont_steal_focus(root, mapWindow=not args.script)
+    if args.script:
+        with open(args.script) as f:
+            _run_script(panel, _parse_script(f.read()), args.quit_after)
+    elif args.quit_after is not None:
+        root.after(args.quit_after, root.quit)
+    # Keep a reference so the panel is not collected.
     root._panel = panel
     root.mainloop()
 
