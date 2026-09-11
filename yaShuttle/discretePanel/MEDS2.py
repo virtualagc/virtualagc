@@ -9230,9 +9230,9 @@ class MDU(LRU):
         # Mirror DEUUnit's default so the title reports the real position
         # before the switch has ever been moved, not a guess.
         self.majorFunc = int(envnum('NSTS_MAJOR_FUNC', 0)) & 3
-        # The IDP POWER switch as the pane shows it.  The IDP starts powered,
-        # as it always has; only the switch turns it off.
-        self.idpPower = True
+        # The IDP POWER switch as the pane shows it -- the same default the
+        # IDP itself starts with (see MedsRunner.startLRUsIn).
+        self.idpPower = bool(CONFIG.get('powerOn', True))
         self.pane = None
         self.config = config
         self.priPortIDP = priPortIDP
@@ -9702,7 +9702,8 @@ class IDP(LRU):
         self.running = False
         self._hbTimer = None
         self.bgDFB = None
-        self.powered = True      # the IDP POWER switch; see setPower
+        # The IDP POWER switch; see setPower and MedsRunner.startLRUsIn.
+        self.powered = bool(CONFIG.get('powerOn', True))
 
         deulog = env('NSTS_DEU_LOG')
 
@@ -9899,6 +9900,14 @@ class IDP(LRU):
         self.loadFCWs(wordsFromBytes(self.bgDFB))
 
     def exec_(self):
+        if not self.powered:
+            # Off at start-up: no heartbeat, so the MDU goes AUTONOMOUS until
+            # IDP POWER is switched ON -- and a unit then comes up cold and
+            # asks to be loaded, as it would on the vehicle.
+            self.unit.log("IDP%s: POWER OFF -- switch IDP POWER ON on the MDU's pane"
+                          % self.id)
+            self.unit.ipled = False
+            return
         self._heartbeat()
         # dev mode has no GPC at all, so the test background is loaded once
         # here rather than driven from the bus.
@@ -10438,6 +10447,37 @@ class IDPPane(QtWidgets.QWidget):
                    fill=fill, outline=P_PADDLE_LO, width=1.0 / self.dpr)
 
     # -- the pane --------------------------------------------------------------
+    @staticmethod
+    def _layout(top, pad, th10, ths):
+        """Caption centres and control tops, in reference units, from `top`:
+        panelO6's rhythm -- PAD of air above and below every caption."""
+        L = {}
+        y = top + pad + th10
+        L['pt'] = y
+        y += 2 * th10                       # the title's second line
+        L['pt2'] = y
+        y += th10 + pad + ths
+        L['on'] = y
+        L['psw'] = y + ths + pad
+        y = L['psw'] + 124 + pad + ths
+        L['off'] = y
+        L['sep1'] = y + ths + pad
+        y = L['sep1'] + pad + th10
+        L['mt'] = y
+        y += 2 * th10
+        L['mt2'] = y
+        y += th10 + pad + ths
+        L['gnc'] = y
+        L['msw'] = y + ths + pad
+        y = L['msw'] + 136 + pad + ths
+        L['pl'] = y
+        L['sep2'] = y + ths + pad
+        y = L['sep2'] + pad + th10
+        L['dt'] = y
+        L['dbtn'] = y + th10 + pad
+        L['bottom'] = L['dbtn'] + 50 + pad
+        return L
+
     def paintEvent(self, _ev):
         self.dpr = self.devicePixelRatioF() or 1.0
         self.sp = self.height() / float(PANE_FULL) if self.height() > 0 else 1.0
@@ -10451,33 +10491,19 @@ class IDPPane(QtWidgets.QWidget):
         gw = 58
         cx = PANE_REF_W / 2.0
         x0, x1 = 10, PANE_REF_W - 10
-        top = 16
-        # Lay out first, so the panel body can be drawn under the controls.
-        y = top + pad + th10
-        yPowerTitle = y
-        y += 2 * th10                       # the title's second line
-        yPowerTitle2 = y
-        y += th10 + pad + ths
-        yOn = y
-        powerTop = y + ths + pad
-        y = powerTop + 124 + pad + ths
-        yOff = y
-        ySep1 = y + ths + pad
-        y = ySep1 + pad + th10
-        yMfTitle = y
-        y += 2 * th10
-        yMfTitle2 = y
-        y += th10 + pad + ths
-        yGnc = y
-        mfTop = y + ths + pad
-        y = mfTop + 136 + pad + ths
-        yPl = y
-        ySep2 = y + ths + pad
-        y = ySep2 + pad + th10
-        yDeuTitle = y
-        deuTop = y + th10 + pad
-        bottom = deuTop + 50 + pad + 6
-        self._rect_panel(p, x0, top, x1, bottom)
+        # The control block is centred in the pane's height, and the panel
+        # body runs the full height of the pane, as the user asked: the
+        # block's height is its layout from 0, so lay it out once for that
+        # and again from where it has to start.
+        paneH = self.height() / max(self.s, 0.01)
+        L = self._layout(0.0, pad, th10, ths)
+        L = self._layout(max(0.0, (paneH - L['bottom']) / 2.0), pad, th10, ths)
+        yPowerTitle, yPowerTitle2, yOn, powerTop, yOff, ySep1 = (
+            L['pt'], L['pt2'], L['on'], L['psw'], L['off'], L['sep1'])
+        yMfTitle, yMfTitle2, yGnc, mfTop, yPl, ySep2 = (
+            L['mt'], L['mt2'], L['gnc'], L['msw'], L['pl'], L['sep2'])
+        yDeuTitle, deuTop = L['dt'], L['dbtn']
+        self._rect_panel(p, x0, 0, x1, paneH)
 
         # IDP POWER
         self._text(p, cx, yPowerTitle, "IDP/", 10)
@@ -10964,10 +10990,24 @@ class MedsRunner(object):
         """simRunner/renderer/startup.civet: one window per windowed LRU, with
         headless "shared" LRUs bundled in for bus comms only."""
         lruMap = {'meds/mdu': mdu_start, 'meds/idp': idp_start}
+        # IDP POWER STARTS OFF when there is a pane to turn it on with: a
+        # display unit is not powered until the crew powers it (PASS User's
+        # Guide Table 2-2 step 8, "DEU(s) Power - ON").  Without the pane
+        # (--no-pane), and in --dev, it starts powered as it always did, since
+        # nothing could switch it on.  NSTS_IDP_POWER=on|off overrides.
+        _pw = str(env('NSTS_IDP_POWER', '')).lower()
+        if _pw in ('on', '1'):
+            powerOn = True
+        elif _pw in ('off', '0'):
+            powerOn = False
+        else:
+            powerOn = bool(CONFIG.get('dev')) or not self.opts.get('pane', True) \
+                or str(env('NSTS_MDU_PANE', '1')) == '0'
         for lruName in CONFIG['thisStart']:
             lruConf = dict(CONFIG['lrus'][lruName])
             lruConf['NSTS_TOP'] = CONFIG['NSTS_TOP']
             lruConf['dev'] = CONFIG.get('dev')
+            lruConf['powerOn'] = powerOn
             mod = lruMap.get(lruConf.get('module'))
             if mod is None:
                 sys.stderr.write("startup: no renderer module for %s (LRU %s)\n"
