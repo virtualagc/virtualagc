@@ -1,8 +1,15 @@
 # Building the OPS 9 tape
 
-How to build **`OI340700-v42boot.mmv`** from source — the volume that runs
+How to build **`OI340700-v43boot.mmv`** from source — the volume that runs
 `OPS 201/301/302/801/901/101 PRO` and keeps polling the displays (see "The
 OPS 901/201/301 blocker" below).
+
+**v43 (2026-09-11) is v42 with the last three data gaps closed in PFS**
+(`24af1848`): the SM compools carry the flight's tables, DCDDS2 is the
+flight's code, and the DEU critical formats are built from source instead of
+borrowed.  Against the eight DASS dumps, every code csect of every phase now
+matches; what differs is data the dumps show unstamped, fill, and the
+compiler's representation of all-zero and NAME data (section 3).
 
 **v42 (2026-09-11) is v41 with the link repaired instead of patched.**  v41
 needed 88 halfwords hand-filled on the finished volume; v42 needs none, and
@@ -23,19 +30,19 @@ committed beside the script; nothing is read from `~/pass-build/OI340700` or
 from any scratch directory.
 
 What the volume is made of, honestly: our own compiles (`HALSFC`), assemblies
-(`ASM101Sa`), `GPCIPL`, links and stamped tables — except the DEU critical-
-format load module, which is **24 blocks taken from `pass-910.mmv`** (itself a
-volume we built; see "DEU load modules" under stages 4–7 for exactly what they
-are and why the current sources cannot rebuild them), and **two root Z-CON
+(`ASM101Sa`), display translation (`dfg`), `GPCIPL`, links and stamped tables
+— nothing copied from another volume since v43 — except **two root Z-CON
 words** whose targets no phase of this release links, written from the SSW
-dump (stage 4c).
+dump (stage 4c).  Some of the SOURCE is itself reconstructed from the dumps:
+PFS `70e65182` (payload tables) and `24af1848` (SM tables, DCDDS2), each file
+saying so in its header; `tools/dassrecon/` re-verifies them.
 
 ---
 
 ## 0.  One command
 
 ```bash
-REF=~/workspace/pass-run/OI340700-v42boot.mmv \
+REF=~/workspace/pass-run/OI340700-v43boot.mmv \
     ~/git/virtualagc/yaShuttle/yaGPC2/tapebuild/build.sh /tmp/claude-1000/tapebuild
 ```
 
@@ -43,8 +50,9 @@ About 25 minutes, most of it `compilePASS`.  It must end with
 
 ```
   tree 0dce2b7fb827adf6455718ef53a7ce0c2b6ffedc
-  1981 objects
-  SYSLIBL1: 4277 entries
+  PFS at 24af1848
+  1998 objects
+  SYSLIBL1: 4294 entries
   lib/runtime: RUN 205 (0 failed), ZCON 284
   extsyms: 12 per-phase tables
     PHASE01: linked 7 objects ...          (every phase must say "linked")
@@ -54,15 +62,16 @@ About 25 minutes, most of it `compilePASS`.  It must end with
     #ZDCDDS4 @001E2 = C074 0E40
     #ZDKFCM5 @0023C = C03A 0E40
     FCMSSLPT stamped, 444 non-zero
-      2  #PFCMGPT  0x01ccf2  1093       0     843
+      2  #PFCMGPT  0x01ccf2  1093       0     846
     OVERSIZE rows (must be 0): 0
-    DEU blocks forced: 24 (must be 24), volume 2666 blocks
-### MATCH: byte-identical to /home/rburkey/workspace/pass-run/OI340700-v42boot.mmv
+    CFIT 32 slots + 3288 body halfwords + PAD -> 3657 halfwords (CFBSIZE 3656 + checksum 5D8D) -> .../DEUCFLM.bin
+    DEU critical formats: 24 block(s) added, 0 overwritten; volume now holds 2665
+### MATCH: byte-identical to /home/rburkey/workspace/pass-run/OI340700-v43boot.mmv
 ```
 
 **Verified 2026-09-11 by running exactly this command in an empty directory**
--- twice: once to make `OI340700-v42boot.mmv`, once more with `REF` to prove
-the new stages deterministic.  (v41 was verified the same way on 2026-09-10;
+-- twice: once to make `OI340700-v43boot.mmv`, once more with `REF` to prove
+it deterministic (v42 was verified the same way that morning).  (v41 was verified the same way on 2026-09-10;
 the first attempt then did not match -- a bare toolchain clone links nothing,
 see "`con80build`'s default runtime directories must exist" under stages 4–7
 -- and the script was fixed until it did; that is the only way this document
@@ -70,14 +79,15 @@ gets to say it works.)
 
 Omit `REF` to build without comparing.  `WORK` (the argument) may be any empty
 directory; the two git clones in it are reused on a rerun.  v41 is not lost:
-this directory's git history at `7961906c2` builds it byte for byte.
+this directory's git history builds it byte for byte (`7961906c2`), and v42
+likewise (`0b19d1454`).
 
 **Prerequisites** — the only things taken from the machine rather than from a
 pinned source:
 
 | what | why |
 |---|---|
-| `~/workspace/PFS` containing commit `19464059` | sources are `git archive`d at that commit (`PFSREV` overrides) |
+| `~/workspace/PFS` containing commit `24af1848` | sources are `git archive`d at that commit (`PFSREV` overrides) |
 | this repository's `PASS.REL32V0` with built `HALSFC-*` binaries | `compilePASS` refuses a compiler older than its sources |
 | `ASM101S/ASM101Sa` built | the assembler |
 | `~/donschmidt/nsts-sdl-dps` | **only** its `ext/` submodules and its Python venv (`typer`, `rich`, `lark`); none of its code is run |
@@ -92,10 +102,10 @@ pinned source:
 |---|---|---|---|
 | 0 | linker toolchain | fork `rburkey2005/nsts-sdl-dps`: upstream `db9d34b` + branches `lib-inserts-and-stacks`, `mmustamp-skip-phase`, `mmu2mmv-unstamped-guard`, merged (tree `a68da6e6` checked), + `toolchain-patches/lnk101-first-definition-and-zcon-pool.patch` committed; **tree `0dce2b7f` checked** | `$WORK/nsts-sdl-dps` |
 | 0b | `dfg` | upstream `ColanderCombo/nsts-sdl-dps` `7d90b05` + `toolchain-patches/dfg-7d90b05-to-OI340700.patch` | `$WORK/bin/dfg` |
-| 1 | source tree | PFS `19464059`: `OI340600` overlaid with `OI340700`; `RUNASM/RUNMAC/ZCONASM` from `PASS.REL32V0`; `source-patches/`: the CSPCLB qualification and SM2's STACK cards | `$WORK/OI340700` |
-| 2 | objects | `compilePASS --no-csects --sdl --release=OI340700` | 1,981 objects |
+| 1 | source tree | PFS `24af1848`: `OI340600` overlaid with `OI340700`; `RUNASM/RUNMAC/ZCONASM` from `PASS.REL32V0`; `source-patches/OI340700-APPLSRC-CSPCLB-qualification.patch` | `$WORK/OI340700` |
+| 2 | objects | `compilePASS --no-csects --sdl --release=OI340700` | 1,998 objects |
 | 3 | derived layers | `tapebuild/derive.py` | `SYSLIBL1`, `lib/runtime`, `sdfpad`, `pchsrc`, per-phase csect tables |
-| 4–7 | link, cross-phase resolution (4b), unlinked pool words (4c), stamp, cut, DEU splice, SSL checksum | `tapebuild/link-and-cut.sh` | `OI340700-v42boot.mmv` |
+| 4–7 | link, cross-phase resolution (4b), unlinked pool words (4c), stamp, cut, DEU critical formats built from source, SSL checksum | `tapebuild/link-and-cut.sh` | `OI340700-v43boot.mmv` |
 
 ---
 
@@ -153,25 +163,19 @@ appeared and the probe always said no.  **Fixed in `compilePASS` on
 
 ### Stage 1 — the source tree
 
-`OI340600`, overlaid with `OI340700`, from PFS at `19464059` — which includes
-`OI340700/CON80` with the **`STACK` cards activated** (without them the tape
-has no process stacks; see below).  A **zero-byte `.hal` in the `OI340700`
+`OI340600`, overlaid with `OI340700`, from PFS at `24af1848` — which includes
+`OI340700/CON80` with the **`STACK` cards activated** (`19464059`; without them
+the tape has no process stacks; see below), SM2's lost STACK block restored,
+the SM tables and DCDDS2 in their OI340700 form, and the DEU critical-format
+decks back (all `24af1848`; section 3).  A **zero-byte `.hal` in the `OI340700`
 overlay is an exclusion marker** — the file is not part of this release — and
 is copied over OI340600's on purpose.  Never fill one in.
 
-Two source changes are not in PFS, and are `source-patches/`:
-
-- the "CSPCLB qualification" of `CSPB_PI_UMB_RESET_MASK` in
-  `APPLSRC/SPSPSP.hal` and `SSOSPDAT.hal`, needed for them to compile (made in
-  a scratch tree on 2026-09-03 and never committed anywhere);
-- **SM2's STACK cards** (2026-09-11, ledger #78).  The regenerated `CON80/SM2`
-  keeps its `*STACK *  SM2 STACKS` header at sequence `009300` and its next
-  card is `011200`: the whole block was lost, so S2's phase 15 ran its 26
-  programs with no stacks (the first store into one is a store-protect).
-  Restored from SM4's intact block, `$0SM4OPS` -> `$0SM2OPS`; all 26 are in
-  the S2 dump, and with them every one of S2's 53 stacks is at its flight
-  address and size.  **This belongs in PFS** (`OI340700/CON80/SM2`), where it
-  was not written because PFS is managed elsewhere.
+One source change is not in PFS, and is `source-patches/`: the "CSPCLB
+qualification" of `CSPB_PI_UMB_RESET_MASK` in `APPLSRC/SPSPSP.hal` and
+`SSOSPDAT.hal`, needed for them to compile (made in a scratch tree on
+2026-09-03 and never committed anywhere).  SM2's STACK cards were a second
+patch here in v42 and are PFS `24af1848` now.
 
 ### Stage 2 — objects: `--sdl` and `--release=OI340700`, both required
 
@@ -279,7 +283,7 @@ size, the csect table the pin and the size where it names the stack.  Result
 on v42: **all 361 stacks of all eight DASS configurations at exactly the flight
 address and size** (SSW 30, G16 40, G2 42, G3 40, G8 40, G9 80, P9 36, S2 53).
 `$0ASCTIM` and `$0ASGCYC` come from PFS `19464059`'s two added cards; S2's 26
-program stacks from `source-patches/`' SM2 cards (stage 1).
+program stacks from SM2's restored STACK block (PFS `24af1848`).
 
 **Phases 16 and 26 are omitted.**  16 is SM4, and OI340700 excludes SM OPS 4
 (the zero-byte `CS4*`/`SM4OPS` sources above); linked anyway it lacks those six
@@ -305,75 +309,58 @@ and `FCMG3DAT` into phase 2.  `#PFCMGPT` **must** land at `0x01ccf2`.
 
 **Cut** — `mmu2mmv`; no row may say `OVERSIZE`.
 
-**DEU load modules** — `mmu2mmv` cannot generate them.  The 24 blocks v36
-took from `pass-910.mmv` (md5 `f9d116d2…`), extracted into
-`inputs/deu-loadmodules.mmv` so the build does not depend on that volume, are
-**the three copies of `DEUCFLM`** (`DMACDFT1/2/3`, 8 blocks each at
-`4/4/4/8..31`), the critical-format backgrounds GPCIPL downloads to the unit.
-Measured 2026-09-11: `tools/build_deucflm.py` with the pinned `dfg`, pointed at
-the **OI340600** decks, reproduces each copy in 3,654 of its 3,657 halfwords.
-The three that differ are CFIT slots 30/31 and the checksum: the pinned
-`dfg`'s `deucflm` writes the exit stub there (a sector-qualified branch to
-CFITDBA `19EE`, where every body's closing `111E` branch lands), and the older
-one that made pass-910 wrote two SPARE branches (`1DE8`) -- so on our volume a
-finished critical background branches into the spare body instead of into the
-display.  **It cannot be rebuilt from this release's sources** because
-`OI340700/SSSRC/XD0001.dfg` and `XD0990.dfg` are zero-byte tombstones (PFS
-`70e65182`), and filling one from OI340600 is not allowed.  See section 3.  Then `tools/stamp_ssl_checksum.py` writes `SSLENGTH`/`SSLCKSUM`,
+**DEU critical formats** (stage 7) — `DEUCFLM`, the display unit's
+critical-format backgrounds, three copies (`DMACDFT1/2/3`, 8 blocks each at
+`4/4/4/8..31`), which GPCIPL downloads to the unit.  `mmu2mmv` does not write
+SYSID 5, so `tools/build_deucflm.py` links it with the pinned `dfg` from the
+sixteen static decks `CON80/CFSYSIN` names, and `tools/add_sysid_allocs.py`
+writes each copy at its card address with the load-module checksum where the
+`SYSTEM` card's `HWDS=E4C` puts it.  **Until v43 these were 24 blocks copied
+from `pass-910.mmv`**, because OI340700 had tombstoned every one of those
+decks; PFS `24af1848` restored them (section 3).  Measured before switching:
+`add_sysid_allocs.py` fed pass-910's own image reproduces all 24 borrowed
+blocks exactly, and the from-source image differs from pass-910's in three of
+its 3,657 halfwords -- CFIT slots 30/31 and the checksum.  The pinned `dfg`
+writes the exit stub there (a sector-qualified branch to CFITDBA `19EE`,
+where every body's closing `111E` branch lands); the older `dfg` that made
+pass-910 wrote two SPARE branches (`1DE8`).  The DEU control program and
+self-test modules (`FMADEU*`) are the unit's own firmware and are not built;
+MEDS runs its own.
+
+Then `tools/stamp_ssl_checksum.py` writes `SSLENGTH`/`SSLCKSUM`,
 without which `SSLCHECK` takes its error path and ITEM 1 EXEC loads nothing.
 
 ---
 
 ## 3.  Deviations and loose ends, recorded rather than hidden
 
-Measured on v42 against the DASS dumps, every csect each phase places at the
-address its configuration's table gives (1,125,122 halfwords).  **In code
-csects the only differences left in any phase are `#CDCDDS2` and the
-`FCMG3DAT` stamp**; the rest is data, and none of it is a link defect:
+Measured on v43 against the DASS dumps, every csect each phase places at the
+address its configuration's table gives (1,120,690 halfwords).  **Every code
+csect of every phase matches, HAL/S and assembler, but for the `FCMG3DAT`
+stamp**; no compool overlaps another; all 361 stacks of all eight
+configurations are at their flight address and size.  What differs is:
 
-- **SM compools overlap in phases 14 and 15 -- a decision, not a bug fix.**
-  Thirteen SM compools compile LONGER than the flight's (`#PCSARST` 2,782
-  halfwords against 352, `#PCP2GXT` 658 against 126, ...), and the S2 table
-  pins each at its flight address, so they overlap their pinned neighbours:
-  14 overlapping pairs in phase 14, 7 in phase 15, where later text overwrites
-  earlier.  The long ones are `F GEN ... F END` blocks -- generated,
-  mission-dependent tables -- from **OI340600** sources, i.e. another flight's
-  data; `CSAS_RMT_NUM_ENTRIES` is 273 in our source and 35 in the dump.
-  Unpinning them is not a fix (tried: phase 15 went from 7 overlaps to 20).
-  The remedy PFS already used for seventeen payload tables (`70e65182`,
-  `dass-ixgen.py`: transcribe the table from the dump) would apply; that is a
-  change to PFS.  Only SM OPS 2 is affected.  Ledger #79.
-- **The DEU critical formats are borrowed** (stages 4–7): pass-910's DEUCFLM,
-  built from OI340600's `XD0001`/`XD0990` decks with an older exit stub.  The
-  two OI340700 tombstones on those decks look wrong: the tombstone rule in
-  `70e65182` is "the unit's name appears in none of the eight dumps", but a
-  static format (`XD*`/`XG*`) lives in the display unit and on mass memory,
-  never in GPC memory -- none of the XG decks appears either, and they were not
-  tombstoned -- while `CD0001` and `CD0990`, the same displays' GPC halves, are
-  in all eight dumps and `CFSYSIN` still lists both backgrounds.  If they are
-  restored, `build_deucflm.py` builds DEUCFLM from source and the splice goes.
-  Ledger #80.
-- **`#CDCDDS2` (phase 15, SM2's display procedure) is OI340600's**: 2,006
-  halfwords against the flight's 2,074, 1,526 differing.  No OI340700 version
-  exists anywhere on this machine (OI301700 and OI340600 only).  Ledger #81.
-- **Other OI340600-layer data**: 6,796 halfwords of `F GEN` tables and about
-  500 more in compools OI340700 does not overlay (`CRDCIL`, `CSSCOT`,
-  `CRCCOT`, `CRILVC`, ...) -- mission data, same class as the first item.
 - **Mass-memory-build stamps**: `#PFCMGPT`, `#PCDCPHA` and `FCMG3DAT` are
-  stamped by `mmustamp`; every dump shows them unstamped (zero).  Our volume
-  needs them stamped to transition at all.
-- **NAME pointers**: our `HALSFC` initialises Z-CON NAME pointers to compools
-  statically (relocated text) where the flight image has fill -- 998
-  halfwords in HAL data and 550 in compools hold a value where the dump has
-  `C9FB`/`C6C6`, and every one sampled is a relocated NAME pointer.  Code is
-  identical, so this is how the compiler represents them.  Phase 2's copy of
-  `#DDMPMMM` has 19 such pointers into PL9/SM compools, used only in OPS 0,
-  where neither is loaded.
-- **Fill**: uninitialised compool, HAL data and stack words are `0000`/`C6C6`
-  in our images and `C9FB` or `C6C6` in the flight's (~182,000 halfwords); no
-  rule separating the flight's two fills was found.  Uninitialised memory.
+  stamped by `mmustamp`, and the dumps show them unstamped (zero); our volume
+  needs them to transition at all.  The dumps also star (mass memory differs
+  from load module) `MISSION_ID` in `#DDCDDOW` (`001D`) and `CPGPCD`'s
+  `CPGV_MM_PL_FTSBB` copy 1 (`0600`); the source values stand.
+- **The flight compiler emitted no text for all-zero data** -- a variable
+  initialised to zero, a zero `CONSTANT`, a `n#0` group -- where our HAL/S-FC
+  emits zeros: ~158,000 halfwords of compool and HAL data read `C9FB`/`C6C6`
+  in the dumps and `0000` in ours.  Same behaviour at run time.
+- **NAME pointers**: our HAL/S-FC initialises Z-CON NAME pointers to compools
+  statically where the flight image has fill (998 halfwords of HAL data, 550
+  of compools; every one sampled a relocated pointer).  Code is identical.
+- **One unreferenced literal**: HAL/S-FC adds a Z-CON literal for DCDDS2's
+  `REMOTE` include of `#PCVNMMU` that the flight's #DDCDDS2 lacks.
+- **Fill**: stacks and uninitialised areas are `C6C6` in ours and `C9FB` in
+  the flight's; no rule separating the flight's two fills was found.
 - **`dfg`'s `CS2120` allowance is empirical** (Don's comment: the general rule
   is unconstrained there) and lives only in our patch until it is upstream.
+- **Seven display decks do not compile** (`_dfg_CDAP04/05/06/07/08/12/15`,
+  exit 240) -- the same seven in v41, v42 and v43; nothing on the volume
+  depends on them.
 - **`~/pass-build/OI340700` is stale — do not build from it.**
   `objects/AIGDEU.obj` there is the v79 `WAIT 0.100` experiment's object,
   never recompiled after the source was restored; a link from that tree gives
@@ -381,6 +368,29 @@ csects the only differences left in any phase are `#CDCDDS2` and the
   PFS `19464059` + the CSPCLB patch.
 - **`HANDOFF-OI340700-BUILD.md` needs `--sdl --release=OI340700`** added to
   its recipe (see stage 2).
+
+### What v43 fixed (PFS `24af1848`; `tools/dassrecon/` re-verifies it)
+
+| v42 | v43 |
+|---|---|
+| 13 SM compools longer than the flight's, overlapping their neighbours in phases 14/15 (14 and 7 pairs) -- OI340600's generated (F GEN) tables, another flight's data | the flight's tables: 25 compools rebuilt from the S2 dump, each compiled and equal to `#P<stem>` halfword for halfword; no overlaps |
+| `#CDCDDS2` (SM2 downlist) OI340600's: 2,006 halfwords against 2,074, 1,526 differing | the flight's: DCD12401 gains nine statements, eight CSAS_INB_ENTRY subscripts renumbered, `LDR_SIZE_OF_24` 28 -- `#CDCDDS2` exact |
+| DEU critical formats copied from pass-910, with an older dfg's CFIT exit slots | built from source: the 17 CFSYSIN decks OI340700 had tombstoned are restored |
+| SM2's STACK cards a source patch in tapebuild | in PFS |
+
+How the tables were rebuilt, for anyone repeating it: `tools/dassrecon/`
+(`recon_compools.py`, `recon_dcdds2.py`; the header of each says what it
+needs).  Values come from the as-built image (`S2.fcm`), layout and names
+from the listing; each unit is compiled with HAL/S-FC and compared with the
+dump after relocating its RLDs (sign bit = target minus text, as
+`ap101Utils.addrcon.AddrCon` has it; Z-CONs through `ZCon.apply`).  **HAL/S-FC's
+decimal-to-float conversion is not correctly rounded** -- even the exact
+decimal expansion sometimes lands one unit low -- so every scalar literal was
+chosen by compiling candidates (`oracle.py`).  DCDDS2's statements were
+decompiled from the dump's annotated disassembly, which names each
+statement's include SRN and line, and compared on raw relocated addresses
+rather than names, because MAFGEN and HAL/S-FC name the same cells
+differently.
 
 ### What v42 fixed
 
@@ -524,16 +534,16 @@ the carry out of the doubling.
 `build.sh` already refuses a phase that does not link, an `OVERSIZE` cut, a
 failed stamp, any cross-phase residue but stage 4c's two words, and `REF`
 compares the whole volume.  Two further checks, with the values the verified
-v42 build gives (2026-09-11):
+v43 build gives (2026-09-11):
 
 ```bash
 W=/tmp/claude-1000/tapebuild
 python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/check_volume_destinations.py \
-        $W/OI340700-v42boot.mmv
+        $W/OI340700-v43boot.mmv
 ```
 
-Expect `No recognised load block is aimed at resident memory.` and, on v42,
-`headers recognised 0`.  (v41 had one header recognised as fill-only -- the
+Expect `No recognised load block is aimed at resident memory.` and, since
+v42, `headers recognised 0`.  (v41 had one header recognised as fill-only -- the
 staging fill pattern read as a length inside a raw phase record, not a
 finding.  A block with a *plausible* length and `BODY IS ENTIRELY FILL` would
 be.)
@@ -556,16 +566,16 @@ for x in lib.extents:
         text[b + i] = (x.data[2*i] << 8) | x.data[2*i + 1]
 gpt = [text.get(0x1CCF2 + i, 0) for i in range(1093)]
 sig = b"".join(v.to_bytes(2, "big") for v in gpt[:12])
-raw = open(W + "/OI340700-v42boot.mmv", "rb").read()
+raw = open(W + "/OI340700-v43boot.mmv", "rb").read()
 print("GPT %d non-zero; on tape: %s; first descriptor %s"
       % (sum(1 for v in gpt if v), "yes" if sig in raw else "NO",
          " ".join("%04X" % v for v in gpt[:4])))
 PYEOF
 ```
 
-Expect `GPT 843 non-zero; on tape: yes; first descriptor 0040 000A 1BC0 0026`.
-(`mmustamp` reports the same 843 for `#PFCMGPT`; `FCMSSLPT` is stamped with 444
-non-zero halfwords.  v41 had 918 and 462.  The GPT changed only with SM2's
+Expect `GPT 846 non-zero; on tape: yes; first descriptor 0040 000A 1BC0 0026`.
+(`mmustamp` reports the same 846 for `#PFCMGPT`; `FCMSSLPT` is stamped with 444
+non-zero halfwords.  v41 had 918 and 462, v42 843 and 444.  The GPT changed only with SM2's
 stacks, which close gaps in phase 15's image so it cuts into fewer load
 blocks; `FCMSSLPT` only with phase 2's generated table, which drops two
 load-block splits -- same content, fewer descriptors, in both.)
@@ -577,19 +587,19 @@ load-block splits -- same content, fewer descriptors, in both.)
 Kill any leftover `discretePanel` **before** the run, not only after — one
 left from a previous run makes the GPC flap `HALT`↔`RUN`.
 
-The recipe that verified OPS 901/201/301 on v41 (2026-09-10) and on v42
-(2026-09-11, runs `F42_*` with `YAGPC_BUSLOG`, three at once on port bases
-6800/6700/6600;
+The recipe that verified OPS 901/201/301 on v41 (2026-09-10), v42 and v43
+(2026-09-11, runs `F42_*`/`V43_*` with `YAGPC_BUSLOG`, three at once on port
+bases 6800/6700/6600;
 use `OPS,2,0,1,PRO` or `OPS,3,0,1,PRO` for the others):
 
 ```bash
 cd ~/workspace/pass-run
-YAGPC_DEU_EXTRA_PRELOADED=1 TAPE=/tmp/claude-1000/tapebuild/OI340700-v42boot.mmv \
+YAGPC_DEU_EXTRA_PRELOADED=1 TAPE=/tmp/claude-1000/tapebuild/OI340700-v43boot.mmv \
 DEU2="7,8,9" DEUMF=1 DEUKEYS="@120s:ITEM,1,EXEC;@280s:OPS,9,0,1,PRO" \
-PORT_BASE=6800 ./headless-gpcmem.sh 430 ~/workspace/pass-run/headless-v42
+PORT_BASE=6800 ./headless-gpcmem.sh 430 ~/workspace/pass-run/headless-v43
 ```
 
-Interactively: `./retest-crt2.sh --tape ~/workspace/pass-run/OI340700-v42boot.mmv`.
+Interactively: `./retest-crt2.sh --tape ~/workspace/pass-run/OI340700-v43boot.mmv`.
 
 The IPL SOURCE switch must be **off** before RUN or FCOS refuses every
 post-IPL mass-memory transaction; the harness handles this.  `IDLE_TIMEOUT`
@@ -765,6 +775,7 @@ section 7b's `resident` and `phase8` groups.  Measured with the bus log
 | V301, Z301 | v39 / v41 | steady, ~14,000 DEU events per 20 s |
 | X901b | v40 | silent after ~285 s |
 | Y901a, Y901b | v41 | steady; **G9 MDM buses 10/11 carry traffic for the first time** |
+| V43_901/201/301 | v43 (DEU formats from source) | identical to v42; the tape-loaded display unit's memory differs from v42's in exactly the three DEUCFLM words (CFIT 30/31 and checksum) and nothing else |
 | A42_901/201/301, F42_901/201/301 | v42 (no hand fill) | the same as v41 in every column: DEU buses 6/7/8 steady to the end of the 400 s run (~10,000 / ~8,900 / ~14,000 per 20 s after 901/201/301), G9 MDM buses 10/11 after 901, 14/16/20/22 after 201; `UNIV PTG`, `DEORB MNVR COAST` drawn as on Z201/Z301 |
 
 **Confirmed interactively by the user on v41** with MEDS: `OPS 201 PRO` (`UNIV
@@ -1013,12 +1024,9 @@ state — went from **8.37 %** to **0.50 %** over this work.
   patch).  Two SM4-only words remain, written in 4c.
 * **Four Z-CONs holding wrong values rather than fill -- RESOLVED in v42**
   (`0x1E8`, `0x202`, `0x218`, `0x22C`): double relocation, section 7b.
-* **SM (S2) data, for a decision** -- section 3: 13 compools from another
-  flight's generated tables overlap in phases 14/15 (ledger #79), and
-  `#CDCDDS2` is OI340600's (#81).  Nothing exercises SM OPS 2 yet.
-* **DEU critical formats, for a decision** -- section 3 and stages 4–7: the
-  `XD0001`/`XD0990` tombstones (#80), and the older exit stub the borrowed
-  copy carries.
+* **SM (S2) data, DCDDS2 and the DEU critical formats -- RESOLVED in v43**
+  (PFS `24af1848`, section 3).  Nothing exercises SM OPS 2 yet, so the SM
+  tables and DCDDS2 are verified against the dump, not by a run.
 * **Build provenance -- RESOLVED 2026-09-10.**  The volume is now built by
   `tapebuild/build.sh` from pinned sources and committed inputs, and verified
   byte-identical to the tested v41 (sections 0-3).  What had been wrong: the

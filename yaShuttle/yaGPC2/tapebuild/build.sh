@@ -3,11 +3,15 @@
 #
 #     tapebuild/build.sh [WORK]          default WORK=/tmp/claude-1000/tapebuild
 #
-# Produces $WORK/OI340700-v42boot.mmv.  Given the same inputs it is
-# byte-identical to ~/workspace/pass-run/OI340700-v42boot.mmv -- the last
+# Produces $WORK/OI340700-v43boot.mmv.  Given the same inputs it is
+# byte-identical to ~/workspace/pass-run/OI340700-v43boot.mmv -- the last
 # stage checks that when REF is set:
 #
-#     REF=~/workspace/pass-run/OI340700-v42boot.mmv tapebuild/build.sh
+#     REF=~/workspace/pass-run/OI340700-v43boot.mmv tapebuild/build.sh
+#
+# (v42boot, 2026-09-11 morning, is this build at PFS 19464059 with the SM2
+# STACK cards as a source patch and the DEU critical formats copied from
+# pass-910; git history of this directory reproduces it.)
 #
 # (v41boot, 2026-09-10, was this build WITHOUT toolchain-patches/lnk101-*
 # and link-and-cut stages 4b/4c, plus 88 halfwords hand-filled on the volume
@@ -21,7 +25,7 @@
 # Inputs (override by environment):
 #   PFS      ~/workspace/PFS            OI340600 + OI340700 source overlays and
 #                                       mafgen/csects-*.json, read at PFSREV
-#   PFSREV   19464059                   (git archive, not the working tree)
+#   PFSREV   24af1848                   (git archive, not the working tree)
 #   PASSREL  <this repo>/yaShuttle/Source Code/PASS.REL32V0
 #                                       HALSFC, compilePASS, RUNASM/RUNMAC/ZCONASM
 #   ASM      <this repo>/ASM101S        ASM101Sa
@@ -39,7 +43,7 @@ ASM=${ASM:-$VA/ASM101S}
 DPS=${DPS:-$HOME/donschmidt/nsts-sdl-dps}
 FORK=${FORK:-https://github.com/rburkey2005/nsts-sdl-dps}
 UPSTREAM=${UPSTREAM:-https://github.com/ColanderCombo/nsts-sdl-dps}
-PFSREV=${PFSREV:-19464059}
+PFSREV=${PFSREV:-24af1848}
 TOOLS="$VA/yaShuttle/yaGPC2/tools"
 IN="$HERE/inputs"
 die() { echo "FAILED: $*" >&2; exit 1; }
@@ -126,14 +130,11 @@ for d in APPLSRC SSSRC MLIB80 INCL80 CON80; do
   done
 done
 for d in RUNASM RUNMAC ZCONASM; do cp -a "$PASSREL/$d" "$T/"; done
-# Source patches not (yet) in PFS: the CSPCLB qualification (stage 1 of
-# HANDOFF-OPS9.md) and SM2's lost STACK cards -- the regenerated deck keeps
-# its `*STACK *` header (009300) and the next card is 011200, so S2's phase 15
-# ran its 26 programs with NO stacks; restored from SM4's intact block with
-# $0SM4OPS -> $0SM2OPS, all 26 of which the S2 dump places.
-for sp in OI340700-APPLSRC-CSPCLB-qualification.patch OI340700-CON80-SM2-STACK-cards.patch; do
-  ( cd "$T" && patch -s -p1 < "$HERE/source-patches/$sp" ) || die "source patch $sp"
-done
+# The one source patch not in PFS: the CSPCLB qualification (stage 1 of
+# HANDOFF-OPS9.md).  (SM2's lost STACK cards were a patch here until PFS
+# 24af1848 took them.)
+( cd "$T" && patch -s -p1 < "$HERE/source-patches/OI340700-APPLSRC-CSPCLB-qualification.patch" ) \
+  || die "source patch"
 echo "  PFS at $PFSREV"
 
 # ---------------------------------------------------------------------------
@@ -165,10 +166,10 @@ echo "### 4-7. link, resolve, stamp, cut, splice"
 mkdir -p "$SDL/build/lib/runtime"
 ln -sfn "$T/lib/runtime/RUN"  "$SDL/build/lib/runtime/RUN"
 ln -sfn "$T/lib/runtime/ZCON" "$SDL/build/lib/runtime/ZCON"
-T="$T" S="$S" WORK="$WORK" IN="$IN" TOOLS="$TOOLS" bash "$HERE/link-and-cut.sh" \
+T="$T" S="$S" WORK="$WORK" IN="$IN" TOOLS="$TOOLS" DFG="$DFG" DPS="$DPS" bash "$HERE/link-and-cut.sh" \
   || die "link-and-cut.sh"
 
-OUT="$WORK/OI340700-v42boot.mmv"
+OUT="$WORK/OI340700-v43boot.mmv"
 if [ -n "${REF:-}" ]; then
   if cmp -s "$OUT" "$REF"; then echo "### MATCH: byte-identical to $REF"
   else echo "### MISMATCH against $REF"; cmp "$OUT" "$REF" | head -1; exit 1; fi

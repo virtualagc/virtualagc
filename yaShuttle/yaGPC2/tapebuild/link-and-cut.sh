@@ -6,7 +6,8 @@
 #   S      the toolchain's src/ directory (modules run from its parent)
 #   WORK   scratch: sdfpad/, pchsrc/, extsyms/, and the outputs
 #   IN     tapebuild/inputs    TOOLS  yaGPC2/tools
-# Output: $WORK/OI340700-v42boot.mmv.  (Until 2026-09-11 this produced v36boot,
+#   DFG    the pinned dfg checkout   DPS  Don's checkout (its Python venv)
+# Output: $WORK/OI340700-v43boot.mmv.  (Until 2026-09-11 this produced v36boot,
 # which tools/patch_unresolved.py then hand-filled into v41boot; stages 4b
 # and 4c replace that fill, and the link fixes in toolchain-patches/ the rest.)
 set -u
@@ -14,7 +15,7 @@ set -o pipefail
 : "${T:?}" "${S:?}" "${WORK:?}" "${IN:?}" "${TOOLS:?}"
 C="$WORK/c80"; P="$WORK/pchsrc"; SD="$WORK/sdfpad"; ML="$WORK/minilibs"
 RT="--linklib $T/lib/runtime/RUN --linklib $T/lib/runtime/ZCON"
-OUT="$WORK/OI340700-v42.mmv"; BOOT="$WORK/OI340700-v42boot.mmv"
+OUT="$WORK/OI340700-v43.mmv"; BOOT="$WORK/OI340700-v43boot.mmv"
 export C80SRC_RESOLVED="$S"
 rm -rf "$C"; mkdir -p "$C"
 cd "$(dirname "$S")" || exit 1
@@ -151,28 +152,24 @@ ov=$(grep -ci oversize $WORK/cut.log)
 echo "    OVERSIZE rows (must be 0): $ov"
 [ "$ov" -eq 0 ] && [ -s "$OUT" ] || { tail -5 $WORK/cut.log >&2; exit 1; }
 
-echo "  7. splice the DEU load modules, close the SSL checksum"
-# mmu2mmv cannot generate DEUDCPLM/DEUCFLM/DEUSTLM.  The 24 blocks are the
-# ones v36 took from pass-910.mmv (md5 f9d116d2...), extracted into
-# inputs/deu-loadmodules.mmv so the build does not depend on that volume.
-python3 - "$OUT" "$BOOT" "$IN/deu-loadmodules.mmv" <<'PYEOF'
-import struct, sys
-def load(p):
-    raw = open(p, "rb").read()
-    hw, ent, flag = struct.unpack(">III", raw[8:20])
-    dirs = list(struct.unpack(">%dI" % ent, raw[32:32 + 4 * ent]))
-    off = 32 + 4 * ent
-    return raw[:8], hw, flag, {d: raw[off+i*hw*2: off+(i+1)*hw*2] for i, d in enumerate(dirs)}
-magic, hw, flag, ours = load(sys.argv[1])
-_, _, _, ref = load(sys.argv[3])
-for d, blk in ref.items(): ours[d] = blk
-dirs = sorted(ours)
-out = bytearray(magic) + struct.pack(">III", hw, len(dirs), flag)
-out += b"\0" * (32 - len(out))
-for d in dirs: out += struct.pack(">I", d)
-for d in dirs: out += ours[d]
-open(sys.argv[2], "wb").write(bytes(out))
-print("    DEU blocks forced: %d (must be 24), volume %d blocks" % (len(ref), len(dirs)))
-PYEOF
+echo "  7. DEU critical formats from source, close the SSL checksum"
+# DEUCFLM -- the display unit's critical-format backgrounds, three copies
+# (DMACDFT1/2/3) -- is linked by dfg from the sixteen static decks CFSYSIN
+# names.  Until v43 these were 24 blocks copied from pass-910.mmv, because
+# OI340700 had tombstoned every one of those decks (PFS 70e65182); PFS
+# 24af1848 restored them.  add_sysid_allocs.py writes each copy at its card
+# address with the load-module checksum where the SYSTEM card's HWDS puts it;
+# fed pass-910's own image it reproduces all 24 borrowed blocks exactly.
+: "${DFG:?}" "${DPS:?}"
+"$DPS/build/venv/bin/python" $TOOLS/build_deucflm.py --con80 $T/CON80 --deck-root $T \
+    --dfg $WORK/bin/dfg --sdl $DFG/src -o $WORK/DEUCFLM.bin > $WORK/deucflm.log 2>&1 \
+  || { tail -5 $WORK/deucflm.log >&2; exit 1; }
+tail -1 $WORK/deucflm.log | sed 's/^/  /'
+python3 $TOOLS/add_sysid_allocs.py $OUT --con80 $T/CON80 \
+    --member DMACDFT1 --member DMACDFT2 --member DMACDFT3 \
+    --content DMACDFT1=$WORK/DEUCFLM.bin --content DMACDFT2=$WORK/DEUCFLM.bin \
+    --content DMACDFT3=$WORK/DEUCFLM.bin --out $BOOT > $WORK/sysid.log 2>&1 \
+  || { tail -5 $WORK/sysid.log >&2; exit 1; }
+grep -E "block\(s\) added" $WORK/sysid.log | sed 's/^ */    DEU critical formats: /'
 python3 $TOOLS/stamp_ssl_checksum.py $BOOT | sed 's/^/    /'
 [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
