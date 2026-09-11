@@ -549,6 +549,8 @@ static bool dmaq_shift(DMAQueue *q, DMARequest *out) {
 
 void iop_init(IOP *iop, struct CPU *cpu) {
     iop->cpu = cpu;
+    iop->peerWait = NULL;
+    iop->peerWaitCtx = NULL;
 
     msc_init(&iop->msc);
     for (int i = 0; i < 24; i++) bce_init(&iop->bce[i], i + 1);
@@ -612,6 +614,11 @@ void iop_free(IOP *iop) {
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx) {
     iop->servicer = fn;
     iop->servicerCtx = servicerCtx;
+}
+
+void iop_set_peer_wait(IOP *iop, bool (*fn)(void *ctx, int busID, bool gotAny), void *ctx) {
+    iop->peerWait = fn;
+    iop->peerWaitCtx = ctx;
 }
 
 void iop_exec_channel_control(IOP *iop) { (void)iop; }
@@ -1491,6 +1498,30 @@ double iop_now_us(IOP *iop) {
     return (iop != NULL && iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
 }
 
+/* Move every word the MIA has into the receive, up to its count. */
+static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
+    while (bce->recvLeft > 0 && mia_data_available(iop, &bce->mia)) {
+        bool wasLatch = bce->mia.latchValid;
+        uint32_t data = mia_get_data(iop, &bce->mia);
+        if (g_clearWatch[p] && getenv("YAGPC_CLEARTRACE")) {
+            fprintf(stderr, "CLEARREAD bce=%d took=%04x from=%s t=%.1f\n",
+                    p, (unsigned)data, wasLatch ? "latch-or-live" : "LIVE",
+                    now);
+            g_clearWatch[p] = 0;
+        }
+        iopls_setD(&iop->ls, data);
+        iop_write_main16(iop, bce->recvAddr, data);
+        bce->recvAddr = (bce->recvAddr + 1) & 0x3ffffu;
+        bce->recvLeft--;
+        bce->recvGotAny = true;
+        bce->recvSinceUs = now;
+    }
+}
+
+/* How overdue, in simulated microseconds, a reply must be before a peer in
+ * another process is allowed to hold the machine for it.  See iop_bce_receive. */
+#define PEER_HOLD_AFTER_US 500.0
+
 bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
     BCE *bce = iop_cur_bce(iop);
     if (bce == NULL) return true;
@@ -1521,22 +1552,19 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         }
     }
 
-    while (bce->recvLeft > 0 && mia_data_available(iop, &bce->mia)) {
-        bool wasLatch = bce->mia.latchValid;
-        uint32_t data = mia_get_data(iop, &bce->mia);
-        if (g_clearWatch[p] && getenv("YAGPC_CLEARTRACE")) {
-            fprintf(stderr, "CLEARREAD bce=%d took=%04x from=%s t=%.1f\n",
-                    p, (unsigned)data, wasLatch ? "latch-or-live" : "LIVE",
-                    now);
-            g_clearWatch[p] = 0;
-        }
-        iopls_setD(&iop->ls, data);
-        iop_write_main16(iop, bce->recvAddr, data);
-        bce->recvAddr = (bce->recvAddr + 1) & 0x3ffffu;
-        bce->recvLeft--;
-        bce->recvGotAny = true;
-        bce->recvSinceUs = now;
-    }
+    bce_take_words(iop, bce, p, now);
+
+    /* A PEER IN ANOTHER PROCESS IS LATE IN WALL TIME, NOT IN SIMULATED TIME.
+     * Once a reply is overdue by PEER_HOLD_AFTER_US, let the peer hold the
+     * machine until it arrives (bcenet_framer_peer_wait says when that is
+     * warranted), so it lands inside the flight software's window as a real
+     * unit's would.  A real display unit answers in tens of microseconds;
+     * the threshold is well past that and well inside the 5 ms GPCIPL
+     * allows, and before the MSC gives up on the BCE. */
+    if (bce->recvLeft > 0 && iop->peerWait != NULL
+        && now - bce->recvSinceUs >= PEER_HOLD_AFTER_US
+        && iop->peerWait(iop->peerWaitCtx, bce->mia.bceNum, bce->recvGotAny))
+        bce_take_words(iop, bce, p, now);
 
     if (bce->recvLeft == 0) {
         bce->recvActive = false;

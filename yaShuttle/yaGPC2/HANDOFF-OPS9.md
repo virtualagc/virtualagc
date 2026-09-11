@@ -1061,14 +1061,25 @@ state — went from **8.37 %** to **0.50 %** over this work.
 * **The real end-of-load rule for a display unit is unknown.**  This model
   uses GPCIPL's 250-halfword final fill, which only ever recognises the load of
   the BFC-selected unit; `YAGPC_DEU_EXTRA_PRELOADED` is a stand-in, not an
-  answer.  The user's `MEDS2-port.py` shows the same symptom from the other
-  side — clock but no menu under GPCIPL, correct from GPC MEMORY onward — so
-  it may well settle what the terminator actually is.
+  answer.  (The MEDS2.py "clock but no menu under GPCIPL" symptom once cited
+  here as the same thing from the other side was not: it was late replies,
+  now fixed -- see "Closed since the last sync" and ledger #85.)
 * **Phase 16 is not built**: it is SM4, which OI340700 excludes (stages
   4–7); skipped with `mmustamp --skip-phase 16`.  `HALSTAT.ASC`'s SM4 map is
   the one description of it we have.
 
 ### Closed since the last sync
+
+* **GPCIPL's menu with MEDS2.py: clock over a blank page, hit-and-miss --
+  FIXED 2026-09-11** (ledger #85).  Not dropped fills: the display unit
+  answered LATE.  MEDS2.py's IDP shares an event loop with the MDU's drawing
+  and sometimes misses the 5 ms GPCIPL allows (MTO 303); the BCE times out,
+  GPCIPL re-IPLs the unit, and after a second failure never sends the one-shot
+  menu.  yaGPC2 now lets a peer in another process hold the machine -- no
+  simulated time passes -- while a reply it owes is on its way
+  (`bcenet_framer_peer_wait`, `YAGPC_PEER_HOLD_MS`, default 200, 0 = off).
+  Reproduced and verified in private network namespaces with Xephyr: 4 of 4
+  failed without it, 7 of 7 good with it, including a full run to GPC MEMORY.
 
 * **The `GPC POWER REFAIL` message -- FIXED in v44** (ledger #84).  This item
   used to say "it is not a build defect of ours", on the strength of GPCIPL's

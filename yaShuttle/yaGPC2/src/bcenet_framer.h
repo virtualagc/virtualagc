@@ -43,4 +43,13 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
  * to flush any per-bus word buffers accumulated since the last call. */
 void bcenet_framer_flush_tick(BceNetFramer *f);
 
+/* Block the calling (emulation) thread in WALL time until a word from the
+ * peer on busID is waiting, so that no simulated time passes while the reply
+ * of a peer in another process is on its way.  Holds only when a reply is
+ * owed -- a command went out on the bus and its peer has been heard from
+ * recently -- and within a per-command budget; see the long comment above
+ * its definition.  Returns true when a word is waiting.  *heldMs, if given,
+ * receives the wall time spent. */
+bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *heldMs);
+
 #endif

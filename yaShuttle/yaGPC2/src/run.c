@@ -186,6 +186,31 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
     }
 }
 
+/* iop.h's peerWait, for --bce-network: a bus whose far end is a process
+ * reached over a socket may hold the machine until that process answers (see
+ * bcenet_framer_peer_wait).  A bus an in-process model owns never holds --
+ * the model answers in simulated time, which is the point of it.  A long
+ * hold leaves the simulated clock behind the wall clock; re-base the pacer
+ * rather than let it run the machine flat out to repay the gap, which would
+ * only bring the next reply in late again (rtpacer.c, STALL_REBASE_MS). */
+#define PEER_HOLD_REBASE_MS 20.0
+static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
+    BatchRunner *r = ctx;
+    const BusRouter *br = &r->busRouter;
+    if (r->bceFramer == NULL) return false;
+    if (br->mmu && busID == br->mmuBus) return false;
+    if (br->mtu && mtumodel_owns_bus(busID)) return false;
+    for (int d = 0; d < br->nDeuExtra; d++)
+        if (br->deuExtra[d] && busID == br->deuExtraBus[d]) return false;
+    double heldMs = 0.0;
+    bool got = bcenet_framer_peer_wait(r->bceFramer, busID, gotAny, &heldMs);
+    if (heldMs >= PEER_HOLD_REBASE_MS && r->realTime) rtpacer_rebase(&r->rtPacer);
+    if (heldMs > 0.0 && getenv("YAGPC_TIMEOUT_TRACE"))
+        fprintf(stderr, "BCE%d PEER HOLD %.2f ms wall -> %s\n", busID, heldMs,
+                got ? "reply" : "none");
+    return got;
+}
+
 void batchrunner_init(BatchRunner *r, const Options *opts) {
     memset(r, 0, sizeof(*r));
     r->opts = opts;
@@ -395,6 +420,8 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     } else if (base) {
         ap101_set_servicer(&r->age.gpc, base, baseCtx);
     }
+
+    if (r->bceFramer) iop_set_peer_wait(&r->age.gpc.iop, run_peer_wait, r);
 
     /* Independent of the peripheral bus: discretes are their own bus, and
      * a run may want them with or without --bce-network.  Failing to open

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define FRAMER_MAX_BUS_ID 24
 /* Was 64 ("generous headroom over any real BCE long-form transfer") --
@@ -63,7 +64,15 @@ typedef struct {
      * mass-memory blocks (512 halfwords each) landing between ticks. */
     uint16_t recvQueue[FRAMER_RECV_QUEUE_WORDS];
     size_t recvHead, recvCount;
+
+    /* For bcenet_framer_peer_wait(): whether a reply is owed, and whether
+     * anything is there to owe it.  Wall seconds (CLOCK_MONOTONIC). */
+    double lastPeerWall;    /* last datagram from the peer; 0 = never */
+    bool cmdPending;        /* a command has gone out since the last hold budget */
+    double heldSinceCmd;    /* wall seconds already spent holding for it */
 } BceNetBusState;
+
+static double wall_now(void);
 
 struct BceNetFramer {
     BceNetTransport *transport; /* not owned */
@@ -127,7 +136,14 @@ static void drain_bus(BceNetFramer *f, int busID, BceNetBusState *b) {
         }
         memcpy(b->recvQueue + b->recvCount, words, count * sizeof words[0]);
         b->recvCount += count;
+        if (count > 0) b->lastPeerWall = wall_now();
     }
+}
+
+static double wall_now(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
 }
 
 static void refill_recv_queue(BceNetFramer *f, int busID, BceNetBusState *b) {
@@ -163,6 +179,8 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
              * legitimately arrive later in a transfer. */
             b->recvHead = 0;
             b->recvCount = 0;
+            b->cmdPending = true;
+            b->heldSinceCmd = 0.0;
 
             /* And then SEND the command.  This is the whole point of the
              * call and it was missing: the IUA was recorded, any pending
@@ -228,4 +246,88 @@ void bcenet_framer_flush_tick(BceNetFramer *f) {
          * exactly what let our own transmissions come back as replies. */
         drain_bus(f, i, &f->buses[i]);
     }
+}
+
+/* HOLDING THE MACHINE FOR A PEER IN ANOTHER PROCESS.
+ *
+ * A real display unit answers a poll in tens of microseconds, and the flight
+ * software's windows assume it: GPCIPL gives the DK bus a message time out of
+ * 5.0 ms, and the MSC that services the bus gives up on the BCE sooner than
+ * that.  A display unit that is a Python process on the same host usually
+ * answers in a few hundred microseconds of WALL time -- but not always.  Its
+ * event loop also draws the MDU, and a redraw, a garbage collection or the
+ * scheduler can keep it from reading the socket for tens of milliseconds.
+ * The simulated clock does not wait, so the reply lands after the window has
+ * closed: the BCE error-terminates, GPCIPL counts a failed transaction
+ * (ERROR 44, BCE TIME-OUT N RETRY FAIL-DEUIPL; 96, REAL TIME MSC TIME OUT),
+ * re-IPLs the unit, and after a second failure gives up on it -- which is
+ * the "clock but no menu" screen: the time fills still flow, the one-shot
+ * menu fill is never sent.  Measured with MEDS2.py in a private namespace:
+ * 46 to 60 BCE6 receive time outs per run, three runs of three failed.
+ *
+ * Lengthening the time out does not help and was tried (iop.c,
+ * RECV_TIMEOUT_FLOOR_US): a window longer in SIMULATED time puts the MSC's
+ * service loop out of phase.  What does help is the other way round -- let no
+ * simulated time pass while the reply is on its way.  This blocks the
+ * emulation thread, in wall time, until a word arrives or the budget is
+ * spent, and the reply then lands inside the software's own window exactly
+ * as a real unit's would.
+ *
+ * Only when a reply is actually owed: a command has gone out on this bus
+ * since the budget was last spent, and the peer has been heard from within
+ * PEER_LIVE_SECONDS -- so a bus with nothing on it, or a unit that has gone
+ * away, still times out at full speed, and GPCIPL's polling of empty DK buses
+ * costs nothing.  The budget is per command: PEER_HOLD_SECONDS while nothing
+ * has arrived, PEER_HOLD_PARTIAL_SECONDS once part of the reply is in, since
+ * a unit being loaded answers a sixteen-word read with its header alone and
+ * that is not lateness (deumodel.c, FUNC_POLL).  YAGPC_PEER_HOLD_MS sets the
+ * first; 0 turns the hold off. */
+#define PEER_LIVE_SECONDS 3.0
+#define PEER_HOLD_SECONDS 0.200
+#define PEER_HOLD_PARTIAL_SECONDS 0.005
+#define PEER_HOLD_TICK_NS 50000L   /* 50 us between looks at the socket */
+
+static double peer_hold_seconds(void) {
+    static double cached = -1.0;
+    if (cached < 0.0) {
+        const char *e = getenv("YAGPC_PEER_HOLD_MS");
+        cached = (e != NULL && *e != '\0') ? atof(e) / 1000.0 : PEER_HOLD_SECONDS;
+        if (cached < 0.0) cached = 0.0;
+    }
+    return cached;
+}
+
+bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *heldMs) {
+    if (heldMs) *heldMs = 0.0;
+    if (f == NULL || busID < 0 || busID > FRAMER_MAX_BUS_ID) return false;
+    BceNetBusState *b = &f->buses[busID];
+    if (!b->used) return false;
+    if (b->recvHead < b->recvCount) return true;   /* already here */
+    double hold = peer_hold_seconds();
+    if (hold <= 0.0 || !b->cmdPending) return false;
+    double t0 = wall_now();
+    if (b->lastPeerWall <= 0.0 || t0 - b->lastPeerWall > PEER_LIVE_SECONDS) return false;
+    double budget = (gotAny ? PEER_HOLD_PARTIAL_SECONDS : hold) - b->heldSinceCmd;
+    if (budget <= 0.0) {
+        b->cmdPending = false;   /* spent: time out normally from here */
+        return false;
+    }
+    bool got = false;
+    double t = t0;
+    for (;;) {
+        /* Our own transmit queue may still hold the command the peer is to
+         * answer; without a transmit thread only this pump sends it. */
+        bcenet_transport_pump(f->transport);
+        drain_bus(f, busID, b);
+        t = wall_now();
+        if (b->recvHead < b->recvCount) { got = true; break; }
+        if (t - t0 >= budget) break;
+        struct timespec ts = {0, PEER_HOLD_TICK_NS};
+        nanosleep(&ts, NULL);
+    }
+    b->heldSinceCmd += t - t0;
+    if (!got && b->heldSinceCmd >= (gotAny ? PEER_HOLD_PARTIAL_SECONDS : hold))
+        b->cmdPending = false;
+    if (heldMs) *heldMs = (t - t0) * 1000.0;
+    return got;
 }

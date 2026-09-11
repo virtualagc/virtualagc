@@ -312,6 +312,13 @@ typedef struct IOP {
      * GpcServicerFn comment. */
     GpcServicerFn servicer;
     void *servicerCtx;
+    /* Optional, and only for a peripheral in ANOTHER PROCESS: asked when a
+     * receive on bus `busID` is overdue, it may hold the machine -- block,
+     * so that no simulated time passes -- until the peer's reply arrives.
+     * Returns true when a word is waiting.  NULL (the default) never holds.
+     * See iop_bce_receive() and bcenet_framer_peer_wait(). */
+    bool (*peerWait)(void *ctx, int busID, bool gotAny);
+    void *peerWaitCtx;
 } IOP;
 
 /* PER-PROCESSOR STATUS REGISTERS ARE NUMBERED FROM THE MS END.
@@ -377,6 +384,7 @@ bool iop_has_servicer(const IOP *iop);
 void iop_free(IOP *iop);
 
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx);
+void iop_set_peer_wait(IOP *iop, bool (*fn)(void *ctx, int busID, bool gotAny), void *ctx);
 
 /* Lower bound on a commanded receive's timeout, in microseconds.  Exists
  * for a peripheral in another process; set it to 0 when the peripheral is
