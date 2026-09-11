@@ -1,8 +1,10 @@
 #include "mtumodel.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 /* FIOCBLKS names the MTU device 22 -- FIO22020/1/2 -- but that is FCOS's
  * own device number, not the bus address: the NSP beside it is device 24.
@@ -39,12 +41,12 @@
  * and a six-word reply leaves it one short, whereupon it times out with
  * left=1 and error terminates the BCE onto its NO-GO path.
  *
- * The extra word goes on the END so the three time halfwords stay at
- * offset 2, where FPMMTURM reads them (LA R3,TFCMMTU1+2). */
+ * The extra word goes on the END, after GMT (0,1,2) and MET (3,4,5). */
 #define MTU_WORDS 7
 
 struct MtuModel {
     const double *clockUs;
+    const double *epochSec;      /* see mtumodel_set_epoch; NULL = elapsed only */
     uint16_t reply[MTU_WORDS];
     int replyHead, replyCount;
     long commands, reads, wordsOut;
@@ -59,6 +61,10 @@ void mtumodel_free(struct MtuModel *m) { free(m); }
 
 void mtumodel_set_clock(struct MtuModel *m, const double *clockUs) {
     if (m) m->clockUs = clockUs;
+}
+
+void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec) {
+    if (m) m->epochSec = epochSec;
 }
 
 bool mtumodel_owns_bus(int busID) {
@@ -80,16 +86,33 @@ static unsigned bcd_pack(unsigned value, unsigned tensBits, unsigned onesBits,
 static void mtu_fill_time(struct MtuModel *m) {
     double us = m->clockUs ? *m->clockUs : 0.0;
     if (us < 0.0) us = 0.0;
-    unsigned long long totalMs = (unsigned long long)(us / 1000.0);
-
-    unsigned ms   = (unsigned)(totalMs % 1000ull);
-    unsigned long long totalSec = totalMs / 1000ull;
-    unsigned sec  = (unsigned)(totalSec % 60ull);
-    unsigned long long totalMin = totalSec / 60ull;
-    unsigned min  = (unsigned)(totalMin % 60ull);
-    unsigned long long totalHr = totalMin / 60ull;
-    unsigned hr   = (unsigned)(totalHr % 24ull);
-    unsigned days = (unsigned)((totalHr / 24ull) % 400ull);
+    unsigned ms, sec, min, hr, days;
+    if (m->epochSec != NULL && *m->epochSec > 0.0) {
+        /* THE TIME OF DAY, not seconds since start-up.  The unit is a clock:
+         * PASS initialises GMT from it (FPMMTURM) and shows it on every
+         * display's top line.  Reporting elapsed time made every session
+         * begin on day 0 at whatever hour the run had reached.  Local time,
+         * day of year counted from 001, as --date-time-epoch documents. */
+        double t = *m->epochSec + us / 1e6;
+        time_t whole = (time_t)floor(t);
+        struct tm lt;
+        localtime_r(&whole, &lt);
+        ms = (unsigned)((t - (double)whole) * 1000.0) % 1000u;
+        sec = (unsigned)lt.tm_sec % 60u;     /* a leap second reads as :59 */
+        min = (unsigned)lt.tm_min;
+        hr = (unsigned)lt.tm_hour;
+        days = (unsigned)(lt.tm_yday + 1);
+    } else {
+        unsigned long long totalMs = (unsigned long long)(us / 1000.0);
+        ms   = (unsigned)(totalMs % 1000ull);
+        unsigned long long totalSec = totalMs / 1000ull;
+        sec  = (unsigned)(totalSec % 60ull);
+        unsigned long long totalMin = totalSec / 60ull;
+        min  = (unsigned)(totalMin % 60ull);
+        unsigned long long totalHr = totalMin / 60ull;
+        hr   = (unsigned)(totalHr % 24ull);
+        days = (unsigned)((totalHr / 24ull) % 400ull);
+    }
 
     /* DAYS/HOURS: 2 bits day-hundreds, 4 day-tens, 4 day-units,
      * 2 hour-tens, 4 hour-units. */
@@ -109,16 +132,27 @@ static void mtu_fill_time(struct MtuModel *m) {
     /* MILLISECONDS in 0.125 ms units, thirteen bits. */
     unsigned msec = (ms * 8u) & 0x1fffu;
 
-    /* TFMTU's three time halfwords sit at OFFSET 2 of the six-word
-     * transfer, not at its start.  FPMMTURM says so itself:
-     *     LA  R3,TFCMMTU1+2      POINT TO FIRST TIME READ
-     *     LH  R4,TFCMMTU2+2      LOAD ACTUAL TIME FROM BUFF 2
-     * The first two words are the unit's header, which this model leaves
-     * zero. */
+    /* The six transferred halfwords are GMT at 0,1,2 and MET at 3,4,5 --
+     * the buffer's very start, not offset 2.  FIOPRMPG's commander points
+     * the buffer register AT the buffer (`#LBR TFCMMTU1`) and then reads
+     * `#MIN 0,6`; DCD14201 takes `%COPY(DL(19),TFCMMTU1$(1:), 6)`; and
+     * FPMMTURM walks the result from the base:
+     *     LH  R2,0(R0)   GET GMT DAYS/HRS      (FPMLIMCK)
+     *     LH  R2,1(R0)   GET GMT MIN/SEC
+     *     LH  R2,3(R0)   GET MET DAYS/HRS
+     *     AHI R0,3       POINT TO MET TIME
+     * The `TFCMMTU1+2` this model was built on is the PCMMU branch (lines
+     * 265-365), where +2 is the MILLISECONDS word, read repeatedly to
+     * detect the PCMMU clock ticking -- not a header offset, and not the
+     * MTU's own layout.
+     *
+     * MET is left zero: this simulator has no launch to count from, and
+     * FPMLIMCK's MET tests have no lower bound (days < X'365', hours
+     * <= X'23', min <= X'59', sec <= X'164'), so all-zero passes. */
     memset(m->reply, 0, sizeof m->reply);
-    m->reply[2] = (uint16_t)dyhr;
-    m->reply[3] = (uint16_t)mnsc;
-    m->reply[4] = (uint16_t)msec;
+    m->reply[0] = (uint16_t)dyhr;
+    m->reply[1] = (uint16_t)mnsc;
+    m->reply[2] = (uint16_t)msec;
     m->replyHead = 0;
     m->replyCount = MTU_WORDS;
     m->reads++;
@@ -174,5 +208,5 @@ void mtumodel_report(struct MtuModel *m) {
     fprintf(stderr, "mtu: {\"commands\":%ld,\"timeReads\":%ld,\"wordsOut\":%ld,"
             "\"lastTime\":\"%04x %04x %04x\"}\n",
             m->commands, m->reads, m->wordsOut,
-            m->reply[2], m->reply[3], m->reply[4]);
+            m->reply[0], m->reply[1], m->reply[2]);
 }

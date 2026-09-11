@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <time.h>
 
 #include "ebcdic.h"
@@ -436,6 +437,35 @@ static void deu_complete_fill(DeuModel *d) {
      * timeFills sat at 0 and said nothing had arrived. */
     if (d->xferFunc == FUNC_TIME_FILL) {
         d->timeFills++;
+        /* YAGPC_TIMEFILL: decode what PASS is actually sending.  Seven
+         * halfwords -- mission time and event time as 48-bit IBM floats
+         * (sign, 7-bit excess-64 characteristic, 40-bit base-16 fraction),
+         * then the conversion word.  Printed as day/hh:mm:ss the way the
+         * MEDS header clock renders it, which is how a wrong MTU reading
+         * becomes visible without a display attached. */
+        if (n >= 7 && getenv("YAGPC_TIMEFILL")) {
+            static long nt = 0;
+            /* The first fills predate the MTU read -- PASS initialises its
+             * clock from the unit well into the run -- so sample forever,
+             * thinned, rather than printing only the opening seconds. */
+            if (nt++ < 4 || nt % 20 == 0) {
+                double v[2];
+                for (int k = 0; k < 2; ++k) {
+                    const uint16_t *f = w + 3 * k;
+                    uint64_t frac = ((uint64_t)(f[0] & 0x00ffu) << 32) |
+                                    ((uint64_t)f[1] << 16) | (uint64_t)f[2];
+                    int ex = (int)((f[0] >> 8) & 0x7fu) - 64;
+                    double x = (double)frac / 1099511627776.0; /* 2^40 */
+                    x *= pow(16.0, (double)ex);
+                    v[k] = (f[0] & 0x8000u) ? -x : x;
+                }
+                long ms = (long)(v[0] + 0.5);
+                fprintf(stderr, "deu: timefill mission=%.3f (%03ld/%02ld:%02ld:%02ld)"
+                        " event=%.3f conv=%04x\n", v[0],
+                        ms / 86400, (ms / 3600) % 24, (ms / 60) % 60, ms % 60,
+                        v[1], (unsigned)w[6]);
+            }
+        }
         d->xferActive = false;
         d->xferCount = 0;
         return;

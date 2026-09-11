@@ -38,6 +38,13 @@ void mtumodel_free(struct MtuModel *m);
 /* The MTU reports elapsed time, so it needs the same simulated clock the
  * rest of the machine runs on. */
 void mtumodel_set_clock(struct MtuModel *m, const double *clockUs);
+/* The wall-clock time the simulated clock's zero stands for, in Unix epoch
+ * seconds -- the CPU's dateTimeAnchorEpochSec, which --date-time-epoch sets
+ * and which otherwise is the host's time at start-up.  With it the unit
+ * reports that plus elapsed time as LOCAL day-of-year/hh:mm:ss, the time
+ * base DATE() and CLOCKTIME() already use; without it, elapsed time from
+ * day 0, as before. */
+void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec);
 
 /* True for the buses this unit answers on (20, 21, 22). */
 bool mtumodel_owns_bus(int busID);

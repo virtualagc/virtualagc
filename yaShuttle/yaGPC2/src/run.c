@@ -359,8 +359,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
 
     if (opts->mtuModel) {
         r->mtuModel = mtumodel_create();
-        if (r->mtuModel)
+        if (r->mtuModel) {
             mtumodel_set_clock(r->mtuModel, &r->age.gpc.cpu.elapsedTimeUs);
+            mtumodel_set_epoch(r->mtuModel, &r->age.gpc.cpu.dateTimeAnchorEpochSec);
+        }
     }
 
     if (opts->mmuModelVolume || r->mtuModel || r->nDeuModelExtra > 0) {
