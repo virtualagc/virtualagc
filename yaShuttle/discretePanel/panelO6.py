@@ -33,6 +33,11 @@ and SELECT 1+2 / 2+3 / 3+1) and the BFC DISENGAGE block from panel F6
 (a horizontal two-position toggle; RIGHT disengages the BFS).  Those
 follow the highlighted insets on SCOM printed page 2.6-25.
 
+Below the IPL SOURCE tab, in the same column and at F6's size, is an
+ACTIVITY pane with MM1 and MM2 lamps: pane grey when unpowered, green
+for READY, red for BUSY.  They are indicators, not controls; set them
+with PanelO6.set_activity().  Nothing drives them yet.
+
 This is the paddle-switch variant of panelO6.py: same layout and
 behaviour, but the two- and three-position switches are drawn as
 bat-handle paddle toggles rather than sliding capsules.
@@ -59,6 +64,8 @@ IPL_SOURCE_POS = ("MMU 1", "OFF", "MMU 2")       # up, mid, down
 BFC_DISPLAY_POS = ("ON", "OFF")                 # up, down
 BFC_SELECT_POS = ("1+2", "2+3", "3+1")          # up, mid, down
 BFC_DISENGAGE_POS = ("LEFT", "RIGHT")           # left, right; unlabeled
+MMUS = ("MM1", "MM2")                           # ACTIVITY lamps, left to right
+ACTIVITY_STATES = ("OFF", "READY", "BUSY")      # unpowered, green, red
 
 # Typical pre-flight: GPC 5 is the BFS computer, OUTPUT in BACKUP.
 DEFAULT_POWER = ["ON"] * N_GPC
@@ -68,6 +75,7 @@ DEFAULT_IPL_SOURCE = "OFF"
 DEFAULT_BFC_DISPLAY = "OFF"
 DEFAULT_BFC_SELECT = "1+2"
 DEFAULT_BFC_DISENGAGE = "LEFT"     # RIGHT disengages the BFS
+DEFAULT_ACTIVITY = ["OFF", "OFF"]
 
 # Aircraft-panel greys.  Overhead panels are light gull gray with black
 # engraved legends, not the dark of a CRT bezel.
@@ -89,6 +97,15 @@ C_TB_GRAY = "#a3a39c"
 C_TB_LEGEND = "#f2f0e6"
 C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
+# ACTIVITY lamps.  Unpowered is the pane grey, so a dark lamp is just its rim.
+C_LAMP = {"OFF": C_PANEL, "READY": "#1fbf2a", "BUSY": "#e02418"}
+# Tk reports no cap height, and its "ascent" is not one (on X11 with
+# Nimbus Sans it nearly equals the caps; with Arial it is 1/4 taller).
+# Advance widths are reliable, and the Helvetica metric family (Helvetica,
+# Arial, Nimbus Sans, Liberation Sans) shares them: every digit is 0.556
+# em, and caps are about 0.72 em.
+HELV_DIGIT_EM = 0.556
+HELV_CAP_EM = 0.72
 
 # Window margin on every side equals the original top inset.
 MARGIN = 28
@@ -186,6 +203,7 @@ class PanelO6:
         self.bfc_display = DEFAULT_BFC_DISPLAY
         self.bfc_select = DEFAULT_BFC_SELECT
         self.bfc_disengage = DEFAULT_BFC_DISENGAGE
+        self.activity = list(DEFAULT_ACTIVITY)
         self._held_ipl = None
 
         cw, ch = scaled_wh(REF_W, REF_H, size)
@@ -235,6 +253,8 @@ class PanelO6:
         log("  BFC CRT DISPLAY=%s  SELECT=%s" %
             (self.bfc_display, self.bfc_select))
         log("  BFC DISENGAGE=%s" % self.bfc_disengage)
+        log("  ACTIVITY  %s" % "  ".join(
+            "%s=%s" % (m, a) for m, a in zip(MMUS, self.activity)))
 
     def _announce(self, what, old, new):
         if old == new:
@@ -528,6 +548,11 @@ class PanelO6:
         f6_y1 = f6_y0 + 4 * pad + 4 * th10 + sw_h
         self._draw_c3(c3_x0, c3_y0, c3_x1, c3_y1)
         self._draw_f6(f6_x0, f6_y0, f6_x1, f6_y1)
+        # ACTIVITY is F6's size, in the same column, with its bottom on
+        # O6's bottom edge -- below the IPL SOURCE tab.
+        act_y1 = my1
+        act_y0 = act_y1 - (f6_y1 - f6_y0)
+        self._draw_activity(f6_x0, act_y0, f6_x1, act_y1)
 
     def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
@@ -714,6 +739,44 @@ class PanelO6:
         pos = BFC_DISENGAGE_POS.index(self.bfc_disengage)
         self._guarded_toggle_h(sx1, sy1, sx2, sy2, pos, npos=2)
         self._hit("bfc_disengage", None, sx1, sy1, sx2, sy2)
+
+    def _draw_activity(self, x0, y0, x1, y1):
+        """MM1 / MM2 ACTIVITY lamps, each captioned on its left."""
+        self._rect_panel(x0, y0, x1, y1)
+        pad = 10
+        th10 = self._th(10)
+        cx = (x0 + x1) / 2.0
+        y = y0 + pad + th10
+        self._text(cx, y, "ACTIVITY", size=10)
+        # Lamps centred in the space below the title.
+        row_y = (y + th10 + pad + y1 - pad) / 2.0
+        quarter = (x1 - x0) / 4.0
+        for i, (name, state) in enumerate(zip(MMUS, self.activity)):
+            self._lamp(cx + (2 * i - 1) * quarter, row_y, name, state)
+
+    def _lamp(self, gx, y, caption, state, size=10):
+        """Caption then disk, the pair centred on gx.
+
+        The disk's diameter is the caption's cap height, and its centre
+        is on the caps' centre rather than on the em box's.
+        """
+        f = self._tkfont(size)
+        ascent = float(f.metrics("ascent"))
+        descent = float(f.metrics("descent"))
+        em = f.measure("0123456789") / (10 * HELV_DIGIT_EM)
+        cap = HELV_CAP_EM * em
+        s = max(self.s, 0.01)
+        d = cap / s
+        gap = 0.5 * d
+        tw = f.measure(caption) / s
+        tx = gx - (tw + gap + d) / 2.0
+        self._text(tx, y, caption, size=size, anchor="w")
+        # anchor w centres the linespace; the baseline is (a - d)/2 below.
+        cy = y + ((ascent - descent) / 2.0 - cap / 2.0) / s
+        lx = tx + tw + gap
+        self._oval(lx, cy - d / 2.0, lx + d, cy + d / 2.0,
+                   fill=C_LAMP[state], outline=C_INK,
+                   width=max(1, int(self.s)))
 
     # ---- control bodies -------------------------------------------------
 
@@ -991,6 +1054,19 @@ class PanelO6:
         old = self.bfc_disengage
         self.bfc_disengage = value
         self._announce("BFC DISENGAGE", old, value)
+        self.redraw()
+
+    def set_activity(self, i, state):
+        """Light ACTIVITY lamp i (0 = MM1): OFF, READY (green), BUSY (red).
+
+        An indicator, not a control; nothing on the panel calls this.
+        """
+        if state not in ACTIVITY_STATES:
+            raise ValueError("ACTIVITY state must be one of %s, not %r"
+                             % (", ".join(ACTIVITY_STATES), state))
+        old = self.activity[i]
+        self.activity[i] = state
+        self._announce("%s ACTIVITY" % MMUS[i], old, state)
         self.redraw()
 
 
