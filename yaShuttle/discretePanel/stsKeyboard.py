@@ -63,7 +63,7 @@ GAP_RATIO = 1.0 / 8.0
 GAP_REF = KEY_REF * GAP_RATIO
 REF_W = int(round(NCOL * KEY_REF + (NCOL + 1) * GAP_REF))
 REF_H = int(round(NROW * KEY_REF + (NROW + 1) * GAP_REF))
-FULL_SIZE = 1024       # --size units: 1024 is the design (full) window
+FULL_SIZE = 768        # --size units: 768 is the design (full) window, as in panelO6.py
 
 # Same gull grey as panelO6.py; keys are black on that surface.
 C_WINDOW = "#2a2a2a"
@@ -199,7 +199,7 @@ def _dont_steal_focus(root):
 
 
 def scaled_wh(w, h, size):
-    """Pixel size at --size N, where FULL_SIZE (1024) is the design window."""
+    """Pixel size at --size N, where FULL_SIZE (768) is the design window."""
     f = size / float(FULL_SIZE)
     return max(1, int(round(w * f))), max(1, int(round(h * f)))
 
@@ -360,7 +360,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Space Shuttle DPS keyboard")
     ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
-                    help="Scale: 1024 is full size (default), 512 is half, etc.")
+                    help="Scale: 768 is full size (default), 512 is 2/3, 384 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 520x1020+80+20 (overrides --size)")
     ap.add_argument("--kybd", type=int, choices=sorted(KYBD_PORT), default=1,
