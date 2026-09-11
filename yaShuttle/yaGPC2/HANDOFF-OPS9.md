@@ -418,6 +418,87 @@ Expect `DEU blocks forced: 24, volume 2210 blocks`.
 
 ---
 
+## 7b.  Fill the root's unresolved cross-phase Z-CONs
+
+**This step is a WORKAROUND for a build defect.**  Skip it and the tape boots,
+IPLs, and completes an `OPS 901/201/301 PRO` transition -- and then the machine
+stops with `invalid instruction 0xc6c6 at 0x48da`.
+
+```bash
+python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/patch_root_zcons.py \
+        /tmp/claude-1000/OI340700-vNNboot.mmv
+```
+
+Expect `18 Z-CONs filled` and a recomputed load-block checksum.  The tool finds
+its own load block by anchoring on the three filled Z-CONs that precede the
+hole, so it need not be told a slot or a destination address, and it refuses to
+write if a target cell is not fill.
+
+### What it is fixing
+
+A HAL/S call into a procedure that lives in an **overlay** phase goes through a
+fullword indirect address pointer -- a Z-CON -- held in the **resident root**
+at a fixed low address.  The compiler emits the cell as `8000 0E00`: offset 0
+with the sector bit set, `XC=1 C=1 CB=1 BSR=0`.  Only the linker can finish it,
+because only the linker knows which sector the overlay's code landed in.
+
+Our root link does not.  `PHASE02` has **678 unresolved relocations over 304
+distinct symbols**, eighteen of them these Z-CONs, so the cells reach the
+volume as IPL fill.
+
+Read as a pointer, `C6C6C6C6` is not inert.  Its bits say `XC=0, C=1, CB=1,
+CD=0, BSR=12`, so the `C=1`/`CB=1` rule (AP-101S PoO Fig. 2-17) **replaces the
+PSW's BSR with 12**, and `XC=0` asks for post-indexing.  A `SCAL` through such
+a cell branches to `(0xC6C6 + index)` in sector 12, which is unloaded fill.
+
+Measured on v36: the `DO CASE` dispatch in `#CDCDDOW` does `SCAL` through
+`#ZDCDDG9` at `0x001DE` and lands at `0x648DA`.  Note that every **correctly
+filled** Z-CON here carries `XC=1` -- no post-indexing -- so which cell in the
+hole is used does not change where it goes; the target depends only on the
+index register.  That is why `OPS 901 PRO` and `OPS 201 PRO`, which do not call
+the same routine, die at the identical address.
+
+### Where the values come from
+
+Two independent sources that agree, neither of them one of our tapes: the eight
+DASS dumps in `~/workspace/PFS/mafgen`, which agree with each other on all 18
+cells; and our own **whole-memory** link, `link/G9-symbols.json`, whose
+relocation list gives the same target for 17 of the 18.  The exception is
+`0x001E2`, where `#ZDCDDS4` comes from `<external-syms>` rather than from a
+real `DCDDS4.obj` and the linker put `ACOS`'s Z-CON in the same cell -- a
+placement collision, and a second defect.
+
+### The real fix, which is cheaper than it looks
+
+`pass-build/OI340700/phase3/PHASE02.lib` (2026-09-05) **already gets this
+right**: it matches the DASS dumps on 159 of the 160 halfwords of the root load
+block at `0x1a8..0x247`.  The root link **regressed** after that date.
+
+| root image | deck root | modules | unresolved | matches DASS, `0x1a8-0x247` |
+|---|---|---|---|---|
+| `phase3/PHASE02.lib` (09-05) | `PHASE02` | 517 | 104 | **159 / 160** |
+| `phase2/PHASE02.lib` (09-05) | `PHASE02` | 500 | 96 | 42 / 160 |
+| `phase/PHASE02.lib` (09-06) | `PHASE02` | 516 | **6** | 96 / 160 |
+| `c80boot/PHASE02.lib` (09-08) | `OFTMP@2` | 321 | 678 | -- |
+| v36 tape as shipped | | | | 120 / 160 |
+
+**Resolution count does not predict correctness.**  The 09-06 build resolves
+all but six relocations and still scores 96, because its table is not unfilled
+but **permuted** -- real Z-CON values in the wrong cells from `0x1ac` onward,
+which is what happens when missing sections let later Z-CONs pack into earlier
+slots.  So find what `phase3` did differently rather than hand-writing
+`extsyms-02.json` pins; that file currently contains **none** of the eighteen
+`#C...` targets.
+
+### Not patched, on purpose
+
+`0x1E8`, `0x202`, `0x218` and `0x22C` also differ from the DASS dumps, but they
+hold **real values rather than fill**, and all four have bit 0 clear where the
+dumps have it set, so the target is taken as sector 0.  That is a different
+defect and wants its own diagnosis, not a hand-applied constant.
+
+---
+
 ## 8.  Check the volume before booting it
 
 ```bash
@@ -629,11 +710,56 @@ what §5 stamped.
 
 ---
 
-## The OPS 901/201/301 blocker, as of 2026-09-10
+## The OPS 901/201/301 blocker -- RESOLVED 2026-09-10
 
-`OPS 901 PRO` **does not complete.**  Phase 3 and phase 8 load from the tape;
-phase 18 never does.  `OPS 201` and `OPS 301` fail identically, and neither
-needs phase 18.  Roughly ninety runs have produced no `6/5/0/0`.
+`OPS 901/201/301 PRO` complete, and the machine survives them.  It took **two**
+fixes, and either alone leaves the machine dead.
+
+**1.  `@LH` did not sign-extend** (`src/iop_msc_instr.c`).  `FIOMNTR2` reads
+`TCVTMTTG`, the time-to-go of an I/O operation, and branches on its sign; a
+negative value means the I/O is overdue.  Zero-extended, `-1` read as 65535 and
+armed `FIOMDLY` with a bogus MSC sleep of up to 65535 x 33 us = **2162.7 ms**.
+DK completions then ran ~1053 ms late, DEU fill requests queued, the 25-entry
+IOQE pool drained, `FIOSVC` walked onto the `080ce` sentinel, the store-protect
+program check cost `FPMIHPC2` its `CALL FPMITUPD`, Clock 2 was never re-armed,
+and phase 8's overlay never posted.  Fixed, and **on by default**.  After it:
+OPS 901 reads 34 blocks from `6/5/0/0`, OPS 201 reads 250 from `1/5/0/5`, OPS
+301 reads 162 from `6/5/2/0`; `FTRMGPOV` posts; zero sentinel faults; longest
+DK hold 78 ms against 4264 ms before.
+
+**2.  Eighteen unresolved cross-phase Z-CONs in the root image** (section 7b).
+With the loads working, the machine ran on into a `SCAL` through an **unfilled**
+Z-CON and stopped with `invalid instruction 0xc6c6 at 0x48da`.
+
+> **I MISSED THE SECOND FAULT BY NOT READING THE STOP REASON.**  Seven runs
+> after the `@LH` fix were scored as successes because the transition completed
+> and the tape reads were right.  Every one of them had in fact stopped on the
+> invalid instruction, at a fixed ~226 million steps.  The pre-fix runs end on
+> `interrupted (SIGINT)`, the harness timeout, because the machine was parked
+> in `FPMIDLE` and never crashed -- so "ended at the timeout" and "crashed" look
+> alike unless you read the line.  **Read `STOPPED after` before believing any
+> run.**
+
+Measured, same recipe and wall time, v37 (= v36 plus section 7b) against v36:
+
+| | v36 | v37 |
+|---|---|---|
+| stop reason | `invalid instruction 0xc6c6 at 0x48da` | `interrupted (SIGINT)`, the harness timeout |
+| simulated time | 404.05 s | **613.70 s** |
+| steps | 226,882,033 | **379,270,912** |
+| final NIA | `648da`, `BSR=12` -- unloaded fill | `080c6`, `BSR=1` -- normal |
+| `6/5/0/0` read | yes | yes |
+
+v37 ran **210 s of simulated time past the point where v36 dies** and stopped
+only because its wall clock ran out.  Both tapes read `6/5/0/0`, so the
+transition itself is the `@LH` fix's doing; section 7b is what lets the machine
+live through it.
+
+The crash is **not** a CPU defect.  `SCAL` is not in the PoO's Branch
+Operations list -- it is catalogued under *Special Operations* -- but section
+9.7 says "First, a branch address is computed... This is essentially a BAL
+instruction", so it is branch-type for addressing and `OPTYPE_BRCH` on it is
+correct.  Every digit of the crash follows from the unfilled Z-CON.
 
 > **BEFORE SPENDING A RUN, ASK THE LEDGER.**  Causes investigated and fixes
 > attempted live in `gpc-causes.db`, generated to `CAUSES.md`:
@@ -647,7 +773,11 @@ needs phase 18.  Roughly ninety runs have produced no `6/5/0/0`.
 > without new evidence.  This exists because the observed failure mode is not
 > forgetting a fact but **rediscovering and re-refuting the same cause**.
 
-### There are TWO independent blockers, not one
+### Historical: the two blockers as they looked before the fixes
+
+Kept because the reasoning is reusable and because both builds' symptoms are
+recorded nowhere else.  **Everything from here to "Diagnostics added for this
+work" predates the `@LH` fix** and describes a machine that no longer exists.
 
 They share an outcome and must not be conflated.  Fixing either alone will not
 produce `6/5/0/0`.
@@ -791,14 +921,29 @@ state — went from **8.37 %** to **0.50 %** over this work.
 
 ## What is still open
 
-* **`OPS 901/201/301 PRO` do not complete.**  Phase 3 and phase 8 load; phase
-  18 never does.  See "The OPS 901/201/301 blocker" above.  There are **two**
-  independent faults, one per build, and both end by killing Clock 2 so that
-  phase 8's mass-memory transaction never completes.  The two open links are:
-  (a) our build — why a completed DK transaction does not clear its
-  `TCVTBCEB` bit for ~1 s; (b) the other build — why the phase-8 overlay's
-  unprotect walk starts at `0x1010e` rather than covering its block.
+* **The root link's unresolved relocations.**  Section 7b patches eighteen
+  Z-CONs onto the finished volume; the build should not need patching.  678
+  relocations over 304 distinct symbols are unresolved in `PHASE02`, and the
+  eighteen are only the currently-fatal subset — `#PCDHMMU` alone has 179
+  unresolved references.  `phase3/PHASE02.lib` (09-05) already gets the Z-CONs
+  right, so this is a bisect between 09-05 and 09-08, not new work.
   `gpc-causes.py list --status=open` is the live list.
+* **Four Z-CONs hold wrong values rather than fill** — `0x1E8`, `0x202`,
+  `0x218`, `0x22C`, each with bit 0 clear where all eight DASS dumps have it
+  set, so the target is taken as sector 0.  Deliberately not patched.
+* **Build provenance is not kept.**  The tape a run used cannot be traced back
+  to the tree that made it: staging is reused in place, so `c80boot/` and
+  `c80src/` hold only what the **last** build left there.  Thirty-six numbered
+  volumes were cut across 09-08/09-09 and only the `.mmv` of each survives;
+  **no tree on disk reproduces v36's root block** — its fingerprint (`c878` at
+  `0x1d0` *and* `117c` at `0x1e8`) matches none of 64 staged `.lib` files.
+  This is not a `/tmp` cleanup: last boot was 09-07, `tmpfiles.d` keeps `/tmp`
+  for 30 days, and `OI340700-v2` through `v30` are all still there.
+  Fingerprint a few halfwords before assuming a `phase*/` artifact belongs to a
+  given tape.
+* **The old DK question is closed by the `@LH` fix** and should not be
+  reopened: a completed DK transaction was never slow to clear `TCVTBCEB`; the
+  monitor was asleep for up to 2.16 s on a sign-extension bug.
 * **`#RDL`'s count read was wrong and is fixed, but latent.**  It used a
   halfword access masked to 16 bits and did not ignore the address LSB, where
   the BCE PoO specifies bits 14-31 of the *fullword* with the LSB ignored —
@@ -823,6 +968,19 @@ state — went from **8.37 %** to **0.50 %** over this work.
 
 ### Closed since the last sync
 
+* **`OPS 901/201/301 PRO` now complete and the machine survives them** — the
+  `@LH` sign-extension fix plus section 7b's Z-CON fill.  Measured against a
+  v36 control in the same session; see the section above.
+* **The `0xc6c6` crash at `0x648DA` is not a CPU defect.**  `SCAL` is not in
+  the PoO's Branch Operations list — it is catalogued under *Special
+  Operations* — but section 9.7 ("Stack Call") says "First, a branch address is
+  computed... This is essentially a BAL instruction", so it **is** branch-type
+  for addressing, and `OPTYPE_BRCH` on it is correct.  The pointer's field
+  layout is confirmed independently by the data: the real Z-CONs around the
+  hole read `0x0E80` = `XC=1 C=1 CB=1 BSR=8`, exactly what a cross-sector call
+  needs.
+* **`tools/patch_root_zcons.py`** — new, and labelled a workaround in its own
+  header, like `patch_ssl_zcon.py`.
 * **A searchable ledger of causes now exists** — `gpc-causes.py` over
   `gpc-causes.db`, generated to `CAUSES.md`, following the same pattern as the
   `dass-handoff.py` handoffs (database is the source, Markdown is generated,
