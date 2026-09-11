@@ -81,8 +81,10 @@ MMUS = ("MM1", "MM2")                           # ACTIVITY lamps, left to right
 ACTIVITY_STATES = ("OFF", "READY", "BUSY")      # unpowered, green, red
 RHCS = ("CDR", "PLT")                           # BFS ENGAGE pushbuttons
 
-# Typical pre-flight: GPC 5 is the BFS computer, OUTPUT in BACKUP.
-DEFAULT_POWER = ["ON"] * N_GPC
+# Typical pre-flight: GPC 5 is the BFS computer, OUTPUT in BACKUP.  The
+# GPCs start unpowered.  POWER drives no discrete -- the emulator is its own
+# process -- so OFF only keeps the OUTPUT talkbacks barberpole.
+DEFAULT_POWER = ["OFF"] * N_GPC
 DEFAULT_OUTPUT = ["NORMAL", "NORMAL", "NORMAL", "NORMAL", "BACKUP"]
 DEFAULT_MODE = ["HALT"] * N_GPC
 DEFAULT_IPL_SOURCE = "OFF"
