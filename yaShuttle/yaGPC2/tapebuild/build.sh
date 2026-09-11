@@ -3,11 +3,17 @@
 #
 #     tapebuild/build.sh [WORK]          default WORK=/tmp/claude-1000/tapebuild
 #
-# Produces $WORK/OI340700-v43boot.mmv.  Given the same inputs it is
-# byte-identical to ~/workspace/pass-run/OI340700-v43boot.mmv -- the last
+# Produces $WORK/OI340700-v44boot.mmv.  Given the same inputs it is
+# byte-identical to ~/workspace/pass-run/OI340700-v44boot.mmv -- the last
 # stage checks that when REF is set:
 #
-#     REF=~/workspace/pass-run/OI340700-v43boot.mmv tapebuild/build.sh
+#     REF=~/workspace/pass-run/OI340700-v44boot.mmv tapebuild/build.sh
+#
+# (v43boot, 2026-09-11, is this build with the ASM101Sa before its RLD
+# R-pointer fix: BILDNEW5.obj named GPCIPL instead of LINES in ten RLDs, so
+# GPCIPL read its error-message table two halfwords low and announced itself
+# with message 130's text, ">>> GPC POWER REFAIL -PROGRAM/MACHINE WERE R".
+# That object is the only input that differs.)
 #
 # (v42boot, 2026-09-11 morning, is this build at PFS 19464059 with the SM2
 # STACK cards as a source patch and the DEU critical formats copied from
@@ -169,7 +175,7 @@ ln -sfn "$T/lib/runtime/ZCON" "$SDL/build/lib/runtime/ZCON"
 T="$T" S="$S" WORK="$WORK" IN="$IN" TOOLS="$TOOLS" DFG="$DFG" DPS="$DPS" bash "$HERE/link-and-cut.sh" \
   || die "link-and-cut.sh"
 
-OUT="$WORK/OI340700-v43boot.mmv"
+OUT="$WORK/OI340700-v44boot.mmv"
 if [ -n "${REF:-}" ]; then
   if cmp -s "$OUT" "$REF"; then echo "### MATCH: byte-identical to $REF"
   else echo "### MISMATCH against $REF"; cmp "$OUT" "$REF" | head -1; exit 1; fi

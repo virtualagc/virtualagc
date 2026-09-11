@@ -1,8 +1,18 @@
 # Building the OPS 9 tape
 
-How to build **`OI340700-v43boot.mmv`** from source — the volume that runs
+How to build **`OI340700-v44boot.mmv`** from source — the volume that runs
 `OPS 201/301/302/801/901/101 PRO` and keeps polling the displays (see "The
 OPS 901/201/301 blocker" below).
+
+**v44 (2026-09-11) is v43 with ASM101S's RLD fix** (virtualagc `6d418f3c6`),
+and its only effect is on `GPCIPL`: ten halfwords of phase 10, each two higher.
+v43 announced every IPL with `>>> GPC POWER REFAIL -PROGRAM/MACHINE WERE R`.
+That was never a power refail -- FAILEXEC does not run -- but message 132,
+`GPCIPL 09.05.00.00.00 LOADED`, displayed with message 130's text:
+`BILDNEW5.obj` named GPCIPL rather than LINES in ten RLDs, the link puts
+LINES two halfwords past its assembled 3C20 (the overlay's inter-block
+checksum), and so CM4UPDT read its error-message table two entries low.  See
+"The `GPC POWER REFAIL` message" under open items, now closed, and ledger #84.
 
 **v43 (2026-09-11) is v42 with the last three data gaps closed in PFS**
 (`24af1848`): the SM compools carry the flight's tables, DCDDS2 is the
@@ -42,7 +52,7 @@ saying so in its header; `tools/dassrecon/` re-verifies them.
 ## 0.  One command
 
 ```bash
-REF=~/workspace/pass-run/OI340700-v43boot.mmv \
+REF=~/workspace/pass-run/OI340700-v44boot.mmv \
     ~/git/virtualagc/yaShuttle/yaGPC2/tapebuild/build.sh /tmp/claude-1000/tapebuild
 ```
 
@@ -66,12 +76,14 @@ About 25 minutes, most of it `compilePASS`.  It must end with
     OVERSIZE rows (must be 0): 0
     CFIT 32 slots + 3288 body halfwords + PAD -> 3657 halfwords (CFBSIZE 3656 + checksum 5D8D) -> .../DEUCFLM.bin
     DEU critical formats: 24 block(s) added, 0 overwritten; volume now holds 2665
-### MATCH: byte-identical to /home/rburkey/workspace/pass-run/OI340700-v43boot.mmv
+### MATCH: byte-identical to /home/rburkey/workspace/pass-run/OI340700-v44boot.mmv
 ```
 
 **Verified 2026-09-11 by running exactly this command in an empty directory**
 -- twice: once to make `OI340700-v43boot.mmv`, once more with `REF` to prove
-it deterministic (v42 was verified the same way that morning).  (v41 was verified the same way on 2026-09-10;
+it deterministic (v42 was verified the same way that morning).  v44 was
+verified the same way that afternoon (`tapebuild-v44`, then `tapebuild-v44r`
+with `REF`); every stage line above is unchanged from v43.  (v41 was verified the same way on 2026-09-10;
 the first attempt then did not match -- a bare toolchain clone links nothing,
 see "`con80build`'s default runtime directories must exist" under stages 4–7
 -- and the script was fixed until it did; that is the only way this document
@@ -105,7 +117,7 @@ pinned source:
 | 1 | source tree | PFS `24af1848`: `OI340600` overlaid with `OI340700`; `RUNASM/RUNMAC/ZCONASM` from `PASS.REL32V0`; `source-patches/OI340700-APPLSRC-CSPCLB-qualification.patch` | `$WORK/OI340700` |
 | 2 | objects | `compilePASS --no-csects --sdl --release=OI340700` | 1,998 objects |
 | 3 | derived layers | `tapebuild/derive.py` | `SYSLIBL1`, `lib/runtime`, `sdfpad`, `pchsrc`, per-phase csect tables |
-| 4–7 | link, cross-phase resolution (4b), unlinked pool words (4c), stamp, cut, DEU critical formats built from source, SSL checksum | `tapebuild/link-and-cut.sh` | `OI340700-v43boot.mmv` |
+| 4–7 | link, cross-phase resolution (4b), unlinked pool words (4c), stamp, cut, DEU critical formats built from source, SSL checksum | `tapebuild/link-and-cut.sh` | `OI340700-v44boot.mmv` |
 
 ---
 
@@ -534,12 +546,12 @@ the carry out of the doubling.
 `build.sh` already refuses a phase that does not link, an `OVERSIZE` cut, a
 failed stamp, any cross-phase residue but stage 4c's two words, and `REF`
 compares the whole volume.  Two further checks, with the values the verified
-v43 build gives (2026-09-11):
+v43 and v44 builds give (2026-09-11):
 
 ```bash
 W=/tmp/claude-1000/tapebuild
 python3 ~/git/virtualagc/yaShuttle/yaGPC2/tools/check_volume_destinations.py \
-        $W/OI340700-v43boot.mmv
+        $W/OI340700-v44boot.mmv
 ```
 
 Expect `No recognised load block is aimed at resident memory.` and, since
@@ -566,7 +578,7 @@ for x in lib.extents:
         text[b + i] = (x.data[2*i] << 8) | x.data[2*i + 1]
 gpt = [text.get(0x1CCF2 + i, 0) for i in range(1093)]
 sig = b"".join(v.to_bytes(2, "big") for v in gpt[:12])
-raw = open(W + "/OI340700-v43boot.mmv", "rb").read()
+raw = open(W + "/OI340700-v44boot.mmv", "rb").read()
 print("GPT %d non-zero; on tape: %s; first descriptor %s"
       % (sum(1 for v in gpt if v), "yes" if sig in raw else "NO",
          " ".join("%04X" % v for v in gpt[:4])))
@@ -589,17 +601,18 @@ left from a previous run makes the GPC flap `HALT`↔`RUN`.
 
 The recipe that verified OPS 901/201/301 on v41 (2026-09-10), v42 and v43
 (2026-09-11, runs `F42_*`/`V43_*` with `YAGPC_BUSLOG`, three at once on port
-bases 6800/6700/6600;
+bases 6800/6700/6600; v44's `headless-v44` OPS 901 run leaves all four
+display units' memories byte-identical to `V43_901`'s;
 use `OPS,2,0,1,PRO` or `OPS,3,0,1,PRO` for the others):
 
 ```bash
 cd ~/workspace/pass-run
-YAGPC_DEU_EXTRA_PRELOADED=1 TAPE=/tmp/claude-1000/tapebuild/OI340700-v43boot.mmv \
+YAGPC_DEU_EXTRA_PRELOADED=1 TAPE=/tmp/claude-1000/tapebuild/OI340700-v44boot.mmv \
 DEU2="7,8,9" DEUMF=1 DEUKEYS="@120s:ITEM,1,EXEC;@280s:OPS,9,0,1,PRO" \
-PORT_BASE=6800 ./headless-gpcmem.sh 430 ~/workspace/pass-run/headless-v43
+PORT_BASE=6800 ./headless-gpcmem.sh 430 ~/workspace/pass-run/headless-v44
 ```
 
-Interactively: `./retest-crt2.sh --tape ~/workspace/pass-run/OI340700-v43boot.mmv`.
+Interactively: `./retest-crt2.sh --v 44`.
 
 The IPL SOURCE switch must be **off** before RUN or FCOS refuses every
 post-IPL mass-memory transaction; the harness handles this.  `IDLE_TIMEOUT`
@@ -1054,14 +1067,25 @@ state — went from **8.37 %** to **0.50 %** over this work.
 * **Phase 16 is not built**: it is SM4, which OI340700 excludes (stages
   4–7); skipped with `mmustamp --skip-phase 16`.  `HALSTAT.ASC`'s SM4 map is
   the one description of it we have.
-* **The `GPC POWER REFAIL` message.**  It tracks our `GPCIPL` exactly — present
-  on v2–v17 and v27, absent on v18–v26 which carried the reference's — but it
-  does **not** block the load, and our `GPCIPL` is bit-exact to the original
-  IBM listing (`PFS/temp/temp/BILDNEW5.lst`, VER 9.05 09-23-96): 0 mismatches
-  in 13,285 halfwords, against 1,167 for the GPCIPL inside
-  `pass-ipl-cflm.mmv`.  It is not a build defect of ours.
 
 ### Closed since the last sync
+
+* **The `GPC POWER REFAIL` message -- FIXED in v44** (ledger #84).  This item
+  used to say "it is not a build defect of ours", on the strength of GPCIPL's
+  text matching `BILDNEW5.lst`.  That was the wrong test: the listing cannot
+  show an RLD.  A headless v43 boot with `YAGPC_RANGETRACE=235-290`,
+  `YAGPC_WATCHHW=46e-471` and `YAGPC_SVCTRACE` executes nothing in FAILEXEC,
+  never writes FAILSWCH and issues no SVC 130; the display line is message
+  132 (SVC X'8084' at 029A4, CM4UPDT's once-per-IPL annunciation) shown with
+  message 130's text.  CM4UPDT indexes the packed pointer table ERRMSGS
+  through `LA$ B1,ERRMSGS(Z3)`; ASM101S emitted that RLD (and nine
+  self-references inside LINES) against GPCIPL's ESDID, and phase 10's
+  `OVERLAY STP2` puts LINES at 3C22, after the inter-block checksum, not at
+  its assembled 3C20.  Entry 132 read as entry 130, and its text from two
+  halfwords early -- hence `WERE R` for `WERE RESET`.  The v18–v26 volumes
+  carried another chain's GPCIPL, which has 3C22 there.  Fixed in the
+  assembler (`6d418f3c6`), not on the volume: `$POF057` (the unprotect start
+  address) and the MSG154–156 text pointers were two low as well.
 
 * **POLL FAIL after OPS 201, 301, 801 and 901** -- fixed on v41 by section 7b's
   `resident` and `phase8` groups; confirmed headless and interactively.  See

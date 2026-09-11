@@ -7,7 +7,7 @@
 #   WORK   scratch: sdfpad/, pchsrc/, extsyms/, and the outputs
 #   IN     tapebuild/inputs    TOOLS  yaGPC2/tools
 #   DFG    the pinned dfg checkout   DPS  Don's checkout (its Python venv)
-# Output: $WORK/OI340700-v43boot.mmv.  (Until 2026-09-11 this produced v36boot,
+# Output: $WORK/OI340700-v44boot.mmv.  (Until 2026-09-11 this produced v36boot,
 # which tools/patch_unresolved.py then hand-filled into v41boot; stages 4b
 # and 4c replace that fill, and the link fixes in toolchain-patches/ the rest.)
 set -u
@@ -15,7 +15,7 @@ set -o pipefail
 : "${T:?}" "${S:?}" "${WORK:?}" "${IN:?}" "${TOOLS:?}"
 C="$WORK/c80"; P="$WORK/pchsrc"; SD="$WORK/sdfpad"; ML="$WORK/minilibs"
 RT="--linklib $T/lib/runtime/RUN --linklib $T/lib/runtime/ZCON"
-OUT="$WORK/OI340700-v43.mmv"; BOOT="$WORK/OI340700-v43boot.mmv"
+OUT="$WORK/OI340700-v44.mmv"; BOOT="$WORK/OI340700-v44boot.mmv"
 export C80SRC_RESOLVED="$S"
 rm -rf "$C"; mkdir -p "$C"
 cd "$(dirname "$S")" || exit 1
