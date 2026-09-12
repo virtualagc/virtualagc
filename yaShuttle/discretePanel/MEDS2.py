@@ -275,6 +275,13 @@ MCAST_GROUP = "239.255.1.1"
 PORT_BASE_DEFAULT = 6900
 PORT_BASE = PORT_BASE_DEFAULT
 
+# WHAT THE WINDOW IS CALLED, before the LRU's own name.  The orbiter has
+# eleven MDUs (CRT1-4, CDR1-2, PLT1-2, MFD1-2, AFD1) and a given GPC talks
+# only to some of them, so several may be on screen at once -- and with
+# --port-base there may be two whole simulations' worth.  "CRT1" alone does
+# not say which of those a window belongs to; --title does.
+WINDOW_TITLE = "MEDS2 MDU"
+
 
 def setPortBase(base):
     """Shift every bus port by base - 6900.  Call BEFORE any Bus exists."""
@@ -9370,7 +9377,8 @@ class MDU(LRU):
         page to put it without disturbing a layout that took a long time to
         fit, and the switch is invisible otherwise."""
         name = MF_NAMES[(self.majorFunc or 0) & 3]
-        t = "MEDS2 MDU / %s - MF %s" % (self.CONFIG.get('config', {}).get('lru'), name)
+        t = "%s / %s - MF %s" % (WINDOW_TITLE,
+                                 self.CONFIG.get('config', {}).get('lru'), name)
         try:
             if self.win is not None:
                 self.win.setWindowTitle(t)
@@ -10700,8 +10708,9 @@ class MDUWindow(QtWidgets.QWidget):
             self.move(int(win['x']), int(win['y']))
         if win.get('fullscreen'):
             self.showFullScreen()
-        self.setWindowTitle("MEDS2 MDU / %s" % (lruConf.get('config', {}).get('lru')
-                                                or name))
+        self.setWindowTitle("%s / %s" % (WINDOW_TITLE,
+                                         lruConf.get('config', {}).get('lru')
+                                         or name))
 
     @staticmethod
     def _envPos():
@@ -11158,6 +11167,12 @@ def buildParser():
     p.add_argument('lrus', nargs='*',
                    help='LRU names from config/meds.json (e.g. crt1 idp1 cdr1); '
                         'default: the config "start" list')
+    p.add_argument('--title', metavar='<text>',
+                   help='what to call the windows, before each LRU\'s own '
+                        'name: "<text> / CRT1".  The orbiter has eleven MDUs '
+                        'and a GPC talks only to some of them, so several may '
+                        'be on screen at once -- and with --port-base there '
+                        'may be two simulations\' worth.  Default "MEDS2 MDU".')
     p.add_argument('--port-base', dest='portBase', type=int, metavar='<n>',
                    help='base of the UDP port range the buses use: every port '
                         'in busConfig is written as base 6900 gives it and '
@@ -11209,6 +11224,9 @@ def main(argv=None):
     # Before any Bus is constructed.
     if args.portBase is not None:
         setPortBase(args.portBase)
+    if args.title:
+        global WINDOW_TITLE
+        WINDOW_TITLE = args.title
     opts = {
         'lrus': args.lrus,
         'configFile': os.path.abspath(args.config) if args.config else None,
