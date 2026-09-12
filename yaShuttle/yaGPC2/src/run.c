@@ -196,7 +196,8 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
     }
     for (int d = 0; d < br->nDeuExtra; d++) {
         if (br->deuExtra[d] && in->busID == br->deuExtraBus[d]) {
-            vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
+            vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
+                              deumodel_in_transfer(br->deuExtra[d]));
             deumodel_service(br->deuExtra[d], svc, in, out);
             vehicle_bus_leave(br->vehicle, in->busID);
             return;
@@ -204,8 +205,13 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
     }
     if (br->fallback) {
         /* The built-in display unit on DK1 arrives here, and it is a shared
-         * device like the rest -- one accumulator, one reply cursor. */
-        vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
+         * device like the rest -- one accumulator, one reply cursor.  Its
+         * mid-transfer state is the DEU's own: measured, two computers told
+         * to drive the same display abandoned 477 transfers between them and
+         * no keystroke ever reached the flight software, with nothing but a
+         * counter in the closing report to say so. */
+        vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
+                          deumodel_in_transfer(br->deu));
         br->fallback(br->fallbackCtx, svc, in, out);
         vehicle_bus_leave(br->vehicle, in->busID);
         return;
@@ -485,6 +491,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             r->busRouter.clockUs = &r->age.gpc.cpu.elapsedTimeUs;
             r->busRouter.vehicle = veh;
             r->busRouter.gpcId = gpcId;
+            r->busRouter.deu = r->deuModel;
             r->busRouter.fallback = base;
             r->busRouter.fallbackCtx = baseCtx;
             ap101_set_servicer(&r->age.gpc, bus_router_service, &r->busRouter);

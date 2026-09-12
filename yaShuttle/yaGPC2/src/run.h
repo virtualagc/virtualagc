@@ -49,6 +49,10 @@ typedef struct {
     /* Simulated microseconds, for YAGPC_DKTRACE.  The router is the one
      * place that sees every bus command with a clock in reach. */
     const double *clockUs;
+    /* The built-in display unit on DK1.  It is reached through `fallback`
+     * rather than by bus number, so the router needs it by name to ask
+     * whether it is mid-transfer -- see bus_router_service. */
+    struct DeuModel *deu;
     struct DeuModel *deuExtra[DEU_EXTRA_MAX];
     int deuExtraBus[DEU_EXTRA_MAX];
     int nDeuExtra;

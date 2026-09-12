@@ -72,6 +72,9 @@ struct DeuModel {
     long commands, fills, timeFills, displayFills, formatFills, headerless, polls, bite, dumps;
     long medsXfers;
     long resets, unknown, abandoned, modeStatus;
+    /* YAGPC_DEUKEYS: which batches THIS unit has delivered.  See
+     * deu_pending_keys. */
+    unsigned char keysSent[16];
     long wordsIn, wordsOut;
 };
 
@@ -251,7 +254,14 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
      *
      * A batch with no `@N:` uses YAGPC_DEUKEYS_AFTER (default 400).  Batches
      * are sent in order, one per poll at most, each exactly once. */
-    static unsigned char sent[16];
+    /* WHICH BATCHES THIS UNIT HAS ALREADY DELIVERED -- per unit, not per
+     * process.  The parsed spec below is configuration and is rightly
+     * shared, but this is state: as a file static, the first display unit to
+     * reach a batch's moment marked it sent and every other unit was silent
+     * for the rest of the run.  A vehicle can have several (--deu-bus, and
+     * PASS drives four), and they are not interchangeable -- a keystroke
+     * reaches the flight software through the unit the crew typed at. */
+    unsigned char *sent = d->keysSent;
     static long batchAfter[16];
     static long batchSecs[16];
     static const char *batchKeys[16];
@@ -689,6 +699,15 @@ static void deu_image_stats(const DeuModel *d, unsigned *zeros, unsigned *fill,
 
 void deumodel_set_clock(DeuModel *d, const double *clockUs) {
     if (d) d->clockUs = clockUs;
+}
+
+/* Mid-transfer: this unit is part way through handing a computer the words
+ * it asked for.  A new command here abandons that transfer -- the real unit
+ * does the same -- which is correct when it is the SAME computer changing
+ * its mind and a lost conversation when it is a different one.  See
+ * vehicle_bus_enter. */
+bool deumodel_in_transfer(const DeuModel *d) {
+    return d != NULL && d->xferActive && d->xferCount < d->xferLeft;
 }
 
 void deumodel_report(const DeuModel *d) {

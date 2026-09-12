@@ -51,6 +51,9 @@ void deumodel_set_clock(DeuModel *d, const double *clockUs);
 
 /* One line of counters in the same shape the real unit's harness prints,
  * so the two can be compared directly. */
+/* True while the unit is part way through a transfer to whoever asked. */
+bool deumodel_in_transfer(const DeuModel *d);
+
 void deumodel_report(const DeuModel *d);
 
 #endif
