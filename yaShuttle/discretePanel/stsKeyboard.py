@@ -228,10 +228,17 @@ def scaled_wh(w, h, size):
 
 
 class STSKeyboard:
-    def __init__(self, root, size=FULL_SIZE, bus=None):
+    def __init__(self, root, size=FULL_SIZE, bus=None, title=None):
         self.root = root
         self.bus = bus
-        root.title("STS Keyboard" + (" (KYBD%d)" % bus.n if bus else ""))
+        # SHORT, because the window is small.  "STS Keyboard (KYBD1)" is
+        # wider than a --size 512 title bar and truncates to "STS Key...",
+        # which says nothing -- and WHICH keyboard is the only thing the
+        # caption has to carry when there are three of them on screen.
+        # --title overrides it: the keyboards are switchable between MEDS
+        # from the crew panel, which we do not model yet, so a caption that
+        # says more than the bus number will be wanted eventually.
+        root.title(title or ("KYBD%d" % bus.n if bus else "STS Keyboard"))
         root.configure(bg=C_PANEL)
         mw, mh = scaled_wh(200, 360, size)
         root.minsize(mw, mh)
@@ -386,6 +393,12 @@ def main(argv=None):
                     help="Scale: 768 is full size (default), 512 is 2/3, 384 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 520x1020+80+20 (overrides --size)")
+    ap.add_argument("--title", metavar="TEXT", default=None,
+                    help="window caption (default the bus name, KYBD1..3).  "
+                         "The keyboards are switchable between MEDS from the "
+                         "crew panel, which is not modelled yet; when it is, "
+                         "a caption saying which display this one drives will "
+                         "be wanted.")
     ap.add_argument("--port-base", type=int, metavar="N", default=None,
                     help="base of the UDP port range the buses use: the "
                          "keyboard buses are base+31..base+33 (default 6900, "
@@ -405,7 +418,8 @@ def main(argv=None):
         raise SystemExit("stsKeyboard: --size must be a positive integer")
 
     root = tk.Tk()
-    kb = STSKeyboard(root, size=args.size, bus=KeyboardBus(args.kybd))
+    kb = STSKeyboard(root, size=args.size, bus=KeyboardBus(args.kybd),
+                     title=args.title)
     geom = args.geometry or os.environ.get("NSTS_KEYBOARD_GEOMETRY")
     if geom:
         try:
