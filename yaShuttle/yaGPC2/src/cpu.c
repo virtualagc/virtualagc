@@ -1563,8 +1563,10 @@ void cpu_exec1(CPU *cpu) {
         if (iu_shadow_lookup(cpu, nia + 1, &held)) hw2 = held;
     }
 
+    /* NOT zeroed here: instr_decode() memsets it first thing, and DInstr
+     * is 688 bytes -- doing it twice per instruction was 1.4 KB of memset
+     * for every instruction the machine executed. */
     DInstr v;
-    memset(&v, 0, sizeof(v));
     cpu->decodeFailed = false;
     const InstrDesc *desc = instr_decode(hw1, hw2, &v);
     if (!desc) {

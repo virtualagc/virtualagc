@@ -238,8 +238,22 @@ static void apply(const uint8_t *b, size_t n) {
     }
 }
 
+/* The crew panel's switches move at human speed, but the flight software
+ * reads the discrete inputs in tight polling loops -- iop_discrete_overlay()
+ * drained this socket on EVERY read, about 11 million recvfrom() calls in a
+ * 170 s run.  Draining at most this often still takes several thousand
+ * datagrams a second, which is far faster than anything on that bus
+ * changes, and costs one clock read instead of a syscall. */
+#define DISCRETES_POLL_MIN_SECONDS 250e-6
+
 void discretes_poll(void) {
     if (!g.open) return;
+    {
+        static double lastPoll = 0.0;
+        double now = yagpc_monotonic_seconds();
+        if (now - lastPoll < DISCRETES_POLL_MIN_SECONDS && now >= lastPoll) return;
+        lastPoll = now;
+    }
     uint8_t buf[64];
     for (;;) {
         ssize_t n = recv(g.fd, buf, sizeof buf, 0);
