@@ -188,10 +188,6 @@ class VotingPanel:
         return self.cv.create_rectangle(
             self.X(x1), self.Y(y1), self.X(x2), self.Y(y2), **kw)
 
-    def _oval(self, x1, y1, x2, y2, **kw):
-        return self.cv.create_oval(
-            self.X(x1), self.Y(y1), self.X(x2), self.Y(y2), **kw)
-
     def _poly(self, pts, **kw):
         flat = []
         for x, y in pts:
@@ -265,18 +261,6 @@ class VotingPanel:
             self._line(right_start, y, x1, y, fill=C_INK, width=w)
         self._line(x0, y, x0, y + tick, fill=C_INK, width=w)
         self._line(x1, y, x1, y + tick_r, fill=C_INK, width=w)
-
-    def _fastener(self, cx, cy, r=16):
-        """Phillips-head panel screw, as at the top-left of voting2.png."""
-        ow = max(1, int(self.s))
-        self._oval(cx - r, cy - r, cx + r, cy + r,
-                   fill=C_PANEL_HI, outline=C_INK, width=ow)
-        self._oval(cx - r * 0.70, cy - r * 0.70, cx + r * 0.70, cy + r * 0.70,
-                   fill=C_PANEL, outline=C_INK, width=ow)
-        a = r * 0.40
-        pw = max(2, int(round(2.0 * self.s)))
-        self._line(cx - a, cy, cx + a, cy, fill=C_INK, width=pw)
-        self._line(cx, cy - a, cx, cy + a, fill=C_INK, width=pw)
 
     def _mesh_lamp(self, x1, y1, x2, y2, on):
         """Small square lamp with a 4×4 mesh, the voting2.png indicator."""
@@ -356,8 +340,6 @@ class VotingPanel:
         mx1, my1 = REF_W - MARGIN, L["bottom"] - MARGIN
         self._rect_panel(mx0, my0, mx1, my1)
 
-        self._fastener(MARGIN + 20,
-                       (L["gpc_status"] + L["failed_gpc"]) / 2.0)
         self._dim_caption(L["gpc_status"], "GPC STATUS", 12,
                           BEZEL_X0, BEZEL_X1, tick=7, tick_r=14)
         self._dim_caption(L["failed_gpc"], "FAILED GPC", 11,
