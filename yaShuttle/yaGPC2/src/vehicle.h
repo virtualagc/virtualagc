@@ -113,6 +113,7 @@ typedef struct Vehicle {
     double barOffsetUs[6];
     bool barActive[6];        /* false while a machine is held in reset */
     unsigned long barHolds;   /* how often the barrier actually bound */
+    unsigned long barAbandoned; /* ... and gave up on a clock that had stopped */
     double barHeldSec;
 #ifdef HAVE_PTHREADS
     pthread_mutex_t barLock;

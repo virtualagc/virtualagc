@@ -1286,10 +1286,30 @@ static bool batchrunner_step(BatchRunner *r) {
          * machine's clock has stopped, and a stopped clock is the slowest
          * there is -- leaving it in would halt the whole vehicle. */
         vehicle_barrier_leave(r->vehicle, r->gpcId);
+        r->modeWasHeld = true;
         /* Nothing to do but wait for the switch to move; don't spin a
          * core doing it. */
         yagpc_sleep_seconds(0.002);
         return true;
+    }
+
+    /* JUST RELEASED FROM RESET.  A computer in HALT executes nothing, so its
+     * simulated clock stood still while the wall clock ran; to the pacer that
+     * looks like a machine that has fallen minutes behind and owes the time,
+     * and it lets it run flat out until the debt is repaid.  But the debt is
+     * not real -- the computer was switched off, and a computer powered up
+     * now starts from now.  Re-tie the clocks rather than repaying the gap,
+     * which is exactly what rtpacer.h says a resync is for and what the
+     * debugger already does for its own stalls.
+     *
+     * Measured in a two-computer run: with GPC2's switch moved nine seconds
+     * after GPC1's, GPC2 sprinted through nine seconds of simulated time on
+     * release, and the simulated-time barrier -- which correctly refuses to
+     * let one machine run ahead of the other -- then had to hold it for 46 s
+     * of a 60 s run.  With this, the sprint does not happen. */
+    if (r->modeWasHeld) {
+        r->modeWasHeld = false;
+        if (r->realTime) rtpacer_resync(&r->rtPacer);
     }
 
     /* YAGPC_DUMPSTATE_AT=<sec>[,<sec>...] writes --dump-state's JSON the
@@ -1792,10 +1812,28 @@ static bool batchrunner_step(BatchRunner *r) {
                 if (rtpacer_ahead_ms(&r->rtPacer) < -RTPACE_CATCHUP_MS) continue;
                 /* Ctrl-C has to be honoured here too: a paced wait can
                  * legitimately last seconds of wall time, and a loop that
-                 * only checked between instructions would swallow it. */
+                 * only checked between instructions would swallow it.
+                 *
+                 * STOP THE MACHINE, DO NOT EXIT THE PROCESS.  This used to
+                 * call interactive_report_and_exit(), whose exit() is fatal
+                 * to a vehicle: with several computers running, whichever
+                 * thread happened to be in a wait state took the signal and
+                 * ended the process from under the others, so the remaining
+                 * machines were cut off mid-instruction and vehicle_free
+                 * never ran -- no mass memory, timing unit or display
+                 * reports at all, and no way to see what the run did.  A
+                 * stop reason instead lands in the same reporting path as a
+                 * fault, which is what the comment on the SIGINT handler
+                 * says it is for. */
                 if (g_sigint_received) {
-                    interactive_report_and_exit(r, "\n--- INTERRUPTED after %ld steps ---",
-                                                r->step, 0);
+                    snprintf(r->stopReason, sizeof r->stopReason,
+                             "interrupted (SIGINT) after %ld steps in a wait state",
+                             r->step);
+                    r->hasStopReason = true;
+                    rtpacer_note_idle_loop(&r->rtPacer,
+                                           yagpc_monotonic_seconds() - idleLoopW0,
+                                           (r->age.gpc.cpu.elapsedTimeUs - idleLoopS0) / 1e6);
+                    return false;
                 }
                 yagpc_sleep_seconds(RTPACE_IDLE_POLL_SECONDS);
             }
@@ -2326,6 +2364,13 @@ int batchrunner_run(BatchRunner *r) {
     halucp_flush_all_pending(&r->age.halUCP);
 
     batchrunner_free_watchpoints(r);
+
+    /* OUT OF THE BARRIER THE MOMENT THIS MACHINE STOPS RUNNING, not later in
+     * batchrunner_free: its clock has stopped, and a stopped clock is the
+     * slowest in the vehicle.  Leaving it until the cleanup, which does not
+     * happen until every thread has been joined, is a deadlock -- the other
+     * machines wait for a computer that has finished. */
+    vehicle_barrier_leave(r->vehicle, r->gpcId);
 
     return batchrunner_report_stop(r);
 }

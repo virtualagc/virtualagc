@@ -19,6 +19,11 @@
  * YAGPC_BARRIER_US=0 turns the barrier off. */
 #define BARRIER_DELTA_US 200.0
 
+/* The longest a machine will wait on another's clock before deciding that
+ * clock has stopped rather than merely fallen behind.  Far longer than any
+ * legitimate hold -- a legitimate one is the delta divided by the rate. */
+#define BARRIER_MAX_HOLD_SEC 0.25
+
 void vehicle_init(Vehicle *v) {
     if (v == NULL) return;
     memset(v, 0, sizeof *v);
@@ -104,6 +109,20 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
     double t0 = yagpc_monotonic_seconds();
     v->barHolds++;
     while (pub - barrier_slowest(v, gpcId, pub) > v->barDeltaUs) {
+        /* AND NEVER FOREVER.  Waiting on another machine's clock is only
+         * safe while that clock is moving, and the ways it can stop are not
+         * all ones this code gets told about -- a machine that has ended its
+         * run, or is blocked on something of its own, is still marked
+         * active until its thread tidies up.  The first version of this
+         * loop had no way out and hung a two-computer run at shutdown: GPC1
+         * stopped on SIGINT, GPC2 waited on its frozen clock, and the join
+         * never returned.  Giving up after BARRIER_MAX_HOLD_SEC costs a
+         * little accuracy in a situation that is already wrong, and the
+         * count of them is reported. */
+        if (yagpc_monotonic_seconds() - t0 > BARRIER_MAX_HOLD_SEC) {
+            v->barAbandoned++;
+            break;
+        }
         yagpc_sleep_seconds(50e-6);
     }
     v->barHeldSec += yagpc_monotonic_seconds() - t0;
@@ -148,14 +167,17 @@ void vehicle_note_time(Vehicle *v, double machineUs) {
 
 void vehicle_free(Vehicle *v) {
     if (v == NULL) return;
-    /* REPORT WHEN THE BARRIER BOUND.  Occasional holds are the barrier doing
-     * its job; constant ones mean the machines are spending their time
-     * waiting for each other rather than running, which is worth seeing
-     * rather than absorbing silently. */
+    /* REPORT WHEN THE BARRIER BOUND.  Holding is how it works, not a sign of
+     * trouble: a machine executes in bursts and then waits, so it reaches the
+     * delta often, and measured over a 60 s two-computer run the holds cost
+     * nothing -- simulated time came out 55.74 s with the barrier and 55.70 s
+     * without.  What the numbers are for is the ABANDONED count, which means
+     * a machine waited on a clock that had stopped, and the total, which is
+     * worth comparing against the run if a vehicle ever does look slow. */
     if (v->barHolds > 0)
         fprintf(stderr, "vehicle: simulated-time barrier held %lu times, "
-                        "%.3f s total (delta %.0f us)\n",
-                v->barHolds, v->barHeldSec, v->barDeltaUs);
+                        "%.3f s total, %lu abandoned (delta %.0f us)\n",
+                v->barHolds, v->barHeldSec, v->barAbandoned, v->barDeltaUs);
 #ifdef HAVE_PTHREADS
     pthread_mutex_destroy(&v->barLock);
 #endif

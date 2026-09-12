@@ -146,6 +146,9 @@ typedef struct {
      * generation -- see the comment there. */
     unsigned modeHeldGen;
     bool modeHeldLast;
+    /* Set while the mode switch holds this machine in reset, so the pacer can
+     * be re-tied on the way out -- see batchrunner_step. */
+    bool modeWasHeld;
     /* When the bus sockets were last drained and flushed, in SIMULATED
      * microseconds -- see batchrunner_step()'s bus-service gate. */
     double busServiceUs;
