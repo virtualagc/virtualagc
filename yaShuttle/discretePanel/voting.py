@@ -10,9 +10,9 @@ instead of a lamp.
 
 The layout follows ~/Desktop/voting2.png (the clearest CAM drawing):
 dimension-ruled GPC STATUS / FAILED GPC with the titles sitting right of
-centre, a rounded bezel, large yellow GPC numbers on the diagonal, and a
-small square lamp in the upper half of each off-diagonal cell.  (Y) and (W)
-in the drawing are colours, not text.
+centre, a rounded bezel, yellow GPC numbers on the diagonal, and a small
+square lamp centred in each off-diagonal cell.  (Y) and (W) in the drawing
+are colours, not text.
 
 Styling follows panelO6.py: gull-grey panel, Helvetica legends, a
 standard decorated resizable window.  Unlike panelO6.py / stsKeyboard.py
@@ -33,10 +33,7 @@ import tkinter.font as tkfont
 N = 5
 
 # Same gull grey as panelO6.py.
-C_WINDOW = "#2a2a2a"
 C_PANEL = "#c6c3b6"
-C_PANEL_HI = "#dddaca"
-C_PANEL_LO = "#8e8b7e"
 C_INK = "#1b1b1b"
 C_LAMP_ON = "#ffffff"
 # Slightly darker than the pane, so an unlit lamp is a square you can
@@ -44,14 +41,18 @@ C_LAMP_ON = "#ffffff"
 C_LAMP_OFF = "#a4a193"
 C_DIAG = "#d4aa00"     # yellow GPC identity on the diagonal
 
-MARGIN = 28
+MARGIN = 16
 CELL = 76
-# voting2.png: tight gaps, a small square lamp (~1/4 of the cell) in the
-# upper half of each off-diagonal cell.
+# voting2.png: tight gaps, a small square lamp (~1/4 of the cell).
 GAP = 5
 GRID_PAD = 10          # air between the rounded bezel and the cells
 RADIUS = 16
 LAMP_FRAC = 0.26       # inner lamp side / cell side
+# Captions ~half the original point sizes; diagonal numbers ~70%.
+SZ_TITLE = 6
+SZ_NUM = 6
+SZ_DIAG = 15
+SZ_VTEXT = 6
 FULL_SIZE = 768        # --size units: 768 is the design window, as in panelO6.py
 
 # Left of the grid: stacked "VOTING GPC", a bracket, then the row numbers.
@@ -79,7 +80,7 @@ class VotingPanel:
     def __init__(self, root, size=FULL_SIZE):
         self.root = root
         root.title("GPC STATUS")
-        root.configure(bg=C_WINDOW)
+        root.configure(bg=C_PANEL)
         self.size = size
 
         # Lamps[row][col] is True when ON.  The diagonal is never a lamp.
@@ -99,7 +100,7 @@ class VotingPanel:
         root.minsize(mw, mh)
 
         cw, ch = scaled_wh(REF_W, self.REF_H, size)
-        self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
+        self.cv = tk.Canvas(root, bg=C_PANEL, highlightthickness=0,
                             width=cw, height=ch)
         self.cv.pack(fill="both", expand=True)
         self.cv.bind("<Configure>", self._on_configure)
@@ -170,28 +171,43 @@ class VotingPanel:
         self.cv.create_text(self.X(x), self.Y(y), text=text, fill=fill,
                             font=self._font(size, bold), anchor=anchor)
 
-    def _vtext_span(self, x, y1, y2, text, size=10, fill=C_INK):
-        """Stacked caption whose letters are spaced evenly between y1 and y2.
+    def _ink_y(self, y, size):
+        """Shift a centre-anchored y so the glyph ink, not the em box, is centred."""
+        f = self._tkfont(size)
+        return y + (f.metrics("descent") / 2.0) / max(self.s, 0.01)
 
-        Spaces are kept as empty slots so 'VOTING GPC' reads as two words.
+    def _vtext_packed(self, x, y, text, size=6, fill=C_INK):
+        """Stacked caption, packed (ascent + 1 px), centred on y.
+
+        A space is a half-slot so 'VOTING GPC' reads as two words without
+        a large hole between them.
         """
-        chars = list(text)
-        n = len(chars) or 1
-        step = (y2 - y1) / float(n)
-        for i, ch in enumerate(chars):
+        font = self._font(size)
+        ascent = int(self._tkfont(size).metrics("ascent"))
+        fh = ascent + 1
+        slots = []
+        for ch in text:
             if ch.isspace():
-                continue
-            self._text(x, y1 + step * (i + 0.5), ch, size=size, fill=fill)
+                slots.append(None)
+            else:
+                slots.append(ch)
+        n = len(slots) or 1
+        # A space is one letter-height so VOTING / GPC stay two words.
+        heights = [fh if ch is None else fh for ch in slots]
+        total = sum(heights)
+        y0 = self.Y(y) - total / 2.0
+        cx = self.X(x)
+        acc = 0.0
+        for ch, h in zip(slots, heights):
+            cy = y0 + acc + h / 2.0
+            if ch is not None:
+                self.cv.create_text(cx, cy, text=ch, fill=fill,
+                                    font=font, anchor="c")
+            acc += h
 
     def _rect(self, x1, y1, x2, y2, **kw):
         return self.cv.create_rectangle(
             self.X(x1), self.Y(y1), self.X(x2), self.Y(y2), **kw)
-
-    def _poly(self, pts, **kw):
-        flat = []
-        for x, y in pts:
-            flat.extend(self.xy(x, y))
-        return self.cv.create_polygon(flat, **kw)
 
     def _round_rect(self, x1, y1, x2, y2, r, fill="", outline=C_INK, width=2):
         """Axis-aligned rounded rectangle in reference coords."""
@@ -223,18 +239,6 @@ class VotingPanel:
             for a, b, c, d, start in box:
                 self.cv.create_arc(a, b, c, d, start=start, extent=90,
                                    style="arc", outline=outline, width=w)
-
-    def _rect_panel(self, x0, y0, x1, y1):
-        """A rectangular crew-panel body, same surface as O6."""
-        ow = max(2, int(2 * self.s))
-        self._poly([(x0 + 5, y0 + 6), (x1 + 5, y0 + 6),
-                    (x1 + 5, y1 + 6), (x0 + 5, y1 + 6)],
-                   fill="#1a1a1a", outline="", width=0)
-        self._rect(x0, y0, x1, y1, fill=C_PANEL, outline=C_INK, width=ow)
-        self._line(x0, y0, x1, y0, fill=C_PANEL_HI, width=ow)
-        self._line(x0, y0, x0, y1, fill=C_PANEL_HI, width=ow)
-        self._line(x0, y1, x1, y1, fill=C_PANEL_LO, width=ow)
-        self._line(x1, y0, x1, y1, fill=C_PANEL_LO, width=ow)
 
     def _dim_caption(self, y, text, size, x0, x1, tick=8, tick_r=None,
                      at=0.63):
@@ -271,22 +275,21 @@ class VotingPanel:
 
     def _layout(self):
         """Vertical rhythm from glyph bounds, same idea as panelO6.py."""
-        pad = 10
-        th12 = self._th(12)
-        th11 = self._th(11)
+        pad = 8
+        th_t = self._th(SZ_TITLE)
+        th_n = self._th(SZ_NUM)
         L = {}
         y = MARGIN + pad
 
-        # GPC STATUS and FAILED GPC sit close, as in Figure 3-27.
-        y += th12
+        y += th_t
         L["gpc_status"] = y
-        y += th12 + 4 + th11
+        y += th_t + 3 + th_t
         L["failed_gpc"] = y
-        y += th11 + pad
+        y += th_t + pad
 
-        y += th12
+        y += th_n
         L["col_nums"] = y
-        y += th12 + pad
+        y += th_n + pad
 
         L["bezel0"] = y
         L["grid0"] = y + GRID_PAD
@@ -317,35 +320,28 @@ class VotingPanel:
         self.cv.delete("all")
         self._hits = []
 
-        mx0, my0 = MARGIN, MARGIN
-        mx1, my1 = REF_W - MARGIN, L["bottom"] - MARGIN
-        self._rect_panel(mx0, my0, mx1, my1)
-
-        self._dim_caption(L["gpc_status"], "GPC STATUS", 12,
-                          BEZEL_X0, BEZEL_X1, tick=7, tick_r=14)
-        self._dim_caption(L["failed_gpc"], "FAILED GPC", 11,
-                          BEZEL_X0, BEZEL_X1, tick=7, tick_r=8)
+        self._dim_caption(L["gpc_status"], "GPC STATUS", SZ_TITLE,
+                          BEZEL_X0, BEZEL_X1, tick=5, tick_r=10)
+        self._dim_caption(L["failed_gpc"], "FAILED GPC", SZ_TITLE,
+                          BEZEL_X0, BEZEL_X1, tick=5, tick_r=6)
 
         for col in range(N):
             x1, _, x2, _ = self._cell(0, col)
-            self._text((x1 + x2) / 2.0, L["col_nums"], str(col + 1), size=12)
+            self._text((x1 + x2) / 2.0, self._ink_y(L["col_nums"], SZ_NUM),
+                       str(col + 1), size=SZ_NUM)
 
         self._round_rect(BEZEL_X0, L["bezel0"], BEZEL_X1, L["bezel1"],
                          RADIUS, fill=C_PANEL, outline=C_INK, width=2.5)
 
         gy0, gy1 = L["bezel0"], L["bezel1"]
-        self._bracket(BRACKET_X, gy0, gy1, tick=8)
-        # voting2.png: VOTING sits against rows 1-3, GPC against rows 4-5.
-        _, vt0, _, vt1 = self._cell(0, 0)
-        _, _, _, vt1 = self._cell(2, 0)
-        _, gp0, _, gp1 = self._cell(3, 0)
-        _, _, _, gp1 = self._cell(4, 0)
-        self._vtext_span(VTEXT_X, vt0, vt1, "VOTING", size=11)
-        self._vtext_span(VTEXT_X, gp0, gp1, "GPC", size=11)
+        self._bracket(BRACKET_X, gy0, gy1, tick=6)
+        self._vtext_packed(VTEXT_X, (gy0 + gy1) / 2.0, "VOTING GPC",
+                           size=SZ_VTEXT)
 
         for row in range(N):
             _, y1, _, y2 = self._cell(row, 0)
-            self._text(ROW_NUM_X, (y1 + y2) / 2.0, str(row + 1), size=12)
+            cy = self._ink_y((y1 + y2) / 2.0, SZ_NUM)
+            self._text(ROW_NUM_X, cy, str(row + 1), size=SZ_NUM)
 
         for row in range(N):
             for col in range(N):
@@ -356,15 +352,14 @@ class VotingPanel:
         ow = max(1, int(self.s))
         self._rect(x1, y1, x2, y2, fill=C_PANEL, outline=C_INK, width=ow)
         cx = (x1 + x2) / 2.0
-        # voting2.png: the number / lamp sits in the upper half of the cell;
-        # (Y) and (W) below it are colour notes, not drawn.
-        upper = y1 + CELL * 0.38
+        cy = (y1 + y2) / 2.0
         if row == col:
-            self._text(cx, upper, str(row + 1), size=22, fill=C_DIAG)
+            self._text(cx, self._ink_y(cy, SZ_DIAG),
+                       str(row + 1), size=SZ_DIAG, fill=C_DIAG)
             return
         side = CELL * LAMP_FRAC
-        lx1, ly1 = cx - side / 2.0, upper - side / 2.0
-        lx2, ly2 = cx + side / 2.0, upper + side / 2.0
+        lx1, ly1 = cx - side / 2.0, cy - side / 2.0
+        lx2, ly2 = cx + side / 2.0, cy + side / 2.0
         fill = C_LAMP_ON if self.lamps[row][col] else C_LAMP_OFF
         self._rect(lx1, ly1, lx2, ly2, fill=fill, outline=C_INK, width=ow)
         self._hits.append((row, col,
