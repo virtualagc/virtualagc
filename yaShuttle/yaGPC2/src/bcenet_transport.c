@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
+#include <poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #define BCENET_HAVE_POSIX_SOCKETS 1
@@ -247,6 +248,9 @@ typedef struct {
     uint16_t txPort;   /* the port the kernel gave txFd, in host order */
     SelfEchoEntry selfEcho[SELF_ECHO_MAX];
     int selfEchoCount;
+
+    /* Set by bcenet_transport_poll_ready(): a datagram is waiting. */
+    bool rxReady;
 
     /* Outbound pacing: a FIFO plus a token bucket in wall time. */
     OutDatagram outQ[BCENET_OUT_QUEUE];
@@ -752,6 +756,49 @@ static void *tx_thread_main(void *arg) {
     return NULL;
 }
 #endif
+
+/* ONE poll() FOR EVERY BUS, INSTEAD OF A recvfrom() PER BUS.
+ *
+ * Draining used to cost a non-blocking recvfrom() on every open bus every
+ * time the sockets were serviced, nearly all of them returning EAGAIN --
+ * the syscall count scaled with how often we looked, not with how much
+ * traffic there was.  poll() answers the same question for all of them at
+ * once, so a service with nothing waiting costs one syscall instead of
+ * one per bus.  (poll() rather than epoll: this is ~23 descriptors, where
+ * epoll's setup wins nothing, and poll has a WSAPoll equivalent on the
+ * MSVC target.) */
+void bcenet_transport_poll_ready(BceNetTransport *t) {
+    if (!t) return;
+#ifdef BCENET_HAVE_POSIX_SOCKETS
+    struct pollfd pfd[BCENET_MAX_BUS_ID + 1];
+    int idx[BCENET_MAX_BUS_ID + 1];
+    int n = 0;
+    for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
+        BceNetBusSocket *b = &t->buses[i];
+        b->rxReady = false;
+        if (b->fd < 0) continue;
+        pfd[n].fd = b->fd;
+        pfd[n].events = POLLIN;
+        pfd[n].revents = 0;
+        idx[n] = i;
+        n++;
+    }
+    if (n == 0) return;
+    if (poll(pfd, (nfds_t)n, 0) <= 0) return;
+    for (int k = 0; k < n; k++)
+        if (pfd[k].revents & (POLLIN | POLLERR | POLLHUP))
+            t->buses[idx[k]].rxReady = true;
+#else
+    /* No poll(): say every bus might have something, which is what the
+     * per-bus recvfrom() did anyway. */
+    for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) t->buses[i].rxReady = true;
+#endif
+}
+
+bool bcenet_transport_bus_ready(const BceNetTransport *t, int busID) {
+    if (!t || busID < 0 || busID > BCENET_MAX_BUS_ID) return false;
+    return t->buses[busID].rxReady;
+}
 
 void bcenet_transport_pump(BceNetTransport *t) {
     if (!t) return;

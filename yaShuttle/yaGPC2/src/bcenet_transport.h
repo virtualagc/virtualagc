@@ -64,6 +64,12 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
  * *outCount, both already byte-swapped back to host order, and returns
  * true. Returns false if nothing was available, the message didn't match
  * this IUA, or it wouldn't fit in maxWords (logged, not fatal). */
+/* Ask the kernel, in ONE syscall, which buses have a datagram waiting;
+ * bcenet_transport_bus_ready() then answers per bus without a syscall.
+ * See the definition for why this exists and why poll() and not epoll. */
+void bcenet_transport_poll_ready(BceNetTransport *t);
+bool bcenet_transport_bus_ready(const BceNetTransport *t, int busID);
+
 bool bcenet_transport_recv(BceNetTransport *t, int busID, int iua, bool isShuttleBus, uint16_t *outWords,
                             size_t maxWords, size_t *outCount);
 
