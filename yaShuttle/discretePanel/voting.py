@@ -83,7 +83,7 @@ def scaled_wh(w, h, size):
 class VotingPanel:
     def __init__(self, root, size=FULL_SIZE):
         self.root = root
-        root.title("GPC STATUS")
+        root.title("Voting")
         root.configure(bg=C_PANEL)
         self.size = size
 
