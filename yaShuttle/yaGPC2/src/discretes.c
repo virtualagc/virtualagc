@@ -143,6 +143,10 @@ struct Discretes {
     struct sockaddr_in group;
     unsigned generation;  /* see discretes_generation() */
     unsigned pollCalls;   /* the poll rate-limiter, per machine */
+    /* THE ATTENTIVE CLOCK -- see attend().  Staleness is measured in this,
+     * not in wall time. */
+    double attentive;
+    double lastAttendSec;
     DiscretesOutFn outHook;
     void *outHookCtx;
     double lastPollSec;
@@ -182,6 +186,11 @@ Discretes *discretes_create(int gpcId) {
      * that, so a "last seen" of 0 would swallow it. */
     d->syncOutLast = 8u;
     for (int k = 0; k < 5; k++) d->syncInLast[k] = 8u;
+    /* THE ATTENTIVE CLOCK STARTS AT ONE, not at zero.  lastSeen uses 0.0 to
+     * mean "this bit has never been published", so a clock that began at 0
+     * would stamp the very first datagram with the never-seen sentinel and
+     * the bit would not count as driven until the clock had moved on. */
+    d->attentive = 1.0;
 
     /* Publishers repeat themselves several times a second, so tracing
      * every message would be noise: only a message that actually CHANGES
@@ -409,9 +418,9 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
     if (op == OP_SET) d->value[r] |= mask;
     else              d->value[r] &= ~mask;
 
-    double now = yagpc_monotonic_seconds();
+    /* Stamped in attentive time, and read back in it -- see attend(). */
     for (int bit = 0; bit < 32; bit++) {
-        if (mask & (0x80000000u >> bit)) d->lastSeen[r][bit] = now;
+        if (mask & (0x80000000u >> bit)) d->lastSeen[r][bit] = d->attentive;
     }
     d->messages++;
 
@@ -439,6 +448,42 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
  * changes, and costs one clock read instead of a syscall. */
 #define DISCRETES_POLL_MIN_SECONDS 250e-6
 
+/* THE MOST ONE GAP MAY AGE THE BUS.
+ *
+ * "Nobody is driving this bit any more" is a judgement only a listener can
+ * make, and this machine does not listen continuously: a firmware IPL fills
+ * memory and reads seventy-odd blocks off a tape without once touching the
+ * discrete socket, and with two computers sharing a mass memory that takes
+ * seconds.  Aged against the wall clock, EVERY bit the crew panel was
+ * driving went stale during it -- not because the panel stopped talking but
+ * because we stopped listening -- and the backlog then refreshed them a
+ * datagram at a time, rebuilding the driven mask in pieces.  The mode switch
+ * is read after each of those datagrams (it has to be: a pushbutton is a
+ * pulse and draining the whole queue before looking loses it), so it saw
+ * incoherent half-states.  One of them was "HALT and IPL, with no source
+ * bit driven yet" -- a fresh IPL edge, from a button nobody pressed, reading
+ * the default mass memory.  That is gpc-causes #93.
+ *
+ * So the staleness clock advances by real time while we are listening and
+ * by at most this much across a gap when we were not.  It is the same
+ * principle the pacer uses for a debugger stall: time spent not running is
+ * not time the world may hold against you. */
+#define DISCRETES_ATTEND_MAX_STEP 0.05
+
+/* Advance the attentive clock.  Called wherever this machine actually looks
+ * at its socket, and nowhere else -- the whole point is that it stops when
+ * the machine stops looking. */
+static void attend(Discretes *d) {
+    double now = yagpc_monotonic_seconds();
+    if (d->lastAttendSec > 0.0) {
+        double gap = now - d->lastAttendSec;
+        if (gap > 0.0)
+            d->attentive += (gap < DISCRETES_ATTEND_MAX_STEP)
+                                ? gap : DISCRETES_ATTEND_MAX_STEP;
+    }
+    d->lastAttendSec = now;
+}
+
 /* Apply AT MOST ONE pending datagram; true if there was one.
  *
  * A drain that applies everything waiting collapses a pulse.  The crew
@@ -450,6 +495,7 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
  * HALT->STBY release -- steps through them one at a time instead. */
 bool discretes_poll_one(Discretes *d) {
     if (d == NULL || !d->open) return false;
+    attend(d);
     uint8_t buf[64];
     ssize_t n = recv(d->fd, buf, sizeof buf, 0);
     if (n <= 0) return false;
@@ -479,6 +525,7 @@ void discretes_poll(Discretes *d) {
             now >= d->lastPollSec) return;
         d->lastPollSec = now;
     }
+    attend(d);
     uint8_t buf[64];
     for (;;) {
         ssize_t n = recv(d->fd, buf, sizeof buf, 0);
@@ -558,7 +605,7 @@ void discretes_publish(Discretes *d, int reg, uint32_t mask, bool on) {
 uint32_t discretes_driven_mask(const Discretes *d, int reg) {
     if (d == NULL || !d->open) return 0u;
     int r = reg_index(reg);
-    double now = yagpc_monotonic_seconds();
+    double now = d->attentive;
     uint32_t m = 0u;
     for (int bit = 0; bit < 32; bit++) {
         double t = d->lastSeen[r][bit];
