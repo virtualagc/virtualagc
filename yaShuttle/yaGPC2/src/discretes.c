@@ -146,6 +146,11 @@ struct Discretes {
     DiscretesOutFn outHook;
     void *outHookCtx;
     double lastPollSec;
+    /* YAGPC_SYNCTRACE: the last code seen going out, and the last seen
+     * arriving from each of the four neighbours.  8 is "nothing yet", which
+     * no real code is, so the first of each always prints. */
+    unsigned syncOutLast;
+    unsigned syncInLast[5];
 };
 
 static int reg_index(int reg) {
@@ -172,6 +177,11 @@ Discretes *discretes_create(int gpcId) {
     if (d == NULL) return NULL;
     d->gpcId = gpcId;
     d->fd = -1;
+    /* NOT what the zeroing leaves: 000 is a real sync code (dead/halt/
+     * standby), and the very first thing a computer says is usually exactly
+     * that, so a "last seen" of 0 would swallow it. */
+    d->syncOutLast = 8u;
+    for (int k = 0; k < 5; k++) d->syncInLast[k] = 8u;
 
     /* Publishers repeat themselves several times a second, so tracing
      * every message would be noise: only a message that actually CHANGES
@@ -283,6 +293,88 @@ uint32_t discretes_rotate_out(int sourceGpc, int readerGpc, uint32_t outMask) {
     return in;
 }
 
+/* ---------------------------------------------------------------------
+ * YAGPC_SYNCTRACE -- what the computers are saying to each other
+ *
+ * The inter-GPC lines are not four signals but a THREE-BIT CODE, driven on
+ * output bits 20, 24 and 28, which the flight software calls A, B and C.
+ * Idle is all three set -- TCVTNULS, X'00000888' in MLIB80/TFCVT.asm -- and
+ * every sync is issued by RESETTING bits out of that null pattern.  TFCVT
+ * names the masks of bits to reset "code-inverse sending patterns", and
+ * they are exactly:
+ *
+ *     TCVTSIPI  X'00000008'   reset C        -> 110  SSIP (common set)
+ *     TCVTTIMI  X'00000080'   reset B        -> 101  timer
+ *     TCVTSVCI  X'00000088'   reset B and C  -> 100  SVC
+ *     TCVTIPRI  X'00000808'   reset A and C  -> 010  input problem report
+ *     TCVTIOCI  X'00000880'   reset A and B  -> 001  I/O complete
+ *
+ * with 111 the null and 000 halt/standby/dead.  Five FCOS programs spin on
+ * this waiting for the neighbours to agree, each with a 3.85 ms timeout, and
+ * a timeout votes the offending computer out of the set.  So when a
+ * redundant set fails to form, what it looks like from outside is a hang
+ * with no explanation; this turns it into a conversation one can read.
+ * ------------------------------------------------------------------- */
+
+static bool synctrace_on(void) {
+    static int init = 0, on = 0;
+    if (!init) { init = 1; on = getenv("YAGPC_SYNCTRACE") != NULL; }
+    return on != 0;
+}
+
+/* A=bit 20, B=bit 24, C=bit 28 of whichever register, at the given offset
+ * within each group (0 for the output register, k-1 for neighbour k). */
+static unsigned sync_code(uint32_t reg, int aBase, int bBase, int cBase, int off) {
+    unsigned code = 0;
+    if (reg & (0x80000000u >> (aBase + off))) code |= 4u;
+    if (reg & (0x80000000u >> (bBase + off))) code |= 2u;
+    if (reg & (0x80000000u >> (cBase + off))) code |= 1u;
+    return code;
+}
+
+const char *discretes_sync_code_name(unsigned code) {
+    switch (code & 7u) {
+        case 7: return "null";
+        case 6: return "SSIP";
+        case 5: return "timer";
+        case 4: return "SVC";
+        case 3: return "(unassigned)";
+        case 2: return "IPR";
+        case 1: return "I/O complete";
+        default: return "dead/halt/standby";
+    }
+}
+
+/* Which computer group N+k carries, seen from this one: the wiring rotates,
+ * so the inverse of discretes_rotate_out's k = (source - reader) mod 5. */
+static int sync_neighbour_gpc(int readerGpc, int k) {
+    if (readerGpc < 1 || readerGpc > 5) return 0;
+    return ((readerGpc - 1 + k) % 5) + 1;
+}
+
+void discretes_synctrace(Discretes *d) {
+    if (d == NULL || !synctrace_on()) return;
+
+    unsigned out = sync_code(d->value[reg_index(DISCRETES_REG_OUT)], 20, 24, 28, 0);
+    if (out != d->syncOutLast) {
+        d->syncOutLast = out;
+        fprintf(stderr, "SYNC GPC%d out  %u%u%u %s\n", d->gpcId,
+                (out >> 2) & 1u, (out >> 1) & 1u, out & 1u,
+                discretes_sync_code_name(out));
+    }
+
+    uint32_t in = d->value[reg_index(DISCRETES_REG_A)];
+    for (int k = 1; k <= 4; k++) {
+        unsigned code = sync_code(in, 20, 24, 28, k - 1);
+        if (code == d->syncInLast[k]) continue;
+        d->syncInLast[k] = code;
+        int from = sync_neighbour_gpc(d->gpcId, k);
+        fprintf(stderr, "SYNC GPC%d  <- N+%d (GPC%d)  %u%u%u %s\n", d->gpcId, k,
+                from, (code >> 2) & 1u, (code >> 1) & 1u, code & 1u,
+                discretes_sync_code_name(code));
+    }
+}
+
 static void send_msg(Discretes *d, unsigned op, int reg, uint32_t mask);
 
 /* Apply one well-formed message.  Anything else is ignored rather than
@@ -363,6 +455,7 @@ bool discretes_poll_one(Discretes *d) {
     if (n <= 0) return false;
     apply(d, buf, (size_t)n);
     d->generation++;
+    discretes_synctrace(d);
     return true;
 }
 
@@ -371,13 +464,20 @@ void discretes_poll(Discretes *d) {
     {
         /* Called once per instruction; count first (an increment and a test)
          * and ask the clock only every 32nd call.  The time gate still bounds
-         * how stale the bus may get. */
-        static unsigned calls = 0;
-        static double lastPoll = 0.0;
-        if ((++calls & 31u) != 0u) return;
+         * how stale the bus may get.
+         *
+         * PER MACHINE, not per process.  These were file statics, which was
+         * the same thing while one computer ran but is not now: with two,
+         * each machine's call advanced the OTHER's counter and refreshed the
+         * OTHER's time gate, so each polled its own socket about half as
+         * often as it asked to, and every inter-GPC line took twice as long
+         * to arrive.  That matters directly -- FCOS's sync timeout is
+         * 3.85 ms, and this is on the path (gpc-causes #91). */
+        if ((++d->pollCalls & 31u) != 0u) return;
         double now = yagpc_monotonic_seconds();
-        if (now - lastPoll < DISCRETES_POLL_MIN_SECONDS && now >= lastPoll) return;
-        lastPoll = now;
+        if (now - d->lastPollSec < DISCRETES_POLL_MIN_SECONDS &&
+            now >= d->lastPollSec) return;
+        d->lastPollSec = now;
     }
     uint8_t buf[64];
     for (;;) {
@@ -389,6 +489,7 @@ void discretes_poll(Discretes *d) {
         apply(d, buf, (size_t)n);
         d->generation++;
     }
+    discretes_synctrace(d);
 }
 
 static void send_msg(Discretes *d, unsigned op, int reg, uint32_t mask) {
@@ -443,6 +544,7 @@ void discretes_publish_out(Discretes *d, uint32_t before, uint32_t after) {
     /* And onward to the other computers: these four lines are wired to them
      * (see discretes_rotate_out). */
     if (d->outHook != NULL) d->outHook(d->outHookCtx, d->gpcId, before, after);
+    discretes_synctrace(d);
 }
 
 void discretes_publish(Discretes *d, int reg, uint32_t mask, bool on) {

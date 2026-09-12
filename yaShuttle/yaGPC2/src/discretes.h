@@ -125,6 +125,14 @@ typedef void (*DiscretesOutFn)(void *ctx, int sourceGpc, uint32_t before,
                                uint32_t after);
 void discretes_set_out_hook(Discretes *d, DiscretesOutFn fn, void *ctx);
 
+/* YAGPC_SYNCTRACE: report this computer's outgoing 3-bit sync code and each
+ * neighbour's incoming one whenever either changes, decoded into the flight
+ * software's own alphabet.  Called from the poll and publish paths; a no-op
+ * unless the variable is set.  See the block comment in discretes.c for the
+ * codes and where they come from. */
+void discretes_synctrace(Discretes *d);
+const char *discretes_sync_code_name(unsigned code);
+
 /* Bits of `reg` currently being published by somebody, and their values.
  * Call discretes_poll() first.  The mask is empty when disabled, so
  * callers need no special case. */
