@@ -2367,6 +2367,11 @@ void cpu_instr_table_init(void) {
             !strcmp(OPS[i].nm, "LPS"))
             DESCS[i].indexWidth = 1;
         DESCS[i].opType = OPS[i].opType;
+        DESCS[i].fieldN = 0;
+        for (int c = 0; c < DINSTR_FIELD_TABLE_SIZE; c++)
+            if (DESCS[i].pb.field[c].present)
+                DESCS[i].fieldIx[DESCS[i].fieldN++] = (uint8_t)c;
+        DESCS[i].isLFXI = (strcmp(OPS[i].nm, "LFXI") == 0);
         SORTED[i] = &DESCS[i];
     }
     qsort(SORTED, OPS_COUNT, sizeof(SORTED[0]), cmp_mask_desc);
@@ -2433,10 +2438,9 @@ static void decodef(const InstrDesc *desc, uint32_t hw1, uint32_t hw2, DInstr *v
     v->hw1 = hw1;
     v->hw2 = hw2;
 
-    for (int c = 0; c < DINSTR_FIELD_TABLE_SIZE; c++) {
-        if (desc->pb.field[c].present) {
-            df_set(v, (char)c, pb_get_field(hw1, &desc->pb.field[c]));
-        }
+    for (int k = 0; k < desc->fieldN; k++) {
+        int c = desc->fieldIx[k];
+        df_set(v, (char)c, pb_get_field(hw1, &desc->pb.field[c]));
     }
 
     v->niaIncr = desc->pb.len; /* == origLen */
@@ -2451,7 +2455,7 @@ static void decodef(const InstrDesc *desc, uint32_t hw1, uint32_t hw2, DInstr *v
     /* `desc.longdisp?` (source) is never set by any real instruction —
      * dead code, not ported (see cpu.h's instr_decode doc comment). */
 
-    if (strcmp(desc->nm, "LFXI") == 0) {
+    if (desc->isLFXI) {
         df_set(v, 'y', df_get(v, 'y') - 2);
     }
 

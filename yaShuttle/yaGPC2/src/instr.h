@@ -61,6 +61,13 @@ typedef struct {
     int addrWidth;
     int indexWidth;
     int opType;
+    /* Precomputed by cpu_instr_table_init() so decodef() need not rediscover
+     * them on every instruction: the indices of pb.field[] that are present
+     * (it used to walk all DINSTR_FIELD_TABLE_SIZE of them to find ~18), and
+     * whether this is LFXI (it used to strcmp the mnemonic per decode). */
+    uint8_t fieldIx[DINSTR_FIELD_TABLE_SIZE];
+    uint8_t fieldN;
+    bool isLFXI;
 } InstrDesc;
 
 /* ADDR_* / OPTYPE_* — from cpu.coffee/cpu_instr.coffee (both files define
