@@ -8,6 +8,11 @@ the voting GPC, columns the failed GPC.  Digits 1-5 typed as a pair
 Clicking a lamp toggles it too.  Diagonal cells show a yellow GPC number
 instead of a lamp.
 
+The matrix follows DPS Workbook USA005350 Rev B Figure 3-27 (pdf p. 95)
+and Figure 3-19 (the full CAM on panel O1): dimension-ruled GPC STATUS /
+FAILED GPC captions, a rounded bezel, and a small inner lamp in each
+off-diagonal cell.  (Y) and (W) in those figures are colours, not text.
+
 Styling follows panelO6.py: gull-grey panel, Helvetica legends, a
 standard decorated resizable window.  Unlike panelO6.py / stsKeyboard.py
 this window *does* take the keyboard, because the lamps are driven by
@@ -32,18 +37,20 @@ C_PANEL = "#c6c3b6"
 C_PANEL_HI = "#dddaca"
 C_PANEL_LO = "#8e8b7e"
 C_INK = "#1b1b1b"
-C_BEZEL = "#4a4840"
 C_LAMP_ON = "#ffffff"
 # Slightly darker than the pane, so an unlit lamp is a square you can
 # still see without competing with a lit one.
-C_LAMP_OFF = "#b0ad9f"
+C_LAMP_OFF = "#a4a193"
 C_DIAG = "#d4aa00"     # yellow GPC identity on the diagonal
 
 MARGIN = 28
 CELL = 72
-GAP = 6
+# Figure 3-27: gap ≈ 0.14 of a cell, inner bezel pad about the same,
+# inner lamp ≈ 0.38 of the cell.
+GAP = 10
 GRID_PAD = 12          # air between the rounded bezel and the cells
 RADIUS = 18
+LAMP_FRAC = 0.42       # inner lamp side / cell side
 FULL_SIZE = 768        # --size units: 768 is the design window, as in panelO6.py
 
 # Left of the grid: stacked "VOTING GPC", a bracket, then the row numbers.
@@ -232,20 +239,26 @@ class VotingPanel:
         self._line(x0, y1, x1, y1, fill=C_PANEL_LO, width=ow)
         self._line(x1, y0, x1, y1, fill=C_PANEL_LO, width=ow)
 
-    def _ruled_caption(self, y, text, size, x0, x1):
-        """`text` centred, with a rule filling the space on either side."""
+    def _dim_caption(self, y, text, size, x0, x1, tick=8):
+        """Dimension bar: rule interrupted by `text`, ticks at both ends.
+
+        Figure 3-27 draws GPC STATUS and FAILED GPC this way, the ticks
+        hanging down from the rule.
+        """
         f = self._tkfont(size)
         tw = f.measure(text) / max(self.s, 0.01)
-        gap = 10
+        gap = 8
         cx = (x0 + x1) / 2.0
         self._text(cx, y, text, size=size)
-        w = max(1, int(self.s))
+        w = max(1, int(round(1.25 * self.s)))
         left_end = cx - tw / 2.0 - gap
         right_start = cx + tw / 2.0 + gap
         if left_end > x0:
             self._line(x0, y, left_end, y, fill=C_INK, width=w)
         if x1 > right_start:
             self._line(right_start, y, x1, y, fill=C_INK, width=w)
+        self._line(x0, y, x0, y + tick, fill=C_INK, width=w)
+        self._line(x1, y, x1, y + tick, fill=C_INK, width=w)
 
     def _bracket(self, x, y1, y2, tick=10):
         w = max(2, int(1.5 * self.s))
@@ -258,17 +271,15 @@ class VotingPanel:
     def _layout(self):
         """Vertical rhythm from glyph bounds, same idea as panelO6.py."""
         pad = 10
-        th13 = self._th(13)
-        th11 = self._th(11)
         th12 = self._th(12)
+        th11 = self._th(11)
         L = {}
         y = MARGIN + pad
 
-        y += th13
+        # GPC STATUS and FAILED GPC sit close, as in Figure 3-27.
+        y += th12
         L["gpc_status"] = y
-        y += th13 + pad
-
-        y += th11
+        y += th12 + 4 + th11
         L["failed_gpc"] = y
         y += th11 + pad
 
@@ -309,10 +320,11 @@ class VotingPanel:
         mx1, my1 = REF_W - MARGIN, L["bottom"] - MARGIN
         self._rect_panel(mx0, my0, mx1, my1)
 
-        self._ruled_caption(L["gpc_status"], "GPC STATUS", 13,
-                            BEZEL_X0, BEZEL_X1)
-        self._ruled_caption(L["failed_gpc"], "FAILED GPC", 11,
-                            BEZEL_X0, BEZEL_X1)
+        tick = 8
+        self._dim_caption(L["gpc_status"], "GPC STATUS", 12,
+                          BEZEL_X0, BEZEL_X1, tick=tick)
+        self._dim_caption(L["failed_gpc"], "FAILED GPC", 11,
+                          BEZEL_X0, BEZEL_X1, tick=tick)
 
         for col in range(N):
             x1, _, x2, _ = self._cell(0, col)
@@ -337,18 +349,19 @@ class VotingPanel:
         x1, y1, x2, y2 = self._cell(row, col)
         ow = max(1, int(self.s))
         self._rect(x1, y1, x2, y2, fill=C_PANEL, outline=C_INK, width=ow)
+        cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
         if row == col:
-            self._text((x1 + x2) / 2.0, (y1 + y2) / 2.0,
-                       str(row + 1), size=16, fill=C_DIAG)
+            self._text(cx, cy, str(row + 1), size=16, fill=C_DIAG)
             return
-        # Inner square lamp, inset so the cell border stays visible.
-        m = CELL * 0.12
+        # Figure 3-27: a small inner square, about 0.38 of the cell.
+        side = CELL * LAMP_FRAC
+        lx1, ly1 = cx - side / 2.0, cy - side / 2.0
+        lx2, ly2 = cx + side / 2.0, cy + side / 2.0
         fill = C_LAMP_ON if self.lamps[row][col] else C_LAMP_OFF
-        self._rect(x1 + m, y1 + m, x2 - m, y2 - m,
-                   fill=fill, outline=C_BEZEL, width=ow)
+        self._rect(lx1, ly1, lx2, ly2, fill=fill, outline=C_INK, width=ow)
         self._hits.append((row, col,
-                           self.X(x1 + m), self.Y(y1 + m),
-                           self.X(x2 - m), self.Y(y2 - m)))
+                           self.X(lx1), self.Y(ly1),
+                           self.X(lx2), self.Y(ly2)))
 
     # ---- state ----------------------------------------------------------
 
