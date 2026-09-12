@@ -110,3 +110,65 @@ THE END
 *** HAL/S PROGRAM HALT (SVC 0)
 </pre>
 
+### Running more than one GPC
+
+An orbiter carries five General Purpose Computers, and `--gpcs` runs any
+combination of them in one process, one thread each:
+
+<pre>
+yaGPC2 run --gpcs 1,2 ...        # also "1", "1-3,5"
+</pre>
+
+They share the vehicle's hardware — two mass memory units, one master timing
+unit, the display units, one set of bus sockets — because that is what the
+spacecraft has; what each computer owns privately is its discrete channel, its
+identity, its pacer and its intercomputer bus. `--gpc-id <n>` remains the
+single-computer spelling, and a GPC that is not named is simply not there: its
+discrete channel answers nobody and its neighbours see it as absent, which the
+flight software already reads as halt/standby/dead.
+
+`--interactive` and `--debug` drive one machine from stdin and are refused with
+more than one.
+
+Each computer paces itself to the wall clock, which keeps the group roughly
+together but says nothing about how far apart they drift in *simulated* time.
+That matters because the flight software's synchronisation programs spin on the
+inter-GPC discrete lines with a 3.85 ms timeout measured in the GPC's own time,
+and a miss votes the offending computer out of the redundant set — so a
+fail-to-sync caused by the host's scheduler would be indistinguishable from a
+flight-software defect. A barrier therefore holds any machine that gets more
+than `YAGPC_BARRIER_US` microseconds of simulated time ahead of the slowest
+(default 200; `0` disables it). Holding is normal and costs nothing measurable;
+the run's closing report gives the number of holds, the seconds spent in them,
+and the number *abandoned* — a hold given up on because the machine being
+waited for had stopped rather than merely fallen behind, which is the number
+worth looking at.
+
+### The regression gate
+
+Most of `yaGPC2`'s defects have been caught not by the unit tests but by one
+long run: boot the real PASS flight software from a mass-memory volume, let it
+reach GPC MEMORY, and compare the device models' counters. The harness that
+drives it (`headless-gpcmem.sh`, roughly seven minutes unattended) lives with
+the flight-software workspace rather than in this repository, since it needs a
+built volume; what matters here is the shape of the check.
+
+Measured 2026-09-12 over a 420-second run, and reproduced byte for byte across
+three runs on two different builds:
+
+<pre>
+deu: 1848 commands, 375 fills, 569 timeFills, 367 displayFills, 8 formatFills,
+     328 medsXfers, 575 polls, 114476 wordsIn, 9110 wordsOut
+mtu: 7890 commands, 5421 timeReads, 26139 wordsOut
+</pre>
+
+with the scripted keystrokes landing at `poll=247 simt=135.520 s wall=120.0 s`.
+Only the last of those — 247 polls at the keystroke — survives from the figures
+quoted in earlier notes; the rest moved with the master-timing-unit and MEDS
+work and had gone stale. Quote these rather than the older set, and re-measure
+rather than quoting either: the point of the gate is that a run of the current
+tree and a run of the tree being compared against are made the same afternoon.
+
+Note that the timing unit's `lastTime` is the time of day at which the run was
+stopped and is expected to differ between runs; everything else above should
+match exactly.

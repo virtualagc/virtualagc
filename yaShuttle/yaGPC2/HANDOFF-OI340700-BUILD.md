@@ -21,6 +21,26 @@ Progression, so each change's worth is visible:
     --csects again                  126
       + 105 tombstones               22
 
+## This is no longer the whole story -- see HANDOFF-OPS9.md
+
+The counts above are the OBJECT-FILE stage as it stood when linking was out
+of scope.  Linking is in scope now, a bootable volume exists, and the build
+is automated end to end by `tapebuild/build.sh`:
+
+    REF=~/workspace/pass-run/OI340700-v44boot.mmv \
+        yaShuttle/yaGPC2/tapebuild/build.sh <workdir>
+
+v44 is v43 plus ASM101S `6d418f3c6`, which changes only `BILDNEW5.obj`'s RLDs
+and ten phase-10 halfwords.  `HANDOFF-OPS9.md` is that build's handoff -- its
+sections 0-3 carry the stages, what pins each of them, and the deviations --
+and this file remains useful for WHY the object stage is shaped as it is:
+the tombstones, the 21 HAL failures, and the blind spots in the verification
+method.
+
+One finding worth carrying here rather than leaving it in OPS9: GPCIPL's
+`>>> GPC POWER REFAIL -PROGRAM/MACHINE WERE R` is NOT a refail.  It is
+message 132 printed with message 130's text.  See `gpc-causes.py show 84`.
+
 ## The recipe that produces that
 
 Scratch tree at `/mnt/STORAGE/home/rburkey/pass-build/OI340700`, built by
@@ -33,7 +53,7 @@ copying OI340600's `APPLSRC SSSRC MLIB80 INCL80` plus PASS.REL32V0's
     prepareINCLIB --clear --include=INCL80
     rm -rf objects SDFLIB TEMPLIB archive.results; mkdir objects SDFLIB
     PATH=<PASS.REL32V0>:<ASM101S>:<dps>/build/bin:$PATH \
-        compilePASS --no-csects
+        compilePASS --no-csects --sdl --release=OI340700
 
 `PATH` must carry PASS.REL32V0 (HALSFC, preprocessHALSFC), our ASM101S
 directory (ASM101Sa), and Don's `build/bin` (dfg only).  Launch it with
@@ -41,6 +61,25 @@ directory (ASM101Sa), and Don's `build/bin` (dfg only).  Launch it with
 and takes the build with it.  About 15 minutes.
 
 `--no-csects` is right ONLY because tombstones now do the removal; see below.
+
+**`--sdl --release=OI340700` are not optional for a TAPE build**, and a plain
+`compilePASS --no-csects` does not reproduce the objects the volume was built
+from:
+
+- Without `--sdl`, 160 PROGRAM objects gain a START csect, a stack prologue
+  and stack ERs that the tape's objects do not have.
+- Without `--release`, `CPUSLS` and `CPTOSV` get `CARDTYPE` ACBD instead of
+  ACBC -- the B->D mapping discussed under "Open decision" below -- fail XI3,
+  and eight phase-15 objects cascade away behind them.
+
+With both, 1,981 of 1,981 objects match in loaded content.
+
+Two things that must be pinned alongside them.  `dfg` must be the pinned
+build (`HANDOFF-OPS9.md` stage 0b), not whatever is on `PATH`.  And
+`compilePASS`'s own `dfg --release` probe was broken by `rich`'s ANSI styling
+until 2026-09-10 -- it parsed the styled help text and concluded the option
+was absent -- so a build from before that date silently omitted the release
+even when it was asked for.
 
 ## What was added to compilePASS
 
