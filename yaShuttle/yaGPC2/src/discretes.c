@@ -51,10 +51,21 @@ int yagpc_gpc_id(void) {
     return g_gpcId;
 }
 
-#define DISCRETES_PORT  (yagpc_port_base() + YAGPC_DISCRETES_OFFSET)
+/* A CHANNEL PER COMPUTER, port 6980 + GPC ID (nsts-sim-gpc 7946bc1), so
+ * all five GPCs can run at once without hearing each other's switches.  A
+ * device wired to every computer -- a mass memory's READY -- drives them
+ * all by publishing on each. */
+#define DISCRETES_PORT \
+    (yagpc_port_base() + YAGPC_DISCRETES_OFFSET + yagpc_gpc_id())
 
-#define OP_SET   1
-#define OP_RESET 2
+#define OP_SET     1
+#define OP_RESET   2
+/* nsts-sim-gpc 7946bc1: anyone may ask the GPC for a register's whole
+ * current value, and the GPC -- which holds it -- is the only sender of
+ * the answer.  This replaces re-broadcasting on a timer: a process that
+ * attaches late asks instead of waiting to overhear. */
+#define OP_REQUEST 3
+#define OP_VALUE   4
 
 #define WORDS 4
 
@@ -90,21 +101,32 @@ static struct {
     bool trace;
     unsigned long messages;
     double staleSec;
-    /* Index 0 is register A, 1 is register B. */
-    uint32_t value[2];
+    /* Index 0 is register A, 1 is B, 2 is the output register. */
+    uint32_t value[3];
+    /* What this GPC believes each register's whole value to be, which is
+     * what a REQUEST is answered with.  For A and B that is the combination
+     * of locally derived and published bits, which only iop.c can form. */
+    uint32_t canonical[3];
     /* When each bit was last published.  Per BIT, not per register: a
      * crew panel republishing the switches must not make a departed mass
      * memory's READY look fresh. */
-    double lastSeen[2][32];
+    double lastSeen[3][32];
     /* Bits this process drives itself, which it must not then treat as
      * externally driven -- see discretes.h. */
-    uint32_t selfDriven[2];
+    uint32_t selfDriven[3];
     struct sockaddr_in group;
     unsigned generation;  /* see discretes_generation() */
 } g;
 
 static int reg_index(int reg) {
-    return (reg == DISCRETES_REG_B) ? 1 : 0;
+    if (reg == DISCRETES_REG_B) return 1;
+    if (reg == DISCRETES_REG_OUT) return 2;
+    return 0;
+}
+
+static bool reg_known(int reg) {
+    return reg == DISCRETES_REG_A || reg == DISCRETES_REG_B ||
+           reg == DISCRETES_REG_OUT;
 }
 
 bool discretes_enabled(void) { return g.open; }
@@ -203,6 +225,8 @@ void discretes_close(void) {
     g.fd = -1;
 }
 
+static void send_msg(unsigned op, int reg, uint32_t mask);
+
 /* Apply one well-formed message.  Anything else is ignored rather than
  * guessed at, so unrelated traffic on the group cannot corrupt a
  * register. */
@@ -210,11 +234,24 @@ static void apply(const uint8_t *b, size_t n) {
     if (n < WORDS * 2) return;
     unsigned op  = (unsigned)((b[0] << 8) | b[1]);
     unsigned reg = (unsigned)((b[2] << 8) | b[3]);
-    if (op != OP_SET && op != OP_RESET) return;
-    if (reg != DISCRETES_REG_A && reg != DISCRETES_REG_B) return;
+    if (!reg_known((int)reg)) return;
 
     uint32_t mask = ((uint32_t)b[4] << 24) | ((uint32_t)b[5] << 16) |
                     ((uint32_t)b[6] << 8) | (uint32_t)b[7];
+
+    /* REQUEST: somebody attached late and is asking what the register
+     * holds.  This GPC holds it, and is the only thing that may answer --
+     * which is what lets the protocol drop the re-broadcast timer. */
+    if (op == OP_REQUEST) {
+        send_msg(OP_VALUE, (int)reg, g.canonical[reg_index((int)reg)]);
+        g.messages++;
+        return;
+    }
+    /* VALUE: only a GPC sends one, and this IS the GPC, so any that
+     * arrives is another computer's answer on a channel we should not be
+     * hearing.  Ignored rather than applied. */
+    if (op == OP_VALUE) return;
+    if (op != OP_SET && op != OP_RESET) return;
     if (mask == 0) return;
 
     int r = reg_index((int)reg);
@@ -277,20 +314,42 @@ void discretes_poll(void) {
     }
 }
 
+static void send_msg(unsigned op, int reg, uint32_t mask) {
+    if (!g.open) return;
+    uint8_t b[WORDS * 2];
+    b[0] = (uint8_t)(op >> 8);    b[1] = (uint8_t)op;
+    b[2] = (uint8_t)(reg >> 8);   b[3] = (uint8_t)reg;
+    b[4] = (uint8_t)(mask >> 24); b[5] = (uint8_t)(mask >> 16);
+    b[6] = (uint8_t)(mask >> 8);  b[7] = (uint8_t)mask;
+    (void)sendto(g.fd, b, sizeof b, 0,
+                 (struct sockaddr *)&g.group, sizeof g.group);
+}
+
+void discretes_set_canonical(int reg, uint32_t value) {
+    if (!g.open || !reg_known(reg)) return;
+    g.canonical[reg_index(reg)] = value;
+}
+
+/* The output register is entirely this GPC's own, so every change to it is
+ * published as the SET and RESET of the bits that moved -- nothing else
+ * drives it and nothing else can contradict it. */
+void discretes_publish_out(uint32_t before, uint32_t after) {
+    if (!g.open) return;
+    uint32_t changed = before ^ after;
+    g.value[reg_index(DISCRETES_REG_OUT)] = after;
+    g.canonical[reg_index(DISCRETES_REG_OUT)] = after;
+    if (changed == 0) return;
+    if (changed & after)  send_msg(OP_SET, DISCRETES_REG_OUT, changed & after);
+    if (changed & ~after) send_msg(OP_RESET, DISCRETES_REG_OUT, changed & ~after);
+    g.generation++;
+}
+
 void discretes_publish(int reg, uint32_t mask, bool on) {
     if (!g.open || mask == 0u) return;
     int r = reg_index(reg);
     g.selfDriven[r] |= mask;
     g.generation++;
-
-    uint8_t b[WORDS * 2];
-    unsigned op = on ? OP_SET : OP_RESET;
-    b[0] = (uint8_t)(op >> 8);   b[1] = (uint8_t)op;
-    b[2] = (uint8_t)(reg >> 8);  b[3] = (uint8_t)reg;
-    b[4] = (uint8_t)(mask >> 24); b[5] = (uint8_t)(mask >> 16);
-    b[6] = (uint8_t)(mask >> 8);  b[7] = (uint8_t)mask;
-    (void)sendto(g.fd, b, sizeof b, 0,
-                 (struct sockaddr *)&g.group, sizeof g.group);
+    send_msg(on ? OP_SET : OP_RESET, reg, mask);
 }
 
 uint32_t discretes_driven_mask(int reg) {

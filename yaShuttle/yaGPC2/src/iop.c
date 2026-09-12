@@ -193,7 +193,11 @@ static uint32_t iop_discrete_overlay(int reg, uint32_t local) {
         cachedValue[i] = discretes_value(reg);
         lastGen[i] = gen;
     }
-    return (local & ~cachedDriven[i]) | (cachedValue[i] & cachedDriven[i]);
+    uint32_t effective = (local & ~cachedDriven[i]) | (cachedValue[i] & cachedDriven[i]);
+    /* What a REQUEST for this register is answered with.  Only here can the
+     * locally derived bits and the published ones be combined. */
+    discretes_set_canonical(reg, effective);
+    return effective;
 }
 
 void iop_set_discrete_in(IOP *iop, int reg, uint32_t value) {
@@ -1929,16 +1933,18 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
                            register_get32(&iop->regRecvEna) | (data & MIA_WRITE_MASK));
             break;
         case 0x84100000: { /* DISCRETE OUTPUT RESET */
-            uint32_t r1 = register_get32(&iop->regDiscreteOut);
-            uint32_t r2 = r1 & data;
-            r1 = r1 ^ r2;
+            uint32_t r0 = register_get32(&iop->regDiscreteOut);
+            uint32_t r2 = r0 & data;
+            uint32_t r1 = r0 ^ r2;
             register_set32(&iop->regDiscreteOut, r1);
+            discretes_publish_out(r0, r1);
             break;
         }
         case 0x85100000: { /* DISCRETE OUTPUT SET */
-            uint32_t r1 = register_get32(&iop->regDiscreteOut);
-            r1 = r1 | data;
+            uint32_t r0 = register_get32(&iop->regDiscreteOut);
+            uint32_t r1 = r0 | data;
             register_set32(&iop->regDiscreteOut, r1);
+            discretes_publish_out(r0, r1);
             break;
         }
         case 0x86200000: { /* CONFIGURE PROCESSORS HALT */
@@ -1972,7 +1978,12 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             iop_log_procs(iop, "MRESET", data);
             register_set32(&iop->regXmitEna, 0x00000000u);
             register_set32(&iop->regRecvEna, 0x00000000u);
-            register_set32(&iop->regDiscreteOut, 0x00000000u);
+            {   /* Master reset drops every discrete output; that is a change
+                 * like any other and is published. */
+                uint32_t r0 = register_get32(&iop->regDiscreteOut);
+                register_set32(&iop->regDiscreteOut, 0x00000000u);
+                discretes_publish_out(r0, 0x00000000u);
+            }
             /* MASTER RESET's INTERRUPT effects, which were missing
              * entirely.  The instruction set's own reset table gives them
              * bit by bit:

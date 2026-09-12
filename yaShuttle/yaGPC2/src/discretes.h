@@ -51,6 +51,10 @@
 
 #define DISCRETES_REG_A 1
 #define DISCRETES_REG_B 2
+/* The discrete OUTPUT register, added with REQUEST/VALUE in
+ * nsts-sim-gpc 7946bc1.  The GPC owns every bit of it and publishes its
+ * own writes; nothing else drives it. */
+#define DISCRETES_REG_OUT 3
 
 /* How long a bit stays "externally driven" after its last message.
  * Publishers republish every 250 ms, so this is several periods -- long
@@ -82,6 +86,13 @@ unsigned long discretes_message_count(void);
 /* Changes whenever the discrete bus state does; lets a caller cache what it
  * derived from discretes_driven_mask()/discretes_value(). */
 unsigned discretes_generation(void);
+
+/* The whole value of a register as this GPC believes it -- what a REQUEST
+ * is answered with.  iop.c keeps A and B current here because only it can
+ * combine the locally derived bits with the published ones; the OUT
+ * register is this process's own and is published on every change. */
+void discretes_set_canonical(int reg, uint32_t value);
+void discretes_publish_out(uint32_t before, uint32_t after);
 
 /* Drive a level onto the bus, for a device modelled in this process that
  * a real vehicle would have wired to a discrete line -- the mass memory's

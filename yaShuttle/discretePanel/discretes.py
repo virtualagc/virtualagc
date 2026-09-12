@@ -54,7 +54,20 @@ PORT_BASE_DEFAULT = 6900
 DISCRETES_OFFSET = 80
 
 PORT_BASE = int(os.environ.get("NSTS_BUS_PORT_BASE", PORT_BASE_DEFAULT))
-PORT = PORT_BASE + DISCRETES_OFFSET     # busConfig._gpcDiscretes
+
+# A CHANNEL PER COMPUTER: busConfig._gpcDiscretes<N>, port 6980 + GPC ID,
+# so all five GPCs can run at once without hearing one another's switches
+# (nsts-sim-gpc 7946bc1).  A device wired to every computer -- a mass
+# memory's READY -- drives them all by publishing on each in turn.
+GPC_IDS = (0, 1, 2, 3, 4, 5)
+GPC = 1                     # yaGPC2's --gpc-id default; 0 is standalone
+PORT = PORT_BASE + DISCRETES_OFFSET + GPC
+
+
+def _recompute_port():
+    global PORT
+    PORT = PORT_BASE + DISCRETES_OFFSET + GPC
+    return PORT
 
 
 def set_port_base(base):
@@ -63,17 +76,38 @@ def set_port_base(base):
     Call BEFORE opening any socket; sender()/receiver() read PORT at the
     moment they bind.
     """
-    global PORT_BASE, PORT
+    global PORT_BASE
     PORT_BASE = int(base)
-    PORT = PORT_BASE + DISCRETES_OFFSET
-    return PORT
+    return _recompute_port()
+
+
+def set_gpc(gpc):
+    """Select which computer's discrete channel to speak on.
+
+    Call BEFORE opening any socket, for the same reason as set_port_base.
+    """
+    global GPC
+    gpc = int(gpc)
+    if gpc not in GPC_IDS:
+        raise ValueError("GPC ID must be 0 to 5, got %r" % (gpc,))
+    GPC = gpc
+    return _recompute_port()
 IFACE = "127.0.0.1"         # matches Bus.IFACE / NSTS_BUS_IFACE
 
 SET = 1
 RESET = 2
+# Anyone may ask the GPC for a register's whole current value; the GPC
+# holds it and is the only sender of the answer.  This is what replaces
+# re-broadcasting on a timer -- a process that attaches late asks.
+REQUEST = 3
+VALUE = 4
 
 REG_A = 1                   # discrete inputs 1-32
 REG_B = 2                   # discrete inputs 33-40
+REG_OUT = 3                 # the discrete outputs, which the GPC owns
+
+REG_NAME = {REG_A: "A", REG_B: "B", REG_OUT: "OUT"}
+OP_NAME = {SET: "SET", RESET: "RESET", REQUEST: "REQUEST", VALUE: "VALUE"}
 
 REPUBLISH_MS = 250
 WORDS = 4
@@ -100,20 +134,38 @@ def decode(data):
     if data is None or len(data) < WORDS * 2:
         return None
     op, reg, hi, lo = struct.unpack(">HHHH", data[:WORDS * 2])
-    if op not in (SET, RESET):
+    if op not in (SET, RESET, REQUEST, VALUE):
         return None
-    if reg not in (REG_A, REG_B):
+    if reg not in (REG_A, REG_B, REG_OUT):
         return None
     return {"op": op, "reg": reg, "mask": ((hi << 16) | lo) & 0xFFFFFFFF}
 
 
 def apply(value, msg):
-    """Apply a decoded message to a register value."""
+    """Apply a decoded message to a register value.
+
+    VALUE carries the whole register, so it replaces rather than merges --
+    that is the point of it, and why only the GPC may send one.  REQUEST
+    asks and changes nothing.
+    """
     if msg is None:
+        return value
+    if msg["op"] == VALUE:
+        return msg["mask"] & 0xFFFFFFFF
+    if msg["op"] == REQUEST:
         return value
     if msg["op"] == SET:
         return (value | msg["mask"]) & 0xFFFFFFFF
     return value & ~msg["mask"] & 0xFFFFFFFF
+
+
+def request(sock, reg):
+    """Ask the GPC for a register's whole current value.
+
+    A process that attaches after the interesting transitions have already
+    happened has missed them; the protocol has no replay, so it asks.
+    """
+    publish(sock, REQUEST, reg, 0)
 
 
 def sender(iface=IFACE):

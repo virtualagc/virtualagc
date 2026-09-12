@@ -1542,6 +1542,11 @@ def main(argv=None):
     # Before any socket is opened.
     if args.port_base is not None:
         D.set_port_base(args.port_base)
+    # The column this panel publishes is the GPC it is wired to, and that
+    # now names the discrete channel as well.  (Driving all five columns on
+    # their five channels is the obvious next step, and what the per-GPC
+    # channels are for; this keeps the wired-column behaviour it has now.)
+    D.set_gpc(args.gpc_id)
 
     root = tk.Tk()
     panel = PanelO6(root, size=args.size, gpc_id=args.gpc_id)

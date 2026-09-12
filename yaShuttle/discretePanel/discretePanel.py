@@ -641,6 +641,11 @@ def main():
     # Before any socket is opened.
     if args.port_base is not None:
         D.set_port_base(args.port_base)
+    # A CHANNEL PER COMPUTER: the GPC ID now names the discrete bus as well
+    # as seeding register B, so five GPCs can run without hearing one
+    # another's switches.  Must precede any socket being opened.
+    if args.gpc_id is not None:
+        D.set_gpc(args.gpc_id)
 
     root = tk.Tk()
     panel = Panel(root)

@@ -59,6 +59,14 @@ def main():
                          "own base -- the same option on yaGPC2 and MEDS -- "
                          "to run it alongside the first without port "
                          "conflicts.  NSTS_BUS_PORT_BASE sets it too.")
+    ap.add_argument("--gpc", type=int, metavar="N", default=1,
+                    help="which computer's discrete channel to watch: port "
+                         "6980 + GPC ID, 0 to 5 (default 1, matching "
+                         "yaGPC2's --gpc-id).  Each GPC has its own channel "
+                         "so five can run at once.")
+    ap.add_argument("--no-request", action="store_true",
+                    help="do not ask the GPC for the registers at start-up; "
+                         "show only what is published from now on")
     ap.add_argument("--changes", action="store_true",
                     help="print only when a register value actually changes")
     args = ap.parse_args()
@@ -66,10 +74,21 @@ def main():
     # Before any socket is opened.
     if args.port_base is not None:
         D.set_port_base(args.port_base)
+    D.set_gpc(args.gpc)
 
     sock = D.receiver(timeout=0.5)
-    print("listening on %s:%d" % (D.GROUP, D.PORT))
-    state = {D.REG_A: 0, D.REG_B: 0}
+    print("listening on %s:%d (GPC %d)" % (D.GROUP, D.PORT, D.GPC))
+    state = {D.REG_A: 0, D.REG_B: 0, D.REG_OUT: 0}
+
+    # A MONITOR IS ALWAYS THE LATE JOINER.  The interesting transitions have
+    # already happened by the time it attaches and the protocol has no
+    # replay, so it asks: the GPC holds the registers and answers with
+    # VALUE.  Without this the display starts at zero and stays wrong until
+    # something happens to move each bit.
+    if not args.no_request:
+        out = D.sender()
+        for reg in (D.REG_A, D.REG_B, D.REG_OUT):
+            D.request(out, reg)
     t0 = time.time()
     n = 0
     try:
@@ -89,12 +108,12 @@ def main():
             state[reg] = D.apply(before, msg)
             if args.changes and state[reg] == before:
                 continue
-            print("%7.2fs  %-5s reg %s  %-28s   A=%08x B=%08x"
+            print("%7.2fs  %-7s reg %s  %-28s   A=%08x B=%08x OUT=%08x"
                   % (time.time() - t0,
-                     "SET" if msg["op"] == D.SET else "RESET",
-                     REGNAME.get(reg, "?"),
+                     D.OP_NAME.get(msg["op"], "?"),
+                     REGNAME.get(reg, D.REG_NAME.get(reg, "?")),
                      describe(reg, msg["mask"]),
-                     state[D.REG_A], state[D.REG_B]))
+                     state[D.REG_A], state[D.REG_B], state[D.REG_OUT]))
     except KeyboardInterrupt:
         pass
     print("%d discrete message(s)" % n)
