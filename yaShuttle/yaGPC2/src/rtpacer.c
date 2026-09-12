@@ -18,8 +18,15 @@
  * simulated time at once, past the 20 ms floor a bus receive gets, so a
  * reply already at the socket would arrive to a transaction that had
  * been error-terminated.  Capping the lump is what keeps the two clocks
- * inside each other's tolerance. */
-#define IDLE_CATCHUP_MAX_NS 50000000.0  /* 50 ms of simulated time per pass */
+ * inside each other's tolerance.
+ *
+ * The cap no longer DROPS the remainder (it did, and that was one of the
+ * ways the simulated clock lost time permanently): what is left over is
+ * still owed and the next pass still sees it.  So the cap now only decides
+ * how finely a deficit is repaid, and it stays well inside a bus receive
+ * timeout -- the wait loop skips its sleep while behind, so successive
+ * passes come back-to-back and 5 ms apiece is repaid quickly. */
+#define IDLE_CATCHUP_MAX_NS 5000000.0   /* 5 ms of simulated time per pass */
 
 /* WHEN A REBASE IS LEGITIMATE.
  *
