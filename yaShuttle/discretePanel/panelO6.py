@@ -9,12 +9,16 @@ included) and lets the controls be operated with the mouse.
 
 It is also the crew panel on the GPC discrete bus, replacing
 discretePanel.py: the same UDP multicast set/reset protocol (discretes.py),
-the same 250 ms republishing, the same --script language.  One GPC is
-wired -- GPC 1, or the one --gpc-id names -- and its column drives that
-GPC's discrete inputs together with the shared IPL SOURCE, BFC CRT, BFC
-DISENGAGE and RHC BFC ENGAGE controls.  The other columns are drawn and
-operable but publish nothing.  See "GPC discrete inputs" below for the
-bit-by-bit mapping and where each part of it comes from.
+the same 250 ms republishing, the same --script language.  EVERY column
+drives its own GPC: each computer has its own discrete channel (port 6980
++ GPC ID), so all five columns publish, each on the channel of the GPC it
+belongs to.  The per-GPC controls -- MODE, IPL, OUTPUT, BFC ENGAGE -- go
+only to that column's computer; the shared IPL SOURCE, BFC CRT, BFC
+DISENGAGE and RHC BFC ENGAGE controls are one wire feeding all five, and
+are published to each.  --gpc-id names the column the log calls primary
+and the channel this panel listens on for mass memory READY.  See "GPC
+discrete inputs" below for the bit-by-bit mapping and where each part of
+it comes from.
 
 Control changes, and the discrete words they produce, are printed to
 stdout.
@@ -327,8 +331,9 @@ class PanelO6:
         self.sock = D.sender()
         self._published = None
         self._send_failed = False
-        log("publishing %s discretes on %s:%d every %d ms"
-            % (GPCS[self.wired], D.GROUP, D.PORT, D.REPUBLISH_MS))
+        log("publishing all %d GPCs' discretes on %s:%d-%d every %d ms"
+            % (N_GPC, D.GROUP, D.gpc_port(1), D.gpc_port(N_GPC),
+               D.REPUBLISH_MS))
         # Mass memory READY, heard by a listener thread and picked up on the
         # Tk side by _tick(): the last level per unit, or None if never.
         self._rx_lock = threading.Lock()
@@ -408,7 +413,7 @@ class PanelO6:
                 % (name, self.power[i], self.output[i], self.mode[i],
                    "ON" if self.ipl[i] else "OFF",
                    self.output_tb(i), self.mode_tb(i),
-                   "  (wired)" if i == self.wired else ""))
+                   "  (primary)" if i == self.wired else ""))
         log("  IPL SOURCE=%s" % self.ipl_source)
         log("  BFC CRT DISPLAY=%s  SELECT=%s" %
             (self.bfc_display, self.bfc_select))
@@ -420,13 +425,20 @@ class PanelO6:
 
     # ---- the discrete bus -------------------------------------------------
 
-    def discretes(self):
-        """Registers A and B as the wired GPC should read them.
+    def discretes(self, w=None):
+        """Registers A and B as the GPC in column `w` should read them.
+
+        Defaults to the highlighted column.  Each computer has its own
+        discrete channel, so every column is published on its own -- the
+        per-GPC state (mode, IPL, BFC latch, I/O TERMINATE B) differs by
+        column, while the panel-wide switches (IPL SOURCE, I/O TERMINATE A,
+        the BFC CRT select) are the same wire feeding all five.
 
         Only the OWNED_A / OWNED_B bits mean anything; the rest belong to
         other devices.
         """
-        w = self.wired
+        if w is None:
+            w = self.wired
         a = D.bit_mask(MODE_BITS[self.mode[w]])
         if self._ipl_live(w):
             a |= D.bit_mask(IPL_BIT)
@@ -454,23 +466,32 @@ class PanelO6:
         value passes through "no bit set", which the hardware does too, and
         never through a value it did not hold.
         """
-        a, b = self.discretes()
         try:
-            for reg, owned, value in ((D.REG_A, OWNED_A, a),
-                                      (D.REG_B, OWNED_B, b)):
-                if owned & ~value:
-                    D.publish(self.sock, D.RESET, reg, owned & ~value)
-                if owned & value:
-                    D.publish(self.sock, D.SET, reg, owned & value)
+            columns = []
+            for w in range(N_GPC):
+                a, b = self.discretes(w)
+                columns.append((a, b))
+                port = D.gpc_port(w + 1)
+                for reg, owned, value in ((D.REG_A, OWNED_A, a),
+                                          (D.REG_B, OWNED_B, b)):
+                    if owned & ~value:
+                        D.publish(self.sock, D.RESET, reg, owned & ~value,
+                                  port=port)
+                    if owned & value:
+                        D.publish(self.sock, D.SET, reg, owned & value,
+                                  port=port)
             self._send_failed = False
         except OSError as e:
             if not self._send_failed:
                 log("cannot publish on the discrete bus: %s" % e)
             self._send_failed = True
-        if (a, b) != self._published:
-            self._published = (a, b)
-            log("%s discretes  A=%08x  B=%08x"
-                % (GPCS[self.wired], a & OWNED_A, b & OWNED_B))
+            return
+        if columns != self._published:
+            for w, (a, b) in enumerate(columns):
+                if self._published is None or self._published[w] != (a, b):
+                    log("%s discretes  A=%08x  B=%08x"
+                        % (GPCS[w], a & OWNED_A, b & OWNED_B))
+            self._published = columns
 
     def _listen(self):
         """Thread: note every MM READY level anybody publishes."""
@@ -1522,10 +1543,14 @@ def main(argv=None):
                     help="Tk geometry, e.g. 948x1250+80+20 (overrides --size; "
                          "also NSTS_O6_GEOMETRY)")
     ap.add_argument("--gpc-id", type=int, metavar="N", default=DEFAULT_GPC_ID,
-                    help="the GPC whose column is wired to the discrete bus, "
-                         "and the ID it reads (discrete B bits 0-2); default "
-                         "1.  NOT yaGPC2's --gpc-id, which only names its "
-                         "intercomputer port")
+                    help="the GPC this panel treats as primary: the column "
+                         "the log marks, and the discrete channel it listens "
+                         "on for mass memory READY (default 1).  It no longer "
+                         "selects what is PUBLISHED -- every column now drives "
+                         "its own computer on that computer's channel, port "
+                         "6980 + GPC ID, and each reads its own ID in discrete "
+                         "B bits 0-2.  Same numbering as yaGPC2's --gpc-id, "
+                         "which now picks the same channel.")
     ap.add_argument("--port-base", type=int, metavar="N", default=None,
                     help="base of the UDP port range the buses use: the "
                          "discrete bus is base+80 (default 6900, matching "
@@ -1542,10 +1567,9 @@ def main(argv=None):
     # Before any socket is opened.
     if args.port_base is not None:
         D.set_port_base(args.port_base)
-    # The column this panel publishes is the GPC it is wired to, and that
-    # now names the discrete channel as well.  (Driving all five columns on
-    # their five channels is the obvious next step, and what the per-GPC
-    # channels are for; this keeps the wired-column behaviour it has now.)
+    # Every column publishes on its own computer's channel (see _publish);
+    # this sets the module's own channel, which is the one the MM READY
+    # listener subscribes to.
     D.set_gpc(args.gpc_id)
 
     root = tk.Tk()

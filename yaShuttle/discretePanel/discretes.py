@@ -192,5 +192,23 @@ def receiver(iface=IFACE, timeout=None):
     return s
 
 
-def publish(sock, op, reg, mask):
-    sock.sendto(encode(op, reg, mask), (GROUP, PORT))
+def gpc_port(gpc):
+    """The channel a given computer listens on: 6980 + GPC ID.
+
+    A device wired to more than one computer -- a mass memory's READY, or a
+    crew panel with a column per GPC -- drives them all by publishing the
+    same line on each of their channels.
+    """
+    gpc = int(gpc)
+    if gpc not in GPC_IDS:
+        raise ValueError("GPC ID must be 0 to 5, got %r" % (gpc,))
+    return PORT_BASE + DISCRETES_OFFSET + gpc
+
+
+def publish(sock, op, reg, mask, port=None):
+    """Send one message, to this process's channel or a named one.
+
+    `port` is for a publisher that drives several computers: it names the
+    destination rather than changing the module's own channel.
+    """
+    sock.sendto(encode(op, reg, mask), (GROUP, PORT if port is None else port))
