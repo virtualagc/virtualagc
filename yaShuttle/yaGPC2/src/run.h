@@ -56,6 +56,13 @@ typedef struct {
     struct DeuModel *deuExtra[DEU_EXTRA_MAX];
     int deuExtraBus[DEU_EXTRA_MAX];
     int nDeuExtra;
+    /* WHICH COMPUTER EACH DISPLAY UNIT IS ATTACHED TO.  Two GPCs cannot drive
+     * the same display: a display-keyboard bus has one commander, and a unit
+     * hangs off one bus.  0 means "no particular computer", which is what a
+     * single-machine run wants and what every command line before --gpcs
+     * meant.  See vehicle.h. */
+    int deuOwner;
+    int deuExtraOwner[DEU_EXTRA_MAX];
     GpcServicerFn fallback;
     void *fallbackCtx;
     /* Which computer this router belongs to, and the vehicle whose shared

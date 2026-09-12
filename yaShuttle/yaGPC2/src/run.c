@@ -37,6 +37,12 @@ static void halucp_error_cb(void *ctx, const char *msg) {
  * else goes wherever it would have gone with no model installed, so
  * --mmu-model composes with --bce-network and --deu-model rather than
  * displacing them. */
+/* A display unit belongs to one computer -- see vehicle.h.  0 is "anyone",
+ * which is what a single-machine run uses. */
+static bool deu_owned_by(int owner, int gpcId) {
+    return owner == 0 || owner == gpcId;
+}
+
 void bus_router_service(void *ctx, GpcServiceNumber svc,
                         const GpcServiceInput *in, GpcServiceOutput *out) {
     BusRouter *br = (BusRouter *)ctx;
@@ -196,6 +202,10 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
     }
     for (int d = 0; d < br->nDeuExtra; d++) {
         if (br->deuExtra[d] && in->busID == br->deuExtraBus[d]) {
+            /* Somebody's unit is on this bus.  If it is not THIS computer's,
+             * this computer is not on that bus at all and finds nothing
+             * there -- it does not get to share it. */
+            if (!deu_owned_by(br->deuExtraOwner[d], br->gpcId)) break;
             vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
                               deumodel_in_transfer(br->deuExtra[d]));
             deumodel_service(br->deuExtra[d], svc, in, out);
@@ -203,6 +213,20 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             return;
         }
     }
+    /* The built-in display unit answers through `fallback`, so ownership has
+     * to be checked before getting there -- otherwise every computer that
+     * was not given a unit would drive the first computer's. */
+    if (br->deu != NULL && !deu_owned_by(br->deuOwner, br->gpcId)) {
+        switch (svc) {
+        case GPC_SVC_XMIT_CMD:
+        case GPC_SVC_XMIT_WORD: out->out.xmit.ok = true; break;
+        case GPC_SVC_RECV_POLL: out->out.poll.available = false; break;
+        case GPC_SVC_RECV_WORD: out->out.recv.available = false; break;
+        default: break;
+        }
+        return;
+    }
+
     if (br->fallback) {
         /* The built-in display unit on DK1 arrives here, and it is a shared
          * device like the rest -- one accumulator, one reply cursor.  Its
@@ -360,7 +384,19 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
         /* In this process, so the socket-latency floor does not apply:
          * honour the bus program's own message timeout exactly. */
         iop_set_recv_timeout_floor_us(&r->age.gpc.iop, 0.0);
-        if (!veh->built) veh->deu = deumodel_create(6);   /* DK1 */
+        if (!veh->built) {
+            veh->deu = deumodel_create(6);   /* DK1 */
+            /* The built-in unit goes to the computer that created it, which
+             * is the first one named.  Unconditionally, and NOT gated on
+             * there being more than one machine: nMachines is still 1 here
+             * even in a five-computer run, because the others have not
+             * reached batchrunner_init yet.  Gating on it left the unit
+             * owned by nobody and every computer drove it -- 184 clashes on
+             * bus 6 in a two-computer run that was supposed to have none.
+             * With one machine the owner is that machine, so nothing
+             * changes. */
+            veh->deuOwner = gpcId;
+        }
         r->deuModel = veh->deu;
         base = deumodel_service;
         baseCtx = r->deuModel;
@@ -403,17 +439,30 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             char *end = NULL;
             long b = strtol(p, &end, 10);
             if (end == p) break;
+            /* "<gpc>:<bus>" attaches the unit to one computer; a bare bus
+             * number attaches it to whoever has the built-in one, which is
+             * what it meant before there was more than one computer. */
+            int owner = 0;
+            if (*end == ':') {
+                owner = (int)b;
+                p = end + 1;
+                b = strtol(p, &end, 10);
+                if (end == p) break;
+                if (owner < 1 || owner > 5) owner = 0;
+            }
             if (b > 0 && b <= 24) {
                 int k = r->nDeuModelExtra;
                 if (!veh->built) {
                     veh->deuExtra[k] = deumodel_create((int)b);
                     veh->deuExtraBus[k] = (int)b;
+                    veh->deuExtraOwner[k] = owner ? owner : veh->deuOwner;
                     veh->nDeuExtra = k + 1;
                 }
                 r->deuModelExtra[k] = veh->deuExtra[k];
                 if (r->deuModelExtra[k] != NULL) {
                     r->busRouter.deuExtra[k] = r->deuModelExtra[k];
                     r->busRouter.deuExtraBus[k] = (int)b;
+                    r->busRouter.deuExtraOwner[k] = veh->deuExtraOwner[k];
                     r->nDeuModelExtra = k + 1;
                     r->busRouter.nDeuExtra = k + 1;
                 }
@@ -492,6 +541,9 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             r->busRouter.vehicle = veh;
             r->busRouter.gpcId = gpcId;
             r->busRouter.deu = r->deuModel;
+            r->busRouter.deuOwner = veh->deuOwner;
+            for (int d = 0; d < r->nDeuModelExtra; d++)
+                r->busRouter.deuExtraOwner[d] = veh->deuExtraOwner[d];
             r->busRouter.fallback = base;
             r->busRouter.fallbackCtx = baseCtx;
             ap101_set_servicer(&r->age.gpc, bus_router_service, &r->busRouter);

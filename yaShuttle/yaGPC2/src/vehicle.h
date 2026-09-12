@@ -50,6 +50,23 @@ typedef struct Vehicle {
     int deuExtraBus[DEU_EXTRA_MAX];
     int nDeuExtra;
 
+    /* WHICH COMPUTER EACH DISPLAY UNIT BELONGS TO.
+     *
+     * Two GPCs cannot drive the same display unit.  A display-keyboard bus
+     * has a single commander and a unit hangs off one bus, so a unit is one
+     * computer's -- measured, two machines told to drive the built-in DK1
+     * unit abandoned 477 transfers between them and no keystroke ever
+     * reached the flight software.
+     *
+     * The built-in unit goes to the first computer named; the rest are
+     * named on the command line, `--deu-bus <gpc>:<bus>`.  0 means "no
+     * particular computer", which is what one machine wants and what every
+     * command line before --gpcs meant.  A computer with no unit attached
+     * sees nothing on the display buses, which is the truth about a GPC
+     * with no MEDS on it. */
+    int deuOwner;
+    int deuExtraOwner[DEU_EXTRA_MAX];
+
     /* One set of bus sockets for the process.  Per machine they would each
      * bind the same ports for buses 1-23 and mistake one another's
      * transmissions for peripheral replies. */
