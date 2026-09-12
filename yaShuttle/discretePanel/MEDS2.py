@@ -9373,12 +9373,21 @@ class MDU(LRU):
         print("MEDS2: DEU LOAD -> IDP%s" % self.priPortIDP)
 
     def showMajorFunc(self):
-        """ON SCREEN, in the window title bar.  There is nowhere on the DPS
-        page to put it without disturbing a layout that took a long time to
-        fit, and the switch is invisible otherwise."""
+        """ON SCREEN -- on the IDP pane's MAJ FUNC paddle, which shows the
+        position and sets it.
+
+        It used to be appended to the window title instead, because there is
+        nowhere on the DPS page to put it without disturbing a layout that
+        took a long time to fit, and the switch was invisible otherwise.  The
+        pane says it better, so the title no longer has to.  WITHOUT the pane
+        (--no-pane) there is still nowhere else for it, so it goes back to
+        the title bar rather than disappearing."""
         name = MF_NAMES[(self.majorFunc or 0) & 3]
-        t = "%s / %s - MF %s" % (WINDOW_TITLE,
-                                 self.CONFIG.get('config', {}).get('lru'), name)
+        lru = self.CONFIG.get('config', {}).get('lru')
+        if self.pane is None:
+            t = "%s / %s - MF %s" % (WINDOW_TITLE, lru, name)
+        else:
+            t = "%s / %s" % (WINDOW_TITLE, lru)
         try:
             if self.win is not None:
                 self.win.setWindowTitle(t)
