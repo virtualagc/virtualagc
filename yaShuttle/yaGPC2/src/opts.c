@@ -138,14 +138,20 @@ static const char *HELP_TEXT =
 "                                  runs. Default: the real host machine's\n"
 "                                  current wall-clock time (its own\n"
 "                                  configured timezone) at program start.\n"
-"  --mmu-model <volume>             Serve the mass memory bus from an\n"
+"  --mmu-model [<unit>:]<volume>    Serve a mass memory bus from an\n"
 "                                  IN-PROCESS model reading this .mmv tape,\n"
 "                                  answering in the same call with no socket,\n"
 "                                  no drops and no pacing -- so a run is\n"
 "                                  reproducible.  Composes with --bce-network\n"
 "                                  and --deu-model: only the mass memory bus\n"
-"                                  is taken over (default: none)\n"
-"  --mmu-unit <n>                   which mass memory the model is, 1 or 2\n"
+"                                  is taken over (default: none).\n"
+"                                  THE VEHICLE HAS TWO UNITS, MM1 on bus 18\n"
+"                                  and MM2 on bus 19, shared by every GPC --\n"
+"                                  give the option twice to have both, as\n"
+"                                  `--mmu-model 1:A.mmv --mmu-model 2:B.mmv`.\n"
+"                                  A bare volume is MM1 unless --mmu-unit\n"
+"                                  says otherwise\n"
+"  --mmu-unit <n>                   which mass memory a bare --mmu-model is\n"
 "  --deu-bus <n>                    install a SECOND display unit on bus n,\n"
 "                                  beside the one --deu-model puts on DK1.\n"
 "                                  PASS surrenders whichever DK bus the BFC\n"
@@ -379,7 +385,20 @@ void opts_parse(int argc, char **argv, Options *opts) {
         } else if (tok_is(tok, "--discretes", &n)) {
             (void)n; opts->discretes = true;
         } else if (tok_is(tok, "--mmu-model", &n)) {
-            opts->mmuModelVolume = take_value(argc, argv, &i, tok, n);
+            {   /* [unit:]volume -- "--mmu-model 2:OTHER.mmv" names MM2, a
+                 * bare volume means MM1 unless --mmu-model-unit says
+                 * otherwise, which is how it was spelled before. */
+                char *v = take_value(argc, argv, &i, tok, n);
+                int unit = 0;
+                if (v != NULL && v[0] >= '1' && v[0] <= '2' && v[1] == ':') {
+                    unit = v[0] - '0';
+                    v += 2;
+                } else if (opts->mmuModelUnit != NULL) {
+                    unit = (int)strtol(opts->mmuModelUnit, NULL, 10);
+                }
+                if (unit < 1 || unit > 2) unit = opts->mmuVolume[0] ? 2 : 1;
+                opts->mmuVolume[unit - 1] = v;
+            }
         } else if (tok_is(tok, "--mmu-unit", &n)) {
             opts->mmuModelUnit = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--deu-bus", &n)) {
@@ -447,7 +466,7 @@ void opts_parse(int argc, char **argv, Options *opts) {
                 "asked for it has already expired.  A display unit will IPL "
                 "forever and never show a menu.  Add --real-time.\n");
         }
-        if (!opts->mmuModelVolume && !opts->bceNetwork) {
+        if (!opts->mmuVolume[0] && !opts->mmuVolume[1] && !opts->bceNetwork) {
             fprintf(stderr,
                 "error: no 'fcm-file', so the bootstrap must come from a "
                 "mass memory -- give --mmu-model VOLUME.mmv, or "

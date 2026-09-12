@@ -191,8 +191,12 @@ typedef struct {
      * run can have a deterministic tape AND a real display.  See
      * mmumodel.h for why a second implementation of someone else's
      * device is worth having. */
-    char *mmuModelVolume;             /* default NULL */
-    char *mmuModelUnit;               /* "1" (MM1/BCE 18) or "2"; default 1 */
+    /* THE VEHICLE HAS TWO MASS MEMORY UNITS, not two per computer.  MM1 is
+     * on bus 18 and MM2 on bus 19, each with its own volume, and one GPC can
+     * be loading from one while another loads from the other.  Indexed by
+     * unit - 1; NULL means that unit is not present. */
+    char *mmuVolume[2];
+    char *mmuModelUnit;               /* legacy: unit for a bare --mmu-model */
 
     /* Base of the UDP port range every bus socket derives from: bus n uses
      * base+n and the discrete bus base+80.  Default 6900, which reproduces

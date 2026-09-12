@@ -158,9 +158,11 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             if (t / 1000000u != blSec) { blSec = t / 1000000u; fflush(bl); }
         }
     }
-    if (br->mmu && in->busID == br->mmuBus) {
-        mmumodel_service(br->mmu, svc, in, out);
-        return;
+    for (int u = 0; u < 2; u++) {
+        if (br->mmu[u] && in->busID == br->mmuBus[u]) {
+            mmumodel_service(br->mmu[u], svc, in, out);
+            return;
+        }
     }
     if (br->mtu && mtumodel_owns_bus(in->busID)) {
         mtumodel_service(br->mtu, svc, in, out);
@@ -198,7 +200,8 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
     BatchRunner *r = ctx;
     const BusRouter *br = &r->busRouter;
     if (r->bceFramer == NULL) return false;
-    if (br->mmu && busID == br->mmuBus) return false;
+    for (int u = 0; u < 2; u++)
+        if (br->mmu[u] && busID == br->mmuBus[u]) return false;
     if (br->mtu && mtumodel_owns_bus(busID)) return false;
     for (int d = 0; d < br->nDeuExtra; d++)
         if (br->deuExtra[d] && busID == br->deuExtraBus[d]) return false;
@@ -383,14 +386,17 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
         }
     }
 
-    if (opts->mmuModelVolume || r->mtuModel || r->nDeuModelExtra > 0) {
-        long unit = opts->mmuModelUnit ? strtol(opts->mmuModelUnit, NULL, 10) : 1;
-        r->mmuModel = opts->mmuModelVolume
-                          ? mmumodel_create((int)unit, opts->mmuModelVolume)
-                          : NULL;
-        if (r->mmuModel || r->mtuModel || r->nDeuModelExtra > 0) {
-            if (r->mmuModel) {
-                mmumodel_set_clock(r->mmuModel, &r->age.gpc.cpu.elapsedTimeUs);
+    if (opts->mmuVolume[0] || opts->mmuVolume[1] || r->mtuModel ||
+        r->nDeuModelExtra > 0) {
+        for (int u = 0; u < 2; u++)
+            r->mmuModel[u] = opts->mmuVolume[u]
+                                 ? mmumodel_create(u + 1, opts->mmuVolume[u])
+                                 : NULL;
+        if (r->mmuModel[0] || r->mmuModel[1] || r->mtuModel ||
+            r->nDeuModelExtra > 0) {
+            for (int u = 0; u < 2; u++) {
+                if (r->mmuModel[u] == NULL) continue;
+                mmumodel_set_clock(r->mmuModel[u], &r->age.gpc.cpu.elapsedTimeUs);
     /* The DEU models get the same clock, so YAGPC_DEUKEYS_SIMTIME can gate
      * a keystroke batch on simulated time. */
     if (r->deuModel != NULL)
@@ -419,13 +425,16 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
                  * to test it, reached only by selecting PFS from the GPCIPL
                  * menu, and it spun there until ERROR 115 MMU WILL NOT GO
                  * READY. */
-                uint32_t readyBit = (unit == 2) ? 0x01000000u : 0x02000000u;
+                uint32_t readyBit = (u == 1) ? 0x01000000u : 0x02000000u;
                 iop_set_discrete_in(&r->age.gpc.iop, DISCRETES_REG_A,
                                     iop_discrete_in_a_stored(&r->age.gpc.iop) | readyBit);
             }
             if (base == NULL) iop_set_recv_timeout_floor_us(&r->age.gpc.iop, 0.0);
-            r->busRouter.mmu = r->mmuModel;
-            r->busRouter.mmuBus = r->mmuModel ? mmumodel_bus(r->mmuModel) : -1;
+            for (int u = 0; u < 2; u++) {
+                r->busRouter.mmu[u] = r->mmuModel[u];
+                r->busRouter.mmuBus[u] =
+                    r->mmuModel[u] ? mmumodel_bus(r->mmuModel[u]) : -1;
+            }
             r->busRouter.mtu = r->mtuModel;
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtra[d] = r->deuModelExtra[d];
@@ -449,7 +458,11 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     if (opts->discretes) {
         r->discretes = discretes_create(r->gpcId);
         iop_set_discretes(&r->age.gpc.iop, r->discretes);
-        if (r->mmuModel) mmumodel_set_discretes(r->mmuModel, r->discretes);
+        /* A mass memory is wired to every computer; with one machine that
+         * is one channel. */
+        for (int u = 0; u < 2; u++)
+            if (r->mmuModel[u])
+                mmumodel_set_discretes(r->mmuModel[u], r->discretes);
     }
 }
 
@@ -460,10 +473,11 @@ void batchrunner_free(BatchRunner *r) {
     }
     discretes_free(r->discretes);
     r->discretes = NULL;
-    if (r->mmuModel) {
-        mmumodel_report(r->mmuModel);
-        mmumodel_free(r->mmuModel);
-        r->mmuModel = NULL;
+    for (int u = 0; u < 2; u++) {
+        if (r->mmuModel[u] == NULL) continue;
+        mmumodel_report(r->mmuModel[u]);
+        mmumodel_free(r->mmuModel[u]);
+        r->mmuModel[u] = NULL;
     }
     if (r->deuModel) {
         deumodel_report(r->deuModel);
@@ -969,7 +983,8 @@ static void firmware_ipl(BatchRunner *r) {
                 /* Only ours to drive.  A networked unit publishes its own
                  * READY, and overriding it from here would be this process
                  * asserting a discrete about somebody else's hardware. */
-                if (r->mmuModel) mmumodel_publish_ready(r->mmuModel);
+                for (int u = 0; u < 2; u++)
+            if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
             }
             continue;
         }
@@ -987,7 +1002,8 @@ static void firmware_ipl(BatchRunner *r) {
     }
     ageharness_firmware_ipl(&r->age, image, (uint32_t)got);
     free(image);
-    if (r->mmuModel) mmumodel_publish_ready(r->mmuModel);
+    for (int u = 0; u < 2; u++)
+            if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
     fprintf(stderr, "MODE: IPL; memory filled, bootstrap read from MM%d "
                     "(BCE %d) over the bus (%zu blocks, %zu halfwords) "
                     "to 0x00000\n",
@@ -1220,7 +1236,8 @@ static bool batchrunner_step(BatchRunner *r) {
          * Publishing it here as well as in the running path is what makes
          * a crew panel show something before the switch is ever moved,
          * which is the only sign a person has that this is running. */
-        if (r->mmuModel) mmumodel_publish_ready(r->mmuModel);
+        for (int u = 0; u < 2; u++)
+            if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
         /* Nothing to do but wait for the switch to move; don't spin a
          * core doing it. */
         yagpc_sleep_seconds(0.002);
@@ -1575,7 +1592,8 @@ static bool batchrunner_step(BatchRunner *r) {
          * mass memory's READY is a real line in the vehicle; publishing it
          * is what lets a crew panel show the tape working, and doubles as
          * the only outward sign that this emulator is running at all. */
-        if (r->mmuModel) mmumodel_publish_ready(r->mmuModel);
+        for (int u = 0; u < 2; u++)
+            if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
     }
 
     /* Elapsed instruction time (cpu->elapsedTimeUs) is now accumulated

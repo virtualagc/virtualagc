@@ -36,8 +36,11 @@ typedef enum { PACING_BURST, PACING_SIGNAL } PacingMode;
 /* Routes one bus to the in-process mass memory and the rest to whatever
  * servicer would otherwise have been installed; see run.c. */
 typedef struct {
-    struct MmuModel *mmu;
-    int mmuBus;
+    /* BOTH mass memory units: MM1 on bus 18, MM2 on bus 19.  The vehicle
+     * has two, shared by every computer, and one GPC can be loading from
+     * one while another loads from the other. */
+    struct MmuModel *mmu[2];
+    int mmuBus[2];
     struct MtuModel *mtu;   /* buses 20-22, device 22; see mtumodel.h */
     /* --deu-bus: display units BEYOND the built-in one on DK1.  PASS drives
      * FOUR (DCICYC.asm: DCIS#DEU EQU 4; device IDs 5-8 per FIOERRLC.asm's
@@ -155,7 +158,7 @@ typedef struct {
     struct DeuModel *deuModel;
     /* In-process mass memory, and the routing that lets it own one bus
      * while everything else still reaches whatever else is installed. */
-    struct MmuModel *mmuModel;
+    struct MmuModel *mmuModel[2];
     struct MtuModel *mtuModel;  /* --mtu-model: the in-process timing unit */
     struct DeuModel *deuModelExtra[DEU_EXTRA_MAX]; /* --deu-bus list */
     int nDeuModelExtra;
