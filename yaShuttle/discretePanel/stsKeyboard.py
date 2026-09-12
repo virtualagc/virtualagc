@@ -81,6 +81,29 @@ C_LEGEND = "#f4f4f4"
 MCAST_GROUP = "239.255.1.1"
 KYBD_PORT = {1: 6931, 2: 6932, 3: 6933}
 
+# The ports above are what the default base (6900) gives; shifting the base
+# moves them with it, so a second complete simulation can run beside the
+# first without the two fighting over sockets.  The same rule and the same
+# NSTS_BUS_PORT_BASE that yaGPC2 (--port-base), MEDS2.py and discretePanel/
+# use.
+PORT_BASE_DEFAULT = 6900
+PORT_BASE = PORT_BASE_DEFAULT
+
+
+def setPortBase(base):
+    """Shift every keyboard port by base - 6900.  Call BEFORE opening one."""
+    global PORT_BASE
+    base = int(base)
+    shift = base - PORT_BASE
+    if shift:
+        for _n in KYBD_PORT:
+            KYBD_PORT[_n] += shift
+    PORT_BASE = base
+    return PORT_BASE
+
+
+setPortBase(int(os.environ.get("NSTS_BUS_PORT_BASE", PORT_BASE_DEFAULT)))
+
 # Scan codes by legend, from KYBD.DEUKey in MEDS2.py, which is where the IDP
 # looks them up (KYBD.byScan).  They are the row/column strobe pattern the
 # keyboard puts on the bus, not the 5-bit code the GPC is eventually given.
@@ -363,11 +386,21 @@ def main(argv=None):
                     help="Scale: 768 is full size (default), 512 is 2/3, 384 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 520x1020+80+20 (overrides --size)")
+    ap.add_argument("--port-base", type=int, metavar="N", default=None,
+                    help="base of the UDP port range the buses use: the "
+                         "keyboard buses are base+31..base+33 (default 6900, "
+                         "matching MEDS2.py's busConfig).  The same option as "
+                         "on yaGPC2, MEDS2.py and panelO6.py -- give a second "
+                         "simulation its own base and the two run side by "
+                         "side.  NSTS_BUS_PORT_BASE sets it too.")
     ap.add_argument("--kybd", type=int, choices=sorted(KYBD_PORT), default=1,
                     metavar="N",
                     help="MEDS keyboard bus to send on, 1-3 (default 1: "
                          "IDP1 and IDP3)")
     args = ap.parse_args(argv)
+    # Before any socket is opened.
+    if args.port_base is not None:
+        setPortBase(args.port_base)
     if args.size <= 0:
         raise SystemExit("stsKeyboard: --size must be a positive integer")
 

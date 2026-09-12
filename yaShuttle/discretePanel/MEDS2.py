@@ -265,6 +265,31 @@ for _name, _cfg in busConfig.items():
 
 MCAST_GROUP = "239.255.1.1"
 
+# EVERY BUS PORT DERIVES FROM ONE BASE, so a second complete simulation can
+# run beside the first without the two fighting over sockets.  busConfig's
+# ports are written as the default base's (6900) gives them, and shifting
+# the base moves all of them together -- the same rule, and the same
+# NSTS_BUS_PORT_BASE, that yaGPC2 (--port-base) and discretePanel/ use.
+# Ports outside the 69xx block move with it too, so nothing is left behind
+# to collide.
+PORT_BASE_DEFAULT = 6900
+PORT_BASE = PORT_BASE_DEFAULT
+
+
+def setPortBase(base):
+    """Shift every bus port by base - 6900.  Call BEFORE any Bus exists."""
+    global PORT_BASE
+    base = int(base)
+    shift = base - PORT_BASE
+    if shift:
+        for _cfg in busConfig.values():
+            _cfg['port'] += shift
+    PORT_BASE = base
+    return PORT_BASE
+
+
+setPortBase(int(os.environ.get("NSTS_BUS_PORT_BASE", PORT_BASE_DEFAULT)))
+
 
 class BusMsg(object):
     """A bus message: `length16` halfwords, addressable as `data16`."""
@@ -11133,6 +11158,13 @@ def buildParser():
     p.add_argument('lrus', nargs='*',
                    help='LRU names from config/meds.json (e.g. crt1 idp1 cdr1); '
                         'default: the config "start" list')
+    p.add_argument('--port-base', dest='portBase', type=int, metavar='<n>',
+                   help='base of the UDP port range the buses use: every port '
+                        'in busConfig is written as base 6900 gives it and '
+                        'moves with the base (default 6900).  The same option '
+                        'as on yaGPC2, panelO6.py and stsKeyboard.py -- give a '
+                        'second simulation its own base and the two run side '
+                        'by side.  NSTS_BUS_PORT_BASE sets it too.')
     p.add_argument('--config', dest='config', metavar='<file>',
                    help='alternate LRU config JSON (default: config/meds.json)')
     p.add_argument('--display', metavar='<name>',
@@ -11174,6 +11206,9 @@ def main(argv=None):
     argv = [a for a in argv if a not in ('--no-sandbox', '--disable-gpu-sandbox',
                                          '--disable-setuid-sandbox')]
     args = buildParser().parse_args(argv)
+    # Before any Bus is constructed.
+    if args.portBase is not None:
+        setPortBase(args.portBase)
     opts = {
         'lrus': args.lrus,
         'configFile': os.path.abspath(args.config) if args.config else None,
