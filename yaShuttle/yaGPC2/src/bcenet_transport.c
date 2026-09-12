@@ -61,6 +61,18 @@
 
 #define BCENET_MULTICAST_GROUP "239.255.1.1"
 #define BCENET_MAX_BUS_ID 24
+/* BUS 24 IS THE ONE PER-COMPUTER BUS.  Buses 1-23 are one shared wire each,
+ * the same port whichever GPC is talking, so one socket serves every machine.
+ * IP1..IP5 have a port each, selected by GPC identity, so bus 24 needs a
+ * socket per computer -- held in slots above the bus numbers. */
+#define BCENET_IP_BUS 24
+#define BCENET_SLOTS  (BCENET_MAX_BUS_ID + 6)
+
+static int bcenet_slot(int busID, int gpcId) {
+    if (busID == BCENET_IP_BUS && gpcId >= 0 && gpcId <= 5)
+        return BCENET_MAX_BUS_ID + 1 + gpcId;
+    return busID;
+}
 
 /* Mirrors nsts-sim-gpc/com/bus.civet's busConfig table -- only the
  * gpcBceNum-mapped entries (the ones a real BCE number can address).
@@ -315,7 +327,7 @@ struct BceNetTransport {
      * intercomputer bus) depends on it -- buses 1-23 are one shared wire
      * each, the same port whichever GPC is talking. */
     int gpcId;
-    BceNetBusSocket buses[BCENET_MAX_BUS_ID + 1];
+    BceNetBusSocket buses[BCENET_SLOTS];
 #ifdef BCENET_HAVE_TX_THREAD
     pthread_mutex_t lock;   /* guards every bus's outbound FIFO and bucket */
     pthread_t txThread;
@@ -353,7 +365,7 @@ BceNetTransport *bcenet_transport_create(int gpcId) {
     BceNetTransport *t = malloc(sizeof(BceNetTransport));
     if (t == NULL) return NULL;
     t->gpcId = (gpcId >= 0 && gpcId <= 5) ? gpcId : 1;
-    for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
+    for (int i = 0; i < BCENET_SLOTS; i++) {
         t->buses[i].busID = i;
         t->buses[i].fd = -1;
         t->buses[i].txFd = -1;
@@ -381,7 +393,7 @@ void bcenet_transport_free(BceNetTransport *t) {
     pthread_mutex_destroy(&t->lock);
 #endif
 #ifdef BCENET_HAVE_POSIX_SOCKETS
-    for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
+    for (int i = 0; i < BCENET_SLOTS; i++) {
         if (t->buses[i].fd >= 0) close(t->buses[i].fd);
         if (t->buses[i].txFd >= 0) close(t->buses[i].txFd);
         self_echo_clear(&t->buses[i]);
@@ -390,13 +402,13 @@ void bcenet_transport_free(BceNetTransport *t) {
     free(t);
 }
 
-static BceNetBusSocket *find_bus(BceNetTransport *t, int busID) {
+static BceNetBusSocket *find_bus(BceNetTransport *t, int busID, int gpcId) {
     if (busID < 0 || busID > BCENET_MAX_BUS_ID) return NULL;
-    return &t->buses[busID];
+    return &t->buses[bcenet_slot(busID, gpcId)];
 }
 
-bool bcenet_transport_open_bus(BceNetTransport *t, int busID) {
-    BceNetBusSocket *b = find_bus(t, busID);
+bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
+    BceNetBusSocket *b = find_bus(t, busID, gpcId);
     if (!b) {
         fprintf(stderr, "bcenet: bus %d out of range (1-%d)\n", busID, BCENET_MAX_BUS_ID);
         return false;
@@ -604,9 +616,10 @@ static bool transport_send_now(BceNetTransport *t, BceNetBusSocket *b, int busID
 #endif
 }
 
-bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttleBus,
+bool bcenet_transport_send(BceNetTransport *t, int busID, int gpcId, int iua,
+                            bool isShuttleBus,
                             const uint16_t *words, size_t wordCount) {
-    BceNetBusSocket *b = find_bus(t, busID);
+    BceNetBusSocket *b = find_bus(t, busID, gpcId);
     if (!b || b->fd < 0) return false;
     if (wordCount == 0) return true;
     /* Queued, not sent: the bus carries one halfword every 20 us and the
@@ -687,7 +700,7 @@ static void pump_once(BceNetTransport *t) {
     static long burstSent[BCENET_MAX_BUS_ID + 1];
     static int burstOpen[BCENET_MAX_BUS_ID + 1];
 
-    for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
+    for (int i = 0; i < BCENET_SLOTS; i++) {
         BceNetBusSocket *b = &t->buses[i];
         if (b->fd < 0) continue;
 
@@ -779,7 +792,7 @@ void bcenet_transport_poll_ready(BceNetTransport *t) {
     struct pollfd pfd[BCENET_MAX_BUS_ID + 1];
     int idx[BCENET_MAX_BUS_ID + 1];
     int n = 0;
-    for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
+    for (int i = 0; i < BCENET_SLOTS; i++) {
         BceNetBusSocket *b = &t->buses[i];
         b->rxReady = false;
         if (b->fd < 0) continue;
@@ -797,13 +810,14 @@ void bcenet_transport_poll_ready(BceNetTransport *t) {
 #else
     /* No poll(): say every bus might have something, which is what the
      * per-bus recvfrom() did anyway. */
-    for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) t->buses[i].rxReady = true;
+    for (int i = 0; i < BCENET_SLOTS; i++) t->buses[i].rxReady = true;
 #endif
 }
 
-bool bcenet_transport_bus_ready(const BceNetTransport *t, int busID) {
+bool bcenet_transport_bus_ready(const BceNetTransport *t, int busID, int gpcId) {
     if (!t || busID < 0 || busID > BCENET_MAX_BUS_ID) return false;
-    return t->buses[busID].rxReady;
+    /* Bus 24 has a socket per computer, so the readiness is that machine's. */
+    return t->buses[bcenet_slot(busID, gpcId)].rxReady;
 }
 
 void bcenet_transport_pump(BceNetTransport *t) {
@@ -816,9 +830,9 @@ void bcenet_transport_pump(BceNetTransport *t) {
     pump_once(t);
 }
 
-bool bcenet_transport_recv(BceNetTransport *t, int busID, int iua, bool isShuttleBus, uint16_t *outWords,
+bool bcenet_transport_recv(BceNetTransport *t, int busID, int gpcId, int iua, bool isShuttleBus, uint16_t *outWords,
                             size_t maxWords, size_t *outCount) {
-    BceNetBusSocket *b = find_bus(t, busID);
+    BceNetBusSocket *b = find_bus(t, busID, gpcId);
     if (!b || b->fd < 0) return false;
 #ifndef BCENET_HAVE_POSIX_SOCKETS
     (void)iua;

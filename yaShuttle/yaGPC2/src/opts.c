@@ -161,6 +161,13 @@ static const char *HELP_TEXT =
 "                                  on BCE 20-22), so PASS can initialise its\n"
 "                                  clock.  Without it those reads return\n"
 "                                  nothing and PASS computes a 24-hour time\n"
+"  --gpcs <list>                    WHICH COMPUTERS TO RUN: 1-5, comma\n"
+"                                  separated, ranges allowed -- \"1\",\n"
+"                                  \"1,2,3\", \"1-3,5\".  The orbiter carries\n"
+"                                  five and they share one set of\n"
+"                                  peripherals; each runs on its own thread.\n"
+"                                  A computer not named is simply not there.\n"
+"                                  Default: the single one --gpc-id names\n"
 "  --gpc-id <n>                     which of the five GPCs this is (1-5,\n"
 "                                  default 1).  Only the intercomputer bus\n"
 "                                  (BCE 24) needs it: every other bus has one\n"
@@ -407,6 +414,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->mtuModel = true;
         } else if (tok_is(tok, "--port-base", &n)) {
             opts->portBase = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--gpcs", &n)) {
+            opts->gpcs = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--gpc-id", &n)) {
             opts->gpcId = take_value(argc, argv, &i, tok, n);
         } else {

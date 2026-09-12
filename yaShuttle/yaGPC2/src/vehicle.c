@@ -15,6 +15,15 @@ void vehicle_init(Vehicle *v) {
     for (int u = 0; u < 2; u++) v->mmuBus[u] = -1;
 }
 
+bool vehicle_multi(const Vehicle *v) { return v != NULL && v->nMachines > 1; }
+
+void vehicle_note_time(Vehicle *v, double machineUs) {
+    /* Monotone, and deliberately unlocked: it is a double written by whichever
+     * machine is furthest ahead and read by the device models, and the worst a
+     * lost update can do is leave the tape a word time behind for one pass. */
+    if (v != NULL && machineUs > v->clockUs) v->clockUs = machineUs;
+}
+
 void vehicle_free(Vehicle *v) {
     if (v == NULL) return;
     /* The models report on the way out, as they did when the BatchRunner

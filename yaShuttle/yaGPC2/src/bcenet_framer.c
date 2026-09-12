@@ -75,13 +75,18 @@ typedef struct {
 static double wall_now(void);
 
 struct BceNetFramer {
-    BceNetTransport *transport; /* not owned */
+    BceNetTransport *transport; /* not owned: one for the whole vehicle */
+    /* WHICH COMPUTER this framer belongs to.  Only bus 24 (IP, the
+     * intercomputer bus) depends on it -- buses 1-23 are one shared wire
+     * each -- but the transport needs it to pick the right socket. */
+    int gpcId;
     BceNetBusState buses[FRAMER_MAX_BUS_ID + 1];
 };
 
-BceNetFramer *bcenet_framer_create(BceNetTransport *transport) {
+BceNetFramer *bcenet_framer_create(BceNetTransport *transport, int gpcId) {
     BceNetFramer *f = malloc(sizeof(BceNetFramer));
     f->transport = transport;
+    f->gpcId = gpcId;
     memset(f->buses, 0, sizeof f->buses);
     return f;
 }
@@ -92,7 +97,7 @@ static BceNetBusState *ensure_bus(BceNetFramer *f, int busID) {
     if (busID < 0 || busID > FRAMER_MAX_BUS_ID) return NULL;
     BceNetBusState *b = &f->buses[busID];
     if (!b->used) {
-        bcenet_transport_open_bus(f->transport, busID); /* logs its own failure; harmless to keep trying */
+        bcenet_transport_open_bus(f->transport, busID, f->gpcId); /* logs its own failure; harmless to keep trying */
         b->used = true;
     }
     return b;
@@ -106,7 +111,8 @@ static BceNetBusState *ensure_bus(BceNetFramer *f, int busID) {
 static void flush_bus(BceNetFramer *f, int busID, BceNetBusState *b) {
     if (b->xmitCount == 0) return;
     int iua = b->haveLastIua ? b->lastIua : 0;
-    bcenet_transport_send(f->transport, busID, iua, FRAMER_IS_SHUTTLE_BUS, b->xmitBuf, b->xmitCount);
+    bcenet_transport_send(f->transport, busID, f->gpcId, iua, FRAMER_IS_SHUTTLE_BUS,
+                          b->xmitBuf, b->xmitCount);
     b->xmitCount = 0;
 }
 
@@ -117,7 +123,7 @@ static void drain_bus(BceNetFramer *f, int busID, BceNetBusState *b) {
     for (;;) {
         uint16_t words[FRAMER_MAX_WORDS];
         size_t count = 0;
-        if (!bcenet_transport_recv(f->transport, busID, iua, FRAMER_IS_SHUTTLE_BUS, words,
+        if (!bcenet_transport_recv(f->transport, busID, f->gpcId, iua, FRAMER_IS_SHUTTLE_BUS, words,
                                    FRAMER_MAX_WORDS, &count)) {
             return;   /* nothing left, or a datagram the filters dropped */
         }
@@ -193,7 +199,7 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
             uint16_t words[2];
             words[0] = (uint16_t)((cmd24 >> 8) & 0xffffu);
             words[1] = (uint16_t)((cmd24 & 0xffu) << 8);
-            bcenet_transport_send(f->transport, input->busID, input->address,
+            bcenet_transport_send(f->transport, input->busID, f->gpcId, input->address,
                                   FRAMER_IS_SHUTTLE_BUS, words, 2);
             output->out.xmit.ok = true;
             break;
@@ -211,7 +217,7 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
              * anything carrying data behind it did not. */
             uint16_t word = (uint16_t)input->in.word;
             int iua = b->haveLastIua ? b->lastIua : 0;
-            bcenet_transport_send(f->transport, input->busID, iua,
+            bcenet_transport_send(f->transport, input->busID, f->gpcId, iua,
                                   FRAMER_IS_SHUTTLE_BUS, &word, 1);
             output->out.xmit.ok = true;
             break;
@@ -243,7 +249,7 @@ void bcenet_framer_flush_tick(BceNetFramer *f) {
     for (int i = 0; i <= FRAMER_MAX_BUS_ID; i++) {
         if (!f->buses[i].used) continue;
         flush_bus(f, i, &f->buses[i]);
-        if (!bcenet_transport_bus_ready(f->transport, i)) continue;
+        if (!bcenet_transport_bus_ready(f->transport, i, f->gpcId)) continue;
         /* Drain every tick, not only when a receive instruction asks:
          * the transport's self-echo record is bounded, and leaving
          * datagrams in the socket long enough for it to turn over is

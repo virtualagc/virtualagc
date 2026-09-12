@@ -117,6 +117,8 @@ struct Discretes {
     uint32_t selfDriven[3];
     struct sockaddr_in group;
     unsigned generation;  /* see discretes_generation() */
+    unsigned pollCalls;   /* the poll rate-limiter, per machine */
+    double lastPollSec;
 };
 
 static int reg_index(int reg) {
@@ -296,6 +298,25 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
  * datagrams a second, which is far faster than anything on that bus
  * changes, and costs one clock read instead of a syscall. */
 #define DISCRETES_POLL_MIN_SECONDS 250e-6
+
+/* Apply AT MOST ONE pending datagram; true if there was one.
+ *
+ * A drain that applies everything waiting collapses a pulse.  The crew
+ * panel presses IPL by publishing the bit set and, a few hundred
+ * milliseconds later, clear; if both datagrams are in the socket when the
+ * reader runs, a caller that looks at the result once sees only the final
+ * state and the press never happened.  A caller that cares about EDGES --
+ * mode_switch_held, which is the whole of the IPL pushbutton and the
+ * HALT->STBY release -- steps through them one at a time instead. */
+bool discretes_poll_one(Discretes *d) {
+    if (d == NULL || !d->open) return false;
+    uint8_t buf[64];
+    ssize_t n = recv(d->fd, buf, sizeof buf, 0);
+    if (n <= 0) return false;
+    apply(d, buf, (size_t)n);
+    d->generation++;
+    return true;
+}
 
 void discretes_poll(Discretes *d) {
     if (d == NULL || !d->open) return;

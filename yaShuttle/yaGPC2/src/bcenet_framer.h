@@ -31,7 +31,7 @@ typedef struct BceNetFramer BceNetFramer;
 
 /* transport is NOT owned/freed by the framer -- caller creates and frees
  * it separately (same lifetime discipline as any other servicerCtx). */
-BceNetFramer *bcenet_framer_create(BceNetTransport *transport);
+BceNetFramer *bcenet_framer_create(BceNetTransport *transport, int gpcId);
 void bcenet_framer_free(BceNetFramer *f);
 
 /* The GpcServicerFn itself -- install via ap101_set_servicer()/

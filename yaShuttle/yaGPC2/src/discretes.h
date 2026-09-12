@@ -83,6 +83,10 @@ bool discretes_enabled(const Discretes *d);
  * value a PCI returns is as fresh as the wire. */
 void discretes_poll(Discretes *d);
 
+/* One datagram at a time, for a caller that must not miss an intermediate
+ * state -- see the definition. */
+bool discretes_poll_one(Discretes *d);
+
 /* Bits of `reg` currently being published by somebody, and their values.
  * Call discretes_poll() first.  The mask is empty when disabled, so
  * callers need no special case. */

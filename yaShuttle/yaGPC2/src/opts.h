@@ -205,6 +205,10 @@ typedef struct {
      * sockets -- MEDS and discretePanel.py take the same option. */
     char *portBase;                   /* decimal; default 6900 */
     char *gpcId;                      /* decimal 1-5; default 1 */
+    /* --gpcs: WHICH COMPUTERS TO RUN, "1", "1,2,3", "1-3,5".  The orbiter
+     * carries five and they share one set of peripherals; each runs on its
+     * own thread.  NULL means the single computer --gpc-id names. */
+    char *gpcs;
 
     /* --mtu-model: answer as the Master Timing Unit (device 22 on BCE
      * 20-22) so PASS can initialise its clock.  See src/mtumodel.h. */

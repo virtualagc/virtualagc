@@ -47,9 +47,30 @@ typedef struct Vehicle {
      * bind the same ports for buses 1-23 and mistake one another's
      * transmissions for peripheral replies. */
     struct BceNetTransport *transport;
+
+    /* How many computers are running on this vehicle.  Only used to decide
+     * whether stderr lines need a "GPC n: " prefix -- a single-computer run
+     * should look exactly as it always has. */
+    int nMachines;
+
+    /* THE VEHICLE'S CLOCK, in simulated microseconds.  The shared device
+     * models pace against simulated time -- the mass memory releases a word
+     * per word time as the tape turns -- and they used to watch ONE machine's
+     * elapsedTimeUs, which was the same thing when there was one machine.
+     * With several it is not: whichever machine initialised last owned the
+     * pointer, so a mass memory would sit still while a DIFFERENT computer
+     * tried to IPL from it, hand over one word and stop.  The tape turns
+     * whoever is watching, so this follows the furthest-advanced machine. */
+    double clockUs;
 } Vehicle;
 
 void vehicle_init(Vehicle *v);
 void vehicle_free(Vehicle *v);
+
+/* True when more than one computer is running on this vehicle. */
+bool vehicle_multi(const Vehicle *v);
+
+/* Carry the vehicle's clock forward to this machine's simulated time. */
+void vehicle_note_time(Vehicle *v, double machineUs);
 
 #endif

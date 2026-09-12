@@ -133,6 +133,9 @@ typedef struct {
     /* The shared hardware this computer is plugged into.  Borrowed, not
      * owned -- see vehicle.h. */
     struct Vehicle *vehicle;
+    /* What this machine's run returned, so a thread's joiner need not unpack
+     * a void*.  See main.c. */
+    int exitCode;
     /* The crew mode switch as this machine last saw it, and whether it has
      * reported a position yet.  Per computer: each has its own column on the
      * panel and its own HALT->STBY edge, and sharing these let one machine's
@@ -169,7 +172,7 @@ typedef struct {
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts,
-                      struct Vehicle *vehicle);
+                      struct Vehicle *vehicle, int gpcId);
 void batchrunner_free(BatchRunner *r);
 
 /* Ported from BatchRunner#run. Returns the process exit code (0 or 1 —

@@ -3,6 +3,7 @@
 
 #include <errno.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -159,13 +160,23 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             if (t / 1000000u != blSec) { blSec = t / 1000000u; fflush(bl); }
         }
     }
+    /* A DEVICE FOLLOWS THE CLOCK OF WHOEVER IS TALKING TO IT.  The models
+     * pace against simulated time -- the mass memory releases a word per word
+     * time as the tape turns -- and a transfer is a conversation with ONE
+     * computer.  Pointing them at a vehicle-wide clock is wrong in both
+     * directions: at one machine's clock, the tape stands still while a
+     * DIFFERENT computer IPLs from it; at the furthest-advanced machine's,
+     * the tape appears to have run past the words this one is reading and
+     * they are dropped as stale.  The router is per machine, so it knows. */
     for (int u = 0; u < 2; u++) {
         if (br->mmu[u] && in->busID == br->mmuBus[u]) {
+            mmumodel_set_clock(br->mmu[u], br->clockUs);
             mmumodel_service(br->mmu[u], svc, in, out);
             return;
         }
     }
     if (br->mtu && mtumodel_owns_bus(in->busID)) {
+        mtumodel_set_clock(br->mtu, br->clockUs);
         mtumodel_service(br->mtu, svc, in, out);
         return;
     }
@@ -197,6 +208,9 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
  * rather than let it run the machine flat out to repay the gap, which would
  * only bring the next reply in late again (rtpacer.c, STALL_REBASE_MS). */
 #define PEER_HOLD_REBASE_MS 20.0
+/* Per-machine stderr, defined below: see mode_log. */
+static void mode_log(const BatchRunner *r, const char *fmt, ...);
+
 static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
     BatchRunner *r = ctx;
     const BusRouter *br = &r->busRouter;
@@ -219,9 +233,11 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
     return got;
 }
 
-void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh) {
+void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
+                      int gpcId) {
     memset(r, 0, sizeof(*r));
     r->vehicle = veh;
+    if (veh != NULL) veh->nMachines++;
     /* BUILD THE DECODE TABLES BEFORE ANY MACHINE RUNS.  Each is an unguarded
      * check-then-build on a file-scope flag, which is safe when one machine
      * builds them on its first instruction and a race once several do.  They
@@ -304,21 +320,12 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh) {
         yagpc_set_port_base((int)v);
     }
 
-    r->gpcId = 1;
+    r->gpcId = gpcId;
     /* NOT the zero memset leaves: generation 0 is a real value, and a memo
      * that matched it would answer "not held" before the panel had ever been
      * heard -- releasing the machine from reset on nothing at all. */
     r->modeHeldGen = ~0u;
     r->modeHeldLast = true;
-    if (opts->gpcId != NULL && *opts->gpcId != '\0') {
-        char *end = NULL;
-        long v = strtol(opts->gpcId, &end, 10);
-        if (end == NULL || *end != '\0' || v < 1 || v > 5) {
-            fprintf(stderr, "--gpc-id: expected 1-5, got \"%s\"\n", opts->gpcId);
-            exit(1);
-        }
-        r->gpcId = (int)v;
-    }
 
     if (opts->deuModel) {
         /* Deliberately instead of, not alongside, the network servicer:
@@ -336,7 +343,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh) {
          * the per-bus receive queues, stay per machine. */
         if (!veh->built) veh->transport = bcenet_transport_create(r->gpcId);
         r->bceTransport = veh->transport;
-        r->bceFramer = bcenet_framer_create(r->bceTransport);
+        r->bceFramer = bcenet_framer_create(r->bceTransport, r->gpcId);
         base = bcenet_framer_service;
         baseCtx = r->bceFramer;
     }
@@ -393,7 +400,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh) {
         if (!veh->built) veh->mtu = mtumodel_create();
         r->mtuModel = veh->mtu;
         if (r->mtuModel) {
-            mtumodel_set_clock(r->mtuModel, &r->age.gpc.cpu.elapsedTimeUs);
+            mtumodel_set_clock(r->mtuModel, &veh->clockUs);
             mtumodel_set_epoch(r->mtuModel, &r->age.gpc.cpu.dateTimeAnchorEpochSec);
         }
     }
@@ -411,13 +418,13 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh) {
             r->nDeuModelExtra > 0) {
             for (int u = 0; u < 2; u++) {
                 if (r->mmuModel[u] == NULL) continue;
-                mmumodel_set_clock(r->mmuModel[u], &r->age.gpc.cpu.elapsedTimeUs);
+                mmumodel_set_clock(r->mmuModel[u], &veh->clockUs);
     /* The DEU models get the same clock, so YAGPC_DEUKEYS_SIMTIME can gate
      * a keystroke batch on simulated time. */
     if (r->deuModel != NULL)
-        deumodel_set_clock(r->deuModel, &r->age.gpc.cpu.elapsedTimeUs);
+        deumodel_set_clock(r->deuModel, &veh->clockUs);
     for (int d = 0; d < r->nDeuModelExtra; d++)
-        deumodel_set_clock(r->deuModelExtra[d], &r->age.gpc.cpu.elapsedTimeUs);
+        deumodel_set_clock(r->deuModelExtra[d], &veh->clockUs);
                 /* Tell the IOP this mass memory is PRESENT, by setting its
                  * READY bit in the stored discrete.  iop_discrete_in_a()
                  * computes the bit rather than storing it -- ready means
@@ -830,6 +837,8 @@ static uint32_t mm_cmd(int opcode, uint32_t operands) {
  * this work with exactly one of them. */
 static void mm_service(BatchRunner *r, GpcServiceNumber svc, int busID,
                        uint32_t word, GpcServiceOutput *out) {
+    /* Same rule as the router: the tape turns on the clock of the machine
+     * reading it.  This path is the firmware IPL's own bootstrap read. */
     GpcServiceInput in;
     memset(&in, 0, sizeof in);
     memset(out, 0, sizeof *out);
@@ -878,7 +887,7 @@ static void firmware_ipl(BatchRunner *r) {
      * cpu_system_reset() and iop_system_reset(). */
     ap101_system_reset(&r->age.gpc);
     if (!r->age.gpc.iop.servicer) {
-        fprintf(stderr, "MODE: IPL, but no mass memory is attached; "
+        mode_log(r, "MODE: IPL, but no mass memory is attached; "
                         "nothing to read a bootstrap from\n");
         return;
     }
@@ -906,7 +915,7 @@ static void firmware_ipl(BatchRunner *r) {
         srcVal = discretes_value(r->discretes, DISCRETES_REG_A) & srcDriven;
     }
     if (srcDriven && !srcVal) {
-        fprintf(stderr, "MODE: IPL, but IPL SOURCE SELECT is OFF; "
+        mode_log(r, "MODE: IPL, but IPL SOURCE SELECT is OFF; "
                         "no mass memory to read from\n");
         return;
     }
@@ -927,7 +936,7 @@ static void firmware_ipl(BatchRunner *r) {
             if (!stale.out.recv.available || ++dropped > 65536) break;
         }
         if (dropped > 0)
-            fprintf(stderr, "MODE: IPL; discarded %zu word(s) MM%d still held "
+            mode_log(r, "MODE: IPL; discarded %zu word(s) MM%d still held "
                             "from before\n", dropped, unit);
     }
 
@@ -988,6 +997,12 @@ static void firmware_ipl(BatchRunner *r) {
             continue;
         }
         r->age.gpc.cpu.elapsedTimeUs += MM_BUS_WORD_US;
+        /* The tape is paced by the VEHICLE's clock, and this loop runs
+         * outside batchrunner_step -- so carry it forward here too, or the
+         * mass memory releases one word and then waits for a clock that
+         * nothing is advancing. */
+        if (r->vehicle != NULL)
+            vehicle_note_time(r->vehicle, r->age.gpc.cpu.elapsedTimeUs);
     }
 
     if (got == 0) {
@@ -1003,7 +1018,7 @@ static void firmware_ipl(BatchRunner *r) {
     free(image);
     for (int u = 0; u < 2; u++)
             if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
-    fprintf(stderr, "MODE: IPL; memory filled, bootstrap read from MM%d "
+    mode_log(r, "MODE: IPL; memory filled, bootstrap read from MM%d "
                     "(BCE %d) over the bus (%zu blocks, %zu halfwords) "
                     "to 0x00000\n",
             unit, busID, got / MM_HALFWORDS_PER_BLOCK, got);
@@ -1011,6 +1026,29 @@ static void firmware_ipl(BatchRunner *r) {
 
 /* True when the machine is held in reset and must not execute.  Called once
  * per INSTRUCTION, through the caching wrapper below. */
+/* "GPC2: " when several computers are running, "" when only one is.  Every
+ * line below describes one machine, and with five of them on one stderr an
+ * untagged line says nothing.  A single-computer run is left exactly as it
+ * was, so existing logs and the harnesses that grep them do not move. */
+static const char *batchrunner_tag(const BatchRunner *r) {
+    static char buf[5][16];
+    if (r == NULL || r->vehicle == NULL || !vehicle_multi(r->vehicle)) return "";
+    int i = (r->gpcId >= 1 && r->gpcId <= 5) ? r->gpcId - 1 : 0;
+    snprintf(buf[i], sizeof buf[i], "GPC%d: ", r->gpcId);
+    return buf[i];
+}
+
+/* One fprintf, so a line from one machine does not interleave with another's
+ * halfway through.  vsnprintf first, then a single write. */
+static void mode_log(const BatchRunner *r, const char *fmt, ...) {
+    char buf[512];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof buf, fmt, ap);
+    va_end(ap);
+    fprintf(stderr, "%s%s", batchrunner_tag(r), buf);
+}
+
 static bool mode_switch_held_uncached(BatchRunner *r) {
     uint32_t driven = discretes_driven_mask(r->discretes, DISCRETES_REG_A);
     uint32_t mode = discretes_value(r->discretes, DISCRETES_REG_A) & driven & MODE_ANY;
@@ -1054,7 +1092,7 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
 
     if (!published) {
         if (!r->modeReported) {
-            fprintf(stderr, "MODE: HALT; CPU held in reset "
+            mode_log(r, "MODE: HALT; CPU held in reset "
                             "(no crew panel heard yet)\n");
             r->modeReported = true;
         }
@@ -1079,19 +1117,19 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
              * and holding it down does not repeat. */
             firmware_ipl(r);
         } else if (iplEdge) {
-            fprintf(stderr, "MODE: IPL pressed but the mode switch is not "
+            mode_log(r, "MODE: IPL pressed but the mode switch is not "
                             "in HALT; ignored\n");
         } else if ((r->prevMode & MODE_HALT) && (mode & MODE_STBY)) {
             /* The release.  Reload the whole PSW pair from the System
              * Reset vector, which is what hands control to FCMBOOT. */
             cpu_reset(&r->age.gpc.cpu);
-            fprintf(stderr, "MODE: HALT -> STBY; reset released, "
+            mode_log(r, "MODE: HALT -> STBY; reset released, "
                             "starting at 0x%05x\n",
                     psw_get_nia(&r->age.gpc.cpu.psw));
         } else if (mode & MODE_HALT) {
-            fprintf(stderr, "MODE: HALT; CPU held in reset\n");
+            mode_log(r, "MODE: HALT; CPU held in reset\n");
         } else if (mode & (MODE_RUN | MODE_STBY)) {
-            fprintf(stderr, "MODE: %s\n",
+            mode_log(r, "MODE: %s\n",
                     (mode & MODE_RUN) ? "RUN" : "STBY");
         }
         r->prevMode = mode;
@@ -1219,11 +1257,15 @@ static void dump_main_storage(BatchRunner *r, const char *path) {
  * change in that state. */
 static bool mode_switch_held(BatchRunner *r) {
     if (!discretes_enabled(r->discretes)) return false;
-    discretes_poll(r->discretes);
-    unsigned gen = discretes_generation(r->discretes);
-    if (gen == r->modeHeldGen) return r->modeHeldLast;
-    r->modeHeldGen = gen;
-    r->modeHeldLast = mode_switch_held_uncached(r);
+    /* ONE DATAGRAM AT A TIME, evaluating after each.  The pushbutton is a
+     * pulse: draining the socket and looking once would let a press and its
+     * release arrive together and cancel out.  See discretes_poll_one. */
+    while (discretes_poll_one(r->discretes)) {
+        unsigned g = discretes_generation(r->discretes);
+        if (g == r->modeHeldGen) continue;
+        r->modeHeldGen = g;
+        r->modeHeldLast = mode_switch_held_uncached(r);
+    }
     return r->modeHeldLast;
 }
 
@@ -1594,6 +1636,13 @@ static bool batchrunner_step(BatchRunner *r) {
         for (int u = 0; u < 2; u++)
             if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
     }
+
+    /* The shared devices pace against the vehicle's clock, not this
+     * machine's -- see vehicle.h.  Carry it forward here, once per
+     * instruction, so a tape keeps turning for a computer that is IPLing
+     * from it while another sits in reset. */
+    if (r->vehicle != NULL)
+        vehicle_note_time(r->vehicle, r->age.gpc.cpu.elapsedTimeUs);
 
     /* Elapsed instruction time (cpu->elapsedTimeUs) is now accumulated
      * unconditionally inside cpu_exec1() itself, not just under --debug

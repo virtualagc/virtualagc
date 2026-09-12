@@ -32,7 +32,7 @@ void bcenet_transport_free(BceNetTransport *t);
  * port mapping, or if the socket couldn't be created/bound/joined
  * (details logged to stderr). Safe to call repeatedly for the same
  * busID -- a no-op once open. */
-bool bcenet_transport_open_bus(BceNetTransport *t, int busID);
+bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId);
 
 /* Sends one message: `wordCount` 16-bit words, each byte-swapped to
  * network order individually, on busID's socket. If isShuttleBus, a
@@ -48,7 +48,8 @@ void bcenet_transport_pump(BceNetTransport *t);
 
 /* QUEUES one datagram (1 data halfword, or a 2-halfword command); the
  * pump puts it on the wire at the bus's own rate. */
-bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttleBus, const uint16_t *words,
+bool bcenet_transport_send(BceNetTransport *t, int busID, int gpcId, int iua,
+                           bool isShuttleBus, const uint16_t *words,
                             size_t wordCount);
 
 /* Non-blocking: attempts to receive one whole datagram already queued on
@@ -68,9 +69,9 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
  * bcenet_transport_bus_ready() then answers per bus without a syscall.
  * See the definition for why this exists and why poll() and not epoll. */
 void bcenet_transport_poll_ready(BceNetTransport *t);
-bool bcenet_transport_bus_ready(const BceNetTransport *t, int busID);
+bool bcenet_transport_bus_ready(const BceNetTransport *t, int busID, int gpcId);
 
-bool bcenet_transport_recv(BceNetTransport *t, int busID, int iua, bool isShuttleBus, uint16_t *outWords,
+bool bcenet_transport_recv(BceNetTransport *t, int busID, int gpcId, int iua, bool isShuttleBus, uint16_t *outWords,
                             size_t maxWords, size_t *outCount);
 
 #endif
