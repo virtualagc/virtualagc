@@ -23,6 +23,13 @@
 
 typedef struct BceNetTransport BceNetTransport;
 
+/* Tell the transport which computers this vehicle is running -- bit n set
+ * means GPC n -- BEFORE any bus is opened.  It is needed for one thing: the
+ * upstream intercomputer-bus port table gives GPC 2 and GPC 3 the same port,
+ * and a vehicle carrying both must not let them share a bus.  See the note
+ * on BCENET_IP_PORT_SPARE.  Harmless, and a no-op, for any other set. */
+void bcenet_declare_gpc_set(unsigned mask);
+
 BceNetTransport *bcenet_transport_create(int gpcId);
 void bcenet_transport_free(BceNetTransport *t);
 

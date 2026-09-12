@@ -6,6 +6,7 @@
 #include <pthread.h>
 #endif
 
+#include "bcenet_transport.h"
 #include "opts.h"
 #include "run.h"
 #include "vehicle.h"
@@ -89,6 +90,13 @@ int main(int argc, char **argv) {
                         "with --interactive or --debug\n");
         return 1;
     }
+
+    /* WHICH COMPUTERS, before any socket is opened.  The intercomputer bus is
+     * the one bus whose port depends on who owns it, and the upstream table
+     * gives GPC 2 and GPC 3 the same one -- see bcenet_transport.h. */
+    unsigned gpcMask = 0u;
+    for (int i = 0; i < nGpc; i++) gpcMask |= 1u << gpcs[i];
+    bcenet_declare_gpc_set(gpcMask);
 
     /* The peripherals belong to the vehicle, not to any one computer: two
      * mass memory units, one timing unit, the display units, one set of bus

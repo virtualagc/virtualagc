@@ -66,7 +66,12 @@
  * IP1..IP5 have a port each, selected by GPC identity, so bus 24 needs a
  * socket per computer -- held in slots above the bus numbers. */
 #define BCENET_IP_BUS 24
-#define BCENET_SLOTS  (BCENET_MAX_BUS_ID + 6)
+/* Buses 0..BCENET_MAX_BUS_ID, then one slot per GPC 0..5 for bus 24.  That
+ * is MAX+1 slots plus 6, not MAX+6 -- which it was, one short, so GPC 5's
+ * intercomputer bus landed on slot 30 of a 30-slot array and wrote off the
+ * end of it.  Reachable by any run with GPC 5 in it, --gpc-id 5 included,
+ * and found only because five computers produced four sockets. */
+#define BCENET_SLOTS  (BCENET_MAX_BUS_ID + 1 + 6)
 
 static int bcenet_slot(int busID, int gpcId) {
     if (busID == BCENET_IP_BUS && gpcId >= 0 && gpcId <= 5)
@@ -106,11 +111,60 @@ static const int BCENET_BUS_PORT[BCENET_MAX_BUS_ID + 1] = {
  * failure than sharing one. */
 static const int BCENET_IP_PORT_BY_GPC[6] = { 0, 24, 25, 25, 26, 27 };
 
+/* WHAT WE DO ABOUT IT IN THE MEANTIME.  Reported upstream as
+ * ColanderCombo/nsts-sim-gpc#34; until that is answered, the table above is
+ * used VERBATIM -- except in the one configuration where it is not merely
+ * odd but wrong: a vehicle carrying BOTH GPC 2 and GPC 3.  There the two
+ * computers would transmit and listen on one intercomputer bus and each
+ * would read the other's traffic as its own, which is not a bus fault the
+ * flight software can diagnose -- it is the kind of artefact that presents
+ * as a redundant set failing to form for no visible reason, and this project
+ * has spent enough runs on those.
+ *
+ * GPC 3 moves, and only GPC 3: 1, 2, 4 and 5 keep their upstream ports, so a
+ * run that does not contain the colliding pair is bit-for-bit what it always
+ * was, and a run that does diverges from the reference by exactly one
+ * computer.  That is the smallest divergence available, and it is NOT a
+ * guess at what the upstream fix will be -- if Don shifts IP4 and IP5
+ * instead, this follows him.  6928-6930 are unused in bus.civet.
+ *
+ * YAGPC_IP_PORTS_VERBATIM=1 keeps the collision, for anyone who needs to
+ * reproduce the reference exactly, and still says what it is doing. */
+#define BCENET_IP_PORT_SPARE 28
+
+static int g_ipPortOverride[6];
+
+void bcenet_declare_gpc_set(unsigned mask) {
+    for (int g = 0; g < 6; g++) g_ipPortOverride[g] = 0;
+    if (!(mask & (1u << 2)) || !(mask & (1u << 3))) return;   /* no clash */
+    if (getenv("YAGPC_IP_PORTS_VERBATIM") != NULL) {
+        fprintf(stderr,
+                "bcenet: GPC2 and GPC3 are BOTH running and the upstream port "
+                "table gives them the same intercomputer bus (%d); "
+                "YAGPC_IP_PORTS_VERBATIM is set, so they will share it -- "
+                "their ICC traffic will be each other's.  See "
+                "ColanderCombo/nsts-sim-gpc#34.\n",
+                yagpc_port_base() + BCENET_IP_PORT_BY_GPC[2]);
+        return;
+    }
+    g_ipPortOverride[3] = BCENET_IP_PORT_SPARE;
+    fprintf(stderr,
+            "bcenet: GPC2 and GPC3 are BOTH running and the upstream port "
+            "table gives them the same intercomputer bus (%d); GPC3 moved to "
+            "%d so they do not share one.  This DIVERGES from nsts-sim-gpc "
+            "for GPC3 only -- see ColanderCombo/nsts-sim-gpc#34, or set "
+            "YAGPC_IP_PORTS_VERBATIM=1 to keep the collision.\n",
+            yagpc_port_base() + BCENET_IP_PORT_BY_GPC[2],
+            yagpc_port_base() + BCENET_IP_PORT_SPARE);
+}
+
 static int bcenet_bus_port(int gpcId, int busID) {
     if (busID == 24) {
         int gpc = gpcId;
         if (gpc < 1 || gpc > 5) gpc = 1;
-        return yagpc_port_base() + BCENET_IP_PORT_BY_GPC[gpc];
+        int off = g_ipPortOverride[gpc] ? g_ipPortOverride[gpc]
+                                        : BCENET_IP_PORT_BY_GPC[gpc];
+        return yagpc_port_base() + off;
     }
     int off = (busID >= 0 && busID <= BCENET_MAX_BUS_ID)
                   ? BCENET_BUS_PORT[busID] : 0;
@@ -411,7 +465,11 @@ void bcenet_transport_free(BceNetTransport *t) {
 
 static BceNetBusSocket *find_bus(BceNetTransport *t, int busID, int gpcId) {
     if (busID < 0 || busID > BCENET_MAX_BUS_ID) return NULL;
-    return &t->buses[bcenet_slot(busID, gpcId)];
+    /* The SLOT is checked, not just the bus: bus 24's slot depends on the
+     * computer as well, and it was the slot that overran, not the bus. */
+    int slot = bcenet_slot(busID, gpcId);
+    if (slot < 0 || slot >= BCENET_SLOTS) return NULL;
+    return &t->buses[slot];
 }
 
 bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
