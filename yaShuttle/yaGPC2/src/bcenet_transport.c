@@ -258,6 +258,12 @@ typedef struct {
     int fd;     /* receive socket, bound to the bus port; -1 = closed */
     int txFd;   /* transmit socket, bound to an EPHEMERAL port; -1 = none */
     uint16_t txPort;   /* the port the kernel gave txFd, in host order */
+    /* THE PORT THIS SLOT ACTUALLY TALKS ON, settled when it was opened.
+     * Bus 24 is the intercomputer bus and is the one bus whose port depends
+     * on WHICH COMPUTER owns the slot, so it cannot be recomputed later from
+     * the transport -- the transport is shared by every machine and carries
+     * only the id of whichever created it. */
+    int port;
     SelfEchoEntry selfEcho[SELF_ECHO_MAX];
     int selfEchoCount;
 
@@ -370,6 +376,7 @@ BceNetTransport *bcenet_transport_create(int gpcId) {
         t->buses[i].fd = -1;
         t->buses[i].txFd = -1;
         t->buses[i].txPort = 0;
+        t->buses[i].port = 0;
         t->buses[i].selfEchoCount = 0;
     }
 #ifdef BCENET_HAVE_TX_THREAD
@@ -415,7 +422,15 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
     }
     if (b->fd >= 0) return true; /* already open */
 
-    int port = bcenet_bus_port(t->gpcId, busID);
+    /* THE SLOT'S OWN COMPUTER, not the transport's.  The transport became
+     * one-per-process when the vehicle took ownership of the bus sockets,
+     * and it is stamped with whichever machine happened to create it -- so
+     * asking it for the port gave EVERY machine's intercomputer bus the
+     * FIRST machine's port, and three computers run with --gpcs 1,2,3 all
+     * transmitted and listened on one wire.  Bus 24 is the only bus this
+     * matters for, and it is precisely the bus the redundant set talks on.
+     * The caller has passed the owning gpcId all along. */
+    int port = bcenet_bus_port(gpcId, busID);
     if (port == 0) {
         fprintf(stderr, "bcenet: bus %d has no known port mapping (see BCENET_BUS_PORT)\n", busID);
         return false;
@@ -502,6 +517,7 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
     b->fd = fd;
+    b->port = port;
 
     /* A SEPARATE socket for transmitting, bound to an ephemeral port.
      * Its only purpose is to give our own datagrams a return address no
@@ -602,7 +618,10 @@ static bool transport_send_now(BceNetTransport *t, BceNetBusSocket *b, int busID
         buf[headerLen + i * 2] = (unsigned char)(w >> 8);
         buf[headerLen + i * 2 + 1] = (unsigned char)(w & 0xff);
     }
-    struct sockaddr_in dest = bcenet_group_addr(bcenet_bus_port(t->gpcId, busID));
+    /* b->port, settled when this slot was opened: the transmit thread walks
+     * slots and cannot say which computer owns one, and for bus 24 that is
+     * the whole question. */
+    struct sockaddr_in dest = bcenet_group_addr(b->port);
     /* Only the fallback path needs the byte-exact record: when we have a
      * transmit socket, the loopback copy is identified by its port. */
     int sendFd = (b->txFd >= 0) ? b->txFd : b->fd;
