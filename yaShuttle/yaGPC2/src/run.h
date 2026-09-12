@@ -122,6 +122,21 @@ typedef struct {
      * --time-scale) drives simulated time FROM it while the CPU waits.
      * NULL unless --real-time was given.  See rtpacer.h. */
     bool realTime;
+    /* THIS MACHINE'S identity and its discrete bus connection.  Both are per
+     * computer, not per process: the id selects the machine's discrete
+     * channel and its intercomputer (bus 24) port. */
+    int gpcId;
+    struct Discretes *discretes;
+    /* The crew mode switch as this machine last saw it, and whether it has
+     * reported a position yet.  Per computer: each has its own column on the
+     * panel and its own HALT->STBY edge, and sharing these let one machine's
+     * panel reading release another's reset. */
+    uint32_t prevMode;
+    bool modeReported;
+    /* mode_switch_held()'s memo, keyed on this machine's discrete bus
+     * generation -- see the comment there. */
+    unsigned modeHeldGen;
+    bool modeHeldLast;
     /* When the bus sockets were last drained and flushed, in SIMULATED
      * microseconds -- see batchrunner_step()'s bus-service gate. */
     double busServiceUs;

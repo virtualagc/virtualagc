@@ -158,6 +158,10 @@ struct MmuModel {
     uint32_t nextSlot;
 
     /* The READY discrete this unit drives; see mmumodel_publish_ready. */
+    /* The discrete channel this unit drives READY on.  A mass memory is
+     * wired to every computer, so with several GPCs this becomes several
+     * channels; one is enough while one machine runs. */
+    struct Discretes *lines;
     bool readyPublished, lastReady;
     double lastReadyPublishSec;
 
@@ -586,6 +590,10 @@ MmuModel *mmumodel_create(int unit, const char *volumePath) {
 
 int mmumodel_bus(const MmuModel *m) { return m ? m->busID : -1; }
 
+void mmumodel_set_discretes(MmuModel *m, struct Discretes *d) {
+    if (m) m->lines = d;
+}
+
 void mmumodel_free(MmuModel *m) {
     if (!m) return;
     if (m->blocks) {
@@ -644,7 +652,7 @@ static bool timed_ready_enabled(void) {
 }
 
 void mmumodel_publish_ready(MmuModel *m) {
-    if (!m || !discretes_enabled()) return;
+    if (!m || !discretes_enabled(m->lines)) return;
     /* Ready when it is not moving data: nothing left over from a read and
      * no write running. */
     bool ready = (m->queueHead >= m->queueCount) && !m->writeActive;
@@ -663,7 +671,7 @@ void mmumodel_publish_ready(MmuModel *m) {
         now - m->lastReadyPublishSec < READY_REPUBLISH_SEC)
         return;
     uint32_t bit = (m->unit == 2) ? DISCRETE_A_MM2_READY : DISCRETE_A_MM1_READY;
-    discretes_publish(DISCRETES_REG_A, bit, ready);
+    discretes_publish(m->lines, DISCRETES_REG_A, bit, ready);
     if (m->verbose && (!m->readyPublished || ready != m->lastReady))
         mm_log(m, "READY -> %d", (int)ready);
     m->lastReady = ready;

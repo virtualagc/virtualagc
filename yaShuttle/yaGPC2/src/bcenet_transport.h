@@ -23,7 +23,7 @@
 
 typedef struct BceNetTransport BceNetTransport;
 
-BceNetTransport *bcenet_transport_create(void);
+BceNetTransport *bcenet_transport_create(int gpcId);
 void bcenet_transport_free(BceNetTransport *t);
 
 /* Opens (if not already open) the UDP multicast socket for busID, per the

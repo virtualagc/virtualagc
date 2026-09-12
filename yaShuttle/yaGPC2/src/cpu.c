@@ -65,6 +65,11 @@ void cpu_init(CPU *cpu) {
 }
 
 void cpu_free(CPU *cpu) {
+    /* The NIA ring belongs to this machine now, not to the process, so it
+     * is released with the machine. */
+    free(cpu->niaRing);
+    cpu->niaRing = NULL;
+    cpu->niaRingCap = cpu->niaRingPos = cpu->niaRingFilled = 0;
     free(cpu->iuShadow);
     cpu->iuShadow = NULL;
     cpu->iuShadowCount = cpu->iuShadowCap = 0;
@@ -1617,26 +1622,24 @@ void cpu_exec1(CPU *cpu) {
      * execution ARRIVED, and a full --trace over the ~200M instructions this
      * boot takes is not usable -- so the question "what branched into the
      * PSA" needs the few addresses immediately before it. */
+    /* ONE RING PER CPU.  This used to be a file static, so every machine in
+     * the process wrote into one buffer with one cursor and a dump printed an
+     * interleaving of all of their instruction histories -- useless for the
+     * one question the ring exists to answer. */
     {
-        static uint32_t *ring = NULL;
-        static unsigned cap = 0, pos = 0, filled = 0;
-        if (cap == 0) {
+        if (cpu->niaRingCap == 0) {
             const char *w = getenv("YAGPC_NIARING");
             char *end = NULL;
             long v = (w != NULL) ? strtol(w, &end, 10) : 0;
-            cap = (w != NULL && end != w && *end == '\0' && v > 0 && v <= 4096)
-                      ? (unsigned)v : 1u;
-            ring = calloc(cap, sizeof *ring);
-            if (ring == NULL) cap = 1;
+            unsigned cap = (w != NULL && end != w && *end == '\0' &&
+                            v > 0 && v <= 4096) ? (unsigned)v : 1u;
+            cpu->niaRing = calloc(cap, sizeof *cpu->niaRing);
+            cpu->niaRingCap = (cpu->niaRing == NULL) ? 1u : cap;
         }
-        if (ring != NULL && cap > 1) {
-            ring[pos] = nia;
-            pos = (pos + 1) % cap;
-            if (filled < cap) filled++;
-            cpu->niaRing = ring;
-            cpu->niaRingCap = cap;
-            cpu->niaRingPos = pos;
-            cpu->niaRingFilled = filled;
+        if (cpu->niaRing != NULL && cpu->niaRingCap > 1) {
+            cpu->niaRing[cpu->niaRingPos] = nia;
+            cpu->niaRingPos = (cpu->niaRingPos + 1) % cpu->niaRingCap;
+            if (cpu->niaRingFilled < cpu->niaRingCap) cpu->niaRingFilled++;
         }
     }
     /* YAGPC_IOQEDEPTH: once per simulated second, walk FCOS's IOQE free list

@@ -179,24 +179,24 @@ static uint32_t iop_mm_ready(const IOP *iop, uint32_t stored, uint32_t mask, int
  * called from the READ DISCRETE INPUT PCIs, which is exactly when the
  * value has to be current, and the flight software polls those in tight
  * loops while it waits.  Draining a non-blocking socket is cheap. */
-static uint32_t iop_discrete_overlay(int reg, uint32_t local) {
-    if (!discretes_enabled()) return local;
-    discretes_poll();
+static uint32_t iop_discrete_overlay(IOP *iop, int reg, uint32_t local) {
+    Discretes *d = iop->discretes;
+    if (!discretes_enabled(d)) return local;
+    discretes_poll(d);
     /* Cached on the bus generation: this runs on every READ DISCRETE INPUT
      * PCI and the flight software polls those in tight loops. */
-    static unsigned lastGen[2] = { ~0u, ~0u };
-    static uint32_t cachedDriven[2], cachedValue[2];
     int i = (reg == DISCRETES_REG_B) ? 1 : 0;
-    unsigned gen = discretes_generation();
-    if (gen != lastGen[i]) {
-        cachedDriven[i] = discretes_driven_mask(reg);
-        cachedValue[i] = discretes_value(reg);
-        lastGen[i] = gen;
+    unsigned gen = discretes_generation(d);
+    if (gen != iop->discOverlayGen[i]) {
+        iop->discOverlayDriven[i] = discretes_driven_mask(d, reg);
+        iop->discOverlayValue[i] = discretes_value(d, reg);
+        iop->discOverlayGen[i] = gen;
     }
-    uint32_t effective = (local & ~cachedDriven[i]) | (cachedValue[i] & cachedDriven[i]);
+    uint32_t effective = (local & ~iop->discOverlayDriven[i]) |
+                         (iop->discOverlayValue[i] & iop->discOverlayDriven[i]);
     /* What a REQUEST for this register is answered with.  Only here can the
      * locally derived bits and the published ones be combined. */
-    discretes_set_canonical(reg, effective);
+    discretes_set_canonical(d, reg, effective);
     return effective;
 }
 
@@ -211,12 +211,12 @@ uint32_t iop_discrete_in_a_stored(const IOP *iop) {
     return register_get32(&iop->regDiscreteInA);
 }
 
-uint32_t iop_discrete_in_a(const IOP *iop) {
+uint32_t iop_discrete_in_a(IOP *iop) {
     uint32_t stored = register_get32(&iop->regDiscreteInA);
     uint32_t v = stored & ~(DISCRETE_A_MM1_READY | DISCRETE_A_MM2_READY);
     v |= iop_mm_ready(iop, stored, DISCRETE_A_MM1_READY, MM1_BCE);
     v |= iop_mm_ready(iop, stored, DISCRETE_A_MM2_READY, MM2_BCE);
-    uint32_t out = iop_discrete_overlay(DISCRETES_REG_A, v);
+    uint32_t out = iop_discrete_overlay(iop, DISCRETES_REG_A, v);
     /* YAGPC_DISCTRACE: report every change of discrete input A as the flight
      * software actually reads it -- stored, computed, and after the crew
      * panel's overlay -- so "the MMU published READY but CZ2BDIA never got
@@ -237,8 +237,8 @@ uint32_t iop_discrete_in_a(const IOP *iop) {
     return out;
 }
 
-uint32_t iop_discrete_in_b(const IOP *iop) {
-    return iop_discrete_overlay(DISCRETES_REG_B,
+uint32_t iop_discrete_in_b(IOP *iop) {
+    return iop_discrete_overlay(iop, DISCRETES_REG_B,
                                 register_get32(&iop->regDiscreteInB));
 }
 
@@ -445,7 +445,7 @@ static long dmaQueuedRead[32];
 
 void mia_xmit_word(struct IOP *iop, MIA *m, uint32_t halfword) {
     if (m->bceNum == xmit_trace_bus() && m->bceNum >= 0 && m->bceNum < 32)
-        xmitWords[m->bceNum]++;
+        iop->xmitWords[m->bceNum]++;
     if (!iop->servicer) return;
     GpcServiceInput input = {.busID = m->bceNum, .address = 0, .in.word = halfword};
     GpcServiceOutput output = {0};
@@ -561,7 +561,15 @@ static bool dmaq_shift(DMAQueue *q, DMARequest *out) {
  * IOP
  * ------------------------------------------------------------------- */
 
+#define RECV_TIMEOUT_FLOOR_US 2000.0    /* 2 ms; see iop_recv_timeout_us */
+
 void iop_init(IOP *iop, struct CPU *cpu) {
+    /* NOT what the zeroing leaves: generation 0 is a real value, so a memo
+     * initialised to it would serve a stale answer on the first read, and the
+     * receive floor has a non-zero default. */
+    for (int i = 0; i < 2; i++) iop->discOverlayGen[i] = ~0u;
+    iop->recvTimeoutFloorUs = RECV_TIMEOUT_FLOOR_US;
+    iop->recvFloorFromEnv = 0;
     iop->cpu = cpu;
     iop->peerWait = NULL;
     iop->peerWaitCtx = NULL;
@@ -690,6 +698,10 @@ void iop_free(IOP *iop) {
     registerfile_free(&iop->regInterrupts);
     iopls_free(&iop->ls);
     dmaq_free(&iop->dmaQueue);
+}
+
+void iop_set_discretes(IOP *iop, struct Discretes *d) {
+    if (iop) iop->discretes = d;
 }
 
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx) {
@@ -1417,7 +1429,6 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value);
  * (0.25 ms), which no peer on a socket can answer inside -- while being
  * comfortably under any timeout the software sets deliberately, and
  * twenty times the ~100 us a peer here actually takes to reply. */
-#define RECV_TIMEOUT_FLOOR_US 2000.0    /* 2 ms */
 
 /* The floor is a concession to a peripheral in ANOTHER PROCESS, reached
  * over a socket: the count a bus program loads can be far shorter than
@@ -1431,10 +1442,10 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value);
  * subsystem eighty times longer than the software intended, and the
  * machine then spends all its time retrying.  So an in-process
  * peripheral turns it off. */
-static double g_recvTimeoutFloorUs = RECV_TIMEOUT_FLOOR_US;
-static int g_recvFloorFromEnv = 0;
 
-void iop_set_recv_timeout_floor_us(double us) { g_recvTimeoutFloorUs = us; }
+void iop_set_recv_timeout_floor_us(IOP *iop, double us) {
+    if (iop) iop->recvTimeoutFloorUs = us;
+}
 
 /* The BCE's own message time out, from its local store (bank 1, word 3),
  * in the same 16.5 us ticks the delay instructions use. */
@@ -1444,20 +1455,20 @@ static double iop_recv_timeout_us(IOP *iop, int p) {
      * software asks for here -- GPCIPL loads the display BCE an MTO of
      * 303, which is 5.0 ms, and a 20 ms floor turns one starved receive
      * into more than three whole 6 ms MSC service periods. */
-    if (!g_recvFloorFromEnv) {
+    if (!iop->recvFloorFromEnv) {
         const char *e = getenv("YAGPC_RECV_FLOOR_US");
-        g_recvFloorFromEnv = 1;
-        if (e != NULL) g_recvTimeoutFloorUs = atof(e);
+        iop->recvFloorFromEnv = 1;
+        if (e != NULL) iop->recvTimeoutFloorUs = atof(e);
         /* Upstream: "the receive time-out floor is zero: the loaded time
          * out governs."  FCMINIOP programs every BCE's MTO explicitly, and
          * a 2 ms floor overrides all of them except buses 6-9, 12-13 and
          * 18-19 -- bus 24's 49.5 us becomes 2 ms, 40x. */
-        else if (iop_upstream()) g_recvTimeoutFloorUs = 0.0;
+        else if (iop_upstream()) iop->recvTimeoutFloorUs = 0.0;
     }
     Register *r = iopls_at(&iop->ls, p, 1, 3);
     uint32_t mto = r ? (register_get32(r) & 0x3ffffu) : 0u;
     double t = (double)mto * MTO_TICK_US;
-    return t > g_recvTimeoutFloorUs ? t : g_recvTimeoutFloorUs;
+    return t > iop->recvTimeoutFloorUs ? t : iop->recvTimeoutFloorUs;
 }
 
 void iop_bce_error_terminate(IOP *iop, int p) {
@@ -1573,7 +1584,6 @@ static void iop_watch_store(IOP *iop, uint32_t addr, uint32_t value,
             iop->curPE, iop_now_us(iop));
 }
 
-static int g_clearWatch[32];
 
 double iop_now_us(IOP *iop) {
     return (iop != NULL && iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
@@ -1584,11 +1594,11 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
     while (bce->recvLeft > 0 && mia_data_available(iop, &bce->mia)) {
         bool wasLatch = bce->mia.latchValid;
         uint32_t data = mia_get_data(iop, &bce->mia);
-        if (g_clearWatch[p] && getenv("YAGPC_CLEARTRACE")) {
+        if (iop->clearWatch[p] && getenv("YAGPC_CLEARTRACE")) {
             fprintf(stderr, "CLEARREAD bce=%d took=%04x from=%s t=%.1f\n",
                     p, (unsigned)data, wasLatch ? "latch-or-live" : "LIVE",
                     now);
-            g_clearWatch[p] = 0;
+            iop->clearWatch[p] = 0;
         }
         iopls_setD(&iop->ls, data);
         iop_write_main16(iop, bce->recvAddr, data);
@@ -1615,7 +1625,7 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
          * one-word #RDLI meant to discard a STALE word.  Whether it gets
          * the latch or a live word decides the phase of everything after
          * it, so record which. */
-        if (count == 1) g_clearWatch[p] = 1;
+        if (count == 1) iop->clearWatch[p] = 1;
         bce->recvActive = true;
         bce->recvPC = pc;
         bce->recvAddr = addr & 0x3ffffu;
@@ -1937,14 +1947,14 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             uint32_t r2 = r0 & data;
             uint32_t r1 = r0 ^ r2;
             register_set32(&iop->regDiscreteOut, r1);
-            discretes_publish_out(r0, r1);
+            discretes_publish_out(iop->discretes, r0, r1);
             break;
         }
         case 0x85100000: { /* DISCRETE OUTPUT SET */
             uint32_t r0 = register_get32(&iop->regDiscreteOut);
             uint32_t r1 = r0 | data;
             register_set32(&iop->regDiscreteOut, r1);
-            discretes_publish_out(r0, r1);
+            discretes_publish_out(iop->discretes, r0, r1);
             break;
         }
         case 0x86200000: { /* CONFIGURE PROCESSORS HALT */
@@ -1982,7 +1992,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
                  * like any other and is published. */
                 uint32_t r0 = register_get32(&iop->regDiscreteOut);
                 register_set32(&iop->regDiscreteOut, 0x00000000u);
-                discretes_publish_out(r0, 0x00000000u);
+                discretes_publish_out(iop->discretes, r0, 0x00000000u);
             }
             /* MASTER RESET's INTERRUPT effects, which were missing
              * entirely.  The instruction set's own reset table gives them

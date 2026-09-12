@@ -94,9 +94,9 @@ static const int BCENET_BUS_PORT[BCENET_MAX_BUS_ID + 1] = {
  * failure than sharing one. */
 static const int BCENET_IP_PORT_BY_GPC[6] = { 0, 24, 25, 25, 26, 27 };
 
-static int bcenet_bus_port(int busID) {
+static int bcenet_bus_port(int gpcId, int busID) {
     if (busID == 24) {
-        int gpc = yagpc_gpc_id();
+        int gpc = gpcId;
         if (gpc < 1 || gpc > 5) gpc = 1;
         return yagpc_port_base() + BCENET_IP_PORT_BY_GPC[gpc];
     }
@@ -311,6 +311,10 @@ static void self_echo_clear(BceNetBusSocket *b) {
 }
 
 struct BceNetTransport {
+    /* Which computer this transport belongs to.  Only bus 24 (IP, the
+     * intercomputer bus) depends on it -- buses 1-23 are one shared wire
+     * each, the same port whichever GPC is talking. */
+    int gpcId;
     BceNetBusSocket buses[BCENET_MAX_BUS_ID + 1];
 #ifdef BCENET_HAVE_TX_THREAD
     pthread_mutex_t lock;   /* guards every bus's outbound FIFO and bucket */
@@ -345,8 +349,10 @@ static void transport_unlock(BceNetTransport *t) {
 #endif
 }
 
-BceNetTransport *bcenet_transport_create(void) {
+BceNetTransport *bcenet_transport_create(int gpcId) {
     BceNetTransport *t = malloc(sizeof(BceNetTransport));
+    if (t == NULL) return NULL;
+    t->gpcId = (gpcId >= 0 && gpcId <= 5) ? gpcId : 1;
     for (int i = 0; i <= BCENET_MAX_BUS_ID; i++) {
         t->buses[i].busID = i;
         t->buses[i].fd = -1;
@@ -397,7 +403,7 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID) {
     }
     if (b->fd >= 0) return true; /* already open */
 
-    int port = bcenet_bus_port(busID);
+    int port = bcenet_bus_port(t->gpcId, busID);
     if (port == 0) {
         fprintf(stderr, "bcenet: bus %d has no known port mapping (see BCENET_BUS_PORT)\n", busID);
         return false;
@@ -584,7 +590,7 @@ static bool transport_send_now(BceNetTransport *t, BceNetBusSocket *b, int busID
         buf[headerLen + i * 2] = (unsigned char)(w >> 8);
         buf[headerLen + i * 2 + 1] = (unsigned char)(w & 0xff);
     }
-    struct sockaddr_in dest = bcenet_group_addr(bcenet_bus_port(busID));
+    struct sockaddr_in dest = bcenet_group_addr(bcenet_bus_port(t->gpcId, busID));
     /* Only the fallback path needs the byte-exact record: when we have a
      * transmit socket, the loopback copy is identified by its port. */
     int sendFd = (b->txFd >= 0) ? b->txFd : b->fd;

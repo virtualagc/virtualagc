@@ -217,6 +217,14 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
 
 void batchrunner_init(BatchRunner *r, const Options *opts) {
     memset(r, 0, sizeof(*r));
+    /* BUILD THE DECODE TABLES BEFORE ANY MACHINE RUNS.  Each is an unguarded
+     * check-then-build on a file-scope flag, which is safe when one machine
+     * builds them on its first instruction and a race once several do.  They
+     * are read-only afterwards and shared by every machine, which is correct
+     * -- the instruction set does not vary by computer. */
+    cpu_instr_table_init();
+    bce_instr_table_init();
+    msc_instr_table_init();
     r->opts = opts;
     r->maxSteps = atol(opts->maxSteps);
     /* 0 means "no limit", as `gpc run --max-steps 0` does -- which is how
@@ -291,6 +299,12 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
         yagpc_set_port_base((int)v);
     }
 
+    r->gpcId = 1;
+    /* NOT the zero memset leaves: generation 0 is a real value, and a memo
+     * that matched it would answer "not held" before the panel had ever been
+     * heard -- releasing the machine from reset on nothing at all. */
+    r->modeHeldGen = ~0u;
+    r->modeHeldLast = true;
     if (opts->gpcId != NULL && *opts->gpcId != '\0') {
         char *end = NULL;
         long v = strtol(opts->gpcId, &end, 10);
@@ -298,7 +312,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
             fprintf(stderr, "--gpc-id: expected 1-5, got \"%s\"\n", opts->gpcId);
             exit(1);
         }
-        yagpc_set_gpc_id((int)v);
+        r->gpcId = (int)v;
     }
 
     if (opts->deuModel) {
@@ -307,12 +321,12 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
          * point of this one is that no socket is involved. */
         /* In this process, so the socket-latency floor does not apply:
          * honour the bus program's own message timeout exactly. */
-        iop_set_recv_timeout_floor_us(0.0);
+        iop_set_recv_timeout_floor_us(&r->age.gpc.iop, 0.0);
         r->deuModel = deumodel_create(6);   /* DK1 */
         base = deumodel_service;
         baseCtx = r->deuModel;
     } else if (opts->bceNetwork) {
-        r->bceTransport = bcenet_transport_create();
+        r->bceTransport = bcenet_transport_create(r->gpcId);
         r->bceFramer = bcenet_framer_create(r->bceTransport);
         base = bcenet_framer_service;
         baseCtx = r->bceFramer;
@@ -409,7 +423,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
                 iop_set_discrete_in(&r->age.gpc.iop, DISCRETES_REG_A,
                                     iop_discrete_in_a_stored(&r->age.gpc.iop) | readyBit);
             }
-            if (base == NULL) iop_set_recv_timeout_floor_us(0.0);
+            if (base == NULL) iop_set_recv_timeout_floor_us(&r->age.gpc.iop, 0.0);
             r->busRouter.mmu = r->mmuModel;
             r->busRouter.mmuBus = r->mmuModel ? mmumodel_bus(r->mmuModel) : -1;
             r->busRouter.mtu = r->mtuModel;
@@ -432,15 +446,20 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     /* Independent of the peripheral bus: discretes are their own bus, and
      * a run may want them with or without --bce-network.  Failing to open
      * is not fatal -- iop.c keeps deriving what it can. */
-    if (opts->discretes) discretes_open();
+    if (opts->discretes) {
+        r->discretes = discretes_create(r->gpcId);
+        iop_set_discretes(&r->age.gpc.iop, r->discretes);
+        if (r->mmuModel) mmumodel_set_discretes(r->mmuModel, r->discretes);
+    }
 }
 
 void batchrunner_free(BatchRunner *r) {
-    if (discretes_enabled()) {
+    if (discretes_enabled(r->discretes)) {
         fprintf(stderr, "discretes: %lu message(s) applied\n",
-                discretes_message_count());
-        discretes_close();
+                discretes_message_count(r->discretes));
     }
+    discretes_free(r->discretes);
+    r->discretes = NULL;
     if (r->mmuModel) {
         mmumodel_report(r->mmuModel);
         mmumodel_free(r->mmuModel);
@@ -756,8 +775,6 @@ static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, l
 /* Position last seen, so the HALT->STBY EDGE can be caught: it is the
  * transition, not the level, that releases reset and starts the
  * bootstrap. */
-static uint32_t g_prevMode = 0;
-static bool g_modeReported = false;
 
 /* The firmware IPL, driven from the panel's IPL position.
  *
@@ -870,10 +887,10 @@ static void firmware_ipl(BatchRunner *r) {
      * "no": it would refuse every IPL, and before that it had been
      * silently choosing MM1 for an MM2 selection. */
     uint32_t srcDriven = 0, srcVal = 0;
-    if (discretes_enabled()) {
-        srcDriven = discretes_driven_mask(DISCRETES_REG_A)
+    if (discretes_enabled(r->discretes)) {
+        srcDriven = discretes_driven_mask(r->discretes, DISCRETES_REG_A)
                     & (MODE_SRC_MM1 | MODE_SRC_MM2);
-        srcVal = discretes_value(DISCRETES_REG_A) & srcDriven;
+        srcVal = discretes_value(r->discretes, DISCRETES_REG_A) & srcDriven;
     }
     if (srcDriven && !srcVal) {
         fprintf(stderr, "MODE: IPL, but IPL SOURCE SELECT is OFF; "
@@ -980,8 +997,8 @@ static void firmware_ipl(BatchRunner *r) {
 /* True when the machine is held in reset and must not execute.  Called once
  * per INSTRUCTION, through the caching wrapper below. */
 static bool mode_switch_held_uncached(BatchRunner *r) {
-    uint32_t driven = discretes_driven_mask(DISCRETES_REG_A);
-    uint32_t mode = discretes_value(DISCRETES_REG_A) & driven & MODE_ANY;
+    uint32_t driven = discretes_driven_mask(r->discretes, DISCRETES_REG_A);
+    uint32_t mode = discretes_value(r->discretes, DISCRETES_REG_A) & driven & MODE_ANY;
 
     /* Silence is HALT, not RUN.  The mode switch is a three-position
      * switch somebody has to physically throw, it sits in HALT until they
@@ -1021,12 +1038,12 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
         return true;
 
     if (!published) {
-        if (!g_modeReported) {
+        if (!r->modeReported) {
             fprintf(stderr, "MODE: HALT; CPU held in reset "
                             "(no crew panel heard yet)\n");
-            g_modeReported = true;
+            r->modeReported = true;
         }
-        /* g_prevMode is deliberately left alone. */
+        /* r->prevMode is deliberately left alone. */
         return true;
     }
 
@@ -1037,11 +1054,11 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
      * standing.  So its bit is not exclusive of HALT's, it DEPENDS on it,
      * and the two are asserted together.  Pressing it in STBY or RUN is
      * not a thing the panel can do to a running machine. */
-    if (mode != g_prevMode) {
+    if (mode != r->prevMode) {
         if (getenv("YAGPC_MODETRACE"))
             fprintf(stderr, "MODETRACE driven=%08x value=%08x mode=%08x prev=%08x\n",
-                    driven, discretes_value(DISCRETES_REG_A), mode, g_prevMode);
-        bool iplEdge = (mode & MODE_IPL) && !(g_prevMode & MODE_IPL);
+                    driven, discretes_value(r->discretes, DISCRETES_REG_A), mode, r->prevMode);
+        bool iplEdge = (mode & MODE_IPL) && !(r->prevMode & MODE_IPL);
         if (iplEdge && (mode & MODE_HALT)) {
             /* The pushbutton, on its press: pressing it again re-IPLs,
              * and holding it down does not repeat. */
@@ -1049,7 +1066,7 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
         } else if (iplEdge) {
             fprintf(stderr, "MODE: IPL pressed but the mode switch is not "
                             "in HALT; ignored\n");
-        } else if ((g_prevMode & MODE_HALT) && (mode & MODE_STBY)) {
+        } else if ((r->prevMode & MODE_HALT) && (mode & MODE_STBY)) {
             /* The release.  Reload the whole PSW pair from the System
              * Reset vector, which is what hands control to FCMBOOT. */
             cpu_reset(&r->age.gpc.cpu);
@@ -1062,10 +1079,10 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
             fprintf(stderr, "MODE: %s\n",
                     (mode & MODE_RUN) ? "RUN" : "STBY");
         }
-        g_prevMode = mode;
-        g_modeReported = true;
+        r->prevMode = mode;
+        r->modeReported = true;
     }
-    (void)g_modeReported;
+    (void)r->modeReported;
     /* HALT alone decides this.  IPL cannot be pressed out of HALT, so a
      * machine being IPLed is already held by the switch itself. */
     return (mode & MODE_HALT) != 0;
@@ -1186,15 +1203,13 @@ static void dump_main_storage(BatchRunner *r, const char *path) {
  * already computed -- and no edge can have been missed, because an edge IS a
  * change in that state. */
 static bool mode_switch_held(BatchRunner *r) {
-    if (!discretes_enabled()) return false;
-    discretes_poll();
-    static unsigned lastGen = ~0u;
-    static bool lastHeld = true;
-    unsigned gen = discretes_generation();
-    if (gen == lastGen) return lastHeld;
-    lastGen = gen;
-    lastHeld = mode_switch_held_uncached(r);
-    return lastHeld;
+    if (!discretes_enabled(r->discretes)) return false;
+    discretes_poll(r->discretes);
+    unsigned gen = discretes_generation(r->discretes);
+    if (gen == r->modeHeldGen) return r->modeHeldLast;
+    r->modeHeldGen = gen;
+    r->modeHeldLast = mode_switch_held_uncached(r);
+    return r->modeHeldLast;
 }
 
 static bool batchrunner_step(BatchRunner *r) {
@@ -1554,8 +1569,8 @@ static bool batchrunner_step(BatchRunner *r) {
      * flipping switches on a panel.  Every 1024 steps, so this is a
      * non-blocking syscall roughly a thousand times less often than an
      * instruction. */
-    if (discretes_enabled() && (r->step & 0x3ff) == 0) {
-        discretes_poll();
+    if (discretes_enabled(r->discretes) && (r->step & 0x3ff) == 0) {
+        discretes_poll(r->discretes);
         /* And drive what this process's own devices put ON the bus.  The
          * mass memory's READY is a real line in the vehicle; publishing it
          * is what lets a crew panel show the tape working, and doubles as

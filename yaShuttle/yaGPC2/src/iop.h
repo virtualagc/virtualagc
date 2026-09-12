@@ -310,6 +310,23 @@ typedef struct IOP {
      * MIA behavior; set via iop_set_servicer()/ap101_set_servicer().
      * servicerCtx is opaque -- never a GpcState, see yaGpcIntegration.h's
      * GpcServicerFn comment. */
+    /* THIS MACHINE'S discrete bus connection, owned by the BatchRunner that
+     * owns the machine.  Per computer, not per process: five GPCs each have
+     * their own channel (port base+80+gpcId).  NULL when --discretes was not
+     * given, and every discretes_* call tolerates that. */
+    struct Discretes *discretes;
+    /* PER-MACHINE STATE THAT USED TO BE FILE STATICS.  Each of these is a
+     * property of one computer, and sharing them between machines changes
+     * behaviour rather than merely merging a trace. */
+    unsigned discOverlayGen[2];      /* iop_discrete_overlay's memo, A and B */
+    uint32_t discOverlayDriven[2];
+    uint32_t discOverlayValue[2];
+    double recvTimeoutFloorUs;       /* --deu-model/--mmu-model lower it */
+    int recvFloorFromEnv;
+    long xmitWords[32];              /* words transmitted per bus since cmd */
+    long dmaQueuedRead[32];
+    int clearWatch[32];              /* "the next MIA read is the CLEAR read" */
+
     GpcServicerFn servicer;
     void *servicerCtx;
     /* Optional, and only for a peripheral in ANOTHER PROCESS: asked when a
@@ -356,7 +373,7 @@ void iop_reset_discrete_inputs(IOP *iop);
  * on them -- it waits for ready to clear and then to set again -- and a
  * constant ready bit hangs it.  See iop.c for the full account. */
 uint32_t iop_discrete_in_a_stored(const struct IOP *iop);
-uint32_t iop_discrete_in_a(const IOP *iop);
+uint32_t iop_discrete_in_a(IOP *iop);
 
 /* Override the LOCAL value of a discrete input register -- what this GPC
  * reads when nobody is publishing that bit on the discretes bus.  The
@@ -371,7 +388,7 @@ void iop_set_discrete_in(IOP *iop, int reg, uint32_t value);
 /* Discrete inputs B (33-40) as READ DISCRETE INPUTS B reports it.  Carries
  * no derived bits of its own, but anything being published on the discrete
  * bus overrides the stored value the same way it does for A. */
-uint32_t iop_discrete_in_b(const IOP *iop);
+uint32_t iop_discrete_in_b(IOP *iop);
 
 /* Is any processor both enabled and busy -- i.e. is the IOP still doing
  * something that could raise an interrupt?  Used to decide whether a CPU
@@ -384,6 +401,7 @@ bool iop_has_servicer(const IOP *iop);
 void iop_free(IOP *iop);
 
 void iop_set_servicer(IOP *iop, GpcServicerFn fn, void *servicerCtx);
+void iop_set_discretes(IOP *iop, struct Discretes *d);
 void iop_set_peer_wait(IOP *iop, bool (*fn)(void *ctx, int busID, bool gotAny), void *ctx);
 /* The I/O side of POO 2.5.3's system reset sequence; see iop.c. */
 void iop_system_reset(IOP *iop);
@@ -392,7 +410,7 @@ void iop_system_reset(IOP *iop);
  * for a peripheral in another process; set it to 0 when the peripheral is
  * in this one, so the bus program's own message timeout is honoured
  * exactly.  See RECV_TIMEOUT_FLOOR_US in iop.c. */
-void iop_set_recv_timeout_floor_us(double us);
+void iop_set_recv_timeout_floor_us(IOP *iop, double us);
 
 void iop_exec(IOP *iop);
 void iop_exec_idle(IOP *iop);

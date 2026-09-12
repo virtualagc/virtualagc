@@ -62,6 +62,11 @@ void mmumodel_set_clock(MmuModel *m, const double *clockUs);
 /* Which BCE this unit answers on: 18 for MM1, 19 for MM2. */
 int mmumodel_bus(const MmuModel *m);
 
+/* The discrete channel this unit asserts READY on.  A mass memory is wired to
+ * every computer; with several GPCs running this becomes several channels. */
+struct Discretes;
+void mmumodel_set_discretes(MmuModel *m, struct Discretes *d);
+
 /* The GpcServicerFn the emulator installs; ctx is the MmuModel. */
 void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
                       const GpcServiceInput *input, GpcServiceOutput *output);

@@ -55,8 +55,8 @@ int yagpc_gpc_id(void) {
  * all five GPCs can run at once without hearing each other's switches.  A
  * device wired to every computer -- a mass memory's READY -- drives them
  * all by publishing on each. */
-#define DISCRETES_PORT \
-    (yagpc_port_base() + YAGPC_DISCRETES_OFFSET + yagpc_gpc_id())
+#define DISCRETES_PORT_FOR(gpc) \
+    (yagpc_port_base() + YAGPC_DISCRETES_OFFSET + (gpc))
 
 #define OP_SET     1
 #define OP_RESET   2
@@ -95,7 +95,8 @@ static const char *bit_name(int reg, int bit) {
     }
 }
 
-static struct {
+struct Discretes {
+    int gpcId;
     int fd;
     bool open;
     bool trace;
@@ -116,7 +117,7 @@ static struct {
     uint32_t selfDriven[3];
     struct sockaddr_in group;
     unsigned generation;  /* see discretes_generation() */
-} g;
+};
 
 static int reg_index(int reg) {
     if (reg == DISCRETES_REG_B) return 1;
@@ -129,52 +130,57 @@ static bool reg_known(int reg) {
            reg == DISCRETES_REG_OUT;
 }
 
-bool discretes_enabled(void) { return g.open; }
-unsigned long discretes_message_count(void) { return g.messages; }
+bool discretes_enabled(const Discretes *d) { return d != NULL && d->open; }
+unsigned long discretes_message_count(const Discretes *d) { return d ? d->messages : 0; }
 
 /* Bumped whenever a datagram changes the bus state, or this process drives a
  * line.  Lets a caller cache what it derived from the bus instead of
  * re-deriving it on every read -- see iop_discrete_overlay(). */
-unsigned discretes_generation(void) { return g.generation; }
+unsigned discretes_generation(const Discretes *d) { return d ? d->generation : 0; }
 
-bool discretes_open(void) {
-    if (g.open) return true;
-    memset(&g, 0, sizeof g);
+Discretes *discretes_create(int gpcId) {
+    Discretes *d = (Discretes *)calloc(1, sizeof *d);
+    if (d == NULL) return NULL;
+    d->gpcId = gpcId;
+    d->fd = -1;
 
     /* Publishers repeat themselves several times a second, so tracing
      * every message would be noise: only a message that actually CHANGES
      * a register prints. */
-    g.trace = getenv("YAGPC_DISCRETETRACE") != NULL;
+    d->trace = getenv("YAGPC_DISCRETETRACE") != NULL;
 
-    g.staleSec = DISCRETES_STALE_SEC;
+    d->staleSec = DISCRETES_STALE_SEC;
     const char *s = getenv("YAGPC_DISCRETES_STALE_SEC");
     if (s != NULL) {
         double v = atof(s);
-        if (v > 0.0) g.staleSec = v;
+        if (v > 0.0) d->staleSec = v;
     }
 
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
         fprintf(stderr, "discretes: socket failed: %s\n", strerror(errno));
-        return false;
+        free(d);
+        return NULL;
     }
 
     int reuse = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse) < 0) {
         fprintf(stderr, "discretes: SO_REUSEADDR failed: %s\n", strerror(errno));
         close(fd);
-        return false;
+        free(d);
+        return NULL;
     }
 
     struct sockaddr_in addr = {0};
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons((uint16_t)DISCRETES_PORT);
+    addr.sin_port = htons((uint16_t)DISCRETES_PORT_FOR(d->gpcId));
     if (bind(fd, (struct sockaddr *)&addr, sizeof addr) < 0) {
         fprintf(stderr, "discretes: bind(port %d) failed: %s\n",
-                DISCRETES_PORT, strerror(errno));
+                DISCRETES_PORT_FOR(d->gpcId), strerror(errno));
         close(fd);
-        return false;
+        free(d);
+        return NULL;
     }
 
     /* Pin the interface, for the same reason bcenet_transport.c does:
@@ -195,7 +201,8 @@ bool discretes_open(void) {
     if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof mreq) < 0) {
         fprintf(stderr, "discretes: IP_ADD_MEMBERSHIP failed: %s\n", strerror(errno));
         close(fd);
-        return false;
+        free(d);
+        return NULL;
     }
 
     int loop = 1;
@@ -206,31 +213,32 @@ bool discretes_open(void) {
     /* Where discretes_publish sends.  Same socket: it is already pinned to
      * the interface and in the group, and a device driving a line is a peer
      * on this bus like any other. */
-    g.group.sin_family = AF_INET;
-    g.group.sin_addr.s_addr = inet_addr(DISCRETES_GROUP);
-    g.group.sin_port = htons((uint16_t)DISCRETES_PORT);
+    d->group.sin_family = AF_INET;
+    d->group.sin_addr.s_addr = inet_addr(DISCRETES_GROUP);
+    d->group.sin_port = htons((uint16_t)DISCRETES_PORT_FOR(d->gpcId));
 
     int flags = fcntl(fd, F_GETFL, 0);
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
-    g.fd = fd;
-    g.open = true;
-    return true;
+    d->fd = fd;
+    d->open = true;
+    return d;
 }
 
-void discretes_close(void) {
-    if (!g.open) return;
-    close(g.fd);
-    g.open = false;
-    g.fd = -1;
+void discretes_free(Discretes *d) {
+    if (d == NULL) return;
+    if (d->open) close(d->fd);
+    free(d);
 }
 
-static void send_msg(unsigned op, int reg, uint32_t mask);
+int discretes_gpc_id(const Discretes *d) { return d ? d->gpcId : 0; }
+
+static void send_msg(Discretes *d, unsigned op, int reg, uint32_t mask);
 
 /* Apply one well-formed message.  Anything else is ignored rather than
  * guessed at, so unrelated traffic on the group cannot corrupt a
  * register. */
-static void apply(const uint8_t *b, size_t n) {
+static void apply(Discretes *d, const uint8_t *b, size_t n) {
     if (n < WORDS * 2) return;
     unsigned op  = (unsigned)((b[0] << 8) | b[1]);
     unsigned reg = (unsigned)((b[2] << 8) | b[3]);
@@ -243,8 +251,8 @@ static void apply(const uint8_t *b, size_t n) {
      * holds.  This GPC holds it, and is the only thing that may answer --
      * which is what lets the protocol drop the re-broadcast timer. */
     if (op == OP_REQUEST) {
-        send_msg(OP_VALUE, (int)reg, g.canonical[reg_index((int)reg)]);
-        g.messages++;
+        send_msg(d, OP_VALUE, (int)reg, d->canonical[reg_index((int)reg)]);
+        d->messages++;
         return;
     }
     /* VALUE: only a GPC sends one, and this IS the GPC, so any that
@@ -255,20 +263,20 @@ static void apply(const uint8_t *b, size_t n) {
     if (mask == 0) return;
 
     int r = reg_index((int)reg);
-    uint32_t before = g.value[r];
-    if (op == OP_SET) g.value[r] |= mask;
-    else              g.value[r] &= ~mask;
+    uint32_t before = d->value[r];
+    if (op == OP_SET) d->value[r] |= mask;
+    else              d->value[r] &= ~mask;
 
     double now = yagpc_monotonic_seconds();
     for (int bit = 0; bit < 32; bit++) {
-        if (mask & (0x80000000u >> bit)) g.lastSeen[r][bit] = now;
+        if (mask & (0x80000000u >> bit)) d->lastSeen[r][bit] = now;
     }
-    g.messages++;
+    d->messages++;
 
-    if (g.trace && g.value[r] != before) {
+    if (d->trace && d->value[r] != before) {
         fprintf(stderr, "DISCRETE %-5s %c  %08x  ->  %08x   ",
                 (op == OP_SET) ? "SET" : "RESET",
-                (reg == DISCRETES_REG_B) ? 'B' : 'A', mask, g.value[r]);
+                (reg == DISCRETES_REG_B) ? 'B' : 'A', mask, d->value[r]);
         const char *sep = "";
         for (int bit = 0; bit < 32; bit++) {
             if (!(mask & (0x80000000u >> bit))) continue;
@@ -289,8 +297,8 @@ static void apply(const uint8_t *b, size_t n) {
  * changes, and costs one clock read instead of a syscall. */
 #define DISCRETES_POLL_MIN_SECONDS 250e-6
 
-void discretes_poll(void) {
-    if (!g.open) return;
+void discretes_poll(Discretes *d) {
+    if (d == NULL || !d->open) return;
     {
         /* Called once per instruction; count first (an increment and a test)
          * and ask the clock only every 32nd call.  The time gate still bounds
@@ -304,71 +312,72 @@ void discretes_poll(void) {
     }
     uint8_t buf[64];
     for (;;) {
-        ssize_t n = recv(g.fd, buf, sizeof buf, 0);
+        ssize_t n = recv(d->fd, buf, sizeof buf, 0);
         if (n <= 0) {
             /* EAGAIN/EWOULDBLOCK: nothing more waiting. */
             break;
         }
-        apply(buf, (size_t)n);
-        g.generation++;
+        apply(d, buf, (size_t)n);
+        d->generation++;
     }
 }
 
-static void send_msg(unsigned op, int reg, uint32_t mask) {
-    if (!g.open) return;
+static void send_msg(Discretes *d, unsigned op, int reg, uint32_t mask) {
+    if (d == NULL || !d->open) return;
     uint8_t b[WORDS * 2];
     b[0] = (uint8_t)(op >> 8);    b[1] = (uint8_t)op;
     b[2] = (uint8_t)(reg >> 8);   b[3] = (uint8_t)reg;
     b[4] = (uint8_t)(mask >> 24); b[5] = (uint8_t)(mask >> 16);
     b[6] = (uint8_t)(mask >> 8);  b[7] = (uint8_t)mask;
-    (void)sendto(g.fd, b, sizeof b, 0,
-                 (struct sockaddr *)&g.group, sizeof g.group);
+    (void)sendto(d->fd, b, sizeof b, 0,
+                 (struct sockaddr *)&d->group, sizeof d->group);
 }
 
-void discretes_set_canonical(int reg, uint32_t value) {
-    if (!g.open || !reg_known(reg)) return;
-    g.canonical[reg_index(reg)] = value;
+void discretes_set_canonical(Discretes *d, int reg, uint32_t value) {
+    if (d == NULL || !d->open || !reg_known(reg)) return;
+    d->canonical[reg_index(reg)] = value;
 }
 
 /* The output register is entirely this GPC's own, so every change to it is
  * published as the SET and RESET of the bits that moved -- nothing else
  * drives it and nothing else can contradict it. */
-void discretes_publish_out(uint32_t before, uint32_t after) {
-    if (!g.open) return;
+void discretes_publish_out(Discretes *d, uint32_t before, uint32_t after) {
+    if (d == NULL || !d->open) return;
     uint32_t changed = before ^ after;
-    g.value[reg_index(DISCRETES_REG_OUT)] = after;
-    g.canonical[reg_index(DISCRETES_REG_OUT)] = after;
+    d->value[reg_index(DISCRETES_REG_OUT)] = after;
+    d->canonical[reg_index(DISCRETES_REG_OUT)] = after;
     if (changed == 0) return;
-    if (changed & after)  send_msg(OP_SET, DISCRETES_REG_OUT, changed & after);
-    if (changed & ~after) send_msg(OP_RESET, DISCRETES_REG_OUT, changed & ~after);
-    g.generation++;
+    if (changed & after)  send_msg(d, OP_SET, DISCRETES_REG_OUT, changed & after);
+    if (changed & ~after) send_msg(d, OP_RESET, DISCRETES_REG_OUT, changed & ~after);
+    d->generation++;
 }
 
-void discretes_publish(int reg, uint32_t mask, bool on) {
-    if (!g.open || mask == 0u) return;
+void discretes_publish(Discretes *d, int reg, uint32_t mask, bool on) {
+    if (d == NULL || !d->open || mask == 0u) return;
     int r = reg_index(reg);
-    g.selfDriven[r] |= mask;
-    g.generation++;
-    send_msg(on ? OP_SET : OP_RESET, reg, mask);
+    d->selfDriven[r] |= mask;
+    d->generation++;
+    send_msg(d, on ? OP_SET : OP_RESET, reg, mask);
 }
 
-uint32_t discretes_driven_mask(int reg) {
-    if (!g.open) return 0u;
+uint32_t discretes_driven_mask(const Discretes *d, int reg) {
+    if (d == NULL || !d->open) return 0u;
     int r = reg_index(reg);
     double now = yagpc_monotonic_seconds();
     uint32_t m = 0u;
     for (int bit = 0; bit < 32; bit++) {
-        double t = g.lastSeen[r][bit];
-        if (t > 0.0 && (now - t) <= g.staleSec) m |= (0x80000000u >> bit);
+        double t = d->lastSeen[r][bit];
+        if (t > 0.0 && (now - t) <= d->staleSec) m |= (0x80000000u >> bit);
     }
     /* Our own multicast comes back to us, being a member of the group.
      * Honouring it would replace a device's in-process state with the
      * same state a socket round trip later -- worse in every way, and
      * nondeterministic besides. */
-    return m & ~g.selfDriven[r];
+    return m & ~d->selfDriven[r];
 }
 
-uint32_t discretes_value(int reg) {
-    if (!g.open) return 0u;
-    return g.value[reg_index(reg)];
+uint32_t discretes_value(const Discretes *d, int reg) {
+    if (d == NULL) return 0u;
+    if (!d->open) return 0u;
+    return d->value[reg_index(reg)];
 }

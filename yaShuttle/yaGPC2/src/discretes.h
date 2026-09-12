@@ -49,6 +49,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* ONE PER COMPUTER, not one per process.  Five GPCs run in one process and
+ * each has its own discrete channel (port base+80+gpcId), its own register
+ * A/B/OUT, and its own view of who is driving what.  The bus really is per
+ * computer -- see the channel-per-GPC note on DISCRETES_PORT_FOR -- so this
+ * is the machine's connection to it, held by the BatchRunner that owns the
+ * machine and reachable from its IOP. */
+typedef struct Discretes Discretes;
+
 #define DISCRETES_REG_A 1
 #define DISCRETES_REG_B 2
 /* The discrete OUTPUT register, added with REQUEST/VALUE in
@@ -63,36 +71,37 @@
  * overrides it. */
 #define DISCRETES_STALE_SEC 1.5
 
-/* Join the bus.  False (with a message on stderr) if the socket cannot be
- * opened; the caller carries on without it. */
-bool discretes_open(void);
-void discretes_close(void);
-bool discretes_enabled(void);
+/* Join the bus as the named computer (1-5, or 0 for a standalone GPC).
+ * NULL (with a message on stderr) if the socket cannot be opened; the caller
+ * carries on without it, and every function below is a safe no-op on NULL. */
+Discretes *discretes_create(int gpcId);
+void discretes_free(Discretes *d);
+bool discretes_enabled(const Discretes *d);
 
 /* Take in whatever has arrived.  Cheap, non-blocking, and safe to call on
  * every read of the discrete registers -- which is what iop.c does, so the
  * value a PCI returns is as fresh as the wire. */
-void discretes_poll(void);
+void discretes_poll(Discretes *d);
 
 /* Bits of `reg` currently being published by somebody, and their values.
  * Call discretes_poll() first.  The mask is empty when disabled, so
  * callers need no special case. */
-uint32_t discretes_driven_mask(int reg);
-uint32_t discretes_value(int reg);
+uint32_t discretes_driven_mask(const Discretes *d, int reg);
+uint32_t discretes_value(const Discretes *d, int reg);
 
 /* Datagrams applied since open, for the run summary. */
-unsigned long discretes_message_count(void);
+unsigned long discretes_message_count(const Discretes *d);
 
 /* Changes whenever the discrete bus state does; lets a caller cache what it
  * derived from discretes_driven_mask()/discretes_value(). */
-unsigned discretes_generation(void);
+unsigned discretes_generation(const Discretes *d);
 
 /* The whole value of a register as this GPC believes it -- what a REQUEST
  * is answered with.  iop.c keeps A and B current here because only it can
  * combine the locally derived bits with the published ones; the OUT
  * register is this process's own and is published on every change. */
-void discretes_set_canonical(int reg, uint32_t value);
-void discretes_publish_out(uint32_t before, uint32_t after);
+void discretes_set_canonical(Discretes *d, int reg, uint32_t value);
+void discretes_publish_out(Discretes *d, uint32_t before, uint32_t after);
 
 /* Drive a level onto the bus, for a device modelled in this process that
  * a real vehicle would have wired to a discrete line -- the mass memory's
@@ -112,7 +121,7 @@ void discretes_publish_out(uint32_t before, uint32_t after);
  * out through a socket and back would put UDP delivery -- the very thing
  * --mmu-model exists to keep out of the tape path -- between a device and
  * the machine reading it. */
-void discretes_publish(int reg, uint32_t mask, bool on);
+void discretes_publish(Discretes *d, int reg, uint32_t mask, bool on);
 
 
 /* ALL bus ports derive from one base, so a second emulation can be run
@@ -125,7 +134,10 @@ void discretes_publish(int reg, uint32_t mask, bool on);
 #define YAGPC_DISCRETES_OFFSET  80
 void yagpc_set_port_base(int base);
 int  yagpc_port_base(void);
-void yagpc_set_gpc_id(int id);
-int  yagpc_gpc_id(void);
+/* The port base stays process-wide: the five computers share one port range
+ * by design.  The GPC IDENTITY does not -- it is a property of a machine, is
+ * now carried by its Discretes, and selects both that machine's discrete
+ * channel and its intercomputer (bus 24) port. */
+int  discretes_gpc_id(const Discretes *d);
 
 #endif
