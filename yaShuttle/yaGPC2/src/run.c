@@ -977,10 +977,9 @@ static void firmware_ipl(BatchRunner *r) {
             unit, busID, got / MM_HALFWORDS_PER_BLOCK, got);
 }
 
-/* True when the machine is held in reset and must not execute. */
-static bool mode_switch_held(BatchRunner *r) {
-    if (!discretes_enabled()) return false;
-    discretes_poll();
+/* True when the machine is held in reset and must not execute.  Called once
+ * per INSTRUCTION, through the caching wrapper below. */
+static bool mode_switch_held_uncached(BatchRunner *r) {
     uint32_t driven = discretes_driven_mask(DISCRETES_REG_A);
     uint32_t mode = discretes_value(DISCRETES_REG_A) & driven & MODE_ANY;
 
@@ -1180,6 +1179,22 @@ static void dump_main_storage(BatchRunner *r, const char *path) {
     fclose(mf);
     fprintf(stderr, "dump: memory (%u hw) -> %s  t=%.1f us\n",
             (unsigned)nhw, path, r->age.gpc.cpu.elapsedTimeUs);
+}
+
+/* Everything below the poll depends only on the discrete bus state, so if
+ * nothing has been published since the last call the answer is the one
+ * already computed -- and no edge can have been missed, because an edge IS a
+ * change in that state. */
+static bool mode_switch_held(BatchRunner *r) {
+    if (!discretes_enabled()) return false;
+    discretes_poll();
+    static unsigned lastGen = ~0u;
+    static bool lastHeld = true;
+    unsigned gen = discretes_generation();
+    if (gen == lastGen) return lastHeld;
+    lastGen = gen;
+    lastHeld = mode_switch_held_uncached(r);
+    return lastHeld;
 }
 
 static bool batchrunner_step(BatchRunner *r) {

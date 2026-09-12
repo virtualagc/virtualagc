@@ -79,6 +79,10 @@ uint32_t discretes_value(int reg);
 /* Datagrams applied since open, for the run summary. */
 unsigned long discretes_message_count(void);
 
+/* Changes whenever the discrete bus state does; lets a caller cache what it
+ * derived from discretes_driven_mask()/discretes_value(). */
+unsigned discretes_generation(void);
+
 /* Drive a level onto the bus, for a device modelled in this process that
  * a real vehicle would have wired to a discrete line -- the mass memory's
  * READY, to begin with.  Publishing it is what lets a crew panel or any

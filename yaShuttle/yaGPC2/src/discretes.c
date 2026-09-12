@@ -100,6 +100,7 @@ static struct {
      * externally driven -- see discretes.h. */
     uint32_t selfDriven[2];
     struct sockaddr_in group;
+    unsigned generation;  /* see discretes_generation() */
 } g;
 
 static int reg_index(int reg) {
@@ -108,6 +109,11 @@ static int reg_index(int reg) {
 
 bool discretes_enabled(void) { return g.open; }
 unsigned long discretes_message_count(void) { return g.messages; }
+
+/* Bumped whenever a datagram changes the bus state, or this process drives a
+ * line.  Lets a caller cache what it derived from the bus instead of
+ * re-deriving it on every read -- see iop_discrete_overlay(). */
+unsigned discretes_generation(void) { return g.generation; }
 
 bool discretes_open(void) {
     if (g.open) return true;
@@ -249,7 +255,12 @@ static void apply(const uint8_t *b, size_t n) {
 void discretes_poll(void) {
     if (!g.open) return;
     {
+        /* Called once per instruction; count first (an increment and a test)
+         * and ask the clock only every 32nd call.  The time gate still bounds
+         * how stale the bus may get. */
+        static unsigned calls = 0;
         static double lastPoll = 0.0;
+        if ((++calls & 31u) != 0u) return;
         double now = yagpc_monotonic_seconds();
         if (now - lastPoll < DISCRETES_POLL_MIN_SECONDS && now >= lastPoll) return;
         lastPoll = now;
@@ -262,6 +273,7 @@ void discretes_poll(void) {
             break;
         }
         apply(buf, (size_t)n);
+        g.generation++;
     }
 }
 
@@ -269,6 +281,7 @@ void discretes_publish(int reg, uint32_t mask, bool on) {
     if (!g.open || mask == 0u) return;
     int r = reg_index(reg);
     g.selfDriven[r] |= mask;
+    g.generation++;
 
     uint8_t b[WORDS * 2];
     unsigned op = on ? OP_SET : OP_RESET;

@@ -182,8 +182,18 @@ static uint32_t iop_mm_ready(const IOP *iop, uint32_t stored, uint32_t mask, int
 static uint32_t iop_discrete_overlay(int reg, uint32_t local) {
     if (!discretes_enabled()) return local;
     discretes_poll();
-    uint32_t driven = discretes_driven_mask(reg);
-    return (local & ~driven) | (discretes_value(reg) & driven);
+    /* Cached on the bus generation: this runs on every READ DISCRETE INPUT
+     * PCI and the flight software polls those in tight loops. */
+    static unsigned lastGen[2] = { ~0u, ~0u };
+    static uint32_t cachedDriven[2], cachedValue[2];
+    int i = (reg == DISCRETES_REG_B) ? 1 : 0;
+    unsigned gen = discretes_generation();
+    if (gen != lastGen[i]) {
+        cachedDriven[i] = discretes_driven_mask(reg);
+        cachedValue[i] = discretes_value(reg);
+        lastGen[i] = gen;
+    }
+    return (local & ~cachedDriven[i]) | (cachedValue[i] & cachedDriven[i]);
 }
 
 void iop_set_discrete_in(IOP *iop, int reg, uint32_t value) {
