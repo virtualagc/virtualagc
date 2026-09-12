@@ -1447,7 +1447,10 @@ class PanelO6:
 #                                  is bfsengage; B6-7 fold into crt.  Any other
 #                                  bit is sent once, raw, and the next
 #                                  republish undoes it if this panel owns it.
-SCRIPT_HELP = "timed discrete sequence: '<ms> <command>' per line"
+SCRIPT_HELP = ("timed discrete sequence: '<ms> <command>' per line.  "
+               "Commands act on the primary GPC until 'gpc <n>' moves "
+               "them to another column, which is how a script brings up "
+               "more than one computer.")
 IPL_HOLD_MS = 250
 
 
@@ -1471,13 +1474,26 @@ def _parse_script(text):
 
 def _run_script(panel, entries, quit_after_ms=None):
     root = panel.root
+    # WHICH COLUMN THE SCRIPT IS DRIVING.  Every column now drives its own
+    # computer, so a script that brings up more than one GPC has to be able
+    # to say which it means: `gpc <n>` moves the target, and it stays there
+    # until moved again.  Starts at the primary column, so a script that
+    # never mentions a GPC behaves exactly as it did when only one was
+    # published.
+    target = [panel.wired]
 
     def do(cmd):
         verb, _, arg = cmd.partition(" ")
         arg = arg.strip()
         log(cmd)
-        w = panel.wired
-        if verb == "mode":
+        w = target[0]
+        if verb == "gpc":
+            n = int(arg)
+            if not 1 <= n <= N_GPC:
+                raise SystemExit("panelO6: script: GPC must be 1 to %d, got %r"
+                                 % (N_GPC, arg))
+            target[0] = n - 1
+        elif verb == "mode":
             name = {"STANDBY": "STBY"}.get(arg.upper(), arg.upper())
             if name not in MODE_POS:
                 raise SystemExit("panelO6: unknown mode %r" % arg)
@@ -1514,7 +1530,7 @@ def _run_script(panel, entries, quit_after_ms=None):
                 panel.set_crt(v | place if on else v & ~place)
             else:
                 D.publish(panel.sock, D.SET if on else D.RESET, reg,
-                          D.bit_mask(num))
+                          D.bit_mask(num), port=D.gpc_port(w + 1))
         else:
             raise SystemExit("panelO6: unknown command %r" % verb)
 
