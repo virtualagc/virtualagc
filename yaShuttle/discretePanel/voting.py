@@ -39,7 +39,7 @@ C_LAMP_ON = "#ffffff"
 # Slightly darker than the pane, so an unlit lamp is a square you can
 # still see without competing with a lit one.
 C_LAMP_OFF = "#a4a193"
-C_DIAG = "#d4aa00"     # yellow GPC identity on the diagonal
+C_DIAG = "#ffe600"     # bright yellow GPC identity on the diagonal
 
 MARGIN = 16
 CELL = 76
@@ -49,15 +49,19 @@ GRID_PAD = 10          # air between the rounded bezel and the cells
 RADIUS = 16
 LAMP_FRAC = 0.26       # inner lamp side / cell side
 # Captions ~half the original point sizes; diagonal numbers ~70%.
-SZ_TITLE = 6
+# GPC STATUS is ~30% larger than FAILED GPC.
+SZ_STATUS = 8
+SZ_FAILED = 6
 SZ_NUM = 6
 SZ_DIAG = 15
 SZ_VTEXT = 6
 FULL_SIZE = 768        # --size units: 768 is the design window, as in panelO6.py
 
 # Left of the grid: stacked "VOTING GPC", a bracket, then the row numbers.
-VTEXT_X = 42
+# VTEXT_X sits in the middle of the air between the pane edge (0) and
+# the bracket, so those two gaps match.
 BRACKET_X = 58
+VTEXT_X = BRACKET_X / 2.0
 ROW_NUM_X = 78
 GRID_X0 = 102
 GRID_SPAN = N * CELL + (N - 1) * GAP
@@ -177,28 +181,25 @@ class VotingPanel:
         return y + (f.metrics("descent") / 2.0) / max(self.s, 0.01)
 
     def _vtext_packed(self, x, y, text, size=6, fill=C_INK):
-        """Stacked caption, packed (ascent + 1 px), centred on y.
+        """Stacked caption centred on y.
 
-        A space is a half-slot so 'VOTING GPC' reads as two words without
-        a large hole between them.
+        Letter pitch is cap-height plus 30% of that height.  A space is
+        just the 30% gap, so VOTING / GPC stay two words without a hole.
         """
         font = self._font(size)
-        ascent = int(self._tkfont(size).metrics("ascent"))
-        fh = ascent + 1
+        ascent = float(self._tkfont(size).metrics("ascent"))
+        gap = 0.30 * ascent
         slots = []
         for ch in text:
             if ch.isspace():
-                slots.append(None)
+                slots.append((None, gap))
             else:
-                slots.append(ch)
-        n = len(slots) or 1
-        # A space is one letter-height so VOTING / GPC stay two words.
-        heights = [fh if ch is None else fh for ch in slots]
-        total = sum(heights)
+                slots.append((ch, ascent + gap))
+        total = sum(h for _ch, h in slots) or 1.0
         y0 = self.Y(y) - total / 2.0
         cx = self.X(x)
         acc = 0.0
-        for ch, h in zip(slots, heights):
+        for ch, h in slots:
             cy = y0 + acc + h / 2.0
             if ch is not None:
                 self.cv.create_text(cx, cy, text=ch, fill=fill,
@@ -240,20 +241,17 @@ class VotingPanel:
                 self.cv.create_arc(a, b, c, d, start=start, extent=90,
                                    style="arc", outline=outline, width=w)
 
-    def _dim_caption(self, y, text, size, x0, x1, tick=8, tick_r=None,
-                     at=0.63):
+    def _dim_caption(self, y, text, size, x0, x1, cx, tick=8, tick_r=None):
         """Dimension bar: rule interrupted by `text`, ticks at both ends.
 
-        voting2.png puts GPC STATUS / FAILED GPC right of centre (`at`)
-        with a long left rule and a short right one.  Ticks hang down;
-        the GPC STATUS right tick is the longer of the two.
+        `cx` is the text centre (column 3 of the matrix).  Ticks hang
+        down; the GPC STATUS right tick is the longer of the two.
         """
         if tick_r is None:
             tick_r = tick
         f = self._tkfont(size)
         tw = f.measure(text) / max(self.s, 0.01)
         gap = 6
-        cx = x0 + at * (x1 - x0)
         self._text(cx, y, text, size=size)
         w = max(1, int(round(1.25 * self.s)))
         left_end = cx - tw / 2.0 - gap
@@ -276,16 +274,17 @@ class VotingPanel:
     def _layout(self):
         """Vertical rhythm from glyph bounds, same idea as panelO6.py."""
         pad = 8
-        th_t = self._th(SZ_TITLE)
+        th_s = self._th(SZ_STATUS)
+        th_f = self._th(SZ_FAILED)
         th_n = self._th(SZ_NUM)
         L = {}
         y = MARGIN + pad
 
-        y += th_t
+        y += th_s
         L["gpc_status"] = y
-        y += th_t + 3 + th_t
+        y += th_s + 3 + th_f
         L["failed_gpc"] = y
-        y += th_t + pad
+        y += th_f + pad
 
         y += th_n
         L["col_nums"] = y
@@ -320,10 +319,11 @@ class VotingPanel:
         self.cv.delete("all")
         self._hits = []
 
-        self._dim_caption(L["gpc_status"], "GPC STATUS", SZ_TITLE,
-                          BEZEL_X0, BEZEL_X1, tick=5, tick_r=10)
-        self._dim_caption(L["failed_gpc"], "FAILED GPC", SZ_TITLE,
-                          BEZEL_X0, BEZEL_X1, tick=5, tick_r=6)
+        col3 = (self._cell(0, 2)[0] + self._cell(0, 2)[2]) / 2.0
+        self._dim_caption(L["gpc_status"], "GPC STATUS", SZ_STATUS,
+                          BEZEL_X0, BEZEL_X1, col3, tick=5, tick_r=10)
+        self._dim_caption(L["failed_gpc"], "FAILED GPC", SZ_FAILED,
+                          BEZEL_X0, BEZEL_X1, col3, tick=5, tick_r=6)
 
         for col in range(N):
             x1, _, x2, _ = self._cell(0, col)
