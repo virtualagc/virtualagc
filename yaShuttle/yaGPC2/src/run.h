@@ -130,6 +130,9 @@ typedef struct {
      * channel and its intercomputer (bus 24) port. */
     int gpcId;
     struct Discretes *discretes;
+    /* The shared hardware this computer is plugged into.  Borrowed, not
+     * owned -- see vehicle.h. */
+    struct Vehicle *vehicle;
     /* The crew mode switch as this machine last saw it, and whether it has
      * reported a position yet.  Per computer: each has its own column on the
      * panel and its own HALT->STBY edge, and sharing these let one machine's
@@ -165,7 +168,8 @@ typedef struct {
     BusRouter busRouter;   /* --deu-model: the in-process display unit */
 } BatchRunner;
 
-void batchrunner_init(BatchRunner *r, const Options *opts);
+void batchrunner_init(BatchRunner *r, const Options *opts,
+                      struct Vehicle *vehicle);
 void batchrunner_free(BatchRunner *r);
 
 /* Ported from BatchRunner#run. Returns the process exit code (0 or 1 —

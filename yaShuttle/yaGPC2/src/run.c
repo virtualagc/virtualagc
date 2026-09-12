@@ -11,6 +11,7 @@
 
 #include "compat.h"
 #include "cpu_instr.h"
+#include "vehicle.h"
 #include "discretes.h"
 #include "mtumodel.h"
 #include "mmumodel.h"
@@ -218,8 +219,9 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
     return got;
 }
 
-void batchrunner_init(BatchRunner *r, const Options *opts) {
+void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh) {
     memset(r, 0, sizeof(*r));
+    r->vehicle = veh;
     /* BUILD THE DECODE TABLES BEFORE ANY MACHINE RUNS.  Each is an unguarded
      * check-then-build on a file-scope flag, which is safe when one machine
      * builds them on its first instruction and a race once several do.  They
@@ -325,11 +327,15 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
         /* In this process, so the socket-latency floor does not apply:
          * honour the bus program's own message timeout exactly. */
         iop_set_recv_timeout_floor_us(&r->age.gpc.iop, 0.0);
-        r->deuModel = deumodel_create(6);   /* DK1 */
+        if (!veh->built) veh->deu = deumodel_create(6);   /* DK1 */
+        r->deuModel = veh->deu;
         base = deumodel_service;
         baseCtx = r->deuModel;
     } else if (opts->bceNetwork) {
-        r->bceTransport = bcenet_transport_create(r->gpcId);
+        /* ONE transport for the process: see vehicle.h.  The framer, and so
+         * the per-bus receive queues, stay per machine. */
+        if (!veh->built) veh->transport = bcenet_transport_create(r->gpcId);
+        r->bceTransport = veh->transport;
         r->bceFramer = bcenet_framer_create(r->bceTransport);
         base = bcenet_framer_service;
         baseCtx = r->bceFramer;
@@ -366,7 +372,12 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
             if (end == p) break;
             if (b > 0 && b <= 24) {
                 int k = r->nDeuModelExtra;
-                r->deuModelExtra[k] = deumodel_create((int)b);
+                if (!veh->built) {
+                    veh->deuExtra[k] = deumodel_create((int)b);
+                    veh->deuExtraBus[k] = (int)b;
+                    veh->nDeuExtra = k + 1;
+                }
+                r->deuModelExtra[k] = veh->deuExtra[k];
                 if (r->deuModelExtra[k] != NULL) {
                     r->busRouter.deuExtra[k] = r->deuModelExtra[k];
                     r->busRouter.deuExtraBus[k] = (int)b;
@@ -379,7 +390,8 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     }
 
     if (opts->mtuModel) {
-        r->mtuModel = mtumodel_create();
+        if (!veh->built) veh->mtu = mtumodel_create();
+        r->mtuModel = veh->mtu;
         if (r->mtuModel) {
             mtumodel_set_clock(r->mtuModel, &r->age.gpc.cpu.elapsedTimeUs);
             mtumodel_set_epoch(r->mtuModel, &r->age.gpc.cpu.dateTimeAnchorEpochSec);
@@ -388,10 +400,13 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
 
     if (opts->mmuVolume[0] || opts->mmuVolume[1] || r->mtuModel ||
         r->nDeuModelExtra > 0) {
-        for (int u = 0; u < 2; u++)
-            r->mmuModel[u] = opts->mmuVolume[u]
-                                 ? mmumodel_create(u + 1, opts->mmuVolume[u])
-                                 : NULL;
+        for (int u = 0; u < 2; u++) {
+            if (!veh->built)
+                veh->mmu[u] = opts->mmuVolume[u]
+                                  ? mmumodel_create(u + 1, opts->mmuVolume[u])
+                                  : NULL;
+            r->mmuModel[u] = veh->mmu[u];
+        }
         if (r->mmuModel[0] || r->mmuModel[1] || r->mtuModel ||
             r->nDeuModelExtra > 0) {
             for (int u = 0; u < 2; u++) {
@@ -434,6 +449,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
                 r->busRouter.mmu[u] = r->mmuModel[u];
                 r->busRouter.mmuBus[u] =
                     r->mmuModel[u] ? mmumodel_bus(r->mmuModel[u]) : -1;
+                veh->mmuBus[u] = r->busRouter.mmuBus[u];
             }
             r->busRouter.mtu = r->mtuModel;
             for (int d = 0; d < r->nDeuModelExtra; d++)
@@ -455,6 +471,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts) {
     /* Independent of the peripheral bus: discretes are their own bus, and
      * a run may want them with or without --bce-network.  Failing to open
      * is not fatal -- iop.c keeps deriving what it can. */
+    /* Whatever this machine created above belongs to the vehicle now; the
+     * next machine borrows it rather than making its own. */
+    veh->built = true;
+
     if (opts->discretes) {
         r->discretes = discretes_create(r->gpcId);
         iop_set_discretes(&r->age.gpc.iop, r->discretes);
@@ -473,36 +493,15 @@ void batchrunner_free(BatchRunner *r) {
     }
     discretes_free(r->discretes);
     r->discretes = NULL;
-    for (int u = 0; u < 2; u++) {
-        if (r->mmuModel[u] == NULL) continue;
-        mmumodel_report(r->mmuModel[u]);
-        mmumodel_free(r->mmuModel[u]);
-        r->mmuModel[u] = NULL;
-    }
-    if (r->deuModel) {
-        deumodel_report(r->deuModel);
-        deumodel_free(r->deuModel);
-        r->deuModel = NULL;
-    }
-    for (int d = 0; d < r->nDeuModelExtra; d++) {
-        if (r->deuModelExtra[d] == NULL) continue;
-        fprintf(stderr, "deu%d (bus %d): ", d + 2, r->busRouter.deuExtraBus[d]);
-        deumodel_report(r->deuModelExtra[d]);
-        deumodel_free(r->deuModelExtra[d]);
-        r->deuModelExtra[d] = NULL;
-    }
-    if (r->mtuModel) {
-        mtumodel_report(r->mtuModel);
-        mtumodel_free(r->mtuModel);
-        r->mtuModel = NULL;
-    }
+    /* The device models and the bus transport belong to the vehicle and are
+     * reported and released by vehicle_free -- they are shared, and with
+     * several machines only one set of reports should be printed. */
     for (size_t i = 0; i < r->lineCount; i++) free(r->lines[i]);
     free(r->lines);
     iohost_free(&r->iohost);
     ageharness_free(&r->age);
     if (r->dbg) debugger_free(r->dbg);
-    if (r->bceFramer) bcenet_framer_free(r->bceFramer);
-    if (r->bceTransport) bcenet_transport_free(r->bceTransport);
+    if (r->bceFramer) bcenet_framer_free(r->bceFramer);   /* per machine */
     memset(r, 0, sizeof(*r));
 }
 
