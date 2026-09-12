@@ -47,4 +47,22 @@ void ap101_reset(AP101 *gpc);
 void ap101_set_servicer(AP101 *gpc, GpcServicerFn fn, void *servicerCtx);
 void ap101_system_reset(AP101 *gpc);
 
+/* Re-anchor the IOP's pass clock to the CPU's current time.
+ *
+ * The IOP is paced by SIMULATED time: ap101_step_iop() takes one slice per
+ * iop_pass_us() and remembers when the next one falls.  cpu_advance_idle_ns()
+ * carries the machine through a wait state and services the IOP itself, at
+ * the same 500 ns rate -- but it lives in cpu.c and cannot see iopNextPassUs,
+ * which is in AP101.  So the first instruction after a wait used to find that
+ * clock stale by the whole length of the wait and REPLAY every pass of it,
+ * stepping the IOP a second time over simulated time it had already served:
+ * 462 million passes in a 250 s run where 24 million was the right number,
+ * and every BCE sampling its MIA twice as often as the hardware does.
+ *
+ * Call this when something else has carried the clock forward and serviced
+ * the IOP on the way.  iop_exec_channel_control() is a no-op stub, so
+ * iop_exec_idle() does everything iop_exec() does and the skipped passes
+ * are exactly the duplicates. */
+void ap101_iop_resync(AP101 *gpc);
+
 #endif

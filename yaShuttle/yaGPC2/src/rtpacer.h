@@ -66,6 +66,13 @@ typedef struct {
     double statRebaseWhyMs[4];
     double statIdleLoopWallS;     /* wall spent in the whole wait loop */
     double statIdleLoopSimS;      /* simulated time the loop delivered */
+    double statFlushWallS;        /* wall spent servicing the bus sockets */
+    long   statFlushCalls;
+    double statExecWallS;         /* wall spent inside ap101_exec1 */
+    long   statExecCalls;
+    double statHoldWallS;         /* wall spent holding for a bus peer */
+    long   statHoldCalls;         /* holds that actually waited */
+    long   statHoldGot;           /* ... and got their reply */
 } RTPacer;
 
 /* Why a paced wait ended. */
@@ -104,6 +111,17 @@ void rtpacer_rebase(RTPacer *p, RTPaceRebaseWhy why);
  * keeps up with the wall clock -- and a wait state is where this machine
  * spends most of its life. */
 void rtpacer_note_idle_loop(RTPacer *p, double wallSeconds, double simSeconds);
+
+/* Wall time the machine spent stopped, waiting for a peripheral in another
+ * process to answer a bus command.  Simulated time does not advance across
+ * it, so it is a direct debit against real time and has to be visible. */
+void rtpacer_note_peer_hold(RTPacer *p, double wallSeconds, bool got);
+
+/* Wall time spent draining and flushing the bus sockets.  Simulated time
+ * does not advance across it either, so if it is being done per
+ * instruction it competes directly with real time. */
+void rtpacer_note_bus_service(RTPacer *p, double wallSeconds);
+void rtpacer_note_exec(RTPacer *p, double wallSeconds);
 
 /* Called when the machine starts running again after the HOST stopped it
  * (a debugger halt).  Forgets the wall time that passed meanwhile: the

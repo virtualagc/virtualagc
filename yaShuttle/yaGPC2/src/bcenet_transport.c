@@ -256,6 +256,21 @@ typedef struct {
     bool pumpStarted;
 } BceNetBusSocket;
 
+/* THE HOT PATHS ASK THESE PER DATAGRAM AND PER PUMP.  getenv() walks the
+ * whole environment on every call, and pump_once() alone ran 11 million
+ * times in a 220 s run, so the lookups are made once and remembered. */
+static bool bustrace_on(void) {
+    static int v = -1;
+    if (v < 0) v = getenv("YAGPC_BUSTRACE") != NULL;
+    return v != 0;
+}
+
+static bool pumptrace_on(void) {
+    static int v = -1;
+    if (v < 0) v = getenv("YAGPC_PUMPTRACE") != NULL;
+    return v != 0;
+}
+
 /* Remember a datagram we just sent, so the loopback copy can be dropped. */
 static void self_echo_note_sent(BceNetBusSocket *b, const unsigned char *buf, size_t len) {
     unsigned char *copy = malloc(len ? len : 1);
@@ -608,7 +623,7 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
      * is strictly in order, so the poll that asks a subsystem to answer
      * cannot overtake the fill in front of it, and the depth here is
      * exactly how long the reply will be held up. */
-    if (wordCount == 2 && b->outCount > 0 && getenv("YAGPC_BUSTRACE"))
+    if (wordCount == 2 && b->outCount > 0 && bustrace_on())
         fprintf(stderr, "BUSCMDQ bus%-3d command queued behind %zu datagrams\n",
                 busID, b->outCount);
     OutDatagram *d = &b->outQ[b->outHead + b->outCount];
@@ -635,7 +650,7 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int iua, bool isShuttl
 static void pump_once(BceNetTransport *t) {
 #ifdef BCENET_HAVE_POSIX_SOCKETS
     double now = yagpc_monotonic_seconds();
-    if (getenv("YAGPC_PUMPTRACE")) {
+    if (pumptrace_on()) {
         static double lastReport = -1.0;
         static long calls = 0, lastCalls = 0;
         static double prevCall = -1.0, maxGap = 0.0;
@@ -717,7 +732,7 @@ static void pump_once(BceNetTransport *t) {
         if (burstOpen[i] && remaining == 0 && batchCount > 0) {
             double ms = (yagpc_monotonic_seconds() - burstStart[i]) * 1000.0;
             burstOpen[i] = 0;
-            if (burstSent[i] >= 16 && getenv("YAGPC_PUMPTRACE"))
+            if (burstSent[i] >= 16 && pumptrace_on())
                 fprintf(stderr, "BURST bus%-3d %ld datagrams in %.2f ms = %.0f words/s\n",
                         i, burstSent[i], ms, ms > 0.0 ? burstSent[i] * 1000.0 / ms : 0.0);
         }
@@ -784,7 +799,7 @@ bool bcenet_transport_recv(BceNetTransport *t, int busID, int iua, bool isShuttl
      * leading words.  This is how the self-echo filter was caught eating
      * the display unit's poll replies, and the same view is what any
      * future "the peripheral never answered" question needs. */
-    if (getenv("YAGPC_BUSTRACE")) {
+    if (bustrace_on()) {
         fprintf(stderr, "BUSRX bus%-3d %s from %s:%-5u  %2zd bytes ",
                 busID, mine ? "ECHO" : "KEEP", inet_ntoa(from.sin_addr),
                 (unsigned)ntohs(from.sin_port), n);

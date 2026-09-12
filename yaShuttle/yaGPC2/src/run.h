@@ -122,6 +122,9 @@ typedef struct {
      * --time-scale) drives simulated time FROM it while the CPU waits.
      * NULL unless --real-time was given.  See rtpacer.h. */
     bool realTime;
+    /* When the bus sockets were last drained and flushed, in SIMULATED
+     * microseconds -- see batchrunner_step()'s bus-service gate. */
+    double busServiceUs;
     RTPacer rtPacer;
 
     double pacingRefWallSeconds;

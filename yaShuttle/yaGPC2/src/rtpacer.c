@@ -69,6 +69,13 @@ void rtpacer_init(RTPacer *p, struct CPU *cpu, double factor, double idleTimeout
     for (int i = 0; i < 4; i++) { p->statRebaseWhyCalls[i] = 0; p->statRebaseWhyMs[i] = 0.0; }
     p->statIdleLoopWallS = 0.0;
     p->statIdleLoopSimS = 0.0;
+    p->statFlushWallS = 0.0;
+    p->statFlushCalls = 0;
+    p->statExecWallS = 0.0;
+    p->statExecCalls = 0;
+    p->statHoldWallS = 0.0;
+    p->statHoldCalls = 0;
+    p->statHoldGot = 0;
 }
 
 /* Every couple of seconds, say how the wall clock was spent and what
@@ -93,6 +100,15 @@ static void rtpacer_report(RTPacer *p) {
             p->statRebaseWhyCalls[1], p->statRebaseWhyMs[1] / 1000.0,
             p->statRebaseWhyCalls[2], p->statRebaseWhyMs[2] / 1000.0,
             p->statRebaseWhyCalls[3], p->statRebaseWhyMs[3] / 1000.0);
+    fprintf(stderr, "     exec1: %ld calls %.2fs wall (%.3f us each)\n",
+            p->statExecCalls, p->statExecWallS,
+            p->statExecCalls ? p->statExecWallS * 1e6 / p->statExecCalls : 0.0);
+    fprintf(stderr, "     bus service: %ld calls %.2fs wall (%.3f us each)\n",
+            p->statFlushCalls, p->statFlushWallS,
+            p->statFlushCalls ? p->statFlushWallS * 1e6 / p->statFlushCalls : 0.0);
+    fprintf(stderr, "     peer holds: %ld (%ld answered) %.2fs wall, %.3f ms each\n",
+            p->statHoldCalls, p->statHoldGot, p->statHoldWallS,
+            p->statHoldCalls ? p->statHoldWallS * 1000.0 / p->statHoldCalls : 0.0);
     fprintf(stderr, "     wait loop: %.2fs wall delivered %.2fs sim (%.3f)\n",
             p->statIdleLoopWallS, p->statIdleLoopSimS,
             p->statIdleLoopWallS > 0 ? p->statIdleLoopSimS / p->statIdleLoopWallS : 0.0);
@@ -143,6 +159,22 @@ void rtpacer_rebase(RTPacer *p, RTPaceRebaseWhy why) {
 void rtpacer_note_idle_loop(RTPacer *p, double wallSeconds, double simSeconds) {
     p->statIdleLoopWallS += wallSeconds;
     p->statIdleLoopSimS += simSeconds;
+}
+
+void rtpacer_note_peer_hold(RTPacer *p, double wallSeconds, bool got) {
+    p->statHoldWallS += wallSeconds;
+    p->statHoldCalls++;
+    if (got) p->statHoldGot++;
+}
+
+void rtpacer_note_bus_service(RTPacer *p, double wallSeconds) {
+    p->statFlushWallS += wallSeconds;
+    p->statFlushCalls++;
+}
+
+void rtpacer_note_exec(RTPacer *p, double wallSeconds) {
+    p->statExecWallS += wallSeconds;
+    p->statExecCalls++;
 }
 
 double rtpacer_wall_ms(const RTPacer *p) {

@@ -204,6 +204,8 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
         if (br->deuExtra[d] && busID == br->deuExtraBus[d]) return false;
     double heldMs = 0.0;
     bool got = bcenet_framer_peer_wait(r->bceFramer, busID, gotAny, &heldMs);
+    if (heldMs > 0.0 && r->realTime)
+        rtpacer_note_peer_hold(&r->rtPacer, heldMs / 1000.0, got);
     /* A peer that answered slowly is not a stall either -- the wait state
      * the machine drops into next will make the time up (rtpacer.c).  This
      * used to rebase past PEER_HOLD_REBASE_MS and write the hold off. */
@@ -1087,6 +1089,27 @@ static bool mode_switch_held(BatchRunner *r) {
 /* Whether YAGPC_RANGETRACE is set at all.  range_trace() parses the spec
  * lazily on its first call, but batchrunner_step() has to know BEFORE the
  * instruction runs whether to do the work the trace consumes. */
+/* The pacing instrumentation costs two clock reads per use, so it is only
+ * paid for when YAGPC_PACETRACE is actually asking for the numbers. */
+/* How much SIMULATED time may pass between drains of the bus sockets. */
+#define BUS_SERVICE_US_DEFAULT 2.0
+static double bus_service_us(void) {
+    static int inited = 0;
+    static double us = BUS_SERVICE_US_DEFAULT;
+    if (!inited) {
+        const char *e = getenv("YAGPC_BUS_SERVICE_US");
+        if (e != NULL) { double v = atof(e); if (v >= 0.0) us = v; }
+        inited = 1;
+    }
+    return us;
+}
+
+static bool pace_trace_enabled(void) {
+    static int v = -1;
+    if (v < 0) v = getenv("YAGPC_PACETRACE") != NULL;
+    return v != 0;
+}
+
 static bool range_trace_enabled(void) {
     static int v = -1;
     if (v < 0) v = getenv("YAGPC_RANGETRACE") != NULL;
@@ -1479,7 +1502,13 @@ static bool batchrunner_step(BatchRunner *r) {
         halucp_check_trap(&r->age.halUCP, nia); /* may synchronously block on stdin under --interactive */
     }
 
-    ap101_exec1(&r->age.gpc);
+    {
+        bool paceStats = r->realTime && pace_trace_enabled();
+        double execT0 = paceStats ? yagpc_monotonic_seconds() : 0.0;
+        ap101_exec1(&r->age.gpc);
+        if (paceStats)
+            rtpacer_note_exec(&r->rtPacer, yagpc_monotonic_seconds() - execT0);
+    }
 
     /* An instruction that did not decode executed as a no-op, so the NIA
      * has not moved and the machine would spin here forever.  Report it
@@ -1529,7 +1558,26 @@ static bool batchrunner_step(BatchRunner *r) {
      * batchrunner_pace() below, which is a different concern) -- see
      * bcenet_framer.h's own comment on why per-tick flushing is the
      * right message-boundary signal. */
-    if (r->bceFramer) bcenet_framer_flush_tick(r->bceFramer);
+    /* SERVICE THE BUS SOCKETS ON SIMULATED TIME, NOT PER INSTRUCTION.
+     * Draining and flushing every instruction meant 11 million passes over
+     * the sockets in a 220 s run -- a rate set by how fast the CPU model
+     * issues instructions, which has nothing to do with how fast the bus
+     * moves.  A bus word takes about 20 us (YAGPC_BUS_WORD_US) and a BCE
+     * samples its MIA buffer at most once every 16.5 us (BCE PoO 3.4.1),
+     * so servicing every BUS_SERVICE_US of simulated time is still far
+     * finer than anything on the bus can observe.  YAGPC_BUS_SERVICE_US=0
+     * restores the per-instruction behaviour. */
+    if (r->bceFramer) {
+        double nowUs = r->age.gpc.cpu.elapsedTimeUs;
+        if (nowUs - r->busServiceUs >= bus_service_us() || nowUs < r->busServiceUs) {
+            r->busServiceUs = nowUs;
+            bool busStats = r->realTime && pace_trace_enabled();
+            double busT0 = busStats ? yagpc_monotonic_seconds() : 0.0;
+            bcenet_framer_flush_tick(r->bceFramer);
+            if (busStats)
+                rtpacer_note_bus_service(&r->rtPacer, yagpc_monotonic_seconds() - busT0);
+        }
+    }
 
     RegChange filtered[REG_SNAPSHOT_MAX_CHANGES];
     int filteredCount = 0;
@@ -1635,6 +1683,10 @@ static bool batchrunner_step(BatchRunner *r) {
                 }
                 yagpc_sleep_seconds(RTPACE_IDLE_POLL_SECONDS);
             }
+            /* The wait carried the clock forward and serviced the IOP as
+             * it went; without this the next instruction replays every
+             * pass of it (see ap101_iop_resync). */
+            ap101_iop_resync(&r->age.gpc);
             rtpacer_note_idle_loop(&r->rtPacer,
                                    yagpc_monotonic_seconds() - idleLoopW0,
                                    (r->age.gpc.cpu.elapsedTimeUs - idleLoopS0) / 1e6);

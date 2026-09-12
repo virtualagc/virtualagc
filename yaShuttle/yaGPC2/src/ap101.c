@@ -120,6 +120,10 @@ static int iop_per_instruction(void) {
     return per;
 }
 
+void ap101_iop_resync(AP101 *gpc) {
+    if (gpc != NULL) gpc->iopNextPassUs = gpc->cpu.elapsedTimeUs;
+}
+
 static void ap101_step_iop(AP101 *gpc, double startUs) {
     if (iop_per_instruction()) { iop_exec(&gpc->iop); return; }
     double now = gpc->cpu.elapsedTimeUs;
