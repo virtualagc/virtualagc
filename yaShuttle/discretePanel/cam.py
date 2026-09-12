@@ -20,9 +20,9 @@ this window *does* take the keyboard, because the lamps are driven by
 keystrokes.
 
 Usage:
-    python3 voting.py
-    python3 voting.py --size 512
-    python3 voting.py --geometry 560x600+80+20
+    python3 cam.py
+    python3 cam.py --size 384
+    python3 cam.py --geometry 560x600+80+20
 """
 
 import argparse
@@ -55,7 +55,10 @@ SZ_FAILED = 6
 SZ_NUM = 6
 SZ_DIAG = 15
 SZ_VTEXT = 6
-FULL_SIZE = 768        # --size units: 768 is the design window, as in panelO6.py
+FULL_SIZE = 512        # --size units: 512 is the design window.  NOT 768
+                       # like panelO6.py and stsKeyboard.py: this is a small
+                       # annunciator matrix beside their full-height panels,
+                       # and at their unit the natural window came out tiny.
 
 # Left of the grid: stacked "VOTING GPC", a bracket, then the row numbers.
 # VTEXT_X sits in the middle of the air between the pane edge (0) and
@@ -75,15 +78,15 @@ def log(msg):
 
 
 def scaled_wh(w, h, size):
-    """Pixel size at --size N, where FULL_SIZE (768) is the design window."""
+    """Pixel size at --size N, where FULL_SIZE (512) is the design window."""
     f = size / float(FULL_SIZE)
     return max(1, int(round(w * f))), max(1, int(round(h * f)))
 
 
-class VotingPanel:
+class CamPanel:
     def __init__(self, root, size=FULL_SIZE):
         self.root = root
-        root.title("Voting")
+        root.title("CAM")
         root.configure(bg=C_PANEL)
         self.size = size
 
@@ -439,19 +442,19 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Space Shuttle GPC STATUS / FAILED GPC voting matrix")
     ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
-                    help="Scale: 768 is full size (default), 512 is 2/3, "
-                         "384 is half, etc.")
+                    help="Scale: 512 is full size (default), 384 is 3/4, "
+                         "256 is half, 768 is 1.5x, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 560x600+80+20 (overrides --size; "
-                         "also NSTS_VOTING_GEOMETRY)")
+                         "also NSTS_CAM_GEOMETRY)")
     args = ap.parse_args(argv)
     if args.size <= 0:
         raise SystemExit("voting: --size must be a positive integer")
 
     root = tk.Tk()
     root.resizable(True, True)
-    panel = VotingPanel(root, size=args.size)
-    geom = args.geometry or os.environ.get("NSTS_VOTING_GEOMETRY")
+    panel = CamPanel(root, size=args.size)
+    geom = args.geometry or os.environ.get("NSTS_CAM_GEOMETRY")
     if geom:
         try:
             root.geometry(geom)
