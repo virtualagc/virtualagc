@@ -135,6 +135,12 @@ typedef struct CPU {
      * `iuShadow` holds the pre-store halfwords for the window the IU
      * could have reached, and is discarded at the next discontinuity. */
     bool diagIuStoreDetect;          /* B STAT bit 6; true at power-up */
+    /* Set by cpu_exec1() when the halfwords at NIA do not decode.  The
+     * runner used to answer that question itself, with a SECOND full
+     * instr_decode() per instruction purely to ask it -- 30% of all CPU
+     * time went into decoding everything twice.  The CPU has to decode
+     * anyway, so it reports instead. */
+    bool decodeFailed;
     IuShadowEntry *iuShadow;
     int iuShadowCount, iuShadowCap;
     uint32_t curIC;                  /* address of the instruction being run */

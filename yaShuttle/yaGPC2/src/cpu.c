@@ -1565,8 +1565,10 @@ void cpu_exec1(CPU *cpu) {
 
     DInstr v;
     memset(&v, 0, sizeof(v));
+    cpu->decodeFailed = false;
     const InstrDesc *desc = instr_decode(hw1, hw2, &v);
     if (!desc) {
+        cpu->decodeFailed = true;
         /* Unreachable from `gpc run`: cmd_run.coffee checks Instruction
          * .decode()'s result itself and reports "invalid instruction"
          * before ever calling exec1 (see gpc/cmd_run.coffee's run()).

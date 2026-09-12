@@ -60,6 +60,12 @@ typedef struct {
     long   statIdleCalls;
     long   statCappedCalls;       /* advances that hit IDLE_CATCHUP_MAX_NS */
     double statCappedLostMs;      /* simulated time dropped by those caps */
+    long   statRebaseCalls;       /* rebases that dropped a deficit */
+    double statRebaseLostMs;      /* wall time those rebases wrote off */
+    long   statRebaseWhyCalls[4]; /* by RTPaceRebaseWhy */
+    double statRebaseWhyMs[4];
+    double statIdleLoopWallS;     /* wall spent in the whole wait loop */
+    double statIdleLoopSimS;      /* simulated time the loop delivered */
 } RTPacer;
 
 /* Why a paced wait ended. */
@@ -80,7 +86,24 @@ double rtpacer_ahead_ms(const RTPacer *p);
 void rtpacer_pace(RTPacer *p);
 
 /* Restart the pacing baseline at "now". */
-void rtpacer_rebase(RTPacer *p);
+/* Why a rebase is happening -- only for the YAGPC_PACETRACE accounting,
+ * which is useless without it: every call site writes off time the same
+ * way, and the question is always WHICH one is doing it. */
+typedef enum {
+    RTPACE_REBASE_PACE = 0,    /* fell behind while executing */
+    RTPACE_REBASE_WAKE = 1,    /* left a wait state */
+    RTPACE_REBASE_PEER = 2,    /* held for a peripheral on the bus */
+    RTPACE_REBASE_RESYNC = 3   /* host stopped the machine (debugger) */
+} RTPaceRebaseWhy;
+
+void rtpacer_rebase(RTPacer *p, RTPaceRebaseWhy why);
+
+/* What one complete pass through the caller's wait loop cost in wall time
+ * and delivered in simulated time.  The loop's SLEEP is outside this
+ * module, so statIdleWallSeconds alone cannot say whether a wait state
+ * keeps up with the wall clock -- and a wait state is where this machine
+ * spends most of its life. */
+void rtpacer_note_idle_loop(RTPacer *p, double wallSeconds, double simSeconds);
 
 /* Called when the machine starts running again after the HOST stopped it
  * (a debugger halt).  Forgets the wall time that passed meanwhile: the
@@ -98,6 +121,13 @@ void rtpacer_resync(RTPacer *p);
  * rtpacer_advance_idle() repeatedly, sleeping RTPACE_IDLE_POLL_SECONDS
  * between turns, until it returns something other than RTPACE_WAITING. */
 #define RTPACE_IDLE_POLL_SECONDS 0.001
+
+/* How far behind the wall clock is worth fast-forwarding for.  The wait
+ * loop skips its sleep while behind by more than this, so that simulated
+ * time catches up; without a threshold it skipped the sleep whenever the
+ * deficit was so much as a nanosecond and spun on the clock -- 747 million
+ * passes in a 170 s run, and clock_gettime costs about 15 ns a call. */
+#define RTPACE_CATCHUP_MS 0.25
 void rtpacer_enter_idle(RTPacer *p);
 RTPaceResult rtpacer_advance_idle(RTPacer *p);
 

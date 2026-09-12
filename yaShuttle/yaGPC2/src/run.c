@@ -204,7 +204,9 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
         if (br->deuExtra[d] && busID == br->deuExtraBus[d]) return false;
     double heldMs = 0.0;
     bool got = bcenet_framer_peer_wait(r->bceFramer, busID, gotAny, &heldMs);
-    if (heldMs >= PEER_HOLD_REBASE_MS && r->realTime) rtpacer_rebase(&r->rtPacer);
+    /* A peer that answered slowly is not a stall either -- the wait state
+     * the machine drops into next will make the time up (rtpacer.c).  This
+     * used to rebase past PEER_HOLD_REBASE_MS and write the hold off. */
     if (heldMs > 0.0 && getenv("YAGPC_TIMEOUT_TRACE"))
         fprintf(stderr, "BCE%d PEER HOLD %.2f ms wall -> %s\n", busID, heldMs,
                 got ? "reply" : "none");
@@ -1082,6 +1084,15 @@ static bool mode_switch_held(BatchRunner *r) {
  * every display cycle from initialisation onwards: the interesting call is
  * the one happening NOW, on the page in front of you, and without a start
  * time the budget is spent on the first few seconds of the boot instead. */
+/* Whether YAGPC_RANGETRACE is set at all.  range_trace() parses the spec
+ * lazily on its first call, but batchrunner_step() has to know BEFORE the
+ * instruction runs whether to do the work the trace consumes. */
+static bool range_trace_enabled(void) {
+    static int v = -1;
+    if (v < 0) v = getenv("YAGPC_RANGETRACE") != NULL;
+    return v != 0;
+}
+
 static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
                         uint32_t hw2, const char *disasm,
                         const RegSnapshot *after) {
@@ -1242,8 +1253,20 @@ static bool batchrunner_step(BatchRunner *r) {
         }
     }
 
+    /* DISASSEMBLING AND SNAPSHOTTING EVERY INSTRUCTION COSTS MORE THAN
+     * EXECUTING IT.  instr_to_str() formats a string, the register file is
+     * snapshotted twice and then diffed with a strcmp per register -- all
+     * of it discarded unless a trace, a watchpoint or the debugger reads
+     * it.  With it unconditional the emulator executed AP-101S code at
+     * about half real time, so the simulated clock could not keep up with
+     * the wall clock and the MEDS header clock lost a third of real time
+     * (measured: 61 s of wall outside the wait state delivering 27 s of
+     * simulated time).  Nothing here changes what the machine COMPUTES --
+     * only whether it also narrates it. */
+    const bool wantDetail = r->traceEnabled || r->debugMode ||
+                            r->hasWatchpoints || range_trace_enabled();
     RegSnapshot before, after;
-    ageharness_snapshot_regs(&r->age, &before);
+    if (wantDetail) ageharness_snapshot_regs(&r->age, &before);
     uint32_t nia = psw_get_nia(&r->age.gpc.cpu.psw);
 
     if (r->traceEnabled && r->age.sym.loaded) {
@@ -1419,28 +1442,21 @@ static bool batchrunner_step(BatchRunner *r) {
     uint32_t hw2 = mcm_get16(&r->age.gpc.cpu.mainStorage, nia + 1);
 
     char disasm[256];
-    instr_to_str(hw1, hw2, disasm, sizeof disasm);
-    DInstr v;
-    const InstrDesc *d = instr_decode(hw1, hw2, &v);
-    int instrLen = d ? d->pb.origLen : 1;
+    if (wantDetail) instr_to_str(hw1, hw2, disasm, sizeof disasm);
+    else disasm[0] = '\0';
+    /* The length is only ever printed, so it is only ever computed when
+     * something is printing.  Whether the instruction decodes AT ALL is
+     * answered by cpu_exec1() itself, after the fact (cpu.h decodeFailed)
+     * -- decoding here as well doubled the single most expensive thing
+     * the emulator does. */
+    int instrLen = 1;
+    if (wantDetail) {
+        DInstr v;
+        const InstrDesc *d = instr_decode(hw1, hw2, &v);
+        if (d) instrLen = d->pb.origLen;
+    }
 
     bool traceWanted = r->traceEnabled || (r->debugMode && debugger_wants_htrace(r->dbg));
-
-    if (!d) {
-        if (traceWanted) {
-            char line[400];
-            batchrunner_format_trace_line(r, r->step, nia, hw1, hw2, "??? (invalid)", 1, NULL, 0, line, sizeof line);
-            batchrunner_write(r, line);
-        }
-        char hexv[16];
-        as_hex(hexv, sizeof hexv, (long long)hw1, 4);
-        char niaHex[16];
-        as_hex(niaHex, sizeof niaHex, (long long)nia, 4);
-        cpu_dump_nia_ring(&r->age.gpc.cpu, "the invalid instruction", psw_get_nia(&r->age.gpc.cpu.psw));
-        snprintf(r->stopReason, sizeof r->stopReason, "invalid instruction 0x%s at 0x%s", hexv, niaHex);
-        r->hasStopReason = true;
-        return false;
-    }
 
     if (r->hasWatchpoints) {
         for (int i = 0; i < r->watchAddrCount; i++) {
@@ -1464,6 +1480,26 @@ static bool batchrunner_step(BatchRunner *r) {
     }
 
     ap101_exec1(&r->age.gpc);
+
+    /* An instruction that did not decode executed as a no-op, so the NIA
+     * has not moved and the machine would spin here forever.  Report it
+     * exactly as the pre-decode check used to. */
+    if (r->age.gpc.cpu.decodeFailed) {
+        if (traceWanted) {
+            char line[400];
+            batchrunner_format_trace_line(r, r->step, nia, hw1, hw2, "??? (invalid)", 1, NULL, 0, line, sizeof line);
+            batchrunner_write(r, line);
+        }
+        char hexv[16], niaHex[16];
+        as_hex(hexv, sizeof hexv, (long long)hw1, 4);
+        as_hex(niaHex, sizeof niaHex, (long long)nia, 4);
+        cpu_dump_nia_ring(&r->age.gpc.cpu, "the invalid instruction",
+                          psw_get_nia(&r->age.gpc.cpu.psw));
+        snprintf(r->stopReason, sizeof r->stopReason,
+                 "invalid instruction 0x%s at 0x%s", hexv, niaHex);
+        r->hasStopReason = true;
+        return false;
+    }
 
     /* Drain the discrete bus periodically as well as on the reads
      * themselves.  The reads are what freshness actually depends on --
@@ -1495,14 +1531,16 @@ static bool batchrunner_step(BatchRunner *r) {
      * right message-boundary signal. */
     if (r->bceFramer) bcenet_framer_flush_tick(r->bceFramer);
 
-    ageharness_snapshot_regs(&r->age, &after);
-    range_trace(r, nia, hw1, hw2, disasm, &after);
-    RegChange changes[REG_SNAPSHOT_MAX_CHANGES];
-    int changeCount = ageharness_diff_regs(&before, &after, changes);
-    int filteredCount = 0;
     RegChange filtered[REG_SNAPSHOT_MAX_CHANGES];
-    for (int i = 0; i < changeCount; i++) {
-        if (strcmp(changes[i].name, "NIA") != 0) filtered[filteredCount++] = changes[i];
+    int filteredCount = 0;
+    if (wantDetail) {
+        ageharness_snapshot_regs(&r->age, &after);
+        range_trace(r, nia, hw1, hw2, disasm, &after);
+        RegChange changes[REG_SNAPSHOT_MAX_CHANGES];
+        int changeCount = ageharness_diff_regs(&before, &after, changes);
+        for (int i = 0; i < changeCount; i++) {
+            if (strcmp(changes[i].name, "NIA") != 0) filtered[filteredCount++] = changes[i];
+        }
     }
 
     if (traceWanted) {
@@ -1571,6 +1609,8 @@ static bool batchrunner_step(BatchRunner *r) {
              * on the other end of a socket hopelessly behind.  See
              * rtpacer.h. */
             rtpacer_enter_idle(&r->rtPacer);
+            double idleLoopW0 = yagpc_monotonic_seconds();
+            double idleLoopS0 = r->age.gpc.cpu.elapsedTimeUs;
             RTPaceResult why;
             for (;;) {
                 why = rtpacer_advance_idle(&r->rtPacer);
@@ -1581,6 +1621,11 @@ static bool batchrunner_step(BatchRunner *r) {
                  * where this machine spends most of its time. */
                 if (r->bceFramer) bcenet_framer_flush_tick(r->bceFramer);
                 if (why != RTPACE_WAITING) break;
+                /* Behind the wall clock?  Then do not sleep -- go round
+                 * again and keep fast-forwarding until simulated time has
+                 * caught up with real time.  Sleeping here is what made a
+                 * wait state unable to repay a deficit. */
+                if (rtpacer_ahead_ms(&r->rtPacer) < -RTPACE_CATCHUP_MS) continue;
                 /* Ctrl-C has to be honoured here too: a paced wait can
                  * legitimately last seconds of wall time, and a loop that
                  * only checked between instructions would swallow it. */
@@ -1590,6 +1635,9 @@ static bool batchrunner_step(BatchRunner *r) {
                 }
                 yagpc_sleep_seconds(RTPACE_IDLE_POLL_SECONDS);
             }
+            rtpacer_note_idle_loop(&r->rtPacer,
+                                   yagpc_monotonic_seconds() - idleLoopW0,
+                                   (r->age.gpc.cpu.elapsedTimeUs - idleLoopS0) / 1e6);
             if (why != RTPACE_RESUMED) {
                 snprintf(r->stopReason, sizeof r->stopReason,
                          "wait state (%s)", rtpacer_result_name(why));
