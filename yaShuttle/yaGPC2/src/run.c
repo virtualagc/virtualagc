@@ -168,26 +168,46 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
      * DIFFERENT computer IPLs from it; at the furthest-advanced machine's,
      * the tape appears to have run past the words this one is reading and
      * they are dropped as stale.  The router is per machine, so it knows. */
+    /* THE SHARED DEVICES ARE SHARED.  Each is one instance answering
+     * whichever computer commands it, so with several machines two threads
+     * can be inside one model's state machine at once.  The lock stops that
+     * corrupting it, and counts the times a computer walked into another's
+     * transfer -- which is a finding, not a condition to handle.  See
+     * vehicle.h.  With one machine it is a bounds check and nothing more. */
     for (int u = 0; u < 2; u++) {
         if (br->mmu[u] && in->busID == br->mmuBus[u]) {
+            vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
+                              mmumodel_in_transfer(br->mmu[u]));
             mmumodel_set_clock(br->mmu[u], br->clockUs);
             mmumodel_service(br->mmu[u], svc, in, out);
+            vehicle_bus_leave(br->vehicle, in->busID);
             return;
         }
     }
     if (br->mtu && mtumodel_owns_bus(in->busID)) {
+        /* The timing unit rewrites its whole reply on every command and has
+         * no transfer to walk into, so there is nothing to count here -- only
+         * the two threads to keep out of each other's way. */
+        vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
         mtumodel_set_clock(br->mtu, br->clockUs);
         mtumodel_service(br->mtu, svc, in, out);
+        vehicle_bus_leave(br->vehicle, in->busID);
         return;
     }
     for (int d = 0; d < br->nDeuExtra; d++) {
         if (br->deuExtra[d] && in->busID == br->deuExtraBus[d]) {
+            vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
             deumodel_service(br->deuExtra[d], svc, in, out);
+            vehicle_bus_leave(br->vehicle, in->busID);
             return;
         }
     }
     if (br->fallback) {
+        /* The built-in display unit on DK1 arrives here, and it is a shared
+         * device like the rest -- one accumulator, one reply cursor. */
+        vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
         br->fallback(br->fallbackCtx, svc, in, out);
+        vehicle_bus_leave(br->vehicle, in->busID);
         return;
     }
     /* No peripheral on that bus, which is the truth. */
@@ -463,6 +483,8 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
                 r->busRouter.deuExtra[d] = r->deuModelExtra[d];
             r->busRouter.nDeuExtra = r->nDeuModelExtra;
             r->busRouter.clockUs = &r->age.gpc.cpu.elapsedTimeUs;
+            r->busRouter.vehicle = veh;
+            r->busRouter.gpcId = gpcId;
             r->busRouter.fallback = base;
             r->busRouter.fallbackCtx = baseCtx;
             ap101_set_servicer(&r->age.gpc, bus_router_service, &r->busRouter);

@@ -33,6 +33,8 @@ void vehicle_init(Vehicle *v) {
     if (e != NULL && *e != '\0') v->barDeltaUs = atof(e);
 #ifdef HAVE_PTHREADS
     pthread_mutex_init(&v->barLock, NULL);
+    for (int b = 0; b <= YAGPC_BUS_MAX; b++)
+        pthread_mutex_init(&v->busLock[b], NULL);
 #endif
 }
 
@@ -78,6 +80,29 @@ static void barrier_join(Vehicle *v, int gpcId, double machineUs) {
     v->barPubUs[gpcId] = machineUs + v->barOffsetUs[gpcId];
     v->barActive[gpcId] = true;
     barrier_unlock(v);
+}
+
+void vehicle_bus_enter(Vehicle *v, int busID, int gpcId, bool inTransfer) {
+    if (v == NULL || v->nMachines < 2 || busID < 1 || busID > YAGPC_BUS_MAX)
+        return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->busLock[busID]);
+#endif
+    /* A HANDOFF IS ORDINARY; A HANDOFF MID-TRANSFER IS NOT.  Two computers
+     * taking turns on an idle unit is just two computers taking turns.  A
+     * second one arriving while the unit still owes the first its words has
+     * overwritten a conversation, and neither computer is told. */
+    int prev = v->busOwner[busID];
+    if (inTransfer && prev != 0 && prev != gpcId) v->busClash[busID]++;
+    v->busOwner[busID] = gpcId;
+}
+
+void vehicle_bus_leave(Vehicle *v, int busID) {
+    if (v == NULL || v->nMachines < 2 || busID < 1 || busID > YAGPC_BUS_MAX)
+        return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&v->busLock[busID]);
+#endif
 }
 
 void vehicle_barrier_leave(Vehicle *v, int gpcId) {
@@ -178,8 +203,20 @@ void vehicle_free(Vehicle *v) {
         fprintf(stderr, "vehicle: simulated-time barrier held %lu times, "
                         "%.3f s total, %lu abandoned (delta %.0f us)\n",
                 v->barHolds, v->barHeldSec, v->barAbandoned, v->barDeltaUs);
+    /* TWO COMPUTERS IN ONE CONVERSATION.  Not a condition to handle -- it
+     * means the run asked two GPCs to use one unit at the same moment, which
+     * the vehicle cannot do and a crew would not ask for. */
+    for (int b = 0; b <= YAGPC_BUS_MAX; b++) {
+        if (v->busClash[b] == 0) continue;
+        fprintf(stderr, "vehicle: bus %d -- %lu command(s) from a second "
+                        "computer while the device still owed words to the "
+                        "first; they were sharing a unit that serves one at "
+                        "a time\n", b, v->busClash[b]);
+    }
 #ifdef HAVE_PTHREADS
     pthread_mutex_destroy(&v->barLock);
+    for (int b = 0; b <= YAGPC_BUS_MAX; b++)
+        pthread_mutex_destroy(&v->busLock[b]);
 #endif
     /* The models report on the way out, as they did when the BatchRunner
      * owned them -- the reports are of the vehicle's devices, not of any one

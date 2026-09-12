@@ -54,6 +54,11 @@ typedef struct {
     int nDeuExtra;
     GpcServicerFn fallback;
     void *fallbackCtx;
+    /* Which computer this router belongs to, and the vehicle whose shared
+     * devices it reaches, so a service call can be serialised against the
+     * other computers' -- see vehicle_bus_enter. */
+    struct Vehicle *vehicle;
+    int gpcId;
 } BusRouter;
 
 typedef struct {

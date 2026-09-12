@@ -88,6 +88,9 @@ void mmumodel_publish_ready(MmuModel *m);
 
 /* Counters in the shape the real unit's own report prints, so the two can
  * be compared directly. */
+/* True while the unit still owes words to whoever commanded it. */
+bool mmumodel_in_transfer(const MmuModel *m);
+
 void mmumodel_report(const MmuModel *m);
 
 #endif

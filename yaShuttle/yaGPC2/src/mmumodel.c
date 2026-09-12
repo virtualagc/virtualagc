@@ -679,6 +679,15 @@ void mmumodel_publish_ready(MmuModel *m) {
     m->lastReadyPublishSec = now;
 }
 
+/* Mid-transfer: this unit still owes the computer that commanded it words
+ * from the block it is reading.  See vehicle_bus_enter -- a second computer
+ * commanding the unit here does not queue behind the first, it overwrites
+ * the first's conversation, which is a finding rather than a condition to
+ * handle. */
+bool mmumodel_in_transfer(const MmuModel *m) {
+    return m != NULL && m->queueCount > m->queueHead;
+}
+
 void mmumodel_report(const MmuModel *m) {
     if (!m) return;
     fprintf(stderr,

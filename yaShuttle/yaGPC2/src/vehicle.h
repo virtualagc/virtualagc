@@ -32,6 +32,9 @@
 #include "run.h"
 
 
+/* Buses 1-24; 24 is the intercomputer bus. */
+#define YAGPC_BUS_MAX 24
+
 typedef struct Vehicle {
     /* Built on the first machine's init and shared by the rest. */
     bool built;
@@ -118,6 +121,29 @@ typedef struct Vehicle {
 #ifdef HAVE_PTHREADS
     pthread_mutex_t barLock;
 #endif
+
+    /* PER-BUS SERIALISATION, AND WHAT IT IS AND IS NOT FOR.
+     *
+     * The device models are single-conversation state machines, faithfully:
+     * a mass memory latches its status and clears it on the read, holds one
+     * queue cursor, and serves ONE computer at a time.  On the real vehicle
+     * nobody arbitrates a queue for a busy mass memory -- the crew waits for
+     * it, and two GPCs commanding the same unit at once is a situation that
+     * should not arise.
+     *
+     * So this lock exists to stop a model corrupting its own state machine
+     * when it does arise, and NOT to make it work.  What makes it visible is
+     * busClash: a count of the times a DIFFERENT computer commanded a unit
+     * that still owed words to the last one.  Smoothing that over with a
+     * transparent queue would hide exactly the finding worth having --
+     * measured, two computers IPLing from MM1 at the same moment split one
+     * 72-block bootstrap read into 37 blocks and 36, and each machine then
+     * ran on half an image with nothing to say why. */
+    int busOwner[YAGPC_BUS_MAX + 1];          /* last commanding GPC, 0 none */
+    unsigned long busClash[YAGPC_BUS_MAX + 1];
+#ifdef HAVE_PTHREADS
+    pthread_mutex_t busLock[YAGPC_BUS_MAX + 1];
+#endif
 } Vehicle;
 
 void vehicle_init(Vehicle *v);
@@ -141,5 +167,12 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs);
 /* Take this machine out of the barrier -- it is held in reset, or done --
  * so the others do not wait for a clock that has stopped. */
 void vehicle_barrier_leave(Vehicle *v, int gpcId);
+
+/* Serialise one service call on a shared device, and notice if a computer
+ * has walked into another's conversation.  `inTransfer` says whether the
+ * device still owes the last commander words; pass false for a device that
+ * has no such notion.  Every enter must be matched by a leave. */
+void vehicle_bus_enter(Vehicle *v, int busID, int gpcId, bool inTransfer);
+void vehicle_bus_leave(Vehicle *v, int busID);
 
 #endif
