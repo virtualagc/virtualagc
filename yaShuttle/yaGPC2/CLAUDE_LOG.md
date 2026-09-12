@@ -16,3 +16,17 @@ because this file records everything and recovers nothing.
 
 ### [2026-09-11] Target: HANDOFF-OI340700-BUILD.md
 - The volume is now v44 (tapebuild/build.sh, ~/workspace/pass-run/OI340700-v44boot.mmv): v43 plus ASM101S 6d418f3c6, which changes only BILDNEW5.obj's RLDs and ten phase-10 halfwords. GPCIPL's ">>> GPC POWER REFAIL -PROGRAM/MACHINE WERE R" was message 132 with message 130's text, not a refail -- see gpc-causes #84 and HANDOFF-OPS9.md "Closed since the last sync".
+
+### [2026-09-12] Target: [yaShuttle/yaGPC2/README.md]
+- The headless-gpcmem.sh reference figures quoted in the multi-GPC plan ("744
+  commands, 256 fills, 241 timeFills, 248 displayFills, 247 polls") are STALE:
+  they predate the MTU/clock and MEDS work. Measured 2026-09-12 on a 420 s run,
+  the run now reaches `deu: 1848 commands, 375 fills, 569 timeFills, 367
+  displayFills, 8 formatFills, 328 medsXfers, 575 polls, 114476 wordsIn, 9110
+  wordsOut` and `mtu: 7890 commands, 5421 timeReads, 26139 wordsOut`, with the
+  DEUKEYS batch landing at `poll=247 simt=135.520 s wall=120.0 s`. Only `polls`
+  at the keystroke (247) survives from the old set. Reproduced byte for byte
+  across three runs on two different builds, so it is a usable regression gate.
+- `--gpcs <list>` runs several computers, one thread each. `YAGPC_BARRIER_US`
+  sets how far apart in SIMULATED microseconds they may drift (default 200,
+  0 disables); vehicle_free reports holds, seconds held and abandoned holds.
