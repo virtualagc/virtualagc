@@ -11,7 +11,7 @@ instead of a lamp.
 The layout follows ~/Desktop/voting2.png (the clearest CAM drawing):
 dimension-ruled GPC STATUS / FAILED GPC with the titles sitting right of
 centre, a rounded bezel, large yellow GPC numbers on the diagonal, and a
-small mesh lamp in the upper half of each off-diagonal cell.  (Y) and (W)
+small square lamp in the upper half of each off-diagonal cell.  (Y) and (W)
 in the drawing are colours, not text.
 
 Styling follows panelO6.py: gull-grey panel, Helvetica legends, a
@@ -46,13 +46,12 @@ C_DIAG = "#d4aa00"     # yellow GPC identity on the diagonal
 
 MARGIN = 28
 CELL = 76
-# voting2.png: tight gaps, a small mesh lamp (~1/4 of the cell) in the
+# voting2.png: tight gaps, a small square lamp (~1/4 of the cell) in the
 # upper half of each off-diagonal cell.
 GAP = 5
 GRID_PAD = 10          # air between the rounded bezel and the cells
 RADIUS = 16
 LAMP_FRAC = 0.26       # inner lamp side / cell side
-LAMP_GRID = 4          # 4×4 mesh, as in voting2.png
 FULL_SIZE = 768        # --size units: 768 is the design window, as in panelO6.py
 
 # Left of the grid: stacked "VOTING GPC", a bracket, then the row numbers.
@@ -262,24 +261,6 @@ class VotingPanel:
         self._line(x0, y, x0, y + tick, fill=C_INK, width=w)
         self._line(x1, y, x1, y + tick_r, fill=C_INK, width=w)
 
-    def _mesh_lamp(self, x1, y1, x2, y2, on):
-        """Small square lamp with a 4×4 mesh, the voting2.png indicator."""
-        fill = C_LAMP_ON if on else C_LAMP_OFF
-        ow = max(1, int(self.s))
-        self._rect(x1, y1, x2, y2, fill=fill, outline=C_INK, width=ow)
-        if on:
-            return
-        # Unlit: the 4×4 mesh of voting2.png.  Lit, the mesh washes out
-        # to a solid white square.
-        gw = max(1, int(round(self.s)))
-        n = LAMP_GRID
-        for i in range(1, n):
-            t = i / float(n)
-            x = x1 + t * (x2 - x1)
-            y = y1 + t * (y2 - y1)
-            self._line(x, y1, x, y2, fill=C_INK, width=gw)
-            self._line(x1, y, x2, y, fill=C_INK, width=gw)
-
     def _bracket(self, x, y1, y2, tick=10):
         w = max(2, int(1.5 * self.s))
         self._line(x, y1, x + tick, y1, fill=C_INK, width=w)
@@ -384,7 +365,8 @@ class VotingPanel:
         side = CELL * LAMP_FRAC
         lx1, ly1 = cx - side / 2.0, upper - side / 2.0
         lx2, ly2 = cx + side / 2.0, upper + side / 2.0
-        self._mesh_lamp(lx1, ly1, lx2, ly2, self.lamps[row][col])
+        fill = C_LAMP_ON if self.lamps[row][col] else C_LAMP_OFF
+        self._rect(lx1, ly1, lx2, ly2, fill=fill, outline=C_INK, width=ow)
         self._hits.append((row, col,
                            self.X(lx1), self.Y(ly1),
                            self.X(lx2), self.Y(ly2)))
