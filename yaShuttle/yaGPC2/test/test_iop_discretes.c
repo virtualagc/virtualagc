@@ -157,13 +157,16 @@ static void test_discrete_b_unchanged(void) {
  * failed, since that is an environment problem and not a defect.
  */
 static void test_bus_overrides_derivation(void) {
-    if (!discretes_open()) {
-        printf("SKIP bus overlay: discretes_open() failed (environment)\n");
+    /* One computer's channel, created the way a BatchRunner creates it. */
+    Discretes *d = discretes_create(0);
+    if (d == NULL || !discretes_enabled(d)) {
+        printf("SKIP bus overlay: discretes_create() failed (environment)\n");
+        discretes_free(d);
         return;
     }
 
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (fd < 0) { discretes_close(); printf("SKIP bus overlay: no socket\n"); return; }
+    if (fd < 0) { discretes_free(d); printf("SKIP bus overlay: no socket\n"); return; }
     struct in_addr iface;
     iface.s_addr = inet_addr("127.0.0.1");
     setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &iface, sizeof iface);
@@ -173,7 +176,7 @@ static void test_bus_overrides_derivation(void) {
     struct sockaddr_in to = {0};
     to.sin_family = AF_INET;
     to.sin_addr.s_addr = inet_addr("239.255.1.1");
-    to.sin_port = htons(6980);
+    to.sin_port = htons((uint16_t)(yagpc_port_base() + YAGPC_DISCRETES_OFFSET + 0));
 
     /* RESET MM1 READY (bit 6) and SET STANDBY (bit 1), the two a mass
      * memory and a crew panel would respectively be driving. */
@@ -184,19 +187,21 @@ static void test_bus_overrides_derivation(void) {
 
     CPU cpu; IOP iop;
     setup(&cpu, &iop);
+    iop_set_discretes(&iop, d);
     /* Give the loopback datagrams a moment to arrive. */
     for (int i = 0; i < 200; i++) {
-        discretes_poll();
-        if (discretes_driven_mask(DISCRETES_REG_A) != 0) break;
+        discretes_poll(d);
+        if (discretes_driven_mask(d, DISCRETES_REG_A) != 0) break;
         struct timespec ts = {0, 1000000};   /* 1 ms */
         nanosleep(&ts, NULL);
     }
 
-    uint32_t driven = discretes_driven_mask(DISCRETES_REG_A);
+    uint32_t driven = discretes_driven_mask(d, DISCRETES_REG_A);
     if (driven == 0) {
         printf("SKIP bus overlay: nothing received on loopback\n");
         close(fd);
-        discretes_close();
+        iop_set_discretes(&iop, NULL);
+        discretes_free(d);
         return;
     }
 
@@ -207,7 +212,8 @@ static void test_bus_overrides_derivation(void) {
           got & MM1_IPL_SRC, MM1_IPL_SRC);
 
     close(fd);
-    discretes_close();
+    iop_set_discretes(&iop, NULL);
+    discretes_free(d);
     check("closing gives the derivation back", iop_discrete_in_a(&iop), 0x0a000000u);
 }
 

@@ -54,6 +54,15 @@ void cpu_init(CPU *cpu) {
     cpu->iuShadow = NULL;
     cpu->iuShadowCount = 0;
     cpu->iuShadowCap = 0;
+    /* THE NIA RING IS THIS MACHINE'S NOW.  It used to be a file static, so
+     * nothing here had to name it and cpu_free had nothing to release; as a
+     * member it is whatever the caller's storage held, and a CPU declared on
+     * the stack -- which the unit tests do -- then hands cpu_free a pointer
+     * that was never allocated. */
+    cpu->niaRing = NULL;
+    cpu->niaRingCap = 0;
+    cpu->niaRingPos = 0;
+    cpu->niaRingFilled = 0;
     cpu->curIC = 0;
     cpu->prevDiscont = false;
     cpu->storeProtectOverride = false;

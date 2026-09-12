@@ -485,6 +485,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
     if (opts->discretes) {
         r->discretes = discretes_create(r->gpcId);
         iop_set_discretes(&r->age.gpc.iop, r->discretes);
+        vehicle_add_machine(veh, r->gpcId, r->discretes);
         /* A mass memory is wired to every computer; with one machine that
          * is one channel. */
         for (int u = 0; u < 2; u++)
@@ -494,6 +495,8 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
 }
 
 void batchrunner_free(BatchRunner *r) {
+    /* This machine is done; the others must not wait on its stopped clock. */
+    vehicle_barrier_leave(r->vehicle, r->gpcId);
     if (discretes_enabled(r->discretes)) {
         fprintf(stderr, "discretes: %lu message(s) applied\n",
                 discretes_message_count(r->discretes));
@@ -1279,6 +1282,10 @@ static bool batchrunner_step(BatchRunner *r) {
          * which is the only sign a person has that this is running. */
         for (int u = 0; u < 2; u++)
             if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
+        /* And out of the simulated-time barrier while it is held: this
+         * machine's clock has stopped, and a stopped clock is the slowest
+         * there is -- leaving it in would halt the whole vehicle. */
+        vehicle_barrier_leave(r->vehicle, r->gpcId);
         /* Nothing to do but wait for the switch to move; don't spin a
          * core doing it. */
         yagpc_sleep_seconds(0.002);
@@ -1641,8 +1648,13 @@ static bool batchrunner_step(BatchRunner *r) {
      * machine's -- see vehicle.h.  Carry it forward here, once per
      * instruction, so a tape keeps turning for a computer that is IPLing
      * from it while another sits in reset. */
-    if (r->vehicle != NULL)
+    if (r->vehicle != NULL) {
         vehicle_note_time(r->vehicle, r->age.gpc.cpu.elapsedTimeUs);
+        /* And keep this machine within reach of the others in SIMULATED
+         * time, which is the time the sync timeouts are measured in --
+         * see the barrier note in vehicle.h. */
+        vehicle_barrier_wait(r->vehicle, r->gpcId, r->age.gpc.cpu.elapsedTimeUs);
+    }
 
     /* Elapsed instruction time (cpu->elapsedTimeUs) is now accumulated
      * unconditionally inside cpu_exec1() itself, not just under --debug
@@ -1764,6 +1776,14 @@ static bool batchrunner_step(BatchRunner *r) {
                  * flush below is never reached during a wait, which is
                  * where this machine spends most of its time. */
                 if (r->bceFramer) bcenet_framer_flush_tick(r->bceFramer);
+                /* THE BARRIER HAS TO BE SERVICED IN HERE TOO, and not only
+                 * because this machine might get ahead: a wait state is
+                 * where it spends most of its time, and a clock that stops
+                 * being published for the length of one looks to the others
+                 * like the slowest machine in the vehicle, frozen.  They
+                 * would all stop to wait for it. */
+                vehicle_barrier_wait(r->vehicle, r->gpcId,
+                                     r->age.gpc.cpu.elapsedTimeUs);
                 if (why != RTPACE_WAITING) break;
                 /* Behind the wall clock?  Then do not sleep -- go round
                  * again and keep fast-forwarding until simulated time has

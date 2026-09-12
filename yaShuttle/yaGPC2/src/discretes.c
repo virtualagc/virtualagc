@@ -76,13 +76,38 @@ int yagpc_gpc_id(void) {
  * can follow rather than a hex mask.  From the IOP Principles of
  * Operation, as laid out in iop.c's own discrete-input comment. */
 static const char *bit_name(int reg, int bit) {
+    if (reg == DISCRETES_REG_OUT) {
+        switch (bit) {
+            case 7: return "I/O active tb"; case 9: return "READY tb";
+            case 12: return "MM1 reset";    case 13: return "MM2 reset";
+            case 20: return "STBY out";     case 22: return "BFS RUN out";
+            case 24: return "RUN out";      case 28: return "SYNC out";
+            case 30: return "ID source";    case 31: return "IPL out";
+            default: return NULL;
+        }
+    }
     if (reg == DISCRETES_REG_A) {
         switch (bit) {
             case 0: return "HALT";        case 1: return "STANDBY";
             case 2: return "RUN";         case 3: return "IPL";
             case 4: return "MM1 IPL src"; case 5: return "MM2 IPL src";
             case 6: return "MM1 READY";   case 7: return "MM2 READY";
+            /* THE INTER-GPC LINES, numbered N+1..N+4 relative to THIS
+             * computer: "the wiring rotates, so N+1 at gpc 1 is gpc 2 and
+             * N+1 at gpc 5 is gpc 1" (BILDNEW5.asm's own table, and
+             * nsts-sim-gpc com/discretes.coffee).  The STBY/RUN/SYNC groups
+             * are not three signals but one 3-bit code per neighbour -- see
+             * discretes_rotate_out. */
+            case 8: return "BFS RUN N+1";  case 9: return "BFS RUN N+2";
+            case 10: return "BFS RUN N+3"; case 11: return "BFS RUN N+4";
             case 12: return "IOP term A"; case 13: return "IOP term B";
+            case 15: return "dump request";
+            case 20: return "STBY N+1";   case 21: return "STBY N+2";
+            case 22: return "STBY N+3";   case 23: return "STBY N+4";
+            case 24: return "RUN N+1";    case 25: return "RUN N+2";
+            case 26: return "RUN N+3";    case 27: return "RUN N+4";
+            case 28: return "SYNC N+1";   case 29: return "SYNC N+2";
+            case 30: return "SYNC N+3";   case 31: return "SYNC N+4";
             default: return NULL;
         }
     }
@@ -118,6 +143,8 @@ struct Discretes {
     struct sockaddr_in group;
     unsigned generation;  /* see discretes_generation() */
     unsigned pollCalls;   /* the poll rate-limiter, per machine */
+    DiscretesOutFn outHook;
+    void *outHookCtx;
     double lastPollSec;
 };
 
@@ -234,6 +261,27 @@ void discretes_free(Discretes *d) {
 }
 
 int discretes_gpc_id(const Discretes *d) { return d ? d->gpcId : 0; }
+
+/* See discretes.h.  The four output lines and where each lands, given the
+ * neighbour index k: the group's base bit plus (k - 1). */
+uint32_t discretes_rotate_out(int sourceGpc, int readerGpc, uint32_t outMask) {
+    static const struct { int outBit, inBase; } WIRE[] = {
+        { 20, 20 },   /* STBY    -> STBY N+k    */
+        { 22,  8 },   /* BFS RUN -> BFS RUN N+k */
+        { 24, 24 },   /* RUN     -> RUN N+k     */
+        { 28, 28 },   /* SYNC    -> SYNC N+k    */
+    };
+    if (sourceGpc < 1 || sourceGpc > 5 || readerGpc < 1 || readerGpc > 5)
+        return 0u;
+    int k = (sourceGpc - readerGpc + 5) % 5;
+    if (k == 0) return 0u;            /* a computer is not its own neighbour */
+    uint32_t in = 0u;
+    for (size_t i = 0; i < sizeof WIRE / sizeof WIRE[0]; i++) {
+        if (outMask & (0x80000000u >> WIRE[i].outBit))
+            in |= 0x80000000u >> (WIRE[i].inBase + (k - 1));
+    }
+    return in;
+}
 
 static void send_msg(Discretes *d, unsigned op, int reg, uint32_t mask);
 
@@ -362,6 +410,27 @@ void discretes_set_canonical(Discretes *d, int reg, uint32_t value) {
 /* The output register is entirely this GPC's own, so every change to it is
  * published as the SET and RESET of the bits that moved -- nothing else
  * drives it and nothing else can contradict it. */
+void discretes_set_out_hook(Discretes *d, DiscretesOutFn fn, void *ctx) {
+    if (d == NULL) return;
+    d->outHook = fn;
+    d->outHookCtx = ctx;
+}
+
+void discretes_publish_to(Discretes *from, int destGpc, int reg, uint32_t mask,
+                          bool on) {
+    if (from == NULL || !from->open || mask == 0u) return;
+    struct sockaddr_in dest = from->group;
+    dest.sin_port = htons((uint16_t)DISCRETES_PORT_FOR(destGpc));
+    uint8_t b[WORDS * 2];
+    unsigned op = on ? OP_SET : OP_RESET;
+    b[0] = (uint8_t)(op >> 8);    b[1] = (uint8_t)op;
+    b[2] = (uint8_t)(reg >> 8);   b[3] = (uint8_t)reg;
+    b[4] = (uint8_t)(mask >> 24); b[5] = (uint8_t)(mask >> 16);
+    b[6] = (uint8_t)(mask >> 8);  b[7] = (uint8_t)mask;
+    (void)sendto(from->fd, b, sizeof b, 0,
+                 (struct sockaddr *)&dest, sizeof dest);
+}
+
 void discretes_publish_out(Discretes *d, uint32_t before, uint32_t after) {
     if (d == NULL || !d->open) return;
     uint32_t changed = before ^ after;
@@ -371,6 +440,9 @@ void discretes_publish_out(Discretes *d, uint32_t before, uint32_t after) {
     if (changed & after)  send_msg(d, OP_SET, DISCRETES_REG_OUT, changed & after);
     if (changed & ~after) send_msg(d, OP_RESET, DISCRETES_REG_OUT, changed & ~after);
     d->generation++;
+    /* And onward to the other computers: these four lines are wired to them
+     * (see discretes_rotate_out). */
+    if (d->outHook != NULL) d->outHook(d->outHookCtx, d->gpcId, before, after);
 }
 
 void discretes_publish(Discretes *d, int reg, uint32_t mask, bool on) {

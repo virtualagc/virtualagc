@@ -567,9 +567,24 @@ void iop_init(IOP *iop, struct CPU *cpu) {
     /* NOT what the zeroing leaves: generation 0 is a real value, so a memo
      * initialised to it would serve a stale answer on the first read, and the
      * receive floor has a non-zero default. */
-    for (int i = 0; i < 2; i++) iop->discOverlayGen[i] = ~0u;
+    for (int i = 0; i < 2; i++) {
+        iop->discOverlayGen[i] = ~0u;
+        iop->discOverlayDriven[i] = 0u;
+        iop->discOverlayValue[i] = 0u;
+    }
     iop->recvTimeoutFloorUs = RECV_TIMEOUT_FLOOR_US;
     iop->recvFloorFromEnv = 0;
+    /* NO CHANNEL UNTIL ONE IS INSTALLED.  The IOP used to reach a process-wide
+     * discrete bus through file statics, so nothing here had to name it; the
+     * per-machine channel is a pointer, and a caller that declares its IOP on
+     * the stack (the unit tests do) would otherwise dereference whatever was
+     * there.  The per-bus counters below are the same story. */
+    iop->discretes = NULL;
+    for (int i = 0; i < 32; i++) {
+        iop->xmitWords[i] = 0;
+        iop->dmaQueuedRead[i] = 0;
+        iop->clearWatch[i] = 0;
+    }
     iop->cpu = cpu;
     iop->peerWait = NULL;
     iop->peerWaitCtx = NULL;

@@ -113,7 +113,7 @@ $(BUILD_DIR):
 
 TEST_BIN_DIR := $(BUILD_DIR)/test
 
-UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_gpcops test_schedule
+UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_discrete_rotation test_gpcops test_schedule
 
 TEST_SCRIPTS := test/run_all.sh test/test_debugger.sh test/test_scheduler.sh \
                 test/test_io_read.sh test/test_random.sh test/test_rtl.sh
@@ -203,6 +203,12 @@ $(TEST_BIN_DIR)/test_iop_exec_processors: test/test_iop_exec_processors.c $(IOP_
 
 $(TEST_BIN_DIR)/test_iop_discretes: test/test_iop_discretes.c $(IOP_TEST_DEPS) src/iop.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_discretes.c $(IOP_TEST_DEPS) $(LDLIBS)
+
+# The inter-GPC discrete wiring, against the rotation table in the flight
+# source itself (SSSRC/BILDNEW5.asm).  discretes.c needs no other object for
+# the pure mapping function.
+$(TEST_BIN_DIR)/test_discrete_rotation: test/test_discrete_rotation.c src/discretes.c src/compat.c src/discretes.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_discrete_rotation.c src/discretes.c src/compat.c $(LDLIBS)
 
 # Both link against $(LIB) itself, not the raw source list -- deliberately,
 # since that's exactly what a real integrator would do, and it doubles as

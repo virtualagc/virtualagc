@@ -87,6 +87,44 @@ void discretes_poll(Discretes *d);
  * state -- see the definition. */
 bool discretes_poll_one(Discretes *d);
 
+/* THE INTER-GPC WIRING.
+ *
+ * A computer's discrete OUTPUT register carries its own STBY (bit 20), BFS
+ * RUN (22), RUN (24) and SYNC (28), and those four lines run to the other
+ * four computers' INPUT register A -- at a position that depends on who is
+ * listening.  The groups are numbered N+1..N+4 relative to the reader, and
+ * "the wiring rotates, so N+1 at gpc 1 is gpc 2 and N+1 at gpc 5 is gpc 1"
+ * (BILDNEW5.asm).  So the same fact -- "GPC 4 is in RUN" -- arrives at a
+ * DIFFERENT BIT in each recipient's register.
+ *
+ * STBY/RUN/SYNC are not three independent signals.  The flight software
+ * drives them as one 3-bit code (it calls them A, B, C): null is all three
+ * set, X'0888' in the output register, and a sync is issued by RESETTING
+ * bits out of that -- 110 SSIP, 101 timer, 100 SVC, 010 input problem
+ * report, 001 I/O complete, 000 halt/standby/dead.  Five FCOS programs spin
+ * on the result with a 3.85 ms timeout and vote out whoever misses it, so a
+ * code that arrives half-applied is a different code with a different
+ * meaning.  They are therefore rotated and delivered together.
+ *
+ * `k` is which neighbour the source is, from the reader's seat:
+ * (source - reader) mod 5, 1..4.  Returns the reader's register A mask for
+ * the bits `outMask` sets in the source's output register. */
+uint32_t discretes_rotate_out(int sourceGpc, int readerGpc, uint32_t outMask);
+
+/* Publish onto ANOTHER computer's channel, from this one's socket.  That is
+ * what the inter-GPC wiring is: GPC n's output lines are an input to GPC m,
+ * so n drives them on m's channel and m hears them as it hears any other
+ * device.  Deliberately over the wire rather than reached into m's state --
+ * m must see them as externally driven, and a monitor should see them too. */
+void discretes_publish_to(Discretes *from, int destGpc, int reg, uint32_t mask,
+                          bool on);
+
+/* Told whenever this computer's discrete OUTPUT register changes, so the
+ * vehicle can route the inter-GPC lines to the other computers. */
+typedef void (*DiscretesOutFn)(void *ctx, int sourceGpc, uint32_t before,
+                               uint32_t after);
+void discretes_set_out_hook(Discretes *d, DiscretesOutFn fn, void *ctx);
+
 /* Bits of `reg` currently being published by somebody, and their values.
  * Call discretes_poll() first.  The mask is empty when disabled, so
  * callers need no special case. */

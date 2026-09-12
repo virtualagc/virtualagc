@@ -2,20 +2,142 @@
 #include "vehicle.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "compat.h"
 
 #include "bcenet_transport.h"
 #include "deumodel.h"
 #include "mmumodel.h"
+#include "discretes.h"
 #include "mtumodel.h"
+
+/* How far apart, in simulated microseconds, the machines are allowed to
+ * drift.  Well inside FCOS's 3.85 ms sync timeout with room for the host's
+ * scheduler, and coarse enough that the check costs nothing worth measuring.
+ * YAGPC_BARRIER_US=0 turns the barrier off. */
+#define BARRIER_DELTA_US 200.0
 
 void vehicle_init(Vehicle *v) {
     if (v == NULL) return;
     memset(v, 0, sizeof *v);
     for (int u = 0; u < 2; u++) v->mmuBus[u] = -1;
+    v->barDeltaUs = BARRIER_DELTA_US;
+    const char *e = getenv("YAGPC_BARRIER_US");
+    if (e != NULL && *e != '\0') v->barDeltaUs = atof(e);
+#ifdef HAVE_PTHREADS
+    pthread_mutex_init(&v->barLock, NULL);
+#endif
+}
+
+static void barrier_lock(Vehicle *v) {
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->barLock);
+#else
+    (void)v;
+#endif
+}
+
+static void barrier_unlock(Vehicle *v) {
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&v->barLock);
+#else
+    (void)v;
+#endif
+}
+
+/* The slowest running machine's time in the shared frame, or this one's own
+ * if it is alone -- which is what makes a single-computer run, and a vehicle
+ * whose other computers are all in reset, cost one loop and no waiting. */
+static double barrier_slowest(const Vehicle *v, int gpcId, double pub) {
+    double slowest = pub;
+    for (int m = 1; m <= 5; m++)
+        if (m != gpcId && v->barActive[m] && v->barPubUs[m] < slowest)
+            slowest = v->barPubUs[m];
+    return slowest;
+}
+
+/* Bring a machine into the barrier at the group's pace.  A computer that has
+ * been sitting in HALT has a clock minutes behind the others; it rejoins
+ * level with the furthest advanced rather than dragging them back to it. */
+static void barrier_join(Vehicle *v, int gpcId, double machineUs) {
+    barrier_lock(v);
+    double maxPub = 0.0;
+    bool any = false;
+    for (int m = 1; m <= 5; m++) {
+        if (m == gpcId || !v->barActive[m]) continue;
+        if (!any || v->barPubUs[m] > maxPub) { maxPub = v->barPubUs[m]; any = true; }
+    }
+    v->barOffsetUs[gpcId] = any ? (maxPub - machineUs) : 0.0;
+    v->barPubUs[gpcId] = machineUs + v->barOffsetUs[gpcId];
+    v->barActive[gpcId] = true;
+    barrier_unlock(v);
+}
+
+void vehicle_barrier_leave(Vehicle *v, int gpcId) {
+    if (v == NULL || gpcId < 1 || gpcId > 5 || !v->barActive[gpcId]) return;
+    barrier_lock(v);
+    v->barActive[gpcId] = false;
+    barrier_unlock(v);
+}
+
+void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
+    /* OFF unless there is somebody to wait for.  One computer is the case
+     * every existing command line asks for, and it must not pay for this. */
+    if (v == NULL || v->nMachines < 2 || v->barDeltaUs <= 0.0) return;
+    if (gpcId < 1 || gpcId > 5) return;
+
+    if (!v->barActive[gpcId]) barrier_join(v, gpcId, machineUs);
+
+    double pub = machineUs + v->barOffsetUs[gpcId];
+    v->barPubUs[gpcId] = pub;
+    if (pub - barrier_slowest(v, gpcId, pub) <= v->barDeltaUs) return;
+
+    /* AHEAD OF THE GROUP.  Wait for it, re-reading each pass: the machine
+     * this one is waiting on may catch up, or may leave the barrier
+     * altogether by being switched to HALT, and both release it.  The
+     * sleep is short against the delta so the hold costs about what it
+     * should and not a scheduler quantum more.  Nobody deadlocks: the
+     * slowest machine never waits, and if every other machine leaves,
+     * barrier_slowest() returns this machine's own time. */
+    double t0 = yagpc_monotonic_seconds();
+    v->barHolds++;
+    while (pub - barrier_slowest(v, gpcId, pub) > v->barDeltaUs) {
+        yagpc_sleep_seconds(50e-6);
+    }
+    v->barHeldSec += yagpc_monotonic_seconds() - t0;
 }
 
 bool vehicle_multi(const Vehicle *v) { return v != NULL && v->nMachines > 1; }
+
+/* ONE COMPUTER'S OUTPUT IS THE OTHERS' INPUT.  Its STBY/BFS RUN/RUN/SYNC
+ * lines run to the other four, arriving at a bit that depends on who is
+ * reading -- see discretes_rotate_out.  The three of them that form the sync
+ * code are delivered together, because a half-applied code is a different
+ * code with a different meaning. */
+static void vehicle_route_out(void *ctx, int sourceGpc, uint32_t before,
+                              uint32_t after) {
+    Vehicle *v = (Vehicle *)ctx;
+    uint32_t changed = before ^ after;
+    if (v == NULL || changed == 0u) return;
+    struct Discretes *from = (sourceGpc >= 1 && sourceGpc <= 5)
+                                 ? v->lines[sourceGpc] : NULL;
+    if (from == NULL) return;
+    for (int m = 1; m <= 5; m++) {
+        if (m == sourceGpc || v->lines[m] == NULL) continue;
+        uint32_t set = discretes_rotate_out(sourceGpc, m, changed & after);
+        uint32_t clr = discretes_rotate_out(sourceGpc, m, changed & ~after);
+        if (set) discretes_publish_to(from, m, DISCRETES_REG_A, set, true);
+        if (clr) discretes_publish_to(from, m, DISCRETES_REG_A, clr, false);
+    }
+}
+
+void vehicle_add_machine(Vehicle *v, int gpcId, struct Discretes *d) {
+    if (v == NULL || d == NULL || gpcId < 1 || gpcId > 5) return;
+    v->lines[gpcId] = d;
+    discretes_set_out_hook(d, vehicle_route_out, v);
+}
 
 void vehicle_note_time(Vehicle *v, double machineUs) {
     /* Monotone, and deliberately unlocked: it is a double written by whichever
@@ -26,6 +148,17 @@ void vehicle_note_time(Vehicle *v, double machineUs) {
 
 void vehicle_free(Vehicle *v) {
     if (v == NULL) return;
+    /* REPORT WHEN THE BARRIER BOUND.  Occasional holds are the barrier doing
+     * its job; constant ones mean the machines are spending their time
+     * waiting for each other rather than running, which is worth seeing
+     * rather than absorbing silently. */
+    if (v->barHolds > 0)
+        fprintf(stderr, "vehicle: simulated-time barrier held %lu times, "
+                        "%.3f s total (delta %.0f us)\n",
+                v->barHolds, v->barHeldSec, v->barDeltaUs);
+#ifdef HAVE_PTHREADS
+    pthread_mutex_destroy(&v->barLock);
+#endif
     /* The models report on the way out, as they did when the BatchRunner
      * owned them -- the reports are of the vehicle's devices, not of any one
      * computer, and with several machines only one set should be printed. */
