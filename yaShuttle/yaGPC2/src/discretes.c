@@ -76,6 +76,17 @@ int yagpc_gpc_id(void) {
  * can follow rather than a hex mask.  From the IOP Principles of
  * Operation, as laid out in iop.c's own discrete-input comment. */
 static const char *bit_name(int reg, int bit) {
+    if (reg == DISCRETES_REG_FAILVOTE) {
+        /* One row of the GPC STATUS matrix, five bits wide, and ROTATED --
+         * "N+k" is the computer k places along from this one, not GPC k.
+         * See DISCRETES_REG_FAILVOTE in discretes.h. */
+        switch (bit) {
+            case 27: return "fail vote N+0 (self)";
+            case 28: return "fail vote N+1"; case 29: return "fail vote N+2";
+            case 30: return "fail vote N+3"; case 31: return "fail vote N+4";
+            default: return NULL;
+        }
+    }
     if (reg == DISCRETES_REG_OUT) {
         switch (bit) {
             case 7: return "I/O active tb"; case 9: return "READY tb";
@@ -128,18 +139,18 @@ struct Discretes {
     unsigned long messages;
     double staleSec;
     /* Index 0 is register A, 1 is B, 2 is the output register. */
-    uint32_t value[3];
+    uint32_t value[4];
     /* What this GPC believes each register's whole value to be, which is
      * what a REQUEST is answered with.  For A and B that is the combination
      * of locally derived and published bits, which only iop.c can form. */
-    uint32_t canonical[3];
+    uint32_t canonical[4];
     /* When each bit was last published.  Per BIT, not per register: a
      * crew panel republishing the switches must not make a departed mass
      * memory's READY look fresh. */
-    double lastSeen[3][32];
+    double lastSeen[4][32];
     /* Bits this process drives itself, which it must not then treat as
      * externally driven -- see discretes.h. */
-    uint32_t selfDriven[3];
+    uint32_t selfDriven[4];
     struct sockaddr_in group;
     unsigned generation;  /* see discretes_generation() */
     unsigned pollCalls;   /* the poll rate-limiter, per machine */
@@ -160,12 +171,13 @@ struct Discretes {
 static int reg_index(int reg) {
     if (reg == DISCRETES_REG_B) return 1;
     if (reg == DISCRETES_REG_OUT) return 2;
+    if (reg == DISCRETES_REG_FAILVOTE) return 3;
     return 0;
 }
 
 static bool reg_known(int reg) {
     return reg == DISCRETES_REG_A || reg == DISCRETES_REG_B ||
-           reg == DISCRETES_REG_OUT;
+           reg == DISCRETES_REG_OUT || reg == DISCRETES_REG_FAILVOTE;
 }
 
 bool discretes_enabled(const Discretes *d) { return d != NULL && d->open; }
@@ -592,6 +604,26 @@ void discretes_publish_out(Discretes *d, uint32_t before, uint32_t after) {
      * (see discretes_rotate_out). */
     if (d->outHook != NULL) d->outHook(d->outHookCtx, d->gpcId, before, after);
     discretes_synctrace(d);
+}
+
+/* See discretes.h.  The same shape as the output register: this computer
+ * owns every bit, publishes its own changes, and is the only sender of a
+ * VALUE for it. */
+void discretes_publish_failvote(Discretes *d, uint32_t value) {
+    if (d == NULL || !d->open) return;
+    int r = reg_index(DISCRETES_REG_FAILVOTE);
+    uint32_t before = d->value[r];
+    value &= 0x1fu;                       /* five bits, and only five */
+    if (value == before) return;
+    d->value[r] = value;
+    d->canonical[r] = value;
+    uint32_t changed = before ^ value;
+    if (changed & value)  send_msg(d, OP_SET, DISCRETES_REG_FAILVOTE, changed & value);
+    if (changed & ~value) send_msg(d, OP_RESET, DISCRETES_REG_FAILVOTE, changed & ~value);
+    d->generation++;
+    if (getenv("YAGPC_SYNCTRACE") != NULL)
+        fprintf(stderr, "SYNC GPC%d fail-vote %08x -> %08x  (rotated; see "
+                        "discretes.h)\n", d->gpcId, before, value);
 }
 
 void discretes_publish(Discretes *d, int reg, uint32_t mask, bool on) {

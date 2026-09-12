@@ -64,6 +64,27 @@ typedef struct Discretes Discretes;
  * own writes; nothing else drives it. */
 #define DISCRETES_REG_OUT 3
 
+/* THE FAIL-VOTE DISCRETES -- the GPC STATUS matrix on panel O1.
+ *
+ * Five bits, one computer's ROW of the 5x5 matrix: which computers THIS one
+ * has voted out of the set.  They are not a software report but a hardware
+ * register, driven by the IOP's MSC through the @SFD and @RFD instructions
+ * (Set / Reset Fail Discretes) from the MSC program FCMSFCAM, whose two
+ * masks -- TCVTSETC and TCVTRESC -- FCMSFAIL fills as it votes.  An
+ * application asks for them through SVC 25 request 2, the SETCAMEX macro in
+ * INCL80/CAMEMACS.hal; CAM is the Computer Annunciation Matrix, which is
+ * what the panel lamps are.
+ *
+ * CAUTION, AND NOT YET PINNED DOWN: the bits in the register are ROTATED
+ * relative to the computer driving them, as the sync lines are.  FCMSFAIL's
+ * FCMCVTM procedure rotates an absolute 5-bit mask of failed GPCs by this
+ * computer's own id before it reaches the hardware.  So a consumer that
+ * wants absolute columns must un-rotate.  What is published here is the RAW
+ * REGISTER, exactly as the hardware holds it, because that is the thing that
+ * exists and nothing is lost by it -- the exact bit order of the rotation
+ * has NOT been verified against a run, only read out of the assembly. */
+#define DISCRETES_REG_FAILVOTE 4
+
 /* How long a bit stays "externally driven" after its last message.
  * Publishers republish every 250 ms, so this is several periods -- long
  * enough not to flap on a dropped datagram, short enough that a departed
@@ -152,6 +173,10 @@ unsigned discretes_generation(const Discretes *d);
  * register is this process's own and is published on every change. */
 void discretes_set_canonical(Discretes *d, int reg, uint32_t value);
 void discretes_publish_out(Discretes *d, uint32_t before, uint32_t after);
+
+/* Publish a change in this computer's fail-vote register.  A no-op when the
+ * value has not moved, so it is safe to call periodically. */
+void discretes_publish_failvote(Discretes *d, uint32_t value);
 
 /* Drive a level onto the bus, for a device modelled in this process that
  * a real vehicle would have wired to a discrete line -- the mass memory's

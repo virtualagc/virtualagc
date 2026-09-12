@@ -105,8 +105,24 @@ VALUE = 4
 REG_A = 1                   # discrete inputs 1-32
 REG_B = 2                   # discrete inputs 33-40
 REG_OUT = 3                 # the discrete outputs, which the GPC owns
+# One computer's ROW of the GPC STATUS matrix on panel O1 -- which computers
+# THIS one has voted out of the set.  Five bits, held in a hardware register
+# the IOP's MSC drives with @SFD / @RFD (Set / Reset Fail Discretes) from the
+# MSC program FCMSFCAM; the masks come from FCMSFAIL as it votes, and an
+# application asks for them through SVC 25 request 2 (SETCAMEX, CAMEMACS.hal).
+# CAM is the Computer Annunciation Matrix, which is what the lamps are.
+#
+# THE BITS ARE ROTATED relative to the computer driving them, exactly as the
+# inter-GPC sync lines are: FCMSFAIL's FCMCVTM rotates an absolute mask of
+# failed GPCs by the computer's own id before it reaches the hardware.  What
+# the GPC publishes is the RAW REGISTER.  A consumer wanting absolute columns
+# must un-rotate -- and note that the exact bit order has been read out of the
+# assembly but NOT yet confirmed against a run, so check it before trusting a
+# lamp position.
+REG_FAILVOTE = 4
 
-REG_NAME = {REG_A: "A", REG_B: "B", REG_OUT: "OUT"}
+REG_NAME = {REG_A: "A", REG_B: "B", REG_OUT: "OUT",
+            REG_FAILVOTE: "FAILVOTE"}
 OP_NAME = {SET: "SET", RESET: "RESET", REQUEST: "REQUEST", VALUE: "VALUE"}
 
 REPUBLISH_MS = 250
@@ -136,7 +152,7 @@ def decode(data):
     op, reg, hi, lo = struct.unpack(">HHHH", data[:WORDS * 2])
     if op not in (SET, RESET, REQUEST, VALUE):
         return None
-    if reg not in (REG_A, REG_B, REG_OUT):
+    if reg not in (REG_A, REG_B, REG_OUT, REG_FAILVOTE):
         return None
     return {"op": op, "reg": reg, "mask": ((hi << 16) | lo) & 0xFFFFFFFF}
 

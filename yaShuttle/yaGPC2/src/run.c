@@ -1743,6 +1743,13 @@ static bool batchrunner_step(BatchRunner *r) {
          * the only outward sign that this emulator is running at all. */
         for (int u = 0; u < 2; u++)
             if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
+        /* AND THIS COMPUTER'S ROW OF THE GPC STATUS MATRIX.  The fail-vote
+         * register is written by the IOP's MSC, not by anything on this
+         * path, so it is sampled rather than hooked; publishing is a no-op
+         * unless it moved.  See DISCRETES_REG_FAILVOTE in discretes.h. */
+        discretes_publish_failvote(
+            r->discretes,
+            (uint32_t)register_get32(&r->age.gpc.iop.msc.regFailDisc));
     }
 
     /* The shared devices pace against the vehicle's clock, not this
