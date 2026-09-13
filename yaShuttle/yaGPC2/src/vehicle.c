@@ -82,6 +82,36 @@ static void barrier_join(Vehicle *v, int gpcId, double machineUs) {
     barrier_unlock(v);
 }
 
+void vehicle_dk_claim(Vehicle *v, int gpcId, bool claiming) {
+    if (v == NULL || gpcId < 1 || gpcId > 5) return;
+    if (claiming) {
+        if (v->dkClaimant == gpcId) return;
+        barrier_lock(v);
+        if (v->dkClaimant != 0 && v->dkClaimant != gpcId) {
+            v->dkDualClaims++;
+            fprintf(stderr, "vehicle: GPC%d claims the display buses while "
+                            "GPC%d still holds them -- dual commanders, which "
+                            "USA005350 3.2.15.1 warns can fail a redundant "
+                            "set to sync\n", gpcId, v->dkClaimant);
+        }
+        v->dkClaimant = gpcId;
+        v->dkHandovers++;
+        barrier_unlock(v);
+        fprintf(stderr, "vehicle: GPC%d commands the display buses\n", gpcId);
+    } else if (v->dkClaimant == gpcId) {
+        barrier_lock(v);
+        v->dkClaimant = 0;
+        barrier_unlock(v);
+        fprintf(stderr, "vehicle: GPC%d releases the display buses\n", gpcId);
+    }
+}
+
+bool vehicle_dk_commands(const Vehicle *v, int gpcId, int staticOwner) {
+    if (v == NULL) return true;
+    if (v->dkClaimant != 0) return v->dkClaimant == gpcId;
+    return staticOwner == 0 || staticOwner == gpcId;
+}
+
 void vehicle_bus_enter(Vehicle *v, int busID, int gpcId, bool inTransfer) {
     if (v == NULL || v->nMachines < 2 || busID < 1 || busID > YAGPC_BUS_MAX)
         return;

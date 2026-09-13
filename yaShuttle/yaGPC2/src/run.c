@@ -39,8 +39,10 @@ static void halucp_error_cb(void *ctx, const char *msg) {
  * displacing them. */
 /* A display unit belongs to one computer -- see vehicle.h.  0 is "anyone",
  * which is what a single-machine run uses. */
-static bool deu_owned_by(int owner, int gpcId) {
-    return owner == 0 || owner == gpcId;
+static bool deu_owned_by(const BusRouter *br, int owner) {
+    /* The crew's BFC CRT SELECT decides this while anybody is claiming the
+     * display buses; --deu-bus is only the fallback.  See vehicle.h. */
+    return vehicle_dk_commands(br->vehicle, br->gpcId, owner);
 }
 
 void bus_router_service(void *ctx, GpcServiceNumber svc,
@@ -56,8 +58,9 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
      * YAGPC_DEUTRACE only counts calls. */
     if (svc == GPC_SVC_XMIT_CMD && br->clockUs != NULL &&
         in->busID >= 6 && in->busID <= 9 && getenv("YAGPC_DKTRACE"))
-        fprintf(stderr, "DK bus=%d cmd=%06x t=%.6f\n", in->busID,
-                (unsigned)(in->in.word & 0xffffffu), *br->clockUs / 1e6);
+        fprintf(stderr, "DK gpc=%d bus=%d cmd=%06x t=%.6f\n", br->gpcId,
+                in->busID, (unsigned)(in->in.word & 0xffffffu),
+                *br->clockUs / 1e6);
     /* YAGPC_DKSTALL: per-second census of what the DK buses are DOING, which
      * is the only way to tell a long transfer from a long wait.  A DEU
      * transaction that holds its bus for 1052.6 ms while moving ~100 words
@@ -205,7 +208,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             /* Somebody's unit is on this bus.  If it is not THIS computer's,
              * this computer is not on that bus at all and finds nothing
              * there -- it does not get to share it. */
-            if (!deu_owned_by(br->deuExtraOwner[d], br->gpcId)) break;
+            if (!deu_owned_by(br, br->deuExtraOwner[d])) break;
             vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
                               deumodel_in_transfer(br->deuExtra[d]));
             deumodel_service(br->deuExtra[d], svc, in, out);
@@ -216,7 +219,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
     /* The built-in display unit answers through `fallback`, so ownership has
      * to be checked before getting there -- otherwise every computer that
      * was not given a unit would drive the first computer's. */
-    if (br->deu != NULL && !deu_owned_by(br->deuOwner, br->gpcId)) {
+    if (br->deu != NULL && !deu_owned_by(br, br->deuOwner)) {
         switch (svc) {
         case GPC_SVC_XMIT_CMD:
         case GPC_SVC_XMIT_WORD: out->out.xmit.ok = true; break;
@@ -1750,6 +1753,15 @@ static bool batchrunner_step(BatchRunner *r) {
         discretes_publish_failvote(
             r->discretes,
             (uint32_t)register_get32(&r->age.gpc.iop.msc.regFailDisc));
+        /* AND WHO COMMANDS THE DISPLAY BUSES.  BFC CRT SELECT is discrete
+         * input B bits 6 and 7; off zero this computer is claiming them.
+         * See vehicle.h -- every GPC's bootstrap talks to DK1, so without
+         * this two of them talk over each other. */
+        {
+            uint32_t b = discretes_value(r->discretes, DISCRETES_REG_B);
+            uint32_t crt = b & ((0x80000000u >> 6) | (0x80000000u >> 7));
+            vehicle_dk_claim(r->vehicle, r->gpcId, crt != 0u);
+        }
     }
 
     /* The shared devices pace against the vehicle's clock, not this

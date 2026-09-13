@@ -156,6 +156,24 @@ typedef struct Vehicle {
      * measured, two computers IPLing from MM1 at the same moment split one
      * 72-block bootstrap read into 37 blocks and 36, and each machine then
      * ran on half an image with nothing to say why. */
+    /* WHICH COMPUTER CURRENTLY COMMANDS THE DISPLAY-KEYBOARD BUSES.
+     *
+     * Not a static wiring question.  Every GPC's bootstrap talks to DK1, and
+     * measured, two computers IPLing at once BOTH command bus 6 -- GPC1 531
+     * commands and GPC2 340 in the same 100 s.  On the vehicle the crew IPLs
+     * them one at a time and the BFC CRT SELECT switch is what hands the
+     * buses over, so command follows that switch rather than the command
+     * line: a computer claims the DK buses while its switch is off zero and
+     * releases them when it returns to zero.  Last claimant wins, and a
+     * second claimant arriving while another holds them is REPORTED, because
+     * USA005350 3.2.15.1 says dual commanders on a CRT "can result in PASS
+     * GPCs failing-to-sync" and that is a finding, not a thing to smooth.
+     *
+     * 0 means nobody has claimed them, and then the static --deu-bus owner
+     * applies -- which is what a single-computer run has always done. */
+    int dkClaimant;
+    unsigned long dkHandovers, dkDualClaims;
+
     int busOwner[YAGPC_BUS_MAX + 1];          /* last commanding GPC, 0 none */
     unsigned long busClash[YAGPC_BUS_MAX + 1];
 #ifdef HAVE_PTHREADS
@@ -189,6 +207,13 @@ void vehicle_barrier_leave(Vehicle *v, int gpcId);
  * has walked into another's conversation.  `inTransfer` says whether the
  * device still owes the last commander words; pass false for a device that
  * has no such notion.  Every enter must be matched by a leave. */
+/* A computer's BFC CRT SELECT switch moved: non-zero claims the display
+ * buses for it, zero releases them.  Safe to call on every poll. */
+void vehicle_dk_claim(Vehicle *v, int gpcId, bool claiming);
+
+/* True if this computer may command a display unit on this bus. */
+bool vehicle_dk_commands(const Vehicle *v, int gpcId, int staticOwner);
+
 void vehicle_bus_enter(Vehicle *v, int busID, int gpcId, bool inTransfer);
 void vehicle_bus_leave(Vehicle *v, int busID);
 
