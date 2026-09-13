@@ -1308,11 +1308,25 @@ static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
     }
     if (left <= 0 || nia < lo || nia > hi) return;
     if (r->age.gpc.cpu.elapsedTimeUs < afterUs) return;
+    /* YAGPC_RANGETRACE_GPC=<n> restricts the trace to ONE computer.  The
+     * line budget below is a file static shared by every machine, so
+     * without this the first one to reach the range spends all of it and a
+     * later machine's pass is never seen -- which is exactly the case worth
+     * looking at when two computers are supposed to find each other. */
+    {
+        static int onlyInit = 0, only = 0;
+        if (!onlyInit) {
+            onlyInit = 1;
+            const char *g = getenv("YAGPC_RANGETRACE_GPC");
+            if (g != NULL && *g != '\0') only = atoi(g);
+        }
+        if (only != 0 && r->gpcId != only) return;
+    }
     left--;
-    fprintf(stderr, "RT %05x %04x %04x  %-28s "
+    fprintf(stderr, "RT gpc=%d %05x %04x %04x  %-28s "
             "R0=%08x R1=%08x R2=%08x R3=%08x "
             "R4=%08x R5=%08x R6=%08x R7=%08x\n",
-            (unsigned)nia, (unsigned)hw1, (unsigned)hw2, disasm,
+            r->gpcId, (unsigned)nia, (unsigned)hw1, (unsigned)hw2, disasm,
             (unsigned)after->r[0], (unsigned)after->r[1],
             (unsigned)after->r[2], (unsigned)after->r[3],
             (unsigned)after->r[4], (unsigned)after->r[5],
@@ -1779,6 +1793,11 @@ static bool batchrunner_step(BatchRunner *r) {
             uint32_t crt = b & ((0x80000000u >> 6) | (0x80000000u >> 7));
             vehicle_dk_claim(r->vehicle, r->gpcId, crt != 0u);
         }
+        /* AND HOLD THIS COMPUTER'S LINES UP AT THE NEIGHBOURS.  They are
+         * levels; routing them only when they change lets the steady ones
+         * go stale.  See vehicle_refresh_lines. */
+        vehicle_refresh_lines(r->vehicle, r->gpcId,
+                              discretes_value(r->discretes, DISCRETES_REG_OUT));
     }
 
     /* The shared devices pace against the vehicle's clock, not this

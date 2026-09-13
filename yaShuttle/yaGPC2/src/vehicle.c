@@ -218,6 +218,21 @@ static void vehicle_route_out(void *ctx, int sourceGpc, uint32_t before,
     }
 }
 
+void vehicle_refresh_lines(Vehicle *v, int gpcId, uint32_t outValue) {
+    if (v == NULL || v->nMachines < 2 || gpcId < 1 || gpcId > 5) return;
+    for (int m = 1; m <= 5; m++) {
+        if (m == gpcId || v->lines[m] == NULL) continue;
+        /* The WHOLE code, set and clear together -- a half-applied code is a
+         * different code, which is why this does not just re-send the set
+         * bits.  No datagram: the wire carries changes for the monitors,
+         * this is the level the neighbour must keep seeing. */
+        uint32_t on = discretes_rotate_out(gpcId, m, outValue);
+        uint32_t off = discretes_rotate_out(gpcId, m, ~outValue);
+        if (on)  discretes_apply_external(v->lines[m], DISCRETES_REG_A, on, true);
+        if (off) discretes_apply_external(v->lines[m], DISCRETES_REG_A, off, false);
+    }
+}
+
 void vehicle_add_machine(Vehicle *v, int gpcId, struct Discretes *d) {
     if (v == NULL || d == NULL || gpcId < 1 || gpcId > 5) return;
     v->lines[gpcId] = d;

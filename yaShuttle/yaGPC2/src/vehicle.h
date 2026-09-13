@@ -197,6 +197,18 @@ void vehicle_note_time(Vehicle *v, double machineUs);
  * other computers' inputs. */
 void vehicle_add_machine(Vehicle *v, int gpcId, struct Discretes *d);
 
+/* RE-ASSERT one computer's inter-GPC lines to its neighbours.
+ *
+ * They are LEVELS, not pulses.  A computer holds STBY and RUN set for as
+ * long as it is running and toggles only SYNC, so routing on CHANGE alone
+ * refreshes the toggling bit and lets the steady ones age out of the
+ * neighbour's driven mask -- after which they fall back to the neighbour's
+ * locally derived value, which is zero, and a null code of 111 is read as
+ * 001.  A GPC that is still running is still driving those lines even
+ * though the level has not moved, so they have to be re-asserted.  Cheap
+ * and idempotent; call it on the same schedule as the discrete poll. */
+void vehicle_refresh_lines(Vehicle *v, int gpcId, uint32_t outValue);
+
 /* Hold this machine until it is no more than the barrier's delta of
  * simulated time ahead of the slowest running one.  Cheap and returning at
  * once in the ordinary case; call it once per instruction. */
