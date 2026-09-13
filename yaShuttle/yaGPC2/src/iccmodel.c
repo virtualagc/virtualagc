@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "compat.h"
+
 #ifdef HAVE_PTHREADS
 #include <pthread.h>
 #endif
@@ -26,6 +28,7 @@ struct IccModel {
     } q[6];                       /* indexed by receiving GPC id 1-5 */
     unsigned long xmitCmds, xmitWords, recvWords;
     unsigned long recvPolls, recvCalls;   /* does anybody even ask? */
+    int traced;
 #ifdef HAVE_PTHREADS
     pthread_mutex_t lock;
 #endif
@@ -84,6 +87,16 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
     switch (svc) {
     case GPC_SVC_XMIT_CMD:
         m->xmitCmds++;
+        /* YAGPC_ICCTRACE: the first commands each computer issues on the
+         * bus, raw.  The question they answer is whether the software ever
+         * asks to READ another computer, which the counters say it does
+         * not -- and a command word says what kind it is. */
+        if (m->traced < 24 && getenv("YAGPC_ICCTRACE") != NULL) {
+            m->traced++;
+            fprintf(stderr, "ICCCMD t=%.1f gpc=%d cmd=%08x\n",
+                    yagpc_monotonic_seconds(), gpcId,
+                    (unsigned)in->in.word);
+        }
         icc_broadcast(m, gpcId, in->in.word);
         out->out.xmit.ok = true;
         break;
