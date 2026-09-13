@@ -406,10 +406,18 @@ void discretes_synctrace(Discretes *d) {
         if (code == d->syncInLast[k]) continue;
         d->syncInLast[k] = code;
         int from = sync_neighbour_gpc(d->gpcId, k);
-        fprintf(stderr, "SYNC t=%.6f GPC%d  <- N+%d (GPC%d)  %u%u%u %s\n",
+        /* THE DRIVEN MASK IS PRINTED WITH IT.  The value alone proves only
+         * that the bits reached this object; what the CPU reads is the
+         * overlay, which passes a bit ONLY if it is also currently driven.
+         * A neighbour whose code is in `value` but not in `driven` is
+         * invisible to FCMASYNC, and that is not a distinction the decoded
+         * code can show. */
+        fprintf(stderr, "SYNC t=%.6f GPC%d  <- N+%d (GPC%d)  %u%u%u %s "
+                        "A=%08x driven=%08x\n",
                 yagpc_monotonic_seconds(), d->gpcId, k,
                 from, (code >> 2) & 1u, (code >> 1) & 1u, code & 1u,
-                discretes_sync_code_name(code));
+                discretes_sync_code_name(code), in,
+                discretes_driven_mask(d, DISCRETES_REG_A));
     }
 }
 
