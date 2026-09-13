@@ -28,14 +28,41 @@
 
 typedef struct IccModel IccModel;
 
-/* Bus 24, the intercomputer bus (BCENET_IP_BUS). */
-#define YAGPC_ICC_BUS 24
+/* THE INTERCOMPUTER BUSES ARE 1-5, ONE PER COMPUTER -- NOT BUS 24.
+ *
+ * The bus table this emulator's numbering comes from (nsts-sim-gpc
+ * com/bus.civet, the same table that gives DK1=6, MM1=18, MM2=19) names
+ * gpcBceNum 1..5 "Intercomputer 1".."Intercomputer 5", and gpcBceNum 24
+ * IP1..IP5, one per GPC.  yaGPC2 inherited the ICC on bus 24, which is the
+ * IP bus, and the flight software's own command words settle which is
+ * right:
+ *
+ *   CMD gpc=1 bus=1  iua=5  func=000 words=124
+ *   CMD gpc=2 bus=2  iua=5  func=000 words=124
+ *   CMD gpc=1 bus=24 iua=13 func=120..126 words=32     x7134 each
+ *   CMD gpc=1 bus=24 iua=15 func=221      words=481    x6147
+ *
+ * 124 is SIPICCNT, the SSIP ICC word count in FIOICCPG.asm, to the word --
+ * and each computer commands ITS OWN bus, GPC 1 bus 1 and GPC 2 bus 2,
+ * exactly as the table says.  Bus 24 carries 32-word and 481-word reads
+ * from two other units and nothing resembling an intercomputer transfer.
+ *
+ * So a computer COMMANDS its own bus and LISTENS on the other four, which
+ * is why the queues are per (bus, receiver) rather than per receiver: the
+ * words GPC 1 puts on bus 1 must reach whoever is reading BUS 1, and must
+ * not be confused with what GPC 2 is putting on bus 2 at the same moment.
+ * With one shared wire they were. */
+#define YAGPC_ICC_BUS_FIRST 1
+#define YAGPC_ICC_BUS_LAST  5
+#define YAGPC_ICC_IS_BUS(b) \
+    ((b) >= YAGPC_ICC_BUS_FIRST && (b) <= YAGPC_ICC_BUS_LAST)
 
 IccModel *iccmodel_create(void);
 void iccmodel_free(IccModel *m);
 
-/* Serve one bus-24 transaction for the named computer.  Transmitted words go
- * to every OTHER computer's queue; receives take from this computer's own. */
+/* Serve one intercomputer-bus transaction for the named computer.  Words
+ * transmitted on a bus go to every OTHER computer's queue FOR THAT BUS;
+ * a receive takes from this computer's queue for the bus it is reading. */
 void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
                       const GpcServiceInput *in, GpcServiceOutput *out);
 

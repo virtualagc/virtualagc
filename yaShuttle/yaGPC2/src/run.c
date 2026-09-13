@@ -74,13 +74,21 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
      * Decoding per the BCE Principles of Operation (IBM-6246556A part 3):
      * bits 5-9 the interface unit address, 13-22 the function, 23-31 the
      * count, which is ONE LESS than the number of words. */
-    if (svc == GPC_SVC_XMIT_CMD && getenv("YAGPC_CMDTRACE") != NULL) {
-        static int ctInit = 0;
+    if (svc == GPC_SVC_XMIT_CMD) {
+        /* The getenv is done ONCE, not once per command.  It was per
+         * command, and the regression gate noticed: a run with the variable
+         * merely PRESENT in the environment came back 1845 DEU commands
+         * against the gate's 1848, because the run is paced to the wall
+         * clock and the extra work moves the instant a scripted keystroke
+         * lands on.  An instrument that changes the measurement is not an
+         * instrument. */
+        static int ctInit = 0, ctOn = 0;
         static unsigned char want[YAGPC_BUS_MAX + 1];
         static long budget = 200000;
         if (!ctInit) {
             ctInit = 1;
             const char *e = getenv("YAGPC_CMDTRACE");
+            ctOn = (e != NULL && *e != '\0');
             while (e != NULL && *e != '\0') {
                 int b = atoi(e);
                 if (b >= 1 && b <= YAGPC_BUS_MAX) want[b] = 1;
@@ -88,8 +96,8 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
                 e = (c != NULL) ? c + 1 : NULL;
             }
         }
-        if (in->busID >= 1 && in->busID <= YAGPC_BUS_MAX && want[in->busID] &&
-            budget-- > 0) {
+        if (ctOn && in->busID >= 1 && in->busID <= YAGPC_BUS_MAX &&
+            want[in->busID] && budget-- > 0) {
             unsigned cmd = (unsigned)(in->in.word & 0x00ffffffu);
             fprintf(stderr, "CMD gpc=%d bus=%d cmd=%06x iua=%u func=%03x "
                             "words=%u t=%.6f\n",
@@ -242,9 +250,10 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             return;
         }
     }
-    /* THE INTERCOMPUTER BUS FIRST: it is not a peripheral's bus and must not
-     * fall through to one.  See iccmodel.h. */
-    if (br->icc != NULL && in->busID == YAGPC_ICC_BUS) {
+    /* THE INTERCOMPUTER BUSES FIRST: they are not peripherals' buses and must
+     * not fall through to one.  Buses 1-5, one per computer, NOT bus 24 --
+     * see iccmodel.h, which carries the command words that settle it. */
+    if (br->icc != NULL && YAGPC_ICC_IS_BUS(in->busID)) {
         vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
         iccmodel_service(br->icc, br->gpcId, svc, in, out);
         vehicle_bus_leave(br->vehicle, in->busID);

@@ -32,7 +32,9 @@
 #include "run.h"
 
 
-/* Buses 1-24; 24 is the intercomputer bus. */
+/* Buses 1-24.  The intercomputer buses are 1-5, one per computer -- NOT
+ * bus 24, which is the IP bus and carries something else entirely; see
+ * iccmodel.h for the command words that settle it. */
 #define YAGPC_BUS_MAX 24
 
 typedef struct Vehicle {
@@ -45,8 +47,9 @@ typedef struct Vehicle {
     int mmuBus[2];
 
     struct MtuModel *mtu;                        /* buses 20-22 */
-    /* Bus 24, the wire between the computers -- see iccmodel.h.  Built only
-     * when more than one is running; with one there is nobody to talk to. */
+    /* Buses 1-5, the wires between the computers -- see iccmodel.h.  Built
+     * only when more than one is running; with one there is nobody to talk
+     * to. */
     struct IccModel *icc;
     struct DeuModel *deu;                        /* the built-in DK1 unit */
     struct DeuModel *deuExtra[DEU_EXTRA_MAX];    /* --deu-bus */
