@@ -262,10 +262,20 @@ static void exec_WIX(IOP *t, DInstr *v) {
  * 3.3 BCE TRANSMISSION INSTRUCTIONS
  * ------------------------------------------------------------------- */
 
+/* THE IUAR IS LOADED WHETHER OR NOT THE COMMAND GOES OUT.  A disabled
+ * transmitter suppresses the transmission, not the instruction: FIOPRMPG's
+ * timing-unit listener runs '#CMDI FIOFFIUA,FIOMDMRT  SET IUA.' then
+ * '#RDLI 6' with its transmitter off, and only that #CMDI gives its
+ * Listen-Mode receive the address to wait for.  Loading it only when
+ * transmitting left a listener that had never commanded the bus with IUAR 0,
+ * waiting through every transfer; the MSC's single look found it busy and the
+ * computer failed itself out of the redundant set (ledger #138).  #MIN's
+ * command word is different, and documented so -- "In Listen mode, the IUAR
+ * is unchanged" -- see bce_process_mio_command. */
 static void exec_CMDI(IOP *t, DInstr *v) {
+    register_set32(iopls_IUAR(&t->ls), df_get(v, 'u'));
     if (iop_proc_get(&t->regXmitEna, t->curPE)) {
         uint32_t cmd = (df_get(v, 'u') << 19) | df_get(v, 'i');
-        register_set32(iopls_IUAR(&t->ls), df_get(v, 'u'));
         BCE *bce = iop_cur_bce(t);
         if (bce) mia_xmit_cmd(t, &bce->mia, cmd);
     }
@@ -275,8 +285,8 @@ static void exec_CMDI(IOP *t, DInstr *v) {
 static void exec_CMD(IOP *t, DInstr *v) {
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
     uint32_t cmd = iop_g_eaf(t, addr) & 0x00ffffffu;
+    register_set32(iopls_IUAR(&t->ls), (cmd >> 19) & 0x1f);   /* see #CMDI */
     if (iop_proc_get(&t->regXmitEna, t->curPE)) {
-        register_set32(iopls_IUAR(&t->ls), (cmd >> 19) & 0x1f);
         BCE *bce = iop_cur_bce(t);
         if (bce) mia_xmit_cmd(t, &bce->mia, cmd);
     }

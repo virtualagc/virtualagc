@@ -2456,7 +2456,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
          * Reading bits 7-11 alone put every one of those writes on the MSC's
          * page or BCE 1's: no display-bus controller was ever given its IUA,
          * so a Listen-Mode receive on DK1 waited for a command it could not
-         * match and the MSC's single look found it busy (ledger #138).  The
+         * match and the MSC's single look found it busy (ledger #137).  The
          * sum of the two fields is the only rule all three satisfy -- FCMTBCD
          * counts buses 1-24 as 1 + (0..23), the other two as 0 + (1..24) --
          * and a command that leaves bits 23-27 clear decodes as before. */
