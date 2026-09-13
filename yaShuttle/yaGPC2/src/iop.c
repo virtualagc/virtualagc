@@ -426,6 +426,7 @@ uint32_t mia_get_data(struct IOP *iop, MIA *m) {
     if (m->latchValid) {
         m->latchValid = false;
         m->lastFromLatch = true;
+        m->lastCmdSync = m->latchCmdSync;
         return m->latch;
     }
     m->lastFromLatch = false;
@@ -475,6 +476,22 @@ void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
     }
     if (m->bceNum >= 1 && m->bceNum <= 24)
         iop_bce_wire_hold(iop, &iop->bce[m->bceNum - 1], 1u);
+    /* THE ECHO OVERWRITES THE ADAPTER'S BUFFER.  A command this MIA puts on
+     * the bus comes straight back into its own receiver -- the copy BCE
+     * Principles of Operation 3.4.4 says a Command Mode receive may discard
+     * -- and the buffer holds one word, which 'stays there until either the
+     * BCE removes it or the MIA overwrites it'.  No device model echoes a
+     * command to the computer that sent it, so a word latched by an earlier
+     * delay outlived the command: a mass-memory commander's '#DLYI 1814'
+     * latched the 00c6c6 tail of the previous stream, '#CMD FIOCWE' went
+     * out, and '#RDL' took 00c6c6 as the first word of the overlay block --
+     * one place late throughout, a load-block checksum failure (FIOMGSNC
+     * 0080) on the COMMANDER, and ARCGPC dropped it from the redundant set
+     * (ledger #139).  The latched echo is marked command sync so the receive
+     * discards it; a word from the bus still overwrites it (mia_get_data). */
+    m->latch = cmd24 & 0xffffffu;
+    m->latchValid = true;
+    m->latchCmdSync = true;
     if (!iop->servicer) return;
     /* IUA occupies bits 19-23 of the 24-bit command word (see
      * exec_CMDI/exec_CMD in iop_bce_instr.c, which build it as
@@ -1799,8 +1816,12 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
                     e = c + 1;
                 }
             }
+            /* Short receives in full; longer ones only their first three
+             * words, which is enough to see whether two computers reading the
+             * same segment start it on the same word. */
             if (rwMask != 0 && p > 0 && p < 32 && (rwMask & (1u << p)) &&
-                bce->recvCount <= 4 && iop->cpu != NULL)
+                (bce->recvCount <= 4 || bce->recvCount - bce->recvLeft < 3) &&
+                iop->cpu != NULL)
                 fprintf(stderr, "RECVWORD gpc=%d bce=%d pc=%05x word=%06x sync=%s src=%s await=%d skipped=%d got=%d left=%u xmit=%d t=%.1f\n",
                         iop->cpu->gpcId, p,
                         (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu),
@@ -2007,6 +2028,7 @@ bool iop_bce_delay(IOP *iop, uint32_t count) {
         bool held = false;
         while (mia_data_available(iop, &bce->mia)) {
             bce->mia.latch = mia_get_data(iop, &bce->mia);
+            bce->mia.latchCmdSync = bce->mia.lastCmdSync;
             held = true;             /* re-latches what it just took */
         }
         if (held) bce->mia.latchValid = true;

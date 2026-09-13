@@ -145,6 +145,14 @@ typedef struct {
      * the next receive, ahead of anything newer. */
     uint32_t latch;
     bool latchValid;
+    /* The latched word's sync type.  A held command word is still a command
+     * word: a mass-memory listener delaying through its commander's READ
+     * found the READ in the buffer, and its receive -- Command Mode, since
+     * FIOMMCMD picks the listener per request and leaves its transmitter
+     * enabled -- took it as the first data word when, marked, it is the one
+     * echo Command Mode discards.  Every word after it was one place late
+     * and the overlay failed its checksum (ledger #139). */
+    bool latchCmdSync;
     bool lastFromLatch;    /* the last word handed over was the latch, not the bus */
     /* YAGPC_IOP_UPSTREAM: simulated time at or after which the next
      * received word may be taken.  A real receiver presents halfwords to

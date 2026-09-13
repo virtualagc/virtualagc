@@ -125,6 +125,38 @@ static uint32_t block_gap_words(void) {
 #define BLOCK_GAP_WORDS (block_gap_words())
 #define SLOT_UNPACED 0xffffffffu
 
+/* A READ's first data word does not follow the command at once: the unit
+ * has to find the block first.  Streaming from the command's own word
+ * time put the head of every read on the wire while the listening
+ * computers were still in the delay FIOMMUPG gives them, and a delaying
+ * BCE throws away what arrives -- so each listener's copy of an overlay
+ * block began a dozen words in, failed FIOMGCV's load-block checksum
+ * (FIOMGSNC error 0080), and ARCGPC dropped that computer from the
+ * redundant set (ledger #139).
+ *
+ * The flight software states the constraint.  FIOMMUPG: 'COMMANDER DELAY
+ * = 1814 FOR TAPE REVERSAL.  LISTENER DELAY = 1833 = TAPE REVERSAL + 19
+ * FOR 2 CMDR'S CMD AND 17 FOR SYNC SKEW, PC1 ROLL-OVER, MSC AVAILABILITY,
+ * IOP ALIGNMENT SKEW, AND DISCRETE NOISE'.  At 16.5 us a tick the listener
+ * arms up to 17 + 17 ticks, about 560 us, after the commander's READ, and
+ * the design only works if no data word is on the wire before then.  The
+ * search time is not modelled; 1 ms is past that bound with margin and
+ * small against the receive's 1.96 s timeout.  YAGPC_MMU_READ_LATENCY_US
+ * overrides it, 0 restoring the old behaviour. */
+static uint32_t read_latency_words(void) {
+    static int inited = 0;
+    static uint32_t v = 31;          /* 31 x 33 us, just over 1 ms */
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_MMU_READ_LATENCY_US");
+        if (e != NULL && *e != '\0') {
+            double us = strtod(e, NULL);
+            if (us >= 0.0 && us < 1e7) v = (uint32_t)((us + BUS_WORD_US - 1.0) / BUS_WORD_US);
+        }
+    }
+    return v;
+}
+
 struct MmuModel {
     int unit;
     int busID;
@@ -157,6 +189,7 @@ struct MmuModel {
     uint32_t slot[QUEUE_HW];
     double burstStartUs;
     uint32_t nextSlot;
+    bool burstPrimed;                 /* do_read has set burstStartUs/nextSlot */
 
     /* The READY discrete this unit drives; see mmumodel_publish_ready. */
     /* The discrete channel this unit drives READY on.  A mass memory is
@@ -291,10 +324,11 @@ static void queue_words_paced(MmuModel *m, const uint16_t *w, size_t n, bool pac
     }
     /* An idle bus starts the clock again: word times are counted from the
      * first word of a burst, not from some transfer long finished. */
-    if (m->queueHead >= m->queueCount) {
+    if (m->queueHead >= m->queueCount && !m->burstPrimed) {
         m->burstStartUs = mm_now(m);
         m->nextSlot = 0;
     }
+    m->burstPrimed = false;
     for (size_t i = 0; i < n; i++) {
         m->slot[m->queueCount + i] = paced ? m->nextSlot++ : SLOT_UNPACED;
     }
@@ -421,6 +455,20 @@ static void do_read(MmuModel *m, int track, int subfile, int block, int count) {
     }
 
     mm_log(m, "read %d block(s) from %d/%d/%d/%d", n, track, m->file, subfile, block);
+    /* The first word waits out the search (read_latency_words), counted
+     * from now whether or not an unread reply keeps the burst open. */
+    if (m->queueHead >= m->queueCount) {
+        m->burstStartUs = mm_now(m);
+        m->nextSlot = 0;
+    }
+    {
+        double sinceUs = mm_now(m) - m->burstStartUs;
+        uint32_t nowSlot = sinceUs > 0.0
+            ? (uint32_t)((sinceUs + BUS_WORD_US - 1.0) / BUS_WORD_US) : 0;
+        if (m->nextSlot < nowSlot + read_latency_words())
+            m->nextSlot = nowSlot + read_latency_words();
+        m->burstPrimed = true;
+    }
     static uint16_t zero[HALFWORDS_PER_BLOCK];
     for (int i = 0; i < n; i++) {
         int idx = first + i;
