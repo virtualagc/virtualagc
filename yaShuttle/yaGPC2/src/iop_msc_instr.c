@@ -547,8 +547,30 @@ static void exec_SIO(IOP *t, DInstr *v) {
         register_set32(iopls_MST(&t->ls), st);
         iop_proc_set(&t->regProgExcept, PROC_MSC, 0); /* MSC to NO-GO */
     }
+    /* A START I/O BEGINS A NEW BUS PROGRAM, AND A WORD LATCHED BY THE LAST
+     * ONE DOES NOT CARRY INTO IT.  The latch (iop_bce_delay) models the word a
+     * delay leaves in the MIA buffer for the same program's next receive --
+     * FCMBOOT's one-halfword '#RDLI  CLEAR THE MIA BUFFER' after its delay.
+     * Left across a #WAT and a new @SIO it reached programs written to find
+     * nothing waiting: FIOMMUPG's receiver FIOM1PSR is '#LBR@ / #RDLI 1' with
+     * no delay, the transmitter's '#DLYI 0 *ALIGNMENT FOR LISTENER PROGRAM'
+     * exists so the listener is sampling before the command arrives, and in a
+     * redundant set the listener took a mass-memory stream tail latched by its
+     * previous program as its first status word, then the commander's command
+     * as its second, and error-terminated -- an overlay error that dropped the
+     * computer from the set (ledger #139).  The BCE Principles of Operation
+     * does not say an @SIO clears the MIA buffer; this is an approximation
+     * scoped to the one word the emulator itself holds back. */
+    bool wasBusy[25];
+    for (int p = 1; p <= 24; p++) wasBusy[p] = iop_proc_get(&t->regBusyWait, p);
     bw = bw | acc;
     register_set32(&t->regBusyWait, bw);
+    for (int p = 1; p <= 24; p++) {
+        if (!wasBusy[p] && iop_proc_get(&t->regBusyWait, p)) {
+            t->bce[p - 1].mia.latchValid = false;
+            t->bce[p - 1].mia.lastFromLatch = false;
+        }
+    }
     iop_incr_nia(t, 1);
 }
 

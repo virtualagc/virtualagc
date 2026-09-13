@@ -145,6 +145,7 @@ typedef struct {
      * the next receive, ahead of anything newer. */
     uint32_t latch;
     bool latchValid;
+    bool lastFromLatch;    /* the last word handed over was the latch, not the bus */
     /* YAGPC_IOP_UPSTREAM: simulated time at or after which the next
      * received word may be taken.  A real receiver presents halfwords to
      * its BCE at the bus rate however fast the host modelling the

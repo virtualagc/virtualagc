@@ -416,6 +416,7 @@ uint32_t mia_get_data(struct IOP *iop, MIA *m) {
              * that an error, so BSL1 reported ERROR 118 "MMU ERROR" and
              * reset instead of loading anything. */
             m->latchValid = false;
+            m->lastFromLatch = false;
             /* The sync mark belongs to the adapter, not to the data. */
             m->lastCmdSync = (output.out.recv.word & YAGPC_BUSWORD_CMD_SYNC) != 0u;
             return output.out.recv.word & ~YAGPC_BUSWORD_CMD_SYNC;
@@ -424,8 +425,10 @@ uint32_t mia_get_data(struct IOP *iop, MIA *m) {
     m->lastCmdSync = false;
     if (m->latchValid) {
         m->latchValid = false;
+        m->lastFromLatch = true;
         return m->latch;
     }
+    m->lastFromLatch = false;
     return 0;
 }
 
@@ -1798,10 +1801,11 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
             }
             if (rwMask != 0 && p > 0 && p < 32 && (rwMask & (1u << p)) &&
                 bce->recvCount <= 4 && iop->cpu != NULL)
-                fprintf(stderr, "RECVWORD gpc=%d bce=%d pc=%05x word=%06x sync=%s await=%d skipped=%d got=%d left=%u xmit=%d t=%.1f\n",
+                fprintf(stderr, "RECVWORD gpc=%d bce=%d pc=%05x word=%06x sync=%s src=%s await=%d skipped=%d got=%d left=%u xmit=%d t=%.1f\n",
                         iop->cpu->gpcId, p,
                         (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu),
                         (unsigned)(data & 0xffffffu), bce->mia.lastCmdSync ? "CMD " : "data",
+                        bce->mia.lastFromLatch ? "latch" : "bus  ",
                         (int)bce->recvAwaitCmd, (int)bce->recvSkippedEcho, (int)bce->recvGotAny,
                         (unsigned)bce->recvLeft, (int)iop_proc_get(&iop->regXmitEna, p), now);
         }
