@@ -177,6 +177,13 @@ typedef struct Vehicle {
     int dkClaimant;
     unsigned long dkHandovers, dkDualClaims;
 
+    /* YAGPC_BUSCENSUS: how many transactions each computer put on each bus.
+     * The I/O-complete sync is a barrier every set member must reach, so a
+     * set holds only if its members do comparable I/O -- and measured, ours
+     * differ by seventy to one.  This says WHICH BUS the difference is on,
+     * which is what separates a real asymmetry from an emulator artefact. */
+    unsigned long busCount[6][YAGPC_BUS_MAX + 1];
+
     int busOwner[YAGPC_BUS_MAX + 1];          /* last commanding GPC, 0 none */
     unsigned long busClash[YAGPC_BUS_MAX + 1];
 #ifdef HAVE_PTHREADS

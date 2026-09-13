@@ -128,6 +128,7 @@ void vehicle_bus_enter(Vehicle *v, int busID, int gpcId, bool inTransfer) {
      * taking turns on an idle unit is just two computers taking turns.  A
      * second one arriving while the unit still owes the first its words has
      * overwritten a conversation, and neither computer is told. */
+    if (gpcId >= 1 && gpcId <= 5) v->busCount[gpcId][busID]++;
     int prev = v->busOwner[busID];
     if (inTransfer && prev != 0 && prev != gpcId) v->busClash[busID]++;
     v->busOwner[busID] = gpcId;
@@ -260,6 +261,18 @@ void vehicle_free(Vehicle *v) {
      * without.  What the numbers are for is the ABANDONED count, which means
      * a machine waited on a clock that had stopped, and the total, which is
      * worth comparing against the run if a vehicle ever does look slow. */
+    if (getenv("YAGPC_BUSCENSUS") != NULL) {
+        for (int b = 1; b <= YAGPC_BUS_MAX; b++) {
+            unsigned long tot = 0;
+            for (int g = 1; g <= 5; g++) tot += v->busCount[g][b];
+            if (tot == 0) continue;
+            fprintf(stderr, "vehicle: bus %2d transactions:", b);
+            for (int g = 1; g <= 5; g++)
+                if (v->busCount[g][b] > 0)
+                    fprintf(stderr, "  GPC%d=%lu", g, v->busCount[g][b]);
+            fprintf(stderr, "\n");
+        }
+    }
     if (v->barHolds > 0)
         fprintf(stderr, "vehicle: simulated-time barrier held %lu times, "
                         "%.3f s total, %lu abandoned (delta %.0f us)\n",
