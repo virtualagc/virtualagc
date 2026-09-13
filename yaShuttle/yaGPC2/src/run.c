@@ -683,9 +683,15 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
              * unit (20-22) models, and the display units (6-9, #137), whose
              * listeners are shown the commander's command word (#136).  One computer keeps its old
              * receives: with no second machine there is nobody to echo. */
-            if (veh->icc != NULL)
+            if (veh->icc != NULL) {
                 iop_set_bus_marks_sync(&r->age.gpc.iop,
                                        0x3eu | (0xfu << 6) | (0x1fu << 18));
+                /* And the display buses take their wire time: FIODEUPG's
+                 * listener delays for its commander's transmission, and with
+                 * a free wire the commander's '#MIN' went past it (#137).  Not
+                 * the ICC buses -- held there the set broke sooner. */
+                iop_set_wire_hold_buses(&r->age.gpc.iop, 0xfu << 6);
+            }
             r->busRouter.deuOwner = veh->deuOwner;
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtraOwner[d] = veh->deuExtraOwner[d];

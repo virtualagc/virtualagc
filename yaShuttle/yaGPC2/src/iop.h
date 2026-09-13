@@ -261,6 +261,10 @@ typedef struct IOP {
      * any other bus a listening BCE would wait for a command it can never be
      * shown, so it keeps the old behaviour.  Set by the router. */
     uint32_t busMarksSync;
+    /* Buses whose BCEs wait out their transmitted words' wire time before
+     * their next instruction -- see iop_bce_wire_hold.  Set by the router
+     * when several computers share the buses; YAGPC_WIRE_HOLD_BUSES wins. */
+    uint32_t wireHoldBuses;
     /* regHalt is Status Register 5, "the Halt Register", as READ
      * PROCESSOR HALT STATUS (040C0000) reports it.  Despite the name the
      * polarity is the ENABLE direction, straight from the PCI format:
@@ -434,6 +438,7 @@ void iop_system_reset(IOP *iop);
  * exactly.  See RECV_TIMEOUT_FLOOR_US in iop.c. */
 void iop_set_recv_timeout_floor_us(IOP *iop, double us);
 void iop_set_bus_marks_sync(IOP *iop, uint32_t busMask);
+void iop_set_wire_hold_buses(IOP *iop, uint32_t busMask);
 
 void iop_exec(IOP *iop);
 void iop_exec_idle(IOP *iop);

@@ -1372,26 +1372,37 @@ BCE *iop_cur_bce(IOP *iop) {
  * waits: its next instruction is held until the words it has sent would have
  * cleared the wire.  YAGPC_WIRE_HOLD_BUSES=<n>[,<n>...] chooses the buses;
  * none by default. */
-static bool wire_hold_bus(int bus) {
-    static int inited = 0;
+static bool wire_hold_bus(const IOP *iop, int bus) {
+    /* YAGPC_WIRE_HOLD_BUSES, when given, replaces what the router asked for:
+     * a list of buses, or 'none'. */
+    static int inited = 0, given = 0;
     static unsigned mask = 0;
     if (!inited) {
         inited = 1;
         const char *e = getenv("YAGPC_WIRE_HOLD_BUSES");
-        while (e != NULL && *e != '\0') {
-            int n = atoi(e);
-            if (n >= 0 && n < 32) mask |= 1u << n;
-            const char *c = strchr(e, ',');
-            e = (c != NULL) ? c + 1 : NULL;
+        if (e != NULL) {
+            given = 1;
+            while (*e != '\0' && strcmp(e, "none") != 0) {
+                int n = atoi(e);
+                if (n >= 0 && n < 32) mask |= 1u << n;
+                const char *c = strchr(e, ',');
+                if (c == NULL) break;
+                e = c + 1;
+            }
         }
     }
-    return bus >= 0 && bus < 32 && (mask & (1u << bus));
+    unsigned m = given ? mask : iop->wireHoldBuses;
+    return bus >= 0 && bus < 32 && (m & (1u << bus));
+}
+
+void iop_set_wire_hold_buses(IOP *iop, uint32_t busMask) {
+    if (iop) iop->wireHoldBuses = busMask;
 }
 
 #define WIRE_WORD_US 33.0
 
 static void iop_bce_wire_hold(IOP *iop, BCE *bce, unsigned words) {
-    if (bce == NULL || iop->cpu == NULL || !wire_hold_bus(bce->bceNum)) return;
+    if (bce == NULL || iop->cpu == NULL || !wire_hold_bus(iop, bce->bceNum)) return;
     double now = iop->cpu->elapsedTimeUs;
     if (bce->wireHoldUntilUs < now) bce->wireHoldUntilUs = now;
     bce->wireHoldUntilUs += (double)words * WIRE_WORD_US;
