@@ -48,3 +48,6 @@ because this file records everything and recovers nothing.
   count; and a suspicious register value should be checked against TFCVT's
   constant table before it is treated as evidence (0x088 is TCVTSVCI, not a
   mask). See gpc-causes #110, #117, #118.
+
+### [2026-09-13] Target: README.md
+- The regression-gate section quotes the DEU and MTU counters as figures that "should match exactly". Split them: the EVENT-driven ones (mmu commands/blocksRead/wordsOut/wordsTaken/wordsLost/position, deu formatFills/resets/modeStatus/ipled and the zeroed error counters) are bit-exact across runs and builds and ARE the gate; the PERIODIC ones (deu commands/fills/timeFills/displayFills/medsXfers/polls/wordsIn/wordsOut and every mtu counter) cannot be, because the harness cuts off after a fixed WALL duration and they count how much simulated time fitted inside it. Measured over four runs on two builds, 2026-09-13: spread 1848/1845/1844/1844 deu commands with every event counter identical, and the scripted keystroke at simt=133.704 in all four. Say that 1848 is one sample and not uniquely correct, that a HIGHER number is not a regression, and that a same-day control run of the committed build is the thing to compare against. See gpc-causes.py #124.
