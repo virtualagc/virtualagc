@@ -42,6 +42,11 @@
 #define XFER_MAX            COUNT_MASK
 #define REPLY_MAX           64
 
+/* YAGPC_DEUKEYS batches.  Sixteen was one short of a three-computer run --
+ * three loads, thirteen NBAT items and the OPS request -- and the seventeenth
+ * batch, the OPS request itself, was silently never parsed. */
+#define YAGPC_DEU_MAX_BATCHES 64
+
 struct DeuModel {
     int busID;
 
@@ -89,7 +94,7 @@ struct DeuModel {
     long resets, unknown, abandoned, modeStatus;
     /* YAGPC_DEUKEYS: which batches THIS unit has delivered.  See
      * deu_pending_keys. */
-    unsigned char keysSent[16];
+    unsigned char keysSent[YAGPC_DEU_MAX_BATCHES];
     long wordsIn, wordsOut;
 };
 
@@ -283,11 +288,11 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
      * PASS drives four), and they are not interchangeable -- a keystroke
      * reaches the flight software through the unit the crew typed at. */
     unsigned char *sent = d->keysSent;
-    static long batchAfter[16];
-    static long batchSecs[16];
-    static const char *batchKeys[16];
+    static long batchAfter[YAGPC_DEU_MAX_BATCHES];
+    static long batchSecs[YAGPC_DEU_MAX_BATCHES];
+    static const char *batchKeys[YAGPC_DEU_MAX_BATCHES];
     static int nBatch = -1;
-    static char specBuf[512];
+    static char specBuf[16384];
     if (nBatch < 0) {
         long dflt = 400;
         const char *w = getenv("YAGPC_DEUKEYS_AFTER");
@@ -297,7 +302,7 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
         }
         snprintf(specBuf, sizeof specBuf, "%s", spec);
         nBatch = 0;
-        for (char *p = specBuf; *p && nBatch < 16; ) {
+        for (char *p = specBuf; *p && nBatch < YAGPC_DEU_MAX_BATCHES; ) {
             char *semi = p; while (*semi && *semi != ';') semi++;
             char save = *semi; *semi = '\0';
             long after = dflt;

@@ -184,11 +184,13 @@ struct MmuModel {
      * started; with no shared clock there are no taps and nothing changes. */
     struct MmuTap {
         uint32_t *w;            /* NULL until this computer is seen here */
-        double *due;            /* shared us; < 0 for an unpaced reply */
+        double *due;            /* shared us the word is on the wire */
+        unsigned char *paced;   /* 1 for a streamed block word */
         size_t head, count;
     } tap[6];
     int owner;                  /* GPC id of the commander, 0 = none yet */
     double ownerOffsetUs;       /* shared minus the commander's own clock */
+    double replyWireUs;         /* shared time the last reply/command word ends */
     bool haveOffset;
     long listenerWords, listenerLost;
 };
@@ -225,29 +227,34 @@ static double mm_now(const MmuModel *m) {
     return m->clockUs ? *m->clockUs : 0.0;
 }
 
-static void tap_push(MmuModel *m, int r, uint32_t w, double due) {
+static void tap_push(MmuModel *m, int r, uint32_t w, double due, bool paced) {
     struct MmuTap *t = &m->tap[r];
     if (t->w == NULL) return;
     if (t->head > 0 && t->count + 1 > QUEUE_HW) {
         memmove(t->w, t->w + t->head, (t->count - t->head) * sizeof t->w[0]);
         memmove(t->due, t->due + t->head, (t->count - t->head) * sizeof t->due[0]);
+        memmove(t->paced, t->paced + t->head, (t->count - t->head) * sizeof t->paced[0]);
         t->count -= t->head;
         t->head = 0;
     }
     if (t->count >= QUEUE_HW) { m->listenerLost++; return; }
     t->w[t->count] = w;
     t->due[t->count] = due;
+    t->paced[t->count] = paced ? 1 : 0;
     t->count++;
 }
 
-/* A new command ends the streamed transfer for listeners as it does for the
- * commander (see on_command). */
-static void tap_discard_streamed(MmuModel *m, int r) {
+/* A new command ends a stream: the unit stops sending, so streamed words
+ * that are not yet on the wire never will be -- the commander's queue drops
+ * them in on_command.  Words already due, and replies, stay in wire order. */
+static void tap_end_stream(MmuModel *m, int r, double nowShared) {
     struct MmuTap *t = &m->tap[r];
-    while (t->head < t->count && t->due[t->head] >= 0.0) {
-        t->head++;
-        m->listenerLost++;
+    size_t j = t->head;
+    for (size_t i = t->head; i < t->count; i++) {
+        if (t->paced[i] && t->due[i] > nowShared) { m->listenerLost++; continue; }
+        t->w[j] = t->w[i]; t->due[j] = t->due[i]; t->paced[j] = t->paced[i]; j++;
     }
+    t->count = j;
 }
 
 /* bus_word() for a listener, on the shared clock, with the same grace. */
@@ -296,13 +303,30 @@ static void queue_words_paced(MmuModel *m, const uint16_t *w, size_t n, bool pac
     m->queueCount += n;
     m->stats.wordsOut += (long)n;
     if (m->owner >= 1 && m->haveOffset) {
-        for (int r = 1; r <= 5; r++) {
-            if (r == m->owner || m->tap[r].w == NULL) continue;
-            for (size_t i = 0; i < n; i++) {
-                uint32_t sl = m->slot[first + i];
-                double due = (sl == SLOT_UNPACED) ? -1.0
-                    : m->burstStartUs + (double)sl * BUS_WORD_US + m->ownerOffsetUs;
-                tap_push(m, r, w[i], due);
+        /* EACH WORD AT ITS WIRE TIME.  A streamed word is due at its slot;
+         * a reply follows the command, and each word the one before it, a
+         * word time apart.  Releasing replies the moment the command was
+         * issued put them into a listener before it had reached its receive:
+         * FIOMMUPG's listener entries begin '#DLYI 0 *ALIGNMENT FOR LISTENER
+         * PROGRAM', the delay drained the echo and the first status word,
+         * the '#RDLI' took the second as its first, and the commander's next
+         * command echo then error-terminated it with one word left -- an
+         * overlay error on that computer alone, and ARCGPC dropped it from
+         * the redundant set (ledger #139). */
+        double nowShared = mm_now(m) + m->ownerOffsetUs;
+        for (size_t i = 0; i < n; i++) {
+            uint32_t sl = m->slot[first + i];
+            bool paced = (sl != SLOT_UNPACED);
+            double due;
+            if (!paced) {
+                due = (m->replyWireUs > nowShared ? m->replyWireUs : nowShared) + BUS_WORD_US;
+                m->replyWireUs = due;
+            } else {
+                due = m->burstStartUs + (double)sl * BUS_WORD_US + m->ownerOffsetUs;
+            }
+            for (int r = 1; r <= 5; r++) {
+                if (r == m->owner || m->tap[r].w == NULL) continue;
+                tap_push(m, r, w[i], due, paced);
             }
         }
     }
@@ -672,7 +696,7 @@ void mmumodel_set_discretes(MmuModel *m, struct Discretes *d) {
 
 void mmumodel_free(MmuModel *m) {
     if (!m) return;
-    for (int r = 0; r < 6; r++) { free(m->tap[r].w); free(m->tap[r].due); }
+    for (int r = 0; r < 6; r++) { free(m->tap[r].w); free(m->tap[r].due); free(m->tap[r].paced); }
     if (m->blocks) {
         for (int i = 0; i < BLOCKS_TOTAL; i++) free(m->blocks[i]);
         free(m->blocks);
@@ -838,8 +862,10 @@ void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
         if (t->w == NULL) {
             t->w = calloc(QUEUE_HW, sizeof t->w[0]);
             t->due = calloc(QUEUE_HW, sizeof t->due[0]);
-            if (t->w == NULL || t->due == NULL) {
-                free(t->w); free(t->due); t->w = NULL; t->due = NULL;
+            t->paced = calloc(QUEUE_HW, sizeof t->paced[0]);
+            if (t->w == NULL || t->due == NULL || t->paced == NULL) {
+                free(t->w); free(t->due); free(t->paced);
+                t->w = NULL; t->due = NULL; t->paced = NULL;
             }
         }
         switch (serviceNumber) {
@@ -854,11 +880,17 @@ void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
             m->ownerOffsetUs = sharedUs - mm_now(m);
             m->haveOffset = true;
             uint32_t cmd = input->in.word & 0xffffffu;
+            /* The command word goes on the wire after the reply words ahead
+             * of it; a stream in progress simply stops. */
+            double echoDue = (m->replyWireUs > sharedUs ? m->replyWireUs : sharedUs) + BUS_WORD_US;
             if ((int)((cmd >> 19) & 0x1f) == IUA) {
+                m->replyWireUs = echoDue;
                 for (int r = 1; r <= 5; r++) {
                     if (r == g || m->tap[r].w == NULL) continue;
-                    tap_discard_streamed(m, r);
-                    tap_push(m, r, cmd | YAGPC_BUSWORD_CMD_SYNC, -1.0);
+                    /* Wire order: the echo follows the replies already
+                     * sent, and a word nobody takes ages out in tap_word. */
+                    tap_end_stream(m, r, sharedUs);
+                    tap_push(m, r, cmd | YAGPC_BUSWORD_CMD_SYNC, echoDue, false);
                 }
             }
             break;                      /* and on to the unit itself, below */

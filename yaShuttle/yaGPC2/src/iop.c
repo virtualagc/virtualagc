@@ -1776,6 +1776,35 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
          * of 2 (33 us) and whose commander delays 198 us before it transmits,
          * timed out before every transfer, was retried, and read each
          * transfer one cycle late or not at all (ledger #131-#133). */
+        /* YAGPC_RECVWORD_TRACE=<n>[,<n>...]: every word a SHORT receive (armed
+         * for four words or fewer) takes on those BCEs, per computer, with its
+         * sync type and the receive's state as the word arrives.  Written to
+         * see, rather than infer from the listing, what a mass-memory
+         * listener's two-word status receive is handed when it error-
+         * terminates with one word left (ledger #139). */
+        {
+            static int rwInit = 0;
+            static unsigned rwMask = 0;
+            if (!rwInit) {
+                rwInit = 1;
+                const char *e = getenv("YAGPC_RECVWORD_TRACE");
+                while (e != NULL && *e != '\0') {
+                    int n = atoi(e);
+                    if (n > 0 && n < 32) rwMask |= 1u << n;
+                    const char *c = strchr(e, ',');
+                    if (c == NULL) break;
+                    e = c + 1;
+                }
+            }
+            if (rwMask != 0 && p > 0 && p < 32 && (rwMask & (1u << p)) &&
+                bce->recvCount <= 4 && iop->cpu != NULL)
+                fprintf(stderr, "RECVWORD gpc=%d bce=%d pc=%05x word=%06x sync=%s await=%d skipped=%d got=%d left=%u xmit=%d t=%.1f\n",
+                        iop->cpu->gpcId, p,
+                        (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu),
+                        (unsigned)(data & 0xffffffu), bce->mia.lastCmdSync ? "CMD " : "data",
+                        (int)bce->recvAwaitCmd, (int)bce->recvSkippedEcho, (int)bce->recvGotAny,
+                        (unsigned)bce->recvLeft, (int)iop_proc_get(&iop->regXmitEna, p), now);
+        }
         if (bce->recvAwaitCmd || bce->mia.lastCmdSync) {
             if (bce->recvAwaitCmd) {
                 if (bce->mia.lastCmdSync &&
@@ -1871,6 +1900,7 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         bce->recvPC = pc;
         bce->recvAddr = addr & 0x3ffffu;
         bce->recvLeft = count;
+        bce->recvCount = count;
         bce->recvSinceUs = now;
         bce->recvGotAny = false;
         /* LISTEN MODE is a transmitter-disabled BCE, and it waits for a

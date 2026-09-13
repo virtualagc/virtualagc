@@ -199,6 +199,7 @@ typedef struct {
     /* Wire hold (YAGPC_WIRE_HOLD_BUSES): the BCE may not run its next
      * instruction before this simulated time -- see iop_bce_wire_hold. */
     double wireHoldUntilUs;
+    uint32_t recvCount;        /* the count the current receive was armed with */
 } BCE;
 
 void bce_init(BCE *b, int bceNum);
