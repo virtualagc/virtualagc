@@ -158,6 +158,10 @@ typedef struct {
      * panel and its own HALT->STBY edge, and sharing these let one machine's
      * panel reading release another's reset. */
     uint32_t prevMode;
+    /* The CAM diagonal's latch: two votes against this computer were seen.
+     * Cleared when the mode switch goes to HALT, the nearest the emulator
+     * has to the hardware latch's reset.  See DISCRETES_REG_CFAIL. */
+    bool cfailLatched;
     bool modeReported;
     /* mode_switch_held()'s memo, keyed on this machine's discrete bus
      * generation -- see the comment there. */

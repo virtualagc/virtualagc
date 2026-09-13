@@ -76,3 +76,6 @@
 
 ### [2026-09-13] Target: [HANDOFF-panelO6.md]
 - `cam.py` corrected per the user: every CAM lamp fills its cell (no small centred square); the diagonal cells are lamps too, lit YELLOW with the GPC number as a BLACK legend (off-diagonal lamps light WHITE); the diagonal shows each GPC's vote against ITSELF, so keystroke pairs 11..55 and clicks toggle it. yaGPC2's fail-vote register already names that bit "fail vote N+0 (self)" (bit 27, src/discretes.c). cam.py is still keystroke/click driven, not wired to the discrete bus.
+
+### [2026-09-13] Target: [HANDOFF-panelO6.md]
+- `cam.py` now follows the computers: listens on all five GPC discrete channels (--port-base, --no-bus), rows from each GPC's raw fail-discrete register un-rotated (0x08..0x01 = N+1..N+4, 0x10 inhibits the row), diagonal from the new register REG_CFAIL (5, bit 31, discretes.py CFAIL_LIT) that yaGPC2 composes for the lamp; REQUESTs both registers at start-up; a lit lamp stays lit at least HOLD_MIN_S = 40 ms. Verified in yaGPC2 runs cf-short-0 and cf-g3-0 (ledger #141).

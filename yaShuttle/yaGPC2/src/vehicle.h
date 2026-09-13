@@ -267,6 +267,10 @@ void vehicle_add_machine(Vehicle *v, int gpcId, struct Discretes *d);
  * though the level has not moved, so they have to be re-asserted.  Cheap
  * and idempotent; call it on the same schedule as the discrete poll. */
 void vehicle_refresh_lines(Vehicle *v, int gpcId, uint32_t outValue);
+/* How many of the other computers' fail discretes -- as last published,
+ * outputs not inhibited -- vote against this one.  For the CAM's diagonal
+ * only; see DISCRETES_REG_CFAIL. */
+int vehicle_votes_against(const Vehicle *v, int gpcId);
 
 /* Hold this machine until it is no more than the barrier's delta of
  * simulated time ahead of the slowest running one.  Cheap and returning at

@@ -75,15 +75,29 @@ typedef struct Discretes Discretes;
  * INCL80/CAMEMACS.hal; CAM is the Computer Annunciation Matrix, which is
  * what the panel lamps are.
  *
- * CAUTION, AND NOT YET PINNED DOWN: the bits in the register are ROTATED
- * relative to the computer driving them, as the sync lines are.  FCMSFAIL's
- * FCMCVTM procedure rotates an absolute 5-bit mask of failed GPCs by this
- * computer's own id before it reaches the hardware.  So a consumer that
- * wants absolute columns must un-rotate.  What is published here is the RAW
- * REGISTER, exactly as the hardware holds it, because that is the thing that
- * exists and nothing is lost by it -- the exact bit order of the rotation
- * has NOT been verified against a run, only read out of the assembly. */
+ * THE BITS, per the IOP Principles of Operation (IBM 6246556A, @SFD/@RFD):
+ * the MSC accumulator's bits 0-4 land here, bit 0 -- 0x10 in this value --
+ * "will inhibit the output of the four fail discretes", and bits 1-4 --
+ * 0x08, 0x04, 0x02, 0x01 -- are the four fail discretes themselves.  They
+ * are ROTATED as the sync lines are: 0x08 is a vote against the computer
+ * N+1 places along from this one, 0x01 against N+4.  CONFIRMED by run
+ * le-g5-0, where GPC1, 2, 3 and 5 all voted GPC4 out and published 0x02,
+ * 0x04, 0x08 and 0x01 -- N+3, N+2, N+1 and N+4 of each.  What is published
+ * is the RAW REGISTER; a consumer wanting columns un-rotates it. */
 #define DISCRETES_REG_FAILVOTE 4
+
+/* THE COMPUTER FAIL LAMP -- the CAM's diagonal.  Bit 31 (value 1) lit.
+ *
+ * A computer's own cell on the diagonal shows its Computer Fail: the RM
+ * voter's fail latch, which the hardware sets when "at least two of four"
+ * fail discretes from the other computers vote against it, and which
+ * FCMSFAIL also sets on purpose -- "ISSUE GPC TEST VOTER COMMAND TO LIGHT
+ * SELF'S DIAGONAL" -- when it finds itself alone.  Not an IOP register:
+ * the emulated voter models self test only, so this is composed by the
+ * vehicle FOR THE LAMP (see vehicle_votes_against and run.c) and changes
+ * nothing the flight software sees.  A new register on the wire; nothing
+ * but cam.py reads it. */
+#define DISCRETES_REG_CFAIL 5
 
 /* How long a bit stays "externally driven" after its last message.
  * Publishers republish every 250 ms, so this is several periods -- long
@@ -206,6 +220,8 @@ void discretes_publish_out(Discretes *d, uint32_t before, uint32_t after);
 /* Publish a change in this computer's fail-vote register.  A no-op when the
  * value has not moved, so it is safe to call periodically. */
 void discretes_publish_failvote(Discretes *d, uint32_t value);
+/* This computer's CAM diagonal -- see DISCRETES_REG_CFAIL. */
+void discretes_publish_cfail(Discretes *d, bool lit);
 
 /* Drive a level onto the bus, for a device modelled in this process that
  * a real vehicle would have wired to a discrete line -- the mass memory's

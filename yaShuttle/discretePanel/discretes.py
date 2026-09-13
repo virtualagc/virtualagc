@@ -113,16 +113,21 @@ REG_OUT = 3                 # the discrete outputs, which the GPC owns
 # CAM is the Computer Annunciation Matrix, which is what the lamps are.
 #
 # THE BITS ARE ROTATED relative to the computer driving them, exactly as the
-# inter-GPC sync lines are: FCMSFAIL's FCMCVTM rotates an absolute mask of
-# failed GPCs by the computer's own id before it reaches the hardware.  What
-# the GPC publishes is the RAW REGISTER.  A consumer wanting absolute columns
-# must un-rotate -- and note that the exact bit order has been read out of the
-# assembly but NOT yet confirmed against a run, so check it before trusting a
-# lamp position.
+# inter-GPC sync lines are.  What the GPC publishes is the RAW REGISTER: 0x10
+# inhibits the four fail discretes' outputs (IOP POO, @SFD), and 0x08, 0x04,
+# 0x02, 0x01 vote against the computers N+1, N+2, N+3, N+4 places along from
+# the publisher.  Confirmed by yaGPC2 run le-g5-0, where four computers voted
+# GPC4 out with four different bits.
 REG_FAILVOTE = 4
+# A computer's own Computer Fail lamp -- the CAM's diagonal -- lit when bit 31
+# (CFAIL_LIT) is set.  The RM voter's fail latch: two or more fail discretes
+# against the computer, or FCMSFAIL lighting "SELF'S DIAGONAL" on purpose.
+# yaGPC2 composes it for the lamp; it is not something the IOP reports.
+REG_CFAIL = 5
+CFAIL_LIT = 0x00000001
 
 REG_NAME = {REG_A: "A", REG_B: "B", REG_OUT: "OUT",
-            REG_FAILVOTE: "FAILVOTE"}
+            REG_FAILVOTE: "FAILVOTE", REG_CFAIL: "CFAIL"}
 OP_NAME = {SET: "SET", RESET: "RESET", REQUEST: "REQUEST", VALUE: "VALUE"}
 
 REPUBLISH_MS = 250
@@ -152,7 +157,7 @@ def decode(data):
     op, reg, hi, lo = struct.unpack(">HHHH", data[:WORDS * 2])
     if op not in (SET, RESET, REQUEST, VALUE):
         return None
-    if reg not in (REG_A, REG_B, REG_OUT, REG_FAILVOTE):
+    if reg not in (REG_A, REG_B, REG_OUT, REG_FAILVOTE, REG_CFAIL):
         return None
     return {"op": op, "reg": reg, "mask": ((hi << 16) | lo) & 0xFFFFFFFF}
 

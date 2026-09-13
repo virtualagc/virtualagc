@@ -505,6 +505,7 @@ static void exec_SFD(IOP *t, DInstr *v) {
     uint32_t fd = register_get32(&t->msc.regFailDisc);
     fd = fd | (acc >> 27); /* top 5 bits of ACC */
     register_set32(&t->msc.regFailDisc, fd & 0x1fu);
+    t->msc.failDiscSeen |= (acc >> 27) & 0x1fu;   /* see MSC.failDiscSeen */
     iop_incr_nia(t, 1);
 }
 

@@ -10,6 +10,17 @@ drive the diagonal.  Digits 1-5 typed as a pair (row, then column) toggle
 that lamp, the diagonal included.  There is no visible entry widget.
 Clicking a lamp toggles it too.
 
+THE LAMPS FOLLOW THE COMPUTERS.  Unless --no-bus is given, the panel listens
+on all five GPC discrete channels (port base + 81 .. + 85): row N comes from
+GPC N's fail-discrete register, un-rotated (0x08 votes against N+1 ... 0x01
+against N+4, and 0x10 inhibits all four), and the diagonal cell N from GPC
+N's computer-fail lamp.  At start-up it asks each computer for both, so it
+can be started at any time.  Messages are taken one at a time and a lit lamp
+stays lit for at least HOLD_MIN_S, so a vote the flight software sets and
+clears within a millisecond still shows, for a video frame and then some.
+The keys and clicks still toggle a lamp by hand; the next message from that
+computer overrides them.
+
 The layout follows ~/Desktop/voting2.png (the clearest CAM drawing):
 dimension-ruled GPC STATUS / FAILED GPC with the titles sitting right of
 centre and a rounded bezel.  (Y) and (W) in the drawing are the lit colours
@@ -26,14 +37,29 @@ Usage:
     python3 cam.py
     python3 cam.py --size 384
     python3 cam.py --geometry 560x600+80+20
+    python3 cam.py --port-base 13400      # the emulator's --port-base
+    python3 cam.py --no-bus               # keys and clicks only
 """
 
 import argparse
 import os
+import queue
+import socket
+import struct
+import sys
+import threading
+import time
 import tkinter as tk
 import tkinter.font as tkfont
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import discretes as D  # noqa: E402
+
 N = 5
+# A lit lamp stays lit at least this long, however briefly the computer drove
+# it: one frame of 25 fps video with margin, so a sub-millisecond vote is not
+# lost between frames.
+HOLD_MIN_S = 0.040
 
 # Same gull grey as panelO6.py.
 C_PANEL = "#c6c3b6"
@@ -86,7 +112,7 @@ def scaled_wh(w, h, size):
 
 
 class CamPanel:
-    def __init__(self, root, size=FULL_SIZE):
+    def __init__(self, root, size=FULL_SIZE, bus=True):
         self.root = root
         root.title("CAM")
         root.configure(bg=C_PANEL)
@@ -95,6 +121,11 @@ class CamPanel:
         # Lamps[row][col] is True when ON; lamps[n][n] is GPC n+1's vote
         # against itself.
         self.lamps = [[False] * N for _ in range(N)]
+        self.on_since = [[0.0] * N for _ in range(N)]
+        self.off_at = [[None] * N for _ in range(N)]
+        self.fv = [0] * N          # GPC n+1's raw fail-discrete register
+        self.cf = [0] * N          # GPC n+1's computer-fail lamp register
+        self._q = queue.Queue()
         self._pending = None       # first digit of a pair, 1-5, or None
         self._hits = []            # (row, col, x1, y1, x2, y2) in canvas px
         self._wh = (0, 0)
@@ -123,6 +154,8 @@ class CamPanel:
         root.after_idle(lambda: self.cv.focus_set())
 
         self._dump_state("startup")
+        if bus:
+            self._start_bus()
 
     # ---- fonts / scale --------------------------------------------------
 
@@ -373,6 +406,113 @@ class CamPanel:
                            self.X(x1), self.Y(y1),
                            self.X(x2), self.Y(y2)))
 
+    # ---- the discrete bus ----------------------------------------------
+
+    @staticmethod
+    def _channel_receiver(port):
+        """A socket on one computer's discrete channel (discretes.receiver()
+        binds the module's single PORT; the CAM needs all five)."""
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind(("", port))
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                     struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                                 socket.inet_aton(D.IFACE)))
+        s.settimeout(0.5)
+        return s
+
+    def _start_bus(self):
+        for g in range(1, N + 1):
+            port = D.gpc_port(g)
+            try:
+                s = self._channel_receiver(port)
+            except OSError as e:
+                log("GPC %d channel (port %d): %s" % (g, port, e))
+                continue
+            threading.Thread(target=self._reader, args=(g, s),
+                             daemon=True).start()
+        log("listening on ports %d-%d" % (D.gpc_port(1), D.gpc_port(N)))
+        # The computers hold the registers; a panel started late asks.
+        try:
+            out = D.sender()
+            for g in range(1, N + 1):
+                for reg in (D.REG_FAILVOTE, D.REG_CFAIL):
+                    D.publish(out, D.REQUEST, reg, 0, port=D.gpc_port(g))
+        except OSError as e:
+            log("request: %s" % e)
+        self.root.after(10, self._pump)
+
+    def _reader(self, g, sock):
+        while True:
+            try:
+                data, _ = sock.recvfrom(2048)
+            except socket.timeout:
+                continue
+            except OSError:
+                return
+            msg = D.decode(data)
+            if msg is None or msg["op"] == D.REQUEST:
+                continue
+            if msg["reg"] in (D.REG_FAILVOTE, D.REG_CFAIL):
+                self._q.put((g, msg))
+
+    def _pump(self):
+        """Apply queued messages ONE AT A TIME, in arrival order, then let
+        any held lamp whose minimum has run out go dark."""
+        now = time.monotonic()
+        changed = False
+        while True:
+            try:
+                g, msg = self._q.get_nowait()
+            except queue.Empty:
+                break
+            changed = self._apply(g, msg, now) or changed
+        for row in range(N):
+            for col in range(N):
+                due = self.off_at[row][col]
+                if due is not None and now >= due:
+                    self.off_at[row][col] = None
+                    self.lamps[row][col] = False
+                    log("%d%d  OFF (bus, held %.0f ms)"
+                        % (row + 1, col + 1, HOLD_MIN_S * 1e3))
+                    changed = True
+        if changed:
+            self.redraw()
+        self.root.after(10, self._pump)
+
+    def _apply(self, g, msg, now):
+        n = g - 1
+        if msg["reg"] == D.REG_FAILVOTE:
+            self.fv[n] = D.apply(self.fv[n], msg) & 0x1F
+            inhibited = bool(self.fv[n] & 0x10)
+            results = [self._drive(n, (n + k) % N,
+                                   not inhibited and bool(self.fv[n] & (0x10 >> k)),
+                                   now)
+                       for k in range(1, N)]
+            return any(results)
+        self.cf[n] = D.apply(self.cf[n], msg)
+        return self._drive(n, n, bool(self.cf[n] & D.CFAIL_LIT), now)
+
+    def _drive(self, row, col, on, now):
+        """Set a lamp from the bus, honouring HOLD_MIN_S.  True if it moved."""
+        if on:
+            self.off_at[row][col] = None
+            if self.lamps[row][col]:
+                return False
+            self.lamps[row][col] = True
+            self.on_since[row][col] = now
+            log("%d%d  ON (bus)" % (row + 1, col + 1))
+            return True
+        if not self.lamps[row][col] or self.off_at[row][col] is not None:
+            return False
+        due = self.on_since[row][col] + HOLD_MIN_S
+        if now < due:
+            self.off_at[row][col] = due     # _pump puts it out
+            return False
+        self.lamps[row][col] = False
+        log("%d%d  OFF (bus)" % (row + 1, col + 1))
+        return True
+
     # ---- state ----------------------------------------------------------
 
     def _dump_state(self, why):
@@ -387,6 +527,8 @@ class CamPanel:
             return
         old = "ON" if self.lamps[row][col] else "OFF"
         self.lamps[row][col] = not self.lamps[row][col]
+        self.on_since[row][col] = time.monotonic()
+        self.off_at[row][col] = None
         new = "ON" if self.lamps[row][col] else "OFF"
         log("%d%d  %s -> %s" % (row + 1, col + 1, old, new))
         self.redraw()
@@ -443,13 +585,20 @@ def main(argv=None):
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 560x600+80+20 (overrides --size; "
                          "also NSTS_CAM_GEOMETRY)")
+    ap.add_argument("--port-base", type=int, metavar="N", default=None,
+                    help="base of the bus port range, as given to yaGPC2's "
+                         "--port-base (default 6900, or NSTS_BUS_PORT_BASE)")
+    ap.add_argument("--no-bus", action="store_true",
+                    help="do not listen to the computers; keys and clicks only")
     args = ap.parse_args(argv)
     if args.size <= 0:
         raise SystemExit("voting: --size must be a positive integer")
+    if args.port_base is not None:
+        D.set_port_base(args.port_base)
 
     root = tk.Tk()
     root.resizable(True, True)
-    panel = CamPanel(root, size=args.size)
+    panel = CamPanel(root, size=args.size, bus=not args.no_bus)
     geom = args.geometry or os.environ.get("NSTS_CAM_GEOMETRY")
     if geom:
         try:

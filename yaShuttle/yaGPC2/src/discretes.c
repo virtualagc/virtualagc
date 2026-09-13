@@ -84,12 +84,14 @@ static const char *bit_name(int reg, int bit) {
          * "N+k" is the computer k places along from this one, not GPC k.
          * See DISCRETES_REG_FAILVOTE in discretes.h. */
         switch (bit) {
-            case 27: return "fail vote N+0 (self)";
+            case 27: return "inhibit fail discrete outputs";
             case 28: return "fail vote N+1"; case 29: return "fail vote N+2";
             case 30: return "fail vote N+3"; case 31: return "fail vote N+4";
             default: return NULL;
         }
     }
+    if (reg == DISCRETES_REG_CFAIL)
+        return (bit == 31) ? "computer fail (CAM diagonal)" : NULL;
     if (reg == DISCRETES_REG_OUT) {
         switch (bit) {
             case 7: return "I/O active tb"; case 9: return "READY tb";
@@ -141,19 +143,20 @@ struct Discretes {
     bool trace;
     unsigned long messages;
     double staleSec;
-    /* Index 0 is register A, 1 is B, 2 is the output register. */
-    uint32_t value[4];
+    /* Index 0 is register A, 1 is B, 2 the output register, 3 the fail
+     * discretes and 4 the computer fail lamp -- see reg_index(). */
+    uint32_t value[5];
     /* What this GPC believes each register's whole value to be, which is
      * what a REQUEST is answered with.  For A and B that is the combination
      * of locally derived and published bits, which only iop.c can form. */
-    uint32_t canonical[4];
+    uint32_t canonical[5];
     /* When each bit was last published.  Per BIT, not per register: a
      * crew panel republishing the switches must not make a departed mass
      * memory's READY look fresh. */
-    double lastSeen[4][32];
+    double lastSeen[5][32];
     /* Bits this process drives itself, which it must not then treat as
      * externally driven -- see discretes.h. */
-    uint32_t selfDriven[4];
+    uint32_t selfDriven[5];
     struct sockaddr_in group;
     unsigned generation;  /* see discretes_generation() */
     unsigned pollCalls;   /* the poll rate-limiter, per machine */
@@ -181,12 +184,14 @@ static int reg_index(int reg) {
     if (reg == DISCRETES_REG_B) return 1;
     if (reg == DISCRETES_REG_OUT) return 2;
     if (reg == DISCRETES_REG_FAILVOTE) return 3;
+    if (reg == DISCRETES_REG_CFAIL) return 4;
     return 0;
 }
 
 static bool reg_known(int reg) {
     return reg == DISCRETES_REG_A || reg == DISCRETES_REG_B ||
-           reg == DISCRETES_REG_OUT || reg == DISCRETES_REG_FAILVOTE;
+           reg == DISCRETES_REG_OUT || reg == DISCRETES_REG_FAILVOTE ||
+           reg == DISCRETES_REG_CFAIL;
 }
 
 bool discretes_enabled(const Discretes *d) { return d != NULL && d->open; }
@@ -692,6 +697,20 @@ void discretes_publish_failvote(Discretes *d, uint32_t value) {
     if (getenv("YAGPC_SYNCTRACE") != NULL)
         fprintf(stderr, "SYNC GPC%d fail-vote %08x -> %08x  (rotated; see "
                         "discretes.h)\n", d->gpcId, before, value);
+}
+
+void discretes_publish_cfail(Discretes *d, bool lit) {
+    if (d == NULL || !d->open) return;
+    int r = reg_index(DISCRETES_REG_CFAIL);
+    uint32_t value = lit ? 1u : 0u, before = d->value[r];
+    if (value == before) return;
+    d->value[r] = value;
+    d->canonical[r] = value;
+    send_msg(d, lit ? OP_SET : OP_RESET, DISCRETES_REG_CFAIL, 1u);
+    d->generation++;
+    if (getenv("YAGPC_SYNCTRACE") != NULL)
+        fprintf(stderr, "SYNC GPC%d computer fail lamp %s\n", d->gpcId,
+                lit ? "ON" : "OFF");
 }
 
 void discretes_publish(Discretes *d, int reg, uint32_t mask, bool on) {

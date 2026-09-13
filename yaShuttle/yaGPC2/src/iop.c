@@ -518,6 +518,7 @@ void bce_init(BCE *b, int bceNum) {
 
 void msc_init(MSC *m) {
     register_init(&m->regFailDisc);
+    m->failDiscSeen = 0u;
     register_init(&m->regIntProg);
 }
 

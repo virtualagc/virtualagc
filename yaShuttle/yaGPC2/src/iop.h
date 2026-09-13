@@ -215,6 +215,11 @@ void bce_init(BCE *b, int bceNum);
 
 typedef struct {
     Register regFailDisc; /* 5-bit fail discretes */
+    /* Bits @SFD has set since the vehicle last published this register.
+     * The register is sampled, every 1024 steps, and a fail vote the flight
+     * software sets and resets inside one sample would otherwise never
+     * reach the CAM at all.  Cleared by the publisher. */
+    uint32_t failDiscSeen;
     Register regIntProg;  /* 12-bit IOP programmable interrupt register */
 } MSC;
 

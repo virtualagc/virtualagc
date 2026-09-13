@@ -361,6 +361,23 @@ void vehicle_refresh_lines(Vehicle *v, int gpcId, uint32_t outValue) {
     }
 }
 
+/* A computer m's fail discrete 0x10 >> k votes against the computer k places
+ * along, k = 1..4 (see DISCRETES_REG_FAILVOTE); 0x10 inhibits all four.
+ * Read without a lock from other machines' threads: a value at most one
+ * publish old, which is all a lamp needs. */
+int vehicle_votes_against(const Vehicle *v, int gpcId) {
+    if (v == NULL || gpcId < 1 || gpcId > 5) return 0;
+    int votes = 0;
+    for (int m = 1; m <= 5; m++) {
+        if (m == gpcId || v->lines[m] == NULL) continue;
+        uint32_t fd = discretes_value(v->lines[m], DISCRETES_REG_FAILVOTE);
+        if (fd & 0x10u) continue;
+        int k = ((gpcId - m) % 5 + 5) % 5;
+        if (fd & (0x10u >> k)) votes++;
+    }
+    return votes;
+}
+
 void vehicle_add_machine(Vehicle *v, int gpcId, struct Discretes *d) {
     if (v == NULL || d == NULL || gpcId < 1 || gpcId > 5) return;
     v->lines[gpcId] = d;

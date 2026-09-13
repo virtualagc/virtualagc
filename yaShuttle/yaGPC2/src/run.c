@@ -1349,6 +1349,7 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
      * and the two are asserted together.  Pressing it in STBY or RUN is
      * not a thing the panel can do to a running machine. */
     if (mode != r->prevMode) {
+        if (mode & MODE_HALT) r->cfailLatched = false;   /* the CAM latch */
         if (getenv("YAGPC_MODETRACE"))
             fprintf(stderr, "MODETRACE driven=%08x value=%08x mode=%08x prev=%08x\n",
                     driven, discretes_value(r->discretes, DISCRETES_REG_A), mode, r->prevMode);
@@ -1957,9 +1958,23 @@ static bool batchrunner_step(BatchRunner *r) {
          * register is written by the IOP's MSC, not by anything on this
          * path, so it is sampled rather than hooked; publishing is a no-op
          * unless it moved.  See DISCRETES_REG_FAILVOTE in discretes.h. */
-        discretes_publish_failvote(
-            r->discretes,
-            (uint32_t)register_get32(&r->age.gpc.iop.msc.regFailDisc));
+        {
+            /* A vote set and reset between two samples is published as
+             * both edges, so the lamp still shows it (MSC.failDiscSeen). */
+            MSC *msc = &r->age.gpc.iop.msc;
+            uint32_t fd = (uint32_t)register_get32(&msc->regFailDisc) & 0x1fu;
+            uint32_t seen = msc->failDiscSeen;
+            msc->failDiscSeen = 0u;
+            if (seen & ~fd) discretes_publish_failvote(r->discretes, fd | seen);
+            discretes_publish_failvote(r->discretes, fd);
+            /* AND THE DIAGONAL: two votes against this computer latch its
+             * Computer Fail lamp; FCMSFAIL's self test lights it directly.
+             * For the lamp only -- see DISCRETES_REG_CFAIL. */
+            if (vehicle_votes_against(r->vehicle, r->gpcId) >= 2)
+                r->cfailLatched = true;
+            discretes_publish_cfail(r->discretes,
+                                    r->cfailLatched || r->age.gpc.iop.rmVoterFail);
+        }
         /* AND WHO COMMANDS THE DISPLAY BUSES.  BFC CRT SELECT is discrete
          * input B bits 6 and 7; off zero this computer is claiming them.
          * See vehicle.h -- every GPC's bootstrap talks to DK1, so without
