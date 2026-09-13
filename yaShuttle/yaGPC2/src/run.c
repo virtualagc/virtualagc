@@ -359,6 +359,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
     }
 
     ageharness_init(&r->age);
+    /* AFTER the CPU is built, because cpu_init clears it.  For the trace
+     * hooks only -- with --gpcs they interleave on one stderr and are
+     * otherwise unattributable. */
+    r->age.gpc.cpu.gpcId = gpcId;
     r->age.halUCP.verbose = r->verbose;
     r->age.halUCP.cbCtx = NULL;
     r->age.halUCP.errorCallback = halucp_error_cb;

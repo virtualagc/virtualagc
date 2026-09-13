@@ -148,6 +148,10 @@ typedef struct CPU {
 
     /* YAGPC_NIARING: the last n instruction addresses, dumped when the
      * Instruction Monitor fires.  See cpu_exec1. */
+    /* WHICH COMPUTER THIS IS, for the trace hooks only.  With --gpcs the
+     * CPU-side traces interleave on one stderr and are otherwise
+     * unattributable; nothing in the model reads it. */
+    int gpcId;
     uint32_t *niaRing;
     unsigned niaRingCap, niaRingPos, niaRingFilled;                /* last instruction broke sequential fetch */
 

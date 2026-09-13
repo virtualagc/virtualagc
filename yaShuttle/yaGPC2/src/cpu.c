@@ -59,6 +59,7 @@ void cpu_init(CPU *cpu) {
      * member it is whatever the caller's storage held, and a CPU declared on
      * the stack -- which the unit tests do -- then hands cpu_free a pointer
      * that was never allocated. */
+    cpu->gpcId = 0;
     cpu->niaRing = NULL;
     cpu->niaRingCap = 0;
     cpu->niaRingPos = 0;
@@ -1300,9 +1301,9 @@ static void cpu_watch_store(CPU *cpu, uint32_t addr, uint32_t value,
     /* The protect bit and the pre-store contents both matter: cpu_store_fw
      * tests protection BEFORE writing and returns without writing, so a
      * refused store is otherwise indistinguishable from one that took. */
-    fprintf(stderr, "WATCHHW %s addr=%05x val=%08x was=%04x prot=%d%s "
+    fprintf(stderr, "WATCHHW gpc=%d %s addr=%05x val=%08x was=%04x prot=%d%s "
                     "nia=%05x t=%.1f\n",
-            kind, (unsigned)addr, (unsigned)value,
+            cpu->gpcId, kind, (unsigned)addr, (unsigned)value,
             (unsigned)membus_get16(cpu->ram, addr),
             (int)membus_get_store_protect(cpu->ram, addr),
             cpu->storeProtectOverride ? " ovr" : "",
