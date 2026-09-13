@@ -40,6 +40,17 @@ static void halucp_error_cb(void *ctx, const char *msg) {
  * displacing them. */
 /* A display unit belongs to one computer -- see vehicle.h.  0 is "anyone",
  * which is what a single-machine run uses. */
+/* What a computer sees on a bus with nothing of its own on it: the truth. */
+static void bus_no_peripheral(GpcServiceNumber svc, GpcServiceOutput *out) {
+    switch (svc) {
+    case GPC_SVC_XMIT_CMD:
+    case GPC_SVC_XMIT_WORD: out->out.xmit.ok = true; break;
+    case GPC_SVC_RECV_POLL: out->out.poll.available = false; break;
+    case GPC_SVC_RECV_WORD: out->out.recv.available = false; break;
+    default: break;
+    }
+}
+
 static bool deu_owned_by(const BusRouter *br, int owner, int busID) {
     /* The crew's BFC CRT SELECT decides the BOOTSTRAP bus while anybody is
      * claiming it; every other display bus follows its --deu-bus owner, so a
@@ -218,8 +229,18 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         if (br->deuExtra[d] && in->busID == br->deuExtraBus[d]) {
             /* Somebody's unit is on this bus.  If it is not THIS computer's,
              * this computer is not on that bus at all and finds nothing
-             * there -- it does not get to share it. */
-            if (!deu_owned_by(br, br->deuExtraOwner[d], in->busID)) break;
+             * there -- it does not get to share it.
+             *
+             * RETURN, do not break.  Breaking left the bus unmatched, and an
+             * unmatched bus falls through to `fallback`, which is the
+             * BUILT-IN display and answers on ANY bus number.  So a computer
+             * denied its neighbour's display was handed its own instead, and
+             * the assignment did nothing: measured, GPC1 took 561,010
+             * transactions on DK2 while the GPC2 it belonged to took none. */
+            if (!deu_owned_by(br, br->deuExtraOwner[d], in->busID)) {
+                bus_no_peripheral(svc, out);
+                return;
+            }
             vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
                               deumodel_in_transfer(br->deuExtra[d]));
             deumodel_service(br->deuExtra[d], svc, in, out);
@@ -231,13 +252,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
      * to be checked before getting there -- otherwise every computer that
      * was not given a unit would drive the first computer's. */
     if (br->deu != NULL && !deu_owned_by(br, br->deuOwner, in->busID)) {
-        switch (svc) {
-        case GPC_SVC_XMIT_CMD:
-        case GPC_SVC_XMIT_WORD: out->out.xmit.ok = true; break;
-        case GPC_SVC_RECV_POLL: out->out.poll.available = false; break;
-        case GPC_SVC_RECV_WORD: out->out.recv.available = false; break;
-        default: break;
-        }
+        bus_no_peripheral(svc, out);
         return;
     }
 
@@ -255,13 +270,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         return;
     }
     /* No peripheral on that bus, which is the truth. */
-    switch (svc) {
-    case GPC_SVC_XMIT_CMD:
-    case GPC_SVC_XMIT_WORD: out->out.xmit.ok = true; break;
-    case GPC_SVC_RECV_POLL: out->out.poll.available = false; break;
-    case GPC_SVC_RECV_WORD: out->out.recv.available = false; break;
-    default: break;
-    }
+    bus_no_peripheral(svc, out);
 }
 
 /* iop.h's peerWait, for --bce-network: a bus whose far end is a process
