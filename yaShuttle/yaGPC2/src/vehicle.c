@@ -93,6 +93,14 @@ static void barrier_join(Vehicle *v, int gpcId, double machineUs) {
     v->barOffsetUs[gpcId] = any ? (maxPub - machineUs) : 0.0;
     v->barPubUs[gpcId] = machineUs + v->barOffsetUs[gpcId];
     v->barActive[gpcId] = true;
+    /* The offset is what turns a machine's OWN time -- the t= on every
+     * WATCHHW and RT line -- into shared time, the t= on SYNCORDER.  Without
+     * it a window chosen on one clock lands in the wrong place on the other,
+     * which is exactly how an AIESIP probe came to look after the event it
+     * was aimed at. */
+    if (getenv("YAGPC_SYNCORDER") != NULL)
+        fprintf(stderr, "SYNCORDER-JOIN gpc=%d own=%.1f shared=%.1f offset_us=%.1f\n",
+                gpcId, machineUs, v->barPubUs[gpcId], v->barOffsetUs[gpcId]);
     barrier_unlock(v);
 }
 

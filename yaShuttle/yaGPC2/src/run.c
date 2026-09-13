@@ -255,6 +255,14 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
      * see iccmodel.h, which carries the command words that settle it. */
     if (br->icc != NULL && YAGPC_ICC_IS_BUS(in->busID)) {
         vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
+        /* The shared clock exists only while the barrier runs; without it
+         * two machines' own clocks are not comparable, so pass 'unknown'
+         * and nothing ages out. */
+        if (br->clockUs != NULL && br->vehicle != NULL && br->gpcId >= 1 && br->gpcId <= 5)
+            iccmodel_note_shared_us(br->icc, br->gpcId,
+                                    (br->vehicle->barDeltaUs > 0.0 && br->vehicle->barActive[br->gpcId])
+                                        ? *br->clockUs + br->vehicle->barOffsetUs[br->gpcId]
+                                        : -1.0);
         iccmodel_service(br->icc, br->gpcId, svc, in, out);
         vehicle_bus_leave(br->vehicle, in->busID);
         return;
@@ -631,6 +639,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
              * across a 900 s two-computer run. */
             if (veh->icc == NULL && vehicle_multi(veh)) veh->icc = iccmodel_create();
             r->busRouter.icc = veh->icc;
+            /* The intercomputer model marks command sync (busword.h), so
+             * receives on buses 1-5 can honour Listen Mode. */
+            if (veh->icc != NULL)
+                iop_set_bus_marks_sync(&r->age.gpc.iop, 0x3eu);
             r->busRouter.deuOwner = veh->deuOwner;
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtraOwner[d] = veh->deuExtraOwner[d];

@@ -66,6 +66,11 @@ void iccmodel_free(IccModel *m);
 void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
                       const GpcServiceInput *in, GpcServiceOutput *out);
 
+/* The caller's time on the vehicle's shared clock, for the instruments only:
+ * a message sent by one computer and read by another can only be put in
+ * order on a clock both share.  Set immediately before iccmodel_service. */
+void iccmodel_note_shared_us(IccModel *m, int gpcId, double sharedUs);
+
 void iccmodel_report(const IccModel *m);
 
 #endif

@@ -152,6 +152,10 @@ typedef struct {
      * one slice and the software's pacing against it means nothing.
      * Ported from nsts-sim-gpc's MIA.rxNextNs (iop_bce.coffee). */
     double rxNextUs;
+    /* The sync type of the word mia_get_data() last returned: true for
+     * command sync.  See busword.h -- the device model marks it and the
+     * adapter strips the mark, so no bus program ever sees the bit. */
+    bool lastCmdSync;
 } MIA;
 
 void mia_init(MIA *m, int bceNum);
@@ -182,6 +186,16 @@ typedef struct {
     uint32_t recvLeft;
     double recvSinceUs;
     bool recvGotAny;
+    /* FIRST-INPUT STATE BY BCE MODE (BCE Principles of Operation 4.1).
+     * recvAwaitCmd: Listen Mode -- the MIA transmitter is disabled, so the
+     * receive waits INDEFINITELY for a command with command sync and an IUA
+     * matching the IUAR, and only its arrival starts the MTO timer.
+     * recvSkippedEcho: Command Mode may skip exactly one command-sync word
+     * before the first data, the echo of the command it sent.
+     * recvErrored: the receive error-terminated inside bce_take_words. */
+    bool recvAwaitCmd;
+    bool recvSkippedEcho;
+    bool recvErrored;
 } BCE;
 
 void bce_init(BCE *b, int bceNum);
@@ -239,6 +253,11 @@ typedef struct IOP {
     bool dmaBurst, dmaForceBadParity, dataForceBadParity;
 
     Register regXmitEna, regRecvEna;
+    /* Buses whose device model marks command sync on the words it delivers
+     * (bit n = bus n).  Only on those can a receive honour Listen Mode: on
+     * any other bus a listening BCE would wait for a command it can never be
+     * shown, so it keeps the old behaviour.  Set by the router. */
+    uint32_t busMarksSync;
     /* regHalt is Status Register 5, "the Halt Register", as READ
      * PROCESSOR HALT STATUS (040C0000) reports it.  Despite the name the
      * polarity is the ENABLE direction, straight from the PCI format:
@@ -411,6 +430,7 @@ void iop_system_reset(IOP *iop);
  * in this one, so the bus program's own message timeout is honoured
  * exactly.  See RECV_TIMEOUT_FLOOR_US in iop.c. */
 void iop_set_recv_timeout_floor_us(IOP *iop, double us);
+void iop_set_bus_marks_sync(IOP *iop, uint32_t busMask);
 
 void iop_exec(IOP *iop);
 void iop_exec_idle(IOP *iop);

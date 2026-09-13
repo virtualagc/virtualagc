@@ -1,4 +1,5 @@
 #include "iop.h"
+#include "busword.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -415,9 +416,12 @@ uint32_t mia_get_data(struct IOP *iop, MIA *m) {
              * that an error, so BSL1 reported ERROR 118 "MMU ERROR" and
              * reset instead of loading anything. */
             m->latchValid = false;
-            return output.out.recv.word;
+            /* The sync mark belongs to the adapter, not to the data. */
+            m->lastCmdSync = (output.out.recv.word & YAGPC_BUSWORD_CMD_SYNC) != 0u;
+            return output.out.recv.word & ~YAGPC_BUSWORD_CMD_SYNC;
         }
     }
+    m->lastCmdSync = false;
     if (m->latchValid) {
         m->latchValid = false;
         return m->latch;
@@ -1462,6 +1466,10 @@ void iop_set_recv_timeout_floor_us(IOP *iop, double us) {
     if (iop) iop->recvTimeoutFloorUs = us;
 }
 
+void iop_set_bus_marks_sync(IOP *iop, uint32_t busMask) {
+    if (iop) iop->busMarksSync = busMask;
+}
+
 /* The BCE's own message time out, from its local store (bank 1, word 3),
  * in the same 16.5 us ticks the delay instructions use. */
 static double iop_recv_timeout_us(IOP *iop, int p) {
@@ -1609,6 +1617,43 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
     while (bce->recvLeft > 0 && mia_data_available(iop, &bce->mia)) {
         bool wasLatch = bce->mia.latchValid;
         uint32_t data = mia_get_data(iop, &bce->mia);
+        /* FIRST INPUT, BY MODE.  BCE Principles of Operation 4.1 and 3.4.4.
+         *
+         * Listen Mode (transmitter disabled) 'waits (indefinitely) for a bus
+         * word having command sync ... and an IUA that matches the BCE's
+         * IUAR', and 'uses the arrival of this command as a signal to set
+         * its timers and start watching for arrival of the first input of
+         * data'.  Command Mode starts timing at once and may discard one
+         * command-sync word -- 'the copy of that command that has been
+         * echoed back by the MIA' -- and a second is an error; any
+         * command-sync word after data has begun is a sync error in either
+         * mode.
+         *
+         * Without this an intercomputer listener, which FCMINIOP gives an MTO
+         * of 2 (33 us) and whose commander delays 198 us before it transmits,
+         * timed out before every transfer, was retried, and read each
+         * transfer one cycle late or not at all (ledger #131-#133). */
+        if (bce->recvAwaitCmd || bce->mia.lastCmdSync) {
+            if (bce->recvAwaitCmd) {
+                if (bce->mia.lastCmdSync &&
+                    ((data >> 19) & 0x1fu) ==
+                        (register_get32(iopls_IUAR(&iop->ls)) & 0x1fu)) {
+                    bce->recvAwaitCmd = false;
+                    bce->recvSinceUs = now;          /* the MTO starts here */
+                }
+                continue;                            /* nothing is stored */
+            }
+            if (!bce->recvGotAny && !bce->recvSkippedEcho &&
+                iop_proc_get(&iop->regXmitEna, p)) {
+                bce->recvSkippedEcho = true;
+                bce->recvSinceUs = now;
+                continue;
+            }
+            iop_bce_error_terminate(iop, p);
+            bce->recvActive = false;
+            bce->recvErrored = true;
+            return;
+        }
         if (iop->clearWatch[p] && getenv("YAGPC_CLEARTRACE")) {
             fprintf(stderr, "CLEARREAD bce=%d took=%04x from=%s t=%.1f\n",
                     p, (unsigned)data, wasLatch ? "latch-or-live" : "LIVE",
@@ -1627,6 +1672,30 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
 /* How overdue, in simulated microseconds, a reply must be before a peer in
  * another process is allowed to hold the machine for it.  See iop_bce_receive. */
 #define PEER_HOLD_AFTER_US 500.0
+
+/* YAGPC_TIMEOUT_TRACE_PE=<n>[,<n>...] restricts YAGPC_TIMEOUT_TRACE to those
+ * processing elements.  The unfiltered trace logs every receive the machine
+ * arms, and a computer driving the whole vehicle arms millions -- the
+ * intercomputer BCEs, which are the ones in question, drown in it. */
+static bool timeout_trace_pe(int pe) {
+    static int inited = 0;
+    static unsigned mask = 0;
+    static bool all = true;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_TIMEOUT_TRACE_PE");
+        if (e != NULL && *e != '\0') {
+            all = false;
+            while (e != NULL && *e != '\0') {
+                int n = atoi(e);
+                if (n >= 0 && n < 32) mask |= 1u << n;
+                const char *c = strchr(e, ',');
+                e = (c != NULL) ? c + 1 : NULL;
+            }
+        }
+    }
+    return all || (pe >= 0 && pe < 32 && (mask & (1u << pe)));
+}
 
 bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
     BCE *bce = iop_cur_bce(iop);
@@ -1647,18 +1716,27 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         bce->recvLeft = count;
         bce->recvSinceUs = now;
         bce->recvGotAny = false;
-        if (getenv("YAGPC_TIMEOUT_TRACE")) {
+        /* LISTEN MODE is a transmitter-disabled BCE, and it waits for a
+         * command before it starts timing out data -- but only where the
+         * bus's model can show it one. */
+        bce->recvAwaitCmd = !iop_proc_get(&iop->regXmitEna, p) &&
+                            bce->bceNum >= 0 && bce->bceNum < 32 &&
+                            ((iop->busMarksSync >> bce->bceNum) & 1u);
+        bce->recvSkippedEcho = false;
+        bce->recvErrored = false;
+        if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p)) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);
             fprintf(stderr, "BCE%d RECV ARM t=%.1f us pc=%05x addr=%05x "
-                            "count=%u mto=%u timeout=%.2f ms\n",
+                            "count=%u mto=%u timeout=%.2f ms listen=%d\n",
                     p, now, (unsigned)pc, (unsigned)bce->recvAddr,
                     (unsigned)count,
                     (unsigned)(r ? register_get32(r) & 0x3ffffu : 0u),
-                    iop_recv_timeout_us(iop, p) / 1000.0);
+                    iop_recv_timeout_us(iop, p) / 1000.0, (int)bce->recvAwaitCmd);
         }
     }
 
     bce_take_words(iop, bce, p, now);
+    if (bce->recvErrored) { bce->recvErrored = false; return false; }
 
     /* A PEER IN ANOTHER PROCESS IS LATE IN WALL TIME, NOT IN SIMULATED TIME.
      * Once a reply is overdue by PEER_HOLD_AFTER_US, let the peer hold the
@@ -1671,6 +1749,7 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         && now - bce->recvSinceUs >= PEER_HOLD_AFTER_US
         && iop->peerWait(iop->peerWaitCtx, bce->mia.bceNum, bce->recvGotAny))
         bce_take_words(iop, bce, p, now);
+    if (bce->recvErrored) { bce->recvErrored = false; return false; }
 
     if (bce->recvLeft == 0) {
         bce->recvActive = false;
@@ -1683,13 +1762,15 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
          * receive would lose the rest of it. */
         return true;
     }
-    if (now - bce->recvSinceUs >= iop_recv_timeout_us(iop, p)) {
+    /* A Listen-Mode BCE that has not yet seen its command waits
+     * indefinitely; the timer starts when the command arrives. */
+    if (!bce->recvAwaitCmd && now - bce->recvSinceUs >= iop_recv_timeout_us(iop, p)) {
         /* The reference prints the same line under NSTS_BUS_TIMEOUT_TRACE.
          * A receive that times out error-terminates the BCE, which is
          * what puts it NO-GO and sends the flight software down its
          * RESET STATUS1 recovery path -- so if that path runs here and
          * not there, this is where to look first. */
-        if (getenv("YAGPC_TIMEOUT_TRACE"))
+        if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p))
             fprintf(stderr, "BCE%d RECV TIMEOUT t=%.1f us left=%u gotAny=%d "
                             "waited=%.2f ms mto=%.2f ms\n",
                     p, now, (unsigned)bce->recvLeft, (int)bce->recvGotAny,
