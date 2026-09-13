@@ -254,7 +254,12 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
      * vehicle.h.  With one machine it is a bounds check and nothing more. */
     for (int u = 0; u < 2; u++) {
         if (br->mmu[u] && in->busID == br->mmuBus[u]) {
+            /* Only a COMMAND walks into another computer's transfer: with
+             * several computers in a redundant set the listeners read the
+             * same unit throughout, and counting their reads reported over a
+             * million 'clashes' on a bus with one commander (ledger #138). */
             vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
+                              svc == GPC_SVC_XMIT_CMD &&
                               mmumodel_in_transfer(br->mmu[u]));
             mmumodel_set_clock(br->mmu[u], br->clockUs);
             /* The shared clock, so a listening computer's copy of each word
@@ -324,6 +329,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
                 return;
             }
             vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
+                              svc == GPC_SVC_XMIT_CMD &&
                               deumodel_in_transfer(br->deuExtra[d]));
             deumodel_service_as(br->deuExtra[d], br->gpcId, svc, in, out);
             vehicle_bus_leave(br->vehicle, in->busID);
@@ -354,7 +360,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
          * no keystroke ever reached the flight software, with nothing but a
          * counter in the closing report to say so. */
         vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
-                          deumodel_in_transfer(br->deu));
+                          svc == GPC_SVC_XMIT_CMD && deumodel_in_transfer(br->deu));
         /* The built-in unit is told who is calling, so its listeners get
          * their own copy (#137); any other fallback -- the network framer --
          * is called as before. */

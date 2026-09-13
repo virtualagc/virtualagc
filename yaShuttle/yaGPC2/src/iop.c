@@ -1610,6 +1610,34 @@ static double iop_recv_timeout_us(IOP *iop, int p) {
 }
 
 void iop_bce_error_terminate(IOP *iop, int p) {
+    /* YAGPC_ERRTERM_TRACE=<n>[,<n>...]: every error termination of those
+     * BCEs (all, if the list is empty), per computer, with the BCE's program
+     * address.  A time-out has its own RECV TIMEOUT line; one without it is a
+     * command-sync word arriving mid-receive or another cause, and in a
+     * redundant set an error on one computer alone ends the set (#138). */
+    {
+        static int inited = 0, on = 0;
+        static unsigned mask = 0;
+        if (!inited) {
+            inited = 1;
+            const char *e = getenv("YAGPC_ERRTERM_TRACE");
+            if (e != NULL) {
+                on = 1;
+                while (*e != '\0') {
+                    int n = atoi(e);
+                    if (n > 0 && n < 32) mask |= 1u << n;
+                    const char *c = strchr(e, ',');
+                    if (c == NULL) break;
+                    e = c + 1;
+                }
+            }
+        }
+        if (on && p >= 1 && p <= 24 && (mask == 0 || (mask & (1u << p))) && iop->cpu != NULL)
+            fprintf(stderr, "ERRTERM gpc=%d bce=%d pc=%05x left=%u t=%.1f\n",
+                    iop->cpu->gpcId, p,
+                    (unsigned)(register_get32(iopls_at(&iop->ls, p, 0, 2)) & 0x3ffffu),
+                    (unsigned)iop->bce[p - 1].recvLeft, iop->cpu->elapsedTimeUs);
+    }
     iop_proc_set(&iop->regProgExcept, p, 0);
     iop_proc_set(&iop->regBusyWait, p, 0);
     iop_proc_set(&iop->regIndicator, p, 1);
@@ -2164,13 +2192,23 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
          * writable here.  Applying the word unmasked, as these did, let
          * a blanket enable/disable reach processors that have no MIA. */
         case 0x84040000: /* MIA TRANSMITTER DISABLE */
-            register_set32(&iop->regXmitEna,
-                           register_get32(&iop->regXmitEna) & ~(data & MIA_WRITE_MASK));
+        case 0x85040000: /* MIA TRANSMITTER ENABLE */ {
+            uint32_t before = register_get32(&iop->regXmitEna);
+            uint32_t after = (cmd == 0x85040000u) ? (before | (data & MIA_WRITE_MASK))
+                                                  : (before & ~(data & MIA_WRITE_MASK));
+            register_set32(&iop->regXmitEna, after);
+            /* YAGPC_XMITENA_TRACE: every transmitter enable and disable, per
+             * computer, with the CPU address that sent it.  In a redundant
+             * set only the commander of a bus may transmit on it; a listener
+             * whose transmitter was never disabled sends every command too
+             * (ledger #139). */
+            if (getenv("YAGPC_XMITENA_TRACE") && iop->cpu != NULL)
+                fprintf(stderr, "XMITENA gpc=%d %s data=%08x %08x->%08x nia=%05x t=%.1f\n",
+                        iop->cpu->gpcId, (cmd == 0x85040000u) ? "ENABLE " : "DISABLE",
+                        (unsigned)data, (unsigned)before, (unsigned)after,
+                        (unsigned)psw_get_nia(&iop->cpu->psw), iop->cpu->elapsedTimeUs);
             break;
-        case 0x85040000: /* MIA TRANSMITTER ENABLE */
-            register_set32(&iop->regXmitEna,
-                           register_get32(&iop->regXmitEna) | (data & MIA_WRITE_MASK));
-            break;
+        }
         case 0x84080000: /* MIA RECEIVER DISABLE */
             register_set32(&iop->regRecvEna,
                            register_get32(&iop->regRecvEna) & ~(data & MIA_WRITE_MASK));
