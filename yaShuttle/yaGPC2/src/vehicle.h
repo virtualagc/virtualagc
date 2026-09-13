@@ -162,8 +162,32 @@ typedef struct Vehicle {
     unsigned long barHolds;   /* how often the barrier actually bound */
     unsigned long barAbandoned; /* ... and gave up on a clock that had stopped */
     double barHeldSec;
+
+    /* WAKE ON PROGRESS, NOT ON A TIMER.
+     *
+     * A held machine used to sleep 50 us of wall time at a stretch and look
+     * again.  The OS rounds that up -- measured at a 25 us delta, 9.5
+     * million holds cost 1,000 s, 106 us each -- and a delta tight enough to
+     * keep the two computers' views of each other's sync lines honest is
+     * exactly the delta that holds millions of times.  Measured, tightening
+     * the delta from 200 us to 25 us delayed the first fail-to-sync tenfold
+     * and removed the handshake failure it was aimed at (1 in 713 against 8
+     * in 124), so the tight delta is worth having and the cost is the
+     * sleep's.
+     *
+     * So a held machine first re-checks for barSpinUs of wall time, which is
+     * where nearly every hold ends, and only then sleeps on barCond -- and
+     * the machine it is waiting for WAKES it the moment its published time
+     * reaches barWakeAtUs, rather than the sleeper finding out on its next
+     * timer tick.  The waker pays one integer compare per instruction while
+     * nobody is asleep, and a compare and a double while somebody is. */
+    int barWaiters;             /* machines asleep in the barrier */
+    double barWakeAtUs;         /* shared time that releases the earliest one */
+    double barSpinUs;           /* YAGPC_BARRIER_SPIN_US; 0 = never spin */
+    unsigned long barSpinReleases, barSleeps;
 #ifdef HAVE_PTHREADS
     pthread_mutex_t barLock;
+    pthread_cond_t barCond;
 #endif
 
     /* PER-BUS SERIALISATION, AND WHAT IT IS AND IS NOT FOR.

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "compat.h"
 
@@ -24,6 +25,10 @@
  * clock has stopped rather than merely fallen behind.  Far longer than any
  * legitimate hold -- a legitimate one is the delta divided by the rate. */
 #define BARRIER_MAX_HOLD_SEC 0.25
+/* Wall time a held machine re-checks before it sleeps, and the longest it
+ * sleeps before re-checking without being woken -- a safety net only. */
+#define BARRIER_SPIN_US 200.0
+#define BARRIER_SLEEP_SEC 0.002
 
 void vehicle_init(Vehicle *v) {
     if (v == NULL) return;
@@ -32,12 +37,20 @@ void vehicle_init(Vehicle *v) {
     v->barDeltaUs = BARRIER_DELTA_US;
     const char *e = getenv("YAGPC_BARRIER_US");
     if (e != NULL && *e != '\0') v->barDeltaUs = atof(e);
+    v->barSpinUs = BARRIER_SPIN_US;
+    const char *sp = getenv("YAGPC_BARRIER_SPIN_US");
+    if (sp != NULL && *sp != '\0') v->barSpinUs = atof(sp);
+    v->barWakeAtUs = 1e300;
 #ifdef HAVE_PTHREADS
     pthread_mutex_init(&v->barLock, NULL);
+    pthread_cond_init(&v->barCond, NULL);
     for (int b = 0; b <= YAGPC_BUS_MAX; b++)
         pthread_mutex_init(&v->busLock[b], NULL);
 #endif
 }
+
+/* Defined below vehicle_barrier_leave's first use; see its comment. */
+static void barrier_wake(Vehicle *v);
 
 static void barrier_lock(Vehicle *v) {
 #ifdef HAVE_PTHREADS
@@ -147,6 +160,22 @@ void vehicle_barrier_leave(Vehicle *v, int gpcId) {
     barrier_lock(v);
     v->barActive[gpcId] = false;
     barrier_unlock(v);
+    /* Whoever was waiting on this machine is waiting on nothing now. */
+    barrier_wake(v);
+}
+
+/* Release every machine asleep in the barrier so each re-evaluates.  Called
+ * by a machine whose clock has reached the earliest sleeper's release time,
+ * and by one leaving the barrier -- either can end a hold. */
+static void barrier_wake(Vehicle *v) {
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->barLock);
+    v->barWakeAtUs = 1e300;
+    pthread_cond_broadcast(&v->barCond);
+    pthread_mutex_unlock(&v->barLock);
+#else
+    (void)v;
+#endif
 }
 
 void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
@@ -159,34 +188,74 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
 
     double pub = machineUs + v->barOffsetUs[gpcId];
     v->barPubUs[gpcId] = pub;
+
+    /* WAKE ANYONE THIS MACHINE'S PROGRESS HAS RELEASED.  The ORDER matters:
+     * the time is published above BEFORE the sleepers are looked at here,
+     * and a sleeper registers itself BEFORE its final re-check below.  So
+     * either this sees the sleeper and wakes it, or the sleeper's re-check
+     * sees this time and never sleeps; neither can miss the other.  The
+     * reads are unlocked, which at worst costs one BARRIER_SLEEP_SEC. */
+    if (v->barWaiters > 0 && pub >= v->barWakeAtUs) barrier_wake(v);
+
     if (pub - barrier_slowest(v, gpcId, pub) <= v->barDeltaUs) return;
 
-    /* AHEAD OF THE GROUP.  Wait for it, re-reading each pass: the machine
-     * this one is waiting on may catch up, or may leave the barrier
-     * altogether by being switched to HALT, and both release it.  The
-     * sleep is short against the delta so the hold costs about what it
-     * should and not a scheduler quantum more.  Nobody deadlocks: the
-     * slowest machine never waits, and if every other machine leaves,
-     * barrier_slowest() returns this machine's own time. */
+    /* AHEAD OF THE GROUP.  Nobody deadlocks: the slowest machine never
+     * waits, and if every other machine leaves, barrier_slowest() returns
+     * this machine's own time. */
     double t0 = yagpc_monotonic_seconds();
     v->barHolds++;
-    while (pub - barrier_slowest(v, gpcId, pub) > v->barDeltaUs) {
+
+    /* 1. RE-CHECK WITHOUT SLEEPING, briefly.  A hold normally ends within
+     * a few tens of microseconds -- the partner has only to run 25-200 us of
+     * simulated time -- and any OS sleep is rounded up past that. */
+    if (v->barSpinUs > 0.0) {
+        double until = t0 + v->barSpinUs * 1e-6;
+        for (unsigned i = 0;; i++) {
+            if (pub - barrier_slowest(v, gpcId, pub) <= v->barDeltaUs) {
+                v->barSpinReleases++;
+                v->barHeldSec += yagpc_monotonic_seconds() - t0;
+                return;
+            }
+            if ((i & 63u) == 63u && yagpc_monotonic_seconds() >= until) break;
+        }
+    }
+
+#ifdef HAVE_PTHREADS
+    /* 2. SLEEP UNTIL WOKEN BY PROGRESS. */
+    pthread_mutex_lock(&v->barLock);
+    v->barWaiters++;
+    for (;;) {
+        double need = pub - v->barDeltaUs;
+        if (need < v->barWakeAtUs) v->barWakeAtUs = need;
+        if (pub - barrier_slowest(v, gpcId, pub) <= v->barDeltaUs) break;
         /* AND NEVER FOREVER.  Waiting on another machine's clock is only
-         * safe while that clock is moving, and the ways it can stop are not
-         * all ones this code gets told about -- a machine that has ended its
-         * run, or is blocked on something of its own, is still marked
-         * active until its thread tidies up.  The first version of this
-         * loop had no way out and hung a two-computer run at shutdown: GPC1
-         * stopped on SIGINT, GPC2 waited on its frozen clock, and the join
-         * never returned.  Giving up after BARRIER_MAX_HOLD_SEC costs a
-         * little accuracy in a situation that is already wrong, and the
-         * count of them is reported. */
+         * safe while that clock is moving, and a machine that has ended its
+         * run is still marked active until its thread tidies up -- the first
+         * version of this loop had no way out and hung a two-computer run at
+         * shutdown.  The count of these is reported. */
+        if (yagpc_monotonic_seconds() - t0 > BARRIER_MAX_HOLD_SEC) {
+            v->barAbandoned++;
+            break;
+        }
+        v->barSleeps++;
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        long ns = ts.tv_nsec + (long)(BARRIER_SLEEP_SEC * 1e9);
+        ts.tv_sec += ns / 1000000000L;
+        ts.tv_nsec = ns % 1000000000L;
+        pthread_cond_timedwait(&v->barCond, &v->barLock, &ts);
+    }
+    v->barWaiters--;
+    pthread_mutex_unlock(&v->barLock);
+#else
+    while (pub - barrier_slowest(v, gpcId, pub) > v->barDeltaUs) {
         if (yagpc_monotonic_seconds() - t0 > BARRIER_MAX_HOLD_SEC) {
             v->barAbandoned++;
             break;
         }
         yagpc_sleep_seconds(50e-6);
     }
+#endif
     v->barHeldSec += yagpc_monotonic_seconds() - t0;
 }
 
@@ -214,6 +283,45 @@ static void vehicle_route_out(void *ctx, int sourceGpc, uint32_t before,
     struct Discretes *from = (sourceGpc >= 1 && sourceGpc <= 5)
                                  ? v->lines[sourceGpc] : NULL;
     if (from == NULL) return;
+    /* YAGPC_SYNCORDER: every change of a computer's 3-bit sync code, stamped
+     * with that computer's time IN THE SHARED FRAME -- the barrier's
+     * barPubUs, which is the only clock on which two machines' instants can
+     * be compared.  YAGPC_SYNCTRACE stamps wall time from two threads, and
+     * each machine's own elapsedTimeUs counts from its own start; lining
+     * those up by assuming two events were simultaneous is circular, and the
+     * question this answers is exactly WHICH came first.
+     *
+     * This runs on the source machine's own thread at the instant its
+     * output register changes, and barPubUs[sourceGpc] is refreshed once
+     * per instruction, so the stamp is good to one instruction.  Only the
+     * source writes lastCode[sourceGpc], so it needs no lock. */
+    {
+        static int soInit = 0, soOn = 0;
+        static int lastCode[6] = {-1, -1, -1, -1, -1, -1};
+        if (!soInit) { soInit = 1; soOn = getenv("YAGPC_SYNCORDER") != NULL; }
+        if (soOn && v->barDeltaUs > 0.0) {
+            /* Bits 20/24/28 (MSB = bit 0) are A/B/C. */
+            int code = ((after & 0x800u) ? 4 : 0) | ((after & 0x080u) ? 2 : 0) |
+                       ((after & 0x008u) ? 1 : 0);
+            if (code != lastCode[sourceGpc]) {
+                lastCode[sourceGpc] = code;
+                /* EVERY active machine's shared-frame clock at this instant,
+                 * not just the source's.  The code reaches the neighbours at
+                 * once in WALL time, but a neighbour may be up to the barrier
+                 * delta ahead of or behind the source in SIMULATED time -- so
+                 * what a reader sees depends on who is behind, and that skew
+                 * at the handshake that fails is the thing to measure. */
+                char pubs[96]; int n = 0; pubs[0] = '\0';
+                for (int m = 1; m <= 5 && n < (int)sizeof pubs - 24; m++)
+                    if (v->barActive[m])
+                        n += snprintf(pubs + n, sizeof pubs - (size_t)n,
+                                      " pub%d=%.1f", m, v->barPubUs[m]);
+                fprintf(stderr, "SYNCORDER gpc=%d code=%d%d%d tshared=%.1f%s\n",
+                        sourceGpc, (code >> 2) & 1, (code >> 1) & 1, code & 1,
+                        v->barPubUs[sourceGpc], pubs);
+            }
+        }
+    }
     for (int m = 1; m <= 5; m++) {
         if (m == sourceGpc || v->lines[m] == NULL) continue;
         uint32_t set = discretes_rotate_out(sourceGpc, m, changed & after);
@@ -281,8 +389,10 @@ void vehicle_free(Vehicle *v) {
     }
     if (v->barHolds > 0)
         fprintf(stderr, "vehicle: simulated-time barrier held %lu times, "
-                        "%.3f s total, %lu abandoned (delta %.0f us)\n",
-                v->barHolds, v->barHeldSec, v->barAbandoned, v->barDeltaUs);
+                        "%.3f s total, %lu abandoned (delta %.0f us); "
+                        "%lu released while spinning, %lu sleeps\n",
+                v->barHolds, v->barHeldSec, v->barAbandoned, v->barDeltaUs,
+                v->barSpinReleases, v->barSleeps);
     /* TWO COMPUTERS IN ONE CONVERSATION.  Not a condition to handle -- it
      * means the run asked two GPCs to use one unit at the same moment, which
      * the vehicle cannot do and a crew would not ask for. */
@@ -295,6 +405,7 @@ void vehicle_free(Vehicle *v) {
     }
 #ifdef HAVE_PTHREADS
     pthread_mutex_destroy(&v->barLock);
+    pthread_cond_destroy(&v->barCond);
     for (int b = 0; b <= YAGPC_BUS_MAX; b++)
         pthread_mutex_destroy(&v->busLock[b]);
 #endif
