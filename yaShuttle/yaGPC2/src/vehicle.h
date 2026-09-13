@@ -226,8 +226,19 @@ void vehicle_barrier_leave(Vehicle *v, int gpcId);
  * buses for it, zero releases them.  Safe to call on every poll. */
 void vehicle_dk_claim(Vehicle *v, int gpcId, bool claiming);
 
-/* True if this computer may command a display unit on this bus. */
-bool vehicle_dk_commands(const Vehicle *v, int gpcId, int staticOwner);
+/* True if this computer may command a display unit on this bus.
+ *
+ * The CLAIM governs only the bootstrap's bus.  Every GPC's GPCIPL talks to
+ * DK1 and nothing else, so that is the one bus two computers contend for,
+ * and the BFC CRT switch is how the crew hands it over.  Once a computer has
+ * loaded, the bus it drives is its NBAT assignment, which here is the static
+ * --deu-bus owner -- so a claim on DK1 must NOT also take away a display
+ * that belongs to somebody else on another bus.  It used to, and that left
+ * the second computer commanding nothing at all: it then reached no I/O
+ * completion when its neighbour did, and the I/O-complete sync voted it out
+ * of the set 4.33 ms after it was admitted. */
+bool vehicle_dk_commands(const Vehicle *v, int gpcId, int staticOwner,
+                         int busID);
 
 void vehicle_bus_enter(Vehicle *v, int busID, int gpcId, bool inTransfer);
 void vehicle_bus_leave(Vehicle *v, int busID);

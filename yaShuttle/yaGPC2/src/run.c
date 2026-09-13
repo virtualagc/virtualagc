@@ -40,10 +40,12 @@ static void halucp_error_cb(void *ctx, const char *msg) {
  * displacing them. */
 /* A display unit belongs to one computer -- see vehicle.h.  0 is "anyone",
  * which is what a single-machine run uses. */
-static bool deu_owned_by(const BusRouter *br, int owner) {
-    /* The crew's BFC CRT SELECT decides this while anybody is claiming the
-     * display buses; --deu-bus is only the fallback.  See vehicle.h. */
-    return vehicle_dk_commands(br->vehicle, br->gpcId, owner);
+static bool deu_owned_by(const BusRouter *br, int owner, int busID) {
+    /* The crew's BFC CRT SELECT decides the BOOTSTRAP bus while anybody is
+     * claiming it; every other display bus follows its --deu-bus owner, so a
+     * computer that has been given a unit of its own keeps it.  See
+     * vehicle.h. */
+    return vehicle_dk_commands(br->vehicle, br->gpcId, owner, busID);
 }
 
 void bus_router_service(void *ctx, GpcServiceNumber svc,
@@ -217,7 +219,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             /* Somebody's unit is on this bus.  If it is not THIS computer's,
              * this computer is not on that bus at all and finds nothing
              * there -- it does not get to share it. */
-            if (!deu_owned_by(br, br->deuExtraOwner[d])) break;
+            if (!deu_owned_by(br, br->deuExtraOwner[d], in->busID)) break;
             vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
                               deumodel_in_transfer(br->deuExtra[d]));
             deumodel_service(br->deuExtra[d], svc, in, out);
@@ -228,7 +230,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
     /* The built-in display unit answers through `fallback`, so ownership has
      * to be checked before getting there -- otherwise every computer that
      * was not given a unit would drive the first computer's. */
-    if (br->deu != NULL && !deu_owned_by(br, br->deuOwner)) {
+    if (br->deu != NULL && !deu_owned_by(br, br->deuOwner, in->busID)) {
         switch (svc) {
         case GPC_SVC_XMIT_CMD:
         case GPC_SVC_XMIT_WORD: out->out.xmit.ok = true; break;

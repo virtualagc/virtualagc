@@ -107,9 +107,14 @@ void vehicle_dk_claim(Vehicle *v, int gpcId, bool claiming) {
     }
 }
 
-bool vehicle_dk_commands(const Vehicle *v, int gpcId, int staticOwner) {
+/* DK1.  The bootstrap's bus, and the only one a claim governs. */
+#define YAGPC_DK_BOOTSTRAP_BUS 6
+
+bool vehicle_dk_commands(const Vehicle *v, int gpcId, int staticOwner,
+                         int busID) {
     if (v == NULL) return true;
-    if (v->dkClaimant != 0) return v->dkClaimant == gpcId;
+    if (v->dkClaimant != 0 && busID == YAGPC_DK_BOOTSTRAP_BUS)
+        return v->dkClaimant == gpcId;
     return staticOwner == 0 || staticOwner == gpcId;
 }
 
