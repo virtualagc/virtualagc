@@ -2,17 +2,20 @@
 # -*- coding: utf-8 -*-
 """Visual simulation of the Space Shuttle GPC STATUS / FAILED GPC matrix.
 
-A 5×5 array of square indicator lamps with the diagonal absent: rows are
-the voting GPC, columns the failed GPC.  Digits 1-5 typed as a pair
-(row, then column) toggle that lamp.  There is no visible entry widget.
-Clicking a lamp toggles it too.  Diagonal cells show a yellow GPC number
-instead of a lamp.
+A 5×5 array of indicator lamps: rows are the voting GPC, columns the
+failed GPC.  Every lamp fills its cell.  Off the diagonal a lit lamp is
+white; ON the diagonal it is yellow and carries the GPC number in black,
+because a GPC can vote against ITSELF, and those self-failure votes are what
+drive the diagonal.  Digits 1-5 typed as a pair (row, then column) toggle
+that lamp, the diagonal included.  There is no visible entry widget.
+Clicking a lamp toggles it too.
 
 The layout follows ~/Desktop/voting2.png (the clearest CAM drawing):
 dimension-ruled GPC STATUS / FAILED GPC with the titles sitting right of
-centre, a rounded bezel, yellow GPC numbers on the diagonal, and a small
-square lamp centred in each off-diagonal cell.  (Y) and (W) in the drawing
-are colours, not text.
+centre and a rounded bezel.  (Y) and (W) in the drawing are the lit colours
+of the diagonal and off-diagonal lamps, not text.  The drawing's small
+squares and yellow digits were misread at first: each lamp fills its
+enclosure, and the diagonal digits are black legends on yellow lamps.
 
 Styling follows panelO6.py: gull-grey panel, Helvetica legends, a
 standard decorated resizable window.  Unlike panelO6.py / stsKeyboard.py
@@ -35,19 +38,18 @@ N = 5
 # Same gull grey as panelO6.py.
 C_PANEL = "#c6c3b6"
 C_INK = "#1b1b1b"
-C_LAMP_ON = "#ffffff"
-# Slightly darker than the pane, so an unlit lamp is a square you can
+C_LAMP_ON = "#ffffff"   # off-diagonal lamp, lit (W)
+C_DIAG_ON = "#ffe600"   # diagonal (self-failure) lamp, lit (Y)
+# Slightly darker than the pane, so an unlit lamp is a cell you can
 # still see without competing with a lit one.
 C_LAMP_OFF = "#a4a193"
-C_DIAG = "#ffe600"     # bright yellow GPC identity on the diagonal
 
 MARGIN = 16
 CELL = 76
-# voting2.png: tight gaps, a small square lamp (~1/4 of the cell).
+# voting2.png: tight gaps; each lamp fills its cell.
 GAP = 5
 GRID_PAD = 10          # air between the rounded bezel and the cells
 RADIUS = 16
-LAMP_FRAC = 0.26       # inner lamp side / cell side
 # Captions ~half the original point sizes; diagonal numbers ~70%.
 # GPC STATUS is ~30% larger than FAILED GPC.
 SZ_STATUS = 8
@@ -90,7 +92,8 @@ class CamPanel:
         root.configure(bg=C_PANEL)
         self.size = size
 
-        # Lamps[row][col] is True when ON.  The diagonal is never a lamp.
+        # Lamps[row][col] is True when ON; lamps[n][n] is GPC n+1's vote
+        # against itself.
         self.lamps = [[False] * N for _ in range(N)]
         self._pending = None       # first digit of a pair, 1-5, or None
         self._hits = []            # (row, col, x1, y1, x2, y2) in canvas px
@@ -351,43 +354,36 @@ class CamPanel:
                 self._draw_cell(row, col)
 
     def _draw_cell(self, row, col):
+        """The lamp IS the cell: it fills the enclosure to its outline."""
         x1, y1, x2, y2 = self._cell(row, col)
         ow = max(1, int(self.s))
-        self._rect(x1, y1, x2, y2, fill=C_PANEL, outline=C_INK, width=ow)
-        cx = (x1 + x2) / 2.0
-        cy = (y1 + y2) / 2.0
+        on = self.lamps[row][col]
         if row == col:
+            fill = C_DIAG_ON if on else C_LAMP_OFF
+        else:
+            fill = C_LAMP_ON if on else C_LAMP_OFF
+        self._rect(x1, y1, x2, y2, fill=fill, outline=C_INK, width=ow)
+        if row == col:
+            # The GPC number is a black legend on the self-failure lamp.
+            cx = (x1 + x2) / 2.0
+            cy = (y1 + y2) / 2.0
             self._text(cx, self._ink_y(cy, SZ_DIAG),
-                       str(row + 1), size=SZ_DIAG, fill=C_DIAG)
-            return
-        side = CELL * LAMP_FRAC
-        lx1, ly1 = cx - side / 2.0, cy - side / 2.0
-        lx2, ly2 = cx + side / 2.0, cy + side / 2.0
-        fill = C_LAMP_ON if self.lamps[row][col] else C_LAMP_OFF
-        self._rect(lx1, ly1, lx2, ly2, fill=fill, outline=C_INK, width=ow)
+                       str(row + 1), size=SZ_DIAG, fill=C_INK)
         self._hits.append((row, col,
-                           self.X(lx1), self.Y(ly1),
-                           self.X(lx2), self.Y(ly2)))
+                           self.X(x1), self.Y(y1),
+                           self.X(x2), self.Y(y2)))
 
     # ---- state ----------------------------------------------------------
 
     def _dump_state(self, why):
         log(why)
         for row in range(N):
-            bits = []
-            for col in range(N):
-                if row == col:
-                    bits.append("-")
-                else:
-                    bits.append("1" if self.lamps[row][col] else "0")
+            bits = ["1" if self.lamps[row][col] else "0" for col in range(N)]
             log("  row %d  %s" % (row + 1, " ".join(bits)))
 
     def toggle(self, row, col):
-        """Toggle the lamp at 0-based (row, col).  Diagonal is a no-op."""
+        """Toggle the lamp at 0-based (row, col); row == col is a self-vote."""
         if not (0 <= row < N and 0 <= col < N):
-            return
-        if row == col:
-            log("%d%d  ignored (no lamp on the diagonal)" % (row + 1, col + 1))
             return
         old = "ON" if self.lamps[row][col] else "OFF"
         self.lamps[row][col] = not self.lamps[row][col]

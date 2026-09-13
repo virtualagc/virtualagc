@@ -73,3 +73,6 @@
   ROTATED relative to the emitting GPC (FCMSFAIL's FCMCVTM), so a consumer
   must un-rotate for absolute columns, and the exact bit order is read from
   the assembly and NOT yet confirmed against a run.
+
+### [2026-09-13] Target: [HANDOFF-panelO6.md]
+- `cam.py` corrected per the user: every CAM lamp fills its cell (no small centred square); the diagonal cells are lamps too, lit YELLOW with the GPC number as a BLACK legend (off-diagonal lamps light WHITE); the diagonal shows each GPC's vote against ITSELF, so keystroke pairs 11..55 and clicks toggle it. yaGPC2's fail-vote register already names that bit "fail vote N+0 (self)" (bit 27, src/discretes.c). cam.py is still keystroke/click driven, not wired to the discrete bus.
