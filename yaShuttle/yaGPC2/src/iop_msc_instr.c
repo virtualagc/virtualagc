@@ -687,104 +687,56 @@ static void exec_RAI(IOP *t, DInstr *v) {
     iop_msc_repeat(t, v, (register_get32(&t->regIndicator) & m) == m);
 }
 
-/* THE MSC'S OWN BIT IS NOT IN THIS MASK, AND THAT IS WRONG.  The document
- * is explicit and this code contradicts it; PROC_ALL_BCE is a COMPENSATING
- * ERROR that the machine currently depends on.  Read the next paragraph
- * before believing anything further down.
+/* @RAW "REPEAT UNTIL ALL WAITING" -- AND THE MSC'S OWN BIT IS IN THE MASK.
  *
- * IOP Principles of Operation (IBM-6246556A), @RAW "REPEAT UNTIL ALL
- * WAITING", PROGRAMMING NOTES, verbatim:
+ * IOP Principles of Operation (IBM-6246556A), @RAW PROGRAMMING NOTES:
  *
  *     "Since processor 0 corresponds to the MSC, (which is busy during
  *      instruction execution), the MSC execution of an @RAW instruction
  *      will correspond to a loop until the maximum repeat count is
  *      reached."
  *
- * So bit 0 IS the MSC, the MSC IS busy while executing, and an @RAW with
- * bit 0 set loops to the count -- exactly the delay FIOMDLY builds with
- * "@LI -1  *TURN ON MSC BIT IN REPEAT MASK".  nsts-sim-gpc 818df88 makes
- * the same correction, citing POO II-80.
+ * So an @RAW with bit 0 set is a DELAY of the full count, which is exactly
+ * how FIOMDLY builds its time-to-go sleep ("@LI -1  *TURN ON MSC BIT IN
+ * REPEAT MASK").  FIOMCKIO's test loads a bus mask without bit 0 and so is
+ * unaffected.  nsts-sim-gpc 818df88 makes the same correction (POO II-80).
  *
- * Both arguments below fail.  2.6.1.6's "all of a set of specified BCEs"
- * is the general description, and the programming notes address bit 0
- * directly.  FIOMNTR3's `@N FIOM7FFF ... OFF MSC BIT` does not show the
- * hardware ignoring bit 0 -- it shows the software clearing it BECAUSE
- * the hardware honours it.
+ * HISTORY, because this was the wrong way round for a long time.  The mask
+ * used to be PROC_ALL_BCE, and the correction was twice recorded as fatal:
+ * it killed a single-GPC run at ~231 s (the IOQE sentinel fault, runs x2,
+ * u1) and made the DK bus holds constant.  Ledger #2 showed that was not a
+ * second defect but the same hold pathology the wrong mask had been hiding
+ * by cutting FIOMDLY short; with the fixes since, the corrected mask passes
+ * the single-GPC regression gate on every event counter (run mb-regress).
+ * The wrong mask also produced the '0x3ffff' repeat arms: a MET FIOMDLY
+ * repeat skips the next halfword, which is FIOMCKIO's '@LI 0 *JUST CHECK
+ * IT', so the check armed with the index left at -1 (run mp-short-0).  A
+ * repeat with bit 0 set can only time out, so that skip cannot happen.
  *
- * WHY IT IS STILL PROC_ALL_BCE.  Correcting it kills the machine at
- * t~231 s: the IOQE sentinel fault (PGMCHK 0007 at=1be4b lastProt=080d6)
- * instead of ~398, no transition, and the bus-6 hold median going from
- * 0.85 ms to thousands.  Measured alone (run x2) and together with
- * upstream's receive pacing and zero time-out floor (run u1) -- the same
- * failure both times, so it is not an isolation artifact.  That means a
- * SECOND defect exists which this error has been masking, and the t~231
- * fault is its symptom.  Fix that first, then set the mask correctly.
- * YAGPC_RAW_MSCBIT and YAGPC_IOP_UPSTREAM both select the correct
- * behaviour for testing.
- *
- * The historical argument for PROC_ALL_BCE follows, kept because it is
- * what the measurements were made against -- but it is REFUTED BY THE
- * DOCUMENT above, not merely doubtful.
- *
- * FIOMDLY builds a delay out of @RAW and comments it
- *      @LI  -1   *TURN ON MSC BIT IN REPEAT MASK
- * which reads as though bit 0 takes part in the comparison and makes the
- * condition unsatisfiable.  It does not.  The same instruction serves
- * FIOMCKIO, the I/O-COMPLETE test, whose condition is exactly
- * "(busy/wait AND the request's bus mask) == 0"; the MSC's own busy bit is
- * set the whole time it is executing, so including bit 0 makes that test
- * unable to EVER report complete, and every I/O falls through to FIOMTOUT
- * and is declared an MSC timeout.  Measured with YAGPC_REPEATTRACE over one
- * IPL: FIOMCKIO arms 98478 times against FIOMDLY's 14.  Changing this to
- * PROC_ALL therefore stopped the I/O engine outright -- second DEUKEYS batch
- * never delivered, zero tape reads after t=200 s, deu.log 1009 lines against
- * ~96900 with fills=0 (v53b, against v51a/v51b on the same tape).
- *
- * The POO agrees: 2.6.1.6 is about "all of a set of specified BCEs", and
- * FIOMNTR3's `@N FIOM7FFF ... OFF MSC BIT` shows the software clearing bit 0
- * by hand when it has a word that might carry it.  FIOMDLY's comment is loose
- * wording -- the literal -1 does set the bit, the hardware ignores it, and the
- * delay still works because the BCEs being monitored are busy.  That is what
- * FIOMDLY is for in the first place: its own header says the purpose is "to
- * delay until the I/O to be monitored is done".
- *
- * DO NOT "fix" this to PROC_ALL EXPECTING IT TO WORK -- it is the right
- * value and the machine dies on it until the masked defect is found. */
+ * WHY IT MATTERS MOST WITH SEVERAL COMPUTERS (ledger #135): every member of
+ * a redundant set runs the same FIOMDLY sleep, so on the vehicle their I/O
+ * completions arrive together.  With the wrong mask the sleep ended as soon
+ * as every BCE was waiting -- at once on an idle IOP, the full time-to-go on
+ * a busy one -- and the two computers reached the same sync barrier with
+ * different codes and voted each other out. */
 static void exec_RAW(IOP *t, DInstr *v) {
-    /* YAGPC_RAW_MSCBIT=1 includes the MSC's own bit, i.e. the change the
-     * comment above forbids.  It is a MEASUREMENT HOOK, not a fix, and it
-     * is OFF by default so the refuted change cannot creep into the tree:
-     * the claim that it stops the I/O engine dead is backed by a run
-     * (v53b) and must be re-refuted or overturned with evidence, not with
-     * an argument.  What put the question back on the table is that some
-     * @RAW arms its follower with a count of 0x3ffff -- exactly
-     * -1 & 0x3ffff, which only @LI -1 can supply and only @XAX can move
-     * into the index register, so the '@LI 0 *JUST CHECK IT' between them
-     * was skipped by a met-exit.  Whether that @RAW is FIOMDLY's is not
-     * yet established: the site arming 0x3ffff (pc=1cb70, ~8k times) is
-     * NOT the one whose 98478 count=0 arms match this comment's own
-     * FIOMCKIO measurement (pc=03445).
-     *
-     * RETESTED AND THE WARNING STANDS.  Run x2, MSC bit IN, full length:
-     * the IOQE sentinel fault (PGMCHK 0007 at 1be4b, lastProt 080d6)
-     * fires at t=230.9 s instead of ~398, no transition happens at all,
-     * and the bus-6 hold distribution goes from a 0.85 ms median with
-     * 5-6 excursions to a 4263 ms MEDIAN, 6361 ms max, 12 of 13 over
-     * 300 ms.  So this is worse, not better, and the mask is not the
-     * explanation for the 0x3ffff arm.
-     *
-     * BEWARE THE SHORT SMOKE TEST.  Run x1 with the bit IN looked
-     * completely healthy -- every IPL read present, 99,914 log lines,
-     * fills=226 -- because the damage does not begin until about t=230 s
-     * and x1 stopped at ~190.  A 200-second run cannot clear this
-     * change. */
-    static int mbInit = 0, mbOn = 0;
+    /* NOW THE DEFAULT (ledger #135).  With several computers in a redundant
+     * set the wrong mask is not a slow-down but a fault: FIOMDLY's sleep
+     * ended as soon as every BCE was waiting, so a computer with an idle IOP
+     * raised its I/O completion at once while a busy one slept the full
+     * time-to-go, and the two reached the same barrier with different sync
+     * codes -- 001 on one, 100 on the other -- and voted each other out.
+     * Measured across both computers on the shared clock (runs ms-short-0,
+     * ms-std-0): the same ICC transfer, finished within 0.05 ms on both,
+     * completed 0.22 ms after the MSC start on one and 4.52 ms on the other.
+     * With the bit in, the single-GPC regression gate matches on every event
+     * counter (run mb-regress) -- the ~231 s death recorded above no longer
+     * happens on this tree -- and the two-computer set holds past the ICC
+     * barrier.  YAGPC_RAW_NO_MSCBIT restores the old mask for comparison. */
+    static int mbInit = 0, mbOn = 1;
     if (!mbInit) {
         mbInit = 1;
-        /* YAGPC_IOP_UPSTREAM turns this on as part of the coordinated set;
-         * YAGPC_RAW_MSCBIT still selects it alone, which is refuted. */
-        mbOn = (getenv("YAGPC_RAW_MSCBIT") != NULL ||
-                getenv("YAGPC_IOP_UPSTREAM") != NULL);
+        mbOn = getenv("YAGPC_RAW_NO_MSCBIT") == NULL;
     }
     uint32_t m = iopls_getACC(&t->ls) & (mbOn ? PROC_ALL : PROC_ALL_BCE);
     iop_msc_repeat(t, v, (register_get32(&t->regBusyWait) & m) == 0);
