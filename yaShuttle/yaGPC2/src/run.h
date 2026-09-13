@@ -42,6 +42,7 @@ typedef struct {
     struct MmuModel *mmu[2];
     int mmuBus[2];
     struct MtuModel *mtu;   /* buses 20-22, device 22; see mtumodel.h */
+    struct IccModel *icc;   /* bus 24, the wire between the computers */
     /* --deu-bus: display units BEYOND the built-in one on DK1.  PASS drives
      * FOUR (DCICYC.asm: DCIS#DEU EQU 4; device IDs 5-8 per FIOERRLC.asm's
      * FIODEULW/FIODEUHI), so modelling one or two leaves the DK handler with

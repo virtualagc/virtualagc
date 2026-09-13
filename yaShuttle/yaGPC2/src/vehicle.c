@@ -12,6 +12,7 @@
 #include "mmumodel.h"
 #include "discretes.h"
 #include "mtumodel.h"
+#include "iccmodel.h"
 
 /* How far apart, in simulated microseconds, the machines are allowed to
  * drift.  Well inside FCOS's 3.85 ms sync timeout with room for the host's
@@ -270,6 +271,11 @@ void vehicle_free(Vehicle *v) {
         v->deuExtra[d] = NULL;
     }
     v->nDeuExtra = 0;
+    if (v->icc != NULL) {
+        iccmodel_report(v->icc);
+        iccmodel_free(v->icc);
+        v->icc = NULL;
+    }
     if (v->mtu != NULL) {
         mtumodel_report(v->mtu);
         mtumodel_free(v->mtu);

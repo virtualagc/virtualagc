@@ -45,6 +45,9 @@ typedef struct Vehicle {
     int mmuBus[2];
 
     struct MtuModel *mtu;                        /* buses 20-22 */
+    /* Bus 24, the wire between the computers -- see iccmodel.h.  Built only
+     * when more than one is running; with one there is nobody to talk to. */
+    struct IccModel *icc;
     struct DeuModel *deu;                        /* the built-in DK1 unit */
     struct DeuModel *deuExtra[DEU_EXTRA_MAX];    /* --deu-bus */
     int deuExtraBus[DEU_EXTRA_MAX];

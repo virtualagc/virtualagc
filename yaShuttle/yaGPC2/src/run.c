@@ -15,6 +15,7 @@
 #include "vehicle.h"
 #include "discretes.h"
 #include "mtumodel.h"
+#include "iccmodel.h"
 #include "mmumodel.h"
 #include "strfmt.h"
 #include "trace.h"
@@ -192,6 +193,14 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             vehicle_bus_leave(br->vehicle, in->busID);
             return;
         }
+    }
+    /* THE INTERCOMPUTER BUS FIRST: it is not a peripheral's bus and must not
+     * fall through to one.  See iccmodel.h. */
+    if (br->icc != NULL && in->busID == YAGPC_ICC_BUS) {
+        vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
+        iccmodel_service(br->icc, br->gpcId, svc, in, out);
+        vehicle_bus_leave(br->vehicle, in->busID);
+        return;
     }
     if (br->mtu && mtumodel_owns_bus(in->busID)) {
         /* The timing unit rewrites its whole reply on every command and has
@@ -544,6 +553,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             r->busRouter.vehicle = veh;
             r->busRouter.gpcId = gpcId;
             r->busRouter.deu = r->deuModel;
+            /* One wire for the vehicle, built by the first machine, and only
+             * when there is more than one computer to carry between. */
+            if (veh->icc == NULL && veh->nMachines > 1) veh->icc = iccmodel_create();
+            r->busRouter.icc = veh->icc;
             r->busRouter.deuOwner = veh->deuOwner;
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtraOwner[d] = veh->deuExtraOwner[d];
