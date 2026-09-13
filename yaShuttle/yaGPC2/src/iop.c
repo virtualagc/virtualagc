@@ -447,6 +447,8 @@ static int xmit_trace_bus(void) {
 static long xmitWords[32];
 static long dmaQueuedRead[32];
 
+static void iop_bce_wire_hold(IOP *iop, BCE *bce, unsigned words);  /* see below */
+
 void mia_xmit_word(struct IOP *iop, MIA *m, uint32_t halfword) {
     if (m->bceNum == xmit_trace_bus() && m->bceNum >= 0 && m->bceNum < 32)
         iop->xmitWords[m->bceNum]++;
@@ -468,6 +470,8 @@ void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
         xmitWords[m->bceNum] = 0;
         dmaQueuedRead[m->bceNum] = 0;
     }
+    if (m->bceNum >= 1 && m->bceNum <= 24)
+        iop_bce_wire_hold(iop, &iop->bce[m->bceNum - 1], 1u);
     if (!iop->servicer) return;
     /* IUA occupies bits 19-23 of the 24-bit command word (see
      * exec_CMDI/exec_CMD in iop_bce_instr.c, which build it as
@@ -478,6 +482,7 @@ void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
 }
 
 void bce_init(BCE *b, int bceNum) {
+    b->wireHoldUntilUs = 0.0;
     b->delayActive = false;
     b->delayPC = 0;
     b->delayUntilUs = 0.0;
@@ -965,6 +970,34 @@ static double bus_word_us(void) {
     return us;
 }
 
+/* YAGPC_BUS_WORD_US_BUSES=<n>[,<n>...]: the wire time above, on those buses
+ * only.  All of them at once is not usable -- FCMBOOT's mass-memory block
+ * timing is load-bearing and a paced bus 18 stops the load (#115) -- but the
+ * display buses need it: FIODEUPG's commander sends seven time words, the
+ * listen command and two delays before its '#MIN', and its listener's
+ * '#DLYI 30 DELAY TO LET MOUTC/CMDI EXECUTE' is sized to that.  With a free
+ * wire the '#MIN' and its echo arrive while the listener is still delaying,
+ * the delay discards them, and the listener waits in Listen Mode for a
+ * command that has already gone past (#137).  No list: every bus, as before. */
+static double bus_word_us_for(int bus) {
+    static int inited = 0;
+    static unsigned mask = 0;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_BUS_WORD_US_BUSES");
+        while (e != NULL && *e != '\0') {
+            int n = atoi(e);
+            if (n >= 0 && n < 32) mask |= 1u << n;
+            const char *c = strchr(e, ',');
+            e = (c != NULL) ? c + 1 : NULL;
+        }
+    }
+    double us = bus_word_us();
+    if (us <= 0.0) return 0.0;
+    if (mask == 0) return us;
+    return (bus >= 0 && bus < 32 && (mask & (1u << bus))) ? us : 0.0;
+}
+
 /* YAGPC_FIRSTOP: the FIRST execution of each distinct opcode, with the
  * processor, the address the instruction sits at, and the simulated time.
  *
@@ -1016,7 +1049,8 @@ void iop_exec_dma_queue(IOP *iop) {
             const DMARequest *r = &iop->dmaQueue.items[iop->dmaQueue.head + i];
             if (r->direction != DMA_READ || r->bce == NULL) { pick = i; break; }
             int b = r->bce->bceNum;
-            if (b < 0 || b >= 32 || now >= iop->busFreeUs[b]) { pick = i; break; }
+            if (b < 0 || b >= 32 || bus_word_us_for(b) <= 0.0 ||
+                now >= iop->busFreeUs[b]) { pick = i; break; }
         }
         if (pick < 0) return;                 /* every pending wire is busy */
         req = iop->dmaQueue.items[iop->dmaQueue.head + pick];
@@ -1026,7 +1060,7 @@ void iop_exec_dma_queue(IOP *iop) {
         iop->dmaQueue.head++; iop->dmaQueue.count--;
         if (req.direction == DMA_READ && req.bce != NULL) {
             int b = req.bce->bceNum;
-            if (b >= 0 && b < 32) iop->busFreeUs[b] = now + wordUs;
+            if (b >= 0 && b < 32) iop->busFreeUs[b] = now + bus_word_us_for(b);
         }
     } else {
         dmaq_shift(&iop->dmaQueue, &req);
@@ -1196,6 +1230,9 @@ void iop_exec_processors(IOP *iop) {
         }
         if (!iop_proc_get(&iop->regHalt, bceIdx)) return;
         if (!iop_proc_get(&iop->regBusyWait, bceIdx)) return;
+        /* Still on the wire: see iop_bce_wire_hold. */
+        if (bceIdx >= 1 && bceIdx <= 24 && iop->cpu != NULL &&
+            iop->cpu->elapsedTimeUs < iop->bce[bceIdx - 1].wireHoldUntilUs) return;
     }
 
     /* A slice is where the three data flow parity checkers that watch a
@@ -1317,7 +1354,51 @@ BCE *iop_cur_bce(IOP *iop) {
     return NULL;
 }
 
+/* THE WIRE HOLD.  A transmit here costs the bus program nothing: #MOUT queues
+ * its words and moves on at once, and a command word goes out inside the
+ * instruction that sends it.  On the orbiter a bus word is 33 us (28 bits
+ * at 1 MHz and the interword gap, IBM-74-A31-016), and bus programs are
+ * written against that -- FIODEUPG's listener waits '#DLYI 30 DELAY TO LET
+ * MOUTC/CMDI EXECUTE', sized to its commander's seven-word '#MOUT', listen
+ * command and delays before the '#MIN'.  With a free wire that '#MIN' and its
+ * echo arrived while the listener was still delaying, the delay discarded
+ * them, and the listener waited for a command that had gone past (#137).
+ *
+ * Pacing each word through the DMA queue instead (YAGPC_BUS_WORD_US) is the
+ * obvious model and is wrong here: the command words it does not queue
+ * overtake the data words it does, so a '#MIN' reached the display unit
+ * before the '#MOUT' ahead of it, and on the display buses traffic fell ten-
+ * fold.  So the words still go at once, in order, and it is the BCE that
+ * waits: its next instruction is held until the words it has sent would have
+ * cleared the wire.  YAGPC_WIRE_HOLD_BUSES=<n>[,<n>...] chooses the buses;
+ * none by default. */
+static bool wire_hold_bus(int bus) {
+    static int inited = 0;
+    static unsigned mask = 0;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_WIRE_HOLD_BUSES");
+        while (e != NULL && *e != '\0') {
+            int n = atoi(e);
+            if (n >= 0 && n < 32) mask |= 1u << n;
+            const char *c = strchr(e, ',');
+            e = (c != NULL) ? c + 1 : NULL;
+        }
+    }
+    return bus >= 0 && bus < 32 && (mask & (1u << bus));
+}
+
+#define WIRE_WORD_US 33.0
+
+static void iop_bce_wire_hold(IOP *iop, BCE *bce, unsigned words) {
+    if (bce == NULL || iop->cpu == NULL || !wire_hold_bus(bce->bceNum)) return;
+    double now = iop->cpu->elapsedTimeUs;
+    if (bce->wireHoldUntilUs < now) bce->wireHoldUntilUs = now;
+    bce->wireHoldUntilUs += (double)words * WIRE_WORD_US;
+}
+
 void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce) {
+    if (bce && direction == DMA_READ) iop_bce_wire_hold(iop, bce, 1u);
     /* Counted here rather than in the five instructions that can queue a
      * transmit (#TDS, #TDL, #TDLI, #MOUT, #MOUT@), so no path is missed.
      * "Queued" against "sent" is the discriminator: a shortfall at queue
@@ -1766,14 +1847,19 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);
             /* gpc= because with several computers the local clocks overlap
              * and a line cannot otherwise be attributed (run fc-short-0). */
+            /* iuar= is what a Listen-Mode receive will accept a command for:
+             * a listener whose IUAR does not match the commander's command
+             * waits through the whole transfer and the MSC's single look
+             * finds it still busy (ledger #137). */
             fprintf(stderr, "BCE%d RECV ARM gpc=%d t=%.1f us pc=%05x addr=%05x "
-                            "count=%u mto=%u timeout=%.2f ms listen=%d xmit=%d\n",
+                            "count=%u mto=%u timeout=%.2f ms listen=%d xmit=%d iuar=%u\n",
                     p, (iop->cpu != NULL) ? iop->cpu->gpcId : 0,
                     now, (unsigned)pc, (unsigned)bce->recvAddr,
                     (unsigned)count,
                     (unsigned)(r ? register_get32(r) & 0x3ffffu : 0u),
                     iop_recv_timeout_us(iop, p) / 1000.0, (int)bce->recvAwaitCmd,
-                    (int)iop_proc_get(&iop->regXmitEna, p));
+                    (int)iop_proc_get(&iop->regXmitEna, p),
+                    (unsigned)(register_get32(iopls_IUAR(&iop->ls)) & 0x1fu));
         }
     }
 
@@ -1812,10 +1898,12 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
          * what puts it NO-GO and sends the flight software down its
          * RESET STATUS1 recovery path -- so if that path runs here and
          * not there, this is where to look first. */
-        if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p))
-            fprintf(stderr, "BCE%d RECV TIMEOUT t=%.1f us left=%u gotAny=%d "
+        if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
+            now >= timeout_trace_from_us())
+            fprintf(stderr, "BCE%d RECV TIMEOUT gpc=%d t=%.1f us left=%u gotAny=%d "
                             "waited=%.2f ms mto=%.2f ms\n",
-                    p, now, (unsigned)bce->recvLeft, (int)bce->recvGotAny,
+                    p, (iop->cpu != NULL) ? iop->cpu->gpcId : 0,
+                    now, (unsigned)bce->recvLeft, (int)bce->recvGotAny,
                     (now - bce->recvSinceUs) / 1000.0,
                     iop_recv_timeout_us(iop, p) / 1000.0);
         iop_bce_error_terminate(iop, p);
@@ -2343,7 +2431,27 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
     }
 
     if (devSelect == 0x8) { /* Local Store */
-        uint32_t region = dataSelect >> 5;
+        /* THE PROCESSOR IS NAMED IN TWO PLACES, AND THEY ADD.  The manual's
+         * bits 7-11 designate the MSC or a BCE, and that is all this used to
+         * read -- but the flight software names the BCE in bits 23-27 (C
+         * shift 4), which the layout above calls ignored:
+         *
+         *   FCMINIOP  FCMTBCD  X'A2158000' 'WRITE BANK B BUS 1', +16 per bus
+         *   FIOCBLKS  FIOSTIUA X'A20A8000' 'SET IUA (BANK C WORD 5 OF BCE)',
+         *             OR'd with BCE number SLL 4
+         *   FIOMGDSP  FIOMGTSK X'A2058000' 'COMMAND LOAD TIMEOUT', 'SLL R5,4
+         *             POSITION FOR COMMAND / OR R4,R5 PUT BCE NUMBER IN COMMAND'
+         *
+         * Reading bits 7-11 alone put every one of those writes on the MSC's
+         * page or BCE 1's: no display-bus controller was ever given its IUA,
+         * so a Listen-Mode receive on DK1 waited for a command it could not
+         * match and the MSC's single look found it busy (ledger #138).  The
+         * sum of the two fields is the only rule all three satisfy -- FCMTBCD
+         * counts buses 1-24 as 1 + (0..23), the other two as 0 + (1..24) --
+         * and a command that leaves bits 23-27 clear decodes as before. */
+        static int lsInit = 0, lsLegacy = 0;
+        if (!lsInit) { lsInit = 1; lsLegacy = getenv("YAGPC_LS_REGION_LEGACY") != NULL; }
+        uint32_t region = (dataSelect >> 5) + (lsLegacy ? 0u : ((cmd >> 4) & 0x1fu));
         uint32_t bank = (dataSelect >> 3) & 0x3;
         uint32_t word = dataSelect & 0x7;
 

@@ -211,7 +211,20 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                         m->clockUs ? *m->clockUs / 1e6 : 0.0,
                         in->busID, (unsigned)cmd, (unsigned)CMD_IUA(cmd));
         }
-        if (CMD_IUA(cmd) == MTU_IUA) {
+        if (CMD_IUA(cmd) != MTU_IUA) {
+            /* A command for ANOTHER device on this bus -- the flight-critical
+             * buses carry several, and only this one is modelled.  That
+             * device is absent, so nothing answers: every computer on the bus
+             * gets the same silence.  Leaving this unit's last reply readable
+             * handed seven stale words to 32-word receives meant for the
+             * other device, which then timed out with seven taken -- and with
+             * a cursor per computer, not necessarily the same seven for each
+             * (ledger #137). */
+            for (int r = 0; r < MTU_READERS; r++) {
+                m->count[b][r] = 0;
+                m->echoPending[b][r] = false;
+            }
+        } else {
             mtu_fill_time(m, b);
             m->commander[b] = g;
             m->echoCmd[b] = cmd;

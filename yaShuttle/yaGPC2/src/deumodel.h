@@ -45,6 +45,13 @@ void deumodel_free(DeuModel *d);
 void deumodel_service(void *ctx, GpcServiceNumber serviceNumber, const GpcServiceInput *input,
                       GpcServiceOutput *output);
 
+/* The same, for a caller that names itself.  The computer that commands the
+ * unit talks to it exactly as through deumodel_service; any other computer
+ * reading this bus gets its own copy of the unit's reply, first shown the
+ * commander's command word marked command sync (ledger #137). */
+void deumodel_service_as(DeuModel *d, int gpcId, GpcServiceNumber serviceNumber,
+                         const GpcServiceInput *input, GpcServiceOutput *output);
+
 /* The emulator's simulated-microsecond clock, so a keystroke batch can be
  * gated on simulated rather than wall time (YAGPC_DEUKEYS_SIMTIME). */
 void deumodel_set_clock(DeuModel *d, const double *clockUs);

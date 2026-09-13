@@ -226,11 +226,29 @@ static void exec_WIX(IOP *t, DInstr *v) {
         BCE *bce = iop_cur_bce(t);
         if (bce && mia_data_available(t, &bce->mia)) {
             uint32_t data = mia_get_data(t, &bce->mia);
-            uint32_t listenCmd = (data & 0x01f00000u) >> 20;
-            if (listenCmd == 0x8) {
-                uint32_t iua = (data & 0x00003e00u) >> 9;
+            /* THE LISTEN COMMAND'S FIELDS, per the BCE Principles of
+             * Operation: the BCE "places bits 14 to 18 of the command in its
+             * Interface Unit Address Register" and "adds the Index bits 19 to
+             * 26 to the Table address".  Bits are numbered over the 28-bit
+             * bus word -- 0-2 sync, 3-7 the IUA, 8-26 the command -- so in
+             * the 24-bit command held here the IUA is (data >> 19) & 0x1f,
+             * bits 14-18 are (data >> 8) & 0x1f and bits 19-26 are the low
+             * eight.  FIODEUPG's commander sends '#CMDI FIOLMIUA,
+             * FIODEUAD*256+254' with FIOLMIUA = 8 and FIODEUAD = 10
+             * (BCEEQU): command 400AFE, subsystem 10, index 254.  The masks
+             * here were one bit off -- (data & 0x01f00000) >> 20 is 4 for that
+             * word, so the command was never recognised, and the subsystem
+             * and index would have come out 5 and 127 (ledger #137).
+             *
+             * A listen command is a COMMAND-sync word.  Where the bus's model
+             * marks sync (busword.h), a data word with those bits is not
+             * one; elsewhere nothing can tell, and it is taken as before. */
+            uint32_t listenIua = (data >> 19) & 0x1fu;
+            bool syncOk = !(((t->busMarksSync >> t->curPE) & 1u)) || bce->mia.lastCmdSync;
+            if (listenIua == 0x8 && syncOk) {
+                uint32_t iua = (data >> 8) & 0x1fu;
                 register_set32(iopls_IUAR(&t->ls), iua);
-                uint32_t index = (data & 0x000001feu) >> 1;
+                uint32_t index = data & 0xffu;
                 uint32_t table = register_get32(a00);
                 table += index;
                 uint32_t v1 = iop_g_eaf(t, table);

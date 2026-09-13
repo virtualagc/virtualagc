@@ -308,12 +308,24 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
              * break really would have put a denied computer's traffic on
              * another computer's wire. */
             if (!deu_owned_by(br, br->deuExtraOwner[d], in->busID)) {
+                /* ...unless it is only LISTENING.  A computer whose
+                 * transmitter is disabled on a display bus hears the unit's
+                 * reply to whoever commands it; telling it the bus is empty
+                 * timed its receive out, and a redundant-set member alone
+                 * with an I/O error fails itself out of the set (#137). */
+                if (vehicle_multi(br->vehicle) &&
+                    (svc == GPC_SVC_RECV_POLL || svc == GPC_SVC_RECV_WORD)) {
+                    vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
+                    deumodel_service_as(br->deuExtra[d], br->gpcId, svc, in, out);
+                    vehicle_bus_leave(br->vehicle, in->busID);
+                    return;
+                }
                 bus_no_peripheral(svc, out);
                 return;
             }
             vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
                               deumodel_in_transfer(br->deuExtra[d]));
-            deumodel_service(br->deuExtra[d], svc, in, out);
+            deumodel_service_as(br->deuExtra[d], br->gpcId, svc, in, out);
             vehicle_bus_leave(br->vehicle, in->busID);
             return;
         }
@@ -322,6 +334,14 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
      * to be checked before getting there -- otherwise every computer that
      * was not given a unit would drive the first computer's. */
     if (br->deu != NULL && !deu_owned_by(br, br->deuOwner, in->busID)) {
+        /* A listener on the built-in unit's bus: see the extra units above. */
+        if (vehicle_multi(br->vehicle) &&
+            (svc == GPC_SVC_RECV_POLL || svc == GPC_SVC_RECV_WORD)) {
+            vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
+            deumodel_service_as(br->deu, br->gpcId, svc, in, out);
+            vehicle_bus_leave(br->vehicle, in->busID);
+            return;
+        }
         bus_no_peripheral(svc, out);
         return;
     }
@@ -335,7 +355,13 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
          * counter in the closing report to say so. */
         vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
                           deumodel_in_transfer(br->deu));
-        br->fallback(br->fallbackCtx, svc, in, out);
+        /* The built-in unit is told who is calling, so its listeners get
+         * their own copy (#137); any other fallback -- the network framer --
+         * is called as before. */
+        if (br->deu != NULL && br->fallbackCtx == (void *)br->deu)
+            deumodel_service_as(br->deu, br->gpcId, svc, in, out);
+        else
+            br->fallback(br->fallbackCtx, svc, in, out);
         vehicle_bus_leave(br->vehicle, in->busID);
         return;
     }
@@ -654,11 +680,12 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             /* The intercomputer model marks command sync (busword.h), so
              * receives on buses 1-5 can honour Listen Mode -- and with more
              * than one computer so do the mass memory (18, 19) and timing
-             * unit (20-22) models, whose listeners are shown the commander's
-             * command word (ledger #136).  One computer keeps its old
+             * unit (20-22) models, and the display units (6-9, #137), whose
+             * listeners are shown the commander's command word (#136).  One computer keeps its old
              * receives: with no second machine there is nobody to echo. */
             if (veh->icc != NULL)
-                iop_set_bus_marks_sync(&r->age.gpc.iop, 0x3eu | (0x1fu << 18));
+                iop_set_bus_marks_sync(&r->age.gpc.iop,
+                                       0x3eu | (0xfu << 6) | (0x1fu << 18));
             r->busRouter.deuOwner = veh->deuOwner;
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtraOwner[d] = veh->deuExtraOwner[d];

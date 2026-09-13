@@ -3,6 +3,7 @@
  * invented here, and are named the same so the two can be read side by
  * side. */
 #include "deumodel.h"
+#include "busword.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,6 +68,20 @@ struct DeuModel {
     /* What the unit has to say back, read out one word per RECV_WORD. */
     uint16_t reply[REPLY_MAX];
     size_t replyHead, replyCount;
+
+    /* LISTENING COMPUTERS (ledger #137).  In a redundant set the computer
+     * whose MIA transmitter is enabled on this display bus commands the unit
+     * and the others listen; each hears the unit's reply on the wire.  The
+     * cursor above is the commander's, unchanged.  Every other computer has
+     * its own over a copy of the same reply, and is first shown the
+     * commander's command word marked command sync (busword.h) -- what a
+     * transmitter-disabled BCE in Listen Mode waits for. */
+    uint16_t lreply[REPLY_MAX];
+    size_t lhead[6], lcount[6];
+    bool echoPending[6];
+    uint32_t echoCmd;
+    int commander;                  /* GPC id of the last command, 0 = unnamed */
+    long listenerWords;
 
     /* Counters, named as the real unit's harness names them. */
     long commands, fills, timeFills, displayFills, formatFills, headerless, polls, bite, dumps;
@@ -179,6 +194,12 @@ static void deu_queue_reply(DeuModel *d, const uint16_t *words, size_t n) {
     d->replyCount = n;
     memcpy(d->reply, words, n * sizeof words[0]);
     d->wordsOut += (long)n;
+    memcpy(d->lreply, words, n * sizeof words[0]);
+    for (int r = 1; r <= 5; r++) {
+        if (r == d->commander) continue;
+        d->lhead[r] = 0;
+        d->lcount[r] = n;
+    }
 }
 
 /* YAGPC_DEUKEYS: one keystroke sequence to deliver on the first poll after
@@ -697,6 +718,55 @@ static void deu_image_stats(const DeuModel *d, unsigned *zeros, unsigned *fill,
     }
 }
 
+void deumodel_service_as(DeuModel *d, int gpcId, GpcServiceNumber serviceNumber,
+                         const GpcServiceInput *input, GpcServiceOutput *output) {
+    if (!d || !input || !output) return;
+    int g = (gpcId >= 1 && gpcId <= 5) ? gpcId : 0;
+    if (g != 0 && input->busID == d->busID) {
+        switch (serviceNumber) {
+        case GPC_SVC_XMIT_CMD:
+            /* Only a transmitter-enabled computer reaches here with a
+             * command.  Whatever it asks supersedes what listeners had from
+             * the last one; its reply, if any, is copied to them as it is
+             * queued. */
+            d->commander = g;
+            d->echoCmd = input->in.word & 0x00ffffffu;
+            for (int r = 1; r <= 5; r++) {
+                d->echoPending[r] = (r != g);
+                d->lcount[r] = 0;
+            }
+            break;                      /* and on to the unit itself */
+        case GPC_SVC_RECV_POLL:
+            if (g != d->commander && d->commander != 0) {
+                output->out.poll.available = d->echoPending[g] || d->lcount[g] > 0;
+                return;
+            }
+            break;
+        case GPC_SVC_RECV_WORD:
+            if (g != d->commander && d->commander != 0) {
+                if (d->echoPending[g]) {
+                    d->echoPending[g] = false;
+                    output->out.recv.available = true;
+                    output->out.recv.word = d->echoCmd | YAGPC_BUSWORD_CMD_SYNC;
+                } else if (d->lcount[g] > 0) {
+                    output->out.recv.available = true;
+                    output->out.recv.word = d->lreply[d->lhead[g]++];
+                    d->lcount[g]--;
+                    d->listenerWords++;
+                } else {
+                    output->out.recv.available = false;
+                    output->out.recv.word = 0;
+                }
+                return;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    deumodel_service(d, serviceNumber, input, output);
+}
+
 void deumodel_set_clock(DeuModel *d, const double *clockUs) {
     if (d) d->clockUs = clockUs;
 }
@@ -767,4 +837,7 @@ void deumodel_report(const DeuModel *d) {
             d->commands, d->fills, d->timeFills, d->displayFills, d->formatFills, d->medsXfers, d->headerless, d->polls, d->bite,
             d->dumps, d->resets, d->unknown, d->wordsIn, d->wordsOut, d->abandoned,
             d->modeStatus, d->ipled ? "true" : "false");
+    if (d->listenerWords > 0)
+        fprintf(stderr, "deu (bus %d): %ld word(s) delivered to listening computers\n",
+                d->busID, d->listenerWords);
 }
