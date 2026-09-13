@@ -1152,23 +1152,45 @@ void iop_exec_processors(IOP *iop) {
          * defects in opposite files. */
         {
             static int bwInit = 0, bwOn = 0;
-            static int bwLast[33];
+            static unsigned bwMask = 0;
             if (!bwInit) {
                 bwInit = 1;
                 bwOn = getenv("YAGPC_BWTRACE") != NULL;
-                for (int i = 0; i < 33; i++) bwLast[i] = -1;
+                /* YAGPC_BWTRACE_PE=<n>[,<n>...] chooses the BCEs; the default
+                 * is the one the trace was built for, the DK buses 6/7/8 and
+                 * mass memory 18.  The intercomputer BCEs 1-5 are the ones in
+                 * question at the redundant-set barrier, where the same ICC
+                 * I/O completes ~5 ms apart on two computers (ledger #134). */
+                const char *e = getenv("YAGPC_BWTRACE_PE");
+                if (e != NULL && *e != '\0') {
+                    while (e != NULL && *e != '\0') {
+                        int n = atoi(e);
+                        if (n >= 0 && n < 32) bwMask |= 1u << n;
+                        const char *c = strchr(e, ',');
+                        e = (c != NULL) ? c + 1 : NULL;
+                    }
+                } else {
+                    bwMask = (1u << 6) | (1u << 7) | (1u << 8) | (1u << 18);
+                }
             }
-            /* Buses 6/7/8 are the DK/DEU buses under study and 18 is mass
-             * memory; every other BCE would only bulk out the log. */
-            if (bwOn && (bceIdx == 6 || bceIdx == 7 || bceIdx == 8 ||
-                         bceIdx == 18)) {
+            /* One previous state per BCE PER IOP: with several computers
+             * these statics are shared, and a single table would report one
+             * machine's edges against the other's state. */
+            static int bwLast[6][33];
+            static int bwLastInit = 0;
+            if (!bwLastInit) {
+                bwLastInit = 1;
+                for (int g = 0; g < 6; g++) for (int i = 0; i < 33; i++) bwLast[g][i] = -1;
+            }
+            int bwG = (iop->cpu != NULL && iop->cpu->gpcId >= 0 && iop->cpu->gpcId < 6) ? iop->cpu->gpcId : 0;
+            if (bwOn && bceIdx >= 0 && bceIdx < 32 && (bwMask & (1u << bceIdx))) {
                 int h = iop_proc_get(&iop->regHalt, bceIdx) ? 1 : 0;
                 int b = iop_proc_get(&iop->regBusyWait, bceIdx) ? 1 : 0;
                 int st = (h << 1) | b;
-                if (bwLast[bceIdx] != st) {
-                    bwLast[bceIdx] = st;
-                    fprintf(stderr, "BW bce=%d halt=%d busy=%d t=%.1f\n",
-                            bceIdx, h, b, iop_now_us(iop));
+                if (bwLast[bwG][bceIdx] != st) {
+                    bwLast[bwG][bceIdx] = st;
+                    fprintf(stderr, "BW gpc=%d bce=%d halt=%d busy=%d t=%.1f\n",
+                            bwG, bceIdx, h, b, iop_now_us(iop));
                 }
             }
         }
@@ -1727,11 +1749,12 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p)) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);
             fprintf(stderr, "BCE%d RECV ARM t=%.1f us pc=%05x addr=%05x "
-                            "count=%u mto=%u timeout=%.2f ms listen=%d\n",
+                            "count=%u mto=%u timeout=%.2f ms listen=%d xmit=%d\n",
                     p, now, (unsigned)pc, (unsigned)bce->recvAddr,
                     (unsigned)count,
                     (unsigned)(r ? register_get32(r) & 0x3ffffu : 0u),
-                    iop_recv_timeout_us(iop, p) / 1000.0, (int)bce->recvAwaitCmd);
+                    iop_recv_timeout_us(iop, p) / 1000.0, (int)bce->recvAwaitCmd,
+                    (int)iop_proc_get(&iop->regXmitEna, p));
         }
     }
 
