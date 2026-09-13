@@ -203,8 +203,18 @@ static void vehicle_route_out(void *ctx, int sourceGpc, uint32_t before,
         if (m == sourceGpc || v->lines[m] == NULL) continue;
         uint32_t set = discretes_rotate_out(sourceGpc, m, changed & after);
         uint32_t clr = discretes_rotate_out(sourceGpc, m, changed & ~after);
-        if (set) discretes_publish_to(from, m, DISCRETES_REG_A, set, true);
-        if (clr) discretes_publish_to(from, m, DISCRETES_REG_A, clr, false);
+        /* IN PROCESS, DIRECTLY -- the sync lines have a 3.85 ms budget and the
+         * socket cannot meet it (see discretes_apply_external).  The datagram
+         * still goes out, because it is the only thing an external monitor
+         * can see; it is no longer what the neighbour depends on. */
+        if (set) {
+            discretes_apply_external(v->lines[m], DISCRETES_REG_A, set, true);
+            discretes_publish_to(from, m, DISCRETES_REG_A, set, true);
+        }
+        if (clr) {
+            discretes_apply_external(v->lines[m], DISCRETES_REG_A, clr, false);
+            discretes_publish_to(from, m, DISCRETES_REG_A, clr, false);
+        }
     }
 }
 

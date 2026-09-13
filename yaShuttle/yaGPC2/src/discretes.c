@@ -9,6 +9,9 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_PTHREADS
+#include <pthread.h>
+#endif
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -158,6 +161,12 @@ struct Discretes {
      * not in wall time. */
     double attentive;
     double lastAttendSec;
+#ifdef HAVE_PTHREADS
+    /* Held only around a register update.  The owning machine writes these
+     * from its own thread; discretes_apply_external lets ANOTHER machine's
+     * thread do it too, which is what the inter-GPC lines need. */
+    pthread_mutex_t lock;
+#endif
     DiscretesOutFn outHook;
     void *outHookCtx;
     double lastPollSec;
@@ -203,6 +212,9 @@ Discretes *discretes_create(int gpcId) {
      * would stamp the very first datagram with the never-seen sentinel and
      * the bit would not count as driven until the clock had moved on. */
     d->attentive = 1.0;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_init(&d->lock, NULL);
+#endif
 
     /* Publishers repeat themselves several times a second, so tracing
      * every message would be noise: only a message that actually CHANGES
@@ -286,6 +298,9 @@ Discretes *discretes_create(int gpcId) {
 }
 
 void discretes_free(Discretes *d) {
+#ifdef HAVE_PTHREADS
+    if (d != NULL) pthread_mutex_destroy(&d->lock);
+#endif
     if (d == NULL) return;
     if (d->open) close(d->fd);
     free(d);
@@ -379,7 +394,8 @@ void discretes_synctrace(Discretes *d) {
     unsigned out = sync_code(d->value[reg_index(DISCRETES_REG_OUT)], 20, 24, 28, 0);
     if (out != d->syncOutLast) {
         d->syncOutLast = out;
-        fprintf(stderr, "SYNC GPC%d out  %u%u%u %s\n", d->gpcId,
+        fprintf(stderr, "SYNC t=%.6f GPC%d out  %u%u%u %s\n",
+                yagpc_monotonic_seconds(), d->gpcId,
                 (out >> 2) & 1u, (out >> 1) & 1u, out & 1u,
                 discretes_sync_code_name(out));
     }
@@ -390,10 +406,34 @@ void discretes_synctrace(Discretes *d) {
         if (code == d->syncInLast[k]) continue;
         d->syncInLast[k] = code;
         int from = sync_neighbour_gpc(d->gpcId, k);
-        fprintf(stderr, "SYNC GPC%d  <- N+%d (GPC%d)  %u%u%u %s\n", d->gpcId, k,
+        fprintf(stderr, "SYNC t=%.6f GPC%d  <- N+%d (GPC%d)  %u%u%u %s\n",
+                yagpc_monotonic_seconds(), d->gpcId, k,
                 from, (code >> 2) & 1u, (code >> 1) & 1u, code & 1u,
                 discretes_sync_code_name(code));
     }
+}
+
+void discretes_apply_external(Discretes *d, int reg, uint32_t mask, bool on) {
+    if (d == NULL || !d->open || mask == 0u || !reg_known(reg)) return;
+    int r = reg_index(reg);
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&d->lock);
+#endif
+    if (on) d->value[r] |= mask;
+    else    d->value[r] &= ~mask;
+    for (int bit = 0; bit < 32; bit++)
+        if (mask & (0x80000000u >> bit)) d->lastSeen[r][bit] = d->attentive;
+    d->messages++;
+    d->generation++;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&d->lock);
+#endif
+    /* Trace it HERE, where the bits actually land.  The receive-side trace
+     * used to run only from this machine's own poll, so it reported the
+     * delivery whenever the machine next got round to looking -- which is
+     * what made the first measurement of this path look like the path's own
+     * latency when it was the instrument's. */
+    discretes_synctrace(d);
 }
 
 static void send_msg(Discretes *d, unsigned op, int reg, uint32_t mask);

@@ -140,6 +140,23 @@ uint32_t discretes_rotate_out(int sourceGpc, int readerGpc, uint32_t outMask);
 void discretes_publish_to(Discretes *from, int destGpc, int reg, uint32_t mask,
                           bool on);
 
+/* APPLY A CHANGE STRAIGHT INTO THIS COMPUTER'S REGISTER, from another
+ * computer's thread.
+ *
+ * The datagram in discretes_publish_to is the right carrier for a crew panel
+ * and the only one an external monitor can see, but it is far too slow for
+ * the inter-GPC sync lines, which FCOS gives a 3.85 ms timeout.  MEASURED
+ * between two machines in one process: median 0.80 ms, p90 158.6 ms, worst
+ * 455.9 ms, with 28.7% of codes arriving LATE -- the median is the receiving
+ * machine's poll interval and the tail is it sitting in the real-time idle
+ * wait, not executing instructions and so not polling at all.  A quarter of
+ * every sync missing its deadline is not a set that can form.
+ *
+ * So when the sender and the receiver are in the same process, the bits go
+ * in directly and the datagram is still sent, for the monitors.  Safe to
+ * call from another machine's thread. */
+void discretes_apply_external(Discretes *d, int reg, uint32_t mask, bool on);
+
 /* Told whenever this computer's discrete OUTPUT register changes, so the
  * vehicle can route the inter-GPC lines to the other computers. */
 typedef void (*DiscretesOutFn)(void *ctx, int sourceGpc, uint32_t before,
