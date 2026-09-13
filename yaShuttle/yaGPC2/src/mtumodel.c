@@ -6,6 +6,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "busword.h"
+
 /* FIOCBLKS names the MTU device 22 -- FIO22020/1/2 -- but that is FCOS's
  * own device number, not the bus address: the NSP beside it is device 24.
  * The BUS address comes from the BCE program that reads it, FIOPRMPG:
@@ -44,12 +46,34 @@
  * The extra word goes on the END, after GMT (0,1,2) and MET (3,4,5). */
 #define MTU_WORDS 7
 
+/* EVERY COMPUTER ON A BUS HEARS THE REPLY; NONE OF THEM USES IT UP.
+ *
+ * In a redundant set every member issues the same read: the one whose MIA
+ * transmitter is enabled sends the command and the others listen
+ * (FIOPRMPG's '#RDLI 6').  On the wire each receives its own copy of the
+ * unit's words.  This model had one reply cursor, so a listener's receive
+ * took the commander's words: the commander got a short read, FIOERRLC
+ * counted an error that only it had, and at the second one it failed itself
+ * out of the set (ledger #136).
+ *
+ * So each BUS keeps its own reply (the unit answers on the bus it was asked
+ * on) and each READER -- GPC id 0-5, 0 for a caller that does not say --
+ * its own cursor over it.  A listener is first handed the commander's
+ * command word marked COMMAND SYNC, which a transmitter-disabled BCE in
+ * Listen Mode waits for (busword.h).  The commander is not echoed, so a
+ * single computer sees exactly what it saw before. */
+#define MTU_READERS 6
+#define MTU_NBUS (MTU_BUS_LAST - MTU_BUS_FIRST + 1)
 struct MtuModel {
     const double *clockUs;
     const double *epochSec;      /* see mtumodel_set_epoch; NULL = elapsed only */
-    uint16_t reply[MTU_WORDS];
-    int replyHead, replyCount;
-    long commands, reads, wordsOut;
+    uint16_t reply[MTU_NBUS][MTU_WORDS];
+    int head[MTU_NBUS][MTU_READERS], count[MTU_NBUS][MTU_READERS];
+    bool echoPending[MTU_NBUS][MTU_READERS];
+    uint32_t echoCmd[MTU_NBUS];
+    int commander[MTU_NBUS];
+    int lastBus;                 /* the bus last filled, for the report */
+    long commands, reads, wordsOut, listenerWords;
 };
 
 struct MtuModel *mtumodel_create(void) {
@@ -83,7 +107,7 @@ static unsigned bcd_pack(unsigned value, unsigned tensBits, unsigned onesBits,
     return out;
 }
 
-static void mtu_fill_time(struct MtuModel *m) {
+static void mtu_fill_time(struct MtuModel *m, int b) {
     double us = m->clockUs ? *m->clockUs : 0.0;
     if (us < 0.0) us = 0.0;
     unsigned ms, sec, min, hr, days;
@@ -149,19 +173,29 @@ static void mtu_fill_time(struct MtuModel *m) {
      * MET is left zero: this simulator has no launch to count from, and
      * FPMLIMCK's MET tests have no lower bound (days < X'365', hours
      * <= X'23', min <= X'59', sec <= X'164'), so all-zero passes. */
-    memset(m->reply, 0, sizeof m->reply);
-    m->reply[0] = (uint16_t)dyhr;
-    m->reply[1] = (uint16_t)mnsc;
-    m->reply[2] = (uint16_t)msec;
-    m->replyHead = 0;
-    m->replyCount = MTU_WORDS;
+    memset(m->reply[b], 0, sizeof m->reply[b]);
+    m->reply[b][0] = (uint16_t)dyhr;
+    m->reply[b][1] = (uint16_t)mnsc;
+    m->reply[b][2] = (uint16_t)msec;
+    for (int r = 0; r < MTU_READERS; r++) {
+        m->head[b][r] = 0;
+        m->count[b][r] = MTU_WORDS;
+    }
+    m->lastBus = b;
     m->reads++;
 }
 
 void mtumodel_service(void *ctx, GpcServiceNumber svc,
                       const GpcServiceInput *in, GpcServiceOutput *out) {
-    struct MtuModel *m = (struct MtuModel *)ctx;
+    mtumodel_service_as((struct MtuModel *)ctx, 0, svc, in, out);
+}
+
+void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
+                         const GpcServiceInput *in, GpcServiceOutput *out) {
     if (!m || !in || !out) return;
+    int g = (gpcId >= 0 && gpcId < MTU_READERS) ? gpcId : 0;
+    int b = in->busID - MTU_BUS_FIRST;
+    if (b < 0 || b >= MTU_NBUS) b = 0;
 
     switch (svc) {
     case GPC_SVC_XMIT_CMD: {
@@ -177,7 +211,15 @@ void mtumodel_service(void *ctx, GpcServiceNumber svc,
                         m->clockUs ? *m->clockUs / 1e6 : 0.0,
                         in->busID, (unsigned)cmd, (unsigned)CMD_IUA(cmd));
         }
-        if (CMD_IUA(cmd) == MTU_IUA) mtu_fill_time(m);
+        if (CMD_IUA(cmd) == MTU_IUA) {
+            mtu_fill_time(m, b);
+            m->commander[b] = g;
+            m->echoCmd[b] = cmd;
+            /* Only named computers listen; reader 0 is a caller that does not
+             * say who it is, which is the single-machine case. */
+            for (int r = 0; r < MTU_READERS; r++)
+                m->echoPending[b][r] = (g >= 1 && r >= 1 && r != g);
+        }
         out->out.xmit.ok = true;
         break;
     }
@@ -185,14 +227,19 @@ void mtumodel_service(void *ctx, GpcServiceNumber svc,
         out->out.xmit.ok = true;
         break;
     case GPC_SVC_RECV_POLL:
-        out->out.poll.available = (m->replyCount > 0);
+        out->out.poll.available = m->echoPending[b][g] || (m->count[b][g] > 0);
         break;
     case GPC_SVC_RECV_WORD:
-        if (m->replyCount > 0) {
+        if (m->echoPending[b][g]) {
+            m->echoPending[b][g] = false;
             out->out.recv.available = true;
-            out->out.recv.word = m->reply[m->replyHead++];
-            m->replyCount--;
-            m->wordsOut++;
+            out->out.recv.word = m->echoCmd[b] | YAGPC_BUSWORD_CMD_SYNC;
+        } else if (m->count[b][g] > 0) {
+            out->out.recv.available = true;
+            out->out.recv.word = m->reply[b][m->head[b][g]++];
+            m->count[b][g]--;
+            if (g == m->commander[b] || g == 0) m->wordsOut++;
+            else m->listenerWords++;
         } else {
             out->out.recv.available = false;
             out->out.recv.word = 0;
@@ -208,5 +255,9 @@ void mtumodel_report(struct MtuModel *m) {
     fprintf(stderr, "mtu: {\"commands\":%ld,\"timeReads\":%ld,\"wordsOut\":%ld,"
             "\"lastTime\":\"%04x %04x %04x\"}\n",
             m->commands, m->reads, m->wordsOut,
-            m->reply[0], m->reply[1], m->reply[2]);
+            m->reply[m->lastBus][0], m->reply[m->lastBus][1],
+            m->reply[m->lastBus][2]);
+    if (m->listenerWords > 0)
+        fprintf(stderr, "mtu: %ld word(s) delivered to listening computers\n",
+                m->listenerWords);
 }

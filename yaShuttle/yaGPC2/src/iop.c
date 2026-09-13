@@ -1385,8 +1385,9 @@ void iop_msc_repeat(IOP *iop, DInstr *v, bool met) {
              * but not what it was waiting on, which is the actual
              * question when one bus's completion is 1052 ms late while
              * the MSC cycles every 34 ms. */
-            fprintf(stderr, "REPEAT pc=%05x d=%u x=%05x count=%u (%.1f us) "
+            fprintf(stderr, "REPEAT gpc=%d pc=%05x d=%u x=%05x count=%u (%.1f us) "
                             "acc=%08x busy=%08x t=%.1f\n",
+                    (iop->cpu != NULL) ? iop->cpu->gpcId : 0,
                     (unsigned)pc, (unsigned)df_get(v, 'd'),
                     (unsigned)(register_get32(iopls_X(&iop->ls)) & 0x3ffff),
                     (unsigned)count, (double)count * MSC_REPEAT_TICK_US,
@@ -1719,6 +1720,20 @@ static bool timeout_trace_pe(int pe) {
     return all || (pe >= 0 && pe < 32 && (mask & (1u << pe)));
 }
 
+/* YAGPC_TIMEOUT_TRACE_FROM=<seconds>: arms before that point on the
+ * computer's own clock are not logged.  The mass-memory BCEs arm millions of
+ * receives, and the question is usually a few seconds after the OPS request. */
+static double timeout_trace_from_us(void) {
+    static int inited = 0;
+    static double us = 0.0;
+    if (!inited) {
+        inited = 1;
+        const char *e = getenv("YAGPC_TIMEOUT_TRACE_FROM");
+        if (e != NULL && *e != '\0') us = atof(e) * 1e6;
+    }
+    return us;
+}
+
 bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
     BCE *bce = iop_cur_bce(iop);
     if (bce == NULL) return true;
@@ -1746,11 +1761,15 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
                             ((iop->busMarksSync >> bce->bceNum) & 1u);
         bce->recvSkippedEcho = false;
         bce->recvErrored = false;
-        if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p)) {
+        if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
+            now >= timeout_trace_from_us()) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);
-            fprintf(stderr, "BCE%d RECV ARM t=%.1f us pc=%05x addr=%05x "
+            /* gpc= because with several computers the local clocks overlap
+             * and a line cannot otherwise be attributed (run fc-short-0). */
+            fprintf(stderr, "BCE%d RECV ARM gpc=%d t=%.1f us pc=%05x addr=%05x "
                             "count=%u mto=%u timeout=%.2f ms listen=%d xmit=%d\n",
-                    p, now, (unsigned)pc, (unsigned)bce->recvAddr,
+                    p, (iop->cpu != NULL) ? iop->cpu->gpcId : 0,
+                    now, (unsigned)pc, (unsigned)bce->recvAddr,
                     (unsigned)count,
                     (unsigned)(r ? register_get32(r) & 0x3ffffu : 0u),
                     iop_recv_timeout_us(iop, p) / 1000.0, (int)bce->recvAwaitCmd,

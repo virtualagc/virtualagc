@@ -70,6 +70,14 @@ void mmumodel_set_discretes(MmuModel *m, struct Discretes *d);
 /* The GpcServicerFn the emulator installs; ctx is the MmuModel. */
 void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
                       const GpcServiceInput *input, GpcServiceOutput *output);
+/* The same, for a caller that names itself and gives its time on the shared
+ * clock (< 0 when there is none).  The commander talks to the unit exactly
+ * as through mmumodel_service; any other computer on the bus reads its own
+ * copy of what the unit puts out, starting with the commander's command
+ * word marked command sync.  See ledger #136. */
+void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
+                         GpcServiceNumber serviceNumber,
+                         const GpcServiceInput *input, GpcServiceOutput *output);
 
 /* Drive this unit's READY discrete onto the bus, so a crew panel (or
  * anything else listening) can see what the tape is doing -- MM1 READY is

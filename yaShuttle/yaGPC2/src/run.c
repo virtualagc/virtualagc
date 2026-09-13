@@ -59,6 +59,18 @@ static bool deu_owned_by(const BusRouter *br, int owner, int busID) {
     return vehicle_dk_commands(br->vehicle, br->gpcId, owner, busID);
 }
 
+/* This machine's time on the vehicle's shared clock, or -1 when there is
+ * none -- the barrier is off, or this machine is held in reset and has no
+ * place in the group's frame.  Without it two machines' clocks cannot be
+ * compared, so nothing that needs comparing them may act. */
+static double router_shared_us(const BusRouter *br) {
+    if (br->clockUs == NULL || br->vehicle == NULL || br->gpcId < 1 || br->gpcId > 5)
+        return -1.0;
+    if (!(br->vehicle->barDeltaUs > 0.0 && br->vehicle->barActive[br->gpcId]))
+        return -1.0;
+    return *br->clockUs + br->vehicle->barOffsetUs[br->gpcId];
+}
+
 void bus_router_service(void *ctx, GpcServiceNumber svc,
                         const GpcServiceInput *in, GpcServiceOutput *out) {
     BusRouter *br = (BusRouter *)ctx;
@@ -245,7 +257,10 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             vehicle_bus_enter(br->vehicle, in->busID, br->gpcId,
                               mmumodel_in_transfer(br->mmu[u]));
             mmumodel_set_clock(br->mmu[u], br->clockUs);
-            mmumodel_service(br->mmu[u], svc, in, out);
+            /* The shared clock, so a listening computer's copy of each word
+             * is due when the commander's is (ledger #136). */
+            mmumodel_service_as(br->mmu[u], br->gpcId, router_shared_us(br),
+                                svc, in, out);
             vehicle_bus_leave(br->vehicle, in->busID);
             return;
         }
@@ -259,10 +274,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
          * two machines' own clocks are not comparable, so pass 'unknown'
          * and nothing ages out. */
         if (br->clockUs != NULL && br->vehicle != NULL && br->gpcId >= 1 && br->gpcId <= 5)
-            iccmodel_note_shared_us(br->icc, br->gpcId,
-                                    (br->vehicle->barDeltaUs > 0.0 && br->vehicle->barActive[br->gpcId])
-                                        ? *br->clockUs + br->vehicle->barOffsetUs[br->gpcId]
-                                        : -1.0);
+            iccmodel_note_shared_us(br->icc, br->gpcId, router_shared_us(br));
         iccmodel_service(br->icc, br->gpcId, svc, in, out);
         vehicle_bus_leave(br->vehicle, in->busID);
         return;
@@ -273,7 +285,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
          * the two threads to keep out of each other's way. */
         vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
         mtumodel_set_clock(br->mtu, br->clockUs);
-        mtumodel_service(br->mtu, svc, in, out);
+        mtumodel_service_as(br->mtu, br->gpcId, svc, in, out);
         vehicle_bus_leave(br->vehicle, in->busID);
         return;
     }
@@ -640,9 +652,13 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             if (veh->icc == NULL && vehicle_multi(veh)) veh->icc = iccmodel_create();
             r->busRouter.icc = veh->icc;
             /* The intercomputer model marks command sync (busword.h), so
-             * receives on buses 1-5 can honour Listen Mode. */
+             * receives on buses 1-5 can honour Listen Mode -- and with more
+             * than one computer so do the mass memory (18, 19) and timing
+             * unit (20-22) models, whose listeners are shown the commander's
+             * command word (ledger #136).  One computer keeps its old
+             * receives: with no second machine there is nobody to echo. */
             if (veh->icc != NULL)
-                iop_set_bus_marks_sync(&r->age.gpc.iop, 0x3eu);
+                iop_set_bus_marks_sync(&r->age.gpc.iop, 0x3eu | (0x1fu << 18));
             r->busRouter.deuOwner = veh->deuOwner;
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtraOwner[d] = veh->deuExtraOwner[d];

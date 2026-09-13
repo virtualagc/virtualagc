@@ -8,6 +8,7 @@
 
 #include "compat.h"
 #include "discretes.h"
+#include "busword.h"
 
 /* MM1 is register A bit 6, MM2 bit 7 -- the same bits iop.c computes for
  * the machine's own READ DISCRETE INPUT A. */
@@ -169,6 +170,27 @@ struct MmuModel {
     struct {
         long commands, blocksRead, blocksWritten, wordsOut, wordsIn, wordsTaken, wordsLost;
     } stats;
+
+    /* LISTENING COMPUTERS (ledger #136).  In a redundant set every member
+     * issues the same mass-memory I/O; the one whose MIA transmitter is
+     * enabled commands the unit and the others listen, and on the wire each
+     * receives its own copy of the unit's words.  The queue above is the
+     * COMMANDER's -- untouched, so a single computer sees exactly what it did
+     * -- and each other computer that has been on this bus gets a tap: the
+     * commander's command word marked command sync (what a Listen-Mode BCE
+     * waits for), then every word the unit puts out, each due at the same
+     * moment it is due for the commander.  That moment is kept on the SHARED
+     * clock, since the computers' own clocks differ by however far apart they
+     * started; with no shared clock there are no taps and nothing changes. */
+    struct MmuTap {
+        uint32_t *w;            /* NULL until this computer is seen here */
+        double *due;            /* shared us; < 0 for an unpaced reply */
+        size_t head, count;
+    } tap[6];
+    int owner;                  /* GPC id of the commander, 0 = none yet */
+    double ownerOffsetUs;       /* shared minus the commander's own clock */
+    bool haveOffset;
+    long listenerWords, listenerLost;
 };
 
 static int block_index(int track, int file, int subfile, int block) {
@@ -203,6 +225,48 @@ static double mm_now(const MmuModel *m) {
     return m->clockUs ? *m->clockUs : 0.0;
 }
 
+static void tap_push(MmuModel *m, int r, uint32_t w, double due) {
+    struct MmuTap *t = &m->tap[r];
+    if (t->w == NULL) return;
+    if (t->head > 0 && t->count + 1 > QUEUE_HW) {
+        memmove(t->w, t->w + t->head, (t->count - t->head) * sizeof t->w[0]);
+        memmove(t->due, t->due + t->head, (t->count - t->head) * sizeof t->due[0]);
+        t->count -= t->head;
+        t->head = 0;
+    }
+    if (t->count >= QUEUE_HW) { m->listenerLost++; return; }
+    t->w[t->count] = w;
+    t->due[t->count] = due;
+    t->count++;
+}
+
+/* A new command ends the streamed transfer for listeners as it does for the
+ * commander (see on_command). */
+static void tap_discard_streamed(MmuModel *m, int r) {
+    struct MmuTap *t = &m->tap[r];
+    while (t->head < t->count && t->due[t->head] >= 0.0) {
+        t->head++;
+        m->listenerLost++;
+    }
+}
+
+/* bus_word() for a listener, on the shared clock, with the same grace. */
+static bool tap_word(MmuModel *m, int r, double nowShared, uint32_t *out) {
+    struct MmuTap *t = &m->tap[r];
+    if (t->w == NULL) return false;
+    while (t->head < t->count) {
+        double d = t->due[t->head];
+        if (d < 0.0) break;
+        if (nowShared < d) return false;
+        if (nowShared <= d + (double)BLOCK_GAP_WORDS * BUS_WORD_US) break;
+        t->head++;
+        m->listenerLost++;
+    }
+    if (t->head >= t->count) { t->head = t->count = 0; return false; }
+    *out = t->w[t->head];
+    return true;
+}
+
 static void queue_words_paced(MmuModel *m, const uint16_t *w, size_t n, bool paced) {
     /* Compact first if the head has run on, exactly as the framer does. */
     if (m->queueHead > 0 && m->queueCount + n > QUEUE_HW) {
@@ -228,8 +292,20 @@ static void queue_words_paced(MmuModel *m, const uint16_t *w, size_t n, bool pac
         m->slot[m->queueCount + i] = paced ? m->nextSlot++ : SLOT_UNPACED;
     }
     memcpy(m->queue + m->queueCount, w, n * sizeof w[0]);
+    size_t first = m->queueCount;
     m->queueCount += n;
     m->stats.wordsOut += (long)n;
+    if (m->owner >= 1 && m->haveOffset) {
+        for (int r = 1; r <= 5; r++) {
+            if (r == m->owner || m->tap[r].w == NULL) continue;
+            for (size_t i = 0; i < n; i++) {
+                uint32_t sl = m->slot[first + i];
+                double due = (sl == SLOT_UNPACED) ? -1.0
+                    : m->burstStartUs + (double)sl * BUS_WORD_US + m->ownerOffsetUs;
+                tap_push(m, r, w[i], due);
+            }
+        }
+    }
 }
 
 static void queue_words(MmuModel *m, const uint16_t *w, size_t n) {
@@ -596,6 +672,7 @@ void mmumodel_set_discretes(MmuModel *m, struct Discretes *d) {
 
 void mmumodel_free(MmuModel *m) {
     if (!m) return;
+    for (int r = 0; r < 6; r++) { free(m->tap[r].w); free(m->tap[r].due); }
     if (m->blocks) {
         for (int i = 0; i < BLOCKS_TOTAL; i++) free(m->blocks[i]);
         free(m->blocks);
@@ -697,6 +774,9 @@ void mmumodel_report(const MmuModel *m) {
             m->unit, m->stats.commands, m->stats.blocksRead,
             m->stats.blocksWritten, m->stats.wordsOut, m->stats.wordsTaken,
             m->stats.wordsLost, m->stats.wordsIn, m->track, m->file, m->subfile);
+    if (m->listenerWords > 0 || m->listenerLost > 0)
+        fprintf(stderr, "mmu%d listeners: %ld word(s) delivered, %ld gone past unread\n",
+                m->unit, m->listenerWords, m->listenerLost);
 }
 
 void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
@@ -746,4 +826,71 @@ void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
     default:
         break;
     }
+}
+
+void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
+                         GpcServiceNumber serviceNumber,
+                         const GpcServiceInput *input, GpcServiceOutput *output) {
+    if (!m || !input || !output) return;
+    int g = (gpcId >= 1 && gpcId <= 5) ? gpcId : 0;
+    if (g != 0 && sharedUs >= 0.0 && input->busID == m->busID) {
+        struct MmuTap *t = &m->tap[g];
+        if (t->w == NULL) {
+            t->w = calloc(QUEUE_HW, sizeof t->w[0]);
+            t->due = calloc(QUEUE_HW, sizeof t->due[0]);
+            if (t->w == NULL || t->due == NULL) {
+                free(t->w); free(t->due); t->w = NULL; t->due = NULL;
+            }
+        }
+        switch (serviceNumber) {
+        case GPC_SVC_XMIT_CMD: {
+            /* Only a computer whose transmitter is enabled gets here -- the
+             * BCE instructions gate the command -- so this is the commander.
+             * A different one taking over starts every listener afresh. */
+            if (g != m->owner) {
+                for (int r = 1; r <= 5; r++) m->tap[r].head = m->tap[r].count = 0;
+                m->owner = g;
+            }
+            m->ownerOffsetUs = sharedUs - mm_now(m);
+            m->haveOffset = true;
+            uint32_t cmd = input->in.word & 0xffffffu;
+            if ((int)((cmd >> 19) & 0x1f) == IUA) {
+                for (int r = 1; r <= 5; r++) {
+                    if (r == g || m->tap[r].w == NULL) continue;
+                    tap_discard_streamed(m, r);
+                    tap_push(m, r, cmd | YAGPC_BUSWORD_CMD_SYNC, -1.0);
+                }
+            }
+            break;                      /* and on to the unit itself, below */
+        }
+        case GPC_SVC_XMIT_WORD:
+            if (g == m->owner) { m->ownerOffsetUs = sharedUs - mm_now(m); m->haveOffset = true; }
+            break;
+        case GPC_SVC_RECV_POLL:
+            if (m->owner != 0 && g != m->owner) {
+                uint32_t w;
+                output->out.poll.available = tap_word(m, g, sharedUs, &w);
+                return;
+            }
+            break;
+        case GPC_SVC_RECV_WORD:
+            if (m->owner != 0 && g != m->owner) {
+                uint32_t w;
+                if (tap_word(m, g, sharedUs, &w)) {
+                    output->out.recv.word = w;
+                    output->out.recv.available = true;
+                    t->head++;
+                    if (t->head == t->count) t->head = t->count = 0;
+                    m->listenerWords++;
+                } else {
+                    output->out.recv.available = false;
+                }
+                return;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    mmumodel_service(m, serviceNumber, input, output);
 }

@@ -28,6 +28,8 @@
 #ifndef YAGPC_MTUMODEL_H
 #define YAGPC_MTUMODEL_H
 
+#include <stdbool.h>
+
 #include "yaGpcIntegration.h"
 
 struct MtuModel;
@@ -51,6 +53,12 @@ bool mtumodel_owns_bus(int busID);
 
 void mtumodel_service(void *ctx, GpcServiceNumber svc,
                       const GpcServiceInput *in, GpcServiceOutput *out);
+/* The same, for a caller that names itself: each computer on a bus has its
+ * own copy of the reply, and a listener is shown the commander's command
+ * word first, marked command sync (busword.h).  gpcId 0 is an unnamed
+ * caller, which is what mtumodel_service passes. */
+void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
+                         const GpcServiceInput *in, GpcServiceOutput *out);
 
 void mtumodel_report(struct MtuModel *m);
 
