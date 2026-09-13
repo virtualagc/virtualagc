@@ -444,6 +444,26 @@ void discretes_apply_external(Discretes *d, int reg, uint32_t mask, bool on) {
     discretes_synctrace(d);
 }
 
+void discretes_apply_external_pair(Discretes *d, int reg, uint32_t setMask,
+                                   uint32_t clrMask) {
+    if (d == NULL || !d->open || !reg_known(reg)) return;
+    if ((setMask | clrMask) == 0u) return;
+    int r = reg_index(reg);
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&d->lock);
+#endif
+    d->value[r] = (d->value[r] | setMask) & ~clrMask;
+    uint32_t touched = setMask | clrMask;
+    for (int bit = 0; bit < 32; bit++)
+        if (touched & (0x80000000u >> bit)) d->lastSeen[r][bit] = d->attentive;
+    d->messages++;
+    d->generation++;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&d->lock);
+#endif
+    discretes_synctrace(d);
+}
+
 static void send_msg(Discretes *d, unsigned op, int reg, uint32_t mask);
 
 /* Apply one well-formed message.  Anything else is ignored rather than

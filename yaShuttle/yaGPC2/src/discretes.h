@@ -157,6 +157,18 @@ void discretes_publish_to(Discretes *from, int destGpc, int reg, uint32_t mask,
  * call from another machine's thread. */
 void discretes_apply_external(Discretes *d, int reg, uint32_t mask, bool on);
 
+/* SET AND CLEAR IN ONE INDIVISIBLE STEP.
+ *
+ * The inter-GPC lines are a three-bit code, and half of one is a DIFFERENT
+ * code with a different meaning -- which is why the rotation delivers all
+ * three together.  Applying the set and the clear as two locked operations
+ * defeats that: the neighbour's CPU reads discrete input A whenever it likes,
+ * and a read landing between them sees a torn code.  Measured, that is what
+ * the sync failures are: each computer waiting on TWO of its neighbour's
+ * three bits, GPC1 on 0x088 out of 0x888 and GPC2 on 0x011 out of 0x111. */
+void discretes_apply_external_pair(Discretes *d, int reg, uint32_t setMask,
+                                   uint32_t clrMask);
+
 /* Told whenever this computer's discrete OUTPUT register changes, so the
  * vehicle can route the inter-GPC lines to the other computers. */
 typedef void (*DiscretesOutFn)(void *ctx, int sourceGpc, uint32_t before,

@@ -213,14 +213,12 @@ static void vehicle_route_out(void *ctx, int sourceGpc, uint32_t before,
          * socket cannot meet it (see discretes_apply_external).  The datagram
          * still goes out, because it is the only thing an external monitor
          * can see; it is no longer what the neighbour depends on. */
-        if (set) {
-            discretes_apply_external(v->lines[m], DISCRETES_REG_A, set, true);
-            discretes_publish_to(from, m, DISCRETES_REG_A, set, true);
-        }
-        if (clr) {
-            discretes_apply_external(v->lines[m], DISCRETES_REG_A, clr, false);
-            discretes_publish_to(from, m, DISCRETES_REG_A, clr, false);
-        }
+        /* Both halves of the code in ONE indivisible step -- see
+         * discretes_apply_external_pair.  The datagrams follow, separately,
+         * because they are only for monitors. */
+        discretes_apply_external_pair(v->lines[m], DISCRETES_REG_A, set, clr);
+        if (set) discretes_publish_to(from, m, DISCRETES_REG_A, set, true);
+        if (clr) discretes_publish_to(from, m, DISCRETES_REG_A, clr, false);
     }
 }
 
@@ -234,8 +232,7 @@ void vehicle_refresh_lines(Vehicle *v, int gpcId, uint32_t outValue) {
          * this is the level the neighbour must keep seeing. */
         uint32_t on = discretes_rotate_out(gpcId, m, outValue);
         uint32_t off = discretes_rotate_out(gpcId, m, ~outValue);
-        if (on)  discretes_apply_external(v->lines[m], DISCRETES_REG_A, on, true);
-        if (off) discretes_apply_external(v->lines[m], DISCRETES_REG_A, off, false);
+        discretes_apply_external_pair(v->lines[m], DISCRETES_REG_A, on, off);
     }
 }
 
