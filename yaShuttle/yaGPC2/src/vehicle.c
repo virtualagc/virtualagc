@@ -119,7 +119,7 @@ bool vehicle_dk_commands(const Vehicle *v, int gpcId, int staticOwner,
 }
 
 void vehicle_bus_enter(Vehicle *v, int busID, int gpcId, bool inTransfer) {
-    if (v == NULL || v->nMachines < 2 || busID < 1 || busID > YAGPC_BUS_MAX)
+    if (v == NULL || !vehicle_multi(v) || busID < 1 || busID > YAGPC_BUS_MAX)
         return;
 #ifdef HAVE_PTHREADS
     pthread_mutex_lock(&v->busLock[busID]);
@@ -135,7 +135,7 @@ void vehicle_bus_enter(Vehicle *v, int busID, int gpcId, bool inTransfer) {
 }
 
 void vehicle_bus_leave(Vehicle *v, int busID) {
-    if (v == NULL || v->nMachines < 2 || busID < 1 || busID > YAGPC_BUS_MAX)
+    if (v == NULL || !vehicle_multi(v) || busID < 1 || busID > YAGPC_BUS_MAX)
         return;
 #ifdef HAVE_PTHREADS
     pthread_mutex_unlock(&v->busLock[busID]);
@@ -152,7 +152,7 @@ void vehicle_barrier_leave(Vehicle *v, int gpcId) {
 void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
     /* OFF unless there is somebody to wait for.  One computer is the case
      * every existing command line asks for, and it must not pay for this. */
-    if (v == NULL || v->nMachines < 2 || v->barDeltaUs <= 0.0) return;
+    if (v == NULL || !vehicle_multi(v) || v->barDeltaUs <= 0.0) return;
     if (gpcId < 1 || gpcId > 5) return;
 
     if (!v->barActive[gpcId]) barrier_join(v, gpcId, machineUs);
@@ -190,7 +190,16 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
     v->barHeldSec += yagpc_monotonic_seconds() - t0;
 }
 
-bool vehicle_multi(const Vehicle *v) { return v != NULL && v->nMachines > 1; }
+bool vehicle_multi(const Vehicle *v) {
+    if (v == NULL) return false;
+    /* nExpected is right from the start; nMachines only once everybody has
+     * been built.  Either one being above 1 settles it. */
+    return v->nExpected > 1 || v->nMachines > 1;
+}
+
+void vehicle_expect_machines(Vehicle *v, int n) {
+    if (v != NULL) v->nExpected = n;
+}
 
 /* ONE COMPUTER'S OUTPUT IS THE OTHERS' INPUT.  Its STBY/BFS RUN/RUN/SYNC
  * lines run to the other four, arriving at a bit that depends on who is
@@ -223,7 +232,7 @@ static void vehicle_route_out(void *ctx, int sourceGpc, uint32_t before,
 }
 
 void vehicle_refresh_lines(Vehicle *v, int gpcId, uint32_t outValue) {
-    if (v == NULL || v->nMachines < 2 || gpcId < 1 || gpcId > 5) return;
+    if (v == NULL || !vehicle_multi(v) || gpcId < 1 || gpcId > 5) return;
     for (int m = 1; m <= 5; m++) {
         if (m == gpcId || v->lines[m] == NULL) continue;
         /* The WHOLE code, set and clear together -- a half-applied code is a

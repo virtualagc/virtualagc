@@ -80,6 +80,27 @@ typedef struct Vehicle {
      * should look exactly as it always has. */
     int nMachines;
 
+    /* HOW MANY COMPUTERS WILL RUN, declared before any of them is built.
+     *
+     * nMachines counts the ones CONSTRUCTED SO FAR and is incremented at the
+     * top of batchrunner_init, so while the FIRST machine is being built it
+     * reads 1 even in a five-computer run.  Every "is this a multi-GPC
+     * vehicle?" question asked during that machine's construction therefore
+     * gets the wrong answer, and it has now cost two defects in that one
+     * function.  The display unit ended up owned by nobody (fixed in place;
+     * see the comment there).  Worse, the intercomputer bus was never wired
+     * to GPC 1 AT ALL -- `veh->icc == NULL && veh->nMachines > 1` is false
+     * while GPC 1 is being built, so the wire was created by GPC 2 and only
+     * GPC 2's router ever held a pointer to it.  GPC 1 does all the
+     * intercomputer traffic, so measured, the ICC model went through an
+     * entire 900 s two-computer run untouched: 0 transmits, 0 receives, 0
+     * polls, while the census recorded two million bus-24 transactions
+     * falling through to a display that declined every one.
+     *
+     * main() knows the answer before it builds anything, so it says so, and
+     * vehicle_multi() prefers it. */
+    int nExpected;
+
     /* THE VEHICLE'S CLOCK, in simulated microseconds.  The shared device
      * models pace against simulated time -- the mass memory releases a word
      * per word time as the tape turns -- and they used to watch ONE machine's
@@ -194,8 +215,12 @@ typedef struct Vehicle {
 void vehicle_init(Vehicle *v);
 void vehicle_free(Vehicle *v);
 
-/* True when more than one computer is running on this vehicle. */
+/* True when more than one computer is running on this vehicle.  Correct
+ * DURING construction as well as after it -- see nExpected. */
 bool vehicle_multi(const Vehicle *v);
+
+/* Say how many computers will run, before any of them is constructed. */
+void vehicle_expect_machines(Vehicle *v, int n);
 
 /* Carry the vehicle's clock forward to this machine's simulated time. */
 void vehicle_note_time(Vehicle *v, double machineUs);

@@ -103,6 +103,11 @@ int main(int argc, char **argv) {
      * sockets.  The machines borrow them.  See vehicle.h. */
     Vehicle vehicle;
     vehicle_init(&vehicle);
+    /* Before a single machine is built, so that anything constructed during
+     * the FIRST machine's init already knows this is a multi-GPC vehicle --
+     * the intercomputer bus is built there and was silently skipped for
+     * GPC 1.  See vehicle.h's nExpected. */
+    vehicle_expect_machines(&vehicle, nGpc);
 
     BatchRunner runners[MAX_GPCS];
     for (int i = 0; i < nGpc; i++)

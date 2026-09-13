@@ -63,6 +63,41 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
                         const GpcServiceInput *in, GpcServiceOutput *out) {
     BusRouter *br = (BusRouter *)ctx;
     if (!br || !in || !out) return;
+    /* YAGPC_CMDTRACE=<bus>[,<bus>...]: every command word issued on those
+     * buses, decoded.  YAGPC_DKTRACE answers the same question but only for
+     * buses 6-9, and the question keeps being asked about other buses --
+     * "what IS that traffic?"  The bus census says a computer put 12,396
+     * transactions on bus 1 and nothing models bus 1; only the command word
+     * says whether that is the intercomputer exchange the bus table claims
+     * lives there, and a name in a table is not evidence.
+     *
+     * Decoding per the BCE Principles of Operation (IBM-6246556A part 3):
+     * bits 5-9 the interface unit address, 13-22 the function, 23-31 the
+     * count, which is ONE LESS than the number of words. */
+    if (svc == GPC_SVC_XMIT_CMD && getenv("YAGPC_CMDTRACE") != NULL) {
+        static int ctInit = 0;
+        static unsigned char want[YAGPC_BUS_MAX + 1];
+        static long budget = 200000;
+        if (!ctInit) {
+            ctInit = 1;
+            const char *e = getenv("YAGPC_CMDTRACE");
+            while (e != NULL && *e != '\0') {
+                int b = atoi(e);
+                if (b >= 1 && b <= YAGPC_BUS_MAX) want[b] = 1;
+                const char *c = strchr(e, ',');
+                e = (c != NULL) ? c + 1 : NULL;
+            }
+        }
+        if (in->busID >= 1 && in->busID <= YAGPC_BUS_MAX && want[in->busID] &&
+            budget-- > 0) {
+            unsigned cmd = (unsigned)(in->in.word & 0x00ffffffu);
+            fprintf(stderr, "CMD gpc=%d bus=%d cmd=%06x iua=%u func=%03x "
+                            "words=%u t=%.6f\n",
+                    br->gpcId, in->busID, cmd, (cmd >> 19) & 0x1fu,
+                    (cmd >> 9) & 0x3ffu, (cmd & 0x1ffu) + 1u,
+                    br->clockUs != NULL ? *br->clockUs / 1e6 : 0.0);
+        }
+    }
     /* YAGPC_DKTRACE: every command issued on a display-keyboard bus, with the
      * simulated time.  The IOQE a DK request holds is not released until the
      * transfer completes, so how long one takes is what decides whether an
@@ -575,8 +610,17 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             r->busRouter.gpcId = gpcId;
             r->busRouter.deu = r->deuModel;
             /* One wire for the vehicle, built by the first machine, and only
-             * when there is more than one computer to carry between. */
-            if (veh->icc == NULL && veh->nMachines > 1) veh->icc = iccmodel_create();
+             * when there is more than one computer to carry between.
+             *
+             * vehicle_multi(), NOT veh->nMachines > 1.  nMachines counts the
+             * machines built so far and reads 1 while the FIRST one is being
+             * built, so this test was false for GPC 1 and the wire was
+             * created by GPC 2 -- leaving GPC 1, which does all the
+             * intercomputer traffic, with br->icc == NULL and its bus-24
+             * transmissions falling through to a display unit that declined
+             * every one.  The model recorded 0 transmits and 0 receives
+             * across a 900 s two-computer run. */
+            if (veh->icc == NULL && vehicle_multi(veh)) veh->icc = iccmodel_create();
             r->busRouter.icc = veh->icc;
             r->busRouter.deuOwner = veh->deuOwner;
             for (int d = 0; d < r->nDeuModelExtra; d++)
@@ -1262,10 +1306,27 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
     return (mode & MODE_HALT) != 0;
 }
 
-/* YAGPC_RANGETRACE=lo-hi[,max[,afterSec]] (halfword addresses in hex, max
- * lines decimal, default 200000; afterSec in EMULATED seconds, default 0):
- * every instruction executed with NIA inside the range, disassembled, with
- * R0-R7 as they stand AFTER it.
+/* YAGPC_RANGETRACE=lo-hi[+lo-hi...][,max[,afterSec]] (halfword addresses in
+ * hex, max lines decimal, default 200000; afterSec in EMULATED seconds,
+ * default 0): every instruction executed with NIA inside one of the ranges,
+ * disassembled, with R0-R7 as they stand AFTER it and the machine's own
+ * simulated time.
+ *
+ * SEVERAL RANGES, because the question is usually about two places at once.
+ * A branch is only interesting next to what it led to, and the two are
+ * rarely adjacent: FCMISYNC picks its set mask at 0x18ea0/0x18eab and the
+ * timeout it may end in lands in FCMSFINT at 0x19674, three hundred
+ * halfwords away.  One range spanning both traces everything in between --
+ * millions of lines of unrelated FCOS -- and two runs cannot be correlated
+ * at all, because the failure is rare and the passes are not.  So the
+ * ranges are a list, sharing one budget, and the interleaving in the output
+ * IS the correlation: the mask a failing pass chose is on the line above
+ * the failure.
+ *
+ * The TIME is on every line for the same reason.  Two machines write this
+ * stream from two threads, so position in the file orders each machine's
+ * own lines but says nothing across them, and every question here is about
+ * what one computer did relative to the other.
  *
  * --trace traces everything, which for flight software means the routine of
  * interest arrives a hundred million steps in and buried.  A range is what
@@ -1309,21 +1370,42 @@ static bool range_trace_enabled(void) {
 static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
                         uint32_t hw2, const char *disasm,
                         const RegSnapshot *after) {
+#define RANGE_TRACE_MAX 8
     static int inited = 0;
-    static uint32_t lo = 0, hi = 0;
+    static uint32_t lo[RANGE_TRACE_MAX], hi[RANGE_TRACE_MAX];
+    static int nRange = 0;
     static long left = 0;
     static double afterUs = 0.0;
     if (!inited) {
         inited = 1;
         const char *spec = getenv("YAGPC_RANGETRACE");
         if (spec) {
-            unsigned a = 0, b = 0; long m = 200000; double t = 0.0;
-            if (sscanf(spec, "%x-%x,%ld,%lf", &a, &b, &m, &t) >= 2) {
-                lo = a; hi = b; left = m; afterUs = t * 1.0e6;
+            /* The ranges first, '+'-separated, then the shared budget and
+             * start time.  A spec with one range and no '+' parses exactly
+             * as it always did. */
+            const char *p = spec;
+            while (nRange < RANGE_TRACE_MAX) {
+                unsigned a = 0, b = 0;
+                if (sscanf(p, "%x-%x", &a, &b) != 2) break;
+                lo[nRange] = a; hi[nRange] = b; nRange++;
+                const char *plus = strchr(p, '+');
+                const char *comma = strchr(p, ',');
+                if (plus == NULL || (comma != NULL && comma < plus)) break;
+                p = plus + 1;
             }
+            long m = 200000; double t = 0.0;
+            const char *tail = strchr(p, ',');
+            if (tail != NULL) sscanf(tail + 1, "%ld,%lf", &m, &t);
+            if (nRange > 0) { left = m; afterUs = t * 1.0e6; }
         }
     }
-    if (left <= 0 || nia < lo || nia > hi) return;
+    if (left <= 0) return;
+    {
+        bool in = false;
+        for (int i = 0; i < nRange; i++)
+            if (nia >= lo[i] && nia <= hi[i]) { in = true; break; }
+        if (!in) return;
+    }
     if (r->age.gpc.cpu.elapsedTimeUs < afterUs) return;
     /* YAGPC_RANGETRACE_GPC=<n> restricts the trace to ONE computer.  The
      * line budget below is a file static shared by every machine, so
@@ -1340,10 +1422,11 @@ static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
         if (only != 0 && r->gpcId != only) return;
     }
     left--;
-    fprintf(stderr, "RT gpc=%d %05x %04x %04x  %-28s "
+    fprintf(stderr, "RT gpc=%d t=%.6f %05x %04x %04x  %-28s "
             "R0=%08x R1=%08x R2=%08x R3=%08x "
             "R4=%08x R5=%08x R6=%08x R7=%08x\n",
-            r->gpcId, (unsigned)nia, (unsigned)hw1, (unsigned)hw2, disasm,
+            r->gpcId, r->age.gpc.cpu.elapsedTimeUs * 1.0e-6,
+            (unsigned)nia, (unsigned)hw1, (unsigned)hw2, disasm,
             (unsigned)after->r[0], (unsigned)after->r[1],
             (unsigned)after->r[2], (unsigned)after->r[3],
             (unsigned)after->r[4], (unsigned)after->r[5],
