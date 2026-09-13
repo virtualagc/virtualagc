@@ -231,12 +231,18 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
              * this computer is not on that bus at all and finds nothing
              * there -- it does not get to share it.
              *
-             * RETURN, do not break.  Breaking left the bus unmatched, and an
-             * unmatched bus falls through to `fallback`, which is the
-             * BUILT-IN display and answers on ANY bus number.  So a computer
-             * denied its neighbour's display was handed its own instead, and
-             * the assignment did nothing: measured, GPC1 took 561,010
-             * transactions on DK2 while the GPC2 it belonged to took none. */
+             * RETURN, do not break.  Breaking left the bus unmatched, and
+             * an unmatched bus falls through to `fallback` -- whatever
+             * servicer was installed before the router.  Under --deu-model
+             * that is the built-in unit, which declines a bus that is not
+             * its own (deumodel.c, `input->busID != d->busID`), so the
+             * software was told the same thing either way; what the break
+             * cost there was a lock on somebody else's bus and 561,010
+             * phantom transactions in the census, counted at the router
+             * before the model declined.  Under --bce-network the fallback
+             * is the NETWORK FRAMER, which serves any bus, and there the
+             * break really would have put a denied computer's traffic on
+             * another computer's wire. */
             if (!deu_owned_by(br, br->deuExtraOwner[d], in->busID)) {
                 bus_no_peripheral(svc, out);
                 return;
