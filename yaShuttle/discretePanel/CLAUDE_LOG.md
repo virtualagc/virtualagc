@@ -27,3 +27,5 @@
 ### [2026-09-14] Target: HANDOFF-panelO6.md, HANDOFF-stsKeyboard.md
 - R11 inset: right margin 5+4 units, left 5 -- _rect_panel's dark right bevel covers the panel face while the light left one reads as panel, so equal numbers looked lopsided. Measured light gap left/right: 4/4 px at --size 512, 6/7 px at 768.
 - stsKeyboard.py default caption is now just the keyboard number ("1", "2", "3"; 1 left, 2 right, 3 aft) -- "KYBDn" and longer titles truncated at the small --size many-CRT runs use; simulatePASS passes the same. --title help updated (the SEL switches are modelled now). Verified: --kybd 2 window titled "2".
+### [2026-09-14] Target: README.md (simulatePASS)
+- simulatePASS --instructions prints the switch-and-keyboard steps for the given --gpcs/--crts and exits without starting anything (--procedure kept as a hidden alias). A launch no longer prints the steps (they scrolled away under program output); it logs the exact --instructions command instead. The text is tailored: keyboard lines only for the CRTs in use, RIGHT IDP/CRT SEL only with CRT2, R11 only with CRT4, the GPC columns named. Lengths: 30 lines (1 GPC), 73 (2 GPCs), 113 (4 GPCs, 4 CRTs).

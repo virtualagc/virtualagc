@@ -8,10 +8,12 @@ cam.py's GPC STATUS lamps.  yaGPC2 is the computer.
     python3 simulatePASS.py --tape OI340700-v44boot.mmv
     python3 simulatePASS.py --gpcs 1,2 --tape OI340700-v44boot.mmv
     python3 simulatePASS.py --gpcs 1-3 --tape ... --size 640 --scale 0.9
-    python3 simulatePASS.py --gpcs 1,2 --procedure     # just the steps
+    python3 simulatePASS.py --gpcs 1,2 --instructions  # the steps, then exit
 
-Once everything is up it prints the switch-and-keyboard procedure for the
-computers you named.  Press Enter in this terminal (or Ctrl-C) to shut it all
+The switch-and-keyboard steps for a configuration are printed by the same
+command with --instructions added, which starts nothing -- run it in a second
+terminal, where the programs' output will not scroll the steps away.  Once
+everything is up, press Enter in this terminal (or Ctrl-C) to shut it all
 down.  Each program's output goes to a log in --logs; the previous run's are
 kept in a prev-<time> directory there.
 
@@ -39,6 +41,7 @@ import socket
 import struct
 import subprocess
 import sys
+import textwrap
 import threading
 import time
 
@@ -90,24 +93,34 @@ def procedure_text(gpcs, crts):
     n = len(g)
     L = []
     L.append("-" * 72)
-    L.append("PROCEDURE for GPC%s %s" % ("s" if n > 1 else "", ", ".join(map(str, g))))
+    L.append("INSTRUCTIONS: GPC%s %s with %d CRT%s"
+             % ("s" if n > 1 else "", ", ".join(map(str, g)), crts, "s" if crts > 1 else ""))
     L.append("-" * 72)
     L.append("")
-    L.append("The IDP switches are on panelO6: panel C2 (IDP/CRT POWER and MAJ FUNC, and the")
-    L.append("two IDP/CRT SEL switches) and O6 (INTEGRATED DISPLAY PROCESSOR LOAD).  The")
-    L.append("LEFT keyboard (KYBD1) reaches IDP 1 or 3, the RIGHT keyboard (KYBD2) IDP 2 or 3.")
-    L.append("The box at the foot of a DPS page names its IDP, with a red bar beside it for")
-    L.append("the left keyboard and a yellow one for the right; the digit before the time in")
-    L.append("the page header is the GPC driving it.")
+    # Only what this configuration needs: its keyboards, its IDP/CRT sets.
+    kb = ["keyboard 1 (left) types on CRT1"]
+    if crts >= 2:
+        kb.append("keyboard 2 (right) on CRT2")
+    if crts >= 3:
+        kb.append("either reaches CRT3 with its IDP/CRT SEL at 3")
+    if crts == 4:
+        kb.append("keyboard 3 (aft) on CRT4")
+    L += textwrap.wrap("Keyboards: " + "; ".join(kb) + ".  On a DPS page the digit "
+                       "before the time is the GPC driving it, and the box at the foot "
+                       "is its IDP.", 78)
     L.append("")
-    L.append("BEFORE ANY IPL")
+    L.append("BEFORE ANY IPL  (every switch is on panelO6)")
     L.append("  a. C2: IDP/CRT %s POWER -> ON, MAJ FUNC -> GNC  (\"MDU IS AUTONOMOUS\" goes)."
              % ", ".join(str(k) for k in range(1, min(crts, 3) + 1)))
     if crts == 4:
-        L.append("     R11 (under O6's IDP LOAD): IDP/CRT 4 POWER -> ON, MAJ FUNC -> GNC.")
-    L.append("  b. C2: LEFT IDP/CRT SEL -> 1, RIGHT IDP/CRT SEL -> 2.")
-    L.append("  c. panelO6: MODE -> HALT for %s." % ("GPC%d" % g[0] if n == 1 else
-                                                   "every GPC column in use"))
+        L.append("     R11: IDP/CRT 4 POWER -> ON, MAJ FUNC -> GNC.")
+    if crts == 1:
+        L.append("  b. C2: LEFT IDP/CRT SEL -> 1.")
+    else:
+        L.append("  b. C2: LEFT IDP/CRT SEL -> 1, RIGHT IDP/CRT SEL -> 2.")
+    names = ["GPC%d" % x for x in g]
+    L.append("  c. MODE -> HALT for %s."
+             % (names[0] if n == 1 else ", ".join(names[:-1]) + " and " + names[-1]))
     L.append("")
     if n == 1:
         gpc = g[0]
@@ -400,7 +413,11 @@ def main():
                          "from the screen's DPI)")
     ap.add_argument("--no-keyboard", action="store_true", help="no stsKeyboard.py "
                     "(--keyboards 0)")
-    ap.add_argument("--procedure", action="store_true", help="print the procedure and exit")
+    ap.add_argument("--instructions", action="store_true",
+                    help="print the switch-and-keyboard steps for these --gpcs and --crts, "
+                         "and exit without starting anything")
+    ap.add_argument("--procedure", dest="instructions", action="store_true",
+                    help=argparse.SUPPRESS)          # the old name
     ap.add_argument("--panel-script", metavar="FILE", help="timed script for panelO6.py")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
     ap.add_argument("--duration", type=float, metavar="SECONDS",
@@ -413,7 +430,7 @@ def main():
     if args.no_keyboard:
         args.keyboards = 0
 
-    if args.procedure:
+    if args.instructions:
         print(procedure_text(gpcs, args.crts))
         return 0
 
@@ -562,9 +579,10 @@ def main():
                              args=(args.port_base, os.path.abspath(args.keys), t0, stop_event),
                              daemon=True).start()
 
-        print()
-        print(procedure_text(gpcs, args.crts))
-        print()
+        # Not the steps themselves: they are long, and the programs' output
+        # would scroll them away while they are being read.
+        log("for the steps: python3 simulatePASS.py --gpcs %s --crts %d --instructions"
+            % (",".join(map(str, gpcs)), args.crts))
         if args.duration:
             log("running for %.0f s" % args.duration)
             while time.time() - t0 < args.duration and gpc.poll() is None:
