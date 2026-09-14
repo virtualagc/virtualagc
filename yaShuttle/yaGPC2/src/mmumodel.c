@@ -198,6 +198,14 @@ struct MmuModel {
     struct Discretes *lines;
     bool readyPublished, lastReady;
     double lastReadyPublishSec;
+    /* EVERY COMPUTER'S CHANNEL.  A mass memory is wired to all of them, and a
+     * crew panel listens on one: publishing only on the channel of whichever
+     * computer was set up last (GPC4 of four) left the panel's MM1 ACTIVITY
+     * lamp dark through an IPL that read the bootstrap perfectly well.  Filled
+     * by mmumodel_set_discretes, one entry per computer, before any machine
+     * thread starts; each entry keeps its own republish timing. */
+    struct { struct Discretes *d; bool published, last; double lastSec; } readyOut[6];
+    int nReadyOut;
 
 
     struct {
@@ -740,6 +748,11 @@ int mmumodel_bus(const MmuModel *m) { return m ? m->busID : -1; }
 
 void mmumodel_set_discretes(MmuModel *m, struct Discretes *d) {
     if (m) m->lines = d;
+    if (m && d) {
+        bool have = false;
+        for (int i = 0; i < m->nReadyOut; i++) have = have || m->readyOut[i].d == d;
+        if (!have && m->nReadyOut < 6) m->readyOut[m->nReadyOut++].d = d;
+    }
 }
 
 void mmumodel_free(MmuModel *m) {
@@ -798,6 +811,42 @@ static bool timed_ready_enabled(void) {
     static int inited = 0, on = 0;
     if (!inited) { inited = 1; on = getenv("YAGPC_MMU_QUEUE_READY") == NULL; }
     return on != 0;
+}
+
+/* Ready when it is not moving data: nothing left over from a read and no
+ * write running (with the timed grace below). */
+static bool mm_ready_now(MmuModel *m);
+
+/* The unit's READY on one computer's channel -- see readyOut. */
+void mmumodel_publish_ready_on(MmuModel *m, struct Discretes *d) {
+    if (!m || !discretes_enabled(d)) return;
+    int k = -1;
+    for (int i = 0; i < m->nReadyOut; i++) if (m->readyOut[i].d == d) k = i;
+    if (k < 0) return;
+    bool ready = mm_ready_now(m);
+    double now = yagpc_monotonic_seconds();
+    if (m->readyOut[k].published && ready == m->readyOut[k].last &&
+        now - m->readyOut[k].lastSec < READY_REPUBLISH_SEC)
+        return;
+    uint32_t bit = (m->unit == 2) ? DISCRETE_A_MM2_READY : DISCRETE_A_MM1_READY;
+    discretes_publish(d, DISCRETES_REG_A, bit, ready);
+    if (k == 0 && m->verbose && (!m->readyOut[k].published || ready != m->readyOut[k].last))
+        mm_log(m, "READY -> %d", (int)ready);
+    m->readyOut[k].last = ready;
+    m->readyOut[k].published = true;
+    m->readyOut[k].lastSec = now;
+}
+
+static bool mm_ready_now(MmuModel *m) {
+    bool ready = (m->queueHead >= m->queueCount) && !m->writeActive;
+    if (!ready && !m->writeActive && timed_ready_enabled() && m->clockUs &&
+        m->nextSlot > 0) {
+        double lastDue = m->burstStartUs +
+                         (double)(m->nextSlot - 1) * BUS_WORD_US;
+        if (mm_now(m) > lastDue + (double)BLOCK_GAP_WORDS * BUS_WORD_US)
+            ready = true;
+    }
+    return ready;
 }
 
 void mmumodel_publish_ready(MmuModel *m) {

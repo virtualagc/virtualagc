@@ -93,6 +93,10 @@ void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
  * value iop.c derives from the channel, which is why nothing about the
  * boot changes when this is on -- see iop_mm_ready(). */
 void mmumodel_publish_ready(MmuModel *m);
+/* The same, on the channel of one computer the unit is wired to (each call
+ * mmumodel_set_discretes'd first).  With several computers each publishes on
+ * its own, so a panel listening on any of them sees the unit's READY. */
+void mmumodel_publish_ready_on(MmuModel *m, struct Discretes *d);
 
 /* Counters in the shape the real unit's own report prints, so the two can
  * be compared directly. */

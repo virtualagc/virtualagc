@@ -1243,7 +1243,7 @@ static void firmware_ipl(BatchRunner *r) {
                  * READY, and overriding it from here would be this process
                  * asserting a discrete about somebody else's hardware. */
                 for (int u = 0; u < 2; u++)
-            if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
+            if (r->mmuModel[u]) mmumodel_publish_ready_on(r->mmuModel[u], r->discretes);
             }
             continue;
         }
@@ -1268,7 +1268,7 @@ static void firmware_ipl(BatchRunner *r) {
     ageharness_firmware_ipl(&r->age, image, (uint32_t)got);
     free(image);
     for (int u = 0; u < 2; u++)
-            if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
+            if (r->mmuModel[u]) mmumodel_publish_ready_on(r->mmuModel[u], r->discretes);
     mode_log(r, "MODE: IPL; memory filled, bootstrap read from MM%d "
                     "(BCE %d) over the bus (%zu blocks, %zu halfwords) "
                     "to 0x00000\n",
@@ -1583,7 +1583,7 @@ static bool batchrunner_step(BatchRunner *r) {
          * a crew panel show something before the switch is ever moved,
          * which is the only sign a person has that this is running. */
         for (int u = 0; u < 2; u++)
-            if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
+            if (r->mmuModel[u]) mmumodel_publish_ready_on(r->mmuModel[u], r->discretes);
         /* And out of the simulated-time barrier while it is held: this
          * machine's clock has stopped, and a stopped clock is the slowest
          * there is -- leaving it in would halt the whole vehicle. */
@@ -1963,7 +1963,7 @@ static bool batchrunner_step(BatchRunner *r) {
          * is what lets a crew panel show the tape working, and doubles as
          * the only outward sign that this emulator is running at all. */
         for (int u = 0; u < 2; u++)
-            if (r->mmuModel[u]) mmumodel_publish_ready(r->mmuModel[u]);
+            if (r->mmuModel[u]) mmumodel_publish_ready_on(r->mmuModel[u], r->discretes);
         /* AND THIS COMPUTER'S ROW OF THE GPC STATUS MATRIX.  The fail-vote
          * register is written by the IOP's MSC, not by anything on this
          * path, so it is sampled rather than hooked; publishing is a no-op
