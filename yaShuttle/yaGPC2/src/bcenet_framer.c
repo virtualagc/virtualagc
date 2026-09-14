@@ -1,6 +1,10 @@
 /* See bcenet_framer.h. */
 #include "bcenet_framer.h"
+#include "busword.h"
 
+#ifdef HAVE_PTHREADS
+#include <pthread.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,7 +66,7 @@ typedef struct {
      * the matching echoes were read, and the leftovers then arrived as
      * if they were the peripheral's replies.  Sized for a burst of
      * mass-memory blocks (512 halfwords each) landing between ticks. */
-    uint16_t recvQueue[FRAMER_RECV_QUEUE_WORDS];
+    uint32_t recvQueue[FRAMER_RECV_QUEUE_WORDS];   /* may carry YAGPC_BUSWORD_CMD_SYNC */
     size_t recvHead, recvCount;
 
     /* For bcenet_framer_peer_wait(): whether a reply is owed, and whether
@@ -83,15 +87,86 @@ struct BceNetFramer {
     BceNetBusState buses[FRAMER_MAX_BUS_ID + 1];
 };
 
+/* EVERY COMPUTER ON A WIRE HEARS WHAT IS ON IT.  With several machines in
+ * one process there is one transport, and so one socket per bus, and each
+ * machine's framer reads that socket: a display unit's reply went to
+ * whichever computer's thread happened to read first, and a listener lost
+ * words at random.  And the transport drops everything from its own transmit
+ * socket as an echo, so no computer ever saw another's command word -- which
+ * a Listen Mode receive waits for (busword.h).
+ *
+ * So with more than one framer every datagram read from a bus is appended to
+ * the queue of EVERY framer using that bus, whoever read it; and a command a
+ * computer sends is shown to the others as a command-sync word, after
+ * clearing what they had queued (a new command ends the last transaction on
+ * the wire), exactly as the in-process device models show their listeners
+ * the commander's command (#136, #137).  A computer's DATA words are not
+ * copied: a listener's receiver is not armed for them, and a word it never
+ * reads would only sit in its queue.  Bus 24 is per computer and excluded.
+ * With one framer none of this happens and nothing changes. */
+#define FAN_SLOTS 6
+static BceNetFramer *g_framers[FAN_SLOTS];
+static int g_nFramers;
+#ifdef HAVE_PTHREADS
+static pthread_mutex_t g_fanLock = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
+static bool fanout_bus(int busID) { return g_nFramers > 1 && busID >= 1 && busID <= 23; }
+static void fan_lock(int busID) {
+#ifdef HAVE_PTHREADS
+    if (fanout_bus(busID)) pthread_mutex_lock(&g_fanLock);
+#else
+    (void)busID;
+#endif
+}
+static void fan_unlock(int busID) {
+#ifdef HAVE_PTHREADS
+    if (fanout_bus(busID)) pthread_mutex_unlock(&g_fanLock);
+#else
+    (void)busID;
+#endif
+}
+
 BceNetFramer *bcenet_framer_create(BceNetTransport *transport, int gpcId) {
     BceNetFramer *f = malloc(sizeof(BceNetFramer));
     f->transport = transport;
     f->gpcId = gpcId;
     memset(f->buses, 0, sizeof f->buses);
+    if (gpcId >= 1 && gpcId < FAN_SLOTS && g_framers[gpcId] == NULL) {
+        g_framers[gpcId] = f;
+        g_nFramers++;
+    }
     return f;
 }
 
-void bcenet_framer_free(BceNetFramer *f) { free(f); }
+void bcenet_framer_free(BceNetFramer *f) {
+    if (f != NULL && f->gpcId >= 1 && f->gpcId < FAN_SLOTS && g_framers[f->gpcId] == f) {
+        g_framers[f->gpcId] = NULL;
+        g_nFramers--;
+    }
+    free(f);
+}
+
+/* Append to one framer's queue for a bus.  `quiet` for another computer's
+ * copy: a queue it never drains is simply restarted rather than reported. */
+static void queue_push(BceNetBusState *b, int busID, const uint32_t *w, size_t count, bool quiet) {
+    if (b->recvHead > 0 && b->recvCount + count > FRAMER_RECV_QUEUE_WORDS) {
+        memmove(b->recvQueue, b->recvQueue + b->recvHead,
+                (b->recvCount - b->recvHead) * sizeof b->recvQueue[0]);
+        b->recvCount -= b->recvHead;
+        b->recvHead = 0;
+    }
+    if (b->recvCount + count > FRAMER_RECV_QUEUE_WORDS) {
+        if (quiet) { b->recvHead = b->recvCount = 0; }
+        else {
+            fprintf(stderr, "bcenet: bus %d: receive queue full, dropping %zu words\n",
+                    busID, count);
+            return;
+        }
+    }
+    memcpy(b->recvQueue + b->recvCount, w, count * sizeof w[0]);
+    b->recvCount += count;
+}
 
 static BceNetBusState *ensure_bus(BceNetFramer *f, int busID) {
     if (busID < 0 || busID > FRAMER_MAX_BUS_ID) return NULL;
@@ -122,27 +197,28 @@ static void drain_bus(BceNetFramer *f, int busID, BceNetBusState *b) {
     int iua = b->haveLastIua ? b->lastIua : 0;
     for (;;) {
         uint16_t words[FRAMER_MAX_WORDS];
+        uint32_t w32[FRAMER_MAX_WORDS];
         size_t count = 0;
         if (!bcenet_transport_recv(f->transport, busID, f->gpcId, iua, FRAMER_IS_SHUTTLE_BUS, words,
                                    FRAMER_MAX_WORDS, &count)) {
             return;   /* nothing left, or a datagram the filters dropped */
         }
-        /* Compact first: the queue is consumed from the head, so once the
-         * head has advanced the space in front of it is free. */
-        if (b->recvHead > 0 && b->recvCount + count > FRAMER_RECV_QUEUE_WORDS) {
-            memmove(b->recvQueue, b->recvQueue + b->recvHead,
-                    (b->recvCount - b->recvHead) * sizeof b->recvQueue[0]);
-            b->recvCount -= b->recvHead;
-            b->recvHead = 0;
+        for (size_t i = 0; i < count; i++) w32[i] = words[i];
+        double now = (count > 0) ? wall_now() : 0.0;
+        if (fanout_bus(busID)) {
+            /* To every computer using this wire -- see g_framers. */
+            fan_lock(busID);
+            for (int g = 1; g < FAN_SLOTS; g++) {
+                BceNetFramer *o = g_framers[g];
+                if (o == NULL || !o->buses[busID].used) continue;
+                queue_push(&o->buses[busID], busID, w32, count, o != f);
+                if (count > 0) o->buses[busID].lastPeerWall = now;
+            }
+            fan_unlock(busID);
+            continue;
         }
-        if (b->recvCount + count > FRAMER_RECV_QUEUE_WORDS) {
-            fprintf(stderr, "bcenet: bus %d: receive queue full, dropping %zu words\n",
-                    busID, count);
-            return;
-        }
-        memcpy(b->recvQueue + b->recvCount, words, count * sizeof words[0]);
-        b->recvCount += count;
-        if (count > 0) b->lastPeerWall = wall_now();
+        queue_push(b, busID, w32, count, false);
+        if (count > 0) b->lastPeerWall = now;
     }
 }
 
@@ -183,8 +259,10 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
              * transfer, never captures it.  Discarded here rather than at
              * receive completion, which would also throw away words that
              * legitimately arrive later in a transfer. */
+            fan_lock(input->busID);
             b->recvHead = 0;
             b->recvCount = 0;
+            fan_unlock(input->busID);
             b->cmdPending = true;
             b->heldSinceCmd = 0.0;
 
@@ -201,6 +279,19 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
             words[1] = (uint16_t)((cmd24 & 0xffu) << 8);
             bcenet_transport_send(f->transport, input->busID, f->gpcId, input->address,
                                   FRAMER_IS_SHUTTLE_BUS, words, 2);
+            /* And onto the wire for the other computers on it. */
+            if (fanout_bus(input->busID)) {
+                uint32_t marked = cmd24 | YAGPC_BUSWORD_CMD_SYNC;
+                fan_lock(input->busID);
+                for (int g = 1; g < FAN_SLOTS; g++) {
+                    BceNetFramer *o = g_framers[g];
+                    if (o == NULL || o == f || !o->buses[input->busID].used) continue;
+                    BceNetBusState *ob = &o->buses[input->busID];
+                    ob->recvHead = ob->recvCount = 0;
+                    queue_push(ob, input->busID, &marked, 1, true);
+                }
+                fan_unlock(input->busID);
+            }
             output->out.xmit.ok = true;
             break;
         }
@@ -225,17 +316,21 @@ void bcenet_framer_service(void *ctx, GpcServiceNumber serviceNumber, const GpcS
 
         case GPC_SVC_RECV_POLL:
             refill_recv_queue(f, input->busID, b);
+            fan_lock(input->busID);
             output->out.poll.available = (b->recvHead < b->recvCount);
+            fan_unlock(input->busID);
             break;
 
         case GPC_SVC_RECV_WORD:
             refill_recv_queue(f, input->busID, b);
+            fan_lock(input->busID);
             if (b->recvHead < b->recvCount) {
                 output->out.recv.available = true;
                 output->out.recv.word = b->recvQueue[b->recvHead++];
             } else {
                 output->out.recv.available = false;
             }
+            fan_unlock(input->busID);
             break;
     }
 }
@@ -312,7 +407,10 @@ bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *he
     if (f == NULL || busID < 0 || busID > FRAMER_MAX_BUS_ID) return false;
     BceNetBusState *b = &f->buses[busID];
     if (!b->used) return false;
-    if (b->recvHead < b->recvCount) return true;   /* already here */
+    fan_lock(busID);
+    bool already = (b->recvHead < b->recvCount);
+    fan_unlock(busID);
+    if (already) return true;   /* already here */
     double hold = peer_hold_seconds();
     if (hold <= 0.0 || !b->cmdPending) return false;
     double t0 = wall_now();
@@ -330,7 +428,10 @@ bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *he
         bcenet_transport_pump(f->transport);
         drain_bus(f, busID, b);
         t = wall_now();
-        if (b->recvHead < b->recvCount) { got = true; break; }
+        fan_lock(busID);
+        got = (b->recvHead < b->recvCount);
+        fan_unlock(busID);
+        if (got) break;
         if (t - t0 >= budget) break;
         struct timespec ts = {0, PEER_HOLD_TICK_NS};
         nanosleep(&ts, NULL);

@@ -1992,7 +1992,15 @@ static bool batchrunner_step(BatchRunner *r) {
         {
             uint32_t b = discretes_value(r->discretes, DISCRETES_REG_B);
             uint32_t crt = b & ((0x80000000u >> 6) | (0x80000000u >> 7));
-            vehicle_dk_claim(r->vehicle, r->gpcId, crt != 0u);
+            /* Only where it arbitrates something: a claim decides which
+             * computer an IN-PROCESS display unit answers.  Real display
+             * units on the network (--bce-network) arbitrate their own bus,
+             * and there one panel's CRT select reaches every computer, so
+             * the claim flipped between them on every pass -- 53,000
+             * "dual commanders" lines in a two-computer run with
+             * panelO6.py and MEDS2.py, for a gate nothing consulted. */
+            if (r->busRouter.deu != NULL || r->busRouter.nDeuExtra > 0)
+                vehicle_dk_claim(r->vehicle, r->gpcId, crt != 0u);
         }
         /* AND HOLD THIS COMPUTER'S LINES UP AT THE NEIGHBOURS.  They are
          * levels; routing them only when they change lets the steady ones
