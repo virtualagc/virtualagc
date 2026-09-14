@@ -134,12 +134,14 @@ TERM_B_BIT = 13
 GPC_ID_BITS = (0, 1, 2)                          # this GPC's ID, 1-5
 BFS_ENGAGE_BITS = (3, 4, 5)                      # one field, all or none
 # BFC CRT SELECT, a two-bit field with bit 6 the 2s place.  Workbook 8.2:
-# with DISPLAY OFF "both discretes are off", so 0.  Which value each SELECT
-# position sends is NOT the "first number" of its legend, which is how this
-# was first wired: per the project owner (2026-09-11), 2+3 sends 1, 3+1
-# sends 2 and 1+2 sends 3.
+# with DISPLAY OFF "both discretes are off", so 0.  Each SELECT position sends
+# the FIRST number of its legend: 1+2 sends 1, 2+3 sends 2, 3+1 sends 3.  The
+# flight software says so twice.  ARAGPCSW.hal's ARAB_MASK_ARRAY, indexed by
+# this value, hands BFS DK1/DK2/DK3 for 1/2/3 before engage and 1+2/2+3/3+1
+# after; GPCIPL (GPCRTOPT.asm, CM4POLL) takes the value itself as the DEU to
+# drive.  (A 2026-09-11 wiring of 2+3=1, 3+1=2, 1+2=3 is withdrawn.)
 CRT_SELECT_BITS = (6, 7)
-CRT_SELECT_VALUE = {"2+3": 1, "3+1": 2, "1+2": 3}
+CRT_SELECT_VALUE = {"1+2": 1, "2+3": 2, "3+1": 3}
 
 
 def _bits(bits):
@@ -1437,7 +1439,7 @@ class PanelO6:
 #     ipl                          its IPL pushbutton, held IPL_HOLD_MS
 #     source MM1|MM2|OFF           IPL SOURCE
 #     crt 0|1|2|3                  BFC CRT: 0 is DISPLAY OFF, else DISPLAY ON
-#                                  and SELECT 2+3 / 3+1 / 1+2
+#                                  and SELECT 1+2 / 2+3 / 3+1
 #     bfsengage on|off             on: CDR ENGAGE pressed and released; off:
 #                                  BFC DISENGAGE to RIGHT and back.  An engage
 #                                  latches only if some GPC is in BACKUP.
