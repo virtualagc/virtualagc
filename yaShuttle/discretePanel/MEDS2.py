@@ -25,14 +25,18 @@ core through Qt's own GL function wrappers.
 
 import argparse
 import ctypes
+import heapq
 import json
 import math
 import os
 import re
+import selectors
 import socket
 import struct
 import sys
+import threading
 import time
+import traceback
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -363,6 +367,7 @@ class Bus(object):
         self.selfEcho = []
         self.server = None
         self._notifier = None
+        self._pumped = False             # serviced by BusPump, not Qt
         self._startMulticast()
         Bus._all.append(self)
 
@@ -416,6 +421,17 @@ class Bus(object):
         self.recvCB = recvCB
         self.cbObj = cbObj
 
+    def serviceOffGuiThread(self):
+        """Hear this bus on the BusPump thread instead of the GUI thread; the
+        receive callback then runs there too.  See BusPump."""
+        if self._pumped:
+            return
+        if self._notifier is not None:
+            self._notifier.setEnabled(False)
+            self._notifier = None
+        self._pumped = True
+        BusPump.get().add(self)
+
     def _isSelfEcho(self, message):
         for i, buf in enumerate(self.selfEcho):
             if buf == message:
@@ -464,12 +480,155 @@ class Bus(object):
         if self._notifier is not None:
             self._notifier.setEnabled(False)
             self._notifier = None
+        if self._pumped:
+            # The pump may be reading the socket this moment: let it let go
+            # of the socket first, on its own thread.
+            self._pumped = False
+            BusPump.get().remove(self, then=self._closeSocket)
+            return
+        self._closeSocket()
+
+    def _closeSocket(self):
         if self.server is not None:
             try:
                 self.server.close()
             except OSError:
                 pass
             self.server = None
+
+
+class BusPump(object):
+    """A THREAD THAT ANSWERS THE BUS WHILE THE WINDOWS DRAW.
+
+    A display unit's reply to a GPC poll is due within milliseconds (GPCIPL
+    allows 5 ms), and the IDP used to hear its buses through QSocketNotifier,
+    on the one thread that also draws every MDU.  Whatever held that thread
+    held every reply with it: a long redraw, or a graphics driver throttling
+    buffer swaps for windows nobody can see, as NVIDIA's does behind a locked
+    screen.  The GPC then waits on its display, its simulated clock falls
+    behind the wall, and I/O errors and fail-to-syncs follow -- an overnight
+    two-GPC run lost 1h14m and its redundant set behind a screen lock
+    (gpc-causes #144).
+
+    An IDP draws nothing and reaches its MDUs only over UDP (the _IDPn bus),
+    so its buses and its heartbeat are serviced here, on a thread of their
+    own, while the MDUs keep theirs on the GUI thread.  From IDP.start() on,
+    EVERYTHING an IDP does runs on this thread: its DEUUnit, its replies, its
+    fills to the MDUs, IDP POWER and DEU LOAD (both arrive as bus messages).
+    Nothing on the GUI thread touches an IDP after start() -- keep it that
+    way, or take a lock.  NSTS_IDP_THREAD=0 puts the IDPs back on the GUI
+    thread."""
+
+    _instance = None
+    _instanceLock = threading.Lock()
+
+    @classmethod
+    def get(cls):
+        with cls._instanceLock:
+            if cls._instance is None:
+                cls._instance = BusPump()
+            return cls._instance
+
+    def __init__(self):
+        self._sel = selectors.DefaultSelector()
+        self._lock = threading.Lock()
+        self._calls = []
+        self._timers = []                # heap of [due, seq, periodS, fn, live]
+        self._seq = 0
+        self._wakeR, self._wakeW = os.pipe()
+        os.set_blocking(self._wakeR, False)
+        os.set_blocking(self._wakeW, False)
+        self._sel.register(self._wakeR, selectors.EVENT_READ, None)
+        # A thread that wants the GIL waits for the holder to give it up, and
+        # CPython asks the holder only once per switch interval: 5 ms by
+        # default, the whole of GPCIPL's reply window, while the GUI thread
+        # runs a great deal of Python per frame.
+        sys.setswitchinterval(0.001)
+        self._thread = threading.Thread(target=self._run, name="BusPump",
+                                        daemon=True)
+        self._thread.start()
+
+    def call(self, fn):
+        """Run fn on the pump thread, soon.  Safe from any thread."""
+        with self._lock:
+            self._calls.append(fn)
+        try:
+            os.write(self._wakeW, b'x')
+        except (BlockingIOError, InterruptedError):
+            pass                         # full: a wake is already pending
+
+    def add(self, bus):
+        self.call(lambda: self._sel.register(bus.server, selectors.EVENT_READ, bus))
+
+    def remove(self, bus, then=None):
+        def go():
+            try:
+                self._sel.unregister(bus.server)
+            except (KeyError, ValueError):
+                pass
+            if then is not None:
+                then()
+        self.call(go)
+
+    def every(self, ms, fn):
+        """Call fn every `ms` milliseconds on the pump thread.  Returns a
+        handle whose stop() cancels it, as the QTimer it stands in for."""
+        entry = [0.0, 0, ms / 1000.0, fn, True]
+
+        class Handle(object):
+            def stop(self_):
+                entry[4] = False
+
+        def arm():
+            self._seq += 1
+            entry[0] = time.monotonic() + entry[2]
+            entry[1] = self._seq
+            heapq.heappush(self._timers, entry)
+        self.call(arm)
+        return Handle()
+
+    @staticmethod
+    def _guard(fn, *args):
+        # As a Qt slot would: report the exception and keep serving.
+        try:
+            fn(*args)
+        except Exception:
+            traceback.print_exc()
+
+    def _run(self):
+        while True:
+            timeout = None
+            if self._timers:
+                timeout = max(0.0, self._timers[0][0] - time.monotonic())
+            try:
+                events = self._sel.select(timeout)
+            except OSError:
+                events = []
+            for key, _mask in events:
+                if key.data is None:
+                    try:
+                        while os.read(self._wakeR, 4096):
+                            pass
+                    except (BlockingIOError, InterruptedError):
+                        pass
+                elif key.data.server is not None:
+                    self._guard(key.data._readable, None)
+            with self._lock:
+                calls, self._calls = self._calls, []
+            for fn in calls:
+                self._guard(fn)
+            now = time.monotonic()
+            while self._timers and self._timers[0][0] <= now:
+                entry = heapq.heappop(self._timers)
+                if not entry[4]:
+                    continue
+                self._guard(entry[3])
+                # Late is late: after a stall carry on from now rather than
+                # firing every missed beat back to back.
+                entry[0] = max(entry[0] + entry[2], now)
+                self._seq += 1
+                entry[1] = self._seq
+                heapq.heappush(self._timers, entry)
 
 
 class LRU(object):
@@ -9779,6 +9938,9 @@ class IDP(LRU):
         self.bgDFB = None
         # The IDP POWER switch; see setPower and MedsRunner.startLRUsIn.
         self.powered = bool(CONFIG.get('powerOn', True))
+        # Whether this unit's buses and heartbeat run on the BusPump thread
+        # (the default) or, as they used to, on the GUI thread.
+        self.threaded = str(env('NSTS_IDP_THREAD', '1')) != '0'
 
         deulog = env('NSTS_DEU_LOG')
 
@@ -9821,6 +9983,12 @@ class IDP(LRU):
     def start(self):
         self.running = True
         self.exec_()
+        # Only now, so that everything exec_() does is done before the pump
+        # can deliver a datagram: from here on the unit belongs to the pump
+        # thread.  Anything that arrived meanwhile is waiting in the socket.
+        if self.threaded:
+            for bus in self.bus.values():
+                bus.serviceOffGuiThread()
 
     # The FC1-4 busses carry flight instrument ("steam gauge") data from the
     # ADC.  Not yet implemented.
@@ -9875,9 +10043,14 @@ class IDP(LRU):
         the DEU flash's 5/8 : 3/8 duty cycle."""
         if self._hbTimer is not None:
             return
+        beat = lambda: self._sendMDU(MDUMsg.HEARTBEAT, [self._idNum()])
+        if self.threaded:
+            # IDP POWER ON arrives on the pump thread, which has no Qt event
+            # loop for a QTimer to run in.
+            self._hbTimer = BusPump.get().every(HEARTBEAT_MS, beat)
+            return
         self._hbTimer = QTimer()
-        self._hbTimer.timeout.connect(
-            lambda: self._sendMDU(MDUMsg.HEARTBEAT, [self._idNum()]))
+        self._hbTimer.timeout.connect(beat)
         self._hbTimer.start(HEARTBEAT_MS)
 
     def _sendClock(self, t):
@@ -10946,7 +11119,24 @@ def _vd_attach(self, win):
     self._pump.start(16)
 
 
+# NSTS_GUI_STALL_MS=<ms>: A TEST OF BusPump.  Every redraw tick holds the GUI
+# thread this long, standing in for a graphics driver that holds buffer swaps
+# (a locked or hidden screen); NSTS_GUI_STALL_BUSY=1 spins instead of
+# sleeping, so the GIL is held too, as a long Python redraw holds it.  The
+# IDPs must go on answering the GPC through either; with NSTS_IDP_THREAD=0
+# they cannot.
+_GUI_STALL_S = envnum('NSTS_GUI_STALL_MS', 0) / 1000.0
+_GUI_STALL_BUSY = str(env('NSTS_GUI_STALL_BUSY', '0')) not in ('', '0')
+
+
 def _vd_tick(self):
+    if _GUI_STALL_S > 0:
+        if _GUI_STALL_BUSY:
+            end = time.monotonic() + _GUI_STALL_S
+            while time.monotonic() < end:
+                pass
+        else:
+            time.sleep(_GUI_STALL_S)
     if self.dirty:
         self.widget.update()
 
