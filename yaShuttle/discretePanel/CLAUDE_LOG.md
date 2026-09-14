@@ -82,3 +82,6 @@
 
 ### [2026-09-13] Target: [HANDOFF-meds2-py.md]
 - MEDS2.py: Screen_DPS.setClock redraws the header clock only when its text changes (tracked in _clockDrawn, reset when geo_dps_time is rebuilt). GPCIPL time-fills every poll, twice a second, so half the redraws repainted unchanged digits and the clock looked like it ran 1.5-2x fast; the user confirmed it looks right now. New diagnostic NSTS_CLOCK_LOG=<file>: wall-stamped "send" (IDP forwards a time fill) and "draw" (MDU draws it) lines.
+
+### [2026-09-13] Target: [README.md]
+- simulatePASS.py now exists: one Python launcher for 1-4 GPCs (--gpcs 1 | 1,2 | 1-3 | 1-4) that always runs MEDS2.py, stsKeyboard.py and panelO6.py, adds cam.py for more than one GPC, and starts ../yaGPC2/yaGPC2 (--bce-network; --mmu-model for both units with several GPCs). Options --tape (or $NSTS_PASS_TAPE), --size 512, --scale 0.8, --crts 1|2, --major-func, --port-base, --logs, --no-keyboard, --procedure (print the steps and exit); unattended --panel-script/--keys/--duration. Prints the switch-and-key procedure for the chosen GPCs; windows side by side if they fit, otherwise stacked by kind. The README entry should drop "a wrapper ... to tie all of the above together" vagueness and say this, and note the OI340700-OPS0.mmv tape only reaches OPS 0 (multi-GPC/OPS 2 needs a full volume via --tape).
