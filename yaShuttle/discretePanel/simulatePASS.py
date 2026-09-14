@@ -109,18 +109,21 @@ def procedure_text(gpcs, crts):
                        "before the time is the GPC driving it, and the box at the foot "
                        "is its IDP.", 78)
     L.append("")
+    names = ["GPC%d" % x for x in g]
+    gpcs_named = names[0] if n == 1 else ", ".join(names[:-1]) + " and " + names[-1]
     L.append("BEFORE ANY IPL  (every switch is on panelO6)")
-    L.append("  a. C2: IDP/CRT %s POWER -> ON, MAJ FUNC -> GNC  (\"MDU IS AUTONOMOUS\" goes)."
+    # The GPCs are powered first, as on the vehicle, though the switches drive
+    # nothing yet.
+    L.append("  a. O6: GENERAL PURPOSE COMPUTER POWER -> ON for %s." % gpcs_named)
+    L.append("  b. C2: IDP/CRT %s POWER -> ON, MAJ FUNC -> GNC  (\"MDU IS AUTONOMOUS\" goes)."
              % ", ".join(str(k) for k in range(1, min(crts, 3) + 1)))
     if crts == 4:
         L.append("     R11: IDP/CRT 4 POWER -> ON, MAJ FUNC -> GNC.")
     if crts == 1:
-        L.append("  b. C2: LEFT IDP/CRT SEL -> 1.")
+        L.append("  c. C2: LEFT IDP/CRT SEL -> 1.")
     else:
-        L.append("  b. C2: LEFT IDP/CRT SEL -> 1, RIGHT IDP/CRT SEL -> 2.")
-    names = ["GPC%d" % x for x in g]
-    L.append("  c. MODE -> HALT for %s."
-             % (names[0] if n == 1 else ", ".join(names[:-1]) + " and " + names[-1]))
+        L.append("  c. C2: LEFT IDP/CRT SEL -> 1, RIGHT IDP/CRT SEL -> 2.")
+    L.append("  d. MODE -> HALT for %s." % gpcs_named)
     L.append("")
     if n == 1:
         gpc = g[0]
@@ -394,10 +397,12 @@ def main():
                     help="display windows CRT1 up to CRT4: 1-4 (default 2 with more than "
                          "one GPC, else 1).  CRT4 is the aft display, on IDP 4 and the aft "
                          "keyboard")
-    ap.add_argument("--keyboards", type=int, choices=(0, 1, 2, 3), default=3,
-                    help="stsKeyboard.py windows: 3 (default) the left, right and aft "
-                         "keyboards; 2 the forward pair; 1 the left; 0 none.  Which IDP "
-                         "each forward keyboard reaches is panel C2's IDP/CRT SEL")
+    ap.add_argument("--keyboards", type=int, choices=(0, 1, 2, 3), default=None,
+                    help="stsKeyboard.py windows: 3 the left, right and aft keyboards; "
+                         "2 the forward pair; 1 the left; 0 none.  Default: the ones the "
+                         "CRTs can use -- 1 with --crts 1, 2 with --crts 2 or 3, 3 with "
+                         "--crts 4 (the aft keyboard reaches only CRT4).  Which IDP each "
+                         "forward keyboard reaches is panel C2's IDP/CRT SEL")
     ap.add_argument("--title", metavar="TEXT",
                     help="display window title (default: GPCs <list>)")
     ap.add_argument("--major-func", choices=sorted(MAJOR_FUNC), default="GNC",
@@ -427,6 +432,10 @@ def main():
     multi = len(gpcs) > 1
     if args.crts is None:
         args.crts = 2 if multi else 1
+    if args.keyboards is None:
+        # Only keyboards that can reach a display: the right one reaches IDP 2
+        # or 3, the aft one only IDP 4.
+        args.keyboards = {1: 1, 2: 2, 3: 2, 4: 3}[args.crts]
     if args.no_keyboard:
         args.keyboards = 0
 
