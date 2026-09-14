@@ -298,6 +298,22 @@ def setPortBase(base):
 setPortBase(int(os.environ.get("NSTS_BUS_PORT_BASE", PORT_BASE_DEFAULT)))
 
 
+def _clock_log(text):
+    """NSTS_CLOCK_LOG=<file>: one line per header-clock message, stamped with
+    the host's wall time -- 'send' as the IDP forwards a GPC time fill, 'draw'
+    as the MDU takes it -- so a header clock that runs fast or late can be set
+    against what the GPC actually sent and when."""
+    path = env('NSTS_CLOCK_LOG')
+    if not path:
+        return
+    try:
+        import time as _t
+        with open(path, 'a') as fh:
+            fh.write("%.3f %s\n" % (_t.time(), text))
+    except Exception:
+        pass
+
+
 class BusMsg(object):
     """A bus message: `length16` halfwords, addressable as `data16`."""
 
@@ -5302,6 +5318,7 @@ class Screen_DPS(MDUScreen):
         self.setKybd(self.data()['kybd'])
 
         self.geo_dps_time = Object3D()
+        self._clockDrawn = None
         self.group.add(self.geo_dps_time)
 
         self.geo_scratchpad = Object3D()
@@ -5337,7 +5354,15 @@ class Screen_DPS(MDUScreen):
                                 str(secs % 60).rjust(2, '0'))
 
     def setClock(self, missionSecs, eventSecs, conv=1):
+        # The GPC sends a time fill with every poll -- twice a second from
+        # GPCIPL -- so every other one carries the same whole second as the
+        # last.  Redrawing those re-paints the header's digits with nothing
+        # changed, twice a second, and to the eye a clock that ticks twice
+        # a second is a clock running fast.  Draw only when the text moves.
         self._clock = {'mission': missionSecs, 'event': eventSecs, 'conv': conv}
+        text = (self._clockText(missionSecs), self._clockText(eventSecs))
+        if self.geo_dps_time is not None and getattr(self, '_clockDrawn', None) == text:
+            return False
         # A time fill can arrive before this screen has ever been built.
         if self.fcw is None or self.geo_dps_time is None:
             return
@@ -5346,6 +5371,10 @@ class Screen_DPS(MDUScreen):
         fcws = (self.makeDFB(self._clockText(missionSecs), {'xy': [39, 1]})
                 + self.makeDFB(self._clockText(eventSecs), {'xy': [39, 2]}))
         self.geo_dps_time = self.drawFCWS(fcws, self.geo_dps_time)
+        # What the header now shows.  Cleared wherever geo_dps_time is made
+        # afresh, so a rebuilt screen always gets its clock drawn.
+        self._clockDrawn = text
+        return True
 
     def makeDFB(self, s, opt=None):
         """Text at a character cell -> the FCWs that draw it."""
@@ -9471,8 +9500,9 @@ class MDU(LRU):
                 if len(msg.data16) >= 6:      # the high halves (_sendClock)
                     mis |= int(msg.data16[4]) << 16
                     evt |= int(msg.data16[5]) << 16
-                scr.setClock(mis, evt, int(msg.data16[3]))
-                t.redraw()
+                if scr.setClock(mis, evt, int(msg.data16[3])) is not False:
+                    _clock_log("draw mission=%d" % mis)
+                    t.redraw()
         elif tag == MDUMsg.RESET_SPL:
             if scr is not None:
                 if scr.spl is not None:
@@ -9864,6 +9894,7 @@ class IDP(LRU):
         # those -- the Electron one -- still sees what it always did.
         mis = max(0, jsround(t['mission']))
         evt = max(0, jsround(t['event']))
+        _clock_log("send IDP%s mission=%d" % (self.id, mis))
         self._sendMDU(MDUMsg.CLOCK, [mis & 0xffff, evt & 0xffff, t['conv'],
                                      (mis >> 16) & 0xffff, (evt >> 16) & 0xffff])
 

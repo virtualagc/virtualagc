@@ -79,3 +79,6 @@
 
 ### [2026-09-13] Target: [HANDOFF-panelO6.md]
 - `cam.py` now follows the computers: listens on all five GPC discrete channels (--port-base, --no-bus), rows from each GPC's raw fail-discrete register un-rotated (0x08..0x01 = N+1..N+4, 0x10 inhibits the row), diagonal from the new register REG_CFAIL (5, bit 31, discretes.py CFAIL_LIT) that yaGPC2 composes for the lamp; REQUESTs both registers at start-up; a lit lamp stays lit at least HOLD_MIN_S = 40 ms. Verified in yaGPC2 runs cf-short-0 and cf-g3-0 (ledger #141).
+
+### [2026-09-13] Target: [HANDOFF-meds2-py.md]
+- MEDS2.py: Screen_DPS.setClock redraws the header clock only when its text changes (tracked in _clockDrawn, reset when geo_dps_time is rebuilt). GPCIPL time-fills every poll, twice a second, so half the redraws repainted unchanged digits and the clock looked like it ran 1.5-2x fast; the user confirmed it looks right now. New diagnostic NSTS_CLOCK_LOG=<file>: wall-stamped "send" (IDP forwards a time fill) and "draw" (MDU draws it) lines.
