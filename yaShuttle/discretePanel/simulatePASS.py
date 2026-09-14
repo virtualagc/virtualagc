@@ -115,10 +115,11 @@ def procedure_text(gpcs, crts):
     # The GPCs are powered first, as on the vehicle, though the switches drive
     # nothing yet.
     L.append("  a. O6: GENERAL PURPOSE COMPUTER POWER -> ON for %s." % gpcs_named)
-    L.append("  b. C2: IDP/CRT %s POWER -> ON, MAJ FUNC -> GNC  (\"MDU IS AUTONOMOUS\" goes)."
+    L.append("  b. C2: IDP/CRT %s POWER -> ON, MAJ FUNC -> GNC."
              % ", ".join(str(k) for k in range(1, min(crts, 3) + 1)))
     if crts == 4:
         L.append("     R11: IDP/CRT 4 POWER -> ON, MAJ FUNC -> GNC.")
+    L.append("     (\"MDU IS AUTONOMOUS\" goes away.)")
     if crts == 1:
         L.append("  c. C2: LEFT IDP/CRT SEL -> 1.")
     else:
@@ -162,18 +163,20 @@ def procedure_text(gpcs, crts):
             steps.append("O6: IDP %d LOAD  (PASS on GPC%d has loaded that display; without this"
                          "\n      GPC%d's menu never appears, or is drawn over PASS's page)"
                          % (crt, g[0], gpc))
+        # PASS User's Guide Table 2-2's order: the load completes in STBY, the
+        # CRT is deselected, THEN RUN, and the IPL source comes off last.
         steps += ["GPC%d column: press and release IPL" % gpc,
-                  "GPC%d MODE -> STBY, then about 15 s later -> RUN" % gpc,
+                  "GPC%d MODE -> STBY" % gpc,
                   "wait for the GPCIPL MENU on CRT%d (\"GPCIPL MENU (1)  %d\"; its clock counts"
                   "\n      up from 000/00:00:00)" % (crt, gpc),
-                  "on the %s keyboard: ITEM 1 EXEC  (the system software loads: the MM1 lamp"
-                  "\n      flickers red)" % kb,
+                  "on the %s keyboard: ITEM 1 EXEC  (the system software loads: the MM1"
+                  "\n      lamp flickers red)" % kb,
                   "when the MM1 lamp has stayed green (roughly 80 s after ITEM 1 EXEC):"
-                  "\n      BFC CRT DISPLAY -> OFF, then IPL SOURCE -> OFF.  GPC%d now runs PASS"
-                  "\n      OPS 0; leave its switches alone from here on.%s"
-                  % (gpc, "" if crt == 1 else
-                     "  GPC%d takes CRT2 back:\n      both CRTs show its GPC MEMORY page"
-                     " until OPS 2." % g[0])]
+                  "\n      BFC CRT DISPLAY -> OFF, then GPC%d MODE -> RUN, then IPL SOURCE -> OFF."
+                  "\n      GPC%d now runs PASS OPS 0; leave its switches alone from here on.%s"
+                  % (gpc, gpc, "" if crt == 1 else
+                     "\n      GPC%d takes CRT2 back: both CRTs show its GPC MEMORY page until"
+                     " OPS 2." % g[0])]
         for k, st in enumerate(steps, 1):
             L.append("  %d. %s" % (k, st))
         L.append("")
