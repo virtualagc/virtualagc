@@ -1296,14 +1296,18 @@ class PanelO6:
         aft keyboard on panel R11 (Crew Software Interface figure 2-3).  It
         has no IDP/CRT SEL: the aft keyboard reaches only IDP 4.  Returns the
         inset's bottom edge."""
-        # C2's margins: the set's box 5 in from the inset's sides, as C2's
+        # C2's margins: the set's box 5 in from the inset's left side, as C2's
         # sets are from theirs, and as far from the bottom as from the top.
+        # The right side gets 4 more, because _rect_panel's dark right-hand
+        # bevel lies over the panel face while the light left one reads as
+        # panel: equal numbers looked lopsided.
         pad = 10
         rows = self._idp_rows(y0)
         y1 = rows[7] + (rows[6] - y0)
-        width = 230 + 2 * 5
+        left, right = 5, 5 + 4
+        width = left + 230 + right
         self._rect_panel(x0, y0, x0 + width, y1)
-        self._idp_set(x0 + width / 2.0, 4, rows)
+        self._idp_set(x0 + left + 115, 4, rows)
         return y1
 
     def _draw_idp_load(self, x0, y0, x1):

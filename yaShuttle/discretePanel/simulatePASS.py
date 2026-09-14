@@ -530,7 +530,7 @@ def main():
                                    int(ky) + (0 if kb_side_by_side else k * 60))
                 L.start("keyboard%d" % (k + 1),
                         [py, "stsKeyboard.py", "--kybd", str(k + 1), "--title",
-                         "KYBD%d (%s)" % (k + 1, ("left", "right", "aft")[k]), "--port-base",
+                         str(k + 1), "--port-base",
                          str(args.port_base), "--size", str(size), "--geometry", geom],
                         HERE, env)
         if multi:
