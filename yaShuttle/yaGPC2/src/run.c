@@ -290,6 +290,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
          * the two threads to keep out of each other's way. */
         vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
         mtumodel_set_clock(br->mtu, br->clockUs);
+        mtumodel_set_clock_offset(br->mtu, br->writtenOffUs);
         mtumodel_service_as(br->mtu, br->gpcId, svc, in, out);
         vehicle_bus_leave(br->vehicle, in->busID);
         return;
@@ -406,6 +407,14 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
         fprintf(stderr, "BCE%d PEER HOLD %.2f ms wall -> %s\n", busID, heldMs,
                 got ? "reply" : "none");
     return got;
+}
+
+/* Re-tie the pacer to the wall clock after the machine was stopped, and
+ * remember what that forgave: the computer's clock does not count time it
+ * was not running, but the vehicle's time of day does (mtumodel). */
+static void batchrunner_resync(BatchRunner *r) {
+    rtpacer_resync(&r->rtPacer);
+    r->writtenOffUs = r->rtPacer.statRebaseLostMs * 1000.0 * r->rtPacer.factor;
 }
 
 void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
@@ -667,6 +676,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
                 r->busRouter.deuExtra[d] = r->deuModelExtra[d];
             r->busRouter.nDeuExtra = r->nDeuModelExtra;
             r->busRouter.clockUs = &r->age.gpc.cpu.elapsedTimeUs;
+            r->busRouter.writtenOffUs = &r->writtenOffUs;
             r->busRouter.vehicle = veh;
             r->busRouter.gpcId = gpcId;
             r->busRouter.deu = r->deuModel;
@@ -1601,7 +1611,7 @@ static bool batchrunner_step(BatchRunner *r) {
      * of a 60 s run.  With this, the sprint does not happen. */
     if (r->modeWasHeld) {
         r->modeWasHeld = false;
-        if (r->realTime) rtpacer_resync(&r->rtPacer);
+        if (r->realTime) batchrunner_resync(r);
     }
 
     /* YAGPC_DUMPSTATE_AT=<sec>[,<sec>...] writes --dump-state's JSON the
@@ -2480,7 +2490,7 @@ static void batchrunner_pace(BatchRunner *r) {
         /* The debugger stops the machine for arbitrary wall time while
          * the world outside keeps running.  Re-tie the clocks on the way
          * back rather than repaying the gap -- see rtpacer.h. */
-        if (r->realTime) rtpacer_resync(&r->rtPacer);
+        if (r->realTime) batchrunner_resync(r);
         return;
     }
     if (r->realTime) {

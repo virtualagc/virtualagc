@@ -50,6 +50,9 @@ typedef struct {
     /* Simulated microseconds, for YAGPC_DKTRACE.  The router is the one
      * place that sees every bus command with a clock in reach. */
     const double *clockUs;
+    /* Simulated microseconds this computer's pacer has written off -- see
+     * mtumodel_set_clock_offset. */
+    const double *writtenOffUs;
     /* The built-in display unit on DK1.  It is reached through `fallback`
      * rather than by bus number, so the router needs it by name to ask
      * whether it is mid-transfer -- see bus_router_service. */
@@ -162,6 +165,9 @@ typedef struct {
      * Cleared when the mode switch goes to HALT, the nearest the emulator
      * has to the hardware latch's reset.  See DISCRETES_REG_CFAIL. */
     bool cfailLatched;
+    /* What rtPacer has written off, in simulated microseconds: the time of
+     * day the timing unit adds back.  See batchrunner_resync. */
+    double writtenOffUs;
     bool modeReported;
     /* mode_switch_held()'s memo, keyed on this machine's discrete bus
      * generation -- see the comment there. */

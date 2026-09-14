@@ -496,10 +496,16 @@ static void deu_complete_fill(DeuModel *d) {
                     v[k] = (f[0] & 0x8000u) ? -x : x;
                 }
                 long ms = (long)(v[0] + 0.5);
+                /* And the host's own time of day, so a mission time meant
+                 * to be the real time of day can be checked against it. */
+                time_t now = time(NULL);
+                struct tm lt;
+                localtime_r(&now, &lt);
                 fprintf(stderr, "deu: timefill mission=%.3f (%03ld/%02ld:%02ld:%02ld)"
-                        " event=%.3f conv=%04x\n", v[0],
+                        " event=%.3f conv=%04x host=%03d/%02d:%02d:%02d\n", v[0],
                         ms / 86400, (ms / 3600) % 24, (ms / 60) % 60, ms % 60,
-                        v[1], (unsigned)w[6]);
+                        v[1], (unsigned)w[6], lt.tm_yday + 1, lt.tm_hour,
+                        lt.tm_min, lt.tm_sec);
             }
         }
         d->xferActive = false;

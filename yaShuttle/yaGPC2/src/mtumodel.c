@@ -67,6 +67,7 @@
 struct MtuModel {
     const double *clockUs;
     const double *epochSec;      /* see mtumodel_set_epoch; NULL = elapsed only */
+    const double *offsetUs;      /* see mtumodel_set_clock_offset */
     uint16_t reply[MTU_NBUS][MTU_WORDS];
     int head[MTU_NBUS][MTU_READERS], count[MTU_NBUS][MTU_READERS];
     bool echoPending[MTU_NBUS][MTU_READERS];
@@ -89,6 +90,10 @@ void mtumodel_set_clock(struct MtuModel *m, const double *clockUs) {
 
 void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec) {
     if (m) m->epochSec = epochSec;
+}
+
+void mtumodel_set_clock_offset(struct MtuModel *m, const double *offsetUs) {
+    if (m) m->offsetUs = offsetUs;
 }
 
 bool mtumodel_owns_bus(int busID) {
@@ -117,7 +122,11 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
          * display's top line.  Reporting elapsed time made every session
          * begin on day 0 at whatever hour the run had reached.  Local time,
          * day of year counted from 001, as --date-time-epoch documents. */
-        double t = *m->epochSec + us / 1e6;
+        /* Plus the time the computer spent not running -- held in HALT
+         * while the crew set up the IPL, most of all.  Without it PASS's
+         * GMT ran behind the real time of day by exactly that long. */
+        double t = *m->epochSec +
+                   (us + (m->offsetUs != NULL ? *m->offsetUs : 0.0)) / 1e6;
         time_t whole = (time_t)floor(t);
         struct tm lt;
         localtime_r(&whole, &lt);

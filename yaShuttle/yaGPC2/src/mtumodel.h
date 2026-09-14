@@ -48,6 +48,14 @@ void mtumodel_set_clock(struct MtuModel *m, const double *clockUs);
  * day 0, as before. */
 void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec);
 
+/* Simulated microseconds of the time of day that the calling computer's own
+ * clock does not contain: whatever its real-time pacer wrote off while the
+ * computer was held in HALT, or stopped by a debugger.  The timing unit is a
+ * separate box that kept running, so its time of day includes that time
+ * while the computer's elapsed time -- GPCIPL's clock -- rightly does not.
+ * Set per call, like the clock.  NULL = none. */
+void mtumodel_set_clock_offset(struct MtuModel *m, const double *offsetUs);
+
 /* True for the buses this unit answers on (20, 21, 22). */
 bool mtumodel_owns_bus(int busID);
 
