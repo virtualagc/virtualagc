@@ -129,13 +129,13 @@ DEFAULT_GPC_ID = 1
 #     KYBD_SEL       0x0004 [mask]  bit 0: the LEFT keyboard talks to this
 #                                   IDP; bit 1: the RIGHT keyboard does
 #
-# POWER, MAJ FUNC and KYBD_SEL for IDPs 1-3 are sent on every change and
-# re-asserted every IDP_REPUBLISH_MS, as the discretes are: a late-starting
-# MEDS2 gets them within a second.  LOAD goes once, when thrown.  And THE
-# PANEL FOLLOWS THE BUS: the same messages from anyone else -- a --keys token,
-# a MEDS2 window's major function keys -- move the matching switch, so the
-# re-assertion never fights them and the picture always shows what the IDPs
-# were last told.
+# POWER and MAJ FUNC for IDPs 1-4, and KYBD_SEL for IDPs 1-3, are sent on
+# every change and re-asserted every IDP_REPUBLISH_MS, as the discretes are: a
+# late-starting MEDS2 gets them within a second.  LOAD goes once, when
+# thrown.  And THE PANEL FOLLOWS THE BUS: the same messages from anyone else --
+# a --keys token, a MEDS2 window's major function keys -- move the matching
+# switch, so the re-assertion never fights them and the picture always shows
+# what the IDPs were last told.
 IDP_POWER_POS = ("ON", "OFF")                   # up, down
 MAJ_FUNC_POS = ("GNC", "SM", "PL")              # up, mid, down
 MF_NAMES = ("PL", "GNC", "SM", "ILLEGAL")       # MEDS2's major function values
@@ -1761,7 +1761,7 @@ class PanelO6:
 
     def _listen_idp(self):
         """Thread: note every IDP_POWER, SET_MAJOR_FUNC and KYBD_SEL anybody
-        else sends to IDPs 1-3."""
+        else sends to IDPs 1-4."""
         socks = self._idp_socks
         if not socks:
             return

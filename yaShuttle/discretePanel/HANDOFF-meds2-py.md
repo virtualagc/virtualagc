@@ -1,7 +1,7 @@
 # HANDOFF — `MEDS2-port.py`
 
 A Python 3 port of **MEDS2**, the Electron / CoffeeScript / Civet MEDS glass-cockpit
-simulator that `MEDS2.sh` launches. Written 2026-09-09, amended 2026-09-11 and 2026-09-13.
+simulator that `MEDS2.sh` launches. Written 2026-09-09, amended 2026-09-11, 2026-09-13 and 2026-09-14.
 
 One file, `MEDS2-port.py`, ~10 500 lines, at the tree root beside `MEDS2.sh`. It
 reads the same `config/meds.json` and the same `data/` fonts and `.dfb` files, and
@@ -30,7 +30,10 @@ Added here:
 * `--scale X` — text size only. Config key `textScale` does the same; the CLI
   value overrides it for every MDU launched. See §10.
 * `--stroke-scale X` — text stroke width only. Config key `textStrokeScale`. See §10.
-* `--no-pane` — no IDP pane beside the display (§10); also `NSTS_MDU_PANE=0`.
+* `--pane` — show the IDP pane beside the display (§10); hidden by default. Also
+  `NSTS_MDU_PANE=1`. `--no-pane` is still accepted and does nothing.
+* `--no-idp-box` — hide the IDP identifier box and keyboard bars at the foot of DPS
+  pages (§10); also `NSTS_DPS_IDP_BOX=0`.
 * `--title <text>`, `--port-base <n>` — window title, and the bus port base.
 
 **Requirements:** PyQt6 with `QtOpenGLWidgets`, numpy, and a driver that gives an
@@ -42,7 +45,8 @@ clear message if the context comes back lower.
 Everything runs in **one process**. Electron used one renderer process per window;
 here several MDUs and IDPs share an event loop. Each `Bus` still binds its own
 socket with `SO_REUSEADDR`, so multicast delivery and the self-echo filter behave
-as they did across processes.
+as they did across processes. Two threads, though: from `IDP.start()` on, every IDP's
+buses and heartbeat run on the `BusPump` thread (§5); the MDUs stay on the GUI thread.
 
 ---
 
@@ -66,7 +70,10 @@ Every `NSTS_*` variable the original reads is honoured, with one exception.
 | `NSTS_DEU_LOG` | append the DEU unit's log to a file |
 | `NSTS_EXEC` | code run 2 s after the LRUs start — **Python here, not JavaScript** |
 | `NSTS_MDU_FRAMELESS` | *port only*: restore the original's borderless window |
-| `NSTS_MDU_PANE` | *port only*: `0` = no IDP pane, as `--no-pane` (§10) |
+| `NSTS_MDU_PANE` | *port only*: `1` = show the IDP pane, as `--pane`; `0` hides it and wins (§10) |
+| `NSTS_DPS_IDP_BOX` | *port only*: `0` = no IDP identifier box or keyboard bars, as `--no-idp-box` (§10) |
+| `NSTS_IDP_THREAD` | *port only*: `0` = IDP buses back on the GUI thread, no `BusPump` (§5) |
+| `NSTS_GUI_STALL_MS`, `NSTS_GUI_STALL_BUSY` | *port only*, test hook: every 16 ms redraw tick holds the GUI thread this many ms — sleeping, or with `_BUSY=1` spinning with the GIL held (§8h) |
 | `NSTS_IDP_POWER` | *port only*: `on`/`off` overrides the IDP's power at start (§10) |
 | `NSTS_CLOCK_LOG` | *port only*: file of wall-stamped header-clock lines — `send` when the IDP forwards a time fill, `draw` when the MDU draws it |
 
@@ -82,7 +89,7 @@ Line numbers drift — the class and function names are the durable anchors.
 
 | original | port | notes |
 |---|---|---|
-| `com/bus.civet` | `BusMsg`, `Bus` ≈ 269–425 | `busConfig` table verbatim |
+| `com/bus.civet` | `BusMsg`, `Bus` ≈ 269–425, `BusPump` right after `Bus` | `busConfig` table verbatim; `BusPump` is port-only (§5) |
 | `com/lru.civet` | `LRU` ≈ 427 | |
 | `gpc/util.coffee` `PackedBits` | `PackedBits` ≈ 473 | |
 | `meds/deuFCW.coffee` | `FCW` ≈ 751, geometry helpers ≈ 565–750 | `GEOMS`, `setGeom`, `cellCol`/`cellRow`, `inAUGrid` |
@@ -180,15 +187,41 @@ records why: GPCIPL sends its menu as one 509-halfword `DISPLAY_FILL` inside a b
 of seven, and the default buffer drops words mid-burst while the display is drawing.
 The OS silently caps at `net.core.rmem_max`, so the achieved size is logged.
 
-Sockets are read through a `QSocketNotifier` and drained in a loop per activation.
+Sockets are read through a `QSocketNotifier` and drained in a loop per activation —
+**except an IDP's.** `IDP.start()` calls `Bus.serviceOffGuiThread()` on each of its
+buses, handing the socket to `BusPump`: one daemon thread, a selector over every IDP
+socket, plus the IDP heartbeat (`BusPump.every`; a `QTimer` only when
+`NSTS_IDP_THREAD=0`). The MDUs keep their buses on Qt. Why: a poll reply is due
+within ~5 ms, and on the GUI thread anything holding it — a long redraw, a driver
+throttling swaps behind a locked screen — held every reply. An overnight two-GPC run
+lost 1h14m of simulated time and its redundant set that way (gpc-causes #144).
+`sys.setswitchinterval(0.001)` is part of the fix: CPython's default 5 ms GIL hand-off
+is the whole reply window. **Rule: nothing on the GUI thread touches an IDP after
+`start()`** — keep it that way, or take a lock.
 
-**MDU → IDP tags added by the port** (`MDUMsg`, on the IDP's `_IDPn` bus), for the
-IDP pane (§10): `DEU_LOAD` `0x0002`, no words (DEU LOAD pushed — `IDP.deuLoad` →
-`DEUUnit.requestLoad`); `IDP_POWER` `0x0003`, one word, 1 ON / 0 OFF
-(`IDP.setPower` → `DEUUnit.powerUp`). Anything that can send a datagram can press
-them: `simulatePASS.py`'s `--keys` tokens `DEU_LOAD`, `IDP_POWER_ON`/`_OFF`
-(IDP1) and `DEU_LOAD2`, `IDP2_POWER_ON`/`_OFF` (IDP2) do exactly that. Those
-tokens are simulatePASS's; MEDS2.py itself knows only the two tags.
+**MDU → IDP tags** (`MDUMsg`, on the IDP's `_IDPn` bus, all below `FILL`):
+`SET_MAJOR_FUNC` `0x0001`, one word 0..3 (the IDP logs it on change only — panelO6
+re-asserts every second); `DEU_LOAD` `0x0002`, no words (`IDP.deuLoad` →
+`DEUUnit.requestLoad`); `IDP_POWER` `0x0003`, one word, 1 ON / 0 OFF (`IDP.setPower`
+→ `DEUUnit.powerUp`); `KYBD_SEL` `0x0004`, one word, bit 0 the left keyboard is
+selected to this IDP, bit 1 the right (IDP/CRT SEL). `panelO6.py` sends them — panel
+C2 for IDPs 1–3, R11 for IDP 4, O6 IDP LOAD 1–4 — and so does the pane when shown
+(§10). Anything that can send a datagram can press them: `simulatePASS.py`'s
+`--keys` tokens `DEU_LOAD`, `IDP_POWER_ON`/`_OFF` (IDP1) and `DEU_LOAD2`,
+`IDP2_POWER_ON`/`_OFF` (IDP2) do exactly that; those tokens are simulatePASS's.
+
+**The keyboard switch.** `IDP.kybdSel` is `None` until a `KYBD_SEL` arrives, and
+until then every wired keyboard bus is heard, as before switches. After one,
+`IDP.recvKYBD` drops `_KYBD1`/`_KYBD2` keys whose bit is clear; `_KYBD3` (aft) has no
+switch and is always heard. `HEARTBEAT` word 2 is `IDP._kybdBars()`: the selection,
+or with none yet, the wired forward keyboards.
+
+**The MDU ignores MDU → IDP traffic.** `MDU.recvFromPri` and `recvFromSec` return
+early for tags below `MDUMsg.FILL`, so panel traffic cannot keep a dead port alive
+(the panel re-asserts IDP POWER OFF every second; the MDU must still go AUTONOMOUS).
+It follows the switches it hears — `_majorFuncHeard`, `_idpPowerHeard` (window title
+or pane) — and keeps heartbeat word 2 as `MDU.kybdMask`, which drives
+`Screen_DPS.setIdpBox(priPortIDP, mask)` and gates `KYBD.recvKYBD`'s scratch-pad echo.
 
 ---
 
@@ -300,6 +333,13 @@ RSS was flat at 228 MB over 30 s.
 run: IDP1 logs `KYBD1: _KYBD1 recv ITEM` / `1` / `EXEC`, and its next poll reply
 carries `KYBD_MSG`.
 
+**h. IDP replies under a stalled GUI thread** (2026-09-14, gpc-causes #144). One GPC,
+IPL → ITEM 1 EXEC → PASS on CRT1, `NSTS_GUI_STALL_MS=500`, `YAGPC_TIMEOUT_TRACE=1`,
+240 s. `NSTS_IDP_THREAD=0`: never reached PASS, 176 of 276 peer holds unanswered,
+median 200 ms. Threaded: reached PASS, 0 unanswered, median 0.31 ms with a sleeping
+stall, 6.5 ms with `NSTS_GUI_STALL_BUSY=1`. Unstalled regression, `simulatePASS
+--gpcs 1,2 --crts 2` through OPS 2: every count identical to the old MEDS2.
+
 ---
 
 ## 9. Faithful quirks — deliberately preserved, do not "fix"
@@ -369,15 +409,39 @@ carries `KYBD_MSG`.
   keyboard-bus listener, puts keys from OTHER senders on its bus onto the scratch
   pad; the original only printed them. `stsKeyboard.py` needs this, because the IDP
   never sends typed keys back to the MDU (only `RESET_SPL`). The window's own sends
-  are dropped as self-echo, so nothing echoes twice. Side effect: two MDUs on one
-  keyboard bus both echo, as both of their IDPs hear the key.
+  are dropped as self-echo, so nothing echoes twice. Only while that keyboard is
+  selected to the MDU's primary IDP (`MDU.kybdMask`, §5), as the IDP ignores it
+  otherwise. Side effect: two MDUs on one keyboard bus both echo, as both of their
+  IDPs hear the key.
+* **IDP buses on their own thread** (`BusPump`, §5). Electron gave each IDP a renderer
+  event loop; here the one loop also draws every MDU.
+* **The IDP identifier box and keyboard bars** at the foot of DPS pages are live, and
+  shown by default (`SHOW_IDP_BOX`; `--no-idp-box` or `NSTS_DPS_IDP_BOX=0` hides).
+  MEDS carried them as `gpcNo`: a placeholder "1" and a red left bar nothing changed.
+  The number is the IDP driving the MDU (`priPortIDP`; MEDS2's PORT SELECT only moves
+  the `*`, data still come from the primary). The bars are heartbeat word 2: red left
+  = left (CDR) keyboard, yellow right = right (PLT), both possible on IDP 3, never
+  on IDP 4 (Crew Software Interface USA006083 Rev B §2.2, 2.5, 2.6). `setKybd` takes
+  `'left'`/`'right'`/`'both'`/`None`. A flight-deck photo,
+  gigapan.com/gigapans/102753, shows CRT1 with box "2" and a yellow right bar while
+  GPC 4 drove it: IDP 2 with the pilot's keyboard.
+* **`MEDSConf` checked against the orbiter.** IDP2 no longer lists `_KYBD3`
+  (inherited from MEDS): the aft keyboard reaches only IDP 4 (USA006083 §2.6). The
+  MDU ports match the per-MDU stickers in that photo — CDR2 P1 S2, MFD1 P2 S3, MFD2
+  P1 S3, PLT1 P2 S1, PLT2 P3 S2, CRT1–3 a single IDP (CRT MDUs use only their primary
+  port, DPS Workbook USA005350 Rev B §2.5.3); CDR1's sticker is unread (MEDS2's P3
+  S1). Power matches USA005350 §2.5.4: Main A MFD2/PLT1, Main B CDR2/MFD1, Main C
+  CDR1/PLT2/AFD1 via R14 breakers; CRTs on control buses via IDP/CRT POWER.
 * **The IDP pane** (`IDPPane`, laid out with the canvas by `MDUWindow._layoutBox` /
   `paneBox`): IDP POWER, IDP MAJ FUNC and DEU LOAD down the right of each MDU
   window, in `panelO6.py`'s styling and `--size` unit (`PANE_FULL = 768`). It sends
-  the §5 tags. **IDP POWER starts OFF** when there is a pane, as a display unit is
-  not powered until the crew powers it (PASS User's Guide Table 2-2 step 8); with
-  `--no-pane` or `--dev` it starts on, since nothing could switch it on.
-  `NSTS_IDP_POWER` overrides. A re-IPL needs DEU LOAD (Table 2-2 step 9). Added in
+  the §5 tags. **Hidden by default** (`_pane_wanted()`): those switches live on
+  `panelO6.py` — C2 for IDPs 1–3, R11 for IDP 4, O6 IDP LOAD 1–4. `--pane` or
+  `NSTS_MDU_PANE=1` shows it; `NSTS_MDU_PANE=0` wins. **Without the pane an IDP starts
+  powered**, and panelO6's IDP/CRT POWER switch (default OFF) takes over. **With it,
+  IDP POWER starts OFF**, as a display unit is not powered until the crew powers it
+  (PASS User's Guide Table 2-2 step 8). `--dev` starts powered; `NSTS_IDP_POWER`
+  overrides. A re-IPL needs DEU LOAD (Table 2-2 step 9). Added in
   1b8f7f3c0, which also made `_drawPasses` clear the DFG background when
   `BACKGROUND_TOP` loses its BRANCH (it used to stay drawn).
 * **The header clock is redrawn only when its digits change**
@@ -407,11 +471,13 @@ carries `KYBD_MSG`.
   so both render identically.
 * The FC1–4 buses are received and discarded (`IDP.recvFC` is empty), matching the
   original: ADC flight-instrument data is not implemented on either side.
-* **The boxed number at the bottom of the DPS page is not the GPC number.** It is
-  `curData['gpcNo']`, which defaults to 1; `Screen_DPS.setGPCNo` exists but nothing
-  calls it, so every display shows 1. The page header's digit after the title IS
-  the driving GPC (PASS writes its own ID there). The red line beside the box is
-  the keyboard-select indicator (`setKybd`, `left`/`right`).
+* **AFD 1's ports are unverified.** The only aft MDU in photos is stickered "MNC
+  CNTL CA2 / IDP 4" (= CRT 4, on panel R11 per USA006083 fig. 2-3); both manuals list
+  a second aft MDU, AFD 1, whose `MEDSConf` ports P4 S2 nothing confirms.
+* **IDP2's PASS load logs `load started` but never `load complete`** in the two-CRT
+  scripted run, though CRT2 draws PASS pages. Pre-dates `BusPump`, unchanged by it.
+* Prints from the `BusPump` thread and the GUI thread can interleave on one log
+  line. Cosmetic.
 * **A keyboard echoes only on its MDU's first `_KYBDn`** — the first keyboard bus
   of the MDU's primary IDP. So KYBD2 keys reach IDP3 but do not echo on
   crt3/cdr1/plt2.
@@ -428,10 +494,11 @@ carries `KYBD_MSG`.
 | fills, readout boxes or pointer arrows missing | depth function is not `GL_LEQUAL` (§4) |
 | text in the right place, wrong glyph shapes | `CharGen` transform or the id→charcode mapping (§6) |
 | whole page shifted by ~1 row or column | `ADJ` defaults, or `penX`/`penY` in `drawFCWS` — run the cell trace (§8b) |
-| page blank but the clock updates | usually NOT a dropped fill: the IDP answered GPCIPL's polls late (its event loop also draws the MDU; up to ~65 ms against a 5 ms window), so GPCIPL re-IPLed the unit and gave up. Signature: `load started` twice in the IDP log, then no 509-halfword fill at `0x19ee`. Fixed on the GPC side (yaGPC2 `bcenet_framer_peer_wait`, gpc-causes #85). Only then suspect `net.core.rmem_max` (§5) |
+| page blank but the clock updates | usually NOT a dropped fill: the IDP answered GPCIPL's polls late (on the GUI thread, before `BusPump`, which also draws the MDU; up to ~65 ms against a 5 ms window), so GPCIPL re-IPLed the unit and gave up. Signature: `load started` twice in the IDP log, then no 509-halfword fill at `0x19ee`. Fixed on the GPC side (yaGPC2 `bcenet_framer_peer_wait`, gpc-causes #85). Only then suspect `net.core.rmem_max` (§5) |
 | page drawn in the wrong beam frame | the `GEOM_BAD_FRACTION` discriminator in `Screen_DPS.refresh`; `Shift+V` toggles manually |
-| a GPCIPL menu squashed into the upper right, over an old PASS page | a GPC was IPLed onto a display still holding PASS's load, without DEU LOAD on that display's pane first. The PASS page stays, and the frame guess draws GPCIPL's text in DFG's frame. Push DEU LOAD before the IPL |
+| a GPCIPL menu squashed into the upper right, over an old PASS page | a GPC was IPLed onto a display still holding PASS's load, without DEU LOAD first (panelO6's O6 IDP LOAD, or the pane). The PASS page stays, and the frame guess draws GPCIPL's text in DFG's frame. Push DEU LOAD before the IPL |
 | strokes too thick or thin after a resize | `pxRatio` (§4) |
+| clock falls behind real time, `I/O ERROR CRTn`, fail-to-sync after the screen locks | IDP replies held by the GUI thread. Fixed by `BusPump` (§5, gpc-causes #144); `NSTS_IDP_THREAD=0` with `NSTS_GUI_STALL_MS=500` reproduces it |
 | a display corrupts when several MDUs run | `GLResources` sweep keyed to the wrong renderer (§4) |
 | stroke widths right but everything washed out | an sRGB conversion crept into the shaders (§4) |
 

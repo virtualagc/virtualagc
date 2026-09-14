@@ -19,7 +19,9 @@ The filename is `panelO6` (letter O, not digit 0).
 A Python 3 tkinter Canvas app that draws the GPC half of Space Shuttle
 overhead panel **O6**, plus the BFC CRT block from panel **C3**, the BFC
 DISENGAGE block from panel **F6**, an RHC BFC ENGAGE pane and a mass-memory
-ACTIVITY pane.
+ACTIVITY pane, and, in a right-hand column of its own, the **IDP controls**
+(panel C2, O6's IDP LOAD inset, and IDP/CRT 4's switches from panel R11).
+Window title "Panels O6, C3, F6, C2, R11  —  GPC / BFC / IDP".
 
 History of the two looks (both were wanted at the time):
 
@@ -41,14 +43,14 @@ helpers `_vbar` / `_hbar` exist only in the discontinued file.
 cd yaShuttle/discretePanel
 python3 panelO6.py
 python3 panelO6.py --size 512
-python3 panelO6.py --geometry 948x1250+80+20
+python3 panelO6.py --geometry 1684x1250+80+20
 python3 panelO6.py --port-base 6900 --gpc-id 2
 python3 panelO6.py --script seq.txt --quit-after 60
 ```
 
 - `--size N`: scale the window and contents.  **768 is full size** (the
-  design window 948×1250, `FULL_SIZE = 768`); 512 is two-thirds (632×833);
-  384 is half.  Contents scale with the window.  stsKeyboard.py uses the
+  design window 1684×1250, `FULL_SIZE = 768`); 512 is two-thirds
+  (1123×833); 384 is half (842×625).  Contents scale with the window.  stsKeyboard.py uses the
   same 768 unit; cam.py uses 512; MEDS2.py's `--size` is pixels.
 - `--geometry SPEC`: exact Tk geometry; **overrides `--size`**.
 - `NSTS_O6_GEOMETRY` is the env-var equivalent of `--geometry`.
@@ -91,6 +93,8 @@ Do not trust PDF page numbers from memory.  Measure:
 - `yaShuttle/discretePanel/discretes.py` is the **yaGPC2 discrete
   protocol**.  The old `discretePanel.py` is **not** the visual reference.
   The user said so on day one: ttk look is wrong; match the SCOM hardware.
+- **IDP controls:** DPS Workbook USA005350 Rev B figure 2-31 (PDF p.54), and
+  Crew Software Interface USA006083 Rev B §2.3-2.6 and figure 2-3 (R11).
 
 The physical O6 also has MDM power switches on the left.  Those are
 **not drawn**.  Only the GPC half plus the C3/F6 BFC blocks.
@@ -149,6 +153,21 @@ listener thread only records; the Tk-side `_tick` (every 250 ms) applies
 them -- no Tk calls from the thread.  yaGPC2 publishes READY on every
 running computer's channel (commit cd4319576); before that only the last
 GPC's channel carried it and the lamps stayed dark in multi-GPC runs.
+
+### The IDP column
+
+Right of everything above (`REF_W` 948 → 1684; `REF_H` 1250 unchanged),
+top to bottom:
+
+| Inset | Controls |
+|---|---|
+| C2 | IDP/CRT **1, 3, 2** (that order, left to right), each POWER ON/OFF and MAJ FUNC GNC / SM / PL.  Below them LEFT IDP/CRT SEL (1 / 3) and RIGHT IDP/CRT SEL (3 / 2), horizontal toggles |
+| O6 **INTEGRATED DISPLAY PROCESSOR** | LOAD 1-4, momentary |
+| R11 | IDP/CRT 4 POWER and MAJ FUNC (beside the aft keyboard in the orbiter).  No IDP/CRT SEL: the aft keyboard reaches only IDP 4 |
+
+MAJ FUNC value 3 (ILLEGAL) is kept, not coerced, and drawn as an end-on
+centred paddle ringed in red (`MF_RING`).  C2's per-set drawing is
+`_idp_rows` / `_idp_set`, shared by `_draw_r11`.
 
 ---
 
@@ -222,12 +241,50 @@ which is how one script brings up more than one computer.
 | `bfsengage on\|off` | on: CDR ENGAGE pressed and released; off: DISENGAGE RIGHT then LEFT.  Latches only if some GPC is in BACKUP |
 | `gpcid N` | rewire the primary column |
 | `bit A\|B N on\|off` | one bit.  A12 TERM A; A13 moves OUTPUT to TERMINATE / NORMAL; B3-5 fold into bfsengage; B6-7 fold into crt; anything else is sent once, raw |
+| `idppower N on\|off` | IDP/CRT N POWER (N 1-3 on C2, 4 on R11) |
+| `majfunc N GNC\|SM\|PL` | IDP/CRT N MAJ FUNC (N 1-3 on C2, 4 on R11) |
+| `kybdsel left 1\|3`, `kybdsel right 2\|3` | LEFT / RIGHT IDP/CRT SEL |
+| `idpload N` | O6 IDP N LOAD (N 1-4), held `IPL_HOLD_MS` |
+
+`_dump_state` lists every IDP switch too.
 
 Verified at wiring time: the same 20-command script through panelO6.py and
 discretePanel.py on port base 17900, the bus sampled at +120 / +700 ms, gave
 identical registers from `source MM1` on except where intended (startup
 positions; `bfsengage on` also raises TERM B; a mid-script `gpcid 2` takes
 column 2's own MODE).
+
+---
+
+## The IDP buses
+
+The IDP controls talk to the **IDPs** (MEDS2.py), not the GPCs.  UDP to
+group 239.255.1.1, port base + 40 + n for IDP n (`IDP_BUS_OFFSET`),
+big-endian 16-bit words, word 0 the tag:
+
+| Tag | Words | From |
+|---|---|---|
+| `SET_MAJOR_FUNC` 0x0001 | [mf]: 0 PL, 1 GNC, 2 SM, 3 ILLEGAL | MAJ FUNC |
+| `IDP_LOAD` 0x0002 (MEDS2's `DEU_LOAD`) | none | IDP LOAD, once when thrown |
+| `IDP_POWER` 0x0003 | [1 on / 0 off] | POWER |
+| `KYBD_SEL` 0x0004 | [mask]: bit 0 left keyboard selected to this IDP, bit 1 right | IDP/CRT SEL |
+
+KYBD_SEL masks: IDP1 1 if LEFT=1; IDP2 2 if RIGHT=2; IDP3 bit 0 if LEFT=3,
+bit 1 if RIGHT=3 (`kybd_mask`).  POWER and MAJ FUNC for IDPs 1-4
+(`N_IDP_SW = 4`) and KYBD_SEL for IDPs 1-3 (`N_IDP_C2 = 3`) are sent on
+change and re-asserted every `IDP_REPUBLISH_MS` = 1000.
+
+**The panel follows the bus.**  `_listen_idp` (a thread on base + 41..44)
+takes the same three tags from anyone else -- simulatePASS `--keys` tokens,
+a MEDS2 window's Shift+M, MEDS2 `--pane` -- into `_idp_rx` under `_rx_lock`;
+`_idp_adopt`, on the Tk side, moves the switches and logs "(heard)".  The
+panel's own echoes are dropped by matching IDP and payload within
+`ECHO_WINDOW_S` = 0.5 s; each send is noted before `sendto`, and the
+sockets are bound before the first publish.  A KYBD_SEL **set** bit moves
+a SEL switch; clear bits alone move nothing.
+
+Defaults: POWER OFF; MAJ FUNC from env `NSTS_MAJOR_FUNC` (0 PL, 1 GNC, 2 SM,
+3 ILLEGAL, as MEDS2 reads it), else GNC; LEFT SEL 1, RIGHT SEL 2.
 
 ---
 
@@ -283,6 +340,8 @@ output discretes, not a function of the crew switches alone.
 - RHC BFC ENGAGE both released
 - ACTIVITY lamps OFF (grey) until a mass memory is heard
 - All talkbacks barberpole
+- IDP/CRT 1-4 POWER OFF; MAJ FUNC `NSTS_MAJOR_FUNC` or GNC; LEFT IDP/CRT
+  SEL 1, RIGHT 2; IDP LOAD all released
 
 Every change, and a full dump at startup, prints to stdout.
 
@@ -292,25 +351,26 @@ Every change, and a full dump at startup, prints to stdout.
 
 `simulatePASS.py --gpcs 1,2` (up to `1-4`) starts yaGPC2 with both mass
 memories, two MEDS2.py CRTs with a keyboard each (KYBD1 → CRT1, KYBD2 →
-CRT2), panelO6.py, and cam.py.  `--procedure` prints the steps.
+CRT2), panelO6.py, and cam.py; `--crts 3` / `4` add IDPs.
+`simulatePASS --instructions` prints the steps for a configuration.
 
-**Observed in the user's manual two-GPC run, 2026-09-13** (not yet a
-scripted, repeatable test):
+**The two-CRT procedure:** GPC1 on CRT1 (BFC CRT SELECT 1+2, left
+keyboard); each later GPC on CRT2 (SELECT 2+3, **O6 IDP 2 LOAD** before its
+IPL, right keyboard).
 
-- Both computers IPL from **MMU 1**, one after the other.  IPL SOURCE and
+- Every computer IPLs from **MMU 1**, one after the other.  IPL SOURCE and
   the BFC CRT switches are single switches shared by every column, so the
   IPLs cannot overlap; which computer IPLs is only which column's IPL
   button is pressed.
 - GPC1: SOURCE MMU 1, SELECT 1+2, DISPLAY ON, IPL, STBY, RUN; GPCIPL menu on
   CRT1; ITEM 1 EXEC on keyboard 1; when the MM1 lamp stays green, DISPLAY
   OFF then SOURCE OFF.
-- GPC2: SOURCE MMU 1, SELECT **2+3**, DISPLAY ON, **DEU LOAD on CRT2's IDP
-  pane**, IPL on GPC2's column, STBY, RUN.  "GPCIPL MENU (1) 2" appears on
-  CRT2; ITEM 1 EXEC on **keyboard 2**; then DISPLAY OFF, SOURCE OFF.
-- **DEU LOAD is required** once PASS has loaded its display software into a
-  CRT.  Without it the second computer's GPCIPL either shows nothing (1+2
-  onto CRT1) or draws over the leftover PASS page (2+3 onto CRT2): the old
-  "GPC MEMORY" title plus GPCIPL's "(1) 2" header, with the GPCIPL text
+- Later GPC: SOURCE MMU 1, SELECT **2+3**, DISPLAY ON, **IDP 2 LOAD**, IPL
+  on that GPC's column, STBY, RUN.  "GPCIPL MENU (1) n" appears on CRT2;
+  ITEM 1 EXEC on **keyboard 2**; then DISPLAY OFF, SOURCE OFF.
+- **The IDP LOAD is required** once PASS has loaded its display software
+  into a CRT.  Without it GPCIPL draws over the leftover PASS page: the old
+  "GPC MEMORY" title plus GPCIPL's "(1) n" header, with the GPCIPL text
   squashed into the upper right because MEDS2.py keeps PASS's screen
   geometry.  ITEM 1 EXEC still reaches the computer.
 - While DISPLAY is ON, GPC1's PASS gives up the selected CRT (the BFS mask
@@ -320,10 +380,14 @@ scripted, repeatable test):
   STBY.
 - `OPS 2 0 1 PRO` **without entering the NBAT** brought UNIV PTG up with
   CRT1's header digit 1 and CRT2's 2.
-- The simulatePASS procedure text still says to IPL later computers through
-  CRT1 with 1+2 plus DEU LOAD on CRT1.  That worked in scripted runs, but
-  the 2+3 / CRT2 path above is cleaner and should replace it once
-  scripted-verified.
+
+**Verified (2026-09-14):** a full `simulatePASS --gpcs 1,2` run through
+OPS 2 driven only by the panel's script verbs: CRT1 "UNIV PTG 1" with box 1
+and red left bar, CRT2 "UNIV PTG 2" with box 2 and yellow right bar.  A
+`--gpcs 1 --crts 4` run with all four IDPs powered from the panel; after
+`kybdsel left 3` the bars were CRT1 none, CRT2 yellow right, CRT3 red left,
+CRT4 none.  Also bus-listener tests (tags, words, 1 s re-assert, external
+moves, IDP 4 has no KYBD_SEL) and screenshots at `--size` 384 / 512 / 768.
 
 **Reading the displays:**
 
@@ -347,7 +411,7 @@ scripted, repeatable test):
 
 ## Implementation notes that are easy to break
 
-**Reference coordinates.**  Layout lives in a 948×1250 design space
+**Reference coordinates.**  Layout lives in a 1684×1250 design space
 (`REF_W` × `REF_H`).  `FULL_SIZE = 768` is the `--size` unit for “the
 window as designed”, not 948.  On resize, `s = min(cw/REF_W, ch/REF_H)`
 and the drawing is centred.  All drawing helpers (`X`, `Y`, `_text`,
@@ -377,8 +441,14 @@ every label blew up.  `_tkfont()` is metrics only.
 **Focus.**  This window is meant to sit beside a terminal / GPC run
 without grabbing keys.  That is why `_dont_steal_focus` exists.
 
-**Threads.**  The bus listener must never touch Tk; it records under
-`_rx_lock` and `_tick` applies.
+**Threads.**  The bus listeners must never touch Tk; they record under
+`_rx_lock` and `_tick` / `_idp_tick` apply.
+
+**R11 inset margins.**  The set's box is 5 units from the inset's left,
+5 + 4 from its right, bottom margin equal to top.  `_rect_panel`'s dark
+right-hand bevel covers the panel face while the light left one reads as
+panel, so equal numbers looked lopsided.  Measured light gaps: 4/4 px at
+`--size 512`, 6/7 px at 768.
 
 **Paddle switch body.**  No rectangular guard.
 
@@ -542,6 +612,12 @@ computer (08e9d0bef), and a script names its column with `gpc <n>`
 
 1+2 = 1 again, from the flight source (3c9a7b454); see "The discrete bus".
 
+### 12. IDP controls (2026-09-14)
+
+C2 and O6 IDP LOAD, wired to the IDP buses and following them (6976ba4c0);
+IDP/CRT 4 on R11 (4ba71a40c); R11 margins matched to C2 (5c1d5a79d,
+81d4b5570).
+
 ---
 
 ## What is still open
@@ -553,8 +629,8 @@ computer (08e9d0bef), and a script names its column with `gpc <n>`
   GPC output discretes.
 - The panel is not wired to `stsKeyboard.py` or `MEDS2.py` directly; they
   meet only through the emulator's buses.
-- The simulatePASS procedure for later GPCs should move to the 2+3 / CRT2
-  path once a scripted run verifies it.
+- A command heard between `_idp_adopt` and `_idp_publish` in one tick can
+  be reverted by the re-assertion for up to a second.
 - What real hardware resets the CAM diagonal latch is unknown; yaGPC2
   clears it on that GPC's HALT.
 
@@ -615,6 +691,10 @@ b9d585258 2026-09-11  panelO6: ACTIVITY pane with MM1 / MM2 lamps
 08e9d0bef 2026-09-12  panelO6.py: every column drives its own GPC
 5184ed5a2 2026-09-12  panelO6.py: let a script say which GPC it means
 3c9a7b454 2026-09-13  panelO6: BFC CRT SELECT sends the first CRT of its legend again (1+2=1)
+6976ba4c0 2026-09-14  IDP switches on panelO6 (C2, O6 IDP LOAD); MEDS2 pane hidden, IDP box real
+4ba71a40c 2026-09-14  panelO6: IDP/CRT 4 POWER and MAJ FUNC, panel R11
+5c1d5a79d 2026-09-14  simulatePASS: --crts 3 and 4; panelO6: R11 inset margins match C2
+81d4b5570 2026-09-14  Keyboard windows titled 1, 2, 3; R11 inset's right margin matches its left
 ```
 
 cam.py (voting.py until 0399e250c): 5b22c9a46 … 0399e250c (2026-09-12),

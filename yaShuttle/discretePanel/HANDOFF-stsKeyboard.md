@@ -15,7 +15,7 @@ and window habits were copied from `panelO6.py`; the key layout matches
 in the SCOM).
 
 323 lines at the time of this handoff; 438 after the bus wiring,
-`--port-base` and `--title`.
+`--port-base` and `--title`; 435 with the numeric caption.
 
 ---
 
@@ -49,8 +49,11 @@ python3 stsKeyboard.py --geometry 520x1020+80+20
 - `--port-base N`: the bus port base (default 6900, or
   `NSTS_BUS_PORT_BASE`); the keyboard buses are base+31..base+33.  Same
   option as `yaGPC2`, `MEDS2.py` and `panelO6.py`.
-- `--title TEXT`: window caption; default the bus name (`KYBD1`..`KYBD3`),
-  kept short so a small title bar does not truncate it.
+- `--title TEXT`: window caption; default just the keyboard number,
+  `1`, `2` or `3` (1 left/CDR, 2 right/PLT, 3 aft).  Longer captions
+  (`KYBD1`) truncated at the small `--size` values many-CRT runs use, and
+  which keyboard it is is all the caption must say.  Help: "window
+  caption (default the keyboard number, 1..3: 1 left, 2 right, 3 aft)".
 - `--geometry SPEC`: exact Tk geometry; **overrides `--size`**.
 - `NSTS_KEYBOARD_GEOMETRY` is the env-var equivalent of `--geometry`.
 - Logging prefix is `stsKeyboard:`.
@@ -156,9 +159,18 @@ keys up, `KYBD.byScan`), cross-checked 32/32.  These are the row/column
 strobe patterns the keyboard puts on the bus, not the 5-bit code the
 GPC is eventually given.
 
-Which IDPs listen (`MEDSConf` in `MEDS2.py`): KYBD1 -> IDP1, IDP3;
-KYBD2 -> IDP2, IDP3; KYBD3 -> IDP2, IDP4.  An MDU echoes the scratch
-pad for the first keyboard its primary IDP listens to:
+Which IDPs are wired to each bus (`MEDSConf` in `MEDS2.py`): KYBD1 ->
+IDP1, IDP3; KYBD2 -> IDP2, IDP3; KYBD3 -> IDP4 only.  MEDS's table also
+wired IDP2 to KYBD3; that was removed, since the aft keyboard "can
+communicate only with IDP 4" (Crew Software Interface USA006083 Rev B
+§2.6).  Which IDP a forward keyboard actually reaches is `panelO6.py`'s
+panel C2 IDP/CRT SEL switches, not the window: left -> IDP 1 or 3,
+right -> IDP 2 or 3.  The IDP takes `_KYBD1`/`_KYBD2` keys only while
+selected (the `KYBD_SEL` message; `kybdSel`, all wired buses heard
+until one arrives); `_KYBD3` has no switch.  An MDU echoes the scratch
+pad for the first keyboard its primary IDP is wired to, and only while
+its primary IDP's heartbeat says that keyboard is selected
+(`kybdMask`):
 
 ```
 KYBD1  crt1 crt3 cdr1 cdr2 plt2 mfd2
@@ -176,9 +188,11 @@ neither.  Also in a namespace run: IDP1 logged
 "KYBD1: _KYBD1 recv ITEM/1/EXEC" and its next poll reply carried
 KYBD_MSG.
 
-`simulatePASS.py` starts **one keyboard per CRT**: keyboard k is
-`stsKeyboard.py --kybd k --title "KYBDk -> CRTk"` with the run's
-`--port-base`, `--size` and a stacked `--geometry`.
+`simulatePASS.py` starts **three keyboards** by default (`--keyboards
+0-3`, default 3: left, right, aft; 2 the forward pair; 1 the left;
+`--no-keyboard` = 0): keyboard k is `stsKeyboard.py --kybd k --title k`
+with the run's `--port-base`, `--size` and a stacked or side-by-side
+`--geometry`.
 
 ---
 
@@ -276,15 +290,20 @@ At the user's request, `FULL_SIZE = 768` to match `panelO6.py`, so
 by side (`57e82b497`).  Caption `KYBD1` rather than a truncated
 "STS Key..." and `--title` to override it (`6212e7b6d`).
 
+### 8. Caption is the keyboard number (2026-09-14)
+
+`KYBD1` also truncated at the small `--size` values of many-CRT runs, so
+the default caption became `1`/`2`/`3`; `simulatePASS.py` passes the
+same.  Verified: a `--kybd 2` window is titled "2".  Commit `81d4b5570`.
+
 ---
 
 ## What is still open
 
-- Keyboard-to-display switching from the crew panel is not modelled; a
-  keyboard stays on its `--kybd` bus.  `--title` exists so a caption can
-  say which display it drives (as `simulatePASS.py` does).
-- An MDU echoes only the first `_KYBDn` of its primary IDP, so KYBD2 keys
-  reach IDP3 but do not echo on crt3/cdr1/plt2.
+- A keyboard stays on its `--kybd` bus; which IDP hears it is decided
+  in `MEDS2.py` by panel C2's IDP/CRT SEL, not here.
+- An MDU echoes only the first `_KYBDn` its primary IDP is wired to, so
+  KYBD2 keys reach IDP3 but do not echo on crt3/cdr1/plt2.
 - Several keyboards are several processes, one bus each.
 - The period key logs as `.` (`key_id` of `(".",)`), even though it is
   drawn as a disc.
@@ -300,7 +319,9 @@ by side (`57e82b497`).  Caption `KYBD1` rather than a truncated
   `pressed` / `released` strings.
 - `MEDS2.py` — MDU/IDP runner; its IDPs consume these scan codes
   (`KYBD.DEUKey`, `MEDSConf`).  See `HANDOFF-meds2-py.md`.
-- `simulatePASS.py` — launcher; starts one keyboard per CRT.
+- `simulatePASS.py` — launcher; starts three keyboards by default.
+- `panelO6.py` panel C2 — IDP/CRT SEL, which IDP each forward keyboard
+  reaches.
 
 ---
 
@@ -317,4 +338,5 @@ a14cf8ba6 2026-09-11  Rationalized and collected Shuttle peripherals into discre
 718801b04 2026-09-11  stsKeyboard: --size unit is 768, so --size 512 is two-thirds size
 57e82b497 2026-09-12  MEDS2.py, stsKeyboard.py: --port-base, so two simulations can run side by side
 6212e7b6d 2026-09-12  stsKeyboard.py: caption "KYBD1", not "STS Key..."
+81d4b5570 2026-09-14  Keyboard windows titled 1, 2, 3; R11 inset's right margin matches its left
 ```
