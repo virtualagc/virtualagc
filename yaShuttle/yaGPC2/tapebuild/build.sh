@@ -3,7 +3,9 @@
 #
 #     tapebuild/build.sh [WORK]          default WORK=/tmp/claude-1000/tapebuild
 #
-# Produces $WORK/OI340700-v44boot.mmv.  Given the same inputs it is
+# Produces $WORK/OI340700-v44boot.mmv, and beside it
+# $WORK/OI340700-v44boot-noOPS136.mmv, the same volume without GNC OPS 1, 3
+# and 6 (stage 8).  Given the same inputs the full volume is
 # byte-identical to ~/workspace/pass-run/OI340700-v44boot.mmv -- the last
 # stage checks that when REF is set:
 #
@@ -180,4 +182,19 @@ if [ -n "${REF:-}" ]; then
   if cmp -s "$OUT" "$REF"; then echo "### MATCH: byte-identical to $REF"
   else echo "### MISMATCH against $REF"; cmp "$OUT" "$REF" | head -1; exit 1; fi
 fi
+
+echo "### 8. abridged volume: no GNC OPS 1, 3 or 6"
+# The same volume without memory configurations 1 (GNC OPS 1 and 6) and 3
+# (GNC OPS 3): phases 4 and 6 left off, every other block untouched.  Rebuilt
+# with the full volume, so a change to one is never missing from the other.
+# Requesting a removed OPS from it is not supported -- see the tool.
+# REF_ABRIDGED=<volume> checks it the way REF checks the full one.
+ABR="$WORK/OI340700-v44boot-noOPS136.mmv"
+python3 "$TOOLS/abridge_volume.py" "$OUT" --con80 "$T/CON80" --drop-mc 1,3 -o "$ABR" \
+  || die "abridge_volume.py"
+if [ -n "${REF_ABRIDGED:-}" ]; then
+  if cmp -s "$ABR" "$REF_ABRIDGED"; then echo "### MATCH: byte-identical to $REF_ABRIDGED"
+  else echo "### MISMATCH against $REF_ABRIDGED"; cmp "$ABR" "$REF_ABRIDGED" | head -1; exit 1; fi
+fi
 echo "### done -> $OUT"
+echo "###        $ABR"
