@@ -42,6 +42,8 @@ typedef struct {
     struct CPU *cpu;
     double factor;          /* speed multiplier; 2.0 = twice real speed */
     double idleTimeoutMs;   /* give up on a wait after this much wall time */
+    double minSleepMs;      /* sleep off a lead only past this (--rt-min-sleep-ms) */
+    double idlePollSeconds; /* sleep between wait passes (--rt-idle-poll-ms) */
 
     double wallStartSeconds;  /* pacing baseline, re-based after idle */
     double simStartUs;

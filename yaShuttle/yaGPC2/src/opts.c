@@ -113,6 +113,16 @@ static const char *HELP_TEXT =
 "                                  (2 = 2x real speed) (default: 1)\n"
 "  --rt-idle-timeout <ms>          give up on a --real-time wait state after\n"
 "                                  this much wall time (default: 10000)\n"
+"  --rt-min-sleep-ms <ms>          --real-time: sleep off a lead over the wall\n"
+"                                  clock only once it exceeds this (default: 2)\n"
+"  --rt-idle-poll-ms <ms>          --real-time: sleep between passes of the\n"
+"                                  wait-state loop (default: 1)\n"
+"  --barrier-us <us>               several GPCs: how far apart in simulated time\n"
+"                                  the machines may drift; 0 turns the barrier\n"
+"                                  off (default: YAGPC_BARRIER_US, else 200)\n"
+"  --barrier-spin-us <us>          several GPCs: wall time a held machine busy-\n"
+"                                  waits before sleeping; 0 never spins\n"
+"                                  (default: YAGPC_BARRIER_SPIN_US, else 200)\n"
 "  --time-scale <factor>           wall-clock pacing divisor for SCHEDULE/WAIT\n"
 "                                  real-time throttling (default: 1.0, genuine\n"
 "                                  real time; factor > 0). A larger factor\n"
@@ -230,6 +240,10 @@ static void set_defaults(Options *o) {
     o->realTime = false;
     o->rtFactor = "1";
     o->rtIdleTimeout = "10000";
+    o->rtMinSleepMs = "2";
+    o->rtIdlePollMs = "1";
+    o->barrierUs = NULL;
+    o->barrierSpinUs = NULL;
 }
 
 /* JS parseInt(s, 16) applied after stripping a leading "0x"/"0X" — matches
@@ -382,6 +396,30 @@ void opts_parse(int argc, char **argv, Options *opts) {
             }
         } else if (tok_is(tok, "--rt-idle-timeout", &n)) {
             opts->rtIdleTimeout = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--rt-min-sleep-ms", &n)) {
+            opts->rtMinSleepMs = take_value(argc, argv, &i, tok, n);
+            if (atof(opts->rtMinSleepMs) < 0.0) {
+                fprintf(stderr, "error: --rt-min-sleep-ms must be >= 0 (got '%s')\n", opts->rtMinSleepMs);
+                exit(1);
+            }
+        } else if (tok_is(tok, "--rt-idle-poll-ms", &n)) {
+            opts->rtIdlePollMs = take_value(argc, argv, &i, tok, n);
+            if (atof(opts->rtIdlePollMs) < 0.0) {
+                fprintf(stderr, "error: --rt-idle-poll-ms must be >= 0 (got '%s')\n", opts->rtIdlePollMs);
+                exit(1);
+            }
+        } else if (tok_is(tok, "--barrier-us", &n)) {
+            opts->barrierUs = take_value(argc, argv, &i, tok, n);
+            if (atof(opts->barrierUs) < 0.0) {
+                fprintf(stderr, "error: --barrier-us must be >= 0 (got '%s')\n", opts->barrierUs);
+                exit(1);
+            }
+        } else if (tok_is(tok, "--barrier-spin-us", &n)) {
+            opts->barrierSpinUs = take_value(argc, argv, &i, tok, n);
+            if (atof(opts->barrierSpinUs) < 0.0) {
+                fprintf(stderr, "error: --barrier-spin-us must be >= 0 (got '%s')\n", opts->barrierSpinUs);
+                exit(1);
+            }
         } else if (tok_is(tok, "--timing", &n)) {
             opts->timing = take_value(argc, argv, &i, tok, n);
             if (strcmp(opts->timing, "poo") != 0 && strcmp(opts->timing, "pass2") != 0) {

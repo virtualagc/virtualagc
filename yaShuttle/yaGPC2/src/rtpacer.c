@@ -53,6 +53,8 @@ void rtpacer_init(RTPacer *p, struct CPU *cpu, double factor, double idleTimeout
     p->cpu = cpu;
     p->factor = factor;
     p->idleTimeoutMs = idleTimeoutMs;
+    p->minSleepMs = 2.0;
+    p->idlePollSeconds = RTPACE_IDLE_POLL_SECONDS;
     p->wallStartSeconds = yagpc_monotonic_seconds();
     p->simStartUs = cpu->elapsedTimeUs;
     p->wallBirthSeconds = p->wallStartSeconds;
@@ -124,7 +126,7 @@ double rtpacer_ahead_ms(const RTPacer *p) {
 void rtpacer_pace(RTPacer *p) {
     rtpacer_report(p);
     double ahead = rtpacer_ahead_ms(p);
-    if (ahead > 2.0) {
+    if (ahead > p->minSleepMs) {
         double t0 = yagpc_monotonic_seconds();
         yagpc_sleep_seconds(ahead / 1000.0);
         p->statSleepSeconds += yagpc_monotonic_seconds() - t0;

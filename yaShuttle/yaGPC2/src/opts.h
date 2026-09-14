@@ -237,6 +237,12 @@ typedef struct {
     bool realTime;                    /* default false */
     char *rtFactor;                   /* default "1"; parsed via atof */
     char *rtIdleTimeout;              /* default "10000" (ms) */
+    /* Pacing knobs, for finding out where a multi-GPC run's CPU goes.  Each
+     * default is the behaviour from before the option existed. */
+    char *rtMinSleepMs;               /* default "2": sleep off a lead past this */
+    char *rtIdlePollMs;               /* default "1": sleep between wait passes */
+    char *barrierUs;                  /* NULL: YAGPC_BARRIER_US, else 200 */
+    char *barrierSpinUs;              /* NULL: YAGPC_BARRIER_SPIN_US, else 200 */
 
     char *timing;                     /* "poo" (default) or "pass2" */
 } Options;

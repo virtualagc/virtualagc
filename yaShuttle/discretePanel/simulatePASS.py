@@ -35,6 +35,7 @@ that many seconds.  Key and panel times both count from when the panel starts.
 import argparse
 import datetime
 import os
+import shlex
 import shutil
 import signal
 import socket
@@ -412,6 +413,9 @@ def main():
                     help="the IDP MAJ FUNC switch at start (default GNC)")
     ap.add_argument("--port-base", type=int, default=6900, metavar="N",
                     help="bus port base for every program (default 6900)")
+    ap.add_argument("--yagpc-extra", metavar="ARGS", default="",
+                    help="extra yaGPC2 options, quoted as one string, e.g. "
+                         "\"--barrier-spin-us 50 --rt-idle-poll-ms 2\"")
     ap.add_argument("--yagpc", metavar="PATH",
                     help="the yaGPC2 executable (default ../yaGPC2/yaGPC2)")
     ap.add_argument("--logs", metavar="DIR", default="simulatePASS-logs",
@@ -577,7 +581,7 @@ def main():
         gpc_argv += ["--mtu-model", "--discretes", "--bce-network", "--real-time",
                      "--rt-factor", "1", "--port-base", str(args.port_base),
                      "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
-                     "--verbose"]
+                     "--verbose"] + shlex.split(args.yagpc_extra)
         gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env)
         time.sleep(3)
         panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),

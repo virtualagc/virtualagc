@@ -103,6 +103,13 @@ int main(int argc, char **argv) {
      * sockets.  The machines borrow them.  See vehicle.h. */
     Vehicle vehicle;
     vehicle_init(&vehicle);
+    /* The command line wins over YAGPC_BARRIER_US / YAGPC_BARRIER_SPIN_US. */
+    if (opts.barrierUs) vehicle.barDeltaUs = atof(opts.barrierUs);
+    if (opts.barrierSpinUs) vehicle.barSpinUs = atof(opts.barrierSpinUs);
+    if (nGpc > 1 || opts.realTime)
+        fprintf(stderr, "pacing: min sleep %g ms, idle poll %g ms, barrier %g us, "
+                "barrier spin %g us\n", atof(opts.rtMinSleepMs), atof(opts.rtIdlePollMs),
+                vehicle.barDeltaUs, vehicle.barSpinUs);
     /* Before a single machine is built, so that anything constructed during
      * the FIRST machine's init already knows this is a multi-GPC vehicle --
      * the intercomputer bus is built there and was silently skipped for

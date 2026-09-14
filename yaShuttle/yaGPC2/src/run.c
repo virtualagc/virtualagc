@@ -468,6 +468,8 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
          * whatever setup precedes it. */
         rtpacer_init(&r->rtPacer, &r->age.gpc.cpu,
                      atof(opts->rtFactor), atof(opts->rtIdleTimeout));
+        r->rtPacer.minSleepMs = atof(opts->rtMinSleepMs);
+        r->rtPacer.idlePollSeconds = atof(opts->rtIdlePollMs) / 1000.0;
     }
 
     r->debugMode = opts->debug;
@@ -2180,7 +2182,7 @@ static bool batchrunner_step(BatchRunner *r) {
                                            (r->age.gpc.cpu.elapsedTimeUs - idleLoopS0) / 1e6);
                     return false;
                 }
-                yagpc_sleep_seconds(RTPACE_IDLE_POLL_SECONDS);
+                yagpc_sleep_seconds(r->rtPacer.idlePollSeconds);
             }
             /* The wait carried the clock forward and serviced the IOP as
              * it went; without this the next instruction replays every
