@@ -12,6 +12,21 @@ simulation on an orderly shutdown (and on request) and resume it later exactly
 where it stopped: GPC memory and CPU/IOP state, the shared hardware models,
 the MEDS displays, the panel switches, and the window layout.
 
+A worked example of the cost (2026-09-14).  The owner brought up a 4-GPC,
+2-CRT simulation by hand through every IPL and the NBAT, recording the screen
+as they went.  Mid-way through the NBAT they backed up one step to re-check an
+entry, and the entries after that repeated the previous line's value: the
+target set went in as `ITEM 3+1`, `4+1`, `5+1` (GPC1 alone, instead of
+`+2 +3 +4`) and CRT 2 as `ITEM 13+1`, while strings and MM2 were still given
+to GPCs 2-4.  Shortly after `OPS 2 0 1 PRO`, GPCs 1, 3 and 4 voted GPC2 out
+(CAM 22, 12, 32, 42) and it stayed failed.  Nothing in the simulator was at
+fault; the keyboard log and the video agree.  The owner's point: instructions
+live outside the simulated keyboard and display, so every glance between them
+is a chance to slip, and adding clarification past a point makes slips MORE
+likely.  Recovery meant re-IPLing a computer or starting all over.  With
+persistence, a pinned save taken just before the NBAT turns such a slip into a
+restore of a few seconds.
+
 ## Decisions already made with the owner
 
 - **Format versioning, not build versioning.**  Each save carries a
