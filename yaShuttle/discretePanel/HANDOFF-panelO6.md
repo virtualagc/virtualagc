@@ -362,12 +362,22 @@ IPL, right keyboard).
   the BFC CRT switches are single switches shared by every column, so the
   IPLs cannot overlap; which computer IPLs is only which column's IPL
   button is pressed.
-- GPC1: SOURCE MMU 1, SELECT 1+2, DISPLAY ON, IPL, STBY, RUN; GPCIPL menu on
+- Before any IPL the instructions turn the O6 GENERAL PURPOSE COMPUTER
+  POWER switches ON (as the vehicle procedure does; they drive nothing
+  yet), then IDP/CRT POWER, IDP/CRT SEL, and MODE HALT.
+- Each IPL follows PASS User's Guide Table 2-2's order: **RUN comes after
+  the load**.  An earlier version of the instructions said "STBY, then about
+  15 s later RUN", copied from the scripted runs (which went to RUN before
+  ITEM 1 EXEC and still worked); `retest-crt2.sh` and `headless-gpcmem.sh`
+  both use the documented order, and a two-GPC run in that order reached
+  OPS 2 (2026-09-14).
+- GPC1: SOURCE MMU 1, SELECT 1+2, DISPLAY ON, IPL, STBY; GPCIPL menu on
   CRT1; ITEM 1 EXEC on keyboard 1; when the MM1 lamp stays green, DISPLAY
-  OFF then SOURCE OFF.
+  OFF, then RUN, then SOURCE OFF.
 - Later GPC: SOURCE MMU 1, SELECT **2+3**, DISPLAY ON, **IDP 2 LOAD**, IPL
-  on that GPC's column, STBY, RUN.  "GPCIPL MENU (1) n" appears on CRT2;
-  ITEM 1 EXEC on **keyboard 2**; then DISPLAY OFF, SOURCE OFF.
+  on that GPC's column, STBY.  "GPCIPL MENU (1) n" appears on CRT2;
+  ITEM 1 EXEC on **keyboard 2**; when the MM1 lamp stays green, DISPLAY
+  OFF, then RUN, then SOURCE OFF.
 - **The IDP LOAD is required** once PASS has loaded its display software
   into a CRT.  Without it GPCIPL draws over the leftover PASS page: the old
   "GPC MEMORY" title plus GPCIPL's "(1) n" header, with the GPCIPL text

@@ -188,11 +188,13 @@ neither.  Also in a namespace run: IDP1 logged
 "KYBD1: _KYBD1 recv ITEM/1/EXEC" and its next poll reply carried
 KYBD_MSG.
 
-`simulatePASS.py` starts **three keyboards** by default (`--keyboards
-0-3`, default 3: left, right, aft; 2 the forward pair; 1 the left;
-`--no-keyboard` = 0): keyboard k is `stsKeyboard.py --kybd k --title k`
-with the run's `--port-base`, `--size` and a stacked or side-by-side
-`--geometry`.
+`simulatePASS.py` starts **the keyboards the CRTs can use** by default:
+1 (left) with `--crts 1`, 2 (left, right) with `--crts 2` or `3`, and 3
+(adding the aft keyboard) only with `--crts 4` -- the right keyboard reaches
+only IDP 2 or 3 and the aft one only IDP 4.  `--keyboards 0-3` overrides,
+`--no-keyboard` = 0.  Keyboard k is `stsKeyboard.py --kybd k --title k` with
+the run's `--port-base`, `--size` and a stacked or side-by-side
+`--geometry`.  Verified by 10 s launches: 1, 2 and 3 keyboards started.
 
 ---
 
@@ -319,7 +321,7 @@ same.  Verified: a `--kybd 2` window is titled "2".  Commit `81d4b5570`.
   `pressed` / `released` strings.
 - `MEDS2.py` — MDU/IDP runner; its IDPs consume these scan codes
   (`KYBD.DEUKey`, `MEDSConf`).  See `HANDOFF-meds2-py.md`.
-- `simulatePASS.py` — launcher; starts three keyboards by default.
+- `simulatePASS.py` — launcher; starts the keyboards the CRTs can use.
 - `panelO6.py` panel C2 — IDP/CRT SEL, which IDP each forward keyboard
   reaches.
 

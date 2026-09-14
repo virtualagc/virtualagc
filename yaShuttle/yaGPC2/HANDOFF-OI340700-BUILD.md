@@ -30,6 +30,23 @@ is automated end to end by `tapebuild/build.sh`:
     REF=~/workspace/pass-run/OI340700-v44boot.mmv \
         yaShuttle/yaGPC2/tapebuild/build.sh <workdir>
 
+Its last stage (8) also writes `OI340700-v44boot-noOPS136.mmv`, the same
+volume without GNC OPS 1, 3 and 6, via `tools/abridge_volume.py VOLUME
+--con80 CON80 --drop-mc 1,3 -o OUT` (`REF_ABRIDGED=` checks it as `REF=`
+checks the full one).  The tool takes memory-configuration rows from the
+flight table `CZ2V_GRT_PHASES` (`OI340600/SSSRC/CZ2COMMO.hal`: MC1 3,4; MC2
+3,5; MC3 3,6; MC4 14,15; MC5 14,16; MC6 9,12; MC8 3,7; MC9 3,8,18),
+cross-checks them against `CON80/MMUSYS1`'s `MC=` cards, removes a phase only
+if neither the IPL set nor a kept configuration loads it, drops that phase's
+whole `MMUDATn` allocation (overlaps refused), and verifies every kept block
+byte-identical.  From v44boot it removes phases 4 ("GNC ASCENT AND ABORT")
+and 6 ("GNC ENTRY"), keeping 1866 of 2665 blocks
+(`~/workspace/pass-run/OI340700-v44boot-noOPS136.mmv`); a two-GPC run reached
+OPS 2 on it with mass memory 1 read exactly as on the full tape.  Requesting
+OPS 1, 3 or 6 from it is not supported: `#PFCMGPT` still describes phases 4
+and 6, their blocks read as zeros, and a zero load block passes its
+checksum.  SM OPS 4 (phase 16) is absent from the full tape as well.
+
 v44 is v43 plus ASM101S `6d418f3c6`, which changes only `BILDNEW5.obj`'s RLDs
 and ten phase-10 halfwords.  `HANDOFF-OPS9.md` is that build's handoff -- its
 sections 0-3 carry the stages, what pins each of them, and the deviations --
