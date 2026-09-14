@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Run the Space Shuttle flight software on one to four simulated GPCs, with
 the crew station around them: MEDS2.py displays, the stsKeyboard.py DPS
-keyboard, the panelO6.py GPC panel, and -- with more than one computer --
+keyboards, the panelO6.py GPC and IDP panel, and -- with more than one computer --
 cam.py's GPC STATUS lamps.  yaGPC2 is the computer.
 
     python3 simulatePASS.py --tape OI340700-v44boot.mmv
@@ -19,12 +19,15 @@ With one GPC the procedure is retest-crt2.sh's; with several, the order the
 scripted two-, three- and four-computer runs verified through OPS 2.
 
 UNATTENDED RUNS.  --panel-script hands panelO6.py a timed script ('<ms>
-<command>' per line; 'gpc <n>' picks the column), --keys a file of
-'<seconds> KEY KEY ...' lines typed on the keyboard bus (keys as on the
-keyboard: ITEM EXEC OPS PRO SPEC RESUME CLEAR + - . 0-9 A-F; also IDP_POWER_ON,
-IDP_POWER_OFF and DEU_LOAD, which work CRT1's IDP pane), and --duration ends
-the run after that many seconds.  Key and panel times both count from when
-the panel starts.
+<command>' per line; 'gpc <n>' picks the column, and 'idppower N on|off',
+'majfunc N GNC|SM|PL', 'kybdsel left 1|3', 'kybdsel right 2|3' and 'idpload N'
+work the IDP switches), --keys a file of '<seconds> KEY KEY ...' lines typed on
+a keyboard bus (keys as on the keyboard: ITEM EXEC OPS PRO SPEC RESUME CLEAR +
+- . 0-9 A-F; KB1, KB2 or KB3 sends the rest of the line on the left, right or
+aft keyboard, KB1 by default; also IDP_POWER_ON, IDP_POWER_OFF and DEU_LOAD for
+IDP 1 and IDP2_POWER_ON, IDP2_POWER_OFF and DEU_LOAD2 for IDP 2, which the panel
+follows as if its switches had been thrown), and --duration ends the run after
+that many seconds.  Key and panel times both count from when the panel starts.
 """
 
 import argparse
@@ -55,7 +58,8 @@ SCAN = {
     "SPEC": 0xCFFC, "-": 0xDFFC, "0": 0xEFFC, "+": 0xFFFC,
     "RESUME": 0x8FFC, "CLEAR": 0x9FFC, ".": 0xAFFC, "PRO": 0xBFFC,
 }
-# MDU -> IDP messages on the _IDP1 bus (MEDS2.py's MDUMsg), for IDP1's pane.
+# MDU -> IDP messages on an _IDPn bus (MEDS2.py's MDUMsg): IDP POWER and IDP
+# LOAD, which panelO6.py's C2 and O6 switches send and follow.
 IDP_MSG = {"DEU_LOAD": (0x0002,), "IDP_POWER_ON": (0x0003, 1), "IDP_POWER_OFF": (0x0003, 0)}
 MAJOR_FUNC = {"PL": 0, "GNC": 1, "SM": 2}
 
@@ -89,9 +93,17 @@ def procedure_text(gpcs, crts):
     L.append("PROCEDURE for GPC%s %s" % ("s" if n > 1 else "", ", ".join(map(str, g))))
     L.append("-" * 72)
     L.append("")
+    L.append("The IDP switches are on panelO6: panel C2 (IDP/CRT POWER and MAJ FUNC, and the")
+    L.append("two IDP/CRT SEL switches) and O6 (INTEGRATED DISPLAY PROCESSOR LOAD).  The")
+    L.append("LEFT keyboard (KYBD1) reaches IDP 1 or 3, the RIGHT keyboard (KYBD2) IDP 2 or 3.")
+    L.append("The box at the foot of a DPS page names its IDP, with a red bar beside it for")
+    L.append("the left keyboard and a yellow one for the right; the digit before the time in")
+    L.append("the page header is the GPC driving it.")
+    L.append("")
     L.append("BEFORE ANY IPL")
-    L.append("  a. CRT1's pane: IDP POWER -> ON (the MDU leaves \"MDU IS AUTONOMOUS\").")
-    L.append("  b. The MDU title shows MF GNC; if not, click the MDU and press Shift+2.")
+    L.append("  a. C2: IDP/CRT 1%s POWER -> ON, MAJ FUNC -> GNC  (\"MDU IS AUTONOMOUS\" goes)."
+             % ("" if crts == 1 else " and IDP/CRT 2"))
+    L.append("  b. C2: LEFT IDP/CRT SEL -> 1, RIGHT IDP/CRT SEL -> 2.")
     L.append("  c. panelO6: MODE -> HALT for %s." % ("GPC%d" % g[0] if n == 1 else
                                                    "every GPC column in use"))
     L.append("")
@@ -99,34 +111,53 @@ def procedure_text(gpcs, crts):
         gpc = g[0]
         L += [
             "IPL GPC%d" % gpc,
-            "  1. BFC CRT select -> CRT 1",
+            "  1. BFC CRT SELECT -> 1+2, BFC CRT DISPLAY -> ON   (GPCIPL uses CRT1)",
             "  2. IPL SOURCE -> MMU 1",
             "  3. GPC%d column: press and release IPL" % gpc,
             "  4. GPC%d MODE -> STBY" % gpc,
             "     ... the GPCIPL MENU appears on CRT1 and loads the display.  Wait.",
-            "  5. On the keyboard: ITEM 1 EXEC   (the system software loads, ~1 minute)",
-            "  6. BFC CRT select -> none          (after the load, before RUN)",
+            "  5. On the left keyboard: ITEM 1 EXEC   (the system software loads, ~1 minute;",
+            "     the MM1 ACTIVITY lamp flickers red while it reads, green when done)",
+            "  6. BFC CRT DISPLAY -> OFF          (after the load, before RUN)",
             "  7. GPC%d MODE -> RUN" % gpc,
             "  8. IPL SOURCE -> OFF               (after RUN)",
             "",
-            "TO RE-IPL: IPL SOURCE -> MMU 1, BFC CRT -> CRT 1, MODE -> HALT, push",
-            "DEU LOAD on CRT1's pane, press IPL, MODE -> STBY, and on from step 4.",
+            "TO RE-IPL: IPL SOURCE -> MMU 1, BFC CRT DISPLAY -> ON, MODE -> HALT, O6: IDP 1",
+            "LOAD, press IPL, MODE -> STBY, and on from step 4.",
         ]
         return "\n".join(L)
+    L.append("IPL THE COMPUTERS ONE AT A TIME: finish each one completely before starting")
+    L.append("the next.  IPL SOURCE and BFC CRT SELECT are single switches shared by every")
+    L.append("computer, and GPCIPL drives one display: the first CRT named by BFC CRT SELECT.")
+    L.append("Every computer loads from MMU 1; the MM1 ACTIVITY lamp is red while the unit is")
+    L.append("reading and green when it is idle.")
+    L.append("")
     for i, gpc in enumerate(g):
-        mm = "MMU 1" if i % 2 == 0 else "MMU 2"
-        L.append("IPL GPC%d  (from %s)" % (gpc, mm))
-        steps = ["IPL SOURCE -> %s" % mm, "BFC CRT select -> CRT 1"]
+        if i == 0 or crts == 1:
+            crt, sel, kb = 1, "1+2", "left"
+        else:
+            crt, sel, kb = 2, "2+3", "right"
+        L.append("IPL GPC%d  (on CRT%d)" % (gpc, crt))
+        steps = ["IPL SOURCE -> MMU 1",
+                 "BFC CRT SELECT -> %s, BFC CRT DISPLAY -> ON" % sel]
         if i > 0:
-            steps.append("CRT1's pane: push and release DEU LOAD  (GPC%d already loaded that "
-                         "display;\n      without this GPC%d's menu never appears)" % (g[0], gpc))
+            steps.append("O6: IDP %d LOAD  (PASS on GPC%d has loaded that display; without this"
+                         "\n      GPC%d's menu never appears, or is drawn over PASS's page)"
+                         % (crt, g[0], gpc))
         steps += ["GPC%d column: press and release IPL" % gpc,
                   "GPC%d MODE -> STBY, then about 15 s later -> RUN" % gpc,
-                  "wait for the GPCIPL MENU on CRT1 (its clock counts up from 000/00:00:00)",
-                  "on the keyboard: ITEM 1 EXEC  (the system software loads)",
-                  "about 80 s after ITEM 1 EXEC: BFC CRT select -> none, then IPL SOURCE -> OFF"]
-        for k, s in enumerate(steps, 1):
-            L.append("  %d. %s" % (k, s))
+                  "wait for the GPCIPL MENU on CRT%d (\"GPCIPL MENU (1)  %d\"; its clock counts"
+                  "\n      up from 000/00:00:00)" % (crt, gpc),
+                  "on the %s keyboard: ITEM 1 EXEC  (the system software loads: the MM1 lamp"
+                  "\n      flickers red)" % kb,
+                  "when the MM1 lamp has stayed green (roughly 80 s after ITEM 1 EXEC):"
+                  "\n      BFC CRT DISPLAY -> OFF, then IPL SOURCE -> OFF.  GPC%d now runs PASS"
+                  "\n      OPS 0; leave its switches alone from here on.%s"
+                  % (gpc, "" if crt == 1 else
+                     "  GPC%d takes CRT2 back:\n      both CRTs show its GPC MEMORY page"
+                     " until OPS 2." % g[0])]
+        for k, st in enumerate(steps, 1):
+            L.append("  %d. %s" % (k, st))
         L.append("")
     # The NBAT the verified runs entered.  CRT 1 must go to the first computer:
     # given to another, no OPS 2 page ever appeared on it.
@@ -141,7 +172,9 @@ def procedure_text(gpcs, crts):
              ("13", g[1], "CRT 2 -> GPC%d" % g[1]),
              ("18", g[0], "mass memory 1 -> GPC%d" % g[0]),
              ("19", g[1], "mass memory 2 -> GPC%d" % g[1])]
-    L.append("THE NBAT, on CRT1 (PASS on GPC%d drives it now).  Each line ends in EXEC." % g[0])
+    L.append("THE NBAT, on CRT1 with the left keyboard (PASS on GPC%d drives it now).  Each"
+             % g[0])
+    L.append("line ends in EXEC.")
     for item, val, what in rows:
         L.append("   %-24s %s" % ("ITEM %s + %d EXEC" % (" ".join(item), val), what))
     L += [
@@ -154,7 +187,8 @@ def procedure_text(gpcs, crts):
         "  its column; one that finds itself alone lights its own diagonal.",
     ]
     if crts == 2:
-        L.append("  CRT2 is the second display; the NBAT gave it to GPC%d." % g[1])
+        L.append("  CRT2 then shows GPC%d's pages (header digit %d), typed on the right keyboard."
+                 % (g[1], g[1]))
     return "\n".join(L)
 
 
@@ -296,13 +330,21 @@ def send_keys_thread(port_base, path, t0, stop_event):
         while time.time() - t0 < at:
             if stop_event.wait(0.05):
                 return
+        kbd = 1
         for key in parts[1:]:
             k = key.upper()
+            if k in ("KB1", "KB2", "KB3"):
+                kbd = int(k[2])          # the rest of the line on that keyboard
+                continue
+            idp = 1
+            if k.startswith("IDP2_") or k.endswith("2") and k[:-1] in IDP_MSG:
+                idp = 2
+                k = k.replace("IDP2_", "IDP_") if k.startswith("IDP2_") else k[:-1]
             if k in IDP_MSG:
                 kb.sendto(struct.pack(">%dH" % len(IDP_MSG[k]), *IDP_MSG[k]),
-                          (MCAST_GROUP, port_base + 41))
+                          (MCAST_GROUP, port_base + 40 + idp))
             elif k in SCAN:
-                kb.sendto(struct.pack(">H", SCAN[k]), (MCAST_GROUP, port_base + 31))
+                kb.sendto(struct.pack(">H", SCAN[k]), (MCAST_GROUP, port_base + 30 + kbd))
             else:
                 log("keys: unknown key %r ignored" % key)
                 continue
@@ -322,8 +364,15 @@ def main():
                     help="MDU size; the panel, keyboard and CAM scale with it (default 512)")
     ap.add_argument("--scale", type=float, default=0.8, metavar="F",
                     help="MEDS2.py text size factor (default 0.8)")
-    ap.add_argument("--crts", type=int, choices=(1, 2), default=1,
-                    help="display windows: 1 (default) or 2")
+    ap.add_argument("--crts", type=int, choices=(1, 2), default=None,
+                    help="display windows: 1 or 2 (default 2 with more than one GPC, "
+                         "else 1)")
+    ap.add_argument("--keyboards", type=int, choices=(0, 1, 2, 3), default=3,
+                    help="stsKeyboard.py windows: 3 (default) the left, right and aft "
+                         "keyboards; 2 the forward pair; 1 the left; 0 none.  Which IDP "
+                         "each forward keyboard reaches is panel C2's IDP/CRT SEL")
+    ap.add_argument("--title", metavar="TEXT",
+                    help="display window title (default: GPCs <list>)")
     ap.add_argument("--major-func", choices=sorted(MAJOR_FUNC), default="GNC",
                     help="the IDP MAJ FUNC switch at start (default GNC)")
     ap.add_argument("--port-base", type=int, default=6900, metavar="N",
@@ -335,7 +384,8 @@ def main():
     ap.add_argument("--window-scale", type=int, metavar="N",
                     help="physical pixels per Qt pixel, for window placement (default: "
                          "from the screen's DPI)")
-    ap.add_argument("--no-keyboard", action="store_true", help="no stsKeyboard.py")
+    ap.add_argument("--no-keyboard", action="store_true", help="no stsKeyboard.py "
+                    "(--keyboards 0)")
     ap.add_argument("--procedure", action="store_true", help="print the procedure and exit")
     ap.add_argument("--panel-script", metavar="FILE", help="timed script for panelO6.py")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
@@ -344,6 +394,10 @@ def main():
     args = ap.parse_args()
     gpcs = args.gpcs
     multi = len(gpcs) > 1
+    if args.crts is None:
+        args.crts = 2 if multi else 1
+    if args.no_keyboard:
+        args.keyboards = 0
 
     if args.procedure:
         print(procedure_text(gpcs, args.crts))
@@ -388,15 +442,19 @@ def main():
     ws_auto, screen_w, screen_h = screen_info()
     ws = args.window_scale or ws_auto
     size = args.size
-    pane = int(round(180.0 * size / 768 / ws))            # MEDS2's IDP pane, Qt pixels
+    # MEDS2's IDP pane, in Qt pixels: hidden unless NSTS_MDU_PANE=1, since
+    # panelO6.py has those switches.
+    pane = int(round(180.0 * size / 768 / ws)) if os.environ.get("NSTS_MDU_PANE") == "1" else 0
     mdu_w = size + pane + 16                               # Qt pixels
     crt_pos = [(0, 0), (mdu_w + 32, 0)]
     right = args.crts * (mdu_w + 32) * ws + 20             # physical pixels
     kb_w = int(round(509.0 * size / 768))
-    o6_w = int(round(948.0 * size / 768))
+    o6_w = int(round(1684.0 * size / 768))                 # panelO6.py REF_W, with C2
+    kb_side_by_side = True
+    kbs_w = args.keyboards * (kb_w + 20)
     kb_geom = "+%d+0" % right
-    o6_geom = "+%d+0" % (right + (0 if args.no_keyboard else kb_w + 20))
-    cam_x = right + (0 if args.no_keyboard else kb_w + 20) + o6_w + 20
+    o6_geom = "+%d+0" % (right + kbs_w)
+    cam_x = right + kbs_w + o6_w + 20
     cam_geom = "+%d+0" % cam_x
     cam_size = int(round(size * 0.75))
     # SIDE BY SIDE IF IT FITS, AND OTHERWISE DON'T TRY HARD.  Several full
@@ -420,10 +478,11 @@ def main():
         x = 0
         crt_pos = [(0, 0), (step // ws, step // ws)]
         x += mdu_w * ws + (args.crts - 1) * step + 20
-        if not args.no_keyboard:
-            kx = stack_x(x, kb_w)
+        if args.keyboards:
+            kx = stack_x(x, kb_w + (args.keyboards - 1) * 60)
             kb_geom = "+%d+0" % kx
-            x = kx + kb_w + 20
+            kb_side_by_side = False
+            x = kx + kb_w + (args.keyboards - 1) * 60 + 20
         ox = stack_x(x, o6_w)
         o6_geom = "+%d+0" % ox
         x = ox + o6_w + 20
@@ -441,7 +500,7 @@ def main():
     L = Launcher(logs)
     stop_event = threading.Event()
     try:
-        title = "GPC%s %s" % ("s" if multi else "", ",".join(map(str, gpcs)))
+        title = args.title or "GPC%s %s" % ("s" if multi else "", ",".join(map(str, gpcs)))
         for k in range(args.crts):
             e = dict(env)
             e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[k]
@@ -450,10 +509,16 @@ def main():
                      "--scale", str(args.scale), "--title", title,
                      "crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
             time.sleep(1)
-        if not args.no_keyboard:
-            L.start("keyboard", [py, "stsKeyboard.py", "--kybd", "1", "--port-base",
-                                 str(args.port_base), "--size", str(size),
-                                 "--geometry", kb_geom], HERE, env)
+        if args.keyboards:
+            for k in range(args.keyboards):
+                kx, ky = kb_geom.lstrip("+").split("+")
+                geom = "+%d+%d" % (int(kx) + k * (kb_w + 20 if kb_side_by_side else 60),
+                                   int(ky) + (0 if kb_side_by_side else k * 60))
+                L.start("keyboard%d" % (k + 1),
+                        [py, "stsKeyboard.py", "--kybd", str(k + 1), "--title",
+                         "KYBD%d (%s)" % (k + 1, ("left", "right", "aft")[k]), "--port-base",
+                         str(args.port_base), "--size", str(size), "--geometry", geom],
+                        HERE, env)
         if multi:
             L.start("cam", [py, "cam.py", "--port-base", str(args.port_base),
                             "--size", str(cam_size), "--geometry", cam_geom],

@@ -2098,6 +2098,11 @@ MDUMsg = NS(
     SET_MAJOR_FUNC=0x0001,   # the major function switch moved: one word, 0..3
     DEU_LOAD=0x0002,         # DEU LOAD pushed (Table 2-2 step 9): no words
     IDP_POWER=0x0003,        # IDP POWER switch moved: one word, 1 ON, 0 OFF
+    # IDP/CRT SEL (panel C2), as panelO6.py sends it to each forward IDP: one
+    # word, bit 0 the left keyboard is selected to this IDP, bit 1 the right.
+    # The IDP echoes the word it acts on as word 2 of its HEARTBEAT, which is
+    # what draws the keyboard bars beside the IDP identifier box.
+    KYBD_SEL=0x0004,
 )
 MDUMsgName = {}
 for _k, _v in MDUMsg.items():
@@ -4911,16 +4916,19 @@ class MDUScreen(object):
 # nowhere left to go.
 # ===========================================================================
 
-# THE BOXED NUMBER AND KEYBOARD BAR at the foot of a DPS page are real, but
-# not normally shown.  A photograph of seven MEDS displays in operation
-# (gigapan.com/gigapans/102753) has them on exactly one: CRT1, a box with "2"
-# in it and a YELLOW bar to its RIGHT -- while that display was being driven
-# by GPC 4, so the number is not the GPC.  What it is, and what turns the
-# assembly on, are not known.  So it is hidden unless asked for, and nothing
-# here should switch it on by itself until that is found out.  The digit and
-# bar sides drawn when shown are MEDS's placeholders ('gpcNo' 1, 'kybd'
-# left), not data.
-SHOW_GPC_BOX = str(env('NSTS_DPS_GPC_BOX', '0')) not in ('', '0')
+# THE IDP IDENTIFIER BOX AND KEYBOARD BARS at the foot of a DPS page.  "Located
+# toward the bottom of each DPS display is a box with its commanding IDP
+# number inside it" (Crew Software Interface, USA006083 Rev B, 2.2); the red
+# bar left of the box is the commander's (left) keyboard and the yellow bar
+# right of it the pilot's (right) keyboard, drawn on whichever IDP each
+# IDP/CRT SEL switch has selected (2.5).  IDP 4's display has the box and never
+# a bar.  MEDS carried the assembly as 'gpcNo', a placeholder "1" and a red
+# left bar that nothing changed.  The number is now the IDP driving the MDU
+# and the bars come from the IDP's heartbeat (MDUMsg.KYBD_SEL).  (A photograph
+# of seven MEDS displays, gigapan.com/gigapans/102753, shows it on one: CRT1
+# with "2" and a yellow right bar -- IDP 2 with the pilot's keyboard, not
+# GPC 4, which drove it.)  --no-idp-box or NSTS_DPS_IDP_BOX=0 hides it.
+SHOW_IDP_BOX = str(env('NSTS_DPS_IDP_BOX', '1')) not in ('', '0')
 
 
 class Screen_DPS(MDUScreen):
@@ -4975,26 +4983,47 @@ class Screen_DPS(MDUScreen):
         return self.curData
 
     def setGPCNo(self, gpcNo):
+        """The number in the identifier box: the IDP, despite the name."""
         self.gpcNo = gpcNo
+        if self.curData is not None:
+            self.curData['gpcNo'] = gpcNo
+        if self.group is None:
+            return                       # build() draws it from curData
         self.group.remove(self.geo_gpcNo)
-        self.geo_gpcNo = self.d.str(24.73, 28.785, "%s" % self.gpcNo,
-                                    self.d.c2h['green'], 1.75)   # up one row
-        if SHOW_GPC_BOX:
+        # where build() puts it
+        self.geo_gpcNo = self.d.str(24.48, 28.735, "%s" % self.gpcNo,
+                                    self.d.c2h['green'], 1.75)
+        if SHOW_IDP_BOX:
             self.group.add(self.geo_gpcNo)
+        self.d.dirty = True
 
     def setKybd(self, kybd):
+        """The keyboard bars: 'left', 'right', 'both' or None."""
         self.kybd = kybd
         if self.curData is not None:
             self.curData['kybd'] = kybd
+        if self.group is None:
+            return
         self.group.remove(self.geo_kybd_left)
         self.group.remove(self.geo_kybd_right)
-        if not SHOW_GPC_BOX:
-            pass
-        elif self.kybd == 'left':
-            self.group.add(self.geo_kybd_left)
-        elif self.kybd == 'right':
-            self.group.add(self.geo_kybd_right)
+        if SHOW_IDP_BOX:
+            if self.kybd in ('left', 'both'):
+                self.group.add(self.geo_kybd_left)
+            if self.kybd in ('right', 'both'):
+                self.group.add(self.geo_kybd_right)
         self.d.dirty = True
+
+    KYBD_OF_MASK = {0: None, 1: 'left', 2: 'right', 3: 'both'}
+
+    def setIdpBox(self, idpNo, mask):
+        """The identifier box and bars from the MDU: which IDP drives it, and
+        which forward keyboards that IDP takes (bit 0 left, bit 1 right).
+        Cheap when nothing changed, since the heartbeat calls it."""
+        if idpNo is not None and idpNo != self.gpcNo:
+            self.setGPCNo(idpNo)
+        kybd = self.KYBD_OF_MASK[mask & 3]
+        if kybd != self.kybd:
+            self.setKybd(kybd)
 
     def _pollFailFCWs(self):
         fcws = [self.fcw.colorMode(self.POLL_FAIL_COLOR),
@@ -5478,9 +5507,9 @@ class Screen_DPS(MDUScreen):
                                     self.d.c2h['green'], 1.75)
         # The whole GPC-number assembly -- box, digit and the two kybd-active
         # bars -- moves up one text row with the rest of the page.  Built
-        # always, drawn only with SHOW_GPC_BOX.
+        # always, drawn only with SHOW_IDP_BOX.
         self.geo_gpcBox = self.d.box(24.33, 28.335, 28.13, 30.985)
-        if SHOW_GPC_BOX:
+        if SHOW_IDP_BOX:
             self.group.add(self.geo_gpcNo)
             self.group.add(self.geo_gpcBox)
 
@@ -5662,7 +5691,7 @@ class Screen_DPS(MDUScreen):
                      if (self._dfbIndex is not None and self._dfbIndex >= 0)
                      else u'—'),
              'set': (lambda f: self.setBGDFBByName(f))},
-            {'label': 'Kybd', 'options': ['left', 'right', 'none'],
+            {'label': 'Kybd', 'options': ['left', 'right', 'both', 'none'],
              'get': (lambda: (self.curData or {}).get('kybd') or 'none'),
              'set': (lambda v: self.setKybd(None if v == 'none' else v))},
             {'label': 'POLL FAIL',
@@ -9284,7 +9313,13 @@ class KYBD(object):
         # window.  The IDP hears the same datagram and queues the key for the
         # GPC; this only echoes it on the scratch pad, as a press in this
         # window does.  This window's own sends never get here: the bus drops
-        # them as self-echo.
+        # them as self-echo.  And only while this keyboard is selected to the
+        # IDP (IDP/CRT SEL): the IDP ignores it otherwise, so the scratch pad
+        # must too.
+        mask = getattr(self.mdu, 'kybdMask', None) if self.mdu else None
+        bit = {'1': 1, '2': 2}.get(str(self.kybdBus))
+        if mask is not None and bit is not None and not (mask & bit):
+            return
         for w in msg.data16:
             k = KYBD.byScan(int(w))
             if k is None:
@@ -9471,6 +9506,9 @@ class MDU(LRU):
         # IDP itself starts with (see MedsRunner.startLRUsIn).
         self.idpPower = bool(CONFIG.get('powerOn', True))
         self.pane = None
+        # Which forward keyboards the primary IDP takes, from its heartbeat
+        # (bit 0 left, bit 1 right); None until one says.  See recvFromPri.
+        self.kybdMask = None
         self.config = config
         self.priPortIDP = priPortIDP
         self.secPortIDP = secPortIDP
@@ -9577,6 +9615,26 @@ class MDU(LRU):
             self.curBus.sendMsg(msg)
         print("MEDS2: DEU LOAD -> IDP%s" % self.priPortIDP)
 
+    def _majorFuncHeard(self, mf):
+        """Someone else moved this IDP's MAJ FUNC switch -- panelO6.py's C2, or
+        another window on the same IDP.  Follow it; send nothing back."""
+        if mf == self.majorFunc:
+            return
+        self.majorFunc = mf
+        name = self.showMajorFunc()
+        print("MEDS2: major function switch -> %d (%s), heard on the bus"
+              % (mf, name))
+        if self.pane is not None:
+            self.pane.update()
+
+    def _idpPowerHeard(self, on):
+        """IDP POWER moved elsewhere (panelO6.py's C2); the pane follows."""
+        if bool(on) == self.idpPower:
+            return
+        self.idpPower = bool(on)
+        if self.pane is not None:
+            self.pane.update()
+
     def showMajorFunc(self):
         """ON SCREEN -- on the IDP pane's MAJ FUNC paddle, which shows the
         position and sets it.
@@ -9652,16 +9710,30 @@ class MDU(LRU):
         self.redraw()
 
     def recvFromPri(self, t, busID, msg, remote):
+        tag = int(msg.data16[0])
+        # MDU -> IDP traffic on this bus -- panelO6.py's C2 and O6 switches,
+        # simulatePASS's tokens, another window on the same IDP -- is not the
+        # IDP talking, so it must not count as a live port (the panel
+        # re-asserts IDP POWER OFF every second, and the MDU must still go
+        # AUTONOMOUS).  The switch positions it reports are followed.
+        if tag < MDUMsg.FILL:
+            if tag == MDUMsg.SET_MAJOR_FUNC and len(msg.data16) > 1:
+                t._majorFuncHeard(int(msg.data16[1]) & 3)
+            elif tag == MDUMsg.IDP_POWER and len(msg.data16) > 1:
+                t._idpPowerHeard(int(msg.data16[1]) != 0)
+            return
         # Any traffic at all says the port is alive; only a POLL says a GPC is.
         t._idpHeard()
         t._rearm('_idpWatchdog', IDP_LOST_MS, t._idpLost)
         scr = t.screens.get('DPS')
-        tag = int(msg.data16[0])
         if tag == MDUMsg.HEARTBEAT:
             # The DEU's flashing attribute is local: it advances one phase per
-            # heartbeat, so it keeps flashing with no GPC on the bus.
+            # heartbeat, so it keeps flashing with no GPC on the bus.  Word 2,
+            # when there is one, is which forward keyboards the IDP takes.
+            t.kybdMask = (int(msg.data16[2]) & 3) if len(msg.data16) > 2 else None
             if scr is not None:
                 scr.blinkTick()
+                scr.setIdpBox(t.priPortIDP, t.kybdMask or 0)
         elif tag == MDUMsg.POLL:
             t._rearm('_pollWatchdog', POLL_FAIL_MS, t._pollLost)
             t._pollHeard()
@@ -9700,6 +9772,8 @@ class MDU(LRU):
     def recvFromSec(self, t, busID, msg, remote):
         """The secondary port has a heartbeat of its own, so it can drop
         independently of the primary."""
+        if int(msg.data16[0]) < MDUMsg.FILL:
+            return                       # MDU -> IDP traffic; see recvFromPri
         if t._secTimedOut:
             t._secTimedOut = False
             if t.curDisplay == "AUTONOMOUS":
@@ -9958,6 +10032,12 @@ class IDP(LRU):
         # Whether this unit's buses and heartbeat run on the BusPump thread
         # (the default) or, as they used to, on the GUI thread.
         self.threaded = str(env('NSTS_IDP_THREAD', '1')) != '0'
+        # IDP/CRT SEL: which forward keyboards this unit takes keys from, bit 0
+        # the left (_KYBD1) and bit 1 the right (_KYBD2), as panelO6.py's C2
+        # sends it.  None until one arrives, and then every keyboard bus the
+        # unit is wired to is heard, as before there were switches.  _KYBD3,
+        # the aft keyboard, has no switch and is always heard.
+        self.kybdSel = None
 
         deulog = env('NSTS_DEU_LOG')
 
@@ -10053,6 +10133,14 @@ class IDP(LRU):
         # IDP indistinguishable from the JavaScript one.
         return _js_uint16(self.id)
 
+    def _kybdBars(self):
+        """The forward keyboards this unit takes keys from, bit 0 left and
+        bit 1 right: what its MDUs draw as keyboard bars."""
+        if self.kybdSel is not None:
+            return self.kybdSel & 3
+        return ((1 if '_KYBD1' in self.bus else 0) |
+                (2 if '_KYBD2' in self.bus else 0))
+
     def _heartbeat(self):
         """The IDP's own heartbeat, free-running.  An MDU is autonomous when
         its port goes quiet, and a port is quiet only when the IDP has stopped
@@ -10060,7 +10148,8 @@ class IDP(LRU):
         the DEU flash's 5/8 : 3/8 duty cycle."""
         if self._hbTimer is not None:
             return
-        beat = lambda: self._sendMDU(MDUMsg.HEARTBEAT, [self._idNum()])
+        beat = lambda: self._sendMDU(MDUMsg.HEARTBEAT,
+                                     [self._idNum(), self._kybdBars()])
         if self.threaded:
             # IDP POWER ON arrives on the pump thread, which has no Qt event
             # loop for a QTimer to run in.
@@ -10099,11 +10188,21 @@ class IDP(LRU):
         if int(msg.data16[0]) == MDUMsg.SET_MAJOR_FUNC:
             mf = int(msg.data16[1]) & 3
             was = t.unit.majorFunc if t.unit is not None else None
-            if t.unit is not None:
+            # Logged on a change only: panelO6.py re-asserts it every second.
+            if t.unit is not None and mf != was:
                 t.unit.majorFunc = mf
                 t.unit.log("IDP%s: major function %s -> %s%s"
                            % (t.id, was, mf,
                               " (the INVALID position)" if mf == 3 else ""))
+            return
+        if int(msg.data16[0]) == MDUMsg.KYBD_SEL:
+            sel = (int(msg.data16[1]) & 3) if len(msg.data16) > 1 else 0
+            if sel != t.kybdSel:
+                names = {None: "every wired keyboard", 0: "no forward keyboard",
+                         1: "the left keyboard", 2: "the right keyboard",
+                         3: "both forward keyboards"}
+                t.unit.log("IDP%s: IDP/CRT SEL -> %s" % (t.id, names[sel]))
+                t.kybdSel = sel
             return
         if int(msg.data16[0]) == MDUMsg.IDP_POWER:
             t.setPower(len(msg.data16) > 1 and int(msg.data16[1]) != 0)
@@ -10149,6 +10248,9 @@ class IDP(LRU):
     def recvKYBD(self, t, busID, msg, remote):
         if not t.powered:
             return
+        bit = {'_KYBD1': 1, '_KYBD2': 2}.get(busID)
+        if t.kybdSel is not None and bit is not None and not (t.kybdSel & bit):
+            return                       # IDP/CRT SEL has that keyboard elsewhere
         for w in msg.data16:
             k = KYBD.byScan(int(w))
             if k is not None:
@@ -10510,7 +10612,9 @@ class ParamPanel(QtWidgets.QWidget):
 # are taller: a linespace of 1.05 em, stacked letters ascent (0.75 em) plus
 # 2 px apart.  The titles are two lines, "IDP/" over "POWER" and "IDP/" over
 # "MAJ FUNC", as the orbiter's panels mark them, which keeps the pane narrow.
-# --no-pane (or NSTS_MDU_PANE=0) leaves the window as it was.
+# HIDDEN BY DEFAULT: those switches are on panelO6.py now, panel C2 (IDP/CRT
+# POWER, MAJ FUNC) and O6 (INTEGRATED DISPLAY PROCESSOR LOAD), where the
+# orbiter has them.  --pane (or NSTS_MDU_PANE=1) puts the pane back.
 # ===========================================================================
 
 PANE_REF_W = 180                 # reference units across
@@ -11293,16 +11397,16 @@ class MedsRunner(object):
         # IDP POWER STARTS OFF when there is a pane to turn it on with: a
         # display unit is not powered until the crew powers it (PASS User's
         # Guide Table 2-2 step 8, "DEU(s) Power - ON").  Without the pane
-        # (--no-pane), and in --dev, it starts powered as it always did, since
-        # nothing could switch it on.  NSTS_IDP_POWER=on|off overrides.
+        # (the default), and in --dev, it starts powered, and panelO6.py's C2
+        # IDP/CRT POWER switch -- OFF until thrown -- takes it from there.
+        # NSTS_IDP_POWER=on|off overrides.
         _pw = str(env('NSTS_IDP_POWER', '')).lower()
         if _pw in ('on', '1'):
             powerOn = True
         elif _pw in ('off', '0'):
             powerOn = False
         else:
-            powerOn = bool(CONFIG.get('dev')) or not self.opts.get('pane', True) \
-                or str(env('NSTS_MDU_PANE', '1')) == '0'
+            powerOn = bool(CONFIG.get('dev')) or not _pane_wanted(self.opts)
         for lruName in CONFIG['thisStart']:
             lruConf = dict(CONFIG['lrus'][lruName])
             lruConf['NSTS_TOP'] = CONFIG['NSTS_TOP']
@@ -11319,8 +11423,7 @@ class MedsRunner(object):
                 win.lru = lru
             lru.start()
             if isinstance(lru, MDU) and not lruConf.get('shared') \
-                    and self.opts.get('pane', True) \
-                    and str(env('NSTS_MDU_PANE', '1')) != '0':
+                    and _pane_wanted(self.opts):
                 lru.pane = IDPPane(lru, win)
                 win.setSidePane(lru.pane)
             self.lrus[lruName] = lru
@@ -11367,6 +11470,14 @@ class MedsRunner(object):
                                           lruConf.get('module'), kind))
             sys.exit(0)
         self.createWindows()
+
+
+def _pane_wanted(opts):
+    """The IDP pane: --pane or NSTS_MDU_PANE=1; NSTS_MDU_PANE=0 wins."""
+    e = str(env('NSTS_MDU_PANE', '')).strip()
+    if e == '0':
+        return False
+    return e == '1' or bool(opts.get('pane', False))
 
 
 # The namespace NSTS_EXEC runs in.  The JavaScript build evaluated its string
@@ -11445,15 +11556,16 @@ def buildParser():
                    help='text stroke width factor, e.g. 0.8: thins or thickens the '
                         'lines glyphs are drawn with, and no other lines (default: '
                         '1, or the config "textStrokeScale")')
+    p.add_argument('--pane', dest='pane', action='store_true',
+                   help='an IDP control pane (IDP POWER, IDP MAJ FUNC, DEU LOAD) '
+                        'down the right side of each MDU window.  Off by '
+                        'default: those switches are panelO6.py\'s C2 and O6 '
+                        'IDP LOAD.  Also NSTS_MDU_PANE=1')
     p.add_argument('--no-pane', dest='noPane', action='store_true',
-                   help='no IDP control pane (IDP POWER, IDP MAJ FUNC, DEU LOAD) '
-                        'down the right side of each MDU window; also '
-                        'NSTS_MDU_PANE=0')
-    p.add_argument('--gpc-box', dest='gpcBox', action='store_true',
-                   help='draw the boxed number and keyboard bar at the foot of '
-                        'DPS pages.  Real MEDS shows them only sometimes, for '
-                        'reasons not yet known, so they are off by default; '
-                        'what is drawn is a placeholder.  Also NSTS_DPS_GPC_BOX=1')
+                   help=argparse.SUPPRESS)          # the old default, now a no-op
+    p.add_argument('--no-idp-box', dest='noIdpBox', action='store_true',
+                   help='hide the IDP identifier box and keyboard bars at the '
+                        'foot of DPS pages; also NSTS_DPS_IDP_BOX=0')
     p.add_argument('--dev', action='store_true',
                    help='developer mode: MDUs run standalone (no IDP heartbeat '
                         'gating, preloaded DPS test formats)')
@@ -11479,9 +11591,9 @@ def main(argv=None):
     if args.title:
         global WINDOW_TITLE
         WINDOW_TITLE = args.title
-    if args.gpcBox:
-        global SHOW_GPC_BOX
-        SHOW_GPC_BOX = True
+    if args.noIdpBox:
+        global SHOW_IDP_BOX
+        SHOW_IDP_BOX = False
     opts = {
         'lrus': args.lrus,
         'configFile': os.path.abspath(args.config) if args.config else None,
@@ -11492,7 +11604,7 @@ def main(argv=None):
         'strokeScale': args.strokeScale,
         'dev': args.dev,
         'list': args.list,
-        'pane': not args.noPane,
+        'pane': args.pane and not args.noPane,
     }
 
     # --list needs no window system at all.

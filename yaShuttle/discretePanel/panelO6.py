@@ -54,6 +54,16 @@ ACTIVITY has MM1 and MM2 lamps showing the mass memories' own READY
 lines as heard on the bus: pane grey (OFF) until a unit's READY is first
 heard, then green READY or red BUSY (READY dropped) for good.
 
+To the right of those, a column of its own, are the IDP controls.  Panel
+C2's inset (DPS Workbook USA005350 Rev B figure 2-31; Crew Software Interface
+USA006083 Rev B sections 2.3-2.5): POWER and MAJ FUNC for IDP/CRT 1, 3 and 2,
+in that order left to right, and below them the LEFT and RIGHT IDP/CRT SEL
+switches, which say which IDP each forward keyboard talks to (left: 1 or 3;
+right: 3 or 2).  Under C2 is panel O6's INTEGRATED DISPLAY PROCESSOR inset,
+the four momentary LOAD switches.  IDP/CRT 4's switches are on aft panel R11
+and are not drawn.  These go to the display processors, not to the GPCs: see
+"The IDP buses" below.
+
 Usage:
     python3 panelO6.py
     python3 panelO6.py --size 512
@@ -64,8 +74,12 @@ Usage:
 
 import argparse
 import os
+import select
+import socket
+import struct
 import subprocess
 import threading
+import time
 import tkinter as tk
 import tkinter.font as tkfont
 
@@ -97,6 +111,78 @@ DEFAULT_BFC_SELECT = "1+2"
 DEFAULT_BFC_DISENGAGE = "LEFT"     # RIGHT disengages the BFS
 DEFAULT_ACTIVITY = ["OFF", "OFF"]
 DEFAULT_GPC_ID = 1
+
+# ---- The IDP buses ----------------------------------------------------------
+#
+# Panel C2 and the O6 IDP LOAD switches are wired to the display processors,
+# which MEDS2.py simulates.  They talk to each IDP over its MDU <-> IDP bus,
+# _IDPn: UDP multicast on the discrete bus's group, port base + 40 + n,
+# big-endian 16-bit words, word 0 a tag.  These are MEDS2's MDU -> IDP tags
+# (MDUMsg), the ones its IDP pane and simulatePASS's --keys tokens send; words
+# 0xFF00 and up are IDP -> MDU traffic and are ignored here.
+#
+#     SET_MAJOR_FUNC 0x0001 [mf]    mf 0 PL, 1 GNC, 2 SM, 3 ILLEGAL
+#     IDP_LOAD       0x0002         (MEDS2's DEU_LOAD); no words
+#     IDP_POWER      0x0003 [on]    1 ON, 0 OFF
+#     KYBD_SEL       0x0004 [mask]  bit 0: the LEFT keyboard talks to this
+#                                   IDP; bit 1: the RIGHT keyboard does
+#
+# POWER, MAJ FUNC and KYBD_SEL for IDPs 1-3 are sent on every change and
+# re-asserted every IDP_REPUBLISH_MS, as the discretes are: a late-starting
+# MEDS2 gets them within a second.  LOAD goes once, when thrown.  And THE
+# PANEL FOLLOWS THE BUS: the same messages from anyone else -- a --keys token,
+# a MEDS2 window's major function keys -- move the matching switch, so the
+# re-assertion never fights them and the picture always shows what the IDPs
+# were last told.
+IDP_POWER_POS = ("ON", "OFF")                   # up, down
+MAJ_FUNC_POS = ("GNC", "SM", "PL")              # up, mid, down
+MF_NAMES = ("PL", "GNC", "SM", "ILLEGAL")       # MEDS2's major function values
+LEFT_SEL_POS = ("1", "3")                       # left, right
+RIGHT_SEL_POS = ("3", "2")                      # left, right
+C2_IDPS = (1, 3, 2)                             # C2's sets, left to right
+N_IDP_C2 = 3                                    # IDP 4's switches are on R11
+N_IDP_LOAD = 4
+IDP_BUS_OFFSET = 40
+IDP_REPUBLISH_MS = 1000
+ECHO_WINDOW_S = 0.5      # how long our own datagram's echo is waited for
+TAG_SET_MAJOR_FUNC = 0x0001
+TAG_IDP_LOAD = 0x0002
+TAG_IDP_POWER = 0x0003
+TAG_KYBD_SEL = 0x0004
+DEFAULT_IDP_POWER = "OFF"
+DEFAULT_LEFT_SEL = "1"
+DEFAULT_RIGHT_SEL = "2"
+MF_RING = "#c0201a"     # an ILLEGAL major function, as MEDS2's pane marks it
+
+
+def default_major_func():
+    """NSTS_MAJOR_FUNC, as MEDS2 reads it (0 PL, 1 GNC, 2 SM, 3 ILLEGAL);
+    GNC without it."""
+    v = os.environ.get("NSTS_MAJOR_FUNC", "")
+    try:
+        return int(v) & 3 if v.strip() else 1
+    except ValueError:
+        return 1
+
+
+def idp_port(n):
+    """IDP n's MDU <-> IDP bus, _IDPn."""
+    return D.PORT_BASE + IDP_BUS_OFFSET + int(n)
+
+
+def idp_receiver(n):
+    """A socket subscribed to IDP n's bus, shared with MEDS2's own."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    except (AttributeError, OSError):
+        pass
+    s.bind(("", idp_port(n)))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                             socket.inet_aton(D.IFACE)))
+    return s
 
 # ---- GPC discrete inputs --------------------------------------------------
 #
@@ -198,11 +284,12 @@ HELV_CAP_EM = 0.72
 MARGIN = 28
 PANE_GAP = 16          # air between O6 and the C3/F6 stack
 C3_W = 236
+C2_W = 720             # the IDP column: panel C2 over the O6 IDP LOAD inset
 # ENGAGE pushbuttons.  Smaller than IPL's 50: at 50 the pane leaves only
 # ~5 px under the IPL SOURCE tab at some --size values; at 40, 15 or more.
 RHC_BTN = 40
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
-REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + MARGIN   # 948
+REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + PANE_GAP + C2_W + MARGIN   # 1684
 REF_H = 1250
 FULL_SIZE = 768        # --size units: 768 is the design (full) window
 
@@ -288,7 +375,7 @@ def scaled_wh(w, h, size):
 class PanelO6:
     def __init__(self, root, size=FULL_SIZE, gpc_id=DEFAULT_GPC_ID):
         self.root = root
-        root.title("Panels O6, C3, F6  —  GPC / BFC")
+        root.title("Panels O6, C3, F6, C2  —  GPC / BFC / IDP")
         root.configure(bg=C_WINDOW)
         mw, mh = scaled_wh(640, 700, size)
         root.minsize(mw, mh)
@@ -307,6 +394,11 @@ class PanelO6:
         self.term_a = False                  # hardware 0; --script only
         self.wired = gpc_id - 1              # the column that is published
         self._held = None                    # (kind, index) of a held button
+        # The IDP controls, indexed by IDP number - 1.
+        self.idp_power = [DEFAULT_IDP_POWER] * N_IDP_C2
+        self.idp_mf = [default_major_func()] * N_IDP_C2
+        self.kybd_sel = {"left": DEFAULT_LEFT_SEL, "right": DEFAULT_RIGHT_SEL}
+        self.idp_load = [False] * N_IDP_LOAD
 
         cw, ch = scaled_wh(REF_W, REF_H, size)
         self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
@@ -341,6 +433,26 @@ class PanelO6:
         self._rx_lock = threading.Lock()
         self._mm_heard = [None] * len(MM_READY_BITS)
         threading.Thread(target=self._listen, daemon=True).start()
+        # The IDP buses; see "The IDP buses" above.  What the listener hears
+        # waits in _idp_rx for the Tk side; what we sent waits in _idp_sent
+        # so that its own echo is not mistaken for someone else's command.
+        self.idp_sock = D.sender()
+        self._idp_rx = []
+        self._idp_sent = []
+        self._idp_send_failed = False
+        log("IDP controls on %s:%d-%d, re-asserted every %d ms"
+            % (D.GROUP, idp_port(1), idp_port(N_IDP_LOAD), IDP_REPUBLISH_MS))
+        # Bound here, before the first publish, so that publish's own echo
+        # is heard and struck off rather than left to eat a later command.
+        self._idp_socks = {}
+        for n in range(1, N_IDP_C2 + 1):
+            try:
+                self._idp_socks[idp_receiver(n)] = n
+            except OSError as e:
+                log("cannot listen on IDP%d's bus: %s" % (n, e))
+        threading.Thread(target=self._listen_idp, daemon=True).start()
+        self._idp_publish()
+        self.root.after(IDP_REPUBLISH_MS, self._idp_tick)
         self._tick()
 
     # ---- the BFC modules --------------------------------------------------
@@ -424,6 +536,11 @@ class PanelO6:
             "%s=%s" % (r, "ON" if h else "OFF") for r, h in zip(RHCS, self.rhc)))
         log("  ACTIVITY  %s" % "  ".join(
             "%s=%s" % (m, a) for m, a in zip(MMUS, self.activity)))
+        for n in C2_IDPS:
+            log("  IDP/CRT %d  POWER=%s  MAJ FUNC=%s"
+                % (n, self.idp_power[n - 1], MF_NAMES[self.idp_mf[n - 1]]))
+        log("  IDP/CRT SEL  LEFT=%s  RIGHT=%s"
+            % (self.kybd_sel["left"], self.kybd_sel["right"]))
 
     # ---- the discrete bus -------------------------------------------------
 
@@ -521,6 +638,7 @@ class PanelO6:
         A lamp is OFF until its unit's READY is first heard, and READY or
         BUSY from then on -- a unit that goes quiet keeps its last state.
         """
+        self._idp_adopt()
         with self._rx_lock:
             heard = list(self._mm_heard)
         for u, h in enumerate(heard):
@@ -840,6 +958,12 @@ class PanelO6:
         rhc_y0 = rhc_y1 - (5 * pad + 6 * th10 + RHC_BTN)
         self._draw_rhc(f6_x0, rhc_y0, f6_x1, rhc_y1)
         self._draw_activity(f6_x0, act_y0, f6_x1, act_y1)
+        # The IDP column, right of C3/F6: C2 at the top, the O6 IDP LOAD
+        # inset under it.
+        idp_x0 = c3_x1 + PANE_GAP
+        idp_x1 = idp_x0 + C2_W
+        c2_y1 = self._draw_c2(idp_x0, my0, idp_x1)
+        self._draw_idp_load(idp_x0, c2_y1 + PANE_GAP, idp_x1)
 
     def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
@@ -1063,6 +1187,114 @@ class PanelO6:
         quarter = (x1 - x0) / 4.0
         for i, (name, state) in enumerate(zip(MMUS, self.activity)):
             self._lamp(cx + (2 * i - 1) * quarter, row_y, name, state)
+
+    def _draw_c2(self, x0, y0, x1):
+        """Panel C2: POWER and MAJ FUNC for IDP/CRT 1, 3, 2, and the two
+        IDP/CRT SEL switches.  Returns the inset's bottom edge."""
+        pad = 10
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        pw, ph = 58, 124        # POWER: O6 POWER's guard
+        mw, mh = 58, 136        # MAJ FUNC: O6 OUTPUT's 3-position guard
+        sw, sh = 124, 58        # SEL: F6 DISENGAGE's horizontal guard
+        # The vertical rhythm first, so the body can be drawn behind it.
+        y_idp = y0 + 2 * pad + th10
+        y_crt = y_idp + th10 + pad + th10
+        y_names = y_crt + th10 + pad + ths
+        y_up = y_names + ths + pad + ths
+        sw_top = y_up + ths + pad
+        y_down = sw_top + mh + pad + ths
+        box_y0 = y_idp - th10 - pad / 2.0
+        box_y1 = y_down + ths + pad / 2.0
+        y_sel = box_y1 + 2 * pad + th10
+        y_selcrt = y_sel + th10 + pad + ths
+        sel_top = y_selcrt + ths + pad
+        y1 = sel_top + sh + 2 * pad
+        self._rect_panel(x0, y0, x1, y1)
+
+        width = x1 - x0
+        centres = [x0 + width * (2 * k + 1) / 6.0 for k in range(3)]
+        ow = max(1, int(self.s))
+        for scx, n in zip(centres, C2_IDPS):
+            self._rect(scx - 115, box_y0, scx + 115, box_y1,
+                       fill="", outline=C_GUARD_LO, width=ow)
+            self._text(scx, y_idp, "IDP/", size=10)
+            self._text(scx, y_crt, "CRT %d" % n, size=10)
+            pcx, mcx = scx - 55, scx + 55
+            self._text(pcx, y_names, "POWER", size=SETTING_SIZE)
+            self._text(mcx, y_names, "MAJ FUNC", size=SETTING_SIZE)
+            self._text(pcx, y_up, "ON", size=SETTING_SIZE)
+            self._text(mcx, y_up, "GNC", size=SETTING_SIZE)
+            ptop = sw_top + (mh - ph) / 2.0
+            pos = IDP_POWER_POS.index(self.idp_power[n - 1])
+            self._guarded_toggle(pcx - pw / 2, ptop, pcx + pw / 2, ptop + ph,
+                                 pos, npos=2)
+            self._hit("idp_power", n, pcx - pw / 2, ptop, pcx + pw / 2, ptop + ph)
+            mf = self.idp_mf[n - 1]
+            mx1, mx2 = mcx - mw / 2, mcx + mw / 2
+            if mf == 3:
+                # ILLEGAL is not a place the paddle can be: end-on, ringed
+                # in red, as MEDS2's pane shows it.
+                self._guarded_toggle(mx1, sw_top, mx2, sw_top + mh, 1, npos=3)
+                r = mw * 0.60
+                cy = sw_top + mh / 2.0
+                self._oval(mcx - r, cy - r, mcx + r, cy + r, fill="",
+                           outline=MF_RING, width=max(2, int(3 * self.s)))
+            else:
+                self._guarded_toggle(mx1, sw_top, mx2, sw_top + mh,
+                                     MAJ_FUNC_POS.index(MF_NAMES[mf]), npos=3)
+            self._hit("idp_mf", n, mx1, sw_top, mx2, sw_top + mh)
+            self._vtext(mx2 + 14 + SETTING_SIZE * 2 / 3.0,
+                        sw_top + mh / 2.0, "SM")
+            self._text(pcx, y_down, "OFF", size=SETTING_SIZE)
+            self._text(mcx, y_down, "PL", size=SETTING_SIZE)
+
+        for side, title, scx, positions in (
+                ("left", "LEFT IDP/CRT SEL", x0 + width / 4.0, LEFT_SEL_POS),
+                ("right", "RIGHT IDP/CRT SEL", x0 + width * 3 / 4.0, RIGHT_SEL_POS)):
+            self._text(scx, y_sel, title, size=10)
+            self._text(scx, y_selcrt, "CRT", size=SETTING_SIZE)
+            sx1, sx2 = scx - sw / 2, scx + sw / 2
+            pos = positions.index(self.kybd_sel[side])
+            self._guarded_toggle_h(sx1, sel_top, sx2, sel_top + sh, pos, npos=2)
+            self._hit("kybd_sel", side, sx1, sel_top, sx2, sel_top + sh)
+            cy = sel_top + sh / 2.0
+            self._text(sx1 - 12, cy, positions[0], size=10)
+            self._text(sx2 + 12, cy, positions[1], size=10)
+        return y1
+
+    def _draw_idp_load(self, x0, y0, x1):
+        """Panel O6's INTEGRATED DISPLAY PROCESSOR inset: LOAD switches 1-4,
+        momentary, thrown down to load.  Returns the inset's bottom edge."""
+        pad = 10
+        th10 = self._th(10)
+        th12 = self._th(12)
+        ths = self._th(SETTING_SIZE)
+        gw, gh = 58, 124
+        y_title = y0 + pad + th10
+        y_nums = y_title + th10 + pad + th12
+        y_load = y_nums + th12 + pad + ths
+        sw_top = y_load + ths + pad
+        y1 = sw_top + gh + 2 * pad
+        self._rect_panel(x0, y0, x1, y1)
+        cx = (x0 + x1) / 2.0
+        self._text(cx, y_title, "INTEGRATED DISPLAY PROCESSOR", size=10)
+        self._text(cx, y_load, "LOAD", size=SETTING_SIZE)
+        tw = self._tkfont(SETTING_SIZE).measure("LOAD") / max(self.s, 0.01)
+        tx = cx + tw / 2.0 + 5
+        t = ths * 0.45
+        self._poly([(tx, y_load - t), (tx + 2 * t, y_load - t),
+                    (tx + t, y_load + t)], fill=C_INK, outline="")
+        width = x1 - x0
+        for k in range(N_IDP_LOAD):
+            gx = x0 + width * (2 * k + 1) / (2.0 * N_IDP_LOAD)
+            self._text(gx, y_nums, str(k + 1), size=12)
+            pos = 1 if self.idp_load[k] else 0
+            self._guarded_toggle(gx - gw / 2, sw_top, gx + gw / 2, sw_top + gh,
+                                 pos, npos=2)
+            self._hit("idp_load", k + 1, gx - gw / 2, sw_top, gx + gw / 2,
+                      sw_top + gh)
+        return y1
 
     def _lamp(self, gx, y, caption, state, size=10):
         """Caption then disk, the pair centred on gx.
@@ -1316,6 +1548,19 @@ class PanelO6:
         elif kind == "bfc_disengage":
             z = self._zone(event.x, x1, x2, 2)
             self._set_bfc_disengage(BFC_DISENGAGE_POS[z])
+        elif kind == "idp_power":
+            z = self._zone(event.y, y1, y2, 2)
+            self._set_idp_power(index, IDP_POWER_POS[z])
+        elif kind == "idp_mf":
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_idp_mf(index, MF_NAMES.index(MAJ_FUNC_POS[z]))
+        elif kind == "kybd_sel":
+            z = self._zone(event.x, x1, x2, 2)
+            positions = LEFT_SEL_POS if index == "left" else RIGHT_SEL_POS
+            self._set_kybd_sel(index, positions[z])
+        elif kind == "idp_load":
+            self._set_idp_load(index, True)
+            self._held = (kind, index)
 
 
     def _on_release(self, event):
@@ -1327,6 +1572,8 @@ class PanelO6:
             self._set_ipl(index, False)
         elif kind == "rhc":
             self._set_rhc(index, False)
+        elif kind == "idp_load":
+            self._set_idp_load(index, False)
 
     def _set_power(self, i, value):
         old = self.power[i]
@@ -1385,6 +1632,136 @@ class PanelO6:
         self._announce("%s RHC BFC ENGAGE" % RHCS[i], old,
                        "ON" if down else "OFF")
         self._changed()
+
+    # ---- the IDP controls -------------------------------------------------
+
+    def _set_idp_power(self, n, value, heard=False):
+        old = self.idp_power[n - 1]
+        if value == old:
+            return
+        self.idp_power[n - 1] = value
+        self._announce("IDP/CRT %d POWER%s" % (n, " (heard)" if heard else ""),
+                       old, value)
+        self._idp_publish()
+        self.redraw()
+
+    def _set_idp_mf(self, n, mf, heard=False):
+        old = self.idp_mf[n - 1]
+        mf &= 3
+        if mf == old:
+            return
+        self.idp_mf[n - 1] = mf
+        self._announce("IDP/CRT %d MAJ FUNC%s" % (n, " (heard)" if heard else ""),
+                       MF_NAMES[old], MF_NAMES[mf])
+        self._idp_publish()
+        self.redraw()
+
+    def _set_kybd_sel(self, side, value, heard=False):
+        old = self.kybd_sel[side]
+        if value == old:
+            return
+        self.kybd_sel[side] = value
+        self._announce("%s IDP/CRT SEL%s" % (side.upper(), " (heard)" if heard else ""),
+                       old, value)
+        self._idp_publish()
+        self.redraw()
+
+    def _set_idp_load(self, n, down):
+        old = self.idp_load[n - 1]
+        self.idp_load[n - 1] = down
+        self._announce("IDP %d LOAD" % n, "ON" if old else "OFF",
+                       "ON" if down else "OFF")
+        if down and not old:
+            self._idp_send(n, TAG_IDP_LOAD)
+        self.redraw()
+
+    def kybd_mask(self, n):
+        """KYBD_SEL for IDP n: bit 0 the left keyboard, bit 1 the right."""
+        m = 0
+        if self.kybd_sel["left"] == str(n):
+            m |= 1
+        if self.kybd_sel["right"] == str(n):
+            m |= 2
+        return m
+
+    def _idp_send(self, n, *words):
+        payload = struct.pack(">%dH" % len(words), *words)
+        # Noted BEFORE sending: the echo can arrive before sendto returns.
+        with self._rx_lock:
+            self._idp_sent.append((time.monotonic(), n, payload))
+            del self._idp_sent[:-64]
+        try:
+            self.idp_sock.sendto(payload, (D.GROUP, idp_port(n)))
+            self._idp_send_failed = False
+        except OSError as e:
+            if not self._idp_send_failed:
+                log("cannot send on IDP%d's bus: %s" % (n, e))
+            self._idp_send_failed = True
+
+    def _idp_publish(self):
+        for n in range(1, N_IDP_C2 + 1):
+            self._idp_send(n, TAG_IDP_POWER,
+                           1 if self.idp_power[n - 1] == "ON" else 0)
+            self._idp_send(n, TAG_SET_MAJOR_FUNC, self.idp_mf[n - 1])
+            self._idp_send(n, TAG_KYBD_SEL, self.kybd_mask(n))
+
+    def _idp_tick(self):
+        """Every IDP_REPUBLISH_MS: take in what was heard, then re-assert."""
+        self._idp_adopt()
+        self._idp_publish()
+        self.root.after(IDP_REPUBLISH_MS, self._idp_tick)
+
+    def _listen_idp(self):
+        """Thread: note every IDP_POWER, SET_MAJOR_FUNC and KYBD_SEL anybody
+        else sends to IDPs 1-3."""
+        socks = self._idp_socks
+        if not socks:
+            return
+        while True:
+            try:
+                ready, _, _ = select.select(list(socks), [], [])
+            except OSError:
+                return
+            for sock in ready:
+                try:
+                    data, _ = sock.recvfrom(65536)
+                except OSError:
+                    continue
+                if len(data) < 4:
+                    continue
+                tag, value = struct.unpack(">HH", data[:4])
+                if tag not in (TAG_IDP_POWER, TAG_SET_MAJOR_FUNC, TAG_KYBD_SEL):
+                    continue            # FILL, CLOCK, POLL, HEARTBEAT, ...
+                n = socks[sock]
+                with self._rx_lock:
+                    # An echo comes back within milliseconds; anything older
+                    # was never heard, and must not mask a real command.
+                    now = time.monotonic()
+                    self._idp_sent[:] = [e for e in self._idp_sent
+                                         if now - e[0] < ECHO_WINDOW_S]
+                    echo = next((e for e in self._idp_sent
+                                 if e[1] == n and e[2] == data), None)
+                    if echo is not None:
+                        self._idp_sent.remove(echo)
+                        continue
+                    self._idp_rx.append((n, tag, value))
+
+    def _idp_adopt(self):
+        """Move the switches to what was heard.  A KYBD_SEL's SET bit moves a
+        SEL switch to that IDP; a clear bit alone says nothing about where
+        the switch is."""
+        with self._rx_lock:
+            rx, self._idp_rx = self._idp_rx, []
+        for n, tag, value in rx:
+            if tag == TAG_IDP_POWER:
+                self._set_idp_power(n, "ON" if value else "OFF", heard=True)
+            elif tag == TAG_SET_MAJOR_FUNC:
+                self._set_idp_mf(n, value, heard=True)
+            elif tag == TAG_KYBD_SEL:
+                if value & 1 and str(n) in LEFT_SEL_POS:
+                    self._set_kybd_sel("left", str(n), heard=True)
+                if value & 2 and str(n) in RIGHT_SEL_POS:
+                    self._set_kybd_sel("right", str(n), heard=True)
 
     def set_crt(self, value):
         """BFC CRT DISPLAY and SELECT from the field value: 0 is DISPLAY OFF."""
@@ -1449,6 +1826,11 @@ class PanelO6:
 #                                  is bfsengage; B6-7 fold into crt.  Any other
 #                                  bit is sent once, raw, and the next
 #                                  republish undoes it if this panel owns it.
+#     idppower N on|off            C2 IDP/CRT N POWER (N 1-3)
+#     majfunc N GNC|SM|PL          C2 IDP/CRT N MAJ FUNC (N 1-3)
+#     kybdsel left 1|3             LEFT IDP/CRT SEL
+#     kybdsel right 2|3            RIGHT IDP/CRT SEL
+#     idpload N                    O6 IDP N LOAD (N 1-4), held IPL_HOLD_MS
 SCRIPT_HELP = ("timed discrete sequence: '<ms> <command>' per line.  "
                "Commands act on the primary GPC until 'gpc <n>' moves "
                "them to another column, which is how a script brings up "
@@ -1533,8 +1915,38 @@ def _run_script(panel, entries, quit_after_ms=None):
             else:
                 D.publish(panel.sock, D.SET if on else D.RESET, reg,
                           D.bit_mask(num), port=D.gpc_port(w + 1))
+        elif verb == "idppower":
+            n, val = arg.split()
+            panel._set_idp_power(c2_idp(n), "ON" if _on(val) else "OFF")
+        elif verb == "majfunc":
+            n, val = arg.split()
+            if val.upper() not in MAJ_FUNC_POS:
+                raise SystemExit("panelO6: MAJ FUNC is GNC, SM or PL, not %r" % val)
+            panel._set_idp_mf(c2_idp(n), MF_NAMES.index(val.upper()))
+        elif verb == "kybdsel":
+            side, val = arg.split()
+            side = side.lower()
+            positions = {"left": LEFT_SEL_POS, "right": RIGHT_SEL_POS}.get(side)
+            if positions is None or val not in positions:
+                raise SystemExit("panelO6: kybdsel is 'left 1|3' or 'right 2|3', "
+                                 "not %r" % arg)
+            panel._set_kybd_sel(side, val)
+        elif verb == "idpload":
+            n = int(arg)
+            if not 1 <= n <= N_IDP_LOAD:
+                raise SystemExit("panelO6: IDP LOAD is 1 to %d, not %r"
+                                 % (N_IDP_LOAD, arg))
+            panel._set_idp_load(n, True)
+            root.after(IPL_HOLD_MS, lambda: panel._set_idp_load(n, False))
         else:
             raise SystemExit("panelO6: unknown command %r" % verb)
+
+    def c2_idp(word):
+        n = int(word)
+        if not 1 <= n <= N_IDP_C2:
+            raise SystemExit("panelO6: IDP/CRT %r is not on panel C2 (1 to %d)"
+                             % (word, N_IDP_C2))
+        return n
 
     def bfsengage(on):
         if on:
@@ -1553,8 +1965,9 @@ def _run_script(panel, entries, quit_after_ms=None):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        description="Space Shuttle panels O6, C3, F6: the GPC crew panel "
-                    "on the discrete bus")
+        description="Space Shuttle panels O6, C3, F6 and C2: the GPC crew "
+                    "panel on the discrete bus, and the IDP controls on the "
+                    "IDP buses")
     ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
                     help="Scale: 768 is full size (default), 512 is 2/3, 384 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
