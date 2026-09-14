@@ -2151,8 +2151,12 @@ MEDSConf = {
                  'dkBus': "DK1",
                  'errorMsgTarget': ["CRT1", "CDR1", "CDR2", "MFD2", "PLT1"],
                  'busAddr': 0x01},
+        # No _KYBD3 on IDP 2, though MEDS had one: the aft keyboard "can
+        # communicate only with IDP 4" (Crew Software Interface, USA006083
+        # Rev B, 2.6), and the forward ones reach IDP 2 only through the
+        # RIGHT IDP/CRT SEL switch (2.5).
         'IDP2': {'lruID': 0x00,
-                 'busses': ['_IDP2', 'FC1', 'FC2', 'FC3', 'FC4', 'DK2', '_KYBD2', '_KYBD3'],
+                 'busses': ['_IDP2', 'FC1', 'FC2', 'FC3', 'FC4', 'DK2', '_KYBD2'],
                  'powerBus': ["CA1", "MNC"], 'fcBus': ["FC1", "FC2", "FC3", "FC4"],
                  'dkBus': "DK2",
                  'errorMsgTarget': ["CRT2", "PLT2", "PLT1", "MFD1", "CDR2", "AFD1"],

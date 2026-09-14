@@ -16,3 +16,5 @@
 - Known cosmetic: prints from the BusPump thread and the GUI thread can interleave on one log line.
 ### [2026-09-14] Target: HANDOFF-stsKeyboard.md
 - simulatePASS starts three keyboards by default (--keyboards 3: KYBD1 left, KYBD2 right, KYBD3 aft; titles "KYBDn (left|right|aft)"); which IDP a forward keyboard reaches is panel C2's IDP/CRT SEL, not the window.
+### [2026-09-14] Target: HANDOFF-meds2-py.md
+- MEDSConf IDP2 no longer lists _KYBD3 (inherited from MEDS): the aft keyboard reaches only IDP 4 (USA006083 2.6). Verified: an IDP2 run opens only _KYBD2. MDU port table checked against the per-MDU stickers in gigapan.com/gigapans/102753: CDR2 P1 S2, MFD1 P2 S3, MFD2 P1 S3, PLT1 P2 S1, PLT2 P3 S2, CRT1-3 single IDP -- all match; CDR1's sticker unread (MEDS2 P3 S1). Power stickers match USA005350 2.5.4 (MNA MFD2/PLT1, MNB CDR2/MFD1, MNC CDR1/PLT2 via R14; CRTs on CNTL buses via IDP/CRT POWER). Open: the only aft MDU in photos is stickered "MNC CNTL CA2 / IDP 4" (= CRT 4); both manuals list a second aft MDU, AFD 1 (MNC, R14), whose MEDS2 ports P4 S2 are unverified.
