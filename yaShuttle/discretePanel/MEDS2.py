@@ -4911,6 +4911,18 @@ class MDUScreen(object):
 # nowhere left to go.
 # ===========================================================================
 
+# THE BOXED NUMBER AND KEYBOARD BAR at the foot of a DPS page are real, but
+# not normally shown.  A photograph of seven MEDS displays in operation
+# (gigapan.com/gigapans/102753) has them on exactly one: CRT1, a box with "2"
+# in it and a YELLOW bar to its RIGHT -- while that display was being driven
+# by GPC 4, so the number is not the GPC.  What it is, and what turns the
+# assembly on, are not known.  So it is hidden unless asked for, and nothing
+# here should switch it on by itself until that is found out.  The digit and
+# bar sides drawn when shown are MEDS's placeholders ('gpcNo' 1, 'kybd'
+# left), not data.
+SHOW_GPC_BOX = str(env('NSTS_DPS_GPC_BOX', '0')) not in ('', '0')
+
+
 class Screen_DPS(MDUScreen):
     POLL_FAIL_COLOR = 48
     POLL_FAIL_X = [[0, 1, 52, 27], [52, 1, 0, 27]]
@@ -4967,7 +4979,8 @@ class Screen_DPS(MDUScreen):
         self.group.remove(self.geo_gpcNo)
         self.geo_gpcNo = self.d.str(24.73, 28.785, "%s" % self.gpcNo,
                                     self.d.c2h['green'], 1.75)   # up one row
-        self.group.add(self.geo_gpcNo)
+        if SHOW_GPC_BOX:
+            self.group.add(self.geo_gpcNo)
 
     def setKybd(self, kybd):
         self.kybd = kybd
@@ -4975,7 +4988,9 @@ class Screen_DPS(MDUScreen):
             self.curData['kybd'] = kybd
         self.group.remove(self.geo_kybd_left)
         self.group.remove(self.geo_kybd_right)
-        if self.kybd == 'left':
+        if not SHOW_GPC_BOX:
+            pass
+        elif self.kybd == 'left':
             self.group.add(self.geo_kybd_left)
         elif self.kybd == 'right':
             self.group.add(self.geo_kybd_right)
@@ -5461,11 +5476,13 @@ class Screen_DPS(MDUScreen):
 
         self.geo_gpcNo = self.d.str(24.48, 28.735, "%s" % self.data()['gpcNo'],
                                     self.d.c2h['green'], 1.75)
-        self.group.add(self.geo_gpcNo)
         # The whole GPC-number assembly -- box, digit and the two kybd-active
-        # bars -- moves up one text row with the rest of the page.
+        # bars -- moves up one text row with the rest of the page.  Built
+        # always, drawn only with SHOW_GPC_BOX.
         self.geo_gpcBox = self.d.box(24.33, 28.335, 28.13, 30.985)
-        self.group.add(self.geo_gpcBox)
+        if SHOW_GPC_BOX:
+            self.group.add(self.geo_gpcNo)
+            self.group.add(self.geo_gpcBox)
 
         # kybd-active bar: 2px-tall filled quad, 1/4 up from the GPC box
         # bottom, ending just clear of the box sides
@@ -11432,6 +11449,11 @@ def buildParser():
                    help='no IDP control pane (IDP POWER, IDP MAJ FUNC, DEU LOAD) '
                         'down the right side of each MDU window; also '
                         'NSTS_MDU_PANE=0')
+    p.add_argument('--gpc-box', dest='gpcBox', action='store_true',
+                   help='draw the boxed number and keyboard bar at the foot of '
+                        'DPS pages.  Real MEDS shows them only sometimes, for '
+                        'reasons not yet known, so they are off by default; '
+                        'what is drawn is a placeholder.  Also NSTS_DPS_GPC_BOX=1')
     p.add_argument('--dev', action='store_true',
                    help='developer mode: MDUs run standalone (no IDP heartbeat '
                         'gating, preloaded DPS test formats)')
@@ -11457,6 +11479,9 @@ def main(argv=None):
     if args.title:
         global WINDOW_TITLE
         WINDOW_TITLE = args.title
+    if args.gpcBox:
+        global SHOW_GPC_BOX
+        SHOW_GPC_BOX = True
     opts = {
         'lrus': args.lrus,
         'configFile': os.path.abspath(args.config) if args.config else None,
