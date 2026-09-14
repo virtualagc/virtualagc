@@ -101,8 +101,10 @@ def procedure_text(gpcs, crts):
     L.append("the page header is the GPC driving it.")
     L.append("")
     L.append("BEFORE ANY IPL")
-    L.append("  a. C2: IDP/CRT 1%s POWER -> ON, MAJ FUNC -> GNC  (\"MDU IS AUTONOMOUS\" goes)."
-             % ("" if crts == 1 else " and IDP/CRT 2"))
+    L.append("  a. C2: IDP/CRT %s POWER -> ON, MAJ FUNC -> GNC  (\"MDU IS AUTONOMOUS\" goes)."
+             % ", ".join(str(k) for k in range(1, min(crts, 3) + 1)))
+    if crts == 4:
+        L.append("     R11 (under O6's IDP LOAD): IDP/CRT 4 POWER -> ON, MAJ FUNC -> GNC.")
     L.append("  b. C2: LEFT IDP/CRT SEL -> 1, RIGHT IDP/CRT SEL -> 2.")
     L.append("  c. panelO6: MODE -> HALT for %s." % ("GPC%d" % g[0] if n == 1 else
                                                    "every GPC column in use"))
@@ -172,6 +174,11 @@ def procedure_text(gpcs, crts):
              ("13", g[1], "CRT 2 -> GPC%d" % g[1]),
              ("18", g[0], "mass memory 1 -> GPC%d" % g[0]),
              ("19", g[1], "mass memory 2 -> GPC%d" % g[1])]
+    if crts >= 3:
+        # Not yet entered in any run.  PASS drives at most three CRTs at a
+        # time (DPS Workbook USA005350 Rev B), so CRT 4 is left unassigned.
+        c3 = g[2] if n >= 3 else g[0]
+        rows.append(("14", c3, "CRT 3 -> GPC%d   (not yet tried)" % c3))
     L.append("THE NBAT, on CRT1 with the left keyboard (PASS on GPC%d drives it now).  Each"
              % g[0])
     L.append("line ends in EXEC.")
@@ -186,9 +193,15 @@ def procedure_text(gpcs, crts):
         "  The CAM stays dark while the set is healthy.  A computer voted out lights",
         "  its column; one that finds itself alone lights its own diagonal.",
     ]
-    if crts == 2:
+    if crts >= 2:
         L.append("  CRT2 then shows GPC%d's pages (header digit %d), typed on the right keyboard."
                  % (g[1], g[1]))
+    if crts >= 3:
+        L.append("  CRT3 is typed on whichever forward keyboard has its IDP/CRT SEL at 3.")
+    if crts == 4:
+        L.append("  CRT4 is typed on the aft keyboard.  PASS drives at most three CRTs at a time,")
+        L.append("  so to use it the NBAT must give up CRT3 (ITEM 14) for CRT4 (ITEM 15); not")
+        L.append("  yet tried here.")
     return "\n".join(L)
 
 
@@ -364,9 +377,10 @@ def main():
                     help="MDU size; the panel, keyboard and CAM scale with it (default 512)")
     ap.add_argument("--scale", type=float, default=0.8, metavar="F",
                     help="MEDS2.py text size factor (default 0.8)")
-    ap.add_argument("--crts", type=int, choices=(1, 2), default=None,
-                    help="display windows: 1 or 2 (default 2 with more than one GPC, "
-                         "else 1)")
+    ap.add_argument("--crts", type=int, choices=(1, 2, 3, 4), default=None,
+                    help="display windows CRT1 up to CRT4: 1-4 (default 2 with more than "
+                         "one GPC, else 1).  CRT4 is the aft display, on IDP 4 and the aft "
+                         "keyboard")
     ap.add_argument("--keyboards", type=int, choices=(0, 1, 2, 3), default=3,
                     help="stsKeyboard.py windows: 3 (default) the left, right and aft "
                          "keyboards; 2 the forward pair; 1 the left; 0 none.  Which IDP "
@@ -446,7 +460,7 @@ def main():
     # panelO6.py has those switches.
     pane = int(round(180.0 * size / 768 / ws)) if os.environ.get("NSTS_MDU_PANE") == "1" else 0
     mdu_w = size + pane + 16                               # Qt pixels
-    crt_pos = [(0, 0), (mdu_w + 32, 0)]
+    crt_pos = [(k * (mdu_w + 32), 0) for k in range(args.crts)]
     right = args.crts * (mdu_w + 32) * ws + 20             # physical pixels
     kb_w = int(round(509.0 * size / 768))
     o6_w = int(round(1684.0 * size / 768))                 # panelO6.py REF_W, with C2
@@ -476,7 +490,7 @@ def main():
             return max(0, min(x, screen_w - width))
 
         x = 0
-        crt_pos = [(0, 0), (step // ws, step // ws)]
+        crt_pos = [(k * step // ws, k * step // ws) for k in range(args.crts)]
         x += mdu_w * ws + (args.crts - 1) * step + 20
         if args.keyboards:
             kx = stack_x(x, kb_w + (args.keyboards - 1) * 60)
