@@ -1,9 +1,12 @@
 # HANDOFF: stsKeyboard.py
 
 Working notes for a later session.  `stsKeyboard.py` is the Space Shuttle
-DPS keyboard simulator in `yaShuttle/panelO6/`.  It is finished as a
-visual, mouse-driven 8×4 keypad that prints every press and release to
-stdout.  It does **not** yet send keystrokes to `yaGPC2` or `MEDS2.py`.
+DPS keyboard simulator, now in `yaShuttle/discretePanel/` (moved from
+`yaShuttle/panelO6/` in `a14cf8ba6`).  It is a mouse-driven 8×4 keypad
+that sends each key's scan code to `MEDS2.py` on a MEDS keyboard bus
+(`--kybd N`) and prints every press and release to stdout.  It does not
+talk to `yaGPC2` directly: the IDP in `MEDS2.py` forwards keys to the
+GPC.
 
 Built in the same 2026-09-04 session as `panelO6.py`, after the C3/F6
 blocks were accepted and before `--size` / the paddle variant.  Styling
@@ -11,7 +14,8 @@ and window habits were copied from `panelO6.py`; the key layout matches
 `yaShuttle/shuttleCrewInterface.py` (and the commander/pilot keyboards
 in the SCOM).
 
-323 lines at the time of this handoff.
+323 lines at the time of this handoff; 438 after the bus wiring,
+`--port-base` and `--title`.
 
 ---
 
@@ -30,14 +34,23 @@ Every key is the same size.  Captions differ.
 ## How to run
 
 ```bash
-cd yaShuttle/panelO6
+cd yaShuttle/discretePanel
 python3 stsKeyboard.py
+python3 stsKeyboard.py --kybd 2
 python3 stsKeyboard.py --size 512
 python3 stsKeyboard.py --geometry 520x1020+80+20
 ```
 
-- `--size N`: scale the window and contents.  **1024 is full size**
-  (the design default).  512 is half.  Same convention as `panelO6.py`.
+- `--size N`: scale the window and contents.  **768 is full size**
+  (`FULL_SIZE = 768`, the design window 509×1004, and the default);
+  512 is 2/3 (339×669), 384 is half (254×502), 1024 is 4/3 (679×1339).
+  Same unit as `panelO6.py`.  `MEDS2.py` keeps pixels (1024 = full).
+- `--kybd N`: the MEDS keyboard bus to send on, 1-3 (default 1).
+- `--port-base N`: the bus port base (default 6900, or
+  `NSTS_BUS_PORT_BASE`); the keyboard buses are base+31..base+33.  Same
+  option as `yaGPC2`, `MEDS2.py` and `panelO6.py`.
+- `--title TEXT`: window caption; default the bus name (`KYBD1`..`KYBD3`),
+  kept short so a small title bar does not truncate it.
 - `--geometry SPEC`: exact Tk geometry; **overrides `--size`**.
 - `NSTS_KEYBOARD_GEOMETRY` is the env-var equivalent of `--geometry`.
 - Logging prefix is `stsKeyboard:`.
@@ -122,12 +135,50 @@ Log names (`key_id`):
   `GPC/CRT`).
 - Other two-line: joined with a space (`FAULT SUMM`, `I/O RESET`).
 
-Examples: `stsKeyboard: FAULT SUMM  down` then `stsKeyboard: FAULT SUMM  up`.
+Examples: `stsKeyboard: FAULT SUMM  down -> KYBD1 0xFFE1` then
+`stsKeyboard: FAULT SUMM  up` (the `-> KYBDn 0x....` suffix appears only
+when the send succeeded).
 
-Cursor is `hand2` over a key.  Nothing is sent to `yaGPC2`, the IDP
-keyboard bus, or `MEDS2.py`.  `MEDS2.py` already listens for scan codes
-on `_KYBD1` so this keyboard can feed it later; that wire does not
-exist yet.
+Cursor is `hand2` over a key.
+
+### The keyboard bus
+
+A key is sent on **press**, not release, as the MDU window's keydown
+does.  Each keystroke is one UDP multicast datagram to 239.255.1.1,
+port 6931+N-1 at the default base (`KYBD_PORT`), holding the key's
+**scan code** as a single big-endian halfword.  The socket is pinned
+to `NSTS_BUS_IFACE` (default 127.0.0.1), the interface `MEDS2.py`'s
+buses use; without that the datagram leaves by the default route and
+no listener sees it.
+
+`SCAN` is copied from `KYBD.DEUKey` in `MEDS2.py` (where the IDP looks
+keys up, `KYBD.byScan`), cross-checked 32/32.  These are the row/column
+strobe patterns the keyboard puts on the bus, not the 5-bit code the
+GPC is eventually given.
+
+Which IDPs listen (`MEDSConf` in `MEDS2.py`): KYBD1 -> IDP1, IDP3;
+KYBD2 -> IDP2, IDP3; KYBD3 -> IDP2, IDP4.  An MDU echoes the scratch
+pad for the first keyboard its primary IDP listens to:
+
+```
+KYBD1  crt1 crt3 cdr1 cdr2 plt2 mfd2
+KYBD2  crt2 plt1 mfd1
+KYBD3  crt4 afd1
+```
+
+The echo depends on a `MEDS2.py` departure (`KYBD.recvKYBD` echoes keys
+from other senders; see `HANDOFF-meds2-py.md` §10), because the IDP
+never sends typed keys back to the MDU.
+
+Verified end to end against `MEDS2.py crt1 idp1`: IDP1 queued
+[SPEC,1,2,PRO] and crt1 drew "SPEC 12 PRO"; a KYBD2 key reached
+neither.  Also in a namespace run: IDP1 logged
+"KYBD1: _KYBD1 recv ITEM/1/EXEC" and its next poll reply carried
+KYBD_MSG.
+
+`simulatePASS.py` starts **one keyboard per CRT**: keyboard k is
+`stsKeyboard.py --kybd k --title "KYBDk -> CRTk"` with the run's
+`--port-base`, `--size` and a stacked `--geometry`.
 
 ---
 
@@ -137,7 +188,7 @@ exist yet.
 `_layout()` picks the largest square key `k` that fits
 `NCOL` keys and `NCOL+1` gaps (same for rows) in the current window,
 then centres the grid.  `REF_W`/`REF_H` (509×1004 at `KEY_REF=110`)
-only set the default `--size 1024` window.  Resize keeps squares and
+only set the default `--size 768` window.  Resize keeps squares and
 equal gaps.
 
 **Window background is the pane grey**, not `C_WINDOW`.  `C_WINDOW` is
@@ -199,22 +250,42 @@ User: “Excellent, thanks!”
 
 ### 4. `--size` and the 6 pt floor (same day, shared with panelO6)
 
-`--size N` with 1024 = current full size, on both apps.  Then the user
+`--size N` with 1024 = current full size, on both apps (the unit later
+became 768; see 6).  Then the user
 noticed fonts not shrinking at small sizes.  Cause: `max(6, …)` in both
 programs.  Floor became 1 pt.  Commits `7389164a0`, `d0732f754`.
 
-No further stsKeyboard-only changes after that.  The paddle work and
+No further stsKeyboard-only changes that day.  The paddle work and
 `MEDS2.py` did not touch this file.
+
+### 5. Wired to the MEDS keyboard bus (2026-09-11)
+
+Keys go to `MEDS2.py` as scan codes on `_KYBDn` (`--kybd N`), sent on
+press; see "The keyboard bus" above.  Commit `3a07fa351`.  The file
+moved to `yaShuttle/discretePanel/` with the other peripherals
+(`a14cf8ba6`).
+
+### 6. `--size` unit 768 (2026-09-11)
+
+At the user's request, `FULL_SIZE = 768` to match `panelO6.py`, so
+`--size 512` is two-thirds.  `MEDS2.py` kept pixels.  Commit `718801b04`.
+
+### 7. `--port-base` and a short caption (2026-09-12)
+
+`--port-base` (and `NSTS_BUS_PORT_BASE`) so two simulations can run side
+by side (`57e82b497`).  Caption `KYBD1` rather than a truncated
+"STS Key..." and `--title` to override it (`6212e7b6d`).
 
 ---
 
 ## What is still open
 
-- **yaGPC2 / IDP / MEDS2 keystrokes.**  Intentionally unwired.  `MEDS2.py`
-  already accepts scan codes on `_KYBD1`; `stsKeyboard.py` would be the
-  natural source once someone maps `key_id` to those scans.
-- Multiple keyboards (CDR vs PLT) as in `shuttleCrewInterface.py`: this
-  app is one window.
+- Keyboard-to-display switching from the crew panel is not modelled; a
+  keyboard stays on its `--kybd` bus.  `--title` exists so a caption can
+  say which display it drives (as `simulatePASS.py` does).
+- An MDU echoes only the first `_KYBDn` of its primary IDP, so KYBD2 keys
+  reach IDP3 but do not echo on crt3/cdr1/plt2.
+- Several keyboards are several processes, one bus each.
 - The period key logs as `.` (`key_id` of `(".",)`), even though it is
   drawn as a disc.
 
@@ -227,7 +298,9 @@ No further stsKeyboard-only changes after that.  The paddle work and
 - `yaShuttle/shuttleCrewInterface.py` — older OpenCV keyboard; same 8×4
   captions, different look (photo of the hardware), already queues
   `pressed` / `released` strings.
-- `MEDS2.py` — MDU/IDP runner that can consume keyboard scans later.
+- `MEDS2.py` — MDU/IDP runner; its IDPs consume these scan codes
+  (`KYBD.DEUKey`, `MEDSConf`).  See `HANDOFF-meds2-py.md`.
+- `simulatePASS.py` — launcher; starts one keyboard per CRT.
 
 ---
 
@@ -239,4 +312,9 @@ a7bac10dc 2026-09-04  stsKeyboard: one size for function keys, larger hex keypad
 ead5b55ca 2026-09-04  stsKeyboard: smaller RESUME face, tighter caption margins
 7389164a0 2026-09-04  panelO6, stsKeyboard: --size N scales the window (1024 is full)
 d0732f754 2026-09-04  panelO6, stsKeyboard: let fonts scale below 6 pt
+a14cf8ba6 2026-09-11  Rationalized and collected Shuttle peripherals into discretePanel/.
+3a07fa351 2026-09-11  stsKeyboard: send its keys to MEDS2.py on a MEDS keyboard bus
+718801b04 2026-09-11  stsKeyboard: --size unit is 768, so --size 512 is two-thirds size
+57e82b497 2026-09-12  MEDS2.py, stsKeyboard.py: --port-base, so two simulations can run side by side
+6212e7b6d 2026-09-12  stsKeyboard.py: caption "KYBD1", not "STS Key..."
 ```

@@ -1,7 +1,7 @@
 # HANDOFF — `MEDS2-port.py`
 
 A Python 3 port of **MEDS2**, the Electron / CoffeeScript / Civet MEDS glass-cockpit
-simulator that `MEDS2.sh` launches. Written 2026-09-09, amended 2026-09-11.
+simulator that `MEDS2.sh` launches. Written 2026-09-09, amended 2026-09-11 and 2026-09-13.
 
 One file, `MEDS2-port.py`, ~10 500 lines, at the tree root beside `MEDS2.sh`. It
 reads the same `config/meds.json` and the same `data/` fonts and `.dfb` files, and
@@ -23,7 +23,15 @@ places where it deliberately differs are listed under **Departures** below.
 
 Same flags as `MEDS2.sh`: `--config`, `--display`, `--menu`, `--size`, `--dev`,
 `--list`. A leading `meds` argument is accepted and ignored, so anything that
-invoked `main.js meds …` still works.
+invoked `main.js meds …` still works. `--size` is pixels, 1024 = full size.
+
+Added here:
+
+* `--scale X` — text size only. Config key `textScale` does the same; the CLI
+  value overrides it for every MDU launched. See §10.
+* `--stroke-scale X` — text stroke width only. Config key `textStrokeScale`. See §10.
+* `--no-pane` — no IDP pane beside the display (§10); also `NSTS_MDU_PANE=0`.
+* `--title <text>`, `--port-base <n>` — window title, and the bus port base.
 
 **Requirements:** PyQt6 with `QtOpenGLWidgets`, numpy, and a driver that gives an
 **OpenGL 4.1 core profile**. The 4.1 requirement is not arbitrary — PyQt6 wraps
@@ -58,6 +66,9 @@ Every `NSTS_*` variable the original reads is honoured, with one exception.
 | `NSTS_DEU_LOG` | append the DEU unit's log to a file |
 | `NSTS_EXEC` | code run 2 s after the LRUs start — **Python here, not JavaScript** |
 | `NSTS_MDU_FRAMELESS` | *port only*: restore the original's borderless window |
+| `NSTS_MDU_PANE` | *port only*: `0` = no IDP pane, as `--no-pane` (§10) |
+| `NSTS_IDP_POWER` | *port only*: `on`/`off` overrides the IDP's power at start (§10) |
+| `NSTS_CLOCK_LOG` | *port only*: file of wall-stamped header-clock lines — `send` when the IDP forwards a time fill, `draw` when the MDU draws it |
 
 **Not supported:** `NSTS_WINDOW_LOG`. It instruments `_fitWindowToCanvas`, the
 Electron measure-and-grow loop; the port sets the client area directly and has no
@@ -171,6 +182,14 @@ The OS silently caps at `net.core.rmem_max`, so the achieved size is logged.
 
 Sockets are read through a `QSocketNotifier` and drained in a loop per activation.
 
+**MDU → IDP tags added by the port** (`MDUMsg`, on the IDP's `_IDPn` bus), for the
+IDP pane (§10): `DEU_LOAD` `0x0002`, no words (DEU LOAD pushed — `IDP.deuLoad` →
+`DEUUnit.requestLoad`); `IDP_POWER` `0x0003`, one word, 1 ON / 0 OFF
+(`IDP.setPower` → `DEUUnit.powerUp`). Anything that can send a datagram can press
+them: `simulatePASS.py`'s `--keys` tokens `DEU_LOAD`, `IDP_POWER_ON`/`_OFF`
+(IDP1) and `DEU_LOAD2`, `IDP2_POWER_ON`/`_OFF` (IDP2) do exactly that. Those
+tokens are simulatePASS's; MEDS2.py itself knows only the two tags.
+
 ---
 
 ## 6. The fonts
@@ -272,6 +291,15 @@ page with POLL FAIL — that is correct behaviour, not a fault.
 **e. Stability.** `Screen_DPS.enterSelfTest()` rebuilds the whole FCW list 20×/s.
 RSS was flat at 228 MB over 30 s.
 
+**f. Without a desktop.** `unshare -rn` + Xephyr with
+`QT_XCB_GL_INTEGRATION=xcb_egl LIBGL_ALWAYS_SOFTWARE=1` hosts a full MDU.
+`QT_QPA_PLATFORM=offscreen` cannot (no `QOpenGLWidget`), but it can render
+`IDPPane` on its own.
+
+**g. With a keyboard.** `stsKeyboard.py` → MEDS2.py was verified in a namespace
+run: IDP1 logs `KYBD1: _KYBD1 recv ITEM` / `1` / `EXEC`, and its next poll reply
+carries `KYBD_MSG`.
+
 ---
 
 ## 9. Faithful quirks — deliberately preserved, do not "fix"
@@ -324,6 +352,39 @@ RSS was flat at 228 MB over 30 s.
 * `machina` FSM → a `QTimer` chain (`Screen_IDP_CST.seq_mdu_selftest`).
 * `localStorage` → one JSON file, `~/.local/state/meds2-port/localStorage.json`
   (`$XDG_STATE_HOME` honoured). Same API, so the overlay-slot code is unchanged.
+* **`--scale` resizes text only.** `CharGen.scaleGlyphs` scales each font's strokes
+  at load time about that font's digit ink centre (meds 1.368, 0.330 = `GXC`/`GYC`;
+  deu 1.524, 0.509). Advances, anchors, vectors and stroke weight in px are
+  unchanged. ADI ball labels follow automatically, because `_ballText` reads
+  `medsFont.chars`. Verified by screenshots of DPS and AE_PFD at 1 and 0.85. Side
+  effect: rules built from glyphs (rows of `-`, `|`) open gaps below 1.0.
+* **`--stroke-scale` thins or thickens text strokes only.** They are
+  `lineWidthPx × X`; halos keep their px border either side of the thinner core.
+  `VectorDisplay.lines` takes `widthScale`, with scaled materials cached in `wMats`;
+  at 1 the palette's own materials are used. ADI ball labels moved from bucket `d`
+  into a new `dt` bucket, created right after `d`, so the draw order at 1 is
+  unchanged. Verified: at 1, DPS and AE_PFD are pixel-identical to the build before
+  the change; at 0.6 every changed pixel lies in the text mask.
+* **An MDU echoes keys from other keyboards.** `KYBD.recvKYBD`, the MDU's own
+  keyboard-bus listener, puts keys from OTHER senders on its bus onto the scratch
+  pad; the original only printed them. `stsKeyboard.py` needs this, because the IDP
+  never sends typed keys back to the MDU (only `RESET_SPL`). The window's own sends
+  are dropped as self-echo, so nothing echoes twice. Side effect: two MDUs on one
+  keyboard bus both echo, as both of their IDPs hear the key.
+* **The IDP pane** (`IDPPane`, laid out with the canvas by `MDUWindow._layoutBox` /
+  `paneBox`): IDP POWER, IDP MAJ FUNC and DEU LOAD down the right of each MDU
+  window, in `panelO6.py`'s styling and `--size` unit (`PANE_FULL = 768`). It sends
+  the §5 tags. **IDP POWER starts OFF** when there is a pane, as a display unit is
+  not powered until the crew powers it (PASS User's Guide Table 2-2 step 8); with
+  `--no-pane` or `--dev` it starts on, since nothing could switch it on.
+  `NSTS_IDP_POWER` overrides. A re-IPL needs DEU LOAD (Table 2-2 step 9). Added in
+  1b8f7f3c0, which also made `_drawPasses` clear the DFG background when
+  `BACKGROUND_TOP` loses its BRANCH (it used to stay drawn).
+* **The header clock is redrawn only when its digits change**
+  (`Screen_DPS.setClock`, tracked in `_clockDrawn`, reset when `geo_dps_time` is
+  rebuilt). GPCIPL time-fills on every poll, twice a second, so half the redraws
+  repainted unchanged digits, and the clock looked as though it ran 1.5–2× fast.
+  `NSTS_CLOCK_LOG` (§2) is the diagnostic for it.
 
 ---
 
@@ -346,6 +407,14 @@ RSS was flat at 228 MB over 30 s.
   so both render identically.
 * The FC1–4 buses are received and discarded (`IDP.recvFC` is empty), matching the
   original: ADC flight-instrument data is not implemented on either side.
+* **The boxed number at the bottom of the DPS page is not the GPC number.** It is
+  `curData['gpcNo']`, which defaults to 1; `Screen_DPS.setGPCNo` exists but nothing
+  calls it, so every display shows 1. The page header's digit after the title IS
+  the driving GPC (PASS writes its own ID there). The red line beside the box is
+  the keyboard-select indicator (`setKybd`, `left`/`right`).
+* **A keyboard echoes only on its MDU's first `_KYBDn`** — the first keyboard bus
+  of the MDU's primary IDP. So KYBD2 keys reach IDP3 but do not echo on
+  crt3/cdr1/plt2.
 * Only tested on Linux/X11 with an NVIDIA 4.1 context at device pixel ratio 2.
   Wayland, macOS and dpr 1 are unexercised; the dpr-sensitive code is the
   `resolution`/`pxRatio` pair in `VectorDisplay.renderFrame`.
@@ -359,10 +428,11 @@ RSS was flat at 228 MB over 30 s.
 | fills, readout boxes or pointer arrows missing | depth function is not `GL_LEQUAL` (§4) |
 | text in the right place, wrong glyph shapes | `CharGen` transform or the id→charcode mapping (§6) |
 | whole page shifted by ~1 row or column | `ADJ` defaults, or `penX`/`penY` in `drawFCWS` — run the cell trace (§8b) |
-| page blank but the clock updates | a `DISPLAY_FILL` was dropped at the socket — raise `net.core.rmem_max` (§5) |
+| page blank but the clock updates | usually NOT a dropped fill: the IDP answered GPCIPL's polls late (its event loop also draws the MDU; up to ~65 ms against a 5 ms window), so GPCIPL re-IPLed the unit and gave up. Signature: `load started` twice in the IDP log, then no 509-halfword fill at `0x19ee`. Fixed on the GPC side (yaGPC2 `bcenet_framer_peer_wait`, gpc-causes #85). Only then suspect `net.core.rmem_max` (§5) |
 | page drawn in the wrong beam frame | the `GEOM_BAD_FRACTION` discriminator in `Screen_DPS.refresh`; `Shift+V` toggles manually |
+| a GPCIPL menu squashed into the upper right, over an old PASS page | a GPC was IPLed onto a display still holding PASS's load, without DEU LOAD on that display's pane first. The PASS page stays, and the frame guess draws GPCIPL's text in DFG's frame. Push DEU LOAD before the IPL |
 | strokes too thick or thin after a resize | `pxRatio` (§4) |
 | a display corrupts when several MDUs run | `GLResources` sweep keyed to the wrong renderer (§4) |
 | stroke widths right but everything washed out | an sRGB conversion crept into the shaders (§4) |
 
-Related notes are staged in `CLAUDE_LOG.md` pending a documentation sync.
+Later notes are staged in `CLAUDE_LOG.md` until the next documentation sync.

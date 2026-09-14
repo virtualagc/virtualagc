@@ -142,7 +142,54 @@ than `YAGPC_BARRIER_US` microseconds of simulated time ahead of the slowest
 the run's closing report gives the number of holds, the seconds spent in them,
 and the number *abandoned* — a hold given up on because the machine being
 waited for had stopped rather than merely fallen behind, which is the number
-worth looking at.
+worth looking at. The runs verified below used `YAGPC_BARRIER_US=25`, which is
+also what `simulatePASS.py` sets.
+
+#### Where it stands (2026-09-13)
+
+Two-, three- and four-computer redundant sets form, hold lockstep through the
+OPS 2 transition with no votes or overlay errors, and bring OPS 2's UNIV PTG
+page (major mode 201) up on screen, both with the in-process display model and
+with real `MEDS2.py` displays over `--bce-network`. The things that had to be
+fixed on the way, each recorded in `gpc-causes.py`:
+
+- **#139** — the set dissolved about 31 s into the OPS 2 transition because a
+  mass-memory listener error-terminated. Mass-memory reads now take about 1 ms
+  (`YAGPC_MMU_READ_LATENCY_US`), a BCE's latched word keeps its command-sync
+  type, and a commander's own command echo replaces its stale latch.
+- **CRT1 must go to the first computer in the NBAT.** Given to another, no
+  OPS 2 page ever appeared; the earlier scripts gave CRT1 to GPC3 (commit
+  a526004e8).
+- **#141** — every fail vote reaches the CAM, including one set and cleared
+  within a few milliseconds, and each computer's Computer Fail (the CAM
+  diagonal) is published as discrete register 5.
+- **#142** — the timing unit's time of day includes the time a GPC spent held
+  in HALT, so PASS's GMT matches the real time of day.
+- **#143** — several computers against real network displays: every datagram
+  on buses 1-23 is fanned out to every computer that uses the bus, as a real
+  bus would carry it.
+- **#140** — five computers: GPC4 fails itself out on a timing-unit
+  transaction that four handle cleanly. Real, but deliberately out of scope;
+  the target is four PASS computers, the fifth being the BFS machine.
+
+`../discretePanel/simulatePASS.py` launches one to four GPCs together with the
+crew station (displays, keyboards, GPC panel and, with more than one computer,
+the CAM) and prints the switch-and-keyboard procedure for them.
+
+Diagnostics added for this work, all env-gated and off by default:
+`YAGPC_SYNCTRACE` (3-bit sync codes per neighbour, with the driven mask),
+`YAGPC_BUSCENSUS` (transactions per computer per bus),
+`YAGPC_RANGETRACE_GPC` (restrict the range trace to one computer) and
+`YAGPC_ICCTRACE` (intercomputer-bus command words). The range trace's line
+budget is a file static shared by every machine, and its `afterSec` gate is in
+each machine's *own* simulated time — both silently return nothing for a
+later-starting computer.
+
+Method warnings, each of which cost a round: a trace count is meaningless if
+the budget truncated it; an entry count is not a barrier count; and a
+suspicious register value should be checked against TFCVT's constant table
+before it is treated as evidence (0x088 is TCVTSVCI, not a mask). See
+`gpc-causes.py` #110, #117 and #118.
 
 ### The regression gate
 
@@ -153,22 +200,39 @@ drives it (`headless-gpcmem.sh`, roughly seven minutes unattended) lives with
 the flight-software workspace rather than in this repository, since it needs a
 built volume; what matters here is the shape of the check.
 
-Measured 2026-09-12 over a 420-second run, and reproduced byte for byte across
-three runs on two different builds:
+**Only half of the counters are a gate** (`gpc-causes.py` #124). The harness
+cuts the run off after a fixed *wall* duration, so:
+
+- **Event-driven counters are the gate, and must match exactly** across runs
+  and builds: the mass memory's commands, blocksRead, wordsOut, wordsTaken,
+  wordsLost and position; the display unit's formatFills, resets, modeStatus
+  and ipled; and every error counter, which should be zero. A healthy run
+  shows exactly one `MODE: IPL` line.
+- **Periodic counters are not a gate**: the display unit's commands, fills,
+  timeFills, displayFills, medsXfers, polls, wordsIn and wordsOut, and every
+  timing-unit counter. They count how much simulated time fitted into the wall
+  duration, so an exact hit is luck and a small miss is weather. A *higher*
+  number is not a regression.
+
+Measured 2026-09-12 over a 420-second run:
 
 <pre>
-deu: 1848 commands, 375 fills, 569 timeFills, 367 displayFills, 8 formatFills,
-     328 medsXfers, 575 polls, 114476 wordsIn, 9110 wordsOut
-mtu: 7890 commands, 5421 timeReads, 26139 wordsOut
+mmu1: 56 commands, 431 blocksRead, 220731 wordsOut, 220011 wordsTaken, 720 wordsLost
+deu:  ~1848 commands, 375 fills, 569 timeFills, 367 displayFills, 8 formatFills,
+      575 polls
+mtu:  ~7890 commands, 5421 timeReads
 </pre>
 
-with the scripted keystrokes landing at `poll=247 simt=135.520 s wall=120.0 s`.
-Only the last of those — 247 polls at the keystroke — survives from the figures
-quoted in earlier notes; the rest moved with the master-timing-unit and MEDS
-work and had gone stale. Quote these rather than the older set, and re-measure
-rather than quoting either: the point of the gate is that a run of the current
-tree and a run of the tree being compared against are made the same afternoon.
+with the scripted keystrokes landing at `poll=247 simt=133.704 s wall=120.0 s`.
+The `simt` figure and the mmu1 line reproduce exactly; the deu and mtu figures
+are one sample. Four runs on two builds on 2026-09-13 gave 1848, 1845, 1844
+and 1844 deu commands, with every event counter identical and the keystroke at
+`simt=133.704` in all four. (Figures quoted before 2026-09-12 came from a run
+that IPLed twice, `gpc-causes.py` #93: 503 blocksRead and `simt=135.520`, the
+1.8 s the spurious IPL cost.)
 
-Note that the timing unit's `lastTime` is the time of day at which the run was
-stopped and is expected to differ between runs; everything else above should
-match exactly.
+Compare against a same-day control run of the committed build, not against
+these numbers: the point of the gate is that a run of the current tree and a
+run of the tree being compared against are made the same afternoon. The timing
+unit's `lastTime` is the time of day at which the run was stopped and always
+differs between runs.

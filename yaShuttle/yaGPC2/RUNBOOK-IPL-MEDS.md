@@ -209,6 +209,15 @@ first thing to check.
 It comes up with the GPC MODE SWITCH at **HALT**, which is where it should be
 before the GPC starts.
 
+**With `panelO6.py` instead** (`python3 ~/git/virtualagc/yaShuttle/discretePanel/panelO6.py`,
+its working replacement), MODE also starts at HALT, but IPL SOURCE and BFC CRT
+DISPLAY both start **OFF** — the default-option IPL, which loads with no
+GPCIPL menu. `discretePanel.py` started at MM1 and CRT 1, the menu-option IPL
+that C.5 assumes. So before moving MODE to STBY, set **IPL SOURCE to MMU 1**
+and **BFC CRT DISPLAY ON with SELECT 1+2**. That sends CRT value 1, what
+`discretePanel.py` called CRT 1: each SELECT position sends the first CRT of
+its legend (commit 3c9a7b454; an earlier note saying 2+3 is withdrawn).
+
 ### C.4  Start the GPC
 
     cd ~/git/virtualagc/yaShuttle/yaGPC2
@@ -237,7 +246,9 @@ Flag by flag:
 
 ### C.5  Drive it
 
-Move the panel's **GPC MODE SWITCH from HALT to STBY**.  Then:
+Move the panel's **GPC MODE SWITCH from HALT to STBY**.  (With `panelO6.py`,
+first set IPL SOURCE to MMU 1 and BFC CRT DISPLAY ON with SELECT 1+2 — see
+C.3; otherwise it takes the default-option IPL and no menu appears.)  Then:
 
 1. `MM1 READY` on the panel drops and comes back — FCMBOOT reading the tape.
 2. FCMBOOT hands to GPCIPL, which runs a memory sweep and loads further
