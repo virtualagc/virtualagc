@@ -60,8 +60,10 @@ USA006083 Rev B sections 2.3-2.5): POWER and MAJ FUNC for IDP/CRT 1, 3 and 2,
 in that order left to right, and below them the LEFT and RIGHT IDP/CRT SEL
 switches, which say which IDP each forward keyboard talks to (left: 1 or 3;
 right: 3 or 2).  Under C2 is panel O6's INTEGRATED DISPLAY PROCESSOR inset,
-the four momentary LOAD switches.  IDP/CRT 4's switches are on aft panel R11
-and are not drawn.  These go to the display processors, not to the GPCs: see
+the four momentary LOAD switches, and under that IDP/CRT 4's POWER and MAJ
+FUNC, which in the orbiter are beside the aft keyboard on panel R11 (Crew
+Software Interface figure 2-3).  These go to the display processors, not to
+the GPCs: see
 "The IDP buses" below.
 
 Usage:
@@ -141,6 +143,7 @@ LEFT_SEL_POS = ("1", "3")                       # left, right
 RIGHT_SEL_POS = ("3", "2")                      # left, right
 C2_IDPS = (1, 3, 2)                             # C2's sets, left to right
 N_IDP_C2 = 3                                    # IDP 4's switches are on R11
+N_IDP_SW = 4                                    # POWER and MAJ FUNC: C2's and R11's
 N_IDP_LOAD = 4
 IDP_BUS_OFFSET = 40
 IDP_REPUBLISH_MS = 1000
@@ -375,7 +378,7 @@ def scaled_wh(w, h, size):
 class PanelO6:
     def __init__(self, root, size=FULL_SIZE, gpc_id=DEFAULT_GPC_ID):
         self.root = root
-        root.title("Panels O6, C3, F6, C2  —  GPC / BFC / IDP")
+        root.title("Panels O6, C3, F6, C2, R11  —  GPC / BFC / IDP")
         root.configure(bg=C_WINDOW)
         mw, mh = scaled_wh(640, 700, size)
         root.minsize(mw, mh)
@@ -395,8 +398,8 @@ class PanelO6:
         self.wired = gpc_id - 1              # the column that is published
         self._held = None                    # (kind, index) of a held button
         # The IDP controls, indexed by IDP number - 1.
-        self.idp_power = [DEFAULT_IDP_POWER] * N_IDP_C2
-        self.idp_mf = [default_major_func()] * N_IDP_C2
+        self.idp_power = [DEFAULT_IDP_POWER] * N_IDP_SW
+        self.idp_mf = [default_major_func()] * N_IDP_SW
         self.kybd_sel = {"left": DEFAULT_LEFT_SEL, "right": DEFAULT_RIGHT_SEL}
         self.idp_load = [False] * N_IDP_LOAD
 
@@ -445,7 +448,7 @@ class PanelO6:
         # Bound here, before the first publish, so that publish's own echo
         # is heard and struck off rather than left to eat a later command.
         self._idp_socks = {}
-        for n in range(1, N_IDP_C2 + 1):
+        for n in range(1, N_IDP_SW + 1):
             try:
                 self._idp_socks[idp_receiver(n)] = n
             except OSError as e:
@@ -536,7 +539,7 @@ class PanelO6:
             "%s=%s" % (r, "ON" if h else "OFF") for r, h in zip(RHCS, self.rhc)))
         log("  ACTIVITY  %s" % "  ".join(
             "%s=%s" % (m, a) for m, a in zip(MMUS, self.activity)))
-        for n in C2_IDPS:
+        for n in list(C2_IDPS) + [4]:
             log("  IDP/CRT %d  POWER=%s  MAJ FUNC=%s"
                 % (n, self.idp_power[n - 1], MF_NAMES[self.idp_mf[n - 1]]))
         log("  IDP/CRT SEL  LEFT=%s  RIGHT=%s"
@@ -963,7 +966,8 @@ class PanelO6:
         idp_x0 = c3_x1 + PANE_GAP
         idp_x1 = idp_x0 + C2_W
         c2_y1 = self._draw_c2(idp_x0, my0, idp_x1)
-        self._draw_idp_load(idp_x0, c2_y1 + PANE_GAP, idp_x1)
+        load_y1 = self._draw_idp_load(idp_x0, c2_y1 + PANE_GAP, idp_x1)
+        self._draw_r11(idp_x0, load_y1 + PANE_GAP, idp_x1)
 
     def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
@@ -1214,40 +1218,9 @@ class PanelO6:
 
         width = x1 - x0
         centres = [x0 + width * (2 * k + 1) / 6.0 for k in range(3)]
-        ow = max(1, int(self.s))
+        rows = (y_idp, y_crt, y_names, y_up, sw_top, y_down, box_y0, box_y1)
         for scx, n in zip(centres, C2_IDPS):
-            self._rect(scx - 115, box_y0, scx + 115, box_y1,
-                       fill="", outline=C_GUARD_LO, width=ow)
-            self._text(scx, y_idp, "IDP/", size=10)
-            self._text(scx, y_crt, "CRT %d" % n, size=10)
-            pcx, mcx = scx - 55, scx + 55
-            self._text(pcx, y_names, "POWER", size=SETTING_SIZE)
-            self._text(mcx, y_names, "MAJ FUNC", size=SETTING_SIZE)
-            self._text(pcx, y_up, "ON", size=SETTING_SIZE)
-            self._text(mcx, y_up, "GNC", size=SETTING_SIZE)
-            ptop = sw_top + (mh - ph) / 2.0
-            pos = IDP_POWER_POS.index(self.idp_power[n - 1])
-            self._guarded_toggle(pcx - pw / 2, ptop, pcx + pw / 2, ptop + ph,
-                                 pos, npos=2)
-            self._hit("idp_power", n, pcx - pw / 2, ptop, pcx + pw / 2, ptop + ph)
-            mf = self.idp_mf[n - 1]
-            mx1, mx2 = mcx - mw / 2, mcx + mw / 2
-            if mf == 3:
-                # ILLEGAL is not a place the paddle can be: end-on, ringed
-                # in red, as MEDS2's pane shows it.
-                self._guarded_toggle(mx1, sw_top, mx2, sw_top + mh, 1, npos=3)
-                r = mw * 0.60
-                cy = sw_top + mh / 2.0
-                self._oval(mcx - r, cy - r, mcx + r, cy + r, fill="",
-                           outline=MF_RING, width=max(2, int(3 * self.s)))
-            else:
-                self._guarded_toggle(mx1, sw_top, mx2, sw_top + mh,
-                                     MAJ_FUNC_POS.index(MF_NAMES[mf]), npos=3)
-            self._hit("idp_mf", n, mx1, sw_top, mx2, sw_top + mh)
-            self._vtext(mx2 + 14 + SETTING_SIZE * 2 / 3.0,
-                        sw_top + mh / 2.0, "SM")
-            self._text(pcx, y_down, "OFF", size=SETTING_SIZE)
-            self._text(mcx, y_down, "PL", size=SETTING_SIZE)
+            self._idp_set(scx, n, rows)
 
         for side, title, scx, positions in (
                 ("left", "LEFT IDP/CRT SEL", x0 + width / 4.0, LEFT_SEL_POS),
@@ -1261,6 +1234,74 @@ class PanelO6:
             cy = sel_top + sh / 2.0
             self._text(sx1 - 12, cy, positions[0], size=10)
             self._text(sx2 + 12, cy, positions[1], size=10)
+        return y1
+
+    def _idp_rows(self, y0):
+        """The vertical rhythm of one IDP/CRT set, from the inset's top."""
+        pad = 10
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        mh = 136
+        y_idp = y0 + 2 * pad + th10
+        y_crt = y_idp + th10 + pad + th10
+        y_names = y_crt + th10 + pad + ths
+        y_up = y_names + ths + pad + ths
+        sw_top = y_up + ths + pad
+        y_down = sw_top + mh + pad + ths
+        box_y0 = y_idp - th10 - pad / 2.0
+        box_y1 = y_down + ths + pad / 2.0
+        return (y_idp, y_crt, y_names, y_up, sw_top, y_down, box_y0, box_y1)
+
+    def _idp_set(self, scx, n, rows):
+        """One IDP/CRT set, POWER and MAJ FUNC, centred on scx."""
+        y_idp, y_crt, y_names, y_up, sw_top, y_down, box_y0, box_y1 = rows
+        pw, ph = 58, 124        # POWER: O6 POWER's guard
+        mw, mh = 58, 136        # MAJ FUNC: O6 OUTPUT's 3-position guard
+        ow = max(1, int(self.s))
+        self._rect(scx - 115, box_y0, scx + 115, box_y1,
+                   fill="", outline=C_GUARD_LO, width=ow)
+        self._text(scx, y_idp, "IDP/", size=10)
+        self._text(scx, y_crt, "CRT %d" % n, size=10)
+        pcx, mcx = scx - 55, scx + 55
+        self._text(pcx, y_names, "POWER", size=SETTING_SIZE)
+        self._text(mcx, y_names, "MAJ FUNC", size=SETTING_SIZE)
+        self._text(pcx, y_up, "ON", size=SETTING_SIZE)
+        self._text(mcx, y_up, "GNC", size=SETTING_SIZE)
+        ptop = sw_top + (mh - ph) / 2.0
+        pos = IDP_POWER_POS.index(self.idp_power[n - 1])
+        self._guarded_toggle(pcx - pw / 2, ptop, pcx + pw / 2, ptop + ph,
+                             pos, npos=2)
+        self._hit("idp_power", n, pcx - pw / 2, ptop, pcx + pw / 2, ptop + ph)
+        mf = self.idp_mf[n - 1]
+        mx1, mx2 = mcx - mw / 2, mcx + mw / 2
+        if mf == 3:
+            # ILLEGAL is not a place the paddle can be: end-on, ringed
+            # in red, as MEDS2's pane shows it.
+            self._guarded_toggle(mx1, sw_top, mx2, sw_top + mh, 1, npos=3)
+            r = mw * 0.60
+            cy = sw_top + mh / 2.0
+            self._oval(mcx - r, cy - r, mcx + r, cy + r, fill="",
+                       outline=MF_RING, width=max(2, int(3 * self.s)))
+        else:
+            self._guarded_toggle(mx1, sw_top, mx2, sw_top + mh,
+                                 MAJ_FUNC_POS.index(MF_NAMES[mf]), npos=3)
+        self._hit("idp_mf", n, mx1, sw_top, mx2, sw_top + mh)
+        self._vtext(mx2 + 14 + SETTING_SIZE * 2 / 3.0,
+                    sw_top + mh / 2.0, "SM")
+        self._text(pcx, y_down, "OFF", size=SETTING_SIZE)
+        self._text(mcx, y_down, "PL", size=SETTING_SIZE)
+
+    def _draw_r11(self, x0, y0, x1):
+        """IDP/CRT 4's POWER and MAJ FUNC, which in the orbiter sit beside the
+        aft keyboard on panel R11 (Crew Software Interface figure 2-3).  It
+        has no IDP/CRT SEL: the aft keyboard reaches only IDP 4.  Returns the
+        inset's bottom edge."""
+        pad = 10
+        rows = self._idp_rows(y0)
+        y1 = rows[7] + pad / 2.0 + 2 * pad
+        width = 230 + 4 * pad
+        self._rect_panel(x0, y0, x0 + width, y1)
+        self._idp_set(x0 + width / 2.0, 4, rows)
         return y1
 
     def _draw_idp_load(self, x0, y0, x1):
@@ -1699,11 +1740,12 @@ class PanelO6:
             self._idp_send_failed = True
 
     def _idp_publish(self):
-        for n in range(1, N_IDP_C2 + 1):
+        for n in range(1, N_IDP_SW + 1):
             self._idp_send(n, TAG_IDP_POWER,
                            1 if self.idp_power[n - 1] == "ON" else 0)
             self._idp_send(n, TAG_SET_MAJOR_FUNC, self.idp_mf[n - 1])
-            self._idp_send(n, TAG_KYBD_SEL, self.kybd_mask(n))
+            if n <= N_IDP_C2:           # IDP 4 has no IDP/CRT SEL
+                self._idp_send(n, TAG_KYBD_SEL, self.kybd_mask(n))
 
     def _idp_tick(self):
         """Every IDP_REPUBLISH_MS: take in what was heard, then re-assert."""
@@ -1826,8 +1868,8 @@ class PanelO6:
 #                                  is bfsengage; B6-7 fold into crt.  Any other
 #                                  bit is sent once, raw, and the next
 #                                  republish undoes it if this panel owns it.
-#     idppower N on|off            C2 IDP/CRT N POWER (N 1-3)
-#     majfunc N GNC|SM|PL          C2 IDP/CRT N MAJ FUNC (N 1-3)
+#     idppower N on|off            IDP/CRT N POWER (N 1-3 on C2, 4 on R11)
+#     majfunc N GNC|SM|PL          IDP/CRT N MAJ FUNC (N 1-3 on C2, 4 on R11)
 #     kybdsel left 1|3             LEFT IDP/CRT SEL
 #     kybdsel right 2|3            RIGHT IDP/CRT SEL
 #     idpload N                    O6 IDP N LOAD (N 1-4), held IPL_HOLD_MS
@@ -1943,9 +1985,9 @@ def _run_script(panel, entries, quit_after_ms=None):
 
     def c2_idp(word):
         n = int(word)
-        if not 1 <= n <= N_IDP_C2:
-            raise SystemExit("panelO6: IDP/CRT %r is not on panel C2 (1 to %d)"
-                             % (word, N_IDP_C2))
+        if not 1 <= n <= N_IDP_SW:
+            raise SystemExit("panelO6: IDP/CRT is 1 to %d (4 is on R11), not %r"
+                             % (N_IDP_SW, word))
         return n
 
     def bfsengage(on):
