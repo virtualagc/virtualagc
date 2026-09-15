@@ -73,6 +73,15 @@ C_WINDOW = "#2a2a2a"
 C_PANEL = "#c6c3b6"
 C_KEY = "#1a1a1a"
 C_KEY_DOWN = "#000000"
+# A PRESSED KEY INVERTS.  Black going to a slightly blacker black, with a
+# swapped bevel and a 1 px shift, could not be seen without staring at the key
+# -- least of all a script's key, lit for a fraction of a second.  A near-white
+# face with a black legend and a dark inset border stands out among 31 black
+# keys from across the room.  Change these two for another look (amber, say).
+C_KEY_PRESSED = "#f0f0f0"
+C_LEGEND_PRESSED = "#000000"
+C_KEY_PRESSED_EDGE = "#303030"
+PRESS_SINK = 0.03              # legend shift when pressed, per unit of key size
 C_KEY_HI = "#5a5a5a"
 C_KEY_LO = "#000000"
 C_LEGEND = "#f4f4f4"
@@ -127,9 +136,9 @@ def log(msg):
 
 
 # A key that arrives from the bus -- a script typing it -- shows pressed for
-# this long.  Shorter than a script's 0.35 s between keys, so a run of the
-# same key reads as separate presses.
-FLASH_S = 0.2
+# this long.  Still shorter than a script's 0.35 s between keys, so a run of
+# the same key reads as separate presses.
+FLASH_S = 0.3
 # Our own clicks come back to us on the multicast loop; one arriving this soon
 # after we sent the same code is that echo, not someone else's press.
 ECHO_S = 1.0
@@ -405,15 +414,23 @@ class STSKeyboard:
             self._hits.append((row, col, x1, y1, x2, y2))
 
     def _draw_key(self, x1, y1, x2, y2, lines, down, k):
-        fill = C_KEY_DOWN if down else C_KEY
-        dx = 1 if down else 0
-        self.cv.create_rectangle(x1, y1, x2, y2, fill=fill, outline="#000000",
-                                 width=1)
-        hi, lo = (C_KEY_LO, C_KEY_HI) if down else (C_KEY_HI, C_KEY_LO)
-        self.cv.create_line(x1 + 1, y1 + 1, x2 - 1, y1 + 1, fill=hi)
-        self.cv.create_line(x1 + 1, y1 + 1, x1 + 1, y2 - 1, fill=hi)
-        self.cv.create_line(x1 + 1, y2 - 1, x2 - 1, y2 - 1, fill=lo)
-        self.cv.create_line(x2 - 1, y1 + 1, x2 - 1, y2 - 1, fill=lo)
+        legend = C_LEGEND_PRESSED if down else C_LEGEND
+        if down:
+            edge = max(2, int(round(k * 0.05)))
+            dx = max(1, int(round(k * PRESS_SINK)))
+            self.cv.create_rectangle(x1, y1, x2, y2, fill=C_KEY_PRESSED_EDGE,
+                                     outline="#000000", width=1)
+            self.cv.create_rectangle(x1 + edge, y1 + edge + dx / 2.0,
+                                     x2 - edge, y2 - edge + dx / 2.0,
+                                     fill=C_KEY_PRESSED, outline="")
+        else:
+            dx = 0
+            self.cv.create_rectangle(x1, y1, x2, y2, fill=C_KEY, outline="#000000",
+                                     width=1)
+            self.cv.create_line(x1 + 1, y1 + 1, x2 - 1, y1 + 1, fill=C_KEY_HI)
+            self.cv.create_line(x1 + 1, y1 + 1, x1 + 1, y2 - 1, fill=C_KEY_HI)
+            self.cv.create_line(x1 + 1, y2 - 1, x2 - 1, y2 - 1, fill=C_KEY_LO)
+            self.cv.create_line(x2 - 1, y1 + 1, x2 - 1, y2 - 1, fill=C_KEY_LO)
 
         kind = key_kind(lines)
         cx = (x1 + x2) / 2.0 + dx
@@ -423,19 +440,19 @@ class STSKeyboard:
             d = float(other.measure("o"))
             r = d / 2.0
             self.cv.create_oval(cx - r, cy - r, cx + r, cy + r,
-                                fill=C_LEGEND, outline="")
+                                fill=legend, outline="")
             return
         font = self._tkfont(self._pts_for(kind, k, lines))
         ls = font.metrics("linespace")
         n = len(lines)
         if n == 1:
-            self.cv.create_text(cx, cy, text=lines[0], fill=C_LEGEND,
+            self.cv.create_text(cx, cy, text=lines[0], fill=legend,
                                 font=font, anchor="c")
         else:
             total = n * ls
             y0 = cy - total / 2.0 + ls / 2.0
             for i, line in enumerate(lines):
-                self.cv.create_text(cx, y0 + i * ls, text=line, fill=C_LEGEND,
+                self.cv.create_text(cx, y0 + i * ls, text=line, fill=legend,
                                     font=font, anchor="c")
 
     def _find(self, x, y):

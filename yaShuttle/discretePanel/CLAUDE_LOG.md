@@ -28,3 +28,4 @@
 - --wait-user (panelO6 and simulatePASS): an implied `wait user` before the script's first line, and the panel shown -- the demonstration pause without editing a script that also runs unattended.
 - stsKeyboard.py listens on its own keyboard bus and shows keys that arrive from other senders (crew scripts, --keys) pressed for FLASH_S 0.2 s; echoes of its own clicks (within ECHO_S 1 s) are skipped. panelO6 wait-user cursor now survives <Leave> and motion.
 - subtitles.py is now a managed window (listed in the taskbar as "Subtitles") that sets _MOTIF_WM_HINTS no-decorations on the Tk wrapper (parent of winfo_id) before first map, since Marco reads it only at map time; --no-taskbar keeps the old overrideredirect window.
+- stsKeyboard.py pressed look is now dramatic: the key inverts (C_KEY_PRESSED #f0f0f0 face, black legend, dark inset edge C_KEY_PRESSED_EDGE, legend sinks PRESS_SINK 3% of key size), for mouse and bus presses alike; scripted flash FLASH_S 0.2 -> 0.3 s.
