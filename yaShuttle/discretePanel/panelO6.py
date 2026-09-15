@@ -2226,6 +2226,9 @@ def main(argv=None):
     ap.add_argument("--show", action="store_true",
                     help="show the panel window during a --script run too (it is "
                          "hidden otherwise, unless the script has a 'wait user')")
+    ap.add_argument("--wait-user", action="store_true",
+                    help="hold the --script until someone clicks in the panel window, "
+                         "as if its first line were 'wait user' (and show the window)")
     ap.add_argument("--quit-after", type=int, metavar="MS",
                     help="exit this many ms after startup (for scripted runs)")
     args = ap.parse_args(argv)
@@ -2253,6 +2256,8 @@ def main(argv=None):
         w, h = scaled_wh(REF_W, REF_H, args.size)
         root.geometry("%dx%d" % (w, h))
     entries, text = None, ""
+    if args.wait_user and not args.script:
+        raise SystemExit("panelO6: --wait-user holds a --script; there is none")
     if args.script:
         with open(args.script) as f:
             text = f.read()
@@ -2260,10 +2265,15 @@ def main(argv=None):
             entries = crewscript.parse(text)
         except crewscript.ScriptError as e:
             raise SystemExit("panelO6: %s" % e)
+        # --wait-user: the pause a demonstration needs, without putting a
+        # 'wait user' into a script that also runs unattended.
+        if args.wait_user:
+            entries.insert(0, {"kind": "wait_user", "text": "wait user (--wait-user)",
+                               "line": 0})
     # An unattended scripted run has nobody watching it, so it gets no
     # window -- unless asked for one (--show, for a demonstration), or the
     # script waits for someone to click in it.
-    _dont_steal_focus(root, mapWindow=(not args.script or args.show
+    _dont_steal_focus(root, mapWindow=(not args.script or args.show or args.wait_user
                                        or crewscript.has_wait_user(text)))
     if entries is not None:
         _run_script(panel, entries, args.quit_after)

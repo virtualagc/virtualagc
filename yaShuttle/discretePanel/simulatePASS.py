@@ -29,24 +29,28 @@ OPS 2.  For a demonstration, --show-panel keeps panelO6's window up so the
 switches are seen to move, and a 'wait user' line (first, say) holds the
 script until someone clicks in the panel window -- time to arrange windows
 and start a recording; leave --duration off then, since it counts from
-start-up.  The paragraphs below describe the older split, which still works.
+start-up.  --wait-user gives that pause without editing the script (it also
+shows the panel), so a script can stay fit to run unattended.  The paragraphs
+below describe the older split, which still works.
 
 UNATTENDED RUNS.  --panel-script hands panelO6.py a timed script ('<seconds>
-<command>' per line, decimals allowed; 'gpc <n>' picks the column, and 'idppower N on|off',
-'majfunc N GNC|SM|PL', 'kybdsel left 1|3', 'kybdsel right 2|3' and 'idpload N'
-work the IDP switches), --keys a file of '<seconds> KEY KEY ...' lines typed on
-a keyboard bus (keys as on the keyboard: ITEM EXEC OPS PRO SPEC RESUME CLEAR +
-- . 0-9 A-F; KB1, KB2 or KB3 sends the rest of the line on the left, right or
-aft keyboard, KB1 by default; also IDP_POWER_ON, IDP_POWER_OFF and DEU_LOAD for
-IDP 1 and IDP2_POWER_ON, IDP2_POWER_OFF and DEU_LOAD2 for IDP 2, which the panel
-follows as if its switches had been thrown), and --duration ends the run after
-that many seconds.  Key and panel times both count from when the panel starts.
+<command>' per line, decimals allowed; 'gpc <n>' picks the column, and
+'idppower N on|off', 'majfunc N GNC|SM|PL', 'kybdsel left 1|3', 'kybdsel right
+2|3' and 'idpload N' work the IDP switches), --keys a file of '<seconds> KEY
+KEY ...' lines typed on a keyboard bus (keys as on the keyboard: ITEM EXEC OPS
+PRO SPEC RESUME CLEAR + - . 0-9 A-F; KB1, KB2 or KB3 sends the rest of the
+line on the left, right or aft keyboard, KB1 by default; also IDP_POWER_ON,
+IDP_POWER_OFF and DEU_LOAD for IDP 1 and IDP2_POWER_ON, IDP2_POWER_OFF and
+DEU_LOAD2 for IDP 2, which the panel follows as if its switches had been
+thrown), and --duration ends the run after that many seconds.  Key and panel
+times both count from when the panel starts.
 
 CAPTIONS FOR VIDEOS.  '<seconds> SUBTITLE text ...' in the keys file, or
-'<seconds> subtitle text ...' in the panel script, shows the text in subtitles.py's
-borderless caption box (the same line with no text clears it; \n starts a new
-line; a leading <left>, <center> or <right> aligns that caption alone).  The box is started automatically when either file has such a line;
---subtitles starts it regardless, --no-subtitles never.
+'<seconds> subtitle text ...' in the panel script, shows the text in
+subtitles.py's borderless caption box (the same line with no text clears it;
+\\n starts a new line; a leading <left>, <center> or <right> aligns that
+caption alone).  The box is started automatically when either file has such a
+line; --subtitles starts it regardless, --no-subtitles never.
 
 WAITING INSTEAD OF GUESSING.  A line 'WAIT gpc N mode-tb RUN|IPL|BP [timeout S]'
 in either file holds that file until GPC N's MODE talkback on panel O6 shows
@@ -539,6 +543,9 @@ def main():
                     help=argparse.SUPPRESS)          # the old name
     ap.add_argument("--show-panel", action="store_true",
                     help="show panelO6's window during a --script run (for demonstrations)")
+    ap.add_argument("--wait-user", action="store_true",
+                    help="hold the --script until someone clicks in panelO6's window, as if "
+                         "it began with 'wait user'; shows the panel too")
     ap.add_argument("--script", "--panel-script", dest="panel_script", metavar="FILE",
                     help="crew script for panelO6.py: switches, keys, subtitles and waits "
                          "in one file (crewscript.py)")
@@ -716,15 +723,19 @@ def main():
             time.sleep(1)
         panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
                       "--gpc-id", str(gpcs[0]), "--size", str(size), "--geometry", o6_geom]
+        if args.wait_user and not args.panel_script:
+            log("note: --wait-user holds a --script, and there is none; ignored")
         if args.panel_script:
             panel_argv += ["--script", os.path.abspath(args.panel_script)]
             if args.show_panel:
                 panel_argv += ["--show"]
+            if args.wait_user:
+                panel_argv += ["--wait-user"]
             try:
                 with open(args.panel_script) as fh:
-                    waits_for_user = crewscript.has_wait_user(fh.read())
+                    waits_for_user = args.wait_user or crewscript.has_wait_user(fh.read())
             except OSError:
-                waits_for_user = False
+                waits_for_user = args.wait_user
             if waits_for_user and args.duration:
                 log("note: the script has a 'wait user', and --duration counts from "
                     "start-up -- including the time spent waiting")
