@@ -841,3 +841,23 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   FIOMSCTO on 6764/6772/... vanish, no 12 s splits, no class (b) losses.
   If the DK buses (MTO 5 ms, networked MEDS2) misbehave, the floor may need
   to be per-bus (networked buses only) rather than zero.
+- THE MSC WINDOW FOR THE NSP READ (flight source, via search agent 00:31):
+  FIONSPPC (FIOADCNS.asm:912-925) starts FIONSR11/31 on buses 20/22 and
+  branches to the generic FIOMCNTL (FIOMCNTL.asm), which does NOT wait on
+  indicators: it @RAWs with the MSC's own bit in the mask -- a pure delay --
+  then looks ONCE (FIOMCKIO @LI 0 / @RAW / @B FIOMTOUT, :182-187).  Count:
+  TIIC0024 DC Y(141) (FIOCBLKS.asm:1487, 16 us units = 2256 us) -> IOQE
+  deadline -> time-to-go 71 (x16/33) -> +FIOMSCDB 3 -FIOMPT1 4 = 70 ->
+  70 x 33 us = 2.31 ms, then one look.  Bypassed commander (FCMBCEMD.asm
+  overlays #DLYI 21/#DLYI 75, or #DLYI 109 for the FF1 return word):
+  108-121 x 16.5 us = 1.78-2.00 ms + overhead ~2.0-2.2 ms -- A 0.1-0.4 ms
+  MARGIN EVEN ON THE VEHICLE.  Bypassed listener: #DLYI 0s then #WAT, ~0.1
+  ms -- unless it sits in a receive, which under our 2 ms floor alone
+  exceeds the window (eve13's FIOMSCTO masks were exactly the LISTENED
+  buses).  Rate: DUPNSP every 0.160 s (TIME_DUM, ZPRIOTIM.hal:296).  12 s:
+  MEDS DK collection on NSP phase cycles every 0.48 s (AIESIP.hal:411-415)
+  against DCDDOW's 1 s data cycle (frame count 0/25) -> LCM 300 frames.
+  So which GPCs miss the look at the 12 s phase is decided by emulator
+  timing inside a ~0.1-0.4 ms margin; the zero floor removes the 2 ms
+  listener term.  If eve15 still splits, the commander side's #DLYI (16.5
+  us) and @RAW (33 us) units and instruction overhead are next.
