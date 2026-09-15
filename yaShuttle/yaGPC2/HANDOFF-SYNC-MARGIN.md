@@ -332,6 +332,54 @@ Not yet covered, so record it overnight:
    and the fix is to make that path tolerant; if the quiet runs lose GPCs as
    often, the hypothesis is refuted -- record either way in #145.
 
+## EVENING RUN eve1 (started 2026-09-14 20:43, owner using the desktop)
+
+The owner agreed (20:39-20:42) to start early so their own desktop use --
+exercise break ~20:42-21:12, then at least an hour of normal use -- is the
+DISTURBED condition; the unattended night is the quiet one.  The owner's
+simulation and 10 s atop were stopped with permission.
+
+Files (scratchpad = /tmp/claude-1000/-mnt-STORAGE-home-rburkey-git-virtualagc-
+yaShuttle-yaGPC2/8cd63a77-3409-4931-9bc0-d9c0953b865d/scratchpad, NVMe):
+- run: `simulatePASS.py --gpcs 1-4 --crts 2 --port-base 25000 --title sync-eve
+  --logs <scratch>/eve1 --panel-script <scratch>/perf-in/panel.script --keys
+  <scratch>/perf-in/keys.txt --duration 18000` (defaults, ends ~01:43), env
+  `YAGPC_PACETRACE=1 YAGPC_SYNCORDER=1 YAGPC_ERRTERM_TRACE= (empty = all buses)
+  YAGPC_TIMEOUT_TRACE=1 YAGPC_TIMEOUT_TRACE_PE=6,7,8,9`.  simulatePASS started
+  20:43:31; yaGPC2 pid 3020726 started 20:43:33.300 (<scratch>/eve1-yagpc2-
+  start.txt); OPS 2 keyed ~20:57:35.  yaGPC2.log grows ~300 KB/s (~5.5 GB).
+- `/fastlogs/atop-1s.raw` (atop at 1 s, started 20:42:31 by Claude; the
+  owner's old `/fastlogs/atop.raw` 10 s file is kept).
+- `<scratch>/stall/latprobe.log` (latprobe.c, started 20:42:4x): per second
+  `HH:MM:SS wakes maxlate_ms n>2 n>5 n>20 n>100`.
+- `<scratch>/stall/camwatch-eve1.log`: every cam.log line with a wall stamp.
+- Scripts in `<scratch>/stall/`: `around.py HH:MM:SS [secs]` (probe + atop
+  1 s + camwatch around a moment); `sync_margin.py yaGPC2.log START_ISO`
+  (handshakes aligned per code in sequence, spread/3850 us, per-minute worst/
+  p99/p90 and the largest spreads with wall times).
+
+Baselines measured 20:55-21:01 (owner away, host quiet):
+- margin: 55,359 handshakes, all 4 GPCs; per minute p90 ~0.015, p99 ~0.10,
+  worst 0.41-0.57.  The three largest (20:55:16.442 SSIP 2201 us, 20:58:39.411
+  SVC 2032 us, 20:58:01.011 SVC 1984 us) were at QUIET host moments (probe
+  max < 0.2 ms, atop RDELAY/BDELAY 0.00 for yaGPC2 and MEDS2, disks idle) --
+  so ~0.5 spreads are intrinsic, and big SVC spreads recur at .011/.019 s
+  positions (20:58:01.011, :08.819, :16.019, 20:59:04.019, :52.019),
+  suggesting a periodic flight-software cycle.
+- THE BARRIER MAKES HOST STALLS INVISIBLE TO SYNC SPREAD: all four machines
+  stay within 25 us of simulated time, so a wall-clock freeze makes everyone
+  wait rather than opening a spread.  Host stalls can only bite through
+  WALL-CLOCK waits that become I/O errors -- the display peer holds (200 ms
+  first word, 5 ms minus time held for the rest) -- feeding FIOERRLC.
+- ERRTERM after OPS 2: GPC1 steady on BCE 8, 20, 22 (~125/187/188 per
+  minute; known #137 kind); GPC3 and GPC4 on 8/20/22 only through 20:58;
+  GPC2 none.  Peer holds after OPS 2: bus 6 29 replies (median 3 ms, max 67),
+  bus 7 85 replies (median 9.1, max 66) and 3 'none' (10-38 ms held).
+- A persistent Monitor tails camwatch for lamp changes; on a loss run
+  `around.py` at the camwatch stamp, then look at ERRTERM/PEER HOLD/SYNCORDER
+  lines just before it on each GPC's clock (map own clock -> wall with that
+  GPC's PACE group: offsets ~0/10 s GPC1, ~180 GPC2, ~360 GPC3, ~540 GPC4).
+
 ## Deliverables for the morning
 
 1. The metric working (script A at least), with its definition written down.
