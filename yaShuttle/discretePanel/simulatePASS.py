@@ -508,7 +508,10 @@ def main():
     # windows rarely fit one screen; when they don't, each kind of window gets
     # a stack of its own (below), so every title bar can still be grabbed.
     need_w = cam_x + (int(round(528.0 * cam_size / 512)) if len(gpcs) > 1 else -20)
-    need_h = max(int(round(1250.0 * size / 768)), (size + 40) * ws)
+    # An MDU window is the display plus MEDS2's edgekey strip under it
+    # (EDGE_STRIP_K = 0.09 of the display's width) plus its frame.
+    edge_h = int(round(0.09 * size)) if os.environ.get("NSTS_MDU_EDGEKEYS") != "0" else 0
+    need_h = max(int(round(1250.0 * size / 768)), (size + edge_h + 40) * ws)
     if screen_w is not None and (need_w > screen_w or need_h > screen_h):
         # One cascading STACK per kind of window -- the displays together, the
         # keyboard, the panel, the CAM -- the stacks left to right, each pulled

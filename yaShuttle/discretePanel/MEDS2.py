@@ -9395,8 +9395,21 @@ class MDUEdgeKeys(object):
         if not (112 <= ev.keyCode <= 117):
             return
         ev.preventDefault()
-        i = ev.keyCode - 112
-        if self.failed[i]:
+        self.press(ev.keyCode - 112)
+
+    def _up(self, ev):
+        if KYBD.isEditable(ev.target):
+            return
+        if not (112 <= ev.keyCode <= 117):
+            return
+        ev.preventDefault()
+        self.release(ev.keyCode - 112)
+
+    # THE ONE PATH FOR A PRESS, whether it came from F1..F6 or from a click on
+    # the pushbuttons under the display (MDUEdgeKeyStrip), so both are held,
+    # released and declared stuck by the same rule.
+    def press(self, i):
+        if not 0 <= i < 6 or self.failed[i]:
             return
         if self.downTimers.get(i) is not None:   # already armed (auto-repeat)
             return
@@ -9406,14 +9419,8 @@ class MDUEdgeKeys(object):
         t.start(STUCK_MS)
         self.downTimers[i] = t
 
-    def _up(self, ev):
-        if KYBD.isEditable(ev.target):
-            return
-        if not (112 <= ev.keyCode <= 117):
-            return
-        ev.preventDefault()
-        i = ev.keyCode - 112
-        if self.failed[i]:
+    def release(self, i):
+        if not 0 <= i < 6 or self.failed[i]:
             return
         t = self.downTimers.get(i)
         if t is not None:                        # released in time
@@ -10980,6 +10987,144 @@ class IDPPane(QtWidgets.QWidget):
                        else Qt.CursorShape.ArrowCursor)
 
 
+# ===========================================================================
+# The edgekeys themselves: six pushbuttons in the bezel under the display.
+#
+# On the orbiter they are hardware, not screen: DPS Workbook USA005350 Rev B
+# figure 2-26 (p. 2-33) and the photograph in yaShuttle/MDU.jpg both show six
+# square keys in a row in the bottom bezel, below the glass, a rounded rib at
+# either end and between each pair, each key directly under the legend box
+# the menu area draws for it (the photograph's key pitch is 0.149 of the
+# display's width; the legend boxes' is 7.75 of 52.24 display units, 0.148).
+# The logic was always here -- F1..F6 press them -- and a click on a key goes
+# through the same MDUEdgeKeys.press/release, so holding one down for
+# STUCK_MS fails it exactly as holding F-key does.  The strip is as wide as
+# the canvas and EDGE_STRIP_K of that high, and the window grows by that
+# much.  --no-edgekeys or NSTS_MDU_EDGEKEYS=0 leaves it off.
+# ===========================================================================
+
+EDGE_STRIP_K = 0.09              # strip height per unit of canvas width
+E_BEZEL = "#a9a9a6"              # the MDU's grey bezel (MDU.jpg)
+E_BEZEL_LO = "#5f5f5c"
+E_RIB = "#c2c2bf"
+E_RIB_LO = "#6b6b68"
+E_KEY = "#141414"
+E_KEY_FACE = "#f0f0f0"
+E_KEY_DOWN = "#8c8c8c"
+
+
+def _edgekeys_wanted(opts):
+    """The edgekey pushbuttons: on unless --no-edgekeys; NSTS_MDU_EDGEKEYS=0
+    turns them off and =1 on, whatever the option."""
+    e = str(env('NSTS_MDU_EDGEKEYS', '')).strip()
+    if e in ('0', '1'):
+        return e == '1'
+    return bool(opts.get('edgekeys', True))
+
+
+class MDUEdgeKeyStrip(QtWidgets.QWidget):
+    def __init__(self, mdu, parent):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.mdu = mdu
+        self.down = None
+        self._keys = []
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)   # the keyboard stays with the MDU
+        self.setMouseTracking(True)
+        self.setAutoFillBackground(False)
+
+    def _centres(self):
+        """Each key's centre in display units: the middle of its legend box."""
+        area = getattr(self.mdu, 'mdu_menuArea', None)
+        boxes = getattr(area, 'menuBoxX', None) if area is not None else None
+        if boxes and len(boxes) == 6:
+            return [(a + b) / 2.0 for a, b in boxes]
+        return [3.3 + i * 7.75 + (0.05 if i >= 3 else 0.0) + 3.75 for i in range(6)]
+
+    def _layout(self):
+        disp = getattr(self.mdu, 'disp', None)
+        left = getattr(disp, 'CAM_L', 0.20)
+        right = getattr(disp, 'CAM_R', 52.442456)
+        W, H = float(self.width()), float(self.height())
+        u = W / (right - left)                 # pixels per display unit
+        pitch = 7.75 * u
+        side = min(0.42 * pitch, 0.66 * H)
+        cy = H / 2.0
+        keys = [QRectF((c - left) * u - side / 2.0, cy - side / 2.0, side, side)
+                for c in self._centres()]
+        ribW = max(2.0, 0.09 * pitch)
+        ribH = 0.84 * H
+        xs = [(c - left) * u for c in self._centres()]
+        ribX = [xs[0] - pitch / 2.0] + [(a + b) / 2.0 for a, b in zip(xs, xs[1:])] \
+            + [xs[-1] + pitch / 2.0]
+        ribs = [QRectF(x - ribW / 2.0, cy - ribH / 2.0, ribW, ribH) for x in ribX]
+        return keys, ribs
+
+    def paintEvent(self, _ev):
+        keys, ribs = self._layout()
+        self._keys = keys
+        p = QtGui.QPainter(self)
+        p.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
+        p.fillRect(self.rect(), QColor(E_BEZEL))
+        p.setPen(QtGui.QPen(QColor(E_BEZEL_LO), 1.0))
+        p.drawLine(QPointF(0, 0.5), QPointF(self.width(), 0.5))
+        for r in ribs:
+            p.setPen(QtGui.QPen(QColor(E_RIB_LO), 1.0))
+            p.setBrush(QColor(E_RIB))
+            p.drawRoundedRect(r, r.width() / 2.0, r.width() / 2.0)
+        for i, r in enumerate(keys):
+            down = (i == self.down)
+            if down:
+                r = r.translated(0, 1.0)
+            p.setPen(QtGui.QPen(QColor(E_BEZEL_LO), 1.0))
+            p.setBrush(QColor(E_KEY))
+            p.drawRect(r)
+            m = r.width() * 0.16
+            pen = QtGui.QPen(QColor(E_KEY_DOWN if down else E_KEY_FACE),
+                             max(1.0, r.width() * 0.07))
+            p.setPen(pen)
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawRect(r.adjusted(m, m, -m, -m))
+        p.end()
+
+    def _keyAt(self, pos):
+        for i, r in enumerate(self._keys):
+            if r.contains(pos):
+                return i
+        return None
+
+    def mousePressEvent(self, ev):
+        ev.accept()
+        if ev.button() != Qt.MouseButton.LeftButton:
+            return
+        i = self._keyAt(ev.position())
+        if i is None:
+            return
+        self.down = i
+        keys = getattr(self.mdu, '_edgeKeys', None)
+        if keys is not None:
+            keys.press(i)
+        self.update()
+
+    def mouseDoubleClickEvent(self, ev):
+        # two presses on a key, not the window's parameter-editor gesture
+        self.mousePressEvent(ev)
+
+    def mouseReleaseEvent(self, ev):
+        ev.accept()
+        if self.down is None:
+            return
+        i, self.down = self.down, None
+        keys = getattr(self.mdu, '_edgeKeys', None)
+        if keys is not None:
+            keys.release(i)
+        self.update()
+
+    def mouseMoveEvent(self, ev):
+        want = self._keyAt(ev.position()) is not None
+        self.setCursor(Qt.CursorShape.PointingHandCursor if want
+                       else Qt.CursorShape.ArrowCursor)
+
+
 class MDUWindow(QtWidgets.QWidget):
     def __init__(self, name, lruConf, dev=False):
         QtWidgets.QWidget.__init__(self)
@@ -10994,6 +11139,7 @@ class MDUWindow(QtWidgets.QWidget):
         self.chromeInset = int(envnum('NSTS_MDU_CHROME_X', 8)) if self.chrome > 0 else 0
         self.titleBar = None
         self.sidePane = None     # the IDP control pane, when there is one
+        self.edgeStrip = None    # the edgekey pushbuttons under the display
 
         win = lruConf.get('window') or {}
         # A REAL WINDOW FRAME BY DEFAULT.  The Electron build asked for
@@ -11081,6 +11227,23 @@ class MDUWindow(QtWidgets.QWidget):
             return 0.0
         return PANE_REF_W / (float(PANE_FULL) * (self.devicePixelRatioF() or 1.0))
 
+    def _stripK(self):
+        """The edgekey strip's height per unit of canvas width; 0 with none."""
+        return EDGE_STRIP_K if self.edgeStrip is not None else 0.0
+
+    def setEdgeStrip(self, strip):
+        """Put the edgekey pushbuttons under the display, making the window
+        taller by exactly the strip so the canvas keeps every pixel it had."""
+        self.edgeStrip = strip
+        _x, _y, cw, _ch = self.canvasBox()
+        self.resize(self.width(), self.height() + int(round(EDGE_STRIP_K * cw)))
+        strip.show()
+        self.layoutCanvas()
+
+    def stripBox(self):
+        x, y, cw, ch = self.canvasBox()
+        return (x, y + ch, cw, max(1, int(round(self._stripK() * cw))))
+
     def setSidePane(self, pane):
         """Put the IDP control pane down the right-hand side, widening the
         window by exactly its width so the canvas keeps every pixel it had."""
@@ -11097,11 +11260,13 @@ class MDUWindow(QtWidgets.QWidget):
         availW = max(1, self.width() - 2 * self.chromeInset)
         availH = max(1, self.height() - self.chrome)
         k = self._paneK()
-        ch = min(availH, availW / (self._aspect + k)) if (self._aspect + k) else availH
+        sk = self._stripK() * self._aspect     # strip height per unit canvas height
+        tall = availH / (1.0 + sk)
+        ch = min(tall, availW / (self._aspect + k)) if (self._aspect + k) else tall
         cw = ch * self._aspect
         pw = ch * k
         x = self.chromeInset + (availW - (cw + pw)) / 2.0
-        y = self.chrome + (availH - ch) / 2.0
+        y = self.chrome + (availH - ch * (1.0 + sk)) / 2.0
         return x, y, cw, ch, pw
 
     def canvasBox(self):
@@ -11124,6 +11289,8 @@ class MDUWindow(QtWidgets.QWidget):
             # window background between pane and frame shows as a dark line.
             px, py, _pw, ph = self.paneBox()
             self.sidePane.setGeometry(px, py, max(1, self.width() - self.chromeInset - px), ph)
+        if self.edgeStrip is not None:
+            self.edgeStrip.setGeometry(*self.stripBox())
         if self.titleBar is not None:
             self.titleBar.setGeometry(0, 0, self.width(), self.chrome)
         disp = getattr(getattr(self, 'lru', None), 'disp', None)
@@ -11148,7 +11315,8 @@ class MDUWindow(QtWidgets.QWidget):
             return
         _x, _y, cw, ch = self.canvasBox()
         pw = self.paneBox()[2] if self.sidePane is not None else 0
-        want = QtCore.QSize(cw + pw + 2 * self.chromeInset, ch + self.chrome)
+        sh = self.stripBox()[3] if self.edgeStrip is not None else 0
+        want = QtCore.QSize(cw + pw + 2 * self.chromeInset, ch + sh + self.chrome)
         if want != self.size():
             self.resize(want)
 
@@ -11430,6 +11598,10 @@ class MedsRunner(object):
                     and _pane_wanted(self.opts):
                 lru.pane = IDPPane(lru, win)
                 win.setSidePane(lru.pane)
+            if isinstance(lru, MDU) and not lruConf.get('shared') \
+                    and _edgekeys_wanted(self.opts):
+                lru.edgeStrip = MDUEdgeKeyStrip(lru, win)
+                win.setEdgeStrip(lru.edgeStrip)
             self.lrus[lruName] = lru
         # console access: window.lru is the last LRU started in this window
         _EXEC_NS['lru'] = self.lrus.get(CONFIG['thisStart'][-1]) if CONFIG['thisStart'] else None
@@ -11567,6 +11739,9 @@ def buildParser():
                         'IDP LOAD.  Also NSTS_MDU_PANE=1')
     p.add_argument('--no-pane', dest='noPane', action='store_true',
                    help=argparse.SUPPRESS)          # the old default, now a no-op
+    p.add_argument('--no-edgekeys', dest='noEdgekeys', action='store_true',
+                   help='no edgekey pushbuttons under each display (F1-F6 still '
+                        'press the edgekeys); also NSTS_MDU_EDGEKEYS=0')
     p.add_argument('--no-idp-box', dest='noIdpBox', action='store_true',
                    help='hide the IDP identifier box and keyboard bars at the '
                         'foot of DPS pages; also NSTS_DPS_IDP_BOX=0')
@@ -11609,6 +11784,7 @@ def main(argv=None):
         'dev': args.dev,
         'list': args.list,
         'pane': args.pane and not args.noPane,
+        'edgekeys': not args.noEdgekeys,
     }
 
     # --list needs no window system at all.
