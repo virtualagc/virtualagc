@@ -785,3 +785,37 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
 3. Findings recorded in `gpc-causes.py` (update #145 and/or add), CLAUDE_LOG
    notes for README targets, verified work committed.  No `.md` edits other
    than this handoff and CLAUDE_LOG.md.
+- eve11 LOSS, 23:50:58 (keys-late: OPS 2 at 1140 s; loss at shared 1187.951,
+  so LATE KEYS DID NOT HELP -- GPC4 still first).  THE CALLER TRACE WORKED:
+  GPC4 R7=9dc70031 -> 19dc7 = FIOERRLC+0313, THE SELF FAIL-TO-SYNC (error
+  count >= 2, 'CHI R5,2' after FIOSSM07); GPC1-3 R7=8f4f2031 -> 18f4f =
+  FCMISYNC+00BB (they see GPC4 fail).  At the call R4=0018 = 24 = FIONSPID
+  (FIOERRLC's equates: NSP DEVICE ID) and R5=4 (the count) -- GPC4 WAS
+  COUNTING NSP ERRORS.
+  THE 12 s IS A SPLIT HANDSHAKE: at one I/O completion some GPCs issue IPR
+  (010) and the rest IOC (001).  scratchpad stall/splits.py over the post-
+  OPS 2 part of eve11 finds such splits only at shared 1151.947, 1163.947,
+  1187.947, 1199.947 (phase 11.95 mod 12; 1175.947 had none), and eve10/eve8
+  the same phase.  Every class (b) loss is one: eve11 G3,G4 IPR vs G1,G2
+  IOC (G4 had IPR at 1151, 1163 and 1187 -> count 2 -> FTS); eve10 911.948
+  G1 IPR vs G2,G3; eve8 875.947 G1,G4 IPR vs G2,G3.  Splits before OPS 2
+  (eve11 1127-1139, every 1.92 s, G1 IOC vs G2-4 IPR) are the old NSP
+  listener pattern and dropped nobody.
+  THE SPLIT IS NOT AN EMULATOR ERROR TERMINATION: YAGPC_ERRTERM_TRACE is on
+  for every BCE and prints nothing at any post-OPS 2 split (only the routine
+  BCE8 = absent IDP3 timeouts ~12 ms later, on all GPCs).  So the flight
+  software itself decides some GPCs had an NSP error: FIOERRLC's other
+  sources are FIOBCERR (STAT1 no-go), FIOMSCTO (STAT4 busy/wait: the BCE
+  still busy when the MSC checks -- a race an emulator could lose on one
+  GPC and not another), FIOMMERR, FIOPSDTO (MSC pseudo time-out).  The NSP
+  BCE programs are FIONSPPG (bypassed after the early errors: 'OVERLAID BY
+  BCE BYPASS CODE' at FIOBYNC1-8; PSEUDO MDM RETURN WORD paths).
+  The split sits ~0.4-0.6 ms before a DEU poll arm (FIODEUPG pc 19974/
+  1997d, BCE6/7/8 every 0.48 s); the 12 s = 25 polls, i.e. a 0.48 s cycle
+  beating against a 1.0 s or 0.96 s one.  Whether the DEU poll is involved
+  or merely coincident is open.
+  NEXT INSTRUMENT (eve12 stopped in IPL 23:59; eve13 from ~00:00): RANGETRACE
+  '1948c + 19b85 FIOBCERR + 19b9d FIOMSCTO + 19bbc FIOMMERR + 19bff FIOPSDTO,
+  400000 lines, from own t=600 s' and TIMEOUT_TRACE_PE widened to 20-23 (RECV
+  ARM on the FF buses).  At the next split, which entry each GPC took names
+  the error kind; R1/R3 there give the BCE and IOQE.
