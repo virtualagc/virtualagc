@@ -25,7 +25,11 @@ Anything can send one:
 
 THE WINDOW has no title bar, so it is moved by dragging it with the left
 button; the right button offers Clear and Quit, and Ctrl+Q quits.  It stays
-above the other windows so a recording always shows it.
+above the other windows so a recording always shows it.  It is an ordinary
+window the desktop manages -- listed in the taskbar as "Subtitles" -- that
+asks not to be decorated (_MOTIF_WM_HINTS); --no-taskbar makes it an
+unmanaged one instead, as it first was, which no window manager can frame
+but which the taskbar does not list either.
 """
 
 import argparse
@@ -34,6 +38,7 @@ import queue
 import re
 import socket
 import struct
+import subprocess
 import threading
 import tkinter as tk
 import tkinter.font as tkfont
@@ -87,7 +92,14 @@ class Subtitles(object):
     def __init__(self, root, args):
         self.root = root
         self.args = args
-        root.overrideredirect(True)          # no title bar, no border
+        root.title("Subtitles")
+        if args.no_taskbar:
+            root.overrideredirect(True)      # unmanaged: no frame, no taskbar entry
+        else:
+            # Managed, so the taskbar lists it, but undecorated.  The window
+            # manager (Marco, here) reads the hint only when a window is FIRST
+            # mapped, so the window stays withdrawn until the hint is on it.
+            root.withdraw()
         root.attributes("-topmost", True)
         root.configure(bg=args.bg)
         try:
@@ -110,9 +122,38 @@ class Subtitles(object):
         self.popup.add_command(label="Quit", command=root.quit)
         self.q = queue.Queue()
         self._grab = (0, 0)
+        if not args.no_taskbar:
+            self._undecorate()               # before anything can map the window
         self.show(args.text or "")
+        if not args.no_taskbar and not (args.hide_when_empty and not (args.text or "").strip()):
+            root.deiconify()
         threading.Thread(target=self._listen, daemon=True).start()
         root.after(50, self._poll)
+
+    def _undecorate(self):
+        """Ask the window manager for no title bar or border, before the
+        window is first mapped: _MOTIF_WM_HINTS flags=2 (decorations given),
+        decorations=0, on Tk's WRAPPER -- the parent of winfo_id(), which is
+        what the window manager manages.  wm_frame() names the inner window
+        until the window has been mapped, so it cannot be used here."""
+        try:
+            self.root.update_idletasks()
+            tree = subprocess.run(["xwininfo", "-tree", "-id", str(self.root.winfo_id())],
+                                  capture_output=True, text=True, timeout=5).stdout
+            m = re.search(r"Parent window id: (0x[0-9a-fA-F]+)", tree)
+            if not m:
+                raise ValueError("no parent window for %s" % hex(self.root.winfo_id()))
+            wrapper = str(int(m.group(1), 16))
+            subprocess.run(["xprop", "-id", wrapper, "-f", "_MOTIF_WM_HINTS", "32c",
+                            "-set", "_MOTIF_WM_HINTS", "2, 0, 0, 0, 0"],
+                           check=False, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=5)
+            back = subprocess.run(["xprop", "-id", wrapper, "_MOTIF_WM_HINTS"],
+                                  capture_output=True, text=True, timeout=5).stdout
+            if "2, 0, 0, 0, 0" not in back:
+                raise ValueError("the hint did not stick: %s" % back.strip())
+        except (OSError, ValueError, subprocess.SubprocessError, tk.TclError) as e:
+            log("cannot ask for an undecorated window (it will have a title bar): %s" % e)
 
     def _rewrap(self, _event=None):
         self.label.configure(wraplength=max(50, self.root.winfo_width() - 40))
@@ -187,6 +228,9 @@ def main(argv=None):
                     help="0-1, where the window manager supports it (default 0.85)")
     ap.add_argument("--align", choices=sorted(ANCHORS), default="center",
                     help="horizontal alignment of the caption (default center)")
+    ap.add_argument("--no-taskbar", action="store_true",
+                    help="an unmanaged window, as before: never framed by the window "
+                         "manager, but not listed in the taskbar either")
     ap.add_argument("--hide-when-empty", action="store_true",
                     help="withdraw the box while there is no caption")
     ap.add_argument("--text", default="", help="caption to show at start")
