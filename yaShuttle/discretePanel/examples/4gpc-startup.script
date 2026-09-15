@@ -1,0 +1,91 @@
+# EXAMPLE crew script: bring up four GPCs and two CRTs through the NBAT to
+# OPS 2, waiting on the O6 MODE talkbacks rather than fixed times.  One file
+# holds the switches and the keystrokes; panelO6.py plays it (crewscript.py).
+# Run from discretePanel/:
+#
+#   python3 simulatePASS.py --gpcs 1-4 --crts 2 --tape OI340700-v44boot.mmv \
+#       --script examples/4gpc-startup.script --duration 900
+#
+# Times are seconds from the start, or from the last wait.  The one delay that
+# is still a fixed time is STBY to ITEM 1 EXEC (67 s for GPC1, 65 s for the
+# others), for the IPL display to come up.  Verified 2026-09-15 as two files
+# (OPS 2 typed about 570 s after the panel started, against 840 s with fixed
+# times).
+
+# --- all four GPCs to HALT, the IDPs on, GPC1 IPL from MM1 on CRT 1 ---------
+0     gpc 1
+0     mode HALT
+0.01  gpc 2
+0.02  mode HALT
+0.03  gpc 3
+0.04  mode HALT
+0.05  gpc 4
+0.06  mode HALT
+0.08  idppower 1 on
+0.09  idppower 2 on
+0.1   crt 1
+0.2   source MM1
+0.4   gpc 1
+0.5   ipl
+3     mode STANDBY
+70    keys ITEM 1 EXEC
+
+# --- GPC1 loaded: to RUN; GPC2 IPL on CRT 2 ----------------------------------
+wait gpc 1 mode-tb RUN timeout 300
+1     crt 0
+3     mode RUN
+5     source OFF
+10    gpc 2
+11    source MM1
+12    crt 2
+12.5  idpload 2
+13    ipl
+16    mode STANDBY
+81    keys KB2 ITEM 1 EXEC
+
+# --- GPC2 loaded: to RUN; GPC3 IPL -------------------------------------------
+wait gpc 2 mode-tb RUN timeout 300
+1     crt 0
+3     mode RUN
+5     source OFF
+10    gpc 3
+11    source MM1
+12    crt 2
+12.5  idpload 2
+13    ipl
+16    mode STANDBY
+81    keys KB2 ITEM 1 EXEC
+
+# --- GPC3 loaded: to RUN; GPC4 IPL -------------------------------------------
+wait gpc 3 mode-tb RUN timeout 300
+1     crt 0
+3     mode RUN
+5     source OFF
+10    gpc 4
+11    source MM1
+12    crt 2
+12.5  idpload 2
+13    ipl
+16    mode STANDBY
+81    keys KB2 ITEM 1 EXEC
+
+# --- GPC4 loaded: to RUN; the NBAT, then OPS 2 -------------------------------
+wait gpc 4 mode-tb RUN timeout 300
+1     crt 0
+3     mode RUN
+5     source OFF
+16    keys ITEM 1 + 2 EXEC
+24    keys ITEM 2 + 1 EXEC
+32    keys ITEM 3 + 2 EXEC
+40    keys ITEM 4 + 3 EXEC
+48    keys ITEM 5 + 4 EXEC
+56    keys ITEM 7 + 1 EXEC
+64    keys ITEM 8 + 2 EXEC
+72    keys ITEM 9 + 3 EXEC
+80    keys ITEM 1 0 + 4 EXEC
+88    keys ITEM 1 1 + 1 EXEC
+96    keys ITEM 1 2 + 1 EXEC
+104   keys ITEM 1 3 + 2 EXEC
+112   keys ITEM 1 8 + 1 EXEC
+120   keys ITEM 1 9 + 2 EXEC
+141   keys OPS 2 0 1 PRO

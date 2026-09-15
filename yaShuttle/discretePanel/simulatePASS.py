@@ -20,6 +20,13 @@ kept in a prev-<time> directory there.
 With one GPC the procedure is retest-crt2.sh's; with several, the order the
 scripted two-, three- and four-computer runs verified through OPS 2.
 
+CREW SCRIPTS.  --script FILE (also spelled --panel-script) is one file for the
+whole scripted crew: panel switches, 'keys ...' keystrokes, 'subtitle ...'
+captions and 'wait gpc N mode-tb RUN|IPL|BP' lines, all in seconds, played by
+panelO6.py on one clock so switches and keys stay in step.  crewscript.py
+documents the language; examples/4gpc-startup.script brings up four GPCs to
+OPS 2.  The paragraphs below describe the older split, which still works.
+
 UNATTENDED RUNS.  --panel-script hands panelO6.py a timed script ('<seconds>
 <command>' per line, decimals allowed; 'gpc <n>' picks the column, and 'idppower N on|off',
 'majfunc N GNC|SM|PL', 'kybdsel left 1|3', 'kybdsel right 2|3' and 'idpload N'
@@ -66,20 +73,9 @@ YAGPC_DIR = os.path.normpath(os.path.join(HERE, "..", "yaGPC2"))
 MCAST_GROUP = "239.255.1.1"
 IFACE = os.environ.get("NSTS_BUS_IFACE", "127.0.0.1")
 
-# DPS keyboard scan codes (stsKeyboard.py's SCAN, from MEDS2.py's KYBD.DEUKey).
-SCAN = {
-    "FAULT_SUMM": 0xFFE1, "SYS_SUMM": 0xFFE9, "MSG_RESET": 0xFFF1, "ACK": 0xFFF9,
-    "GPC/CRT": 0xFFC1, "A": 0xFFC9, "B": 0xFFD1, "C": 0xFFD9,
-    "I/O_RESET": 0xFF3A, "D": 0xFF7A, "E": 0xFFBA, "F": 0xFFFA,
-    "ITEM": 0xFE3A, "1": 0xFE7A, "2": 0xFEFB, "3": 0xFEFA,
-    "EXEC": 0xF9FB, "4": 0xFBFB, "5": 0xFDFB, "6": 0xFFFB,
-    "OPS": 0xF1FB, "7": 0xF3FB, "8": 0xF5FB, "9": 0xF7FB,
-    "SPEC": 0xCFFC, "-": 0xDFFC, "0": 0xEFFC, "+": 0xFFFC,
-    "RESUME": 0x8FFC, "CLEAR": 0x9FFC, ".": 0xAFFC, "PRO": 0xBFFC,
-}
-# MDU -> IDP messages on an _IDPn bus (MEDS2.py's MDUMsg): IDP POWER and IDP
-# LOAD, which panelO6.py's C2 and O6 switches send and follow.
-IDP_MSG = {"DEU_LOAD": (0x0002,), "IDP_POWER_ON": (0x0003, 1), "IDP_POWER_OFF": (0x0003, 0)}
+# The DPS keyboard scan codes and MDU -> IDP messages live with the crew script
+# language, which --keys playback below shares.
+from crewscript import SCAN, IDP_MSG
 MAJOR_FUNC = {"PL": 0, "GNC": 1, "SM": 2}
 
 
@@ -536,7 +532,9 @@ def main():
                          "and exit without starting anything")
     ap.add_argument("--procedure", dest="instructions", action="store_true",
                     help=argparse.SUPPRESS)          # the old name
-    ap.add_argument("--panel-script", metavar="FILE", help="timed script for panelO6.py")
+    ap.add_argument("--script", "--panel-script", dest="panel_script", metavar="FILE",
+                    help="crew script for panelO6.py: switches, keys, subtitles and waits "
+                         "in one file (crewscript.py)")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
     ap.add_argument("--subtitles", dest="subtitles", action="store_true", default=None,
                     help="start subtitles.py, the caption box, even if no script uses it")

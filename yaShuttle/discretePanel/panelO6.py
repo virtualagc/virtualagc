@@ -91,6 +91,7 @@ import time
 import tkinter as tk
 import tkinter.font as tkfont
 
+import crewscript
 import discretes as D
 
 GPCS = ("GPC1", "GPC2", "GPC3", "GPC4", "GPC5")
@@ -2010,9 +2011,11 @@ class PanelO6:
 #
 # discretePanel.py's language, so a rig that drives that panel can drive this
 # one; see its "scripted playback" for why a crew sequence has to be a timed
-# script rather than a static override.  Each line is `<seconds> <command>`,
-# decimals allowed (milliseconds until 2026-09-15), times from startup or from
-# the last wait line; blank lines and `#` comments are ignored.
+# script rather than a static override.  The script is a CREW SCRIPT
+# (crewscript.py, which documents the language and plays it): `<seconds>
+# <command>` lines, times from startup or from the last `wait` line, and
+# besides the panel commands below, `keys ...` typed on a DPS keyboard and
+# `subtitle ...` for subtitles.py -- one file, one clock.  The panel commands:
 # The commands move the controls, so the window, the log and the bus agree:
 #
 #     mode HALT|STANDBY|STBY|RUN   the wired GPC's MODE switch
@@ -2044,95 +2047,17 @@ class PanelO6:
 # A wait that times out stops the script (it is logged), rather than going on
 # as if the GPC were ready.  Without wait lines a script runs exactly as
 # before.
-SCRIPT_HELP = ("timed discrete sequence: '<seconds> <command>' per line "
-               "(decimals allowed, e.g. 12.5).  "
-               "Commands act on the primary GPC until 'gpc <n>' moves "
-               "them to another column, which is how a script brings up "
-               "more than one computer.  'wait gpc <n> mode-tb RUN|IPL|BP "
-               "[timeout <s>]' holds the script for a talkback; later times "
-               "count from when it is met.")
+SCRIPT_HELP = ("crew script (crewscript.py): '<seconds> <command>' lines -- panel "
+               "commands, 'keys [KB1|KB2|KB3] KEY ...', 'subtitle TEXT' -- and "
+               "'wait gpc <n> mode-tb RUN|IPL|BP [timeout <s>]', after which times "
+               "count from when it is met.  Panel commands act on the primary GPC "
+               "until 'gpc <n>' moves them to another column.")
 IPL_HOLD_MS = 250
-# SCRIPT TIMES ARE SECONDS.  They were milliseconds until 2026-09-15, when the
-# panel script was made to count the way a simulatePASS keys file always has.
-# No script needs anything like ten hours, and every millisecond script ever
-# written has a time far above it, so a larger time is refused rather than
-# silently waited out.
-MAX_SCRIPT_SECONDS = 36000
 TB_WORD_SIZE = 9               # RUN / IPL on a talkback flag
-WAIT_TIMEOUT_S = 600           # a `wait` line with no timeout gives up after this
 
 
 def _on(word):
     return word.lower() in ("on", "1", "set", "true")
-
-
-SUBTITLE_OFFSET = 90            # subtitles.py listens on port base + this
-
-
-def _send_subtitle(text):
-    """One caption for subtitles.py: a UTF-8 datagram, empty to clear."""
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    try:
-        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF,
-                     socket.inet_aton(D.IFACE))
-        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
-        s.sendto(text.encode("utf-8"), (D.GROUP, D.PORT_BASE + SUBTITLE_OFFSET))
-    except OSError as e:
-        log("cannot send a subtitle: %s" % e)
-    finally:
-        s.close()
-
-
-def _parse_wait(arg, where="script"):
-    """'gpc N mode-tb STATE [timeout S]' -> (column, STATE, seconds)."""
-    w = arg.split()
-    try:
-        if (len(w) not in (4, 6) or w[0].lower() != "gpc"
-                or w[2].lower() != "mode-tb"):
-            raise ValueError
-        col = int(w[1]) - 1
-        state = {"BARBERPOLE": "BP"}.get(w[3].upper(), w[3].upper())
-        timeout = WAIT_TIMEOUT_S
-        if len(w) == 6:
-            if w[4].lower() != "timeout":
-                raise ValueError
-            timeout = float(w[5])
-    except ValueError:
-        raise SystemExit("panelO6: %s: expected 'wait gpc N mode-tb "
-                         "RUN|IPL|BP [timeout S]', got %r" % (where, arg))
-    if not 0 <= col < N_GPC or state not in ("RUN", "IPL", "BP"):
-        raise SystemExit("panelO6: %s: bad wait %r" % (where, arg))
-    return col, state, timeout
-
-
-def _parse_script(text):
-    """Entries in running order: (ms, command) or ("wait", arg).  Times sort
-    within each stretch between wait lines, which is all they ever meant."""
-    out, stretch = [], []
-    for n, line in enumerate(text.splitlines(), 1):
-        line = line.split("#", 1)[0].strip()
-        if not line:
-            continue
-        parts = line.split(None, 1)
-        if len(parts) == 2 and parts[0].lower() == "wait":
-            _parse_wait(parts[1], "script line %d" % n)
-            out += sorted(stretch, key=lambda e: e[0])
-            stretch = []
-            out.append(("wait", parts[1].strip()))
-            continue
-        try:
-            seconds = float(parts[0]) if len(parts) == 2 else None
-        except ValueError:
-            seconds = None
-        if seconds is None or seconds < 0 or parts[0].lower() in ("nan", "inf"):
-            raise SystemExit("panelO6: script line %d: expected "
-                             "'<seconds> <command>', got %r" % (n, line))
-        if seconds > MAX_SCRIPT_SECONDS:
-            raise SystemExit("panelO6: script line %d: %s seconds is over %d -- script "
-                             "times are SECONDS now, not milliseconds (divide by 1000)"
-                             % (n, parts[0], MAX_SCRIPT_SECONDS))
-        stretch.append((int(round(seconds * 1000)), parts[1].strip()))
-    return out + sorted(stretch, key=lambda e: e[0])
 
 
 def _run_script(panel, entries, quit_after_ms=None):
@@ -2145,10 +2070,7 @@ def _run_script(panel, entries, quit_after_ms=None):
     # published.
     target = [panel.wired]
 
-    def do(cmd):
-        verb, _, arg = cmd.partition(" ")
-        arg = arg.strip()
-        log(cmd)
+    def do(verb, arg):
         w = target[0]
         if verb == "gpc":
             n = int(arg)
@@ -2210,8 +2132,6 @@ def _run_script(panel, entries, quit_after_ms=None):
                 raise SystemExit("panelO6: kybdsel is 'left 1|3' or 'right 2|3', "
                                  "not %r" % arg)
             panel._set_kybd_sel(side, val)
-        elif verb == "subtitle":
-            _send_subtitle(arg)
         elif verb == "idpload":
             n = int(arg)
             if not 1 <= n <= N_IDP_LOAD:
@@ -2238,41 +2158,10 @@ def _run_script(panel, entries, quit_after_ms=None):
             root.after(IPL_HOLD_MS,
                        lambda: panel._set_bfc_disengage("LEFT"))
 
-    # Run in order.  A timed line fires at its time after the ORIGIN -- the
-    # script's start, or the moment the last wait was met; a wait line polls
-    # the talkback it names.
-    origin = [time.monotonic()]
-
-    def run_from(k):
-        while k < len(entries):
-            first, rest = entries[k]
-            if first == "wait":
-                col, state, timeout = _parse_wait(rest)
-                log("wait " + rest)
-                begun = time.monotonic()
-
-                def poll(k=k, col=col, state=state, timeout=timeout,
-                         begun=begun, rest=rest):
-                    waited = time.monotonic() - begun
-                    if panel.mode_tb(col) == state:
-                        log("wait met after %.1f s: %s" % (waited, rest))
-                        origin[0] = time.monotonic()
-                        run_from(k + 1)
-                    elif waited > timeout:
-                        log("WAIT TIMED OUT after %.0f s: %s -- script stopped"
-                            % (timeout, rest))
-                    else:
-                        root.after(100, poll)
-                root.after(0, poll)
-                return
-            due = origin[0] + first / 1000.0 - time.monotonic()
-            if due > 0:
-                root.after(int(due * 1000) + 1, lambda k=k: run_from(k))
-                return
-            do(rest)
-            k += 1
-
-    root.after(0, lambda: run_from(0))
+    # ONE PLAYER FOR THE WHOLE CREW SCRIPT: its clock and its waits time the
+    # switches above and the keystrokes and captions alike (crewscript.py).
+    crewscript.Player(entries, root.after, do,
+                      lambda gpc: panel.mode_tb(gpc - 1), log).start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
 
@@ -2332,7 +2221,11 @@ def main(argv=None):
     _dont_steal_focus(root, mapWindow=not args.script)
     if args.script:
         with open(args.script) as f:
-            _run_script(panel, _parse_script(f.read()), args.quit_after)
+            try:
+                entries = crewscript.parse(f.read())
+            except crewscript.ScriptError as e:
+                raise SystemExit("panelO6: %s" % e)
+        _run_script(panel, entries, args.quit_after)
     elif args.quit_after is not None:
         root.after(args.quit_after, root.quit)
     # Keep a reference so the panel is not collected.
