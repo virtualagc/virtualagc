@@ -231,6 +231,43 @@ can stay on for multi-hour runs.  The flight software's own number.
   alternates between few values, so pair by handshake/sequence, not by code
   match), #111, #130, #136, #137, #139, #141, #145.
 
+## Host events: record them alongside (owner's hypothesis)
+
+The owner suspects exogenous host events -- swap, large memory moves, file
+I/O -- freeze the host briefly and tip a GPC out.  Already checked (ledger
+#145, 2026-09-14 evening): journal empty around all five losses; the
+simulation's processes had no swapped pages and zero major faults through a
+loss; scripted runs logging to NVMe failed as often as the hand run logging
+to the spinning /mnt/STORAGE disk; barrier never abandoned (no single-thread
+stall > 250 ms); display peer holds that went unanswered (including partial
+replies past their 5 ms budget, which is 5 ms MINUS time already held) never
+landed on the voted-out computer near its loss, and clean runs had as many.
+
+Not yet covered, so record it overnight:
+
+1. **A host-stall recorder** running beside each run (scratchpad script):
+   once a second, with a wall-clock timestamp, `/proc/pressure/{cpu,memory,io}`
+   totals (deltas), `/proc/vmstat` pswpin/pswpout/pgmajfault/compact_stall/
+   allocstall_*, and for yaGPC2 and each MEDS2 process majflt, voluntary and
+   involuntary context switches, and per-thread utime/stime.  Correlate every
+   CAM change (cam.log mtime, or poll cam.log once a second and timestamp the
+   new lines) against the preceding seconds.
+2. **The display listener path.**  GPCs 3 and 4 are only ever LISTENERS on DK
+   buses 6-9 (CRT1 is GPC1's, CRT2 GPC2's) and a listener does not peer-hold,
+   so a late MEDS2 reply reaching a listener is the untested route to a
+   self-only I/O error (FIOERRLC).  Turn on `YAGPC_TIMEOUT_TRACE=1
+   YAGPC_TIMEOUT_TRACE_PE=6,7,8,9 YAGPC_TIMEOUT_TRACE_FROM=<OPS 2 time>` and
+   `YAGPC_ERRTERM_TRACE=6,7,8,9` (check each variable's exact syntax in
+   src/iop.c ~1618-2000 and run.c:406 first) with `YAGPC_SYNCORDER=1`, and see
+   what precedes the FCMSFAIL that takes the computer out.
+3. **A deliberate host stall as a test of both ideas** (after 1 and 2 work):
+   SIGSTOP / SIGCONT a MEDS2 process for 5, 20, 100 ms (`kill -STOP <pid>;
+   sleep; kill -CONT <pid>` in one short script, by PID), and separately
+   generate I/O pressure (a large `dd` to /mnt/STORAGE with conv=fsync).  If
+   losses or the margin follow the stalls, the hypothesis is confirmed and the
+   fix is to make the path tolerant; if not, it is refuted -- record either
+   way.
+
 ## Deliverables for the morning
 
 1. The metric working (script A at least), with its definition written down.
