@@ -1,0 +1,1542 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>Building and Running PASS</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="Author" content="Ronald Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <link rel="stylesheet" href="Header.css">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <div align="center">
+      <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software").replace("@SUBTITLE@","Building and Running It"))
+</script><font size="+1"><i><b>(For now, I'm only going to discuss
+            working in Linux, and particularly Linux Mint. <br>
+            Over time, I'll expand the discussion to include Mac OS and
+            Windows.)</b></i></font><br>
+    </div>
+    <h1>Table of Contents </h1>
+    <ul>
+      <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#setup">Step 0: Setup</a></li>
+      <li><a moz-do-not-send="true" href="#compilePASS">Step 1:
+          Compiling and Assembling</a></li>
+      <li><a moz-do-not-send="true" href="#linking">Step 2: Linking</a>
+        <br>
+      </li>
+      <li><a moz-do-not-send="true" href="#verification">Step 3:
+          (Optional) Verification</a></li>
+      <li><a moz-do-not-send="true" href="#standalone">Step 4:
+          (Optional) Stand-Alone Emulation</a></li>
+      <li><a moz-do-not-send="true" href="#taping">Step 5: Taping</a></li>
+      <li><a moz-do-not-send="true" href="emulationFromTape">Step 6:
+          Emulation and IPL from Tape</a></li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#background">Background</a></li>
+        <li><a moz-do-not-send="true" href="ipl">IPL</a></li>
+        <li><a moz-do-not-send="true" href="#tour">A Brief Tour</a></li>
+      </ul>
+      <li><a moz-do-not-send="true" href="#multiGPC">For Enthusiasts</a><br>
+      </li>
+      <ul>
+      </ul>
+      <ul>
+      </ul>
+    </ul>
+    <h1><a name="Introduction"></a>Introduction</h1>
+    Elsewhere on this website we've discussed various topics related to
+    the Space Shuttle's flight software, such as:<br>
+    <ul>
+      <li><a moz-do-not-send="true" href="Shuttle.html">The general
+          characteristics of the Orbiter spacecraft and its Data
+          Processing System (DPS)</a></li>
+      <li>T<a moz-do-not-send="true" href="HAL.html">he compiler used to
+          compile that portion of the flight software written in the
+          high-level language HAL/S</a></li>
+      <li><a moz-do-not-send="true" href="ASM101S.html">The assembler
+          used to assemble that portion of the flight software written
+          in the AP-101S assembly language of the shuttle's General
+          Purpose Computers (GPC)</a></li>
+      <li><a moz-do-not-send="true" href="HALLINK101S.html">The linker
+          used to combine the object files produced by those tools into
+          a form that's actually executable</a></li>
+      <li><a moz-do-not-send="true" href="emulation-shuttle.html">The
+          emulation software allowing you to run GPC programs on your
+          modern Linux, Mac OS, or Windows computer system</a>.</li>
+    </ul>
+    All of that sounds very complex — and indeed <i>is</i> very complex
+    —, and you might be forgiven for imagining that it's sufficient if
+    you simply put enough effort into understanding it.&nbsp; And
+    indeed, it does allow you to create and run simple HAL/S or AP-101S
+    programs that you may care to write yourself or that you find in
+    books or Shuttle-era documents.&nbsp; Alas! it is <i>not</i>
+    sufficient Space Shuttle flight software, no matter how much effort
+    you're willing to put into it.&nbsp; For that, your nightmare of
+    complexity is just starting ... but hopefully can be put to rest by
+    our discussion here on this page.<br>
+    <br>
+    I should say that our discussion extends only as far as the
+    Shuttle's Primary Avionics Software Subsystem (PASS), and the Backup
+    Flight Software (BFS) isn't touched upon except as needed for
+    explaining execution of PASS.&nbsp; That's because we have only
+    small fragments of BFS.&nbsp; What we do have is <i>very large</i>
+    portions of certain versions of PASS software source code, though
+    it's a subjective matter as to whether you could say we have 100% of
+    the source code of any given version. In descending order of
+    confidence, I'd say that we have "complete" versions of:<br>
+    <ul>
+      <li>PASS version OI-34.07 (STS-134)</li>
+      <li>PASS version OI-34.06</li>
+      <li>PASS version OI-30.17</li>
+    </ul>
+    <p>Our focus <i>here</i> will be OI-34.07, though as a longer-range
+      goal, we'd like to eventually extend our coverage to the other
+      versions as well.<br>
+    </p>
+    <p>What make it all as nightmarish as I claim?&nbsp; Here's the
+      synopsis:<br>
+    </p>
+    <ul>
+      <li>There are roughly 2000 source-code files, most of which are
+        compiled or assembled individually into object files.&nbsp;
+        However, the HAL/S compiler has a number of compile-time options
+        that affect the code produced, and each file must be compiled
+        with the appropriate options ... which are similar but not
+        identical for all files. Even the assembler has an option or two
+        you need to know about.&nbsp; Additionally, the files must be
+        compiled in a particular order, since most files depend on other
+        files that have to have been previously compiled.<br>
+      </li>
+      <li>This collection of object files is partitioned into up to 60
+        overlapping "PHASES", and all of files in any given PHASE must
+        be linked together (in a particular order).</li>
+      <li>Nine overlapping collections of PHASES have special
+        interpretations, because they correspond to the Shuttle's nine
+        Operational Sequences (OPS).&nbsp; These collections are called
+        "memory configurations" (MC).&nbsp; Some PHASES don't belong to
+        any MC.<br>
+      </li>
+      <li>Five of the memory configurations are grouped together as
+        something called the GNC Major Function Base (GNC-FB)</li>
+      <li>There are five separate GPCs in a Shuttle, and at any given
+        time, the memory of any of those GPCs contains either a PHASE or
+        an MC, identical or different to/from the other GPCs.</li>
+      <li>GPC memory is loaded from a Mass Memory Unit (MMU) —
+        originally a tape, but a solid-state memory in later flights —
+        which stores PHASES.&nbsp; In particular, to load an MC, you
+        have to load several different PHASES from the MMU.<br>
+      </li>
+      <li>And finally, there are <i>patches</i> for specific areas of
+        GPC memory, of which we have little or no surviving information,
+        which are uploaded directly to the GPCs.</li>
+    </ul>
+    <p>So in order to get a working setup in which PASS can be run on a
+      modern computer, we need not only emulators for the GPC, the MMU,
+      and other peripheral devices in the spacecraft, but also need to
+      know how to compile PASS source code (i.e., which ordering and
+      which options), how to combine the object files into PHASES, and
+      how to get those PHASES onto tape in a format that the GPC can
+      correctly understand. And hope that any patches we're missing
+      aren't too important.<br>
+    </p>
+    Perhaps you'd be surprised to learn that this turns out not to be
+    easy, and that's why its the subject of the entire remainder of this
+    page.<br>
+    <h1><a name="setup"></a>Step 0: Setup</h1>
+    <p>Before building any PASS source code, you need an appropriate
+      setup for doing so.&nbsp; First, you'll need to have installed the
+      development tools, i.e., the HAL/S compiler, the assembler, and so
+      on.&nbsp; The first step is to locally clone <a
+        moz-do-not-send="true"
+        href="https://github.com/virtualagc/virtualagc">the Virtual AGC
+        software repository</a>, if you have not done so already.&nbsp;
+      This will give you a local directory called "virtualagc".&nbsp;
+      Since I don't know where you will put this directory on your own
+      computer system, I'll refer to it as <font color="#009900"><i><b>virtualagc</b></i></font>,
+      and when you see this in the discussion below you'll just have to
+      remember to use the path that's correct for your own computer
+      system.</p>
+    <p>TBD<br>
+    </p>
+    <blockquote>
+      <p><b><i>An important decision for you:</i></b> Perhaps you just
+        don't care about how to compile the flight software, or about
+        building a "tape" from it, but just want to <i>run</i> it. If
+        that's you, then you can simply skip all this dreadful, nerdy
+        stuff and <a moz-do-not-send="true" href="#emulationFromTape">jump
+
+
+
+
+          right down to the <i>other</i> dreadful, nerdy stuff</a>.<br>
+      </p>
+    </blockquote>
+    <p>Next, you'll need PASS source code.&nbsp; As has been discussed
+      in depressing detail elsewhere (TBD), this software is being
+      treated as restricted out of fear of legal repression — or in the
+      dreadful euphemism people are using at the time I'm writing this,
+      "in an abundance of caution" —, so if you qualify to get this
+      material, download it.&nbsp; It's a compressed git
+      repository.&nbsp; Unpack it, and you'll have a directory called
+      "PFS".&nbsp; Since I don't know where on your computer this
+      directory will be, I'll refer to it as <font color="#009900"><b><i>PFS</i></b></font>,
+      and when you see this in the discussion below you'll just have to
+      remember to use the path that's correct for your own computer
+      system.<br>
+    </p>
+    <p>Building PASS source code produces a <i>lot</i> of files that
+      are created by the compiler <i>et al.</i>, so as a practical
+      measure you need to do your work in a scratch directory used only
+      for that purpose, which you won't feel bad about disposing of
+      later. (It's <i>your</i> computer, of course, so you can do what
+      you want.)&nbsp; I'll refer to this directory as <font
+        color="#009900"><i><b>scratch</b></i></font>, and when you see
+      this in the discussion below you'll just have to remember to use
+      the path that's correct for your own computer system.<br>
+    </p>
+    <p>Depending on which PASS version you're going to build, you need
+      to make sure that the source code you need is accessible from <font
+        color="#009900"><i><b>scratch</b></i></font>. Here's how we set
+      it up:<br>
+    </p>
+    <ul>
+      <li>For OI-30.17:&nbsp; copy the directory <font color="#009900"><i><b>PFS</b></i></font>/OI301700
+
+
+
+
+        into <font color="#009900"><i><b>scratch</b></i></font>. <br>
+      </li>
+      <li>For OI-34.06:&nbsp; copy the directory <font color="#009900"><i><b>PFS</b></i></font>/OI340600
+
+
+
+
+        into <font color="#009900"><i><b>scratch</b></i></font>.</li>
+      <li>For OI-34.07:&nbsp; copy the directory <font color="#009900"><i><b>PFS</b></i></font>/OI340600
+
+
+
+
+        into <font color="#009900"><i><b>scratch</b></i></font>,
+        renaming it OI340700. Then copy the directory <font
+          color="#009900"><i><b>PFS</b></i></font>/OI340700 into <font
+          color="#009900"><i><b>scratch</b></i></font>, accepting any
+        overwriting of files with the identical names.&nbsp; (Because
+        OI-34.06 and OI-34.07 source code is so similar, <font
+          color="#009900"><i><b>PFS</b></i></font>/OI340700 stores only
+        the files that are <i>different</i> from <font color="#009900"><i><b>PFS</b></i></font>/OI340600.
+
+
+
+
+        You may notice that a lot of these files are empty; i.e., that
+        they have 0 length. That's not a bug, but rather just our little
+        trick for getting rid of OI-34.06 files which OI-34.07 doesn't
+        need.)</li>
+    </ul>
+    <p>Finally, copy the following directories into your <font
+        color="#009900"><i><b>scratch</b></i></font>/OI301700 or <font
+        color="#009900"><i><b>scratch</b></i></font>/OI340600 or <font
+        color="#009900"><i><b>scratch</b></i></font>/OI340700 directory:<br>
+    </p>
+    <ul>
+      <li><font color="#009900"><i><b>virtualagc</b></i></font>/yaShuttle/"Source
+
+
+
+
+        Code"/PASS.REL32V0/RUNASM</li>
+      <li><font color="#009900"><i><b>virtualagc</b></i></font>/yaShuttle/"Source
+
+
+
+
+        Code"/PASS.REL32V0/RUNMAC</li>
+    </ul>
+    <ul>
+    </ul>
+    <h1><a name="compilePASS"></a>Step 1: Compiling and Assembling<br>
+    </h1>
+    <blockquote>
+      <pre>cd <font color="#009900"><i><b>scratch</b></i><font color="#000000">/OI340700  # Or someday, OI340600 or OI301700</font></font><br>prepareTEMPLIB --clear<br>prepareINCLIB  --clear --include=INCL80<br>mkdir SDFLIB         # Or just clear the directory if it already exists.<br>mkdir objects        # Or just clear the directory if it already exists.
+compilePASS<br></pre>
+    </blockquote>
+    This is a long process, but at the end you should see that the
+    objects/ directory has been filled with object files.<br>
+    <p> </p>
+    <h1> <a name="linking"></a>Step 2: Linking</h1>
+    <h1><a name="verification"></a>Step 3: (Optional) Verification</h1>
+    <p><i>For OI-34.07 only</i>, we have disassembly reports generated
+      from dumps of GPC memory back in the Shuttle era by a program
+      called <b>MAFGEN</b>. It is therefore possible to verify the
+      build process up to this point by comparing the linked memory
+      images created in <a moz-do-not-send="true" href="#linking">the
+        preceding step</a> with memory images extracted from those
+      disassembly reports. This verification process is, of course,
+      entirely optional, and isn't needed if you're just interested in
+      running PASS.<br>
+    </p>
+    <p>TBD<br>
+    </p>
+    <h1><a name="standalone"></a>Step 4: (Optional) Stand-Alone
+      Emulation</h1>
+    <p>When we <a moz-do-not-send="true" href="#linking">linked the
+        PASS software</a> earlier, we produced images of the contents of
+      GPC memory for the various memory configurations (MC), or in
+      more-conventional terms, for the various "operational sequences"
+      (OPS) familiar to actual users of PASS.&nbsp; <br>
+    </p>
+    <p>TBD<br>
+    </p>
+    <p>In principle, it should be possible to load one of these memory
+      images into an AP-101S emulator and run it.&nbsp; In practice,
+      that's much more difficult than it sounds, because in actual use
+      one of these memory images will only be loaded <i>after</i> the
+      IPL process (or other software) has initialized the GPC and other
+      peripheral devices, and without that prior setup the memory image
+      cannot be run even if 100% correct.&nbsp; For example,
+      counter/timers need to be running, interrupt vectors need to be in
+      place and interrupts enabled, and so forth.&nbsp; There are other
+      issues as well, in that the GPC has memory-protection features,
+      and PASS software can be run only if (roughly speaking) all memory
+      containing <i>code</i> is "protected" and all <i>data</i> areas
+      are "unprotected".&nbsp; Any of these (and other) setups which
+      have not already been performed will cause PASS software to halt.<br>
+    </p>
+    <p>TBD<br>
+    </p>
+    <h1><a name="taping"></a>Step 5: Taping</h1>
+    <p>As I mentioned above, for the PASS software to be used in real
+      life, the GPC has to load it into memory from the Mass Memory Unit
+      (MMU).&nbsp; That was originally a tape drive, though it later
+      flights it was apparently a drop-in replacement using solid-state
+      memory instead, but we'll just continue to call the storage
+      mechanism a "tape".<br>
+    </p>
+    <p>Getting the built PASS software onto the tape is an adventure.<br>
+    </p>
+    <p>TBD<br>
+    </p>
+    <h1><a name="emulationFromTape"></a>Step 6: Emulation and IPL from
+      Tape</h1>
+    <h2><a name="iplBackground"></a>Background<br>
+    </h2>
+    <p>If everything above (other than the optional steps) has been done
+      correctly, it should now be possible to run PASS from the
+      tape!&nbsp; You will, however, have to understand a little bit
+      about the Initial Program Load (IPL) process, because it's not
+      automatic.&nbsp; And not fast, either.&nbsp; Why anyone would find
+      that acceptable in a flight-critical system in an object whizzing
+      through space, or possibly pointed toward the ground, at a high
+      rate of speed ... well, that's beyond my pay grade.&nbsp;
+      (Admittedly, <i>everything</i> is beyond my pay grade since I get
+      paid nothing for this, but you know what I mean.)<br>
+    </p>
+    <p>The minimal set of emulated equipment you'll need for an IPL is
+      fairly substantial:<br>
+    </p>
+    <ul>
+      <li>GPC</li>
+      <li>MMU</li>
+      <li>Master Timing Unit (MTU)</li>
+      <li>Multifunction Electronic Display Subsystem (MEDS):</li>
+      <ul>
+        <li>Integrated Display Processor (IDP)<br>
+        </li>
+        <li>Display Electronics Unit (DEU).</li>
+        <li>Keyboard Unit (KBU)<br>
+        </li>
+      </ul>
+      <li>Some control-panel switches</li>
+    </ul>
+    <p>Don't worry, if you've followed the setup instructions, all of
+      these things are available.&nbsp; Other combinations of
+      currently-existing emulated equipment are possible as well, but
+      won't be discussed here.&nbsp; These various emulations interact
+      via networking, as did the corresponding physical equipment in the
+      Shuttle itself.&nbsp; There, that network consisted of
+      MIL-STD-1553 buses, which are emulated via what's known as UDP
+      broadcasting.<br>
+    </p>
+    <p>Here's a basic IPL process we'll follow, though many variations
+      are possible.&nbsp; If you want to know more, <a
+        moz-do-not-send="true"
+        href="Shuttle/PASS%20USER%20GUIDE%20-%20OI32.pdf#page=52">the <i>OI-32
+
+
+
+
+          PASS User's Guide</i> has a more-extensive if still
+        abbreviated discussion</a>.<br>
+    </p>
+    <ol>
+      <li>The "bootstrap" program (FCMBOOT) is loaded and run, by the
+        GPC's microcode.<br>
+      </li>
+      <li>The GPC IPL program (GPCIPL) is loaded and run via FCMBOOT.<br>
+      </li>
+      <li>OPS 000 is loaded and run via GPCIPL.</li>
+    </ol>
+    <p>Having reached OPS 000 (the "system sofware" or SSW), the
+      remainder of PASS is accessible via additional commands.<br>
+    </p>
+    Other than FCMBOOT, which has no user interface, there are actually
+    quite a few interesting things you can do in any of these stages
+    (GPCIPL, OPS 0, ...) beyond just mindlessly proceeding to the next
+    stage, but that stuff is all outside of the scope of what I'm
+    talking about here, which is just IPL. Just for the purpose of
+    demonstration, I will walk you through some of it, but if you want
+    to explore the many capabilities that we're just skipping past, I'd
+    recommend the aforementioned <a moz-do-not-send="true"
+      href="Shuttle/PASS%20USER%20GUIDE%20-%20OI32.pdf"><i>OI-32 PASS
+        User's Guide</i></a> as a place where you might get a
+    toehold.&nbsp; There are probably much better training materials on
+    <a moz-do-not-send="true" href="links-shuttle.html">our Shuttle
+      Library page</a>, if you put your mind to finding them. I've not
+    yet put much effort into doing so myself, so I don't have much more
+    I can tell you of my own personal knowledge.<br>
+    <p>Although as I've mentioned so endlessly that it's probably
+      boring, for legal reasons we are afraid at present provide a full
+      copy of PASS on tape, so I've had an abridged tape prepared for
+      PASS OI-34.07 that includes only the IPL code and the following
+      major functions:<br>
+    </p>
+    <ul>
+      <li>OPS 000 (SSW) — System Software<br>
+      </li>
+      <li>OPS 9 (GNC) — Precount / post-landing</li>
+      <li>OPS 2 (GNC) — On orbit</li>
+      <li>OPS 8 (GNC) — On-orbit checkout</li>
+      <li>OPS 2 (SM) — Orbit / doors</li>
+      <li>OPS 9 (PL) — Mass memory utility<br>
+      </li>
+    </ul>
+    <p>(Recall that GNC is for guidance &amp; navigation, SM is for
+      system management, and PL stands for "payload" but is a misnomer
+      since it has nothing to do with the Shuttle's physical
+      payload.)&nbsp; Or in short, everything is provided on the
+      abridged tape except OPS 1/6 (Ascent / Return-to-launch-site) and
+      OPS 3 (Entry), so that you can't smash your simulation into
+      anything!&nbsp; Or to put it differently, so that you can't do
+      anything really interesting either.&nbsp; Still, it should give
+      you enough to play with, and I figure it's legally safe,
+      ITAR-wise.<br>
+    </p>
+    <p>We've provided a handy-dandy wrapper program (<b>TBD</b>) that
+      runs the simulation for you from the abridged tape:<br>
+    </p>
+    <blockquote>
+      <pre><b>TBD</b><br></pre>
+    </blockquote>
+    <blockquote>
+      <p><b><font size="-1">Note:</font></b><font size="-1"> If you
+          happen to have a different tape, such as the full OI-34.07, or
+          OI-34.06, OI-30.17, or indeed something of your own devising,
+          perhaps called MYTAPE.mmv, you could run it as follows:</font><br>
+      </p>
+      <blockquote>
+        <pre><font size="-1">TBD ...</font><br></pre>
+      </blockquote>
+      <font size="-1">In principle, it's even possible to directly run
+        one of the memory-configuration images (SSW, G16, G2, G3, G8,
+        G9, S2, P9) corresponding to the OPS <i>directly</i>, without
+        ever going through the MMU "tape" or IPL process.&nbsp; This is
+        trickier than it sounds, because the IPL process provides
+        critical setups like memory protection, interrupt vectors, timer
+        settings, and so forth, that aren't available otherwise. But
+        we've tried to provide those to the extent that we can, so here
+        are some commands you could try if you wanted:<br>
+      </font>
+      <blockquote>
+        <pre><font size="-1">TBD ...</font><br></pre>
+      </blockquote>
+    </blockquote>
+    <h2>IPL<a name="ipl"></a></h2>
+    <p>Let's look at the IPL process first, as it's a prerequisite to
+      everything else — after all, if you can't load a program, how are
+      you going to run it anyway? —, and yet it's ultimately the least
+      interesting thing. It's the equivalent of performing your morning
+      ablutions: a necessary preliminary to your day's activities, but
+      usually not something worthy of a "Dear Diary" entry.<br>
+    </p>
+    <p>Here's a video that shows going through an IPL process for GPC 1,
+      from power-up all the way to an OPS 000 menu screen. (It may play
+      in your browser, but if not, it'll hopefully let you download it
+      instead.)<br>
+    </p>
+    <p><video controls="controls" style="width:80%; height:auto;
+        display:block; margin:0 auto"> <source
+          src="demoIPL-final-1080.mp4" type="video/mp4"> </video></p>
+    <p></p>
+    <p>Even from just the screen-capture above, you can tell that there
+      are a lot of seemingly-complicated controls, and a lot of them are
+      actually used in the IPL process!&nbsp; At the left is the
+      emulated display screen (MEDS) itself, while at the right is the
+      keyboard that's associated with the MEDS, and in the middle there
+      are a lot of Shuttle control-panel switches. How do we know what
+      to do with the keyboard and all of those switches?&nbsp; The <a
+        moz-do-not-send="true"
+        href="Shuttle/PASS%20USER%20GUIDE%20-%20OI32.pdf#page=52">PASS
+        User's Guide (OI-32)</a> goes through it step-by-step, as well
+      as providing some extra explanation of what's going on behind the
+      scenes, so I won't waste my or your time by rehashing something
+      you could read just as easily there as here.&nbsp; I will comment
+      that a few of the steps in the PASS User's Guide are unnecessary
+      in the simulation, and I haven't bothered to supply controls for
+      them.&nbsp; For example, Step #1 in the published procedure is to
+      apply power to MMU1 and MMU2, but in the simulation they're just
+      always "on", and I haven't bothered to provide any fake power
+      switches for them that you can pretend to click.&nbsp; (But I
+      don't present I'm consistent on this matter: the simulated GPC
+      POWER switches <i>are</i> fake and are just provided for
+      pretending.)&nbsp; The only place in the published procedure where
+      you have a real option is at Step #12, in which you can choose
+      which "area" into which the software downloaded from the MMU is
+      supposed to be loaded; choose any of 1, 3, or 5, since areas 2 and
+      4 are for loading BFS, which we don't have. <br>
+    </p>
+    <p>The worst thing about the process, other than the need to hit all
+      those switches in the right order, at the right time instead of
+      having it proceed automatically, is that you'll notice the video
+      is 80 seconds long, and you've got 5 GPCs to deal with, so you're
+      looking at 400 seconds to IPL all of them unless you have buddies
+      helping you.<br>
+    </p>
+    <p>But enough grousing!&nbsp; What you get at the end of the process
+      is a menu screen entitled "GPC MEMORY", which is actually the
+      entry screen for OPS 000, as promised.&nbsp; That's your entrée to
+      the rest of PASS.<br>
+    </p>
+    <h2><a name="tour"></a>A Brief Tour<br>
+    </h2>
+    <a href="Shuttle%20flight%20computer%20software%20USA006083%20B.png"><img
+        moz-do-not-send="true"
+        src="Shuttle%20flight%20computer%20software%20USA006083%20B.png"
+        title="Click to enlarge" alt="" height="413" align="right"
+        border="2" width="400"></a>Before proceeding, there are a few
+    general things worth knowing.&nbsp; PASS software is partitioned
+    into up to 10 <i>Memory Configurations</i> (MC) or <i>Operational
+      Sequences</i> (OPS), which as far as I can tell are essentially
+    the same things, although a purist can probably tell me some
+    difference between them which at that instant seems significant to
+    whoever is doing the telling. These are are identified in a number
+    of confusing ways by/for particular audiences:<br>
+    <ol start="0">
+      <li>OPS 0, OPS 000, SSW, "System Software"</li>
+      <li>OPS 1, G1, GN1, GNC1, "Ascent"; or OPS 6, G6, GNC6, "RTLS"
+        (Return To Launch Site)<br>
+      </li>
+      <li>OPS 2, OPS 2 (GNC), G2, GN2, GNC2, "Orbit"</li>
+      <li>OPS 3, G3, GN3, GNC3, "Entry"</li>
+      <li>OPS 2 (SM), S2, SM2, "On-Orbit", "Orbit/doors"<br>
+      </li>
+      <li>(Omitted for many flights) OPS 4, S4, SM4, "Orbit P/L",
+        "Orbit/doors"<br>
+      </li>
+      <li>OPS 9 (PL), P9, P/L9, "MMU"</li>
+      <li>(Not used, what a relief!)</li>
+      <li>OPS 8, G8, GN8, GNC8, "On-Orbit Checkout"</li>
+      <li>OPS 9 (GNC), G9, GN9, GNC9, "Preflight"<br>
+      </li>
+    </ol>
+    The details also differ from flight to flight, and our documentation
+    is sadly incomplete, so you have to be a little flexible in terms of
+    guessing what some of the terminology salad thrown at you refers
+    to.&nbsp; For example, the diagram to the right (click to enlarge)
+    is from OI-30. Is it still correct for OI-34? You tell me!<br>
+    <br>
+    Each OPS is generally associated with a number of menu screens, with
+    which the crew interacts.&nbsp; Those are referred to as <i>Major
+      Modes</i> (MM), and each MM has a three-digit identifying number,
+    most (all?) of which you can see in the diagram above.&nbsp; For
+    example, one major mode of OPS 9 is MM 901, "Configuration
+    Monitor".&nbsp; The titles printed one these menu screens may or may
+    not match those in the diagram, but are usually obviously
+    related.&nbsp; On the other hand, there are examples such as MM 201
+    in OI-34.07 whose screen is titled "UNIV PNTR", which is wholly
+    unlike the "ORBIT COAST" that the diagram above implies.<br>
+    <br>
+    But here's the important part:&nbsp; Once you're past the IPL
+    process described earlier and are actually running PASS, you change
+    from one MM to another by using the keyboard associated with the
+    MEDS, both of which are illustrated in the videos above, with the
+    command sequence<br>
+    <blockquote>
+      <pre>OPS <i><b>O</b></i> 0 <i><b>N</b></i> PRO<br></pre>
+    </blockquote>
+    where <code><i><b>O</b></i>0<b><i>N</i></b></code> is the MM's
+    3-digit number as in the diagram.&nbsp; For example, if you were in
+    MM 901 (in OI-34.07, "TBD") and wanted to transition to MM 201 (in
+    OI-34.07, "UNIV PNTR"), you'd use the command "<code>OPS 201 PRO</code>".<br>
+    <br>
+    <a href="legalMMtoMM-OI-32.png"><img moz-do-not-send="true"
+        src="legalMMtoMM-OI-32.png" title="Click to enlarge" alt=""
+        height="531" align="right" border="2" width="400"></a>But if you
+    try to jump around at random from MM to MM, you'll quickly get into
+    trouble because not all transitions from MM to MM are allowed.&nbsp;
+    In the diagram to the right, for example, you see the allowed
+    transitions in OI-32.&nbsp; (Again: Are the identical transitions
+    allowed in OI-34?&nbsp; Don't ask <i>me</i>!)&nbsp; And indeed, if
+    you look at the table in relation to the example I gave earlier, of
+    transitioning from MM 901 to MM 201, you'll see that in fact it is <i>not</i>
+    legal: From MM 901, you can only transition to MM 000, so if you
+    want to get from MM 901 to MM 201, you'd have to do something like<br>
+    <blockquote>
+      <pre>OPS 0 0 0 PRO<br>OPS 2 0 1 PRO<br></pre>
+    </blockquote>
+    But that brings up another point, which is that this involves
+    transitioning from OPS 9 to OPS 0 and then to OPS 2.&nbsp; You may
+    recall that I equated each OPS to a "memory configuration" (MC).
+    That's because there's too much PASS software to fit into GPC memory
+    at any given time, so when you transition from one OPS to another it
+    requires downloading the MC for the desired OPS from the MMU (or
+    from a cache in another GPC) and replacing the MC already loaded
+    into the GPC.&nbsp; So if you wanted to go from MM 901 to MM 201,
+    you'd find that the GPC first downloaded the MC for OPS 0 (which
+    happens also to be MC 0), and then a little while later download the
+    MC for OPS 2 (namely MC 2).&nbsp; <br>
+    <br>
+    Now fortunately, that's all transparent to you when it happens, at
+    least in the sense that you don't have to take any additional action
+    to make it happen.&nbsp; <i>Unfortunately</i>, it happens to take a
+    long time.&nbsp; So you might enter a few innocent keystrokes like
+    those shown above, and have to wait for a minute or so for those
+    actions to complete.&nbsp; Also unfortunately, there's not much of a
+    visual clue for you to know any of it's happening, so you just have
+    to be patient.<br>
+    <br>
+    Before I leave the topic of legal MM-to-MM transitions, I'd also
+    note that even when a transition is legal, it's not necessarily
+    legal for you to make manually. The legal manual transitions are the
+    one marked with "M" in the matrix above. But some are just
+    automatic, such as the transitions from MM 101 to 102 to 103; once
+    such a sequence gets started, you're just trapped and may have few
+    or no means to escape them.<br>
+    <br>
+    Beyond the menu screens for the major modes, there tend to be a
+    number of "special function" or "specialized" screens that you can
+    call up.&nbsp; These also are characterized by 3-digit codes, though
+    you can omit leading zeroes in the commands to pull up those
+    screen.&nbsp; To call up the specialized menu screen <i><b><code>LMN</code></b></i>,
+    the keyboard command would be<br>
+    <blockquote>
+      <pre>SPEC <i><b>L</b></i> <i><b>M</b></i> <i><b>N</b></i> PRO<br></pre>
+    </blockquote>
+    <a href="GPC_MEMORY.png"><img moz-do-not-send="true"
+        src="GPC_MEMORY.png" title="Click to enlarge" alt=""
+        height="397" align="right" border="2" width="400"></a>The
+    available specialized screens tend to vary according to the current
+    OPS, although some are available in most or all OPS:<br>
+    <ul>
+      <li><code>SPEC 0 PRO</code> — The "GPC MEMORY" screen, as in the
+        illustration at the right.&nbsp; TBD <br>
+      </li>
+      <li><code>SPEC 1 PRO</code> — The "DPS UTILITY" screen. TBD<br>
+      </li>
+      <li><code>SPEC 2 PRO</code> (not in OPS 1, 3, 6) — The "TIME"
+        screen. TBD<br>
+      </li>
+      <li><code>SPEC 6 PRO</code> — The "GPC / BUS STATUS" screen. TBD<br>
+      </li>
+      <li><code>SPEC 9 9 PRO</code> — The "FAULT SUMMARY" screen, which
+        allows you to see a list of the logged faults. You can also
+        quickly get to this screen via the keyboard's <code>FAULT SUMM</code>
+        button.<br>
+      </li>
+    </ul>
+    <p>But that's only scratching the surface: There are lots of
+      specialized screens, and to learn more about them you'll have to
+      consult the Shuttle-era documentation.&nbsp; I'd suggest the <a
+        moz-do-not-send="true"
+        href="Shuttle/PASS%20USER%20GUIDE%20-%20OI32.pdf"><i>PASS User's
+          Guide OI-32</i></a>. <br>
+    </p>
+    Okay, now suppose you've found the MM screen you need, or maybe a
+    specialized screen.&nbsp; A number of items on the screen will often
+    just be monitors that let you see what's happening right now in the
+    Shuttle; for example, perhaps you'll see a temperature
+    monitor.&nbsp; But some screens will have configurable items or
+    actions you need to have initiated.&nbsp; What then?<br>
+    <br>
+    Items which are configurable will be printed next to a number that
+    has no obvious purpose.&nbsp; For example in the sample "GPC MEMORY"
+    screen shown above, you'll see <br>
+    <ul>
+      <li>"<b>1</b> CONFIG&nbsp;<u> 0</u> ( 0)" (upper left)<br>
+      </li>
+      <li>"<b>2</b> GPC _ _ _ _ _"</li>
+      <li>"1 | <b>7</b> <u>0</u>"</li>
+      <li>"2 | <b>8</b> <u>0</u>"</li>
+      <li>... </li>
+      <li>"SM <b>54</b> <u>1</u>" (lower right)<br>
+      </li>
+    </ul>
+    The <b>bold</b> numbers (1, 2, 7, 8, ..., 54) are what I'm
+    referring to.&nbsp; These numbers select options you can
+    configure.&nbsp; Next to some of them, you'll see something <u>underlined</u>;
+    if so, those are things which you can change, using a keyboard
+    command like<br>
+    <blockquote>
+      <pre>ITEM <i><b>N</b></i> + <i><b>V</b></i> EXEC<br></pre>
+    </blockquote>
+    where <code><i><b>N</b></i></code> is the option number and <i><b><code>V</code></b></i>
+    is the new value.&nbsp; For example, you see from "<b>46</b> GPC _"
+    that for the "STORE" function, GPC has no default value.&nbsp; To
+    change it to GPC <u>3</u>, the command would be<br>
+    <blockquote>
+      <pre>ITEM 4 6 + 3 EXEC<br></pre>
+    </blockquote>
+    Next to some items, like "DATA <b>20</b>" for the READ/WRITE
+    function, there is no underlined area. That means it's a toggle,
+    with an asterisk ("*") next to it if enabled or selected, but no
+    asterisk if disabled or not selected.&nbsp; The command to toggle it
+    is just<br>
+    <blockquote>
+      <pre>ITEM 2 0 EXEC<br></pre>
+    </blockquote>
+    or more generally, "<code>ITEM <i><b>N</b></i> EXEC</code>".<br>
+    <br>
+    So with that introduction, let's take a little visual tour via
+    video. I won't go through <i>every</i> screen in OI-34.07 because
+    I'm neither a sadist nor a masochist, though you'd hardly believe
+    that from the turgid text you've seen so far, but hopefully you'll
+    see enough to get the general idea.&nbsp; I've cut out the
+    transitions from OPS to OPS, since I don't think the long delays for
+    loading the memory configurations are very instructive.&nbsp; We
+    pick up at the "GPC MEMORY" screen (MM 000) where we left off from
+    the IPL discussion in the preceding section:<br>
+    <br>
+    TBD<br>
+    <h1><a name="multiGPC"></a>For Enthusiasts</h1>
+    <p>If that wasn't enough for you already, perhaps you might want to
+      have yourself checked out.&nbsp; In the words of the immortal J,
+      "Not to change the subject or anything, but when was the last time
+      you got a CAT scan?"&nbsp; Nevertheless, we'll proceed with our
+      little excursion into PASS-land, on the assumption that you're
+      healthy enough to tolerate it.<br>
+    </p>
+    <p>As you recall, the Shuttle's Data Processing System (DPS) doesn't
+      merely <i>have</i> 5 GPCs, it expects 4 of those GPCs to operate
+      in a redundant configuration during critical flight phases —
+      Ascent, Return To Launch Site (RTLS), Entry, or in other words, in
+      OPS 1, 6, 3 —, during which they are executing identical software,
+      processing hopefully-identical input data, and outputting
+      hopefully-identical commands as well.&nbsp; The technique involved
+      is that each of the 4 GPCs continually evaluates data from the
+      other 3, and then they vote on whether they think the each of the
+      others are working properly.&nbsp; <br>
+    </p>
+    <blockquote>
+      <p><b><font size="-1">Aside:</font></b><font size="-1"> Here's a
+          heads-up on the computer resources you need to run the
+          simulation in this form.&nbsp; Roughly speaking, to run a
+          simulation using <i>N</i> GPCs, with <i>N</i> being 5 or
+          less, you'll want at least <i>N</i>+1 cores. That's not to
+          say that you couldn't get by with less in a pinch, but on my
+          computer (which is new as of August 2026, and chosen to be as
+          fast as possible at that time, consistent with what I think is
+          a reasonable budget), each GPC takes about 80% of a core.
+          These things will only get faster in the future, of course —
+          knock wood! —, but I'm just saying that your experience may be
+          less satisfactory on an older machine. The memory resources
+          for the simulation are meager, around 30MB, and shouldn't
+          concern anyone.&nbsp; But why is so much CPU needed to
+          simulate such an old, slow computer system?&nbsp; I really
+          can't point to any one factor.&nbsp; We've uncovered no
+          obvious culprits so far.&nbsp; The need to insure
+          synchronization between the GPCs and between the GPCs and the
+          MEDS form some pretty hard constraints on what we can try,
+          since a couple of hundred microseconds discrepancy here or
+          there is enough to destroy synchronization.</font> </p>
+    </blockquote>
+    <p>In point of fact, the redundancy checks occur any time two or
+      more of the GPCs are running the same OPS, so we don't actually
+      have to be in OPS 1, 6, or 3 to observe the effect.&nbsp; And in
+      truth, there's very little to see, insofar as redundancy is
+      concerned.&nbsp; Basically, the control panel has a 5×5 array of
+      indicator lamps, called the Computer Annunciation Matrix (CAM), in
+      which you can see what all of the GPC votes are. So when it's
+      working properly, all there is to see is a CAM array with none of
+      its lamps lit.<br>
+    </p>
+    <p>In the video below, you see me IPL'ing a simulation in which
+      there are 4 GPCs and 2 displays ... or rather, trying to do so,
+      because I make a number of dumb mistakes that I never notice,
+      eventually causing the GPCs to fall out of sync several minutes
+      later when I reach the end of the process. It takes me nearly 9
+      minutes for the whole thing, but it's the first time I had tried
+      it, so undoubtedly some training (or practice!) would make it go
+      much faster.&nbsp; I've left the mistakes in the video, because I
+      had been worrying about how to demonstrate a redundancy failure to
+      you, and I managed to achieve a video that demos it purely by
+      accident. &nbsp;<img moz-do-not-send="true" src="smiley.png"
+        alt="" height="16" width="16">&nbsp; The <i>correct</i>
+      instructions are on the left, and I'll let it as a where's-waldo
+      exercise for the reader to find the six (or more?) ways I screwed
+      it up.<br>
+    </p>
+    <table height="600px" width="100%" cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td style="height:600px; width:40%" valign="top">
+            <div style="height:600px; overflow:auto">
+              <table border="1" width="100%" cellspacing="2"
+                cellpadding="2">
+                <tbody>
+                  <tr>
+                    <th valign="top">Left Keyboard<br>
+                    </th>
+                    <th valign="top">Control Panel<font size="-1"> (and
+                        comments)</font><br>
+                    </th>
+                    <th valign="top" nowrap="nowrap">Right Keyboard<br>
+                    </th>
+                  </tr>
+                  <tr>
+                    <td rowspan="1" colspan="3" valign="top"><i>General
+                        setup:</i><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>GENERAL PURPOSE COMPUTER POWER →
+                        ON for GPC 1, 2, 3, and 4</b>. <font size="-1">(This
+                        doesn't actually do anything within the
+                        simulation, but you'd have to do it in real
+                        life. There's a 5th GPC, but we're not running
+                        it in this example.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IDP/ CRT 1 and 2 POWER </b><b>→
+                        ON</b>. <font size="-1">(We won't use IDP 3 and
+                        4 in this example, so you don't need to turn
+                        them on, but could if you wanted to.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IDP/ CRT 1 and 2 MAJ FUNC </b><b>→
+                        GNC</b>. <font size="-1">(This is the default
+                        for the simulation, but you'd have to do it in
+                        real life, so better check it.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>LEFT IDP/CRT SEL </b><b>→ 1</b>
+                      and <b>RIGHT</b><b> IDP/CRT SEL → 2</b>. <font
+                        size="-1">(This is what insures that the left
+                        display will use the left keyboard and the right
+                        display will use the right keyboard.&nbsp;
+                        There's also a third keyboard, but we're not
+                        bothering with it in this example.&nbsp; These
+                        are the simulation's default settings, so the
+                        switches are probably already correct.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>MODE </b><b>→ HALT for GPC 1,
+                        2, 3, and 4</b>. <font size="-1">(You'll have
+                        to use these switches later in the procedure
+                        quite a few times, so remember where they are!
+                        HALT is actually the default for the simulation,
+                        so they're probably already set correctly.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td rowspan="1" colspan="3" valign="top"><i>IPL GPC
+                        1:</i><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IPL SOURCE </b><b>→ MMU 1</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT SELECT </b><b> </b><b>→
+                        1+2</b>.&nbsp; <font size="-1">("1+2" is the
+                        actual marking. It's just one setting.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT DISPLAY </b><b><b>→ ON</b></b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Press and release INITIAL
+                        PROGRAM LOAD pushbutton for GPC 1</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for steady green on
+                        ACTIVITY indicator for MM1</b>. <font size="-1">(The
+                        preceding step causes the indicator to change
+                        from <font color="#009900">green</font> to <font
+                          color="#ff0000">red</font>, and then back to <font
+                          color="#009900">green</font>. It'll be pretty
+                        quick.)</font> </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Toggle the INTEGRATED DISPLAY
+                        PROCESSOR paddle switch for IDP 1</b>. <font
+                        size="-1">(The switch is spring-loaded, so it
+                        will automatically pop back to the UP position
+                        after you release it.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>MODE </b><b> </b><b>→ STBY for
+                        GPC 1</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for the "GPCIPL MENU (1) 1"
+                        screen to appear on the left display</b>. <font
+                        size="-1">(There will be quite a bit of space
+                        between "(1)" and "1". The final "1" indicates
+                        GPC 1.)</font><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 EXEC</b><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for steady green on
+                        ACTIVITY indicator for MM1</b>. <font size="-1">(The
+                        preceding step causes the indicator to change
+                        from <font color="#009900">green</font> to <font
+                          color="#ff0000">red</font> to <font
+                          color="#009900">green</font> several
+                        times.&nbsp; There may be a pretty long delay of
+                        several seconds before the first transition. The
+                        timing of this can vary, but the first time you
+                        try it, the entire process will probably be over
+                        within 30 seconds or so.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT DISPLAY </b><b><b>→</b>
+                        OFF</b>.<br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>GPC 1 MODE </b><b><b>→</b> RUN</b>.<br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IPL SOURCE </b><b><b>→</b> OFF</b>.
+                      <font size="-1">(If that has all worked, you have
+                        successfully IPL'd into OPS 0, and the left
+                        display should now be showing a screen titled
+                        "GPC MEMORY".)</font><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td rowspan="1" colspan="3" valign="top"><i>IPL GPC
+                        2:</i><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IPL SOURCE </b><b>→ MMU1</b>. <font
+                        size="-1">(You may be thinking, "Why didn't we
+                        just <i>let</i> it at MMU1 rather than changing
+                        it to OFF when we were IPL'ing GPC 1 above?
+                        Because the IPL for GPC 1 wouldn't have worked.)</font><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT SELECT </b><b> </b><b>→
+                        2+3</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT DISPLAY </b><b><b>→ ON</b></b>.
+                      <font size="-1">(You may be thinking, "Why didn't
+                        we just <i>let</i> it ON rather than changing
+                        it to OFF when we were IPL'ing GPC 1 above?
+                        Because the IPL for GPC 1 wouldn't have worked.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Press and release INITIAL
+                        PROGRAM LOAD pushbutton for GPC 2</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for steady green on
+                        ACTIVITY indicator for MM1</b>. </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Toggle the INTEGRATED DISPLAY
+                        PROCESSOR paddle switch for IDP 2</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>MODE </b><b> </b><b>→ STBY for
+                        GPC 2</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for the "GPCIPL MENU (1) 2"
+                        screen to appear on the left display</b>. <font
+                        size="-1">(The "2" indicates GPC 2.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 EXEC</b></td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for steady green on
+                        ACTIVITY indicator for MM1</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT DISPLAY </b><b><b>→</b>
+                        OFF</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>GPC 2 MODE </b><b><b>→</b> RUN</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IPL SOURCE </b><b><b>→</b> OFF</b>.
+                      <font size="-1">(If that has all worked, you have
+                        successfully IPL'd into OPS 0, and the right
+                        display should now be showing a screen titled
+                        "GPC MEMORY 1". You'd think that it would be "2"
+                        rather than "1", but apparently it should be
+                        "1", for reasons I don't fully understand.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td rowspan="1" colspan="3" valign="top"><i>IPL GPC
+                        3:</i></td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IPL SOURCE </b><b>→ MMU1</b>.<br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT SELECT </b><b> </b><b>→
+                        2+3</b>. <font size="-1">(It should actually
+                        still be set at 2+3 from when you IPL'd GPC 2.)</font><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT DISPLAY </b><b><b>→ ON</b></b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Press and release INITIAL
+                        PROGRAM LOAD pushbutton for GPC 3</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for steady green on
+                        ACTIVITY indicator for MM1</b>. </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Toggle the INTEGRATED DISPLAY
+                        PROCESSOR paddle switch for IDP 2</b>.<font
+                        size="-1"> (This may look like a misprint to
+                        you, and you may think you should use the switch
+                        for IDP 3.&nbsp; Do not do so.)</font><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>MODE </b><b> </b><b>→ STBY for
+                        GPC 3</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for the "GPCIPL MENU (1) 3"
+                        screen to appear on the left display</b>. <font
+                        size="-1">(The "3" indicates GPC 3.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>ITEM 1 EXEC</b></td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for steady green on
+                        ACTIVITY indicator for MM1</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT DISPLAY </b><b><b>→</b>
+                        OFF</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>GPC 3 MODE </b><b><b>→</b> RUN</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IPL SOURCE </b><b><b>→</b> OFF</b>.
+                      <font size="-1">(If that has all worked, you have
+                        successfully IPL'd into OPS 0, and the right
+                        display should now be showing a screen titled
+                        "GPC MEMORY 1".)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td rowspan="1" colspan="3" valign="top"><i>IPL GPC
+                        4:</i></td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IPL SOURCE </b><b>→ MMU1</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT SELECT </b><b> </b><b>→
+                        2+3</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT DISPLAY </b><b><b>→ ON</b></b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Press and release INITIAL
+                        PROGRAM LOAD pushbutton for GPC 4</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for steady green on
+                        ACTIVITY indicator for MM1</b>. </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Toggle the INTEGRATED DISPLAY
+                        PROCESSOR paddle switch for IDP 2</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>MODE </b><b> </b><b>→ STBY for
+                        GPC 4</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for the "GPCIPL MENU (1) 4"
+                        screen to appear on the left display</b>. <font
+                        size="-1">(The "4" indicates GPC 4.)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>ITEM 1 EXEC</b></td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for steady green on
+                        ACTIVITY indicator for MM1</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>BFC CRT DISPLAY </b><b><b>→</b>
+                        OFF</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>GPC 4 MODE </b><b><b>→</b> RUN</b>.</td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>IPL SOURCE </b><b><b>→</b> OFF</b>.
+                      <font size="-1">(If that has all worked, you have
+                        successfully IPL'd into OPS 0, and the right
+                        display should now be showing a screen titled
+                        "GPC MEMORY1".)</font></td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td rowspan="1" colspan="3" valign="top"><i>Databus
+                        setup:</i><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 + 2 EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><font size="-1">(This steps could
+                        all be done either on the left keyboard or the
+                        right keyboard. Whichever keyboard you choose,
+                        the resulting changes will appear on both the
+                        left and right displays.)</font><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 2 + 1 EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 3 + 2 EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 4 + 3 EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 5 + 4 EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 7 + 1 EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 8 + 2 EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 9 + 3 EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 0 + 4
+                        EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 1 + 1
+                        EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 2 + 1
+                        EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 3 + 2
+                        EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 8 + 1
+                        EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top" nowrap="nowrap"><b>ITEM 1 9 + 2
+                        EXEC</b><b><br>
+                      </b></td>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td rowspan="1" colspan="3" valign="top"><i>Transition
+                        to OPS 2:</i><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><font size="-1">(This could be done
+                        on either the right or left keyboard, but I've
+                        chosen the right-hand one just because the
+                        left-hand one had all the action above!
+                        Whichever one you choose, though, all of the
+                        redundant GPCs will transition, using this
+                        single command, and that will generally continue
+                        to happen as long as the GPCs remain in sync. By
+                        the way, you may think that you need to set IPL
+                        SOURCE to either MMU1 or MMU2 for this, so that
+                        OPS 2 has somewhere to load from, but you don't:
+                        the last two databus setups above assigned MMU 1
+                        to GPC 1 and MMU 2 to GPC 2, so in entering the
+                        command from the right-hand keyboard, it will
+                        pull from MMU 2, and you should see that in the
+                        ACTIVITY MM2 indicator lamp.)</font><br>
+                    </td>
+                    <td valign="top" nowrap="nowrap"><b>OPS 2 0 1 PRO</b><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="top"><br>
+                    </td>
+                    <td valign="top"><b>Wait for screen "2011/&nbsp;
+                        /&nbsp; UNIV PTG" to appear on both displays</b>.
+                      <font size="-1">(If the CAM lamps are all dark
+                        too, then you've succeeded. Congratulations!)</font><br>
+                    </td>
+                    <td valign="top"><br>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+          <td style="width:60%" valign="top"><br>
+            <video controls="controls" style="height:600px; width:auto;
+              display:block; margin:0 auto"> <source
+                src="demoIPL-4-2.mp4" type="video/mp4"> </video> </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><br>
+    </p>
+    <hr style="width: 100%; height: 2px;">
+    <center><br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
+          Creative Commons No Rights Reserved License</a> </span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2026-09-14<br>
+          <br>
+          <a href="https://www.ibiblio.org"> <img style="border: 0px
+              solid ; width: 300px; height: 100px;" alt="Virtual AGC is
+              hosted by ibiblio.org" src="hosted.png" height="100"
+              width="300"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>
