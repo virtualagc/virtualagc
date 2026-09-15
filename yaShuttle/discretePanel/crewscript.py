@@ -72,6 +72,11 @@ HELP = """\
                         start, or from when the last wait line was met.
                         Lines run in file order; a time may not be earlier
                         than the line before it since the last wait.
+  +<seconds> <command>  a timed step that many seconds after the line before
+                        was due (or after the start or the last wait, if no
+                        line came since), as if the sum had been written.  A
+                        line added among +N lines needs no renumbering of
+                        the lines after it.  The two forms mix freely.
 
   waits (no time in front):
     wait gpc N mode-tb RUN|IPL|BP [timeout S]
@@ -117,14 +122,14 @@ HELP = """\
 
   example (examples/4gpc-startup.script has a full one):
     0     gpc 1
-    0     mode HALT
-    0.2   source MM1
-    0.5   ipl
-    3     mode STANDBY
-    70    keys ITEM 1 EXEC
+    +0    mode HALT
+    +0.2  source MM1
+    +0.3  ipl
+    +2.5  mode STANDBY
+    +67   keys ITEM 1 EXEC
     wait gpc 1 mode-tb RUN timeout 300
-    1     subtitle <left> GPC 1 loaded\\nnow to RUN
-    3     mode RUN
+    +1    subtitle <left> GPC 1 loaded\\nnow to RUN
+    +2    mode RUN
 
   To check a script without running anything:  python3 crewscript.py FILE
 """ % {"timeout": WAIT_TIMEOUT_S, "gap": KEY_GAP_S,
@@ -201,21 +206,25 @@ def parse(text):
                                 "timeout": timeout, "text": line, "line": n})
                 last_ms = 0
                 continue
+            # '+N': N seconds after the line before (or after the start or the
+            # last wait), resolved here, so the player sees only the sum.
+            rel = first.startswith("+")
             try:
-                seconds = float(first)
+                seconds = float(first[1:] if rel else first)
             except ValueError:
-                raise ScriptError("expected '<seconds> <command>' or 'wait ...', got %r" % line)
+                raise ScriptError("expected '<seconds> <command>', '+<seconds> <command>' "
+                                  "or 'wait ...', got %r" % line)
             if seconds != seconds or seconds < 0 or seconds == float("inf"):
                 raise ScriptError("bad time %r" % first)
             if seconds > MAX_SCRIPT_SECONDS:
                 raise ScriptError("%s seconds is over %d -- script times are SECONDS, "
                                   "not milliseconds (divide by 1000)"
                                   % (first, MAX_SCRIPT_SECONDS))
-            ms = int(round(seconds * 1000))
+            ms = int(round(seconds * 1000)) + (last_ms if rel else 0)
             if ms < last_ms:
                 raise ScriptError("time %s is earlier than the line before it -- lines run "
-                                  "in file order, so times may not go backwards between waits"
-                                  % first)
+                                  "in file order, so times may not go backwards between waits "
+                                  "(+%s would mean %s seconds after it)" % (first, first, first))
             last_ms = ms
             verb, _, arg = rest.partition(" ")
             verb, arg = verb.lower(), arg.strip()

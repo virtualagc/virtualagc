@@ -1,0 +1,2 @@
+### [2026-09-15] Target: HANDOFF-panelO6.md
+- Script times may be written +N: N seconds after the line before was due (or after the start / the last wait), resolved when the file is read, so inserting a line needs no renumbering; plain N still means from the start or last wait, and the two mix. In crewscript.parse (crew scripts, panelO6/simulatePASS --script), discretePanel.py _parse_script (relative to the previous line in file order, before its sort), and simulatePASS --keys files (reset after WAIT). crewscript.HELP example now uses +N.

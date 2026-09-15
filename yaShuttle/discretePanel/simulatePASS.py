@@ -44,7 +44,8 @@ line on the left, right or aft keyboard, KB1 by default; also IDP_POWER_ON,
 IDP_POWER_OFF and DEU_LOAD for IDP 1 and IDP2_POWER_ON, IDP2_POWER_OFF and
 DEU_LOAD2 for IDP 2, which the panel follows as if its switches had been
 thrown), and --duration ends the run after that many seconds.  Key and panel
-times both count from when the panel starts.
+times both count from when the panel starts; a time written '+N' is instead N
+seconds after the line before, in either file.
 
 CAPTIONS FOR VIDEOS.  '<seconds> SUBTITLE text ...' in the keys file, or
 '<seconds> subtitle text ...' in the panel script, shows the text in
@@ -438,6 +439,7 @@ def send_keys_thread(port_base, path, t0, stop_event, panel_log=None):
     with open(path) as fh:
         lines = [ln.split("#", 1)[0].split() for ln in fh]
     watch = TalkbackWatch(panel_log) if panel_log else None
+    prev = 0.0                  # the line before's time, for '+N'
     for parts in lines:
         if not parts:
             continue
@@ -457,6 +459,7 @@ def send_keys_thread(port_base, path, t0, stop_event, panel_log=None):
                 if watch.shows(gpc) == state:
                     log("keys: GPC%d MODE tb %s after %.1f s" % (gpc, state, time.time() - begun))
                     t0 = time.time()
+                    prev = 0.0
                     break
                 if time.time() - begun > timeout:
                     log("keys: WAIT TIMED OUT after %.0f s for GPC%d MODE tb %s -- keys stopped"
@@ -465,7 +468,9 @@ def send_keys_thread(port_base, path, t0, stop_event, panel_log=None):
                 if stop_event.wait(0.2):
                     return
             continue
-        at = float(parts[0])
+        # '+N' is N seconds after the line before (or the start, or the WAIT).
+        at = prev + float(parts[0][1:]) if parts[0].startswith("+") else float(parts[0])
+        prev = at
         while time.time() - t0 < at:
             if stop_event.wait(0.05):
                 return

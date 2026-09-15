@@ -525,17 +525,20 @@ class Panel:
 #
 # Each line is `<seconds> <command>`, times measured from startup, decimals
 # allowed -- seconds, as panelO6.py's scripts and simulatePASS keys files count
-# (these were milliseconds until 2026-09-15):
+# (these were milliseconds until 2026-09-15).  A time written `+N` is N
+# seconds after the line before it instead, so a line can be inserted without
+# renumbering the ones after it:
 #
 #     0     mode HALT
-#     0.5   ipl                 (press and release, 250 ms apart)
-#     3     mode STANDBY
-#     60    mode RUN
+#     +0.5  ipl                 (press and release, 250 ms apart)
+#     +2.5  mode STANDBY
+#     +57   mode RUN
 #
 # `source MM1|MM2|OFF` and `gpcid <n>` are also accepted.  Blank lines and
 # `#` comments are ignored.
 SCRIPT_HELP = ("timed discrete sequence: '<seconds> <command>' per line "
-               "(decimals allowed, e.g. 0.5)")
+               "(decimals allowed, e.g. 0.5), or '+<seconds> <command>' for that "
+               "long after the line before")
 IPL_HOLD_MS = 250
 # No script needs anything like ten hours, and every millisecond script ever
 # written has a time far above it, so a larger time is refused, not waited out.
@@ -543,24 +546,30 @@ MAX_SCRIPT_SECONDS = 36000
 
 
 def _parse_script(text):
-    out = []
+    out, last_ms = [], 0
     for n, line in enumerate(text.splitlines(), 1):
         line = line.split("#", 1)[0].strip()
         if not line:
             continue
         parts = line.split(None, 1)
+        # '+N' is N seconds after the line before it in the file.
+        word = parts[0] if len(parts) == 2 else ""
+        rel = word.startswith("+")
         try:
-            seconds = float(parts[0]) if len(parts) == 2 else None
+            seconds = float(word[1:] if rel else word) if word else None
         except ValueError:
             seconds = None
-        if seconds is None or seconds < 0 or parts[0].lower() in ("nan", "inf"):
-            raise SystemExit(f"discretePanel: script line {n}: "
-                             f"expected '<seconds> <command>', got {line!r}")
+        if (seconds is None or not seconds >= 0
+                or word.lstrip("+").lower() in ("nan", "inf", "infinity")):
+            raise SystemExit(f"discretePanel: script line {n}: expected '<seconds> "
+                             f"<command>' or '+<seconds> <command>', got {line!r}")
         if seconds > MAX_SCRIPT_SECONDS:
             raise SystemExit(f"discretePanel: script line {n}: {parts[0]} seconds is over "
                              f"{MAX_SCRIPT_SECONDS} -- script times are SECONDS now, not "
                              f"milliseconds (divide by 1000)")
-        out.append((int(round(seconds * 1000)), parts[1].strip()))
+        ms = int(round(seconds * 1000)) + (last_ms if rel else 0)
+        last_ms = ms
+        out.append((ms, parts[1].strip()))
     return sorted(out, key=lambda e: e[0])
 
 
