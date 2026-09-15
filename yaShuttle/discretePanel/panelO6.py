@@ -2033,6 +2033,8 @@ class PanelO6:
 #     kybdsel left 1|3             LEFT IDP/CRT SEL
 #     kybdsel right 2|3            RIGHT IDP/CRT SEL
 #     idpload N                    O6 IDP N LOAD (N 1-4), held IPL_HOLD_MS
+#     subtitle TEXT                show TEXT in subtitles.py (no TEXT clears it;
+#                                  \n in TEXT starts a new line)
 #
 # WAIT LINES.  `wait gpc N mode-tb RUN|IPL|BP [timeout S]`, with no time in
 # front, holds the script until GPC N's MODE talkback shows that state, then
@@ -2053,6 +2055,23 @@ WAIT_TIMEOUT_S = 600           # a `wait` line with no timeout gives up after th
 
 def _on(word):
     return word.lower() in ("on", "1", "set", "true")
+
+
+SUBTITLE_OFFSET = 90            # subtitles.py listens on port base + this
+
+
+def _send_subtitle(text):
+    """One caption for subtitles.py: a UTF-8 datagram, empty to clear."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    try:
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF,
+                     socket.inet_aton(D.IFACE))
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+        s.sendto(text.encode("utf-8"), (D.GROUP, D.PORT_BASE + SUBTITLE_OFFSET))
+    except OSError as e:
+        log("cannot send a subtitle: %s" % e)
+    finally:
+        s.close()
 
 
 def _parse_wait(arg, where="script"):
@@ -2174,6 +2193,8 @@ def _run_script(panel, entries, quit_after_ms=None):
                 raise SystemExit("panelO6: kybdsel is 'left 1|3' or 'right 2|3', "
                                  "not %r" % arg)
             panel._set_kybd_sel(side, val)
+        elif verb == "subtitle":
+            _send_subtitle(arg)
         elif verb == "idpload":
             n = int(arg)
             if not 1 <= n <= N_IDP_LOAD:

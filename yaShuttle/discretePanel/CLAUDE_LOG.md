@@ -15,3 +15,7 @@
 - panelO6 layout: IPL_TO_MODE_TB_GAP 50 px (one pushbutton) above the MODE talkbacks; REF_H 1250 -> 1300; talkback word size 9, centred on its ink.
 - --script `wait gpc N mode-tb RUN|IPL|BP [timeout S]`; later times count from when it is met; a timeout stops the script.
 - simulatePASS --keys `WAIT gpc N mode-tb ... [timeout S]` (follows panel.log); panel height 1300 in window layout. Verified one GPC (run talkback-test: wait met 24.8 s after ITEM 1 EXEC).
+
+### [2026-09-15] Target: README.md
+- New subtitles.py: borderless always-on-top caption box for demo videos; captions are UTF-8 datagrams on the discrete bus group at port base + 90 (empty clears, \n = new line); drag to move, right-click Clear/Quit, Ctrl+Q; --geometry, --font/--font-size, --fg/--bg, --opacity, --hide-when-empty, --text.
+- Script command: panelO6 --script `<ms> subtitle TEXT`; simulatePASS --keys `<seconds> SUBTITLE TEXT`; simulatePASS starts subtitles.py (bottom centre) when either script has one, --subtitles / --no-subtitles override.

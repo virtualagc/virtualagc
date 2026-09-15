@@ -31,6 +31,12 @@ IDP 1 and IDP2_POWER_ON, IDP2_POWER_OFF and DEU_LOAD2 for IDP 2, which the panel
 follows as if its switches had been thrown), and --duration ends the run after
 that many seconds.  Key and panel times both count from when the panel starts.
 
+CAPTIONS FOR VIDEOS.  '<seconds> SUBTITLE text ...' in the keys file, or
+'<ms> subtitle text ...' in the panel script, shows the text in subtitles.py's
+borderless caption box (the same line with no text clears it; \n starts a new
+line).  The box is started automatically when either file has such a line;
+--subtitles starts it regardless, --no-subtitles never.
+
 WAITING INSTEAD OF GUESSING.  A line 'WAIT gpc N mode-tb RUN|IPL|BP [timeout S]'
 in either file holds that file until GPC N's MODE talkback on panel O6 shows
 the state -- RUN when a load is complete, IPL while a bootstrap is in, BP
@@ -360,6 +366,22 @@ def screen_info():
 
 
 WAIT_TIMEOUT_S = 600
+SUBTITLE_OFFSET = 90            # subtitles.py listens on port base + this
+
+
+def script_has_subtitles(path, panel):
+    """Does a keys file (panel=False) or panel script (panel=True) caption?"""
+    if not path:
+        return False
+    try:
+        with open(path) as fh:
+            for ln in fh:
+                w = ln.split("#", 1)[0].split()
+                if len(w) >= 2 and w[0][:1].isdigit() and w[1].lower() == "subtitle":
+                    return True
+    except OSError:
+        pass
+    return False
 
 
 class TalkbackWatch(object):
@@ -439,6 +461,14 @@ def send_keys_thread(port_base, path, t0, stop_event, panel_log=None):
         while time.time() - t0 < at:
             if stop_event.wait(0.05):
                 return
+        if len(parts) >= 2 and parts[1].upper() == "SUBTITLE":
+            text = " ".join(parts[2:])
+            try:
+                kb.sendto(text.encode("utf-8"), (MCAST_GROUP, port_base + SUBTITLE_OFFSET))
+            except OSError as e:
+                log("keys: cannot send a subtitle: %s" % e)
+            log("keys at %.1f s: SUBTITLE %s" % (time.time() - t0, text or "(cleared)"))
+            continue
         kbd = 1
         for key in parts[1:]:
             k = key.upper()
@@ -508,6 +538,10 @@ def main():
                     help=argparse.SUPPRESS)          # the old name
     ap.add_argument("--panel-script", metavar="FILE", help="timed script for panelO6.py")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
+    ap.add_argument("--subtitles", dest="subtitles", action="store_true", default=None,
+                    help="start subtitles.py, the caption box, even if no script uses it")
+    ap.add_argument("--no-subtitles", dest="subtitles", action="store_false",
+                    help="never start subtitles.py")
     ap.add_argument("--duration", type=float, metavar="SECONDS",
                     help="shut down after this long instead of waiting for Enter")
     args = ap.parse_args()
@@ -663,6 +697,18 @@ def main():
                      "--verbose"] + shlex.split(args.yagpc_extra)
         gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env)
         time.sleep(3)
+        want_subs = args.subtitles
+        if want_subs is None:
+            want_subs = (script_has_subtitles(args.keys, False)
+                         or script_has_subtitles(args.panel_script, True))
+        if want_subs:
+            sub_argv = [py, "subtitles.py", "--port-base", str(args.port_base)]
+            if screen_w is not None and screen_h is not None:
+                sw_ = min(1000, screen_w)
+                sub_argv += ["--geometry", "%dx120+%d+%d" % (sw_, (screen_w - sw_) // 2,
+                                                             max(0, screen_h - 200))]
+            L.start("subtitles", sub_argv, HERE, env)
+            time.sleep(1)
         panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
                       "--gpc-id", str(gpcs[0]), "--size", str(size), "--geometry", o6_geom]
         if args.panel_script:
