@@ -212,6 +212,14 @@ can stay on for multi-hour runs.  The flight software's own number.
   SYNCTRACE on) and the owner's hand-run networked 4-GPC set (3+ hours, CAM
   dark).  These runs are the natural first test set for the meter: re-run the
   same config with YAGPC_SYNCORDER=1 and see if the margin predicts the loss.
+- **UPDATE 2026-09-14 19:47:** the owner's next HAND-WORKED 4-GPC 2-CRT run
+  (defaults, --size 384) lost GPC4 about 13 minutes after OPS 2 (cam.log
+  19:19:26; OPS 2 load ended before 19:06:52).  So losses are not scripted-
+  only and not a start-up transient: they arrive at random, from 26 s to 13+
+  min, and a 3-hour clean run was just a lucky sample.  CONSEQUENCE FOR THE
+  OVERNIGHT RUNS: "no vote-out" in one 20-minute run means nothing; use the
+  margin distribution, and run long enough (or enough runs) that a loss rate
+  can be stated with a count behind it.
 - **CPU (commit 7f9a542bc, CLAUDE_LOG.md):** ~350% for 4 GPCs whatever the
   pacing knobs; no wait states in OPS 2; owner does not want CPU changes.
 - Barrier: vehicle.c BARRIER_DELTA_US 200 default, simulatePASS sets 25;
