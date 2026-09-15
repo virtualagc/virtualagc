@@ -32,7 +32,7 @@
 - stsKeyboard.py pressed face changed to mid-grey C_KEY_PRESSED #787878 with the normal white legend (near-white looked like a lamp lighting, per owner).
 
 ### [2026-09-15] Target: README.md
-- subtitles.py: the box now grows upward (bottom edge fixed) to fit wrapped captions, never below the --geometry height; new --edit mode takes typing (Enter/Backspace/Escape), Ctrl +/- font size, Ctrl L/E/R align, drag to move, Shift-drag for width and minimum height, Ctrl P, and prints "--geometry WxH+X+Y --font-size N --align A" after each change.
+- subtitles.py: the box now grows downward (top edge fixed, so extra lines cover nothing above the caption; moved up only as far as needed to stay on screen) to fit wrapped captions, never below the --geometry height; new --edit mode takes typing (Enter/Backspace/Escape), Ctrl +/- font size, Ctrl L/E/R align, drag to move, Shift-drag for width and minimum height, Ctrl P, and prints "--geometry WxH+X+Y --font-size N --align A" after each change.
 
 ### [2026-09-15] Target: README.md
 - crewscript.py is now runnable: `python3 crewscript.py --help` lists every crew-script command; `python3 crewscript.py FILE ...` checks scripts without running anything (exit 1 on an error). The same command list (crewscript.HELP) ends panelO6.py --help and simulatePASS.py --help. --help screens no longer name internals (crewscript.py as an unexplained module, busConfig, retest-crt2.sh).

@@ -25,9 +25,11 @@ Anything can send one:
       s.sendto(b'OPS 2 transition', ('239.255.1.1', 6990))"
 
 THE BOX GROWS TO FIT.  The width stays as given; a caption that wraps to more
-lines than the height holds makes the box taller, upward, so its bottom edge
-stays put, and a shorter caption brings it back to the height given (never
-less).
+lines than the height holds makes the box taller, DOWNWARD, so its top edge
+stays put and the extra lines cover nothing above the caption, and a shorter
+caption brings it back to the height given (never less).  Only if the box
+would run off the bottom of the screen is it moved up, and only by as much as
+that needs.
 
 TRYING SIZES: --edit.  The box takes the keyboard, so captions can be typed
 straight into it to find a geometry and font size that suit a recording:
@@ -120,9 +122,9 @@ class Subtitles(object):
         self.args = args
         # The box is kept here rather than read back from the window, which
         # has no size of its own until it is mapped: width, least height, the
-        # left edge, and the BOTTOM edge, which stays put as the box grows.
-        self.w, self.min_h, self.x = box[0], box[1], box[2]
-        self.bottom = box[3] + box[1]
+        # left edge, and the TOP edge, which stays put as the box grows.
+        self.w, self.min_h, self.x, self.top = box
+        self.shift = 0                        # moved up this far to stay on screen
         self.h = None
         self.align = args.align
         self.text = ""
@@ -205,21 +207,22 @@ class Subtitles(object):
             log("cannot ask for an undecorated window (it will have a title bar): %s" % e)
 
     # -- size and place ---------------------------------------------------
-    def _fit(self, top=None):
+    def _fit(self):
         """Wrap to the width, then make the box as tall as the text needs, but
-        no shorter than the height given, keeping its bottom edge where it is
-        -- or, while Shift-dragging, its top edge (top)."""
+        no shorter than the height given, growing downward from its top edge
+        -- moved up only if it would otherwise run off the bottom of the
+        screen."""
         self.label.configure(wraplength=max(50, self.w - 2 * PAD_X - 8))
         self.root.update_idletasks()
         self.h = max(self.min_h, self.label.winfo_reqheight())
-        if top is not None:
-            self.bottom = top + self.h
-        self.root.geometry("%dx%d+%d+%d" % (self.w, self.h, self.x, self.bottom - self.h))
+        over = self.top + self.h - self.root.winfo_screenheight()
+        self.shift = max(0, min(over, self.top))
+        self.root.geometry("%dx%d+%d+%d" % (self.w, self.h, self.x, self.top - self.shift))
 
     def options(self):
         """The command-line options that make this box again."""
         return "--geometry %dx%d+%d+%d --font-size %d --align %s" % (
-            self.w, self.min_h, self.x, self.bottom - self.min_h,
+            self.w, self.min_h, self.x, self.top,
             int(self.font.cget("size")), self.align)
 
     def _report(self):
@@ -231,21 +234,20 @@ class Subtitles(object):
         self.root.update_idletasks()
         if self.root.winfo_ismapped():
             self.x = self.root.winfo_rootx()
-            self.bottom = self.root.winfo_rooty() + (self.h or self.min_h)
+            self.top = self.root.winfo_rooty() + self.shift
 
     def _drag_start(self, e):
         self._sync_place()
-        self._grab = (e.x_root - self.x, e.y_root - (self.bottom - (self.h or self.min_h)))
+        self._grab = (e.x_root - self.x, e.y_root - self.top)
         self._moved = False
         if self.args.edit:
             self.root.focus_force()
 
     def _drag(self, e):
-        top = e.y_root - self._grab[1]
         self.x = e.x_root - self._grab[0]
-        self.bottom = top + (self.h or self.min_h)
+        self.top = e.y_root - self._grab[1]
         self._moved = True
-        self.root.geometry("+%d+%d" % (self.x, top))
+        self._fit()
 
     def _drag_end(self, _e):
         if (self._moved or self._resize_from is not None) and self.args.edit:
@@ -255,17 +257,16 @@ class Subtitles(object):
 
     def _resize_start(self, e):
         self._sync_place()
-        self._resize_from = (e.x_root, e.y_root, self.w, self.min_h,
-                             self.bottom - (self.h or self.min_h))
+        self._resize_from = (e.x_root, e.y_root, self.w, self.min_h)
         self.root.focus_force()
 
     def _resize(self, e):
         if self._resize_from is None:
             return
-        x0, y0, w0, h0, top = self._resize_from
+        x0, y0, w0, h0 = self._resize_from
         self.w = max(MIN_W, w0 + (e.x_root - x0))
         self.min_h = max(MIN_H, h0 + (e.y_root - y0))
-        self._fit(top)
+        self._fit()
 
     def _menu(self, e):
         try:
@@ -359,8 +360,9 @@ captions:
   <left>, <center> or <right> to align that caption alone.
 
 the box:
-  grows upward, bottom edge fixed, when a caption wraps past its height, and
-  returns to the --geometry height (never less) for a shorter one.
+  grows downward, top edge fixed, when a caption wraps past its height, and
+  returns to the --geometry height (never less) for a shorter one.  It moves
+  up only as far as it must to stay on the screen.
   drag            move it
   right button    Clear / Quit
   Ctrl Q          quit
@@ -390,7 +392,7 @@ def main(argv=None):
                          "captions arrive on base+%d" % SUBTITLE_OFFSET)
     ap.add_argument("--geometry", metavar="WxH+X+Y", default=None,
                     help="width, least height and place (default %dx%d, bottom centre); "
-                         "the box grows taller, upward, for a caption that needs it"
+                         "the box grows taller, downward, for a caption that needs it"
                          % (DEFAULT_W, DEFAULT_H))
     ap.add_argument("--font", default="Helvetica", help="font family (default Helvetica)")
     ap.add_argument("--font-size", type=int, default=28, metavar="PT")
