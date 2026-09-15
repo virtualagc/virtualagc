@@ -23,3 +23,6 @@ because this file records everything and recovers nothing.
 ### [2026-09-15] Target: problems.md
 - --mtu-model on buses 20-22 now echoes EVERY bus command (command-sync) to listening computers, not only its own read (0x24C26); data is still returned only for the read. Listen-Mode receives wait indefinitely for a command at their IUA, so NSP listeners had stalled and drawn MSC time-outs in 4-GPC sets (ledger #145, commit 273563b7f). Single-GPC behaviour unchanged (gate echo-regress ALL MATCH).
 - Host note: if /usr/bin/ar segfaults, build the library with `make AR=llvm-ar`.
+
+### [2026-09-15] Target: problems.md
+- CORRECTION to the llvm-ar note above: /usr/bin/ar was not broken. GNU ar dlopens every /usr/lib/bfd-plugins plugin (LLVMgold-14 -> libLLVM-14.so.1) and the PAGE-CACHE copy of libLLVM-14.so.1 was corrupt in RAM (md5 b56ec9da..., disk/direct read and package c7037a8d...), so ar segfaulted inside libLLVM-14 (also Sep 14 16:18). Fix: `dd if=/usr/lib/x86_64-linux-gnu/libLLVM-14.so.1 iflag=nocache count=0` (no root) evicts the pages; plain ar then works. Not LTO-related. Repeat corruption suggests running memtest86+.

@@ -944,3 +944,11 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   set to run 5 h; Claude stopped the supervisor and eve17 so the machine is
   free in the morning (NO_NEW_RUN_AFTER should have been 'no run that
   would END after', i.e. launch cut-off minus --duration).
+- CORRECTION to the HOST NOTE above (07:02): ar was not broken.  GNU ar
+  loads /usr/lib/bfd-plugins/LLVMgold-14.so -> libLLVM-14.so.1, whose
+  PAGE-CACHE copy was corrupt in RAM (cached md5 b56ec9da...; direct read
+  and package c7037a8d...).  Identical crashes also at Sep 14 16:18.  The
+  owner approved evicting it (`dd ... iflag=nocache count=0`); the cached
+  md5 then matched and plain `make` rebuilt libyaGPC2.a with ar.  Separate:
+  sda logs repeated critical medium errors (sector 310399144) and ext4
+  itable read errors on sda1 (Sep 14 21:48) -- not the build disk.
