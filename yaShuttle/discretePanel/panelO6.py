@@ -438,7 +438,7 @@ class PanelO6:
         self.cv.bind("<ButtonRelease-1>", self._on_release)
         self.cv.bind("<Motion>", self._on_motion)
         self.cv.bind("<Configure>", self._on_configure)
-        self.cv.bind("<Leave>", lambda _e: self.cv.configure(cursor=""))
+        self.cv.bind("<Leave>", self._on_leave)
 
         self._dump_state("startup")
 
@@ -1734,8 +1734,16 @@ class PanelO6:
             self.root.after(ms, lambda: self.cv.event_generate(
                 "<ButtonPress-1>", x=5, y=5, when="tail"))
 
+    def _on_leave(self, _event):
+        # A 'wait user' keeps its cursor: the window usually appears with the
+        # pointer elsewhere, and clearing it on the way out left the arrow.
+        if self._user_wait is None:
+            self.cv.configure(cursor="")
+
     def _on_motion(self, event):
         if self._user_wait is not None:
+            if str(self.cv.cget("cursor")) != self.WAIT_CURSOR:
+                self.cv.configure(cursor=self.WAIT_CURSOR)
             return
         hit = self._find(event.x, event.y)
         want = bool(hit)
