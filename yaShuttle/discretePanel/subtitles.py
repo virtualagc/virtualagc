@@ -40,6 +40,9 @@ straight into it to find a geometry and font size that suit a recording:
     drag            move the box
     Shift-drag      change its width and its (minimum) height
     Ctrl P          print the options that reproduce the box
+    Ctrl H          hide or show the cursor (it shows only while the box
+                    has the keyboard anyway, so clicking another window
+                    hides it for a recording)
 
 After any change of size, place, font size or alignment it prints the
 equivalent options -- '--geometry WxH+X+Y --font-size N --align A' -- to
@@ -157,8 +160,14 @@ class Subtitles(object):
             root.bind("<Shift-ButtonPress-1>", self._resize_start)
             root.bind("<Shift-B1-Motion>", self._resize)
         root.bind_all("<Control-q>", lambda _e: root.quit())
+        # The typing cursor shows only while it is wanted (Ctrl H) and the box
+        # has the keyboard, so it is gone once focus moves to another window.
+        self.cursor_wanted = True
+        self.focused = False
         if args.edit:
             root.bind("<Key>", self._key)
+            root.bind("<FocusIn>", lambda _e: self._focus(True))
+            root.bind("<FocusOut>", lambda _e: self._focus(False))
         self.popup = tk.Menu(root, tearoff=0)
         self.popup.add_command(label="Clear", command=lambda: self.show(""))
         self.popup.add_command(label="Quit", command=root.quit)
@@ -176,7 +185,7 @@ class Subtitles(object):
         if args.edit:
             root.after(200, root.focus_force)
             log("--edit: type a caption; Ctrl +/- font, Ctrl L/E/R align, "
-                "Shift-drag size, Ctrl P options")
+                "Shift-drag size, Ctrl P options, Ctrl H cursor")
             self._report()
         threading.Thread(target=self._listen, daemon=True).start()
         root.after(50, self._poll)
@@ -283,7 +292,7 @@ class Subtitles(object):
         if tag:
             align = tag.group(1).lower().replace("centre", "center")
             shown = shown[tag.end():]
-        if self.args.edit:
+        if self.args.edit and self.cursor_wanted and self.focused:
             shown += EDIT_CURSOR
         self.label.configure(text=shown, justify=align, anchor=ANCHORS[align])
         self._fit()
@@ -293,6 +302,11 @@ class Subtitles(object):
                 self.root.attributes("-topmost", True)
             else:
                 self.root.withdraw()
+
+    def _focus(self, focused):
+        if focused != self.focused:
+            self.focused = focused
+            self.show(self.text)
 
     def _key(self, e):
         ctrl = bool(e.state & 0x4)
@@ -306,6 +320,10 @@ class Subtitles(object):
                 self.align = {"l": "left", "e": "center", "r": "right"}[k.lower()]
             elif k.lower() == "p":
                 self._report()
+                return "break"
+            elif k.lower() == "h":
+                self.cursor_wanted = not self.cursor_wanted
+                self.show(self.text)
                 return "break"
             else:
                 return None
@@ -377,6 +395,8 @@ editing controls (--edit only):
   Ctrl L / E / R  align left, centre, right
   Shift-drag      set width (left-right) and minimum height (up-down)
   Ctrl P          print the options that reproduce the box
+  Ctrl H          hide or show the cursor; it shows only while the box has
+                  the keyboard, so clicking another window also hides it
   after each change of size, place, font size or alignment it prints
   '--geometry WxH+X+Y --font-size N --align A' to paste into a command line.
 """

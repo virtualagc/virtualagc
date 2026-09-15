@@ -12,3 +12,6 @@
 
 ### [2026-09-15] Target: HANDOFF-panelO6.md
 - crewscript HELP now says [timeout S] is the literal word timeout plus seconds (default WAIT_TIMEOUT_S 600); a wait ending in a bare number after mode-tb STATE or new-screen gets the error "a timeout is written with the word timeout". A title may still end in a number.
+
+### [2026-09-15] Target: HANDOFF-panelO6.md
+- subtitles.py --edit: the typing cursor shows only while the box has keyboard focus (FocusIn/FocusOut), so clicking another window hides it for a recording; Ctrl H toggles it (cursor_wanted). In --help, the docstring and the start-up line.
