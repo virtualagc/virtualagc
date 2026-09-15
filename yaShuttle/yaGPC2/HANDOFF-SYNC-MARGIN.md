@@ -243,7 +243,26 @@ stall > 250 ms); display peer holds that went unanswered (including partial
 replies past their 5 ms budget, which is 5 ms MINUS time already held) never
 landed on the voted-out computer near its loss, and clean runs had as many.
 
+**LEAD HYPOTHESIS (owner, 20:03): desktop activity.**  The one long clean
+run (12:59-16:23) was while the machine was unattended; every loss -- the
+owner's hand run and the scripted ones -- came while the owner was using the
+desktop (opening and closing large programs such as an email reader).  The
+logs cannot test this after the fact (program launches do not reach the
+journals), and the scripted comparisons are weak: runs B-E changed timing
+settings, so only A and F (defaults) are like-for-like.  RULES FOR THE
+OVERNIGHT RUNS: defaults only (no pacing/barrier options) for anything
+compared; an unattended overnight run IS the quiet condition, so few or no
+losses there is evidence FOR the hypothesis, not a null result; the
+disturbed condition must be created deliberately and timestamped.
+
 Not yet covered, so record it overnight:
+
+0. **A scheduling-latency probe**, the most direct measure of "the host got
+   busy": a thread (or small C program) that sleeps 1 ms in a loop and logs,
+   once a second with a wall timestamp, its worst overshoot and how many
+   wake-ups were more than 2, 5, 20 and 100 ms late.  Run it at normal
+   priority beside the simulation.  Swap was already ruled out for the
+   simulation's own processes; CPU contention and scheduler delays were not.
 
 1. **A host-stall recorder** running beside each run (scratchpad script):
    once a second, with a wall-clock timestamp, `/proc/pressure/{cpu,memory,io}`
@@ -260,13 +279,29 @@ Not yet covered, so record it overnight:
    `YAGPC_ERRTERM_TRACE=6,7,8,9` (check each variable's exact syntax in
    src/iop.c ~1618-2000 and run.c:406 first) with `YAGPC_SYNCORDER=1`, and see
    what precedes the FCMSFAIL that takes the computer out.
-3. **A deliberate host stall as a test of both ideas** (after 1 and 2 work):
-   SIGSTOP / SIGCONT a MEDS2 process for 5, 20, 100 ms (`kill -STOP <pid>;
-   sleep; kill -CONT <pid>` in one short script, by PID), and separately
-   generate I/O pressure (a large `dd` to /mnt/STORAGE with conv=fsync).  If
-   losses or the margin follow the stalls, the hypothesis is confirmed and the
-   fix is to make the path tolerant; if not, it is refuted -- record either
-   way.
+3. **Quiet vs disturbed, as a controlled comparison** (after 0-2 work), all
+   runs at defaults, same scripted configuration, each long enough to count
+   losses (e.g. 60-90 min in OPS 2):
+   - QUIET: nothing else running; probe and recorder only.
+   - DISTURBED: the same, plus a timestamped disturbance every few minutes,
+     one kind per run so the cause can be named --
+     (a) an all-core CPU burst for 1-5 s (e.g. `nproc` busy loops);
+     (b) a memory burst: allocate and touch several GB, then free it
+         (large-block moves, page-cache reclaim, compaction);
+     (c) spinning-disk I/O: a large `dd ... conv=fsync` to /mnt/STORAGE;
+     (d) launching and closing a large program headlessly (e.g. a browser
+         with a throwaway profile, `--headless`), the nearest scriptable
+         stand-in for the owner opening an email reader;
+     (e) SIGSTOP/SIGCONT of one MEDS2 process for 5, 20, 100 ms, by PID
+         (`kill -STOP <pid>; sleep; kill -CONT <pid>`), which isolates the
+         display path.
+   Compare loss count and the sync-margin distribution between conditions,
+   and line every loss and every margin excursion up against the probe,
+   the recorder and the disturbance log.  Do NOT touch the owner's own
+   programs or running simulation; use private port bases.  If losses or
+   margin excursions follow a kind of disturbance, that names the mechanism
+   and the fix is to make that path tolerant; if the quiet runs lose GPCs as
+   often, the hypothesis is refuted -- record either way in #145.
 
 ## Deliverables for the morning
 
