@@ -20,3 +20,4 @@
 - New subtitles.py: borderless always-on-top caption box for demo videos; captions are UTF-8 datagrams on the discrete bus group at port base + 90 (empty clears, \n = new line); drag to move, right-click Clear/Quit, Ctrl+Q; --geometry, --font/--font-size, --fg/--bg, --opacity, --hide-when-empty, --text.
 - Script command: panelO6 --script `<ms> subtitle TEXT`; simulatePASS --keys `<seconds> SUBTITLE TEXT`; simulatePASS starts subtitles.py (bottom centre) when either script has one, --subtitles / --no-subtitles override.
 - subtitles.py --align left|center|right (default center): justify and anchor of the caption.
+- subtitles.py: a caption may start with <left>, <center>/<centre> or <right> to align that caption alone; untagged captions use --align.

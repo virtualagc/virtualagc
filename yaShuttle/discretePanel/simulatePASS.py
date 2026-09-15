@@ -34,7 +34,7 @@ that many seconds.  Key and panel times both count from when the panel starts.
 CAPTIONS FOR VIDEOS.  '<seconds> SUBTITLE text ...' in the keys file, or
 '<ms> subtitle text ...' in the panel script, shows the text in subtitles.py's
 borderless caption box (the same line with no text clears it; \n starts a new
-line).  The box is started automatically when either file has such a line;
+line; a leading <left>, <center> or <right> aligns that caption alone).  The box is started automatically when either file has such a line;
 --subtitles starts it regardless, --no-subtitles never.
 
 WAITING INSTEAD OF GUESSING.  A line 'WAIT gpc N mode-tb RUN|IPL|BP [timeout S]'

@@ -2034,7 +2034,8 @@ class PanelO6:
 #     kybdsel right 2|3            RIGHT IDP/CRT SEL
 #     idpload N                    O6 IDP N LOAD (N 1-4), held IPL_HOLD_MS
 #     subtitle TEXT                show TEXT in subtitles.py (no TEXT clears it;
-#                                  \n in TEXT starts a new line)
+#                                  \n in TEXT starts a new line; a leading
+#                                  <left>, <center> or <right> aligns it)
 #
 # WAIT LINES.  `wait gpc N mode-tb RUN|IPL|BP [timeout S]`, with no time in
 # front, holds the script until GPC N's MODE talkback shows that state, then

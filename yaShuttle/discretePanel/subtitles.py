@@ -16,6 +16,8 @@ program by itself when either script contains a subtitle line.
 THE BUS.  One UDP datagram per caption, UTF-8, on the discrete bus's multicast
 group at port base + 90 (SUBTITLE_OFFSET).  An empty or all-blank datagram
 clears the box; the two characters backslash-n in the text start a new line.
+A caption may begin with <left>, <center> (or <centre>) or <right> to align
+that caption alone; one without uses --align.
 Anything can send one:
 
     python3 -c "import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); \\
@@ -29,6 +31,7 @@ above the other windows so a recording always shows it.
 import argparse
 import os
 import queue
+import re
 import socket
 import struct
 import threading
@@ -43,6 +46,8 @@ BOTTOM_MARGIN = 80
 # --align: how the lines sit against each other (justify) and where the text
 # sits in the box (anchor).
 ANCHORS = {"left": "w", "center": "center", "right": "e"}
+# A caption's own alignment, at its very start: "<left> Loading PASS".
+ALIGN_TAG = re.compile(r"<(left|center|centre|right)>\s*", re.IGNORECASE)
 
 
 def log(msg):
@@ -126,7 +131,12 @@ class Subtitles(object):
 
     def show(self, text):
         text = text.replace("\\n", "\n").strip()
-        self.label.configure(text=text)
+        align = self.args.align
+        tag = ALIGN_TAG.match(text)
+        if tag:
+            align = tag.group(1).lower().replace("centre", "center")
+            text = text[tag.end():]
+        self.label.configure(text=text, justify=align, anchor=ANCHORS[align])
         if self.args.hide_when_empty:
             if text:
                 self.root.deiconify()
