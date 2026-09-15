@@ -1,0 +1,62 @@
+# EXAMPLE: bring up four GPCs and two CRTs through the NBAT to OPS 2, waiting on
+# panel O6 talkbacks instead of fixed times.  Run from discretePanel/:
+#
+#   python3 simulatePASS.py --gpcs 1-4 --crts 2 --tape OI340700-v44boot.mmv \
+#       --panel-script examples/4gpc-startup-panel.script \
+#       --keys examples/4gpc-startup-keys.txt --duration 900
+#
+# Pair with examples/4gpc-startup-keys.txt.  Verified 2026-09-15 (OPS 2 typed
+# about 570 s after the panel started, against 840 s with fixed times).
+#
+# The four-GPC 2-CRT start-up (perf-in/panel.script), waiting on the O6 MODE
+# talkbacks instead of fixed times: each GPC is taken to RUN as soon as its
+# talkback shows RUN (load complete).  Times after a wait count from it.
+0 gpc 1
+0 mode HALT
+10 gpc 2
+20 mode HALT
+30 gpc 3
+40 mode HALT
+50 gpc 4
+60 mode HALT
+80 idppower 1 on
+90 idppower 2 on
+100 crt 1
+200 source MM1
+400 gpc 1
+500 ipl
+3000 mode STANDBY
+wait gpc 1 mode-tb RUN timeout 300
+1000 crt 0
+3000 mode RUN
+5000 source OFF
+10000 gpc 2
+11000 source MM1
+12000 crt 2
+12500 idpload 2
+13000 ipl
+16000 mode STANDBY
+wait gpc 2 mode-tb RUN timeout 300
+1000 crt 0
+3000 mode RUN
+5000 source OFF
+10000 gpc 3
+11000 source MM1
+12000 crt 2
+12500 idpload 2
+13000 ipl
+16000 mode STANDBY
+wait gpc 3 mode-tb RUN timeout 300
+1000 crt 0
+3000 mode RUN
+5000 source OFF
+10000 gpc 4
+11000 source MM1
+12000 crt 2
+12500 idpload 2
+13000 ipl
+16000 mode STANDBY
+wait gpc 4 mode-tb RUN timeout 300
+1000 crt 0
+3000 mode RUN
+5000 source OFF

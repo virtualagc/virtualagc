@@ -1,0 +1,37 @@
+# EXAMPLE keys for examples/4gpc-startup-panel.script -- see that file for the
+# command line.  WAIT lines follow the O6 MODE talkbacks in panel.log; times
+# after a WAIT count from when it was met.
+#
+# Keys for panel-wait.script.  Each ITEM 1 EXEC follows its GPC's IPL
+# talkback (IPL at the pushbutton, barberpole again at STBY) by the same
+# 65-67 s the timed script allowed for the IPL display; that one delay stays
+# timed until a display event exists.  The NBAT and OPS 2 follow GPC4's RUN
+# talkback, with the timed script's spacing.
+WAIT gpc 1 mode-tb IPL timeout 60
+WAIT gpc 1 mode-tb BP timeout 60
+67 ITEM 1 EXEC
+WAIT gpc 2 mode-tb IPL timeout 400
+WAIT gpc 2 mode-tb BP timeout 60
+65 KB2 ITEM 1 EXEC
+WAIT gpc 3 mode-tb IPL timeout 400
+WAIT gpc 3 mode-tb BP timeout 60
+65 KB2 ITEM 1 EXEC
+WAIT gpc 4 mode-tb IPL timeout 400
+WAIT gpc 4 mode-tb BP timeout 60
+65 KB2 ITEM 1 EXEC
+WAIT gpc 4 mode-tb RUN timeout 300
+16 ITEM 1 + 2 EXEC
+24 ITEM 2 + 1 EXEC
+32 ITEM 3 + 2 EXEC
+40 ITEM 4 + 3 EXEC
+48 ITEM 5 + 4 EXEC
+56 ITEM 7 + 1 EXEC
+64 ITEM 8 + 2 EXEC
+72 ITEM 9 + 3 EXEC
+80 ITEM 1 0 + 4 EXEC
+88 ITEM 1 1 + 1 EXEC
+96 ITEM 1 2 + 1 EXEC
+104 ITEM 1 3 + 2 EXEC
+112 ITEM 1 8 + 1 EXEC
+120 ITEM 1 9 + 2 EXEC
+141 OPS 2 0 1 PRO
