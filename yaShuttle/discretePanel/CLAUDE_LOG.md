@@ -9,3 +9,9 @@
 
 ### [2026-09-14] Target: HANDOFF-panelO6.md
 - panelO6.py publishes its discretes from its own thread (_pub_loop): the Tk side only hands it the columns, the thread sends RESET then SET per register on every change and every REPUBLISH_MS, so a Tk thread waiting on a busy X server no longer silences the bus (with Xorg pegged it had gone quiet for more than yaGPC2's 1.5 s staleness limit and halted every running GPC; yaGPC2 ledger #147). _tick logs 'Tk tick N ms late' past 200 ms. Test hook NSTS_PANEL_STALL=<start s>,<seconds> holds the Tk thread once.
+
+### [2026-09-15] Target: README.md
+- panelO6 talkbacks are now GPC-driven: OUTPUT row from each GPC DO bit 7 (I/O ACTIVE), MODE row IPL from DO bit 31 and RUN from DO bit 9 (RUN(READY), set by FCMSWMON when a load completes), barberpole otherwise; per-GPC OUT listeners with a REQUEST at start; changes logged as "GPCn MODE tb  A -> B" / "GPCn OUTPUT tb  A -> B". Sources: DPS Workbook USA005350 Rev B 2.x/3.x, DPS Overview Workbook 3-6/3-7, DPS Console Handbook SCP 5.18.
+- panelO6 layout: IPL_TO_MODE_TB_GAP 50 px (one pushbutton) above the MODE talkbacks; REF_H 1250 -> 1300; talkback word size 9, centred on its ink.
+- --script `wait gpc N mode-tb RUN|IPL|BP [timeout S]`; later times count from when it is met; a timeout stops the script.
+- simulatePASS --keys `WAIT gpc N mode-tb ... [timeout S]` (follows panel.log); panel height 1300 in window layout. Verified one GPC (run talkback-test: wait met 24.8 s after ITEM 1 EXEC).

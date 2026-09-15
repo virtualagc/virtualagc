@@ -30,12 +30,18 @@ printed page 2.6-4).  Two rows of that figure are easy to misread:
   * The second row is not a set of slide switches.  Those hatched windows
     are the OUTPUT talkbacks: gray if that GPC may transmit on the
     flight-critical buses, barberpole if it may not.  They are driven by
-    GPC output discretes, not by a crew switch of their own.  Here they
-    are approximated as gray when the GPC is powered, in RUN, and not held
-    off the buses by I/O TERM B (below), so a BFS engage flips them.
+    GPC output discretes, not by a crew switch of their own: here by each
+    GPC's DO bit 7 (I/O ACTIVE TALKBACK), as yaGPC2 publishes it on that
+    GPC's channel.  PASS sets it once in RUN.
   * The fifth row is the MODE talkback (RUN, IPL, or barberpole), not a
-    control.  It shows RUN while the MODE switch is in RUN, and IPL while
-    the IPL pushbutton is held in HALT.
+    control, and likewise driven by the GPC: IPL from DO bit 31 (IPL,
+    hardware) while a bootstrap is in, RUN from DO bit 9 (RUN(READY)
+    TALKBACK) once the GPC has initialised -- which, after an IPL, is how the
+    crew knows the load is complete ("When the talkback goes to RUN, the IPL
+    is complete", DPS Workbook USA005350 Rev B), even with the switch still
+    in STBY -- and barberpole otherwise, or before the GPC is heard.  Each
+    change is logged ("GPC2 MODE tb  BP -> RUN"), and a --script or
+    simulatePASS --keys file can wait for one.
 
 The OUTPUT switch itself is the third-row three-position toggle
 (BACKUP / NORMAL / TERMINATE).  The MODE switch is the bottom-row
@@ -97,6 +103,12 @@ IPL_SOURCE_POS = ("MMU 1", "OFF", "MMU 2")       # up, mid, down
 BFC_DISPLAY_POS = ("ON", "OFF")                 # up, down
 BFC_SELECT_POS = ("1+2", "2+3", "3+1")          # up, mid, down
 BFC_DISENGAGE_POS = ("LEFT", "RIGHT")           # left, right; unlabeled
+# The GPC discrete OUTPUT bits that drive O6's talkbacks (IBM numbering;
+# SSSRC/BILDNEW5.asm's DO table).  Bit 7 is the I/O ACTIVE talkback.
+DO_IO_ACTIVE_TB_BIT = 7
+DO_READY_TB_BIT = 9
+DO_IPL_TB_BIT = 31
+IPL_TO_MODE_TB_GAP = 50  # = the IPL pushbutton's height
 MMUS = ("MM1", "MM2")                           # ACTIVITY lamps, left to right
 ACTIVITY_STATES = ("OFF", "READY", "BUSY")      # unpowered, green, red
 RHCS = ("CDR", "PLT")                           # BFS ENGAGE pushbuttons
@@ -293,7 +305,7 @@ C2_W = 720             # the IDP column: panel C2 over the O6 IDP LOAD inset
 RHC_BTN = 40
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
 REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + PANE_GAP + C2_W + MARGIN   # 1684
-REF_H = 1250
+REF_H = 1300           # 1250 before the IPL-to-talkback gap was added
 FULL_SIZE = 768        # --size units: 768 is the design (full) window
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
@@ -402,6 +414,12 @@ class PanelO6:
         self.idp_mf = [default_major_func()] * N_IDP_SW
         self.kybd_sel = {"left": DEFAULT_LEFT_SEL, "right": DEFAULT_RIGHT_SEL}
         self.idp_load = [False] * N_IDP_LOAD
+        # Each GPC's own discrete OUTPUT register, as yaGPC2 publishes it on
+        # that GPC's channel: None until heard.  The O6 talkbacks are driven
+        # from these bits -- see mode_tb().
+        self.gpc_out = [None] * N_GPC
+        self._tb_shown = ["BP"] * N_GPC
+        self._out_tb_shown = ["BP"] * N_GPC
 
         cw, ch = scaled_wh(REF_W, REF_H, size)
         self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
@@ -456,6 +474,7 @@ class PanelO6:
         self._rx_lock = threading.Lock()
         self._mm_heard = [None] * len(MM_READY_BITS)
         threading.Thread(target=self._listen, daemon=True).start()
+        threading.Thread(target=self._listen_out, daemon=True).start()
         # The IDP buses; see "The IDP buses" above.  What the listener hears
         # waits in _idp_rx for the Tk side; what we sent waits in _idp_sent
         # so that its own echo is not mistaken for someone else's command.
@@ -522,12 +541,18 @@ class PanelO6:
     def term_b(self, i):
         return self.latch[i] != self._bfc_gpc_select(i)
 
-    # ---- talkbacks (local stand-in until yaGPC2 drives them) -------------
+    # ---- talkbacks: driven by each GPC's discrete outputs ------------------
 
     def output_tb(self, i):
-        if (self.power[i] == "ON"
-                and self.mode[i] == "RUN"
-                and not self.term_b(i)):
+        """GRAY when the GPC can command the flight-critical buses, else BP.
+
+        DPS Workbook (USA005350 Rev B) 2.x: "A discrete output from the GPC
+        drives the talkback to gray if output is enabled, and the talkback
+        goes barberpole (bp) if it is not (I/O TERM B set or the GPC not in
+        RUN)."  That output is DO bit 7, I/O ACTIVE TALKBACK; yaGPC2 run
+        verify-tb saw PASS set it 2.4 s after the switch reached RUN."""
+        out = self.gpc_out[i]
+        if out is not None and out & D.bit_mask(DO_IO_ACTIVE_TB_BIT):
             return "GRAY"
         return "BP"
 
@@ -536,9 +561,21 @@ class PanelO6:
         return self.ipl[i] and self.mode[i] == "HALT"
 
     def mode_tb(self, i):
-        if self._ipl_live(i):
+        """RUN, IPL or barberpole, driven by the GPC, not by the switch.
+
+        DPS Workbook (USA005350 Rev B) 2.x: the OUTPUT and MODE talkbacks "are
+        driven directly from GPC output discretes"; 3.x: "The MODE talkback
+        goes to IPL while the initialization software is loaded ... When the
+        talkback goes to RUN, the IPL is complete."  The bits are the GPC's DO
+        register (SSSRC/BILDNEW5.asm): 9 RUN(READY) TALKBACK, which FCMSWMON
+        sets when the load is complete, and 31 IPL (HDWR).  A GPC nobody has
+        heard from is barberpole, as an unpowered one is."""
+        out = self.gpc_out[i]
+        if out is None:
+            return "BP"
+        if out & D.bit_mask(DO_IPL_TB_BIT):
             return "IPL"
-        if self.mode[i] == "RUN":
+        if out & D.bit_mask(DO_READY_TB_BIT):
             return "RUN"
         return "BP"
 
@@ -667,6 +704,67 @@ class PanelO6:
                     if msg["mask"] & D.bit_mask(bit):
                         self._mm_heard[u] = msg["op"] == D.SET
 
+    def _listen_out(self):
+        """Thread: every GPC's discrete OUTPUT register, on its own channel.
+
+        The panel's own channel hears only the primary GPC, and _listen keeps
+        only register A, so the talkbacks need a socket per computer.  A
+        REQUEST asks each GPC for its whole register, so a panel started after
+        the computers still shows what they are driving."""
+        socks = {}
+        for n in range(1, N_GPC + 1):
+            port = D.gpc_port(n)
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
+                                  socket.IPPROTO_UDP)
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind(("", port))
+                s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                             struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                                         socket.inet_aton(D.IFACE)))
+            except OSError as e:
+                log("cannot listen for GPC%d's discrete outputs: %s" % (n, e))
+                continue
+            socks[s] = n - 1
+            try:
+                D.publish(self.sock, D.REQUEST, D.REG_OUT, 0, port=port)
+            except OSError:
+                pass
+        while socks:
+            try:
+                ready, _, _ = select.select(list(socks), [], [], 1.0)
+            except (OSError, ValueError):
+                return
+            for s in ready:
+                try:
+                    data, _ = s.recvfrom(2048)
+                except OSError:
+                    continue
+                msg = D.decode(data)
+                if (msg is None or msg["reg"] != D.REG_OUT
+                        or msg["op"] == D.REQUEST):
+                    continue
+                i = socks[s]
+                with self._rx_lock:
+                    self.gpc_out[i] = D.apply(self.gpc_out[i] or 0, msg)
+
+    def _talkbacks_follow(self):
+        """Tk side: log and redraw a talkback when its GPC moves it."""
+        changed = False
+        for i in range(N_GPC):
+            now = self.mode_tb(i)
+            if now != self._tb_shown[i]:
+                log("%s MODE tb  %s -> %s" % (GPCS[i], self._tb_shown[i], now))
+                self._tb_shown[i] = now
+                changed = True
+            now = self.output_tb(i)
+            if now != self._out_tb_shown[i]:
+                log("%s OUTPUT tb  %s -> %s" % (GPCS[i], self._out_tb_shown[i], now))
+                self._out_tb_shown[i] = now
+                changed = True
+        if changed:
+            self.redraw()
+
     def _tick(self):
         """Every REPUBLISH_MS: re-assert our bits, refresh the lamps.
 
@@ -687,6 +785,7 @@ class PanelO6:
             self._stall = None
             now = time.monotonic()
         self._tick_last = now
+        self._talkbacks_follow()
         self._idp_adopt()
         with self._rx_lock:
             heard = list(self._mm_heard)
@@ -907,6 +1006,10 @@ class PanelO6:
         y += th10 + pad
         L["ipl_btn"] = y
         y += 50 + bezel + pad
+        # About one pushbutton's height of air before the MODE talkbacks
+        # (owner, 2026-09-15): they report what the GPC is doing, not the
+        # state of the IPL button above them, and sat too close to read so.
+        y += IPL_TO_MODE_TB_GAP
 
         L["mode_tb"] = y
         y += 34 + bezel + pad
@@ -1564,7 +1667,12 @@ class PanelO6:
             self._rect(x1 + 1, y1 + 1, x2 - 1, y2 - 1,
                        fill=C_TB_LEGEND, outline="")
             word = state if state != "RUN" or legend_always is None else legend_always
-            self._text((x1 + x2) / 2.0, (y1 + y2) / 2.0, word, size=10)
+            # Anchor=c centres the em box, which puts the capitals high; as in
+            # _pushbutton, move down by half the descent to centre the ink.
+            f = self._tkfont(TB_WORD_SIZE)
+            y_fix = (f.metrics("descent") / 2.0) / max(self.s, 0.01)
+            self._text((x1 + x2) / 2.0, (y1 + y2) / 2.0 + y_fix, word,
+                       size=TB_WORD_SIZE)
 
     def _pushbutton(self, x1, y1, x2, y2, label, down=False):
         fill = C_BTN_DOWN if down else C_BTN
@@ -1925,29 +2033,70 @@ class PanelO6:
 #     kybdsel left 1|3             LEFT IDP/CRT SEL
 #     kybdsel right 2|3            RIGHT IDP/CRT SEL
 #     idpload N                    O6 IDP N LOAD (N 1-4), held IPL_HOLD_MS
+#
+# WAIT LINES.  `wait gpc N mode-tb RUN|IPL|BP [timeout S]`, with no time in
+# front, holds the script until GPC N's MODE talkback shows that state, then
+# carries on with the times of the lines after it counted from that moment.
+# A wait that times out stops the script (it is logged), rather than going on
+# as if the GPC were ready.  Without wait lines a script runs exactly as
+# before.
 SCRIPT_HELP = ("timed discrete sequence: '<ms> <command>' per line.  "
                "Commands act on the primary GPC until 'gpc <n>' moves "
                "them to another column, which is how a script brings up "
-               "more than one computer.")
+               "more than one computer.  'wait gpc <n> mode-tb RUN|IPL|BP "
+               "[timeout <s>]' holds the script for a talkback; later times "
+               "count from when it is met.")
 IPL_HOLD_MS = 250
+TB_WORD_SIZE = 9               # RUN / IPL on a talkback flag
+WAIT_TIMEOUT_S = 600           # a `wait` line with no timeout gives up after this
 
 
 def _on(word):
     return word.lower() in ("on", "1", "set", "true")
 
 
+def _parse_wait(arg, where="script"):
+    """'gpc N mode-tb STATE [timeout S]' -> (column, STATE, seconds)."""
+    w = arg.split()
+    try:
+        if (len(w) not in (4, 6) or w[0].lower() != "gpc"
+                or w[2].lower() != "mode-tb"):
+            raise ValueError
+        col = int(w[1]) - 1
+        state = {"BARBERPOLE": "BP"}.get(w[3].upper(), w[3].upper())
+        timeout = WAIT_TIMEOUT_S
+        if len(w) == 6:
+            if w[4].lower() != "timeout":
+                raise ValueError
+            timeout = float(w[5])
+    except ValueError:
+        raise SystemExit("panelO6: %s: expected 'wait gpc N mode-tb "
+                         "RUN|IPL|BP [timeout S]', got %r" % (where, arg))
+    if not 0 <= col < N_GPC or state not in ("RUN", "IPL", "BP"):
+        raise SystemExit("panelO6: %s: bad wait %r" % (where, arg))
+    return col, state, timeout
+
+
 def _parse_script(text):
-    out = []
+    """Entries in running order: (ms, command) or ("wait", arg).  Times sort
+    within each stretch between wait lines, which is all they ever meant."""
+    out, stretch = [], []
     for n, line in enumerate(text.splitlines(), 1):
         line = line.split("#", 1)[0].strip()
         if not line:
             continue
         parts = line.split(None, 1)
+        if len(parts) == 2 and parts[0].lower() == "wait":
+            _parse_wait(parts[1], "script line %d" % n)
+            out += sorted(stretch, key=lambda e: e[0])
+            stretch = []
+            out.append(("wait", parts[1].strip()))
+            continue
         if len(parts) != 2 or not parts[0].isdigit():
             raise SystemExit("panelO6: script line %d: expected "
                              "'<ms> <command>', got %r" % (n, line))
-        out.append((int(parts[0]), parts[1].strip()))
-    return sorted(out, key=lambda e: e[0])
+        stretch.append((int(parts[0]), parts[1].strip()))
+    return out + sorted(stretch, key=lambda e: e[0])
 
 
 def _run_script(panel, entries, quit_after_ms=None):
@@ -2051,8 +2200,41 @@ def _run_script(panel, entries, quit_after_ms=None):
             root.after(IPL_HOLD_MS,
                        lambda: panel._set_bfc_disengage("LEFT"))
 
-    for ms, cmd in entries:
-        root.after(ms, lambda c=cmd: do(c))
+    # Run in order.  A timed line fires at its time after the ORIGIN -- the
+    # script's start, or the moment the last wait was met; a wait line polls
+    # the talkback it names.
+    origin = [time.monotonic()]
+
+    def run_from(k):
+        while k < len(entries):
+            first, rest = entries[k]
+            if first == "wait":
+                col, state, timeout = _parse_wait(rest)
+                log("wait " + rest)
+                begun = time.monotonic()
+
+                def poll(k=k, col=col, state=state, timeout=timeout,
+                         begun=begun, rest=rest):
+                    waited = time.monotonic() - begun
+                    if panel.mode_tb(col) == state:
+                        log("wait met after %.1f s: %s" % (waited, rest))
+                        origin[0] = time.monotonic()
+                        run_from(k + 1)
+                    elif waited > timeout:
+                        log("WAIT TIMED OUT after %.0f s: %s -- script stopped"
+                            % (timeout, rest))
+                    else:
+                        root.after(100, poll)
+                root.after(0, poll)
+                return
+            due = origin[0] + first / 1000.0 - time.monotonic()
+            if due > 0:
+                root.after(int(due * 1000) + 1, lambda k=k: run_from(k))
+                return
+            do(rest)
+            k += 1
+
+    root.after(0, lambda: run_from(0))
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
 

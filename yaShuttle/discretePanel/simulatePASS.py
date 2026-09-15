@@ -30,11 +30,20 @@ aft keyboard, KB1 by default; also IDP_POWER_ON, IDP_POWER_OFF and DEU_LOAD for
 IDP 1 and IDP2_POWER_ON, IDP2_POWER_OFF and DEU_LOAD2 for IDP 2, which the panel
 follows as if its switches had been thrown), and --duration ends the run after
 that many seconds.  Key and panel times both count from when the panel starts.
+
+WAITING INSTEAD OF GUESSING.  A line 'WAIT gpc N mode-tb RUN|IPL|BP [timeout S]'
+in either file holds that file until GPC N's MODE talkback on panel O6 shows
+the state -- RUN when a load is complete, IPL while a bootstrap is in, BP
+(barberpole) otherwise, as the GPC drives it -- and the times of the lines
+after it count from that moment.  The keys file learns the talkback from the
+panel's log; a wait that times out stops that file, logged, rather than
+typing on as if the GPC were ready.
 """
 
 import argparse
 import datetime
 import os
+import re
 import shlex
 import shutil
 import signal
@@ -350,14 +359,81 @@ def screen_info():
         return 1, None, None
 
 
-def send_keys_thread(port_base, path, t0, stop_event):
+WAIT_TIMEOUT_S = 600
+
+
+class TalkbackWatch(object):
+    """The MODE talkbacks as panelO6.py logs them ('GPC2 MODE tb  BP -> RUN'),
+    read by following the panel's log."""
+    PATTERN = re.compile(r"GPC(\d) MODE tb\s+(\S+)\s+->\s+(\S+)")
+
+    def __init__(self, log_path):
+        self.path, self.pos, self.state = log_path, 0, {}
+
+    def poll(self):
+        try:
+            with open(self.path, errors="replace") as fh:
+                fh.seek(self.pos)
+                data = fh.read()
+                self.pos = fh.tell()
+        except OSError:
+            return
+        for m in self.PATTERN.finditer(data):
+            self.state[int(m.group(1))] = m.group(3)
+
+    def shows(self, gpc):
+        return self.state.get(gpc, "BP")
+
+
+def parse_wait(words):
+    """['gpc', N, 'mode-tb', STATE, ('timeout', S)] -> (N, STATE, seconds)."""
+    if (len(words) not in (4, 6) or words[0].lower() != "gpc"
+            or words[2].lower() != "mode-tb"):
+        raise ValueError("expected 'WAIT gpc N mode-tb RUN|IPL|BP [timeout S]'")
+    state = {"BARBERPOLE": "BP"}.get(words[3].upper(), words[3].upper())
+    if state not in ("RUN", "IPL", "BP"):
+        raise ValueError("a MODE talkback shows RUN, IPL or BP, not %r" % words[3])
+    timeout = WAIT_TIMEOUT_S
+    if len(words) == 6:
+        if words[4].lower() != "timeout":
+            raise ValueError("expected 'timeout S' after the state")
+        timeout = float(words[5])
+    return int(words[1]), state, timeout
+
+
+def send_keys_thread(port_base, path, t0, stop_event, panel_log=None):
     kb = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     kb.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(IFACE))
     kb.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
     with open(path) as fh:
         lines = [ln.split("#", 1)[0].split() for ln in fh]
+    watch = TalkbackWatch(panel_log) if panel_log else None
     for parts in lines:
         if not parts:
+            continue
+        if parts[0].upper() == "WAIT":
+            try:
+                gpc, state, timeout = parse_wait(parts[1:])
+            except ValueError as e:
+                log("keys: %s -- keys stopped: %s" % (e, " ".join(parts)))
+                return
+            if watch is None:
+                log("keys: WAIT needs the panel's log -- keys stopped")
+                return
+            log("keys: waiting for GPC%d MODE tb %s" % (gpc, state))
+            begun = time.time()
+            while True:
+                watch.poll()
+                if watch.shows(gpc) == state:
+                    log("keys: GPC%d MODE tb %s after %.1f s" % (gpc, state, time.time() - begun))
+                    t0 = time.time()
+                    break
+                if time.time() - begun > timeout:
+                    log("keys: WAIT TIMED OUT after %.0f s for GPC%d MODE tb %s -- keys stopped"
+                        % (timeout, gpc, state))
+                    return
+                if stop_event.wait(0.2):
+                    return
             continue
         at = float(parts[0])
         while time.time() - t0 < at:
@@ -511,7 +587,7 @@ def main():
     # An MDU window is the display plus MEDS2's edgekey strip under it
     # (EDGE_STRIP_K = 0.09 of the display's width) plus its frame.
     edge_h = int(round(0.09 * size)) if os.environ.get("NSTS_MDU_EDGEKEYS") != "0" else 0
-    need_h = max(int(round(1250.0 * size / 768)), (size + edge_h + 40) * ws)
+    need_h = max(int(round(1300.0 * size / 768)), (size + edge_h + 40) * ws)   # panelO6 REF_H
     if screen_w is not None and (need_w > screen_w or need_h > screen_h):
         # One cascading STACK per kind of window -- the displays together, the
         # keyboard, the panel, the CAM -- the stacks left to right, each pulled
@@ -595,7 +671,8 @@ def main():
         t0 = time.time()
         if args.keys:
             threading.Thread(target=send_keys_thread,
-                             args=(args.port_base, os.path.abspath(args.keys), t0, stop_event),
+                             args=(args.port_base, os.path.abspath(args.keys), t0, stop_event,
+                                   os.path.join(logs, "panel.log")),
                              daemon=True).start()
 
         # Not the steps themselves: they are long, and the programs' output
