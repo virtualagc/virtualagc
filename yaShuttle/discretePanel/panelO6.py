@@ -2149,6 +2149,21 @@ def _run_script(panel, entries, quit_after_ms=None):
                                  % (N_IDP_LOAD, arg))
             panel._set_idp_load(n, True)
             root.after(IPL_HOLD_MS, lambda: panel._set_idp_load(n, False))
+        # Every other control, by its panel legend, as the crew would move it.
+        elif verb == "power":
+            panel._set_power(w, position("GPC POWER", arg, POWER_POS))
+        elif verb == "output":
+            panel._set_output(w, position("GPC OUTPUT", arg, OUTPUT_POS))
+        elif verb == "display":
+            panel._set_bfc_display(position("BFC CRT DISPLAY", arg, BFC_DISPLAY_POS))
+        elif verb == "select":
+            panel._set_bfc_select(position("BFC CRT SELECT", arg, BFC_SELECT_POS))
+        elif verb == "disengage":
+            panel._set_bfc_disengage(position("BFC DISENGAGE", arg, BFC_DISENGAGE_POS))
+        elif verb == "rhcengage":
+            i = RHCS.index(position("RHC BFC ENGAGE", arg, RHCS))
+            panel._set_rhc(i, True)
+            root.after(IPL_HOLD_MS, lambda: panel._set_rhc(i, False))
         else:
             raise SystemExit("panelO6: unknown command %r" % verb)
 
@@ -2158,6 +2173,13 @@ def _run_script(panel, entries, quit_after_ms=None):
             raise SystemExit("panelO6: IDP/CRT is 1 to %d (4 is on R11), not %r"
                              % (N_IDP_SW, word))
         return n
+
+    def position(control, arg, positions):
+        value = arg.strip().upper()
+        if value not in positions:
+            raise SystemExit("panelO6: %s is %s, not %r"
+                             % (control, " | ".join(positions), arg))
+        return value
 
     def bfsengage(on):
         if on:

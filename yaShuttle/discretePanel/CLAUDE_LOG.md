@@ -1,2 +1,5 @@
 ### [2026-09-15] Target: HANDOFF-panelO6.md
 - Script times may be written +N: N seconds after the line before was due (or after the start / the last wait), resolved when the file is read, so inserting a line needs no renumbering; plain N still means from the start or last wait, and the two mix. In crewscript.parse (crew scripts, panelO6/simulatePASS --script), discretePanel.py _parse_script (relative to the previous line in file order, before its sort), and simulatePASS --keys files (reset after WAIT). crewscript.HELP example now uses +N.
+
+### [2026-09-15] Target: HANDOFF-panelO6.md
+- Every panelO6 control now has a crew-script command, by legend, acting on the gpc N column where per-GPC: power on|off, output backup|normal|terminate, display on|off (C3), select 1+2|2+3|3+1, disengage left|right (F6), rhcengage cdr|plt (held IPL_HOLD_MS); crt and bfsengage stay as shortcuts. crewscript.PANEL_ARGS/PANEL_USAGE check every panel command's arguments when a script is read (case-insensitive), so crewscript.py FILE reports a bad value with the allowed ones. HELP's panel section is now grouped by panel (O6 per GPC, O6 shared, C3, F6/RHC, C2/R11).

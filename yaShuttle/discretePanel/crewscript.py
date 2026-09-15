@@ -44,8 +44,39 @@ SCAN = {
 # LOAD, which panelO6.py's C2 and O6 switches send and follow.
 IDP_MSG = {"DEU_LOAD": (0x0002,), "IDP_POWER_ON": (0x0003, 1), "IDP_POWER_OFF": (0x0003, 0)}
 
-PANEL_VERBS = ("gpc", "mode", "ipl", "source", "crt", "bfsengage", "gpcid", "bit",
-               "idppower", "majfunc", "kybdsel", "idpload")
+# Panel commands and the arguments each takes, checked when a script is read
+# (panelO6.py carries them out).  Case does not matter.
+_ON_OFF = r"(on|off)"
+PANEL_ARGS = {
+    "gpc": r"[1-5]",
+    "power": _ON_OFF,
+    "output": r"(backup|normal|terminate)",
+    "ipl": r"",
+    "mode": r"(halt|standby|stby|run)",
+    "source": r"(mm1|mm2|off)",
+    "display": _ON_OFF,
+    "select": r"(1\+2|2\+3|3\+1)",
+    "crt": r"[0-3]",
+    "disengage": r"(left|right)",
+    "rhcengage": r"(cdr|plt)",
+    "bfsengage": _ON_OFF,
+    "idppower": r"[1-4]\s+" + _ON_OFF,
+    "majfunc": r"[1-4]\s+(gnc|sm|pl)",
+    "kybdsel": r"(left\s+[13]|right\s+[23])",
+    "idpload": r"[1-4]",
+    "gpcid": r"[1-5]",
+    "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
+}
+PANEL_USAGE = {
+    "gpc": "gpc 1-5", "power": "power on|off", "output": "output backup|normal|terminate",
+    "ipl": "ipl (no argument)", "mode": "mode halt|standby|run", "source": "source mm1|mm2|off",
+    "display": "display on|off", "select": "select 1+2|2+3|3+1", "crt": "crt 0-3",
+    "disengage": "disengage left|right", "rhcengage": "rhcengage cdr|plt",
+    "bfsengage": "bfsengage on|off", "idppower": "idppower 1-4 on|off",
+    "majfunc": "majfunc 1-4 gnc|sm|pl", "kybdsel": "kybdsel left 1|3, or kybdsel right 2|3",
+    "idpload": "idpload 1-4", "gpcid": "gpcid 1-5", "bit": "bit a|b N on|off",
+}
+PANEL_VERBS = tuple(PANEL_ARGS)
 TALKBACK_STATES = ("RUN", "IPL", "BP")
 
 # The key names a script may use, as the keyboard has them, then the IDP ones.
@@ -100,25 +131,40 @@ HELP = """\
                         a leading <left>, <center> or <right> aligns that
                         caption.
 
-  panel controls (on the GPC column chosen by 'gpc N', at first the primary):
-    gpc N               drive GPC N's column from here on (1-5)
-    mode HALT|STANDBY|RUN
-                        that column's MODE switch (STBY also accepted)
-    ipl                 its IPL pushbutton, held 0.25 s
-    source MM1|MM2|OFF  IPL SOURCE
-    crt 0|1|2|3         BFC CRT: 0 is DISPLAY OFF, else DISPLAY ON and
+  panel controls, by panel and legend.  The GPC controls act on the column
+  chosen by 'gpc N' (at first the primary); case does not matter:
+    gpc N               the GPC column the controls below act on (1-5)
+   O6, per GPC:
+    power on|off        GPC POWER
+    output backup|normal|terminate
+                        GPC OUTPUT
+    ipl                 INITIAL PROGRAM LOAD pushbutton, held 0.25 s
+    mode halt|standby|run
+                        GPC MODE (stby also accepted)
+   O6, shared:
+    source mm1|mm2|off  IPL SOURCE
+    idpload N           IDP LOAD pushbutton N (1-4), held 0.25 s
+   C3, BFC CRT:
+    display on|off      DISPLAY
+    select 1+2|2+3|3+1  SELECT
+    crt 0|1|2|3         both at once: 0 is DISPLAY OFF, else DISPLAY ON and
                         SELECT 1+2 / 2+3 / 3+1
-    bfsengage on|off    on: CDR ENGAGE pressed and released; off: BFC
-                        DISENGAGE to RIGHT and back
-    gpcid N             make GPC N the primary column
-    bit A|B N on|off    one discrete bit: A12 I/O TERM A, A13 OUTPUT
-                        TERMINATE/NORMAL, B3-5 bfsengage, B6-7 crt; any other
-                        is sent once, raw
-    idppower N on|off   IDP/CRT N POWER (1-3 on C2, 4 on R11)
-    majfunc N GNC|SM|PL IDP/CRT N MAJ FUNC
+   F6 and the RHCs:
+    disengage left|right
+                        BFC DISENGAGE (RIGHT disengages)
+    rhcengage cdr|plt   that RHC's BFC ENGAGE pushbutton, held 0.25 s
+    bfsengage on|off    shortcut: on presses CDR ENGAGE; off moves DISENGAGE
+                        to RIGHT and back
+   C2 and R11, IDP/CRT N (1-3 on C2, 4 on R11):
+    idppower N on|off   IDP/CRT POWER
+    majfunc N gnc|sm|pl IDP/CRT MAJ FUNC
     kybdsel left 1|3    LEFT IDP/CRT SEL
     kybdsel right 2|3   RIGHT IDP/CRT SEL
-    idpload N           O6 IDP N LOAD (1-4), held 0.25 s
+   not a control:
+    gpcid N             make GPC N the primary column
+    bit a|b N on|off    one discrete bit: A12 I/O TERM A, A13 OUTPUT
+                        TERMINATE/NORMAL, B3-5 bfsengage, B6-7 crt; any other
+                        is sent once, raw
 
   example (examples/4gpc-startup.script has a full one):
     0     gpc 1
@@ -238,6 +284,8 @@ def parse(text):
                 pass
             elif verb not in PANEL_VERBS:
                 raise ScriptError("unknown command %r" % verb)
+            elif not re.fullmatch(PANEL_ARGS[verb], arg, re.IGNORECASE):
+                raise ScriptError("%r: expected '%s'" % (rest, PANEL_USAGE[verb]))
             entries.append(entry)
         except ScriptError as e:
             raise ScriptError("script line %d: %s" % (n, e))
