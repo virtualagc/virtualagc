@@ -819,3 +819,25 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   400000 lines, from own t=600 s' and TIMEOUT_TRACE_PE widened to 20-23 (RECV
   ARM on the FF buses).  At the next split, which entry each GPC took names
   the error kind; R1/R3 there give the BCE and IOQE.
+- eve13 LOSS, 00:19:42 (GPC4, then GPC3 00:20:28): THE ERROR KIND IS AN MSC
+  TIME-OUT.  stall/errsrc.py <log> <after_s> decodes splits + FIOERRLC
+  entries.  At the fatal split 1163.9476 (G1,G4 IPR vs G2,G3 IOC) only G1
+  (BCE22) and G4 (BCE20+22) entered FIOMSCTO (19b9d) for IOQE 905a, the NSP
+  cyclic read; G4 then failed itself (R1=0014 = BCE20, R7=19dc7).  At
+  1151.948 ALL FOUR took that same FIOMSCTO, so nothing split.  And MSC
+  time-outs are ROUTINE on every GPC: eve13 FIOMSCTO by IOQE 6764 x4938,
+  6772 x4936, 905a x1611, 904c x1239, 6780 x1239, 678e x202, 90c4 x170 ...
+  -- listener BCEs on BCE20-22 (masks exclude the bus the GPC commands)
+  still busy when the MSC's wait ends.
+  CAUSE CANDIDATE, ALREADY IN THE LEDGER: #50 (CONFIRMED) -- our 2 ms
+  receive-timeout floor overrides FCMINIOP's MTOs; eve13's arms show every
+  BCE20-23 receive loaded mto=2 (33 us) and run at timeout=2.00 ms, 60x.
+  #52 (run u2) found YAGPC_RECV_FLOOR_US=0 safe and faithful in one GPC but
+  not a fix for the DK holds -- a different claim.  The floor stays 2 ms in
+  these runs because --bce-network MEDS2 keeps it (run.c:526/669 zero it
+  only for in-process models).
+  TEST (from eve15, eve14 stopped in IPL ~00:23): supervisor ENV adds
+  YAGPC_RECV_FLOOR_US=0, everything else unchanged.  Predict: routine
+  FIOMSCTO on 6764/6772/... vanish, no 12 s splits, no class (b) losses.
+  If the DK buses (MTO 5 ms, networked MEDS2) misbehave, the floor may need
+  to be per-bus (networked buses only) rather than zero.
