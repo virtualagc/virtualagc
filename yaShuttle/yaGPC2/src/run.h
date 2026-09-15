@@ -173,6 +173,11 @@ typedef struct {
      * generation -- see the comment there. */
     unsigned modeHeldGen;
     bool modeHeldLast;
+    /* The crew panel gone quiet while this machine was running: it rides
+     * through on its last position until YAGPC_DISCRETES_HOLD_SEC, then is
+     * held (see mode_switch_held_uncached). */
+    bool panelSilent;
+    bool panelSilentHeld;
     /* Set while the mode switch holds this machine in reset, so the pacer can
      * be re-tied on the way out -- see batchrunner_step. */
     bool modeWasHeld;

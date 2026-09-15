@@ -428,6 +428,26 @@ class PanelO6:
         self.sock = D.sender()
         self._published = None
         self._send_failed = False
+        # THE BUS IS SERVED FROM ITS OWN THREAD.  The Tk thread waits on the X
+        # server whenever it draws, and a saturated X server (Xorg pegged at a
+        # full core) kept it from re-asserting for more than yaGPC2's 1.5 s
+        # staleness limit -- which held every running GPC at once and broke
+        # their common set (yaGPC2 ledger #147, run heldrep).  So the Tk side
+        # only says WHAT to publish (_publish) and _pub_loop does ALL the
+        # sending, which also keeps each RESET/SET pair in order.
+        self._pub_lock = threading.Lock()
+        self._pub_columns = None
+        self._pub_wake = threading.Event()
+        self._tick_last = None
+        threading.Thread(target=self._pub_loop, daemon=True).start()
+        # NSTS_PANEL_STALL=<start s>,<seconds>: A TEST OF _pub_loop.  One tick
+        # holds the Tk thread that long, as a busy X server would.
+        stall = os.environ.get("NSTS_PANEL_STALL", "")
+        try:
+            a, b = stall.split(",")
+            self._stall = (time.monotonic() + float(a), float(b))
+        except ValueError:
+            self._stall = None
         log("publishing all %d GPCs' discretes on %s:%d-%d every %d ms"
             % (N_GPC, D.GROUP, D.gpc_port(1), D.gpc_port(N_GPC),
                D.REPUBLISH_MS))
@@ -582,38 +602,50 @@ class PanelO6:
         return CRT_SELECT_VALUE[self.bfc_select]
 
     def _publish(self):
-        """Assert every owned bit: one RESET, then one SET, per register.
-
-        Break before make, as discretePanel.py's _sendField: a field changing
-        value passes through "no bit set", which the hardware does too, and
-        never through a value it did not hold.
-        """
-        try:
-            columns = []
-            for w in range(N_GPC):
-                a, b = self.discretes(w)
-                columns.append((a, b))
-                port = D.gpc_port(w + 1)
-                for reg, owned, value in ((D.REG_A, OWNED_A, a),
-                                          (D.REG_B, OWNED_B, b)):
-                    if owned & ~value:
-                        D.publish(self.sock, D.RESET, reg, owned & ~value,
-                                  port=port)
-                    if owned & value:
-                        D.publish(self.sock, D.SET, reg, owned & value,
-                                  port=port)
-            self._send_failed = False
-        except OSError as e:
-            if not self._send_failed:
-                log("cannot publish on the discrete bus: %s" % e)
-            self._send_failed = True
-            return
+        """Hand every column's discretes to _pub_loop, and wake it."""
+        columns = [self.discretes(w) for w in range(N_GPC)]
+        with self._pub_lock:
+            self._pub_columns = columns
+        self._pub_wake.set()
         if columns != self._published:
             for w, (a, b) in enumerate(columns):
                 if self._published is None or self._published[w] != (a, b):
                     log("%s discretes  A=%08x  B=%08x"
                         % (GPCS[w], a & OWNED_A, b & OWNED_B))
             self._published = columns
+
+    def _pub_loop(self):
+        """Thread: assert every owned bit, one RESET then one SET per register,
+        at once on a change and every REPUBLISH_MS regardless.
+
+        Break before make, as discretePanel.py's _sendField: a field changing
+        value passes through "no bit set", which the hardware does too, and
+        never through a value it did not hold.
+        """
+        period = D.REPUBLISH_MS / 1000.0
+        while True:
+            self._pub_wake.wait(period)
+            self._pub_wake.clear()
+            with self._pub_lock:
+                columns = self._pub_columns
+            if columns is None:
+                continue
+            try:
+                for w, (a, b) in enumerate(columns):
+                    port = D.gpc_port(w + 1)
+                    for reg, owned, value in ((D.REG_A, OWNED_A, a),
+                                              (D.REG_B, OWNED_B, b)):
+                        if owned & ~value:
+                            D.publish(self.sock, D.RESET, reg, owned & ~value,
+                                      port=port)
+                        if owned & value:
+                            D.publish(self.sock, D.SET, reg, owned & value,
+                                      port=port)
+                self._send_failed = False
+            except OSError as e:
+                if not self._send_failed:
+                    log("cannot publish on the discrete bus: %s" % e)
+                self._send_failed = True
 
     def _listen(self):
         """Thread: note every MM READY level anybody publishes."""
@@ -641,6 +673,20 @@ class PanelO6:
         A lamp is OFF until its unit's READY is first heard, and READY or
         BUSY from then on -- a unit that goes quiet keeps its last state.
         """
+        # How late is the Tk thread?  Only a tick well past its period is
+        # logged; _pub_loop keeps the bus up meanwhile.
+        now = time.monotonic()
+        if self._tick_last is not None:
+            late = (now - self._tick_last) * 1000.0 - D.REPUBLISH_MS
+            if late > 200:
+                log("Tk tick %.0f ms late (the discrete bus is republished "
+                    "by its own thread)" % late)
+        if self._stall is not None and now >= self._stall[0]:
+            log("NSTS_PANEL_STALL: holding the Tk thread %.1f s" % self._stall[1])
+            time.sleep(self._stall[1])
+            self._stall = None
+            now = time.monotonic()
+        self._tick_last = now
         self._idp_adopt()
         with self._rx_lock:
             heard = list(self._mm_heard)

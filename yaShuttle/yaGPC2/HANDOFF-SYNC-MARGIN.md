@@ -613,6 +613,60 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   does not depend on Tk (as MEDS2's BusPump), and/or do not hold a GPC that
   was already in RUN/STBY on stale bits alone (keep the last position until
   an explicit HALT arrives) -- the owner's call.
+- CONFIRMED X SATURATION AT EVERY IPL-TIME BREAK: Xorg (single-threaded) ran
+  at 79-102% of a core through eve4's break (21:53:28-46), eve5's (22:09:08-
+  28) and heldrep's held events (22:21:12-30); with one simulation's windows
+  alone it sat at ~80%.  BOTH FIXES, OWNER'S GO-AHEAD 22:40 ('set the timeout
+  at whatever seems best'):
+  FIX 2 (yaGPC2 src/run.c, run.h): in mode_switch_held_uncached, when nothing
+  is published and prevMode is RUN or STBY (not HALT), the machine RIDES
+  THROUGH on that position until panel_quiet_seconds() (the freshest of the
+  four mode bits' attentive ages) reaches YAGPC_DISCRETES_HOLD_SEC (default
+  60 s), logging 'MODE: crew panel silent N s; keeping RUN (held after 60
+  s)', then 'holding the CPU until it is heard', and 'crew panel heard
+  again'.  A machine that never heard a position is still held.  The held
+  decision (mode_held_update, which also carries YAGPC_HELDTRACE) is now also
+  re-evaluated every 4096 steps, because silence sends no datagram.
+  FIX 1 (discretePanel/panelO6.py): _publish only hands the columns to
+  _pub_loop, a thread that does ALL discrete sending (RESET then SET per
+  register, at once on a change and every REPUBLISH_MS); _tick logs 'Tk tick
+  N ms late' past 200 ms; NSTS_PANEL_STALL=<start s>,<seconds> holds the Tk
+  thread once, for testing.  OPEN QUESTION the late-tick log answers: whether
+  Tkinter's wait on X also holds Python's GIL (then _pub_loop would stall
+  too and fix 2 is the only protection).
+  TESTS RUNNING 22:44: stale-test (1 GPC, port base 26100, RUN at 20 s,
+  NSTS_PANEL_STALL=45,5; SIGSTOP of the panel 5 s at ~70 s and 70 s at ~90 s;
+  expect no silence for the Tk stall, 'keeping RUN' then 'heard again' for 5
+  s, 'holding' after 60 s of the 70 s) and the regression gate stale-regress.
+  RESULT stale-test (22:46): fix 1 -- NSTS_PANEL_STALL 5 s gave 'Tk tick 4960
+  ms late' in panelO6 and NO silence in yaGPC2 (but time.sleep releases the
+  GIL, so a real X wait is not yet proven the same); fix 2 -- 5 s SIGSTOP:
+  'crew panel silent 1.6 s; keeping RUN', 'heard again'; 70 s SIGSTOP:
+  'keeping RUN', then at 60.0 s 'holding the CPU until it is heard' (mode
+  bits 60.044 s old), then 'heard again' and release.  FLAW FOUND: on resume
+  'HELD no position t=69.700582 value=2a000000 driven=d40c0000 run=5.200' --
+  the panel's first datagram is the RESET (refreshing HALT/STBY/IPL) while
+  RUN, still set, stays stale until the SET: a momentary hold, which in a set
+  leaves the barrier.  REFINED (build 22:47:34): in the no-position branch a
+  last-heard RUN/STBY bit still SET in the register (only stale), with HALT
+  not set and quiet < hold, keeps running; a real switch move clears the old
+  bit, so genuine gaps still hold.  Re-test stale-test2 (5 s SIGSTOP at ~40
+  s) and gate stale-regress2 (PORT_BASE=6700) running 22:48.
+  eve7 (launched 22:37 on the pre-fix build) and the supervisor were stopped
+  22:44; the supervisor now also sets YAGPC_HELDTRACE=1.
+  OVERNIGHT PLAN (owner signed off 22:42): once both tests pass and the fixes
+  are committed, restart the supervisor with `--fresh 8` on the fixed build,
+  NO disturbance scheduler (quiet condition), atop 1 s, latprobe and camwatch
+  still running; for every loss record: which GPC entered FCMSFAIL first
+  (offset rule above), whether a one-GPC ERRTERM/RECV TIMEOUT preceded it,
+  whether any HELD/'panel silent' line or barrier rejoin preceded it, the
+  last sync codes (slip vs IPR->IOC->silence), and host state.  Classify:
+  (a) handshake slip; (b) IPR->IOC->silent with no logged error (eve6 x2,
+  possibly ARC's SVC 39 drop for an overlay error during the OPS 2 load,
+  #139 family); (c) anything new.  Stop starting runs before ~07:00 so the
+  owner's machine is free; report per class in the morning.  THE OWNER WILL
+  BE AT THE DESKTOP FOR 5-10 MIN SOMETIME 04:00-05:00 (said 22:45): flag any
+  loss in that window as possibly disturbed, and check atop/latprobe for it.
 - WHICH MMU AN OPS OVERLAY LOADS FROM (owner's question 22:24): not IPL
   SOURCE (yaGPC2 reads it only in firmware_ipl, run.c ~1152-1171) and not
   the keyboard/CRT.  ARCGPC CHOOSE_BUS: 'IF CZ2B_MM_MF$(ARC_J:4)= ON THEN

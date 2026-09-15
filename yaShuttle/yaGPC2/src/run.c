@@ -1302,6 +1302,28 @@ static void mode_log(const BatchRunner *r, const char *fmt, ...) {
     fprintf(stderr, "%s%s", batchrunner_tag(r), buf);
 }
 
+/* How long a machine that was RUNNING rides through a silent crew panel
+ * before it is held: YAGPC_DISCRETES_HOLD_SEC, default 60 s. */
+static double discretes_hold_sec(void) {
+    static double v = -1.0;
+    if (v < 0.0) {
+        const char *e = getenv("YAGPC_DISCRETES_HOLD_SEC");
+        v = (e != NULL && *e != '\0') ? atof(e) : 60.0;
+        if (v < 0.0) v = 0.0;
+    }
+    return v;
+}
+
+/* How long, in attentive seconds, since ANY mode-switch bit was heard. */
+static double panel_quiet_seconds(const BatchRunner *r) {
+    double q = -1.0;
+    for (int bit = 0; bit < 4; bit++) {
+        double a = discretes_bit_age(r->discretes, DISCRETES_REG_A, bit);
+        if (a >= 0.0 && (q < 0.0 || a < q)) q = a;
+    }
+    return q < 0.0 ? 0.0 : q;
+}
+
 static bool mode_switch_held_uncached(BatchRunner *r) {
     uint32_t driven = discretes_driven_mask(r->discretes, DISCRETES_REG_A);
     uint32_t mode = discretes_value(r->discretes, DISCRETES_REG_A) & driven & MODE_ANY;
@@ -1340,8 +1362,23 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
      * position and must not be treated as a change; reporting it is what
      * put pairs of MODE lines in the terminal for a switch nobody
      * touched.  Hold, and wait for the panel to finish speaking. */
-    if (published && !(mode & (MODE_HALT | MODE_STBY | MODE_RUN)))
+    if (published && !(mode & (MODE_HALT | MODE_STBY | MODE_RUN))) {
+        /* ...BUT A POSITION THAT IS ONLY STALE IS NOT A GAP.  After a silence
+         * the panel's first datagram is the RESET of the bits that are off,
+         * which refreshes HALT and STBY while RUN, still set, waits a
+         * datagram longer for its SET: 'no position' for that instant, and a
+         * machine held for it leaves the barrier -- exactly what riding
+         * through a silence is for (stale-test, t=69.70: value=2a000000
+         * driven=d40c0000, RUN 5.2 s old).  A real move of the switch CLEARS
+         * the old bit, so only a last-heard running position still set in the
+         * register, and not yet past the hold timeout, carries on. */
+        uint32_t val = discretes_value(r->discretes, DISCRETES_REG_A);
+        uint32_t still = val & r->prevMode & (MODE_STBY | MODE_RUN);
+        if (still && !(val & MODE_HALT) &&
+            panel_quiet_seconds(r) < discretes_hold_sec())
+            return false;
         return true;
+    }
 
     if (!published) {
         if (!r->modeReported) {
@@ -1349,8 +1386,40 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
                             "(no crew panel heard yet)\n");
             r->modeReported = true;
         }
+        /* A PANEL GONE QUIET IS NOT A SWITCH THROWN TO HALT.  The mode switch
+         * is hardware and stays where it was; what goes quiet is a process on
+         * the host.  panelO6.py's Tk thread waits on the X server, and a
+         * saturated X server kept it from re-asserting for more than
+         * DISCRETES_STALE_SEC -- holding every running computer at once, each
+         * leaving the barrier, and breaking their common set (ledger #147).
+         * So a machine last heard in RUN or STBY rides through on that
+         * position; only if the panel stays quiet past YAGPC_DISCRETES_HOLD_SEC
+         * is it treated as gone and the machine held, as before.  A machine
+         * that never heard a position is still held from the start. */
+        if ((r->prevMode & (MODE_RUN | MODE_STBY)) && !(r->prevMode & MODE_HALT)) {
+            double quiet = panel_quiet_seconds(r);
+            if (quiet < discretes_hold_sec()) {
+                if (!r->panelSilent) {
+                    mode_log(r, "MODE: crew panel silent %.1f s; keeping %s "
+                                "(held after %.0f s)\n", quiet,
+                             (r->prevMode & MODE_RUN) ? "RUN" : "STBY",
+                             discretes_hold_sec());
+                    r->panelSilent = true;
+                }
+                return false;
+            }
+            if (!r->panelSilentHeld) {
+                mode_log(r, "MODE: crew panel silent %.1f s; holding the CPU "
+                            "until it is heard\n", quiet);
+                r->panelSilentHeld = true;
+            }
+        }
         /* r->prevMode is deliberately left alone. */
         return true;
+    }
+    if (r->panelSilent || r->panelSilentHeld) {
+        mode_log(r, "MODE: crew panel heard again\n");
+        r->panelSilent = r->panelSilentHeld = false;
     }
 
     /* IPL IS NOT A MODE-SWITCH POSITION.  The mode switch is HALT / STBY /
@@ -1562,6 +1631,33 @@ static void dump_main_storage(BatchRunner *r, const char *path) {
  * nothing has been published since the last call the answer is the one
  * already computed -- and no edge can have been missed, because an edge IS a
  * change in that state. */
+static void mode_held_update(BatchRunner *r) {
+    bool was = r->modeHeldLast;
+    r->modeHeldLast = mode_switch_held_uncached(r);
+    /* YAGPC_HELDTRACE: every flip of this machine's held state, with
+     * what the mode bits looked like -- a machine already in RUN that is
+     * held even for a moment stops executing and leaves the barrier, and
+     * a set of computers doing that together breaks its common set
+     * (ledger #145, eve4/eve5 during the later GPCs' IPLs). */
+    if (was != r->modeHeldLast && getenv("YAGPC_HELDTRACE")) {
+        uint32_t drv = discretes_driven_mask(r->discretes, DISCRETES_REG_A);
+        uint32_t val = discretes_value(r->discretes, DISCRETES_REG_A);
+        uint32_t mode = val & drv & MODE_ANY;
+        const char *why = !r->modeHeldLast ? "released"
+                        : !(drv & MODE_ANY) ? "nothing published"
+                        : !(mode & (MODE_HALT | MODE_STBY | MODE_RUN)) ? "no position"
+                        : "HALT";
+        fprintf(stderr, "%sHELD %s t=%.6f value=%08x driven=%08x "
+                        "age halt=%.3f stby=%.3f run=%.3f ipl=%.3f\n",
+                batchrunner_tag(r), why, r->age.gpc.cpu.elapsedTimeUs / 1e6,
+                val, drv,
+                discretes_bit_age(r->discretes, DISCRETES_REG_A, 0),
+                discretes_bit_age(r->discretes, DISCRETES_REG_A, 1),
+                discretes_bit_age(r->discretes, DISCRETES_REG_A, 2),
+                discretes_bit_age(r->discretes, DISCRETES_REG_A, 3));
+    }
+}
+
 static bool mode_switch_held(BatchRunner *r) {
     if (!discretes_enabled(r->discretes)) return false;
     /* ONE DATAGRAM AT A TIME, evaluating after each.  The pushbutton is a
@@ -1571,31 +1667,15 @@ static bool mode_switch_held(BatchRunner *r) {
         unsigned g = discretes_generation(r->discretes);
         if (g == r->modeHeldGen) continue;
         r->modeHeldGen = g;
-        bool was = r->modeHeldLast;
-        r->modeHeldLast = mode_switch_held_uncached(r);
-        /* YAGPC_HELDTRACE: every flip of this machine's held state, with
-         * what the mode bits looked like -- a machine already in RUN that is
-         * held even for a moment stops executing and leaves the barrier, and
-         * a set of computers doing that together breaks its common set
-         * (ledger #145, eve4/eve5 during the later GPCs' IPLs). */
-        if (was != r->modeHeldLast && getenv("YAGPC_HELDTRACE")) {
-            uint32_t drv = discretes_driven_mask(r->discretes, DISCRETES_REG_A);
-            uint32_t val = discretes_value(r->discretes, DISCRETES_REG_A);
-            uint32_t mode = val & drv & MODE_ANY;
-            const char *why = !r->modeHeldLast ? "released"
-                            : !(drv & MODE_ANY) ? "nothing published"
-                            : !(mode & (MODE_HALT | MODE_STBY | MODE_RUN)) ? "no position"
-                            : "HALT";
-            fprintf(stderr, "%sHELD %s t=%.6f value=%08x driven=%08x "
-                            "age halt=%.3f stby=%.3f run=%.3f ipl=%.3f\n",
-                    batchrunner_tag(r), why, r->age.gpc.cpu.elapsedTimeUs / 1e6,
-                    val, drv,
-                    discretes_bit_age(r->discretes, DISCRETES_REG_A, 0),
-                    discretes_bit_age(r->discretes, DISCRETES_REG_A, 1),
-                    discretes_bit_age(r->discretes, DISCRETES_REG_A, 2),
-                    discretes_bit_age(r->discretes, DISCRETES_REG_A, 3));
-        }
+        mode_held_update(r);
     }
+    /* SILENCE SENDS NO DATAGRAM, so nothing above would ever look again once
+     * the panel went quiet: the ride-through could never expire, and a panel
+     * silent from the start of a gap would not even be noticed.  Look on a
+     * clock too -- every 4096 steps, a few milliseconds; while held the step
+     * count does not move, so a held machine looks on every pass.  With no
+     * change of position it produces no edge. */
+    if ((r->step & 0xfffL) == 0) mode_held_update(r);
     return r->modeHeldLast;
 }
 

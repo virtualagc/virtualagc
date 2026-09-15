@@ -6,3 +6,6 @@
 
 ### [2026-09-14] Target: README.md
 - MEDS2.py draws the MDU edgekeys as clickable pushbuttons under each display (F1-F6 still work); --no-edgekeys or NSTS_MDU_EDGEKEYS=0 hides them. simulatePASS.py counts the strip (0.09 x --size) in its fits-on-screen height check.
+
+### [2026-09-14] Target: HANDOFF-panelO6.md
+- panelO6.py publishes its discretes from its own thread (_pub_loop): the Tk side only hands it the columns, the thread sends RESET then SET per register on every change and every REPUBLISH_MS, so a Tk thread waiting on a busy X server no longer silences the bus (with Xorg pegged it had gone quiet for more than yaGPC2's 1.5 s staleness limit and halted every running GPC; yaGPC2 ledger #147). _tick logs 'Tk tick N ms late' past 200 ms. Test hook NSTS_PANEL_STALL=<start s>,<seconds> holds the Tk thread once.
