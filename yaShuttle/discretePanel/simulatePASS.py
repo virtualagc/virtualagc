@@ -25,7 +25,11 @@ whole scripted crew: panel switches, 'keys ...' keystrokes, 'subtitle ...'
 captions and 'wait gpc N mode-tb RUN|IPL|BP' lines, all in seconds, played by
 panelO6.py on one clock so switches and keys stay in step.  crewscript.py
 documents the language; examples/4gpc-startup.script brings up four GPCs to
-OPS 2.  The paragraphs below describe the older split, which still works.
+OPS 2.  For a demonstration, --show-panel keeps panelO6's window up so the
+switches are seen to move, and a 'wait user' line (first, say) holds the
+script until someone clicks in the panel window -- time to arrange windows
+and start a recording; leave --duration off then, since it counts from
+start-up.  The paragraphs below describe the older split, which still works.
 
 UNATTENDED RUNS.  --panel-script hands panelO6.py a timed script ('<seconds>
 <command>' per line, decimals allowed; 'gpc <n>' picks the column, and 'idppower N on|off',
@@ -75,6 +79,7 @@ IFACE = os.environ.get("NSTS_BUS_IFACE", "127.0.0.1")
 
 # The DPS keyboard scan codes and MDU -> IDP messages live with the crew script
 # language, which --keys playback below shares.
+import crewscript
 from crewscript import SCAN, IDP_MSG
 MAJOR_FUNC = {"PL": 0, "GNC": 1, "SM": 2}
 
@@ -532,6 +537,8 @@ def main():
                          "and exit without starting anything")
     ap.add_argument("--procedure", dest="instructions", action="store_true",
                     help=argparse.SUPPRESS)          # the old name
+    ap.add_argument("--show-panel", action="store_true",
+                    help="show panelO6's window during a --script run (for demonstrations)")
     ap.add_argument("--script", "--panel-script", dest="panel_script", metavar="FILE",
                     help="crew script for panelO6.py: switches, keys, subtitles and waits "
                          "in one file (crewscript.py)")
@@ -711,6 +718,16 @@ def main():
                       "--gpc-id", str(gpcs[0]), "--size", str(size), "--geometry", o6_geom]
         if args.panel_script:
             panel_argv += ["--script", os.path.abspath(args.panel_script)]
+            if args.show_panel:
+                panel_argv += ["--show"]
+            try:
+                with open(args.panel_script) as fh:
+                    waits_for_user = crewscript.has_wait_user(fh.read())
+            except OSError:
+                waits_for_user = False
+            if waits_for_user and args.duration:
+                log("note: the script has a 'wait user', and --duration counts from "
+                    "start-up -- including the time spent waiting")
         L.start("panel", panel_argv, HERE, env)
         t0 = time.time()
         if args.keys:

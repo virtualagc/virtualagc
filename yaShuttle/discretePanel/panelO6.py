@@ -410,6 +410,7 @@ class PanelO6:
         self.term_a = False                  # hardware 0; --script only
         self.wired = gpc_id - 1              # the column that is published
         self._held = None                    # (kind, index) of a held button
+        self._user_wait = None               # done() for a script's 'wait user'
         # The IDP controls, indexed by IDP number - 1.
         self.idp_power = [DEFAULT_IDP_POWER] * N_IDP_SW
         self.idp_mf = [default_major_func()] * N_IDP_SW
@@ -1711,7 +1712,31 @@ class PanelO6:
         z = int(t * npos)
         return npos - 1 if z >= npos else z
 
+    # WAIT USER.  A crew script's 'wait user' holds until someone clicks in
+    # this window -- the time to arrange windows and start a recording before
+    # a demonstration.  The cursor says so, and the click that carries on is
+    # taken here, so it moves no control.
+    WAIT_CURSOR = "target"
+
+    def wait_for_click(self, done):
+        self._user_wait = done
+        self._cursor_hits = None
+        self.cv.configure(cursor=self.WAIT_CURSOR)
+        # NSTS_PANEL_AUTOCLICK=<seconds>: A TEST OF 'wait user'.  The click
+        # arrives through the canvas's own binding, as a real one would.
+        auto = os.environ.get("NSTS_PANEL_AUTOCLICK", "")
+        try:
+            ms = int(float(auto) * 1000)
+        except ValueError:
+            ms = None
+        if ms is not None:
+            log("NSTS_PANEL_AUTOCLICK: clicking in %.1f s" % (ms / 1000.0))
+            self.root.after(ms, lambda: self.cv.event_generate(
+                "<ButtonPress-1>", x=5, y=5, when="tail"))
+
     def _on_motion(self, event):
+        if self._user_wait is not None:
+            return
         hit = self._find(event.x, event.y)
         want = bool(hit)
         if want != self._cursor_hits:
@@ -1719,6 +1744,12 @@ class PanelO6:
             self.cv.configure(cursor="hand2" if want else "")
 
     def _on_press(self, event):
+        if self._user_wait is not None:
+            done, self._user_wait = self._user_wait, None
+            self._cursor_hits = False
+            self.cv.configure(cursor="")
+            done()
+            return
         hit = self._find(event.x, event.y)
         if hit is None:
             return
@@ -2161,7 +2192,8 @@ def _run_script(panel, entries, quit_after_ms=None):
     # ONE PLAYER FOR THE WHOLE CREW SCRIPT: its clock and its waits time the
     # switches above and the keystrokes and captions alike (crewscript.py).
     crewscript.Player(entries, root.after, do,
-                      lambda gpc: panel.mode_tb(gpc - 1), log).start()
+                      lambda gpc: panel.mode_tb(gpc - 1), log,
+                      wait_user=panel.wait_for_click).start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
 
@@ -2191,6 +2223,9 @@ def main(argv=None):
                          "busConfig).  The same option as on yaGPC2 and MEDS. "
                          "NSTS_BUS_PORT_BASE sets it too.")
     ap.add_argument("--script", metavar="FILE", help=SCRIPT_HELP)
+    ap.add_argument("--show", action="store_true",
+                    help="show the panel window during a --script run too (it is "
+                         "hidden otherwise, unless the script has a 'wait user')")
     ap.add_argument("--quit-after", type=int, metavar="MS",
                     help="exit this many ms after startup (for scripted runs)")
     args = ap.parse_args(argv)
@@ -2217,14 +2252,20 @@ def main(argv=None):
     else:
         w, h = scaled_wh(REF_W, REF_H, args.size)
         root.geometry("%dx%d" % (w, h))
-    # A scripted run has nobody watching it, so it gets no window.
-    _dont_steal_focus(root, mapWindow=not args.script)
+    entries, text = None, ""
     if args.script:
         with open(args.script) as f:
-            try:
-                entries = crewscript.parse(f.read())
-            except crewscript.ScriptError as e:
-                raise SystemExit("panelO6: %s" % e)
+            text = f.read()
+        try:
+            entries = crewscript.parse(text)
+        except crewscript.ScriptError as e:
+            raise SystemExit("panelO6: %s" % e)
+    # An unattended scripted run has nobody watching it, so it gets no
+    # window -- unless asked for one (--show, for a demonstration), or the
+    # script waits for someone to click in it.
+    _dont_steal_focus(root, mapWindow=(not args.script or args.show
+                                       or crewscript.has_wait_user(text)))
+    if entries is not None:
         _run_script(panel, entries, args.quit_after)
     elif args.quit_after is not None:
         root.after(args.quit_after, root.quit)

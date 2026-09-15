@@ -12,6 +12,7 @@ ignored.
 
     <seconds> <command>        a timed step, e.g.   3 mode STANDBY
     wait gpc N mode-tb RUN|IPL|BP [timeout S]
+    wait user                  pause until someone clicks in panelO6's window
 
 Times are SECONDS (decimals allowed) from the start of the script, or from
 the moment the last wait line was met.  Lines run in file order, and a time
@@ -19,6 +20,14 @@ may not be earlier than the one before it since the last wait.  A wait holds
 the script until GPC N's MODE talkback on panel O6 shows that state -- RUN
 when a load is complete, IPL while a bootstrap is in, BP (barberpole)
 otherwise -- and a wait that times out stops the script.
+
+'wait user' is for a person at the screen, such as someone recording a
+demonstration: the script holds, the cursor over panelO6 changes shape, and a
+click anywhere in the panel window carries on (that click moves no control).
+First in a script, it leaves as long as it takes to arrange the windows and
+start a capture program.  panelO6.py shows its window whenever a script has
+one.  With no window to click, the script stops there rather than waiting
+forever.
 
 Commands:
 
@@ -140,6 +149,10 @@ def parse(text):
         try:
             first, _, rest = line.partition(" ")
             rest = rest.strip()
+            if first.lower() == "wait" and rest.lower() == "user":
+                entries.append({"kind": "wait_user", "text": line, "line": n})
+                last_ms = 0
+                continue
             if first.lower() == "wait":
                 gpc, state, timeout = parse_wait(rest)
                 entries.append({"kind": "wait", "gpc": gpc, "state": state,
@@ -180,6 +193,15 @@ def parse(text):
     return entries
 
 
+def has_wait_user(text):
+    """Does this script wait for a person?  Then it needs a window to click."""
+    for raw in text.splitlines():
+        w = raw.split("#", 1)[0].split()
+        if len(w) == 2 and w[0].lower() == "wait" and w[1].lower() == "user":
+            return True
+    return False
+
+
 def has_subtitles(text):
     """Does this script caption?  Cheap enough for a launcher to ask."""
     for raw in text.splitlines():
@@ -216,11 +238,14 @@ class Player(object):
     panel(verb, arg)    carry out a panel command
     talkback(gpc)       'RUN', 'IPL' or 'BP' for GPC N now
     log(text)           report what happened
+    wait_user(done)     optional: let a person say go, calling done() when
+                        they do; without it a 'wait user' stops the script
     """
 
-    def __init__(self, entries, after, panel, talkback, log, bus=None):
+    def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None):
         self.entries, self.after, self.panel = entries, after, panel
         self.talkback, self.log = talkback, log
+        self.wait_user = wait_user
         self.bus = bus or Bus()
         self.origin = None
         self.stopped = False
@@ -232,6 +257,22 @@ class Player(object):
     def _run(self, k):
         while k < len(self.entries) and not self.stopped:
             e = self.entries[k]
+            if e["kind"] == "wait_user":
+                if self.wait_user is None:
+                    self.log("%s: nothing to click -- script stopped" % e["text"])
+                    self.stopped = True
+                    return
+                self.log("%s: click in the panel window to continue" % e["text"])
+                begun = time.monotonic()
+
+                def resumed(k=k, begun=begun):
+                    if self.stopped:
+                        return
+                    self.log("wait user met after %.1f s" % (time.monotonic() - begun))
+                    self.origin = time.monotonic()
+                    self._run(k + 1)
+                self.wait_user(resumed)
+                return
             if e["kind"] == "wait":
                 self.log(e["text"])
                 self._poll(k, e, time.monotonic())
