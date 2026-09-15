@@ -436,6 +436,19 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   Reading a loss: FCMSFINT shortly before FCMSFAIL on that GPC = a sync
   program's timeout; FCMSFAIL alone = FIOERRLC's self-FTS or SVC 39 (ARC
   drop).
+  NORMAL HITS, NOT LOSSES: in eve3, FCMSFINT fired 8 times during the IPLs
+  (#1 t=160.99 at GPC1 RUN; #2-#8 at t~168.8 on each later GPC's own clock
+  and at t~341/349/521/529 as each new GPC joined) and FCMSFAIL none -- so a
+  joining computer costs about two FCMSFINT hits, and 12 of the 20 remained
+  for losses once eve3 reached OPS 2 (~21:25).
+- CLAUDE CODE FREEZES (owner, 21:36): the claude process (pid 2745832) hit
+  >= 25% CPU in 45 of 2,258 seconds 21:00-21:37 (mostly Claude's own work;
+  40% at 21:36:51 as the owner typed); those seconds rarely coincide with
+  latprobe wakes > 2 ms, and no other process showed RDELAY then -- a stall
+  of the claude process itself, not host-wide.  latprobe saw 22 seconds with
+  a wake > 2 ms in 37 min, all 2-6.5 ms.  At the eve1 losses the probe was
+  clean; claude was 4% (GPC4) and 36% (GPC2).  Claude keeps its analysis
+  light while the owner's disturbed hour runs.
 - A persistent Monitor tails camwatch for lamp changes; on a loss run
   `around.py` at the camwatch stamp, then look at ERRTERM/PEER HOLD/SYNCORDER
   lines just before it on each GPC's clock (map own clock -> wall with that
