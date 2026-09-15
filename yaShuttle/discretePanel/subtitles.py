@@ -6,6 +6,7 @@ whatever text arrives on the simulation's bus, and nothing else.
     python3 subtitles.py                      # port base 6900, bottom centre
     python3 subtitles.py --port-base 27000 --font-size 32
     python3 subtitles.py --geometry 1200x140+360+900
+    python3 subtitles.py --align left          # left, center (default) or right
 
 Scripts drive it: a simulatePASS.py --keys line '<seconds> SUBTITLE text ...'
 or a panelO6.py --script line '<ms> subtitle text ...' replaces the caption,
@@ -39,6 +40,9 @@ import discretes as D
 SUBTITLE_OFFSET = 90
 DEFAULT_W, DEFAULT_H = 1000, 120
 BOTTOM_MARGIN = 80
+# --align: how the lines sit against each other (justify) and where the text
+# sits in the box (anchor).
+ANCHORS = {"left": "w", "center": "center", "right": "e"}
 
 
 def log(msg):
@@ -87,7 +91,8 @@ class Subtitles(object):
             pass                              # no compositor: opaque it is
         font = tkfont.Font(family=args.font, size=args.font_size, weight="bold")
         self.label = tk.Label(root, text="", fg=args.fg, bg=args.bg, font=font,
-                              justify="center", anchor="center", padx=16, pady=8)
+                              justify=args.align, anchor=ANCHORS[args.align],
+                              padx=16, pady=8)
         self.label.pack(fill="both", expand=True)
         root.bind("<Configure>", self._rewrap)
         for w in (root, self.label):
@@ -170,6 +175,8 @@ def main(argv=None):
     ap.add_argument("--bg", default="#000000", help="box colour (default black)")
     ap.add_argument("--opacity", type=float, default=0.85,
                     help="0-1, where the window manager supports it (default 0.85)")
+    ap.add_argument("--align", choices=sorted(ANCHORS), default="center",
+                    help="horizontal alignment of the caption (default center)")
     ap.add_argument("--hide-when-empty", action="store_true",
                     help="withdraw the box while there is no caption")
     ap.add_argument("--text", default="", help="caption to show at start")
