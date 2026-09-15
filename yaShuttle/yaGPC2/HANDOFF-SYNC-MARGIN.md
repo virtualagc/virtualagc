@@ -901,3 +901,17 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   HOST NOTE: /usr/bin/ar (binutils 2.42) now segfaults on ANY object, even
   an unchanged one, into any path; libyaGPC2.a rebuilt with `make
   AR=llvm-ar` (38 objects, no main.o).  The yaGPC2 binary links normally.
+- RESULT, eve16 (echo fix 273563b7f, default floor), at shared 1219.5 s
+  (79 s past OPS 2), same traces as eve13/eve15:
+      FIOMSCTO   eve13 ~14,400   eve15 ~57,000 (whole run)   eve16 4
+      splits after 1140 s   eve13 2   eve15 5   eve16 NONE
+      FCMSFAIL   eve13 9   eve15 4   eve16 0
+  eve16's four FIOMSCTO are ONE NSP read at 1141.8696 on all four GPCs
+  together (the OPS 2 transition) -- no split.  FF listeners now reach
+  their receives: 1ccae (MTU listener) 48 per bus (eve13: 3/48/3), 1cc2e
+  and 1cc68 (NSP listeners) 279 each, plus 1d5xx/1d8xx/1dd24 listeners
+  that never armed before.  FIOBCERR stays ~2350 (routine, all GPCs
+  alike: absent IDP3 on BCE8 etc.).  No CAM vote.  Earlier runs lost a GPC
+  26-170 s after OPS 2 and split every 12 s, so eve16 already has ~6
+  split opportunities with none; the long run and later eve* runs are the
+  confirmation.  Ledger #145 set FIXED.
