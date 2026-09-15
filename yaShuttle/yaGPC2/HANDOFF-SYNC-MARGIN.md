@@ -441,6 +441,24 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   and at t~341/349/521/529 as each new GPC joined) and FCMSFAIL none -- so a
   joining computer costs about two FCMSFINT hits, and 12 of the 20 remained
   for losses once eve3 reached OPS 2 (~21:25).
+- DISTURBANCE SCHEDULER (owner approved all blocks, 21:40): `<scratch>/stall/
+  disturb.py`, started 21:41:45, log `<scratch>/stall/disturb.log` (one
+  timestamped line per burst, 'BLOCK ... begin/end' per block).  Two cycles
+  of five 10-min blocks, then it exits by itself at ~23:21:45 so the
+  overnight quiet runs are not disturbed:
+    1 none  21:41:45 / 22:31:45      2 cpu  21:51:45 / 22:41:45
+    3 disk  22:01:45 / 22:51:45      4 mem  22:11:45 / 23:01:45
+    5 stop  22:21:45 / 23:11:45      (cycle 1 / cycle 2 block start)
+  cpu = 2 s busy loop on every core every 30 s; disk = 4 GB dd conv=fsync to
+  /mnt/STORAGE/home/rburkey/.claude-disturb-io.bin, deleted after each, every
+  60 s; mem = 8 GB bytes object (memset, so touched) held 5 s, every 60 s;
+  stop = SIGSTOP/SIGCONT of the current run's CRT2 MEDS2 (highest port base
+  >= 25000) for 5, 20, 100 ms in turn, every 20 s, SIGCONT in a finally.
+  All at normal priority.  To stop early: SIGTERM its python PID (find by
+  cmdline disturb.py) -- it logs 'DISTURB stopped by signal'; check no
+  .claude-disturb-io.bin is left and no MEDS2 is in state T (stopped).
+  around.py now prints disturb.log lines near the window and reads
+  camwatch-all.log.  The owner cannot see when bursts happen.
 - CLAUDE CODE FREEZES (owner, 21:36): the claude process (pid 2745832) hit
   >= 25% CPU in 45 of 2,258 seconds 21:00-21:37 (mostly Claude's own work;
   40% at 21:36:51 as the owner typed); those seconds rarely coincide with
