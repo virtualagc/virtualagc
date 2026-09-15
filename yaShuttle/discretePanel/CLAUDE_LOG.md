@@ -18,7 +18,7 @@
 
 ### [2026-09-15] Target: README.md
 - New subtitles.py: borderless always-on-top caption box for demo videos; captions are UTF-8 datagrams on the discrete bus group at port base + 90 (empty clears, \n = new line); drag to move, right-click Clear/Quit, Ctrl+Q; --geometry, --font/--font-size, --fg/--bg, --opacity, --hide-when-empty, --text.
-- Script command: panelO6 --script `<ms> subtitle TEXT`; simulatePASS --keys `<seconds> SUBTITLE TEXT`; simulatePASS starts subtitles.py (bottom centre) when either script has one, --subtitles / --no-subtitles override.
+- Script command: panelO6 --script `<ms> subtitle TEXT`; simulatePASS --keys `<seconds> SUBTITLE TEXT`; simulatePASS does NOT start subtitles.py (no default size/place suits a recording; --subtitles/--no-subtitles removed); the user runs it with the same --port-base, and simulatePASS logs that command when a script has captions.
 - subtitles.py --align left|center|right (default center): justify and anchor of the caption.
 - subtitles.py: a caption may start with <left>, <center>/<centre> or <right> to align that caption alone; untagged captions use --align.
 - Panel script times are now SECONDS (decimals allowed) in panelO6.py and discretePanel.py, matching simulatePASS keys files; a time over 36000 s is refused as a probable old millisecond script. --quit-after stays in ms. Converted: examples/4gpc-startup-panel.script; outside the repo ~/workspace/pass-run/headless-gpcmem.sh (backup .bak-20260915-ms) and ipl.script (backup). HANDOFF-panelO6.md line ~229 still says `<ms> <command>` -- needs updating at the next sync.

@@ -244,15 +244,6 @@ def has_wait_user(text):
     return False
 
 
-def has_subtitles(text):
-    """Does this script caption?  Cheap enough for a launcher to ask."""
-    for raw in text.splitlines():
-        w = raw.split("#", 1)[0].split()
-        if len(w) >= 2 and w[0][:1].isdigit() and w[1].lower() == "subtitle":
-            return True
-    return False
-
-
 class Bus(object):
     """Sends what a script says onto the simulation's buses (port base from
     discretes.py, so set_port_base() first)."""

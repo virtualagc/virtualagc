@@ -50,8 +50,10 @@ CAPTIONS FOR VIDEOS.  '<seconds> SUBTITLE text ...' in the keys file, or
 '<seconds> subtitle text ...' in the panel script, shows the text in
 subtitles.py's borderless caption box (the same line with no text clears it;
 \\n starts a new line; a leading <left>, <center> or <right> aligns that
-caption alone).  The box is started automatically when either file has such a
-line; --subtitles starts it regardless, --no-subtitles never.
+caption alone).  This program does not start the box, since no default size
+or place suits every recording: run subtitles.py yourself with the same
+--port-base, and use its --edit to find the options that suit.  When a script
+captions, the log says so and gives the command.
 
 WAITING INSTEAD OF GUESSING.  A line 'WAIT gpc N mode-tb RUN|IPL|BP [timeout S]'
 in either file holds that file until GPC N's MODE talkback on panel O6 shows
@@ -553,10 +555,6 @@ def main():
                     help="crew script for panelO6.py: switches, keys, subtitles and waits "
                          "in one file (commands below)")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
-    ap.add_argument("--subtitles", dest="subtitles", action="store_true", default=None,
-                    help="start subtitles.py, the caption box, even if no script uses it")
-    ap.add_argument("--no-subtitles", dest="subtitles", action="store_false",
-                    help="never start subtitles.py")
     ap.add_argument("--duration", type=float, metavar="SECONDS",
                     help="shut down after this long instead of waiting for Enter")
     args = ap.parse_args()
@@ -712,18 +710,10 @@ def main():
                      "--verbose"] + shlex.split(args.yagpc_extra)
         gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env)
         time.sleep(3)
-        want_subs = args.subtitles
-        if want_subs is None:
-            want_subs = (script_has_subtitles(args.keys, False)
-                         or script_has_subtitles(args.panel_script, True))
-        if want_subs:
-            sub_argv = [py, "subtitles.py", "--port-base", str(args.port_base)]
-            if screen_w is not None and screen_h is not None:
-                sw_ = min(1000, screen_w)
-                sub_argv += ["--geometry", "%dx120+%d+%d" % (sw_, (screen_w - sw_) // 2,
-                                                             max(0, screen_h - 200))]
-            L.start("subtitles", sub_argv, HERE, env)
-            time.sleep(1)
+        if (script_has_subtitles(args.keys, False)
+                or script_has_subtitles(args.panel_script, True)):
+            log("note: the script has captions; start the caption box yourself: "
+                "python3 subtitles.py --port-base %d" % args.port_base)
         panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
                       "--gpc-id", str(gpcs[0]), "--size", str(size), "--geometry", o6_geom]
         if args.wait_user and not args.panel_script:
