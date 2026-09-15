@@ -3697,7 +3697,22 @@ class VectorDisplay(object):
     CAM_L = 0.20
     CAM_R = 52.442456
     CAM_T = 0.25 - 2 + 0.374
-    CAM_B = 38.57 - 2 + 0.374
+    # THE BOTTOM STOPS JUST UNDER THE MENU.  It was 38.57 - 2 + 0.374 (36.944),
+    # 1.39 units below the lowest thing ever drawn -- the edgekey legend
+    # frames, at 36.2 in a menu area placed 0.643 up (MDUMenuArea.build), so
+    # 35.557 -- and with the edgekey strip under the display that band of blank
+    # canvas sat between the menu and its keys.  It now ends CAM_B_GAP below
+    # the frames, and MDUWindow makes the canvas shorter by the same fraction
+    # (canvas_height_k), so nothing on the page moves or rescales.  Measured
+    # on a 1016 px display: 36 rows of blank canvas between frames and strip.
+    CAM_B_FULL = 38.57 - 2 + 0.374
+    CAM_B_GAP = 0.3
+    CAM_B = 36.2 - 0.643 + CAM_B_GAP
+
+    @classmethod
+    def canvas_height_k(cls):
+        """The canvas height per unit of the configured (square) display size."""
+        return (cls.CAM_B - cls.CAM_T) / (cls.CAM_B_FULL - cls.CAM_T)
 
     CHAR_WIDTH = 53
     CHAR_HEIGHT = 38
@@ -5663,8 +5678,9 @@ class Screen_DPS(MDUScreen):
         self.group.position.y = -0.75 + ADJ['pageY']
         m = self.d.scene.getObjectByName('MDUMenuArea')
         if m is not None:
+            # x only: the menu area does not follow pageY (MDUMenuArea.build),
+            # and the frustum now ends just under it (VectorDisplay.CAM_B).
             m.position.x = ADJ['menuX']
-            m.position.y = ADJ['pageY']
         self.d.resetCamera()
         self.refresh()
         self.d.dirty = True
@@ -11162,7 +11178,10 @@ class MDUWindow(QtWidgets.QWidget):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         w = int(win.get('displayPx') or win.get('width') or 1024)
-        h = int(win.get('displayPx') or win.get('height') or 1024)
+        # Shorter than the configured size by exactly the frustum's trim below
+        # the menu (VectorDisplay.canvas_height_k), so the page keeps its scale.
+        h = int(round(int(win.get('displayPx') or win.get('height') or 1024)
+                      * VectorDisplay.canvas_height_k()))
         self.canvasW = w
         self.canvasH = h
         if self.chrome > 0:
