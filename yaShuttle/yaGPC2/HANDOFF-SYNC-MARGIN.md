@@ -441,6 +441,41 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   and at t~341/349/521/529 as each new GPC joined) and FCMSFAIL none -- so a
   joining computer costs about two FCMSFINT hits, and 12 of the 20 remained
   for losses once eve3 reached OPS 2 (~21:25).
+- LOSS 1 of eve3: 21:44:04.321, disturbance block 1 (none), owner at the
+  desktop but host quiet before it (latprobe clean, RDELAY/BDELAY 0.00 for
+  yaGPC2 and MEDS2; sda 26% busy in the loss second itself; chrome 194% only
+  3-5 s AFTER).  GPC4 out, diagonal lit.  FCMSFINT had spent all 20 landmark
+  hits at the IPLs and the OPS 2 transition (#11-#20 at shared ~842.35/842.5
+  on all four clocks) -- useless at the loss.  FCMSFAIL hits, mapped by
+  SYNCORDER-JOIN offsets (GPC2 172.0118, GPC3 352.0018, GPC4 532.0026 s):
+  #1 GPC4 shared 1986.2770, #2 GPC3 1986.2813, #3 GPC2 1986.2850, #4 GPC1
+  1986.2850 -- GPC4 FIRST, 1.45 ms after its final IOC issue (1986.275310),
+  i.e. NOT a 3.85 ms timeout; the others followed 4-8 ms later (voting).
+  THE SYNC SEQUENCE (all GPCs, shared s): IOC handshake 1: GPC3/1/2 issue
+  .272490-.272513, GPC4 .272522 (9 us after the last), GPC1-3 null .272741-
+  .272769 but GPC4 STAYS in IOC; handshake 2: GPC1-3 IOC .273655-.273681,
+  all four null .27389-.27392 -- GPC4 consumed the others' 2nd handshake as
+  its 1st; then GPC4 IOC .274133 vs others .274225-.274244; GPC4 .274662 vs
+  others .274868-.274879; GPC4's 4th IOC .275310 answered by nobody (the
+  others' next code was timer at .280975); FCMSFAIL at .2770; GPC4 null
+  .280666.  So GPC4 slipped ONE I/O-completion handshake out of phase: on
+  handshake 1 its confirming DIA read did not see the agreement before the
+  others (holding IOC only ~220-250 us) had returned to null, and from then
+  on it was one behind; FCMISYNC's own shorter checks (csect labels
+  FCMIT3DL/FCMIT5DL) caught the extra.  ISSUE-TIME SPREAD WAS 9-32 us --
+  the spread metric CANNOT see this failure.  The margin that matters is the
+  COMMON OVERLAP of all members' code-held intervals (min over members of
+  drop time minus max issue time) against what a member needs to confirm
+  (read, FCMNOISE settle, re-read).  ERRTERM around it: only the steady all-
+  GPC BCE 20/22 pattern; PEER HOLDs all replies <= 3 ms; nothing GPC4-only.
+  eve1's GPC4 loss (SVC, 5.35 ms hold) is very likely the same slip.
+  NEXT: an overlap-margin script over SYNCORDER, and YAGPC_SYNCTRACE (what
+  each GPC READS from its neighbours) on a run to see the missed read.
+  Runs from eve4 mark FCMSFAIL only (supervisor restarted 21:46:22 with
+  `--adopt 3`).
+- OWNER NOTE (21:45): the CAM window does not draw the eye; the owner saw
+  this loss only because Claude's output scrolled.  Earlier 'unnoticed for
+  15+ min' cases are consistent with that.
 - DISTURBANCE SCHEDULER (owner approved all blocks, 21:40): `<scratch>/stall/
   disturb.py`, started 21:41:45, log `<scratch>/stall/disturb.log` (one
   timestamped line per burst, 'BLOCK ... begin/end' per block).  Two cycles
