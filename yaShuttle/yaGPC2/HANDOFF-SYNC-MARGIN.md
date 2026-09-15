@@ -861,3 +861,20 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   timing inside a ~0.1-0.4 ms margin; the zero floor removes the 2 ms
   listener term.  If eve15 still splits, the commander side's #DLYI (16.5
   us) and @RAW (33 us) units and instruction overhead are next.
+- eve15 (YAGPC_RECV_FLOOR_US=0) LOSS 00:42:33: GPC2, SAME MECHANISM -- split
+  at 1163.9486 (G2,G3 IPR vs G1,G4 IOC), G2 FIOMSCTO BCE20+22 IOQE 905a ->
+  count 2 -> self-FTS (R7=19dc7, R1=0016).  Over shared 1140-1215 s eve15
+  has as many FIOMSCTO as eve13 (6764 x6160, 6772 x6160, 905a x1555 --
+  counts span the run to that time, the window filter did not bind) and
+  the same listened-bus masks, plus hundreds of FIOBCERR the floor adds.
+  THE 2 ms FLOOR IS REFUTED AS THE CAUSE (its #50 infidelity stands).
+  NEW LEAD (00:44): the masks are always within buses 20-22 -- exactly
+  MTU_BUS_FIRST..LAST, the buses src/mtumodel.c owns -- never 23; and in
+  eve13 commanders armed 1cc90 ~1022 times per bus but listeners armed
+  1ccae only 3-48 times: FF listeners mostly never reach their receive.
+  CORRECTION (00:47): the #WIX idea is already answered -- ledger #137:
+  "PASS does not use #WIX here -- FIOWAIT is #WAT and the MSC starts the
+  listener directly" (FIOADCCL rebuilds the PC table to FIONSL11/FIOMTUL1).
+  So why FF listeners are still busy at the MSC's look is OPEN.  Next
+  instrument: YAGPC_BWTRACE on BCE20-22 (Busy/Wait edges per GPC) against
+  the FIOMSCTO RT lines, default floor restored.
