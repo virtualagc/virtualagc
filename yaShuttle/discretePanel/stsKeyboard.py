@@ -503,8 +503,8 @@ def main(argv=None):
                          "1 left, 2 right, 3 aft)")
     ap.add_argument("--port-base", type=int, metavar="N", default=None,
                     help="base of the UDP port range the buses use: the "
-                         "keyboard buses are base+31..base+33 (default 6900, "
-                         "matching MEDS2.py's busConfig).  The same option as "
+                         "keyboard buses are base+31..base+33 (default "
+                         "6900).  The same option as "
                          "on yaGPC2, MEDS2.py and panelO6.py -- give a second "
                          "simulation its own base and the two run side by "
                          "side.  NSTS_BUS_PORT_BASE sets it too.")

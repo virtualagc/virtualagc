@@ -17,15 +17,16 @@ everything is up, press Enter in this terminal (or Ctrl-C) to shut it all
 down.  Each program's output goes to a log in --logs; the previous run's are
 kept in a prev-<time> directory there.
 
-With one GPC the procedure is retest-crt2.sh's; with several, the order the
-scripted two-, three- and four-computer runs verified through OPS 2.
+The steps are the ones the scripted runs followed, which reached OPS 2 with
+two, three and four computers.
 
 CREW SCRIPTS.  --script FILE (also spelled --panel-script) is one file for the
 whole scripted crew: panel switches, 'keys ...' keystrokes, 'subtitle ...'
 captions and 'wait gpc N mode-tb RUN|IPL|BP' lines, all in seconds, played by
-panelO6.py on one clock so switches and keys stay in step.  crewscript.py
-documents the language; examples/4gpc-startup.script brings up four GPCs to
-OPS 2.  For a demonstration, --show-panel keeps panelO6's window up so the
+panelO6.py on one clock so switches and keys stay in step.  The commands are
+listed at the end of this help, and 'python3 crewscript.py FILE' checks a
+script without running anything; examples/4gpc-startup.script brings up four
+GPCs to OPS 2.  For a demonstration, --show-panel keeps panelO6's window up so the
 switches are seen to move, and a 'wait user' line (first, say) holds the
 script until someone clicks in the panel window -- time to arrange windows
 and start a recording; leave --duration off then, since it counts from
@@ -498,7 +499,9 @@ def send_keys_thread(port_base, path, t0, stop_event, panel_log=None):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+                                 formatter_class=argparse.RawDescriptionHelpFormatter,
+                                 epilog="crew script commands (--script FILE):\n"
+                                        + crewscript.HELP)
     ap.add_argument("--gpcs", type=parse_gpcs, default=[1], metavar="LIST",
                     help="which GPCs: 1 (default), 1,2, 1-3, 1-4")
     ap.add_argument("--tape", metavar="FILE",
@@ -548,7 +551,7 @@ def main():
                          "it began with 'wait user'; shows the panel too")
     ap.add_argument("--script", "--panel-script", dest="panel_script", metavar="FILE",
                     help="crew script for panelO6.py: switches, keys, subtitles and waits "
-                         "in one file (crewscript.py)")
+                         "in one file (commands below)")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
     ap.add_argument("--subtitles", dest="subtitles", action="store_true", default=None,
                     help="start subtitles.py, the caption box, even if no script uses it")

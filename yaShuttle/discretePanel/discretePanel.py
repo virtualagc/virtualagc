@@ -645,8 +645,8 @@ def main():
                          "(also NSTS_PANEL_GEOMETRY)")
     ap.add_argument("--port-base", type=int, metavar="N", default=None,
                     help="base of the UDP port range the buses use: bus n is "
-                         "base+n and the discrete bus base+80 (default 6900, "
-                         "matching busConfig).  Give a second emulation its "
+                         "base+n and the discrete bus base+80 (default "
+                         "6900).  Give a second emulation its "
                          "own base -- the same option on yaGPC2 and MEDS -- "
                          "to run it alongside the first without port "
                          "conflicts.  NSTS_BUS_PORT_BASE sets it too.")

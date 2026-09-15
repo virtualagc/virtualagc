@@ -11727,9 +11727,8 @@ def buildParser():
                         'be on screen at once -- and with --port-base there '
                         'may be two simulations\' worth.  Default "MEDS2 MDU".')
     p.add_argument('--port-base', dest='portBase', type=int, metavar='<n>',
-                   help='base of the UDP port range the buses use: every port '
-                        'in busConfig is written as base 6900 gives it and '
-                        'moves with the base (default 6900).  The same option '
+                   help='base of the UDP port range the buses use: every bus '
+                        'port moves with the base (default 6900).  The same option '
                         'as on yaGPC2, panelO6.py and stsKeyboard.py -- give a '
                         'second simulation its own base and the two run side '
                         'by side.  NSTS_BUS_PORT_BASE sets it too.')

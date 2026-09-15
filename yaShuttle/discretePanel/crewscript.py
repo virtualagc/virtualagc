@@ -7,51 +7,11 @@ panelO6.py plays it (--script FILE; simulatePASS.py --script passes it on).
 One player means one clock and one reading of each wait, so the switches and
 the keystrokes stay in step by construction.
 
-THE LANGUAGE.  One command per line; '#' starts a comment; blank lines are
-ignored.
+THE LANGUAGE is described by HELP below, which is what the programs that take
+a crew script print in their --help, and what this module prints when run:
 
-    <seconds> <command>        a timed step, e.g.   3 mode STANDBY
-    wait gpc N mode-tb RUN|IPL|BP [timeout S]
-    wait user                  pause until someone clicks in panelO6's window
-
-Times are SECONDS (decimals allowed) from the start of the script, or from
-the moment the last wait line was met.  Lines run in file order, and a time
-may not be earlier than the one before it since the last wait.  A wait holds
-the script until GPC N's MODE talkback on panel O6 shows that state -- RUN
-when a load is complete, IPL while a bootstrap is in, BP (barberpole)
-otherwise -- and a wait that times out stops the script.
-
-'wait user' is for a person at the screen, such as someone recording a
-demonstration: the script holds, the cursor over panelO6 changes shape, and a
-click anywhere in the panel window carries on (that click moves no control).
-First in a script, it leaves as long as it takes to arrange the windows and
-start a capture program.  panelO6.py shows its window whenever a script has
-one.  With no window to click, the script stops there rather than waiting
-forever.
-
-Commands:
-
-    keys [KB1|KB2|KB3] KEY KEY ...   type on a DPS keyboard, 0.35 s apart; KB1
-                                     (left) unless a KBn token says otherwise,
-                                     and a KBn part way along switches the rest.
-                                     Keys as on the keyboard: ITEM EXEC OPS PRO
-                                     SPEC RESUME CLEAR + - . 0-9 A-F FAULT_SUMM
-                                     SYS_SUMM MSG_RESET ACK GPC/CRT I/O_RESET;
-                                     also IDP_POWER_ON, IDP_POWER_OFF, DEU_LOAD
-                                     (IDP 1) and IDP2_POWER_ON, IDP2_POWER_OFF,
-                                     DEU_LOAD2 (IDP 2).  The next line starts
-                                     when the typing is done.
-    subtitle TEXT                    show TEXT in subtitles.py; no TEXT clears
-                                     it; \\n starts a new line; a leading
-                                     <left>, <center> or <right> aligns it.
-    gpc N | mode HALT|STANDBY|RUN | ipl | source MM1|MM2|OFF | crt 0-3 |
-    bfsengage on|off | gpcid N | bit A|B N on|off | idppower N on|off |
-    majfunc N GNC|SM|PL | kybdsel left 1|3 | kybdsel right 2|3 | idpload N
-                                     panel O6/C2/C3/F6 controls -- see
-                                     panelO6.py's "scripted playback".
-
-Every line is checked when the file is read, so a mistyped command or key is
-reported before anything happens rather than part way through a run.
+    python3 crewscript.py --help           the commands
+    python3 crewscript.py FILE ...         check scripts without running them
 """
 
 import re
@@ -87,6 +47,88 @@ IDP_MSG = {"DEU_LOAD": (0x0002,), "IDP_POWER_ON": (0x0003, 1), "IDP_POWER_OFF": 
 PANEL_VERBS = ("gpc", "mode", "ipl", "source", "crt", "bfsengage", "gpcid", "bit",
                "idppower", "majfunc", "kybdsel", "idpload")
 TALKBACK_STATES = ("RUN", "IPL", "BP")
+
+# The key names a script may use, as the keyboard has them, then the IDP ones.
+_KEY_NAMES = " ".join(["ITEM", "EXEC", "OPS", "PRO", "SPEC", "RESUME", "CLEAR",
+                       "+", "-", ".", "0-9", "A-F"]
+                      + [k for k in SCAN if len(k) > 1 and k not in
+                         ("ITEM", "EXEC", "OPS", "PRO", "SPEC", "RESUME", "CLEAR")]
+                      + list(IDP_MSG) + ["IDP2_" + k[4:] if k.startswith("IDP_") else k + "2"
+                                         for k in IDP_MSG])
+
+
+def _wrap(text, indent):
+    import textwrap
+    return textwrap.fill(text, 76, initial_indent=indent, subsequent_indent=indent)
+
+
+# For --help screens: RawDescriptionHelpFormatter keeps the layout.
+HELP = """\
+  One command per line; '#' starts a comment (so a subtitle cannot contain
+  one); blank lines are ignored.  Every line is checked when the file is
+  read, so a mistake is reported before anything happens.
+
+  <seconds> <command>   a timed step.  SECONDS (decimals allowed) from the
+                        start, or from when the last wait line was met.
+                        Lines run in file order; a time may not be earlier
+                        than the line before it since the last wait.
+
+  waits (no time in front):
+    wait gpc N mode-tb RUN|IPL|BP [timeout S]
+                        hold until GPC N's MODE talkback on panel O6 shows
+                        that state: RUN when a load is complete, IPL while a
+                        bootstrap is in, BP (barberpole) otherwise.  A
+                        timeout (default %(timeout)d s) stops the script.
+    wait user           hold until someone clicks in the panel O6 window (the
+                        cursor changes; the click moves no control).
+                        --wait-user puts one first.
+
+  keyboard and captions:
+    keys [KB1|KB2|KB3] KEY ...
+                        type on a DPS keyboard, %(gap)s s apart; KB1 (left)
+                        unless a KBn token says otherwise, and one part way
+                        along switches the rest.  The next line starts when
+                        the typing is done.  Keys:
+%(keys)s
+    subtitle [TEXT]     show TEXT in the caption box (subtitles.py); no TEXT
+                        clears it.  The two characters \\n start a new line;
+                        a leading <left>, <center> or <right> aligns that
+                        caption.
+
+  panel controls (on the GPC column chosen by 'gpc N', at first the primary):
+    gpc N               drive GPC N's column from here on (1-5)
+    mode HALT|STANDBY|RUN
+                        that column's MODE switch (STBY also accepted)
+    ipl                 its IPL pushbutton, held 0.25 s
+    source MM1|MM2|OFF  IPL SOURCE
+    crt 0|1|2|3         BFC CRT: 0 is DISPLAY OFF, else DISPLAY ON and
+                        SELECT 1+2 / 2+3 / 3+1
+    bfsengage on|off    on: CDR ENGAGE pressed and released; off: BFC
+                        DISENGAGE to RIGHT and back
+    gpcid N             make GPC N the primary column
+    bit A|B N on|off    one discrete bit: A12 I/O TERM A, A13 OUTPUT
+                        TERMINATE/NORMAL, B3-5 bfsengage, B6-7 crt; any other
+                        is sent once, raw
+    idppower N on|off   IDP/CRT N POWER (1-3 on C2, 4 on R11)
+    majfunc N GNC|SM|PL IDP/CRT N MAJ FUNC
+    kybdsel left 1|3    LEFT IDP/CRT SEL
+    kybdsel right 2|3   RIGHT IDP/CRT SEL
+    idpload N           O6 IDP N LOAD (1-4), held 0.25 s
+
+  example (examples/4gpc-startup.script has a full one):
+    0     gpc 1
+    0     mode HALT
+    0.2   source MM1
+    0.5   ipl
+    3     mode STANDBY
+    70    keys ITEM 1 EXEC
+    wait gpc 1 mode-tb RUN timeout 300
+    1     subtitle <left> GPC 1 loaded\\nnow to RUN
+    3     mode RUN
+
+  To check a script without running anything:  python3 crewscript.py FILE
+""" % {"timeout": WAIT_TIMEOUT_S, "gap": KEY_GAP_S,
+       "keys": _wrap(_KEY_NAMES, " " * 24)}
 
 
 class ScriptError(Exception):
@@ -323,3 +365,35 @@ class Player(object):
             self.stopped = True
         else:
             self.after(WAIT_POLL_MS, lambda: self._poll(k, e, begun))
+
+
+def main(argv=None):
+    import argparse
+    import sys
+    ap = argparse.ArgumentParser(
+        description="Check crew scripts -- the files panelO6.py and simulatePASS.py\n"
+                    "take with --script -- without running them.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="crew script commands:\n" + HELP)
+    ap.add_argument("files", nargs="*", metavar="FILE", help="script to check")
+    args = ap.parse_args(argv)
+    if not args.files:
+        ap.print_help()
+        return 0
+    bad = 0
+    for name in args.files:
+        try:
+            with open(name) as f:
+                text = f.read()
+            entries = parse(text)
+        except (OSError, ScriptError) as e:
+            print("%s: %s" % (name, e))
+            bad += 1
+            continue
+        waits = sum(1 for e in entries if e["kind"] != "step")
+        print("%s: ok, %d steps and %d waits" % (name, len(entries) - waits, waits))
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
