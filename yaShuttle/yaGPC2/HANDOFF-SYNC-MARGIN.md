@@ -541,6 +541,56 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   one-GPC left=1 error disappears.  Needs the reader's IUA in the service
   call (check GpcServiceInput) and a rebuild -- which would change the binary
   new runs use mid-experiment, so timing is the owner's call.
+- FIX, OWNER'S CHOICE 'FIX NOW' (21:57): the IUAR filter first proposed
+  CANNOT work -- FIOFFIUA EQU 10 in both FIOPRMPG and FIONSPPG, the same
+  IUA as the timing unit: IUA 10 is the FORWARD MDM, through which both the
+  MTU (FIOMTURD EQU X'00024C26', 'MTU READ - MDM FF01 CARD=03 CHANNEL=01
+  WORD COUNT=7') and the NSPs (FIONSPDR X'25000', FIONSP1P X'26420',
+  FIONSP2P X'27020', FIONSPRD X'26C7F') are read.  So mtumodel.c was
+  refilling its 7-word reply and resetting every reader on EACH of the NSP's
+  commands.  CHANGE (src/mtumodel.c): MTU_READ_CMD 0x024C26 and CMD_FIELD(c)
+  = c & 0x7ffff; XMIT_CMD refills only when CMD_IUA==10 AND
+  CMD_FIELD==MTU_READ_CMD, every other command on buses 20-22 silences all
+  readers.  (GpcServiceInput already has an 'address' field documented as
+  IUA/subaddress, unused for receives -- not needed after all, no shared-
+  header change.)  Built 22:01:11 (make AR=llvm-ar).  GATE PASSED 22:09:
+  nsp-regress ALL MATCH (periodic deu 1805/342/566/334/572, mtu commands
+  2951 vs ~7897 before -- the NSP reads now bypassed); committed with the
+  new ledger entry for the defect.  The gate was run as: `headless-gpcmem.sh 420 <scratch>/nsp-regress`
+  then `python3 <scratch>/gate.py <scratch>/nsp-regress` (event counters must
+  match exactly: mmu 56/431/220731/220011/720/3-3-0, deu formatFills 8,
+  resets 1, modeStatus 6, ipled, 0 abandoned/bite/dumps/headerless/unknown);
+  and eve5 (supervisor `--fresh 5`, port base 25400, launched 22:02:06 on the
+  patched binary) -- expect NSP errors identical on every GPC at the first
+  one-word read and NO one-GPC 'pc=1cc2e left=1'.  The disturbance scheduler
+  was stopped 21:56:59 (cycle 1 block 2 cpu, partial).  CORRECTION: eve4 was
+  NOT stopped at 21:58 -- simulatePASS ignored SIGINT (twice: 21:57 and
+  22:08) and Claude misread a 60 s wait timeout as 'gone'; all of eve4
+  (old binary, port base 25300) ran on until 22:08, overlapping the
+  nsp-regress gate run and eve5's IPL (about four extra cores), and its
+  keyboard windows sat exactly on top of eve5's.  Stopped 22:08 by SIGINT to
+  its yaGPC2 and SIGTERM to the rest, by PID.  The supervisor's stop() now
+  escalates the same way (SIGINT simulatePASS, 15 s; SIGINT yaGPC2; SIGTERM
+  everything on the port base; SIGKILL) and logs anything still alive; it
+  was restarted with `--adopt 5`.  CHECK FOR STRAYS by listing processes
+  whose argv contains each port base, not by counting seconds.
+  FIRST RESULT OF THE FIX (eve5 at 22:07, GPC1 alone in PASS OPS 0, commander
+  path), ERRTERM by (bce, pc, left): old binary (eve3, own t < 300 s): bus 20
+  (1cc1c, 25) x428, bus 22 (1cc56, 25) x427 -- the NSP data read failing
+  every cycle, 25 words short, forever.  Fixed binary: bus 20 (1cc0a, 1) x2
+  then (1cc1c, 32) x1, bus 22 (1cc44, 1) x2, and then NO MORE; bus 7 x7, bus
+  8 x231 (absent IDP3), bus 24 (1ccd2, 1) x2 unchanged.  So the NSP's first
+  one-word read now fails, as an absent unit should, and PASS apparently
+  BYPASSES the NSP read after a couple of errors (FIOBYNC1 'OVERLAID BY BCE
+  BYPASS CODE'); with the old model those one-word reads got stray timing-
+  unit words and seemed to succeed, so the bypass never came and the data
+  read failed every cycle.  THIS EXPLAINS THE OWNER'S 2026-09-14 MORNING
+  SPEC 99 LOG: GPC1 reporting 'BCE STRG 1 NSP' / 'BCE STRG 3 NSP' over and
+  over.  With the fix they should appear once at start and stop.  The owner
+  will look at eve5's SPEC 99 after OPS 2 (~22:17); whether 'TIME' (seen on
+  GPC1 the same morning) also stops is open -- CDLANNUN lists TIME TONE
+  (TM004), CDSANNUN a minor 'MTU' message, FCMCOM MTU TMP FAILURE bits;
+  nothing yet ties it to the FIOPRMPG pc=1ccae short reads.
 - OWNER NOTE (21:45): the CAM window does not draw the eye; the owner saw
   this loss only because Claude's output scrolled.  Earlier 'unnoticed for
   15+ min' cases are consistent with that.

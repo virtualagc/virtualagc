@@ -18,12 +18,30 @@
  * a six-word Message In, and the only six-word command seen on buses 20-22
  * is 524c26 -- IUA 10, count 6.  (IUA 8's is twelve words.) */
 #define MTU_IUA        10
+/* ...and IUA 10 is the FORWARD MDM, not the timing unit alone: FIONSPPG
+ * reads NSP 1 and 2 through the same MDM at the same IUA ('#MINC FIOFFIUA,
+ * FIONSP1P', FIONSPDR, FIONSP2P, FIONSPRD; FIOFFIUA EQU 10).  Only the
+ * command's remaining 19 bits say which card and channel is meant, and the
+ * timing unit is one of them -- FIOPRMPG's
+ *
+ *     FIOMTURD EQU X'00024C26'   MTU READ - MDM FF01 CARD=03 CHANNEL=01
+ *
+ * Treating every IUA-10 command as a timing-unit read refilled the reply,
+ * and reset every reader, on each of the NSP's three commands; a listener
+ * whose one-word NSP power-discrete read straddled a refill came up empty
+ * while the others picked up timing-unit words, FIOERRLC counted an error
+ * only that computer had, and at the second it failed itself out of the
+ * redundant set (ledger #145: eve1 GPC2, eve3 GPC3, 'ERRTERM bce=20
+ * pc=1cc2e left=1', FIONSPPG FIOBYNC3+4). */
+#define MTU_READ_CMD   0x024C26u
 #define MTU_BUS_FIRST  20
 #define MTU_BUS_LAST   22
 
 /* The command word's IUA field, the same extraction iop.c's mia_xmit_cmd
  * uses. */
 #define CMD_IUA(c)     (((c) >> 19) & 0x1fu)
+/* Everything below the IUA: the MDM card, channel and word count. */
+#define CMD_FIELD(c)   ((c) & 0x7ffffu)
 
 /* The reply is TFMTU, three halfwords (FPMMTUFX's own DSECT):
  *     TMTUDYHR  H   DAYS/HOURS
@@ -220,9 +238,11 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                         m->clockUs ? *m->clockUs / 1e6 : 0.0,
                         in->busID, (unsigned)cmd, (unsigned)CMD_IUA(cmd));
         }
-        if (CMD_IUA(cmd) != MTU_IUA) {
+        if (CMD_IUA(cmd) != MTU_IUA || CMD_FIELD(cmd) != MTU_READ_CMD) {
             /* A command for ANOTHER device on this bus -- the flight-critical
-             * buses carry several, and only this one is modelled.  That
+             * buses carry several, and only this one is modelled; a command
+             * to another card or channel of the same MDM is another device
+             * too (see MTU_READ_CMD).  That
              * device is absent, so nothing answers: every computer on the bus
              * gets the same silence.  Leaving this unit's last reply readable
              * handed seven stale words to 32-word receives meant for the
