@@ -667,6 +667,69 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   owner's machine is free; report per class in the morning.  THE OWNER WILL
   BE AT THE DESKTOP FOR 5-10 MIN SOMETIME 04:00-05:00 (said 22:45): flag any
   loss in that window as possibly disturbed, and check atop/latprobe for it.
+- OVERNIGHT, FIXED BUILD (commit bca2581d5), quiet: eve8 launched 22:55:54.
+  THE IPL-TIME FIX HELD: YAGPC_HELDTRACE showed only the ordinary STBY->RUN
+  momentary gaps, and no SYNCORDER-JOIN after the four initial joins -- no
+  barrier rejoins, no IPL-time common-set break.  eve8 LOSSES, both CLASS (b)
+  (IPR, IPR, IOC completed, then silence, no logged error): 23:10:35 GPC4
+  (null at shared 875.950690, FCMSFAIL 875.950938; others 875.9567) and
+  23:10:47 GPC1, GPC2 and GPC3 together (FCMSFAIL ~887.9507-887.9565) -- the
+  whole set dissolved; nothing in the 4000 log lines before (no ERRTERM off
+  bus 8, no RECV TIMEOUT, no PEER HOLD); Xorg 0-1%.  The two losses are
+  exactly 12.000 s apart (phase 11.95 s mod 12), as eve6's were 108 s apart
+  (phase 8.008 s) -- but IPR handshakes are ROUTINE (3811 GPC1 IPR issues
+  after 820 s, in bursts every 0.1-0.2 s, most likely the absent IDP3's bus-8
+  errors), so the IPR-IPR-IOC run before each loss is background, not a 12 s
+  task; the 12 s phase is unexplained or chance.  NEXT INSTRUMENT (eve10 on,
+  eve9 stopped early in IPL for it at 23:13): YAGPC_RANGETRACE=1948c-1948c+
+  19674-19674,2000 -- at FCMSFAIL's and FCMSFINT's first instruction R7 is
+  the caller's return address (FIOERRLC+0313 self-FTS = 19dc7; FCMSFINT from
+  a sync program; FSVC0039/FPMSVC for SVC 39, ARC's drop), naming the path
+  of every class (b) loss.  Reusable report: `<scratch>/stall/loss_report.py
+  <run>/yaGPC2.log [GPC]`.  SUPERVISOR LIMITS (23:13): MAX_RUNS 40 (was 12,
+  which would have ended the night at eve12) and NO_NEW_RUN_AFTER 06:30
+  local, so the owner's machine is free in the morning; re-adopted eve10 with
+  `--adopt 10`.  A 23:30 check confirms whether the range trace writes lines.
+- eve10 LOSS 1, 23:27:50, class (b): GPC4 null at shared 839.951986 after
+  IPR, IPR, IOC; FCMSFAIL on GPC4 at 839.952233 and 839.953106, GPC1-3 at
+  ~839.958; one PEER HOLD (reply) in the 4000 lines before, nothing else.
+  THE CALLER TRACE MISSED IT: FCMSFINT (19674) is called by FCMISYNC's routine
+  IPR processing (R7=8f7d4031, i.e. FCMISYNC+00E9 = 18f7d, #136), so its hits
+  on all four GPCs from ~823 s spent the 2000-line budget first.  From eve11
+  the trace is FCMSFAIL entry only (YAGPC_RANGETRACE=1948c-1948c,2000).
+  Trace line format: 'RT gpc=N t=<own s> <addr> <hw1> <hw2> <mnemonic> ...
+  R0=.. R7=..'.  FC-BUS ERRORS AROUND THE OPS 2 TRANSITION (shared 700-835 s):
+  every GPC x2 on buses 14-17 and on 20-23 at commander and listener pcs --
+  universal; NSP commander-only errors GPC1 bus 20 1cc0a x93 and GPC3 bus 22
+  1cc44 x93 (listeners 1cc32 left=25 x5 each) -- but NEITHER was dropped;
+  nothing at all from 835 s.  So 'the fix leaves commander-only errors and
+  ARC drops them' does not fit GPC4.  GPC4-FIRST TALLY: GPC4 was the first
+  lost in eve1, eve3, eve6, eve8 and eve10 -- the LAST GPC IPLed, which
+  reaches RUN at 702 s with the NBAT from 715 s and OPS 2 at 840 s, only
+  138 s later (eve10's loss is AT the OPS 2 request).  EXPERIMENT from eve11:
+  `<scratch>/perf-in/keys-late.txt` shifts every key at or after 715 s by
+  +300 s (NBAT 1015 s, OPS 2 1140 s; duration 18300 s) -- compare transition-
+  time losses, early (eve8, eve10) vs late (eve11+).
+- eve10 LOSS 2, 23:29:24: GPC1 out (11 ON, 21/31 votes; its vote against
+  GPC4 cleared) -- class (b): IPR, IPR, IOC, null at shared 911.951802,
+  FCMSFAIL on GPC1 911.952038, GPC2/GPC3 ~911.9578 and ~911.968; nothing
+  logged before but one PEER HOLD (reply).  CLASS (b) LOSSES COME IN EXACT
+  12-SECOND MULTIPLES OF SIMULATED TIME within a run: eve6 704.008 -> 812.008
+  (108 s = 9x12), eve8 875.950 -> 887.950 (12 s), eve10 839.952 -> 911.952
+  (71.9998 s = 6x12) -- to within a millisecond.  The IPR/IOC handshakes
+  before each are routine (every 0.1-0.2 s), so the 12 s period belongs to
+  some other periodic task whose pass occasionally takes a GPC out: FIND IT
+  (flight source: a 12 s cycle in FCOS/SM/RM, time/MTU checks -- the owner
+  saw 'TIME MTU' in SPEC 99).  COLLISION: Claude restarted the
+  supervisor (to pick up keys-late) just as eve10's second loss was handled;
+  the old supervisor had already launched eve11 (23:29:42, early keys), the
+  new one adopted the dead eve10 and launched a SECOND eve11 on the same port
+  base 26000 (23:29:47).  Both stopped 23:30:34; ONE clean eve11 launched
+  23:30:36 (keys-late, trace FCMSFAIL only) -- ignore anything in
+  eve11/prev-* from the collided attempts.  launch() now refuses a port base
+  already in use and skips to the next run number; restart the supervisor
+  only with `--fresh N` after stopping runs, or `--adopt N` when nothing is
+  mid-transition.
 - WHICH MMU AN OPS OVERLAY LOADS FROM (owner's question 22:24): not IPL
   SOURCE (yaGPC2 reads it only in firmware_ipl, run.c ~1152-1171) and not
   the keyboard/CRT.  ARCGPC CHOOSE_BUS: 'IF CZ2B_MM_MF$(ARC_J:4)= ON THEN
