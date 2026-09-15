@@ -257,6 +257,28 @@ disturbed condition must be created deliberately and timestamped.
 
 Not yet covered, so record it overnight:
 
+00. **atop, which the owner started 2026-09-14 20:22** -- `atop -w
+   /fastlogs/atop.raw` (default 10 s interval) on the NVMe root; the atop
+   package (2.10.0) also runs a system service writing
+   `/var/log/atop/atop_YYYYMMDD` every 600 s, whose first record was 20:09:55
+   that evening -- NEITHER covers the 2026-09-14 losses.  Read with
+   `atop -r /fastlogs/atop.raw -b HH:MM -e HH:MM` (text) or add
+   `-P PRG,PRC,PRD,CPU,DSK` for parseable lines; the first record in a file
+   is cumulative since boot -- skip it.  WHAT MATTERS IN IT: per-process
+   `RDELAY` (time runnable but waiting for a CPU -- the direct "host got
+   busy" figure) and `BDELAY` (waiting on block I/O) for yaGPC2 and each
+   MEDS2 python3, next to the top CPU users, CPU idle/wait, disk busy and
+   PAG/SWP lines, for the record containing each CAM change.  In a quiet
+   record at 20:33 all of the simulation's processes showed RDELAY and
+   BDELAY 0.00 s.  SIZE: one 10 s record was 65,956 bytes; the size is per
+   record (mostly per-process data), so 1 s intervals cost ~66 KB/s, ~240
+   MB/h, ~2.4 GB for a 10 h night -- affordable on the SSD (254 GB free) but
+   delete afterwards.  Records are averages: a 20-50 ms freeze inside one
+   barely moves them, so atop NAMES the busy program while the probe below
+   catches the stall itself.  Suggested: 1 s only during the disturbed runs,
+   the owner's 10 s otherwise.  Do not restart or reconfigure the owner's
+   atop without asking.
+
 0. **A scheduling-latency probe**, the most direct measure of "the host got
    busy": a thread (or small C program) that sleeps 1 ms in a loop and logs,
    once a second with a wall timestamp, its worst overshoot and how many
