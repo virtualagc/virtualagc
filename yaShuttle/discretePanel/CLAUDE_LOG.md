@@ -9,3 +9,6 @@
 
 ### [2026-09-15] Target: HANDOFF-panelO6.md
 - simulatePASS.py now parses a --script with crewscript.parse before starting anything, and exits with the script error ("-- nothing started"); before, a bad script silently stopped panelO6 at start-up while yaGPC2, MEDS2 and the keyboards ran on without a panel.
+
+### [2026-09-15] Target: HANDOFF-panelO6.md
+- crewscript HELP now says [timeout S] is the literal word timeout plus seconds (default WAIT_TIMEOUT_S 600); a wait ending in a bare number after mode-tb STATE or new-screen gets the error "a timeout is written with the word timeout". A title may still end in a number.

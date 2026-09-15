@@ -115,7 +115,8 @@ HELP = """\
                         line added among +N lines needs no renumbering of
                         the lines after it.  The two forms mix freely.
 
-  waits (no time in front):
+  waits (no time in front).  [timeout S] is the word timeout and a number of
+  seconds, e.g. 'timeout 300'; without it a wait gives up after %(timeout)d s:
     wait gpc N mode-tb RUN|IPL|BP [timeout S]
                         hold until GPC N's MODE talkback on panel O6 shows
                         that state: RUN when a load is complete, IPL while a
@@ -236,6 +237,10 @@ def parse_wait(arg):
         except ValueError:
             raise ScriptError("expected 'timeout S' in seconds, got %r" % " ".join(w[-2:]))
         w = w[:-2]
+    elif w and re.fullmatch(r"[0-9]+(\.[0-9]*)?", w[-1]) and len(w) >= 3 \
+            and w[-2].lower() in ("mode-tb", "new-screen", "run", "ipl", "bp", "barberpole"):
+        raise ScriptError("a timeout is written with the word timeout: '... timeout %s', "
+                          "got %r" % (w[-1], arg))
     if w and w[0].lower() == "crt":
         bad = ScriptError("expected 'wait crt N title TEXT [timeout S]' or "
                           "'wait crt N new-screen [timeout S]', got %r" % arg)
