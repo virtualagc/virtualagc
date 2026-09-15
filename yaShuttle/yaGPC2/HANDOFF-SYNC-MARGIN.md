@@ -292,6 +292,13 @@ Not yet covered, so record it overnight:
      (d) launching and closing a large program headlessly (e.g. a browser
          with a throwaway profile, `--headless`), the nearest scriptable
          stand-in for the owner opening an email reader;
+     (d2) THE REAL CASE SEEN: the owner's hand run lost GPC2 at 19:51:46,
+         3 min 24 s after Eclipse C/C++ 2024-06 started (19:48:22; java,
+         -Xmx4g, 3.2 GB RSS, ~100 s CPU in its first 20 min -- start-up and
+         probably CDT indexing from /mnt/STORAGE).  ASK THE OWNER before
+         launching their Eclipse or its workspace; a throwaway workspace
+         (`eclipse -data <scratch dir>`) importing a large C tree is the safe
+         stand-in;
      (e) SIGSTOP/SIGCONT of one MEDS2 process for 5, 20, 100 ms, by PID
          (`kill -STOP <pid>; sleep; kill -CONT <pid>`), which isolates the
          display path.
