@@ -510,6 +510,37 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   GPC2 21:04, eve3 GPC3 21:46).  NEXT: which program is at 1cc2e, and how
   the mtumodel's per-reader reply delivery can leave one listener a word
   short.
+- THE KILLER ERROR, EXPLAINED FROM THE FLIGHT SOURCE (OI301700
+  SSSRC/FIONSPPG.asm; G2 csects: 1cc2e FIONSPPG FIOBYNC3+4, 1cc32 FIOBYNC3+8,
+  1cc1c FIOBYNC2+6, 1cc56/1cc6c the bus-22 twins, 1ccae FIOPRMPG FIOEL53L+2):
+  FIONSR11 (commander, FF01 cyclic NSP1 read, bus 20) sends a LISTEN command,
+  then #MIN 0,0 'READ NSP1 POWER DISCRETE' and #MIN 1,0 '2-STAGE A
+  DISCRETE' (one word each, through the FF MDM, IUA FIOFFIUA), then #MIN 0,31
+  'READ NSP1 DATA' (32 words).  FIONSL11 (listener) does #CMDI FIOFFIUA,
+  FIOMDMRT (set IUA), then FIOBYNC3: #RDS 0,0 (power discrete, at 1cc2e),
+  #RDS 0,1, then FIOBYNC4 #RDLI 31 (data).  Neither MDMs nor NSPs are
+  modelled.  The STEADY listener error (1cc32/1cc6c left=25, on all
+  listeners) is the 32-word read getting 7 STALE TIMING-UNIT reply words (#137
+  saw the same); the KILLER (1cc2e left=1, one GPC) is the one-word power-
+  discrete read getting NOTHING.  mtumodel.c answers every read on buses 20-22
+  from ONE shared model: an MTU command (IUA 10) refills every reader's copy,
+  a command for any other IUA zeroes every reader ('the same silence') -- but
+  both happen when the COMMANDER'S thread is serviced, and each listener
+  reads when ITS thread gets there, so whether a listener's read comes before
+  or after the silencing is a wall-clock thread race.  Usually every
+  listener catches stale words (the harmless universal error); occasionally
+  one listener's power-discrete read comes after the silence, errors at a
+  different step from the others, FIOERRLC counts it as that computer's own,
+  and at the second it fails itself out.  This is the one place tonight where
+  host load plausibly MODULATES the loss rate (thread interleaving).  FIX
+  (proposed, not made): the timing-unit model delivers words ONLY to a
+  receive addressed to the timing unit (the reading BCE's IUAR == 10); every
+  other read on buses 20-22 -- the absent MDMs/NSPs -- gets silence on every
+  GPC regardless of thread order.  Expected effect: the steady left=25
+  errors become universal no-reply errors at the first read, and the
+  one-GPC left=1 error disappears.  Needs the reader's IUA in the service
+  call (check GpcServiceInput) and a rebuild -- which would change the binary
+  new runs use mid-experiment, so timing is the owner's call.
 - OWNER NOTE (21:45): the CAM window does not draw the eye; the owner saw
   this loss only because Claude's output scrolled.  Earlier 'unnoticed for
   15+ min' cases are consistent with that.
