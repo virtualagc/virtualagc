@@ -26,3 +26,6 @@ because this file records everything and recovers nothing.
 
 ### [2026-09-15] Target: problems.md
 - CORRECTION to the llvm-ar note above: /usr/bin/ar was not broken. GNU ar dlopens every /usr/lib/bfd-plugins plugin (LLVMgold-14 -> libLLVM-14.so.1) and the PAGE-CACHE copy of libLLVM-14.so.1 was corrupt in RAM (md5 b56ec9da..., disk/direct read and package c7037a8d...), so ar segfaulted inside libLLVM-14 (also Sep 14 16:18). Fix: `dd if=/usr/lib/x86_64-linux-gnu/libLLVM-14.so.1 iflag=nocache count=0` (no root) evicts the pages; plain ar then works. Not LTO-related. Repeat corruption suggests running memtest86+.
+
+### [2026-09-15] Target: problems.md
+- yaGPC2 now drives GPC discrete output bit 31 (IPL talkback, hardware) from a successful firmware IPL until the HALT -> STBY release (run.c ipl_talkback), published against the last announced OUT value so a re-IPL also clears a stale RUN(READY) bit 9. panelO6 shows it as IPL on the O6 MODE talkback.

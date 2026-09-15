@@ -1131,6 +1131,26 @@ static void mm_send_cmd(BatchRunner *r, int busID, uint32_t cmd) {
  * booted parks on the next release rather than re-running the mover.
  * Re-executing is possible only because a fresh IPL puts a pristine copy
  * back.  Collapsing the two would make that unreachable. */
+/* THE IPL TALKBACK.  Discrete output bit 31 is "IPL (HDWR)" (SSSRC/BILDNEW5.asm's
+ * DO table), the hardware's own output to the MODE talkback on panel O6: "The
+ * MODE talkback goes to IPL while the initialization software is loaded. If
+ * this does not happen, then a mass memory I/O error has occurred" (DPS
+ * Workbook USA005350 Rev B, 3.x).  So it is set when the bootstrap is in, and
+ * the software owns the register from the release at HALT -> STBY, where it is
+ * dropped.  Published against what this GPC last announced, not against the
+ * register alone: the system reset an IPL begins with has already cleared the
+ * register, and a talkback left showing RUN from before must clear with it. */
+#define DO_IPL_TALKBACK (0x80000000u >> 31)
+static void ipl_talkback(BatchRunner *r, bool on) {
+    IOP *iop = &r->age.gpc.iop;
+    uint32_t after = register_get32(&iop->regDiscreteOut);
+    after = on ? (after | DO_IPL_TALKBACK) : (after & ~DO_IPL_TALKBACK);
+    register_set32(&iop->regDiscreteOut, after);
+    if (r->discretes != NULL)
+        discretes_publish_out(r->discretes,
+                              discretes_value(r->discretes, DISCRETES_REG_OUT), after);
+}
+
 static void firmware_ipl(BatchRunner *r) {
     if (r->opts->fcmPath) return;
     /* "IPL first causes a system reset function" (POO 2.5.3.3), and "the
@@ -1275,6 +1295,7 @@ static void firmware_ipl(BatchRunner *r) {
                     "(BCE %d) over the bus (%zu blocks, %zu halfwords) "
                     "to 0x00000\n",
             unit, busID, got / MM_HALFWORDS_PER_BLOCK, got);
+    ipl_talkback(r, true);
 }
 
 /* True when the machine is held in reset and must not execute.  Called once
@@ -1446,6 +1467,7 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
             /* The release.  Reload the whole PSW pair from the System
              * Reset vector, which is what hands control to FCMBOOT. */
             cpu_reset(&r->age.gpc.cpu);
+            ipl_talkback(r, false);
             mode_log(r, "MODE: HALT -> STBY; reset released, "
                             "starting at 0x%05x\n",
                     psw_get_nia(&r->age.gpc.cpu.psw));
