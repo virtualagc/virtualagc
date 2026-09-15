@@ -1571,7 +1571,30 @@ static bool mode_switch_held(BatchRunner *r) {
         unsigned g = discretes_generation(r->discretes);
         if (g == r->modeHeldGen) continue;
         r->modeHeldGen = g;
+        bool was = r->modeHeldLast;
         r->modeHeldLast = mode_switch_held_uncached(r);
+        /* YAGPC_HELDTRACE: every flip of this machine's held state, with
+         * what the mode bits looked like -- a machine already in RUN that is
+         * held even for a moment stops executing and leaves the barrier, and
+         * a set of computers doing that together breaks its common set
+         * (ledger #145, eve4/eve5 during the later GPCs' IPLs). */
+        if (was != r->modeHeldLast && getenv("YAGPC_HELDTRACE")) {
+            uint32_t drv = discretes_driven_mask(r->discretes, DISCRETES_REG_A);
+            uint32_t val = discretes_value(r->discretes, DISCRETES_REG_A);
+            uint32_t mode = val & drv & MODE_ANY;
+            const char *why = !r->modeHeldLast ? "released"
+                            : !(drv & MODE_ANY) ? "nothing published"
+                            : !(mode & (MODE_HALT | MODE_STBY | MODE_RUN)) ? "no position"
+                            : "HALT";
+            fprintf(stderr, "%sHELD %s t=%.6f value=%08x driven=%08x "
+                            "age halt=%.3f stby=%.3f run=%.3f ipl=%.3f\n",
+                    batchrunner_tag(r), why, r->age.gpc.cpu.elapsedTimeUs / 1e6,
+                    val, drv,
+                    discretes_bit_age(r->discretes, DISCRETES_REG_A, 0),
+                    discretes_bit_age(r->discretes, DISCRETES_REG_A, 1),
+                    discretes_bit_age(r->discretes, DISCRETES_REG_A, 2),
+                    discretes_bit_age(r->discretes, DISCRETES_REG_A, 3));
+        }
     }
     return r->modeHeldLast;
 }

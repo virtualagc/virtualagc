@@ -737,6 +737,12 @@ uint32_t discretes_driven_mask(const Discretes *d, int reg) {
     return m & ~d->selfDriven[r];
 }
 
+double discretes_bit_age(const Discretes *d, int reg, int bit) {
+    if (d == NULL || !d->open || bit < 0 || bit > 31) return -1.0;
+    double t = d->lastSeen[reg_index(reg)][bit];
+    return (t > 0.0) ? d->attentive - t : -1.0;
+}
+
 uint32_t discretes_value(const Discretes *d, int reg) {
     if (d == NULL) return 0u;
     if (!d->open) return 0u;

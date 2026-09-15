@@ -201,6 +201,9 @@ const char *discretes_sync_code_name(unsigned code);
  * Call discretes_poll() first.  The mask is empty when disabled, so
  * callers need no special case. */
 uint32_t discretes_driven_mask(const Discretes *d, int reg);
+/* How long ago, in attentive seconds, BIT (IBM numbering, 0 = MSB) of REG was
+ * last heard from outside; negative if never.  For YAGPC_HELDTRACE. */
+double discretes_bit_age(const Discretes *d, int reg, int bit);
 uint32_t discretes_value(const Discretes *d, int reg);
 
 /* Datagrams applied since open, for the run summary. */

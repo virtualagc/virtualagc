@@ -591,6 +591,41 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   GPC1 the same morning) also stops is open -- CDLANNUN lists TIME TONE
   (TM004), CDSANNUN a minor 'MTU' message, FCMCOM MTU TMP FAILURE bits;
   nothing yet ties it to the FIOPRMPG pc=1ccae short reads.
+- IPL-TIME COMMON-SET BREAKS (eve4 21:53:41, eve5 22:09:25; 'GPC 2 *' in the
+  owner's SPEC 99): during a LATER GPC's IPL, GPC1 and GPC2 (PASS OPS 0,
+  common set) both entered FCMSFAIL within ~15 ms with no I/O error; the
+  SYNCORDER-JOIN lines show GPC1/GPC2 repeatedly LEAVING and REJOINING the
+  barrier (only run.c's held path can clear barActive), and at one rejoin
+  the shared frame jumped ~165 s.  DIAGNOSTIC ADDED (uncommitted, env-gated):
+  YAGPC_HELDTRACE prints every flip of a machine's held state with value/
+  driven of register A and the attentive age of HALT/STBY/RUN/IPL
+  (discretes_bit_age() added).  REPRODUCTION heldrep (2 GPCs, ord-in scripts,
+  port base 26000, 22:19:54): GPC1 'HELD nothing published t=84.79 ...
+  driven=00000000 age halt=1.510 stby=1.510 run=1.510 ipl=1.510', again at
+  85.77 (1.598) and 87.51 (1.742), each released by the next datagram --
+  i.e. panelO6's republish to GPC1's channel went silent for more than
+  DISCRETES_STALE_SEC (1.5 s) during GPC1's GPCIPL load, so run.c's 'silence
+  is HALT' rule stopped the CPU and took it out of the barrier.  atop:
+  panelO6 at 0-5% CPU, RDELAY 0, throughout -- not busy; its Tk thread has no
+  blocking socket call (receivers are threads), so the suspect is Tk
+  WAITING ON THE X SERVER (Xorg was 20-57% CPU while heldrep's windows
+  opened).  Candidate fixes: publish panelO6's discretes from a thread that
+  does not depend on Tk (as MEDS2's BusPump), and/or do not hold a GPC that
+  was already in RUN/STBY on stale bits alone (keep the last position until
+  an explicit HALT arrives) -- the owner's call.
+- WHICH MMU AN OPS OVERLAY LOADS FROM (owner's question 22:24): not IPL
+  SOURCE (yaGPC2 reads it only in firmware_ipl, run.c ~1152-1171) and not
+  the keyboard/CRT.  ARCGPC CHOOSE_BUS: 'IF CZ2B_MM_MF$(ARC_J:4)= ON THEN
+  ARC_BUS_ID = 19; ELSE ARC_BUS_ID = 18;' with CZ2B_MM_MF INITIAL(4#HEX'2000')
+  -- bit 4 OFF, so every major function starts on MM1 (bus 18); ARCGPC's ICC
+  message code confirms 'SET BIT 16 ON FOR MMU1 SELECTED' when = HEX'2000'.
+  On an overlay error RETRY_CHOOSE_BUS takes the other bus (37 - ARC_BUS_ID)
+  and flips the selector (XOR HEX'3000' -> HEX'1000', MM2) for that function,
+  shared by ICC.  So an OPS 2 load from MM2 means the MM1 attempt failed and
+  PASS silently retried -- in the owner's hand run and in Claude's scripted
+  runs (#139: GPC2 commanding MM2 throughout).  Claude first misread HEX'2000'
+  as MM2 and told the owner so; corrected.  OPEN: why the MM1 attempt fails
+  in the emulator.
 - OWNER NOTE (21:45): the CAM window does not draw the eye; the owner saw
   this loss only because Claude's output scrolled.  Earlier 'unnoticed for
   15+ min' cases are consistent with that.
