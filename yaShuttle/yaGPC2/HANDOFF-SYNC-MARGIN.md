@@ -878,3 +878,26 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   So why FF listeners are still busy at the MSC's look is OPEN.  Next
   instrument: YAGPC_BWTRACE on BCE20-22 (Busy/Wait edges per GPC) against
   the FIOMSCTO RT lines, default floor restored.
+- ROOT CAUSE CANDIDATE AND FIX (00:48, UNCOMMITTED until the gate passes):
+  in eve13 the BCE20-22 RECV ARM lines STOP at shared 1140.9 (OPS 2) on
+  every GPC -- no budget in that trace (iop.c timeout_trace_pe/_from only)
+  -- and before it listeners armed the MTU read 16x on BCE21 but ~1x on 20
+  and 22, the NSP buses.  iop_bce_receive: a transmitter-disabled BCE on a
+  sync-marked bus (18-22) 'waits indefinitely; the timer starts when the
+  command arrives', and only a command at its own IUAR ends the wait
+  (iop.c ~1839).  src/mtumodel.c echoed a command to listeners ONLY for the
+  MTU read (0x24C26); every other command on 20-22 -- the NSP's IUA-10
+  reads included -- set echoPending false.  So NSP listeners (FIONSPPG
+  FIONSL11/31, #RDS/#RDLI) waited forever, the MSC's single look found them
+  busy on every GPC every cycle (thousands of FIOMSCTO), and at the 12 s
+  phase the look came out differently per GPC.  Class (b) losses appeared
+  with #146 (deaa3bad0), which narrowed the echo from 'any IUA 10' to the
+  MTU read.  FIX: echo EVERY command to listeners (a listener ignores other
+  IUAs, so the IUA-8 listen command is harmless); the data reply stays
+  MTU-read-only (count 0 = silence otherwise).  Single GPC unaffected
+  (echo only for named readers r != commander).  Build 00:48:39; gate
+  echo-regress (PORT_BASE 6900) running; eve16 (port 26500, 00:49:05) runs
+  the fixed build with YAGPC_BWTRACE on BCE20-22 and the default floor.
+  HOST NOTE: /usr/bin/ar (binutils 2.42) now segfaults on ANY object, even
+  an unchanged one, into any path; libyaGPC2.a rebuilt with `make
+  AR=llvm-ar` (38 objects, no main.o).  The yaGPC2 binary links normally.

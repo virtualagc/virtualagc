@@ -249,19 +249,27 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * other device, which then timed out with seven taken -- and with
              * a cursor per computer, not necessarily the same seven for each
              * (ledger #137). */
-            for (int r = 0; r < MTU_READERS; r++) {
+            for (int r = 0; r < MTU_READERS; r++)
                 m->count[b][r] = 0;
-                m->echoPending[b][r] = false;
-            }
         } else {
             mtu_fill_time(m, b);
-            m->commander[b] = g;
-            m->echoCmd[b] = cmd;
-            /* Only named computers listen; reader 0 is a caller that does not
-             * say who it is, which is the single-machine case. */
-            for (int r = 0; r < MTU_READERS; r++)
-                m->echoPending[b][r] = (g >= 1 && r >= 1 && r != g);
         }
+        /* BUT THE COMMAND ITSELF IS ON THE WIRE, whoever it is for.  A
+         * listener's Listen-Mode receive waits, with no time-out, for a
+         * command at its own IUA (iop.c); echoing only the timing unit's read
+         * left the NSP's listeners (FIONSPPG, IUA 10, buses 20 and 22) waiting
+         * through every transfer, so the MSC's single look found them busy on
+         * every computer -- thousands of FIOMSCTO a run -- and at the 12 s
+         * phase where that look is decided differently on different
+         * computers, one failed itself out of the set (ledger #145, eve13 and
+         * eve15).  A command for another IUA, such as the listen command, is
+         * ignored by a waiting listener, so echoing it costs nothing.  Only
+         * named computers listen; reader 0 is a caller that does not say who
+         * it is, which is the single-machine case. */
+        m->commander[b] = g;
+        m->echoCmd[b] = cmd;
+        for (int r = 0; r < MTU_READERS; r++)
+            m->echoPending[b][r] = (g >= 1 && r >= 1 && r != g);
         out->out.xmit.ok = true;
         break;
     }
