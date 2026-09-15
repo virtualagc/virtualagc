@@ -2090,7 +2090,72 @@ SCRIPT_HELP = ("crew script (crewscript.py): '<seconds> <command>' lines -- pane
                "commands, 'keys [KB1|KB2|KB3] KEY ...', 'subtitle TEXT' -- and "
                "'wait gpc <n> mode-tb RUN|IPL|BP [timeout <s>]', after which times "
                "count from when it is met.  Panel commands act on the primary GPC "
-               "until 'gpc <n>' moves them to another column.")
+               "until 'gpc <n>' moves them to another column.  All commands: below.")
+SCRIPT_EPILOG = """\
+crew script (--script FILE):
+  One command per line; '#' starts a comment (so a subtitle cannot contain
+  one); blank lines are ignored.  Every line is checked when the file is read.
+
+  <seconds> <command>   a timed step.  SECONDS (decimals allowed) from the
+                        start, or from when the last wait line was met.
+                        Lines run in file order; a time may not be earlier
+                        than the line before it since the last wait.
+
+  waits (no time in front):
+    wait gpc N mode-tb RUN|IPL|BP [timeout S]
+                        hold until GPC N's MODE talkback shows that state:
+                        RUN when a load is complete, IPL while a bootstrap is
+                        in, BP (barberpole) otherwise.  A timeout stops the
+                        script.
+    wait user           hold until someone clicks in this window (the cursor
+                        changes; the click moves no control).  --wait-user
+                        puts one first.
+
+  keyboard and captions:
+    keys [KB1|KB2|KB3] KEY ...
+                        type on a DPS keyboard, 0.35 s apart; KB1 unless a
+                        KBn token says otherwise (one part way along switches
+                        the rest).  Keys: ITEM EXEC OPS PRO SPEC RESUME CLEAR
+                        + - . 0-9 A-F FAULT_SUMM SYS_SUMM MSG_RESET ACK
+                        GPC/CRT I/O_RESET IDP_POWER_ON IDP_POWER_OFF DEU_LOAD
+                        IDP2_POWER_ON IDP2_POWER_OFF DEU_LOAD2.  The next line
+                        starts when the typing is done.
+    subtitle [TEXT]     show TEXT in subtitles.py; no TEXT clears it.  The two
+                        characters \\n start a new line; a leading <left>,
+                        <center> or <right> aligns that caption.
+
+  panel controls (act on the GPC column chosen by 'gpc N', at first the
+  --gpc-id column):
+    gpc N               drive GPC N's column from here on (1-5)
+    mode HALT|STANDBY|RUN
+                        that column's MODE switch (STBY also accepted)
+    ipl                 its IPL pushbutton, held 0.25 s
+    source MM1|MM2|OFF  IPL SOURCE
+    crt 0|1|2|3         BFC CRT: 0 is DISPLAY OFF, else DISPLAY ON and
+                        SELECT 1+2 / 2+3 / 3+1
+    bfsengage on|off    on: CDR ENGAGE pressed and released; off: BFC
+                        DISENGAGE to RIGHT and back
+    gpcid N             make GPC N the primary (--gpc-id) column
+    bit A|B N on|off    one discrete bit: A12 I/O TERM A, A13 OUTPUT
+                        TERMINATE/NORMAL, B3-5 bfsengage, B6-7 crt; any other
+                        is sent once, raw
+    idppower N on|off   IDP/CRT N POWER (1-3 on C2, 4 on R11)
+    majfunc N GNC|SM|PL IDP/CRT N MAJ FUNC
+    kybdsel left 1|3    LEFT IDP/CRT SEL
+    kybdsel right 2|3   RIGHT IDP/CRT SEL
+    idpload N           O6 IDP N LOAD (1-4), held 0.25 s
+
+  example (discretePanel/examples/4gpc-startup.script has a full one):
+    0     gpc 1
+    0     mode HALT
+    0.2   source MM1
+    0.5   ipl
+    3     mode STANDBY
+    70    keys ITEM 1 EXEC
+    wait gpc 1 mode-tb RUN timeout 300
+    1     subtitle <left> GPC 1 loaded\\nnow to RUN
+    3     mode RUN
+"""
 IPL_HOLD_MS = 250
 TB_WORD_SIZE = 9               # RUN / IPL on a talkback flag
 
@@ -2210,7 +2275,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Space Shuttle panels O6, C3, F6 and C2: the GPC crew "
                     "panel on the discrete bus, and the IDP controls on the "
-                    "IDP buses")
+                    "IDP buses",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=SCRIPT_EPILOG)
     ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
                     help="Scale: 768 is full size (default), 512 is 2/3, 384 is half, etc.")
     ap.add_argument("--geometry", metavar="SPEC", default=None,
