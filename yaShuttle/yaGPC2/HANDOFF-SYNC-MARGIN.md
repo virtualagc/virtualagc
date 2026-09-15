@@ -447,10 +447,16 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   3-5 s AFTER).  GPC4 out, diagonal lit.  FCMSFINT had spent all 20 landmark
   hits at the IPLs and the OPS 2 transition (#11-#20 at shared ~842.35/842.5
   on all four clocks) -- useless at the loss.  FCMSFAIL hits, mapped by
-  SYNCORDER-JOIN offsets (GPC2 172.0118, GPC3 352.0018, GPC4 532.0026 s):
-  #1 GPC4 shared 1986.2770, #2 GPC3 1986.2813, #3 GPC2 1986.2850, #4 GPC1
-  1986.2850 -- GPC4 FIRST, 1.45 ms after its final IOC issue (1986.275310),
-  i.e. NOT a 3.85 ms timeout; the others followed 4-8 ms later (voting).
+  SYNCORDER-JOIN offsets.  CORRECTED 21:50: a GPC that rejoins the barrier
+  at its HALT->RUN gets a SECOND join line with a new offset, and the offset
+  IN FORCE is the last join whose own= is <= the landmark's t (eve3: GPC3
+  352.001817 then 352.005465 s from own 168.8157 s; GPC4 532.002634 then
+  532.004685 s from own 168.8159 s).  With that: #1 GPC4 shared 1986.279441,
+  #2 GPC3 1986.284998, #3 GPC2 1986.285013, #4 GPC1 1986.285026 -- GPC4
+  FIRST, 4.13 ms after its final IOC issue (1986.275310), i.e. the 3.85 ms
+  timeout plus handling (the first version of this note used the first
+  offsets and wrongly said 1.45 ms, not a timeout).  The others followed
+  ~5.6 ms later (voting).
   THE SYNC SEQUENCE (all GPCs, shared s): IOC handshake 1: GPC3/1/2 issue
   .272490-.272513, GPC4 .272522 (9 us after the last), GPC1-3 null .272741-
   .272769 but GPC4 STAYS in IOC; handshake 2: GPC1-3 IOC .273655-.273681,
@@ -473,6 +479,37 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   each GPC READS from its neighbours) on a run to see the missed read.
   Runs from eve4 mark FCMSFAIL only (supervisor restarted 21:46:22 with
   `--adopt 3`).
+- LOSS 2 of eve3: 21:46:37.531 (block 1, host quiet; Xorg 18-26% at :35-:36,
+  no RDELAY for the simulation): GPC3 out.  A GPC3-ONLY I/O ERROR: `ERRTERM
+  gpc=3 bce=20 pc=1cc2e left=1` at shared 2139.468247 (timing-unit bus 20;
+  the steady all-GPC BCE20 errors are pc 1cc32 / GPC1 1cc1c with left=25);
+  IPR handshakes .470284 and .471090 (GPC3 238 us late on the second); IOC
+  handshake complete .473033; GPC3 ALONE into FCMSFAIL at .473263, no
+  handshake pending; GPC1/GPC2 at .484938/.484945.  = FIOERRLC's one-GPC-
+  with-errors self-FTS, the #136 family.
+- ONE-GPC ERRORS ACROSS eve1 AND eve3 (ERRTERM on a bus with no other GPC
+  erring on that bus within 20 ms, after OPS 2):
+      eve1  989.227  GPC4 bce20 pc=1cc2e left=1   no loss then (GPC4 later
+                                                   lost to a SLIP at 1118.8)
+      eve1 1137.986  GPC1 bce21 pc=1ccae left=2   no loss
+      eve1 1233.866  GPC2 bce20 pc=1cc2e left=1   GPC2 LOST (final sync
+                                                   1233.871182, 5 ms later)
+      eve1 1256.066  GPC3 bce20 pc=1ccae left=4   no loss
+      eve3 1073.668  GPC2 bce22 pc=1ccae left=4   no loss (and 5 more 1ccae
+                                                   left=2/4/6 on GPC1/2/4)
+      eve3 1924.908  GPC3 bce20 pc=1cc2e left=1   no loss then
+      eve3 2139.468  GPC3 bce20 pc=1cc2e left=1   GPC3 LOST (its SECOND)
+  READING: `bce20 pc=1cc2e left=1` (a timing-unit receive ONE WORD short on
+  one GPC) is the killer, and FIOERRLC forces self-FTS at the second count
+  (CHI R5,2) -- eve3 GPC3 shows first-no-loss / second-loss exactly; eve1
+  GPC2's first may be hidden by the 20 ms uniqueness filter (a routine BCE20
+  error on another GPC nearby).  pc=1ccae short reads (left 2-6) on buses
+  20-22 occur without losses.  SO TONIGHT'S FOUR LOSSES ARE TWO EMULATOR
+  DEFECTS, NOT HOST EVENTS: (a) handshake SLIPS, both on GPC4 (eve1 21:02,
+  eve3 21:44); (b) one-word-short timing-unit receives on one GPC (eve1
+  GPC2 21:04, eve3 GPC3 21:46).  NEXT: which program is at 1cc2e, and how
+  the mtumodel's per-reader reply delivery can leave one listener a word
+  short.
 - OWNER NOTE (21:45): the CAM window does not draw the eye; the owner saw
   this loss only because Claude's output scrolled.  Earlier 'unnoticed for
   15+ min' cases are consistent with that.
