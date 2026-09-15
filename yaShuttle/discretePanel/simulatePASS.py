@@ -578,6 +578,16 @@ def main():
         print(procedure_text(gpcs, args.crts))
         return 0
 
+    # A crew script with a mistake stops panelO6.py as it starts, which left
+    # everything else running without a panel.  Read it here first, with the
+    # same parser, and start nothing if it is wrong.
+    if args.panel_script:
+        try:
+            with open(args.panel_script) as fh:
+                crewscript.parse(fh.read())
+        except (OSError, crewscript.ScriptError) as e:
+            sys.exit("simulatePASS: %s: %s -- nothing started" % (args.panel_script, e))
+
     tape = args.tape or os.environ.get("NSTS_PASS_TAPE") or os.path.join(HERE, "OI340700-OPS0.mmv")
     tape = os.path.abspath(tape)
     if not os.path.isfile(tape):
