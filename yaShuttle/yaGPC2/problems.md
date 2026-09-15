@@ -10426,6 +10426,43 @@ belongs in the **tape-building** path, not the emulator. An emulator check can
 only refuse what the hardware would refuse, and the hardware was right to allow
 this write. The defect was that we asked for it.
 
+### 8.76 The timing unit must echo every command to its listeners
+
+In four-GPC redundant sets with networked displays, a computer dropped out after
+OPS 2 at unpredictable times (`gpc-causes.py` #145). The cause was `--mtu-model`
+on buses 20-22: it echoed only its own read command (`MTU_READ_CMD`, 0x024C26)
+to the listening computers. A Listen-Mode receive waits indefinitely for a
+command at its IUA, so the NSP listeners stalled on every other bus command and
+drew MSC time-outs. The model now echoes **every** bus command, as
+command-sync, to every listening computer, and returns data only for the read
+(`mtumodel.c`, `echoCmd` / `echoPending`; commit `273563b7f`). Single-GPC
+behaviour is unchanged: the regression gate matched exactly.
+
+### 8.77 The IPL talkback
+
+yaGPC2 drives GPC discrete output bit 31, the hardware IPL talkback, from a
+successful firmware IPL until the HALT -> STBY release (`run.c`,
+`ipl_talkback()`, `DO_IPL_TALKBACK`). It is published against the last value
+announced on the output register, so a re-IPL also clears a stale RUN(READY)
+bit 9, which FCOS sets when a load completes. `panelO6.py` shows bit 31 as IPL
+on the O6 MODE talkback, and bit 9 as RUN.
+
+### 8.78 A host note: `ar` segfaults were page-cache corruption
+
+On 2026-09-14 and 15 `make` failed at `libyaGPC2.a` because `/usr/bin/ar`
+segfaulted, even on a single object. It was first taken for a broken `ar`, with
+`make AR=llvm-ar` as the workaround. **`ar` was not broken.** GNU `ar` dlopens
+every plugin in `/usr/lib/bfd-plugins`, LLVMgold-14 among them, which loads
+`libLLVM-14.so.1` -- and the page-cache copy of that library was corrupt in RAM
+(md5 b56ec9da... against c7037a8d... for the file read directly and for the
+package). Nothing to do with LTO. Evicting the cached pages fixes it, without
+root:
+
+    dd if=/usr/lib/x86_64-linux-gnu/libLLVM-14.so.1 iflag=nocache count=0
+
+after which plain `ar` works. Corruption that recurs points at the host's
+memory; run memtest86+.
+
 ## Methodology and caveats
 
 **Section 1** items were found during `yaGPC`'s original CoffeeScript→C

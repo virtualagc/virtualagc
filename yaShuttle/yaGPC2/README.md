@@ -191,6 +191,50 @@ suspicious register value should be checked against TFCVT's constant table
 before it is treated as evidence (0x088 is TCVTSVCI, not a mask). See
 `gpc-causes.py` #110, #117 and #118.
 
+#### Where four computers' CPU goes (measured 2026-09-14)
+
+A four-GPC, two-CRT `simulatePASS.py` run to OPS 2 uses about 350% of a core in
+`yaGPC2`: each GPC thread about 85% (65% user, 20% system) and the bus transmit
+thread about 10%. Four options exist for measuring it, each defaulting to the
+earlier behaviour, and a `pacing:` line on stderr states their values for any
+multi-GPC or `--real-time` run:
+
+- `--rt-min-sleep-ms <ms>` (default 2): the pacer sleeps off a lead over the
+  wall clock only past this.
+- `--rt-idle-poll-ms <ms>` (default 1): the wait-state loop's sleep.
+- `--barrier-us <us>` and `--barrier-spin-us <us>`: override
+  `YAGPC_BARRIER_US` and `YAGPC_BARRIER_SPIN_US` (else 200 each).
+
+**None of them reduces CPU.** Measured per thread from `/proc` over 240 s of
+OPS 2: defaults 356%, `--barrier-spin-us 20` 348%, `--barrier-spin-us 0` 352%,
+`--rt-idle-poll-ms 4` 349%, `--rt-min-sleep-ms 10` 348%. In OPS 2 no computer
+ever enters a wait state, only the machine furthest ahead sleeps in the pacer
+(about 34 s in 240), and barrier holds end while still spinning whatever the
+budget. The time is in the work itself: about 0.75 million instructions a
+second per GPC (1.32 µs simulated each); `ap101_exec1` about 36% of a core; bus
+service about 25% (`bcenet_framer_flush_tick` every `BUS_SERVICE_US_DEFAULT` =
+2 µs simulated, about 205,000 calls a second, each a `poll()` over some 28
+sockets at 315-433 ns); `mode_switch_held()` about 9%, because it calls
+`discretes_poll_one()` -- an unconditional non-blocking `recv()` (115 ns) plus a
+clock read -- before every instruction; barrier and step overhead the rest.
+The savings available are code, not settings: gate that per-instruction receive
+(while still seeing pulses one datagram at a time) and service the buses less
+often (a BCE samples its MIA at most every 16.5 µs). `perf` is not available on
+the host that measured this (`kernel.perf_event_paranoid=4`).
+
+#### When the crew panel goes quiet
+
+A running computer does not halt because the crew panel stops talking. If its
+mode bits go stale (older than `DISCRETES_STALE_SEC`, 1.5 s) while it was last
+heard in RUN or STBY, it keeps that position and logs `MODE: crew panel silent
+N s; keeping RUN (held after 60 s)`; only after `YAGPC_DISCRETES_HOLD_SEC`
+seconds of silence (default 60) is it held (`holding the CPU until it is
+heard`), and it is released when the panel is heard again. A computer that has
+never heard a panel still starts held. `YAGPC_HELDTRACE=1` logs every change of
+a machine's held state with register A's value, the driven mask and the age of
+each mode bit. The cause was a saturated X server stalling `panelO6.py`'s
+publishing, which had halted every running GPC at once (`gpc-causes.py` #147).
+
 ### The regression gate
 
 Most of `yaGPC2`'s defects have been caught not by the unit tests but by one
