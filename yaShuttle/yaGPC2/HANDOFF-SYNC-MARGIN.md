@@ -915,3 +915,20 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   26-170 s after OPS 2 and split every 12 s, so eve16 already has ~6
   split opportunities with none; the long run and later eve* runs are the
   confirmation.  Ledger #145 set FIXED.
+- eve16 LOSS 02:42:27 (GPC2; CAM 23 first, then 12/32/42 + diagonal 22),
+  shared 6021.07 s, ~4880 s after OPS 2, host quiet (latprobe max 0.15 ms,
+  no disturbance), NOT the 12 s mechanism (no splits, no FIOMSCTO).  A NEW
+  CLASS, an IPR-handshake slip inside the barrier:
+    .069539 G1 IPR, .069539 G4, .069542 G3, .069562 G2 (GPC2 20 us late)
+    .069777 GPC2 FCMSFAIL, R7=18fab = FCMISYNC+0117 (the BAL FCMSFINT after
+            FCMIPRDL: after the FCMNOISE delay GPC2 re-reads DIA and a set
+            member is not showing IPR), R4=8 = its N+1 = GPC3 (CAM 23)
+    .069813 G1 null, .069817 G3 null (GPC2's view of G3 null stamped
+            pub2=.0697925 -- 15 us after GPC2's FCMSFAIL, inside the 25 us
+            barrier, so thread order can let GPC2's read see it first)
+    .070170-.070209 G1,G3,G4 second IPR; G2's at .070863; GPC1/3/4 FCMSFAIL
+            from FCMSSYNC+0086 (R7=1979c) at .075050 -- they drop GPC2.
+  Candidate lever: the barrier delta (YAGPC_BARRIER_US, 25 us) lets one GPC
+  lag its peers by up to 25 us; real GPCs lag microseconds.  Log note: eve16
+  yaGPC2.log reached 2.19 GB in 2 h, 16.4 M of 29 M lines BW (the BCE20-22
+  Busy/Wait trace, no longer needed); RANGETRACE used 43k of 400k.
