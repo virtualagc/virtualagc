@@ -423,6 +423,19 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   every run and 'SUPERVISOR ...' events go to `<scratch>/stall/
   camwatch-all.log` with wall stamps; a persistent Monitor tails that.  eve1
   was stopped 21:06:36; eve2 launched 21:06:38 (OPS 2 ~21:20:40).
+  eve2 was STOPPED BY HAND at 21:10:51, 5 min into its IPL, to relaunch with
+  landmarks; the supervisor now takes `--fresh N` to launch run N directly.
+  eve3 launched 21:10:53 (port base 25200, OPS 2 ~21:24:55) with
+  `YAGPC_LANDMARKS=1948c:FCMSFAIL,19674:FCMSFINT` (entries from
+  mafgen/csects-G2.json, decimal 103564 and 104052; FCMSFAIL also serves SVC
+  39; FIOERRLC 105140 = 0x19ab4 and FPMSVC 110906 = 0x1b13a were NOT marked
+  -- they run on every I/O error / SVC and would spend the 20-hit budget).
+  LANDMARK lines carry t= on the hitting GPC's OWN clock and no gpc id --
+  tell the GPCs apart by their clock offsets (SYNCORDER-JOIN offset_us).
+  The 20-hit cap is per landmark for the whole process, not per GPC.
+  Reading a loss: FCMSFINT shortly before FCMSFAIL on that GPC = a sync
+  program's timeout; FCMSFAIL alone = FIOERRLC's self-FTS or SVC 39 (ARC
+  drop).
 - A persistent Monitor tails camwatch for lamp changes; on a loss run
   `around.py` at the camwatch stamp, then look at ERRTERM/PEER HOLD/SYNCORDER
   lines just before it on each GPC's clock (map own clock -> wall with that
