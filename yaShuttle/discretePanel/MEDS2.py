@@ -3342,6 +3342,32 @@ class GLRenderer(object):
 # it, the character cell it landed in, and the character.  Capped: a refresh
 # draws hundreds and there are two a second.
 _cellTraceLeft = [0]
+
+# SCREEN ANNOUNCEMENTS, for crew scripts that wait on a page (crewscript.py's
+# 'wait crt N title TEXT' and 'wait crt N new-screen').  After each refresh a
+# DPS screen takes its top two text lines and sends one UTF-8 datagram,
+# "<mdu name>\n<line 1>\n<line 2>", to the bus group at port base +
+# SCREEN_OFFSET: when the lines change (clocks aside) and the change has held
+# for two refreshes, so a blinking field is not a new page, and otherwise at
+# least every SCREEN_REANNOUNCE_S, so a listener started later soon knows.
+SCREEN_OFFSET = 91
+SCREEN_REANNOUNCE_S = 1.0
+SCREEN_CLOCK = re.compile(r"(\d+/)?\d\d:\d\d:\d\d")
+_screenSock = [None]
+
+
+def announceScreen(name, lines):
+    if _screenSock[0] is None:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF,
+                     socket.inet_aton(os.environ.get('NSTS_BUS_IFACE', '127.0.0.1')))
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+        _screenSock[0] = s
+    try:
+        _screenSock[0].sendto(("%s\n%s" % (name, "\n".join(lines))).encode('utf-8'),
+                              (MCAST_GROUP, PORT_BASE + SCREEN_OFFSET))
+    except OSError:
+        pass
 _gridTally = {'seen': 0, 'bad': 0}
 CELL_TRACE_PER_FRAME = 4000
 
@@ -5109,6 +5135,7 @@ class Screen_DPS(MDUScreen):
         self.d.dirty = True
 
     def _drawPasses(self):
+        self._frameRows = {}          # row -> {column: character}, for announceScreen
         # The trace holds ONE frame -- the most recent.
         if env('NSTS_CELL_TRACE'):
             try:
@@ -5138,6 +5165,35 @@ class Screen_DPS(MDUScreen):
             self.bgFCWS, self.geo_dps_fcws,
             {'memory': self.bgFCWS, 'start': DEU.ADDR.DISPLAY_HEADER,
              'rowScale': ADJ['rowGap']})
+        self._announceTopLines()
+
+    def _announceTopLines(self):
+        """The top two text lines to crew scripts (see announceScreen)."""
+        rows, self._frameRows = self._frameRows, None
+        name = getattr(self, 'mduName', None)
+        if not name or rows is None:
+            return
+        lines = []
+        for r in sorted(rows)[:2]:
+            cols = rows[r]
+            lines.append("".join(cols.get(c, ' ')
+                                 for c in range(min(0, min(cols)), max(cols) + 1)).rstrip())
+        while len(lines) < 2:
+            lines.append("")
+        key = SCREEN_CLOCK.sub('#', " ".join(" ".join(lines).split()))
+        now = time.monotonic()
+        if key != getattr(self, '_scrKey', None):
+            if key == getattr(self, '_scrCand', None):
+                self._scrCandN += 1
+            else:
+                self._scrCand, self._scrCandN = key, 1
+            if self._scrCandN < 2:
+                return
+            self._scrKey = key
+        elif now - getattr(self, '_scrSent', 0.0) < SCREEN_REANNOUNCE_S:
+            return
+        self._scrSent = now
+        announceScreen(name, lines)
 
     def setBGDFB(self, words):
         """Load a bare format control word stream at the refresh entry point --
@@ -5257,6 +5313,9 @@ class Screen_DPS(MDUScreen):
                     # ALTCHAR symbol draws its `DEUCharset` counterpart.
                     if traceOn:
                         trace('GLYPH', "'%s'%s" % (ch, ' ALTCHAR' if st['altchar'] else ''))
+                    frameRows = getattr(self, '_frameRows', None)
+                    if frameRows is not None:
+                        frameRows.setdefault(int(round(penY())), {})[int(round(penX()))] = ch
                     if cellTraceFile and _cellTraceLeft[0] > 0:
                         _cellTraceLeft[0] -= 1
                         try:
@@ -9854,6 +9913,9 @@ class MDU(LRU):
             if self.curDisplay not in self.screens:
                 cls = ScreenMods[self.curDisplay]
                 self.screens[self.curDisplay] = cls(self.disp)
+                # Which display this is, for the screen announcements: crt1.
+                self.screens[self.curDisplay].mduName = str(
+                    self.CONFIG.get('config', {}).get('lru', '')).lower()
             cd = self.screens[self.curDisplay]
             cd.draw()
             if self.curDisplay == 'DPS':

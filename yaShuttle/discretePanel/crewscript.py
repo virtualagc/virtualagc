@@ -17,6 +17,7 @@ a crew script print in their --help, and what this module prints when run:
 import re
 import socket
 import struct
+import threading
 import time
 
 import discretes as D
@@ -24,6 +25,11 @@ import discretes as D
 KEYBOARD_OFFSET = 30            # keyboard n's bus: port base + 30 + n
 IDP_BUS_OFFSET = 40             # IDP n's bus: port base + 40 + n
 SUBTITLE_OFFSET = 90            # subtitles.py: port base + 90
+SCREEN_OFFSET = 91              # MEDS2.py's screen announcements: port base + 91
+# A settled ScreenWatch has heard at least one round of MEDS2.py's
+# re-announcements (every 1 s), so "nothing heard" means a display is silent.
+SCREEN_SETTLE_S = 2.5
+SCREEN_CLOCK = re.compile(r"(\d+/)?\d\d:\d\d:\d\d")
 MAX_SCRIPT_SECONDS = 36000
 WAIT_TIMEOUT_S = 600
 KEY_GAP_S = 0.35
@@ -118,6 +124,15 @@ HELP = """\
     wait user           hold until someone clicks in the panel O6 window (the
                         cursor changes; the click moves no control).
                         --wait-user puts one first.
+    wait crt N title TEXT [timeout S]
+                        hold until TEXT appears anywhere in the top two lines
+                        of CRT N's display (1-4), spaces squeezed and case
+                        ignored; quotes around TEXT are optional.
+    wait crt N new-screen [timeout S]
+                        hold until CRT N shows a different page from the one
+                        on show when the wait began: its top two lines change,
+                        clocks aside.  A page appearing on a blank CRT counts.
+                        Both need MEDS2.py running for that CRT.
 
   keyboard and captions:
     keys [KB1|KB2|KB3] KEY ...
@@ -209,24 +224,54 @@ def key_codes(words):
 
 
 def parse_wait(arg):
-    """'gpc N mode-tb STATE [timeout S]' -> (N, STATE, seconds)."""
+    """The words after 'wait' -> an entry dict (without 'text' and 'line'):
+    'gpc N mode-tb STATE [timeout S]'   {'kind': 'wait', 'gpc', 'state', 'timeout'}
+    'crt N title TEXT [timeout S]'      {'kind': 'wait_screen', 'mdu', 'title', 'timeout'}
+    'crt N new-screen [timeout S]'      the same with title None."""
     w = arg.split()
-    bad = ScriptError("expected 'wait gpc N mode-tb RUN|IPL|BP [timeout S]', got %r" % arg)
-    if len(w) not in (4, 6) or w[0].lower() != "gpc" or w[2].lower() != "mode-tb":
+    timeout = WAIT_TIMEOUT_S
+    if len(w) >= 2 and w[-2].lower() == "timeout":
+        try:
+            timeout = float(w[-1])
+        except ValueError:
+            raise ScriptError("expected 'timeout S' in seconds, got %r" % " ".join(w[-2:]))
+        w = w[:-2]
+    if w and w[0].lower() == "crt":
+        bad = ScriptError("expected 'wait crt N title TEXT [timeout S]' or "
+                          "'wait crt N new-screen [timeout S]', got %r" % arg)
+        if len(w) < 3 or w[1] not in ("1", "2", "3", "4"):
+            raise bad
+        mdu = "crt" + w[1]
+        if w[2].lower() == "new-screen" and len(w) == 3:
+            return {"kind": "wait_screen", "mdu": mdu, "title": None, "timeout": timeout}
+        if w[2].lower() == "title" and len(w) > 3:
+            text = " ".join(w[3:])
+            if len(text) >= 2 and text[0] == text[-1] and text[0] in "\"'":
+                text = text[1:-1]
+            text = " ".join(text.split())
+            if not text:
+                raise bad
+            return {"kind": "wait_screen", "mdu": mdu, "title": text, "timeout": timeout}
+        raise bad
+    bad = ScriptError("expected 'wait gpc N mode-tb RUN|IPL|BP [timeout S]', "
+                      "'wait crt N title TEXT' or 'wait crt N new-screen', got %r" % arg)
+    if len(w) != 4 or w[0].lower() != "gpc" or w[2].lower() != "mode-tb":
         raise bad
     try:
         gpc = int(w[1])
-        timeout = WAIT_TIMEOUT_S
-        if len(w) == 6:
-            if w[4].lower() != "timeout":
-                raise ValueError
-            timeout = float(w[5])
     except ValueError:
         raise bad
     state = {"BARBERPOLE": "BP"}.get(w[3].upper(), w[3].upper())
     if not 1 <= gpc <= 5 or state not in TALKBACK_STATES:
         raise bad
-    return gpc, state, timeout
+    return {"kind": "wait", "gpc": gpc, "state": state, "timeout": timeout}
+
+
+def screen_text(lines):
+    """Two display lines -> (text to search for a title, key for a new screen):
+    spaces squeezed and case folded; the key also drops the clocks."""
+    text = " ".join(" ".join(lines).split()).upper()
+    return text, SCREEN_CLOCK.sub("#", text)
 
 
 def parse(text):
@@ -247,9 +292,9 @@ def parse(text):
                 last_ms = 0
                 continue
             if first.lower() == "wait":
-                gpc, state, timeout = parse_wait(rest)
-                entries.append({"kind": "wait", "gpc": gpc, "state": state,
-                                "timeout": timeout, "text": line, "line": n})
+                entry = parse_wait(rest)
+                entry.update({"text": line, "line": n})
+                entries.append(entry)
                 last_ms = 0
                 continue
             # '+N': N seconds after the line before (or after the start or the
@@ -321,6 +366,47 @@ class Bus(object):
         self.sock.sendto(text.encode("utf-8"), (D.GROUP, D.PORT_BASE + SUBTITLE_OFFSET))
 
 
+class ScreenWatch(object):
+    """Listens for MEDS2.py's screen announcements (port base + 91): the top
+    two text lines of each DPS display, by MDU name.  A thread records them;
+    latest(name) and settled() are safe to call from the host's loop."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._screens = {}
+        self._started = time.monotonic()
+        threading.Thread(target=self._listen, daemon=True).start()
+
+    def _listen(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind(("", D.PORT_BASE + SCREEN_OFFSET))
+            s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                         struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                                     socket.inet_aton(D.IFACE)))
+        except OSError:
+            return
+        while True:
+            try:
+                data, _ = s.recvfrom(4096)
+            except OSError:
+                return
+            parts = data.decode("utf-8", errors="replace").split("\n")
+            if len(parts) < 2:
+                continue
+            with self._lock:
+                self._screens[parts[0].strip().lower()] = screen_text(parts[1:3])
+
+    def latest(self, name):
+        """(title text, new-screen key) last heard from that MDU, or None."""
+        with self._lock:
+            return self._screens.get(name)
+
+    def settled(self):
+        return time.monotonic() - self._started >= SCREEN_SETTLE_S
+
+
 class Player(object):
     """Runs parsed entries on the host's event loop.
 
@@ -330,12 +416,16 @@ class Player(object):
     log(text)           report what happened
     wait_user(done)     optional: let a person say go, calling done() when
                         they do; without it a 'wait user' stops the script
+    screens             optional: a ScreenWatch; without it a 'wait crt'
+                        stops the script
     """
 
-    def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None):
+    def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
+                 screens=None):
         self.entries, self.after, self.panel = entries, after, panel
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
+        self.screens = screens
         self.bus = bus or Bus()
         self.origin = None
         self.stopped = False
@@ -366,6 +456,15 @@ class Player(object):
             if e["kind"] == "wait":
                 self.log(e["text"])
                 self._poll(k, e, time.monotonic())
+                return
+            if e["kind"] == "wait_screen":
+                if self.screens is None:
+                    self.log("%s: no screen announcements to follow -- script stopped"
+                             % e["text"])
+                    self.stopped = True
+                    return
+                self.log(e["text"])
+                self._poll_screen(k, e, time.monotonic(), [False, None])
                 return
             due = self.origin + e["ms"] / 1000.0 - time.monotonic()
             if due > 0:
@@ -413,6 +512,35 @@ class Player(object):
             self.stopped = True
         else:
             self.after(WAIT_POLL_MS, lambda: self._poll(k, e, begun))
+
+    def _poll_screen(self, k, e, begun, base):
+        """base: [baseline taken, the new-screen key when it was]."""
+        if self.stopped:
+            return
+        waited = time.monotonic() - begun
+        cur = self.screens.latest(e["mdu"])
+        met = False
+        if e["title"] is not None:
+            met = cur is not None and " ".join(e["title"].split()).upper() in cur[0]
+        elif not base[0]:
+            # The page on show when the wait began is not a new one.  Until the
+            # watch has heard a round of announcements, nothing is known yet.
+            if cur is not None or self.screens.settled():
+                base[0], base[1] = True, cur[1] if cur is not None else None
+        else:
+            met = cur is not None and cur[1] != base[1] and not (base[1] is None and cur[1] == "")
+        if met:
+            self.log("wait met after %.1f s: %s  [%s: %s]"
+                     % (waited, e["text"], e["mdu"], cur[0]))
+            self.origin = time.monotonic()
+            self._run(k + 1)
+        elif waited > e["timeout"]:
+            self.log("WAIT TIMED OUT after %.0f s: %s -- script stopped  [%s: %s]"
+                     % (e["timeout"], e["text"], e["mdu"],
+                        cur[0] if cur is not None else "nothing heard"))
+            self.stopped = True
+        else:
+            self.after(WAIT_POLL_MS, lambda: self._poll_screen(k, e, begun, base))
 
 
 def main(argv=None):

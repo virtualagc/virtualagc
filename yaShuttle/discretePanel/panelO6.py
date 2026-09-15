@@ -2194,7 +2194,8 @@ def _run_script(panel, entries, quit_after_ms=None):
     # switches above and the keystrokes and captions alike (crewscript.py).
     crewscript.Player(entries, root.after, do,
                       lambda gpc: panel.mode_tb(gpc - 1), log,
-                      wait_user=panel.wait_for_click).start()
+                      wait_user=panel.wait_for_click,
+                      screens=crewscript.ScreenWatch()).start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
 
