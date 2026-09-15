@@ -932,3 +932,15 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   lag its peers by up to 25 us; real GPCs lag microseconds.  Log note: eve16
   yaGPC2.log reached 2.19 GB in 2 h, 16.4 M of 29 M lines BW (the BCE20-22
   Busy/Wait trace, no longer needed); RANGETRACE used 43k of 400k.
+- eve16 WHOLE RUN (launched 00:49:05, ran its full --duration, exited
+  05:54:09; shared 15,728 s, OPS 2 at 1140): FIOMSCTO 4 in total (the one
+  NSP read at 1141.87 on all four GPCs), IPR/IOC split handshakes after
+  OPS 2: ZERO in ~14,600 s (eve13 split every 12 s), FCMSFAIL: only the
+  #148 episode at 6021.07.  The remaining three GPCs held the set for the
+  last 3 h 12 min.  No loss in the owner's 04:00-05:00 window.  FIOBCERR
+  102,941 (routine, identical on every GPC: absent IDP3 on BCE8 etc.).
+  The log reached 5.17 GB (BWTRACE).  #145 CONFIRMED FIXED over a full run.
+  The supervisor launched eve17 at 05:54:11, inside the 06:30 cut-off but
+  set to run 5 h; Claude stopped the supervisor and eve17 so the machine is
+  free in the morning (NO_NEW_RUN_AFTER should have been 'no run that
+  would END after', i.e. launch cut-off minus --duration).
