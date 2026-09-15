@@ -225,7 +225,16 @@ class Subtitles(object):
     def _report(self):
         log("options: " + self.options())
 
+    def _sync_place(self):
+        """Take the box's place from the window itself: the window manager may
+        have put it somewhere other than where it was asked to go."""
+        self.root.update_idletasks()
+        if self.root.winfo_ismapped():
+            self.x = self.root.winfo_rootx()
+            self.bottom = self.root.winfo_rooty() + (self.h or self.min_h)
+
     def _drag_start(self, e):
+        self._sync_place()
         self._grab = (e.x_root - self.x, e.y_root - (self.bottom - (self.h or self.min_h)))
         self._moved = False
         if self.args.edit:
@@ -245,6 +254,7 @@ class Subtitles(object):
         self._resize_from = None
 
     def _resize_start(self, e):
+        self._sync_place()
         self._resize_from = (e.x_root, e.y_root, self.w, self.min_h,
                              self.bottom - (self.h or self.min_h))
         self.root.focus_force()
