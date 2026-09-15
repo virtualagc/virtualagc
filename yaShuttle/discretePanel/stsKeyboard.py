@@ -75,11 +75,12 @@ C_KEY = "#1a1a1a"
 C_KEY_DOWN = "#000000"
 # A PRESSED KEY INVERTS.  Black going to a slightly blacker black, with a
 # swapped bevel and a 1 px shift, could not be seen without staring at the key
-# -- least of all a script's key, lit for a fraction of a second.  A near-white
-# face with a black legend and a dark inset border stands out among 31 black
-# keys from across the room.  Change these two for another look (amber, say).
-C_KEY_PRESSED = "#f0f0f0"
-C_LEGEND_PRESSED = "#000000"
+# -- least of all a script's key, lit for a fraction of a second.  A mid-grey
+# face inside a dark inset border stands out among 31 black keys; near-white
+# was conspicuous too but looked like a lamp lighting rather than a key going
+# down.  Change these two for another look.
+C_KEY_PRESSED = "#787878"
+C_LEGEND_PRESSED = "#f4f4f4"      # the unpressed legend, C_LEGEND (defined below)
 C_KEY_PRESSED_EDGE = "#303030"
 PRESS_SINK = 0.03              # legend shift when pressed, per unit of key size
 C_KEY_HI = "#5a5a5a"
