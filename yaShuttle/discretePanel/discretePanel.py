@@ -523,17 +523,23 @@ class Panel:
 # sequence belongs here, where the bit layout and the momentary-pushbutton
 # semantics already live.
 #
-# Each line is `<milliseconds> <command>`, times measured from startup:
+# Each line is `<seconds> <command>`, times measured from startup, decimals
+# allowed -- seconds, as panelO6.py's scripts and simulatePASS keys files count
+# (these were milliseconds until 2026-09-15):
 #
 #     0     mode HALT
-#     500   ipl                 (press and release, 250 ms apart)
-#     3000  mode STANDBY
-#     60000 mode RUN
+#     0.5   ipl                 (press and release, 250 ms apart)
+#     3     mode STANDBY
+#     60    mode RUN
 #
 # `source MM1|MM2|OFF` and `gpcid <n>` are also accepted.  Blank lines and
 # `#` comments are ignored.
-SCRIPT_HELP = "timed discrete sequence: '<ms> <command>' per line"
+SCRIPT_HELP = ("timed discrete sequence: '<seconds> <command>' per line "
+               "(decimals allowed, e.g. 0.5)")
 IPL_HOLD_MS = 250
+# No script needs anything like ten hours, and every millisecond script ever
+# written has a time far above it, so a larger time is refused, not waited out.
+MAX_SCRIPT_SECONDS = 36000
 
 
 def _parse_script(text):
@@ -543,10 +549,18 @@ def _parse_script(text):
         if not line:
             continue
         parts = line.split(None, 1)
-        if len(parts) != 2 or not parts[0].isdigit():
+        try:
+            seconds = float(parts[0]) if len(parts) == 2 else None
+        except ValueError:
+            seconds = None
+        if seconds is None or seconds < 0 or parts[0].lower() in ("nan", "inf"):
             raise SystemExit(f"discretePanel: script line {n}: "
-                             f"expected '<ms> <command>', got {line!r}")
-        out.append((int(parts[0]), parts[1].strip()))
+                             f"expected '<seconds> <command>', got {line!r}")
+        if seconds > MAX_SCRIPT_SECONDS:
+            raise SystemExit(f"discretePanel: script line {n}: {parts[0]} seconds is over "
+                             f"{MAX_SCRIPT_SECONDS} -- script times are SECONDS now, not "
+                             f"milliseconds (divide by 1000)")
+        out.append((int(round(seconds * 1000)), parts[1].strip()))
     return sorted(out, key=lambda e: e[0])
 
 

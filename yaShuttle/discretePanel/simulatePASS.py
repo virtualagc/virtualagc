@@ -20,8 +20,8 @@ kept in a prev-<time> directory there.
 With one GPC the procedure is retest-crt2.sh's; with several, the order the
 scripted two-, three- and four-computer runs verified through OPS 2.
 
-UNATTENDED RUNS.  --panel-script hands panelO6.py a timed script ('<ms>
-<command>' per line; 'gpc <n>' picks the column, and 'idppower N on|off',
+UNATTENDED RUNS.  --panel-script hands panelO6.py a timed script ('<seconds>
+<command>' per line, decimals allowed; 'gpc <n>' picks the column, and 'idppower N on|off',
 'majfunc N GNC|SM|PL', 'kybdsel left 1|3', 'kybdsel right 2|3' and 'idpload N'
 work the IDP switches), --keys a file of '<seconds> KEY KEY ...' lines typed on
 a keyboard bus (keys as on the keyboard: ITEM EXEC OPS PRO SPEC RESUME CLEAR +
@@ -32,7 +32,7 @@ follows as if its switches had been thrown), and --duration ends the run after
 that many seconds.  Key and panel times both count from when the panel starts.
 
 CAPTIONS FOR VIDEOS.  '<seconds> SUBTITLE text ...' in the keys file, or
-'<ms> subtitle text ...' in the panel script, shows the text in subtitles.py's
+'<seconds> subtitle text ...' in the panel script, shows the text in subtitles.py's
 borderless caption box (the same line with no text clears it; \n starts a new
 line; a leading <left>, <center> or <right> aligns that caption alone).  The box is started automatically when either file has such a line;
 --subtitles starts it regardless, --no-subtitles never.

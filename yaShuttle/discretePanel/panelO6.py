@@ -2010,8 +2010,9 @@ class PanelO6:
 #
 # discretePanel.py's language, so a rig that drives that panel can drive this
 # one; see its "scripted playback" for why a crew sequence has to be a timed
-# script rather than a static override.  Each line is `<milliseconds>
-# <command>`, times from startup; blank lines and `#` comments are ignored.
+# script rather than a static override.  Each line is `<seconds> <command>`,
+# decimals allowed (milliseconds until 2026-09-15), times from startup or from
+# the last wait line; blank lines and `#` comments are ignored.
 # The commands move the controls, so the window, the log and the bus agree:
 #
 #     mode HALT|STANDBY|STBY|RUN   the wired GPC's MODE switch
@@ -2043,13 +2044,20 @@ class PanelO6:
 # A wait that times out stops the script (it is logged), rather than going on
 # as if the GPC were ready.  Without wait lines a script runs exactly as
 # before.
-SCRIPT_HELP = ("timed discrete sequence: '<ms> <command>' per line.  "
+SCRIPT_HELP = ("timed discrete sequence: '<seconds> <command>' per line "
+               "(decimals allowed, e.g. 12.5).  "
                "Commands act on the primary GPC until 'gpc <n>' moves "
                "them to another column, which is how a script brings up "
                "more than one computer.  'wait gpc <n> mode-tb RUN|IPL|BP "
                "[timeout <s>]' holds the script for a talkback; later times "
                "count from when it is met.")
 IPL_HOLD_MS = 250
+# SCRIPT TIMES ARE SECONDS.  They were milliseconds until 2026-09-15, when the
+# panel script was made to count the way a simulatePASS keys file always has.
+# No script needs anything like ten hours, and every millisecond script ever
+# written has a time far above it, so a larger time is refused rather than
+# silently waited out.
+MAX_SCRIPT_SECONDS = 36000
 TB_WORD_SIZE = 9               # RUN / IPL on a talkback flag
 WAIT_TIMEOUT_S = 600           # a `wait` line with no timeout gives up after this
 
@@ -2112,10 +2120,18 @@ def _parse_script(text):
             stretch = []
             out.append(("wait", parts[1].strip()))
             continue
-        if len(parts) != 2 or not parts[0].isdigit():
+        try:
+            seconds = float(parts[0]) if len(parts) == 2 else None
+        except ValueError:
+            seconds = None
+        if seconds is None or seconds < 0 or parts[0].lower() in ("nan", "inf"):
             raise SystemExit("panelO6: script line %d: expected "
-                             "'<ms> <command>', got %r" % (n, line))
-        stretch.append((int(parts[0]), parts[1].strip()))
+                             "'<seconds> <command>', got %r" % (n, line))
+        if seconds > MAX_SCRIPT_SECONDS:
+            raise SystemExit("panelO6: script line %d: %s seconds is over %d -- script "
+                             "times are SECONDS now, not milliseconds (divide by 1000)"
+                             % (n, parts[0], MAX_SCRIPT_SECONDS))
+        stretch.append((int(round(seconds * 1000)), parts[1].strip()))
     return out + sorted(stretch, key=lambda e: e[0])
 
 
