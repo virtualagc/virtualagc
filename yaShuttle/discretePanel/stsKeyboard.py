@@ -28,9 +28,12 @@ Usage:
 
 import argparse
 import os
+import queue
 import socket
 import struct
 import subprocess
+import threading
+import time
 import tkinter as tk
 import tkinter.font as tkfont
 
@@ -123,15 +126,27 @@ def log(msg):
     print("stsKeyboard: %s" % msg, flush=True)
 
 
+# A key that arrives from the bus -- a script typing it -- shows pressed for
+# this long.  Shorter than a script's 0.35 s between keys, so a run of the
+# same key reads as separate presses.
+FLASH_S = 0.2
+# Our own clicks come back to us on the multicast loop; one arriving this soon
+# after we sent the same code is that echo, not someone else's press.
+ECHO_S = 1.0
+
+
 class KeyboardBus:
-    """The sending end of one MEDS keyboard bus."""
+    """One MEDS keyboard bus: sends this keyboard's keys, and remembers them
+    so their echo can be told from a key someone else puts on the bus."""
 
     def __init__(self, n):
         self.n = n
         self.port = KYBD_PORT[n]
+        self._sent = []            # (scan, monotonic time) of our recent sends
         # The same interface MEDS2.py's buses are pinned to, or the datagram
         # leaves by the default route and its listeners never see it.
         iface = os.environ.get("NSTS_BUS_IFACE", "127.0.0.1")
+        self.iface = iface
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 128)
@@ -145,7 +160,27 @@ class KeyboardBus:
         except OSError as e:
             log("KYBD%d: send failed: %s" % (self.n, e))
             return False
+        self._sent.append((scan, time.monotonic()))
         return True
+
+    def is_own_echo(self, scan):
+        """True, once, for a code we sent within ECHO_S."""
+        now = time.monotonic()
+        self._sent = [(c, t) for c, t in self._sent if now - t < ECHO_S]
+        for i, (c, _t) in enumerate(self._sent):
+            if c == scan:
+                del self._sent[i]
+                return True
+        return False
+
+    def receiver(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind(("", self.port))
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                     struct.pack("4s4s", socket.inet_aton(MCAST_GROUP),
+                                 socket.inet_aton(self.iface)))
+        return s
 
 
 def key_id(lines):
@@ -259,6 +294,58 @@ class STSKeyboard:
         self.cv.bind("<Configure>", self._on_configure)
         self.cv.bind("<Leave>", lambda _e: self.cv.configure(cursor=""))
 
+        # KEYS FROM THE BUS SHOW TOO.  A crew script types on this keyboard's
+        # bus directly, so without this the keyboard sat still through a whole
+        # demonstration while its keys were being pressed.
+        self._by_scan = {}
+        for row in range(NROW):
+            for col in range(NCOL):
+                code = SCAN.get(key_id(KEYS[row][col]))
+                if code is not None:
+                    self._by_scan[code] = (row, col)
+        self._flash = {}           # (row, col) -> monotonic time it ends
+        self._rx = queue.Queue()
+        if self.bus is not None:
+            threading.Thread(target=self._listen, daemon=True).start()
+            root.after(30, self._poll_bus)
+
+    def _listen(self):
+        try:
+            s = self.bus.receiver()
+        except OSError as e:
+            log("KYBD%d: cannot listen for keys from the bus: %s" % (self.bus.n, e))
+            return
+        while True:
+            try:
+                data, _ = s.recvfrom(64)
+            except OSError:
+                return
+            if len(data) >= 2:
+                self._rx.put(struct.unpack(">H", data[:2])[0])
+
+    def _poll_bus(self):
+        now = time.monotonic()
+        changed = False
+        while True:
+            try:
+                scan = self._rx.get_nowait()
+            except queue.Empty:
+                break
+            if self.bus.is_own_echo(scan):
+                continue
+            where = self._by_scan.get(scan)
+            if where is None:
+                continue
+            self._flash[where] = now + FLASH_S
+            log("%s  pressed on the bus" % key_id(KEYS[where[0]][where[1]]))
+            changed = True
+        for where in [w for w, t in self._flash.items() if t <= now]:
+            del self._flash[where]
+            changed = True
+        if changed:
+            self.redraw()
+        self.root.after(30, self._poll_bus)
+
     def _on_configure(self, event):
         if event.widget is not self.cv:
             return
@@ -313,7 +400,7 @@ class STSKeyboard:
         held = self._held
         for i, (x1, y1, x2, y2) in enumerate(cells):
             row, col = divmod(i, NCOL)
-            down = held == (row, col)
+            down = held == (row, col) or (row, col) in self._flash
             self._draw_key(x1, y1, x2, y2, KEYS[row][col], down, k)
             self._hits.append((row, col, x1, y1, x2, y2))
 
