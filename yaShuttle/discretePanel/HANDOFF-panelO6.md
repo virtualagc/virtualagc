@@ -43,14 +43,14 @@ helpers `_vbar` / `_hbar` exist only in the discontinued file.
 cd yaShuttle/discretePanel
 python3 panelO6.py
 python3 panelO6.py --size 512
-python3 panelO6.py --geometry 1684x1250+80+20
+python3 panelO6.py --geometry 1684x1300+80+20
 python3 panelO6.py --port-base 6900 --gpc-id 2
-python3 panelO6.py --script seq.txt --quit-after 60
+python3 panelO6.py --script examples/4gpc-startup.script --show --wait-user
 ```
 
 - `--size N`: scale the window and contents.  **768 is full size** (the
-  design window 1684×1250, `FULL_SIZE = 768`); 512 is two-thirds
-  (1123×833); 384 is half (842×625).  Contents scale with the window.  stsKeyboard.py uses the
+  design window 1684×1300, `FULL_SIZE = 768`); 512 is two-thirds
+  (1123×867); 384 is half (842×650).  Contents scale with the window.  stsKeyboard.py uses the
   same 768 unit; cam.py uses 512; MEDS2.py's `--size` is pixels.
 - `--geometry SPEC`: exact Tk geometry; **overrides `--size`**.
 - `NSTS_O6_GEOMETRY` is the env-var equivalent of `--geometry`.
@@ -58,8 +58,13 @@ python3 panelO6.py --script seq.txt --quit-after 60
 - `--gpc-id N` (default 1): the **primary** column -- marked `(primary)` in
   the startup dump, and the column a script drives until `gpc <n>` moves it.
   It no longer limits what is published: every column is.
-- `--script FILE` / `--quit-after S`: timed playback, as discretePanel.py;
-  a scripted run never maps the window.
+- `--script FILE`: plays a crew script (see "Scripted playback").  A
+  scripted run keeps the window unmapped unless `--show`, `--wait-user` or a
+  `wait user` line in the script asks for it.
+- `--wait-user`: an implied `wait user` before the script's first line, and
+  the window shown.
+- `--quit-after MS`: exit after that many **milliseconds** (script times are
+  seconds).
 - Logging prefix is `panelO6:`.
 - The window tries not to steal keyboard focus (`_dont_steal_focus`, copied
   from `discretePanel.py`: `takefocus=0`, `_NET_WM_USER_TIME=0`, then
@@ -110,10 +115,10 @@ GPC1 … GPC5 left to right.
 | Row | What | Positions / states |
 |---|---|---|
 | 1 | POWER, 2-position toggle | ON (up), OFF (down) |
-| 2 | OUTPUT **talkbacks** (not switches) | GRAY = may transmit on the FC buses; barberpole = may not |
+| 2 | OUTPUT **talkbacks** (not switches) | GRAY = may transmit on the FC buses; barberpole = may not.  Driven by the GPC (DO bit 7), see Talkbacks |
 | 3 | OUTPUT, 3-position toggle | BACKUP / NORMAL / TERMINATE |
 | 4 | INITIAL PROGRAM LOAD, momentary pushbuttons | ON while held, OFF on release |
-| 5 | MODE **talkbacks** (not switches) | RUN, or IPL while a live IPL press is held, else barberpole |
+| 5 | MODE **talkbacks** (not switches) | IPL (GPC DO bit 31), RUN (DO bit 9, load complete), else barberpole.  Driven by the GPC, see Talkbacks |
 | 6 | MODE, 3-position toggle | RUN / STBY / HALT.  Real hardware is lever-locked in RUN; this sim does not require pulling a lock |
 | Right tab | IPL SOURCE, 3-position toggle | MMU 1 (up) / OFF (middle) / MMU 2 (down) |
 
@@ -156,7 +161,7 @@ GPC's channel carried it and the lamps stayed dark in multi-GPC runs.
 
 ### The IDP column
 
-Right of everything above (`REF_W` 948 → 1684; `REF_H` 1250 unchanged),
+Right of everything above (`REF_W` 948 → 1684; `REF_H` 1250 then, 1300 since the MODE talkbacks moved down),
 top to bottom:
 
 | Inset | Controls |
@@ -181,6 +186,15 @@ channel on every change and re-asserted every `REPUBLISH_MS` (250 ms) as one
 RESET then one SET per register (break before make), because a discrete is
 a level and UDP has no replay for a late joiner.  The log prints
 `GPCn discretes A=.. B=..` on every change.
+
+**Publishing has its own thread** (`_pub_loop`).  The Tk side only hands it
+the columns; the thread sends the RESET/SET pairs on every change and every
+`REPUBLISH_MS`.  Before that, a Tk thread waiting on a saturated X server
+silenced the bus for longer than yaGPC2's 1.5 s staleness limit and halted
+every running GPC at once (yaGPC2 ledger #147; yaGPC2 now also rides
+through a quiet panel).  `_tick` logs `Tk tick N ms late` when a tick is
+more than 200 ms past its period.  Test hook:
+`NSTS_PANEL_STALL=<start s>,<seconds>` holds the Tk thread once.
 
 Per-GPC state (MODE, IPL, BFC latch, I/O TERM B, GPC ID) differs by column;
 the panel-wide switches (IPL SOURCE, I/O TERM A, BFC CRT) are the same wire
@@ -226,9 +240,24 @@ started at MM1 + CRT 1 (menu IPL).
 
 ### Scripted playback
 
-`--script FILE`: `<ms> <command>` per line, times from startup, `#`
-comments.  The commands move the controls, so the window, the log and the
-bus agree.  Commands act on the primary column until `gpc <n>` moves them,
+`--script FILE` plays a **crew script**: one file for everything the crew
+does in a scripted run -- the panel verbs below, keystrokes
+(`keys [KB1|KB2|KB3] KEY ...`), captions (`subtitle TEXT`) and waits.  The
+language, the parser and the player are `crewscript.py`'s
+(`crewscript.parse`, `crewscript.Player`); panelO6.py hosts the one player
+on its Tk loop (`root.after`), so switches and keystrokes share one clock.
+`crewscript.HELP` is the full command list, printed at the end of
+`panelO6.py --help` and `simulatePASS.py --help`, and
+`python3 crewscript.py FILE ...` checks scripts without running anything.
+
+`<seconds> <command>` per line, decimals allowed, `#` comments (so a caption
+cannot contain `#`).  Times count from the start, or from the moment the last
+wait was met; lines run in file order, and a time may not go backwards
+between waits.  The whole file is checked when it is read.  Times were
+milliseconds until f1f6d064c; a time over `MAX_SCRIPT_SECONDS` (36000) is
+refused as a probable old millisecond script, and discretePanel.py has the
+same guard.  The panel verbs move the controls, so the window, the log and
+the bus agree.  They act on the primary column until `gpc <n>` moves them,
 which is how one script brings up more than one computer.
 
 | Verb | Effect |
@@ -253,6 +282,31 @@ discretePanel.py on port base 17900, the bus sampled at +120 / +700 ms, gave
 identical registers from `source MM1` on except where intended (startup
 positions; `bfsengage on` also raises TERM B; a mid-script `gpcid 2` takes
 column 2's own MODE).
+
+**Waits.**  `wait gpc N mode-tb RUN|IPL|BP [timeout S]`, with no time in
+front, holds the script until GPC N's MODE talkback shows that state (see
+Talkbacks; polled every `WAIT_POLL_MS` = 100 ms, default timeout 600 s).  A
+timeout is logged and stops the script rather than carrying on as if the
+GPC were ready.  `wait user` holds until a click in the window: the cursor
+becomes `WAIT_CURSOR` ("target") and stays so across `<Leave>` and motion,
+and the click is consumed, moving no control.  `--wait-user` inserts one
+before the first line.  The window is mapped when there is no script, or
+with `--show`, `--wait-user`, or a `wait user` in the script; an unattended
+script stays hidden.  Test hook: `NSTS_PANEL_AUTOCLICK=<s>` clicks once after
+that many seconds.
+
+**Keys and captions.**  `keys` sends DPS scan codes on the keyboard buses
+(IDP POWER / DEU LOAD messages on the IDP buses for those key names),
+`KEY_GAP_S` = 0.35 s apart, and the next line starts when the typing is
+done.  `subtitle` sends one UTF-8 datagram to port base + 90 for
+`subtitles.py`; nothing starts that box (see Related files).
+
+**Verified (2026-09-15):** `examples/4gpc-startup.script` with
+`simulatePASS --gpcs 1-4 --crts 2` brought four GPCs to OPS 2, each IPL
+gated on `wait gpc N mode-tb RUN` (met 25-28 s after its ITEM 1 EXEC), with
+no CAM lamp and MM1 at 239 commands / 2045 blocks read.  As two files with
+waits, OPS 2 was typed about 570 s after the panel started, against 840 s
+with fixed times.
 
 ---
 
@@ -308,30 +362,47 @@ simulated.
 
 ---
 
-## Talkbacks (local stand-in until a GPC drives them)
+## Talkbacks (driven by the GPCs)
 
-OUTPUT talkback for GPC *i* is GRAY only if POWER is ON **and** MODE is RUN
-**and** I/O TERM B is off; otherwise barberpole.  So an engage turns the
-PASS talkbacks barberpole and the BFS talkback grey.
+Both rows are GPC output discretes, as on the vehicle (DPS Workbook
+USA005350 Rev B 2.x: "driven directly from GPC output discretes"), read from
+each GPC's DO register (`REG_OUT`, 3) on that GPC's channel.  `_listen_out`
+keeps a socket per channel and REQUESTs the register at start-up, so a GPC
+already running shows at once; `gpc_out[i]` is None until that GPC is
+heard.  Bit numbers are IBM (bit n = 0x80000000 >> n), names from
+`SSSRC/BILDNEW5.asm`.
 
-MODE talkback is IPL only while that GPC's IPL press is live (held, in
-HALT), else RUN if MODE is RUN, else barberpole.  The SCOM MODE window is
-silk-screened RUN; that word is shown in the RUN state and replaced by IPL /
-stripes.
+- **OUTPUT** (`output_tb`): GRAY while DO bit 7, I/O ACTIVE TALKBACK, is
+  set; otherwise barberpole.  The Workbook: gray if output is enabled,
+  barberpole with I/O TERM B set or the GPC not in RUN.  PASS set it 2.4 s
+  after the switch reached RUN (yaGPC2 run verify-tb).
+- **MODE** (`mode_tb`): IPL while DO bit 31, IPL (HDWR), is set -- yaGPC2
+  drives it from a successful firmware IPL until the HALT → STBY release
+  (`run.c` `ipl_talkback`, f421b0573); else RUN while bit 9, RUN(READY)
+  TALKBACK, is set, which FCMSWMON sets when the load completes ("When the
+  talkback goes to RUN, the IPL is complete", Workbook 3.x); else
+  barberpole.  A GPC never heard is barberpole, as an unpowered one is.
+
+Changes are logged as `GPCn MODE tb  A -> B` and `GPCn OUTPUT tb  A -> B`
+(`_talkbacks_follow`); `wait gpc N mode-tb` follows the same state, and
+simulatePASS's keys-file `WAIT` lines follow those log lines.  The SCOM MODE
+window is silk-screened RUN; that word, or IPL, is drawn at `TB_WORD_SIZE`
+(9 pt) over the flag, centred on its ink rather than its em box.  The MODE
+talkbacks sit `IPL_TO_MODE_TB_GAP` (50, one IPL pushbutton's height) below
+the IPL buttons, which is why `REF_H` went from 1250 to 1300.
 
 Barberpole is a `PhotoImage` of diagonal cream/black stripes, cached by
 pixel size.
 
-These are **approximations**.  On the vehicle the talkbacks are GPC
-output discretes, not a function of the crew switches alone.
+Other sources: DPS Overview Workbook 3-6/3-7, DPS Console Handbook
+SCP 5.18.
 
 ---
 
 ## Startup defaults (typical pre-flight)
 
-- All POWER **OFF** (user request).  POWER drives no discrete, so the bus is
-  unaffected; the only effect is that OUTPUT talkbacks stay barberpole until
-  a GPC is powered.
+- All POWER **OFF** (user request).  POWER drives no discrete and, since the
+  talkbacks became GPC-driven, nothing else: it is drawn only.
 - OUTPUT NORMAL on GPC1–4, **BACKUP on GPC5** (BFS)
 - All MODE HALT
 - IPL SOURCE OFF
@@ -339,7 +410,7 @@ output discretes, not a function of the crew switches alone.
 - BFC DISENGAGE LEFT
 - RHC BFC ENGAGE both released
 - ACTIVITY lamps OFF (grey) until a mass memory is heard
-- All talkbacks barberpole
+- All talkbacks barberpole until a GPC is heard
 - IDP/CRT 1-4 POWER OFF; MAJ FUNC `NSTS_MAJOR_FUNC` or GNC; LEFT IDP/CRT
   SEL 1, RIGHT 2; IDP LOAD all released
 
@@ -353,6 +424,15 @@ Every change, and a full dump at startup, prints to stdout.
 memories, two MEDS2.py CRTs with a keyboard each (KYBD1 → CRT1, KYBD2 →
 CRT2), panelO6.py, and cam.py; `--crts 3` / `4` add IDPs.
 `simulatePASS --instructions` prints the steps for a configuration.
+`--yagpc-extra "ARGS"` appends options to yaGPC2's command line
+(shlex-split), e.g. `--yagpc-extra "--barrier-spin-us 50 --rt-idle-poll-ms 2"`.
+`--script FILE` hands panelO6 a crew script (see "Scripted playback");
+`--show-panel` and `--wait-user` pass `--show` / `--wait-user` for
+demonstrations, and `--duration` should be left off with a wait user, since
+it counts from start-up.  The older split still works: `--keys FILE` with
+`<seconds> KEY ...` lines, and `WAIT gpc N mode-tb ...` lines that follow
+panel.log.  simulatePASS does not start `subtitles.py` (no default size or
+place suits a recording); when a script captions, it logs the command.
 
 **The two-CRT procedure:** GPC1 on CRT1 (BFC CRT SELECT 1+2, left
 keyboard); each later GPC on CRT2 (SELECT 2+3, **O6 IDP 2 LOAD** before its
@@ -421,7 +501,7 @@ moves, IDP 4 has no KYBD_SEL) and screenshots at `--size` 384 / 512 / 768.
 
 ## Implementation notes that are easy to break
 
-**Reference coordinates.**  Layout lives in a 1684×1250 design space
+**Reference coordinates.**  Layout lives in a 1684×1300 design space
 (`REF_W` × `REF_H`).  `FULL_SIZE = 768` is the `--size` unit for “the
 window as designed”, not 948.  On resize, `s = min(cw/REF_W, ch/REF_H)`
 and the drawing is centred.  All drawing helpers (`X`, `Y`, `_text`,
@@ -628,6 +708,24 @@ C2 and O6 IDP LOAD, wired to the IDP buses and following them (6976ba4c0);
 IDP/CRT 4 on R11 (4ba71a40c); R11 margins matched to C2 (5c1d5a79d,
 81d4b5570).
 
+### 13. Publishing thread (2026-09-14)
+
+Discretes published from `_pub_loop`, so a stalled Tk thread cannot silence
+the bus (bca2581d5).
+
+### 14. GPC-driven talkbacks and crew scripts (2026-09-15)
+
+MODE and OUTPUT talkbacks from the GPC DO register, the gap above the MODE
+talkbacks, and `wait gpc N mode-tb` (1efb8a53e; yaGPC2's IPL output,
+f421b0573).  Script times in seconds (f1f6d064c).  One crew script for
+switches, keys, captions and waits (b2e0b94c3); `wait user`, `--show` and
+`--wait-user` for demonstrations (d93266cde, c7b2d5ddb, 9715d8310).  The
+command list moved into `crewscript.HELP`, printed by `--help`, and
+crewscript.py became a checker (4ef0faac0, 064b84ffa).  Alongside:
+`subtitles.py` (c88b8e649 … 5712ccece), scripted key presses shown on
+stsKeyboard.py (f7888f861, 3a5485c8b, ca287722d), and simulatePASS no longer
+starting subtitles.py (239062faa).
+
 ---
 
 ## What is still open
@@ -635,8 +733,6 @@ IDP/CRT 4 on R11 (4ba71a40c); R11 margins matched to C2 (5c1d5a79d,
 - **MDM power switches** on the left of physical O6: not drawn.
 - **MODE lever lock** (pull to leave RUN): not simulated; a click in the
   RUN third is enough.
-- Talkbacks are a local function of the switches and the BFC model, not
-  GPC output discretes.
 - The panel is not wired to `stsKeyboard.py` or `MEDS2.py` directly; they
   meet only through the emulator's buses.
 - A command heard between `_idp_adopt` and `_idp_publish` in one tick can
@@ -650,7 +746,12 @@ IDP/CRT 4 on R11 (4ba71a40c); R11 margins matched to C2 (5c1d5a79d,
 
 - `stsKeyboard.py` — 8×4 black DPS keyboard, same Canvas / `--size` (unit
   768) / no-focus habits; sends scan codes on keyboard bus `--kybd N`.
-  See HANDOFF-stsKeyboard.md.
+  See HANDOFF-stsKeyboard.md.  Since 2026-09-15 (not yet in that handoff)
+  it also listens on its own bus: a key sent by anyone else (a crew script,
+  `--keys`) shows pressed for `FLASH_S` (0.3 s), the same look as a mouse
+  press -- mid-grey face `C_KEY_PRESSED` #787878, dark inset edge, legend
+  sunk `PRESS_SINK` (3% of key size).  Echoes of its own clicks, within
+  `ECHO_S` (1 s), are skipped.  Near-white was tried and looked like a lamp.
 - `MEDS2.py` — Python port of `~/workspace/MEDS2/`.  See
   HANDOFF-meds2-py.md; do not mix it into the panel programs.
 - `cam.py` — the **Computer Annunciation Matrix** (formerly `voting.py`;
@@ -670,6 +771,26 @@ IDP/CRT 4 on R11 (4ba71a40c); R11 margins matched to C2 (5c1d5a79d,
   lamps by hand until that computer's next message.  Unlike the panels it
   takes the keyboard.  Verified in yaGPC2 runs cf-short-0 and cf-g3-0
   (gpc-causes #141).
+- `crewscript.py` — the crew script language, parser and player (see
+  "Scripted playback").  Run directly it is only a checker:
+  `python3 crewscript.py FILE ...`, and `--help` for the commands.
+  `examples/4gpc-startup.script` is the worked example.
+- `subtitles.py` — caption box for demonstration videos.  Captions are UTF-8
+  datagrams on the discrete bus group at port base + 90; empty clears, the
+  two characters `\n` break a line, and a leading `<left>`, `<center>` or
+  `<right>` aligns that caption (else `--align`, default center).  A managed,
+  undecorated window: `_MOTIF_WM_HINTS` "2, 0, 0, 0, 0" is set on Tk's
+  wrapper (the parent of `winfo_id()`) before the first map, since Marco
+  reads it only then, so it is listed in the taskbar without a title bar;
+  `--no-taskbar` gives the old overrideredirect window.  The box keeps its
+  width and TOP edge and grows downward to fit wrapped text (growing upward
+  covered what the caption was about), never below the `--geometry` height,
+  moving up only to stay on the screen.  `--edit` takes typing (Enter,
+  Backspace, Escape), Ctrl +/- font size, Ctrl L/E/R alignment, drag to move
+  and Shift-drag for width and minimum height, and prints
+  `--geometry WxH+X+Y --font-size N --align A` after each change; a drag
+  first re-reads the window's real position, as the window manager may have
+  placed it elsewhere.  Nothing starts it: run it with the same `--port-base`.
 - `simulatePASS.py` — the launcher; see README.md.
 
 ---
@@ -705,6 +826,18 @@ b9d585258 2026-09-11  panelO6: ACTIVITY pane with MM1 / MM2 lamps
 4ba71a40c 2026-09-14  panelO6: IDP/CRT 4 POWER and MAJ FUNC, panel R11
 5c1d5a79d 2026-09-14  simulatePASS: --crts 3 and 4; panelO6: R11 inset margins match C2
 81d4b5570 2026-09-14  Keyboard windows titled 1, 2, 3; R11 inset's right margin matches its left
+3b435dc19 2026-09-14  Documentation sync: MEDS2, panelO6 and stsKeyboard handoffs
+bca2581d5 2026-09-14  Running GPCs ride through a silent crew panel; panelO6 publishes from its own thread
+1efb8a53e 2026-09-15  panelO6: GPC-driven talkbacks, and scripts that wait for them
+c88b8e649 2026-09-15  subtitles.py: a caption box for demonstration videos, driven from the scripts
+83f671d2d 2026-09-15  subtitles.py: align a caption on its own with a leading <left>, <center> or <right>
+f1f6d064c 2026-09-15  Panel scripts count in seconds, as keys files do
+b2e0b94c3 2026-09-15  crewscript.py: one crew script for switches, keys, captions and waits, played on one clock
+d93266cde 2026-09-15  Crew scripts for demonstrations: show the panel, and 'wait user' before starting
+c7b2d5ddb 2026-09-15  --wait-user: the demonstration pause without editing the script
+9715d8310 2026-09-15  panelO6: keep the 'wait user' cursor when the pointer leaves and returns
+4ef0faac0 2026-09-15  panelO6.py: --help lists every crew-script command
+064b84ffa 2026-09-15  Crew-script commands in one place; --help names only what a user can run
 ```
 
 cam.py (voting.py until 0399e250c): 5b22c9a46 … 0399e250c (2026-09-12),

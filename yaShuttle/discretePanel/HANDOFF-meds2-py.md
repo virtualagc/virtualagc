@@ -35,6 +35,8 @@ Added here:
 * `--no-idp-box` — hide the IDP identifier box and keyboard bars at the foot of DPS
   pages (§10); also `NSTS_DPS_IDP_BOX=0`.
 * `--title <text>`, `--port-base <n>` — window title, and the bus port base.
+* `--no-edgekeys` — no edgekey pushbuttons under the display (§10); also
+  `NSTS_MDU_EDGEKEYS=0`.
 
 **Requirements:** PyQt6 with `QtOpenGLWidgets`, numpy, and a driver that gives an
 **OpenGL 4.1 core profile**. The 4.1 requirement is not arbitrary — PyQt6 wraps
@@ -72,6 +74,7 @@ Every `NSTS_*` variable the original reads is honoured, with one exception.
 | `NSTS_MDU_FRAMELESS` | *port only*: restore the original's borderless window |
 | `NSTS_MDU_PANE` | *port only*: `1` = show the IDP pane, as `--pane`; `0` hides it and wins (§10) |
 | `NSTS_DPS_IDP_BOX` | *port only*: `0` = no IDP identifier box or keyboard bars, as `--no-idp-box` (§10) |
+| `NSTS_MDU_EDGEKEYS` | *port only*: `0` = no edgekey pushbuttons, as `--no-edgekeys`; `1` = shown, whatever the option (§10) |
 | `NSTS_IDP_THREAD` | *port only*: `0` = IDP buses back on the GUI thread, no `BusPump` (§5) |
 | `NSTS_GUI_STALL_MS`, `NSTS_GUI_STALL_BUSY` | *port only*, test hook: every 16 ms redraw tick holds the GUI thread this many ms — sleeping, or with `_BUSY=1` spinning with the GIL held (§8h) |
 | `NSTS_IDP_POWER` | *port only*: `on`/`off` overrides the IDP's power at start (§10) |
@@ -109,7 +112,7 @@ Line numbers drift — the class and function names are the durable anchors.
 | the other screens | `Screen_*` ≈ 5563–8425 | `Screen_AE_PFD` ≈ 6352 is the big one |
 | `meds/mduMenuArea.coffee` | `MDUMenuArea` ≈ 8427 | |
 | `meds/kybd.coffee` | `KeyEvent` ≈ 8753, `KYBD` ≈ 8794 | |
-| `meds/mduEdgeKeys.coffee` | `MDUEdgeKeys` ≈ 9000 | |
+| `meds/mduEdgeKeys.coffee` | `MDUEdgeKeys` ≈ 9000 | `press(i)`/`release(i)` shared by F1–F6 and clicks; `MDUEdgeKeyStrip` (port-only pushbuttons, §10) just before `MDUWindow` |
 | `meds/mdu.coffee` | `MDU` ≈ 9095, `mdu_start` ≈ 9532 | |
 | `meds/idp.coffee` | `IDP` ≈ 9558, `idp_start` ≈ 9734 | |
 | the param editor in `mdu.coffee` | `ParamPanel` ≈ 9770 | Qt widgets instead of DOM |
@@ -373,7 +376,8 @@ stall, 6.5 ms with `NSTS_GUI_STALL_BUSY=1`. Unstalled regression, `simulatePASS
   **`NSTS_MDU_FRAMELESS=1` restores the original.** Keep that in mind for screenshot
   tooling: only in the frameless window is the content area *exactly* the canvas,
   which is what makes a whole-window grab a 1:1 capture of the display. Fullscreen
-  LRUs are frameless regardless.
+  LRUs are frameless regardless.  With the edgekey strip on, the frameless
+  window's grab includes the strip below the display.
 * **Windows are resizable, aspect locked.** Drag a border: the canvas letterboxes in
   `window.backgroundColor` during the drag, then the window snaps to the config's
   ratio 250 ms after it settles (`MDUWindow._snapToAspect`). Render resolution is
@@ -449,6 +453,33 @@ stall, 6.5 ms with `NSTS_GUI_STALL_BUSY=1`. Unstalled regression, `simulatePASS
   rebuilt). GPCIPL time-fills on every poll, twice a second, so half the redraws
   repainted unchanged digits, and the clock looked as though it ran 1.5–2× fast.
   `NSTS_CLOCK_LOG` (§2) is the diagnostic for it.
+* **Edgekey pushbuttons under the display.** Each MDU window has six clickable
+  edgekeys in a grey bezel strip below the display, as on the orbiter (DPS
+  Workbook USA005350 Rev B fig. 2-26 p. 2-33; `yaShuttle/MDU.jpg`): square keys
+  between seven rounded ribs, each centred under its legend box (centres from
+  `MDUMenuArea.menuBoxX` mapped through `CAM_L`/`CAM_R`; the photo's key pitch,
+  0.149 of display width, matches the boxes' 7.75/52.24). `MDUEdgeKeyStrip`;
+  strip height `EDGE_STRIP_K` = 0.09 of canvas width; `MDUWindow.setEdgeStrip`,
+  `stripBox` and `_stripK`, and `_layoutBox`/`_snapToAspect` count the strip, so
+  the window grows by exactly its height and the canvas keeps every pixel.
+  `MDUEdgeKeys.press(i)`/`release(i)` serve F1–F6 and clicks alike, so a key held
+  `STUCK_MS` (2 s) by mouse fails exactly as by F-key. On by default;
+  `--no-edgekeys` or `NSTS_MDU_EDGEKEYS=0` hides it, `=1` forces it on.
+  simulatePASS.py counts the strip (0.09 × `--size`) in its fits-on-screen check.
+  Verified: an offscreen widget test (a click on key 4 reached handler 3; a 2.3 s
+  hold failed key 2 and later clicks on it were ignored; a bezel click was
+  ignored) and a full `--dev crt1` MDU in Xephyr (a synthetic press on key 4 took
+  the MAIN menu to DPS; window 508×554 = 508 canvas + 46 strip at `--size 512`,
+  dpr 2).
+* **A small gap, not a band, between the edgekey menu and the strip.** The
+  display frustum's bottom `VectorDisplay.CAM_B` was `CAM_B_FULL` (38.57 − 2 +
+  0.374 = 36.944); it is now the legend frames' bottom, 36.2 less the menu offset
+  0.643, plus `CAM_B_GAP` 0.3 = 35.857. The MDU canvas is shorter by
+  `VectorDisplay.canvas_height_k()` (`(CAM_B − CAM_T)/(CAM_B_FULL − CAM_T)`,
+  0.9716), so the page keeps its scale. On a 1016 px display the blank rows went
+  from 36 to 8. Some gap is deliberate: photos of physical MEDS show a small,
+  varying one. The geometry panel no longer moves the menu area with `pageY`
+  (cce2e88c5).
 
 ---
 
@@ -483,7 +514,10 @@ stall, 6.5 ms with `NSTS_GUI_STALL_BUSY=1`. Unstalled regression, `simulatePASS
   crt3/cdr1/plt2.
 * Only tested on Linux/X11 with an NVIDIA 4.1 context at device pixel ratio 2.
   Wayland, macOS and dpr 1 are unexercised; the dpr-sensitive code is the
-  `resolution`/`pxRatio` pair in `VectorDisplay.renderFrame`.
+  `resolution`/`pxRatio` pair in `VectorDisplay.renderFrame`.  Test note:
+  `QT_SCALE_FACTOR=2` is set in this desktop's environment, so a Xephyr screen
+  must be about twice the window's logical size, or a root capture shows only
+  its top-left.
 
 ---
 
