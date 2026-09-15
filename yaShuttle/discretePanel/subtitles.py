@@ -342,9 +342,39 @@ class Subtitles(object):
         self.root.after(50, self._poll)
 
 
+EPILOG = """\
+captions:
+  a script line '<seconds> subtitle TEXT' shows TEXT; with no TEXT it clears.
+  The two characters \\n in TEXT start a new line.  TEXT may begin with
+  <left>, <center> or <right> to align that caption alone.
+
+the box:
+  grows upward, bottom edge fixed, when a caption wraps past its height, and
+  returns to the --geometry height (never less) for a shorter one.
+  drag            move it
+  right button    Clear / Quit
+  Ctrl Q          quit
+
+editing controls (--edit only):
+  typing          set the caption
+  Enter           new line
+  Backspace       delete the last character
+  Escape          clear the caption
+  Ctrl + / Ctrl = font size up 2 points
+  Ctrl -          font size down 2 points
+  Ctrl L / E / R  align left, centre, right
+  Shift-drag      set width (left-right) and minimum height (up-down)
+  Ctrl P          print the options that reproduce the box
+  after each change of size, place, font size or alignment it prints
+  '--geometry WxH+X+Y --font-size N --align A' to paste into a command line.
+"""
+
+
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Caption box for demonstration videos, "
-                                             "driven over the simulation's bus")
+    ap = argparse.ArgumentParser(
+        description="Caption box for demonstration videos, driven over the simulation's bus",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=EPILOG)
     ap.add_argument("--port-base", type=int, metavar="N", default=None,
                     help="base of the UDP port range (default 6900, or NSTS_BUS_PORT_BASE); "
                          "captions arrive on base+%d" % SUBTITLE_OFFSET)
