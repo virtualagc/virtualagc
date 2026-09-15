@@ -19,3 +19,7 @@ because this file records everything and recovers nothing.
 
 ### [2026-09-14] Target: README.md
 - A running GPC no longer halts when the crew panel merely goes quiet. If its mode bits go stale (more than 1.5 s) while it was last heard in RUN or STBY, it keeps that position and logs 'MODE: crew panel silent N s; keeping RUN'; after YAGPC_DISCRETES_HOLD_SEC seconds of silence (default 60) it is held ('holding the CPU until it is heard') and released when the panel is heard again. A GPC that never heard a panel still starts held. YAGPC_HELDTRACE=1 logs every change of a machine's held state with register A's value, driven mask and the age of each mode bit. Cause: a saturated X server stalled panelO6's publishing and halted every running GPC at once (ledger #147).
+
+### [2026-09-15] Target: problems.md
+- --mtu-model on buses 20-22 now echoes EVERY bus command (command-sync) to listening computers, not only its own read (0x24C26); data is still returned only for the read. Listen-Mode receives wait indefinitely for a command at their IUA, so NSP listeners had stalled and drawn MSC time-outs in 4-GPC sets (ledger #145, commit 273563b7f). Single-GPC behaviour unchanged (gate echo-regress ALL MATCH).
+- Host note: if /usr/bin/ar segfaults, build the library with `make AR=llvm-ar`.
