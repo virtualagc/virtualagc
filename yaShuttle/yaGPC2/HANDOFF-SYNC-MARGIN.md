@@ -375,6 +375,54 @@ Baselines measured 20:55-21:01 (owner away, host quiet):
   minute; known #137 kind); GPC3 and GPC4 on 8/20/22 only through 20:58;
   GPC2 none.  Peer holds after OPS 2: bus 6 29 replies (median 3 ms, max 67),
   bus 7 85 replies (median 9.1, max 66) and 3 'none' (10-38 ms held).
+- LOSS 1 of eve1: 21:02:17.248 (camwatch), owner AWAY: 44, 14, 24, 34 ON --
+  GPC4 out, its diagonal lit.  ANALYSIS: (a) sync margins in the 13 shared
+  seconds before were normal (per second worst 0.02-0.18, p99 ~0.11);
+  (b) GPC4 was the LAST member in the final nine SVC handshakes, its lag
+  growing 12 -> 475 us over ~2 ms (margin 0.003 -> 0.123) -- beyond the
+  25 us barrier, so GPC4 was executing MORE instructions between syncs, not
+  being held; (c) its last SVC issue (tshared 1118.793778 s) was matched by
+  no other GPC; it held the code 5.35 ms (> 3850 us timeout), returned to
+  null at 1118.799131 s and never issued again; GPC1-3 went on syncing.  So
+  GPC4 DIVERGED (an SVC sync the others did not make) and failed itself --
+  not a slow handshake.  (d) ERRTERM identical on all four GPCs (BCE 8, 20,
+  22, steady; bus 8 is the absent IDP3) -- no self-only I/O error; display
+  peer holds nearby all replied within 7 ms (~1.4 s earlier).  (e) HOST: the
+  only blip in 25 s was at 21:02:13 -- a new chrome renderer (pid 3022340,
+  +285 MB, 140% CPU, RDELAY 0.12 s; exited since; owner away) with latprobe
+  max 2.96 ms (2 wakes > 2 ms), yaGPC2 RDELAY 0.02 s, cam.py 0.05 s -- 3-4 s
+  BEFORE the loss (wall<->shared mapping uncertain by ~1 s: PACE wall counts
+  from pacer birth, slightly after process start).  Also Claude's own
+  analysis (two 51 MB log parses, atop reads) ran 21:00-21:02 -- analysis now
+  runs under `nice -n 19 ionice -c3`.  HYPOTHESIS TO TEST: host delays act on
+  the set not through sync spread (the barrier hides that) but through INPUT
+  DIVERGENCE -- data from networked peers (MEDS2 IDPs/keyboards, the panel)
+  arrives in wall time and each GPC reads it at its own simulated instant, so
+  a delayed datagram can be seen by one GPC at a different point from the
+  others; divergent processing then shows as an unmatched sync, as here.
+- LOSS 2 of eve1: 21:04:12.354, owner AWAY: 24 OFF, 22/12/32 ON -- GPC2
+  out, diagonal lit, leaving GPC1+GPC3.  HOST: nothing -- latprobe no wake
+  over 2 ms; RDELAY/BDELAY 0.00 for yaGPC2 and every MEDS2 in 15 s; only
+  Claude's niced analysis (python3 59% at 21:04:07, an atop read 21:04:11).
+  LOG: margins normal (per shared second worst 0.02-0.15); GPC2's last codes
+  were two IPR handshakes (the second 239 us spread, GPC2 last) and an IOC
+  handshake at 1233.870930 s that COMPLETED with all three, then null at
+  1233.871182 s and nothing more; GPC1/GPC3 synced on 144 s.  No unmatched
+  GPC2 event.  In ~20 s of log around it: no ERRTERM off BCE 8/20/22, no
+  BCE6/7 RECV TIMEOUT, no unanswered PEER HOLD; one BCE7 PEER HOLD 40.59 ms
+  -> reply ~1 s before.  IPR handshakes are routine (~9/s, probably the
+  absent IDP3 on bus 8).  CONCLUSION: neither eve1 loss shows its cause in
+  these traces; neither had a self-only I/O error, a near-timeout
+  handshake, or a host stall at the moment.  NEXT: landmarks at FCMSFAIL
+  entry and its call sites (FIOERRLC+0313 self-FTS, FCMSFINT from each sync
+  program, FPMSVC for SVC 39) so a loss names its FCOS path.
+- SUPERVISOR (`<scratch>/stall/supervise.py`, started 21:06:36): adopts the
+  current run, and when two CAM diagonals are lit (or the run ends) stops it
+  by SIGINT and IPLs the next, eve2, eve3, ... (port base 25000+100*(n-1),
+  same traces, max 12 runs, stops if < 30 GB free); every CAM line from
+  every run and 'SUPERVISOR ...' events go to `<scratch>/stall/
+  camwatch-all.log` with wall stamps; a persistent Monitor tails that.  eve1
+  was stopped 21:06:36; eve2 launched 21:06:38 (OPS 2 ~21:20:40).
 - A persistent Monitor tails camwatch for lamp changes; on a loss run
   `around.py` at the camwatch stamp, then look at ERRTERM/PEER HOLD/SYNCORDER
   lines just before it on each GPC's clock (map own clock -> wall with that
