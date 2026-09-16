@@ -18,3 +18,6 @@
 
 ### [2026-09-15] Target: HANDOFF-panelO6.md
 - examples/4gpc-startup.script now waits for the GPCIPL menu (`wait crt N title GPCIPL timeout 150`) instead of the fixed 67/65 s STBY-to-ITEM-1-EXEC delays; 8 waits, no guessed delay left. Verified 2026-09-15: four GPCs to OPS 2, no CAM lamp, mmu1 239 commands / 2045 blocks read; menus at 13.5 s after each STANDBY, loads 25.2/27.3/28.0/28.5 s, OPS 2 typed about 363 s after the panel started (570 s with talkback waits only, 840 s with fixed times).
+
+### [2026-09-15] Target: README.md
+- New windowLayout.py: `save FILE` records where the simulation's windows are, `restore FILE` puts them back, `show [FILE]` lists either. Windows are named by the program that made them (crt1..crt4, kybd1..3, panel, cam, subtitles, discretepanel) from /proc/PID/cmdline; Tk sets no _NET_WM_PID, so its windows are matched by title instead (Subtitles, CAM, "Panels O6...", a keyboard titled 1/2/3). Only subtitles is resized by default (--with-sizes resizes all); placement measures after each move and corrects for the frame offset, which is 24,140 on this desktop. Needs wmctrl and xdotool. subtitles.py now adopts an outside move or resize (Configure handler comparing against the geometry it last asked for), so a restored placement is not undone by the next caption.

@@ -129,6 +129,7 @@ class Subtitles(object):
         self.w, self.min_h, self.x, self.top = box
         self.shift = 0                        # moved up this far to stay on screen
         self.h = None
+        self._asked = None            # the geometry this program last set
         self.align = args.align
         self.text = ""
         root.title("Subtitles")
@@ -156,6 +157,10 @@ class Subtitles(object):
         root.bind("<B1-Motion>", self._drag)
         root.bind("<ButtonRelease-1>", self._drag_end)
         root.bind("<ButtonPress-3>", self._menu)
+        # A move or resize from outside -- a window manager, wmctrl, or
+        # windowLayout.py restoring a saved placement -- becomes the box's own
+        # idea of where it is, so the next caption does not undo it.
+        root.bind("<Configure>", self._configured)
         if args.edit:
             root.bind("<Shift-ButtonPress-1>", self._resize_start)
             root.bind("<Shift-B1-Motion>", self._resize)
@@ -227,6 +232,7 @@ class Subtitles(object):
         over = self.top + self.h - self.root.winfo_screenheight()
         self.shift = max(0, min(over, self.top))
         self.root.geometry("%dx%d+%d+%d" % (self.w, self.h, self.x, self.top - self.shift))
+        self._asked = (self.w, self.h, self.x, self.top - self.shift)
 
     def options(self):
         """The command-line options that make this box again."""
@@ -276,6 +282,20 @@ class Subtitles(object):
         self.w = max(MIN_W, w0 + (e.x_root - x0))
         self.min_h = max(MIN_H, h0 + (e.y_root - y0))
         self._fit()
+
+    def _configured(self, e):
+        if e.widget is not self.root or self._asked is None:
+            return
+        now = (self.root.winfo_width(), self.root.winfo_height(),
+               self.root.winfo_rootx(), self.root.winfo_rooty())
+        if now == self._asked:
+            return                    # our own geometry call coming back
+        self._asked = now
+        self.w, self.x = now[0], now[2]
+        self.h = self.min_h = now[1]  # a size set from outside is the new least
+        self.top, self.shift = now[3], 0
+        self.label.configure(wraplength=max(50, self.w - 2 * PAD_X - 8))
+        self._report() if self.args.edit else None
 
     def _menu(self, e):
         try:
