@@ -1732,6 +1732,27 @@ static bool batchrunner_step(BatchRunner *r) {
         vehicle_refresh_lines(r->vehicle, r->gpcId,
                               discretes_value(r->discretes, DISCRETES_REG_OUT)
                                   & ~DISCRETES_OUT_SYNC_MASK);
+        /* AND IT VOTES FOR NOTHING AND FAILS NOTHING.  The fail-vote and
+         * computer-fail publishing lives in the running path below, which a
+         * held machine never reaches, so whatever it last published stood on
+         * the wire for as long as it sat in reset.  Measured 2026-09-16, the
+         * same session as the sync-code half: as the crew moded the vehicle
+         * down, GPC4 voted against GPC1 and then GPC2 as each went silent --
+         * correct at the time -- and was then moded to HALT itself holding
+         * 00000006.  It went on accusing two computers, from a processor in
+         * reset, until it was IPLed.  A machine that is switched off votes
+         * for nothing. */
+        discretes_publish_failvote(r->discretes, 0u);
+        discretes_publish_cfail(r->discretes, false);
+        /* SAY SO IN THE TRACE, ONCE PER HOLD.  What the neighbours see is
+         * changed above without touching this machine's own OUT register,
+         * and discretes_synctrace prints FROM that register -- so none of
+         * this appears in a YAGPC_SYNCTRACE log, and a reader sees the last
+         * code the software drove and concludes the fix is not working. */
+        if (!r->modeWasHeld && getenv("YAGPC_SYNCTRACE") != NULL)
+            fprintf(stderr, "SYNC t=%.6f GPC%d out  000 dead/halt/standby "
+                            "(held in reset)\n",
+                    yagpc_monotonic_seconds(), r->gpcId);
         r->modeWasHeld = true;
         /* Nothing to do but wait for the switch to move; don't spin a
          * core doing it. */
