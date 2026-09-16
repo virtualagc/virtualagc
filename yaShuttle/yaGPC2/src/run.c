@@ -1451,7 +1451,6 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
      * and the two are asserted together.  Pressing it in STBY or RUN is
      * not a thing the panel can do to a running machine. */
     if (mode != r->prevMode) {
-        if (mode & MODE_HALT) r->cfailLatched = false;   /* the CAM latch */
         if (getenv("YAGPC_MODETRACE"))
             fprintf(stderr, "MODETRACE driven=%08x value=%08x mode=%08x prev=%08x\n",
                     driven, discretes_value(r->discretes, DISCRETES_REG_A), mode, r->prevMode);
@@ -2104,13 +2103,18 @@ static bool batchrunner_step(BatchRunner *r) {
             msc->failDiscSeen = 0u;
             if (seen & ~fd) discretes_publish_failvote(r->discretes, fd | seen);
             discretes_publish_failvote(r->discretes, fd);
-            /* AND THE DIAGONAL: two votes against this computer latch its
-             * Computer Fail lamp; FCMSFAIL's self test lights it directly.
-             * For the lamp only -- see DISCRETES_REG_CFAIL. */
-            if (vehicle_votes_against(r->vehicle, r->gpcId) >= 2)
-                r->cfailLatched = true;
+            /* AND THE DIAGONAL: this computer's Computer Fail lamp, which
+             * FOLLOWS THE PRESENT STATE -- two or more votes against it now,
+             * or its own RM voter failing its self test.  It used to latch,
+             * cleared only by a mode change into HALT, and that was wrong:
+             * on 2026-09-16 two diagonals stayed lit with every computer
+             * syncing, no vote outstanding anywhere, and SPEC 6 reporting no
+             * GPC down -- the flight software disagreeing with our own lamp.
+             * A vote too brief to see is not lost: cam.py holds a lamp lit
+             * for HOLD_MIN_S.  See DISCRETES_REG_CFAIL and ledger #141. */
+            bool votedOut = vehicle_votes_against(r->vehicle, r->gpcId) >= 2;
             discretes_publish_cfail(r->discretes,
-                                    r->cfailLatched || r->age.gpc.iop.rmVoterFail);
+                                    votedOut || r->age.gpc.iop.rmVoterFail);
         }
         /* AND WHO COMMANDS THE DISPLAY BUSES.  BFC CRT SELECT is discrete
          * input B bits 6 and 7; off zero this computer is claiming them.

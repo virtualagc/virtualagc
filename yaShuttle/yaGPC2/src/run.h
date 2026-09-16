@@ -164,7 +164,6 @@ typedef struct {
     /* The CAM diagonal's latch: two votes against this computer were seen.
      * Cleared when the mode switch goes to HALT, the nearest the emulator
      * has to the hardware latch's reset.  See DISCRETES_REG_CFAIL. */
-    bool cfailLatched;
     /* What rtPacer has written off, in simulated microseconds: the time of
      * day the timing unit adds back.  See batchrunner_resync. */
     double writtenOffUs;
