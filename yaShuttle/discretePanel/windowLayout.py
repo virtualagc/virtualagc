@@ -135,6 +135,15 @@ def windows():
         role, cmd = role_of(pid, title)
         entry = {"id": wid, "pid": pid, "x": int(x), "y": int(y),
                  "w": int(w), "h": int(h), "title": title, "role": role, "cmd": cmd}
+        # WHERE IT REALLY IS, asked of the same tool that moves it.  wmctrl
+        # lists the window the desktop manages, which for an undecorated
+        # window (subtitles.py) is a wrapper that is not itself placed on
+        # screen: it reported the caption box at 7020,3984 -- twice the real
+        # position, and off a 7680x2160 screen -- while xdotool had 3510,1992.
+        # Saving one and restoring with the other put the box nowhere near.
+        real = geometry(wid)
+        if real is not None:
+            entry.update({"x": real[0], "y": real[1], "w": real[2], "h": real[3]})
         if role == "subtitles":
             entry["look"] = look_of(wid)
         out.append(entry)
