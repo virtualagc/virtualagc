@@ -13,19 +13,24 @@
 # that GPC's MODE talkback to read RUN.
 #
 # IPLing a computer is ONE PROCEDURE DONE FOUR TIMES, so it is written once,
-# in ipl-one-gpc.script, and played once per computer with the values that
-# differ.  GPC1 is the exception and is still spelled out below: it is the
-# first, so the panel's opening setup belongs with it, it uses CRT 1 and the
-# left-hand keyboard rather than CRT 2 and KB2, and it is loaded without the
-# IDP LOAD toggle the others need.
+# in ipl-one-gpc.script, and played once per computer with the four values
+# that differ: which GPC, which CRT, which IDP and which keyboard.  GPC1 takes
+# CRT 1 and the left-hand keyboard, the rest CRT 2 and KB2.
 #
 # Verified 2026-09-15: four GPCs to OPS 2, no CAM lamp, MM1 239 commands /
 # 2045 blocks read (the same as every earlier verified run).  Each GPCIPL menu
 # appeared 13.5 s after its STANDBY and each load took 25-28.5 s, so OPS 2 was
 # typed about 363 s after the panel started -- against 570 s when only the
-# talkbacks were waited on, and 840 s with fixed times throughout.  Splitting
-# the per-GPC procedure out on 2026-09-16 did not change a single action or
-# time: it resolves to exactly the sequence that run verified.
+# talkbacks were waited on, and 840 s with fixed times throughout.
+#
+# Splitting the per-GPC procedure out on 2026-09-16 left GPC2, 3 and 4 with
+# exactly the actions and times that run verified.  GPC1 changed in two ways
+# and has NOT been re-run: its setup switches are now spread over 3 s rather
+# than 0.4 s before the same wait on the GPCIPL title, and it now gets the IDP
+# LOAD toggle the others get.  That toggle is not needed for the first IPL of
+# a freshly started panel, which is why it was absent, but it IS needed to
+# re-IPL a computer in a running vehicle -- so the shared procedure always
+# does it, and is usable for both.
 
 # --- all four GPCs to HALT, the IDPs on, GPC1 IPL from MM1 on CRT 1 ---------
 +0     gpc 1
@@ -38,21 +43,9 @@
 +0.01  mode HALT
 +0.02  idppower 1 on
 +0.01  idppower 2 on
-+0.01  crt 1
-+0.1   source MM1
-+0.2   gpc 1
-+0.1   ipl
-+2.5   mode STANDBY
-wait crt 1 title GPCIPL timeout 150
-+2     keys ITEM 1 EXEC
 
-# --- GPC1 loaded: to RUN -----------------------------------------------------
-wait gpc 1 mode-tb RUN timeout 300
-+1     crt 0
-+2     mode RUN
-+2     source OFF
-
-# --- GPC2, 3 and 4: the same procedure, once each, on CRT 2 and KB2 ----------
+# --- each computer in turn: the same procedure, four times -------------------
++0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
 +5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
 +5     script ipl-one-gpc.script gpc=3 crt=2 idp=2 kb=KB2
 +5     script ipl-one-gpc.script gpc=4 crt=2 idp=2 kb=KB2
