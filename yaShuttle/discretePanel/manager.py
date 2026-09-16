@@ -56,6 +56,22 @@ C_FG = "#e8e8e8"
 C_NOTE = "#b0c4de"
 
 
+def shrink_fonts(root, points):
+    """Take `points` off every font Tk builds its widgets from.  A size is
+    POINTS when positive and PIXELS when negative, so the magnitude is what
+    shrinks either way."""
+    for name in tkfont.names(root):
+        try:
+            f = tkfont.nametofont(name, root)
+            size = f.cget("size")
+        except tk.TclError:
+            continue
+        if size > 0:
+            f.configure(size=max(1, size - points))
+        elif size < 0:
+            f.configure(size=min(-1, size + points))
+
+
 def running(port_base):
     """Which of the simulation's programs are up on this port base."""
     found = []
@@ -95,7 +111,8 @@ class Manager(object):
         self.subtitles = None              # the caption box this window started
         root.title("Simulation manager")
         root.configure(bg=C_BG)
-        bold = tkfont.Font(family="Helvetica", size=10, weight="bold")
+        shrink_fonts(root, 2)
+        bold = tkfont.Font(family="Helvetica", size=8, weight="bold")
 
         self.script = tk.StringVar(value=args.script or self._first_script())
         self.layout = tk.StringVar(value=args.layout)
@@ -124,8 +141,6 @@ class Manager(object):
         row = self._row()
         self._button(row, "Start", self.start_subtitles, wide=True)
         self._button(row, "Stop", self.stop_subtitles)
-        tk.Label(row, text="   (started with the look the layout file holds)",
-                 bg=C_BG, fg="#808080").pack(side="left")
 
         tk.Label(root, textvariable=self.state, bg=C_BG, fg=C_NOTE, anchor="w",
                  justify="left").pack(fill="x", padx=10, pady=(10, 0))

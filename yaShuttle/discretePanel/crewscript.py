@@ -16,6 +16,7 @@ a crew script print in their --help, and what this module prints when run:
 
 import os
 import re
+import shlex
 import socket
 import struct
 import threading
@@ -145,13 +146,30 @@ HELP = """\
                         along switches the rest.  The next line starts when
                         the typing is done.  Keys:
 %(keys)s
-    script FILE         play another crew script here, then carry on with
+    script FILE [NAME=VALUE ...]
+                        play another crew script here, then carry on with
                         this one: FILE's own times start when it starts, and
                         this script's remaining times count from when it
                         finishes.  A relative FILE is relative to the script
                         that names it.  The whole tree is read and checked
                         when the first script is read, and a script that
                         calls itself is refused.
+                        Each NAME=VALUE fills in $NAME (or ${NAME}) wherever
+                        it appears in FILE, so a procedure that differs only
+                        in which GPC it is done to can be written once and
+                        played for each in turn:
+                            script ipl-one-gpc.script gpc=1 sel=1+2
+                            script ipl-one-gpc.script gpc=2 sel=2+3
+                        and inside ipl-one-gpc.script:
+                            +0  gpc $gpc
+                            +2  select $sel
+                        A $NAME nobody supplies is an error, and so is a value
+                        the script never uses -- both are caught when the
+                        script is read.  FILE sees only the values it was
+                        given; to hand one on to a script FILE itself plays,
+                        name it again: script inner.script gpc=$gpc.  Write $$
+                        for a literal $, and quote a VALUE that has a space in
+                        it.
     subtitle [TEXT]     show TEXT in the caption box (subtitles.py); no TEXT
                         clears it.  The two characters \\n start a new line;
                         a leading <left>, <center> or <right> aligns that
@@ -289,6 +307,51 @@ def screen_text(lines):
     return text, SCREEN_CLOCK.sub("#", text)
 
 
+PARAM_RE = re.compile(r"\$(?:\{(\w+)\}|(\w+))")
+
+
+def substitute_params(text, params, where):
+    """Fill in $NAME and ${NAME} through a called script from the NAME=VALUE
+    pairs on the 'script' line that called it, so one procedure written once
+    can be played for each GPC in turn.  Returns the filled text and the names
+    that were actually used, and raises ScriptError -- naming the file and the
+    line -- for a $NAME nobody supplied.  $$ is a literal $."""
+    used, out = set(), []
+    for n, raw in enumerate(text.splitlines(), 1):
+        def one(m):
+            name = m.group(1) or m.group(2)
+            if name not in params:
+                raise ScriptError("%s line %d: nothing given for $%s -- the "
+                                  "'script' line that plays %s must say %s=VALUE"
+                                  % (where, n, name, where, name))
+            used.add(name)
+            return params[name]
+        # $$ means a literal $: split on it first so the halves are filled in
+        # separately and the doubled one can never look like a name.
+        out.append("$".join(PARAM_RE.sub(one, piece) for piece in raw.split("$$")))
+    return "\n".join(out), used
+
+
+def script_call(arg):
+    """'FILE NAME=VALUE ...' from a script line -> (file, {NAME: VALUE})."""
+    try:
+        tokens = shlex.split(arg)
+    except ValueError as err:
+        raise ScriptError("script %s: %s" % (arg, err))
+    if not tokens:
+        raise ScriptError("script needs a file name")
+    params = {}
+    for tok in tokens[1:]:
+        name, eq, value = tok.partition("=")
+        if not eq or not re.fullmatch(r"\w+", name):
+            raise ScriptError("a script's arguments are NAME=VALUE, and %r is not "
+                              "one -- as in 'script ipl.script gpc=1'" % tok)
+        if name in params:
+            raise ScriptError("%s given twice" % name)
+        params[name] = value
+    return tokens[0], params
+
+
 def parse(text, path=None, _depth=0, _seen=None):
     """The whole script -> entries in running order, each a dict with 'line':
     {'kind': 'wait', 'gpc', 'state', 'timeout', 'text'} or
@@ -351,7 +414,7 @@ def parse(text, path=None, _depth=0, _seen=None):
             elif verb == "script":
                 if not arg:
                     raise ScriptError("script needs a file name")
-                sub = arg.strip('"\'')
+                sub, params = script_call(arg)
                 if not os.path.isabs(sub):
                     sub = os.path.join(os.path.dirname(os.path.abspath(path or ".")), sub)
                 real = os.path.realpath(sub)
@@ -366,6 +429,17 @@ def parse(text, path=None, _depth=0, _seen=None):
                         sub_text = fh.read()
                 except OSError as err:
                     raise ScriptError("cannot read %s: %s" % (sub, err))
+                # FILLED IN BEFORE IT IS PARSED, so what is checked is what
+                # will run -- a bad GPC number reached through $gpc is caught
+                # here, not part way through the run.
+                sub_text, used = substitute_params(sub_text, params,
+                                                   os.path.basename(sub))
+                spare = set(params) - used
+                if spare:
+                    raise ScriptError("%s never uses %s"
+                                      % (os.path.basename(sub),
+                                         ", ".join("$" + u for u in sorted(spare))))
+                entry["params"] = params
                 try:
                     entry["entries"] = parse(sub_text, sub, _depth + 1, _seen | {real})
                 except ScriptError as err:
