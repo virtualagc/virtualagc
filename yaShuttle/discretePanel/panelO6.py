@@ -2225,15 +2225,24 @@ def _listen_control(panel):
         if word == "stop":
             log("script command: stop")
             panel.root.after(0, lambda: _stop_script(panel))
-        elif word == "play" and rest:
+        elif word in ("play", "playnow") and rest:
             try:
                 with open(rest) as fh:
                     entries = crewscript.parse(fh.read(), rest)
             except (OSError, crewscript.ScriptError) as e:
                 log("script command: cannot play %s: %s" % (rest, e))
                 continue
+            if word == "playnow":
+                # Whoever sent this has just pressed Play; an opening 'wait
+                # user' would only ask them to say go twice.
+                dropped = 0
+                while entries and entries[0]["kind"] == "wait_user":
+                    entries.pop(0)
+                    dropped += 1
+                if dropped:
+                    log("script command: skipping the opening 'wait user'")
             steps, waits = crewscript.count_entries(entries)
-            log("script command: play %s (%d steps, %d waits)" % (rest, steps, waits))
+            log("script command: %s %s (%d steps, %d waits)" % (word, rest, steps, waits))
             panel.root.after(0, lambda e=entries: _run_script(panel, e))
         else:
             log("script command not understood: %r" % text)
