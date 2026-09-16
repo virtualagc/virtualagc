@@ -112,11 +112,6 @@ class Manager(object):
         self._button(row, "Browse", self.browse_script)
         self._button(row, "Play", self.play, wide=True)
         self._button(row, "Stop", self.stop)
-        self.skip_wait = tk.BooleanVar(value=True)
-        tk.Checkbutton(row, text="  skip an opening 'wait user' (you just pressed Play)",
-                       variable=self.skip_wait, bg=C_BG, fg="#9a9a9a",
-                       activebackground=C_BG, activeforeground=C_FG,
-                       selectcolor="#1b1b1b", highlightthickness=0).pack(side="left")
 
         self._section("LAYOUT", bold)
         self._path_box(self.layout)
@@ -204,20 +199,15 @@ class Manager(object):
             self.say("%s" % e)
             return
         steps, waits = crewscript.count_entries(entries)
-        opens_waiting = bool(entries) and entries[0]["kind"] == "wait_user"
-        skip = self.skip_wait.get()
         try:
-            crewscript.send_control(("playnow " if skip else "play ") + path)
+            # 'playnow': pressing Play is the go-ahead, so a script that opens
+            # with 'wait user' does not ask for it twice.
+            crewscript.send_control("playnow " + path)
         except OSError as e:
             self.say("cannot reach the panel: %s" % e)
             return
-        if opens_waiting and not skip:
-            self.say("%s starts with 'wait user' -- CLICK IN THE PANEL WINDOW to start it"
-                     % os.path.basename(path))
-        else:
-            self.say("playing %s -- %d steps, %d waits%s"
-                     % (os.path.basename(path), steps, waits,
-                        " (opening 'wait user' skipped)" if opens_waiting and skip else ""))
+        self.say("playing %s -- %d steps, %d waits (the panel's log has the rest)"
+                 % (os.path.basename(path), steps, waits))
 
     def stop(self):
         try:
