@@ -70,6 +70,9 @@
  *                              `sdfDirnameOut`.
  *              2026-08-03 DAS  use runtime record widths set by SET_RECORD_WIDTH
  *                              on RECORD DYNAMIC tables
+ *              2026-09-16 RSB  `MONITOR1` returned whether the member stowed
+ *                              by the PREVIOUS call existed rather than the
+ *                              one being stowed now.  See issue #1347.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -2563,8 +2566,16 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
     abend("Out of memory in MONITOR(1)");
   sprintf(path, "%s/%s", DCB_OUTS[dev].filename, cname);
   strcpy(DCB_OUTS[dev].member, cname);
-  existed = DCB_OUTS[dev].existed;
-  DCB_OUTS[dev].existed = (access(path, F_OK) == 0); // Partition already exists?
+  // Whether the member exists must be asked before the fopen below, which
+  // creates it.  What is returned is the answer for the member being stowed
+  // *now*: the saved copy this used to return was the answer from the
+  // previous MONITOR(1) on this device, so the return lagged by one call and
+  // on the first stow to a device reported the field's initial 0 whatever the
+  // member's state.  Callers read it as "this member already existed" --
+  // PASS1's STREAM.xpl raises CLASS_XD error 9 on it for a DATA_REMOTE
+  // member -- so the diagnostic was attributed to the wrong member.
+  existed = (access(path, F_OK) == 0);
+  DCB_OUTS[dev].existed = existed;
   DCB_OUTS[dev].fp = fopen(path, DCB_OUTS[dev].fileFlags);
   free(path);
   if (DCB_OUTS[dev].fp == NULL)
