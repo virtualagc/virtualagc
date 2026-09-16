@@ -24,6 +24,7 @@ import sys
 import os
 import platform
 import shutil
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -92,6 +93,20 @@ The available OPTIONS are:
     --archive        Causes the results directories ("HALSFC ...".results) to
                      appear in a directory called archive.results rather than
                      in the current working directory.
+    --concurrent     Run every compiler pass in a private working directory,
+                     so that several HALSFCs can compile at once in the same
+                     directory without overwriting each other's workfiles.
+                     Implies --clean and --archive, and creates no
+                     "current.results" symbolic link, that link being a
+                     single name that concurrent runs would fight over.
+                     The libraries -- TEMPLIB, INCLIB, SDFLIB and their
+                     counterparts -- stay in the directory HALSFC was run
+                     from, as they must: they persist from one compilation to
+                     the next.  Concurrent compilations must still be
+                     SCHEDULED so that a source file is compiled only after
+                     the files it takes templates or SDFs from, exactly as
+                     make would; --concurrent makes that safe, it does not
+                     work it out for you.
     --sdfi=D         Name of a directory to read Simulation Data Files (SDF)
                      from, so that a "D INCLUDE TEMPLATE" can be satisfied
                      from an SDF in preference to the template library.
@@ -130,6 +145,7 @@ verbose = False
 debugLiterals = ""
 clean = False
 archive = False
+concurrent = False
 sdfi = None
 if isWindows:
     ext = ".exe"
@@ -168,6 +184,10 @@ for parm in sys.argv[1:]:
     elif parm == "--clean":
         clean = True
     elif parm == "--archive":
+        archive = True
+    elif parm == "--concurrent":
+        concurrent = True
+        clean = True
         archive = True
     elif parm.startswith("--sdfi="):
         sdfi = parm[7:]
@@ -210,6 +230,32 @@ pass3 = "NOTABLES" not in parmString
 now = datetime.now()
 now = now.strftime("%Y-%m-%d %H-%M-%S")
 
+# Everything the compiler is told about by name, rather than finding in the
+# working directory, is resolved against the directory HALSFC was run from.
+# That is where the source file, the libraries and the object file belong,
+# and under --concurrent it is no longer the directory the passes run in.
+# Resolving unconditionally keeps the two cases identical but for the chdir.
+invocationDir = os.getcwd()
+
+
+def fromInvocation(path):
+    if path == None:
+        return None
+    if os.path.isabs(path):
+        return path
+    return os.path.normpath(os.path.join(invocationDir, path))
+
+
+halsFileAbs = fromInvocation(halsFile)
+objectFilenameAbs = fromInvocation(objectFilename)
+sdfiAbs = fromInvocation(sdfi)
+# PASS3 writes its SDFs to a directory of its own, whose XCOM-I default is a
+# *relative* "SDFLIB"; run in a private working directory it would write them
+# there, where the next compilation in dependency order could never read them.
+# So it is named explicitly, whether or not --sdfi was given, since --sdfi
+# governs only the reading of SDFs.
+sdfoAbs = fromInvocation("SDFLIB")
+
 filesPorted = ["FILE4.bin", "FILE5.bin", 
                "FILE6.bin", "&&TEMPLIB.json", "&&TEMPINC.json", "SOURCECO.txt",
                "$FILES_PORTED", "SYM_TAB.json", "$FILES_PORTED", 
@@ -231,23 +277,101 @@ filesPreserve = ["litfile.bin", "cards", "COMMON0.out", "COMMON0.out.bin.gz",
                  "optmat.bin", "halmat.bin", "FILE3.bin", "icfile.bin",
                  "auxp.rpt", "flo.rpt", "COMMON4.out.bin.gz", "litfile4.bin",
                  "COMMON3.out"]
-filesReallyPreserve = ["TEMPLIB.json", "TEMPLIBB.json", 
-                       "INCLIB.json", "INCLIBB.json"]
-dirsReallyPreserve = ["TEMPLIB", "TEMPLIBB", 
+filesReallyPreserve = []
+dirsReallyPreserve = ["TEMPLIB", "TEMPLIBB", "TEMPLIBp", "TEMPLIBBp",
                        "INCLIB", "INCLIBB", "SDFLIB"]
 if clean:
     filesLocal += filesPreserve
     filesPreserve = []
-for f in filesPorted+filesLocal+filesPreserve:
+
+# A private working directory, so that two HALSFCs can run at once in the
+# same place.  It is created inside the results directory and *becomes* the
+# results directory at the end, by being renamed: nothing is then moved file
+# by file, and a run that dies leaves its workfiles where they can be looked
+# at rather than half-moved.
+workDir = None
+if concurrent:
+    archiveDir = os.path.join(invocationDir, "archive.results")
+    os.makedirs(archiveDir, exist_ok=True)
+    workDir = tempfile.mkdtemp(prefix="HALSFC-", dir=archiveDir)
+    os.chdir(workDir)
+else:
+    # The deletions below are for the workfiles of a *previous* run in this
+    # directory, and are exactly what makes two simultaneous runs impossible:
+    # the second one's startup deletes the first one's files out from under
+    # it.  Under --concurrent the working directory is new and empty, so
+    # there is nothing to delete and nothing that may be deleted.
+    for f in filesPorted+filesLocal+filesPreserve:
+        try:
+            os.remove(f)
+        except:
+            pass
+
+# Copy the object file(s) out to wherever -o asked for them.  Under
+# --concurrent the destination is in the invocation directory while the
+# working directory is elsewhere, so the destination is always the resolved
+# one, and "cards.bin" (or "cards") is never copied onto itself.
+def copyObject():
     try:
-        os.remove(f)
+        if bfs:
+            if objectFilenameAbs != os.path.join(invocationDir, "cards"):
+                try:
+                    shutil.rmtree(objectFilenameAbs)
+                except:
+                    pass
+                shutil.copytree("cards", objectFilenameAbs)
+        else:
+            if objectFilenameAbs != os.path.join(invocationDir, "cards.bin"):
+                shutil.copy("cards.bin", objectFilenameAbs)
     except:
-        pass
+        print(f"FYI: Unable to copy object file(s) to {objectFilename}")
+
 
 # Move all generated files to a *.results folder.
 results = ""
 def moveAll(message):
     global results
+    if concurrent:
+        # The working directory already holds everything a results directory
+        # would be given, so it becomes one by being renamed.  Nothing is
+        # left in the invocation directory to move, and the libraries are
+        # deliberately not snapshotted into the results: copying a library
+        # that another compilation may be stowing into would be both racy and
+        # a misleading record of what this compilation saw.
+        with open("comment.txt", "w") as f:
+            print(message, file=f)
+        copyObject()
+        # The source file lives in the invocation directory, so it is brought
+        # in for the record -- or moved in, if it is a preprocessor's
+        # throwaway, as the underscore convention marks.
+        try:
+            if normFile.startswith("_"):
+                shutil.move(halsFileAbs, normFile)
+            else:
+                shutil.copy(halsFileAbs, normFile)
+        except:
+            pass
+        # The name is the same one a serial run would use, with a suffix if
+        # some other run took it first: the timestamp is only to the second,
+        # so two compilations of one file can easily share it.
+        stem = os.path.join(archiveDir, "HALSFC %s %s.results" % (normFile, now))
+        os.chdir(invocationDir)
+        results = stem
+        i = 0
+        while os.path.exists(results):
+            i += 1
+            if i > 999:
+                break
+            results = "%s.%d" % (stem, i)
+        try:
+            os.rename(workDir, results)
+        except OSError:
+            results = workDir  # Leave it where it is, and say where that is.
+        # Reported the way a serial run reports it, relative to where HALSFC
+        # was run, rather than as the absolute path it is carried around as.
+        results = os.path.relpath(results, invocationDir)
+        print(f"Results stored in the folder \"{results}\".")
+        return
     results = "HALSFC %s %s.results" % (normFile, now)
     if archive:
         try:
@@ -259,19 +383,7 @@ def moveAll(message):
     f = open("%s%scomment.txt" % (results, os.sep), "w")
     print(message, file=f)
     f.close()
-    try:
-        if bfs:
-            if objectFilename != "cards":
-                try:
-                    shutil.rmtree(objectFilename)
-                except:
-                    pass
-                shutil.copytree("cards", objectFilename)
-        else:
-            if objectFilename != "cards.bin":
-                shutil.copy("cards.bin", objectFilename)
-    except:
-        print(f"FYI: Unable to copy object file(s) to {objectFilename}")
+    copyObject()
     if halsFile.startswith("_") or halsFile.startswith(f".{os.sep}_"):
         extras1 = [halsFile]
         extras2 = []
@@ -376,6 +488,7 @@ if bfs:
     PASS3 = "HALSFC-PASS3B" + ext
     PASS4 = "HALSFC-PASS4" + ext
     TEMPLIB = "TEMPLIBB"
+    TEMPLIBP = "TEMPLIBBp"
     INCLIB = "INCLIBB"
     INCLIB2 = "&&TEMPINC"
     CARDS = "--pdso=3,cards,E"
@@ -389,6 +502,7 @@ else:
     PASS3 = "HALSFC-PASS3" + ext
     PASS4 = "HALSFC-PASS4" + ext
     TEMPLIB = "TEMPLIB"
+    TEMPLIBP = "TEMPLIBp"
     INCLIB = "INCLIB"
     INCLIB2 = "&&TEMPINC"
     CARDS = "--ddo=3,cards.bin,E"
@@ -399,6 +513,21 @@ if appDir == None:
     print("Directory containing the compiler is not in the PATH")
     sys.exit(EXIT_ENVIRONMENT)
 ERRORLIB = appDir + os.sep + "ERRORLIB"
+# The libraries persist from one compilation to the next, so they belong to
+# the invocation directory rather than to whatever directory the passes
+# happen to run in.  TEMPLIBP is HAL_S_FC.py's own copy of the template
+# library: it is written as well as read, and both compilers bumping the same
+# version codes would be two writers of one member.
+TEMPLIBABS = fromInvocation(TEMPLIB)
+TEMPLIBPABS = fromInvocation(TEMPLIBP)
+INCLIBABS = fromInvocation(INCLIB)
+# ACCESS, the PDS of module access rights, is looked for where HALSFC was run
+# and otherwise alongside the compiler, which is where the installation keeps
+# it.  Resolving it matters because the passes no longer necessarily run in
+# the directory it is in.
+ACCESSABS = fromInvocation("ACCESS")
+if not os.path.isdir(ACCESSABS):
+    ACCESSABS = appDir + os.sep + "ACCESS"
 parmList = parmString.split(",")
 # An SDF library to import from, for PASS1 and for HAL_S_FC.py alike.  PASS3
 # writes to SDFLIB by default whether or not this is given; --sdfi is only
@@ -406,18 +535,18 @@ parmList = parmString.split(",")
 if sdfi == None:
     sdfiSwitch = ""
 else:
-    sdfiSwitch = '--sdfi="%s"' % sdfi
+    sdfiSwitch = '--sdfi="%s"' % sdfiAbs
 
 # Run PASS1.
 command ='''%s
  --parm="%s"
  --ddi=0,"%s"
  --ddo=2,listing2.txt
- --pdsi=4,%s,E
+ --pdsi=4,"%s",E
  --pdsi=5,"%s"
- --pdsi=6,ACCESS
- --pdso=6,%s,E
- --pdsi=8,%s,E
+ --pdsi=6,"%s"
+ --pdso=6,"%s",E
+ --pdsi=8,"%s",E
  --pdso=8,"%s",E
  --pdsi=9,"%s",E
  --commono=COMMON0%s
@@ -429,9 +558,9 @@ command ='''%s
  %s
  %s
  %s
- >pass1.rpt''' % (PASS1, parmString, halsFile, TEMPLIB, ERRORLIB, TEMPLIB, 
-                 INCLIB, INCLIB2, INCLIB2, extCOMMON, debugX, rsbTrace,
-                 prettyBNF, sdfiSwitch)
+ >pass1.rpt''' % (PASS1, parmString, halsFileAbs, TEMPLIBABS, ERRORLIB,
+                 ACCESSABS, TEMPLIBABS, INCLIBABS, INCLIB2, INCLIB2,
+                 extCOMMON, debugX, rsbTrace, prettyBNF, sdfiSwitch)
 #print(f"Here {command}", file=sys.stderr)
 command = command.replace("\n", "")
 if verbose:
@@ -477,10 +606,17 @@ if test:
     ported=Path(ported).parent
     if ported == None:
         errorExit("Not available for --test:  HAL_S_FC.py")
-    command = 'python "%s" %s %s %s %s %s %s --templib --hal="%s" >pass1p.rpt' \
-                         % (fullPath, TARGET, parmString.replace(",", " "), 
+    # HAL_S_FC.py's libraries are named explicitly rather than left to
+    # default, since its working directory is not necessarily the one the
+    # libraries are in.  Its inclusion library is PASS1's very own -- the
+    # members are pure EBCDIC and it only reads them -- while its template
+    # library is the separate TEMPLIBp, which the comparison below holds
+    # against PASS1's TEMPLIB.
+    command = 'python "%s" %s %s %s %s %s %s --templib' \
+              ' --templib-dir="%s" --inclib-dir="%s" --hal="%s" >pass1p.rpt' \
+                         % (fullPath, TARGET, parmString.replace(",", " "),
                             rsbTrace, prettyBNF, debugLiterals, sdfiSwitch,
-                            halsFile)
+                            TEMPLIBPABS, INCLIBABS, halsFileAbs)
     #print(command)
     if verbose:
         print(command)
@@ -497,11 +633,14 @@ if test:
     sys.stdout.flush()
     print("PASS1 cross-comparison test:")
     sys.stdout.flush()
-    for n in filesPorted:
-        try:
-            shutil.copy(os.path.join(ported, n), n)
-        except:
-            pass
+    # HAL_S_FC.py writes every one of filesPorted into its own working
+    # directory, which is this one.  There used to be a loop here copying
+    # those same names in from the ported/ directory one level above it,
+    # left from when xplBuiltins.py opened them relative to the script rather
+    # than to the working directory -- see the commented-out
+    # `scriptParentFolder` lines still beside each of those opens.  All it
+    # could do now is overwrite what was just produced with something stale,
+    # so the comparisons below read the files where they were written.
     IGNORE_LINES='(HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS|COMPOOL.*VERSION|^REALLOCATIONS|^ *$|SRN STMT|^.[-]+$)'
     os.system('egrep -v "%s" pass1.rpt >pass1A.rpt' % IGNORE_LINES)
     os.system('egrep -v "%s" pass1p.rpt >pass1pA.rpt' % IGNORE_LINES)
@@ -516,6 +655,15 @@ if test:
     os.system('diff --strip-trailing-cr -q -s literals1.txt literals1p.txt')
     if "LISTING2" in parmList:
             os.system('diff --strip-trailing-cr -q -s LISTING2p.txt listing2.txt')
+    # The two template libraries, member for member and byte for byte.  Both
+    # compilers now write the same EBCDIC form, so this compares what each
+    # one made of the same templates -- including the version code, which is
+    # a raw byte the ported compiler has to reproduce rather than a character.
+    # It is only meaningful if the two libraries were prepared together and
+    # every compilation since has run --test; otherwise TEMPLIBp is simply
+    # behind, which is why a difference here is reported and not fatal.
+    if os.path.isdir(TEMPLIBABS) or os.path.isdir(TEMPLIBPABS):
+        os.system('diff -r -q -s "%s" "%s"' % (TEMPLIBABS, TEMPLIBPABS))
     sys.stdout.flush()
     print("======================================================")
     sys.stdout.flush()
@@ -604,14 +752,21 @@ if pass3:
     # Run PASS3.  Note that while SDF generation in principle would use
     # --raf=B,1680,5,FILENAME (and probably --raf=B,3360,6,vmem.bin),
     # but our implementation bypasses all of that.
-    command = '''%s 
-     --pdsi=5,"%s" 
-     --commoni=COMMON4%s 
-     --commono=COMMON5%s 
-     --raf=B,1560,2,litfile.bin 
-     --raf=B,3360,6,vmem.bin 
+    #
+    # --sdfo names the directory the SDFs are written to.  XCOM-I's default
+    # for it is a relative "SDFLIB", so left unsaid the SDFs would be written
+    # into whatever directory the pass ran in -- which under --concurrent is
+    # a working directory about to be archived, leaving nothing for the next
+    # compilation in dependency order to include.
+    command = '''%s
+     --pdsi=5,"%s"
+     --commoni=COMMON4%s
+     --commono=COMMON5%s
+     --raf=B,1560,2,litfile.bin
+     --raf=B,3360,6,vmem.bin
+     --sdfo="%s"
      %s
-     >pass3.rpt''' % (PASS3, ERRORLIB, extCOMMON, extCOMMON, debugX)
+     >pass3.rpt''' % (PASS3, ERRORLIB, extCOMMON, extCOMMON, sdfoAbs, debugX)
     command = command.replace("\n", "")
     if verbose:
         print(command)
@@ -644,7 +799,15 @@ if pass3:
      --commono=COMMON6%s
      %s
      %s
-     >pass4.rpt''' % (PASS4, ERRORLIB, extCOMMON, extCOMMON, sdfiSwitch, debugX)
+     >pass4.rpt''' % (PASS4, ERRORLIB, extCOMMON, extCOMMON,
+                      # PASS4 lists the SDF PASS3 has just written, and
+                      # XCOM-I's fallback for it -- PASS4 being the one
+                      # program for which reading SDFs is the whole job -- is
+                      # again a relative "SDFLIB", so it is named here for the
+                      # same reason PASS3's --sdfo is.
+                      sdfiSwitch if sdfiSwitch != "" \
+                          else '--sdfi="%s"' % sdfoAbs,
+                      debugX)
     command = command.replace("\n", "")
     if verbose:
         print(command)

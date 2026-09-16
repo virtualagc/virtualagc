@@ -11,7 +11,6 @@ following three steps:
 import sys
 import shutil
 import os
-import json
 from pathlib import Path
 from asciiToEbcdic import asciiToEbcdic
 
@@ -69,12 +68,12 @@ for parm in sys.argv[1:]:
         sys.exit(1)
 
 # Clear or create the inclusion library as needed.
+# &&TEMPINC, the temporary inclusion library, is per-compilation rather than
+# persistent, and HAL_S_FC.py still keeps its own as a JSON file -- one that
+# lives in the working directory, so under "HALSFC --concurrent" each
+# compilation has its own and they cannot collide.  It is created empty here
+# only because HALSFC-PASS1 is given it as an input as well as an output.
 jsonName = tempincName + ".json"
-if clear or not Path(jsonName).is_file():
-    f = open(jsonName, "w")
-    print("{}", file=f)
-    f.close()
-jsonName = inclibName + ".json"
 if clear or not Path(jsonName).is_file():
     f = open(jsonName, "w")
     print("{}", file=f)
@@ -94,12 +93,10 @@ if clear or not Path(inclibName).is_dir():
 if len(inclusionDirectories) == 0:
     sys.exit(0)
 
-# Get the json version of the library: i.e., the HAL_S_FC.py version.  We don't
-# need to have the HALSFC version of the library in memory.
-with open(jsonName, "r") as f:
-    jsonLibrary = json.load(f)
-
-# Process each of the inclusion directories.
+# Process each of the inclusion directories.  One library serves both
+# compilers now: the members are pure EBCDIC and neither compiler writes to
+# them, so HAL_S_FC.py reads these very files, translating as it goes, and
+# there is no longer a JSON copy of them to keep in step.
 record = bytearray(80)
 for dir in inclusionDirectories:
     # Process each HAL/S file in the directory.
@@ -123,22 +120,13 @@ for dir in inclusionDirectories:
                         lineCount += 1
                         lines[i] = "C" + lines[i][1:]
             i += 1
-        # What we do with the contents of the file differs for HAL_S_FC.py 
-        # vs HALSFC.  For HAL_S_FC.py, we simply stash the entire contents into
-        # `jsonLibrary`, which is a dictionary that will eventually be written
-        # out to a file.
-        jsonLibrary[name.ljust(8)] = lines
-        # For HALSFC, we convert the entire thing to EBCDIC and immediately 
-        # write it out to a file in the directory representing the inclusion
-        # library's PDS, as a sequence of 80-byte records.
+        # Convert the entire thing to EBCDIC and write it out to a file in the
+        # directory representing the inclusion library's PDS, as a sequence of
+        # 80-byte records.  The member's filename is the name with no padding,
+        # which is how MONITOR(1) and MONITOR(2) spell it.
         f = open(inclibName + os.sep + name, "wb")
         for line in lines:
             for i in range(len(record)):
                 record[i] = asciiToEbcdic[ord(line[i])]
             f.write(record)
         f.close()
-
-# Finally, write out the HAL_S_FC.py version of the library.  We've already 
-# written out the HALSFC version above.
-with open(jsonName, "w") as f:
-    json.dump(jsonLibrary, f, indent=2)

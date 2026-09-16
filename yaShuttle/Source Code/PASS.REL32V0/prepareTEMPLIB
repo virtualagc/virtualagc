@@ -11,44 +11,56 @@ following three steps:
 import sys
 import shutil
 import os
-import json
 from pathlib import Path
-from asciiToEbcdic import asciiToEbcdic
 
 # Process the command-line parameters.
 helpMessage = '''
 Prepare (or clear) a HAL/S "template library" for usage by the compiler:
     prepareTEMPLIB [OPTIONS]
-    
+
 The available options are:
-    
+
     --help      Show this message.
-    --bfs       Prepare the library called TEMPLIBB, for use with the
-                BFS version of the HAL/S compiler.  (The default is to 
-                prepare TEMPLIB, for use with the PASS HAL/S compiler.)
-    --clear     Clear the selected library, if it already exists.
+    --bfs       Prepare the libraries called TEMPLIBB and TEMPLIBBp, for use
+                with the BFS version of the HAL/S compiler.  (The default is
+                to prepare TEMPLIB and TEMPLIBp, for use with the PASS HAL/S
+                compiler.)
+    --clear     Clear the selected libraries, if they already exist.
+
+Two libraries are prepared rather than one.  HALSFC-PASS1 uses TEMPLIB and
+HAL_S_FC.py uses TEMPLIBp; both are directories of EBCDIC members in the same
+format, and they would hold identical contents were every compilation run
+under "HALSFC --test", which compiles with both.  They have to be separate
+because a template's members carry a version code that each compilation bumps,
+so one library written by both compilers would have its versions bumped twice.
 '''
 clear = False
-templibName = "TEMPLIB"
+bfs = False
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMessage)
         sys.exit(0)
     elif parm == "--clear":
         clear = True
+    elif parm == "--bfs":
+        bfs = True
     else:
         print(f"Unrecognized command-line parameter '{parm}.")
         sys.exit(1)
+if bfs:
+    templibNames = ["TEMPLIBB", "TEMPLIBBp"]
+else:
+    templibNames = ["TEMPLIB", "TEMPLIBp"]
 
-# Clear or create the template library as needed.
-jsonName = templibName + ".json"
-if clear or not Path(jsonName).is_file():
-    f = open(jsonName, "w")
-    print("{}", file=f)
-    f.close()
-if clear or not Path(templibName).is_dir():
-    try:
-        shutil.rmtree(templibName)
-    except:
-        pass
-    os.mkdir(templibName)
+# Clear or create the template libraries as needed.  There used to be a JSON
+# form of the library as well, for HAL_S_FC.py, which now reads and writes the
+# directory form instead; a JSON file left over from before is of no further
+# use, but it is not deleted here either, since deleting files nobody asked
+# about is not this script's business.
+for templibName in templibNames:
+    if clear or not Path(templibName).is_dir():
+        try:
+            shutil.rmtree(templibName)
+        except:
+            pass
+        os.mkdir(templibName)
