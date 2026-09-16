@@ -67,6 +67,16 @@ Key options:
   directory (kept only under the results directory).
 - `--archive` — put results directories (`"HALSFC ...".results`) under
   `archive.results/` instead of the current directory.
+- `--concurrent` — run every pass in a working directory of its own, so
+  that several `HALSFC`s can compile at once in one directory. Implies
+  `--clean --archive`, and makes no `current.results` symlink, that
+  being a single name concurrent runs would fight over. The libraries
+  — `TEMPLIB`, `TEMPLIBp`, `INCLIB`, `SDFLIB` — stay in the directory
+  `HALSFC` was run from, since they persist from one compilation to the
+  next. Concurrent compilations still have to be *scheduled* in
+  template/SDF dependency order, as `make` would: `--concurrent` makes
+  that safe, it does not work it out. `compilePASSm.py` is what does
+  the scheduling for a whole corpus.
 - `--debug=X` — hex debug flagword passed to the compiler passes (bit
   0: PASS2 prints messages in `SAVE_LITERAL`).
 - `--verbose` — print the underlying command lines.

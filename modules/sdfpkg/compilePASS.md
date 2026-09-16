@@ -170,3 +170,71 @@ XI3 fell from 11 to 3 to none.
 
 Check `grep -c 'Done\.'` before believing any of those numbers: a run that stops
 early still prints a summary.
+
+## Two builders: `compilePASS` and `compilePASSm.py`
+
+`compilePASS` compiles one file at a time.  `compilePASSm.py` is a copy of it
+with the scheduling replaced, running up to `--jobs=N` compilations at once
+through `HALSFC --concurrent`, which is what gives each compilation a working
+directory of its own.  The order is the same rule -- a unit starts once none of
+the files it imports is still waiting -- evaluated incrementally, each
+completion releasing just the units that waited on it, rather than by
+rescanning between sweeps.
+
+Everything else in the two files is character for character the same: the
+dependency analysis, the PASS membership test, the cycle-breaking stubs, the
+retry sweeps, the summary.  So `diff compilePASS compilePASSm.py` is the whole
+of the difference, and a fix to either belongs in both.  Keep it that way.
+
+Four switches cannot be parallel and pin the run to one job rather than being
+ignored: `--skip-to` and `--rsb-trace` name a position in the order or "the
+next compilation"; `--no-clean`/`--no-archive` ask for the old shared working
+directory; and `--halt-on-error` would stop mid-compilation, which can leave a
+torn `TEMPLIB` member behind for the next run to read.
+
+Measured on a synthetic 18-unit corpus -- a 4-deep chain, a 2-member dependency
+cycle and 12 independent units: 9.0 s for `compilePASS`, 9.0 s for
+`compilePASSm.py --jobs=1`, 4.6 s at `--jobs=4`, 3.8 s at `--jobs=8` and at
+`--jobs=16`.  All four produced the same 19 objects, 18 template members and 18
+SDFs.  The template library was byte-identical; the objects and SDFs differed
+only in the bytes of their embedded compilation time, in the same byte region
+by which two *serial* runs differ from each other, which is the control that
+says concurrency changes nothing.
+
+A note on the ordering, for the anchor `#compilePASS` in HAL.html that this
+file points at: the order comes from analysing `D INCLUDE TEMPLATE` and
+`D INCLUDE SDF`.  Plain `D INCLUDE` is *not* an ordering constraint -- it is
+satisfied from `INCLIB`, which `prepareINCLIB` builds in full before the run.
+
+## Why not a Makefile and `make -j`
+
+That is the obvious thing to try, now that compilations can run at once, and it
+does not work: this build is not a DAG, and `make`'s whole model is that it is.
+
+- **Cycles.**  Six groups of files in OI340600 need each other's templates, 156
+  files in all, the largest group of 29.  They are broken by *seeding*:
+  compiling a stub of one member so the rest can start, then compiling the real
+  unit over it.  That is two builds of one target, ordered.  Given a cycle,
+  `make` drops an edge and says so -- demonstrated on the test corpus, where
+  `make -j4` reports "Circular objects/UNITF.obj <- objects/UNITE.obj
+  dependency dropped", compiles UNITF without UNITE's template, and fails it.
+- **The retry sweeps**, which exist precisely because the dependency analysis
+  is imperfect -- 36 of 51 failures in one measured build were XI3 or XI10, a
+  template or SDF that simply had not been written yet.  There is no "come back
+  to it once more of the build exists" in a model where the graph is right.
+- **The reporting.**  `make -k` continues past a failure but can say almost
+  nothing about it, so every recipe would have to write a status file for
+  Python to read back, which is to keep in files what is already in variables.
+
+On top of which every per-file decision is a Python call anyway: `getParms` for
+the CARDTYPE, `isInPass` against the csects indexes, `isTombstone`, the
+column-1 rewrite through `getCardtypeMap`, and the two-step for a display deck.
+Recipes would call a helper per file, and the Makefile would be a lossy
+re-encoding of the program.
+
+`compilePASSm.py --makefile=F` writes the graph out as a Makefile regardless,
+because a dependency graph is worth being able to read, and it is runnable
+through `--one`: `make -k -j4` built 16 of the test corpus's 18 units,
+everything but the two cycle members.  Its cost is that `--one` re-runs the
+whole source analysis per recipe (0.49 s for 18 files, and the analysis reads
+every source), so it is a view of the build and not a way to run one.

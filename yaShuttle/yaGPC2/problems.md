@@ -1879,8 +1879,16 @@ it can be `INCLUDE`d, analogous to a C header needing to exist before
 must include the compiler option `TEMPLATE` — usable unconditionally
 for *every* file with no downside, whether or not it's actually acting
 as a template consumer/provider. The template library is a `TEMPLIB/`
-directory plus a `TEMPLIB.json` file (`{}` if empty); both must exist
-before compiling anything that needs `TEMPLATE`.
+directory, which must exist before compiling anything that needs
+`TEMPLATE`; `prepareTEMPLIB` creates it. It used also to need a
+`TEMPLIB.json` file (`{}` if empty), which was `HAL_S_FC.py`'s own form
+of the same library. There is no JSON form any more: `prepareTEMPLIB`
+now creates two directories in the same format, `TEMPLIB/` for
+`HALSFC-PASS1` and `TEMPLIBp/` for `HAL_S_FC.py`, separate because each
+compilation bumps a member's version code and one library written by
+both compilers would be bumped twice. `prepareTEMPLIB --bfs` also works
+now, for `TEMPLIBB/` and `TEMPLIBBp/`; it used to reject the switch its
+own help advertised (virtualagc issue #1346).
 
 Dependency chain traced and resolved for all 10 files: 4 template
 providers (`269-PROCESS_CONTROL` → `264-TQE` → `189-IMU_DATA` →

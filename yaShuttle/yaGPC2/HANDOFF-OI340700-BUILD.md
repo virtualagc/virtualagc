@@ -77,6 +77,16 @@ directory (ASM101Sa), and Don's `build/bin` (dfg only).  Launch it with
 `setsid nohup ... &` -- a foreground wrapper's timeout kills the process group
 and takes the build with it.  About 15 minutes.
 
+`compilePASSm.py --jobs=N` is a drop-in for `compilePASS` here and compiles
+several files at a time, in the same dependency order, through
+`HALSFC --concurrent`.  It is NOT what `tapebuild/build.sh` step 2 runs, and
+that was left alone deliberately: the whole purpose of that script is a
+byte-identical volume, so the swap is worth a `REF=` comparison of the volume
+first.  What is known so far is only that an object built concurrently differs
+from a serially-built one in the bytes of its embedded compilation timestamp,
+which is also how two *serial* builds differ from each other -- established on
+a synthetic 18-unit corpus, not on this one.
+
 `--no-csects` is right ONLY because tombstones now do the removal; see below.
 
 **`--sdl --release=OI340700` are not optional for a TAPE build**, and a plain
