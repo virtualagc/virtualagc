@@ -1,0 +1,1980 @@
+#!/usr/bin/env python
+# For compiling the HAL/S source-code files in OI340600 or OI301700.  Run this 
+# from one of those directories.  It neither assembles the AP-101S assembly
+# language files, nor links any of this stuff, so look elsewhere for that
+# functionality.
+
+'''
+A note on naming:  Like T. S. Eliot's cats, any given template for the template
+library has three separate names:
+    1) The name of the file in which its source-code resides.
+    2) The member name within the template-library PDS.
+    3) The name used in compiler directives "D INCLUDE TEMPLATE name".
+Now that I think of it, there may actually be more than 3 names, since sometimes 
+multiple distinct spellings are used in the "D INCLUDE TEMPLATE name" 
+directives.  And besides that, there's the name of the object (COMPOOL, PROGRAM,
+PROCEDURE, or FUNCTION) used within the source-code file.
+
+In fact, though, all of these names reduce to just the first two.  That's
+because the name within the source-code file and the name in 
+"D INCLUDE TEMPLATE name" are all normalized ("descored") to produce the PDS
+name, as follows:
+    - Remove all underscore characters.
+    - Truncate to 6 characters.
+    - Right-pad to 6 characters.
+    - Prefix by "@@".
+Therefore, any two strings that "descore" to the same 8-character string are
+treated as identical.  For our purposes internally in compilePASS, we neither
+right-pad nor use the prefix @@, since they don't affect the uniqueness of the
+symbols.  For our purposes, I call these descored names "halnames".
+'''
+
+# THIS IS compilePASSm.py, THE PARALLEL VARIANT OF compilePASS.
+#
+# It is a copy of compilePASS with the scheduling replaced, and it is meant to
+# be read as a copy: everything else -- the dependency analysis, the PASS
+# membership test, the cycle-breaking stubs, the retry sweeps, the end-of-run
+# summary -- is character for character the same, so that
+#
+#     diff compilePASS compilePASSm.py
+#
+# shows the whole of the difference and nothing else.  Keep it that way.  A fix
+# to either one belongs in both, and the diff is how you tell whether it is.
+#
+# WHAT DIFFERS.  compilePASS compiles one file at a time.  This runs up to
+# --jobs of them at once, each in a working directory of its own, by way of
+# `HALSFC --concurrent`.  The order is still the dependency order: a unit is
+# started only once every template and SDF it imports has been written, which
+# is the same rule compilePASS applies, evaluated incrementally so that the
+# pipe stays full rather than in lock-step waves.
+#
+# WHY NOT A Makefile AND make -j.  Because this build is not a DAG, and make's
+# whole model is that it is.  Three things here are outside what make can say:
+#
+#   * Cycles.  Six groups of files in OI340600 need each other's templates,
+#     156 files in all, the largest group of 29.  They are broken by SEEDING:
+#     compiling a stub of one member so the rest can start, then compiling the
+#     real unit over it.  That is two builds of one target, ordered.  Given a
+#     cycle, make drops an edge and says "circular dependency dropped", which
+#     is the wrong repair.
+#   * The retry sweeps.  --retries exists because the analysis is imperfect --
+#     36 of 51 failures in one measured build were XI3 or XI10, a template or
+#     SDF that simply had not been written yet.  make has no "come back to it
+#     once more of the build exists".
+#   * The reporting.  tombstones, files not part of PASS, display-deck
+#     failures, unrecognised failures, seeded cycles.  `make -k` continues past
+#     a failure but can tell you almost nothing about it, so every recipe would
+#     have to write a status file for Python to read back -- which is to keep
+#     in files what is already in variables here.
+#
+# On top of which every per-file decision is a Python call anyway: getParms for
+# the CARDTYPE, isInPass against the csects indexes, isTombstone, the column-1
+# rewrite through getCardtypeMap, and the two-step for a display deck.  Recipes
+# would call a helper per file and the Makefile would be a lossy re-encoding of
+# this program.
+#
+# --makefile=F does still write the graph out as a Makefile, because a
+# dependency graph is worth being able to read, and what it writes is runnable
+# under `make -j` through --one.  It just cannot seed a cycle or retry, so it
+# builds the acyclic part and fails on the rest.  The scheduler below is the
+# engine; that file is a view of it.
+
+import subprocess
+import sys
+import shutil
+import os
+import stat
+from datetime import datetime
+from pathlib import Path
+import tempfile
+import shutil
+import io
+import threading
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+
+# A job's output is collected while it runs and printed in one piece when it
+# finishes, so that two compilations running at once do not interleave their
+# lines.  `_job.buffer` is that collector, per thread, and None on the main
+# thread, where printing goes straight out.
+# What to call this program when telling the user what to re-run.  compilePASS
+# names itself in three places, and a copy of it that named the original would
+# be quietly telling you to resume with the other engine.
+ME = "compilePASSm.py"
+
+_job = threading.local()
+_realStdout = sys.stdout
+_printLock = threading.Lock()
+
+
+class _ThreadedStdout:
+    """The run's sys.stdout.  A write from a job goes to that job's buffer;
+    every other write goes straight out.
+
+    This is installed once, globally, rather than each job redirecting stdout
+    around itself with contextlib.redirect_stdout.  That was the first attempt
+    and it silently loses output: redirect_stdout assigns to sys.stdout, which
+    is shared by the whole process, so two jobs entering it at once each save
+    what the other had just installed and restore it on the way out.  Writes
+    then land in whichever buffer was installed last and are discarded with it.
+    Measured on an 18-unit corpus: 3 of 19 "Compilation successful" lines were
+    missing at --jobs=4 and 7 at --jobs=8, while every object, template and SDF
+    was correctly built -- a lossy log, which is the worst way for this to go
+    wrong, since the log is the record of the build.
+
+    Dispatching per thread instead means sys.stdout is only ever assigned once
+    and there is nothing to race over."""
+
+    def write(self, text):
+        buffer = getattr(_job, "buffer", None)
+        if buffer != None:
+            return buffer.write(text)
+        return _realStdout.write(text)
+
+    def flush(self):
+        buffer = getattr(_job, "buffer", None)
+        if buffer != None:
+            return buffer.flush()
+        return _realStdout.flush()
+
+    def isatty(self):
+        return _realStdout.isatty()
+
+    def fileno(self):
+        return _realStdout.fileno()
+
+
+sys.stdout = _ThreadedStdout()
+
+
+def outtaHere(n):
+    # os._exit() does not flush, and stdout is block-buffered whenever the
+    # output has been redirected to a log rather than to a terminal.  Without
+    # these flushes the diagnostic explaining why we are exiting sits in the
+    # buffer and is discarded, which makes an orderly abort look for all the
+    # world like the process having been killed.
+    #
+    # Exiting from inside a job has the same problem twice over, since its
+    # stdout is a StringIO that flushes nowhere, so hand whatever it had
+    # collected to the real stdout before going.  Without this an abort inside
+    # a job is not merely unexplained, it is silent.
+    buffered = getattr(_job, "buffer", None)
+    if buffered != None:
+        try:
+            _realStdout.write(buffered.getvalue())
+            _realStdout.flush()
+        except Exception:
+            pass
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(n)
+
+
+def inOnePiece(work):
+    """Wrap work(item) so that everything it prints is collected while it runs
+    and written out in one block when it returns.  Two compilations running at
+    once would otherwise interleave their lines and the log would be
+    unreadable."""
+    def wrapped(item):
+        buffer = io.StringIO()
+        _job.buffer = buffer
+        try:
+            return work(item)
+        finally:
+            _job.buffer = None
+            text = buffer.getvalue()
+            if text:
+                with _printLock:
+                    _realStdout.write(text)
+                    _realStdout.flush()
+    return wrapped
+
+
+def inParallel(work):
+    """inOnePiece, but only when there is more than one job.  With one job
+    there is nothing to interleave with, and buffering would then cost the
+    thing a log is for: "Compiling X" would not appear until X had finished,
+    so a run could not be watched, only read afterwards."""
+    if jobs > 1:
+        return inOnePiece(work)
+    return work
+
+helpMsg = '''
+Compiles HAL/S source-code files for the PASS version stored in the current 
+working directory's sub-hierarchy (i.e., subdirectories like APPLSRC/, SSSRC/,
+and INCL80/).  Usage:
+
+    compilePASSm.py [OPTIONS]
+    
+The only OPTIONS available are:
+
+    --help          Show this message.
+    --preprocess    Preprocess the HAL/S source code prior to compilation to
+                    eliminate DI11 compile-time errors.  This is no longer the
+                    default, and is not expected to be useful when SDFs are
+                    being imported.  preprocessHALSFC exists because the
+                    template path does not include a template's own templates
+                    (DI11) and has no way to cope with the same template being
+                    included twice (PM2).  Importing an SDF has both: INCSDF's
+                    ENTER_COMPOOL_VARS enters the whole declare chain, which
+                    carries the symbols the COMPOOL itself obtained from its
+                    own includes, and its DUPLICATE_NAME flags a redeclaration
+                    rather than rejecting it.  The preprocessor also does
+                    active harm now, since it knows only "D INCLUDE TEMPLATE"
+                    and is blind to "D INCLUDE SDF X:", so it hoists a second
+                    include of something already included and PASS1 rejects it
+                    with PL2 -- which is what happened to CS2PAT.
+    --no-preprocess (Default.)  Opposite of --preprocess.
+    --clean         (Default) Use HALSFC's --clean switch.
+    --no-clean      Don't use HALSFC's --clean switch.
+    --archive       (Default) Use HALSFC's --archive switch.
+    --no-archive    Don't use HALSFC's --archive switch.
+    --extra-parms=P P is a list of extra HAL/S-FC compiler options prefixed to
+                    the defaults used by this program.  A trailing comma is
+                    supplied if you leave it off.  TABLST is the reason it
+                    exists: with it, PASS4 parses each SDF the run has just
+                    written rather than merely opening it, so a corpus run
+                    becomes a test of PASS4 and SDFPKG as well as the compiler.
+    --sdfi=D        (Default SDFLIB.)  Directory the compilers read Simulation
+                    Data Files (SDF) from, so that a "D INCLUDE TEMPLATE" is
+                    satisfied from an SDF where one exists, in preference to
+                    the template library.  Since the files here are compiled in
+                    dependency order, a file's SDFs have been written by the
+                    time it is compiled.
+    --no-sdfi       Read no SDFs at all, and satisfy every "D INCLUDE TEMPLATE"
+                    from the template library, as was done before SDF import
+                    existed.
+    --dfg           (Not yet available.)  Run the DFG preprocessor to convert
+                    display-format files to HAL/S source code.
+    --no-dfg        Do not run the DFG preprocessor to convert display-format 
+                    files to HAL/S source code.
+    --ops=C         (Default G16.)  Select a GPC configuration.  The choices
+                    are G16, G2, G3, G8, G9, S2, P9, and SSW.  These correspond
+                    to the various operational modes of PASS, and each would
+                    represent a different memory image.  [Ignore this parameter
+                    and don't use it for now.]
+    --csects=D      (Default ../mafgen.)  Directory holding csects-*.json, the
+                    indexes of the CSECTs actually present in each PASS
+                    configuration.  A HAL/S file whose CSECT appears in none of
+                    them is auxiliary code that is not part of PASS at all, and
+                    is reported as such rather than compiled.  Membership is
+                    the union of all eight configurations.
+    --no-csects     Compile every HAL/S file found, without regard to whether
+                    it is part of PASS.  This was the behaviour before the
+                    check existed.
+    --release=R     Build release R (e.g. OI340700), which selects any
+                    per-file CARDTYPE exceptions that release needs.  Omitted,
+                    the base table is used -- that is OI340600.
+    --no-assemble   Compile the HAL/S and display decks but do not assemble
+                    the AP-101S sources in SSSRC/, APPLSRC/, RUNASM/ and
+                    ZCONASM/.  (A full build does both.)
+    --jobs=N        (Default one less than the processor count, at least 1.)
+                    How many compilations to run at once.  Each gets a working
+                    directory of its own by way of `HALSFC --concurrent`, so
+                    they cannot tread on one another's workfiles.  The
+                    libraries TEMPLIB, SDFLIB and INCLIB stay in this
+                    directory and are shared, which is safe because a unit is
+                    never started until every member it imports has been
+                    written.
+                    A compilation is seven programs run one after another, so
+                    N above the processor count buys nothing, and N equal to it
+                    leaves nothing for the rest of the machine.
+    --makefile=F    Also write the dependency graph to F as a Makefile, for
+                    reading.  It is runnable -- `make -j -f F` compiles through
+                    --one -- but it can neither seed a dependency cycle nor
+                    retry anything, so it builds the acyclic part of the corpus
+                    and fails on the rest.  The build here goes ahead either
+                    way.
+    --one=PATH      Compile just the one source file PATH, with the same
+                    options and the same per-file CARDTYPE a full run would
+                    give it, and exit.  This is what the recipes of a
+                    --makefile Makefile call, and it is a convenient way to
+                    redo a single unit by hand.  No dependency analysis is
+                    done, so whatever PATH imports had better be in the
+                    libraries already.
+    --no-compiler-check
+                    Do not check whether HALSFC-PASS1 and its companions are
+                    older than the sources they are built from.  The check
+                    exists because those binaries are untracked build products
+                    that nothing in a PASS build rebuilds, so a fix committed
+                    to XCOM-I or to the compiler's XPL reaches the flight
+                    software only when somebody remembers `make all` by hand.
+                    Use this when the mtimes are misleading rather than the
+                    binaries stale -- a fresh git checkout stamps every source
+                    with the checkout time.
+    --halt-on-error Abandon the run on the first failure that is not one of the
+                    recognized, delayable kinds, as compilePASS always used to.
+                    The default is now to record it and carry on: a run takes an
+                    hour, the files that fail are the ones reached last, and
+                    halting discards every other result and the summary with it.
+    --no-seed-cycles
+                    Do not break template-dependency cycles.  Files that need
+                    each other's templates are then never attempted at all, as
+                    they were before seeding existed: no member of a cycle can
+                    go first, because each waits on a template only another
+                    member can produce.  Seeding compiles a stub carrying one
+                    member's block statement, which is enough for the others
+                    to compile, and the real unit is compiled over it after.
+    --no-provider-deps
+                    Do not widen PASS membership to cover the providers of
+                    templates that PASS members include.  A COMPOOL that some
+                    PASS member includes must be compiled for its template or
+                    SDF to exist, even when it contributes no CSECT of its own
+                    and so does not look like part of PASS; by default such
+                    providers are compiled.  This switch restores the older,
+                    strictly CSECT-based membership.
+    --skip-to=F     Skip all source-code files prior to F.  F must be the
+                    relative path of a file, such as APPLSRC/RDDDDI.hal.
+                    Note the presence of the subdirectory name and the .hal
+                    filename extension.  If the selected filename is never 
+                    encountered, then nothing at all will be compiled.
+    --rsb-trace=N   Supplies an --rsb-trace=N option to pass 1 of the HAL/S
+                    compilers.  Applies only to the first HAL/S file compiled,
+                    and is discarded for subsequent HAL/S files.  It's typically
+                    used in conjunction with a preceding --skip-to=F.
+                    Note that this requires a HALSFC-PASS1 compiled with the
+                    -DRSB_TRACE switch, and HALSFC-PASS1 will abort if not.
+                    This can be checked by running `HALSFC-PASS1 --help` to 
+                    see if --rsb-trace is listed among HALSFC-PASS1's available 
+                    options.
+                    
+(The typical commands below are written as compilePASS, the one-at-a-time
+program this is a copy of.  They apply unchanged with compilePASSm.py in its
+place, which additionally takes --jobs=N.)
+
+In Linux, a typical usage would be to *begin* a clean compilation like so:
+    rm *.results -rf
+    prepareTEMPLIB --clear
+    prepareINCLIB --clear --include=INCL80
+    unbuffer compilePASS --clean --archive  2>&1 | tee compilePASS.log
+Whereas you'd subsequently *resume* compilation previously aborted due to 
+failure of a clean compilation, presumably after fixing the problem that caused
+the failure, like so:
+    unbuffer compilePASS --clean --archive --skip-to=FILENAME 2>&1 | tee -a compilePASS.log
+where FILENAME was the file at which the clean compilation had failed. 
+
+But not all of these things (namely rm, unbuffer, 2>&1, tee) necessarily work 
+identically, or even at all, on other platforms like Mac OS or Windows.  The 
+simplest variant of these commands guaranteed to work the same way on all 
+platforms would be clean-compile commands of
+    prepareTEMPLIB --clear
+    prepareINCLIB --clear --include=INCL80
+    compilePASS  >compilePASS.log
+versus a resumption-compile command of
+    compilePASS --skip-to=FILENAME >>compilePASS.log
+
+Presumably the reason for piping the output reports into a log file 
+(compilePASS.log) is self-evident:  Production of the log file is optional, but 
+since over a thousand HAL/S files are compiled in any given PASS version, a log
+of what actually happened during the full compilation process is likely a useful
+thing to have.  
+
+As for the rest of the complexity of some of the "typical" commands listed 
+above, here's the explanation:  The "2>&1" is to insure that error messages 
+emitted on stderr are included in the log.  The "tee" is to insure that you can 
+actually see the messages (and thus have a progress gauge) rather than having 
+to wait until the compilation process is complete in order to view the full log
+file. The "-a"  in the tee command means that the messages are appended to the 
+end of the log rather than overwriting it.  The "unbuffer" means that you can 
+see the messages more-or-less at the time they're emitted, rather than having 
+the operating system buffer them in large blocks and only emitting them when 
+full blocks become available.
+'''
+preprocess = False
+dfg = True
+skipTo = None
+rsbTrace = ""
+ops = "G16"
+clean = True
+archive = True
+sdfi = "SDFLIB"
+csectsDir = ".." + os.sep + "mafgen"
+providerDeps = True
+seedCycles = True
+haltOnError = False
+# Which release is being built.  A file's conditional-compilation letters can
+# differ between releases even when its text does not, because what the letters
+# SELECT differs -- CPUSLS and CPTOSV carry a type-B "INCLUDE TEMPLATE CS4_PDT"
+# that must be a directive for OI340600 and must not be for OI340700, which has
+# no CS4 family.  halsParms.cardtypesByRelease holds those exceptions; None
+# means the base table, which is OI340600's.
+release = None
+# How many times to sweep over the units that produced no object.  Most
+# failures are ordering accidents that clear on a second look; the sweep stops
+# early as soon as one pass gains nothing.
+retryPasses = 4
+# A full build assembles as well as compiling; --no-assemble is for the case
+# where only the HAL/S side is wanted (it is much the slower half to redo).
+assembleToo = True
+unrecognizedFailures = []
+# One less than the processor count, so that a corpus build at full tilt leaves
+# the machine usable.  os.cpu_count() can return None.
+jobs = max(1, (os.cpu_count() or 2) - 1)
+makefilePath = None
+oneFile = None
+extraParms = ""
+sdl = None
+compilerCheck = True
+for parm in sys.argv[1:]:
+    if parm == "--help":
+        print(helpMsg)
+        outtaHere(0)
+    elif parm == "--preprocess":
+        preprocess = True
+    elif parm == "--no-preprocess":
+        preprocess = False
+    elif parm == "--clean":
+        clean = True
+    elif parm == "--archive":
+        archive = True
+    elif parm == "--no-clean":
+        clean = False
+    elif parm == "--no-archive":
+        archive = False
+    elif parm.startswith("--extra-parms="):
+        # Prefixed to every compilation's PARM field.  TABLST is the reason it
+        # exists:  with it, PASS4 parses each SDF the run has just written
+        # rather than merely opening it, so a corpus becomes a test of PASS4
+        # and SDFPKG as well as of the compiler.
+        extraParms = parm[14:]
+    elif parm == "--sdl":
+        # Compile as the Software Development Lab did.  The DASS memory dumps
+        # we compare against are SDL builds, and NOSDL -- the default -- emits
+        # a START CSECT and an "LHI R0,<stack>" prologue for every PROGRAM that
+        # those images do not have.  See the note beside DEFAULT_SDL.
+        sdl = True
+    elif parm == "--no-sdl":
+        sdl = False
+    elif parm.startswith("--sdfi="):
+        sdfi = parm[7:]
+    elif parm == "--no-sdfi":
+        sdfi = None
+    elif parm.startswith("--csects="):
+        csectsDir = parm[9:]
+    elif parm == "--no-csects":
+        csectsDir = None
+    elif parm == "--no-provider-deps":
+        providerDeps = False
+    elif parm == "--no-seed-cycles":
+        seedCycles = False
+    elif parm == "--no-compiler-check":
+        compilerCheck = False
+    elif parm == "--halt-on-error":
+        haltOnError = True
+    elif parm == "--no-assemble":
+        assembleToo = False
+    elif parm.startswith("--jobs="):
+        jobs = int(parm[7:])
+        if jobs < 1:
+            print("--jobs must be 1 or more.")
+            outtaHere(1)
+    elif parm.startswith("--makefile="):
+        makefilePath = parm[11:]
+    elif parm.startswith("--one="):
+        oneFile = parm[6:]
+    elif parm.startswith("--release="):
+        release = parm[10:]
+    elif parm.startswith("--retries="):
+        retryPasses = int(parm[10:])
+    elif parm == "--dfg":
+        dfg = True
+    elif parm == "--no-dfg":
+        dfg = False
+    elif parm.startswith("--ops="):
+        ops = parm[6:]
+        if ops not in ["G16", "G2", "G3", "G8", "G9", "S2", "P9", "SSW"]:
+            print("Illegal --ops setting.")
+            outtaHere(1)
+    elif parm.startswith("--skip-to="):
+        skipTo = parm[10:]
+    elif parm.startswith("--rsb-trace="):
+        rsbTrace = parm
+    else:
+        print("Unrecognized parameter:", parm)
+        print(helpMsg)
+        outtaHere(1)
+
+# ---------------------------------------------------------------------------
+# SWITCHES THAT CANNOT BE PARALLEL
+#
+# `--concurrent` is what gives each compilation a working directory of its own,
+# and it is how this program compiles.  It implies --clean --archive, so asking
+# for the old shared working directory with --no-clean or --no-archive means
+# asking for the old one-at-a-time build too.
+#
+# The other three describe a position in a serial order, or apply to "the next
+# compilation", and neither idea survives running several at once.  Rather than
+# ignore them, or let them land on an arbitrary unit, they pin the run to a
+# single job and say so.  --halt-on-error is there for a different reason:
+# stopping the instant one unit fails would leave the others part-way through,
+# and a compilation killed between MONITOR(1)'s truncate and its write leaves a
+# torn member in TEMPLIB for the next run to find.
+useConcurrent = clean and archive
+serialOnly = []
+if not useConcurrent:
+    serialOnly.append("--no-clean/--no-archive want a shared working directory")
+if skipTo != None:
+    serialOnly.append("--skip-to names a place in the compilation order")
+if rsbTrace != "":
+    serialOnly.append("--rsb-trace applies to one compilation")
+if haltOnError:
+    serialOnly.append("--halt-on-error stops the run mid-compilation")
+if serialOnly and jobs > 1:
+    for why in serialOnly:
+        print("Note: %s," % why)
+    print("      so --jobs is 1 for this run.")
+    jobs = 1
+
+# ---------------------------------------------------------------------------
+# IS THE COMPILER ITSELF UP TO DATE?
+#
+# HALSFC-PASS1 and its ten companions are build products, untracked by git, and
+# nothing in a PASS build rebuilds them.  A fix committed to XCOM-I or to the
+# compiler's XPL therefore reaches the flight software only when somebody
+# remembers to run `make all` in PASS.REL32V0 by hand.
+#
+# On 2026-09-06 that was found not to have happened for 26 days.  XCOM-I
+# 8310a61db corrected MONITOR(9,5) to the original EXPON algorithm on 08-11;
+# the binaries dated from 08-07; and every corpus measurement in between was
+# made with a compiler that folded 10**(-6) one ULP wrong.  Nothing announced
+# it.  Worse, the four CSECTs it spoiled had been written off in
+# mafgen/defects.txt as defects in the ORIGINAL compiler -- our own stale
+# toolchain masquerading as IBM's bug, for a month.
+#
+# So refuse, the way dass-resolve.py refuses a stale phase link, and say what
+# to run.  A manual step handed to a person is a step that gets forgotten.
+def compilerIsStale():
+    """(oldest binary, newest source) if the compiler needs rebuilding."""
+    here = Path(__file__).resolve().parent
+    sources = []
+    xcomi = here.parent.parent.parent / "XCOM-I"
+    if xcomi.is_dir():
+        for pat in ("*.c", "*.h", "*.py"):
+            sources += list(xcomi.glob(pat))
+    sources += list(here.glob("*.PROCS/*.xpl"))
+    if not sources:
+        return None                      # cannot tell; say nothing
+    newestSource = max(sources, key=lambda f: f.stat().st_mtime)
+    oldestBinary = None
+    for name in ("HALSFC-PASS1", "HALSFC-PASS1B", "HALSFC-OPT", "HALSFC-OPTB",
+                 "HALSFC-AUXP", "HALSFC-PASS2", "HALSFC-PASS2B", "HALSFC-PASS3",
+                 "HALSFC-PASS3B", "HALSFC-PASS4", "HALSFC-FLO"):
+        found = shutil.which(name) or (here / name if (here / name).exists()
+                                       else None)
+        if found is None:
+            continue
+        f = Path(found)
+        if oldestBinary is None or f.stat().st_mtime < oldestBinary.stat().st_mtime:
+            oldestBinary = f
+    if oldestBinary is None:
+        return None                      # not on PATH; HALSFC will complain
+    if oldestBinary.stat().st_mtime < newestSource.stat().st_mtime:
+        return (oldestBinary, newestSource)
+    return None
+
+if compilerCheck:
+    stale = compilerIsStale()
+    if stale != None:
+        binary, source = stale
+        print("The HAL/S-FC binaries are older than the sources they are built")
+        print("from, so this build would not contain whatever changed:")
+        print("    %s" % binary)
+        print("        built %s" % datetime.fromtimestamp(binary.stat().st_mtime))
+        print("    %s" % source)
+        print("        changed %s" % datetime.fromtimestamp(source.stat().st_mtime))
+        print("Rebuild the compiler first:")
+        print("    ( cd \"%s\" && make all )" % binary.parent
+              if binary.parent.name == "PASS.REL32V0" else
+              "    ( cd <PASS.REL32V0> && make all )")
+        print("or pass --no-compiler-check if the mtimes are misleading rather")
+        print("than the binaries stale.")
+        outtaHere(1)
+
+if not Path("SSSRC").is_dir():
+    print("SSSRC/ not found.")
+    outtaHere(1)
+if not Path("APPLSRC").is_dir():
+    print("APPLSRC/ not found.")
+    outtaHere(1)
+
+def descore(s):
+    return s.strip().replace("_", "")[:6]
+
+# ---------------------------------------------------------------------------
+# TOMBSTONES
+#
+# The OI340700 overlay is applied by copying OI340700/ over a clone of
+# OI340600/, so it can ADD a file and it can REPLACE one, but it has no way to
+# say that OI340600 carried a file the later release does not.  Nothing in the
+# prescription can express a deletion.
+#
+# A ZERO-LENGTH file is that missing verb.  Overlaying an empty
+# OI340700/APPLSRC/CS4PDT.hal over OI340600's leaves an empty file in the
+# merged tree, and an empty file is not a compilation unit -- there is nothing
+# to compile and nothing to say about it -- so it reads naturally as "this unit
+# is not in this release".  Such a file is skipped wherever sources are
+# gathered: it never enters the dependency graph, is never compiled or
+# assembled, and produces no object.
+#
+# This matters for correctness, not just tidiness.  OI340600's CS4PDT declares
+# CSAS_PDT_6020002 with INITIAL(HEX'4103',...) and an extra _FDA member;
+# OI340700's CS2PDT declares the same name with INITIAL(HEX'4003',...) and
+# without it.  Two different definitions of one payload cannot both be right,
+# and an SDF only tolerates a duplicate when the definitions agree, so building
+# the CS4 family into an OI340700 tree is not a harmless extra -- it is a
+# conflict.
+def isTombstone(path):
+    """True for a zero-length source: a file OI340700 has REMOVED."""
+    try:
+        return os.path.getsize(str(path)) == 0
+    except OSError:
+        return False
+
+tombstones = []
+
+# OI340600 holds more than PASS: auxiliary code for the same software version
+# sits alongside it in APPLSRC/ and SSSRC/, and compiling it is a waste at best
+# and misleading at worst, since some of it cannot compile at all.  (The CS4
+# family, for instance, duplicates structure names with the CS2 family that
+# really is in PASS.)  Membership cannot be read off the filenames, but it can
+# be had from the CSECT indexes distilled from the disassemblies: a compilation
+# unit's CSECT is "#P" followed by its descored name, truncated to eight
+# characters.  Take the union of all the configurations, so that a file
+# belonging to any of them is compiled.
+import glob
+csectsInPass = set()
+if csectsDir != None:
+    for name in sorted(glob.glob(csectsDir + os.sep + "csects-*.json")):
+        try:
+            import json as _json
+            csectsInPass |= set(k for k in _json.load(open(name)))
+        except:
+            print("Warning: could not read " + name)
+    if len(csectsInPass) == 0:
+        print("Warning: no CSECT indexes found in " + csectsDir +
+              "; every HAL/S file will be compiled.")
+    else:
+        print("%d CSECTs across %d PASS configurations." %
+              (len(csectsInPass),
+               len(glob.glob(csectsDir + os.sep + "csects-*.json"))))
+
+notInPass = []
+# Every CSECT naming convention in the SDL Interface Control Document (pages
+# 163-164) is two characters of type followed by the six-character name of the
+# HAL/S compilation unit: $0 for a PROGRAM, $1-$F for a task, #C for a COMSUB,
+# #D for DECLARE data, #P for COMPOOL data, @c for a stack, an (a=A-M, n=0-9)
+# for an internal procedure, aa for a library routine, and #Z/#Q/#0/#E/#L/#X
+# for the various ZCON and special data sections.  Rather than enumerate them,
+# strip the two-character prefix off every CSECT in the indexes and keep the
+# names; a unit is part of PASS if any CSECT of any type was emitted for it.
+unitsInPass = set(n[2:8].strip() for n in csectsInPass if len(n) >= 3)
+
+def isInPass(halname):
+    if not unitsInPass or halname == None:
+        return True
+    return halname.strip() in unitsInPass
+
+'''
+Regarding the compiler parameters:
+    LIST        Not necessary in "production".  But for debugging I need to
+                be able to look at the assembly language in the PASS2 report
+                to compare against MAFGEN.
+    SRN         Necessary, since the PASS source code mostly has SRNs.
+    TEMPLATE    Necessary to generate templates for external compilation units
+                for the template library.
+    NOLFXI      Empirically necessary from comparison to MAFGEN.
+    REGOPT      Empirically necessary from comparison to MAFGEN.
+    CARDTYPE    Necessary, though I got the exact values from comments in 
+                source code, so perhaps needing adjustments.
+    X1          Upon finding a ZO3 error in the OPT pass, recompilation is done
+                by prefixing the X1 parameter, since otherwise object-code
+                generation does not occur.  There are other potential 
+                workarounds, though much more expensive to implement.  So far,
+                this approach agrees with MAFGEN.
+'''
+
+# STRPDT is included by sixteen units, and its R cards are
+# "DECLARE X NAME X-STRUCTURE" -- a NAME variable whose name equals its own
+# template's name.  That is exactly the condition CHECK_STRUCTURE tests before
+# setting SYT_PTR (HALINCL/CHECKSTR.xpl:60), and SYT_PTR is in turn the gate on
+# SET_DUPL_FLAG's DQ7 (HALINCL/SETDUPLF.xpl).  A unit that includes two
+# templates whose COMPOOLs both carry the aliases sees STRPDT's nodes twice and
+# gets DQ7 on CSAS_PDT_PAR_ENTRY and its siblings, followed by a fatal PM1.
+# This is issue #1281.  Note that duplication by itself is not the trigger:
+# CGEIPA and CGCFL1 each declare their own STRUCTURE QUAT, and the 36 compiled
+# units that include both are fine.  It is the NAME-alias form specifically.
+#
+# Which units suppressed the R cards is not a matter of inference: the
+# OI30.17 "output-writer" reports in PFS/"OI301700 as received"/APPLSRC/ are
+# real listings from the original build, and they carry the resolved card type
+# per line.  The alias lines appear marked C, with no statement number, in
+# CSAPDT, CS2PDT, CS4PDT and PGSCRU, and marked M with statement numbers in
+# SCKPNT, STCCYCL, STMTAB and SULUPLIN.  So the historical build really did
+# compile STRPDT both ways, which is why the cards are type R rather than
+# plain C or M.  The remaining seven includers say "INCLUDE STRPDT NOLIST", so
+# their listings show nothing and the reports cannot say; all of those compile
+# clean at the default R=M and are left there.
+#
+# The CARDTYPE table, the conditional pairs and the option list live in
+# halsParms.py, which compileLinkRun and compileLinkCompare share.  Keeping
+# three copies in step by hand had already failed: they agreed on the table but
+# not on how to look a file up in it, nor on which conditional pairs to append.
+from halsParms import getCardtype, getCardtypeMap, cardtypesBySourceFile
+import halsParms
+
+def getParms(template):
+    return halsParms.getParms(template["stem"], extraParms, sdl=sdl,
+                              release=release)
+
+# SPACELIB, the space-management system, is linked into every pass and can
+# abend with any of BI002, BI003, BI004 or BI010 -- respectively a bug in the
+# system, a bug with no space left to describe it, too many such errors, and
+# "yoyoing".  All four are severity 3, all four name "SPACE MANAGEMENT", and any
+# of them halts the entire run, which is intolerable when surveying a thousand
+# source files, so treat them like the other delayable errors and skip the
+# file.  They need a check of their own because, unlike the others, the
+# messages carry no "***** " prefix, and because they can come from any pass.
+#
+# BI002 in particular was not a SPACELIB fault at all and no longer occurs:
+# XCOM-I was translating a RETURN from an XPL program's outermost scope into a
+# call to RECORD_LINK, which enforces "every record still allocated is in
+# COMMON" -- an invariant the XPL deliberately routes around on exactly the
+# paths that RETURN rather than linking.  See XCOM-I/generateC.py.  The check
+# below is kept for BI003, BI004 and BI010, none of which has been seen in
+# practice.
+spaceBugsSkipped = set()
+spaceBugReports = ["pass1.rpt", "flo.rpt", "opt.rpt", "aux.rpt", "auxp.rpt",
+                   "pass2.rpt", "pass3.rpt", "pass4.rpt"]
+def checkSpaceManagementBug(template):
+    global spaceBugsSkipped
+    for report in spaceBugReports:
+        try:
+            f = open(f"current.results{os.sep}{report}", "r")
+        except:
+            continue
+        found = False
+        try:
+            for line in f:
+                if "SPACE MANAGEMENT" in line:
+                    found = line.strip()
+                    break
+        except:
+            pass
+        f.close()
+        if found:
+            stem = template["stem"]
+            if stem in spaceBugsSkipped:
+                return False
+            spaceBugsSkipped.add(stem)
+            print(f"      {report}: {found}")
+            return True
+    return False
+
+# Importing SDFs in place of TEMPLATEs lets many files get further through
+# PASS1 than they ever did before, whereupon they meet source-level errors of
+# their own that the named-error checks above know nothing about -- D15, M1 and
+# so on.  Halting the whole run at each new one makes a survey of a thousand
+# files impossible, so this is a final catch-all: any PASS1 error at all is
+# delayable.  The codes found are named in the message, so a file skipped here
+# is still identifiable afterwards rather than vanishing into a bare count.
+anyPass1Skipped = set()
+lastPass1Errors = ""
+def checkAnyPassError(template, passRptFilename, skipped):
+    global lastPass1Errors
+    codes = set()
+    try:
+        f = open(f"current.results{os.sep}{passRptFilename}", "r")
+        for line in f:
+            fields = line.split()
+            if len(fields) >= 2 and fields[0] == "*****" and \
+                    fields[1][:1].isalpha() and fields[1][-1:].isdigit():
+                codes.add(fields[1])
+        f.close()
+    except:
+        return False
+    if not codes:
+        return False
+    stem = template["stem"]
+    if stem in skipped:
+        return False
+    skipped.add(stem)
+    lastPass1Errors = ",".join(sorted(codes))
+    return True
+
+def checkAnyPass1Error(template):
+    return checkAnyPassError(template, "pass1.rpt", anyPass1Skipped)
+
+# The same reasoning one pass later.  A file that gets through PASS1 can still
+# meet a conversion error in PASS2 -- PMQTEC has FT101, "DATA TYPE CONFLICT ON
+# PARAMETER #1", at statement 116 -- and PASS2 then inhibits the object module
+# and HALSFC exits 240.  Nothing caught that, so a single such file halted the
+# entire run: the OI-30.17 corpus stopped at file 1030 of 1266 and the 236
+# after it were never compiled at all, while the summary still read as though
+# the run had merely found four failures.  A survey cannot be allowed to end
+# on its first unfamiliar error.
+anyPass2Skipped = set()
+def checkAnyPass2Error(template):
+    return checkAnyPassError(template, "pass2.rpt", anyPass2Skipped)
+
+# Return True if there's a delayable error.
+errorsSkipped = set()
+def checkDelayableErrors(template, nameOfPass, passRptFilename, candidateErrorList):
+    global errorsSkipped
+    returnValue = False
+    try:
+        f = open(f"current.results{os.sep}{passRptFilename}", "r")
+        for line in f:
+            for errorType in candidateErrorList:
+                if "***** " + errorType in line:
+                    stem = template["stem"]
+                    if stem not in errorsSkipped:
+                        errorsSkipped.add(stem)
+                        returnValue = True
+                        break
+            if returnValue:
+                break
+        f.close()
+    except:
+        try:
+            f.close()
+        except:
+            pass
+    return returnValue
+
+defaultSubdirectory = "."
+compilationCount = 0
+_countLock = threading.Lock()
+skipping = (skipTo != None)
+try:
+    os.mkdir("objects")
+except:
+    pass
+# ---------------------------------------------------------------------------
+# ASSEMBLY (.asm) and DISPLAY DECKS (.dfg)
+#
+# `compile` handles HAL/S.  These two handle the other kinds of source in a
+# release, so that a full build is compile + assemble + dfg over APPLSRC/,
+# SSSRC/, RUNASM/ and ZCONASM/.  Both drop their object into objects/ under the
+# source's own basename, exactly as `compile` does, so the three are
+# interchangeable from the caller's point of view.
+
+# The assembler is OURS.  ASM101Sa is the C port: it is deterministic, where
+# ASM101S.py emits csects in Python `set` order and so produces a different
+# object file on every run (identical in content -- see objcanon.py -- but not
+# byte-comparable).  A build wants reproducibility, so the C port it is.
+assembler = "ASM101Sa"
+
+# The macro library depends on where the source lives: the RTL is assembled
+# against RUNMAC/, the flight software against MLIB80/.
+#
+# BUILD.md named only RUNASM/ (RUNMAC) and SSSRC/ (MLIB80).  ZCONASM/ is RTL
+# too, so it is grouped with RUNASM/ here.  That choice is not load-bearing:
+# the ZCON sources define data and invoke no macros, and twelve of them
+# assembled byte-identically under either library.
+def macroLibraryFor(path):
+    return "RUNMAC" if Path(path).parent.name in ("RUNASM", "ZCONASM") \
+           else "MLIB80"
+
+# NOTE for anyone tempted to run these commands through a shell: every one of
+# the 286 sources in ZCONASM/ is named with a leading "#" (#QACOS.asm and so
+# on), as are three in SSSRC/ and seven in MLIB80/.  "#" starts a comment in
+# sh, so such a name must be quoted on a command line.  Nothing here uses a
+# shell -- subprocess is given an argument list -- so the names pass through
+# untouched; introducing shell=True would silently truncate the command for
+# those 296 files.
+
+# C6C6 is the TAPE's padding convention, and tapes are what these objects are
+# for.  The other two values in play are 0000 (ASM101S's own default) and C9FB
+# (what a DASS dump shows for a halfword that was never written) -- so an
+# object built with C9FB will appear to agree with a dump for reasons that have
+# nothing to do with the code being right.  If these objects are ever built for
+# comparison against dumps rather than for a tape, this is the knob to change.
+# MEASURED, not chosen.  In the DASS dumps every CSECT with an alignment gap
+# uses ONE fill value throughout, and which value it is tracks the toolchain
+# rather than the module: across S2's 124 such CSECTs, all 94 of HAL origin are
+# C6C6 and all 29 assembly ones are C9FB.  C6C6 is the COMPILER's fill -- HALSFC
+# takes no --fill option and emits it inherently -- so passing it to the
+# assembler as well was conflating the two.  Don's own RUN objects, built with
+# his assembler, are C9FB in exactly the halfwords ours had C6C6.
+assemblyFill = "C9FB"
+
+# An abort throws away however many hours the run had already spent, so say how
+# to pick it up again rather than leaving --skip-to to be found in --help.
+def resumeHint(where):
+    print("")
+    print("To resume after fixing this, from this directory:")
+    print("    %s --skip-to=%s" % (ME, where))
+    print("(Do NOT re-run prepareTEMPLIB/prepareINCLIB first -- that would "
+          "discard the templates and SDFs already built.)")
+    print("")
+
+assemblyCount = 0
+def assemble(path, fatal = True):
+    """Assemble one AP-101S source file into objects/<stem>.obj.  True on
+    success.  Any assembly error is fatal unless the caller says otherwise."""
+    global assemblyCount
+    with _countLock:
+        assemblyCount += 1
+    path = str(path)
+    stem = Path(path).stem
+    obj = "objects" + os.sep + stem + ".obj"
+    command = [assembler,
+               "--object=" + obj,
+               "--library=" + macroLibraryFor(path),
+               "--tolerable=4",
+               "--fill=" + assemblyFill,
+               # The RTL fixes are deliberate corrections to historical bugs.
+               # A release must reproduce what was actually built, bugs and
+               # all, so they are suppressed here.
+               "--no-rtl-fixes",
+               path]
+    print("%3d: Assembling %s" % (assemblyCount, path))
+    try:
+        result = subprocess.run(command, capture_output = True, text = True)
+    except Exception as e:
+        print("Could not run %s: %s" % (assembler, str(e)))
+        outtaHere(1)
+    if result.returncode != 0 or not Path(obj).is_file():
+        print("Assembly of %s failed, exit code %d." % (path, result.returncode))
+        tail = (result.stderr or result.stdout or "").strip().splitlines()[-8:]
+        for line in tail:
+            print("     ", line)
+        if fatal:
+            resumeHint(path)
+            outtaHere(1)
+        return False
+    return True
+
+# Don's `dfg` is used here because we have no display-deck translator of our
+# own; it only rewrites the deck as HAL/S, and OUR compiler then compiles that.
+displayGenerator = "dfg"
+
+displayFailures = []
+_dfgRelease = None
+def dfgHasRelease():
+    """True if the dfg on PATH accepts --release.  Probed once."""
+    global _dfgRelease
+    if _dfgRelease == None:
+        # dfg's help is drawn by `rich`, which styles the two dashes of an
+        # option separately -- "-" ESC[0m ESC[1;36m "-release" -- so the
+        # literal string "--release" was never in the output and this probe
+        # always said no.  compilePASS therefore never told dfg the release,
+        # dfg fell back to OI340600's rate-group allowances, and OI340700's
+        # CS2120 came out with VPD 00D3 where the flight dump has 00D5.  Ask
+        # for plain output AND strip whatever styling is left.
+        import re
+        try:
+            env = dict(os.environ, NO_COLOR = "1", TERM = "dumb",
+                       COLUMNS = "200")
+            h = subprocess.run([displayGenerator, "--help"],
+                               capture_output = True, text = True, env = env)
+            txt = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "",
+                         (h.stdout or "") + (h.stderr or ""))
+            _dfgRelease = "--release" in txt
+        except Exception:
+            _dfgRelease = False
+    return _dfgRelease
+
+
+def dfg(path, fatal = False):
+    """Translate one display deck to HAL/S with `dfg`, compile the result with
+    `compile`, and discard the intermediate.  True on success.
+
+    A generation failure is RECOVERABLE by default, unlike a compilation or
+    assembly error.  `dfg` is a translator, and the decks it cannot derive are
+    its own limitation rather than an error in our source -- CS2210 fails with
+    "cannot derive rate count ... draw not derivable".  Stopping the whole run
+    for one deck would cost hours and surface exactly one failure per run, when
+    what is wanted is the whole list; they are collected and reported instead."""
+    global skipping
+    path = str(path)
+    stem = Path(path).stem
+    # Mirror compile()'s --skip-to handling.  Without this a resumed run
+    # re-translates every earlier deck before compile() discards the result.
+    if skipping:
+        if path == skipTo:
+            skipping = False
+        else:
+            return True
+    tmp = "_dfg_" + stem + ".hal"
+    command = [displayGenerator, path, "-o", tmp, "--deck-root", "."]
+    # --no-sdfi sets sdfi to None; passing that through would put None into the
+    # argument list.  A deck needs the compool SDFs to resolve its types, so
+    # without a library dfg will fail on any deck that includes one -- but that
+    # is dfg's diagnostic to give, not a crash here.
+    #
+    # Naming, for whoever needs it next: the two libraries do NOT agree.  An
+    # SDF member is SDFLIB/##NAME.sdf, WITH the extension; a template member is
+    # TEMPLIB/@@NAME, without one.  NAME is descore()d -- underscores stripped,
+    # truncated to six characters -- in both.
+    if sdfi != None:
+        command += ["--sdflib", sdfi]
+    # A release's generator allowances differ, so dfg has to be told which one
+    # is being built -- but only if this dfg has the option.  Upstream's does
+    # not yet (nsts-sdl-dps PR #46 is open), and a build must not fail because
+    # the local dfg is the stock one; probe once and stay silent if absent.
+    if release != None and dfgHasRelease():
+        command += ["--release", release]
+    try:
+        result = subprocess.run(command, capture_output = True, text = True)
+    except Exception as e:
+        print("Could not run %s: %s" % (displayGenerator, str(e)))
+        outtaHere(1)
+    if result.returncode != 0 or not Path(tmp).is_file():
+        print("Display generation for %s failed, exit code %d."
+              % (path, result.returncode))
+        tail = (result.stderr or result.stdout or "").strip().splitlines()[-8:]
+        for line in tail:
+            print("     ", line)
+        displayFailures.append(path)
+        if fatal:
+            outtaHere(1)
+        return False
+    # Compile the generated HAL/S under the DECK's name, so the object lands in
+    # objects/<stem>.obj like every other unit rather than under the temporary
+    # file's name.
+    template = { "filename": tmp, "stem": stem, "halname": descore(stem),
+                 "includedFilenames": [], "includedHalnames": [] }
+    try:
+        ok = compile(template, fatal)
+    finally:
+        try:
+            os.remove(tmp)
+        except:
+            pass
+    return ok
+
+# Return True on success, False on skipped compilation.
+def compile(template, fatal = True):
+    """Compile one unit.  True on success, False on a failure that can be
+    lived with, and normally the run is abandoned on any other failure.
+
+    fatal=False is for stubs (see seedCycle): a stub is an optimisation, so
+    one that will not compile must cost its cycle and nothing more."""
+    global compilationCount, skipping, rsbTrace
+    # Only the log's line numbering depends on this, but two jobs incrementing
+    # it at once would be handed the same number.
+    with _countLock:
+        compilationCount += 1
+    rawFilename = template["filename"]
+    filename = rawFilename[:]
+    # Suppress the listings.  getParms() returns the finished --parms STRING,
+    # so the option list has to be trimmed before it is built, not after:
+    # `options` replaces DEFAULT_OPTIONS outright, which is the supported way
+    # to drop LIST and LISTING2.  (An earlier in-progress edit called
+    # parms.remove() on the result, which raises -- str has no .remove.)
+    parms = halsParms.getParms(template["stem"], extraParms,
+                               options = [o for o in halsParms.DEFAULT_OPTIONS
+                                          if o not in ("LIST", "LISTING2")],
+                               sdl = sdl,
+                               release = release)
+    fields = filename.split("/")
+    if len(fields) == 2:
+        subfolder = fields[0]
+        filename = fields[1]
+    elif len(fields) == 1:
+        subfolder = defaultSubdirectory
+    else:
+        print(f"Specified source-code filename {subfolder}/{filename} is illegal.")
+        outtaHere(1)
+    if skipping:
+        if subfolder + "/" + filename == skipTo:
+            skipping = False
+        else:
+            #print("%3d: Skipping past %s/%s." % \
+            #  (compilationCount, subfolder, filename))
+            return None
+    # Auxiliary code that is not part of PASS at all: report it and move on,
+    # rather than compiling it and counting whatever it does as a result.
+    if not isInPass(template.get("halname")):
+        notInPass.append(template["filename"])
+        print("%4d: Not part of PASS, skipping %s" %
+              (compilationCount, rawFilename))
+        return None
+    if False and preprocess:
+        subfolder = "."
+        filename = "_" + template["stem"] + ".hal"
+        command = ["preprocessHALSFC", f"--in={rawFilename}", f"--out={filename}"]
+        try:
+            result = subprocess.run(command, capture_output = True, text = True, check = True)
+        except subprocess.CalledProcessError as e:
+            print(f"The preprocessor attempted to create {filename}.")
+            print(f"Preprocessor failed with exit code {e.returncode}.")
+            print("STDERR:", e.stderr)
+            outtaHere(1)
+    result = None
+    try:
+        parmsFull = parms
+        print("%4d: Compiling %s" % \
+              (compilationCount, rawFilename))
+        command = ["HALSFC", f"{subfolder}/{filename}", # "--test", "--force",
+             f"--parms={parmsFull}", "-o", f"objects/{template['stem']}.obj"]
+        if useConcurrent:
+            command.append("--concurrent")
+        else:
+            if clean:
+                command.append("--clean")
+            if archive:
+                command.append("--archive")
+        if sdfi != None:
+            command.append(f"--sdfi={sdfi}")
+        if rsbTrace != "":
+            command.append(rsbTrace)
+        result = subprocess.run(command, capture_output = True, text = True, check = True)
+        if len(result.stdout):
+            print(result.stdout)
+        if len(result.stderr):
+            print(result.stderr)
+    except subprocess.CalledProcessError as e:
+        '''
+        if checkDelayableErrors(template, "OPT", "opt.rpt", ["ZO3"]):
+            print(f"      ZO3 error in OPT, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["PM2"]):
+            print(f"      PM2 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["IR1"]):
+            print(f"      IR1 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["DI11"]):
+            print(f"      DI11 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["D15"]):
+            print(f"      D15 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkDelayableErrors(template, "PASS1", "pass1.rpt", ["XI3"]):
+            print(f"      XI3 error in PASS1, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkSpaceManagementBug(template):
+            print(f"      SPACELIB error, compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkAnyPass1Error(template):
+            print(f"      PASS1 errors ({lastPass1Errors}), compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        elif checkAnyPass2Error(template):
+            print(f"      PASS2 errors ({lastPass1Errors}), compilation of {rawFilename} skipped.")
+            rsbTrace = ""
+            return False
+        '''
+        print(f"Failed with exit code {e.returncode}.")
+        if len(e.stdout):
+            print(e.stdout)
+        if len(e.stderr):
+            print(e.stderr)
+        if not fatal:
+            rsbTrace = ""
+            return False
+        if preprocess:
+            extra = "--preprocess"
+        else:
+            extra = ""
+        resumeCommand = '''#!/bin/bash
+prepareINCLIB %s --clear --include=INCL80
+unbuffer %s %s --skip-to=%s  2>&1 | tee -a compilePASS.log
+''' % (extra, ME, extra, template["filename"])
+        resumeFilename = "resumeCompilePASS"
+        f = open(resumeFilename, "w")
+        f.write(resumeCommand)
+        f.close()
+        os.chmod(resumeFilename, os.stat(resumeFilename).st_mode | stat.S_IEXEC)
+        print("Note:  Created script", resumeFilename)
+        # Halting here made sense while a failure was rare, arrived early, and
+        # was likely to be the cause of failures further on.  It does not now:
+        # a full run takes an hour, the files that fail are the ones reached
+        # last, and halting throws away the other thousand-odd results along
+        # with the end-of-run summary -- which is why "never attempted: 0" has
+        # been reported twice from runs that never got as far as counting.
+        # The failure is recorded and the run goes on; --halt-on-error restores
+        # the old behaviour, and resumeCompilePASS is still written either way.
+        unrecognizedFailures.append(template["filename"])
+        if haltOnError:
+            outtaHere(1)
+        rsbTrace = ""
+        return False
+    rsbTrace = ""
+    return True
+
+# First we have to determine all template dependencies, so we can compile the
+# templates in the correct order.  Assume that all of the template files are in
+# APPLSRC/ and SSSRC/, and get a list of them.
+if preprocess:
+    print(f"{datetime.now()}: Preprocessing all source-code files ...")
+SSSRC = Path("SSSRC")
+APPLSRC = Path("APPLSRC")
+templateFiles = list(SSSRC.glob("*.hal")) + list(APPLSRC.glob("*.hal"))
+# Display decks are compilation units too, and they depend on COMPOOLs exactly
+# as HAL/S files do -- `dfg` needs the compool SDFs to resolve types -- so they
+# have to be ordered along with everything else rather than swept up at the end.
+displayFiles = sorted(str(x) for x in
+                      list(SSSRC.glob("*.dfg")) + list(APPLSRC.glob("*.dfg")))
+templateFiles = templateFiles + displayFiles
+removedByOverlay = [f for f in templateFiles if isTombstone(f)]
+tombstones += [str(f) for f in removedByOverlay]
+templateFiles = [f for f in templateFiles if not isTombstone(f)]
+for i in range(len(templateFiles)):
+    rawFilename = str(templateFiles[i])
+    if preprocess and not rawFilename.endswith(".dfg"):
+        filename = f".{os.sep}_{Path(rawFilename).name}"
+        command = ["preprocessHALSFC", f"--in={rawFilename}", f"--out={filename}"]
+        try:
+            result = subprocess.run(command, capture_output = True, text = True, check = True)
+        except subprocess.CalledProcessError as e:
+            print(f"The preprocessor failed to create {filename}, exit code {e.returncode}.")
+            print("STDERR:", e.stderr)
+            outtaHere(1)
+        templateFiles[i] = filename
+    else:
+        templateFiles[i] = rawFilename
+#print(templateFiles)
+#sys.exit(1)
+
+# Read each of the template files.  Determine the full HAL name (not just the
+# normalized version of it use for the filename and all of the templates (by
+# their HAL names) that the file imports.
+
+debugging = False
+def debug(msg):
+    if debugging:
+        print(msg, file=sys.stderr)
+
+templatesByFilename = {}
+templatesByHalname = {}
+templatesByStem = {}
+for filename in templateFiles:
+    debugging = False
+    debug("A")
+    if str(filename).endswith(".dfg"):
+        # A deck names its compools as "INCLUDE=NAME," -- a different syntax
+        # from HAL/S's "D INCLUDE TEMPLATE name", and one that carries
+        # underscores (INCLUDE=CGK_KIP_FLT_FLOAT), so descore() as usual.  The
+        # deck itself becomes a COMPOOL named for the deck.
+        entry = { "filename": str(filename), "halname": descore(Path(filename).stem),
+                  "includedFilenames": [], "includedHalnames": [], "kind": "dfg" }
+        f = open(filename, "r", errors = "replace")
+        for line in f.readlines():
+            field = line[:72].strip()
+            if field.upper().startswith("INCLUDE="):
+                name = field[len("INCLUDE="):].strip().rstrip(",;:").strip()
+                if name:
+                    entry["includedHalnames"].append(descore(name))
+        f.close()
+        entry["stem"] = Path(filename).stem
+        templatesByFilename[str(filename)] = entry
+        templatesByHalname[entry["halname"]] = entry
+        templatesByStem[entry["stem"]] = entry
+        continue
+    f = open(filename, "r")
+    # Column 1 is rewritten through this file's CARDTYPE before the card is
+    # classified, so that conditionally-compiled comments really disappear and
+    # conditionally-compiled directives really are seen as directives.  Note
+    # that the substitution is applied once and not iterated: a pair maps a
+    # card type to a *behaviour*, so the result is not itself a type to
+    # translate again.
+    cardtypeMap = getCardtypeMap(Path(filename).stem, release=release)
+    lines = []
+    for line in f.readlines():
+        line = cardtypeMap.get(line[:1], line[:1]) + line[1:]
+        if line[:1] == "C":
+            continue
+        lines.append(line[:72])
+    f.close()
+    entry = { "filename": filename, "halname": None, "includedFilenames": [],
+             "includedHalnames": [] }
+    debug("B " + str(entry))
+    halname = None
+    for i in range(len(lines)):
+        line = lines[i]
+        if line.startswith("D"):
+            fields = line[1:].strip().split()
+            if len(fields) < 3:
+                continue
+            # "D INCLUDE SDF X:" is as much a dependency as "D INCLUDE
+            # TEMPLATE X" -- X's SDF has to have been written before this file
+            # is compiled -- but only the latter used to be recorded, so the
+            # ordering was left to chance.  CS2IX4 and CS2IX5 were compiled at
+            # positions 389 and 475 against a CS2IXP that was not compiled
+            # until 518, and failed XI10 "REL3 SDF ##CS2IXP NOT FOUND"; CS2IX2
+            # and CS2IX3 happened to fall after it and were fine.  The name is
+            # written with a trailing colon, and sometimes a space before it.
+            if fields[0] == "INCLUDE" and fields[1] in ("TEMPLATE", "SDF"):
+                name = fields[2].rstrip(";:")
+                if name:
+                    entry["includedHalnames"].append(descore(name))
+                debug("C " + str(entry))
+            continue
+        if halname != None:
+            continue
+        nLines = "".join(lines[i:i+3])
+        fields = nLines[1:].split(":")
+        if len(fields) < 2:
+            continue
+        h = fields[0].strip()
+        if " " in h:
+            continue
+        fields = fields[1].strip().split()
+        if len(fields) < 1:
+            continue
+        if not fields[0].startswith("PROGRAM") and \
+           not fields[0].startswith("PROCEDURE") and \
+           not fields[0].startswith("FUNCTION") and \
+           not fields[0].startswith("COMPOOL"):
+            continue
+        halname = descore(h)
+        entry["halname"] = halname
+        # Keep the block statement verbatim.  It is all a stub needs -- what a
+        # caller wants from a template is the name and the parameter list --
+        # and it is needed to break dependency cycles further down.  It can
+        # span cards, so accumulate until the terminating semicolon; GV6STA
+        # writes its name on one card and PROGRAM; on the next.
+        text = ""
+        for k in range(i, min(i + 12, len(lines))):
+            text = (text + " " + lines[k][1:].strip()).strip()
+            if ";" in text:
+                break
+        if ";" in text:
+            entry["blockName"] = h
+            entry["blockStatement"] = text[:text.index(";") + 1]
+        debug("D " + str(entry))
+        continue
+    if halname == None:
+        continue
+    entry["stem"] = Path(filename).stem
+    templatesByFilename[filename] = entry
+    templatesByHalname[halname] = entry
+    templatesByStem[entry["stem"]] = entry
+#for stem in templatesByStem:
+#    print(stem, templatesByStem[stem])
+
+# Now determine which filenames each file includes via D INCLUDE TEMPLATE ....
+# Note that since the values in `templatesByFilename` are aliases (vs copies)
+# of those in `templatesByHalname`, we only need to make our changes in one
+# of those dictionaries.
+print(f"{datetime.now()}: Determining file dependencies ...")
+nonexistentTemplates = {}
+for filename in templateFiles:
+    template = templatesByFilename[filename]
+    for halname in template["includedHalnames"]:
+        if halname in templatesByHalname:
+            template["includedFilenames"].append(templatesByHalname[halname]["filename"])
+        else:
+            if False:
+                # There are cases (the only one of which I'm aware right now is
+                # CDAP02) in which "D INCLUDE TEMPLATE CDAP02 ..." gives the name of
+                # the PDS member instead of the actual name of the COMPOOL (which
+                # in this case is CDA_P02_AMT).  That being the case, we
+                # have to search for it.  Unfortunately, these strings aren't
+                # always truncated in the same way, so we have to find out
+                # whether there's consistency.
+                okay = False
+                if False:
+                    for length in [8, 7, 6]:
+                        if True:
+                            halname = halname.replace("_", "")[:length]
+                        testname1 = "APPLSRC/" + halname + ".hal"
+                        testname2 = "SSSRC/" + halname + ".hal"
+                        if testname1 in templatesByFilename:
+                            template["includedFilenames"].append(testname1)
+                            okay = True
+                            break
+                        elif testname2 in templatesByFilename:
+                            template["includedFilenames"].append(testname2)
+                            okay = True
+                            break
+                else:
+                    halname = halname.replace("_", "")[:8]
+                    maxLength = 0
+                    maxStem = None
+                    maxFilename = None
+                    dupes = 0
+                    for stem in templatesByStem:
+                        match = os.path.commonprefix([halname, stem])
+                        if len(match) > maxLength:
+                            maxLength = len(match)
+                            maxStem = match
+                            maxFilename = templatesByStem[stem]["filename"]
+                            dupes = 0
+                        elif len(match) == maxLength:
+                            dupes += 1
+                    if dupes == 0 and maxLength in [len(maxStem), len(halname)]:
+                        template["includedFilenames"].append(maxFilename)
+                        okay = True
+                if not okay:
+                    if halname not in nonexistentTemplates:
+                        nonexistentTemplates[halname] = []
+                    nonexistentTemplates[halname].append(Path(filename).stem)
+print("FYI: Non-existent templates appearing in D INCLUDE TEMPLATE:")
+for halname in sorted(nonexistentTemplates):
+    msg = f"\t{halname} called by:"
+    for filename in sorted(nonexistentTemplates[halname]):
+        msg += f" {filename}"
+    print(msg)
+print(f"     {len(nonexistentTemplates)} non-existent templates referenced")
+print(f"{len(templatesByFilename)} templates in all")
+
+# ---------------------------------------------------------------------------
+# TO DISABLE THIS, run with --no-provider-deps, or set providerDeps = False.
+#
+# Widen PASS membership to include the providers of templates that PASS
+# members need.  The CSECT test answers "does this unit contribute code or
+# data to a linked image?", which is not the same question as "must this unit
+# be compiled in order to build PASS?".  A COMPOOL that some PASS member
+# includes has to be compiled so that its template -- or, with --sdfi, its SDF
+# -- exists by the time that member is compiled, even when the compool itself
+# contributes no CSECT to any configuration and so looks like auxiliary code.
+#
+# Skipping such a compool produced XI3, "SDF ... NOT FOUND", in 11 files of
+# the corpus, from nine providers: CPCGXT, CSAPXT, CSACAT, CSAPAT, CSAPAR,
+# CSAINB, CSADAR, CSAFCM and CSDINI.  Each exists as source, each is declared
+# COMPOOL, each is named in a "D INCLUDE TEMPLATE" of a file that *is* in
+# PASS, and none appears under any CSECT prefix in any of the eight
+# csects-*.json indexes.
+#
+# The closure is transitive, since a needed compool may itself include one.
+# It only ever widens the set, so no file that would have been compiled is
+# skipped because of it.
+if providerDeps and unitsInPass:
+    pending = [h for h in templatesByHalname if h in unitsInPass]
+    added = set()
+    while pending:
+        h = pending.pop()
+        entry = templatesByHalname.get(h)
+        if entry == None:
+            continue
+        for needed in entry["includedHalnames"]:
+            if needed in unitsInPass or needed not in templatesByHalname:
+                continue
+            unitsInPass.add(needed)
+            added.add(needed)
+            pending.append(needed)
+    if added:
+        print("%d template providers added to PASS membership: %s" %
+              (len(added), " ".join(sorted(added))))
+#for filename in templatesByFilename:
+#    print(filename, templatesByFilename[filename])
+#sys.exit(1)
+
+# Now determine an optimum order for the templates to be compiled, so that 
+# for any given file, all of the templates it needs to import will already have
+# been compiled and hence will be in the template library already.  Here's my
+# dumb brute-force technique.  First, all files that have no INCLUDE TEMPLATE
+# directives are compiled.  We loop through all of the remaining files to see
+# which of them can be compiled using just the templates that already exist.
+# keep doing that until either all of the files are compiled, or else no new
+# compilable files are identified.
+removed = set()
+skipped = set()
+
+
+def buildOne(template):
+    """Build one unit, whichever kind it is.  True if it produced an object."""
+    # A display deck goes through dfg() first.  compilePASS chose between the
+    # two in three places; there is one scheduler here, so the choice is made
+    # in one.
+    if template.get("kind") == "dfg":
+        return dfg(template["filename"])
+    return compile(template)
+
+
+if oneFile != None:
+    # --one: the whole program reduces to a single compilation.  The unit has
+    # to be one the analysis found, so that it is built under its own stem and
+    # with its own CARDTYPE; a path that was never scanned is a mistake worth
+    # reporting rather than guessing at.
+    template = templatesByFilename.get(oneFile)
+    if template == None:
+        for candidate in templatesByFilename.values():
+            if Path(candidate["filename"]).name == Path(oneFile).name:
+                template = candidate
+                break
+    if template == None:
+        print("--one=%s is not one of the source files analysed." % oneFile)
+        outtaHere(1)
+    # compile() has three answers, not two: True built it, False could not, and
+    # None means it was deliberately not built -- a unit that is no part of
+    # PASS.  Only False is a failure to report; a unit outside PASS has simply
+    # nothing to do, and a make recipe must not be told that is an error.
+    outtaHere(1 if buildOne(template) == False else 0)
+
+if makefilePath != None:
+    # The graph as a Makefile.  A unit's object is made to depend on the
+    # objects of the units whose templates and SDFs it imports, which is the
+    # same edge the scheduler uses -- the object stands in for the template,
+    # since the one compilation writes both.
+    print(f"{datetime.now()}: Writing {makefilePath} ...")
+    try:
+        mf = open(makefilePath, "w")
+        print("# Generated by compilePASSm.py.  A view of the dependency "
+              "graph, not the", file = mf)
+        print("# engine: compilePASSm.py schedules this graph itself.  See "
+              "the comment at", file = mf)
+        print("# the head of that program for why make cannot do the whole "
+              "job -- in short,", file = mf)
+        print("# this build is not a DAG.  What is missing here is the "
+              "seeding that breaks a", file = mf)
+        print("# dependency cycle and the sweeps that retry a unit once more "
+              "of the build", file = mf)
+        print("# exists, so `make -j -f %s` builds the acyclic part of the "
+              "corpus and" % makefilePath, file = mf)
+        print("# fails on the rest.  Prepare the libraries first, as for any "
+              "build:", file = mf)
+        print("#", file = mf)
+        print("#     prepareTEMPLIB --clear && prepareINCLIB --clear "
+              "--include=INCL80", file = mf)
+        print("#", file = mf)
+        print("ONE = compilePASSm.py --one=", file = mf)
+        print(file = mf)
+        # One assignment per object rather than one long continued line, so
+        # that nothing here has to write a backslash continuation.
+        print("OBJECTS =", file = mf)
+        for filename in sorted(templatesByFilename):
+            print("OBJECTS += objects/%s.obj"
+                  % templatesByFilename[filename]["stem"], file = mf)
+        print(file = mf)
+        print("all: $(OBJECTS)", file = mf)
+        print(file = mf)
+        for filename in sorted(templatesByFilename):
+            template = templatesByFilename[filename]
+            target = "objects/" + template["stem"] + ".obj"
+            prerequisites = [filename]
+            for dep in sorted(set(template["includedFilenames"])):
+                if dep == filename:
+                    continue
+                prerequisites.append("objects/" +
+                                     templatesByFilename[dep]["stem"] + ".obj")
+            print("%s: %s" % (target, " ".join(prerequisites)), file = mf)
+            print("\t$(ONE)%s" % filename, file = mf)
+            print(file = mf)
+        print(".PHONY: all", file = mf)
+        mf.close()
+    except Exception as e:
+        print("Could not write %s: %s" % (makefilePath, str(e)))
+        outtaHere(1)
+
+
+# ---------------------------------------------------------------------------
+# THE SCHEDULER
+#
+# compilePASS compiles the files with no imports, then sweeps repeatedly over
+# the rest picking up whatever has become compilable, which is a topological
+# order arrived at by rescanning.  The rule it applies is: a unit may be
+# compiled once none of the files it imports is still waiting to be compiled.
+# That rule is kept exactly.  What changes is that it is evaluated
+# incrementally -- each completion releases the units that were waiting on
+# that one and no others -- so that up to `jobs` compilations are in flight at
+# any moment instead of one, and there is no barrier between sweeps for the
+# longest compilation in a sweep to hold everything else up behind.
+#
+# A unit is released by its dependency having been ATTEMPTED, not by its having
+# succeeded.  That is compilePASS's rule too: a file it gives up on is removed
+# from the waiting set along with the ones that compiled, so that a single
+# failure does not strand everything downstream of it.  The retry sweeps
+# further down are what catch a unit that failed only because it went too
+# early.
+#
+# `seeded` holds the files whose templates were put in the library from a stub;
+# they no longer block anyone, though they have still to be compiled for real.
+def runSchedule(reason):
+    """Compile everything that can be reached in dependency order, and return
+    when nothing further can start.  The return value is the number of units
+    attempted."""
+    # What still blocks others: everything not yet attempted, less the seeded.
+    pending = set(templatesByFilename) - seeded
+    waitingFor = {}
+    dependents = {}
+    for filename in templatesByFilename:
+        waitingFor[filename] = \
+            set(templatesByFilename[filename]["includedFilenames"]) & pending
+        # A file that imports its own template blocks itself, and so is
+        # reported at the end as uncompiled for want of a dependency.  That is
+        # what compilePASS does with one, and cyclesAmong() will not rescue it
+        # either, returning only the SCCs of more than one member.  Left that
+        # way deliberately: this program is meant to agree with compilePASS,
+        # not to be cleverer than it.
+        for dep in waitingFor[filename]:
+            dependents.setdefault(dep, set()).add(filename)
+    ready = [f for f in sorted(templatesByFilename) if not waitingFor[f]]
+    if not ready:
+        return 0
+    print("%s: %s (%d ready of %d, %d job(s)) ..." %
+          (datetime.now(), reason, len(ready), len(templatesByFilename), jobs))
+
+    attempted = 0
+    work = inParallel(lambda filename: buildOne(templatesByFilename[filename]))
+    with ThreadPoolExecutor(max_workers = jobs) as pool:
+        running = {}
+        while ready or running:
+            while ready and len(running) < jobs:
+                filename = ready.pop(0)
+                running[pool.submit(work, filename)] = filename
+            # Wait for the first of them to finish.  concurrent.futures.wait
+            # with FIRST_COMPLETED is the whole of the scheduling: whichever
+            # compilation ends first gives its slot to the next ready unit.
+            done, _ = wait(running, return_when = FIRST_COMPLETED)
+            for future in done:
+                filename = running.pop(future)
+                attempted += 1
+                built = future.result()
+                if not built:
+                    skipped.add(filename)
+                removed.add(filename)
+                for other in dependents.get(filename, ()):
+                    waitingFor[other].discard(filename)
+                    if not waitingFor[other]:
+                        ready.append(other)
+            ready.sort()
+    # Popping is left to the end of the round rather than done as each unit
+    # finishes, because `templatesByFilename` is what the rest of the program
+    # reads -- the summary prints what is left in it as "never attempted" --
+    # and a dict being mutated while the loop above walks it is a hazard for
+    # no gain.
+    for filename in removed:
+        templatesByFilename.pop(filename, None)
+    return attempted
+
+# ---------------------------------------------------------------------------
+# Breaking template-dependency cycles.
+#
+# The ordering above compiles a file only once every template it needs already
+# exists, so a group of files that need each other's templates can never
+# start: no member can go first.  That alone accounted for 156 files never
+# attempted in OI340600 and 178 in OI301700, in six groups, the largest of 29
+# members.  Nothing is wrong with those files.
+#
+# The D INCLUDE TEMPLATE cards cannot simply be dropped, because both members
+# of a cycle really do use each other -- VM1BFDCY calls VM4_BF_SHUT_DN and
+# VM4BFSHU cancels VM1_BFD_CYCLIC -- so removing one fails on an undeclared
+# name rather than on a missing template.  What works is seeding the library.
+# PASS1 takes TEMPLIB as both input (--pdsi=4) and output (--pdso=6) but emits
+# nothing when the compile fails, so a member cannot seed itself by failing.
+# A stub carrying only the block statement can, since the name and the
+# parameter list are all a caller needs, and the real unit is compiled over
+# the stub as soon as its own dependencies clear.  Nothing synthetic survives.
+#
+# Stubs are named _stub*.hal because corpus-run.sh clears _*.hal at the start
+# of a run, so a stub cannot leak into a later one.
+
+def cyclesAmong(filenames):
+    "Tarjan's algorithm, iterative.  Returns the multi-member SCCs."
+    edges = {}
+    for filename in filenames:
+        edges[filename] = [f for f in
+                           templatesByFilename[filename]["includedFilenames"]
+                           if f in filenames and f != filename]
+    index, low, onStack, stack, result, counter = {}, {}, set(), [], [], [0]
+    for root in filenames:
+        if root in index:
+            continue
+        index[root] = low[root] = counter[0]
+        counter[0] += 1
+        stack.append(root)
+        onStack.add(root)
+        work = [(root, iter(edges[root]))]
+        while work:
+            node, children = work[-1]
+            descended = False
+            for child in children:
+                if child not in index:
+                    index[child] = low[child] = counter[0]
+                    counter[0] += 1
+                    stack.append(child)
+                    onStack.add(child)
+                    work.append((child, iter(edges[child])))
+                    descended = True
+                    break
+                elif child in onStack:
+                    low[node] = min(low[node], index[child])
+            if descended:
+                continue
+            work.pop()
+            if work:
+                low[work[-1][0]] = min(low[work[-1][0]], low[node])
+            if low[node] == index[node]:
+                component = []
+                while True:
+                    member = stack.pop()
+                    onStack.discard(member)
+                    component.append(member)
+                    if member == node:
+                        break
+                if len(component) > 1:
+                    result.append(component)
+    return result
+
+def wrapCards(statement):
+    "Break a block statement across cards, leaving column 1 blank."
+    cards, current = [], ""
+    for word in statement.split():
+        if current and len(current) + len(word) + 2 > 71:
+            cards.append(" " + current)
+            current = word
+        else:
+            current = (current + " " + word).strip()
+    if current:
+        cards.append(" " + current)
+    return cards
+
+def seedable(template):
+    """Can this unit's template be reproduced from its block statement alone?
+
+    Only then is a stub safe.  The point is not merely that the stub must
+    compile: the template it deposits is used by every unit compiled before
+    the real one lands, and those units are NOT compiled again afterwards.
+    So a stub whose template merely resembles the real one would let its
+    callers compile against an interface that never existed.  Two kinds
+    cannot be reproduced and are never seeded:
+
+    A COMPOOL, because a compool's template IS its declarations.  A stub
+    would export nothing, and its callers would compile against an empty
+    compool.  Seeding CVJFDECP that way is what produced the DU1/SV3/XI3
+    failures in DGILDBIO, SBCSM and DGRGSERO.
+
+    Anything taking parameters, because HAL/S requires a procedure to
+    DECLARE its parameters in its body and a stub has no body to declare
+    them in -- "DU2, UNDECLARED PARAMETER ASL_I" for ASL_TM_COORD.  Their
+    types would have to be recovered from the real source to do better.
+
+    What is left -- a parameterless PROGRAM, PROCEDURE or FUNCTION -- has a
+    template that the block statement gives exactly, attributes and all."""
+    statement = template.get("blockStatement")
+    if statement == None or template.get("blockName") == None:
+        return False
+    if "(" in statement:
+        return False
+    if "COMPOOL" in statement.upper():
+        return False
+    return True
+
+def seedCycle(component):
+    """Compile a stub for one member of a cycle so the rest can start.
+
+    Returns the filename seeded, or None if no member could be."""
+    # Prefer the member fewest others in the cycle depend on: it perturbs the
+    # least, and its own real compile comes soonest.
+    def dependents(filename):
+        return sum(1 for other in component if filename in
+                   templatesByFilename[other]["includedFilenames"])
+    candidates = [f for f in component if seedable(templatesByFilename[f])]
+    if len(candidates) == 0:
+        print("      no member of this cycle of %d can be stubbed safely "
+              "(all take parameters or are COMPOOLs)" % len(component))
+        return None
+    for filename in sorted(candidates, key = lambda f: (dependents(f), f)):
+        template = templatesByFilename[filename]
+        statement = template["blockStatement"]
+        name = template["blockName"]
+        stubStem = "_stub" + template["stem"]
+        stubFilename = "./" + stubStem + ".hal"
+        try:
+            g = open(stubFilename, "w")
+            for card in wrapCards(statement):
+                g.write(card + "\n")
+            g.write(" CLOSE " + name + ";\n")
+            g.close()
+        except:
+            print("      cannot write %s" % stubFilename)
+            continue
+        stub = { "filename": stubFilename, "stem": stubStem,
+                 "halname": template["halname"], "includedFilenames": [],
+                 "includedHalnames": [] }
+        print("      seeding %s from a stub, to break a cycle of %d" %
+              (template["stem"], len(component)))
+        if compile(stub, fatal = False):
+            stubsCompiled.append(template["stem"])
+            return filename
+        print("      the stub for %s did not compile; trying another member" %
+              template["stem"])
+    return None
+
+seeded = set()
+stubsCompiled = []
+while True:
+    # A seeded file no longer blocks the others: its template is in the
+    # library, even though the file itself has still to be compiled for real.
+    # It is compiled when its own dependencies clear, like any other, and that
+    # compilation replaces the stub's template.
+    runSchedule("Compiling in dependency order")
+    if not seedCycles:
+        break
+    stalled = set(templatesByFilename) - skipped - seeded
+    if len(stalled) == 0:
+        break
+    components = cyclesAmong(stalled)
+    if len(components) == 0:
+        break
+    print("%s: %d file(s) blocked; %d dependency cycle(s) to break" %
+          (datetime.now(), len(stalled), len(components)))
+    progress = False
+    for component in sorted(components, key = len, reverse = True):
+        member = seedCycle(component)
+        if member != None:
+            seeded.add(member)
+            progress = True
+    if not progress:
+        print("      no member of any cycle could be seeded; giving up on them")
+        break
+
+if False:
+    print(f"Compilation of {len(errorsSkipped)} files skipped due to ZO3 or PM2 errors:")
+    print("     ", errorsSkipped)
+    print(f"{datetime.now()}: Compiling delayed files ...")
+    for stem in errorsSkipped:
+        template = templatesByStem[stem]
+        filename = template["filename"]
+        compile(template)
+        templatesByFilename.pop(filename)
+
+# ---------------------------------------------------------------------------
+# RETRY PASS
+#
+# The dependency analysis is not perfect, and BUILD.md says what to do about
+# that: "instead of treating an error as fatal, just come back to it later on.
+# Obviously, that takes longer."  Measured on a full build, 36 of 51 HAL
+# failures were XI3 ("@@X NOT IN TEMPLIB") or XI10 ("REL3 SDF ##X NOT FOUND")
+# -- a template or SDF that simply had not been written yet when the dependent
+# was compiled.  Every one of those is fixed by trying again once the rest of
+# the build has populated the libraries.
+#
+# Sweep repeatedly over everything that produced no object, stopping when a
+# whole pass adds nothing.  What survives is a real error rather than an
+# ordering accident: a genuine duplicate definition, say, which no amount of
+# reordering will fix.
+if retryPasses > 0:
+    print(f"{datetime.now()}: Retrying units that produced no object ...")
+    for attempt in range(1, retryPasses + 1):
+        again = []
+        for stem in sorted(templatesByStem):
+            template = templatesByStem[stem]
+            if Path("objects" + os.sep + stem + ".obj").is_file():
+                continue
+            again.append(template)
+        if not again:
+            break
+        print("   pass %d: %d unit(s) to retry" % (attempt, len(again)))
+        gained = 0
+        # A retry is a flat sweep: these are the units whose dependencies the
+        # analysis got wrong or which failed for want of something that has
+        # since been written, so there is no order left to respect among them.
+        # Note that two of them can therefore be reading and re-stowing the
+        # same TEMPLIB member at the same moment, and PASS1 writes a member in
+        # place; the reader would see a torn one and fail.  That is bounded and
+        # self-healing -- the sweep it fails in is itself a retry, and the next
+        # pass picks it up -- which is why it is left alone rather than
+        # serialised.  A unit that has already produced an object is never
+        # retried, so the window is only ever between two failures.
+        def retryOne(template):
+            if template.get("kind") == "dfg":
+                return dfg(template["filename"])
+            return compile(template, fatal = False)
+        # Keyed by stem: a template is a dict, and so cannot be a dict key.
+        results = {}
+        work = inParallel(retryOne)
+        with ThreadPoolExecutor(max_workers = jobs) as pool:
+            futures = dict((pool.submit(work, t), t) for t in again)
+            for future, template in futures.items():
+                results[template["stem"]] = future.result()
+        for template in again:
+            if results.get(template["stem"]) and \
+                    Path("objects" + os.sep + template["stem"] + ".obj").is_file():
+                gained += 1
+        print("   pass %d: %d unit(s) now built" % (attempt, gained))
+        if gained == 0:
+            break
+
+# ---------------------------------------------------------------------------
+# ASSEMBLY PASS
+#
+# Unlike HAL/S and the display decks, assembly has no COMPOOL dependency: an
+# AP-101S source is self-contained apart from its macro library, so the order
+# does not matter and one sweep does them all.  RUNASM/ and ZCONASM/ are the
+# RTL and are assembled against RUNMAC/; APPLSRC/ and SSSRC/ against MLIB80/.
+if assembleToo:
+    print(f"{datetime.now()}: Assembling AP-101S source files ...")
+    assemblyFiles = []
+    for d in ("SSSRC", "APPLSRC", "RUNASM", "ZCONASM"):
+        if Path(d).is_dir():
+            found = sorted(str(x) for x in Path(d).glob("*.asm"))
+            tombstones.extend(f for f in found if isTombstone(f))
+            assemblyFiles += [f for f in found if not isTombstone(f)]
+        else:
+            print("     %s/ not present; skipping it." % d)
+    # BUILD.md: "Any compilation or assembly error is fatal."  compilePASS
+    # lets assemble() exit the run where it stands.  That cannot be done from
+    # inside a job: os._exit() would take the other assemblies with it
+    # part-way through, and their objects would be left half-written.  So the
+    # jobs are told not to exit (fatal = False), the pool is allowed to drain,
+    # and the run is abandoned here instead -- the same outcome, reached in
+    # order, and with every failure of the sweep reported rather than just the
+    # first.
+    #
+    # An assembly needs no ordering: an AP-101S source is self-contained apart
+    # from its macro library, which is prepared before the run.
+    work = inParallel(lambda path: assemble(path, fatal = False))
+    failedAssemblies = []
+    with ThreadPoolExecutor(max_workers = jobs) as pool:
+        futures = dict((pool.submit(work, path), path) for path in assemblyFiles)
+        for future, path in futures.items():
+            if not future.result():
+                failedAssemblies.append(path)
+    print("%s: %d file(s) assembled." %
+          (datetime.now(), len(assemblyFiles) - len(failedAssemblies)))
+    if failedAssemblies:
+        print("%d assembly(s) failed, which is fatal:" % len(failedAssemblies))
+        for path in sorted(failedAssemblies):
+            print("     ", path)
+        resumeHint(sorted(failedAssemblies)[0])
+        outtaHere(1)
+
+if len(tombstones) > 0:
+    print("%d source file(s) removed by the overlay (zero length), not built:"
+          % len(tombstones))
+    for f in sorted(tombstones):
+        print("     ", f)
+
+if len(displayFailures) > 0:
+    print("%d display deck(s) could not be translated by dfg, and have no "
+          "object:" % len(displayFailures))
+    for path in displayFailures:
+        print("     ", path)
+
+if len(unrecognizedFailures) > 0:
+    print("%d file(s) failed in a way compilePASS does not recognize, and the "
+          "run continued past them:" % len(unrecognizedFailures))
+    for filename in unrecognizedFailures:
+        print("     ", filename)
+    print("     (--halt-on-error stops at the first of these instead)")
+if len(stubsCompiled) > 0:
+    print("%d cycle(s) broken by seeding a stub: %s" %
+          (len(stubsCompiled), " ".join(stubsCompiled)))
+    print("     (each counts as one extra compilation; the real unit was "
+          "compiled over it)")
+print(f"{len(notInPass)} files not part of PASS (CSECT in no configuration)")
+print(f"{len(skipped)} skipped files due to IR1, DI11, PM2, or ZO3 errors")
+print(f"Uncompiled files due to dependence ({len(templatesByFilename)-len(skipped)}):")
+if len(templatesByFilename) == len(skipped):
+    print("(None)")
+else:
+    for filename in templatesByFilename:
+        if filename in skipped:
+            continue
+        compilationCount += 1
+        if preprocess and Path(filename).name.startswith("_"):
+            print("%3d: Did not compile %s, removing it." % (compilationCount, filename))
+            try:
+                os.remove(filename)
+            except:
+                pass
+        else:
+            print("%3d: Did not compile %s." % (compilationCount, filename))
+
+print(f"{datetime.now()}: Done.")
+
+outtaHere(0)
+
+
