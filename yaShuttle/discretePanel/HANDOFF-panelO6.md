@@ -161,7 +161,8 @@ GPC's channel carried it and the lamps stayed dark in multi-GPC runs.
 
 ### The IDP column
 
-Right of everything above (`REF_W` 948 → 1684; `REF_H` 1250 then, 1300 since the MODE talkbacks moved down),
+Right of everything above (`REF_W` 948 → 1684; `REF_H` 1250 then, 1300
+since the MODE talkbacks moved down),
 top to bottom:
 
 | Inset | Controls |
@@ -253,7 +254,13 @@ on its Tk loop (`root.after`), so switches and keystrokes share one clock.
 `<seconds> <command>` per line, decimals allowed, `#` comments (so a caption
 cannot contain `#`).  Times count from the start, or from the moment the last
 wait was met; lines run in file order, and a time may not go backwards
-between waits.  The whole file is checked when it is read.  Times were
+between waits.  **`+<seconds>` is that long after the line before was due**
+(or after the start or the last wait, if none came since), worked out when
+the file is read, so the player sees only the sum and a line inserted among
+`+N` lines needs no renumbering of the rest; the two spellings mix.
+discretePanel.py takes `+N` too, relative to the previous line in file order,
+and so do simulatePASS's `--keys` files, where a `WAIT` resets it.  The whole
+file is checked when it is read.  Times were
 milliseconds until f1f6d064c; a time over `MAX_SCRIPT_SECONDS` (36000) is
 refused as a probable old millisecond script, and discretePanel.py has the
 same guard.  The panel verbs move the controls, so the window, the log and
@@ -274,8 +281,24 @@ which is how one script brings up more than one computer.
 | `majfunc N GNC\|SM\|PL` | IDP/CRT N MAJ FUNC (N 1-3 on C2, 4 on R11) |
 | `kybdsel left 1\|3`, `kybdsel right 2\|3` | LEFT / RIGHT IDP/CRT SEL |
 | `idpload N` | O6 IDP N LOAD (N 1-4), held `IPL_HOLD_MS` |
+| `power on\|off` | that column's GPC POWER |
+| `output backup\|normal\|terminate` | its OUTPUT switch (the whole switch; `bit A 13` still moves TERMINATE / NORMAL alone) |
+| `display on\|off` | C3 BFC CRT DISPLAY, without touching SELECT |
+| `select 1+2\|2+3\|3+1` | C3 BFC CRT SELECT, without touching DISPLAY |
+| `disengage left\|right` | F6 BFC DISENGAGE, to that position |
+| `rhcengage cdr\|plt` | that RHC's BFC ENGAGE pushbutton, held `IPL_HOLD_MS` |
 
-`_dump_state` lists every IDP switch too.
+Every control on the panel now has a command, named for its legend, so a
+script can do what the crew does whether or not the switch drives a discrete
+(POWER drives none; a demonstration still wants to see it thrown).  `crt` and
+`bfsengage` remain as shortcuts that move two controls at once.
+
+**Every argument is checked when the script is read**, against
+`crewscript.PANEL_ARGS` (patterns) and `PANEL_USAGE` (what to say), case
+insensitively: `'select 1+3': expected 'select 1+2|2+3|3+1'`.  So
+`python3 crewscript.py FILE` reports a mistyped value with the allowed ones
+before a run starts, rather than a `SystemExit` from panelO6 part way
+through.  `_dump_state` lists every IDP switch too.
 
 Verified at wiring time: the same 20-command script through panelO6.py and
 discretePanel.py on port base 17900, the bus sampled at +120 / +700 ms, gave
@@ -287,7 +310,23 @@ column 2's own MODE).
 front, holds the script until GPC N's MODE talkback shows that state (see
 Talkbacks; polled every `WAIT_POLL_MS` = 100 ms, default timeout 600 s).  A
 timeout is logged and stops the script rather than carrying on as if the
-GPC were ready.  `wait user` holds until a click in the window: the cursor
+GPC were ready.  `timeout S` is the literal word and a number of seconds:
+a wait ending in a bare number is refused with "a timeout is written with
+the word timeout", since `[timeout S]` in the help read as a value to
+replace.  (A *title* may still end in a number -- `wait crt 1 title UNIV PTG
+2` is a title, not a timeout.)
+
+**Waiting for a page.**  `wait crt N title TEXT [timeout S]` holds until TEXT
+appears anywhere in CRT N's top two lines, spaces squeezed and case ignored,
+quotes around TEXT optional; `wait crt N new-screen [timeout S]` holds until
+those two lines differ from the ones on show when the wait began, clocks
+masked, and a page appearing on a silent CRT counts.  Both follow MEDS2.py's
+screen announcements (port base + 91; see HANDOFF-meds2-py.md §10):
+`crewscript.ScreenWatch` listens on a thread, `Player(screens=...)` polls it,
+and panelO6.py hands one to the player.  A wait whose display never speaks
+times out like any other.  simulatePASS's `--keys` files have no such waits.
+
+`wait user` holds until a click in the window: the cursor
 becomes `WAIT_CURSOR` ("target") and stays so across `<Leave>` and motion,
 and the click is consumed, moving no control.  `--wait-user` inserts one
 before the first line.  The window is mapped when there is no script, or
@@ -301,12 +340,16 @@ that many seconds.
 done.  `subtitle` sends one UTF-8 datagram to port base + 90 for
 `subtitles.py`; nothing starts that box (see Related files).
 
-**Verified (2026-09-15):** `examples/4gpc-startup.script` with
-`simulatePASS --gpcs 1-4 --crts 2` brought four GPCs to OPS 2, each IPL
-gated on `wait gpc N mode-tb RUN` (met 25-28 s after its ITEM 1 EXEC), with
-no CAM lamp and MM1 at 239 commands / 2045 blocks read.  As two files with
-waits, OPS 2 was typed about 570 s after the panel started, against 840 s
-with fixed times.
+**Verified (2026-09-15/16):** `examples/4gpc-startup.script` with
+`simulatePASS --gpcs 1-4 --crts 2` brought four GPCs to OPS 2, no CAM lamp,
+MM1 at 239 commands / 2045 blocks read -- the same as every earlier verified
+run.  The script now waits for the GPCIPL menu instead of the old fixed 67 s
+(GPC1) and 65 s (the others) between STANDBY and ITEM 1 EXEC:
+`wait crt N title GPCIPL timeout 150`, met 13.5 s after each STANDBY, with
+the loads taking 25.2 / 27.3 / 28.0 / 28.5 s.  OPS 2 was typed about **363 s**
+after the panel started, against 570 s when only the talkbacks were waited on
+and 840 s with fixed times.  A title wait rather than `new-screen`, because
+DEU LOAD blanks the display just before each IPL.
 
 ---
 
@@ -426,7 +469,12 @@ CRT2), panelO6.py, and cam.py; `--crts 3` / `4` add IDPs.
 `simulatePASS --instructions` prints the steps for a configuration.
 `--yagpc-extra "ARGS"` appends options to yaGPC2's command line
 (shlex-split), e.g. `--yagpc-extra "--barrier-spin-us 50 --rt-idle-poll-ms 2"`.
-`--script FILE` hands panelO6 a crew script (see "Scripted playback");
+`--script FILE` hands panelO6 a crew script (see "Scripted playback"), and
+is read with `crewscript.parse` BEFORE anything is started, so a mistake ends
+the run with the script error and "nothing started" -- before, a bad script
+stopped panelO6 as it came up, logged only in panel.log, while yaGPC2, MEDS2
+and the keyboards ran on without a panel.  `--layout FILE` puts this run's
+windows where a `windowLayout.py` file says (see Related files);
 `--show-panel` and `--wait-user` pass `--show` / `--wait-user` for
 demonstrations, and `--duration` should be left off with a wait user, since
 it counts from start-up.  The older split still works: `--keys FILE` with
@@ -790,7 +838,31 @@ starting subtitles.py (239062faa).
   and Shift-drag for width and minimum height, and prints
   `--geometry WxH+X+Y --font-size N --align A` after each change; a drag
   first re-reads the window's real position, as the window manager may have
-  placed it elsewhere.  Nothing starts it: run it with the same `--port-base`.
+  placed it elsewhere.  The typing cursor shows only while the box has the
+  keyboard (`FocusIn`/`FocusOut`), so clicking another window hides it for a
+  recording, and Ctrl H hides or shows it outright.  The box **adopts an
+  outside move or resize** as its own (a `<Configure>` handler comparing
+  against the geometry it last asked for), so a placement restored by
+  `windowLayout.py` is not undone by the next caption, and it keeps its look
+  -- font, size, colours, opacity, alignment -- on its window as
+  `_NSTS_SUBTITLES`, refreshed on every change, for a layout to save.
+  Nothing starts it except `simulatePASS --layout` with a layout that names
+  it; otherwise run it with the same `--port-base`.
+- `windowLayout.py` — where the windows are.  `save FILE`, `restore FILE`,
+  `show [FILE]`.  Each window is named for the program that made it
+  (`crt1`..`crt4`, `kybd1`..`kybd3`, `panel`, `cam`, `subtitles`,
+  `discretepanel`) from `/proc/PID/cmdline`; Tk publishes no `_NET_WM_PID`,
+  so its windows are matched by title instead.  **Geometry is read with
+  xdotool, the tool that also moves them**: wmctrl lists the window the
+  desktop manages, and for the caption box -- managed but undecorated -- that
+  is a wrapper which is not itself placed, reported at 7020,3984 against
+  xdotool's 3510,1992, so mixing the two put the box nowhere near.  Placement
+  measures after each move and corrects for the frame offset (24,140 here),
+  five tries, no `xdotool --sync` (it waits for ever when a move is refused,
+  which hung a run part way through).  Marco keeps a window on ONE monitor,
+  so a hand-written layout straddling the boundary cannot be satisfied and
+  the report says how far off it finished.  Only the caption box is resized
+  unless `--with-sizes`.  Needs wmctrl and xdotool.
 - `simulatePASS.py` — the launcher; see README.md.
 
 ---

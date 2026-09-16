@@ -480,6 +480,22 @@ stall, 6.5 ms with `NSTS_GUI_STALL_BUSY=1`. Unstalled regression, `simulatePASS
   from 36 to 8. Some gap is deliberate: photos of physical MEDS show a small,
   varying one. The geometry panel no longer moves the menu area with `pageY`
   (cce2e88c5).
+* **Each DPS display announces its top two lines**, so a crew script can wait
+  for a page (`wait crt N title TEXT`, `wait crt N new-screen`; see
+  HANDOFF-panelO6.md). `Screen_DPS._drawPasses` starts a frame by emptying
+  `_frameRows`; the glyph site in `drawFCWS` records each character by
+  `int(round(penY()))` and `int(round(penX()))`; after both passes
+  `_announceTopLines` takes the two lowest rows, and `announceScreen` sends one
+  UTF-8 datagram, `<mdu name>\n<line 1>\n<line 2>`, to the bus group at
+  `PORT_BASE + SCREEN_OFFSET` (91). It goes out when the lines change with the
+  clocks masked (`SCREEN_CLOCK`) **and the change has held for two refreshes**,
+  so a blinking field is not a new page, and otherwise at most every
+  `SCREEN_REANNOUNCE_S` (1 s) so a listener started later soon knows. The name
+  is `CONFIG['config']['lru']` lowercased (`crt1`), set on the screen when
+  `setCurrentDisplay` creates it. **Only refreshes speak**: `--dev` fills the
+  page once, so it announces nothing there, and a real run's time fills drive
+  it twice a second. Seen in a one-GPC run: `GPCIPL MENU (1) 1 PASS1 1 PASS5 9`
+  13.5 s after STANDBY, then `GPC MEMORY MEM/BUS CONFIG READ/WRITE`.
 
 ---
 
