@@ -144,6 +144,12 @@ bool discretes_poll_one(Discretes *d);
  * `k` is which neighbour the source is, from the reader's seat:
  * (source - reader) mod 5, 1..4.  Returns the reader's register A mask for
  * the bits `outMask` sets in the source's output register. */
+/* The three output lines that carry the sync code: STBY (20), RUN (24) and
+ * SYNC (28), X'0888'.  All three clear is 000, "halt / standby / dead" -- the
+ * code a computer that is not executing must present, so that its neighbours
+ * read it as gone rather than as present and silent.  See run.c's held path. */
+#define DISCRETES_OUT_SYNC_MASK 0x00000888u
+
 uint32_t discretes_rotate_out(int sourceGpc, int readerGpc, uint32_t outMask);
 
 /* Publish onto ANOTHER computer's channel, from this one's socket.  That is

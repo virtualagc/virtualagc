@@ -1714,6 +1714,24 @@ static bool batchrunner_step(BatchRunner *r) {
          * machine's clock has stopped, and a stopped clock is the slowest
          * there is -- leaving it in would halt the whole vehicle. */
         vehicle_barrier_leave(r->vehicle, r->gpcId);
+        /* AND SAY SO ON THE INTER-GPC LINES.  A machine held in reset drives
+         * nothing, so whatever code it last put out -- usually 111 null,
+         * "present and idle" -- stayed on its neighbours' lines for as long
+         * as it sat there.  They saw a computer that claimed to be present
+         * and then never spoke again, which is a fail-to-sync, and voted it
+         * out: measured 2026-09-16, GPC1 held 111 for three and a half hours
+         * after a vote-out, and the peers re-voted the moment it was moded to
+         * HALT to be re-IPLed.  000 is the code for halt/standby/dead
+         * (BILDNEW5.asm), and a computer leaving a set forces it deliberately
+         * (FPMZSYNC, FCMSWMON) so the survivors do NOT take a fail-to-sync.
+         * It is also what FCMCSYNC watches for: a member is admitted on an
+         * observed 000 -> 111, which a machine that never showed 000 cannot
+         * offer.  The register itself is left alone -- the lines are driven
+         * by the machine's reset state, not by its software, and on release
+         * cpu_reset hands FCMBOOT a fresh one. */
+        vehicle_refresh_lines(r->vehicle, r->gpcId,
+                              discretes_value(r->discretes, DISCRETES_REG_OUT)
+                                  & ~DISCRETES_OUT_SYNC_MASK);
         r->modeWasHeld = true;
         /* Nothing to do but wait for the switch to move; don't spin a
          * core doing it. */
