@@ -364,6 +364,21 @@ def parse(text, path=None, _depth=0, _seen=None):
     _seen = set(_seen or ())
     if path:
         _seen.add(os.path.realpath(path))
+    # A SCRIPT WITH $NAMES IN IT IS A CALLED SCRIPT, and nothing has filled
+    # them in, so every line it appears on would fail its argument check with
+    # a message about the wrong thing ("'gpc $gpc': expected 'gpc 1-5'").  Say
+    # what is actually wrong instead.
+    if _depth == 0:
+        names = sorted({(m.group(1) or m.group(2))
+                        for line in text.splitlines()
+                        for piece in line.split("$$")
+                        for m in PARAM_RE.finditer(piece)})
+        if names:
+            raise ScriptError("%s takes arguments (%s), so it is played BY another "
+                              "script, which fills them in -- and it is checked when "
+                              "that script is checked.  Write $$ for a literal $."
+                              % (os.path.basename(path) if path else "this script",
+                                 ", ".join("$" + n for n in names)))
     for n, raw in enumerate(text.splitlines(), 1):
         line = raw.split("#", 1)[0].strip()
         if not line:
@@ -445,6 +460,13 @@ def parse(text, path=None, _depth=0, _seen=None):
                 except ScriptError as err:
                     raise ScriptError("in %s: %s" % (os.path.basename(sub), err))
                 entry["path"] = sub
+                # AND THE TIMES AFTER IT START AGAIN, exactly as they do after
+                # a wait: Player._call resets the caller's origin when the
+                # called script finishes, so a '+N' below this line means N
+                # seconds after it came back.  Without this the line kept the
+                # whole segment's accumulated time and was then measured from
+                # that new origin, so it ran that much too late.
+                last_ms = 0
             elif verb not in PANEL_VERBS:
                 raise ScriptError("unknown command %r" % verb)
             elif not re.fullmatch(PANEL_ARGS[verb], arg, re.IGNORECASE):

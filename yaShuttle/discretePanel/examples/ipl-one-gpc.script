@@ -1,0 +1,30 @@
+# One GPC's IPL, as done from the O6 panel and a DPS keyboard: select the
+# computer, point it at a mass memory, put its IPL display on a CRT, load it,
+# and take it to RUN.  4gpc-startup.script plays this once per computer --
+# the procedure is the same for each, and only these four values change:
+#
+#   script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
+#
+#   gpc   the GPC column the O6 controls act on, 1-5
+#   crt   the CRT its IPL display goes to, and the one waited on
+#   idp   the IDP given the spring-loaded LOAD toggle
+#   kb    the keyboard ITEM 1 EXEC is typed on: KB1, KB2 or KB3
+#
+# Nothing here is a guessed delay: the load waits for the GPCIPL menu's title
+# to appear on CRT $crt, and the run waits for this GPC's MODE talkback to
+# read RUN.  It leaves the IPL SOURCE switch off, ready for the next computer.
+
++0     gpc $gpc
++1     source MM1
++1     crt $crt
++0.5   idpload $idp
++0.5   ipl
++3     mode STANDBY
+wait crt $crt title GPCIPL timeout 150
++2     keys $kb ITEM 1 EXEC
+
+# loaded: to RUN, and the IPL source back off
+wait gpc $gpc mode-tb RUN timeout 300
++1     crt 0
++2     mode RUN
++2     source OFF
