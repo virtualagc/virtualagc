@@ -129,6 +129,7 @@ class Subtitles(object):
         self.w, self.min_h, self.x, self.top = box
         self.shift = 0                        # moved up this far to stay on screen
         self.h = None
+        self._wm_id = None            # the window the desktop deals with
         self._asked = None            # the geometry this program last set
         self.align = args.align
         self.text = ""
@@ -192,8 +193,29 @@ class Subtitles(object):
             log("--edit: type a caption; Ctrl +/- font, Ctrl L/E/R align, "
                 "Shift-drag size, Ctrl P options, Ctrl H cursor")
             self._report()
+        root.after(300, self._publish_look)
         threading.Thread(target=self._listen, daemon=True).start()
         root.after(50, self._poll)
+
+    def _wm_window(self):
+        """The window the desktop deals with: Tk's WRAPPER, the parent of
+        winfo_id(), when the window manager has one; the window itself when it
+        does not (--no-taskbar).  Properties meant for other programs -- the
+        decoration hint, the look below -- belong on this one, since it is
+        what a window list names."""
+        if self._wm_id is None:
+            self._wm_id = str(self.root.winfo_id())
+            try:
+                self.root.update_idletasks()
+                tree = subprocess.run(["xwininfo", "-tree", "-id", str(self.root.winfo_id())],
+                                      capture_output=True, text=True, timeout=5).stdout
+                m = re.search(r"Parent window id: (0x[0-9a-fA-F]+)", tree)
+                root_m = re.search(r"Root window id: (0x[0-9a-fA-F]+)", tree)
+                if m and (root_m is None or m.group(1) != root_m.group(1)):
+                    self._wm_id = str(int(m.group(1), 16))
+            except (OSError, ValueError, subprocess.SubprocessError, tk.TclError):
+                pass
+        return self._wm_id
 
     def _undecorate(self):
         """Ask the window manager for no title bar or border, before the
@@ -203,12 +225,9 @@ class Subtitles(object):
         until the window has been mapped, so it cannot be used here."""
         try:
             self.root.update_idletasks()
-            tree = subprocess.run(["xwininfo", "-tree", "-id", str(self.root.winfo_id())],
-                                  capture_output=True, text=True, timeout=5).stdout
-            m = re.search(r"Parent window id: (0x[0-9a-fA-F]+)", tree)
-            if not m:
-                raise ValueError("no parent window for %s" % hex(self.root.winfo_id()))
-            wrapper = str(int(m.group(1), 16))
+            wrapper = self._wm_window()
+            if wrapper == str(self.root.winfo_id()):
+                raise ValueError("no wrapper window for %s" % hex(self.root.winfo_id()))
             subprocess.run(["xprop", "-id", wrapper, "-f", "_MOTIF_WM_HINTS", "32c",
                             "-set", "_MOTIF_WM_HINTS", "2, 0, 0, 0, 0"],
                            check=False, stdout=subprocess.DEVNULL,
@@ -240,8 +259,27 @@ class Subtitles(object):
             self.w, self.min_h, self.x, self.top,
             int(self.font.cget("size")), self.align)
 
+    def look(self):
+        """Everything but the geometry: what the box is to look like.  Kept on
+        the window itself (_NSTS_SUBTITLES) so a layout can be saved with the
+        look it was arranged with -- see windowLayout.py."""
+        return "--font %s --font-size %d --fg %s --bg %s --opacity %s --align %s" % (
+            self.font.cget("family"), int(self.font.cget("size")),
+            self.args.fg, self.args.bg, self.args.opacity, self.align)
+
+    def _publish_look(self):
+        try:
+            subprocess.run(["xprop", "-id", self._wm_window(),
+                            "-f", "_NSTS_SUBTITLES", "8u",
+                            "-set", "_NSTS_SUBTITLES", self.look()],
+                           check=False, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=5)
+        except (OSError, subprocess.SubprocessError):
+            pass
+
     def _report(self):
         log("options: " + self.options())
+        self._publish_look()
 
     def _sync_place(self):
         """Take the box's place from the window itself: the window manager may

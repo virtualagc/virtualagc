@@ -26,13 +26,31 @@ command line, so the same name matches the same window in a later run:
 
 Anything not recognised is saved under 'other:<title>', matched by title.
 
+THE CAPTION BOX'S LOOK is saved too -- font, size, colours, opacity and
+alignment, which subtitles.py keeps on its own window (_NSTS_SUBTITLES) and
+updates as they are changed in --edit.  simulatePASS.py --layout starts the
+box with exactly those options.
+
 SIZES.  Only the caption box is resized: the displays and the panel size
 themselves from --size, and forcing a different size on them would not scale
 what they draw.  'restore --with-sizes' resizes everything in the file.
 
+WHOSE WINDOWS.  'restore' moves whatever it finds by that name, so with two
+simulations running it may move the wrong one's; it says so when a name
+matches more than one window.  simulatePASS.py --layout does not have this
+problem: it notes what was on screen before it started and places only its
+own windows.
+
 A window manager may place a window a few pixels from where it is asked to
 (the frame is its business, not ours), so each window is moved, measured, and
-nudged by the difference, up to three times.  --verbose shows that happening.
+nudged by the difference, up to five times.  --verbose shows that happening.
+
+WHAT IT CANNOT DO.  Marco keeps a window on ONE monitor: asked for a place
+where the window would straddle the boundary, it shoves it back, and asked
+for one further over it moves it to the next monitor entirely.  A layout
+saved from windows that were placed by hand never asks for the impossible;
+one written by hand can, and then a window ends up somewhere else and the
+report says how far off it finished.
 """
 
 import argparse
@@ -67,8 +85,12 @@ RESIZE_BY_DEFAULT = ("subtitles",)
 HOSTNAME = os.uname().nodename
 
 
-def run(cmd):
-    return subprocess.run(cmd, capture_output=True, text=True).stdout
+def run(cmd, timeout=10):
+    """Never wait on a window that will not answer: every call is bounded."""
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout).stdout
+    except (OSError, subprocess.SubprocessError):
+        return ""
 
 
 def cmdline(pid):
@@ -111,9 +133,20 @@ def windows():
             continue
         pid = int(pid)
         role, cmd = role_of(pid, title)
-        out.append({"id": wid, "pid": pid, "x": int(x), "y": int(y),
-                    "w": int(w), "h": int(h), "title": title, "role": role, "cmd": cmd})
+        entry = {"id": wid, "pid": pid, "x": int(x), "y": int(y),
+                 "w": int(w), "h": int(h), "title": title, "role": role, "cmd": cmd}
+        if role == "subtitles":
+            entry["look"] = look_of(wid)
+        out.append(entry)
     return out
+
+
+def look_of(wid):
+    """subtitles.py keeps its own look -- font, size, colours, alignment -- on
+    its window as _NSTS_SUBTITLES, so a layout can be saved with it."""
+    text = run(["xprop", "-id", wid, "_NSTS_SUBTITLES"])
+    m = re.search(r'_NSTS_SUBTITLES.*?=\s*"(.*)"\s*$', text, re.S)
+    return m.group(1).strip() if m else ""
 
 
 def geometry(wid):
@@ -126,18 +159,22 @@ def geometry(wid):
 
 
 def place(wid, x, y, w=None, h=None, verbose=False):
-    """Move (and optionally resize), correcting for what the frame does."""
+    """Move (and optionally resize), correcting for what the frame does.
+
+    Without xdotool's --sync: that waits for the window manager to confirm,
+    and waits for ever when the move is refused, which hung a whole run.  The
+    loop below measures for itself instead."""
     if w and h:
-        subprocess.run(["xdotool", "windowsize", "--sync", wid, str(w), str(h)],
-                       capture_output=True)
+        run(["xdotool", "windowsize", wid, str(w), str(h)], timeout=5)
+        time.sleep(0.15)
     ask_x, ask_y = x, y                # x, y stay the target; the ask moves
-    for attempt in range(3):
-        subprocess.run(["xdotool", "windowmove", "--sync", wid, str(ask_x), str(ask_y)],
-                       capture_output=True)
-        time.sleep(0.05)
+    dx = dy = None
+    for attempt in range(5):
+        run(["xdotool", "windowmove", wid, str(ask_x), str(ask_y)], timeout=5)
+        time.sleep(0.25)
         now = geometry(wid)
         if now is None:
-            return False
+            return None                # gone; nothing to say about it
         dx, dy = x - now[0], y - now[1]
         if verbose:
             print("    try %d: asked %d,%d got %d,%d (want %d,%d)"
@@ -145,14 +182,15 @@ def place(wid, x, y, w=None, h=None, verbose=False):
         if dx == 0 and dy == 0:
             return True
         ask_x, ask_y = ask_x + dx, ask_y + dy    # off by that much: ask for less
-    return False
+    return (dx, dy)                    # how far out it finished
 
 
 def cmd_save(args):
     ws = windows()
     keep = [w for w in ws if not w["role"].startswith("other:") or args.all]
     layout = {"saved": time.strftime("%Y-%m-%d %H:%M:%S"),
-              "windows": [{k: w[k] for k in ("role", "x", "y", "w", "h", "title")}
+              "windows": [{k: w[k] for k in ("role", "x", "y", "w", "h", "title", "look")
+                           if k in w}
                           for w in sorted(keep, key=lambda w: w["role"])]}
     with open(args.file, "w") as fh:
         json.dump(layout, fh, indent=2)
@@ -161,34 +199,86 @@ def cmd_save(args):
     for w in layout["windows"]:
         print("   %-12s %5d,%-5d %4dx%-4d  %s" % (w["role"], w["x"], w["y"],
                                                   w["w"], w["h"], w["title"][:40]))
+        if w.get("look"):
+            print("   %-12s %s" % ("", w["look"]))
     return 0
 
 
-def cmd_restore(args):
-    with open(args.file) as fh:
+def window_ids():
+    """Every window id on screen now.  A launcher takes this before it starts
+    anything, so it can place its OWN windows and not another run's."""
+    return {w["id"] for w in windows()}
+
+
+def has_role(role, only_ids=None):
+    """Is a window of that name on screen now?  For a launcher deciding
+    whether it still has to start the program.  only_ids narrows the question
+    to that launcher's own windows, so another simulation's do not answer it."""
+    return any(w["role"] == role and (only_ids is None or w["id"] in only_ids)
+               for w in windows())
+
+
+def roles_in(path):
+    """The names a layout file mentions."""
+    with open(path) as fh:
+        return [w["role"] for w in json.load(fh)["windows"]]
+
+
+def look_in(path, role="subtitles"):
+    """The look saved for that window, as a list of options, or []."""
+    with open(path) as fh:
+        for w in json.load(fh)["windows"]:
+            if w["role"] == role and w.get("look"):
+                return w["look"].split()
+    return []
+
+
+def restore_layout(path, with_sizes=False, verbose=False, log=print, only_ids=None):
+    """Put the windows where the file says.  only_ids, if given, is the set of
+    window ids that may be moved -- everything else is left alone, so one
+    simulation cannot drag another's windows about.  Returns (placed, missing,
+    inexact)."""
+    with open(path) as fh:
         layout = json.load(fh)
     here = {}
     for w in windows():
+        if only_ids is not None and w["id"] not in only_ids:
+            continue
         here.setdefault(w["role"], []).append(w)
     done = missing = failed = 0
     for want in layout["windows"]:
         role = want["role"]
         got = here.get(role)
         if not got:
-            print("   %-12s not on screen" % role)
+            log("   %-12s not on screen" % role)
             missing += 1
             continue
+        if len(got) > 1:
+            log("   %-12s %d windows have this name; taking %s (%s)"
+                % (role, len(got), got[0]["id"], got[0]["title"][:40]))
         w = got.pop(0)
-        size = (want["w"], want["h"]) if (args.with_sizes or role in RESIZE_BY_DEFAULT) else (None, None)
-        ok = place(w["id"], want["x"], want["y"], size[0], size[1], args.verbose)
-        print("   %-12s -> %d,%d%s%s" % (role, want["x"], want["y"],
-                                         " %dx%d" % size if size[0] else "",
-                                         "" if ok else "  (could not place it exactly)"))
+        size = ((want["w"], want["h"]) if (with_sizes or role in RESIZE_BY_DEFAULT)
+                else (None, None))
+        ok = place(w["id"], want["x"], want["y"], size[0], size[1], verbose)
+        if ok is True:
+            note = ""
+        elif ok is None:
+            note = "  (the window went away)"
+        else:
+            note = ("  (ended %+d,%+d from there -- a window that would straddle two "
+                    "monitors is pushed back onto one)" % (-ok[0], -ok[1]))
+        log("   %-12s -> %d,%d%s%s" % (role, want["x"], want["y"],
+                                       " %dx%d" % size if size[0] else "", note))
         done += 1
-        failed += 0 if ok else 1
-    print("placed %d window(s)%s%s" % (done,
-                                       ", %d not running" % missing if missing else "",
-                                       ", %d inexact" % failed if failed else ""))
+        failed += 0 if ok is True else 1
+    log("placed %d window(s)%s%s" % (done,
+                                     ", %d not running" % missing if missing else "",
+                                     ", %d inexact" % failed if failed else ""))
+    return done, missing, failed
+
+
+def cmd_restore(args):
+    restore_layout(args.file, args.with_sizes, args.verbose)
     return 0
 
 

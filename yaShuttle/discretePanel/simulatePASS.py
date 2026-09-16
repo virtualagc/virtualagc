@@ -51,10 +51,11 @@ CAPTIONS FOR VIDEOS.  '<seconds> SUBTITLE text ...' in the keys file, or
 '<seconds> subtitle text ...' in the panel script, shows the text in
 subtitles.py's borderless caption box (the same line with no text clears it;
 \\n starts a new line; a leading <left>, <center> or <right> aligns that
-caption alone).  This program does not start the box, since no default size
-or place suits every recording: run subtitles.py yourself with the same
---port-base, and use its --edit to find the options that suit.  When a script
-captions, the log says so and gives the command.
+caption alone).  This program does not start the box of its own accord, since
+no default size or place suits every recording: run subtitles.py yourself with
+the same --port-base, and use its --edit to find the options that suit -- or
+name it in a --layout file, which says where it goes and starts one.  When a
+script captions, the log says so and gives the command.
 
 WAITING INSTEAD OF GUESSING.  A line 'WAIT gpc N mode-tb RUN|IPL|BP [timeout S]'
 in either file holds that file until GPC N's MODE talkback on panel O6 shows
@@ -88,6 +89,7 @@ IFACE = os.environ.get("NSTS_BUS_IFACE", "127.0.0.1")
 # The DPS keyboard scan codes and MDU -> IDP messages live with the crew script
 # language, which --keys playback below shares.
 import crewscript
+import windowLayout
 from crewscript import SCAN, IDP_MSG
 MAJOR_FUNC = {"PL": 0, "GNC": 1, "SM": 2}
 
@@ -559,6 +561,11 @@ def main():
     ap.add_argument("--script", "--panel-script", dest="panel_script", metavar="FILE",
                     help="crew script for panelO6.py: switches, keys, subtitles and waits "
                          "in one file (commands below)")
+    ap.add_argument("--layout", metavar="FILE",
+                    help="put the windows where this layout file says once they are up "
+                         "(windowLayout.py save FILE writes one).  If it names the caption "
+                         "box and none is running, one is started first: subtitles.py "
+                         "--font-size 14 --bg #404040 --edit")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
     ap.add_argument("--duration", type=float, metavar="SECONDS",
                     help="shut down after this long instead of waiting for Enter")
@@ -587,6 +594,19 @@ def main():
                 crewscript.parse(fh.read())
         except (OSError, crewscript.ScriptError) as e:
             sys.exit("simulatePASS: %s: %s -- nothing started" % (args.panel_script, e))
+
+    # Likewise a layout: read it now, so a bad one does not surface after
+    # everything is running.
+    layout_roles = []
+    windows_before = set()
+    if args.layout:
+        try:
+            layout_roles = windowLayout.roles_in(args.layout)
+        except (OSError, ValueError, KeyError) as e:
+            sys.exit("simulatePASS: %s: %s -- nothing started" % (args.layout, e))
+        # What is already on screen, so this run places ITS OWN windows and
+        # never another simulation's (they are named the same).
+        windows_before = windowLayout.window_ids()
 
     tape = args.tape or os.environ.get("NSTS_PASS_TAPE") or os.path.join(HERE, "OI340700-OPS0.mmv")
     tape = os.path.abspath(tape)
@@ -725,8 +745,9 @@ def main():
                      "--verbose"] + shlex.split(args.yagpc_extra)
         gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env)
         time.sleep(3)
-        if (script_has_subtitles(args.keys, False)
-                or script_has_subtitles(args.panel_script, True)):
+        if ((script_has_subtitles(args.keys, False)
+             or script_has_subtitles(args.panel_script, True))
+                and "subtitles" not in layout_roles):
             log("note: the script has captions; start the caption box yourself: "
                 "python3 subtitles.py --port-base %d" % args.port_base)
         panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
@@ -749,6 +770,35 @@ def main():
                     "start-up -- including the time spent waiting")
         L.start("panel", panel_argv, HERE, env)
         t0 = time.time()
+
+        # THE WINDOWS WHERE THEY WERE PUT LAST TIME.  A run does not start the
+        # caption box of its own accord (no size or place suits every
+        # recording), but a layout that names it says where it goes, so one is
+        # started here if none is up.
+        if args.layout:
+            mine_now = windowLayout.window_ids() - windows_before
+            if ("subtitles" in layout_roles
+                    and not windowLayout.has_role("subtitles", mine_now)):
+                # The look the layout was saved with, if it has one; failing
+                # that, something legible on a dark background.
+                look = (windowLayout.look_in(args.layout)
+                        or ["--font-size", "14", "--bg", "#404040"])
+                if "--edit" not in look:
+                    look = look + ["--edit"]      # so it can be adjusted in place
+                L.start("subtitles",
+                        [py, "subtitles.py", "--port-base", str(args.port_base)] + look,
+                        HERE, env)
+            deadline = time.time() + 12
+            while time.time() < deadline:
+                mine = windowLayout.window_ids() - windows_before
+                roles = {w["role"] for w in windowLayout.windows() if w["id"] in mine}
+                if all(r in roles for r in layout_roles):
+                    break
+                time.sleep(0.5)
+            time.sleep(1.5)        # let the window manager finish placing them
+            mine = windowLayout.window_ids() - windows_before
+            log("placing this run's windows as %s says" % args.layout)
+            windowLayout.restore_layout(args.layout, log=log, only_ids=mine)
         if args.keys:
             threading.Thread(target=send_keys_thread,
                              args=(args.port_base, os.path.abspath(args.keys), t0, stop_event,
