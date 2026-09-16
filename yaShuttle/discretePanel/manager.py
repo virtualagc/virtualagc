@@ -102,24 +102,25 @@ class Manager(object):
         self.note = tk.StringVar(value="port base %d" % D.PORT_BASE)
         self.state = tk.StringVar(value="looking...")
 
+        # A path is long and its interesting end is the file name, so each box
+        # is as wide as the window (and grows with it) and is scrolled to show
+        # the end whenever it changes; the buttons sit underneath rather than
+        # stealing the width.
         self._section("SCRIPT", bold)
+        self._path_box(self.script)
         row = self._row()
-        tk.Entry(row, textvariable=self.script, width=44, bg="#1b1b1b", fg=C_FG,
-                 insertbackground=C_FG).pack(side="left", padx=(0, 6))
         self._button(row, "Browse", self.browse_script)
         self._button(row, "Play", self.play, wide=True)
         self._button(row, "Stop", self.stop)
-        row = self._row()
         self.skip_wait = tk.BooleanVar(value=True)
-        tk.Checkbutton(row, text="skip an opening 'wait user' (you just pressed Play)",
+        tk.Checkbutton(row, text="  skip an opening 'wait user' (you just pressed Play)",
                        variable=self.skip_wait, bg=C_BG, fg="#9a9a9a",
                        activebackground=C_BG, activeforeground=C_FG,
                        selectcolor="#1b1b1b", highlightthickness=0).pack(side="left")
 
         self._section("LAYOUT", bold)
+        self._path_box(self.layout)
         row = self._row()
-        tk.Entry(row, textvariable=self.layout, width=44, bg="#1b1b1b", fg=C_FG,
-                 insertbackground=C_FG).pack(side="left", padx=(0, 6))
         self._button(row, "Browse", self.browse_layout)
         self._button(row, "Save", self.save_layout, wide=True)
         self._button(row, "Restore", self.restore_layout)
@@ -147,6 +148,19 @@ class Manager(object):
         row = tk.Frame(self.root, bg=C_BG)
         row.pack(fill="x", padx=10)
         return row
+
+    def _path_box(self, var):
+        """A file name box the width of the window, showing the END of the
+        path -- the part that says which file it is."""
+        entry = tk.Entry(self.root, textvariable=var, bg="#1b1b1b", fg=C_FG,
+                         insertbackground=C_FG, highlightthickness=1,
+                         highlightbackground="#4a4a4a", highlightcolor="#7a9a7a")
+        entry.pack(fill="x", padx=10, pady=(0, 2))
+        show_end = lambda *_a: entry.after_idle(lambda: entry.xview_moveto(1.0))
+        var.trace_add("write", show_end)
+        entry.bind("<Configure>", show_end)      # and when the window is resized
+        show_end()
+        return entry
 
     def _button(self, row, text, command, wide=False):
         tk.Button(row, text=text, command=command, width=8 if wide else 7,

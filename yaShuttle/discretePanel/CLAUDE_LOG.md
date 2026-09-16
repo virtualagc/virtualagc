@@ -6,3 +6,6 @@
 
 ### [2026-09-16] Target: HANDOFF-panelO6.md
 - panelO6 also takes "playnow FILE" on the control channel: as "play", but leading wait_user entries are dropped, since whoever sent it has just pressed Play. manager.py Play sends playnow when its "skip an opening wait user" box is ticked (the default) and says so; unticked it sends play and warns "CLICK IN THE PANEL WINDOW to start it" when the script opens with a wait user. Found because a script beginning with wait user looked like Play doing nothing.
+
+### [2026-09-16] Target: README.md
+- manager.py: the script and layout boxes are now full window width and grow with it (pack fill=x on the toplevel, buttons moved to their own row below each box), and each is scrolled to show the END of the path -- the file name -- on every change and on resize (trace_add write plus a Configure binding, xview_moveto(1.0) after idle). Long paths were cut off at the right, so two different files looked identical.
