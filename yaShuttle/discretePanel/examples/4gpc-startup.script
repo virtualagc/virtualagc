@@ -7,13 +7,15 @@
 #       --script examples/4gpc-startup.script --duration 900
 #
 # Every time is written +N: N seconds after the line before (or after the
-# wait above it), so a line can be inserted without renumbering the rest.  The
-# one delay that is still a fixed time is STBY to ITEM 1 EXEC (67 s for GPC1,
-# 65 s for the others), for the IPL display to come up.
+# wait above it), so a line can be inserted without renumbering the rest.
+# Nothing here is a guessed delay: each IPL waits for the GPCIPL menu's title
+# to appear on the CRT, and each load for that GPC's MODE talkback to read RUN.
 #
-# Verified 2026-09-15: four GPCs to OPS 2, with no CAM lamp.  As two files, OPS
-# 2 was typed about 570 s after the panel started, against 840 s with fixed
-# times.  This +N spelling resolves to exactly the times of the verified file.
+# Verified 2026-09-15 with these waits: four GPCs to OPS 2, no CAM lamp, MM1
+# 239 commands / 2045 blocks read (the same as every earlier verified run).
+# Each GPCIPL menu appeared 13.5 s after its STANDBY and each load took 25-28.5
+# s, so OPS 2 was typed about 363 s after the panel started -- against 570 s
+# when only the talkbacks were waited on, and 840 s with fixed times throughout.
 
 # --- all four GPCs to HALT, the IDPs on, GPC1 IPL from MM1 on CRT 1 ---------
 +0     gpc 1
@@ -31,7 +33,8 @@
 +0.2   gpc 1
 +0.1   ipl
 +2.5   mode STANDBY
-+67    keys ITEM 1 EXEC
+wait crt 1 title GPCIPL timeout 150
++2     keys ITEM 1 EXEC
 
 # --- GPC1 loaded: to RUN; GPC2 IPL on CRT 2 ----------------------------------
 wait gpc 1 mode-tb RUN timeout 300
@@ -44,7 +47,8 @@ wait gpc 1 mode-tb RUN timeout 300
 +0.5   idpload 2
 +0.5   ipl
 +3     mode STANDBY
-+65    keys KB2 ITEM 1 EXEC
+wait crt 2 title GPCIPL timeout 150
++2     keys KB2 ITEM 1 EXEC
 
 # --- GPC2 loaded: to RUN; GPC3 IPL -------------------------------------------
 wait gpc 2 mode-tb RUN timeout 300
@@ -57,7 +61,8 @@ wait gpc 2 mode-tb RUN timeout 300
 +0.5   idpload 2
 +0.5   ipl
 +3     mode STANDBY
-+65    keys KB2 ITEM 1 EXEC
+wait crt 2 title GPCIPL timeout 150
++2     keys KB2 ITEM 1 EXEC
 
 # --- GPC3 loaded: to RUN; GPC4 IPL -------------------------------------------
 wait gpc 3 mode-tb RUN timeout 300
@@ -70,7 +75,8 @@ wait gpc 3 mode-tb RUN timeout 300
 +0.5   idpload 2
 +0.5   ipl
 +3     mode STANDBY
-+65    keys KB2 ITEM 1 EXEC
+wait crt 2 title GPCIPL timeout 150
++2     keys KB2 ITEM 1 EXEC
 
 # --- GPC4 loaded: to RUN; the NBAT, then OPS 2 -------------------------------
 wait gpc 4 mode-tb RUN timeout 300

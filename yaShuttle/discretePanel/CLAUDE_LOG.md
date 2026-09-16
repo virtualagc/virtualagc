@@ -15,3 +15,6 @@
 
 ### [2026-09-15] Target: HANDOFF-panelO6.md
 - subtitles.py --edit: the typing cursor shows only while the box has keyboard focus (FocusIn/FocusOut), so clicking another window hides it for a recording; Ctrl H toggles it (cursor_wanted). In --help, the docstring and the start-up line.
+
+### [2026-09-15] Target: HANDOFF-panelO6.md
+- examples/4gpc-startup.script now waits for the GPCIPL menu (`wait crt N title GPCIPL timeout 150`) instead of the fixed 67/65 s STBY-to-ITEM-1-EXEC delays; 8 waits, no guessed delay left. Verified 2026-09-15: four GPCs to OPS 2, no CAM lamp, mmu1 239 commands / 2045 blocks read; menus at 13.5 s after each STANDBY, loads 25.2/27.3/28.0/28.5 s, OPS 2 typed about 363 s after the panel started (570 s with talkback waits only, 840 s with fixed times).
