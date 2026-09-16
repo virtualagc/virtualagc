@@ -654,6 +654,9 @@ if not suppress:
             templib = True
         elif parm.startswith("--sdfi=") or parm in ("--sdfpkg", "--no-sdfpkg"):
             pass  # Handled in xplBuiltins.py, where MONITOR(22) lives.
+        elif parm.startswith("--templib-dir=") or \
+                parm.startswith("--inclib-dir="):
+            pass  # Handled in HAL_S_FC.py, where the devices are opened.
         elif parm == "--debugwr":
             debugwr = True
         elif parm in pCON or ("NO" + parm) in pCON or \
@@ -699,6 +702,21 @@ if not suppress:
             print('                 Note that if --bfs is used, place it first.')
             print('--tabs=N         (Default 8.) Tab-stop size in source code.')
             print('--templib        Identify &&TEMPLIB with TEMPLIB.')
+            print('--templib-dir=D  The permanent template library, a')
+            print('                 directory of EBCDIC members in the same')
+            print('                 form HALSFC-PASS1 uses.  Defaults to')
+            print('                 TEMPLIBp (TEMPLIBBp for --bfs) in the')
+            print('                 current directory.  The "p" distinguishes')
+            print('                 it from PASS1\'s own TEMPLIB, which this')
+            print('                 compiler must not write to, since both')
+            print('                 would then be bumping the same version')
+            print('                 codes.')
+            print('--inclib-dir=D   The inclusion library, likewise a')
+            print('                 directory of EBCDIC members.  Defaults to')
+            print('                 INCLIB (INCLIBB for --bfs) in the current')
+            print('                 directory.  It is only read, so this can')
+            print('                 be -- and customarily is -- the very same')
+            print('                 directory HALSFC-PASS1 reads.')
             print('--sdfi=D         Name of a directory to read Simulation')
             print('                 Data Files (SDF) from, so that an')
             print('                 INCLUDE TEMPLATE can be satisfied from an')

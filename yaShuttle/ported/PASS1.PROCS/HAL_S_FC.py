@@ -19,6 +19,10 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
             2026-03-07 RSB  Added the inclusion library as INPUT(8).
             2026-03-13 RSB  Added temporary inclusion library as INPUT(9).
             2026-06-27 RSB  Now fetches sdfpkg.py at start.
+            2026-09-16 RSB  The template and inclusion libraries (INPUT(4),
+                            OUTPUT(6), INPUT(8)) are now directories of
+                            EBCDIC members rather than JSON files, and can be
+                            located with --templib-dir and --inclib-dir.
 
  /***************************************************************************/
  /* PROCEDURE NAME:  MAIN PROGRAM                                           */
@@ -109,6 +113,8 @@ if "--help" not in sys.argv:
     sourceFile = None  # Use stdin by default for HAL/S source-code file.
     listing2 = False
     templib = False
+    templibDir = None
+    inclibDir = None
     for parm in sys.argv[1:]:
         if parm.startswith("--hal="):
             sourceFile = parm[6:]
@@ -118,6 +124,10 @@ if "--help" not in sys.argv:
             listing2 = True
         elif parm == "--templib":
             templib = True
+        elif parm.startswith("--templib-dir="):
+            templibDir = parm[14:]
+        elif parm.startswith("--inclib-dir="):
+            inclibDir = parm[13:]
 
     # Open the files that we need for INPUT() and OUTPUT(), other than 
     # output files 0 and 1 (whose behavior is hard-coded separately), 
@@ -172,13 +182,32 @@ if "--help" not in sys.argv:
     if listing2:
         # Secondary output listing.
         outputDevices[2] = openGenericOutputDevice("LISTING2p.txt")
-    # Template library.
+    # Template and inclusion libraries.  Both are directories of EBCDIC
+    # members, in the very form HALSFC-PASS1 reads and writes, rather than
+    # the JSON files they used to be.  A JSON file cannot be rewritten by two
+    # compilations at once, whereas distinct members of a directory can be
+    # written at once, which is what lets a corpus be compiled concurrently.
+    #
+    # The inclusion library is only ever read, so it is *the same* directory
+    # PASS1 reads, translated from EBCDIC on the fly.  The template library
+    # is also written, and its members carry a version code that each
+    # compilation bumps, so this compiler keeps its own -- TEMPLIBp -- and
+    # `HALSFC --test` can then compare the two directories member for member.
     if g.pfs:
-        inputDevices[4] = openGenericInputDevice("TEMPLIB.json", isPDS=True, rw=templib)
-        inputDevices[8] = openGenericInputDevice("INCLIB.json", isPDS=True)
+        templibName = "TEMPLIBp"
+        inclibName = "INCLIB"
     else:
-        inputDevices[4] = openGenericInputDevice("TEMPLIBB.json", isPDS=True, rw=templib)
-        inputDevices[8] = openGenericInputDevice("INCLIBB.json", isPDS=True)
+        templibName = "TEMPLIBBp"
+        inclibName = "INCLIBB"
+    if templibDir != None:
+        templibName = templibDir
+    if inclibDir != None:
+        inclibName = inclibDir
+    inputDevices[4] = openGenericInputDevice(templibName, isPDS=True,
+                                             rw=templib, isDir=True,
+                                             versionCoded=True)
+    inputDevices[8] = openGenericInputDevice(inclibName, isPDS=True,
+                                             isDir=True)
     # Error-message library.
     inputDevices[5] = openGenericInputDevice("ERRORLIB.json", isPDS=True, inParent=True)
     # File of module access rights.

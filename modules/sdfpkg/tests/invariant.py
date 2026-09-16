@@ -167,8 +167,11 @@ def main():
         os.mkdir(os.path.join(workDir, "SDFLIB"))
 
         # Build the template library from the compools.  Note that the
-        # template library HAL_S_FC.py uses is TEMPLIB.json, not HALSFC's
-        # TEMPLIB/ directory, so it has to be built with this compiler.
+        # template library HAL_S_FC.py uses is TEMPLIBp/, not HALSFC's
+        # TEMPLIB/, so it has to be built with this compiler.  Both are now
+        # directories of EBCDIC members in the same format -- they were
+        # TEMPLIB.json and TEMPLIB/ when this was written -- but they are
+        # still separate, each compiler bumping its own version codes.
         for name in compools:
             status, _ = compile(compiler, workDir, name, "TEMPLATE")
             if status not in (0, 8):

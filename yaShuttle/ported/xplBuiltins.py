@@ -24,6 +24,13 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
                             to ibmFloat module for native HFP calculations.
                             Other changes also related to issue #1306.
             2026-07-05 RSB  Accounted for --tabs with `tabSize`.
+            2026-09-16 RSB  A PDS can now be a directory of EBCDIC members,
+                            the form HALSFC-PASS1 uses, as well as a JSON
+                            file.  Two compilations cannot both rewrite one
+                            JSON file, but they can write different members
+                            of a directory, which is what the persistent
+                            template and inclusion libraries need in order
+                            for compilations to run concurrently.
 '''
 
 import sys
@@ -230,8 +237,116 @@ maxDevices = 10
 inputDevices = [None] * maxDevices
 outputDevices = [None] * maxDevices
 
+#---------------------------------------------------------------------------
+# A PDS can alternatively be backed by a directory of members rather than by
+# a single JSON file, which is how HALSFC-PASS1 -- i.e., XCOM-I's runtime,
+# with the ",E" suffix on a --pdsi=/--pdso= switch -- implements one.  Two
+# compilations running at once cannot both rewrite one JSON file, but they
+# can write different members of a directory, so the persistent libraries
+# (TEMPLIB and INCLIB, and their BFS counterparts) use this backend while
+# the per-compilation ones (&&TEMPLIB, &&TEMPINC) and the read-only ones
+# (ERRORLIB, ACCESS) stay JSON.
+#
+# The format is settled by XCOM-I's runtimeC.c and confirmed by hexdump of a
+# member HALSFC-PASS1 wrote:
+#
+#   * A member is a whole number of 80-byte records, each blank-padded with
+#     EBCDIC 0x40 (`OUTPUT` pads to the record size; `MONITOR1` blank-fills
+#     to the record boundary and rewrites the whole member).  A short final
+#     record is legal on input -- the reader pads what is missing -- but
+#     PASS1 does not write one, so neither do we.
+#   * A member's filename is its name with trailing blanks stripped.
+#   * The records are EBCDIC and are *not* translated: XCOM-I's XPL strings
+#     are EBCDIC natively, which is how BYTE() reaches the version code
+#     described below.  This port's strings are ASCII, so the translation
+#     happens here, on the way in and out.
 
-def openGenericInputDevice(name, isPDS=False, rw=False, inParent=False):
+PDS_RECORD_SIZE = 80
+EBCDIC_BLANK = 0x40
+VERSION_PREFIX = "D VERSION "  # EMITEXTE's VERSION, less its version byte.
+
+
+def pdsMemberPath(directory, member):
+    '''The file a member lives in; MONITOR(1)/MONITOR(2) in runtimeC.c strip
+    trailing whitespace from the member name to get it.'''
+    return os.path.join(directory, member.rstrip())
+
+
+def isVersionRecord(record):
+    return record.startswith(VERSION_PREFIX)
+
+
+def pdsDecodeMember(data, versionCoded=False):
+    '''One member's bytes as read from its file -> a list of ASCII strings,
+    one per 80-byte record.'''
+    records = []
+    for i in range(0, len(data), PDS_RECORD_SIZE):
+        record = data[i : i + PDS_RECORD_SIZE]
+        text = "".join(ebcdicToAscii[b] for b in record)
+        records.append(text)
+    # EMITEXTE.xpl writes the template's version code as a raw byte at offset
+    # 10 of a final 'D VERSION ' record, followed (this is a local change to
+    # the XPL, not original behavior -- see EMITEXTE.xpl, the OUTPUT(6) at the
+    # end of the STOPPING case) by the same value as EBCDIC decimal digits.
+    # The byte is the datum and the digits are a human-readable duplicate, so
+    # we recover the value from the byte and hand the compiler the decimal
+    # form it already expects: EMITEXTE reads it back with int(NEWBUFF[10:])
+    # and STREAM parses a 'D VERSION n' directive the same way.
+    if versionCoded and len(records) > 0 and isVersionRecord(records[-1]):
+        version = data[(len(records) - 1) * PDS_RECORD_SIZE + len(VERSION_PREFIX)]
+        records[-1] = VERSION_PREFIX + str(version)
+    return records
+
+
+def pdsEncodeMember(records, versionCoded=False):
+    '''A list of ASCII strings -> the bytes of a member file.'''
+    data = bytearray()
+    for i in range(len(records)):
+        record = records[i]
+        if versionCoded and i == len(records) - 1 and isVersionRecord(record):
+            try:
+                version = int(record[len(VERSION_PREFIX):])
+            except ValueError:
+                # Not a version code after all; fall through and write the
+                # record as ordinary text rather than losing it.
+                version = None
+            if version != None:
+                data += bytes(asciiToEbcdic[ord(c)] for c in VERSION_PREFIX)
+                data.append(version & 0xFF)
+                data += bytes(asciiToEbcdic[ord(c)] for c in str(version))
+                while len(data) % PDS_RECORD_SIZE != 0:
+                    data.append(EBCDIC_BLANK)
+                continue
+        record = record[:PDS_RECORD_SIZE]
+        for c in record:
+            # A character with no EBCDIC of its own becomes a blank, which is
+            # what ebcdicToAscii does in the other direction.
+            o = ord(c)
+            data.append(asciiToEbcdic[o] if o < len(asciiToEbcdic) \
+                        else EBCDIC_BLANK)
+        while len(data) % PDS_RECORD_SIZE != 0:
+            data.append(EBCDIC_BLANK)
+    return bytes(data)
+
+
+def openGenericInputDevice(name, isPDS=False, rw=False, inParent=False,
+                           isDir=False, versionCoded=False):
+    if isDir:
+        # A directory-backed PDS has no single file object, and members are
+        # read when MONITOR(2) finds them rather than all at once here.  The
+        # directory is not created: for input, absent means "no members",
+        # which is what MONITOR(2) exists to report.
+        return {
+            "name": name,
+            "dir": name,
+            "versionCoded": versionCoded,
+            "file": None,
+            "open": True,
+            "ptr":-1,
+            "buf": [],
+            "pds": {},
+            "mem": ""
+            }
     if rw:
         mode = "r+"
     else:
@@ -262,7 +377,22 @@ def openGenericInputDevice(name, isPDS=False, rw=False, inParent=False):
     return inputDevice
 
     
-def openGenericOutputDevice(name, isPDS=False):
+def openGenericOutputDevice(name, isPDS=False, isDir=False,
+                            versionCoded=False):
+    if isDir:
+        # The directory is created at stow time, as MONITOR1 does, so that
+        # merely opening the device leaves nothing behind.
+        return {
+            "name": name,
+            "dir": name,
+            "versionCoded": versionCoded,
+            "file": None,
+            "open": True,
+            "ptr":-1,
+            "buf": [],
+            "pds": {},
+            "mem": ""
+            }
     outputDevice = {
         "name": name,
         #"file": open(scriptParentFolder + "/" + name, "w"),
@@ -431,8 +561,29 @@ def MONITOR(function, arg2=None, arg3=None):
             error("not open")
         if "pds" not in device:
             error("not PDS")
-        file = device["file"]
         pds = device["pds"]
+        if "dir" in device:
+            # One file per member, so a second compilation stowing a
+            # different member does not disturb this one.  MONITOR1 in
+            # runtimeC.c likewise creates the library directory here rather
+            # than when the device was opened.
+            os.makedirs(device["dir"], exist_ok=True)
+            path = pdsMemberPath(device["dir"], member)
+            if os.path.exists(path):
+                returnValue = 1
+            else:
+                returnValue = 0
+            pds[member] = device["buf"]
+            device["buf"] = []
+            # Through a temporary name, so that a concurrent compilation
+            # reading this member sees either the old one or the new one and
+            # never a partial write.  PASS1 writes the member in place.
+            tmp = "%s.tmp%d" % (path, os.getpid())
+            with open(tmp, "wb") as f:
+                f.write(pdsEncodeMember(pds[member], device["versionCoded"]))
+            os.replace(tmp, path)
+            return returnValue
+        file = device["file"]
         if member in pds:
             returnValue = 1
         else:
@@ -458,6 +609,20 @@ def MONITOR(function, arg2=None, arg3=None):
             file = inputDevices[n]
         if "pds" not in file:
             error("not PDS")
+        if "dir" in file and member not in file["pds"]:
+            # A directory-backed library is read member by member as it is
+            # searched, which is what MONITOR2 in runtimeC.c does -- it
+            # fopen()s the member here.  The JSON backend instead snapshots
+            # the whole library when the device is opened, so a member another
+            # compilation stowed in the meantime becomes visible to a
+            # directory-backed device and did not to a JSON one.
+            path = pdsMemberPath(file["dir"], member)
+            try:
+                with open(path, "rb") as f:
+                    file["pds"][member] = \
+                        pdsDecodeMember(f.read(), file["versionCoded"])
+            except OSError:
+                pass  # Not there, which is what we were asked.
         if member in file["pds"]:
             file["mem"] = member
             file["ptr"] = -1
