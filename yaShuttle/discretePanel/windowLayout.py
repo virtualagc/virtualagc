@@ -194,6 +194,23 @@ def place(wid, x, y, w=None, h=None, verbose=False):
     return (dx, dy)                    # how far out it finished
 
 
+def save_layout(path, everything=False, only_ids=None, log=print):
+    """Write where the windows are now.  everything keeps unrecognised ones;
+    only_ids limits it to those windows.  Returns how many were saved."""
+    keep = [w for w in windows()
+            if (everything or not w["role"].startswith("other:"))
+            and (only_ids is None or w["id"] in only_ids)]
+    layout = {"saved": time.strftime("%Y-%m-%d %H:%M:%S"),
+              "windows": [{k: w[k] for k in ("role", "x", "y", "w", "h", "title", "look")
+                           if k in w}
+                          for w in sorted(keep, key=lambda w: w["role"])]}
+    with open(path, "w") as fh:
+        json.dump(layout, fh, indent=2)
+        fh.write("\n")
+    log("saved %d windows to %s" % (len(keep), path))
+    return len(keep)
+
+
 def cmd_save(args):
     ws = windows()
     keep = [w for w in ws if not w["role"].startswith("other:") or args.all]

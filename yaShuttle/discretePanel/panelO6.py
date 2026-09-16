@@ -2192,12 +2192,57 @@ def _run_script(panel, entries, quit_after_ms=None):
 
     # ONE PLAYER FOR THE WHOLE CREW SCRIPT: its clock and its waits time the
     # switches above and the keystrokes and captions alike (crewscript.py).
-    crewscript.Player(entries, root.after, do,
-                      lambda gpc: panel.mode_tb(gpc - 1), log,
-                      wait_user=panel.wait_for_click,
-                      screens=crewscript.ScreenWatch()).start()
+    if getattr(panel, "player", None) is not None:
+        panel.player.stopped = True        # whatever was playing, stop it
+    panel.player = crewscript.Player(entries, root.after, do,
+                                     lambda gpc: panel.mode_tb(gpc - 1), log,
+                                     wait_user=panel.wait_for_click,
+                                     screens=panel.screens)
+    panel.player.start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
+
+
+def _listen_control(panel):
+    """Thread: 'play FILE' and 'stop' from manager.py (port base + 92), so a
+    script can be started at any moment and not only at start-up.  The file is
+    read and checked here; the playing itself is handed to the Tk side."""
+    try:
+        s = crewscript.control_receiver()
+    except OSError as e:
+        log("cannot listen for script commands: %s" % e)
+        return
+    log("script commands on %s:%d ('play FILE', 'stop')"
+        % (D.GROUP, D.PORT_BASE + crewscript.CONTROL_OFFSET))
+    while True:
+        try:
+            data, _ = s.recvfrom(4096)
+        except OSError:
+            return
+        text = data.decode("utf-8", errors="replace").strip()
+        word, _, rest = text.partition(" ")
+        word, rest = word.lower(), rest.strip()
+        if word == "stop":
+            log("script command: stop")
+            panel.root.after(0, lambda: _stop_script(panel))
+        elif word == "play" and rest:
+            try:
+                with open(rest) as fh:
+                    entries = crewscript.parse(fh.read(), rest)
+            except (OSError, crewscript.ScriptError) as e:
+                log("script command: cannot play %s: %s" % (rest, e))
+                continue
+            steps, waits = crewscript.count_entries(entries)
+            log("script command: play %s (%d steps, %d waits)" % (rest, steps, waits))
+            panel.root.after(0, lambda e=entries: _run_script(panel, e))
+        else:
+            log("script command not understood: %r" % text)
+
+
+def _stop_script(panel):
+    if getattr(panel, "player", None) is not None and not panel.player.stopped:
+        panel.player.stopped = True
+        log("script stopped")
 
 
 def main(argv=None):
@@ -2265,7 +2310,7 @@ def main(argv=None):
         with open(args.script) as f:
             text = f.read()
         try:
-            entries = crewscript.parse(text)
+            entries = crewscript.parse(text, args.script)
         except crewscript.ScriptError as e:
             raise SystemExit("panelO6: %s" % e)
         # --wait-user: the pause a demonstration needs, without putting a
@@ -2278,6 +2323,10 @@ def main(argv=None):
     # script waits for someone to click in it.
     _dont_steal_focus(root, mapWindow=(not args.script or args.show or args.wait_user
                                        or crewscript.has_wait_user(text)))
+    # The screen announcements and the script commands are wanted whether or
+    # not a script was named: manager.py can start one at any moment.
+    panel.screens = crewscript.ScreenWatch()
+    threading.Thread(target=_listen_control, args=(panel,), daemon=True).start()
     if entries is not None:
         _run_script(panel, entries, args.quit_after)
     elif args.quit_after is not None:

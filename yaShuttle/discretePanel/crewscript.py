@@ -14,6 +14,7 @@ a crew script print in their --help, and what this module prints when run:
     python3 crewscript.py FILE ...         check scripts without running them
 """
 
+import os
 import re
 import socket
 import struct
@@ -26,11 +27,13 @@ KEYBOARD_OFFSET = 30            # keyboard n's bus: port base + 30 + n
 IDP_BUS_OFFSET = 40             # IDP n's bus: port base + 40 + n
 SUBTITLE_OFFSET = 90            # subtitles.py: port base + 90
 SCREEN_OFFSET = 91              # MEDS2.py's screen announcements: port base + 91
+CONTROL_OFFSET = 92             # panelO6.py's script control: port base + 92
 # A settled ScreenWatch has heard at least one round of MEDS2.py's
 # re-announcements (every 1 s), so "nothing heard" means a display is silent.
 SCREEN_SETTLE_S = 2.5
 SCREEN_CLOCK = re.compile(r"(\d+/)?\d\d:\d\d:\d\d")
 MAX_SCRIPT_SECONDS = 36000
+MAX_SCRIPT_DEPTH = 8            # a script calling a script calling a script...
 WAIT_TIMEOUT_S = 600
 KEY_GAP_S = 0.35
 WAIT_POLL_MS = 100
@@ -142,6 +145,13 @@ HELP = """\
                         along switches the rest.  The next line starts when
                         the typing is done.  Keys:
 %(keys)s
+    script FILE         play another crew script here, then carry on with
+                        this one: FILE's own times start when it starts, and
+                        this script's remaining times count from when it
+                        finishes.  A relative FILE is relative to the script
+                        that names it.  The whole tree is read and checked
+                        when the first script is read, and a script that
+                        calls itself is refused.
     subtitle [TEXT]     show TEXT in the caption box (subtitles.py); no TEXT
                         clears it.  The two characters \\n start a new line;
                         a leading <left>, <center> or <right> aligns that
@@ -279,12 +289,18 @@ def screen_text(lines):
     return text, SCREEN_CLOCK.sub("#", text)
 
 
-def parse(text):
+def parse(text, path=None, _depth=0, _seen=None):
     """The whole script -> entries in running order, each a dict with 'line':
     {'kind': 'wait', 'gpc', 'state', 'timeout', 'text'} or
     {'kind': 'step', 'ms', 'verb', 'arg', 'keys' (for keys lines), 'text'}.
-    Raises ScriptError naming the line."""
+    A 'script FILE' line is read here too, and its own entries hang off the
+    step as 'entries', so a whole tree of scripts is checked before any of it
+    runs.  path is the file text came from, which is what a relative FILE is
+    relative to.  Raises ScriptError naming the line."""
     entries, last_ms = [], 0
+    _seen = set(_seen or ())
+    if path:
+        _seen.add(os.path.realpath(path))
     for n, raw in enumerate(text.splitlines(), 1):
         line = raw.split("#", 1)[0].strip()
         if not line:
@@ -332,6 +348,29 @@ def parse(text):
                 entry["keys"] = key_codes(arg.split())
             elif verb == "subtitle":
                 pass
+            elif verb == "script":
+                if not arg:
+                    raise ScriptError("script needs a file name")
+                sub = arg.strip('"\'')
+                if not os.path.isabs(sub):
+                    sub = os.path.join(os.path.dirname(os.path.abspath(path or ".")), sub)
+                real = os.path.realpath(sub)
+                if real in _seen:
+                    raise ScriptError("%s calls itself (directly or through another script)"
+                                      % os.path.basename(sub))
+                if _depth + 1 > MAX_SCRIPT_DEPTH:
+                    raise ScriptError("scripts call each other more than %d deep"
+                                      % MAX_SCRIPT_DEPTH)
+                try:
+                    with open(sub) as fh:
+                        sub_text = fh.read()
+                except OSError as err:
+                    raise ScriptError("cannot read %s: %s" % (sub, err))
+                try:
+                    entry["entries"] = parse(sub_text, sub, _depth + 1, _seen | {real})
+                except ScriptError as err:
+                    raise ScriptError("in %s: %s" % (os.path.basename(sub), err))
+                entry["path"] = sub
             elif verb not in PANEL_VERBS:
                 raise ScriptError("unknown command %r" % verb)
             elif not re.fullmatch(PANEL_ARGS[verb], arg, re.IGNORECASE):
@@ -343,10 +382,22 @@ def parse(text):
 
 
 def has_wait_user(text):
-    """Does this script wait for a person?  Then it needs a window to click."""
+    """Does this script wait for a person?  Then it needs a window to click.
+    Text only, so a 'script FILE' line's contents are not seen -- use
+    needs_user(parse(text, path)) when the file is to hand."""
     for raw in text.splitlines():
         w = raw.split("#", 1)[0].split()
         if len(w) == 2 and w[0].lower() == "wait" and w[1].lower() == "user":
+            return True
+    return False
+
+
+def needs_user(entries):
+    """Does this script, or any script it calls, wait for a person?"""
+    for e in entries:
+        if e["kind"] == "wait_user":
+            return True
+        if e.get("entries") and needs_user(e["entries"]):
             return True
     return False
 
@@ -369,6 +420,49 @@ class Bus(object):
 
     def send_subtitle(self, text):
         self.sock.sendto(text.encode("utf-8"), (D.GROUP, D.PORT_BASE + SUBTITLE_OFFSET))
+
+
+def send_control(text, port_base=None, sock=None):
+    """Tell panelO6.py to play a script or stop the one it is playing:
+    'play <file>' or 'stop', one UTF-8 datagram on port base + 92.  Any
+    program can send one; manager.py does."""
+    own = sock is None
+    if own:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+    try:
+        base = D.PORT_BASE if port_base is None else port_base
+        sock.sendto(text.encode("utf-8"), (D.GROUP, base + CONTROL_OFFSET))
+    finally:
+        if own:
+            sock.close()
+
+
+def control_receiver(port_base=None):
+    """The socket panelO6.py listens on for those commands."""
+    base = D.PORT_BASE if port_base is None else port_base
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind(("", base + CONTROL_OFFSET))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 struct.pack("4s4s", socket.inet_aton(D.GROUP), socket.inet_aton(D.IFACE)))
+    return s
+
+
+def count_entries(entries):
+    """(steps, waits) in this script and every script it calls."""
+    steps = waits = 0
+    for e in entries:
+        if e["kind"] == "step":
+            steps += 1
+        else:
+            waits += 1
+        if e.get("entries"):
+            s2, w2 = count_entries(e["entries"])
+            steps += s2
+            waits += w2
+    return steps, waits
 
 
 class ScreenWatch(object):
@@ -426,11 +520,12 @@ class Player(object):
     """
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
-                 screens=None):
+                 screens=None, on_done=None):
         self.entries, self.after, self.panel = entries, after, panel
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
         self.screens = screens
+        self.on_done = on_done         # called (stopped) when this script ends
         self.bus = bus or Bus()
         self.origin = None
         self.stopped = False
@@ -462,6 +557,14 @@ class Player(object):
                 self.log(e["text"])
                 self._poll(k, e, time.monotonic())
                 return
+            if e["kind"] == "step" and e["verb"] == "script":
+                due = self.origin + e["ms"] / 1000.0 - time.monotonic()
+                if due > 0:
+                    self.after(int(due * 1000) + 1, lambda k=k: self._run(k))
+                    return
+                self.log("%s  [%d lines]" % (e["text"], len(e["entries"])))
+                self._call(k, e)
+                return
             if e["kind"] == "wait_screen":
                 if self.screens is None:
                     self.log("%s: no screen announcements to follow -- script stopped"
@@ -488,6 +591,12 @@ class Player(object):
             else:
                 self.panel(e["verb"], e["arg"])
             k += 1
+        if self.stopped and self.on_done:
+            self.on_done(True)
+            return
+        if k >= len(self.entries) and self.on_done:
+            self.on_done(False)
+            return
         if k >= len(self.entries) and not self.stopped:
             self.log("script complete")
 
@@ -517,6 +626,27 @@ class Player(object):
             self.stopped = True
         else:
             self.after(WAIT_POLL_MS, lambda: self._poll(k, e, begun))
+
+    def _call(self, k, e):
+        """Play a called script, then carry on with this one.  The caller's
+        remaining times count from the moment the called script finished, as
+        they do after a wait."""
+        def done(stopped):
+            if stopped:
+                self.log("%s stopped inside %s -- script stopped"
+                         % (e["text"], os.path.basename(e["path"])))
+                self.stopped = True
+                if self.on_done:
+                    self.on_done(True)
+                return
+            self.log("back from %s" % os.path.basename(e["path"]))
+            self.origin = time.monotonic()
+            self._run(k + 1)
+
+        child = Player(e["entries"], self.after, self.panel, self.talkback, self.log,
+                       bus=self.bus, wait_user=self.wait_user, screens=self.screens,
+                       on_done=done)
+        child.start()
 
     def _poll_screen(self, k, e, begun, base):
         """base: [baseline taken, the new-screen key when it was]."""
@@ -566,13 +696,15 @@ def main(argv=None):
         try:
             with open(name) as f:
                 text = f.read()
-            entries = parse(text)
+            entries = parse(text, name)
         except (OSError, ScriptError) as e:
             print("%s: %s" % (name, e))
             bad += 1
             continue
-        waits = sum(1 for e in entries if e["kind"] != "step")
-        print("%s: ok, %d steps and %d waits" % (name, len(entries) - waits, waits))
+        steps, waits = count_entries(entries)
+        print("%s: ok, %d steps and %d waits%s"
+              % (name, steps, waits,
+                 " (including called scripts)" if any(e.get("entries") for e in entries) else ""))
     return 1 if bad else 0
 
 

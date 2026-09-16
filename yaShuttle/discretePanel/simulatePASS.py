@@ -561,6 +561,12 @@ def main():
     ap.add_argument("--script", "--panel-script", dest="panel_script", metavar="FILE",
                     help="crew script for panelO6.py: switches, keys, subtitles and waits "
                          "in one file (commands below)")
+    ap.add_argument("--manager", dest="manager", action="store_true", default=True,
+                    help="a small control window (manager.py) to play a script at any "
+                         "moment, save and restore the window layout, and start the "
+                         "caption box (the default)")
+    ap.add_argument("--no-manager", dest="manager", action="store_false",
+                    help="no control window")
     ap.add_argument("--layout", metavar="FILE",
                     help="put the windows where this layout file says once they are up "
                          "(windowLayout.py save FILE writes one).  If it names the caption "
@@ -591,7 +597,7 @@ def main():
     if args.panel_script:
         try:
             with open(args.panel_script) as fh:
-                crewscript.parse(fh.read())
+                crewscript.parse(fh.read(), args.panel_script)
         except (OSError, crewscript.ScriptError) as e:
             sys.exit("simulatePASS: %s: %s -- nothing started" % (args.panel_script, e))
 
@@ -770,6 +776,14 @@ def main():
                     "start-up -- including the time spent waiting")
         L.start("panel", panel_argv, HERE, env)
         t0 = time.time()
+
+        if args.manager:
+            manager_argv = [py, "manager.py", "--port-base", str(args.port_base)]
+            if args.panel_script:
+                manager_argv += ["--script", os.path.abspath(args.panel_script)]
+            if args.layout:
+                manager_argv += ["--layout", os.path.abspath(args.layout)]
+            L.start("manager", manager_argv, HERE, env)
 
         # THE WINDOWS WHERE THEY WERE PUT LAST TIME.  A run does not start the
         # caption box of its own accord (no size or place suits every
