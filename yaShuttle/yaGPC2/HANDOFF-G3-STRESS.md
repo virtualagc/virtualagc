@@ -61,7 +61,65 @@ back to "open" within an hour of being written.
 6. **Only then**, if the set still loses computers, go back to #137 (identical
    I/O between set members) and #107 (the ICC read path).
 
-## The third-CRT problem  (being worked, #159)
+## The third-CRT problem  --  SOLVED 2026-09-17 (#159)
+
+**A display powered before the NBAT names its commander goes to whoever is
+already running.**  USA005350 3.2.15.1: a PASS GPC moded to RUN takes IDPs 1 TO
+3 when the common set commands no DK buses.  So with all three powered during
+the IPLs, GPC1 alone drove every display while the others idled.  ONE GPC
+DRIVING THREE DISPLAYS NEEDS MORE THAN ONE CORE AND A GPC ONLY GETS ONE -- its
+emulation is serial, so the host's other sixteen cores cannot help.  Rate fell
+to 0.42, the barrier correctly paced everyone to the slowest, MEDS2's WALL-CLOCK
+watchdogs began firing against a vehicle running at 0.42, and a set member alone
+with an I/O error failed itself out (#137).
+
+**The fix is in `examples/4gpc-g3-startup.script`:** `--crts 3`, `ITEM 14 +3`
+giving CRT3 to GPC3, and `idppower`/`majfunc`/`idpload` for IDP3 moved AFTER
+`OPS 3 0 1 PRO`.  An 18-minute run gave whole-run rate 0.979 / 0.823 / 0.925 /
+0.874 against the two-display baseline's 0.735 / 0.811 / 0.976 / 0.895 -- three
+displays now cost nothing measurable -- with zero fail-votes, zero BCE8 timeouts
+where early power cost 120, and one dominant commander per display.
+
+### What was refuted, so nobody retries it
+
+| idea | result |
+|---|---|
+| barrier Delta too small | Delta 200 cut holds by a third; rate did not move |
+| host CPU starvation | four threads at 100% of a core, sixteen cores idle |
+| the extra MEDS2 process | three processes with IDP3 off: rate 1.00 |
+| the `poll()` rate (2 us gate) | measured 3-8% of wall time, not the culprit |
+
+### The profile, and its limits
+
+`YAGPC_PACETRACE=1` now labels each report with its computer.  Steady state in
+the FAILING configuration, four machines at the same wall time:
+
+    rate 0.649   exec1 48.42s (20%)   bus service 15.58s ( 6%)   slept 22.46s
+    rate 0.413   exec1 74.88s (31%)   bus service 19.12s ( 8%)
+    rate 0.210   exec1 15.35s ( 6%)   bus service  6.48s ( 3%)   175.1s written off
+    rate 0.040   exec1  2.06s ( 1%)   bus service  1.09s (0.4%)  224.4s written off
+
+`exec1` is ~0.3 us per emulated instruction.  **These categories account for
+under 40% of each thread's wall time**; the rest is mostly barrier spinning,
+which the pacer does not instrument and which is known not to be causal.  So
+the profile rules the poll rate OUT but does not explain where the majority
+goes -- that is still open if anyone wants the emulation faster.
+
+### Residual limit, unfixed
+
+A single computer driving three displays still runs at about 0.42.  The real
+vehicle concentrates displays on one GPC freely, so that configuration remains
+beyond this emulator at real time.  What was fixed is the configuration, not the
+emulation speed.  Two candidate levers if it is ever worth chasing:
+`YAGPC_BUS_SERVICE_US` from 2 to 10 (worth ~5%, and 16.5 us is the hardware's
+own sampling limit per BCE PoO 3.4.1, so it is defensible -- but it needs the
+regression gate, since coarser servicing is exactly what produces #137-style
+receive timeouts), and moving the socket RECEIVE path to its own thread as
+transmit already is (`tx_thread_main`) -- though note the traffic is 12:1 in the
+GPC's favour, 113,292 halfwords out against 9,110 in, so the win would be
+syscalls rather than data.
+
+## The third-CRT problem  (earlier framing, kept for the timeline)
 
 **Cause found.**  A third display halves the simulation rate, and the set then
 loses a computer.  Rate (simulated seconds per wall second): **0.74-0.98 with
