@@ -13,6 +13,18 @@
 # Nothing here is a guessed delay: the load waits for the GPCIPL menu's title
 # to appear on CRT $crt, and the run waits for this GPC's MODE talkback to
 # read RUN.  It leaves the IPL SOURCE switch off, ready for the next computer.
+#
+# THE TIMEOUTS ARE SAFETY NETS, NOT DELAYS, so they are sized for the SLOWEST
+# host we run on rather than the fastest.  A wait ends the moment its condition
+# is met, so a large cap costs a fast machine exactly nothing -- but a small one
+# ABORTS THE PROCEDURE on a slow one, and the script then carries on issuing
+# crew actions to a computer that never came up.  Measured on a 2011 i7-3930K,
+# where a GPC runs at about a quarter of real time: the GPCIPL menu took 41 s
+# for the first computer and 66 s for the second, and the first computer needed
+# 164 s to reach RUN with nothing else competing.  Each later computer is slower
+# again, because the ones already running are taking their share of the host.
+# The old caps of 150 and 300 fitted the first computer and would have cut off
+# the fourth.
 
 +0     gpc $gpc
 +1     source MM1
@@ -20,11 +32,32 @@
 +0.5   idpload $idp
 +0.5   ipl
 +3     mode STANDBY
-wait crt $crt title GPCIPL timeout 150
+# WAIT FOR THE PAGE TO CHANGE HANDS BEFORE BELIEVING WHAT IT SAYS.
+#
+# 'wait crt N title TEXT' is a STATE test -- crewscript's _poll_screen matches
+# whenever the page currently on show CONTAINS the text.  That is fine for the
+# first computer to use a CRT and WRONG for every one after it, because three
+# computers share CRT2 here: GPC2's GPCIPL MENU is still on the screen when
+# GPC3's turn comes, so GPC3's wait was met after 0.0 s, the script typed
+# ITEM 1 EXEC into a computer that had not yet put up its menu, the
+# menu-selected load never started, and GPC3 sat there until its RUN wait
+# expired.  GPC4 then did the same.  That is why four-GPC runs reached only
+# one or two computers in RUN -- not a sync failure at all.
+#
+# 'new-screen' is a TRANSITION test: it baselines the page when the wait
+# begins and returns only when a DIFFERENT one arrives.  Waiting for that
+# first means the stale page has actually gone before the title is read.
+#
+# A fixed delay would not have fixed this.  The IDP reload is given a few
+# seconds of WALL clock to clear the display, which was plenty of display
+# polls on a fast host and about one simulated second here -- the same
+# wall-versus-simulated trap as ledger #164.
+wait crt $crt new-screen timeout 300
+wait crt $crt title GPCIPL timeout 300
 +2     keys $kb ITEM 1 EXEC
 
 # loaded: to RUN, and the IPL source back off
-wait gpc $gpc mode-tb RUN timeout 300
+wait gpc $gpc mode-tb RUN timeout 900
 +1     crt 0
 +2     mode RUN
 +2     source OFF
