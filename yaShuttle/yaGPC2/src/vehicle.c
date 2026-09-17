@@ -15,6 +15,7 @@
 #include "mtumodel.h"
 #include "iccmodel.h"
 
+#include "envcache.h"
 /* How far apart, in simulated microseconds, the machines are allowed to
  * drift.  Well inside FCOS's 3.85 ms sync timeout with room for the host's
  * scheduler, and coarse enough that the check costs nothing worth measuring.
@@ -35,10 +36,10 @@ void vehicle_init(Vehicle *v) {
     memset(v, 0, sizeof *v);
     for (int u = 0; u < 2; u++) v->mmuBus[u] = -1;
     v->barDeltaUs = BARRIER_DELTA_US;
-    const char *e = getenv("YAGPC_BARRIER_US");
+    const char *e = yagpc_getenv("YAGPC_BARRIER_US");
     if (e != NULL && *e != '\0') v->barDeltaUs = atof(e);
     v->barSpinUs = BARRIER_SPIN_US;
-    const char *sp = getenv("YAGPC_BARRIER_SPIN_US");
+    const char *sp = yagpc_getenv("YAGPC_BARRIER_SPIN_US");
     if (sp != NULL && *sp != '\0') v->barSpinUs = atof(sp);
     v->barWakeAtUs = 1e300;
 #ifdef HAVE_PTHREADS
@@ -98,7 +99,7 @@ static void barrier_join(Vehicle *v, int gpcId, double machineUs) {
      * it a window chosen on one clock lands in the wrong place on the other,
      * which is exactly how an AIESIP probe came to look after the event it
      * was aimed at. */
-    if (getenv("YAGPC_SYNCORDER") != NULL)
+    if (yagpc_getenv("YAGPC_SYNCORDER") != NULL)
         fprintf(stderr, "SYNCORDER-JOIN gpc=%d own=%.1f shared=%.1f offset_us=%.1f\n",
                 gpcId, machineUs, v->barPubUs[gpcId], v->barOffsetUs[gpcId]);
     barrier_unlock(v);
@@ -306,7 +307,7 @@ static void vehicle_route_out(void *ctx, int sourceGpc, uint32_t before,
     {
         static int soInit = 0, soOn = 0;
         static int lastCode[6] = {-1, -1, -1, -1, -1, -1};
-        if (!soInit) { soInit = 1; soOn = getenv("YAGPC_SYNCORDER") != NULL; }
+        if (!soInit) { soInit = 1; soOn = yagpc_getenv("YAGPC_SYNCORDER") != NULL; }
         if (soOn && v->barDeltaUs > 0.0) {
             /* Bits 20/24/28 (MSB = bit 0) are A/B/C. */
             int code = ((after & 0x800u) ? 4 : 0) | ((after & 0x080u) ? 2 : 0) |
@@ -400,7 +401,7 @@ void vehicle_free(Vehicle *v) {
      * without.  What the numbers are for is the ABANDONED count, which means
      * a machine waited on a clock that had stopped, and the total, which is
      * worth comparing against the run if a vehicle ever does look slow. */
-    if (getenv("YAGPC_BUSCENSUS") != NULL) {
+    if (yagpc_getenv("YAGPC_BUSCENSUS") != NULL) {
         for (int b = 1; b <= YAGPC_BUS_MAX; b++) {
             unsigned long tot = 0;
             for (int g = 1; g <= 5; g++) tot += v->busCount[g][b];

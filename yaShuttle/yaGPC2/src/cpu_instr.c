@@ -31,6 +31,7 @@
 #include "q31.h"
 #include "strfmt.h"
 
+#include "envcache.h"
 /* ---------------------------------------------------------------------
  * Raw table: {name, bit-pattern, exec, addrWidth, opType}
  * ------------------------------------------------------------------- */
@@ -503,7 +504,7 @@ static void cc_branch_fallthru_trace(CPU *t, uint32_t m1, uint32_t cc,
     static int inited = 0;
     static long lo = -1, hi = -1;
     if (!inited) {
-        const char *w = getenv("YAGPC_BCTRACE");
+        const char *w = yagpc_getenv("YAGPC_BCTRACE");
         if (w != NULL) {
             char *end = NULL;
             lo = strtol(w, &end, 16);
@@ -530,7 +531,7 @@ static void exec_BC(CPU *t, DInstr *v) {
         static int inited = 0;
         static long lo = -1, hi = -1;
         if (!inited) {
-            const char *w = getenv("YAGPC_BCTRACE");
+            const char *w = yagpc_getenv("YAGPC_BCTRACE");
             if (w != NULL) {
                 char *end = NULL;
                 lo = strtol(w, &end, 16);
@@ -1620,7 +1621,7 @@ static void exec_DIAG(CPU *t, DInstr *v) {
  * settling this. */
 static bool ispb_align(void) {
     static int inited = 0, on = 0;
-    if (!inited) { on = getenv("YAGPC_ISPB_ALIGN") != NULL; inited = 1; }
+    if (!inited) { on = yagpc_getenv("YAGPC_ISPB_ALIGN") != NULL; inited = 1; }
     return on != 0;
 }
 
@@ -1630,7 +1631,7 @@ static void exec_ISPB(CPU *t, DInstr *v) {
          * vanishes leaves storage protected that the program believes it
          * has just unprotected, and the fault then lands somewhere else
          * entirely. */
-        if (getenv("YAGPC_ISPBTRACE"))
+        if (yagpc_getenv("YAGPC_ISPBTRACE"))
             fprintf(stderr, "ISPB SKIPPED (problem state) nia=%05x t=%.1f\n",
                     (unsigned)psw_get_nia(&t->psw), t->elapsedTimeUs);
         return;
@@ -1645,7 +1646,7 @@ static void exec_ISPB(CPU *t, DInstr *v) {
         static int inited = 0;
         static long lo = -1, hi = -1;
         if (!inited) {
-            const char *w = getenv("YAGPC_ISPBTRACE");
+            const char *w = yagpc_getenv("YAGPC_ISPBTRACE");
             if (w != NULL) {
                 char *end = NULL;
                 lo = strtol(w, &end, 16);
@@ -1779,7 +1780,7 @@ static void exec_MVH(CPU *t, DInstr *v) {
          * is not updated either. */
         if (!cpu_store_hw(t, destAddr + count, hw)) { mvhDone = false; break; }
     }
-    if (getenv("YAGPC_MVHTRACE"))
+    if (yagpc_getenv("YAGPC_MVHTRACE"))
         fprintf(stderr, "MVH dest=%05x src=%05x count=%u %s left=%u "
                         "nia=%05x t=%.1f\n",
                 (unsigned)mvhDest, (unsigned)mvhSrc, (unsigned)mvhCount,
@@ -1895,7 +1896,7 @@ static void exec_SVC(CPU *t, DInstr *v) {
         static FILE *f = NULL;
         if (!inited) {
             inited = 1;
-            const char *e = getenv("YAGPC_SVCTRACE");
+            const char *e = yagpc_getenv("YAGPC_SVCTRACE");
             if (e != NULL) f = fopen(e, "w");
         }
         if (f != NULL) {
@@ -2087,7 +2088,7 @@ static void exec_ICR(CPU *t, DInstr *v) {
              * CLK2DELY) could ever complete; confirmed no other call
              * site sets it either. */
             t->counter1Enabled = true;
-            if (getenv("YAGPC_CLKTRACE"))
+            if (yagpc_getenv("YAGPC_CLKTRACE"))
                 fprintf(stderr, "CLK ARM1 t=%.6f val=%08x (%.6f s)\n",
                         t->elapsedTimeUs / 1e6, (unsigned)r1, (double)r1 / 1e6);
             break;
@@ -2099,7 +2100,7 @@ static void exec_ICR(CPU *t, DInstr *v) {
             t->intPending.clk2 = false;  /* see Write Counter 1 */
             t->counter2Deferred = false;
             t->counter2Enabled = true; /* see Write Counter 1's comment */
-            if (getenv("YAGPC_CLKTRACE"))
+            if (yagpc_getenv("YAGPC_CLKTRACE"))
                 fprintf(stderr, "CLK ARM2 t=%.6f val=%08x (%.6f s)\n",
                         t->elapsedTimeUs / 1e6, (unsigned)r1, (double)r1 / 1e6);
             break;
@@ -2397,7 +2398,7 @@ void cpu_instr_table_init(void) {
      * the full scan would, for every one of the 65536 possible hw1.  This
      * is the whole correctness argument for the bucketing, so it is
      * checkable rather than merely asserted. */
-    if (getenv("YAGPC_DECODE_SELFTEST") != NULL) {
+    if (yagpc_getenv("YAGPC_DECODE_SELFTEST") != NULL) {
         long bad = 0, matched = 0, none = 0;
         for (uint32_t h = 0; h < 65536u; h++) {
             const InstrDesc *ref = NULL;

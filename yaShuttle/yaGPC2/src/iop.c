@@ -9,6 +9,7 @@
 #include "cpu.h"
 #include "discretes.h"
 
+#include "envcache.h"
 /* YAGPC_MSCRING helpers, defined beside iop_write_main16(). */
 static void msc_ring_record(IOP *iop, uint32_t pc, uint32_t hw1, uint32_t hw2);
 static void msc_ring_dump_once(IOP *iop, const char *why);
@@ -222,7 +223,7 @@ uint32_t iop_discrete_in_a(IOP *iop) {
      * software actually reads it -- stored, computed, and after the crew
      * panel's overlay -- so "the MMU published READY but CZ2BDIA never got
      * it" can be attributed to a stage instead of guessed at. */
-    if (getenv("YAGPC_DISCTRACE")) {
+    if (yagpc_getenv("YAGPC_DISCTRACE")) {
         static uint32_t last = 0xffffffffu;
         if (out != last) {
             fprintf(stderr, "DISCA stored=%08x computed=%08x out=%08x "
@@ -362,7 +363,7 @@ void mia_init(MIA *m, int bceNum) { m->bceNum = bceNum; }
  * healthy for 190 s and the damage did not start until about 230. */
 static int iop_upstream(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = getenv("YAGPC_IOP_UPSTREAM") != NULL; }
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_IOP_UPSTREAM") != NULL; }
     return on;
 }
 
@@ -376,8 +377,8 @@ static int iop_mia_pace(void) {
     static int inited = 0, on = 0;
     if (!inited) {
         inited = 1;
-        on = (getenv("YAGPC_MIA_PACE") != NULL ||
-              getenv("YAGPC_IOP_UPSTREAM") != NULL);
+        on = (yagpc_getenv("YAGPC_MIA_PACE") != NULL ||
+              yagpc_getenv("YAGPC_IOP_UPSTREAM") != NULL);
     }
     return on;
 }
@@ -443,7 +444,7 @@ static int xmit_trace_bus(void) {
     static int inited = 0, bus = -1;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_XMITTRACE");
+        const char *e = yagpc_getenv("YAGPC_XMITTRACE");
         if (e != NULL) bus = (int)strtol(e, NULL, 10);
     }
     return bus;
@@ -533,7 +534,7 @@ void msc_init(MSC *m) {
  * its #MOUT, the transport never sees the words, and the peer reports
  * only "transfer abandoned N short".  This names the discard. */
 static void dmaq_drop_for_bce(DMAQueue *q, BCE *bce) {
-    if (getenv("YAGPC_DMATRACE")) {
+    if (yagpc_getenv("YAGPC_DMATRACE")) {
         int n = 0;
         for (int i = 0; i < q->count; i++)
             if (q->items[(q->head + i) % q->cap].bce == bce) n++;
@@ -985,7 +986,7 @@ static double bus_word_us(void) {
     static double us = 0.0;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_BUS_WORD_US");
+        const char *e = yagpc_getenv("YAGPC_BUS_WORD_US");
         if (e != NULL) { double v = atof(e); if (v >= 0.0) us = v; }
     }
     return us;
@@ -1005,7 +1006,7 @@ static double bus_word_us_for(int bus) {
     static unsigned mask = 0;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_BUS_WORD_US_BUSES");
+        const char *e = yagpc_getenv("YAGPC_BUS_WORD_US_BUSES");
         while (e != NULL && *e != '\0') {
             int n = atoi(e);
             if (n >= 0 && n < 32) mask |= 1u << n;
@@ -1038,7 +1039,7 @@ static double bus_word_us_for(int bus) {
 void iop_first_op(IOP *iop, const char *kind, const char *nm, uint32_t pc) {
     static int inited = 0, on = 0, nSeen = 0;
     static const char *seen[512];
-    if (!inited) { inited = 1; on = getenv("YAGPC_FIRSTOP") != NULL; }
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_FIRSTOP") != NULL; }
     if (!on || nm == NULL) return;
     for (int i = 0; i < nSeen; i++) if (seen[i] == nm) return;
     if (nSeen < 512) seen[nSeen++] = nm;
@@ -1140,7 +1141,7 @@ void iop_exec_processors(IOP *iop) {
         {
             static int msInit = 0, msOn = 0, lastH = -1, lastB = -1;
             static long bin[4096]; static int lastBin = -1;
-            if (!msInit) { msInit = 1; msOn = getenv("YAGPC_MSCSTATE") != NULL; }
+            if (!msInit) { msInit = 1; msOn = yagpc_getenv("YAGPC_MSCSTATE") != NULL; }
             if (msOn) {
                 int h = (int)iop_proc_get(&iop->regHalt, PROC_MSC);
                 int b = (int)iop_proc_get(&iop->regBusyWait, PROC_MSC);
@@ -1176,7 +1177,7 @@ void iop_exec_processors(IOP *iop) {
         if (bceIdx >= 6 && bceIdx <= 8) {
             static int bsInit = 0, bsOn = 0, lastSec = -1;
             static long elig[9], seen[9];
-            if (!bsInit) { bsInit = 1; bsOn = getenv("YAGPC_BCESTATE") != NULL; }
+            if (!bsInit) { bsInit = 1; bsOn = yagpc_getenv("YAGPC_BCESTATE") != NULL; }
             if (bsOn && iop->cpu != NULL) {
                 int sec = (int)(iop->cpu->elapsedTimeUs / 1e6);
                 if (lastSec >= 0 && sec != lastSec) {
@@ -1210,13 +1211,13 @@ void iop_exec_processors(IOP *iop) {
             static unsigned bwMask = 0;
             if (!bwInit) {
                 bwInit = 1;
-                bwOn = getenv("YAGPC_BWTRACE") != NULL;
+                bwOn = yagpc_getenv("YAGPC_BWTRACE") != NULL;
                 /* YAGPC_BWTRACE_PE=<n>[,<n>...] chooses the BCEs; the default
                  * is the one the trace was built for, the DK buses 6/7/8 and
                  * mass memory 18.  The intercomputer BCEs 1-5 are the ones in
                  * question at the redundant-set barrier, where the same ICC
                  * I/O completes ~5 ms apart on two computers (ledger #134). */
-                const char *e = getenv("YAGPC_BWTRACE_PE");
+                const char *e = yagpc_getenv("YAGPC_BWTRACE_PE");
                 if (e != NULL && *e != '\0') {
                     while (e != NULL && *e != '\0') {
                         int n = atoi(e);
@@ -1299,7 +1300,7 @@ void iop_exec_processors(IOP *iop) {
         static int tinited = 0;
         static long tlo = -1, thi = -1;
         if (!tinited) {
-            const char *w = getenv("YAGPC_BCEPCTRACE");
+            const char *w = yagpc_getenv("YAGPC_BCEPCTRACE");
             if (w != NULL) {
                 char *end = NULL;
                 tlo = strtol(w, &end, 16);
@@ -1323,7 +1324,7 @@ void iop_exec_processors(IOP *iop) {
      * TRACED back to the branch or start that put it there. */
     if (page == 0) msc_ring_record(iop, pc, hw1, hw2);
 
-    if (getenv("YAGPC_IOPTRACE")) {
+    if (yagpc_getenv("YAGPC_IOPTRACE")) {
         char who[8];
         if (page == 0) snprintf(who, sizeof who, "MSC");
         else snprintf(who, sizeof who, "BCE%d", page);
@@ -1400,7 +1401,7 @@ static bool wire_hold_bus(const IOP *iop, int bus) {
     static unsigned mask = 0;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_WIRE_HOLD_BUSES");
+        const char *e = yagpc_getenv("YAGPC_WIRE_HOLD_BUSES");
         if (e != NULL) {
             given = 1;
             while (*e != '\0' && strcmp(e, "none") != 0) {
@@ -1438,7 +1439,7 @@ void iop_queue_dma(IOP *iop, uint32_t addr, DMADirection direction, BCE *bce) {
      * time is the emulator losing words. */
     if (bce && direction == DMA_READ && bce->bceNum >= 0 && bce->bceNum < 32) {
         dmaQueuedRead[bce->bceNum]++;
-        if (getenv("YAGPC_DMATRACE"))
+        if (yagpc_getenv("YAGPC_DMATRACE"))
             fprintf(stderr, "  QDMA bce=%d addr=%05x  bcePC=%05x\n",
                     bce->bceNum, (unsigned)addr,
                     (unsigned)(register_get32(iopls_at(&iop->ls, bce->bceNum, 0, 2)) & 0x3ffffu));
@@ -1488,7 +1489,7 @@ void iop_msc_repeat(IOP *iop, DInstr *v, bool met) {
          * not visible any other way -- the instruction's own displacement is
          * only half of it, the index register supplies the rest. */
         static int rtInit = 0, rtOn = 0;
-        if (!rtInit) { rtInit = 1; rtOn = getenv("YAGPC_REPEATTRACE") != NULL; }
+        if (!rtInit) { rtInit = 1; rtOn = yagpc_getenv("YAGPC_REPEATTRACE") != NULL; }
         if (rtOn)
             /* THE ACCUMULATOR IS THE MONITOR MASK.  FIOMNTR0 loads it from
              * the TOP ACTIVE IOQE ("GET I/O MONITOR MASK FROM THE TOP
@@ -1531,7 +1532,7 @@ static int mscRingInit = 0, mscRingDumped = 0;
 static void msc_ring_record(IOP *iop, uint32_t pc, uint32_t hw1, uint32_t hw2) {
     if (!mscRingInit) {
         mscRingInit = 1;
-        const char *e = getenv("YAGPC_MSCRING");
+        const char *e = yagpc_getenv("YAGPC_MSCRING");
         if (e != NULL && atoi(e) > 0) {
             mscRingCap = (unsigned)atoi(e);
             mscRing = calloc(mscRingCap, sizeof *mscRing);
@@ -1615,7 +1616,7 @@ static double iop_recv_timeout_us(IOP *iop, int p) {
      * 303, which is 5.0 ms, and a 20 ms floor turns one starved receive
      * into more than three whole 6 ms MSC service periods. */
     if (!iop->recvFloorFromEnv) {
-        const char *e = getenv("YAGPC_RECV_FLOOR_US");
+        const char *e = yagpc_getenv("YAGPC_RECV_FLOOR_US");
         iop->recvFloorFromEnv = 1;
         if (e != NULL) iop->recvTimeoutFloorUs = atof(e);
         /* Upstream: "the receive time-out floor is zero: the loaded time
@@ -1641,7 +1642,7 @@ void iop_bce_error_terminate(IOP *iop, int p) {
         static unsigned mask = 0;
         if (!inited) {
             inited = 1;
-            const char *e = getenv("YAGPC_ERRTERM_TRACE");
+            const char *e = yagpc_getenv("YAGPC_ERRTERM_TRACE");
             if (e != NULL) {
                 on = 1;
                 while (*e != '\0') {
@@ -1695,7 +1696,7 @@ bool iop_bce_receive_starting(IOP *iop) {
  * display -- is never enabled again afterwards, which is why the DEU goes
  * quiet at the handoff and stays quiet. */
 static void iop_log_procs(IOP *iop, const char *what, uint32_t data) {
-    if (!getenv("YAGPC_PROCTRACE")) return;
+    if (!yagpc_getenv("YAGPC_PROCTRACE")) return;
     static uint32_t last = 0xffffffffu;
     uint32_t now = register_get32(&iop->regHalt);
     if (now == last) return;
@@ -1757,7 +1758,7 @@ static void iop_watch_store(IOP *iop, uint32_t addr, uint32_t value,
     static int inited = 0;
     static long lo = -1, hi = -1;
     if (!inited) {
-        const char *w = getenv("YAGPC_WATCHHW");
+        const char *w = yagpc_getenv("YAGPC_WATCHHW");
         if (w != NULL) {
             char *end = NULL;
             lo = strtol(w, &end, 16);
@@ -1808,7 +1809,7 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
             static unsigned rwMask = 0;
             if (!rwInit) {
                 rwInit = 1;
-                const char *e = getenv("YAGPC_RECVWORD_TRACE");
+                const char *e = yagpc_getenv("YAGPC_RECVWORD_TRACE");
                 while (e != NULL && *e != '\0') {
                     int n = atoi(e);
                     if (n > 0 && n < 32) rwMask |= 1u << n;
@@ -1852,7 +1853,7 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
             bce->recvErrored = true;
             return;
         }
-        if (iop->clearWatch[p] && getenv("YAGPC_CLEARTRACE")) {
+        if (iop->clearWatch[p] && yagpc_getenv("YAGPC_CLEARTRACE")) {
             fprintf(stderr, "CLEARREAD bce=%d took=%04x from=%s t=%.1f\n",
                     p, (unsigned)data, wasLatch ? "latch-or-live" : "LIVE",
                     now);
@@ -1881,7 +1882,7 @@ static bool timeout_trace_pe(int pe) {
     static bool all = true;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_TIMEOUT_TRACE_PE");
+        const char *e = yagpc_getenv("YAGPC_TIMEOUT_TRACE_PE");
         if (e != NULL && *e != '\0') {
             all = false;
             while (e != NULL && *e != '\0') {
@@ -1903,7 +1904,7 @@ static double timeout_trace_from_us(void) {
     static double us = 0.0;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_TIMEOUT_TRACE_FROM");
+        const char *e = yagpc_getenv("YAGPC_TIMEOUT_TRACE_FROM");
         if (e != NULL && *e != '\0') us = atof(e) * 1e6;
     }
     return us;
@@ -1937,7 +1938,7 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
                             ((iop->busMarksSync >> bce->bceNum) & 1u);
         bce->recvSkippedEcho = false;
         bce->recvErrored = false;
-        if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
+        if (yagpc_getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
             now >= timeout_trace_from_us()) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);
             /* gpc= because with several computers the local clocks overlap
@@ -1993,7 +1994,7 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
          * what puts it NO-GO and sends the flight software down its
          * RESET STATUS1 recovery path -- so if that path runs here and
          * not there, this is where to look first. */
-        if (getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
+        if (yagpc_getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
             now >= timeout_trace_from_us())
             fprintf(stderr, "BCE%d RECV TIMEOUT gpc=%d t=%.1f us left=%u gotAny=%d "
                             "waited=%.2f ms mto=%.2f ms\n",
@@ -2077,7 +2078,7 @@ uint32_t iop_g_eaf(IOP *iop, uint32_t addr) {
      * count it rather than guess. */
     if (addr & 1u) {
         static int ofInit = 0, ofOn = 0; static long n = 0;
-        if (!ofInit) { ofInit = 1; ofOn = getenv("YAGPC_ODDFW") != NULL; }
+        if (!ofInit) { ofInit = 1; ofOn = yagpc_getenv("YAGPC_ODDFW") != NULL; }
         if (ofOn && n < 40) {
             n++;
             fprintf(stderr, "ODDFW addr=%05x proc=%d pc=%05x t=%.6f\n",
@@ -2108,7 +2109,7 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value) {
     {
         static int inited = 0;
         static int bypass = 0;
-        if (!inited) { bypass = getenv("YAGPC_NO_DMA_PROTECT") != NULL; inited = 1; }
+        if (!inited) { bypass = yagpc_getenv("YAGPC_NO_DMA_PROTECT") != NULL; inited = 1; }
         if (bypass) {
             mcm_set16(&iop->cpu->mainStorage, addr, value, false);
             return true;
@@ -2120,7 +2121,7 @@ static bool iop_write_main16(IOP *iop, uint32_t addr, uint32_t value) {
      * YAGPC_INTTRACE while still able to break a CPU-side condition test
      * mid-loop.  YAGPC_DMAPROT is the only way to see it happen. */
     msc_ring_dump_once(iop, "the first DMA store-protect violation");
-    if (getenv("YAGPC_DMAPROT"))
+    if (yagpc_getenv("YAGPC_DMAPROT"))
         fprintf(stderr, "DMAPROT addr=%05x val=%04x pe=%d ovr=%d pc=%05x "
                         "t=%.1f\n",
                 (unsigned)addr, (unsigned)(value & 0xffff), iop->curPE,
@@ -2259,7 +2260,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
              * set only the commander of a bus may transmit on it; a listener
              * whose transmitter was never disabled sends every command too
              * (ledger #139). */
-            if (getenv("YAGPC_XMITENA_TRACE") && iop->cpu != NULL)
+            if (yagpc_getenv("YAGPC_XMITENA_TRACE") && iop->cpu != NULL)
                 fprintf(stderr, "XMITENA gpc=%d %s data=%08x %08x->%08x nia=%05x t=%.1f\n",
                         iop->cpu->gpcId, (cmd == 0x85040000u) ? "ENABLE " : "DISABLE",
                         (unsigned)data, (unsigned)before, (unsigned)after,
@@ -2435,7 +2436,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
              * so.  No PC is printed -- iopls_PC() reads whichever page
              * the round-robin happens to have selected, which for a
              * CPU-side PCO is any of the 26. */
-            if (getenv("YAGPC_DISPTRACE")) {
+            if (yagpc_getenv("YAGPC_DISPTRACE")) {
                 /* A busy-set arriving while the MSC is ALREADY busy is the
                  * case the POO warns about twice: "while the MSC is busy do
                  * not attempt to alter the STAT1 or STAT4 Registers by using
@@ -2521,7 +2522,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
              * discretes: a BCE that reads busy takes its unit's READY away.
              * So the busy bits are as much a part of "did READY reach
              * CZ2BDIA" as READY itself, and are traced beside it. */
-            if (getenv("YAGPC_DISCTRACE")) {
+            if (yagpc_getenv("YAGPC_DISCTRACE")) {
                 static uint32_t lastbw = 0xffffffffu;
                 uint32_t bw = register_get32(&iop->regBusyWait);
                 if ((bw & 0x00003000u) != (lastbw & 0x00003000u)) {
@@ -2556,7 +2557,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
          * counts buses 1-24 as 1 + (0..23), the other two as 0 + (1..24) --
          * and a command that leaves bits 23-27 clear decodes as before. */
         static int lsInit = 0, lsLegacy = 0;
-        if (!lsInit) { lsInit = 1; lsLegacy = getenv("YAGPC_LS_REGION_LEGACY") != NULL; }
+        if (!lsInit) { lsInit = 1; lsLegacy = yagpc_getenv("YAGPC_LS_REGION_LEGACY") != NULL; }
         uint32_t region = (dataSelect >> 5) + (lsLegacy ? 0u : ((cmd >> 4) & 0x1fu));
         uint32_t bank = (dataSelect >> 3) & 0x3;
         uint32_t word = dataSelect & 0x7;
@@ -2567,7 +2568,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
          * that write arrives decides where the MSC resumes, which decides
          * how much of the display's IPL it gets through per wake. */
         if (isOutput && region == 0 && bank == 0 && word == 2 &&
-            getenv("YAGPC_DISPTRACE"))
+            yagpc_getenv("YAGPC_DISPTRACE"))
             fprintf(stderr, "DISP MSCPC<-%05x t=%.1f us\n", (unsigned)(data & 0x3ffffu),
                     (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0);
 
@@ -2575,7 +2576,7 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
          * MSC's.  A bus program that runs somewhere unintended is almost
          * always one that was AIMED somewhere unintended, and this is the
          * only place that aiming happens. */
-        if (isOutput && word == 2 && getenv("YAGPC_PCTRACE"))
+        if (isOutput && word == 2 && yagpc_getenv("YAGPC_PCTRACE"))
             fprintf(stderr, "PCTRACE %s%u PC<-%05x t=%.1f us\n",
                     region == 0 ? "MSC" : "BCE", (unsigned)region,
                     (unsigned)(data & 0x3ffffu),

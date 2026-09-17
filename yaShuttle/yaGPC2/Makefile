@@ -165,13 +165,13 @@ $(TEST_BIN_DIR)/test_q31: test/test_q31.c src/q31.c src/q31.h test/q31_fixtures.
 $(TEST_BIN_DIR)/test_regmem: test/test_regmem.c src/regmem.c src/regmem.h src/util.c test/regmem_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_regmem.c src/regmem.c src/util.c $(LDLIBS)
 
-$(TEST_BIN_DIR)/test_mcm_membus: test/test_mcm_membus.c src/mcm.c src/mcm.h src/membus.c src/membus.h test/mcm_membus_fixtures.h | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/test_mcm_membus.c src/mcm.c src/membus.c $(LDLIBS)
+$(TEST_BIN_DIR)/test_mcm_membus: test/test_mcm_membus.c src/envcache.c src/mcm.c src/mcm.h src/membus.c src/membus.h test/mcm_membus_fixtures.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_mcm_membus.c src/mcm.c src/membus.c src/envcache.c $(LDLIBS)
 
 $(TEST_BIN_DIR)/test_floatIBM: test/test_floatIBM.c src/floatIBM.c src/floatIBM.h test/floatIBM_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_floatIBM.c src/floatIBM.c $(LDLIBS)
 
-IOP_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/discretes.c src/compat.c
+IOP_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/discretes.c src/compat.c src/envcache.c
 
 $(TEST_BIN_DIR)/test_cpu_ea: test/test_cpu_ea.c src/cpu.c src/cpu.h src/regmem.c src/mcm.c src/membus.c src/util.c src/timing.c $(IOP_DEPS) test/cpu_ea_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_cpu_ea.c src/cpu.c src/regmem.c src/mcm.c src/membus.c src/util.c src/timing.c $(IOP_DEPS) $(LDLIBS)
@@ -187,7 +187,7 @@ $(TEST_BIN_DIR)/test_cpu_instr_exec: test/test_cpu_instr_exec.c $(CPU_INSTR_DEPS
 # iop.c consults the discrete bus on every read of the discrete
 # registers, so anything linking it needs discretes.c, and discretes.c
 # needs compat.c for the monotonic clock its staleness rule uses.
-IOP_TEST_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/regmem.c src/mcm.c src/membus.c src/util.c src/cpu.c src/floatIBM.c src/q31.c src/timing.c src/discretes.c src/compat.c
+IOP_TEST_DEPS := src/iop.c src/iop_bce_instr.c src/iop_msc_instr.c src/regmem.c src/mcm.c src/membus.c src/util.c src/cpu.c src/floatIBM.c src/q31.c src/timing.c src/discretes.c src/compat.c src/envcache.c
 
 $(TEST_BIN_DIR)/test_iop_bce_exec: test/test_iop_bce_exec.c $(IOP_TEST_DEPS) src/iop.h test/iop_bce_exec_fixtures.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_bce_exec.c $(IOP_TEST_DEPS) $(LDLIBS)
@@ -207,8 +207,8 @@ $(TEST_BIN_DIR)/test_iop_discretes: test/test_iop_discretes.c $(IOP_TEST_DEPS) s
 # The inter-GPC discrete wiring, against the rotation table in the flight
 # source itself (SSSRC/BILDNEW5.asm).  discretes.c needs no other object for
 # the pure mapping function.
-$(TEST_BIN_DIR)/test_discrete_rotation: test/test_discrete_rotation.c src/discretes.c src/compat.c src/discretes.h | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/test_discrete_rotation.c src/discretes.c src/compat.c $(LDLIBS)
+$(TEST_BIN_DIR)/test_discrete_rotation: test/test_discrete_rotation.c src/discretes.c src/compat.c src/envcache.c src/discretes.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_discrete_rotation.c src/discretes.c src/compat.c src/envcache.c $(LDLIBS)
 
 # Both link against $(LIB) itself, not the raw source list -- deliberately,
 # since that's exactly what a real integrator would do, and it doubles as
@@ -227,8 +227,8 @@ $(TEST_BIN_DIR)/test_schedule: test/test_schedule.c $(LIB) $(INTEGRATION_DIR)/ya
 # of the `test` target's own UNIT_TESTS list or recipe). Links directly
 # against src/bcenet_transport.c, not $(LIB), since that's the one file
 # it actually exercises.
-$(TEST_BIN_DIR)/bcenet_recv_check: test/bcenet_recv_check.c src/bcenet_transport.c src/bcenet_transport.h | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/bcenet_recv_check.c src/bcenet_transport.c $(LDLIBS)
+$(TEST_BIN_DIR)/bcenet_recv_check: test/bcenet_recv_check.c src/bcenet_transport.c src/envcache.c src/bcenet_transport.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/bcenet_recv_check.c src/bcenet_transport.c src/envcache.c $(LDLIBS)
 
 # Not a unit test -- a runnable example of GpcOps-only usage (see its own
 # header comment), and per its own header comment now the demonstration

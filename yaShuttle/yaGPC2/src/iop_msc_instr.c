@@ -29,6 +29,7 @@
 #include "instr.h"
 #include "util.h"
 
+#include "envcache.h"
 static int32_t sign_extend(uint32_t val, int bits) {
     uint32_t mask = 1u << (bits - 1);
     if (val & mask) {
@@ -344,7 +345,7 @@ static void exec_LBB(IOP *t, DInstr *v) {
             t->ls.curPage = (int)bceNum;
             register_set32(iopls_BASE(&t->ls), ea & 0x3ffffu);
             t->ls.curPage = savedPage;
-            if (getenv("YAGPC_DISPTRACE"))
+            if (yagpc_getenv("YAGPC_DISPTRACE"))
                 fprintf(stderr, "DISP @LBB  bce%-3u base<-%05x X=%04x\n", (unsigned)bceNum,
                         (unsigned)(ea & 0x3ffffu),
                         (unsigned)register_get32(iopls_X(&t->ls)));
@@ -376,7 +377,7 @@ static void exec_LBB_at(IOP *t, DInstr *v) {
             t->ls.curPage = (int)bceNum;
             register_set32(iopls_BASE(&t->ls), ea);
             t->ls.curPage = savedPage;
-            if (getenv("YAGPC_DISPTRACE"))
+            if (yagpc_getenv("YAGPC_DISPTRACE"))
                 fprintf(stderr, "DISP @LBB@ bce%-3u base<-%05x X=%04x tbl=%05x\n",
                         (unsigned)bceNum, (unsigned)ea,
                         (unsigned)register_get32(iopls_X(&t->ls)), (unsigned)tblEa);
@@ -421,7 +422,7 @@ static void exec_LBP(IOP *t, DInstr *v) {
             t->ls.curPage = (int)bceNum;
             register_set32(iopls_PC(&t->ls), ea & 0x3ffffu);
             t->ls.curPage = savedPage;
-            if (getenv("YAGPC_DISPTRACE"))
+            if (yagpc_getenv("YAGPC_DISPTRACE"))
                 fprintf(stderr, "DISP @LBP  bce%-3u pc<-%05x  X=%04x\n", (unsigned)bceNum,
                         (unsigned)(ea & 0x3ffffu),
                         (unsigned)register_get32(iopls_X(&t->ls)));
@@ -452,7 +453,7 @@ static void exec_LBP_at(IOP *t, DInstr *v) {
             t->ls.curPage = (int)bceNum;
             register_set32(iopls_PC(&t->ls), ea);
             t->ls.curPage = savedPage;
-            if (getenv("YAGPC_DISPTRACE"))
+            if (yagpc_getenv("YAGPC_DISPTRACE"))
                 fprintf(stderr, "DISP @LBP@ bce%-3u pc<-%05x  X=%04x\n", (unsigned)bceNum,
                         (unsigned)ea, (unsigned)register_get32(iopls_X(&t->ls)));
         }
@@ -536,7 +537,7 @@ static void exec_SIO(IOP *t, DInstr *v) {
      * This is the only place a dispatched transaction becomes a running
      * BCE, so "FCOS dispatched an I/O and the BCEs never moved" can only
      * be answered here. */
-    if (getenv("YAGPC_SIOTRACE"))
+    if (yagpc_getenv("YAGPC_SIOTRACE"))
         fprintf(stderr, "SIO t=%.1f acc=%08x busy=%08x ena=%08x conflict=%08x\n",
                 t->cpu ? t->cpu->elapsedTimeUs : 0.0, (unsigned)acc,
                 (unsigned)bw, (unsigned)register_get32(&t->regHalt),
@@ -759,7 +760,7 @@ static void exec_RAW(IOP *t, DInstr *v) {
     static int mbInit = 0, mbOn = 1;
     if (!mbInit) {
         mbInit = 1;
-        mbOn = getenv("YAGPC_RAW_NO_MSCBIT") == NULL;
+        mbOn = yagpc_getenv("YAGPC_RAW_NO_MSCBIT") == NULL;
     }
     uint32_t m = iopls_getACC(&t->ls) & (mbOn ? PROC_ALL : PROC_ALL_BCE);
     iop_msc_repeat(t, v, (register_get32(&t->regBusyWait) & m) == 0);
@@ -790,7 +791,7 @@ static void exec_WAT(IOP *t, DInstr *v) {
      * any bus can be serviced and no completion interrupt is raised, which
      * stalls FCOS's whole I/O engine -- FIOPDISP -> FIOSTMSC -> MSC -> EX2 ->
      * FIOCMPLT -> FIOPDISP is a closed loop that stops if one link is missed. */
-    if (getenv("YAGPC_DISPTRACE"))
+    if (yagpc_getenv("YAGPC_DISPTRACE"))
         fprintf(stderr, "DISP MSCWAIT t=%.1f us\n",
                 (t->cpu != NULL) ? t->cpu->elapsedTimeUs : 0.0);
     iop_proc_set(&t->regBusyWait, PROC_MSC, 0);
@@ -827,7 +828,7 @@ static void exec_INT(IOP *t, DInstr *v) {
      * only thing that drives FIOCMPLT, so a silent @INT is a completion the
      * flight software never learns about.  TCVTMSC then stays latched at
      * "MSC BUSY / NOT INTERRUPTABLE" and FIOPDISP dispatches nothing further. */
-    if (getenv("YAGPC_DISPTRACE"))
+    if (yagpc_getenv("YAGPC_DISPTRACE"))
         fprintf(stderr, "DISP MSCINT il=%03x t=%.1f us\n", (unsigned)il,
                 (t->cpu != NULL) ? t->cpu->elapsedTimeUs : 0.0);
     if (il != 0 && t->cpu) {

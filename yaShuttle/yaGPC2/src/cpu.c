@@ -7,6 +7,7 @@
 #include "floatIBM.h"
 #include "timing.h"
 
+#include "envcache.h"
 /* ---------------------------------------------------------------------
  * Construction
  * ------------------------------------------------------------------- */
@@ -150,7 +151,7 @@ void cpu_swap_psw(CPU *cpu, uint32_t oldAddr, uint32_t newAddr) {
     /* One line per interrupt actually taken, naming the PSA vector pair
      * it came through -- which is what identifies the class.  Added to
      * find an interrupt we take that the reference does not. */
-    if (getenv("YAGPC_INTTRACE")) {
+    if (yagpc_getenv("YAGPC_INTTRACE")) {
         /* The interrupt code says WHICH program check / machine check this
          * is, and without it a 0048 line names only the class.  It is set
          * into the PSW before the swap, so it reads correctly here. */
@@ -271,7 +272,7 @@ void cpu_check_interrupts(CPU *cpu) {
          * therefore never reaches the `CALL FPMITUPD` that re-arms Clock 2. */
         {
             static int pgInit = 0, pgOn = 0;
-            if (!pgInit) { pgInit = 1; pgOn = getenv("YAGPC_PGMTRACE") != NULL; }
+            if (!pgInit) { pgInit = 1; pgOn = yagpc_getenv("YAGPC_PGMTRACE") != NULL; }
             if (pgOn) {
                 fprintf(stderr, "PGMCHK code=%04x at=%05x lastProt=%05x t=%.6f\n",
                         (unsigned)cpu->intCode, (unsigned)psw_get_nia(&cpu->psw),
@@ -519,7 +520,7 @@ void cpu_signal_protection_violation(CPU *cpu) {
      * moved off that because it locks the runtime's own IOCODE/IOBUF
      * cells and the stack.  If that over-protects, GPCIPL's own stores
      * fault here, so this counter says whether it does. */
-    if (getenv("YAGPC_PROTTRACE")) {
+    if (yagpc_getenv("YAGPC_PROTTRACE")) {
         static long n = 0;
         if (++n <= 20 || n % 1000 == 0)
             fprintf(stderr, "PROTVIOL #%ld at NIA=%05x addr=%05x\n", n,
@@ -668,7 +669,7 @@ static void cpu_ea_trace(CPU *cpu, uint32_t ea) {
     static int count = 0;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_EATRACE");
+        const char *e = yagpc_getenv("YAGPC_EATRACE");
         while (e != NULL && *e != '\0' && count < 8) {
             char *end = NULL;
             nia[count++] = strtol(e, &end, 16);
@@ -712,7 +713,7 @@ static void cpu_ea_watch(CPU *cpu, uint32_t ea) {
     static double afterUs = 0.0;
     if (!inited) {
         inited = 1;
-        const char *spec = getenv("YAGPC_EAWATCH");
+        const char *spec = yagpc_getenv("YAGPC_EAWATCH");
         if (spec != NULL) {
             unsigned a = 0, b = 0; long m = 2000; double t = 0.0;
             if (sscanf(spec, "%x-%x,%ld,%lf", &a, &b, &m, &t) >= 2) {
@@ -746,7 +747,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
          * rule applying it is flagged above as inherited from gpc and
          * never independently re-verified, so when an operand lands in
          * the wrong sector this is the first thing to look at. */
-        if (getenv("YAGPC_DSETRACE") && hasDse && dseVal != 0)
+        if (yagpc_getenv("YAGPC_DSETRACE") && hasDse && dseVal != 0)
             fprintf(stderr, "DSE nia=%05x pea=%05x b=%u dse=%u\n",
                     (unsigned)psw_get_nia(&cpu->psw), pea,
                     (unsigned)df_get(v, 'b'), dseVal);
@@ -867,7 +868,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
                         static double afterUs = 0.0;
                         if (!inited) {
                             inited = 1;
-                            const char *spec = getenv("YAGPC_INDTRACE");
+                            const char *spec = yagpc_getenv("YAGPC_INDTRACE");
                             if (spec) {
                                 unsigned a = 0, b = 0; long m = 40; double t = 0.0;
                                 if (sscanf(spec, "%x-%x,%ld,%lf", &a, &b, &m, &t) >= 2) {
@@ -981,7 +982,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
         } else {
             ea = ea_expand(cpu, pea, v->opType, hasDse, dseVal);
         }
-        if (v->addrWidth == 2 && (ea & 1) && getenv("YAGPC_RSALIGNTRACE"))
+        if (v->addrWidth == 2 && (ea & 1) && yagpc_getenv("YAGPC_RSALIGNTRACE"))
             fprintf(stderr, "RSALIGN A nia=%05x ea=%05x b=%d ia=%d ii=%d x=%d\n",
                     (unsigned)psw_get_nia(&cpu->psw), ea,
                     df_has(v,'b') ? (int)df_get(v,'b') : -1,
@@ -1030,7 +1031,7 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
          * non-authoritative.  See exec_ISPB, which had to change with it.
          */
         if (v->addrWidth == 2) {
-            if ((ea & 1) && getenv("YAGPC_ALIGNTRACE"))
+            if ((ea & 1) && yagpc_getenv("YAGPC_ALIGNTRACE"))
                 fprintf(stderr, "ALIGN nia=%05x ea=%05x->%05x b=%u\n",
                         (unsigned)psw_get_nia(&cpu->psw), ea, ea & 0xfffe,
                         (unsigned)df_get(v, 'b'));
@@ -1129,7 +1130,7 @@ uint32_t cpu_g_ea_16(CPU *cpu, DInstr *v) {
         } else {
             ea = pea & 0xffff;
         }
-        if (v->addrWidth == 2 && (ea & 1) && getenv("YAGPC_RSALIGNTRACE"))
+        if (v->addrWidth == 2 && (ea & 1) && yagpc_getenv("YAGPC_RSALIGNTRACE"))
             fprintf(stderr, "RSALIGN B nia=%05x ea=%05x b=%d ia=%d ii=%d x=%d\n",
                     (unsigned)psw_get_nia(&cpu->psw), ea,
                     df_has(v,'b') ? (int)df_get(v,'b') : -1,
@@ -1157,7 +1158,7 @@ uint32_t cpu_g_eaf(CPU *cpu, DInstr *v, int extraOffset) {
         static int inited = 0;
         static long watch = -1;
         if (!inited) {
-            const char *w = getenv("YAGPC_WATCHRD");
+            const char *w = yagpc_getenv("YAGPC_WATCHRD");
             if (w != NULL) watch = strtol(w, NULL, 16);
             inited = 1;
         }
@@ -1254,7 +1255,7 @@ static void cpu_ring_trigger(CPU *cpu, uint32_t addr, uint32_t value) {
     static long trigAddr = -1, trigVal = -1;
     if (!inited) {
         inited = 1;
-        const char *w = getenv("YAGPC_RINGTRIG");
+        const char *w = yagpc_getenv("YAGPC_RINGTRIG");
         if (w != NULL) {
             char *end = NULL;
             trigAddr = strtol(w, &end, 16);
@@ -1287,7 +1288,7 @@ static void cpu_watch_store(CPU *cpu, uint32_t addr, uint32_t value,
     static int inited = 0;
     static long lo = -1, hi = -1;
     if (!inited) {
-        const char *w = getenv("YAGPC_WATCHHW");
+        const char *w = yagpc_getenv("YAGPC_WATCHHW");
         if (w != NULL) {
             char *end = NULL;
             lo = strtol(w, &end, 16);
@@ -1549,7 +1550,7 @@ void cpu_run(CPU *cpu) {
  * is the one that loaded it. */
 static void cpu_wait_trace(CPU *cpu, uint32_t byNia) {
     static int inited = 0, on = 0, wasWaiting = 0;
-    if (!inited) { inited = 1; on = getenv("YAGPC_WAITTRACE") != NULL; }
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_WAITTRACE") != NULL; }
     if (!on) return;
     int now = psw_get_wait_state(&cpu->psw);
     if (now && !wasWaiting)
@@ -1638,7 +1639,7 @@ void cpu_exec1(CPU *cpu) {
      * one question the ring exists to answer. */
     {
         if (cpu->niaRingCap == 0) {
-            const char *w = getenv("YAGPC_NIARING");
+            const char *w = yagpc_getenv("YAGPC_NIARING");
             char *end = NULL;
             long v = (w != NULL) ? strtol(w, &end, 10) : 0;
             unsigned cap = (w != NULL && end != w && *end == '\0' &&
@@ -1663,7 +1664,7 @@ void cpu_exec1(CPU *cpu) {
      * burst of requests. */
     {
         static int dpInit = 0, dpOn = 0, lastSec = -1;
-        if (!dpInit) { dpInit = 1; dpOn = getenv("YAGPC_IOQEDEPTH") != NULL; }
+        if (!dpInit) { dpInit = 1; dpOn = yagpc_getenv("YAGPC_IOQEDEPTH") != NULL; }
         if (dpOn) {
             int sec = (int)(cpu->elapsedTimeUs / 1e6);
             if (sec != lastSec) {
@@ -1710,7 +1711,7 @@ void cpu_exec1(CPU *cpu) {
         static unsigned aLo = 0, aHi = 0xfffff;
         if (!nwInit) {
             nwInit = 1;
-            const char *w = getenv("YAGPC_NIAWINDOW");
+            const char *w = yagpc_getenv("YAGPC_NIAWINDOW");
             if (w != NULL) {
                 unsigned x = 0, y = 0;
                 int n = sscanf(w, "%lf,%lf,%x-%x", &lo, &hi, &x, &y);
@@ -1733,7 +1734,7 @@ void cpu_exec1(CPU *cpu) {
          * was measured at ~4700 per SECOND, each one a full PSW swap into
          * the monitor handler -- so this says which code is sitting in
          * memory we have failed to protect. */
-        if (getenv("YAGPC_IMONHIST")) {
+        if (yagpc_getenv("YAGPC_IMONHIST")) {
             static long hist[64]; static long tot = 0; static int reg = 0;
             if (!reg) { reg = 1; atexit(cpu_imon_report); }
             tot++; cpu_imon_total = tot;
@@ -1824,7 +1825,7 @@ static void counter_borrow(CPU *cpu, uint32_t hiAddr, bool *pending) {
     if (hi == 0) {
         membus_set16(cpu->ram, hiAddr, 0xffff, false);
         *pending = true;
-        if (getenv("YAGPC_CLKTRACE"))
+        if (yagpc_getenv("YAGPC_CLKTRACE"))
             fprintf(stderr, "CLK FIRE%d t=%.6f\n",
                     hiAddr == 0x00B0 ? 1 : 2, cpu->elapsedTimeUs / 1e6);
     } else {

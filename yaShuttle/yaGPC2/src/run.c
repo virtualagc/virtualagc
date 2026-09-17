@@ -20,6 +20,7 @@
 #include "strfmt.h"
 #include "trace.h"
 
+#include "envcache.h"
 static void halucp_error_cb(void *ctx, const char *msg) {
     (void)ctx;
     fprintf(stderr, "\n*** %s\n\n", msg);
@@ -99,7 +100,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         static long budget = 200000;
         if (!ctInit) {
             ctInit = 1;
-            const char *e = getenv("YAGPC_CMDTRACE");
+            const char *e = yagpc_getenv("YAGPC_CMDTRACE");
             ctOn = (e != NULL && *e != '\0');
             while (e != NULL && *e != '\0') {
                 int b = atoi(e);
@@ -126,7 +127,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
      * reports that interval: the DEU model has no clock of its own and
      * YAGPC_DEUTRACE only counts calls. */
     if (svc == GPC_SVC_XMIT_CMD && br->clockUs != NULL &&
-        in->busID >= 6 && in->busID <= 9 && getenv("YAGPC_DKTRACE"))
+        in->busID >= 6 && in->busID <= 9 && yagpc_getenv("YAGPC_DKTRACE"))
         fprintf(stderr, "DK gpc=%d bus=%d cmd=%06x t=%.6f\n", br->gpcId,
                 in->busID, (unsigned)(in->in.word & 0xffffffu),
                 *br->clockUs / 1e6);
@@ -140,7 +141,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
     if (br->clockUs != NULL && in->busID >= 6 && in->busID <= 9) {
         static int dsInit = 0, dsOn = 0, lastSec = -1;
         static long xmitC, xmitW, pollY, pollN, recvY, recvN;
-        if (!dsInit) { dsInit = 1; dsOn = getenv("YAGPC_DKSTALL") != NULL; }
+        if (!dsInit) { dsInit = 1; dsOn = yagpc_getenv("YAGPC_DKSTALL") != NULL; }
         if (dsOn) {
             int sec = (int)(*br->clockUs / 1e6);
             if (lastSec >= 0 && sec != lastSec) {
@@ -170,7 +171,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         static int drInit = 0, drOn = 0;
         static double startUs[10];
         static long words[10];
-        if (!drInit) { drInit = 1; drOn = getenv("YAGPC_DKRATE") != NULL; }
+        if (!drInit) { drInit = 1; drOn = yagpc_getenv("YAGPC_DKRATE") != NULL; }
         if (drOn) {
             int b = in->busID;
             if (svc == GPC_SVC_XMIT_CMD) {
@@ -204,7 +205,7 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         static FILE *bl = NULL;
         if (!blInit) {
             blInit = 1;
-            const char *path = getenv("YAGPC_BUSLOG");
+            const char *path = yagpc_getenv("YAGPC_BUSLOG");
             if (path != NULL && *path != '\0') {
                 bl = fopen(path, "wb");
                 if (bl == NULL)
@@ -403,7 +404,7 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
     /* A peer that answered slowly is not a stall either -- the wait state
      * the machine drops into next will make the time up (rtpacer.c).  This
      * used to rebase past PEER_HOLD_REBASE_MS and write the hold off. */
-    if (heldMs > 0.0 && getenv("YAGPC_TIMEOUT_TRACE"))
+    if (heldMs > 0.0 && yagpc_getenv("YAGPC_TIMEOUT_TRACE"))
         fprintf(stderr, "BCE%d PEER HOLD %.2f ms wall -> %s\n", busID, heldMs,
                 got ? "reply" : "none");
     return got;
@@ -1329,7 +1330,7 @@ static void mode_log(const BatchRunner *r, const char *fmt, ...) {
 static double discretes_hold_sec(void) {
     static double v = -1.0;
     if (v < 0.0) {
-        const char *e = getenv("YAGPC_DISCRETES_HOLD_SEC");
+        const char *e = yagpc_getenv("YAGPC_DISCRETES_HOLD_SEC");
         v = (e != NULL && *e != '\0') ? atof(e) : 60.0;
         if (v < 0.0) v = 0.0;
     }
@@ -1452,7 +1453,7 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
      * and the two are asserted together.  Pressing it in STBY or RUN is
      * not a thing the panel can do to a running machine. */
     if (mode != r->prevMode) {
-        if (getenv("YAGPC_MODETRACE"))
+        if (yagpc_getenv("YAGPC_MODETRACE"))
             fprintf(stderr, "MODETRACE driven=%08x value=%08x mode=%08x prev=%08x\n",
                     driven, discretes_value(r->discretes, DISCRETES_REG_A), mode, r->prevMode);
         bool iplEdge = (mode & MODE_IPL) && !(r->prevMode & MODE_IPL);
@@ -1528,7 +1529,7 @@ static double bus_service_us(void) {
     static int inited = 0;
     static double us = BUS_SERVICE_US_DEFAULT;
     if (!inited) {
-        const char *e = getenv("YAGPC_BUS_SERVICE_US");
+        const char *e = yagpc_getenv("YAGPC_BUS_SERVICE_US");
         if (e != NULL) { double v = atof(e); if (v >= 0.0) us = v; }
         inited = 1;
     }
@@ -1537,13 +1538,13 @@ static double bus_service_us(void) {
 
 static bool pace_trace_enabled(void) {
     static int v = -1;
-    if (v < 0) v = getenv("YAGPC_PACETRACE") != NULL;
+    if (v < 0) v = yagpc_getenv("YAGPC_PACETRACE") != NULL;
     return v != 0;
 }
 
 static bool range_trace_enabled(void) {
     static int v = -1;
-    if (v < 0) v = getenv("YAGPC_RANGETRACE") != NULL;
+    if (v < 0) v = yagpc_getenv("YAGPC_RANGETRACE") != NULL;
     return v != 0;
 }
 
@@ -1558,7 +1559,7 @@ static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
     static double afterUs = 0.0;
     if (!inited) {
         inited = 1;
-        const char *spec = getenv("YAGPC_RANGETRACE");
+        const char *spec = yagpc_getenv("YAGPC_RANGETRACE");
         if (spec) {
             /* The ranges first, '+'-separated, then the shared budget and
              * start time.  A spec with one range and no '+' parses exactly
@@ -1596,7 +1597,7 @@ static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
         static int onlyInit = 0, only = 0;
         if (!onlyInit) {
             onlyInit = 1;
-            const char *g = getenv("YAGPC_RANGETRACE_GPC");
+            const char *g = yagpc_getenv("YAGPC_RANGETRACE_GPC");
             if (g != NULL && *g != '\0') only = atoi(g);
         }
         if (only != 0 && r->gpcId != only) return;
@@ -1661,7 +1662,7 @@ static void mode_held_update(BatchRunner *r) {
      * held even for a moment stops executing and leaves the barrier, and
      * a set of computers doing that together breaks its common set
      * (ledger #145, eve4/eve5 during the later GPCs' IPLs). */
-    if (was != r->modeHeldLast && getenv("YAGPC_HELDTRACE")) {
+    if (was != r->modeHeldLast && yagpc_getenv("YAGPC_HELDTRACE")) {
         uint32_t drv = discretes_driven_mask(r->discretes, DISCRETES_REG_A);
         uint32_t val = discretes_value(r->discretes, DISCRETES_REG_A);
         uint32_t mode = val & drv & MODE_ANY;
@@ -1750,7 +1751,7 @@ static bool batchrunner_step(BatchRunner *r) {
          * and discretes_synctrace prints FROM that register -- so none of
          * this appears in a YAGPC_SYNCTRACE log, and a reader sees the last
          * code the software drove and concludes the fix is not working. */
-        if (!r->modeWasHeld && getenv("YAGPC_SYNCTRACE") != NULL)
+        if (!r->modeWasHeld && yagpc_getenv("YAGPC_SYNCTRACE") != NULL)
             fprintf(stderr, "SYNC t=%.6f GPC%d out  000 dead/halt/standby "
                             "(held in reset)\n",
                     yagpc_monotonic_seconds(), r->gpcId);
@@ -1794,7 +1795,7 @@ static bool batchrunner_step(BatchRunner *r) {
         static int dsN = 0, dsNext = 0;
         if (!dsInit) {
             dsInit = 1;
-            const char *e = getenv("YAGPC_DUMPSTATE_AT");
+            const char *e = yagpc_getenv("YAGPC_DUMPSTATE_AT");
             while (e != NULL && *e != '\0' && dsN < 8) {
                 dsAt[dsN++] = atof(e);
                 const char *c = strchr(e, ',');
@@ -1814,7 +1815,7 @@ static bool batchrunner_step(BatchRunner *r) {
         static double dsBusyAfterUs = 0.0;
         if (!dsBusyInit) {
             dsBusyInit = 1;
-            const char *b = getenv("YAGPC_DUMPSTATE_BUSY");
+            const char *b = yagpc_getenv("YAGPC_DUMPSTATE_BUSY");
             if (b != NULL && *b != '\0') {
                 dsBusyProc = atoi(b);
                 /* ",<afterSec>": the FIRST time a processor goes busy is
@@ -1934,8 +1935,8 @@ static bool batchrunner_step(BatchRunner *r) {
         static unsigned char lmMaybe[2048 / 8];
         if (!lmInit) {
             lmInit = 1;
-            const char *e = getenv("YAGPC_LANDMARKS");
-            const char *a = getenv("YAGPC_LANDMARKS_AFTER");
+            const char *e = yagpc_getenv("YAGPC_LANDMARKS");
+            const char *a = yagpc_getenv("YAGPC_LANDMARKS_AFTER");
             if (a != NULL) lmAfterUs = atof(a) * 1e6;
             if (e != NULL) {
                 if (strlen(e) >= sizeof lmBuf) {
@@ -2724,7 +2725,7 @@ static int batchrunner_report_stop(BatchRunner *r) {
     /* Every stop reason, not only max-steps: a run that ends on a halt or
      * a wait state is precisely the one whose processor state matters, and
      * hooking this to the max-steps branch alone hid it. */
-    if (getenv("YAGPC_PROCDUMP")) {
+    if (yagpc_getenv("YAGPC_PROCDUMP")) {
         /* The CPU half matters as much as the IOP half: a parked BCE is
          * only half a deadlock, and which of them is waiting on the other
          * is decided by where the CPU stopped. */
@@ -2741,7 +2742,7 @@ static int batchrunner_report_stop(BatchRunner *r) {
      * programs at run time, so the only way to see what a given
      * address actually holds is to look after the fact. */
     {
-        const char *w = getenv("YAGPC_MEMDUMP");
+        const char *w = yagpc_getenv("YAGPC_MEMDUMP");
         if (w != NULL) {
             char *end = NULL;
             long lo = strtol(w, &end, 16);
@@ -2827,7 +2828,7 @@ int batchrunner_run(BatchRunner *r) {
      * (Yama blocks gdb from attaching here). */
     double sampleEvery = 0.0, sampleNext = 0.0;
     {
-        const char *sv = getenv("YAGPC_NIASAMPLE");
+        const char *sv = yagpc_getenv("YAGPC_NIASAMPLE");
         if (sv != NULL && *sv != '\0') {
             sampleEvery = strtod(sv, NULL) / 1000.0;
             sampleNext = yagpc_monotonic_seconds() + sampleEvery;

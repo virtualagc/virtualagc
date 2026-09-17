@@ -8,6 +8,7 @@
 
 #include "busword.h"
 
+#include "envcache.h"
 /* FIOCBLKS names the MTU device 22 -- FIO22020/1/2 -- but that is FCOS's
  * own device number, not the bus address: the NSP beside it is device 24.
  * The BUS address comes from the BCE program that reads it, FIOPRMPG:
@@ -231,7 +232,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         /* YAGPC_MTUTRACE: every command reaching these buses, with the IUA
          * it names.  This is what showed the MTU is IUA 10 rather than the
          * device number 22 FIOCBLKS calls it. */
-        if (getenv("YAGPC_MTUTRACE")) {
+        if (yagpc_getenv("YAGPC_MTUTRACE")) {
             static long n = 0;
             if (n++ < 40)
                 fprintf(stderr, "MTUCMD t=%.3f bus=%d cmd=%06x iua=%u\n",

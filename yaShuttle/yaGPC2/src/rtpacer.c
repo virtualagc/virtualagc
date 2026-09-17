@@ -4,6 +4,7 @@
 #include "compat.h"
 #include "cpu.h"
 
+#include "envcache.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -84,7 +85,7 @@ void rtpacer_init(RTPacer *p, struct CPU *cpu, double factor, double idleTimeout
  * fraction of real time the simulation actually achieved. */
 static void rtpacer_report(RTPacer *p) {
     static int on = -1;
-    if (on < 0) on = getenv("YAGPC_PACETRACE") != NULL;
+    if (on < 0) on = yagpc_getenv("YAGPC_PACETRACE") != NULL;
     if (!on) return;
     double now = yagpc_monotonic_seconds();
     if (now - p->statLastReportSeconds < 2.0) return;

@@ -10,6 +10,7 @@
 #include "discretes.h"
 #include "busword.h"
 
+#include "envcache.h"
 /* MM1 is register A bit 6, MM2 bit 7 -- the same bits iop.c computes for
  * the machine's own READ DISCRETE INPUT A. */
 #define DISCRETE_A_MM1_READY 0x02000000u
@@ -114,7 +115,7 @@ static uint32_t block_gap_words(void) {
     static uint32_t v = BLOCK_GAP_WORDS_DEFAULT;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_MMU_BLOCK_GAP");
+        const char *e = yagpc_getenv("YAGPC_MMU_BLOCK_GAP");
         if (e != NULL && *e != '\0') {
             long n = strtol(e, NULL, 0);
             if (n >= 0 && n < 100000) v = (uint32_t)n;
@@ -148,7 +149,7 @@ static uint32_t read_latency_words(void) {
     static uint32_t v = 31;          /* 31 x 33 us, just over 1 ms */
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_MMU_READ_LATENCY_US");
+        const char *e = yagpc_getenv("YAGPC_MMU_READ_LATENCY_US");
         if (e != NULL && *e != '\0') {
             double us = strtod(e, NULL);
             if (us >= 0.0 && us < 1e7) v = (uint32_t)((us + BUS_WORD_US - 1.0) / BUS_WORD_US);
@@ -729,7 +730,7 @@ MmuModel *mmumodel_create(int unit, const char *volumePath) {
     if (!m) return NULL;
     m->unit = unit;
     m->busID = (unit == 1) ? 18 : 19;      /* MM1 is BCE 18, MM2 is BCE 19 */
-    m->verbose = getenv("YAGPC_MMUTRACE") != NULL;
+    m->verbose = yagpc_getenv("YAGPC_MMUTRACE") != NULL;
     m->writeEnabledTrack = -1;
     m->extendedCount = -1;
     m->bof = 1;                            /* beginning of tape at power up */
@@ -809,7 +810,7 @@ void mmumodel_set_clock(MmuModel *m, const double *clockUs) {
  * caveat.  YAGPC_MMU_TIMED_READY is still accepted, and is now a no-op. */
 static bool timed_ready_enabled(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = getenv("YAGPC_MMU_QUEUE_READY") == NULL; }
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MMU_QUEUE_READY") == NULL; }
     return on != 0;
 }
 

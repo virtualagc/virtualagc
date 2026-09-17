@@ -2,6 +2,7 @@
 #include "bcenet_framer.h"
 #include "busword.h"
 
+#include "envcache.h"
 #ifdef HAVE_PTHREADS
 #include <pthread.h>
 #endif
@@ -395,7 +396,7 @@ void bcenet_framer_flush_tick(BceNetFramer *f) {
 static double peer_hold_seconds(void) {
     static double cached = -1.0;
     if (cached < 0.0) {
-        const char *e = getenv("YAGPC_PEER_HOLD_MS");
+        const char *e = yagpc_getenv("YAGPC_PEER_HOLD_MS");
         cached = (e != NULL && *e != '\0') ? atof(e) / 1000.0 : PEER_HOLD_SECONDS;
         if (cached < 0.0) cached = 0.0;
     }

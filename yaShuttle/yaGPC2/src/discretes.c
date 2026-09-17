@@ -1,5 +1,13 @@
 /* Receiving side of the GPC discrete-input bus; see discretes.h. */
 #define _DEFAULT_SOURCE /* struct ip_mreq under -std=c11's strict mode */
+#if defined(__linux__)
+#define _GNU_SOURCE     /* recvmmsg() -- see discretes_poll()'s drain */
+#define DISCRETES_HAVE_RECVMMSG 1
+/* 32 datagrams: more than a four-GPC set puts on the wire between two
+ * polls, so the common drain is one syscall, and small enough that the
+ * descriptor arrays stay in cache. */
+#define DISCRETES_RECV_BATCH 32
+#endif
 
 #include "discretes.h"
 
@@ -18,6 +26,7 @@
 
 #include "compat.h"
 
+#include "envcache.h"
 #define DISCRETES_GROUP "239.255.1.1"
 /* One base for every bus socket in the process; see discretes.h.  Read
  * from NSTS_BUS_PORT_BASE if --port-base was not given, so a shell that
@@ -28,7 +37,7 @@ void yagpc_set_port_base(int base) { g_portBase = base; }
 
 int yagpc_port_base(void) {
     if (g_portBase < 0) {
-        const char *w = getenv("NSTS_BUS_PORT_BASE");
+        const char *w = yagpc_getenv("NSTS_BUS_PORT_BASE");
         char *end = NULL;
         long v = (w != NULL && *w != '\0') ? strtol(w, &end, 10) : -1;
         g_portBase = (end != NULL && *end == '\0' && v > 0 && v < 65536 - 100)
@@ -46,7 +55,7 @@ void yagpc_set_gpc_id(int id) { g_gpcId = (id >= 1 && id <= 5) ? id : 1; }
 
 int yagpc_gpc_id(void) {
     if (g_gpcId < 0) {
-        const char *w = getenv("NSTS_GPC_ID");
+        const char *w = yagpc_getenv("NSTS_GPC_ID");
         char *end = NULL;
         long v = (w != NULL && *w != '\0') ? strtol(w, &end, 10) : -1;
         g_gpcId = (end != NULL && *end == '\0' && v >= 1 && v <= 5) ? (int)v : 1;
@@ -163,6 +172,7 @@ struct Discretes {
     /* THE ATTENTIVE CLOCK -- see attend().  Staleness is measured in this,
      * not in wall time. */
     double attentive;
+    unsigned attendCalls;   /* see attend() */
     double lastAttendSec;
 #ifdef HAVE_PTHREADS
     /* Held only around a register update.  The owning machine writes these
@@ -224,10 +234,10 @@ Discretes *discretes_create(int gpcId) {
     /* Publishers repeat themselves several times a second, so tracing
      * every message would be noise: only a message that actually CHANGES
      * a register prints. */
-    d->trace = getenv("YAGPC_DISCRETETRACE") != NULL;
+    d->trace = yagpc_getenv("YAGPC_DISCRETETRACE") != NULL;
 
     d->staleSec = DISCRETES_STALE_SEC;
-    const char *s = getenv("YAGPC_DISCRETES_STALE_SEC");
+    const char *s = yagpc_getenv("YAGPC_DISCRETES_STALE_SEC");
     if (s != NULL) {
         double v = atof(s);
         if (v > 0.0) d->staleSec = v;
@@ -265,7 +275,7 @@ Discretes *discretes_create(int gpcId) {
      * twice.  Every LRU is a process on this machine, so loopback by
      * default; NSTS_BUS_IFACE runs the bus across a real network, exactly
      * as the reference's Bus.IFACE does. */
-    const char *ifaceStr = getenv("NSTS_BUS_IFACE");
+    const char *ifaceStr = yagpc_getenv("NSTS_BUS_IFACE");
     if (ifaceStr == NULL) ifaceStr = "127.0.0.1";
     struct in_addr iface;
     iface.s_addr = inet_addr(ifaceStr);
@@ -359,7 +369,7 @@ uint32_t discretes_rotate_out(int sourceGpc, int readerGpc, uint32_t outMask) {
 
 static bool synctrace_on(void) {
     static int init = 0, on = 0;
-    if (!init) { init = 1; on = getenv("YAGPC_SYNCTRACE") != NULL; }
+    if (!init) { init = 1; on = yagpc_getenv("YAGPC_SYNCTRACE") != NULL; }
     return on != 0;
 }
 
@@ -554,11 +564,35 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
  * principle the pacer uses for a debugger stall: time spent not running is
  * not time the world may hold against you. */
 #define DISCRETES_ATTEND_MAX_STEP 0.05
+/* Must be a power of two: attend() masks with ATTEND_SAMPLE-1. */
+#define ATTEND_SAMPLE 32u
 
 /* Advance the attentive clock.  Called wherever this machine actually looks
  * at its socket, and nowhere else -- the whole point is that it stops when
  * the machine stops looking. */
 static void attend(Discretes *d) {
+    /* SAMPLE THE CLOCK, DO NOT READ IT EVERY CALL.
+     *
+     * discretes_poll_one() is called from mode_switch_held() on the step
+     * loop, and it called this unconditionally -- so every pass took a
+     * wall-clock reading.  That is cheap where clock_gettime is a vDSO read
+     * of the TSC, and ruinous where it is not: on a host whose kernel has
+     * fallen back to the hpet clocksource every reading is a full syscall
+     * into a memory-mapped timer, and a profile of a one-GPC run put
+     * read_hpet at 31% of all cycles with 30% of that arriving through this
+     * one line -- against 12% for emulating the AP-101S itself.
+     *
+     * Sampling every ATTEND_SAMPLE calls does not make `attentive` wrong.
+     * It accumulates the GAP between readings, so a gap measured across 32
+     * calls is the same elapsed time those 32 calls actually took; only the
+     * resolution changes, and the quantity is compared against staleSec,
+     * which is seconds.  The existing DISCRETES_ATTEND_MAX_STEP cap still
+     * bounds each step, so a genuinely inattentive stretch is still not
+     * counted as attention.
+     *
+     * discretes_poll() already gates itself this way, for the same reason;
+     * discretes_poll_one() never did. */
+    if ((++d->attendCalls & (ATTEND_SAMPLE - 1u)) != 0u) return;
     double now = yagpc_monotonic_seconds();
     if (d->lastAttendSec > 0.0) {
         double gap = now - d->lastAttendSec;
@@ -611,6 +645,53 @@ void discretes_poll(Discretes *d) {
         d->lastPollSec = now;
     }
     attend(d);
+#ifdef DISCRETES_HAVE_RECVMMSG
+    /* ONE SYSCALL PER BATCH, NOT PER DATAGRAM.
+     *
+     * With four computers in a set this socket is busy: every SSIP, every
+     * PC2 timer interrupt, every synchronising SVC and every I/O completion
+     * puts a sync code on the wire, and each machine hears the other three.
+     * Draining that one recv() at a time cost a syscall per datagram plus
+     * one more for the EAGAIN that ended the loop, and a saturated
+     * four-GPC profile put __libc_recv at 4.4% of cycles with the kernel's
+     * per-syscall overhead -- __fdget, the AppArmor socket check, the
+     * return path -- stacked behind it.
+     *
+     * recvmmsg() answers with up to DISCRETES_RECV_BATCH datagrams at once.
+     * They arrive in the order they were sent, exactly as the loop below
+     * used to read them, and are applied in that order, so a sequence of
+     * codes still reads as a sequence.  A short batch means the socket is
+     * empty and ends the drain without the extra EAGAIN syscall.
+     *
+     * NOT used by discretes_poll_one(), deliberately: that one exists to
+     * apply a SINGLE datagram so a pulse is not collapsed, and batching is
+     * the opposite of what it is for. */
+    static _Thread_local uint8_t bufs[DISCRETES_RECV_BATCH][64];
+    static _Thread_local struct mmsghdr msgs[DISCRETES_RECV_BATCH];
+    static _Thread_local struct iovec iov[DISCRETES_RECV_BATCH];
+    for (;;) {
+        for (int i = 0; i < DISCRETES_RECV_BATCH; i++) {
+            iov[i].iov_base = bufs[i];
+            iov[i].iov_len = sizeof bufs[i];
+            msgs[i].msg_hdr.msg_name = NULL;
+            msgs[i].msg_hdr.msg_namelen = 0;
+            msgs[i].msg_hdr.msg_iov = &iov[i];
+            msgs[i].msg_hdr.msg_iovlen = 1;
+            msgs[i].msg_hdr.msg_control = NULL;
+            msgs[i].msg_hdr.msg_controllen = 0;
+            msgs[i].msg_hdr.msg_flags = 0;
+            msgs[i].msg_len = 0;
+        }
+        int got = recvmmsg(d->fd, msgs, DISCRETES_RECV_BATCH, 0, NULL);
+        if (got <= 0) break;         /* EAGAIN/EWOULDBLOCK: nothing waiting */
+        for (int i = 0; i < got; i++) {
+            if (msgs[i].msg_len == 0) continue;
+            apply(d, bufs[i], (size_t)msgs[i].msg_len);
+            d->generation++;
+        }
+        if (got < DISCRETES_RECV_BATCH) break;   /* the socket ran dry */
+    }
+#else
     uint8_t buf[64];
     for (;;) {
         ssize_t n = recv(d->fd, buf, sizeof buf, 0);
@@ -621,6 +702,7 @@ void discretes_poll(Discretes *d) {
         apply(d, buf, (size_t)n);
         d->generation++;
     }
+#endif
     discretes_synctrace(d);
 }
 
@@ -694,7 +776,7 @@ void discretes_publish_failvote(Discretes *d, uint32_t value) {
     if (changed & value)  send_msg(d, OP_SET, DISCRETES_REG_FAILVOTE, changed & value);
     if (changed & ~value) send_msg(d, OP_RESET, DISCRETES_REG_FAILVOTE, changed & ~value);
     d->generation++;
-    if (getenv("YAGPC_SYNCTRACE") != NULL)
+    if (yagpc_getenv("YAGPC_SYNCTRACE") != NULL)
         fprintf(stderr, "SYNC GPC%d fail-vote %08x -> %08x  (rotated; see "
                         "discretes.h)\n", d->gpcId, before, value);
 }
@@ -708,7 +790,7 @@ void discretes_publish_cfail(Discretes *d, bool lit) {
     d->canonical[r] = value;
     send_msg(d, lit ? OP_SET : OP_RESET, DISCRETES_REG_CFAIL, 1u);
     d->generation++;
-    if (getenv("YAGPC_SYNCTRACE") != NULL)
+    if (yagpc_getenv("YAGPC_SYNCTRACE") != NULL)
         fprintf(stderr, "SYNC GPC%d computer fail lamp %s\n", d->gpcId,
                 lit ? "ON" : "OFF");
 }

@@ -36,6 +36,7 @@
 #include "instr.h"
 #include "util.h"
 
+#include "envcache.h"
 typedef struct {
     const char *nm;
     const char *pattern;
@@ -90,14 +91,14 @@ static void exec_SSC(IOP *t, DInstr *v) {
 static void exec_SST(IOP *t, DInstr *v) {
     uint32_t raw = iop_bce_ea(t, df_get(v, 'd'), df_get(v, 'm') != 0);
     uint32_t ea = raw & ~1u;
-    if (getenv("YAGPC_SSTTRACE")) {
+    if (yagpc_getenv("YAGPC_SSTTRACE")) {
         /* Capped at 10 for years, which silently truncated the trace and
          * made a still-running BCE look like it had stopped signalling.
          * YAGPC_SSTTRACE=N sets the cap; any non-numeric value means all. */
         static int n = 0;
         static int cap = -2;
         if (cap == -2) {
-            const char *w = getenv("YAGPC_SSTTRACE");
+            const char *w = yagpc_getenv("YAGPC_SSTTRACE");
             char *end = NULL;
             long v = (w != NULL) ? strtol(w, &end, 10) : 0;
             cap = (w != NULL && end != w && *end == '\0' && v > 0)
@@ -199,7 +200,7 @@ static void exec_BU_at(IOP *t, DInstr *v) {
      * rather than confirmation -- the flight software above is the
      * evidence, not either implementation. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
-    if (getenv("YAGPC_BUATTRACE")) {
+    if (yagpc_getenv("YAGPC_BUATTRACE")) {
         static int n = 0;
         if (n++ < 12)
             fprintf(stderr, "BU@ #%d bce=%u table=%05x entry->%05x "
@@ -342,7 +343,7 @@ static void exec_TDL(IOP *t, DInstr *v) {
      * per word, so this is worth printing. */
     {
         static int tlInit = 0, tlOn = 0;
-        if (!tlInit) { tlInit = 1; tlOn = getenv("YAGPC_TDLTRACE") != NULL; }
+        if (!tlInit) { tlInit = 1; tlOn = yagpc_getenv("YAGPC_TDLTRACE") != NULL; }
         if (tlOn && bce)
             fprintf(stderr, "TDL bce=%d count=%u tableAddr=%05x raw=%08x\n",
                     bce->bceNum, (unsigned)count, (unsigned)addr,
@@ -362,7 +363,7 @@ static void exec_TDL(IOP *t, DInstr *v) {
  * to be decoded in the context of their parent instruction. */
 static void bce_process_mio_command(IOP *t, uint32_t pc) {
     if (!iop_proc_get(&t->regXmitEna, t->curPE)) {
-        if (getenv("YAGPC_DISPTRACE"))
+        if (yagpc_getenv("YAGPC_DISPTRACE"))
             fprintf(stderr, "MIOCMD proc%-3d pc=%05x GATED (xmit disabled)\n",
                     t->curPE, (unsigned)pc);
         return;
@@ -373,7 +374,7 @@ static void bce_process_mio_command(IOP *t, uint32_t pc) {
      * above bit 17 sent the fetch outside main storage, which read as
      * zero and left the IUA register at 0. */
     uint32_t cmdWord = iop_g_eaf(t, (pc + 2) & 0x3ffffu) & 0x00ffffffu;
-    if (getenv("YAGPC_DISPTRACE"))
+    if (yagpc_getenv("YAGPC_DISPTRACE"))
         fprintf(stderr, "MIOCMD proc%-3d pc=%05x cmd=%06x\n",
                 t->curPE, (unsigned)pc, (unsigned)cmdWord);
     register_set32(iopls_IUAR(&t->ls), (cmdWord >> 19) & 0x1fu);
@@ -397,7 +398,7 @@ static void exec_MOUT(IOP *t, DInstr *v) {
     /* YAGPC_DMATRACE: what a #MOUT ASKED for, against what the bus later
      * carries.  The instruction advances its NIA immediately, so a
      * transmit's real length is only observable here. */
-    if (getenv("YAGPC_DMATRACE"))
+    if (yagpc_getenv("YAGPC_DMATRACE"))
         fprintf(stderr, "MOUT    bce=%d queued %u word(s) from %05x\n",
                 t->curPE, (unsigned)count,
                 (unsigned)(base + df_get(v, 'd')));

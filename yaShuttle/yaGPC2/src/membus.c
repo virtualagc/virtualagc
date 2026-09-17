@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "membus.h"
 
+#include "envcache.h"
 MemoryBus membus_create(MCM *mcm) {
     MemoryBus b;
     b.mcm = mcm;
@@ -84,7 +85,7 @@ void membus_set_store_protect(MemoryBus *b, uint32_t addr, bool v) {
         static int inited = 0;
         static long lo = -1, hi = -1;
         if (!inited) {
-            const char *w = getenv("YAGPC_PROTSET");
+            const char *w = yagpc_getenv("YAGPC_PROTSET");
             if (w != NULL) {
                 char *end = NULL;
                 lo = strtol(w, &end, 16);

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "ap101.h"
 
+#include "envcache.h"
 void ap101_init(AP101 *gpc) {
     cpu_init(&gpc->cpu);
     iop_init(&gpc->iop, &gpc->cpu);
@@ -31,8 +32,8 @@ static void ap101_timed_unprotect(AP101 *gpc) {
     static long lo[UNPROT_MAX], hi[UNPROT_MAX];
     static double atUs = 0.0;
     if (!inited) {
-        const char *w = getenv("YAGPC_UNPROTECT");
-        const char *t = getenv("YAGPC_UNPROTECT_AT");
+        const char *w = yagpc_getenv("YAGPC_UNPROTECT");
+        const char *t = yagpc_getenv("YAGPC_UNPROTECT_AT");
         if (w != NULL && t != NULL) {
             const char *p = w;
             while (*p != '\0' && nRanges < UNPROT_MAX) {
@@ -104,7 +105,7 @@ static double iop_pass_us(void) {
     static int inited = 0;
     static double us = IOP_PASS_US_DEFAULT;
     if (!inited) {
-        const char *e = getenv("YAGPC_IOP_PASS_US");
+        const char *e = yagpc_getenv("YAGPC_IOP_PASS_US");
         if (e != NULL) {
             double v = atof(e);
             if (v > 0.0) us = v;
@@ -116,7 +117,7 @@ static double iop_pass_us(void) {
 
 static int iop_per_instruction(void) {
     static int inited = 0, per = 0;
-    if (!inited) { per = getenv("YAGPC_IOP_PER_INSTR") != NULL; inited = 1; }
+    if (!inited) { per = yagpc_getenv("YAGPC_IOP_PER_INSTR") != NULL; inited = 1; }
     return per;
 }
 
@@ -177,7 +178,7 @@ static void ap101_timed_poison(AP101 *gpc) {
     static uint32_t val[POISON_MAX_GROUPS][POISON_MAX_RANGES];
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_POISON");
+        const char *e = yagpc_getenv("YAGPC_POISON");
         while (e != NULL && *e != '\0' && nGroups < POISON_MAX_GROUPS) {
             char *end = NULL;
             atUs[nGroups] = strtod(e, &end) * 1e6;
@@ -236,7 +237,7 @@ static void ap101_timed_patch(AP101 *gpc) {
     static uint32_t val[PATCH_MAX_GROUPS][PATCH_MAX_WRITES];
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_PATCH");
+        const char *e = yagpc_getenv("YAGPC_PATCH");
         while (e != NULL && *e != '\0' && nGroups < PATCH_MAX_GROUPS) {
             char *end = NULL;
             atUs[nGroups] = strtod(e, &end);
@@ -291,7 +292,7 @@ static void ap101_timed_loadbin(AP101 *gpc) {
     static int done[LOADBIN_MAX];
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_LOADBIN");
+        const char *e = yagpc_getenv("YAGPC_LOADBIN");
         while (e != NULL && *e != '\0' && count < LOADBIN_MAX) {
             char path[512];
             double t; unsigned a;
@@ -342,7 +343,7 @@ static void ap101_timed_snapshot(AP101 *gpc) {
     static char prefix[400];
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_SNAPSHOT");
+        const char *e = yagpc_getenv("YAGPC_SNAPSHOT");
         if (e != NULL) {
             const char *colon = strrchr(e, ':');
             if (colon != NULL) {
@@ -391,7 +392,7 @@ static void ap101_timed_trace(AP101 *gpc) {
     static FILE *f = NULL;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_TRACEWIN");
+        const char *e = yagpc_getenv("YAGPC_TRACEWIN");
         if (e != NULL) {
             char path[400];
             if (sscanf(e, "%lf-%lf:%399s", &from, &to, path) == 3)
@@ -418,7 +419,7 @@ static void ap101_trig_trace(AP101 *gpc) {
     static FILE *f = NULL;
     if (!inited) {
         inited = 1;
-        const char *e = getenv("YAGPC_TRACETRIG");
+        const char *e = yagpc_getenv("YAGPC_TRACETRIG");
         if (e != NULL) {
             char path[400];
             unsigned a, v; long n;
@@ -489,7 +490,7 @@ void ap101_pccount_report(void) {
 static void ap101_pc_count(AP101 *gpc) {
     if (g_nPcCount < 0) {
         g_nPcCount = 0;
-        const char *e = getenv("YAGPC_PCCOUNT");
+        const char *e = yagpc_getenv("YAGPC_PCCOUNT");
         for (const char *p = e; p != NULL && *p && g_nPcCount < PCCOUNT_MAX; ) {
             char *end = NULL;
             unsigned long a = strtoul(p, &end, 16);
@@ -508,7 +509,7 @@ static void ap101_pc_count(AP101 *gpc) {
                 g_pcCount[j - 1] = t;
             }
         }
-        const char *bw = getenv("YAGPC_PCCOUNT_BINS");
+        const char *bw = yagpc_getenv("YAGPC_PCCOUNT_BINS");
         if (bw != NULL) {
             int a = 0, b = 0;
             if (sscanf(bw, "%d-%d", &a, &b) == 2 && b >= a &&
@@ -552,7 +553,7 @@ void ap101_exec1(AP101 *gpc) {
     static int probeInit = 0;
     static long probeAddr = -1;
     if (!probeInit) {
-        const char *probe = getenv("YAGPC_NIAPROBE");
+        const char *probe = yagpc_getenv("YAGPC_NIAPROBE");
         probeAddr = probe ? (long)strtoul(probe, NULL, 16) : -1;
         probeInit = 1;
     }
@@ -566,7 +567,7 @@ void ap101_exec1(AP101 *gpc) {
                 for (int i = 0; i < 8; i++)
                     fprintf(stderr, " R%d=%08x", i,
                             (unsigned)register_get32(cpu_r(&gpc->cpu, i)));
-                if (getenv("YAGPC_SSLDUMP")) {
+                if (yagpc_getenv("YAGPC_SSLDUMP")) {
                     static const struct { const char *n; unsigned a, len; } B[] = {
                         {"FCMIBLK1", 0x72f2, 20}, {"FCMIBLK2", 0x7306, 20},
                         {"FCMINSST", 0x731a, 2},  {"FCMRSADD", 0x7320, 6},

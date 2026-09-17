@@ -9,6 +9,7 @@
 #include "compat.h"
 #include "busword.h"
 
+#include "envcache.h"
 #ifdef HAVE_PTHREADS
 #include <pthread.h>
 #endif
@@ -124,7 +125,7 @@ IccModel *iccmodel_create(void) {
 #endif
     m->expireUs = 10000.0;
     {
-        const char *e = getenv("YAGPC_ICC_EXPIRE_US");
+        const char *e = yagpc_getenv("YAGPC_ICC_EXPIRE_US");
         if (e != NULL && *e != '\0') m->expireUs = atof(e);
     }
     for (int g = 0; g < 6; g++) m->sharedUs[g] = -1.0;
@@ -179,7 +180,7 @@ static void icc_check_order(IccModel *m, int bus, int rx, uint32_t tag,
             what = "moved to a new transfer before finishing the last";
         }
     }
-    if (what != NULL && m->seqShown < 60 && getenv("YAGPC_ICCSEQ") != NULL) {
+    if (what != NULL && m->seqShown < 60 && yagpc_getenv("YAGPC_ICCSEQ") != NULL) {
         m->seqShown++;
         fprintf(stderr, "ICCSEQ t=%.6f bus=%d rx=GPC%d %s: transfer %u pos %u "
                         "(of %u) word=%06x, previous transfer %u pos %u\n",
@@ -207,7 +208,7 @@ void iccmodel_note_shared_us(IccModel *m, int gpcId, double sharedUs) {
 #define ICCTRACE_DEFAULT_MAX 20000L
 
 static long icctrace_max(void) {
-    const char *e = getenv("YAGPC_ICCTRACE_MAX");
+    const char *e = yagpc_getenv("YAGPC_ICCTRACE_MAX");
     if (e == NULL || *e == '\0') return ICCTRACE_DEFAULT_MAX;
     long v = strtol(e, NULL, 0);
     return v > 0 ? v : LONG_MAX;
@@ -257,7 +258,7 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
          * bus, raw.  The question they answer is whether the software ever
          * asks to READ another computer, which the counters say it does
          * not -- and a command word says what kind it is. */
-        if (m->traced < icctrace_max() && getenv("YAGPC_ICCTRACE") != NULL) {
+        if (m->traced < icctrace_max() && yagpc_getenv("YAGPC_ICCTRACE") != NULL) {
             m->traced++;
             fprintf(stderr, "ICCCMD t=%.1f gpc=%d bus=%d cmd=%08x\n",
                     yagpc_monotonic_seconds(), gpcId, bus,
@@ -306,12 +307,12 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
              * cap spent its whole budget on routine traffic long before the
              * OPS request and showed nothing.  Given with no list, it reports
              * every change of message content, capped. */
-            if (pos == 123u && getenv("YAGPC_ICCMSG") != NULL) {
+            if (pos == 123u && yagpc_getenv("YAGPC_ICCMSG") != NULL) {
                 static int wInit = 0, nWant = 0;
                 static uint16_t want[16];
                 if (!wInit) {
                     wInit = 1;
-                    const char *e = getenv("YAGPC_ICCMSG");
+                    const char *e = yagpc_getenv("YAGPC_ICCMSG");
                     while (e != NULL && *e != '\0' && nWant < 16) {
                         char *end = NULL;
                         unsigned long h = strtoul(e, &end, 16);
@@ -373,7 +374,7 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
                     if (m->lagN[bus][gpcId] == 0 || lag < m->lagMin[bus][gpcId]) m->lagMin[bus][gpcId] = lag;
                     if (m->lagN[bus][gpcId] == 0 || lag > m->lagMax[bus][gpcId]) m->lagMax[bus][gpcId] = lag;
                     m->lagN[bus][gpcId]++;
-                    if (m->lagShown < 60 && getenv("YAGPC_ICCLAG") != NULL) {
+                    if (m->lagShown < 60 && yagpc_getenv("YAGPC_ICCLAG") != NULL) {
                         m->lagShown++;
                         fprintf(stderr, "ICCLAG bus=%d rx=GPC%d transfer=%u sent=%.1f read=%.1f lag_us=%.1f queued_after=%lu\n",
                                 bus, gpcId, (unsigned)ICC_SEQ(tg), m->sentAtUs[bus][ICC_SEQ(tg) & 63u],

@@ -9,6 +9,7 @@
 #include "compat.h"
 #include "json.h"
 
+#include "envcache.h"
 static bool load_state(AGEHarness *age, const char *path, bool verbose);
 
 static const char *simple_basename(const char *path) {
@@ -130,7 +131,7 @@ static void mem_pattern_fill(AGEHarness *age) {
  * and #PCVNMMU (FIOMUWB2's staging buffer) is exactly such a region --
  * yet PHASE02.sym.json's own storeProtect map excludes it. */
 static const char *ipl_protect_mode(void) {
-    const char *e = getenv("YAGPC_IPL_PROTECT");
+    const char *e = yagpc_getenv("YAGPC_IPL_PROTECT");
     return e != NULL ? e : "all";
 }
 static bool ipl_protect_all(void) {

@@ -13,6 +13,7 @@
 
 #include "ebcdic.h"
 
+#include "envcache.h"
 /* deuProto.coffee */
 #define DEU_IUA             10
 #define FUNC_SHIFT          9
@@ -123,7 +124,7 @@ DeuModel *deumodel_create(int busID) {
      *     preloaded displayFills   0, timeFills 403, polls 403
      * The clock keeps running either way, which is exactly what makes the
      * failure look like "nothing is happening" rather than a skipped step. */
-    if (getenv("YAGPC_DEUPRELOADED")) d->ipled = true;
+    if (yagpc_getenv("YAGPC_DEUPRELOADED")) d->ipled = true;
     /* YAGPC_DEU_EXTRA_PRELOADED: the units BEYOND the built-in DK1 one come
      * up already initialised.  GPCIPL loads exactly one unit -- the
      * BFC-selected CRT -- and this model only recognises the end of THAT
@@ -143,7 +144,7 @@ DeuModel *deumodel_create(int busID) {
      * A real orbiter has all four units up, so this is closer to the truth
      * than three units permanently demanding a load we cannot finish.  It is
      * opt-in until the real end-of-load rule is known. */
-    if (busID != 6 && getenv("YAGPC_DEU_EXTRA_PRELOADED")) d->ipled = true;
+    if (busID != 6 && yagpc_getenv("YAGPC_DEU_EXTRA_PRELOADED")) d->ipled = true;
     d->iplRunning = false;
     /* YAGPC_DEUMF=<0..3>: the MAJOR FUNCTION switch position this unit
      * reports in every poll header -- 0 PL, 1 GNC, 2 SM, 3 ILLEGAL.
@@ -157,7 +158,7 @@ DeuModel *deumodel_create(int busID) {
      * is not.  MF GNC OPS 9 is GRT index 9, set HEX'F000' -- GPCs 1 to 4.
      * See CZ2COMMO's CZ2V_GRT_TAB and CZ2B_GRT_GPC_SET. */
     {
-        const char *mf = getenv("YAGPC_DEUMF");
+        const char *mf = yagpc_getenv("YAGPC_DEUMF");
         if (mf != NULL) {
             d->majorFunc = (int)strtol(mf, NULL, 0) & 3;
             fprintf(stderr, "deu: bus %d major function %d (%s)\n", busID,
@@ -255,7 +256,7 @@ static double deu_wall_seconds(void) {
 }
 
 static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
-    const char *spec = getenv("YAGPC_DEUKEYS");
+    const char *spec = yagpc_getenv("YAGPC_DEUKEYS");
     if (spec == NULL) return 0;
     /* NOT gated on d->ipled.  It used to be, and that made crew input
      * impossible on the IPL path that omits the BFC CRT switch: GPCIPL's
@@ -295,7 +296,7 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
     static char specBuf[16384];
     if (nBatch < 0) {
         long dflt = 400;
-        const char *w = getenv("YAGPC_DEUKEYS_AFTER");
+        const char *w = yagpc_getenv("YAGPC_DEUKEYS_AFTER");
         if (w != NULL) {
             char *end = NULL; long v = strtol(w, &end, 10);
             if (end != w && *end == '\0' && v >= 0) dflt = v;
@@ -360,7 +361,7 @@ static uint16_t deu_pending_keys(DeuModel *d, uint16_t *w) {
             static int stInit = 0, stOn = 0;
             if (!stInit) {
                 stInit = 1;
-                stOn = getenv("YAGPC_DEUKEYS_SIMTIME") != NULL;
+                stOn = yagpc_getenv("YAGPC_DEUKEYS_SIMTIME") != NULL;
             }
             if (stOn && d->clockUs != NULL) gateSec = *d->clockUs / 1e6;
         }
@@ -479,7 +480,7 @@ static void deu_complete_fill(DeuModel *d) {
          * then the conversion word.  Printed as day/hh:mm:ss the way the
          * MEDS header clock renders it, which is how a wrong MTU reading
          * becomes visible without a display attached. */
-        if (n >= 7 && getenv("YAGPC_TIMEFILL")) {
+        if (n >= 7 && yagpc_getenv("YAGPC_TIMEFILL")) {
             static long nt = 0;
             /* The first fills predate the MTU read -- PASS initialises its
              * clock from the unit well into the run -- so sample forever,
@@ -650,7 +651,7 @@ void deumodel_service(void *ctx, GpcServiceNumber serviceNumber, const GpcServic
                       GpcServiceOutput *output) {
     DeuModel *d = (DeuModel *)ctx;
     if (!d || !input || !output) return;
-    if (getenv("YAGPC_DEUTRACE")) {
+    if (yagpc_getenv("YAGPC_DEUTRACE")) {
         static int first = 1;
         if (first) { first = 0;
             fprintf(stderr, "deu: first service call, svc=%d bus=%d\n",
@@ -661,7 +662,7 @@ void deumodel_service(void *ctx, GpcServiceNumber serviceNumber, const GpcServic
        * wrong" from "the machine never got there". */
       static long byBus[32]; static long total = 0;
       int b = input->busID; if (b >= 0 && b < 32) byBus[b]++;
-      if (++total % 5000 == 0 && getenv("YAGPC_DEUTRACE")) {
+      if (++total % 5000 == 0 && yagpc_getenv("YAGPC_DEUTRACE")) {
           fprintf(stderr, "deu: %ld service calls; by bus:", total);
           for (int i = 0; i < 32; i++) if (byBus[i]) fprintf(stderr, " %d=%ld", i, byBus[i]);
           fprintf(stderr, "\n");
@@ -805,7 +806,7 @@ void deumodel_report(const DeuModel *d) {
          * eight words and sixteen characters, which is no use at all for
          * decoding a display list that has gone wrong. */
         {
-            const char *pfx = getenv("YAGPC_DEUDUMP");
+            const char *pfx = yagpc_getenv("YAGPC_DEUDUMP");
             if (pfx) {
                 char path[512];
                 snprintf(path, sizeof path, "%s-bus%d.bin", pfx, d->busID);
@@ -821,7 +822,7 @@ void deumodel_report(const DeuModel *d) {
                 }
             }
         }
-        if (getenv("YAGPC_DEUIMAGE")) {
+        if (yagpc_getenv("YAGPC_DEUIMAGE")) {
             /* The non-zero runs, with the DISPLAY LIST read as text beside
              * them.  This used to read each halfword as two EBCDIC bytes and
              * produced pure noise: the display list is not EBCDIC. */
