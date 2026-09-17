@@ -61,7 +61,56 @@ back to "open" within an hour of being written.
 6. **Only then**, if the set still loses computers, go back to #137 (identical
    I/O between set members) and #107 (the ICC read path).
 
-## The third-CRT problem  (the live question)
+## The third-CRT problem  (being worked, #159)
+
+**Cause found.**  A third display halves the simulation rate, and the set then
+loses a computer.  Rate (simulated seconds per wall second): **0.74-0.98 with
+two displays, 0.31-0.48 with three.**  Confirmed independently by the SSIP
+cadence, 160.0 ms on every computer in a working run against 377-386 ms in a
+failing one -- 160 / 0.42 = 381.
+
+It is NOT host starvation: the four GPC threads sit at 100% of a core each on a
+20-core machine with sixteen cores idle.  Two things combine:
+
+- **Linear bus cost.**  Four computers on three display buses instead of two is
+  1.5x the transactions, and each `sendto` costs about 8 us.
+- **The barrier amplifies it.**  It holds a machine 241,300 times a second with
+  three displays against 75,800 with two, and for 44% of thread time against
+  19%.  A held machine does not advance simulated time.
+  Unheld time 56% vs 81%, and 0.40/0.56 = 0.71 against 0.90/0.81 = 1.11 -- a
+  ratio of 1.56, which is the linear bus scaling.  So the two together give the
+  2.25x observed.
+
+**Why a low rate kills a computer.**  MEDS2's watchdogs are in WALL time --
+`POLL_FAIL_MS = 4000`, `IDP_LOST_MS = 2000` -- while the GPCs run in simulated
+time.  At rate 0.4 everything a computer does takes 2.5x longer in wall terms,
+so those timers fire on far less provocation.  The victim varies between runs
+(GPC1+GPC2, then GPC2, then GPC3), which is what a timing failure looks like.
+
+Symptoms that follow rather than cause: GPC1 takes 120 `BCE8` (DK3) receive
+timeouts, all `gotAny=1 left=15`, but they total 810 ms in 420 s -- 0.2%.  IDP3
+logs `load started` and never `load complete`, taking 5 fills where IDP1 takes
+174, so it keeps asserting IPL_REQUIRED.
+
+**Fixes under test**, in order of promise:
+
+1. `YAGPC_BARRIER_US=200` -- simulatePASS forces 25 while the emulator's own
+   default is 200, still 19x inside FCOS's 3850 us deadline.  This is the new
+   evidence #125 asked for before retuning.
+2. `idpload 3` -- the script does `idpload 1` and `idpload 2` and never 3, and
+   an IDP that starts unpowered comes up cold wanting a load.  `deuLoad()`
+   clears the stuck `iplRunning`/`xfer` state IDP3 is in.
+3. Power IDP3 only AFTER the set is formed and CRT3 assigned.  Before the NBAT
+   is typed at minute 5, GPC1 holds all three displays (USA005350: a GPC in RUN
+   takes IDPs 1 to 3 when the common set commands none), and the barrier paces
+   the whole vehicle at its speed.
+
+Variants for all three are in the session scratchpad as `g3-3crt.script`,
+`g3-3crt-load.script` and `g3-3crt-late.script`.
+
+### Earlier framing, kept for the timeline
+
+
 
 Three runs, and the variable is clear:
 
