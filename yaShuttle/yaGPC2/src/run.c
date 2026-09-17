@@ -511,6 +511,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
     }
 
     r->gpcId = gpcId;
+    r->rtPacer.gpcId = gpcId;   /* for the YAGPC_PACETRACE label */
     /* NOT the zero memset leaves: generation 0 is a real value, and a memo
      * that matched it would answer "not held" before the panel had ever been
      * heard -- releasing the machine from reset on nothing at all. */

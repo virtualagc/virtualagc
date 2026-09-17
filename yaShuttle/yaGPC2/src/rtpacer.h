@@ -75,6 +75,10 @@ typedef struct {
     double statHoldWallS;         /* wall spent holding for a bus peer */
     long   statHoldCalls;         /* holds that actually waited */
     long   statHoldGot;           /* ... and got their reply */
+    /* Which computer this paces.  Only for the YAGPC_PACETRACE line: with
+     * several machines the reports interleave, and an unlabelled one cannot
+     * be matched to the computer whose rate it describes. */
+    int gpcId;
 } RTPacer;
 
 /* Why a paced wait ended. */

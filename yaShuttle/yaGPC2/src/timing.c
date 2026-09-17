@@ -45,6 +45,7 @@
  */
 #include "timing.h"
 
+#include <stdint.h>
 #include <string.h>
 
 #include "regmem.h"
@@ -365,18 +366,53 @@ static const PooTimingEntry POO_TIMING_TABLE[] = {
 };
 #define POO_TIMING_COUNT (sizeof(POO_TIMING_TABLE) / sizeof(POO_TIMING_TABLE[0]))
 
+/* THESE TWO WERE A LINEAR strcmp SCAN OF THE WHOLE TABLE ON EVERY EMULATED
+ * INSTRUCTION, and it cost more than the emulation.  Measured with perf on a
+ * one-GPC run, 2026-09-17: __strcmp_avx2 was 21.8% of all CPU, 15.9% of it
+ * reached through instr_time_poo -> find_poo_entry, against 5.8% for
+ * instr_decode and 1.5% for iop_exec_processors.  The instruction timing model
+ * was costing several times what decoding the instruction did.
+ *
+ * The lookup key is desc->nm, which is a string LITERAL from the static
+ * instruction table (cpu_instr.c: { "PC", "11011xxx11101yyy", exec_PC, 2, 1 }),
+ * so one opcode always presents the same POINTER.  Memoising on the pointer is
+ * therefore exact -- a hit returns precisely what the scan would have -- and a
+ * miss costs one extra comparison before the old scan runs.  Misses are cached
+ * too, or an instruction with no timing entry would rescan the table forever.
+ *
+ * Thread-local, because a vehicle runs one of these per computer and a shared
+ * cache would need synchronising for no gain: the table is small. */
+#define TIMING_MEMO 256
+#define TIMING_MEMO_SLOT(p) ((((uintptr_t)(p)) >> 3) & (TIMING_MEMO - 1))
+
+static _Thread_local const char *pooMemoKey[TIMING_MEMO];
+static _Thread_local const PooTimingEntry *pooMemoVal[TIMING_MEMO];
+
 static const PooTimingEntry *find_poo_entry(const char *nm) {
+    size_t h = TIMING_MEMO_SLOT(nm);
+    if (pooMemoKey[h] == nm) return pooMemoVal[h];
+    const PooTimingEntry *found = NULL;
     for (size_t i = 0; i < POO_TIMING_COUNT; i++) {
-        if (strcmp(POO_TIMING_TABLE[i].nm, nm) == 0) return &POO_TIMING_TABLE[i];
+        if (strcmp(POO_TIMING_TABLE[i].nm, nm) == 0) { found = &POO_TIMING_TABLE[i]; break; }
     }
-    return NULL;
+    pooMemoKey[h] = nm;
+    pooMemoVal[h] = found;
+    return found;
 }
 
+static _Thread_local const char *entMemoKey[TIMING_MEMO];
+static _Thread_local const TimingEntry *entMemoVal[TIMING_MEMO];
+
 static const TimingEntry *find_entry(const char *nm) {
+    size_t h = TIMING_MEMO_SLOT(nm);
+    if (entMemoKey[h] == nm) return entMemoVal[h];
+    const TimingEntry *found = NULL;
     for (size_t i = 0; i < TIMING_TABLE_COUNT; i++) {
-        if (strcmp(TIMING_TABLE[i].nm, nm) == 0) return &TIMING_TABLE[i];
+        if (strcmp(TIMING_TABLE[i].nm, nm) == 0) { found = &TIMING_TABLE[i]; break; }
     }
-    return NULL;
+    entMemoKey[h] = nm;
+    entMemoVal[h] = found;
+    return found;
 }
 
 static bool is_indexed(const DInstr *v) { return df_has(v, 'i') && df_get(v, 'i') != 0; }
@@ -501,12 +537,49 @@ static double xt_pick(const double t[7], int xtCase) {
  *
  * `preN` carries whatever instr_time_pre_n() captured for this
  * mnemonic; `cpu` is read for LXA/LXAR's post-execution DSE only. */
+/* poo_override tests the mnemonic against TWENTY names, and the overwhelming
+ * majority of instructions match none of them -- paying all twenty strcmps on
+ * every emulated instruction.  Measured with perf after the find_poo_entry
+ * memo, 2026-09-17: __strcmp_avx2 was still 5-9% of CPU and this is where the
+ * rest of it came from.
+ *
+ * The list is checked ONCE per opcode and memoised on desc->nm's pointer, a
+ * literal from the static instruction table and so stable and unique.  Every
+ * return inside poo_override is guarded by a strcmp on nm, so a mnemonic that
+ * is not in this list cannot reach any of them and the function's "no
+ * override" answer of -1.0 is exactly right.
+ *
+ * THIS LIST IS DERIVED FROM poo_override'S OWN strcmp CALLS.  Add a name
+ * there and it must be added here too, or that override silently stops
+ * firing. */
+static const char *const POO_OVERRIDE_NAMES[] = {
+    "D", "DR", "ICR", "ISPB", "LXA", "LXAR", "M", "ME", "MER", "MR",
+    "NCT", "SLDL", "SLL", "SRA", "SRDA", "SRDL", "SRDR", "SRL", "SRR", "SUM",
+};
+
+static bool poo_override_possible(const char *nm) {
+    static _Thread_local const char *key[TIMING_MEMO];
+    static _Thread_local bool val[TIMING_MEMO];
+    size_t h = TIMING_MEMO_SLOT(nm);
+    if (key[h] == nm) return val[h];
+    bool any = false;
+    for (size_t i = 0; i < sizeof POO_OVERRIDE_NAMES / sizeof POO_OVERRIDE_NAMES[0]; i++) {
+        if (strcmp(POO_OVERRIDE_NAMES[i], nm) == 0) { any = true; break; }
+    }
+    key[h] = nm;
+    val[h] = any;
+    return any;
+}
+
 static double poo_override(CPU *cpu, const char *nm, const DInstr *v,
                            uint32_t preN, int xtCase) {
     bool oddR = (df_get(v, 'x') & 1) != 0;
 
     /* MVH: computed in full before execution (see instr_time_pre_n). */
     if (cpu->timePooOverrideUs >= 0.0) return cpu->timePooOverrideUs;
+
+    /* Nothing below can match this mnemonic -- see poo_override_possible. */
+    if (!poo_override_possible(nm)) return -1.0;
 
     /* Multiply/divide with an ODD R1 keep only the high half of the
      * product (or take the short divide path) and are correspondingly

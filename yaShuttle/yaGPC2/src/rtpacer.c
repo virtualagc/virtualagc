@@ -91,28 +91,28 @@ static void rtpacer_report(RTPacer *p) {
     double wall = now - p->wallBirthSeconds;
     double sim = (p->cpu->elapsedTimeUs - 0.0) / 1e6;
     fprintf(stderr,
-            "PACE wall=%8.2fs sim=%8.2fs rate=%.3f | idle: %ld calls %.2fs wall, "
+            "PACE gpc=%d wall=%8.2fs sim=%8.2fs rate=%.3f | idle: %ld calls %.2fs wall, "
             "capped %ld (%.0f ms sim dropped) | slept %.2fs | rebase %ld (%.1fs written off)\n",
-            wall, sim, wall > 0 ? sim / wall : 0.0, p->statIdleCalls,
+            p->gpcId, wall, sim, wall > 0 ? sim / wall : 0.0, p->statIdleCalls,
             p->statIdleWallSeconds, p->statCappedCalls, p->statCappedLostMs,
             p->statSleepSeconds, p->statRebaseCalls, p->statRebaseLostMs / 1000.0);
     fprintf(stderr,
-            "     rebase by cause: pace %ld/%.1fs  wake %ld/%.1fs  peer %ld/%.1fs  resync %ld/%.1fs\n",
-            p->statRebaseWhyCalls[0], p->statRebaseWhyMs[0] / 1000.0,
+            "  gpc=%d rebase by cause: pace %ld/%.1fs  wake %ld/%.1fs  peer %ld/%.1fs  resync %ld/%.1fs\n",
+            p->gpcId, p->statRebaseWhyCalls[0], p->statRebaseWhyMs[0] / 1000.0,
             p->statRebaseWhyCalls[1], p->statRebaseWhyMs[1] / 1000.0,
             p->statRebaseWhyCalls[2], p->statRebaseWhyMs[2] / 1000.0,
             p->statRebaseWhyCalls[3], p->statRebaseWhyMs[3] / 1000.0);
-    fprintf(stderr, "     exec1: %ld calls %.2fs wall (%.3f us each)\n",
-            p->statExecCalls, p->statExecWallS,
+    fprintf(stderr, "  gpc=%d exec1: %ld calls %.2fs wall (%.3f us each)\n",
+            p->gpcId, p->statExecCalls, p->statExecWallS,
             p->statExecCalls ? p->statExecWallS * 1e6 / p->statExecCalls : 0.0);
-    fprintf(stderr, "     bus service: %ld calls %.2fs wall (%.3f us each)\n",
-            p->statFlushCalls, p->statFlushWallS,
+    fprintf(stderr, "  gpc=%d bus service: %ld calls %.2fs wall (%.3f us each)\n",
+            p->gpcId, p->statFlushCalls, p->statFlushWallS,
             p->statFlushCalls ? p->statFlushWallS * 1e6 / p->statFlushCalls : 0.0);
-    fprintf(stderr, "     peer holds: %ld (%ld answered) %.2fs wall, %.3f ms each\n",
-            p->statHoldCalls, p->statHoldGot, p->statHoldWallS,
+    fprintf(stderr, "  gpc=%d peer holds: %ld (%ld answered) %.2fs wall, %.3f ms each\n",
+            p->gpcId, p->statHoldCalls, p->statHoldGot, p->statHoldWallS,
             p->statHoldCalls ? p->statHoldWallS * 1000.0 / p->statHoldCalls : 0.0);
-    fprintf(stderr, "     wait loop: %.2fs wall delivered %.2fs sim (%.3f)\n",
-            p->statIdleLoopWallS, p->statIdleLoopSimS,
+    fprintf(stderr, "  gpc=%d wait loop: %.2fs wall delivered %.2fs sim (%.3f)\n",
+            p->gpcId, p->statIdleLoopWallS, p->statIdleLoopSimS,
             p->statIdleLoopWallS > 0 ? p->statIdleLoopSimS / p->statIdleLoopWallS : 0.0);
     p->statLastReportSeconds = now;
 }
