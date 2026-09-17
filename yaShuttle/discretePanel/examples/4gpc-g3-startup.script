@@ -2,7 +2,8 @@
 # actually flies one -- memory configuration 3, GNC OPS 301 (entry).  Run from
 # discretePanel/:
 #
-#   python3 simulatePASS.py --gpcs 1-4 --crts 3 --tape OI340700-v44boot.mmv \
+#   python3 simulatePASS.py --gpcs 1-4 --crts 3 \
+#       --tape ~/workspace/pass-run/OI340700-v44boot.mmv \
 #       --script examples/4gpc-g3-startup.script --duration 1200
 #
 # WHY THIS AND NOT 4gpc-startup.script.  That one asks for OPS 201, and OPS 2
@@ -26,8 +27,10 @@
 # Each IPL is ipl-one-gpc.script, unchanged -- the IPL procedure does not care
 # which OPS follows it.
 #
-# NOT YET RUN.  The 2026-09-15 verification belongs to the OPS 201 script; this
-# one has never been exercised, and the OPS 3 overlay load is the part to watch.
+# FIRST RUN 2026-09-16, unattended: the script itself works -- all four IPLs,
+# all fifteen NBAT entries and OPS 3 0 1 PRO went in -- but NO WORKING SET CAME
+# OF IT.  GPC1 and GPC2 fell silent at the OPS 301 transition while GPC3 and
+# GPC4 paired off and idled.  See ledger #158 before trusting a run of this.
 
 # --- all four GPCs to HALT, the IDPs on ---------------------------------------
 +0     gpc 1

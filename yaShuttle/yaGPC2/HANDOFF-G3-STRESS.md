@@ -1,7 +1,7 @@
 # Four GPCs in a real redundant set: G3, and GPC-to-GPC loading
 
 Written 2026-09-16 evening, for the morning.  The ledger
-(`gpc-causes.py`, entries #151-#157) holds the evidence; this file holds only
+(`gpc-causes.py`, entries #151-#158) holds the evidence; this file holds only
 the plan and the order to do it in.
 
 ## Where we got to
@@ -22,32 +22,66 @@ back to "open" within an hour of being written.
 
 ## To do, in order
 
-1. **Run `examples/4gpc-g3-startup.script`.**  New, checked, never executed.
-   Four GPCs, memory configuration 3, OPS 301, three CRTs.
+1. ~~**Run `examples/4gpc-g3-startup.script`.**~~  DONE, unattended, 21:14 on
+   2026-09-16 -- and it did NOT form a working set.  See **#158** and "What the
+   first G3 run did" below.  The script itself is sound: all four IPLs, all
+   fifteen NBAT entries and `OPS 3 0 1 PRO` went in, and all three CRTs kept
+   taking fills.  Four GPCs, memory configuration 3, OPS 301, three CRTs.
 
-       python3 simulatePASS.py --gpcs 1-4 --crts 3 --tape OI340700-v44boot.mmv \
+       python3 simulatePASS.py --gpcs 1-4 --crts 3 \
+           --tape ~/workspace/pass-run/OI340700-v44boot.mmv \
            --script examples/4gpc-g3-startup.script --duration 1200
 
-   Watch the OPS 3 overlay load -- that is the step most likely to behave
-   differently from OPS 2.  If the set forms and holds, we finally have a
-   defensible workload to measure on.
+   (a bare tape name is resolved relative to `discretePanel/` and will not be
+   found -- give the path)
 
-2. **Re-measure #153 on it.**  Do the computers still diverge in I/O?  The
+   Watch the OPS 3 overlay load -- that is the step most likely to behave
+   differently from OPS 2, and on the first run it is where things went wrong.
+
+2. **Work out why GPC1 and GPC2 stop** (#158) -- this now comes before
+   re-measuring anything, because there is no set to measure.
+
+3. **Re-measure #153 on it**, once a set holds.  Do the computers still diverge in I/O?  The
    counting is a per-GPC tally of non-null sync codes over a few minutes; the
    OPS 201 numbers to compare against are in #153 (SVC 33901 against
    33885/33887/33887, timer/SSIP/IPR identical).
 
-3. **Put simulated time on the `SYNC` trace line.**  `discretes_synctrace()`
+4. **Put simulated time on the `SYNC` trace line.**  `discretes_synctrace()`
    prints `yagpc_monotonic_seconds()` only, and FCOS's 3.85 ms timeout is
    SIMULATED time, so every join-delay figure we have mixes the two.  Until
    this is done, arguments about the timing margin are arguments, not
    measurements.  See #153.
 
-4. **Try GPC-to-GPC loading (freeze dry).**  See below; this is the piece Ron
+5. **Try GPC-to-GPC loading (freeze dry).**  See below; this is the piece Ron
    asked for specifically.
 
-5. **Only then**, if the set still loses computers, go back to #137 (identical
+6. **Only then**, if the set still loses computers, go back to #137 (identical
    I/O between set members) and #107 (the ICC read path).
+
+## What the first G3 run did
+
+Sync issues per GPC per minute, from the run's own trace:
+
+    min 1-2   GPC1 alone (684, 668)                 the IPLs
+    min 3     GPC1 + GPC3 (1300 each)
+    min 4     GPC4 joins (1520 / 1520 / 1454)
+    min 5     all four (1080 / 310 / 1080 / 1080)
+    min 6     GPC3,GPC4 ~4575 each; GPC1 828; GPC2 0
+    min 7     GPC1 and GPC2 ZERO; GPC3,GPC4 ~5475
+    min 8-20  GPC3,GPC4 steady ~666/min; the others silent
+
+So the two computers that go quiet are **GPC1 and GPC2 -- exactly the two the
+NBAT gives mass memory and CRTs to** -- and MM2 was still cycling READY/BUSY
+when the run ended.  The suspicion is that they are stuck in the OPS 3 overlay
+load.  GPC3 and GPC4 settle into the common-set-but-not-redundant-set rhythm of
+#155 (SSIP, I/O complete, null, nothing else), and the CAM ends with one lamp:
+21, GPC2 voting against GPC1.
+
+This is one run, ended by its own `--duration`, on entry software that drives
+flight-critical buses and sensors this vehicle model may not provide -- and Ron
+saw FAx bus faults on all four computers reaching OPS 301 by hand earlier the
+same day, which may be the same thing.  It is a starting point, not a verdict
+on G3.
 
 ## GPC-to-GPC loading: what it is and how it is driven
 
