@@ -1,0 +1,68 @@
+# EXAMPLE crew script: four GPCs in a REDUNDANT SET, the way the vehicle
+# actually flies one -- memory configuration 3, GNC OPS 301 (entry).  Run from
+# discretePanel/:
+#
+#   python3 simulatePASS.py --gpcs 1-4 --crts 3 --tape OI340700-v44boot.mmv \
+#       --script examples/4gpc-g3-startup.script --duration 1200
+#
+# WHY THIS AND NOT 4gpc-startup.script.  That one asks for OPS 201, and OPS 2
+# ON ORBIT IS A TWO-GPC SET: the flight MEMORY CONFIGURATION TABLE gives
+# CONFIG 2 a GPC SEL of 1,2 with strings 1,3 to one computer and 2,4 to the
+# other, and the post-insertion procedure then HALTs the rest.  Four computers
+# in one set is CONFIG 1 (ascent) or CONFIG 3 (entry), not CONFIG 2.  The older
+# script asks for MC 2 while assigning buses the CONFIG 3 way, which is a
+# mixture that never flies.  This script is CONFIG 3 throughout.
+#
+# The table, from STS-134 Post Insertion (local mirror, Shuttle/Post Insertion,
+# book page 1-3), CONFIG 3 column:
+#     GPC SEL 1,2,3,4    STR 1->1 2->2 3->3 4->4    P/L 0
+#     CRT 1->1 2->2 3->3 4->0        L 1->0 2->0    MM 1->1 2->2
+#
+# THREE CRTs, deliberately.  CONFIG 3 gives CRT3 to GPC3, so the third and
+# fourth computers are not mute: if one drops out of the set there is still a
+# keyboard into it.  Every recovery attempt on 2026-09-16 failed for want of
+# exactly that.
+#
+# Each IPL is ipl-one-gpc.script, unchanged -- the IPL procedure does not care
+# which OPS follows it.
+#
+# NOT YET RUN.  The 2026-09-15 verification belongs to the OPS 201 script; this
+# one has never been exercised, and the OPS 3 overlay load is the part to watch.
+
+# --- all four GPCs to HALT, the IDPs on ---------------------------------------
++0     gpc 1
++0     mode HALT
++0.01  gpc 2
++0.01  mode HALT
++0.01  gpc 3
++0.01  mode HALT
++0.01  gpc 4
++0.01  mode HALT
++0.02  idppower 1 on
++0.01  idppower 2 on
++0.01  idppower 3 on
++0.01  majfunc 3 gnc
+
+# --- each computer in turn: the same procedure, four times -------------------
++0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
++5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
++5     script ipl-one-gpc.script gpc=3 crt=2 idp=2 kb=KB2
++5     script ipl-one-gpc.script gpc=4 crt=2 idp=2 kb=KB2
+
+# --- the NBAT for memory configuration 3, then OPS 301 -----------------------
++11    keys ITEM 1 + 3 EXEC
++8     keys ITEM 2 + 1 EXEC
++8     keys ITEM 3 + 2 EXEC
++8     keys ITEM 4 + 3 EXEC
++8     keys ITEM 5 + 4 EXEC
++8     keys ITEM 7 + 1 EXEC
++8     keys ITEM 8 + 2 EXEC
++8     keys ITEM 9 + 3 EXEC
++8     keys ITEM 1 0 + 4 EXEC
++8     keys ITEM 1 1 + 0 EXEC
++8     keys ITEM 1 2 + 1 EXEC
++8     keys ITEM 1 3 + 2 EXEC
++8     keys ITEM 1 4 + 3 EXEC
++8     keys ITEM 1 8 + 1 EXEC
++8     keys ITEM 1 9 + 2 EXEC
++21    keys OPS 3 0 1 PRO
