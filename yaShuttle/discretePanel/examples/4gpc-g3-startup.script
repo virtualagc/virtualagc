@@ -2,7 +2,7 @@
 # actually flies one -- memory configuration 3, GNC OPS 301 (entry).  Run from
 # discretePanel/:
 #
-#   python3 simulatePASS.py --gpcs 1-4 --crts 3 \
+#   python3 simulatePASS.py --gpcs 1-4 --crts 2 \
 #       --tape ~/workspace/pass-run/OI340700-v44boot.mmv \
 #       --script examples/4gpc-g3-startup.script --duration 1200
 #
@@ -19,18 +19,28 @@
 #     GPC SEL 1,2,3,4    STR 1->1 2->2 3->3 4->4    P/L 0
 #     CRT 1->1 2->2 3->3 4->0        L 1->0 2->0    MM 1->1 2->2
 #
-# THREE CRTs, deliberately.  CONFIG 3 gives CRT3 to GPC3, so the third and
-# fourth computers are not mute: if one drops out of the set there is still a
-# keyboard into it.  Every recovery attempt on 2026-09-16 failed for want of
-# exactly that.
+# TWO CRTs, THOUGH CONFIG 3 WANTS THREE.  The flight table gives CRT3 to GPC3,
+# which would be worth having -- a computer that drops out of the set would
+# still have a keyboard into it, and every recovery attempt on 2026-09-16
+# failed for want of exactly that.  But a THIRD POWERED IDP kills GPC2 before
+# the set forms: measured twice, and with it removed the same script gives a
+# full four-computer set.  See ledger #158.  To restore the faithful three-CRT
+# arrangement when that is understood, run with --crts 3 and put back
+#     +0.01  idppower 3 on
+#     +0.01  majfunc 3 gnc
+# above, and change ITEM 1 4 + 0 to ITEM 1 4 + 3 below.
 #
 # Each IPL is ipl-one-gpc.script, unchanged -- the IPL procedure does not care
 # which OPS follows it.
 #
-# FIRST RUN 2026-09-16, unattended: the script itself works -- all four IPLs,
-# all fifteen NBAT entries and OPS 3 0 1 PRO went in -- but NO WORKING SET CAME
-# OF IT.  GPC1 and GPC2 fell silent at the OPS 301 transition while GPC3 and
-# GPC4 paired off and idled.  See ledger #158 before trusting a run of this.
+# VERIFIED 2026-09-17, unattended, with two CRTs: a FULL FOUR-COMPUTER
+# REDUNDANT SET formed and held in OPS 301 -- 36,319 / 36,322 / 36,320 / 36,308
+# sync issues per minute and matched to within 30 a minute for five minutes,
+# until the run's own --duration stopped it -- with every computer driving its
+# own flight-critical strings (bus 14/20 GPC1, 15/21 GPC2, 16/22 GPC3,
+# 17/23 GPC4).  This is the first healthy multi-computer set the project has
+# produced.  With THREE CRTs the same script loses GPC2 before the set forms;
+# see ledger #158.
 
 # --- all four GPCs to HALT, the IDPs on ---------------------------------------
 +0     gpc 1
@@ -43,8 +53,6 @@
 +0.01  mode HALT
 +0.02  idppower 1 on
 +0.01  idppower 2 on
-+0.01  idppower 3 on
-+0.01  majfunc 3 gnc
 
 # --- each computer in turn: the same procedure, four times -------------------
 +0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
@@ -65,7 +73,7 @@
 +8     keys ITEM 1 1 + 0 EXEC
 +8     keys ITEM 1 2 + 1 EXEC
 +8     keys ITEM 1 3 + 2 EXEC
-+8     keys ITEM 1 4 + 3 EXEC
++8     keys ITEM 1 4 + 0 EXEC
 +8     keys ITEM 1 8 + 1 EXEC
 +8     keys ITEM 1 9 + 2 EXEC
 +21    keys OPS 3 0 1 PRO

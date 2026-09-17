@@ -38,10 +38,13 @@ back to "open" within an hour of being written.
    Watch the OPS 3 overlay load -- that is the step most likely to behave
    differently from OPS 2, and on the first run it is where things went wrong.
 
-2. **Work out why GPC1 and GPC2 stop** (#158) -- this now comes before
-   re-measuring anything, because there is no set to measure.
+2. ~~**Work out why GPC1 and GPC2 stop**~~  ANSWERED 2026-09-17: **a third
+   powered IDP was the variable, not G3.**  With `--crts 2` the same script
+   gives a FULL FOUR-COMPUTER SET that holds.  The script now ships in that
+   configuration.  What remains open is *why* a third IDP kills GPC2 before the
+   set forms -- see #158 and "The third-CRT problem" below.
 
-3. **Re-measure #153 on it**, once a set holds.  Do the computers still diverge in I/O?  The
+3. **Re-measure #153 on it** -- a set now holds, so this is unblocked.  Do the computers still diverge in I/O?  The
    counting is a per-GPC tally of non-null sync codes over a few minutes; the
    OPS 201 numbers to compare against are in #153 (SVC 33901 against
    33885/33887/33887, timer/SSIP/IPR identical).
@@ -57,6 +60,35 @@ back to "open" within an hour of being written.
 
 6. **Only then**, if the set still loses computers, go back to #137 (identical
    I/O between set members) and #107 (the ICC read path).
+
+## The third-CRT problem  (the live question)
+
+Three runs, and the variable is clear:
+
+| run | CRTs | outcome |
+|---|---|---|
+| g3-first | 3 | GPC1 and GPC2 both die at the OPS transition |
+| g3-census | 3 | GPC2 dies at minute 2; GPC1+GPC3+GPC4 form a healthy THREE-computer set |
+| g3-2crt | 2 | **all four form and hold**, ~36,320 issues/min each |
+
+GPC2 dies at about minute 2, but the NBAT that assigns CRT3 to GPC3 is not
+typed until minute 5 -- so it is not the assignment, it is the PRESENCE of a
+third powered IDP.  #99 quotes USA005350: a PASS GPC moded to RUN automatically
+takes control of **IDPs 1 to 3** when no DK buses are commanded by the common
+set, and "no check is made to ensure against multiple commanders on the same DK
+bus ... Dual commanders should be avoided, as it can result in PASS GPCs
+failing-to-sync."  The three-CRT census fits: GPC1 held bus 8 (DK3) with 127,203
+transactions where GPC3, the computer the NBAT gives CRT3 to, had 413.
+
+So the likely shape is that GPC1, first to RUN, grabs IDPs 1-3 including the
+one GPC2 needs, and GPC2 fails to sync against a dual-commanded DK bus.  If
+that is right it is FAITHFUL behaviour being provoked by our IPL order, not an
+emulator defect -- and the fix is a crew-procedure one: assign the displays
+before the other computers come up, or IPL in an order that does not leave GPC1
+holding three.
+
+Worth having, because CRT3 on GPC3 is what would give a dropped-out computer a
+keyboard -- the thing every recovery attempt on 2026-09-16 lacked.
 
 ## What the first G3 run did
 
