@@ -2,6 +2,7 @@
 #include "iccmodel.h"
 
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -196,6 +197,22 @@ void iccmodel_note_shared_us(IccModel *m, int gpcId, double sharedUs) {
     if (m != NULL && gpcId >= 1 && gpcId <= 5) m->sharedUs[gpcId] = sharedUs;
 }
 
+/* HOW MANY ICCCMD LINES YAGPC_ICCTRACE IS WORTH.  It was 24, which answered
+ * the question it was written for -- does the software ever ask to READ
+ * another computer -- and is useless for any question about what happens
+ * LATER in a run: an IPL alone spends all 24, so a trace aimed at a crew
+ * action taken minutes in captures nothing of it (ledger #107, and an
+ * attempt on 2026-09-16 to trace a GPC/CRT entry). YAGPC_ICCTRACE_MAX
+ * overrides; 0 means no limit. */
+#define ICCTRACE_DEFAULT_MAX 20000L
+
+static long icctrace_max(void) {
+    const char *e = getenv("YAGPC_ICCTRACE_MAX");
+    if (e == NULL || *e == '\0') return ICCTRACE_DEFAULT_MAX;
+    long v = strtol(e, NULL, 0);
+    return v > 0 ? v : LONG_MAX;
+}
+
 void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
                       const GpcServiceInput *in, GpcServiceOutput *out) {
     if (m == NULL || in == NULL || out == NULL) return;
@@ -240,7 +257,7 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
          * bus, raw.  The question they answer is whether the software ever
          * asks to READ another computer, which the counters say it does
          * not -- and a command word says what kind it is. */
-        if (m->traced < 24 && getenv("YAGPC_ICCTRACE") != NULL) {
+        if (m->traced < icctrace_max() && getenv("YAGPC_ICCTRACE") != NULL) {
             m->traced++;
             fprintf(stderr, "ICCCMD t=%.1f gpc=%d bus=%d cmd=%08x\n",
                     yagpc_monotonic_seconds(), gpcId, bus,
