@@ -2325,7 +2325,7 @@ def _listen_control(panel):
     except OSError as e:
         log("cannot listen for script commands: %s" % e)
         return
-    log("script commands on %s:%d ('play FILE', 'stop', 'save FILE')"
+    log("script commands on %s:%d ('play FILE', 'stop', 'save FILE', 'show')"
         % (D.GROUP, D.PORT_BASE + crewscript.CONTROL_OFFSET))
     while True:
         try:
@@ -2338,6 +2338,15 @@ def _listen_control(panel):
         if word == "stop":
             log("script command: stop")
             panel.root.after(0, lambda: _stop_script(panel))
+        elif word == "show":
+            # A SCRIPTED RUN NEVER MAPS THIS WINDOW: nobody is looking, and a
+            # window that is never mapped cannot steal the keyboard.  But a
+            # run started with a script is also how someone sets a vehicle up
+            # before flying it by hand, and at that point the panel is exactly
+            # what they want -- so it can be asked for without restarting.
+            # It is withdrawn, not destroyed, so this is all it takes.
+            log("script command: show the panel")
+            panel.root.after(0, panel.root.deiconify)
         elif word == "save" and rest:
             # ON THE TK THREAD.  The switches are read by the same thread
             # that writes them, so a save can never catch a control

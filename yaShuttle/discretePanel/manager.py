@@ -172,7 +172,8 @@ class Manager(object):
 
         self._section("SIMULATION", bold)
         row = self._row()
-        self._button(row, "End Simulation", self.end_simulation, wide=True)
+        self._button(row, "Show Panel", self.show_panel)
+        self._button(row, "End Simulation", self.end_simulation)
 
         # ONE BAND, SET OFF FROM THE CONTROLS.  Both lines say what the run is
         # doing rather than offering anything to do, so they read as a status
@@ -479,6 +480,23 @@ class Manager(object):
             return
         if self._session("resume", path):
             self.say("Restoring from %s ..." % os.path.basename(path))
+
+    def show_panel(self):
+        """Bring up a crew panel that a scripted run never mapped.
+
+        simulatePASS hides it when it is given a --script, on the reasoning
+        that nobody is watching an unattended run and an unmapped window
+        cannot steal the keyboard.  But a script is also how someone sets a
+        vehicle up before flying it by hand, and then the panel is the thing
+        they want -- so rather than making them restart with --show-panel,
+        ask for it.  The window is withdrawn, not destroyed.
+        """
+        try:
+            crewscript.send_control("show", self.args.port_base)
+        except OSError as e:
+            self.say("Cannot reach the panel: %s" % e)
+            return
+        self.say("Asked the crew panel to show itself")
 
     def end_simulation(self):
         """The only control here that destroys a run without saving it, so it
